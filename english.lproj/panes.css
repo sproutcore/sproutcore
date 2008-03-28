@@ -1,0 +1,155 @@
+
+
+/* @group Core */
+
+#panes {
+	position: absolute ;
+	position: fixed ;
+	z-index: 100 ;
+	overflow: hidden ;
+	top:  0;
+	left:  0;
+	width: 100%;
+	height: 100%;
+}
+
+.sc-theme #panes .pane-wrapper h1 {
+	font-size: 16px;
+	margin:  0;
+	margin-bottom: 10px;	
+	border-bottom: 1px #aaa dotted;
+}
+
+.sc-theme #panes .pane-wrapper .buttons {
+	border-top: 1px #aaa dotted;
+	text-align: right ;
+	padding-top: 12px;
+	margin-top: 10px;
+	margin-left: -16px;
+	margin-right: -16px;
+	padding-right: 16px;
+	padding-left: 16px;
+}
+
+.sc-theme .pane .shadow {
+	position: relative ;
+	border: none ;
+	background: #e8e8e8 static_url('panels/background-thin') repeat-x left -1px; 
+	border-top: 1px #ddd solid;
+}
+
+.sc-theme .pane .shadow .top-right-edge {
+	background: static_url('panels/top-right-corner') ;
+	position: absolute ;
+	width: 5px;
+	height: 9px;
+	top: -6px;
+	right: -5px;
+}
+
+.sc-theme .pane .shadow .top-left-edge {
+	background: static_url('panels/top-left-corner') ;
+	position: absolute ;
+	width: 5px;
+	height: 9px;
+	top: -6px;
+	left: -5px;
+}
+
+.sc-theme .pane .shadow .bottom-left-edge {
+	background: static_url('panels/bottom-left-corner') ;
+	position: absolute ;
+	width: 10px;
+	height: 5px;
+	bottom: -5px;
+	left: -5px;
+}
+
+.sc-theme .pane .shadow .bottom-right-edge {
+	background: static_url('panels/bottom-right-corner') ;
+	position: absolute ;
+	width: 10px;
+	height: 5px;
+	bottom: -5px;
+	right: -5px;
+}
+
+.sc-theme .pane .shadow .top-edge {
+	background: static_url('panels/top-edge') repeat-x ;
+	position: absolute ;
+	height: 4px;
+	top: -5px;
+	left: 0;
+}
+
+.sc-theme .pane .shadow .bottom-edge {
+	background: static_url('panels/bottom-edge') repeat-x ;
+	position: absolute ;
+	height: 5px;
+	bottom: -5px;
+	right: 5px;
+	left: 5px;
+}
+
+.sc-theme .pane .shadow .left-edge {
+	background: static_url('panels/left-edge') repeat-y ;
+	position: absolute ;
+	width: 5px;
+	top: 3px;
+	bottom: 0px;
+	left: -5px;
+}
+
+.sc-theme .pane .shadow .right-edge {
+	background: static_url('panels/right-edge') repeat-y ;
+	position: absolute ;
+	width: 5px;
+	top: 3px;
+	bottom: 0px;
+	right: -5px;
+}
+
+/* @end */
+
+/* @group Panels */
+
+.sc-theme .panel-pane {
+	position: absolute ;
+	top: 0;
+	left:  0;
+	width: 100%;
+	height: 100%;
+	background: static_url('panels/overlay') repeat;
+}
+
+.sc-theme .panel-pane .pane-wrapper {
+	top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 11px 16px;
+}
+
+/* @end */
+
+/* @group Dialogs */
+
+.sc-theme .dialog-pane {
+	position: absolute ;
+	top: 0;
+	left:  0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(255,255,255,0.63);
+}
+
+.sc-theme .dialog-pane .pane-wrapper {
+	margin-left: auto ;
+	margin-right: auto ;
+	border: 6px #888 solid ;
+	background: #e8e8e8 static_url('panels/background-thin') repeat-x left -1px; 
+	padding: 10px 14px;
+	position: relative ;
+	top: 75px;
+}
+
+/* @end */

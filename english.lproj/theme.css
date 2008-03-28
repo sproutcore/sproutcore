@@ -1,0 +1,90 @@
+/* @override http://localhost:4020/static/sproutcore/en/_cache/theme-1205438214.css */
+
+/* @group Root Container */
+
+.sc-scroll-view {
+	overflow: auto ;
+}
+
+/* @end */
+
+/* @group Root Form */
+
+input.show-hint {
+	color: #888;
+}
+
+textarea.show-hint {
+	color: #888;
+}
+
+.radio.vertical,
+.radio.vertical .button.radio {
+	display: block ;	
+}
+
+.radio.horizontal,
+.radio.horizontal .button.radio {
+	display: inline ;
+}
+
+.radio.vertical {
+  text-align: left ;
+}
+
+/* @end */
+
+/* @group sc-theme */
+
+body.sc-theme {
+	font: 13px Helvetica, Verdana, sans-serif;
+	line-height: 18px;
+	background-color: #f0f0f0 ;
+	padding: 0px;
+}
+
+.sc-theme h1 {
+	margin: 0;
+	padding: 0 ;
+	margin-bottom: 10px;
+}
+
+.sc-theme label {
+	font-weight: bold ;
+}
+
+.sc-theme .ghost {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	opacity: 0.45;
+	-moz-opacity: .45 ;
+}
+
+/* @end */
+
+/* @group sc-theme Form */
+
+.sc-theme .invalid {
+	border: 2px red solid ;
+}
+
+.sc-theme ul.errors {
+	color:  red ;
+	list-style-type: none ;
+	font-size: 11px;
+}
+
+.sc-theme form ul.errors {
+	margin:  0;
+	padding: 0; 
+	color: red ;
+}
+
+.sc-theme input {
+	font-size: 12px; 
+}
+
+/* @end */
+
+

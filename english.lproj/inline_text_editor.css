@@ -1,0 +1,21 @@
+.inline_editor
+{
+  position: relative;
+}
+.inline_editor_field
+{
+  margin: 0;
+  padding: 0;
+
+  resize: none;
+  white-space: nowrap;
+  border: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+.inline_editor_sizer 
+{
+  visibility: hidden;
+  position: absolute;
+}

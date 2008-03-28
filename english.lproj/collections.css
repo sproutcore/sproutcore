@@ -1,0 +1,82 @@
+/* @override http://localhost:4020/static/sproutcore/en/_cache/collections-1205614097.css */
+
+/* @group Common */
+
+body {
+	overflow: hidden;
+}
+
+.collection-item {
+	cursor: pointer ;
+}
+
+/* @end */
+
+/* @group List View */
+
+.sc-theme .sc-collection-view {
+	background-color: white ;
+}
+
+.sc-theme .list-insertion-point {
+	border: 1px #4e4977 solid;
+	position: absolute ;
+}
+
+.sc-theme .list-insertion-point .anchor {
+	position: absolute ;
+	width: 7px;
+	height: 7px;
+	left: -6px;
+	top: -4px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -931px;
+}
+
+/* @end */
+
+/* @group Grid View */
+
+.sc-theme .grid-insertion-point {
+	border: 1px #4e4977 solid;
+	position: absolute ;
+}
+
+.sc-theme .grid-insertion-point .anchor {
+	position: absolute ;
+	width: 7px;
+	height: 7px;
+	left: -4px;
+	top: -6px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -931px;
+}
+
+/* @end */
+
+/* @group Text Cell */
+
+.sc-theme .collection-item {
+	text-decoration: none ;
+	color: #000;
+	border-top: 1px white solid;
+	background-color: white ;
+}
+
+.sc-theme .collection-item.text-cell {
+	display: block ;
+	padding: 0 6px;
+	line-height: 22px;
+}
+.sc-theme .collection-item.sel {
+	background-color: #ddd;
+	border-top: 1px solid #eee;
+}
+
+.sc-theme .sc-collection-view.focus .collection-item.sel {
+	background-color: #40007e;
+	color: white ;
+	border-top: 1px solid #84788f;
+}
+
+/* @end */
+
+
