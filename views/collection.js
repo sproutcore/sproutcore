@@ -327,7 +327,7 @@ SC.CollectionView = SC.View.extend(
     
     You can also set this to true yourself to be notified when it is completed.
   */
-  isDirty: true,
+  isDirty: false,
   
   /**
     The maximum time the collection view will spend updating its
@@ -505,6 +505,8 @@ SC.CollectionView = SC.View.extend(
     called rebuildChildren() instead.
   */
   updateChildren: function() {
+    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.start('%@.updateChildren()'.fmt(this)) ;
+
     // if the collection is not presently visible in the window, then there is really 
     // nothing to do here.  Just mark the view as dirty and return.
     if (!this.get('isVisibleInWindow')) {
@@ -512,7 +514,11 @@ SC.CollectionView = SC.View.extend(
       return; 
     }
     
-    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.start('%@.updateChildren()'.fmt(this)) ;
+    // Save the current clipping frame.  If the frame methods are called again
+    // later but the frame has not actually changed, we don't want to run
+    // updateChildren again.
+    if (this.get('hasCustomLayout')) this._lastClippingFrame = this.get('clippingFrame') ;
+    
     this.beginPropertyChanges() ; // avoid sending notifications
     
     // STEP 1: Determine the range to display for clippingFrame
@@ -553,6 +559,11 @@ SC.CollectionView = SC.View.extend(
       } else this.layoutItemViewsFor(this, this.get('firstChild')) ;
     } 
 
+    // Set this to true once children have been rendered.  Whenever the content
+    // changes, we don't want resize or clipping frame changes to cause a refresh
+    // until the content has been rendered for the first time.
+    this._hasChildren = !!this._itemViewRoot ;
+    
     this.set('isDirty',false); 
     this.endPropertyChanges() ;
     if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end('%@.updateChildren()'.fmt(this)) ;
@@ -584,6 +595,7 @@ SC.CollectionView = SC.View.extend(
     while(this._groupViewRoot) this._removeGroupView(this._groupViewRoot) ;
     
     // now updateChildren.
+    this._hasChildren = false ;
     this.updateChildren() ;
     
     this.endPropertyChanges() ;
@@ -632,8 +644,7 @@ SC.CollectionView = SC.View.extend(
   resizeChildrenWithOldSize: function(oldSize) {
     if (this.get('hasCustomLayout')) {
       if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
-        this.updateChildren() ;
-        this._lastClippingFrame = this.get('clippingFrame') ;
+        if (this._hasChildren) this.updateChildren() ;
       }
     } else {
       arguments.callee.base.apply(this, arguments) ;
@@ -647,8 +658,7 @@ SC.CollectionView = SC.View.extend(
   clippingFrameDidChange: function() {
     if (this.get('hasCustomLayout')) {
       if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
-        this.updateChildren() ;
-        this._lastClippingFrame = this.get('clippingFrame') ;
+        if (this._hasChildren) this.updateChildren() ;
       }
     }
   },
@@ -772,11 +782,11 @@ SC.CollectionView = SC.View.extend(
     // OK, now add to itemView list.  If itemView is already in the right
     // place, do nothing.
     if (!ret) throw "Could not create itemView for content: %@".fmt(content);
-    if (ret.__nextItemView !== beforeView) {
+    if (!beforeView || (ret.__nextItemView != beforeView)) {
 
       // remove from old location if needed
-      if (this._itemViewRoot === ret) this._itemViewRoot = ret.__nextItemView ;
-      if (this._itemViewTail === ret) this._itemViewRoot = ret.__prevItemView ;
+      if (this._itemViewRoot == ret) this._itemViewRoot = ret.__nextItemView ;
+      if (this._itemViewTail == ret) this._itemViewRoot = ret.__prevItemView ;
       if (ret.__nextItemView) ret.__nextItemView.__prevItemView = ret.__prevItemView ;
       if (ret.__prevItemView) ret.__prevItemView.__nextItemView = ret.__nextItemView ;
 
@@ -791,7 +801,7 @@ SC.CollectionView = SC.View.extend(
         if (this._itemViewTail) this._itemViewTail.__nextItemView = ret ;
         this._itemViewTail = ret ;
       }
-      if (this._itemViewRoot === beforeView) this._itemViewRoot = ret ;
+      if (this._itemViewRoot == beforeView) this._itemViewRoot = ret ;
       
     }
     
@@ -1300,6 +1310,7 @@ SC.CollectionView = SC.View.extend(
   },
 
   mouseDown: function(ev) {
+
     // save for drag opt
     this._mouseDownEvent = ev ;
 
@@ -1308,10 +1319,12 @@ SC.CollectionView = SC.View.extend(
 
     // Make sure that saved mouseDown state is always reset in case we do
     // not get a paired mouseUp. (Only happens if subclass does not call us like it should)
-    this._mouseDownAt = this._shouldDeselect = this._shouldReselect = this._refreshSelection = false;
+    this._mouseDownAt = this._shouldDeselect = 
+      this._shouldReselect = this._refreshSelection = false;
 
     var mouseDownView    = this._mouseDownView = this.itemViewForEvent(ev);
-    var mouseDownContent = this._mouseDownContent = (mouseDownView) ? mouseDownView.get('content') : null;
+    var mouseDownContent = 
+      this._mouseDownContent = (mouseDownView) ? mouseDownView.get('content') : null;
 
     // become first responder if possible.
     this.becomeFirstResponder() ;
@@ -1875,7 +1888,7 @@ SC.CollectionView = SC.View.extend(
     this._content = content; //cache
     this._contentPropertyRevision = null ;
     this._contentPropertyObserver(this, '[]', content, content.propertyRevision) ; 
-  },
+  }.observes('content'),
   
   /** @private
     Whenever the selection changes, update the itemViews.
@@ -1883,7 +1896,7 @@ SC.CollectionView = SC.View.extend(
   _selectionObserver: function() {
     var sel = this.get('selection') ;
     if (SC.isEqual(sel, this._selection)) return ; // nothing to do
-    
+
     if (!this._boundSelectionPropertyObserver) {
       this._boundSelectionPropertyObserver = this._selectionPropertyObserver.bind(this) ;
     }
@@ -1894,7 +1907,7 @@ SC.CollectionView = SC.View.extend(
     this._selection = sel ;
     this._selectionPropertyRevision = null ;
     this._selectionPropertyObserver(this, '[]', sel, sel.propertyRevision) ;
-  },
+  }.observes('selection'),
   
   // called on content change *and* content.[] change...
   // update children if this is a new propertyRevision
@@ -1902,7 +1915,7 @@ SC.CollectionView = SC.View.extend(
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
       this._updatingContent = true ;
-      this.set('isDirty', true) ;
+      this._hasChildren = false ;
       this.updateChildren() ;
       this._updatingContent = false ;
     }
