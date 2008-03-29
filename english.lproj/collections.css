@@ -2,10 +2,6 @@
 
 /* @group Common */
 
-body {
-	overflow: hidden;
-}
-
 .collection-item {
 	cursor: pointer ;
 }
@@ -59,6 +55,7 @@ body {
 	color: #000;
 	border-top: 1px white solid;
 	background-color: white ;
+	position: absolute;
 }
 
 .sc-theme .collection-item.text-cell {

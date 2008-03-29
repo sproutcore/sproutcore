@@ -21,9 +21,9 @@ SC.BENCHMARK_OBJECTS = NO;
   
   I should be able to put a long list of things here I suppose.
   
-  Do bullet
-  points
-  work?
+  * * Do bullet
+  * * points
+  * * work?
   
   @extends SC.Observable 
 */
@@ -91,7 +91,10 @@ Object.extend(SC.Object, {
     return array.map(function(props) { return obj.create(props); }) ;
   },
 
-  // configure this object as an outlet
+  /**
+    Adding this function to the end of a view declaration will define the class as
+    an outlet that can be constructed using the outlet() method (instead of get()).
+  */
   outlet: function() {
     var obj = this ;
     return function() {
@@ -100,6 +103,68 @@ Object.extend(SC.Object, {
   },
   
   isClass: true,
+  
+  /**
+    Returns the name of this class.  If the name is not known, triggers
+    a search.  This can be expensive the first time it is called.
+  */
+  objectClassName: function() {
+    if (!this._objectClassName) this._findObjectClassNames() ;
+    if (this._objectClassName) return this._objectClassName ;
+    var ret = this ;
+    while(ret && !ret._objectClassName) ret = ret._type; 
+    return (ret._objectClassName) ? ret._objectClassName : 'Anonymous' ;
+  },
+
+  /** @private
+    This is a way of performing brute-force introspection.  This searches 
+    through all the top-level properties looking for classes.  When it finds
+    one, it saves the class path name.
+  */
+  _findObjectClassNames: function() {
+    
+    if (SC._foundObjectClassNames) return ;
+    SC._foundObjectClassNames = true ;
+    
+    var seen = [] ;
+    var searchObject = function(root, object, levels) {
+      levels-- ;
+      
+      // not the fastest, but safe
+      if (seen.indexOf(object) >= 0) return ;
+      seen.push(object) ;
+      
+      for(var key in object) {
+        if (!object.hasOwnProperty(key)) continue ;
+        if (key == '__scope__') continue ;
+        if (key == '_type') continue ;
+
+        var isCaps = key[0].toUpperCase() == key[0];
+        if (!isCaps) continue ;
+        
+        var path = (root) ? [root,key].join('.') : key ;
+        if (path == 'SproutCore') continue ;
+
+        var value = object[key] ;
+        
+        switch($type(value)) {
+        case T_CLASS:
+          if (!value._objectClassName) value._objectClassName = path;
+
+        case T_OBJECT:
+        case T_HASH:
+          if (levels>=0) searchObject(path, value, levels) ;
+
+        default:
+          break;
+        }
+      }
+    } ;
+    
+    searchObject(null, window, 2) ;
+  },
+  
+  toString: function() { return this.objectClassName(); },
   
   // ..........................................
   // PROPERTY SUPPORT METHODS
@@ -212,8 +277,6 @@ Object.extend(SC.Object, {
     
     return base ;
   },
-  
-  toString: function() { return 'Object('+ SC.getGUID(this) +')'; },
   
   // Returns true if the receiver is a subclass of the named class.  If the
   // receiver is the class passed, this will return false.  See kindOf().
@@ -449,6 +512,8 @@ SC.Object.prototype = {
     return ret ;
   },
 
+  toString: function() { return "%@<%@>".fmt(this._type, this._guid); },
+  
   // ..........................................
   // OUTLETS
   // 
@@ -524,6 +589,7 @@ SC.Object.prototype = {
       if (!this._originalOutlets) this._originalOutlets = {} ;
       this._originalOutlets[key] = value ;
 
+      // create the outlet by calling the outlet function.  this should be the owner view.
       value = value.call(this) ;
       this.set(key, value) ;
     } else if (typeof(value) == "string") {
@@ -651,8 +717,8 @@ SC.NotificationQueue = {
   maxFlush: 5000, // max time you can spend flushing before we reschedule.
   _flushing: false,
   add: function(target, func, args) { this.queue.push([target, func, args]);},
-  flush: function() {
-    if (this._flushing) return ;
+  flush: function(force) {
+    if (this._flushing && !force) return ;
     this._flushing = true ;
     
     var start = new Date().getTime() ;
@@ -664,7 +730,7 @@ SC.NotificationQueue = {
         n[1].apply(t,n[2]) ;
       }
       catch(e) {
-        console.log("Exception while notify("+n[1]+"): " + e) ;
+        console.log("Exception while notify("+n[2]+"): " + e) ;
       } // catch  
       now = Date.now() ;
     }

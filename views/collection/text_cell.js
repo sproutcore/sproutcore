@@ -105,7 +105,7 @@ SC.TextCellView = SC.View.extend(SC.CollectionItem,
     }
     
     // 2. If the returned value is not a string, convert it.
-    if (($type(value) != T_NULL) && value.toString) value = value.toString() ;
+    if (value != null && value.toString) value = value.toString() ;
     
     // 3. Localize
     if (value && this._getDefault('localize')) value = value.loc() ;

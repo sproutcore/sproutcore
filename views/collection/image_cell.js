@@ -58,6 +58,8 @@ SC.ImageCellView = SC.View.extend(SC.CollectionItem,
     // parent.  Automatically triggered when load status changes and
     // also by owner whenever it is resized.
     sizeToFit: function() {
+
+      if (this.get('status') != 'loaded') return ; 
       
       // find the best fit.
       var f= this.owner.get('frame') ;
@@ -136,7 +138,7 @@ SC.ImageCellView = SC.View.extend(SC.CollectionItem,
     }
     
     // 2. If the returned value is not a string, convert it.
-    if (($type(value) != T_NULL) && value.toString) value = value.toString() ;
+    if (value != null && value.toString) value = value.toString() ;
 
     // 3. Apply URL to image view.
     this.outlet('imageView').set('content', value) ;

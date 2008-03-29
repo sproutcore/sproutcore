@@ -227,8 +227,9 @@ SC.Drag = SC.Object.extend(
     this._createGhostView() ;
     
     // compute the offset from the original mouse location.
-    var origin = this.dragView.convertFrameToView(this.dragView.get('origin'), null);
+    var origin = this.dragView.convertFrameToView(this.dragView.get('frame'), null);
     var pointer = Event.pointerLocation(this.event) ;
+    
     this.ghostOffset = { x: (pointer.x-origin.x), y: (pointer.y-origin.y) };
 
     // position the ghost view.
@@ -384,6 +385,7 @@ SC.Drag = SC.Object.extend(
     var loc = { x: Event.pointerX(evt), y: Event.pointerY(evt) } ;
     loc.x -= this.ghostOffset.x ;
     loc.y -= this.ghostOffset.y ;
+    loc = this._ghostView.convertFrameFromView(loc, null) ;
     this._ghostView.set('origin', loc) ;   
   },
   
@@ -397,8 +399,7 @@ SC.Drag = SC.Object.extend(
     // create the ghost view instance add ghost class name.
     this._ghostView = this._ghostViewClass.viewFor(el) ;
     this._ghostView.owner = this ;
-    this._ghostView.addClassName('ghost') ;
-    this._ghostView.set('isPositioned', true) ; // make absolute position.
+    this._ghostView.addClassName('sc-ghost-view') ;
     
     // add to bottom of main document body and to window.
     SC.window.appendChild(this._ghostView) ;
@@ -479,7 +480,9 @@ SC.Drag = SC.Object.extend(
     return null ;
   },
   
-  _ghostViewClass: SC.View.extend({})   
+  _ghostViewClass: SC.View.extend({ 
+    emptyElement: '<div class="sc-ghost-view"></div>'
+  })   
   
 }) ;
 
@@ -502,6 +505,23 @@ SC.Drag.mixin(
   },
   
   _dropTargets: {},
+  _scrollableViews: {},
+  
+  /**
+    Register the view object as a scrollable view.  These views will auto-scroll
+    during a drag.
+  */
+  addScrollableView: function(target) {
+    this._scrollableViews[target._guid] = target ;  
+  },
+
+  /**
+    Remove the view object as a scrollable view.  These views will auto-scroll
+    during a drag.
+  */
+  removeScrollableView: function(target) {
+    delete this._scrollableViews[target._guid] ;  
+  },
   
   /**
     Register the view object as a drop target.

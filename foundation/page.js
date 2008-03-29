@@ -56,7 +56,10 @@ SC.Page = SC.Object.extend(
     if (value && (value instanceof Function) && (value.isOutlet)) {
       return null ;
     } else return value ;
-  }
+  },
+  
+  _insertBefore: function() {},
+  _rebuildChildNodes: function() {}
   
 }) ;
 

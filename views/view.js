@@ -9,20 +9,30 @@ require('foundation/node_descriptor') ;
 require('foundation/binding');
 require('foundation/path_module');
 
-BENCHMARK_OUTLETS = NO ;
+SC.BENCHMARK_OUTLETS = NO ;
+SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
 SC.FIXED = 'fixed';
 SC.FLEXIBLE = 'flexible';
 
 /** 
-  @class Manages a DOM element for display.
   
-  Views are how you interact with the DOM.
+  A view is the root class you use to manage the web page DOM in your
+  application.  You can use views to render visible content on your page,
+  provide animations, and to capture and respond to events.  
+
+  You can use SC.View directly to manage DOM elements or you can extend one
+  of the many subclasses provided by SproutCore.  This documentation describes
+  the general concepts you need to understand when working with views, though
+  most often you will want to work with one of the subclasses instead.
+  
   
   @extends SC.Responder
+  @author Charles Jolley
+  @version 1.0
+  @class
 */
 SC.View = SC.Responder.extend(SC.PathModule, 
-  /** @scope SC.View.prototype */
-  {
+/** @scope SC.View.prototype */ {
 
   // ..........................................
   // VIEW API
@@ -33,14 +43,25 @@ SC.View = SC.Responder.extend(SC.PathModule,
   // array and use standard iterators.
   //
 
-  /*  
-    insert the view before the specified view.  pass null to insert at the
-    end.
+  /**
+    Insert the view into the the receiver's childNodes array.
+    
+    The view will be added to the childNodes array before the beforeView.  If beforeView is
+    null, then the view will be added to the end of the array.  This will also add the view's
+    rootElement DOM node to the receivers containerElement DOM node as a child.
+
+    If the specified view already belongs to another parent, it will be removed from that
+    view first.
+    
+    @param view {SC.View} the view to insert as a child node.
+    @param beforeView {SC.View} view to insert before, or null to insert at end
+    @returns {void}
   */
   insertBefore: function(view, beforeView) { 
     this._insertBefore(view,beforeView,true);
   },
-  
+
+  /** @private */
   _insertBefore: function(view, beforeView, updateDom) {
     // verify that beforeView is a child.
     if (beforeView) {
@@ -80,6 +101,8 @@ SC.View = SC.Responder.extend(SC.PathModule,
 
       // update parent state.
       view._updateIsVisibleInWindow() ;
+      view._flushInternalCaches() ;
+      view._invalidateClippingFrame() ;
     }
 
     
@@ -89,8 +112,15 @@ SC.View = SC.Responder.extend(SC.PathModule,
     
     return this ;
   },
-  
-  // remove the current child
+
+  /**
+    Remove the view from the receiver's childNodes array.  
+    
+    This will also remove the view's DOM element from the recievers DOM.
+    
+    @param view {SC.View} the view to remove
+    @returns {void}
+  */
   removeChild: function(view) {
     if (!view) return ;
     if (view.parentNode != this) throw "removeChild: view must belong to parent";
@@ -116,53 +146,126 @@ SC.View = SC.Responder.extend(SC.PathModule,
     // regenerate the childNodes array.
     this._rebuildChildNodes();
 
-    // update parent state.
-    view._updateIsVisibleInWindow() ;
-
-    
     view.set('nextSibling', null);
     view.set('previousSibling', null);
     view.set('parentNode', null) ;
+    
+    // update parent state.
+    view._updateIsVisibleInWindow() ;
+    view._flushInternalCaches();
+    view._invalidateClippingFrame() ;
+    
     view.didRemoveFromParent(this) ;
     this.didRemoveChild(view);
   },
-  
-  // replace the oldView with the new view.
+
+  /**
+    Replace the oldView with the specified view in the receivers childNodes array.
+    This will also replace the DOM node of the oldView with the DOM node of the 
+    new view in the receivers DOM.
+
+    If the specified view already belongs to another parent, it will be removed 
+    from that view first.
+
+    @param view {SC.View} the view to insert in the DOM
+    @param view {SC.View} the view to remove from the DOM.
+    @returns {void}
+  */
   replaceChild: function(view, oldView) {
     this.insertBefore(view,oldView) ; this.removeChild(oldView) ;
   },
-  
-  // remove the receiver from the parent view.  Safe to call even if there
-  // is no parent node.
+
+  /**
+    Removes the receiver from its parentNode.  If the receiver does not belong
+    to a parentNode,  this method does nothing.
+    
+    @returns {void}
+  */
   removeFromParent: function() {
     if (this.parentNode) this.parentNode.removeChild(this) ;    
   },
-  
-  // add a child to the end of the current views.
+
+  /**
+    Appends the specified view to the end of the receivers childNodes array.  This is
+    equivalent to calling insertBefore(view, null);
+    
+    @param view {SC.View} the view to insert
+    @returns {void}
+  */
   appendChild: function(view) {
     this.insertBefore(view,null) ;    
   },
-  
-  // this array contains the childViews associated with this view.  You should
-  // always access this via a GET.
+
+  /**
+    The array of views that are direct children of the receiver view.  The DOM elements 
+    managed by the views are also directl children of the containerElement for the 
+    receiver.
+    
+    @property
+    @type Array
+  */
   childNodes: [],
-  
-  // the first child in the chain.
+
+  /**
+    The first child view in the childNodes array.  If the view does not have any children,
+    this property will be null.
+     
+    @property
+    @type SC.View
+  */
   firstChild: null,
   
-  // the last child in the chain. 
+  /**
+    The last child view in the childNodes array.  If the view does not have any children,
+    this property will be null.
+     
+    @property
+    @type SC.View
+  */
   lastChild: null,
   
-  // the next child view. access via a get()
+  /**
+    The next sibling view in the childNodes array of the receivers parentNode.  If the
+    receiver is the last view in the array or if the receiver does not belong to a parent
+    view this property will be null.
+     
+    @property
+    @type SC.View
+  */
   nextSibling: null,
 
-  // the previous view
+  /**
+    The previous sibling view in the childNodes array of the receivers parentNode.  If the
+    receiver is the first view in the array or if the receiver does not belong to a parent
+    view this property will be null.
+     
+    @property
+    @type SC.View
+  */
   previousSibling: null,
 
-  // the parent node.  null if not in the hierarchy.
+  /**
+    The parent view this view belongs to.  If the receiver does not belong to a parent view
+    then this property is null.
+     
+    @property
+    @type SC.View
+  */
   parentNode: null,
   
-  
+
+  /**
+    The pane this view belongs to.  The pane is the root of the responder chain that this
+    view belongs to.  Typically a view's pane will be the SC.window object. However, if you
+    have added the view to a dialog, panel, popup or other pane, this property will point to
+    that pane instead.
+    
+    If the view does not belong to a parentNode or if the view is not onscreen, this property
+    will be null.
+    
+    @property
+    @type SC.View
+  */
   pane: function()
   {
     var view = this;
@@ -173,34 +276,105 @@ SC.View = SC.Responder.extend(SC.PathModule,
     return view;
   }.property(),
   
-  
-  // This will remove all child views.
+
+  /**
+    Removes all child views from the receiver.
+    
+    @returns {void}  
+  */
   clear: function() {
     while(this.firstChild) this.removeChild(this.firstChild) ;
   },
-  
-  // This callback is invoke just before your view is added to a new parent.
+
+  /**
+    This method is called on the view just before it is added to a new parent view.  
+    
+    You can override this method to do any setup you need on your view or to reset any cached
+    values that are impacted by being added to a view.  The default implementation does nothing.
+    
+    @param parent {SC.View} the new parent
+    @paran beforeView {SC.View} the view in the parent's childNodes array that will follow this view once it is added.  If the view is being added to the end of the array, this will be null.
+    @returns {void}
+  */
   willAddToParent: function(parent, beforeView) {},
   
-  // This callback is invoked just after your view added to a new parent.
+  /**
+    This method is called on the view just after it is added to a new parent view.  
+    
+    You can override this method to do any setup you need on your view or to reset any cached
+    values that are impacted by being added to a view.  The default implementation does nothing.
+    
+    @param parent {SC.View} the new parent
+    @paran beforeView {SC.View} the view in the parent's childNodes array that will follow this view once it is added.  If the view is being added to the end of the array, this will be null.
+    @returns {void}
+  */
   didAddToParent: function(parent, beforeView) {},
   
-  // This callback is invoked just before your view is removed from a parent.
+  /**
+    This method is called on the view just before it is removed from a parent view.  
+    
+    You can override this method to clear out any values that depend on the view belonging to
+    the current parentNode.  The default implementation does nothing.
+    
+    @returns {void}
+  */
   willRemoveFromParent: function() {},
   
-  // This callback is invoked just after your view is remove from a parent.
+  /**
+    This method is called on the view just after it is removed from a parent view.  
+    
+    You can override this method to clear out any values that depend on the view belonging to
+    the current parentNode.  The default implementation does nothing.
+
+    @param oldParent {SC.View} the old parent view
+    @returns {void}
+  */
   didRemoveFromParent: function(oldParent) {},
 
-  // This callback is invoked just before a new child is added to view.
+  /**
+    This method is called just before a new child view is added to the receiver's childNodes
+    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    
+    The default implementation does nothing.
+    
+    @param child {SC.View} the view to be added
+    @param beforeView {SC.View} and existing child view that will follow the child view in the array once it is added.  If adding to the end of the array, this param will be null.
+    @returns {void}
+  */
   willAddChild: function(child, beforeView) {},
   
-  // This callback is invoked just after a new child is added to a view.
+  /**
+    This method is called just after a new child view is added to the receiver's childNodes
+    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    
+    The default implementation does nothing.
+    
+    @param child {SC.View} the view that was added
+    @param beforeView {SC.View} and existing child view that will follow the child view in the array once it is added.  If adding to the end of the array, this param will be null.
+    @returns {void}
+  */
   didAddChild: function(child, beforeView) {},
   
-  // This callback is invoke just before a child is removed from a view.
+  /**
+    This method is called just before a child view is removed from the receiver's childNodes
+    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    
+    The default implementation does nothing.
+    
+    @param child {SC.View} the view to be removed
+    @returns {void}
+  */
   willRemoveChild: function(child) {},
   
-  // This callback is invoked this just after a child is removed from a view.
+  /**
+    This method is called just after a child view is removed from the receiver's childNodes
+    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    
+    The default implementation does nothing.
+    
+    @param child {SC.View} the view that was removed
+    @returns {void}
+  */
   didRemoveChild: function(child) {},
   
   
@@ -226,6 +400,18 @@ SC.View = SC.Responder.extend(SC.PathModule,
     return null;
   },
   
+  /** @private 
+      Invoked whenever the child hierarchy changes and any internally cached values
+      might need to be recalculated.       
+  */
+  _flushInternalCaches: function() {
+    // only flush cache for parent if this item was cached since the top level
+    // cached can only be populated if this one is populated also...
+    if ((this._needsClippingFrame != null) || (this._needsFrameChanges != null)) {
+      this._needsClippingFrame = this._needsFrameChanges = null ;
+      if (this.parentNode) this.parentNode._flushInternalCaches() ;
+    }
+  },
   
   // ..........................................
   // SC.Responder implementation 
@@ -300,7 +486,30 @@ SC.View = SC.Responder.extend(SC.PathModule,
 
   // get the named style. (see also style properties)
   getStyle: function(style) {
-    return Element.getStyle(this.rootElement,style) ;
+    var element = this.rootElement ;
+    if (!this._computedStyle) {
+      this._computedStyle = document.defaultView.getComputedStyle(element, null) ;
+    }
+
+    //if (style == 'float') style = 'cssFloat' ;
+    style = (style == 'float') ? 'cssFloat' : style.camelize() ;
+    var value = element.style[style];
+    if (!value) {
+      value = this._computedStyle ? this._computedStyle[style] : null ;
+    }
+
+    switch(style) {
+    case 'opacity':
+      value = value ? parseFloat(value) : 1.0;
+      break ;
+    case 'auto':
+      value = null;
+      break ;
+    default:
+      break ;
+    }
+    
+    return value ;
   },
 
   // set the passed styles.
@@ -336,17 +545,37 @@ SC.View = SC.Responder.extend(SC.PathModule,
   // The methods in this section give you some low-level control over how the
   // view interacts with the DOM.  You do not normally need to work with this.
   
-  // This is the DOM element actually managed by this view.  This will be set
-  // by the view when it is created.  Changing it afterwards will likely 
-  // break things.
+  /**
+    This is the DOM element actually managed by this view.  This will be set
+    by the view when it is created.  You should rarely need to access this 
+    property directly.  When you do access it, you should only do so from 
+    within methods you write on your SC.View subclasses, never from outside
+    the view.
+    
+    Unlike most properties, you do not need to use get()/set() to access this
+    property.  It is not currently safe to edit this property once the view
+    has been createde.
+    
+    @property
+    @type {Element}
+  */
   rootElement: null,
   
-  // Normally when you add child views to your view, their DOM elements will
-  // be set as direct children of the root element.  However you can
-  // choose instead to designate an alertnative child node using this 
-  // property.  Set this to a selector string to begin with.  The first time
-  // it is access, the view will convert it to an actual element.  It is not
-  // currently safe to edit this property once the view has been created.
+  /**
+    Normally when you add child views to your view, their DOM elements will
+    be set as direct children of the root element.  However you can
+    choose instead to designate an alertnative child node using this 
+    property.  Set this to a selector string to begin with.  The first time
+    it is accessed, the view will convert it to an actual element.  It is not
+    currently safe to edit this property once the view has been created.
+    
+    Like rootElement, you should only access this property from within
+    methods you write on an SC.View subclass, never from outside the view.
+    Unlike most properties, it is not necessary to use get()/set().
+    
+    @property
+    @type {Element}
+  */
   containerElement: null,
 
   // ..........................................
@@ -357,7 +586,72 @@ SC.View = SC.Responder.extend(SC.PathModule,
   // location and size of your views.  You can then use the automatic
   // resizing.
   
+  /**
+    Returns true if the view or any of its contained views implement the
+    clippingFrameDidChange method.
+    
+    If this property returns false, then notifications about changes to the 
+    clippingFrame will probably not be called on the receiver.  Normally if you
+    do not need to worry about this property since implementing the clippingFrameDidChange()
+    method will change its value and cause your method to be invoked.
+    
+    This property is automatically updated whenever you add or remove a child view.
+  */
+  needsClippingFrame: function() {
+    if (this._needsClippingFrame == null) {
+      var ret = this.clippingFrameDidChange != SC.View.prototype.clippingFrameDidChange;
+      var view = this.get('firstChild') ;
+      while(!ret && view) {
+        ret = view.get('needsClippingFrame') ;
+        view = view.get('nextSibling') ;
+      }
+      this._needsClippingFrame = ret ;
+    }
+    return this._needsClippingFrame ;
+  }.property(),
   
+  /**
+    Returns true if the view or any of its contained views implements any resize
+    methods.
+    
+    If this property returns false, changes to your frame view may not be 
+    relayed to child methods.  This may mean that your various frame properties could 
+    become stale unless you call refreshFrames() first.
+
+    If you want you make sure your frames are up to date, see hasManualLayout.
+    
+    This property is automatically updated whenever you add or remove a child view.  It 
+    returns true if you implement any of the resize methods or if hasManualLayout is true.
+  */
+  needsFrameChanges: function() {
+    if (this._needsFrameChanges == null)   {
+      var ret = this.get('needsClippingFrame') || this.get('hasManualLayout') ;
+      var view = this.get('firstChild') ;
+      while(!ret && view) {
+        ret = view.get('needsFrameChanges') ;
+        view = view.get('nextSibling') ;
+      }
+      this._needsFrameChanges = ret ;
+    }
+    return this._needsFrameChanges ;
+  }.property(),
+  
+
+  /**
+    Returns true if the receiver manages the layout for itself or its children.
+    
+    Normally this property returns true automatically if you implement
+    resizeChildrenWithOldSize() or resizeWithOldParentSize() or clippingFrameDidChange().
+    
+    If you do not implement these methods but need to make sure your frame is always up-to-date
+    anyway, set this property to true.
+  */
+  hasManualLayout: function() {
+    return (this.resizeChildrenWithOldSize != SC.View.prototype.resizeChildrenWithOldSize) ||
+    (this.resizeWithOldParentSize != SC.View.prototype.resizeWithOldParentSize) ||
+    (this.clippingFrameDidChange != SC.View.prototype.clippingFrameDidChange) ;
+  }.property(),
+    
   /**
     Convert a point _from_ the offset parent of the passed view to the current view.
 
@@ -376,12 +670,12 @@ SC.View = SC.Responder.extend(SC.PathModule,
   convertFrameFromView: function(f, targetView) {
     
     // first, convert to root level offset.
-    var thisOffset = Element.viewportOffset(this.get('offsetParent')) ;
-    var thatOffset = (targetView) ? Element.viewportOffset(targetView.get('offsetParent')) : [0,0] ;
+    var thisOffset = SC.viewportOffset(this.get('offsetParent')) ;
+    var thatOffset = (targetView) ? SC.viewportOffset(targetView.get('offsetParent')) : SC.zeroPoint;
     
     // now get adjustment.
-    var adjustX = thatOffset[0] - thisOffset[0] ;
-    var adjustY = thatOffset[1] - thisOffset[1] ;
+    var adjustX = thatOffset.x - thisOffset.x ;
+    var adjustY = thatOffset.y - thisOffset.y ;
     return { x: (f.x + adjustX), y: (f.y + adjustY), width: f.width, height: f.height  };
   },
   
@@ -402,273 +696,192 @@ SC.View = SC.Responder.extend(SC.PathModule,
   */
   convertFrameToView: function(f, sourceView) {
     // first, convert to root level offset.
-    var thisOffset = Element.viewportOffset(this.get('offsetParent')) ;
-    var thatOffset = (sourceView) ? Element.viewportOffset(sourceView.get('offsetParent')) : [0,0] ;
+    var thisOffset = SC.viewportOffset(this.get('offsetParent')) ;
+    var thatOffset = (sourceView) ? SC.viewportOffset(sourceView.get('offsetParent')) : SC.zeroPoint ;
     
     // now get adjustment.
-    var adjustX = thisOffset[0] - thatOffset[0] ;
-    var adjustY = thisOffset[1] - thatOffset[1] ;
+    var adjustX = thisOffset.x - thatOffset.x ;
+    var adjustY = thisOffset.y - thatOffset.y ;
     return { x: (f.x + adjustX), y: (f.y + adjustY), width: f.width, height: f.height };
   },
 
-  // if a view isPositioned, then you can manually control the size and 
-  // origin of the view using the frame property.  If isPositioned is false,
-  // then this view will be sized and positioned by the browser using CSS.
-  // You can read the current frame, but you cannot make edits.
-  //
-  // You can edit the innerFrame of a view anytime, even if the element is 
-  // not positioned.
-  //
-  isPositioned: false,
-
-  changePositionObserver: function() {
-    var isPositioned = this.get('isPositioned') ;
-    if (this._wasPositioned == isPositioned) return ;
+  /**
+    This property returns a DOM ELEMENT that is the offset parent for
+    this view's frame coordinates.  Depending on your CSS, this parent
+    may or may not match with the parent view.
     
-    // make absolute positioned.  Also get default frame.  
-    if (isPositioned) {
-      var el = this.rootElement;
-      this.cacheFrame();
-      
-      this.setStyle({ 
-        position: 'absolute',
-        top:    Math.floor(this._frame.y) + 'px',
-        left:   Math.floor(this._frame.x) + 'px',
-        width:  Math.floor(this._frame.width) + 'px',
-        height: Math.floor(this._frame.height) + 'px'
-      }) ;
-      
-    } else {
-      var el = this.rootElement;
-      el.style.position = 
-      el.style.top = 
-      el.style.left = 
-      el.style.width = 
-      el.style.height = '' ;
-      this._frame = null ;
-    }
-    this._wasPositioned = isPositioned ;
-  }.observes('isPositioned'),
-  
-  // Normally we don't get the dimensions of a view until you actually ask
-  // for them.  However, sometimes you need to get the frame before you 
-  // remove the view from the parent, etc.  This will cache the frame.  
-  cacheFrame: function() {
-    if (this._frame || this._frameCached) return ; // don't cache twice
+    @example
+    offsetView = $view(this.get('offsetParent')) ;
     
-    var el = this.rootElement ;
-    this._frame = Element.getDimensions(el);
-    this._frame.x = el.offsetLeft ;
-    this._frame.y = el.offsetTop ;
-    this._frameCached = true ;
-  },
-  
-  // if you cached the frame, you can use this to clear that cache so that it
-  // will now track with the frame in the document.
-  flushFrameCache: function() {
-    this._frame = null ;
-    this._frameCached = false;
-  },
-  
-  // This property returns a DOM ELEMENT that is the offset parent for
-  // this view's frame coordinates.  Depending on your CSS, this parent
-  // may or may not match with the parent view.
+    @property
+    @type {Element}
+  */
   offsetParent: function() {
     return Position.offsetParent(this.rootElement) ;
   }.property(),
-  
-  // This property is used to set the internal padding of an element. The
-  // innerFrame is an offset from the outer frame.  Changing these settings
-  // will adjust the height, width, and padding of the element.
+
+  /**
+    The inner bounds for the content shown inside of this frame.  Reflects scroll position
+    and other properties.
+
+    The inner frame returns the actual available frame for child elements, less any borders
+    or scroll bars. 
+    
+    This value can change when:
+    - the receiver's frame changes
+    - the receiver's child views change, adding or removing scrollbars
+    - You can the CSS or applied style that effects the borders or scrollbar visibility
+  */
   innerFrame: function(key, value) {
     
-    // get the basic inner framce
-    var el = this.rootElement ;
-    var f = {
-      x: parseInt(this.getStyle('padding-left'),0) || 0,
-      y: parseInt(this.getStyle('padding-top'), 0) || 0,
-      width: parseInt(this.getStyle('width'), 0) || 0, 
-      height: parseInt(this.getStyle('height'),0) || 0
-    } ;
+    var f ;
+    if (this._innerFrame == null) {  
 
-    // get the current frame size.
-    var size = {
-      width: f.x + f.width + parseInt(this.getStyle('padding-right'),0),
-      height: f.y + f.height + parseInt(this.getStyle('padding-bottom'),0)
-    };
+      // get the base frame
+      var el = this.rootElement ;
+      f = this._collectFrame(function() {
+        return { 
+          x: el.offsetLeft, 
+          y: el.offsetTop, 
+          width: Math.min(el.scrollWidth, el.clientWidth), 
+          height: Math.min(el.scrollHeight, el.clientHeight) 
+        };
+      }) ;
 
-    // now update the innerFrame if needed.  Change only the bits that are
-    // passed in.
-    if (value !== undefined) {
-      var style = {} ;
-      var didResize = false ;
-      var clearFrame = false ;
-
-      // reposition X
-      if (value.x !== undefined) {
-        f.x = value.x ;
-        style.paddingLeft = Math.floor(f.x) + 'px' ;
-      }
-
-      // reposition Y
-      if (value.y !== undefined) {
-        f.y = value.y ;
-        style.paddingTop = Math.floor(f.y) + 'px' ;
-      }
-
-      // resize Width
-      // adjust both the element width and padding right so that the overall
-      // frame size does not change.
-      if (value.width !== undefined) {
-        didResize = true ;
-        f.width = value.width ;
-        style.width = Math.floor(f.width).toString() + 'px' ;
-        
-        var padding = size.width - f.width - f.x ;
-        if (padding < 0) {
-          clearFrame = true ;
-          padding = 0 ;
+      // bizarely for FireFox if your offsetParent has a border, then it can impact
+      // the offset
+      if (SC.Platform.Firefox && (this.getStyle('position') == 'absolute')) {
+        var parent = el.offsetParent ;
+        if (parent && (Element.getStyle(parent, 'overflow') != 'visible')) {
+          var left = parseInt(Element.getStyle(parent, 'borderLeftWidth'),0) || 0 ;
+          var top = parseInt(Element.getStyle(parent, 'borderTopWidth'),0) || 0 ;
+          f.x += left; f.y += top ;
         }
-        style.paddingRight = Math.floor(padding).toString() + 'px' ;
       }
       
-      // Resize Height
-      // adjust both the element height and padding bottom so that the 
-      // overall frame size does not change.
-      if (value.height !== undefined) {
-        didResize = true ;
-        f.height = value.height ;
-        style.height = Math.floor(f.height).toString() + 'px' ;
+      // fix the x & y with the clientTop/clientLeft
+      var clientLeft, clientTop ;
+      if (el.clientLeft == null) {
+        clientLeft = parseInt(this.getStyle('border-left-width'),0) || 0 ;
+      } else clientLeft = el.clientLeft ;
 
-        var padding = size.height - f.height - f.y ;
-        if (padding < 0) {
-          clearFrame = true ;
-          padding = 0 ;
-        }
-        style.paddingBottom = Math.floor(padding).toString() + 'px' ;
-      }
+      if (el.clientTop == null) {
+        clientTop = parseInt(this.getStyle('border-top-width'),0) || 0 ;
+      } else clientTop = el.clientTop ;
 
-      // now apply style change
-      this.setStyle(style) ;
+      f.x += clientLeft; f.y += clientTop;
       
-      // if the user sets an innerFrame size that cannot fit within the 
-      // current outer frame, then the outer frame will be adjusted to fit.
-      // clear the frame so that this can happen.
-      if (clearFrame) {
-        this.propertyWillChange('frame') ;
-        this._frame = null ;
-        this.propertyDidChange('frame') ;
-      }
-
-      // also notify children so they can resize also.
-      if (didResize) this.resizeChildrenWithOldSize(size) ;
-    }
-
-    // finally return the frame. 
-    return f ;  
+      // cache this frame if using manual layout mode
+      this._innerFrame = SC.cloneRect(f);
+    } else f = SC.cloneRect(this._innerFrame) ;
+    return f ;
   }.property('frame'),
+
+  /** Frame returns the outside bounds of your view, offset from its offsetParent
   
-  innerSize: function(key, value) {
-    if (value !== undefined) {
-      this.set('innerFrame',{ width: value.width, height: value.height }) ;
-    }
-    return this.get('innerFrame') ;
-  }.property('innerFrame'),
-  
-  innerOrigin: function(key, value) {
-    if (value !== undefined) {
-      this.set('innerFrame',{ x: value.x, y: value.y }) ;
-    }
-    return this.get('innerFrame') ;
-  }.property('innerFrame'),
-  
-  // This property identifies the height and offset of your view with 
-  // respect to the parent view and its bounds.  To resize your view, edit
-  // this property.
-  //
-  // This method is carefully constructed to use the computed CSS style 
-  // until you actually override it by setting your own size and location
-  // at which point it will use its own settings.
+    When you have the view's layoutMode in AUTO, frame is recalculated each time you
+    call it.  Otherwise, it will be cached for best performance.
+    
+    The frame can change whenever:
+    - you set a new frame property
+    - you change a CSS class or style that effects the top, left, width, height, margins, padding, or borders of the element.
+    
+    @property
+  */
   frame: function(key, value) {
 
-    // build frame
-    var el = this.rootElement ;
-    var f = Object.clone(this._frame) ;
-    if (f.x === undefined) f.x = el.offsetLeft ;
-    if (f.y === undefined) f.y = el.offsetTop ;
-    
-    // get the current size if needed.
-    var size ;
-    if ((f.width === undefined) || (f.height === undefined)) {
-      var isVisibleInWindow = this.get('isVisibleInWindow') ;
-
-      // if not visible in window, move parent node into window and get 
-      // dim and offset.  If the element has no parentNode, then just move
-      // the element in.
-      if (!isVisibleInWindow) {
-        var pn = el.parentNode || el ;
-        var pnParent = pn.parentNode ;
-        var pnSib = pn.nextSibling ;
-        SC.window.rootElement.insertBefore(pn, null) ;
-      }
-      
-      size = Element.getDimensions(el);
-      f.width = size.width ;
-      f.height = size.height;
-      
-      if (!isVisibleInWindow) {
-        if (pnParent) {
-          pnParent.insertBefore(pn, pnSib) ;
-        } else SC.window.removeChild(pn) ;
-      }
-    } else size = f ;
-
+    // if value was passed, set the values in the style
     // now update the frame if needed.  Only actually change the style for
     // those parts of the frame that were passed in.
     if (value !== undefined) {
+      
+      this.viewFrameWillChange() ;
+      
+      var f= value ;
       var style = {} ;
       var didResize = false ;
 
+      // collect required info 
       // reposition X
       if (value.x !== undefined) {
-        f.x = value.x ;
         style.left = Math.floor(f.x) + 'px' ;
       }
 
       // reposition Y
       if (value.y !== undefined) {
-        f.y = value.y ;
         style.top = Math.floor(f.y) + 'px' ;
       }
       
       // Resize width
       if (value.width !== undefined) {
         didResize = true ;
-        f.width = value.width ;
-        var padding = parseInt(this.getStyle('padding-left'),0) + parseInt(this.getStyle('padding-right'),0) ;
+        var padding = 0 ;
+        var idx = SC.View.WIDTH_PADDING_STYLES.length;
+        while(--idx >= 0) {
+          padding += parseInt(this.getStyle(SC.View.WIDTH_PADDING_STYLES[idx]), 0) || 0;
+        }
         style.width = (Math.floor(f.width) - padding).toString() + 'px' ;
       }
       
       // Resize Height
       if (value.height !== undefined) {
         didResize = true ;
-        f.height = value.height ;
-        var padding = parseInt(this.getStyle('padding-top'),0) + parseInt(this.getStyle('padding-bottom'),0) ;
+        var padding = 0 ;
+        var idx = SC.View.HEIGHT_PADDING_STYLES.length;
+        while(--idx >= 0) {
+          padding += parseInt(this.getStyle(SC.View.HEIGHT_PADDING_STYLES[idx]), 0) || 0;
+        }
         style.height = (Math.floor(f.height) - padding).toString() + 'px' ;
       }
 
-      // now apply style change and save new frame.
+      // now apply style change and clear the cached frame
       this.setStyle(style) ;
-      this._frame = Object.clone(f) ;
-
-      // also notify children so they can resize also.
-      if (didResize) this.resizeChildrenWithOldSize(size) ;
+      
+      // notify for a resize only.
+      this.viewFrameDidChange() ;
     }
+    
+    // build frame.  We can use a cached version but only 
+    // if layoutMode == SC.MANUAL_MODE
+    var f;
+    if (this._frame == null) {
+      var el = this.rootElement ;
+      f = this._collectFrame(function() {
+        return { 
+          x: el.offsetLeft, 
+          y: el.offsetTop, 
+          width: el.offsetWidth, 
+          height: el.offsetHeight 
+        };
+      }) ;
+      
+      // bizarely for FireFox if your offsetParent has a border, then it can impact
+      // the offset
+      if (SC.Platform.Firefox && (this.getStyle('position') == 'absolute')) {
+        var parent = el.offsetParent ;
+        if (parent && (Element.getStyle(parent, 'overflow') != 'visible')) {
+          var left = parseInt(Element.getStyle(parent, 'borderLeftWidth'),0) || 0 ;
+          var top = parseInt(Element.getStyle(parent, 'borderTopWidth'),0) || 0 ;
+          f.x += left; f.y += top ;
+        }
+      }
+      
+      // cache this frame if using manual layout mode
+      this._frame = SC.cloneRect(f);
+    } else f = SC.cloneRect(this._frame) ;
 
     // finally return the frame. 
     return f ;
-  }.property('innerFrame'),
+  }.property(),
   
+  /**
+    The current frame size.
+    
+    This property will actually return the same value as the frame property, however setting
+    this property will set only the frame size and ignore any origin you might pass.
+    
+    @field
+  */
   size: function(key, value) {
     if (value !== undefined) {
       this.set('frame',{ width: value.width, height: value.height }) ;
@@ -676,6 +889,14 @@ SC.View = SC.Responder.extend(SC.PathModule,
     return this.get('frame') ;
   }.property('frame'),
   
+  /**
+    The current frame origin.
+    
+    This property will actually return the same value as the frame property, however setting
+    this property will set only the frame origin and ignore any size you might pass.
+    
+    @field
+  */
   origin: function(key, value) {
     if (value !== undefined) {
       this.set('frame',{ x: value.x, y: value.y }) ;
@@ -684,27 +905,205 @@ SC.View = SC.Responder.extend(SC.PathModule,
   }.property('frame'),
   
   /**
-    The current scroll frame for the view.
+    Call this method before you make a change that will impact the frame of the view 
+    such as changing the border thickness or adding/removing a CSS style.
     
-    This will tell you the total scroll height and width of the view as well
-    as any current scroll offset.  You can also set the x and y properties of
-    the scrollFrame.  Any changes to height and width will be ignored.
+    Once you finish making your changes, be sure to call viewFrameDidChange() as well.
+    This will deliver any relevant resizing and other notifications.  It is safe to nest
+    multiple calls to this method.
     
-    @returns frame
+    This method is called automatically anytime you set the frame.
+    
+    @returns {void}
+  */
+  viewFrameWillChange: function() {
+    if (this._frameChangeLevel++ <= 0) {
+      this._frameChangeLevel = 1 ;
+
+      // save frame information if view has manual layout.
+      if (this.get('needsFrameChanges')) {
+        this._cachedFrames = this.getEach('innerFrame', 'clippingFrame', 'frame') ;
+      } else this._cachedFrames = null ;
+      this.beginPropertyChanges(); // suspend change notifications
+    }
+  },
+
+  /**
+    Call this method just after you finish making changes that will impace the frame
+    of the view such as changing the border thickness or adding/removing a CSS style.
+    
+    It is safe to next multiple calls to this method.   This method is called automatically
+    anytime you set the frame.
+    
+    @returns {void}
+  */
+  viewFrameDidChange: function() {
+    
+    // clear the frame caches
+    this._innerFrame = this._frame = this._clippingFrame = this._scrollFrame = null ; 
+
+    // if this is a top-level call then also deliver notifications as needed.
+    if (--this._frameChangeLevel <= 0) {
+      this._frameChangeLevel = 0 ;
+      if (this._cachedFrames) {
+        var newFrames = this.getEach('innerFrame', 'clippingFrame') ;
+        
+        // notify children if the size of the innerFrame has changed.
+        var nf = newFrames[0]; var of = this._cachedFrames[0] ;
+        if ((nf.width != of.width) || (nf.height != of.height)) {
+          this.resizeChildrenWithOldSize(this._cachedFrames.last()) ;          
+        }
+        
+        // notify if clippingFrame has changed and clippingFrameDidChange is implemented.
+        var nf = newFrames[1]; var of = this._cachedFrames[1] ;
+        if ((nf.width != of.width) || (nf.height != of.height)) {
+          this._invalidateClippingFrame() ;
+        }
+        
+        this.notifyPropertyChange('frame') ; // trigger notifications.
+      }
+      
+      // allow notifications again
+      this.endPropertyChanges() ;
+    }
+  },
+
+
+  /**
+    Set to true if you expect this view to have scrollable content.
+
+    Normally views do not monitor their onscroll event.  If you set this property to true,
+    however, the view will observe its onscroll event and update its scrollFrame and 
+    clippedFrame.
+
+    This will also register the view as a scrollable area that can be auto-scrolled during
+    a drag/drop event.
+  */
+  isScrollable: false,
+  
+  /**
+    The frame used to control scrolling of content.
+    
+    x,y => offset from the innerFrame root.
+    width,height => total size of the frame
+
+    This frame changes when:
+    - the receiver's innerFrame changes
+    - the scroll location is changed programatically
+    - the size of child views changes
+    - the user scrolls the view
+    
+    @field
   */
   scrollFrame: function(key, value) {  
-    var el = this.rootElement ;
-    if (value !== undefined) {
-      el.scrollTop = value.y ;
-      el.scrollLeft = value.x ;
-    }
 
-    return { x: el.scrollLeft, y: el.scrollTop, height: el.scrollHeight, width: el.scrollWidth } ;
+    // if value was passed, update the scroll x,y only.
+    if (value != undefined) {
+      var el = this.rootElement ;
+      if (value.x != null) el.scrollLeft = 0-value.x ;
+      if (value.y != null) el.scrollTop = 0-value.y ;
+      this._scrollFrame = null ;
+      this._invalidateClippingFrame() ;
+    }
+    
+    // build frame.  We can use a cached version but only 
+    var f;
+    if (this._scrollFrame == null) {
+      var el = this.rootElement ;
+      f = this._collectFrame(function() {
+        return { 
+          x: 0 - el.scrollLeft, 
+          y: 0 - el.scrollTop, 
+          width: el.scrollWidth, 
+          height: el.scrollHeight 
+        };
+      }) ;
+      
+      // cache this frame if using manual layout mode
+      this._scrollFrame = SC.cloneRect(f);
+    } else f = SC.cloneRect(this._scrollFrame) ;
+
+    // finally return the frame. 
+    return f ;
   }.property('frame'),
   
-  // called on the view when you need to resize your child views.  Normally
-  // this will call resizeWithOldParentSize() on the child views, but you
-  // can override this to do whatever funky layout to want.
+  /**
+    The visible portion of the view.
+
+    Returns the subset of the receivers frame that is actually visible on screen. 
+    This frame is automatically updated whenever one of the following changes:
+    
+    - A parent view is resized
+    - A parent view's scrollFrame changes.
+    - The receiver is moved or resized
+    - The receiver or a parent view is added to or removed from the window.
+    
+    @field
+  */
+  clippingFrame: function() {
+    var f ;
+    if (this._clippingFrame == null) {
+
+      // my clipping frame is usually my frame
+      f = this.get('frame') ;
+      
+      // scope to my parents clipping frame.
+      if (this.parentNode) {
+        
+        // use only the visible portion of the parent's innerFrame.
+        var parent = this.parentNode ;
+        var prect = SC.intersectRects(parent.get('clippingFrame'), parent.get('innerFrame'));
+
+        // convert the local view's coordinates
+        prect = this.convertFrameFromView(prect, parent) ;
+
+        // if parent is scrollable, then adjust by scroll frame also.
+        if (this.parentNode.get('isScrollable')) {
+          var scrollFrame = this.get('scrollFrame') ;
+          prect.x -= scrollFrame.x ; 
+          prect.y -= scrollFrame.y ;
+        }
+        
+        // blend with current frame
+        f = SC.intersectRects(f, prect) ;
+      } else {
+        f.width = f.height = 0 ;
+      }
+      
+      this._clippingFrame = SC.cloneRect(f) ;
+
+    } else f = SC.cloneRect(this._clippingFrame) ;
+    return f ;
+  }.property('frame', 'scrollFrame'),
+  
+  /**
+    Called whenever the receivers clippingFrame has changed.  You can override this
+    method to perform partial rendering or other clippingFrame-dependent actions.
+    
+    The default implementation does nothing (and may not even be called do to optimizations).
+    Note that this is the preferred way to respond to changes in the clippingFrame
+    of using an observer since this method is gauranteed to happen in the correct
+    order.  You can use observers and bindings as well if you wish to handle anything
+    that need not be handled synchronously.
+  */
+  clippingFrameDidChange: function() {
+    
+  },
+  
+  /**
+    Called whenever the view's innerFrame size changes.  You can override this 
+    method to perform your own layout of your child views.  
+    
+    If you do not override this method, the view will assume you are using 
+    CSS to layout your child views.  As an optimization the view may not always 
+    call this method if it determines that you have not overridden it.
+    
+    This default version simply calls resizeWithOldParentSize() on all of its
+    children.
+    
+    @param oldSize {Size} The old frame size of the view.
+    @returns {void}
+  */
   resizeChildrenWithOldSize: function(oldSize) {
     var child = this.get('firstChild') ;
     while(child) {
@@ -712,117 +1111,232 @@ SC.View = SC.Responder.extend(SC.PathModule,
       child = child.get('nextSibling') ;
     }
   },
-  
-  // called by the parentNode when it is resized.  If you define the
-  // resizeOptions property, then this will respect those properties, 
-  // otherwise it will let the browser do all the resizing and simply informs
-  // the child views that they need to resize also.
+
+  /**
+    Called whenever the parent's innerFrame size has changed.  You can override this
+    method to change how your view responds to this change.
+    
+    If you do not override this method, the view will assume you are using CSS to
+    control your layout and it will simply relay the change information to your
+    child views.  As an optmization, the view may not always call this method if it 
+    determines that you have not overridden it.
+    
+    @param oldSize {Size} The old frame size of the parent view.
+  */
   resizeWithOldParentSize: function(oldSize) {
-    var opts = this.get('resizeOptions') ;
-    
-    // if there are no options, then just notify the children and return.
-    if (opts == null) {
-      if (this.firstChild) {
-        var oldSize = (this._frame) ? { width: this._frame.width, height: this._frame.height } : this.get('size') ;
-        this.resizeChildrenWithOldSize(oldSize) ;
-      }
-      return ;
-    }
-
-    // if there are options, then handle the resizing.  This will 
-    // notify the children also.
-    if (this.get('isPositioned')) this.set('isPositioned',true) ;
-    
-    var f = Object.clone(this.get('frame')) ;
-    var newSize = this.get('parentNode').get('size') ;
-    
-    var adjust = function(props, apts, newSize, oldSize) {
-      var loc ;
-      
-      // first, compute the dimensions for old size.
-      var dims = [f[apts[0]], f[apts[1]]] ;
-      dims.push(oldSize - (dims[0] + dims[1])) ;
-      
-      // next, subtract the dimensions of fixed elements from the old and
-      // new sizes.
-      for(loc=0;loc < 3;loc++) {
-        if (opts[props[loc]] != SC.FLEXIBLE) {
-          newSize -= dims[loc]; oldSize -= dims[loc] ;
-        }
-      }
-      
-      // finally, adjust the flexible area as a percentage of the limited
-      // dimensions.
-      for(loc=0;loc < 2; loc++) {
-        if (opts[props[loc]] == SC.FLEXIBLE) {
-          f[apts[loc]] = newSize * dims[loc] / oldSize ;
-        }
-      }
-    };
-    
-    // handle horizontal
-    adjust(['left','width','right'], ['x','width'], newSize.width, oldSize.width) ;
-
-    adjust(['top','height','bottom'], ['y','height'], newSize.height, oldSize.height) ;
-
-    this.set('frame',f) ;
+    this.viewFrameWillChange() ;
+    this.viewFrameDidChange() ;
   },
   
-  // These properties are provide simple control for autoresizing.  If you
-  // set these, then resizeWithOldParentSize() will autoresize for you.
-  // The allowed options are: SC.FLEXIBLE, SC.FIXED.
-  resizeOptions: null,
+  /** @private
+    Handler for the onscroll event.  Hooked in on init if isScrollable is true.
+    Notify children that their clipping frame has changed.
+  */
+  _onscroll: function() {
+    this._scrollFrame = null ;
+    this.notifyPropertyChange('scrollFrame') ;
+    this._invalidateClippingFrame() ;
+  },
+
+  _frameChangeLevel: 0,
+  
+  /** @private
+    Used internally to collect client offset and location info.  If the element is 
+    not in the main window or hidden, it will be added temporarily and then the passed
+    function will be called.
+  */
+  _collectFrame: function(func) {
+    var el = this.rootElement ;
+    
+    // if not visible in window, move parent node into window and get 
+    // dim and offset.  If the element has no parentNode, then just move
+    // the element in.
+    var isVisibleInWindow = this.get('isVisibleInWindow') ;
+    if (!isVisibleInWindow) {
+      var pn = el.parentNode || el ;
+      var pnParent = pn.parentNode ; // cache former parent node
+      var pnSib = pn.nextSibling ; // cache next sibling
+      SC.window.rootElement.insertBefore(pn, null) ;
+    }
+
+    // if view is not displayed, temporarily display it also
+    var display = this.getStyle('display') ;
+    var isHidden = !(display != 'none' && display != null) ;
+
+    // All *Width and *Height properties give 0 on elements with display none,
+    // so enable the element temporarily
+    if (isHidden) {
+      var els = this.rootElement.style;
+      var originalVisibility = els.visibility;
+      var originalPosition = els.position;
+      var originalDisplay = els.display;
+      els.visibility = 'hidden';
+      els.position = 'absolute';
+      els.display = 'block';
+    }
+
+    var ret = func.call(this) ;
+    
+    if (isHidden) {
+      els.display = originalDisplay;
+      els.position = originalPosition;
+      els.visibility = originalVisibility;
+    }
+
+    if (!isVisibleInWindow) {
+      if (pnParent) {
+        pnParent.insertBefore(pn, pnSib) ;
+      } else SC.window.rootElement.removeChild(pn) ;
+    }  
+    
+    return ret;
+  },
+  
+  /** @private
+    Called whenever some aspect of the receiver's frames have changed that 
+    probably has invalidated the child views clippingFrames.  Events that cause 
+    this include:
+    
+    - change to the innerFrame size
+    - change to the scrollFrame
+    - change to the clippingFrame
+    
+    For performance reasons, this only passes onto children if they or a decendent 
+    implements the clippingFrameDidChange method.
+  */
+  _invalidateChildrenClippingFrames: function() {
+    var view = this.get('firstChild') ;
+    while(view) {
+      view._invalidateClippingFrame() ;
+      view = view.get('nextSibling') ;
+    }
+  },
+
+  /** @private
+    Called by a parentNode whenever the clippingFrame needs to be recalculated.
+  */
+  _invalidateClippingFrame: function() {  
+    if (this.get('needsClippingFrame')) {
+      this._clippingFrame = null ;
+      this.clippingFrameDidChange() ; 
+      this.notifyPropertyChange('clippingFrame') ;
+      this._invalidateChildrenClippingFrames() ;
+    }
+  },
   
   // ..........................................
   // PROPERTIES
   //
 
-  // set isVisible to false to hide a view or true to display it.  You can
-  // optionally setup a visibleAnimation that will be used to transition the
-  // view in and out.
-  //
-  // If you would instead like to be notified when the view's actual
-  // visibility state changes (i.e. when animations are complete) bind to
-  // isDisplayVisible.
+  /** 
+    Makes the view visible.  
+    
+    If false, sets display: none on the DOM element as well. You will
+    often want to bind this property to some setting in your application
+    to make various parts of your app visible as needed.
+
+    If you have animation enabled, then changing this property will actually
+    trigger the animation to bring the view in or out.
+    
+    The default binding format is SC.Binding.Bool
+    
+    @property
+    @type Boolean
+  */
   isVisible: true,
-  isVisibleBindingDefault: SC.Binding.Flag,
   
-  // [RO] This property reflects the current display visibility of the view.
-  // Usually, this property will mirror the current state of the isVisible
-  // property.  However, if your view animates its visibility in and out, then
-  // this will not become false until the animation completes.
+  /** @private */
+  isVisibleBindingDefault: SC.Binding.Bool,
+  
+  /**
+    (Read Only) The current display visibility of the view.
+    
+    Usually, this property will mirror the current state of the isVisible
+    property.  However, if your view animates its visibility in and out, then
+    this will not become false until the animation completes.
+    
+    @type {Boolean}
+  */
   displayIsVisible: true,
 
-  // This property is set to true only when the view is (a) in the main DOM
-  // hierarchy and (b) all parent nodes are visible and (c) the receiver node
-  // is visible.
+  /**
+    true when the view is actually visible in the DOM window.
+
+    This property is set to true only when the view is (a) in the main DOM
+    hierarchy and (b) all parent nodes are visible and (c) the receiver node
+    is visible.
+    
+    @type {Boolean}
+    @property
+  */
   isVisibleInWindow: true,
   
-  // Localize boolean. This is used if you need toolTips.
+  /**
+    If true, the tooltip will be localized.  Also used by some subclasses.
+    
+    @type {Boolean}
+    @property
+  */
   localize: false,
-  
-  // Tool tip gets applied to the title attribute if set.
+
+  /**
+    Applied to the title attribute of the rootElement DOM if set. 
+    
+    If localize is true, then the toolTip will be localized first.
+    
+    @type {String}
+    @property
+  */
   toolTip: '',
 
-  // set this to the HTML you want to use when creating a new element. You
-  // can specify the HTML as a string of text, using the NodeDescriptor, or
-  // by pointing directly to an element.
+
+  /**
+    The HTML you want to use when creating a new element. 
+    
+    You can specify the HTML as a string of text, using the NodeDescriptor, or
+    by pointing directly to an element.
+    
+    Note that as an optimization, SC.View will actually convert the value of this
+    property to an actual DOM structure the first time you create a view and then
+    clone the DOM structure for future views.  
+    
+    This means that in general you should only set the value of emptyElement when
+    you create a view subclass.  Changing this property value at other times will
+    often have no effect.
+    
+    @property
+    @type {String}
+  */
   emptyElement: "<div></div>",
   
-  // Set to true and the view will display in a lightbox when you show it.
+  /**
+    If true, view will display in a lightbox when you show it.
+    
+    @property
+    @type {Boolean}
+  */
   isPanel: false,
 
-  // Set to true if the view should be modal when shown as a panel.
+  /**
+    If true, the view should be modal when shown as a panel.
+  
+    @property
+    @type {Boolean}
+  */
   isModal: true,
   
-  // Enable visible animation by default.
+  /**
+    Enable visible animation by default.
+  */
   isAnimationEnabled: true,
-
-  // General support for animation.  Just call this method and it will build
-  // and play an animation starting from the current state.  The second param
-  // is optional.  It should either be a hash of animator options or an 
-  // animator object returned by a previous call to transitionTo().
-  //
+  
+  /**
+    General support for animation.  Just call this method and it will build
+    and play an animation starting from the current state.  The second param
+    is optional.  It should either be a hash of animator options or an 
+    animator object returned by a previous call to transitionTo().
+  
+  */
   transitionTo: function(target,animator,opts) {
     var animatorOptions = opts || {} ;
 
@@ -877,130 +1391,34 @@ SC.View = SC.Responder.extend(SC.PathModule,
     return this.asHTML().unescapeHTML() ;
   }.property(),
 
-
-
-
-  //
-  // Command methods (used by the command manager)
-  //
-
-  /**
-  * Queries to see if the view has function matching the passed name .
-  * @param {String} name The name of the function
-  * @return Boolean
-  **/
-  hasNamedFunction: function( name )
-  {
-    return ( this[name] && ($type(this[name]) == T_FUNCTION) );
-  },
-  /**
-  * Queries to see if the view has a named command.
-  * @param {String} name The name of the command
-  * @return Boolean
-  **/
-  hasCommand: function( name )
-  {
-    return this.hasNamedFunction(name);
-  },
-  /**
-  * Queries to see if the view has a validator for the named command.
-  * @param {String} name The name of the command
-  * @return Boolean
-  **/
-  hasCommandValidator: function( name )
-  {
-    var name = this._commandValidatorForCommand(name);
-    return this.hasNamedFunction(name);
-  },
-
-  /**
-  * Queries to see if the view is capable of executing a named command.
-  * The view must have a method named after the command and, if there is a command validator method, it must pass validation.
-  * @param {String} name The name of the command
-  * @return Boolean
-  **/
-  canExecuteCommand: function( name )
-  {
-    var hasCommand          = this.hasCommand(name);
-    var hasCommandValidator = this.hasCommandValidator(name);
-    // can't execute what you haven't got...
-    if ( !hasCommand ) return false;
-    // got it and not validating before usage... 
-    if ( hasCommand && !hasCommandValidator ) return true;
-    // ok... we got it, and we need to check before using...
-    if ( hasCommand && hasCommandValidator )
-    {
-      return this.executeCommandValidator(name);
-    }
-  },
-  /**
-  * Executes the command (if permitted).
-  * @param {String} name The name of the command
-  * @return Boolean Either the return value of executing the command, or false.
-  **/
-  executeCommand: function( name )
-  {
-    return this.canExecuteCommand(name) ? this.executeCommandWithoutValidation(name) : false;
-  },
-  /**
-  * Executes the command without performing any validation.
-  * @param {String} name The name of the command
-  * @return Boolean The return value of executing the command.
-  **/
-  executeCommandWithoutValidation: function( name )
-  {
-    return this[name]();
-  },
-  /**
-  * Executes the command validator.
-  * @param {String} name The name of the command to be validated.
-  * @return Boolean Wether or not the command can be executed.
-  **/
-  executeCommandValidator: function( name )
-  {
-    var name = this._commandValidatorForCommand(name);
-    return this[name]();
-  },
-
-  /**
-  * Utility to construct the command alidator method name.
-  * @private
-  * @param {String} name The name of the command
-  * @return String
-  **/
-  _commandValidatorForCommand: function( name )
-  {
-    return "can" + name.capitalize();
-  },
-
-
-
-
   // ..........................................
   // SUPPORT METHODS
   //
   init: function() {
-    this._frame = {} ;    
     arguments.callee.base.call(this) ;
 
     // configure them outlets.
-    var r = SC.idt.active ; var idtStart ; var idtSt ;
-    if (r) { idtSt = new Date().getTime(); }
+    if (SC.BENCHMARK_CONFIGURE_OUTLETS) SC.Benchmark.start('SC.View.configureOutlets') ;
     this.configureOutlets() ;
-    if (r) { SC.idt.conf_t += ((new Date().getTime()) - idtSt); }
+    if (SC.BENCHMARK_CONFIGURE_OUTLETS) SC.Benchmark.end('SC.View.configureOutlets') ;
 
     var toolTip = this.get('toolTip') ;
     if(toolTip && (toolTip != '')) this._updateToolTipObserver();
-    
-    // despite what was written in the comments for the containerElement property, it was not being converted 
-    // from a sring to an element on access... doing so here...
-    // shouldn't be a bottleneck since if containerElement is set, you are likely to need the DOM element at some point.
-    if ( this.containerElement && (SC.typeOf(this.containerElement) == T_STRING) )
-    {
+
+    // if container element is a string, convert it to an actual DOM element.
+    if (this.containerElement && ($type(this.containerElement) == T_STRING)) {
       this.containerElement = this.$sel(this.containerElement);
     }
-    
+
+    // register as a drop target and scrollable.
     if (this.get('isDropTarget')) SC.Drag.addDropTarget(this) ;
+    if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
+    
+    // add scrollable handler
+    if (this.isScrollable) this.rootElement.onscroll = SC.View._onscroll ;
+    
+    // setup isVisibleInWindow ;
+    this.isVisibleInWindow = (this.parentNode) ? this.parentNode.get('isVisibleInWindow') : false;
   },
   
   // this method looks through your outlets array and will try to
@@ -1014,23 +1432,6 @@ SC.View = SC.Responder.extend(SC.PathModule,
     this.beginPropertyChanges(); // bundle changes
     for(var oloc=0;oloc < this.outlets.length;oloc++) {
       var view = this.outlet(this.outlets[oloc]) ;
-      
-      // if the HTML for the view is already in the DOM, then walk up the
-      // DOM tree to find the first parent element managed by a view (incl
-      // the receiver.  Add the view to the list of child views also.
-      if (view && view.rootElement && view.rootElement.parentNode) {
-        var node = view.rootElement.parentNode;
-        var parentView ;
-        while(node && (node != this.rootElement) && !(parentView = $view(node))) node = node.parentNode;
-        if (node == this.rootElement) parentView = this;
-        if (parentView) parentView._insertBefore(view,null,false) ;
-      }
-      this._rebuildChildNodes() ; // this is not done with _insertBefore.
-
-      // update parent state.
-      if (view && view._updateIsVisibleInWindow) {
-        view._updateIsVisibleInWindow() ;
-      } 
     }    
     this.endPropertyChanges() ;
   },
@@ -1256,7 +1657,7 @@ SC.View = SC.Responder.extend(SC.PathModule,
     var attrs = el.attributes ;
     attrs = (attrs) ? $A(attrs).map(function(atr) { return [atr.nodeName,atr.nodeValue].join("="); }).join(' ') : '';
     var tagName = (!!el.tagName) ? el.tagName.toLowerCase() : 'document' ;
-    return "View(<%@>)".format([tagName,attrs].join(' ')) ;
+    return "%@<%@>".fmt(this._type, [tagName,attrs].join(' ')) ;
   }
     
 }) ;
@@ -1349,42 +1750,104 @@ SC.View.mixin({
     ret.prototype._cachedEmptyElement = null ;
     return ret ;
   },
-  
-  // define your view as an outlet.
+
+  /** 
+    Defines a view as an outlet.  This will return an function that
+    can be executed at a later time to actually create itself as an outlet.
+  */
   outletFor: function(path) {
-    var view = this ;
-    var _func = function() {
-      if (path === null) return view.viewFor(null) ;
+    var viewClass = this ; // save the view class
+    var func = function() {
+      if (SC.BENCHMARK_OUTLETS) SC.Benchmark.start("OUTLET(%@)".format(path)) ;
 
-      
-      var ret = (this.$$sel) ? this.$$sel(path) : $$sel(path) ;
-      if (ret) {
-        var owner = this ;
-        var newRet = [] ;
-        for(var loc=0;loc<ret.length;loc++) {
-          newRet.push(view.viewFor(ret[loc], { owner: owner })); 
+      // if no path was passed, then create the view from scratch
+      if (path == null) {
+        var ret = viewClass.viewFor(null) ;
+        
+      // otherwise, try to find the HTML element identified by the path.
+      // If the element cannot be found in the caller (the owner view), then
+      // search the entire document.
+      } else {
+        var ret = (this.$$sel) ? this.$$sel(path) : $$sel(path) ;
+
+        // if some HTML has been found, then loop through and create views for each 
+        // one.  Be sure to setup the proper parent view.
+        if (ret) {
+          var owner = this ; var views = [] ;
+          for(var loc=0;loc<ret.length;loc++) {
+            
+            // create the new view instance
+            var view = viewClass.viewFor(ret[loc], { owner: owner }) ;
+            
+            // if successful, then we need to determine the new parentNode.
+            // then walk up the DOM tree to find the first parent element 
+            // managed by a view (including this).
+            //
+            // If a matching view is not found, but the view IS in a DOM
+            // somewhere then make the view a child of either SC.page or 
+            // SC.window.
+            //  
+            // Add the view to the list of child views also.
+            //
+            if (view && view.rootElement && view.rootElement.parentNode) {
+              var node = view.rootElement.parentNode;
+              var parentView = null ;
+
+              // go up the chain.  stop when we find a parent view, or the rootElement
+              // for SC.page.
+              while(node && !parentView) {
+                switch(node) {
+                case this.rootElement:
+                  parentView = this;
+                  break ;
+                case SC.page.rootElement:
+                  parentView = SC.page ;
+                  break;
+                case SC.window.rootElement:
+                  parentView = SC.window ;
+                default:
+                  node = node.parentNode ; 
+                }
+              }
+
+              // if a parentView was found, then add to parentView.
+              if (parentView) {
+                parentView._insertBefore(view,null,false) ;
+                parentView._rebuildChildNodes() ; // this is not done with _insertBefore.
+                view._updateIsVisibleInWindow();
+              }
+              
+            // view is not in a DOM. nothing to do.
+            }
+
+            // add to return array
+            views[views.length] = view ;
+            
+          }
+          ret = views ;
+          ret = (ret.length == 0) ? null : ((ret.length == 1) ? ret[0] : ret);
         }
-        ret = newRet ;
-        ret = (ret.length == 0) ? null : ((ret.length == 1) ? ret[0] : ret);
+        
       }
-
+      
+      if (SC.BENCHMARK_OUTLETS) SC.Benchmark.end("OUTLET(%@)".format(path)) ;
       return ret ;
     } ;
-    
-    var func ;
-    if (BENCHMARK_OUTLETS) {
-      func = function() {
-        var that = this ;
-        return SC.Benchmark._bench(function() {
-          return _func.call(that);
-        }, "OUTLET(%@)".format(path)) ;
-      };
-    } else func = _func ;    
     func.isOutlet = true ;
     return func ;
   }  
 
 }) ;
+
+// this handler goes through the guid to avoid any potential memory leaks
+SC.View._onscroll = function(evt) { $view(this)._onscroll(evt); } ;
+
+SC.View.WIDTH_PADDING_STYLES = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'];
+
+SC.View.HEIGHT_PADDING_STYLES = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth'];
+
+SC.View.SCROLL_WIDTH_PADDING_STYLES = ['borderLeftWidth', 'borderRightWidth'];
+SC.View.SCROLL_HEIGHT_PADDING_STYLES = ['borderTopWidth', 'borderBottomWidth'];
 
 SC.View.elementFor = SC.View.viewFor ; // Old Sprout Compatibility.
 

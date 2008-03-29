@@ -1,0 +1,131 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("CollectionView with simple vertical layout", {
+  
+  "should contain all member views": function() {
+    assertEqual(view.get('content').get('length'), data.get('length')) ;
+  },
+  
+  setup: function() {
+    SC.CollectionViewTest.setup(this, {
+      
+      rowHeight: 22,
+      
+      layoutItemViewsFor: function(parentView, startingView) {
+        var rowHeight = this.get('rowHeight') ;
+        if (rowHeight == null) return false ;
+
+        if (!startingView) startingView = parentView.firstChild ;
+        var y = (startingView && startingView.previousSibling) ? SC.maxY(startingView.previousSibling.get('frame')) : 0;
+        var f = (parentView || this).get('innerFrame') ; 
+        f = { x: 0, height: rowHeight, width: f.width } ;
+        var view = startingView || parentView.firstChild;
+        while(view) {
+          f.y = y ;
+          if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
+          y += rowHeight; 
+          view = view.nextSibling ;
+        }
+        return true; 
+      }
+      
+    }) ;
+    window.context = this ;
+  },
+
+  teardown: function() {
+    //SC.CollectionViewTest.teardown(this) ;
+  }
+  
+});
+
+// Common methods to setup the collection views for testing
+SC.CollectionViewTest = {
+  setup: function(that, props) { this._setup.call(that, props) ; },
+  _setup: function(props) {
+    
+    // create the controller
+    this.controller = SC.ArrayController.create();
+
+    // create the view, bind it to the controller
+    props = props || {} ;
+    props.contentBinding = [this.controller, 'arrangedObjects']; 
+    props.selectionBinding = [this.controller, 'selection']; 
+    props.delegate = this.controller ;
+    
+    if (!props.exampleView) props.exampleView = SC.TextCellView ;
+    if (!props.displayProperty) props.displayProperty = 'name' ;
+    
+    // create the view with the props
+    this.view = SC.CollectionView.create(props);
+    this.view.addClassName('test-collection') ;
+    SC.page.get('root').appendChild(this.view);
+    
+    // create some item data...  use a lot.
+    this.data = [] ;
+    var idx = 1000 ;
+    while(--idx >= 0) {
+      this.data[this.data.length] = SC.Object.create({
+        guid: (1000 + idx).toString(),
+        name: "Item %@".fmt(1000 + idx)
+      }) ;
+    }
+
+    // set the content to the array
+    this.controller.set('content', this.data);
+  },
+  
+  teardown: function(that) { this._teardown.call(that); },
+  _teardown: function() {
+    
+    // remove view from the parent
+    this.view.removeFromParent() ;
+    
+    // unhook some things
+    this.controller.set('content', null) ;
+    
+    // delete the view, controller, etc.
+    delete this.view ; 
+    delete this.controller ;
+    delete this.data ;    
+  }
+  
+} ;
+
+main = function() { SC.page.awake(); } ;
+
+</script>
+
+<% end %>
+
+<% content_for('body') do %>
+<style>
+
+.test-collection {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 400px;
+  height: 200px;
+  border: 1px #ccc solid;
+  overflow: auto;
+  background-color: white;
+}
+
+.root {
+  position: fixed;
+  bottom: 0;
+  left: 0 ;
+  width: 100%;
+  border-top: 1px #ccc solid;
+  padding: 20px;
+  height: 280px;
+  overflow: auto;
+}
+
+</style>
+
+<%= view :root %>
+
+<% end %>

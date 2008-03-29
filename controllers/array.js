@@ -26,7 +26,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
     @property
     @type {SC.ArrayController}
   */
-  arrangedObjects: function() { return this; }.property(),
+  arrangedObjects: function() { return this; }.property('content'),
 
   /**
     The array content that is being managed by the controller.
@@ -132,7 +132,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
   *   return null.
   */
   objectAt: function(idx) {
-    var obj = this._getSourceContent().objectAt(idx);
+    var obj = this._getSourceContent() ;
+    obj = (obj && obj.objectAt) ? obj.objectAt(idx) : null;
     return this._objectControllerFor(obj) ;
   },
   /**
@@ -141,7 +142,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
   * @type {integer}
   */
   length: function( key, value ) {
-    return this._getSourceContent().get('length');
+    var ret = this._getSourceContent() ;
+    return (ret && ret.get) ? (ret.get('length') || 0) : 0 ;
   }.property(),
 
   /**

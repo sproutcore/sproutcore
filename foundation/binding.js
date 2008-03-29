@@ -216,7 +216,7 @@ SC.Binding.mixin({
 // of properties.  The second param is a set of properties.  Both are opt.
 SC.Binding.From = function(from,opts) {
   if (!opts) opts = {} ;
-  if ((typeof(from) == "string") || (from instanceof Array)) {
+  if (($type(from) == T_STRING) || ($type(from) == T_ARRAY)) {
     opts.from = from ;
   } else Object.extend(opts,from) ;
   var ret = SC.Binding.extend(opts) ; 

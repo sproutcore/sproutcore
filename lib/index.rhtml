@@ -22,6 +22,7 @@
 	 # :requires option in routes.rb. 
 -%>
     <%= stylesheets_for_client %>
+<%= @content_for_page_styles %>
   </head>
   <body class="<%= @theme || 'sc-theme' %>">    
 <% #
@@ -50,6 +51,7 @@
 -%>
     <!-- Include Site Javascript -->
     <%= javascripts_for_client %>
+<%= @content_for_page_javascript %>
 
 <% #
    # The following lines to the closing body tag must be included at the

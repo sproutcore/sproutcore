@@ -45,22 +45,27 @@ SC.ListView = SC.CollectionView.extend(
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   
   /** @private */
-  layoutChildViewsFor: function(parentView, startingView) {
+  layoutItemViewsFor: function(parentView, startingView) {
+    SC.Benchmark.start('SC.ListView.layoutItemViewsFor') ;
+    
     var rowHeight = this.get('rowHeight') ;
     if (rowHeight == null) return false ;
     
     if (!startingView) startingView = parentView.firstChild ;
     var y = (startingView && startingView.previousSibling) ? SC.maxY(startingView.previousSibling.get('frame')) : 0;
     var f = (parentView || this).get('frame') ; 
-    f = { x: 0, height: rowHeight } ;
+    f = { x: 0, height: rowHeight, width: f.width } ;
     var view = startingView || parentView.firstChild;
     while(view) {
-      view.set('isPositioned', true) ;
       f.y = y ;
-      if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
+      
+      var isEqual = SC.rectsEqual(view.get('frame'), f) ;
+      if (!isEqual) view.set('frame', f) ;
+
       y += rowHeight; 
       view = view.nextSibling ;
     }
+    SC.Benchmark.end('SC.ListView.layoutItemViewsFor') ;
     return true; 
   },
   

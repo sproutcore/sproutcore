@@ -10,7 +10,7 @@ Test.context("SC.ArrayController", {
     for (var i=0, n=items.length; i < n; i++)
     {
       this.c.set('content', items[i]);
-      this.c.get('content').isEqual([]).shouldEqual(true);
+      this.c.isEqual([]).shouldEqual(true);
       this.c.get('length').shouldEqual(0);
       (this.c.objectAt(0) == undefined).shouldEqual(true);
     }
@@ -29,12 +29,13 @@ Test.context("SC.ArrayController", {
   {
     // note that we're not directly requesting the public 'contentClone' property, because
     // doing so would cause the clone to be created.
-    (this.c._contentClone == undefined).shouldEqual(true);
+    (this.c.get('contentClone') == undefined).shouldEqual(true);
     this.c.set('content', this.multiple_a );
-    (this.c._contentClone == undefined).shouldEqual(true);
+    (this.c.get('contentClone') == undefined).shouldEqual(true);
     this.c.popObject();
-    (this.c._contentClone == undefined).shouldEqual(false);
+    (this.c.get('contentClone') == undefined).shouldEqual(false);
   },
+  
   "Should modify it's managed content when making changes": function()
   {
     this.c.set('content', this.multiple_a );
@@ -43,12 +44,51 @@ Test.context("SC.ArrayController", {
     this.c.get('content').get('length').shouldEqual(2);
     this.c.get('contentClone').get('length').shouldEqual(1);
   },
+  
+  "Should not modify managed content until commitChanges() if commitChangesImmediately is disabled": function() 
+  {
+    this.c.set('commitChangesImmediately', false) ;
+    
+    var content = this.multiple_a ;
+    this.c.set('content', content );
+    content.get('length').shouldEqual(2);
+
+    this.c.popObject();
+    content.get('length').shouldEqual(2) ;
+    this.c.get('length').shouldEqual(1) ;
+    
+    this.c.commitChanges() ;
+    content.get('length').shouldEqual(1) ;
+    this.c.get('length').shouldEqual(1) ;
+  },
+  
   "Should flag itself as dirty when adding an item to the array": function()
   {
     this.c.set('content', this.multiple_a );
     this.c.get('hasChanges').shouldEqual(false);
     this.c.pushObject( SC.Object.create({ test: 'NAME2' }) );
     this.c.get('hasChanges').shouldEqual(true);
+  },
+  
+  "Should not delete object on removal only if destroyOnRemoval = true": function() {
+    var content = this.multiple_a ;
+
+    this.c.set('content', content) ;
+    this.c.set('destroyOnRemoval', true) ;
+
+    var didDestroy = false ;
+    content[0].destroy = function() { didDestroy = true; } ;
+    content[1].destroy = function() { didDestroy = true; } ;
+    
+    this.c.removeAt(1);
+    this.c.commitChanges() ; // force this to happen immediately.  It may be queued otherwise
+    didDestroy.shouldEqual(true) ;
+    
+    didDestroy = false ;
+    this.c.set('destroyOnRemoval', false) ;
+    this.c.removeAt(0) ;
+    this.c.commitChanges() ; 
+    didDestroy.shouldEqual(false) ;
   },
   
   setup: function()

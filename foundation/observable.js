@@ -160,6 +160,15 @@ SC.Observable = {
     return ret ;
   },  
 
+  /**
+    sets the property only if the passed value is different from the
+    current value.  Depending on how expensive a get() is on this property,
+    this may be more efficient.
+  */
+  setIfChanged: function(key, value) {
+    return (this.get(key) != value) ? this.set(key, value) : value ;
+  },
+  
   /**  
     use this to automatically navigate a property path.
   */
@@ -339,6 +348,19 @@ SC.Observable = {
   addProbe: function(key) { this.addObserver(key,logChange); },
   removeProbe: function(key) { this.removeObserver(key,logChange); },
 
+  /**
+    Logs the named properties to the console.
+    
+    @param propertyNames one or more property names
+  */
+  logProperty: function() {
+    var props = $A(arguments) ;
+    for(var idx=0;idx<props.length; idx++) {
+      var prop = props[idx] ;
+      console.log('%@:%@: '.fmt(this._guid, prop), this.get(prop)) ;
+    }
+  },
+  
   /**  
     This method will listen for the observed value to change one time and 
     then will remove itself.  You can also set an optional timeout that

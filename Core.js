@@ -322,7 +322,7 @@ T_BOOL = 'boolean' ;
 T_ARRAY = 'array' ;
 T_STRING = 'string' ;
 
-$type = function(item) { return SC.typeOf(item); }; 
+$type = SC.typeOf ;
 
 Object.extend(Object,{
 

@@ -14,10 +14,6 @@ input.show-hint {
 	color: #888;
 }
 
-textarea.show-hint {
-	color: #888;
-}
-
 .radio.vertical,
 .radio.vertical .button.radio {
 	display: block ;	
@@ -30,6 +26,15 @@ textarea.show-hint {
 
 .radio.vertical {
   text-align: left ;
+}
+
+.sc-theme .sc-ghost-view {
+  position: absolute;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	opacity: 0.45;
+	-moz-opacity: .45 ;
 }
 
 /* @end */
@@ -51,14 +56,6 @@ body.sc-theme {
 
 .sc-theme label {
 	font-weight: bold ;
-}
-
-.sc-theme .ghost {
-	-moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
-	opacity: 0.45;
-	-moz-opacity: .45 ;
 }
 
 /* @end */

@@ -26,6 +26,18 @@ SC.window = SC.PaneView.extend({
   // Window Size/Resizing
   //
 
+  innerFrame: function() { 
+    return this.frame(); 
+  }.property('frame'),
+  
+  clippingFrame: function() { 
+    return this.frame(); 
+  }.property('frame'),
+
+  scrollFrame: function() { 
+    return this.frame(); 
+  }.property('frame'),
+  
   frame: function() {
     var size = this.get('size') ;
     return { x: 0, y: 0, width: size.width, height: size.height } ;
@@ -308,6 +320,7 @@ SC.window = SC.PaneView.extend({
     });
     
     this.get('size') ; // fetch the size from the window and save it.
+    this.set('isVisibleInWindow', true) ;
   }
 }).viewFor($tag('body')) ;
 

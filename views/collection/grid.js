@@ -42,14 +42,16 @@ SC.GridView = SC.CollectionView.extend(
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
   
   /** @private */
-  layoutChildViewsFor: function(parentView, startingView) {
+  layoutItemViewsFor: function(parentView, startingView) {
+    SC.Benchmark.start('SC.GridView.layoutItemViewsFor') ;
+
     var rowHeight = this.get('rowHeight') ;
     var columnWidth = this.get('columnWidth') ;
     if ((rowHeight == null) || (columnWidth == null)) return false ;
 
     // set items per row.
     parentView = parentView || this ;
-    var f = parentView.get('frame') ;
+    var f = parentView.get('innerFrame') ;
     f.x= f.y = 0 ; 
     var itemsPerRow = Math.floor(f.width / (columnWidth || 1)) ;
     if (this.get('itemsPerRow') != itemsPerRow) this.set('itemsPerRow', itemsPerRow);
@@ -72,18 +74,20 @@ SC.GridView = SC.CollectionView.extend(
     var view = startingView ;
     while(view) {
       // loop back to beginning of next line if needed.
-      if (x >= maxX) {
+      if ((x+columnWidth) >= maxX) {
         x = minX ;
         y += rowHeight ;
       }
 
       // save frame
-      view.set('isPositioned', true) ;
       f.y = y ; f.x = x;
       if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
       x += columnWidth; 
       view = view.nextSibling ;
     }
+    
+    SC.Benchmark.end('SC.GridView.layoutItemViewsFor') ;
+    
     return true; 
   },
   
@@ -141,8 +145,9 @@ SC.GridView = SC.CollectionView.extend(
     
     var itemsPerRow = this.get('itemsPerRow') || 1 ; 
     var columnWidth = Math.floor(f.width / itemsPerRow) ;
-    var row = Math.floor((loc.y - f.y) / this.get('rowHeight') + 0.5) ;
+    var row = Math.floor((loc.y - f.y) / this.get('rowHeight')) ;
     var col = Math.floor((loc.x - f.x) / columnWidth + 0.5) ;
+    
     return (row*itemsPerRow) + col ;
   }
   

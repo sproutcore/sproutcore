@@ -328,17 +328,11 @@ Array.prototype.collect = Array.prototype.map ;
 // Returns the passed item as an array.  If the item is already an array,
 // it is returned as is.  If it is not an array, it is placed into one.  If
 // it is null, an empty array is returned.
-Array.asArray = function (array)
-{
-  if(array && !(array instanceof Array))
-  {
+Array.asArray = function (array) {
+  if(array && (array.length === undefined)) {
     return [array]; 
   }
-  if(array)
-  {
-    return array;
-  }
-  return [];
+  return (array) ? array : [] ;
 };
 
 // Alias for asArray
