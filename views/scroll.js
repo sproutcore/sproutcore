@@ -2,9 +2,11 @@
 // Sproutcore.ScrollView
 // ==========================================================================
 
+require('mixins/scrollable') ;
 require('views/container') ;
 
-/** @class
+/** 
+  @class
 
   Scroll Views are used throughout SproutCore to provide scrollable areas.
   Although you can use overflow: auto to provide scrollbar anywhere, using
@@ -15,19 +17,6 @@ require('views/container') ;
   @author  Charles Jolley  
   @version 1.0
 */
-SC.ScrollView = SC.View.extend(
-/** @scope SC.ScrollView.prototype */ {
-
-  emptyElement: '<div class="sc-scroll-view"></div>',
+SC.ScrollView = SC.ContainerView.extend(SC.Scrollable, {
   
-  // add observer to onscroll event.
-  init: function() {
-    arguments.callee.base.apply(this,arguments) ;
-    this.rootElement.onscroll = this._onscroll.bind(this) ;
-  },
-  
-  _onscroll: function() {
-    console.log('onscroll') ;
-  }
-    
 }) ;

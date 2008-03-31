@@ -8,6 +8,7 @@ require('views/view') ;
 
 SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
 SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x0007 ;
+SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20 ;
 
 /**
 
@@ -230,6 +231,8 @@ SC.Drag = SC.Object.extend(
     var origin = this.dragView.convertFrameToView(this.dragView.get('frame'), null);
     var pointer = Event.pointerLocation(this.event) ;
     
+    window.dragEvent = this.event ;
+    
     this.ghostOffset = { x: (pointer.x-origin.x), y: (pointer.y-origin.y) };
 
     // position the ghost view.
@@ -255,10 +258,11 @@ SC.Drag = SC.Object.extend(
   */
   mouseDragged: function(evt) {
     
-    // ignore duplicate calls.
     var loc = Event.pointerLocation(evt) ;
+    var scrolled = this._autoscroll(evt) ;
     
-    if ((loc.x == this._lastLoc.x) && (loc.y == this._lastLoc.y)) return ;
+    // ignore duplicate calls.
+    if (!scrolled && (loc.x == this._lastLoc.x) && (loc.y == this._lastLoc.y)) return ;
     this._lastLoc = loc ;
     this.set('location', loc) ;
 
@@ -379,10 +383,14 @@ SC.Drag = SC.Object.extend(
   // PRIVATE PROPERTIES AND METHODS
   //
   
+  _ghostViewClass: SC.View.extend({ 
+    emptyElement: '<div class="sc-ghost-view"></div>'
+  }),
+  
   // positions the ghost view underneath the mouse with the initial offset
   // recorded by when the drag started.
   _positionGhostView: function(evt) {
-    var loc = { x: Event.pointerX(evt), y: Event.pointerY(evt) } ;
+    var loc = Event.pointerLocation(evt) ;
     loc.x -= this.ghostOffset.x ;
     loc.y -= this.ghostOffset.y ;
     loc = this._ghostView.convertFrameFromView(loc, null) ;
@@ -452,7 +460,7 @@ SC.Drag = SC.Object.extend(
   // target area.
   _findDropTarget: function(evt) {
     var dt = this._dropTargets() ;
-    var loc = { x: Event.pointerX(evt), y: Event.pointerY(evt) } ;
+    var loc = Event.pointerLocation(evt) ;
 
     var ret = null ;
     for(var idx=0;idx<dt.length;idx++) {
@@ -480,9 +488,191 @@ SC.Drag = SC.Object.extend(
     return null ;
   },
   
-  _ghostViewClass: SC.View.extend({ 
-    emptyElement: '<div class="sc-ghost-view"></div>'
-  })   
+  // ............................................
+  // AUTOSCROLLING
+  //
+  
+  // Performs auto-scrolling for the drag.  This will only do anything if
+  // the user keeps the mouse within a few pixels of one location for a little
+  // while.
+  //
+  // Returns true if a scroll was performed
+  _autoscroll: function(evt) {
+  
+    // STEP 1: Find the first view that we can actually scroll.  This view must be:
+    // - scrollable
+    // - the mouse pointer must be within a scrolling hot zone
+    // - there must be room left to scroll in that direction. 
+    
+    // NOTE: an event is passed only when called from mouseDragged
+    var loc = (evt) ? Event.pointerLocation(evt) : this._lastMouseLocation ;
+    if (!loc) return false ;
+    this._lastMouseLocation = loc ;
+
+    var view = this._findScrollableView(loc) ;
+    
+    // these will become either 1 or -1 to indicate scroll direction or 0 for no scroll.
+    var verticalScroll, horizontalScroll ;
+    var min, max, edge ;
+    var scrollableView = null;
+
+    while(view && !scrollableView) {
+      
+      // quick check...can we scroll this view right now?
+      verticalScroll = view.get('hasVerticalScroller') ? 1 : 0;
+      horizontalScroll = view.get('hasHorizontalScroller') ? 1 : 0;
+      
+      // at least one direction might be scrollable.  Collect some extra
+      // info to investigate further.
+      if ((verticalScroll != 0) || (horizontalScroll != 0)) {
+        var f = view.convertFrameToView(view.get('frame'), null) ;
+        var innerSize = view.get('innerFrame') ;
+        var scrollFrame = view.get('scrollFrame') ;
+      }
+      
+      
+      if (verticalScroll != 0) {
+        
+        // bottom hotzone?
+        max = SC.maxY(f); min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
+        edge = SC.maxY(scrollFrame) ;
+        
+        if ((edge >= innerSize.height) && (loc.y >= min) && (loc.y <= max)) {
+          verticalScroll = 1 ;
+          
+        // no...how about top hotzone?
+        } else {
+          min = SC.minY(f); max = min + SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ;
+          edge = SC.minY(scrollFrame) ;
+          if ((edge <= innerSize.height) && (loc.y >= min) && (loc.y <= max)) {
+            verticalScroll = -1 ;
+          
+          // no, ok don't scroll vertical
+          } else verticalScroll = 0 ;
+        }
+      }
+
+      if (horizontalScroll != 0) {
+        // right hotzone?
+        max = SC.maxX(f); min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
+        edge = SC.maxX(scrollFrame) ;
+        if ((edge >= innerSize.width) && (loc.x >= min) && (loc.x <= max)) {
+          horizontalScroll = 1 ;
+          
+        // no...how about left hotzone?
+        } else {
+          min = SC.minY(f); max = min + SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ;
+          edge = SC.minY(scrollFrame) ;
+          if ((edge <= innerSize.width) && (loc.x >= min) && (loc.x <= max)) {
+            horizontalScroll = -1 ;
+          
+          // no, ok don't scroll vertical
+          } else horizontalScroll = 0 ;
+        }
+      }
+
+      // if we can scroll, then set this.
+      if ((verticalScroll != 0) || (horizontalScroll != 0)) {
+        scrollableView = view ;
+      } else view = this._findNextScrollableView(view) ;
+    }
+
+    // STEP 2: Only scroll if the user remains within the hot-zone for a period of
+    // time
+    if (scrollableView && (this._lastScrollableView == scrollableView)) {
+      if ((Date.now() - this._hotzoneStartTime) > 100) {
+        this._horizontalScrollAmount *= 1.05 ;
+        this._verticalScrollAmount *= 1.05 ;
+      }
+      
+    // otherwise, reset everything and disallow scroll
+    } else {
+      this._lastScrollableView = scrollableView ;
+      this._horizontalScrollAmount = 15 ;
+      this._verticalScrollAmount = 15 ;
+      this._hotzoneStartTime = (scrollableView) ? Date.now() : null ;
+      
+      horizontalScroll = verticalScroll = 0 ;
+    }
+    
+    // STEP 3: Scroll!
+    if (scrollableView && ((horizontalScroll != 0) || (verticalScroll != 0))) {
+      var scroll = { 
+        x: horizontalScroll * this._horizontalScrollAmount,
+        y: verticalScroll * this._verticalScrollAmount 
+      } ;
+
+      scrollableView.scrollBy(scroll) ;
+      
+    }
+
+    // If a scrollable view was found, then reschedule
+    if (scrollableView) {
+      setTimeout(this._autoscroll.bind(this, null), 100) ;
+      return true ;
+    } else return false ;
+  },
+
+  // Returns an array of scrollable views, sorted with nested scrollable
+  // views at the top of the array.  The first time this method is called
+  // during a drag, it will reconstrut this array using the current ste of
+  // scrollable views.  Afterwards it uses the cached set until the drop
+  // completes.
+  _scrollableViews: function() {
+    if (this._cachedScrollableView) return this._cachedScrollableView ;
+    var ret = [];
+    
+    // build array of drop targets
+    var dt = SC.Drag._scrollableViews ;
+    for(var key in dt) {
+      if (!dt.hasOwnProperty(key)) continue ;
+      ret.push(dt[key]) ;      
+    }
+    
+    // now resort.  This custom function will sort nested drop targets
+    // at the start of the list.
+    ret = ret.sort(function(a,b) {
+      var view = a;
+      while((view = view.parentNode) && (view != SC.window)) {
+        if (b == view) return -1 ;
+      }
+      return 1; 
+    }) ;
+
+    this._cachedScrollableView = ret ;
+    
+    return ret ;
+  },
+  
+  // This will search through the scrollable views, looking for one in the 
+  // target area.
+  _findScrollableView: function(loc) {
+    var dt = this._scrollableViews() ;
+
+    var ret = null ;
+    for(var idx=0;idx<dt.length;idx++) {
+      var t = dt[idx] ;
+
+      if(!t.get('isVisibleInWindow')) continue ;
+      
+      // get frame, converted to view.
+      var f = t.convertFrameToView(t.get('frame'), null) ;
+      
+      // check to see if loc is inside.  
+      if (SC.pointInRect(loc, f)) return t;
+    } 
+    return null ;
+  },
+  
+  // Search the parent nodes of the target to find another scrollable view.
+  // return null if none is found.
+  _findNextScrollableView: function(view) {
+    while ((view = view.parentNode) && (view != SC.window)) {
+      if (SC.Drag._scrollableViews[view._guid]) return view ;
+    }
+    return null ;
+  }  
+    
   
 }) ;
 

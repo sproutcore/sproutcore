@@ -5,7 +5,7 @@
 
 require('Core') ;
 require('foundation/benchmark') ;
-require('foundation/observable') ;
+require('mixins/observable') ;
 
 SC.BENCHMARK_OBJECTS = NO;
 
@@ -129,31 +129,33 @@ Object.extend(SC.Object, {
     var seen = [] ;
     var searchObject = function(root, object, levels) {
       levels-- ;
-      
+
       // not the fastest, but safe
       if (seen.indexOf(object) >= 0) return ;
       seen.push(object) ;
-      
+
       for(var key in object) {
-        if (!object.hasOwnProperty(key)) continue ;
         if (key == '__scope__') continue ;
         if (key == '_type') continue ;
+        if (!key.match(/^[A-Z0-9]/)) continue ;
 
-        var isCaps = key[0].toUpperCase() == key[0];
-        if (!isCaps) continue ;
-        
         var path = (root) ? [root,key].join('.') : key ;
-        if (path == 'SproutCore') continue ;
-
         var value = object[key] ;
-        
+
+
         switch($type(value)) {
         case T_CLASS:
           if (!value._objectClassName) value._objectClassName = path;
+          if (levels>=0) searchObject(path, value, levels) ;
+          break ;
 
         case T_OBJECT:
-        case T_HASH:
           if (levels>=0) searchObject(path, value, levels) ;
+          break ;
+
+        case T_HASH:
+          if (((root != null) || (path=='SC')) && (levels>=0)) searchObject(path, value, levels) ;
+          break ;
 
         default:
           break;
@@ -512,7 +514,7 @@ SC.Object.prototype = {
     return ret ;
   },
 
-  toString: function() { return "%@<%@>".fmt(this._type, this._guid); },
+  toString: function() { return "%@:%@".fmt(this._type, this._guid); },
   
   // ..........................................
   // OUTLETS

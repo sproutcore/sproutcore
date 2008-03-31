@@ -305,8 +305,7 @@ SC.window = SC.PaneView.extend({
   _listenerCache: [],
   
   setup: function() {
-    console.log('setup') ;
-    
+
     // setup event listeners for window.
     var win = this ;
     win._EVTS.each(function(e) {

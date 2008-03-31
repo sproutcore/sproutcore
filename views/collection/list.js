@@ -69,21 +69,6 @@ SC.ListView = SC.CollectionView.extend(
     return true; 
   },
   
-  // computedViewHeight: function(groupView) {
-  //   var content = this.get('content') ;
-  //   var rowHeight = this.get('rowHeight') ;
-  //   var parentNode = this.get('parentNode') ;
-  //   var minHeight = (parentNode) ? 20 : parentNode.get('frame').height ;
-  //   var height = 0 ;
-  //   
-  //   if (content && rowHeight) {
-  //     var rows = content.get('length') ;
-  //     height = rows * rowHeight ;
-  //   }
-  //   if (height < minHeight) height = minHeight ;
-  //   return height ;
-  // },
-  
   insertionPointClass: SC.View.extend({
     emptyElement: '<div class="list-insertion-point"><span class="anchor"></span></div>'
   }),
@@ -111,9 +96,10 @@ SC.ListView = SC.CollectionView.extend(
   
   // We can do this much faster programatically using the rowHeight
   insertionIndexForLocation: function(loc) {  
-    var f = this.get('frame') ;
+    var f = this.get('innerFrame') ;
+    var sf = this.get('scrollFrame') ;
     loc = this.convertFrameFromView(loc, null) ;
-    var ret = Math.floor((loc.y - f.y) / this.get('rowHeight') + 0.5) ;
+    var ret = Math.floor(((loc.y - f.y - sf.y) / this.get('rowHeight')) + 0.4) ;
     return ret ;
   }
   

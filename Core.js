@@ -366,8 +366,15 @@ Object.extend(Event,{
     return String.fromCharCode(Event.getCharCode(e)) ;
   },
   
-  pointerLocation: function(e) {
-    return { x: Event.pointerX(e), y: Event.pointerY(e) };
+  pointerLocation: function(event) {
+    var ret = {
+      x: event.pageX || (event.clientX +
+        (document.documentElement.scrollLeft || document.body.scrollLeft)),
+      y: event.pageY || (event.clientY +
+        (document.documentElement.scrollTop || document.body.scrollTop))
+      
+    };
+    return ret ;
   },
   
   ALT_KEY: '_ALT',

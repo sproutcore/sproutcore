@@ -3,7 +3,7 @@
 // copyright 2006-2007, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('foundation/observable');
+require('mixins/observable');
 
 // Make Arrays observable
 Object.extend(Array.prototype, SC.Observable) ;
@@ -125,8 +125,9 @@ SC.Array = {
   */
   removeAt: function(idx) {
     if ((idx < 0) || (idx >= this.get('length'))) throw SC.OUT_OF_RANGE_EXCEPTION;
+    var ret = this.objectAt(idx) ;
     this.replace(idx,1,[]);
-    return this ;
+    return ret ;
   },
   
   /**

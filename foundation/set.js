@@ -3,7 +3,7 @@
 // copyright 2006-2007, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('foundation/array') ;
+require('mixins/array') ;
 
 /**
   @class An unordered collection for keeping objects.
@@ -14,7 +14,7 @@ require('foundation/array') ;
   @extends SC.Object
 
 */
-SC.Set = SC.Object.extend(Enumerable, 
+SC.Set = SC.Object.extend(SC.Array, 
   /** @scope SC.Set.prototype */
   {
   

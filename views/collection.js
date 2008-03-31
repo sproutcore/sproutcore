@@ -513,6 +513,8 @@ SC.CollectionView = SC.View.extend(
       this.set('isDirty', true) ;
       return; 
     }
+
+    console.log('updateCHildren') ;
     
     // Save the current clipping frame.  If the frame methods are called again
     // later but the frame has not actually changed, we don't want to run
@@ -550,15 +552,22 @@ SC.CollectionView = SC.View.extend(
     }
 
     if (this.layoutItemViewsFor !== SC.CollectionView.prototype.layoutItemViewsFor) {
+      var didChangeLayout = false ;
+      
       if (hasGrouping) {
         var groupView = this.get('firstChild') ;
         while(groupView) {
-          this.layoutItemViewsFor(groupView, groupView.get('firstChild')) ;
+          var ret = this.layoutItemViewsFor(groupView, groupView.get('firstChild')) ;
+          if (!(ret === NO)) didChangeLayout = true ;
           groupView = groupView.get('nextSibling') ;
         }
-      } else this.layoutItemViewsFor(this, this.get('firstChild')) ;
+      } else didChangeLayout = this.layoutItemViewsFor(this, this.get('firstChild')) ;
     } 
 
+    // Recache frames just in case this changed the scroll height.
+    this.recacheFrames() ;
+    
+    
     // Set this to true once children have been rendered.  Whenever the content
     // changes, we don't want resize or clipping frame changes to cause a refresh
     // until the content has been rendered for the first time.
@@ -756,6 +765,8 @@ SC.CollectionView = SC.View.extend(
   */
   _insertItemViewInChainFor: function(content, beforeView) {
     
+    //console.log('_insertItemViewInChainFor(%@,%@)'.fmt(content, beforeView));
+    
     // first look for a matching record.
     var key = (content && content._guid) ? content._guid : '0' ;
     var ret = (content) ? this._itemViewsByContent[key] : null;
@@ -786,7 +797,7 @@ SC.CollectionView = SC.View.extend(
 
       // remove from old location if needed
       if (this._itemViewRoot == ret) this._itemViewRoot = ret.__nextItemView ;
-      if (this._itemViewTail == ret) this._itemViewRoot = ret.__prevItemView ;
+      if (this._itemViewTail == ret) this._itemViewTail = ret.__prevItemView ;
       if (ret.__nextItemView) ret.__nextItemView.__prevItemView = ret.__prevItemView ;
       if (ret.__prevItemView) ret.__prevItemView.__nextItemView = ret.__nextItemView ;
 
@@ -817,6 +828,8 @@ SC.CollectionView = SC.View.extend(
   // pool for later use.  Returns the next item view that replaces it.
   _removeItemViewFromChain: function(itemView) {
     if (!itemView) return null ;
+
+    //console.log('_removeItemViewFromChain(%@)'.fmt(itemView));
 
     if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
     delete this._itemViewsByGuid[SC.getGUID(itemView)] ;
@@ -949,9 +962,12 @@ SC.CollectionView = SC.View.extend(
           
           // if grouping is turned off, go ahead and add the itemView to the parent so
           // we can avoid STEP 3 altogether.
-          if (!hasGrouping && itemView.parentNode != this) {
-            this._removeRootElementFromDom() ;
-            this.insertBefore(itemView, itemView.__nextItemView) ;
+          if (!hasGrouping) {
+            var nextSibling = (itemView.__beforeItemView) ? itemView.__beforeItemView.get('nextSibling') : this.get('firstChild') ;
+            if ((itemView.get('parentNode') != this) || (itemView.get('nextSibling') != nextSibling)) {
+              this._removeRootElementFromDom() ;
+              this.insertBefore(itemView, itemView.__nextItemView) ;
+            }
           }
         }
         

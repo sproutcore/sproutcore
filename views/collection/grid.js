@@ -57,7 +57,7 @@ SC.GridView = SC.CollectionView.extend(
     if (this.get('itemsPerRow') != itemsPerRow) this.set('itemsPerRow', itemsPerRow);
     
     // fix width to evenly match items per row
-    columnWidth = Math.floor(f.width/itemsPerRow) ;
+    columnWidth = Math.floor((f.width-20)/itemsPerRow) ;
     
     // get the startingView and the starting X,Y
     if (!startingView) startingView = parentView.firstChild ;
@@ -141,14 +141,17 @@ SC.GridView = SC.CollectionView.extend(
   // // We can do this much faster programatically using the rowHeight
   insertionIndexForLocation: function(loc) {  
     var f = this.get('frame') ;
+    var sf = this.get('scrollFrame') ;
     loc = this.convertFrameFromView(loc, null) ;
     
     var itemsPerRow = this.get('itemsPerRow') || 1 ; 
     var columnWidth = Math.floor(f.width / itemsPerRow) ;
-    var row = Math.floor((loc.y - f.y) / this.get('rowHeight')) ;
-    var col = Math.floor((loc.x - f.x) / columnWidth + 0.5) ;
+    var row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight')) ;
+    var col = Math.floor(((loc.x - f.x - sf.x) / columnWidth) + 0.5) ;
     
-    return (row*itemsPerRow) + col ;
+    var ret= (row*itemsPerRow) + col ;
+    console.log('ret: %@ - itemsPerRow: %@ scrollFrame: %@'.fmt(ret, itemsPerRow, $H(sf).inspect())) ;
+    return ret ;
   }
   
 }) ;

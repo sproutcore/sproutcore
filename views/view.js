@@ -940,7 +940,7 @@ SC.View = SC.Responder.extend(SC.PathModule,
   viewFrameDidChange: function() {
     
     // clear the frame caches
-    this._innerFrame = this._frame = this._clippingFrame = this._scrollFrame = null ; 
+    this.recacheFrames() ;
 
     // if this is a top-level call then also deliver notifications as needed.
     if (--this._frameChangeLevel <= 0) {
@@ -970,6 +970,17 @@ SC.View = SC.Responder.extend(SC.PathModule,
 
 
   /**
+    Clears any cached frames so the next get will recompute them.
+    
+    This method does not notify any observers of changes to the frames.  It should
+    only be used when you need to make sure your frame info is up to date but you do
+    not expect anything to have happened that frame observers would be interested in.
+  */
+  recacheFrames: function() {
+    this._innerFrame = this._frame = this._clippingFrame = this._scrollFrame = null ; 
+  },
+  
+  /**
     Set to true if you expect this view to have scrollable content.
 
     Normally views do not monitor their onscroll event.  If you set this property to true,
@@ -986,6 +997,9 @@ SC.View = SC.Responder.extend(SC.PathModule,
     
     x,y => offset from the innerFrame root.
     width,height => total size of the frame
+    
+    If the frame does not have scrollable content, then the size will be equal to the 
+    innerFrame size.
 
     This frame changes when:
     - the receiver's innerFrame changes
@@ -1657,7 +1671,7 @@ SC.View = SC.Responder.extend(SC.PathModule,
     var attrs = el.attributes ;
     attrs = (attrs) ? $A(attrs).map(function(atr) { return [atr.nodeName,atr.nodeValue].join("="); }).join(' ') : '';
     var tagName = (!!el.tagName) ? el.tagName.toLowerCase() : 'document' ;
-    return "%@<%@>".fmt(this._type, [tagName,attrs].join(' ')) ;
+    return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,attrs].join(' ')) ;
   }
     
 }) ;

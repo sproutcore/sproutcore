@@ -32,8 +32,9 @@ SC.PopupView = SC.PanelView.extend({
   }),
   
   locationFor: function(view,ev) {
-    var x = (ev) ? (Event.pointerX(ev) - 20) : 100 ;
-    var y = (ev) ? Event.pointerY(ev) : 100 ;
+    var loc = Event.pointerLocation(ev) ;
+    var x = (ev) ? (loc.x - 20) : 100 ;
+    var y = (ev) ? lox.y : 100 ;
     var dim = view.get('size') ;
     var screenSize = Element.getDimensions(this) ;
     

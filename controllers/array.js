@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('controllers/controller') ;
-require('foundation/array') ;
+require('mixins/array') ;
 require('foundation/binding') ;
 
 /** @class
@@ -114,10 +114,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
 
     // and record additions
     if (!this._changelog) this._changelog = []; 
-    this._changelog.push({ idx: idx, amt: amt, objects: objects });
+    this._changelog.push({ idx: idx, amt: amt, objects: sourceObjects });
     
     // then actually perform the edit on the contentClone
-    contentClone.replace(idx, amt, objects);
+    contentClone.replace(idx, amt, sourceObjects);
     
     this.editorDidChange() ;
     this.arrayContentDidChange();
@@ -239,7 +239,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
     will be returned.
   */
   _sourceObjectFor: function(obj) {
-    return (obj && obj.__isArrayController) ? obj.get('content') : obj ;
+    return (obj && obj.kindOf && obj.kindOf(SC.Controller)) ? obj.get('content') : obj ;
   }
 
 });

@@ -1,48 +1,35 @@
 <% content_for('final') do %>
 <script>
 
-Test.context("CollectionView with simple vertical layout", {
+/*
+  This set of tests verifies that the collection view can render content and pass a
+  battery of functional tests for four different supported configurations:
   
-  "should contain all member views": function() {
-    assertEqual(view.get('content').get('length'), data.get('length')) ;
-  },
+  - No scrolling, no incremental rendering, no custom layout: all views are rendered and view expands
+  - no scrolling, no incremental rendering, custom layout
+
+  - autoscroll, no incremental rendering, no custom layout: all views are rendered and view has overlow: auto
+  - autoscroll, no incremental rendering, custom layout
   
-  setup: function() {
-    SC.CollectionViewTest.setup(this, {
-      
-      rowHeight: 22,
-      
-      layoutItemViewsFor: function(parentView, startingView) {
-        var rowHeight = this.get('rowHeight') ;
-        if (rowHeight == null) return false ;
+  - 
+  - scrollview, no incremental rendering, no custom layout: all views are rendered and lives in scrollview.
+  - scrollview, no incremental rendering, custom layout: all views are rendered and lives in scrollview.
+  - scrollview, incremental rendering: incrementally rendered views; lives in scroll view
 
-        if (!startingView) startingView = parentView.firstChild ;
-        var y = (startingView && startingView.previousSibling) ? SC.maxY(startingView.previousSibling.get('frame')) : 0;
-        var f = (parentView || this).get('innerFrame') ; 
-        f = { x: 0, height: rowHeight, width: f.width } ;
-        var view = startingView || parentView.firstChild;
-        while(view) {
-          f.y = y ;
-          if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
-          y += rowHeight; 
-          view = view.nextSibling ;
-        }
-        return true; 
-      }
-      
-    }) ;
-    window.context = this ;
-  },
-
-  teardown: function() {
-    //SC.CollectionViewTest.teardown(this) ;
+  The standard tests are below.  The actual contexts setup at the end of this code
+  configure the above four scenarios.
+*/
+SC.StandardTests = {
+  
+  "dummy test": function() {
   }
   
-});
+}; 
 
 // Common methods to setup the collection views for testing
 SC.CollectionViewTest = {
   setup: function(that, props) { this._setup.call(that, props) ; },
+
   _setup: function(props) {
     
     // create the controller
@@ -60,11 +47,17 @@ SC.CollectionViewTest = {
     // create the view with the props
     this.view = SC.CollectionView.create(props);
     this.view.addClassName('test-collection') ;
-    SC.page.get('root').appendChild(this.view);
+    
+    var container = SC.View.extend({
+      emptyElement: '<div class="test-container"></div>'
+    }).create() ;
+    
+    container.appendChild(this.view) ;
+    SC.page.get('root').appendChild(container);
     
     // create some item data...  use a lot.
     this.data = [] ;
-    var idx = 1000 ;
+    var idx = 100 ;
     while(--idx >= 0) {
       this.data[this.data.length] = SC.Object.create({
         guid: (1000 + idx).toString(),
@@ -93,6 +86,133 @@ SC.CollectionViewTest = {
   
 } ;
 
+Test.context("CASE 1: No scrolling, no incremental rendering, no custom layout", 
+  Object.extend(SC.StandardTests,{
+  
+  setup: function() {
+    SC.CollectionViewTest.setup(this, {
+      exampleView: SC.TextCellView.extend({
+        emptyElement: '<div class="text-cell collection-item" style="position: relative;"></div>'
+      })
+    }) ;
+    
+    window.context = this ;
+  },
+
+  teardown: function() {
+    //SC.CollectionViewTest.teardown(this) ;
+  }
+  
+}));
+
+Test.context("CASE 2: No scrolling, no incremental rendering, custom layout", 
+  Object.extend(SC.StandardTests,{
+  
+  setup: function() {
+    SC.CollectionViewTest.setup(this, {
+      
+      rowHeight: 22,
+      
+      layoutItemViewsFor: function(parentView, startingView) {
+        var rowHeight = this.get('rowHeight') ;
+        if (rowHeight == null) return false ;
+
+        if (!startingView) startingView = parentView.firstChild ;
+        var y = (startingView && startingView.previousSibling) ? SC.maxY(startingView.previousSibling.get('frame')) : 0;
+        var f = (parentView || this).get('innerFrame') ; 
+        f = { x: 0, height: rowHeight, width: f.width } ;
+        var view = startingView || parentView.firstChild;
+        while(view) {
+          f.y = y ;
+          if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
+          y += rowHeight; 
+          view = view.nextSibling ;
+        }
+        return true; 
+      },
+      
+      computeFrame: function() {
+        return { height: this.get('content') * this.get('rowHeight') } ;
+      }
+      
+    }) ;
+  },
+
+  teardown: function() {
+    //SC.CollectionViewTest.teardown(this) ;
+  }
+  
+}));
+
+
+Test.context("CASE 3: Autoscrolling, no incremental rendering, no custom layout", 
+  Object.extend(SC.StandardTests,{
+  
+  setup: function() {
+    SC.CollectionViewTest.setup(this, {
+      exampleView: SC.TextCellView.extend({
+        emptyElement: '<div class="text-cell collection-item" style="position: relative;"></div>'
+      }),
+      
+      init: function() {
+        arguments.callee.base.apply(this, arguments) ;
+        this.setStyle({ overflow: "auto", height: '200px' }) ;
+      }
+    }) ;
+  },
+
+  teardown: function() {
+    //SC.CollectionViewTest.teardown(this) ;
+  }
+  
+}));
+
+Test.context("CASE 4: Autoscrolling, no incremental rendering, custom layout", 
+  Object.extend(SC.StandardTests,{
+  
+  setup: function() {
+    SC.CollectionViewTest.setup(this, {
+      
+      rowHeight: 22,
+      
+      layoutItemViewsFor: function(parentView, startingView) {
+        var rowHeight = this.get('rowHeight') ;
+        if (rowHeight == null) return false ;
+
+        if (!startingView) startingView = parentView.firstChild ;
+        var y = (startingView && startingView.previousSibling) ? SC.maxY(startingView.previousSibling.get('frame')) : 0;
+        var f = (parentView || this).get('innerFrame') ; 
+        f = { x: 0, height: rowHeight, width: f.width } ;
+        var view = startingView || parentView.firstChild;
+        while(view) {
+          f.y = y ;
+          if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
+          y += rowHeight; 
+          view = view.nextSibling ;
+        }
+        return true; 
+      },
+      
+      computeFrame: function() {
+        return { height: 200 } ;
+      },
+
+      init: function() {
+        arguments.callee.base.apply(this, arguments) ;
+        this.setStyle({ overflow: "auto", height: '200px' }) ;
+      }
+      
+    }) ;
+  },
+
+  teardown: function() {
+    //SC.CollectionViewTest.teardown(this) ;
+  }
+  
+}));
+
+
+
 main = function() { SC.page.awake(); } ;
 
 </script>
@@ -103,13 +223,9 @@ main = function() { SC.page.awake(); } ;
 <style>
 
 .test-collection {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 400px;
-  height: 200px;
+  position: relative;
+  width: 180px;
   border: 1px #ccc solid;
-  overflow: auto;
   background-color: white;
 }
 
@@ -119,9 +235,22 @@ main = function() { SC.page.awake(); } ;
   left: 0 ;
   width: 100%;
   border-top: 1px #ccc solid;
-  padding: 20px;
-  height: 280px;
+  padding: 10px;
+  height: 220px;
   overflow: auto;
+  z-index: 10000000;
+  background-color: #f0f0f0;
+}
+
+.test-container {
+  float: left;
+  width: 200px;
+  padding: 10px;
+  border: 1px #ccc solid;
+  position: relative;
+  overflow: auto;
+  height: 200px;
+  border: 1px red dotted;
 }
 
 </style>

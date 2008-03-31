@@ -52,7 +52,12 @@ SC.ContainerView = SC.View.extend(
     var containerView = this.get('rootView') || this ;
     containerView.clear() ;
     var newView = newContent ;
-    if (newView) containerView.appendChild(newView) ;
+    
+    if (newView) {
+      newView.viewFrameWillChange() ;
+      containerView.appendChild(newView) ;
+      newView.viewFrameDidChange() ;
+    }
   },
   
   _contentObserver: function() {
