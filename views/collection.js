@@ -7,6 +7,7 @@ require('views/view') ;
 require('views/label') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = YES ;
+SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /** Indicates that selection points should be selected using horizontal 
   orientation.
@@ -472,6 +473,19 @@ SC.CollectionView = SC.View.extend(
   },
 
 
+  /**
+    Debug returns the chain of item views.
+  */
+  _inspectItemViewChain: function() {
+    var ret = [] ;
+    var view = this._itemViewRoot ;
+    while(view) {
+      ret.push(view.get('content').get('guid')) ;
+      view = view.__nextItemView ;
+    }  
+    return ret ;
+  },
+  
   // ......................................
   // GENERATING CHILDREN
   //
@@ -503,9 +517,12 @@ SC.CollectionView = SC.View.extend(
     This method is called automatically whenever the content array changes.  You will
     not usually need to call it yourself.  If you want to refresh the item views,
     called rebuildChildren() instead.
+    
+    @param {Bool} quick (Optional) if set to true, assumes content has not changed and will update faster.
+    
   */
-  updateChildren: function() {
-    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.start('%@.updateChildren()'.fmt(this)) ;
+  updateChildren: function(quick) {
+    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.start('%@.updateChildren()'.fmt(this));
 
     // if the collection is not presently visible in the window, then there is really 
     // nothing to do here.  Just mark the view as dirty and return.
@@ -514,7 +531,7 @@ SC.CollectionView = SC.View.extend(
       return; 
     }
 
-    console.log('updateCHildren') ;
+    //console.log('updateChildren') ;
     
     // Save the current clipping frame.  If the frame methods are called again
     // later but the frame has not actually changed, we don't want to run
@@ -523,13 +540,24 @@ SC.CollectionView = SC.View.extend(
     
     this.beginPropertyChanges() ; // avoid sending notifications
     
+    // STEP 0: Update frame size if needed.  Required to compute the clippingFrame.
+    if (this.computeFrame !== SC.CollectionView.prototype.computeFrame) {
+      var f = this.computeFrame() ;
+      if (f && !SC.rectsEqual(f, this.get('frame'))) this.set('frame', f) ;
+    }
+    
     // STEP 1: Determine the range to display for clippingFrame
     var range = this.contentRangeInFrame(this.get('clippingFrame')) ;
+    var lastRange = (quick) ? this._lastRange : { start: 0, end: 0 } ;
+    this._lastRange = range ;
+    
     var groupBy = this.get('groupBy') ;
     var hasGrouping = groupBy != null ;
     var didChange = false ;
     
     // STEP 2: Iterate through the content and itemViews to make sure they line up.
+    
+    // if the visible range has shifted downard, then remove any views that 
     didChange = this._updateItemViewChainWithContentRange(range, hasGrouping) ;
 
     // STEP 3: If grouping is enabled, iterate through the content and itemViews to 
@@ -546,11 +574,6 @@ SC.CollectionView = SC.View.extend(
     // STEP 4: Incremental rendering stuff.  If any of these methods are implemented,
     // call them.   Set the computeFrameSize first.  Be sure to maintain the scroll offset
     // if possible.
-    if (this.computeFrame !== SC.CollectionView.prototype.computeFrame) {
-      var f = this.computeFrame() ;
-      if (f && !SC.rectsEqual(f, this.get('frame'))) this.set('frame', f) ;
-    }
-
     if (this.layoutItemViewsFor !== SC.CollectionView.prototype.layoutItemViewsFor) {
       var didChangeLayout = false ;
       
@@ -661,8 +684,8 @@ SC.CollectionView = SC.View.extend(
   },
 
   /**
-    Calls updateChildren whenever the clippingView changes, unless you have not 
-    implemented custom layout or incremental rendering.
+    Whenever your clipping frame changes, determine new range to display.  If 
+    new range is a change, then it will update the children and relayout.
   */
   clippingFrameDidChange: function() {
     if (this.get('hasCustomLayout')) {
@@ -831,8 +854,15 @@ SC.CollectionView = SC.View.extend(
 
     //console.log('_removeItemViewFromChain(%@)'.fmt(itemView));
 
+    // delete from guid hash
     if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
     delete this._itemViewsByGuid[SC.getGUID(itemView)] ;
+    
+    // delete from content hash
+    var content = itemView.get('content') ;
+    var key = (content && content._guid) ? content._guid : '0' ;
+    if (!this._itemViewsByContent) this._itemViewsByContent = {} ;
+    delete this._itemViewsByContent[key] ;
     
     var ret = itemView.__nextItemView ;
     
@@ -964,12 +994,15 @@ SC.CollectionView = SC.View.extend(
           // we can avoid STEP 3 altogether.
           if (!hasGrouping) {
             var nextSibling = (itemView.__beforeItemView) ? itemView.__beforeItemView.get('nextSibling') : this.get('firstChild') ;
-            if ((itemView.get('parentNode') != this) || (itemView.get('nextSibling') != nextSibling)) {
+            if ((itemView.get('parentNode') != this) || ((nextSibling != itemView) && (itemView.get('nextSibling') != nextSibling))) {
               this._removeRootElementFromDom() ;
               this.insertBefore(itemView, itemView.__nextItemView) ;
             }
           }
         }
+
+        // get the next itemView.
+        itemView = (itemView) ? itemView.__nextItemView : null ;
         
       // if we are out of content but there are itemViews left, remove them.
       } else if (itemView) {
@@ -978,9 +1011,32 @@ SC.CollectionView = SC.View.extend(
         didChange = true ;
       } 
       
-      // get the next itemView.
-      itemView = (itemView) ? itemView.__nextItemView : null ;
     }
+    
+    if (SC.VALIDATE_COLLECTION_CONSISTANCY) {
+      console.log('validate') ;
+      var contentIdx = range.start ;  
+      var maxContentIdx = Math.min(range.start + range.length, content.get('length'));
+      var itemView = this._itemViewRoot ;
+      while(contentIdx < maxContentIdx) {
+        if (!itemView || (itemView.get('content') != content.objectAt(contentIdx++))) {
+          console.log('collection inconsistancy at %@'.fmt(contentIdx-1)) ;
+          debugger ;
+        }
+        itemView = itemView.__nextItemView ;
+      }
+      
+      if (this._itemViewRoot.__prevItemView != null) {
+        console.log('collection rootItemView inconsistancy') ;
+        debugger ;
+      }
+      
+      if (this._itemViewTail.__nextItemView != null) {
+        console.log('collection tailItemView inconsistancy') ;
+        debugger ;
+      }
+    }
+    
     return didChange ;
   },
   

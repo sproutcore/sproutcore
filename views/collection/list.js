@@ -44,18 +44,31 @@ SC.ListView = SC.CollectionView.extend(
   
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   
+  contentRangeInFrame: function(frame) {
+    var rowHeight = this.get('rowHeight') || 20 ;
+    var min = Math.floor(SC.minY(frame) / rowHeight) ;
+    var max = Math.ceil(SC.maxY(frame) / rowHeight) ;
+    var ret = { start: min, length: max - min } ; 
+    //console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
+    //if (frame.height < 100) debugger ;
+    return ret ;
+  },
+  
   /** @private */
   layoutItemViewsFor: function(parentView, startingView) {
     SC.Benchmark.start('SC.ListView.layoutItemViewsFor') ;
     
+    var view = startingView || parentView.firstChild;
+    var content = this.get('content') || [] ;
+    var startingIndex = (view) ? content.indexOf(view.get('content')) : 0;
+    
     var rowHeight = this.get('rowHeight') ;
     if (rowHeight == null) return false ;
     
-    if (!startingView) startingView = parentView.firstChild ;
-    var y = (startingView && startingView.previousSibling) ? SC.maxY(startingView.previousSibling.get('frame')) : 0;
-    var f = (parentView || this).get('frame') ; 
+    var y = startingIndex * rowHeight ; 
+    var f = (parentView || this).get('innerFrame') ; 
     f = { x: 0, height: rowHeight, width: f.width } ;
-    var view = startingView || parentView.firstChild;
+    
     while(view) {
       f.y = y ;
       
@@ -65,8 +78,22 @@ SC.ListView = SC.CollectionView.extend(
       y += rowHeight; 
       view = view.nextSibling ;
     }
+    
     SC.Benchmark.end('SC.ListView.layoutItemViewsFor') ;
     return true; 
+  },
+  
+  computeFrame: function() {
+    var content = this.get('content') ;
+    var rows = (content) ? content.get('length') : 0 ;
+    var rowHeight = this.get('rowHeight') || 20 ;
+    
+    var parent = this.get('parentNode') ;
+    var f = (parent) ? parent.get('innerFrame') : { width: 100, height: 100 } ;
+
+    f.x = f.y = 0;
+    f.height = Math.max(f.height, rows * rowHeight) ;
+    return f ;
   },
   
   insertionPointClass: SC.View.extend({
@@ -98,7 +125,6 @@ SC.ListView = SC.CollectionView.extend(
   insertionIndexForLocation: function(loc) {  
     var f = this.get('innerFrame') ;
     var sf = this.get('scrollFrame') ;
-    loc = this.convertFrameFromView(loc, null) ;
     var ret = Math.floor(((loc.y - f.y - sf.y) / this.get('rowHeight')) + 0.4) ;
     return ret ;
   }

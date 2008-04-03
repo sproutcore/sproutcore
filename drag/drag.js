@@ -577,6 +577,7 @@ SC.Drag = SC.Object.extend(
       } else view = this._findNextScrollableView(view) ;
     }
 
+    
     // STEP 2: Only scroll if the user remains within the hot-zone for a period of
     // time
     if (scrollableView && (this._lastScrollableView == scrollableView)) {

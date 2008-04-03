@@ -960,6 +960,13 @@ SC.View = SC.Responder.extend(SC.PathModule,
           this._invalidateClippingFrame() ;
         }
         
+        // clear parent scrollFrame if needed
+        var parent = this.parentNode ;
+        while (parent && parent != SC.window) {
+          if (parent._scrollFrame) parent._scrollFrame = null ;
+          parent = parent.parentNode ;
+        }
+        
         this.notifyPropertyChange('frame') ; // trigger notifications.
       }
       
@@ -1668,10 +1675,15 @@ SC.View = SC.Responder.extend(SC.PathModule,
   
   toString: function() {
     var el = this.rootElement ;
-    var attrs = el.attributes ;
-    attrs = (attrs) ? $A(attrs).map(function(atr) { return [atr.nodeName,atr.nodeValue].join("="); }).join(' ') : '';
     var tagName = (!!el.tagName) ? el.tagName.toLowerCase() : 'document' ;
-    return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,attrs].join(' ')) ;
+
+    var className = el.className ;
+    className = (className && className.length>0) ? 'class=%@'.fmt(className) : null;
+
+    var idName = el.id ;
+    idName = (idName && idName.length>0) ? 'id=%@'.fmt(idName) : null;
+
+    return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,idName, className].compact().join(' ')) ;
   }
     
 }) ;

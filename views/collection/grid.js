@@ -40,6 +40,20 @@ SC.GridView = SC.CollectionView.extend(
   exampleView: SC.TextCellView,
   
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
+
+  contentRangeInFrame: function(frame) {
+    var rowHeight = this.get('rowHeight') || 48 ;
+    var columnWidth = this.get('columnWidth') || 64 ;
+    var f = this.get('innerFrame') ;
+    var itemsPerRow = Math.floor(f.width / (columnWidth || 1)) ;
+
+    var min = Math.floor(SC.minY(frame) / rowHeight) * itemsPerRow  ;
+    var max = Math.ceil(SC.maxY(frame) / rowHeight) * itemsPerRow ;
+    var ret = { start: min, length: max - min } ; 
+    //console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
+    //if (frame.height < 100) debugger ;
+    return ret ;
+  },
   
   /** @private */
   layoutItemViewsFor: function(parentView, startingView) {
@@ -59,31 +73,26 @@ SC.GridView = SC.CollectionView.extend(
     // fix width to evenly match items per row
     columnWidth = Math.floor((f.width-20)/itemsPerRow) ;
     
-    // get the startingView and the starting X,Y
-    if (!startingView) startingView = parentView.firstChild ;
-    var x,y ;
-    if (startingView && startingView.previousSibling) {
-      var prevFrame = startingView.previousSibling.get('frame') ;
-      x = SC.maxX(prevFrame); y = SC.minY(prevFrame) ;
-    } else { x = f.x; y = f.y; } 
-    
-    // Now setup the default frame
-    var maxX = SC.maxX(f);
-    var minX = f.x;
-    f = { x: 0, y: 0, height: rowHeight, width: columnWidth } ;
-    var view = startingView ;
-    while(view) {
-      // loop back to beginning of next line if needed.
-      if ((x+columnWidth) >= maxX) {
-        x = minX ;
-        y += rowHeight ;
-      }
+    // get the startingView and the starting row, col
+    var view = startingView || parentView.firstChild;
+    var content = this.get('content') || [] ;
+    var idx = (view) ? content.indexOf(view.get('content')) : 0;
 
-      // save frame
-      f.y = y ; f.x = x;
+    
+    f = { x: 0, y: 0, height: rowHeight, width: columnWidth } ;
+    
+    while(view) {
+
+      // calculate position.
+      var row = Math.floor(idx / itemsPerRow) ;
+      var col = idx - (row * itemsPerRow) ;
+      f.x = col * columnWidth;  f.y = row * rowHeight ;
+
       if (!SC.rectsEqual(view.get('frame'), f)) view.set('frame', f) ;
-      x += columnWidth; 
+      
+      // go to next one
       view = view.nextSibling ;
+      idx++ ;
     }
     
     SC.Benchmark.end('SC.GridView.layoutItemViewsFor') ;
@@ -91,20 +100,24 @@ SC.GridView = SC.CollectionView.extend(
     return true; 
   },
   
-  // computedViewHeight: function(groupView) {
-  //   var content = this.get('content') ;
-  //   var rowHeight = this.get('rowHeight') ;
-  //   var parentNode = this.get('parentNode') ;
-  //   var minHeight = (parentNode) ? 20 : parentNode.get('frame').height ;
-  //   var height = 0 ;
-  //   
-  //   if (content && rowHeight) {
-  //     var rows = content.get('length') ;
-  //     height = rows * rowHeight ;
-  //   }
-  //   if (height < minHeight) height = minHeight ;
-  //   return height ;
-  // },
+  computeFrame: function() {
+    var content = this.get('content') ;
+    var count = (content) ? content.get('length') : 0 ;
+    var rowHeight = this.get('rowHeight') || 20 ;
+    var columnWidth = this.get('columnWidth') || 64 ;
+    var f = this.get('innerFrame') ;
+    var itemsPerRow = Math.floor(f.width / (columnWidth || 1)) ;
+
+    var rows = Math.ceil(count / itemsPerRow) ;
+    
+    var parent = this.get('parentNode') ;
+    var f = (parent) ? parent.get('innerFrame') : { width: 100, height: 100 } ;
+
+    f.x = f.y = 0;
+    f.height = Math.max(f.height, rows * rowHeight) ;
+    return f ;
+  },
+  
   
   insertionPointClass: SC.View.extend({
     emptyElement: '<div class="grid-insertion-point"><span class="anchor"></span></div>'
@@ -142,7 +155,6 @@ SC.GridView = SC.CollectionView.extend(
   insertionIndexForLocation: function(loc) {  
     var f = this.get('frame') ;
     var sf = this.get('scrollFrame') ;
-    loc = this.convertFrameFromView(loc, null) ;
     
     var itemsPerRow = this.get('itemsPerRow') || 1 ; 
     var columnWidth = Math.floor(f.width / itemsPerRow) ;
@@ -150,7 +162,6 @@ SC.GridView = SC.CollectionView.extend(
     var col = Math.floor(((loc.x - f.x - sf.x) / columnWidth) + 0.5) ;
     
     var ret= (row*itemsPerRow) + col ;
-    console.log('ret: %@ - itemsPerRow: %@ scrollFrame: %@'.fmt(ret, itemsPerRow, $H(sf).inspect())) ;
     return ret ;
   }
   
