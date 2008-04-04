@@ -17,6 +17,13 @@ SC.HORIZONTAL_ORIENTATION = 'horizontal';
 /** Selection points should be selected using vertical orientation. */
 SC.VERTICAL_ORIENTATION = 'vertical' ;
 
+/** Enables an optimization using zombie group views.  This option is configurable for perf testing purposes.  You should not change it. */
+SC.ZOMBIE_GROUPS_ENABLED = YES ;
+
+/** Enables an optimization that removes the root element from the DOM during 
+a render and then readds it when complete.  This option is configurable for 
+perf testing purposes.  You should not change it. */
+SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
 
 /**
   @class 
@@ -50,8 +57,8 @@ SC.CollectionView = SC.View.extend(
 
     This array should contain the content objects you want the collection view 
     to display.  An item view (based on the exampleView view class) will be 
-    created for each content object, in the order the content objects appear in
-    this array.
+    created for each content object, in the order the content objects appear 
+    in this array.
     
     If you make the collection editable, the collection view will also modify 
     this array using the observable array methods of SC.Array.
@@ -69,20 +76,20 @@ SC.CollectionView = SC.View.extend(
   /**  
     The array of currently selected objects.  
 
-    This array should contain the currently selected content objects.  
-    It is modified automatically by the collection view when the user 
-    changes the selection on the collection.
+    This array should contain the currently selected content objects.  It is 
+    modified automatically by the collection view when the user changes the 
+    selection on the collection.
 
-    Any item views representing content objects in this array will
-    have their isSelected property set to YES automatically.
+    Any item views representing content objects in this array will have their 
+    isSelected property set to YES automatically.
     
-    The CollectionView can deal with selection arrays that contain content
-    objects that do not belong to the content array itself.  Sometimes this
-    will happen if you share the same selection across multiple collection
+    The CollectionView can deal with selection arrays that contain content 
+    objects that do not belong to the content array itself.  Sometimes this 
+    will happen if you share the same selection across multiple collection 
     views.
     
-    Usually you will want to bind this property to a controller property
-    that actually manages the selection for your display.
+    Usually you will want to bind this property to a controller property that 
+    actually manages the selection for your display.
     
     @type Array
   */
@@ -370,22 +377,48 @@ SC.CollectionView = SC.View.extend(
   /**  
     Property returns all of the item views, regardless of group view.
 
-    @property
+    @field
     @returns {Array} the item views.
   */
   itemViews: function() {
     if (!this._itemViews) {
-      var ret = [] ;
-      var itemView = this._itemViewRoot ;
-      while(itemView) {
-        ret.push(itemView) ;
-        itemView = itemView.__nextItemView ;
+      var range = this.get('nowShowingRange') ;
+      var content = this.get('content') || [] ;
+      this._itemViews = [] ;
+      for(var idx=0;idx<range.length;idx++) {
+        var cur = content.objectAt(idx) ;
+        this._itemViews.push(this.itemViewForContent(cur)) ;
       }
-      this._itemViews = ret ;
     }
     return this._itemViews;
   }.property(),
 
+  /**
+    Property returns all of the rendered group views in order of their 
+    appearance with the content.
+  */
+  groupViews: function() {
+    if (!this._groupViews) {
+      var groupBy = this.get('groupBy') ;
+      if (groupBy) {
+        var range = this.get('nowShowingRange') ;
+        var content = this.get('content') || [] ;
+        var groupValue = undefined ;
+        this._groupViews = [] ;
+
+        for(var idx=0;idx<range.length;idx++) {
+          var cur = content.objectAt(idx) ;
+          var curGroupValue = (cur) ? cur.get(groupBy) : null ;
+          if (curGroupValue != groupValue) {
+            groupValue = curGroupValue ;
+            this._itemViews.push(this.groupViewForGroupValue(groupValue)) ;
+          }
+        }
+        
+      }
+    }
+    return this._groupViews; 
+  }.property(),
   
   /**
     Returns true if the passed view belongs to the collection.
@@ -400,7 +433,7 @@ SC.CollectionView = SC.View.extend(
   */
   hasItemView: function(view) {
     if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
-    return !!this._itemViewsByGuid[SC.getGUID(view)] ;
+    return !!this._itemViewsByGuid[SC.guidFor(view)] ;
   },
 
   /** 
@@ -409,7 +442,8 @@ SC.CollectionView = SC.View.extend(
     The default implementation of this method simply searches each item view's
     frame to find one that includes the location.  If you are doing your own
     layout, you may be able to perform this calculation more quickly.  If so,
-    consider overriding this method for better performance during drag operations.
+    consider overriding this method for better performance during drag 
+    operations.
     
     @param {Point} loc   The current mouse location in the coordinate of the 
       collection view
@@ -430,12 +464,12 @@ SC.CollectionView = SC.View.extend(
   /** 
     Find the first content item view for the passed event.
     
-    This method will go up the view chain, starting with the view that was the target
-    of the passed event, looking for a child item.  This will become the view that 
-    is selected by the mouse event.
+    This method will go up the view chain, starting with the view that was the 
+    target of the passed event, looking for a child item.  This will become 
+    the view that is selected by the mouse event.
     
-    This method only works for mouseDown & mouseUp events.  mouseMoved events do
-    not have a target.
+    This method only works for mouseDown & mouseUp events.  mouseMoved events 
+    do not have a target.
     
     @param {Event} evt An event
     
@@ -465,153 +499,244 @@ SC.CollectionView = SC.View.extend(
     If no item view is currently rendered for the object, this method will
     return null.
     
-    @param {Object} obj The content object.  Should be a member of the content array.
-    @returns {SC.View} The item view for this object or null if no match could be found.
+    @param {Object} obj The content object. 
+    @returns {SC.View} The item view or null
   */
   itemViewForContent: function(obj) {
-    return this._itemViewsByContent[SC.getGUID(obj)];
+    var key = (obj) ? SC.guidFor(obj) : '0';
+    return this._itemViewsByContent[key];
   },
 
+  /**
+    Returns the groupView that represents the passed group value.
+    
+    If no group view is currently rendered for the gorup value, this method
+    will return null.  If grouping is disabled, this method will also return
+    null.
+    
+    @param {Object} value The group value.
+    @param {SC.View} The group view or null
+  */
+  groupViewForGroupValue: function(groupValue) {
+    return this._groupViewsByValue[groupValue] ;
+  },
 
   /**
-    Debug returns the chain of item views.
+    Returns the groupValue for the passed group view.
+    
+    Older-style groupViews expect the group value to be set directly on 
+    their labelView while newer groupViews expect their groupValue to be set.
+    This method takes into account both approaches.
+    
+    @param {SC.View} groupView the group view.
+    @returns {Object} the value of the group view or null.
   */
-  _inspectItemViewChain: function() {
-    var ret = [] ;
-    var view = this._itemViewRoot ;
-    while(view) {
-      ret.push(view.get('content').get('guid')) ;
-      view = view.__nextItemView ;
-    }  
+  groupValueForGroupView: function(groupView) {
+    if (!groupView) return null ;
+    var ret ;
+    if (groupView.groupValue === undefined) {
+      ret = groupView.labelView.get('content') ;
+    } else ret = groupView.get('groupValue') ;
     return ret ;
   },
   
+  /**
+    Expands the index into a range of content objects that have the same
+    group value.
+    
+    This method searches backward and forward through your content array for  
+    objects that have the same group value as the object at the index you 
+    pass in.  You can use this method when implementing layoutGroupView to 
+    determine the range of the content that belongs to the group.  
+    
+    Since this method simply searches through the content array, it is really
+    only suitable for content arrays of a few hundred items or less.  If you
+    expect to have a larger size of content array, then you may need to do
+    something custom in your data model to calculate this range in less time.
+    
+    @param {Number} contentIndex index of a content object
+    @returns {Range} a range of objects
+  */
+  groupRangeForContentIndex: function(contentIndex) {
+    var groupBy = this.get('groupBy') ;
+    if (!groupBy) return { start: contentIndex, length: 1 } ;
+
+    var min = contentIndex, max = contentIndex ;
+    var content = Array.from(this.get('content')) ;
+    var len = content.get('length') ;
+    var cur = content.objectAt(contentIndex) ;
+    var groupValue = (cur) ? cur.get(groupBy) : null ;
+    
+    // find first item at bottom that does not match.  add one to get start
+    while(--min >= 0) {
+      var cur = content.objectAt(min) ;
+      var curGroupValue = (cur) ? cur.get(groupBy) : null ;
+      if (curGroupValue !== groupValue) break ;
+    }
+    min++ ;
+    
+    // find first item at top that does not match.  keep value to calc range
+    while(++max < len) {
+      var cur = content.objectAt(max) ;
+      var curGroupValue = (cur) ? cur.get(groupBy) : null ;
+      if (curGroupValue !== groupValue) break ;
+    }
+    
+    return { start: min, length: max-min } ;
+  },
+    
   // ......................................
   // GENERATING CHILDREN
   //
   
   /**
-    Ensure that the displayed item views match the current set of content objects.
-  
-    This is the main entry point to the collection view layout system.  It is called
-    anytime the collection view is scrolled, resized, or anytime its content changes.
-    If you ever think the your child views might need to be relaidout for some reason.
+    Update the itemViews in the receiver to match the currently visible 
+    content objects.  Normally this method assumes the content objects 
+    themselves have not changed and only updates the views if the range of 
+    visible content has changed.  If you pass true to the fullUpdate property, 
+    then the entire set of itemViews will be revalidated in case any content 
+    objects have changed.
     
-    h3. How Updating Works
-    
-    Updates take place in three steps:
-    
-    Step 1: contentRangeInFrame() is called to determine the range of items to display.
-    The default returns the entire range of content items.
-    
-    Step 2: updateChildren will make sure that itemViews exist for each child in the
-    range.  It will also make sure each itemView belongs to the correct group view.
-    
-    Step 3: layoutItemViewsFor() will be called for each group.  You can use this 
-    method to position your item views.
-    
-    You can override contentRangeInFrame() and layoutItemViewsFor() to provide support
-    for incremental rendering.  See the documentation for those methods for info on how
-    they should function.
-
-    This method is called automatically whenever the content array changes.  You will
-    not usually need to call it yourself.  If you want to refresh the item views,
-    called rebuildChildren() instead.
-    
-    @param {Bool} quick (Optional) if set to true, assumes content has not changed and will update faster.
+    @param {Bool} fullUpdate (Optional) if set to true, assumes content has
+      changed and will perform a full update.
     
   */
-  updateChildren: function(quick) {
-    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.start('%@.updateChildren()'.fmt(this));
+  updateChildren: function(fullUpdate) {
 
-    // if the collection is not presently visible in the window, then there is really 
-    // nothing to do here.  Just mark the view as dirty and return.
+    var f ;
+
+    // if the collection is not presently visible in the window, then there is 
+    // really nothing to do here.  Just mark the view as dirty and return.
     if (!this.get('isVisibleInWindow')) {
       this.set('isDirty', true) ;
+      this._needsFullUpdate = this._needsFullUpdate || fullUpdate ;
       return; 
+    }
+
+    if (SC.BENCHMARK_UPDATE_CHILDREN) {
+      var bkey = '%@.updateChildren(%@)'.fmt(this, (fullUpdate) ? 'FULL' : 'FAST') ;
+      SC.Benchmark.start(bkey);
     }
 
     //console.log('updateChildren') ;
     
+    this.beginPropertyChanges() ; // avoid sending notifications
+    
+    // STEP 1: Update frame size if needed.  Required to compute the 
+    // clippingFrame.
+    var f ;
+    if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
+      this.set('frame', f) ;
+    }
+
     // Save the current clipping frame.  If the frame methods are called again
     // later but the frame has not actually changed, we don't want to run
     // updateChildren again.
-    if (this.get('hasCustomLayout')) this._lastClippingFrame = this.get('clippingFrame') ;
+    var clippingFrame = this._lastClippingFrame = this.get('clippingFrame') ;
     
-    this.beginPropertyChanges() ; // avoid sending notifications
-    
-    // STEP 0: Update frame size if needed.  Required to compute the clippingFrame.
-    if (this.computeFrame !== SC.CollectionView.prototype.computeFrame) {
-      var f = this.computeFrame() ;
-      if (f && !SC.rectsEqual(f, this.get('frame'))) this.set('frame', f) ;
-    }
-    
-    // STEP 1: Determine the range to display for clippingFrame
-    var range = this.contentRangeInFrame(this.get('clippingFrame')) ;
-    var lastRange = (quick) ? this._lastRange : { start: 0, end: 0 } ;
-    this._lastRange = range ;
-    
+    // STEP 2: Calculate the new range of content to display in 
+    // the clipping frame.  Determine if we need to do a full update or
+    // not.
+    var range = this.contentRangeInFrame(clippingFrame) ;
+    var nowShowingRange = this.get('nowShowingRange') ;
+    fullUpdate = fullUpdate || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
+    this.set('nowShowingRange', range) ;
+
+    // STEP 3: Update item views.
     var groupBy = this.get('groupBy') ;
-    var hasGrouping = groupBy != null ;
     var didChange = false ;
     
-    // STEP 2: Iterate through the content and itemViews to make sure they line up.
-    
-    // if the visible range has shifted downard, then remove any views that 
-    didChange = this._updateItemViewChainWithContentRange(range, hasGrouping) ;
-
-    // STEP 3: If grouping is enabled, iterate through the content and itemViews to 
-    // make sure the itemViews belong to the correct group/parentNode.  This 
-    // theoretically be integrated into the loop above but the cost of doing a second 
-    // pass is less than 0.01msec and it significantly simplifies this code.
-    if (hasGrouping) this._updateGroupViews(groupBy) ;
-    if (didChange) this.updateSelectionStates() ;
-
-    // Replace DOM if needed - this will unset any calles to removeRootElementFromDom()
-    // in Steps 2 & 3.
-    this._restoreRootElementInDom() ;
-
-    // STEP 4: Incremental rendering stuff.  If any of these methods are implemented,
-    // call them.   Set the computeFrameSize first.  Be sure to maintain the scroll offset
-    // if possible.
-    if (this.layoutItemViewsFor !== SC.CollectionView.prototype.layoutItemViewsFor) {
-      var didChangeLayout = false ;
+    // If this is a fullUpdate, then rebuild the itemViewsByContent hash
+    // from scratch.  This is necessary of the content of the visible range
+    // might have changed.
+    if (fullUpdate) {
+      var content = this.get('content') || [];
+      var itemViewsByContent = {} ; // this will replace the current hash.
       
-      if (hasGrouping) {
-        var groupView = this.get('firstChild') ;
-        while(groupView) {
-          var ret = this.layoutItemViewsFor(groupView, groupView.get('firstChild')) ;
-          if (!(ret === NO)) didChangeLayout = true ;
-          groupView = groupView.get('nextSibling') ;
-        }
-      } else didChangeLayout = this.layoutItemViewsFor(this, this.get('firstChild')) ;
-    } 
+      // iterate through all of the views and insert them.  If the view 
+      // already exists, it will simply be reused.
+      var idx = SC.maxRange(range) ;
+      while(--idx >= range.start) {
+        var c = content.objectAt(idx) ;
+        var key = SC.guidFor(c) ;
+        var itemView = this._insertItemViewFor(c, groupBy, idx) ;
+        
+        // add item view to new hash and remove from old hash.
+        itemViewsByContent[key] = itemView; 
+        delete this._itemViewsByContent[key];
+      }
+      
+      // Now iterate through the old hash.  Any left over item views should
+      // be removed.
+      for(var key in this._itemViewsByContent) {
+        if (!this._itemViewsByContent.hasOwnProperty(key)) continue ;
+        var itemView = this._itemViewsByContent[key] ;
+        this._removeItemView(itemView, groupBy) ;
+      } ;
+      
+      // Swap out remaining content items.
+      this._itemViewsByContent = itemViewsByContent ;
+      didChange = true;
+      
+    // If a fullUpdate is not required, then we assume no content has changed
+    // and we just need to add or remove some views to bring the ranges up
+    // to date.
+    } else {
+      // Find changed range at the top.  Note that the length here may be 
+      // negative.  Negative means views should be removed.
+      var start = range.start ;
+      var length = (nowShowingRange.start - start) ;
+      if (length != 0) {
+        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+        didChange = true ;
+      }
+      
+      // Find the changed range at the bottom.  Note that the length here may
+      // also be negative. Negative means views should be removed.
+      var start = SC.maxRange(nowShowingRange) ;
+      var length = SC.maxRange(range) - start ;
+      if (length != 0) {
+        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+        didChange = true ;
+      }
+    }
+    
+    // Clean out some cached items and notify their changes.
+    if (didChange) {
+      this.updateSelectionStates() ;
+      
+      this._itemViews = null ;
+      this.notifyPropertyChange('itemViews') ;
+      
+      this._groupViews = null ;
+      this.notifyPropertyChange('groupViews') ;
+    }
 
     // Recache frames just in case this changed the scroll height.
     this.recacheFrames() ;
     
     
-    // Set this to true once children have been rendered.  Whenever the content
-    // changes, we don't want resize or clipping frame changes to cause a refresh
-    // until the content has been rendered for the first time.
-    this._hasChildren = !!this._itemViewRoot ;
+    // Set this to true once children have been rendered.  Whenever the 
+    // content changes, we don't want resize or clipping frame changes to 
+    // cause a refresh until the content has been rendered for the first time.
+    this._hasChildren = range.length>0 ;
     
     this.set('isDirty',false); 
     this.endPropertyChanges() ;
-    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end('%@.updateChildren()'.fmt(this)) ;
+    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end(bkey);    
   },
 
   /**
     Rebuild all the child item views in the collection view.
     
-    This will remove all the child views from the collection view and rebuild them
-    from scratch.  This method is generally expensive, but if you have made a
-    substantial number of changes to the content array, this may be the most efficient
-    way to perform the update.
+    This will remove all the child views from the collection view and rebuild 
+    them from scratch.  This method is generally expensive, but if you have 
+    made a substantial number of changes to the content array, this may be the 
+    most efficient way to perform the update.
     
-    In general the collection view will automatically keep the item views in sync
-    with the content objects for you.  You should not need to call this method
-    very often.
+    In general the collection view will automatically keep the item views in 
+    sync with the content objects for you.  You should not need to call this 
+    method very often.
     
     @returns {void}
   */
@@ -653,18 +778,22 @@ SC.CollectionView = SC.View.extend(
     if (!selectionHash) {
       selectionHash = {} ;
       var idx = selection.get('length') ;
-      while(--idx >= 0) selectionHash[SC.getGUID(selection.objectAt(idx))] = true ;
+      while(--idx >= 0) {
+        var cur = selection.objectAt(idx) ;
+        var key = SC.guidFor(cur) ;
+        selectionHash[key] = true ;
+      }
       this._selectionHash = selectionHash ;
     }
 
     // Iterate over the item views and set their selection property.
-    var itemView = this._itemViewRoot ;
-    while(itemView) {
-      var content = itemView.get('content') ;
-      var guid = (content) ? SC.getGUID(content) : null ;
-      var isSelected = (guid) ? selectionHash[guid] : false ;
-      if (itemView.get('isSelected') != isSelected) itemView.set('isSelected', isSelected) ;
-      itemView = itemView.__nextItemView; 
+    for(var key in this._itemViewsByContent) {
+      if (!this._itemViewsByContent.hasOwnProperty(key)) continue ;
+      var itemView = this._itemViewsByContent[key] ;
+      var isSelected = (key) ? selectionHash[key] : false ;
+      if (itemView.get('isSelected') != isSelected) {
+        itemView.set('isSelected', isSelected) ;
+      }
     }
   },
     
@@ -672,423 +801,422 @@ SC.CollectionView = SC.View.extend(
   /**
     Calls updateChildren whenever the view is resized, unless you have not 
     implemented custom layout or incremental rendering.
+    
+    UPDATE:
+    -- add/remove any children as needed
+    -- update layout on all itemViews unless you have a more efficient
   */
   resizeChildrenWithOldSize: function(oldSize) {
-    if (this.get('hasCustomLayout')) {
-      if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
-        if (this._hasChildren) this.updateChildren() ;
-      }
-    } else {
-      arguments.callee.base.apply(this, arguments) ;
+    if (!this._hasChildren) return ;
+    if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
+      this.updateChildren() ; // add/remove any new views.
+      this.layoutResize() ; // perform layout on all of the views if needed.
     }
   },
 
   /**
     Whenever your clipping frame changes, determine new range to display.  If 
     new range is a change, then it will update the children and relayout.
+    
+    UPDATE:
+    -- add/remove any children as needed
+    -- update layout on added children only
   */
   clippingFrameDidChange: function() {
-    if (this.get('hasCustomLayout')) {
-      if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
-        if (this._hasChildren) this.updateChildren() ;
-      }
-    }
+    if (!this._hasChildren) return ;
+    SC.Benchmark.start('%@.clippingFrameDidChange'.fmt(this.toString())) ;
+    if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
+          if (this._hasChildren) this.updateChildren() ;
+        }
+    SC.Benchmark.end('%@.clippingFrameDidChange'.fmt(this.toString())) ;
   },
-  
+
   /**
-    Returns true if you implement any kind of custom layout or incremental 
-    rendering.  This property is set once when your view is instantiated.
+    Override to return the computed frame dimensions of the collection view.
+    
+    These dimensions are automatically applied at the end of a call to  
+    updateChildren() if they change at all.  This method is critical for 
+    support of incremental rendering.
+  
+    @returns {Rect} width and/or height you want this collection view to have.
   */
-  hasCustomLayout: function() {
-    if (this._hasCustomLayout == null) {
-      this._hasCustomLayout = 
-        (this.contentRangeInFrame != SC.CollectionView.prototype.contentRangeInFrame) || 
-        (this.layoutItemViewsFor != SC.CollectionView.prototype.layoutItemViewsFor) ||  
-        (this.layoutChildViewsFor != SC.CollectionView.prototype.layoutChildViewsFor) ;
-    }  
-    return this._hasCustomLayout ;
-  }.property(),
+  computeFrame: function() { return null; },
   
   /**
     Override to return the range of items to render for a given frame.
 
-    You can override this method to implement support for incremenetal rendering.  The range
-    you return here will be used to limit the number of actual item views that are created
-    by the collection view.
+    You can override this method to implement support for incremenetal 
+    rendering.  The range you return here will be used to limit the number of 
+    actual item views that are created by the collection view.
     
     @param {Rect} frame The frame you should use to determine the range.
     
-    @returns {Range} A hash that indicates the range of content objects to render.  ({ start: X, length: Y }) 
+    @returns {Range} A hash that indicates the range of content objects to 
+      render.  ({ start: X, length: Y }) 
   */  
   contentRangeInFrame: function(frame) {
     var content = this.get('content') ;
     var len = ((content && content.get) ? content.get('length') : 0) || 0 ;
     return { start: 0, length: len };
   },
+
+
+  /**
+    This method is called whenever a group view is added or during the 
+    layoutResize() method.  You should use this method to size and position 
+    the group view.
+    
+    The included contentIndexHint can be used to help you determine the range
+    of content that should be included in the group.  If you are renderings a
+    list of items 100 or less, you can get the range of content belonging to
+    the group using the contentRangeForGroup() method.  If you are managing
+    a much larger set of content, you should probably implement your own 
+    data model.
+    
+    Your layout method should can optionally also use the firstLayout to 
+    further optimize itself.  Normally, you will want to only change a view's
+    actual frame if it does not match your calculated size.  However, if 
+    firstLayout is true, you can simply set the new layout without checking
+    first.
+    
+    @param {SC.View} groupView the view to size and position.
+    @param {Object} groupValue the value the groupView represents.
+    @param {Number} contentIndexHint the index of a content object.
+    @param {Bool} firstLayout True if this is the first the view has been laid out. 
+    
+  */
+  layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {
+    
+  },
   
   /**
-    Override to layout itemViews once they have been created.
+    This method is called whenever an itemView is added or during the 
+    layoutResize() method.  You should use this method to size and position
+    the itemView.
     
-    You can override this method to implement support for manually laying out 
-    items in your collection.  Manually positioned collections are generally
-    faster and often are also the only way you can support incremental rendering.
-
-    In this method, you should position every view belonging to the parent view, beginning
-    with the startingItemView.  startingItemView will always be a child of parentView.
-    
-    If you have grouping enabled, parentView will be the groupView the itemViews belongs to.
-    Otherwise, the parentView will be the collection view itself.
-    
-    @param parentView {SC.View} the group view to layout or null
-    @param startingItemView {SC.View} the first itemView to layout. 
+    @param {SC.View} itemViewthe item view to layout
+    @param {Number} contentIndex the index of the content this layout represents.
+    @param {Bool} firstLayout true if this is the first time it has been laid out.
   */
-  layoutItemViewsFor: function(parentView, startingItemView) {},
+  layoutItemView: function(itemView, contentIndex, firstLayout) {
+    
+  },
   
   /**
-    Override to return the computed frame dimensions of the collection view.
+    This method is called whenever the view is resized.  The default
+    implementation will simply iterate through the visible content range and
+    call layoutItemView() and layoutGroupView() on all the views.
     
-    These dimensions are automatically applied at the end of a call to updateChildren()
-    if they change at all.  This method is critical for support of incremental rendering.
-  
-    @returns {Rect} width and/or height you want this collection view to have.
+    If you would like to provide a more efficient method for updating the
+    layout on a resize, you could override this method and do the iterating 
+    yourself.
   */
-  computeFrame: function() { return null; },
+  layoutResize: function() {
+    if (!this._hasChildren) return ; // ignore calls before first render
+    var nowShowingRange = this.get('nowShowingRange') ;
+    var groupBy = this.get('groupBy') ;
+    var groupValue = undefined ;
+    var content = this.get('content') || [] ;
+    
+    var idx = SC.maxRange(nowShowingRange) ;
+    while(--idx >= nowShowingRange.start) {
+      var cur = content.objectAt(idx) ;
+      var itemView = this.itemViewForContent(cur) ;
 
+      // should never happen, but recover just in case.
+      if (!itemView) continue ; 
+      
+      // if grouping is enabled, get the group value and layout based on that.
+      if (groupBy && ((curGroupValue = (cur) ? cur.get(groupBy) : null) !== groupValue)) {
+        var groupView = this.groupViewForGroupValue(groupValue) ;
+        if (groupView) {
+          this.layoutGroupView(groupView, groupValue, idx, false) ;
+        }
+      }
+      
+      // now layout the itemView itself.
+      this.layoutItemView(itemView, idx, false) ;
+    }
+  },
+    
+  
   // Ordered array of item views currently on display.  This array 
-  // is reset whenever the content items is regenerated.
+  // is reset whenever the item views are regenerated.
   _itemViews: null,
 
+  // Ordered array of group views currently in the display.  This array is
+  // reset whenever the group views are regenerated.
+  _groupViews: null,
+  
+  // Most recent content range on display.
+  _visibleContentRange: null,
+  
   // Hash of itemViews to the content guids they current represent.  This
-  // only matches views in currently in the _itemViews array.
+  // only matches views in currently in the _visibleContentRange.
   _itemViewsByContent: null,
-  
-  // Hash of itemViews by their own guid.
-  _itemViewsByGuid: null,
 
-  // Root element in the chain of item view records.
-  _itemViewRoot: null,
-  _itemViewTail: null,
-
-  // Pool of unused item views
-  _itemViewPoolRoot: null,
+  // Hash of groupViews to the group key they currently represent.
+  _groupViewsByValue: null,
   
-  // Pool of unused group views.
-  _groupViewPoolRoot: null,
+  // Hash of counts of item views contained in a group view.  When the count
+  // of a group reaches zero, it will be removed.
+  _groupViewCounts: null,
+
+  // Array of unused itemViews.  Push/pop only.
+  _itemViewPool: null,
+  
+  // Array of unused groupViews.  Push/pop only.
+  _groupViewPool: null,
+  
+  // When a group view's item view count reaches zero, it is moved to this
+  // hash until updateChildren() completes.  During that time, if the group 
+  // is needed again, it can be reused.  At the end of updateChildren() this
+  // hash will be flushed and its members returned to the groupView pool.
+  //
+  _zombieGroupViews: null,
   
   /** @private
-    Finds or creates the itemView for the named content and inserts it into the
-    view chain before the named view (or at the end of the chain if beforeView is 
-    null)
+    Finds or creates the itemView for the named content and inserts it into 
+    view under the correct group if needed.  Note that this method does not 
+    take into account the actual ORDER of item views in the hierarchy.  It 
+    assumes that manual layout will ensure the items appear visually in the 
+    proper order anyway.
+
+    @param {SC.View} itemView The item view to remove
+    @param {String} groupBy the value used for grouping or null if grouping is 
+      disabled.
     
-    If an itemView matching the content is already found in the chain, then that
-    itemView will simply be moved.  Note that this does not update the actual
-    DOM membership.
-    
-    Returns the new itemView.
+    @returns {SC.View} the new itemView.
   */
-  _insertItemViewInChainFor: function(content, beforeView) {
-    
-    //console.log('_insertItemViewInChainFor(%@,%@)'.fmt(content, beforeView));
+  _insertItemViewFor: function(content, groupBy, contentIndex) {
     
     // first look for a matching record.
-    var key = (content && content._guid) ? content._guid : '0' ;
-    var ret = (content) ? this._itemViewsByContent[key] : null;
+    var key = SC.guidFor(content) ;
+    var ret = this._itemViewsByContent[key];
+    var firstLayout = false ;
 
     // if no record was found, pull an item view from the pool or create one.
     // set the content.
     if (!ret) {
-      
-      // first try to get a view from the pool.  Note that the pool is a single
-      // linked list.  the __prevItemView property is always null.
-      if (this._itemViewPoolRoot) {
-        ret = this._itemViewPoolRoot;
-        this._itemViewPoolRoot = ret.__nextItemView ;
-        ret.__nextItemView = null ;
-
-      // if not found in pool, then create the record instead
-      } else ret = this.get('exampleView').create({ owner: this }) ;
+      ret = this._itemViewPool.pop() || this.get('exampleView').create({ owner: this }) ;
       
       // set content and add to content hash
       ret.set('content', content) ;
       this._itemViewsByContent[key] = ret ;
+      this._itemViewsByGuid[SC.guidFor(ret)] = ret ;
+      firstLayout = true ;
     }
-
-    // OK, now add to itemView list.  If itemView is already in the right
-    // place, do nothing.
     if (!ret) throw "Could not create itemView for content: %@".fmt(content);
-    if (!beforeView || (ret.__nextItemView != beforeView)) {
 
-      // remove from old location if needed
-      if (this._itemViewRoot == ret) this._itemViewRoot = ret.__nextItemView ;
-      if (this._itemViewTail == ret) this._itemViewTail = ret.__prevItemView ;
-      if (ret.__nextItemView) ret.__nextItemView.__prevItemView = ret.__prevItemView ;
-      if (ret.__prevItemView) ret.__prevItemView.__nextItemView = ret.__nextItemView ;
-
-      // Insert at appropriate location.
-      if (beforeView) {
-        ret.__nextItemView = beforeView ;
-        ret.__prevItemView = beforeView.__prevItemView ;
-        if (beforeView.__prevItemView) beforeView.__prevItemView.__nextItemView = ret ;
-        beforeView.__prevItemView = ret ;
-      } else {
-        ret.__prevItemView = this._itemViewTail;
-        if (this._itemViewTail) this._itemViewTail.__nextItemView = ret ;
-        this._itemViewTail = ret ;
-      }
-      if (this._itemViewRoot == beforeView) this._itemViewRoot = ret ;
-      
+    // Determine proper parent view and insert itemView if needed.
+    // Also update count of itemViews.  
+    var parentView = (groupBy) ? this._insertGroupViewFor(ret.get(groupBy), contentIndex) : this ;
+    if (ret.get('parentNode') != parentView) {
+      parentView.appendChild(ret) ;
+      if (groupBy) this._groupViewCounts[SC.guidFor(parentView)]++ ;
     }
-    
-    this._itemViews = null ; // clear cached array.
-    this.notifyPropertyChange('itemViews') ;
-    
-    if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
-    this._itemViewsByGuid[SC.getGUID(ret)] = ret ;
-    return ret ;
-  },
 
-  // Removes the itemView from the chain, clearing its content and returning it to the 
-  // pool for later use.  Returns the next item view that replaces it.
-  _removeItemViewFromChain: function(itemView) {
-    if (!itemView) return null ;
-
-    //console.log('_removeItemViewFromChain(%@)'.fmt(itemView));
-
-    // delete from guid hash
-    if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
-    delete this._itemViewsByGuid[SC.getGUID(itemView)] ;
-    
-    // delete from content hash
-    var content = itemView.get('content') ;
-    var key = (content && content._guid) ? content._guid : '0' ;
-    if (!this._itemViewsByContent) this._itemViewsByContent = {} ;
-    delete this._itemViewsByContent[key] ;
-    
-    var ret = itemView.__nextItemView ;
-    
-    // remove itemView from current chain.
-    if (this._itemViewRoot === itemView) this._itemViewRoot = itemView.__nextItemView ;
-    if (this._itemViewTail === itemView) this._itemViewTail = itemView.__prevItemView ;
-    if (itemView.__nextItemView) itemView.__nextItemView.__prevItemView = itemView.__prevItemView ;
-    if (itemView.__prevItemView) itemView.__prevItemView.__nextItemView = itemView.__nextItemView ;
-    
-    // clear content of itemView, remove from parent view.
-    itemView.removeFromParent() ;
-    itemView.set('content', null) ;
-    
-    // now add itemView to the pool.
-    itemView.__prevItemView = null ; // ignored for pool
-    itemView.__nextItemView = this._itemViewPoolRoot ;
-    this._itemViewPoolRoot = itemView ;
-    
-    // clear cached array
-    this._itemViews = null ;
-    this.notifyPropertyChange('itemViews') ;
-    
-    // return the next itemView in the chain
+    // Layout itemView.
+    this.layoutItemView(ret, contentIndex, firstLayout) ;
     return ret ;
   },
 
   /** @private
-    Returns the groupValue for the current groupView.  If groupView is null, returns
-    null.
+    Removes the itemView from the receiver and returns it to the itemView pool 
+    for later reuse.  
+    
+    If the itemView belongs to a groupView and this leaves the groupView empty 
+    as well, then the groupView will be moved to the zombieGroupViews hash.
+    
+    @param {SC.View} itemView The item view to remove
+    @param {String} groupBy the value used for grouping or null if grouping is 
+      disabled.
+    
+    @returns {SC.View} The itemView that was removed.
   */
-  _groupValueForGroupView: function(groupView) {
-    if (groupView == null) return null ;
-    if (groupView.groupValue !== undefined) return groupView.get('groupValue') ;
-    return (groupView.labelView) ? groupView.labelView.get('content') : null ;
+  _removeItemView: function(itemView, groupBy) {
+    
+    // If we are grouping, then decrement the groupViewCount.  If the new 
+    // count is zero, save groupView for later removal.
+    var groupView = null ; var groupValue ;
+    if (groupBy && (groupView = itemView.get('parentNode'))) {
+      if (--this._groupViewCounts[SC.guidFor(groupView)] > 0) groupView = null ; 
+      if (groupView) groupValue = itemView.get(groupBy) ;
+    }
+    
+    // Remove itemView from parent and remove from content hash.
+    var content = itemView.get('content') ;
+    var key = SC.guidFor(content) ;
+    delete this._itemViewsByContent[key] ;
+    delete this._itemViewsByGuid[SC.guidFor(itemView)] ;
+    itemView.removeFromParent() ;
+    
+    // Clear content and return itemView to pool
+    itemView.set('content', null) ;
+    this._itemViewPool.push(itemView) ;
+    
+    // if a groupView is set, then it also needs to be returned to the pool
+    if (groupView) this._removeGroupView(groupView, groupValue) ;
+    
+    return itemView;
   },
   
   /** @private
-    Creates a new groupView for the specified groupValue and inserts it into the receiver
-    before the passed groupView.  This will pull from the groupView pool if possible.
+    Adds or removes itemViews for the content in the specified range.
+    Note that this is not passed as a formal range because the length 
+    could be negative.  
+    
+    A negative length means views should be removed.
   */
-  _insertGroupViewFor: function(groupValue, beforeGroup) {
+  _insertOrRemoveItemViewsInRange: function(start, length, groupBy) {
+    // zero length means do nothing.
+    if (length == 0) return ;
+
+    var content = this.get('content') || [] ;
     
-    // try to get a groupView from the pool
-    var ret = this._groupViewPoolRoot ;
-    if (ret) {
-      this._groupViewPoolRoot = ret.__nextGroupView ;
-      ret.__nextGroupView = null ;
+    // negative length == remove item views
+    if (length < 0) {
+      while(++length < 0) {
+        var c = content.objectAt(start + length) ;
+        var itemView = this.itemViewForContent(c) ;
+        if (itemView) this._removeItemView(itemView, groupBy) ;
+      }
       
-    // otherwise, create a new group view
-    } else ret = this.get('exampleGroupView').create({ owner: this }) ;
-    if (!ret) throw "Could not create a groupView for value: %@".fmt(groupValue) ;
+    // positive length == add item views.
+    } else if (length > 0) {
+      while(--length >= 0) {
+        var idx = start + length ;
+        var c = content.objectAt(idx) ;
+        this._insertItemViewFor(c, groupBy, idx) ;
+      }  
+    }
+  },
+
+  /** @private
+    Finds or creates a groupView for the named group value and inserts it into
+    the receiver.  This method does not take into account the actual ORDER of
+    the groupViews in the hierarchy.  It assumes that manual layout will 
+    ensure the items appear visually in the proper order anyway.
     
+    @returns {SC.View} the new groupView.
+  */
+  _insertGroupViewFor: function(groupValue, contentIndex) {
+    var ret =  this._groupViewsByValue[groupValue] ; 
+    var firstLayout = false ;
+    
+    // if the group was not found, check the zombie pool.  If found in zombie
+    // pool, restore it to the regular group view hash.
+    if (!ret && this._zombieGroupViews) {
+      ret = this._zombieGroupViews[groupValue] ;
+      if (ret) {
+        delete this._zombieGroupViews[groupValue] ;
+        this._groupViewsByValue[groupValue] = ret ;
+        this._groupViewCounts[SC.guidFor(ret)] = 0 ;
+      }
+    }
+
+    // If groupValue still not found, create one.
+    if (!ret) {
+      ret = this._groupViewPool.pop() || this.get('exampleGroupView').create({ owner: this });
+
+      // set the groupValue on the groupView.  Older groupViews expect us to 
+      // set this directly on the labelView.  Newer groupViews should have a 
+      // groupValue property.
+      if (ret.groupValue !== undefined) {
+        ret.set('groupValue', groupValue) ;
+      } else if (ret.labelView) ret.labelView.set('content', groupValue) ;
+      
+      // save in cache
+      this._groupViewsByValue[groupValue] = ret ;
+      this._groupViewCounts[SC.guidFor(ret)] = 0 ;
+      firstLayout = true; 
+    }
+    
+    // If the group view does not already belong to the receiver, add it.
+    if (!ret) throw "Could not create a groupView for value: %@".fmt(groupValue) ;
+    if (ret.get('parentNode') != this) this.appendChild(ret) ;
+    
+    // Layout the group View
+    this.layoutGroupView(ret, groupValue, contentIndex, firstLayout) ;
+    
+    return ret ;
+  },
+
+  /** @private
+    Called whenever a groupView is no longer being used.
+    
+    Theoretically, this method removes a group view from the receiver and 
+    stores it in the pool for later use.  In actuality, this will just moved 
+    the view to the zombieGroupView pool.  You must call 
+    _flushZombieGroupViews() to actually remove them from the receiver.
+  */
+  _removeGroupView: function(groupView, groupValue) {
+    if (SC.ZOMBIE_GROUPS_ENABLED) {
+      this._zombieGroupViews[groupValue] = groupView ;
+    } else {
+      this._finalRemoveGroupView(groupView) ;
+    }
+    
+    delete this._groupViewsByValue[groupValue] ;
+    delete this._groupViewCounts[SC.guidFor(groupView)] ;
+    return groupView ;
+  },
+  
+  /** @private
+    Flushes any zombie group views, removing them from their parent view and 
+    returning them to the groupView pool for later consumption.
+  */
+  _flushZombieGroupViews: function() {
+    if (!SC.ZOMBIE_GROUPS_ENABLED) return ; // nothing to do
+    
+    for(var key in this._zombieGroupViews) {
+      if (!this._zombieGroupViews.hasOwnProperty(key)) continue ;
+      var groupView = this._zombieGroupViews[key] ;
+      this._finalRemoveGroupView(groupView) ;
+    } 
+    this._zombieGroupViews = {} ; // reset
+  },
+  
+  /** @private
+    Final method to actually remove a groupView from its parent view and
+    return it to the groupView pool.
+  */
+  _finalRemoveGroupView: function(groupView) {
+    groupView.removeFromParent() ;
+
     // set the groupValue on the groupView.  Older groupViews expect us to set 
     // this directly on the labelView.  Newer groupViews should have a groupValue property.
     if (ret.groupValue !== undefined) {
-      ret.set('groupValue', groupValue) ;
-    } else if (ret.labelView) ret.labelView.set('content', groupValue) ;
+      ret.set('groupValue', null) ;
+    } else if (ret.labelView) ret.labelView.set('content', null) ;
     
-    // now add groupView to receiver as a child
-    this.insertBefore(ret, beforeGroup) ;
-    
-    // done!
-    return ret ;
-  },
-  
-  /** @private
-    Removes an unneeded groupView from the receiver and (places it back in the pool. 
-    This will not actually remove any itemViews from the group.  We assume those have
-    been cleaned out already.
-  */
-  _removeGroupView: function(groupView) {
-    
-    var ret = groupView.get('nextSibling') ;
-    groupView.removeFromParent() ;
-
-    // clear the groupValue.  see _insertGroupView() for info on why this is complicated.
-    if (groupView.groupValue !== undefined) {
-      groupView.set('groupValue', null) ;
-    } else if (groupView.labelView) groupView.labelView.set('content', null) ;
-    
-    // add groupView to the pool for later use.
-    groupView.__nextGroupView = this._groupViewPoolRoot ;
-    this._groupViewPoolRoot = groupView ;
-    
-    // return the next sibling
-    return ret ;
+    this._groupViewPool.push(groupView) ;
+    return groupView ;
   },
   
   /** @private
     Removes the rootElement from the DOM temporarily if needed to optimize performance.
   */
   _removeRootElementFromDom: function() {
-    // if (this._cachedRootElementParent === undefined) {
-    //   var parent = this._cachedRootElementParent = this.rootElement.parentNode ;
-    //   this._cachedRootElementNextSibling = this.rootElement.nextSibling ;
-    //   if (parent) parent.removeChild(this.rootElement) ;
-    // }
+    if (!SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER) return ;
+    if (this._cachedRootElementParent === undefined) {
+      var parent = this._cachedRootElementParent = this.rootElement.parentNode ;
+      this._cachedRootElementNextSibling = this.rootElement.nextSibling ;
+      if (parent) parent.removeChild(this.rootElement) ;
+    }
   },
   
   /** @private
     Re-adds root element into DOM if necessary.  Inverts _removeRootElementFromDom().
   */
   _restoreRootElementInDom: function() {
-    // if (this._cachedRootElementParent) {
-    //   this._cachedRootElementParent.insertBefore(this.rootElement, this._cachedRootElementNextSibling);
-    // }
-    // this._cachedRootElementParent = this._cachedRootElementNextSibling = null ;
+    if (!SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER) return ;
+    if (this._cachedRootElementParent) {
+      this._cachedRootElementParent.insertBefore(this.rootElement, this._cachedRootElementNextSibling);
+    }
+    this._cachedRootElementParent = this._cachedRootElementNextSibling = null ;
   },
   
-  _updateItemViewChainWithContentRange: function(range, hasGrouping) {
-    var content = Array.from(this.get('content'));
-    var contentIdx = range.start ;  
-    var maxContentIdx = Math.min(range.start + range.length, content.get('length'));
-    var cur = null ; // the current content object
-    var itemView = this._itemViewRoot ;
-    var didChange = false ;
-  
-    while(itemView || (contentIdx < maxContentIdx)) {
-    
-      // if we should have content, get the content and make sure it matches up
-      // if they do not match or there is no itemView, insert one.
-      if (contentIdx < maxContentIdx) {
-        cur = content.objectAt(contentIdx++) ;
-        if (!itemView || (cur !== itemView.get('content'))) {
-          itemView = this._insertItemViewInChainFor(cur, itemView);
-          didChange = true ;
-          
-          // if grouping is turned off, go ahead and add the itemView to the parent so
-          // we can avoid STEP 3 altogether.
-          if (!hasGrouping) {
-            var nextSibling = (itemView.__beforeItemView) ? itemView.__beforeItemView.get('nextSibling') : this.get('firstChild') ;
-            if ((itemView.get('parentNode') != this) || ((nextSibling != itemView) && (itemView.get('nextSibling') != nextSibling))) {
-              this._removeRootElementFromDom() ;
-              this.insertBefore(itemView, itemView.__nextItemView) ;
-            }
-          }
-        }
-
-        // get the next itemView.
-        itemView = (itemView) ? itemView.__nextItemView : null ;
-        
-      // if we are out of content but there are itemViews left, remove them.
-      } else if (itemView) {
-        this._removeRootElementFromDom() ;
-        itemView = this._removeItemViewFromChain(itemView) ;
-        didChange = true ;
-      } 
-      
-    }
-    
-    if (SC.VALIDATE_COLLECTION_CONSISTANCY) {
-      console.log('validate') ;
-      var contentIdx = range.start ;  
-      var maxContentIdx = Math.min(range.start + range.length, content.get('length'));
-      var itemView = this._itemViewRoot ;
-      while(contentIdx < maxContentIdx) {
-        if (!itemView || (itemView.get('content') != content.objectAt(contentIdx++))) {
-          console.log('collection inconsistancy at %@'.fmt(contentIdx-1)) ;
-          debugger ;
-        }
-        itemView = itemView.__nextItemView ;
-      }
-      
-      if (this._itemViewRoot.__prevItemView != null) {
-        console.log('collection rootItemView inconsistancy') ;
-        debugger ;
-      }
-      
-      if (this._itemViewTail.__nextItemView != null) {
-        console.log('collection tailItemView inconsistancy') ;
-        debugger ;
-      }
-    }
-    
-    return didChange ;
-  },
-  
-  _updateGroupViews: function(groupBy) {
-    var curGroupView = null ;
-    var curGroupValue = null ;
-    var groupValue, groupView ;
-
-    var cur = null ; // the current content object
-    var itemView = this._itemViewRoot ;
-    while(itemView) {
-      
-      // find the group value for this item.
-      cur = itemView.get('content') ;
-      groupValue = (cur && cur.get) ? cur.get(groupBy) : null ; 
-
-      // if the groupValue does not match the current group value, then 
-      // try to get the next group view.  If the next group view does not match
-      // either, then get a new groupView.
-      if (!curGroupView || (groupValue != curGroupValue)) {
-        groupView = (curGroupView) ? curGroupView.get('nextSibling') : this.get('firstChild') ;
-        if (this._groupValueForGroupView(groupView) !== groupValue) {
-          this._removeRootElementFromDom() ;
-          groupView = this._insertGroupViewFor(groupValue, groupView) ;
-        }
-      } else groupView = curGroupView ;
-      
-      // now make sure that the itemView actually belongs to the groupView and comes after
-      // the previous view.  If groupView is changing from last groupView then the itemView 
-      // belongs at the top of the group.
-      //
-      // We look at the prevSibling because it has always been processed.
-      //
-      var container = groupView.itemView || groupView ;
-      var prevSibling = (groupView == curGroupView) ? itemView.__prevItemView : null ;
-      if ((itemView.parentNode !== container) || (itemView.get('previousSibling') !== prevSibling)) {
-        // no match, add itemView to the proper location.
-        var nextSibling = (prevSibling) ? prevSibling.get('nextSibling') : container.get('firstChild');
-        this._removeRootElementFromDom() ;
-        container.insertBefore(itemView, nextSibling) ;  
-      }
-      
-      // save groupView and groupValue, get next itemView
-      curGroupView = groupView ;
-      curGroupValue = curGroupValue ;
-      itemView = itemView.__nextItemView ;
-    }
-    
-    // if there are extra groupViews still in the receiver, then remove them.
-    groupView = (curGroupView) ? curGroupView.get('nextSibling') : this.get('firstChild') ;
-    while(groupView) groupView = this._removeGroupView(groupView) ;
-  },
     
   // ......................................
   // SELECTION
@@ -1152,11 +1280,11 @@ SC.CollectionView = SC.View.extend(
 
       // If the selBottom is after the anchor, then reduce the selection
       if (selBottom > anchor) {
-        selBottom-- ;
+        selBottom = selBottom - numberOfItems ;
         
       // otherwise, select the previous item from the top 
       } else {
-        selTop-- ;
+        selTop = selTop - numberOfItems ;
       }
       
       // Ensure we are not out of bounds
@@ -1165,7 +1293,7 @@ SC.CollectionView = SC.View.extend(
       
     // if not extending, just select the item previous to the selTop
     } else {
-      selTop = this._indexOfSelectionTop() - 1;
+      selTop = this._indexOfSelectionTop() - numberOfItems;
       if (selTop < 0) selTop = 0 ;
       selBottom = selTop ;
       anchor = null ;
@@ -1214,11 +1342,11 @@ SC.CollectionView = SC.View.extend(
 
       // If the selTop is before the anchor, then reduce the selection
       if (selTop < anchor) {
-        selTop++ ;
+        selTop = selTop + numberOfItems ;
         
       // otherwise, select the next item after the top 
       } else {
-        selBottom++ ;
+        selBottom = selBottom + numberOfItems ;
       }
       
       // Ensure we are not out of bounds
@@ -1227,7 +1355,7 @@ SC.CollectionView = SC.View.extend(
       
     // if not extending, just select the item next to the selBottom
     } else {
-      selBottom = this._indexOfSelectionBottom() + 1;
+      selBottom = this._indexOfSelectionBottom() + numberOfItems;
       if (selBottom >= contentLength) selBottom = contentLength-1;
       selTop = selBottom ;
       anchor = null ;
@@ -1264,24 +1392,7 @@ SC.CollectionView = SC.View.extend(
   */
   scrollToItemView: function( view )
   {
-    var visible       = Element.extend(this.get('rootElement'));
-    var visibleTop    = visible.scrollTop;
-    var visibleBottom = visibleTop + visible.getHeight();
-    
-    visible.makePositioned();
-    
-    var item       = Element.extend(view.get('rootElement'));
-    var itemTop    = item.positionedOffset().top;
-    var itemBottom = itemTop + item.getHeight();
-
-    visible.undoPositioned();
-    
-    if (itemTop < visibleTop) {
-      visible.scrollTop = itemTop;
-    }
-    if (itemBottom > visibleBottom) {
-      visible.scrollTop += (itemBottom - visibleBottom);
-    }
+    this.scrolToVisible(view) ;
   },
 
   /** 
@@ -1343,7 +1454,7 @@ SC.CollectionView = SC.View.extend(
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveLeft: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(false, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1) ;
     return true ;
   },
 
@@ -1351,7 +1462,7 @@ SC.CollectionView = SC.View.extend(
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveRight: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(false, 1) ;
     return true ;
   },
 
@@ -1369,7 +1480,7 @@ SC.CollectionView = SC.View.extend(
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveLeftAndModifySelection: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(true, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(true, 1) ;
     return true ;
   },
 
@@ -1377,7 +1488,7 @@ SC.CollectionView = SC.View.extend(
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveRightAndModifySelection: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(true, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(true, 1) ;
     return true ;
   },
 
@@ -1390,7 +1501,8 @@ SC.CollectionView = SC.View.extend(
     if (this.useToggleSelection) return true;
 
     // Make sure that saved mouseDown state is always reset in case we do
-    // not get a paired mouseUp. (Only happens if subclass does not call us like it should)
+    // not get a paired mouseUp. (Only happens if subclass does not call us 
+    // like it should)
     this._mouseDownAt = this._shouldDeselect = 
       this._shouldReselect = this._refreshSelection = false;
 
@@ -1804,14 +1916,14 @@ SC.CollectionView = SC.View.extend(
       // do any data valdidation, just to map the location to an insertion index.
       var ret = this.insertionIndexForLocation(loc) ;
 
-      // now that we have an index, find the nearest index that we can actually
-      // insert at, or do not allow.
+      // now that we have an index, find the nearest index that we can 
+      // actually insert at, or do not allow.
       var objects = (drag.source == this) ? (drag.dataForType('_mouseDownContent') || []) : [];
       var content = this.get('content') || [] ;
 
-      // if the insertion index is in between two items in the drag itself, then this is
-      // not allowed.  Either use the last insertion index or find the first index that is not 
-      // in between selections.
+      // if the insertion index is in between two items in the drag itself, 
+      // then this is not allowed.  Either use the last insertion index or 
+      // find the first index that is not in between selections.
       var isPreviousInDrag = (ret > 0) ? objects.indexOf(content.objectAt(ret-1)) : -1 ;
       var isNextInDrag = (ret < content.get('length')-1) ? objects.indexOf(content.objectAt(ret)) : -1 ;
       if (isPreviousInDrag>=0 && isNextInDrag>=0) {
@@ -1850,7 +1962,7 @@ SC.CollectionView = SC.View.extend(
   
   performDragOperation: function(op, drag) { 
     
-    SC.Benchmark.start('%@ performDragOperation'.fmt(this._guid)) ;
+    SC.Benchmark.start('%@ performDragOperation'.fmt(SC.guidFor(this))) ;
     
     var loc = drag.get('location') ;
     loc = this.convertFrameFromView(loc, null) ;
@@ -1879,7 +1991,7 @@ SC.CollectionView = SC.View.extend(
       content.endPropertyChanges(); // restart notifications
     }
     
-    SC.Benchmark.end('%@ performDragOperation'.fmt(this._guid)) ;
+    SC.Benchmark.end('%@ performDragOperation'.fmt(SC.guidFor(this))) ;
     console.log(SC.Benchmark.report()) ;
     
     return SC.DRAG_MOVE; 
@@ -1897,7 +2009,20 @@ SC.CollectionView = SC.View.extend(
   //
   
   init: function() {
-    this._itemViewsByContent = {} ;
+
+    // Initialize internal hashes and arrays.  Normally the best approach to this 
+    // is to initialize a property only when it is used.  However, these properties
+    // are critical to layout and therefore will always be needed so it is faster
+    // to do it once here.
+    this._itemViewsByContent= {};
+    this._groupViewsByValue= {};
+    this._groupViewCounts= {};
+    this._zombieGroupViews= {};
+    this._itemViewsByGuid = {} ;
+
+    this._itemViewPool= [];
+    this._groupViewPool= [];
+
     arguments.callee.base.apply(this, arguments) ;
     this._dropTargetObserver();
   },
@@ -1983,12 +2108,18 @@ SC.CollectionView = SC.View.extend(
   
   // called on content change *and* content.[] change...
   // update children if this is a new propertyRevision
+  //
+  // UPDATE:
+  // -- recheck all item views, add/remove children as needed
+  // -- update layout on all item views.
+  // -- optional: determine the first item view that does not match.
+  //
   _contentPropertyObserver: function(target, key, value, rev) {
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
       this._updatingContent = true ;
       this._hasChildren = false ;
-      this.updateChildren() ;
+      this.updateChildren(true) ;
       this._updatingContent = false ;
     }
   },

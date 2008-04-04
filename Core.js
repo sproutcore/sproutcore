@@ -204,11 +204,17 @@ Object.extend(SC,{
   },
   
   _nextGUID: 0,
-  getGUID: function( obj )
-  {
+  
+  /**
+    Returns a unique GUID for the object.  If the object does not yet have
+    a guid, one will be assigned to it.  You can call this on any object,
+    SC.Object-based or not, but be aware that it will add a _guid property.
+  */
+  guidFor: function(obj) {
     if (obj == null) return 0 ;
     return obj._guid ? obj._guid : (obj._guid = SC._nextGUID++);
   },
+  
 
   /** Browser and Platform info. */
   Platform: {
@@ -298,6 +304,9 @@ Object.extend(SC,{
   }
   
 });
+
+/** @deprecated  Use guidFor() instead. */
+SC.getGUID = SC.guidFor ;
 
 // Save the Platform.Browser name.
 SC.Platform.Browser = function() {

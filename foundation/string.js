@@ -28,7 +28,7 @@ Object.extend(String.prototype,{
     
     // first, replace any ORDERED replacements.
     var str = this.gsub(/%@([0-9]+)/, function(m) {
-      return args[parseInt(m[1],0)-1] || ''; 
+      return (args[parseInt(m[1],0)-1] || '').toString(); 
     }) ;
 
     // now, replace any remaining %@ items.  Use this indexOf() method b/c
@@ -42,7 +42,7 @@ Object.extend(String.prototype,{
      loc = idx + 2 ; // 2 to skip '%@'.
      
      // add in replacement.
-     ret.push(args.shift()) ;
+     ret.push(args.shift().toString()) ;
     }
     
     // include any remaining bits of the string.

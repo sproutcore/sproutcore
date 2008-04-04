@@ -479,11 +479,6 @@ SC.View = SC.Responder.extend(SC.PathModule,
     return ret ;
   },
 
-  // scroll the main window to the selected element.
-  scrollTo: function() {
-    Element.scrollTo(this.rootElement) ;
-  },
-
   // get the named style. (see also style properties)
   getStyle: function(style) {
     var element = this.rootElement ;
@@ -671,7 +666,7 @@ SC.View = SC.Responder.extend(SC.PathModule,
     
     // first, convert to root level offset.
     var thisOffset = SC.viewportOffset(this.get('offsetParent')) ;
-    var thatOffset = (targetView) ? SC.viewportOffset(targetView.get('offsetParent')) : SC.zeroPoint;
+    var thatOffset = (targetView) ? SC.viewportOffset(targetView.get('offsetParent')) : SC.ZERO_POINT;
     
     // now get adjustment.
     var adjustX = thatOffset.x - thisOffset.x ;
@@ -697,7 +692,7 @@ SC.View = SC.Responder.extend(SC.PathModule,
   convertFrameToView: function(f, sourceView) {
     // first, convert to root level offset.
     var thisOffset = SC.viewportOffset(this.get('offsetParent')) ;
-    var thatOffset = (sourceView) ? SC.viewportOffset(sourceView.get('offsetParent')) : SC.zeroPoint ;
+    var thatOffset = (sourceView) ? SC.viewportOffset(sourceView.get('offsetParent')) : SC.ZERO_POINT ;
     
     // now get adjustment.
     var adjustX = thisOffset.x - thatOffset.x ;
@@ -1156,7 +1151,9 @@ SC.View = SC.Responder.extend(SC.PathModule,
   _onscroll: function() {
     this._scrollFrame = null ;
     this.notifyPropertyChange('scrollFrame') ;
+    SC.Benchmark.start('%@.onscroll'.fmt(this)) ;
     this._invalidateClippingFrame() ;
+    SC.Benchmark.end('%@.onscroll'.fmt(this)) ;
   },
 
   _frameChangeLevel: 0,
@@ -1671,20 +1668,20 @@ SC.View = SC.Responder.extend(SC.PathModule,
         Event.observe(this.rootElement,methodMap[name],method) ;
       }
     }
-  },
+  }//,
   
-  toString: function() {
-    var el = this.rootElement ;
-    var tagName = (!!el.tagName) ? el.tagName.toLowerCase() : 'document' ;
-
-    var className = el.className ;
-    className = (className && className.length>0) ? 'class=%@'.fmt(className) : null;
-
-    var idName = el.id ;
-    idName = (idName && idName.length>0) ? 'id=%@'.fmt(idName) : null;
-
-    return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,idName, className].compact().join(' ')) ;
-  }
+  // toString: function() {
+  //   var el = this.rootElement ;
+  //   var tagName = (!!el.tagName) ? el.tagName.toLowerCase() : 'document' ;
+  // 
+  //   var className = el.className ;
+  //   className = (className && className.length>0) ? 'class=%@'.fmt(className) : null;
+  // 
+  //   var idName = el.id ;
+  //   idName = (idName && idName.length>0) ? 'id=%@'.fmt(idName) : null;
+  // 
+  //   return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,idName, className].compact().join(' ')) ;
+  // }
     
 }) ;
   

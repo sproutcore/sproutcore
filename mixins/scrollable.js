@@ -105,6 +105,32 @@ SC.Scrollable = {
     newSf = this.set('scrollFrame', newSf) ;
     return { x: newSf.x - sf.x, y: newSf.y - sf.y }; 
   },
+
+  /**
+    Scrolls the receiver to the specified x,y coordinate
+  */
+  scrollTo: function(x,y) {
+    this.set('scrollFrame', { x: 0-x, y: 0-y }) ;  
+  },
+  
+  /**
+    Scroll the view to make the passed frame visible.
+    
+    Frame must be relative to the receiver's offsetParent.
+    
+    @param {SC.View} view the view you want to make visible
+  */
+  scrollToVisible: function(view) {
+    // TODO: Not Implemented.
+    
+    // var vframe = this.convertFrameFromView(view.get('frame'), view) ;
+    // var f = this.get('innerFrame') ;
+    // var sf = this.get('scrollFrame') ;
+    // 
+    // var offsetX = vframe.x - f.x - sf.x ;
+    // var offsetY = vframe.y - f.y - sf.y ;
+
+  },
   
   /**
     Scrolls the receiver down one line if allowed.

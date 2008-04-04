@@ -514,7 +514,12 @@ SC.Object.prototype = {
     return ret ;
   },
 
-  toString: function() { return "%@:%@".fmt(this._type, this._guid); },
+  toString: function() {
+    if (!this.__toString) {
+      this.__toString = "%@:%@".fmt(this._type.objectClassName(), this._guid);
+    } 
+    return this.__toString ;
+  },
   
   // ..........................................
   // OUTLETS

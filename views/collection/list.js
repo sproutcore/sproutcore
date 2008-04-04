@@ -45,42 +45,33 @@ SC.ListView = SC.CollectionView.extend(
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   
   contentRangeInFrame: function(frame) {
-    var rowHeight = this.get('rowHeight') || 20 ;
-    var min = Math.floor(SC.minY(frame) / rowHeight) ;
+    var rowHeight = this.get('rowHeight') || 0 ;
+    var min = Math.max(0,Math.floor(SC.minY(frame) / rowHeight)-1) ;
     var max = Math.ceil(SC.maxY(frame) / rowHeight) ;
     var ret = { start: min, length: max - min } ; 
-    //console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
+//    console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
     //if (frame.height < 100) debugger ;
     return ret ;
   },
   
   /** @private */
-  layoutItemViewsFor: function(parentView, startingView) {
+  layoutItemView: function(itemView, contentIndex, firstLayout) {
+    if (!itemView) debugger ;
     SC.Benchmark.start('SC.ListView.layoutItemViewsFor') ;
     
-    var view = startingView || parentView.firstChild;
-    var content = this.get('content') || [] ;
-    var startingIndex = (view) ? content.indexOf(view.get('content')) : 0;
+    var rowHeight = this.get('rowHeight') || 0 ;
+    var parentView = itemView.get('parentView') ;
+    var f = { 
+      x: 0, 
+      y: contentIndex*rowHeight,
+      height: rowHeight, 
+      width: (parentView || this).get('innerFrame').width 
+    } ;
     
-    var rowHeight = this.get('rowHeight') ;
-    if (rowHeight == null) return false ;
-    
-    var y = startingIndex * rowHeight ; 
-    var f = (parentView || this).get('innerFrame') ; 
-    f = { x: 0, height: rowHeight, width: f.width } ;
-    
-    while(view) {
-      f.y = y ;
-      
-      var isEqual = SC.rectsEqual(view.get('frame'), f) ;
-      if (!isEqual) view.set('frame', f) ;
-
-      y += rowHeight; 
-      view = view.nextSibling ;
+    if (firstLayout || !SC.rectsEqual(itemView.get('frame'), f)) {
+      itemView.set('frame', f) ;      
     }
-    
     SC.Benchmark.end('SC.ListView.layoutItemViewsFor') ;
-    return true; 
   },
   
   computeFrame: function() {
@@ -93,6 +84,7 @@ SC.ListView = SC.CollectionView.extend(
 
     f.x = f.y = 0;
     f.height = Math.max(f.height, rows * rowHeight) ;
+//    console.log('computeFrame(%@)'.fmt($H(f).inspect())) ;
     return f ;
   },
   

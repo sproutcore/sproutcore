@@ -17,6 +17,7 @@
 .sc-theme .list-insertion-point {
 	border: 1px #4e4977 solid;
 	position: absolute ;
+	z-index: 1000;
 }
 
 .sc-theme .list-insertion-point .anchor {
@@ -35,6 +36,7 @@
 .sc-theme .grid-insertion-point {
 	border: 1px #4e4977 solid;
 	position: absolute ;
+	z-index: 1000;
 }
 
 .sc-theme .grid-insertion-point .anchor {
