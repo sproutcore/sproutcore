@@ -110,6 +110,7 @@ SC.Scrollable = {
     Scrolls the receiver to the specified x,y coordinate
   */
   scrollTo: function(x,y) {
+    console.log('scrollTo(%@,%@)'.fmt(x,y)) ;
     this.set('scrollFrame', { x: 0-x, y: 0-y }) ;  
   },
   
@@ -122,14 +123,34 @@ SC.Scrollable = {
   */
   scrollToVisible: function(view) {
     // TODO: Not Implemented.
-    
-    // var vframe = this.convertFrameFromView(view.get('frame'), view) ;
-    // var f = this.get('innerFrame') ;
-    // var sf = this.get('scrollFrame') ;
-    // 
-    // var offsetX = vframe.x - f.x - sf.x ;
-    // var offsetY = vframe.y - f.y - sf.y ;
 
+    // get frames and convert them to proper offsets
+    var f = this.get('innerFrame') ;
+    var sf = this.get('scrollFrame') ;
+    
+    // frame of the view, relative to the top of the scroll frame
+    console.log('view: %@'.fmt(view)) ;
+    var vf = this.convertFrameFromView(view.get('frame'), view) ;
+    vf.x -= (f.x + sf.x); vf.y -= (f.y + sf.y);
+    
+    // first visible origin
+    var vo = { 
+      x: 0-sf.x, 
+      y: 0-sf.y, 
+      width: f.width, 
+      height: f.height 
+    };
+
+    // if top edge is not visible, shift origin
+    vo.y += Math.max(0, SC.minY(vo) - SC.minY(vf)) ;
+    vo.x += Math.max(0, SC.minX(vo) - SC.minX(vf)) ;
+
+    // if bottom edge is not visible, shift origin
+    vo.y += Math.max(0, SC.maxY(vf) - SC.maxY(vo)) ;
+    vo.x += Math.max(0, SC.maxX(vf) - SC.maxX(vo)) ;
+
+    // scroll to that origin.
+    this.scrollTo(vo.x, vo.y) ;
   },
   
   /**

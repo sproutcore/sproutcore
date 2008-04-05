@@ -1307,7 +1307,7 @@ SC.CollectionView = SC.View.extend(
 
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToItemRecord(items.first());
+      this.scrollToContent(items.first());
       this.selectItems(items);
     }
     
@@ -1369,7 +1369,7 @@ SC.CollectionView = SC.View.extend(
 
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToItemRecord(items.first());
+      this.scrollToContent(items.first());
       this.selectItems(items);
     }
     
@@ -1381,9 +1381,16 @@ SC.CollectionView = SC.View.extend(
   * @param {SC.Record} record The record to scroll to
   * @returns {void}
   */
-  scrollToItemRecord: function( record )
-  {
-    this.scrollToItemView( this.itemViewForContent(record) );
+  scrollToContent: function(record) {
+    // find the itemView.  if not present, add one.
+    var itemView = this.itemViewForContent(record) ;
+    if (!itemView) {
+      var content = Array.from(this.get('content')) ;
+      var contentIndex = content.indexOf(record) ;
+      var groupBy = this.get('groupBy');
+      itemView = this._insertItemViewFor(itemView, groupBy, contentIndex); 
+    }
+    if (itemView) this.scrollToItemView(itemView);
   },
   /**
   * Scroll the rootElement (if needed) to ensure that the item is visible.
@@ -1392,7 +1399,13 @@ SC.CollectionView = SC.View.extend(
   */
   scrollToItemView: function( view )
   {
-    this.scrolToVisible(view) ;
+    // find first scrollable view.
+    var scrollable = this ;
+    while(scrollable && (scrollable != SC.window) && (!scrollable.get('isScrollable'))) {
+      scrollable = scrollable.get('parentNode') ;
+    }
+    if (!scrollable || (scrollable == SC.window)) return ; // no scrollable!
+    scrollable.scrollToVisible(view) ;
   },
 
   /** 

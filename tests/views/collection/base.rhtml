@@ -17,14 +17,14 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   {
     testCollection.get('records').length.shouldEqual(6);
     testCollectionView.get('rootElement').scrollTop.shouldEqual(0);
-    testCollectionView.scrollToItemRecord( testCollection.get('records').last() );
+    testCollectionView.scrollToContent( testCollection.get('records').last() );
     testCollectionView.get('rootElement').scrollTop.shouldEqual(30);
   },
   "Should not scroll to the selected item if it's already fully visible": function()
   {
     testCollection.get('records').length.shouldEqual(6);
     testCollectionView.get('rootElement').scrollTop.shouldEqual(0);
-    testCollectionView.scrollToItemRecord( testCollection.get('records')[1] );
+    testCollectionView.scrollToContent( testCollection.get('records')[1] );
     testCollectionView.get('rootElement').scrollTop.shouldEqual(0);
   },
   setup: function()
