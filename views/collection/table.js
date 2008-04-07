@@ -1,5 +1,5 @@
 // ==========================================================================
-// SC.ListView
+// SC.TableView
 // ==========================================================================
 
 require('views/collection') ;
@@ -7,27 +7,21 @@ require('views/collection/text_cell');
 
 /** @class
 
-  A list view renders vertical lists of items.  It is a specialized form of
-  collection view that is simpler than the table view, but more refined than
-  a generic collection.
-  
-  You can use a list view just like a collection view, except that often you
-  also should provide a default rowHeight.  Setting this value will allow 
-  the ListView to optimize its rendering.
+  Displays a table view with columns
 
   @extends SC.CollectionView
   @author    Charles Jolley  
   @version 1.0
 */
-SC.ListView = SC.CollectionView.extend(
-/** @scope SC.ListView.prototype */ {
+SC.TableView = SC.CollectionView.extend(
+/** @scope SC.TableView.prototype */ {
   
-  emptyElement: '<div class="list-view"></div>',
+  emptyElement: '<div class="sc-table-view"></div>',
   
   /** 
     The common row height for list view items.
     
-    If you set this property, then the ListView will be able to use this
+    If you set this property, then the TableView will be able to use this
     property to perform absolute layout of its children and to minimize t
     number of actual views it has to create.
     
@@ -57,7 +51,7 @@ SC.ListView = SC.CollectionView.extend(
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
     if (!itemView) debugger ;
-    SC.Benchmark.start('SC.ListView.layoutItemViewsFor') ;
+    SC.Benchmark.start('SC.TableView.layoutItemViewsFor') ;
     
     var rowHeight = this.get('rowHeight') || 0 ;
     var parentView = itemView.get('parentView') ;
@@ -70,9 +64,8 @@ SC.ListView = SC.CollectionView.extend(
     
     if (firstLayout || !SC.rectsEqual(itemView.get('frame'), f)) {
       itemView.set('frame', f) ;      
-      itemView.setStyle({ zIndex: contentIndex.toString() }) ;
     }
-    SC.Benchmark.end('SC.ListView.layoutItemViewsFor') ;
+    SC.Benchmark.end('SC.TableView.layoutItemViewsFor') ;
   },
   
   computeFrame: function() {

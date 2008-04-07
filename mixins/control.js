@@ -4,18 +4,14 @@
 // ========================================================================
 
 /**
-  Apply this mixin to any view class to automatically inherit most of the
-  basic properties you need to support to act as an item view in a collection.
-  
-  In addition to this module, make sure that your view class knows how to
-  render the object set on the 'content' property.
-  
-  This module provides both the properties and reasonable default observers.
-  You can override them in your own class as well.
+  A Control is a view that also implements some basic state functionality.
+  Apply this mixin to any view that you want to have standard control
+  functionality including showing a selected state, enabled state, focus
+  state, etc.
   
   @namespace
 */
-SC.CollectionItem = {
+SC.Control = {
   
   /** Set to true when the item is selected. */
   isSelected: false,
@@ -31,6 +27,11 @@ SC.CollectionItem = {
   /** By default, adds the disabled CSS class if disabled. */
   isEnabledObserver: function() {
     this.setClassName('disabled', !this.get('isEnabled'));
-  }.observes('isEnabled')
+  }.observes('isEnabled'),
+  
+  /** Add a focus CSS class whenever the view has first responder status. */
+  isFocusedObserver: function() {
+    this.setClassName('focus', this.get('isFirstResponder')) ;
+  }.observes('isFirstResponder')
   
 };

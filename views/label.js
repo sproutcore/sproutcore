@@ -38,7 +38,7 @@ SC.LabelView = SC.View.extend({
     arguments.callee.base.call(this) ;
     if (this.get("localize"))
     {
-      var inner = this.get("asHTML");
+      var inner = this.get("innerHTML");
       if (inner !== "") this.set("content", inner);
     }
   },
@@ -64,7 +64,7 @@ SC.LabelView = SC.View.extend({
     if ( this.get('isEditing') ) return;
     
     this.set('isEditing', true);
-    this.set("asHTML", ''); // blank out the label contents
+    this.set("innerHTML", ''); // blank out the label contents
     this.appendChild( SC.inlineTextEditor );
     SC.inlineTextEditor.field.set('value', this.get('content'));
     SC.inlineTextEditor.field.becomeFirstResponder();
@@ -165,10 +165,12 @@ SC.LabelView = SC.View.extend({
     
     // localize
     if (value && this.get('localize')) value = value.loc() ;
-    if (value && this.get('escapeHTML') && value.escapeHTML) value = value.escapeHTML() ;
     
-    // set
-    this.set('asHTML',value || '') ;
+    if (this.get('escapeHTML')) {
+      this.set('innerText', value || '') ;
+    } else {
+      this.set('innerHTML',value || '') ;
+    }
 
   },
   

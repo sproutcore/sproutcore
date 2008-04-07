@@ -183,30 +183,6 @@ SC.CollectionView = SC.View.extend(
   useToggleSelection: false,
 
   /**
-    Delete views when the content object is removed from the content array.
-
-    Whenever you remove a content object from the content array, the collection view
-    will automatically remove the corresponding item view from the display.  If this
-    property is set to true, that view will be subsequently deleted as well.
-  
-    If you set this property to false, then the collection view will store these
-    unused views in a cache and reuse them later should the content object they 
-    represent reappear in the content array.
-  
-    In general, you want to leave this property to true in order to keep your 
-    memory usage under control.  However, if you are rendering a collection of 
-    views that will change often, adding and removing the same content objects,
-    then your collection view will be much faster if you set this to false.
-  
-    Most of the time, you will set this to false if you are rendering a collection
-    of objects that may be filtered based on search criteria and you want to update
-    the display very quickly.
-  
-    @type Boolean
-  */
-  flushUnusedViews: true,
-
-  /**
     Trigger the action method on a single click.
   
     Normally, clicking on an item view in a collection will select the content 
@@ -411,7 +387,7 @@ SC.CollectionView = SC.View.extend(
           var curGroupValue = (cur) ? cur.get(groupBy) : null ;
           if (curGroupValue != groupValue) {
             groupValue = curGroupValue ;
-            this._itemViews.push(this.groupViewForGroupValue(groupValue)) ;
+            this._groupViews.push(this.groupViewForGroupValue(groupValue)) ;
           }
         }
         
@@ -1010,7 +986,7 @@ SC.CollectionView = SC.View.extend(
 
     // Determine proper parent view and insert itemView if needed.
     // Also update count of itemViews.  
-    var parentView = (groupBy) ? this._insertGroupViewFor(ret.get(groupBy), contentIndex) : this ;
+    var parentView = (groupBy && content) ? this._insertGroupViewFor(content.get(groupBy), contentIndex) : this ;
     if (ret.get('parentNode') != parentView) {
       parentView.appendChild(ret) ;
       if (groupBy) this._groupViewCounts[SC.guidFor(parentView)]++ ;
@@ -1041,7 +1017,10 @@ SC.CollectionView = SC.View.extend(
     var groupView = null ; var groupValue ;
     if (groupBy && (groupView = itemView.get('parentNode'))) {
       if (--this._groupViewCounts[SC.guidFor(groupView)] > 0) groupView = null ; 
-      if (groupView) groupValue = itemView.get(groupBy) ;
+      if (groupView) {
+        var content = itemView.get('content') ;
+        groupValue = (content) ? content.get(groupBy) : null ;
+      }
     }
     
     // Remove itemView from parent and remove from content hash.
@@ -1102,6 +1081,8 @@ SC.CollectionView = SC.View.extend(
   */
   _insertGroupViewFor: function(groupValue, contentIndex) {
     var ret =  this._groupViewsByValue[groupValue] ; 
+    if (ret) return ret ; // nothing to do
+    
     var firstLayout = false ;
     
     // if the group was not found, check the zombie pool.  If found in zombie

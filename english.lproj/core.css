@@ -1,0 +1,56 @@
+/* @override http://localhost:4020/static/sproutcore/en/_cache/core-1207528979.css */
+
+/* =============================================
+   Core Styles
+   
+   These styles are required by various views.  You should keep these in your views even if you write your own theme.
+*/
+
+/* @group SC.Drag */
+
+.sc-theme .sc-ghost-view {
+  	position: absolute;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	opacity: 0.45;
+	-moz-opacity: .45 ;
+	z-index: 1000000;
+	cursor: default ;
+}
+
+/* @end */
+
+/* @group SC.ScrollView */
+
+.sc-scroll-view {
+	overflow:  hidden;
+}
+
+.sc-scroll-view.sc-scroll-vertical {
+	overflow-y: auto ;
+}
+
+.sc-scroll-view.sc-scroll-horizontal {
+	overflow-x: auto ;
+}
+
+/* Always absolutely position children of a scroll view since the scroll view will lay them out. */
+.sc-scroll-view > * {
+	position: absolute ;
+}
+
+/* @end */
+
+
+/* @group SC.CollectionView */
+
+.sc-collection-view .collection-item {
+	cursor: pointer ;
+	position: absolute ;
+}
+
+/* @end */
+
+
+

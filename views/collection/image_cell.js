@@ -2,8 +2,9 @@
 // SC.TextCellView
 // ==========================================================================
 
-require('views/collection/collection_item') ;
+require('mixins/control') ;
 require('views/image') ;
+
 /** @class
 
   An image cell displays a single image inside of a collection view.  Unlike
@@ -14,7 +15,7 @@ require('views/image') ;
   @author    AuthorName  
   @version 0.1
 */
-SC.ImageCellView = SC.View.extend(SC.CollectionItem,
+SC.ImageCellView = SC.View.extend(SC.Control,
 /** @scope SC.ImageCellView.prototype */ {
 
   emptyElement: '<div class="image-cell collection-item"><img src="%@"  style="position:relative;" /></div>'.fmt(static_url('blank')),

@@ -2,7 +2,7 @@
 // SC.TextCellView
 // ==========================================================================
 
-require('views/collection/collection_item') ;
+require('mixins/control') ;
 
 /** @class
 
@@ -15,7 +15,7 @@ require('views/collection/collection_item') ;
   @author    AuthorName  
   @version 0.1
 */
-SC.TextCellView = SC.View.extend(SC.CollectionItem,
+SC.TextCellView = SC.View.extend(SC.Control,
 /** @scope SC.TextCellView.prototype */ {
 
   emptyElement: '<div class="text-cell collection-item"></div>',
@@ -111,9 +111,10 @@ SC.TextCellView = SC.View.extend(SC.CollectionItem,
     if (value && this._getDefault('localize')) value = value.loc() ;
     
     // 4. Escape HTML
-    if (value && this._getDefault('escapeHtml')) value = value.escapeHTML() ;
-    
-    this.set('asHTML', value || '') ;
+    if (this._getDefault('escapeHtml')) {
+      this.set('innerText', value || '') ;
+    } else this.set('innerHTML', value || '') ;
+
   },
   
   _boundValueDidChange: function() { 

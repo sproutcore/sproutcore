@@ -62,10 +62,11 @@ SC.Scrollable = {
   }.property('innerFrame'),
   
   /**
-    Returns true if the receiver has enough vertical content to require scrolling.
+    Returns true if the receiver has enough vertical content to require 
+    scrolling.
     
-    If you do not want to allow vertical scrolling, override this to be false and
-    set the appropriate CSS.
+    If you do not want to allow vertical scrolling, override this to be false 
+    and set the appropriate CSS.
     
   */
   hasVerticalScroller: function() {
@@ -73,10 +74,11 @@ SC.Scrollable = {
   }.property('scrollFrame'),
   
   /**
-    Returns true if the receiver has enough horizontal content to require scrolling.
+    Returns true if the receiver has enough horizontal content to require 
+    scrolling.
     
-    If you do not want to allow horizontal scrolling, override this to be false and
-    set the appropriate CSS.
+    If you do not want to allow horizontal scrolling, override this to be 
+    false and set the appropriate CSS.
     
   */
   hasHorizontalScroller: function() {
@@ -84,8 +86,8 @@ SC.Scrollable = {
   }.property('scrollFrame'),
 
   /**
-    Scrolls the receiver in the horizontal and vertical directions by the amount 
-    specified, if allowed.
+    Scrolls the receiver in the horizontal and vertical directions by the 
+    amount specified, if allowed.
     
     @param {Point} amount the amount to scroll.  Must include x, y or both
     @returns {Point} the actual amount scrolled.

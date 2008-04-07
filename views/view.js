@@ -11,8 +11,6 @@ require('foundation/path_module');
 
 SC.BENCHMARK_OUTLETS = NO ;
 SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
-SC.FIXED = 'fixed';
-SC.FLEXIBLE = 'flexible';
 
 /** 
   
@@ -514,10 +512,10 @@ SC.View = SC.Responder.extend(SC.PathModule,
 
   // use this method to update the HTML of an element.  This takes care of 
   // nasties like processing scripts and inserting HTML into a table.  You can
-  // also use asHTML, which builds on this method.
+  // also use innerHTML, which builds on this method.
   update: function(html) {
     Element.update((this.containerElement || this.rootElement),html) ;
-    this.propertyDidChange('asHTML') ;
+    this.propertyDidChange('innerHTML') ;
   },
 
   // this works like the element getAttribute() except it is standardized 
@@ -1380,11 +1378,21 @@ SC.View = SC.Responder.extend(SC.PathModule,
     }
     return animator ;    
   },
-  
-  // returns the contents of the element as HTML.  Accounts for browser
-  // bugs.
-  asHTML: function(key, value) {
+
+  /**
+    The contents of the view as HTML. You can use this property to both 
+    retrieve the content and to change it.  Use this property instead of 
+    manually changing the content of your view as this property works around
+    certain cross-browser bugs.
+    
+    @field
+  */
+  innerHTML: function(key, value) {
     if (value !== undefined) {
+      
+      // Clear the text node.
+      this._textNode = null ;
+      
       // Safari2 has a bad habit of sometimes not actually changing its 
       // innerHTML. This will make sure the innerHTML get's changed properly.
       if (SC.isSafari() && !SC.isSafari3()) {
@@ -1398,15 +1406,30 @@ SC.View = SC.Responder.extend(SC.PathModule,
     } else value = (this.containerElement || this.rootElement).innerHTML ;
     return value ;
   }.property(),
+
+  /**
+    The contents of the view as plain text.  You can use this property to
+    both retrieve the content and to change it.  Use this property instead of
+    the innerHTML property when you want to set plain text only as this 
+    property is much faster.
   
-  // returns the contents of the element as plain text.  Accounts for browser
-  // bugs.
-  asText: function(key, value) {
+    @field
+  */
+  innerText: function(key, value) {
     if (value !== undefined) {
       if (value == null) value = '' ;
-      this.asHTML(key,value.toString().escapeHTML()) ;
+
+      // add a textNode if necessary
+      if (this._textNode == null) {
+        this._textNode = document.createTextNode(value) ;
+        var el = this.rootElement || this.containerElement ;
+        while(el.firstChild) el.removeChild(el.firstChild) ;
+        el.appendChild(this._textNode) ;
+      } else this._textNode.data = value ;
     }
-    return this.asHTML().unescapeHTML() ;
+    
+    return (this._textNode) ? this._textNode.data : this.innerHTML().unescapeHTML() ;
+    
   }.property(),
 
   // ..........................................
