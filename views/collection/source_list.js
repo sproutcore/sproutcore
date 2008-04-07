@@ -42,7 +42,7 @@ SC.SourceListView = SC.CollectionView.extend(
   */
   exampleGroupView: SC.View.extend({
     
-    emptyElement: '<div class="sc-source-list-group"><div class="sc-collection-item sc-source-list-label"></div><div class="sc-source-list-container"></div>',
+    emptyElement: '<div class="sc-source-list-group"><div class="sc-collection-item sc-source-list-label"></div></div>',
     
     groupValue: null,
     
@@ -51,8 +51,7 @@ SC.SourceListView = SC.CollectionView.extend(
       this.outlet('labelView').set('content', v.capitalize()) ;  
     }.observes('groupValue'),
     
-    labelView: SC.LabelView.outletFor('.sc-source-list-label:1:1'),
-    containerRoot: '.sc-source-list-container?'
+    labelView: SC.LabelView.outletFor('.sc-source-list-label:1:1')
     
   }),
   

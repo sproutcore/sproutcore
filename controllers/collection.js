@@ -3,6 +3,7 @@
 // copyright 2006-2007 Sprout Systems, Inc.
 // ========================================================================
 
+require('mixins/selection_management') ;
 require('controllers/object') ;
 
 /** @class
@@ -15,7 +16,7 @@ require('controllers/object') ;
 
   @extends SC.ObjectController
 */
-SC.CollectionController = SC.ObjectController.extend(
+SC.CollectionController = SC.ObjectController.extend(SC.SelectionManagement,
   /** @scope SC.CollectionController.prototype */
   {
 
@@ -30,85 +31,7 @@ SC.CollectionController = SC.ObjectController.extend(
   */
   arrangedObjects: [],
   
-  /**  
-    @property {Array} selection 
-    This is the current selection.  You can make this selection and another
-    controller's selection work in concert by binding them together. You
-    generally have a master selection that relays changes TO all the others.
-  */
-  selection: function(key,value)
-  {
-    if (value !== undefined)
-    {
-      // selection must be an array... force if needed....
-      value = (value) ? ((value instanceof Array) ? value : [value]) : [];
-      
-      var allowsSelection         = this.get('allowsSelection');
-      var allowsEmptySelection    = this.get('allowsEmptySelection');
-      var allowsMultipleSelection = this.get('allowsMultipleSelection');
-      
-      // are we even allowing selection at all?
-      // if not, then bail out.
-      if ( !allowsSelection ) return this._selection;
-      
-      // ok, new decide if the *type* of seleciton is allowed...
-      switch ( value.length )
-      {
-        case 0:
-          // check to see if we're attemting to set an empty array
-          // if that's not allowed, set to the first available item in arrangedObjects
-          this._selection = allowsEmptySelection ? value : (this.get('arrangedObjects') || []).first();
-          break;
-        case 1:
-          // check to see id we've just taken focus away from a new record
-          // if so, queue up the callback to be triggered...
-          if ( this._editingNewRecord && (this._editingNewRecord != value[0]) )
-          {
-            setTimeout(this._newRecordDidLoseFocus.bind(this,this._editingNewRecord),1);
-            this._editingNewRecord = null;
-          }
-          this._selection = value;
-          break;
-        default:
-          // fall through for >= 2 items...
-          // only allow if configured for multi-select
-          this._selection = allowsMultipleSelection ? value : this._selection;
-          break;
-      }
-      
-      if ( this._selection && (this._selection.length > 1) )
-      {
-        var collection = this.get('content');
-        var order = collection ? collection.get('orderBy') : null;
-        if ( !order ) order = ['guid'];
-        this._selection = this._selection.sort(function(a,b) { return a.compareTo(b,order); });
-      }
-    }
-    
-    return this._selection;
-  }.property(),
-  
-  /**
-    If true, selection is allowed.
 
-    @type bool
-  */
-  allowsSelection: true,
-  
-  /**
-    If true, multiple selection is allowed.
-  
-    @type bool
-  */
-  allowsMultipleSelection: true,
-  
-  /**
-    If true, allow empty selection
-  
-    @type bool
-  */
-  allowsEmptySelection: true,
-  
   /**
     If true, new, add, remove will work.
   
@@ -273,33 +196,10 @@ SC.CollectionController = SC.ObjectController.extend(
     value = Array.asArray(target.get(key)) ;
     
     this.set('arrangedObjects',value.slice()) ;
+    
     // update selection.
-    var objects = this.get('arrangedObjects') || [] ;
-    if (!(objects instanceof Array)) objects = [objects] ;
-    
-    var currentSelection = this.get('selection') || [] ;
-    var sel = [] ;
+    this.updateSelectionAfterContentChange() ;
 
-    // the new selection is the current selection that exists in 
-    // arrangedObjects.
-    currentSelection.each(function(obj) {
-      if (objects.include(obj)) sel.push(obj) ;
-    }) ;
-    
-    // make new selection match current selection settings.
-    if (!this.allowsSelection) {
-      sel = [] ;
-    }
-    
-    if ((sel.length>1) && !this.allowsMultipleSelection) {
-      sel = [sel[0]] ;
-    }
-    
-    if ((sel.length == 0) && !this.allowsEmptySelection) {
-      if (objects.length > 0) sel = [objects[0]] ;
-    }
-    
-    this.set('selection',sel) ;
   }.observes('records') 
   
 }) ;

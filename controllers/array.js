@@ -5,6 +5,7 @@
 
 require('controllers/controller') ;
 require('mixins/array') ;
+require('mixins/selection_management') ;
 require('foundation/binding') ;
 
 /** @class
@@ -18,7 +19,7 @@ until you call commitChanges().
 @extends SC.Array
 
 */
-SC.ArrayController = SC.Controller.extend(SC.Array, 
+SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionManagement,
 /** @scope SC.ArrayController.prototype */
 {
   /**
@@ -54,6 +55,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
   _contentObserver: function() {
     this.contentCloneReset();
     this.arrayContentDidChange() ;
+    this.updateSelectionAfterContentChange();
   }.observes('content'),
 
   /**
@@ -121,6 +123,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array,
     
     this.editorDidChange() ;
     this.arrayContentDidChange();
+    this.updateSelectionAfterContentChange();
     
     return this;
   },
