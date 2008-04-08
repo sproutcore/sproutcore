@@ -42,7 +42,9 @@ Object.extend(String.prototype,{
      loc = idx + 2 ; // 2 to skip '%@'.
      
      // add in replacement.
-     ret.push(args.shift().toString()) ;
+     var value = args.shift() ;
+     if (value && value.toString) value = value.toString() ;
+     ret.push(value) ;
     }
     
     // include any remaining bits of the string.

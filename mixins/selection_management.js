@@ -41,6 +41,7 @@ SC.SelectionManagement = {
     var max = currentSelection.get('length') ;
     if (this.get('allowsSelection')) {
       for(var idx=0;idx<max;idx++) {
+        var obj = currentSelection.objectAt(idx) ;
         if (objects.indexOf(obj) >= 0) sel.push(obj) ;
       }
     }
