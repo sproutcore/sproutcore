@@ -42,7 +42,7 @@ SC.CollectionViewTest = {
     props.delegate = this.controller ;
     
     if (!props.exampleView) props.exampleView = SC.TextCellView ;
-    if (!props.displayProperty) props.displayProperty = 'name' ;
+    if (!props.contentValueProperty) props.contentValueProperty = 'name' ;
     
     // create the view with the props
     this.view = SC.CollectionView.create(props);

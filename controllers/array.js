@@ -5,7 +5,7 @@
 
 require('controllers/controller') ;
 require('mixins/array') ;
-require('mixins/selection_management') ;
+require('mixins/selection_support') ;
 require('foundation/binding') ;
 
 /** @class
@@ -19,7 +19,7 @@ until you call commitChanges().
 @extends SC.Array
 
 */
-SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionManagement,
+SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 /** @scope SC.ArrayController.prototype */
 {
   /**

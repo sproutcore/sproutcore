@@ -331,7 +331,7 @@ SC.CollectionView = SC.View.extend(
     Most built-in item views will respect this property.  You can also use it when writing 
     you own item views.
   */
-  displayProperty: null,
+  contentValueProperty: null,
 
   /**
     Enables keyboard-based navigate if set to true.
@@ -974,7 +974,9 @@ SC.CollectionView = SC.View.extend(
     // if no record was found, pull an item view from the pool or create one.
     // set the content.
     if (!ret) {
-      ret = this._itemViewPool.pop() || this.get('exampleView').create({ owner: this }) ;
+      ret = this._itemViewPool.pop() || this.get('exampleView').create({ 
+        owner: this, collectionDelegate: this 
+      }) ;
       
       // set content and add to content hash
       ret.set('content', content) ;
@@ -1098,7 +1100,9 @@ SC.CollectionView = SC.View.extend(
 
     // If groupValue still not found, create one.
     if (!ret) {
-      ret = this._groupViewPool.pop() || this.get('exampleGroupView').create({ owner: this });
+      ret = this._groupViewPool.pop() || this.get('exampleGroupView').create({
+         owner: this, collectionDelegate: this 
+      });
 
       // set the groupValue on the groupView.  Older groupViews expect us to 
       // set this directly on the labelView.  Newer groupViews should have a 

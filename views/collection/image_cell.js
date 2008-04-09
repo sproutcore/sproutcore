@@ -21,9 +21,9 @@ SC.ImageCellView = SC.View.extend(SC.Control,
   emptyElement: '<div class="image-cell collection-item"><img src="%@"  style="position:relative;" /></div>'.fmt(static_url('blank')),
   
   /** 
-    The content object this image item view will display. 
+    The image URL you wish to display.
   */
-  content: null,
+  value: null,
 
   /** 
     The owner view of this cell.  The ImageCell relies on this
@@ -41,7 +41,7 @@ SC.ImageCellView = SC.View.extend(SC.Control,
   */
   formatter: null,
   
-  displayProperty: null,
+  contentValueProperty: null,
   
   /**
     This is the required margin you want to appear around the image.  Expressed in px
@@ -93,46 +93,23 @@ SC.ImageCellView = SC.View.extend(SC.Control,
     }  
   },
   
-  // invoked whenever the content object changes.
-  _contentObserver: function() {
-    var content = this.get('content') ;
-    if (this._content == content) return ;
-    var f = this._boundValueDidChange() ;
-
-    // stop observing the old display property, if there is one.
-    if (this._content && this._displayProperty) {
-      this._content.removeObserver(this._displayProperty, f) ;
-    }
-    
-    // start observing the new display property, if there is one
-    this._displayProperty = this._getDefault('displayProperty') ;
-    this._content = content ;
-    if (this._content && this._displayProperty) {
-      this._content.addObserver(this._displayProperty, f) ;
-    }
-    
-    // notify value did change
-    this._valueDidChange() ;
-  }.observes('content'),
-  
   /** 
     @private
     
     Invoked whenever the monitored value on the content object 
     changes.
     
-    The value processed is either the displayProperty, if set, or 
+    The value processed is either the contentValueProperty, if set, or 
     it is the content object itself.
   */
   _valueDidChange: function() {
-    var content = this.get('content') ;
-    var value = (content && this._displayProperty) ? content.get(this._displayProperty) : content;
+    var value = this.get('value') ;
     var owner = this.get('owner') ;
     
     // prepare the value...
     
     // 1. apply the formatter
-    var formatter = this._getDefault('formatter') ;
+    var formatter = this.getDelegateProperty(this.collectionDelegate, 'formatter') ;
     if (formatter) {
       var formattedValue = ($type(formatter) == T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;
@@ -143,15 +120,6 @@ SC.ImageCellView = SC.View.extend(SC.Control,
 
     // 3. Apply URL to image view.
     this.outlet('imageView').set('content', value) ;
-  },
-  
-  _boundValueDidChange: function() { 
-    return this._boundValueDidChange = this._boundValueDidChange  || this._valueDidChange.bind(this); 
-  },
-  
-  // Retrieves the default value from the owner or locally.
-  _getDefault: function(keyName) {
-    var ret = (this.owner) ? this.owner.get(keyName) : null ;
-    return (ret != null) ? ret : this.get(keyName) ;
-  }  
+  }.observes('value')
+ 
 }) ;

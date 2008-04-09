@@ -3,7 +3,7 @@
 // copyright 2006-2007 Sprout Systems, Inc.
 // ========================================================================
 
-require('mixins/selection_management') ;
+require('mixins/selection_support') ;
 require('controllers/object') ;
 
 /** @class
@@ -16,7 +16,7 @@ require('controllers/object') ;
 
   @extends SC.ObjectController
 */
-SC.CollectionController = SC.ObjectController.extend(SC.SelectionManagement,
+SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
   /** @scope SC.CollectionController.prototype */
   {
 

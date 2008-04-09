@@ -21,20 +21,15 @@ SC.SourceListView = SC.CollectionView.extend(
   /** 
     The common row height for list view items.
     
-    If you set this property, then the SourceListView will be able to use this
-    property to perform absolute layout of its children and to minimize t
-    number of actual views it has to create.
-    
     The value should be an integer expressed in pixels.
   */
   rowHeight: 32,
   
   /**
-    The default example item view will render text-based items.
-    
-    You can override this as you wish.
+    Source list view items are usually list item views.  You can override 
+    this if you wish.
   */
-  exampleView: SC.TextCellView,
+  exampleView: SC.ListItemView,
   
   /**
     The standard group view provided by source list view generally 
@@ -98,7 +93,7 @@ SC.SourceListView = SC.CollectionView.extend(
   layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {
     SC.Benchmark.start('SC.SourceListView.layoutGroupView') ;
     
-    console.log('layoutGouprView', groupValue) ;
+    console.log('layoutGroupView', groupValue) ;
     
     // find the range this group will belong to
     var range = this.groupRangeForContentIndex(contentIndexHint) ;

@@ -25,7 +25,7 @@
   already applied to the CollectionController and ArrayController.
 
 */
-SC.SelectionManagement = {
+SC.SelectionSupport = {
   
   /** 
     Call this method whenever  your source content changes to ensure the 

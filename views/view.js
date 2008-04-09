@@ -9,6 +9,8 @@ require('foundation/node_descriptor') ;
 require('foundation/binding');
 require('foundation/path_module');
 
+require('mixins/delegate_support') ;
+
 SC.BENCHMARK_OUTLETS = NO ;
 SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
 
@@ -25,11 +27,14 @@ SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
   
   
   @extends SC.Responder
+  @extends SC.PathModule
+  @extends SC.DelegateSupport
+  
   @author Charles Jolley
   @version 1.0
   @class
 */
-SC.View = SC.Responder.extend(SC.PathModule, 
+SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
   // ..........................................
@@ -1431,6 +1436,7 @@ SC.View = SC.Responder.extend(SC.PathModule,
     return (this._textNode) ? this._textNode.data : this.innerHTML().unescapeHTML() ;
     
   }.property(),
+  
 
   // ..........................................
   // SUPPORT METHODS
