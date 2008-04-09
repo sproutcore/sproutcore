@@ -2,7 +2,7 @@
 // SC.ListItemView
 // ==========================================================================
 
-require('core');
+require('Core') ;
 require('views/view') ;
 require('mixins/control');
 
