@@ -358,6 +358,8 @@ SC.CollectionView = SC.View.extend(
   */
   itemViews: function() {
     if (!this._itemViews) {
+      
+
       var range = this.get('nowShowingRange') ;
       var content = this.get('content') || [] ;
       this._itemViews = [] ;
@@ -603,7 +605,7 @@ SC.CollectionView = SC.View.extend(
     var f ;
     if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
       this.set('frame', f) ;
-    }
+    } 
 
     // Save the current clipping frame.  If the frame methods are called again
     // later but the frame has not actually changed, we don't want to run
@@ -613,7 +615,14 @@ SC.CollectionView = SC.View.extend(
     // STEP 2: Calculate the new range of content to display in 
     // the clipping frame.  Determine if we need to do a full update or
     // not.
+   
     var range = this.contentRangeInFrame(clippingFrame) ;
+    var content = this.get('content') || [];
+     
+    //make sure the range isn't greater than the content length 
+    //this will prevent trying to render items that aren't really there.
+    
+    if(range.length > content.get("length")) range.length = content.get("length"); 
     var nowShowingRange = this.get('nowShowingRange') ;
     fullUpdate = fullUpdate || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
     this.set('nowShowingRange', range) ;
@@ -626,7 +635,7 @@ SC.CollectionView = SC.View.extend(
     // from scratch.  This is necessary of the content of the visible range
     // might have changed.
     if (fullUpdate) {
-      var content = this.get('content') || [];
+     
       var itemViewsByContent = {} ; // this will replace the current hash.
       
       // iterate through all of the views and insert them.  If the view 
@@ -634,12 +643,16 @@ SC.CollectionView = SC.View.extend(
       var idx = SC.maxRange(range) ;
       while(--idx >= range.start) {
         var c = content.objectAt(idx) ;
-        var key = SC.guidFor(c) ;
-        var itemView = this._insertItemViewFor(c, groupBy, idx) ;
-        
-        // add item view to new hash and remove from old hash.
-        itemViewsByContent[key] = itemView; 
-        delete this._itemViewsByContent[key];
+        //make sure there's actually content at the object, to be safe 
+        if(c != null && c != "" && c != [])
+        {
+          var key = SC.guidFor(c) ;
+          var itemView = this._insertItemViewFor(c, groupBy, idx) ;
+          // add item view to new hash and remove from old hash.
+          itemViewsByContent[key] = itemView;
+         
+          delete this._itemViewsByContent[key];
+         }
       }
       
       // Now iterate through the old hash.  Any left over item views should
