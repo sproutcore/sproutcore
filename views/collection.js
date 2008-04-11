@@ -617,12 +617,12 @@ SC.CollectionView = SC.View.extend(
     // not.
    
     var range = this.contentRangeInFrame(clippingFrame) ;
-    var content = this.get('content') || [];
+    var content = Array.from(this.get('content'));
      
     //make sure the range isn't greater than the content length 
     //this will prevent trying to render items that aren't really there.
-    
-    if(range.length > content.get("length")) range.length = content.get("length"); 
+    range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
+
     var nowShowingRange = this.get('nowShowingRange') ;
     fullUpdate = fullUpdate || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
     this.set('nowShowingRange', range) ;
@@ -643,16 +643,13 @@ SC.CollectionView = SC.View.extend(
       var idx = SC.maxRange(range) ;
       while(--idx >= range.start) {
         var c = content.objectAt(idx) ;
-        //make sure there's actually content at the object, to be safe 
-        if(c != null && c != "" && c != [])
-        {
-          var key = SC.guidFor(c) ;
-          var itemView = this._insertItemViewFor(c, groupBy, idx) ;
-          // add item view to new hash and remove from old hash.
-          itemViewsByContent[key] = itemView;
-         
-          delete this._itemViewsByContent[key];
-         }
+        var key = SC.guidFor(c) ;
+        var itemView = this._insertItemViewFor(c, groupBy, idx) ;
+
+        // add item view to new hash and remove from old hash.
+        itemViewsByContent[key] = itemView;
+       
+        delete this._itemViewsByContent[key];
       }
       
       // Now iterate through the old hash.  Any left over item views should
