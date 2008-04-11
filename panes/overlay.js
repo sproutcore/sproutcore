@@ -190,7 +190,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
         content.resizeWithOldParentSize(this.get('size')) ;
         
         // compute padding we need to add.
-        var padding = this.get('size').width - this.get('innerSize').width;
+        var padding = this.get('size').width - this.get('innerFrame').width;
         this.set('size', { width: (content.get('size').width + padding) });
         this.owner.positionPane() ;
         this.owner.setStyle({ visibility: 'visible' }) ;
