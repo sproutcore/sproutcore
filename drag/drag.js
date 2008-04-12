@@ -221,6 +221,9 @@ SC.Drag = SC.Object.extend(
   */
   data: null,
 
+  // required by autoscroll
+  _dragInProgress: YES,
+  
   // this will actually start the drag process.
   startDrag: function() {
     
@@ -377,6 +380,8 @@ SC.Drag = SC.Object.extend(
       this.source.dragDidEnd(this, loc, op) ;
     }
     
+    this._dragInProgress = NO ; // required by autoscroll.
+    
   },
   
   // ..........................................
@@ -469,7 +474,7 @@ SC.Drag = SC.Object.extend(
       if(!t.get('isVisibleInWindow')) continue ;
       
       // get frame, converted to view.
-      var f = t.convertFrameToView(t.get('frame'), null) ;
+      var f = t.convertFrameToView(t.get('clippingFrame'), null) ;
       
       // check to see if loc is inside.  If so, then make this the drop
       // target unless there is a drop target and the current one 
@@ -499,7 +504,11 @@ SC.Drag = SC.Object.extend(
   // Returns true if a scroll was performed
   _autoscroll: function(evt) {
   
-    // STEP 1: Find the first view that we can actually scroll.  This view must be:
+    // If drag has ended, exit
+    if (!this._dragInProgress) return ;
+    
+    // STEP 1: Find the first view that we can actually scroll.  This view 
+    // must be:
     // - scrollable
     // - the mouse pointer must be within a scrolling hot zone
     // - there must be room left to scroll in that direction. 

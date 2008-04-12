@@ -92,7 +92,7 @@ Test.context("CASE 1: No scrolling, no incremental rendering, no custom layout",
   setup: function() {
     SC.CollectionViewTest.setup(this, {
       exampleView: SC.TextCellView.extend({
-        emptyElement: '<div class="text-cell collection-item" style="position: relative;"></div>'
+        emptyElement: '<div class="text-cell sc-collection-item" style="position: relative;"></div>'
       })
     }) ;
     
@@ -151,7 +151,7 @@ Test.context("CASE 3: Autoscrolling, no incremental rendering, no custom layout"
   setup: function() {
     SC.CollectionViewTest.setup(this, {
       exampleView: SC.TextCellView.extend({
-        emptyElement: '<div class="text-cell collection-item" style="position: relative;"></div>'
+        emptyElement: '<div class="text-cell sc-collection-item" style="position: relative;"></div>'
       }),
       
       init: function() {

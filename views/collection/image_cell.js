@@ -18,7 +18,7 @@ require('views/image') ;
 SC.ImageCellView = SC.View.extend(SC.Control,
 /** @scope SC.ImageCellView.prototype */ {
 
-  emptyElement: '<div class="image-cell collection-item"><img src="%@"  style="position:relative;" /></div>'.fmt(static_url('blank')),
+  emptyElement: '<div class="image-cell sc-collection-item"><img src="%@"  style="position:relative;" /></div>'.fmt(static_url('blank')),
   
   /** 
     The image URL you wish to display.
@@ -109,7 +109,7 @@ SC.ImageCellView = SC.View.extend(SC.Control,
     // prepare the value...
     
     // 1. apply the formatter
-    var formatter = this.getDelegateProperty(this.collectionDelegate, 'formatter') ;
+    var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
       var formattedValue = ($type(formatter) == T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;

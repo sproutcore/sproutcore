@@ -173,6 +173,10 @@ SC.window = SC.PaneView.extend({
   
   _onmousedown: function(evt)
   {
+    // make sure the view gets focus no matter what.  FF is inconsistant 
+    // about this.
+    this._onfocus(); 
+    
     // first, save the click count.  Click count resets if your down is
     // more than 125msec after you last click up.
     this._clickCount = this._clickCount + 1 ;
@@ -255,6 +259,11 @@ SC.window = SC.PaneView.extend({
   // trigger calls to mouseDragged.
   //
   _onmousemove: function(evt) {
+
+    // make sure the view gets focus no matter what.  FF is inconsistant 
+    // about this.
+    this._onfocus(); 
+
     var lh = this._lastHovered || [] ;
     var nh = [] ;
     var view = this.firstViewForEvent(evt) ;
@@ -301,14 +310,22 @@ SC.window = SC.PaneView.extend({
   },
   
   _onfocus: function() {
-    this.addClassName('focus') ;
-    this.removeClassName('blur') ;
+    if (!this._hasFocus) {
+      this._hasFocus = YES ;
+      this.addClassName('focus') ;
+      this.removeClassName('blur') ;
+    }
   },
   
   _onblur: function() {
-    this.removeClassName('focus') ;
-    this.addClassName('blur');
+    if (!this._hasFocus) {
+      this._hasFocus = NO ;
+      this.removeClassName('focus') ;
+      this.addClassName('blur');
+    }
   },
+  
+  _hasFocus: NO,
   
   _EVTS: ['mousedown', 'mouseup', 'click', 'dblclick', 'keydown', 'keyup', 'keypress', 'mouseover', 'mouseout', 'mousemove', 'resize', 'unload', 'focus', 'blur'],
 
@@ -330,7 +347,7 @@ SC.window = SC.PaneView.extend({
     
     this.get('size') ; // fetch the size from the window and save it.
     this.set('isVisibleInWindow', true) ;
-    this.addClassName('focus') ;
+    this._onfocus() ;
   }
 }).viewFor($tag('body')) ;
 

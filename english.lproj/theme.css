@@ -5,6 +5,9 @@
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1207534439.css
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1207535807.css
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1207552236.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1207567613.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1207985766.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1207989881.css
 */
 
 /* =========================================
@@ -51,7 +54,7 @@ body.sc-theme {
 	border-top: 1px white solid;
 }
 
-.sc-theme .sc-collection-view .collection-item {
+.sc-theme .sc-collection-view .sc-collection-item {
 	border-top: 1px solid white;
 }
 
@@ -133,12 +136,12 @@ body.sc-theme {
 	color: black ;
 }
 
-.sc-theme .sc-collection-view.sc-source-list-view .collection-item {
+.sc-theme .sc-collection-view.sc-source-list-view .sc-collection-item {
 	border-top: 1px solid #f0f0f0;
 	font-size: 12px;
 }
 
-.sc-theme.focus .sc-collection-view.sc-source-list-view .collection-item {
+.sc-theme.focus .sc-collection-view.sc-source-list-view .sc-collection-item {
 	border-top: 1px solid #e6e3ef;
 }
 
@@ -154,7 +157,7 @@ body.sc-theme {
 	border-top: 1px solid #5a3f62;
 }
 
-.sc-theme .sc-source-list-view .collection-item {
+.sc-theme .sc-source-list-view .sc-collection-item {
 	padding: 0 4px 0 16px;
 	line-height: 31px;
 }
@@ -173,6 +176,37 @@ body.sc-theme {
 
 .sc-theme.focus .sc-source-list-group .sc-source-list-label {
 	color: #241d38;
+}
+
+/* @end */
+
+/* @group SC.ListItemView */
+
+.sc-theme .sc-count {
+	height: 18px;
+	display: block;
+	top: 6px;
+	padding-left: 9px;
+	background: no-repeat static_url('images/buttons-sprite.png') left -993px;
+}
+
+.sc-theme .sc-count .inner {
+	display: block ;
+	padding-right: 9px;
+	background: no-repeat static_url('images/buttons-sprite.png') right -974px;
+	min-width: 10px ;
+	text-align: center ;
+	font-weight: bold ;
+	font-size: 11px;
+	line-height: 19px;
+	vertical-align: middle ;
+	height: 18px;
+	max-height: 18px;
+	color: #241d38;
+}
+
+.sc-theme .sel .sc-count .inner {
+	color:  white ;
 }
 
 /* @end */
@@ -220,6 +254,12 @@ input.show-hint {
 .sc-theme input {
 	font-size: 12px; 
 }
+
+/* @end */
+
+/* @group My Group */
+
+
 
 /* @end */
 

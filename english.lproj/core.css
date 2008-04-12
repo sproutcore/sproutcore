@@ -1,4 +1,7 @@
-/* @override http://localhost:4020/static/sproutcore/en/_cache/core-1207528979.css */
+/* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/core-1207528979.css
+	http://localhost:4020/static/sproutcore/en/_cache/core-1207680408.css
+*/
 
 /* =============================================
    Core Styles
@@ -45,9 +48,40 @@
 
 /* @group SC.CollectionView */
 
-.sc-collection-view .collection-item {
+.sc-collection-view .sc-collection-item {
 	cursor: pointer ;
 	position: absolute ;
+}
+
+/* @end */
+
+/* @group SC.ListItemView */
+
+.sc-list-item-view .sc-icon {
+	width: 16px;
+	height: 16px;
+	vertical-align: middle ;
+	position: relative ;
+	top:  -1px;
+	margin-right: 4px;
+}
+
+.sc-list-item-view .sc-count {
+	position: absolute  ;
+	right: 3px ;
+	margin-right: 2px;
+}
+
+.sc-list-item-view .sc-branch {
+	position: absolute;
+	display:  block;
+	right: 0;
+	width: 14px;
+	top: 0;
+}
+
+.sc-list-item-view.sc-has-branch .sc-count {
+	right: 14px;
 }
 
 /* @end */

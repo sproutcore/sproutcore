@@ -326,10 +326,20 @@ SC.CollectionView = SC.View.extend(
   maxRenderTime: 0,
 
   /** 
-    The property on content objects item views should display.
+    Property to on content items to use for display.
+
+    Built-in item views such as the LabelViews and ImageViews will use the
+    value of this property as a key on the content object to determine the
+    value they should display.
     
-    Most built-in item views will respect this property.  You can also use it when writing 
-    you own item views.
+    For example, if you set contentValueProperty to 'name' and set the 
+    exampleView to an SC.LabelView, then the label views created by the 
+    colleciton view will display the value of the content.name.
+    
+    If you are writing your own custom item view for a collection, you can
+    get this behavior automatically by including the SC.Control mixin on your
+    view.  You can also ignore this property if you like.  The collection view
+    itself does not use this property to impact rendering.
   */
   contentValueProperty: null,
 
@@ -604,7 +614,13 @@ SC.CollectionView = SC.View.extend(
     // clippingFrame.
     var f ;
     if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
+      var parent = this.get('parentNode') ;
+      if (parent) parent.viewFrameWillChange() ;
       this.set('frame', f) ;
+      if (parent) parent.viewFrameDidChange() ;
+      if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
+        this.set('frame', f) ;
+      } 
     } 
 
     // Save the current clipping frame.  If the frame methods are called again
@@ -985,7 +1001,7 @@ SC.CollectionView = SC.View.extend(
     // set the content.
     if (!ret) {
       ret = this._itemViewPool.pop() || this.get('exampleView').create({ 
-        owner: this, collectionDelegate: this 
+        owner: this, displayDelegate: this 
       }) ;
       
       // set content and add to content hash
@@ -1111,7 +1127,7 @@ SC.CollectionView = SC.View.extend(
     // If groupValue still not found, create one.
     if (!ret) {
       ret = this._groupViewPool.pop() || this.get('exampleGroupView').create({
-         owner: this, collectionDelegate: this 
+         owner: this, displayDelegate: this 
       });
 
       // set the groupValue on the groupView.  Older groupViews expect us to 

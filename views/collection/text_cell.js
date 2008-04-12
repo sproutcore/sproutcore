@@ -18,7 +18,7 @@ require('mixins/control') ;
 SC.TextCellView = SC.View.extend(SC.Control,
 /** @scope SC.TextCellView.prototype */ {
 
-  emptyElement: '<div class="text-cell collection-item"></div>',
+  emptyElement: '<div class="text-cell sc-collection-item"></div>',
 
   /** 
     The value of the text cell.
@@ -78,7 +78,7 @@ SC.TextCellView = SC.View.extend(SC.Control,
     var owner = this.get('owner') ;
     
     // 1. apply the formatter
-    var formatter = this.getDelegateProperty(this.collectionDelegate, 'formatter') ;
+    var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
       var formattedValue = ($type(formatter) == T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;
@@ -88,10 +88,10 @@ SC.TextCellView = SC.View.extend(SC.Control,
     if (value != null && value.toString) value = value.toString() ;
     
     // 3. Localize
-    if (value && this.getDelegateProperty(this.collectionDelegate, 'localize')) value = value.loc() ;
+    if (value && this.getDelegateProperty(this.displayDelegate, 'localize')) value = value.loc() ;
     
     // 4. Escape HTML
-    if (this.getDelegateProperty(this.collectionDelegate, 'escapeHtml')) {
+    if (this.getDelegateProperty(this.displayDelegate, 'escapeHtml')) {
       this.set('innerText', value || '') ;
     } else this.set('innerHTML', value || '') ;
 
