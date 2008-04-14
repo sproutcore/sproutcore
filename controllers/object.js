@@ -134,6 +134,7 @@ SC.ObjectController = SC.Controller.extend(
         var oldValue = content.get ? content.get(key) : content[key];
         var newValue = this._changes[key];
         
+        if (oldValue == null && newValue == '') newValue = null;
         if (newValue != oldValue) 
         {
           (content.set) ? content.set('isDirty', true) : (content['isDirty'] = true);
