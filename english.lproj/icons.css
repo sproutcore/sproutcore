@@ -1,600 +1,227 @@
 /* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/icons-1208151762.css
+	http://localhost:4020/static/sproutcore/en/_cache/icons-1208151807.css
 */
 
-/* @group 32x32 Icons */
+/* @group General */
 
-/*img.sc-icon-add-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px 0px;
-}*/
-
-img.sc-icon-about-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -32px;
+.sc-icon {
+	background-image: url(/static/sproutcore/_src/english.lproj/images/shared-icons.png);
 }
 
-/*img.sc-icon-apps-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -64px;
+/* @end */
+
+/* @group 48-Pixel Icons */
+
+.sc-icon-alert-48 {
+	width: 48px;
+	height: 48px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) left top;
 }
 
- img.sc-icon-back-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -96px;
+.sc-icon-info-48 {
+	width: 48px;
+	height: 48px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) left -48px;
 }
 
- img.sc-icon-calendar-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -128px;
-}*/
-
- img.sc-icon-cart-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -160px;
-}
-
- img.sc-icon-chart-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -192px;
-}
-
- img.sc-icon-clock-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -224px;
-}
-
- img.sc-icon-close-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -256px;
-}
-
- /*img.sc-icon-docs-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -288px;
-}
-
- img.sc-icon-edit-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -320px;
-}*/
-
- img.sc-icon-favs-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -352px;
-}
-
- /*img.sc-icon-flag-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -416px;
-}
-
- img.sc-icon-forward-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -448px;
-}*/
-
- img.sc-icon-group-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -384px;
-}
-
- img.sc-icon-help-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -480px;
-}
-
- img.sc-icon-history-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -512px;
-}
-
- /*img.sc-icon-home-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -544px;
-}*/
-
- /*img.sc-icon-images-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -576px;
-}*/
-
- img.sc-icon-mail-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -608px;
-}
-
- img.sc-icon-note-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -640px;
-}
-
- /*img.sc-icon-search-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -672px;
-}*/
-
- img.sc-icon-task-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -704px;
-}
-
- /*img.sc-icon-tools-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -736px;
-}
-
- img.sc-icon-trash-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -768px;
-}*/
-
- img.sc-icon-user-32 {
-	width:  32px; height: 32px;
-	background: static_url('shared-icons') no-repeat scroll 0px -800px;
+.sc-icon-error-48 {
+	width: 48px;
+	height: 48px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) left -96px;
 }
 
 
 /* @end */
 
-/* @group 24x24 Icons */
+/* @group 24-Pixel Icons */
 
-img.sc-icon-about-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -832px;
+.sc-icon-tools-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -144px;
 }
 
- /*img.sc-icon-add-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -856px;
-}*/
-
- /*img.sc-icon-apps-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -880px;
+.sc-icon-bookmark-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -144px;
 }
 
- img.sc-icon-back-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -904px;
+.sc-icon-info-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -168px;
 }
 
- img.sc-icon-calendar-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -928px;
-}*/
-
- img.sc-icon-cart-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -952px;
+.sc-icon-help-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -0px -192px;
 }
 
- img.sc-icon-chart-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -976px;
+.sc-icon-alert-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -192px;
 }
 
- /*img.sc-icon-clock-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1000px;
+.sc-icon-left-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -216px;
 }
 
- img.sc-icon-close-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1024px;
-}*/
-
- img.sc-icon-docs-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1048px;
+.sc-icon-right-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -216px;
 }
 
- img.sc-icon-edit-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1072px;
+.sc-icon-up-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -240px;
 }
 
- img.sc-icon-favs-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1096px;
+.sc-icon-down-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -240px;
 }
 
- /*img.sc-icon-flag-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1120px;
+.sc-icon-undo-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -264px;
 }
 
- img.sc-icon-forward-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1144px;
-}*/
-
- img.sc-icon-group-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1168px;
+.sc-icon-redo-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -264px;
 }
 
- img.sc-icon-help-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1192px;
+.sc-icon-group-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -288px;
 }
 
- img.sc-icon-history-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1216px;
+.sc-icon-user-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -288px;
 }
 
- img.sc-icon-home-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1240px;
+.sc-icon-cancel-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -312px;
 }
 
- /*img.sc-icon-images-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1264px;
-}*/
-
- img.sc-icon-mail-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1288px;
+.sc-icon-options-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -312px;
 }
 
- img.sc-icon-note-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1312px;
+.sc-icon-folder-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -336px;
 }
 
- /*img.sc-icon-search-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1336px;
-}*/
-
- img.sc-icon-tag-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1360px;
+.sc-icon-trash-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -336px;
 }
 
- /*img.sc-icon-task-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1384px;
-}*/
-
- img.sc-icon-trash-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1408px;
+.sc-icon-document-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) 0px -360px;
 }
 
- /*img.sc-icon-tools-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1432px;
-}*/
-
- img.sc-icon-user-24 {
-	width:  24px; height: 24px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1456px;
-}
- 
-/* @end */
-
-/* @group 16x16 Icons - Enabled */
-
- img.sc-icon-about-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1504px;
-}
-
-img.sc-icon-add-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1504px;
-}
-
- img.sc-icon-apps-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1520px;
-}
-
- img.sc-icon-back-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1520px;
-}
-
- img.sc-icon-calendar-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1536px;
-}
-
- img.sc-icon-cart-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1536px;
-}
-
- img.sc-icon-chart-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1552px;
-}
-
- img.sc-icon-clock-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1552px;
-}
-
- img.sc-icon-close-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1568px;
-}
-
- img.sc-icon-docs-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1568px;
-}
-
- img.sc-icon-edit-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1584px;
-}
-
- img.sc-icon-favs-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1584px;
-}
-
- img.sc-icon-flag-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1600px;
-}
-
- img.sc-icon-forward-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1600px;
-}
-
- img.sc-icon-group-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1616px;
-}
-
- img.sc-icon-help-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1616px;
-}
-
- img.sc-icon-history-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1632px;
-}
-
- img.sc-icon-home-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1632px;
-}
-
- img.sc-icon-images-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1648px;
-}
-
- img.sc-icon-mail-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1648px;
-}
-
- img.sc-icon-note-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1664px;
-}
-
- img.sc-icon-search-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1664px;
-}
-
- img.sc-icon-tag-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1680px;
-}
-
- img.sc-icon-task-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1680px;
-}
-
- img.sc-icon-tools-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1696px;
-}
-
- img.sc-icon-trash-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1696px;
-}
-
- img.sc-icon-user-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1712px;
-}
-
- img.sc-icon-checkmark-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1712px;
-}
-
- img.sc-icon-rss-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1728px;
-}
-
- img.sc-icon-basecamp-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1728px;
+.sc-icon-favorite-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -24px -360px;
 }
 
 /* @end */
 
-/* @group 16x16 Icons - Disabled */
+/* @group 16-Pixel Icons */
 
- .disabled img.sc-icon-about-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1760px;
+.sc-icon-bookmark-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -16px -384px;
 }
 
-.disabled img.sc-icon-add-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1760px;
+.sc-icon-info-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -32px -384px;
 }
 
- .disabled img.sc-icon-apps-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1776px;
+.sc-icon-help-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -16px -400px;
 }
 
- .disabled img.sc-icon-back-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1776px;
+.sc-icon-alert-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -32px -400px;
 }
 
- .disabled img.sc-icon-calendar-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1792px;
+.sc-icon-group-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -0px -448px;
 }
 
- .disabled img.sc-icon-cart-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1792px;
+.sc-icon-user-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -16px -448px;
 }
 
- .disabled img.sc-icon-chart-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1808px;
+.sc-icon-options-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -0px -464px;
 }
 
- .disabled img.sc-icon-clock-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1808px;
+.sc-icon-folder-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -16px -464px;
 }
 
- .disabled img.sc-icon-close-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1824px;
+.sc-icon-trash-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -32px -464px;
 }
 
- .disabled img.sc-icon-docs-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1824px;
+.sc-icon-document-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -0px -480px;
 }
 
- .disabled img.sc-icon-edit-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1840px;
-}
-
- .disabled img.sc-icon-favs-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1840px;
-}
-
- .disabled img.sc-icon-flag-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1856px;
-}
-
- .disabled img.sc-icon-forward-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1856px;
-}
-
- .disabled img.sc-icon-group-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1872px;
-}
-
- .disabled img.sc-icon-help-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1872px;
-}
-
- .disabled img.sc-icon-history-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1888px;
-}
-
- .disabled img.sc-icon-home-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1888px;
-}
-
- .disabled img.sc-icon-images-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1904px;
-}
-
- .disabled img.sc-icon-mail-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1904px;
-}
-
- .disabled img.sc-icon-note-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1920px;
-}
-
- .disabled img.sc-icon-search-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1920px;
-}
-
- .disabled img.sc-icon-tag-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1936px;
-}
-
- .disabled img.sc-icon-task-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1936px;
-}
-
- .disabled img.sc-icon-tools-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1952px;
-}
-
- .disabled img.sc-icon-trash-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1952px;
-}
-
- .disabled img.sc-icon-user-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1968px;
-}
-
- .disabled img.sc-icon-checkmark-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1968px;
-}
-
- .disabled img.sc-icon-rss-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -1984px;
-}
-
- .disabled img.sc-icon-basecamp-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -1984px;
-}
-
-img.sc-icon-task-mode-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -2128px;
-}
-
-img.sc-icon-list-mode-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll -16px -2128px;
-}
-
-img.sc-icon-preview-mode-16 {
-	width:  16px; height: 16px;
-	background: static_url('shared-icons') no-repeat scroll 0px -2144px;
+.sc-icon-favorite-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat url(/static/sproutcore/_src/english.lproj/images/shared-icons.png) -16px -480px;
 }
 
 /* @end */
+
+
+
 

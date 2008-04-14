@@ -4,35 +4,137 @@
 // ========================================================================
 
 require('views/view') ;
+require('mixins/control') ;
 
 lc_cnt = 0 ;
 
-SC.ImageView = SC.View.extend({
-  emptyElement: '<img src="%@" />'.fmt(static_url('blank')),
+SC.IMAGE_STATE_NONE = 'none';
+SC.IMAGE_STATE_LOADING = 'loading';
+SC.IMAGE_STATE_LOADED = 'loaded';
+SC.IMAGE_STATE_FAILED = 'failed';
+
+/**
+  URL to a transparent GIF.  Used for spriting.
+*/
+SC.BLANK_IMAGE_URL = static_url('blank.gif');
+
+/**
+  Displays an image in the browser.  
   
-  status: 'unknown',
+  The ImageView can be used to efficiently display images in the browser.
+  It includes a built in support for a number of features that can improve
+  your page load time if you use a lot of images including a image loading
+  queue and automatic support for CSS spriting.
+
+  @extends SC.View
+  @extends SC.Control
+  @author Charles Jolley
+  @class
+*/
+SC.ImageView = SC.View.extend(SC.Control, 
+/** @scope SC.ImageView.prototype */ {
   
-  content: null, // becomes the url.
-  contentBindingDefault: SC.Binding.Single,
+  /** Image views contain an img tag. */
+  emptyElement: '<img src="%@" class="sc-image-view" />'.fmt(SC.BLANK_IMAGE_URL),
   
-  // override with your own function to transform content into a URL.
+  /**
+    Current load status of the image.
+    
+    This status changes as an image is loaded from the server.  If spriting
+    is used, this will always be loaded.  Must be one of the following
+    constants: SC.IMAGE_STATE_NONE, SC.IMAGE_STATE_LOADING, 
+    SC.IMAGE_STATE_LOADED, SC.IMAGE_STATE_FAILED
+  */
+  status: SC.IMAGE_STATE_NONE,
+  
+  /**
+    A url or CSS class name.
+    
+    This is the image you want the view to display.  It should be either a
+    url or css class name.  You can also set the content and 
+    contentValueProperty properties to have this value extracted 
+    automatically.
+    
+    If you want to use CSS spriting, set this value to a CSS class name.  If
+    you need to use multiple class names to set your icon, separate them by
+    spaces.
+  */
+  value: null,
+  _value: null,
+
+  /**
+    Invoked whenever the content or value changes. (To be removed in 
+    SproutCore 1.0)
+    
+    This method is no longer necessary since we have the standard SC.Control
+    behavior.
+    
+    @deprecated
+    @param {Object} content The content object.
+    @returns {String} the URL or CSS class name
+  */
   transform: function(content) { return content; },
   
-  contentObserver: function() {
-    var prop = this.get('content') || '' ;
-    var url = this.transform(prop) ;
+  valueDidChange: function() {
     
-    if (url && url.length > 0) {
+    // get the new URL.
+    var value = this.get('value') ;
+    
+    // invoke the old transform method if it is defined
+    if (this.transform !== SC.ImageView.prototype.transform) {
+      var content = this.get('content') || '' ;
+      value = this.transform(content) ;
+    }
+    
+    // if the value has not changed, do nothing.
+    if (value == this._value) return ;
+    
+    // if the old value was a class name, then we need to remove it.
+    if (this._value && this._value.length>0 && !this._valueIsUrl(this._value)) {
+      var classNames = this._value.split(' ') ;
+      var idx = classNames.length ;
+      while(--idx >= 0) { 
+        this.removeClassName(classNames[idx]); 
+      }
+      this.removeClassName('sc-sprite') ;
+    }
+    this._value = value ;
+    
+    // if the new value is empty, just clear the img.
+    if (!value || value.length == 0) {
+      this.rootElement.src = SC.BLANK_IMAGE_URL;
+      this.set('status', SC.IMAGE_STATE_NONE) ;
+      
+    // if a new value was set that is a URL, load the image URL.
+    } else if (this._valueIsUrl(value)) {
       this.beginPropertyChanges() ;
-      this.set('status','loading') ;
+      this.set('status', SC.IMAGE_STATE_LOADING) ;
       SC.imageCache.loadImage(url, this, this._onLoadComplete) ;
       this.endPropertyChanges() ;
+      
+    // if the new is a CSS class name, set an empty image and add class name 
     } else {
-      this.rootElement.src = '' ;
-      this.set('status','unknown') ;
+      var classNames = value.split(' ');
+      var idx = classNames.length ;
+      while(--idx >= 0) this.addClassName(classNames[idx]) ;
+      this.addClassName('sc-sprite') ;
+      this.rootElement.src = SC.BLANK_IMAGE_URL ;
+      this.set('status', SC.IMAGE_STATE_LOADED) ;
     }
-  }.observes('content') ,
+  },
   
+  /**
+    Returns YES if the passed value looks like an URL and not a CSS class
+    name.
+  */
+  _valueIsUrl: function(value) {
+    return (value.indexOf('/') >= 0) || (value.indexOf('.') >= 0) ;
+  },
+
+  /** 
+    Invoked once an image loads.  If an image has already been loaded,
+    this method will be invoked immediately.
+  */
   _onLoadComplete: function(url, status, img) {  
     this.beginPropertyChanges() ;
     this.set('imageWidth', parseInt(img.width,0)) ;
@@ -40,7 +142,7 @@ SC.ImageView = SC.View.extend({
     this.set('status',status) ;
     this.endPropertyChanges() ;
     
-    if (status == 'loaded') {
+    if (status == SC.IMAGE_STATE_LOADED) {
       if (this.imageDidLoad) this.imageDidLoad(url) ;
       this.rootElement.src =  url ;
     } else {
@@ -50,6 +152,8 @@ SC.ImageView = SC.View.extend({
   
   init: function() {
     arguments.callee.base.apply(this,arguments) ;
+    this.initControl() ;
+    this.valueDidChange() ;
     if (this.rootElement.src) {
       this.set('imageWidth',parseInt(this.rootElement.width,0)) ;
       this.set('imageHeight',parseInt(this.rootElement.height,0)) ;
@@ -58,9 +162,11 @@ SC.ImageView = SC.View.extend({
   
 }) ;
 
-// The image cache will create Image objects to preload a set of 
-// images.  This will control the number of images being loaded to maximize
-// browser throughput.
+/**
+  The image cache will create Image objects to preload a set of 
+  images.  This will control the number of images being loaded to maximize
+  browser throughput.
+*/
 SC.imageCache = SC.Object.create({  
   
   // this restricts the maximum number of images that can load in.
