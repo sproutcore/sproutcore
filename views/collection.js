@@ -1109,7 +1109,7 @@ SC.CollectionView = SC.View.extend(
   */
   _insertGroupViewFor: function(groupValue, contentIndex) {
     var ret =  this._groupViewsByValue[groupValue] ; 
-    if (ret) return ret ; // nothing to do
+    // if (ret) return ret ; // nothing to do
     
     var firstLayout = false ;
     
