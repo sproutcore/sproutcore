@@ -1,14 +1,4 @@
-/* @override 
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207528191.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207529450.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207531983.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207534439.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207535807.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207552236.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207567613.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207985766.css
-	http://localhost:4020/static/sproutcore/en/_cache/theme-1207989881.css
-*/
+/* @override http://localhost:4020/static/sproutcore/en/_cache/theme-1208227908.css */
 
 /* =========================================
    SproutCore UI Theme
@@ -152,7 +142,7 @@ body.sc-theme {
 }
 
 .sc-theme.focus .sc-collection-view.sc-source-list-view .sel {
-	background: url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') 0 -940px;
+	background: url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') 0 0px;
 	color: white ;
 	border-top: 1px solid #5a3f62;
 }
@@ -182,18 +172,18 @@ body.sc-theme {
 
 /* @group SC.ListItemView */
 
-.sc-theme .sc-count {
+.sc-theme .sc-source-list-view .sc-count {
 	height: 18px;
 	display: block;
 	top: 6px;
 	padding-left: 9px;
-	background: no-repeat static_url('images/buttons-sprite.png') left -993px;
+	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') left -51px;
 }
 
-.sc-theme .sc-count .inner {
+.sc-theme .sc-source-list-view .sc-count .inner {
 	display: block ;
 	padding-right: 9px;
-	background: no-repeat static_url('images/buttons-sprite.png') right -974px;
+	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') right -33px;
 	min-width: 10px ;
 	text-align: center ;
 	font-weight: bold ;
@@ -202,11 +192,15 @@ body.sc-theme {
 	vertical-align: middle ;
 	height: 18px;
 	max-height: 18px;
-	color: #241d38;
+	color: white;
 }
 
-.sc-theme .sel .sc-count .inner {
-	color:  white ;
+.sc-theme .sc-source-list-view .sel .sc-count {
+	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') left -87px;
+}
+.sc-theme .sc-source-list-view .sel .sc-count .inner {
+	color: #372a3c;
+	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') right -69px;
 }
 
 /* @end */

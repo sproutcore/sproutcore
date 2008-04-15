@@ -1,4 +1,7 @@
-/* @override http://localhost:4020/static/sproutcore/en/_cache/buttons-1207550134.css */
+/* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/buttons-1207550134.css
+	http://localhost:4020/static/sproutcore/en/_cache/buttons-1207585975.css
+*/
 
 /* @group Button Core */
 
@@ -25,7 +28,7 @@ a.button img {
 
 /* @end */
 
-/* @group regular - back */
+/* @group regular */
 
 /* @group basic */
 
@@ -87,45 +90,29 @@ a.back span.label {
 /* @group disabled */
 
 .sc-theme.blur a.regular,
-.sc-theme.blur a.back,
-
-.sc-theme.focus a.regular.disabled, 
-.sc-theme.focus a.back.disabled {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -484px;
+.sc-theme.focus a.regular.disabled {
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -496px;
 }
 
 .sc-theme.blur a.regular span.button-inner,
 
 .sc-theme.focus a.regular.disabled span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -220px;
-}
-
-.sc-theme.blur a.back span.button-inner,
-
-.sc-theme.focus a.back.disabled span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -352px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -450px;
 }
 
 .sc-theme.blur a.regular span.label, 
-.sc-theme.blur a.back span.label,
-
-.sc-theme.focus a.regular.disabled span.label, 
-.sc-theme.focus a.back.disabled span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -88px;
+.sc-theme.focus a.regular.disabled span.label {
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -473px;
 	color: #999;
 }
 
 
 .sc-theme.blur a.regular.sel, 
-.sc-theme.blur a.back.sel,
 .sc-theme.blur a.regular.def, 
-.sc-theme.blur a.back.def,
 
 .sc-theme.focus a.regular.sel.disabled, 
-.sc-theme.focus a.back.sel.disabled,
-.sc-theme.focus a.regular.def.disabled, 
-.sc-theme.focus a.back.def.disabled {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -506px;
+.sc-theme.focus a.regular.def.disabled {
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -289px;
 }
 
 .sc-theme.blur a.regular.sel span.button-inner,
@@ -133,27 +120,15 @@ a.back span.label {
 
 .sc-theme.focus a.regular.sel.disabled span.button-inner,
 .sc-theme.focus a.regular.def.disabled span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -242px;
-}
-
-.sc-theme.blur a.back.sel span.button-inner,
-.sc-theme.blur a.back.def span.button-inner,
-
-.sc-theme.focus a.back.sel.disabled span.button-inner,
-.sc-theme.focus a.back.def.disabled span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -374px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -243px;
 }
 
 .sc-theme.blur a.regular.def span.label, 
-.sc-theme.blur a.back.def span.label,
 .sc-theme.blur a.regular.sel span.label, 
-.sc-theme.blur a.back.sel span.label,
 
 .sc-theme.focus a.regular.def.disabled span.label, 
-.sc-theme.focus a.back.def.disabled span.label,
-.sc-theme.focus a.regular.sel.disabled span.label, 
-.sc-theme.focus a.back.sel.disabled span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -110px;
+.sc-theme.focus a.regular.sel.disabled span.label {
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -266px;
 	color: #999;
 }
 
@@ -161,21 +136,16 @@ a.back span.label {
 
 /* @group enabled */
 
-a.regular, a.back {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -396px;
+a.regular {
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -358px;
 }
 
 a.regular span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -132px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -312px;
 }
 
-a.back span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -264px;
-}
-
-a.back span.label,
 a.regular span.label {
- 	background: transparent static_url('images/buttons-sprite.png') repeat-x left top;
+ 	background: transparent static_url('images/buttons-sprite.png') repeat-x left -335px;
 }
 
 /* @end */
@@ -183,27 +153,18 @@ a.regular span.label {
 /* @group sel - def */
 
 a.regular.sel, 
-a.back.sel,
-a.regular.def, 
-a.back.def {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -440px;
+a.regular.def {
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -151px;
 }
 
 a.regular.sel span.button-inner, 
 a.regular.def span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -176px;
-}
-
-a.back.sel span.button-inner,
-a.back.def span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -308px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -105px;
 }
 
 a.regular.sel span.label, 
-a.back.sel span.label,
-a.regular.def span.label, 
-a.back.def span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -44px;
+a.regular.def span.label {
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -128px;
 }
 
 /* @end */
@@ -211,49 +172,34 @@ a.back.def span.label {
 /* @group sel.active - def.active */
 
 a.regular.sel.active, 
-a.back.sel.active,
-a.regular.def.active, 
-a.back.def.active {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -462px;
+a.regular.def.active {
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -220px;
 }
 
 a.regular.sel.active span.button-inner, 
 a.regular.def.active span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -198px;
-}
-
-a.back.sel.active span.button-inner,
-a.back.def.active span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -330px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -174px;
 }
 
 a.regular.sel.active span.label, 
-a.back.sel.active span.label,
-a.regular.def.active span.label, 
-a.back.def.active span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -66px;
+a.regular.def.active span.label {
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -197px;
 }
 
 /* @end */
 
 /* @group active */
 
-a.regular.active, 
-a.back.active {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -418px;
+a.regular.active {
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -427px;
 }
 
 a.regular.active span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -154px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -381px;
 }
 
-a.back.active span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -286px;
-}
-
-a.regular.active span.label, 
-a.back.active span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -22px;
+a.regular.active span.label {
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -404px;
 }
 
 /* @end */
@@ -332,15 +278,15 @@ a.checkbox img.button {
 	vertical-align: middle ;
 	position: relative ;
 	top: -1px;
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -708px;
+	background: static_url('images/buttons-sprite.png') no-repeat -32px -728px;
 } 
 
 a.checkbox.sel img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -724px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -728px;
 }
 
 a.checkbox.mixed img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -756px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -744px;
 }
 
 
@@ -354,15 +300,15 @@ a.checkbox.disabled {
 }
 
 a.checkbox.disabled img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -724px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -760px;
 } 
 
 a.checkbox.sel.disabled img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -740px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -760px;
 }
 
 a.checkbox.mixed.disabled img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -772px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -760px;
 }
 
 
@@ -372,15 +318,15 @@ a.checkbox.mixed.disabled img.button {
 /* @group active */
 
 a.checkbox.active img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -708px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -744px;
 } 
 
 a.checkbox.sel.active img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -740px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -728px;
 }
 
 a.checkbox.mixed.active img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -756px;
+	background: static_url('images/buttons-sprite.png') no-repeat -32px -744px;
 }
 
 
@@ -404,15 +350,15 @@ a.radio img.button {
 	vertical-align: middle ;
 	position: relative ;
 	top: -1px;
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -772px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -776px;
 } 
 
 a.radio.sel img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -804px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -760px;
 }
 
 a.radio.mixed img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -820px;
+	background: static_url('images/buttons-sprite.png') no-repeat -32px -776px;
 }
 
 
@@ -426,15 +372,15 @@ a.radio.disabled {
 }
 
 a.radio.disabled img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -788px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -792px;
 } 
 
 a.radio.sel.disabled img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0px -820px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -792px;
 }
 
 a.radio.mixed.disabled img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -836px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -792px;
 }
 
 
@@ -444,15 +390,15 @@ a.radio.mixed.disabled img.button {
 /* @group active */
 
 a.radio.active img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0px -788px;
+	background: static_url('images/buttons-sprite.png') no-repeat -16px -776px;
 } 
 
 a.radio.sel.active img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat -16px -804px;
+	background: static_url('images/buttons-sprite.png') no-repeat -32px -760px;
 }
 
 a.radio.mixed.active img.button {
-	background: static_url('images/buttons-sprite.png') no-repeat 0px -836px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0px -792px;
 }
 
 
@@ -479,7 +425,7 @@ a.square span.button-inner {
 }
 
 a.square span.label {
- 	background: transparent static_url('images/buttons-sprite.png') repeat-x left top;
+ 	background: transparent static_url('images/buttons-sprite.png') repeat-x 0px -335px;
  	display: block ;
 	//font-weight: bold;
 	text-align: center;
@@ -497,7 +443,7 @@ a.square span.label {
 
 a.square.sel span.label, 
 a.square.def span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -44px;
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -128px;
 }
 
 /* @end */
@@ -505,13 +451,13 @@ a.square.def span.label {
 /* @group disabled */
 
 a.square.disabled span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -88px;
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -473px;
 	color: #999;
 }
 
 a.square.def.disabled span.label, 
 a.square.sel.disabled span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -110px;
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -266px;
 	color: #999;
 }
 
@@ -521,7 +467,7 @@ a.square.sel.disabled span.label {
 
 a.square.sel.active span.label, 
 a.square.def.active span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -66px;
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -197px;
 }
 
 /* @end */
@@ -529,7 +475,7 @@ a.square.def.active span.label {
 /* @group active */
 
 a.square.active span.label {
-	background: static_url('images/buttons-sprite.png') repeat-x 0 -22px;
+	background: static_url('images/buttons-sprite.png') repeat-x 0 -404px;
 }
 
 /* @end */
@@ -555,24 +501,24 @@ a.dropdown {
 }
 
 a.dropdown {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -528px;
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -565px;
 }
 
 a.popup {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -594px;
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -565px;
 }
 
 
 a.dropdown span.button-inner,
 a.popup span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -132px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -519px;
 	display: block ;
 	height: 22px;
 }
 
 a.dropdown span.label,
 a.popup span.label {
- 	background: transparent static_url('images/buttons-sprite.png') repeat-x left top;
+ 	background: transparent static_url('images/buttons-sprite.png') repeat-x 0px -542px;
  	display: block ;
 	font-weight: normal;
 	text-align: left;
@@ -588,21 +534,21 @@ a.popup span.label {
 /* @group active */
 
 a.dropdown.active {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -550px;
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -634px;
 }
 
 a.popup.active {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -616px;
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -634px;
 }
 
 a.dropdown.active span.button-inner,
 a.popup.active span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -154px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -588px;
 }
 
 a.dropdown.active span.label,
 a.popup.active span.label {
- 	background: transparent static_url('images/buttons-sprite.png') repeat-x left -22px;
+ 	background: transparent static_url('images/buttons-sprite.png') repeat-x left -611px;
 }
 
 /* @end */
@@ -610,21 +556,21 @@ a.popup.active span.label {
 /* @group disabled */
 
 a.dropdown.disabled {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -572px;
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -703px;
 }
 
 a.popup.disabled {
-	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -638px;
+	background: transparent static_url('images/buttons-sprite.png') no-repeat scroll right -703px;
 }
 
 a.dropdown.disabled span.button-inner,
 a.popup.disabled span.button-inner {
-	background: static_url('images/buttons-sprite.png') no-repeat 0 -220px;
+	background: static_url('images/buttons-sprite.png') no-repeat 0 -657px;
 }
 
 a.dropdown.disabled span.label,
 a.popup.disabled span.label {
- 	background: transparent static_url('images/buttons-sprite.png') repeat-x left -88px;
+ 	background: transparent static_url('images/buttons-sprite.png') repeat-x left -680px;
  	color: #999;
 }
 
