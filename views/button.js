@@ -5,7 +5,7 @@
 
 require('views/view') ;
 require('views/label') ;
-require('mixin/control') ;
+require('mixins/control') ;
 
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';
