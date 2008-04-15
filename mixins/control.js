@@ -14,9 +14,6 @@ SC.MIXED_STATE = '__MIXED__' ;
   functionality including showing a selected state, enabled state, focus
   state, etc.
   
-  To use this mixin, apply it to your view and invoke initControl() from 
-  your init method.
-  
   h2. About Values and Content
   
   Controls typically are used to represent a single value, such as a number,
@@ -31,13 +28,13 @@ SC.MIXED_STATE = '__MIXED__' ;
   view.
   
   You can use the content-approach to work with a control by setting the 
-  "content" and "contentValueProperty" properties of the control.  The 
+  "content" and "contentValueKey" properties of the control.  The 
   "content" property is the content object you want to manage, while the 
-  "contentValueProperty" is the name of the property on the content object 
+  "contentValueKey" is the name of the property on the content object 
   you want the control to display.  
   
   The default implementation of the Control mixin will essentially map the
-  contentValueProperty of a content object to the value property of the 
+  contentValueKey of a content object to the value property of the 
   control.  Thus if you are writing a custom control yourself, you can simply
   work with the value property and the content object support will come for
   free.  Just write an observer for the value property and update your 
@@ -63,15 +60,11 @@ SC.MIXED_STATE = '__MIXED__' ;
 */
 SC.Control = {
   
-  /**
-    Performs necessary setup on your view for use as a control.  Always
-    call this method from your init() method.
-  */
-  initControl: function() {
+  initMixin: function() {
     this._contentObserver(); // setup content observing if needed.
-    this._isSelectedObserver() ;
-    this._isEnabledObserver() ;
-    this._isFocusedObserver(); 
+    this.isSelectedObserver() ;
+    this.isEnabledObserver() ;
+    this.isFocusedObserver(); 
   },
   
   /** 
@@ -112,7 +105,7 @@ SC.Control = {
     object, especially if you are using the control as an item view in a
     collection view.
     
-    In those cases, you can set the content and contentValueProperty for the
+    In those cases, you can set the content and contentValueKey for the
     control.  This will cause the control to observe the content object for
     changes to the value property and then set the value of that property 
     on the "value" property of this object.
@@ -127,44 +120,88 @@ SC.Control = {
     The property on the content object that would want to represent the 
     value of this control.  This property should only be set before the
     content object is first set.  If you have a displayDelegate, then
-    you can also use the contentValueProperty of the displayDelegate.
+    you can also use the contentValueKey of the displayDelegate.
   */
-  contentValueProperty: null,
+  contentValueKey: null,
 
   /**
     Invoked whenever any property on the content object changes.  
     
     The default implementation will update the value property of the view
-    if the contentValueProperty property has changed.  You can override this
+    if the contentValueKey property has changed.  You can override this
     method to implement whatever additional changes you would like.
+    
+    The key will typically contain the name of the property that changed or 
+    '*' if the content object itself has changed.  You should generally do
+    a total reset of '*' is changed.
     
     @param {Object} target the content object
     @param {String} key the property that changes
   */
   contentPropertyDidChange: function(target, key) {
-    if (!!this._contentValueProperty && ((key == this._contentValueProperty) || (key == '*'))) {
+    if (!!this._contentValueKey && ((key == this._contentValueKey) || (key == '*'))) {
       var content = this.get('content') ;
-      var value = (content) ? content.get(this._contentValueProperty) : null;
+      var value = (content) ? content.get(this._contentValueKey) : null;
       if (value != this._contentValue) {
         this._contentValue = value ;
         this.set('value', value) ;
       }
     }
   },
-  
-  /** @private
-    By default, adds the 'sel' CSS class if selected or mixed if mixed.
+
+  /**
+    Relays changes to the value back to the content object if you are using
+    a content object.
+    
+    This observer is triggered whenever the value changes.  It will only do
+    something if it finds you are using the content property and
+    contentValueKey and the new value does not match the old value of the
+    content object.  
+    
+    If you are using contentValueKey in some other way than typically
+    implemented by this mixin, then you may want to override this method as
+    well.
   */
-  _isSelectedObserver: function() {
+  updateContentWithValueObserver: function() {
+    if (!this._contentValueKey) return; // do nothing if disabled
+
+    // get value.  return if value matches current content value.
+    // this avoids infinite loops where setting the value from the content
+    // in turns sets the content and so on.
+    var value = this.get('value') ;
+    if (value == this._contentValue) return ; 
+
+    var content = this.get('content') ;
+    if (!content) return; // do nothing if no content.
+    
+    // passed all of our checks, update the content (and the _contentValue
+    // to avoid infinite loops)
+    this._contentValue = value ;
+    content.set(this._contentValueKey, value) ;
+    
+  }.observes('value'),
+  
+  /**
+    Default observer for selected state changes
+    
+    The default will simply add either a "mixed" or "sel" class name to the
+    root element of your view based on the state. You can override this with
+    your own behavior if you prefer.
+  */
+  isSelectedObserver: function() {
     var sel = this.get('isSelected') ;
     this.setClassName('mixed', sel == SC.MIXED_STATE) ;
     this.setClassName('sel', sel && (sel != SC.MIXED_STATE)) ;
   }.observes('isSelected'),
   
-  /** @private
-    By default, adds the disabled CSS class if disabled. 
+  /**
+    Default observer for the isEnabled state.
+    
+    The default will simply add or remove a "disabled" class name to the root 
+    element of your view based on the state.  You can override this with your
+    own behavior if you prefer.
   */
-  _isEnabledObserver: function() {
+  isEnabledObserver: function() {
     var disabled = !this.get('isEnabled') ;
     this.setClassName('disabled', disabled);
 
@@ -173,11 +210,15 @@ SC.Control = {
       this.rootElement.disabled = disabled ;
     }
   }.observes('isEnabled'),
-  
-  /** @private
-    Add a focus CSS class whenever the view has first responder status. 
+
+  /**
+    Default observer for the isFirstResponder state.
+    
+    The default will add or remove a "focus" class name ot the root element
+    of your view based on the state.  You can override this with your own
+    behavior if you prefer.
   */
-  _isFocusedObserver: function() {
+  isFocusedObserver: function() {
     this.setClassName('focus', !!this.get('isFirstResponder')) ;
   }.observes('isFirstResponder'),
   
@@ -206,7 +247,7 @@ SC.Control = {
 
     // cache for future use
     var del = this.displayDelegate ;
-    this._contentValueProperty = this.getDelegateProperty(del, 'contentValueProperty');
+    this._contentValueKey = this.getDelegateProperty(del, 'contentValueKey');
 
     
     // add observer to new content if necessary.

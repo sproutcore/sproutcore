@@ -5,20 +5,41 @@
 
 require('validators/validator') ;
 
-// Force to be a valid credit card number.
-SC.Validator.CreditCard = SC.Validator.extend({
+/**
+  Validate a field value as a credit card number. 
   
-  // expects a string of 16 digits. split into groups of 4
+  This validator will perform a basic check to ensure the credit card number
+  is mathematically valid.  It will also accept numbers with spaces, dashes
+  or other punctuation.  
+  
+  Converted credit card numbers are broken into units of 4.
+  
+  Basic credit card validation courtesy David Leppek 
+  (https://www.azcode.com/Mod10)
+
+  @class
+  @extends SC.Validator
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.Validator.CreditCard = SC.Validator.extend(
+/** @scope SC.Validator.CreditCard.prototype */ {
+
+  /**
+    Expects a string of 16 digits.  Will split into groups of 4 for display.
+  */
   fieldValueForObject: function(object, form, field) {
     if (typeof(object) == "string" && object.length == 16) {
       object = [object.slice(0,4),object.slice(4,8),object.slice(8,12),object.slice(12,16)].join(' ') ;
     }
     return object ;
   },
-  
-  // remove all whitespace to make a single number.
+
+  /**
+    Removes all whitespace or dashes to make a single string.
+  */
   objectForFieldValue: function(value, form, field) {
-    return value.replace(/^\s+|\s+$/g,'') ;
+    return value.replace(/[\s-\.\:]/g,'') ;
   },
   
   validate: function(form, field) { 
@@ -30,11 +51,10 @@ SC.Validator.CreditCard = SC.Validator.extend({
     return $error("Invalid.CreditCard(%@)".loc(label), label);
   },
   
-  // Borrowed from: David Leppek :: https://www.azcode.com/Mod10
   checkNumber: function(ccNumb) {
-    var valid = "0123456789"  // Valid digits in a credit card number
+    var valid = "0123456789";  // Valid digits in a credit card number
     var len = ccNumb.length;  // The length of the submitted cc number
-    var iCCN = parseInt(ccNumb);  // integer of ccNumb
+    var iCCN = parseInt(ccNumb,0);  // integer of ccNumb
     var sCCN = ccNumb.toString();  // string of ccNumb
     sCCN = sCCN.replace (/^\s+|\s+$/g,'');  // strip spaces
     var iTotal = 0;  // integer total set at zero
@@ -59,12 +79,12 @@ SC.Validator.CreditCard = SC.Validator.extend({
     } else{  // ccNumb is a number and the proper length - let's see if it is a valid card number
       if(len >= 15){  // 15 or 16 for Amex or V/MC
         for(var i=len;i>0;i--){  // LOOP throught the digits of the card
-          calc = parseInt(iCCN) % 10;  // right most digit
-          calc = parseInt(calc);  // assure it is an integer
+          calc = parseInt(iCCN,0) % 10;  // right most digit
+          calc = parseInt(calc,0);  // assure it is an integer
           iTotal += calc;  // running total of the card number as we loop - Do Nothing to first digit
           i--;  // decrement the count - move to the next digit in the card
           iCCN = iCCN / 10;                               // subtracts right most digit from ccNumb
-          calc = parseInt(iCCN) % 10 ;    // NEXT right most digit
+          calc = parseInt(iCCN,0) % 10 ;    // NEXT right most digit
           calc = calc *2;                                 // multiply the digit by two
           // Instead of some screwy method of converting 16 to a string and then parsing 1 and 6 and then adding them to make 7,
           // I use a simple switch statement to change the value of calc2 to 7 if 16 is the multiple.

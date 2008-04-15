@@ -21,7 +21,7 @@ SC.SourceListView = SC.CollectionView.extend(
   /**
     name of property on the content object to use for the source list text.
   */
-  contentValueProperty: null,
+  contentValueKey: null,
   
   /**
     Set to YES if you want source list items to display an icon.

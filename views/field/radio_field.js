@@ -5,24 +5,39 @@
 
 require('views/field') ;
 
-// A RadioFieldView can be used to wrap a series of radio inputs.  The value
-// of this field will be the selected radio.  To use this, you really need to
-// provide some preformatted HTML that already contains the radio buttons with
-// matching name attributes.  If you use the form_view helpers, this will be
-// handled for you.
-SC.RadioFieldView = SC.FieldView.extend({
+/**
+  @class
+  
+  A RadioFieldView can be used to wrap a series of radio inputs.  The value
+  of this field will be the selected radio.  To use this, you really need to
+  provide some preformatted HTML that already contains the radio buttons with
+  matching name attributes.  If you use the form_view helpers, this will be
+  handled for you.
+  
+  @extends SC.FieldView
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.RadioFieldView = SC.FieldView.extend(
+/** @scope SC.RadioFieldView.prototype */ {
   
   emptyElement: '<div></div>',
   
-  // RO - returns the list of values allowed by these radio buttons.
+  /**
+    RO - The list of values allowed by these radio buttons.
+    
+    @field
+  */
   values: function() {
     if (!this._fields) return [] ;
     return Object.keys(this._fields) ;
   }.property(),
   
-  // If you would like your radio buttons to map to actual object values,
-  // then set this to a hash with keys matching values found in the radio
-  // buttons.
+  /**
+    If you would like your radio buttons to map to actual object values,
+    then set this to a hash with keys matching values found in the radio
+    buttons.
+  */  
   objects: null,
   
   // INTERNAL SUPPORT METHODS

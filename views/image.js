@@ -52,7 +52,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     
     This is the image you want the view to display.  It should be either a
     url or css class name.  You can also set the content and 
-    contentValueProperty properties to have this value extracted 
+    contentValueKey properties to have this value extracted 
     automatically.
     
     If you want to use CSS spriting, set this value to a CSS class name.  If
@@ -152,7 +152,6 @@ SC.ImageView = SC.View.extend(SC.Control,
   
   init: function() {
     arguments.callee.base.apply(this,arguments) ;
-    this.initControl() ;
     this.valueObserver() ;
     if (this.rootElement.src) {
       this.set('imageWidth',parseInt(this.rootElement.width,0)) ;

@@ -3,9 +3,19 @@
 // copyright 2006-2007 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/text_field') ;
+require('views/field/text_field') ;
 
-SC.TextareaFieldView = SC.TextFieldView.extend({
+/**
+  @class
+  
+  Manages a text area field.
+  
+  @extends SC.TextFieldView
+  @author Skip Baney
+  @version 1.0
+*/
+SC.TextareaFieldView = SC.TextFieldView.extend(
+/** @scope SC.TextareaFieldView.prototype */ {
   
   emptyElement: '<textarea></textarea>',
 

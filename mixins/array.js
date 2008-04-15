@@ -330,7 +330,8 @@ Array.prototype.collect = Array.prototype.map ;
 // it is returned as is.  If it is not an array, it is placed into one.  If
 // it is null, an empty array is returned.
 Array.asArray = function (array) {
-  if(array && (array.length === undefined)) {
+  if(array && 
+      ((array.length === undefined) || ($type(array) == T_FUNCTION))) {
     return [array]; 
   }
   return (array) ? array : [] ;

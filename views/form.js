@@ -5,7 +5,7 @@
 
 require('views/view') ;
 require('views/button') ;
-require('views/text_field') ;
+require('views/field/text_field') ;
 
 // FormView provides a simple way for you to "stage" input by capturing
 // data from your views into the form before it is set on your actual

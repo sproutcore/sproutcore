@@ -5,9 +5,19 @@
 
 require('views/field') ;
 
-// A text field is an input element with type "text".  This view adds support
-// for hinted values, etc.
-SC.CheckboxFieldView = SC.FieldView.extend({
+/**
+  @class
+  
+  Supports using platform native checkboxs with the input field.  If you 
+  would like to make use of the extended SproutCore checkbox features
+  including a mixed state and theming support, use SC.CheckboxView instead.
+  
+  @extends SC.FieldView
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.CheckboxFieldView = SC.FieldView.extend(
+/** @scope SC.CheckboxFieldView.prototype */ {
   
   emptyElement: '<input type="checkbox" value="1" />',
   
@@ -19,7 +29,7 @@ SC.CheckboxFieldView = SC.FieldView.extend({
     return this.rootElement.checked;
   },
   
-  valueBindingDefault: SC.Binding.Flag,
+  valueBindingDefault: SC.Binding.Bool,
   
   init: function() {
     arguments.callee.base.apply(this,arguments) ;

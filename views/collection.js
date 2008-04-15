@@ -332,7 +332,7 @@ SC.CollectionView = SC.View.extend(
     value of this property as a key on the content object to determine the
     value they should display.
     
-    For example, if you set contentValueProperty to 'name' and set the 
+    For example, if you set contentValueKey to 'name' and set the 
     exampleView to an SC.LabelView, then the label views created by the 
     colleciton view will display the value of the content.name.
     
@@ -341,7 +341,7 @@ SC.CollectionView = SC.View.extend(
     view.  You can also ignore this property if you like.  The collection view
     itself does not use this property to impact rendering.
   */
-  contentValueProperty: null,
+  contentValueKey: null,
 
   /**
     Enables keyboard-based navigate if set to true.

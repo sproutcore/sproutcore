@@ -9,7 +9,18 @@
 // ==========================================================================
 
 require('validators/validator') ;
-SC.Validator.Password = SC.Validator.extend({
+
+/**
+  Ensures all fields with the Password validator attached in the same form
+  contain the same value.
+  
+  @class
+  @extends SC.Validator
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.Validator.Password = SC.Validator.extend(
+/** @scope SC.Validator.Password.prototype */ {
 
   attachTo: function(form,field) {
     argments.callee.base.call(this,form,field) ;

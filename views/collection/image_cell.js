@@ -41,7 +41,7 @@ SC.ImageCellView = SC.View.extend(SC.Control,
   */
   formatter: null,
   
-  contentValueProperty: null,
+  contentValueKey: null,
   
   /**
     This is the required margin you want to appear around the image.  Expressed in px
@@ -99,7 +99,7 @@ SC.ImageCellView = SC.View.extend(SC.Control,
     Invoked whenever the monitored value on the content object 
     changes.
     
-    The value processed is either the contentValueProperty, if set, or 
+    The value processed is either the contentValueKey, if set, or 
     it is the content object itself.
   */
   _valueDidChange: function() {

@@ -24,7 +24,7 @@ SC.TextCellView = SC.View.extend(SC.Control,
     The value of the text cell.
     
     You may also set the value using a content object and a 
-    contentValueProperty.
+    contentValueKey.
     
     @field {String}
   */
@@ -62,7 +62,7 @@ SC.TextCellView = SC.View.extend(SC.Control,
   */
   formatter: null,
   
-  contentValueProperty: null,
+  contentValueKey: null,
     
   /** 
     @private
@@ -70,7 +70,7 @@ SC.TextCellView = SC.View.extend(SC.Control,
     Invoked whenever the monitored value on the content object 
     changes.
     
-    The value processed is either the contentValueProperty, if set, or 
+    The value processed is either the contentValueKey, if set, or 
     it is the content object itself.
   */
   _valueDidChange: function() {

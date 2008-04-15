@@ -5,9 +5,11 @@
 
 require('views/label');
 
-// The ErrorExplanation view is a special type of label view that can display
-// one or more errors related to a form or field.  This view will set itself
-// to visible only if it has errors.
+/**
+  The ErrorExplanation view is a special type of label view that can display
+  one or more errors related to a form or field.  This view will set itself
+  to visible only if it has errors.
+*/
 SC.ErrorExplanationView = SC.LabelView.extend({
 
   emptyElement: '<ul class="errors"></ul>',

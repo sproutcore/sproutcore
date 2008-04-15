@@ -5,17 +5,30 @@
 
 require('views/field') ;
 
-// A text field is an input element with type "text".  This view adds support
-// for hinted values, etc.
-SC.TextFieldView = SC.FieldView.extend({
+/**
+  @class
+  
+  A text field is an input element with type "text".  This view adds support
+  for hinted values, etc.
+  
+  @extends SC.FieldView
+  @author Charles Jolley
+*/
+SC.TextFieldView = SC.FieldView.extend(
+/** @scope SC.TextFieldView.prototype */ {
   
   emptyElement: '<input type="text" value="" />',
 
   // PROPERTIES
-  // set this property to the hinted value.
+
+  /**
+    The hint to display while the field is not active.  Can be a loc key.
+  */  
   hint: null,
   
-  // automatically set by text field if the hint is current showing.
+  /**
+    automatically set to YES if the hint is currently showing.
+  */
   isHintShowing: false,
 
 
@@ -59,7 +72,10 @@ SC.TextFieldView = SC.FieldView.extend({
       this.resignFirstResponder() ;
     }
   },
-  
+
+  /**
+    tied to the isEnabled state
+  */
   acceptsFirstResponder: function() {
     return this.get('isEnabled');
   }.property('isEnabled'),
@@ -70,6 +86,7 @@ SC.TextFieldView = SC.FieldView.extend({
 
   // when we become first responder, focus the text field if needed and
   // hide the hint text.
+  /** @private */
   didBecomeFirstResponder: function() {
 
     // focus the text field.
@@ -87,6 +104,7 @@ SC.TextFieldView = SC.FieldView.extend({
 
   // when we lose first responder, blur the text field if needed and show
   // the hint text if needed.
+  /** @private */
   willLoseFirstResponder: function() {
     
     if (this._isFocused) {
@@ -116,16 +134,19 @@ SC.TextFieldView = SC.FieldView.extend({
   },
   
   // field value updates...
+  /** @private */
   getFieldValue: function() {
     return this._value ;
   },
   
+  /** @private */
   setFieldValue: function(value) {
     if (this._value == value) return ;
     this._value = value ;
     this._updateFieldHint() ;
   },
   
+  /** @private */
   mouseDown: function(e)
   {
     e._stopWhenHandled = false;
@@ -133,6 +154,7 @@ SC.TextFieldView = SC.FieldView.extend({
   },
   
   // trap key-press events and notify as needed.
+  /** @private */
   keyDown: function(evt) {
     if (this._value != this.rootElement.value) {
       this._value = this.rootElement.value ;
@@ -143,6 +165,7 @@ SC.TextFieldView = SC.FieldView.extend({
     //return false;
   },
   
+  /** @private */
   keyUp: function() {
     if (this._value != this.rootElement.value) {
       this._value = this.rootElement.value ;
@@ -162,18 +185,44 @@ SC.TextFieldView = SC.FieldView.extend({
   // THESE ARE DUMMY IMPLEMENTATIONS OF THE REPONDER METHODS FOR KEYBOARD
   // ACTIONS HANDLED BY THE BROWSER.  This avoids having the responder 
   // bubble up these items.
+
+  /** @private */
   deleteBackward: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   deleteForward: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveLeft: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveRight: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveUp: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveDown: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveLeftAndModifySelection: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveRightAndModifySelection: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveUpAndModifySelection: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveDownAndModifySelection: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveToBeginningOfDocument: function(evt) { evt._stopWhenHandled = false; return true; },
+
+  /** @private */
   moveToEndOfDocument: function(evt) { evt._stopWhenHandled = false; return true; },
+  
+  /** @private */
   selectAll: function(evt) { evt._stopWhenHandled = false; return true; }
   
 }) ;

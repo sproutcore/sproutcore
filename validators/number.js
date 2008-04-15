@@ -5,10 +5,24 @@
 
 require('validators/validator') ;
 
-// Handle the parsing and display of numbers.
-SC.Validator.Number = SC.Validator.extend({
+/**
+  Handles parsing and validating of numbers.
+  
+  @extends SC.Validator
+  @author Charles Jolley
+  @version 1.0
+  @class
+*/
+SC.Validator.Number = SC.Validator.extend(
+/** @scope SC.Validator.Number.prototype */ {
 
-  places: 0, // 0 to force int. otherwise fixed.
+  /**
+    Number of decimal places to show.  
+    
+    If 0, then numbers will be treated as integers.  Otherwise, numbers will
+    show with a fixed number of decimals.
+  */
+  places: 0,
   
   fieldValueForObject: function(object, form, field) {
     switch($type(object)) {

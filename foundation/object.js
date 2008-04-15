@@ -6,6 +6,7 @@
 require('Core') ;
 require('foundation/benchmark') ;
 require('mixins/observable') ;
+require('mixins/array') ;
 
 SC.BENCHMARK_OBJECTS = NO;
 
@@ -229,7 +230,7 @@ Object.extend(SC.Object, {
     var concats = {} ;
     if (cprops) for(var cloc=0;cloc<cprops.length;cloc++) {
       var p = cprops[cloc]; var p1 = base[p]; var p2 = ext[p] ;
-      p1 = (p1 && p2) ? p1.concat(p2) : (p1 || p2) ;
+      p1 = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
       concats[p] = p1 ;
     }
     
@@ -441,6 +442,12 @@ SC.Object.prototype = {
       }
     }
 
+    // Call 'initMixin' methods to automatically setup modules.
+    if (this.initMixin) {
+      var inc = Array.from(this.initMixin) ;
+      for(var idx=0; idx < inc.length; idx++) inc[idx].call(this);
+    }
+    
     if (r) { SC.idt.t += ((new Date().getTime()) - idtStart); }
   },
   
@@ -619,7 +626,7 @@ SC.Object.prototype = {
     return SC.runLoop.schedule.apply(SC.runLoop,args) ; 
   },
   
-  _cprops: ['_cprops','outlets','_bindings','_observers','_properties']  
+  _cprops: ['_cprops','outlets','_bindings','_observers','_properties', 'initMixin']  
 
 } ;
 
@@ -630,126 +637,6 @@ function logChange(target,key,value) {
   console.log("CHANGE: " + target + "["+key+"]=" + value) ;
 }
 
-// ........................................................................
-// FUNCTION ENHANCEMENTS
-//
-// Enhance function.
-Object.extend(Function.prototype,{
-  
-  // Declare a function as a property.  This makes it something that can be
-  // accessed via get/set.
-  property: function() {
-    this.dependentKeys = $A(arguments) ; 
-    this.isProperty = true; return this; 
-  },
-  
-  // Declare that a function should observe an object at the named path.  Note
-  // that the path is used only to construct the observation one time.
-  observes: function(propertyPaths) { 
-    this.propertyPaths = $A(arguments); 
-    return this;
-  },
-  
-  typeConverter: function() {
-    this.isTypeConverter = true; return this ;
-  }
-  
-}) ;
-
-// ........................................................................
-// OBSERVER QUEUE
-//
-// This queue is used to hold observers when the object you tried to observe
-// does not exist yet.  This queue is flushed just before any property 
-// notification is sent.
-SC.Observers = {
-  queue: {},
-  
-  addObserver: function(propertyPath, func) {
-    // try to get the tuple for this.
-    if (typeof(propertyPath) == "string") {
-      var tuple = SC.Object.tupleForPropertyPath(propertyPath) ;
-    } else {
-      var tuple = propertyPath; 
-    }
-    
-    if (tuple) {
-      tuple[0].addObserver(tuple[1],func) ;
-    } else {
-      var ary = this.queue[propertyPath] || [] ;
-      ary.push(func) ;
-      this.queue[propertyPath] = ary ;
-    }
-  },
-  
-  removeObserver: function(propertyPath, func) {
-    var tuple = SC.Object.tupleForPropertyPath(propertyPath) ;
-    if (tuple) {
-      tuple[0].removeObserver(tuple[1],func) ;
-    }
-    
-    var ary = this.queue[propertyPath] ;
-    if (ary) {
-      ary = ary.without(func) ;
-      this.queue[propertyPath] = ary ;
-    }
-  },
-  
-  flush: function() {
-    var newQueue = {} ;
-    for(var path in this.queue) {
-      var funcs = this.queue[path] ;
-      var tuple = SC.Object.tupleForPropertyPath(path) ;
-      if (tuple) {
-        var loc = funcs.length ;
-        while(--loc >= 0) {
-          var func = funcs[loc] ;
-          tuple[0].addObserver(tuple[1],func) ;
-        }
-      } else newQueue[path] = funcs ;
-    }
-    
-    // set queue to remaining items
-    this.queue = newQueue ; 
-  }
-} ;
-
-// ........................................................................
-// NOTIFCATION QUEUE
-//
-// Property notifications are placed into this queue first and then processed
-// to keep the stack size down.
-SC.NotificationQueue = {
-  queue: [],
-  maxFlush: 5000, // max time you can spend flushing before we reschedule.
-  _flushing: false,
-  add: function(target, func, args) { this.queue.push([target, func, args]);},
-  flush: function(force) {
-    if (this._flushing && !force) return ;
-    this._flushing = true ;
-    
-    var start = new Date().getTime() ;
-    var now = start ;
-    var n = null ;
-    while(((now - start) < this.maxFlush) && (n = this.queue.pop())) { 
-      try {
-        var t = n[0] || n[1] ;
-        n[1].apply(t,n[2]) ;
-      }
-      catch(e) {
-        console.log("Exception while notify("+n[2]+"): " + e) ;
-      } // catch  
-      now = Date.now() ;
-    }
-    this._flushing = false ;
-    
-    if (this.queue.length > 0) { 
-      setTimeout(this._reflush,1); 
-    }
-  },
-  
-  _reflush: function() { SC.NotificationQueue.flush(); }
-} ;
 
 // ........................................................................
 // CHAIN OBSERVER

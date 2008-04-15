@@ -71,7 +71,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     
     If null, then the content object itself will be used..
   */
-  contentValueProperty: null,
+  contentValueKey: null,
   
   /**
     (displayDelegate) The name of the property used to find the count of 
@@ -137,7 +137,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     }
     
     // handle label
-    var labelKey = this.getDelegateProperty(del, 'contentValueProperty') ;
+    var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
     var label = (labelKey && content && content.get) ? content.get(labelKey) : null ;
     html.push('<span class="sc-label">') ;
     html.push(label || '') ;

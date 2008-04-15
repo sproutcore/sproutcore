@@ -5,13 +5,31 @@
 
 require('validators/validator') ;
 
-// Handle the parsing and display of dates.
-SC.Validator.Date = SC.Validator.extend({
+/**
+  Handle parsing and display of dates.
+  
+  @class
+  @extends SC.Validator
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.Validator.Date = SC.Validator.extend(
+/** @scope SC.Validator.Date.prototype */ {
 
+  /**
+    The standard format you want the validator to convert dates to.
+  */
   format: 'NNN d, yyyy h:mm:ss a',
+  
+  /**
+    If true, dates will be converted to a natural language format if
+    possible such as "Tomorrow" or "Today".
+  */
   naturalLanguage: true,
   
-  // if we have a number, then convert to a date object.
+  /**
+    if we have a number, then convert to a date object.
+  */
   fieldValueForObject: function(object, form, field) {
     var date ;
     if (typeof(object) == "number") {
@@ -23,8 +41,10 @@ SC.Validator.Date = SC.Validator.extend({
     return object ;
   },
 
-  // try to pase value as a date. convert into a number, or return null if
-  // it could not be parsed.
+  /**
+    Try to pase value as a date. convert into a number, or return null if
+    it could not be parsed.
+  */
   objectForFieldValue: function(value, form, field) {
     if (value) {
       var date = Date.parseDate(value) ;

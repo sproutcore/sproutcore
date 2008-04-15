@@ -265,7 +265,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
     arguments.callee.base.call(this) ;
     
     // setup initial CSS clases
-    this.initControl() ;
     this._isDefaultOrCancelObserver() ;
     
     // If we need to localze, handle it...

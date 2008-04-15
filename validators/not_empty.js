@@ -7,7 +7,17 @@
 // ==========================================================================
 
 require('validators/validator') ;
-SC.Validator.NotEmpty = SC.Validator.extend({
+
+/**
+  Requires some content in field, but does not check the specific content.
+  
+  @class
+  @extends SC.Validator
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.Validator.NotEmpty = SC.Validator.extend(
+/** @scope SC.Validator.NotEmpty.prototype */ {
   
   validate: function(form, field) {
     var value = field.get('fieldValue'); 
