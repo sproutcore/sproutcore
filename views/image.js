@@ -75,7 +75,7 @@ SC.ImageView = SC.View.extend(SC.Control,
   */
   transform: function(content) { return content; },
   
-  valueDidChange: function() {
+  valueObserver: function() {
     
     // get the new URL.
     var value = this.get('value') ;
@@ -109,7 +109,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     } else if (this._valueIsUrl(value)) {
       this.beginPropertyChanges() ;
       this.set('status', SC.IMAGE_STATE_LOADING) ;
-      SC.imageCache.loadImage(url, this, this._onLoadComplete) ;
+      SC.imageCache.loadImage(value, this, this._onLoadComplete) ;
       this.endPropertyChanges() ;
       
     // if the new is a CSS class name, set an empty image and add class name 
@@ -121,7 +121,7 @@ SC.ImageView = SC.View.extend(SC.Control,
       this.rootElement.src = SC.BLANK_IMAGE_URL ;
       this.set('status', SC.IMAGE_STATE_LOADED) ;
     }
-  },
+  }.observes('value'),
   
   /**
     Returns YES if the passed value looks like an URL and not a CSS class
@@ -153,7 +153,7 @@ SC.ImageView = SC.View.extend(SC.Control,
   init: function() {
     arguments.callee.base.apply(this,arguments) ;
     this.initControl() ;
-    this.valueDidChange() ;
+    this.valueObserver() ;
     if (this.rootElement.src) {
       this.set('imageWidth',parseInt(this.rootElement.width,0)) ;
       this.set('imageHeight',parseInt(this.rootElement.height,0)) ;

@@ -119,7 +119,7 @@ SC.ImageCellView = SC.View.extend(SC.Control,
     if (value != null && value.toString) value = value.toString() ;
 
     // 3. Apply URL to image view.
-    this.outlet('imageView').set('content', value) ;
+    this.outlet('imageView').set('value', value) ;
   }.observes('value')
  
 }) ;
