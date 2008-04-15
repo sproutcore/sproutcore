@@ -142,7 +142,7 @@ body.sc-theme {
 }
 
 .sc-theme.focus .sc-collection-view.sc-source-list-view .sel {
-	background: url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') 0 0px;
+	background: static_url('images/buttons-sprite.png') 0 0px;
 	color: white ;
 	border-top: 1px solid #5a3f62;
 }
@@ -177,13 +177,13 @@ body.sc-theme {
 	display: block;
 	top: 6px;
 	padding-left: 9px;
-	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') left -51px;
+	background: no-repeat static_url('images/buttons-sprite.png') left -51px;
 }
 
 .sc-theme .sc-source-list-view .sc-count .inner {
 	display: block ;
 	padding-right: 9px;
-	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') right -33px;
+	background: no-repeat static_url('images/buttons-sprite.png') right -33px;
 	min-width: 10px ;
 	text-align: center ;
 	font-weight: bold ;
@@ -195,12 +195,15 @@ body.sc-theme {
 	color: white;
 }
 
-.sc-theme .sc-source-list-view .sel .sc-count {
-	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') left -87px;
+.sc-theme .sc-source-list-view .sel .sc-count,
+.sc-theme.blur .sc-source-list-view .sc-count {
+	background: no-repeat static_url('images/buttons-sprite.png') left -87px;
 }
-.sc-theme .sc-source-list-view .sel .sc-count .inner {
+
+.sc-theme .sc-source-list-view .sel .sc-count .inner,
+.sc-theme.blur .sc-source-list-view .sc-count .inner {
 	color: #372a3c;
-	background: no-repeat url('/static/sproutcore/_src/english.lproj/images/buttons-sprite.png') right -69px;
+	background: no-repeat static_url('images/buttons-sprite.png') right -69px;
 }
 
 /* @end */

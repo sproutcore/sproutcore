@@ -318,7 +318,7 @@ SC.window = SC.PaneView.extend({
   },
   
   _onblur: function() {
-    if (!this._hasFocus) {
+    if (this._hasFocus) {
       this._hasFocus = NO ;
       this.removeClassName('focus') ;
       this.addClassName('blur');
