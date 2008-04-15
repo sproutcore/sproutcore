@@ -28,6 +28,7 @@
 
 .sc-scroll-view {
 	overflow:  hidden;
+	position: relative;
 }
 
 .sc-scroll-view.sc-scroll-vertical {
