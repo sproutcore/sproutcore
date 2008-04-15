@@ -5,13 +5,13 @@
 
 require('views/view') ;
 require('views/label') ;
+require('mixin/control') ;
 
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';
 SC.PUSH_BEHAVIOR =   'push';
 SC.TOGGLE_ON_BEHAVIOR = "on";
 SC.TOGGLE_OFF_BEHAVIOR = "off" ;  
-SC.MIXED_STATE = '__MIXED__' ;
 
 /** @class
 
@@ -19,12 +19,15 @@ SC.MIXED_STATE = '__MIXED__' ;
   enabled or disabled state.
   
   @extends SC.View
-*/
-SC.ButtonView = SC.View.extend(
-  /** @scope SC.ButtonView.prototype */ 
-  {
+  @extends SC.Control
+  @author Charles Jolley
+  @version 1.0
   
-  emptyElement: '<a href="javascript:;" class="regular"><span class="button-inner"><span class="label"></span></span></a>',
+*/
+SC.ButtonView = SC.View.extend(SC.Control,
+/** @scope SC.ButtonView.prototype */ {
+  
+  emptyElement: '<a href="javascript:;" class="sc-button-view regular"><span class="button-inner"><span class="label"></span></span></a>',
   
   // PROPERTIES
   
@@ -81,8 +84,7 @@ SC.ButtonView = SC.View.extend(
     should set a class name on the HTML with the same value to allow CSS 
     styling.
     
-    The default SproutCore theme supports "regular", "back", "checkbox", and
-    "radio"
+    The default SproutCore theme supports "regular", "checkbox", and "radio"
   */
   theme: 'regular',
   
@@ -113,70 +115,74 @@ SC.ButtonView = SC.View.extend(
   buttonBehavior: SC.PUSH_BEHAVIOR,
   
   /**
-    set to false to disable the button. clicks will be ignored.
+    If NO the button will be disabled. 
     
-    @type bool
+    @type Bool
   */  
-  isEnabled: true,
-  isEnabledBindingDefault: SC.Binding.OneWayBool,
+  isEnabled: YES,
   
   /**
-    this is the buttons selection state.  Returns true, false or SC.MIXED_STATE.
+    button's selection state.  Returns YES, NO, or SC.MIXED_STATE
   */
-  isSelected: false,
-  isSelectedBindingDefault: SC.Binding.OneWayBool,
+  isSelected: NO,
 
   /**
-    if set to true, then this button will be triggered when you hit return
-    while focused on a form view.  This will also apply the 'def' class name
-    to the button.
+    If YES, then this button will be triggered when you hit return.
+    
+    This is the same as setting the keyEquivalent to 'return'.  This will also
+    apply the "def" classname to the button.
   */
-  isDefault: false,
+  isDefault: NO,
   isDefaultBindingDefault: SC.Binding.OneWayBool,
   
   /**
-    is set to true, then this button will be triggered when you hit escape
-    inside a pane.
+    If YES, then this button will be triggered when you hit escape.
+    
+    This is the same as setting the keyEquivalent to 'escape'.
   */  
-  isCancel: false,
+  isCancel: NO,
   isCancelBindingDefault: SC.Binding.OneWayBool,
   
   /**
-    set to true if you want the internal element with the class name 
-    'label' to be localized on init.
+    If YES, then the title will be localized.
   */
-  localize: false,
+  localize: NO,
   
   /**
-    this property can be used to edit the contents of the label element,
-    (if there is one).
+    The selector path to the element that contains the button title. 
+    
+    This property is only used if you try to get or set the title property.
   */
-  labelText: function(key, value) {
+  titleSelector: '.label',
+  
+  /**
+    The button title.
+    
+    This property is observable and bindable.
+    
+    @field {String}
+  */
+  title: function(key, value) {
+    
     // set the value of the label text.  Possibly localize and set innerHTML.
     if (value !== undefined) {
-      if (this._labelText != value) {
-        var text = this._labelText = value ;
-        var lsel = this.get('labelSelector') ;
+      if (this._title != value) {
+        var text = this._title = value ;
+        var lsel = this.get('titleSelector') ;
         var el = (lsel) ? this.$sel(lsel) : this.rootElement ;
 
         if (this.get('localize')) text = text.loc() ;
-        if (el) Element.update(el, text) ;
+        el.innerHTML = text ;
       }
-      
-      // lazily fetch the label text.  This only happens if localization is
-      // turned off.
-      if (!this._labelText) {
-        var el = this.$sel(this.labelSelector) ;
-        this._labelText = (el) ? el.innerHTML : '' ;
-      }
-      return this._labelText ;
     }
-    
-    // return value.
-    return this._labelText ;
+
+    // lazily fetch the label text.
+    if (!this._title) {
+      var el = this.$sel(this.get('titleSelector')) ;
+      this._title = (el) ? el.innerHTML : '' ;
+    }
+    return this._title ;
   }.property(),
-  
-  labelSelector: '.label',
   
   /**
     The name of the action you want triggered when the button is pressed.  
@@ -257,16 +263,21 @@ SC.ButtonView = SC.View.extend(
   /** @private */
   init: function() {
     arguments.callee.base.call(this) ;
-    this._updateClassForState() ;
     
+    // setup initial CSS clases
+    this.initControl() ;
+    this._isDefaultOrCancelObserver() ;
+    
+    // If we need to localze, handle it...
     var el ;
-    var lsel = this.get('labelSelector') ;
-    if (this.get('localize') && (el = (lsel) ? this.$sel(lsel) : this.rootElement)) {
-      this._labelText = el.innerHTML.strip() ;
-      Element.update(el, this._labelText.loc()) ;
+    var sel = this.get('titleSelector') ;
+    if (this.get('localize') && sel && (el = this.$sel(sel))) {
+      this._title = (el.innerHTML || '').strip() ;
+      el.innerHTML = this._title.loc() ;
     }
   },
 
+  // determines the target selected state
   _selectedStateFromValue: function(value) {
     var targetValue = this.get('toggleOnValue') ;
     var state ;
@@ -275,7 +286,7 @@ SC.ButtonView = SC.View.extend(
       if (value.length == 1) {
         state = (value[0] == targetValue) ;
       } else {
-        state = (value.include(targetValue)) ? SC.MIXED_STATE : false ;
+        state = (value.indexOf(targetValue) >= 0) ? SC.MIXED_STATE : false ;
       }
     } else {
       state = (value == targetValue) ;
@@ -288,53 +299,46 @@ SC.ButtonView = SC.View.extend(
     if (target != this) return ;
 
     // handle changes to the value
-    if (key == 'value') {
+    switch(key) {
+
       // determine the new selection state.
-      value = this.get('value') ;
-      if (value == this._value) return ; // process value one time.
-      this._value = value ;
+      case 'value':
+        value = this.get('value') ;
+        if (value == this._value) return ; // process value one time.
+        this._value = value ;
       
-      // if the new selected state does not match the computed value, set it.
-      var state = this._selectedStateFromValue(value) ;
-      if (!(this.get('isSelected') == state)) {
-        this.set('isSelected', state) ;
-        this._updateClassForState() ;
-      }
-      
-    // handle changes to the selected state
-    // forward to value if needed...
-    } else if (key == "isSelected") {
-      var newState = this.get('isSelected') ;
-      var curState = this._selectedStateFromValue(this.get('value')) ;
-      if (curState != newState) {
-        var valueKey = (newState) ? 'toggleOnValue' : 'toggleOffValue' ;
-        this.set('value', this.get(valueKey)) ;
-      }
-      this._updateClassForState() ;
-      
-    // otherwise, handle changes to the isEnabled or isDefault states...
-    } else if ((key == 'isEnabled') || (key == 'isDefault')) {
-      this._updateClassForState() ;
+        // set the new selected state if it does not match
+        var state = this._selectedStateFromValue(value) ;
+        this.setIfChanged('isSelected', state) ;
+        break ;
+
+      // forward to value if needed.
+      case 'isSelected':
+        var newState = this.get('isSelected') ;
+        var curState = this._selectedStateFromValue(this.get('value')) ;
+        if (curState != newState) {
+          var valueKey = (newState) ? 'toggleOnValue' : 'toggleOffValue' ;
+          this.set('value', this.get(valueKey)) ;
+        }
+        break ;
+        
+      // otherwise do nothing
+      default:
+        break ;
     }
   },
   
-  _updateClassForState: function() {
-    var enabled = !!this.get('isEnabled') ; // force to bool.
-    var tagName = this.rootElement.tagName.toLowerCase() ;
-    if (tagName == "button") {
-      this.rootElement.disabled = !enabled ;
-    }
+  _isDefaultOrCancelObserver: function() {
+    var isDef = !!this.get('isDefault') ;
+    var isCancel = !isDef && this.get('isCancel') ;
+
+    this.setClassName('def', isDef) ;
+
+    var key = this.get('keyEquivalent') ;
+    if (isDef && key != 'return') this.set('keyEquivalent', 'return') ;
+    if (isCancel && key != 'escape') this.set('keyEquivalent', 'escape') ;
+  }.observes('isDefault', 'isCancel'),
     
-    this.setClassName('disabled', !enabled) ;
-    this.setClassName('def', this.get('isDefault')) ;
-    
-    // handle selected state.
-    var sel =this.get('isSelected') ;
-    var mixed = (sel == SC.MIXED_STATE) ;
-    this.setClassName('mixed', mixed) ;
-    this.setClassName('sel', ((mixed) ? false : sel)) ;
-  },
-  
   // on mouse down, set active only if enabled.  
   /** @private */
   mouseDown: function(evt) {

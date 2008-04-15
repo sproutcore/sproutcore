@@ -4,16 +4,16 @@
 
 /* @group Button Core */
 
-a.button:active,
-a.button:focus {
+a.sc-button-view:active,
+a.sc-button-view:focus {
 	outline: none ;	
 }
 
-a.button {
+a.sc-button-view {
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	user-select: none;
-	cursor: pointer;
+  cursor: default;
 	text-decoration: none ;
 	color: black ;
 	border: none ;
@@ -21,7 +21,7 @@ a.button {
 	margin: 0;
 }
 
-a.button img {
+a.sc-button-view img {
 	border: none ;
 }
 

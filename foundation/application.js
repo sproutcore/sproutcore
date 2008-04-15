@@ -12,7 +12,8 @@ require('foundation/responder');
 * @copyright 2006-2007, Sprout Systems, Inc. and contributors.
 * @version 0.1
 */
-SC.Application = SC.Responder.extend( /** @scope SC.Application.prototype */ {
+SC.Application = SC.Responder.extend( 
+/** @scope SC.Application.prototype */ {
   
   /**
   * The pane that is currently receiving key events.

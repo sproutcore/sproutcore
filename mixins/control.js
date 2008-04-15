@@ -4,6 +4,11 @@
 // ========================================================================
 
 /**
+  Indicates a value has a mixed state of both on and off.
+*/
+SC.MIXED_STATE = '__MIXED__' ;
+
+/**
   A Control is a view that also implements some basic state functionality.
   Apply this mixin to any view that you want to have standard control
   functionality including showing a selected state, enabled state, focus
@@ -64,6 +69,9 @@ SC.Control = {
   */
   initControl: function() {
     this._contentObserver(); // setup content observing if needed.
+    this._isSelectedObserver() ;
+    this._isEnabledObserver() ;
+    this._isFocusedObserver(); 
   },
   
   /** 
@@ -72,6 +80,7 @@ SC.Control = {
     This property is observable and bindable.
   */
   isSelected: false,
+  isSelectedBindingDefault: SC.Binding.OneWayBool,
 
   /** 
     Set to true when the item is enabled. 
@@ -79,6 +88,7 @@ SC.Control = {
     This property is observable and bindable.
   */
   isEnabled: true,
+  isEnabledBindingDefault: SC.Binding.OneWayBool,
   
   /**
     The value represented by this control.
@@ -143,24 +153,32 @@ SC.Control = {
   },
   
   /** @private
-    By default, adds the 'sel' CSS class if selected. 
+    By default, adds the 'sel' CSS class if selected or mixed if mixed.
   */
   _isSelectedObserver: function() {
-    this.setClassName('sel', this.get('isSelected')) ;
+    var sel = this.get('isSelected') ;
+    this.setClassName('mixed', sel == SC.MIXED_STATE) ;
+    this.setClassName('sel', sel && (sel != SC.MIXED_STATE)) ;
   }.observes('isSelected'),
   
   /** @private
     By default, adds the disabled CSS class if disabled. 
   */
   _isEnabledObserver: function() {
-    this.setClassName('disabled', !this.get('isEnabled'));
+    var disabled = !this.get('isEnabled') ;
+    this.setClassName('disabled', disabled);
+
+    // set disabled attr as well if relevant
+    if (this.rootElement && (this.rootElement.disabled !== undefined) && (this.rootElement.disabled != disabled)) {
+      this.rootElement.disabled = disabled ;
+    }
   }.observes('isEnabled'),
   
   /** @private
     Add a focus CSS class whenever the view has first responder status. 
   */
   _isFocusedObserver: function() {
-    this.setClassName('focus', this.get('isFirstResponder')) ;
+    this.setClassName('focus', !!this.get('isFirstResponder')) ;
   }.observes('isFirstResponder'),
   
   // This should be null so that if content is also null, the

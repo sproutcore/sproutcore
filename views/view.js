@@ -447,39 +447,49 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 
   // returns the CSS classNames for the element.
   classNames: function() { 
-    return Element.classNames(this.rootElement); 
+    if (!this._classNames) {
+      var classNames = this.rootElement.className;
+      this._classNames = (classNames && classNames.length > 0) ? classNames.split(' ') : [] ;
+    }
+    return this._classNames ;
   }.property(),
   
   // return true if the element has the classname.
   hasClassName: function(className) {
-    var ret = Element.hasClassName(this.rootElement,className) ;
-    this.propertyDidChange('classNames') ;
-    return ret ;
+    return (this._classNames || this.get('classNames')).indexOf(className) >= 0 ;
   },
 
   // add the specified class name.
   addClassName: function(className) {
-    var ret = Element.addClassName(this.rootElement,className) ;
+    if (this.hasClassName(className)) return ; // nothing to do
+
+    this.propertyWillChange('classNames') ;
+    var classNames = this._classNames || this.get('classNames') ;
+    classNames.push(className) ;
+    if (this.rootElement) this.rootElement.className = classNames.join(' ');
     this.propertyDidChange('classNames') ;
-    return ret ;
+    return className ;
   },
   
   // remove the specified class name.
   removeClassName: function(className) {
-    var ret = Element.removeClassName(this.rootElement,className) ;
+    if (!this.hasClassName(className)) return ; // nothing to do
+    
+    this.propertyWillChange('classNames') ;
+    var classNames = this._classNames || this.get('classNames') ;
+    classNames = this._classNames = classNames.without(className) ;
+    if (this.rootElement) this.rootElement.className = classNames.join(' ');
     this.propertyDidChange('classNames') ;
-    return ret ;
+    return className ;
   },
 
   setClassName: function(className, flag) {
-    (!!flag) ? this.addClassName(className) : this.removeClassName(className);
+    return (!!flag) ? this.addClassName(className) : this.removeClassName(className);
   },
   
   // toggler specified class name..
   toggleClassName: function(className) {
-    var ret = Element.toggleClassName(this.rootElement,className) ;
-    this.propertyDidChange('classNames') ;
-    return ret ;
+    return this.setClassName(className, !this.hasClassName(className)) ;
   },
 
   // get the named style. (see also style properties)
