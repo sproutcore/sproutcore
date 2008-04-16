@@ -90,7 +90,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (value == this._value) return ;
     
     // if the old value was a class name, then we need to remove it.
-    if (this._value && this._value.length>0 && !this._valueIsUrl(this._value)) {
+    if (this._value && this._value.length>0 && !SC.ImageView.valueIsUrl(this._value)) {
       var classNames = this._value.split(' ') ;
       var idx = classNames.length ;
       while(--idx >= 0) { 
@@ -106,7 +106,7 @@ SC.ImageView = SC.View.extend(SC.Control,
       this.set('status', SC.IMAGE_STATE_NONE) ;
       
     // if a new value was set that is a URL, load the image URL.
-    } else if (this._valueIsUrl(value)) {
+    } else if (SC.ImageView.valueIsUrl(value)) {
       this.beginPropertyChanges() ;
       this.set('status', SC.IMAGE_STATE_LOADING) ;
       SC.imageCache.loadImage(value, this, this._onLoadComplete) ;
@@ -123,13 +123,6 @@ SC.ImageView = SC.View.extend(SC.Control,
     }
   }.observes('value'),
   
-  /**
-    Returns YES if the passed value looks like an URL and not a CSS class
-    name.
-  */
-  _valueIsUrl: function(value) {
-    return (value.indexOf('/') >= 0) || (value.indexOf('.') >= 0) ;
-  },
 
   /** 
     Invoked once an image loads.  If an image has already been loaded,
@@ -160,6 +153,14 @@ SC.ImageView = SC.View.extend(SC.Control,
   }
   
 }) ;
+
+/**
+  Returns YES if the passed value looks like an URL and not a CSS class
+  name.
+*/
+SC.ImageView.valueIsUrl = function(value) {
+  return (value.indexOf('/') >= 0) || (value.indexOf('.') >= 0) ;
+} ;
 
 /**
   The image cache will create Image objects to preload a set of 

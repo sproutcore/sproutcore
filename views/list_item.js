@@ -50,21 +50,12 @@ SC.ListItemView = SC.View.extend(SC.Control,
   hasContentBranch: NO,
   
   /**
-    (displayDelegate) The name of the property used to get the icon URL.
-    
-    Set this property on the collection view or on a subclass.
-    Leave it null to keep the icon URL set to a blank GIF.
-  */
-  contentIconUrlProperty: null,
-  
-  /**
-    (displayDelegate) The name of the property used for the icon CSS class.
+    (displayDelegate) Property key to use for the icon url
 
-    This property will be checked on the content object for a CSS class name
-    to apply to the list item view's icon.  You can use either this property
-    of the iconUrlProperty to set the icon that should display.
+    This property will be checked on the content object to determine the 
+    icon to display.  It must return either a URL or a CSS class name.
   */
-  contentIconClassNameProperty: null,
+  contentIconKey: null,
   
   /**
     (displayDelegate) The name of the property used for label itself
@@ -80,7 +71,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     The count will only be visible if this property is not null and the 
     returned value is not 0.
   */
-  contentUnreadCountProperty: null,
+  contentUnreadCountKey: null,
   
   /**
     (displayDelegate) The name of the property used to determine if the item
@@ -90,24 +81,8 @@ SC.ListItemView = SC.View.extend(SC.Control,
     If this is null, then the branch view will be completely hidden.
     Otherwise space will be allocated for it.
   */
-  contentIsBranchProperty: null,
+  contentIsBranchKey: null,
   
-  
-  /**
-    (displayDelegate) The name of the property used to determine the action 
-    item to display.  
-    
-    This property value should be a CSS class name to apply to the action
-    icon that will display the appropriate glyph.  If the value is NO or
-    null, then no action will be displayed.
-  */
-  contentActionProperty: null,
-  
-  /**
-    (displayDelegate) Invoked when the user presses the action button.
-    Called first on the delegate.
-  */
-  itemAction: function(listItem, actionName) {},
   
   contentPropertyDidChange: function() {
     this.render() ;  
@@ -123,11 +98,17 @@ SC.ListItemView = SC.View.extend(SC.Control,
     
     // handle icon
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
-      var urlKey = this.getDelegateProperty(del,'contentIconUrlProperty') ;
-      var url = (urlKey && content && content.get) ? content.get(urlKey) : null ;
       
-      var classNameKey = this.getDelegateProperty(del,'contentIconClassNameProperty') ;
-      var className = (classNameKey && content && content.get) ? content.get(classNameKey) : null ;
+      var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
+      var icon = (iconKey && content && content.get) ? content.get(iconKey) : null ;
+
+      // get a class name and url to include if relevant
+      var url = null, className = null ;
+      if (icon && SC.ImageView.valueIsUrl(icon)) {
+        url = icon; className = '' ;
+      } else {
+        className = icon; url = static_url('blank.gif') ;
+      }
       
       html.push('<img class="sc-icon ');
       html.push(className || '');
@@ -144,7 +125,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     html.push('</span>') ;
     
     // handle unread count
-    var countKey = this.getDelegateProperty(del, 'contentUnreadCountProperty') ;
+    var countKey = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
     var count = (countKey && content && content.get) ? content.get(countKey) : null ;
     if ((count != null) && (count != 0)) {
       html.push('<span class="sc-count"><span class="inner">') ;
@@ -164,7 +145,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     
     // handle branch
     if (this.getDelegateProperty(del, 'hasContentBranch')) {
-      var branchKey = this.getDelegateProperty(del, 'contentIsBranchProperty');
+      var branchKey = this.getDelegateProperty(del, 'contentIsBranchKey');
       var hasBranch = (branchKey && content && content.get) ? 
         content.get(branchKey) : false ;
       html.push('<span class="sc-branch ');

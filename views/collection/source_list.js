@@ -41,53 +41,25 @@ SC.SourceListView = SC.CollectionView.extend(
     reveal a menu or another level of content. 
     
     To actually display a branch arrow, you must also set the 
-    contentIsBranchProperty.
+    contentIsBranchKey.
   */
   hasContentBranch: NO,
   
   /**
-    Name of the content object property that contains the icon url.
+    Name of the content object property that contains the icon .
     
     This is the *name* of the property you want the list items to inspect
     on content objects to retrieve an icon image URL.  For example, if you
     set this property to 'icon', then the icon displayed for each item will
     be the URL returned by content.get('icon').
-    
-    The list item will display a blank icon if this property or the property
-    you name return a null value.  Note that to display an icon at all, you 
-    must set hasContentIcon to YES.
-    
-    If you would prefer to use a CSS class name instead of an icon URL (for
-    example, if you want to use spriting), then you should set the
-    contentIconClassNameProperty instead.  If you do set the class name
-    property and this property together, then the class name property will
-    be used only if the value of this property is null.
-  */
-  contentIconUrlProperty: null,
 
-  /**
-    Name of the content object property that contains the icon class name.
-    
-    This is the *name* of the property you want the list items to inspect
-    on content objects to retrieve an css class name to apply to icon image.
-    For example, if you set this property to 'icon', then the icon displayed 
-    for each item will be the URL returned by content.get('icon').
-    
-    You would use this property if you want to use sprites to set the image
-    icon for a list item instead of setting the image directly. Spriting 
-    common icons can dramatically reduce the load time of your application.  
-    If you are using anything other than a custom icon for your icons, it is 
-    highly recommended that you use spriting and this property instead of 
-    setting image URLs directly.
-
-    No class name will be applied to the img tag if this property or the 
-    property you name return a null value.  Note that to display an icon at 
-    all, you must set hasContentIcon to YES.
-    
-    If you would prefer to use an image URL instead of an spriting then you 
-    should set the contentIconUrlProperty instead.
+    The value of this property must be either a URL or a CSS class name.  If
+    you use a CSS class name, then the image src will be set to a blank 
+    image and the class name will be applied automatically so you can use 
+    spriting.  If a URL is returned it will be set as the src property on
+    the image tag.
   */
-  contentIconClassNameProperty: null,
+  contentIconKey: null,
   
   /**
     Name of content object property that contains the unread count.
@@ -104,7 +76,7 @@ SC.SourceListView = SC.CollectionView.extend(
     
     If you do not want to use unread counts, leave this property to null.
   */
-  contentUnreadCountProperty: null,
+  contentUnreadCountKey: null,
   
   /**
     Name of the content object property that contains the branch state.
@@ -120,7 +92,7 @@ SC.SourceListView = SC.CollectionView.extend(
     you set this property to "isBranch", then the branch state will be the
     value returned by content.get('isBranch').
   */
-  contentIsBranchProperty: null,
+  contentIsBranchKey: null,
   
   /** 
     The common row height for list view items.
