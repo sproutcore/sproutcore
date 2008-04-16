@@ -116,6 +116,7 @@ view_helper :label_view do
   var      :label, nil
   view     'SC.LabelView'
   
+  css_class_names << 'sc-label-view'
   @inner_html = @label unless @label.nil?
 end
 

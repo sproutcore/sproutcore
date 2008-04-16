@@ -67,7 +67,7 @@ body.sc-theme {
 	background-color: white ;
 }
 
-.sc-theme .sc-list-view .text-cell {
+.sc-theme .sc-list-view .sc-label-view {
 	display: block ;
 	padding: 0 6px;
 	line-height: 22px;
