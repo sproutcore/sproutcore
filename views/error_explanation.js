@@ -6,11 +6,18 @@
 require('views/label');
 
 /**
+  @class
+  
   The ErrorExplanation view is a special type of label view that can display
   one or more errors related to a form or field.  This view will set itself
   to visible only if it has errors.
+  
+  @extends SC.View
+  @extends SC.Control
+  
 */
-SC.ErrorExplanationView = SC.LabelView.extend({
+SC.ErrorExplanationView = SC.View.extend(SC.Control,
+/** @scope SC.ErrorExplanationView.prototype */ {
 
   emptyElement: '<ul class="errors"></ul>',
   explanationTemplate: '<li>%@</li>',
@@ -22,7 +29,8 @@ SC.ErrorExplanationView = SC.LabelView.extend({
     }).compact() ;
   },
   
-  contentBindingDefault: SC.Binding.Multiple,
+  valueBindingDefault: SC.Binding.Multiple,
+  
   formatter: function(errors, view) {
     errors = view._errorsFor(errors) ;
     if (!errors || errors.length == 0) return '' ;
@@ -32,16 +40,19 @@ SC.ErrorExplanationView = SC.LabelView.extend({
       return view.explanationTemplate.fmt(er); 
     }).join("") ;
   },
+  
   escapeHTML: false,
   
-  _contentVisibleObserver: function() {
-    var errors = this._errorsFor(this.get('content')) ;
+  _valueObserver: function() {
+    var errors = this._errorsFor(this.get('value')) ;
     var isVisible = errors && errors.length > 0 ;
     if (this.get('isVisible') != isVisible) this.set('isVisible',isVisible);
-  }.observes('content'),
+    this.set('innerHTML', this.formatter(errors, this)) ;
+  }.observes('value'),
   
   init: function() {
     arguments.callee.base.apply(this,arguments) ;
-    this._contentVisibleObserver() ;
+    this._valueObserver() ;
   }
+  
 });

@@ -119,7 +119,7 @@ SC.SourceListView = SC.CollectionView.extend(
     
     groupValueObserver: function() {
       var v=  this.get('groupValue') || '' ;
-      this.outlet('labelView').set('content', v.capitalize()) ;  
+      this.outlet('labelView').set('value', v.capitalize()) ;  
     }.observes('groupValue'),
     
     labelView: SC.LabelView.outletFor('.sc-source-list-label:1:1')
