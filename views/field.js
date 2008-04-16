@@ -142,7 +142,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     // get the field value and set it.
     // if ret is an error, use that instead of the field value.
     var ret = this.performValidate(partialChange) ;
-    if (valid == SC.Validator.NO_CHANGE) return ret ;
+    if (ret == SC.Validator.NO_CHANGE) return ret ;
 
     // if the validator says everything is OK, then in addition to posting
     // out the value, go ahead and pass the value back through itself.
