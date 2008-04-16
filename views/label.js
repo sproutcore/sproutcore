@@ -146,7 +146,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
     this.set('isEditing', true);
     this.set("innerHTML", ''); // blank out the label contents
     this.appendChild( SC.inlineTextEditor );
-    SC.inlineTextEditor.field.set('value', this.get('content'));
+    SC.inlineTextEditor.field.set('value', this.get('value'));
     SC.inlineTextEditor.field.becomeFirstResponder();
   },
   /**
@@ -159,7 +159,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
     if ( !this.get('isEditing') ) return;
 
     // if there were changes, then commit them... 
-    if ( SC.inlineTextEditor.field.get('value') != this.get('content') )
+    if ( SC.inlineTextEditor.field.get('value') != this.get('value') )
     {
       this._inlineEditValue = SC.inlineTextEditor.field.get('value') ;
       this._closeInlineEditor(false) ;
@@ -184,12 +184,12 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
     this.removeChild( SC.inlineTextEditor );
     if(!canceled)
     {
-      this.set('content',this._inlineEditValue) ;
+      this.set('value',this._inlineEditValue) ;
       this.commitInlineEdit();
     }  
     else
     {
-      this._updateValue() ; // restore value.
+      this._valueDidChange() ; // restore value.
     }  
   },
   
