@@ -21,10 +21,9 @@ SC.TextCellView = SC.View.extend(SC.Control,
   emptyElement: '<div class="text-cell sc-collection-item"></div>',
 
   /** 
-    The value of the text cell.
+    The value of the label.
     
-    You may also set the value using a content object and a 
-    contentValueKey.
+    You may also set the value using a content object and a contentValueKey.
     
     @field {String}
   */

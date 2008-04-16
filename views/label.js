@@ -4,19 +4,109 @@
 // ========================================================================
 
 require('views/view') ;
+require('mixins/control') ;
+require('mixins/delegate_support');
 
-SC.LabelView = SC.View.extend({
+/**
+  @class
+  
+  Displays a static string of text.
+  
+  You use a label view anytime you need to display a static string of text 
+  or to display text that may need to be edited using only an inline control.
+  
+  @extends SC.View
+  @extends SC.Control
+  @author Charles Jolley
+  @version 1.0
+*/
+SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
+/** @scope SC.LabelView.protoype */ {
+
+  emptyElement: '<span class="sc-label-view"></span>',
 
   /**
-  * Can the label be edited using the inline editor?
-  * @type Boolean
-  **/
-  isEditable: false,
+    If true, value will be escaped to avoid scripting attacks.
+    
+    This is a default value that can be overridden by the
+    settings on the owner view.
+  */
+  escapeHtml: true,
+
   /**
-  * Is the editor open?
-  * @type Boolean
-  **/
-  isEditing: false,
+    If true, then the value will be localized.
+    
+    This is a default default that can be overidden by the
+    settings in the owner view.
+  */
+  localize: false,
+  
+  /**
+    Set this to a validator or to a function and the value
+    will be passed through it before being set.
+    
+    This is a default default that can be overidden by the
+    settings in the owner view.
+  */
+  formatter: null,
+
+  /** 
+    The value of the label.
+    
+    You may also set the value using a content object and a contentValueKey.
+    
+    @field {String}
+  */
+  value: '',
+  
+  /**
+    [RO] The value that will actually be displayed.
+    
+    This property is dynamically computed by applying localization, 
+    string conversion and other normalization utilities.
+    
+    @field
+  */
+  displayValue: function() {
+    var value = this.get('value') ;
+    
+    // 1. apply the formatter
+    var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
+    if (formatter) {
+      var formattedValue = ($type(formatter) == T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
+      if (formattedValue != null) value = formattedValue ;
+    }
+    
+    // 2. If the returned value is an array, convert items to strings and 
+    // join with commas.
+    if ($type(value) == T_ARRAY) {
+      var ary = [];
+      for(var idx=0;idx<value.get('length');idx++) {
+        var x = value.objectAt(idx) ;
+        if (x != null && x.toString) x = x.toString() ;
+        ary.push(x) ;
+      }
+      value = ary.join(',') ;
+    }
+    
+    // 3. If value is not a string, convert to string. (handles 0)
+    if (value != null && value.toString) value = value.toString() ;
+    
+    // 4. Localize
+    if (value && this.getDelegateProperty(this.displayDelegate, 'localize')) value = value.loc() ;
+    
+    return value ;
+  }.property('value'),
+  
+  /**
+    enables editing using the inline editor
+  */
+  isEditable: NO,
+
+  /**
+    YES if currently editing label view.
+  */
+  isEditing: NO,
 
 
   /**
@@ -29,24 +119,13 @@ SC.LabelView = SC.View.extend({
   */
   localize: false,
   
-  
-  /**
-  * @constructor
-  */
-  init: function()
-  {
-    arguments.callee.base.call(this) ;
-    if (this.get("localize"))
-    {
-      var inner = this.get("innerHTML");
-      if (inner !== "") this.set("content", inner);
-    }
-  },
 
   /**
-  * Event dispatcher callback.
-  * If isEditable is set to true, opens the inline text editor view.
-  * @param {DOMMouseEvent} evt DOM event
+    Event dispatcher callback.
+    If isEditable is set to true, opens the inline text editor view.
+
+    @param {DOMMouseEvent} evt DOM event
+    
   */
   doubleClick: function( evt )
   {
@@ -55,9 +134,10 @@ SC.LabelView = SC.View.extend({
   
   
   /**
-  * Opens the inline text editor (closing it if it was already open for another view).
-  * @return void
-  **/
+    Opens the inline text editor (closing it if it was already open for another view).
+    
+    @return void
+  */
   beginInlineEdit: function()
   {
     if ( !this.get('isEditable') ) return;
@@ -70,9 +150,10 @@ SC.LabelView = SC.View.extend({
     SC.inlineTextEditor.field.becomeFirstResponder();
   },
   /**
-  * Closes the inline text editor.
-  * @return void
-  **/
+    Closes the inline text editor.
+    
+    @return void
+  */
   endInlineEdit: function()
   {
     if ( !this.get('isEditing') ) return;
@@ -114,69 +195,42 @@ SC.LabelView = SC.View.extend({
   
   // abstract method... implement to persist changes made in the editor.
   commitInlineEdit: function() {},
-
-
-  // setting this to a non-null value will cause the label to get the
-  // property value and use that for display.
-  property: function(key, value) {
-    if ((value !== undefined) && (value != this._property)) {
-      if (this._content) {
-        var func = this._boundObserver() ;
-        if (this._property && this._content && this._content.removeObserver) this._content.removeObserver(this._property,func);
-        this._property = value ;
-        if (this._property && this._content && this._content.addObserver) this._content.addObserver(this._property,func) ;
-      } else this._property = value ;
-    }
-    return this._property ;
-  }.property(),
   
-  // set to a validator object to have your content converted using the
-  // validator.  The formatter will be applied before localization.
-  formatter: null,
-  
-  // change this property value to update the content.
-  content: function(key,value) {
-    if ((value !== undefined) && (this._content != value)) {
-      var prop = this.get('property') ;
-      var func = this._boundObserver() ;
-      if (prop && this._content && this._content.removeObserver) this._content.removeObserver(prop, func) ;
-      this._content = value ;
-      if (prop && this._content && this._content.addObserver) this._content.addObserver(prop, func) ;
-      this._updateValue() ;      
-    } 
-    return this._content ;
-  }.property(),
-
-  contentBindingDefault: SC.Binding.Single,
-
-  _updateValue: function() {
-    var value = this._content ;
-    var prop = this.get('property') ;
-    if (prop && value && value.get) value = value.get(prop) ;
-
-    // apply formatter
-    var formatter = this.get('formatter') ;
-    if (formatter) {
-      var formattedValue = (SC.typeOf(formatter) == "function") ? formatter(value,this) : formatter.fieldValueForObject(value) ;
-      if (formattedValue) value = formattedValue ;
-    }
-
-    if ($type(value) == 'number') value = value.toString() ; // handle 0
+  /** @private */
+  init: function()
+  {
+    arguments.callee.base.call(this) ;
     
-    // localize
-    if (value && this.get('localize')) value = value.loc() ;
-    
-    if (this.get('escapeHTML')) {
-      this.set('innerText', value || '') ;
-    } else {
-      this.set('innerHTML',value || '') ;
+    // if we are supposed to localize, get the content value
+    if (this.get("localize")) {
+      this.value = this._value = this.get('innerHTML').loc() ;
+      if (this.value != '') this.set('innerHTML', this.value) ;
     }
-
   },
+
+  /** 
+    @private
+    
+    Invoked whenever the monitored value on the content object 
+    changes.
+    
+    The value processed is either the contentValueKey, if set, or 
+    it is the content object itself.
+  */
+  _valueDidChange: function() {
+
+    var value = this.get('value') ;
+    if (value == this._value) return; // nothing to do
+
+    // get display value
+    var value = this.get('displayValue') ;
+    
+    // Escape HTML
+    if (this.getDelegateProperty(this.displayDelegate, 'escapeHtml')) {
+      this.set('innerText', value || '') ;
+    } else this.set('innerHTML', value || '') ;
+
+  }.observes('value')
   
-  _boundObserver: function() {
-    if (!this._observer) this._observer = this._updateValue.bind(this) ;
-    return this._observer ;
-  }
 
 });

@@ -1003,6 +1003,7 @@ SC.CollectionView = SC.View.extend(
       ret = this._itemViewPool.pop() || this.get('exampleView').create({ 
         owner: this, displayDelegate: this 
       }) ;
+      ret.addClassName('sc-collection-item') ; // add class name for display
       
       // set content and add to content hash
       ret.set('content', content) ;
@@ -1129,6 +1130,7 @@ SC.CollectionView = SC.View.extend(
       ret = this._groupViewPool.pop() || this.get('exampleGroupView').create({
          owner: this, displayDelegate: this 
       });
+      ret.addClassName('sc-collection-group') ;
 
       // set the groupValue on the groupView.  Older groupViews expect us to 
       // set this directly on the labelView.  Newer groupViews should have a 

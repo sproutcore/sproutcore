@@ -3,7 +3,7 @@
 // ==========================================================================
 
 require('views/collection') ;
-require('views/collection/text_cell');
+require('views/label');
 
 /** @class
 
@@ -40,7 +40,7 @@ SC.ListView = SC.CollectionView.extend(
     
     You can override this as you wish.
   */
-  exampleView: SC.TextCellView,
+  exampleView: SC.LabelView,
   
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   
