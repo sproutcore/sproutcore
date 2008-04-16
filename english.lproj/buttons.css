@@ -585,11 +585,11 @@ a.regular.image span.label {
 	padding-left: 2px;
 }
 
-.sc-theme a.disclosure.opened img.button {
+.sc-theme a.disclosure.sel img.button {
 	background-position: 0px -1008px ;
 }
 
-.sc-theme a.disclosure.closed img.button {
+.sc-theme a.disclosure img.button {
 	background-position: -16px -1025px ;
 }
 
@@ -599,11 +599,11 @@ a.regular.image span.label {
 
 /* @group disabled */
 
-.sc-theme a.disclosure.opened.disabled img.button {
+.sc-theme a.disclosure.sel.disabled img.button {
 	background-position: 0px -1024px ;
 }
 
-.sc-theme a.disclosure.closed.disabled img.button {
+.sc-theme a.disclosure.disabled img.button {
 	background-position: -16px -1041px ;
 }
 
@@ -611,11 +611,11 @@ a.regular.image span.label {
 
 /* @group active */
 
-.sc-theme a.disclosure.opened.active img.button {
+.sc-theme a.disclosure.sel.active img.button {
 	background-position: -16px -1008px ;
 }
 
-.sc-theme a.disclosure.closed.active img.button {
+.sc-theme a.disclosure.active img.button {
 	background-position: -0px -1041px ;
 }
 

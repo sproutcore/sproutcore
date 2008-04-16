@@ -32,17 +32,11 @@ SC.DisclosureView = SC.ButtonView.extend(
 
   valueBindingDefault: SC.Binding.Bool,
   
-  _updateDisclosureState: function() {
-    var value = this.get('value') ;
-    var openValue = this.get('toggleOnValue') ;
-    var isOpened = value == openValue ;
-    this.setClassName('opened', isOpened) ;
-    this.setClassName('closed', !isOpened) ;
-  }.observes('value'),
-  
   init: function() {
     arguments.callee.base.apply(this,arguments) ;
-    this._updateDisclosureState() ;
+    if (this.get('value') == this.get('toggleOnValue')) {
+      this.set('isSelected', true) ;
+    }
   }
   
 }) ;

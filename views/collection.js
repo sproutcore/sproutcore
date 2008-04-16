@@ -523,7 +523,7 @@ SC.CollectionView = SC.View.extend(
     if (!groupView) return null ;
     var ret ;
     if (groupView.groupValue === undefined) {
-      ret = groupView.labelView.get('content') ;
+      ret = groupView.get('content') ;
     } else ret = groupView.get('groupValue') ;
     return ret ;
   },
@@ -572,6 +572,13 @@ SC.CollectionView = SC.View.extend(
     
     return { start: min, length: max-min } ;
   },
+
+  // Determines the group value at a specified index.
+  groupValueAtContentIndex: function(contentIndex) {
+    var groupBy = this.get('groupBy') ;
+    var content = Array.from(this.get('content')).objectAt(contentIndex) ;
+    return (groupBy && content && content.get) ? content.get(groupBy) : null;
+  },
     
   // ......................................
   // GENERATING CHILDREN
@@ -618,6 +625,7 @@ SC.CollectionView = SC.View.extend(
       if (parent) parent.viewFrameWillChange() ;
       this.set('frame', f) ;
       if (parent) parent.viewFrameDidChange() ;
+      
       if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
         this.set('frame', f) ;
       } 
@@ -1137,7 +1145,7 @@ SC.CollectionView = SC.View.extend(
       // groupValue property.
       if (ret.groupValue !== undefined) {
         ret.set('groupValue', groupValue) ;
-      } else if (ret.labelView) ret.labelView.set('content', groupValue) ;
+      } else ret.set('content', groupValue) ;
       
       // save in cache
       this._groupViewsByValue[groupValue] = ret ;

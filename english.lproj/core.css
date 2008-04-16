@@ -87,5 +87,13 @@
 
 /* @end */
 
+/* @group SC.SourceListView */
+
+.sc-source-list-group .sc-source-list-label.no-disclosure img {
+	display:  none ;
+}
+
+/* @end */
+
 
 

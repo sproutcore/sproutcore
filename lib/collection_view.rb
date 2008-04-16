@@ -24,6 +24,8 @@ view_helper :collection_view do
   property(:example_view) { |v| v }
   property(:example_group_view) { |v| v }
   property :content_value_key
+  property :group_visible_key
+  property :group_title_key
   property :accepts_first_responder, true
   property :can_reorder_content
   

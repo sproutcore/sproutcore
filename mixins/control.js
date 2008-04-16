@@ -241,7 +241,7 @@ SC.Control = {
     var f = this._boundContentPropertyDidChangeObserver ;
 
     // remove an observer from the old content if necessary
-    if (this._content) {
+    if (this._content && this._content.removeObserver) {
       this._content.removeObserver('*', f) ;
     }
 
@@ -252,7 +252,7 @@ SC.Control = {
     
     // add observer to new content if necessary.
     this._content = content ;
-    if (this._content) {
+    if (this._content && this._content.addObserver) {
       this._content.addObserver('*', f) ;
     }
     

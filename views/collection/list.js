@@ -40,7 +40,7 @@ SC.ListView = SC.CollectionView.extend(
     
     You can override this as you wish.
   */
-  exampleView: SC.LabelView,
+  exampleView: SC.ListItemView,
   
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   

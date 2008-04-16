@@ -4,6 +4,7 @@
 
 require('views/collection') ;
 require('views/button/disclosure');
+require('views/source_list_group');
 
 /** @class
 
@@ -127,99 +128,163 @@ SC.SourceListView = SC.CollectionView.extend(
     The standard group view provided by source list view generally 
     provides all the functionality you need.
   */
-  exampleGroupView: SC.View.extend(SC.DelegateSupport, {
-    
-    emptyElement: ['<div class="sc-source-list-group">',
-      '<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure">',
-      '<img src="%@" class="button" />'.fmt(static_url('blank')),
-      '<span class="label"></span></a>',
-    '</div>'].join(''),
-    
-    groupValue: null,
-    
-    groupTitleKey: null,
-    
-    groupVisibleKey: null,
-    
-    groupValueObserver: function() {
-
-      var v=  this.get('groupValue') ;
-      var labelView = this.outlet('labelView') ;
-       
-      // get the title.
-      var groupTitleKey = this.getDelegateProperty(this.displayDelegate, 'groupTitleKey') ;
-      var title = (v && v.get && groupTitleKey) ? v.get(groupTitleKey) : v;
-      labelView.set('title', title.capitalize()) ;  
-
-      // get the disclosure state.
-      var groupVisibleKey = this.getDelegateProperty(this.displayDelegate, 'groupVisibleKey') ;
-      if (groupVisibleKey) {
-        var isVisible = (v && v.get) ? !!v.get(groupVisibleKey) : YES ;
-        this.addClassName('show-disclosure') ;
-        labelView.set('value', isVisible) ;
-      } else this.removeClassName('show-disclosure') ;
-
-    }.observes('groupValue'),
-    
-    labelView: SC.DisclosureView.outletFor('.sc-source-list-label:1:1')
-    
-  }),
+  exampleGroupView: SC.SourceListGroupView,
   
-  insertionOrientation: SC.VERTICAL_ORIENTATION,
+  
+  // .......................................
+  // LAYOUT METHODS
+  //
+
+  // whenever updateChildren is called with a deep method, flush the
+  // cached group rows to make sure we get an accurate count.
+  updateChildren: function(deep) {
+    if (deep) this._groupRows = null ;
+    return arguments.callee.base.apply(this, arguments) ;  
+  },
+  
+  // determines if the group at the specified content index is visible or
+  // not.  This will look either at a property on the group or on the
+  // SourceListGroupView.
+  groupAtContentIndexIsVisible: function(contentIndex) {
+    
+    if (!this.get('groupBy')) return YES; // no grouping
+
+    // get the group value and try to find a matching view, which may
+    // or may not exist yet.
+    var groupValue = this.groupValueAtContentIndex(contentIndex) ;
+    var groupView = this.groupViewForGroupValue(groupValue) ;
+    
+    // if the groupView exists, use that.  The visible state is stored here
+    // in case the group does not actually support storing its own visibility.
+    var ret = YES ;
+    if (groupView) {
+      ret = groupView.get('isGroupVisible') ;
+
+    // otherwise try to get from the group itself.
+    } else if (groupValue && groupValue.get) {
+      var key = this.get('groupVisibleKey') ;
+      if (key) ret = !!groupValue.get(key) ;
+    }
+    
+    return ret ;
+  },
+  
+  // calculates the number of rows consumed by each group.  stores a hash of
+  // contentIndexes and rows. 
+  computedGroupRows: function() {
+    if (this._groupRows) return this._groupRows;
+    
+    var loc = 0 ; 
+    var content = Array.from(this.get('content')) ;  
+    var max = content.get('length') ;
+    
+    var ret = {} ;
+    while(loc < max) {
+      var range = this.groupRangeForContentIndex(loc) ;
+      var isVisible = this.groupAtContentIndexIsVisible(range.start) ;
+      ret[range.start] = (isVisible) ? range.length+1 : 1 ;
+      loc = (range.length <= 0) ? max : SC.maxRange(range) ;
+    }
+    
+    return this._groupRows = ret ;
+  },
+
+  // Returns the number of rows in the specified range.
+  countRowsInRange: function(range) {
+    var groupRows = this.computedGroupRows() ;
+    var max = SC.maxRange(range) ;
+    var loc = SC.minRange(range) ;
+    var ret = 0 ;
+    
+    while(loc < max) {
+      var range = this.groupRangeForContentIndex(loc) ;
+      loc = (range.length <= 0) ? max : SC.maxRange(range) ;
+      ret += groupRows[range.start] || (range+1);
+    }
+    return ret ;
+  },
+  
+  computeFrame: function() {
+    var content = this.get('content') ;
+    var rowHeight = this.get('rowHeight') || 20 ;
+
+    // find number of groups.  
+    var rows = this.countRowsInRange({ start: 0, length: content.get('length') });
+    if (rows <= 0) rows = 0 ;
+
+    // get parent width
+    var parent = this.get('parentNode') ;
+    var f = (parent) ? parent.get('innerFrame') : { width: 100, height: 100 };
+    f.x = f.y = 0;
+    f.height = Math.max(f.height, rows * rowHeight) ;
+    return f ;
+  },
+
   
   // disable incremental rendering for now
   contentRangeInFrame: function(frame) {
-    // var rowHeight = this.get('rowHeight') || 0 ;
-    // var min = Math.max(0,Math.floor(SC.minY(frame) / rowHeight)-1) ;
-    // var max = Math.ceil(SC.maxY(frame) / rowHeight) ;
-    // var ret = { start: min, length: max - min } ; 
     var content =this.get('content') ;
     var len = (content) ? content.get('length') : 0 ;
     var ret = { start: 0, length: len } ;
     return ret ;
   },
+
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
     SC.Benchmark.start('SC.SourceListView.layoutItemViewsFor') ;
     
-    var rowHeight = this.get('rowHeight') || 0 ;
-    
-    // layout relative to top of group.  Leave open row for title
-    var range = this.groupRangeForContentIndex(contentIndex) ;
+    // if itemView's group is not visible, then just set to invisible.
+    if (!this.groupAtContentIndexIsVisible(contentIndex)) {
+      itemView.set('isVisible', false) ;
+    } else {
 
-    //console.log('layout: %@ -- range: {%@,%@} -- v: %@'.fmt(contentIndex, range.start, range.length, itemView.getPath('content.name'))) ;
+      // if item was not visible, make it visible.  Also force layout.
+      if (!itemView.get('isVisible')) {
+        firstLayout = YES ;        
+        itemView.set('isVisible', true) ;
+      }
 
-    contentIndex = (contentIndex - range.start) + 1 ;
-    var f = { 
-      x: 0, 
-      y: contentIndex*rowHeight,
-      height: rowHeight, 
-      width: this.get('innerFrame').width 
-    } ;
-    
-    
-    if (firstLayout || !SC.rectsEqual(itemView.get('frame'), f)) {
-      itemView.set('frame', f) ;      
+      var rowHeight = this.get('rowHeight') || 0 ;
+
+      // layout relative to top of group.  Leave open row for title
+      var range = this.groupRangeForContentIndex(contentIndex) ;
+      contentIndex = (contentIndex - range.start) + 1 ;
+
+      var f = { 
+        x: 0, 
+        y: contentIndex*rowHeight,
+        height: rowHeight, 
+        width: this.get('innerFrame').width 
+      } ;
+
+      if (firstLayout || !SC.rectsEqual(itemView.get('frame'), f)) {
+        itemView.set('frame', f) ;      
+      }
+
     }
+    
     SC.Benchmark.end('SC.SourceListView.layoutItemViewsFor') ;
   },
   
   layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {
     SC.Benchmark.start('SC.SourceListView.layoutGroupView') ;
     
-    console.log('layoutGroupView', groupValue) ;
+    //console.log('layoutGroupView', groupValue) ;
     
     // find the range this group will belong to
     var range = this.groupRangeForContentIndex(contentIndexHint) ;
-    var priorGroupCount = this.countGroupsInRange({ start: 0, length: range.start }) ;
+    var isVisible = this.groupAtContentIndexIsVisible(range.start) ;
+    
+    var priorRows = this.countRowsInRange({ start: 0, length: range.start }) ;
     var rowHeight = this.get('rowHeight') || 0 ;
     var parentView = groupView.get('parentView') || this ;
+    var rows = (isVisible) ? (range.length+1) : 1 ;
 
     var f = { 
       x: 0, 
-      y: (range.start + priorGroupCount)*rowHeight,
-      height: rowHeight * (range.length + 1), 
+      y: priorRows*rowHeight,
+      height: rowHeight * rows, 
       width: (parentView || this).get('innerFrame').width 
     } ;
     
@@ -229,37 +294,11 @@ SC.SourceListView = SC.CollectionView.extend(
     SC.Benchmark.end('SC.SourceListView.layoutGroupView') ;    
   },
   
-  // Calculates groups in the specified range
-  countGroupsInRange: function(range) {
-    var max = SC.maxRange(range) ;
-    var loc = SC.minRange(range) ;
-    var ret = 0 ;
-    while(loc < max) {
-      var range = this.groupRangeForContentIndex(loc) ;
-      loc = SC.maxRange(range) ;
-      ret++;
-    }
-    return ret ;
-  },
+  // .......................................
+  // INSERTION POINT METHODS
+  //
   
-  computeFrame: function() {
-    var content = this.get('content') ;
-    var rows = (content) ? content.get('length') : 0 ;
-    var rowHeight = this.get('rowHeight') || 20 ;
-    
-    // find number of groups.  If group count == 1, it will be hidden to set 
-    // to 0
-    var groupCount = this.countGroupsInRange({ start: 0, length: content.get('length') });
-    if (groupCount <= 1) groupCount = 0 ;
-    
-    var parent = this.get('parentNode') ;
-    var f = (parent) ? parent.get('innerFrame') : { width: 100, height: 100 } ;
-
-    f.x = f.y = 0;
-    f.height = Math.max(f.height, (rows + groupCount) * rowHeight) ;
-//    console.log('computeFrame(%@)'.fmt($H(f).inspect())) ;
-    return f ;
-  },
+  insertionOrientation: SC.VERTICAL_ORIENTATION,
   
   insertionPointClass: SC.View.extend({
     emptyElement: '<div class="list-insertion-point"><span class="anchor"></span></div>'
