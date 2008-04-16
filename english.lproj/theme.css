@@ -85,7 +85,7 @@ body.sc-theme {
 	height: 7px;
 	left: -6px;
 	top: -4px;
-	background: static_url('images/buttons-sprite.png') no-repeat 0px -931px;
+	background: static_url('images/buttons-sprite.png') no-repeat -32px -1040px;
 }
 
 /* @end */
@@ -108,7 +108,7 @@ body.sc-theme {
 	height: 7px;
 	left: -4px;
 	top: -6px;
-	background: static_url('images/buttons-sprite.png') no-repeat 0px -931px;
+	background: static_url('images/buttons-sprite.png') no-repeat -32px -1040px;
 }
 
 /* @end */
