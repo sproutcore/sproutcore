@@ -156,19 +156,22 @@ SC.SourceListView = SC.CollectionView.extend(
     
     // if the groupView exists, use that.  The visible state is stored here
     // in case the group does not actually support storing its own visibility.
+    // ignore groupView if it does not support isGroupVisible
     var ret = YES ;
-    if (groupView) {
-      ret = groupView.get('isGroupVisible') ;
+    if (groupView) ret = groupView.get('isGroupVisible') ;
 
     // otherwise try to get from the group itself.
-    } else if (groupValue && groupValue.get) {
+    if (((ret === undefined) || (ret === null) || !groupView) && groupValue && groupValue.get) {
       var key = this.get('groupVisibleKey') ;
       if (key) ret = !!groupValue.get(key) ;
     }
     
+    // if the above methods failed for some reason, just leave the group visible
+    if ((ret === undefined) || (ret === null)) ret = YES ;
+    
     return ret ;
   },
-  
+    
   // calculates the number of rows consumed by each group.  stores a hash of
   // contentIndexes and rows. 
   computedGroupRows: function() {
