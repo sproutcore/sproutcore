@@ -171,7 +171,21 @@ view_helper :popup_button_view, :wraps => :button_view do
 end
 
 
+# Renders a disclosure triangle.
+view_helper :disclosure_view, :wraps => :button_view do
+  opts = { :theme => :disclosure }
+  opts[:label] = false if options[:label].nil?
+  parent_helper(opts)
+  
+  view 'SC.DisclosureView'
+  @inner_html = [%(<img class="button" src="#{blank_url}" />)]
+  @inner_html << %(<span #{@label_style}class="label">#{@label}</span>) if @label
+  @inner_html = @inner_html.join('')
 
+  css_class_names << 'sc-disclosure-view'
+end
+
+  
 # Renders a checkbox.  If you pass a label this will render the label
 # text next to the checkbox. Unlike button_view, passing no :label is
 # the same as passing :label => false.
@@ -181,7 +195,6 @@ view_helper :checkbox_view, :wraps => :button_view do
   parent_helper(opts)
   
   # provide some defaults to the JavaScript.
-  property :behavior, :key => 'buttonBehavior'
   view 'SC.CheckboxView'
   
   # render checkbox HTML.

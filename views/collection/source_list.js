@@ -3,7 +3,7 @@
 // ==========================================================================
 
 require('views/collection') ;
-require('views/collection/text_cell');
+require('views/button/disclosure');
 
 /** @class
 
@@ -94,6 +94,22 @@ SC.SourceListView = SC.CollectionView.extend(
   */
   contentIsBranchKey: null,
   
+  /**
+    Key that contains the group name.
+    
+    If set, the title shown in the group label will be the value returned
+    by this property on the group object.
+  */
+  groupTitleKey: null,
+
+  /**
+    Key that contains group visibility.
+    
+    If set, the group label will display a disclosure triangle matching the
+    value of this property.
+  */
+  groupVisibleKey: null,
+  
   /** 
     The common row height for list view items.
     
@@ -111,18 +127,41 @@ SC.SourceListView = SC.CollectionView.extend(
     The standard group view provided by source list view generally 
     provides all the functionality you need.
   */
-  exampleGroupView: SC.View.extend({
+  exampleGroupView: SC.View.extend(SC.DelegateSupport, {
     
-    emptyElement: '<div class="sc-source-list-group"><div class="sc-collection-item sc-source-list-label"></div></div>',
+    emptyElement: ['<div class="sc-source-list-group">',
+      '<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure">',
+      '<img src="%@" class="button" />'.fmt(static_url('blank')),
+      '<span class="label"></span></a>',
+    '</div>'].join(''),
     
     groupValue: null,
     
+    groupTitleKey: null,
+    
+    groupVisibleKey: null,
+    
     groupValueObserver: function() {
-      var v=  this.get('groupValue') || '' ;
-      this.outlet('labelView').set('value', v.capitalize()) ;  
+
+      var v=  this.get('groupValue') ;
+      var labelView = this.outlet('labelView') ;
+       
+      // get the title.
+      var groupTitleKey = this.getDelegateProperty(this.displayDelegate, 'groupTitleKey') ;
+      var title = (v && v.get && groupTitleKey) ? v.get(groupTitleKey) : v;
+      labelView.set('title', title.capitalize()) ;  
+
+      // get the disclosure state.
+      var groupVisibleKey = this.getDelegateProperty(this.displayDelegate, 'groupVisibleKey') ;
+      if (groupVisibleKey) {
+        var isVisible = (v && v.get) ? !!v.get(groupVisibleKey) : YES ;
+        this.addClassName('show-disclosure') ;
+        labelView.set('value', isVisible) ;
+      } else this.removeClassName('show-disclosure') ;
+
     }.observes('groupValue'),
     
-    labelView: SC.LabelView.outletFor('.sc-source-list-label:1:1')
+    labelView: SC.DisclosureView.outletFor('.sc-source-list-label:1:1')
     
   }),
   

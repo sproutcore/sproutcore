@@ -135,20 +135,20 @@ body.sc-theme {
 	border-top: 1px solid #e6e3ef;
 }
 
-.sc-theme .sc-collection-view.sc-source-list-view .sel {
+.sc-theme .sc-collection-view.sc-source-list-view .sc-collection-item.sel {
 	background-color: #ddd;
 	border-top: 1px solid #eee;
 	font-weight: bold ;
 }
 
-.sc-theme.focus .sc-collection-view.sc-source-list-view .sel {
+.sc-theme.focus .sc-collection-view.sc-source-list-view .sc-collection-item.sel {
 	background: static_url('images/buttons-sprite.png') 0 0px;
 	color: white ;
 	border-top: 1px solid #5a3f62;
 }
 
 .sc-theme .sc-source-list-view .sc-collection-item {
-	padding: 0 4px 0 16px;
+	padding: 0 4px 0 18px;
 	line-height: 31px;
 }
 
@@ -156,17 +156,25 @@ body.sc-theme {
   position: absolute;
 }
 
+
 .sc-theme .sc-source-list-group .sc-source-list-label {
 	line-height: 32px;
-	padding-left: 8px;
+	padding-left: 1px;
 	text-transform: uppercase;
 	font-size: 11px;
 	font-weight: bold ;
 }
 
-.sc-theme.focus .sc-source-list-group .sc-source-list-label {
+.sc-theme .sc-collection-view .sc-source-list-group .sc-source-list-label.sel {
+    background-color: transparent;
+    border-top: none ;
+}
+
+.sc-theme.focus .sc-source-list-group .sc-source-list-label,
+.sc-theme.focus .sc-collection-view .sc-source-list-group .sc-source-list-label.sel {
 	color: #241d38;
 }
+
 
 /* @end */
 

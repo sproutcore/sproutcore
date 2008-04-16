@@ -1,5 +1,4 @@
 /* @override 
-	http://localhost:4020/static/sproutcore/en/_cache/buttons-1208227827.css
 */
 
 /* @group Button Core */
@@ -561,6 +560,68 @@ a.regular.image span.label {
 }
 
 /* @end */
+
+/* @end */
+
+/* @group disclosure */
+
+/* @group basic */
+
+.sc-theme a.disclosure {
+	margin-right: 4px;
+	margin-left: 4px;
+}
+
+.sc-theme a.disclosure img.button {
+	width: 12px;
+	height: 12px;
+	vertical-align: middle ;
+	position: relative ;
+	top: -2px;
+	background-image: static_url('images/buttons-sprite.png') ;
+} 
+
+.sc-theme a.disclosure .label {
+	padding-left: 2px;
+}
+
+.sc-theme a.disclosure.opened img.button {
+	background-position: 0px -1008px ;
+}
+
+.sc-theme a.disclosure.closed img.button {
+	background-position: -16px -1025px ;
+}
+
+
+
+/* @end */
+
+/* @group disabled */
+
+.sc-theme a.disclosure.opened.disabled img.button {
+	background-position: 0px -1024px ;
+}
+
+.sc-theme a.disclosure.closed.disabled img.button {
+	background-position: -16px -1041px ;
+}
+
+/* @end */
+
+/* @group active */
+
+.sc-theme a.disclosure.opened.active img.button {
+	background-position: -16px -1008px ;
+}
+
+.sc-theme a.disclosure.closed.active img.button {
+	background-position: -0px -1041px ;
+}
+
+/* @end */
+
+
 
 /* @end */
 

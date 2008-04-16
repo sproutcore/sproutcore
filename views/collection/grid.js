@@ -3,7 +3,7 @@
 // ==========================================================================
 
 require('views/collection') ;
-require('views/collection/text_cell');
+require('views/label');
 
 /** @class
 
@@ -37,7 +37,7 @@ SC.GridView = SC.CollectionView.extend(
     
     You can override this as you wish.
   */
-  exampleView: SC.TextCellView,
+  exampleView: SC.LabelView,
   
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
 

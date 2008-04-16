@@ -41,7 +41,7 @@ SC.CollectionViewTest = {
     props.selectionBinding = [this.controller, 'selection']; 
     props.delegate = this.controller ;
     
-    if (!props.exampleView) props.exampleView = SC.TextCellView ;
+    if (!props.exampleView) props.exampleView = SC.LabelView ;
     if (!props.contentValueKey) props.contentValueKey = 'name' ;
     
     // create the view with the props
@@ -91,7 +91,7 @@ Test.context("CASE 1: No scrolling, no incremental rendering, no custom layout",
   
   setup: function() {
     SC.CollectionViewTest.setup(this, {
-      exampleView: SC.TextCellView.extend({
+      exampleView: SC.LabelView.extend({
         emptyElement: '<div class="text-cell sc-collection-item" style="position: relative;"></div>'
       })
     }) ;
@@ -150,7 +150,7 @@ Test.context("CASE 3: Autoscrolling, no incremental rendering, no custom layout"
   
   setup: function() {
     SC.CollectionViewTest.setup(this, {
-      exampleView: SC.TextCellView.extend({
+      exampleView: SC.LabelView.extend({
         emptyElement: '<div class="text-cell sc-collection-item" style="position: relative;"></div>'
       }),
       
