@@ -53,9 +53,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @observes content
   */
   _contentObserver: function() {
+    this.beginPropertyChanges();
     this.contentCloneReset();
     this.arrayContentDidChange() ;
+    this.notifyPropertyChange('length') ;
     this.updateSelectionAfterContentChange();
+    this.endPropertyChanges() ;
   }.observes('content'),
 
   /**
