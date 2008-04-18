@@ -2137,7 +2137,8 @@ SC.CollectionView = SC.View.extend(
     if (sel) sel.addObserver('[]', func) ;
     this._selection = sel ;
     this._selectionPropertyRevision = null ;
-    this._selectionPropertyObserver(this, '[]', sel, sel.propertyRevision) ;
+    var propertyRevision = (sel) ? sel.propertyRevision : null;
+    this._selectionPropertyObserver(this, '[]', sel, propertyRevision) ;
   }.observes('selection'),
   
   // called on content change *and* content.[] change...
