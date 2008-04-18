@@ -88,6 +88,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     this.render() ;  
   },
   
+  
   /**
     Regenerates the innerHTML for this view and updates it if necessary.
   */
@@ -98,59 +99,36 @@ SC.ListItemView = SC.View.extend(SC.Control,
     
     // handle icon
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
-      
-      var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
-      var icon = (iconKey && content && content.get) ? content.get(iconKey) : null ;
-
-      // get a class name and url to include if relevant
-      var url = null, className = null ;
-      if (icon && SC.ImageView.valueIsUrl(icon)) {
-        url = icon; className = '' ;
-      } else {
-        className = icon; url = static_url('blank.gif') ;
-      }
-      
-      html.push('<img class="sc-icon ');
-      html.push(className || '');
-      html.push('" src="');
-      html.push(url || static_url('blank.gif')) ;
-      html.push('" />') ;
+       var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
+       var icon = (iconKey && content && content.get) ? content.get(iconKey) : null ;
+       html.push(this.renderIconHTML(icon));
     }
     
     // handle label
     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
     var label = (labelKey && content && content.get) ? content.get(labelKey) : null ;
-    html.push('<span class="sc-label">') ;
-    html.push(label || '') ;
-    html.push('</span>') ;
+    html.push(this.renderLabelHTML(label));
     
     // handle unread count
     var countKey = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
     var count = (countKey && content && content.get) ? content.get(countKey) : null ;
     if ((count != null) && (count != 0)) {
-      html.push('<span class="sc-count"><span class="inner">') ;
-      html.push(count.toString()) ;
-      html.push('</span></span>') ;
+      html.push(this.renderCountHTML(count));
     }
     
     // handle action 
     var actionKey = this.getDelegateProperty(del, 'listItemActionProperty') ;
     var actionClassName = (actionKey && content && content.get) ? content.get(actionKey) : null ;
     if (actionClassName) {
-      html.push('<img src="') ;
-      html.push(static_url('blank.gif')) ;
-      html.push('" class="sc-action" />') ;
+       html.push(this.renderActionHTML(actionClassName));
     }
     this.setClassName('sc-has-action', actionClassName) ;
     
     // handle branch
     if (this.getDelegateProperty(del, 'hasContentBranch')) {
       var branchKey = this.getDelegateProperty(del, 'contentIsBranchKey');
-      var hasBranch = (branchKey && content && content.get) ? 
-        content.get(branchKey) : false ;
-      html.push('<span class="sc-branch ');
-      html.push(hasBranch ? 'sc-branch-visible' : 'sc-branch-hidden') ;
-      html.push('">&nbsp;</span>') ;
+      var hasBranch = (branchKey && content && content.get) ? content.get(branchKey) : false ;
+      html.push(this.renderBranchHTML(hasBranch));
       this.setClassName('sc-has-branch', true) ;
     } else this.setClassName('sc-has-branch', false) ;
     
@@ -159,6 +137,89 @@ SC.ListItemView = SC.View.extend(SC.Control,
       this._lastRenderedHtml = html ;
       this.set('innerHTML', html) ;
     }
-  }
+  },
+  
+  /** 
+     renderIconHTML generates the html string used to represent the icon for your 
+     list item.  override this to return your own custom HTML
+     @returns {String}
+     @arguments {String} the icon property based on your view's contentIconKey
+   */
+   renderIconHTML: function(icon){
+     var html = [];
+     // get a class name and url to include if relevant
+     var url = null, className = null ;
+     if (icon && SC.ImageView.valueIsUrl(icon)) {
+       url = icon; className = '' ;
+     } else {
+       className = icon; url = static_url('blank.gif') ;
+     }
+     html.push('<img class="sc-icon ');
+     html.push(className || '');
+     html.push('" src="');
+     html.push(url || static_url('blank.gif')) ;
+     html.push('" />') ;
+     html=html.join('');
+     return html;
+   },
+   
+   /** 
+       renderLabelHTML generates the html string used to represent the label for your 
+       list item.  override this to return your own custom HTML
+       @returns {String}
+       @arguments {String} the label property based on your view's contentValueKey
+     */
+   renderLabelHTML: function(label){
+     var html = [];
+     html.push('<span class="sc-label">') ;
+     html.push(label || '') ;
+     html.push('</span>') ;
+     return html.join('');    
+   },
+   
+   /** 
+        renderCountHTML generates the html string used to represent the count (like unread count)
+        for your list item.  override this to return your own custom HTML
+        @returns {String}
+        @arguments {Integer} the label property based on your view's contentValueKey
+    */
+   renderCountHTML: function(count) {
+     var html= [];
+      html.push('<span class="sc-count"><span class="inner">') ;
+       html.push(count.toString()) ;
+       html.push('</span></span>') ;
+       return html.join('');
+   },
+   
+   /** 
+        renderActiontHTML generates the html string used to represent the action item
+        for your list item.  override this to return your own custom HTML
+        @returns {String}
+        @arguments {String} the name of the action item.
+    */
+   renderActionHTML: function(actionClassName){
+     var html = [];
+     html.push('<img src="') ;
+     html.push(static_url('blank.gif')) ;
+     html.push('" class="sc-action" />') ;
+     return html.join('');
+   },
+   
+   /** 
+         renderBranchHTML generates the html string used to represent the branch arrow.
+         override this to return your own custom HTML
+         @returns {String}
+         @arguments {Boolean} whehter the branch is 
+   */
+   
+   renderBranchHTML: function(hasBranch) {
+     var html = [];
+     html.push('<span class="sc-branch ');
+     html.push(hasBranch ? 'sc-branch-visible' : 'sc-branch-hidden') ;
+     html.push('">&nbsp;</span>');
+     return html.join('');
+   }
+  
+  
   
 }) ;
