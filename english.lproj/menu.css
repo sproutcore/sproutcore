@@ -49,7 +49,7 @@
 }
 
 .menu-pane li.menu-item.active a {
-	background: static_url('images/buttons-sprite.png') repeat-x left -67px;
+	background: static_url('images/sc-theme-sprite.png') repeat-x left -67px;
 	color:  white ;
 	border-top-width: 1px;
 	border-top-color: #a9a9a9;

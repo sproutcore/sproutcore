@@ -54,11 +54,11 @@ SC.ScrollView = SC.ContainerView.extend(SC.Scrollable, {
   },
 
   // auto fit child view based on which scrollviews are visible
-  resizeChildrenWithOldSize: function() {
+  resizeChildrenWithOldSize: function(oldSize) {
     var v = this.get('firstChild') ;
     if (v) {
       var f = v.get('frame');
-      var orig = f ;
+      var orig = Object.clone(f) ;
       var innerFrame = this.get('innerFrame') ;
       f.x = f.y = 0 ;
       if (!this.get('canScrollHorizontal')) f.width = innerFrame.width ;

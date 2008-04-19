@@ -1,4 +1,9 @@
-/* @override http://localhost:4020/static/sproutcore/en/_cache/theme-1208227908.css */
+/* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208227908.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208343214.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208497760.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208500445.css
+*/
 
 /* =========================================
    SproutCore UI Theme
@@ -85,7 +90,7 @@ body.sc-theme {
 	height: 7px;
 	left: -6px;
 	top: -4px;
-	background: static_url('images/buttons-sprite.png') no-repeat -32px -1040px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
 }
 
 /* @end */
@@ -108,7 +113,7 @@ body.sc-theme {
 	height: 7px;
 	left: -4px;
 	top: -6px;
-	background: static_url('images/buttons-sprite.png') no-repeat -32px -1040px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
 }
 
 /* @end */
@@ -142,7 +147,7 @@ body.sc-theme {
 }
 
 .sc-theme.focus .sc-collection-view.sc-source-list-view .sc-collection-item.sel {
-	background: static_url('images/buttons-sprite.png') 0 0px;
+	background: static_url('images/sc-theme-sprite.png') 0 0px;
 	color: white ;
 	border-top: 1px solid #5a3f62;
 }
@@ -185,13 +190,13 @@ body.sc-theme {
 	display: block;
 	top: 6px;
 	padding-left: 9px;
-	background: no-repeat static_url('images/buttons-sprite.png') left -51px;
+	background: no-repeat static_url('images/sc-theme-sprite.png') left -51px;
 }
 
 .sc-theme .sc-source-list-view .sc-count .inner {
 	display: block ;
 	padding-right: 9px;
-	background: no-repeat static_url('images/buttons-sprite.png') right -33px;
+	background: no-repeat static_url('images/sc-theme-sprite.png') right -33px;
 	min-width: 10px ;
 	text-align: center ;
 	font-weight: bold ;
@@ -205,13 +210,25 @@ body.sc-theme {
 
 .sc-theme .sc-source-list-view .sel .sc-count,
 .sc-theme.blur .sc-source-list-view .sc-count {
-	background: no-repeat static_url('images/buttons-sprite.png') left -87px;
+	background: no-repeat static_url('images/sc-theme-sprite.png') left -87px;
 }
 
 .sc-theme .sc-source-list-view .sel .sc-count .inner,
 .sc-theme.blur .sc-source-list-view .sc-count .inner {
 	color: #372a3c;
-	background: no-repeat static_url('images/buttons-sprite.png') right -69px;
+	background: no-repeat static_url('images/sc-theme-sprite.png') right -69px;
+}
+
+/* @end */
+
+/* @group SC.SplitView */
+
+.sc-theme .horizontal .sc-split-divider-view {
+	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
+	border-left: 1px #888 solid;
+	border-right: 1px #888 solid ;
+ 	z-index: 5;
+	width: 3px;
 }
 
 /* @end */
@@ -265,6 +282,62 @@ input.show-hint {
 /* @group My Group */
 
 
+
+/* @end */
+
+/* @group Typical Workspace */
+
+.sc-app-workspace {
+	position: absolute ;
+	left: 0;
+	right: 0;
+	top:  0;
+	bottom: 36px;
+	overflow: auto ;
+}
+
+.sc-footer {
+	position: absolute ;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 39px;
+	background:  url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') repeat-x left -1057px;
+}
+
+.sc-footer .left,
+.sc-footer .right,
+.sc-footer .center {
+	height: 23px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	bottom: 0;
+}
+
+.sc-footer .left {	
+	left: 0; 
+	text-align: left ;
+	padding-left: 8px;
+	position: absolute ;
+}
+
+.sc-footer .right {	
+	right: 0; 
+	text-align: left ;
+	padding-right: 15px;
+	position: absolute ;
+}
+
+.sc-footer .center {
+	text-align: center ;
+	margin-top: 4px;
+}
+
+.sc-footer .sc-label-view {
+	line-height: 23px;
+	font-size: 12px;
+	font-weight: bold;
+}
 
 /* @end */
 

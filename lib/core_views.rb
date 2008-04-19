@@ -40,6 +40,12 @@ view_helper :view do
   property :value
   property :content_value_key
   
+  # For SC.SplitView support
+  property :max_thickness
+  property :min_thickness
+  property :can_collapse
+  property :collapsed, :key => 'isCollapsed'
+  
 
   # set panel type
   var :panel
@@ -251,3 +257,19 @@ view_helper :scroll_view do
   view 'SC.ScrollView'
   css_class_names << 'sc-scroll-view'
 end
+
+view_helper :split_view do
+  view 'SC.SplitView'
+  property :direction, :key => 'layoutDirection'
+  property :can_collapse_views
+  
+  var :direction, 'horizontal'
+  css_class_names << 'sc-split-view'
+  css_class_names << @direction
+end
+
+view_helper :split_divider_view do
+  view 'SC.SplitDividerView'
+  css_class_names << 'sc-split-divider-view'
+end
+

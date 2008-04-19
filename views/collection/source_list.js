@@ -6,6 +6,8 @@ require('views/collection') ;
 require('views/button/disclosure');
 require('views/source_list_group');
 
+SC.BENCHMARK_SOURCE_LIST_VIEW = NO ;
+
 /** @class
 
   Displays a source list like the source list in iTunes.
@@ -235,7 +237,9 @@ SC.SourceListView = SC.CollectionView.extend(
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
-    SC.Benchmark.start('SC.SourceListView.layoutItemViewsFor') ;
+    if (SC.BENCHMARK_SOURCE_LIST_VIEW) {
+      SC.Benchmark.start('SC.SourceListView.layoutItemViewsFor') ;
+    }
     
     // if itemView's group is not visible, then just set to invisible.
     if (!this.groupAtContentIndexIsVisible(contentIndex)) {
@@ -267,11 +271,16 @@ SC.SourceListView = SC.CollectionView.extend(
 
     }
     
-    SC.Benchmark.end('SC.SourceListView.layoutItemViewsFor') ;
+    if (SC.BENCHMARK_SOURCE_LIST_VIEW) {
+      SC.Benchmark.end('SC.SourceListView.layoutItemViewsFor') ;
+    }
   },
   
   layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {
-    SC.Benchmark.start('SC.SourceListView.layoutGroupView') ;
+    
+    if (SC.BENCHMARK_SOURCE_LIST_VIEW) {
+      SC.Benchmark.start('SC.SourceListView.layoutGroupView') ;
+    }
     
     //console.log('layoutGroupView', groupValue) ;
     
@@ -294,7 +303,10 @@ SC.SourceListView = SC.CollectionView.extend(
     if (firstLayout || !SC.rectsEqual(groupView.get('frame'), f)) {
       groupView.set('frame', f) ;      
     }
-    SC.Benchmark.end('SC.SourceListView.layoutGroupView') ;    
+
+    if (SC.BENCHMARK_SOURCE_LIST_VIEW) {
+      SC.Benchmark.end('SC.SourceListView.layoutGroupView') ;    
+    }
   },
   
   // .......................................

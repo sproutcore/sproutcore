@@ -195,8 +195,6 @@ SC.GridView = SC.CollectionView.extend(
           width: 0 
         };
         
-    console.log('showInsertionPointBefore(%@) f=%@'.fmt(itemView,$H(f).inspect())) ;
-    
     if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
       insertionPoint.set('frame', f) ;
     }

@@ -101,13 +101,12 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 
       // regenerate the childNodes array.
       this._rebuildChildNodes();
-
-      // update parent state.
-      view._updateIsVisibleInWindow() ;
-      view._flushInternalCaches() ;
-      view._invalidateClippingFrame() ;
     }
 
+    // update cached states.
+    view._updateIsVisibleInWindow() ;
+    view._flushInternalCaches() ;
+    view._invalidateClippingFrame() ;
     
     // call notices.
     view.didAddToParent(this, beforeView) ;
@@ -785,16 +784,34 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     return f ;
   }.property('frame'),
 
-  /** Frame returns the outside bounds of your view, offset from its offsetParent
-  
-    When you have the view's layoutMode in AUTO, frame is recalculated each time you
-    call it.  Otherwise, it will be cached for best performance.
+  /** 
+    The outside bounds of your view, offset top/left from its offsetParent
+
+    The frame rect is the area actually occupied by a view including any
+    borders or padding, but excluding margins.  
     
-    The frame can change whenever:
-    - you set a new frame property
-    - you change a CSS class or style that effects the top, left, width, height, margins, padding, or borders of the element.
+    The frame is calculated and cached the first time you get it.  Afer that, 
+    the frame cache should automatically update when you make changes that 
+    will effect the view frames unless you change the frame indirectly, such 
+    as through changing CSS classes or by-passing the view to edit the DOM.
+
+    If you make a change like this, be sure to wrap the code that makes this
+    change with calls to viewFrameWillChange() and viewFrameDidChange() on the
+    highest-level view that will be impacted by the change.  Calling this
+    method will automatically update child frames as well.
     
-    @property
+    When you set the frame property, it will update the left, top, height,
+    and width CSS attributes on the element.  Since the height and width in
+    the frame rect includes borders and padding, the view will automatically
+    adjust the height and width CSS it sets to account for this.  
+
+    If you would prefer to edit the CSS attributes for the frame directly
+    instead, you can do so by using the styleTop, styleLeft, styleRight, 
+    styleBottom, styleWidth, and styleHeight properties on the view.  These
+    properties will update the CSS attributes and call viewFrameDidChange()/
+    viewFrameWillChange().
+
+    @field
   */
   frame: function(key, value) {
 
@@ -813,11 +830,13 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       // reposition X
       if (value.x !== undefined) {
         style.left = Math.floor(f.x) + 'px' ;
+        style.right = 'auto';
       }
 
       // reposition Y
       if (value.y !== undefined) {
         style.top = Math.floor(f.y) + 'px' ;
+        style.bottom = 'auto';
       }
       
       // Resize width
@@ -885,8 +904,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     The current frame size.
     
-    This property will actually return the same value as the frame property, however setting
-    this property will set only the frame size and ignore any origin you might pass.
+    This property will actually return the same value as the frame property, 
+    however setting this property will set only the frame size and ignore any 
+    origin you might pass.
     
     @field
   */
@@ -900,8 +920,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     The current frame origin.
     
-    This property will actually return the same value as the frame property, however setting
-    this property will set only the frame origin and ignore any size you might pass.
+    This property will actually return the same value as the frame property, 
+    however setting this property will set only the frame origin and ignore 
+    any size you might pass.
     
     @field
   */
@@ -913,12 +934,118 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   }.property('frame'),
   
   /**
-    Call this method before you make a change that will impact the frame of the view 
-    such as changing the border thickness or adding/removing a CSS style.
+    Style-width for the views rootElement
     
-    Once you finish making your changes, be sure to call viewFrameDidChange() as well.
-    This will deliver any relevant resizing and other notifications.  It is safe to nest
-    multiple calls to this method.
+    Setting this property will also notify of a view frame change.
+  
+    @field
+  */
+  styleWidth: function(key, value) {
+    if (value !== undefined) {
+      this.viewFrameWillChange() ;
+      this.setStyle({ width: ((value != null) ? value+'px' : 'auto') }) ;
+      this.viewFrameDidChange() ;
+      this._styleWidth = null;
+    }
+    
+    var ret = this.getStyle('width') ;
+    ret = (ret == 'auto') ? null : parseInt(ret, 0) ;
+  }.property(),
+
+  /**
+    Style-height for the views rootElement
+    
+    Setting this property will also notify of a view frame change.
+  
+    @field
+  */
+  styleHeight: function(key, value) {
+    if (value !== undefined) {
+      this.viewFrameWillChange() ;
+      this.setStyle({ height: ((value != null) ? value+'px' : 'auto') }) ;
+      this.viewFrameDidChange() ;
+    }
+    var ret =  this.getStyle('height') ;
+    return (ret == 'auto') ? null : parseInt(ret, 0) ;
+  }.property(),
+
+  /**
+    Style-top for the views rootElement
+    
+    Setting this property will also notify of a view frame change.
+  
+    @field
+  */
+  styleTop: function(key, value) {
+    if (value !== undefined) {
+      this.viewFrameWillChange() ;
+      this.setStyle({ top: ((value != null) ? value+'px' : 'auto') }) ;
+      this.viewFrameDidChange() ;
+    }
+    var ret =  this.getStyle('top') ;
+    return (ret == 'auto') ? null : parseInt(ret, 0) ;
+  }.property(),
+
+  /**
+    Style-bottom for the views rootElement
+    
+    Setting this property will also notify of a view frame change.
+  
+    @field
+  */
+  styleBottom: function(key, value) {
+    if (value !== undefined) {
+      this.viewFrameWillChange() ;
+      this.setStyle({ bottom: ((value != null) ? value+'px' : 'auto') }) ;
+      this.viewFrameDidChange() ;
+    }
+    var ret =  this.getStyle('bottom') ;
+    return (ret == 'auto') ? null : parseInt(ret, 0) ;
+  }.property(),
+
+  /**
+    Style-left for the views rootElement
+    
+    Setting this property will also notify of a view frame change.
+  
+    @field
+  */
+  styleLeft: function(key, value) {
+    if (value !== undefined) {
+      this.viewFrameWillChange() ;
+      this.setStyle({ left: ((value != null) ? value+'px' : 'auto') }) ;
+      this.viewFrameDidChange() ;
+    }
+    var ret =  this.getStyle('left') ;
+    return (ret == 'auto') ? null : parseInt(ret, 0) ;
+  }.property(),
+
+  /**
+    Style-right for the views rootElement
+    
+    Setting this property will also notify of a view frame change.
+  
+    @field
+  */
+  styleRight: function(key, value) {
+    if (value !== undefined) {
+      this.viewFrameWillChange() ;
+      this.setStyle({ right: ((value != null) ? value+'px' : 'auto') }) ;
+      this.viewFrameDidChange() ;
+    }
+    var ret =  this.getStyle('right') ;
+    return (ret == 'auto') ? null : parseInt(ret, 0) ;
+  }.property(),
+
+  
+  /**
+    Call this method before you make a change that will impact the frame of 
+    the view such as changing the border thickness or adding/removing a CSS 
+    style.
+    
+    Once you finish making your changes, be sure to call viewFrameDidChange() 
+    as well. This will deliver any relevant resizing and other notifications.  
+    It is safe to nest multiple calls to this method.
     
     This method is called automatically anytime you set the frame.
     
@@ -945,7 +1072,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     @returns {void}
   */
-  viewFrameDidChange: function() {
+  viewFrameDidChange: function(force) {
     
     // clear the frame caches
     this.recacheFrames() ;
@@ -956,16 +1083,17 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       if (this._cachedFrames) {
         var newFrames = this.getEach('innerFrame', 'clippingFrame') ;
         
+        // notify if clippingFrame has changed and clippingFrameDidChange is 
+        // implemented.
+        var nf = newFrames[1]; var of = this._cachedFrames[1] ;
+        if (force || (nf.width != of.width) || (nf.height != of.height)) {
+          this._invalidateClippingFrame() ;
+        }
+
         // notify children if the size of the innerFrame has changed.
         var nf = newFrames[0]; var of = this._cachedFrames[0] ;
-        if ((nf.width != of.width) || (nf.height != of.height)) {
+        if (force || (nf.width != of.width) || (nf.height != of.height)) {
           this.resizeChildrenWithOldSize(this._cachedFrames.last()) ;          
-        }
-        
-        // notify if clippingFrame has changed and clippingFrameDidChange is implemented.
-        var nf = newFrames[1]; var of = this._cachedFrames[1] ;
-        if ((nf.width != of.width) || (nf.height != of.height)) {
-          this._invalidateClippingFrame() ;
         }
         
         // clear parent scrollFrame if needed
@@ -1073,6 +1201,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     var f ;
     if (this._clippingFrame == null) {
 
+      //if (this instanceof SC.SplitView) debugger ;
+      
       // my clipping frame is usually my frame
       f = this.get('frame') ;
       
@@ -1142,19 +1272,19 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
 
   /**
-    Called whenever the parent's innerFrame size has changed.  You can override this
-    method to change how your view responds to this change.
+    Called whenever the parent's innerFrame size has changed.  You can 
+    override this method to change how your view responds to this change.
     
-    If you do not override this method, the view will assume you are using CSS to
-    control your layout and it will simply relay the change information to your
-    child views.  As an optmization, the view may not always call this method if it 
-    determines that you have not overridden it.
+    If you do not override this method, the view will assume you are using CSS 
+    to control your layout and it will simply relay the change information to 
+    your child views.  As an optmization, the view may not always call this 
+    method if it determines that you have not overridden it.
     
     @param oldSize {Size} The old frame size of the parent view.
   */
   resizeWithOldParentSize: function(oldSize) {
     this.viewFrameWillChange() ;
-    this.viewFrameDidChange() ;
+    this.viewFrameDidChange(YES) ;
   },
   
   /** @private

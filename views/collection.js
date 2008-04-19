@@ -6,7 +6,7 @@
 require('views/view') ;
 require('views/label') ;
 
-SC.BENCHMARK_UPDATE_CHILDREN = YES ;
+SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /** Indicates that selection points should be selected using horizontal 
@@ -818,10 +818,8 @@ SC.CollectionView = SC.View.extend(
   */
   resizeChildrenWithOldSize: function(oldSize) {
     if (!this._hasChildren) return ;
-    if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
-      this.updateChildren() ; // add/remove any new views.
-      this.layoutResize() ; // perform layout on all of the views if needed.
-    }
+    this.updateChildren() ; // add/remove any new views.
+    this.layoutResize() ; // perform layout on all of the views if needed.
   },
 
   /**
