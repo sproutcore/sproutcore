@@ -187,7 +187,12 @@ SC.SourceListView = SC.CollectionView.extend(
     while(loc < max) {
       var range = this.groupRangeForContentIndex(loc) ;
       var isVisible = this.groupAtContentIndexIsVisible(range.start) ;
-      ret[range.start] = (isVisible) ? range.length+1 : 1 ;
+      ret[range.start] = (isVisible) ? range.length : 0 ;
+
+      // add a header row space if neede
+      var groupValue = this.groupValueAtContentIndex(range.start) ;
+      if (groupValue != null) ret[range.start]++ ;
+      
       loc = (range.length <= 0) ? max : SC.maxRange(range) ;
     }
     
@@ -256,7 +261,10 @@ SC.SourceListView = SC.CollectionView.extend(
 
       // layout relative to top of group.  Leave open row for title
       var range = this.groupRangeForContentIndex(contentIndex) ;
-      contentIndex = (contentIndex - range.start) + 1 ;
+      contentIndex = (contentIndex - range.start) ;
+      
+      var groupValue = this.groupValueAtContentIndex(range.start) ;
+      if (groupValue != null) contentIndex++ ;
 
       var f = { 
         x: 0, 

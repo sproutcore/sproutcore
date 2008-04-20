@@ -37,6 +37,15 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
   */
   isGroupVisible: YES,
   
+  /** 
+    YES if group is showing its titlebar.
+    
+    Group views will typically hide their header if the content is set to 
+    null.  You can also override this method to always hide the header if 
+    you want and the SourceListView will not leave room for it.
+  */
+  hasGroupTitle: YES,
+  
   groupTitleKey: null,
   
   groupVisibleKey: null,
@@ -45,7 +54,17 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
     var content = this.get('content') ;
     var labelView = this.outlet('labelView') ;
     
-    // set the title if that changed.
+    // hide labelView if content is null.
+    if (content == null) {
+      labelView.setIfChanged('isVisible', NO) ;
+      this.setIfChanged('hasGroupTitle', NO) ;
+      return ;
+    } else {
+      labelView.setIfChanged('isVisible', YES) ;
+      this.setIfChanged('hasGroupTitle', YES) ;
+    }
+    
+   // set the title if that changed.
     var groupTitleKey = this.getDelegateProperty(this.displayDelegate, 'groupTitleKey') ;
     if ((key == '*') || (groupTitleKey && (key == groupTitleKey))) {
       var title = (content && content.get && groupTitleKey) ? content.get(groupTitleKey) : content;
