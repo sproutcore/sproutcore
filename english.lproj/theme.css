@@ -4,6 +4,7 @@
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1208497760.css
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1208500445.css
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1208631591.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208633924.css
 */
 
 /* =========================================
@@ -366,6 +367,91 @@ input.show-hint {
 	line-height: 23px;
 	font-size: 12px;
 	font-weight: bold;
+}
+
+/* @end */
+
+/* @group SC.SliderView */
+
+.sc-theme .sc-slider-view {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	cursor: default;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 18px;
+	vertical-align: middle ;
+	position: relative ;
+	padding-left: 48px;
+	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') no-repeat ;
+}
+
+.sc-theme.blur .sc-slider-view,
+.sc-theme.focus .sc-slider-view.disabled {
+	background-position: left -945px;
+}
+
+.sc-theme.focus .sc-slider-view {
+	background-position: left -897px;
+}
+
+.sc-theme .sc-slider-view .outer {
+	display: block;
+	height: 18px;
+	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') no-repeat ;
+	padding-right: 48px;
+	position: relative ;
+}
+
+.sc-theme.focus .sc-slider-view .outer {
+	background-position: right -929px ;
+}
+
+.sc-theme.blur .sc-slider-view .outer,
+.sc-theme.focus .sc-slider-view.disabled .outer {
+	background-position: right -977px ;
+}
+
+.sc-theme .sc-slider-view .inner {
+	display: block;
+	height: 18px;
+	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') repeat-x ;
+	width: 98px;
+	position: relative ;
+}
+
+.sc-theme.blur .sc-slider-view .inner,
+.sc-theme.focus .sc-slider-view.disabled .inner {
+	background-position: right -961px ;
+}
+
+.sc-theme.focus .sc-slider-view .inner {
+	background-position: right -913px ;
+}
+
+.sc-theme .sc-slider-view .sc-handle {
+	height: 18px;
+	width: 18px;
+	vertical-align: middle ;
+	position: absolute ;
+	margin-left: -9px;
+	left:  50%;
+	top: 0;
+	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') no-repeat
+}
+
+.sc-theme.focus .sc-slider-view .sc-handle {
+	background-position: -24px -825px ;
+}
+
+.sc-theme.blur .sc-slider-view .sc-handle,
+.sc-theme.focus .sc-slider-view.disabled .sc-handle {
+	background-position: -24px -873px
+}
+
+.sc-theme.focus .sc-slider-view.active .sc-handle {
+	background-position: -24px -849px ;
 }
 
 /* @end */

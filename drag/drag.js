@@ -21,57 +21,49 @@ SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20 ;
   To initiate a drag, you should call SC.Drag.start() with the options below
   specified in a hash. Pass the ones you need to get the drag you want:  
    
-  {{{
-   event: (req)
-     The mouse event that triggered the drag.  This will be used to 
-     position the element.
+  - *event: (req)* The mouse event that triggered the drag.  This will be used 
+    to position the element.
   
-   source: (req)
-     The drag source object that should be consulted during the drag operations.
-     This is usually the container view that initiated the drag.
+   - *source: (req)* The drag source object that should be consulted during 
+     the drag operations. This is usually the container view that initiated 
+     the drag.
   
-   dragView: (req)
-     This should point to a view that will be used as the source image for 
-     the drag. The drag operation will clone the DOM elements for this 
-     view and add the class name 'drag-image' to the outermost element.
+   - *dragView: (req)*  This should point to a view that will be used as the 
+     source image for the drag. The drag operation will clone the DOM elements 
+     for this view and add the class name 'drag-image' to the outermost 
+     element.
   
-   ghost:  YES | NO
-     if YES or not passed, then drag view image will show, but the source
-     dragView will not be hidden.  set to NO to make it appear that the
-     dragView itself is being dragged around.
+   - *ghost:  YES | NO*  If YES or not passed, then drag view image will show, 
+     but the source dragView will not be hidden.  set to NO to make it appear 
+     that the dragView itself is being dragged around.
   
-   slideBack: YES | NO
-     If YES or not specified, then if the drag operation is cancelled, the
-     dragView will slide back to its source origin.
+   - *slideBack: YES | NO*  If YES or not specified, then if the drag 
+     operation is cancelled, the dragView will slide back to its source 
+     origin.
   
-   origin:
-     If passed, this will be used as the origin point for the ghostView
-     when it slides back.  You normally do not need to pass this unless
-     the ghost view does not appear in the main UI.
+   - *origin:*  If passed, this will be used as the origin point for the 
+     ghostView when it slides back.  You normally do not need to pass this 
+     unless the ghost view does not appear in the main UI.
   
-   data:
-     Optional hash of data types and values.  You can use this to pass a
-     static set of data instead of providing a dataSource.  If you provide
+   - *data:* Optional hash of data types and values.  You can use this to pass 
+     a static set of data instead of providing a dataSource.  If you provide
      a dataSource, it will override this.
   
-   dataSource:
-     Optional object that will provide the data for the drag to be consumed
-     by the drop target.  If you do not pass this parameter or the data 
-     hash, then the source object will be used if it implements the
+   - *dataSource:*  Optional object that will provide the data for the drag to 
+     be consumed by the drop target.  If you do not pass this parameter or the 
+     data hash, then the source object will be used if it implements the 
      SC.DragDataSource protocol.
   
-   anchorView:
-     if you pass this optional view, then the drag will only be allowed to
-     happen within this view.  The ghostView will actually be added as a
-     child of this view during the drag.  Normally the anchorView is the
+   - *anchorView:* if you pass this optional view, then the drag will only be 
+     allowed to happen within this view.  The ghostView will actually be added 
+     as a child of this view during the drag.  Normally the anchorView is the 
      window.
-   }}}
    
   @extends SC.Object
 */
 SC.Drag = SC.Object.extend(
-/** @scope SC.Drag.prototype */
-{
+/** @scope SC.Drag.prototype */ {
+  
   /** [RO] The source object used to coordinate this drag. */  
   source: null,
 
@@ -121,7 +113,7 @@ SC.Drag = SC.Object.extend(
   //
 
   /**
-    (Property) Data types supported by this drag operation.
+    Data types supported by this drag operation.
     
     Returns an array of data types supported by the drag source.  This may 
     be generated dynamically depending on the data source.
@@ -133,7 +125,7 @@ SC.Drag = SC.Object.extend(
     on your dragEntered() and prepareForDragOperation() methods to determine 
     if you can handle any of the data types offered up by the drag source.
     
-    @returns {Array} available data types
+    @field {Array} available data types
   */
   dataTypes: function() {
     
@@ -687,8 +679,7 @@ SC.Drag = SC.Object.extend(
 }) ;
 
 SC.Drag.mixin(
-/** @scope SC.Drag */
-{
+/** @scope SC.Drag */ {
   
    
   /**  

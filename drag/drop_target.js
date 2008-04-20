@@ -6,7 +6,7 @@
 require('drag/drag');
 
 /**
-  @namespace Interface for Drop Targets
+  @namespace
   
   Add the droppable mixin to your view to be able to accept drop events.  You
   should also override the methods below as needed to handle accepting of 

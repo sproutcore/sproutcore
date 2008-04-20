@@ -29,7 +29,10 @@ view_helper :view do
   attribute :title
 
   # there are some standard JS properties
+  bind :enabled, :key => 'isEnabled'
   bind :visible, :key => 'isVisible'
+
+  property :enabled, :key => 'isEnabled'
   property :modal,   :key => 'isModal'
   property :custom_panel, :key => 'hasCustomPanelWrapper'
   property :localize 
@@ -88,6 +91,9 @@ view_helper :view do
   # flattened
   var :class, :key => :class_names
   css_class_names << @class_names if @class_names
+  
+  var :enabled, true
+  css_class_names << 'disabled' if @enabled == false
   
   var :style
   css_styles << @style unless @style.nil?

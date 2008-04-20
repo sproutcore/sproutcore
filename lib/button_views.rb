@@ -226,7 +226,6 @@ view_helper :radio_view, :wraps => :button_view do
   @inner_html = @inner_html.join ''
 end
 
-
 # This renders a group of radio buttons.  The buttons are controlled by
 # a RadioGroupView that will map the value to a set of selection states.
 #
@@ -294,4 +293,36 @@ view_helper :radio_group_view do
     
     @inner_html = html * "\n"
   end
+end
+
+# Renders a slider view.
+view_helper :slider_view do
+  
+  property :minimum
+  property :maximum
+  property :step
+  view 'SC.SliderView'
+  
+  css_class_names << 'sc-slider-view'
+  
+  @label_style = []
+  css_styles.flatten!
+  css_styles.reject! do | part |
+    if part =~ /width:/
+      @label_style << part
+      true
+    else
+      false
+    end
+  end
+  if @label_style.size > 0
+    # subtract the extra space required
+    @label_style = @label_style.map { |x| x.gsub(/[0-9]+/,($1.to_i-48).to_s)}
+    @label_style = %(style="#{@label_style * ' '}" )
+  else
+    @label_style = ''
+  end
+  
+  @inner_html = %(<span class="outer"><span #{@label_style} class="inner"></span><img src="#{self.blank_url}" class="sc-handle" /></span>)
+  
 end
