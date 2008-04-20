@@ -4,7 +4,7 @@
 // ========================================================================
 
 /**
-  @namespace Implements a Scrollable View
+  @namespace
 
   Any views you implement that are scrollable should include this mixin to
   provide basic support for scrolling actions.  You can also override any 

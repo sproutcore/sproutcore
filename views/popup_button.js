@@ -1,19 +1,22 @@
 require('views/button') ;
 
 /**
-* @class
-* @constructor
-* @extends SC.ButtonView
-* @author Skip Baney
-* @copyright 2006-2007, Sprout Systems, Inc. and contributors.
-* @version 0.1
+  @class
+
+  @extends SC.ButtonView
+  @author Skip Baney
+  @copyright 2006-2007, Sprout Systems, Inc. and contributors.
+  @version 1.0
 */
 SC.PopupButtonView = SC.ButtonView.extend({
 
   /**
-  * Overriding the default SC.ButtonView#performKeyEquivalent method to pass it onto the menu
-  * @param {string} keystring method name corresponding to the keys pressed (i.e alt_shift_z)
-  * @param {DOMMouseEvent} evt mousedown event
+    Overriding the default SC.ButtonView#performKeyEquivalent method to pass 
+    it onto the menu
+
+    @param {string} keystring method name corresponding to the keys pressed 
+    (i.e alt_shift_z)
+    @param {DOMMouseEvent} evt mousedown event
   */
   performKeyEquivalent: function( keystring, evt )
   {
@@ -28,14 +31,14 @@ SC.PopupButtonView = SC.ButtonView.extend({
   },
   
   /**
-  * Name of the menu view to use.
-  * @type {string}
+    Name of the menu view to use.
+    @type {string}
   */
   menuName: null,
 
   /**
-  * PopupMenu reference. Will be lazy-loaded from the 'menuName' string.
-  * @type {SC.PopupMenu}
+    PopupMenu reference. Will be lazy-loaded from the 'menuName' string.
+    @type {SC.PopupMenu}
   */
   menu: function( key, value )
   {
@@ -53,15 +56,16 @@ SC.PopupButtonView = SC.ButtonView.extend({
     }
     return this._menu;
   }.property(),
+  
   /**
-  * Binds the button's selection state to the menu's visibility.
-  * @private
+    Binds the button's selection state to the menu's visibility.
+    @private
   */
   isSelectedBinding: '*_menu.isVisible',
   
   /**
-  * Button action handler
-  * @param {DOMMouseEvent} evt mouseup event that triggered the action
+    Button action handler
+    @param {DOMMouseEvent} evt mouseup event that triggered the action
   */
   action: function( evt )
   {
@@ -70,9 +74,9 @@ SC.PopupButtonView = SC.ButtonView.extend({
     if (!menu) return false;
     
     if (!this._didFirstRun) {
-      // for some reason the menu#isVisible is true the first time we get it...
-      // and since this#isSelected is bound to it... we get an incorrect conditional check.
-      // hacking it here to keep moving.
+      // for some reason the menu#isVisible is true the first time we get 
+      // it... and since this#isSelected is bound to it... we get an incorrect 
+      // conditional check. hacking it here to keep moving.
       menu.popup(this, evt);
       this._didFirstRun = true;
     } else {

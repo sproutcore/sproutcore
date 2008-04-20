@@ -5,9 +5,15 @@
 
 require('views/view') ;
 
-// This is a basic menu item for inclusion in a popup menu.  This is a type
-// of button that will automatically close the popup menu when it is
-// pressed.
+/** @class
+
+  This is a basic menu item for inclusion in a popup menu.  This is a type
+  of button that will automatically close the popup menu when it is
+  pressed.
+  
+  @extends SC.ButtonView
+  
+*/
 SC.MenuItemView = SC.ButtonView.extend({
 
   emptyElement: [

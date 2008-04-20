@@ -8,7 +8,10 @@ require('foundation/object') ;
 require('foundation/input_manager');
 
 /**
-  @class A responder is capable of responding to events such as mouse clicks and key presses.  
+  @class 
+  
+  A responder is capable of responding to events such as mouse clicks and key 
+  presses.  
   
   All views are a type of responder, but you can extend this class yourself 
   as well to implement your own responders if you need to.

@@ -17,11 +17,12 @@ require('mixins/delegate_support');
   
   @extends SC.View
   @extends SC.Control
+  @extends SC.DelegateSupport
   @author Charles Jolley
   @version 1.0
 */
 SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
-/** @scope SC.LabelView.protoype */ {
+/** @scope SC.LabelView.prototype */ {
 
   emptyElement: '<span class="sc-label-view"></span>',
 

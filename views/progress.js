@@ -5,28 +5,41 @@
 
 require('views/view') ;
 
-// ProgressView displays a progress bar.  It does this mostly through CSS classes
-// so that you can style them however you want.  A progress bar must have the
-// following structure:
-//
-// <div class="outer progress"><div class="inner"></div></div>
-//
-// The outer can form the boundary of the bar while the inner will be adjusted 
-// to fit the percentage of the progress.
-//
-// Style the progress bar with the following CSS classes:
-//
-// .progress.indeterminate = to show an indeterminate progress. inner will hide.
-// .progress.disabled = show as disabled.
+/**
+  @class
 
+  ProgressView displays a progress bar.  It does this mostly through CSS 
+  classes so that you can style them however you want.  A progress bar must 
+  have the following structure:
+
+  <div class="outer progress"><div class="inner"></div></div>
+
+  The outer can form the boundary of the bar while the inner will be adjusted 
+  to fit the percentage of the progress.
+
+  Style the progress bar with the following CSS classes:
+
+  .progress.indeterminate = to show an indeterminate progress. inner will 
+      hide.
+  .progress.disabled = show as disabled.
+
+  @extends SC.View
+*/
 SC.ProgressView = SC.View.extend({
   
   // ........................................
   // PROPERTIES
   //
   
-  minimum: 0, // the minimum value of the progress 
-  maximum: 1.0, // the maximum value of the progress bar.
+  /**
+    The minimum value of the progress.
+  */ 
+  minimum: 0,
+
+  /**
+    The maximum value of the progress bar.
+  */
+  maximum: 1.0,
 
   // Bind this to the current value of the progress bar.  Note that by default an
   // empty value will disable the progress bar and a multiple value too make it

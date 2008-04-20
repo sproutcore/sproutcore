@@ -11,7 +11,7 @@ Object.extend(Array.prototype, SC.Observable) ;
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 
 /**
-  @namespace SC.Array
+  @namespace
   
   This module implements Observer-friendly Array-like behavior.  This mixin is 
   picked up by the Array class as well as other controllers, etc. that want to  

@@ -1,3 +1,4 @@
+/* @override http://localhost:4020/static/sproutcore/en/_cache/buttons-1208588621.css */
 
 /* @group Button Core */
 
@@ -59,6 +60,7 @@ a.regular span.label {
 	padding-top: 3px;
 	height: 19px;
 	margin-left: 20px;
+	text-shadow: #f0f0f0 0px 1px 0px;
 }
 
 a.regular.image span.label {
@@ -84,6 +86,7 @@ a.regular.image span.label {
 .sc-theme.focus a.regular.disabled span.label {
 	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -473px;
 	color: #999;
+	text-shadow: none ;
 }
 
 
@@ -110,6 +113,7 @@ a.regular.image span.label {
 .sc-theme.focus a.regular.sel.disabled span.label {
 	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -266px;
 	color: #999;
+	text-shadow: none ;
 }
 
 /* @end */
@@ -145,6 +149,7 @@ a.regular.image span.label {
 .sc-theme a.regular.sel span.label, 
 .sc-theme a.regular.def span.label {
 	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -128px;
+	text-shadow: #dabec6 0px 1px 0px;
 }
 
 /* @end */
@@ -164,6 +169,7 @@ a.regular.image span.label {
 .sc-theme a.regular.sel.active span.label, 
 .sc-theme a.regular.def.active span.label {
 	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -197px;
+	text-shadow: #b884a4 0px 1px 0px;
 }
 
 /* @end */
@@ -180,6 +186,7 @@ a.regular.image span.label {
 
 .sc-theme a.regular.active span.label {
 	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -404px;
+	text-shadow: #b8b8b8 0px 1px 0px;
 }
 
 /* @end */
@@ -199,6 +206,7 @@ a.regular.image span.label {
 .sc-theme .sc-square-theme a.regular span.label,
 .sc-theme .sc-square-theme a.regular.def span.label {
  	background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1127px;
+	text-shadow: #dabec6 0px 1px 0px;
 }
 
 .sc-theme .sc-square-theme a.regular.sel,
@@ -214,6 +222,7 @@ a.regular.image span.label {
 .sc-theme .sc-square-theme a.regular.sel span.label,
 .sc-theme .sc-square-theme a.regular.active span.label {
  	background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1196px;
+	text-shadow: #b884a4 0px 1px 0px;
 }
 
 .sc-theme.blur .sc-square-theme a.regular,
@@ -229,6 +238,7 @@ a.regular.image span.label {
 .sc-theme.blur .sc-square-theme a.regular span.label,
 .sc-theme .sc-square-theme a.regular.disabled span.label {
  	background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1265px;
+	text-shadow: none ;
 }
 
 /* @end */

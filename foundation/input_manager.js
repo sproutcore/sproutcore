@@ -6,25 +6,34 @@
 require('Core') ;
 require('foundation/object') ;
 
-// An InputManager knows how to convert incoming keyboard events and convert
-// them into actions on a responder.  The default version should provide the
-// correct behavior for most people.  However, if you want some special
-// behavior, you can always write your own.
-//
-// An instance of this input manager is created as a property of
-// SC.Responder.  To overide the inputManager used for all responders, replace
-// this property with your own instance.  To override the inputManager used 
-// only for one responder, set the inputManager property on your specific 
-// instance.
-//
-// Note that generally you do not want to write your own inputManager.  They
-// are tricky to get right.  Instead, you should implement the various handler
-// methods on the responder.
-SC.InputManager = SC.Object.extend({
+/** @class
+
+  An InputManager knows how to convert incoming keyboard events and convert
+  them into actions on a responder.  The default version should provide the
+  correct behavior for most people.  However, if you want some special
+  behavior, you can always write your own.
+
+  An instance of this input manager is created as a property of
+  SC.Responder.  To overide the inputManager used for all responders, replace
+  this property with your own instance.  To override the inputManager used 
+  only for one responder, set the inputManager property on your specific 
+  instance.
+
+  Note that generally you do not want to write your own inputManager.  They
+  are tricky to get right.  Instead, you should implement the various handler
+  methods on the responder.
   
-  // The is the primary entry point for the inputManager.  If you override
-  // the input manager, have this method process the key event and invoke
-  // methods on the responder. 
+  @extends SC.Object
+  @author Charles Jolley
+*/
+SC.InputManager = SC.Object.extend(
+/** @scope SC.InputManager.prototype */ {
+  
+  /**
+    The is the primary entry point for the inputManager.  If you override
+    the input manager, have this method process the key event and invoke
+    methods on the responder. 
+  */
   interpretKeyEvents: function(event, responder)
   {
     var codes = this.codesForEvent(event) ;
@@ -50,8 +59,10 @@ SC.InputManager = SC.Object.extend({
     return false ; //nothing to do.
   },
   
-  // this will get a standardized command code for the event.  It returns
-  // null if the event is plain text, not a command code.
+  /**
+    this will get a standardized command code for the event.  It returns
+    null if the event is plain text, not a command code.
+  */  
   codesForEvent: function(e) {
     var code = e.keyCode ;
     var ret = null ; var key = null ;

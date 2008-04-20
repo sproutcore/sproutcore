@@ -6,9 +6,16 @@
 require('views/view') ;
 require('controllers/collection') ;
 
-// A pagination view renders a widget for showing the total number of pages and
-// for switching between them.  It includes a forward arrow, back arrow, and
-// a popup.
+/**
+
+  @class
+
+  A pagination view renders a widget for showing the total number of pages and
+  for switching between them.  It includes a forward arrow, back arrow, and
+  a popup.
+  
+  @extends SC.View
+*/
 SC.PaginationView = SC.View.extend({
 
   // ......................................

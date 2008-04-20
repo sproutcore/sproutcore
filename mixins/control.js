@@ -9,6 +9,8 @@
 SC.MIXED_STATE = '__MIXED__' ;
 
 /**
+  @namespace
+
   A Control is a view that also implements some basic state functionality.
   Apply this mixin to any view that you want to have standard control
   functionality including showing a selected state, enabled state, focus
@@ -56,7 +58,6 @@ SC.MIXED_STATE = '__MIXED__' ;
   to show.  Anytime your control is shown as part of a collection view, the
   collection view will be automatically set as its displayDelegate.
   
-  @namespace
 */
 SC.Control = {
   

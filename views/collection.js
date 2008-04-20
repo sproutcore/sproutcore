@@ -713,6 +713,7 @@ SC.CollectionView = SC.View.extend(
     
     // Clean out some cached items and notify their changes.
     if (didChange) {
+      this._flushZombieGroupViews() ;
       this.updateSelectionStates() ;
       
       this._itemViews = null ;
@@ -1204,10 +1205,11 @@ SC.CollectionView = SC.View.extend(
     groupView.removeFromParent() ;
 
     // set the groupValue on the groupView.  Older groupViews expect us to set 
-    // this directly on the labelView.  Newer groupViews should have a groupValue property.
-    if (ret.groupValue !== undefined) {
-      ret.set('groupValue', null) ;
-    } else if (ret.labelView) ret.labelView.set('content', null) ;
+    // this directly on the labelView.  Newer groupViews should have a 
+    // groupValue property.
+    if (groupView.groupValue !== undefined) {
+      groupView.set('groupValue', null) ;
+    } else groupView.set('content', null) ;
     
     this._groupViewPool.push(groupView) ;
     return groupView ;

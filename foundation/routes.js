@@ -5,8 +5,15 @@
 
 require('foundation/object') ;
 
-// Routes makes it possible to load a location in the browser.
-SC.Routes = SC.Object.create({
+/**
+  @class
+  
+  Routes makes it possible to load a location in the browser.
+  
+  @extends SC.Object
+*/
+SC.Routes = SC.Object.create(
+/** @scope SC.Routes.prototype */ {
 
   // set this property to your current app lication
   location: function(key,value) {

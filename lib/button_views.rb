@@ -94,7 +94,8 @@ view_helper :button_view do
   view 'SC.ButtonView'
 
   # HTML
-  var :label, @inner_html || 'Submit'
+  var :title
+  var :label, @title || @inner_html || 'Submit'
   var :tag, 'a'
   var :theme, :regular
   var :size, :normal

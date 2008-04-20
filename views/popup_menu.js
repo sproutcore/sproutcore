@@ -5,9 +5,15 @@
 
 require('views/view') ;
 
-// This is a basic popup menu. You can show the popup menu by calling the 
-// view's popup() method.  Pass in the root element and event so that is can
-// be positioned.
+/**
+  @class
+  
+  This is a basic popup menu. You can show the popup menu by calling the 
+  view's popup() method.  Pass in the root element and event so that is can
+  be positioned.
+  
+  @extends SC.View
+*/
 SC.PopupMenuView = SC.View.extend({
   emptyElement: "<ul></ul>",
   

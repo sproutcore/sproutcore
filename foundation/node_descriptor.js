@@ -5,11 +5,14 @@
 
 require('Core') ;
 
-// This object can generate HTML DOM elements from a hash-based description of 
-// the nodes.  See the NodeDescriptor wiki page for complete docs.
-//
-// See https://wiki.sproutit.com/engineering/show/NodeDescriptor 
-//
+/**
+  This object can generate HTML DOM elements from a hash-based description of 
+  the nodes.  See the NodeDescriptor wiki page for complete docs.
+
+  See https://wiki.sproutit.com/engineering/show/NodeDescriptor 
+
+  @deprecated
+*/
 SC.NodeDescriptor = {
   create: function(descriptor, opts) {
     if (!opts) opts = {} ;

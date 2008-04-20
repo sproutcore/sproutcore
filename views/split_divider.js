@@ -89,7 +89,6 @@ SC.SplitDividerView = SC.View.extend(
   },
   
   doubleClick: function(evt) {
-    console.log('doubleClick') ;
     var splitView = this.get('parentNode') ;
     if (!splitView) return; // nothing to do.
     

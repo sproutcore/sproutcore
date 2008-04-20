@@ -4,8 +4,8 @@
 // ========================================================================
 
 /**
-  @namespace Implements Key-Value Observing
-
+  @namespace 
+  
   Key-Value Observing is one of the fundamental ways that models, controllers
   and views communicate with each other in a SproutCore application.  Any 
   object that has this module applied to it can be used in KVO-operations.

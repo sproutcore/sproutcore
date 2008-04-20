@@ -4,11 +4,11 @@
 // ========================================================================
 
 /**
+  @namespace
 
   Views that include the Validatable mixin can be used with validators to 
   ensure their values are valid.  
   
-  @namespace
 */
 SC.Validatable = {
   

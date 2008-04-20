@@ -51,7 +51,8 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
       var title = (content && content.get && groupTitleKey) ? content.get(groupTitleKey) : content;
       if (title != this._title) {
         this._title = title ;
-        labelView.set('title', title.capitalize()) ;
+        if (title) title = title.capitalize() ;
+        labelView.set('title', title) ;
       }
     }
     
@@ -75,8 +76,6 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
   
   // called when the user clicks on the disclosure triangle
   disclosureValueDidChange: function(newValue) {
-    console.log('disclosureValueDidChange: %@'.fmt(newValue)) ;
-    
     if (newValue == this.get('isGroupVisible')) return; // nothing to do
     
     // update group if necessary

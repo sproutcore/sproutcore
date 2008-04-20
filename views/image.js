@@ -19,6 +19,8 @@ SC.IMAGE_STATE_FAILED = 'failed';
 SC.BLANK_IMAGE_URL = static_url('blank.gif');
 
 /**
+  @class
+
   Displays an image in the browser.  
   
   The ImageView can be used to efficiently display images in the browser.
@@ -29,7 +31,6 @@ SC.BLANK_IMAGE_URL = static_url('blank.gif');
   @extends SC.View
   @extends SC.Control
   @author Charles Jolley
-  @class
 */
 SC.ImageView = SC.View.extend(SC.Control, 
 /** @scope SC.ImageView.prototype */ {

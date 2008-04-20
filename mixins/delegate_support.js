@@ -4,6 +4,7 @@
 // ========================================================================
 
 /**
+  @namespace
   
   Support methods for the Delegate design pattern.
   
@@ -28,7 +29,6 @@
   Note that typically delegates are not observable, hence it is not necessary
   to use get() to retrieve the value of the delegate.
   
-  @namespace
 */
 SC.DelegateSupport = {  
   

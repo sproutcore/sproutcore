@@ -11,22 +11,42 @@ require('mixins/array') ;
 SC.BENCHMARK_OBJECTS = NO;
 
 /** 
-  @class Root Object for SproutCore framework.
+  @class 
+
+  Root Object for the SproutCore Framework
+  
+  h2. Class at a Glance
+  
+  Add a one or two paragraph description of the class here.
   
   This is the root object of the SproutCore framework.  All other objects
   inherit from you.  SC.Object among other things implements support for
   class inheritance, observers, and bindings.  You should use SC.Object to
   create your own subclasses as well.
+
+  h2. Overview
   
+  Some overview information about the class should go here.
   Please see online documentation for more information about this.
+
+  h2. Subclassing Notes
   
   I should be able to put a long list of things here I suppose.
   
-  * * Do bullet
-  * * points
-  * * work?
+  - Do bullet
+  - points
+  - work?
+  
+  {{{
+    // Also some sample
+    code.goesHere() ;
+  }}}
   
   @extends SC.Observable 
+  @author Charles Jolley
+  @version 1.0
+  @since Version 1.0
+
 */
 SC.Object = function(noinit) { 
 	if (noinit == SC.Object._noinit_) return ;

@@ -3,6 +3,7 @@
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1208343214.css
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1208497760.css
 	http://localhost:4020/static/sproutcore/en/_cache/theme-1208500445.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208631591.css
 */
 
 /* =========================================
@@ -287,53 +288,81 @@ input.show-hint {
 
 /* @group Typical Workspace */
 
-.sc-app-workspace {
+.sc-theme .sc-app-workspace {
 	position: absolute ;
 	left: 0;
 	right: 0;
 	top:  0;
-	bottom: 36px;
+	bottom: 0;
 	overflow: auto ;
 }
 
-.sc-footer {
+.sc-theme .sc-app-workspace.header {
+	top:  36px;
+}
+
+.sc-theme .sc-app-workspace.footer {
+	bottom: 36px;
+}
+
+.sc-theme .sc-footer {
 	position: absolute ;
 	bottom: 0;
 	left: 0;
 	right: 0;
 	height: 39px;
-	background:  url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') repeat-x left -1057px;
+	background:  static_url('images/sc-theme-sprite.png') repeat-x left -1057px;
+	z-index: 10;
 }
 
-.sc-footer .left,
-.sc-footer .right,
-.sc-footer .center {
+.sc-theme .sc-header {
+	position: absolute ;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 39px;
+	background:  static_url('images/sc-theme-sprite.png') repeat-x left -1062px;
+	z-index: 10;
+}
+
+.sc-theme .sc-header > * {
+	height: 23px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	top: 2px;
+}
+
+.sc-theme .sc-footer > * {
 	height: 23px;
 	padding-top: 6px;
 	padding-bottom: 6px;
 	bottom: 0;
 }
 
-.sc-footer .left {	
+.sc-theme .sc-footer .left,
+.sc-theme .sc-header .left {	
 	left: 0; 
 	text-align: left ;
 	padding-left: 8px;
 	position: absolute ;
 }
 
-.sc-footer .right {	
+.sc-theme .sc-footer .right,
+.sc-theme .sc-header .right {	
 	right: 0; 
 	text-align: left ;
 	padding-right: 15px;
 	position: absolute ;
 }
 
-.sc-footer .center {
+.sc-theme .sc-footer .center,
+.sc-theme .sc-header .center {
 	text-align: center ;
 	margin-top: 4px;
 }
 
-.sc-footer .sc-label-view {
+.sc-theme .sc-footer .sc-label-view,
+.sc-theme .sc-header .sc-label-view {
 	line-height: 23px;
 	font-size: 12px;
 	font-weight: bold;

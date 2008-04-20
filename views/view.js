@@ -15,6 +15,7 @@ SC.BENCHMARK_OUTLETS = NO ;
 SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
 
 /** 
+  @class
   
   A view is the root class you use to manage the web page DOM in your
   application.  You can use views to render visible content on your page,
@@ -32,7 +33,6 @@ SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
   
   @author Charles Jolley
   @version 1.0
-  @class
 */
 SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 /** @scope SC.View.prototype */ {

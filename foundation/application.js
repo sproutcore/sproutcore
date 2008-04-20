@@ -1,16 +1,16 @@
 require('Core');
 require('foundation/responder');
 
-/**
-* The SC.Application object manages a SproutCore application. 
-* A single instance is created and placed in a global variable named SC.app.
-* All events and actions are routed through this object.
-*
-* @class
-* @extends SC.Responder
-* @author Skip Baney
-* @copyright 2006-2007, Sprout Systems, Inc. and contributors.
-* @version 0.1
+/** @class
+  The SC.Application object manages a SproutCore application. 
+  A single instance is created and placed in a global variable named SC.app.
+  All events and actions are routed through this object.
+ 
+  
+  @extends SC.Responder
+  @author Skip Baney
+  @copyright 2006-2007, Sprout Systems, Inc. and contributors.
+  @version 0.1
 */
 SC.Application = SC.Responder.extend( 
 /** @scope SC.Application.prototype */ {

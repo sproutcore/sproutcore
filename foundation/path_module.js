@@ -19,16 +19,17 @@ require('foundation/benchmark') ;
 SC.BENCHMARK_SELECTOR = NO ;
 NO_LIMIT = 10000 ;
 
-// PathModule is high-performance API for locating DOM nodes in your HTML
-// document.  It's designed to be used by searching elements from a parent
-// node.  
-//
-// PathModule is patched into Prototypes Element.Methods, which means that 
-// you can automatically access this API for any DOM element retrieved via
-// the $() operator.  You can also mixin the PathModule api to your own 
-// objects.  Be sure to also have a property called rootElement that points to 
-// the root DOM element you want to search.
-//
+/**
+  PathModule is high-performance API for locating DOM nodes in your HTML
+  document.  It's designed to be used by searching elements from a parent
+  node.  
+
+  PathModule is patched into Prototypes Element.Methods, which means that 
+  you can automatically access this API for any DOM element retrieved via
+  the $() operator.  You can also mixin the PathModule api to your own 
+  objects.  Be sure to also have a property called rootElement that points to 
+  the root DOM element you want to search.
+*/
 SC.PathModule = {
 
     $$func: function(func, levels, max, nest) {
