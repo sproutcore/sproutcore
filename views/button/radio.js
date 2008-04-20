@@ -2,7 +2,7 @@
 // SC.RadioView
 // ==========================================================================
 
-require('views/button');
+require('views/button/button');
 
 /** @class
 

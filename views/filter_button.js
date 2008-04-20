@@ -3,7 +3,7 @@
 // copyright 2006-2007 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/button') ;
+require('views/button/button') ;
 
 // A filter button sets a filter property to whatever you specifiy.  It 
 // also binds to the same property and updates its isSelected state based

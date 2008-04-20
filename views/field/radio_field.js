@@ -3,7 +3,7 @@
 // copyright 2006-2007 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/field') ;
+require('views/field/field') ;
 
 /**
   @class

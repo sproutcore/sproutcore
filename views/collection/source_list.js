@@ -2,7 +2,7 @@
 // SC.SourceListView
 // ==========================================================================
 
-require('views/collection') ;
+require('views/collection/collection') ;
 require('views/button/disclosure');
 require('views/source_list_group');
 
@@ -299,7 +299,8 @@ SC.SourceListView = SC.CollectionView.extend(
     var priorRows = this.countRowsInRange({ start: 0, length: range.start }) ;
     var rowHeight = this.get('rowHeight') || 0 ;
     var parentView = groupView.get('parentView') || this ;
-    var rows = (isVisible) ? (range.length+1) : 1 ;
+    var rows = (isVisible) ? range.length : 0 ;
+    if (groupValue != null) rows++ ;
 
     var f = { 
       x: 0, 

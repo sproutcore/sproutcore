@@ -2,7 +2,7 @@
 // SC.ListView
 // ==========================================================================
 
-require('views/collection') ;
+require('views/collection/collection') ;
 require('views/label');
 
 /** @class

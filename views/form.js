@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/view') ;
-require('views/button') ;
+require('views/button/button') ;
 require('views/field/text_field') ;
 
 // FormView provides a simple way for you to "stage" input by capturing
