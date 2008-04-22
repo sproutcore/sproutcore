@@ -145,9 +145,25 @@ Object.extend(SC,
       valueT += (element.offsetTop  || 0) + (element.clientTop  || 0);
       valueL += (element.offsetLeft || 0) + (element.clientLeft || 0);
 
+      // bizarely for FireFox if your offsetParent has a border, then it can 
+      // impact the offset. 
+      if (SC.Platform.Firefox) {
+        var overflow = Element.getStyle(element, 'overflow') ;
+        if (overflow !== 'visible') {
+          var left = parseInt(Element.getStyle(element, 'borderLeftWidth'),0) || 0 ;
+          var top = parseInt(Element.getStyle(element, 'borderTopWidth'),0) || 0 ;
+          if (el !== element) {
+            left *= 2; top *= 2 ;
+          }
+          valueL += left; valueT += top ;
+        }
+      }
+
       // Safari fix
       if (element.offsetParent == document.body &&
         Element.getStyle(element, 'position') == 'absolute') break;
+
+
 
     } while (element = element.offsetParent);
 

@@ -199,8 +199,35 @@ SC.Array = {
       if (ary.objectAt(loc) != this.objectAt(loc)) return false ;
     }
     return true ;
+  },
+
+  /**
+    Invoke the passed method and arguments on the member elements as long as 
+    the value returned is the first argument.
+    
+    @param {Object} retValue the expected return value
+    @param {String} methodName the method to call
+    @returns {Object} the return value of the last time the method was 
+     invoked.
+  */
+  invokeWhile: function(retValue, methodName) {
+    var ret ;
+    var args = $A(arguments) ;
+    retValue = args.shift() ;
+    methodName = args.shift() ; 
+
+    try {
+      this._each(function(item) {
+        var func = (item) ? item[methodName] : null ;
+        ret = func.apply(item, args) ;
+        if (ret != retValue) throw $break ;
+      }); 
+    } catch (e) {
+      if (e != $break) throw e ;
+    }
+    return ret ;
   }
-  
+      
 } ;
 
 // All arrays have the SC.Array mixin.  Do this before we add the 
@@ -280,21 +307,15 @@ Object.extend(Array.prototype, {
     return ret ;
   },
 
-  map: function(iterator) {
-    var ret = [] ;
-    try {
-      for(var index=0;index<this.length;index++) {
-        var item = this[index] ;
-        ret.push((iterator || Prototype.K).call(item,item,index))  ;
-      } ;
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return ret ;
-  },
-
-  // This will invoke the passed method and arguments on the member elements
-  // as long as the value returned is the first argument.
+  /*
+    Invoke the passed method and arguments on the member elements as long as 
+    the value returned is the first argument.
+    
+    @param {Object} retValue the expected return value
+    @param {String} methodName the method to call
+    @returns {Object} the return value of the last time the method was 
+     invoked.
+  */
   invokeWhile: function(retValue, methodName) {
     var ret ;
     var args = $A(arguments) ;
@@ -313,6 +334,20 @@ Object.extend(Array.prototype, {
     }
     return ret ;
   },
+  
+  map: function(iterator) {
+    var ret = [] ;
+    try {
+      for(var index=0;index<this.length;index++) {
+        var item = this[index] ;
+        ret.push((iterator || Prototype.K).call(item,item,index))  ;
+      } ;
+    } catch (e) {
+      if (e != $break) throw e ;
+    }
+    return ret ;
+  },
+
   
   // If you ask for an unknown property, then try to collect the value
   // from member items.

@@ -1,12 +1,12 @@
 <% # ========================================================================
-   # Sproutcore.CheckboxView Unit Test
+   # SC.CheckboxView Unit Test
    # ========================================================================
 %>
 <% content_for('final') do %>
 
 <script>
 
-Test.context("Sproutcore.CheckboxView",{
+Test.context("SC.CheckboxView",{
 
   "TODO: Add your own tests here": function() {
     true.shouldEqual(true) ;
@@ -14,7 +14,7 @@ Test.context("Sproutcore.CheckboxView",{
 
 }) ;
 
-appMain = main; main = null ; // Cancel main() so app does not start
+if (window.main && (appMain = main)) main = null ; 
 
 </script>
 

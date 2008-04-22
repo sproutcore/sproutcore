@@ -107,7 +107,7 @@ SC.Routes = SC.Object.create(
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
     func = this._routes.functionForRoute(parts,params) ;
     if (func) func(params) ;
-    else console.log('could not find route for: "'+route+'"') ;
+    //else console.log('could not find route for: "'+route+'"') ;
   },
   
   

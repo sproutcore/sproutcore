@@ -18,9 +18,11 @@ NESTED_CHILD_HEIGHT = 40 ;
 Test.context("CASE 1: Non-scrollable view - all view fits within content", {
 
   "child clippingFrame should == child innerFrame": function() {
+    //debugger ;
     var v = this.v.child ;
     var f = v.get('frame') ;
     var cf = v.get('clippingFrame') ;
+
     SC.rectsEqual(f, cf).shouldEqual(true) ;  
   },
   
@@ -67,9 +69,8 @@ Test.context("CASE 2: A scrollable view - child view cannot fit within visible a
     var cf = v.get('clippingFrame') ;
     var f = v.get('frame') ;
     f.height = VIEW_HEIGHT ;
-    console.log('cf',cf);
-    console.log('f',f) ;
-    console.log('position', v.getStyle('position')) ;
+    
+    console.log('cf = %@ - f = %@ - pos = %@'.fmt($I(cf), $I(f), v.getStyle('position'))) ;
     
     SC.rectsEqual(f,cf).shouldEqual(true) ;
   },

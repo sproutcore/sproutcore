@@ -124,14 +124,12 @@ SC.Scrollable = {
     @param {SC.View} view the view you want to make visible
   */
   scrollToVisible: function(view) {
-    // TODO: Not Implemented.
 
     // get frames and convert them to proper offsets
     var f = this.get('innerFrame') ;
     var sf = this.get('scrollFrame') ;
     
     // frame of the view, relative to the top of the scroll frame
-    console.log('view: %@'.fmt(view)) ;
     var vf = this.convertFrameFromView(view.get('frame'), view) ;
     vf.x -= (f.x + sf.x); vf.y -= (f.y + sf.y);
     

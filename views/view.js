@@ -49,15 +49,17 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     Insert the view into the the receiver's childNodes array.
     
-    The view will be added to the childNodes array before the beforeView.  If beforeView is
-    null, then the view will be added to the end of the array.  This will also add the view's
-    rootElement DOM node to the receivers containerElement DOM node as a child.
+    The view will be added to the childNodes array before the beforeView.  If 
+    beforeView is null, then the view will be added to the end of the array.  
+    This will also add the view's rootElement DOM node to the receivers 
+    containerElement DOM node as a child.
 
-    If the specified view already belongs to another parent, it will be removed from that
-    view first.
+    If the specified view already belongs to another parent, it will be 
+    removed from that view first.
     
     @param view {SC.View} the view to insert as a child node.
-    @param beforeView {SC.View} view to insert before, or null to insert at end
+    @param beforeView {SC.View} view to insert before, or null to insert at 
+     end
     @returns {void}
   */
   insertBefore: function(view, beforeView) { 
@@ -162,12 +164,12 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
 
   /**
-    Replace the oldView with the specified view in the receivers childNodes array.
-    This will also replace the DOM node of the oldView with the DOM node of the 
-    new view in the receivers DOM.
+    Replace the oldView with the specified view in the receivers childNodes 
+    array. This will also replace the DOM node of the oldView with the DOM 
+    node of the new view in the receivers DOM.
 
-    If the specified view already belongs to another parent, it will be removed 
-    from that view first.
+    If the specified view already belongs to another parent, it will be 
+    removed from that view first.
 
     @param view {SC.View} the view to insert in the DOM
     @param view {SC.View} the view to remove from the DOM.
@@ -188,8 +190,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
 
   /**
-    Appends the specified view to the end of the receivers childNodes array.  This is
-    equivalent to calling insertBefore(view, null);
+    Appends the specified view to the end of the receivers childNodes array.  
+    This is equivalent to calling insertBefore(view, null);
     
     @param view {SC.View} the view to insert
     @returns {void}
@@ -199,9 +201,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
 
   /**
-    The array of views that are direct children of the receiver view.  The DOM elements 
-    managed by the views are also directl children of the containerElement for the 
-    receiver.
+    The array of views that are direct children of the receiver view.  The DOM 
+    elements managed by the views are also directl children of the 
+    containerElement for the receiver.
     
     @property
     @type Array
@@ -209,8 +211,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   childNodes: [],
 
   /**
-    The first child view in the childNodes array.  If the view does not have any children,
-    this property will be null.
+    The first child view in the childNodes array.  If the view does not have 
+    any children, this property will be null.
      
     @property
     @type SC.View
@@ -227,9 +229,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   lastChild: null,
   
   /**
-    The next sibling view in the childNodes array of the receivers parentNode.  If the
-    receiver is the last view in the array or if the receiver does not belong to a parent
-    view this property will be null.
+    The next sibling view in the childNodes array of the receivers parentNode.  
+    If the receiver is the last view in the array or if the receiver does not 
+    belong to a parent view this property will be null.
      
     @property
     @type SC.View
@@ -237,9 +239,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   nextSibling: null,
 
   /**
-    The previous sibling view in the childNodes array of the receivers parentNode.  If the
-    receiver is the first view in the array or if the receiver does not belong to a parent
-    view this property will be null.
+    The previous sibling view in the childNodes array of the receivers 
+    parentNode.  If the receiver is the first view in the array or if the 
+    receiver does not belong to a parent view this property will be null.
      
     @property
     @type SC.View
@@ -257,13 +259,13 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   
 
   /**
-    The pane this view belongs to.  The pane is the root of the responder chain that this
-    view belongs to.  Typically a view's pane will be the SC.window object. However, if you
-    have added the view to a dialog, panel, popup or other pane, this property will point to
-    that pane instead.
+    The pane this view belongs to.  The pane is the root of the responder 
+    chain that this view belongs to.  Typically a view's pane will be the 
+    SC.window object. However, if you have added the view to a dialog, panel, 
+    popup or other pane, this property will point to that pane instead.
     
-    If the view does not belong to a parentNode or if the view is not onscreen, this property
-    will be null.
+    If the view does not belong to a parentNode or if the view is not 
+    onscreen, this property will be null.
     
     @property
     @type SC.View
@@ -289,44 +291,56 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
 
   /**
-    This method is called on the view just before it is added to a new parent view.  
+    This method is called on the view just before it is added to a new parent 
+    view.  
     
-    You can override this method to do any setup you need on your view or to reset any cached
-    values that are impacted by being added to a view.  The default implementation does nothing.
+    You can override this method to do any setup you need on your view or to 
+    reset any cached values that are impacted by being added to a view.  The 
+    default implementation does nothing.
     
     @param parent {SC.View} the new parent
-    @paran beforeView {SC.View} the view in the parent's childNodes array that will follow this view once it is added.  If the view is being added to the end of the array, this will be null.
+    @paran beforeView {SC.View} the view in the parent's childNodes array that 
+      will follow this view once it is added.  If the view is being added to 
+      the end of the array, this will be null.
     @returns {void}
   */
   willAddToParent: function(parent, beforeView) {},
   
   /**
-    This method is called on the view just after it is added to a new parent view.  
+    This method is called on the view just after it is added to a new parent 
+    view.  
     
-    You can override this method to do any setup you need on your view or to reset any cached
-    values that are impacted by being added to a view.  The default implementation does nothing.
+    You can override this method to do any setup you need on your view or to 
+    reset any cached values that are impacted by being added to a view.  The 
+    default implementation does nothing.
     
     @param parent {SC.View} the new parent
-    @paran beforeView {SC.View} the view in the parent's childNodes array that will follow this view once it is added.  If the view is being added to the end of the array, this will be null.
+    @paran beforeView {SC.View} the view in the parent's childNodes array that 
+      will follow this view once it is added.  If the view is being added to 
+      the end of the array, this will be null.
     @returns {void}
   */
   didAddToParent: function(parent, beforeView) {},
   
   /**
-    This method is called on the view just before it is removed from a parent view.  
+    This method is called on the view just before it is removed from a parent 
+    view.  
     
-    You can override this method to clear out any values that depend on the view belonging to
-    the current parentNode.  The default implementation does nothing.
+    You can override this method to clear out any values that depend on the 
+    view belonging to the current parentNode.  The default implementation does 
+    nothing.
     
     @returns {void}
   */
   willRemoveFromParent: function() {},
   
   /**
-    This method is called on the view just after it is removed from a parent view.  
+    This method is called on the view just after it is removed from a parent 
+    view.  
     
-    You can override this method to clear out any values that depend on the view belonging to
-    the current parentNode.  The default implementation does nothing.
+    You can override this method to clear out any values that depend on the 
+    view belonging to the current parentNode.  The default implementation does 
+    nothing.
 
     @param oldParent {SC.View} the old parent view
     @returns {void}
@@ -334,32 +348,39 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   didRemoveFromParent: function(oldParent) {},
 
   /**
-    This method is called just before a new child view is added to the receiver's childNodes
-    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    This method is called just before a new child view is added to the 
+    receiver's childNodes array.  You can use this to prepare for any layout 
+    or other cleanup you might need to do.
     
     The default implementation does nothing.
     
     @param child {SC.View} the view to be added
-    @param beforeView {SC.View} and existing child view that will follow the child view in the array once it is added.  If adding to the end of the array, this param will be null.
+    @param beforeView {SC.View} and existing child view that will follow the 
+      child view in the array once it is added.  If adding to the end of the 
+      array, this param will be null.
     @returns {void}
   */
   willAddChild: function(child, beforeView) {},
   
   /**
-    This method is called just after a new child view is added to the receiver's childNodes
-    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    This method is called just after a new child view is added to the 
+    receiver's childNodes array.  You can use this to prepare for any layout 
+    or other cleanup you might need to do.
     
     The default implementation does nothing.
     
     @param child {SC.View} the view that was added
-    @param beforeView {SC.View} and existing child view that will follow the child view in the array once it is added.  If adding to the end of the array, this param will be null.
+    @param beforeView {SC.View} and existing child view that will follow the 
+      child view in the array once it is added.  If adding to the end of the 
+      array, this param will be null.
     @returns {void}
   */
   didAddChild: function(child, beforeView) {},
   
   /**
-    This method is called just before a child view is removed from the receiver's childNodes
-    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    This method is called just before a child view is removed from the 
+    receiver's childNodes array.  You can use this to prepare for any layout 
+    or other cleanup you might need to do.
     
     The default implementation does nothing.
     
@@ -369,8 +390,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   willRemoveChild: function(child) {},
   
   /**
-    This method is called just after a child view is removed from the receiver's childNodes
-    array.  You can use this to prepare for any layout or other cleanup you might need to do.
+    This method is called just after a child view is removed from the 
+    receiver's childNodes array.  You can use this to prepare for any layout 
+    or other cleanup you might need to do.
     
     The default implementation does nothing.
     
@@ -388,7 +410,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     var view = this;
     while (view = view.get('nextKeyView'))
     {
-      if (view.get('isVisible') && view.get('acceptsFirstResponder')) return view;
+      if (view.get('isVisible') && view.get('acceptsFirstResponder')) {
+        return view;
+      }
     }
     return null;
   },
@@ -397,14 +421,16 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     var view = this;
     while (view = view.get('previousKeyView'))
     {
-      if (view.get('isVisible') && view.get('acceptsFirstResponder')) return view;
+      if (view.get('isVisible') && view.get('acceptsFirstResponder')) {
+        return view;
+      }
     }
     return null;
   },
   
   /** @private 
-      Invoked whenever the child hierarchy changes and any internally cached values
-      might need to be recalculated.       
+    Invoked whenever the child hierarchy changes and any internally cached 
+    values might need to be recalculated.       
   */
   _flushInternalCaches: function() {
     // only flush cache for parent if this item was cached since the top level
@@ -664,8 +690,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 
     This is a useful utility for converting points in the coordinate system of
     another view to the coordinate system of the receiver. Pass null for 
-    targetView to convert a point from a window offset.  This is the inverse of 
-    convertFrameToView().
+    targetView to convert a point from a window offset.  This is the inverse 
+    of convertFrameToView().
     
     Note that if your view is not visible on the screen, this may not work.
     
@@ -755,9 +781,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         };
       }) ;
 
-      // bizarely for FireFox if your offsetParent has a border, then it can impact
-      // the offset
-      if (SC.Platform.Firefox && (this.getStyle('position') == 'absolute')) {
+      // bizarely for FireFox if your offsetParent has a border, then it can 
+      // impact the offset
+      if (SC.Platform.Firefox) {
         var parent = el.offsetParent ;
         if (parent && (Element.getStyle(parent, 'overflow') != 'visible')) {
           var left = parseInt(Element.getStyle(parent, 'borderLeftWidth'),0) || 0 ;
@@ -882,9 +908,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         };
       }) ;
       
-      // bizarely for FireFox if your offsetParent has a border, then it can impact
-      // the offset
-      if (SC.Platform.Firefox && (this.getStyle('position') == 'absolute')) {
+      // bizarely for FireFox if your offsetParent has a border, then it can 
+      // impact the offset
+      if (SC.Platform.Firefox) {
         var parent = el.offsetParent ;
         if (parent && (Element.getStyle(parent, 'overflow') != 'visible')) {
           var left = parseInt(Element.getStyle(parent, 'borderLeftWidth'),0) || 0 ;
@@ -1430,7 +1456,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @type {Boolean}
     @property
   */
-  isVisibleInWindow: true,
+  isVisibleInWindow: YES,
   
   /**
     If true, the tooltip will be localized.  Also used by some subclasses.
@@ -1605,7 +1631,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if (this.isScrollable) this.rootElement.onscroll = SC.View._onscroll ;
     
     // setup isVisibleInWindow ;
-    this.isVisibleInWindow = (this.parentNode) ? this.parentNode.get('isVisibleInWindow') : false;
+    this.isVisibleInWindow = (this.parentNode) ? this.parentNode.get('isVisibleInWindow') : NO;
   },
   
   // this method looks through your outlets array and will try to

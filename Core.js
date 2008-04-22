@@ -216,6 +216,13 @@ Object.extend(SC,{
   },
   
 
+  /**
+    Convenience method to inspect an object by converting it to a hash.
+  */
+  inspect: function(obj) {
+    return $H(obj).inspect() ;  
+  },
+  
   /** Browser and Platform info. */
   Platform: {
     
@@ -332,6 +339,8 @@ T_ARRAY = 'array' ;
 T_STRING = 'string' ;
 
 $type = SC.typeOf ;
+
+$I = SC.inspect ;
 
 Object.extend(Object,{
 

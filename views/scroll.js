@@ -19,6 +19,8 @@ require('views/container') ;
 */
 SC.ScrollView = SC.ContainerView.extend(SC.Scrollable, {
   
+  emptyElement: '<div class="sc-scroll-view"></div>',
+  
   /** 
     Determines if the view should be scrollable vertically.  
     

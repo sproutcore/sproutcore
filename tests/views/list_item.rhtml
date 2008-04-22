@@ -14,8 +14,7 @@ Test.context("SC.ListItemView",{
 
 }) ;
 
-appMain = main; main = null ; // Cancel main() so app does not start
-
+if (window.main && (appMain = main)) main = null ; 
 </script>
 
 <% end %>
