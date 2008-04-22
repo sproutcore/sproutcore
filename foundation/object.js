@@ -54,12 +54,18 @@ SC.Object = function(noinit) {
   return ret ;
 };
 
-Object.extend(SC.Object, {
+Object.extend(SC.Object, 
+/** @scope SC.Object */ {
 
 	_noinit_: '__noinit__',
 	
-  // Use this to add class methods to an object.
-  mixin: function() {
+  /**
+    Add properties to a object's class definition.
+    
+    @params {Hash} props the properties you want to add
+    @returns {void}
+  */
+  mixin: function(props) {
     var ext = $A(arguments) ;
     for(var loc=0;loc<ext.length;loc++) {
       Object.extend(this,ext[loc]);
@@ -67,9 +73,14 @@ Object.extend(SC.Object, {
     return this ;
   },
   
-  // this will created a new version of the passed object, updating the 
-  // prototype to use the new code.
-  extend: function() {   
+  /**
+    Creates a new subclass, add to the receiver any passed properties
+    or methods.
+    
+    @params {Hash} props the methods of properties you want to add
+    @returns {Class} A new object class
+  */
+  extend: function(props) {   
     
     if (SC.BENCHMARK_OBJECTS) SC.Benchmark.start('SC.Object.extend') ;
      
@@ -99,22 +110,50 @@ Object.extend(SC.Object, {
     
     return ret ;
   },
-  
-  // create a new instance of the object.
-  create: function() {
+
+  /**
+    Creates a new instance of the class.
+
+    Unlike most frameworks, you do not pass paramters into the init funciton
+    for an object.  Instead, you pass a hash of additonal properties you want
+    to have assigned to the object when it is first created.  This is
+    functionally like creating a anonymous subclass of the receiver and then
+    instantiating it, but more efficient.
+    
+    You can use create() like you would a normal constructor in a class-based
+    system, or you can use it to create highly customized singleton objects
+    such as controllers or app-level objects.  This is often more efficient
+    than creating subclasses and than instantiating them.
+    
+    @param {Hash} props optional hash of method or properties to add to the instance.
+    @returns {SC.Object} new instance of the receiver class.
+  */
+  create: function(props) {
     var ret = new this($A(arguments),this) ;
     return ret ;
   },
     
-  // takes an array of configs and returns instances of each object.
+  /**
+    Takes an array of hashes and returns newly created instances.
+    
+    This convenience method will take an array of properties and simply
+    instantiates objects from them.
+    
+    @params {Array} array Array of hashes with properties to assigned to each object.
+    @returns {Array} array of instantiated objects.
+  */
   createArray: function(array) {
     var obj = this ;
     return array.map(function(props) { return obj.create(props); }) ;
   },
 
   /**
-    Adding this function to the end of a view declaration will define the class as
-    an outlet that can be constructed using the outlet() method (instead of get()).
+    Adding this function to the end of a view declaration will define the 
+    class as an outlet that can be constructed using the outlet() method 
+    (instead of get()).
+    
+    @returns {Outlet} a specially constructed function that will be used to
+     build the outlet later.
   */
   outlet: function() {
     var obj = this ;
@@ -123,7 +162,10 @@ Object.extend(SC.Object, {
     } ;
   },
   
-  isClass: true,
+  /**
+    Alway YES since this is a class.
+  */
+  isClass: YES,
   
   /**
     Returns the name of this class.  If the name is not known, triggers
