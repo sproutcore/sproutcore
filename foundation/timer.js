@@ -223,9 +223,7 @@ SC.Timer = SC.Object.extend(
     @type {Boolean}
   */
   isValid: function() {
-    if (this._invalid) return NO ;
-    
-    var now = Date.now() ;
+    return !this._invalid ;
   }.property('isPaused'),
   
   /**
@@ -241,21 +239,29 @@ SC.Timer = SC.Object.extend(
     if (this._invalid || !this.get('isValid')) return 0;
 
     var now = Date.now() ;
-    var start = this.startDate || now ;
-    var cycle = Math.ceil((now - start) / this.interval) ;
+    var start = this.get('startTime') || now ;
+    if (this.until && this.until > 0 && now >= this.until) return 0;
+
+    var cycle = Math.ceil(((now - start) / this.interval)+0.01) ;
     if ((cycle > 1) && !this.repeats) return 0 ;
+
+    if (cycle < 1) cycle = 1 ;
     return start + (cycle * this.interval) ;
-  },
+  }.property(),
   
   /**
     Invalidates the timer so that it will not execute again.  If a timer has
     been scheduled, it will be removed from the run loop immediately.
+    
+    @returns {SC.Timer} The receiver
   */
   invalidate: function() {
     this.propertyWillChange('isValid') ;
-    this._invalid = NO ;
+    this._invalid = YES ;
     SC.runLoop.cancelTimer(this) ;
     this.propertyDidChange('isValid') ;
+    this.action = this.target = null ; // avoid memory leaks
+    return this ;
   },
   
   /**
@@ -267,8 +273,8 @@ SC.Timer = SC.Object.extend(
     @returns {void}
   */
   fire: function() {
-
-    if (!this.get('isPaused')) {
+    if (this.get('isPaused') === NO) {
+      
       // if the action is a function, just try to call it.
       if ($type(this.action) == T_FUNCTION) {
         this.action.call((this.target || this), this) ;
@@ -289,10 +295,10 @@ SC.Timer = SC.Object.extend(
 
       // otherwise, try to execute action direction on target or send down
       // responder chain.
-      } else SC.app.sendAction(this.target, this.action, this) ;
+      } else SC.app.sendAction(this.action, this.target, this) ;
     }
     
-    (this.repeats) ? this.schedule() : this.invalidate() ;
+    (this.repeats && (this.get('fireTime')>0)) ? this.schedule() : this.invalidate() ;
   },
   
   /**
@@ -302,10 +308,11 @@ SC.Timer = SC.Object.extend(
     schedule() class method.  If you create the timer manually, you will
     need to call this method yourself for the timer to execute.
     
-    @returns {void}
+    @returns {SC.Timer} The receiver
   */
   schedule: function() {
-    SC.runLoop.scheduleTimer(this, this.get('fireTime')) ;
+    if (!this._invalid) SC.runLoop.scheduleTimer(this, this.get('fireTime')) ;
+    return this ;
   },
   
   init: function() {
@@ -321,7 +328,7 @@ SC.Timer = SC.Object.extend(
     }
     
     // if start time was not set, get it from the run loop.
-    if (!this.startTime) this.startTime = SC.runLoop.get('loopStartTime') ;
+    if (!this.startTime) this.startTime = SC.runLoop.get('startTime') ;
   }
   
 }) ;

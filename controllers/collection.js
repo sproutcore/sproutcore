@@ -90,11 +90,10 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
     try {
       if (content.newRecord) { 
         var rec = content.newRecord(settings) ;
-        var controller = this ;
-        setTimeout(function() {
-          controller.set('selection',(rec) ? [rec] : []) ;
-          controller._editingNewRecord = rec ;
-        },1) ;
+        var t = function() {
+          this.set('selection',(rec) ? [rec] : []) ;
+          this._editingNewRecord = rec ;
+        }.invokeLater(this, 1) ;
         return rec;
       }
     }   

@@ -377,13 +377,13 @@ SC.Observable = {
     var handler = function(theTarget,theKey,theValue,didTimeout) {
       func(theTarget,theKey,theValue,didTimeout) ;
       target.removeObserver(key,handler) ;
-      if (timeoutObject) { clearTimeout(timeoutObject); }
+      if (timeoutObject) { timeoutObject.invalidate(); }
     } ;
 
     target.addObserver(key,handler) ;
-    if (timeout) timeoutObject = setTimeout(function() {
+    if (timeout) timeoutObject = function() {
       handler(target,key,target.get(key),true) ;
-    }, timeout) ;
+    }.invokeLater(this, timeout) ;
 
     handler.cancel = function() { target.removeObserver(key,handler); } ;
     return handler ;
@@ -555,7 +555,34 @@ Object.extend(Function.prototype,{
   
   typeConverter: function() {
     this.isTypeConverter = true; return this ;
-  }
+  },
+  
+  /**
+    Creates a timer that will execute the function after a specified 
+    period of time.
+    
+    If you pass an optional set of arguments, the arguments will be passed
+    to the function as well.  Otherwise the function should have the 
+    signature:
+    
+    {{{
+      function functionName(timer)
+    }}}
+
+    @param interval {Number} the time to wait, in msec
+    @param target {Object} optional target object to use as this
+    @returns {SC.Timer} scheduled timer
+  */
+  invokeLater: function(target, interval) {
+    if (interval === undefined) interval = 1 ;
+    var f = this;
+    if (arguments.length > 2) {
+      var args =$A(arguments).slice(2,arguments.length);
+      args.unshift(target);
+      f = f.bind.apply(f, args) ;
+    }
+    return SC.Timer.schedule({ target: target, action: f, interval: interval });
+  }    
   
 }) ;
 
@@ -647,7 +674,7 @@ SC.NotificationQueue = {
     this._flushing = false ;
     
     if (this.queue.length > 0) { 
-      setTimeout(this._reflush,1); 
+      this.invokeLater(this._reflush, 1) ;
     }
   },
   

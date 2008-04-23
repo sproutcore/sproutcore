@@ -142,8 +142,7 @@ SC.Routes = SC.Object.create(
         // create forward stack.
         this._forwardStack = [] ;
 
-        this._boundChecker = this._checkWindowLocation.bind(this) ;
-        this.timer = setTimeout(this._boundChecker,1000) ;
+        this.invokeLater(this._checkWindowLocation, 1000) ;
       },
       
       _checkWindowLocation: function() { 
@@ -205,7 +204,7 @@ SC.Routes = SC.Object.create(
           this.gotoRoute(cloc) ;
         }
         
-        this.timer = setTimeout(this._boundChecker,50) ; 
+        this.invokeLater(this._checkWindowLocation, 50) ;
       },
 
       _setWindowLocation: function(loc) {        
@@ -224,8 +223,7 @@ SC.Routes = SC.Object.create(
     // for IE.
     ie: {
       _setupHistory: function() {
-        this._boundChecker = this._checkWindowLocation.bind(this) ;
-//        this.timer = setTimeout(this._boundChecker,1000) ;
+        this.invokeLater(this._checkWindowLocation, 1000) ;
       },
 
       _checkWindowLocation: function() {
@@ -233,7 +231,7 @@ SC.Routes = SC.Object.create(
         var cloc = location.hash ;
         cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
         if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
-        this.timer = setTimeout(this._boundChecker,100) ;
+        this.invokeLater(this._checkWindowLocation, 100) ;
       },
 
       _setWindowLocation: function(loc) {
@@ -249,8 +247,7 @@ SC.Routes = SC.Object.create(
   },
   
   _setupHistory: function() {
-    this._boundChecker = this._checkWindowLocation.bind(this) ;
-    this.timer = setTimeout(this._boundChecker,1000) ;
+    this.invokeLater(this._checkWindowLocation, 1000) ;
   },
   
   _checkWindowLocation: function() {
@@ -258,7 +255,7 @@ SC.Routes = SC.Object.create(
     var cloc = location.hash ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
     if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
-    this.timer = setTimeout(this._boundChecker,100) ;
+    this.invokeLater(this._checkWindowLocation, 100) ;
   },
   
   _setWindowLocation: function(loc) {

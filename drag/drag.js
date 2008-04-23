@@ -610,7 +610,7 @@ SC.Drag = SC.Object.extend(
 
     // If a scrollable view was found, then reschedule
     if (scrollableView) {
-      setTimeout(this._autoscroll.bind(this, null), 100) ;
+      this.invokeLater('_autoscroll', 100, null);
       return true ;
     } else return false ;
   },

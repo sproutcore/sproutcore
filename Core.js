@@ -101,7 +101,7 @@ Object.extend(SC,{
       var r = function() { 
         document.body.removeChild(document.getElementById(frameId)); 
       } ;
-      var t = setTimeout(r,2000);
+      var t = r.invokeLater(null, 2000);
     }
 	},
 		

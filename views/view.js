@@ -1570,7 +1570,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         var el = (this.containerElement || this.rootElement) ; var reps = 0 ;
         var f = function() {
           el.innerHTML = '' ; el.innerHTML = value ;
-          if ((reps++ < 5) && (value.length>0) && (el.innerHTML == '')) setTimeout(f,1) ;
+          if ((reps++ < 5) && (value.length>0) && (el.innerHTML == '')) {
+            f.invokeLater() ;
+          }
         };
         f();
       } else (this.containerElement || this.rootElement).innerHTML = value;

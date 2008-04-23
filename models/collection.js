@@ -178,7 +178,7 @@ SC.Collection = SC.Object.extend({
   _flushChangedRecords: function() {
     if (!this._changedRecords) return ; // nothing to do.
 
-    if (this.dataSource != SC.Store) throw "non-local data source is not supported"
+    if (this.dataSource != SC.Store) throw "non-local data source is not supported" ;
 
     var current = this._store || [] ;
     var order = this.get('orderBy') || [this.recordType.primaryKey()] ;
@@ -321,8 +321,8 @@ SC.Collection = SC.Object.extend({
     }
     
     //if (refresh && !this._refreshing) {
-    //  this._refreshing = true ; var that = this ;
-    //  setTimeout(function() { that.refresh(); },1) ;
+    //  this._refreshing = true ;
+    //  this.invokeLater(this.refresh, 1) ;
     //}
   },
   
@@ -363,7 +363,7 @@ SC.Collection = SC.Object.extend({
       this._refreshing = true ;
       this._cacheCode = null ;
       this.set('isLoading',true) ; 
-      setTimeout(this.refresh.bind(this),1);
+      this.invokeLater(this.refresh) ;
     }
   },
   

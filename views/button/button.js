@@ -250,8 +250,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     this.setClassName('active', true);
     this.didTriggerAction();
     this._action(evt);
-    var view = this;
-    setTimeout(function() { view.setClassName('active', false); }, 200);
+    this.invokeLater('setClassName', 200, 'active', false) ;
     return true;
   },
   

@@ -1,0 +1,33 @@
+<% content_for('final') do %>
+
+<script>
+
+Test.context("Timer.invalidate", {
+
+  "invalidate immediately should never execute": function() {
+    
+    var fired = NO ;
+    
+    SC.runLoop.beginRunLoop() ;
+    var start = SC.runLoop.get('startTime') ;
+    var t = SC.Timer.schedule({
+      target: this,
+      action: function() { fired = YES ; },
+      interval: 100
+    });
+    t.invalidate() ;
+    SC.runLoop.endRunLoop() ;
+
+    var checks = 10 ;
+    wait(1500, function() {
+      assertEqual(NO, fired) ;
+    }) ;
+  }
+  
+  // using invalidate on a repeating timer is tested in schedule().
+
+});
+
+</script>
+
+<% end %>

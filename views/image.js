@@ -190,7 +190,7 @@ SC.imageCache = SC.Object.create({
     if (dta.img == null) {
       this._queue.push(dta) ;
       if (!this._imgTimeout) {
-        this._imgTimeout = setTimeout(this.loadNextImage.bind(this),100) ;
+        this._imgTimeout = this.invokeLater(this.loadNextImage, 100) ;
       }
     }
 

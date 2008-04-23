@@ -390,16 +390,33 @@ SC.report = function() {
 // 
 SC.Object.prototype = {
   
+  /**
+    Always YES since this is an object and not a class.
+  */
   isObject: true,
   
-  respondsTo: function( name )
+  /**
+    Returns YES if the named value is an executable function.
+    
+    @param methodName {String} the property name to check
+    @returns {Boolean}
+  */
+  respondsTo: function( methodName )
   {
-    return !!(name && this[name] && ($type(this[name]) == T_FUNCTION));
+    return !!(methodName && this[methodName] && ($type(this[methodName]) == T_FUNCTION));
   },
   
-  tryToPerform: function( name, args )
+  /**
+    If the passed property is a method, then it will be executed with the
+    passed arguments.  Otherwise, returns NO.
+    
+    @param methodName {String} the method name to try to perform.
+    @param args {*arguments} arbitrary arguments to pass along to the method.
+    @returns {Object} NO if method could not be performed or method result.
+  */
+  tryToPerform: function( methodName, args )
   {
-    if ( !name ) return false;
+    if ( !methodName ) return false;
     
     var args = $A(arguments);
     var name = args.shift();
@@ -514,8 +531,15 @@ SC.Object.prototype = {
   },
   
   /**  
-    EXPERIMENTAL: You can use this to call super in any method.  This 
-    currently does not work in some versions of Safari.
+    EXPERIMENTAL: You can use this to call super in any method.  
+    
+    This currently does not work in some versions of Safari.  Instead you
+    should use:
+    
+    argments.callee.base.apply(this, arguments); to call super.
+    
+    @params args {*args} any arguments you want to pass along.
+    @returns {void}
   */
   $super: function(args) {
     var caller = SC.Object.prototype.$super.caller; 
@@ -524,7 +548,10 @@ SC.Object.prototype = {
   },
   
   /**  
-  Use this to add class methods to an object.
+    Add passed properties to the object's class.
+    
+    @param props {Hash} properties to append.
+    @returns {void}
   */
   mixin: function() { return SC.Object.mixin.apply(this,arguments) ; },
 
@@ -543,6 +570,9 @@ SC.Object.prototype = {
   /**  
     returns true if the receiver is an instance of the named class.  See also
     kindOf().
+    
+    @param {Class} scClass the class
+    @returns {Boolean}
   */
   instanceOf: function(scClass) {
     return this._type == scClass ;  
@@ -551,6 +581,9 @@ SC.Object.prototype = {
   /**  
     Returns true if the receiver is an instance of the named class or any 
     subclass of the named class.  See also instanceOf().
+    
+    @param scClass {Class} the class
+    @returns {Boolean}
   */
   kindOf: function(scClass) {
     var t = this._type ;
@@ -562,27 +595,6 @@ SC.Object.prototype = {
   },
 
   /** @private */
-  _enumerator: function() {
-    
-    // build in enumerator.
-    if (this.objectAtIndex) {
-      ret = {
-        nextObject: function() { 
-          var loc = this.loc ;
-          return (loc>=0) ? this.obj.objectAtIndex(--loc) : null ; 
-        },
-        loc: this.get('length') || 0,
-        obj: this
-      } ;
-
-    // or just return one that does nothing.
-    } else {
-      ret = { nextObject: function() { return null; } } ;
-    }
-    
-    return ret ;
-  },
-
   toString: function() {
     if (!this.__toString) {
       this.__toString = "%@:%@".fmt(this._type.objectClassName(), this._guid);
@@ -595,8 +607,14 @@ SC.Object.prototype = {
   // 
 
   /**  
+    Activates any outlet connections in the the object.  This is called 
+    automatically for views typically.
+    
     A view may contain outlets.  Outlets are a way to find and connect to
     elements within the view.
+    
+    @param key {String} optional single key to awake.
+    @returns {void}
   */
   awake: function(key) { 
     // if a key is passed, convert that from an outlet and awake it. otherwise
@@ -645,17 +663,27 @@ SC.Object.prototype = {
   },
   
   /**  
-    name your outlets here or name the outlets "somethingOutlet".  See 
-    also outletFor in views.
+    Array of outlets to awake automatically.
+    
+    If you have outlets defined on a class, add this array with their
+    property names to have them awake automatically.  This array is merged
+    with the parent class outlet's array automatically when you call extend().
+    
+    @type {Array}
+    @field
   */
   outlets: [],
 
   /**
+    Just like get() except it will also create an outlet-packaged view if that 
+    is the value of the property.
+    
     This method works just like get() except if the value of the property
     is an outlet-packaged View, the view will be created first.  You can use
-    this to create lazy outlets.  (DOC-INCOMPLETE)
+    this to create lazy outlets.
     
     @param {String} key The key to read as an outlet.
+    @returns {Object} the value of the key, possibly an awakened outlet.
   */        
   outlet: function(key) {
     var value = this[key] ; // get the current value.
@@ -679,13 +707,35 @@ SC.Object.prototype = {
 
     return value ;
   },
-  
+
   /**
-    DEPRECATED: Will be removed in SproutCore 1.0.
+    Invokes the named method after the specified period of time.
+    
+    This is a convenience method that will create a single run timer to
+    invoke a method after a period of time.  The method should have the
+    signature:
+    
+    {{{
+      methodName: function(timer)
+    }}}
+    
+    If you would prefer to pass your own parameters instead, you can instead
+    call invokeLater() directly on the function object itself.
+    
+    @param interval {Number} period from current time to schedule.
+    @param methodName {String} method name to perform.
+    @returns {SC.Timer} scheduled timer.
   */
-  invokeLater: function(period) {
-    var args = $A(arguments) ; args.unshift(this) ;
-    return SC.runLoop.schedule.apply(SC.runLoop,args) ; 
+  invokeLater: function(methodName, interval) {
+    if (interval === undefined) interval = 1 ;
+    var f = methodName ;
+    if (arguments.length > 2) {
+      var args =$A(arguments).slice(2,arguments.length);
+      args.unshift(this);
+      if ($type(f) === T_STRING) f = this[methodName] ;
+      f = f.bind.apply(f, args) ;
+    }
+    return SC.Timer.schedule({ target: this, action: f, interval: interval });
   },
   
   _cprops: ['_cprops','outlets','_bindings','_observers','_properties', 'initMixin']  
