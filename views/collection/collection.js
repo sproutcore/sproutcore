@@ -1898,7 +1898,7 @@ SC.CollectionView = SC.View.extend(
     if ((Date.now() - this._mouseDownAt) < 123) return true ;
     
     // OK, they must be serious, start a drag if possible. 
-    if (this.get('canReorderContent')) {
+    if (this.get('canReorderContent') && this._mouseDownEvent != null) {
 
       // First, get the selection to drag.  Drag an array of selected
       // items appearing in this collection, in the order of the 
