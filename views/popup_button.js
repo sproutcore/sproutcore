@@ -5,7 +5,7 @@ require('views/button/button') ;
 
   @extends SC.ButtonView
   @author Skip Baney
-  @copyright 2006-2007, Sprout Systems, Inc. and contributors.
+  @copyright 2006-2008, Sprout Systems, Inc. and contributors.
   @version 1.0
 */
 SC.PopupButtonView = SC.ButtonView.extend({

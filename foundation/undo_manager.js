@@ -1,6 +1,6 @@
 // ==========================================================================
 // SproutCore -- JavaScript Application Framework
-// copyright 2006-2007, Sprout Systems, Inc. and contributors.
+// copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
 require('Core');

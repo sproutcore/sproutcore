@@ -12,7 +12,7 @@ require('foundation/responder');
   
   @extends SC.Responder
   @author Skip Baney
-  @copyright 2006-2007, Sprout Systems, Inc. and contributors.
+  @copyright 2006-2008, Sprout Systems, Inc. and contributors.
   @version 0.1
 */
 SC.Application = SC.Responder.extend( 

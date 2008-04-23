@@ -1,6 +1,6 @@
 // ========================================================================
 // SproutCore
-// copyright 2006-2007 Sprout Systems, Inc.
+// copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
 require('mixins/selection_support') ;

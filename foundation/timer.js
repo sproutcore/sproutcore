@@ -1,6 +1,6 @@
 // ========================================================================
 // SproutCore
-// copyright 2006-2007 Sprout Systems, Inc.
+// copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
 require('Core') ;
@@ -213,6 +213,11 @@ SC.Timer = SC.Object.extend(
   isPaused: NO,
 
   /**
+    YES onces the timer has been scheduled for the first time.
+  */
+  isScheduled: NO,
+  
+  /**
     YES if the timer can still execute.
     
     This read only property will return YES as long as the timer may possibly
@@ -242,11 +247,12 @@ SC.Timer = SC.Object.extend(
     var start = this.get('startTime') || now ;
     if (this.until && this.until > 0 && now >= this.until) return 0;
 
-    var cycle = Math.ceil(((now - start) / this.interval)+0.01) ;
+    var interval = this.get('interval') ;
+    var cycle = Math.ceil(((now - start) / interval)+0.01) ;
     if ((cycle > 1) && !this.repeats) return 0 ;
 
     if (cycle < 1) cycle = 1 ;
-    return start + (cycle * this.interval) ;
+    return start + (cycle * interval) ;
   }.property(),
   
   /**
@@ -274,31 +280,38 @@ SC.Timer = SC.Object.extend(
   */
   fire: function() {
     if (this.get('isPaused') === NO) {
-      
-      // if the action is a function, just try to call it.
-      if ($type(this.action) == T_FUNCTION) {
-        this.action.call((this.target || this), this) ;
-
-      // otherwise, action should be a string.  If it has a period, treat it
-      // like a property path.
-      } else if (this.action.indexOf('.') >= 0) {
-        var path = this.action.split('.') ;
-        var property = path.pop() ;
-
-        var target = SC.Object.objectForPropertyPath(path, window) ;
-        var action = (target.get) ? target.get(property) : target[property];
-        if (action && $type(action) == T_FUNCTION) {
-          action.call(target, this) ;
-        } else {
-          throw '%@: Timer could not find a function at %@'.fmt(this, this.action) ;
-        }
-
-      // otherwise, try to execute action direction on target or send down
-      // responder chain.
-      } else SC.app.sendAction(this.action, this.target, this) ;
+      this.performAction() ;
     }
     
     (this.repeats && (this.get('fireTime')>0)) ? this.schedule() : this.invalidate() ;
+  },
+
+  /**
+    Actually fires the action. You can override this method if you need
+    to change how the timer fires its action.
+  */
+  performAction: function() {
+    // if the action is a function, just try to call it.
+    if ($type(this.action) == T_FUNCTION) {
+      this.action.call((this.target || this), this) ;
+
+    // otherwise, action should be a string.  If it has a period, treat it
+    // like a property path.
+    } else if (this.action.indexOf('.') >= 0) {
+      var path = this.action.split('.') ;
+      var property = path.pop() ;
+
+      var target = SC.Object.objectForPropertyPath(path, window) ;
+      var action = (target.get) ? target.get(property) : target[property];
+      if (action && $type(action) == T_FUNCTION) {
+        action.call(target, this) ;
+      } else {
+        throw '%@: Timer could not find a function at %@'.fmt(this, this.action) ;
+      }
+
+    // otherwise, try to execute action direction on target or send down
+    // responder chain.
+    } else SC.app.sendAction(this.action, this.target, this) ;
   },
   
   /**
@@ -311,7 +324,10 @@ SC.Timer = SC.Object.extend(
     @returns {SC.Timer} The receiver
   */
   schedule: function() {
-    if (!this._invalid) SC.runLoop.scheduleTimer(this, this.get('fireTime')) ;
+    if (!this._invalid) {
+      this.set('isScheduled', YES) ;
+      SC.runLoop.scheduleTimer(this, this.get('fireTime')) ;
+    }
     return this ;
   },
   
@@ -329,6 +345,12 @@ SC.Timer = SC.Object.extend(
     
     // if start time was not set, get it from the run loop.
     if (!this.startTime) this.startTime = SC.runLoop.get('startTime') ;
+  },
+  
+  // if the paused state changes, notify the runloop so that it can 
+  // reschedule its timeout.
+  _isPausedObserver: function() {
+    SC.runLoop.timerPausedStateDidChange(this) ;
   }
   
 }) ;

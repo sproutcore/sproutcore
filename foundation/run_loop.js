@@ -1,6 +1,6 @@
 // ========================================================================
 // SproutCore
-// copyright 2006-2007 Sprout Systems, Inc.
+// copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
 require('Core') ;
@@ -166,28 +166,38 @@ SC.runLoop = SC.Object.create({
     }
   },
 
+  timerPausedStateDidChange: function(timer) {
+    this._rescheduleTimeout() ;
+  },
+  
   // determines the next time the timeout needs to trigger and reschedules
   // if necessary.  If you pass in the next timer to use, then it will be 
   // scheduled instead of searching the timers.
   _rescheduleTimeout: function() {
+    
+    // if we are currently flushing, don't do this since it will happen
+    // later anyway
+    if (this._flushing) return ;
+    
     if (!this._timers) this._timers = {} ;
     
-    // find next timer to trigger
-    var next = this._next ;
+    // find next timer to trigger.  If the first unpaused timer.
+    var rec = this._next ;
+    while(rec && rec.timer.get('isPaused')) rec = rec.next ;
 
     // if no next timer was found, then cancel any timer.
-    if (!next) {
+    if (!rec) {
       this._timeoutAt = 0 ;
       if (this._timeout) clearTimeout(this._timeout) ;
       this._timeout = null ;
 
     // determine if we need to reschedule
-    } else if ((this._timeoutAt === 0) || (next.at !== this._timeoutAt)) {
+    } else if ((this._timeoutAt === 0) || (rec.at !== this._timeoutAt)) {
       if (this._timeout) clearTimeout(this._timeout) ;
 
-      var delay = Math.max(next.at - Date.now(),0) ;
+      var delay = Math.max(rec.at - Date.now(),0) ;
       this._timeout = setTimeout(this._timeoutAction, delay) ;
-      this.timeoutAt = next.at ;
+      this.timeoutAt = rec.at ;
     }
   },
   
@@ -208,6 +218,8 @@ SC.runLoop = SC.Object.create({
     var now = this.get('startTime') ;
     var max = now + 3000;  // max time we are allowed to run timers
 
+    this._flushing = YES ;
+    
     // work down the list, do not fire a timer more than once per loop.
     var fired = {} ;
     var rec = this._next ;
@@ -228,13 +240,15 @@ SC.runLoop = SC.Object.create({
         delete this._timers[rec.guid] ;
         
         fired[guid] = YES ; 
-        rec.timer.fire() ;
+        if (rec.timer) rec.timer.fire() ;
         
         // finish clean up.
         rec.next = rec.prev = rec.timer = null ;
         rec = next ;
       }
     }
+    
+    this._flushing = NO ;
     
     // schedule next timer if needed.
     this._rescheduleTimeout() ;
