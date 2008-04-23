@@ -112,7 +112,6 @@ SC.Scrollable = {
     Scrolls the receiver to the specified x,y coordinate
   */
   scrollTo: function(x,y) {
-    console.log('scrollTo(%@,%@)'.fmt(x,y)) ;
     this.set('scrollFrame', { x: 0-x, y: 0-y }) ;  
   },
   
