@@ -97,7 +97,7 @@ Object.extend(Date,{
   	var token2="";
   	var x,y;
   	var now=new Date();
-  	var year=now.getYear();
+  	var year=now.getFullYear();
   	var month=now.getMonth()+1;
   	var date=1;
   	var hh=now.getHours();
@@ -302,7 +302,7 @@ Object.extend(Date.prototype, {
   	var i_format=0;
   	var c="";
   	var token="";
-  	var y=date.getYear()+"";
+  	var y=date.getFullYear()+"";
   	var M=date.getMonth()+1;
   	var d=date.getDate();
   	var E=date.getDay();
