@@ -63,7 +63,15 @@ Animator.prototype = {
 		this.state = Math.max(0, Math.min(1, from));
 		this.lastTime = new Date().getTime();
 		if (!this.intervalId) {
-			this.intervalId = window.setInterval(this.timerDelegate, this.options.interval);
+      // this.intervalId = this.setInterval(this.timerDelegate, this.options.interval);
+     
+       this.intervalId = SC.Timer.schedule({
+          target: this, 
+          action: this.timerDelegate, 
+          interval: this.options.interval,
+          repeats: YES
+        }) ;
+    
 		}
 	},
 	// animate from the current state to provided value
@@ -113,7 +121,8 @@ Animator.prototype = {
 		} finally {
 			this.options.onStep.call(this);
 			if (this.target == this.state) {
-				window.clearInterval(this.intervalId);
+        // window.clearInterval(this.intervalId);
+				this.intervalId.invalidate();
 				this.intervalId = null;
 				this.options.onComplete.call(this);
 			}
