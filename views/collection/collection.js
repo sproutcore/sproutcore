@@ -186,11 +186,11 @@ SC.CollectionView = SC.View.extend(
     Trigger the action method on a single click.
   
     Normally, clicking on an item view in a collection will select the content 
-    object and double clicking will trigger the action method on the collection
-    view.  
+    object and double clicking will trigger the action method on the 
+    collection view.  
   
-    If you set this property to true, then clicking on a view will both select it
-    (if isSelected is true) and trigger the action method.  
+    If you set this property to true, then clicking on a view will both select 
+    it (if isSelected is true) and trigger the action method.  
   
     Use this if you are using the collection view as a menu of items.
   
@@ -206,9 +206,9 @@ SC.CollectionView = SC.View.extend(
     passed property key.  The exampleGroupView will be used to display the 
     items in groups.
   
-    If this property is set, you MUST ensure the items in the content array are
-    already sorted by the group key.  Otherwise item view groups might appear more
-    than once.
+    If this property is set, you MUST ensure the items in the content array 
+    are already sorted by the group key.  Otherwise item view groups might 
+    appear more than once.
   
     @type {String}
   */
@@ -217,25 +217,25 @@ SC.CollectionView = SC.View.extend(
   /**
     The view class to use when creating new item views.
   
-    The collection view will automatically create an instance of the view class
-    you set here for each item in its content array.  You should provide your own
-    subclass for this property to display the type of content you want. 
+    The collection view will automatically create an instance of the view 
+    class you set here for each item in its content array.  You should provide 
+    your own subclass for this property to display the type of content you 
+    want. 
   
     For best results, the view you set here should understand the following 
     properties:
   
-    {{{
-      content: The content object from the content array your view should display
-      isEnabled: True if the view should appear enabled
-      isSelected: True if the view should appear selected
-    }}}
+    - *content* The content object from the content array your view should display
+    - *isEnabled* True if the view should appear enabled
+    - *isSelected* True if the view should appear selected
   
-    In general you do not want your child views to actually respond to mouse and
-    keyboard events themselves.  It is better to let the collection view do that.
+    In general you do not want your child views to actually respond to mouse 
+    and keyboard events themselves.  It is better to let the collection view 
+    do that.
 
-    If you do implement your own event handlers such as mouseDown or mouseUp, you
-    should be sure to actually call the same method on the collection view to
-    give it the chance to perform its own selection housekeeping.
+    If you do implement your own event handlers such as mouseDown or mouseUp, 
+    you should be sure to actually call the same method on the collection view 
+    to give it the chance to perform its own selection housekeeping.
   
     @type {SC.View}
   */
@@ -245,21 +245,21 @@ SC.CollectionView = SC.View.extend(
     The view class to use when displaying item views in groups.
   
     If the groupBy property is not null, then the collection view will create
-    an instance of this view class with the item views that belong to the group
-    as child nodes for each distinct group value it encounters.
+    an instance of this view class with the item views that belong to the 
+    group as child nodes for each distinct group value it encounters.
   
     Your groupView should have two outlets:
   
     {{{
-      labelView: The view to display the group label.  The group value will be set 
-      as the content property of this view.
+      labelView: The view to display the group label.  The group value will be 
+      set as the content property of this view.
     
-      itemView: This is the view the item views will be added to as children to 
-      this view.
+      itemView: This is the view the item views will be added to as children 
+      to this view.
     }}}
   
-    If groupBy is null, then this property will not be used.  The default class
-    provided here simply displays the group value in an H1 tag.
+    If groupBy is null, then this property will not be used.  The default 
+    class provided here simply displays the group value in an H1 tag.
   
     @type {SC.View}
   */
@@ -271,20 +271,21 @@ SC.CollectionView = SC.View.extend(
   }),
   
   /**
-    Invoked when the user double clicks on an item (or single clicks of actOnSelect is true)
+    Invoked when the user double clicks on an item (or single clicks of 
+    actOnSelect is true)
 
     Set this to the name of the action you want to send down the
-    responder chain when the user double clicks on an item (or single clicks if 
-    actOnSelect is true).  You can optionally specify a specific target as well 
-    using the target property.
+    responder chain when the user double clicks on an item (or single clicks 
+    if actOnSelect is true).  You can optionally specify a specific target as 
+    well using the target property.
 
     If you do not specify an action, then the collection view will also try to 
     invoke the action named on the target item view.
     
-    Older versions of SproutCore expected the action property to contain an actual
-    function that would be run.  This format is still supported but is deprecated 
-    for future use.  You should generally use the responder chain to handle your
-    action for you.
+    Older versions of SproutCore expected the action property to contain an 
+    actual function that would be run.  This format is still supported but is 
+    deprecated for future use.  You should generally use the responder chain 
+    to handle your action for you.
     
     @type {String}
   */  
@@ -293,10 +294,10 @@ SC.CollectionView = SC.View.extend(
   /**
     Optional target to send the action to when the user double clicks.
     
-    If you set the action property to the name of an action, you can optionally
-    specify the target object you want the action to be sent to.  This can be
-    either an actual object or a property path that will resolve to an object at
-    the time that the action is invoked.  
+    If you set the action property to the name of an action, you can 
+    optionally specify the target object you want the action to be sent to.  
+    This can be either an actual object or a property path that will resolve 
+    to an object at the time that the action is invoked.  
     
     This property is ignored if you use the deprecated approach of making the
     action property a function.
@@ -309,7 +310,8 @@ SC.CollectionView = SC.View.extend(
     Set to true whenever the content changes and remains true until
     the content has been rerendered.  
     
-    You can also set this to true yourself to be notified when it is completed.
+    You can also set this to true yourself to be notified when it is 
+    completed.
   */
   isDirty: false,
   
@@ -355,8 +357,8 @@ SC.CollectionView = SC.View.extend(
     The CollectionView will use this property to support keyboard navigation 
     using the arrow keys.
     
-    If your collection view is simply a vertical list of items then you do not need
-    to edit this property.
+    If your collection view is simply a vertical list of items then you do not 
+    need to edit this property.
   */
   itemsPerRow: 1,
 
@@ -770,13 +772,15 @@ SC.CollectionView = SC.View.extend(
   },
   
   /**
-    Update the selection state for the item views to reflect the selection array.
+    Update the selection state for the item views to reflect the selection 
+    array.
     
-    This will update the isSelected property of all item views so that only those
-    representing content objects found in the selection array are selected.
+    This will update the isSelected property of all item views so that only 
+    those representing content objects found in the selection array are 
+    selected.
     
-    This method is called automatically whenever your content or selection properties
-    changed.  You should not need to call or override it often.
+    This method is called automatically whenever your content or selection 
+    properties changed.  You should not need to call or override it often.
   */
   updateSelectionStates: function() {
     if (!this._itemViews) return ;
@@ -1275,12 +1279,15 @@ SC.CollectionView = SC.View.extend(
   
   /**
     Select one or more items before the current selection, optionally
-    extending the current selection.  Also scrolls the selected item into view.
+    extending the current selection.  Also scrolls the selected item into 
+    view.
     
     Selection does not wrap around.
     
-    @param extend {Boolean} (Optional) If true, the selection will be extended instead of replaced.  Defaults to false.
-    @param numberOfItems {Integer} (Optional) The number of previous to be selected.  Defaults to 1
+    @param extend {Boolean} (Optional) If true, the selection will be extended 
+      instead of replaced.  Defaults to false.
+    @param numberOfItems {Integer} (Optional) The number of previous to be 
+      selected.  Defaults to 1
     @returns {void}
   */
   selectPreviousItem: function(extend, numberOfItems)
@@ -1341,8 +1348,10 @@ SC.CollectionView = SC.View.extend(
 
     Selection does not wrap around.
     
-    @param extend {Boolean} (Optional) If true, the selection will be extended instead of replaced.  Defaults to false.
-    @param numberOfItems {Integer} (Optional) The number of items to be selected.  Defaults to 1.
+    @param extend {Boolean} (Optional) If true, the selection will be extended 
+      instead of replaced.  Defaults to false.
+    @param numberOfItems {Integer} (Optional) The number of items to be 
+      selected.  Defaults to 1.
     @returns {void}
   */
   selectNextItem: function(extend, numberOfItems)
@@ -1398,9 +1407,9 @@ SC.CollectionView = SC.View.extend(
   },
   
   /**
-  * Scroll the rootElement (if needed) to ensure that the item is visible.
-  * @param {SC.Record} record The record to scroll to
-  * @returns {void}
+    Scroll the rootElement (if needed) to ensure that the item is visible.
+    @param {SC.Record} record The record to scroll to
+    @returns {void}
   */
   scrollToContent: function(record) {
     // find the itemView.  if not present, add one.
@@ -1414,9 +1423,9 @@ SC.CollectionView = SC.View.extend(
     if (itemView) this.scrollToItemView(itemView);
   },
   /**
-  * Scroll the rootElement (if needed) to ensure that the item is visible.
-  * @param {SC.View} view The item view to scroll to
-  * @returns {void}
+    Scroll the rootElement (if needed) to ensure that the item is visible.
+    @param {SC.View} view The item view to scroll to
+    @returns {void}
   */
   scrollToItemView: function( view )
   {
@@ -1434,7 +1443,8 @@ SC.CollectionView = SC.View.extend(
     current selection.
     
     @param items {Array} The item or items to select.
-    @param extendSelection {Boolean} If true, extends the selection instead of replacing it.
+    @param extendSelection {Boolean} If true, extends the selection instead of 
+      replacing it.
   */
   selectItems: function(items, extendSelection) {
     var base = (extendSelection) ? this.get('selection') : [] ;
@@ -1537,7 +1547,7 @@ SC.CollectionView = SC.View.extend(
     // Make sure that saved mouseDown state is always reset in case we do
     // not get a paired mouseUp. (Only happens if subclass does not call us 
     // like it should)
-    this._mouseDownAt = this._shouldDeselect = 
+    this._mouseDownAt = this._shouldDeselect =
       this._shouldReselect = this._refreshSelection = false;
 
     var mouseDownView    = this._mouseDownView = this.itemViewForEvent(ev);
@@ -1574,8 +1584,8 @@ SC.CollectionView = SC.View.extend(
       selection = this._findSelectionExtendedByShift(selection, mouseDownContent) ;
       this.selectItems(selection) ;
       
-    // If no modifier key was pressed, then clicking on the selected item should clear
-    // the selection and reselect only the clicked on item.
+    // If no modifier key was pressed, then clicking on the selected item 
+    // should clear the selection and reselect only the clicked on item.
     } else if (!modifierKeyPressed && isSelected) {
       this._shouldReselect = mouseDownContent;
       
@@ -1608,12 +1618,33 @@ SC.CollectionView = SC.View.extend(
       
     } else {
       if (this._shouldDeselect) this.deselectItems(this._shouldDeselect);
-      if (this._shouldReselect) this.selectItems(this._shouldReselect,false) ;
 
-      // this is invoked if the user clicked on a checkbox.  If this is not 
-      // done then the checkbox might not update properly.
-      if (this._refreshSelection) {
+      // begin editing of an item view IF all of the following is true:
+      //   otherwise, just reselect.
+      if (this._shouldReselect) {
+
+        // - contentValueIsEditable is true
+        var canEdit = this.get('contentValueIsEditable') ;
+        
+        // - the user clicked on an item that was already selected
+        // - is the only item selected
+        if (canEdit) {
+          var sel = this.get('selection') ;
+          canEdit = sel && (sel.get('length') === 1) && (sel.objectAt(0) === this._shouldReselect) ;
+        }
+
+        // - the item view responds to contentHitTest() and returns YES.
+        // - the item view responds to beginEditing and returns YES.
+        if (canEdit) {
+          var itemView = this.itemViewForContent(this._shouldReselect) ;
+          canEdit = itemView && (!itemView.contentHitTest || itemView.contentHitTest(ev)) ;
+          canEdit = (canEdit && itemView.beginEditing) ? itemView.beginEditing() : NO ;
+        }
+        
+        // if cannot edit, just reselect
+        if (!canEdit) this.selectItems(this._shouldReselect,false) ;
       }
+
       this._cleanupMouseDown() ;
     }
 
@@ -1713,6 +1744,29 @@ SC.CollectionView = SC.View.extend(
   },
   
 
+  // if content value is editable and we have one item selected, then edit.
+  // otherwise, invoke action.
+  insertNewline: function() {
+    if (this.get('contentValueIsEditable')) {
+      var sel = this.get('selection') ;
+      if (sel && sel.get('length') === 1) {
+        var itemView = this.itemViewForContent(sel.objectAt(0)) ;
+        if (itemView && itemView.beginEditing) {
+          this.scrollToItemView(itemView) ;
+          itemView.beginEditing() ;
+        }
+      }
+      
+    // invoke action!
+    } else {
+      var sel = this.get('selection') ;
+      var itemView = (sel && sel.get('length') === 1) ? this.itemViewForContent(sel.objectAt(0)) : null ;
+      this._action(itemView, null) ;
+    }
+    
+    return YES ; // always handle
+  },
+  
   // ......................................
   // FIRST RESPONDER
   //

@@ -123,13 +123,17 @@ end
 view_helper :label_view do
   property(:formatter) { |v| v }
   property :localize,   false
+  property :editable, :key => 'isEditable'
   property :escape_html, true, :key => 'escapeHTML'
+  property :value
   
   var      :label, nil
+  var      :value, nil
   view     'SC.LabelView'
   
   css_class_names << 'sc-label-view'
   @inner_html = @label unless @label.nil?
+  @inner_html = @value unless @value.nil?
 end
 
 # Render an SC.SpinnerView. Inherits from SC.View. You should bind 

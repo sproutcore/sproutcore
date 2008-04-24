@@ -674,9 +674,7 @@ SC.NotificationQueue = {
     this._flushing = false ;
     
     if (this.queue.length > 0) { 
-      this.invokeLater(this._reflush, 1) ;
+      SC.NotificationQueue.flush.invokeLater(SC.NotificationQueue, 1) ;
     }
-  },
-  
-  _reflush: function() { SC.NotificationQueue.flush(); }
+  }
 } ;

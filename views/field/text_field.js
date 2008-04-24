@@ -4,6 +4,7 @@
 // ========================================================================
 
 require('views/field/field') ;
+require('mixins/editable') ;
 
 /**
   @class
@@ -12,9 +13,10 @@ require('views/field/field') ;
   for hinted values, etc.
   
   @extends SC.FieldView
+  @extends SC.Editable
   @author Charles Jolley
 */
-SC.TextFieldView = SC.FieldView.extend(
+SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 /** @scope SC.TextFieldView.prototype */ {
   
   emptyElement: '<input type="text" value="" />',
@@ -31,6 +33,10 @@ SC.TextFieldView = SC.FieldView.extend(
   */
   isHintShowing: false,
 
+  /**
+    If YES then the text field is currently editing. 
+  */
+  isEditing: NO,
 
   // PRIVATE SUPPORT METHODS
   init: function() {

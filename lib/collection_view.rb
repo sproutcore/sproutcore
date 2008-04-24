@@ -26,6 +26,7 @@ view_helper :collection_view do
   property :content_value_key
   property :group_visible_key
   property :group_title_key
+  property :content_value_editable, :key => 'contentValueIsEditable'
   property :accepts_first_responder, true
   property :can_reorder_content
   

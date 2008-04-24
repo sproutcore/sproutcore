@@ -6,6 +6,8 @@
 require('views/view') ;
 require('mixins/control') ;
 require('mixins/delegate_support');
+require('views/inline_text_field');
+require('mixins/inline_editor_delegate');
 
 /**
   @class
@@ -18,10 +20,11 @@ require('mixins/delegate_support');
   @extends SC.View
   @extends SC.Control
   @extends SC.DelegateSupport
-  @author Charles Jolley
-  @version 1.0
+  @extends SC.InlineEditorDelegate
+  @extends SC.Editable
+  @since SproutCore 1.0
 */
-SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
+SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.LabelView.prototype */ {
 
   emptyElement: '<span class="sc-label-view"></span>',
@@ -120,6 +123,15 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
   */
   localize: false,
   
+  /**
+    Validator to use during inline editing.
+    
+    If you have set isEditing to YES, then any validator you set on this
+    property will be used when the label view is put into edit mode.
+    
+    @type {SC.Validator}
+  */
+  validator: null,
 
   /**
     Event dispatcher callback.
@@ -128,85 +140,83 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control,
     @param {DOMMouseEvent} evt DOM event
     
   */
-  doubleClick: function( evt )
-  {
-    this.beginInlineEdit();
-  },
+  doubleClick: function( evt ) { return this.beginEditing(); },
   
   
   /**
-    Opens the inline text editor (closing it if it was already open for another view).
+    Opens the inline text editor (closing it if it was already open for 
+    another view).
     
-    @return void
+    @return {Boolean} YES if did begin editing
   */
-  beginInlineEdit: function()
+  beginEditing: function()
   {
-    if ( !this.get('isEditable') ) return;
-    if ( this.get('isEditing') ) return;
+    if (this.get('isEditing')) return YES ;
+    if (!this.get('isEditable')) return NO ;
     
-    this.set('isEditing', true);
-    this.set("innerHTML", ''); // blank out the label contents
-    this.appendChild( SC.inlineTextEditor );
-    SC.inlineTextEditor.field.set('value', this.get('value'));
-    SC.inlineTextEditor.field.becomeFirstResponder();
+    var value = this.get('value') || '' ;
+    var f = this.convertFrameToView(this.get('frame'), null) ;
+    var el = this.rootElement;
+    SC.InlineTextFieldView.beginEditing({
+      frame: f,
+      delegate: this,
+      exampleElement: el,
+      value: value, 
+      multiline: NO, 
+      validator: this.get('validator')
+    });
   },
+  
   /**
-    Closes the inline text editor.
+    Cancels the current inline editor and then exits editor. 
     
-    @return void
+    @return {Boolean} NO if the editor could not exit.
   */
-  endInlineEdit: function()
-  {
-    if ( !this.get('isEditing') ) return;
+  discardEditing: function() {
+    if (!this.get('isEditing')) return YES ;
+    return SC.InlineTextFieldView.discardEditing() ;
+  },
+  
+  /**
+    Commits current inline editor and then exits editor.
+    
+    @return {Boolean} NO if the editor could not exit
+  */
+  commitEditing: function() {
+    if (!this.get('isEditing')) return YES ;
+    return SC.InlineTextFieldView.commitEditing() ;
+  },
 
-    // if there were changes, then commit them... 
-    if ( SC.inlineTextEditor.field.get('value') != this.get('value') )
-    {
-      this._inlineEditValue = SC.inlineTextEditor.field.get('value') ;
-      this._closeInlineEditor(false) ;
-    }
-    else
-    {
-      this.cancelInlineEdit() ;
-    }
+  /** @private
+    Set editing to true so edits will no longer be allowed.
+  */
+  inlineEditorWillBeginEditing: function(inlineEditor) {
+    this.set('isEditing', YES);
   },
-  
-  _inlineEditValue: '', 
-  
-  cancelInlineEdit: function()
-  {
-    if ( !this.get('isEditing') ) return;
-    this._closeInlineEditor(true);
+
+  /** @private 
+    Hide the label view while the inline editor covers it.
+  */
+  inlineEditorDidBeginEditing: function(inlineEditor) {
+    this._oldOpacity = this.getStyle('opacity') ;
+    this.setStyle({ opacity: 0.0 }) ;
   },
-  
-  _closeInlineEditor: function(canceled)
-  {
-    this.set('isEditing', false);
-    this.removeChild( SC.inlineTextEditor );
-    if(!canceled)
-    {
-      this.set('value',this._inlineEditValue) ;
-      this.commitInlineEdit();
-    }  
-    else
-    {
-      this._valueDidChange() ; // restore value.
-    }  
+
+  /** @private
+    Could check with a validator someday...
+  */
+  inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
+    return YES ;
   },
-  
-  // abstract method... implement to persist changes made in the editor.
-  commitInlineEdit: function() {},
-  
-  /** @private */
-  init: function()
-  {
-    arguments.callee.base.call(this) ;
-    
-    // if we are supposed to localize, get the content value
-    if (this.get("localize")) {
-      this.value = this._value = this.get('innerHTML').loc() ;
-      if (this.value != '') this.set('innerHTML', this.value) ;
-    }
+
+  /** @private
+    Update the field value and make it visible again.
+  */
+  inlineEditorDidEndEditing: function(inlineEditor, finalValue) {
+    this.setIfChanged('value', finalValue) ;
+    this.setStyle({ opacity: this._oldOpacity }) ;
+    this._oldOpacity = null ;
+    this.set('isEditing', NO) ;
   },
 
   /** 

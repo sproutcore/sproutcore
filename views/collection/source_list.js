@@ -27,6 +27,11 @@ SC.SourceListView = SC.CollectionView.extend(
   contentValueKey: null,
   
   /**
+    Set to YES if you want the content value to be editable.
+  */
+  contentValueIsEditable: NO,
+  
+  /**
     Set to YES if you want source list items to display an icon.
     
     If this property is set, list items will leave space for a display 

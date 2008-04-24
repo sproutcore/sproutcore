@@ -5,6 +5,7 @@
 require('Core') ;
 require('views/view') ;
 require('mixins/control');
+require('mixins/inline_editor_delegate');
 
 SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
@@ -16,10 +17,12 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
 
   @extends SC.View
   @extends SC.Control
-  @author    AuthorName  
-  @version 0.1
+  @extends SC.InlineEditorDelegate
+  @extends SC.Editable
+  @author  Charles Jolley  
+  @since SproutCore 1.0
 */
-SC.ListItemView = SC.View.extend(SC.Control,
+SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.ListItemView.prototype */ {
   
   /** A ListItemView has an img tag, label, count, optional right button, and
@@ -83,8 +86,13 @@ SC.ListItemView = SC.View.extend(SC.Control,
   */
   contentIsBranchKey: null,
   
+  /**
+    YES if the item view is currently editing.
+  */
+  isEditing: NO,
   
   contentPropertyDidChange: function() {
+    if (this.get('isEditing')) this.discardEditing() ;
     this.render() ;  
   },
   
@@ -101,26 +109,26 @@ SC.ListItemView = SC.View.extend(SC.Control,
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
        var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
        var icon = (iconKey && content && content.get) ? content.get(iconKey) : null ;
-       html.push(this.renderIconHTML(icon));
+       html.push(this.renderIconHtml(icon));
     }
     
     // handle label
     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
     var label = (labelKey && content && content.get) ? content.get(labelKey) : null ;
-    html.push(this.renderLabelHTML(label));
+    html.push(this.renderLabelHtml(label));
     
     // handle unread count
     var countKey = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
     var count = (countKey && content && content.get) ? content.get(countKey) : null ;
     if ((count != null) && (count != 0)) {
-      html.push(this.renderCountHTML(count));
+      html.push(this.renderCountHtml(count));
     }
     
     // handle action 
     var actionKey = this.getDelegateProperty(del, 'listItemActionProperty') ;
     var actionClassName = (actionKey && content && content.get) ? content.get(actionKey) : null ;
     if (actionClassName) {
-       html.push(this.renderActionHTML(actionClassName));
+       html.push(this.renderActionHtml(actionClassName));
     }
     this.setClassName('sc-has-action', actionClassName) ;
     
@@ -128,7 +136,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     if (this.getDelegateProperty(del, 'hasContentBranch')) {
       var branchKey = this.getDelegateProperty(del, 'contentIsBranchKey');
       var hasBranch = (branchKey && content && content.get) ? content.get(branchKey) : false ;
-      html.push(this.renderBranchHTML(hasBranch));
+      html.push(this.renderBranchHtml(hasBranch));
       this.setClassName('sc-has-branch', true) ;
     } else this.setClassName('sc-has-branch', false) ;
     
@@ -140,12 +148,13 @@ SC.ListItemView = SC.View.extend(SC.Control,
   },
   
   /** 
-     renderIconHTML generates the html string used to represent the icon for your 
-     list item.  override this to return your own custom HTML
+     renderIconHtml generates the html string used to represent the icon for 
+     your list item.  override this to return your own custom HTML
+     
      @returns {String}
      @arguments {String} the icon property based on your view's contentIconKey
    */
-   renderIconHTML: function(icon){
+   renderIconHtml: function(icon){
      var html = [];
      // get a class name and url to include if relevant
      var url = null, className = null ;
@@ -164,12 +173,14 @@ SC.ListItemView = SC.View.extend(SC.Control,
    },
    
    /** 
-       renderLabelHTML generates the html string used to represent the label for your 
-       list item.  override this to return your own custom HTML
+       renderLabelHtml generates the html string used to represent the label 
+       for your list item.  override this to return your own custom HTML
+       
        @returns {String}
-       @arguments {String} the label property based on your view's contentValueKey
+       @arguments {String} the label property based on your view's 
+        contentValueKey
      */
-   renderLabelHTML: function(label){
+   renderLabelHtml: function(label){
      var html = [];
      html.push('<span class="sc-label">') ;
      html.push(label || '') ;
@@ -177,13 +188,25 @@ SC.ListItemView = SC.View.extend(SC.Control,
      return html.join('');    
    },
    
+   /**
+      Finds and retrieves the element containing the label.  This is used
+      for inline editing.  If you override renderLabelHtml() you probably
+      need to override this as well.
+  */
+   findLabelElement: function() {
+     return this.$class('sc-label') ;
+   },
+   
    /** 
-        renderCountHTML generates the html string used to represent the count (like unread count)
-        for your list item.  override this to return your own custom HTML
+        renderCountHtml generates the html string used to represent the count 
+        (like unread count) for your list item.  override this to return your 
+        own custom HTML
+        
         @returns {String}
-        @arguments {Integer} the label property based on your view's contentValueKey
+        @arguments {Integer} the label property based on your view's 
+         contentValueKey
     */
-   renderCountHTML: function(count) {
+   renderCountHtml: function(count) {
      var html= [];
       html.push('<span class="sc-count"><span class="inner">') ;
        html.push(count.toString()) ;
@@ -192,12 +215,14 @@ SC.ListItemView = SC.View.extend(SC.Control,
    },
    
    /** 
-        renderActiontHTML generates the html string used to represent the action item
-        for your list item.  override this to return your own custom HTML
-        @returns {String}
-        @arguments {String} the name of the action item.
+      renderActionHtml generates the html string used to represent the 
+      action item for your list item.  override this to return your own 
+      custom HTML
+    
+      @returns {String}
+      @param actionClassName {String} the name of the action item.
     */
-   renderActionHTML: function(actionClassName){
+   renderActionHtml: function(actionClassName){
      var html = [];
      html.push('<img src="') ;
      html.push(static_url('blank.gif')) ;
@@ -206,20 +231,148 @@ SC.ListItemView = SC.View.extend(SC.Control,
    },
    
    /** 
-         renderBranchHTML generates the html string used to represent the branch arrow.
-         override this to return your own custom HTML
-         @returns {String}
-         @arguments {Boolean} whehter the branch is 
+     renderBranchHtml generates the html string used to represent the 
+     branch arrow. override this to return your own custom HTML
+     @returns {String}
+     @arguments {Boolean} whehter the branch is 
    */
    
-   renderBranchHTML: function(hasBranch) {
+   renderBranchHtml: function(hasBranch) {
      var html = [];
      html.push('<span class="sc-branch ');
      html.push(hasBranch ? 'sc-branch-visible' : 'sc-branch-hidden') ;
      html.push('">&nbsp;</span>');
      return html.join('');
-   }
+   },
+   
+   /** 
+    Returns true if a click is on the label text itself to enable editing.
+    
+    Note that if you override renderLabelHtml(), you probably need to override 
+    this as well.
   
-  
+    @param evt {Event} the mouseUp event.
+    @returns {Boolean} YES if the mouse was on the content element itself.
+   */
+   contentHitTest: function(evt) {
+     
+     // if not content value is returned, not much to do.
+     var del = this.displayDelegate ;
+     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+     if (!labelKey) return NO ;
+     
+     // get the element to check for.
+     var el = this.findLabelElement() ;
+     if (!el) return NO ; // no label to check for.
+     
+     var cur = Event.element(evt) ;
+     while(cur && (cur != (this.rootElement)) && (cur != window)) {
+       if (cur === el) return YES ;
+       cur = cur.parentNode ;
+     }
+     
+     return NO;
+   },
+   
+   beginEditing: function() {
+     
+     if (this.get('isEditing')) return YES ;
+     
+     var content = this.get('content') ;
+     var del = this.displayDelegate ;
+     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+     var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
+     
+     var f = this.get('frame') ;
+     var el = this.findLabelElement() ;
+     if (!el) return NO ;
+
+     // if the label has a large line height, try to adjust it to something
+     // more reasonable so that it looks right when we show the popup editor.
+     var oldLineHeight = Element.getStyle(el, 'lineHeight') ;
+     var fontSize = parseInt(Element.getStyle(el, 'fontSize'), 0) ;
+     var lineHeight = parseInt(oldLineHeight, 0) ;
+     var lineHeightShift = 0;
+     
+     if (fontSize && lineHeight) {
+       var targetLineHeight = fontSize * 1.5 ;
+       if (targetLineHeight < lineHeight) {
+         Element.setStyle(el, { lineHeight: '1.5' }) ;
+         lineHeightShift = (lineHeight - targetLineHeight) / 2; 
+       } else oldLineHeight = null ;
+     }
+     
+     f.x += el.offsetLeft ;
+     f.y += el.offsetTop + lineHeightShift - 2;
+     f.height = el.offsetHeight ;
+     f.width = (f.width - 30 - el.offsetLeft) ;
+     f = this.convertFrameToView(f, null) ;
+     
+     var ret = SC.InlineTextFieldView.beginEditing({
+       frame: f, 
+       exampleElement: el, 
+       delegate: this, 
+       value: v
+     }) ;
+
+     // restore old line height for original item if the old line height 
+     // was saved.
+     if (oldLineHeight) Element.setStyle(el, { lineHeight: oldLineHeight }) ;
+     
+     // Done!  If this failed, then set editing back to no.
+     return ret ;
+   },
+   
+   commitEditing: function() {
+     if (!this.get('isEditing')) return YES ;
+     return SC.InlineTextFieldView.commitEditing();
+   },
+   
+   discardEditing: function() {
+     if (!this.get('isEditing')) return YES ;
+     return SC.InlineTextFieldView.discardEditing();
+   },
+   
+   /** @private
+     Set editing to true so edits will no longer be allowed.
+   */
+   inlineEditorWillBeginEditing: function(inlineEditor) {
+     this.set('isEditing', YES);
+   },
+
+   /** @private 
+     Hide the label view while the inline editor covers it.
+   */
+   inlineEditorDidBeginEditing: function(inlineEditor) {
+     var el = this.findLabelElement() ;
+     this._oldOpacity = Element.getStyle(el, 'opacity') ;
+     Element.setStyle(el, { opacity: 0.0 }) ;
+   },
+
+   /** @private
+     Could check with a validator someday...
+   */
+   inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
+     return YES ;
+   },
+
+   /** @private
+     Update the field value and make it visible again.
+   */
+   inlineEditorDidEndEditing: function(inlineEditor, finalValue) {
+     this.set('isEditing', NO) ;
+
+     var content = this.get('content') ;
+     var del = this.displayDelegate ;
+     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+     if (labelKey && content && content.set) {
+       content.set(labelKey, finalValue) ;
+     }
+     
+     // force a refresh, otherwise the label will never be visible again
+     // b/c its opacity is 0.
+     this._lastRenderedHtml = null;
+     this.render() ;
+   }   
   
 }) ;

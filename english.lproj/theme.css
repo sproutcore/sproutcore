@@ -456,5 +456,25 @@ input.show-hint {
 
 /* @end */
 
+/* @group SC.InlineTextFieldView */
+
+.sc-theme .sc-inline-text-field-view {
+}
+
+.sc-theme .sc-inline-text-field-view .inner-field {
+	border: 1px solid #888;
+	-webkit-box-shadow: #555 0px 1px 5px ;
+	background-color: white ;
+}
+
+.sc-theme .sc-inline-text-field-view .inner-field.invalid {
+	outline: 2px red solid;
+}
+
+/* @end */
+
+
+
+
 
 
