@@ -135,16 +135,16 @@ Test.context("Chained SC.Controllers", {
       this.root.discardChanges() ;
       this.child.get('hasChanges').shouldEqual(NO) ;
   },
-
+  
   "root.hasChanges should be FALSE after child.commit if root DOES NOT have other changes": function() {
       // edit child only
       this.child.editorDidChange() ;
       this.root.get('hasChanges').shouldEqual(YES) ;
-
+  
       this.child.commitChanges() ;
       this.root.get('hasChanges').shouldEqual(NO) ;
   },  
-
+  
   "root.hasChanges should be TRUE after child.commit if root DOES have other changes": function() {
       // edit child and root
       this.child.editorDidChange() ;
@@ -154,7 +154,7 @@ Test.context("Chained SC.Controllers", {
       this.child.commitChanges() ;
       this.root.get('hasChanges').shouldEqual(YES) ;
   },  
-
+  
   "root.hasChanges should be FALSE after child.discard if root DOES NOT have other changes": function() {
       // edit child only
       this.child.editorDidChange() ;
@@ -173,8 +173,8 @@ Test.context("Chained SC.Controllers", {
       this.child.discardChanges() ;
       this.root.get('hasChanges').shouldEqual(YES) ;
   },
-
-
+  
+  
   "child.hasChanges should be TRUE if another child cannot commit": function() {
     // edit child and child2
     this.child.editorDidChange() ;
@@ -191,7 +191,7 @@ Test.context("Chained SC.Controllers", {
     this.child.get('hasChanges').shouldEqual(YES) ;
     this.root.get('hasChanges').shouldEqual(YES) ;
   },
-
+  
   "child.hasChanges should be TRUE if another child cannot discard": function() {
     // edit child and child2
     this.child.editorDidChange() ;
@@ -208,12 +208,12 @@ Test.context("Chained SC.Controllers", {
     this.child.get('hasChanges').shouldEqual(YES) ;
     this.root.get('hasChanges').shouldEqual(YES) ;
   },
-
+  
   "root.hasChanges should be TRUE if any child fails to commit": function() {
     // NOTE: Commits are not atomic.  IN this case, child2 fails while child1 succeeds.
     // the hasChanges state of child2 and root must both be TRUE in this case, but 
     // child1's state is undefined.  It may have commited or it may not.
-
+  
     this.child.editorDidChange() ;
     this.child2.editorDidChange() ;
     this.child2.isCommitSuccessful = NO ;
@@ -222,12 +222,12 @@ Test.context("Chained SC.Controllers", {
     this.root.get('hasChanges').shouldEqual(YES) ;
     this.child2.get('hasChanges').shouldEqual(YES) ;
   },
-
+  
   "root.hasChanges should be TRUE if any child fails to discard": function() {
     // NOTE: Commits are not atomic.  IN this case, child2 fails while child1 succeeds.
     // the hasChanges state of child2 and root must both be TRUE in this case, but 
     // child1's state is undefined.  It may have commited or it may not.
-
+  
     this.child.editorDidChange() ;
     this.child2.editorDidChange() ;
     this.child2.isDiscardSuccessful = NO ;
@@ -236,7 +236,7 @@ Test.context("Chained SC.Controllers", {
     this.root.get('hasChanges').shouldEqual(YES) ;
     this.child2.get('hasChanges').shouldEqual(YES) ;
   },
-
+  
   "child.commitChangesImmediately should be inherited from the root": function()
   {
     var Klass = SC.Controller.extend({ commitChangesImmediately: NO });

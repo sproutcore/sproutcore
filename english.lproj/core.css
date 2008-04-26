@@ -147,6 +147,7 @@
 	height:  100%;
 	border: none ;
 	overflow:  hidden ;
+	resize: none;
 }
 
 /* @end */

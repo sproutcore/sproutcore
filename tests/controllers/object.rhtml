@@ -86,7 +86,7 @@ Test.context("SC.ObjectController", {
       this.c.get('value').shouldEqualEnum([0,1]) ;
       this.c.get('flag').shouldEqualEnum([YES, NO]) ;
       
-      // get('array').shouldEqual: [ [0,0,0], [1,1,1] ];
+      // get('array').shouldEqual() [ [0,0,0], [1,1,1] ];
       var ar = this.c.get('array') ;
       ar.length.shouldEqual(2) ;
       ar[0].shouldEqualEnum([0,0,0]) ;
@@ -244,7 +244,7 @@ Test.context("SC.ObjectController", {
       this.c.get('value').shouldEqualEnum([0,1]) ;
       this.c.get('flag').shouldEqualEnum([YES, NO]) ;
       
-      // get('array').shouldEqual: [ [0,0,0], [1,1,1] ];
+      // get('array').shouldEqual(): [ [0,0,0], [1,1,1] ];
       var ar = this.c.get('array') ;
       ar.length.shouldEqual(2) ;
       ar[0].shouldEqualEnum([0,0,0]) ;

@@ -525,22 +525,16 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     }
 
     //if (style == 'float') style = 'cssFloat' ;
-    style = (style == 'float') ? 'cssFloat' : style.camelize() ;
+    style = (style === 'float') ? 'cssFloat' : style.camelize() ;
     var value = element.style[style];
     if (!value) {
       value = this._computedStyle ? this._computedStyle[style] : null ;
     }
 
-    switch(style) {
-    case 'opacity':
+    if (style === 'opacity') {
       value = value ? parseFloat(value) : 1.0;
-      break ;
-    case 'auto':
-      value = null;
-      break ;
-    default:
-      break ;
     }
+    if (value === 'auto') value = null ;
     
     return value ;
   },
@@ -2058,6 +2052,44 @@ SC.View.mixin({
   }  
 
 }) ;
+
+// IE Specfic Overrides
+console.log('SC.Platform.IE = %@'.fmt(SC.Platform.IE));
+if (SC.Platform.IE) {
+  SC.View.prototype.getStyle = function(style) {
+    var element = this.rootElement ;
+
+    // collect value
+    style = (style == 'float' || style == 'cssFloat') ? 'styleFloat' : style.camelize();
+    var value = element.style[style];
+    if (!value && element.currentStyle) value = element.currentStyle[style];
+
+    // handle opacity
+    if (style === 'opacity') {
+      if (value = (this.getStyle('filter') || '').match(/alpha\(opacity=(.*)\)/)) {
+        if (value[1]) value = parseFloat(value[1]) / 100;
+      }
+      value = 1.0;
+    }
+
+    // handle auto
+    if (value === 'auto') {
+      switch(style) {
+        case 'width':
+          value = (this.getStyle('display') != 'none') ? (element.offsetWidth + 'px') : null;
+          break ;
+        case 'height':
+          value = (this.getStyle('display') != 'none') ? (element.offsetHeight + 'px') : null;
+          break ;
+        default:
+          value = null ;
+      }
+    }
+
+    return value;
+  };
+}
+
 
 // this handler goes through the guid to avoid any potential memory leaks
 SC.View._onscroll = function(evt) { $view(this)._onscroll(evt); } ;

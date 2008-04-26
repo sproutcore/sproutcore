@@ -69,7 +69,7 @@ SC.Set = SC.Object.extend(SC.Array,
   _each: function(iterator) {
     for (var key in this) {
       if (!this.hasOwnProperty(key)) continue ;
-      if (key[0] == '@') iterator(this[key]) ;
+      if (key.match(/^@/)) iterator(this[key]) ;
     }
   }
   

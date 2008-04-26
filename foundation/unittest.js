@@ -166,7 +166,7 @@ Test.Unit.Runner.prototype = {
       if (!rootLog) {
         var el = document.createElement('div') ;
         el.id = 'test-log' ;
-        el.addClassName('testlog') ;
+        $(el).addClassName('testlog') ;
         var body = document.getElementsByTagName('body')[0] ;
         body.insertBefore(el, body.firstChild) ;
         rootLog = el ;
@@ -530,18 +530,20 @@ Object.extend(Object.extend(Test.Unit.Testcase.prototype, Test.Unit.Assertions.p
     this.timeToWait = time;
   },
   run: function() {
-    try {
-      try {
+    //try {
+      //try {
         if (!this.isWaiting) this.setup.bind(this)();
         this.isWaiting = false;
         this.test.bind(this)();
-      } finally {
+      //} catch(e) {
+      //  throw e; // required for IE compatibility.
+      //} finally {
         if(!this.isWaiting) {
           this.teardown.bind(this)();
         }
-      }
-    }
-    catch(e) { this.error(e); }
+      //}
+    //}
+    //catch(e) { this.error(e); }
   }
 });
 
@@ -595,7 +597,7 @@ Test.context = function(name, spec, log){
       default:
         var testName = 'test'+specName.gsub(/\s+/,'-').camelize();
         var body = spec[specName].toString().split('\n').slice(1);
-        if(/^\{/.test(body[0])) body = body.slice(1);
+        if(/^\s*\{/.test(body[0])) body = body.slice(1);
         body.pop();
         body = body.map(function(statement){ 
           return statement.strip() ;
@@ -618,5 +620,6 @@ Test.Observer = function()
     if (!arguments.callee.notified) arguments.callee.notified = 0;
     return ++arguments.callee.notified;
   };
-}
+} ;
+
 

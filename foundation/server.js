@@ -98,6 +98,7 @@ SC.Server = SC.Object.extend({
       if (onFailure) onFailure(transport.status, transport, cacheCode,context);
     } ; 
     
+    console.log('REQUEST: %@'.fmt(url)) ;
     request = new Ajax.Request(url,opts) ;
   },
 
@@ -379,7 +380,7 @@ SC.Server = SC.Object.extend({
 
       // find the recordType
       if (data.type) {
-        var recordName = data.type.capitalize()
+        var recordName = data.type.capitalize() ;
         if (server.prefix) for(var prefixLoc=0;prefixLoc < server.prefix.length; prefixLoc++) {
           var namespace = window[server.prefix[prefixLoc]] ;
           if (namespace) data.recordType = namespace[recordName] ;
@@ -404,7 +405,7 @@ SC.Server = SC.Object.extend({
     var ret = {} ;
     records.each(function(rec) {
       var recs = ret[rec.resourceURL || '*'] || [] ;
-      recs.push(rec) 
+      recs.push(rec)  ;
       ret[rec.resourceURL || '*'] = recs ;
     }) ;
     return ret ;
@@ -477,7 +478,7 @@ SC.Server = SC.Object.extend({
       
     // handle objects
     } else if (typeof(params) == "object") {
-      var ret = []       
+      var ret = [];
       for(var cur in params) {
         var key = (rootKey) ? (rootKey + '['+cur+']') : cur ;
         ret.push(this._toQueryString(params[cur],key)) ;

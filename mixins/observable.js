@@ -6,9 +6,11 @@
 /**
   @namespace 
   
-  Key-Value Observing is one of the fundamental ways that models, controllers
-  and views communicate with each other in a SproutCore application.  Any 
-  object that has this module applied to it can be used in KVO-operations.
+  Key-Value-Observing (KVO) simply allows one object to observe changes to a 
+  property on another object. It is one of the fundamental ways that models, 
+  controllers and views communicate with each other in a SproutCore 
+  application.  Any object that has this module applied to it can be used in 
+  KVO-operations.
   
   This module is applied automatically to all objects that inherit from
   SC.Object, which includes most objects bundled with the SproutCore 
@@ -16,21 +18,22 @@
   but you will use the features provided by this module frequently, so it is
   important to understand how to use it.
   
-  h2. About Key Value Observing
+  h2. Enabling Key Value Observing
 
-  Key-Value-Observing (KVO) simply allows one object to observe changes to a 
-  property on another object.  This can replace much of the "glue code" that
-  you often have to write to make parts of your application work together.
+  With KVO, you can write functions that will be called automatically whenever 
+  a property on a particular object changes.  You can use this feature to
+  reduce the amount of "glue code" that you often write to tie the various 
+  parts of your application together.
   
-  Using KVO is easy.  All you have to do is use the KVO methods to get and set
-  properties.  Instead of writing:
+  To use KVO, just use the KVO-aware methods get() and set() to access 
+  properties instead of accessing properties directly.  Instead of writing:
   
   {{{
     var aName = contact.firstName ;
     contact.firstName = 'Charles' ;
   }}}
-  
-  you use:
+
+  use:
 
   {{{
     var aName = contact.get('firstName') ;
@@ -40,8 +43,36 @@
   get() and set() work just like the normal "dot operators" provided by 
   JavaScript but they provide you with much more power, including not only
   observing but computed properties as well.
+
+  h2. Observing Property Changes
+
+  You typically observe property changes simply by adding the observes() 
+  call to the end of your method declarations in classes that you write.  For
+  example:
   
-  INCOMPLETE
+  {{{
+    SC.Object.create({
+      valueObserver: function() {
+        // Executes whenever the "Value" property changes
+      }.observes('value')
+    }) ;
+  }}}
+  
+  Although this is the most common way to add an observer, this capability is
+  actually built into the SC.Object class on top of two methods defined in
+  this mixin called addObserver() and removeObserver().  You can use these two
+  methods to add and remove observers yourself if you need to do so at run 
+  time.  
+  
+  To add an observer for a property, just call:
+  
+  {{{
+    object.addObserver('propertyKey', targetObject, targetAction) ;
+  }}}
+  
+  This will call the 'targetAction' method on the targetObject to be called
+  whenever the value of the propertyKey changes.
+  
 
 */
 SC.Observable = {

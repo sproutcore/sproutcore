@@ -49,7 +49,7 @@ SC.BENCHMARK_OBJECTS = NO;
 
 */
 SC.Object = function(noinit) { 
-	if (noinit == SC.Object._noinit_) return ;
+	if (noinit === SC.Object._noinit_) return ;
 	var ret = SC.Object._init.apply(this,$A(arguments)) ;
   return ret ;
 };
@@ -176,7 +176,7 @@ Object.extend(SC.Object,
     if (this._objectClassName) return this._objectClassName ;
     var ret = this ;
     while(ret && !ret._objectClassName) ret = ret._type; 
-    return (ret._objectClassName) ? ret._objectClassName : 'Anonymous' ;
+    return (ret && ret._objectClassName) ? ret._objectClassName : 'Anonymous' ;
   },
 
   /** @private
