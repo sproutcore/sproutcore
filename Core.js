@@ -127,6 +127,7 @@ Object.extend(SC,{
 
     // call the onloadQueue.
     var queue ;
+    SC.runLoop.beginRunLoop() ;
     if (window.callOnLoad) {
       if (window.callOnLoad instanceof Array) {
         queue = window.callOnLoad ;
@@ -148,7 +149,8 @@ Object.extend(SC,{
     } else if (typeof SC.Routes != 'undefined') {
       SC.Routes.ping() ; // handle routes, if modules is installed.
     }
-
+    
+    SC.runLoop.endRunLoop();
   },
   
   // this will take a URL of any type and convert it to a fully qualified URL.
@@ -179,10 +181,10 @@ Object.extend(SC,{
         ret = (item.isClass) ? T_CLASS : T_FUNCTION ;
       } else if (item instanceof SC.Error) {
         ret = T_ERROR ;        
-      } else if (item.isObject == true) {
+      } else if (item.isObject === true) {
         ret = T_OBJECT ;
       } else ret = T_HASH ;
-    } else if (ret == T_FUNCTION) ret = (item.isClass) ? T_CLASS : T_FUNCTION;
+    } else if (ret === T_FUNCTION) ret = (item.isClass) ? T_CLASS : T_FUNCTION;
     return ret ;
   },
   
@@ -200,7 +202,7 @@ Object.extend(SC,{
   
   isArray: function( obj )
   {
-    return ($type(obj) == T_ARRAY) || (obj && obj.objectAt);
+    return ($type(obj) === T_ARRAY) || (obj && obj.objectAt);
   },
   
   _nextGUID: 0,

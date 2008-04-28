@@ -28,7 +28,7 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 SC.Array = {
 
 /**
-  @property {Number} length
+  @field {Number} length
   
   Your array must support the length property.  your replace methods should
   set this property whenever it changes.
@@ -92,7 +92,7 @@ SC.Array = {
   },
   
   /**
-    @property []
+    @field []
 
     This is the handler for the special array content property.  If you get
     this property, it will return this.  If you set this property it a new 

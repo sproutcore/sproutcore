@@ -2203,7 +2203,7 @@ SC.CollectionView = SC.View.extend(
   // -- update layout on all item views.
   // -- optional: determine the first item view that does not match.
   //
-  _contentPropertyObserver: function(target, key, value, rev) {
+  _contentPropertyObserver: function(target, key, value, rev) {    
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
       this._updatingContent = true ;

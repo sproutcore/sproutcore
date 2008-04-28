@@ -71,12 +71,16 @@ SC.window = SC.PaneView.extend({
   autoresizesChildViews: true,
   
   _onresize: function(evt) {
+    SC.runLoop.beginRunLoop();
+    
     var oldSize = Object.clone(this.get('size')) ;
     this._size = null ;
     var newSize = this.get('size') ;
     if ((newSize.width != oldSize.width) || (newSize.height != oldSize.height)) {
       this.resizeChildrenWithOldSize(oldSize) ;
     }
+    
+    SC.runLoop.endRunLoop() ;
   },
   
   // ........................................................................
@@ -133,17 +137,21 @@ SC.window = SC.PaneView.extend({
 
   _sendEvent: function( sctype, evt )
   {
+    SC.runLoop.beginRunLoop();
+    
     evt._type = sctype;
     evt._stopWhenHandled = (evt._stopWhenHandled !== undefined) ? evt._stopWhenHandled : true;
     
     var handler = SC.app.sendEvent( evt );
     
+    var ret = true;
     if (handler && evt._stopWhenHandled) {
       Event.stop(evt);
-      return false;
-    } else {
-      return true;
+      ret = false;
     }
+    
+    SC.runLoop.endRunLoop();
+    return ret ; 
   },
 
   // util code factored out of keypress and keydown handlers
@@ -173,6 +181,8 @@ SC.window = SC.PaneView.extend({
   
   _onmousedown: function(evt)
   {
+    SC.runLoop.beginRunLoop();
+
     // make sure the view gets focus no matter what.  FF is inconsistant 
     // about this.
     this._onfocus(); 
@@ -189,26 +199,15 @@ SC.window = SC.PaneView.extend({
     evt._stopWhenHandled = (evt._stopWhenHandled !== undefined) ? evt._stopWhenHandled : true;
 
     this._mouseDownView = SC.app.sendEvent( evt );
+    var ret = true ;
     if (this._mouseDownView && evt._stopWhenHandled)
     {
       Event.stop(evt);
+      ret = false ;
     }
 
-    // find the view to handle the mouseDown.  go up the chain till you find
-    // one that implements didMouseDown or mouseDown && returns true.
-/*    var view = this.firstViewForEvent(evt) ;
-    var handled = false ;
-    while(view && (view != this) && !handled) {
-      var func = view.mouseDown || view.didMouseDown;
-      if (func) handled = func.call(view, evt) ;
-      
-      if (!handled) view = view.get('nextResponder');
-    }
-    if (view == this) view = null;
-    this._mouseDownView = view ;
-    
-    if (handled) Event.stop(evt) ;
-*/
+    SC.runLoop.endRunLoop();
+    return ret ;
   },
   
   // mouseUp only gets delivered to the view that handled the mouseDown evt.
@@ -218,6 +217,7 @@ SC.window = SC.PaneView.extend({
   // send.
   _onmouseup: function(evt)
   {
+    SC.runLoop.beginRunLoop();
     var handler = null;
 
     this._lastMouseUpAt = Date.now();
@@ -246,6 +246,7 @@ SC.window = SC.PaneView.extend({
     }
     
     this._mouseDownView = null;
+    SC.runLoop.endRunLoop() ;
   },
   
   _lastHovered: null,
@@ -259,6 +260,8 @@ SC.window = SC.PaneView.extend({
   // trigger calls to mouseDragged.
   //
   _onmousemove: function(evt) {
+
+    SC.runLoop.beginRunLoop();
 
     // make sure the view gets focus no matter what.  FF is inconsistant 
     // about this.
@@ -300,6 +303,8 @@ SC.window = SC.PaneView.extend({
     if (this._mouseDownView && this._mouseDownView.mouseDragged) {
       this._mouseDownView.mouseDragged(evt) ;
     }
+    
+    SC.runLoop.endRunLoop();
   },
   
   // remove event observers.

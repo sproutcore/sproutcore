@@ -197,7 +197,7 @@ SC.Observable = {
     this may be more efficient.
   */
   setIfChanged: function(key, value) {
-    return (this.get(key) != value) ? this.set(key, value) : value ;
+    return (this.get(key) !== value) ? this.set(key, value) : value ;
   },
   
   /**  
@@ -236,6 +236,9 @@ SC.Observable = {
   
   /**  
     Increments the value of a property.
+    
+    @param key {String} property name
+    @returns {Number} new value of property
   */
   incrementProperty: function(key) { 
     return this.set(key,(this.get(key) || 0)+1); 
@@ -243,25 +246,35 @@ SC.Observable = {
 
   /**  
     decrements a property
+    
+    @param key {String} property name
+    @returns {Number} new value of property
   */
   decrementProperty: function(key) {
     return this.set(key,(this.get(key) || 0) - 1 ) ;
   },
 
   /**  
-    inverts a property.  Property should be a bool.
+    Inverts a property.  Property should be a bool.
+    
+    @param key {String} property name
+    @param value {Object} optional parameter for "true" value
+    @param alt {Object} optional parameter for "false" value
+    @returns {Object} new value
   */
   toggleProperty: function(key,value,alt) { 
     if (value === undefined) value = true ;
     if (alt == undefined) alt = false ;
     value = (this.get(key) == value) ? alt : value ;
-    this.set(key,value);
+    return this.set(key,value);
   },
 
   /**  
-  This is a generic property handler.  If you define it, it will be called
-  when the named property is not yet set in the object.  The default does
-  nothing.
+    Called whenever you try to get or set an undefined property.
+    
+    This is a generic property handler.  If you define it, it will be called
+    when the named property is not yet set in the object.  The default does
+    nothing.
   */
   unknownProperty: function(key,value) {
     if (!(value === undefined)) { this[key] = value; }
@@ -269,18 +282,55 @@ SC.Observable = {
   },
 
   /**  
-    Override to receive generic observation notices.
+    Generic property observer called whenever a property on the receiver 
+    changes.
+    
+    If you need to observe a large number of properties on your object, it
+    is sometimes more efficient to implement this observer only and then to
+    handle requests yourself.  Although this observer will be triggered 
+    more often than an observer registered on a specific property, it also
+    does not need to be registered which can make it faster to setup your 
+    object instance.
+    
+    You will often implement this observer using a switch statement on the
+    key parameter, taking appropriate action. 
+    
+    @param observer {null} no longer used; usually null
+    @param target {Object} the target of the change.  usually this
+    @param key {String} the name of the property that changed
+    @param value {Object} the new value of the property.
+    @returns {void}
   */
   propertyObserver: function(observer,target,key,value) {},
 
   /**  
-    You can wrap property changes with these methods to cause notifications
-    to be delivered only after groups are closed.
+    Begins a grouping of property changes.
+    
+    You can use this method to group property changes so that notifications
+    will not be sent until the changes are finished.  If you plan to make a 
+    large number of changes to an object at one time, you should call this 
+    method at the beginning of the changes to suspend change notifications.
+    When you are done making changes, all endPropertyChanges() to allow 
+    notification to resume.
+    
+    @returns {void}
   */
   beginPropertyChanges: function() {
     this._kvo().changes++ ;
   },
 
+  /**  
+    Ends a grouping of property changes.
+    
+    You can use this method to group property changes so that notifications
+    will not be sent until the changes are finished.  If you plan to make a 
+    large number of changes to an object at one time, you should call 
+    beginsPropertyChanges() at the beginning of the changes to suspend change 
+    notifications. When you are done making changes, call this method to allow 
+    notification to resume.
+    
+    @returns {void}
+  */
   endPropertyChanges: function() {
     var kvo = this._kvo() ;  kvo.changes--;
     if (kvo.changes <= 0) this._notifyPropertyObservers() ;
@@ -289,16 +339,18 @@ SC.Observable = {
   /**  
     Notify the observer system that a property is about to change.
 
-    Sometimes you need to change a value directly or indirectly without actually
-    calling get() or set() on it.  In this case, you can use this method and 
-    propertyDidChange() instead.  Calling these two methods together will notify all
-    observers that the property has potentially changed value.
+    Sometimes you need to change a value directly or indirectly without 
+    actually calling get() or set() on it.  In this case, you can use this 
+    method and propertyDidChange() instead.  Calling these two methods 
+    together will notify all observers that the property has potentially 
+    changed value.
     
-    Note that you must always call propertyWillChange and propertyDidChange as a pair.
-    If you do not, it may get the property change groups out of order and cause
-    notifications to be delivered more often than you would like.
+    Note that you must always call propertyWillChange and propertyDidChange as 
+    a pair.  If you do not, it may get the property change groups out of order 
+    and cause notifications to be delivered more often than you would like.
     
     @param key {String} The property key that is about to change.
+    @returns {void}
   */
   propertyWillChange: function(key) {
     this._kvo().changes++ ;
@@ -307,17 +359,19 @@ SC.Observable = {
   /**  
     Notify the observer system that a property has just changed.
 
-    Sometimes you need to change a value directly or indirectly without actually
-    calling get() or set() on it.  In this case, you can use this method and 
-    propertyWillChange() instead.  Calling these two methods together will notify all
-    observers that the property has potentially changed value.
+    Sometimes you need to change a value directly or indirectly without 
+    actually calling get() or set() on it.  In this case, you can use this 
+    method and propertyWillChange() instead.  Calling these two methods 
+    together will notify all observers that the property has potentially 
+    changed value.
     
-    Note that you must always call propertyWillChange and propertyDidChange as a pair.
-    If you do not, it may get the property change groups out of order and cause
-    notifications to be delivered more often than you would like.
+    Note that you must always call propertyWillChange and propertyDidChange as 
+    a pair. If you do not, it may get the property change groups out of order 
+    and cause notifications to be delivered more often than you would like.
     
     @param key {String} The property key that has just changed.
     @param value {Object} The new value of the key.  May be null.
+    @returns {void}
   */
   propertyDidChange: function(key,value) {
     this._kvo().changed[key] = value ;
@@ -328,9 +382,10 @@ SC.Observable = {
   /**
     Convenience method to call propertyWillChange/propertyDidChange.
     
-    Sometimes you need to notify observers that a property has changed value without
-    actually changing this value.  In those cases, you can use this method as a 
-    convenience instead of calling propertyWillChange() and propertyDidChange().
+    Sometimes you need to notify observers that a property has changed value 
+    without actually changing this value.  In those cases, you can use this 
+    method as a convenience instead of calling propertyWillChange() and 
+    propertyDidChange().
     
     @param key {String} The property key that has just changed.
     @param value {Object} The new value of the key.  May be null.
@@ -342,16 +397,36 @@ SC.Observable = {
   },
   
   /**  
-    This may be a simpler way to notify of changes if you are making a major
-    update or don't know exactly which properties have changed.  This ignores
-    property gorups.
+    Notifies all of observers of a property changes.
+    
+    Sometimes when you make a major update to your object, it is cheaper to
+    simply notify all observers that their property might have changed than
+    to figure out specifically which properties actually did change.
+    
+    In those cases, you can simply call this method to notify all property
+    observers immediately.  Note that this ignores property groups.
+    
+    @returns {void}
   */
   allPropertiesDidChange: function() {
     this._notifyPropertyObservers(true) ;
   },
 
   /**  
-    Add an observer
+    Adds an observer on a property.
+    
+    This is the core method used to register an observer for a property.
+    The observer can be either a simple function or an object and a method.
+    
+    Once you call this method, anytime the key's value is set, your observer
+    will be notified.  Note that the observers are triggered anytime the
+    value is set, regardless of whether it has actually changed.  Your
+    observer should be prepared to handle that.
+    
+    @param key {String} the key to observer
+    @param target {Object} the object holding the action to call.  May benull.
+    @param action {String,Function} the action to call.
+    @returns {void}
   */
   addObserver: function(key,func) {
     var kvo = this._kvo() ;
@@ -374,6 +449,28 @@ SC.Observable = {
       if (!found) observers.push(func) ;
     }
 
+  },
+
+  removeObserver: function(key,func) {
+    var kvo = this._kvo() ;
+
+    // if the key contains a '.', this is a chained observer.
+    key = key.toString() ;
+    var parts = key.split('.') ;
+    if (parts.length > 1) {
+      var chainObservers = kvo.chainObserver[key] || [] ;
+      var newObservers = [] ;
+      chainObservers.each(function(co) {
+        if (co.masterFunc != func) newObservers.push(co) ;
+      }) ;
+      kvo.chainObservers[key] = newObservers ;
+
+    // otherwise, just like a normal observer.
+    } else {
+      var observers = kvo.observers[key] || [] ;
+      observers = observers.without(func) ;
+      kvo.observers[key] = observers ;
+    }
   },
 
   addProbe: function(key) { this.addObserver(key,logChange); },
@@ -418,28 +515,6 @@ SC.Observable = {
 
     handler.cancel = function() { target.removeObserver(key,handler); } ;
     return handler ;
-  },
-
-  removeObserver: function(key,func) {
-    var kvo = this._kvo() ;
-
-    // if the key contains a '.', this is a chained observer.
-    key = key.toString() ;
-    var parts = key.split('.') ;
-    if (parts.length > 1) {
-      var chainObservers = kvo.chainObserver[key] || [] ;
-      var newObservers = [] ;
-      chainObservers.each(function(co) {
-        if (co.masterFunc != func) newObservers.push(co) ;
-      }) ;
-      kvo.chainObservers[key] = newObservers ;
-
-    // otherwise, just like a normal observer.
-    } else {
-      var observers = kvo.observers[key] || [] ;
-      observers = observers.without(func) ;
-      kvo.observers[key] = observers ;
-    }
   },
 
   /**

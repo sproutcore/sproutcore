@@ -26,13 +26,14 @@ SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
   the general concepts you need to understand when working with views, though
   most often you will want to work with one of the subclasses instead.
   
+  h2. Working with DOM Elements
+  
+  h2. Handling Events
   
   @extends SC.Responder
   @extends SC.PathModule
   @extends SC.DelegateSupport
-  
-  @author Charles Jolley
-  @version 1.0
+  @since SproutCore 1.0
 */
 SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
@@ -205,7 +206,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     elements managed by the views are also directl children of the 
     containerElement for the receiver.
     
-    @property
+    @field
     @type Array
   */
   childNodes: [],
@@ -214,7 +215,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     The first child view in the childNodes array.  If the view does not have 
     any children, this property will be null.
      
-    @property
+    @field
     @type SC.View
   */
   firstChild: null,
@@ -223,7 +224,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     The last child view in the childNodes array.  If the view does not have any children,
     this property will be null.
      
-    @property
+    @field
     @type SC.View
   */
   lastChild: null,
@@ -233,7 +234,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     If the receiver is the last view in the array or if the receiver does not 
     belong to a parent view this property will be null.
      
-    @property
+    @field
     @type SC.View
   */
   nextSibling: null,
@@ -243,7 +244,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     parentNode.  If the receiver is the first view in the array or if the 
     receiver does not belong to a parent view this property will be null.
      
-    @property
+    @field
     @type SC.View
   */
   previousSibling: null,
@@ -252,7 +253,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     The parent view this view belongs to.  If the receiver does not belong to a parent view
     then this property is null.
      
-    @property
+    @field
     @type SC.View
   */
   parentNode: null,
@@ -267,7 +268,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     If the view does not belong to a parentNode or if the view is not 
     onscreen, this property will be null.
     
-    @property
+    @field
     @type SC.View
   */
   pane: function()
@@ -416,6 +417,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     }
     return null;
   },
+  
   previousValidKeyView: function()
   {
     var view = this;
@@ -465,12 +467,13 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   // ..........................................
   // ELEMENT API
   //
-  // The methods in this section provide compatibility with the most common 
-  // Prototype methods used on elements.  These methods are generally primitives
-  // for modifying the underlying DOM element.  You should only use them for
-  // INTERNAL VIEW CODE.
 
-  // returns the CSS classNames for the element.
+  /**
+    Read-only array of currently applied classNames.
+    
+    @field
+    @type {Array}
+  */
   classNames: function() { 
     if (!this._classNames) {
       var classNames = this.rootElement.className;
@@ -478,13 +481,23 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     }
     return this._classNames ;
   }.property(),
-  
-  // return true if the element has the classname.
+
+  /**
+    Detects the presence of the class name on the root element.
+    
+    @param className {String} the class name
+    @returns {Boolean} YES if class name is currently applied, NO otherwise
+  */
   hasClassName: function(className) {
     return (this._classNames || this.get('classNames')).indexOf(className) >= 0 ;
   },
 
-  // add the specified class name.
+  /**
+    Adds the class name to the element.
+    
+    @param className {String} the class name to add.
+    @returns {String} the class name
+  */
   addClassName: function(className) {
     if (this.hasClassName(className)) return ; // nothing to do
 
@@ -495,8 +508,13 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     this.propertyDidChange('classNames') ;
     return className ;
   },
-  
-  // remove the specified class name.
+
+  /**
+    Removes the specified class name from the element.
+    
+    @param className {String} the class name to remove
+    @returns {String} the class name
+  */
   removeClassName: function(className) {
     if (!this.hasClassName(className)) return ; // nothing to do
     
@@ -508,16 +526,44 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     return className ;
   },
 
+  /**
+    Adds or removes the class name according to flag.
+    
+    This is a simple way to add or remove a class from the root element.
+    
+    @param className {String} the class name
+    @param flag {Boolean} YES to add class name, NO to remove it.
+    @returns {String} The class Name.
+  */
   setClassName: function(className, flag) {
     return (!!flag) ? this.addClassName(className) : this.removeClassName(className);
   },
-  
-  // toggler specified class name..
+
+  /**
+    Toggles the presence of the class name.
+    
+    If the specified CSS class is applied, it will be removed.  If it is not
+    present, it will be added.  Note that if this changes the potential 
+    layout of the view, you must wrap calls to this in viewFrameDidChange()
+    and viewFrameWillChange().
+    
+    @param className {String} the class name
+    @returns {Boolean} YES if classname is now applied
+  */
   toggleClassName: function(className) {
     return this.setClassName(className, !this.hasClassName(className)) ;
   },
 
-  // get the named style. (see also style properties)
+  /**
+    Retrieves the current value of the named CSS style.
+    
+    This method is designed to work cross platform and uses the current
+    computed style, which is the combination of all applied CSS class names
+    and inline styles.
+    
+    @param style {String} the style key.
+    @returns {Object} the style value or null if not-applied/auto
+  */
   getStyle: function(style) {
     var element = this.rootElement ;
     if (!this._computedStyle) {
@@ -538,30 +584,63 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     return value ;
   },
-
-  // set the passed styles.
+  
+  
+  /**
+    Sets the passed hash of CSS styles and values on the element.  You should
+    pass your properties pre-camelized.
+    
+    @param styles {Hash} hash of keys and values
+    @param camelized {Boolean} optional bool set to NO if you did not camelize.
+    @returns {Boolean} YES if set succeeded.
+  */
   setStyle: function(styles, camelized) {
     return Element.setStyle(this.rootElement, styles, camelized) ;
   },
 
-  // use this method to update the HTML of an element.  This takes care of 
-  // nasties like processing scripts and inserting HTML into a table.  You can
-  // also use innerHTML, which builds on this method.
+/**
+  Updates the HTML of an element.  
+  
+  This method takes care of nasties like processing scripts and inserting
+  HTML into a table.  It is also somewhat slow.  If you control the HTML 
+  being inserted and you are not working with table elements, you should use
+  the innerHTML property instead.  If you are setting content generated by
+  users, this method can insert the content safely.
+  
+  @param html {String} the html to insert.
+*/
   update: function(html) {
     Element.update((this.containerElement || this.rootElement),html) ;
     this.propertyDidChange('innerHTML') ;
   },
 
-  // this works like the element getAttribute() except it is standardized 
-  // across all browsers.
+  /**
+    Retrieves the value for an attribute on the DOM element
+    
+    @param attrName {String} the attribute name
+    @returns {String} attribute value
+  */
   getAttribute: function(attrName) {
     return Element.readAttribute(this.rootElement,attrName) ;
   },
-  
+
+  /**
+    Sets an attribute on the root DOM element.
+    
+    @param attrName {String} the attribute name
+    @param value {String} the new attribute value
+    @returns {String} the set attribute name
+  */
   setAttribute: function(attrName, value) {
     this.rootElement.setAttribute(atrrName, value) ;
   },
   
+  /**
+    Returns true if the named attributes is defined on the views root element.
+    
+    @param attrName {String} the attribute name
+    @returns {Boolean} YES if attribute is present.
+  */
   hasAttribute: function(attrName) {
     return Element.hasAttribute(this.rootElement, attrName) ;
   },
@@ -583,7 +662,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     property.  It is not currently safe to edit this property once the view
     has been createde.
     
-    @property
+    @field
     @type {Element}
   */
   rootElement: null,
@@ -600,7 +679,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     methods you write on an SC.View subclass, never from outside the view.
     Unlike most properties, it is not necessary to use get()/set().
     
-    @property
+    @field
     @type {Element}
   */
   containerElement: null,
@@ -618,11 +697,13 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     clippingFrameDidChange method.
     
     If this property returns false, then notifications about changes to the 
-    clippingFrame will probably not be called on the receiver.  Normally if you
-    do not need to worry about this property since implementing the clippingFrameDidChange()
-    method will change its value and cause your method to be invoked.
+    clippingFrame will probably not be called on the receiver.  Normally if 
+    you do not need to worry about this property since implementing the 
+    clippingFrameDidChange() method will change its value and cause your 
+    method to be invoked.
     
-    This property is automatically updated whenever you add or remove a child view.
+    This property is automatically updated whenever you add or remove a child 
+    view.
   */
   needsClippingFrame: function() {
     if (this._needsClippingFrame == null) {
@@ -638,17 +719,18 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   }.property(),
   
   /**
-    Returns true if the view or any of its contained views implements any resize
-    methods.
+    Returns true if the view or any of its contained views implements any 
+    resize methods.
     
     If this property returns false, changes to your frame view may not be 
-    relayed to child methods.  This may mean that your various frame properties could 
-    become stale unless you call refreshFrames() first.
+    relayed to child methods.  This may mean that your various frame 
+    properties could become stale unless you call refreshFrames() first.
 
     If you want you make sure your frames are up to date, see hasManualLayout.
     
-    This property is automatically updated whenever you add or remove a child view.  It 
-    returns true if you implement any of the resize methods or if hasManualLayout is true.
+    This property is automatically updated whenever you add or remove a child 
+    view.  It returns true if you implement any of the resize methods or if 
+    hasManualLayout is true.
   */
   needsFrameChanges: function() {
     if (this._needsFrameChanges == null)   {
@@ -665,13 +747,15 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   
 
   /**
-    Returns true if the receiver manages the layout for itself or its children.
+    Returns true if the receiver manages the layout for itself or its 
+    children.
     
     Normally this property returns true automatically if you implement
-    resizeChildrenWithOldSize() or resizeWithOldParentSize() or clippingFrameDidChange().
+    resizeChildrenWithOldSize() or resizeWithOldParentSize() or 
+    clippingFrameDidChange().
     
-    If you do not implement these methods but need to make sure your frame is always up-to-date
-    anyway, set this property to true.
+    If you do not implement these methods but need to make sure your frame is 
+    always up-to-date anyway, set this property to true.
   */
   hasManualLayout: function() {
     return (this.resizeChildrenWithOldSize != SC.View.prototype.resizeChildrenWithOldSize) ||
@@ -680,7 +764,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   }.property(),
     
   /**
-    Convert a point _from_ the offset parent of the passed view to the current view.
+    Convert a point _from_ the offset parent of the passed view to the current 
+    view.
 
     This is a useful utility for converting points in the coordinate system of
     another view to the coordinate system of the receiver. Pass null for 
@@ -690,7 +775,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     Note that if your view is not visible on the screen, this may not work.
     
     @param {Point} f The point or frame to convert
-    @param {SC.Vew} targetView The view to convert from.  Pass null to convert from window coordinates.
+    @param {SC.View} targetView The view to convert from.  Pass null to convert from window coordinates.
       
     @returns {Point} The converted point or frame
   */
@@ -707,7 +792,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
   
   /**
-    Convert a point _to_ the offset parent of the passed view from the current view.
+    Convert a point _to_ the offset parent of the passed view from the current 
+    view.
 
     This is a useful utility for converting points in the coordinate system of
     the receiver to the coordinate system of another view. Pass null for 
@@ -717,7 +803,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     Note that if your view is not visible on the screen, this may not work.
     
     @param {Point} f The point or frame to convert
-    @param {SC.Vew} targetView The view to convert to.  Pass null to convert to window coordinates.
+    @param {SC.View} targetView The view to convert to.  Pass null to convert to window coordinates.
       
     @returns {Point} The converted point or frame
   */
@@ -740,7 +826,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @example
     offsetView = $view(this.get('offsetParent')) ;
     
-    @property
+    @field
     @type {Element}
   */
   offsetParent: function() {
@@ -748,11 +834,11 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   }.property(),
 
   /**
-    The inner bounds for the content shown inside of this frame.  Reflects scroll position
-    and other properties.
+    The inner bounds for the content shown inside of this frame.  Reflects 
+    scroll position and other properties.
 
-    The inner frame returns the actual available frame for child elements, less any borders
-    or scroll bars. 
+    The inner frame returns the actual available frame for child elements, 
+    less any borders or scroll bars. 
     
     This value can change when:
     - the receiver's frame changes
@@ -1084,11 +1170,12 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
 
   /**
-    Call this method just after you finish making changes that will impace the frame
-    of the view such as changing the border thickness or adding/removing a CSS style.
+    Call this method just after you finish making changes that will impace the 
+    frame of the view such as changing the border thickness or adding/removing 
+    a CSS style.
     
-    It is safe to next multiple calls to this method.   This method is called automatically
-    anytime you set the frame.
+    It is safe to next multiple calls to this method.   This method is called 
+    automatically anytime you set the frame.
     
     @returns {void}
   */
@@ -1135,9 +1222,10 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     Clears any cached frames so the next get will recompute them.
     
-    This method does not notify any observers of changes to the frames.  It should
-    only be used when you need to make sure your frame info is up to date but you do
-    not expect anything to have happened that frame observers would be interested in.
+    This method does not notify any observers of changes to the frames.  It 
+    should only be used when you need to make sure your frame info is up to 
+    date but you do not expect anything to have happened that frame observers 
+    would be interested in.
   */
   recacheFrames: function() {
     this._innerFrame = this._frame = this._clippingFrame = this._scrollFrame = null ; 
@@ -1146,12 +1234,12 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     Set to true if you expect this view to have scrollable content.
 
-    Normally views do not monitor their onscroll event.  If you set this property to true,
-    however, the view will observe its onscroll event and update its scrollFrame and 
-    clippedFrame.
+    Normally views do not monitor their onscroll event.  If you set this 
+    property to true, however, the view will observe its onscroll event and 
+    update its scrollFrame and clippedFrame.
 
-    This will also register the view as a scrollable area that can be auto-scrolled during
-    a drag/drop event.
+    This will also register the view as a scrollable area that can be 
+    auto-scrolled during a drag/drop event.
   */
   isScrollable: false,
   
@@ -1161,8 +1249,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     x,y => offset from the innerFrame root.
     width,height => total size of the frame
     
-    If the frame does not have scrollable content, then the size will be equal to the 
-    innerFrame size.
+    If the frame does not have scrollable content, then the size will be equal 
+    to the innerFrame size.
 
     This frame changes when:
     - the receiver's innerFrame changes
@@ -1207,8 +1295,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     The visible portion of the view.
 
-    Returns the subset of the receivers frame that is actually visible on screen. 
-    This frame is automatically updated whenever one of the following changes:
+    Returns the subset of the receivers frame that is actually visible on
+    screen. This frame is automatically updated whenever one of the following 
+    changes:
     
     - A parent view is resized
     - A parent view's scrollFrame changes.
@@ -1256,14 +1345,16 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   }.property('frame', 'scrollFrame'),
   
   /**
-    Called whenever the receivers clippingFrame has changed.  You can override this
-    method to perform partial rendering or other clippingFrame-dependent actions.
+    Called whenever the receivers clippingFrame has changed.  You can override 
+    this method to perform partial rendering or other clippingFrame-dependent 
+    actions.
     
-    The default implementation does nothing (and may not even be called do to optimizations).
-    Note that this is the preferred way to respond to changes in the clippingFrame
-    of using an observer since this method is gauranteed to happen in the correct
-    order.  You can use observers and bindings as well if you wish to handle anything
-    that need not be handled synchronously.
+    The default implementation does nothing (and may not even be called do to 
+    optimizations).  Note that this is the preferred way to respond to changes 
+    in the clippingFrame of using an observer since this method is gauranteed 
+    to happen in the correct order.  You can use observers and bindings as 
+    well if you wish to handle anything that need not be handled 
+    synchronously.
   */
   clippingFrameDidChange: function() {
     
@@ -1274,8 +1365,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     method to perform your own layout of your child views.  
     
     If you do not override this method, the view will assume you are using 
-    CSS to layout your child views.  As an optimization the view may not always 
-    call this method if it determines that you have not overridden it.
+    CSS to layout your child views.  As an optimization the view may not 
+    always call this method if it determines that you have not overridden it.
     
     This default version simply calls resizeWithOldParentSize() on all of its
     children.
@@ -1308,8 +1399,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
   
   /** @private
-    Handler for the onscroll event.  Hooked in on init if isScrollable is true.
-    Notify children that their clipping frame has changed.
+    Handler for the onscroll event.  Hooked in on init if isScrollable is 
+    true.  Notify children that their clipping frame has changed.
   */
   _onscroll: function() {
     this._scrollFrame = null ;
@@ -1322,9 +1413,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   _frameChangeLevel: 0,
   
   /** @private
-    Used internally to collect client offset and location info.  If the element is 
-    not in the main window or hidden, it will be added temporarily and then the passed
-    function will be called.
+    Used internally to collect client offset and location info.  If the 
+    element is not in the main window or hidden, it will be added temporarily 
+    and then the passed function will be called.
   */
   _collectFrame: function(func) {
     var el = this.rootElement ;
@@ -1410,19 +1501,19 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   //
 
   /** 
-    Makes the view visible.  
+    Used to show or hide the view. 
     
-    If false, sets display: none on the DOM element as well. You will
-    often want to bind this property to some setting in your application
-    to make various parts of your app visible as needed.
+    If this property is set to NO, then the DOM element will be hidden using
+    display:none.  You will often want to bind this property to some setting 
+    in your application to make various parts of your app visible as needed.
 
     If you have animation enabled, then changing this property will actually
     trigger the animation to bring the view in or out.
     
     The default binding format is SC.Binding.Bool
     
-    @property
-    @type Boolean
+    @field
+    @type {Boolean}
   */
   isVisible: true,
   
@@ -1448,7 +1539,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     is visible.
     
     @type {Boolean}
-    @property
+    @field
   */
   isVisibleInWindow: YES,
   
@@ -1456,7 +1547,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     If true, the tooltip will be localized.  Also used by some subclasses.
     
     @type {Boolean}
-    @property
+    @field
   */
   localize: false,
 
@@ -1466,7 +1557,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     If localize is true, then the toolTip will be localized first.
     
     @type {String}
-    @property
+    @field
   */
   toolTip: '',
 
@@ -1477,15 +1568,15 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     You can specify the HTML as a string of text, using the NodeDescriptor, or
     by pointing directly to an element.
     
-    Note that as an optimization, SC.View will actually convert the value of this
-    property to an actual DOM structure the first time you create a view and then
-    clone the DOM structure for future views.  
+    Note that as an optimization, SC.View will actually convert the value of 
+    this property to an actual DOM structure the first time you create a view 
+    and then clone the DOM structure for future views.  
     
-    This means that in general you should only set the value of emptyElement when
-    you create a view subclass.  Changing this property value at other times will
-    often have no effect.
+    This means that in general you should only set the value of emptyElement 
+    when you create a view subclass.  Changing this property value at other 
+    times will often have no effect.
     
-    @property
+    @field
     @type {String}
   */
   emptyElement: "<div></div>",
@@ -1493,7 +1584,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     If true, view will display in a lightbox when you show it.
     
-    @property
+    @field
     @type {Boolean}
   */
   isPanel: false,
@@ -1501,7 +1592,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   /**
     If true, the view should be modal when shown as a panel.
   
-    @property
+    @field
     @type {Boolean}
   */
   isModal: true,
@@ -1615,7 +1706,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if(toolTip && (toolTip != '')) this._updateToolTipObserver();
 
     // if container element is a string, convert it to an actual DOM element.
-    if (this.containerElement && ($type(this.containerElement) == T_STRING)) {
+    if (this.containerElement && ($type(this.containerElement) === T_STRING)) {
       this.containerElement = this.$sel(this.containerElement);
     }
 
@@ -2054,7 +2145,6 @@ SC.View.mixin({
 }) ;
 
 // IE Specfic Overrides
-console.log('SC.Platform.IE = %@'.fmt(SC.Platform.IE));
 if (SC.Platform.IE) {
   SC.View.prototype.getStyle = function(style) {
     var element = this.rootElement ;

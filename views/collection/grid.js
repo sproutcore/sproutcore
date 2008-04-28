@@ -97,21 +97,6 @@ SC.GridView = SC.CollectionView.extend(
     SC.Benchmark.end('SC.GridView.layoutItemViewsFor') ;
   },
 
-  computeFrame: function() {
-    var content = this.get('content') ;
-    var rows = (content) ? content.get('length') : 0 ;
-    var rowHeight = this.get('rowHeight') || 20 ;
-
-    var parent = this.get('parentNode') ;
-    var f = (parent) ? parent.get('innerFrame') : { width: 100, height: 100 } ;
-
-    f.x = f.y = 0;
-    f.height = Math.max(f.height, rows * rowHeight) ;
-//    console.log('computeFrame(%@)'.fmt($H(f).inspect())) ;
-    return f ;
-  },
-  
-    
   /** @private */
   layoutItemViewsFor: function(parentView, startingView) {
     SC.Benchmark.start('SC.GridView.layoutItemViewsFor') ;
@@ -165,6 +150,9 @@ SC.GridView = SC.CollectionView.extend(
 
     var parent = this.get('parentNode') ;
     var f = (parent) ? parent.get('innerFrame') : { width: 0, height: 0 };
+
+    //console.log('computeFrame(%@)'.fmt($I(f))) ;
+
     var itemsPerRow = (columnWidth <= 0) ? 1 : (f.width / columnWidth) ;
     var rows = Math.ceil(count / itemsPerRow) ;
 

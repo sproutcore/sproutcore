@@ -24,14 +24,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 {
   /**
     Provides compatibility with CollectionControllers.
-    @property
+    @field
     @type {SC.ArrayController}
   */
   arrangedObjects: function() { return this; }.property('content'),
 
   /**
     The array content that is being managed by the controller.
-    @property
+    @field
     @type {Array}
   */
   content: null,
@@ -42,7 +42,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     deleted.  This is a convenient way to manage lists of items owned
     by a parent record object.
     
-    @property
+    @field
     @type {Boolean}
   */
   destroyOnRemoval: false,
@@ -65,7 +65,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     The array content that (when committed) will be merged back into the content property.
     All array methods will take place on this object.
 
-    @property
+    @field
     @type {SC.Array}
   */
   contentClone: null,
@@ -144,7 +144,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   },
   /**
   * SC.Array interface implimentation.
-  * @property
+  * @field
   * @type {integer}
   */
   length: function( key, value ) {

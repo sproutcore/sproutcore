@@ -1,9 +1,36 @@
+// ========================================================================
+// SproutCore
+// copyright 2006-2008 Sprout Systems, Inc.
+// ========================================================================
+
 require('views/view');
 
 SC.KEYVIEW_SELECTING_NONE      = 0;
 SC.KEYVIEW_SELECTING_NEXT      = 1;
 SC.KEYVIEW_SELECTING_PREVIOUS  = 2;
 
+/**
+  @class
+  
+  A PaneView provides the root view context for a popup, menu, dialog, sheet,
+  widget or a window itself.  The responder chain, which is used to route 
+  keyboard and mouse events, always terminates with a pane view.
+  
+  You can use PaneViews to display various pop-up widgets as well as to 
+  implement your own behaviors.
+  
+  To use a pane, you typically just create a view and set its paneType 
+  property to the name of the type of pane view you want it to display in.
+  Whenever you set the view's isVisible property to true, it will display
+  inside of the pane view automatically.
+  
+  You will rarely use the SC.PaneView directly.  Instead, you should use
+  one of the subclasses included in SproutCore or create your own.
+  
+  @extends SC.View
+  @since SproutCore 1.0
+*/
+  
 SC.PaneView = SC.View.extend({
 
   // panes do not belong to other panes...

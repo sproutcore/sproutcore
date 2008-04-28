@@ -1,3 +1,1 @@
-SproutCore is a framework for building JavaScript applications.  It contains a number of components you can use to enable traditional desktop-like functions using only javascript.  SproutCore relies on Prototype and works with Scriptaculous, jQuery or any other toolkit you like to use.
-
-  
+SproutCore is a framework for building applications in JavaScript.  It eliminates much of the glue code you would often write to build applications on the web so you can focus on building features. To get started using SproutCore, visit the website at http://www.sproutcore.com, where you can find documentation and tutorials.

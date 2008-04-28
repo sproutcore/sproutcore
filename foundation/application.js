@@ -1,3 +1,8 @@
+// ========================================================================
+// SproutCore
+// copyright 2006-2008 Sprout Systems, Inc.
+// ========================================================================
+
 require('Core');
 require('foundation/responder');
 
@@ -13,14 +18,19 @@ require('foundation/responder');
   @extends SC.Responder
   @author Skip Baney
   @copyright 2006-2008, Sprout Systems, Inc. and contributors.
-  @version 0.1
+  @since SproutCore 1.0
 */
 SC.Application = SC.Responder.extend( 
 /** @scope SC.Application.prototype */ {
-  
+
   /**
-  * The pane that is currently receiving key events.
-  * @return {SC.PaneView}
+    The pane that is currently receiving key events.
+    
+    This is most often the SC.window object but if you display a popup or 
+    some other such element, you may set this to some other value.
+    
+    @field
+    @type {SC.View}
   */
   keyPane: function( key, value )
   {
@@ -36,8 +46,14 @@ SC.Application = SC.Responder.extend(
   }.property(),
 
   /**
-  * The primary pane for the application.
-  * @return {SC.PaneView}
+    The main pane for the application.  
+    
+    The main pane is usually the primary pane you expect users to work in. 
+    It receives keyboard equivalent events and other operations even when
+    another key pane is positioned over it.
+    
+    @field
+    @type {SC.View}
   */
   mainPane: function( key, value )
   {
@@ -53,8 +69,13 @@ SC.Application = SC.Responder.extend(
   }.property(),
 
   /**
-  * Starts the application
-  * @return {void}
+    Starts the SproutCore application.
+    
+    Typically this will simply setup the SC.window object so that it starts
+    to receive keyboard and mouse events and then makes the window both
+    main and key pane.
+    
+    @returns {void}
   */
   run: function()
   {
