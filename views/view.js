@@ -100,6 +100,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     // document somwhere.
     if (updateDom) {
       var beforeElement = (beforeView) ? beforeView.rootElement : null;
+      console.log('inserting: %@'.fmt(view.rootElement)) ;
+      
       (this.containerElement || this.rootElement).insertBefore(view.rootElement,beforeElement);
 
       // regenerate the childNodes array.
@@ -644,6 +646,53 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   hasAttribute: function(attrName) {
     return Element.hasAttribute(this.rootElement, attrName) ;
   },
+
+  // ..........................................
+  // STYLE API
+  //
+  // These properties can be used to directly manipulate various CSS 
+  // styles on the view.  These properties are required for animation
+  // support.  Values are typically assumed to be in px.
+  
+  /**
+    SC.View's unknown property is used to implement a large class of 
+    properties beginning with the the world "style".  You can get or set
+    any of these properties to edit individual CSS style properties.
+  */
+  unknownProperty: function(key, value) {
+    if (key.match(/^style/)) {
+      key = key.slice(5,key.length).replace(/^./, function(x) { 
+        return x.toLowerCase(); 
+      });
+
+      var ret = null ;
+      
+      // handle dimensional properties
+      if (key.match(/height$|width$|top$|bottom$|left$|right$/i)) {
+        if (value !== undefined) {
+          this.viewFrameWillChange() ;
+          var props = {} ;
+          props[key] = (value) ? value + 'px' : 'auto' ;
+          this.setStyle(props) ;
+          this.viewFrameDidChange() ;
+        }
+        ret = this.getStyle(key) ;
+        ret = (ret === 'auto') ? null : parseInt(ret, 0) ;
+
+      // all other properties just pass through (and do not change frame)
+      } else {
+        if (value !== undefined) {
+          var props = {} ;
+          props[key] = value ;
+          this.setStyle(props) ;
+        }
+        ret = this.getStyle(key) ;
+      }
+      console.log('get Style: %@ -> %@'.fmt(key, ret)) ;
+      return ret;
+      
+    } else return arguments.callee.base.call(this, key, value) ;
+  },
   
   // ..........................................
   // DOM API
@@ -1040,111 +1089,6 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   }.property('frame'),
   
   /**
-    Style-width for the views rootElement
-    
-    Setting this property will also notify of a view frame change.
-  
-    @field
-  */
-  styleWidth: function(key, value) {
-    if (value !== undefined) {
-      this.viewFrameWillChange() ;
-      this.setStyle({ width: ((value != null) ? value+'px' : 'auto') }) ;
-      this.viewFrameDidChange() ;
-      this._styleWidth = null;
-    }
-    
-    var ret = this.getStyle('width') ;
-    ret = (ret == 'auto') ? null : parseInt(ret, 0) ;
-  }.property(),
-
-  /**
-    Style-height for the views rootElement
-    
-    Setting this property will also notify of a view frame change.
-  
-    @field
-  */
-  styleHeight: function(key, value) {
-    if (value !== undefined) {
-      this.viewFrameWillChange() ;
-      this.setStyle({ height: ((value != null) ? value+'px' : 'auto') }) ;
-      this.viewFrameDidChange() ;
-    }
-    var ret =  this.getStyle('height') ;
-    return (ret == 'auto') ? null : parseInt(ret, 0) ;
-  }.property(),
-
-  /**
-    Style-top for the views rootElement
-    
-    Setting this property will also notify of a view frame change.
-  
-    @field
-  */
-  styleTop: function(key, value) {
-    if (value !== undefined) {
-      this.viewFrameWillChange() ;
-      this.setStyle({ top: ((value != null) ? value+'px' : 'auto') }) ;
-      this.viewFrameDidChange() ;
-    }
-    var ret =  this.getStyle('top') ;
-    return (ret == 'auto') ? null : parseInt(ret, 0) ;
-  }.property(),
-
-  /**
-    Style-bottom for the views rootElement
-    
-    Setting this property will also notify of a view frame change.
-  
-    @field
-  */
-  styleBottom: function(key, value) {
-    if (value !== undefined) {
-      this.viewFrameWillChange() ;
-      this.setStyle({ bottom: ((value != null) ? value+'px' : 'auto') }) ;
-      this.viewFrameDidChange() ;
-    }
-    var ret =  this.getStyle('bottom') ;
-    return (ret == 'auto') ? null : parseInt(ret, 0) ;
-  }.property(),
-
-  /**
-    Style-left for the views rootElement
-    
-    Setting this property will also notify of a view frame change.
-  
-    @field
-  */
-  styleLeft: function(key, value) {
-    if (value !== undefined) {
-      this.viewFrameWillChange() ;
-      this.setStyle({ left: ((value != null) ? value+'px' : 'auto') }) ;
-      this.viewFrameDidChange() ;
-    }
-    var ret =  this.getStyle('left') ;
-    return (ret == 'auto') ? null : parseInt(ret, 0) ;
-  }.property(),
-
-  /**
-    Style-right for the views rootElement
-    
-    Setting this property will also notify of a view frame change.
-  
-    @field
-  */
-  styleRight: function(key, value) {
-    if (value !== undefined) {
-      this.viewFrameWillChange() ;
-      this.setStyle({ right: ((value != null) ? value+'px' : 'auto') }) ;
-      this.viewFrameDidChange() ;
-    }
-    var ret =  this.getStyle('right') ;
-    return (ret == 'auto') ? null : parseInt(ret, 0) ;
-  }.property(),
-
-  
-  /**
     Call this method before you make a change that will impact the frame of 
     the view such as changing the border thickness or adding/removing a CSS 
     style.
@@ -1426,6 +1370,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     var isVisibleInWindow = this.get('isVisibleInWindow') ;
     if (!isVisibleInWindow) {
       var pn = el.parentNode || el ;
+      if (pn === SC.window.rootElement) pn = el ;
+      
       var pnParent = pn.parentNode ; // cache former parent node
       var pnSib = pn.nextSibling ; // cache next sibling
       SC.window.rootElement.insertBefore(pn, null) ;
@@ -1541,7 +1487,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @type {Boolean}
     @field
   */
-  isVisibleInWindow: YES,
+  isVisibleInWindow: NO,
   
   /**
     If true, the tooltip will be localized.  Also used by some subclasses.
