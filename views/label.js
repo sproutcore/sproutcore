@@ -35,7 +35,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     This is a default value that can be overridden by the
     settings on the owner view.
   */
-  escapeHtml: true,
+  escapeHTML: true,
 
   /**
     If true, then the value will be localized.
@@ -112,11 +112,6 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
   */
   isEditing: NO,
 
-
-  /**
-    set to true to have any markup in the content escaped.
-  */
-  escapeHTML: true,
 
   /**
     set to true to have the value you set automatically localized.
@@ -237,7 +232,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     var value = this.get('displayValue') ;
     
     // Escape HTML
-    if (this.getDelegateProperty(this.displayDelegate, 'escapeHtml')) {
+    if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
       this.set('innerText', value || '') ;
     } else this.set('innerHTML', value || '') ;
 
