@@ -344,6 +344,8 @@ SC.Drag = SC.Object.extend(
     
     if (target && target.prepareForDragOperation(op, this)) {
       op = target.performDragOperation(op, this) ;  
+    } else {
+      op = SC.DRAG_NONE;
     }
     
     // create cleanupFunc.  This function will be called at the end of this
