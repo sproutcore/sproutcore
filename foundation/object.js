@@ -302,6 +302,7 @@ Object.extend(SC.Object,
     var bindings = (ext._bindings) ? null : (base._bindings || []).slice() ;
     var observers = (ext._observers) ? null : (base._observers || []).slice();
     var properties = (ext._properties) ? null : (base._properties || []).slice() ;
+    var outlets = (ext.outlets) ? null : (base.outlets || []).slice() ;
     
     // now copy properties, add superclass to func.
     for(var key in ext) {
@@ -320,12 +321,14 @@ Object.extend(SC.Object,
       if (bindings && (key.slice(keyLen-7,keyLen) == "Binding")) {
         bindings.push(key) ;
         
-      // Also add observers and properties for functions...
+      // Also add observers, outlets, and properties for functions...
       } else if (value && (value instanceof Function)) {
         if (observers && value.propertyPaths) {
           observers.push(key) ;
         } else if (properties && value.dependentKeys) {
           properties.push(key) ;
+        } else if (outlets && value.autoconfiguredOutlet) {
+          outlets.push(key) ;
         }
       }
 
@@ -337,6 +340,7 @@ Object.extend(SC.Object,
     if (bindings) base._bindings = bindings;
     if (observers) base._observers = observers ;
     if (properties) base._properties = properties ;
+    if (outlets && outlets.length > 0) base.outlets = outlets ;
 
     //console.log('bindings: %@ -- observers: %@ -- properties: %@'.format(base._bindings,base._observers,base._properties)) ;
     

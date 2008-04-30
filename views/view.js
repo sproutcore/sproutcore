@@ -2086,7 +2086,13 @@ SC.View.mixin({
     } ;
     func.isOutlet = true ;
     return func ;
-  }  
+  },
+  
+  automaticOutletFor: function() {
+    var ret = this.outletFor.apply(this, arguments) ;
+    ret.autoconfiguredOutlet = YES ;
+    return ret ;
+  }
 
 }) ;
 
