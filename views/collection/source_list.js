@@ -264,12 +264,17 @@ SC.SourceListView = SC.CollectionView.extend(
 
       var rowHeight = this.get('rowHeight') || 0 ;
 
+
       // layout relative to top of group.  Leave open row for title
-      var range = this.groupRangeForContentIndex(contentIndex) ;
-      contentIndex = (contentIndex - range.start) ;
-      
-      var groupValue = this.groupValueAtContentIndex(range.start) ;
-      if (groupValue != null) contentIndex++ ;
+      if(this.get("groupBy"))
+      {
+        
+        var range = this.groupRangeForContentIndex(contentIndex) ;
+        contentIndex = (contentIndex - range.start) ;
+
+        var groupValue = this.groupValueAtContentIndex(range.start) ;
+        if (groupValue != null) contentIndex++ ;
+      }
 
       var f = { 
         x: 0, 
