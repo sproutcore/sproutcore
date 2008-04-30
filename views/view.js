@@ -100,7 +100,6 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     // document somwhere.
     if (updateDom) {
       var beforeElement = (beforeView) ? beforeView.rootElement : null;
-      console.log('inserting: %@'.fmt(view.rootElement)) ;
       
       (this.containerElement || this.rootElement).insertBefore(view.rootElement,beforeElement);
 
