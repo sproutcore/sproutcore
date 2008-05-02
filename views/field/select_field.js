@@ -157,7 +157,10 @@ SC.SelectFieldView = SC.FieldView.extend(
    var valueKey = this.get('valueKey') ;
    var objects = this.get('objects') ;
    var fieldValue = this.get('value') ;
-
+   
+   // get the localization flag.
+   var shouldLocalize = this.get('localize'); 
+   
    // convert fieldValue to guid, if it is an object.
    if (!valueKey && fieldValue) fieldValue = fieldValue._guid ;
    if ((fieldValue == null) || (fieldValue == '')) fieldValue = '***' ;
@@ -169,7 +172,7 @@ SC.SelectFieldView = SC.FieldView.extend(
 
      var emptyName = this.get('emptyName') ;
      if (emptyName) {
-       if (this.get('localize')) emptyName = emptyName.loc() ;
+       if (shouldLocalize) emptyName = emptyName.loc() ;
        html.push('<option value="***">%@</option>'.fmt(emptyName)) ;
        html.push('<option disabled="disabled"></option>') ;
      }
@@ -180,6 +183,12 @@ SC.SelectFieldView = SC.FieldView.extend(
        
          // either get the name from the object or convert object to string.
          var name = (nameKey) ? ((object.get) ? object.get(nameKey) : object[nameKey]) : object.toString() ;
+
+         // localize name if specified.
+         if(shouldLocalize)
+         {
+           name = name.loc();
+         }
 
          // get the value using the valueKey or the object if no valueKey.
          // then convert to a string or use _guid if one of available.
