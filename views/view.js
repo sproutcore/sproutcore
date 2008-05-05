@@ -687,7 +687,6 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         }
         ret = this.getStyle(key) ;
       }
-      console.log('get Style: %@ -> %@'.fmt(key, ret)) ;
       return ret;
       
     } else return arguments.callee.base.call(this, key, value) ;
