@@ -1,0 +1,138 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("A SC.CollectionView with it's content set to a SC.CollectionController", {
+  
+  "Should contain the same number of visible item views": function()
+  {
+    testCollectionView.get('itemViews').length.shouldEqual(2);
+  },
+  
+  "Should update it's item views as it's controller is updated": function()
+  {
+    var valueOfFirstItemView = function() {
+      var itemView = testCollectionView.get('itemViews').first() ;
+      return (itemView) ? itemView.get('content').get('guid') : null ;
+    } ;
+    
+    valueOfFirstItemView().shouldEqual('1001') ;
+
+    SC.Store.addRecord( SC.Record.create({ guid: '0999', name: 'item zero' }) );
+    
+    valueOfFirstItemView().shouldEqual('0999') ;
+  },
+
+  "Should scroll to the selected item": function()
+  {
+    testCollectionView.get('rootElement').scrollTop.shouldEqual(0);
+    testCollectionView.scrollToContent( testCollection.get('records').last() );
+    scrollView.get('rootElement').scrollTop.shouldEqual(30);
+  },
+
+  "Should not scroll to the selected item if it's already fully visible": function()
+  {
+    scrollView.get('rootElement').scrollTop.shouldEqual(0);
+    testCollectionView.scrollToContent( testCollection.get('records')[1] );
+    scrollView.get('rootElement').scrollTop.shouldEqual(0);
+  },
+
+  setup: function()
+  {
+    // add a scroll view wrapper.
+    scrollView = SC.ScrollView.create() ;
+    scrollView.set('frame', { x: 10, y: 10, width: 100, height: 30 });
+    SC.window.appendChild(scrollView);
+    
+    // create the view...
+    testCollectionView = SC.ListView.extend({
+      contentValueKey: 'name',
+      contentBinding: 'testController.arrangedObjects',
+      selectionBinding: 'testController.selection'
+    }).create();
+    scrollView.set('content', testCollectionView) ;
+    
+    // create some item data...
+    [
+      { guid: '1001', name: 'item one' },
+      { guid: '1002', name: 'item two' },
+      { guid: '1003', name: 'item three' },
+      { guid: '1004', name: 'item four' },
+      { guid: '1005', name: 'item five' },
+      { guid: '1006', name: 'item six' }
+    ].each(function(o){ SC.Store.addRecord(SC.Record.create(o)); });
+    
+    // a collection to hold the items...
+    testCollection = SC.Record.collection();
+    testCollection.refresh();
+
+    // a controller for the collection...
+    testController = SC.CollectionController.create();
+    testController.set('content', testCollection);
+    
+  },
+  teardown: function()
+  {
+    // tell SC.Store to dump all the records... 
+    // otherwise, since SC.Store is shared across all tests (yuk!) we'll get shared fixtues
+    testCollection.get('records').each(function(r){ SC.Store.removeRecord(r); });
+  
+    // remove the view from SC.window... again, no shared fixtures...
+    testCollectionView.removeFromParent();
+    scrollView.removeFromParent() ;
+  
+    delete testCollectionView;
+    delete testCollection;
+    delete testController;
+    delete scrollView ;
+  }
+  
+});
+
+Test.context("A SC.CollectionView with it's content set to a SC.ArrayController",
+{
+  "Should contain the same number of item views as it's controller has records": function()
+  {
+    this.controller.get('length').shouldEqual(6);
+    this.view.get('itemViews').length.shouldEqual(6);
+  },
+  "Should update it's item views as it's controller is updated": function()
+  {
+    this.view.get('itemViews').length.shouldEqual(6);
+    this.controller.pushObject({ guid: '1007', name: 'item seven' });
+    this.view.get('itemViews').length.shouldEqual(7);
+    this.controller.popObject();
+    this.view.get('itemViews').length.shouldEqual(6);
+  },
+  setup: function()
+  {
+    // create the view...
+    this.view = SC.CollectionView.create();
+    SC.window.appendChild(this.view);
+    
+    // create some item data...
+    this.array = [
+      { guid: '1001', name: 'item one' },
+      { guid: '1002', name: 'item two' },
+      { guid: '1003', name: 'item three' },
+      { guid: '1004', name: 'item four' },
+      { guid: '1005', name: 'item five' },
+      { guid: '1006', name: 'item six' }
+    ];
+    
+    this.controller = SC.ArrayController.create();
+    this.controller.set('content', this.array);
+    this.view.set('content', this.controller);
+  },
+  teardown: function()
+  {
+    // remove the view from SC.window
+    this.view.removeFromParent();
+
+    delete this.view;
+    delete this.array;
+    delete this.controller;
+  }
+});
+
+</script>
+<% end %>

@@ -1,0 +1,70 @@
+<% content_for('final') do %>
+
+<script>
+
+Test.context("Timer.isPaused", {
+
+  "setting isPaused should stop firing": function() {
+    
+    var firedCount = 0 ;
+    
+    SC.runLoop.beginRunLoop() ;
+    var start = SC.runLoop.get('startTime') ;
+    var t = SC.Timer.schedule({
+      target: this,
+      action: function() { firedCount++ ; },
+      interval: 100,
+      repeats: YES
+    });
+    SC.runLoop.endRunLoop() ;
+
+    // wait for timer to fire twice, then pause it.
+    var tries1 = 10 ;
+    var f1 = function() {
+      if(firedCount<2) {
+        if (--tries1 >= 0) {
+          wait(100, f1) ;
+        } else assertEqual(NO, YES, 'Timer never fired 2 times - f1') ;
+      } else {
+        assertEqual(NO, t.get('isPaused'), 'should start with isPaused = NO');
+        t.set('isPaused', YES) ;
+        firedCount = 0 ; // Reset count here.
+        wait(300, f2) ;
+      }
+    };
+    
+    // once timer paused, make sure it did not fire again.
+    var f2 = function() {
+      assertEqual(0, firedCount, 'timer kept firing!') ;
+      assertEqual(YES, t.get('isPaused'), 'timer is not paused') ;
+      t.set('isPaused', NO) ;
+      
+      wait(300, f3) ;
+    } ;
+    
+    // once timer has verified paused, unpause and make sure it fires again.
+    var tries2 = 10 ;
+    var f3 = function() {
+      if (firedCount <= 2) {
+        if (--tries1 >= 0) {
+          wait(100, f3) ;
+        } else assertEqual(NO, YES, "Timer did not resume") ;
+        
+      // timer fired, clean up.
+      } else {
+        t.invalidate() ;
+        assertEqual(NO, t.get('isPaused'), 'timer did not unpause') ;
+      }
+    };
+    
+    wait(300, f1) ;
+    
+  }
+  
+  // using invalidate on a repeating timer is tested in schedule().
+
+});
+
+</script>
+
+<% end %>

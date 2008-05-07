@@ -1,0 +1,227 @@
+/* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/icons-1208151762.css
+	http://localhost:4020/static/sproutcore/en/_cache/icons-1208151807.css
+*/
+
+/* @group General */
+
+.sc-icon {
+	background-image: static_url('shared-icons');
+}
+
+/* @end */
+
+/* @group 48-Pixel Icons */
+
+.sc-icon-alert-48 {
+	width: 48px;
+	height: 48px;
+	background: no-repeat static_url('shared-icons') left top;
+}
+
+.sc-icon-info-48 {
+	width: 48px;
+	height: 48px;
+	background: no-repeat static_url('shared-icons') left -48px;
+}
+
+.sc-icon-error-48 {
+	width: 48px;
+	height: 48px;
+	background: no-repeat static_url('shared-icons') left -96px;
+}
+
+
+/* @end */
+
+/* @group 24-Pixel Icons */
+
+.sc-icon-tools-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -144px;
+}
+
+.sc-icon-bookmark-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -144px;
+}
+
+.sc-icon-info-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -168px;
+}
+
+.sc-icon-help-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -0px -192px;
+}
+
+.sc-icon-alert-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -192px;
+}
+
+.sc-icon-left-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -216px;
+}
+
+.sc-icon-right-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -216px;
+}
+
+.sc-icon-up-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -240px;
+}
+
+.sc-icon-down-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -240px;
+}
+
+.sc-icon-undo-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -264px;
+}
+
+.sc-icon-redo-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -264px;
+}
+
+.sc-icon-group-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -288px;
+}
+
+.sc-icon-user-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -288px;
+}
+
+.sc-icon-cancel-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -312px;
+}
+
+.sc-icon-options-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -312px;
+}
+
+.sc-icon-folder-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -336px;
+}
+
+.sc-icon-trash-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -336px;
+}
+
+.sc-icon-document-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') 0px -360px;
+}
+
+.sc-icon-favorite-24 {
+	width: 24px;
+	height: 24px;
+	background: no-repeat static_url('shared-icons') -24px -360px;
+}
+
+/* @end */
+
+/* @group 16-Pixel Icons */
+
+.sc-icon-bookmark-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -16px -384px;
+}
+
+.sc-icon-info-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -32px -384px;
+}
+
+.sc-icon-help-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -16px -400px;
+}
+
+.sc-icon-alert-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -32px -400px;
+}
+
+.sc-icon-group-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -0px -448px;
+}
+
+.sc-icon-user-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -16px -448px;
+}
+
+.sc-icon-options-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -0px -464px;
+}
+
+.sc-icon-folder-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -16px -464px;
+}
+
+.sc-icon-trash-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -32px -464px;
+}
+
+.sc-icon-document-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -0px -480px;
+}
+
+.sc-icon-favorite-16 {
+	width: 16px;
+	height: 16px;
+	background: no-repeat static_url('shared-icons') -16px -480px;
+}
+
+/* @end */
+
+
+
+

@@ -1,0 +1,145 @@
+<% content_for('final') do %>
+
+<script>
+
+Test.context("SC.Object.invokeLater", {
+
+  "should invoke method string after specified time": function() {
+    var fired = NO ;
+    var o = SC.Object.create({
+      func: function() { fired = YES; }
+    }) ;
+    o.invokeLater('func', 200) ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+    } ;
+    wait(300, f) ;
+  },
+  
+  "should invoke method instance after specified time": function() {
+    var fired = NO ;
+    var o = SC.Object.create({
+      func: function() { fired = YES; }
+    }) ;
+    o.invokeLater(o.func, 200) ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+    } ;
+    wait(300, f) ;
+  },
+  
+  "should invoke method string immediately if no time passed": function() {
+    var fired = NO ;
+    var o = SC.Object.create({
+      func: function() { fired = YES; }
+    }) ;
+    o.invokeLater('func') ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+    } ;
+    wait(300, f) ;
+  },
+  
+  "should automatically bind with arguments if passed": function() {
+    var fired = NO ;
+    var g1 = null, g2 = null ;
+    
+    var o = SC.Object.create({
+      func: function(arg1, arg2) { 
+        g1 = arg1; g2 = arg2; fired = YES; 
+      }
+    }) ;
+    o.invokeLater('func', 200, 'ARG1', 'ARG2') ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+      assertEqual('ARG1', g1, 'arg1');
+      assertEqual('ARG2', g2, 'arg2'); 
+    } ;
+    wait(300, f) ;
+  }
+
+});
+
+Test.context("Prototype.invokeLater", {
+
+  "should invoke function with target after specified time": function() {
+    var fired = NO ;
+    var target = null;
+    var o = SC.Object.create() ;
+    var func = function() { fired = YES; target = this; } ; 
+    func.invokeLater(o, 200) ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+      assertEqual(o, target, 'target') ;
+    } ;
+    wait(300, f) ;
+  },
+  
+  "should invoke object with no target after specified time": function() {
+    var fired = NO ;
+    var func = function() { fired = YES; } ; 
+    func.invokeLater(null, 200) ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+    } ;
+    wait(300, f) ;
+  },
+  
+  "should invoke function immediately if no time passed": function() {
+    var fired = NO ;
+    var o = SC.Object.create() ;
+    var func = function() { fired = YES; } ; 
+    func.invokeLater(o) ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+    } ;
+    wait(300, f) ;
+  },
+  
+  "should automatically bind with arguments if passed": function() {
+    var fired = NO ;
+    var g1 = null, g2 = null ;
+
+    var o = SC.Object.create() ;
+    var func = function(arg1, arg2) { 
+      g1 = arg1; g2 = arg2; fired = YES; 
+    } ; 
+    func.invokeLater(o, 200, 'ARG1', 'ARG2') ;
+    
+    var tries = 20;
+    var f= function() {
+      if (!fired && --tries >= 0) wait(100, f) ;
+      assertEqual(YES, fired, 'did not fire') ;
+      assertEqual('ARG1', g1, 'arg1');
+      assertEqual('ARG2', g2, 'arg2'); 
+    } ;
+    wait(300, f) ;
+  }
+
+
+});
+
+</script>
+
+<% end %>
