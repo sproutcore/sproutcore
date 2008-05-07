@@ -1610,14 +1610,11 @@ SC.CollectionView = SC.View.extend(
     // selection if a modifier key was pressed.
     } else {
        if(this.get("selectOnMouseDown")){
-         console.log("Selecting on mouse down!");
          this.selectItems(mouseDownContent, modifierKeyPressed);
-      } else {
-        // if we're not selecting on mouse down, store the content that we 
-        // originally clicked on and handle it on mouse up
-                 console.log("Saving mouse down for selecting on mouse up!");
-        this._selectOnMouseUp = mouseDownContent; 
-      }
+      } 
+      
+       
+      
     }
 
     // saved for extend by shift ops.
@@ -1643,7 +1640,7 @@ SC.CollectionView = SC.View.extend(
       
     } else {
       var content = (view) ? view.get('content') : null ;
-      if(this._selectOnMouseUp == content) { this.selectItems(content); }
+      if(this._previousMouseDownContent == content) { this.selectItems(content); }
       if (this._shouldDeselect) this.deselectItems(this._shouldDeselect);
 
       // begin editing of an item view IF all of the following is true:
@@ -1989,7 +1986,7 @@ SC.CollectionView = SC.View.extend(
       if(this.get("selectOnMouseDown") == false)
       {
        
-        dragContent = [this._selectOnMouseUp];
+        dragContent = [this._previousMouseDownContent];
       }
       else
       {
