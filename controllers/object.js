@@ -6,8 +6,15 @@
 require('controllers/controller') ;
 
 /** @class
-  An ObjectController gives you a simple way to manage one or more objects
-  as a single object.
+
+  An ObjectController gives you a simple way to manage the editing state of
+  an object.  You can use an ObjectController instance as a "proxy" for your
+  model objects.
+  
+  Any properties you get or set on the object controller, will be passed 
+  through to its content object.  This allows you to setup bindings to your
+  object controller one time for all of your views and then swap out the 
+  content as needed.
   
   @extends SC.Controller
 */
@@ -57,6 +64,18 @@ SC.ObjectController = SC.Controller.extend(
     @type Boolean
   */
   allowsMultipleContent: true,
+  
+  /**
+    Override this method to destroy the selected object. 
+    
+    The default just passes this call onto the content object if it supports
+    it, and then sets the content to null.
+  */
+  destroy: function() {
+    var content = this.get('content') ;
+    if (content && $type(content.destroy) === T_FUNCTION) content.destroy();
+    this.set('content', null) ;  
+  },
   
   // ...............................
   // INTERNAL SUPPORT

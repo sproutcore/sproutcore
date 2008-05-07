@@ -36,34 +36,53 @@ SC.Set = SC.Object.extend(SC.Array,
     Call this method to test for membership.
   */
   contains: function(obj) {
-    if (obj == null) return false ;
-    return [this._guidFor(obj)] == obj ;
+    if (obj === null) return false ;
+    return this[this._guidFor(obj)] === obj ;
   },
   
   /**
     Call this method to add an object. performs a basic add.
+    
+    If the object is already in the set it will not be added again.
+    
+    @param obj {Object} the object to add
+    @returns {Boolean} YES if the object as added.
   */
   add: function(obj) {
-    if (obj == null) return; // cannot add null to a set.
-    this[this._guidFor(obj)] = obj ;
-    this.incrementProperty('length') ;
-    this.incrementProperty('revision') ;
+    if (obj == null) return NO; // cannot add null to a set.
+    
+    var guid = this._guidFor(obj) ;
+    if (this[guid] == null) {
+      this[this._guidFor(obj)] = obj ;
+      this.incrementProperty('length') ;
+      this.incrementProperty('revision') ;
+      return YES ;
+    } else return NO ;
   },
   
   /**
-    Performs a basic remove
+    Removes the object from the set if it is found.
+    
+    If the object is not in the set, nothing will be changed.
+    
+    @param obj {Object} the object to remove
+    @returns {Boolean} YES if the object was removed.
   */  
   remove: function(obj) {
-    if (obj == null) return ;
-    delete this[this._guidFor(obj)] ; 
-    this.decrementProperty('length') ;
-    this.incrementProperty('revision') ;
+    if (obj == null) return NO ;
+    var guid = this._guidFor(obj);
+    if (this[guid] === obj) {
+      delete this[this._guidFor(obj)] ; 
+      this.decrementProperty('length') ;
+      this.incrementProperty('revision') ;
+      return YES ;
+    } else return NO;
   },
   
   // .......................................
   // PRIVATE 
   _guidFor: function(obj) {
-    return '@' + SC.getGUID(obj);
+    return '@' + SC.guidFor(obj);
   },
   
   _each: function(iterator) {

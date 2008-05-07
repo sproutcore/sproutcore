@@ -188,7 +188,6 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
-    console.log('applying finalValue: %@'.fmt(finalValue)) ;
     this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue) ;
 
     // cleanup cached values

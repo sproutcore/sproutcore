@@ -659,7 +659,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     any of these properties to edit individual CSS style properties.
   */
   unknownProperty: function(key, value) {
-    if (key.match(/^style/)) {
+    if (key && key.match && key.match(/^style/)) {
       key = key.slice(5,key.length).replace(/^./, function(x) { 
         return x.toLowerCase(); 
       });
@@ -1762,6 +1762,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     // if state changes, update and notify children.
     if (visible != this.get('isVisibleInWindow')) {
       this.set('isVisibleInWindow', visible) ;
+      this.recacheFrames() ;
       var child = this.get('firstChild') ;
       while(child) {
         child._updateIsVisibleInWindow(visible) ;

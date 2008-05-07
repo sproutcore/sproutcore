@@ -221,6 +221,11 @@ body.sc-theme {
 	background: no-repeat static_url('images/sc-theme-sprite.png') right -69px;
 }
 
+.sc-theme .sc-source-list-view .drop-target {
+  outline: 2px purple solid;
+}
+
+
 /* @end */
 
 /* @group SC.SplitView */

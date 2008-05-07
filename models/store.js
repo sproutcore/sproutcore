@@ -5,21 +5,46 @@
 
 require('foundation/object') ;
 
-// The Store is where you can find all of your records.  You should also
-// use this to define your various types of records, since this will be
-// used to automatically update from data coming from the server.
-//
-// You should create a store for each application.  This allows the records
-// for apps to be kept separate, even if they live in the same page.
-//
-SC.Store = SC.Object.create({
+/**
+  @class
+
+  The Store is where you can find all of your records.  You should also
+  use this to define your various types of records, since this will be
+  used to automatically update from data coming from the server.
+
+  You should create a store for each application.  This allows the records
+  for apps to be kept separate, even if they live in the same page.
+
+  @extends SC.Object
+  @static
+  @since SproutCore 1.0
+*/
+SC.Store = SC.Object.create(
+/** @scope SC.Store.prototype */ {
   
-  // This can be passed in from a Server to push updated data to all the 
-  // named records.  The parameter should be an array of hashes.  Each hash
-  // can contain arrays or strings. Each one should also have a recordType
-  // property, which points to the record type.  dataSource is the server.
-  // this will be automatically set on all the objects so that their future
-  // refreshes will come from the server.
+  /**
+    Pushes updated data to all the named records.  
+  
+    This method is often called from a server to update the store with the 
+    included record objects.
+  
+    You can use this method yourself to mass update the store whenever you 
+    retrieve new records from the server.  The first parameter should contain
+    an array of JSON-compatible hashes.  The hashes can have any properties 
+    you want but they should at least contain the following two keys:
+  
+    - guid: This is a unique identifier for the record. 
+    - type: The name of the record type.  I.e. "Contact" or "Photo"
+  
+    @param dataHashes {Array} array of hash records.  See discussion.
+    @param dataSource {Object} the data source.  Usually a server object.
+    @param recordType {SC.Record} optional record type, used if type is not 
+      found in the data hashes itself.
+    @param isLoaded {Boolean} YES if the data hashes represent the full set of 
+      data loaded from the server.  NO otherwise.
+
+    @returns {Array} Array of records that were actually created/updated.
+  */
   updateRecords: function(dataHashes, dataSource, recordType, isLoaded) {
     
     this.set('updateRecordsInProgress',true) ;
@@ -71,8 +96,10 @@ SC.Store = SC.Object.create({
   // Record Helpers
   //
   
-  // add a record instance to the store.  The record will now be monitored for
-  // changes.
+  /**
+    Add a record instance to the store.  The record will now be monitored for
+    changes.
+  */
   addRecord: function(rec) {
     // save record in a cache
     rec.needsAddToStore = false;
@@ -95,8 +122,10 @@ SC.Store = SC.Object.create({
     this.recordDidChange(rec) ;
   },
 
-  // remove a record instance from the store.  The record will no longer be
-  // monitored for changes and may be deleted.
+  /**
+    remove a record instance from the store.  The record will no longer be
+    monitored for changes and may be deleted.
+  */  
   removeRecord: function(rec) {
     // remove from cache
     var guid = rec._storeKey();
@@ -119,11 +148,13 @@ SC.Store = SC.Object.create({
   },
 
   /**
-  * Since records are cached by primaryKey, whenever that key changes we need to re-cache it in the proper place
-  * @param {string} oldkey Previous primary key
-  * @param {string} newkey New primary key
-  * @param {SC.Record} rec The object to relocate
-  * @return {SC.Record} The record passed in
+    Since records are cached by primaryKey, whenever that key changes we need 
+    to re-cache it in the proper place
+    
+    @param {string} oldkey Previous primary key
+    @param {string} newkey New primary key
+    @param {SC.Record} rec The object to relocate
+    @returns {SC.Record} The record passed in
   **/
   relocateRecord: function( oldkey, newkey, rec )
   {
@@ -141,8 +172,10 @@ SC.Store = SC.Object.create({
   },
 
 
-  // You can pass any number of condition hashes to this, ending with a
-  // recordType.  It will AND the results of each condition hash.
+  /**
+    You can pass any number of condition hashes to this, ending with a
+    recordType.  It will AND the results of each condition hash.
+  */  
   findRecords: function() {
     var allConditions = $A(arguments) ;
     var recordType = allConditions.pop() ;
@@ -174,8 +207,10 @@ SC.Store = SC.Object.create({
     return ret ;
   },
   
-  // finds the record with the primary key value.  If the record does not 
-  // exist, creates it.
+  /**
+    finds the record with the primary key value.  If the record does not 
+    exist, creates it.
+  */
   getRecordFor: function(pkValue,recordType,dontAutoaddRecord) {
     var ret = this._getRecordFor(pkValue,recordType) ;
     if (!ret) {
@@ -231,7 +266,9 @@ SC.Store = SC.Object.create({
   //
   _records: {}, _changedRecords: null, _collections: {},
   
-  // called whenever properties on a record change.
+  /** @private
+    called whenever properties on a record change.
+  */  
   recordDidChange: function(rec) {
     // add to changed records.  This will eventually notify collections.
     var guid = rec._storeKey() ;

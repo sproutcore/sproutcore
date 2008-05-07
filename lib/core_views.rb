@@ -49,6 +49,9 @@ view_helper :view do
   property :can_collapse
   property :collapsed, :key => 'isCollapsed'
   
+  # General delegate support
+  property(:delegate) { |x| x }
+  property :drop_target, :key => 'isDropTarget'
 
   # set panel type
   var :panel
