@@ -32,6 +32,12 @@ SC.SourceListView = SC.CollectionView.extend(
   contentValueIsEditable: NO,
   
   /**
+    Allows reordering without modifiying the selection
+  */
+  
+  selectOnMouseDown: false,
+  
+  /**
     Set to YES if you want source list items to display an icon.
     
     If this property is set, list items will leave space for a display 

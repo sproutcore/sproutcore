@@ -197,6 +197,20 @@ SC.CollectionView = SC.View.extend(
     @type {Boolean}
   */  
   actOnSelect: false,  
+  
+  
+  /**
+    Select an item immediately on mouse down
+  
+    Normally as soon as you begin a click the item will be selected.
+    
+    In some UI scenarios, you might want to prevent selection until
+    the mouse is released, so you can perform, for instance, a drag operation
+    without actually selecting the target item.  
+    
+    @type {Boolean}
+  */  
+  selectOnMouseDown: true,
 
   /**
     Property key to use to group objects.
@@ -1559,11 +1573,12 @@ SC.CollectionView = SC.View.extend(
     this.becomeFirstResponder() ;
     
     // recieved a mouseDown on the collection element, but not on one of the childItems... bail
+   
     if (!mouseDownView) {
       if (this.get('allowDeselectAll')) this.selectItems([], false);
       return true ;
     }
-
+    
     // collection some basic setup info
     var selection  = this.get('selection') || [];
     var isSelected = selection.include(mouseDownContent);
@@ -1590,10 +1605,19 @@ SC.CollectionView = SC.View.extend(
     } else if (!modifierKeyPressed && isSelected) {
       this._shouldReselect = mouseDownContent;
       
-    // Otherwise, simply select the clicked on item, adding it to the current
+    // Otherwise, if selecting on mouse down,  simply select the clicked on item, 
+    // adding it to the current
     // selection if a modifier key was pressed.
     } else {
-      this.selectItems(mouseDownContent, modifierKeyPressed);
+       if(this.get("selectOnMouseDown")){
+         console.log("Selecting on mouse down!");
+         this.selectItems(mouseDownContent, modifierKeyPressed);
+      } else {
+        // if we're not selecting on mouse down, store the content that we 
+        // originally clicked on and handle it on mouse up
+                 console.log("Saving mouse down for selecting on mouse up!");
+        this._selectOnMouseUp = mouseDownContent; 
+      }
     }
 
     // saved for extend by shift ops.
@@ -1618,6 +1642,8 @@ SC.CollectionView = SC.View.extend(
       } else this.selectItems([content],true) ;
       
     } else {
+      var content = (view) ? view.get('content') : null ;
+      if(this._selectOnMouseUp == content) { this.selectItems(content); }
       if (this._shouldDeselect) this.deselectItems(this._shouldDeselect);
 
       // begin editing of an item view IF all of the following is true:
@@ -1959,11 +1985,21 @@ SC.CollectionView = SC.View.extend(
       // items appearing in this collection, in the order of the 
       // collection.
       var content = this.get('content') || [] ;
-      var dragContent = this.get('selection').sort(function(a,b) {
-        a = content.indexOf(a) ; b = content.indexOf(b) ;
-        return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-      });
-
+      var dragContent;
+      if(this.get("selectOnMouseDown") == false)
+      {
+       
+        dragContent = [this._selectOnMouseUp];
+      }
+      else
+      {
+        dragContent = this.get('selection').sort(function(a,b)
+        {
+          a = content.indexOf(a) ;
+          b = content.indexOf(b) ;
+          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
+        });
+      }
       // Build the drag view to use for the ghost drag.  This 
       // should essentially contain any visible drag items.
       var view = this.ghostViewFor(dragContent) ;
