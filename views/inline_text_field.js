@@ -104,11 +104,11 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
       this.endPropertyChanges();  return NO ;
     }
 
-    this._frame = options.frame ;
+    this._optframe = options.frame ;
     this._exampleElement = options.exampleElement ;
     this._delegate = options.delegate ;
 
-    if (!this._frame || !this._delegate) {
+    if (!this._optframe || !this._delegate) {
       throw "At least frame and delegate options are required for inline editor";
     }
     
@@ -191,7 +191,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue) ;
 
     // cleanup cached values
-    this._originalValue = this._delegate = this._exampleElement = this._frame = null ;
+    this._originalValue = this._delegate = this._exampleElement = this._optframe = null ;
     this.set('isEditing', NO) ;
 
     // resign first responder if not done already.  This may call us in a 
@@ -223,7 +223,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
   */
   updateViewStyle: function() {
     // collect font and frame from target.
-    var f= this._frame ;
+    var f= this._optframe ;
     var el = this._exampleElement ;
     
     var styles = {
