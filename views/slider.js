@@ -95,6 +95,8 @@ SC.SliderView = SC.View.extend(SC.Control,
   }.observes('value', 'minimum', 'maximum'),
   
   mouseDown: function(evt) {
+    
+    this.recacheFrames() ;
      
     if (!this.get('isEnabled')) return true ; // nothing to do
     

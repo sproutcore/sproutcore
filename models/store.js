@@ -223,6 +223,22 @@ SC.Store = SC.Object.create(
     return ret ;
   },
   
+  /**
+    Returns an array of all records in the store.  Mostly used for storing.
+  */
+  records: function() {
+    var ret = [] ;
+    if (this._quickCache) {
+      for(var key in this._quickCache) {
+        var recs = this._quickCache[key] ;
+        for(var recKey in recs) {
+          ret.push(recs[recKey]) ;
+        }
+      }
+    }
+    return ret ;
+  }.property(),
+  
   // ....................................
   // Collection Helpers
   //
