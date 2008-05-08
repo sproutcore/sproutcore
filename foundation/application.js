@@ -196,8 +196,6 @@ SC.Application = SC.Responder.extend(
     // keystring is a method name representing the keys pressed (i.e 'alt_shift_escape')
     var keystring = SC.Responder.inputManager.codesForEvent(evt).first();
     
-    //console.log( '[SC.Application#_attemptKeyEquivalent] keystring: %s, evt: %o', keystring, evt );
-
     // inputManager couldn't build a keystring for this key event... nothing to do...
     if (!keystring) return false;
     
@@ -208,6 +206,7 @@ SC.Application = SC.Responder.extend(
     if (mainPane && (mainPane != keyPane) && mainPane.performKeyEquivalent(keystring, evt)) return true;
     return this.performKeyEquivalent(keystring, evt);
   },
+  
   _attemptKeyInterfaceControl: function( evt )
   {
     // keystring is a method name representing the keys pressed (i.e 'alt_shift_escape')

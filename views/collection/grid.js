@@ -44,7 +44,6 @@ SC.GridView = SC.CollectionView.extend(
   // computed function for keyboard handling.
   itemsPerRow: function() {
     var ret = this._computeItemsPerRow() ;
-    console.log('ret = %@'.fmt(ret)) ;
     return ret ;
   }.property(),
   
@@ -167,49 +166,86 @@ SC.GridView = SC.CollectionView.extend(
     emptyElement: '<div class="grid-insertion-point"><span class="anchor"></span></div>'
   }),
   
-  showInsertionPointBefore: function(itemView) {
-    
+  showInsertionPoint: function(itemView, dropOperation) {
     if (!itemView) return ;
-  
-    if (!this._insertionPointView) {
-      this._insertionPointView = this.insertionPointClass.create() ;
-    } ;
+
+    // if drop on, then just add a class...
+    if (dropOperation === SC.DROP_ON) {
+      if (itemView !== this._dropOnInsertionPoint) {
+        this.hideInsertionPoint() ;
+        itemView.addClassName('drop-target') ;
+        this._dropOnInsertionPoint = itemView ;
+      }
+      
+    } else {
+      
+      if (this._dropOnInsertionPoint) {
+        this._dropOnInsertionPoint.removeClassName('drop-target') ;
+        this._dropOnInsertionPoint = null ;
+      }
     
-    var insertionPoint = this._insertionPointView ;
-    var itemViewFrame = itemView.get('frame') ;
-    f = { height: itemViewFrame.height - 6, 
-          x: itemViewFrame.x, 
-          y: itemViewFrame.y + 6, 
-          width: 0 
-        };
-        
-    if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
-      insertionPoint.set('frame', f) ;
+      if (!this._insertionPointView) {
+        this._insertionPointView = this.insertionPointClass.create() ;
+      } ;
+    
+      var insertionPoint = this._insertionPointView ;
+      var itemViewFrame = itemView.get('frame') ;
+      f = { height: itemViewFrame.height - 6, 
+            x: itemViewFrame.x, 
+            y: itemViewFrame.y + 6, 
+            width: 0 
+          };
+
+      if (!SC.rectsEqual(insertionPoint.get('frame'), f)) {
+        insertionPoint.set('frame', f) ;
+      }
+
+      if (insertionPoint.parentNode != itemView.parentNode) {
+        itemView.parentNode.appendChild(insertionPoint) ;
+      }
     }
-  
-    if (insertionPoint.parentNode != itemView.parentNode) {
-      itemView.parentNode.appendChild(insertionPoint) ;
-    }
+    
   },
-  
+    
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
     if (insertionPoint) insertionPoint.removeFromParent() ;
+
+    if (this._dropOnInsertionPoint) {
+      this._dropOnInsertionPoint.removeClassName('drop-target') ;
+      this._dropOnInsertionPoint = null ;
+    }
   },
   
   // // We can do this much faster programatically using the rowHeight
-  insertionIndexForLocation: function(loc) {  
+  insertionIndexForLocation: function(loc, dropOperation) {  
     var f = this.get('frame') ;
     var sf = this.get('scrollFrame') ;
     
     var itemsPerRow = this._computeItemsPerRow(); 
     var columnWidth = Math.floor(f.width / itemsPerRow) ;
     var row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight')) ;
-    var col = Math.floor(((loc.x - f.x - sf.x) / columnWidth) + 0.5) ;
+
+    var retOp = SC.DROP_BEFORE ;
     
+    var offset = (loc.x - f.x - sf.x) ;
+    var col = Math.floor(offset / columnWidth) ;
+    var percentage = (offset / columnWidth) - col ;
+    
+    // if the dropOperation is SC.DROP_ON and we are in the center 60%
+    // then return the current item.
+    if (dropOperation === SC.DROP_ON) {
+      if (percentage > 0.80) col++ ;
+      if ((percentage >= 0.20) && (percentage <= 0.80)) {
+        retOp = SC.DROP_ON;
+      }
+    } else {
+      if (percentage > 0.45) col++ ;
+    }
+    
+    // convert to index
     var ret= (row*itemsPerRow) + col ;
-    //console.log("insertionIndexForLocation = %@".fmt(ret)) ;
-    return ret ;
+    return [ret, retOp] ;
   }
   
 }) ;

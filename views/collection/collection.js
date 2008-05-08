@@ -1476,7 +1476,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var base = (extendSelection) ? this.get('selection') : [] ;
     var sel = [items].concat(base).flatten().uniq() ;
     
-    // if you are not extending the selection, then clear the selection anchor.
+    // if you are not extending the selection, then clear the selection 
+    // anchor.
     this._selectionAnchor = null ;
     this.set('selection',sel) ;  
   },
@@ -1492,6 +1493,62 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     this.set('selection',sel) ;
   },
   
+  /**
+    Deletes the selected content if canDeleteContent is YES.  
+    
+    This will invoke delegate methods to provide fine-grained control.
+    
+    @returns {Boolean} YES if deletion is possible, even if none actually occurred.
+  */
+  deleteSelection: function() {
+    
+    // perform some basic checks...
+    if (!this.get('canDeleteContent')) return NO;  
+    var sel = Array.from(this.get('selection'));
+    if (!sel || sel.get('length') === 0) return NO ;
+
+    // let the delegate decide what to actually delete.  If this returns an
+    // empty array or null, just do nothing.
+    sel = this.invokeDelegateMethod(this.delegate, 'collectionViewShouldDeleteContent', this, sel) ;
+    sel = Array.from(sel) ; // ensure this is an array
+    if (!sel || sel.get('length') === 0) return YES ;
+
+    // now have the delegate (or us) perform the deletion.  The collection
+    // view implements a default version of this method.
+    this.invokeDelegateMethod(this.delegate, 'collectionViewDeleteContent', this, sel) ;
+    return YES ;
+  },
+
+  /**
+    Default implementation of the delegate method.
+    
+    This method will delete the passed items from the content array using 
+    standard array methods.  This is often suitable if you are using an
+    array controller or a real array for your content.
+    
+    @param view {SC.CollectionView} this
+    @param sel {Array} the items to delete
+    @returns {Boolean} YES if the deletion was a success.
+  */
+  collectionViewDeleteContent: function(view, sel) {
+    
+    // get the content.  Bail if this cannot be used as an array.
+    var content = this.get('content') ; 
+    if (!content || !content.removeObject) return NO ;
+    
+    // suspend property notifications and remove the objects...
+    if (content.beginPropertyChanges) content.beginPropertyChanges();
+    var idx = sel.get('length') ;
+    while(--idx >= 0) {
+      var item = sel.objectAt(idx) ;
+      content.removeObject(item) ;      
+    }
+    // begin notifying again...
+    if (content.endPropertyChanges) content.endPropertyChanges() ;
+    
+    return YES ; // done!
+  },
+  
   // ......................................
   // EVENT HANDLING
   //
@@ -1502,6 +1559,29 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   keyUp: function() { return true; },
 
+  /** @private
+    Handle select all keyboard event.
+  */
+  selectAll: function(evt) {
+    var content = (this.get('content') || []).slice() ;
+    this.selectItems(content, NO) ;
+    return YES ;
+  },
+  
+  /** @private
+    Handle delete keyboard event.
+  */
+  deleteBackward: function(evt) {
+    return this.deleteSelection() ;
+  },
+  
+  /** @private
+    Handle delete keyboard event.
+  */
+  deleteForward: function(evt) {
+    return this.deleteSelection() ;
+  },
+  
   /** @private
     Selects the same item on the next row or moves down one if 
     itemsPerRow = 1
@@ -2108,7 +2188,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
         var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
-        console.log('showInsertionPoint(%@, %@)'.fmt(itemView, dropOp)) ;
         this.showInsertionPoint(itemView, dropOp) ;
       }
 
@@ -2499,7 +2578,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (content) content.addObserver('[]', func) ;
     this._content = content; //cache
     this._contentPropertyRevision = null ;
-    this._contentPropertyObserver(this, '[]', content, content.propertyRevision) ; 
+    
+    var rev = (content) ? content.propertyRevision : -1 ;
+    this._contentPropertyObserver(this, '[]', content, rev) ; 
   }.observes('content'),
   
   /** @private

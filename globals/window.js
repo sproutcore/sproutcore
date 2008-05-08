@@ -7,6 +7,8 @@ require('Core') ;
 require('foundation/responder');
 require('panes/pane');
 
+SC.CAPTURE_BACKSPACE_KEY = NO ;
+
 // The window global object is automatically setup for each window that you 
 // load.  Window listens for mouse and keyboard events and routes them to the
 // first responder.  Using the firstResponder method you can control who gets
@@ -112,19 +114,36 @@ SC.window = SC.PaneView.extend({
   // we can map to some non-printable set of keycodes.)
   _onkeydown: function(evt)
   {
+    // Firefox does NOT handle delete here...
+    if (SC.Platform.Firefox > 0 && (evt.which === 8)) {
+      return true ;
+    }
+    
     // modifier keys are handled separately by the 'flagsChanged' event
     this._handleModifierChanges(evt);
-    if (this._isModifierKey(evt)) return;
-    if (!this._isFunctionOrNonPrintableKey(evt)) return true;  // let normal browser processing do its thing.
-    return this._sendEvent('keyDown', evt);
+    if (this._isModifierKey(evt)) return false;
+    
+    // let normal browser processing do its thing.
+    if (!this._isFunctionOrNonPrintableKey(evt)) return true;  
+    var ret = this._sendEvent('keyDown', evt);
+    return ret ;
   },
 
   // this one gets used for all the other keys not handled by key down.
+  // FireFox also needs to handle delete here...
   _onkeypress: function(evt)
   {
-    if (this._isFunctionOrNonPrintableKey(evt)) return; // handled in _onkeydown
-    if (evt.charCode != undefined && evt.charCode == 0) return;
-    return this._sendEvent('keyDown', evt);
+
+    // handled in _onkeydown
+    if (SC.Platform.Firefox > 0 && (evt.which === 8)) {
+      var ret = this._sendEvent('keyDown', evt);
+
+    } else {
+      if (this._isFunctionOrNonPrintableKey(evt)) return true; 
+      if (evt.charCode != undefined && evt.charCode == 0) return true;
+      var ret = this._sendEvent('keyDown', evt);
+    }
+    return ret ;
   },
   
   _onkeyup: function(evt)
@@ -342,10 +361,16 @@ SC.window = SC.PaneView.extend({
     var win = this ;
     win._EVTS.each(function(e) {
       var func = win['_on' + e] ;
-      var target = (SC.isIE() && (e != 'resize')) ? document : window ;
+      var target = (e != 'resize') ? document : window ;
       if (func) {
         var f = func.bindAsEventListener(win) ;
-        Event.observe(target, e, f) ;
+
+        if (e === 'keypress' && SC.CAPTURE_BACKSPACE_KEY && SC.Platform.Firefox > 0) {
+          document.onkeypress = f ;
+        } else {
+          Event.observe(target, e, f) ;
+        }
+
         win._listenerCache.push([target, e, f]) ;
       }
     });
@@ -353,9 +378,9 @@ SC.window = SC.PaneView.extend({
     this.get('size') ; // fetch the size from the window and save it.
     this.set('isVisibleInWindow', true) ;
     this._onfocus() ;
+    
   }
 }).viewFor($tag('body')) ;
-
 
 // events:
 // window.onfocus --

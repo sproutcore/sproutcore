@@ -76,11 +76,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     var func = this._boundContentPropertyObserver ;
 
     // remove old observer, add new observer, and trigger content property change
-    if (this._content) this._content.removeObserver('[]', func) ;
-    if (content) content.addObserver('[]', func) ;
+    if (this._content && this._content.removeObserver) this._content.removeObserver('[]', func) ;
+    if (content && content.addObserver) content.addObserver('[]', func) ;
     this._content = content; //cache
     this._contentPropertyRevision = null ;
-    this._contentPropertyObserver(this, '[]', content, content.propertyRevision) ; 
+    
+    var rev = (content) ? content.propertyRevision : -1 ;
+    this._contentPropertyObserver(this, '[]', content, rev) ; 
   }.observes('content'),
 
   _contentPropertyObserver: function(target, key, value, rev) {  

@@ -297,8 +297,6 @@ SC.Drag = SC.Object.extend(
         op = op & target.dragEntered(this, evt) ;
       } else op = SC.DRAG_NONE ;
 
-      console.log(SC.Drag.inspectOperation(op)) ;
-      
       // if DRAG_NONE, then look for the next parent that is a drop zone.
       if (op == SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
     }
