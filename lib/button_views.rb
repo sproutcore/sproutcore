@@ -262,6 +262,7 @@ view_helper :radio_group_view do
   # get the layout mode.
   var :layout, :vertical
   css_class_names << 'sc-radio-group-view'
+  css_class_names << 'radio'
   css_class_names << @layout if @layout
   
   var :tag, 'span'
