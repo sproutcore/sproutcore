@@ -124,23 +124,57 @@ String.prototype.fmt = String.prototype.format ;
 // Add strings for various languages to this collection.  String.loc()
 // method will try to localize the string passed using the current language.
 // if the language is not available, it will use English.
-Object.extend(String,{
+Object.extend(String,
+/** @scope String @static */ {
+
+  /**
+    The current browser language as a two letter code.
+  */
+  browserLanguage: ((navigator.language || navigator.browserLanguage).split('-', 1)[0]),
   
-  // Default language is English. Currently French, German, and Japanese are
-  // detected. All other languages default to English.
+  /**
+    If YES, localization will favor the detected language instead of the
+    preferred one.
+  */
+  useAutodetectedLanguage: NO,
+  
+  /**
+    This property is set by the build tools to the current build language.
+  */
+  preferredLanguage: null,
+  
+  /**
+    Returns the hash key to use for loc strings.  The default implementation
+    will autodetect the browser language and look for a loc string to 
+    match.  If it can't find one then it will introspect to find loc strings
+    that are defined and use those instead.
+  */
   currentLanguage: function () {
-    var browserLanguage = (navigator.language || navigator.browserLanguage).split('-', 1);
-    switch(browserLanguage[0])
+    
+    var ret = (this.useAutodetectedLanguage) ? (this.browserLanguage || this.preferredLanguage || 'en') : (this.preferredLanguage || this.browserLanguage || 'en') ;
+
+    // then try a couple of normalized forms...
+    if (!this[ret]) switch(ret)
     {
       case 'fr':
-        return 'French';
+        ret = 'French'; 
+        break ;
       case 'de':
-        return 'German';
+        ret = 'German'; 
+        break ;
       case 'ja':
-        return 'Japanese';
+      case 'jp':
+        ret = 'Japanese'; 
+        break ;
+      case 'en':
+        ret = 'English' ;
+        break ;
+      
       default:
-        return 'English'; 
+        break ;
     }
+    
+    return ret ;
   }
 
 });
