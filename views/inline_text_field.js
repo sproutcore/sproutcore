@@ -125,7 +125,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     this.set('isEditing', YES) ;
     
     // add to window.
-    SC.window.appendChild(this) ;
+    SC.app.get("keyPane").appendChild(this) ;
     
     // get style for view.
     this.updateViewStyle() ;
@@ -136,10 +136,9 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
     // allow notifications to go
     this.endPropertyChanges() ;
-    
+
     // and become first responder
     this.field.becomeFirstResponder() ;
-
     this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this) ;
   },
   
