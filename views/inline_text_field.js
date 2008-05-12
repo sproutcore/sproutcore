@@ -125,7 +125,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     this.set('isEditing', YES) ;
     
     // add to window.
-    SC.window.appendChild(this) ;
+    SC.app.get("keyPane").appendChild(this) ;
     
     // get style for view.
     this.updateViewStyle() ;
