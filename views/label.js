@@ -226,10 +226,11 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
   _valueDidChange: function() {
 
     var value = this.get('value') ;
-    if (value == this._value) return; // nothing to do
+    if (value === this._value) return; // nothing to do
+    this._value = value ;
 
     // get display value
-    var value = this.get('displayValue') ;
+    value = this.get('displayValue') ;
     
     // Escape HTML
     if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
