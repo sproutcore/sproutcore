@@ -12,8 +12,19 @@
 
 Test.context("CASE 1: Auto-layout view with no padding & no border", {
   
+  // IMPORTANT:  This test validates that innerFrame works even on elements in
+  // IE when hasLayout = false.  Make sure you do not edit the CSS or other
+  // properties for this test in such a way that it would give the test 
+  // element hasLayout.  
   "frame should == innerFrame": function() {
-    SC.rectsEqual(this.v.get('frame'), this.v.get('innerFrame')).shouldEqual(true) ;
+
+    // verify hasLayout is false in IE.
+    if (SC.Platform.IE) {
+      var hasLayout = v.rootElement.currentStyle.hasLayout ;
+      assertEqual(hasLayout, false, 'element.hasLayout MUST be false in IE');
+    }
+    
+    SC.rectsEqual(v.get('frame'), v.get('innerFrame')).shouldEqual(true) ;
   },
   
   "frame & innerFrame should change when CSS changed and viewFrameDidChange() is called": function() {
@@ -39,42 +50,43 @@ CASE2_OFFSET = 2;
 Test.context("CASE 2: Auto-layout view with padding & border", {
   
   "innerFrame should == frame less border": function() {
-    var f = this.v.get('frame') ;
+    var f = v.get('frame') ;
     f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
     f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
     //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
     
-    SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+    SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
   },
   
   "frame & innerFrame should change when CSS changed and viewFrameDidChange is called.; innerFrame should maintain proportion": function() {
-    var origFrame = this.v.get('frame') ;
-    var origInnerFrame = this.v.get('innerFrame') ;
+    var origFrame = v.get('frame') ;
+    var origInnerFrame = v.get('innerFrame') ;
 
     // verify that frames change
-    this.v.addClassName('half') ;
-    this.v.viewFrameDidChange() ;
+    v.addClassName('half') ;
+    v.viewFrameDidChange() ;
     
-    SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(false) ;    
-    SC.rectsEqual(this.v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;    
+    SC.rectsEqual(v.get('frame'), origFrame).shouldEqual(false) ;    
+    SC.rectsEqual(v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;    
 
     // verify that innerFrame changes correctly.
     var f = this.v.get('frame') ;
     f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
     f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
-    SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+    SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
     
-    this.v.removeClassName('half') ; //reset 
+    v.removeClassName('half') ;
+    
   },
   
   "changing border should change innerFrame": function() {
-    this.v.setStyle({ border: '5px red solid' }) ;
-    this.v.viewFrameDidChange() ;
-    var f = this.v.get('frame') ;
+    v.setStyle({ border: '5px red solid' }) ;
+    v.viewFrameDidChange() ;
+    var f = v.get('frame') ;
     f.x += 5; f.y += 5;
     f.width -= 10; f.height -= 10 ;
     
-    var got = this.v.get('innerFrame') ;
+    var got = v.get('innerFrame') ;
     console.log('expected: %@ got: %@'.fmt($H(f).inspect(), $H(got).inspect()));
     SC.rectsEqual(f, got).shouldEqual(true) ;
   },

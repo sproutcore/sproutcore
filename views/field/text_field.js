@@ -147,7 +147,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   
   /** @private */
   setFieldValue: function(value) {
-    if (this._value == value || value == undefined) return ;
+    if (this._value == value) return ;
     this._value = value ;
     this._updateFieldHint() ;
   },

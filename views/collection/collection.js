@@ -218,6 +218,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @type {Boolean}
   */  
   actOnSelect: false,  
+  
+  
+  /**
+    Select an item immediately on mouse down
+  
+    Normally as soon as you begin a click the item will be selected.
+    
+    In some UI scenarios, you might want to prevent selection until
+    the mouse is released, so you can perform, for instance, a drag operation
+    without actually selecting the target item.  
+    
+    @type {Boolean}
+  */  
+  selectOnMouseDown: true,
 
   /**
     Property key to use to group objects.
@@ -731,8 +745,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         didChange = true ;
       }
     }
-    
+
+    // Recache frames just in case this changed the scroll height.
+    this.recacheFrames() ;
+
+    // Set this to true once children have been rendered.  Whenever the 
+    // content changes, we don't want resize or clipping frame changes to 
+    // cause a refresh until the content has been rendered for the first time.
+    this._hasChildren = range.length>0 ;
+    this.set('isDirty',false); 
+
     // Clean out some cached items and notify their changes.
+    // NOTE: This must be called after _hasChildren has been set or 
+    // updateSelectionStates() may not run.
     if (didChange) {
       this._flushZombieGroupViews() ;
       this.updateSelectionStates() ;
@@ -744,16 +769,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       this.notifyPropertyChange('groupViews') ;
     }
 
-    // Recache frames just in case this changed the scroll height.
-    this.recacheFrames() ;
-    
-    
-    // Set this to true once children have been rendered.  Whenever the 
-    // content changes, we don't want resize or clipping frame changes to 
-    // cause a refresh until the content has been rendered for the first time.
-    this._hasChildren = range.length>0 ;
-    
-    this.set('isDirty',false); 
     this.endPropertyChanges() ;
     if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end(bkey);    
   },
@@ -802,7 +817,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     properties changed.  You should not need to call or override it often.
   */
   updateSelectionStates: function() {
-    if (!this._itemViews) return ;
+    if (!this._hasChildren) return ;
     var selection = this.get('selection') || [];
 
     // First, for efficiency, turn the selection into a hash by GUID.  This 
@@ -1687,7 +1702,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       if (this.get('allowDeselectAll')) this.selectItems([], false);
       return true ;
     }
-
+    
     // collection some basic setup info
     var selection  = this.get('selection') || [];
     var isSelected = selection.include(mouseDownContent);
@@ -1714,10 +1729,16 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     } else if (!modifierKeyPressed && isSelected) {
       this._shouldReselect = mouseDownContent;
       
-    // Otherwise, simply select the clicked on item, adding it to the current
+    // Otherwise, if selecting on mouse down,  simply select the clicked on item, 
+    // adding it to the current
     // selection if a modifier key was pressed.
     } else {
-      this.selectItems(mouseDownContent, modifierKeyPressed);
+       if(this.get("selectOnMouseDown")){
+         this.selectItems(mouseDownContent, modifierKeyPressed);
+      } 
+      
+       
+      
     }
 
     // saved for extend by shift ops.
@@ -1742,6 +1763,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       } else this.selectItems([content],true) ;
       
     } else {
+      var content = (view) ? view.get('content') : null ;
+      if(this._previousMouseDownContent == content) { this.selectItems(content); }
       if (this._shouldDeselect) this.deselectItems(this._shouldDeselect);
 
       // begin editing of an item view IF all of the following is true:
@@ -1965,10 +1988,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       //
       // Set this to the dragContent property.
       var content = this.get('content') || [] ;
-      var dragContent = this.get('selection').sort(function(a,b) {
-        a = content.indexOf(a) ; b = content.indexOf(b) ;
-        return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-      });
+      var dragContent;
+      if (this.get("selectOnMouseDown") == false) {
+        dragContent = [this._previousMouseDownContent];
+      } else {
+        dragContent = this.get('selection').sort(function(a,b) {
+          a = content.indexOf(a) ;
+          b = content.indexOf(b) ;
+          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
+        });
+      }
+      
       this.set('dragContent', dragContent) ;
 
       // Get the set of data types supported by the delegate.  If this returns

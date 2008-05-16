@@ -513,7 +513,7 @@ Object.extend(Object.extend(Test.Unit.Testcase.prototype, Test.Unit.Assertions.p
       test = test.gsub(/(\.should[^\(]+\()/,'#{0}this,');
       test = test.gsub(/(\.should[^\(]+)\(this,\)/,'#{1}(this)');
       this.test = function() {
-        eval('with(this){'+test+'}');
+        eval("with(this){\n"+test+"\n}");
       } ;
     } else {
       this.test = test || function() {};

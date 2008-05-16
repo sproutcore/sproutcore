@@ -151,9 +151,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     // Do this BEFORE we set the value so that the valueObserver will not
     // overreact.
     //
-    if (!partialChange && $ok(ret)) this._setFieldValue(value) ;
-
     var value = ($ok(ret)) ? this._getFieldValue() : ret ;
+    if (!partialChange && $ok(ret)) this._setFieldValue(value) ;
     if (value != this.get('value')) this.set('value',value) ;
     return ret ;
   },
