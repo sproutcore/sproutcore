@@ -187,7 +187,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
-    console.log('applying finalValue: %@'.fmt(finalValue)) ;
+    console.log('applying finalValue: %@.'.fmt(finalValue)) ;
     this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue) ;
 
     // cleanup cached values
@@ -328,8 +328,23 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
         this.owner.commitEditing() ;
         return YES ;
       }
+    },
+    
+    insertTab: function(evt) { 
+        var next = this.get("owner")._delegate.get("nextKeyView");
+        this.owner.commitEditing() ;
+        if(next) next.beginEditing();
+        return YES ;
+    },
+    
+    insertBacktab: function(evt) { 
+        var prev = this.get("owner")._delegate.get("previousKeyView");
+        this.owner.commitEditing() ;
+        if(prev) prev.beginEditing();
+        return YES ;
     }
-
+    
+    
   }).outletFor('.inner-field?'),
   
   sizer: SC.View.outletFor('.sizer?')
