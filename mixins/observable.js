@@ -768,13 +768,8 @@ SC.NotificationQueue = {
     var now = start ;
     var n = null ;
     while(((now - start) < this.maxFlush) && (n = this.queue.pop())) { 
-      try {
-        var t = n[0] || n[1] ;
-        n[1].apply(t,n[2]) ;
-      }
-      catch(e) {
-        console.log("Exception while notify("+n[2]+"): " + e) ;
-      } // catch  
+      var t = n[0] || n[1] ;
+      n[1].apply(t,n[2]) ;
       now = Date.now() ;
     }
     this._flushing = false ;

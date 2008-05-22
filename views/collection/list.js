@@ -49,16 +49,12 @@ SC.ListView = SC.CollectionView.extend(
     var min = Math.max(0,Math.floor(SC.minY(frame) / rowHeight)-1) ;
     var max = Math.ceil(SC.maxY(frame) / rowHeight) ;
     var ret = { start: min, length: max - min } ; 
-//    console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
-    //if (frame.height < 100) debugger ;
     return ret ;
   },
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
-    if (!itemView) debugger ;
-    SC.Benchmark.start('SC.ListView.layoutItemViewsFor') ;
-    
+
     var rowHeight = this.get('rowHeight') || 0 ;
     var parentView = itemView.get('parentView') ;
     var f = { 
@@ -72,7 +68,6 @@ SC.ListView = SC.CollectionView.extend(
       itemView.set('frame', f) ;      
       itemView.setStyle({ zIndex: contentIndex.toString() }) ;
     }
-    SC.Benchmark.end('SC.ListView.layoutItemViewsFor') ;
   },
   
   computeFrame: function() {
@@ -85,41 +80,82 @@ SC.ListView = SC.CollectionView.extend(
 
     f.x = f.y = 0;
     f.height = Math.max(f.height, rows * rowHeight) ;
-//    console.log('computeFrame(%@)'.fmt($H(f).inspect())) ;
     return f ;
   },
   
   insertionPointClass: SC.View.extend({
     emptyElement: '<div class="list-insertion-point"><span class="anchor"></span></div>'
   }),
-  
-  showInsertionPointBefore: function(itemView) {
+
+  showInsertionPoint: function(itemView, dropOperation) {
     if (!itemView) return ;
 
-    if (!this._insertionPointView) {
-      this._insertionPointView = this.insertionPointClass.create() ;
-    } ;
+    // if drop on, then just add a class...
+    if (dropOperation === SC.DROP_ON) {
+      if (itemView !== this._dropOnInsertionPoint) {
+        this.hideInsertionPoint() ;
+        itemView.addClassName('drop-target') ;
+        this._dropOnInsertionPoint = itemView ;
+      }
+      
+    } else {
+      
+      if (this._dropOnInsertionPoint) {
+        this._dropOnInsertionPoint.removeClassName('drop-target') ;
+        this._dropOnInsertionPoint = null ;
+      }
     
-    var insertionPoint = this._insertionPointView ;
-    f = { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
-    insertionPoint.set('frame', f) ;
+      if (!this._insertionPointView) {
+        this._insertionPointView = this.insertionPointClass.create() ;
+      } ;
+    
+      var insertionPoint = this._insertionPointView ;
+      f = { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
+      insertionPoint.set('frame', f) ;
 
-    if (insertionPoint.parentNode != itemView.parentNode) {
-      itemView.parentNode.appendChild(insertionPoint) ;
+      if (insertionPoint.parentNode != itemView.parentNode) {
+        itemView.parentNode.appendChild(insertionPoint) ;
+      }
     }
+    
   },
   
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
     if (insertionPoint) insertionPoint.removeFromParent() ;
+
+    if (this._dropOnInsertionPoint) {
+      this._dropOnInsertionPoint.removeClassName('drop-target') ;
+      this._dropOnInsertionPoint = null ;
+    }
   },
-  
+
   // We can do this much faster programatically using the rowHeight
-  insertionIndexForLocation: function(loc) {  
+  insertionIndexForLocation: function(loc, dropOperation) {  
     var f = this.get('innerFrame') ;
     var sf = this.get('scrollFrame') ;
-    var ret = Math.floor(((loc.y - f.y - sf.y) / this.get('rowHeight')) + 0.4) ;
-    return ret ;
+    var rowHeight = this.get('rowHeight') || 0 ;
+
+    // find the row and offset to work with
+    var offset = loc.y - f.y - sf.y ;
+    var retOp = SC.DROP_BEFORE ;
+    var ret = Math.floor(offset / this.get('rowHeight')) ;
+     
+    // find the percent through the row...
+    var percentage = (offset / rowHeight) - ret ;
+    
+    // if the dropOperation is SC.DROP_ON and we are in the center 60%
+    // then return the current item.
+    if (dropOperation === SC.DROP_ON) {
+      if (percentage > 0.80) ret++ ;
+      if ((percentage >= 0.20) && (percentage <= 0.80)) {
+        retOp = SC.DROP_ON;
+      }
+    } else {
+      if (percentage > 0.45) ret++ ;
+    }
+    
+    return [ret, retOp] ;
   }
   
 }) ;

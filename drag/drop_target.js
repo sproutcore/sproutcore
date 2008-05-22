@@ -25,31 +25,37 @@ SC.DropTarget = {
   */  
   isDropTarget: true,
   
-  /** Called when the drag enters the droppable area.
+  /** 
+    Called when the drag enters the droppable area.
   
-    Override this method to return an OR'd mask of the allowed drag operations.  
-    If the user drags over a droppable area within another droppable area, 
-    the drag will latch onto the deepest view that returns one or more available 
-    operations.
+    Override this method to return an OR'd mask of the allowed drag 
+    operations.  If the user drags over a droppable area within another 
+    droppable area, the drag will latch onto the deepest view that returns one 
+    or more available operations.
   
     You can also use this method to perform any one-time changes to your view
-    when a drop enters the area.  If you return anything other than DRAG_NONE on 
-    this method, the dragUpdated() method will also be called immediately.
+    when a drop enters the area.  If you return anything other than DRAG_NONE 
+    on this method, the dragUpdated() method will also be called immediately.
   
-    Note that dragEntered may be called frequently during a drag, not just when the 
-    drag first enters your view.  In particular, the Drag object may use this method
-    to determine which nested drop target should receive a drop. 
+    Note that dragEntered may be called frequently during a drag, not just 
+    when the drag first enters your view.  In particular, the Drag object may 
+    use this method to determine which nested drop target should receive a 
+    drop.  You should implement this method to determine as quickly as
+    possible all of the possible operations that might be allowed by this 
+    drop target.  You can use dragUpdated to determine the specific operation
+    allowed by the user's current mouse location.
     
-    You should implement your dragEntered method to always return the correct drag
-    operation, but only to perform any one-time setup the first time dragEntered
-    is called after a dragExited.
+    You should implement your dragEntered method to always return the correct 
+    drag operation, but only to perform any one-time setup the first time 
+    dragEntered is called after a dragExited.
     
     The default implementation returns SC.DRAG_NONE
     
-    @param {SC.Drag} drag The current drag object
-    @param {Event}   evt  The most recent mouse move event.  Use to get location 
-
-    @return {DragOps} A mask of all the drag operations allowed or SC.DRAG_NONE
+    @param drag {SC.Drag} The current drag object
+    @param evt {Event} The most recent mouse move event.  Use to get 
+      location 
+    @returns {DragOps} A mask of all the drag operations allowed or 
+      SC.DRAG_NONE
   */
   dragEntered: function(drag, evt) { return SC.DRAG_NONE; },
   
@@ -67,7 +73,8 @@ SC.DropTarget = {
     The default implementation does nothing.
     
     @param {SC.Drag} drag The current drag object
-    @param {Event}   evt  The most recent mouse move event.  Use to get location 
+    @param {Event}   evt  The most recent mouse move event.  Use to get  
+      location 
   */
   dragUpdated: function(drag, evt) {},
 

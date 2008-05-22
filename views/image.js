@@ -105,11 +105,13 @@ SC.ImageView = SC.View.extend(SC.Control,
     if (!value || value.length == 0) {
       this.rootElement.src = SC.BLANK_IMAGE_URL;
       this.set('status', SC.IMAGE_STATE_NONE) ;
+      this._imageUrl = null; //clear
       
     // if a new value was set that is a URL, load the image URL.
     } else if (SC.ImageView.valueIsUrl(value)) {
       this.beginPropertyChanges() ;
       this.set('status', SC.IMAGE_STATE_LOADING) ;
+      this._imageUrl = value ; // save to verify later.
       SC.imageCache.loadImage(value, this, this._onLoadComplete) ;
       this.endPropertyChanges() ;
       
@@ -130,6 +132,11 @@ SC.ImageView = SC.View.extend(SC.Control,
     this method will be invoked immediately.
   */
   _onLoadComplete: function(url, status, img) {  
+    
+    // sometimes this method gets called later after the url has already
+    // changed.  If this is the case, bail...
+    if (url !== this._imageUrl) return ;
+    
     this.beginPropertyChanges() ;
     this.set('imageWidth', parseInt(img.width,0)) ;
     this.set('imageHeight', parseInt(img.height,0)) ;

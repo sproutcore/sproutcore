@@ -344,29 +344,51 @@ SC.SourceListView = SC.CollectionView.extend(
     emptyElement: '<div class="list-insertion-point"><span class="anchor"></span></div>'
   }),
   
-  showInsertionPointBefore: function(itemView) {
+  showInsertionPoint: function(itemView, dropOperation) {
     if (!itemView) return ;
 
-    if (!this._insertionPointView) {
-      this._insertionPointView = this.insertionPointClass.create() ;
-    } ;
+    // if drop on, then just add a class...
+    if (dropOperation === SC.DROP_ON) {
+      if (itemView !== this._dropOnInsertionPoint) {
+        this.hideInsertionPoint() ;
+        itemView.addClassName('drop-target') ;
+        this._dropOnInsertionPoint = itemView ;
+      }
+      
+    } else {
+      
+      if (this._dropOnInsertionPoint) {
+        this._dropOnInsertionPoint.removeClassName('drop-target') ;
+        this._dropOnInsertionPoint = null ;
+      }
     
-    var insertionPoint = this._insertionPointView ;
-    f = { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
-    insertionPoint.set('frame', f) ;
+      if (!this._insertionPointView) {
+        this._insertionPointView = this.insertionPointClass.create() ;
+      } ;
+    
+      var insertionPoint = this._insertionPointView ;
+      f = { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
+      insertionPoint.set('frame', f) ;
 
-    if (insertionPoint.parentNode != itemView.parentNode) {
-      itemView.parentNode.appendChild(insertionPoint) ;
+      if (insertionPoint.parentNode != itemView.parentNode) {
+        itemView.parentNode.appendChild(insertionPoint) ;
+      }
     }
+    
   },
   
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
     if (insertionPoint) insertionPoint.removeFromParent() ;
+
+    if (this._dropOnInsertionPoint) {
+      this._dropOnInsertionPoint.removeClassName('drop-target') ;
+      this._dropOnInsertionPoint = null ;
+    }
   },
   
   // We can do this much faster programatically using the rowHeight
-  insertionIndexForLocation: function(loc) {  
+  insertionIndexForLocation: function(loc, dropOperation) {  
     var f = this.get('innerFrame') ;
     var sf = this.get('scrollFrame') ;
     var rowHeight = this.get('rowHeight') || 0 ;
@@ -374,6 +396,7 @@ SC.SourceListView = SC.CollectionView.extend(
     // find the offset to work with.
     var offset = loc.y - f.y - sf.y ;
     var ret = -1; // the return value
+    var retOp = SC.DROP_BEFORE ;
 
     // search groups until we find one that matches
     var top = 0;
@@ -386,8 +409,26 @@ SC.SourceListView = SC.CollectionView.extend(
       // we hit there.
       if (max >= offset) {
         offset -= top ;
-        ret = Math.floor((offset / rowHeight) + 0.4) ;
-        if (ret < 1) return -1 ; // top row!
+        ret = Math.floor(offset / rowHeight) ;
+
+        // find the percent through the row...
+        var percentage = (offset / rowHeight) - ret ;
+        
+        // if the dropOperation is SC.DROP_ON and we are in the center 60%
+        // then return the current item.
+        if (dropOperation === SC.DROP_ON) {
+          if (percentage > 0.80) ret++ ;
+          if ((percentage >= 0.20) && (percentage <= 0.80)) {
+            retOp = SC.DROP_ON;
+          }
+        } else {
+          if (percentage > 0.45) ret++ ;
+        }
+        
+        // handle dropping on top row...
+        if (ret < 1) return [-1, SC.DROP_BEFORE] ; // top row!
+        
+        // convert to index
         ret = (ret - 1) + idx ;
         
       // we are not yet within the group, go on to the next group.
@@ -396,7 +437,8 @@ SC.SourceListView = SC.CollectionView.extend(
         top = max ;
       }
     }
-    return ret ;
+    
+    return [ret, retOp] ;
   }
   
 }) ;

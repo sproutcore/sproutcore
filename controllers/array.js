@@ -17,11 +17,25 @@ until you call commitChanges().
 
 @extends SC.Controller
 @extends SC.Array
+@extends SC.SelectionSupport
+@since SproutCore 1.0
 
 */
 SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 /** @scope SC.ArrayController.prototype */
 {
+  /**
+    If YES the will return controllers for content objects.
+    
+    If you want to use an array controller to edit an array contents directly
+    but you do not want to wrap the values of the array in controller objects
+    then you should set this property to NO.
+    
+    @field
+    @type {Boolean}
+  */
+  useControllersForContent: NO,
+  
   /**
     Provides compatibility with CollectionControllers.
     @field
@@ -45,7 +59,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @field
     @type {Boolean}
   */
-  destroyOnRemoval: false,
+  destroyOnRemoval: NO,
     
   /**
     Watches changes to the content property updates the contentClone.
@@ -53,17 +67,46 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @observes content
   */
   _contentObserver: function() {
-    this.beginPropertyChanges();
-    this.contentCloneReset();
-    this.arrayContentDidChange() ;
-    this.notifyPropertyChange('length') ;
-    this.updateSelectionAfterContentChange();
-    this.endPropertyChanges() ;
+    var content = this.get('content') ;
+    if (SC.isEqual(content, this._content)) return ; // nothing to do
+
+    if (!this._boundContentPropertyObserver) {
+      this._boundContentPropertyObserver = this._contentPropertyObserver.bind(this) ;
+    }
+    var func = this._boundContentPropertyObserver ;
+
+    // remove old observer, add new observer, and trigger content property change
+    if (this._content && this._content.removeObserver) this._content.removeObserver('[]', func) ;
+    if (content && content.addObserver) content.addObserver('[]', func) ;
+    this._content = content; //cache
+    this._contentPropertyRevision = null ;
+    
+    var rev = (content) ? content.propertyRevision : -1 ;
+    this._contentPropertyObserver(this, '[]', content, rev) ; 
   }.observes('content'),
 
+  _contentPropertyObserver: function(target, key, value, rev) {  
+      
+    if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
+      this._contentPropertyRevision = rev ;
+
+      this._updatingContent = true ;
+
+      this.beginPropertyChanges();
+      this.contentCloneReset();
+      this.arrayContentDidChange() ;
+      this.notifyPropertyChange('length') ;
+      this.updateSelectionAfterContentChange();
+      this.endPropertyChanges() ;
+
+      this._updatingContent = false ;
+
+    }
+  },
+  
   /**
-    The array content that (when committed) will be merged back into the content property.
-    All array methods will take place on this object.
+    The array content that (when committed) will be merged back into the 
+    content property. All array methods will take place on this object.
 
     @field
     @type {SC.Array}
@@ -71,9 +114,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   contentClone: null,
 
   /**
-  * Clones the content property into the contentClone property.
-  * @private
-  **/
+    Clones the content property into the contentClone property.
+    @private
+  */
   contentCloneReset: function() {
     this._changelog = [];
     this.set('contentClone', null);
@@ -82,17 +125,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /**
    SC.Array interface implimentation.
    
-   @param {Number} idx 
-     Starting index in the array to replace.  If idx >= length, then append to 
-     the end of the array.
+   @param idx {Number} Starting index in the array to replace.  If idx >= 
+     length, then append to the end of the array.
    
-   @param {Number} amt 
-     Number of elements that should be removed from the array, starting at 
-     *idx*.
+   @param amt {Number} Number of elements that should be removed from the 
+     array, starting at *idx*.
    
-   @param {Array} objects 
-     An array of zero or more objects that should be inserted into the array at 
-     *idx* 
+   @param objects {Array} An array of zero or more objects that should be 
+     inserted into the array at *idx* 
   */
   replace: function(idx, amt, objects) {
 
@@ -229,6 +269,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Returns the object controller for a source value.
   */
   _objectControllerFor: function(obj) {
+    if (!this.useControllersForContent) return obj;
+    
     var controllers = this._objControllers = this._objControllers || {} ;
     var guid = SC.getGUID(obj) ;
     var ret = controllers[guid] ;
@@ -246,6 +288,11 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   */
   _sourceObjectFor: function(obj) {
     return (obj && obj.kindOf && obj.kindOf(SC.Controller)) ? obj.get('content') : obj ;
+  },
+  
+  init: function() {
+    arguments.callee.base.apply(this, arguments) ;
+    if (this.get('content')) this._contentObserver() ;
   }
 
 });

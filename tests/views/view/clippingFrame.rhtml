@@ -175,8 +175,10 @@ Test.context("CASE 2: A scrollable view - child view cannot fit within visible a
 Test.context("CASE 3: A scrollable view with extra height - nested child view can fit within visible area", {
 
   "clippingFrame should == frame when view is entirely visible": function() {
-    var f = this.nested.get('frame') ;
-    var cf = this.nested.get('clippingFrame') ;  
+
+    var f = nested.get('frame') ;
+    var cf = nested.get('clippingFrame') ; 
+    console.log('%@: f=%@ -- cf=%@'.fmt(nested, $I(f), $I(cf))); 
     SC.rectsEqual(f,cf).shouldEqual(true) ;
   },
   
@@ -197,8 +199,6 @@ Test.context("CASE 3: A scrollable view with extra height - nested child view ca
     // collect new frame and compare
     var ncf = this.nested.get('clippingFrame') ;
     
-    console.log('ncf: %@'.fmt($H(ncf).inspect()));
-    console.log('cf: %@'.fmt($H(cf).inspect()));
     window.case3 = this ;
     
     SC.rectsEqual(ncf,cf).shouldEqual(true) ;
@@ -219,7 +219,7 @@ Test.context("CASE 3: A scrollable view with extra height - nested child view ca
   "clippingFrame should == frame when moved around within view (and notify)": function() {
     var of= this.nested.get('frame') ;
     this.nested.set('frame', { x: 20, y: 20 }) ;
-
+  
     var f = this.nested.get('frame') ;
     var cf = this.nested.get('clippingFrame') ;  
     SC.rectsEqual(f,cf).shouldEqual(true) ;
@@ -228,7 +228,10 @@ Test.context("CASE 3: A scrollable view with extra height - nested child view ca
     this.nested.set('frame', of) ;
   },
   
-  setup: function() { this.v = SC.page.get('case3'); this.nested = this.v.child.nestedChild; }
+  setup: function() { 
+    this.v = SC.page.get('case3'); 
+    this.nested = this.v.child.nestedChild; 
+  }
   
 });
 

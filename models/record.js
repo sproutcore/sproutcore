@@ -164,7 +164,7 @@ SC.Record = SC.Object.extend({
   // This will return the current set of attributes as a hash you can send back
   // to the server.
   attributes: function() {
-    return $H(this._attributes) ;
+    return Object.clone(this._attributes) ;
   }.property(),
   
   // If you try to get/set a property not defined by the record, then this method

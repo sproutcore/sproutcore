@@ -29,6 +29,7 @@ view_helper :collection_view do
   property :content_value_editable, :key => 'contentValueIsEditable'
   property :accepts_first_responder, true
   property :can_reorder_content
+  property :can_delete_content
   
   property :content_icon_key
   

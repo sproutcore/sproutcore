@@ -5,9 +5,16 @@
 
 require('views/view') ;
 require('views/label') ;
+require('mixins/collection_view_delegate') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
+
+/**
+  Special drag operation passed to delegate if the collection view proposes
+  to perform a reorder event.
+*/
+SC.DRAG_REORDER = 0xfff0001 ;
 
 /** Indicates that selection points should be selected using horizontal 
   orientation.
@@ -43,8 +50,10 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   property to allow selection.)
   
   @extends SC.View
+  @extends SC.CollectionViewDelegate
+  
 */
-SC.CollectionView = SC.View.extend(
+SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
@@ -98,6 +107,17 @@ SC.CollectionView = SC.View.extend(
   /** @private */
   selectionBindingDefault: SC.Binding.Multiple,
 
+  /**
+    Delegate used to implement fine-grained control over collection view 
+    behaviors.
+    
+    You can assign a delegate object to this property that will be consulted
+    for various decisions regarding drag and drop, selection behavior, and
+    even rendering.  The object you place here must implement some or all of
+    the SC.CollectionViewDelegate mixin.
+  */
+  delegate: null,
+  
   /** 
     Allow user to select content using the mouse and keyboard 
   
@@ -131,9 +151,9 @@ SC.CollectionView = SC.View.extend(
     Allow user to edit content views.
     
     The collection view will set the isEditable property on its item views to
-    reflect the same value of this property.  Whenever isEditable is false, the
-    user will not be able to reorder, add, or delete items regardless of the
-    canReorderContent and canDeleteContent and isDropTarget properties.
+    reflect the same value of this property.  Whenever isEditable is false, 
+    the user will not be able to reorder, add, or delete items regardless of 
+    the canReorderContent and canDeleteContent and isDropTarget properties.
   */
   isEditable: true,
   
@@ -151,14 +171,14 @@ SC.CollectionView = SC.View.extend(
   
   /** @private */
   canReorderContentBindingDefault: SC.Binding.Bool,
-  
+
   /**
     Allow the user to delete items using the delete key
     
     If true the user will be allowed to delete selected items using the delete
     key.  Otherwise deletes will not be permitted.
   */
-  canDeleteContent: false,
+  canDeleteContent: NO,
   
   /** @private */
   canDeleteContentBindingDefault: SC.Binding.Bool,
@@ -166,10 +186,11 @@ SC.CollectionView = SC.View.extend(
   /**
     Accept drops for data other than reordering.
     
-    Setting this property to return true when the view is instantiated will cause
-    it to be registered as a drop target, activating the other drop machinery.
+    Setting this property to return true when the view is instantiated will 
+    cause it to be registered as a drop target, activating the other drop 
+    machinery.
   */
-  isDropTarget: false,
+  isDropTarget: NO,
   
   /**
     Use toggle selection instead of normal click behavior.
@@ -180,7 +201,7 @@ SC.CollectionView = SC.View.extend(
     
     @type Boolean
   */
-  useToggleSelection: false,
+  useToggleSelection: NO,
 
   /**
     Trigger the action method on a single click.
@@ -629,8 +650,6 @@ SC.CollectionView = SC.View.extend(
       SC.Benchmark.start(bkey);
     }
 
-    //console.log('updateChildren') ;
-    
     this.beginPropertyChanges() ; // avoid sending notifications
     
     // STEP 1: Update frame size if needed.  Required to compute the 
@@ -1017,7 +1036,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.View} the new itemView.
   */
   _insertItemViewFor: function(content, groupBy, contentIndex) {
-    
+
     // first look for a matching record.
     var key = SC.guidFor(content) ;
     var ret = this._itemViewsByContent[key];
@@ -1262,6 +1281,9 @@ SC.CollectionView = SC.View.extend(
   // SELECTION
   //
 
+  /** @private
+    Finds the smallest index of a content object in the selected array.
+  */
   _indexOfSelectionTop: function() {
     var content = this.get('content');
     var sel = this.get('selection');
@@ -1277,7 +1299,10 @@ SC.CollectionView = SC.View.extend(
     
     return (indexOfSelected >= contentLength) ? -1 : indexOfSelected ;
   },
-  
+
+  /**
+    Finds the largest index of a content object in the selection array.
+  */
   _indexOfSelectionBottom: function() {
     var content = this.get('content');
     var sel = this.get('selection');
@@ -1437,6 +1462,7 @@ SC.CollectionView = SC.View.extend(
     }
     if (itemView) this.scrollToItemView(itemView);
   },
+  
   /**
     Scroll the rootElement (if needed) to ensure that the item is visible.
     @param {SC.View} view The item view to scroll to
@@ -1465,7 +1491,8 @@ SC.CollectionView = SC.View.extend(
     var base = (extendSelection) ? this.get('selection') : [] ;
     var sel = [items].concat(base).flatten().uniq() ;
     
-    // if you are not extending the selection, then clear the selection anchor.
+    // if you are not extending the selection, then clear the selection 
+    // anchor.
     this._selectionAnchor = null ;
     this.set('selection',sel) ;  
   },
@@ -1481,6 +1508,62 @@ SC.CollectionView = SC.View.extend(
     this.set('selection',sel) ;
   },
   
+  /**
+    Deletes the selected content if canDeleteContent is YES.  
+    
+    This will invoke delegate methods to provide fine-grained control.
+    
+    @returns {Boolean} YES if deletion is possible, even if none actually occurred.
+  */
+  deleteSelection: function() {
+    
+    // perform some basic checks...
+    if (!this.get('canDeleteContent')) return NO;  
+    var sel = Array.from(this.get('selection'));
+    if (!sel || sel.get('length') === 0) return NO ;
+
+    // let the delegate decide what to actually delete.  If this returns an
+    // empty array or null, just do nothing.
+    sel = this.invokeDelegateMethod(this.delegate, 'collectionViewShouldDeleteContent', this, sel) ;
+    sel = Array.from(sel) ; // ensure this is an array
+    if (!sel || sel.get('length') === 0) return YES ;
+
+    // now have the delegate (or us) perform the deletion.  The collection
+    // view implements a default version of this method.
+    this.invokeDelegateMethod(this.delegate, 'collectionViewDeleteContent', this, sel) ;
+    return YES ;
+  },
+
+  /**
+    Default implementation of the delegate method.
+    
+    This method will delete the passed items from the content array using 
+    standard array methods.  This is often suitable if you are using an
+    array controller or a real array for your content.
+    
+    @param view {SC.CollectionView} this
+    @param sel {Array} the items to delete
+    @returns {Boolean} YES if the deletion was a success.
+  */
+  collectionViewDeleteContent: function(view, sel) {
+    
+    // get the content.  Bail if this cannot be used as an array.
+    var content = this.get('content') ; 
+    if (!content || !content.removeObject) return NO ;
+    
+    // suspend property notifications and remove the objects...
+    if (content.beginPropertyChanges) content.beginPropertyChanges();
+    var idx = sel.get('length') ;
+    while(--idx >= 0) {
+      var item = sel.objectAt(idx) ;
+      content.removeObject(item) ;      
+    }
+    // begin notifying again...
+    if (content.endPropertyChanges) content.endPropertyChanges() ;
+    
+    return YES ; // done!
+  },
+  
   // ......................................
   // EVENT HANDLING
   //
@@ -1492,7 +1575,30 @@ SC.CollectionView = SC.View.extend(
   keyUp: function() { return true; },
 
   /** @private
-    Selects the same item on the next row.  Or moves down one if 
+    Handle select all keyboard event.
+  */
+  selectAll: function(evt) {
+    var content = (this.get('content') || []).slice() ;
+    this.selectItems(content, NO) ;
+    return YES ;
+  },
+  
+  /** @private
+    Handle delete keyboard event.
+  */
+  deleteBackward: function(evt) {
+    return this.deleteSelection() ;
+  },
+  
+  /** @private
+    Handle delete keyboard event.
+  */
+  deleteForward: function(evt) {
+    return this.deleteSelection() ;
+  },
+  
+  /** @private
+    Selects the same item on the next row or moves down one if 
     itemsPerRow = 1
   */
   moveDown: function(sender, evt) {
@@ -1501,7 +1607,7 @@ SC.CollectionView = SC.View.extend(
   },
   
   /** @private
-    Selects the same item on the next row.  Or moves up one if 
+    Selects the same item on the next row or moves up one if 
     itemsPerRow = 1
   */
   moveUp: function(sender, evt) {
@@ -1551,9 +1657,24 @@ SC.CollectionView = SC.View.extend(
     return true ;
   },
 
+  /**
+    Handles mouse down events on the collection view or on any of its 
+    children.
+    
+    The default implementation of this method can handle a wide variety
+    of user behaviors depending on how you have configured the various
+    options for the collection view.
+    
+    @param ev {Event} the mouse down event
+    @returns {Boolean} Usually YES.
+  */
   mouseDown: function(ev) {
 
-    // save for drag opt
+    // When the user presses the mouse down, we don't do much just yet.
+    // Instead, we just need to save a bunch of state about the mouse down
+    // so we can choose the right thing to do later.
+
+    // save the original mouse down event for use in dragging.
     this._mouseDownEvent = ev ;
 
     // Toggle selection only triggers on mouse up.  Do nothing.
@@ -1565,6 +1686,9 @@ SC.CollectionView = SC.View.extend(
     this._mouseDownAt = this._shouldDeselect =
       this._shouldReselect = this._refreshSelection = false;
 
+    // find the actual view the mouse was pressed down on.  This will call
+    // hitTest() on item views so they can implement non-square detection
+    // modes. -- once we have an item view, get its content object as well.
     var mouseDownView    = this._mouseDownView = this.itemViewForEvent(ev);
     var mouseDownContent = 
       this._mouseDownContent = (mouseDownView) ? mouseDownView.get('content') : null;
@@ -1572,8 +1696,8 @@ SC.CollectionView = SC.View.extend(
     // become first responder if possible.
     this.becomeFirstResponder() ;
     
-    // recieved a mouseDown on the collection element, but not on one of the childItems... bail
-   
+    // recieved a mouseDown on the collection element, but not on one of the 
+    // childItems... unless we do not allow empty selections, set it to empty.
     if (!mouseDownView) {
       if (this.get('allowDeselectAll')) this.selectItems([], false);
       return true ;
@@ -1700,20 +1824,7 @@ SC.CollectionView = SC.View.extend(
     if (view && view.didMouseOut) view.didMouseOut(ev) ;
   },
   
-  // invoked when the user double clicks on an item.
-  didDoubleClick: function(ev) {
-    console.warn("didDoubleClick will be removed from CollectionView in the near future. Use mouseOut instead");
-    return this._doubleClick(ev) ;
-  },
-  
   doubleClick: function(ev) {
-    if (this.didDoubleClick != SC.CollectionView.prototype.didDoubleClick) {
-      return this.didDoubleClick(ev) ;
-    } else return this._doubleClick(ev) ;
-  },
-  
-  _doubleClick: function(ev) {
-    console.info('_doubleClick!') ;
     var view = this.itemViewForEvent(ev) ;
     if (view) {
       this._action(view, ev) ;
@@ -1811,6 +1922,409 @@ SC.CollectionView = SC.View.extend(
   // DRAG AND DROP SUPPORT
   //
 
+  _reorderDataType: function() {
+    if (!this._reorderDataTypeKey) {
+      this._reorderDataTypeKey = "SC.CollectionView.Reorder.%@".fmt(SC.guidFor(this)) ;
+    }
+    return this._reorderDataTypeKey ;
+  },
+  
+  /**
+    This property is set to the array of content objects that are the subject
+    of a drag whenever a drag is initiated on the collection view.  You can
+    consult this property when implementing your collection view delegate 
+    methods, but otherwise you should not use this property in your code.
+    
+    Note that drag content will always appear in the same order the content
+    appears in the source content array.
+    
+    @field
+    @type {Array}
+  */
+  dragContent: null,
+  
+  /**
+    This property is set to the proposed insertion index during a call to
+    collectionViewValidateDrop().  Your delegate implementations can change
+    the value of this property to enforce a drop some in some other location.
+    
+    @type {Number}
+    @field
+  */
+  proposedInsertionIndex: null,
+  
+  /**
+    This property is set to the proposed drop operation during a call to
+    collectionViewValidateDrop().  Your delegate implementations can change
+    the value of this property to enforce a different type of drop operation.
+    
+    @type {Number}
+    @field
+  */
+  proposedDropOperation: null,
+  
+  /**  @private
+    mouseDragged event handler.  Initiates a drag if the following conditions
+    are met:
+    
+    - collectionViewShouldBeginDrag() returns YES *OR*
+    - the above method is not implemented and canReorderContent is true.
+    - the dragDataTypes property returns a non-empty array
+    - a mouse down event was saved by the mouseDown method.
+  */
+  mouseDragged: function(ev) {
+    // if the mouse down event was cleared, there is nothing to do; return.
+    if (this._mouseDownEvent === null) return YES ;
+
+    // Don't do anything unless the user has been dragging for 123msec
+    if ((Date.now() - this._mouseDownAt) < 123) return YES ;
+    
+    // OK, they must be serious, decide if a drag will be allowed.
+    if (this.invokeDelegateMethod(this.delegate, 'collectionViewShouldBeginDrag', this)) {
+
+      // First, get the selection to drag.  Drag an array of selected
+      // items appearing in this collection, in the order of the 
+      // collection.
+      //
+      // Set this to the dragContent property.
+      var content = this.get('content') || [] ;
+      var dragContent;
+      if (this.get("selectOnMouseDown") == false) {
+        dragContent = [this._previousMouseDownContent];
+      } else {
+        dragContent = this.get('selection').sort(function(a,b) {
+          a = content.indexOf(a) ;
+          b = content.indexOf(b) ;
+          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
+        });
+      }
+      
+      this.set('dragContent', dragContent) ;
+
+      // Get the set of data types supported by the delegate.  If this returns
+      // a null or empty array and reordering content is not also supported
+      // then do not start the drag.
+      if (this.get('dragDataTypes').get('length') > 0) {
+        // Build the drag view to use for the ghost drag.  This 
+        // should essentially contain any visible drag items.
+        var view = this.ghostViewFor(dragContent) ;
+
+        // Initiate the drag
+        SC.Drag.start({
+          event: this._mouseDownEvent,
+          source: this,
+          dragView: view,
+          ghost: NO,
+          slideBack: YES,
+          dataSource: this
+        }) ; 
+
+        // Also use this opportunity to clean up since mouseUp won't 
+        // get called.
+        this._cleanupMouseDown() ;
+        this._lastInsertionIndex = null ;
+        
+      // Drag was not allowed by the delegate, so bail.
+      } else {
+        this.set('dragContent', null) ;
+      }
+      
+      return YES ;
+    }
+  },
+
+  /**
+    Implements the drag data source protocol for the collection view.  This
+    property will consult the collection view delegate if one is provided. It
+    will also do the right thing if you have set canReorderContent to YES.
+    
+    @field 
+    @type {Array}
+  */
+  dragDataTypes: function() {
+    
+    // consult delegate.
+    var ret = this.invokeDelegateMethod(this.delegate, 'collectionViewDragDataTypes', this) ;
+    var canReorderContent = this.get('canReorderContent') ;
+    
+    // bail if ret returned null or empty array and cannot reorder.
+    if ((!ret || ret.get('length')===0) && !canReorderContent) return [];
+    
+    // add reorder type if needed.
+    if (canReorderContent) {
+      ret = (ret) ? ret.slice() : [] ;
+      
+      var key = this._reorderDataType() ;
+      if (ret.indexOf(key) < 0) ret.push(key) ;
+    }
+    return ret ;
+    
+    //data: { "_mouseDownContent": dragContent }
+      
+  }.property(),
+
+  /**
+    Implements the drag data source protocol method.  The implementation of
+    this method will consult the collection view delegate if one has been
+    provided.  It also respects the canReoderContent method.
+  */
+  dragDataForType: function(dataType, drag) {
+    
+    // if this is a reorder, then return drag content.
+    if (this.get('canReorderContent')) {
+      if (dataType === this._reorderDataType()) return this.get('dragContent') ;
+    }
+    
+    // otherwise, just pass along to the delegate.
+    return this.invokeDelegateMethod(this.delegate, 'collectionViewDragDataForType', this, dataType, drag) ;
+  },
+
+  /**
+    Implements the SC.DropTarget interface.  The default implementation will
+    consult the collection view delegate, if you implement those methods.
+  */
+  dragEntered: function(drag, evt) {
+
+    // the proposed drag operation is either DRAG_MOVE only if we can reorder
+    // content and the drag contains reorder content.
+    var op = SC.DRAG_NONE ;
+    if (this.get('canReorderContent')) {
+      var types = drag.get('dataTypes') ;
+      if (types.indexOf(this._reorderDataType()) >= 0) op = SC.DRAG_MOVE ;
+    }
+    
+    // Now pass this onto the delegate.
+    op = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, SC.DROP_ANY, -1, op) ;
+    
+    // return
+    return op ;
+  },
+
+  // Determines the allowed drop operation insertion point, operation type,
+  // and the drag operation to be performed.  Used by dragUpdated() and 
+  // performDragOperation().
+  _computeDropOperationState: function(drag, evt) {
+    
+    // get the insertion index for this location.  This can be computed
+    // by a subclass using whatever method.  This method is not expected to
+    // do any data valdidation, just to map the location to an insertion 
+    // index.
+    var loc = drag.get('location') ;
+    loc = this.convertFrameFromView(loc, null) ;
+    
+    var dropOp = SC.DROP_BEFORE ;
+    var dragOp = SC.DRAG_NONE ;
+    
+    // STEP 1: Try with a DROP_ON option -- send straight to delegate if 
+    // supported by view.
+    
+    // get the computed insertion index and possibly drop operation.
+    // prefer to drop ON.
+    var idx = this.insertionIndexForLocation(loc, SC.DROP_ON) ;
+    if ($type(idx) === T_ARRAY) {
+      dropOp = idx[1] ;
+      idx = idx[0] ;
+    }
+    
+    // if the return drop operation is DROP_ON, then just check it with the
+    // delegate method.  If the delegate method does not support dropping on,
+    // then it will return DRAG_NONE, in which case we will try again with
+    // drop before.
+    if (dropOp === SC.DROP_ON) {
+      
+      // Now save the insertion index and the dropOp.  This may be changed by
+      // the collection delegate.
+      this.set('proposedInsertionIndex', idx) ;
+      this.set('proposedDropOperation', dropOp) ;
+      dragOp = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, dropOp, idx, dragOp) ;
+      idx = this.get('proposedInsertionIndex') ;
+      dropOp = this.get('proposedDropOperation') ;
+      this._dropInsertionIndex = this._dropOperation = null ;
+
+      // The delegate is OK with a drop on also, so just return.
+      if (dragOp !== SC.DRAG_NONE) {
+        return [idx, dropOp, dragOp] ;
+        
+      // The delegate is NOT OK with a drop on, try to get the insertion
+      // index again, but this time prefer SC.DROP_BEFORE, then let the 
+      // rest of the method run...
+      } else {
+        dropOp = SC.DROP_BEFORE ;
+        idx = this.insertionIndexForLocation(loc, SC.DROP_BEFORE) ;
+        if ($type(idx) === T_ARRAY) {
+          dropOp = idx[1] ;
+          idx = idx[0] ;
+        }
+      }
+    }
+
+    // if this is a reorder drag, set the proposed op to SC.DRAG_REORDER and
+    // validate the insertion point.  This only works if the insertion point
+    // is DROP_BEFORE.  DROP_ON is not handled by reordering content.
+    if ((idx >= 0) && this.get('canReorderContent') && (dropOp === SC.DROP_BEFORE)) {
+
+      var objects = drag.dataForType(this._reorderDataType()) || [];
+      var content = this.get('content') || [] ;
+
+      // if the insertion index is in between two items in the drag itself, 
+      // then this is not allowed.  Either use the last insertion index or 
+      // find the first index that is not in between selections.  Stop when
+      // we get to the beginning.
+      var previousContent = (idx > 0) ? content.objectAt(idx-1) : null ;
+      var nextContent = (idx < content.get('length')) ? content.objectAt(idx) : null;
+
+      var isPreviousInDrag = (previousContent) ? objects.indexOf(previousContent)>=0 : NO;
+      var isNextInDrag = (nextContent) ? objects.indexOf(nextContent)>=0 : NO;
+
+      if (isPreviousInDrag && isNextInDrag) {
+        if (this._lastInsertionIndex == null) {
+          while((idx >= 0) && (objects.indexOf(content.objectAt(idx)) >= 0)) {
+            idx-- ;
+          } 
+        } else idx = this._lastInsertionIndex ;
+      }
+
+      // If we found a valid insertion point to reorder at, then set the op
+      // to custom DRAG_REORDER.
+      if (idx >= 0) dragOp = SC.DRAG_REORDER ;
+    }
+
+    // Now save the insertion index and the dropOp.  This may be changed by
+    // the collection delegate.
+    this.set('proposedInsertionIndex', idx) ;
+    this.set('proposedDropOperation', dropOp) ;
+    dragOp = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, dropOp, idx, dragOp) ;
+    idx = this.get('proposedInsertionIndex') ;
+    dropOp = this.get('proposedDropOperation') ;
+    this._dropInsertionIndex = this._dropOperation = null ;
+    
+    // return generated state
+    return [idx, dropOp, dragOp] ;
+  },
+  
+  /** 
+    Implements the SC.DropTarget interface.  The default implementation will
+    determine the drop location and then consult the collection view delegate
+    if you implement those methods.  Otherwise it will handle reordering
+    content on its own.
+  */
+  dragUpdated: function(drag, evt) {
+
+    var state = this._computeDropOperationState(drag, evt) ;
+    var idx = state[0], dropOp = state[1], dragOp = state[2] ;
+    
+    // if the insertion index or dropOp have changed, update the insertion
+    // point
+    if (dragOp !== SC.DRAG_NONE) {
+      if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
+        var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
+        this.showInsertionPoint(itemView, dropOp) ;
+      }
+
+      this._lastInsertionIndex = idx ;
+      this._lastDropOperation = dropOp ;
+
+    } else {
+      this.hideInsertionPoint() ;
+      this._lastInsertionIndex = this._lastDropOperation = null ;
+    }
+
+    // Normalize drag operation to the standard kinds accepted by the drag
+    // system.
+    return (dragOp === SC.DRAG_REORDER) ? SC.DRAG_MOVE : dragOp;  
+  },
+
+  /**
+    Implements the SC.DropTarget protocol.  Hides any visible insertion 
+    point and clears some cached values.
+  */
+  dragExited: function() {
+    this.hideInsertionPoint() ;
+    this._lastInsertionIndex = this._lastDropOperation = null ;
+  },
+
+  /**
+    Implements the SC.DropTarget protocol.  Hides any visible insertion 
+    point and clears some cached values.
+  */
+  dragEnded: function() {
+    this.hideInsertionPoint() ;
+    this._lastInsertionIndex = this._lastDropOperation = null ;
+  },
+
+  /**
+    Implements the SC.DropTarget protocol.
+  */
+  prepareForDragOperation: function(op, drag) { return YES; },
+  
+  /**
+    Implements the SC.DropTarget protocol.  Consults the collection view
+    delegate to actually perform the operation unless the operation is 
+    reordering content.
+  */
+  performDragOperation: function(op, drag) { 
+    
+    // Get the correct insertion point, drop operation, etc.
+    var state = this._computeDropOperationState(drag, null, op) ;
+    var idx = state[0], dropOp = state[1], dragOp = state[2] ;
+
+    // The dragOp is the kinds of ops allowed.  The drag operation must 
+    // be included in that set.
+    if (dragOp === SC.DRAG_REORDER) {
+      op = (op & SC.DRAG_MOVE) ? SC.DRAG_REORDER : SC.DRAG_NONE ;
+    } else {
+      op = op & dragOp ;
+    }
+    
+    // If no allowed drag operation could be found, just return.
+    if (op === SC.DRAG_NONE) return op;
+    
+    // Some operation is allowed through, give the delegate a chance to
+    // handle it.
+    var performed = this.invokeDelegateMethod(this.delegate, 'collectionViewAcceptDrop', this, drag, dropOp, idx, op) ;
+
+    // If the delegate did not handle the drag (i.e. returned SC.DRAG_NONE),
+    // and the op type is REORDER, then do the reorder here.
+    if ((performed === SC.DRAG_NONE) && (op === SC.DRAG_REORDER)) {
+      var objects = drag.dataForType(this._reorderDataType()) ;
+      if (!objects) return SC.DRAG_NONE ;
+
+      var content = this.get('content') ;
+      content.beginPropertyChanges(); // suspend notifications
+
+      // find the old index and remove it.
+      var objectsIdx = objects.get('length') ;
+      while(--objectsIdx >= 0) {
+        var obj = objects.objectAt(objectsIdx) ;
+        var old = content.indexOf(obj) ;
+        if (old >= 0) content.removeAt(old) ;
+        if ((old >= 0) && (old < idx)) idx--; //adjust idx
+      }
+    
+      // now insert objects at new location
+      content.replace(idx, 0, objects) ;
+      content.endPropertyChanges(); // restart notifications
+      
+      // make the op into its actual value
+      op = SC.DRAG_MOVE ;
+    }
+
+    return op; 
+  },
+  
+  /**
+    Default delegate method implementation, returns YES if canReorderContent
+    is also true.
+  */
+  collectionViewShouldBeginDrag: function(view) {
+    return this.get('canReorderContent') ;
+  },
+  
+  concludeDragOperation: function(op, drag) {
+    this.hideInsertionPoint() ;
+    this._lastInsertionIndex = null ;
+  },
+
   /** 
     The insertion orientation.  This is used to determine which
     dimension we should pay attention to when determining insertion point for
@@ -1827,10 +2341,32 @@ SC.CollectionView = SC.View.extend(
     Get the preferred insertion point for the given location, including 
     an insertion preference of before or after the named index.
     
-    The default implementation will loop through the item views looking for 
-    the first view to "switch sides" in the orientation you specify.
+    You can implement this method in a subclass if you like to perform a 
+    more efficient check.  The default implementation will loop through the 
+    item views looking for the first view to "switch sides" in the orientation 
+    you specify.
+
+    This method should return an array with two values.  The first value is
+    the insertion point index and the second value is the drop operation,
+    which should be one of SC.DROP_BEFORE or SC.DROP_ON. 
+    
+    The preferred drop operation passed in should be used as a hint as to 
+    the type of operation the drag and drop could would prefer to receive.
+    If the dropOperaiton is SC.DROP_ON, then you should return a DROP_ON
+    mode if possible.  Otherwise, you should never return DROP_ON.
+    
+    For compatibility, you can also return just the insertion index.  If you
+    do this, then the collction view will assume the drop operation is 
+    SC.DROP_BEFORE.
+    
+    If an insertion is NOT allowed, you should return -1 as the insertion 
+    point.  In this case, the drop operation will be ignored.
+    
+    @param loc {Point} the mouse location.
+    @param dropOperation {DropOp} the preferred drop operation.
+    @returns {Array} [proposed drop index, drop operation] 
   */
-  insertionIndexForLocation: function(loc) {  
+  insertionIndexForLocation: function(loc, dropOperation) {  
     var content = this.get('content') ;
     var f, itemView, curSide, lastSide = null ;
     var orient = this.get('insertionOrientation') ;
@@ -1896,8 +2432,27 @@ SC.CollectionView = SC.View.extend(
     
     The default implementation of this method does nothing.
     
-    @param {SC.View} itemView view the insertion point should appear directly before. If null, show insertion point at end.
+    @param itemView {SC.View} view the insertion point should appear directly before. If null, show insertion point at end.
+    @param dropOperation {Number} the drop operation.  will be SC.DROP_BEFORE or SC.DROP_ON
     
+    @returns {void}
+  */
+  showInsertionPoint: function(itemView, dropOperation) {
+    return (dropOperation === SC.DROP_BEFORE) ? this.showInsertionPointBefore(itemView) : this.hideInsertionPoint() ;
+  },
+  
+  /**
+    @deprecated
+    
+    Show the insertion point during a drag before the named item view.
+    
+    This method has been deprecated in favor of the more generic 
+    showInsertionPoint() which can be used to show drops occurring both on
+    and before an itemView.  If you do not implement showInsertionPoint() 
+    yourself, the default implementation will call this method whenever the
+    drop operation is SC.DROP_BEFORE.
+    
+    @param itemView {SC.View} the item view to show before.
     @returns {void}
   */
   showInsertionPointBefore: function(itemView) {},
@@ -1905,13 +2460,14 @@ SC.CollectionView = SC.View.extend(
   /**
     Override to hide the insertion point when a drag ends.
     
-    Called during a drag to hide the insertion point.  This will be called when the
-    user exits the view, cancels the drag or completes the drag.  It will not be 
-    called when the insertion point changes during a drag.
+    Called during a drag to hide the insertion point.  This will be called 
+    when the user exits the view, cancels the drag or completes the drag.  It 
+    will not be called when the insertion point changes during a drag.
     
-    You should expect to receive one or more calls to showInsertionPointBefore()
-    during a drag followed by at least one call to this method at the end.  Your
-    method should not raise an error if it is called more than once.
+    You should expect to receive one or more calls to 
+    showInsertionPointBefore() during a drag followed by at least one call to 
+    this method at the end.  Your method should not raise an error if it is 
+    called more than once.
     
     @returns {void}
   */
@@ -1920,10 +2476,11 @@ SC.CollectionView = SC.View.extend(
   /**
     Override this method to provide your own ghost image for a drag.  
     
-    Note that the only purpose of this view is to render a visible drag element.  It is
-    not critical that you make this element bindable, etc.
+    Note that the only purpose of this view is to render a visible drag 
+    element.  It is not critical that you make this element bindable, etc.
     
-    @param dragContent {Array} Array of content objects that will be used in the drag.
+    @param dragContent {Array} Array of content objects that will be used in 
+     the drag.
   */
   ghostViewFor: function(dragContent) {
     var view = SC.View.create() ;
@@ -1950,16 +2507,16 @@ SC.CollectionView = SC.View.extend(
       if (SC.minY(f) < minY) minY = SC.minY(f) ;
 
       // Clone the contents of this node.  We should probably apply the 
-      // computed style to the cloned nodes in order to make sure they match even if the 
-      // CSS styles do not match.  Make sure the items are properly 
-      // positioned.
+      // computed style to the cloned nodes in order to make sure they match 
+      // even if the CSS styles do not match.  Make sure the items are 
+      // properly positioned.
       dom = dom.cloneNode(true) ;
       Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
       view.rootElement.appendChild(dom) ;
     }
 
-    // Now we have a view, create another view that will wrap the other view and position it 
-    // inside.
+    // Now we have a view, create another view that will wrap the other view 
+    // and position it inside.
     var wrapper = SC.View.create() ;
     wrapper.setStyle({ position: 'absolute', overflow: 'hidden' }) ;
     wrapper.set('frame', { 
@@ -1971,161 +2528,6 @@ SC.CollectionView = SC.View.extend(
     return wrapper ;
   },
   
-  mouseDragged: function(ev) {
-    // Don't do anything unless the user has been dragging for 123msec
-    if ((Date.now() - this._mouseDownAt) < 123) return true ;
-    
-    // OK, they must be serious, start a drag if possible. 
-    if (this.get('canReorderContent') && this._mouseDownEvent != null) {
-
-      // First, get the selection to drag.  Drag an array of selected
-      // items appearing in this collection, in the order of the 
-      // collection.
-      var content = this.get('content') || [] ;
-      var dragContent;
-      if(this.get("selectOnMouseDown") == false)
-      {
-       
-        dragContent = [this._previousMouseDownContent];
-      }
-      else
-      {
-        dragContent = this.get('selection').sort(function(a,b)
-        {
-          a = content.indexOf(a) ;
-          b = content.indexOf(b) ;
-          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-        });
-      }
-      // Build the drag view to use for the ghost drag.  This 
-      // should essentially contain any visible drag items.
-      var view = this.ghostViewFor(dragContent) ;
-      
-      // Initiate the drag
-      SC.Drag.start({
-        event: this._mouseDownEvent,
-        source: this,
-        dragView: view,
-        ghost: NO,
-        slideBack: YES,
-        data: { "_mouseDownContent": dragContent }
-      }) ; 
-      
-      // Also use this opportunity to clean up since mouseUp won't 
-      // get called.
-      this._cleanupMouseDown() ;
-      this._lastInsertionIndex = null ;
-    }
-  },
-  
-  // Drop Source. 
-  dragEntered: function(drag, evt) {
-    if ((drag.get('source') == this) && this.get('canReorderContent')) {
-      return SC.DRAG_MOVE ;
-    } else {
-      return SC.DRAG_NONE ;
-    }
-  },
-  
-  // If reordering is allowed, then show insertion point
-  dragUpdated: function(drag, evt) {
-    if (this.get('canReorderContent')) {
-      var loc = drag.get('location') ;
-      loc = this.convertFrameFromView(loc, null) ;
-      
-      // get the insertion index for this location.  This can be computed
-      // by a subclass using whatever method.  This method is not expected to
-      // do any data valdidation, just to map the location to an insertion index.
-      var ret = this.insertionIndexForLocation(loc) ;
-
-      // now that we have an index, find the nearest index that we can 
-      // actually insert at, or do not allow.
-      var objects = (drag.source == this) ? (drag.dataForType('_mouseDownContent') || []) : [];
-      var content = this.get('content') || [] ;
-
-      // if the insertion index is in between two items in the drag itself, 
-      // then this is not allowed.  Either use the last insertion index or 
-      // find the first index that is not in between selections.
-      var isPreviousInDrag = (ret > 0) ? objects.indexOf(content.objectAt(ret-1)) : -1 ;
-      var isNextInDrag = (ret < content.get('length')-1) ? objects.indexOf(content.objectAt(ret)) : -1 ;
-      if (isPreviousInDrag>=0 && isNextInDrag>=0) {
-        if (this._lastInsertionIndex == null) {
-          while((ret > 0) && (objects.indexOf(content.objectAt(ret)) >= 0)) ret-- ;
-        } else ret = this._lastInsertionIndex ;
-      }
-      
-      // Now that we have verified that, check to see if a drop is allowed in the 
-      // insertion index with the delegate.
-      // TODO
-
-      if (this._lastInsertionIndex != ret) {
-        var itemView = this.itemViewForContent(this.get('content').objectAt(ret));
-        this.showInsertionPointBefore(itemView) ;
-      }
-      this._lastInsertionIndex = ret ;
-      
-    }
-    return SC.DRAG_MOVE;  
-  },
-
-  dragExited: function() {
-    this.hideInsertionPoint() ;
-    this._lastInsertionIndex = null ;
-  },
-  
-  dragEnded: function() {
-    this.hideInsertionPoint() ;
-    this._lastInsertionIndex = null ;
-  },
-  
-  prepareForDragOperation: function(op, drag) { 
-    return SC.DRAG_ANY; 
-  },
-  
-  performDragOperation: function(op, drag) { 
-    
-    SC.Benchmark.start('%@ performDragOperation'.fmt(SC.guidFor(this))) ;
-    
-    var loc = drag.get('location') ;
-    loc = this.convertFrameFromView(loc, null) ;
-    
-    // if op is MOVE or COPY, add item to view.
-    var objects = drag.dataForType('_mouseDownContent') ;
-    if (objects && (op == SC.DRAG_MOVE)) {
-
-      // find the index to for the new insertion 
-      var idx = this.insertionIndexForLocation(loc) ;
-
-      var content = this.get('content') ;
-      content.beginPropertyChanges(); // suspend notifications
-
-      // find the old index and remove it.
-      var objectsIdx = objects.get('length') ;
-      while(--objectsIdx >= 0) {
-        var obj = objects.objectAt(objectsIdx) ;
-        var old = content.indexOf(obj) ;
-        if (old >= 0) content.removeAt(old) ;
-        if ((old >= 0) && (old < idx)) idx--; //adjust idx
-      }
-    
-      // now insert objects at new location
-      content.replace(idx, 0, objects) ;
-      content.endPropertyChanges(); // restart notifications
-    }
-    
-    SC.Benchmark.end('%@ performDragOperation'.fmt(SC.guidFor(this))) ;
-    console.log(SC.Benchmark.report()) ;
-    
-    return SC.DRAG_MOVE; 
-  },
-  
-  concludeDragOperation: function(op, drag) {
-    this.hideInsertionPoint() ;
-    this._lastInsertionIndex = null ;
-  },
-    
-
-
   // ......................................
   // INTERNAL
   //
@@ -2206,7 +2608,9 @@ SC.CollectionView = SC.View.extend(
     if (content) content.addObserver('[]', func) ;
     this._content = content; //cache
     this._contentPropertyRevision = null ;
-    this._contentPropertyObserver(this, '[]', content, content.propertyRevision) ; 
+    
+    var rev = (content) ? content.propertyRevision : -1 ;
+    this._contentPropertyObserver(this, '[]', content, rev) ; 
   }.observes('content'),
   
   /** @private

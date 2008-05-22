@@ -150,6 +150,17 @@ SC.Drag = SC.Object.extend(
   }.property(),
   
   /**
+    Checks for a named data type in the drag.
+    
+    @param dataType {String} the data type
+    @returns {Boolean} YES if data type is present in dataTypes array.
+  */
+  hasDataType: function(dataType) {
+    var dataTypes = this.get('dataTypes') || [] ;
+    return (dataTypes.indexOf(dataType) >= 0) ;  
+  },
+  
+  /**
     Retrieve the data for the specified dataType from the drag source.
   
     Drop targets can use this method during their performDragOperation() method
@@ -286,8 +297,6 @@ SC.Drag = SC.Object.extend(
         op = op & target.dragEntered(this, evt) ;
       } else op = SC.DRAG_NONE ;
 
-      console.log(SC.Drag.inspectOperation(op)) ;
-      
       // if DRAG_NONE, then look for the next parent that is a drop zone.
       if (op == SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
     }
@@ -742,9 +751,9 @@ SC.Drag.mixin(
   */
   inspectOperation: function(op) {
     var ret = [] ;
-    if (op == SC.DRAG_NONE) {
+    if (op === SC.DRAG_NONE) {
       ret = ['DRAG_NONE'];
-    } else if (op == SC.DRAG_ANY) {
+    } else if (op === SC.DRAG_ANY) {
       ret = ['DRAG_ANY'] ;
     } else {
       if (op & SC.DRAG_LINK) {

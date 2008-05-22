@@ -115,12 +115,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     
     if (this._isFocused) {
       this._isFocused = false ;
-      this._updateFieldHint() ;
       return this.rootElement.blur() ;
     }
     
     this._value = this.rootElement.value ;
-   
     this.fieldValueDidChange() ;
     this._updateFieldHint() ;
   },
@@ -149,7 +147,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   
   /** @private */
   setFieldValue: function(value) {
-    if (this._value === value) return ;
+    if (this._value == value) return ;
     this._value = value ;
     this._updateFieldHint() ;
   },

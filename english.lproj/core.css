@@ -10,6 +10,10 @@
    These styles are required by various views.  You should keep these in your views even if you write your own theme.
 */
 
+.sc-hide-overflow * {
+  overflow: hidden !important;
+}
+
 /* @group SC.Drag */
 
 .sc-ghost-view {

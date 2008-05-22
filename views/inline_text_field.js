@@ -104,11 +104,11 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
       this.endPropertyChanges();  return NO ;
     }
 
-    this._frame = options.frame ;
+    this._optframe = options.frame ;
     this._exampleElement = options.exampleElement ;
     this._delegate = options.delegate ;
 
-    if (!this._frame || !this._delegate) {
+    if (!this._optframe || !this._delegate) {
       throw "At least frame and delegate options are required for inline editor";
     }
     
@@ -136,9 +136,10 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
     // allow notifications to go
     this.endPropertyChanges() ;
-
+    
     // and become first responder
     this.field.becomeFirstResponder() ;
+
     this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this) ;
   },
   
@@ -187,11 +188,10 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
-    console.log('applying finalValue: %@.'.fmt(finalValue)) ;
     this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue) ;
 
     // cleanup cached values
-    this._originalValue = this._delegate = this._exampleElement = this._frame = null ;
+    this._originalValue = this._delegate = this._exampleElement = this._optframe = null ;
     this.set('isEditing', NO) ;
 
     // resign first responder if not done already.  This may call us in a 
@@ -223,7 +223,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
   */
   updateViewStyle: function() {
     // collect font and frame from target.
-    var f= this._frame ;
+    var f= this._optframe ;
     var el = this._exampleElement ;
     
     var styles = {
@@ -328,23 +328,8 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
         this.owner.commitEditing() ;
         return YES ;
       }
-    },
-    
-    insertTab: function(evt) { 
-        var next = this.get("owner")._delegate.get("nextKeyView");
-        this.owner.commitEditing() ;
-        if(next) next.beginEditing();
-        return YES ;
-    },
-    
-    insertBacktab: function(evt) { 
-        var prev = this.get("owner")._delegate.get("previousKeyView");
-        this.owner.commitEditing() ;
-        if(prev) prev.beginEditing();
-        return YES ;
     }
-    
-    
+
   }).outletFor('.inner-field?'),
   
   sizer: SC.View.outletFor('.sizer?')

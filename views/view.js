@@ -659,7 +659,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     any of these properties to edit individual CSS style properties.
   */
   unknownProperty: function(key, value) {
-    if (key.match(/^style/)) {
+    if (key && key.match && key.match(/^style/)) {
       key = key.slice(5,key.length).replace(/^./, function(x) { 
         return x.toLowerCase(); 
       });
@@ -877,7 +877,25 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @type {Element}
   */
   offsetParent: function() {
-    return Position.offsetParent(this.rootElement) ;
+    
+    // handle simple cases.
+    var el = this.rootElement ;
+    if (!el || el === document.body) return el;
+    if (el.offsetParent) return el.offsetParent ;
+
+    // in some cases, we can't find the offset parent so we walk up the 
+    // chain until an element is found with a position other than
+    // 'static'
+    //
+    // Note that IE places DOM elements not in the main body inside of a 
+    // document-fragment root.  We need to treat document-fragments (i.e. 
+    // nodeType === 11) as null values
+    var ret = null ;
+    while(!ret && (el = el.parentNode) && (el.nodeType !== 11) && (el !== document.body)) {
+      if (Element.getStyle(el, 'position') !== 'static') ret = el;
+    }
+    if (!ret && (el === document.body)) ret = el ;
+    return ret ;
   }.property(),
 
   /**
@@ -898,15 +916,10 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if (this._innerFrame == null) {  
 
       // get the base frame
+      // The _collectInnerFrame function is set at the bottom of this file
+      // based on the browser type.
       var el = this.rootElement ;
-      f = this._collectFrame(function() {
-        return { 
-          x: el.offsetLeft, 
-          y: el.offsetTop, 
-          width: Math.min(el.scrollWidth, el.clientWidth), 
-          height: Math.min(el.scrollHeight, el.clientHeight) 
-        };
-      }) ;
+      f = this._collectFrame(SC.View._collectInnerFrame) ;
 
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset
@@ -1762,6 +1775,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     // if state changes, update and notify children.
     if (visible != this.get('isVisibleInWindow')) {
       this.set('isVisibleInWindow', visible) ;
+      this.recacheFrames() ;
       var child = this.get('firstChild') ;
       while(child) {
         child._updateIsVisibleInWindow(visible) ;
@@ -2116,10 +2130,27 @@ if (SC.Platform.IE) {
     if (value === 'auto') {
       switch(style) {
         case 'width':
-          value = (this.getStyle('display') != 'none') ? (element.offsetWidth + 'px') : null;
+          if (this.getStyle('display') === 'none') {
+            value = null ;
+          } else if (element.currentStyle) {
+            var paddingLeft = parseInt(element.currentStyle.paddingLeft,0)||0;
+            var paddingRight = parseInt(element.currentStyle.paddingRight,0)||0;
+            var borderLeftWidth = parseInt(element.currentStyle.borderLeftWidth, 0) || 0 ;
+            var borderRightWidth = parseInt(element.currentStyle.borderRightWidth, 0) || 0 ;
+            value = (element.offsetWidth - paddingLeft - paddingRight - borderLeftWidth - borderRightWidth) + 'px' ;
+          }
           break ;
         case 'height':
-          value = (this.getStyle('display') != 'none') ? (element.offsetHeight + 'px') : null;
+          if (this.getStyle('display') === 'none') {
+            value = null ;
+          } else if (element.currentStyle) {
+            var paddingTop = parseInt(element.currentStyle.paddingTop,0)||0;
+            var paddingBottom = parseInt(element.currentStyle.paddingBottom,0)||0;
+            var borderTopWidth = parseInt(element.currentStyle.borderTopWidth, 0) || 0 ;
+            var borderBottomWidth = parseInt(element.currentStyle.borderBottomWidth, 0) || 0 ;
+            value = (element.offsetHeight - paddingTop - paddingBottom - borderTopWidth - borderBottomWidth) + 'px' ;
+          }
+
           break ;
         default:
           value = null ;
@@ -2128,6 +2159,37 @@ if (SC.Platform.IE) {
 
     return value;
   };
+  
+  // Called from innerFrame to actually collect the values for the innerFrame.
+  // Normally the value we want for the width/height is stored in clientWidth/
+  // height but in IE this is only good if the element hasLayout.  In this
+  // case always use the scrollWidth/Height.
+  SC.View._collectInnerFrame = function() {
+    var el = this.rootElement ;
+    var hasLayout = (el.currentStyle) ? el.currentStyle.hasLayout : NO ;
+    return { 
+      x: el.offsetLeft, 
+      y: el.offsetTop, 
+      width: (hasLayout) ? Math.min(el.scrollWidth, el.clientWidth) : el.scrollWidth, 
+      height: (hasLayout) ? Math.min(el.scrollHeight, el.clientHeight) : el.scrollHeight 
+    };
+  } ;
+  
+} else {
+  
+  // Called from innerFrame to actually collect the values for the innerFrame.
+  // This method should return the smaller of the scrollWidth/height (which
+  // will be set if the element is scrollable), or the clientWdith/height 
+  // (which is set if the element is not scrollable).
+  SC.View._collectInnerFrame = function() {
+    var el = this.rootElement ;
+    return { 
+      x: el.offsetLeft, 
+      y: el.offsetTop, 
+      width: Math.min(el.scrollWidth, el.clientWidth), 
+      height: Math.min(el.scrollHeight, el.clientHeight) 
+    };
+  } ;
 }
 
 
