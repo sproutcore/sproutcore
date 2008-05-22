@@ -877,7 +877,25 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @type {Element}
   */
   offsetParent: function() {
-    return Position.offsetParent(this.rootElement) ;
+    
+    // handle simple cases.
+    var el = this.rootElement ;
+    if (!el || el === document.body) return el;
+    if (el.offsetParent) return el.offsetParent ;
+
+    // in some cases, we can't find the offset parent so we walk up the 
+    // chain until an element is found with a position other than
+    // 'static'
+    //
+    // Note that IE places DOM elements not in the main body inside of a 
+    // document-fragment root.  We need to treat document-fragments (i.e. 
+    // nodeType === 11) as null values
+    var ret = null ;
+    while(!ret && (el = el.parentNode) && (el.nodeType !== 11) && (el !== document.body)) {
+      if (Element.getStyle(el, 'position') !== 'static') ret = el;
+    }
+    if (!ret && (el === document.body)) ret = el ;
+    return ret ;
   }.property(),
 
   /**

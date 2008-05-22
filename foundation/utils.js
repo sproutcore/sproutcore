@@ -133,6 +133,7 @@ Object.extend(SC,
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
     
+    If you pass NULL to this method, it will return a { x:0, y:0 }
     @param el The DOM element
     @returns {Point} A hash with x,y offsets.
   */
@@ -141,7 +142,7 @@ Object.extend(SC,
 
     // add up all the offsets for the element.
     var element = el ;
-    do {
+    while (element) {
       valueT += (element.offsetTop  || 0) + (element.clientTop  || 0);
       valueL += (element.offsetLeft || 0) + (element.clientLeft || 0);
 
@@ -163,17 +164,19 @@ Object.extend(SC,
       if (element.offsetParent == document.body &&
         Element.getStyle(element, 'position') == 'absolute') break;
 
+      element = element.offsetParent ;
 
-
-    } while (element = element.offsetParent);
+    }
 
     element = el;
-    do {
+    while (element) {
       if (!Prototype.Browser.Opera || element.tagName == 'BODY') {
         valueT -= element.scrollTop  || 0;
         valueL -= element.scrollLeft || 0;
       }
-    } while (element = element.parentNode);
+      
+      element = element.parentNode ;
+    }
 
     return { x: valueL, y: valueT } ;
   },
