@@ -328,6 +328,25 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
         this.owner.commitEditing() ;
         return YES ;
       }
+    },
+    
+    // Tries to find the next key view when tabbing.  If the next view is 
+    // editable, begins editing.
+    
+    insertTab: function(evt)
+    {
+      var next = this.get("owner")._delegate.get("nextKeyView");
+      this.owner.commitEditing() ;
+      if(next) next.beginEditing();
+      return YES ;
+    },
+
+    insertBacktab: function(evt)
+    {
+      var prev = this.get("owner")._delegate.get("previousKeyView");
+      this.owner.commitEditing() ;
+      if(prev) prev.beginEditing();
+      return YES ;
     }
 
   }).outletFor('.inner-field?'),
@@ -384,6 +403,8 @@ SC.InlineTextFieldView.mixin(
   discardEditing: function() {
     return (this.sharedEditor) ? this.sharedEditor.discardEditing() : YES ;  
   },
+  
+
   
   /**
     The current shared inline editor.  This property will often remain NULL
