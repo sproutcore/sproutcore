@@ -2490,13 +2490,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     var idx = dragContent.length ;
     var maxX = 0; var maxY = 0 ; var minX =100000; var minY = 100000 ;
-    
+    var groupValues = [];
     while(--idx >= 0) {
       var itemView = this.itemViewForContent(dragContent[idx]) ;
       if (!itemView) continue ;
+      var groupValue = "";
+      
       var f = itemView.get('frame') ;
       var dom = itemView.rootElement ;
       if (!dom) continue ;
+      
+      if(this.get("groupBy"))
+      {
+        //TODO: MAKE THIS MORE UNIVERSAL
+        // console.log("Group this item's group: %@".fmt(itemView.get("content").get(this.get("groupBy"))));
+        groupValue = (itemView.get("content").get(this.get("groupBy")));
+        var groupView = this.groupViewForGroupValue(groupValue);
+        var offsetY = groupView.get("frame").y;
+        f.y = f.y + offsetY;
+      }
       
       // save the maxX & maxY.  This will be used to trim the size 
       // of the ghost view later.
@@ -2509,7 +2521,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       // computed style to the cloned nodes in order to make sure they match 
       // even if the CSS styles do not match.  Make sure the items are 
       // properly positioned.
-      dom = dom.cloneNode(true) ;
+      dom = dom.cloneNode(true) ;  
+      
       Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
       view.rootElement.appendChild(dom) ;
     }
