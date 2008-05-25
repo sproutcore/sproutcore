@@ -392,9 +392,11 @@ SC.SourceListView = SC.CollectionView.extend(
     var f = this.get('innerFrame') ;
     var sf = this.get('scrollFrame') ;
     var rowHeight = this.get('rowHeight') || 0 ;
-
+    var headerRowCount = (this.get("groupBy")) ? 1 : 0;
+    
     // find the offset to work with.
     var offset = loc.y - f.y - sf.y ;
+    
     var ret = -1; // the return value
     var retOp = SC.DROP_BEFORE ;
 
@@ -402,13 +404,14 @@ SC.SourceListView = SC.CollectionView.extend(
     var top = 0;
     var idx = 0 ;
     while((ret<0) && (range = this.groupRangeForContentIndex(idx)).length>0){
-      var max = top + ((range.length+1) * rowHeight) ;
+      var max = top + ((range.length+headerRowCount) * rowHeight) ;
       
       // the offset is within the group, find the row in the group.  Remember
       // that the top row is actually the label, so we should return -1 if 
       // we hit there.
       if (max >= offset) {
         offset -= top ;
+          
         ret = Math.floor(offset / rowHeight) ;
 
         // find the percent through the row...
@@ -426,11 +429,11 @@ SC.SourceListView = SC.CollectionView.extend(
         }
         
         // handle dropping on top row...
-        if (ret < 1) return [-1, SC.DROP_BEFORE] ; // top row!
+        if (ret < headerRowCount) return [-1, SC.DROP_BEFORE] ; // top row!
         
         // convert to index
-        ret = (ret - 1) + idx ;
-        
+        ret = (ret - headerRowCount) + idx ;
+
       // we are not yet within the group, go on to the next group.
       } else {
         idx += range.length ;
