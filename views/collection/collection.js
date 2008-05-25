@@ -583,12 +583,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {Range} a range of objects
   */
   groupRangeForContentIndex: function(contentIndex) {
-    var groupBy = this.get('groupBy') ;
-    if (!groupBy) return { start: contentIndex, length: 1 } ;
-
-    var min = contentIndex, max = contentIndex ;
     var content = Array.from(this.get('content')) ;
     var len = content.get('length') ;
+    var groupBy = this.get('groupBy') ;
+    if (!groupBy) return { start: 0, length: len } ;
+
+    var min = contentIndex, max = contentIndex ;
     var cur = content.objectAt(contentIndex) ;
     var groupValue = (cur) ? cur.get(groupBy) : null ;
     
@@ -2111,7 +2111,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // index.
     var loc = drag.get('location') ;
     loc = this.convertFrameFromView(loc, null) ;
-    
     var dropOp = SC.DROP_BEFORE ;
     var dragOp = SC.DRAG_NONE ;
     
@@ -2125,7 +2124,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       dropOp = idx[1] ;
       idx = idx[0] ;
     }
-    
+
     // if the return drop operation is DROP_ON, then just check it with the
     // delegate method.  If the delegate method does not support dropping on,
     // then it will return DRAG_NONE, in which case we will try again with
@@ -2143,18 +2142,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
       // The delegate is OK with a drop on also, so just return.
       if (dragOp !== SC.DRAG_NONE) {
+        console.log("DRAG NONE");
         return [idx, dropOp, dragOp] ;
         
       // The delegate is NOT OK with a drop on, try to get the insertion
       // index again, but this time prefer SC.DROP_BEFORE, then let the 
       // rest of the method run...
       } else {
+        console.log("asdasd");
         dropOp = SC.DROP_BEFORE ;
         idx = this.insertionIndexForLocation(loc, SC.DROP_BEFORE) ;
         if ($type(idx) === T_ARRAY) {
           dropOp = idx[1] ;
           idx = idx[0] ;
         }
+        console.log("index: " + idx);
       }
     }
 
@@ -2215,6 +2217,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // if the insertion index or dropOp have changed, update the insertion
     // point
+    console.log(state);
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
         var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
