@@ -583,12 +583,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {Range} a range of objects
   */
   groupRangeForContentIndex: function(contentIndex) {
-    var groupBy = this.get('groupBy') ;
-    if (!groupBy) return { start: contentIndex, length: 1 } ;
-
-    var min = contentIndex, max = contentIndex ;
     var content = Array.from(this.get('content')) ;
     var len = content.get('length') ;
+    var groupBy = this.get('groupBy') ;
+    if (!groupBy) return { start: 0, length: len } ;
+
+    var min = contentIndex, max = contentIndex ;
     var cur = content.objectAt(contentIndex) ;
     var groupValue = (cur) ? cur.get(groupBy) : null ;
     
@@ -2111,7 +2111,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // index.
     var loc = drag.get('location') ;
     loc = this.convertFrameFromView(loc, null) ;
-    
     var dropOp = SC.DROP_BEFORE ;
     var dragOp = SC.DRAG_NONE ;
     
@@ -2125,7 +2124,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       dropOp = idx[1] ;
       idx = idx[0] ;
     }
-    
+
     // if the return drop operation is DROP_ON, then just check it with the
     // delegate method.  If the delegate method does not support dropping on,
     // then it will return DRAG_NONE, in which case we will try again with

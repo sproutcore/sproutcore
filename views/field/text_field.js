@@ -100,12 +100,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this._isFocused = true ;
       if (this.get('isVisibleInWindow')) {
         this.rootElement.focus();
-        this.rootElement.select.bind(this.rootElement).delay(0.05);
+
+		this.invokeLater(this._selectRootElement, 1) ;
+
       }
     }
 
     // hide the hint text if it is showing.
     this._updateFieldHint() ;
+  },
+
+  // In IE, you can't modify functions on DOM elements so we need to wrap the call to select() 
+  // like this.
+  _selectRootElement: function() {
+	this.rootElement.select() ;
   },
 
   // when we lose first responder, blur the text field if needed and show
@@ -115,12 +123,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     
     if (this._isFocused) {
       this._isFocused = false ;
+      this._updateFieldHint() ;
       return this.rootElement.blur() ;
     }
-    
-    this._value = this.rootElement.value ;
-    this.fieldValueDidChange() ;
-    this._updateFieldHint() ;
+    else {
+      this._value = this.rootElement.value ;
+      this.fieldValueDidChange() ;
+      this._updateFieldHint() ;
+      return true;
+    }
   },
   
   _isFocused: false,
