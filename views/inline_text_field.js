@@ -335,7 +335,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     
     insertTab: function(evt)
     {
-      var next = this.get("owner")._delegate.get("nextKeyView");
+      var next = this.get("owner")._delegate.nextValidKeyView();
       this.owner.commitEditing() ;
       if(next) next.beginEditing();
       return YES ;
@@ -343,7 +343,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
     insertBacktab: function(evt)
     {
-      var prev = this.get("owner")._delegate.get("previousKeyView");
+      var prev = this.get("owner")._delegate.previousValidKeyView();
       this.owner.commitEditing() ;
       if(prev) prev.beginEditing();
       return YES ;
