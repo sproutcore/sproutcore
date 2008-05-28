@@ -131,6 +131,12 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     this.updateViewStyle() ;
 
     var del = this._delegate ;
+
+    this._className = this.getDelegateProperty(del,"inlineEditorClassName");
+    if(this._className && !this.hasClassName(this._className)) {
+        this.setClassName(this._className,true);
+      }
+    
     this.invokeDelegateMethod(del, 'inlineEditorWillBeginEditing', this) ;
     this.resizeToFit(field.getFieldValue()) ;
 
@@ -190,8 +196,11 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     // and clean up.
     this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue) ;
 
+    // If the delegate set a class name, let's clean it up:
+    if(this._className) this.setClassName(this._className, false);
+    
     // cleanup cached values
-    this._originalValue = this._delegate = this._exampleElement = this._optframe = null ;
+    this._originalValue = this._delegate = this._exampleElement =  this._optframe = this._className = null ;
     this.set('isEditing', NO) ;
 
     // resign first responder if not done already.  This may call us in a 
@@ -328,6 +337,25 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
         this.owner.commitEditing() ;
         return YES ;
       }
+    },
+    
+    // Tries to find the next key view when tabbing.  If the next view is 
+    // editable, begins editing.
+    
+    insertTab: function(evt)
+    {
+      var next = this.get("owner")._delegate.nextValidKeyView();
+      this.owner.commitEditing() ;
+      if(next) next.beginEditing();
+      return YES ;
+    },
+
+    insertBacktab: function(evt)
+    {
+      var prev = this.get("owner")._delegate.previousValidKeyView();
+      this.owner.commitEditing() ;
+      if(prev) prev.beginEditing();
+      return YES ;
     }
 
   }).outletFor('.inner-field?'),

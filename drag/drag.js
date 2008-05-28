@@ -138,7 +138,7 @@ SC.Drag = SC.Object.extend(
       for(var key in this._data) {
         if (this.data.hasOwnProperty(key)) ret.push(key) ;
       }
-      return key ;
+      return ret ;
     }    
     
     // if that fails, then check to see if the source object is a dataSource.

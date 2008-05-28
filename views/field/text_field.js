@@ -100,9 +100,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this._isFocused = true ;
       if (this.get('isVisibleInWindow')) {
         this.rootElement.focus();
-
-		this.invokeLater(this._selectRootElement, 1) ;
-
+		    this.invokeLater(this._selectRootElement, 1) ;
       }
     }
 
@@ -110,8 +108,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     this._updateFieldHint() ;
   },
 
-  // In IE, you can't modify functions on DOM elements so we need to wrap the call to select() 
-  // like this.
+  // In IE, you can't modify functions on DOM elements so we need to wrap the 
+  // call to select() like this.
   _selectRootElement: function() {
 	this.rootElement.select() ;
   },
@@ -125,8 +123,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this._isFocused = false ;
       this._updateFieldHint() ;
       return this.rootElement.blur() ;
-    }
-    else {
+    } else {
       this._value = this.rootElement.value ;
       this.fieldValueDidChange() ;
       this._updateFieldHint() ;
