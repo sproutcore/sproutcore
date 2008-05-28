@@ -100,7 +100,7 @@ view_helper :button_view do
   var :theme, :regular
   var :size, :normal
 
-  attribute(:href) { |x| (x.nil? && (@tag.downcase.to_s == 'a')) ? 'javascript:;' : nil } 
+  attribute(:href) { |x| (x.nil? && (@tag.downcase.to_s == 'a')) ? 'javascript:;' : x } 
 
   # Add the theme to the CSS class.
   css_class_names << 'sc-button-view'
