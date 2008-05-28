@@ -18,6 +18,16 @@
 SC.InlineEditorDelegate = {
   
     /**
+     This is a  classname you can apply to the inline editor field
+     to configure it's styling, in addition to the the editor's 
+     default style-cloning behavior.
+      
+      @property inlineEditorClassName {String} A class name to use with the inline editor.
+    */
+    inlineEditorClassName: "",
+  
+  
+    /**
       Called just before the inline edit displays itself but after it has been 
       configured for display.  
       
@@ -28,6 +38,7 @@ SC.InlineEditorDelegate = {
       @returns {void}
     */
     inlineEditorWillBeginEditing: function(inlineEditor) {},
+    
 
     /**
       Called just after an inline editor displays itself.
