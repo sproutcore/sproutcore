@@ -38,7 +38,6 @@ SC.InlineEditorDelegate = {
       @returns {void}
     */
     inlineEditorWillBeginEditing: function(inlineEditor) {},
-    
 
     /**
       Called just after an inline editor displays itself.
