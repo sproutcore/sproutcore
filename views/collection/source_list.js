@@ -345,7 +345,7 @@ SC.SourceListView = SC.CollectionView.extend(
   }),
   
   showInsertionPoint: function(itemView, dropOperation) {
-    if (!itemView) return;
+    if (!itemView) return ;
 
     // if drop on, then just add a class...
     if (dropOperation === SC.DROP_ON) {
@@ -379,14 +379,14 @@ SC.SourceListView = SC.CollectionView.extend(
   
   /**
     This is the default frame for the insertion point.  Override this method 
-    if your insertion point's styling needs to be customized, or if you need more 
-    control of the insertion point's positioning (i.e., heirarchical placement)
+    if your insertion point's styling needs to be customized, or if you need 
+    more control of the insertion point's positioning (i.e., heirarchical 
+    placement)
   */
-  
   calculateInsertionPointFrame: function(itemView) {
     return { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
   },
-  
+
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
     if (insertionPoint) insertionPoint.removeFromParent() ;

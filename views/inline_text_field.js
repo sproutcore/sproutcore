@@ -131,8 +131,9 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     this.updateViewStyle() ;
 
     var del = this._delegate ;
+
     this._className = this.getDelegateProperty(del,"inlineEditorClassName");
-    if(this._className) {
+    if(this._className && !this.hasClassName(this._className)) {
         this.setClassName(this._className,true);
       }
     
@@ -194,16 +195,14 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     // OK, we are allowed to end editing.  Notify delegate of final value
     // and clean up.
     this.invokeDelegateMethod(del, 'inlineEditorDidEndEditing', this, finalValue) ;
-    
+
     // If the delegate set a class name, let's clean it up:
     if(this._className) this.setClassName(this._className, false);
     
     // cleanup cached values
     this._originalValue = this._delegate = this._exampleElement =  this._optframe = this._className = null ;
     this.set('isEditing', NO) ;
-    
-    
-    
+
     // resign first responder if not done already.  This may call us in a 
     // loop but since isEditing is already NO, nothing will happen.
     if (this.field.get('isFirstResponder')) this.field.resignFirstResponder();
