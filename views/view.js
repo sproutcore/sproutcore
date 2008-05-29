@@ -470,12 +470,19 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   //
 
   /**
-    Read-only array of currently applied classNames.
+    An array of currently applied classNames.
     
     @field
     @type {Array}
+    @param value {Array} Array of class names to apply to the element
   */
-  classNames: function() { 
+  classNames: function(key, value) { 
+    if (value !== undefined) {
+        value = Array.from(value) ;
+        if (this.rootElement) this.rootElement.className = value.join(' ') ;
+        this._classNames = value.slice() ;
+    }
+    
     if (!this._classNames) {
       var classNames = this.rootElement.className;
       this._classNames = (classNames && classNames.length > 0) ? classNames.split(' ') : [] ;
@@ -502,11 +509,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   addClassName: function(className) {
     if (this.hasClassName(className)) return ; // nothing to do
 
-    this.propertyWillChange('classNames') ;
     var classNames = this._classNames || this.get('classNames') ;
     classNames.push(className) ;
-    if (this.rootElement) this.rootElement.className = classNames.join(' ');
-    this.propertyDidChange('classNames') ;
+    this.set('classNames', classNames) ;
     return className ;
   },
 
@@ -519,11 +524,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   removeClassName: function(className) {
     if (!this.hasClassName(className)) return ; // nothing to do
     
-    this.propertyWillChange('classNames') ;
     var classNames = this._classNames || this.get('classNames') ;
     classNames = this._classNames = classNames.without(className) ;
-    if (this.rootElement) this.rootElement.className = classNames.join(' ');
-    this.propertyDidChange('classNames') ;
+    this.set('classNames', classNames) ;
     return className ;
   },
 
