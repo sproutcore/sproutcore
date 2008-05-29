@@ -413,6 +413,8 @@ SC.InlineTextFieldView.mixin(
     return (this.sharedEditor) ? this.sharedEditor.discardEditing() : YES ;  
   },
   
+
+  
   /**
     The current shared inline editor.  This property will often remain NULL
     until you actually begin editing for the first time.
