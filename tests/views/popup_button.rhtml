@@ -8,7 +8,7 @@ Test.context("A SC.PopupButtonView with no configured menu", {
   {
     for (var i=0, n=this.buttons.length; i < n; i++)
     {
-      (this.buttons[i].get('menu') == null).shouldEqual(true);
+      (buttons[i].get('menu') == null).shouldEqual(true);
     }
   },
   "Should return false if asked to trigger it's action": function()
@@ -32,9 +32,10 @@ Test.context("A SC.PopupButtonView with no configured menu", {
       SC.PopupButtonView.extend({ menuName: '' }).viewFor(null),
       SC.PopupButtonView.extend({ menuName: 'foobarMenu' }).viewFor(null),
       SC.PopupButtonView.extend({ menuName: false }).viewFor(null),
-      SC.PopupButtonView.extend({ menuName: null }).viewFor(null),
+      SC.PopupButtonView.extend({ menuName: null }).viewFor(null) 
     ];
   },
+
   teardown: function()
   {
     delete this.buttons;
