@@ -2494,7 +2494,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     while(--idx >= 0) {
       var itemView = this.itemViewForContent(dragContent[idx]) ;
       if (!itemView) continue ;
+
       var f = itemView.get('frame') ;
+      f = this.convertFrameFromView(f, itemView) ;
+      
       var dom = itemView.rootElement ;
       if (!dom) continue ;
       
@@ -2510,6 +2513,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       // even if the CSS styles do not match.  Make sure the items are 
       // properly positioned.
       dom = dom.cloneNode(true) ;
+
       Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
       view.rootElement.appendChild(dom) ;
     }
