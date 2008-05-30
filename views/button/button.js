@@ -222,6 +222,9 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */
   keyEquivalent: null,
   
+  /** @private {String} used to store a previously defined key equiv */
+  _lastKeyEquivalent: null,
+  
   performKeyEquivalent: function( keystring, evt )
   {
     if (!this.get('isEnabled')) return false;
@@ -329,12 +332,26 @@ SC.ButtonView = SC.View.extend(SC.Control,
   _isDefaultOrCancelObserver: function() {
     var isDef = !!this.get('isDefault') ;
     var isCancel = !isDef && this.get('isCancel') ;
-
-    this.setClassName('def', isDef) ;
-
-    var key = this.get('keyEquivalent') ;
-    if (isDef && key != 'return') this.set('keyEquivalent', 'return') ;
-    if (isCancel && key != 'escape') this.set('keyEquivalent', 'escape') ;
+    if(this.didChangeFor('defaultCancelChanged','isDefault','isCancel')) {
+      this.setClassName('def', isDef) ;
+      var key = this.get('keyEquivalent') ;
+      if (isDef) {
+        //cache the previously defined key equivalent
+        this._lastKeyEquivalent = key;
+        this.setIfChanged('keyEquivalent', 'return');
+      } 
+      else if (isCancel)
+      {
+        //cache the previously defined key equivalent
+        this._lastKeyEquivalent = key;
+        this.setIfChanged('keyEquivalent', 'escape') ;
+      }
+      else
+      {
+        this.setIfChanged("keyEquivalent",this._lastKeyEquivalent);
+      }
+    }
+      
   }.observes('isDefault', 'isCancel'),
     
   // on mouse down, set active only if enabled.  
