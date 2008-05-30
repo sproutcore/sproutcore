@@ -694,7 +694,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // from scratch.  This is necessary of the content of the visible range
     // might have changed.
     if (fullUpdate) {
-
+     
       var itemViewsByContent = {} ; // this will replace the current hash.
       
       // iterate through all of the views and insert them.  If the view 
@@ -1232,20 +1232,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       var groupView = this._zombieGroupViews[key] ;
       this._finalRemoveGroupView(groupView) ;
     } 
-    
     this._zombieGroupViews = {} ; // reset
-    
-    // Go through and make sure that you actually removed all groups that are empty.
-    if(this.get("groupBy"))
-    {
-      for(var i=0; i<this.childNodes.length; i++)
-      {
-        if(this.childNodes[i] && this.childNodes[i].childNodes.length == 1)
-        {
-          this._finalRemoveGroupView(this.childNodes[i]) ;
-        }
-      }
-    }
   },
   
   /** @private
