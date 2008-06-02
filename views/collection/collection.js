@@ -1701,7 +1701,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // Make sure that saved mouseDown state is always reset in case we do
     // not get a paired mouseUp. (Only happens if subclass does not call us 
     // like it should)
-    this._mouseDownAt = this._shouldDeselect =
+    this._mouseDownAt = this._shouldSelect = this._shouldDeselect =
       this._shouldReselect = this._refreshSelection = false;
 
     // find the actual view the mouse was pressed down on.  This will call
@@ -1727,12 +1727,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var modifierKeyPressed = ev.ctrlKey || ev.altKey || ev.metaKey;
     if (mouseDownView.checkboxView && (Event.element(ev) == el.checkboxView.rootElement)) {
       modifierKeyPressed = true ;
-    } 
+    }
+    this._modifierKeyPressed = modifierKeyPressed ;  
 
     this._mouseDownAt = Date.now();
 
-    // holding down a modifier key while clicking a selected item should deselect that item...
-    // deselect and bail.
+    // holding down a modifier key while clicking a selected item should 
+    // deselect that item...deselect and bail.
     if (modifierKeyPressed && isSelected) {
       this._shouldDeselect = mouseDownContent;
     
@@ -1747,20 +1748,17 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     } else if (!modifierKeyPressed && isSelected) {
       this._shouldReselect = mouseDownContent;
       
-    // Otherwise, if selecting on mouse down,  simply select the clicked on item, 
-    // adding it to the current
-    // selection if a modifier key was pressed.
+    // Otherwise, if selecting on mouse down,  simply select the clicked on 
+    // item, adding it to the current selection if a modifier key was pressed.
     } else {
-       if(this.get("selectOnMouseDown")){
+      if (this.get("selectOnMouseDown")){
          this.selectItems(mouseDownContent, modifierKeyPressed);
-      } 
-      
-       
-      
+      } else this._shouldSelect = mouseDownContent ;
     }
-
+    
     // saved for extend by shift ops.
     this._previousMouseDownContent = mouseDownContent;
+    
     return true;
   },
   
@@ -1782,11 +1780,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
     } else {
       var content = (view) ? view.get('content') : null ;
-      if(this._previousMouseDownContent == content) { this.selectItems(content); }
+
+      // this will be set if the user simply clicked on an unselected item and 
+      // selectOnMouseDown was NO.
+      if (this._shouldSelect) this.selectItems(this._shouldSelect, this._modifierKeyPressed);
+      
+      // This is true if the user clicked on a selected item with a modifier
+      // key pressed.
       if (this._shouldDeselect) this.deselectItems(this._shouldDeselect);
 
-      // begin editing of an item view IF all of the following is true:
-      //   otherwise, just reselect.
+      // This is true if the user clicked on a selected item without a 
+      // modifier-key pressed.  When this happens we try to begin editing 
+      // on the content.  If that is not allowed, then simply clear the 
+      // selection and reselect the clicked on item.
       if (this._shouldReselect) {
 
         // - contentValueIsEditable is true
@@ -1821,7 +1827,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   },
   
   _cleanupMouseDown: function() {
-    this._mouseDownAt = this._shouldDeselect = this._shouldReselect = this._refreshSelection = false;
+    this._mouseDownAt = this._shouldDeselect = this._shouldReselect = this._refreshSelection = this._shouldSelect = false;
     this._mouseDownEvent = this._mouseDownContent = this._mouseDownView = null ;
   },
   
@@ -1851,33 +1857,39 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   },
 
   _findSelectionExtendedByShift: function(selection, mouseDownContent) {
-    var collection = this.get('content');
+    var content = this.get('content');
 
     // bounds of the collection...
-    var collectionLowerBounds = 0;
-    var collectionUpperBounds = (collection.get('length') - 1);
+    var contentLowerBounds = 0;
+    var contentUpperBounds = (content.get('length') - 1);
 
-    var selectionBeginIndex = collection.indexOf(selection.first());
-    var selectionEndIndex   = collection.indexOf(selection.last());
+    var selectionBeginIndex = content.indexOf(selection.first());
+    var selectionEndIndex   = content.indexOf(selection.last());
 
-    var previousMouseDownIndex = collection.indexOf(this._previousMouseDownContent);
+    var previousMouseDownIndex = content.indexOf(this._previousMouseDownContent);
     // _previousMouseDownContent couldn't be found... either it hasn't been set yet or the record has been deleted by the user
     // fall back to the first selected item.
     if (previousMouseDownIndex == -1) previousMouseDownIndex = selectionBeginIndex;
 
 
-    var currentMouseDownIndex = collection.indexOf(mouseDownContent);
+    var currentMouseDownIndex = content.indexOf(mouseDownContent);
     // sanity check...
-    if (currentMouseDownIndex == -1) throw "Unable to extend selection to an item that's not in the collection!";
+    if (currentMouseDownIndex == -1) throw "Unable to extend selection to an item that's not in the content array!";
 
     // clicked before the current selection set... extend it's beginning...
-    if (currentMouseDownIndex < selectionBeginIndex) selectionBeginIndex = currentMouseDownIndex;
+    if (currentMouseDownIndex < selectionBeginIndex) {
+      selectionBeginIndex = currentMouseDownIndex;
+    }
+    
     // clicked after the current selection set... extend it's ending...
-    if (currentMouseDownIndex > selectionEndIndex) selectionEndIndex = currentMouseDownIndex;
-    // clicked inside the selection set... need to determine where the las
-    if ((currentMouseDownIndex > selectionBeginIndex) && (currentMouseDownIndex < selectionEndIndex))
-    {
-      if (currentMouseDownIndex == previousMouseDownIndex) {
+    if (currentMouseDownIndex > selectionEndIndex) {
+      selectionEndIndex = currentMouseDownIndex;
+    }
+    
+    // clicked inside the selection set... need to determine where the last
+    // selection was and use that as an anchor.
+    if ((currentMouseDownIndex > selectionBeginIndex) && (currentMouseDownIndex < selectionEndIndex)) {
+      if (currentMouseDownIndex === previousMouseDownIndex) {
         selectionBeginIndex = currentMouseDownIndex;
         selectionEndIndex   = currentMouseDownIndex;
       } else if (currentMouseDownIndex > previousMouseDownIndex) {
@@ -1888,12 +1900,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         selectionEndIndex   = previousMouseDownIndex;
       }
     }
+    
     // slice doesn't include the last index passed... silly..
     selectionEndIndex++;
 
-    // shouldn't need to sanity check that the selection is in bounds due to the indexOf checks above...
-    // I'll have faith that indexOf hasn't lied to me...
-    return collection.slice(selectionBeginIndex, selectionEndIndex);
+    // shouldn't need to sanity check that the selection is in bounds due to 
+    // the indexOf checks above...I'll have faith that indexOf hasn't lied to 
+    // me...
+    return content.slice(selectionBeginIndex, selectionEndIndex);
   },
   
 
@@ -1940,11 +1954,24 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // DRAG AND DROP SUPPORT
   //
 
-  _reorderDataType: function() {
+  /**
+    When reordering its content, the collection view will store its reorder
+    data using this special data type.  The data type is unique to each 
+    collection view instance.  You can use this data type to detect reorders
+    if necessary.
+    
+    @field
+    @type {String}
+  */
+  reorderDataType: function() {
     if (!this._reorderDataTypeKey) {
       this._reorderDataTypeKey = "SC.CollectionView.Reorder.%@".fmt(SC.guidFor(this)) ;
     }
     return this._reorderDataTypeKey ;
+  }.property(),
+  
+  _reorderDataType: function() {
+    return this.get('reorderDataType') ;
   },
   
   /**
@@ -2007,8 +2034,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       // Set this to the dragContent property.
       var content = this.get('content') || [] ;
       var dragContent;
-      if (this.get("selectOnMouseDown") == false) {
-        dragContent = [this._previousMouseDownContent];
+      
+      // if we don't select on mouse down, then the selection has not been 
+      // updated to whatever the user clicked.  Instead use
+      // mouse down content.
+      if (!this.get("selectOnMouseDown")) {
+        dragContent = [this._mouseDownContent];
       } else {
         dragContent = this.get('selection').sort(function(a,b) {
           a = content.indexOf(a) ;
@@ -2072,7 +2103,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (canReorderContent) {
       ret = (ret) ? ret.slice() : [] ;
       
-      var key = this._reorderDataType() ;
+      var key = this.get('reorderDataType') ;
       if (ret.indexOf(key) < 0) ret.push(key) ;
     }
     return ret ;
@@ -2090,7 +2121,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // if this is a reorder, then return drag content.
     if (this.get('canReorderContent')) {
-      if (dataType === this._reorderDataType()) return this.get('dragContent') ;
+      if (dataType === this.get('reorderDataType')) return this.get('dragContent') ;
     }
     
     // otherwise, just pass along to the delegate.
@@ -2103,16 +2134,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   dragEntered: function(drag, evt) {
 
-    // the proposed drag operation is either DRAG_MOVE only if we can reorder
+    // the proposed drag operation is DRAG_REORDER only if we can reorder
     // content and the drag contains reorder content.
     var op = SC.DRAG_NONE ;
     if (this.get('canReorderContent')) {
       var types = drag.get('dataTypes') ;
-      if (types.indexOf(this._reorderDataType()) >= 0) op = SC.DRAG_MOVE ;
+      if (types.indexOf(this.get('reorderDataType')) >= 0) {
+        op = SC.DRAG_REORDER ;
+      }
     }
     
     // Now pass this onto the delegate.
     op = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, SC.DROP_ANY, -1, op) ;
+    
+    if (op === SC.DRAG_REORDER) op = SC.DRAG_MOVE ;
     
     // return
     return op ;
@@ -2180,30 +2215,32 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // is DROP_BEFORE.  DROP_ON is not handled by reordering content.
     if ((idx >= 0) && this.get('canReorderContent') && (dropOp === SC.DROP_BEFORE)) {
 
-      var objects = drag.dataForType(this._reorderDataType()) || [];
-      var content = this.get('content') || [] ;
+      var objects = drag.dataForType(this.get('reorderDataType')) ;
+      if (objects) {
+        var content = this.get('content') || [] ;
 
-      // if the insertion index is in between two items in the drag itself, 
-      // then this is not allowed.  Either use the last insertion index or 
-      // find the first index that is not in between selections.  Stop when
-      // we get to the beginning.
-      var previousContent = (idx > 0) ? content.objectAt(idx-1) : null ;
-      var nextContent = (idx < content.get('length')) ? content.objectAt(idx) : null;
+        // if the insertion index is in between two items in the drag itself, 
+        // then this is not allowed.  Either use the last insertion index or 
+        // find the first index that is not in between selections.  Stop when
+        // we get to the beginning.
+        var previousContent = (idx > 0) ? content.objectAt(idx-1) : null ;
+        var nextContent = (idx < content.get('length')) ? content.objectAt(idx) : null;
 
-      var isPreviousInDrag = (previousContent) ? objects.indexOf(previousContent)>=0 : NO;
-      var isNextInDrag = (nextContent) ? objects.indexOf(nextContent)>=0 : NO;
+        var isPreviousInDrag = (previousContent) ? objects.indexOf(previousContent)>=0 : NO;
+        var isNextInDrag = (nextContent) ? objects.indexOf(nextContent)>=0 : NO;
 
-      if (isPreviousInDrag && isNextInDrag) {
-        if (this._lastInsertionIndex == null) {
-          while((idx >= 0) && (objects.indexOf(content.objectAt(idx)) >= 0)) {
-            idx-- ;
-          } 
-        } else idx = this._lastInsertionIndex ;
+        if (isPreviousInDrag && isNextInDrag) {
+          if (this._lastInsertionIndex == null) {
+            while((idx >= 0) && (objects.indexOf(content.objectAt(idx)) >= 0)) {
+              idx-- ;
+            } 
+          } else idx = this._lastInsertionIndex ;
+        }
+
+        // If we found a valid insertion point to reorder at, then set the op
+        // to custom DRAG_REORDER.
+        if (idx >= 0) dragOp = SC.DRAG_REORDER ;
       }
-
-      // If we found a valid insertion point to reorder at, then set the op
-      // to custom DRAG_REORDER.
-      if (idx >= 0) dragOp = SC.DRAG_REORDER ;
     }
 
     // Now save the insertion index and the dropOp.  This may be changed by
@@ -2303,7 +2340,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // If the delegate did not handle the drag (i.e. returned SC.DRAG_NONE),
     // and the op type is REORDER, then do the reorder here.
     if ((performed === SC.DRAG_NONE) && (op === SC.DRAG_REORDER)) {
-      var objects = drag.dataForType(this._reorderDataType()) ;
+      var objects = drag.dataForType(this.get('reorderDataType')) ;
       if (!objects) return SC.DRAG_NONE ;
 
       var content = this.get('content') ;
