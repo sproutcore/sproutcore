@@ -35,7 +35,7 @@ SC.SourceListView = SC.CollectionView.extend(
     Allows reordering without modifiying the selection
   */
   
-  selectOnMouseDown: false,
+  selectOnMouseDown: NO,
   
   /**
     Set to YES if you want source list items to display an icon.
