@@ -691,7 +691,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var didChange = false ;
     
     // If this is a fullUpdate, then rebuild the itemViewsByContent hash
-    // from scratch.  This is necessary of the content of the visible range
+    // from scratch.  This is necessary if the content or the visible range
     // might have changed.
     if (fullUpdate) {
      
@@ -1059,9 +1059,27 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (!ret) throw "Could not create itemView for content: %@".fmt(content);
 
     // Determine proper parent view and insert itemView if needed.
-    // Also update count of itemViews.  
-    var parentView = (groupBy && content) ? this._insertGroupViewFor(content.get(groupBy), contentIndex) : this ;
-    if (ret.get('parentNode') != parentView) {
+    // Also update count of itemViews.
+    var canGroup = !!(groupBy && content) ;
+    var groupValue = (canGroup) ? content.get(groupBy) : null;  
+    var parentView = (canGroup) ? this._insertGroupViewFor(groupValue, contentIndex) : this ;
+    var curParentView = ret.get('parentNode') ;
+    
+    if (curParentView != parentView) {
+      
+      // if the item is already inside of another group, then it is probably
+      // just being moved, so remove it from its parent group first...
+      if (groupBy && curParentView) {
+        
+        // reduce the group view count.  If this it the last item in the 
+        // group view, the count will be <= 0 and we will need to remove t
+        // the group view itself.
+        if (--this._groupViewCounts[SC.guidFor(curParentView)] <= 0) {
+          this._removeGroupView(curParentView, groupValue) ;
+        }
+        
+      }
+      
       parentView.appendChild(ret) ;
       if (groupBy) this._groupViewCounts[SC.guidFor(parentView)]++ ;
     }
