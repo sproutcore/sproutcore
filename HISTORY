@@ -1,4 +1,8 @@
-== SVN HEAD
+== GIT HEAD
+
+== 0.9.8
+
+* [FIX] collection views now update group views appropriately.
 
 * [IE] offsetParent and viewportOffset() are now IE compliant.
 
