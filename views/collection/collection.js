@@ -1724,7 +1724,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // collection some basic setup info
     var selection  = this.get('selection') || [];
     var isSelected = selection.include(mouseDownContent);
-    var modifierKeyPressed = ev.ctrlKey || ev.altKey || ev.metaKey;
+    var modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
     if (mouseDownView.checkboxView && (Event.element(ev) == el.checkboxView.rootElement)) {
       modifierKeyPressed = true ;
     }
@@ -1736,7 +1736,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // deselect that item...deselect and bail.
     if (modifierKeyPressed && isSelected) {
       this._shouldDeselect = mouseDownContent;
-    
     // if the shiftKey was pressed, then we want to extend the selection
     // from the last selected item
     } else if (ev.shiftKey && selection.get('length') > 0) {
