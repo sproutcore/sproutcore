@@ -223,12 +223,11 @@ SC.ButtonView = SC.View.extend(SC.Control,
   keyEquivalent: null,
   
   /** @private {String} used to store a previously defined key equiv */
-  _lastKeyEquivalent: null,
+  _defaultKeyEquivalent: null,
   
   performKeyEquivalent: function( keystring, evt )
   {
     if (!this.get('isEnabled')) return false;
-    
     var keyEquivalent = this.get('keyEquivalent');
     if (keyEquivalent && (keyEquivalent == keystring))
     {
@@ -266,6 +265,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
   init: function() {
     arguments.callee.base.call(this) ;
     
+    //cache the key equivalent
+    if(this.get("keyEquivalent")) this._defaultKeyEquivalent = this.get("keyEquivalent"); 
     // setup initial CSS clases
     this._isDefaultOrCancelObserver() ;
     
@@ -332,23 +333,20 @@ SC.ButtonView = SC.View.extend(SC.Control,
   _isDefaultOrCancelObserver: function() {
     var isDef = !!this.get('isDefault') ;
     var isCancel = !isDef && this.get('isCancel') ;
+    
     if(this.didChangeFor('defaultCancelChanged','isDefault','isCancel')) {
       this.setClassName('def', isDef) ;
-      var key = this.get('keyEquivalent') ;
       if (isDef) {
-        //cache the previously defined key equivalent
-        this._lastKeyEquivalent = key;
         this.setIfChanged('keyEquivalent', 'return');
       } 
       else if (isCancel)
       {
-        //cache the previously defined key equivalent
-        this._lastKeyEquivalent = key;
         this.setIfChanged('keyEquivalent', 'escape') ;
       }
       else
       {
-        this.setIfChanged("keyEquivalent",this._lastKeyEquivalent);
+        //restore the default key equivalent
+        this.set("keyEquivalent",this._defaultKeyEquivalent);
       }
     }
       

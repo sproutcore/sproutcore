@@ -448,15 +448,29 @@ SC.Drag = SC.Object.extend(
       if (!dt.hasOwnProperty(key)) continue ;
       ret.push(dt[key]) ;      
     }
-    
-    // now resort.  This custom function will sort nested drop targets
-    // at the start of the list.
-    ret = ret.sort(function(a,b) {
-      var view = a;
-      while((view = view.parentNode) && (view !== SC.window)) {
-        if (b === view) return -1 ;
+
+    // views must be sorted so that drop targets with the deepest nesting 
+    // levels appear first in the array.  The getDepthFor().
+    var depth = {} ;
+    var getDepthFor = function(x) {
+      if (!x) return 0 ;
+      var guid = SC.guidFor(x);
+      var ret = depth[guid];
+      if (!ret) {
+        ret = 1 ;
+        while((x = x.parentNode) && (x !== SC.window)) {
+          if (dt[SC.guidFor(x)] !== undefined) ret++ ;
+        }
+        depth[guid] = ret ;
       }
-      return 1; 
+      return ret ;
+    } ;
+
+    ret.sort(function(a,b) {
+      if (a===b) return 0;
+      a = getDepthFor(a) ;
+      b = getDepthFor(b) ;
+      return (a > b) ? -1 : 1 ;
     }) ;
 
     this._cachedDropTargets = ret ;
