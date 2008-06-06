@@ -501,8 +501,8 @@ SC.Drag = SC.Object.extend(
     return null ;
   },
   
-  // Search the parent nodes of the target to find another view matching the drop
-  // target.  Returns null if no matching target is found.
+  // Search the parent nodes of the target to find another view matching the 
+  // drop target.  Returns null if no matching target is found.
   _findNextDropTarget: function(target) {
     while ((target = target.parentNode) && (target != SC.window)) {
       if (SC.Drag._dropTargets[target._guid]) return target ;

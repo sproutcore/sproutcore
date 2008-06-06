@@ -61,7 +61,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @param view {SC.View} the view to insert as a child node.
     @param beforeView {SC.View} view to insert before, or null to insert at 
      end
-    @returns {void}
+    @returns {SC.View} the receiver
   */
   insertBefore: function(view, beforeView) { 
     this._insertBefore(view,beforeView,true);
@@ -125,7 +125,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     This will also remove the view's DOM element from the recievers DOM.
     
     @param view {SC.View} the view to remove
-    @returns {void}
+    @returns {SC.View} the receiver
   */
   removeChild: function(view) {
     if (!view) return ;
@@ -163,6 +163,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     view.didRemoveFromParent(this) ;
     this.didRemoveChild(view);
+    return this;
   },
 
   /**
@@ -175,31 +176,54 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 
     @param view {SC.View} the view to insert in the DOM
     @param view {SC.View} the view to remove from the DOM.
-    @returns {void}
+    @returns {SC.View} the receiver
   */
   replaceChild: function(view, oldView) {
     this.insertBefore(view,oldView) ; this.removeChild(oldView) ;
+    return this;
   },
 
   /**
     Removes the receiver from its parentNode.  If the receiver does not belong
     to a parentNode,  this method does nothing.
     
-    @returns {void}
+    @returns {null}
   */
   removeFromParent: function() {
     if (this.parentNode) this.parentNode.removeChild(this) ;    
+    return null ;
   },
 
+  /** 
+    Works just like removeFromParent but also removes the view from internal
+    caches and sets the rootElement to null so that the view and its DOM can
+    be garbage collected.
+    
+    SproutCore includes special gaurds that ensure views and their related 
+    DOM elements will be garbage collected whenever your web page unloads.
+    However, if you create and destroy views frequently while your application
+    is running, you should call this method when views are no longer needed
+    to ensure they will be garbage collected even while your application is
+    still running.
+    
+    @returns {null}
+  */
+  destroy: function() {
+    this.removeFromParent() ;
+    delete SC.View._view[SC.guidFor(this)];
+    return null ;
+  },
+  
   /**
     Appends the specified view to the end of the receivers childNodes array.  
     This is equivalent to calling insertBefore(view, null);
     
     @param view {SC.View} the view to insert
-    @returns {void}
+    @returns {SC.View} the receiver 
   */
   appendChild: function(view) {
-    this.insertBefore(view,null) ;    
+    this.insertBefore(view,null) ;   
+    return this ; 
   },
 
   /**
