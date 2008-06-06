@@ -389,7 +389,7 @@ input.show-hint {
 	vertical-align: middle ;
 	position: relative ;
 	padding-left: 48px;
-	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') no-repeat ;
+	background: static_url('images/sc-theme-sprite.png') no-repeat ;
 }
 
 .sc-theme.blur .sc-slider-view,
@@ -404,7 +404,7 @@ input.show-hint {
 .sc-theme .sc-slider-view .outer {
 	display: block;
 	height: 18px;
-	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') no-repeat ;
+	background: static_url('images/sc-theme-sprite.png') no-repeat ;
 	padding-right: 48px;
 	position: relative ;
 }
@@ -421,7 +421,7 @@ input.show-hint {
 .sc-theme .sc-slider-view .inner {
 	display: block;
 	height: 18px;
-	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') repeat-x ;
+	background: static_url('images/sc-theme-sprite.png') repeat-x ;
 	width: 98px;
 	position: relative ;
 }
@@ -443,7 +443,7 @@ input.show-hint {
 	margin-left: -9px;
 	left:  50%;
 	top: 0;
-	background: url('/static/sproutcore/_src/english.lproj/images/sc-theme-sprite.png') no-repeat
+	background: static_url('images/sc-theme-sprite.png') no-repeat
 }
 
 .sc-theme.focus .sc-slider-view .sc-handle {
