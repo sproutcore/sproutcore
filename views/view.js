@@ -210,7 +210,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   */
   destroy: function() {
     this.removeFromParent() ;
-    delete SC.View._views[SC.guidFor(this)];
+    delete SC.View._view[SC.guidFor(this)];
     return null ;
   },
   
