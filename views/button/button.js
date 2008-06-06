@@ -185,6 +185,21 @@ SC.ButtonView = SC.View.extend(SC.Control,
   }.property(),
   
   /**
+    The button href value.
+      
+    This property is observable and bindable. Can be used to create localized button href values.
+  */
+  href: function(key, value) {
+    var el = this.rootElement;
+    if (value !== undefined) {
+      if (el) {
+        el.setAttribute('href', value);
+      }
+    }
+    return (el) ? el.getAttribute('href') : null;
+  }.property(),
+
+  /**
     The name of the action you want triggered when the button is pressed.  
     
     This property is used in conjunction with the target property to execute

@@ -127,17 +127,13 @@ SC.PopupMenuView = SC.View.extend({
       if (w > requiredWidth) requiredWidth = w ;
       child = child.get('nextSibling') ;
     }
-    
-    // loop through children again, set their widths to the required with.
-    var size = { width: requiredWidth } ;
-    var child = this.get('firstChild') ;
-    while(child) {
-      child.set('size',size) ;
-      child = child.get('nextSibling') ;
-    }
-    
-    // set this view to the same size.
-    this.set('size',size) ;
+   var oldWidth = this.get("size").width;
+   if(requiredWidth != oldWidth)
+   {
+     var size = { width: requiredWidth };
+     // set this view to the same size.
+     this.set('size',size) ;
+   }
   }
   
 });

@@ -39,6 +39,10 @@ end
 #   The icon for the menu item.  No icon will show if this is not set.
 #   
 # :shortcut =>
+#   You must pass the actualy bit of HTML you want to display as a keyboard
+#   shortcut
+#
+#   THE FOLLOWING PREVIOUS BEHAVIOR IS CURRENTLY DISABLED
 #   The shortcut key for this menu item.  Shortcuts are only active when
 #   the anchorview the popup menu is attached to is part of the in-focus
 #   pane.  Shortcuts should be named in the standard input manager
@@ -68,7 +72,8 @@ view_helper :menu_item_view, :extends => :button_view do
 
   # HTML
   var :tag, 'li'
-  var(:shortcut) { |sc| sc.split('_').map { |x| x.capitalize } * '-' }
+  var :shortcut
+  # var(:shortcut) { |sc| sc.split('_').map { |x| x.capitalize } * '-' }
   css_class_names << 'menu-item'
   
   @my_href = @href || 'javascript:;'
