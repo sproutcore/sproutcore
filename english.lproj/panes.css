@@ -34,7 +34,7 @@
 .sc-theme .pane .shadow {
 	position: relative ;
 	border: none ;
-	background: #e8e8e8 url('/static/sproutcore/_src/english.lproj/panels/background-thin.png') repeat-x left -1px; 
+	background: #e8e8e8 static_url('panels/background-thin.png') repeat-x left -1px; 
 	border-top: 1px #ddd solid;
 }
 
