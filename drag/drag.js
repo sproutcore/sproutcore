@@ -438,7 +438,7 @@ SC.Drag = SC.Object.extend(
   //
   // This means that if you change the view hierarchy of your drop targets
   // during a drag, it will probably be wrong.
-  _dropTargets: function() {
+  _getOrderedDropTargets: function() {
     if (this._cachedDropTargets) return this._cachedDropTargets ;
     var ret = [];
     
@@ -453,8 +453,8 @@ SC.Drag = SC.Object.extend(
     // at the start of the list.
     ret = ret.sort(function(a,b) {
       var view = a;
-      while((view = view.parentNode) && (view != SC.window)) {
-        if (b == view) return -1 ;
+      while((view = view.parentNode) && (view !== SC.window)) {
+        if (b === view) return -1 ;
       }
       return 1; 
     }) ;
@@ -467,7 +467,7 @@ SC.Drag = SC.Object.extend(
   // This will search through the drop targets, looking for one in the 
   // target area.
   _findDropTarget: function(evt) {
-    var dt = this._dropTargets() ;
+    var dt = this._getOrderedDropTargets() ;
     var loc = Event.pointerLocation(evt) ;
 
     var ret = null ;
@@ -487,8 +487,8 @@ SC.Drag = SC.Object.extend(
     return null ;
   },
   
-  // Search the parent nodes of the target to find another view matching the drop
-  // target.  Returns null if no matching target is found.
+  // Search the parent nodes of the target to find another view matching the 
+  // drop target.  Returns null if no matching target is found.
   _findNextDropTarget: function(target) {
     while ((target = target.parentNode) && (target != SC.window)) {
       if (SC.Drag._dropTargets[target._guid]) return target ;
