@@ -365,10 +365,11 @@ Object.extend(Object,{
 // treat it like a bool setting.  Simplifies the common case where you need
 // to make a class name match a bool.
 Element.setClassName = function(element,className,flag) {
+  var el = SC.isIE() ? Element : element;
   if (flag) { 
-    Element.addClassName(element,className); 
+    el.addClassName(element,className); 
   } else {
-    Element.removeClassName(element,className) ;
+    el.removeClassName(element,className) ;
   }
 } ;
 
