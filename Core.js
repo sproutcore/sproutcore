@@ -366,9 +366,9 @@ Object.extend(Object,{
 // to make a class name match a bool.
 Element.setClassName = function(element,className,flag) {
   if (flag) { 
-    element.addClassName(className); 
+    Element.addClassName(element,className); 
   } else {
-    element.removeClassName(className) ;
+    Element.removeClassName(element,className) ;
   }
 } ;
 
