@@ -141,12 +141,14 @@ SC.Scrollable = {
     };
 
     // if top edge is not visible, shift origin
-    vo.y += Math.max(0, SC.minY(vo) - SC.minY(vf)) ;
-    vo.x += Math.max(0, SC.minX(vo) - SC.minX(vf)) ;
+    vo.y -= Math.max(0, SC.minY(vo) - SC.minY(vf)) ;
+    vo.x -= Math.max(0, SC.minX(vo) - SC.minX(vf)) ;
 
     // if bottom edge is not visible, shift origin
     vo.y += Math.max(0, SC.maxY(vf) - SC.maxY(vo)) ;
     vo.x += Math.max(0, SC.maxX(vf) - SC.maxX(vo)) ;
+
+    console.log('scrollToVisible: f=%@ - vf=%@ - vo=%@'.fmt($I(f), $I(vf), $I(vo))) ;
 
     // scroll to that origin.
     this.scrollTo(vo.x, vo.y) ;
