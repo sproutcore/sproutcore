@@ -7,39 +7,45 @@ require('views/view') ;
 require('views/button/button') ;
 require('views/field/text_field') ;
 
-// FormView provides a simple way for you to "stage" input by capturing
-// data from your views into the form before it is set on your actual
-// content object.
-//
-// HOW IT WORKS
-//
-// On startup, FormView will walk any child views looking for any views 
-// with the property "fieldKey".  Any views with this key will be saved as
-// fields on the form.  You can access their value directly on the form by
-// getting the value of fieldKey.
-//
-// Used this way, you can easily combine multiple views into a single,
-// bindable object.  To gain the full functionality however, you should use
-// the content commit capability.
-//
-// IMPORTANT:  FormView defines some properties of its own.  If you try to
-// name your fields with properties already declared in FormView, they will
-// be ignored and a warning will be logged to the console.
-//
-// CONTENT COMMIT
-//
-// If you set the content object on a form view, then the form fields will
-// automatically be bound to the same named keys on the content object.  When
-// the content object value's change, the fields on the form will update
-// automatically.  However, changing values in the fields will not update
-// the content object until the form is committed.
-//
-// You can commit a form promgramatically by calling the commit() method on
-// the form view.  Alternatively, you can add a button to the form with the
-// outlet name submitButton and it will be automatically wired to submit 
-// the form.  You can also create a button named resetButton, it will be 
-// automatically wired to reset the form.
-// 
+/**
+  FormView provides a simple way for you to focus a group of views onto a 
+  single content object or set of content objects.  It can also be used to
+  "stage" input by buffering data from your views into the form before it is 
+  set on your actual content object.  This approach is generally deprecated 
+  however as the Controller objects now provide this same buffering feature
+  in a more robust way.
+
+  h2. How It Works
+
+  On startup, FormView will walk any child views looking for any views 
+  with the property "fieldKey".  Any views with this key will be saved as
+  fields on the form.  You can access their value directly on the form by
+  getting the value of fieldKey.
+
+  Used this way, you can easily combine multiple views into a single,
+  bindable object.  To gain the full functionality however, you should use
+  the content commit capability.
+
+  IMPORTANT:  FormView defines some properties of its own.  If you try to
+  name your fields with properties already declared in FormView, they will
+  be ignored and a warning will be logged to the console.
+
+  h2. Content Commit
+
+  If you set the content object on a form view, then the form fields will
+  automatically be bound to the same named keys on the content object.  When
+  the content object value's change, the fields on the form will update
+  automatically.  Likewise, if you change the value of the field, the value
+  of the content object will generally be changed as wel.
+  
+  If you prefer, you can also turn on buffered commits by setting the 
+  commitChangesImmediately property to NO.  This will cause the form to 
+  buffer any changes to the field values and only forwards them to the content
+  when you call commitChanges() on the form.  This method of buffering is
+  still supported for some simple cases, however it is better to use the newer
+  Controller objects that provide this same buffering in a more robust way.
+
+*/
 SC.FormView = SC.View.extend({
 
   // PROPERTIES
