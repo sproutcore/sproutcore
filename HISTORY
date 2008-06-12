@@ -1,5 +1,8 @@
 == GIT HEAD
 
+* set() and a variety of other methods now returns this instead of the set
+value.  This makes it possible to do method chaining.
+
 == 0.9.8
 
 * [FIX] collection views now update group views appropriately.
