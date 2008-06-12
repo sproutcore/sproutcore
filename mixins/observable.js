@@ -159,7 +159,38 @@ SC.Observable = {
   // used as properties.
 
   /**  
-    Use this to get a property value instead of obj.key.
+    Retrieves the value of key from the object.
+    
+    This method is generally very similar to using object[key] or object.key,
+    however it supports both computed properties and the unknownProperty
+    handler.
+    
+    *Computed Properties*
+    
+    Computed properties are methods defined with the property() modifier
+    declared at the end, such as:
+    
+    {{{
+      fullName: function() {
+        return this.getEach('firstName', 'lastName').compact().join(' ');
+      }.property('firstName', 'lastName')
+    }}}
+    
+    When you call get() on a computed property, the property function will be
+    called and the return value will be returned instead of the function
+    itself.
+    
+    *Unknown Properties*
+    
+    Likewise, if you try to call get() on a property whose values is
+    undefined, the unknownProperty() method will be called on the object.
+    If this method reutrns any value other than undefined, it will be returned
+    instead.  This allows you to implement "virtual" properties that are 
+    not defined upfront.
+    
+    @param key {String} the property to retrieve
+    @returns {Object} the property value or undefined.
+    
   */
   get: function(key) {
     var ret = this[key] ;
@@ -171,7 +202,51 @@ SC.Observable = {
   },
 
   /**  
-    use this to set a property value instead of obj.key = value.
+    Sets the key equal to value.
+    
+    This method is generally very similar to calling object[key] = value or
+    object.key = value, except that it provides support for computed 
+    properties, the unknownProperty() method and property observers.
+    
+    *Computed Properties*
+    
+    If you try to set a value on a key that has a computed property handler
+    defined (see the get() method for an example), then set() will call
+    that method, passing both the value and key instead of simply changing 
+    the value itself.  This is useful for those times when you need to 
+    implement a property that is composed of one or more member
+    properties.
+    
+    *Unknown Properties*
+    
+    If you try to set a value on a key that is undefined in the target 
+    object, then the unknownProperty() handler will be called instead.  This
+    gives you an opportunity to implement complex "virtual" properties that
+    are not predefined on the obejct.  If unknownProperty() returns 
+    undefined, then set() will simply set the value on the object.
+    
+    *Property Observers*
+    
+    In addition to changing the property, set() will also register a 
+    property change with the object.  Unless you have placed this call 
+    inside of a beginPropertyChanges() and endPropertyChanges(), any "local"
+    observers (i.e. observer methods declared on the same object), will be
+    called immediately.  Any "remote" observers (i.e. observer methods 
+    declared on another object) will be placed in a queue and called at a
+    later time in a coelesced manner.
+    
+    *Chaining*
+    
+    In addition to property changes, set() returns the value of the object
+    itself so you can do chaining like this:
+    
+    {{{
+      record.set('firstName', 'Charles').set('lastName', 'Jolley');
+    }}}
+    
+    @param key {String} the property to set
+    @param value {Object} the value to set or null.
+    @returns {this}
   */
   set: function(key, value) {
     var func = this[key] ;
@@ -188,31 +263,45 @@ SC.Observable = {
 
     // post out notifications.
     this.propertyDidChange(key, ret) ;
-    return ret ;
+    return this ;
   },  
 
   /**
-    sets the property only if the passed value is different from the
+    Sets the property only if the passed value is different from the
     current value.  Depending on how expensive a get() is on this property,
     this may be more efficient.
+    
+    @param key {String} the key to change
+    @param value {Object} the value to change
+    @returns {this}
   */
   setIfChanged: function(key, value) {
-    return (this.get(key) !== value) ? this.set(key, value) : value ;
+    return (this.get(key) !== value) ? this.set(key, value) : this ;
   },
   
   /**  
-    use this to automatically navigate a property path.
+    Navigates the property path, returning the value at that point.
+    
+    If any object in the path is undefined, returns undefined.
   */
   getPath: function(path) {
     var tuple = SC.Object.tupleForPropertyPath(path, this) ;
-    if (tuple[0] == null) return null ;
+    if (tuple[0] === null) return undefined ;
     return tuple[0].get(tuple[1]) ;
   },
   
+  /**
+    Navigates the property path, finally setting the value.
+    
+    @param path {String} the property path to set
+    @param value {Object} the value to set
+    @returns {this}
+  */
   setPath: function(path, value) {
     var tuple = SC.Object.tupleForPropertyPath(path, this) ;
     if (tuple[0] == null) return null ;
-    return tuple[0].set(tuple[1], value) ;
+    tuple[0].set(tuple[1], value) ;
+    return this;
   },
 
   
@@ -241,7 +330,8 @@ SC.Observable = {
     @returns {Number} new value of property
   */
   incrementProperty: function(key) { 
-    return this.set(key,(this.get(key) || 0)+1); 
+    this.set(key,(this.get(key) || 0)+1); 
+    return this.get(key) ;
   },
 
   /**  
@@ -251,7 +341,8 @@ SC.Observable = {
     @returns {Number} new value of property
   */
   decrementProperty: function(key) {
-    return this.set(key,(this.get(key) || 0) - 1 ) ;
+    this.set(key,(this.get(key) || 0) - 1 ) ;
+    return this.get(key) ;
   },
 
   /**  
@@ -266,7 +357,8 @@ SC.Observable = {
     if (value === undefined) value = true ;
     if (alt == undefined) alt = false ;
     value = (this.get(key) == value) ? alt : value ;
-    return this.set(key,value);
+    this.set(key,value);
+    return this.get(key) ;
   },
 
   /**  
@@ -275,6 +367,10 @@ SC.Observable = {
     This is a generic property handler.  If you define it, it will be called
     when the named property is not yet set in the object.  The default does
     nothing.
+    
+    @param key {String} the key that was requested
+    @param value {Object} The value if called as a setter, undefined if called as a getter.
+    @returns {Object} The new value for key.
   */
   unknownProperty: function(key,value) {
     if (!(value === undefined)) { this[key] = value; }
@@ -313,10 +409,11 @@ SC.Observable = {
     When you are done making changes, all endPropertyChanges() to allow 
     notification to resume.
     
-    @returns {void}
+    @returns {this}
   */
   beginPropertyChanges: function() {
     this._kvo().changes++ ;
+    return this;
   },
 
   /**  
@@ -329,11 +426,12 @@ SC.Observable = {
     notifications. When you are done making changes, call this method to allow 
     notification to resume.
     
-    @returns {void}
+    @returns {this}
   */
   endPropertyChanges: function() {
     var kvo = this._kvo() ;  kvo.changes--;
     if (kvo.changes <= 0) this._notifyPropertyObservers() ;
+    return this ;
   },
 
   /**  
@@ -350,10 +448,11 @@ SC.Observable = {
     and cause notifications to be delivered more often than you would like.
     
     @param key {String} The property key that is about to change.
-    @returns {void}
+    @returns {this}
   */
   propertyWillChange: function(key) {
     this._kvo().changes++ ;
+    return this ;
   },
 
   /**  
@@ -371,12 +470,13 @@ SC.Observable = {
     
     @param key {String} The property key that has just changed.
     @param value {Object} The new value of the key.  May be null.
-    @returns {void}
+    @returns {this}
   */
   propertyDidChange: function(key,value) {
     this._kvo().changed[key] = value ;
     var kvo = this._kvo() ;  kvo.changes--; kvo.revision++ ;
     if (kvo.changes <= 0) this._notifyPropertyObservers() ;
+    return this ;
   },
 
   /**
@@ -389,11 +489,12 @@ SC.Observable = {
     
     @param key {String} The property key that has just changed.
     @param value {Object} The new value of the key.  May be null.
-    @returns {void}
+    @returns {this}
   */
   notifyPropertyChange: function(key, value) {
     this.propertyWillChange(key) ;
     this.propertyDidChange(key, value) ;
+    return this; 
   },
   
   /**  
@@ -406,10 +507,11 @@ SC.Observable = {
     In those cases, you can simply call this method to notify all property
     observers immediately.  Note that this ignores property groups.
     
-    @returns {void}
+    @returns {this}
   */
   allPropertiesDidChange: function() {
     this._notifyPropertyObservers(true) ;
+    return this ;
   },
 
   /**  
