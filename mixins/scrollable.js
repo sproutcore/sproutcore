@@ -104,7 +104,9 @@ SC.Scrollable = {
 
     // compute new sf
     var newSf = { x: sf.x - (amount.x || 0), y: sf.y - (amount.y || 0) } ;
-    newSf = this.set('scrollFrame', newSf) ;
+    this.set('scrollFrame', newSf) ;
+    newSf = this.get('scrollFrame') ;
+    
     return { x: newSf.x - sf.x, y: newSf.y - sf.y }; 
   },
 

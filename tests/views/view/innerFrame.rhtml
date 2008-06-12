@@ -112,7 +112,9 @@ Test.context("CASE 3: manual-layout view with some padding and no border", {
   },
 
   "after frame change, innerFrame should == frame less border, viewFrameDidChange is not required.": function() {
-    var f = this.v.set('frame', { width: 50, x: 10, y: 10, height: 50 }) ;
+    var f ;
+    
+    this.v.set('frame', f = { width: 50, x: 10, y: 10, height: 50 }) ;
     f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
     f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
     //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));

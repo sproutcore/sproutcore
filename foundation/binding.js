@@ -162,7 +162,8 @@ SC.Binding = SC.Object.extend({
       this._lastFromValue = value ;
       
       // send along to the 'from' source.
-      var result = tuple[0].set(tuple[1],value) ;
+      tuple[0].set(tuple[1],value) ;
+      var result = tuple[0].get(tuple[1]);
       if (result) this._lastFromPropertyRevision = result.propertyRevision ;
       
       // now that it has been set, the FROM object might not allow some 

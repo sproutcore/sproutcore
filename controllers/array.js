@@ -146,7 +146,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // create clone of content array if needed
     var contentClone = this.get('contentClone') ;
     if (!contentClone) {
-      contentClone = this.set('contentClone', content.clone());
+      this.set('contentClone', contentClone = content.clone()) ;
     }
 
     // now, record the removed objects.  This may be used later.
