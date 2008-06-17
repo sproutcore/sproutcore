@@ -245,13 +245,17 @@ Object.extend(SC,{
     
     /** The current Firefox major version number or 0 if not Firefox */
     Firefox: function() {
+      var ret = 0;
       if (Prototype.Browser.Gecko) {
-        var ret = parseFloat((navigator.userAgent.match(/Firefox\/(.)/)[1]) || 0);
-        if (ret < 1) ret = 1;
-        return ret ;
-      } else return 0 ;
-    }(),
-    
+        if(navigator.userAgent.indexOf("Firefox") != -1)
+        {
+          ret = parseFloat((navigator.userAgent.match(/Firefox\/(.)/)[1]) || 0);
+        }
+        if (ret < 1) ret = 2; // default to version 2 if it is a Gecko browser.
+      } 
+      return ret ;
+    }(),    
+      
     isWindows: function() {
       return !!(navigator.appVersion.match(/(Windows)/)) ;
     }(),
