@@ -245,13 +245,17 @@ Object.extend(SC,{
     
     /** The current Firefox major version number or 0 if not Firefox */
     Firefox: function() {
+      var ret = 0;
       if (Prototype.Browser.Gecko) {
-        var ret = parseFloat((navigator.userAgent.match(/Firefox\/(.)/)[1]) || 0);
-        if (ret < 1) ret = 1;
-        return ret ;
-      } else return 0 ;
-    }(),
-    
+        if(navigator.userAgent.indexOf("Firefox") != -1)
+        {
+          ret = parseFloat((navigator.userAgent.match(/Firefox\/(.)/)[1]) || 0);
+        }
+        if (ret < 1) ret = 2; // default to version 2 if it is a Gecko browser.
+      } 
+      return ret ;
+    }(),    
+      
     isWindows: function() {
       return !!(navigator.appVersion.match(/(Windows)/)) ;
     }(),
@@ -365,11 +369,22 @@ Object.extend(Object,{
 // treat it like a bool setting.  Simplifies the common case where you need
 // to make a class name match a bool.
 Element.setClassName = function(element,className,flag) {
-  if (flag) { 
-    Element.addClassName(element,className); 
-  } else {
-    Element.removeClassName(element,className) ;
-  }
+  if(SC.isIE())
+  {
+    if (flag) { 
+      Element.addClassName(element,className); 
+    } else {
+      Element.removeClassName(element,className) ;
+    }
+  } 
+  else
+  {
+    if (flag) { 
+      element.addClassName(className); 
+    } else {
+      element.removeClassName(className) ;
+    }
+  } 
 } ;
 
 // ........................................
