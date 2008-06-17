@@ -36,7 +36,7 @@
 function Animator(options) {
 	this.setOptions(options);
 	var _this = this;
-	this.timerDelegate = function(){_this.onTimerEvent()};
+	this.timerDelegate = function(){_this.onTimerEvent();};
 	this.subjects = [];
 	this.target = 0;
 	this.state = 0;
@@ -129,8 +129,8 @@ Animator.prototype = {
 		}
 	},
 	// shortcuts
-	play: function() {this.seekFromTo(0, 1)},
-	reverse: function() {this.seekFromTo(1, 0)},
+	play: function() {this.seekFromTo(0, 1);},
+	reverse: function() {this.seekFromTo(1, 0);},
 	// return a string describing this Animator, for debugging
 	inspect: function() {
 		var str = "#<Animator:\n";
@@ -140,14 +140,14 @@ Animator.prototype = {
 		str += ">";
 		return str;
 	}
-}
+};
 // merge the properties of two objects
 Animator.applyDefaults = function(defaults, prefs) {
 	prefs = prefs || {};
 	var prop, result = {};
 	for (prop in defaults) result[prop] = prefs[prop] !== undefined ? prefs[prop] : defaults[prop];
 	return result;
-}
+};
 // make an array from any object
 Animator.makeArray = function(o) {
 	if (o == null) return [];
@@ -155,7 +155,7 @@ Animator.makeArray = function(o) {
 	var result = [];
 	for (var i=0; i<o.length; i++) result[i] = o[i];
 	return result;
-}
+};
 // convert a dash-delimited-property to a camelCaseProperty (c/o Prototype, thanks Sam!)
 Animator.camelize = function(string) {
 	var oStringList = string.split('-');
@@ -170,35 +170,35 @@ Animator.camelize = function(string) {
 		camelizedString += s.charAt(0).toUpperCase() + s.substring(1);
 	}
 	return camelizedString;
-}
+};
 // syntactic sugar for creating CSSStyleSubjects
 Animator.apply = function(el, style, options) {
 	if (style instanceof Array) {
 		return new Animator(options).addSubject(new CSSStyleSubject(el, style[0], style[1]));
 	}
 	return new Animator(options).addSubject(new CSSStyleSubject(el, style));
-}
+};
 // make a transition function that gradually accelerates. pass a=1 for smooth
 // gravitational acceleration, higher values for an exaggerated effect
 Animator.makeEaseIn = function(a) {
 	return function(state) {
 		return Math.pow(state, a*2); 
-	}
-}
+	};
+};
 // as makeEaseIn but for deceleration
 Animator.makeEaseOut = function(a) {
 	return function(state) {
 		return 1 - Math.pow(1 - state, a*2); 
-	}
-}
+	};
+};
 // make a transition function that, like an object with momentum being attracted to a point,
 // goes past the target then returns
 Animator.makeElastic = function(bounces) {
 	return function(state) {
 		state = Animator.tx.easeInOut(state);
 		return ((1-Math.cos(state * Math.PI * bounces)) * (1 - state)) + state; 
-	}
-}
+	};
+};
 // make an Attack Decay Sustain Release envelope that starts and finishes on the same level
 // 
 Animator.makeADSR = function(attackEnd, decayEnd, sustainEnd, sustainLevel) {
@@ -214,8 +214,8 @@ Animator.makeADSR = function(attackEnd, decayEnd, sustainEnd, sustainLevel) {
 			return sustainLevel;
 		}
 		return sustainLevel * (1 - ((state - sustainEnd) / (1 - sustainEnd)));
-	}
-}
+	};
+};
 // make a transition function that, like a ball falling to floor, reaches the target and/
 // bounces back again
 Animator.makeBounce = function(bounces) {
@@ -223,8 +223,8 @@ Animator.makeBounce = function(bounces) {
 	return function(state) {
 		state = fn(state); 
 		return state <= 1 ? state : 2-state;
-	}
-}
+	};
+};
  
 // pre-made transition functions to use with the 'transition' option
 Animator.tx = {
@@ -242,7 +242,7 @@ Animator.tx = {
 	veryElastic: Animator.makeElastic(3),
 	bouncy: Animator.makeBounce(1),
 	veryBouncy: Animator.makeBounce(3)
-}
+};
 
 // animates a pixel-based style property between two integer values
 function NumericalStyleSubject(els, property, from, to, units) {
@@ -255,7 +255,7 @@ function NumericalStyleSubject(els, property, from, to, units) {
 	this.from = parseFloat(from);
 	this.to = parseFloat(to);
 	this.units = units != null ? units : 'px';
-}
+};
 NumericalStyleSubject.prototype = {
 	setState: function(state) {
 		var style = this.getStyle(state);
@@ -280,7 +280,7 @@ NumericalStyleSubject.prototype = {
 	inspect: function() {
 		return "\t" + this.property + "(" + this.from + this.units + " to " + this.to + this.units + ")\n";
 	}
-}
+};
 
 // animates a colour based style property between two hex values
 function ColorStyleSubject(els, property, from, to) {
@@ -290,7 +290,7 @@ function ColorStyleSubject(els, property, from, to) {
 	this.from = this.expandColor(from);
 	this.origFrom = from;
 	this.origTo = to;
-}
+};
 
 ColorStyleSubject.prototype = {
 	// parse "#FFFF00" to [256, 256, 0]
@@ -301,7 +301,7 @@ ColorStyleSubject.prototype = {
 			red = parseInt(hexColor.slice(1, 3), 16);
 			green = parseInt(hexColor.slice(3, 5), 16);
 			blue = parseInt(hexColor.slice(5, 7), 16);
-			return [red,green,blue]
+			return [red,green,blue];
 		}
 		if (window.DEBUG) {
 			alert("Invalid colour: '" + color + "'");
@@ -322,7 +322,7 @@ ColorStyleSubject.prototype = {
 	inspect: function() {
 		return "\t" + this.property + "(" + this.origFrom + " to " + this.origTo + ")\n";
 	}
-}
+};
 
 // return a properly formatted 6-digit hex colour spec, or false
 ColorStyleSubject.parseColor = function(string) {
@@ -330,7 +330,7 @@ ColorStyleSubject.parseColor = function(string) {
 	if(match = ColorStyleSubject.parseColor.rgbRe.exec(string)) {
 		var part;
 		for (var i=1; i<=3; i++) {
-			part = Math.max(0, Math.min(255, parseInt(match[i])));
+			part = Math.max(0, Math.min(255, parseInt(match[i],0)));
 			color += ColorStyleSubject.toColorPart(part);
 		}
 		return color;
@@ -345,14 +345,14 @@ ColorStyleSubject.parseColor = function(string) {
 		return '#' + match[1];
 	}
 	return false;
-}
+};
 // convert a number to a 2 digit hex string
 ColorStyleSubject.toColorPart = function(number) {
 	if (number > 255) number = 255;
 	var digits = number.toString(16);
 	if (number < 16) return '0' + digits;
 	return digits;
-}
+};
 ColorStyleSubject.parseColor.rgbRe = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i;
 ColorStyleSubject.parseColor.hexRe = /^\#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
@@ -364,7 +364,7 @@ function DiscreteStyleSubject(els, property, from, to, threshold) {
 	this.from = from;
 	this.to = to;
 	this.threshold = threshold || 0.5;
-}
+};
 
 DiscreteStyleSubject.prototype = {
 	setState: function(state) {
@@ -376,7 +376,7 @@ DiscreteStyleSubject.prototype = {
 	inspect: function() {
 		return "\t" + this.property + "(" + this.from + " to " + this.to + " @ " + this.threshold + ")\n";
 	}
-}
+};
 
 // animates between two styles defined using CSS.
 // if style1 and style2 are present, animate between them, if only style1
@@ -446,7 +446,7 @@ function CSSStyleSubject(els, style1, style2) {
 		}
 		this.subjects[this.subjects.length] = new type(els, prop, from, to, units);
 	}
-}
+};
 
 CSSStyleSubject.prototype = {
 	// parses "width: 400px; color: #FFBB2E" to {width: "400px", color: "#FFBB2E"}
@@ -491,7 +491,7 @@ CSSStyleSubject.prototype = {
 		}
 		return str;
 	}
-}
+};
 // get the current value of a css property, 
 CSSStyleSubject.getStyle = function(el, property){
 	var style;
@@ -505,8 +505,8 @@ CSSStyleSubject.getStyle = function(el, property){
 	if(el.currentStyle){
 		style = el.currentStyle[property];
 	}
-	return style || el.style[property]
-}
+	return style || el.style[property];
+};
 
 
 CSSStyleSubject.ruleRe = /^\s*([a-zA-Z\-]+)\s*:\s*(\S(.+\S)?)\s*$/;
@@ -538,7 +538,7 @@ function AnimatorChain(animators, options) {
 	}
 	this.forwards = false;
 	this.current = 0;
-}
+};
 
 AnimatorChain.prototype = {
 	// apply defaults
@@ -588,7 +588,7 @@ AnimatorChain.prototype = {
 		animator.options.onComplete = function() {
 			if (oldOnComplete) oldOnComplete.call(animator);
 			_this.advance();
-		}
+		};
 	},
 	// play the next animator
 	advance: function() {
@@ -613,7 +613,7 @@ AnimatorChain.prototype = {
 			this.animators[this.current].seekTo(1);
 		}
 	}
-}
+};
 
 // an Accordion is a class that creates and controls a number of Animators. An array of elements is passed in,
 // and for each element an Animator and a activator button is created. When an Animator's activator button is
@@ -638,7 +638,7 @@ function Accordion(options) {
 		an.jumpTo(0);
 		var activator = this.options.getActivator(el);
 		activator.index = i;
-		activator.onclick = function(){_this.show(this.index)};
+		activator.onclick = function(){_this.show(this.index);};
 		this.ans[this.ans.length] = an;
 		this.rememberanceTexts[i] = activator.innerHTML.replace(/\s/g, "");
 		if (this.rememberanceTexts[i] === current) {
@@ -646,7 +646,7 @@ function Accordion(options) {
 		}
 	}
 	this.show(selected);
-}
+};
 
 Accordion.prototype = {
 	// apply defaults
@@ -656,7 +656,7 @@ Accordion.prototype = {
 			sections: null,
 			// a function that locates an activator button element given a section element.
 			// by default it takes a button id from the section's "activator" attibute
-			getActivator: function(el) {return document.getElementById(el.getAttribute("activator"))},
+			getActivator: function(el) {return document.getElementById(el.getAttribute("activator"));},
 			// shifts each animator's range, for example with options {from:0,to:100,shift:20}
 			// the animators' ranges will be 0-100, 20-120, 40-140 etc.
 			shift: 0,
@@ -676,4 +676,4 @@ Accordion.prototype = {
 			document.location.hash = this.rememberanceTexts[section];
 		}
 	}
-}
+};
