@@ -660,7 +660,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @returns {String} the set attribute name
   */
   setAttribute: function(attrName, value) {
-    this.rootElement.setAttribute(atrrName, value) ;
+    this.rootElement.setAttribute(attrName, value) ;
   },
   
   /**
