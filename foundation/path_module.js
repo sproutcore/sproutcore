@@ -313,7 +313,7 @@ SC._PathModule = {
 
   // find first node with an attribute matching then named value.
   $P: function(el, attr, value, levels) {
-    var ret = SC._PathModule.$$A(el, attr, value,levels,1,false) ;
+    var ret = SC._PathModule.$$P(el, attr, value,levels,1,false) ;
     return (ret.length>0) ? ret[0] : null ;
   },
 
