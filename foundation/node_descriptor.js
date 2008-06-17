@@ -55,5 +55,5 @@ SC.NodeDescriptor = {
   },
   
   ignoredProperties: ['tag','cssClass','id','style','childNodes','innerHTML']
-}
+};
 
