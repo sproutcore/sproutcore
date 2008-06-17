@@ -114,7 +114,7 @@ view_helper :view do
   end
 
   # render the basic content
-  content { (@tag == 'img') ? ot : %(#{ot}#{@inner_html}#{ct}) }
+  content { (@tag == 'img') ? %(<#{@tag} #{attributes} />) : %(#{ot}#{@inner_html}#{ct}) }
   
 end
 
@@ -193,6 +193,8 @@ view_helper :image_view do
   view 'SC.ImageView'
   property :content
   property :value
+  
+  attribute :src, static_url('blank')
   
   var :tag, 'img'
   css_class_names << 'sc-image-view'
