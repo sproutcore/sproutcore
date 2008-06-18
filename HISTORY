@@ -1,10 +1,58 @@
-== GIT HEAD
 
+== sproutcore-0.9.10
 
-* SC.Platform.Firefox now returns 2 for any gecko browser that is not Firefox.
+- SC.Platform.Firefox now returns 2 for any gecko browser that is not Firefox.
 
-* set() and a variety of other methods now returns this instead of the set
+- set() and a variety of other methods now returns this instead of the set
 value.  This makes it possible to do method chaining.
+
+- Fixed typo in ().  Fixes #12
+
+- Fixed #11
+
+- Switch from transitional to strict DTD
+
+- Replacement of window.location to window.location.href.
+
+- Added default src to image_view (static_url('blank'))
+
+- Fix  for view_helper view that was closing the element.
+
+- sproutcore now treats space as a printable key instead of a function key.
+    
+- Added chainability to observer methods; improved docs
+    
+    set(), beginPropertyChanges(), endPropertyChanges() and a whole slew of other
+    methods now return this instead of void or the set value.  This allows for
+    method chainings jQuery style such as:
+    
+    contact.beginPropertyChanges()
+      .set('firstName', 'Charles')
+      .set('lastName', 'Jolley')
+    .endPropertyChanges();
+
+- auto select content of textarea when it's focused: this._isFocused is true for textarea while false for text input in didBecomeFirstRespo
+    
+- scrollable#scrollViewToVisible now scrolls up and left.  This corrects a bug with keyboard control that would bust when you move up or left.
+
+- Updated documentation on form
+
+- Use Element instead of element for IE compatability in Element.setClassName()
+    
+- Added SC.View#destroy() to remove views from internal caches. insertBefore, removeChild, etc. also now return the view instance so you can chain them.
+
+- Popup menu was setting the width on each of the child menu items in addition to itself. This had a huge performance impact with little ac
+    
+- Disabled the current behavior for the menu item view helper which parses the shortcut before inserting it; now it simply passes the passe
+
+- [FIX] Replaced url() calls with static_url() in CSS so that they will work properly in build mode
+
+- Cleanup in drag.js
+
+- Adding href property to ButtonView for bindable functionality on href attributes.
+
+- Properly order drop targets so that nested targets appear first.
+
 
 == 0.9.8
 
