@@ -154,8 +154,15 @@ Object.extend(String,
     var ret = (this.useAutodetectedLanguage) ? (this.browserLanguage || this.preferredLanguage || 'en') : (this.preferredLanguage || this.browserLanguage || 'en') ;
 
     // then try a couple of normalized forms...
-    if (!this[ret]) switch(ret)
-    {
+    if (!this[ret]) ret = this.normalizedLanguage(ret);
+    return ret ;
+  },
+  
+  /**
+    Returns a normalized language string for the two letter country code.
+  */
+  normalizedLanguage: function(ret) {
+    switch(ret) {
       case 'fr':
         ret = 'French'; 
         break ;
@@ -170,11 +177,33 @@ Object.extend(String,
         ret = 'English' ;
         break ;
       
+      case 'es':
+        ret = 'Spanish' ;
+        break;
+        
       default:
         break ;
     }
+    return ret;
+  },
+  
+  /**
+    Adds loc strings for the named language.  This method takes care of 
+    creating the localized string hash if it does not already exist.
+    The language can be one of the following or any two-letter country code.
     
-    return ret ;
+    English, French, German, Japanese, Spanish
+    
+    @param language {String} the language code
+    @param strings {Hash} hash of loc strings.
+    @returns {this}
+  */
+  addStringsFor: function(language, strings) {    
+    // convert language to a normalized name...
+    language = String.normalizedLanguage(language) ;
+    if (!String[language]) String[language] = {} ;
+    Object.extend(String[language], strings || {}); 
+    return this;
   }
 
 });
