@@ -1,4 +1,7 @@
 
+- Added documentation for SC.Error.
+- Added documentation for SC.SegmentedView
+
 == sproutcore-0.9.10
 
 - SC.Platform.Firefox now returns 2 for any gecko browser that is not Firefox.

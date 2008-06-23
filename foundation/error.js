@@ -5,15 +5,54 @@
 
 require('foundation/object');
 
-// Error is used to communicate errors throughout the app.
-SC.Error = SC.Object.extend({
-  code: -1, // error code. Used to designate type.
-  description: '', // human readable dscriptions.
-  label: null // optionally set to human readable the name of the item with the error.
+/**
+  @class
+  
+  An error, used to represent an error state.
+  
+  Many API's within SproutCore will return an instance of this object whenever
+  they have an error occur.  An error includes an error code, description,
+  and optional human readable label that indicates the item that failed. 
+  
+  Depending on the error, other properties may also be added to the object
+  to help you recover from the failure.
+  
+  You can pass error objects to various UI elements to display the error in
+  the interface. You can easily determine if the value returned by some API is 
+  an error or not using the helper SC.$ok(value).
+  
+  @extends SC.Object
+  @since SproutCore 1.0
+*/
+SC.Error = SC.Object.extend(
+/** @scope SC.Error.prototype */ {
+  
+  /**
+    error code.  Used to designate the error type.
+  */
+  code: -1,
+  
+  /**
+    Human readable description of the error.  This can also be a non-localized
+    key.
+  */
+  description: '',
+  
+  /**
+    Human readable name of the item with the error.
+  */
+  label: null
 }) ;
 
-// this will create a new instance of the receiver with the passed 
-// description, etc.
+/**
+  Creates a new SC.Error instance with the passed description, label, and
+  code.  All parameters are optional.
+  
+  @param description {String} human readable description of the error
+  @param label {String} human readable name of the item with the error
+  @param code {Number} an error code to use for testing.
+  @returns {SC.Error} new error instance.
+*/
 SC.Error.desc = function(description, label, code) {
   var opts = { description: description } ;
   if (label !== undefined) opts.label = label ;
@@ -21,19 +60,25 @@ SC.Error.desc = function(description, label, code) {
   return this.create(opts) ;
 } ;
 
-// returns an error object.
-function $error(description, label, c) { 
+/**
+  Shorthand form of the SC.Error.desc method.
+*/
+SC.$error = function(description, label, c) { 
   return SC.Error.desc(description,label, c); 
 } ;
+var $error = SC.$error ; // export globally
 
-
-// returns true if the return value is not false or an error.
-function $ok(ret) {
+/**
+  Returns YES if the passed value is an error object, otherwise NO.
+*/
+SC.$ok = function(ret) {
   return (ret !== false) && ($type(ret) != T_ERROR) ;
-}
-
+};
+var $ok = SC.$ok ; // export globally.
 
 // STANDARD ERROR OBJECTS
 
-// Used by objects that do not support multiple values.
+/**
+  Standard error code for errors that do not support multiple values.
+*/
 SC.Error.HAS_MULTIPLE_VALUES = -100 ;
