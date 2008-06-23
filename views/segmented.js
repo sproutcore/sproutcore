@@ -5,27 +5,52 @@
 
 require('views/view') ;
 
-// SegmentView shows an array of buttons that can have mutually exclusive
-// select states.  You can change the value property to the state you
-// want to reflect and a button with the matching name 'xxxButton' will have
-// its select state set.
-//
-// Also, on configure, if the buttons in the segment view do not have actions
-// set, then the button will be configured to change the select state.
-SC.SegmentedView = SC.View.extend({
+/**
+  @class
   
-  value: null, // set to the currently value button.
+  SegmentView shows an array of buttons that can have mutually exclusive
+  select states.  You can change the value property to the state you
+  want to reflect and a button with the matching name 'xxxButton' will have
+  its select state set.
 
-  segments: null, // contains the array of buttons after init.
+  Also, on configure, if the buttons in the segment view do not have actions
+  set, then the button will be configured to change the select state.
+
+  @extends SC.View
+  @since SproutCore 1.0
+*/
+SC.SegmentedView = SC.View.extend(
+/** @scope SC.SegmentedView.prototype */ {
   
-  // changes all buttons to enabled/disabled.  You can also change buttons
-  // individually.
+  /**
+    The value of the segmented view.
+    
+    The SegmentedView's value will always be the value of the currently
+    selected button.  Setting this value will change the selected button. 
+    If you set this value to something that has no matching button, then
+    no buttons will be selected.
+    
+    @field {Object}
+  */
+  value: null,
+
+  /**
+    Contains an array of buttons after init.
+  */
+  segments: null, 
+
+  /**
+    Set to YES to enabled the segmented view, NO to disabled it.
+  */
   isEnabled: true, 
-  
-  // if true, clicking on a button again will deselect it (using the
-  // standard action)
+
+  /**
+    If YES, clicking a selected button again will deselect it, setting the
+    segmented views value to null.  Defaults to NO.
+  */
   allowsEmptySelection: false,  
 
+  /** @private */
   init: function() {
     arguments.callee.base.call(this) ;
     
