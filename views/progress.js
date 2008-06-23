@@ -20,8 +20,8 @@ require('views/view') ;
   Style the progress bar with the following CSS classes:
 
   .progress.indeterminate = to show an indeterminate progress. inner will 
-      hide.
-  .progress.disabled = show as disabled.
+      be set to fill 100%
+  .progress.disabled = show as disabled. 
 
   @extends SC.View
 */
@@ -41,14 +41,19 @@ SC.ProgressView = SC.View.extend({
   */
   maximum: 1.0,
 
-  // Bind this to the current value of the progress bar.  Note that by default an
-  // empty value will disable the progress bar and a multiple value too make it
-  // indeterminate.
+  /**
+    Bind this to the current value of the progress bar.  Note that by default an
+    empty value will disable the progress bar and a multiple value too make it
+    indeterminate.
+  */
   value: 0.50,
   valueBindingDefault: SC.Binding.SingleNotEmpty,
   
-  // set to true if the item in progress is indeterminate.  This may be overridden
-  // by the actual value.
+  /** 
+    Set to true if the item in progress is indeterminate.  This may be overridden
+    by the actual value.
+    @returns {Boolean} 
+  */
   isIndeterminate: function(key,value) {
     if (value !== undefined) {
       this._isIndeterminate = value ;
@@ -56,7 +61,10 @@ SC.ProgressView = SC.View.extend({
     return this._isIndeterminate && (this.value != SC.Binding.EMPTY_PLACEHOLDER) ;
   }.property(),
   
-  // set to false to disable the progress bar
+  /**
+   Set to false to disable the progress bar.
+   @returns {Boolean}
+  */
   isEnabled: function(key, value) {
     if (value !== undefined) {
       this._isEnabled = value ;
@@ -88,11 +96,13 @@ SC.ProgressView = SC.View.extend({
       Element.setClassName(this,'indeterminate',isIndeterminate) ;
       Element.setClassName(this,'disabled',!isEnabled) ;
       
-      // compute value
+      // compute value for setting the width of the inner progress
       var value ;
-      if (isIndeterminate || !isEnabled) {
+      if (!isEnabled) {
         value = 0.0 ;
-      } else {
+      } else if (isIndeterminate) {
+        value = 1.0;
+      }else {
         var minimum = this.get('minimum') || 0.0 ;
         var maximum = this.get('maximum') || 1.0 ;
         value = this.get('value') || 0.0 ;
