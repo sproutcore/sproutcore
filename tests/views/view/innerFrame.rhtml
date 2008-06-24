@@ -10,91 +10,91 @@
 
 <script>
 
-Test.context("CASE 1: Auto-layout view with no padding & no border", {
-  
-  // IMPORTANT:  This test validates that innerFrame works even on elements in
-  // IE when hasLayout = false.  Make sure you do not edit the CSS or other
-  // properties for this test in such a way that it would give the test 
-  // element hasLayout.  
-  "frame should == innerFrame": function() {
-
-    // verify hasLayout is false in IE.
-    if (SC.Platform.IE) {
-      var hasLayout = v.rootElement.currentStyle.hasLayout ;
-      assertEqual(hasLayout, false, 'element.hasLayout MUST be false in IE');
-    }
-    
-    SC.rectsEqual(v.get('frame'), v.get('innerFrame')).shouldEqual(true) ;
-  },
-  
-  "frame & innerFrame should change when CSS changed and viewFrameDidChange() is called": function() {
-    var origFrame = this.v.get('frame') ;
-    var origInnerFrame = this.v.get('innerFrame') ;
-    
-    this.v.addClassName('half') ;
-    this.v.viewFrameDidChange() ;
-    
-    SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(false) ;    
-    SC.rectsEqual(this.v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;   
-    
-    this.v.removeClassName('half') ; //reset 
-  },
-  
-  setup: function() { this.v = SC.page.get('case1'); }
-  
-});
-
-
-// CASE 2: Auto-layout of view with padding
-// - same as Case 1, except innerFrame = frame less padding
-CASE2_OFFSET = 2;
-Test.context("CASE 2: Auto-layout view with padding & border", {
-  
-  "innerFrame should == frame less border": function() {
-    var f = v.get('frame') ;
-    f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
-    f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
-    //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
-    
-    SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
-  },
-  
-  "frame & innerFrame should change when CSS changed and viewFrameDidChange is called.; innerFrame should maintain proportion": function() {
-    var origFrame = v.get('frame') ;
-    var origInnerFrame = v.get('innerFrame') ;
-
-    // verify that frames change
-    v.addClassName('half') ;
-    v.viewFrameDidChange() ;
-    
-    SC.rectsEqual(v.get('frame'), origFrame).shouldEqual(false) ;    
-    SC.rectsEqual(v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;    
-
-    // verify that innerFrame changes correctly.
-    var f = this.v.get('frame') ;
-    f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
-    f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
-    SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
-    
-    v.removeClassName('half') ;
-    
-  },
-  
-  "changing border should change innerFrame": function() {
-    v.setStyle({ border: '5px red solid' }) ;
-    v.viewFrameDidChange() ;
-    var f = v.get('frame') ;
-    f.x += 5; f.y += 5;
-    f.width -= 10; f.height -= 10 ;
-    
-    var got = v.get('innerFrame') ;
-    console.log('expected: %@ got: %@'.fmt($H(f).inspect(), $H(got).inspect()));
-    SC.rectsEqual(f, got).shouldEqual(true) ;
-  },
-  
-  setup: function() { this.v = SC.page.get('case2'); }
-  
-});
+// Test.context("CASE 1: Auto-layout view with no padding & no border", {
+//   
+//   // IMPORTANT:  This test validates that innerFrame works even on elements in
+//   // IE when hasLayout = false.  Make sure you do not edit the CSS or other
+//   // properties for this test in such a way that it would give the test 
+//   // element hasLayout.  
+//   "frame should == innerFrame": function() {
+// 
+//     // verify hasLayout is false in IE.
+//     if (SC.Platform.IE) {
+//       var hasLayout = v.rootElement.currentStyle.hasLayout ;
+//       assertEqual(hasLayout, false, 'element.hasLayout MUST be false in IE');
+//     }
+//     
+//     SC.rectsEqual(v.get('frame'), v.get('innerFrame')).shouldEqual(true) ;
+//   },
+//   
+//   "frame & innerFrame should change when CSS changed and viewFrameDidChange() is called": function() {
+//     var origFrame = this.v.get('frame') ;
+//     var origInnerFrame = this.v.get('innerFrame') ;
+//     
+//     this.v.addClassName('half') ;
+//     this.v.viewFrameDidChange() ;
+//     
+//     SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(false) ;    
+//     SC.rectsEqual(this.v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;   
+//     
+//     this.v.removeClassName('half') ; //reset 
+//   },
+//   
+//   setup: function() { this.v = SC.page.get('case1'); }
+//   
+// });
+// 
+// 
+// // CASE 2: Auto-layout of view with padding
+// // - same as Case 1, except innerFrame = frame less padding
+// CASE2_OFFSET = 2;
+// Test.context("CASE 2: Auto-layout view with padding & border", {
+//   
+//   "innerFrame should == frame less border": function() {
+//     var f = v.get('frame') ;
+//     f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
+//     f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
+//     //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+//     
+//     SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
+//   },
+//   
+//   "frame & innerFrame should change when CSS changed and viewFrameDidChange is called.; innerFrame should maintain proportion": function() {
+//     var origFrame = v.get('frame') ;
+//     var origInnerFrame = v.get('innerFrame') ;
+// 
+//     // verify that frames change
+//     v.addClassName('half') ;
+//     v.viewFrameDidChange() ;
+//     
+//     SC.rectsEqual(v.get('frame'), origFrame).shouldEqual(false) ;    
+//     SC.rectsEqual(v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;    
+// 
+//     // verify that innerFrame changes correctly.
+//     var f = this.v.get('frame') ;
+//     f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
+//     f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
+//     SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
+//     
+//     v.removeClassName('half') ;
+//     
+//   },
+//   
+//   "changing border should change innerFrame": function() {
+//     v.setStyle({ border: '5px red solid' }) ;
+//     v.viewFrameDidChange() ;
+//     var f = v.get('frame') ;
+//     f.x += 5; f.y += 5;
+//     f.width -= 10; f.height -= 10 ;
+//     
+//     var got = v.get('innerFrame') ;
+//     console.log('expected: %@ got: %@'.fmt($H(f).inspect(), $H(got).inspect()));
+//     SC.rectsEqual(f, got).shouldEqual(true) ;
+//   },
+//   
+//   setup: function() { this.v = SC.page.get('case2'); }
+//   
+// });
 
 // CASE 3: Manual-layout view with some padding and border
 // - innerFrame should update at frame is changed.
@@ -104,12 +104,12 @@ CASE3_OFFSET_THICK = 5 ;
 Test.context("CASE 3: manual-layout view with some padding and no border", {
   
   "innerFrame should == frame less border": function() {
-    var f = this.v.get('frame') ;
-    f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
-    f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
-    
-    SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
-  },
+     var f = this.v.get('frame') ;
+     f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
+     f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
+     
+     SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+   },
 
   "after frame change, innerFrame should == frame less border, viewFrameDidChange is not required.": function() {
     var f ;
@@ -117,16 +117,18 @@ Test.context("CASE 3: manual-layout view with some padding and no border", {
     this.v.set('frame', f = { width: 50, x: 10, y: 10, height: 50 }) ;
     f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
     f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
-    //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+    
+    console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+    console.log('v=%@'.fmt(v.rootElement)) ;
     
     SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
   },
-
+  
   "changing CSS to change width should not impact innerFrame if viewFrameDidChange is called": function() {
     var f = this.v.get('frame') ;
     f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
     f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
-
+  
     this.v.addClassName('half') ;
     this.v.viewFrameDidChange() ;
     
@@ -134,20 +136,20 @@ Test.context("CASE 3: manual-layout view with some padding and no border", {
     
     SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
   },
-
+  
   "changing CSS to change border width should impact innerFrame if viewFrameDidChange() is called": function() {
-
+  
     this.v.get('frame') ;
     this.v.get('innerFrame'); // make sure the old value is cached.
     
     this.v.addClassName('thick-border') ;
     this.v.viewFrameDidChange() ;
-
+  
     // calculate the expected new value
     var f = this.v.get('frame') ;
     f.x += CASE3_OFFSET_THICK; f.y += CASE3_OFFSET_THICK;
     f.width -= (CASE3_OFFSET_THICK*2); f.height -= (CASE3_OFFSET_THICK*2) ;
-
+  
     console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
     
     SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
@@ -275,7 +277,7 @@ main = function() { SC.page.awake(); };
 
 .half { width: 50%; }
 
-.case2, .case3 { padding: 10px; border: 2px blue solid; }
+.case2, .case3 { padding: 10px; border: 2px blue solid; position: absolute; }
 
 .case.thick-border { border: 5px green solid; }
 
