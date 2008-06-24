@@ -117,7 +117,6 @@ Object.extend(SC,{
 
   // To flush the callOnLoad queue, you need to set window.onload=SC.didLoad
   didLoad: function() { 
-    
     SC.app = SC.Application.create();
     SC.app.run();
     
@@ -160,7 +159,7 @@ Object.extend(SC,{
     } else if ((url.slice(0,5) == 'http:') || (url.slice(0,6) == 'https:')) {
       // no change
     } else {
-      url = window.location + '/' + url ;
+      url = window.location.href + '/' + url ;
     }
     return url ;
   },

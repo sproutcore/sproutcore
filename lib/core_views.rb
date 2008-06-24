@@ -195,7 +195,7 @@ view_helper :image_view do
   property :value
   
   attribute :src, static_url('blank')
-  
+  attribute :alt, ''
   var :tag, 'img'
   css_class_names << 'sc-image-view'
 end
