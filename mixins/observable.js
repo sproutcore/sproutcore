@@ -518,7 +518,6 @@ SC.Observable = {
     Adds an observer on a property.
     
     This is the core method used to register an observer for a property.
-    The observer can be either a simple function or an object and a method.
     
     Once you call this method, anytime the key's value is set, your observer
     will be notified.  Note that the observers are triggered anytime the
@@ -526,9 +525,8 @@ SC.Observable = {
     observer should be prepared to handle that.
     
     @param key {String} the key to observer
-    @param target {Object} the object holding the action to call.  May benull.
-    @param action {String,Function} the action to call.
-    @returns {void}
+    @param func {String} the function to call when the key changes.
+    @returns {SC.Object}
   */
   addObserver: function(key,func) {
     var kvo = this._kvo() ;
@@ -550,6 +548,8 @@ SC.Observable = {
       while(!found && --loc >= 0) found = (observers[loc] == func) ;
       if (!found) observers.push(func) ;
     }
+    
+    return this;
 
   },
 
@@ -573,6 +573,8 @@ SC.Observable = {
       observers = observers.without(func) ;
       kvo.observers[key] = observers ;
     }
+    
+    return this;
   },
 
   addProbe: function(key) { this.addObserver(key,logChange); },
