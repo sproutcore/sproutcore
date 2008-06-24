@@ -1,7 +1,16 @@
 
+- Progress bar now shows 100% fill when set to indeterminate.  This should 
+  make it easier to style an indeterminate appearance.
+  
+- Changed all references for window.location= to window.location.href=.  
+  Improves IE compatibility.
+  
+- Cleaned JSLink warnings from animator.js
+
 - Removed stray debugger statements (thanks august!)
 
-- Fixed CSS issues with SC-theme that made buttons appear offset.  Now appears correct in FF3 & Safari (thanks mde!)
+- Fixed CSS issues with SC-theme that made buttons appear offset.  Now appears   
+  correct in FF3 & Safari (thanks mde!)
 
 - Added detect-browser script which can be included at the top of your page to 
   detect the current browser and platform.  Also includes an 
