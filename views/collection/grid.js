@@ -74,7 +74,7 @@ SC.GridView = SC.CollectionView.extend(
   },
 
   layoutItemView: function(itemView, contentIndex, firstLayout) {
-    if (!itemView) debugger ;
+    //if (!itemView) debugger ;
     SC.Benchmark.start('SC.GridView.layoutItemViewsFor') ;
 
     var rowHeight = this.get('rowHeight') || 0 ;

@@ -205,7 +205,7 @@ SC.Benchmark = {
     return ret ;
   },
   
-  reset: function() { this.stats = {} ;  debugger;},
+  reset: function() { this.stats = {} ;  /*debugger;*/},
   
   // This is private, but it is used in some places, so we are keeping this for
   // compatibility.

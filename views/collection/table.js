@@ -50,7 +50,7 @@ SC.TableView = SC.CollectionView.extend(
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
-    if (!itemView) debugger ;
+    //if (!itemView) debugger ;
     SC.Benchmark.start('SC.TableView.layoutItemViewsFor') ;
     
     var rowHeight = this.get('rowHeight') || 0 ;
