@@ -1,4 +1,6 @@
 
+- [FIX] innerFrame tests were failing.  Now working.
+
 - Progress bar now shows 100% fill when set to indeterminate.  This should 
   make it easier to style an indeterminate appearance.
   
