@@ -21,10 +21,16 @@
 	 # stylesheets, you don't need to change it here.  Instead, use the
 	 # :requires option in routes.rb. 
 -%>
+    <script src="<%= static_url('detect-browser') %>" type="text/javascript"></script>
+    
     <%= stylesheets_for_client %>
 <%= @content_for_page_styles %>
   </head>
-  <body class="<%= @theme || 'sc-theme' %> focus">    
+  <body class="<%= @theme || 'sc-theme' %> focus">  
+    <script>
+    if (SC.setupBodyClassNames) SC.setupBodyClassNames() ;
+    </script>
+      
 <% #
    # This is where you root body element will appear.  To cause your 
    # content to appear here, just declare content_for('body') in one of
