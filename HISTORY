@@ -1,4 +1,6 @@
 
+- Removed stray debugger statements (thanks august!)
+
 - Fixed CSS issues with SC-theme that made buttons appear offset.  Now appears correct in FF3 & Safari (thanks mde!)
 
 - Added detect-browser script which can be included at the top of your page to 
