@@ -57,8 +57,9 @@ a.regular span.button-inner {
 a.regular span.label {
  	display: block ;
 	text-align: center;
-	padding-top: 3px;
-	height: 19px;
+  height: 22px;
+  line-height: 22px;
+  vertical-align: middle;
 	margin-left: 20px;
 	text-shadow: #f0f0f0 0px 1px 0px;
 }

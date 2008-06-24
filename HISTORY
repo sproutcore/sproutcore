@@ -1,4 +1,6 @@
 
+- Fixed CSS issues with SC-theme that made buttons appear offset.  Now appears correct in FF3 & Safari (thanks mde!)
+
 - Added detect-browser script which can be included at the top of your page to 
   detect the current browser and platform.  Also includes an 
   SC.setupBodyClassNames method that you can call after the body tag has been
