@@ -1,4 +1,4 @@
-require('Core');
+require('core');
 require('foundation/object');
 
 /**

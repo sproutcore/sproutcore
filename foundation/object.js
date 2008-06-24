@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('Core') ;
+require('core') ;
 require('foundation/benchmark') ;
 require('mixins/observable') ;
 require('mixins/array') ;

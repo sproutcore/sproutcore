@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('Core') ;
+require('core') ;
 
 // The Server object knows how to send requests to the server and how to
 // get things back from the server.  It automatically handles situations
