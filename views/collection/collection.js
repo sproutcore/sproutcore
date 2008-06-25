@@ -1476,7 +1476,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       var content = Array.from(this.get('content')) ;
       var contentIndex = content.indexOf(record) ;
       var groupBy = this.get('groupBy');
-      itemView = this._insertItemViewFor(itemView, groupBy, contentIndex); 
+      itemView = this._insertItemViewFor(record, groupBy, contentIndex); 
     }
     if (itemView) this.scrollToItemView(itemView);
   },
