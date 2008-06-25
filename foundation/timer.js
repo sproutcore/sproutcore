@@ -286,7 +286,8 @@ SC.Timer = SC.Object.extend(
       this.performAction() ;
     }
     
-    this.schedule() ; // reschedule the timer if needed...
+     // reschedule the timer if needed...
+     (this.get('repeats') && this.get('fireTime')>0) ? this.schedule() : this.invalidate();
   },
 
   /**
@@ -327,15 +328,9 @@ SC.Timer = SC.Object.extend(
     @returns {SC.Timer} The receiver
   */
   schedule: function() {
-    if (!this.get('isScheduled')) {
-      // invalidate a timer if the fireTime == 0;
-      var fireTime = this.get('fireTime') ;
-      if (fireTime===0) this.invalidate() ;
-
-      if (!this._invalid) {
-        this.set('isScheduled', YES) ;
-        SC.runLoop.scheduleTimer(this, fireTime) ;
-      }
+    if (!this._invalid) {
+      this.set('isScheduled', YES) ;
+      SC.runLoop.scheduleTimer(this, this.get('fireTime')) ;
     }
     return this ;
   },
