@@ -192,8 +192,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   _focusOnVisible: function() {
     if (this.get('isVisibleInWindow') && this._isFocused) {
       this.rootElement.focus() ;
-      this.rootElement.select.bind(this.rootElement).delay(0.05);
-    }  
+      
+      if(SC.isIE()){
+        var selector = function() {
+          Element.select(arguments.callee.it);
+        };
+        selector.it = this.rootElement;
+        setTimeout(selector,0.05);
+      } else{
+        this.rootElement.select.bind(this.rootElement).delay(0.05);  
+      }
+    }
   }.observes('isVisibleInWindow'),
   
   // THESE ARE DUMMY IMPLEMENTATIONS OF THE REPONDER METHODS FOR KEYBOARD
