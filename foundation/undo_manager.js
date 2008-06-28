@@ -3,7 +3,7 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('Core');
+require('core');
 
 /**
   @class

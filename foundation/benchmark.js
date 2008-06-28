@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('Core') ;
+require('core') ;
 require('foundation/date');
 require('foundation/string') ;
 
