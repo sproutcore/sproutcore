@@ -433,24 +433,36 @@ SC.Record = SC.Object.extend(
   matchCondition: function(key, value) {
     var recValue = this.get(key) ;    
     var isMatch ;
+    var loc ;
     
-    // massage value.
-    if (value &&  value.primaryKey) value = value.get(value.primaryKey) ;
-    
-    if (recValue instanceof Array) {
-      var loc = recValue.length ;
-      while(--loc >= 0) { 
-        if (this._matchValue(recValue[loc],value)) return true; 
-      }
-    } else return this._matchValue(recValue,value) ;
+    if (value && value.primaryKey) { // compare records by ref (only)
+      if (recValue instanceof Array) {
+        loc = recValue.length ;
+        while(--loc >= 0) { 
+          if (recValue === value) return true; 
+        }
+      } else return recValue === value ;
+    }
+    else { // compare properties or record's by guid
+      if (recValue instanceof Array) {
+        loc = recValue.length ;
+        while(--loc >= 0) { 
+          if (this._matchValue(recValue[loc],value)) return true; 
+        }
+      } else return this._matchValue(recValue,value) ;
+    }
     return false ;
   },
 
   _matchValue: function(recValue,value) {
-    // massage recValue a tad
-    if (recValue && recValue.primaryKey && typeof(value) == "string") recValue = recValue.get(recValue.primaryKey) ;
+    // if we get here with recValue as a record, we must compare by guid, so grab it
+    if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.primaryKey) ;
     var stringify = (value instanceof RegExp);
-    return (stringify) ? recValue.toString().match(value) : recValue==value ;        
+    if (stringify)  {
+      return recValue.toString().match(value)
+    } else {
+       return recValue==value ;
+    }
   },
   
   // ...............................
