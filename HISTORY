@@ -1,4 +1,8 @@
 
+- [FIX] some settings on the inline editor for multi-line edits were wrong.  Now fixed thanks to maloninc (#38)
+
+== sproutcore 0.9.11
+
 - [FIX] innerFrame tests were failing.  Now working.
 
 - Progress bar now shows 100% fill when set to indeterminate.  This should 
