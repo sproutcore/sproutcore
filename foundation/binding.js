@@ -306,7 +306,7 @@ SC.Binding.MultipleNoError = SC.Binding.NoError.ext(SC.Binding.Multiple);
 // Converts value to a bool.  true if: not null, not empty array, not 0, '',
 // etc.
 SC.Binding.Bool = SC.Binding.build(function(d,k,v) {
-  return ($type(v) == T_ARRAY) ? (t.length > 0) : !!v ;
+  return ($type(v) == T_ARRAY) ? (v.length > 0) : !!v ;
 }) ;
 
 // Converts value to a bool, but its only true if not null
@@ -316,7 +316,7 @@ SC.Binding.NotNull = SC.Binding.build(function(d,k,v) {
 
 // Converts inverse of bool.
 SC.Binding.Not = SC.Binding.build(function(d,k,v) {
-  return !(($type(v) == T_ARRAY) ? (t.length > 0) : !!v) ;
+  return !(($type(v) == T_ARRAY) ? (v.length > 0) : !!v) ;
 }) ;
 
 // Converts value to a bool, but its only true if not null

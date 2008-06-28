@@ -634,7 +634,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
   */
   updateChildren: function(fullUpdate) {
-
     var f ;
 
     // if the collection is not presently visible in the window, then there is 
@@ -670,6 +669,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // later but the frame has not actually changed, we don't want to run
     // updateChildren again.
     var clippingFrame = this._lastClippingFrame = this.get('clippingFrame') ;
+	
+	// this is a workaround for the clippingFrame bug in ie7 clippingFrame is always returning dimensions 0,0
+	if(clippingFrame.width==0 && clippingFrame.height==0){
+		clippingFrame = this._lastClippingFrame = f;
+	}
     
     // STEP 2: Calculate the new range of content to display in 
     // the clipping frame.  Determine if we need to do a full update or
@@ -1476,7 +1480,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       var content = Array.from(this.get('content')) ;
       var contentIndex = content.indexOf(record) ;
       var groupBy = this.get('groupBy');
-      itemView = this._insertItemViewFor(itemView, groupBy, contentIndex); 
+      itemView = this._insertItemViewFor(record, groupBy, contentIndex); 
     }
     if (itemView) this.scrollToItemView(itemView);
   },

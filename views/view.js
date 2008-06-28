@@ -1442,7 +1442,10 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if (!isVisibleInWindow) {
       if (pnParent) {
         pnParent.insertBefore(pn, pnSib) ;
-      } else SC.window.rootElement.removeChild(pn) ;
+      } else {
+        if(pn.parentNode)
+          SC.window.rootElement.removeChild(pn) ;
+      }
     }  
     
     return ret;
