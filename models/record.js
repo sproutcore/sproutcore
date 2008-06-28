@@ -434,17 +434,20 @@ SC.Record = SC.Object.extend(
     var recValue = this.get(key) ;    
     var isMatch ;
     var loc ;
-    
-    if (value && value.primaryKey) { // compare records by ref (only)
-      if (recValue instanceof Array) {
+
+    // The passed in value appears to be another record instance.
+    // just check for equality with the record as an optimization.
+    if (value && value.primaryKey) { 
+      if ($type(recValue) === T_ARRAY) {
         loc = recValue.length ;
         while(--loc >= 0) { 
           if (recValue === value) return true; 
         }
       } else return recValue === value ;
-    }
-    else { // compare properties or record's by guid
-      if (recValue instanceof Array) {
+
+    // Otherwise, do a more in-depth compare
+    } else { 
+      if ($type(recValue) === T_ARRAY) {
         loc = recValue.length ;
         while(--loc >= 0) { 
           if (this._matchValue(recValue[loc],value)) return true; 

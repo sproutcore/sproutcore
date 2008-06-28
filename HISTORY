@@ -1,4 +1,6 @@
 
+- [FIX] SC.Record#matchCondition() did not behave correctly when comparing record instances.  Fix by onitunes includes both a faster comparison method along with correct behavior + kickin' unit tests
+
 - [FIX] some settings on the inline editor for multi-line edits were wrong.  Now fixed thanks to maloninc (#38)
 
 == sproutcore 0.9.11
