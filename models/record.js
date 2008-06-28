@@ -5,43 +5,110 @@
 
 require('foundation/object') ;
 
-SC.Record = SC.Object.extend({
+/**
+  @class
+
+  A Record is the core model class in SproutCore. It is analogous to 
+  NSManagedObject in Core Data and EOEnterpriseObject in the Enterprise
+  Objects Framework (aka WebObjects), or ActiveRecord::Base in Rails.
+  
+  To create a new model class, in your SproutCore workspace, do:
+  
+  {{{
+    $ sc-gen model my_app/my_model
+  }}}
+
+  This will create MyApp.MyModel in clients/my_app/models/my_model.js.
+  
+  The core attributes hash is used to store the values of a record in a 
+  format that can be easily passed to/from the server.  The values should 
+  generally be stored in their raw string form.  References to external 
+  records should be stored as primary keys.
+  
+  Normally you do not need to work with the attributes hash directly.  
+  Instead you should use get/set on normal record properties.  If the 
+  property is not defined on the object, then the record will check the 
+  attributes hash instead.
+  
+  You can bulk update attributes from the server using the 
+  updateAttributes() method.
+
+  @extends SC.Object
+  @since SproutCore 1.0
+*/
+SC.Record = SC.Object.extend(
+/** @scope SC.Record.prototype */ {
   
   // ...............................
   // PROPERTIES
   //
 
-  // override this with the properties you want the record to manage.
+  /**
+    Override this with the properties you want the record to manage.
+    
+    @field
+    @type {Array}
+  */
   properties: ['guid'],
   
-  // this is the primary key used to distinguish records.  If the keys
-  // match, the records are assumed to be identical.
+  /**
+    This is the primary key used to distinguish records.  If the keys
+    match, the records are assumed to be identical.
+    
+    @field
+    @type {String}
+  */
   primaryKey: 'guid',
   
-  // when a new empty record is created, this will be set to true.  It will be
-  // set to false again the first time the record is committed.
+  /**
+    When a new empty record is created, this will be set to true.  It will be
+    set to false again the first time the record is committed.
+    
+    @field
+    @type {Boolean}
+  */
   newRecord: false,
   
-  // set to non-zero whenever the record has uncommitted changes.
+  /**
+    Set to non-zero whenever the record has uncommitted changes.
+    
+    @field
+    @type {Number}
+  */
   changeCount: 0,
   
-  // set to true when the record is deleted.  Will cause it to be removed
-  // from any member collections.  Once no more objects hold references to it,
-  // the property will be disabled.
+  /**
+    Set to true when the record is deleted.  Will cause it to be removed
+    from any member collections.  Once no more objects hold references to it,
+    the property will be disabled.
+    
+    @field
+    @type {Boolean}
+  */
   isDeleted: false,
   
   // ...............................
   // CRUD OPERATIONS
   //
 
-  // Set this URL to point to the type of resource this record is.  Put a
-  // '%@' where you expect the primaryKey to be inserted to identify the
-  // record.
+  /**
+    Set this URL to point to the type of resource this record is.  Put a
+    '%@' where you expect the primaryKey to be inserted to identify the
+    record.
+    
+    @field
+    @type {String}
+  */
   resourceURL: null,
   
-  // The item providing the data for this.  Set to either the store or a
-  // Server.  Setting it to the Store will make refresh and commit effectively
-  // null-ops.
+  /**
+    The item providing the data for this.  Set to either the store or a
+    Server.  Setting it to the Store will make refresh and commit effectively
+    null-ops.
+    
+    @field
+    @type {SC.Store or SC.Server}
+  */
   dataSource: SC.Store,
 
 
@@ -65,15 +132,20 @@ SC.Record = SC.Object.extend({
     return "@" + SC.getGUID(this);
   },
 
-  // invoked by the UI to request the model object be updated from the server.
-  // Override to actually support server changes.
+  /**
+    Invoked by the UI to request the model object be updated from the server.
+    
+    Override to actually support server changes.
+  */
   refresh: function() { 
     if (!this.get('newRecord')) this.dataSource.refreshRecords([this]); 
   },
   
-  // invoked by the UI to tell the model this record should be saved. Override
-  // to support server changes.  Note that this is used to support both the
-  // create and update components of CRUD.
+  /**
+    Invoked by the UI to tell the model this record should be saved. Override
+    to support server changes.  Note that this is used to support both the
+    create and update components of CRUD.
+  */
   commit: function() {
     // no longer a new record once changes have been committed.
     if (this.get('newRecord')) {
@@ -83,7 +155,9 @@ SC.Record = SC.Object.extend({
     }
   },
   
-  // this can delete the record.  The non-server version just sets isDeleted.
+  /**
+    This can delete the record.  The non-server version just sets isDeleted.
+  */
   destroy: function() { this.dataSource.destroyRecords([this]) ; },
 
   // ...............................
@@ -102,7 +176,12 @@ SC.Record = SC.Object.extend({
   // You can bulk update attributes from the server using the 
   // updateAttributes() method.
   
-  // gets an attribute, converting it to the proper format.
+  /**
+    Gets an attribute, converting it to the proper format.
+  
+    @param {string} key the attribute you want to read
+    @returns {value} the value of the key, or null if it doesn't exist
+  **/
   readAttribute: function(key) {
   	if (!this._cachedAttributes) this._cachedAttributes = {} ;
   	var ret = this._cachedAttributes[key] ;
@@ -118,7 +197,13 @@ SC.Record = SC.Object.extend({
   	return (ret === undefined) ? null : ret;
   },
 
-  // updates the attribute, converting it back to the property format.
+  /**
+    Updates the attribute, converting it back to the property format.
+  
+    @param {String} key the attribute you want to read
+    @param {Object} value the attribute you want to read
+    @returns {Object} the value of the key, or null if it doesn't exist
+  **/
   writeAttribute: function(key, value) {
     var recordType = this._getRecordType(key+'Type') ;
     var ret = this._attributeFromProperty(value, recordType) ;
@@ -130,11 +215,18 @@ SC.Record = SC.Object.extend({
     return value ;  
   },
   
-  // This will take the incoming set of attributes and update internal set. Note that
-  // if the attributes have never been set, then the object you pass in may become
-  // the new set of attribute.  This assumes the attrs you pass in will not be
-  // modified later.  This method also assumes it is coming from the server, so the
-  // change count will be reset.
+  /**
+    This will take the incoming set of attributes and update internal set.
+    
+    Note that if the attributes have never been set, then the object you pass in may 
+    become the new set of attribute.  This assumes the attrs you pass in will not be
+    modified later.  This method also assumes it is coming from the server, so the
+    change count will be reset.
+  
+    @param {Object} newAttrs the new attributes for the object
+    @param {Boolean} replace should the overwrite the in-place attributes, or replace them entirely
+    @returns {Boolean} isLoaded is the object loaded?
+  **/
   updateAttributes: function(newAttrs, replace, isLoaded) {
     var changed = false ;
     if (this._attributes && (replace !== true)) {
@@ -161,14 +253,23 @@ SC.Record = SC.Object.extend({
     }
   },
   
-  // This will return the current set of attributes as a hash you can send back
-  // to the server.
+  /**
+    This will return the current set of attributes as a hash you can send back to the server.
+  
+    @returns {Object} the current attributes of the receiver
+  **/
   attributes: function() {
     return Object.clone(this._attributes) ;
   }.property(),
   
-  // If you try to get/set a property not defined by the record, then this method
-  // will be called. It will try to get the value from the set of attributes.
+  /**
+    If you try to get/set a property not defined by the record, then this method
+    will be called. It will try to get the value from the set of attributes.
+  
+    @param {String} key the attribute being get/set
+    @param {Object} value the value to set the key to, if present
+    @returns {Object} the value
+  **/
   unknownProperty: function( key, value )
   {
     if (value !== undefined) {
