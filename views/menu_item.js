@@ -76,6 +76,7 @@ SC.MenuItemView = SC.ButtonView.extend({
   mouseOut: function(evt)
   {
     this.set('isDefault', false);
+    this.setClassName('active', false);
   },
   
   mouseUp: function(evt)
