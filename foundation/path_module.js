@@ -12,7 +12,7 @@
 //
 // ==========================================================================
 
-require('Core') ;
+require('core') ;
 require('foundation/benchmark') ;
 
 // Constants

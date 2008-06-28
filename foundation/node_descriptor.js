@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('Core') ;
+require('core') ;
 
 /**
   This object can generate HTML DOM elements from a hash-based description of 
