@@ -367,11 +367,32 @@ SC.ButtonView = SC.View.extend(SC.Control,
       
   }.observes('isDefault', 'isCancel'),
     
+    
+  isMouseDown: false, 
+    
   // on mouse down, set active only if enabled.  
   /** @private */
   mouseDown: function(evt) {
     this.setClassName('active',this.get('isEnabled')) ;
+    this._isMouseDown = true;
     return true ;
+  },
+  
+  // remove the active class on mouse down as well
+  /** @private */
+  
+  mouseExited: function(evt)
+  {
+    this.setClassName('active', false);
+    return true;
+  },
+  
+  // add the active class name if the mouse is down
+  // this covers a scenario where the user drags out and back on to a button
+  mouseEntered: function(evt)
+  {
+    this.setClassName('active', this._isMouseDown) ;
+    return true;
   },
   
   // on mouse up, trigger the action only if we are enabled and the mouse
@@ -379,7 +400,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   /** @private */
   mouseUp: function(evt) {
     this.setClassName('active', false) ;
-    
+    this._isMouseDown = false;
     var tgt = Event.element(evt) ;
     var inside = false ;
     while(tgt && (tgt != this.rootElement)) tgt = tgt.parentNode;
