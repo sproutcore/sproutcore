@@ -381,7 +381,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   // remove the active class on mouse down as well
   /** @private */
   
-  mouseExited: function(evt)
+  mouseOut: function(evt)
   {
     this.setClassName('active', false);
     return true;
@@ -389,7 +389,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   
   // add the active class name if the mouse is down
   // this covers a scenario where the user drags out and back on to a button
-  mouseEntered: function(evt)
+  mouseOver: function(evt)
   {
     this.setClassName('active', this._isMouseDown) ;
     return true;
