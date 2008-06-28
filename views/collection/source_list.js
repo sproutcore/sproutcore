@@ -5,6 +5,7 @@
 require('views/collection/collection') ;
 require('views/button/disclosure');
 require('views/source_list_group');
+require('views/list_item') ;
 
 SC.BENCHMARK_SOURCE_LIST_VIEW = NO ;
 

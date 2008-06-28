@@ -5,6 +5,7 @@
 
 require('views/view') ;
 require('controllers/collection') ;
+require('views/button/button') ;
 
 /**
 

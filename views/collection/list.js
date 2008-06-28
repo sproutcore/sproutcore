@@ -4,6 +4,7 @@
 
 require('views/collection/collection') ;
 require('views/label');
+require('views/list_item') ;
 
 /** @class
 

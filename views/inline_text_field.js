@@ -6,6 +6,7 @@
 require('views/view') ;
 require('mixins/delegate_support') ;
 require('views/field/text_field') ;
+require('views/field/textarea_field') ;
 require('mixins/inline_editor_delegate');
 
 /**
@@ -289,7 +290,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
   /** 
     The actual text field view used for editing.
   */
-  field: SC.TextFieldView.extend({
+  field: SC.TextareaFieldView.extend({
 
     // handle mouseDown event if we are currently editing so that events
     // don't go any further?
@@ -331,7 +332,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
     // then allow the newine to proceed.  Otherwise, try to commit the 
     // edit.
     insertNewline: function(evt) { 
-      if (this.owner_multiline) {
+      if (this.owner._multiline) {
         return arguments.callee.base.call(this, evt) ;
       } else {
         this.owner.commitEditing() ;
