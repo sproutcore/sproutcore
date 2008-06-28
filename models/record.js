@@ -218,13 +218,13 @@ SC.Record = SC.Object.extend(
   /**
     This will take the incoming set of attributes and update internal set.
     
-    Note that if the attributes have never been set, then the object you pass in may 
-    become the new set of attribute.  This assumes the attrs you pass in will not be
-    modified later.  This method also assumes it is coming from the server, so the
-    change count will be reset.
+    Note that if the attributes have never been set, then the object you pass 
+    in may become the new set of attribute.  This assumes the attrs you pass 
+    in will not be modified later.  This method also assumes it is coming from 
+    the server, so the change count will be reset.
   
     @param {Object} newAttrs the new attributes for the object
-    @param {Boolean} replace should the overwrite the in-place attributes, or replace them entirely
+    @param {Boolean} replace should the overwrite the in-place attributes, or  replace them entirely
     @returns {Boolean} isLoaded is the object loaded?
   **/
   updateAttributes: function(newAttrs, replace, isLoaded) {
@@ -263,8 +263,9 @@ SC.Record = SC.Object.extend(
   }.property(),
   
   /**
-    If you try to get/set a property not defined by the record, then this method
-    will be called. It will try to get the value from the set of attributes.
+    If you try to get/set a property not defined by the record, then this 
+    method will be called. It will try to get the value from the set of 
+    attributes.
   
     @param {String} key the attribute being get/set
     @param {Object} value the value to set the key to, if present
@@ -274,8 +275,9 @@ SC.Record = SC.Object.extend(
   {
     if (value !== undefined) {
       
-      // if we're modifying the PKEY, then SC.Store needs to relocate where this record is cached.
-      // store the old key, update the value, then let the store do the housekeeping...
+      // if we're modifying the PKEY, then SC.Store needs to relocate where 
+      // this record is cached. store the old key, update the value, then let 
+      // the store do the housekeeping...
       var primaryKeyName = this.get('primaryKey');
       if (key == primaryKeyName)
       {
@@ -339,9 +341,16 @@ SC.Record = SC.Object.extend(
   //
   
   valueForSortKey: function(key) { return this.get(key); },
-  
-  // this will compare the target object with the receiver, using the 
-  // orderBy parameters.
+
+  /**
+    Compares the receiver to the passed object, using the array of keys to
+    determine the order.  You can use this method as part of a call to sort()
+    on an array.
+    
+    @param object {SC.Record} the other record
+    @param orderBy {Array} array of one or more keys. Optional.
+    @returns {Number} -1, 0, 1
+  */
   compareTo: function(object, orderBy) {
     if (!orderBy) orderBy = [this.get('primaryKey')] ;
     var ret = SC.Record.SORT_SAME ; var loc ;
@@ -392,8 +401,13 @@ SC.Record = SC.Object.extend(
     return value ;
   },
   
-  // used to match records to a set of conditions.  By default, this will
-  // call matchCondition on each condition.
+  /**  
+    Used to match records to a set of conditions.  By default, this will
+    call matchCondition on each condition.
+    
+    @param conditions {Hash} hash of conditions
+    @returns {Boolean} true if the receiver matches the hash of conditions.
+  */
   matchConditions: function(conditions) {
     for(var key in conditions) {
       var value = conditions[key] ;
@@ -407,10 +421,15 @@ SC.Record = SC.Object.extend(
     }
     return true ;
   },
-  
-  // by default this just gets the key value and compares it.  Based on the 
-  // type of the receiver's value, try to massage the condition value into
-  // that.
+
+  /**
+    Returns true if the value of key matches the passed value.  This is used
+    by matchConditions().
+     
+    @param key {String} the key name
+    @param value {Object} the value to match agains
+    @returns {Boolean} true if matched
+  */
   matchCondition: function(key, value) {
     var recValue = this.get(key) ;    
     var isMatch ;
@@ -456,11 +475,17 @@ SC.Record = SC.Object.extend(
   
   _cprops: ['properties'],
 
-  // This method should be used by the server to push updated data into a
-  // record.  The data should be a hash with strings and arrays.  This will
-  // use any types you define to convert the values into their correct type.
-  // Note that references to external objects should be a string with the
-  // primaryKey value of the record.
+  /**
+    This method should be used by the server to push updated data into a
+    record.  The data should be a hash with strings and arrays.  This will
+    use any types you define to convert the values into their correct type.
+    Note that references to external objects should be a string with the
+    primaryKey value of the record.
+  
+    @param data {Hash} the data hash
+    @param isLoaded {Boolean} true if the hash contains a full set of data for the record vs just a summary.
+    @returns {void}
+  */  
   updateProperties: function(data,isLoaded) {
     var rec = this ;
     
