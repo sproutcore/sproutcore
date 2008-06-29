@@ -273,6 +273,14 @@ SC.window = SC.PaneView.extend({
     this._mouseDownView = null;
     SC.runLoop.endRunLoop() ;
   },
+
+  _ondblclick: function(evt){
+    if(SC.isIE())
+    {
+      this._clickCount = 2;
+      this._onmouseup(evt);
+    }
+  },
   
   _lastHovered: null,
 
