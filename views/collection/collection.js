@@ -1151,11 +1151,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // negative length == remove item views
     if (length < 0) {
-      while(++length < 0) {
-        var c = content.objectAt(start + length) ;
-        var itemView = this.itemViewForContent(c) ;
-        if (itemView) this._removeItemView(itemView, groupBy) ;
-      }
+      // while(++length < 0) {
+      //   var c = content.objectAt(start + length) ;
+      //   var itemView = this.itemViewForContent(c) ;
+      //   if (itemView) this._removeItemView(itemView, groupBy) ;
+      // }
       
     // positive length == add item views.
     } else if (length > 0) {
