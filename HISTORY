@@ -1,4 +1,3 @@
-== GIT HEAD
 
 == 0.9.8
 
@@ -345,5 +344,4 @@ and table_view.  Also refactored collection view helpers into their own file.
 * [FIX] SC.ObjectController: Avoid unwanted commit when oldValue == null && newValue == ''.  
 
 
-== 0.9.0 2008-03-08
 
