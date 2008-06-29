@@ -1154,7 +1154,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       while(++length < 0) {
         var c = content.objectAt(start + length) ;
         var itemView = this.itemViewForContent(c) ;
-        if (itemView) this._removeItemView(itemView, groupBy) ;
+        //if (itemView) this._removeItemView(itemView, groupBy) ;
       }
       
     // positive length == add item views.
