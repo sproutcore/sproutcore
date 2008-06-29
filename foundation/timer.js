@@ -241,22 +241,7 @@ SC.Timer = SC.Object.extend(
     @field
     @type {Number}
   */
-  fireTime: function() {
-    if (this._invalid || !this.get('isValid')) return 0;
-
-    var now = Date.now() ;
-    var start = this.get('startTime') || now ;
-    var until = this.get('until') ;
-    if (until && until > 0 && now >= until) return 0;
-
-    var interval = this.get('interval') ;
-    var cycle = Math.ceil(((now - start) / interval)+0.01) ;
-    var repeats = this.get('repeats') ;
-    if ((cycle > 1) && !repeats) return 0 ;
-
-    if (cycle < 1) cycle = 1 ;
-    return start + (cycle * interval) ;
-  }.property('isValid', 'startTime', 'interval', 'repeats', 'until'),
+  fireTime: null,
   
   /**
     Invalidates the timer so that it will not execute again.  If a timer has
@@ -282,12 +267,15 @@ SC.Timer = SC.Object.extend(
     @returns {void}
   */
   fire: function() {
-    if (this.get('isPaused') === NO) {
-      this.performAction() ;
-    }
+    
+    // whenever the timer fires, calculate the next fireTime immediately.
+    var nextFireTime = this._computeNextFireTime();
+    
+    // now perform the fire action unless paused.
+    if (!this.get('isPaused')) this.performAction() ;
     
      // reschedule the timer if needed...
-     (this.get('repeats') && this.get('fireTime')>0) ? this.schedule() : this.invalidate();
+     (nextFireTime>0) ? this.schedule() : this.invalidate();
   },
 
   /**
@@ -328,10 +316,25 @@ SC.Timer = SC.Object.extend(
     @returns {SC.Timer} The receiver
   */
   schedule: function() {
+
+    this.beginPropertyChanges();
+    
+    // if start time was not set explicitly when the timer was created, 
+    // get it from the run loop.  This way timer scheduling will always
+    // occur in sync.
+    if (!this.startTime) this.set('startTime', SC.runLoop.get('startTime')) ;
+    
+    // If this is the first time the timer was scheduled, compute the fireTime
+    var fireTime = (this.fireTime) ? this.get('fireTime') : this._computeNextFireTime() ; // sets the fire time...
+    
+    // now schedule the timer if needed.
     if (!this._invalid) {
       this.set('isScheduled', YES) ;
-      SC.runLoop.scheduleTimer(this, this.get('fireTime')) ;
+      SC.runLoop.scheduleTimer(this, fireTime) ;
     }
+    
+    this.endPropertyChanges() ;
+    
     return this ;
   },
   
@@ -346,15 +349,42 @@ SC.Timer = SC.Object.extend(
     if (this.until instanceof Date) {
       this.until = this.until.getTime() ;
     }
-    
-    // if start time was not set, get it from the run loop.
-    if (!this.startTime) this.startTime = SC.runLoop.get('startTime') ;
   },
   
   // if the paused state changes, notify the runloop so that it can 
   // reschedule its timeout.
   _isPausedObserver: function() {
     SC.runLoop.timerPausedStateDidChange(this) ;
+  }.observes('isPaused'),
+
+  /** @private
+    Computes the next fireTime and updates the property.
+    
+    @returns the next fire time (also set on fireTime property)
+  */
+  _computeNextFireTime: function() {
+    
+    var fireTime = 0 ;
+    if (!this._invalid && this.get('isValid')) {
+
+      var now = Date.now() ;
+      var start = this.get('startTime') || now ;
+      var until = this.get('until') ;
+      
+      // only calculate if we have not passed unitl.
+      if ((!until) || (until === 0) || (now < until)) {
+
+        var interval = this.get('interval') ;
+        var repeats = this.get('repeats') ;
+        var cycle = Math.ceil(((now - start) / interval)+0.01) ;
+        if (cycle < 1) cycle = 1 ;
+        
+        fireTime = ((cycle <= 1) || repeats) ? start + (cycle * interval) : 0;
+      }
+    }
+    
+    this.setIfChanged('fireTime', fireTime) ;
+    return fireTime ;
   }
   
 }) ;
