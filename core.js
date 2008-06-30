@@ -1,87 +1,131 @@
-//@license
 // ==========================================================================
-// SproutCore -- JavaScript Application Framework
-// copyright 2006-2008, Sprout Systems, Inc. and contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a 
-// copy of this software and associated documentation files (the "Software"), 
-// to deal in the Software without restriction, including without limitation 
-// the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-// and/or sell copies of the Software, and to permit persons to whom the 
-// Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in 
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING 
-// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-// DEALINGS IN THE SOFTWARE.
-//
-// For more information about SproutCore, visit http://www.sproutcore.com
-//
-//
-// ==========================================================================
-//@license
-
-// ==========================================================================
-// Utility Classes
+// SproutCore
 // Author: Charles Jolley
-// copyright 2006, Sprout Systems, Inc.
-//
-// This file contains a number of utility methods and classes used throughout
-// SproutCore. This should be loaded after your load Prototype but before you
-// load any other SproutCore objects.  In general, this is the only
-// dependency most SproutCore objects will have.
-//
+// copyright 2006-2008, Sprout Systems, Inc.
 // ==========================================================================
-
-if (!window.SC) {
-  /**
-    @namespace
-    
-    All objects live in the SproutCore namespace, which is also availabe in the
-    abbreviation SC.
-  */
-  SC = {};
-  SproutCore = SC ;
-}
-
-// this makes for some nicer to read code
-var YES = true ; var NO = false ;
 
 // this is used by the JavascriptCompile class on the server side.  You can
 // use this to automatically determine the order javascript files need to be
 // included in.  On the client side, this is a NOP.
-function require(file) { return null ; }
-
-// implement window.console.log() for IE.
-if (!window.console) { 
- window.console = { 
-   _output: [],
-   log: function(str) { this._output.push(str) ; },
-   tail: function(lines) { 
-     if (!lines) lines = 1 ;
-     var loc = this._output.length - lines ;
-     if (loc < 0) loc = 0 ;
-     var ret = [] ;
-     while(loc < this._output.length) {
-       ret.push(this._output[loc]) ; loc++ ;
-     }
-     return ret.join("\n");
-   }  
- } ;
-}
-window.logCount = 0 ;
+var require = require || function require() { } ;
+require('license') ;
 
 // ........................................
-// GENERAL UTILITIES
+// GLOBAL CONSTANTS
 // 
+// Most global constants should be defined inside of the SC namespace.  
+// However the following two are useful enough and generally benign enough
+// to put into the global object.
+var YES = true ; 
+var NO = false ;
 
-Object.extend(SC,{
+// ........................................
+// INTRODUCING SPROUTCORE
+// 
+// The root namespace and some common utility methods are defined here. The
+// rest of the methods go into the base area.
+
+/**
+  @namespace
+  
+  The SproutCore namespace.  All SproutCore methods and functions are defined
+  inside of this namespace.  You generally should not add new properties to
+  this namespace as it may be overwritten by future versions of SproutCore.
+  
+  You can also use the shorthand "SC" instead of "SproutCore".
+  
+  SproutCore-Base is a framework that provides core functions for SproutCore
+  including cross-platform functions, support for property observing and
+  objects.  It's focus is on small size and performance.  You can use this 
+  in place of or along-side other cross-platform libraries such as jQuery or
+  Prototype.
+  
+  The core Base framework is based on the jQuery API with a number of 
+  performance optimizations.
+*/
+var SC = SC || {} ; 
+var SproutCore = SproutCore || SC ;
+
+/**
+  Adds properties to a target object.
+  
+  Takes the root object and adds the attributes for any additional 
+  arguments passed.  This can also perform a deep copy if the first param
+  is a bool that is YES.  This is generally not very safe though and not
+  advised.
+
+  @param deep {Boolean} optional parameter.  If true, triggers a deep copy.
+  @param target {Object} the target object to extend
+  @param properties {Object} one or more objects with properties to copy.
+  @returns {Object} the target object.
+  @static
+*/
+SC.mixin = function() {
+  // copy reference to target object
+  var target = arguments[0] || {};
+  var idx = 1;
+  var length = arguments.length ;
+  var deep = NO ;
+  var options ;
+
+  // Handle case where we have only one item...extend SC
+  if (length === 1) {
+    target = this || {};
+    idx=0;
+  
+  // Handle a deep copy situation
+  } else if ((target===YES) || (target===NO)) {
+    deep = target;
+    target = arguments[1] || {};
+    idx = 2; // skip the boolean and the target
+  }
+
+  // Handle case when target is a string or something (possible in deep 
+  // copy)
+  if ( typeof target != "object" && typeof target != "function" ) {
+    target = {};
+  }
+
+  // extend SC itself if only one argument is passed
+  if ( length === idx ) {
+    target = this;
+    idx = idx-1;
+  }
+
+  for ( ; idx < length; idx++ ) {
+    if (!(options = arguments[idx])) continue ;
+    for(var key in options) {
+      if (!options.hasOwnProperty(key)) continue ;
+      
+      var src = target[key];
+      var copy = options[key] ;
+      if (target===copy) continue ; // prevent never-ending loop
+      
+      // Recurse if we're merging object values
+      if ( deep && copy && (typeof copy === "object") && !copy.nodeType ) {
+        copy = SC.extend(deep, 
+          src || (copy.length != null ? [ ] : { }), copy) ;
+      }
+      
+      if (copy !== undefined) target[key] = copy ;
+    }
+  }
+  
+  return target;
+} ;
+
+/** 
+  Alternative to mixin.  Provided for compatibility with jQuery.
+  @function 
+*/
+SC.extend = SC.mixin ;
+
+// ........................................
+// GLOBAL CONSTANTS
+//   
+
+// Enough with the bootstrap code.  Let's define some global constants!
+SC.mixin({
 
   _downloadFrames: 0, // count of download frames inserted into document
   
