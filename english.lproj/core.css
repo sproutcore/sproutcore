@@ -23,6 +23,7 @@
 	user-select: none;
 	opacity: 0.45;
 	-moz-opacity: .45 ;
+	filter: alpha(opacity=45);
 	z-index: 1000000;
 	cursor: default ;
 }

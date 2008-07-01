@@ -670,11 +670,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // updateChildren again.
     var clippingFrame = this._lastClippingFrame = this.get('clippingFrame') ;
 	
-	// this is a workaround for the clippingFrame bug in ie7 clippingFrame is always returning dimensions 0,0
-	if(clippingFrame.width==0 && clippingFrame.height==0){
-		clippingFrame = this._lastClippingFrame = f;
-	}
-    
     // STEP 2: Calculate the new range of content to display in 
     // the clipping frame.  Determine if we need to do a full update or
     // not.
