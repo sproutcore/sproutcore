@@ -709,10 +709,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         var key = SC.guidFor(c) ;
         var itemView = this._insertItemViewFor(c, groupBy, idx) ;
 
-        // add item view to new hash and remove from old hash.
-        itemViewsByContent[key] = itemView;
-       
-        delete this._itemViewsByContent[key];
+        if(itemView)
+        {
+          // add item view to new hash and remove from old hash.
+          itemViewsByContent[key] = itemView;
+
+          delete this._itemViewsByContent[key];
+        }
       }
       
       // Now iterate through the old hash.  Any left over item views should
