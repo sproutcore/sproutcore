@@ -1,5 +1,11 @@
 
-- [FIX] SC.Timer now computes the next fire time before it executes your callback action.  This should avoid the situation where a timer would call your action, which would then take it past the last time it should fire and hence the last fire would never happen.
+== sproutcore 0.9.12
+
+- SC.ButtonView & SC.MenuItemView now removes and adds the 'active' class name on mouseExited and mouseEntered when the mouse is pressed to provide better indication of whether an action will occur on mouse up. (Thanks schwa23)
+
+- SC.Record#toString now shows record type in description.
+
+- [FIX] SC.Timer now computes the next fire time before it executes your callback action.  This should avoid the situation where a timer would call your action, which would then take it past the last time it should fire and hence the last fire would never happen. (Thanks August)
 
 - [FIX] SC.Record#matchCondition() did not behave correctly when comparing record instances.  Fix by onitunes includes both a faster comparison method along with correct behavior + kickin' unit tests
 
