@@ -660,7 +660,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     @returns {String} the set attribute name
   */
   setAttribute: function(attrName, value) {
-    this.rootElement.setAttribute(atrrName, value) ;
+    this.rootElement.setAttribute(attrName, value) ;
   },
   
   /**
@@ -2197,11 +2197,19 @@ if (SC.Platform.IE) {
   SC.View._collectInnerFrame = function() {
     var el = this.rootElement ;
     var hasLayout = (el.currentStyle) ? el.currentStyle.hasLayout : NO ;
+    var borderTopWidth = parseInt(el.currentStyle.borderTopWidth, 0) || 0 ;
+    var borderBottomWidth = parseInt(el.currentStyle.borderBottomWidth, 0) || 0 ;
+    var scrollHeight = el.offsetHeight-borderTopWidth-borderBottomWidth;
+    if(el.clientWidth > el.scrollWidth)
+    {
+      scrollHeight-15;
+    }
+    
     return { 
       x: el.offsetLeft, 
       y: el.offsetTop, 
       width: (hasLayout) ? Math.min(el.scrollWidth, el.clientWidth) : el.scrollWidth, 
-      height: (hasLayout) ? Math.min(el.scrollHeight, el.clientHeight) : el.scrollHeight 
+      height: (hasLayout) ? Math.min(scrollHeight, el.clientHeight) : scrollHeight
     };
   } ;
   
