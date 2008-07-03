@@ -86,7 +86,7 @@ SC.Benchmark = {
     var stat = this._statFor(key) ;
     var start = stat._starts.pop() ;
     if (!start) {
-      console.warn('SC.Benchmark "%@" ended without a matching start.  No information was saved.'.fmt(key));
+      console.log('SC.Benchmark "%@" ended without a matching start.  No information was saved.'.fmt(key));
       return ;
     }
 
