@@ -43,7 +43,7 @@ SC.TableView = SC.CollectionView.extend(
     var min = Math.max(0,Math.floor(SC.minY(frame) / rowHeight)-1) ;
     var max = Math.ceil(SC.maxY(frame) / rowHeight) ;
     var ret = { start: min, length: max - min } ; 
-//    console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
+    // console.log('contentRangeInFrame(%@) = %@'.fmt($H(frame).inspect(), $H(ret).inspect()));
     //if (frame.height < 100) debugger ;
     return ret ;
   },
@@ -78,7 +78,7 @@ SC.TableView = SC.CollectionView.extend(
 
     f.x = f.y = 0;
     f.height = Math.max(f.height, rows * rowHeight) ;
-//    console.log('computeFrame(%@)'.fmt($H(f).inspect())) ;
+    // console.log('computeFrame(%@)'.fmt($H(f).inspect())) ;
     return f ;
   },
   

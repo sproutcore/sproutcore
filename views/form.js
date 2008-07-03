@@ -194,7 +194,7 @@ SC.FormView = SC.View.extend({
       this.set('isDirty', !ret) ;
     }
     catch(e) {
-      console.log("commit() exception: " + e) ;
+      console.warn("commit() exception: " + e) ;
       ret = false ;
     }
     
