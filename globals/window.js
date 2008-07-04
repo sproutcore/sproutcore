@@ -21,7 +21,11 @@ SC.window = SC.PaneView.extend({
     while(el && (el != document) && (!el._configured)) el = el.parentNode ;
     if (el) el = SC.View.findViewForElement(el) ;
     if (el == this) el = null ;
-    return el ;
+	try{
+    	return el ;
+	}finally{
+		el=null;
+	}
   },
 
   // ........................................................................

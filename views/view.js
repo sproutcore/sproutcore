@@ -115,8 +115,12 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     // call notices.
     view.didAddToParent(this, beforeView) ;
     this.didAddChild(view, beforeView) ;
-    
-    return this ;
+    try{
+    	return this ;
+	}finally{
+		if(beforeElement)
+		  beforeElement=null;
+	}
   },
 
   /**
@@ -163,7 +167,11 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     view.didRemoveFromParent(this) ;
     this.didRemoveChild(view);
+	try{
     return this;
+}finally{
+	el=null;
+}
   },
 
   /**
