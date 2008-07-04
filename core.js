@@ -90,7 +90,7 @@ Object.extend(SC,{
     tempDLIFrame.style.left='-10000px';    
     // Don't set the iFrame content yet if this is Safari
     if (!(SC.isSafari())) {
-      tempDLIFrame.setAttribute('src',path);    
+      tempDLIFrame.setAttribute('src',path);
     }
     document.getElementsByTagName('body')[0].appendChild(tempDLIFrame);
     if (SC.isSafari()) {
@@ -100,12 +100,12 @@ Object.extend(SC,{
     if (!(SC.isSafari())) {
       var r = function() { 
         document.body.removeChild(document.getElementById(frameId)); 
+				frameId = null;
       } ;
       var t = r.invokeLater(null, 2000);
     }
-	//remove possible IE7 leak
-	tempDLIFrame = null;
-	frameId = null;
+		//remove possible IE7 leak
+		tempDLIFrame = null;
 	},
 		
   // Call this method during setup of your app to queue up methods to be 
@@ -154,10 +154,10 @@ Object.extend(SC,{
     }
     
     SC.runLoop.endRunLoop();
-	//remove possible IE7 leak
-	b =null;
-	queue = null;
-	func = null;
+		//remove possible IE7 leak
+		b = null;
+		queue = null;
+		func = null;
   },
   
   // this will take a URL of any type and convert it to a fully qualified URL.
