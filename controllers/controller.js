@@ -67,7 +67,7 @@ SC.Controller = SC.Object.extend(
   */
   init: function()
   {
-    arguments.callee.base.apply(this,arguments);
+    sc_super();
     this._contextObserver();
   },
   

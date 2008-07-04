@@ -51,7 +51,7 @@ SC.ErrorExplanationView = SC.View.extend(SC.Control,
   }.observes('value'),
   
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     this._valueObserver() ;
   }
   

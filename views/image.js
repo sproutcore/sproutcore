@@ -152,7 +152,7 @@ SC.ImageView = SC.View.extend(SC.Control,
   },
   
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     this.valueObserver() ;
     if (this.rootElement.src) {
       this.set('imageWidth',parseInt(this.rootElement.width,0)) ;

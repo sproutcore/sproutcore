@@ -115,7 +115,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
 
   keyDown: function(evt) {
     if (!this.interpretKeyEvents(evt)) {
-      return arguments.callee.base.apply(this,arguments);
+      return sc_super();
     }
   },
   
@@ -206,7 +206,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
     }.observes('content'),
     
     init: function() {
-      arguments.callee.base.apply(this,arguments) ;
+      sc_super() ;
       
       // only Safari does well enough with animations to handle this dainty
       // guy. 
@@ -228,7 +228,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
   // view to match its content
   show: function() {
     this.containerView._fixWidth();
-    arguments.callee.base.apply(this,arguments);
+    sc_super();
     //this.focusFirstKeyView() ;
   }
 

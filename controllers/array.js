@@ -291,7 +291,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   },
   
   init: function() {
-    arguments.callee.base.apply(this, arguments) ;
+    sc_super() ;
     if (this.get('content')) this._contentObserver() ;
   }
 

@@ -32,7 +32,7 @@ SC.CheckboxFieldView = SC.FieldView.extend(
   valueBindingDefault: SC.Binding.Bool,
   
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     var f = this.fieldValueDidChange.bind(this, false) ;
     Event.observe(this.rootElement,'click', f) ;
   }

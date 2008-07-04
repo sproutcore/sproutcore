@@ -81,7 +81,7 @@ SC.MenuItemView = SC.ButtonView.extend({
   
   mouseUp: function(evt)
   {
-    arguments.callee.base.apply(this, arguments);
+    sc_super();
     this._closeParentMenu();
   },
   didTriggerAction: function()

@@ -155,7 +155,7 @@ Test.context("CASE 3: Autoscrolling, no incremental rendering, no custom layout"
       }),
       
       init: function() {
-        arguments.callee.base.apply(this, arguments) ;
+        sc_super() ;
         this.setStyle({ overflow: "auto", height: '200px' }) ;
       }
     }) ;
@@ -198,7 +198,7 @@ Test.context("CASE 4: Autoscrolling, no incremental rendering, custom layout",
       },
 
       init: function() {
-        arguments.callee.base.apply(this, arguments) ;
+        sc_super() ;
         this.setStyle({ overflow: "auto", height: '200px' }) ;
       }
       

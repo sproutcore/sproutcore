@@ -114,7 +114,7 @@ SC.Record = SC.Object.extend(
 
   init: function()
   {
-    arguments.callee.base.apply(this, arguments);
+    sc_super();
     
     var primaryKeyName = this.get('primaryKey');
     if (!this.get(primaryKeyName))
