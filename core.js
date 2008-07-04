@@ -103,6 +103,9 @@ Object.extend(SC,{
       } ;
       var t = r.invokeLater(null, 2000);
     }
+	//remove possible IE7 leak
+	tempDLIFrame = null;
+	frameId = null;
 	},
 		
   // Call this method during setup of your app to queue up methods to be 
@@ -113,6 +116,7 @@ Object.extend(SC,{
     if (SC._onloadQueueFlushed) func.call(document);
     var queue = SC._onloadQueue || [] ;
     queue.push(func) ; SC._onloadQueue = queue ;
+	queue = null;
   },
 
   // To flush the callOnLoad queue, you need to set window.onload=SC.didLoad
@@ -150,6 +154,10 @@ Object.extend(SC,{
     }
     
     SC.runLoop.endRunLoop();
+	//remove possible IE7 leak
+	b =null;
+	queue = null;
+	func = null;
   },
   
   // this will take a URL of any type and convert it to a fully qualified URL.

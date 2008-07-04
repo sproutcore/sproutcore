@@ -49,9 +49,21 @@ SC.NodeDescriptor = {
       childNodes.each(function(desc) {
         ret.appendChild(that.create(desc)) ;
       }) ;
+	  that=null;
+	  childNodes=null;
     }
     
-    return ret ;
+	try{
+    	return ret ;
+	}finally{
+		//ie7 memory leaks
+		tag=null;
+		className=null;
+		elementId=null;
+		style=null;
+		innerHTML=null;
+		ret=null;
+	}
   },
   
   ignoredProperties: ['tag','cssClass','id','style','childNodes','innerHTML']
