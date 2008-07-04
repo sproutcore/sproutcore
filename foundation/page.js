@@ -48,6 +48,7 @@ SC.Page = SC.Object.extend(
     SC.callOnLoad(function() {
       if (el && el.parentNode) el.parentNode.removeChild(el) ;
     }) ;
+	el=null;
   },
   
   // returns the property, but only if it is already configured.
