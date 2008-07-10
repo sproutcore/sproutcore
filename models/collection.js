@@ -6,46 +6,90 @@
 require('models/record') ;
 require('models/store') ;
 
-// A collection holds a set of records matching the specified conditions. You
-// can set the data source used to find the objects matching the conditions
-// to create collections pulled from the local set of objects or pulled 
-// from the server.
-//
-// Collection's automatically update their contents based on the conditions
-// settings you provide as the state of loaded records change.
-//
-SC.Collection = SC.Object.extend({
+/**
+  @class
+  @extends SC.Object
+  @since   0.9.14
+
+  @author Charles Jolley
+  
+  A collection holds a set of records matching the specified conditions. You
+  can set the data source used to find the objects matching the conditions
+  to create collections pulled from the local set of objects or pulled 
+  from the server.
+  
+  Collection's automatically update their contents based on the conditions
+  settings you provide as the state of loaded records change.
+*/
+SC.Collection = SC.Object.extend(
+/** @scope SC.Collection.prototype */ {
   
   // ........................................
   // CONFIGURABLE PROPERTIES
   //
   // Set these properties to control the records that will be in this list.
   
-  // indicates the keys to use to order the records.  If you want the records
-  // ordered by descending order, use a string like 'guid DESC'.
+  /**
+    Indicates the keys to use to order the records.  If you want the records
+    ordered by descending order, use a string like 'guid DESC'.
+    
+    @type {Array}
+  */
   orderBy: ['guid'],
 
-  // set this to the range of records you are interested in seeing or null if
-  // you want to see all records.  Note that collection actually retrieves
-  // a list of records slightly larger than what you pass here to allow for
-  // members to be added and removed.
-  offset: 0, limit: 0,
+  /**
+    Set this to the range of records you are interested in seeing or null if
+    you want to see all records.  Note that collection actually retrieves
+    a list of records slightly larger than what you pass here to allow for
+    members to be added and removed.
+    
+    @see SC.Collection.offset
+    
+    @type {Number}
+  */
+  limit: 0,
   
-  // set this to a hash with conditions options. e.g. { active: true }.  If you
-  // don't set this property, then all records of the given type will be
-  // used.
+  /**
+    Set this to the offset within the range of records you want to retrieve
+    this.get('limit') records from.
+    
+    @see SC.Collection.limit
+    
+    @type {Number}
+  */
+  offset: 0,
+  
+  /**
+    Set this to a hash with conditions options. e.g. { active: true }.  If you
+    don't set this property, then all records of the given type will be
+    used.
+    
+    @type {Object}
+  */
   conditions: {},
   
-  // this is the actual array of records in the current collection. This
-  // property will change anytime the record members change (but not when
-  // the member record properties change)
+  /**
+    @property
+  
+    This is the actual array of records in the current collection. This
+    property will change anytime the record members change (but not when
+    the member record properties change).
+  
+    @type {Array}
+  */
   records: function() {
     if (this._changedRecords) this._flushChangedRecords() ;
     return this._records ;
   }.property(),
   
-  // the total count of records matching the conditions settings. The contents
-  // of the records array will be clipped to the range value.
+  /**
+    @property
+    
+    The total count of records matching the conditions settings. The contents
+    of the records array will be clipped to the range value.
+    
+    @type {Number}
+  */
   count: function(key, value) {
     if (value !== undefined) {
       this._count = value ;
@@ -54,30 +98,58 @@ SC.Collection = SC.Object.extend({
   }.property(),
 
   // set to true when the collection is destroyed
+  
+  /**
+    The total count of records matching the conditions settings. The contents
+    of the records array will be clipped to the range value.
+    
+    @type {Number}
+  */
   isDeleted: false, // RO
   
-  // set this to the data source you want to use to get the records.  Use
-  // either SC.Store or SC.Server.  If you use SC.Server, your recordType
-  // must have a resourceURL property. // NC
-  dataSource: SC.Store,
+  /**
+    Set this to the data source you want to use to get the records.  Use
+    either SC.Store or SC.Server.  If you use SC.Server, your recordType
+    must have a resourceURL property.
+    
+    This should be set when the collection is created and not changed later.
+    
+    @type {SC.Store or SC.Server}
+  */
+  dataSource: SC.Store, // NC
   
-  // set this to the type of record you want in the collection.  This should
-  // be set when the collection is created and not changed later.
+  /**
+    Set this to the type of record you want in the collection.
+    
+    This should be set when the collection is created and not changed later.
+    
+    @type {SC.Record}
+  */
   recordType: SC.Record, // NC
 
-  // set to true while a refresh is in progress.
+  /**
+    Set to true while a refresh is in progress.
+    
+    @type {Boolean}
+  */
   isLoading: false, // RO
   
-  // set to true if records have changed in a way that might leave the records out
-  // of date.
+  /**
+    Set to true if records have changed in a way that might leave the records out
+    of date.
+    
+    @type {Boolean}
+  */
   isDirty: false, // RO
   
   // ........................................
   // ACTIONS
   //
 
-  // call this to force the list to refresh.  The refresh may not happen
-  // right away, depending on the dataSource.
+  /**
+    Call this to force the list to refresh.  The refresh may not happen
+    right away, depending on the dataSource.
+  */
   refresh: function() {
     var recordType = this.get('recordType') || SC.Record ;
     var offset = (this._limit > 0) ? this._offset : 0 ;
@@ -107,11 +179,16 @@ SC.Collection = SC.Object.extend({
     return this; 
   },
   
-  // call this method when you are done with a collection.  This will remove
-  // it as an observer to changes in the SC.Store so that it can be reclaimed.
-  // isDeleted will also be set to true.
+  /**
+    Call this method when you are done with a collection.  This will remove
+    it as an observer to changes in the SC.Store so that it can be reclaimed.
+    isDeleted will also be set to true.
+  */
   destroy: function() { SC.Store.removeCollection(this); return this; },
   
+  /**
+    TODO: Needs documentation.
+  */
   newRecord: function(settings) {
     if (!settings) settings = {} ;
     settings.newRecord = true ;
