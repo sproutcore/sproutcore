@@ -39,9 +39,16 @@
 //
 // ==========================================================================
 
-// All objects live in the SproutCore namespace, which is also availabe in the
-// abreviation SC.
-if (!window.SC) SC = {};  SproutCore = SC ;
+if (!window.SC) {
+  /**
+    @namespace
+    
+    All objects live in the SproutCore namespace, which is also availabe in the
+    abbreviation SC.
+  */
+  SC = {};
+  SproutCore = SC ;
+}
 
 // this makes for some nicer to read code
 var YES = true ; var NO = false ;
