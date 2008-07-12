@@ -33,60 +33,72 @@ NO_LIMIT = 10000 ;
 SC.PathModule = {
 
     $$func: function(func, levels, max, nest) {
-      return SC._PathModule.$$func(this.rootElement,func,levels,max,nest);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$$func(el,func,levels,max,nest);
     },
 
     $$C: function(className, levels, max, nest) {
-      return SC._PathModule.$$C(this.rootElement,className,levels,max,nest);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$$C(el,className,levels,max,nest);
     },
 
     $$T: function(tagName, levels, max, nest) {
-      return SC._PathModule.$$T(this.rootElement,tagName,levels,max,nest);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$$T(el,tagName,levels,max,nest);
     },
 
     $$P: function(property, value, levels, max, nest) {
-      return SC._PathModule.$$P(this.rootElement, property, value, levels, max, nest);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$$P(el, property, value, levels, max, nest);
     },
 
     $$S: function(selector, levels, max, nest) {
-      return SC._PathModule.$$S(this.rootElement, selector, levels, max, nest);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$$S(el, selector, levels, max, nest);
     },
 
     // finds the first node for which func returns true.
     $func: function(func, levels) {
-      return SC._PathModule.$func(this.rootElement, func, levels);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$func(el, func, levels);
     },
 
     // finds the first node with class name.  returns element, not array.
     $C: function(className, levels) {
-      return SC._PathModule.$C(this.rootElement, className, levels);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$C(el, className, levels);
     },
 
     // finds the first node with tag name.  returns element, not array.
     $T: function(tagName, levels) {
-      return SC._PathModule.$T(this.rootElement, tagName, levels);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$T(el, tagName, levels);
     },
 
     // find first node with an attribute matching then named value.
     $P: function(attr, value, levels) {
-      return SC._PathModule.$P(this.rootElement, attr, value, levels);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$P(el, attr, value, levels);
     },
 
     // find first node matching the specified class selector.
     $S: function(selector, levels) {
-      return SC._PathModule.$S(this.rootElement, selector, levels);
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$S(el, selector, levels);
     },
     
     // find an element and configure it as the named view if it is not already
     // configured.
     $$view: function(selector, viewClass, levels, max, nest) {
-      return SC._PathModule.$$view(this.rootElement, selector, viewClass, levels, max, nest) ;
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$$view(el, selector, viewClass, levels, max, nest) ;
     },
 
     // find the first element matching the selector and create a view if it is
     // not already configured.
     $view: function(selector, viewClass, levels) {
-      return SC._PathModule.$view(this.rootElement, selector, viewClass, levels) ;
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+      return SC._PathModule.$view(el, selector, viewClass, levels) ;
     }
     
 };
@@ -393,7 +405,6 @@ if (typeof HTMLElement != 'undefined') {
 
 // applies to document
 Object.extend(document,SC.PathModule) ;
-document.rootElement = document ;
 
 // applies to window.
 Object.extend(Object.extend(window,SC.PathModule), {
