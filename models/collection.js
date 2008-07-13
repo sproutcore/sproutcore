@@ -97,8 +97,6 @@ SC.Collection = SC.Object.extend(
     return this._count || 0 ;
   }.property(),
 
-  // 
-  
   /**
     Set to true when the collection is destroyed
     
