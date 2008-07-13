@@ -97,13 +97,12 @@ SC.Collection = SC.Object.extend(
     return this._count || 0 ;
   }.property(),
 
-  // set to true when the collection is destroyed
+  // 
   
   /**
-    The total count of records matching the conditions settings. The contents
-    of the records array will be clipped to the range value.
+    Set to true when the collection is destroyed
     
-    @type {Number}
+    @type {Boolean}
   */
   isDeleted: false, // RO
   
