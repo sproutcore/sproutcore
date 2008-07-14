@@ -369,6 +369,7 @@ SC.Server = SC.Object.extend({
   // their data.
   refreshRecordsWithData: function(dataAry,recordType,cacheCode,loaded) {
     var server = this ;
+
     // first, prepare each data item in the Ary.
     dataAry = dataAry.map(function(data) {
       
@@ -381,16 +382,23 @@ SC.Server = SC.Object.extend({
       // find the recordType
       if (data.type) {
         var recordName = data.type.capitalize() ;
-        if (server.prefix) for(var prefixLoc=0;prefixLoc < server.prefix.length; prefixLoc++) {
-          var namespace = window[server.prefix[prefixLoc]] ;
-          if (namespace) data.recordType = namespace[recordName] ;
-          if (data.recordType) break ;
+        if (server.prefix) {
+          for (var prefixLoc = 0; prefixLoc < server.prefix.length; prefixLoc++) {
+            var prefixParts = server.prefix[prefixLoc].split('.');
+            var namespace = window;
+            for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
+              var namespace = namespace[prefixParts[prefixPartsLoc]] ;
+            }
+            if (namespace != window) data.recordType = namespace[recordName] ;
+            if (data.recordType) break ;
+          }
         } else data.recordType = window[recordName] ;
+        
         if (!data.recordType) console.log('skipping undefined recordType:'+recordName) ;
       } else data.recordType = recordType ;
+      
       if (!data.recordType) return null; // could not process.
-
-      return data ;
+      else return data ;
     }).compact() ;
     
     // now update.
