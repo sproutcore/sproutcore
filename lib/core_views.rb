@@ -132,6 +132,7 @@ view_helper :label_view do
   
   var      :label, nil
   var      :value, nil
+  var      :tag, 'span'
   view     'SC.LabelView'
   
   css_class_names << 'sc-label-view'
