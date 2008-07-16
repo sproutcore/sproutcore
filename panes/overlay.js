@@ -159,7 +159,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
     fr.becomeFirstResponder() ;
   },
 
-  click: function(evt) {
+  mouseDown: function(evt) {
     if (!this.get('isModal')) {
       var content = this.containerView.get('content') ;
       if (content) content.set('isVisible', false) ;
