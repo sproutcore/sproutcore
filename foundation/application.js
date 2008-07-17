@@ -87,7 +87,7 @@ SC.Application = SC.Responder.extend(
 
   /**
   * Route an action message to the appropriate responder
-  * @param {String} action The action to perform
+  * @param {String} action The action to perform - this is a method name.
   * @param {SC.Responder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
   * @param {Object} sender The sender of the action
   * @returns return value info
@@ -105,7 +105,7 @@ SC.Application = SC.Responder.extend(
     if (!action || ($type(action) != T_STRING)) return null;
 
     // an explicit target was passed...
-    if (target) return (target.tryToPerform) ? target.tryToPerform(action, sender) : null;
+    if (target) return target.respondsTo(action) ? target : null ;
 
     // ok, no target was passed... try to find one in the responder chain
     var keyPane   = this.get('keyPane');
