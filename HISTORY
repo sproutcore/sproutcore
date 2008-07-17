@@ -1,4 +1,14 @@
 
+- All internal calls for arguments.callee.base.apply() have now been switched to
+sc_super().  This means you MUST use version 0.9.13 or later of the build tools to work with the javascript.
+
+- Fixed a memory leak in IE that was caused by a self-reference to document. (Thanks Juan)
+
+- Improved documentation for a variety of classes. (Thanks gskluzacek)
+
+- SC.Server can now handled nested Server prefixes in case you have multi-level
+namespaces.
+
 == sproutcore 0.9.12
 
 - SC.ButtonView & SC.MenuItemView now removes and adds the 'active' class name on mouseExited and mouseEntered when the mouse is pressed to provide better indication of whether an action will occur on mouse up. (Thanks schwa23)
