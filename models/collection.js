@@ -13,6 +13,10 @@ require('models/store') ;
 
   @author Charles Jolley
   
+  _IMPORTANT: SC.Collection currently has several known performance issues.  It 
+  is suitable for use in existing code, but it is possible that the API will 
+  change before SproutCore 1.0
+  
   A collection holds a set of records matching the specified conditions. You
   can set the data source used to find the objects matching the conditions
   to create collections pulled from the local set of objects or pulled 
@@ -63,6 +67,11 @@ SC.Collection = SC.Object.extend(
     Set this to a hash with conditions options. e.g. { active: true }.  If you
     don't set this property, then all records of the given type will be
     used.
+    
+    Note also that if you are matching a property that contains an array, the
+    condition will match if the key you specify is found in the array.  For 
+    example  { groups: someGroup } would match any record where someGroup is
+    included in the groups array.
     
     @type {Object}
   */
