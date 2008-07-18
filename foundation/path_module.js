@@ -259,6 +259,7 @@ SC._PathModule = {
         if (fret == null) {
           fret = [] ;
           for(var i=0;i<ret.length;i++) {
+
             var found = SC._PathModule.$$func(ret[i],function(node) {
               var match ;
               switch(q) {
@@ -281,7 +282,7 @@ SC._PathModule = {
               }
 
               // if the first item matched, verify that the others match as well.
-              for(var i=0; match && i < bits.length; i++) {
+              for(var i=0, ilen=bits.length; match && i < ilen; i++) {
                 if (!Element.hasClassName(node,bits[i])) match = false ; 
               }
               return match ; 
@@ -295,7 +296,7 @@ SC._PathModule = {
       // now follow indicies, if there are any
       if (indicies && indicies.length > 0 && ret) {
         ret = ret.map(function(el){
-          for(var iloc=0; el && (iloc < indicies.length); iloc++) {
+          for(var iloc=0, iloclen=indicies.length; el && (iloc < iloclen); iloc++) {
             el = el.childNodes[indicies[iloc]] ;
           }
           return el;
