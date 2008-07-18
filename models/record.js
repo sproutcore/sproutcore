@@ -114,7 +114,7 @@ SC.Record = SC.Object.extend(
 
   init: function()
   {
-    arguments.callee.base.apply(this, arguments);
+    sc_super();
     
     var primaryKeyName = this.get('primaryKey');
     if (!this.get(primaryKeyName))
@@ -481,7 +481,7 @@ SC.Record = SC.Object.extend(
       if (value === null) value = "(null)" ;
       return [key,value].join('=') ;
     }) ;
-    return 'Record({ ' + ret.join(', ') + ' })' ;
+    return this._type.toString() + '({ ' + ret.join(', ') + ' })' ;
   },
   
   propertyObserver: function(observing,target,key,value) {

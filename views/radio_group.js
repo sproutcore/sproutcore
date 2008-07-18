@@ -19,7 +19,7 @@ SC.RadioGroupView = SC.View.extend({
 
    // PRIVATE METHODS
    init: function() {
-     arguments.callee.base.apply(this, arguments) ;
+     sc_super() ;
      
      // find the list of buttons to update and set them up.
      var loc = this.outlets.length ;

@@ -28,7 +28,7 @@ SC.Page = SC.Object.extend(
       }
       ret.awake() ;
       return ret ;
-    } else return arguments.callee.base.apply(this,arguments) ;
+    } else return sc_super() ;
   },
   
   // in addition to activating bindings, calling awake on the page object
@@ -43,7 +43,7 @@ SC.Page = SC.Object.extend(
   },
   
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     var el = this.rootElement = $('resources') ;
     SC.callOnLoad(function() {
       if (el && el.parentNode) el.parentNode.removeChild(el) ;

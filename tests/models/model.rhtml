@@ -170,6 +170,12 @@ Test.context("Test model comparisons with numeric guids", {
       assert( todosWeGot.add(obj), "should be no duplicates" );
       assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
     }
+  },
+
+  "toString() should show model class name": function()
+  {
+    var re = /^ModelTest.Todo/;
+    assert( this.todo1.toString().match(re), "Todo 1 toString() should start with ModelTest.Todo" );
   }
 
 });

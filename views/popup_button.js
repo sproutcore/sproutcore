@@ -23,7 +23,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     if (!this.get('isEnabled')) return false;
     
     // is it our own keyEquivalent? 
-    if (arguments.callee.base.apply(this,arguments)) return true;
+    if (sc_super()) return true;
 
     // is it any of our menu items keyEquivalent?
     var menu = this.get('menu');

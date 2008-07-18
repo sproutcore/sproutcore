@@ -181,7 +181,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   isEnabledObserver: function() {
     isEnabled = this.get('isEnabled') ;
-    arguments.callee.base.apply(this, arguments);
+    sc_super();
     (isEnabled) ? this.enableField() : this.disableField(); 
   }.observes('isEnabled'),
 

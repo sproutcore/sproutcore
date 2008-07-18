@@ -102,7 +102,7 @@ SC.RadioFieldView = SC.FieldView.extend(
   },
   
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     
     // find all inputs.
     this._fields = {} ;

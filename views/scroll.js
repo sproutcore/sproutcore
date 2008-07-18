@@ -50,7 +50,7 @@ SC.ScrollView = SC.ContainerView.extend(SC.Scrollable, {
   }.observes('canScrollHorizontal'),
 
   init: function() {
-    arguments.callee.base.apply(this, arguments) ;
+    sc_super() ;
     this._canScrollVerticalObserver() ;
     this._canScrollHorizontalObserver() ;
   },

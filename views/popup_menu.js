@@ -113,7 +113,7 @@ SC.PopupMenuView = SC.View.extend({
       if (!target) sender.set('isEnabled', false);
     }
     // call the superclasses _show method to make the menu visible
-    arguments.callee.base.apply(this, arguments);
+    sc_super();
   },
   
   resizeWithOldParentSize: function() {

@@ -153,7 +153,7 @@ SC.SourceListView = SC.CollectionView.extend(
   // cached group rows to make sure we get an accurate count.
   updateChildren: function(deep) {
     if (deep) this._groupRows = null ;
-    return arguments.callee.base.apply(this, arguments) ;  
+    return sc_super() ;  
   },
   
   // determines if the group at the specified content index is visible or

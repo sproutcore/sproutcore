@@ -137,7 +137,7 @@ SC.PaneManager = SC.View.extend({
   
   // on init, add to main HTML page if not already added.
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     var el = this.rootElement ;
     if (!this.parentNode) {
       $tag('body').insertBefore(el, null) ;

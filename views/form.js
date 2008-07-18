@@ -453,7 +453,7 @@ SC.FormView = SC.View.extend({
   
   // When the form is first created, go find all the fields and save them.
   init: function() {
-    arguments.callee.base.apply(this,arguments) ;
+    sc_super() ;
     
     // disable the normal submission system so we can take over.
     if (this.rootElement && this.rootElement.tagName.toLowerCase() == "form") {

@@ -282,7 +282,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
   
   /** @private */
   init: function() {
-    arguments.callee.base.apply(this, arguments) ;
+    sc_super() ;
     this.addClassName(this.get('layoutDirection')) ;
   }
   

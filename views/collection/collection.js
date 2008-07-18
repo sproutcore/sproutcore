@@ -2608,7 +2608,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     this._itemViewPool= [];
     this._groupViewPool= [];
 
-    arguments.callee.base.apply(this, arguments) ;
+    sc_super() ;
     this._dropTargetObserver();
   },
 
