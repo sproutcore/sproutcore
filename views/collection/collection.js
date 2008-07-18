@@ -1473,6 +1473,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   scrollToContent: function(record) {
     // find the itemView.  if not present, add one.
+    var content = Array.from(this.get('content'));
+    if (content.indexOf(record) < 0) return ; // do nothing if not in content.
+    
     var itemView = this.itemViewForContent(record) ;
     if (!itemView) {
       var content = Array.from(this.get('content')) ;
