@@ -115,8 +115,12 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     // call notices.
     view.didAddToParent(this, beforeView) ;
     this.didAddChild(view, beforeView) ;
-    
-    return this ;
+    try{
+    	return this ;
+	}finally{
+		if(beforeElement)
+		  beforeElement=null;
+	}
   },
 
   /**
@@ -163,7 +167,11 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     view.didRemoveFromParent(this) ;
     this.didRemoveChild(view);
+	try{
     return this;
+}finally{
+	el=null;
+}
   },
 
   /**
@@ -2197,11 +2205,19 @@ if (SC.Platform.IE) {
   SC.View._collectInnerFrame = function() {
     var el = this.rootElement ;
     var hasLayout = (el.currentStyle) ? el.currentStyle.hasLayout : NO ;
+    var borderTopWidth = parseInt(el.currentStyle.borderTopWidth, 0) || 0 ;
+    var borderBottomWidth = parseInt(el.currentStyle.borderBottomWidth, 0) || 0 ;
+    var scrollHeight = el.offsetHeight-borderTopWidth-borderBottomWidth;
+    if(el.clientWidth > el.scrollWidth)
+    {
+      scrollHeight-15;
+    }
+    
     return { 
       x: el.offsetLeft, 
       y: el.offsetTop, 
       width: (hasLayout) ? Math.min(el.scrollWidth, el.clientWidth) : el.scrollWidth, 
-      height: (hasLayout) ? Math.min(el.scrollHeight, el.clientHeight) : el.scrollHeight 
+      height: (hasLayout) ? Math.min(scrollHeight, el.clientHeight) : scrollHeight
     };
   } ;
   

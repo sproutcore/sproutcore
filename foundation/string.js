@@ -150,7 +150,6 @@ Object.extend(String,
     that are defined and use those instead.
   */
   currentLanguage: function () {
-    
     var ret = (this.useAutodetectedLanguage) ? (this.browserLanguage || this.preferredLanguage || 'en') : (this.preferredLanguage || this.browserLanguage || 'en') ;
 
     // then try a couple of normalized forms...
@@ -182,6 +181,7 @@ Object.extend(String,
         break;
         
       default:
+        ret = "English";
         break ;
     }
     return ret;

@@ -47,6 +47,7 @@ SC.Page = SC.Object.extend(
     var el = this.rootElement = $('resources') ;
     SC.callOnLoad(function() {
       if (el && el.parentNode) el.parentNode.removeChild(el) ;
+			el = null;
     }) ;
   },
   

@@ -246,7 +246,7 @@ SC.runLoop = SC.Object.create({
     
     // find next timer to trigger.  If the first unpaused timer.
     var rec = this._next ;
-    while(rec && rec.timer.get('isPaused')) rec = rec.next ;
+    while(rec && (!rec.timer || rec.timer.get('isPaused')) ) rec = rec.next ;
 
     // if no next timer was found, then cancel any timer.
     if (!rec) {

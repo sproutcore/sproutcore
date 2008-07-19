@@ -93,8 +93,8 @@ SC.ProgressView = SC.View.extend({
       var isIndeterminate = this.get('isIndeterminate') ;
       var isEnabled = this.get('isEnabled') ;
       
-      Element.setClassName(this,'indeterminate',isIndeterminate) ;
-      Element.setClassName(this,'disabled',!isEnabled) ;
+      this.setClassName('indeterminate',isIndeterminate);
+      this.setClassName('disabled',!isEnabled);
       
       // compute value for setting the width of the inner progress
       var value ;
@@ -109,6 +109,8 @@ SC.ProgressView = SC.View.extend({
         value = (value - minimum) / (maximum - minimum) ; 
         if (value > 1.0) value = 1.0 ;
       }
+      if(isNaN(value))
+        value = 0.0;
       value = value * 100 ;
       if (this.innerView) this.innerView.setStyle({ width: (value + '%') }) ;
     }

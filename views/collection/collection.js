@@ -670,11 +670,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // updateChildren again.
     var clippingFrame = this._lastClippingFrame = this.get('clippingFrame') ;
 	
-	// this is a workaround for the clippingFrame bug in ie7 clippingFrame is always returning dimensions 0,0
-	if(clippingFrame.width==0 && clippingFrame.height==0){
-		clippingFrame = this._lastClippingFrame = f;
-	}
-    
     // STEP 2: Calculate the new range of content to display in 
     // the clipping frame.  Determine if we need to do a full update or
     // not.
@@ -709,10 +704,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         var key = SC.guidFor(c) ;
         var itemView = this._insertItemViewFor(c, groupBy, idx) ;
 
-        // add item view to new hash and remove from old hash.
-        itemViewsByContent[key] = itemView;
-       
-        delete this._itemViewsByContent[key];
+        if(itemView)
+        {
+          // add item view to new hash and remove from old hash.
+          itemViewsByContent[key] = itemView;
+
+          delete this._itemViewsByContent[key];
+        }
       }
       
       // Now iterate through the old hash.  Any left over item views should
@@ -1151,11 +1149,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // negative length == remove item views
     if (length < 0) {
-      while(++length < 0) {
-        var c = content.objectAt(start + length) ;
-        var itemView = this.itemViewForContent(c) ;
-        //if (itemView) this._removeItemView(itemView, groupBy) ;
-      }
+      // TEMPORARY OPTIMIZATION:  Do not remove views when they go out of
+      // range.  This way they don't need to be created/addred later on.
+      //
+      // while(++length < 0) {
+      //   var c = content.objectAt(start + length) ;
+      //   var itemView = this.itemViewForContent(c) ;
+      //   if (itemView) this._removeItemView(itemView, groupBy) ;
+      // }
       
     // positive length == add item views.
     } else if (length > 0) {

@@ -80,12 +80,12 @@ view_helper :menu_item_view, :extends => :button_view do
   @href = nil
   @inner_html = [
     %(<a href="#{@my_href}">),
-      '<span class="sel">&#x2713;</span>',
-      '<span class="mixed">-</span>',
       '<span class="inner">',
         @image,
         %(<span class="label">#{@label}</span>),
       '</span>',
+      '<span class="sel">&#x2713;</span>',
+      '<span class="mixed">-</span>',
       %(<span class="shortcut">#{@shortcut}</span>),
     '</a>'
   ] * ''
