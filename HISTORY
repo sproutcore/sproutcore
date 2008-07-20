@@ -1,4 +1,9 @@
 
+- Added support for checkbox views in ListItemViews.  Since this is a fairly
+  common requirement, checkbox views are now built in.
+
+== sproutcore 0.9.14
+
 - Fixed bug in SC.SourceListView that could incorrectly hide groups. Closes #57. (Thanks mguymon)
 
 - Fixed bug in SC.ObjectController that would sometimes not commit all pending

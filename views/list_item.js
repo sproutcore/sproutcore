@@ -53,6 +53,15 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
   hasContentBranch: NO,
   
   /**
+    (displayDelegate) The name of the property used for the checkbox value.
+    
+    The checkbox will only be visible if this key is not null.
+    
+    @type {String}
+  */
+  contentCheckboxKey: null,
+  
+  /**
     (displayDelegate) Property key to use for the icon url
 
     This property will be checked on the content object to determine the 
@@ -105,6 +114,13 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     var content = this.get('content') ;
     var del = this.displayDelegate ;
     
+    // handle checkbox
+    var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+    if (checkboxKey) {
+      var checkboxValue = (content && content.get) ? content.get(checkboxKey) : false ;
+      html.push(this.renderCheckboxHtml(checkboxValue)) ;
+    }
+
     // handle icon
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
        var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
@@ -147,12 +163,50 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     }
   },
   
+  /**
+    Generates the HTML string used to represent the checkbox for your list
+    item.  Override this to return your own custom HTML.  The default version
+    will use the HTML provided by SC.CheckboxView.
+    
+    @returns {String}
+    @param state {String} the checkbox state.  YES, NO, or SC.MIXED_STATE
+  */
+  renderCheckboxHtml: function(state) {
+    var ret ;
+    
+    // Note: this basically takes the HTML from the checkbox view and then
+    // inserts class names as necessary.  This is cached to avoid using too
+    // much memory.
+    if (state === SC.MIXED_STATE) {
+      ret = SC.ListItemView._mixedCheckboxHtml ;
+      if (!ret) {
+        ret = SC.CheckboxView.prototype.emptyElement ;
+        ret = ret.replace('class="', 'class="mixed ') ;
+        SC.ListItemView._mixedCheckboxHtml = ret ;
+      }
+    } else if (state) {
+      ret = SC.ListItemView._selectedCheckboxHtml ;
+      if (!ret) {
+        ret = SC.CheckboxView.prototype.emptyElement ;
+        ret = ret.replace('class="', 'class="sel ') ;
+        SC.ListItemView._selectedCheckboxHtml = ret ;
+      }
+    } else {
+      ret = SC.ListItemView._normalCheckboxHtml ;
+      if (!ret) {
+        ret = SC.CheckboxView.prototype.emptyElement ;
+        SC.ListItemView._normalCheckboxHtml = ret ;
+      }
+    }
+    return ret ;
+  },
+  
   /** 
      renderIconHtml generates the html string used to represent the icon for 
      your list item.  override this to return your own custom HTML
      
      @returns {String}
-     @arguments {String} the icon property based on your view's contentIconKey
+     @param icon {String} the icon property based on your view's contentIconKey
    */
    renderIconHtml: function(icon){
      var html = [];
@@ -177,7 +231,7 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
        for your list item.  override this to return your own custom HTML
        
        @returns {String}
-       @arguments {String} the label property based on your view's 
+       @param label {String} the label property based on your view's 
         contentValueKey
      */
    renderLabelHtml: function(label){
@@ -203,7 +257,7 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
         own custom HTML
         
         @returns {String}
-        @arguments {Integer} the label property based on your view's 
+        @param count {Integer} the label property based on your view's 
          contentValueKey
     */
    renderCountHtml: function(count) {
@@ -243,6 +297,90 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      html.push(hasBranch ? 'sc-branch-visible' : 'sc-branch-hidden') ;
      html.push('">&nbsp;</span>');
      return html.join('');
+   },
+   
+   _isInsideElementWithClassName: function(className, evt) {
+     var el = Event.element(evt) ;
+     var rootElement = this.rootElement;
+     var ret = NO ;
+     while(!ret && el && (el !== rootElement)) {
+       if (Element.hasClassName(el, className)) ret = YES ;
+       el = el.parentNode ;
+     }
+     
+     rootElement = el = null ; //avoid memory leaks
+     return ret ;
+   },
+   
+   /** @private 
+    mouseDown is handled only for clicks on the checkbox view or or action
+    button.
+   */
+   mouseDown: function(evt) {
+     var del = this.displayDelegate ;
+     var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+     if (checkboxKey) {
+       if (this._isInsideElementWithClassName('sc-checkbox-view', evt)) {
+         this._addCheckboxActiveState() ;
+         this._isMouseDownOnCheckbox = YES ;
+         this._isMouseInsideCheckbox = YES ;
+         return true ;
+       }
+     }  
+     
+     return false ; // otherwise let normal handlers do it...
+   },
+
+   mouseUp: function(evt) {
+     var ret= NO ;
+     if (this._isMouseDownOnCheckbox) {
+       
+       // update only if mouse inside on mouse up...
+       if (this._isMouseInsideCheckbox) {
+         var del = this.displayDelegate ;
+         var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+         var content = this.get('content') ;
+         if (content && content.get) {
+           var value = content.get(checkboxKey) ;
+           value = (value === SC.MIXED_STATE) ? YES : !value ;
+           content.set(checkboxKey, value) ;
+         }
+       }
+
+       this._removeCheckboxActiveState() ;
+       ret = YES ;
+     } 
+
+     this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
+     return ret ;
+   },
+   
+   mouseOut: function(evt) {
+     if (this._isMouseDownOnCheckbox) {
+       this._removeCheckboxActiveState() ;
+       this._isMouseInsideCheckbox = NO ;
+     }  
+     return NO ;
+   },
+   
+   mouseOver: function(evt) {
+     if (this._isMouseDownOnCheckbox) {
+       this._addCheckboxActiveState() ;
+       this._isMouseInsideCheckbox = YES ;
+     }  
+     return NO ;
+   },
+   
+   _addCheckboxActiveState: function() {
+     var el = this.$sel('.sc-checkbox-view') ;
+     if (this.get('isEnabled')) Element.addClassName(el, 'active') ;
+     el = null ;
+   },
+   
+   _removeCheckboxActiveState: function() {
+     var el = this.$sel('.sc-checkbox-view') ;
+     Element.removeClassName(el, 'active') ;
+     el = null ;
    },
    
    /** 

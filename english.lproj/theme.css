@@ -55,12 +55,12 @@ body.sc-theme {
 	border-top: 1px solid white;
 }
 
-.sc-theme .sc-collection-view .sel {
+.sc-theme .sc-collection-view .sc-collection-item.sel {
 	background-color: #ddd;
 	border-top: 1px solid #eee;
 }
 
-.sc-theme.focus .sc-collection-view.focus .sel {
+.sc-theme.focus .sc-collection-view.focus .sc-collection-item.sel {
 	background-color: #40007e;
 	color: white ;
 	border-top: 1px solid #84788f;

@@ -32,6 +32,7 @@ view_helper :collection_view do
   property :can_delete_content
   
   property :content_icon_key
+  property :content_checkbox_key
   
   # Unless the developer passes something specific, automatically enable
   # has_content_icon if either icon property is specified.
