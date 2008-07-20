@@ -234,7 +234,7 @@ SC._PathModule = {
 
       // convert star to NO_LIMIT
       if (blevels == '*') blevels = NO_LIMIT ;
-      if (bmax == '*') bmac = NO_LIMIT ;
+      if (bmax == '*') bmax = NO_LIMIT ;
 
       // prepare the selector info.
       // q tells us how to process the first part.
