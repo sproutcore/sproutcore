@@ -21,7 +21,7 @@ SC.window = SC.PaneView.extend({
     while(el && (el != document) && (!el._configured)) el = el.parentNode ;
     if (el) el = SC.View.findViewForElement(el) ;
     if (el == this) el = null ;
-    return el ;
+  	return el ;
   },
 
   // ........................................................................
@@ -223,6 +223,12 @@ SC.window = SC.PaneView.extend({
     {
       Event.stop(evt);
       ret = false ;
+      if(this._mouseDownView.mouseDragged && $type(this._mouseDownView.mouseDragged) == T_FUNCTION) {
+        //IE7: if the mouseDownView handles the mouseDragged event, set mouseCanDrag
+        //to true.  TODO: make an optional "allowBrowserSelect" property that
+        // would do the same thing; for now let's just prevent it in this case
+        this._mouseCanDrag = true;
+      }
     }
 
     SC.runLoop.endRunLoop();
@@ -263,9 +269,17 @@ SC.window = SC.PaneView.extend({
       evt._type = 'click';
       handler = SC.app.sendEvent(evt, this._mouseDownView);
     }
-    
+    this._mouseCanDrag = false;
     this._mouseDownView = null;
     SC.runLoop.endRunLoop() ;
+  },
+
+  _ondblclick: function(evt){
+    if(SC.isIE())
+    {
+      this._clickCount = 2;
+      this._onmouseup(evt);
+    }
   },
   
   _lastHovered: null,
@@ -285,6 +299,7 @@ SC.window = SC.PaneView.extend({
     // make sure the view gets focus no matter what.  FF is inconsistant 
     // about this.
     this._onfocus(); 
+    
 
     var lh = this._lastHovered || [] ;
     var nh = [] ;
@@ -349,38 +364,70 @@ SC.window = SC.PaneView.extend({
     }
   },
   
+  /** @private */
+  // these methods are used to prevent unnecessary text-selection in IE,
+  // there could be some more work to improve this behavior and make it
+  // a bit more useful; right now it's just to prevent bugs when dragging
+  // and dropping.
+  
+  _mouseCanDrag: true,
+  
+  _onselectstart: function() {
+    if(this._mouseCanDrag) {
+      return false;
+    } else {
+      return true;
+    }
+  },
+  
+  _ondrag: function() {
+    return false;
+  },
+  
   _hasFocus: NO,
   
-  _EVTS: ['mousedown', 'mouseup', 'click', 'dblclick', 'keydown', 'keyup', 'keypress', 'mouseover', 'mouseout', 'mousemove', 'resize', 'unload', 'focus', 'blur'],
+  _EVTS: ['mousedown', 'mouseup', 'click', 'dblclick', 'keydown', 'keyup', 'keypress', 'mouseover', 'mouseout', 'mousemove', 'resize', 'unload', 'focus', 'blur','drag','selectstart'],
 
   _listenerCache: [],
   
-  setup: function() {
-
+  setup: function()
+  {
     // setup event listeners for window.
     var win = this ;
-    win._EVTS.each(function(e) {
+    win._EVTS.each(function(e)
+    {
       var func = win['_on' + e] ;
       var target = (e != 'resize') ? document : window ;
-      if (func) {
+      if (func)
+      {
         var f = func.bindAsEventListener(win) ;
-
-        if (e === 'keypress' && SC.CAPTURE_BACKSPACE_KEY && SC.Platform.Firefox > 0) {
+        if (e === 'keypress' && SC.CAPTURE_BACKSPACE_KEY && SC.Platform.Firefox > 0)
+        {
           document.onkeypress = f ;
-        } else {
+        }
+        else if (e === 'selectstart' && SC.Platform.IE > 0)
+        {
+          //capture onselectstart events in IE (proprietary)
+          document.body.onselectstart = f;
+        }
+        else if (e === 'drag' && SC.Platform.IE > 0)
+        {
+          document.body.ondrag = f;
+        }
+        else
+        {
           Event.observe(target, e, f) ;
         }
-
         win._listenerCache.push([target, e, f]) ;
       }
     });
-    
-    this.get('size') ; // fetch the size from the window and save it.
+    this.get('size') ;
+    // fetch the size from the window and save it.
     this.set('isVisibleInWindow', true) ;
     this._onfocus() ;
-    
   }
-}).viewFor($tag('body')) ;
+  }).viewFor($tag('body')) ;
+
 
 // events:
 // window.onfocus --

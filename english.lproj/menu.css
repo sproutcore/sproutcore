@@ -83,6 +83,7 @@
 .menu-pane li.menu-item.disabled a img {
 	opacity: .50;
 	-moz-opacity: .50 ;
+	filter: alpha(opacity=50);
 }
 
 .menu-pane li.menu-item .shortcut {

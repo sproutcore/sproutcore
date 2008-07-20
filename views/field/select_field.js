@@ -269,7 +269,7 @@ SC.SelectFieldView = SC.FieldView.extend(
   // rebuild the menu when this happens, but only one time.
   _objectsItemObserver: function(item, key, value) {
     if (item.didChangeFor(this._guid, key)) {
-      console.log('rebuildMenu') ;
+      // console.log('rebuildMenu') ;
       this._rebuildMenu() ;
     }
   },
