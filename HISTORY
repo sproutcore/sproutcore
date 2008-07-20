@@ -1,4 +1,6 @@
 
+- server.js now handles namespaced prefixes. Closes #74
+
 - label_view now defaults to the span tag.  Closes #75.  (Thanks Erich!)
 
 - Added support for posting data in both URL-encoded and JSON formats via
