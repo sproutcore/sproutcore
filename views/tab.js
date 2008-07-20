@@ -6,6 +6,8 @@
 require('views/view') ;
 require('views/container') ;
 
+SC.TAB_VIEW_TAB_REGEXP = /Tab$/ ;
+
 /** @class
 
   To use a TabView, just declare the views and buttons you want to manage
@@ -56,7 +58,7 @@ SC.TabView = SC.ContainerView.extend(
     while(--loc >= 0) {
       var outlet = this.outlets[loc] ;
       // look for outlets ending in 'Tab'
-      if (outlet.slice(outlet.length-3,outlet.length) == "Tab") { 
+      if (outlet.match(SC.TAB_VIEW_TAB_REGEXP)) { 
         var key = outlet.slice(0,-3) ; // remove 'Tab' 
         var tab = view.get(outlet) ; // find tab view
         var button = view.get(key + 'Button') ; // find button view (opt)
