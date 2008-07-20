@@ -189,7 +189,6 @@ SC.Server = SC.Object.extend({
         var recData = server._decamelizeData(rec.getPropertyData()) ;
         recData._guid = rec._guid ;
         context[rec._guid] = rec ;
-        rec.set('newRecord',false) ;
         return recData ;
       }) ;
 
@@ -218,6 +217,7 @@ SC.Server = SC.Object.extend({
         var pk = rec.get('primaryKey') ;
         var dataKey = (pk == 'guid') ? 'id' : pk.decamelize().toLowerCase().replace(/\-/g,'_') ;
         rec.set(pk,data[dataKey]) ;
+        rec.set('newRecord',false) ;
       }
     }) ;
     
