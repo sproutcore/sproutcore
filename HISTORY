@@ -1,4 +1,8 @@
 
+- Fixed bug in SC.ObjectController that would sometimes not commit all pending
+  changes because the model object would clear the changes hash.  Also a test
+  for this was added.  Closes #66.  (Thanks YoNoSoyTu!)
+  
 - default index.html now has text/javascript added to script tags. Closes #71
 - server.js now handles namespaced prefixes. Closes #74
 

@@ -147,16 +147,19 @@ SC.ObjectController = SC.Controller.extend(
     } else {
       
       if (content.beginPropertyChanges) content.beginPropertyChanges() ;
-      for(var key in this._changes) {
-        if (!this._changes.hasOwnProperty(key)) continue;
+      
+      // save the set of changes to apply them.  Nothing should clear it but
+      // just in case.
+      var changes = this._changes ;
+      for(var key in changes) {
+        if (!changes.hasOwnProperty(key)) continue;
         
         var oldValue = content.get ? content.get(key) : content[key];
-        var newValue = this._changes[key];
+        var newValue = changes[key];
         
         if (oldValue == null && newValue == '') newValue = null;
-        if (newValue != oldValue) 
-        {
-          (content.set) ? content.set('isDirty', true) : (content['isDirty'] = true);
+        if (newValue != oldValue) {
+          (content.set) ? content.set('isDirty', YES) : (content.isDirty=YES);
         }
         
         if (content.set) {
