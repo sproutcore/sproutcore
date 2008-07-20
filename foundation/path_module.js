@@ -36,71 +36,119 @@ SC.PathModule = {
 // we can't actually do this assignment because it will leak memory in IE.
 
     $$func: function(func, levels, max, nest) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$func(el,func,levels,max,nest);
     },
 
     $$C: function(className, levels, max, nest) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$C(el,className,levels,max,nest);
     },
 
     $$T: function(tagName, levels, max, nest) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$T(el,tagName,levels,max,nest);
     },
 
     $$P: function(property, value, levels, max, nest) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$P(el, property, value, levels, max, nest);
     },
 
     $$S: function(selector, levels, max, nest) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$S(el, selector, levels, max, nest);
     },
 
     // finds the first node for which func returns true.
     $func: function(func, levels) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$func(el, func, levels);
     },
 
     // finds the first node with class name.  returns element, not array.
     $C: function(className, levels) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$C(el, className, levels);
     },
 
     // finds the first node with tag name.  returns element, not array.
     $T: function(tagName, levels) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$T(el, tagName, levels);
     },
 
     // find first node with an attribute matching then named value.
     $P: function(attr, value, levels) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$P(el, attr, value, levels);
     },
 
     // find first node matching the specified class selector.
     $S: function(selector, levels) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$S(el, selector, levels);
     },
     
     // find an element and configure it as the named view if it is not already
     // configured.
     $$view: function(selector, viewClass, levels, max, nest) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$view(el, selector, viewClass, levels, max, nest) ;
     },
 
     // find the first element matching the selector and create a view if it is
     // not already configured.
     $view: function(selector, viewClass, levels) {
+<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+=======
+	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
+>>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$view(el, selector, viewClass, levels) ;
     }
     
@@ -262,6 +310,7 @@ SC._PathModule = {
         if (fret == null) {
           fret = [] ;
           for(var i=0;i<ret.length;i++) {
+
             var found = SC._PathModule.$$func(ret[i],function(node) {
               var match ;
               switch(q) {
@@ -284,7 +333,7 @@ SC._PathModule = {
               }
 
               // if the first item matched, verify that the others match as well.
-              for(var i=0; match && i < bits.length; i++) {
+              for(var i=0, ilen=bits.length; match && i < ilen; i++) {
                 if (!Element.hasClassName(node,bits[i])) match = false ; 
               }
               return match ; 
@@ -298,7 +347,7 @@ SC._PathModule = {
       // now follow indicies, if there are any
       if (indicies && indicies.length > 0 && ret) {
         ret = ret.map(function(el){
-          for(var iloc=0; el && (iloc < indicies.length); iloc++) {
+          for(var iloc=0, iloclen=indicies.length; el && (iloc < iloclen); iloc++) {
             el = el.childNodes[indicies[iloc]] ;
           }
           return el;
