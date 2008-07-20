@@ -1,18 +1,25 @@
 
-- The newRecord property is now set to false once a record has been successfully
-  sent back to the server.  A new internal property tracks when you are waiting
-  on a record to be created on the server and refuses to submit it a second
-  time. Closes #81 (Thanks Gareth!)
+- Added support for posting data in both URL-encoded and JSON formats via
+  SC.server.  This makes for a much cleaner round-trip.  To use this, set the
+  postFormat: property to SC.JSON_FORMAT in SC.server.  Closes #49. 
+  (Thanks Mauris Lamers!)
   
-- All internal calls for arguments.callee.base.apply() have now been switched to
-sc_super().  This means you MUST use version 0.9.13 or later of the build tools to work with the javascript.
+- The newRecord property is now set to false once a record has been 
+  successfully sent back to the server.  A new internal property tracks when 
+  you are waiting on a record to be created on the server and refuses to 
+  submit it a second time. Closes #81 (Thanks Gareth!)
+  
+- All internal calls for arguments.callee.base.apply() have now been switched 
+  to sc_super().  This means you MUST use version 0.9.13 or later of the build 
+  tools to work with the javascript.
 
-- Fixed a memory leak in IE that was caused by a self-reference to document. (Thanks Juan)
+- Fixed a memory leak in IE that was caused by a self-reference to document. 
+  (Thanks Juan)
 
 - Improved documentation for a variety of classes. (Thanks gskluzacek)
 
-- SC.Server can now handled nested Server prefixes in case you have multi-level
-namespaces.
+- SC.Server can now handled nested Server prefixes in case you have 
+  multi-level namespaces.
 
 == sproutcore 0.9.12
 

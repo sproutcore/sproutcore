@@ -5,6 +5,9 @@
 
 require('core') ;
 
+SC.URL_ENCODED_FORMAT = 'url-encoded' ;
+SC.JSON_FORMAT = 'json';
+
 // The Server object knows how to send requests to the server and how to
 // get things back from the server.  It automatically handles situations
 // such as 304 caching and queuing requests to send to the server later if
@@ -36,6 +39,12 @@ SC.Server = SC.Object.extend({
   
   // Set this string to the format to be used to set your resource and verb.
   urlFormat: '/%@/%@',
+  
+  // Set this string to either rails or json to set the post transport protocol
+  postFormat: SC.URL_ENCODED_FORMAT,
+  
+  // Set this string to true when escaping the JSON string is necessary
+  escapeJSON: true,
   
   // call this in your main to preload any data sent from the server with the
   // initial page load.
@@ -288,20 +297,53 @@ SC.Server = SC.Object.extend({
 
       // collect data for records
       var server = this ;
-      var data = curRecords.map(function(rec) {
-        return server._decamelizeData(rec.getPropertyData()) ;
-      }) ;
 
-      // issue request
-      this.request(resource,'update',null,{
-        requestContext: records, 
-        onSuccess: this._commitSuccess.bind(this),
-        onFailure: this._commitFailure.bind(this),
-        records: data
-      },'post') ;
+      // start format differences
+      switch(this.get('postFormat')){
+        case SC.URL_ENCODED_FORMAT:     				
+          var data = curRecords.map(function(rec) {
+            return server._decamelizeData(rec.getPropertyData()) ;
+          }) ;
+
+          // issue request
+          this.request(resource,'update',null,{
+            requestContext: records, 
+            onSuccess: this._commitSuccess.bind(this),
+            onFailure: this._commitFailure.bind(this),
+            records: data
+            },'post') ;
+            break;
+
+        case SC.JSON_FORMAT:
+          // get all records and put them into an array
+          var objects = [];
+          for(rec in curRecords){
+            if (!curRecords.hasOwnProperty(rec)) continue ;
+            objects.push(curRecords[rec].get('attributes'));
+          }
+          
+          // convert to JSON and escape if this.escapeJSON is true
+          if(this.get('escapeJSON')){
+            var data = escape(objects.toJSONString());
+          } else {
+            var data = objects.toJSONString();
+          }
+          
+          // issue request			
+          this.request(resource,'update',null,{
+            requestContext: records, 
+            onSuccess: this._commitSuccess.bind(this),
+            onFailure: this._commitFailure.bind(this),
+            records: data
+            },'post') ;
+            break;
+        default: 
+          break;
+      }
+	    // end format differences
     }
   },
-  
+    
   // This method is called when a refresh is successful.  It expects an array
   // of hashes, which it will convert to records.
   _commitSuccess: function(status, transport, cacheCode, context) {
