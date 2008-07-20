@@ -77,7 +77,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
     
     // set the group visibility if changed
     var groupVisibleKey = this.getDelegateProperty(this.displayDelegate, 'groupVisibleKey') ;
-    if ((key == '*') || (groupVisibleKey && (key == groupVisibileKey))) {
+    if ((key == '*') || (groupVisibleKey && (key == groupVisibleKey))) {
 
       if (groupVisibleKey) {
         
