@@ -36,119 +36,71 @@ SC.PathModule = {
 // we can't actually do this assignment because it will leak memory in IE.
 
     $$func: function(func, levels, max, nest) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$func(el,func,levels,max,nest);
     },
 
     $$C: function(className, levels, max, nest) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$C(el,className,levels,max,nest);
     },
 
     $$T: function(tagName, levels, max, nest) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$T(el,tagName,levels,max,nest);
     },
 
     $$P: function(property, value, levels, max, nest) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$P(el, property, value, levels, max, nest);
     },
 
     $$S: function(selector, levels, max, nest) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$S(el, selector, levels, max, nest);
     },
 
     // finds the first node for which func returns true.
     $func: function(func, levels) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$func(el, func, levels);
     },
 
     // finds the first node with class name.  returns element, not array.
     $C: function(className, levels) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$C(el, className, levels);
     },
 
     // finds the first node with tag name.  returns element, not array.
     $T: function(tagName, levels) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$T(el, tagName, levels);
     },
 
     // find first node with an attribute matching then named value.
     $P: function(attr, value, levels) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$P(el, attr, value, levels);
     },
 
     // find first node matching the specified class selector.
     $S: function(selector, levels) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$S(el, selector, levels);
     },
     
     // find an element and configure it as the named view if it is not already
     // configured.
     $$view: function(selector, viewClass, levels, max, nest) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$$view(el, selector, viewClass, levels, max, nest) ;
     },
 
     // find the first element matching the selector and create a view if it is
     // not already configured.
     $view: function(selector, viewClass, levels) {
-<<<<<<< HEAD:foundation/path_module.js
       var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
-=======
-	  var el = (this.rootElement) ? this.rootElement : (this === document) ? document : null ;
->>>>>>> svn:foundation/path_module.js
       return SC._PathModule.$view(el, selector, viewClass, levels) ;
     }
     
