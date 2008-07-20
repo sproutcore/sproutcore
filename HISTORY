@@ -1,4 +1,5 @@
 
+- default index.html now has text/javascript added to script tags. Closes #71
 - server.js now handles namespaced prefixes. Closes #74
 
 - label_view now defaults to the span tag.  Closes #75.  (Thanks Erich!)
