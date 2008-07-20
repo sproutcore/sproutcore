@@ -462,7 +462,7 @@ SC.Record = SC.Object.extend(
     if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.primaryKey) ;
     var stringify = (value instanceof RegExp);
     if (stringify)  {
-      return recValue.toString().match(value)
+      return recValue.toString().match(value) ;
     } else {
        return recValue==value ;
     }
