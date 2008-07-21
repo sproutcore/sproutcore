@@ -105,7 +105,12 @@ SC.Application = SC.Responder.extend(
     if (!action || ($type(action) != T_STRING)) return null;
 
     // an explicit target was passed...
-    if (target) return target.respondsTo(action) ? target : null ;
+    if (target) {
+      if ($type(target) === T_STRING) {
+        target = SC.Object.objectForPropertyPath(target) ;
+      }
+      return target.respondsTo(action) ? target : null ;
+    }
 
     // ok, no target was passed... try to find one in the responder chain
     var keyPane   = this.get('keyPane');
