@@ -89,6 +89,9 @@ SC.Array = {
   arrayContentDidChange: function() {
     var kvo = (this._kvo) ? this._kvo().changes : '(null)';
     this.notifyPropertyChange('[]') ;
+    if (this.ownerRecord && this.ownerRecord.recordDidChange) {
+      this.ownerRecord.recordDidChange(this) ;
+    }
   },
   
   /**

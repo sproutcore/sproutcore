@@ -1,4 +1,7 @@
 
+- SC.Record's changeCount now increments whenever a member array's attributes 
+  change.
+  
 - Optimized SC.Object.objectForPropertyPath() to use less memory.
 
 - You can now pass a string path as a :target and it will be converted to an

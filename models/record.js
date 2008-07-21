@@ -183,18 +183,18 @@ SC.Record = SC.Object.extend(
     @returns {value} the value of the key, or null if it doesn't exist
   **/
   readAttribute: function(key) {
-  	if (!this._cachedAttributes) this._cachedAttributes = {} ;
-  	var ret = this._cachedAttributes[key] ;
-  	if (ret === undefined) {
-			var attr = this._attributes ;
-			ret = (attr) ? attr[key] : undefined ;
-			if (ret !== undefined) {
-				var recordType = this._getRecordType(key+'Type') ;
-				ret = this._propertyFromAttribute(ret, recordType) ;
-			}
-			this._cachedAttributes[key] = ret ;
-  	}
-  	return (ret === undefined) ? null : ret;
+    if (!this._cachedAttributes) this._cachedAttributes = {} ;
+    var ret = this._cachedAttributes[key] ;
+    if (ret === undefined) {
+      var attr = this._attributes ;
+      ret = (attr) ? attr[key] : undefined ;
+      if (ret !== undefined) {
+        var recordType = this._getRecordType(key+'Type') ;
+        ret = this._propertyFromAttribute(ret, recordType) ;
+      }
+      this._cachedAttributes[key] = ret ;
+    }
+    return (ret === undefined) ? null : ret;
   },
 
   /**
@@ -210,9 +210,17 @@ SC.Record = SC.Object.extend(
     if (!this._attributes) this._attributes = {} ;
     this._attributes[key] = ret ;
     if (this._cachedAttributes) delete this._cachedAttributes[key];  // clear cache.
+    this.recordDidChange() ;
+    return value ;  
+  },
+  
+  /**
+    You can invoke this method anytime you need to make the record as dirty
+    and needing a commit to the server.
+  */
+  recordDidChange: function() {
     this.incrementProperty('changeCount') ;
     if (SC.Store) SC.Store.recordDidChange(this) ;
-    return value ;  
   },
   
   /**
@@ -313,10 +321,15 @@ SC.Record = SC.Object.extend(
   
   _propertyFromAttribute: function(value,recordType) {
     if (value && value instanceof Array) {
-      var that = this;
-      return value.map(function(v) { 
-        return that._propertyFromAttribute(v,recordType); 
-      }) ;
+      var max = value.get('length') ;
+      var ret = new Array(max) ; 
+      for(var idx=0;idx<max;idx++) {
+        var v = value.objectAt(idx) ; 
+        ret[idx] = this._propertyFromAttribute(v, recordType) ; 
+      }
+      ret.ownerRecord = this ;
+      return ret ;
+      
     } else {
       var typeConverter = this._pickTypeConverter(recordType) ;
       if (typeConverter) return typeConverter(value,'in') ;
