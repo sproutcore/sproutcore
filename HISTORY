@@ -1,4 +1,11 @@
 
+- Optimized SC.Object.objectForPropertyPath() to use less memory.
+
+- You can now pass a string path as a :target and it will be converted to an
+  object. (thanks Peter Blazejewicz!)
+  
+- SC.CollectionView will now call destroyObject on the content array instead of removeObject if that method is defined.  This allows you to implement arrays with a more specific handling of the destroyObject method.
+
 - Added support for checkbox views in ListItemViews.  Since this is a fairly
   common requirement, checkbox views are now built in.
 

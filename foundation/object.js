@@ -254,14 +254,14 @@ Object.extend(SC.Object,
   },
   
   objectForPropertyPath: function(path,root) {
-    var parts = (typeof(path) == "string") ? path.split('.') : path ;
+    var parts = ($type(path) === T_STRING) ? path.split('.') : path ;
     if (!root) root = window ;
-    var key = parts.shift() ;
-    while(key && root) { 
-      root = (root.get) ? root.get(key) : root[key]; 
-      key = parts.shift(); 
+    var loc = 0, max = paths.length, key = null;
+    while((loc < max) && (root)) {
+      key = paths[loc++];
+      if (key) root = (root.get) ? root.get(key) : root[key] ;
     }
-    return (parts.length > 0) ? undefined : root ;  
+    return (loc < max) ? undefined : root ;  
   },
   
   
