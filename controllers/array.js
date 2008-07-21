@@ -56,6 +56,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     deleted.  This is a convenient way to manage lists of items owned
     by a parent record object.
     
+    Note that even if this is set to NO, calling destroyObject() instead of
+    removeObject() will still destroy the object in question as well as 
+    removing it from the parent array.
+    
     @field
     @type {Boolean}
   */
@@ -170,12 +174,11 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     return this;
   },
+  
   /**
-  * SC.Array interface implimentation.
-  * 
-  * @param {Number} idx
-  *   The index of the item to return.  If idx exceeds the current length, 
-  *   return null.
+    SC.Array interface implimentation.
+    @param idx {Number} The index of the item to return.  If idx exceeds the 
+      current length, return null.
   */
   objectAt: function(idx) {
     var obj = this._getSourceContent() ;
@@ -183,9 +186,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return this._objectControllerFor(obj) ;
   },
   /**
-  * SC.Array interface implimentation.
-  * @field
-  * @type {integer}
+    SC.Array interface implimentation.
+    @property
+    @type {integer}
   */
   length: function( key, value ) {
     var ret = this._getSourceContent() ;
