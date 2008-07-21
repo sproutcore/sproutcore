@@ -19,8 +19,7 @@ require('controllers/controller') ;
   @extends SC.Controller
 */
 SC.ObjectController = SC.Controller.extend(
-  /** @scope SC.ObjectController.prototype */
-  {
+/** @scope SC.ObjectController.prototype */ {
   
   // ...............................
   // PROPERTIES
@@ -56,6 +55,13 @@ SC.ObjectController = SC.Controller.extend(
     @type Boolean
   */
   hasMultipleContent: false,
+
+  /**
+    Set to true if the controller has any content, even an empty array.
+  */
+  hasContent: function() {
+    return this.get('content') != null ;
+  }.property('content'),
 
   /**
     Set this property to true and multiple content will be treated like a null 

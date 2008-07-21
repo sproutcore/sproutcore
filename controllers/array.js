@@ -24,6 +24,7 @@ until you call commitChanges().
 SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 /** @scope SC.ArrayController.prototype */
 {
+  
   /**
     If YES the will return controllers for content objects.
     
@@ -44,12 +45,28 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   arrangedObjects: function() { return this; }.property('content'),
 
   /**
-    The array content that is being managed by the controller.
-    @field
+    The content array managed by this controller.  
+  
+    In general you can treat an instance of ArrayController as if it were 
+    the array held in this property.  Any changes you make to the controller
+    that are not specifically implemented in the controller will pass through
+    to the Array.
+  
+    Also if you set commitsChangesImmediately to false, the controller will
+    buffer changes against this.
+
+    @property
     @type {Array}
   */
   content: null,
   contentBindingDefault: SC.Binding.Multiple,
+
+  /**
+    Set to true if the controller has any content, even an empty array.
+  */
+  hasContent: function() {
+    return this.get('content') != null ;
+  }.property('content'),
   
   /**
     Set to true if you want objects removed from the array to also be
@@ -64,7 +81,77 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type {Boolean}
   */
   destroyOnRemoval: NO,
+
+  /**
+    Defines the default class to use when creating new content. 
     
+    This property should either contains a class or a string that resolves
+    to a class that responds to the newRecord() method.
+  
+    @property
+    @type {Class}
+  */
+  exampleContentObject: null,
+  
+  /**
+    Creates a new record instance and adds it to the end of the current array.
+
+    This method works just like insertNewObjectAt() but always appends.
+
+    @param attributes {Hash} optional hash of attributes to pass to the new obejct.
+    @param objectType {Class} optional class of object to create.
+    @returns {Object} the newly created object (also added to the array)
+  */ 
+  newObject: function(attributes, objectType) {
+    return this.insertNewObjectAt(null, attributes, objectType) ;
+  },
+  
+  /**
+    Creates a new content object and inserts it at the passed index or appends
+    it at the end of the array if you pass null.
+
+    This method takes an optional hash of attributes which will be set on
+    the new record.  You can also pass an optional objectType.  If you do 
+    not pass the objectType, you must instead set the exampleContentObject to 
+    the class of the object you want to use.  The object can be of any type 
+    but it must respond to the newRecord() method.
+    
+    Objects created using this method will be destroyed automatically if you
+    have set commitsChangesImmediately to false and call discardChanges().
+
+    @param index {Number} the index to insert at or null to append.
+    @param attributes {Hash} optional hash of attributes to pass to the new obejct.
+    @param objectType {Class} optional class of object to create.
+    @returns {Object} the newly created object (also added to the array)
+  */
+  insertNewObjectAt: function(index, attributes, objectType) {
+    
+    // compute the objectType
+    if (!objectType) objectType = this.get('exampleContentObject') ;
+    if ($type(objectType) === T_STRING) {
+      objectType = SC.Object.objectForPropertyPath(objectType) ;
+    }
+    if (objectType == null) {
+      throw "Invalid object type was provided" ;
+    }
+    
+    if ($type(objectType.newObject) !== T_FUNCTION) {
+      throw "content object type does not support newRecord()" ;
+    }
+    
+    // Create a new object...
+    var obj = objectType.newObject(attributes) ;
+    if (!this._createdObjects) this._createdObjects = [] ;
+    this._createdObjects.push(obj) ; // save for discard...
+    
+    // Add to array.
+    if (index) {
+      this.insertAt(index, obj) ;
+    } else this.pushObject(obj) ;
+    
+    return obj ;
+  },
+  
   /**
     Watches changes to the content property updates the contentClone.
     @private
@@ -144,8 +231,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     // in case the passed objects are controllers, convert to source objects.
     var copyIdx = objects.length ;
-    var sourceObjects = [] ;
-    while(--copyIdx >= 0) sourceObjects[copyIdx] = this._sourceObjectFor(objects[copyIdx]) ;
+    var sourceObjects = objects ;
+    if (copyIdx > 0) {
+      sourceObjects = [] ;
+      while(--copyIdx >= 0) {
+        sourceObjects[copyIdx] = this._sourceObjectFor(objects[copyIdx]) ;
+      }
+    }
     
     // create clone of content array if needed
     var contentClone = this.get('contentClone') ;
@@ -225,14 +317,15 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
 
     // apply all the changes made to the clone
-    var changelog = this._changelog || [] ;
-    for(var idx=0;idx<changelog.length;idx++) {
-      var change = changelog[idx];
-      content.replace(change.idx, change.amt, change.objects) ;
+    if (this._changelog) {
+      var changelog = this._changelog ;
+      var max = changelog.length;
+      for(var idx=0;idx<max;idx++) {
+        var change = changelog[idx];
+        content.replace(change.idx, change.amt, change.objects) ;
+      }
+      this._changelog.length = 0 ; // reset changelog
     }
-    
-    // done, flush the changelog
-    this._changelog = [] ;
 
     // finally, destroy any removed objects if necessary.  Make 
     // sure the objects have not been re-added before doing this.
@@ -244,8 +337,11 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
           obj.destroy() ; 
         }
       }
-      this._deletions = [] ; // clear array
+      this._deletions.length = 0; // clear array
     }
+    
+    // changes commited, clear any created objects from the internal array
+    if (this._createdObjects) this._createdObjects.length = 0 ;
     
      // finish commiting changes.
     if (content.endPropertyChanges) content.endPropertyChanges();
@@ -265,6 +361,18 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   {
     this.contentCloneReset();
     this.editorDidClearChanges();
+    
+    // if any objects were created before the commit, destroy the objects 
+    // and reset the array.
+    if (this._createdObjects && this._createdObjects.length > 0) {
+      var idx = this._createdObjects.length ;
+      while(--idx >= 0) {
+        var obj = this._createdObjects[idx] ;
+        if ($type(obj.destroy) === T_FUNCTION) obj.destroy() ;
+      }
+      this._createdObjects.length = 0 ;
+    }
+    
     return true;
   },
   

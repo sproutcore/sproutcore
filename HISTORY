@@ -1,4 +1,10 @@
 
+- Added support for hasSelection, hasContent, and other useful properties on
+  controllers for activating UI.
+  
+- Added newObject() and insertNewObjectAt() methods to ArrayController.  These
+  methods will create and register new records automatically.
+  
 - SC.Record's changeCount now increments whenever a member array's attributes 
   change.
   

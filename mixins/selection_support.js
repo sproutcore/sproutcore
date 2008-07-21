@@ -143,6 +143,18 @@ SC.SelectionSupport = {
 
     @type bool
   */
-  allowsEmptySelection: true
+  allowsEmptySelection: true,
+  
+  /**
+    YES if the receiver currently has a non-zero selection.
+    
+    @property
+    @type {Boolean}
+  */
+  hasSelection: function() {
+    var sel = this.get('selection') ;
+    return sel && (sel.get('length') > 0) ;
+  }.property('selection')
+    
 };
 

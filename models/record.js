@@ -736,8 +736,10 @@ SC.Record.mixin({
     SC.Store.addRecord(rec) ;
     return rec; 
   }
-  
+    
 }) ;
+
+SC.Record.newObject = SC.Record.newRecord; // clone method
 
 // Built in Type Converters.  You can also use an SC.Record.
 SC.Record.Date = function(value,direction) {

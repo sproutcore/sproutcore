@@ -17,8 +17,7 @@ require('controllers/object') ;
   @extends SC.ObjectController
 */
 SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
-  /** @scope SC.CollectionController.prototype */
-  {
+/** @scope SC.CollectionController.prototype */ {
 
   // ...................................
   // PROPERTIES
