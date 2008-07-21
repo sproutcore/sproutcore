@@ -1575,14 +1575,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // get the content.  Bail if this cannot be used as an array.
     var content = this.get('content') ; 
-    if (!content || !content.removeObject) return NO ;
+    if (!content) return NO;  // nothing to do
+    
+    // determine the method to use
+    var hasDestroyObject = $type(content.destroyObject) === T_FUNCTION ;
+    var hasRemoveObject = $type(content.removeObject) === T_FUNCTION ;
+    if (!hasDestroyObject && !hasRemoveObject) return NO; // nothing to do
     
     // suspend property notifications and remove the objects...
     if (content.beginPropertyChanges) content.beginPropertyChanges();
     var idx = sel.get('length') ;
     while(--idx >= 0) {
       var item = sel.objectAt(idx) ;
-      content.removeObject(item) ;      
+      (hasDestroyObject) ? content.destroyObject(item) : content.removeObject(item);
     }
     // begin notifying again...
     if (content.endPropertyChanges) content.endPropertyChanges() ;
