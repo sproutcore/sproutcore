@@ -256,9 +256,9 @@ Object.extend(SC.Object,
   objectForPropertyPath: function(path,root) {
     var parts = ($type(path) === T_STRING) ? path.split('.') : path ;
     if (!root) root = window ;
-    var loc = 0, max = paths.length, key = null;
+    var loc = 0, max = parts.length, key = null;
     while((loc < max) && (root)) {
-      key = paths[loc++];
+      key = parts[loc++];
       if (key) root = (root.get) ? root.get(key) : root[key] ;
     }
     return (loc < max) ? undefined : root ;  
