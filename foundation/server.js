@@ -82,7 +82,7 @@ SC.Server = SC.Object.extend({
       idPart = '/' + ids[0] ;
     }
     
-    // add "sproutcore" as the user agent for http requests
+    // adds a custom HTTP header for remote requests
     opts.requestHeaders = {'X-SproutCore-Version' : '1.0'}
     
     // convert parameters.
