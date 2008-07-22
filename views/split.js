@@ -111,7 +111,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     var total = this.get('innerFrame') ;
     available = (direction == SC.HORIZONTAL) ? total.width : total.height ;
     var views = this.get('childNodes') ;
-    var idx = view.length ;
+    var idx = views.length ;
     var flexibleView = this.get('flexibleView') ;
     while(--idx >= 0) {
       var currentView = views[idx] ;
