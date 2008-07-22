@@ -83,7 +83,7 @@ SC.Server = SC.Object.extend({
     }
     
     // add "sproutcore" as the user agent for http requests
-    opts.requestHeaders = {'User-Agent' : 'sproutcore'}
+    opts.requestHeaders = {'X-SproutCore-Version' : '1.0'}
     
     // convert parameters.
     var parameters = this._toQueryString(params) ;
