@@ -311,7 +311,7 @@ SC.Server = SC.Object.extend({
             onSuccess: this._commitSuccess.bind(this),
             onFailure: this._commitFailure.bind(this),
             records: data
-            },'post') ;
+            },'put') ;
             break;
 
         case SC.JSON_FORMAT:
@@ -335,7 +335,7 @@ SC.Server = SC.Object.extend({
             onSuccess: this._commitSuccess.bind(this),
             onFailure: this._commitFailure.bind(this),
             records: data
-            },'post') ;
+            },'put') ;
             break;
         default: 
           break;
@@ -392,7 +392,7 @@ SC.Server = SC.Object.extend({
         requestContext: records,
         onSuccess: this._destroySuccess.bind(this),
         onFailure: this._destroyFailure.bind(this)
-      },'post') ;
+      },'delete') ;
     }
   },
 
