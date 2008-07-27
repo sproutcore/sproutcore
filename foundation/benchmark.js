@@ -81,7 +81,7 @@ SC.Benchmark = {
     @param key {String} The benchmark key you used when you called start()
     @param time {Integer} Only pass if you want to explicitly set the end time.  Otherwise start time is now.
   */
-  end: function(key, time) {
+  end: function(key, time, runs) {
     if (!this.enabled) return ;
     var stat = this._statFor(key) ;
     var start = stat._starts.pop() ;
@@ -94,7 +94,7 @@ SC.Benchmark = {
     if (start == 'ignore') return ; 
     
     stat.amt += (time || Date.now()) - start ;
-    stat.runs++ ;
+    stat.runs += (runs || 1) ;
     
     if (this.verbose) this.log(key) ;
   },
@@ -109,11 +109,12 @@ SC.Benchmark = {
     if (!reps) reps = 1 ;
     var ret ;
     
+    var runs = reps; 
+    SC.Benchmark.start(key) ;
     while(--reps >= 0) {
-      SC.Benchmark.start(key) ;
       ret = func();
-      SC.Benchmark.end(key) ; 
     }
+    SC.Benchmark.end(key, null, runs) ; 
     
     return ret ;
   },
@@ -156,9 +157,18 @@ SC.Benchmark = {
   report: function(key) {
     if (key) return this._genReport(key) ;
     var ret = [] ;
+    
+    // find the longest stat name...
+    var maxLen = 0 ;
     for(var key in this.stats) {
       if (!this.stats.hasOwnProperty(key)) continue ;
-      ret.push(this._genReport(key)) ;
+      if (key.length > maxLen) maxLen = key.length;
+    }
+    
+    // now gen report...
+    for(var key in this.stats) {
+      if (!this.stats.hasOwnProperty(key)) continue ;
+      ret.push(this._genReport(key, maxLen)) ;
     }
     return ret.join("\n") ;
   },
@@ -187,11 +197,21 @@ SC.Benchmark = {
   
   // PRIVATE METHODS
   
-  _genReport: function(key) {
+  _genReport: function(key, nameLength) {
     var stat = this._statFor(key) ;
-    var avg = (stat.runs > 0) ? (Math.floor(stat.amt * 1000 / stat.runs) / 1000) : 0 ;
+    var avg = (stat.runs > 0) ? (Math.floor(stat.amt * 100000 / stat.runs) / 100000) : 0 ;
      
-    return 'BENCH %@ msec: %@ (%@x)'.fmt(avg, (stat.name || key), stat.runs) ;  
+    // Generate the name, adding padding spaces if needed.
+    var name = (stat.name || key) + ':' ;
+    nameLength = (nameLength) ? nameLength+1 : 0; 
+    if (nameLength > name.length) {
+      var toJoin = [name] ;
+      nameLength -= name.length ;
+      while(--nameLength >= 0) toJoin.push(' ') ;
+      name = toJoin.join('') ;
+    }
+    
+    return 'BENCH %@ total: %@ msec reps: %@x avg: %@ msec'.fmt(name, stat.amt, stat.runs, avg) ;  
   },
   
   // @private
