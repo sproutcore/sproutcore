@@ -61,6 +61,9 @@ SC.Store = SC.Object.create(
       var pkValue = data[rt.primaryKey()] ;      
       var rec = store.getRecordFor(pkValue,rt,true) ;
       rec.dataSource = dataSource ;
+      if (data.refreshURL) rec.refreshURL = data.refreshURL;
+      if (data.updateURL) rec.updateURL = data.updateURL;
+      if (data.destroyURL) rec.destroyURL = data.destroyURL;
       rec.updateAttributes(data, isLoaded, isLoaded) ;
       if (rec.needsAddToStore) store.addRecord(rec) ;
       ret.push(rec) ;

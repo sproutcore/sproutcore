@@ -92,7 +92,9 @@ SC.Record = SC.Object.extend(
   //
 
   /**
-    Set this URL to point to the type of resource this record is.  Put a
+    Set this URL to point to the type of resource this record is. 
+    
+    If your SC.Server useREST property is set to +false+, then put a
     '%@' where you expect the primaryKey to be inserted to identify the
     record.
     
@@ -110,6 +112,33 @@ SC.Record = SC.Object.extend(
     @type {SC.Store or SC.Server}
   */
   dataSource: SC.Store,
+
+  /**
+    The URL where this record can be refreshed. Usually you would send the value
+    for this URL from the server in response to requests from Sproutcore.
+    
+    @field
+    @type {String}
+  */
+  refreshURL: null,
+
+  /**
+    The URL where this record can be updated. Usually you would send the value
+    for this URL from the server in response to requests from Sproutcore.
+    
+    @field
+    @type {String}
+  */
+  updateURL: null,
+
+  /**
+    The URL where this record can be destroyed. Usually you would send the value
+    for this URL from the server in response to requests from Sproutcore.
+    
+    @field
+    @type {String}
+  */
+  destroyURL: null,
 
 
   init: function()

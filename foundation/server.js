@@ -37,11 +37,13 @@ SC.Server = SC.Object.extend({
   // record_type properties into recordTypes.
   prefix: null,
   
+  // DEPRECATED: Use useREST=true instead.
   // Set this string to the format to be used to set your resource and verb.
   urlFormat: '/%@/%@',
   
-  // Set this string to the path where your RESTful resource is located.
-  restEndpoint: null,
+  // When set to +true+ this server will act in a RESTful manner.
+  // Set this to false if you want sproutcore pre v0.9.15 behaviour.
+  useREST: true,
   
   // Set this string to either rails or json to set the post transport protocol
   postFormat: SC.URL_ENCODED_FORMAT,
@@ -76,13 +78,14 @@ SC.Server = SC.Object.extend({
     var onFailure = params.onFailure ; delete params.onFailure ;
     var context = params.requestContext ; delete params.requestContext ;
     var cacheCode = params.cacheCode; delete params.cacheCode ;
+    var url = params.url; delete params.url;
 
     // handle ids
-    var idPart = '' ;
+    var idPart = null;
     if (ids) if (ids.length > 1) {
       params.ids = [ids].flatten().join(',') ;
     } else if (ids.length == 1) {
-      idPart = '/' + ids[0] ;
+      idPart = ids[0] ;
     }
     
     // convert parameters.
@@ -92,15 +95,15 @@ SC.Server = SC.Object.extend({
     // prepare request headers and options
     if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
     opts.method = method || 'get' ;
-
-    var url = params.url; delete params.url;
-    if (!url) if (this.restEndpoint) {
-      url = this.restEndpoint + idPart;
+    
+    if (!url) if (this.useREST) {
+      url = resource;
+      if (idPart) url = url + '/' + idPart;
       if (verb && verb != '') url = url + '/' + verb;
     } else {
       url = this.urlFormat.format(resource,verb) + idPart;
     }
-
+    
     var request = null ; //will container the ajax request
     
     // Save callback functions.
@@ -159,7 +162,7 @@ SC.Server = SC.Object.extend({
     if (opts.limit) params.limit = opts.limit ;
     if (order) params.order = order ;
     
-    this.request(resource, this.restEndpoint ? '' : 'list', null, params, 'get') ;
+    this.request(resource, this.useREST ? '' : 'list', null, params, 'get') ;
   },
   
   _listSuccess: function(status, transport, cacheCode, context) {
@@ -213,7 +216,7 @@ SC.Server = SC.Object.extend({
       }) ;
 
       // issue request
-      this.request(resource, this.restEndpoint ? '' : 'create', null, {
+      this.request(resource, this.useREST ? '' : 'create', null, {
         requestContext: context, 
         onSuccess: this._createSuccess.bind(this),
         onFailure: this._createFailure.bind(this),
@@ -282,7 +285,7 @@ SC.Server = SC.Object.extend({
       if (ids.length == 1 && curRecords[0].refreshURL) params['url'] = curRecords[0].refreshURL;
       
       // issue request
-      this.request(resource, this.restEndpoint ? '' : 'show', ids, params, 'get') ;
+      this.request(resource, this.useREST ? '' : 'show', ids, params, 'get') ;
     }
   },
   
@@ -359,7 +362,7 @@ SC.Server = SC.Object.extend({
         if (ids.length == 1 && curRecords[0].updateURL) params['url'] = curRecords[0].updateURL;
 
         // issue request
-        this.request(resource, this.restEndpoint ? '' : 'update', ids, params, this.restEndpoint ? 'put' : 'post') ;
+        this.request(resource, this.useREST ? '' : 'update', ids, params, this.useREST ? 'put' : 'post') ;
       }
     }
   },
@@ -417,7 +420,7 @@ SC.Server = SC.Object.extend({
 
         if (ids.length == 1 && curRecords[0].destroyURL) params['url'] = curRecords[0].destroyURL;
 
-        this.request(resource, this.restEndpoint ? '' : 'destroy', ids, params, this.restEndpoint ? 'delete' : 'post') ;
+        this.request(resource, this.useREST ? '' : 'destroy', ids, params, this.useREST ? 'delete' : 'post') ;
       }
     }
   },
@@ -446,7 +449,7 @@ SC.Server = SC.Object.extend({
 
       // convert the 'id' property to 'guid'
       if (data.id) { data.guid = data.id; delete data.id; }
-
+      
       // find the recordType
       if (data.type) {
         var recordName = data.type.capitalize() ;
