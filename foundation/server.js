@@ -40,6 +40,9 @@ SC.Server = SC.Object.extend({
   // Set this string to the format to be used to set your resource and verb.
   urlFormat: '/%@/%@',
   
+  // Set this string to the path where your RESTful resource is located.
+  restEndpoint: null,
+  
   // Set this string to either rails or json to set the post transport protocol
   postFormat: SC.URL_ENCODED_FORMAT,
   
@@ -89,7 +92,15 @@ SC.Server = SC.Object.extend({
     // prepare request headers and options
     if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
     opts.method = method || 'get' ;
-    var url = this.urlFormat.format(resource,verb) + idPart;
+
+    var url = params.url; delete params.url;
+    if (!url) if (this.restEndpoint) {
+      url = this.restEndpoint + idPart;
+      if (verb && verb != '') url = url + '/' + verb;
+    } else {
+      url = this.urlFormat.format(resource,verb) + idPart;
+    }
+
     var request = null ; //will container the ajax request
     
     // Save callback functions.
@@ -107,7 +118,7 @@ SC.Server = SC.Object.extend({
       if (onFailure) onFailure(transport.status, transport, cacheCode,context);
     } ; 
     
-    console.log('REQUEST: %@'.fmt(url)) ;
+    console.log('REQUEST: %@ %@'.fmt(opts.method, url)) ;
     request = new Ajax.Request(url,opts) ;
   },
 
@@ -148,7 +159,7 @@ SC.Server = SC.Object.extend({
     if (opts.limit) params.limit = opts.limit ;
     if (order) params.order = order ;
     
-    this.request(resource,'list',null,params) ;
+    this.request(resource, this.restEndpoint ? '' : 'list', null, params, 'get') ;
   },
   
   _listSuccess: function(status, transport, cacheCode, context) {
@@ -202,7 +213,7 @@ SC.Server = SC.Object.extend({
       }) ;
 
       // issue request
-      this.request(resource,'create',null,{
+      this.request(resource, this.restEndpoint ? '' : 'create', null, {
         requestContext: context, 
         onSuccess: this._createSuccess.bind(this),
         onFailure: this._createFailure.bind(this),
@@ -261,13 +272,17 @@ SC.Server = SC.Object.extend({
       });
       context._recordType = curRecords[0].recordType ; // default rec type.
       
-      // issue request
-      this.request(resource,'show',ids,{
+      params = {
         requestContext: context, 
         cacheCode: ((cacheCode=='') ? null : cacheCode),
         onSuccess: this._refreshSuccess.bind(this),
         onFailure: this._refreshFailure.bind(this)
-      }) ;
+      };
+      
+      if (ids.length == 1 && curRecords[0].refreshURL) params['url'] = curRecords[0].refreshURL;
+      
+      // issue request
+      this.request(resource, this.restEndpoint ? '' : 'show', ids, params, 'get') ;
     }
   },
   
@@ -299,21 +314,13 @@ SC.Server = SC.Object.extend({
       var server = this ;
 
       // start format differences
+      var data = null;
       switch(this.get('postFormat')){
         case SC.URL_ENCODED_FORMAT:     				
-          var data = curRecords.map(function(rec) {
+          data = curRecords.map(function(rec) {
             return server._decamelizeData(rec.getPropertyData()) ;
           }) ;
-
-          // issue request
-          this.request(resource,'update',null,{
-            requestContext: records, 
-            onSuccess: this._commitSuccess.bind(this),
-            onFailure: this._commitFailure.bind(this),
-            records: data
-            },'put') ;
-            break;
-
+          break;
         case SC.JSON_FORMAT:
           // get all records and put them into an array
           var objects = [];
@@ -324,23 +331,36 @@ SC.Server = SC.Object.extend({
           
           // convert to JSON and escape if this.escapeJSON is true
           if(this.get('escapeJSON')){
-            var data = escape(objects.toJSONString());
+            data = escape(objects.toJSONString());
           } else {
-            var data = objects.toJSONString();
+            data = objects.toJSONString();
           }
-          
-          // issue request			
-          this.request(resource,'update',null,{
-            requestContext: records, 
-            onSuccess: this._commitSuccess.bind(this),
-            onFailure: this._commitFailure.bind(this),
-            records: data
-            },'put') ;
-            break;
+          break;
         default: 
           break;
       }
-	    // end format differences
+      // end format differences
+
+      if (data) {
+        var ids = [];
+        if (curRecords.length == 1) {
+          var primaryKey = curRecords[0].get('primaryKey') ;
+          var key = curRecords[0].get(primaryKey);
+          if (key) ids.push(key);
+        }
+
+        params = {
+          requestContext: records,
+          onSuccess: this._commitSuccess.bind(this),
+          onFailure: this._commitFailure.bind(this),
+          records: data
+        };
+
+        if (ids.length == 1 && curRecords[0].updateURL) params['url'] = curRecords[0].updateURL;
+
+        // issue request
+        this.request(resource, this.restEndpoint ? '' : 'update', ids, params, this.restEndpoint ? 'put' : 'post') ;
+      }
     }
   },
     
@@ -388,11 +408,17 @@ SC.Server = SC.Object.extend({
 
       // issue request -- we may not have ids to send tho (for ex, if all
       // records were newRecords.)
-      if (ids && ids.length > 0) this.request(resource,'destroy',ids,{
-        requestContext: records,
-        onSuccess: this._destroySuccess.bind(this),
-        onFailure: this._destroyFailure.bind(this)
-      },'delete') ;
+      if (ids && ids.length > 0) {
+        params = {
+          requestContext: records,
+          onSuccess: this._destroySuccess.bind(this),
+          onFailure: this._destroyFailure.bind(this)
+        };
+
+        if (ids.length == 1 && curRecords[0].destroyURL) params['url'] = curRecords[0].destroyURL;
+
+        this.request(resource, this.restEndpoint ? '' : 'destroy', ids, params, this.restEndpoint ? 'delete' : 'post') ;
+      }
     }
   },
 
