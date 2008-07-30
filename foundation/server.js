@@ -37,13 +37,8 @@ SC.Server = SC.Object.extend({
   // record_type properties into recordTypes.
   prefix: null,
   
-  // DEPRECATED: Use useREST=true instead.
   // Set this string to the format to be used to set your resource and verb.
   urlFormat: '/%@/%@',
-  
-  // When set to +true+ this server will act in a RESTful manner.
-  // Set this to false if you want sproutcore pre v0.9.15 behaviour.
-  useREST: true,
   
   // Set this string to either rails or json to set the post transport protocol
   postFormat: SC.URL_ENCODED_FORMAT,
@@ -67,8 +62,9 @@ SC.Server = SC.Object.extend({
   // onFailure -- function invoked when request fails. Same format.
   // requestContext -- simply passed back.
   // cacheCode -- String indicating the time of the last refresh.
+  // url -- override the default url building with this url.
   //
-  request: function(resource, verb, ids, params, method) {
+  request: function(resource, action, ids, params, method) {
 
     // Get Settings and Options
     if (!params) params = {} ;
@@ -80,29 +76,19 @@ SC.Server = SC.Object.extend({
     var cacheCode = params.cacheCode; delete params.cacheCode ;
     var url = params.url; delete params.url;
 
+    if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
+    opts.method = method || 'get' ;
+
+    if (!url) url = this.urlFor(resource, action, ids, params, opts.method) ;
+
     // handle ids
-    var idPart = null;
-    if (ids) if (ids.length > 1) {
+    if (ids && ids.length > 1) {
       params.ids = [ids].flatten().join(',') ;
-    } else if (ids.length == 1) {
-      idPart = ids[0] ;
     }
-    
+
     // convert parameters.
     var parameters = this._toQueryString(params) ;
     if (parameters && parameters.length > 0) opts.parameters = parameters ;
-    
-    // prepare request headers and options
-    if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
-    opts.method = method || 'get' ;
-    
-    if (!url) if (this.useREST) {
-      url = resource;
-      if (idPart) url = url + '/' + idPart;
-      if (verb && verb != '') url = url + '/' + verb;
-    } else {
-      url = this.urlFormat.format(resource,verb) + idPart;
-    }
     
     var request = null ; //will container the ajax request
     
@@ -122,9 +108,15 @@ SC.Server = SC.Object.extend({
     } ; 
     
     console.log('REQUEST: %@ %@'.fmt(opts.method, url)) ;
+    
     request = new Ajax.Request(url,opts) ;
   },
 
+  // Override this method to build URLs
+  urlFor: function(resource, action, ids, params, method) {
+    var idPart = (ids && ids.length == 1) ? ids[0] : '';
+    return this.urlFormat.format(resource, action) + idPart;
+  },
 
   // RECORD METHODS
   // These methods do the basic record changes.
@@ -137,6 +129,7 @@ SC.Server = SC.Object.extend({
   listFor: function(opts) {
     var recordType = opts.recordType ;
     var resource = recordType.resourceURL() ;
+
     if (!resource) return false ;
     
     var order = opts.order || 'id' ;
@@ -161,9 +154,11 @@ SC.Server = SC.Object.extend({
     if (opts.offset) params.offset = opts.offset;
     if (opts.limit) params.limit = opts.limit ;
     if (order) params.order = order ;
-    
-    this.request(resource, this.useREST ? '' : 'list', null, params, 'get') ;
+    this.request(resource, this._listForAction, null, params, this._listMethod) ;
   },
+  
+  _listForAction: 'list',
+  _listMethod: 'get',
   
   _listSuccess: function(status, transport, cacheCode, context) {
     var json = eval('json='+transport.responseText) ;
@@ -216,14 +211,17 @@ SC.Server = SC.Object.extend({
       }) ;
 
       // issue request
-      this.request(resource, this.useREST ? '' : 'create', null, {
+      this.request(resource, this._createAction, null, {
         requestContext: context, 
         onSuccess: this._createSuccess.bind(this),
         onFailure: this._createFailure.bind(this),
         records: data
-      },'post') ;
+      }, this._createMethod) ;
     }
   },
+  
+  _createAction: 'create',
+  _createMethod: 'post',
 
   // This method is called when a create is successful.  It first goes through
   // and assigns the primaryKey to each record.
@@ -285,9 +283,12 @@ SC.Server = SC.Object.extend({
       if (ids.length == 1 && curRecords[0].refreshURL) params['url'] = curRecords[0].refreshURL;
       
       // issue request
-      this.request(resource, this.useREST ? '' : 'show', ids, params, 'get') ;
+      this.request(resource, this._refreshAction, ids, params, this._refreshMethod) ;
     }
   },
+  
+  _refreshAction: 'show',
+  _refreshMethod: 'get',
   
   // This method is called when a refresh is successful.  It expects an array
   // of hashes, which it will convert to records.
@@ -362,10 +363,13 @@ SC.Server = SC.Object.extend({
         if (ids.length == 1 && curRecords[0].updateURL) params['url'] = curRecords[0].updateURL;
 
         // issue request
-        this.request(resource, this.useREST ? '' : 'update', ids, params, this.useREST ? 'put' : 'post') ;
+        this.request(resource, this._commitAction, ids, params, this._commitMethod) ;
       }
     }
   },
+  
+  _commitAction: 'update',
+  _commitMethod: 'post',
     
   // This method is called when a refresh is successful.  It expects an array
   // of hashes, which it will convert to records.
@@ -420,10 +424,13 @@ SC.Server = SC.Object.extend({
 
         if (ids.length == 1 && curRecords[0].destroyURL) params['url'] = curRecords[0].destroyURL;
 
-        this.request(resource, this.useREST ? '' : 'destroy', ids, params, this.useREST ? 'delete' : 'post') ;
+        this.request(resource, this._destroyAction, ids, params, this._destroyMethod) ;
       }
     }
   },
+  
+  _destroyAction: 'destroy',
+  _destroyMethod: 'post',
 
   _destroySuccess: function(status, transport, cacheCode, records) {
     console.log('destroySuccess!') ;
