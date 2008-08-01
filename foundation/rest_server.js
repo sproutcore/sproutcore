@@ -5,12 +5,12 @@
 
 require('core') ;
 
-/** @namespace SC.RESTServer
+/** @namespace SC.RestServer
 
   Implements a REST client communicating in a RESTful manner with a backend server.
 
 */
-SC.RESTServer = SC.Server.extend({
+SC.RestServer = SC.Server.extend({
 
   urlFor: function(resource, action, ids, params, method) {
     url = resource;
