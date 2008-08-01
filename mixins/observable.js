@@ -196,7 +196,7 @@ SC.Observable = {
     var ret = this[key] ;
     if (ret === undefined) {
       return this.unknownProperty(key) ;
-    } else if (ret && (ret instanceof Function) && ret.isProperty) {
+    } else if (ret && ret.isProperty) {
       return ret.call(this,key) ;
     } else return ret ;
   },
@@ -255,7 +255,7 @@ SC.Observable = {
     this.propertyWillChange(key) ;
 
     // set the value.
-    if (func && (func instanceof Function) && (func.isProperty)) {
+    if (func && func.isProperty) {
       ret = func.call(this,key,value) ;
     } else if (func === undefined) {
       ret = this.unknownProperty(key,value) ;
