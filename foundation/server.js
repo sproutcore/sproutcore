@@ -62,8 +62,9 @@ SC.Server = SC.Object.extend({
   // onFailure -- function invoked when request fails. Same format.
   // requestContext -- simply passed back.
   // cacheCode -- String indicating the time of the last refresh.
+  // url -- override the default url building with this url.
   //
-  request: function(resource, verb, ids, params, method) {
+  request: function(resource, action, ids, params, method) {
 
     // Get Settings and Options
     if (!params) params = {} ;
@@ -73,23 +74,22 @@ SC.Server = SC.Object.extend({
     var onFailure = params.onFailure ; delete params.onFailure ;
     var context = params.requestContext ; delete params.requestContext ;
     var cacheCode = params.cacheCode; delete params.cacheCode ;
+    var url = params.url; delete params.url;
+
+    if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
+    opts.method = method || 'get' ;
+
+    if (!url) url = this.urlFor(resource, action, ids, params, opts.method) ;
 
     // handle ids
-    var idPart = '' ;
-    if (ids) if (ids.length > 1) {
+    if (ids && ids.length > 1) {
       params.ids = [ids].flatten().join(',') ;
-    } else if (ids.length == 1) {
-      idPart = '/' + ids[0] ;
     }
-    
+
     // convert parameters.
     var parameters = this._toQueryString(params) ;
     if (parameters && parameters.length > 0) opts.parameters = parameters ;
     
-    // prepare request headers and options
-    if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
-    opts.method = method || 'get' ;
-    var url = this.urlFormat.format(resource,verb) + idPart;
     var request = null ; //will container the ajax request
     
     // Save callback functions.
@@ -107,10 +107,16 @@ SC.Server = SC.Object.extend({
       if (onFailure) onFailure(transport.status, transport, cacheCode,context);
     } ; 
     
-    console.log('REQUEST: %@'.fmt(url)) ;
+    console.log('REQUEST: %@ %@'.fmt(opts.method, url)) ;
+    
     request = new Ajax.Request(url,opts) ;
   },
 
+  // Override this method to build URLs
+  urlFor: function(resource, action, ids, params, method) {
+    var idPart = (ids && ids.length == 1) ? ids[0] : '';
+    return this.urlFormat.format(resource, action) + idPart;
+  },
 
   // RECORD METHODS
   // These methods do the basic record changes.
@@ -123,6 +129,7 @@ SC.Server = SC.Object.extend({
   listFor: function(opts) {
     var recordType = opts.recordType ;
     var resource = recordType.resourceURL() ;
+
     if (!resource) return false ;
     
     var order = opts.order || 'id' ;
@@ -147,9 +154,11 @@ SC.Server = SC.Object.extend({
     if (opts.offset) params.offset = opts.offset;
     if (opts.limit) params.limit = opts.limit ;
     if (order) params.order = order ;
-    
-    this.request(resource,'list',null,params) ;
+    this.request(resource, this._listForAction, null, params, this._listMethod) ;
   },
+  
+  _listForAction: 'list',
+  _listMethod: 'get',
   
   _listSuccess: function(status, transport, cacheCode, context) {
     var json = eval('json='+transport.responseText) ;
@@ -202,14 +211,17 @@ SC.Server = SC.Object.extend({
       }) ;
 
       // issue request
-      this.request(resource,'create',null,{
+      this.request(resource, this._createAction, null, {
         requestContext: context, 
         onSuccess: this._createSuccess.bind(this),
         onFailure: this._createFailure.bind(this),
         records: data
-      },'post') ;
+      }, this._createMethod) ;
     }
   },
+  
+  _createAction: 'create',
+  _createMethod: 'post',
 
   // This method is called when a create is successful.  It first goes through
   // and assigns the primaryKey to each record.
@@ -261,15 +273,22 @@ SC.Server = SC.Object.extend({
       });
       context._recordType = curRecords[0].recordType ; // default rec type.
       
-      // issue request
-      this.request(resource,'show',ids,{
+      params = {
         requestContext: context, 
         cacheCode: ((cacheCode=='') ? null : cacheCode),
         onSuccess: this._refreshSuccess.bind(this),
         onFailure: this._refreshFailure.bind(this)
-      }) ;
+      };
+      
+      if (ids.length == 1 && curRecords[0].refreshURL) params['url'] = curRecords[0].refreshURL;
+      
+      // issue request
+      this.request(resource, this._refreshAction, ids, params, this._refreshMethod) ;
     }
   },
+  
+  _refreshAction: 'show',
+  _refreshMethod: 'get',
   
   // This method is called when a refresh is successful.  It expects an array
   // of hashes, which it will convert to records.
@@ -299,21 +318,13 @@ SC.Server = SC.Object.extend({
       var server = this ;
 
       // start format differences
+      var data = null;
       switch(this.get('postFormat')){
         case SC.URL_ENCODED_FORMAT:     				
-          var data = curRecords.map(function(rec) {
+          data = curRecords.map(function(rec) {
             return server._decamelizeData(rec.getPropertyData()) ;
           }) ;
-
-          // issue request
-          this.request(resource,'update',null,{
-            requestContext: records, 
-            onSuccess: this._commitSuccess.bind(this),
-            onFailure: this._commitFailure.bind(this),
-            records: data
-            },'post') ;
-            break;
-
+          break;
         case SC.JSON_FORMAT:
           // get all records and put them into an array
           var objects = [];
@@ -324,25 +335,41 @@ SC.Server = SC.Object.extend({
           
           // convert to JSON and escape if this.escapeJSON is true
           if(this.get('escapeJSON')){
-            var data = escape(objects.toJSONString());
+            data = escape(objects.toJSONString());
           } else {
-            var data = objects.toJSONString();
+            data = objects.toJSONString();
           }
-          
-          // issue request			
-          this.request(resource,'update',null,{
-            requestContext: records, 
-            onSuccess: this._commitSuccess.bind(this),
-            onFailure: this._commitFailure.bind(this),
-            records: data
-            },'post') ;
-            break;
+          break;
         default: 
           break;
       }
-	    // end format differences
+      // end format differences
+
+      if (data) {
+        var ids = [];
+        if (curRecords.length == 1) {
+          var primaryKey = curRecords[0].get('primaryKey') ;
+          var key = curRecords[0].get(primaryKey);
+          if (key) ids.push(key);
+        }
+
+        params = {
+          requestContext: records,
+          onSuccess: this._commitSuccess.bind(this),
+          onFailure: this._commitFailure.bind(this),
+          records: data
+        };
+
+        if (ids.length == 1 && curRecords[0].updateURL) params['url'] = curRecords[0].updateURL;
+
+        // issue request
+        this.request(resource, this._commitAction, ids, params, this._commitMethod) ;
+      }
     }
   },
+  
+  _commitAction: 'update',
+  _commitMethod: 'post',
     
   // This method is called when a refresh is successful.  It expects an array
   // of hashes, which it will convert to records.
@@ -388,13 +415,22 @@ SC.Server = SC.Object.extend({
 
       // issue request -- we may not have ids to send tho (for ex, if all
       // records were newRecords.)
-      if (ids && ids.length > 0) this.request(resource,'destroy',ids,{
-        requestContext: records,
-        onSuccess: this._destroySuccess.bind(this),
-        onFailure: this._destroyFailure.bind(this)
-      },'post') ;
+      if (ids && ids.length > 0) {
+        params = {
+          requestContext: records,
+          onSuccess: this._destroySuccess.bind(this),
+          onFailure: this._destroyFailure.bind(this)
+        };
+
+        if (ids.length == 1 && curRecords[0].destroyURL) params['url'] = curRecords[0].destroyURL;
+
+        this.request(resource, this._destroyAction, ids, params, this._destroyMethod) ;
+      }
     }
   },
+  
+  _destroyAction: 'destroy',
+  _destroyMethod: 'post',
 
   _destroySuccess: function(status, transport, cacheCode, records) {
     console.log('destroySuccess!') ;
@@ -420,7 +456,7 @@ SC.Server = SC.Object.extend({
 
       // convert the 'id' property to 'guid'
       if (data.id) { data.guid = data.id; delete data.id; }
-
+      
       // find the recordType
       if (data.type) {
         var recordName = data.type.capitalize() ;
