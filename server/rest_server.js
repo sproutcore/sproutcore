@@ -4,11 +4,17 @@
 // ========================================================================
 
 require('core') ;
+require('server') ;
 
-/** @namespace SC.RestServer
+/** 
+  @class
+  
+  Implements a REST client communicating in a RESTful manner with a backend 
+  server.  This follows the classic API supported by the class Server object.
 
-  Implements a REST client communicating in a RESTful manner with a backend server.
-
+  @extends SC.Server
+  @since SproutCore 1.0
+  
 */
 SC.RestServer = SC.Server.extend({
 
