@@ -198,8 +198,9 @@ SC.Store = SC.Object.create(
       }
       records = ret ;
     }
-    
-    return records ;
+
+    // clone records...
+    return $A(records) ;
   },
   
   // private method used by Record and Store. Returns null if the record does not exist.

@@ -94,9 +94,8 @@ SC.Record = SC.Object.extend(
   /**
     Set this URL to point to the type of resource this record is. 
     
-    If your SC.Server useREST property is set to +false+, then put a
-    '%@' where you expect the primaryKey to be inserted to identify the
-    record.
+    If you are using SC.Server, then put a '%@' where you expect the 
+    primaryKey to be inserted to identify the record.
     
     @field
     @type {String}
@@ -666,13 +665,16 @@ SC.Record = SC.Object.extend(
 }) ;
 
 // Class Methods
-SC.Record.mixin({
+SC.Record.mixin(
+/** @static SC.Record */ {
 
   // Constants for sorting
   SORT_BEFORE: -1, SORT_AFTER: 1, SORT_SAME: 0,
 
-  // Used to find the first object matching the specified conditions.  You can pass
-  // in either a simple guid or one or more hashes of conditions.
+  /** 
+    Used to find the first object matching the specified conditions.  You can 
+    pass in either a simple guid or one or more hashes of conditions.
+  */
   find: function(guid) {
     var args ;
     if (typeof(guid) == 'object') {

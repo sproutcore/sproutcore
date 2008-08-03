@@ -4,39 +4,43 @@
 // ========================================================================
 
 require('core') ;
+require('server') ;
 
-/** @namespace SC.RestServer
+/** 
+  @class
+  
+  Usually you wouldn't need to call any of the methods on this class or it's 
+  superclass, except for calling the +listFor+ method. The other methods are 
+  called for you when you work with your model objects. For example, calling 
+  myObject.commit(); will call the commitRecords method on this server if you 
+  had defined this server to be to the +dataSource+ of myObject.
 
-  Implements a REST client communicating in a RESTful manner with a backend server.
+  To have an SC model reflect data on a backend server attach an instance of 
+  this class to your application. For example:
 
-  Usually you wouldn't need to call any of the methods on this class or it's superclass,
-  except for calling the +listFor+ method. The other methods are called for you when you
-  work with your model objects. For example, calling myObject.commit(); will call the
-  commitRecords method on this server if you had defined this server to be to the
-  +dataSource+ of myObject.
+  {{{
+    Contacts = SC.Object.create({
+      server: SC.RESTServer.create({ prefix: ['Contacts'] })
+    }) ;
+  }}}
 
-  To have an SC model reflect data on a backend server attach an instance of this class
-  to your application. For example:
+  Then attach that server as the +dataSource+ to each model class that you 
+  want to have reflected. Also define a +resourceURL+ which defines the URL 
+  where the collection of your model can be queried. For example:
 
-      Contacts = SC.Object.create({
-        server: SC.RESTServer.create({ prefix: ['Contacts'] })
-      }) ;
+  {{{
+    Contacts.Contact = SC.Record.extend(
+      dataSource: Contacts.server,
+      resourceURL: 'sc/contacts',
+      properties: ['guid','firstName','lastName'],
+      primaryKey: 'guid'
+    }) ;
+  }}}
 
-  Then attach that server as the +dataSource+ to each model class that you want to have
-  reflected. Also define a +resourceURL+ which defines the URL where the collection of
-  your model can be queried. For example:
-
-      Contacts.Contact = SC.Record.extend(
-        dataSource: Contacts.server,
-        resourceURL: 'sc/contacts',
-        properties: ['guid','firstName','lastName'],
-        primaryKey: 'guid'
-      }) ;
-
-  When you work with your models, behind the scenes SC will use 5 main methods on this
-  server. Each is listed below, together with the HTTP method used in the call to the
-  backend server and the URL that is being called. The URL is based on the example
-  given above.
+  When you work with your models, behind the scenes SC will use 5 main methods 
+  on this server. Each is listed below, together with the HTTP method used in 
+  the call to the backend server and the URL that is being called. The URL is 
+  based on the example given above.
 
       listFor             GET    /sc/contacts
 
@@ -60,29 +64,38 @@ require('core') ;
       destroyRecords
       for many records    DELETE /sc/contacts?ids=1,2,3,4,5
 
-  The above is the default behaviour of this server. If you want different URLs
-  to be generated then extend this class and override the +urlFor+ method.
+  The above is the default behaviour of this server. If you want different 
+  URLs to be generated then extend this class and override the +urlFor+ 
+  method.
 
   Another way to override the above is to tell SC where member resources can
   be refreshed, committed and destroyed. For example, when SC calls
-      GET /sc/contacts
+  
+  {{{
+    GET /sc/contacts
+  }}}
+  
   you could reply as follows:
 
-      records: [
-        {  guid: '123',
-          type: "Contact",
-          refreshURL: "/contacts?refresh=123",
-          updateURL: "/contacts/123?update=Y",
-          destroyURL: "/contacts/123",
-          firstName: "Charles",
-          ...
-        }],
+  {{{
+    records: [
+      {  guid: '123',
+        type: "Contact",
+        refreshURL: "/contacts?refresh=123",
+        updateURL: "/contacts/123?update=Y",
+        destroyURL: "/contacts/123",
+        firstName: "Charles",
         ...
-      }
+      }],
+      ...
+    }
+  }}}
 
   Then when contact 123 needs to be refreshed later on by SC, it will call:
 
-      GET /contacts?refresh=123
+  {{{
+    GET /contacts?refresh=123
+  }}}
 
   instead of GET /contacts/123. Note that this only works for members on your
   resource. If a collection of contacts needed to be refreshed it would still
@@ -99,24 +112,32 @@ require('core') ;
   example, server.request('contacts', 'archive', null, params, 'delete')
   would call:
 
-      DELETE /contacts/archive
+  {{{
+    DELETE /contacts/archive
+  }}}
 
   And server.request('contacts', 'give', [12345], {'amount': 1000}, 'put')
   would call:
 
-      PUT /contacts/12345/give
-
+  {{{
+   PUT /contacts/12345/give
+  }}}
+  
   with post data amount=1000.
 
   Alternatively explicitely define the URL to use by setting the +url+
-  property in the +params+ argument that is passed to the server.request method.
-  For example:
+  property in the +params+ argument that is passed to the server.request 
+  method. For example:
 
-      Contacts.server.request(null,null,null, {url: '/sc/archive'}, 'delete')
+  {{{
+    Contacts.server.request(null,null,null, {url: '/sc/archive'}, 'delete')
+  }}}
 
   would call:
 
-      DELETE /sc/archive
+  {{{
+    DELETE /sc/archive
+  }}}
 
 
   @extends SC.Server
