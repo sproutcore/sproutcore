@@ -2106,6 +2106,7 @@ SC.View.mixin({
                   break;
                 case SC.window.rootElement:
                   parentView = SC.window ;
+                  break; 
                 default:
                   node = node.parentNode ; 
                 }

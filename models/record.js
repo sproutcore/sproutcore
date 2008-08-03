@@ -92,9 +92,10 @@ SC.Record = SC.Object.extend(
   //
 
   /**
-    Set this URL to point to the type of resource this record is.  Put a
-    '%@' where you expect the primaryKey to be inserted to identify the
-    record.
+    Set this URL to point to the type of resource this record is. 
+    
+    If you are using SC.Server, then put a '%@' where you expect the 
+    primaryKey to be inserted to identify the record.
     
     @field
     @type {String}
@@ -110,6 +111,33 @@ SC.Record = SC.Object.extend(
     @type {SC.Store or SC.Server}
   */
   dataSource: SC.Store,
+
+  /**
+    The URL where this record can be refreshed. Usually you would send the value
+    for this URL from the server in response to requests from Sproutcore.
+    
+    @field
+    @type {String}
+  */
+  refreshURL: null,
+
+  /**
+    The URL where this record can be updated. Usually you would send the value
+    for this URL from the server in response to requests from Sproutcore.
+    
+    @field
+    @type {String}
+  */
+  updateURL: null,
+
+  /**
+    The URL where this record can be destroyed. Usually you would send the value
+    for this URL from the server in response to requests from Sproutcore.
+    
+    @field
+    @type {String}
+  */
+  destroyURL: null,
 
 
   init: function()
@@ -146,7 +174,7 @@ SC.Record = SC.Object.extend(
     to support server changes.  Note that this is used to support both the
     create and update components of CRUD.
   */
-  commit: function() {
+  commit: function() {  
     // no longer a new record once changes have been committed.
     if (this.get('newRecord')) {
       this.dataSource.createRecords([this]) ;
@@ -637,13 +665,16 @@ SC.Record = SC.Object.extend(
 }) ;
 
 // Class Methods
-SC.Record.mixin({
+SC.Record.mixin(
+/** @static SC.Record */ {
 
   // Constants for sorting
   SORT_BEFORE: -1, SORT_AFTER: 1, SORT_SAME: 0,
 
-  // Used to find the first object matching the specified conditions.  You can pass
-  // in either a simple guid or one or more hashes of conditions.
+  /** 
+    Used to find the first object matching the specified conditions.  You can 
+    pass in either a simple guid or one or more hashes of conditions.
+  */
   find: function(guid) {
     var args ;
     if (typeof(guid) == 'object') {
