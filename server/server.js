@@ -84,7 +84,10 @@ SC.Server = SC.Object.extend({
     // handle ids
     if (ids && ids.length > 1) {
       params.ids = [ids].flatten().join(',') ;
-    }
+    }    
+    
+    // adds a custom HTTP header for remote requests
+    opts.requestHeaders = {'X-SproutCore-Version' : '1.0'}
 
     // convert parameters.
     var parameters = this._toQueryString(params) ;
