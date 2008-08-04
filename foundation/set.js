@@ -3,8 +3,6 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('mixins/array') ;
-
 /**
   @class An unordered collection for keeping objects.
   
@@ -14,11 +12,20 @@ require('mixins/array') ;
   You can iterate through a set just like an array, even accessing objects
   by index, however there is no gaurantee as to their order.
   
-  @extends SC.Object
+  Note that SC.Set is a primitive object, like and array or hash.  It is not
+  fully observable.
+  
+  @extends Object
 
 */
-SC.Set = SC.Object.extend(SC.Array, 
-/** @scope SC.Set.prototype */ {
+SC.Set = function(items) {
+  if (items && items.length > 0) {
+    var idx = items.length ;
+    while(--idx >= 0) this.add(items.objectAt(idx)) ;
+  }
+} ;
+
+SC.Set.prototype = {
     
   /**
     This property will change as the number of objects in the set changes.
@@ -26,6 +33,11 @@ SC.Set = SC.Object.extend(SC.Array,
     @type number
   */
   length: 0,
+  
+  /**
+    Clears the set 
+  */
+  clear: function() { this.length = 0; },
   
   /**
     Call this method to test for membership.
@@ -57,11 +69,18 @@ SC.Set = SC.Object.extend(SC.Array,
       var len = this.length ;
       this[len] = obj ;
       this[SC.guidFor(obj)] = len ;
-      this.set('length', len+1) ;
+      this.length = len+1;
     }
-    this.arrayContentDidChange() ;
     return this ;
   },
+  
+  /**
+    Add all the items in the passed array.
+  */
+  addEach: function(objects) {
+    var idx = objects.length ;
+    while(--idx >= 0) this.add(objects[idx]) ;
+  },  
   
   /**
     Removes the object from the set if it is found.
@@ -94,36 +113,49 @@ SC.Set = SC.Object.extend(SC.Array,
     }
     
     // reduce the length
-    this.set('length', len-1) ;
-    this.arrayContentDidChange() ;
+    this.length = len-1;
     return this ;
+  },
+
+  /**
+    Removes all the items in the passed array.
+  */
+  removeEach: function(objects) {
+    var idx = objects.length ;
+    while(--idx >= 0) this.remove(objects[idx]) ;
+  },  
+  
+  invokeWhile: function(state, methodName) {
+    var len = this.length;
+    var args = $A(arguments) ; args.shift(); args.shift() ;
+    
+    for(var idx=0;idx<len;idx++) {
+      var obj = this[idx] ;
+      var method = obj[methodName];
+      var ret = (method) ? method.apply(obj, args) : null ;
+      if (ret !== state) return ret ;
+    }
+    
+    return ret ;
   },
   
   // .......................................
   // PRIVATE 
   _each: function(iterator) {
-    var len = this.get('length') ;
+    var len = this.length ;
     for(var idx=0;idx<len;idx++) iterator(this[idx]) ;
+  },
+  
+  toString: function() {
+    return "SC.Set<%@>".fmt($A(this)) ;
   }
   
-}) ;
+} ;
 
 SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add;
 SC.Set.prototype.pop = SC.Set.prototype.shift = SC.Set.prototype.remove;
 
-SC.Set._create = SC.Set.create ;
-
 /**
   To create a set, pass an array of items instead of a hash.
 */
-SC.Set.create = function(items) {
-  if (!items) items = [] ;
-  var hash = {}, loc = items.length ;
-  while(--loc >= 0) {
-    var item = items[loc];
-    if (item == null) continue ;
-    hash[SC.Set.prototype._guidFor(item)] = item ;
-  }
-  hash.length = items.length ;
-  return SC.Set._create(hash) ;
-} ;
+SC.Set.create = function(items) { return new SC.Set(items); };
