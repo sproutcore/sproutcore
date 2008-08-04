@@ -115,7 +115,18 @@ SC.Server = SC.Object.extend({
     request = new Ajax.Request(url,opts) ;
   },
 
-  // Override this method to build URLs
+  /**
+    Generates the URL that is going to be called by this server. Note that you
+    should only return relative URLs. You can only call resources that are on
+    the same domain as where this script was downloaded from.
+
+    @param {String} resource  the URL where the collection of the resource can be queried
+    @param {String} action    the action that should be performed on the resource
+    @param {Array} ids        array of identifiers of your model instances
+    @param {Array} params     parameters that were passed to the SC.Server#request method
+    @param {String} method    the HTTP method that will be used
+    @returns {String} the URL to use in the request to the backend server
+  **/
   urlFor: function(resource, action, ids, params, method) {
     var idPart = (ids && ids.length == 1) ? ids[0] : '';
     return this.urlFormat.format(resource, action) + idPart;
