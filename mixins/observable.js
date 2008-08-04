@@ -3,6 +3,8 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+require('foundation/set');
+
 /**
   @namespace 
   
@@ -224,6 +226,7 @@ SC.Observable = {
   set: function(key, value) {
     var func = this[key] ;
     var ret = value ;
+    
     var notify = this.automaticallyNotifiesObserversFor(key) ;
     
     if (notify) this.propertyWillChange(key) ;
@@ -240,11 +243,361 @@ SC.Observable = {
     return this ;
   },
 
+  /**  
+    Called whenever you try to get or set an undefined property.
+    
+    This is a generic property handler.  If you define it, it will be called
+    when the named property is not yet set in the object.  The default does
+    nothing.
+    
+    @param key {String} the key that was requested
+    @param value {Object} The value if called as a setter, undefined if called as a getter.
+    @returns {Object} The new value for key.
+  */
+  unknownProperty: function(key,value) {
+    if (!(value === undefined)) { this[key] = value; }
+    return value ;
+  },
+
+  /**  
+    Begins a grouping of property changes.
+    
+    You can use this method to group property changes so that notifications
+    will not be sent until the changes are finished.  If you plan to make a 
+    large number of changes to an object at one time, you should call this 
+    method at the beginning of the changes to suspend change notifications.
+    When you are done making changes, all endPropertyChanges() to allow 
+    notification to resume.
+    
+    @returns {this}
+  */
+  beginPropertyChanges: function() {
+    this._kvo_changeLevel = (this._kvo_changeLevel || 0) + 1; 
+    return this;
+  },
+
+  /**  
+    Ends a grouping of property changes.
+    
+    You can use this method to group property changes so that notifications
+    will not be sent until the changes are finished.  If you plan to make a 
+    large number of changes to an object at one time, you should call 
+    beginsPropertyChanges() at the beginning of the changes to suspend change 
+    notifications. When you are done making changes, call this method to allow 
+    notification to resume.
+    
+    @returns {this}
+  */
+  endPropertyChanges: function() {
+    var level = this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1 ;
+    if ((level<=0) && this._kvo_changes && (this._kvo_changes.length>0)) {
+      this._notifyPropertyObservers() ;
+    } 
+    return this ;
+  },
+
+  /**  
+    Notify the observer system that a property is about to change.
+
+    Sometimes you need to change a value directly or indirectly without 
+    actually calling get() or set() on it.  In this case, you can use this 
+    method and propertyDidChange() instead.  Calling these two methods 
+    together will notify all observers that the property has potentially 
+    changed value.
+    
+    Note that you must always call propertyWillChange and propertyDidChange as 
+    a pair.  If you do not, it may get the property change groups out of order 
+    and cause notifications to be delivered more often than you would like.
+    
+    @param key {String} The property key that is about to change.
+    @returns {this}
+  */
+  propertyWillChange: function(key) {
+    return this ;
+  },
+
+  /**  
+    Notify the observer system that a property has just changed.
+
+    Sometimes you need to change a value directly or indirectly without 
+    actually calling get() or set() on it.  In this case, you can use this 
+    method and propertyWillChange() instead.  Calling these two methods 
+    together will notify all observers that the property has potentially 
+    changed value.
+    
+    Note that you must always call propertyWillChange and propertyDidChange as 
+    a pair. If you do not, it may get the property change groups out of order 
+    and cause notifications to be delivered more often than you would like.
+    
+    @param key {String} The property key that has just changed.
+    @param value {Object} The new value of the key.  May be null.
+    @returns {this}
+  */
+  propertyDidChange: function(key,value) {
+
+    this._kvo_revision = (this._kvo_revision || 0) + 1; 
+    var level = this._kvo_changeLevel || 0 ;
+
+    // save in the change set if queuing changes
+    if (level > 0) {
+      var changes = this._kvo_changes ;
+      if (!changes) changes = this._kvo_changes = SC.Set.create() ;
+      changes.add(key) ;
+      
+    // otherwise notify property observers immediately
+    } else this._notifyPropertyObservers(key) ;
+    
+    return this ;
+  },
+
+  // ..........................................
+  // DEPENDENT KEYS
+  // 
+
+  /**
+    Use this to indicate that one key changes if other keys it depends on 
+    change.
+    
+    You generally do not call this method, but instead pass dependent keys to
+    your property() method when you declare a computed property.
+    
+    You can call this method during your init to register the keys that should
+    trigger a change notification for your computed properties.  
+    
+    @param key {String} the dependent key followed by any keys the key depends on.
+    @returns {Object} this
+  */  
+  registerDependentKey: function(key) {
+    var idx = arguments.length ;
+    var dependents = this._kvo_dependents ;
+    if (!dependents) this._kvo_dependents = dependents = {} ;
+
+    // note that we store dependents as simple arrays instead of using set.
+    // we assume that in general you won't call registerDependentKey() more
+    // than once for a particular base key.  Even if you do, the added cost
+    // of having dups is minor.
+    
+    // for each key, build array of dependents, add this key...
+    // note that we ignore the first argument since it is the key...
+    while(--idx >= 1) {
+      var dep = arguments[idx] ;
+      
+      // handle the case where the user passes arrays of keys...
+      if ($type(dep) === T_ARRAY) {
+        var array = dep ;  var arrayIdx = array.length;
+        while(--arrayIdx >= 0) {
+          var dep = array[arrayIdx] ;
+          var queue = dependents[dep] ;
+          if (!queue) queue = dependents[dep] = [] ;
+          queue.push(key) ;
+        }
+        
+      // otherwise, just add the key.
+      } else {
+        var queue = dependents[dep] ;
+        if (!queue) queue = dependents[dep] = [] ;
+        queue.push(key) ;
+      }
+    }
+  },
+  
   // ..........................................
   // OBSERVERS
   // 
 
+  /**  
+    Adds an observer on a property.
+    
+    This is the core method used to register an observer for a property.
+    
+    Once you call this method, anytime the key's value is set, your observer
+    will be notified.  Note that the observers are triggered anytime the
+    value is set, regardless of whether it has actually changed.  Your
+    observer should be prepared to handle that.
+    
+    @param key {String} the key to observer
+    @param target {Object} the target object to invoke
+    @param method {String|Function} the method to invoke.
+    @returns {SC.Object} self
+  */
+  addObserver: function(key,target,method) {
+    
+    // normalize.  if a function is passed to target, make it the method.
+    if (method === undefined) {
+      method = target; target = this ;
+    }
+    if (target == null) target = this ;
+    if ($type(method) === T_STRING) method = target[method] ;
+    if (method == null) throw "You must pass a method to addObserver()" ;
+
+    // Normalize key...
+    key = key.toString() ;
+    if (key.indexOf('.') >= 0) {
+      
+      // create the chain and save it for later so we can tear it down if 
+      // needed.
+      var chain = SC._ChainObserver.createChain(this, key, target, method);
+      chain.masterTarget = target;  chain.masterMethod = method ;
+      
+      // Save in set for chain observers.
+      var chainObservers = this._kvo_chainObservers ;
+      if (!chainObservers) chainObservers = this._kvo_chainObservers = {};
+      var chains = chainObservers[key] ;
+      if (!chains) chains = chainObservers[key] = [];
+      chains.push(chain) ;
+      
+    // Create observers if needed...
+    } else {
+      var observers = this._kvo_observers ;
+      if (!observers) this._kvo_observers = observers = {} ;
+
+      var observerSet = observers[key] ;
+      if (!observerSet) {
+        observers[key] = observerSet = SC.beget(SC._ObserverSet);
+      }
+      observerSet.add(target, method) ; 
+    }
+    
+    return this;
+
+  },
+
+  removeObserver: function(key, target, method) {
+    
+    // normalize.  if a function is passed to target, make it the method.
+    if (method === undefined) {
+      method = target; target = this ;
+    }
+    if (target == null) target = this ;
+    if ($type(method) === T_STRING) method = target[method] ;
+    if (method == null) throw "You must pass a method to addObserver()" ;
+
+    // if the key contains a '.', this is a chained observer.
+    key = key.toString() ;
+    if (key.indexOf('.') >= 0) {
+      
+      // try to find matching chains
+      var chainObservers = this._kvo_chainObservers ;
+      var chains = (chainObservers) ? chainObservers[key] : null;
+      if (chains) {
+        var idx = chains.length;
+        while(--idx >= 0) {
+          var chain = chains[idx] ;
+          if (chain && (chain.masterTarget===target) && (chain.masterMethod===method)) {
+            chains[idx] = chain.destroyChain() ;
+          }
+        }
+      }
+
+    // otherwise, just like a normal observer.
+    } else {
+      var observers = this._kvo_observers ;
+      if (observers) {
+        var observerSet = observers[key] ;
+        if (observerSet) observerSet.remove(target, method) ;
+      }
+    }
+    
+    return this;
+  },
   
+
+  // ..........................................
+  // NOTIFICATION
+  // 
+
+  // this private method actually notifies the observers for any keys in the
+  // observer queue.  If you pass a key it will be added to the queue.
+  _notifyPropertyObservers: function(key) {
+
+    // increment revision
+    var rev = this.propertyRevision++;
+
+    SC.Observers.flush() ; // hookup as many observers as possible.
+
+    // get the observers.  If there are none, nothing to do!
+    var observers = this._kvo_observers ;
+    if (!observers) return NO; 
+    
+    // the set of changed keys...
+    var changes = this._kvo_changes;
+    if (!changes && key === undefined) return NO; // nothing to do.
+    
+    // otherwise, create a set to work with.
+    if (!changes) changes = SC.Set.create() ;
+    this._kvo_changes = this._kvo_altChanges ; // avoid recursion...
+    this._kvo_altChanges = null ;
+    
+    // Add the passed key to the changes set.  If a '*' was passed, then
+    // add all keys in the observers to the set...
+    if (key === '*') {
+      changes.add('*') ;
+      for(var key in observers) {
+        if (!observers.hasOwnProperty(key)) continue; 
+        changes.add(key) ;
+      }
+    } else if (key) changes.add(key) ;
+    
+    // Now go through the set and add all dependent keys...
+    var dependents = this._kvo_dependents;
+    if (dependents) {
+      var idx = 0 ;
+      
+      // note that each time we loop, we check the changes length, this
+      // way any dependent keys added to the set will also be evaluated...
+      while(idx < changes.length) {
+        var key = changes[idx] ;
+        var keys = dependents[key] ;
+        if (keys) changes.addEach(keys) ;
+        idx++ ;
+      }
+    }
+    
+    // Get any starObservers -- they will be notified of all changes.
+    var starObservers = observers['*'] ;
+
+    // beginPropertyChanges to avoid calling...
+    this.beginPropertyChanges() ;
+    
+    // now iterate through all changed keys and notify observers.
+    var idx = changes.length ;
+    while(--idx >= 0) {
+      var key = changes[idx] ; // the changed key
+      
+      // find any observers and notify them...
+      var observerSet = observers[key] ;
+      var members, membersLength, member, memberLoc, target, method ;
+      if (observerSet) {
+        members = observerSet.getMembers() ;
+        membersLength = members.length ;
+        for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
+          member = members[memberLoc] ;
+          target = member[0]; method = member[1] ;
+          method.call(target, null, this, key, null, rev) ;
+        }
+      }
+      
+      // if there are starObservers, do the same thing for them
+      if (starObservers && key !== '*') {
+        members = startObservers.getMembers() ;
+        membersLength = members.length ;
+        for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
+          member = members[memberLoc] ;
+          target = member[0]; method = member[1] ;
+          method.call(target, null, this, key, null, rev) ;
+        }
+      }
+      
+      // if there is a default property observer, call that also
+      if (this.propertyObserver) this.propertyObserver(this, key, null, rev);
+    }
+    
+    // all done, clear the changes set and save it for later use.
+    changes.length = 0;
+    this._kvo_altChanges = changes ;    
+    
+    this.endPropertyChanges() ;
+  },
 
   // ..........................................
   // BINDINGS
@@ -296,31 +649,36 @@ SC.Observable = {
        // DO SOMETHING HERE IF CHANGED.
     }
   */  
-  didChangeFor: function(context) {    
-    var keys = $A(arguments) ;
-    context = keys.shift() ;
+  didChangeFor: function(context) { 
     
+    // setup caches...
+    var valueCache = this._kvo_didChange_valueCache ;
+    if (!valueCache) valueCache = this._kvo_didChange_valueChage = {};
+    var revisionCache = this._kvo_didChange_revisionCache;
+    if (!revisionCache) revisionCache=this._kvo_didChange_revisionChage={};
+
+    // get the cache of values and revisions already seen in this context
+    var seenValues = valueCache[context] || {} ;
+    var seenRevisions = revisionCache[context] || {} ;
+    
+    // prepare too loop!
     var ret = false ;
-    if (!this._didChangeCache) this._didChangeCache = {} ;
-    if (!this._didChangeRevisionCache) this._didChangeRevisionCache = {};
-    
-    var seen = this._didChangeCache[context] || {} ;
-    var seenRevisions = this._didChangeRevisionCache[context] || {} ;
-    var loc = keys.length ;
-    var rev = this._kvo().revision ;
-    
-    while(--loc >= 0) {
-      var key = keys[loc] ;
-      if (seenRevisions[key] != rev) {
-        var val = this.get(key) ;
-        if (seen[key] !== val) ret = true ;
-        seen[key] = val ;
+    var currentRevision = this._kvo_revision || 0  ;
+    var idx = arguments.length ;
+    while(--idx >= 1) {  // NB: loop only to 1 to ignore context arg.
+      var key = arguments[idx];
+      
+      // has the kvo revision changed since the last time we did this?
+      if (seenRevisions[key] != currentRevision) {
+        // yes, check the value with the last seen value
+        var value = this.get(key) ;
+        if (seenValues[key] !== value) ret = true ; // did change!
       }
-      seenRevisions[key] = rev ;
+      seenRevisions[key] = currentRevision;
     }
     
-    this._didChangeCache[context] = seen ;
-    this._didChangeRevisionCache[context] = seenRevisions ;
+    valueCache[context] = seenValues ;
+    revisionCache[context] = seenRevisions ;
     return ret ;
   },
 
@@ -422,22 +780,6 @@ SC.Observable = {
   },
 
   /**  
-    Called whenever you try to get or set an undefined property.
-    
-    This is a generic property handler.  If you define it, it will be called
-    when the named property is not yet set in the object.  The default does
-    nothing.
-    
-    @param key {String} the key that was requested
-    @param value {Object} The value if called as a setter, undefined if called as a getter.
-    @returns {Object} The new value for key.
-  */
-  unknownProperty: function(key,value) {
-    if (!(value === undefined)) { this[key] = value; }
-    return value ;
-  },
-
-  /**  
     Generic property observer called whenever a property on the receiver 
     changes.
     
@@ -455,89 +797,10 @@ SC.Observable = {
     @param target {Object} the target of the change.  usually this
     @param key {String} the name of the property that changed
     @param value {Object} the new value of the property.
+    @param revision {Number} a revision you can use to quickly detect changes.
     @returns {void}
   */
-  propertyObserver: function(observer,target,key,value) {},
-
-  /**  
-    Begins a grouping of property changes.
-    
-    You can use this method to group property changes so that notifications
-    will not be sent until the changes are finished.  If you plan to make a 
-    large number of changes to an object at one time, you should call this 
-    method at the beginning of the changes to suspend change notifications.
-    When you are done making changes, all endPropertyChanges() to allow 
-    notification to resume.
-    
-    @returns {this}
-  */
-  beginPropertyChanges: function() {
-    this._kvo().changes++ ;
-    return this;
-  },
-
-  /**  
-    Ends a grouping of property changes.
-    
-    You can use this method to group property changes so that notifications
-    will not be sent until the changes are finished.  If you plan to make a 
-    large number of changes to an object at one time, you should call 
-    beginsPropertyChanges() at the beginning of the changes to suspend change 
-    notifications. When you are done making changes, call this method to allow 
-    notification to resume.
-    
-    @returns {this}
-  */
-  endPropertyChanges: function() {
-    var kvo = this._kvo() ;  kvo.changes--;
-    if (kvo.changes <= 0) this._notifyPropertyObservers() ;
-    return this ;
-  },
-
-  /**  
-    Notify the observer system that a property is about to change.
-
-    Sometimes you need to change a value directly or indirectly without 
-    actually calling get() or set() on it.  In this case, you can use this 
-    method and propertyDidChange() instead.  Calling these two methods 
-    together will notify all observers that the property has potentially 
-    changed value.
-    
-    Note that you must always call propertyWillChange and propertyDidChange as 
-    a pair.  If you do not, it may get the property change groups out of order 
-    and cause notifications to be delivered more often than you would like.
-    
-    @param key {String} The property key that is about to change.
-    @returns {this}
-  */
-  propertyWillChange: function(key) {
-    this._kvo().changes++ ;
-    return this ;
-  },
-
-  /**  
-    Notify the observer system that a property has just changed.
-
-    Sometimes you need to change a value directly or indirectly without 
-    actually calling get() or set() on it.  In this case, you can use this 
-    method and propertyWillChange() instead.  Calling these two methods 
-    together will notify all observers that the property has potentially 
-    changed value.
-    
-    Note that you must always call propertyWillChange and propertyDidChange as 
-    a pair. If you do not, it may get the property change groups out of order 
-    and cause notifications to be delivered more often than you would like.
-    
-    @param key {String} The property key that has just changed.
-    @param value {Object} The new value of the key.  May be null.
-    @returns {this}
-  */
-  propertyDidChange: function(key,value) {
-    this._kvo().changed[key] = value ;
-    var kvo = this._kvo() ;  kvo.changes--; kvo.revision++ ;
-    if (kvo.changes <= 0) this._notifyPropertyObservers() ;
-    return this ;
-  },
+  propertyObserver: function(observer,target,key,value, revision) {},
 
   /**
     Convenience method to call propertyWillChange/propertyDidChange.
@@ -570,71 +833,8 @@ SC.Observable = {
     @returns {this}
   */
   allPropertiesDidChange: function() {
-    this._notifyPropertyObservers(true) ;
+    this._notifyPropertyObservers('*') ;
     return this ;
-  },
-
-  /**  
-    Adds an observer on a property.
-    
-    This is the core method used to register an observer for a property.
-    
-    Once you call this method, anytime the key's value is set, your observer
-    will be notified.  Note that the observers are triggered anytime the
-    value is set, regardless of whether it has actually changed.  Your
-    observer should be prepared to handle that.
-    
-    @param key {String} the key to observer
-    @param func {String} the function to call when the key changes.
-    @returns {SC.Object}
-  */
-  addObserver: function(key,func) {
-    var kvo = this._kvo() ;
-
-    // if the key contains a '.', then create a chained observer.
-    key = key.toString() ;
-    var parts = key.split('.') ;
-    if (parts.length > 1) {
-      var co = SC._ChainObserver.createChain(this,parts,func) ;
-      co.masterFunc = func ;
-      var chainObservers = kvo.chainObservers[key] || [] ;
-      chainObservers.push(co) ;
-      kvo.chainObservers[key] = chainObservers ;
-
-    // otherwise, bind as a normal property
-    } else {      
-      var observers = kvo.observers[key] = (kvo.observers[key] || []) ;
-      var found = false; var loc = observers.length;
-      while(!found && --loc >= 0) found = (observers[loc] == func) ;
-      if (!found) observers.push(func) ;
-    }
-    
-    return this;
-
-  },
-
-  removeObserver: function(key,func) {
-    var kvo = this._kvo() ;
-
-    // if the key contains a '.', this is a chained observer.
-    key = key.toString() ;
-    var parts = key.split('.') ;
-    if (parts.length > 1) {
-      var chainObservers = kvo.chainObserver[key] || [] ;
-      var newObservers = [] ;
-      chainObservers.each(function(co) {
-        if (co.masterFunc != func) newObservers.push(co) ;
-      }) ;
-      kvo.chainObservers[key] = newObservers ;
-
-    // otherwise, just like a normal observer.
-    } else {
-      var observers = kvo.observers[key] || [] ;
-      observers = observers.without(func) ;
-      kvo.observers[key] = observers ;
-    }
-    
-    return this;
   },
 
   addProbe: function(key) { this.addObserver(key,logChange); },
@@ -663,143 +863,59 @@ SC.Observable = {
     The returned value is the function actually set as the observer. You
     can manually remove this observer by calling the cancel() method on it.
   */
-  observeOnce: function(key, func, timeout) {
+  observeOnce: function(key, target, method, timeout) {
+    
+    // fixup the params
+    var targetType = $type(target) ;
+    if (targetType === T_FUNCTION) {
+      if (($type(method) === T_NUMBER) && (timeout === undefined)) {
+        timeout = method ;
+      }
+      method = target ;
+      target = this ;
+    }
+    
+    // convert the method to a function if needed...
+    if ($type(method) === T_STRING) method = target[method] ;
+    if (method == null) throw "You must pass a valid method to observeOnce()";
+
     var timeoutObject = null ;
-    var target = this ;
-    var handler = function(theTarget,theKey,theValue,didTimeout) {
-      func(theTarget,theKey,theValue,didTimeout) ;
-      target.removeObserver(key,handler) ;
-      if (timeoutObject) { timeoutObject.invalidate(); }
+
+    // define a custom observer that will call the target method and remove
+    // itself as an observer.
+    var handler = function(observer, target, property, value, rev, didTimeout) {
+      // invoke method...
+      method.call(this, observer, target, property, value, rev, didTimeout);
+      
+      // remove observer...
+      target.removeObserver(key, this, handler) ;
+      
+      // if there is a timeout, invalidate it.
+      if (timeoutObject) { timeoutObject.invalidate();}
+      
+      // avoid memory leaks
+      handler = target = method = timeoutObject = null;
     } ;
 
-    target.addObserver(key,handler) ;
+    // now add observer
+    target.addObserver(key, target, handler) ;
     if (timeout) timeoutObject = function() {
-      handler(target,key,target.get(key),true) ;
+      handler(null, target, key, target.get(key), target.propertyRevision, true) ;
+      handler = target = method = timeoutObject = null;
     }.invokeLater(this, timeout) ;
 
-    handler.cancel = function() { target.removeObserver(key,handler); } ;
+    handler.cancel = function() { 
+      target.removeObserver(key, target, handler); 
+      handler = target = method = timeoutObject = null;
+    } ;
+
     return handler ;
   },
 
-  /**
-    Use this to indicate that one key changes if other keys it depends on 
-    change.
-  */  
-  registerDependentKey: function(key) {
-    var keys = $A(arguments) ;
-    var dependent = keys.shift() ;
-    var kvo = this._kvo() ;
-    for(var loc=0;loc<keys.length;loc++) {
-    	var key = keys[loc];
-    	if (key instanceof Array) {
-    		key.push(dependent) ;
-    		this.registerDependentKey.apply(this,key) ;
-    	} else {
-				var dependents = kvo.dependents[key] || [] ;
-				dependents.push(dependent) ;
-				kvo.dependents[key] = dependents ;
-    	}
-    }
-  },
 
-  // INTERNAL PROPERTY SUPPORT
-
-  // returns the kvo object.
-  _kvo: function() {
-    if (!this._kvod) this._kvod = { 
-      changes: 0, changed: {}, observers: {}, dependents: {},
-      chainObservers: {}, revision: 0
-    } ;
-    return this._kvod ;
-  },
-
-  propertyRevision: 1,
+  propertyRevision: 1
   
-  // this is invoked when the properties changed.
-  _notifyPropertyObservers: function(allObservers) {
-    // locals
-    var key ; var observers ; var keys = [] ;
-    var loc; var oloc ; var value ;
-    var kvo = this._kvo() ;
 
-    SC.Observers.flush() ; // hookup as many observers as possible.
-
-    // increment revision
-    this.propertyRevision++;
-    
-    // find the keys to notify on.
-    var keySource = (allObservers) ? kvo.observers : kvo.changed ;
-    var allKeys = {} ;
-    
-    // This private function is used to recursively discover all 
-    // dependent keys.
-    var _addDependentKeys = function(key) {
-      if (allKeys[key] !== undefined) return ;
-      allKeys[key] = key ;
-
-      if (allObservers) return ;
-      var dependents = kvo.dependents[key] ;
-      if (dependents && dependents.length > 0) {
-        var loc = dependents.length ;
-        while(--loc >= 0) {
-          var depKey = dependents[loc] ;
-          _addDependentKeys(depKey) ;
-        }
-      }
-    } ;
-
-    // loop throught keys to notify.  find all dependent keys as well.
-    // note that this loops recursively.
-    for(key in keySource) { 
-      if (!keySource.hasOwnProperty(key)) continue ;
-      _addDependentKeys(key) ;
-    }
-
-    // Convert the found keys into an array
-    for(key in allKeys) {
-      if (!allKeys.hasOwnProperty(key)) continue ;
-      keys.push(key) ;
-    }
-    var starObservers = kvo.observers['*'] ;
-
-    // clear out changed to avoid recursion.
-    var changed = kvo.changed ; kvo.changed = {} ;
-
-    // notify all observers.
-    var target = this ; 
-    loc = keys.length ;
-    
-    var notifiedKeys = {} ; // avoid duplicates.
-    while(--loc >= 0) {
-      key = keys[loc] ; observers = kvo.observers[key] ;
-      if (!notifiedKeys[key]) {
-        notifiedKeys[key] = key ;
-        value = (allObservers || (!changed[key])) ? this.get(key) : changed[key];
-
-        if (starObservers) {
-          observers = (observers) ? observers.concat(starObservers) : starObservers ;  
-        }
-
-        if (observers) {
-          oloc = observers.length ;
-          var args = [target, key, value, this.propertyRevision] ;
-          while(--oloc >= 0) {
-            var observer = observers[oloc] ;
-            SC.NotificationQueue.add(null, observer, args) ;
-          } // while(oloc)
-        } // if (observers) 
-
-        // notify self.
-        if (this.propertyObserver != SC.Object.prototype.propertyObserver) {
-          SC.NotificationQueue.add(this, this.propertyObserver,
-            [null, target, key, value, this.propertyRevision]) ;
-        }
-      }
-
-    } // while(--loc)
-
-    SC.NotificationQueue.flush() ; 
-  }
     
 } ;
 
@@ -963,6 +1079,87 @@ Object.extend(Function.prototype,
 }) ;
 
 // ........................................................................
+// OBSERVER Set
+//
+// This private class is used to store information about obversers on a 
+// particular key.  Note that this object is not observable.
+SC._ObserverSet = {
+
+  // the number of targets in the set.
+  targets: 0,
+  
+  _membersCacheIsValid: NO,
+  
+  // adds the named target/method observer to the set.  The method must be
+  // a function, not a string.
+  add: function(target, method) {
+    var targetGuid = SC.guidFor(target) ;
+    
+    // get the set of methods
+    var methods = this[targetGuid] ;
+    if (!methods) {
+      methods = this[targetGuid] = SC.Set.create() ;
+      methods.target = target ;
+      methods.isTargetSet = YES ; // used for getMembers().
+      this.targets++ ;
+    }
+    
+    methods.add(method) ;
+    this._membersCacheIsValid = NO ;
+  },
+  
+  // removes the named target/method observer from the set.  If this is the
+  // last method for the named target, then the number of targets will also
+  // be reduced.
+  //
+  // returns YES if the items was removed, NO if it was not found.
+  remove: function(target, method) {
+    var targetGuid = SC.guidFor(target) ;
+    
+    // get the set of methods
+    var methods = this[targetGuid] ;    
+    if (!methods) return NO ;
+    
+    methods.remove(method) ;
+    if (methods.length <= 0) {
+      methods.target = null;
+      methods.isTargetSet = NO ;
+      delete this[targetGuid] ;
+      this.targets-- ;
+    }
+    
+    this._membersCacheIsValid = NO;
+    
+    return YES ;
+  },
+  
+  // Returns an array of target/method pairs.  This is cached.
+  getMembers: function() {
+    if (this._membersCacheIsValid) return this._members ;
+    
+    // need to recache, reset the array...
+    if (!this._members) {
+      this._members = [] ;
+    } else this._members.length = 0 ; // reset
+    var ret = this._members ;
+
+    // iterate through the set, look for sets.
+    for(var key in this) {
+      if (!this.hasOwnProperty()) continue ;
+      var value = this[key] ;
+      if (value && value.isTargetSet) {
+        var idx = value.length;
+        var target = value.target ;
+        while(--idx>=0) ret.push([target, value[idx]]) ;
+      }
+    }
+    
+    return ret ;
+  }
+  
+} ;
+
+// ........................................................................
 // OBSERVER QUEUE
 //
 // This queue is used to hold observers when the object you tried to observe
@@ -1019,6 +1216,7 @@ SC.Observers = {
     this.queue = newQueue ; 
   }
 } ;
+
 
 // ........................................................................
 // NOTIFCATION QUEUE
