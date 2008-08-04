@@ -72,6 +72,10 @@ SC.Set = SC.Object.extend(SC.Array,
     @returns {Boolean} YES if the object was removed.
   */  
   remove: function(obj) {
+    
+    // if no obj param is passed, remove the last item in the array...
+    if ((obj === undefined) && this.length>0) obj = this[this.length-1];
+     
     if (obj == null) return this ;
     var guid = SC.guidFor(obj);
     var idx = this[guid] ;
