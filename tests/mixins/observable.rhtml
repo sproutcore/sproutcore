@@ -1,0 +1,127 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("object.get()", {
+  
+  setup: function() {
+    object = SC.Object.create({
+      
+      normal: 'value',
+      
+      computed: function() { return 'value'; }.property(),
+      
+      method: function() { return "value"; },
+      
+      nullProperty: null,
+      
+      unknownProperty: function(key, value) {
+        this.lastUnknownProperty = key ;
+        return "unknown" ;
+      }
+      
+    }) ;
+  },
+  
+  "should get normal properties": function() {
+    assertEqual(object.get('normal'), 'value') ;
+  },
+  
+  "should call computed properties and return their result": function() {
+    assertEqual(object.get("computed"), "value") ;
+  },
+  
+  "should return the function for a non-computed property": function() {
+    var value = object.get("method") ;
+    assertEqual($type(value), T_FUNCTION) ;
+  },
+  
+  "should return null when property value is null": function() {
+    assertEqual(object.get("nullProperty"), null);
+  },
+  
+  "should call unknownProperty when value is undefined": function() {
+    assertEqual(object.get("unknown"), "unknown") ;
+    assertEqual(object.lastUnknownProperty, "unknown") ;
+  }
+
+});
+
+Test.context("object.set()", {
+  
+  setup: function() {
+    object = SC.Object.create({
+
+      // normal property
+      normal: 'value',
+
+      // computed property
+      _computed: "computed",
+      computed: function(key, value) {
+        if (value !== undefined) {
+          this._computed = value ;
+        }
+        return this._computed ;
+      }.property(),
+
+      // method, but not a property
+      _method: "method",
+      method: function(key, value) {
+        if (value !== undefined) {
+          this._method = value ;
+        }
+        return this._method ;
+      },
+      
+      // null property
+      nullProperty: null,
+      
+      // unknown property
+      _unknown: 'unknown',
+      unknownProperty: function(key, value) {
+        if (value !== undefined) {
+          this._unknown = value ;
+        }
+        return this._unknown ;
+      }
+      
+    }) ;
+  },
+  
+  "should change normal properties and return this": function() {
+    var ret = object.set("normal", "changed") ;
+    assertEqual(object.normal, "changed") ;
+    assertEqual(ret, object) ;
+  },
+  
+  "should call computed properties passing value and return this": function() {
+    var ret = object.set("computed", "changed") ;
+    assertEqual(object._computed, "changed") ;
+    assertEqual($type(object.computed), T_FUNCTION) ;
+    assertEqual(ret, object) ;
+  },
+  
+  "should replace the function for a non-computed property and return this": function() {
+    var ret = object.set("method", "changed") ;
+    assertEqual(object._method, "method") ; // make sure this was NOT run
+    assertNotEqual($type(object.method), T_FUNCTION) ;
+    assertEqual(ret, object) ;
+  },
+  
+  "should replace prover when property value is null": function() {
+    var ret = object.set("nullProperty", "changed") ;
+    assertEqual(object.nullProperty, "changed") ;
+    assertEqual(object._unknown, "unknown"); // verify unknownProperty not called.
+    assertEqual(ret, object) ;
+  },
+  
+  "should call unknownProperty with value when property is undefined": function() {
+    var ret = object.set("unknown", "changed") ;
+    assertEqual(object._unknown, "changed") ;
+    assertEqual(ret, object) ;
+  }
+
+});
+
+
+</script>
+<% end %>

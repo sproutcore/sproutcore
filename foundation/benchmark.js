@@ -104,7 +104,7 @@ SC.Benchmark = {
     run with the name you provide the number of times you indicate.  Only the
     function is a required param.
   */  
-  bench: function(func, key, reps) {
+  bench: function(func, key, reps, context) {
     if (!key) key = "bench%@".fmt(this._benchCount++) ;
     if (!reps) reps = 1 ;
     var ret ;
@@ -112,7 +112,7 @@ SC.Benchmark = {
     var runs = reps; 
     SC.Benchmark.start(key) ;
     while(--reps >= 0) {
-      ret = func();
+      ret = func(context);
     }
     SC.Benchmark.end(key, null, runs) ; 
     
@@ -166,9 +166,15 @@ SC.Benchmark = {
     }
     
     // now gen report...
+    var keys = [] ;
     for(var key in this.stats) {
       if (!this.stats.hasOwnProperty(key)) continue ;
-      ret.push(this._genReport(key, maxLen)) ;
+      keys.push(key) ;
+    }
+    keys = keys.sort() ;
+    var max = keys.length ;
+    for(var idx=0;idx<max;idx++) {
+      ret.push(this._genReport(keys[idx], maxLen)) ;
     }
     return ret.join("\n") ;
   },
@@ -202,8 +208,8 @@ SC.Benchmark = {
     var avg = (stat.runs > 0) ? (Math.floor(stat.amt * 100000 / stat.runs) / 100000) : 0 ;
      
     // Generate the name, adding padding spaces if needed.
-    var name = (stat.name || key) + ':' ;
-    nameLength = (nameLength) ? nameLength+1 : 0; 
+    var name = (stat.name || key)  ;
+    nameLength = (nameLength) ? nameLength : 0; 
     if (nameLength > name.length) {
       var toJoin = [name] ;
       nameLength -= name.length ;
@@ -211,7 +217,7 @@ SC.Benchmark = {
       name = toJoin.join('') ;
     }
     
-    return 'BENCH %@ total: %@ msec reps: %@x avg: %@ msec'.fmt(name, stat.amt, stat.runs, avg) ;  
+    return 'BENCH | %@1 | avg: %@4 msec | total: %@2 msec | reps: %@3x '.fmt(name, stat.amt, stat.runs, avg) ;  
   },
   
   // @private
