@@ -65,8 +65,9 @@ SC.Set.prototype = {
     if (obj == null) return this; // cannot add null to a set.
     
     var guid = SC.guidFor(obj) ;
-    if (this[guid] == null) {
-      var len = this.length ;
+    var idx = this[guid] ;
+    var len = this.length ;
+    if ((idx == null) || (idx >= len)) {
       this[len] = obj ;
       this[SC.guidFor(obj)] = len ;
       this.length = len+1;
