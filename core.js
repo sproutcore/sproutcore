@@ -227,11 +227,71 @@ Object.extend(SC,{
     SC.Object-based or not, but be aware that it will add a _guid property.
   */
   guidFor: function(obj) {
-    if (obj == null) return '(null)' ;
-    return obj._guid ? obj._guid : (obj._guid = ("@" + (SC._nextGUID++)));
+    if (obj === undefined) return "(undefined)" ;
+    if (obj === null) return '(null)' ;
+    if (obj._guid) return obj._guid ;
+    
+    switch($type(obj)) {
+      case T_NUMBER:
+        return this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj);
+        break ;
+      case T_STRING:
+        return this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj);
+        break ;
+      case T_BOOL:
+        return (obj) ? "(true)" : "(false)" ;
+        break;
+      default:
+        return obj._guid = ("@" + (SC._nextGUID++));
+    }
+  },
+
+  _numberGuids: [],
+  
+  _stringGuids: {},
+  
+  /** 
+    Empty function.  Useful for some operation. 
+  */
+  K: function() {},
+  
+  /**
+    Creates a new object with the passed object as its prototype.
+    
+    Do not use this to create new SC.Object-based objects, but you can use
+    this to beget Arrays, Hashes, and Sets
+    
+    @param obj {Object} the object to beget
+    @returns {Object} the new object.
+  */
+  beget: function(obj) {
+    if (obj == null) return null ;
+    var k = SC.K; k.prototype = obj ;
+    var ret = new k();
+    k.prototype = null ; // avoid leaks
+    return ret ;
   },
   
-
+  /**
+    Creates a clone of the receiver.
+    
+    Unlike beget(), this method will actually copy properties from the 
+    source object to the target.
+    
+    @param obj {Object} the object to clone
+    @returns {Object} the cloned object
+  */
+  clone: function(obj) {
+    if (obj == null) return null ;
+    if ($type(obj) === T_ARRAY) return obj.slice() ;
+    var ret = {} ;
+    for(var key in obj) {
+      if (!obj.hasOwnProperty(key)) continue ;
+      ret[key] = obj[key] ;
+    }
+    return ret ;
+  },
+    
   /**
     Convenience method to inspect an object by converting it to a hash.
   */
