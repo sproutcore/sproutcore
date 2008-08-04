@@ -11,33 +11,34 @@ require('mixins/array') ;
   A Set works a bit like an array except that its items are not ordered.  
   You can create a set to efficiently test for membership for an object.
 
+  You can iterate through a set just like an array, even accessing objects
+  by index, however there is no gaurantee as to their order.
+  
   @extends SC.Object
 
 */
 SC.Set = SC.Object.extend(SC.Array, 
-  /** @scope SC.Set.prototype */
-  {
-  
-/**
+/** @scope SC.Set.prototype */ {
+    
+  /**
     This property will change as the number of objects in the set changes.
 
     @type number
-*/
-  length: 0,
-  
-  /**
-    Changes each time an object is updated or removed. Observe this to be notified of changes to the set.
-  
-    @type number
   */
-  revision: 0,
+  length: 0,
   
   /**
     Call this method to test for membership.
   */
   contains: function(obj) {
-    if (obj === null) return false ;
-    return this[this._guidFor(obj)] === obj ;
+    
+    // because of the way a set is "reset", the guid for an object may 
+    // still be stored as a key, but points to an index that is beyond the
+    // length.  Therefore the found idx must both be defined and less than
+    // the current length.
+    if (obj === null) return NO ;
+    var idx = this[SC.guidFor(obj)] ;
+    return ((idx != null) && (idx < this.length)) ;
   },
   
   /**
@@ -46,18 +47,20 @@ SC.Set = SC.Object.extend(SC.Array,
     If the object is already in the set it will not be added again.
     
     @param obj {Object} the object to add
-    @returns {Boolean} YES if the object as added.
+    @returns {Object} the receiver
   */
   add: function(obj) {
-    if (obj == null) return NO; // cannot add null to a set.
+    if (obj == null) return this; // cannot add null to a set.
     
-    var guid = this._guidFor(obj) ;
+    var guid = SC.guidFor(obj) ;
     if (this[guid] == null) {
-      this[this._guidFor(obj)] = obj ;
-      this.incrementProperty('length') ;
-      this.incrementProperty('revision') ;
-      return YES ;
-    } else return NO ;
+      var len = this.length ;
+      this[len] = obj ;
+      this[SC.guidFor(obj)] = len ;
+      this.set('length', len+1) ;
+    }
+    this.arrayContentDidChange() ;
+    return this ;
   },
   
   /**
@@ -69,27 +72,34 @@ SC.Set = SC.Object.extend(SC.Array,
     @returns {Boolean} YES if the object was removed.
   */  
   remove: function(obj) {
-    if (obj == null) return NO ;
-    var guid = this._guidFor(obj);
-    if (this[guid] === obj) {
-      delete this[this._guidFor(obj)] ; 
-      this.decrementProperty('length') ;
-      this.incrementProperty('revision') ;
-      return YES ;
-    } else return NO;
+    if (obj == null) return this ;
+    var guid = SC.guidFor(obj);
+    var idx = this[guid] ;
+    var len = this.length;
+    
+    if ((idx == null) || (idx <= len)) return this; // not in set.
+
+    // clear the guid key
+    delete this[guid] ;
+    
+    // to clear the index, we will swap the object stored in the last index.
+    // if this is the last object, just reduce the length.
+    if (idx < (len-1)) {
+      var obj = this[idx] = this[len-1];
+      this[SC.guidFor(obj)] = idx ;
+    }
+    
+    // reduce the length
+    this.set('length', len-1) ;
+    this.arrayContentDidChange() ;
+    return this ;
   },
   
   // .......................................
   // PRIVATE 
-  _guidFor: function(obj) {
-    return '@' + SC.guidFor(obj);
-  },
-  
   _each: function(iterator) {
-    for (var key in this) {
-      if (!this.hasOwnProperty(key)) continue ;
-      if (key.match(/^@/)) iterator(this[key]) ;
-    }
+    var len = this.get('length') ;
+    for(var idx=0;idx<len;idx++) iterator(this[idx]) ;
   }
   
 }) ;
