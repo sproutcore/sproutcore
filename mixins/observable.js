@@ -73,82 +73,55 @@
   This will call the 'targetAction' method on the targetObject to be called
   whenever the value of the propertyKey changes.
   
+  
+  h2. Implementing Manual Change Notifications
+  
+  Sometimes you may want to control the rate at which notifications for 
+  a property are delivered, for example by checking first to make sure 
+  that the value has changed.
+  
+  To do this, you need to implement a computed property for the property 
+  you want to change and override automaticallyNotifiesObserversFor().
+  
+  The example below will only notify if the "balance" property value actually
+  changes:
+  
+  {{{
+    
+    automaticallyNotifiesObserversFor: function(key) {
+      return (key === 'balance') ? NO : sc_super() ;
+    },
+    
+    balance: function(key, value) {
+      var balance = this._balance ;
+      if ((value !== undefined) && (balance !== value)) {
+        this.propertyWillChange(key) ;
+        balance = this._balance = value ;
+        this.propertyDidChange(key) ;
+      }
+      return balance ;
+    }
+    
+  }}}
 
 */
 SC.Observable = {
 
-  /**  
-    Manually add a new binding to an object.  This is the same as doing
-    the more familiar propertyBinding: 'property.path' approach.
+  /**
+    Determines whether observers should be automatically notified of changes
+    to a key.
+    
+    If you are manually implementing change notifications for a property, you
+    can override this method to return NO for properties you do not want the
+    observing system to automatically notify for.
+    
+    The default implementation always returns YES.
+    
+    @param key {String} the key that is changing
+    @returns {Boolean} YES if automatic notification should occur.
   */
-  bind: function(toKey, fromPropertyPath) {
-    
-    var r = SC.idt.active ;
-    
-    var binding ;
-    var props = { to: [this, toKey] } ;
-
-    // for strings try to do default relay
-    var pathType = $type(fromPropertyPath) ;
-    if (pathType == T_STRING || pathType == T_ARRAY) {
-      binding = this[toKey + 'BindingDefault'] || SC.Binding.From;
-      binding = binding(fromPropertyPath) ;
-    } else binding = fromPropertyPath ;
-
-    // check the 'from' value of the relay. if it starts w/
-    // '.' || '*' then convert to a local tuple.
-    var relayFrom = binding.prototype.from ;
-    if ($type(relayFrom) == T_STRING) switch(relayFrom.slice(0,1)) {
-      case '*':
-      case '.':
-        relayFrom = [this,relayFrom.slice(1,relayFrom.length)];
-    }        
-
-    if(r) bt = new Date().getTime();
-
-    binding = binding.create(props, { from: relayFrom }) ;
-    this.bindings.push(binding) ;
-
-    if (r) SC.idt.b1_t += (new Date().getTime()) - bt ;
-    
-    return binding ;
-  },
-  
-  /**  
-    didChangeFor makes it easy for you to verify that you haven't seen any
-    changed values.  You need to use this if your method observes multiple
-    properties.  To use this, call it like this:
-  
-    if (this.didChangeFor('render','height','width')) {
-       // DO SOMETHING HERE IF CHANGED.
-    }
-  */  
-  didChangeFor: function(context) {    
-    var keys = $A(arguments) ;
-    context = keys.shift() ;
-    
-    var ret = false ;
-    if (!this._didChangeCache) this._didChangeCache = {} ;
-    if (!this._didChangeRevisionCache) this._didChangeRevisionCache = {};
-    
-    var seen = this._didChangeCache[context] || {} ;
-    var seenRevisions = this._didChangeRevisionCache[context] || {} ;
-    var loc = keys.length ;
-    var rev = this._kvo().revision ;
-    
-    while(--loc >= 0) {
-      var key = keys[loc] ;
-      if (seenRevisions[key] != rev) {
-        var val = this.get(key) ;
-        if (seen[key] !== val) ret = true ;
-        seen[key] = val ;
-      }
-      seenRevisions[key] = rev ;
-    }
-    
-    this._didChangeCache[context] = seen ;
-    this._didChangeRevisionCache[context] = seenRevisions ;
-    return ret ;
+  automaticallyNotifiesObserversFor: function(key) { 
+    return YES;
   },
 
   // ..........................................
@@ -251,20 +224,107 @@ SC.Observable = {
   set: function(key, value) {
     var func = this[key] ;
     var ret = value ;
-
-    this.propertyWillChange(key) ;
-
+    var notify = this.automaticallyNotifiesObserversFor(key) ;
+    
+    if (notify) this.propertyWillChange(key) ;
+    
     // set the value.
     if (func && func.isProperty) {
       ret = func.call(this,key,value) ;
     } else if (func === undefined) {
       ret = this.unknownProperty(key,value) ;
     } else ret = this[key] = value ;
-
+    
     // post out notifications.
-    this.propertyDidChange(key, ret) ;
+    if (notify) this.propertyDidChange(key, ret) ;
     return this ;
-  },  
+  },
+
+  // ..........................................
+  // OBSERVERS
+  // 
+
+  
+
+  // ..........................................
+  // BINDINGS
+  // 
+    
+  /**  
+    Manually add a new binding to an object.  This is the same as doing
+    the more familiar propertyBinding: 'property.path' approach.
+  */
+  bind: function(toKey, fromPropertyPath) {
+    
+    var r = SC.idt.active ;
+    
+    var binding ;
+    var props = { to: [this, toKey] } ;
+
+    // for strings try to do default relay
+    var pathType = $type(fromPropertyPath) ;
+    if (pathType == T_STRING || pathType == T_ARRAY) {
+      binding = this[toKey + 'BindingDefault'] || SC.Binding.From;
+      binding = binding(fromPropertyPath) ;
+    } else binding = fromPropertyPath ;
+
+    // check the 'from' value of the relay. if it starts w/
+    // '.' || '*' then convert to a local tuple.
+    var relayFrom = binding.prototype.from ;
+    if ($type(relayFrom) == T_STRING) switch(relayFrom.slice(0,1)) {
+      case '*':
+      case '.':
+        relayFrom = [this,relayFrom.slice(1,relayFrom.length)];
+    }        
+
+    if(r) bt = new Date().getTime();
+
+    binding = binding.create(props, { from: relayFrom }) ;
+    this.bindings.push(binding) ;
+
+    if (r) SC.idt.b1_t += (new Date().getTime()) - bt ;
+    
+    return binding ;
+  },
+  
+  /**  
+    didChangeFor makes it easy for you to verify that you haven't seen any
+    changed values.  You need to use this if your method observes multiple
+    properties.  To use this, call it like this:
+  
+    if (this.didChangeFor('render','height','width')) {
+       // DO SOMETHING HERE IF CHANGED.
+    }
+  */  
+  didChangeFor: function(context) {    
+    var keys = $A(arguments) ;
+    context = keys.shift() ;
+    
+    var ret = false ;
+    if (!this._didChangeCache) this._didChangeCache = {} ;
+    if (!this._didChangeRevisionCache) this._didChangeRevisionCache = {};
+    
+    var seen = this._didChangeCache[context] || {} ;
+    var seenRevisions = this._didChangeRevisionCache[context] || {} ;
+    var loc = keys.length ;
+    var rev = this._kvo().revision ;
+    
+    while(--loc >= 0) {
+      var key = keys[loc] ;
+      if (seenRevisions[key] != rev) {
+        var val = this.get(key) ;
+        if (seen[key] !== val) ret = true ;
+        seen[key] = val ;
+      }
+      seenRevisions[key] = rev ;
+    }
+    
+    this._didChangeCache[context] = seen ;
+    this._didChangeRevisionCache[context] = seenRevisions ;
+    return ret ;
+  },
+
+
 
   /**
     Sets the property only if the passed value is different from the

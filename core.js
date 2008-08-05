@@ -227,8 +227,8 @@ Object.extend(SC,{
     SC.Object-based or not, but be aware that it will add a _guid property.
   */
   guidFor: function(obj) {
-    if (obj == null) return 0 ;
-    return obj._guid ? obj._guid : (obj._guid = SC._nextGUID++);
+    if (obj == null) return '(null)' ;
+    return obj._guid ? obj._guid : (obj._guid = ("@" + (SC._nextGUID++)));
   },
   
 
