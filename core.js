@@ -202,35 +202,79 @@ Object.extend(SC,{
     return ret ;
   },
   
-  // this will compare two values to see if they are equal.  If you have two 
-  // values of unknown type, this is faster across all browsers than ===.
-  isEqual: function(a,b) {
-    if (a === null) {
-      return b === null ;
-    } else if (a === undefined) {
-      return b === undefined ;
-    } else if (typeof(a) == typeof(b)) {
-      return a == b ;
-    }
-  },
-  
   isArray: function( obj )
   {
     return ($type(obj) === T_ARRAY) || (obj && obj.objectAt);
   },
   
-  _nextGUID: 0,
+  _nextGUID: 0, _numberGuids: [], _stringGuids: {},
   
   /**
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
     SC.Object-based or not, but be aware that it will add a _guid property.
+    
+    @param obj {Object} any object, string, number or primitive
+    @returns {String} the unique guid for this instance.
   */
   guidFor: function(obj) {
-    if (obj == null) return '(null)' ;
-    return obj._guid ? obj._guid : (obj._guid = ("@" + (SC._nextGUID++)));
+    if (obj === undefined) return "(undefined)" ;
+    if (obj === null) return '(null)' ;
+    if (obj._guid) return obj._guid ;
+    
+    switch($type(obj)) {
+      case T_NUMBER:
+        return this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj);
+        break ;
+      case T_STRING:
+        return this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj);
+        break ;
+      case T_BOOL:
+        return (obj) ? "(true)" : "(false)" ;
+        break;
+      default:
+        return obj._guid = ("@" + (SC._nextGUID++));
+    }
   },
-  
+
+  /**
+    Returns a unique hash code for the object.  If the object implements
+    a hash() method, the value of that method will be returned.  Otherwise,
+    this will return the same value as guidFor().  
+    
+    Unlike guidFor(), this method allows you to implement logic in your 
+    code to cause two separate instances of the same object to be treated as
+    if they were equal for comparisons and other functions.
+    
+    IMPORTANT:  If you implement a hash() method, it MUST NOT return a number
+    or a string that contains only a number.  Typically hash codes are strings
+    that begin with a "%".
+    
+    @param obj {Object} the object
+    @returns {String} the hash code for this instance.
+  */
+  hashFor: function(obj) {
+    return (obj && obj.hash) ? obj.hash() : this.guidFor(obj) ;
+  },
+
+  /**
+    This will compare the two object values using their hash codes.
+    
+    @param a {Object} first value to compare
+    @param b {Object} the second value to compare
+    @returns {Boolean} YES if the two have equal hash code values.
+    
+  */
+  isEqual: function(a,b) {
+    // shortcut a few places.
+    if (a === null) {
+      return b === null ;
+    } else if (a === undefined) {
+      return b === undefined ;
+    
+    // finally, check their hash-codes
+    } else return SC.hashFor(a) === SC.hashFor(b) ;
+  },
 
   /**
     Convenience method to inspect an object by converting it to a hash.
