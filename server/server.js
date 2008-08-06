@@ -73,10 +73,13 @@ SC.Server = SC.Object.extend({
     var onNotModified = params.onNotModified; delete params.onNotModified ;
     var onFailure = params.onFailure ; delete params.onFailure ;
     var context = params.requestContext ; delete params.requestContext ;
+    var accept = params.accept ; delete params.accept ;
     var cacheCode = params.cacheCode; delete params.cacheCode ;
     var url = params.url; delete params.url;
 
-    if (cacheCode) opts.requestHeaders = ['Sproutit-Cache',cacheCode] ;
+    opts.requestHeaders = {'Accept': 'application/json, text/javascript, application/xml, text/xml, text/html, */*'}
+    if (accept) opts.requestHeaders['Accept'] = accept ;
+    if (cacheCode) opts.requestHeaders['Sproutit-Cache'] = cacheCode ;
     opts.method = method || 'get' ;
 
     if (!url) url = this.urlFor(resource, action, ids, params, opts.method) ;
