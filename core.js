@@ -254,7 +254,7 @@ Object.extend(SC,{
     @returns {String} the hash code for this instance.
   */
   hashFor: function(obj) {
-    return (obj && obj.hash) ? obj.hash() : this.guidFor(obj) ;
+    return (obj && obj.hash && $type(obj.hash) === T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
   },
 
   /**

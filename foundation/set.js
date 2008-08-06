@@ -53,6 +53,14 @@
   remove the object the first time and have no effect on future calls until 
   you add the object to the set again.
   
+  Note that you cannot add/remove null or undefined to a set.  Any attempt to
+  do so will be ignored.  
+  
+  In addition to add/remove you can also call push()/pop().  Push behaves just
+  like add() but pop(), unlike remove() will pick an arbitrary object, remove
+  it and return it.  This is a good way to use a set as a job queue when you
+  don't care which order the jobs are executed in.
+  
   h1. Testing for an Object
   
   To test for an object's presence in a set you simply call SC.Set#contains().
@@ -98,7 +106,7 @@ SC.Set.prototype = {
     // length.  Therefore the found idx must both be defined and less than
     // the current length.
     if (obj === null) return NO ;
-    var idx = this[SC.guidFor(obj)] ;
+    var idx = this[SC.hashFor(obj)] ;
     return ((idx != null) && (idx < this.length)) ;
   },
   
@@ -108,17 +116,17 @@ SC.Set.prototype = {
     If the object is already in the set it will not be added again.
     
     @param obj {Object} the object to add
-    @returns {Object} the receiver
+    @returns {Object} this
   */
   add: function(obj) {
     if (obj == null) return this; // cannot add null to a set.
     
-    var guid = SC.guidFor(obj) ;
+    var guid = SC.hashFor(obj) ;
     var idx = this[guid] ;
     var len = this.length ;
     if ((idx == null) || (idx >= len)) {
       this[len] = obj ;
-      this[SC.guidFor(obj)] = len ;
+      this[guid] = len ;
       this.length = len+1;
     }
     return this ;
@@ -138,19 +146,16 @@ SC.Set.prototype = {
     If the object is not in the set, nothing will be changed.
     
     @param obj {Object} the object to remove
-    @returns {Boolean} YES if the object was removed.
+    @returns {this} this
   */  
   remove: function(obj) {
     
-    // if no obj param is passed, remove the last item in the array...
-    if ((obj === undefined) && this.length>0) obj = this[this.length-1];
-     
     if (obj == null) return this ;
-    var guid = SC.guidFor(obj);
+    var guid = SC.hashFor(obj);
     var idx = this[guid] ;
     var len = this.length;
     
-    if ((idx == null) || (idx <= len)) return this; // not in set.
+    if ((idx == null) || (idx >= len)) return this; // not in set.
 
     // clear the guid key
     delete this[guid] ;
@@ -159,7 +164,7 @@ SC.Set.prototype = {
     // if this is the last object, just reduce the length.
     if (idx < (len-1)) {
       var obj = this[idx] = this[len-1];
-      this[SC.guidFor(obj)] = idx ;
+      this[SC.hashFor(obj)] = idx ;
     }
     
     // reduce the length
@@ -168,13 +173,24 @@ SC.Set.prototype = {
   },
 
   /**
+    Removes an arbitrary object from the set and returns it.
+    
+    @returns {Object} an object from the set or null
+  */
+  pop: function() {
+    var obj = (this.length > 0) ? this[this.length-1] : null ;
+    if (obj) this.remove(obj) ;
+    return obj ;
+  },
+  
+  /**
     Removes all the items in the passed array.
   */
   removeEach: function(objects) {
     var idx = objects.length ;
     while(--idx >= 0) this.remove(objects[idx]) ;
   },  
-  
+
   invokeWhile: function(state, methodName) {
     var len = this.length;
     var args = $A(arguments) ; args.shift(); args.shift() ;
@@ -202,8 +218,8 @@ SC.Set.prototype = {
   
 } ;
 
-SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add;
-SC.Set.prototype.pop = SC.Set.prototype.shift = SC.Set.prototype.remove;
+SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
+SC.Set.prototype.shift = SC.Set.prototype.pop ;
 
 /**
   To create a set, pass an array of items instead of a hash.
