@@ -1,4 +1,16 @@
 
+- SC.guidFor() now works consistantly with strings, numbers and other primitive
+  objects.  Before it would differentiate between different instances of these
+  objects.  Now it treats them the same if they are the same value.
+
+- Added SC.hashFor() method which can be used to determine if two objects are
+  equal.  Normally this returns the same value as guidFor() but if you
+  implement the hash() method on your object, it will return that value
+  instead.  This gives you an easy way to indicate that two objects are 
+  equal even if they are different instances.
+  
+- Updated SC.isEqual() to respect SC.hashFor().
+
 - Added support for hasSelection, hasContent, and other useful properties on
   controllers for activating UI.
   
