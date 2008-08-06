@@ -20,10 +20,10 @@ var YES = true ;
 var NO = false ;
 
 // ........................................
-// INTRODUCING SPROUTCORE
+// BOOTSTRAP
 // 
 // The root namespace and some common utility methods are defined here. The
-// rest of the methods go into the base area.
+// rest of the methods go into the mixin defined below.
 
 /**
   @namespace
@@ -120,54 +120,92 @@ SC.mixin = function() {
 */
 SC.extend = SC.mixin ;
 
-// ........................................
-// GLOBAL CONSTANTS
-//   
 
-// Enough with the bootstrap code.  Let's define some global constants!
-SC.mixin({
-
-  _downloadFrames: 0, // count of download frames inserted into document
+// Enough with the bootstrap code.  Let's define some core functions
+SC.mixin(/** @scope SC */ {
   
-	download: function(path) {
-    var tempDLIFrame=document.createElement('iframe');
-    var frameId = 'DownloadFrame_' + this._downloadFrames;
-    tempDLIFrame.setAttribute('id',frameId);
-    tempDLIFrame.style.border='10px';
-    tempDLIFrame.style.width='0px';
-    tempDLIFrame.style.height='0px';
-    tempDLIFrame.style.position='absolute';
-    tempDLIFrame.style.top='-10000px';
-    tempDLIFrame.style.left='-10000px';    
-    // Don't set the iFrame content yet if this is Safari
-    if (!(SC.isSafari())) {
-      tempDLIFrame.setAttribute('src',path);
+  // ........................................
+  // GLOBAL CONSTANTS
+  // 
+  T_ERROR:     'error',
+  T_OBJECT:    'object',
+  T_NULL:      'null',
+  T_CLASS:     'class',
+  T_HASH:      'hash',
+  T_FUNCTION:  'function',
+  T_UNDEFINED: 'undefined',
+  T_NUMBER:    'number',
+  T_BOOL:      'boolean',
+  T_ARRAY:     'array',
+  T_STRING:    'string',
+
+  // ........................................
+  // CORE HELPER METHODS
+  //   
+
+
+  /**
+    Creates a clone of the passed object.  This function can take just about
+    any type of object and create a clone of it, including primitive values
+    (which are not actually cloned because they are immutable).
+    
+    If the passed object implements the clone() method, then this function
+    will simply call that method and return the result.
+    
+    @param object {Object} the object to clone
+    @returns {Object} the cloned object
+  */
+  clone: function(object) {
+    var ret = object ;
+    switch (SC.typeOf(object)) {
+    case T_ARRAY:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else ret = object.slice() ;
+      break ;
+    
+    case T_HASH:
+    case T_OBJECT:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else {
+        ret = {} ;
+        for(var key in object) ret[key] = object[key] ;
+      }
     }
-    document.getElementsByTagName('body')[0].appendChild(tempDLIFrame);
-    if (SC.isSafari()) {
-      tempDLIFrame.setAttribute('src',path);    
+    
+    return ret ;
+  },
+  
+  /**  
+    Call this method during setup of your app to queue up methods to be 
+    called once the entire document has finished loading.  If you call this
+    method once the document has already loaded, then the function will be
+    called immediately.
+    
+    Any function you register with this method will be called just before
+    main.
+    
+    @param target {Object} optional target object.  Or just pass a method.
+    @param method {Function} the method to call.
+    @return {void}
+  */
+  callOnLoad: function(target, method) { 
+    
+    // normalize parameters
+    if (method === undefined) { method = target; target = null; }
+    if (typeof(method) === 'string') {
+      if (target) {
+        method = target[method] ;
+      } else {
+        throw "You must pass a function to callOnLoad() (got: "+method+")";
+      }
     }
-    this._downloadFrames = this._downloadFrames + 1;
-    if (!(SC.isSafari())) {
-      var r = function() { 
-        document.body.removeChild(document.getElementById(frameId)); 
-				frameId = null;
-      } ;
-      var t = r.invokeLater(null, 2000);
-    }
-		//remove possible IE7 leak
-		tempDLIFrame = null;
-	},
-		
-  // Call this method during setup of your app to queue up methods to be 
-  // called once the entire document has finished loading.  If you call this
-  // method once the document has already loaded, then the function will be
-  // called immediately.
-  callOnLoad: function(func) { 
-    if (SC._onloadQueueFlushed) func.call(document);
-    var queue = SC._onloadQueue || [] ;
-    queue.push(func) ; SC._onloadQueue = queue ;
-	queue = null;
+
+    // invoke the method if the queue is flushed.
+    if (SC._onloadQueueFlushed) method.apply(target || window.document) ;
+    var queue = SC._onloadQueue = (SC._onloadQueue || []) ;
+    queue.push([target, method]) ;
   },
 
   // To flush the callOnLoad queue, you need to set window.onload=SC.didLoad
@@ -186,12 +224,17 @@ SC.mixin({
       if (window.callOnLoad instanceof Array) {
         queue = window.callOnLoad ;
       } else if (window.callOnLoad instanceof Function) {
-        queue = [window.callOnLoad] ;
+        queue = [window, window.callOnLoad] ;
       }
     } else queue = [] ;
     queue = queue.concat(SC._onloadQueue) ;
     var func = null ;
-    while(func = queue.shift()) func.call(document) ;
+    while(func = queue.shift()) {
+      if (SC.typeOf(func) === T_FUNCTION) {
+        func.call(document) ;
+      } else func[1].call(func[0] || document) ;
+    }
+      
     SC._onloadQueueFlushed = true ;
         
     // start the app; call main.
@@ -205,29 +248,35 @@ SC.mixin({
     }
     
     SC.runLoop.endRunLoop();
+    
 		//remove possible IE7 leak
 		b = null;
 		queue = null;
 		func = null;
   },
   
-  // this will take a URL of any type and convert it to a fully qualified URL.
-  normalizeURL: function(url) {
-    if (url.slice(0,1) == '/') {
-      url = window.location.protocol + '//' + window.location.host + url ;
-    } else if ((url.slice(0,5) == 'http:') || (url.slice(0,6) == 'https:')) {
-      // no change
-    } else {
-      url = window.location.href + '/' + url ;
-    }
-    return url ;
-  },
-  
-  // use this instead of typeOf() to get the type of item.  The return values
-  // are: 'string', 'number', 'function', 'class', 'object', 'hash', 'null', 
-  // 'undefined', 'boolean'.  
-  // 'object' will be returned for any items inheriting from SC.Object. 'hash' 
-  // is any other type of object.
+  /**
+    Returns a consistant type for the passed item.
+    
+    Use this instead of the built-in typeOf() to get the type of an item. 
+    It will return the same result across all browsers and includes a bit 
+    more detail.  Here is what will be returned:
+    
+    | Return Value Constant | Meaning |
+    | SC.T_STRING | String primitive |
+    | SC.T_NUMBER | Number primitive |
+    | SC.T_BOOLEAN | Boolean primitive |
+    | SC.T_NULL | Null value |
+    | SC.T_UNDEFINED | Undefined value |
+    | SC.T_FUNCTION | A function |
+    | SC.T_ARRAY | An instance of Array |
+    | SC.T_CLASS | A SproutCore class (created using SC.Object.extend()) |
+    | SC.T_OBJECT | A SproutCore object instance |
+    | SC.T_HASH | A JavaScript object not inheriting from SC.Object |
+    
+    @param item {Object} the item to check
+    @returns {String} the type
+  */  
   typeOf: function(item) {
     if (item === undefined) return T_UNDEFINED ;
     if (item === null) return T_NULL ; 
@@ -246,9 +295,19 @@ SC.mixin({
     return ret ;
   },
   
+  /**
+    Returns YES if the passed object is an array or array-like.
+    
+    Unlike SC.$type this method returns true even if the passed object is 
+    not formally array but appears to be array-like (i.e. has a length 
+    property, responds to .objectAt, etc.)
+    
+    @param obj {Object} the object to test
+    @returns {Boolean} 
+  */
   isArray: function( obj )
   {
-    return ($type(obj) === T_ARRAY) || (obj && obj.objectAt);
+    return ($type(obj) === T_ARRAY) || (obj && ((obj.length!==undefined) || obj.objectAt));
   },
   
   _nextGUID: 0, _numberGuids: [], _stringGuids: {},
@@ -420,6 +479,9 @@ SC.mixin({
   
 });
 
+/** Alias for SC.typeOf() */
+SC.$type = SC.typeOf ;
+  
 /** @deprecated  Use guidFor() instead. */
 SC.getGUID = SC.guidFor ;
 
@@ -434,23 +496,31 @@ SC.Platform.Browser = function() {
   }
 }() ;
 
-T_ERROR = 'error' ;
-T_OBJECT = 'object' ;
-T_NULL = 'null';
-T_CLASS = 'class' ;
-T_HASH = 'hash' ;
-T_FUNCTION = 'function' ;
-T_UNDEFINED = 'undefined' ;
-T_NUMBER = 'number' ;
-T_BOOL = 'boolean' ;
-T_ARRAY = 'array' ;
-T_STRING = 'string' ;
+// Export the type variables into the global space.
+var T_ERROR = SC.T_ERROR ;
+var T_OBJECT = SC.T_OBJECT ;
+var T_NULL = SC.T_NULL ;
+var T_CLASS = SC.T_CLASS ;
+var T_HASH = SC.T_HASH ;
+var T_FUNCTION = SC.T_FUNCTION ;
+var T_UNDEFINED = SC.T_UNDEFINED ;
+var T_NUMBER = SC.T_NUMBER ;
+var T_BOOL = SC.T_BOOL ;
+var T_ARRAY = SC.T_ARRAY ;
+var T_STRING = SC.T_STRING ;
+
+
+// ........................................
+// GLOBAL EXPORTS
+//   
+// Global exports will be made optional in the future so you can avoid 
+// polluting the global namespace.
 
 $type = SC.typeOf ;
-
 $I = SC.inspect ;
 
-Object.extend(Object,{
+// Legacy.  Will retire.
+SC.mixin(Object,{
 
   // this will serialize a general JSON object into a URI.
   serialize: function(obj) {
