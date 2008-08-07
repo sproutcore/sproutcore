@@ -191,7 +191,7 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
   // potentially the selection.
   _recordsObserver: function(target,key,value) {
     var old = this.get('arrangedObjects') ;
-    value = Array.asArray(target.get(key)) ;
+    value = Array.from(target.get(key)) ;
     
     this.set('arrangedObjects',value.slice()) ;
     

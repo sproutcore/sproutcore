@@ -194,20 +194,6 @@ SC.Set.prototype = {
     while(--idx >= 0) this.remove(objects[idx]) ;
   },  
 
-  invokeWhile: function(state, methodName) {
-    var len = this.length;
-    var args = SC.$A(arguments) ; args.shift(); args.shift() ;
-    
-    for(var idx=0;idx<len;idx++) {
-      var obj = this[idx] ;
-      var method = obj[methodName];
-      var ret = (method) ? method.apply(obj, args) : null ;
-      if (ret !== state) return ret ;
-    }
-    
-    return ret ;
-  },
-  
   // .......................................
   // PRIVATE 
   _each: function(iterator) {

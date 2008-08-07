@@ -1,5 +1,8 @@
 
-- Added SC.SC.$A() helper.  This works like Prototype's SC.$A() except that it will
+- Removed Array.asArray().  This helper has been deprecated for 6mo now.  Use
+  SC.$A() or Array.from() instead.  [CAJ]
+  
+- Added SC.$A() helper.  This works like Prototype's SC.$A() except that it will
   work with any enumerable.  It is also namespaced properly. [CAJ]
   
 - Added "application/json" to the default Accept header for all servers.

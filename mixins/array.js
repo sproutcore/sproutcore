@@ -202,35 +202,8 @@ SC.Array = {
       if (ary.objectAt(loc) != this.objectAt(loc)) return false ;
     }
     return true ;
-  },
-
-  /**
-    Invoke the passed method and arguments on the member elements as long as 
-    the value returned is the first argument.
-    
-    @param {Object} retValue the expected return value
-    @param {String} methodName the method to call
-    @returns {Object} the return value of the last time the method was 
-     invoked.
-  */
-  invokeWhile: function(retValue, methodName) {
-    var ret ;
-    var args = SC.$A(arguments) ;
-    retValue = args.shift() ;
-    methodName = args.shift() ; 
-
-    try {
-      this._each(function(item) {
-        var func = (item) ? item[methodName] : null ;
-        ret = func.apply(item, args) ;
-        if (ret != retValue) throw $break ;
-      }); 
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return ret ;
   }
-      
+        
 } ;
 
 // All arrays have the SC.Array mixin.  Do this before we add the 
@@ -294,34 +267,6 @@ Object.extend(Array.prototype, {
     }
     return this ;
   },
-
-  /*
-    Invoke the passed method and arguments on the member elements as long as 
-    the value returned is the first argument.
-    
-    @param {Object} retValue the expected return value
-    @param {String} methodName the method to call
-    @returns {Object} the return value of the last time the method was 
-     invoked.
-  */
-  invokeWhile: function(retValue, methodName) {
-    var ret ;
-    var args = SC.$A(arguments) ;
-    retValue = args.shift() ;
-    methodName = args.shift() ; 
-
-    try {
-      for(var index=0; index < this.length; index++) {
-        var item = this[index] ;
-        var func = (item) ? item[methodName] : null ;
-        ret = func.apply(item, args) ;
-        if (ret != retValue) return retValue ;
-      }
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return ret ;
-  },
   
   // If you ask for an unknown property, then try to collect the value
   // from member items.
@@ -338,38 +283,4 @@ Array.prototype.collect = Array.prototype.map ;
 // Returns the passed item as an array.  If the item is already an array,
 // it is returned as is.  If it is not an array, it is placed into one.  If
 // it is null, an empty array is returned.
-Array.asArray = function (array) {
-  if(array && 
-      ((array.length === undefined) || ($type(array) == T_FUNCTION))) {
-    return [array]; 
-  }
-  return (array) ? array : [] ;
-};
-
-// Alias for asArray
-Array.from = Array.asArray ;
-
-// Map added array methods to other enumerables
-Object.extend(Enumerable, {
-  
-  invokeWhile: function(retValue, methodName) {
-    var ret ;
-    var args = SC.$A(arguments) ;
-    retValue = args.shift() ;
-    methodName = args.shift() ; 
-
-    try {
-      var obj = this ;
-      this._each(function(item) {
-        var func = (item) ? item[methodName] : null ;
-        ret = func.apply(item, args) ;
-        if (ret != retValue) $break ;
-      }) ;
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return ret ;
-  }
-
-}) ;
-
+Array.from = SC.$A ;

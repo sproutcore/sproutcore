@@ -316,16 +316,30 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
-    Converts the passed enumerable to an Array.
+    Converts the passed object to an Array.  If the object appears to be 
+    array-like, a new array will be cloned from it.  Otherwise, a new array
+    will be created with the item itself as the only item in the array.
+    
+    This is an alias for Array.from() as well.
     
     @param object {Object} any enumerable or array-like object.
     @returns {Array} Array of items
   */
   $A: function(obj) {
-    if (obj.toArray) return obj.toArray() ;
-    if (obj.length==null) throw "SC.$A() requires an enumerable or array-like object";
     
-    // if not enumerable, try to convert manually...
+    // null or undefined
+    if (obj == null) return [] ;
+    
+    // primitive
+    if (obj.slice instanceof Function) return obj.slice() ; 
+    
+    // enumerable
+    if (obj.toArray) return obj.toArray() ;
+    
+    // not array-like
+    if (obj.length===undefined || $type(obj) === SC.T_FUNCTION) return [obj];
+
+    // when all else fails, do a manual convert...
     var len = obj.length;
     var ret = [] ;
     for(var idx=0;idx<len;idx++) ret[idx] = obj[idx];
