@@ -77,7 +77,7 @@ SC.Enumerable = {
     @returns {Object} the next object in the iteration or undefined   
   */ 
   nextObject: function(index, previousObject, context) {
-    return this[index] ;
+    return (this.objectAt) ? this.objectAt(index) : this[index] ;
   },
   
   /**

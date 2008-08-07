@@ -157,15 +157,14 @@ ArrayTests = function(factoryFunc) {
       
       var cnt = 0 ;
       var items = [] ;
-      this.a.each(function( item, idx ) {
+      this.a.forEach(function( item, idx ) {
         items.push(item) ;
         cnt++ ;
       }) ;
-      
-      items[0].shouldEqual('A') ;
-      items[1].shouldEqual('B') ;
-      items[2].shouldEqual('C') ;
       cnt.shouldEqual(this.a.get('length')) ;
+      assertEqual('A', items[0]) ;
+      assertEqual('B', items[1]) ;
+      assertEqual('C',items[2]) ;
     },
     
     "ary.isEqual() should return true when array contents match": function() {
