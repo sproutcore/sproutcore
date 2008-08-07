@@ -81,7 +81,7 @@ SC.Set = SC.Object.extend(SC.Array,
     var idx = this[guid] ;
     var len = this.length;
     
-    if ((idx == null) || (idx <= len)) return this; // not in set.
+    if ((idx == null) || (idx >= len)) return this; // not in set.
 
     // clear the guid key
     delete this[guid] ;
@@ -122,7 +122,7 @@ SC.Set.create = function(items) {
   while(--loc >= 0) {
     var item = items[loc];
     if (item == null) continue ;
-    hash[SC.Set.prototype._guidFor(item)] = item ;
+    hash[SC.guidFor(item)] = item ;
   }
   hash.length = items.length ;
   return SC.Set._create(hash) ;
