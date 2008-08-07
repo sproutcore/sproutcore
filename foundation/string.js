@@ -24,7 +24,7 @@ Object.extend(String.prototype,{
 
   // Interpolate string. looks for %@ or %@1; to control the order of params.
   format: function() {
-    var args = $A(arguments) ;
+    var args = SC.$A(arguments) ;
     
     // first, replace any ORDERED replacements.
     var str = this.gsub(/%@([0-9]+)/, function(m) {
@@ -75,7 +75,7 @@ Object.extend(String.prototype,{
     var kit = String[String.currentLanguage()];
     var str = kit[this] ;
     if (!str) str = String.English[this] || def ;
-    var args = $A(arguments) ;
+    var args = SC.$A(arguments) ;
     args.shift() ; // escape def.
     return str.format.apply(str, args) ;
   },

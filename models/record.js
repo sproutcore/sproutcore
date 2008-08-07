@@ -678,7 +678,7 @@ SC.Record.mixin(
   find: function(guid) {
     var args ;
     if (typeof(guid) == 'object') {
-      args = $A(arguments) ;
+      args = SC.$A(arguments) ;
       args.push(this) ;
       var ret = SC.Store.findRecords.apply(SC.Store,args) ;
       return (ret && ret.length > 0) ? ret[0] : null ;
@@ -698,7 +698,7 @@ SC.Record.mixin(
   // Same as find except returns all records matching the passed conditions.
   findAll: function(filter) {
     if (!filter) filter = {} ;
-    args = $A(arguments) ; args.push(this) ; // add type
+    args = SC.$A(arguments) ; args.push(this) ; // add type
     return SC.Store.findRecords.apply(SC.Store,args) ;  
   },
   

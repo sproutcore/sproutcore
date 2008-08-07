@@ -47,7 +47,7 @@ SC.DelegateSupport = {
     @returns value returned by delegate
   */
   invokeDelegateMethod: function(delegate, methodName, args) {
-    args = $A(arguments); args = args.slice(2, args.length) ;
+    args = SC.$A(arguments); args = args.slice(2, args.length) ;
     if (!delegate || !delegate[methodName]) delegate = this ;
     return delegate[methodName].apply(delegate, args) ;
   },

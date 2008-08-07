@@ -5,7 +5,7 @@
 // the browser, language, and platform.  You can then call 
 // SC.setupBrowserClassNames() in a script tag after the body is defined to 
 // load the class names into the body.
-if (!SC) var SC = {} ;
+var SC = SC || {} ;
 SC.browser = (function() {
 
   var userAgent = navigator.userAgent.toLowerCase();

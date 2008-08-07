@@ -50,7 +50,7 @@ SC.BENCHMARK_OBJECTS = NO;
 */
 SC.Object = function(noinit) { 
 	if (noinit === SC.Object._noinit_) return ;
-	var ret = SC.Object._init.apply(this,$A(arguments)) ;
+	var ret = SC.Object._init.apply(this,SC.$A(arguments)) ;
   return ret ;
 };
 
@@ -66,7 +66,7 @@ Object.extend(SC.Object,
     @returns {void}
   */
   mixin: function(props) {
-    var ext = $A(arguments) ;
+    var ext = SC.$A(arguments) ;
     for(var loc=0;loc<ext.length;loc++) {
       Object.extend(this,ext[loc]);
     }
@@ -87,7 +87,7 @@ Object.extend(SC.Object,
     // build function.  copy class methods on to it.
     var ret = function(noinit) { 
       if (noinit && (typeof(noinit) == 'string') && (noinit == SC.Object._noinit_)) return ;
-      var ret = SC.Object._init.apply(this,$A(arguments)); 
+      var ret = SC.Object._init.apply(this,SC.$A(arguments)); 
       return ret ;
     };
     for(var prop in this) { ret[prop] = this[prop]; }
@@ -96,16 +96,16 @@ Object.extend(SC.Object,
     var base = new this(SC.Object._noinit_) ;
 
 //    var base = SC.Object._extend({},this.prototype) ;
-    var extensions = $A(arguments) ;
+    var extensions = SC.$A(arguments) ;
     for(var loc=0;loc<extensions.length;loc++) {
       base = SC.Object._extend(base, extensions[loc]);
     }
     ret.prototype = base ;
     
     // return new extension
-    ret._guid = SC._nextGUID++ ; // each time we extend, get a new guid.
+    ret._guid = SC.guidFor(ret) ; // each time we extend we get a new guid
     ret._type = this ;
-    
+     
     if (SC.BENCHMARK_OBJECTS) SC.Benchmark.end('SC.Object.extend') ;
     
     return ret ;
@@ -129,7 +129,7 @@ Object.extend(SC.Object,
     @returns {SC.Object} new instance of the receiver class.
   */
   create: function(props) {
-    var ret = new this($A(arguments),this) ;
+    var ret = new this(SC.$A(arguments),this) ;
     return ret ;
   },
     
@@ -274,7 +274,7 @@ Object.extend(SC.Object,
     for(var loc=0;loc<extensions.length;loc++) {
       ret = SC.Object._extend(ret,extensions[loc]) ;
     }
-    ret._guid = SC._nextGUID++ ;
+    ret._guid = SC.guidFor(ret) ;
     ret._type = type ;
     ret.init() ;
     
@@ -422,7 +422,7 @@ SC.Object.prototype = {
   {
     if ( !methodName ) return false;
     
-    var args = $A(arguments);
+    var args = SC.$A(arguments);
     var name = args.shift();
     if (this.respondsTo(name))
     {
@@ -734,7 +734,7 @@ SC.Object.prototype = {
     if (interval === undefined) interval = 1 ;
     var f = methodName ;
     if (arguments.length > 2) {
-      var args =$A(arguments).slice(2,arguments.length);
+      var args =SC.$A(arguments).slice(2,arguments.length);
       args.unshift(this);
       if ($type(f) === T_STRING) f = this[methodName] ;
       f = f.bind.apply(f, args) ;

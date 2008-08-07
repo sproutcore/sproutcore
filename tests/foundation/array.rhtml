@@ -27,7 +27,7 @@ ArrayTests = function(factoryFunc) {
       } ;
       
       this.observe = function() {
-        var keys = $A(arguments) ;
+        var keys = SC.$A(arguments) ;
         var loc = keys.length ;
         while(--loc >= 0) {
           this.a.addObserver(keys[loc], this.observer) ;

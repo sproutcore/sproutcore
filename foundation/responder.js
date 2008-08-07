@@ -168,7 +168,7 @@ SC.Responder = SC.Object.extend(
   doCommand: function(method)
   {
     var responder = this;
-    var args      = $A(arguments);
+    var args      = SC.$A(arguments);
     var method    = args.shift();
     var aliases   = this._commandAliases[method];
     var handled   = false;

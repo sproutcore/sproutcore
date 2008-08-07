@@ -732,7 +732,7 @@ SC.Observable = {
     @returns {Array} Values of property keys.
   */
   getEach: function() {
-    var keys = $A(arguments).flatten() ;
+    var keys = SC.$A(arguments).flatten() ;
     var ret = [];
     for(var idx=0; idx<keys.length;idx++) {
       ret[ret.length] = this.getPath(keys[idx]);
@@ -846,7 +846,7 @@ SC.Observable = {
     @param propertyNames one or more property names
   */
   logProperty: function() {
-    var props = $A(arguments) ;
+    var props = SC.$A(arguments) ;
     for(var idx=0;idx<props.length; idx++) {
       var prop = props[idx] ;
       console.log('%@:%@: '.fmt(this._guid, prop), this.get(prop)) ;
@@ -918,6 +918,8 @@ SC.Observable = {
 
     
 } ;
+
+SC.mixin(Array.prototype, SC.Observable) ;
 
 // ........................................................................
 // FUNCTION ENHANCEMENTS
@@ -1034,7 +1036,7 @@ SC.mixin(Function.prototype,
     @returns {Function} the declared function instance
   */
   property: function() {
-    this.dependentKeys = $A(arguments) ; 
+    this.dependentKeys = SC.$A(arguments) ; 
     this.isProperty = true; return this; 
   },
   
@@ -1043,7 +1045,7 @@ SC.mixin(Function.prototype,
     that the path is used only to construct the observation one time.
   */
   observes: function(propertyPaths) { 
-    this.propertyPaths = $A(arguments); 
+    this.propertyPaths = SC.$A(arguments); 
     return this;
   },
   
@@ -1071,7 +1073,7 @@ SC.mixin(Function.prototype,
     if (interval === undefined) interval = 1 ;
     var f = this;
     if (arguments.length > 2) {
-      var args =$A(arguments).slice(2,arguments.length);
+      var args =SC.$A(arguments).slice(2,arguments.length);
       args.unshift(target);
       f = f.bind.apply(f, args) ;
     }

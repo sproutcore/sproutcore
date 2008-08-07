@@ -344,7 +344,7 @@ Test.Unit.Assertions.prototype = {
   },
   assertEnumEqual: function(expected, actual) {
     var message = arguments[2] || "assertEnumEqual";
-    try { $A(expected).length == $A(actual).length && 
+    try { SC.$A(expected).length == SC.$A(actual).length && 
       expected.zip(actual).all(function(pair) { return pair[0] == pair[1]; }) ?
         this.pass() : this.fail(message + ': expected ' + Test.Unit.inspect(expected) + 
           ', actual ' + Test.Unit.inspect(actual)); }
@@ -456,7 +456,7 @@ Test.Unit.Assertions.prototype = {
     }
   },
   assertElementsMatch: function() {
-    var expressions = $A(arguments), elements = $A(expressions.shift());
+    var expressions = SC.$A(arguments), elements = SC.$A(expressions.shift());
     if (elements.length != expressions.length) {
       this.fail('assertElementsMatch: size mismatch: ' + elements.length + ' elements, ' + expressions.length + ' expressions');
       return false;
@@ -573,7 +573,7 @@ Test.setupBDDExtensionMethods = function(){
   Test.BDDMethods = {};   
   $H(METHODMAP).each(function(pair) { 
     Test.BDDMethods[pair.key] = function() { 
-       var args = $A(arguments); 
+       var args = SC.$A(arguments); 
        var scope = args.shift(); 
        makeAssertion.apply(scope, [pair.value, args, this]); }; 
   });
