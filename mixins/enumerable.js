@@ -542,7 +542,34 @@ SC.Enumerable = {
 } ;
 
 // ......................................................
+// GLOBAL UTILITY FUNCTIONS
+//
+// These helpers make it easier to work with arrays.
+
+SC.mixin(/** @scope SC */ {
+  
+  /**
+    Converts the passed enumerable to an Array.
+    
+    @param object {Object} any enumerable or array-like object.
+    @returns {Array} Array of items
+  */
+  $A: function(obj) {
+    if (obj.toArray) return obj.toArray() ;
+    if (obj.length==null) throw "$A() requires an enumerable or array-like object";
+    
+    // if not enumerable, try to convert manually...
+    var len = obj.length;
+    var ret = [] ;
+    for(var idx=0;idx<len;idx++) ret[idx] = obj[idx];
+    return ret ;
+  }
+
+}) ;
+
+// ......................................................
 // ARRAY SUPPORT
+//
 
 // Implement the same enhancements on Array.  We use specialized methods
 // because working with arrays are so common.
