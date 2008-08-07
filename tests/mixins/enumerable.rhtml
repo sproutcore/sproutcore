@@ -230,20 +230,10 @@ var EnumerableTests = {
     assertEqual(YES, ret, "first") ;
   },
   
-  "invoke should call method on member objects, passing args and return result": function() {
-    var ret = src.invoke("run", "item1", "item2") ;
-    var len = src.get('length') ;
-    
-    assertEqual(len, ret.length, "length of result") ;
-    
-    for(var idx = 0;idx<len;idx++) {
-      var cur = ret[idx] ;
-      assertEqual("DONE", cur[0]) ;
-      assertEqual("item1", cur[1]) ;
-      assertEqual("item2", cur[2]) ;
-    }
+  "invokeWhile should call method on member objects until return does not match": function() {
+    var ret = src.invokeWhile("OK", "invokeWhileTest", "item2") ;
+    assertEqual("FAIL", ret, "return value");
   }
-
   
 }; 
 
@@ -258,18 +248,52 @@ var DummyEnumerable = SC.Object.extend(SC.Enumerable, {
   nextObject: function(idx) { return this.content[idx]; }
 }) ;
 
+var runFunc = function(a,b) { return ['DONE', a, b]; } ;
+var invokeWhileOK = function() { return "OK"; } ;
+var invokeWhileNotOK = function() { return "FAIL"; };
+var CommonArray = [
+  { first: "Charles", 
+    gender: "male", 
+    californian: NO, 
+    ready: YES, 
+    visited: "Prague", 
+    doneTravelling: NO, 
+    run: runFunc,
+    invokeWhileTest: invokeWhileOK 
+  },
+
+  { first: "Jenna", 
+    gender: "female", 
+    californian: YES, 
+    ready: YES, 
+    visited: "Prague", 
+    doneTravelling: NO, 
+    run: runFunc,
+    invokeWhileTest: invokeWhileOK 
+  },
+  
+  { first: "Peter", 
+    gender: "male", 
+    californian: NO, 
+    ready: YES, 
+    visited: "Prague", 
+    doneTravelling: NO, 
+    run: runFunc,
+    invokeWhileTest: invokeWhileNotOK 
+  },
+  { first: "Chris", 
+    gender: "male", 
+    californian: NO, 
+    ready: YES, 
+    visited: "Prague", 
+    doneTravelling: NO, 
+    run: runFunc,
+    invokeWhileTest: invokeWhileOK 
+  } ] ;
 
 Test.context("Real Array", SC.mixin(EnumerableTests, {
   
-  setup: function() { 
-    
-    var runFunc = function(a,b) { return ['DONE', a, b]; } ;
-    src = [
-      { first: "Charles", gender: "male", californian: NO, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc },
-      { first: "Jenna", gender: "female", californian: YES, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc },
-      { first: "Peter", gender: "male", californian: NO, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc },
-      { first: "Chris", gender: "male", californian: NO, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc } ] ;
-  },
+  setup: function() { src = CommonArray; },
   
   teardown: function() { src = null ; }
 
@@ -278,13 +302,7 @@ Test.context("Real Array", SC.mixin(EnumerableTests, {
 Test.context("DummyEnumerable", SC.mixin(EnumerableTests, {
   
   setup: function() { 
-
-    var runFunc = function(a,b) { return ['DONE', a, b]; } ;
-    src = DummyEnumerable.create({ content: [
-      { first: "Charles", gender: "male", californian: NO, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc },
-      { first: "Jenna", gender: "female", californian: YES, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc },
-      { first: "Peter", gender: "male", californian: NO, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc },
-      { first: "Chris", gender: "male", californian: NO, ready: YES, visited: "Prague", doneTravelling: NO, run: runFunc } ] }) ;
+    src = DummyEnumerable.create({ content: CommonArray }) ;
   },
   
   teardown: function() { src = null ; }

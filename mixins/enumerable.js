@@ -511,6 +511,44 @@ SC.Enumerable = {
     context = SC.Enumerator._pushContext(context);
     return ret ;
   },
+
+  /**
+    Invokes the passed method and optional arguments on the receiver elements
+    as long as the methods return value matches the target value.  This is 
+    a useful way to attempt to apply changes to a collection of objects unless
+    or until one fails.
+
+    @param targetValue {Object} the target return value
+    @param methodName {String} the name of the method
+    @param args {Object...} optional arguments to pass as well.
+    @returns {Array} return values from calling invoke.
+  */
+  invokeWhile: function(targetValue, methodName) {
+    var len = (this.get) ? this.get('length') : this.length ;
+    if (len <= 0) return null; // nothing to invoke....
+
+    // collect the arguments
+    var args = null ;
+    var alen = arguments.length ;
+    if (alen > 2) {
+      args = [] ;
+      for(var idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
+    }
+    
+    // call invoke
+    var ret = targetValue ;
+    var last = null ;
+    var context = SC.Enumerator._popContext();
+    for(var idx=0;(ret === targetValue) && (idx<len);idx++) {
+      var next = this.nextObject(idx, last, context) ;
+      var method = (next) ? next[methodName] : null ;
+      if (method) ret = method.apply(next, args) ;
+      last = next ;
+    }
+    last = null ;
+    context = SC.Enumerator._pushContext(context);
+    return ret ;
+  },
   
   /**
     Simply converts the enumerable into a genuine array.  The order, of
@@ -622,6 +660,28 @@ SC.Enumerable = {
         var next = this[idx] ;
         var method = (next) ? next[methodName] : null ;
         if (method) ret[idx] = method.apply(next, args) ;
+      }
+      return ret ;
+    },
+
+    invokeWhile: function(targetValue, methodName) {
+      var len = this.length ;
+      if (len <= 0) return null ; // nothing to invoke....
+
+      // collect the arguments
+      var args = null ;
+      var alen = arguments.length ;
+      if (alen > 2) {
+        args = [] ;
+        for(var idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
+      }
+
+      // call invoke
+      var ret = targetValue ;
+      for(var idx=0;(ret === targetValue) && (idx<len);idx++) {
+        var next = this[idx] ;
+        var method = (next) ? next[methodName] : null ;
+        if (method) ret = method.apply(next, args) ;
       }
       return ret ;
     },
