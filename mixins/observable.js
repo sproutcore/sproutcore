@@ -803,11 +803,13 @@ SC.Observable = {
     
 } ;
 
+SC.mixin(Array.prototype, SC.Observable) ;
+
 // ........................................................................
 // FUNCTION ENHANCEMENTS
 //
 // Enhance function.
-Object.extend(Function.prototype,
+SC.mixin(Function.prototype,
 /** @scope Function.prototype */ {
   
   /**

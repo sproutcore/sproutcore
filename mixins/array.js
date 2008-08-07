@@ -3,11 +3,6 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('mixins/observable');
-
-// Make Arrays observable
-Object.extend(Array.prototype, SC.Observable) ;
-
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 
 /**
@@ -199,7 +194,7 @@ SC.Array = {
     if (loc != this.get('length')) return false ;
 
     while(--loc >= 0) {
-      if (ary.objectAt(loc) != this.objectAt(loc)) return false ;
+      if (!SC.isEqual(ary.objectAt(loc), this.objectAt(loc))) return false ;
     }
     return true ;
   },
