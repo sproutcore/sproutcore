@@ -108,17 +108,14 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     
     // thickness cannot be greater than the total of all the other views (
     // except for the flexibleView) added together.
-    var total = this.get('innerFrame') ;
-    available = (direction == SC.HORIZONTAL) ? total.width : total.height ;
-    var views = this.get('childNodes') ;
-    var idx = views.length ;
-    var flexibleView = this.get('flexibleView') ;
-    while(--idx >= 0) {
-      var currentView = views[idx] ;
-      if ((currentView != view) && (currentView != flexibleView)) {
-        available -= this.thicknessForView(currentView) ;
-      }
-    }
+  
+    // available = total minus thickness of all views except "view" and 
+    // "flexible view" that is the same as thickness 'view' plus thickness 
+    // 'flexible view'
+    var flexibleView = this.get('flexibleView');
+    var available = this.thicknessForView(view) +   
+        this.thicknessForView(flexibleView);
+  
     thickness = Math.min(thickness, available) ;
     
     // cannot be less than 0
@@ -160,6 +157,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
   */
   computeFlexibleView: function() {
     var flexibleView = this.get('flexibleView') ;
+    var originalFlexibleView = flexibleView ;
     if (!flexibleView) {
       var views = this.get('childNodes') ;
       flexibleView = views[Math.ceil(views.length/2)] ;
@@ -168,6 +166,11 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     // If the flexible view is a divider, find the first non-g.
     while(flexibleView && (flexibleView instanceof SC.SplitDividerView)) {
       flexibleView = flexibleView.get('nextSibling') ;
+    }
+    
+    // save new flexible view if we had to fix it up.
+    if (originalFlexibleView !== flexibleView) {
+      this.set('flexibleView', flexibleView);
     }
     
     return flexibleView;
