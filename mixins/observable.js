@@ -912,10 +912,7 @@ SC.Observable = {
     return handler ;
   },
 
-
   propertyRevision: 1
-  
-
     
 } ;
 
