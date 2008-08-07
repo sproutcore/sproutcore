@@ -295,21 +295,6 @@ Object.extend(Array.prototype, {
     return this ;
   },
 
-  invoke: function(iterator) {
-    var args = $A(arguments) ;
-    var methodName = args.shift() ;
-    var ret = [] ;
-    try {
-      for(var index=0;index<this.length;index++) {
-        var item = this[index] ;
-        ret.push(item[methodName].apply(item,args)) ;
-      } ;
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return ret ;
-  },
-
   /*
     Invoke the passed method and arguments on the member elements as long as 
     the value returned is the first argument.
@@ -337,20 +322,6 @@ Object.extend(Array.prototype, {
     }
     return ret ;
   },
-  
-  map: function(iterator) {
-    var ret = [] ;
-    try {
-      for(var index=0;index<this.length;index++) {
-        var item = this[index] ;
-        ret.push((iterator || Prototype.K).call(item,item,index))  ;
-      } ;
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return ret ;
-  },
-
   
   // If you ask for an unknown property, then try to collect the value
   // from member items.

@@ -15,7 +15,7 @@ require('mixins/array') ;
   by index, however there is no gaurantee as to their order.
   
   @extends SC.Object
-
+  @since  SproutCore.10
 */
 SC.Set = SC.Object.extend(SC.Array, 
 /** @scope SC.Set.prototype */ {
