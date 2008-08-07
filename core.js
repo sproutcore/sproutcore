@@ -286,7 +286,12 @@ SC.mixin(/** @scope SC */ {
         ret = T_ARRAY ;
       } else if (item instanceof Function) {
         ret = (item.isClass) ? T_CLASS : T_FUNCTION ;
-      } else if (item instanceof SC.Error) {
+        
+      // NB: typeOf() may be called before SC.Error has had a chance to load
+      // so this code checks for the presence of SC.Error first just to make
+      // sure.  No error instance can exist before the class loads anyway so
+      // this is safe.
+      } else if (SC.Error && (item instanceof SC.Error)) {
         ret = T_ERROR ;        
       } else if (item.isObject === true) {
         ret = T_OBJECT ;
