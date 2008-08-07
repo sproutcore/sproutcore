@@ -1,8 +1,11 @@
 
+- [FIX] SplitView now resizes in both directions properly.  Closes #110 
+  [Christoph Angerer]
+  
 - Added support for the SC.Enumerable mixin and SC.Enumerators.  These items
   provide the basis for our standard enumeration API.  This will replace 
   relying on iterators provided by Prototype eventually.  See docs on those
-  classes for full information.
+  classes for full information. [CAJ]
   
 - SC.guidFor() now works consistantly with strings, numbers and other primitive
   objects.  Before it would differentiate between different instances of these
