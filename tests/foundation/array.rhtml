@@ -202,7 +202,7 @@ DummyArray = SC.Object.extend(SC.Array, {
     this.content.replace(idx,amt,objects) ;
     
     this.set('length', this.content.length) ;
-    this.arrayContentDidChange() ;
+    this.enumerableContentDidChange() ;
     this.endPropertyChanges() ;
   },
   

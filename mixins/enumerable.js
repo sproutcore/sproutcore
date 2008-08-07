@@ -575,9 +575,135 @@ SC.Enumerable = {
     last = null ;
     context = SC.Enumerator._pushContext(context);
     return ret ;
-  }
-    
+  }        
 } ;
+
+// Build in a separate function to avoid unintential leaks through closures...
+SC._buildReducerFor = function(reducerKey) {
+  return function(key, value) {
+    var reducer = this[reducerKey] ;
+    if (SC.typeOf(reducer) !== T_FUNCTION) {
+      return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
+    } else {
+      return this.reduce(reducer, null) ;
+    }
+  }.property('[]') ;
+};
+
+SC.Reducers = {
+  /**
+    This property will trigger anytime the enumerable's content changes.
+    You can observe this property to be notified of changes to the enumerables
+    content.
+    
+    For plain enumerables, this property is read only.  SC.Array overrides
+    this method.
+  */
+  '[]': function(key, value) { return this ; }.property(),
+
+  /**
+    Invoke this method when the contents of your enumerable has changed.
+    This will notify any observers watching for content changes.
+  */
+  enumerableContentDidChange: function() {
+    this.notifyPropertyChange('[]') ;
+    if (this.ownerRecord && this.ownerRecord.recordDidChange) {
+      this.ownerRecord.recordDidChange(this) ;
+    }
+  },
+  
+  /**
+    Call this method from your unknownProperty() handler to implement 
+    automatic reduced properties.  A reduced property is a property that 
+    collects its contents dynamically from your array contents.  Reduced 
+    properties always begin with "@".  Getting this property will call 
+    reduce() on your array with the function matching the key name as the
+    processor.
+    
+    The return value of this will be either the return value from the 
+    reduced property or undefined, which means this key is not a reduced 
+    property.  You can call this at the top of your unknownProperty handler
+    like so:
+    
+    {{{
+      unknownProperty: function(key, value) {
+        var ret = this.handleReduceProperty(key, value) ;
+        if (ret === undefined) {
+          // process like normal
+        }
+      }
+    }}}
+    
+    @param key {String} the reduce property key
+    @param value {Object} a value or undefined.
+    @param generateProperty {Boolean} only set to false if you do not want an
+      optimized computed property handler generated for this.  Not common.
+    @returns {Object} the reduced property or undefined
+  */
+  reducedProperty: function(key, value, generateProperty) {
+    
+    if (key[0] !== '@') return undefined ; // not a reduced property
+    
+    // get the reducer key and the reducer
+    var reducerKey = "reduce%@".fmt(key.slice(1,key.length).capitalize()) ; 
+    var reducer = this[reducerKey] ;
+
+    // if there is no reduce function defined for this key, then we can't 
+    // build a reducer for it.
+    if (SC.typeOf(reducer) !== T_FUNCTION) return undefined;
+    
+    // if we can't generate the property, just run reduce
+    if (generateProperty === NO) return this.reduce(reducer, null) ;
+
+    // ok, found the reducer.  Let's build the computed property and install
+    var func = SC._buildReducerFor(reducerKey);
+    var p = this.constructor.prototype ;
+    if (p) {
+      p[key] = func ;
+      this.registerDependentKey(key, '[]') ;
+    }
+    
+    // and reduce anyway...
+    return this.reduce(reducer, null) ;
+  },
+  
+  /** 
+    Reducer for @max reduced property.
+  */
+  reduceMax: function(previousValue, item, index, enumerable) {
+    if (previousValue == null) return item ;
+    return (item > previousValue) ? item : previousValue ;
+  },
+
+  /** 
+    Reducer for @min reduced property.
+  */
+  reduceMin: function(previousValue, item, index, enumerable) {
+    if (previousValue == null) return item ;
+    return (item < previousValue) ? item : previousValue ;
+  },
+
+  /** 
+    Reducer for @average reduced property.
+  */
+  reduceAverage: function(previousValue, item, index, e) {
+    var ret = (previousValue || 0) + item ;
+    var len = (e.get) ? e.get('length') : e.length;
+    if (index >= len-1) ret = ret / len; //avg after last item.
+    return ret ; 
+  },
+
+  /** 
+    Reducer for @sum reduced property.
+  */
+  reduceSum: function(previousValue, item, index, e) {
+    return (previousValue == null) ? item : previousValue + item ;
+  }
+} ;
+
+// Apply reducers...
+SC.mixin(SC.Enumerable, SC.Reducers) ;
+SC.mixin(Array.prototype, SC.Reducers) ;
 
 // ......................................................
 // ARRAY SUPPORT
@@ -802,7 +928,7 @@ SC.Enumerable = {
   // and don't break the browsers.
   for(var key in mixinIfMissing) {
     if (!mixinIfMissing.hasOwnProperty(key)) continue ;
-    if (!Array.prototype[key] || (Enumerable && Array.prototype[key] === Enumerable[key])) {
+    if (!Array.prototype[key] || (Prototype && Prototype.Version.match(/^1\.6/))) {
       Array.prototype[key] = mixinIfMissing[key] ;
     }
   }

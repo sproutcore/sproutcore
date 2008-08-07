@@ -1,4 +1,12 @@
 
+- Added support for reduced properties.  These properties begin with "@" and
+  will automatically calculate some kind of summary information about the 
+  receiving array.  They are also bindable so you can bind to myArray.@average
+  and it will update whenever the average changes. [CAJ]
+  
+- Cleaned up SC.Array support to incorporate new SC.Enumerable functions.  The
+  Enumerable methods from Prototype are no longer supported. [CAJ]
+  
 - Removed Array.asArray().  This helper has been deprecated for 6mo now.  Use
   SC.$A() or Array.from() instead.  [CAJ]
   

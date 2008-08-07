@@ -4,6 +4,7 @@
 // ==========================================================================
 
 require('mixins/enumerable') ;
+require('mixins/observable') ;
 
 /**
   @class 
@@ -83,6 +84,7 @@ SC.Set = function(items) {
       while(--idx >= 0) this.add(items[idx]) ;
     }
   }
+  return this ;
 } ;
 
 SC.Set.prototype = {
@@ -207,8 +209,8 @@ SC.Set.prototype = {
   
 } ;
 
-// Make this enumerable
-SC.mixin(SC.Set.prototype, SC.Enumerable) ;
+// Make this enumerable and observable
+SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable) ;
 
 SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
 SC.Set.prototype.shift = SC.Set.prototype.pop ;
