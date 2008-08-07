@@ -180,7 +180,7 @@ SC.Store = SC.Object.create(
     recordType.  It will AND the results of each condition hash.
   */  
   findRecords: function() {
-    var allConditions = $A(arguments) ;
+    var allConditions = SC.$A(arguments) ;
     var recordType = allConditions.pop() ;
     var guid = recordType._storeKey() ;
 
@@ -200,7 +200,7 @@ SC.Store = SC.Object.create(
     }
 
     // clone records...
-    return $A(records) ;
+    return SC.$A(records) ;
   },
   
   // private method used by Record and Store. Returns null if the record does not exist.

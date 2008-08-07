@@ -315,8 +315,37 @@ SC.mixin(/** @scope SC */ {
     return ($type(obj) === T_ARRAY) || (obj && ((obj.length!==undefined) || obj.objectAt));
   },
   
-  _nextGUID: 0, _numberGuids: [], _stringGuids: {},
-  
+  /**
+    Converts the passed object to an Array.  If the object appears to be 
+    array-like, a new array will be cloned from it.  Otherwise, a new array
+    will be created with the item itself as the only item in the array.
+    
+    This is an alias for Array.from() as well.
+    
+    @param object {Object} any enumerable or array-like object.
+    @returns {Array} Array of items
+  */
+  $A: function(obj) {
+    
+    // null or undefined
+    if (obj == null) return [] ;
+    
+    // primitive
+    if (obj.slice instanceof Function) return obj.slice() ; 
+    
+    // enumerable
+    if (obj.toArray) return obj.toArray() ;
+    
+    // not array-like
+    if (obj.length===undefined || $type(obj) === SC.T_FUNCTION) return [obj];
+
+    // when all else fails, do a manual convert...
+    var len = obj.length;
+    var ret = [] ;
+    for(var idx=0;idx<len;idx++) ret[idx] = obj[idx];
+    return ret ;
+  },
+
   /**
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
@@ -344,6 +373,7 @@ SC.mixin(/** @scope SC */ {
         return obj._guid = ("@" + (SC._nextGUID++));
     }
   },
+  _nextGUID: 0, _numberGuids: [], _stringGuids: {},
 
   /**
     Returns a unique hash code for the object.  If the object implements

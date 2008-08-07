@@ -2026,7 +2026,7 @@ SC.View.mixin({
     if (el && el._configured) return SC.View.findViewForElement(el); 
     
     // Now that we have found an element, instantiate the view.
-    var args = $A(arguments) ; args[0] = { rootElement: el } ;
+    var args = SC.$A(arguments) ; args[0] = { rootElement: el } ;
     if (r) vStart = new Date().getTime();
     var ret = new this(args,this) ; // create instance.
     if (r) SC.idt.v_t += (new Date().getTime()) - vStart;
@@ -2039,7 +2039,7 @@ SC.View.mixin({
   
   // create in the view work is like viewFor but with 'null' for el
   create: function(configs) {
-    var args = $A(arguments) ;
+    var args = SC.$A(arguments) ;
     args.unshift(null) ;
     return this.viewFor.apply(this,args) ;  
   },

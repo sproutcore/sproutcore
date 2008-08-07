@@ -1,0 +1,114 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("Object", {
+  
+  setup: function() {
+    
+    objectA = {} ;
+    objectB = {} ;
+  },
+
+  "should return same guid for same instance every time": function() {
+    assertEqual(SC.guidFor(objectA), SC.guidFor(objectA)) ;
+  },
+  
+  "should return different guid for different instances": function() {
+    assertNotEqual(SC.guidFor(objectA), SC.guidFor(objectB)) ;
+  },
+  
+  "guid should not parse to a number": function() {
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(objectA), 0)));
+  }
+  
+});
+
+Test.context("String", {
+  
+  setup: function() {
+    stringA = "string A" ;
+    stringACopy = "string A" ;
+    
+    stringB = "string B" ;
+  },
+
+  "same string instance should have same guide every time": function() {
+    assertEqual(SC.guidFor(stringA), SC.guidFor(stringA)) ;  
+  },
+  
+  "two string instances with same value should have same guid": function() {
+    assertEqual(SC.guidFor(stringA), SC.guidFor(stringACopy)) ;  
+  },
+  
+  "two instances with different value should have different guid": function(){
+    assertNotEqual(SC.guidFor(stringA), SC.guidFor(stringB)) ;
+  },
+
+  "guid should not parse to a number": function() {
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(stringA), 0)));
+  }
+  
+});
+
+Test.context("Number", {
+  
+  setup: function() {
+    numberA = 23 ;
+    numberACopy = 23 ;
+    
+    numberB = 34 ;
+  },
+
+  "same number instance should have same guide every time": function() {
+    assertEqual(SC.guidFor(numberA), SC.guidFor(numberA)) ;  
+  },
+  
+  "two number instances with same value should have same guid": function() {
+    assertEqual(SC.guidFor(numberA), SC.guidFor(numberACopy)) ;  
+  },
+  
+  "two instances with different value should have different guid": function(){
+    assertNotEqual(SC.guidFor(numberA), SC.guidFor(numberB)) ;
+  },
+
+  "guid should not parse to a number": function() {
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(numberA), 0)));
+  }  
+});
+
+Test.context("Boolean", {
+  
+  "should always have same guid": function() {
+    assertEqual(SC.guidFor(true), SC.guidFor(true)) ;
+    assertEqual(SC.guidFor(false), SC.guidFor(false)) ;
+  },
+
+  "true should have different guid than false": function() {
+    assertNotEqual(SC.guidFor(true), SC.guidFor(false)) ;
+  },
+
+  "guid should not parse to a number": function() {
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(true), 0)));
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(false), 0)));
+  }  
+});
+
+Test.context("Null and Undefined", {
+  
+  "should always have same guid": function() {
+    assertEqual(SC.guidFor(null), SC.guidFor(null)) ;
+    assertEqual(SC.guidFor(undefined), SC.guidFor(undefined)) ;
+  },
+
+  "null should have different guid than undefined": function() {
+    assertNotEqual(SC.guidFor(null), SC.guidFor(undefined)) ;
+  },
+
+  "guid should not parse to a number": function() {
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(null), 0)));
+    assertEqual(YES, isNaN(parseInt(SC.guidFor(undefined), 0)));
+  }  
+});
+
+</script>
+<% end %>

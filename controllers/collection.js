@@ -105,7 +105,7 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
     var content = this.get('content') ;
     if (!content || !this.get('canEditCollection')) return ; // only if allowed 
     try {
-      objects = $A(arguments).flatten() ;
+      objects = SC.$A(arguments).flatten() ;
       if (content.addRecords) { 
         content.addRecords(objects) ;
         this.set('selection',(objects) ? objects : []) ;
@@ -126,7 +126,7 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
     var content = this.get('content') ;
     if (!content || !this.get('canEditCollection')) return ; // only if allowed 
     try {
-      objects = $A(arguments).flatten() ;
+      objects = SC.$A(arguments).flatten() ;
       if (content.removeRecords) { 
         var rec = content.removeRecords(objects) ;
         var sel = (this.get('selection') || []).without(objects) ;
@@ -191,7 +191,7 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
   // potentially the selection.
   _recordsObserver: function(target,key,value) {
     var old = this.get('arrangedObjects') ;
-    value = Array.asArray(target.get(key)) ;
+    value = Array.from(target.get(key)) ;
     
     this.set('arrangedObjects',value.slice()) ;
     

@@ -130,7 +130,7 @@ SC.Benchmark = {
     
     // replace with this helper.
     object[method] = function() {
-      var key = '%@(%@)'.fmt(method, $A(arguments).join(', ')) ;
+      var key = '%@(%@)'.fmt(method, SC.$A(arguments).join(', ')) ;
       SC.Benchmark.start(key, topLevelOnly) ;
       var ret = __func.apply(this, arguments) ;
       SC.Benchmark.end(key) ;
