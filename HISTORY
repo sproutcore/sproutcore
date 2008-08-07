@@ -1,13 +1,27 @@
 
+- Added "application/json" to the default Accept header for all servers.
+  Required for proper support of json format. [Lawrence Pit]
+  
+- Added experimental support for SC.RailsServer which works with resource
+  oriented Rails applications.  [Lawrence Pit]
+  
+- [FIX] SplitView now resizes in both directions properly.  Closes #110 
+  [Christoph Angerer]
+  
+- Added support for the SC.Enumerable mixin and SC.Enumerators.  These items
+  provide the basis for our standard enumeration API.  This will replace 
+  relying on iterators provided by Prototype eventually.  See docs on those
+  classes for full information. [CAJ]
+  
 - SC.guidFor() now works consistantly with strings, numbers and other primitive
   objects.  Before it would differentiate between different instances of these
-  objects.  Now it treats them the same if they are the same value.
+  objects.  Now it treats them the same if they are the same value. [CAJ]
 
 - Added SC.hashFor() method which can be used to determine if two objects are
   equal.  Normally this returns the same value as guidFor() but if you
   implement the hash() method on your object, it will return that value
   instead.  This gives you an easy way to indicate that two objects are 
-  equal even if they are different instances.
+  equal even if they are different instances. [CAJ]
   
 - Updated SC.isEqual() to respect SC.hashFor().
 

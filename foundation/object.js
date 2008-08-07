@@ -103,9 +103,9 @@ Object.extend(SC.Object,
     ret.prototype = base ;
     
     // return new extension
-    ret._guid = SC._nextGUID++ ; // each time we extend, get a new guid.
+    ret._guid = SC.guidFor(ret) ; // each time we extend we get a new guid
     ret._type = this ;
-    
+     
     if (SC.BENCHMARK_OBJECTS) SC.Benchmark.end('SC.Object.extend') ;
     
     return ret ;
@@ -274,7 +274,7 @@ Object.extend(SC.Object,
     for(var loc=0;loc<extensions.length;loc++) {
       ret = SC.Object._extend(ret,extensions[loc]) ;
     }
-    ret._guid = SC._nextGUID++ ;
+    ret._guid = SC.guidFor(ret) ;
     ret._type = type ;
     ret.init() ;
     

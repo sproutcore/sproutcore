@@ -13,7 +13,7 @@
   can also iterate through a set just like an array, even accessing objects
   by index, however there is no gaurantee as to their order.
   
-  Note that SC.Set is a primitive object, like and array.  It does implement
+  Note that SC.Set is a primitive object, like an array.  It does implement
   limited key-value observing support but it does not extend from SC.Object
   so you should not subclass it.
   
@@ -69,7 +69,7 @@
   use the return value from that method instead.
   
   @extends Object
-  @since SproutCore 1.0
+  @since SproutCore 0.9.15
 */
 SC.Set = function(items) {
   if (items && items.length > 0) {
