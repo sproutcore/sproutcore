@@ -556,7 +556,7 @@ SC.mixin(/** @scope SC */ {
   */
   $A: function(obj) {
     if (obj.toArray) return obj.toArray() ;
-    if (obj.length==null) throw "$A() requires an enumerable or array-like object";
+    if (obj.length==null) throw "SC.$A() requires an enumerable or array-like object";
     
     // if not enumerable, try to convert manually...
     var len = obj.length;

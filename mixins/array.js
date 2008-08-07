@@ -215,7 +215,7 @@ SC.Array = {
   */
   invokeWhile: function(retValue, methodName) {
     var ret ;
-    var args = $A(arguments) ;
+    var args = SC.$A(arguments) ;
     retValue = args.shift() ;
     methodName = args.shift() ; 
 
@@ -306,7 +306,7 @@ Object.extend(Array.prototype, {
   */
   invokeWhile: function(retValue, methodName) {
     var ret ;
-    var args = $A(arguments) ;
+    var args = SC.$A(arguments) ;
     retValue = args.shift() ;
     methodName = args.shift() ; 
 
@@ -354,7 +354,7 @@ Object.extend(Enumerable, {
   
   invokeWhile: function(retValue, methodName) {
     var ret ;
-    var args = $A(arguments) ;
+    var args = SC.$A(arguments) ;
     retValue = args.shift() ;
     methodName = args.shift() ; 
 

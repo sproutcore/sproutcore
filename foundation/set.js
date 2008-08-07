@@ -3,6 +3,8 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
+require('mixins/enumerable') ;
+
 /**
   @class 
   
@@ -69,6 +71,7 @@
   use the return value from that method instead.
   
   @extends Object
+  @extends SC.Enumerable 
   @since SproutCore 0.9.15
 */
 SC.Set = function(items) {
@@ -193,7 +196,7 @@ SC.Set.prototype = {
 
   invokeWhile: function(state, methodName) {
     var len = this.length;
-    var args = $A(arguments) ; args.shift(); args.shift() ;
+    var args = SC.$A(arguments) ; args.shift(); args.shift() ;
     
     for(var idx=0;idx<len;idx++) {
       var obj = this[idx] ;
@@ -213,13 +216,17 @@ SC.Set.prototype = {
   },
   
   toString: function() {
-    return "SC.Set<%@>".fmt($A(this)) ;
+    return "SC.Set<%@>".fmt(SC.SC.$A(this)) ;
   }
   
 } ;
 
+// Make this enumerable
+SC.mixin(SC.Set.prototype, SC.Enumerable) ;
+
 SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
 SC.Set.prototype.shift = SC.Set.prototype.pop ;
+
 
 /**
   To create a set, pass an array of items instead of a hash.
