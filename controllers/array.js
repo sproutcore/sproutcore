@@ -185,7 +185,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
       this.beginPropertyChanges();
       this.contentCloneReset();
-      this.arrayContentDidChange() ;
+      this.enumerableContentDidChange() ;
       this.notifyPropertyChange('length') ;
       this.updateSelectionAfterContentChange();
       this.endPropertyChanges() ;
@@ -261,7 +261,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     contentClone.replace(idx, amt, sourceObjects);
     
     this.editorDidChange() ;
-    this.arrayContentDidChange();
+    this.enumerableContentDidChange();
     this.updateSelectionAfterContentChange();
     
     return this;

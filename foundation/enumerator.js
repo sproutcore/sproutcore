@@ -21,6 +21,7 @@
 SC.Enumerator = function(enumerableObject) {
   this.enumerable = enumerableObject ;
   this.reset() ;
+  return this ;
 } ;
 
 SC.Enumerator.prototype = {

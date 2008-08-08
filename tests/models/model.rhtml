@@ -22,34 +22,34 @@ ModelTest = SC.Object.create({
 //
 ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
   
-  { guid: 'todo-1', 
+  { guid: '1', 
     type: 'Todo', 
     name: "Something to do",
-    todoList: 'todolist-1' // the guid of the todo list object this todo is related to
+    todoList: '1' // the guid of the todo list object this todo is related to
   },
 
-  { guid: 'todo-2', 
+  { guid: '2', 
     type: 'Todo', 
     name: "Something else to do",
-    todoList: 'todolist-1'
+    todoList: '1'
   },
 
-  { guid: 'todo-3', 
+  { guid: '3', 
     type: 'Todo', 
     name: "Gee, I'm busy.",
-    todoList: 'todolist-2'
+    todoList: '2'
   }
 
 ]);
 
 ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
   
-  { guid: 'todolist-1',
+  { guid: '1',
     type: 'TodoList', 
     name: "My List"
   },
 
-  { guid: 'todolist-2',
+  { guid: '2',
     type: 'TodoList', 
     name: "My List 2"
   }
@@ -80,11 +80,11 @@ Test.context("Test model comparisons with numeric guids", {
   
   setup: function()
   {
-    this.todoList1 = ModelTest.TodoList.find('todolist-1');
-    this.todoList2 = ModelTest.TodoList.find('todolist-2');
-    this.todo1 = ModelTest.Todo.find('todo-1');
-    this.todo2 = ModelTest.Todo.find('todo-2');
-    this.todo3 = ModelTest.Todo.find('todo-3');
+    this.todoList1 = ModelTest.TodoList.find('1');
+    this.todoList2 = ModelTest.TodoList.find('2');
+    this.todo1 = ModelTest.Todo.find('1');
+    this.todo2 = ModelTest.Todo.find('2');
+    this.todo3 = ModelTest.Todo.find('3');
   },
   
   teardown: function()
@@ -200,34 +200,34 @@ ModelTest2 = SC.Object.create({
 //
 ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
   
-  { guid: 'todo-1', 
+  { guid: '1', 
     type: 'Todo', 
     name: "Something to do",
-    todoList: 'todolist-1' // the guid of the todo list object this todo is related to
+    todoList: '1' // the guid of the todo list object this todo is related to
   },
 
-  { guid: 'todo-2', 
+  { guid: '2', 
     type: 'Todo', 
     name: "Something else to do",
-    todoList: 'todolist-1'
+    todoList: '1'
   },
 
-  { guid: 'todo-3', 
+  { guid: '3', 
     type: 'Todo', 
     name: "Gee, I'm busy.",
-    todoList: 'todolist-2'
+    todoList: '2'
   }
 
 ]);
 
 ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
   
-  { guid: 'todolist-1',
+  { guid: '1',
     type: 'TodoList', 
     name: "My List"
   },
 
-  { guid: 'todolist-2',
+  { guid: '2',
     type: 'TodoList', 
     name: "My List 2"
   }
@@ -258,11 +258,11 @@ Test.context("Test model comparisons with string guids", {
   
   setup: function()
   {
-    this.todoList1 = ModelTest2.TodoList.find('todolist-1');
-    this.todoList2 = ModelTest2.TodoList.find('todolist-2');
-    this.todo1 = ModelTest2.Todo.find('todo-1');
-    this.todo2 = ModelTest2.Todo.find('todo-2');
-    this.todo3 = ModelTest2.Todo.find('todo-3');
+    this.todoList1 = ModelTest2.TodoList.find('1');
+    this.todoList2 = ModelTest2.TodoList.find('2');
+    this.todo1 = ModelTest2.Todo.find('1');
+    this.todo2 = ModelTest2.Todo.find('2');
+    this.todo3 = ModelTest2.Todo.find('3');
   },
   
   teardown: function()

@@ -3,6 +3,8 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
+require('mixins/enumerable') ;
+
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 
 /**
@@ -12,6 +14,17 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
   picked up by the Array class as well as other controllers, etc. that want to  
   appear to be arrays.
   
+  Unlike SC.Enumerable, this mixin defines methods specifically for 
+  collections that provide index-ordered access to their contents.  When you
+  are designing code that needs to accept any kind of Array-like object, you
+  should use these methods instead of Array primitives because these will 
+  properly notify observers of changes to the array. 
+  
+  Although these methods are efficient, they do add a layer of indirection to
+  your application so it is a good idea to use them only when you need the 
+  flexibility of using both true JavaScript arrays and "virtual" arrays such
+  as controllers and collections.
+  
   You can use the methods defined in this module to access and modify array 
   contents in a KVO-friendly way.  You can also be notified whenever the 
   membership if an array changes by observing the "[]" property.
@@ -19,6 +32,11 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
   To support SC.Array in your own class, you must override two
   primitives to use it: replace() and objectAt().  
 
+  Note that the SC.Array mixin also incorporates the SC.Enumerable mixin.  All
+  SC.Array-like objects are also enumerable.
+
+  @extends SC.Enumerable
+  @since SproutCore 0.9.0
 */
 SC.Array = {
 
@@ -33,7 +51,7 @@ SC.Array = {
 /**
   This is one of the primitves you must implement to support SC.Array.  You 
   should replace amt objects started at idx with the objects in the passed 
-  array.  You should also call this.arrayContentDidChange() ;
+  array.  You should also call this.enumerableContentDidChange() ;
   
   @param {Number} idx 
     Starting index in the array to replace.  If idx >= length, then append to 
@@ -67,27 +85,6 @@ SC.Array = {
     if (idx >= this.get('length')) return undefined;
     return this.get(idx);
   },
-
-  // this is required to support the enumerable options.  Override with your
-  // own method if you prefer.
-  _each: function(iterator) {
-    var len ;
-    for (var i = 0, len = this.get('length'); i < len; i++)
-      iterator(this.objectAt(i));
-  },
-  
-  /**  
-    When you implement replace(), be sure to call this method whenever the 
-    membership of your array changes.  This will make sure users are properly 
-    notified.
-  */
-  arrayContentDidChange: function() {
-    var kvo = (this._kvo) ? this._kvo().changes : '(null)';
-    this.notifyPropertyChange('[]') ;
-    if (this.ownerRecord && this.ownerRecord.recordDidChange) {
-      this.ownerRecord.recordDidChange(this) ;
-    }
-  },
   
   /**
     @field []
@@ -95,6 +92,8 @@ SC.Array = {
     This is the handler for the special array content property.  If you get
     this property, it will return this.  If you set this property it a new 
     array, it will replace the current content.
+    
+    This property overrides the default property defined in SC.Enumerable.
   */
   '[]': function(key, value) {
     if (value !== undefined) {
@@ -198,82 +197,67 @@ SC.Array = {
     }
     return true ;
   }
-        
+    
 } ;
 
-// All arrays have the SC.Array mixin.  Do this before we add the 
-// enumerable methods since Arrays are already enumerable.
-Object.extend(Array.prototype, SC.Array) ; 
+// Add SC.Array to the built-in array before we add SC.Enumerable to SC.Array
+// since built-in Array's are already enumerable.
+SC.mixin(Array.prototype, SC.Array) ; 
+SC.Array = SC.mixin({}, SC.Enumerable, SC.Array) ;
 
-// Now make SC.Array enumerable and add other array method we did not want to
-// override in Array itself.
-Object.extend(SC.Array, Enumerable) ;
-Object.extend(SC.Array, {
-  /**
-    Returns a new array that is a slice of the receiver.  This implementation
-    uses the observable array methods to retrieve the objects for the new slice.
-    
-    @param beginIndex {Integer} (Optional) index to begin slicing from. Default: 0
-    @param endIndex {Integer} (Optional) index to end the slice at. Default: 0
-  */
-  slice: function(beginIndex, endIndex) {
-    var ret = []; 
-    var length = this.get('length') ;
-    if (beginIndex == null) beginIndex = 0 ;
-    if ((endIndex == null) || (endIndex > length)) endIndex = length ;
-    while(beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++) ;
-    return ret ;
-  }
+// Add any extra methods to SC.Array that are native to the built-in Array.
+/**
+  Returns a new array that is a slice of the receiver.  This implementation
+  uses the observable array methods to retrieve the objects for the new 
+  slice.
   
-}) ;
+  @param beginIndex {Integer} (Optional) index to begin slicing from.     
+  @param endIndex {Integer} (Optional) index to end the slice at.
+  @returns {Array} New array with specified slice
+*/
+SC.Array.slice = function(beginIndex, endIndex) {
+  var ret = []; 
+  var length = this.get('length') ;
+  if (beginIndex == null) beginIndex = 0 ;
+  if ((endIndex == null) || (endIndex > length)) endIndex = length ;
+  while(beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++) ;
+  return ret ;
+}  ;
 
-// ........................................................
-// A few basic enhancements to the Array class.
-// These methods add support for the SproutCore replace() method as well as 
-// optimizing certain enumerable methods.
+
+// ......................................................
+// ARRAY SUPPORT
 //
-Object.extend(Array.prototype, {
+// Implement the same enhancements on Array.  We use specialized methods
+// because working with arrays are so common.
+(function() {
+  SC.mixin(Array.prototype, {
 
-  // primitive for array support.
-  replace: function(idx, amt, objects) {
-    if (!objects || objects.length == 0) {
-      this.splice(idx, amt) ;
-    } else {
-      var args = [idx, amt].concat(objects) ;
-      this.splice.apply(this,args) ;
-    }
-    this.arrayContentDidChange() ;
-    return this ;
-  },
-  
-  // These are faster implementations of the iterations defined by prototype.
-  // The iterators there are cool but they consume large numbers of stack
-  // frames.  These are API compatible, but much faster because they duplicate
-  // code instead of calling a bunch of common methods.
-
-  each: function(iterator) {
-    try {
-      for(var index=0;index<this.length;index++) {
-        var item = this[index] ;
-        iterator.call(item,item,index) ;
+    // primitive for array support.
+    replace: function(idx, amt, objects) {
+      if (!objects || objects.length == 0) {
+        this.splice(idx, amt) ;
+      } else {
+        var args = [idx, amt].concat(objects) ;
+        this.splice.apply(this,args) ;
       }
-    } catch (e) {
-      if (e != $break) throw e ;
-    }
-    return this ;
-  },
+      this.enumerableContentDidChange() ;
+      return this ;
+    },
   
-  // If you ask for an unknown property, then try to collect the value
-  // from member items.
-  unknownProperty: function(key, value) {
-    if (value !== undefined) return null ;
-    return this.invoke('get', key) ;
-  }
+    // If you ask for an unknown property, then try to collect the value
+    // from member items.
+    unknownProperty: function(key, value) {
+      var ret = this.reducedProperty(key, value) ;
+      if (ret === undefined) {
+        ret = (value === undefined) ? this.invoke('get', key) : null ;
+      }
+      return ret ;
+    }
     
-}) ;
-
-Array.prototype.collect = Array.prototype.map ;
-
+  }) ;
+  
+})() ;
 
 // Returns the passed item as an array.  If the item is already an array,
 // it is returned as is.  If it is not an array, it is placed into one.  If
