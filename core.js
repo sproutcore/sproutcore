@@ -370,9 +370,11 @@ SC.mixin(/** @scope SC */ {
         return (obj) ? "(true)" : "(false)" ;
         break;
       default:
-        return obj._guid = ("@" + (SC._nextGUID++));
+        return obj._guid = SC.generateGuid();
     }
   },
+  
+  generateGuid: function() { return ("@" + (SC._nextGUID++)); },
   _nextGUID: 0, _numberGuids: [], _stringGuids: {},
 
   /**
