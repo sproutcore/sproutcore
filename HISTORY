@@ -17,7 +17,7 @@
   Required for proper support of json format. [Lawrence Pit]
   
 - Added experimental support for SC.RailsServer which works with resource
-  oriented Rails applications.  [Lawrence Pit]
+  oriented Rails applications.  [Lawrence Pit, Simon Harris]
   
 - [FIX] SplitView now resizes in both directions properly.  Closes #110 
   [Christoph Angerer]
