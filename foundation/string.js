@@ -6,7 +6,7 @@
 // These are basic enhancements to the string class used throughout 
 // SproutCore.
 
-SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])(.)/g);
+SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
 
 /**
   @namespace
@@ -126,8 +126,7 @@ SC.String = {
   titleize: function() {
     return this.replace(SC.STRING_TITLEIZE_REGEXP, 
       function(str,separater,character) { 
-        console.log("sep: " + separator + " char: " + character) ;
-        return separator + character.toUpperCase();
+        return (character) ? (' ' + character.toUpperCase()) : ' ';
       }).capitalize() ;
   },
   
