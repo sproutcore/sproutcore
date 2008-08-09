@@ -6,7 +6,7 @@
 // These are basic enhancements to the string class used throughout 
 // SproutCore.
 
-SC.STRING_TITELIZE_REGEXP = (/([ \-\n])(.)/g);
+SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])(.)/g);
 
 /**
   @namespace
