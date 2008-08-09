@@ -5,30 +5,47 @@
 
 // These are basic enhancements to the string class used throughout 
 // SproutCore.
-// capitalize a string.
-Object.extend(String.prototype,{
 
-  // Capitalize a string.
-  //
-  // mode: optional.  'each' - capitalize each word. the default.
-  //                  'first' - capitalize the first word only.
+SC.STRING_TITELIZE_REGEXP = (/([ \-\n])(.)/g);
+
+/**
+  @namespace
   
-  capitalize: function(mode) {
-    var words = (mode == 'first') ? this : this.split(' ') ;
-    words = words.map(function(word) {
-      if (word.length == 0) return word ;
-      return word.charAt(0).toUpperCase() + word.substring(1) ;
-    }) ;
-    return words.join(' ') ;
-  },
-
+  SproutCore implements a variety of enhancements to the built-in String 
+  object that make it easy to perform common substitutions and conversions.
+  
+  Most of the utility methods defined here mirror those found in Prototype
+  1.6.
+  
+  @since SproutCore 1.0
+*/
+SC.String = {
+  
   // Interpolate string. looks for %@ or %@1; to control the order of params.
-  format: function() {
-    var args = SC.$A(arguments) ;
+  /**
+    Apply formatting options to the string.  This will look for occurrences
+    of %@ in your string and substitute them with the arguments you pass into
+    this method.  If you want to control the specific order of replacement, 
+    you can add a number after the key as well to indicate which argument 
+    you want to insert.  
+
+    Ordered insertions are most useful when building loc strings where values
+    you need to insert may appear in different orders.
+
+    h3. Examples
     
+    {{{
+      "Hello %@ %@".fmt('John', 'Doe') => "Hello John Doe"
+      "Hello %@2, %@1".fmt('John', 'Doe') => "Hello Doe, John"
+    }}}
+    
+    @param args {Object...} optional arguments
+    @returns {String} formatted string
+  */
+  fmt: function() {
     // first, replace any ORDERED replacements.
     var str = this.gsub(/%@([0-9]+)/, function(m) {
-      return (args[parseInt(m[1],0)-1] || '').toString(); 
+      return (arguments[parseInt(m[1],0)-1] || '').toString(); 
     }) ;
 
     // now, replace any remaining %@ items.  Use this indexOf() method b/c
@@ -36,13 +53,14 @@ Object.extend(String.prototype,{
     var ret = [] ;
     var idx = -1 ;
     var loc = 0 ;
+    var argIdx = 0;
     while((idx = str.indexOf("%@",loc)) >= 0) {
      // slice off initial part of string and push into ret. update loc.
      ret.push(str.slice(loc,idx)) ;
      loc = idx + 2 ; // 2 to skip '%@'.
      
      // add in replacement.
-     var value = args.shift() ;
+     var value = arguments[argIdx++] ;
      if (value && value.toString) value = value.toString() ;
      ret.push(value) ;
     }
@@ -56,8 +74,15 @@ Object.extend(String.prototype,{
     return (ret.length > 1) ? ret.join('') : ret[0] ;
   },
 
-  // localize a string.  Also interpolates any items you pass just like
-  // format().
+  /**
+    Localizes the string.  This will look up the reciever string as a key 
+    in the current Strings hash.  If the key matches, the loc'd value will be
+    used.  The resulting string will also be passed through fmt() to insert
+    any variables.
+    
+    @param args {Object...} optional arguments to interpolate also
+    @returns {String} the localized and formatted string.
+  */
   loc: function() {
     // NB: This could be implemented as a wrapper to locWithDefault() but
     // it would add some overhead to deal with the arguments and adds stack
@@ -66,60 +91,140 @@ Object.extend(String.prototype,{
     var kit = String[String.currentLanguage()];
     var str = kit[this] ;
     if (!str) str = String.English[this] || this ;
-    return str.format.apply(str,arguments) ;
+    return str.fmt.apply(str,arguments) ;
   },
-  
-  // this works just like loc except it will return the first argument
-  // as a default if the matching value is not found.
+
+  /**
+    Works just like loc() except that it will return the passed default 
+    string if a matching key is not found.
+    
+    @param def {String} the default to return
+    @param args {Object...} optional formatting arguments
+    @returns {String} localized and formatted string
+  */
   locWithDefault: function(def) {
     var kit = String[String.currentLanguage()];
     var str = kit[this] ;
     if (!str) str = String.English[this] || def ;
     var args = SC.$A(arguments) ;
     args.shift() ; // escape def.
-    return str.format.apply(str, args) ;
+    return str.fmt.apply(str, args) ;
   },
   
+  /** 
+    Capitalizes a string.
+    @return {String} capitalized string
+  */
+  capitalize: function() {
+    return this.charAt(0).toUpperCase() + this.substring(1) ;
+  },
+
+  /**
+    Capitalized every word in the string, separated by spaces or dashes.
+    @return {String} titleized string.
+  */
+  titleize: function() {
+    return this.replace(SC.STRING_TITLEIZE_REGEXP, 
+      function(str,separater,character) { 
+        console.log("sep: " + separator + " char: " + character) ;
+        return separator + character.toUpperCase();
+      }).capitalize() ;
+  },
+  
+  /**
+    Camelizes a string.  This will take any words separated by spaces, dashes
+    or underscores and convert them into camelCase.
+    
+    h3. Examples
+    
+    {{{
+      "my favorite items".camelize() => "myFavoriteItems"
+      "css-class-name".camelize() => "cssClassName"  
+      "action_name".camelize() => "actionName" 
+    }}}
+    
+    @returns {String} camelized string
+  */
+  camelize: function() {
+    var parts = this.split('-'), len = parts.length;
+    if (len == 1) return parts[0];
+
+    var camelized = this.charAt(0) == '-'
+      ? parts[0].charAt(0).toUpperCase() + parts[0].substring(1)
+      : parts[0];
+
+    for (var i = 1; i < len; i++)
+      camelized += parts[i].charAt(0).toUpperCase() + parts[i].substring(1);
+
+    return camelized;
+  },
+
+  
+  /**
+    Converts the string into a class name.  This method will camelize your 
+    string and then capitalize the first letter.
+  */
   classify: function() {
     return this.camelize().capitalize() ;
   },
   
+  /**
+    Converts a camelized string into all lower case separated by underscores.
+    
+    @returns {String} the decamelized string.
+  */
   decamelize: function() { 
     return this.replace(/([a-z])([A-Z])/g,'$1_$2').toLowerCase();
   },
 
+  /**
+    Converts a camelized string or a string with spaces or underscores into
+    a string with components separated by dashes.
+    
+    @returns {String} the dasherized string.
+  */
   dasherize: function() {
     return this.decamelize().replace(/[ _]/g,'-') ;  
   },
   
+  /**
+    Converts a camelized string or a string with dashes or underscores into
+    a string with components separated by spaces.
+    
+    @returns {String} the humanized string.
+  */
   humanize: function() {
     return this.decamelize().replace(/[-_]/g,' ') ;
   },
   
-  toHref: function() {
-    if (this.match(/.+@.+\...+/)) {
-      return 'mailto:' + this;
-    } else if (this.indexOf('http://') != 0 && this.indexOf('https://') !=0 && this.match(/[^.]+\.[^.]+/)) {
-      return 'http://' + this;
-    } else {
-      return this;
-    }
-  },
-  
-  trim: function ()
-  {
+  /**
+    Removes any extra whitespace from the edges of the strings.
+    
+    This method is also aliased as strip().
+    
+    @returns {String} the trimmed string
+  */
+  trim: function () {
     return this.replace(/^\s+|\s+$/g,"");
   },
-  
-  strip: function()
-  {
-    return this.trim();
+
+  /**
+    Explodes a string into an array of characters.
+    
+    @returns {Array}
+  */
+  toArray: function() {
+    return this.split('');
   }
   
-}) ;
+} ;
 
-// Shorter alias of the format function.
-String.prototype.fmt = String.prototype.format ;
+// Deprecated, longer version of this method.
+SC.String.format = SC.String.fmt;
+SC.String.strip = SC.String.trim; // convenience alias.
+
+// Apply SC.String mixin to built-in String object
+SC.mixin(String.prototype, SC.String) ;
 
 // Add strings for various languages to this collection.  String.loc()
 // method will try to localize the string passed using the current language.
