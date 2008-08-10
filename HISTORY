@@ -1,4 +1,8 @@
 
+- SC.Record does a better job of matching null values.  Fixed #96 [Fredrik Blomqvist]
+
+- SC.Server now handles created records with no attributes yet.  Fixed #98 [CAJ]
+
 - Added support for reduced properties.  These properties begin with "@" and
   will automatically calculate some kind of summary information about the 
   receiving array.  They are also bindable so you can bind to myArray.@average
