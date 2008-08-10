@@ -440,10 +440,11 @@ SC.Enumerable = {
     spec. Sorry.
     
     @params callback {Function} the callback to execute
-    @params target {Object} the target object to use
+    @params initialValue {Object} initial value for the reduce
+    @params reducerProperty {String} internal use only.  May not be available.
     @returns {Array} A filtered array.
   */
-  reduce: function(callback, initialValue) {
+  reduce: function(callback, initialValue, reducerProperty) {
     if (typeof callback !== "function") throw new TypeError() ;
     var len = (this.get) ? this.get('length') : this.length ;
 
@@ -463,7 +464,7 @@ SC.Enumerable = {
         if (ret === undefined) {
           ret = next ;
         } else {
-          ret = callback.call(null, ret, next, idx, this);
+          ret = callback.call(null, ret, next, idx, this, reducerProperty);
         }
       }
       last = next ;
@@ -579,13 +580,16 @@ SC.Enumerable = {
 } ;
 
 // Build in a separate function to avoid unintential leaks through closures...
-SC._buildReducerFor = function(reducerKey) {
+SC._buildReducerFor = function(reducerKey, reducerProperty) {
   return function(key, value) {
     var reducer = this[reducerKey] ;
     if (SC.typeOf(reducer) !== T_FUNCTION) {
       return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
     } else {
-      return this.reduce(reducer, null) ;
+      // Invoke the reduce method defined in enumerable instead of using the
+      // one implemented in the receiver.  The receiver might be a native 
+      // implementation that does not support reducerProperty.
+      return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
     }
   }.property('[]') ;
 };
@@ -645,7 +649,12 @@ SC.Reducers = {
     if (key[0] !== '@') return undefined ; // not a reduced property
     
     // get the reducer key and the reducer
-    var reducerKey = "reduce%@".fmt(key.slice(1,key.length).capitalize()) ; 
+    var matches = key.match(/^@([^(]*)(\(([^)]*)\))?$/) ;
+    if (!matches || matches.length < 2) return undefined ; // no match
+    
+    var reducerKey = matches[1]; // = 'max' if key = '@max(balance)'
+    var reducerProperty = matches[3] ; // = 'balance' if key = '@max(balance)'
+    var reducerKey = "reduce%@".fmt(reducerKey.capitalize()) ; 
     var reducer = this[reducerKey] ;
 
     // if there is no reduce function defined for this key, then we can't 
@@ -653,40 +662,94 @@ SC.Reducers = {
     if (SC.typeOf(reducer) !== T_FUNCTION) return undefined;
     
     // if we can't generate the property, just run reduce
-    if (generateProperty === NO) return this.reduce(reducer, null) ;
+    if (generateProperty === NO) {
+      return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
+    }
 
     // ok, found the reducer.  Let's build the computed property and install
-    var func = SC._buildReducerFor(reducerKey);
-    var p = this.constructor.prototype ;
+    var func = SC._buildReducerFor(reducerKey, reducerProperty);
+    var p = (this._type) ? this._type : this.constructor.prototype ;
+    
     if (p) {
       p[key] = func ;
       this.registerDependentKey(key, '[]') ;
     }
     
     // and reduce anyway...
-    return this.reduce(reducer, null) ;
+    return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
   },
   
   /** 
     Reducer for @max reduced property.
   */
-  reduceMax: function(previousValue, item, index, enumerable) {
+  reduceMax: function(previousValue, item, index, e, reducerProperty) {
+    if (reducerProperty && item) {
+      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+    }
     if (previousValue == null) return item ;
     return (item > previousValue) ? item : previousValue ;
   },
 
   /** 
+    Reducer for @maxObject reduced property.
+  */
+  reduceMaxObject: function(previousItem, item, index, e, reducerProperty) {
+    
+    // get the value for both the previous and current item.  If no
+    // reducerProperty was supplied, use the items themselves.
+    var previousValue = previousItem, itemValue = item ;
+    if (reducerProperty) {
+      if (item) {
+        itemValue = (item.get) ? item.get(reducerProperty) : item[reducerProperty] ;
+      }
+      
+      if (previousItem) {
+        previousItemValue = (previousItem.get) ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+      }
+    }
+    if (previousValue == null) return item ;
+    return (itemValue > previousValue) ? item : previousItem ;
+  },
+
+  /** 
     Reducer for @min reduced property.
   */
-  reduceMin: function(previousValue, item, index, enumerable) {
+  reduceMin: function(previousValue, item, index, e, reducerProperty) {
+    if (reducerProperty && item) {
+      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+    }
     if (previousValue == null) return item ;
     return (item < previousValue) ? item : previousValue ;
   },
 
   /** 
+    Reducer for @maxObject reduced property.
+  */
+  reduceMinObject: function(previousItem, item, index, e, reducerProperty) {
+
+    // get the value for both the previous and current item.  If no
+    // reducerProperty was supplied, use the items themselves.
+    var previousValue = previousItem, itemValue = item ;
+    if (reducerProperty) {
+      if (item) {
+        itemValue = (item.get) ? item.get(reducerProperty) : item[reducerProperty] ;
+      }
+      
+      if (previousItem) {
+        previousItemValue = (previousItem.get) ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+      }
+    }
+    if (previousValue == null) return item ;
+    return (itemValue < previousValue) ? item : previousItem ;
+  },
+
+  /** 
     Reducer for @average reduced property.
   */
-  reduceAverage: function(previousValue, item, index, e) {
+  reduceAverage: function(previousValue, item, index, e, reducerProperty) {
+    if (reducerProperty && item) {
+      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+    }
     var ret = (previousValue || 0) + item ;
     var len = (e.get) ? e.get('length') : e.length;
     if (index >= len-1) ret = ret / len; //avg after last item.
@@ -696,7 +759,10 @@ SC.Reducers = {
   /** 
     Reducer for @sum reduced property.
   */
-  reduceSum: function(previousValue, item, index, e) {
+  reduceSum: function(previousValue, item, index, e, reducerProperty) {
+    if (reducerProperty && item) {
+      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+    }
     return (previousValue == null) ? item : previousValue + item ;
   }
 } ;
@@ -894,7 +960,7 @@ SC.mixin(Array.prototype, SC.Reducers) ;
       return ret ;
     },
 
-    reduce: function(callback, initialValue) {
+    reduce: function(callback, initialValue, reducerProperty) {
       if (typeof callback !== "function") throw new TypeError() ;
       var len = this.length ;
 
@@ -912,7 +978,7 @@ SC.mixin(Array.prototype, SC.Reducers) ;
           if (ret === undefined) {
             ret = next ;
           } else {
-            ret = callback.call(null, ret, next, idx, this);
+            ret = callback.call(null, ret, next, idx, this, reducerProperty);
           }
         }
       }

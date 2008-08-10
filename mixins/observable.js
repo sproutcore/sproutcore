@@ -603,6 +603,13 @@ SC.Observable = {
 
     // otherwise, bind as a normal property
     } else {      
+      
+      // if you add an observer beginning with '@', then we might need to 
+      // create or register the property...
+      if (this.reducedProperty && (key.charAt(0) === '@')) {
+        this.reducedProperty(key, undefined) ; // create if needed...
+      }
+      
       var observers = kvo.observers[key] = (kvo.observers[key] || []) ;
       var found = false; var loc = observers.length;
       while(!found && --loc >= 0) found = (observers[loc] == func) ;

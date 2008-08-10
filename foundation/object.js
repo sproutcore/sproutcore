@@ -49,13 +49,12 @@ SC.BENCHMARK_OBJECTS = NO;
 
 */
 SC.Object = function(noinit) { 
-	if (noinit === SC.Object._noinit_) return ;
+	if (noinit === SC.Object._noinit_) return this ;
 	var ret = SC.Object._init.apply(this,SC.$A(arguments)) ;
   return ret ;
 };
 
-Object.extend(SC.Object, 
-/** @scope SC.Object */ {
+SC.mixin(SC.Object, /** @scope SC.Object */ {
 
 	_noinit_: '__noinit__',
 	
@@ -86,7 +85,7 @@ Object.extend(SC.Object,
      
     // build function.  copy class methods on to it.
     var ret = function(noinit) { 
-      if (noinit && (typeof(noinit) == 'string') && (noinit == SC.Object._noinit_)) return ;
+      if (noinit && (typeof(noinit) == 'string') && (noinit == SC.Object._noinit_)) return this ;
       var ret = SC.Object._init.apply(this,SC.$A(arguments)); 
       return ret ;
     };
