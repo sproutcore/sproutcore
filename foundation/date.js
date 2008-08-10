@@ -290,7 +290,7 @@ Object.extend(Date,{
 Object.extend(Date.prototype, {
   
   // ------------------------------------------------------------------
-  // formatDate (date_object, format, naturalLanguage)
+  // formatDate (date_object, format)
   // Returns a date in the output format specified.
   // The format string uses the same abbreviations as in getDateFromFormat()
   // 
