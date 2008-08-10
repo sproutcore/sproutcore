@@ -347,7 +347,7 @@ SC.Server = SC.Object.extend({
           var objects = [];
           for(rec in curRecords){
             if (!curRecords.hasOwnProperty(rec)) continue ;
-            objects.push(curRecords[rec].get('attributes'));
+            objects.push(curRecords[rec].get('attributes') || {});
           }
           
           // convert to JSON and escape if this.escapeJSON is true
