@@ -223,6 +223,14 @@ SC.mixin(
           }
           valueL += left; valueT += top ;
         }
+        
+        // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
+        // clientLeft of the offset parent.
+        var offsetParent = element.offsetParent ;
+        if ((SC.Platform.Firefox >= 3) && offsetParent) {
+          valueT -= offsetParent.clientTop ;
+          valueL -= offsetParent.clientLeft;
+        }
       }
 
       // Safari fix
