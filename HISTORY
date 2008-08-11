@@ -1,4 +1,8 @@
+== sproutcore 0.9.15
 
+- Added titleize() helper for Strings.  Also imported various other helpers
+  from Prototype.
+  
 - Ajax requests sent by SproutCore's SC.Server object will now add a custom
   header "SproutCore-Version: 1.0" to every request.  You can use this to 
   detect requests coming from SproutCore on the server side. Fixes #85 [trek]
