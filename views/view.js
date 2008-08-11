@@ -711,7 +711,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
           this.viewFrameDidChange() ;
         }
         ret = this.getStyle(key) ;
-        ret = (ret === 'auto') ? null : parseInt(ret, 0) ;
+        ret = (ret === 'auto') ? null : Math.round(parseFloat(ret)) ;
 
       // all other properties just pass through (and do not change frame)
       } else {
@@ -960,7 +960,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       // impact the offset
       if (SC.Platform.Firefox) {
         var parent = el.offsetParent ;
-        if (parent && (Element.getStyle(parent, 'overflow') != 'visible')) {
+        var overflow = (parent) ? Element.getStyle(parent, 'overflow') : 'visible' ;
+        if (overflow && overflow !== 'visible') {
           var left = parseInt(Element.getStyle(parent, 'borderLeftWidth'),0) || 0 ;
           var top = parseInt(Element.getStyle(parent, 'borderTopWidth'),0) || 0 ;
           f.x += left; f.y += top ;
@@ -1087,7 +1088,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       // impact the offset
       if (SC.Platform.Firefox) {
         var parent = el.offsetParent ;
-        if (parent && (Element.getStyle(parent, 'overflow') != 'visible')) {
+        var overflow = (parent) ? Element.getStyle(parent, 'overflow') : 'visible' ;
+        if (overflow && overflow !== 'visible') {
           var left = parseInt(Element.getStyle(parent, 'borderLeftWidth'),0) || 0 ;
           var top = parseInt(Element.getStyle(parent, 'borderTopWidth'),0) || 0 ;
           f.x += left; f.y += top ;

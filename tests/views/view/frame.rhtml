@@ -10,101 +10,102 @@
 
 <script>
 
-// Test.context("CASE 1: Auto-layout view with no padding & no border", {
-//   
-//   "frame should reflect current offset settings": function() {
-//     var el = this.v.rootElement ;
-//     var f = { x: el.offsetTop, y: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight };
-//     console.log(this.v.get('frame').x) ;
-//     console.log('this.frame', this.v.get('frame')) ;
-//     SC.rectsEqual(f, this.v.get('frame')).shouldEqual(true) ;
-//   },
-//   
-//   "frame should change when CSS changed": function() {
-//     var origFrame = this.v.get('frame') ;
-//     
-//     this.v.addClassName('half') ;
-//     this.v.viewFrameDidChange() ;
+Test.context("CASE 1: Auto-layout view with no padding & no border", {
+  
+  "frame should reflect current offset settings": function() {
+    var el = this.v.rootElement ;
+    var f = { x: el.offsetTop, y: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight };
+    console.log(this.v.get('frame').x) ;
+    console.log('this.frame', this.v.get('frame')) ;
+    SC.rectsEqual(f, this.v.get('frame')).shouldEqual(true) ;
+  },
+  
+  "frame should change when CSS changed": function() {
+    var origFrame = this.v.get('frame') ;
+    
+    this.v.addClassName('half') ;
+    this.v.viewFrameDidChange() ;
+
+    SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(false) ;    
+    
+    // remove the class.  make sure we have restored the frame
+    this.v.removeClassName('half') ; //reset 
+    this.v.viewFrameDidChange() ; 
+    SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(true) ;    
+  },
+  
+  "setting frame should change style, even if it does not impact actual value": function() {
+    var f = this.v.get('frame') ;
+    var ret = this.v.set('frame', { x: 10, y: 10 }) ;
+
+    // it should change the style though
+    this.v.getStyle('left').shouldEqual('10px');  
+    this.v.getStyle('top').shouldEqual('10px');  
+
+    // change the top & left.  Since the layout is static here, this should not actually 
+    // change anything.
+    SC.rectsEqual(ret, f).shouldEqual(true) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case1'); }
+  
+});
 // 
-//     SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(false) ;    
-//     
-//     // remove the class.  make sure we have restored the frame
-//     this.v.removeClassName('half') ; //reset 
-//     this.v.viewFrameDidChange() ; 
-//     SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(true) ;    
-//   },
-//   
-//   "setting frame should change style, even if it does not impact actual value": function() {
-//     var f = this.v.get('frame') ;
-//     var ret = this.v.set('frame', { x: 10, y: 10 }) ;
-// 
-//     // it should change the style though
-//     this.v.getStyle('left').shouldEqual('10px');  
-//     this.v.getStyle('top').shouldEqual('10px');  
-// 
-//     // change the top & left.  Since the layout is static here, this should not actually 
-//     // change anything.
-//     SC.rectsEqual(ret, f).shouldEqual(true) ;
-//   },
-//   
-//   setup: function() { this.v = SC.page.get('case1'); }
-//   
-// });
-// // 
-// // CASE 2: Manual-layout of view
-// Test.context("CASE 2: Manual-layout of view", {
-// 
-//   "frame should reflect current offset settings at first": function() {
-//     var el = this.v.rootElement ;
-//     var f = { x: el.offsetTop, y: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight };
-//     SC.rectsEqual(f, this.v.get('frame')).shouldEqual(true) ;
-//   },
-// 
-//   "should get absolute positioning": function() {
-//     this.v.getStyle('position').shouldEqual('absolute') ;  
-//   },
-//   
-//   "frame should reflect set values exactly": function() {
-//     var f = { x: 10, y: 10, width: 20, height: 20 } ;
-//     var ret = this.v.set('frame', f);
-//     SC.rectsEqual(f,ret).shouldEqual(true) ;
-//     SC.rectsEqual(this.v.get('frame'), f).shouldEqual(true) ;
-//   },
-//   
-//   "actual offset should reflect set values exactly": function() {
-//     var f = { x: 10, y: 10, width: 20, height: 20 } ;
-//     var ret = this.v.set('frame', f);
-//     var el = this.v.rootElement;
-//     el.offsetLeft.shouldEqual(10) ;
-//     el.offsetTop.shouldEqual(10) ;
-//     el.offsetWidth.shouldEqual(20) ;
-//     el.offsetHeight.shouldEqual(20) ;
-//   },
-//   
-//   "applying CSS class should not change frame": function() {
-//     var f = this.v.get('frame') ;
-//     this.v.addClassName('half') ;
-//     SC.rectsEqual(this.v.get('frame'),f).shouldEqual(true) ;  
-//   },
-//   
-//   "getting frame should cache the value": function() {
-//     f = this.v.get('frame') ;
-//     this.assertNotNull(this.v._frame) ;
-//   },
-//   
-//   setup: function() { this.v = SC.page.get('case2'); }
-//   
-// });
+// CASE 2: Manual-layout of view
+Test.context("CASE 2: Manual-layout of view", {
+
+  "frame should reflect current offset settings at first": function() {
+    var el = this.v.rootElement ;
+    var f = { x: el.offsetTop, y: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight };
+    SC.rectsEqual(f, this.v.get('frame')).shouldEqual(true) ;
+  },
+
+  "should get absolute positioning": function() {
+    this.v.getStyle('position').shouldEqual('absolute') ;  
+  },
+  
+  "frame should reflect set values exactly": function() {
+    var f = { x: 10, y: 10, width: 20, height: 20 } ;
+    var ret = this.v.set('frame', f);
+    SC.rectsEqual(f,ret).shouldEqual(true) ;
+    SC.rectsEqual(this.v.get('frame'), f).shouldEqual(true) ;
+  },
+  
+  "actual offset should reflect set values exactly": function() {
+    var f = { x: 10, y: 10, width: 20, height: 20 } ;
+    var ret = this.v.set('frame', f);
+    var el = this.v.rootElement;
+    el.offsetLeft.shouldEqual(10) ;
+    el.offsetTop.shouldEqual(10) ;
+    el.offsetWidth.shouldEqual(20) ;
+    el.offsetHeight.shouldEqual(20) ;
+  },
+  
+  "applying CSS class should not change frame": function() {
+    var f = this.v.get('frame') ;
+    this.v.addClassName('half') ;
+    SC.rectsEqual(this.v.get('frame'),f).shouldEqual(true) ;  
+  },
+  
+  "getting frame should cache the value": function() {
+    f = this.v.get('frame') ;
+    this.assertNotNull(this.v._frame) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case2'); }
+  
+});
 
 // CASE 3: Manual-layout View with padding & border
 Test.context("CASE 3: Manual-layout of view with padding & border", {
 
   "frame size should include padding and border": function() {
-    var f = this.v.get('frame') ;
-    var el = this.v.rootElement ;
+    var f = v.get('frame') ;
+    var el = v.rootElement ;
 
-    Math.round(v.get('styleWidth')).shouldEqual(f.width - 24) ;
-    Math.round(v.get('styleHeight')).shouldEqual(f.height - 24) ;
+    //debugger ;
+    assertEqual(Math.round(v.get('styleWidth')), f.width-24, 'width') ;
+    assertEqual(Math.round(v.get('styleHeight')), f.height-24, 'height') ;
   },
   
   "changing frame size should subtract padding and border": function() {
@@ -155,11 +156,13 @@ Test.context("CASE 4: Absolute positioned Child view inside of view with overflo
 Test.context("CASE 5: Non-positioned Child view inside of view with overflow = hidden", {
 
   "frame origin should be 0,0 & size should match owner's innerFrame": function() {
+    SC.DEBUGIT = YES ;
     var vf = this.v.get('innerFrame') ;
     var f = this.v.child.get('frame') ;
     f.x.shouldEqual(0) ;
     f.y.shouldEqual(0) ;
     f.width.shouldEqual(vf.width) ;
+    SC.DEBUGIT = NO ;
   },
   
   "nested frame origin should be 1,1 to account for border offset of parent": function() {
