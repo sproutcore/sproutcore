@@ -207,9 +207,17 @@ SC.mixin(
 
     // add up all the offsets for the element.
     var element = el ;
+    var isFirefox3 = SC.Platform.Firefox >= 3 ;
     while (element) {
-      valueT += (element.offsetTop  || 0) + (element.clientTop  || 0);
-      valueL += (element.offsetLeft || 0) + (element.clientLeft || 0);
+      valueT += (element.offsetTop  || 0);
+      if (!isFirefox3 || (element !== el)) {
+        valueT += (element.clientTop  || 0);
+      }
+
+      valueL += (element.offsetLeft || 0);
+      if (!isFirefox3 || (element !== el)) {
+        valueL += (element.clientLeft || 0);
+      }
 
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset. 

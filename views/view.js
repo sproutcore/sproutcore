@@ -1323,7 +1323,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
           prect.x -= scrollFrame.x ; 
           prect.y -= scrollFrame.y ;
         }
-        
+
         // blend with current frame
         f = SC.intersectRects(f, prect) ;
       } else {
