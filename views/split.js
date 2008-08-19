@@ -17,15 +17,15 @@ SC.VERTICAL = 'vertical' ;
   instance of SC.SplitDividerView followed by a bottom right view.
 
   For example:
-  
+
   {{{
     <% view :workspace_container, :class => 'workspace_container' do %>
       <% split_view :workspace, :class => 'sc-app-workspace', :direction => :vertical do %>
-        <% view :top_view, :can_collapse => true, :min_thickness => 50 do %>
+        <% view :top_view, :can_collapse => false, :min_thickness => 50 do %>
           <p>My top view</p>
         <% end %>
         <%= split_divider_view %>
-        <% view :bottom_view, :can_collapse => false, :max_thickness => 100 do %>
+        <% view :bottom_view, :collapse_at_thickness => 100 do %>
           <p>My bottom view</p>
         <% end %>
       <% end%>
@@ -45,17 +45,36 @@ SC.VERTICAL = 'vertical' ;
   clicking on a divider again will restore a collapsed view.  A user can also
   start to drag the divider to show the collapsed view.
 
-  You can programmatically control collapsing behavior by setting a
-  canCollapse property on either of the top/left or right/bottom view
-  (if both are set it will take the top/left), and/or by setting a
-  canCollapseViews property on this split view, or by implementing the
+  You can programmatically control collapsing behavior using various properties
+  on either the split view or its child views, and/or by implementing the
   method splitViewCanCollapse on a delegate object.
 
   Finally, SplitViews can layout their child views either horizontally or
   vertically.  To choose the direction of layout set the layoutDirection
-  property on the view (or the :direction option in the view helper).
+  property on the view (or the :direction option with the view helper).
   This property should be set when the view is created. Changing it
   dynamically will have an unknown effect.
+
+  @property {Boolean} layoutDirection Either SC.HORIZONTAL or SC.VERTICAL.
+  Defaults to SC.HORIZONTAL. Use the :direction option with the split_view
+  viewhelper. 
+
+  @property {Boolean} canCollapseViews Set to NO when you don't want any of
+  the child views to collapse. Defaults to YES. Use the :can_collapse_views
+  option with the split_view viewhelper.
+
+  In addition, the top/left and bottom/right child views can have these
+  properties:
+  
+  @property {Number} minThickness The minimum thickness of the child view
+  @property {Number} maxThickness The maximum thickness of the child view
+  @property {Number} collapseAtThickness When the divider is dragged beyond
+  the point where the thickness of this view would become less than the value
+  of this property, then collapse the view.
+  @property {Boolean} canCollapse Set to NO when you don't want the child view
+  to collapse. Defaults to YES.
+  @property {Boolean} isCollapsed YES if the child view is collapsed, NO
+  otherwise.
 
   @extends SC.View
   @extends SC.DelegateSupport
@@ -120,7 +139,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     var br_view = views[2] ;  // bottom/right view
     var tl_view_thickness = this.getThicknessForView(tl_view);
     var br_view_thickness = this.getThicknessForView(br_view);
-    
+
     var minAvailable = this.getThicknessForView(views[1]) ;  // thickness of divider
     var maxAvailable = 0;
     if (!tl_view.get("isCollapsed")) maxAvailable += this.getThicknessForView(tl_view) ;
@@ -160,14 +179,19 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     // cannot be less than zero
     thickness = Math.max(0, thickness) ;
 
-    if ((proposedThickness <= 0) && this.canCollapseView(tl_view)) {
+    var tlCollapseAtThickness = tl_view.get('collapseAtThickness') ;
+    if (!tlCollapseAtThickness) tlCollapseAtThickness = 0 ;
+    var brCollapseAtThickness = br_view.get('collapseAtThickness') ;
+    brCollapseAtThickness = (brCollapseAtThickness == null) ? maxAvailable : (maxAvailable - brCollapseAtThickness);
+
+    if ((proposedThickness <= tlCollapseAtThickness) && this.canCollapseView(tl_view)) {
       // want to collapse top/left, check if this doesn't violate the max thickness of bottom/right
       max = br_view.get('maxThickness');
       if (!max || (minAvailable + maxAvailable) <= max) {
         // collapse top/left view, even if it has a minThickness
         thickness = 0 ;
       }
-    } else if (proposedThickness >= maxAvailable && this.canCollapseView(br_view)) {
+    } else if (proposedThickness >= brCollapseAtThickness && this.canCollapseView(br_view)) {
       // want to collapse bottom/right, check if this doesn't violate the max thickness of top/left
       max = tl_view.get('maxThickness');
       if (!max || (minAvailable + maxAvailable) <= max) {
@@ -190,9 +214,6 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
       // and layout
       this.layout() ;
     }
-
-    console.log(proposedThickness + " --> " + thickness + " isCollapsed[0]="+tl_view.get('isCollapsed')+ ", isCollapsed[2]="+br_view.get('isCollapsed'));
-
   },
 
 

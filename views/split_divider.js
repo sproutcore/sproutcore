@@ -86,7 +86,6 @@ SC.SplitDividerView = SC.View.extend(
       }
     } else {
       // uncollapse to the last thickness in it's uncollapsed state
-      console.log("Un: " + this._uncollapsedThickness);
       splitView.setThicknessForView(view, view._uncollapsedThickness) ;
       view._uncollapsedThickness = null ;
     }

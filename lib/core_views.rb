@@ -46,6 +46,7 @@ view_helper :view do
   # For SC.SplitView support
   property :max_thickness
   property :min_thickness
+  property :collapse_at_thickness
   property :can_collapse
   property :collapsed, :key => 'isCollapsed'
   
