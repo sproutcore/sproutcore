@@ -214,6 +214,8 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
       // and layout
       this.layout() ;
     }
+    
+    return thickness ;
   },
 
 

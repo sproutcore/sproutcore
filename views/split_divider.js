@@ -54,7 +54,7 @@ SC.SplitDividerView = SC.View.extend(
 
     var proposedThickness = this._originalTopLeftThickness + offset ;
     this._splitView.setThicknessForView(this._topLeftView, proposedThickness) ;
-
+    this._setCursorStyle() ;
     return true ;
   },
 
@@ -74,7 +74,7 @@ SC.SplitDividerView = SC.View.extend(
       isCollapsed = view.get('isCollapsed') || NO;
       if (!isCollapsed && !splitView.canCollapseView(view)) return;
     }
-    
+
     if (!isCollapsed) {
       // remember thickness in it's uncollapsed state
       view._uncollapsedThickness = splitView.getThicknessForView(view)  ;
@@ -89,8 +89,24 @@ SC.SplitDividerView = SC.View.extend(
       splitView.setThicknessForView(view, view._uncollapsedThickness) ;
       view._uncollapsedThickness = null ;
     }
-
+    this._setCursorStyle() ;
     return true ;
+  },
+
+  _setCursorStyle: function() {
+    var splitView = this.get('parentNode') ;
+    var direction = splitView.get('layoutDirection') ;
+    var tlView = this.get('previousSibling') ;
+    var brView = this.get('nextSibling') ;
+    tlThickness = splitView.getThicknessForView(tlView) ;
+    brThickness = splitView.getThicknessForView(brView) ;
+    if (tlView.get('isCollapsed') || tlThickness == tlView.get("minThickness") || brThickness == brView.get("maxThickness")) {
+      this.setStyle({cursor: direction == SC.HORIZONTAL ? "e-resize" : "s-resize" }) ;
+    } else if (brView.get('isCollapsed') || tlThickness == tlView.get("maxThickness") || brThickness == brView.get("minThickness")) {
+      this.setStyle({cursor: direction == SC.HORIZONTAL ? "w-resize" : "n-resize" }) ;
+    } else {
+      this.setStyle({cursor: direction == SC.HORIZONTAL ? "ew-resize" : "ns-resize" }) ;
+    }
   }
 
 });
