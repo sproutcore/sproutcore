@@ -234,9 +234,17 @@ body.sc-theme {
 .sc-theme .horizontal > .sc-split-divider-view {
 	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
 	border-left: 1px #888 solid;
-	border-right: 1px #888 solid ;
- 	z-index: 5;
+	border-right: 1px #888 solid;
+	z-index: 5;
 	width: 3px;
+}
+
+.sc-theme .vertical > .sc-split-divider-view {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0px -1397px;
+	border-top: 1px #888 solid;
+	border-bottom: 1px #888 solid;
+	z-index: 5;
+	height: 3px;
 }
 
 /* @end */
