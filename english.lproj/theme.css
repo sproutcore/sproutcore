@@ -231,7 +231,7 @@ body.sc-theme {
 
 /* @group SC.SplitView */
 
-.sc-theme .horizontal .sc-split-divider-view {
+.sc-theme .horizontal > .sc-split-divider-view {
 	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
 	border-left: 1px #888 solid;
 	border-right: 1px #888 solid ;

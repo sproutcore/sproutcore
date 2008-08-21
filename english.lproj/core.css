@@ -115,11 +115,11 @@
   position: absolute ;   
 }
 
-.sc-split-view.horizontal .sc-split-divider-view {
+.sc-split-view.horizontal > .sc-split-divider-view {
 	cursor: ew-resize;
 }
 
-.sc-split-view.vertical .sc-split-divider-view {
+.sc-split-view.vertical > .sc-split-divider-view {
 	cursor: ns-resize;
 }
 
