@@ -103,7 +103,7 @@ view_helper :view do
   css_styles << @style unless @style.nil?
   
   # Standard CSS attributes you can pass as attributes to standard view helpers.
-  common_css_keys = [:width, :height, :min_height, :max_height, :min_width, :max_width]
+  common_css_keys = [:width, :height, :min_height, :max_height, :min_width, :max_width, :top, :bottom, :right, :left]
   
   common_css_keys.each do | key |
     value = var key
@@ -281,8 +281,10 @@ view_helper :split_view do
   property :can_collapse_views
   
   var :direction, 'horizontal'
+  var :splitter, 'default'
   css_class_names << 'sc-split-view'
   css_class_names << @direction
+  css_class_names << @splitter
 end
 
 view_helper :split_divider_view do
