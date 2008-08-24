@@ -34,8 +34,9 @@ SC.SplitDividerView = SC.View.extend(
     // cache some info for later use.
     this._mouseDownLocation = Event.pointerLocation(evt) ;
     this._splitView = this.get('parentNode') ;
-    this._topLeftView = this.get('previousSibling') ;
-    this._originalTopLeftThickness = this._splitView.getThicknessForView(this._topLeftView) ;
+    this._tlView = this.get('previousSibling') ;
+    this._brView = this.get('nextSibling') ;
+    this._originalTopLeftThickness = this._splitView.getThicknessForView(this._tlView) ;
     this._direction = this._splitView.get('layoutDirection') ;
 
     // return true so we can track mouse dragged.
@@ -53,40 +54,37 @@ SC.SplitDividerView = SC.View.extend(
     }
 
     var proposedThickness = this._originalTopLeftThickness + offset ;
-    this._splitView.setThicknessForView(this._topLeftView, proposedThickness) ;
+    this._splitView.setThicknessForView(this._tlView, proposedThickness) ;
     this._setCursorStyle() ;
     return true ;
   },
 
   // clear left overs.
   mouseUp: function(evt) {
-    this._mouseDownLocation = this._splitView = this._topLeftView =
-    this._originalTopLeftThickness = this._direction = null ;
+    this._mouseDownLocation = this._originalTopLeftThickness = null ;
   },
 
   doubleClick: function(evt) {
-    var splitView = this.get('parentNode') ;
-
-    var view = this.get('previousSibling') ;
-    var isCollapsed = view.get('isCollapsed') || NO;
-    if (!isCollapsed && !splitView.canCollapseView(view)) {
-      view = this.get('nextSibling') ;
-      isCollapsed = view.get('isCollapsed') || NO;
-      if (!isCollapsed && !splitView.canCollapseView(view)) return;
+    var view = this._tlView ;
+    var isCollapsed = view.get('isCollapsed') || NO ;
+    if (!isCollapsed && !this._splitView.canCollapseView(view)) {
+      view = this._brView ;
+      isCollapsed = view.get('isCollapsed') || NO ;
+      if (!isCollapsed && !this._splitView.canCollapseView(view)) return;
     }
 
     if (!isCollapsed) {
       // remember thickness in it's uncollapsed state
-      view._uncollapsedThickness = splitView.getThicknessForView(view)  ;
+      view._uncollapsedThickness = this._splitView.getThicknessForView(view)  ;
       // and collapse
-      splitView.setThicknessForView(view, 0) ;
+      this._splitView.setThicknessForView(view, 0) ;
       // if however the splitview decided not to collapse, clear:
       if (!view.get("isCollapsed")) {
         view._uncollapsedThickness = null;
       }
     } else {
       // uncollapse to the last thickness in it's uncollapsed state
-      splitView.setThicknessForView(view, view._uncollapsedThickness) ;
+      this._splitView.setThicknessForView(view, view._uncollapsedThickness) ;
       view._uncollapsedThickness = null ;
     }
     this._setCursorStyle() ;
@@ -94,18 +92,20 @@ SC.SplitDividerView = SC.View.extend(
   },
 
   _setCursorStyle: function() {
-    var splitView = this.get('parentNode') ;
-    var direction = splitView.get('layoutDirection') ;
-    var tlView = this.get('previousSibling') ;
-    var brView = this.get('nextSibling') ;
-    tlThickness = splitView.getThicknessForView(tlView) ;
-    brThickness = splitView.getThicknessForView(brView) ;
-    if (tlView.get('isCollapsed') || tlThickness == tlView.get("minThickness") || brThickness == brView.get("maxThickness")) {
-      this.setStyle({cursor: direction == SC.HORIZONTAL ? "e-resize" : "s-resize" }) ;
-    } else if (brView.get('isCollapsed') || tlThickness == tlView.get("maxThickness") || brThickness == brView.get("minThickness")) {
-      this.setStyle({cursor: direction == SC.HORIZONTAL ? "w-resize" : "n-resize" }) ;
+    tlThickness = this._splitView.getThicknessForView(this._tlView) ;
+    brThickness = this._splitView.getThicknessForView(this._brView) ;
+    if (this._tlView.get('isCollapsed') ||
+        tlThickness == this._tlView.get("minThickness") ||
+        brThickness == this._brView.get("maxThickness"))
+    {
+      this.setStyle({cursor: this._direction == SC.HORIZONTAL ? "e-resize" : "s-resize" }) ;
+    } else if (this._brView.get('isCollapsed') ||
+               tlThickness == this._tlView.get("maxThickness") ||
+               brThickness == this._brView.get("minThickness"))
+    {
+      this.setStyle({cursor: this._direction == SC.HORIZONTAL ? "w-resize" : "n-resize" }) ;
     } else {
-      this.setStyle({cursor: direction == SC.HORIZONTAL ? "ew-resize" : "ns-resize" }) ;
+      this.setStyle({cursor: this._direction == SC.HORIZONTAL ? "ew-resize" : "ns-resize" }) ;
     }
   }
 
