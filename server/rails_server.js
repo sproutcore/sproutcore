@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('core') ;
+require('server/rest_server') ;
 
 /**
   @class
