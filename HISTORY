@@ -1,3 +1,7 @@
+== sproutcore 0.9.17
+
+* Fix require()'s for server/rest_server.js and server/rails_server.js
+
 == sproutcore 0.9.15
 
 - Added titleize() helper for Strings.  Also imported various other helpers
