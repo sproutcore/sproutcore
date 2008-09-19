@@ -100,14 +100,16 @@ SC.CouchdbServer = SC.Server.extend({
   listFor: function(opts) {
     var recordType = opts.recordType ;
     var resource = recordType.resourceURL() ; if (!resource) return false ;
-    
+    var recordName = recordType.toString()
     // TODO: check if the user has given a path to a view.
     // if so, call that view (with Method: GET)
     var url = resource + "/_temp_view"
     var content = {}
 
+    recordName = recordName.split('.').last() ;
+
     var context = {
-      recordType: recordType
+      recordType: recordName
     }
 
     // TODO: CouchDB will have to deal with these a little different i think
@@ -121,7 +123,7 @@ SC.CouchdbServer = SC.Server.extend({
 
     // Here is the couchdb temp view code.
     content.map = "function(doc) { " +
-      "if (doc.type == \'"+ recordType +"\' ){ "+
+      "if (doc.type == \'"+ recordName +"\' ){ "+
         "emit(doc._id, doc)"+
     "}}" ;
     // TODO: check if the user has given a path to a view.
@@ -191,7 +193,7 @@ SC.CouchdbServer = SC.Server.extend({
         if (!curRecords.hasOwnProperty(rec)) continue ;
         if (curRecords[rec].get('attributes')){
           atts = curRecords[rec].get('attributes');
-          atts.type = curRecords[rec]._type._objectClassName ;
+          atts.type = curRecords[rec]._type._objectClassName.split('.').last() ;
           //atts._id = curRecords[rec]._guid ; // we don't want to send an id to start with
           delete atts.guid ;
           delete atts.idDirty ; // Not sure what this is or where it comes from
