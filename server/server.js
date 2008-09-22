@@ -590,6 +590,19 @@ SC.Server = SC.Object.extend({
       
     // handle other values
     } else return [rootKey,params].join('=') ;
+  },
+  
+  init: function() {
+    sc_super();
+    SC.Server.addServer(this);
   }
     
 }) ;
+
+SC.Server.servers = [];
+
+SC.Server.addServer = function(server) {
+  var ary = SC.Server.servers;
+  ary.push(server);
+  SC.Server.servers = ary;
+};
