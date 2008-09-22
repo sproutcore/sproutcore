@@ -166,7 +166,8 @@ Test.Unit.Runner.prototype = {
       if (!rootLog) {
         var el = document.createElement('div') ;
         el.id = 'test-log' ;
-        $(el).addClassName('testlog') ;
+        var ell = $(el) ; // prevent strange type error when Chrome debug window is open
+        if (ell.addClassName) ell.addClassName('testlog') ;
         var body = document.getElementsByTagName('body')[0] ;
         body.insertBefore(el, body.firstChild) ;
         rootLog = el ;
