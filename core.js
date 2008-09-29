@@ -379,8 +379,6 @@ SC.mixin(/** @scope SC */ {
       default:
         return obj._guid = SC.generateGuid();
     }
-<<<<<<< HEAD:core.js
-=======
   },
   
   generateGuid: function() { return ("@" + (SC._nextGUID++)); },
@@ -423,7 +421,6 @@ SC.mixin(/** @scope SC */ {
     
     // finally, check their hash-codes
     } else return SC.hashFor(a) === SC.hashFor(b) ;
->>>>>>> master:core.js
   },
 
   _numberGuids: [],
