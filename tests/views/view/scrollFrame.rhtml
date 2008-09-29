@@ -24,7 +24,6 @@ Test.context("CASE 1: Non-scrollable view - all view fits within content", {
     // console.log('----') ;
     // console.log('f:' + $H(f).inspect()) ;
     // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
-    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
     // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
     
     SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
@@ -61,11 +60,11 @@ Test.context("CASE 2: Non-scrollable view with hidden overflow content", {
     var f = this.v.get('innerFrame') ;
     f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
     
-    console.log('CASE 2 ----') ;
-    console.log('f:' + $H(f).inspect()) ;
-    console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
-    console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
-    console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    // console.log('CASE 2 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
     
     SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
   },
@@ -112,11 +111,11 @@ Test.context("CASE 3: Scrollable view with hidden overflow content", {
     var f = this.v.get('innerFrame') ;
     f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
     
-    console.log('CASE 3 ----') ;
-    console.log('f:' + $H(f).inspect()) ;
-    console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
-    console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
-    console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    // console.log('CASE 3 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
     
     SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
   },
@@ -164,11 +163,11 @@ Test.context("CASE 4: Scrollable view with scrollbar and vertical overflow conte
     var f = this.v.get('innerFrame') ;
     f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
     
-    console.log('CASE 4 ----') ;
-    console.log('f:' + $H(f).inspect()) ;
-    console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
-    console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
-    console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    // console.log('CASE 4 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
     
     SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
   },
@@ -228,11 +227,11 @@ Test.context("CASE 5: Scrollable view with scrollbar and horizontal overflow con
     var f = this.v.get('innerFrame') ;
     f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
     
-    console.log('CASE 5 ----') ;
-    console.log('f:' + $H(f).inspect()) ;
-    console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
-    console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
-    console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    // console.log('CASE 5 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
     
     SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
   },
@@ -295,11 +294,11 @@ Test.context("CASE 6: Scrollable view with scrollbar and horizontal overflow con
     f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
     f.height = CHILD_HEIGHT ;
     
-    console.log('CASE 6 ----') ;
-    console.log('f:' + $H(f).inspect()) ;
-    console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
-    console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
-    console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    // console.log('CASE 6 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
     
     SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
   },

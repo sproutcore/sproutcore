@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('core') ;
+require('server/rest_server') ;
 
 /**
   @class
@@ -22,15 +22,15 @@ require('core') ;
     }) ;
   }}}
 
-  In order for SproutCore to send the authenticity token in the body of requests
-  there is one prerequisite: you must initialize the SproutCore app by setting
-  the following two variables:
+  In order for SproutCore to send the authenticity token in the body of 
+  requests there is one prerequisite: you must initialize the SproutCore app 
+  by setting the following two variables:
 
-  SC._rails_auth_token_name   Should be set to the name of the authenticity token
-  SC._rails_auth_token        Should be set to the value of the authenticity token
+  | SC.RAILS_AUTH_TOKEN_NAME  | Should be set to the name of the authenticity token |
+  | SC.AUTH_TOKEN | Should be set to the value of the authenticity token |
 
-  Following is a description of how this can be achieved. Stick the following code
-  in one of your controllers:
+  Following is a description of how this can be achieved. Stick the following 
+  code in one of your controllers:
 
   {{{
     # Passes the authenticity token for use in javascript
@@ -38,9 +38,9 @@ require('core') ;
       respond_to do |wants|
         wants.js do
           if protect_against_forgery?
-            render :text => "if (!SC) var SC = {};
-                             SC._rails_auth_token_name = '#{request_forgery_protection_token}';
-                             SC._rails_auth_token = '#{form_authenticity_token}';"
+            render :text => "var SC = SC || {};  
+              SC.RAILS_AUTH_TOKEN_NAME = '#{request_forgery_protection_token}';
+              SC.RAILS_AUTH_TOKEN = '#{form_authenticity_token}';"
           end
         end
       end
@@ -72,16 +72,11 @@ require('core') ;
 SC.RailsServer = SC.RestServer.extend({
 
   urlFor: function(resource, action, ids, params, method) {
-    if (method != 'get' && SC._rails_auth_token_name) {
-      params[SC._rails_auth_token_name] = SC._rails_auth_token;
+    if (method != 'get' && SC.RAILS_AUTH_TOKEN_NAME) {
+      params[SC.RAILS_AUTH_TOKEN_NAME] = SC.RAILS_AUTH_TOKEN;
     }
 
-    // following is a copy from SC.RestServer.urlFor, don't know how to call
-    // super with prototype..
-    url = resource;
-    if (ids && ids.length == 1) url = url + '/' + ids[0];
-    if (action && action != '') url = url + '/' + action;
-    return url;
+    return sc_super();
   }
 
 }) ;

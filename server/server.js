@@ -347,7 +347,7 @@ SC.Server = SC.Object.extend({
           var objects = [];
           for(rec in curRecords){
             if (!curRecords.hasOwnProperty(rec)) continue ;
-            objects.push(curRecords[rec].get('attributes'));
+            objects.push(curRecords[rec].get('attributes') || {});
           }
           
           // convert to JSON and escape if this.escapeJSON is true
@@ -590,6 +590,19 @@ SC.Server = SC.Object.extend({
       
     // handle other values
     } else return [rootKey,params].join('=') ;
+  },
+  
+  init: function() {
+    sc_super();
+    SC.Server.addServer(this);
   }
     
 }) ;
+
+SC.Server.servers = [];
+
+SC.Server.addServer = function(server) {
+  var ary = SC.Server.servers;
+  ary.push(server);
+  SC.Server.servers = ary;
+};

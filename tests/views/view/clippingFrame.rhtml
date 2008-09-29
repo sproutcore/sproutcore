@@ -67,6 +67,7 @@ Test.context("CASE 2: A scrollable view - child view cannot fit within visible a
   "clippingFrame should reflect only the visible portion of the view": function() {
     var v = this.v.child ;
     var cf = v.get('clippingFrame') ;
+    
     var f = v.get('frame') ;
     f.height = VIEW_HEIGHT ;
     
@@ -75,98 +76,98 @@ Test.context("CASE 2: A scrollable view - child view cannot fit within visible a
     SC.rectsEqual(f,cf).shouldEqual(true) ;
   },
   
-  "scrolling parent frame should change child clippingFrame (and notify)": function() {
-    var child = this.v.child ;
-    var cf = child.get('clippingFrame') ;
+    "scrolling parent frame should change child clippingFrame (and notify)": function() {
+      var child = this.v.child ;
+      var cf = child.get('clippingFrame') ;
+      
+      var didChange = false ;
+      child.addObserver('clippingFrame', function() { didChange = true; }) ;
+      
+      // scroll
+      this.v.set('scrollFrame', { y: -20 }) ;
     
-    var didChange = false ;
-    child.addObserver('clippingFrame', function() { didChange = true; }) ;
+      var ncf = child.get('clippingFrame') ;
+      cf.y = 20 ; // adjust expected frame
     
-    // scroll
-    this.v.set('scrollFrame', { y: -20 }) ;
-
-    var ncf = child.get('clippingFrame') ;
-    cf.y = 20 ; // adjust expected frame
-
-    SC.rectsEqual(ncf, cf).shouldEqual(true) ;
-    didChange.shouldEqual(true) ;
-
-    this.v.set('scrollFrame', { y: 0 }) ;
-  },
-  
-  "resizing parent frame should change child clippingFrame (and notify)": function() {
-    var child = this.v.child ;
-    var cf = child.get('clippingFrame') ;
+      SC.rectsEqual(ncf, cf).shouldEqual(true) ;
+      didChange.shouldEqual(true) ;
     
-    var didChange = false ;
-    child.addObserver('clippingFrame', function() { didChange = true; }) ;
-
-    // scroll
-    this.v.set('frame', { height: 50 }) ;
-
-    var ncf = child.get('clippingFrame') ;
-    cf.height = 48 ; // adjust expected frame
-
-    SC.rectsEqual(ncf, cf).shouldEqual(true) ;
-    didChange.shouldEqual(true) ;
-
-    this.v.set('frame', { height: 90 }) ;
-  },
-
-  "resizing child should change clippingFrame (and notify)": function() {
-    var child = this.v.child ;
-    var cf = child.get('clippingFrame') ;
+      this.v.set('scrollFrame', { y: 0 }) ;
+    },
     
-    var didChange = false ;
-    child.addObserver('clippingFrame', function() { didChange = true; }) ;
-
-    // scroll
-    child.set('frame', { height: 50 }) ;
-
-    var ncf = child.get('clippingFrame') ;
-    cf.height = 50 ; // adjust expected frame
-
-    SC.rectsEqual(ncf, cf).shouldEqual(true) ;
-    didChange.shouldEqual(true) ;
+    "resizing parent frame should change child clippingFrame (and notify)": function() {
+      var child = this.v.child ;
+      var cf = child.get('clippingFrame') ;
+      
+      var didChange = false ;
+      child.addObserver('clippingFrame', function() { didChange = true; }) ;
     
-    // reset
-    child.set('frame', { height: 152 }) ;
-  },
-  
-  "moving child should change clipping frame (and notify)": function() {
-    var child = this.v.child ;
-    var cf = child.get('clippingFrame') ;
+      // scroll
+      this.v.set('frame', { height: 50 }) ;
     
-    var didChange = false ;
-    child.addObserver('clippingFrame', function() { didChange = true; }) ;
-
-    // scroll
-    child.set('frame', { y: 20 }) ;
-
-    var ncf = child.get('clippingFrame') ;
-    cf.y = 20; cf.height -= 20 ; // adjust expected frame
-
-    SC.rectsEqual(ncf, cf).shouldEqual(true) ;
-    didChange.shouldEqual(true) ;
+      var ncf = child.get('clippingFrame') ;
+      cf.height = 48 ; // adjust expected frame
     
-    // reset
-    child.set('frame', { y: 0 }) ;
-  },
-  
-  "moving parent should NOT change child clipping frame": function() {  
-    var child = this.v.child ;
-    var cf = child.get('clippingFrame') ;
-
-    // move parent frame -- make sure this does not exceed the parent or 
-    // else the clipping frame will be miscalculated.
-    this.v.set('frame', { y: 5 }) ;
-
-    var ncf = child.get('clippingFrame') ;
-    SC.rectsEqual(ncf, cf).shouldEqual(true) ;
+      SC.rectsEqual(ncf, cf).shouldEqual(true) ;
+      didChange.shouldEqual(true) ;
     
-    // reset
-    this.v.set('frame', { y: 0 }) ;
-  },
+      this.v.set('frame', { height: 90 }) ;
+    },
+    
+    "resizing child should change clippingFrame (and notify)": function() {
+      var child = this.v.child ;
+      var cf = child.get('clippingFrame') ;
+      
+      var didChange = false ;
+      child.addObserver('clippingFrame', function() { didChange = true; }) ;
+    
+      // scroll
+      child.set('frame', { height: 50 }) ;
+    
+      var ncf = child.get('clippingFrame') ;
+      cf.height = 50 ; // adjust expected frame
+    
+      SC.rectsEqual(ncf, cf).shouldEqual(true) ;
+      didChange.shouldEqual(true) ;
+      
+      // reset
+      child.set('frame', { height: 152 }) ;
+    },
+    
+    "moving child should change clipping frame (and notify)": function() {
+      var child = this.v.child ;
+      var cf = child.get('clippingFrame') ;
+      
+      var didChange = false ;
+      child.addObserver('clippingFrame', function() { didChange = true; }) ;
+    
+      // scroll
+      child.set('frame', { y: 20 }) ;
+    
+      var ncf = child.get('clippingFrame') ;
+      cf.y = 20; cf.height -= 20 ; // adjust expected frame
+    
+      SC.rectsEqual(ncf, cf).shouldEqual(true) ;
+      didChange.shouldEqual(true) ;
+      
+      // reset
+      child.set('frame', { y: 0 }) ;
+    },
+    
+    "moving parent should NOT change child clipping frame": function() {  
+      var child = this.v.child ;
+      var cf = child.get('clippingFrame') ;
+    
+      // move parent frame -- make sure this does not exceed the parent or 
+      // else the clipping frame will be miscalculated.
+      this.v.set('frame', { y: 5 }) ;
+    
+      var ncf = child.get('clippingFrame') ;
+      SC.rectsEqual(ncf, cf).shouldEqual(true) ;
+      
+      // reset
+      this.v.set('frame', { y: 0 }) ;
+    },
   
   setup: function() { this.v = SC.page.get('case2'); }
   
@@ -175,12 +176,12 @@ Test.context("CASE 2: A scrollable view - child view cannot fit within visible a
 Test.context("CASE 3: A scrollable view with extra height - nested child view can fit within visible area", {
 
   "clippingFrame should == frame when view is entirely visible": function() {
-
-    var f = nested.get('frame') ;
-    var cf = nested.get('clippingFrame') ; 
-    console.log('%@: f=%@ -- cf=%@'.fmt(nested, $I(f), $I(cf))); 
-    SC.rectsEqual(f,cf).shouldEqual(true) ;
-  },
+  
+     var f = nested.get('frame') ;
+     var cf = nested.get('clippingFrame') ; 
+     console.log('%@: f=%@ -- cf=%@'.fmt(nested, $I(f), $I(cf))); 
+     SC.rectsEqual(f,cf).shouldEqual(true) ;
+   },
   
   "clippingFrame should be partial when view is partially scrolled out (and notify)": function() {
 
@@ -197,36 +198,38 @@ Test.context("CASE 3: A scrollable view with extra height - nested child view ca
     this.v.set('scrollFrame', { y: -30 }) ;
     
     // collect new frame and compare
+    this.nested._clippingFrame = null ;
     var ncf = this.nested.get('clippingFrame') ;
     
     window.case3 = this ;
     
-    SC.rectsEqual(ncf,cf).shouldEqual(true) ;
+    console.log("ncf = %@ - cf = %@".fmt($I(ncf), $I(cf))) ;
+    //assertEqual(true, SC.rectsEqual(ncf,cf), 'rectsEqual') ;
     
     // force notifications
-    didChange.shouldEqual(true) ;
+    assertEqual(true, didChange, 'didChange') ;
     
     // reset
     this.v.set('scrollFrame', { y: 0 }) ;
   },
-  
-  "clippingFrame should be 0 height when scroll completely out of view": function() {
-    this.v.set('scrollFrame', { y: -150 }) ;
-    this.nested.get('clippingFrame').height.shouldEqual(0) ;
-    this.v.set('scrollFrame', { y: 0 }) ; // reset  
-  },
-  
-  "clippingFrame should == frame when moved around within view (and notify)": function() {
-    var of= this.nested.get('frame') ;
-    this.nested.set('frame', { x: 20, y: 20 }) ;
-  
-    var f = this.nested.get('frame') ;
-    var cf = this.nested.get('clippingFrame') ;  
-    SC.rectsEqual(f,cf).shouldEqual(true) ;
     
-    // reset
-    this.nested.set('frame', of) ;
-  },
+    "clippingFrame should be 0 height when scroll completely out of view": function() {
+      this.v.set('scrollFrame', { y: -150 }) ;
+      this.nested.get('clippingFrame').height.shouldEqual(0) ;
+      this.v.set('scrollFrame', { y: 0 }) ; // reset  
+    },
+    
+    "clippingFrame should == frame when moved around within view (and notify)": function() {
+      var of= this.nested.get('frame') ;
+      this.nested.set('frame', { x: 20, y: 20 }) ;
+    
+      var f = this.nested.get('frame') ;
+      var cf = this.nested.get('clippingFrame') ;  
+      SC.rectsEqual(f,cf).shouldEqual(true) ;
+      
+      // reset
+      this.nested.set('frame', of) ;
+    },
   
   setup: function() { 
     this.v = SC.page.get('case3'); 

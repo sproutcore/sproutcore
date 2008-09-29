@@ -291,9 +291,9 @@ SC.Store = SC.Object.create(
   */  
   recordDidChange: function(rec) {
     // add to changed records.  This will eventually notify collections.
-    var guid = rec._storeKey() ;
-    changed = this.get('_changedRecords') || {};
-    records = changed[guid] || {} ;
+    var guid    = rec._storeKey(),
+        changed = this.get('_changedRecords') || {},
+        records = changed[guid] || {} ;
     records[rec._guid] = rec ;
 
     changed[guid] = records ;    

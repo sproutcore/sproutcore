@@ -233,6 +233,91 @@ var EnumerableTests = {
   "invokeWhile should call method on member objects until return does not match": function() {
     var ret = src.invokeWhile("OK", "invokeWhileTest", "item2") ;
     assertEqual("FAIL", ret, "return value");
+  },
+  
+  "get @min(balance) should return the minimum balance": function() {
+    assertEqual(1, src.get('@min(balance)')) ;
+  },
+  
+  "get @max(balance) should return the maximum balance": function() {
+    assertEqual(4, src.get('@max(balance)')) ;
+  },
+  
+  "get @minObject(balance) should return the record with min balance": function() {
+    assertEqual(src.objectAt(0), src.get('@minObject(balance)')) ;
+  },
+  
+  "get @maxObject(balance) should return the record with the max balance": function() {
+    assertEqual(src.objectAt(0), src.get('@maxObject(balance)')) ;
+  },
+  
+  "get @sum(balance) should return the sum of the balances.": function() {
+    assertEqual(1+2+3+4, src.get("@sum(balance)")) ;
+  },
+  
+  "get @average(balance) should return the average of balances": function() {
+    assertEqual((1+2+3+4)/4, src.get("@average(balance)")) ;
+  },
+  
+  "should invoke custom reducer": function() {
+    // install reducer method
+    src.reduceTest = reduceTestFunc ;
+    assertEqual("TEST", src.get("@test")) ;
+    assertEqual("prop", src.get("@test(prop)")) ;
+  },
+  "should trigger observer of reduced prop when array changes once property retrieved once": function() {
+
+    // get the property...this will install the reducer property...
+    src.get("@max(balance)") ;
+    
+    // install observer
+    var observedValue = null ;
+    src.addObserver("@max(balance)", function() { 
+      observedValue = src.get("@max(balance)");
+    }) ;
+    
+    src.addProbe('[]') ;
+    src.addProbe('@max(balance)');
+    
+    // add record to array
+    src.pushObject({ 
+      first: "John", 
+      gender: "male", 
+      californian: NO, 
+      ready: YES, 
+      visited: "Paris", 
+      balance: 5
+    }) ;
+    
+    //SC.NotificationQueue.flush() ; // force observers to trigger
+    
+    // observed value should now be set because the reduced property observer
+    // was triggered when we changed the array contents.
+    assertEqual(5, observedValue) ;
+  },
+  
+  "should trigger observer of reduced prop when array changes - even if you never retrieved the property before": function() {
+    // install observer
+    var observedValue = null ;
+    src.addObserver("@max(balance)", function() { 
+      observedValue = src.get("@max(balance)");
+    }) ;
+    
+    // add record to array
+    src.pushObject({ 
+      first: "John", 
+      gender: "male", 
+      californian: NO, 
+      ready: YES, 
+      visited: "Paris", 
+      balance: 5
+    }) ;
+    
+    //SC.NotificationQueue.flush() ; // force observers to trigger
+    
+    // observed value should now be set because the reduced property observer
+    // was triggered when we changed the array contents.
+    assertEqual(5, observedValue) ;
   }
   
 }; 
@@ -245,12 +330,30 @@ var DummyEnumerable = SC.Object.extend(SC.Enumerable, {
   
   objectAt: function(idx) { return this.content[idx]; },
   
-  nextObject: function(idx) { return this.content[idx]; }
+  nextObject: function(idx) { return this.content[idx]; },
+  
+  // add support for reduced properties.
+  unknownProperty: function(key, value) {
+    var ret = this.reducedProperty(key, value) ;
+    if (ret === undefined) {
+      if (value !== undefined) this[key] = value ;
+      ret = value ;
+    }
+    return ret ;
+  },
+  
+  pushObject: function(object) {
+    this.content.push(object) ;
+    this.enumerableContentDidChange() ;
+  }
+  
 }) ;
 
 var runFunc = function(a,b) { return ['DONE', a, b]; } ;
 var invokeWhileOK = function() { return "OK"; } ;
 var invokeWhileNotOK = function() { return "FAIL"; };
+var reduceTestFunc = function(prev, item, idx, e, pname) { return pname||'TEST'; } ;
+
 var CommonArray = [
   { first: "Charles", 
     gender: "male", 
@@ -259,7 +362,8 @@ var CommonArray = [
     visited: "Prague", 
     doneTravelling: NO, 
     run: runFunc,
-    invokeWhileTest: invokeWhileOK 
+    invokeWhileTest: invokeWhileOK,
+    balance: 1
   },
 
   { first: "Jenna", 
@@ -269,7 +373,8 @@ var CommonArray = [
     visited: "Prague", 
     doneTravelling: NO, 
     run: runFunc,
-    invokeWhileTest: invokeWhileOK 
+    invokeWhileTest: invokeWhileOK,
+    balance: 2 
   },
   
   { first: "Peter", 
@@ -279,8 +384,10 @@ var CommonArray = [
     visited: "Prague", 
     doneTravelling: NO, 
     run: runFunc,
-    invokeWhileTest: invokeWhileNotOK 
+    invokeWhileTest: invokeWhileNotOK,
+    balance: 3 
   },
+  
   { first: "Chris", 
     gender: "male", 
     californian: NO, 
@@ -288,12 +395,13 @@ var CommonArray = [
     visited: "Prague", 
     doneTravelling: NO, 
     run: runFunc,
-    invokeWhileTest: invokeWhileOK 
+    invokeWhileTest: invokeWhileOK,
+    balance: 4
   } ] ;
 
 Test.context("Real Array", SC.mixin(EnumerableTests, {
   
-  setup: function() { src = CommonArray; },
+  setup: function() { src = CommonArray.clone(); },
   
   teardown: function() { src = null ; }
 

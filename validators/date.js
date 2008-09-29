@@ -22,12 +22,6 @@ SC.Validator.Date = SC.Validator.extend(
   format: 'NNN d, yyyy h:mm:ss a',
   
   /**
-    If true, dates will be converted to a natural language format if
-    possible such as "Tomorrow" or "Today".
-  */
-  naturalLanguage: true,
-  
-  /**
     if we have a number, then convert to a date object.
   */
   fieldValueForObject: function(object, form, field) {
@@ -36,7 +30,7 @@ SC.Validator.Date = SC.Validator.extend(
       date = new Date(object) ;
     } else if (object instanceof Date) { date = object; }
       
-    if (date) object = date.format(this.get('format'),this.get('naturalLanguage')) ;
+    if (date) object = date.format(this.get('format')) ;
     
     return object ;
   },

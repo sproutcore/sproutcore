@@ -49,13 +49,12 @@ SC.BENCHMARK_OBJECTS = NO;
 
 */
 SC.Object = function(noinit) { 
-	if (noinit === SC.Object._noinit_) return ;
+	if (noinit === SC.Object._noinit_) return this ;
 	var ret = SC.Object._init.apply(this,SC.$A(arguments)) ;
   return ret ;
 };
 
-Object.extend(SC.Object, 
-/** @scope SC.Object */ {
+SC.mixin(SC.Object, /** @scope SC.Object */ {
 
 	_noinit_: '__noinit__',
 	
@@ -86,7 +85,7 @@ Object.extend(SC.Object,
      
     // build function.  copy class methods on to it.
     var ret = function(noinit) { 
-      if (noinit && (typeof(noinit) == 'string') && (noinit == SC.Object._noinit_)) return ;
+      if (noinit && (typeof(noinit) == 'string') && (noinit == SC.Object._noinit_)) return this ;
       var ret = SC.Object._init.apply(this,SC.$A(arguments)); 
       return ret ;
     };
@@ -172,6 +171,7 @@ Object.extend(SC.Object,
     a search.  This can be expensive the first time it is called.
   */
   objectClassName: function() {
+    if (!SC._onloadQueueFlushed) return ''; // class names are not available until SC.didLoad is called
     if (!this._objectClassName) this._findObjectClassNames() ;
     if (this._objectClassName) return this._objectClassName ;
     var ret = this ;
@@ -227,6 +227,28 @@ Object.extend(SC.Object,
     } ;
     
     searchObject(null, window, 2) ;
+    
+    // Internet Explorer doesn's loop over global variables...
+    if ( SC.isIE() ) {
+      searchObject('SC', SC, 2) ; // get names for the SC classes
+      
+      // get names for the model classes, including nested namespaces (untested)
+      for ( var i = 0; i < SC.Server.servers.length; i++ ) {
+        var server = SC.Server.servers[i];
+        if (server.prefix) {
+          for (var prefixLoc = 0; prefixLoc < server.prefix.length; prefixLoc++) {
+            var prefixParts = server.prefix[prefixLoc].split('.');
+            var namespace = window;
+            var namespaceName;
+            for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
+              namespace = namespace[prefixParts[prefixPartsLoc]] ;
+              namepaceName = prefixParts[prefixPartsLoc];
+            }
+            searchObject(namepaceName, namespace, 2) ;
+          }
+        }
+      }
+    }
   },
   
   toString: function() { return this.objectClassName(); },

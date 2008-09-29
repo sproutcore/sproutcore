@@ -837,6 +837,76 @@ SC.Observable = {
     return this ;
   },
 
+  /**  
+    Adds an observer on a property.
+    
+    This is the core method used to register an observer for a property.
+    
+    Once you call this method, anytime the key's value is set, your observer
+    will be notified.  Note that the observers are triggered anytime the
+    value is set, regardless of whether it has actually changed.  Your
+    observer should be prepared to handle that.
+    
+    @param key {String} the key to observer
+    @param func {String} the function to call when the key changes.
+    @returns {SC.Object}
+  */
+  addObserver: function(key,func) {
+    var kvo = this._kvo() ;
+
+    // if the key contains a '.', then create a chained observer.
+    key = key.toString() ;
+    var parts = key.split('.') ;
+    if (parts.length > 1) {
+      var co = SC._ChainObserver.createChain(this,parts,func) ;
+      co.masterFunc = func ;
+      var chainObservers = kvo.chainObservers[key] || [] ;
+      chainObservers.push(co) ;
+      kvo.chainObservers[key] = chainObservers ;
+
+    // otherwise, bind as a normal property
+    } else {      
+      
+      // if you add an observer beginning with '@', then we might need to 
+      // create or register the property...
+      if (this.reducedProperty && (key.charAt(0) === '@')) {
+        this.reducedProperty(key, undefined) ; // create if needed...
+      }
+      
+      var observers = kvo.observers[key] = (kvo.observers[key] || []) ;
+      var found = false; var loc = observers.length;
+      while(!found && --loc >= 0) found = (observers[loc] == func) ;
+      if (!found) observers.push(func) ;
+    }
+    
+    return this;
+
+  },
+
+  removeObserver: function(key,func) {
+    var kvo = this._kvo() ;
+
+    // if the key contains a '.', this is a chained observer.
+    key = key.toString() ;
+    var parts = key.split('.') ;
+    if (parts.length > 1) {
+      var chainObservers = kvo.chainObserver[key] || [] ;
+      var newObservers = [] ;
+      chainObservers.each(function(co) {
+        if (co.masterFunc != func) newObservers.push(co) ;
+      }) ;
+      kvo.chainObservers[key] = newObservers ;
+
+    // otherwise, just like a normal observer.
+    } else {
+      var observers = kvo.observers[key] || [] ;
+      observers = observers.without(func) ;
+      kvo.observers[key] = observers ;
+    }
+    
+    return this;
+  },
+
   addProbe: function(key) { this.addObserver(key,logChange); },
   removeProbe: function(key) { this.removeObserver(key,logChange); },
 
