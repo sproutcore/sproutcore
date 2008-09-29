@@ -3,12 +3,9 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-<<<<<<< HEAD:foundation/set.js
-=======
 require('mixins/enumerable') ;
 require('mixins/observable') ;
 
->>>>>>> master:foundation/set.js
 /**
   @class 
   
@@ -19,12 +16,6 @@ require('mixins/observable') ;
   can also iterate through a set just like an array, even accessing objects
   by index, however there is no gaurantee as to their order.
   
-<<<<<<< HEAD:foundation/set.js
-  Note that SC.Set is a primitive object, like and array or hash.  It is not
-  fully observable.
-  
-  @extends Object
-=======
   Note that SC.Set is a primitive object, like an array.  It does implement
   limited key-value observing support but it does not extend from SC.Object
   so you should not subclass it.
@@ -45,7 +36,6 @@ require('mixins/observable') ;
     
     // creates a set with four names in it.
     var names = SC.Set.create(["Charles", "Peter", "Chris", "Erich"]) ;
->>>>>>> master:foundation/set.js
 
     // creates a copy of the names set.
     var namesCopy = SC.Set.create(names);
@@ -87,17 +77,12 @@ require('mixins/observable') ;
 */
 SC.Set = function(items) {
   if (items && items.length > 0) {
-<<<<<<< HEAD:foundation/set.js
-    var idx = items.length ;
-    while(--idx >= 0) this.add(items.objectAt(idx)) ;
-=======
     var idx = (items.get) ? items.get('length') : items.length ;
     if (items.objectAt) {
       while(--idx >= 0) this.add(items.objectAt(idx)) ;
     } else {
       while(--idx >= 0) this.add(items[idx]) ;
     }
->>>>>>> master:foundation/set.js
   }
   return this ;
 } ;
@@ -141,20 +126,12 @@ SC.Set.prototype = {
   add: function(obj) {
     if (obj == null) return this; // cannot add null to a set.
     
-<<<<<<< HEAD:foundation/set.js
-    var guid = SC.guidFor(obj) ;
-=======
     var guid = SC.hashFor(obj) ;
->>>>>>> master:foundation/set.js
     var idx = this[guid] ;
     var len = this.length ;
     if ((idx == null) || (idx >= len)) {
       this[len] = obj ;
-<<<<<<< HEAD:foundation/set.js
-      this[SC.guidFor(obj)] = len ;
-=======
       this[guid] = len ;
->>>>>>> master:foundation/set.js
       this.length = len+1;
     }
     return this ;
@@ -201,27 +178,6 @@ SC.Set.prototype = {
   },
 
   /**
-<<<<<<< HEAD:foundation/set.js
-    Removes all the items in the passed array.
-  */
-  removeEach: function(objects) {
-    var idx = objects.length ;
-    while(--idx >= 0) this.remove(objects[idx]) ;
-  },  
-  
-  invokeWhile: function(state, methodName) {
-    var len = this.length;
-    var args = $A(arguments) ; args.shift(); args.shift() ;
-    
-    for(var idx=0;idx<len;idx++) {
-      var obj = this[idx] ;
-      var method = obj[methodName];
-      var ret = (method) ? method.apply(obj, args) : null ;
-      if (ret !== state) return ret ;
-    }
-    
-    return ret ;
-=======
     Removes an arbitrary object from the set and returns it.
     
     @returns {Object} an object from the set or null
@@ -230,7 +186,6 @@ SC.Set.prototype = {
     var obj = (this.length > 0) ? this[this.length-1] : null ;
     if (obj) this.remove(obj) ;
     return obj ;
->>>>>>> master:foundation/set.js
   },
   
   /**
@@ -249,11 +204,7 @@ SC.Set.prototype = {
   },
   
   toString: function() {
-<<<<<<< HEAD:foundation/set.js
-    return "SC.Set<%@>".fmt($A(this)) ;
-=======
     return "SC.Set<%@>".fmt(SC.SC.$A(this)) ;
->>>>>>> master:foundation/set.js
   }
   
 } ;
@@ -264,10 +215,7 @@ SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable) ;
 SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
 SC.Set.prototype.shift = SC.Set.prototype.pop ;
 
-<<<<<<< HEAD:foundation/set.js
-=======
 
->>>>>>> master:foundation/set.js
 /**
   To create a set, pass an array of items instead of a hash.
 */
