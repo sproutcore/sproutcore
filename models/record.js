@@ -249,7 +249,6 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function() {
     this.incrementProperty('changeCount') ;
-    if (SC.Store) SC.Store.recordDidChange(this) ;
   },
   
   /**
