@@ -501,7 +501,7 @@ SC.Record = SC.Object.extend(
 
   _matchValue: function(recValue,value) {
     // if we get here with recValue as a record, we must compare by guid, so grab it
-    if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.primaryKey) ;
+    if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.get('primaryKey')) ;
     var stringify = (value instanceof RegExp);
     if (stringify)  {
       if (recValue == null) return false ;
@@ -649,7 +649,7 @@ SC.Record = SC.Object.extend(
   _convertValueOut: function(value,typeConverter,recordType) {
     if (typeConverter) return typeConverter(value,'out') ;
     if (recordType) {
-      return (value) ? value.get(recordType.primaryKey) : null ;
+      return (value) ? value.get(recordType.primaryKey()) : null ;
     } else return value ;
   },
   
