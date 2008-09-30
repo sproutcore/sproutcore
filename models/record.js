@@ -216,6 +216,7 @@ SC.Record = SC.Object.extend(
     if (ret === undefined) {
       var attr = this._attributes ;
       ret = (attr) ? attr[key] : undefined ;
+      ret = ret || this[key] ; // also check properties...
       if (ret !== undefined) {
         var recordType = this._getRecordType(key+'Type') ;
         ret = this._propertyFromAttribute(ret, recordType) ;
