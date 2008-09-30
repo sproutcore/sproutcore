@@ -502,6 +502,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   itemViewForEvent: function(evt)
   {
     var view = SC.window.firstViewForEvent( evt );
+    
+    if (!view) return null; // workaround for error on IE8, see Ticket #169
+    
     // work up the view hierarchy to find a match...
     do {
       // item clicked was the ContainerView itself... i.e. the user clicked outside the child items
