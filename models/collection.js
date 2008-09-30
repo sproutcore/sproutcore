@@ -193,7 +193,8 @@ SC.Collection = SC.Object.extend(
   destroy: function() { SC.Store.removeCollection(this); return this; },
   
   /**
-    TODO: Needs documentation.
+    Creates a record and immediately adds it to the store. Any collections which
+    match this record will be notified immediately.
   */
   newRecord: function(settings) {
     if (!settings) settings = {} ;
@@ -202,6 +203,16 @@ SC.Collection = SC.Object.extend(
     var ret = this.recordType.create(settings);
     SC.Store.addRecord(ret) ; // this will add the record to the collection.
     return ret;
+  },
+
+  /**
+    This method removes a record from the store, destroying it.
+  */
+  removeRecords: function(objects) {
+    objects = $A(arguments).flatten();
+    for (var i=0; i<objects.length; i++) {
+     objects[i].destroy();
+    }
   },
   
   // ........................................
