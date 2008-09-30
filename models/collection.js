@@ -312,8 +312,8 @@ SC.Collection = SC.Object.extend(
       while ((records.length > 0) && goAgain) {
         var rec = records[0] ;
         if ((rec != working) && !rec.get('isDeleted') && rec.matchConditions(conditions)) {
-          if ((rec == working) || (rec.compareTo(working,order) <= 0)) {
-            if (rec != working) current.splice(loc,0,rec) ; // insert only if not the same. 
+          if (rec.compareTo(working,order) < 0) {
+            current.splice(loc,0,rec) ;
             loc++ ;
           } else goAgain = false ;
         }
