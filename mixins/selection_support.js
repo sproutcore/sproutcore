@@ -153,7 +153,7 @@ SC.SelectionSupport = {
   */
   hasSelection: function() {
     var sel = this.get('selection') ;
-    return sel && (sel.get('length') > 0) ;
+    return !!sel && (sel.get('length') > 0) ;
   }.property('selection')
     
 };
