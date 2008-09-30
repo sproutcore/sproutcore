@@ -425,11 +425,11 @@ a.regular.image span.label {
 } 
 
 .sc-theme a.radio.sel.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -792px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -808px;
 }
 
 .sc-theme a.radio.mixed.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -792px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -808px;
 }
 
 
