@@ -980,6 +980,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
       // if grouping is enabled, get the group value and layout based on that.
       if (groupBy && ((curGroupValue = (cur) ? cur.get(groupBy) : null) !== groupValue)) {
+        groupValue = curGroupValue ;
         var groupView = this.groupViewForGroupValue(groupValue) ;
         if (groupView) {
           this.layoutGroupView(groupView, groupValue, idx, false) ;
