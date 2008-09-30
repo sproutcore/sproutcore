@@ -742,7 +742,7 @@ SC.Record.mixin(
     var conditions = opts.conditions || {} ;
     opts.conditions = conditions ;
 
-    var privateKey = '_' + conditionKey ;
+    var privateKey = '_' + conditionKey + SC.generateGuid() ;
     return function() {
       if (!this[privateKey]) {
         var recordType = eval(recordTypeString);
