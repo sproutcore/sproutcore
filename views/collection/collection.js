@@ -682,7 +682,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
 
     var nowShowingRange = this.get('nowShowingRange') ;
-    fullUpdate = fullUpdate || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
+    fullUpdate = fullUpdate || (this.get('isDirty') && this._needsFullUpdate) || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
     this.set('nowShowingRange', range) ;
 
     // STEP 3: Update item views.
