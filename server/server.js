@@ -464,40 +464,17 @@ SC.Server = SC.Object.extend({
   // their data.
   refreshRecordsWithData: function(dataAry,recordType,cacheCode,loaded) {
     var server = this ;
-
-    // first, prepare each data item in the Ary.
-    dataAry = dataAry.map(function(data) {
-      
-      // camelize the keys received back.
-      data = server._camelizeData(data) ;
-
-      // convert the 'id' property to 'guid'
-      if (data.id) { data.guid = data.id; delete data.id; }
-      
-      // find the recordType
-      if (data.type) {
-        var recordName = data.type.capitalize() ;
-        if (server.prefix) {
-          for (var prefixLoc = 0; prefixLoc < server.prefix.length; prefixLoc++) {
-            var prefixParts = server.prefix[prefixLoc].split('.');
-            var namespace = window;
-            for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
-              var namespace = namespace[prefixParts[prefixPartsLoc]] ;
-            }
-            if (namespace != window) data.recordType = namespace[recordName] ;
-            if (data.recordType) break ;
-          }
-        } else data.recordType = window[recordName] ;
-        
-        if (!data.recordType) console.log('skipping undefined recordType:'+recordName) ;
-      } else data.recordType = recordType ;
-      
-      if (!data.recordType) return null; // could not process.
-      else return data ;
-    }).compact() ;
+    
+    // Loop through the data Array and prepare each element
+    var prepedDataAry = [];
+    for (var idx = 0; idx < dataAry.length; idx++)
+    {
+      var currElem = server._prepareDataForRecords(dataAry[idx], server, recordType);
+      if (currElem !== null) prepedDataAry.push(currElem);
+    }
     
     // now update.
-    SC.Store.updateRecords(dataAry,server,recordType,loaded) ;
+    SC.Store.updateRecords(prepedDataAry,server,recordType,loaded) ;
   },
 
   // ................................
