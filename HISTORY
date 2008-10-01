@@ -31,7 +31,7 @@
   (Ticket #178) [Maurits Lamers, Erich Ocean]
 
 - CollectionView doesn't properly redraw contents if it isn't visible at the time of a
-  content change (Ticket #123) [Christopher Swase]
+  content change (Ticket #123) [Christopher Swasey]
 
 - Split view can collapse when thickness becomes less than a given value
   (Ticket #137) [Lawrence Pit]
