@@ -4,6 +4,7 @@
 // ========================================================================
 
 require('foundation/object') ;
+require('models/store') ;
 
 /**
   @class
