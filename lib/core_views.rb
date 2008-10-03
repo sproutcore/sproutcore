@@ -44,10 +44,13 @@ view_helper :view do
   property :content_value_key
   
   # For SC.SplitView support
-  property :max_thickness
-  property :min_thickness
-  property :can_collapse
-  property :collapsed, :key => 'isCollapsed'
+  if parent_context && parent_context.view_helper_id == :split_view
+    property :max_thickness
+    property :min_thickness
+    property :collapse_at_thickness
+    property :can_collapse
+    property :collapsed, :key => 'isCollapsed'
+  end
   
   # General delegate support
   property(:delegate) { |x| x }
@@ -102,7 +105,7 @@ view_helper :view do
   css_styles << @style unless @style.nil?
   
   # Standard CSS attributes you can pass as attributes to standard view helpers.
-  common_css_keys = [:width, :height, :min_height, :max_height, :min_width, :max_width]
+  common_css_keys = [:width, :height, :min_height, :max_height, :min_width, :max_width, :top, :bottom, :right, :left]
   
   common_css_keys.each do | key |
     value = var key
@@ -114,8 +117,18 @@ view_helper :view do
   end
 
   # render the basic content
-  content { (@tag == 'img') ? %(<#{@tag} #{attributes} />) : %(#{ot}#{@inner_html}#{ct}) }
-  
+  content do
+    ret = ""
+
+    if parent_context  && parent_context.view_helper_id == :split_view
+      if parent_context.child_contexts.size == 2 && view_helper_id != :split_divider_view
+        # insert split divider view
+        ret << parent_context.render_source.split_divider_view(:current_context => parent_context)
+      end
+    end
+
+    ret << ((@tag == 'img') ? %(<#{@tag} #{attributes} />) : %(#{ot}#{@inner_html}#{ct}))
+  end
 end
 
 # Render an SC.LabelView.  Inherits from SC.View
@@ -279,12 +292,34 @@ view_helper :split_view do
   property :direction, :key => 'layoutDirection'
   property :can_collapse_views
   
-  var :direction, 'horizontal'
+  var :direction, :horizontal
+  var :splitter, :default
   css_class_names << 'sc-split-view'
   css_class_names << @direction
+  css_class_names << @splitter
 end
 
 view_helper :split_divider_view do
+  if pc = options[:current_context]
+    # pc == render_context of split_view
+
+    var :splitter_thickness, case pc.var(:splitter, :default)
+    when :thin : 1
+    when :thick : 9
+    else 5
+    end
+
+    if pc.var(:direction, :horizontal) == :horizontal
+      var :left, pc.child_contexts[0].var(:width, 150)
+      css_styles << "left: #{@left}px"
+      pc.child_contexts[1].css_styles << "left: #{@left + @splitter_thickness}px;"
+    else
+      var :top, pc.child_contexts[0].var(:height, 150)
+      css_styles << "top: #{@top}px"
+      pc.child_contexts[1].css_styles << "top: #{@top + @splitter_thickness}px;"
+    end
+  end
+
   view 'SC.SplitDividerView'
   css_class_names << 'sc-split-divider-view'
 end

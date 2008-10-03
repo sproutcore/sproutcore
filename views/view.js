@@ -949,7 +949,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     var f ;
     if (this._innerFrame == null) {  
-
+      
       // get the base frame
       // The _collectInnerFrame function is set at the bottom of this file
       // based on the browser type.
@@ -970,19 +970,34 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       
       // fix the x & y with the clientTop/clientLeft
       var clientLeft, clientTop ;
-      if (el.clientLeft == null) {
-        clientLeft = parseInt(this.getStyle('border-left-width'),0) || 0 ;
-      } else clientLeft = el.clientLeft ;
+      
+      if (SC.Platform.IE) {
+        if (!el.width) {
+          clientLeft = parseInt(this.getStyle('border-left-width'),0) || 0 ;
+        } else clientLeft = el.clientLeft ;
 
-      if (el.clientTop == null) {
-        clientTop = parseInt(this.getStyle('border-top-width'),0) || 0 ;
-      } else clientTop = el.clientTop ;
+        if (!el.height) {
+          clientTop = parseInt(this.getStyle('border-top-width'),0) || 0 ;
+        } else clientTop = el.clientTop ;
 
-      f.x += clientLeft; f.y += clientTop;
+        f.x += clientLeft; f.y += clientTop;
+      }
+      else {
+        if (el.clientLeft == null) {
+          clientLeft = parseInt(this.getStyle('border-left-width'),0) || 0 ;
+        } else clientLeft = el.clientLeft ;
+
+        if (el.clientTop == null) {
+          clientTop = parseInt(this.getStyle('border-top-width'),0) || 0 ;
+        } else clientTop = el.clientTop ;
+
+        f.x += clientLeft; f.y += clientTop;
+      }
       
       // cache this frame if using manual layout mode
       this._innerFrame = SC.cloneRect(f);
     } else f = SC.cloneRect(this._innerFrame) ;
+    // console.log('returning x:%@ y:%@ w:%@ h:%@'.fmt(f.x, f.y, f.width, f.height));
     return f ;
   }.property('frame'),
 
@@ -1049,7 +1064,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         while(--idx >= 0) {
           padding += parseInt(this.getStyle(SC.View.WIDTH_PADDING_STYLES[idx]), 0) || 0;
         }
-        style.width = (Math.floor(f.width) - padding).toString() + 'px' ;
+        var width = Math.floor(f.width) - padding ;
+        if (!isNaN(width)) style.width = width.toString() + 'px' ;
       }
       
       // Resize Height
@@ -1060,7 +1076,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         while(--idx >= 0) {
           padding += parseInt(this.getStyle(SC.View.HEIGHT_PADDING_STYLES[idx]), 0) || 0;
         }
-        style.height = (Math.floor(f.height) - padding).toString() + 'px' ;
+        var height = Math.floor(f.height) - padding ;
+        if(!isNaN(height)) style.height = height.toString() + 'px' ;
       }
 
       // now apply style change and clear the cached frame
@@ -1267,14 +1284,40 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     var f;
     if (this._scrollFrame == null) {
       var el = this.rootElement ;
-      f = this._collectFrame(function() {
-        return { 
-          x: 0 - el.scrollLeft, 
-          y: 0 - el.scrollTop, 
-          width: el.scrollWidth, 
-          height: el.scrollHeight 
+      var func;
+      if (SC.isIE()) {
+        func = function() {
+          var borderTopWidth = 0;
+          var borderBottomWidth = 0;
+          var borderLeftWidth = 0;
+          var borderRightWidth = 0;
+          
+          var overflow = el.currentStyle.overflow;
+          if ( overflow != 'hidden' && overflow != 'auto' ) {
+            borderTopWidth = parseInt(el.currentStyle.borderTopWidth, 0) || 0 ;
+            borderBottomWidth = parseInt(el.currentStyle.borderBottomWidth, 0) || 0 ;
+            borderLeftWidth = parseInt(el.currentStyle.borderLeftWidth, 0) || 0 ;
+            borderRightWidth = parseInt(el.currentStyle.borderRightWidth, 0) || 0 ;
+          }
+          return { 
+            x: 0 - el.scrollLeft, 
+            y: 0 - el.scrollTop, 
+            width: el.scrollWidth + borderLeftWidth + borderRightWidth, 
+            height: Math.max(el.scrollHeight, el.clientHeight) + borderTopWidth + borderBottomWidth
+          };
         };
-      }) ;
+      }
+      else {
+        func = function() {
+          return { 
+            x: 0 - el.scrollLeft, 
+            y: 0 - el.scrollTop, 
+            width: el.scrollWidth, 
+            height: el.scrollHeight 
+          };
+        };
+      }
+      f = this._collectFrame(func);
       
       // cache this frame if using manual layout mode
       this._scrollFrame = SC.cloneRect(f);
@@ -2207,18 +2250,15 @@ if (SC.Platform.IE) {
   // case always use the scrollWidth/Height.
   SC.View._collectInnerFrame = function() {
     var el = this.rootElement ;
-    var hasLayout = (el.currentStyle) ? el.currentStyle.hasLayout : NO ;
+    var hasLayout = (el.currentStyle) ? el.currentStyle.hasLayout : false ;
     var borderTopWidth = parseInt(el.currentStyle.borderTopWidth, 0) || 0 ;
     var borderBottomWidth = parseInt(el.currentStyle.borderBottomWidth, 0) || 0 ;
-    var scrollHeight = el.offsetHeight-borderTopWidth-borderBottomWidth;
-    if(el.clientWidth > el.scrollWidth)
-    {
-      scrollHeight-15;
-    }
+    var scrollHeight = el.offsetHeight - borderTopWidth - borderBottomWidth ;
+    if (el.clientWidth > el.scrollWidth) scrollHeight - 15 ;
     
     return { 
-      x: el.offsetLeft, 
-      y: el.offsetTop, 
+      x: el.offsetLeft,
+      y: el.offsetTop,
       width: (hasLayout) ? Math.min(el.scrollWidth, el.clientWidth) : el.scrollWidth, 
       height: (hasLayout) ? Math.min(scrollHeight, el.clientHeight) : scrollHeight
     };

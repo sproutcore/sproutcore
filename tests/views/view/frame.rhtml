@@ -15,8 +15,8 @@ Test.context("CASE 1: Auto-layout view with no padding & no border", {
   "frame should reflect current offset settings": function() {
     var el = this.v.rootElement ;
     var f = { x: el.offsetTop, y: el.offsetLeft, width: el.offsetWidth, height: el.offsetHeight };
-    console.log(this.v.get('frame').x) ;
-    console.log('this.frame', this.v.get('frame')) ;
+    // console.log(this.v.get('frame').x) ;
+    // console.log('this.frame', this.v.get('frame')) ;
     SC.rectsEqual(f, this.v.get('frame')).shouldEqual(true) ;
   },
   

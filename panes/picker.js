@@ -33,6 +33,7 @@ SC.PickerPaneView = SC.OverlayPaneView.extend({
     } else {
       var wsize = SC.window.get('size') ;
       var psize = picker.get('size') ;
+      origin = {};
       origin.x = (wsize.width - psize.width) / 2 ;
       origin.y = (wsize.height - psize.height) / 2 ;
     }

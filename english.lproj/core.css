@@ -109,22 +109,6 @@
 
 /* @end */
 
-/* @group SC.SplitView */
-
-.sc-split_view > * {
-  position: absolute ;   
-}
-
-.sc-split-view.horizontal .sc-split-divider-view {
-	cursor: ew-resize;
-}
-
-.sc-split-view.vertical .sc-split-divider-view {
-	cursor: ns-resize;
-}
-
-/* @end */
-
 /* @group SC.InlineTextFieldView */
 
 .sc-inline-text-field-view {

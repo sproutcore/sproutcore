@@ -1,0 +1,232 @@
+<% content_for('final') do %>
+<script>
+
+// create some item data...
+[
+  { guid: '1001', name: 'item one', group: '1' },
+  { guid: '1002', name: 'item two', group: '1' },
+  { guid: '1003', name: 'item three', group: '2' },
+  { guid: '1004', name: 'item four', group: '3' },
+  { guid: '1005', name: 'item five', group: '3' },
+  { guid: '1006', name: 'item six', group: '3' }
+].each(function(o){ SC.Store.addRecord(SC.Record.create(o)); });
+
+// a collection to hold the items...
+testCollection = SC.Record.collection();
+testCollection.refresh();
+
+// a controller for the collection...
+testController = SC.CollectionController.create();
+
+Test.context("A grouped SC.SourceListView with its content set to a SC.CollectionController", {
+
+  "Item views should be the same width as the SC.CollectionView": function()
+  {
+    var widthOfFirstItemView = function() {
+      var itemView = testSourceListView.get('itemViews').first() ;
+      return (itemView) ? itemView.get('frame').width : null ;
+    } ;
+    
+    widthOfFirstItemView().shouldEqual(testSourceListView.get('frame').width) ;
+
+    SC.Store.addRecord( SC.Record.create({ guid: '0999', name: 'item zero', group: '1' }) );
+    
+    widthOfFirstItemView().shouldEqual(testSourceListView.get('frame').width) ;
+  },
+	  
+	"Group views should be the same width as the SC.CollectionView": function()
+	{
+	    var widthOfFirstGroupView = function() {
+	      var groupView = testSourceListView.get('groupViews').first() ;
+	      return (groupView) ? groupView.get('frame').width : null ;
+	    } ;
+	    
+	    widthOfFirstGroupView().shouldEqual(testSourceListView.get('frame').width) ;
+	},	
+	
+  // setup: function()
+  // {
+  //   // add a scroll view wrapper.
+  //   scrollView = SC.ScrollView.create() ;
+  //   scrollView.set('frame', { x: 10, y: 10, width: 100, height: 100 });
+  //   SC.window.appendChild(scrollView);
+  //   
+  //   // create the view...
+  //   testSourceListView = SC.ListView.extend({
+  //     contentValueKey: 'name',
+  //      groupBy: 'group',
+  //     contentBinding: 'testController.arrangedObjects',
+  //     selectionBinding: 'testController.selection'
+  //   }).create();
+  // 
+  //   scrollView.set('content', testSourceListView) ;
+  // },
+  // 
+  // teardown: function()
+  // {
+  //   // tell SC.Store to dump all the records... 
+  //   // otherwise, since SC.Store is shared across all tests (yuk!) we'll get shared fixtues
+  //   testCollection.get('records').each(function(r){ SC.Store.removeRecord(r); });
+  // 
+  //   // remove the view from SC.window... again, no shared fixtures...
+  //   testSourceListView.removeFromParent();
+  //   scrollView.removeFromParent() ;
+  // 
+  //   delete testSourceListView;
+  //   delete testCollection;
+  //   delete testController;
+  //   delete scrollView ;
+  // }
+  
+  setup: function()
+  {
+    // add a scroll view wrapper.
+    scrollView = SC.ScrollView.create() ;
+    scrollView.set('frame', { x: 10, y: 10, width: 100, height: 30 }) ;
+    SC.window.appendChild(scrollView) ;
+    
+    // create the view...
+    testSourceListView = SC.SourceListView.create({
+      contentValueKey: 'name',
+      groupBy: 'group',
+      contentBinding: 'testController.arrangedObjects',
+      selectionBinding: 'testController.selection'
+    }) ;
+    scrollView.set('content', testSourceListView) ;
+
+    testController.set('content', testCollection) ;
+  },
+  
+  teardown: function()
+  {
+    // remove the view from SC.window
+    testSourceListView.removeFromParent() ;
+    scrollView.removeFromParent() ;
+    
+    delete testSourceListView ;
+    delete scrollView ;
+    
+    testController.set('content', null) ;
+  }
+  
+});
+
+Test.context("A grouped SC.SourceListView with its content set to a SC.CollectionController, after the containing SC.ScrollView has been resized", {
+  
+
+  "Item views should be the same width as the SC.CollectionView": function()
+  {
+    var widthOfFirstItemView = function() {
+      var itemView = testSourceListView.get('itemViews').first() ;
+      return (itemView) ? itemView.get('frame').width : null ;
+    } ;
+    
+    widthOfFirstItemView().shouldEqual(testSourceListView.get('frame').width) ;
+
+    SC.Store.addRecord( SC.Record.create({ guid: '0999', name: 'item zero', group: '1' }) );
+    
+    widthOfFirstItemView().shouldEqual(testSourceListView.get('frame').width) ;
+  },
+  
+	"Group views should be the same width as the SC.CollectionView": function()
+	{
+    var widthOfFirstGroupView = function() {
+      var groupView = testSourceListView.get('groupViews').first() ;
+      return (groupView) ? groupView.get('frame').width : null ;
+    } ;
+    
+    widthOfFirstGroupView().shouldEqual(testSourceListView.get('frame').width) ;
+	},	
+	
+  // setup: function()
+  // {
+  //   // add a scroll view wrapper.
+  //   scrollView = SC.ScrollView.create() ;
+  //   scrollView.set('frame', { x: 10, y: 10, width: 100, height: 100 });
+  //   SC.window.appendChild(scrollView);
+  //   
+  //   // create the view...
+  //   testSourceListView = SC.SourceListView.extend({
+  //     contentValueKey: 'name',
+  //      groupBy: 'group',
+  //     contentBinding: 'testController.arrangedObjects',
+  //     selectionBinding: 'testController.selection'
+  //   }).create();
+  // 
+  //   scrollView.set('content', testSourceListView) ;
+  //   
+  //   // create some item data...
+  //   [
+  //     { guid: '1001', name: 'item one', group: '1' },
+  //     { guid: '1002', name: 'item two', group: '1' },
+  //     { guid: '1003', name: 'item three', group: '2' },
+  //     { guid: '1004', name: 'item four', group: '3' },
+  //     { guid: '1005', name: 'item five', group: '3' },
+  //     { guid: '1006', name: 'item six', group: '3' }
+  //   ].each(function(o){ SC.Store.addRecord(SC.Record.create(o)); });
+  //   
+  //   // a collection to hold the items...
+  //   testCollection = SC.Record.collection();
+  //   testCollection.refresh();
+  // 
+  //   // a controller for the collection...
+  //   testController = SC.CollectionController.create();
+  //   testController.set('content', testCollection);
+  // 
+  //    // resize the scroll view
+  //    scrollView.viewFrameWillChange()
+  //    scrollView.set('frame', {x: 10, y: 10, width: 200, height: 100})
+  //    scrollView.viewFrameDidChange()
+  //   
+  // },
+  // teardown: function()
+  // {
+  //   // tell SC.Store to dump all the records... 
+  //   // otherwise, since SC.Store is shared across all tests (yuk!) we'll get shared fixtues
+  //   testCollection.get('records').each(function(r){ SC.Store.removeRecord(r); });
+  // 
+  //   // remove the view from SC.window... again, no shared fixtures...
+  //   testSourceListView.removeFromParent();
+  //   scrollView.removeFromParent() ;
+  // 
+  //   delete testSourceListView;
+  //   delete testCollection;
+  //   delete testController;
+  //   delete scrollView ;
+  // }
+  
+  setup: function()
+  {
+    // add a scroll view wrapper.
+    scrollView = SC.ScrollView.create() ;
+    scrollView.set('frame', { x: 10, y: 10, width: 100, height: 30 }) ;
+    SC.window.appendChild(scrollView) ;
+    
+    // create the view...
+    testSourceListView = SC.SourceListView.create({
+      contentValueKey: 'name',
+      groupBy: 'group',
+      contentBinding: 'testController.arrangedObjects',
+      selectionBinding: 'testController.selection'
+    }) ;
+    scrollView.set('content', testSourceListView) ;
+
+    testController.set('content', testCollection) ;
+  },
+  
+  teardown: function()
+  {
+    // remove the view from SC.window
+    testSourceListView.removeFromParent() ;
+    scrollView.removeFromParent() ;
+    
+    delete testSourceListView ;
+    delete scrollView ;
+    
+    testController.set('content', null) ;
+  }
+  
+});
+
+</script>
+<% end %>
