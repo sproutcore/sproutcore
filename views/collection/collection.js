@@ -502,6 +502,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   itemViewForEvent: function(evt)
   {
     var view = SC.window.firstViewForEvent( evt );
+    
+    if (!view) return null; // workaround for error on IE8, see Ticket #169
+    
     // work up the view hierarchy to find a match...
     do {
       // item clicked was the ContainerView itself... i.e. the user clicked outside the child items
@@ -682,7 +685,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
 
     var nowShowingRange = this.get('nowShowingRange') ;
-    fullUpdate = fullUpdate || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
+    fullUpdate = fullUpdate || (this.get('isDirty') && this._needsFullUpdate) || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
     this.set('nowShowingRange', range) ;
 
     // STEP 3: Update item views.
@@ -977,6 +980,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
       // if grouping is enabled, get the group value and layout based on that.
       if (groupBy && ((curGroupValue = (cur) ? cur.get(groupBy) : null) !== groupValue)) {
+        groupValue = curGroupValue ;
         var groupView = this.groupViewForGroupValue(groupValue) ;
         if (groupView) {
           this.layoutGroupView(groupView, groupValue, idx, false) ;

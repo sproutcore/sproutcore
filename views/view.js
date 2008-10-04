@@ -1064,7 +1064,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         while(--idx >= 0) {
           padding += parseInt(this.getStyle(SC.View.WIDTH_PADDING_STYLES[idx]), 0) || 0;
         }
-        style.width = (Math.floor(f.width) - padding).toString() + 'px' ;
+        var width = Math.floor(f.width) - padding ;
+        if (!isNaN(width)) style.width = width.toString() + 'px' ;
       }
       
       // Resize Height
@@ -1075,7 +1076,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
         while(--idx >= 0) {
           padding += parseInt(this.getStyle(SC.View.HEIGHT_PADDING_STYLES[idx]), 0) || 0;
         }
-        style.height = (Math.floor(f.height) - padding).toString() + 'px' ;
+        var height = Math.floor(f.height) - padding ;
+        if(!isNaN(height)) style.height = height.toString() + 'px' ;
       }
 
       // now apply style change and clear the cached frame

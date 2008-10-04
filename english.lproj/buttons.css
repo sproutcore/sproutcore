@@ -291,16 +291,19 @@ a.regular.image span.label {
 .sc-theme a.regular.segment.segment-inner,
 .sc-theme a.regular.segment.segment-left {
 	border-right: 1px #888 solid ;
+	height: 21px;
 }
 
 .sc-theme .sc-square-theme a.regular.segment.segment-inner,
 .sc-theme .sc-square-theme a.regular.segment.segment-left {
 	border-right: 1px solid #625560;
+	height: 21px;
 }
 
 .sc-theme .sc-square-theme a.regular.segment.segment-inner.disabled,
 .sc-theme .sc-square-theme a.regular.segment.segment-left.disabled {
 	border-right: 1px solid #888;
+	height: 21px;
 }
 
 .sc-theme a.segment span.label {
@@ -422,11 +425,11 @@ a.regular.image span.label {
 } 
 
 .sc-theme a.radio.sel.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -792px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -808px;
 }
 
 .sc-theme a.radio.mixed.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -792px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -808px;
 }
 
 

@@ -259,7 +259,7 @@ body.sc-theme {
 
 /* @group Root Form */
 
-input.show-hint {
+textarea.show-hint, input.show-hint {
 	color: #888;
 }
 

@@ -1,0 +1,160 @@
+<% # ========================================================================
+   # Collection Unit Test
+   # ========================================================================
+%>
+<% content_for('final') do %>
+
+<script>
+
+
+//
+//  core.js stub
+//
+CollectionTest = SC.Object.create({
+
+  server: SC.Server.create({ prefix: ['CollectionTest'] }),
+
+  FIXTURES: []
+  
+}) ;
+
+//
+//  fixtures stub
+//
+CollectionTest.FIXTURES = CollectionTest.FIXTURES.concat([
+  
+  { guid: '1', 
+    type: 'Employee', 
+    name: "Anne",
+    sex:  "Female"
+  },
+
+  { guid: '2', 
+    type: 'Employee', 
+    name: "Bob",
+    sex:  "Male"
+  },
+
+  { guid: '3', 
+    type: 'Employee', 
+    name: "Alice",
+    sex:  "Female"
+  },
+
+  { guid: '4', 
+    type: 'Employee', 
+    name: "Rachel",
+    sex:  "Female"
+  },
+
+  { guid: '5', 
+    type: 'Employee', 
+    name: "Michael",
+    sex:  "Male"
+  },
+
+  { guid: '6', 
+    type: 'Employee', 
+    name: "Barbara",
+    sex:  "Female"
+  },
+
+  { guid: '7', 
+    type: 'Employee', 
+    name: "Richard",
+    sex:  "Male"
+  }
+
+]);
+
+//
+// model classes
+//
+CollectionTest.Employee = SC.Record.extend({
+  
+}) ;
+
+//
+// main.js stub
+//
+CollectionTest.server.preload(CollectionTest.FIXTURES) ;
+
+Test.context("Test basic functions of a collection", {
+  
+  setup: function()
+  {
+    this.employees = CollectionTest.Employee.collection()
+  
+    this.anne = CollectionTest.Employee.find('1');
+    this.bob = CollectionTest.Employee.find('2');
+    this.alice = CollectionTest.Employee.find('3');
+    this.rachel = CollectionTest.Employee.find('4');
+    this.michael = CollectionTest.Employee.find('5');
+    this.barbara = CollectionTest.Employee.find('6');
+    this.richard = CollectionTest.Employee.find('7');
+  },
+  
+  teardown: function()
+  {
+    delete this.employees;
+    delete this.anne;
+    delete this.bob;
+    delete this.alice;
+    delete this.rachel;
+    delete this.michael;
+    delete this.barbara;
+    delete this.richard;
+  },
+
+  "Collection should initially be empty": function() {
+    assertNull(this.employees.get('records'));
+  },
+  
+  "Collection should have 7 records upon refresh": function() {
+    this.employees.refresh();
+    this.employees.get('records').length.shouldEqual(7);
+  },
+  
+  "Collections should NOT contain records that have NOT been added to the store": function() {
+    this.employees.refresh();
+    var originalLength = this.employees.get('records').length;
+    var newEmployee = CollectionTest.Employee.create({name: "Joe"});
+    this.employees.get('records').length.shouldEqual(originalLength);
+  },
+  
+  "Collections should contain records that have been added to the store": function() {
+    this.employees.refresh();
+    var originalLength = this.employees.get('records').length;
+    var newEmployee = CollectionTest.Employee.newRecord({name: "Joe"});
+    this.employees.get('records').length.shouldEqual(originalLength + 1);
+    newEmployee.destroy();
+  },
+  
+  "Collections should be properly ordered": function() {
+    var employeesByName = CollectionTest.Employee.collection({orderBy: ['name']});
+    employeesByName.refresh();
+    var names = employeesByName.get('records').map(function(e) { return e.get('name') });
+    assertIdentical(["Alice", "Anne", "Barbara", "Bob", "Michael", "Rachel", "Richard"].join(""), names.join(""));
+    
+    var employeesBySex = CollectionTest.Employee.collection({orderBy: ['sex']});
+    employeesBySex.refresh();
+    var sexes = employeesBySex.get('records').map(function(e) { return e.get('sex') });
+    assertIdentical(["Female", "Female", "Female", "Female", "Male", "Male", "Male"].join(""), sexes.join(""));
+  },
+  
+  "Collections should remain unchanged if a record is changed in a way that does not affect the order": function() {
+    var employeesBySex = CollectionTest.Employee.collection({orderBy: ['sex']});
+    employeesBySex.refresh();
+    var employeesOriginal = employeesBySex.get('records').map(function(e) { return e.get('guid') }).join(", ");
+
+    this.bob.set('name', 'Robert');
+    var employees = employeesBySex.get('records').map(function(e) { return e.get('guid') }).join(", ");
+
+    assertIdentical(employeesOriginal, employees);
+  }
+
+});
+
+</script>
+
+<% end %>

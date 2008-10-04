@@ -250,7 +250,7 @@ Test.context("SC.ObjectController", {
       var rcrds = Contact.collection();
       cc.set('content', rcrds);
       rcrds.refresh();
-      var single = Contact.create({'test' : 'NAME1', 'value' : 0});
+      var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
       
       rcrds.count().shouldEqual(1);
       

@@ -162,8 +162,8 @@ view_helper :text_area_view do
     property :value
   end
   
-  attribute :cols
-  attribute :rows
+  attribute :cols, 72
+  attribute :rows, 10
   attribute :validate
   attribute :label
   attribute :name

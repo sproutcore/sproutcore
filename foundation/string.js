@@ -44,10 +44,11 @@ SC.String = {
   */
   fmt: function() {
     // first, replace any ORDERED replacements.
+    var args = arguments;
     var str = this.gsub(/%@([0-9]+)/, function(m) {
-      return (arguments[parseInt(m[1],0)-1] || '').toString(); 
+      return (args[parseInt(m[1],0)-1] || '').toString(); 
     }) ;
-
+    
     // now, replace any remaining %@ items.  Use this indexOf() method b/c
     // it is faster than split().
     var ret = [] ;
@@ -60,7 +61,7 @@ SC.String = {
      loc = idx + 2 ; // 2 to skip '%@'.
      
      // add in replacement.
-     var value = arguments[argIdx++] ;
+     var value = args[argIdx++] ;
      if (value && value.toString) value = value.toString() ;
      ret.push(value) ;
     }

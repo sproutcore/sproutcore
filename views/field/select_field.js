@@ -135,7 +135,7 @@ SC.SelectFieldView = SC.FieldView.extend(
      }
    }
  
-   return value ;
+   return valueKey ? value : found ;
   },
 
   // when setting the raw value, convert from object...

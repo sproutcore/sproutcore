@@ -53,14 +53,11 @@ require('server/rest_server') ;
     map.connect 'auth-token.js', :controller => 'application', :action => 'auth_token'
   }}}
 
-  Copy-and-paste the default index template of SproutCore into your own
-  client app. Refer to your new default index template by modifying the
-  :layout option in your sc-config file. Lastly, within this default
-  index template add a line to call auth-token.js on your rails server.
-  For example:
-
+  Lastly, add a reference to the script to the :javascript_libs property
+  in your sc-config file, for example:
+  
   {{{
-    <script src="/sc/auth-token.js" type="text/javascript"></script>
+    c[:javascript_libs] = ['/sc/auth-token.js']
   }}}
 
 

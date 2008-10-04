@@ -40,8 +40,8 @@ SC.RadioGroupView = SC.View.extend({
    _isEnabledObserver: function() {
      var newFlag = this.get('isEnabled') ;
      if (!this.didChangeFor('_isEnabled','isEnabled')) return ;
-     if (this.radioButtons) {
-       this.radioButtons.invoke('set','isEnabled',newFlag) ;
+     if (this._radioButtons) {
+       this._radioButtons.invoke('set','isEnabled',newFlag) ;
      }
    }.observes('isEnabled')   
    

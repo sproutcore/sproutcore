@@ -216,6 +216,7 @@ SC.Record = SC.Object.extend(
     if (ret === undefined) {
       var attr = this._attributes ;
       ret = (attr) ? attr[key] : undefined ;
+      ret = ret || this[key] ; // also check properties...
       if (ret !== undefined) {
         var recordType = this._getRecordType(key+'Type') ;
         ret = this._propertyFromAttribute(ret, recordType) ;
@@ -248,7 +249,6 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function() {
     this.incrementProperty('changeCount') ;
-    if (SC.Store) SC.Store.recordDidChange(this) ;
   },
   
   /**
@@ -500,7 +500,7 @@ SC.Record = SC.Object.extend(
 
   _matchValue: function(recValue,value) {
     // if we get here with recValue as a record, we must compare by guid, so grab it
-    if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.primaryKey) ;
+    if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.get('primaryKey')) ;
     var stringify = (value instanceof RegExp);
     if (stringify)  {
       if (recValue == null) return false ;
@@ -648,7 +648,7 @@ SC.Record = SC.Object.extend(
   _convertValueOut: function(value,typeConverter,recordType) {
     if (typeConverter) return typeConverter(value,'out') ;
     if (recordType) {
-      return (value) ? value.get(recordType.primaryKey) : null ;
+      return (value) ? value.get(recordType.primaryKey()) : null ;
     } else return value ;
   },
   
@@ -742,7 +742,7 @@ SC.Record.mixin(
     var conditions = opts.conditions || {} ;
     opts.conditions = conditions ;
 
-    var privateKey = '_' + conditionKey ;
+    var privateKey = '_' + conditionKey + SC.generateGuid() ;
     return function() {
       if (!this[privateKey]) {
         var recordType = eval(recordTypeString);
@@ -781,7 +781,8 @@ SC.Record.Date = function(value,direction) {
   } else if (typeof(value) == "string") {
     // try to parse date. trim any decimal numbers at end since Rails sends
     // this sometimes.
-    var ret = Date.parse(value.replace(/\.\d+$/,'')) ;
+    var ret = Date.parseDate(value.replace(/\.\d+$/,'')) ;
+    if (!ret) ret = new Date(value);
     if (ret) value = ret ;
   }
   return value ;
