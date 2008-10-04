@@ -5,15 +5,18 @@
 
 require('foundation/object') ;
 
-// A relay simply allows you to connect the properties of two objects. 
-// Whenever the value of one property changes, the value of the other 
-// property will change also.  This allows you to design your system more
-// modular.
-//
-// You can also configure a relay to be one way so only the from -> to path
-// changes are permitted. We will also allow transforms and placeholder values 
-// eventually.
-
+/**
+  A binding simply connects the properties of two objects so that whenever the
+  value of one property changes, the other property will be changed also.  You
+  do not usually work with Binding objects directly but instead describe
+  bindings in your class definition using something like:
+  
+    valueBinding: "MyApp.someController.title"
+    
+  Whenever this object is created, a Binding object will be created that
+  "binds" the "value" property of the new object to the "title" property of
+  the object at "MyApp.someController".
+*/
 SC.Binding = SC.Object.extend({
   
   // ......................................
