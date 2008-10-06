@@ -327,23 +327,6 @@ Test.context("SC.ObjectController", {
       delete this.c.nonContentProp;
     },
 
-    "Content changes only fire observers on content properties": function () {
-      this.c.nonContentProp = null;
-      var observer = function () {
-         if (!arguments.callee.notified)
-           arguments.callee.notified = 0;
-
-         if (++arguments.callee.notified > 1)
-           throw 'Too many observer notifications.';
-         this.c.set('content', SC.Object.create());
-      }.bind(this);
-      this.c.addObserver('nonContentProp', observer);
-
-      this.c.set('nonContentProp', 'test');
-
-      delete this.c.nonContentProp;
-    },
-    
     setup: function() {
       this.c = SC.ObjectController.create() ;
       
