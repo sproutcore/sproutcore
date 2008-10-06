@@ -430,7 +430,7 @@ SC.mixin(/** @scope SC */ {
   /** 
     Empty function.  Useful for some operation. 
   */
-  K: function() {},
+  K: function() { return this; },
   
   /**
     Creates a new object with the passed object as its prototype.
