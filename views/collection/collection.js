@@ -1940,20 +1940,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
 
-   @param {Integer} idx the index from which to start looking for selectable items
-   @returns {Integer} the next selectable item index
+   @param {Integer} proposedIndex the desired index to select
+   @returns {Integer} the next selectable index. This will always be in the range of the bottom of the current selection index and the proposed index.
    @private
   */
-  _findNextSelectableItemFromIndex: function (idx) {
+  _findNextSelectableItemFromIndex: function (proposedIndex) {
     var content = this.get('content');
     var contentLength = content.get('length');
-    var rc = idx;
+    var bottom = this._indexOfSelectionTop();
 
-    while (rc < contentLength &&
-      this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(rc)) === NO) {
-      rc++;
+    while (proposedIndex < contentLength &&
+      this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
+      proposedIndex++;
     }
-    return (rc < contentLength) ? rc : idx;
+    return (proposedIndex < contentLength) ? proposedIndex : bottom;
   },
 
   /*
@@ -1961,20 +1961,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
 
-   @param {Integer} idx the index from which to start looking for selectable items
-   @returns {Integer} the previous selectable item index
+   @param {Integer} proposedIndex the desired index to select
+   @returns {Integer} the previous selectable index. This will always be in the range of the top of the current selection index and the proposed index.
    @private
   */
-  _findPreviousSelectableItemFromIndex: function (idx) {
+  _findPreviousSelectableItemFromIndex: function (proposedIndex) {
     var content = this.get('content');
     var contentLength = content.get('length');
-    var rc = idx;
+    var top = this._indexOfSelectionTop();
 
-    while (rc > 0 &&
-      this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(rc)) === NO) {
-      rc--;
+    while (proposedIndex > 0 &&
+           this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
+      proposedIndex--;
     }
-    return (rc > 0) ? rc : idx;
+    return (proposedIndex > 0) ? proposedIndex : top;
   },
 
   // if content value is editable and we have one item selected, then edit.
