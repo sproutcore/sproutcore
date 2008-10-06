@@ -196,6 +196,16 @@ SC.CollectionViewDelegate = {
     @param items {Array} the items to delete
     @returns {Boolean} YES if the operation succeeded, NO otherwise.
   */
-  collectionViewDeleteContent: function(view, items) { return NO; }
+  collectionViewDeleteContent: function(view, items) { return NO; },
 
+  /**
+    Called by the collection when attempting to select an item.
+
+    The default implementation always returns YES.
+
+    @param view {SC.CollectionView} the view collection view
+    @param item {Object} the item to be selected
+    @returns {Boolean} YES to alow, NO to prevent it
+  */
+  collectionViewShouldSelectItem: function (view, item) { return YES; }
 };

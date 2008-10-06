@@ -304,7 +304,29 @@ Test.context("SC.ObjectController", {
       obj.test.shouldEqual('NAME1') ;
       obj.didCommitChanges.shouldEqual(YES) ;      
     },
-    
+
+    "Should not set content properties when setting controller properties": function () {
+       this.c.set('content', SC.Object.create());
+       this.c.set('nonContentProp', 'test');
+       assertNull(this.c.getPath('content.nonContentProp'));
+
+       delete this.c.nonContentProp;
+     },
+
+    "Support observing non-content properties": function () {
+      var observer = new Test.Observer;
+
+      this.c.addObserver('nonContentProp', observer);
+
+      this.c.set('nonContentProp', 'test');
+      observer.notified.shouldEqual(1);
+
+      // Make sure we didn't pass this property on to content.
+      assertNull(this.c.get('content'));
+
+      delete this.c.nonContentProp;
+    },
+
     setup: function() {
       this.c = SC.ObjectController.create() ;
       

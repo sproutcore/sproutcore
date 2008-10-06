@@ -704,7 +704,7 @@ SC.Observable = {
   */
   getPath: function(path) {
     var tuple = SC.Object.tupleForPropertyPath(path, this) ;
-    if (tuple[0] === null) return undefined ;
+    if (tuple === null || tuple[0] === null) return undefined ;
     return tuple[0].get(tuple[1]) ;
   },
   
