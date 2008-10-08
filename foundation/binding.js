@@ -28,14 +28,197 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   bindings in your class definition using something like:
   
     valueBinding: "MyApp.someController.title"
+    
+  This will create a binding from "MyApp.someController.title" to the "value"
+  property of your object instance automatically.  Now the two values will be
+  kept in sync.
   
-  You can also create a binding with specific transforms by using the from()
-  and other helpers.  For example, the following will create a binding that 
-  allows only single values:
+  h2. Customizing Your Bindings
   
-    valueBinding: SC.Binding.from('MyApp.someController.title').single()
+  In addition to synchronizing values, bindings can also perform some basic 
+  transforms on values.  These transforms can help to make sure the data fed 
+  into one object always meets the expectations of that object regardless of
+  what the other object outputs.
+  
+  To customize a binding, you can use one of the many helper methods defined 
+  on SC.Binding like so:
+  
+    valueBinding: SC.Binding.single("MyApp.someController.title") 
+    
+  This will create a binding just like the example above, except that now the
+  binding will convert the value of MyApp.someController.title to a single 
+  object (removing any arrays) before applying it to the "value" property of
+  your object.
+  
+  You can also chain helper methods to build custom bindings like so:
+  
+    valueBinding: SC.Binding.single("MyApp.someController.title").notEmpty("(EMPTY)")
+    
+  This will force the value of MyApp.someController.title to be a single value
+  and then check to see if the value is "empty" (null, undefined, empty array,
+  or an empty string).  If it is empty, the value will be set to the string 
+  "(EMPTY)".
+  
+  h2. One Way Bindings
+  
+  One especially useful binding customization you can use is the oneWay() 
+  helper.  This helper tells SproutCore that you are only interested in 
+  receiving changes on the object you are binding from.  For example, if you
+  are binding to a preference and you want to be notified if the preference 
+  has changed, but your object will not be changing the preference itself, you
+  could do:
+  
+    bigTitlesBinding: SC.Binding.oneWay("MyApp.preferencesController.bigTitles")
+    
+  This way if the value of MyApp.preferencesController.bigTitles changes the
+  "bigTitles" property of your object will change also.  However, if you change
+  the value of your "bigTitles" property, it will not update the 
+  preferencesController.
+  
+  One way bindings are almost twice as fast to setup and twice as fast to 
+  execute because the binding only has to worry about changes to one side.
+  
+  You should consider using one way bindings anytime you have an object that 
+  may be created frequently and you do not intend to change a property; only 
+  to monitor it for changes. (such as in the example above).
       
+  h2. Adding Custom Transforms
+  
+  In addition to using the standard helpers provided by SproutCore, you can 
+  also defined your own custom transform functions which will be used to 
+  convert the value.  To do this, just define your transform function and add
+  it to the binding with the transform() helper.  The following example will 
+  not allow Integers less than ten.  Note that it checks the value of the 
+  bindings and allows all other values to pass:
+  
+  {{{
+    valueBinding: SC.Binding.transform(function(value, binding) {
+      return ((SC.$type(value) === T_NUMBER) && (value < 10)) ? 10 : value;      
+    }).from("MyApp.someController.value")
+  }}}
+  
+  If you would like to instead use this transform on a number of bindings,
+  you can also optionally add your own helper method to SC.Binding.  This
+  method should simply return the value of this.transform(). The example 
+  below adds a new helper called notLessThan() which will limit the value to
+  be not less than the passed minimum:
+  
+  {{{
+    SC.Binding.notLessThan = function(minValue) {
+      return this.transform(function(value, binding) {
+        return ((SC.$type(value) === T_NUMBER) && (value < minValue)) ? minValue : value ;
+      }) ;
+    } ;
+  }}}
+  
+  You could specify this in your core.js file, for example.  Then anywhere in 
+  your application you can use it to define bindings like so:
+  
+  {{{
+    valueBinding: SC.Binding.from("MyApp.someController.value").notLessThan(10)
+  }}}
+  
+  Also, remember that helpers are chained so you can use your helper along with
+  any other helpers.  The example below will create a one way binding that 
+  does not allow empty values or values less than 10:
+  
+  {{{
+    valueBinding: SC.Binding.oneWay("MyApp.someController.value").notEmpty().notLessThan(10)
+  }}}
+  
+  Note that the built in helper methods all allow you to pass a "from" property
+  path so you don't have to use the from() helper to set the path.  You can do
+  the same thing with your own helper methods if you like, but it is not 
+  required.
+  
+  h2. Creating Custom Binding Templates
+  
+  Another way you can customize bindings is to create a binding template.  A
+  template is simply a binding that is already partially or completely 
+  configured.  You can specify this template anywhere in your app and then use 
+  it instead of designating your own custom bindings.  This is a bit faster on
+  app startup but it is mostly useful in making your code less verbose.
+  
+  For example, let's say you will be frequently creating one way, not empty 
+  bindings that allow values greater than 10 throughout your app.  You could
+  create a binding template in your core.js like this:
+  
+    MyApp.LimitBinding = SC.Binding.oneWay().notEmpty().notLessThan(10);
+  
+  Then anywhere you want to use this binding, just refer to the template like 
+  so:
+  
+    valueBinding: MyApp.LimitBinding.beget("MyApp.someController.value")
+    
+  Note that when you use binding templates, it is very important that you always
+  start by using beget() to extend the template.  If you do not do this, you 
+  will end up using the same binding instance throughout your app which will 
+  lead to erratic behavior.
+  
+  h2. How to Manually Activate a Binding
 
+  All of the examples above show you how to configure a custom binding, but the
+  result of these customizations will be a binding template, not a fully active
+  binding.  The binding will actually become active only when you instantiate
+  the object the binding belongs to.  It is useful however, to understand what
+  actually happens when the binding is activated.
+  
+  For a binding to function it must have at least a "from" property and a "to"
+  property.  The from property path points to the object/key that you want to
+  bind from while the to path points to the object/key you want to bind to.  
+  
+  When you define a custom binding, you are usually describing the property 
+  you want to bind from (such as "MyApp.someController.value" in the examples
+  above).  When your object is created, it will automatically assign the value
+  you want to bind "to" based on the name of your binding key.  In the examples
+  above, during init, SproutCore objects will effectively call something like
+  this on your binding:
+  
+    binding = this.valueBinding.beget().to("value", this) ;
+    
+  This creates a new binding instance based on the template you provide, and 
+  sets the to path to the "value" property of the new object.  Now that the 
+  binding is fully configured with a "from" and a "to", it simply needs to be
+  connected to become active.  This is done through the connect() method:
+  
+    binding.connect() ;
+    
+  Now that the binding is connected, it will observe both the from and to side 
+  and relay changes.
+  
+  If you ever needed to do so (you almost never will, but it is useful to 
+  understand this anyway), you could manually create an active binding by 
+  doing the following:
+  
+  {{{
+    SC.Binding.from("MyApp.someController.value")
+     .to("MyApp.anotherObject.value")
+     .connect();
+  }}}
+     
+  You could also use the bind() helper method provided by SC.Object. (This is 
+  the same method used by SC.Object.init() to setup your bindings):
+  
+  {{{
+    MyApp.anotherObject.bind("value", "MyApp.someController.value") ;
+  }}}
+
+  Both of these code fragments have the same effect as doing the most friendly
+  form of binding creation like so:
+  
+  {{{
+    MyApp.anotherObject = SC.Object.create({
+      valueBinding: "MyApp.someController.value",
+      
+      // OTHER CODE FOR THIS OBJECT...
+      
+    }) ;
+  }}}
+  
+  SproutCore's built in binding creation method make it easy to automatically
+  create bindings for you.  You should always use the highest-level APIs 
+  available, even if you understand how to it works underneath.
+  
   
   @extends Object
   
@@ -49,12 +232,14 @@ SC.Binding = {
     
     The returned instance will also have its parentBinding property set to the 
     receiver.
-    
+
+    @param fromPath {String} optional from path.
     @returns {SC.Binding} new binding instance
   */
-  beget: function() {
+  beget: function(fromPath) {
     var ret = SC.beget(this) ;
     ret.parentBinding = this;
+    if (fromPath !== undefined) ret = ret.from(fromPath) ;
     return ret ;
   },
   
@@ -78,6 +263,12 @@ SC.Binding = {
     @returns {SC.Binding} this
   */
   from: function(propertyPath, root) {
+    
+    // if the propertyPath is null/undefined, return this.  This allows the
+    // method to be called from other methods when the fromPath might be 
+    // optional. (cf single(), multiple())
+    if (!propertyPath) return this ;
+    
     // beget if needed.
     var binding = (this === SC.Binding) ? this.beget() : this ;
     binding._fromPropertyPath = propertyPath ;
@@ -259,12 +450,20 @@ SC.Binding = {
     means that if you change the "to" side directly, the "from" side may have a
     different value.
     
+    @param fromPath {String} optional from path to connect.
     @param aFlag {Boolean} Optionally pass NO to set the binding back to two-way
     @returns {SC.Binding} this
   */
-  oneWay: function(aFlag) {
+  oneWay: function(fromPath, aFlag) {
+    
+    // If fromPath is a bool but aFlag is undefined, swap.
+    if ((aFlag === undefined) && ($type(fromPath) === T_BOOL)) {
+      aFlag = fromPath; fromPath = null ;
+    }
+    
     // beget if needed.
-    var binding = (this === SC.Binding) ? this.beget() : this ;
+    var binding = this.from(fromPath) ;
+    if (binding === SC.Binding) binding = binding.beget() ;
     binding._oneWay = (aFlag === undefined) ? YES : aFlag ;
     return binding ;
   },
@@ -324,11 +523,19 @@ SC.Binding = {
     Note that this is not a transform function since it will be called at the
     end of the transform chain.
     
+    @param fromPath {String} optional from path to connect.
     @param aFlag {Boolean} optionally pass NO to allow error objects again.
     @returns {SC.Binding} this
   */
-  noError: function(aFlag) {
-    var binding = (this === SC.Binding) ? this.beget() : this ;
+  noError: function(fromPath, aFlag) {
+    // If fromPath is a bool but aFlag is undefined, swap.
+    if ((aFlag === undefined) && ($type(fromPath) === T_BOOL)) {
+      aFlag = fromPath; fromPath = null ;
+    }
+    
+    // beget if needed.
+    var binding = this.from(fromPath) ;
+    if (binding === SC.Binding) binding = binding.beget() ;
     binding._noError = (aFlag === undefined) ? YES : aFlag ;
     return binding ;
   },
@@ -350,16 +557,17 @@ SC.Binding = {
     Note that this transform will only happen on forwarded valued.  Reverse
     values are send unchanged.
     
-    @param multiplePlaceholder {Object} optional placeholder value.
+    @param fromPath {String} from path or null
+    @param placeholder {Object} optional placeholder value.
     @returns {SC.Binding} this
   */
-  single: function(multiplePlaceholder) {
-    if (multiplePlaceholder === undefined) {
-      multiplePlaceholder = SC.MULTIPLE_PLACEHOLDER ;
+  single: function(fromPath, placeholder) {
+    if (placeholder === undefined) {
+      placeholder = SC.MULTIPLE_PLACEHOLDER ;
     }
-    return this.transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, isForward) {
       if (SC.isArray(value)) {
-        value = (value.length > 1) ? multiplePlaceholder : (value.length <= 0) ? null : (value.objectAt) ? value.objectAt(0) : value[0];
+        value = (value.length > 1) ? placeholder : (value.length <= 0) ? null : (value.objectAt) ? value.objectAt(0) : value[0];
       }
       return value ;
     }) ;
@@ -369,12 +577,13 @@ SC.Binding = {
     Adds a transform that will return the placeholder value if the value is 
     null, undefined, an empty array or an empty string.  See also notNull().
     
+    @param fromPath {String} from path or null
     @param placeholder {Object} optional placeholder.
     @returns {SC.Binding} this
   */
-  notEmpty: function(placeholder) {
+  notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, isForward) {
       if ((value === null) || (value === undefined) || (value === '') || (SC.isArray(value) && value.length === 0)) {
         value = placeholder ;
       }
@@ -386,12 +595,13 @@ SC.Binding = {
     Adds a transform that will return the placeholder value if the value is
     null.  Otherwise it will passthrough untouched.  See also notEmpty().
     
+    @param fromPath {String} from path or null
     @param placeholder {Object} optional placeholder;
     @returns {SC.Binding} this
   */
-  notNull: function(placeholder) {
+  notNull: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
-    return this.transform(function(value, isForward) {
+    return this.from(fromPath).transform(function(value, isForward) {
       if ((value === null) || (value === undefined)) value = placeholder ;
       return value ;
     }) ;
@@ -401,11 +611,11 @@ SC.Binding = {
     Adds a transform that will convert the passed value to an array.  If 
     the value is null or undefined, it will be converted to an empty array.
 
-    @param placeholder {Object} optional placeholder;
+    @param fromPath {String} optional from path
     @returns {SC.Binding} this
   */
-  multiple: function() {
-    return this.transform(function(value) {
+  multiple: function(fromPath) {
+    return this.from(fromPath).transform(function(value) {
       if (!SC.isArray(value)) value = (value == null) ? [] : [value] ;
       return value ;
     }) ;
@@ -416,10 +626,11 @@ SC.Binding = {
     an array it will return YES if array is not empty.  If the value is a string
     it will return YES if the string is not empty.
   
+    @param fromPath {String} optional from path
     @returns {SC.Binding} this
   */
-  bool: function() {
-    return this.transform(function(v) {
+  bool: function(fromPath) {
+    return this.from(fromPath).transform(function(v) {
       var t = $type(v) ;
       if (t === T_ERROR) return v ;
       return (t == T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
@@ -430,10 +641,11 @@ SC.Binding = {
     Adds a transform to convert the value to the inverse of a bool value.  This
     uses the same transform as bool() but inverts it.
     
+    @param fromPath {String} optional from path
     @returns {SC.Binding} this
   */
-  not: function() {
-    return this.transform(function(v) {
+  not: function(fromPath) {
+    return this.from(fromPath).transform(function(v) {
       var t = $type(v) ;
       if (t === T_ERROR) return v ;
       return !((t == T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
@@ -445,8 +657,8 @@ SC.Binding = {
     
     @returns {SC.Binding} this
   */
-  isNull: function() {
-    return this.transform(function(v) { 
+  isNull: function(fromPath) {
+    return this.from(fromPath).transform(function(v) { 
       var t = $type(v) ;
       return (t === T_ERROR) ? v : v == null ;
     });
