@@ -5,6 +5,22 @@
 
 require('foundation/object') ;
 
+/** 
+  Default placeholder for multiple values in bindings.
+*/
+SC.MULTIPLE_PLACEHOLDER = '@@MULT@@' ;
+
+/**
+  Default placeholder for null values in bindings.
+*/
+SC.NULL_PLACEHOLDER = '@@NULL@@' ;
+
+/**
+  Default placeholder for empty values in bindings.
+*/
+SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
+
+
 /**
   A binding simply connects the properties of two objects so that whenever the
   value of one property changes, the other property will be changed also.  You
@@ -12,377 +28,465 @@ require('foundation/object') ;
   bindings in your class definition using something like:
   
     valueBinding: "MyApp.someController.title"
-    
-  Whenever this object is created, a Binding object will be created that
-  "binds" the "value" property of the new object to the "title" property of
-  the object at "MyApp.someController".
-*/
-SC.Binding = SC.Object.extend({
   
-  // ......................................
-  // PROPERTIES
-  // Configure these on setup.  They should be either tuples or property
-  // paths.  The relay will try to observe both of them.
-  from: '', to: '',
+  You can also create a binding with specific transforms by using the from()
+  and other helpers.  For example, the following will create a binding that 
+  allows only single values:
   
-  // set to true if you don't want changes to -> from to relay.
-  oneWay: false,
-  
-  // set this to some value if you want a placeholder when the source
-  // value is an empty array or null (if you don't also set a nullPlaceholder)
-  emptyPlaceholder: null,
-  
-  // set this to some value if you want a placeholder value when the source
-  // value is null.  If you don't set this but you do set an emptyPlaceholder
-  // then the emptyPlaceholder will be used instead.
-  nullPlaceholder: null,
-  
-  // set this to some value if you want a placeholder when the value is 
-  // an array with multiple values.  If you set this, arrays with single
-  // values will be converted to indivdual objects.  If this is set ot null,
-  // multiple values will be allowed to pass untouched.
-  multiplePlaceholder: null,
-  
-  // set this to a function if you want a transform performed on an input
-  // value.  This transform is performed both ways and before placeholder
-  // values are applied.
-  transform: null,
-  
-  // ......................................
-  // METHODS
-  
-  // This will connect the relay so that properties can be forwarded.  If
-  // the items are already connected, this has no effect.
-  connect: function() {
-    if (this._connected) return ;
-    var funcs = this._boundObservers() ;
-    
-    SC.Observers.addObserver(this.get('from'),funcs.from) ;
-    SC.Observers.addObserver(this.get('to'),funcs.to) ;
-    this._connected = true ;
-    return this ;
-  },
-  
-  // this will disconnect the relay from its observing.  Call this if you 
-  // want to destroy the relay. This returns null so you can use it in
-  // assignment.
-  disconnect: function() {  
-    if (!this._connected) return ;
-    var funcs = this._boundObservers() ;
-    SC.Observers.removeObserver(this.get('from'),funcs.from) ;
-    SC.Observers.removeObserver(this.get('to'),funcs.to) ;
-    this._connected = false ;
-    return this ;
-  },
-  
-  // simulate a from -> to relay.
-  relay: function() { 
-    var tuple = SC.Object.tupleForPropertyPath(this.get('from')) ;
-    if (tuple) tuple = this._walkTuple(tuple) ;
-    if (tuple) this._fromObserver(tuple[0],tuple[1],tuple[0].get(tuple[1]));
-  },
-  
-  // ......................................
-  // INTERNAL METHODS
+    valueBinding: SC.Binding.from('MyApp.someController.title').single()
+      
 
-  init: function() {
-    arguments.callee.base.call(this) ;
-    this.connect() ;
-  },
   
-  _boundObservers: function() {
-    var ret = this._boundObserverFuncs ;
-    if (!ret) {
-      this._boundObserverFuncs = ret = {
-        from: this._fromObserver.bind(this),
-        to: this._toObserver.bind(this)
-      } ;
-    }
+  @extends Object
+  
+*/
+SC.Binding = {
+  
+  /**
+    This is the core method you use to create a new binding instance.  The
+    binding instance will have the receiver instance as its parent which means
+    any configuration you have there will be inherited.  
+    
+    The returned instance will also have its parentBinding property set to the 
+    receiver.
+    
+    @returns {SC.Binding} new binding instance
+  */
+  beget: function() {
+    var ret = SC.beget(this) ;
+    ret.parentBinding = this;
     return ret ;
   },
   
-  _fromObserver: function(target,key,value, propertyRevision) {
-    // to avoid echos, check against last toProperty revision.
-    if (propertyRevision <= this._lastFromPropertyRevision) return ;
-    this._lastFromPropertyRevision = propertyRevision ;
+  /**
+    Returns a builder function for compatibility.  
+  */
+  builder: function() {
+    var binding = this ;
+    var ret = function(fromProperty) { return binding.beget().from(fromProperty); };
+    ret.beget = function() { return binding.beget(); } ;
+    return ret ;
+  },
+  
+  /**
+    This will set "from" property path to the specified value.  It will not
+    attempt to resolve this property path to an actual object/property tuple
+    until you connect the binding.
     
-    // no need to forward values if they haven't actually changed.
-    if (!this._didChange(this._lastFromValue,value)) return ;
-    this._lastFromValue = value ;
+    @param propertyPath {String|Tuple} A property path or tuple
+    @param root {Object} optional root object to use when resolving the path.
+    @returns {SC.Binding} this
+  */
+  from: function(propertyPath, root) {
+    // beget if needed.
+    var binding = (this === SC.Binding) ? this.beget() : this ;
+    binding._fromPropertyPath = propertyPath ;
+    binding._fromRoot = root ;
+    bidning._fromTuple = null ;
+    return binding ;
+  },
+  
+  /**
+   This will set the "to" property path to the specified value.  It will not 
+   attempt to reoslve this property path to an actual object/property tuple
+   until you connect the binding.
     
-    // try to get the to object.
-    var tuple = SC.Object.tupleForPropertyPath(this.get('to')) ;
-    if (tuple) tuple = this._walkTuple(tuple) ;
-    if (tuple) {
+    @param propertyPath {String|Tuple} A property path or tuple
+    @param root {Object} optional root object to use when resolving the path.
+    @returns {SC.Binding} this
+  */
+  to: function(propertyPath, root) {
+    // beget if needed.
+    var binding = (this === SC.Binding) ? this.beget() : this ;
+    binding._toPropertyPath = propertyPath ;
+    binding._toRoot = root ;
+    binding._toTuple = null ; // clear out any existing one.
+    return binding ;
+  },
+  
+  /**
+    Attempts to connect this binding instance so that it can receive and relay
+    changes.  This method will raise an exception if you have not set the 
+    from/to properties yet.
+    
+    @returns {SC.Binding} this
+  */
+  connect: function() {
+    
+    // If the binding is already connected, do nothing.
+    if (this.isConnected) return this ;
 
-      // transform the value
-      var transformFunc = this.transform ;
-      if (transformFunc) value = transformFunc('to', key, value) ;
-      this._lastToValue = value ;
+    // try to connect the from side.
+    SC.Observers.addObserver(this._fromPropertyPath, this.propertyDidChange, this, this._fromRoot) ;
+    
+    // try to connect the to side
+    if (!this._oneWay) {
+      SC.Observers.addObserver(this._toPropertyPath, this.propertyDidChange, this, this._toRoot) ;  
+    }
+    
+    this.isConnected = YES ;
+    return this; 
+  },
+  
+  /**
+    Disconnects the binding instance.  Changes will no longer be relayed.  You
+    will not usually need to call this method.
+    
+    @returns {SC.Binding} this
+  */
+  disconnect: function() {
+    if (!this.isConnected) return this; // nothing to do.
 
-      // apply placeholder settings.
-      var pholder ;
+    SC.Observers.removeObserver(this._fromPropertyPath, this.propertyDidChange, this, this._fromRoot) ;
+    if (!this._oneWay) {
+      SC.Observers.removeObserver(this._toPropertyPath, this.propertyDidChange, this, this._toRoot) ;
+    }
+    
+    this.isConnected = NO ;
+    return this ;  
+  },
 
-      // handle empty placeholder.
-      if (value && (value == []) && (pholder = this.get('emptyPlaceholder'))) {
-        value = pholder ;
-
-      // handle multiple value placeholder
-      } else if (value && (value instanceof Array) && (pholder = this.get('multiplePlaceholder'))) {
-        value = (value.length == 1) ? value[0] : pholder ;
-      }
-
-      // now handle null placeholder.  This is used if one of these other 
-      // transforms results in a null value.
-      if ((value == null) && (pholder = this.get('nullPlaceholder') || this.get('emptyPlaceholder'))) {
-        value = pholder ;
-      }
-
-      tuple[0].set(tuple[1],value) ;      
-      this._lastToPropertyRevision = tuple[0].propertyRevision ;
-      
+  /**
+    This method is invoked whenever the value of a property changes.  It will 
+    save the property/key that has changed and relay it later.
+  */
+  fromPropertyDidChange: function(key, target) {
+    var v = target.get(key) ;
+    
+    // if the new value is different from the current binding value, then 
+    // schedule to register an update.
+    if (v !== this._bindingValue) {
+      this._bindingValue = v ;
+      SC.Binding._changeQueue.add(this) ; // save for later.  
     }
   },
 
-  _toObserver: function(target,key,value, propertyRevision) {
-    // try to get the to object.
-    if (this.get('oneWay')) return ; // block.
+  _changeQueue: SC.Set.create(),
+  _alternateChangeQueue: SC.Set.create(),
+  
+  /**
+    Call this method on SC.Binding to flush all bindings with changed pending.
+    
+    @returns {SC.Binding} this
+  */
+  flushPendingChanges: function() {
+    
+    // don't allow flushing more than one at a time
+    if (this._isFlushing) return ; 
+    this._isFlushing = YES ;
+    
+    // keep doing this as long as there are changes to flush.
+    var queue ;
+    while((queue = this._changeQueue).get('length') > 0) {
 
-    // to avoid echos, check against last toProperty revision.
-    if (propertyRevision <= this._lastToPropertyRevision) return ;
-    this._lastToPropertyRevision = propertyRevision ;
-    
-    // no need to forward values if they haven't actually changed.
-    if (!this._didChange(this._lastToValue,value)) return ;
-    this._lastToValue = value ;
-    
-    var tuple = SC.Object.tupleForPropertyPath(this.get('from')) ;
-    if (tuple) tuple = this._walkTuple(tuple) ;
-    if (tuple) {
-      // transform the value
-      var transformFunc = this.get('transform') ;
-      if (transformFunc) value = transformFunc('from', key, value) ;
-      this._lastFromValue = value ;
+      // first, swap the change queues.  This way any binding changes that
+      // happen while we flush the current queue can be queued up.
+      this._changeQueue = this._alternateChangeQueue ;
+      this._alternateChangeQueue = queue ;
       
-      // send along to the 'from' source.
-      tuple[0].set(tuple[1],value) ;
-      var result = tuple[0].get(tuple[1]);
-      if (result) this._lastFromPropertyRevision = result.propertyRevision ;
+      // next, apply any bindings in the current queue.  This may cause 
+      // additional bindings to trigger, which will end up in the new active 
+      // queue.
+      var binding ;
+      while(binding = queue.popObject()) binding.applyBindingValue() ;
       
-      // now that it has been set, the FROM object might not allow some 
-      // changes.  If that is the case, then we need to set this back on the
-      // sender.
-      if (result != value) {
-        target.set(key,result) ;
-        this._lastToPropertyRevision = target.propertyRevision ;
-      }
-      
-    } 
-  },
-  
-  _didChange: function(lastValue, newValue) {
-    if (newValue && lastValue) {
-      if (typeof(newValue) == typeof(lastValue)) {
-        if (lastValue == newValue) return false ;
-      }
-    } else if (((newValue === null) && (lastValue === null)) || ((newValue === undefined) && (lastValue === undefined))) return false ;
-    return true ;
-  },
-  
-  _lastToPropertyRevision: 0,
-  _lastFromPropertyRevision: 0,
-  
-  _walkTuple: function(tuple) {
-    var parts = tuple[1].split('.') ;
-    if (parts.length > 1) {
-      tuple = tuple.slice() ; // duplicate to avoid an error.
-      var obj = tuple[0] ;
-      tuple[1] = parts.pop() ;
-      for(var loc=0;(obj && (loc<parts.length));loc++) {
-        obj = obj.get(parts[loc]) ;
-      }
-      tuple[0] = obj ;
+      // now loop back and see if there are additional changes pending in the
+      // active queue.  Repeat this until all bindings that need to trigger have
+      // triggered.
     }
-    return (tuple[0] && tuple[1]) ? tuple : null ;
-  }
+
+    // clean up
+    this._isFlushing = NO ;
+    return this ;
+  },
   
-}) ;
+  /**
+    This method is called at the end of the Run Loop to relay the changed 
+    binding value from one side to the other.
+  */
+  applyBindingValue: function() {
+    
+    // compute the binding targets if needed.
+    this._computeBindingTargets() ;
+    
+    var v = this._bindingValue ;
+    
+    // the from property value will always be the binding value, update if 
+    // needed.
+    if (!this._oneWay && this._fromTarget) {
+      this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+    }
+    
+    // apply any transforms to get the to property value also
+    var transforms = this._transforms;
+    if (transforms) {
+      var len = transforms.length ;
+      for(var idx=0;idx<len;idx++) {
+        var transform = transforms[idx] ;
+        v = transform(v, this) ;
+      }
+    }
+    
+    // if error objects are not allowed, and the value is an error, then
+    // change it to null.
+    if (this._noError && $type(v) === T_ERROR) v = null ;
+    
+    // update the to value if needed.
+    if (this._toTarget) {
+      this._toTarget.setPathIfChanged(this._toPropertyKey, v) ;
+    }
+  },
 
-SC.Binding.mixin({
-  // Constant values for placeholders
-  MULTIPLE_PLACEHOLDER: '@@MULT@@',
-  NULL_PLACEHOLDER: '@@NULL@@',
-  EMPTY_PLACEHOLDER: '@@EMPTY@@'
-}) ;
+  _computeBindingTargets: function() {
+    if (!this._fromTarget) {
+      var tuple = SC.Object.tupleForPropertyPath(this._fromPropertyPath, this._fromRoot) ;
+      if (tuple) {
+        this._fromTarget = tuple[0]; this._fromPropertyKey = tuple[1] ;
+      }
+    }
 
-// This is the basic method you can use to create a builder function for
-// different types of relays.  The first param is either a string or a set
-// of properties.  The second param is a set of properties.  Both are opt.
-SC.Binding.From = function(from,opts) {
-  if (!opts) opts = {} ;
-  if (($type(from) == T_STRING) || ($type(from) == T_ARRAY)) {
-    opts.from = from ;
-  } else Object.extend(opts,from) ;
-  var ret = SC.Binding.extend(opts) ; 
-  return ret ;
+    if (!this._toTarget) {
+      var tuple = SC.Object.tupleForPropertyPath(this._toPropertyPath, this._toRoot) ;
+      if (tuple) {
+        this._toTarget = tuple[0]; this._toPropertyKey = tuple[1] ;
+      }
+    }
+  },
+  
+  /**
+    Configures the binding as one way.  A one-way binding will relay changes
+    on the "from" side to the "to" side, but not the other way around.  This
+    means that if you change the "to" side directly, the "from" side may have a
+    different value.
+    
+    @param aFlag {Boolean} Optionally pass NO to set the binding back to two-way
+    @returns {SC.Binding} this
+  */
+  oneWay: function(aFlag) {
+    // beget if needed.
+    var binding = (this === SC.Binding) ? this.beget() : this ;
+    binding._oneWay = (aFlag === undefined) ? YES : aFlag ;
+    return binding ;
+  },
+  
+  /**
+    Adds the specified transform function to the array of transform functions.
+    
+    The function you pass must have the following signature:
+    
+    {{{
+      function(value) {} ;
+    }}}
+    
+    It must return either the transformed value or an error object.  
+        
+    Transform functions are chained, so they are called in order.  If you are
+    extending a binding and want to reset the transforms, you can call
+    resetTransform() first.
+    
+    @param transformFunc {Function} the transform function.
+    @returns {SC.Binding} this
+  */
+  transform: function(transformFunc) {
+    var binding = (this === SC.Binding) ? this.beget() : this ;
+    var t = binding._transforms ;
+    
+    // clone the transform array if this comes from the parent
+    if (t && (t === binding.parentBinding._transform)) {
+      t = binding._transforms = t.slice() ;
+    }
+    
+    // create the transform array if needed.
+    if (!t) t = binding._transforms = [] ;
+    
+    // add the transform function
+    t.push(transformFunc) ;
+    return binding;
+  },
+  
+  /**
+    Resets the transforms for the binding.  After calling this method the 
+    binding will no longer transform values.  You can then add new transforms
+    as needed.
+  
+    @returns {SC.Binding} this
+  */
+  resetTransforms: function() {
+    var binding = (this === SC.Binding) ? this.beget() : this ;
+    binding._transforms = null ; return binding ;
+  },
+  
+  /**
+    Specifies that the binding should not return error objects.  If the value
+    of a binding is an Error object, it will be transformed to a null value
+    instead.
+    
+    Note that this is not a transform function since it will be called at the
+    end of the transform chain.
+    
+    @param aFlag {Boolean} optionally pass NO to allow error objects again.
+    @returns {SC.Binding} this
+  */
+  noError: function(aFlag) {
+    var binding = (this === SC.Binding) ? this.beget() : this ;
+    binding._noError = (aFlag === undefined) ? YES : aFlag ;
+    return binding ;
+  },
+  
+  /**
+    Adds a transform to the chain that will allow only single values to pass.
+    This will allow single values, nulls, and error values to pass through.  If
+    you pass an array, it will be mapped as so:
+    
+    {{{
+      [] => null
+      [a] => a
+      [a,b,c] => Multiple Placeholder
+    }}}
+    
+    You can pass in an optional multiple placeholder or it will use the 
+    default.
+    
+    Note that this transform will only happen on forwarded valued.  Reverse
+    values are send unchanged.
+    
+    @param multiplePlaceholder {Object} optional placeholder value.
+    @returns {SC.Binding} this
+  */
+  single: function(multiplePlaceholder) {
+    if (multiplePlaceholder === undefined) {
+      multiplePlaceholder = SC.MULTIPLE_PLACEHOLDER ;
+    }
+    return this.transform(function(value, isForward) {
+      if (SC.isArray(value)) {
+        value = (value.length > 1) ? multiplePlaceholder : (value.length <= 0) ? null : (value.objectAt) ? value.objectAt(0) : value[0];
+      }
+      return value ;
+    }) ;
+  },
+  
+  /** 
+    Adds a transform that will return the placeholder value if the value is 
+    null, undefined, an empty array or an empty string.  See also notNull().
+    
+    @param placeholder {Object} optional placeholder.
+    @returns {SC.Binding} this
+  */
+  notEmpty: function(placeholder) {
+    if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
+    return this.transform(function(value, isForward) {
+      if ((value === null) || (value === undefined) || (value === '') || (SC.isArray(value) && value.length === 0)) {
+        value = placeholder ;
+      }
+      return value ;
+    }) ;
+  },
+  
+  /**
+    Adds a transform that will return the placeholder value if the value is
+    null.  Otherwise it will passthrough untouched.  See also notEmpty().
+    
+    @param placeholder {Object} optional placeholder;
+    @returns {SC.Binding} this
+  */
+  notNull: function(placeholder) {
+    if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
+    return this.transform(function(value, isForward) {
+      if ((value === null) || (value === undefined)) value = placeholder ;
+      return value ;
+    }) ;
+  },
+
+  /** 
+    Adds a transform that will convert the passed value to an array.  If 
+    the value is null or undefined, it will be converted to an empty array.
+
+    @param placeholder {Object} optional placeholder;
+    @returns {SC.Binding} this
+  */
+  multiple: function() {
+    return this.transform(function(value) {
+      if (!SC.isArray(value)) value = (value == null) ? [] : [value] ;
+      return value ;
+    }) ;
+  },
+  
+  /**
+    Adds a transform to convert the value to a bool value.  If the value is
+    an array it will return YES if array is not empty.  If the value is a string
+    it will return YES if the string is not empty.
+  
+    @returns {SC.Binding} this
+  */
+  bool: function() {
+    return this.transform(function(v) {
+      var t = $type(v) ;
+      if (t === T_ERROR) return v ;
+      return (t == T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
+    }) ;
+  },
+  
+  /**
+    Adds a transform to convert the value to the inverse of a bool value.  This
+    uses the same transform as bool() but inverts it.
+    
+    @returns {SC.Binding} this
+  */
+  not: function() {
+    return this.transform(function(v) {
+      var t = $type(v) ;
+      if (t === T_ERROR) return v ;
+      return !((t == T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
+    }) ;
+  },
+  
+  /**
+    Adds a transform that will return YES if the value is null, NO otherwise.
+    
+    @returns {SC.Binding} this
+  */
+  isNull: function() {
+    return this.transform(function(v) { 
+      var t = $type(v) ;
+      return (t === T_ERROR) ? v : v == null ;
+    });
+  }  
 } ;
 
-SC.Binding.build = function(tr) {
-  return function(from) { 
-    return SC.Binding.From(from,{ transform: tr }) ; 
-  } ;
-} ; 
-
-SC.Binding.NoChange = SC.Binding.From;
-
-// This binding will return errors as null.
-SC.Binding.NoError = SC.Binding.build(function(dir, key, value) {
-  return ($type(value) == T_ERROR) ? null : value ;  
-}) ;
-
-SC.Binding.NoError.ext = function(bindFunc) {
-  return function(d,k,v) {
-    return ($type(value) == T_ERROR) ? null : bindFunc(d,k,v) ;  
-  } ;
-} ;
-
-// This binding only allows single, null, or error values.  If an array is 
-// passed, it will be mapped like so:
+// ......................................
+// DEPRECATED
 //
-// [] => null
-// [x] => x
-// [x,x,x] => MULTIPLE_PLACEHOLDER
+// The transforms below are deprecated but still available for backwards 
+// compatibility.  Instead of using these methods, however, you should use
+// the helpers.  For example, where before you would have done:
 //
-SC.Binding.Single = SC.Binding.build(function(d,k,v) {
-  if ($type(v) == T_ARRAY) {
-    switch(v.length) {
-      case 0:
-        v = null ;
-        break ;
-      case 1:
-        v = v[0] ;
-        break ;
-      default:
-        v = SC.Binding.MULTIPLE_PLACEHOLDER ;
-    }
-  }
-  return v;
-});
+//  contentBinding: SC.Binding.Single('MyApp.myController.count') ;
+//
+// you should do:
+//
+//  contentBinding. SC.Binding.from('MyApp.myController.count').single();
+//
+// and for defaults:
+//
+//  contentBindingDefault: SC.Binding.single()
+//
+SC.Binding.From = SC.Binding.NoChange = SC.Binding.builder();
 
-// This binding works just like Single except if you pass a multiple value
-// it will be converted to NULL.
-SC.Binding.SingleNull = SC.Binding.build(function(d,k,v) {
-  if ($type(v) == T_ARRAY) {
-    switch(v.length) {
-      case 0:
-        v = null ;
-        break ;
-      case 1:
-        v = v[0] ;
-        break ;
-      default:
-        v = null ;
-    }
-  }
-  return v;
-});
+SC.Binding.Single = SC.Binding.single().builder() ;
+SC.Binding.SingleNull = SC.Binding.single(null).builder() ;
+SC.Binding.SingleNoError = SC.Binding.Single.beget().noError().builder() ;
+SC.Binding.SingleNullNoError = SC.Binding.SingleNull.beget().noError().builder() ;
+SC.Binding.Multiple = SC.Binding.multiple().builder() ;
+SC.Binding.MultipleNoError = SC.Binding.multiple().noError().builder() ;
 
-// NoError versions.
-SC.Binding.SingleNoError = SC.Binding.NoError.ext(SC.Binding.Single);
-SC.Binding.SingleNullNoError = SC.Binding.NoError.ext(SC.Binding.SingleNull);
-
-// This requires the value to be a multiple.  null => [], x => [x]
-SC.Binding.Multiple = SC.Binding.build(function(d,k,v) {
-  var t = $type(v) ;
-  if (t != T_ARRAY) {
-    if (t == null) {
-      v = [] ;
-    } else if (t != T_ERROR) {
-      v = [v] ;
-    }
-  }
-  return v ;
-}) ;
-
-SC.Binding.MultipleNoError = SC.Binding.NoError.ext(SC.Binding.Multiple);
-
-// Converts value to a bool.  true if: not null, not empty array, not 0, '',
-// etc.
-SC.Binding.Bool = SC.Binding.build(function(d,k,v) {
-  return ($type(v) == T_ARRAY) ? (v.length > 0) : !!v ;
-}) ;
-
-// Converts value to a bool, but its only true if not null
-SC.Binding.NotNull = SC.Binding.build(function(d,k,v) { 
-  return (v != null) ;
-}) ;
-
-// Converts inverse of bool.
-SC.Binding.Not = SC.Binding.build(function(d,k,v) {
-  return !(($type(v) == T_ARRAY) ? (v.length > 0) : !!v) ;
-}) ;
-
-// Converts value to a bool, but its only true if not null
-SC.Binding.IsNull = SC.Binding.build(function(d,k,v) {
-  return (v == null) ;
-}) ;
+SC.Binding.Bool = SC.Binding.bool().builder() ;
+SC.Binding.Not = SC.Binding.bool().not().builder() ;
+SC.Binding.NotNull = SC.Binding.isNull().not().builder() ;
+SC.Binding.IsNull = SC.Binding.isNull().builder() ;
 
 // No Error versions.
-SC.Binding.BoolNoError = SC.Binding.NoError.ext(SC.Binding.Bool) ;
-SC.Binding.NotNullNoError = SC.Binding.NoError.ext(SC.Binding.NotNull) ;
-SC.Binding.NotNoError = SC.Binding.NoError.ext(SC.Binding.Not) ;
-SC.Binding.IsNullNoError = SC.Binding.NoError.ext(SC.Binding.IsNull) ;
-
-// .........................................................
-// DEPRECATED
-
-// This relay forces all values to be multiple values
-SC.Binding.Multiple = function(from) {
-  return SC.Binding.From(from,{
-    transform: function(dir,key,value) { 
-      return (value) ? (SC.isArray(value) ? value : [value]) : value;
-    }
-  }) ;
-} ;
-
-// This relay forces all values to be multiple values, null values are not
-// allowed.
-SC.Binding.MultipleNotEmpty = function(from) {
-  return SC.Binding.From(from,{
-    transform: function(dir,key,value) { 
-      return (value) ? (SC.isArray(value) ? value : [value]) : [];
-    }
-  }) ;
-} ;
-
-// This relay allows single values and no null/empty values.
-SC.Binding.SingleNotEmpty = function(from) {
-  return SC.Binding.From(from,{
-    multiplePlaceholder: SC.Binding.MULTIPLE_PLACEHOLDER,
-    emptyPlaceholder: SC.Binding.EMPTY_PLACEHOLDER,
-    nullPlaceholder: SC.Binding.NULL_PLACEHOLDER
-  }) ;
-} ;
-
-// This relay allows any values, but only one way flow.
-SC.Binding.OneWay = function(from) {
-  return SC.Binding.From(from, { oneWay: true }) ;
-} ;
-
-// This relay forces the value to be true or false.  Empty and null values
-// represent false.
-SC.Binding.Flag = function(from) {
-  return SC.Binding.From(from, { 
-    transform: function(dir,key,value) {
-      return (value && (value instanceof Array)) ? (value.length == 0) : !!value ;
-    }
-  }) ;
-} ;
-
-SC.Binding.OneWayFlag = function(from) {
-  var ret = SC.Binding.Flag(from) ;
-  ret.oneWay = true ;
-  return ret ;  
-} ;
-
+SC.Binding.BoolNoError = SC.Binding.Bool.beget().noError().builder();
+SC.Binding.NotNullNoError = SC.Binding.NotNull.beget().noError().builder();
+SC.Binding.NotNoError = SC.Binding.Not.beget().noError().builder();
+SC.Binding.IsNullNoError = SC.Binding.IsNull.beget().noError().builder() ;
 
