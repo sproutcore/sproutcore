@@ -680,3 +680,164 @@ Object.extend(Event,{
   
 });
 
+
+// ........................................................................
+// FUNCTION ENHANCEMENTS
+//
+// Enhance function.
+SC.mixin(Function.prototype,
+/** @scope Function.prototype */ {
+  
+  /**
+    Indicates that the function should be treated as a computed property.
+    
+    Computed properties are methods that you want to treat as if they were
+    static properties.  When you use get() or set() on a computed property,
+    the object will call the property method and return its value instead of 
+    returning the method itself.  This makes it easy to create "virtual 
+    properties" that are computed dynamically from other properties.
+    
+    Consider the following example:
+    
+    {{{
+      contact = SC.Object.create({
+
+        firstName: "Charles",
+        lastName: "Jolley",
+        
+        // This is a computed property!
+        fullName: function() {
+          return this.getEach('firstName','lastName').compact().join(' ') ;
+        }.property('firstName', 'lastName'),
+        
+        // this is not
+        getFullName: function() {
+          return this.getEach('firstName','lastName').compact().join(' ') ;
+        }
+      });
+
+      contact.get('firstName') ;
+      --> "Charles"
+      
+      contact.get('fullName') ;
+      --> "Charles Jolley"
+      
+      contact.get('getFullName') ;
+      --> function()
+    }}}
+    
+    Note that when you get the fullName property, SproutCore will call the
+    fullName() function and return its value whereas when you get() a property
+    that contains a regular method (such as getFullName above), then the 
+    function itself will be returned instead.
+    
+    h2. Using Dependent Keys
+
+    Computed properties are often computed dynamically from other member 
+    properties.  Whenever those properties change, you need to notify any
+    object that is observing the computed property that the computed property
+    has changed also.  We call these properties the computed property is based
+    upon "dependent keys".
+    
+    For example, in the contact object above, the fullName property depends on
+    the firstName and lastName property.  If either property value changes,
+    any observer watching the fullName property will need to be notified as 
+    well.
+    
+    You inform SproutCore of these dependent keys by passing the key names
+    as parameters to the property() function.  Whenever the value of any key
+    you name here changes, the computed property will be marked as changed
+    also.
+    
+    You should always register dependent keys for computed properties to 
+    ensure they update.
+    
+    h2. Using Computed Properties as Setters
+    
+    Computed properties can be used to modify the state of an object as well
+    as to return a value.  Unlike many other key-value system, you use the 
+    same method to both get and set values on a computed property.  To 
+    write a setter, simply declare two extra parameters: key and value.
+    
+    Whenever your property function is called as a setter, the value 
+    parameter will be set.  Whenever your property is called as a getter the
+    value parameter will be undefined.
+    
+    For example, the following object will split any full name that you set
+    into a first name and last name components and save them.
+    
+    {{{
+      contact = SC.Object.create({
+        
+        fullName: function(key, value) {
+          if (value !== undefined) {
+            var parts = value.split(' ') ;
+            this.beginPropertyChanges()
+              .set('firstName', parts[0])
+              .set('lastName', parts[1])
+            .endPropertyChanges() ;
+          }
+          return this.getEach('firstName', 'lastName').compact().join(' ');
+        }.property('firstName','lastName')
+        
+      }) ;
+      
+    }}}
+    
+    bq. *Why Use The Same Method for Getters and Setters?*  Most property-
+    based frameworks expect you to write two methods for each property but
+    SproutCore only uses one.  We do this because most of the time when
+    you write a setter is is basically a getter plus some extra work.  There 
+    is little added benefit in writing both methods when you can conditionally
+    exclude part of it.  This helps to keep your code more compact and easier
+    to maintain.
+    
+    @param dependentKeys {String...} optional set of dependent keys
+    @returns {Function} the declared function instance
+  */
+  property: function() {
+    this.dependentKeys = SC.$A(arguments) ; 
+    this.isProperty = true; return this; 
+  },
+  
+  /**  
+    Declare that a function should observe an object at the named path.  Note
+    that the path is used only to construct the observation one time.
+  */
+  observes: function(propertyPaths) { 
+    this.propertyPaths = SC.$A(arguments); 
+    return this;
+  },
+  
+  typeConverter: function() {
+    this.isTypeConverter = true; return this ;
+  },
+  
+  /**
+    Creates a timer that will execute the function after a specified 
+    period of time.
+    
+    If you pass an optional set of arguments, the arguments will be passed
+    to the function as well.  Otherwise the function should have the 
+    signature:
+    
+    {{{
+      function functionName(timer)
+    }}}
+
+    @param interval {Number} the time to wait, in msec
+    @param target {Object} optional target object to use as this
+    @returns {SC.Timer} scheduled timer
+  */
+  invokeLater: function(target, interval) {
+    if (interval === undefined) interval = 1 ;
+    var f = this;
+    if (arguments.length > 2) {
+      var args =SC.$A(arguments).slice(2,arguments.length);
+      args.unshift(target);
+      f = f.bind.apply(f, args) ;
+    }
+    return SC.Timer.schedule({ target: target, action: f, interval: interval });
+  }    
+  
+}) ;

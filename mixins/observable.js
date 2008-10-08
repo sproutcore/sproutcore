@@ -572,7 +572,8 @@ SC.Observable = {
         membersLength = members.length ;
         for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
           member = members[memberLoc] ;
-          target = member[0]; method = member[1] ;
+          if (member[2] === rev) continue ; // skip notified items.
+          target = member[0]; method = member[1] ; member[2] = rev;
           method.call(target, null, this, key, null, rev) ;
         }
       }
@@ -716,12 +717,33 @@ SC.Observable = {
     @returns {this}
   */
   setPath: function(path, value) {
-    var tuple = SC.Object.tupleForPropertyPath(path, this) ;
-    if (tuple[0] == null) return null ;
-    tuple[0].set(tuple[1], value) ;
+    if (path.indexOf('.') >= 0) {
+      var tuple = SC.Object.tupleForPropertyPath(path, this) ;
+      if (tuple[0] == null) return null ;
+      tuple[0].set(tuple[1], value) ;
+    } else this.set(path, value) ; // shortcut
     return this;
   },
 
+  /**
+    Navigates the property path, finally setting the value but only if 
+    the value does not match the current value.  This will avoid sending
+    unecessary change notifications.
+    
+    @param path {String} the property path to set
+    @param value {Object} the value to set
+    @returns {Object} this
+  */
+  setPathIfChanged: function(path, value) {
+    if (path.indexOf('.') >= 0) {
+      var tuple = SC.Object.tupleForPropertyPath(path, this) ;
+      if (tuple[0] == null) return null ;
+      if (tuple[0].get(tuple[1]) !== value) {
+        tuple[0].set(tuple[1], value) ;
+      }
+    } else this.setIfChanged(path, value) ; // shortcut
+    return this;
+  },
   
   /** 
     Convenience method to get an array of properties.
@@ -919,221 +941,64 @@ SC.Observable = {
 SC.mixin(Array.prototype, SC.Observable) ;
 
 // ........................................................................
-// FUNCTION ENHANCEMENTS
-//
-// Enhance function.
-SC.mixin(Function.prototype,
-/** @scope Function.prototype */ {
-  
-  /**
-    Indicates that the function should be treated as a computed property.
-    
-    Computed properties are methods that you want to treat as if they were
-    static properties.  When you use get() or set() on a computed property,
-    the object will call the property method and return its value instead of 
-    returning the method itself.  This makes it easy to create "virtual 
-    properties" that are computed dynamically from other properties.
-    
-    Consider the following example:
-    
-    {{{
-      contact = SC.Object.create({
-
-        firstName: "Charles",
-        lastName: "Jolley",
-        
-        // This is a computed property!
-        fullName: function() {
-          return this.getEach('firstName','lastName').compact().join(' ') ;
-        }.property('firstName', 'lastName'),
-        
-        // this is not
-        getFullName: function() {
-          return this.getEach('firstName','lastName').compact().join(' ') ;
-        }
-      });
-
-      contact.get('firstName') ;
-      --> "Charles"
-      
-      contact.get('fullName') ;
-      --> "Charles Jolley"
-      
-      contact.get('getFullName') ;
-      --> function()
-    }}}
-    
-    Note that when you get the fullName property, SproutCore will call the
-    fullName() function and return its value whereas when you get() a property
-    that contains a regular method (such as getFullName above), then the 
-    function itself will be returned instead.
-    
-    h2. Using Dependent Keys
-
-    Computed properties are often computed dynamically from other member 
-    properties.  Whenever those properties change, you need to notify any
-    object that is observing the computed property that the computed property
-    has changed also.  We call these properties the computed property is based
-    upon "dependent keys".
-    
-    For example, in the contact object above, the fullName property depends on
-    the firstName and lastName property.  If either property value changes,
-    any observer watching the fullName property will need to be notified as 
-    well.
-    
-    You inform SproutCore of these dependent keys by passing the key names
-    as parameters to the property() function.  Whenever the value of any key
-    you name here changes, the computed property will be marked as changed
-    also.
-    
-    You should always register dependent keys for computed properties to 
-    ensure they update.
-    
-    h2. Using Computed Properties as Setters
-    
-    Computed properties can be used to modify the state of an object as well
-    as to return a value.  Unlike many other key-value system, you use the 
-    same method to both get and set values on a computed property.  To 
-    write a setter, simply declare two extra parameters: key and value.
-    
-    Whenever your property function is called as a setter, the value 
-    parameter will be set.  Whenever your property is called as a getter the
-    value parameter will be undefined.
-    
-    For example, the following object will split any full name that you set
-    into a first name and last name components and save them.
-    
-    {{{
-      contact = SC.Object.create({
-        
-        fullName: function(key, value) {
-          if (value !== undefined) {
-            var parts = value.split(' ') ;
-            this.beginPropertyChanges()
-              .set('firstName', parts[0])
-              .set('lastName', parts[1])
-            .endPropertyChanges() ;
-          }
-          return this.getEach('firstName', 'lastName').compact().join(' ');
-        }.property('firstName','lastName')
-        
-      }) ;
-      
-    }}}
-    
-    bq. *Why Use The Same Method for Getters and Setters?*  Most property-
-    based frameworks expect you to write two methods for each property but
-    SproutCore only uses one.  We do this because most of the time when
-    you write a setter is is basically a getter plus some extra work.  There 
-    is little added benefit in writing both methods when you can conditionally
-    exclude part of it.  This helps to keep your code more compact and easier
-    to maintain.
-    
-    @param dependentKeys {String...} optional set of dependent keys
-    @returns {Function} the declared function instance
-  */
-  property: function() {
-    this.dependentKeys = SC.$A(arguments) ; 
-    this.isProperty = true; return this; 
-  },
-  
-  /**  
-    Declare that a function should observe an object at the named path.  Note
-    that the path is used only to construct the observation one time.
-  */
-  observes: function(propertyPaths) { 
-    this.propertyPaths = SC.$A(arguments); 
-    return this;
-  },
-  
-  typeConverter: function() {
-    this.isTypeConverter = true; return this ;
-  },
-  
-  /**
-    Creates a timer that will execute the function after a specified 
-    period of time.
-    
-    If you pass an optional set of arguments, the arguments will be passed
-    to the function as well.  Otherwise the function should have the 
-    signature:
-    
-    {{{
-      function functionName(timer)
-    }}}
-
-    @param interval {Number} the time to wait, in msec
-    @param target {Object} optional target object to use as this
-    @returns {SC.Timer} scheduled timer
-  */
-  invokeLater: function(target, interval) {
-    if (interval === undefined) interval = 1 ;
-    var f = this;
-    if (arguments.length > 2) {
-      var args =SC.$A(arguments).slice(2,arguments.length);
-      args.unshift(target);
-      f = f.bind.apply(f, args) ;
-    }
-    return SC.Timer.schedule({ target: target, action: f, interval: interval });
-  }    
-  
-}) ;
-
-// ........................................................................
 // OBSERVER QUEUE
 //
 // This queue is used to hold observers when the object you tried to observe
 // does not exist yet.  This queue is flushed just before any property 
 // notification is sent.
 SC.Observers = {
-  queue: {},
+  queue: [],
   
-  addObserver: function(propertyPath, func) {
+  // Attempt to add the named observer.  If the observer cannot be found, put
+  // it into a queue for later.
+  addObserver: function(propertyPath, target, method, pathRoot) {
     // try to get the tuple for this.
-    if (typeof(propertyPath) == "string") {
-      var tuple = SC.Object.tupleForPropertyPath(propertyPath) ;
+    if ($type(propertyPath) === SC.T_STRING) {
+      var tuple = SC.Object.tupleForPropertyPath(propertyPath, pathRoot) ;
     } else {
       var tuple = propertyPath; 
     }
     
+    // if a tuple was found, add the observer immediately...
     if (tuple) {
-      tuple[0].addObserver(tuple[1],func) ;
+      tuple[0].addObserver(tuple[1],target, method) ;
+      
+    // otherwise, save this in the queue.
     } else {
-      var ary = this.queue[propertyPath] || [] ;
-      ary.push(func) ;
-      this.queue[propertyPath] = ary ;
+      this.queue.push([propertyPath, target, method, pathRoot]) ;
     }
   },
-  
-  removeObserver: function(propertyPath, func) {
-    var tuple = SC.Object.tupleForPropertyPath(propertyPath) ;
+
+  // Remove the observer.  If it is already in the queue, remove it.  Also
+  // if already found on the object, remove that.
+  removeObserver: function(propertyPath, target, method, pathRoot) {
+    var tuple = SC.Object.tupleForPropertyPath(propertyPath, pathRoot) ;
     if (tuple) {
-      tuple[0].removeObserver(tuple[1],func) ;
-    }
-    
-    var ary = this.queue[propertyPath] ;
-    if (ary) {
-      ary = ary.without(func) ;
-      this.queue[propertyPath] = ary ;
+      tuple[0].removeObserver(tuple[1], target, method) ;
+    } 
+
+    var idx = this.queue.length ;
+    var queue = this.queue ;
+    while(--idx >= 0) {
+      var item = queue[idx] ;
+      if ((item[0] === propertyPath) && (item[1] === target) && (item[2] == method) && (item[3] === pathRoot)) queue[idx] = null ;
     }
   },
   
+  // Flush the queue.  Attempt to add any saved observers.
   flush: function() {
-    var newQueue = {} ;
-    for(var path in this.queue) {
-      var funcs = this.queue[path] ;
-      var tuple = SC.Object.tupleForPropertyPath(path) ;
+    var oldQueue = this.queue ;
+    var newQueue = this.queue = [] ; 
+    var idx = oldQueue.length ;
+    while(--idx >= 0) {
+      var item = oldQueue[idx] ;
+      if (!item) continue ;
+      
+      var tuple = SC.Object.tupleForPropertyPath(item[0], item[3]);
       if (tuple) {
-        var loc = funcs.length ;
-        while(--loc >= 0) {
-          var func = funcs[loc] ;
-          tuple[0].addObserver(tuple[1],func) ;
-        }
-      } else newQueue[path] = funcs ;
+        tuple[0].addObserver(tuple[1], item[1], item[2]) ;
+      } else newQueue.push(item) ;
     }
-    
-    // set queue to remaining items
-    this.queue = newQueue ; 
   }
 } ;
 
