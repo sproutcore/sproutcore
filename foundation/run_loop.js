@@ -147,6 +147,14 @@ SC.runLoop = SC.Object.create({
     
     // flush any expired timers, possibly cancelling the timeout.
     this._flushExpiredTimers() ;
+    
+    // flush any pending changed bindings.  This could actually trigger a lot 
+    // of code to execute.
+    SC.Binding.flushPendingChanges() ;
+
+    // Possibly go ahead and ask any changed views to re-render?
+    // --
+    
     this._start = null ;
   },
 
