@@ -378,6 +378,9 @@ SC.Binding = {
     // if the new value is different from the current binding value, then 
     // schedule to register an update.
     if (v !== this._bindingValue) {
+
+      console.log("fromPropertyDidChange: %@".fmt(this)) ;
+
       this._setBindingValue(v) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.  
@@ -473,8 +476,9 @@ SC.Binding = {
     binding value from one side to the other.
   */
   applyBindingValue: function() {
-    console.log("applyBindingValue") ;
     this._changePending = NO ;
+
+    console.log("applyBindingValue: %@".fmt(this)) ;
     
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
