@@ -273,7 +273,7 @@ SC.Binding = {
     var binding = (this === SC.Binding) ? this.beget() : this ;
     binding._fromPropertyPath = propertyPath ;
     binding._fromRoot = root ;
-    bidning._fromTuple = null ;
+    binding._fromTuple = null ;
     return binding ;
   },
   
@@ -308,11 +308,11 @@ SC.Binding = {
     if (this.isConnected) return this ;
 
     // try to connect the from side.
-    SC.Observers.addObserver(this._fromPropertyPath, this.propertyDidChange, this, this._fromRoot) ;
+    SC.Observers.addObserver(this._fromPropertyPath, this, this.propertyDidChange, this._fromRoot) ;
     
     // try to connect the to side
     if (!this._oneWay) {
-      SC.Observers.addObserver(this._toPropertyPath, this.propertyDidChange, this, this._toRoot) ;  
+      SC.Observers.addObserver(this._toPropertyPath, this, this.propertyDidChange, this._toRoot) ;  
     }
     
     this.isConnected = YES ;
@@ -328,9 +328,9 @@ SC.Binding = {
   disconnect: function() {
     if (!this.isConnected) return this; // nothing to do.
 
-    SC.Observers.removeObserver(this._fromPropertyPath, this.propertyDidChange, this, this._fromRoot) ;
+    SC.Observers.removeObserver(this._fromPropertyPath, this, this.propertyDidChange, this._fromRoot) ;
     if (!this._oneWay) {
-      SC.Observers.removeObserver(this._toPropertyPath, this.propertyDidChange, this, this._toRoot) ;
+      SC.Observers.removeObserver(this._toPropertyPath, this, this.propertyDidChange, this._toRoot) ;
     }
     
     this.isConnected = NO ;
@@ -341,13 +341,14 @@ SC.Binding = {
     This method is invoked whenever the value of a property changes.  It will 
     save the property/key that has changed and relay it later.
   */
-  fromPropertyDidChange: function(key, target) {
+  propertyDidChange: function(ignore, target, key) {
     var v = target.get(key) ;
     
     // if the new value is different from the current binding value, then 
     // schedule to register an update.
     if (v !== this._bindingValue) {
       this._bindingValue = v ;
+      this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.  
     }
   },
@@ -368,7 +369,7 @@ SC.Binding = {
     
     // keep doing this as long as there are changes to flush.
     var queue ;
-    while((queue = this._changeQueue).get('length') > 0) {
+    while((queue = this._changeQueue).length > 0) {
 
       // first, swap the change queues.  This way any binding changes that
       // happen while we flush the current queue can be queued up.
@@ -379,7 +380,7 @@ SC.Binding = {
       // additional bindings to trigger, which will end up in the new active 
       // queue.
       var binding ;
-      while(binding = queue.popObject()) binding.applyBindingValue() ;
+      while(binding = queue.pop()) binding.applyBindingValue() ;
       
       // now loop back and see if there are additional changes pending in the
       // active queue.  Repeat this until all bindings that need to trigger have
@@ -396,6 +397,8 @@ SC.Binding = {
     binding value from one side to the other.
   */
   applyBindingValue: function() {
+    
+    this._changePending = NO ;
     
     // compute the binding targets if needed.
     this._computeBindingTargets() ;

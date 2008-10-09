@@ -506,6 +506,31 @@ SC.Observable = {
   // NOTIFICATION
   // 
 
+  /**
+    Returns an array with all of the observers registered for the specified
+    key.  This is intended for debugging purposes only.  You generally do not
+    want to rely on this method for production code.
+    
+    @params key {String} the key to evaluate
+    @returns {Array} array of Observer objects, describing the observer.
+  */
+  observersForKey: function(key) {
+    var toStr = function() { return "<%@>.%@".fmt(this.target, this.method); };
+    var ret ;
+    var observers = this._kvo_observers ;
+    if (observers) {
+      var observerSet = observers[key] ;
+      if (observerSet) ret = observerSet.getMembers() ;
+      
+      // var idx = ret.length ;
+      // while(--idx >= 0) {
+      //   var ary = ret[idx] || [] ;
+      //   ret[idx] = { target: ary[0], method: ary[1], toString: toStr } ;
+      // }
+    }
+    return ret || [] ;
+  },
+  
   // this private method actually notifies the observers for any keys in the
   // observer queue.  If you pass a key it will be added to the queue.
   _notifyPropertyObservers: function(key) {

@@ -1,0 +1,23 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("basic object binding", {
+  
+  setup: function() {
+    objectA = SC.Object.create({ value: 'start' }) ;
+    objectB = SC.Object.create({ value: 'end' }) ;
+    binding = SC.Binding.from("value", objectA).to("value", objectB).connect() ;
+  },
+  
+  "changing objectA should mark binding as dirty": function() {
+    window.objectA = objectA ;
+    window.objectB = objectB ;
+    objectA.set("value", "change") ;
+    assertEqual(binding._changePending, YES) ;
+  }
+  
+});
+
+
+</script>
+<% end %>
