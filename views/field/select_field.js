@@ -216,14 +216,11 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   // object changes to the objects array of objects if possible.
   _objectsObserver: function() {
-   if (!this._boundObserver) {
-     this._boundObserver = this._objectsItemObserver.bind(this) ;
-   }
 
    if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
      var loc ;
      var objects = Array.from(this.get('objects')) ;
-     var func = this._boundObserver ;
+     var func = this._objectsItemObserver ;
    
      // stop observing old objects.
      if (this._objects) {
@@ -232,10 +229,10 @@ SC.SelectFieldView = SC.FieldView.extend(
          var object = this._objects[loc] ;
          if (object && object.removeObserver) {
            if (this._nameKey && this._valueKey) {
-             object.removeObserver(this._nameKey, func) ;
-             object.removeObserver(this._valueKey, func) ;
+             object.removeObserver(this._nameKey, this, func) ;
+             object.removeObserver(this._valueKey, this, func) ;
            } else {
-             object.removeObserver('*', func) ;
+             object.removeObserver('*', this, func) ;
            } // if (this._nameKey)
          } // if (object &&...)
        } // while(--loc)
@@ -252,10 +249,10 @@ SC.SelectFieldView = SC.FieldView.extend(
          var object = this._objects[loc] ;
          if (object && object.addObserver) {
            if (this._nameKey && this._valueKey) {
-             object.addObserver(this._nameKey, func) ;
-             object.addObserver(this._valueKey, func) ;
+             object.addObserver(this._nameKey, this, func) ;
+             object.addObserver(this._valueKey, this, func) ;
            } else {
-             object.addObserver('*', func) ;
+             object.addObserver('*', this, func) ;
            } // if (this._nameKey)
          } // if (object &&...)
        } // while(--loc)

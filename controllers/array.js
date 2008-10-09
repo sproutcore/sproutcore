@@ -157,26 +157,29 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @private
     @observes content
   */
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (SC.isEqual(content, this._content)) return ; // nothing to do
 
-    if (!this._boundContentPropertyObserver) {
-      this._boundContentPropertyObserver = this._contentPropertyObserver.bind(this) ;
-    }
-    var func = this._boundContentPropertyObserver ;
+    var func = this._contentPropertyDidChange ;
 
     // remove old observer, add new observer, and trigger content property change
-    if (this._content && this._content.removeObserver) this._content.removeObserver('[]', func) ;
-    if (content && content.addObserver) content.addObserver('[]', func) ;
+    if (this._content && this._content.removeObserver) {
+      this._content.removeObserver('[]', this, func) ;
+    } 
+    
+    if (content && content.addObserver) {
+      content.addObserver('[]', this, func) ;
+    }
+    
     this._content = content; //cache
     this._contentPropertyRevision = null ;
     
     var rev = (content) ? content.propertyRevision : -1 ;
-    this._contentPropertyObserver(this, '[]', content, rev) ; 
+    this._contentPropertyDidChange(content, '[]', content, rev) ; 
   }.observes('content'),
 
-  _contentPropertyObserver: function(target, key, value, rev) {  
+  _contentPropertyDidChange: function(target, key, value, rev) {  
       
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;

@@ -65,7 +65,7 @@ SC.PaneManager = SC.View.extend({
     
     // make pane not visible then do the rest of the cleanup when that
     // finishes.
-    pane.addObserver('displayIsVisible', this._boundPaneDidHide) ;
+    pane.addObserver('displayIsVisible', this, this._paneDidHide) ;
     pane.set('isVisible', false) ;
   },
 
@@ -102,7 +102,7 @@ SC.PaneManager = SC.View.extend({
     if (visible) return ;
     
     // remove this observer and remove pane from parent view.
-    pane.removeObserver('displayIsVisible', this._boundPanelDidHide) ;
+    pane.removeObserver('displayIsVisible', this, this._paneDidHide) ;
     pane.removeFromParent() ;
 
     // now remove content view from pane and return pane to cache.
@@ -144,7 +144,6 @@ SC.PaneManager = SC.View.extend({
       SC.window.insertBefore(this, null) ;
     }
     this.set('isVisible',false) ;
-    this._boundPaneDidHide = this._paneDidHide.bind(this) ;
   },
   
   // registered panes.

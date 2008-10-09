@@ -231,19 +231,15 @@ SC.Control = {
     Observes when a content object has changed and handles notifying 
     changes to the value of the content object.
   */
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (this._content == content) return; // nothing changed
     
-    // create bound observer function
-    if (!this._boundContentPropertyDidChangeObserver) {
-      this._boundContentPropertyDidChangeObserver = this.contentPropertyDidChange.bind(this) ;
-    }
-    var f = this._boundContentPropertyDidChangeObserver ;
+    var f = this.contentPropertyDidChange ;
 
     // remove an observer from the old content if necessary
     if (this._content && this._content.removeObserver) {
-      this._content.removeObserver('*', f) ;
+      this._content.removeObserver('*', this, f) ;
     }
 
     // cache for future use
@@ -254,7 +250,7 @@ SC.Control = {
     // add observer to new content if necessary.
     this._content = content ;
     if (this._content && this._content.addObserver) {
-      this._content.addObserver('*', f) ;
+      this._content.addObserver('*', this, f) ;
     }
     
     // notify that value did change.

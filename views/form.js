@@ -305,7 +305,7 @@ SC.FormView = SC.View.extend({
     this.propertyDidChange(key,this.getValueForField(key)) ;    
     
     // and add us as an observer.
-    field.addObserver('value', this._fieldValueObserver_b()) ;
+    field.addObserver('value', this, this._fieldValueObserver) ;
     field.set('ownerForm',this) ;
     
     this.propertyWillChange('fieldKeys') ;
@@ -318,7 +318,7 @@ SC.FormView = SC.View.extend({
     // first remove the form as an observer to this field.
     var field = this._fields[key] ;
     if (field) {
-      field.removeObserver('value', this._fieldValueObserver_b());
+      field.removeObserver('value', this, this._fieldValueObserver);
       field.set('ownerForm',null) ;
     }
     
@@ -515,11 +515,6 @@ SC.FormView = SC.View.extend({
     this.endPropertyChanges() ;
   },
 
-  // returns a bound observer function...
-  _fieldValueObserver_b: function() {
-    return this._bound_fieldValueObserver = (this._bound_fieldValueObserver || this._fieldValueObserver.bind(this)) ;
-  },
-
   // this observer gets called anytime any property changes on the content
   // object, even those that are not mapped to fields on the form.  This
   // code simply checks for a change and then updates.
@@ -543,11 +538,6 @@ SC.FormView = SC.View.extend({
     } // else if...
   },
 
-  // returns the bound observer function...
-  _contentPropertyObserver_b: function() {
-    return this._bound_contentPropertyObserver = (this._bound_contentPropertyObserver || this._contentPropertyObserver.bind(this)) ;
-  },
-  
   _isEnabledObserver: function() {
     var fields = this._fields ;
     if (!fields) return ;
@@ -570,15 +560,15 @@ SC.FormView = SC.View.extend({
     var content = this.get('content') ;
     if (content == this._content) return ; // bail if content is same.
     
-    var func = this._contentPropertyObserver_b() ;
+    var func = this._contentPropertyObserver ;
     
     // if there was an older content, remove our observer.
-    if (this._content) this._content.removeObserver('*',func) ;
+    if (this._content) this._content.removeObserver('*', this, func) ;
     
     // now, add observer to new content
     this._content = content ;
     if (!content) return ; // EXIT POINT
-    content.addObserver('*', func) ; 
+    content.addObserver('*', this, func) ; 
 
     // reset the form to the content values
     this.reset() ;

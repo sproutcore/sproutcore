@@ -121,7 +121,7 @@ SC.Store = SC.Object.create(
     this._quickCache[guid] = records;
 
     // and start observing it.
-    rec.addObserver('*',this._boundRecordObserver) ;
+    rec.addObserver('*',this, this.recordDidChange) ;
     this.recordDidChange(rec) ;
   },
 
@@ -146,7 +146,7 @@ SC.Store = SC.Object.create(
     }
 
     // and stop observing it.
-    rec.removeObserver('*',this._boundRecordObserver) ;
+    rec.removeObserver('*',this, this.recordDidChange) ;
     this.recordDidChange(rec) ; // this will remove from cols since destroyed.
   },
 
@@ -342,11 +342,6 @@ SC.Store = SC.Object.create(
     // then clear changed records to start again.
     this._changedRecords = {} ;
     
-  }.observes('_changedRecords'),
-  
-  init: function() {
-    arguments.callee.base.call(this) ;
-    this._boundRecordObserver = this.recordDidChange.bind(this) ;
-  }
+  }.observes('_changedRecords')
     
 }) ;

@@ -2726,23 +2726,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Whenever content changes, update children and also start observing
     new [] property.
   */
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (SC.isEqual(content, this._content)) return ; // nothing to do
 
-    if (!this._boundContentPropertyObserver) {
-      this._boundContentPropertyObserver = this._contentPropertyObserver.bind(this) ;
-    }
-    var func = this._boundContentPropertyObserver ;
+    var func = this._contentPropertyDidChange ;
 
     // remove old observer, add new observer, and trigger content property change
-    if (this._content) this._content.removeObserver('[]', func) ;
-    if (content) content.addObserver('[]', func) ;
+    if (this._content) this._content.removeObserver('[]', this, func) ;
+    if (content) content.addObserver('[]', this, func) ;
     this._content = content; //cache
     this._contentPropertyRevision = null ;
     
     var rev = (content) ? content.propertyRevision : -1 ;
-    this._contentPropertyObserver(this, '[]', content, rev) ; 
+    this._contentPropertyDidChange(this, '[]', content, rev) ; 
   }.observes('content'),
   
   /** @private
@@ -2752,17 +2749,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var sel = this.get('selection') ;
     if (SC.isEqual(sel, this._selection)) return ; // nothing to do
 
-    if (!this._boundSelectionPropertyObserver) {
-      this._boundSelectionPropertyObserver = this._selectionPropertyObserver.bind(this) ;
-    }
-    var func = this._boundSelectionPropertyObserver ;
+    var func = this._selectionPropertyDidChange ;
     
-    if (this._selection) this._selection.removeObserver('[]', func) ;
-    if (sel) sel.addObserver('[]', func) ;
+    if (this._selection) this._selection.removeObserver('[]', this, func) ;
+    if (sel) sel.addObserver('[]', this, func) ;
     this._selection = sel ;
     this._selectionPropertyRevision = null ;
     var propertyRevision = (sel) ? sel.propertyRevision : null;
-    this._selectionPropertyObserver(this, '[]', sel, propertyRevision) ;
+    this._selectionPropertyDidChange(this, '[]', sel, propertyRevision) ;
   }.observes('selection'),
   
   // called on content change *and* content.[] change...
@@ -2773,7 +2767,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // -- update layout on all item views.
   // -- optional: determine the first item view that does not match.
   //
-  _contentPropertyObserver: function(target, key, value, rev) {    
+  _contentPropertyDidChange: function(target, key, value, rev) {    
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
       this._updatingContent = true ;
@@ -2785,7 +2779,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   // called on selection change and selection.[] change...
   // update selection states if this is a new propertyRevision
-  _selectionPropertyObserver: function(target, key, value, rev) {
+  _selectionPropertyDidChange: function(target, key, value, rev) {
     if (!this._updatingSel && (!rev || (rev != this._selectionPropertyRevision))) {
       this._selectionPropertyRevision = rev ;
       this._updatingSel = true ;

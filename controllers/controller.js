@@ -173,7 +173,7 @@ SC.Controller = SC.Object.extend(
       // changes you might make at one time will be batched.
       } else if (this.get('commitChangesImmediately')) {
         if (!this._commitTimeout) {
-          this._commitTimeout = this.commitChanges.bind(this).defer();
+          this._commitTimeout = this.commitChanges.invokeLater(this);
         }
       }
     }
