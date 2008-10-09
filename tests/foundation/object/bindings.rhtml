@@ -1,0 +1,228 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("bind() method", {
+  
+  setup: function() {
+    this.testObject = SC.Object.create({
+      foo: "bar",
+      bar: "foo",
+      extraObject: null 
+    });
+    
+    this.fromObject = SC.Object.create({
+      bar: "foo",
+      extraObject: null 
+    }) ;
+    
+    this.extraObject = SC.Object.create({
+      foo: "extraObjectValue"
+    }) ;
+    
+    window.TestNamespace = {
+      fromObject: this.fromObject,
+      testObject: this.testObject
+    } ;
+  },
+
+  teardown: function() { 
+    delete this.testObject; 
+    delete this.fromObject;
+    delete window.TestNamespace ;
+  },
+
+  "bind(TestNamespace.fromObject.bar) should follow absolute path": function() {
+    // create binding
+    this.testObject.bind("foo", "TestNamespace.fromObject.bar") ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", "changedValue") ;
+    
+    assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
+  },
+  
+  "bind(.bar) should bind to relative path": function() {
+    // create binding
+    this.testObject.bind("foo", ".bar") ;
+    
+    // now make a change to see if the binding triggers.
+    this.testObject.set("bar", "changedValue") ;
+    
+    assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
+  },
+
+  "bind(SC.Binding.Bool(TestNamespace.fromObject.bar)) should create binding with bool transform": function() {
+    // create binding
+    this.testObject.bind("foo", SC.Binding.Bool("TestNamespace.fromObject.bar")) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", 1) ;
+    assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
+
+    this.fromObject.set("bar", 0) ;
+    assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
+  },
+  
+  "bind(TestNamespace.fromObject*extraObject.foo) should create chained binding": function() {
+    this.testObject.bind("foo", "TestNamespace.fromObject*extraObject.foo");
+    this.fromObject.set("extraObject", this.extraObject) ;
+    assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
+  },
+
+  "bind(*extraObject.foo) should create locally chained binding": function() {
+    this.testObject.bind("foo", "*extraObject.foo");
+    this.testObject.set("extraObject", this.extraObject) ;
+    assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
+  }
+  
+});
+
+Test.context("fooBinding method", {
+  
+  setup: function() {
+    this.TestObject = SC.Object.extend({
+      foo: "bar",
+      bar: "foo",
+      extraObject: null 
+    });
+    
+    this.fromObject = SC.Object.create({
+      bar: "foo",
+      extraObject: null 
+    }) ;
+    
+    this.extraObject = SC.Object.create({
+      foo: "extraObjectValue"
+    }) ;
+        
+    window.TestNamespace = {
+      fromObject: this.fromObject,
+      testObject: this.testObject
+    } ;
+  },
+
+  teardown: function() { 
+    delete this.TestObject ;
+    delete this.testObject; 
+    delete this.fromObject;
+    delete window.TestNamespace ;
+  },
+
+  "fooBinding: TestNamespace.fromObject.bar should follow absolute path": function() {
+    // create binding
+    this.testObject = this.TestObject.create({
+      fooBinding: "TestNamespace.fromObject.bar"
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", "changedValue") ;
+    
+    assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
+  },
+  
+  "fooBinding: .bar should bind to relative path": function() {
+    
+    this.testObject = this.TestObject.create({
+      fooBinding: ".bar"
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.testObject.set("bar", "changedValue") ;
+    
+    assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
+  },
+  
+  "fooBinding: SC.Binding.Bool(TestNamespace.fromObject.bar should create binding with bool transform": function() {
+
+    this.testObject = this.TestObject.create({
+      fooBinding: SC.Binding.Bool("TestNamespace.fromObject.bar") 
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", 1) ;
+    assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
+
+    this.fromObject.set("bar", 0) ;
+    assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
+  },
+
+  "foodBinding: TestNamespace.fromObject*extraObject.foo should create chained binding": function() {
+
+    this.testObject = this.TestObject.create({
+      fooBinding: "TestNamespace.fromObject*extraObject.foo" 
+    }) ;
+
+    this.fromObject.set("extraObject", this.extraObject) ;
+    assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
+  },
+
+  "foodBinding: *extraObject.foo should create locally chained binding": function() {
+    this.testObject = this.TestObject.create({
+      fooBinding: "*extraObject.foo" 
+    }) ;
+    this.testObject.set("extraObject", this.extraObject) ;
+    assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
+  }
+  
+});
+
+Test.context("fooBindingDefault", {
+  
+  setup: function() {
+    this.TestObject = SC.Object.extend({
+      foo: "bar",
+      fooBindingDefault: SC.Binding.Bool,
+      bar: "foo",
+      extraObject: null 
+    });
+    
+    this.fromObject = SC.Object.create({
+      bar: "foo",
+      extraObject: null 
+    }) ;
+    
+    window.TestNamespace = {
+      fromObject: this.fromObject,
+      testObject: this.testObject
+    } ;
+  },
+
+  teardown: function() { 
+    delete this.TestObject ;
+    delete this.testObject; 
+    delete this.fromObject;
+    delete window.TestNamespace ;
+  },
+
+  "fooBinding: TestNamespace.fromObject.bar should have bool binding": function() {
+    // create binding
+    this.testObject = this.TestObject.create({
+      fooBinding: "TestNamespace.fromObject.bar"
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", 1) ;
+    assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
+
+    this.fromObject.set("bar", 0) ;
+    assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
+  },
+  
+  "fooBinding: SC.Binding.Not(TestNamespace.fromObject.bar should override default": function() {
+
+    this.testObject = this.TestObject.create({
+      fooBinding: SC.Binding.Not("TestNamespace.fromObject.bar") 
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", 1) ;
+    assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
+
+    this.fromObject.set("bar", 0) ;
+    assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
+  }
+  
+});
+
+</script>
+<% end %>
