@@ -308,11 +308,11 @@ SC.Binding = {
     if (this.isConnected) return this ;
 
     // try to connect the from side.
-    SC.Observers.addObserver(this._fromPropertyPath, this, this.propertyDidChange, this._fromRoot) ;
+    SC.Observers.addObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, this._fromRoot) ;
     
     // try to connect the to side
     if (!this._oneWay) {
-      SC.Observers.addObserver(this._toPropertyPath, this, this.propertyDidChange, this._toRoot) ;  
+      SC.Observers.addObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;  
     }
     
     this.isConnected = YES ;
@@ -328,9 +328,9 @@ SC.Binding = {
   disconnect: function() {
     if (!this.isConnected) return this; // nothing to do.
 
-    SC.Observers.removeObserver(this._fromPropertyPath, this, this.propertyDidChange, this._fromRoot) ;
+    SC.Observers.removeObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, this._fromRoot) ;
     if (!this._oneWay) {
-      SC.Observers.removeObserver(this._toPropertyPath, this, this.propertyDidChange, this._toRoot) ;
+      SC.Observers.removeObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;
     }
     
     this.isConnected = NO ;
@@ -338,24 +338,69 @@ SC.Binding = {
   },
 
   /**
-    This method is invoked whenever the value of a property changes.  It will 
-    save the property/key that has changed and relay it later.
+    Invoked whenever the value of the "from" property changes.  This will mark
+    the binding as dirty if the value has changed.
   */
-  propertyDidChange: function(ignore, target, key) {
+  fromPropertyDidChange: function(ignore, target, key) {
     var v = target.get(key) ;
     
     // if the new value is different from the current binding value, then 
     // schedule to register an update.
     if (v !== this._bindingValue) {
-      this._bindingValue = v ;
+      this._setBindingValue(v) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.  
     }
   },
 
+  /**
+    Invoked whenever the value of the "to" property changes.  This will mark the
+    binding as dirty only if:
+    
+    - the binding is not one way
+    - the value does not match the stored transformedBindingValue
+    
+    if the value does not match the transformedBindingValue, then it will become
+    the new bindingValue. 
+  */
+  toPropertyDidChange: function(ignore, target, key) {
+    if (this._oneWay) return; // nothing to do
+    
+    var v = target.get(key) ;
+    
+    // if the new value is different from the current binding value, then 
+    // schedule to register an update.
+    if (v !== this._transformedBindingValue) {
+      this._setBindingValue(v) ;
+      this._changePending = YES ;
+      SC.Binding._changeQueue.add(this) ; // save for later.  
+    }
+  },
+  
+  _setBindingValue: function(v) {
+    this._bindingValue = v ;
+    
+    // apply any transforms to get the to property value also
+    var transforms = this._transforms;
+    if (transforms) {
+      var len = transforms.length ;
+      for(var idx=0;idx<len;idx++) {
+        var transform = transforms[idx] ;
+        v = transform(v, this) ;
+      }
+    }
+
+    // if error objects are not allowed, and the value is an error, then
+    // change it to null.
+    if (this._noError && $type(v) === T_ERROR) v = null ;
+    
+    this._transformedBindingValue = v;
+  },
+  
   _changeQueue: SC.Set.create(),
   _alternateChangeQueue: SC.Set.create(),
-  
+  _changePending: NO,
+
   /**
     Call this method on SC.Binding to flush all bindings with changed pending.
     
@@ -397,13 +442,14 @@ SC.Binding = {
     binding value from one side to the other.
   */
   applyBindingValue: function() {
-    
+    console.log("applyBindingValue") ;
     this._changePending = NO ;
     
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
     
     var v = this._bindingValue ;
+    var tv = this._transformedBindingValue ;
     
     // the from property value will always be the binding value, update if 
     // needed.
@@ -411,23 +457,9 @@ SC.Binding = {
       this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
     }
     
-    // apply any transforms to get the to property value also
-    var transforms = this._transforms;
-    if (transforms) {
-      var len = transforms.length ;
-      for(var idx=0;idx<len;idx++) {
-        var transform = transforms[idx] ;
-        v = transform(v, this) ;
-      }
-    }
-    
-    // if error objects are not allowed, and the value is an error, then
-    // change it to null.
-    if (this._noError && $type(v) === T_ERROR) v = null ;
-    
-    // update the to value if needed.
+    // update the to value with the transformed value if needed.
     if (this._toTarget) {
-      this._toTarget.setPathIfChanged(this._toPropertyKey, v) ;
+      this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
     }
   },
 
