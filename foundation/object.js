@@ -599,10 +599,12 @@ SC.Object.prototype = {
     if (this._awake) return ;
     this._awake = true ;
     
+    SC.Observers.suspendPropertyObserving() ;
+    
     // it would be cool to do this in a recursive way, but sadly we cannot
     // without a stack overflow problem. Just loop through outlets and collect
     // items to awake.
-    this.bindings.invoke('relay') ; 
+    this.bindings.invoke('sync') ; 
     
     if (this.outlets && this.outlets.length) {
       var stack = [] ;
@@ -617,7 +619,7 @@ SC.Object.prototype = {
           next = obj[next] ;
           if (next) {
             // awake these bindings.
-            if (next.bindings) next.bindings.invoke('relay') ;
+            if (next.bindings) next.bindings.invoke('sync') ;
             
             // next has outlets itself. Start a new context and process them.
             if (next.outlets && next.outlets.length > 0) {
@@ -630,6 +632,9 @@ SC.Object.prototype = {
         } else working = stack.pop() ;
       }
     }
+    
+    SC.Binding.flushPendingChanges() ;
+    SC.Observers.resumePropertyObserving() ;
     
   },
   

@@ -127,7 +127,7 @@ SC.ObjectController = SC.Controller.extend(
     // empty arrays are treated like null values, arrays.len=1 treated like 
     // single objects.
     var isArray = false ;
-    if (this._isArray(content)) {
+    if (SC.isArray(content)) {
       var len = this._lengthFor(content) ;
       if (len == 0) {
         content = null ; 
@@ -162,7 +162,7 @@ SC.ObjectController = SC.Controller.extend(
           
           // if the value is an array, get the idx matching the content
           // object.  Otherwise, just use the value of the item.
-          if(this._isArray(value)) {
+          if(SC.isArray(value)) {
             value = this._objectAt(loc, value) ;
           }
           
@@ -295,7 +295,7 @@ SC.ObjectController = SC.Controller.extend(
     // no content object... return null.
     if (!obj) return null;
 
-    if (this._isArray(obj))
+    if (SC.isArray(obj))
     {
       var value = [];
       var len = this._lengthFor(obj);
@@ -332,25 +332,14 @@ SC.ObjectController = SC.Controller.extend(
     return value;
   },
 
-  _lastPropertyRevision: 0,
+  _lastContentPropertyRevision: 0,
   
   /** @private */
-  propertyObserver: function(observer,target,key,value,propertyRevision) {
-    
-    // only handle property once.
-    if (propertyRevision <= this._lastPropertyRevision) return ;
-    this._lastPropertyRevision = propertyRevision;
-
-    // save the bound observer.
-    if (!this._boundObserver) {
-      this._boundObserver = this._contentPropertyObserver.bind(this);
-    }
+  _contentDidChange: function(target,key,value,propertyRevision) {
     
     // handle changes to the content...
-    if (target != this) return ;
-    if ((key == 'content') && (value != this._content)) {
-      var f = this._boundObserver ;
-      
+    if ((value = this.get('content')) != this._content) {
+
       if (this.get('hasChanges')) {
         // if we have uncommitted changes, then discard the changes or raise
         // an exception.
@@ -362,49 +351,48 @@ SC.ObjectController = SC.Controller.extend(
         this._valueControllers = {} ;
       }
       
+      // get the handler method
+      var f = this._contentPropertyDidChange ;
+      
       // stop listening to old content.
       if (this._content) {
-        var objects = Array.from(this._content) ;
-        var loc = objects.length ;
-        while(--loc >= 0) {
-          var obj = objects[loc] ;
-          if (obj && obj.removeObserver) obj.removeObserver('*', f) ;
+        if (SC.isArray(this._content)) {
+          this._content.invoke('removeObserver', '*', this, f) ;
+        } else if (this._content.removeObserver) {
+          this._content.removeObserver('*', this, f) ;
         }
       }
       
       // start listening for changes on the new content object.
       this._content = value ;
-      if (this._content) {
-        var objects = Array.from(this._content) ;
-        var loc = objects.length ;
-        while(--loc >= 0) {
-          var obj = objects[loc] ;
-          if (obj && obj.addObserver) obj.addObserver('*', f) ;
+      if (value) {
+        if (SC.isArray(value)) {
+          value.invoke('addObserver', '*', this, f) ;
+        } else if (value.addObserver) {
+          value.addObserver('*', this, f) ;
         }
       }
 
       // determine the content type.
-      var count = 0 ;
-      if (this._content) {
-        count = (this._isArray(this._content)) ? this._lengthFor(this._content) : 1 ;
-      } ;
+      var count = (!value) ? 0 : (SC.isArray(value)) ? this._lengthFor(value) : 1 ;
       
+      // New content is configured, update controller stats
       this.beginPropertyChanges() ;
-      this.set('hasNoContent',count == 0) ;
-      this.set('hasSingleContent',count == 1) ;
+      this.set('hasNoContent',count === 0) ;
+      this.set('hasSingleContent',count === 1) ;
       this.set('hasMultipleContent',count > 1) ;
 
       // notify everyone that everything is different now.
       this.allPropertiesDidChange() ;
       this.endPropertyChanges() ;
     }
-  },
+  }.observes('content'),
   
   // invoked when properties on the content object change.  Just forward
   // to controller.
-  _contentPropertyObserver: function(target,key,value) {
+  _contentPropertyDidChange: function(target,key,value, propertyRevision) {
     this._changeFromContent = true ;
-    if (key == '*') {
+    if (key === '*') {
       this.allPropertiesDidChange() ;
     } else {
       this.propertyWillChange(key) ;
@@ -419,10 +407,6 @@ SC.ObjectController = SC.Controller.extend(
   
   _objectAt: function(idx, obj) {
     return (obj.objectAt) ? obj.objectAt(idx) : ((obj.get) ? obj.get(idx) : obj[idx]) ;
-  },
-  
-  _isArray: function(obj) {
-    return ($type(obj) == T_ARRAY) || (obj && obj.objectAt) ;
   }
-    
+      
 }) ;

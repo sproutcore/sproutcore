@@ -339,10 +339,13 @@ SC.Observable = {
     var level = this._kvo_changeLevel || 0 ;
 
     // save in the change set if queuing changes
-    if (level > 0) {
+    var suspended ;
+    if ((level > 0) || (suspended=SC.Observers.isObserveringSuspended)) {
       var changes = this._kvo_changes ;
       if (!changes) changes = this._kvo_changes = SC.Set.create() ;
       changes.add(key) ;
+      
+      if (suspended) SC.Observers.objectHasPendingChanges(this) ;
       
     // otherwise notify property observers immediately
     } else this._notifyPropertyObservers(key) ;
@@ -543,86 +546,91 @@ SC.Observable = {
     // get the observers.  If there are none, nothing to do!
     var observers = this._kvo_observers ;
     if (!observers) return NO; 
-    
-    // the set of changed keys...
-    var changes = this._kvo_changes;
-    if (!changes && key === undefined) return NO; // nothing to do.
-    
-    // otherwise, create a set to work with.
-    if (!changes) changes = SC.Set.create() ;
-    this._kvo_changes = this._kvo_altChanges ; // avoid recursion...
-    this._kvo_altChanges = null ;
-    
-    // Add the passed key to the changes set.  If a '*' was passed, then
-    // add all keys in the observers to the set...
-    if (key === '*') {
-      changes.add('*') ;
-      for(var key in observers) {
-        if (!observers.hasOwnProperty(key)) continue; 
-        changes.add(key) ;
-      }
-    } else if (key) changes.add(key) ;
-    
-    // Now go through the set and add all dependent keys...
-    var dependents = this._kvo_dependents;
-    if (dependents) {
-      var idx = 0 ;
-      
-      // note that each time we loop, we check the changes length, this
-      // way any dependent keys added to the set will also be evaluated...
-      while(idx < changes.length) {
-        var key = changes[idx] ;
-        var keys = dependents[key] ;
-        if (keys) changes.addEach(keys) ;
-        idx++ ;
-      }
-    }
-    
+
     // Get any starObservers -- they will be notified of all changes.
     var starObservers = observers['*'] ;
+    
+    // prevent notifications from being sent until complete
+    this._kvo_changeLevel = (this._kvo_changeLevel || 0) + 1; 
 
-    // beginPropertyChanges to avoid calling...
-    this.beginPropertyChanges() ;
-    
-    // now iterate through all changed keys and notify observers.
-    var idx = changes.length ;
-    while(--idx >= 0) {
-      var key = changes[idx] ; // the changed key
+    // keep sending notifications as long as there are changes
+    var changes, dependents ;
+    while(((changes = this._kvo_changes) && (changes.length > 0)) || (key != undefined)) {
       
-      // find any observers and notify them...
-      var observerSet = observers[key] ;
-      var members, membersLength, member, memberLoc, target, method ;
-      if (observerSet) {
-        members = observerSet.getMembers() ;
-        membersLength = members.length ;
-        for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
-          member = members[memberLoc] ;
-          if (member[2] === rev) continue ; // skip notified items.
-          target = member[0]; method = member[1] ; member[2] = rev;
-          method.call(target, null, this, key, null, rev) ;
+      // save the current set of changes and swap out the kvo_changes so that
+      // any set() calls by observers will be saved in a new set.
+      if (!changes) changes = SC.Set.create() ;
+      this._kvo_changes = this._kvo_altChanges ;
+      this._kvo_altChanges = null ; 
+
+      // Add the passed key to the changes set.  If a '*' was passed, then
+      // add all keys in the observers to the set...
+      // once finished, clear the key so the loop will end.
+      if (key === '*') {
+        changes.add('*') ;
+        for(var key in observers) {
+          if (!observers.hasOwnProperty(key)) continue; 
+          changes.add(key) ;
+        }
+      } else if (key) changes.add(key) ;
+
+      // Now go through the set and add all dependent keys...
+      if (dependents = this._kvo_dependents) {
+        var idx = 0 ;
+
+        // note that each time we loop, we check the changes length, this
+        // way any dependent keys added to the set will also be evaluated...
+        while(idx < changes.length) {
+          var key = changes[idx] ;
+          var keys = dependents[key] ;
+          if (keys) changes.addEach(keys) ;
+          idx++ ;
         }
       }
-      
-      // if there are starObservers, do the same thing for them
-      if (starObservers && key !== '*') {
-        members = startObservers.getMembers() ;
-        membersLength = members.length ;
-        for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
-          member = members[memberLoc] ;
-          target = member[0]; method = member[1] ;
-          method.call(target, null, this, key, null, rev) ;
+
+      // now iterate through all changed keys and notify observers.
+      while(changes.length > 0) {
+        var key = changes.pop() ; // the changed key
+        //if (!(this instanceof SC.Timer)) console.log("%@: notifying key: %@".fmt(this, key)) ;
+
+        // find any observers and notify them...
+        var observerSet = observers[key] ;
+        var members, membersLength, member, memberLoc, target, method ;
+        if (observerSet) {
+          members = observerSet.getMembers() ;
+          membersLength = members.length ;
+          for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
+            member = members[memberLoc] ;
+            if (member[2] === rev) continue ; // skip notified items.
+            target = member[0]; method = member[1] ; member[2] = rev;
+            method.call(target, null, this, key, null, rev) ;
+          }
         }
-      }
+
+        // if there are starObservers, do the same thing for them
+        if (starObservers && key !== '*') {
+          members = starObservers.getMembers() ;
+          membersLength = members.length ;
+          for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
+            member = members[memberLoc] ;
+            target = member[0]; method = member[1] ;
+            method.call(target, null, this, key, null, rev) ;
+          }
+        }
+
+        // if there is a default property observer, call that also
+        if (this.propertyObserver) this.propertyObserver(null, this, key, null, rev);
+      } // while(changes.length>0)
+
+      // changes set should be empty. save this set so it can be reused later
+      this._kvo_altChanges = changes ;
+      key = null ; // key is no longer needed; clear it to avoid infinite loops
       
-      // if there is a default property observer, call that also
-      if (this.propertyObserver) this.propertyObserver(this, key, null, rev);
-    }
+    } // while (changes)
     
-    // all done, clear the changes set and save it for later use.
-    changes.length = 0;
-    this._kvo_altChanges = changes ;    
-    
-    this.endPropertyChanges() ;
+    // done with loop, reduce change level so that future sets can resume
+    this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1; 
+    return YES ; // finished successfully
   },
 
   // ..........................................
@@ -1010,6 +1018,32 @@ SC.Observers = {
         tuple[0].addObserver(tuple[1], item[1], item[2]) ;
       } else newQueue.push(item) ;
     }
+  },
+  
+  isObserveringSuspended: 0,
+  _pending: SC.Set.create(),
+  
+  objectHasPendingChanges: function(obj) {
+    this._pending.add(obj) ; // save for later
+  },
+
+  // temporarily suspends all property change notifications.
+  suspendPropertyObserving: function() {
+    this.isObservingSuspended++ ;
+  },
+  
+  // resume change notifications.  This will call notifications to be
+  // delivered for all pending objects.
+  resumePropertyObserving: function() {
+    if(--this.isObservingSuspended <= 0) {
+      var pending = this._pending ;
+      this._pending = SC.Set.create() ;
+      while(pending.length > 0) {
+        pending.pop()._notifyPropertyObservers() ;
+      }
+      delete pending ; 
+    }
   }
+  
 } ;
 

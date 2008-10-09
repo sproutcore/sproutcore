@@ -204,7 +204,7 @@ SC.Set.prototype = {
   },
   
   toString: function() {
-    return "SC.Set<%@>".fmt(SC.SC.$A(this)) ;
+    return "SC.Set<%@>".fmt(SC.$A(this)) ;
   }
   
 } ;

@@ -379,7 +379,7 @@ SC.Binding = {
     // schedule to register an update.
     if (v !== this._bindingValue) {
 
-      console.log("fromPropertyDidChange: %@".fmt(this)) ;
+      //console.log("fromPropertyDidChange: %@".fmt(this)) ;
 
       this._setBindingValue(v) ;
       this._changePending = YES ;
@@ -478,7 +478,7 @@ SC.Binding = {
   applyBindingValue: function() {
     this._changePending = NO ;
 
-    console.log("applyBindingValue: %@".fmt(this)) ;
+    //console.log("applyBindingValue: %@".fmt(this)) ;
     
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
@@ -498,6 +498,34 @@ SC.Binding = {
     }
   },
 
+  /**
+    Calling this method on a binding will cause it to check the value of the 
+    from side of the binding matches the current expected value of the binding.
+    If not, it will relay the change as if the from side's value has just changed.
+    
+    This method is useful when you are dynamically connecting bindings to a network
+    of objects that may have already been initialized.
+  */
+  sync: function() {
+
+    this._computeBindingTargets() ;
+    var target = this._fromTarget ;
+    var key = this._fromPropertyKey ;
+    if (!target || !key) return ; // nothing to do
+
+    // get the new value
+    var v = target.getPath(key) ;
+    
+    // if the new value is different from the current binding value, then 
+    // schedule to register an update.
+    if (v !== this._bindingValue) {
+      this._setBindingValue(v) ;
+      this._changePending = YES ;
+      SC.Binding._changeQueue.add(this) ; // save for later.  
+    }
+    
+  },
+  
   _computeBindingTargets: function() {
     if (!this._fromTarget) {
 
