@@ -256,75 +256,12 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   // ..........................................
   // PROPERTY SUPPORT METHODS
   //
+  // These methods have moved to the root SC namespace.  They are still
+  // linked here for compatibility.
   
-  /**
-    Returns a tuple containing the object and key for the specified property 
-    path.  If no object could be found to match the property path, then returns
-    null.
-    
-    This is the standard method used throughout SproutCore to resolve property
-    paths.
-    
-    @param path {String} the property path
-    @param root {Object} optional parameter specifying the place to start
-    @returns {Array} array with [object, property] if found or null
-  */
-  tupleForPropertyPath: function(path, root) {
-    
-    // if the passed path is itself a tuple, return it
-    if ($type(path) === T_ARRAY) return path ;
+  tupleForPropertyPath: SC.tupleForPropertyPath,
+  objectForPropertyPath: SC.objectForPropertyPath,
 
-    // find the key.  It is the last . or first *
-    var key ;
-    var stopAt = path.indexOf('*') ;
-    if (stopAt < 0) stopAt = path.lastIndexOf('.') ;
-    key = (stopAt >= 0) ? path.slice(stopAt+1) : path ;
-    
-    // convert path to object.
-    var obj = this.objectForPropertyPath(path, root, stopAt) ;
-    return (obj && key) ? [obj,key] : null ;
-  },
-
-  /** 
-    Finds the object for the passed property path or array of path components.
-    This is the standard method used in SproutCore to traverse object paths.
-    
-    @param path {String} the path
-    @param root {Object} optional root object.  window is used otherwise
-    @param stopAt {Integer} optional point to stop searching the path.
-    @returns {Object} the found object or undefined.
-  */
-  objectForPropertyPath: function(path, root, stopAt) {
-
-    if (!root) root = window ;
-    
-    // faster method for strings
-    if ($type(path) === T_STRING) {
-      if (stopAt === undefined) stopAt = path.length ;
-      var loc = 0 ;
-      while((root) && (loc < stopAt)) {
-        var nextDotAt = path.indexOf('.', loc) ;
-        if ((nextDotAt < 0) || (nextDotAt > stopAt)) nextDotAt = stopAt;
-        var key = path.slice(loc, nextDotAt-1);
-        root = (root.get) ? root.get(key) : root[key] ;
-        loc = nextDotAt+1; 
-      }
-      if (loc < stopAt) root = undefined; // hit a dead end. :(
-        
-    // older method using an array
-    } else {
-
-      var loc = 0, max = path.length, key = null;
-      while((loc < max) && root) {
-        key = path[loc++];
-        if (key) root = (root.get) ? root.get(key) : root[key] ;
-      }
-      if (loc < max) root = undefined ;
-    }
-    
-    return root ;
-  },
-  
   
   // ..........................................
   // INTERNAL SUPPORT METHODS

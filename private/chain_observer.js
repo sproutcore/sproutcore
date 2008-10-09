@@ -31,7 +31,7 @@ SC._ChainObserver = function(property) {
 // This is the primary entry point.  Configures the chain.
 SC._ChainObserver.createChain = function(rootObject, path, target, method) {
 
-  var parts = parts.split('.') ;
+  var parts = path.split('.') ;
   
   // First we create the chain.
   var root ;

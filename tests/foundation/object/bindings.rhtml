@@ -32,46 +32,65 @@ Test.context("bind() method", {
   },
 
   "bind(TestNamespace.fromObject.bar) should follow absolute path": function() {
+    
+    window.testObject = this.testObject ;
+  
     // create binding
     this.testObject.bind("foo", "TestNamespace.fromObject.bar") ;
-    
+  
     // now make a change to see if the binding triggers.
     this.fromObject.set("bar", "changedValue") ;
-    
+  
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
   },
-  
+    
   "bind(.bar) should bind to relative path": function() {
     // create binding
     this.testObject.bind("foo", ".bar") ;
-    
+  
     // now make a change to see if the binding triggers.
     this.testObject.set("bar", "changedValue") ;
-    
+  
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
   },
 
   "bind(SC.Binding.Bool(TestNamespace.fromObject.bar)) should create binding with bool transform": function() {
     // create binding
     this.testObject.bind("foo", SC.Binding.Bool("TestNamespace.fromObject.bar")) ;
-    
+  
     // now make a change to see if the binding triggers.
     this.fromObject.set("bar", 1) ;
+  
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
 
     this.fromObject.set("bar", 0) ;
+  
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
   },
+
+"bind(TestNamespace.fromObject*extraObject.foo) should create chained binding": function() {
+  this.testObject.bind("foo", "TestNamespace.fromObject*extraObject.foo");
+  this.fromObject.set("extraObject", this.extraObject) ;
   
-  "bind(TestNamespace.fromObject*extraObject.foo) should create chained binding": function() {
-    this.testObject.bind("foo", "TestNamespace.fromObject*extraObject.foo");
-    this.fromObject.set("extraObject", this.extraObject) ;
-    assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
-  },
+  // support new-style bindings if available
+  if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
+  assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
+},
 
   "bind(*extraObject.foo) should create locally chained binding": function() {
     this.testObject.bind("foo", "*extraObject.foo");
     this.testObject.set("extraObject", this.extraObject) ;
+    
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
   }
   
@@ -117,6 +136,8 @@ Test.context("fooBinding method", {
     // now make a change to see if the binding triggers.
     this.fromObject.set("bar", "changedValue") ;
     
+  // support new-style bindings if available
+  if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
   },
   
@@ -128,7 +149,9 @@ Test.context("fooBinding method", {
     
     // now make a change to see if the binding triggers.
     this.testObject.set("bar", "changedValue") ;
-    
+
+  // support new-style bindings if available
+  if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("changedValue", this.testObject.get("foo"), "testObject.foo");
   },
   
@@ -140,33 +163,45 @@ Test.context("fooBinding method", {
     
     // now make a change to see if the binding triggers.
     this.fromObject.set("bar", 1) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
 
     this.fromObject.set("bar", 0) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
   },
 
-  "foodBinding: TestNamespace.fromObject*extraObject.foo should create chained binding": function() {
+  "fooBinding: TestNamespace.fromObject*extraObject.foo should create chained binding": function() {
 
     this.testObject = this.TestObject.create({
       fooBinding: "TestNamespace.fromObject*extraObject.foo" 
     }) ;
 
     this.fromObject.set("extraObject", this.extraObject) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
   },
 
-  "foodBinding: *extraObject.foo should create locally chained binding": function() {
+  "fooBinding: *extraObject.foo should create locally chained binding": function() {
     this.testObject = this.TestObject.create({
       fooBinding: "*extraObject.foo" 
     }) ;
     this.testObject.set("extraObject", this.extraObject) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual("extraObjectValue", this.testObject.get("foo"), "testObject.foo") ;
   }
   
 });
 
-Test.context("fooBindingDefault", {
+Test.context("fooBindingDefault: SC.Binding.Bool (old style)", {
   
   setup: function() {
     this.TestObject = SC.Object.extend({
@@ -202,9 +237,15 @@ Test.context("fooBindingDefault", {
     
     // now make a change to see if the binding triggers.
     this.fromObject.set("bar", 1) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
 
     this.fromObject.set("bar", 0) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
   },
   
@@ -216,13 +257,88 @@ Test.context("fooBindingDefault", {
     
     // now make a change to see if the binding triggers.
     this.fromObject.set("bar", 1) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
 
     this.fromObject.set("bar", 0) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
     assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
   }
   
 });
 
+Test.context("fooBindingDefault: SC.Binding.bool() (new style)", {
+  
+  setup: function() {
+    this.TestObject = SC.Object.extend({
+      foo: "bar",
+      fooBindingDefault: SC.Binding.bool(),
+      bar: "foo",
+      extraObject: null 
+    });
+    
+    this.fromObject = SC.Object.create({
+      bar: "foo",
+      extraObject: null 
+    }) ;
+    
+    window.TestNamespace = {
+      fromObject: this.fromObject,
+      testObject: this.testObject
+    } ;
+  },
+
+  teardown: function() { 
+    delete this.TestObject ;
+    delete this.testObject; 
+    delete this.fromObject;
+    delete window.TestNamespace ;
+  },
+
+  "fooBinding: TestNamespace.fromObject.bar should have bool binding": function() {
+    // create binding
+    this.testObject = this.TestObject.create({
+      fooBinding: "TestNamespace.fromObject.bar"
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", 1) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
+    assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
+
+    this.fromObject.set("bar", 0) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
+    assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
+  },
+  
+  "fooBinding: SC.Binding.Not(TestNamespace.fromObject.bar should override default": function() {
+
+    this.testObject = this.TestObject.create({
+      fooBinding: SC.Binding.Not("TestNamespace.fromObject.bar") 
+    }) ;
+    
+    // now make a change to see if the binding triggers.
+    this.fromObject.set("bar", 1) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
+    assertEqual(NO, this.testObject.get("foo"), "testObject.foo == NO");
+
+    this.fromObject.set("bar", 0) ;
+
+    // support new-style bindings if available
+    if (SC.Binding.flushPendingChanges) SC.Binding.flushPendingChanges();
+    assertEqual(YES, this.testObject.get("foo"), "testObject.foo == YES");
+  }
+  
+});
 </script>
 <% end %>

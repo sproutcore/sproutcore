@@ -107,7 +107,7 @@ SC.Application = SC.Responder.extend(
     // an explicit target was passed...
     if (target) {
       if ($type(target) === T_STRING) {
-        target = SC.Object.objectForPropertyPath(target) ;
+        target = SC.objectForPropertyPath(target) ;
       }
       return target.respondsTo(action) ? target : null ;
     }

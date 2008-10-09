@@ -257,6 +257,12 @@ SC.Binding = {
     This will set "from" property path to the specified value.  It will not
     attempt to resolve this property path to an actual object/property tuple
     until you connect the binding.
+
+    The binding will search for the property path starting at the root level 
+    unless you specify an alternate root object as the second paramter to this 
+    method.  Alternatively, you can begin your property path with either "." or
+    "*", which will use the root object of the to side be default.  This special
+    behavior is used to support the high-level API provided by SC.Object.
     
     @param propertyPath {String|Tuple} A property path or tuple
     @param root {Object} optional root object to use when resolving the path.
@@ -294,7 +300,7 @@ SC.Binding = {
     binding._toTuple = null ; // clear out any existing one.
     return binding ;
   },
-  
+
   /**
     Attempts to connect this binding instance so that it can receive and relay
     changes.  This method will raise an exception if you have not set the 
@@ -308,11 +314,36 @@ SC.Binding = {
     if (this.isConnected) return this ;
 
     // try to connect the from side.
-    SC.Observers.addObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, this._fromRoot) ;
+    // as a special behavior, if the from property path begins with either a 
+    // . or * and the fromRoot is null, use the toRoot instead.  This allows for 
+    // support for the SC.Object shorthand:
+    //
+    // contentBinding: "*owner.value"
+    //
+    var path = this._fromPropertyPath ;
+    var root = this._fromRoot ;
+    if ($type(path) === T_STRING) {
+      
+      // if the first character is a '.', this is a static path.  make the toRoot
+      // the default root.
+      if (path.indexOf('.') === 0) {
+        path = path.slice(1);
+        if (!root) root = this._toRoot ;
+        
+      // if the first character is a '*', then setup a tuple since this is a 
+      // chained path.
+      } else if (path.indexOf('*') === 0) {
+        path = [this._fromRoot || this._toRoot, path.slice(1)] ;
+        root = null ;
+      }
+    }
+    SC.Observers.addObserver(path, this, this.fromPropertyDidChange, root) ;
     
     // try to connect the to side
     if (!this._oneWay) {
-      SC.Observers.addObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;  
+      var path = this._toPropertyPath ;
+      var root = this._toRoot ;
+      SC.Observers.addObserver(path, this, this.toPropertyDidChange, root) ;  
     }
     
     this.isConnected = YES ;
@@ -465,14 +496,36 @@ SC.Binding = {
 
   _computeBindingTargets: function() {
     if (!this._fromTarget) {
-      var tuple = SC.Object.tupleForPropertyPath(this._fromPropertyPath, this._fromRoot) ;
+
+      // if the fromPropertyPath begins with a . or * then we may use the toRoot
+      // as the root object.  Similar code exists in connect() so if you make a
+      // change to one be sure to update the other.
+      var path = this._fromPropertyPath ;
+      var root = this._fromRoot ;
+      if ($type(path) === T_STRING) {
+        
+        // static path beginning with the toRoot
+        if (path.indexOf('.') === 0) {
+          path = path.slice(1) ; // remove the .
+          if (!root) root = this._toRoot; // use the toRoot optionally
+          
+        // chained path beginning with toRoot.  Setup a tuple
+        } else if (path.indexOf('*') === 0) {
+          path = [root || this._toRoot, path.slice(1)];
+          root = null ;
+        }
+      }
+      
+      var tuple = SC.tupleForPropertyPath(path, root) ;
       if (tuple) {
         this._fromTarget = tuple[0]; this._fromPropertyKey = tuple[1] ;
       }
     }
 
     if (!this._toTarget) {
-      var tuple = SC.Object.tupleForPropertyPath(this._toPropertyPath, this._toRoot) ;
+      var path = this._toPropertyPath ;
+      var root = this._toRoot ;
+      var tuple = SC.tupleForPropertyPath(path, root) ;
       if (tuple) {
         this._toTarget = tuple[0]; this._toPropertyKey = tuple[1] ;
       }
@@ -697,6 +750,14 @@ SC.Binding = {
       var t = $type(v) ;
       return (t === T_ERROR) ? v : v == null ;
     });
+  },
+  
+  toString: function() {
+    var from = (this._fromRoot) ? "<%@>:%@".fmt(this._fromRoot,this._fromPropertyPath) : this._fromPropertyPath;
+
+    var to = (this._toRoot) ? "<%@>:%@".fmt(this._toRoot,this._toPropertyPath) : this._toPropertyPath;
+    
+    return "SC.Binding%@(%@ -> %@)".fmt(SC.guidFor(this), from, to) ;
   }  
 } ;
 

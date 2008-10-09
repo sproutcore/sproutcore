@@ -293,7 +293,7 @@ SC.Timer = SC.Object.extend(
       var path = this.action.split('.') ;
       var property = path.pop() ;
 
-      var target = SC.Object.objectForPropertyPath(path, window) ;
+      var target = SC.objectForPropertyPath(path, window) ;
       var action = (target.get) ? target.get(property) : target[property];
       if (action && $type(action) == T_FUNCTION) {
         action.call(target, this) ;

@@ -634,34 +634,20 @@ SC.Observable = {
     the more familiar propertyBinding: 'property.path' approach.
   */
   bind: function(toKey, fromPropertyPath) {
-    
-    var r = SC.idt.active ;
-    
-    var binding ;
-    var props = { to: [this, toKey] } ;
 
-    // for strings try to do default relay
+    var binding ;
+
+    // if a string or array (i.e. tuple) is passed, convert this into a
+    // binding.  If a binding default was provided, use that.
     var pathType = $type(fromPropertyPath) ;
-    if (pathType == T_STRING || pathType == T_ARRAY) {
-      binding = this[toKey + 'BindingDefault'] || SC.Binding.From;
-      binding = binding(fromPropertyPath) ;
+    if (pathType === T_STRING || pathType === T_ARRAY) {
+      binding = this[toKey + 'BindingDefault'] || SC.Binding;
+      binding = binding.beget().from(fromPropertyPath) ;
     } else binding = fromPropertyPath ;
 
-    // check the 'from' value of the relay. if it starts w/
-    // '.' || '*' then convert to a local tuple.
-    var relayFrom = binding.prototype.from ;
-    if ($type(relayFrom) == T_STRING) switch(relayFrom.slice(0,1)) {
-      case '*':
-      case '.':
-        relayFrom = [this,relayFrom.slice(1,relayFrom.length)];
-    }        
-
-    if(r) bt = new Date().getTime();
-
-    binding = binding.create(props, { from: relayFrom }) ;
+    // finish configuring the binding and then connect it.
+    binding = binding.to(toKey, this).connect() ;
     this.bindings.push(binding) ;
-
-    if (r) SC.idt.b1_t += (new Date().getTime()) - bt ;
     
     return binding ;
   },
@@ -729,7 +715,7 @@ SC.Observable = {
     If any object in the path is undefined, returns undefined.
   */
   getPath: function(path) {
-    var tuple = SC.Object.tupleForPropertyPath(path, this) ;
+    var tuple = SC.tupleForPropertyPath(path, this) ;
     if (tuple === null || tuple[0] === null) return undefined ;
     return tuple[0].get(tuple[1]) ;
   },
@@ -743,7 +729,7 @@ SC.Observable = {
   */
   setPath: function(path, value) {
     if (path.indexOf('.') >= 0) {
-      var tuple = SC.Object.tupleForPropertyPath(path, this) ;
+      var tuple = SC.tupleForPropertyPath(path, this) ;
       if (tuple[0] == null) return null ;
       tuple[0].set(tuple[1], value) ;
     } else this.set(path, value) ; // shortcut
@@ -761,7 +747,7 @@ SC.Observable = {
   */
   setPathIfChanged: function(path, value) {
     if (path.indexOf('.') >= 0) {
-      var tuple = SC.Object.tupleForPropertyPath(path, this) ;
+      var tuple = SC.tupleForPropertyPath(path, this) ;
       if (tuple[0] == null) return null ;
       if (tuple[0].get(tuple[1]) !== value) {
         tuple[0].set(tuple[1], value) ;
@@ -979,7 +965,7 @@ SC.Observers = {
   addObserver: function(propertyPath, target, method, pathRoot) {
     // try to get the tuple for this.
     if ($type(propertyPath) === SC.T_STRING) {
-      var tuple = SC.Object.tupleForPropertyPath(propertyPath, pathRoot) ;
+      var tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     } else {
       var tuple = propertyPath; 
     }
@@ -997,7 +983,7 @@ SC.Observers = {
   // Remove the observer.  If it is already in the queue, remove it.  Also
   // if already found on the object, remove that.
   removeObserver: function(propertyPath, target, method, pathRoot) {
-    var tuple = SC.Object.tupleForPropertyPath(propertyPath, pathRoot) ;
+    var tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     if (tuple) {
       tuple[0].removeObserver(tuple[1], target, method) ;
     } 
@@ -1019,7 +1005,7 @@ SC.Observers = {
       var item = oldQueue[idx] ;
       if (!item) continue ;
       
-      var tuple = SC.Object.tupleForPropertyPath(item[0], item[3]);
+      var tuple = SC.tupleForPropertyPath(item[0], item[3]);
       if (tuple) {
         tuple[0].addObserver(tuple[1], item[1], item[2]) ;
       } else newQueue.push(item) ;

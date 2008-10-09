@@ -129,7 +129,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // compute the objectType
     if (!objectType) objectType = this.get('exampleContentObject') ;
     if ($type(objectType) === T_STRING) {
-      objectType = SC.Object.objectForPropertyPath(objectType) ;
+      objectType = SC.objectForPropertyPath(objectType) ;
     }
     if (objectType == null) {
       throw "Invalid object type was provided" ;
