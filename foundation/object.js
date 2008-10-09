@@ -441,76 +441,47 @@ SC.Object.prototype = {
     // they just aren't visible to the for...in loop.  viewType is the hash
     // of values that was applied to the HTMLElement, so its a 1:1 substitute.
     var keySource = this.viewType || this ; 
-    var loc ; var keys ; var key ; var value ; 
+    var loc, keys, key, value, observer, propertyPaths, propertyPathsLength ;
     
-    var r = SC.idt.active ; var idtStart ; var idtSt ;
-    if (r) {
-      SC.idt.count++;
-      idtStart = new Date().getTime() ;
-    } ;
-    
-    // Add Observers
-    if (keys = keySource._observers) for(loc=0;loc<keys.length;loc++) {
-      key = keys[loc] ; value = this[key] ;
+    // Loop through observer functions and register them
+    if (keys = keySource._observers) {
+      var len = keys.length ;
+      for(loc=0;loc<len;loc++) {
+        key = keys[loc]; observer = this[key] ;
+        propertyPaths = observer.propertyPaths ;
+        propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
+        for(var ploc=0;ploc<propertyPathsLength;ploc++) {
+          var path = propertyPaths[ploc] ;
+          var dotIndex = path.indexOf('.') ;
+          // handle most common case, observing a local property
+          if (dotIndex < 0) {
+            this.addObserver(path, this, observer) ;
 
-      if (r) {
-        SC.idt.keys++ ;
-        SC.idt.observers++ ;
-        idtSt = new Date().getTime() ;
-      }
-      
-      var propertyPaths = null ;
-      if ((value instanceof Function) && value.propertyPaths) {
-        propertyPaths = value.propertyPaths ;
-        value = value.bind(this) ;
-      } else if (typeof(value) == "string") {
-        propertyPaths = [value] ;
-        value = this.propertyObserver.bind(this,key.slice(0,-8)) ;
-      }
-      
-      // a property path string was found.  Convert this to an object/path
-      // and observe.
-      if (propertyPaths) for(var ploc=0;ploc<propertyPaths.length;ploc++) { 
-        var propertyPath = propertyPaths[ploc] ;
-        var object = null;  
-        
-        // most common case. refers to local property.
-        if (propertyPath.indexOf('.') == -1) {
-          this.addObserver(propertyPath, value) ;
-          
-        // deal with more exotic cases
-        } else switch(propertyPath.slice(0,1)) {
-          // start with a . or * means this is a chained local path.
-          case '*':
-          case '.':
-            propertyPath = propertyPath.slice(1,propertyPath.length) ;
-            this.addObserver(propertyPath, value) ;
-            break ;
+          // next most common case, use a chained observer
+          } else if (path.indexOf('*') === 0) {
+            this.addObserver(path.slice(1), this, observer) ;
             
-          // this is an absolute path. so hook 'er up.
-          default:
-            SC.Observers.addObserver(propertyPath, value) ;
+          // otherwise register the observer in the observers queue.  This 
+          // will add the observer now or later when the named path becomes
+          // available.
+          } else {
+            var root = null ;
+            if (dotIndex === 0) {
+              root = this; path = path.slice(1) ;
+            }
+            SC.Observers.addObserver(path, this, observer, root); 
+          }
         }
       }
-      
-      if (r) SC.idt.observers_t += (new Date().getTime()) - idtSt ;
     }
 
     // Add Bindings
     this.bindings = [] ;
     if (keys = keySource._bindings) for(loc=0;loc<keys.length;loc++) {
-      key = keys[loc] ; value = this[key] ;
-
-      if (r) {
-        SC.idt.keys++ ;
-        SC.idt.bindings++ ;
-        idtSt = new Date().getTime() ;
-      }
-        
       // get propertyKey
+      key = keys[loc] ; value = this[key] ;
       var propertyKey = key.slice(0,-7) ; // contentBinding => content
       this[key] = this.bind(propertyKey, value) ;
-      if (r) SC.idt.bindings_t += (new Date().getTime()) - idtSt ;      
     }
 
     // Add Properties
@@ -528,8 +499,6 @@ SC.Object.prototype = {
       var inc = Array.from(this.initMixin) ;
       for(var idx=0; idx < inc.length; idx++) inc[idx].call(this);
     }
-    
-    if (r) { SC.idt.t += ((new Date().getTime()) - idtStart); }
   },
   
   /**  
