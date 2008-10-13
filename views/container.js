@@ -60,7 +60,7 @@ SC.ContainerView = SC.View.extend(
     }
   },
   
-  _contentObserver: function() {
+  _contentDidChange: function() {
     this.replaceContent(this.get('content'));
   }.observes('content')
   

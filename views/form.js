@@ -556,7 +556,7 @@ SC.FormView = SC.View.extend({
   
   // Automatically observe the content properties and add/remove form as 
   // observer.
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (content == this._content) return ; // bail if content is same.
     

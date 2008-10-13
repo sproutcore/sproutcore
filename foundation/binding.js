@@ -372,14 +372,14 @@ SC.Binding = {
     Invoked whenever the value of the "from" property changes.  This will mark
     the binding as dirty if the value has changed.
   */
-  fromPropertyDidChange: function(ignore, target, key) {
+  fromPropertyDidChange: function(target, key) {
     var v = target.get(key) ;
+
+    //console.log("fromPropertyDidChange: %@ v = %@".fmt(this, v)) ;
     
     // if the new value is different from the current binding value, then 
     // schedule to register an update.
     if (v !== this._bindingValue) {
-
-      //console.log("fromPropertyDidChange: %@".fmt(this)) ;
 
       this._setBindingValue(v) ;
       this._changePending = YES ;
@@ -397,7 +397,7 @@ SC.Binding = {
     if the value does not match the transformedBindingValue, then it will become
     the new bindingValue. 
   */
-  toPropertyDidChange: function(ignore, target, key) {
+  toPropertyDidChange: function(target, key) {
     if (this._oneWay) return; // nothing to do
     
     var v = target.get(key) ;

@@ -252,14 +252,18 @@ Test.context("SC.ObjectController", {
       rcrds.refresh();
       var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
       
+      // verify that the collection updated
       rcrds.count().shouldEqual(1);
+      
+      // make sure bindings have processed
+      SC.Binding.flushPendingChanges() ;
       
       oc.set('test', 'NAME2');
       oc.set('value', 123);
       
-      $ok(oc.commitChanges()).shouldEqual(YES);
-      single.get('test').shouldEqual('NAME2');
-      single.get('value').shouldEqual(123);
+      assertEqual(YES, $ok(oc.commitChanges()), "$ok(oc.commitChanges())");
+      assertEqual("NAME2", single.get('test'), "single.get(test)");
+      assertEqual(123, single.get('value'), "single.get(value)");
     },
     
     "Support content objects that implement SC.Array but are not arrays": function() {

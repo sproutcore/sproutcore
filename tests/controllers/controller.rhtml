@@ -99,7 +99,7 @@ Test.context("Single SC.Controller", {
   "changes should commit immediately if enabled": function() {
     this.c.set('commitChangesImmediately', YES) ;
     this.c.editorDidChange() ;
-    this.c._commitTimeout.shouldNotBeNull() ;
+    assertNotEqual(null, this.c._commitTimeout, '_commitTimeout');
   },
 
   "changes should NOT commit immediately UNLESS enabled": function() {

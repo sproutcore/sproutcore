@@ -62,7 +62,7 @@ SC.MIXED_STATE = '__MIXED__' ;
 SC.Control = {
   
   initMixin: function() {
-    this._contentObserver(); // setup content observing if needed.
+    this._contentDidChange(); // setup content observing if needed.
     this.isSelectedObserver() ;
     this.isEnabledObserver() ;
     this.isFocusedObserver(); 
@@ -224,7 +224,7 @@ SC.Control = {
   }.observes('isFirstResponder'),
   
   // This should be null so that if content is also null, the
-  // _contentObserver won't do anything on init.
+  // _contentDidChange won't do anything on init.
   _content: null,
   
   /** @private

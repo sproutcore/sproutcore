@@ -406,7 +406,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   
   init: function() {
     sc_super() ;
-    if (this.get('content')) this._contentObserver() ;
+    if (this.get('content')) this._contentDidChange() ;
   }
 
 });

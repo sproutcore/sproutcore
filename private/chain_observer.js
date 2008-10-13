@@ -109,7 +109,7 @@ SC._ChainObserver.prototype = {
     var target = this.target; var method = this.method;
     if (target && method) {
       var rev = object.propertyRevision ;
-      method.call(target, null, object, property, value, rev) ;
+      method.call(target, object, property, value, rev) ;
     } 
   },
   

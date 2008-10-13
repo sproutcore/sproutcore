@@ -436,64 +436,8 @@ SC.Object.prototype = {
   */
   init: function() {
     
-    // This keySource is used to fix a bug in FF that will not iterate through
-    // keys you add to an HTMLElement.  The key values are still accessible, 
-    // they just aren't visible to the for...in loop.  viewType is the hash
-    // of values that was applied to the HTMLElement, so its a 1:1 substitute.
-    var keySource = this.viewType || this ; 
-    var loc, keys, key, value, observer, propertyPaths, propertyPathsLength ;
+    this.initObservable();
     
-    // Loop through observer functions and register them
-    if (keys = keySource._observers) {
-      var len = keys.length ;
-      for(loc=0;loc<len;loc++) {
-        key = keys[loc]; observer = this[key] ;
-        propertyPaths = observer.propertyPaths ;
-        propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
-        for(var ploc=0;ploc<propertyPathsLength;ploc++) {
-          var path = propertyPaths[ploc] ;
-          var dotIndex = path.indexOf('.') ;
-          // handle most common case, observing a local property
-          if (dotIndex < 0) {
-            this.addObserver(path, this, observer) ;
-
-          // next most common case, use a chained observer
-          } else if (path.indexOf('*') === 0) {
-            this.addObserver(path.slice(1), this, observer) ;
-            
-          // otherwise register the observer in the observers queue.  This 
-          // will add the observer now or later when the named path becomes
-          // available.
-          } else {
-            var root = null ;
-            if (dotIndex === 0) {
-              root = this; path = path.slice(1) ;
-            }
-            SC.Observers.addObserver(path, this, observer, root); 
-          }
-        }
-      }
-    }
-
-    // Add Bindings
-    this.bindings = [] ;
-    if (keys = keySource._bindings) for(loc=0;loc<keys.length;loc++) {
-      // get propertyKey
-      key = keys[loc] ; value = this[key] ;
-      var propertyKey = key.slice(0,-7) ; // contentBinding => content
-      this[key] = this.bind(propertyKey, value) ;
-    }
-
-    // Add Properties
-    if (keys = keySource._properties) for(loc=0;loc<keys.length;loc++) {
-      key = keys[loc] ; value = this[key] ;
-      if (value && value.dependentKeys && (value.dependentKeys.length > 0)) {
-        args = value.dependentKeys.slice() ;
-        args.unshift(key) ;
-        this.registerDependentKey.apply(this,args) ;
-      }
-    }
-
     // Call 'initMixin' methods to automatically setup modules.
     if (this.initMixin) {
       var inc = Array.from(this.initMixin) ;
@@ -722,7 +666,7 @@ Object.extend(SC.Object.prototype, SC.Observable) ;
 
 
 function logChange(target,key,value) {
-  console.log("CHANGE: " + target + "["+key+"]=" + value) ;
+  console.log("CHANGE: %@[%@] = %@".fmt(target, key, target.get(key)));
 }
 
 

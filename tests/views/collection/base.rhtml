@@ -22,10 +22,11 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   
   "Should scroll to the selected item": function()
   {
-    testCollectionView.get('rootElement').scrollTop.shouldEqual(0);
+    assertEqual(0, testCollectionView.get('rootElement').scrollTop, "scrollTop") ;
     testCollectionView.scrollToContent( testCollection.get('records').last() );
-    testCollectionView.get('itemViews').length.shouldEqual(3);
-    scrollView.get('rootElement').scrollTop.shouldEqual(30);
+
+    assertEqual(3, testCollectionView.get('itemViews').length, 'itemViews.length') ;
+    assertEqual(30, scrollView.get('rootElement').scrollTop, "scrollTop 2") ;
   },
   
   setup: function()
@@ -44,6 +45,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
     scrollView.set('content', testCollectionView) ;
 
     testController.set('content', testCollection) ;
+    SC.Binding.flushPendingChanges(); 
   },
   
   teardown: function()
@@ -56,6 +58,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
     delete scrollView ;
     
     testController.set('content', null) ;
+    SC.Binding.flushPendingChanges(); 
   }
   
 });
@@ -105,7 +108,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   
   "Should contain the same number of visible item views as it's controller has records": function()
   {
-    testCollectionView.get('itemViews').length.shouldEqual(2);
+    assertEqual(2, testCollectionView.get("itemViews").length, "itemViews.length") ;
   },
   
   "Should update it's item views as it's controller is updated": function()
@@ -115,16 +118,19 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
        return (itemView) ? itemView.get('content').get('guid') : null ;
      } ;
      
-     valueOfFirstItemView().shouldEqual('1001') ;
+     assertEqual('1001', valueOfFirstItemView(), 'valueOfFirstItemView'); ;
      
      var rec = SC.Record.create({ guid: '0999', name: 'item zero' });
      SC.Store.addRecord( rec );
+     SC.Binding.flushPendingChanges();
      
-     valueOfFirstItemView().shouldEqual('0999') ;
-     testCollectionView.get('itemViews').length.shouldEqual(2);
+     assertEqual('0999', valueOfFirstItemView(), 'valueOfFirstItemView'); ;
+     assertEqual(2, testCollectionView.get('itemViews').length, 'itemViews.length 2') ;
      
      rec.destroy();
      SC.Store.removeRecord(rec);
+     SC.Binding.flushPendingChanges();
+
      delete rec;
    },
    
@@ -144,6 +150,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
     scrollView.set('content', testCollectionView) ;
 
     testController.set('content', testCollection) ;
+    SC.Binding.flushPendingChanges() ;
   },
   
   teardown: function()
@@ -160,8 +167,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   
 });
 
-Test.context("A SC.CollectionView with it's content set to a SC.ArrayController",
-{
+Test.context("A SC.CollectionView with it's content set to a SC.ArrayController", {
   "Should contain the same number of item views as it's controller has records": function()
   {
     this.controller.get('length').shouldEqual(6);

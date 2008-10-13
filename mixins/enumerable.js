@@ -581,13 +581,17 @@ SC.Enumerable = {
 SC._buildReducerFor = function(reducerKey, reducerProperty) {
   return function(key, value) {
     var reducer = this[reducerKey] ;
+    console.log("reducer = %@".fmt(reducer)) ;
+    
     if (SC.typeOf(reducer) !== T_FUNCTION) {
       return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
     } else {
       // Invoke the reduce method defined in enumerable instead of using the
       // one implemented in the receiver.  The receiver might be a native 
       // implementation that does not support reducerProperty.
-      return SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
+      var ret = SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
+      console.log("RET = %@".fmt(ret)) ;
+      return ret ;
     }
   }.property('[]') ;
 };
@@ -670,6 +674,12 @@ SC.Reducers = {
     
     if (p) {
       p[key] = func ;
+      
+      // add the function to the properties array so that new instances
+      // will have their dependent key registered.
+      var props = p._properties || [] ;
+      props.push(key) ;
+      p._properties = props ;
       this.registerDependentKey(key, '[]') ;
     }
     

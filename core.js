@@ -319,7 +319,8 @@ SC.mixin(/** @scope SC */ {
   */
   isArray: function( obj )
   {
-    return ($type(obj) === T_ARRAY) || (obj && ((obj.length!==undefined) || obj.objectAt));
+    var t = $type(obj);
+    return (t === T_ARRAY) || ((t !== T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
   },
   
   /**

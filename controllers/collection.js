@@ -189,10 +189,10 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
   
   // invoked whenever the list changes.  Updated the arrangedObjects and
   // potentially the selection.
-  _recordsObserver: function(target,key,value) {
+  _recordsDidChange: function(target,key,value) {
     var old = this.get('arrangedObjects') ;
-    value = Array.from(target.get(key)) ;
-    
+    value = Array.from(this.get('records')) ;
+
     this.set('arrangedObjects',value.slice()) ;
     
     // update selection.

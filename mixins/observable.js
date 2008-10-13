@@ -451,6 +451,14 @@ SC.Observable = {
       
     // Create observers if needed...
     } else {
+      
+      // Special case to support reduced properties.  If the property 
+      // key begins with '@' and its value is unknown, then try to get its
+      // value.  This will configure the dependent keys if needed.
+      if ((this[key] === undefined) && (key.indexOf('@') === 0)) {
+        this.get(key) ;
+      }
+      
       var observers = this._kvo_observers ;
       if (!observers) this._kvo_observers = observers = {} ;
 
@@ -505,6 +513,87 @@ SC.Observable = {
   },
   
 
+  /**
+    This method will register any observers and computed properties saved on
+    the object.  Normally you do not need to call this method youself.  It
+    is invoked automatically just before property notifications are sent and
+    from the init() method of SC.Object.  You may choose to call this
+    from your own initialization method if you are using SC.Observable in
+    a non-SC.Object-based object.
+    
+    This method looks for several private variables, which you can setup,
+    to initialize:
+    
+      - _observers: this should contain an array of key names for observers
+        you need to configure.
+        
+      - _bindings: this should contain an array of key names that configure
+        bindings.
+        
+      - _properties: this should contain an array of key names for computed
+        properties.
+        
+    @returns {Object} this
+  */
+  initObservable: function() {
+    if (this._observableInited) return ;
+    this._observableInited = YES ;
+    
+    var loc, keys, key, value, observer, propertyPaths, propertyPathsLength ;
+    
+    // Loop through observer functions and register them
+    if (keys = this._observers) {
+      var len = keys.length ;
+      for(loc=0;loc<len;loc++) {
+        key = keys[loc]; observer = this[key] ;
+        propertyPaths = observer.propertyPaths ;
+        propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
+        for(var ploc=0;ploc<propertyPathsLength;ploc++) {
+          var path = propertyPaths[ploc] ;
+          var dotIndex = path.indexOf('.') ;
+          // handle most common case, observing a local property
+          if (dotIndex < 0) {
+            this.addObserver(path, this, observer) ;
+
+          // next most common case, use a chained observer
+          } else if (path.indexOf('*') === 0) {
+            this.addObserver(path.slice(1), this, observer) ;
+            
+          // otherwise register the observer in the observers queue.  This 
+          // will add the observer now or later when the named path becomes
+          // available.
+          } else {
+            var root = null ;
+            if (dotIndex === 0) {
+              root = this; path = path.slice(1) ;
+            }
+            SC.Observers.addObserver(path, this, observer, root); 
+          }
+        }
+      }
+    }
+
+    // Add Bindings
+    this.bindings = [] ;
+    if (keys = this._bindings) for(loc=0;loc<keys.length;loc++) {
+      // get propertyKey
+      key = keys[loc] ; value = this[key] ;
+      var propertyKey = key.slice(0,-7) ; // contentBinding => content
+      this[key] = this.bind(propertyKey, value) ;
+    }
+
+    // Add Properties
+    if (keys = this._properties) for(loc=0;loc<keys.length;loc++) {
+      key = keys[loc] ; value = this[key] ;
+      if (value && value.dependentKeys && (value.dependentKeys.length > 0)) {
+        args = value.dependentKeys.slice() ;
+        args.unshift(key) ;
+        this.registerDependentKey.apply(this,args) ;
+      }
+    }
+    
+  },
+  
   // ..........................................
   // NOTIFICATION
   // 
@@ -524,12 +613,6 @@ SC.Observable = {
     if (observers) {
       var observerSet = observers[key] ;
       if (observerSet) ret = observerSet.getMembers() ;
-      
-      // var idx = ret.length ;
-      // while(--idx >= 0) {
-      //   var ary = ret[idx] || [] ;
-      //   ret[idx] = { target: ary[0], method: ary[1], toString: toStr } ;
-      // }
     }
     return ret || [] ;
   },
@@ -538,9 +621,8 @@ SC.Observable = {
   // observer queue.  If you pass a key it will be added to the queue.
   _notifyPropertyObservers: function(key) {
 
-    // increment revision
-    var rev = this.propertyRevision++;
-
+    if (!this._observableInited) this.initObservable() ;
+    
     SC.Observers.flush() ; // hookup as many observers as possible.
 
     // get the observers.  If there are none, nothing to do!
@@ -556,6 +638,9 @@ SC.Observable = {
     // keep sending notifications as long as there are changes
     var changes, dependents ;
     while(((changes = this._kvo_changes) && (changes.length > 0)) || (key != undefined)) {
+      
+      // increment revision
+      var rev = this.propertyRevision++;
       
       // save the current set of changes and swap out the kvo_changes so that
       // any set() calls by observers will be saved in a new set.
@@ -591,7 +676,6 @@ SC.Observable = {
       // now iterate through all changed keys and notify observers.
       while(changes.length > 0) {
         var key = changes.pop() ; // the changed key
-        //if (!(this instanceof SC.Timer)) console.log("%@: notifying key: %@".fmt(this, key)) ;
 
         // find any observers and notify them...
         var observerSet = observers[key] ;
@@ -603,7 +687,7 @@ SC.Observable = {
             member = members[memberLoc] ;
             if (member[2] === rev) continue ; // skip notified items.
             target = member[0]; method = member[1] ; member[2] = rev;
-            method.call(target, null, this, key, null, rev) ;
+            method.call(target, this, key, null, rev) ;
           }
         }
 
@@ -614,7 +698,7 @@ SC.Observable = {
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
             target = member[0]; method = member[1] ;
-            method.call(target, null, this, key, null, rev) ;
+            method.call(target, this, key, null, rev) ;
           }
         }
 
@@ -671,11 +755,13 @@ SC.Observable = {
   */  
   didChangeFor: function(context) { 
     
+    context = SC.hashFor(context) ; // get a hash key we can use in caches.
+    
     // setup caches...
     var valueCache = this._kvo_didChange_valueCache ;
-    if (!valueCache) valueCache = this._kvo_didChange_valueChage = {};
+    if (!valueCache) valueCache = this._kvo_didChange_valueCache = {};
     var revisionCache = this._kvo_didChange_revisionCache;
-    if (!revisionCache) revisionCache=this._kvo_didChange_revisionChage={};
+    if (!revisionCache) revisionCache=this._kvo_didChange_revisionCache={};
 
     // get the cache of values and revisions already seen in this context
     var seenValues = valueCache[context] || {} ;

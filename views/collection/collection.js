@@ -408,6 +408,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
 
       var range = this.get('nowShowingRange') ;
+      if (!range) return [] ; 
       var content = this.get('content') || [] ;
       this._itemViews = [] ;
       for(var idx=0;idx<range.length;idx++) {
