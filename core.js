@@ -165,14 +165,14 @@ SC.mixin(/** @scope SC */ {
   clone: function(object) {
     var ret = object ;
     switch (SC.typeOf(object)) {
-    case T_ARRAY:
+    case SC.T_ARRAY:
       if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
         ret = object.clone() ;
       } else ret = object.slice() ;
       break ;
     
-    case T_HASH:
-    case T_OBJECT:
+    case SC.T_HASH:
+    case SC.T_OBJECT:
       if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
         ret = object.clone() ;
       } else {
@@ -237,7 +237,7 @@ SC.mixin(/** @scope SC */ {
     queue = queue.concat(SC._onloadQueue) ;
     var func = null ;
     while(func = queue.shift()) {
-      if (SC.typeOf(func) === T_FUNCTION) {
+      if (SC.typeOf(func) === SC.T_FUNCTION) {
         func.call(document) ;
       } else func[1].call(func[0] || document) ;
     }
@@ -285,25 +285,25 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the type
   */  
   typeOf: function(item) {
-    if (item === undefined) return T_UNDEFINED ;
-    if (item === null) return T_NULL ; 
+    if (item === undefined) return SC.T_UNDEFINED ;
+    if (item === null) return SC.T_NULL ; 
     var ret = typeof(item) ;
     if (ret == "object") {
       if (item instanceof Array) {
-        ret = T_ARRAY ;
+        ret = SC.T_ARRAY ;
       } else if (item instanceof Function) {
-        ret = (item.isClass) ? T_CLASS : T_FUNCTION ;
+        ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION ;
         
       // NB: typeOf() may be called before SC.Error has had a chance to load
       // so this code checks for the presence of SC.Error first just to make
       // sure.  No error instance can exist before the class loads anyway so
       // this is safe.
       } else if (SC.Error && (item instanceof SC.Error)) {
-        ret = T_ERROR ;        
+        ret = SC.T_ERROR ;        
       } else if (item.isObject === true) {
-        ret = T_OBJECT ;
-      } else ret = T_HASH ;
-    } else if (ret === T_FUNCTION) ret = (item.isClass) ? T_CLASS : T_FUNCTION;
+        ret = SC.T_OBJECT ;
+      } else ret = SC.T_HASH ;
+    } else if (ret === SC.T_FUNCTION) ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION;
     return ret ;
   },
   
@@ -320,7 +320,7 @@ SC.mixin(/** @scope SC */ {
   isArray: function( obj )
   {
     var t = $type(obj);
-    return (t === T_ARRAY) || ((t !== T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
+    return (t === SC.T_ARRAY) || ((t !== SC.T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
   },
   
   /**
@@ -368,13 +368,13 @@ SC.mixin(/** @scope SC */ {
     if (obj._guid) return obj._guid ;
     
     switch($type(obj)) {
-      case T_NUMBER:
+      case SC.T_NUMBER:
         return this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj);
         break ;
-      case T_STRING:
+      case SC.T_STRING:
         return this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj);
         break ;
-      case T_BOOL:
+      case SC.T_BOOL:
         return (obj) ? "(true)" : "(false)" ;
         break;
       default:
@@ -402,7 +402,7 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the hash code for this instance.
   */
   hashFor: function(obj) {
-    return (obj && obj.hash && $type(obj.hash) === T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
+    return (obj && obj.hash && $type(obj.hash) === SC.T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
   },
 
   /**
@@ -461,7 +461,7 @@ SC.mixin(/** @scope SC */ {
   */
   clone: function(obj) {
     if (obj == null) return null ;
-    if ($type(obj) === T_ARRAY) return obj.slice() ;
+    if ($type(obj) === SC.T_ARRAY) return obj.slice() ;
     var ret = {} ;
     for(var key in obj) {
       if (!obj.hasOwnProperty(key)) continue ;
@@ -492,7 +492,7 @@ SC.mixin(/** @scope SC */ {
   tupleForPropertyPath: function(path, root) {
     
     // if the passed path is itself a tuple, return it
-    if ($type(path) === T_ARRAY) return path ;
+    if ($type(path) === SC.T_ARRAY) return path ;
 
     // find the key.  It is the last . or first *
     var key ;
@@ -519,7 +519,7 @@ SC.mixin(/** @scope SC */ {
     if (!root) root = window ;
     
     // faster method for strings
-    if ($type(path) === T_STRING) {
+    if ($type(path) === SC.T_STRING) {
       if (stopAt === undefined) stopAt = path.length ;
       var loc = 0 ;
       while((root) && (loc < stopAt)) {
@@ -654,19 +654,6 @@ SC.Platform.Browser = function() {
     return 'Firefox'; 
   }
 }() ;
-
-// Export the type variables into the global space.
-var T_ERROR = SC.T_ERROR ;
-var T_OBJECT = SC.T_OBJECT ;
-var T_NULL = SC.T_NULL ;
-var T_CLASS = SC.T_CLASS ;
-var T_HASH = SC.T_HASH ;
-var T_FUNCTION = SC.T_FUNCTION ;
-var T_UNDEFINED = SC.T_UNDEFINED ;
-var T_NUMBER = SC.T_NUMBER ;
-var T_BOOL = SC.T_BOOL ;
-var T_ARRAY = SC.T_ARRAY ;
-var T_STRING = SC.T_STRING ;
 
 
 // ........................................

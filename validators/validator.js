@@ -260,7 +260,7 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
     } else if (validatorKey.isClass) {
       validator = validatorKey.create() ;
       
-    } else if ($type(validatorKey) == T_STRING) {
+    } else if ($type(validatorKey) == SC.T_STRING) {
 
       // extract optional key name
       var name = null ;

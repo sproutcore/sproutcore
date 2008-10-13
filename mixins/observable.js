@@ -386,7 +386,7 @@ SC.Observable = {
       var dep = arguments[idx] ;
       
       // handle the case where the user passes arrays of keys...
-      if ($type(dep) === T_ARRAY) {
+      if ($type(dep) === SC.T_ARRAY) {
         var array = dep ;  var arrayIdx = array.length;
         while(--arrayIdx >= 0) {
           var dep = array[arrayIdx] ;
@@ -430,7 +430,7 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (target == null) target = this ;
-    if ($type(method) === T_STRING) method = target[method] ;
+    if ($type(method) === SC.T_STRING) method = target[method] ;
     if (method == null) throw "You must pass a method to addObserver()" ;
 
     // Normalize key...
@@ -480,7 +480,7 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (target == null) target = this ;
-    if ($type(method) === T_STRING) method = target[method] ;
+    if ($type(method) === SC.T_STRING) method = target[method] ;
     if (method == null) throw "You must pass a method to addObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
@@ -732,7 +732,7 @@ SC.Observable = {
     // if a string or array (i.e. tuple) is passed, convert this into a
     // binding.  If a binding default was provided, use that.
     var pathType = $type(fromPropertyPath) ;
-    if (pathType === T_STRING || pathType === T_ARRAY) {
+    if (pathType === SC.T_STRING || pathType === SC.T_ARRAY) {
       binding = this[toKey + 'BindingDefault'] || SC.Binding;
       binding = binding.beget().from(fromPropertyPath) ;
     } else binding = fromPropertyPath ;
@@ -994,8 +994,8 @@ SC.Observable = {
     
     // fixup the params
     var targetType = $type(target) ;
-    if (targetType === T_FUNCTION) {
-      if (($type(method) === T_NUMBER) && (timeout === undefined)) {
+    if (targetType === SC.T_FUNCTION) {
+      if (($type(method) === SC.T_NUMBER) && (timeout === undefined)) {
         timeout = method ;
       }
       method = target ;
@@ -1003,7 +1003,7 @@ SC.Observable = {
     }
     
     // convert the method to a function if needed...
-    if ($type(method) === T_STRING) method = target[method] ;
+    if ($type(method) === SC.T_STRING) method = target[method] ;
     if (method == null) throw "You must pass a valid method to observeOnce()";
 
     var timeoutObject = null ;

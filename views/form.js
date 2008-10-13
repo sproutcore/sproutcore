@@ -100,7 +100,7 @@ SC.FormView = SC.View.extend({
       this._errors = [] ;
       this.get('fieldKeys').each(function(k) {
         var value = fview.get(k) ;
-        if ($type(value) == T_ERROR) fview._errors.push(value) ;
+        if ($type(value) == SC.T_ERROR) fview._errors.push(value) ;
       }) ;
     }
     
@@ -399,8 +399,8 @@ SC.FormView = SC.View.extend({
         field.set('value',value) ;
         
         // notify errors if the newValue changed to or from an error.
-        var isOldError = $type(oldValue) == T_ERROR ;
-        var isNewError = $type(value) == T_ERROR ;
+        var isOldError = $type(oldValue) == SC.T_ERROR ;
+        var isNewError = $type(value) == SC.T_ERROR ;
 
         if (isOldError != isNewError) {
           this.propertyWillChange('errors') ;
@@ -500,8 +500,8 @@ SC.FormView = SC.View.extend({
     this.propertyDidChange(key, value) ;
 
     // notify errors if the newValue changed to or from an error.
-    var isOldError = $type(oldValue) == T_ERROR ;
-    var isNewError = $type(value) == T_ERROR ;
+    var isOldError = $type(oldValue) == SC.T_ERROR ;
+    var isNewError = $type(value) == SC.T_ERROR ;
     
     if (isOldError != isNewError) {
       this.propertyWillChange('errors') ;

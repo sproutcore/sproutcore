@@ -583,7 +583,7 @@ SC._buildReducerFor = function(reducerKey, reducerProperty) {
     var reducer = this[reducerKey] ;
     console.log("reducer = %@".fmt(reducer)) ;
     
-    if (SC.typeOf(reducer) !== T_FUNCTION) {
+    if (SC.typeOf(reducer) !== SC.T_FUNCTION) {
       return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
     } else {
       // Invoke the reduce method defined in enumerable instead of using the
@@ -661,7 +661,7 @@ SC.Reducers = {
 
     // if there is no reduce function defined for this key, then we can't 
     // build a reducer for it.
-    if (SC.typeOf(reducer) !== T_FUNCTION) return undefined;
+    if (SC.typeOf(reducer) !== SC.T_FUNCTION) return undefined;
     
     // if we can't generate the property, just run reduce
     if (generateProperty === NO) {

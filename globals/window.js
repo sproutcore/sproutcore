@@ -223,7 +223,7 @@ SC.window = SC.PaneView.extend({
     {
       Event.stop(evt);
       ret = false ;
-      if(this._mouseDownView.mouseDragged && $type(this._mouseDownView.mouseDragged) == T_FUNCTION) {
+      if(this._mouseDownView.mouseDragged && $type(this._mouseDownView.mouseDragged) == SC.T_FUNCTION) {
         //IE7: if the mouseDownView handles the mouseDragged event, set mouseCanDrag
         //to true.  TODO: make an optional "allowBrowserSelect" property that
         // would do the same thing; for now let's just prevent it in this case

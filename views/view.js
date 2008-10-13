@@ -1746,7 +1746,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if(toolTip && (toolTip != '')) this._updateToolTipObserver();
 
     // if container element is a string, convert it to an actual DOM element.
-    if (this.containerElement && ($type(this.containerElement) === T_STRING)) {
+    if (this.containerElement && ($type(this.containerElement) === SC.T_STRING)) {
       this.containerElement = this.$sel(this.containerElement);
     }
 

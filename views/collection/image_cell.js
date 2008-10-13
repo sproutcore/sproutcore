@@ -111,7 +111,7 @@ SC.ImageCellView = SC.View.extend(SC.Control,
     // 1. apply the formatter
     var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
-      var formattedValue = ($type(formatter) == T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
+      var formattedValue = ($type(formatter) == SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;
     }
     

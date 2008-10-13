@@ -102,11 +102,11 @@ SC.Application = SC.Responder.extend(
   targetForAction: function( action, target, sender )
   {
     // no action, no target...
-    if (!action || ($type(action) != T_STRING)) return null;
+    if (!action || ($type(action) != SC.T_STRING)) return null;
 
     // an explicit target was passed...
     if (target) {
-      if ($type(target) === T_STRING) {
+      if ($type(target) === SC.T_STRING) {
         target = SC.objectForPropertyPath(target) ;
       }
       return target.respondsTo(action) ? target : null ;

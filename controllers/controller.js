@@ -126,12 +126,12 @@ SC.Controller = SC.Object.extend(
   controllerForValue: function(value) {
     var ret = null ;
     switch($type(value)) {
-      case T_OBJECT:
+      case SC.T_OBJECT:
         if (value.kindOf(SC.Collection)) {
           ret = SC.CollectionController ;          
         } else ret = SC.ObjectController ;
         break ;
-      case T_ARRAY:
+      case SC.T_ARRAY:
         ret = SC.ArrayController ;
         break ;
       default:
