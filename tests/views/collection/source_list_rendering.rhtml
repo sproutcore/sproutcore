@@ -95,6 +95,7 @@ Test.context("A grouped SC.SourceListView with its content set to a SC.Collectio
     scrollView.set('content', testSourceListView) ;
 
     testController.set('content', testCollection) ;
+    SC.Binding.flushPendingChanges() ;
   },
   
   teardown: function()
@@ -212,6 +213,7 @@ Test.context("A grouped SC.SourceListView with its content set to a SC.Collectio
     scrollView.set('content', testSourceListView) ;
 
     testController.set('content', testCollection) ;
+    SC.Binding.flushPendingChanges() ;
   },
   
   teardown: function()
