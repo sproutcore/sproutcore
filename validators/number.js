@@ -25,7 +25,7 @@ SC.Validator.Number = SC.Validator.extend(
   places: 0,
   
   fieldValueForObject: function(object, form, field) {
-    switch($type(object)) {
+    switch(SC.$type(object)) {
       case SC.T_NUMBER:
         object = object.toFixed(this.get('places')) ;
         break ;
@@ -38,7 +38,7 @@ SC.Validator.Number = SC.Validator.extend(
   },
 
   objectForFieldValue: function(value, form, field) {
-    switch($type(value)) {
+    switch(SC.$type(value)) {
       case SC.T_STRING:
         if (value.length == '') {
           value = null ;

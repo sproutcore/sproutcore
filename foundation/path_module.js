@@ -295,7 +295,7 @@ SC._PathModule = {
           }
           ret = fret ;
         }
-      } else if ($type(ret) != SC.T_ARRAY) ret = [ret] ;
+      } else if (SC.$type(ret) != SC.T_ARRAY) ret = [ret] ;
 
       // now follow indicies, if there are any
       if (indicies && indicies.length > 0 && ret) {

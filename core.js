@@ -289,7 +289,7 @@ SC.mixin(/** @scope SC */ {
   */
   isArray: function( obj )
   {
-    var t = $type(obj);
+    var t = SC.$type(obj);
     return (t === SC.T_ARRAY) || ((t !== SC.T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
   },
   
@@ -315,7 +315,7 @@ SC.mixin(/** @scope SC */ {
     if (obj.toArray) return obj.toArray() ;
     
     // not array-like
-    if (obj.length===undefined || $type(obj) === SC.T_FUNCTION) return [obj];
+    if (obj.length===undefined || SC.$type(obj) === SC.T_FUNCTION) return [obj];
 
     // when all else fails, do a manual convert...
     var len = obj.length;
@@ -337,7 +337,7 @@ SC.mixin(/** @scope SC */ {
     if (obj === null) return '(null)' ;
     if (obj._guid) return obj._guid ;
     
-    switch($type(obj)) {
+    switch(SC.$type(obj)) {
       case SC.T_NUMBER:
         return this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj);
         break ;
@@ -372,7 +372,7 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the hash code for this instance.
   */
   hashFor: function(obj) {
-    return (obj && obj.hash && $type(obj.hash) === SC.T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
+    return (obj && obj.hash && SC.$type(obj.hash) === SC.T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
   },
 
   /**
@@ -431,7 +431,7 @@ SC.mixin(/** @scope SC */ {
   */
   clone: function(obj) {
     if (obj == null) return null ;
-    if ($type(obj) === SC.T_ARRAY) return obj.slice() ;
+    if (SC.$type(obj) === SC.T_ARRAY) return obj.slice() ;
     var ret = {} ;
     for(var key in obj) {
       if (!obj.hasOwnProperty(key)) continue ;
@@ -462,7 +462,7 @@ SC.mixin(/** @scope SC */ {
   tupleForPropertyPath: function(path, root) {
     
     // if the passed path is itself a tuple, return it
-    if ($type(path) === SC.T_ARRAY) return path ;
+    if (SC.$type(path) === SC.T_ARRAY) return path ;
 
     // find the key.  It is the last . or first *
     var key ;
@@ -489,7 +489,7 @@ SC.mixin(/** @scope SC */ {
     if (!root) root = window ;
     
     // faster method for strings
-    if ($type(path) === SC.T_STRING) {
+    if (SC.$type(path) === SC.T_STRING) {
       if (stopAt === undefined) stopAt = path.length ;
       var loc = 0 ;
       while((root) && (loc < stopAt)) {
@@ -632,7 +632,7 @@ SC.Platform.Browser = function() {
 // Global exports will be made optional in the future so you can avoid 
 // polluting the global namespace.
 
-$type = SC.typeOf ;
+SC.$type = SC.typeOf ;
 $I = SC.inspect ;
 
 // Legacy.  Will retire.

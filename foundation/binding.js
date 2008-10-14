@@ -322,7 +322,7 @@ SC.Binding = {
     //
     var path = this._fromPropertyPath ;
     var root = this._fromRoot ;
-    if ($type(path) === SC.T_STRING) {
+    if (SC.$type(path) === SC.T_STRING) {
       
       // if the first character is a '.', this is a static path.  make the toRoot
       // the default root.
@@ -426,7 +426,7 @@ SC.Binding = {
 
     // if error objects are not allowed, and the value is an error, then
     // change it to null.
-    if (this._noError && $type(v) === SC.T_ERROR) v = null ;
+    if (this._noError && SC.$type(v) === SC.T_ERROR) v = null ;
     
     this._transformedBindingValue = v;
   },
@@ -534,7 +534,7 @@ SC.Binding = {
       // change to one be sure to update the other.
       var path = this._fromPropertyPath ;
       var root = this._fromRoot ;
-      if ($type(path) === SC.T_STRING) {
+      if (SC.$type(path) === SC.T_STRING) {
         
         // static path beginning with the toRoot
         if (path.indexOf('.') === 0) {
@@ -577,7 +577,7 @@ SC.Binding = {
   oneWay: function(fromPath, aFlag) {
     
     // If fromPath is a bool but aFlag is undefined, swap.
-    if ((aFlag === undefined) && ($type(fromPath) === SC.T_BOOL)) {
+    if ((aFlag === undefined) && (SC.$type(fromPath) === SC.T_BOOL)) {
       aFlag = fromPath; fromPath = null ;
     }
     
@@ -649,7 +649,7 @@ SC.Binding = {
   */
   noError: function(fromPath, aFlag) {
     // If fromPath is a bool but aFlag is undefined, swap.
-    if ((aFlag === undefined) && ($type(fromPath) === SC.T_BOOL)) {
+    if ((aFlag === undefined) && (SC.$type(fromPath) === SC.T_BOOL)) {
       aFlag = fromPath; fromPath = null ;
     }
     
@@ -751,7 +751,7 @@ SC.Binding = {
   */
   bool: function(fromPath) {
     return this.from(fromPath).transform(function(v) {
-      var t = $type(v) ;
+      var t = SC.$type(v) ;
       if (t === SC.T_ERROR) return v ;
       return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
     }) ;
@@ -766,7 +766,7 @@ SC.Binding = {
   */
   not: function(fromPath) {
     return this.from(fromPath).transform(function(v) {
-      var t = $type(v) ;
+      var t = SC.$type(v) ;
       if (t === SC.T_ERROR) return v ;
       return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
     }) ;
@@ -779,7 +779,7 @@ SC.Binding = {
   */
   isNull: function(fromPath) {
     return this.from(fromPath).transform(function(v) { 
-      var t = $type(v) ;
+      var t = SC.$type(v) ;
       return (t === SC.T_ERROR) ? v : v == null ;
     });
   },

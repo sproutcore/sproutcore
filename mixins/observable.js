@@ -386,7 +386,7 @@ SC.Observable = {
       var dep = arguments[idx] ;
       
       // handle the case where the user passes arrays of keys...
-      if ($type(dep) === SC.T_ARRAY) {
+      if (SC.$type(dep) === SC.T_ARRAY) {
         var array = dep ;  var arrayIdx = array.length;
         while(--arrayIdx >= 0) {
           var dep = array[arrayIdx] ;
@@ -430,7 +430,7 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (target == null) target = this ;
-    if ($type(method) === SC.T_STRING) method = target[method] ;
+    if (SC.$type(method) === SC.T_STRING) method = target[method] ;
     if (method == null) throw "You must pass a method to addObserver()" ;
 
     // Normalize key...
@@ -480,7 +480,7 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (target == null) target = this ;
-    if ($type(method) === SC.T_STRING) method = target[method] ;
+    if (SC.$type(method) === SC.T_STRING) method = target[method] ;
     if (method == null) throw "You must pass a method to addObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
@@ -731,7 +731,7 @@ SC.Observable = {
 
     // if a string or array (i.e. tuple) is passed, convert this into a
     // binding.  If a binding default was provided, use that.
-    var pathType = $type(fromPropertyPath) ;
+    var pathType = SC.$type(fromPropertyPath) ;
     if (pathType === SC.T_STRING || pathType === SC.T_ARRAY) {
       binding = this[toKey + 'BindingDefault'] || SC.Binding;
       binding = binding.beget().from(fromPropertyPath) ;
@@ -993,9 +993,9 @@ SC.Observable = {
   observeOnce: function(key, target, method, timeout) {
     
     // fixup the params
-    var targetType = $type(target) ;
+    var targetType = SC.$type(target) ;
     if (targetType === SC.T_FUNCTION) {
-      if (($type(method) === SC.T_NUMBER) && (timeout === undefined)) {
+      if ((SC.$type(method) === SC.T_NUMBER) && (timeout === undefined)) {
         timeout = method ;
       }
       method = target ;
@@ -1003,7 +1003,7 @@ SC.Observable = {
     }
     
     // convert the method to a function if needed...
-    if ($type(method) === SC.T_STRING) method = target[method] ;
+    if (SC.$type(method) === SC.T_STRING) method = target[method] ;
     if (method == null) throw "You must pass a valid method to observeOnce()";
 
     var timeoutObject = null ;
@@ -1058,7 +1058,7 @@ SC.Observers = {
   // it into a queue for later.
   addObserver: function(propertyPath, target, method, pathRoot) {
     // try to get the tuple for this.
-    if ($type(propertyPath) === SC.T_STRING) {
+    if (SC.$type(propertyPath) === SC.T_STRING) {
       var tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     } else {
       var tuple = propertyPath; 

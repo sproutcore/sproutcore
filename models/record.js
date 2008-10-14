@@ -480,7 +480,7 @@ SC.Record = SC.Object.extend(
     // The passed in value appears to be another record instance.
     // just check for equality with the record as an optimization.
     if (value && value.primaryKey) { 
-      if ($type(recValue) === SC.T_ARRAY) {
+      if (SC.$type(recValue) === SC.T_ARRAY) {
         loc = recValue.length ;
         while(--loc >= 0) { 
           if (recValue === value) return true; 
@@ -489,7 +489,7 @@ SC.Record = SC.Object.extend(
 
     // Otherwise, do a more in-depth compare
     } else { 
-      if ($type(recValue) === SC.T_ARRAY) {
+      if (SC.$type(recValue) === SC.T_ARRAY) {
         loc = recValue.length ;
         while(--loc >= 0) { 
           if (this._matchValue(recValue[loc],value)) return true; 

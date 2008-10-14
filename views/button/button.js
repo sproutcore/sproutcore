@@ -299,7 +299,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     var targetValue = this.get('toggleOnValue') ;
     var state ;
     
-    if ($type(value) == SC.T_ARRAY) {
+    if (SC.$type(value) == SC.T_ARRAY) {
       if (value.length == 1) {
         state = (value[0] == targetValue) ;
       } else {
@@ -456,8 +456,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
   _hasLegacyActionHandler: function()
   {
     var action = this.get('action');
-    if (action && ($type(action) == SC.T_FUNCTION)) return true;
-    if (action && ($type(action) == SC.T_STRING) && (action.indexOf('.') != -1)) return true;
+    if (action && (SC.$type(action) == SC.T_FUNCTION)) return true;
+    if (action && (SC.$type(action) == SC.T_STRING) && (action.indexOf('.') != -1)) return true;
     return false;
   },
 
@@ -467,8 +467,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
     if (!this._hasLegacyActionHandler()) return false;
     
     var action = this.get('action');
-    if ($type(action) == SC.T_FUNCTION) this.action(evt);
-    if ($type(action) == SC.T_STRING)
+    if (SC.$type(action) == SC.T_FUNCTION) this.action(evt);
+    if (SC.$type(action) == SC.T_STRING)
     {
       eval("this.action = function(e) { return "+ action +"(this, e); };");
       this.action(evt);

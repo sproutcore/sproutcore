@@ -284,7 +284,7 @@ SC.Timer = SC.Object.extend(
   */
   performAction: function() {
     // if the action is a function, just try to call it.
-    if ($type(this.action) == SC.T_FUNCTION) {
+    if (SC.$type(this.action) == SC.T_FUNCTION) {
       this.action.call((this.target || this), this) ;
 
     // otherwise, action should be a string.  If it has a period, treat it
@@ -295,7 +295,7 @@ SC.Timer = SC.Object.extend(
 
       var target = SC.objectForPropertyPath(path, window) ;
       var action = (target.get) ? target.get(property) : target[property];
-      if (action && $type(action) == SC.T_FUNCTION) {
+      if (action && SC.$type(action) == SC.T_FUNCTION) {
         action.call(target, this) ;
       } else {
         throw '%@: Timer could not find a function at %@'.fmt(this, this.action) ;

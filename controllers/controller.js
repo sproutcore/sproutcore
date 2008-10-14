@@ -125,7 +125,7 @@ SC.Controller = SC.Object.extend(
   */
   controllerForValue: function(value) {
     var ret = null ;
-    switch($type(value)) {
+    switch(SC.$type(value)) {
       case SC.T_OBJECT:
         if (value.kindOf(SC.Collection)) {
           ret = SC.CollectionController ;          

@@ -206,7 +206,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
         var value = object[key] ;
 
 
-        switch($type(value)) {
+        switch(SC.$type(value)) {
         case SC.T_CLASS:
           if (!value._objectClassName) value._objectClassName = path;
           if (levels>=0) searchObject(path, value, levels) ;
@@ -405,7 +405,7 @@ SC.Object.prototype = {
   */
   respondsTo: function( methodName )
   {
-    return !!(methodName && this[methodName] && ($type(this[methodName]) == SC.T_FUNCTION));
+    return !!(methodName && this[methodName] && (SC.$type(this[methodName]) == SC.T_FUNCTION));
   },
   
   /**
@@ -652,7 +652,7 @@ SC.Object.prototype = {
     if (arguments.length > 2) {
       var args =SC.$A(arguments).slice(2,arguments.length);
       args.unshift(this);
-      if ($type(f) === SC.T_STRING) f = this[methodName] ;
+      if (SC.$type(f) === SC.T_STRING) f = this[methodName] ;
       f = f.bind.apply(f, args) ;
     }
     return SC.Timer.schedule({ target: this, action: f, interval: interval });

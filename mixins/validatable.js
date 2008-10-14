@@ -45,7 +45,7 @@ SC.Validatable = {
     @field
   */
   isValid: function() { 
-    return $type(this.get('value')) != SC.T_ERROR; 
+    return SC.$type(this.get('value')) != SC.T_ERROR; 
   }.property('value'),
   
   /**

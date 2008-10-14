@@ -77,13 +77,13 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     // 1. apply the formatter
     var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
-      var formattedValue = ($type(formatter) == SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
+      var formattedValue = (SC.$type(formatter) == SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;
     }
     
     // 2. If the returned value is an array, convert items to strings and 
     // join with commas.
-    if ($type(value) == SC.T_ARRAY) {
+    if (SC.$type(value) == SC.T_ARRAY) {
       var ary = [];
       for(var idx=0;idx<value.get('length');idx++) {
         var x = value.objectAt(idx) ;

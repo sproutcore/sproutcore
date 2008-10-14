@@ -25,7 +25,7 @@ SC.ErrorExplanationView = SC.View.extend(SC.Control,
   _errorsFor: function(errors) {
     if (!errors || errors.length == 0) return [] ;
     return errors.map(function(er) {
-      return ($type(er) == SC.T_ERROR) ? er : null ;
+      return (SC.$type(er) == SC.T_ERROR) ? er : null ;
     }).compact() ;
   },
   
