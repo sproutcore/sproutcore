@@ -121,39 +121,6 @@ SC.mixin(/** @scope SC */ {
   //   
 
 
-  /**
-    Creates a clone of the passed object.  This function can take just about
-    any type of object and create a clone of it, including primitive values
-    (which are not actually cloned because they are immutable).
-    
-    If the passed object implements the clone() method, then this function
-    will simply call that method and return the result.
-    
-    @param object {Object} the object to clone
-    @returns {Object} the cloned object
-  */
-  clone: function(object) {
-    var ret = object ;
-    switch (SC.typeOf(object)) {
-    case SC.T_ARRAY:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else ret = object.slice() ;
-      break ;
-    
-    case SC.T_HASH:
-    case SC.T_OBJECT:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else {
-        ret = {} ;
-        for(var key in object) ret[key] = object[key] ;
-      }
-    }
-    
-    return ret ;
-  },
-  
   /**  
     Call this method during setup of your app to queue up methods to be 
     called once the entire document has finished loading.  If you call this
@@ -287,8 +254,7 @@ SC.mixin(/** @scope SC */ {
     @param obj {Object} the object to test
     @returns {Boolean} 
   */
-  isArray: function( obj )
-  {
+  isArray: function(obj) {
     var t = SC.$type(obj);
     return (t === SC.T_ARRAY) || ((t !== SC.T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
   },
@@ -399,15 +365,27 @@ SC.mixin(/** @scope SC */ {
   _stringGuids: {},
   
   /** 
-    Empty function.  Useful for some operation. 
+    Empty function.  Useful for some operations. 
   */
   K: function() { return this; },
   
   /**
     Creates a new object with the passed object as its prototype.
     
-    Do not use this to create new SC.Object-based objects, but you can use
-    this to beget Arrays, Hashes, and Sets
+    This method uses JavaScript's native inheritence method to create a new 
+    object.    
+    
+    You cannot use beget() to create new SC.Object-based objects, but you
+    can use it to beget Arrays, Hashes, Sets and objects you build yourself.
+    Note that when you beget() a new object, this method will also call the
+    didBeget() method on the object you passed in if it is defined.  You can
+    use this method to perform any other setup needed.
+    
+    In general, you will not use beget() often as SC.Object is much more 
+    useful, but for certain rare algorithms, this method can be very useful.
+    
+    For more information on using beget(), see the section on beget() in 
+    Crockford's JavaScript: The Good Parts.
     
     @param obj {Object} the object to beget
     @returns {Object} the new object.
@@ -417,40 +395,62 @@ SC.mixin(/** @scope SC */ {
     var k = SC.K; k.prototype = obj ;
     var ret = new k();
     k.prototype = null ; // avoid leaks
+    if (SC.$type(obj.didBeget) === SC.T_FUNCTION) ret = obj.didBeget(ret); 
     return ret ;
   },
   
   /**
-    Creates a clone of the receiver.
+    Creates a clone of the passed object.  This function can take just about
+    any type of object and create a clone of it, including primitive values
+    (which are not actually cloned because they are immutable).
     
-    Unlike beget(), this method will actually copy properties from the 
-    source object to the target.
+    If the passed object implements the clone() method, then this function
+    will simply call that method and return the result.
     
-    @param obj {Object} the object to clone
+    @param object {Object} the object to clone
     @returns {Object} the cloned object
   */
-  clone: function(obj) {
-    if (obj == null) return null ;
-    if (SC.$type(obj) === SC.T_ARRAY) return obj.slice() ;
-    var ret = {} ;
-    for(var key in obj) {
-      if (!obj.hasOwnProperty(key)) continue ;
-      ret[key] = obj[key] ;
+  clone: function(object) {
+    var ret = object ;
+    switch (SC.typeOf(object)) {
+    case SC.T_ARRAY:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else ret = object.slice() ;
+      break ;
+    
+    case SC.T_HASH:
+    case SC.T_OBJECT:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else {
+        ret = {} ;
+        for(var key in object) ret[key] = object[key] ;
+      }
     }
+    
     return ret ;
   },
-    
+  
   /**
-    Convenience method to inspect an object by converting it to a hash.
+    Convenience method to inspect an object.  This method will attempt to 
+    convert the object into a useful string description.
   */
   inspect: function(obj) {
-    return $H(obj).inspect() ;  
+    var ret = [] ;
+    for(var key in obj) {
+      if (v === 'toString') continue ; // ignore useless items
+      var v = obj[key] ;
+      if (SC.typeOf(v) === SC.T_FUNCTION) v = "function() { ... }" ;
+      ret.push(key + ": " + v) ;
+    }
+    return "{" + ret.join(" , ") + "}" ;
   },
 
   /**
     Returns a tuple containing the object and key for the specified property 
-    path.  If no object could be found to match the property path, then returns
-    null.
+    path.  If no object could be found to match the property path, then 
+    returns null.
     
     This is the standard method used throughout SproutCore to resolve property
     paths.
@@ -476,8 +476,8 @@ SC.mixin(/** @scope SC */ {
   },
 
   /** 
-    Finds the object for the passed property path or array of path components.
-    This is the standard method used in SproutCore to traverse object paths.
+    Finds the object for the passed path or array of path components.  This is 
+    the standard method used in SproutCore to traverse object paths.
     
     @param path {String} the path
     @param root {Object} optional root object.  window is used otherwise
