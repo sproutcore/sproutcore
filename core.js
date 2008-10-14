@@ -57,11 +57,8 @@ var SproutCore = SproutCore || SC ;
   Adds properties to a target object.
   
   Takes the root object and adds the attributes for any additional 
-  arguments passed.  This can also perform a deep copy if the first param
-  is a bool that is YES.  This is generally not very safe though and not
-  advised.
+  arguments passed.
 
-  @param deep {Boolean} optional parameter.  If true, triggers a deep copy.
   @param target {Object} the target object to extend
   @param properties {Object} one or more objects with properties to copy.
   @returns {Object} the target object.
@@ -72,48 +69,21 @@ SC.mixin = function() {
   var target = arguments[0] || {};
   var idx = 1;
   var length = arguments.length ;
-  var deep = NO ;
   var options ;
 
   // Handle case where we have only one item...extend SC
   if (length === 1) {
     target = this || {};
     idx=0;
-  
-  // Handle a deep copy situation
-  } else if ((target===YES) || (target===NO)) {
-    deep = target;
-    target = arguments[1] || {};
-    idx = 2; // skip the boolean and the target
-  }
-
-  // Handle case when target is a string or something (possible in deep 
-  // copy)
-  if ( typeof target != "object" && typeof target != "function" ) {
-    target = {};
-  }
-
-  // extend SC itself if only one argument is passed
-  if ( length === idx ) {
-    target = this;
-    idx = idx-1;
   }
 
   for ( ; idx < length; idx++ ) {
     if (!(options = arguments[idx])) continue ;
     for(var key in options) {
       if (!options.hasOwnProperty(key)) continue ;
-      
       var src = target[key];
       var copy = options[key] ;
       if (target===copy) continue ; // prevent never-ending loop
-      
-      // Recurse if we're merging object values
-      if ( deep && copy && (typeof copy === "object") && !copy.nodeType ) {
-        copy = SC.extend(deep, 
-          src || (copy.length != null ? [ ] : { }), copy) ;
-      }
-      
       if (copy !== undefined) target[key] = copy ;
     }
   }
