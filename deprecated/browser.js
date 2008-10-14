@@ -21,7 +21,7 @@ SC.mixin({
     /** The current Firefox major version number or 0 if not Firefox */
     Firefox: SC.browser.mozilla,    
     isWindows: SC.browser.isWindows,
-    isMac: SC.Browser.isMac
+    isMac: SC.browser.isMac
   },
 
   // DEPRECATED.  here for compatibility only.

@@ -1286,7 +1286,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if (this._scrollFrame == null) {
       var el = this.rootElement ;
       var func;
-      if (SC.isIE()) {
+      if (SC.browser.isIE) {
         func = function() {
           var borderTopWidth = 0;
           var borderBottomWidth = 0;
@@ -1692,7 +1692,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       
       // Safari2 has a bad habit of sometimes not actually changing its 
       // innerHTML. This will make sure the innerHTML get's changed properly.
-      if (SC.isSafari() && !SC.isSafari3()) {
+      if (SC.browser.isSafari && !(SC.browser.safari >= 3)) {
         var el = (this.containerElement || this.rootElement) ; var reps = 0 ;
         var f = function() {
           el.innerHTML = '' ; el.innerHTML = value ;

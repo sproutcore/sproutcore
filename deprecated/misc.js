@@ -38,7 +38,7 @@ SC.mixin(Object,
   SC.View, or the sproutcore-jquery framework instead.
 */
 Element.setClassName = function(element,className,flag) {
-  if(SC.isIE())
+  if(SC.browser.isIE)
   {
     if (flag) { 
       Element.addClassName(element,className); 

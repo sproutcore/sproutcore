@@ -276,7 +276,7 @@ SC.window = SC.PaneView.extend({
   },
 
   _ondblclick: function(evt){
-    if(SC.isIE())
+    if(SC.browser.isIE)
     {
       this._clickCount = 2;
       this._onmouseup(evt);

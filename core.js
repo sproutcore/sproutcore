@@ -526,9 +526,10 @@ SC.mixin(/** @scope SC */ {
     
     @returns {SC} SproutCore namespace
   */
-  restoreGlobals: function() {
+  noConflict: function() {
     $type = SC._originalGlobals.$type ;
     $I = SC._originalGlobals.$I ;
+    $A = SC._originalGlobals.$A ;
   }
   
 });
@@ -540,45 +541,13 @@ SC.$type = SC.typeOf ;
 // GLOBAL EXPORTS
 //   
 // These can be restored using SC.restoreGlobals();
-var $type, $I ;
-SC._originalGlobals = { $type: $type,  $I: $I } ;
+var $type, $I, $A ;
+SC._originalGlobals = { $type: $type,  $I: $I, $A: $A } ;
 $type = SC.typeOf; 
 $I = SC.inspect ;
-
+$A = SC.$A ;
 
 // ........................................
-// EVENT EXTENSIONS
-// 
-Object.extend(Event,{
-  // get the character code for key pressed events.
-  getCharCode: function(e) {
-    return (e.keyCode) ? e.keyCode : ((e.which)?e.which:0) ; 
-  },
-  
-  // get the pressed char as a string.
-  getCharString: function(e) {
-    return String.fromCharCode(Event.getCharCode(e)) ;
-  },
-  
-  pointerLocation: function(event) {
-    var ret = {
-      x: event.pageX || (event.clientX +
-        (document.documentElement.scrollLeft || document.body.scrollLeft)),
-      y: event.pageY || (event.clientY +
-        (document.documentElement.scrollTop || document.body.scrollTop))
-      
-    };
-    return ret ;
-  },
-  
-  ALT_KEY: '_ALT',
-  CTRL_KEY: '_CTRL',
-  SHIFT_KEY: '_SHIFT'
-  
-});
-
-
-// ........................................................................
 // FUNCTION ENHANCEMENTS
 //
 // Enhance function.
@@ -722,15 +691,15 @@ SC.mixin(Function.prototype,
       function functionName(timer)
     }}}
 
-    @param interval {Number} the time to wait, in msec
     @param target {Object} optional target object to use as this
+    @param interval {Number} the time to wait, in msec
     @returns {SC.Timer} scheduled timer
   */
   invokeLater: function(target, interval) {
     if (interval === undefined) interval = 1 ;
     var f = this;
     if (arguments.length > 2) {
-      var args =SC.$A(arguments).slice(2,arguments.length);
+      var args = SC.$A(arguments).slice(2,arguments.length);
       args.unshift(target);
       f = f.bind.apply(f, args) ;
     }

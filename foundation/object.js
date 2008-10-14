@@ -229,7 +229,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
     searchObject(null, window, 2) ;
     
     // Internet Explorer doesn's loop over global variables...
-    if ( SC.isIE() ) {
+    if ( SC.browser.isIE ) {
       searchObject('SC', SC, 2) ; // get names for the SC classes
       
       // get names for the model classes, including nested namespaces (untested)

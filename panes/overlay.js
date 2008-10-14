@@ -210,7 +210,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
       
       // only Safari does well enough with animations to handle this dainty
       // guy. 
-      if (SC.isSafari()) {
+      if (SC.browser.isSafari) {
         this.visibleAnimation = {
           visible: 'opacity: 1.0', hidden: 'opacity: 0.0', duration: 100  
         } ;
