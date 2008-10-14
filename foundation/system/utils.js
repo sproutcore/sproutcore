@@ -4,7 +4,7 @@
 // ==========================================================================
 
 // These are helpful utility functions for calculating range and rect values
-
+require('foundation/system/browser');
 
 SC.mixin( 
 /** @scope SC */
@@ -207,7 +207,7 @@ SC.mixin(
 
     // add up all the offsets for the element.
     var element = el ;
-    var isFirefox3 = SC.Platform.Firefox >= 3 ;
+    var isFirefox3 = SC.browser.mozilla >= 3 ;
     while (element) {
       valueT += (element.offsetTop  || 0);
       if (!isFirefox3 || (element !== el)) {
@@ -221,7 +221,7 @@ SC.mixin(
 
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset. 
-      if (SC.Platform.Firefox) {
+      if (SC.browser.mozilla) {
         var overflow = Element.getStyle(element, 'overflow') ;
         if (overflow !== 'visible') {
           var left = parseInt(Element.getStyle(element, 'borderLeftWidth'),0) || 0 ;
@@ -235,7 +235,7 @@ SC.mixin(
         // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
         // clientLeft of the offset parent.
         var offsetParent = element.offsetParent ;
-        if ((SC.Platform.Firefox >= 3) && offsetParent) {
+        if ((SC.browser.mozilla >= 3) && offsetParent) {
           valueT -= offsetParent.clientTop ;
           valueL -= offsetParent.clientLeft;
         }

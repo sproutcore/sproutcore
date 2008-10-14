@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/benchmark') ;
+require('foundation/system/benchmark') ;
 require('mixins/observable') ;
 require('mixins/array') ;
 

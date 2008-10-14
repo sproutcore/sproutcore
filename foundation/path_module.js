@@ -13,7 +13,7 @@
 // ==========================================================================
 
 require('core') ;
-require('foundation/benchmark') ;
+require('foundation/system/benchmark') ;
 
 // Constants
 SC.BENCHMARK_SELECTOR = NO ;

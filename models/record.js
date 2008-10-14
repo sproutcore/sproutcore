@@ -158,7 +158,7 @@ SC.Record = SC.Object.extend(
 
   generateTempPrimaryKey: function()
   {
-    return "@" + SC.getGUID(this);
+    return "@" + SC.guidFor(this);
   },
 
   /**

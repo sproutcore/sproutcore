@@ -513,97 +513,6 @@ SC.mixin(/** @scope SC */ {
     }
     
     return root ;
-  },
-  
-  /** Browser and Platform info. */
-  Platform: {
-    
-    /** The current IE version number or 0 if not IE. */
-    IE: function() {
-      if (Prototype.Browser.IE) {
-        return (navigator.appVersion.match(/\bMSIE.*7\.\b/)) ? 7 : 6 ;
-      } else return 0 ;
-    }(),
-    
-    /** The current Safari major version number of 0 if not Safari */
-    Safari: function() {
-      if (Prototype.Browser.WebKit) {
-        var vers = parseInt(navigator.appVersion.replace(/^.*?AppleWebKit\/(\d+).*?$/,'$1'),0) ;
-        return (vers > 420) ? 3 : 2 ;
-      } return 0 ;
-    }(),
-    
-    /** The current Firefox major version number or 0 if not Firefox */
-    Firefox: function() {
-      var ret = 0;
-      if (Prototype.Browser.Gecko) {
-        if(navigator.userAgent.indexOf("Firefox") != -1)
-        {
-          ret = parseFloat((navigator.userAgent.match(/Firefox\/(.)/)[1]) || 0);
-        }
-        if (ret < 1) ret = 2; // default to version 2 if it is a Gecko browser.
-      } 
-      return ret ;
-    }(),    
-      
-    isWindows: function() {
-      return !!(navigator.appVersion.match(/(Windows)/)) ;
-    }(),
-    
-    isMac: function() {
-      if(Prototype.Browser.Gecko) {
-        return !!(navigator.appVersion.match(/(Macintosh)/));
-      } else {
-        return !!(navigator.appVersion.match(/(Mac OS X)/)) ;    
-      }
-    }()
-    
-  },
-  
-  // DEPRECATED.  here for compatibility only.
-  /** @private */
-  isIE: function() { 
-    return SC.Platform.IE > 0 ;
-  },
-
-  /** @private */
-  isSafari: function() {
-    return SC.Platform.Safari > 0 ;
-  },
-  
-  /** @private */
-  isSafari3: function() {
-    return SC.Platform.Safari >= 3 ;
-  },
-  
-  /** @private */
-  isIE7: function() {
-    return SC.Platform.IE >= 7 ;
-  },
-
-  /** @private */
-  isIE6: function() {
-    return (SC.Platform.IE >= 6) && (SC.Platform.IE < 7) ;
-  },
-
-  /** @private */
-  isWindows: function() {
-    return SC.Platform.isWindows;
-  },
-
-  /** @private */
-  isMacOSX: function() {
-    return SC.Platform.isMac ;
-  },
-  
-  /** @private */
-  isFireFox: function() {
-    return SC.Platform.Firefox > 0 ;
-  },
-  
-  /** @private */
-  isFireFox2: function() {
-    return SC.Platform.Firefox >= 2 ;
   }
   
 });
@@ -611,21 +520,6 @@ SC.mixin(/** @scope SC */ {
 /** Alias for SC.typeOf() */
 SC.$type = SC.typeOf ;
   
-/** @deprecated  Use guidFor() instead. */
-SC.getGUID = SC.guidFor ;
-
-// Save the Platform.Browser name.
-SC.Platform.Browser = function() {
-  if (SC.Platform.IE >0) {
-    return 'IE';
-  } else if (SC.Platform.Safari > 0) {
-    return 'Safari';
-  } else if (SC.Platform.Firefox >0) {
-    return 'Firefox'; 
-  }
-}() ;
-
-
 // ........................................
 // GLOBAL EXPORTS
 //   

@@ -3,12 +3,13 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+require('foundation/system/browser');
+
 require('foundation/object') ;
 require('foundation/responder') ;
 require('foundation/node_descriptor') ;
-require('foundation/binding');
+require('foundation/system/binding');
 require('foundation/path_module');
-
 require('mixins/delegate_support') ;
 
 SC.BENCHMARK_OUTLETS = NO ;
@@ -958,7 +959,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset
-      if (SC.Platform.Firefox) {
+      if (SC.browser.mozilla) {
         var parent = el.offsetParent ;
         var overflow = (parent) ? Element.getStyle(parent, 'overflow') : 'visible' ;
         if (overflow && overflow !== 'visible') {
@@ -971,7 +972,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       // fix the x & y with the clientTop/clientLeft
       var clientLeft, clientTop ;
       
-      if (SC.Platform.IE) {
+      if (SC.browser.msie) {
         if (!el.width) {
           clientLeft = parseInt(this.getStyle('border-left-width'),0) || 0 ;
         } else clientLeft = el.clientLeft ;
@@ -1103,7 +1104,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset
-      if (SC.Platform.Firefox) {
+      if (SC.browser.mozilla) {
         var parent = el.offsetParent ;
         var overflow = (parent) ? Element.getStyle(parent, 'overflow') : 'visible' ;
         if (overflow && overflow !== 'visible') {
@@ -2193,7 +2194,7 @@ SC.View.mixin({
 }) ;
 
 // IE Specfic Overrides
-if (SC.Platform.IE) {
+if (SC.browser.msie) {
   SC.View.prototype.getStyle = function(style) {
     var element = this.rootElement ;
 

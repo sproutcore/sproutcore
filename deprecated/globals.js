@@ -19,3 +19,5 @@ var T_BOOL = SC.T_BOOL ;
 var T_ARRAY = SC.T_ARRAY ;
 var T_STRING = SC.T_STRING ;
 
+/** @deprecated  Use guidFor() instead. */
+SC.getGUID = SC.guidFor ;

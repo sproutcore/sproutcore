@@ -6,7 +6,7 @@
 require('controllers/controller') ;
 require('mixins/array') ;
 require('mixins/selection_support') ;
-require('foundation/binding') ;
+require('foundation/system/binding') ;
 
 /** @class
 
@@ -386,7 +386,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (!this.useControllersForContent) return obj;
     
     var controllers = this._objControllers = this._objControllers || {} ;
-    var guid = SC.getGUID(obj) ;
+    var guid = SC.guidFor(obj) ;
     var ret = controllers[guid] ;
     if (!ret) {
       ret = controllers[guid] = this.controllerForValue(obj) ;
