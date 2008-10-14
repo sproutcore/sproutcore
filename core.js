@@ -513,6 +513,22 @@ SC.mixin(/** @scope SC */ {
     }
     
     return root ;
+  },
+  
+  /**
+    This function will restore the few global functions defined by SproutCore
+    to their original values.  You can call this method if the globals 
+    defined by SproutCore conflict with another library you are using.  The
+    current global methods restored by this method are:
+    
+    - $type()
+    - $I()
+    
+    @returns {SC} SproutCore namespace
+  */
+  restoreGlobals: function() {
+    $type = SC._originalGlobals.$type ;
+    $I = SC._originalGlobals.$I ;
   }
   
 });
@@ -523,51 +539,12 @@ SC.$type = SC.typeOf ;
 // ........................................
 // GLOBAL EXPORTS
 //   
-// Global exports will be made optional in the future so you can avoid 
-// polluting the global namespace.
-
-SC.$type = SC.typeOf ;
+// These can be restored using SC.restoreGlobals();
+var $type, $I ;
+SC._originalGlobals = { $type: $type,  $I: $I } ;
+$type = SC.typeOf; 
 $I = SC.inspect ;
 
-// Legacy.  Will retire.
-SC.mixin(Object,{
-
-  // this will serialize a general JSON object into a URI.
-  serialize: function(obj) {
-    var ret = [] ;
-    for(var key in obj) {
-      var value = obj[key] ;
-      if (typeof value == 'number') { value = '' + value ; }
-      if (!(typeof value == 'string')) { value = value.join(','); }
-      ret.push(encodeURIComponent(key) + "=" + encodeURIComponent(value)) ;
-    }
-    return ret.join('&') ;
-  }
-  
-}) ;
-
-
-// This will add or remove the class name based on the flag, allowing you to
-// treat it like a bool setting.  Simplifies the common case where you need
-// to make a class name match a bool.
-Element.setClassName = function(element,className,flag) {
-  if(SC.isIE())
-  {
-    if (flag) { 
-      Element.addClassName(element,className); 
-    } else {
-      Element.removeClassName(element,className) ;
-    }
-  } 
-  else
-  {
-    if (flag) { 
-      element.addClassName(className); 
-    } else {
-      element.removeClassName(className) ;
-    }
-  } 
-} ;
 
 // ........................................
 // EVENT EXTENSIONS
