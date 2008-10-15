@@ -6,7 +6,7 @@
 require('core') ;
 require('foundation/responder');
 require('panes/pane');
-require('foundation/system/browser');
+require('system/browser');
 
 SC.CAPTURE_BACKSPACE_KEY = NO ;
 

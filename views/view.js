@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/system/browser');
+require('system/browser');
 
 require('foundation/object') ;
 require('foundation/responder') ;
