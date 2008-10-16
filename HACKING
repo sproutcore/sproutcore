@@ -1,0 +1,81 @@
+SproutCore is an open source project aimed at helping people build great,
+desktop-quality applications on the web without plugins.  If you would like
+to help work on the SproutCore source code itself, this guide is for you.
+
+GETTING STARTED
+
+To work on your own version of sproutcore, it's quite easy to do.  Here is 
+what we recommend:
+
+1. Create a github account, if you do not have one already.
+2. Visit the SproutCore source at http://github.com/sproutit/sproutcore and
+   fork the source.  This will give you your own version.
+3. In any application project, cd into your frameworks directory (create it 
+   if it does not exist yet), and checkout your new source into a sproutcore
+   directory.
+4. Restart your sc-server if needed.
+
+Now you will be working with your very own version of SproutCore.  You can 
+make changes as you like and push them to your fork on github.  When you want
+to submit those changes back to the main source, you can send us a pull 
+request.
+
+GUIDE TO THE SOURCE
+
+SproutCore itself is being divided into three libraries:  
+
+- SproutCore Foundation contains the low-level enabling technologies of   
+  SprouCore such as key-value binding, the in memory database, general 
+  controllers, and so on.  This section will tell you a little more about 
+  where you can find various bits of code within sproutcore.
+  
+- SproutCore Desktop contains higher level views and other technologies for
+  creating a large scale desktop-like application, such as list views, table
+  views, and more.
+  
+- SproutCore Mobile contains higher level views and other technologies for 
+  building an app that runs on a mobile phone such as the iPhone or Android.
+  Unlike Desktop it is optimized for applications that will consume small 
+  amounts of data and run on slower devices.
+  
+In addition to the above, you may also find the sproutcore-deprecated library
+useful as it provides ongoing access to older API's no longer supported in 
+SproutCore 1.0.
+
+SPROUTCORE FOUNDATION
+
+Within SproutCore Foundation, you will find the following directories in the
+source.  Keep in mind that all of this source is combined into a single file
+when your application is built:
+
+system:
+  This directory contains the low-level files concerned with starting an
+  app and providing basic classes such as SC.Object.
+  
+mixins:
+  This directory contains mixins and protocols you might include on other
+  classes.
+  
+extensions:
+  This directory contains extensions to built in objects such as Date and 
+  String.
+  
+application:
+  This directory contains files related to application-level support such as
+  the run loop, responder management, SC.Application, and so on.
+  
+private:
+  This directory contains classes that are used internally by SproutCore and
+  not part of the public API
+  
+models:
+  Core code to implement the model layer, including the in memory dtabase
+  
+controllers: 
+  Core code to implement controllers.
+  
+
+  
+
+  
+  
