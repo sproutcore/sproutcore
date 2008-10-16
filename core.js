@@ -535,8 +535,10 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
-    Reads or writes data from a global cache.  This is used throughout the
-    framework to avoid creating memory leaks.
+    Reads or writes data from a global cache.  You can use this facility to
+    store information about an object without actually adding properties to
+    the object itself.  This is needed especially when working with DOM,
+    which can leak easily in IE.
     
     To read data, simply pass in the reference element (used as a key) and
     the name of the value to read.  To write, also include the data.
@@ -546,7 +548,7 @@ SC.mixin(/** @scope SC */ {
     @param elem {Object} An object or Element to use as scope
     @param name {String} Optional name of the value to read/write
     @param data {Object} Optional data.  If passed, write.
-    @returns {Object} Read or written data.
+    @returns {Object} the value of the named data
   */
   data: function(elem, name, data) {
     elem = (elem === window) ? "@window" : elem ;
