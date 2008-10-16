@@ -4,9 +4,6 @@
 // copyright 2006-2008, Sprout Systems, Inc.
 // ==========================================================================
 
-/** @deprecated  Use guidFor() instead. */
-SC.getGUID = SC.guidFor ;
-
 // Legacy.  Will retire.
 SC.mixin(Object,
 /** @scope Object */ {

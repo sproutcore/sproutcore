@@ -120,85 +120,6 @@ SC.mixin(/** @scope SC */ {
   // CORE HELPER METHODS
   //   
 
-
-  /**  
-    Call this method during setup of your app to queue up methods to be 
-    called once the entire document has finished loading.  If you call this
-    method once the document has already loaded, then the function will be
-    called immediately.
-    
-    Any function you register with this method will be called just before
-    main.
-    
-    @param target {Object} optional target object.  Or just pass a method.
-    @param method {Function} the method to call.
-    @return {void}
-  */
-  callOnLoad: function(target, method) { 
-    
-    // normalize parameters
-    if (method === undefined) { method = target; target = null; }
-    if (typeof(method) === 'string') {
-      if (target) {
-        method = target[method] ;
-      } else {
-        throw "You must pass a function to callOnLoad() (got: "+method+")";
-      }
-    }
-
-    // invoke the method if the queue is flushed.
-    if (SC._onloadQueueFlushed) method.apply(target || window.document) ;
-    var queue = SC._onloadQueue = (SC._onloadQueue || []) ;
-    queue.push([target, method]) ;
-  },
-
-  // To flush the callOnLoad queue, you need to set window.onload=SC.didLoad
-  didLoad: function() { 
-    SC.app = SC.Application.create();
-    SC.app.run();
-    
-    // set the current language
-    var b = $tag('body');
-    Element.addClassName(b, String.currentLanguage().toLowerCase()) ;
-
-    // call the onloadQueue.
-    var queue ;
-    SC.runLoop.beginRunLoop() ;
-    if (window.callOnLoad) {
-      if (window.callOnLoad instanceof Array) {
-        queue = window.callOnLoad ;
-      } else if (window.callOnLoad instanceof Function) {
-        queue = [window, window.callOnLoad] ;
-      }
-    } else queue = [] ;
-    queue = queue.concat(SC._onloadQueue) ;
-    var func = null ;
-    while(func = queue.shift()) {
-      if (SC.typeOf(func) === SC.T_FUNCTION) {
-        func.call(document) ;
-      } else func[1].call(func[0] || document) ;
-    }
-      
-    SC._onloadQueueFlushed = true ;
-        
-    // start the app; call main.
-    if (window.main && (main instanceof Function)) main() ; // start app.
-    
-    // finally handle any routes if any.
-    if (typeof Routes != 'undefined') {
-      Routes.doRoutes() ; // old style.
-    } else if (typeof SC.Routes != 'undefined') {
-      SC.Routes.ping() ; // handle routes, if modules is installed.
-    }
-    
-    SC.runLoop.endRunLoop();
-    
-		//remove possible IE7 leak
-		b = null;
-		queue = null;
-		func = null;
-  },
-  
   /**
     Returns a consistant type for the passed item.
     
@@ -609,6 +530,9 @@ SC.mixin(/** @scope SC */ {
 /** Alias for SC.typeOf() */
 SC.$type = SC.typeOf ;
   
+/** @private Provided for compatibility with old HTML templates. */
+SC.didLoad = SC.K ;
+
 // ........................................
 // GLOBAL EXPORTS
 //   

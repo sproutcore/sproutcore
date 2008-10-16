@@ -5,6 +5,7 @@
 
 require('views/view') ;
 require('views/container') ;
+require('system/ready') ;
 
 /**
   @class Manages the panels on a page.
@@ -176,7 +177,7 @@ SC.PanelView = SC.View.extend(
     
 }) ;
 
-SC.callOnLoad(function() { 
+SC.ready(function() { 
   if (!SC.page) SC.page = SC.Page.create() ;
   SC.page.panels = SC.PanelView.outletFor(null); 
 }) ;

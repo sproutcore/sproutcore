@@ -3,6 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+require('system/ready') ;
 require('foundation/path_module') ;
 
 /**
@@ -45,7 +46,7 @@ SC.Page = SC.Object.extend(
   init: function() {
     sc_super() ;
     var el = this.rootElement = $('resources') ;
-    SC.callOnLoad(function() {
+    SC.ready(function() {
       if (el && el.parentNode) el.parentNode.removeChild(el) ;
 			el = null;
     }) ;

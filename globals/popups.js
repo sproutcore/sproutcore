@@ -6,6 +6,7 @@
 require('views/view') ;
 require('views/container') ;
 require('globals/panels') ;
+require('system/ready') ;
 
 // This singleton manages the popups on the page.  It will show an element
 // called 'popups', which is appended to the end of the body node.  To show
@@ -55,7 +56,7 @@ SC.PopupView = SC.PanelView.extend({
     
 }) ;
 
-SC.callOnLoad(function() { 
+SC.ready(function() { 
   if (!SC.page) SC.page = SC.Page.create() ;
   SC.page.popups = SC.PopupView.outletFor(null); 
 }) ;

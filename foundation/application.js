@@ -83,6 +83,7 @@ SC.Application = SC.Responder.extend(
     SC.window.setup();
     SC.window.makeMainPane();
     SC.window.makeKeyPane();
+    return this ;
   },
 
   /**
