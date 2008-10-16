@@ -222,8 +222,8 @@ SC.Server = SC.Object.extend({
       var server = this ; var context = {} ;
       var data = curRecords.map(function(rec) {
         var recData = server._decamelizeData(rec.getPropertyData()) ;
-        recData._guid = rec._guid ;
-        context[rec._guid] = rec ;
+        SC.guidFor(recData) = SC.guidFor(rec) ;
+        context[SC.guidFor(rec)] = rec ;
         return recData ;
       }) ;
 
@@ -249,7 +249,7 @@ SC.Server = SC.Object.extend({
     // first go through and assign the primaryKey to each record.
     if (!context) context = {} ;
     json.each(function(data) {
-      var guid = data._guid ;
+      var guid = SC.guidFor(data) ;
       var rec = (guid) ? context[guid] : null ;
       if (rec) {
         var pk = rec.get('primaryKey') ;

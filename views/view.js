@@ -1818,7 +1818,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   _attachRootElement: function(el) {
     if (this.rootElement) this.rootElement._configured = null ;
     this.rootElement = el ; 
-    el._configured = this._guid ;
+    el._configured = SC.guidFor(this) ;
   },
   
   // This method is called internally after you add or remove a child view.
@@ -2004,7 +2004,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   //   var idName = el.id ;
   //   idName = (idName && idName.length>0) ? 'id=%@'.fmt(idName) : null;
   // 
-  //   return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,idName, className].compact().join(' ')) ;
+  //   return "%@:%@<%@>".fmt(this._type, SC.guidFor(this), [tagName,idName, className].compact().join(' ')) ;
   // }
     
 }) ;
@@ -2076,10 +2076,10 @@ SC.View.mixin({
     if (r) vStart = new Date().getTime();
     var ret = new this(args,this) ; // create instance.
     if (r) SC.idt.v_t += (new Date().getTime()) - vStart;
-    el._configured = ret._guid ;
+    el._configured = SC.guidFor(ret) ;
 
     // return the view.
-    SC.View._view[ret._guid] = ret ;
+    SC.View._view[SC.guidFor(ret)] = ret ;
     return ret ;    
   },
   

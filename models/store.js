@@ -294,7 +294,7 @@ SC.Store = SC.Object.create(
     var guid    = rec._storeKey(),
         changed = this.get('_changedRecords') || {},
         records = changed[guid] || {} ;
-    records[rec._guid] = rec ;
+    records[SC.guidFor(rec)] = rec ;
 
     changed[guid] = records ;    
     this.set('_changedRecords',changed) ;

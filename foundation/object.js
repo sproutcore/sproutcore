@@ -512,7 +512,7 @@ SC.Object.prototype = {
   /** @private */
   toString: function() {
     if (!this.__toString) {
-      this.__toString = "%@:%@".fmt(this._type.objectClassName(), this._guid);
+      this.__toString = "%@:%@".fmt(this._type.objectClassName(), SC.guidFor(this));
     } 
     return this.__toString ;
   },

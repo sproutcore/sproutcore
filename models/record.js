@@ -439,7 +439,7 @@ SC.Record = SC.Object.extend(
       }
     
     // handle records.
-    } else value = (value && value._guid) ? value._guid : value ;
+    } else value = SC.guidFor(value) ;
     return value ;
   },
   
@@ -593,7 +593,7 @@ SC.Record = SC.Object.extend(
     }
     
     catch(e) {
-      console.log(this._guid + ': Exception raised on UPDATE: ' + e) ;
+      console.log(SC.guidFor(this) + ': Exception raised on UPDATE: ' + e) ;
     }
 
     this.endPropertyChanges() ;   
@@ -724,7 +724,7 @@ SC.Record.mixin(
 
   // used by the store
   _storeKey: function() {
-    return (this.coreRecordType) ? this.coreRecordType._guid : this._guid ;
+    return (this.coreRecordType) ? SC.guidFor(this.coreRecordType) : SC.guidFor(this) ;
   },
   
   primaryKey: function() { return this.prototype.primaryKey; },

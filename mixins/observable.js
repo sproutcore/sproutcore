@@ -976,7 +976,7 @@ SC.Observable = {
     var props = SC.$A(arguments) ;
     for(var idx=0;idx<props.length; idx++) {
       var prop = props[idx] ;
-      console.log('%@:%@: '.fmt(this._guid, prop), this.get(prop)) ;
+      console.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop)) ;
     }
   },
   

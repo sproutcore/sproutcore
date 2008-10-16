@@ -30,7 +30,7 @@ SC.PaneManager = SC.View.extend({
     pane.set('anchorView',anchorView) ;
     pane.set('triggerEvent',triggerEvent) ;
     pane.set('isVisible', false) ;
-    this._visiblePanes[view._guid] = pane ;
+    this._visiblePanes[SC.guidFor(view)] = pane ;
     
     // look through child views (which are panes).  Insert before first pane
     // with a layer value > this pane.
@@ -60,7 +60,7 @@ SC.PaneManager = SC.View.extend({
   // this method will hide a visible pane view.  Pass the content view. If
   // the view is not already visible, this will do nothing.
   hidePaneView: function(view) {
-    var pane = this._visiblePanes[view._guid] ;
+    var pane = this._visiblePanes[SC.guidFor(view)] ;
     if (!pane) return ;
     
     // make pane not visible then do the rest of the cleanup when that

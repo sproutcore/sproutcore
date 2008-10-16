@@ -128,7 +128,7 @@ SC.SelectFieldView = SC.FieldView.extend(
        // get value using valueKey if there is one or use object
        // map to _guid or toString.
        if (valueKey) object = (object.get) ? object.get(valueKey) : object[valueKey] ;
-       ov = (object) ? ((object._guid) ? object._guid : object.toString()) : null ;
+       ov = (object) ? ((SC.guidFor(object)) ? SC.guidFor(object) : object.toString()) : null ;
      
        // use this object value if it matches.
        if (value == ov) found = object ;
@@ -142,7 +142,7 @@ SC.SelectFieldView = SC.FieldView.extend(
   /** @private */
   setFieldValue: function(nv) {
    if (nv) {
-     nv = (nv._guid) ? nv._guid : nv.toString() ;
+     nv = (SC.guidFor(nv)) ? SC.guidFor(nv) : nv.toString() ;
    } else {
      nv = "***" ;
    }
@@ -162,7 +162,7 @@ SC.SelectFieldView = SC.FieldView.extend(
    var shouldLocalize = this.get('localize'); 
    
    // convert fieldValue to guid, if it is an object.
-   if (!valueKey && fieldValue) fieldValue = fieldValue._guid ;
+   if (!valueKey && fieldValue) fieldValue = SC.guidFor(fieldValue) ;
    if ((fieldValue == null) || (fieldValue == '')) fieldValue = '***' ;
 
    if (objects) {
@@ -193,7 +193,7 @@ SC.SelectFieldView = SC.FieldView.extend(
          // get the value using the valueKey or the object if no valueKey.
          // then convert to a string or use _guid if one of available.
          var value = (valueKey) ? ((object.get) ? object.get(valueKey) : object[valueKey]) : object ;
-         if (value) value = (value._guid) ? value._guid : value.toString() ;
+         if (value) value = (SC.guidFor(value)) ? SC.guidFor(value) : value.toString() ;
        
          // render HTML
          var disable = (this.validateMenuItem && this.validateMenuItem(value, name)) ? '' : 'disabled="disabled" ' ;
@@ -265,7 +265,7 @@ SC.SelectFieldView = SC.FieldView.extend(
   // this is invoked anytime an item we are interested in in the menu changes
   // rebuild the menu when this happens, but only one time.
   _objectsItemObserver: function(item, key, value) {
-    if (item.didChangeFor(this._guid, key)) {
+    if (item.didChangeFor(SC.guidFor(this), key)) {
       // console.log('rebuildMenu') ;
       this._rebuildMenu() ;
     }
