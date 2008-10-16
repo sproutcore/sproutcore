@@ -22,9 +22,8 @@ SC.event = {
     Bind an event to an element.
 
     This method will cause the passed handler to be executed whenever a
-    relevant event occurs on the named element.  The SproutCore version of
-    this method supports a wide variety of handler types, depending on the
-    paramters that you pass:
+    relevant event occurs on the named element.  This method supports a
+    variety of handler types, depending on the kind of support you need.
     
     h2. Simple Function Handlers
     
@@ -56,151 +55,96 @@ SC.event = {
     Like function handlers, you can pass an additional context data paramater
     that will be included on the event in the event.data property.
       
-    h2. SC.Responder Object
-    
-      SC.event.add(anElement, responderObject) ;
-      
-    Finally, instead of adding events for individual event handlers, you can
-    pass an object that implements the SC.Responder mixin (including one or
-    more of the optional methods documented in the SC.Responder module 
-    description.)
-    
-    This will cause the responder to be invoked whenever an event occurs on
-    the target element and you have implemented a method to respond to it.
-    
-    SC.Responder is a much faster way to bind to and listen for events because
-    it does not require you to register for each individual event on the 
-    element.  In fact, most of the time registering a responder object will
-    involve little more than storing the responder in a data cache.
-    
     h2. Handler Return Values
     
-    Both handler functions and method invocations are expected to return a 
-    boolean value to indicate whether you handled the event or not.  If your
-    method returns NO, then the event will continue to bubble up the DOM.
+    Both handler functions should return YES if you want the event to 
+    continue to propagate and NO if you want it to stop.  Returning NO will
+    both stop bubbling of the event and will prevent any default action 
+    taken by the browser.  You can also control these two behaviors separately
+    by calling the stopPropogation() or preventDefault() methods on the event
+    itself, returning YES from your method.
     
-    Responder objects are implemented differently since responders implement
-    their own responder chain that may not correspond directly to the DOM
-    hierarchy of the DOM.  Events typically will bubble up the DOM until a 
-    responder is found.  Once that responder is found, it will be asked to 
-    handle the event and then it will not continue to bubble.
+    h2. Limitations
+    
+    Although SproutCore's event implementation is based on jQuery, it is 
+    much simpler in design.  Notably, it does not support namespaced events
+    and you can only pass a single type at a time.
+    
+    If you need more advanced event handling, consider the SC.Responder 
+    functionality provided by SproutCore or use your favorite DOM library.
 
-    h2. Event Delegation
-    
-    The SproutCore event's system implements something called event
-    delegation that will not usually impact how you write your code, but may
-    impact how SproutCore event's interact with handlers you register using
-    another library.
-    
-    Event delegation means that instead of registering event listeners with
-    the browser on every element you add a handler for, SproutCore will often
-    register an event listener on the root document element only.  This will
-    allow it to receive notification of all events on the page.  SproutCore
-    will then route the event to the proper handler itself.
-    
-    Event delegation is much faster than typical event handling because it
-    means adding a new event listener has a much lower overhead.  It also 
-    means that SproutCore can provide a gauranteed order of execution for 
-    handlers and responders.
-    
-    The impact of event delegation, however, is that if you also use a 3rd
-    party library to add event listeners, those event listeners may be called
-    and will even bubble up the DOM chain before any listeners registered 
-    through SproutCore are called.
-    
-    The best way to avoid this problem is to stick to using the SproutCore
-    event listener library only.
-    
     @param elem {Element} a DOM element, window, or document object
-    @param types {String} the type or types (as array or separated by spaces) of events to respond to.  You can optionally pass a responder object instead.
-    @param target {Object} The target object for a method call.  Or a function.
-    @param method {Object} optional name of method
-    @param data {Object} optional data to pass to the handler as event.data
+    @param type {String}  the event type you want to respond to
+    @param target {Object} The target object for a method call or a function.
+    @param method {Object} optional method or method name if target passed
+    @param context {Object} optional context to pass to the handler as event.data
     @returns {SC.event}
   */
-  add: function(elem, types, target, method, data) {
+  add: function(elem, eventType, target, method, context) {
     
     // cannot register events on text nodes, etc.
     if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.event;
 
-    // NORMALIZE PARAMETERS
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
     if (SC.browser.msie && elem.setInterval) elem = window;
 
-    // types can be a string or array.  Normalize to array
-    if (SC.typeOf(types) === SC.T_STRING) types = types.split(/\s+/) ;
-
-    // if target is a function, treat it as the method, with optional data
-    var type = SC.typeOf(target) ;
-    if (type === SC.T_FUNCTION) {
-      data = method ; method = target; target = null ;
+    // if target is a function, treat it as the method, with optional context
+    if (SC.typeOf(target) === SC.T_FUNCTION) {
+      context = method; method = target; target = null;
       
     // handle case where passed method is a key on the target.
     } else if (target && SC.typeOf(method) === SC.T_STRING) {
       method = target[method] ;
     }
 
-    // PROCESS EVENT
-    // event cache
+    // Get the handlers queue for this element/eventType.  If the queue does
+    // not exist yet, create it and also setup the shared listener for this
+    // eventType.
     var events = SC.data(elem, "events") || SC.data(elem, "events", {}) ;
-
-    // Build handler array to save.  The array has the format:
-    // target, method, data, event subtype
-    var handler = [target, method, data, null] ;
-    
-    // Now add event handlers for each type
-    var type, currentHandler, handlers ;
-    var len = types.length, idx = len ;
-    while(--idx >= 0) {
-      type = types[idx] ;
-
-      // use the shared handler array unless we have a namespaced handler
-      currentHandler = handler ;
-      if (type.indexOf('.') >= 0) {
-        var parts = type.split(".");
-        type = parts[0];
-        if (max > 1) currentHandler = handler.slice() ;
-        currentHandler[3] = parts[1] ; // save subtype
-      }
-
-      // Get the event handler queue.  If the queue does not exist, also
-      // add an event listener to the element.
-      if (!(handlers = events[type])) {
-        handlers = events[type] = {};
-        this._addEventListener(elem, type) ;
-      }
-      
-      // save the handler array, based on the method's hash.
-      handlers[SC.hashFor(method)] = handler;
-
-      // Keep track of which events have been used, for global triggering
-      SC.event._global[type] = YES;
+    var handlers = events[eventType]; 
+    if (!handlers) {
+      handlers = events[eventType] = {} ;
+      this._addEventListener(elem, type) ;
     }
+    
+    // Build the handler array and add to queue
+    handlers[SC.guidFor(method)] = [target, method, context];
+    SC.event._global[eventType] = YES ; // optimization for global triggers
 
     // Nullify elem to prevent memory leaks in IE
-    elem = handler = null ;
+    elem = events = handlers = null ;
     return this ;
   },
 
   /**
-    Removes a handler for a specific type of event or events on an element.
+    Removes a specific handler or all handlers for an event or event+type.
+
+    To remove a specific handler, you must pass in the same function or the
+    same target and method as you passed into SC.event.add().  See that method
+    for full documentation on the parameters you can pass in.
     
-    You must pass in the same handler function to this method as you passed
-    into the SC.event.add() method.  You can also pass one or more types as 
-    an array or string separated by spaces.
-    
-    If you omit the handler, all handlers for the type will be removed. If you
-    omit both the handler and the types, all handlers for the element will be
+    If you omit a specific handler but provide both an element and eventType,
+    then all handlers for that element will be removed.  If you provide only
+    and element, then all handlers for all events on that element will be
     removed.
     
+    h2. Limitations
+    
+    Although SproutCore's event implementation is based on jQuery, it is 
+    much simpler in design.  Notably, it does not support namespaced events
+    and you can only pass a single type at a time.
+    
+    If you need more advanced event handling, consider the SC.Responder 
+    functionality provided by SproutCore or use your favorite DOM library.
+    
     @param elem {Element} a DOM element, window, or document object
-    @param types {String} the type or types (as array or separated by spaces) of events to respond to.  You can optionally pass a responder object instead.
+    @param eventType {String} the event type to remove
     @param target {Object} The target object for a method call.  Or a function.
     @param method {Object} optional name of method
     @returns {SC.event}
   */
-  remove: function(elem, types, target, method) {
+  remove: function(elem, eventType, target, method) {
     
     // don't do events on text and comment nodes
     if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.event;
@@ -209,185 +153,142 @@ SC.event = {
     // around, causing it to be cloned in the process
     if (SC.browser.msie && elem.setInterval) elem = window;
 
-    var events = SC.data(elem, "events"), ret, index;
+    var handlers, key, events = SC.data(elem, "events") ;
     if (!events) return this ; // nothing to do if no events are registered
 
-    // special case
-    // if types is undefined or begins with a ., then unregister all events. 
-    var type = SC.typeOf(types) ;
-    if (types == undefined || ((type === SC.T_STRING) && (type.charAt(0) === '.'))) {
-      for(var type in events) this.remove(elem, type + (types || "")) ;
-      return this; // done!
-    }
-    
-    // NORMALIZE PARAMETERS
+    // if no type is provided, remove all types for this element.
+    if (eventType == undefined) {
+      for(eventType in events) this.remove(elem, eventType) ;
 
-    // types can be a string, array, or event.  Normalize to array
-    if (type === SC.T_STRING) {
-      types = types.split(/\s+/) ;
+    // otherwise, remove the handler for this specific eventType if found
+    } else if (handlers = events[eventType]) {
+
+      var cleanupHandlers = NO ;
       
-    // handle event case
-    } else if (types && types.type) {
-      types = types.type; target = null; method = types.handler ;
-    }
-    
-    // if target is a function, treat it as the method, with optional data
-    if (SC.typeOf(target) === SC.T_FUNCTION) {
-      method = target; target = null ;
-      
-    // handle case where passed method is a key on the target.
-    } else if (target && SC.typeOf(method) === T_STRING) {
-      method = target[method] ;
-    }
-
-    // PROCESS EVENT
-    var type, handlerType, handlers, handler, key ;
-    var len = types.length, idx = len ;
-    while(--idx >= 0) {
-      var type = types[idx] ;
-
-      // get namespaced event handler
-      var handlerType ;
-      if (type.indexOf('.') >= 0) {
-        var parts = type.split(".");
-        type = parts[0];
-        handlerType = parts[1];
-      } else handlerType = null ;
-
-      if (handlers = events[type]) {
+      // if a target/method is provided, remove only that one
+      if (target || method) {
         
-        // if a method was provided, look for that method to remove it
-        if (method) {
-          delete events[SC.guidFor(method)];
-          
-        // otherwise, remove all handlers for the given type
-        } else {
-          for(key in handlers) {
-            handler = handlers[handlerKey] ;
-            if (!handlerType || !handler || (handler.type === handlerType)) {
-              delete handlers[handlerKey] ;
-            }
-          }
+        // normalize the target/method
+        if (SC.typeOf(target) === SC.T_FUNCTION) {
+          method = target; target = null ;
+        } else if (SC.typeOf(method) === SC.T_STRING) {
+          method = target[method] ;
         }
         
-        // remove the generic listener and handler hash if no more handlers
-        // are registered
+        delete events[SC.guidFor(method)] ;
+        
+        // check to see if there are handlers left on this event/eventType.
+        // if not, then cleanup the handlers.
         key = null ;
-        for(key in handlers) break ;
-        if (!key) {
-          this._removeEventListener(elem, type) ;
-          delete events[type] ;
-        } // if (!key)
-      } // if (handlers = events[type])
-    } // while
+        for(var key in handlers) break ;
+        if (key == null) cleanupHandlers = YES ;
 
-    // if events are no longer used on this element, then make sure to clean
-    // up the generic listener as well.
-    key = null ;
-    for(key in events) break;
-    if(!key) {
-      SC.removeData(elem, "events") ;
-      delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
+      // otherwise, just cleanup all handlers
+      } else cleanupHandlers = YES ;
+      
+      // If there are no more handlers left on this event type, remove 
+      // eventType hash from queue.
+      if (cleanupHandlers) {
+        delete events[eventType] ;
+        this._removeEventListener(elem, eventType) ;
+      }
+      
+      // verify that there are still events registered on this element.  If 
+      // there aren't, cleanup the element completely to avoid memory leaks.
+      key = null ;
+      for(key in events) break;
+      if(!key) {
+        SC.removeData(elem, "events") ;
+        delete this._elements[SC.guidFor(elem)]; // important to avoid leaks
+      }
+      
     }
     
-    elem = null ; // avoid memory leaks
+    elem = events = handlers = null ; // avoid memory leaks
     return this ;
   },
 
   /**
     Trigger an event execution immediately.  You can use this method to 
     simulate arbitrary events on arbitary elements.
+
+    h2. Limitations
     
-    You can trigger all events by omitting the elem parameter.
+    Note that although this is based on the jQuery implementation, it is 
+    much simpler.  Notably namespaced events are not supported and you cannot
+    trigger events globally.
     
-    @param type {String} the event type
-    @param data {Object} custom data
+    If you need more advanced event handling, consider the SC.Responder 
+    functionality provided by SproutCore or use your favorite DOM library.
+
     @param elem {Element} the target element
+    @param eventType {String} the event type
+    @param args {Array} optional argument or arguments to pass to handler.
     @param donative ??
-    @param extra ??
-    @returns {Boolean} Result of trigger
+    @returns {Boolean} Return value of trigger or undefined if not fired
   */
-  trigger: function(type, data, elem, donative, extra) {
+  trigger: function(elem, eventType, args, donative) {
 
-    // Clone the incoming data, if any
-    data = SC.$A(data).slice();
+    // don't do events on text and comment nodes
+    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return undefined;
+    
+    // Normalize to an array
+    data = SC.$A(data) ;
 
-    var exclusive = type.indexOf("!") >= 0 ;
-    if (exclusive) type = type.slice(0,-1) ;
+    var ret, fn = SC.typeOf(elem[eventType] || null) === T_FUNCTION ;
 
-    // Handle a global trigger.  Trigger all event handlers for the
-    // specified type.
-    if (!elem) {
-      
-      // Only trigger if we've ever bound an event for it
-      if (this.global[type]) {
-        throw "Not Yet Implemented" ;
-        //jQuery("*").add([window, document]).trigger(type, data);
-      }
-
-    // Handle triggering a single element
-    } else {
-      
-      // don't do events on text and comment nodes
-      if ( elem.nodeType == 3 || elem.nodeType == 8 ) return undefined;
-
-      var val, ret, fn = SC.typeOf(elem[type] || null) === T_FUNCTION,
-      needsEvent = !data[0] || !data[0].preventDefault;
-
-      // If event is not provided in parameter array, add a fake one.
-      if (needsEvent) data.unshift({
+    // Get the event to pass, creating a fake one if necessary
+    var event = args[0];
+    if (!event || !event.preventDefault) {
+      event = {
         type: type,
         target: elem,
         preventDefault: function(){},
         stopPropagation: function(){},
         timeStamp: Date.now(),
         normalized: YES
-      });
-
-      // Enforce the right trigger type
-      data[0].type = type;
-      if ( exclusive ) data[0].exclusive = YES;
-
-      // Trigger the event
-      val = SC.event.handle.apply(this, data) ;
-
-      // Handle triggering native .onfoo handlers (and on links since we don't call .click() for links)
-      // if ( (!fn || (SC.nodeName(elem, 'a') && type == "click")) && elem["on"+type] && elem["on"+type].apply( elem, data ) === NO ) {
-      //   val = NO;
-      // }
-
-      // Extra functions don't get the custom event object
-      if ( event ) data.shift();
-
-      // Handle triggering of extra function
-      if (extra && (SC.typeOf(extra) === SC.T_FUNCTION)) {
-        // call the extra function and tack the current return value on the 
-        // end for possible inspection
-        ret = extra.apply( elem, (val == null) ? data : data.concat( val ) );
-
-        // if anything is returned, give it precedence and have it overwrite 
-        // the previous value
-        if (ret !== undefined) val = ret;
-      }
-
-      // Trigger the native events (except for clicks on links)
-      // if ( fn && donative !== NO && val !== NO && !(SC.nodeName(elem, 'a') && type == "click") ) {
-      //   this.triggered = YES;
-      //   try {
-      //     elem[ type ]();
-      //   // prevent IE from throwing an error for some hidden elements
-      //   } catch (e) {}
-      // }
-      // 
-      // this.triggered = NO;
+      } ;
+      args.unshift(event) ;
     }
+
+    event.type = eventType ;
+
+    // Trigger the event
+    ret = SC.event.handle.apply(elem, args) ;
+
+    // Handle triggering native .onfoo handlers
+    var onfoo = elem["on" + type] ;
+    var isClick = SC.CoreQuery.nodeName(elem, 'a') && eventType === 'click';
+    if ((!fn || isClick) && onfoo && onfoo.apply(elem, args) === NO) ret = NO;
+
+    // Trigger the native events (except for clicks on links)
+    if (fn && donative !== NO && val !== NO && !isClick) {
+      this.triggered = YES;
+      try {
+        elem[ type ]();
+      // prevent IE from throwing an error for some hidden elements
+      } catch (e) {}
+    }
+    
+    this.triggered = NO;
 
     return val;
   },
 
   /**
     This method will handle the passed event, finding any registered listeners
-    and executing them.
+    and executing them.  If you have an event you want handled, you can 
+    manually invoke this method.  This function expects it's "this" value to
+    be the element the event occurred on, so you should always call this 
+    method like:
+    
+      SC.event.handle.call(element, event) ;
+      
+    Note that like other parts of this library, the handle function does not
+    support namespaces.
+    
+    @param event {Event} the event to handle
+    @returns {Boolean}
   */
   handle: function(event) {
 
@@ -402,44 +303,30 @@ SC.event = {
     // real event with a normalized API.
     event = arguments[0] = SC.event._normalizeEvent(event || window.event) ;
 
-    // handle namespace if needed
-    namespace = event.type ;
-    if (namespace.indexOf('.') >= 0) {
-      namespace = event.type.split(".");
-      event.type = namespace[0];
-      namespace = namespace[1];
-    } else namespace = null ;
-    
-    // Cache this now, all = YES means, any handler
-    all = !namespace && !event.exclusive;
-
     // get the handlers for this event type
     handlers = (SC.data(this, "events") || {})[event.type];
     if (handlers) return NO ; // nothing to do
 
+    // invoke all handlers
     for (var key in handlers ) {
       var handler = handlers[key];
       var method = handler[1] ;
 
-      // Filter the functions by class
-      if ( all || handler[3] === namespace ) {
+      // Pass in a reference to the handler function itself
+      // So that we can later remove it
+      event.handler = method;
+      event.data = event.context = handler[2];
 
-        // Pass in a reference to the handler function itself
-        // So that we can later remove it
-        event.handler = method;
-        event.data = handler[2];
+      var target = handler[0] || this ;
+      ret = method.apply( target, arguments );
+      if (val !== NO) val = ret;
 
-        var target = handler[0] || this ;
-        ret = method.apply( target, arguments );
-        if (val !== NO) val = ret;
-
-        // if method returned NO, do not continue.  Stop propogation and
-        // return default.  Note that we test explicitly for NO since 
-        // if the handler returns no specific value, we do not want to stop.
-        if ( ret === NO ) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
+      // if method returned NO, do not continue.  Stop propogation and
+      // return default.  Note that we test explicitly for NO since 
+      // if the handler returns no specific value, we do not want to stop.
+      if ( ret === NO ) {
+        event.preventDefault();
+        event.stopPropagation();
       }
     }
 
@@ -549,14 +436,17 @@ SC.event = {
     If the event type has a special handler defined in SC.event.special, 
     then that handler will be used.  Otherwise the normal browser method will
     be used.
+    
+    @param elem {Element} the target element
+    @param eventType {String} the event type
   */
-  _addEventListener: function(elem, type) {
-    var listener, special = this.special ;
+  _addEventListener: function(elem, eventType) {
+    var listener, special = this.special[eventType] ;
 
     // Check for a special event handler
     // Only use addEventListener/attachEvent if the special
     // events handler returns NO
-    if ( !special[type] || special[type].setup.call(elem)===NO) {
+    if ( !special || special.setup.call(elem)===NO) {
       
       // Save element in cache.  This must be removed later to avoid 
       // memory leaks.
@@ -570,9 +460,9 @@ SC.event = {
       
       // Bind the global event handler to the element
       if (elem.addEventListener) {
-        elem.addEventListener(type, listener, NO);
+        elem.addEventListener(eventType, listener, NO);
       } else if (elem.attachEvent) {
-        elem.attachEvent("on" + type, listener);
+        elem.attachEvent("on" + eventType, listener);
       }
     }
     
@@ -585,15 +475,21 @@ SC.event = {
     If the event type has a special handler defined in SC.event.special, 
     then that handler will be used.  Otherwise the normal browser method will
     be used.
+    
+    Note that this will not clear the _elements hash from the element.  You
+    must call SC.event.unload() on unload to make sure that is cleared.
+    
+    @param elem {Element} the target element
+    @param eventType {String} the event type
   */
-  _removeEventListener: function(elem, type) {
-    var listener, special = SC.event.special[type] ;
+  _removeEventListener: function(elem, eventType) {
+    var listener, special = SC.event.special[eventType] ;
     if (!special || (special.teardown.call(elem)===NO)) {
       listener = SC.data(elem, "listener") ;
       if (listener) if (elem.removeEventListener) {
-        elem.removeEventListener(type, listener, NO);
+        elem.removeEventListener(eventType, listener, NO);
       } else if (elem.detachEvent) {
-        elem.detachEvent("on" + type, listener);
+        elem.detachEvent("on" + eventType, listener);
       }
     }
     
@@ -610,6 +506,7 @@ SC.event = {
 
     preventDefault: function() {
       var evt = this.originalEvent ;
+      if (!evt) return ; // nothing to do
       if (evt.preventDefault) evt.preventDefault() ;
       evt.returnValue = NO ; // IE
     },
@@ -617,6 +514,7 @@ SC.event = {
     // implement stopPropogation in a cross platform way
     stopPropagation: function() {
       var evt = this.originalEvent ;
+      if (!evt) return ; // nothing to do
       if (evt.stopPropogation) evt.stopPropagation() ;
       evt.cancelBubble = YES ; // IE
     },
