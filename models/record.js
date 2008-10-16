@@ -531,7 +531,7 @@ SC.Record = SC.Object.extend(
     //if ((target == this) && this.properties.include(key)) this.incrementProperty('changeCount') ;
   },
   
-  _cprops: ['properties'],
+  concatenatedProperties: ['properties'],
 
   /**
     This method should be used by the server to push updated data into a

@@ -284,7 +284,7 @@ SC.mixin(SC.Object, /** @scope SC.Object */ {
   _extend: function(base,ext) { return this._extendAllProps(false, base, ext); },
   
   _extendAllProps: function(allProperties, base,ext) {
-    var cprops = base._cprops ; var f = Prototype.emptyFunction ;
+    var cprops = base.concatenatedProperties ; var f = Prototype.emptyFunction ;
     
     // first, save any concat props.
     var concats = {} ;
@@ -658,7 +658,17 @@ SC.Object.prototype = {
     return SC.Timer.schedule({ target: this, action: f, interval: interval });
   },
   
-  _cprops: ['_cprops','outlets','_bindings','_observers','_properties', 'initMixin']  
+  /**
+    The properties named in this array will be concatenated in subclasses
+    instead of replaced.  This allows you to name special properties that
+    should contain any values you specify plus values specified by parents.
+    It is used by SproutCore and is available for your use, though you should
+    limit the number of properties you include in this list as it adds a 
+    slight overhead to new class and instance creation.
+    
+    @property
+  */
+  concatenatedProperties: ['concatenatedProperties','outlets','_bindings','_observers','_properties', 'initMixin']  
 
 } ;
 
