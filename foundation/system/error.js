@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/object');
+require('foundation/system/object');
 
 /**
   @class

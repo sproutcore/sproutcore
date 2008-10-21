@@ -5,12 +5,15 @@
 
 require('foundation/system/browser');
 
-require('foundation/object') ;
-require('foundation/responder') ;
-require('foundation/node_descriptor') ;
+require('foundation/system/object') ;
+require('foundation/application/responder') ;
+require('deprecated/node_descriptor') ;
 require('foundation/system/binding');
-require('foundation/path_module');
+require('deprecated/path_module');
 require('foundation/mixins/delegate_support') ;
+
+require('deprecated/animator') ;
+
 
 SC.BENCHMARK_OUTLETS = NO ;
 SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;

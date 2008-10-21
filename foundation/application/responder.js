@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/object') ;
-require('foundation/input_manager');
+require('foundation/system/object') ;
+require('foundation/application/input_manager');
 
 /**
   @class 

@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('foundation/system/ready') ;
-require('foundation/path_module') ;
+require('deprecated/path_module') ;
 
 /**
   @class SC.Page

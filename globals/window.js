@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/responder');
+require('foundation/application/responder');
 require('panes/pane');
 require('foundation/system/browser');
 

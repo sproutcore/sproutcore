@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/date');
-require('foundation/string') ;
+require('foundation/ext/date');
+require('foundation/ext/string') ;
 
 /** @namespace SC.Benchmark
 
