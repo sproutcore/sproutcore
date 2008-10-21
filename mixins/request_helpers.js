@@ -25,7 +25,7 @@ SC.RequestHelpers = {
     return ret ;
   },
 
-  /** @private Called by query() and option(). */
+  /** @private Called by param() and option(). */
   _updateHashProperty: function(property, key, value) {
     
     // if no key/value is passed, just return this
@@ -51,88 +51,58 @@ SC.RequestHelpers = {
     pair, that pair will be added to the current set of query options.  If
     you pass a hash, all of them will be added.
   */
-  query: function(key, value) {
+  param: function(key, value) {
     return this._updateHashProperty('queryParams', key, value);
   },
 
   /**
-    Resets the query parameters so that new parameters you pass will replace
-    the once already set on the request.
-    
-    @returns {SC.Request}
-  */
-  resetQuery: function() {
-    return this._prepare().set('queryParams', null);
-  },
-  
-  /**
     Sets a URL variable to be interpolated into the URL template.  You can
     also pass a hash and they will all be set.
   */
-  template: function(key, value) {
-    return this._updateHashProperty('templateParams', key, value) ;
-  },
-  
-  /**
-    Parses the passed URL and sets the path and queryParams.
-  */
-  url: function(url) {
-    var ret = this._prepare() ;
-    ret.beginPropertyChanges();
-    
-    // is there a queryString portion.
-    var len, loc = url.indexOf('?') ;
-    
-    // set the path
-    ret.set('path', (loc >= 0) ? url.slice(loc) : url) ;
-    
-    // now set query
-    var query = url.split(/\?|=|&/) ; // break down URL
-    len = query.length; // ignore path at front
-    for(loc=1;loc<len;loc = loc+2) {
-      var key = query[loc], value = query[loc+1] ;
-      if (value && value.length>0) ret.query(key, value) ;
-    }
-    
-    ret.endPropertyChanges();
-    return ret ;
+  option: function(key, value) {
+    return this._updateHashProperty('templateOptions', key, value) ;
   },
   
   /**
     Set the url and optional params to the passed value and the method to GET.
   */
   getUrl: function(url, params) {
-    return this._prepare().set('method', 'GET').url(url).query(params);
+    return this._prepare().set('method', 'GET')
+      .set('url', url).param(params);
   },
 
   /**
     Sets the url and optional params and the method to JSONP
   */
   jsonp: function(url, params) {
-    return this._prepare().set('method', 'JSONP').url(url).query(params);
+    return this._prepare().set('method', 'JSONP')
+      .set('url', url).param(params);
   },
   
   /**
     Set the url and optional params to the passed value and the method to 
     POST.
   */
-  postUrl: function(url, params) {
-    return this._prepare().set('method', 'POST').url(url).query(params);
+  postUrl: function(url, options) {
+    return this._prepare().set('method', 'POST')
+      .set('url', url).param(params);
   },
 
   /**
     Set the url and optional params to the passed value and the method to PUT.
   */
-  putUrl: function(url, params) {
-    return this._prepare().set('method', 'PUT').url(url).query(params);
+  putUrl: function(url, options) {
+    return this._prepare().set('method', 'PUT')
+      .set('url', url).param(params);
   },
 
   /**
     Set the url and optional params to the passed value and the method to 
     DELETE.
   */
-  deleteUrl: function(url, params) {
-    return this._prepare().set('method', 'DELETE').url(url).query(params);
+  deleteUrl: function(url, options) {
+    return this._prepare().set('method', 'DELETE')
+      .set('url', url).param(params);
   },
 
   /**
@@ -158,13 +128,9 @@ SC.RequestHelpers = {
   },
   
   /**
-    Set the format to use when sending data to the server and, optionally, the
-    expected response format.  The requestFormat will be set as the 
-    contentType for the request while the responseFormat will be used to set
-    the accepts header.
-    
-    If you do not name a response format, then SproutCore will auto-detect
-    the response based on the response content type.
+    Sets the data format for both sending and receiving data.  Usually you
+    will only pass one format, which will be used in both direction, though
+    you can pass a separate response format if you need.
     
     @param requestFormat {String} the request format, also used for response
     @param responseFormat {String} optional separate response format
@@ -175,5 +141,5 @@ SC.RequestHelpers = {
       .set('contentType', requestFormat)
       .set('responseContentType', responseFormat) ;
   }
-    
+  
 } ;
