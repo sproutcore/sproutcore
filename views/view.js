@@ -3,14 +3,14 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('system/browser');
+require('foundation/system/browser');
 
 require('foundation/object') ;
 require('foundation/responder') ;
 require('foundation/node_descriptor') ;
 require('foundation/system/binding');
 require('foundation/path_module');
-require('mixins/delegate_support') ;
+require('foundation/mixins/delegate_support') ;
 
 SC.BENCHMARK_OUTLETS = NO ;
 SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;

@@ -49,8 +49,8 @@ source.  Keep in mind that all of this source is combined into a single file
 when your application is built:
 
 system:
-  This directory contains the low-level files concerned with starting an
-  app and providing basic classes such as SC.Object.
+  Files here implement low-level APIs and utility functions that integrate 
+  with the browser.
   
 mixins:
   This directory contains mixins and protocols you might include on other

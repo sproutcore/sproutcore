@@ -41,7 +41,7 @@ SC.CoreQuery = (function() {
   } ;
   
   // add useful helper methods to CoreQuery
-  SC.mixin(SC.CoreQuery, /** @scope SC.CoreQuery */ {
+  SC.mixin(CoreQuery, /** @scope SC.CoreQuery */ {
     
     nodeName: function( elem, name ) {
       return elem.nodeName && elem.nodeName.toUpperCase() == name.toUpperCase();

@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/field/field') ;
-require('mixins/editable') ;
+require('foundation/mixins/editable') ;
 
 /**
   @class

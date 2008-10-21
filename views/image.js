@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/view') ;
-require('mixins/control') ;
+require('foundation/mixins/control') ;
 
 lc_cnt = 0 ;
 

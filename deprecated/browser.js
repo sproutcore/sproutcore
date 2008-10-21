@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('system/browser');
+require('foundation/system/browser');
 
 /**
   @deprecated

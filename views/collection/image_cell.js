@@ -2,7 +2,7 @@
 // SC.LabelView
 // ==========================================================================
 
-require('mixins/control') ;
+require('foundation/mixins/control') ;
 require('views/image') ;
 
 /** @class

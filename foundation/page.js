@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('system/ready') ;
+require('foundation/system/ready') ;
 require('foundation/path_module') ;
 
 /**

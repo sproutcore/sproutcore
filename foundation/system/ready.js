@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('system/event') ;
+require('foundation/system/event') ;
 
 SC.mixin({
   _isReadyBound: NO,
@@ -69,7 +69,7 @@ SC.mixin({
     }
 
     // A fallback to window.onload, that will always work
-    SC.event.add( window, "load", SC._didBecomeReady);
+    SC.Event.add( window, "load", SC._didBecomeReady);
   },
 
   /** @private handlers scheduled to execute on ready. */
@@ -111,7 +111,7 @@ SC.mixin({
     this._readyQueue = null ;
     
     // trigger any bound ready events
-    SC.event.trigger("ready", null, document, NO) ;
+    SC.Event.trigger("ready", null, document, NO) ;
     
     // Now execute main, if defined
     if ((typeof main != "undefined") && (main instanceof Function)) main();

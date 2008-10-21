@@ -4,7 +4,7 @@
 // ==========================================================================
 
 // These are helpful utility functions for calculating range and rect values
-require('system/browser');
+require('foundation/system/browser');
 
 SC.mixin( 
 /** @scope SC */

@@ -5,8 +5,8 @@
 
 require('core') ;
 require('foundation/system/benchmark') ;
-require('mixins/observable') ;
-require('mixins/array') ;
+require('foundation/mixins/observable') ;
+require('foundation/mixins/array') ;
 
 SC.BENCHMARK_OBJECTS = NO;
 
