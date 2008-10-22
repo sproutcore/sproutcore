@@ -1,3 +1,36 @@
+// ========================================================================
+// SproutCore
+// copyright 2008 Sprout Systems, Inc.
+// ========================================================================
+
+SC.json = {
+  
+  /**
+    Encodes an object graph to a JSON output.  Beware that JSON cannot deal
+    with circular references.  If you try to encode an object graph with
+    references it could hang your browser.
+    
+    @param {Object} root object graph
+    @returns {String} encode JSON
+  */
+  encode: function(root) {
+    // TODO: Implement
+    return '';
+  },
+  
+  /**
+    Decodes a JSON file in a safe way, returning the generated object graph.
+  
+    @param {String} encoded JSON
+    @returns {Object} object graph or Error if there was a problem.
+  */
+  decode: function(root) {
+    // TODO: Implement
+    return null ;
+  }
+
+} ;
+
 /*
     json.js
     2007-03-20
