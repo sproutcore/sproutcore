@@ -229,67 +229,67 @@ SC.mixin(String.prototype, SC.String) ;
 // Add strings for various languages to this collection.  String.loc()
 // method will try to localize the string passed using the current language.
 // if the language is not available, it will use English.
-Object.extend(String,
+SC.mixin(String,
 /** @scope String @static */ {
 
-  /**
-    The current browser language as a two letter code.
+  /** @deprecated
+    The current browser language as a two letter code.  
+    Use SC.browser.language instead.
   */
   browserLanguage: ((navigator.language || navigator.browserLanguage).split('-', 1)[0]),
   
-  /**
+  /** @deprecated
     If YES, localization will favor the detected language instead of the
     preferred one.
+    
+    Use SC.Locale.useAutodetectedLanguage instead.
   */
-  useAutodetectedLanguage: NO,
+  useAutodetectedLanguage: null,
   
-  /**
+  /** @deprecated
     This property is set by the build tools to the current build language.
+    Use SC.Locale.preferredLanguage instead
   */
   preferredLanguage: null,
   
-  /**
+  /** @deprecated
     Returns the hash key to use for loc strings.  The default implementation
     will autodetect the browser language and look for a loc string to 
     match.  If it can't find one then it will introspect to find loc strings
     that are defined and use those instead.
+    
+    Use SC.Locale.currentLanguage property instead.
   */
-  currentLanguage: function () {
-    var ret = (this.useAutodetectedLanguage) ? (this.browserLanguage || this.preferredLanguage || 'en') : (this.preferredLanguage || this.browserLanguage || 'en') ;
-
-    // then try a couple of normalized forms...
-    if (!this[ret]) ret = this.normalizedLanguage(ret);
-    return ret ;
+  currentLanguage: function () { 
+    return this.normalizedLanguage(SC.Locale.currentLanguage); 
   },
   
-  /**
+  /** @deprecated
     Returns a normalized language string for the two letter country code.
+    
+    Use SC.Locale.normalizeLanguage() instead.
   */
-  normalizedLanguage: function(ret) {
-    switch(ret) {
-      case 'fr':
-        ret = 'French'; 
-        break ;
-      case 'de':
-        ret = 'German'; 
-        break ;
-      case 'ja':
-      case 'jp':
-        ret = 'Japanese'; 
-        break ;
+  normalizedLanguage: function(ret) { 
+    switch(SC.Locale.normalizeLanguage(ret).split('-')[0]) {
       case 'en':
         ret = 'English' ;
+        break;
+      case 'fr':
+        ret = 'French' ;
         break ;
-      
+      case 'ja':
+        ret = 'Japanese' ;
+        break ;
+      case 'de':
+        ret = 'German' ;
+        break ;
       case 'es':
         ret = 'Spanish' ;
         break;
-        
-      default:
-        ret = "English";
-        break ;
-    }
-    return ret;
+      default: 
+        ret = 'English';
+    } 
+    return ret ;
   },
   
   /**
@@ -303,13 +303,7 @@ Object.extend(String,
     @param strings {Hash} hash of loc strings.
     @returns {this}
   */
-  addStringsFor: function(language, strings) {    
-    // convert language to a normalized name...
-    language = String.normalizedLanguage(language) ;
-    if (!String[language]) String[language] = {} ;
-    Object.extend(String[language], strings || {}); 
-    return this;
-  }
+  addStringsFor: SC.stringsFor
 
 });
 

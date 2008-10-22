@@ -35,7 +35,9 @@ SC.browser = (function() {
     windows: !!(/(Windows)/).test(userAgent),
     
     /** non-zero if we are on a max */
-    mac: !!((/(Macintosh)/).test(userAgent) || (/(Mac OS X)/).test(userAgent))
+    mac: !!((/(Macintosh)/).test(userAgent) || (/(Mac OS X)/).test(userAgent)),
+    
+    language: ((navigator.language || navigator.browserLanguage).split('-', 1)[0])
   };
   
   // Add more SC-like descriptions...
