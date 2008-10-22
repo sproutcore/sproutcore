@@ -44,34 +44,11 @@ SC.String = {
   fmt: function() {
     // first, replace any ORDERED replacements.
     var args = arguments;
-    var str = this.gsub(/%@([0-9]+)/, function(m) {
-      return (args[parseInt(m[1],0)-1] || '').toString(); 
+    var idx  = 0; // the current index for non-numerical replacements
+    return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
+      argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
+      return (args[argIndex] || '').toString(); 
     }) ;
-    
-    // now, replace any remaining %@ items.  Use this indexOf() method b/c
-    // it is faster than split().
-    var ret = [] ;
-    var idx = -1 ;
-    var loc = 0 ;
-    var argIdx = 0;
-    while((idx = str.indexOf("%@",loc)) >= 0) {
-     // slice off initial part of string and push into ret. update loc.
-     ret.push(str.slice(loc,idx)) ;
-     loc = idx + 2 ; // 2 to skip '%@'.
-     
-     // add in replacement.
-     var value = args[argIdx++] ;
-     if (value && value.toString) value = value.toString() ;
-     ret.push(value) ;
-    }
-    
-    // include any remaining bits of the string.
-    if (loc < str.length) {
-      ret.push(str.slice(loc,str.length)) ;
-    }
-    
-    // join return value.
-    return (ret.length > 1) ? ret.join('') : ret[0] ;
   },
 
   /**
@@ -87,10 +64,7 @@ SC.String = {
     // NB: This could be implemented as a wrapper to locWithDefault() but
     // it would add some overhead to deal with the arguments and adds stack
     // frames, so we are keeping the implementation separate.
-    
-    var kit = String[String.currentLanguage()];
-    var str = kit[this] ;
-    if (!str) str = String.English[this] || this ;
+    var str = SC.Locale.currentLocale.locWithDefault(this) || this;
     return str.fmt.apply(str,arguments) ;
   },
 
@@ -98,33 +72,71 @@ SC.String = {
     Works just like loc() except that it will return the passed default 
     string if a matching key is not found.
     
-    @param def {String} the default to return
-    @param args {Object...} optional formatting arguments
+    @param {String} def the default to return
+    @param {Object...} args optional formatting arguments
     @returns {String} localized and formatted string
   */
   locWithDefault: function(def) {
-    var kit = String[String.currentLanguage()];
-    var str = kit[this] ;
-    if (!str) str = String.English[this] || def ;
-    var args = SC.$A(arguments) ;
-    args.shift() ; // escape def.
-    return str.fmt.apply(str, args) ;
+    var str = SC.Locale.currentLocale.locWithDefault(def) || this;
+    var args = SC.$A(arguments); args.shift(); // remove def param
+    return str.fmt.apply(str,args) ;
   },
   
   /** 
     Capitalizes a string.
+
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | My favorite items |
+    | css-class-name | Css-class-name |
+    | action_name | Action_name |
+    | innerHTML | InnerHTML |
+
     @return {String} capitalized string
   */
   capitalize: function() {
-    return this.charAt(0).toUpperCase() + this.substring(1) ;
+    return this.charAt(0).toUpperCase() + this.slice(1) ;
+  },
+  
+  /**
+    Capitalizes every word in a string.  Unlike titleize, spaces or dashes 
+    will remain in-tact.
+    
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | My Favorite Items |
+    | css-class-name | Css-Class-Name |
+    | action_name | Action_Name |
+    | innerHTML | InnerHTML |
+
+    @returns {String} capitalized string
+  */
+  capitalizeEach: function() {
+    return this.replace(SC.STRING_TITLEIZE_REGEXP, 
+      function(str,sep,character) { 
+        return (character) ? (sep + character.toUpperCase()) : sep;
+      }).capitalize() ;
   },
 
   /**
-    Capitalized every word in the string, separated by spaces or dashes.
+    Converts a string to a title.  This will decamelize the string, convert
+    separators to spaces and capitalize every word.
+
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | My Favorite Items |
+    | css-class-name | Css Class Name |
+    | action_name | Action Name |
+    | innerHTML | Inner HTML |
+
     @return {String} titleized string.
   */
   titleize: function() {
-    return this.replace(SC.STRING_TITLEIZE_REGEXP, 
+    var ret = this.replace(/([a-z])([A-Z])/g,'$1_$2'); // decamelize
+    return ret.replace(SC.STRING_TITLEIZE_REGEXP, 
       function(str,separater,character) { 
         return (character) ? (' ' + character.toUpperCase()) : ' ';
       }).capitalize() ;
@@ -134,42 +146,60 @@ SC.String = {
     Camelizes a string.  This will take any words separated by spaces, dashes
     or underscores and convert them into camelCase.
     
-    h3. Examples
+    h2. Examples
     
-    {{{
-      "my favorite items".camelize() => "myFavoriteItems"
-      "css-class-name".camelize() => "cssClassName"  
-      "action_name".camelize() => "actionName" 
-    }}}
-    
+    | *Input String* | *Output String* |
+    | my favorite items | myFavoriteItems |
+    | css-class-name | cssClassName |
+    | action_name | actionName |
+    | innerHTML | innerHTML |
+
     @returns {String} camelized string
   */
   camelize: function() {
-    var parts = this.split('-'), len = parts.length;
-    if (len == 1) return parts[0];
-
-    var camelized = this.charAt(0) == '-'
-      ? parts[0].charAt(0).toUpperCase() + parts[0].substring(1)
-      : parts[0];
-
-    for (var i = 1; i < len; i++)
-      camelized += parts[i].charAt(0).toUpperCase() + parts[i].substring(1);
-
-    return camelized;
+    var ret = this.replace(SC.STRING_TITLEIZE_REGEXP, 
+      function(str,separater,character) { 
+        return (character) ? character.toUpperCase() : '' ;
+      }) ;
+    var first = ret.charAt(0), lower = first.toLowerCase() ;
+    return (first !== lower) ? (lower + ret.slice(1)) : ret ;
   },
 
   
   /**
     Converts the string into a class name.  This method will camelize your 
     string and then capitalize the first letter.
+    
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | MyFavoriteItems |
+    | css-class-name | CssClassName |
+    | action_name | ActionName |
+    | innerHTML | InnerHtml |
+
+    @returns {String}
   */
   classify: function() {
-    return this.camelize().capitalize() ;
+    var ret = this.replace(SC.STRING_TITLEIZE_REGEXP, 
+      function(str,separater,character) { 
+        return (character) ? character.toUpperCase() : '' ;
+      }) ;
+    var first = ret.charAt(0), upper = first.toUpperCase() ;
+    return (first !== upper) ? (upper + ret.slice(1)) : ret ;
   },
   
   /**
     Converts a camelized string into all lower case separated by underscores.
     
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | my favorite items |
+    | css-class-name | css-class-name |
+    | action_name | action_name |
+    | innerHTML | inner_html |
+
     @returns {String} the decamelized string.
   */
   decamelize: function() { 
@@ -180,6 +210,14 @@ SC.String = {
     Converts a camelized string or a string with spaces or underscores into
     a string with components separated by dashes.
     
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | my-favorite-items |
+    | css-class-name | css-class-name |
+    | action_name | action-name |
+    | innerHTML | inner-html |
+
     @returns {String} the dasherized string.
   */
   dasherize: function() {
@@ -190,6 +228,14 @@ SC.String = {
     Converts a camelized string or a string with dashes or underscores into
     a string with components separated by spaces.
     
+    h2. Examples
+    
+    | *Input String* | *Output String* |
+    | my favorite items | my favorite items |
+    | css-class-name | css class name |
+    | action_name | action name |
+    | innerHTML | inner html |
+
     @returns {String} the humanized string.
   */
   humanize: function() {
@@ -197,9 +243,8 @@ SC.String = {
   },
   
   /**
-    Removes any extra whitespace from the edges of the strings.
-    
-    This method is also aliased as strip().
+    Removes any extra whitespace from the edges of the strings. This method is 
+    also aliased as strip().
     
     @returns {String} the trimmed string
   */

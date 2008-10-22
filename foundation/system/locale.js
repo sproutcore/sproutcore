@@ -73,7 +73,20 @@ SC.Locale = SC.Object.extend({
   toString: function() {
     if (!this.language) SC.Locale._assignLocales() ;
     return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
+  },
+  
+  /** 
+    Returns the localized version of the string or the string if no match
+    was found.
+    
+    @param {String} string
+    @param {String} optional default string to return instead
+    @returns {String}
+  */
+  locWithDefault: function(string, def) {
+    return this.strings[string] || def || string ;
   }
+  
   
 }) ;
 
@@ -268,7 +281,6 @@ SC.Locale.locales = {
 SC.stringsFor = function(languageCode, strings) {
   // get the locale, creating one if needed.
   var locale = SC.Locale.localeClassFor(languageCode);
-  console.log("locale: " + locale.toString()) ;
   locale.addStrings(strings) ;
   return this ;
 } ;
