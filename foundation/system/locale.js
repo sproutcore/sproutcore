@@ -3,6 +3,8 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
+require('foundation/system/object');
+
 /**
   The Locale defined information about a specific locale, including date and
   number formatting conventions, and localization strings.  You can define
@@ -66,7 +68,12 @@ SC.Locale = SC.Object.extend({
   hasStrings: NO,
   
   /** The strings hash for this locale. */
-  strings: {}
+  strings: {},
+  
+  toString: function() {
+    if (!this.language) SC.Locale._assignLocales() ;
+    return "SC.Locale["+this.language+"]"+SC.guidFor(this) ;
+  }
   
 }) ;
 
@@ -191,6 +198,8 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     return this;
   },
   
+  _map: { english: 'en', french: 'fr', german: 'de', japanese: 'ja', jp: 'ja', spanish: 'es' },
+  
   /**
     Normalizes the passed language into a two-character language code.
     This method allows you to specify common languages in their full english
@@ -201,30 +210,8 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     @returns {String} normalized code
   */
   normalizeLanguage: function(languageCode) {
-    var ret = languageCode ;
-    switch(ret.toLowerCase()) {
-      case 'french':
-        ret = 'fr'; 
-        break ;
-      case 'german':
-        ret = 'de'; 
-        break ;
-      case 'Japanese':
-      case 'jp':
-        ret = 'ja'; 
-        break ;
-      case 'English':
-        ret = 'en' ;
-        break ;
-      
-      case 'Spanish':
-        ret = 'es' ;
-        break;
-        
-      default:
-        break ;
-    }
-    return ret;
+    if (!languageCode) return 'en' ;
+    return SC.Locale._map[languageCode.toLowerCase()] || languageCode ;
   },
   
   // this method is called once during init to walk the installed locales 
@@ -233,22 +220,38 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     for(var key in this.locales) this.locales[key].prototype.language = key;
   },
   
-  /** 
-    This locales hash contains all of the locales defined by SproutCore and
-    by your own application.  See the SC.Locale class definition for the
-    various properties you can set on your own locales.
-    
-    @property {Hash}
-  */
-  locales: {
-    en: SC.Locale.extend({ _deprecatedLanguageCodes: ['English'] }),
-    fr: SC.Locale.extend({ _deprecatedLanguageCodes: ['French'] }),
-    de: SC.Locale.extend({ _deprecatedLanguageCodes: ['German'] }),
-    ja: SC.Locale.extend({ _deprecatedLanguageCodes: ['Japanese', 'jp'] }),
-    es: SC.Locale.extend({ _deprecatedLanguageCodes: ['Spanish'] })
+  toString: function() {
+    if (!this.prototype.language) SC.Locale._assignLocales() ;
+    return "SC.Locale["+this.prototype.language+"]" ;
+  },
+  
+  // make sure important properties are copied to new class. 
+  extend: function() {
+    var ret= SC.Object.extend.apply(this, arguments) ;
+    ret.addStrings= SC.Locale.addStrings;
+    ret.define = SC.Locale.define ;
+    ret.options = SC.Locale.options ;
+    ret.toString = SC.Locale.toString ;
+    return ret ;
   }
     
 }) ;
+
+/** 
+  This locales hash contains all of the locales defined by SproutCore and
+  by your own application.  See the SC.Locale class definition for the
+  various properties you can set on your own locales.
+  
+  @property {Hash}
+*/
+SC.Locale.locales = {
+  en: SC.Locale.extend({ _deprecatedLanguageCodes: ['English'] }),
+  fr: SC.Locale.extend({ _deprecatedLanguageCodes: ['French'] }),
+  de: SC.Locale.extend({ _deprecatedLanguageCodes: ['German'] }),
+  ja: SC.Locale.extend({ _deprecatedLanguageCodes: ['Japanese', 'jp'] }),
+  es: SC.Locale.extend({ _deprecatedLanguageCodes: ['Spanish'] })
+} ;
+
 
 
 
@@ -264,14 +267,8 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
 */
 SC.stringsFor = function(languageCode, strings) {
   // get the locale, creating one if needed.
-  languageCode = SC.Locale.normalizeLanguage(languageCode) ; 
-  var locale = SC.Locale.locales[languageCode] ;
-  if (!locale) {
-    locale = SC.Local.locales['en'].extend({
-      strings: {} // be sure to create custom strings.    
-    }) ;
-    SC.Locale.locales[languageCode] = locale ;
-  }
+  var locale = SC.Locale.localeClassFor(languageCode);
+  console.log("locale: " + locale.toString()) ;
   locale.addStrings(strings) ;
   return this ;
 } ;

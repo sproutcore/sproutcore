@@ -81,6 +81,9 @@ SC.mixin({
     if (SC.isReady) return ;
     SC.isReady = YES ;
     
+    // setup locale
+    SC.Locale.createCurrentLocale();
+    
     // First, start SC.Application
     SC.app = SC.Application.create() ;
     SC.app.run() ;
