@@ -3,6 +3,16 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+/**
+  The time library provides a common way for working with time offsets.
+  
+  t = SC.time(123)
+*/
+SC.time = function(timeoffset) {
+  
+} ;
+
+
 // Extensions to the Date object. Comes from JavaScript Toolbox at:
 // http://www.mattkruse.com/javascript/date/source.html
 
