@@ -3,8 +3,21 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/object') ;
+require('foundation/system/object') ;
 
+/**
+  Debug parameter you can turn on.  This will log all bindings that fire to
+  the console.  This should be disabled in production code.  Note that you
+  can also enable this from the console or temporarily.
+*/
+SC.LOG_BINDING_NOTIFICATIONS = NO ;
+
+/**
+  Performance paramter.  This will benchmark the time spent firing each 
+  binding.
+*/
+SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
+  
 /** 
   Default placeholder for multiple values in bindings.
 */
@@ -93,7 +106,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   
   {{{
     valueBinding: SC.Binding.transform(function(value, binding) {
-      return ((SC.$type(value) === T_NUMBER) && (value < 10)) ? 10 : value;      
+      return ((SC.$type(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value;      
     }).from("MyApp.someController.value")
   }}}
   
@@ -106,7 +119,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   {{{
     SC.Binding.notLessThan = function(minValue) {
       return this.transform(function(value, binding) {
-        return ((SC.$type(value) === T_NUMBER) && (value < minValue)) ? minValue : value ;
+        return ((SC.$type(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value ;
       }) ;
     } ;
   }}}
@@ -322,7 +335,7 @@ SC.Binding = {
     //
     var path = this._fromPropertyPath ;
     var root = this._fromRoot ;
-    if ($type(path) === T_STRING) {
+    if (SC.$type(path) === SC.T_STRING) {
       
       // if the first character is a '.', this is a static path.  make the toRoot
       // the default root.
@@ -426,7 +439,7 @@ SC.Binding = {
 
     // if error objects are not allowed, and the value is an error, then
     // change it to null.
-    if (this._noError && $type(v) === T_ERROR) v = null ;
+    if (this._noError && SC.$type(v) === SC.T_ERROR) v = null ;
     
     this._transformedBindingValue = v;
   },
@@ -478,23 +491,29 @@ SC.Binding = {
   applyBindingValue: function() {
     this._changePending = NO ;
 
-    //console.log("applyBindingValue: %@".fmt(this)) ;
-    
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
     
     var v = this._bindingValue ;
     var tv = this._transformedBindingValue ;
+    var bench = SC.BENCHMARK_BINDING_NOTIFICATIONS ;
+    var log = SC.LOG_BINDING_NOTIFICATIONS ; 
     
     // the from property value will always be the binding value, update if 
     // needed.
     if (!this._oneWay && this._fromTarget) {
+      if (log) console.log("%@: %@ -> %@".fmt(this, v, tv)) ;
+      if (bench) SC.Benchmark.start(this.toString() + "->") ;
       this._fromTarget.setPathIfChanged(this._fromPropertyKey, v) ;
+      if (bench) SC.Benchmark.end(this.toString() + "->") ;
     }
     
     // update the to value with the transformed value if needed.
     if (this._toTarget) {
+      if (log) console.log("%@: %@ <- %@".fmt(this, v, tv)) ;
+      if (bench) SC.Benchmark.start(this.toString() + "<-") ;
       this._toTarget.setPathIfChanged(this._toPropertyKey, tv) ;
+      if (bench) SC.Benchmark.start(this.toString() + "<-") ;
     }
   },
 
@@ -534,7 +553,7 @@ SC.Binding = {
       // change to one be sure to update the other.
       var path = this._fromPropertyPath ;
       var root = this._fromRoot ;
-      if ($type(path) === T_STRING) {
+      if (SC.$type(path) === SC.T_STRING) {
         
         // static path beginning with the toRoot
         if (path.indexOf('.') === 0) {
@@ -577,7 +596,7 @@ SC.Binding = {
   oneWay: function(fromPath, aFlag) {
     
     // If fromPath is a bool but aFlag is undefined, swap.
-    if ((aFlag === undefined) && ($type(fromPath) === T_BOOL)) {
+    if ((aFlag === undefined) && (SC.$type(fromPath) === SC.T_BOOL)) {
       aFlag = fromPath; fromPath = null ;
     }
     
@@ -649,7 +668,7 @@ SC.Binding = {
   */
   noError: function(fromPath, aFlag) {
     // If fromPath is a bool but aFlag is undefined, swap.
-    if ((aFlag === undefined) && ($type(fromPath) === T_BOOL)) {
+    if ((aFlag === undefined) && (SC.$type(fromPath) === SC.T_BOOL)) {
       aFlag = fromPath; fromPath = null ;
     }
     
@@ -751,9 +770,9 @@ SC.Binding = {
   */
   bool: function(fromPath) {
     return this.from(fromPath).transform(function(v) {
-      var t = $type(v) ;
-      if (t === T_ERROR) return v ;
-      return (t == T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
+      var t = SC.$type(v) ;
+      if (t === SC.T_ERROR) return v ;
+      return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
     }) ;
   },
   
@@ -766,9 +785,9 @@ SC.Binding = {
   */
   not: function(fromPath) {
     return this.from(fromPath).transform(function(v) {
-      var t = $type(v) ;
-      if (t === T_ERROR) return v ;
-      return !((t == T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
+      var t = SC.$type(v) ;
+      if (t === SC.T_ERROR) return v ;
+      return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
     }) ;
   },
   
@@ -779,8 +798,8 @@ SC.Binding = {
   */
   isNull: function(fromPath) {
     return this.from(fromPath).transform(function(v) { 
-      var t = $type(v) ;
-      return (t === T_ERROR) ? v : v == null ;
+      var t = SC.$type(v) ;
+      return (t === SC.T_ERROR) ? v : v == null ;
     });
   },
   
