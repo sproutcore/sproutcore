@@ -10,71 +10,54 @@ require('foundation/mixins/array') ;
 
 SC.BENCHMARK_OBJECTS = NO;
 
-/** 
-  @class 
+/** @class
 
-  Root Object for the SproutCore Framework
+  Root object for the SproutCore framework.  SC.Object is the root class for
+  most classes defined by SproutCore.  It builds on top of the native object
+  support provided by JavaScript to provide support for class-like 
+  inheritance, automatic bindings, properties observers, and more.  
   
-  h2. Class at a Glance
+  Most of the classes you define in your application should inherit from 
+  SC.Object or one of its subclasses.  If you are writing objects of your
+  own, you should read this documentation to learn some of the details of 
+  how SC.Object's behave and how they differ from other frameworks.
   
-  Add a one or two paragraph description of the class here.
+  h2. About SproutCore Classes
   
-  This is the root object of the SproutCore framework.  All other objects
-  inherit from you.  SC.Object among other things implements support for
-  class inheritance, observers, and bindings.  You should use SC.Object to
-  create your own subclasses as well.
+  JavaScript is not a class-based language.  Instead it uses a type of 
+  inheritence inspired by self called "prototypical" inheritance. 
+  ...
 
-  h2. Overview
+  h2. Using SproutCore objects with other JavaScript object.
   
-  Some overview information about the class should go here.
-  Please see online documentation for more information about this.
-
-  h2. Subclassing Notes
-  
-  I should be able to put a long list of things here I suppose.
-  
-  - Do bullet
-  - points
-  - work?
-  
-  {{{
-    // Also some sample
-    code.goesHere() ;
-  }}}
+  You can create a SproutCore object just like any other object...
+  obj = new SC.Object() ;
   
   @extends SC.Observable 
   @author Charles Jolley
-  @version 1.0
-  @since Version 1.0
-
+  @since SproutCore 1.0
 */
-SC.Object = function(noinit) { 
-	if (noinit === SC.Object._noinit_) return this ;
-	var ret = SC.Object._init.apply(this,SC.$A(arguments)) ;
-  return ret ;
-};
+SC.Object = function() { return this; };
 
-SC.mixin(SC.Object, /** @scope SC.Object */ {
+SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 
-	_noinit_: '__noinit__',
-	
   /**
-    Add properties to a object's class definition.
+    Adds the passed properties to the object's class definition.  You can pass
+    as many hashes as you want, including Mixins, and they will be added in
+    the order they are passed.
     
-    @params {Hash} props the properties you want to add
-    @returns {void}
+    @params {Hash} props the properties you want to add.
+    @returns {Object} receiver
   */
   mixin: function(props) {
-    var ext = SC.$A(arguments) ;
-    for(var loc=0;loc<ext.length;loc++) {
-      Object.extend(this,ext[loc]);
-    }
+    var len = props, loc ;
+    for(loc =0;loc<len;loc++) SC.mixin(this, arguments[loc]);
     return this ;
   },
   
   /**
-    Creates a new subclass, add to the receiver any passed properties
-    or methods.
+    Creates a new subclass of the receiver, adding any passed properties to
+    the instance definition.
     
     @params {Hash} props the methods of properties you want to add
     @returns {Class} A new object class
