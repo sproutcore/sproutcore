@@ -458,10 +458,13 @@ SC.Binding = {
     // don't allow flushing more than one at a time
     if (this._isFlushing) return ; 
     this._isFlushing = YES ;
+
+    var log = SC.LOG_BINDING_NOTIFICATIONS ;
     
     // keep doing this as long as there are changes to flush.
     var queue ;
     while((queue = this._changeQueue).length > 0) {
+      if (log) console.log("Begin: Trigger changed bindings") ;
 
       // first, swap the change queues.  This way any binding changes that
       // happen while we flush the current queue can be queued up.
@@ -477,7 +480,9 @@ SC.Binding = {
       // now loop back and see if there are additional changes pending in the
       // active queue.  Repeat this until all bindings that need to trigger have
       // triggered.
+      if (log) console.log("End: Trigger changed bindings") ;
     }
+
 
     // clean up
     this._isFlushing = NO ;
