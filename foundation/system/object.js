@@ -95,121 +95,13 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     // setup new prototype and add properties to ti
     var base = ret.prototype = SC.beget(this.prototype);
     var idx, len = arguments.length;
-    for(idx=0;idx<len;idx++) SC.Object._extend(base, arguments[idx]) ;
+    for(idx=0;idx<len;idx++) SC.__object_extend(base, arguments[idx]) ;
     base.constructor = ret; // save constructor
 
     if (bench) SC.Benchmark.end('SC.Object.extend') ;
     return ret ;
   },
 
-  _extend: function(base, ext) {
-    // get some common vars
-    var idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
-    
-    // first, save any concat props.  use old or new array or concat
-    idx = (cprops) ? cprops.length : 0 ;
-    var concats = (idx>0) ? {} : null;
-    while(--idx>=0) {
-      var key = cprops[idx], p1 = base[key], p2 = ext[key];
-      concats[key] = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
-    }
-
-    // setup arrays for bindings, observers, and properties.  Normally, just
-    // save the arrays from the base.  If these need to be changed during 
-    // processing, then they will be cloned first.
-    var bindings = base._bindings, clonedBindings = NO;
-    var observers = base._observers, clonedObservers = NO;
-    var properties = base._properties, clonedProperties = NO;
-    var initMixins = base.__initMixins, clonedInitMixins = NO ;
-
-    // outlets are treated a little differently because you can manually 
-    // name outlets in the passed in hash. If this is the case, then clone
-    // the array first.
-    var outlets = base.outlets, clonedOutlets = NO ;
-    if (ext.outlets) { 
-      outlets = (outlets || SC.A).concat(ext.outlets);
-      clonedOutlets = YES ;
-    }
-    
-    // now copy properties, add superclass to func.
-    for(var key in ext) {
-
-      // avoid copying builtin methods
-      if (!ext.hasOwnProperty(key)) continue ; 
-
-      // get the value.  use concats if defined
-      var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
-
-      // Possibly add to a bindings.
-      if (key.slice(-7) === "Binding") {
-        if (!clonedBindings) {
-          bindings = (bindings || SC.A).slice() ;
-          clonedBindings = YES ;
-        }
-
-        if (bindings === null) bindings = (base._bindings || SC.A).slice();
-        bindings[bindings.length] = key ;
-        
-      // Also add observers, outlets, and properties for functions...
-      } else if (value && (value instanceof Function)) {
-
-        // add super to funcs.  Be sure not to set the base of a func to 
-        // itself to avoid infinite loops.
-        if (!value.superclass && (value !== (cur=base[key]))) {
-          value.superclass = value.base = cur || k;
-        }
-
-        // handle observers
-        if (value.propertyPaths) {
-          if (!clonedObservers) {
-            observers = (observers || SC.A).slice() ;
-            clonedObservers = YES ;
-          }
-          observers[observers.length] = key ;
-          
-        // handle computed properties
-        } else if (value.dependentKeys) {
-          if (!clonedProperties) {
-            properties = (properties || SC.A).slice() ;
-            clonedProperties = YES ;
-          }
-          properties[properties.length] = key ;
-          
-        // handle outlets
-        } else if (value.autoconfiguredOutlet) {
-          if (!clonedOutlets) {
-            outlets = (outlets || SC.A).slice();
-            clonedOutlets = YES ;
-          }
-          outlets[outlets.length] = key ;
-          
-        // save initMixins in array
-        } else if (key === 'initMixin') {
-          if (!clonedInitMixins) {
-            initMixins = (initMixins || SC.A).slice() ;
-            clonedInitMixins = YES ;
-          }
-          initMixins[initMixins.length] = value ;
-        }
-      }
-
-      // copy property
-      base[key] = value ;
-    }
-
-    // copy bindings, observers, and properties 
-    base._bindings = bindings || [];
-    base._observers = observers || [] ;
-    base._properties = properties || [] ;
-    base.__initMixins = initMixins || [] ;
-    base.outlets = outlets || [];
-
-    // toString is usually skipped.  Don't do that!
-    if (ext.hasOwnProperty('toString')) base.toString = ext.toString;
-    
-    return base ;
-  },
-    
   /**
     Creates a new instance of the class.
 
@@ -262,94 +154,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   */
   isClass: YES,
   
-  /**
-    Returns the name of this class.  If the name is not known, triggers
-    a search.  This can be expensive the first time it is called.
-  */
-  objectClassName: function() {
-    if (!SC.isReady) return ''; // class names are not available until ready
-    if (!this._objectClassName) this._findObjectClassNames() ;
-    if (this._objectClassName) return this._objectClassName ;
-
-    // walk up the superclass chain, looking for 
-    var ret = this ;
-    while(ret && !ret._objectClassName) ret = ret.superclass; 
-    return (ret && ret._objectClassName) ? ret._objectClassName : 'Anonymous';
-  },
-
-  /** @private
-    This is a way of performing brute-force introspection.  This searches 
-    through all the top-level properties looking for classes.  When it finds
-    one, it saves the class path name.
-  */
-  _findObjectClassNames: function() {
-    
-    if (SC._foundObjectClassNames) return ;
-    SC._foundObjectClassNames = true ;
-    
-    var seen = [] ;
-    var searchObject = function(root, object, levels) {
-      levels-- ;
-
-      // not the fastest, but safe
-      if (seen.indexOf(object) >= 0) return ;
-      seen.push(object) ;
-
-      for(var key in object) {
-        if (key == '__scope__') continue ;
-        if (key == 'superclass') continue ;
-        if (!key.match(/^[A-Z0-9]/)) continue ;
-
-        var path = (root) ? [root,key].join('.') : key ;
-        var value = object[key] ;
-
-
-        switch(SC.$type(value)) {
-        case SC.T_CLASS:
-          if (!value._objectClassName) value._objectClassName = path;
-          if (levels>=0) searchObject(path, value, levels) ;
-          break ;
-
-        case SC.T_OBJECT:
-          if (levels>=0) searchObject(path, value, levels) ;
-          break ;
-
-        case SC.T_HASH:
-          if (((root != null) || (path=='SC')) && (levels>=0)) searchObject(path, value, levels) ;
-          break ;
-
-        default:
-          break;
-        }
-      }
-    } ;
-    
-    searchObject(null, window, 2) ;
-    
-    // Internet Explorer doesn's loop over global variables...
-    if ( SC.browser.isIE ) {
-      searchObject('SC', SC, 2) ; // get names for the SC classes
-      
-      // get names for the model classes, including nested namespaces (untested)
-      for ( var i = 0; i < SC.Server.servers.length; i++ ) {
-        var server = SC.Server.servers[i];
-        if (server.prefix) {
-          for (var prefixLoc = 0; prefixLoc < server.prefix.length; prefixLoc++) {
-            var prefixParts = server.prefix[prefixLoc].split('.');
-            var namespace = window;
-            var namespaceName;
-            for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
-              namespace = namespace[prefixParts[prefixPartsLoc]] ;
-              namepaceName = prefixParts[prefixPartsLoc];
-            }
-            searchObject(namepaceName, namespace, 2) ;
-          }
-        }
-      }
-    }
-  },
-  
-  toString: function() { return this.objectClassName(); },
+  toString: function() { return SC.__object_className(this); },
   
   // ..........................................
   // PROPERTY SUPPORT METHODS
@@ -399,7 +204,7 @@ SC.Object.prototype = {
   __init: function(extensions) {
     // apply any new properties
     var idx, len = (extensions) ? extensions.length : 0;
-    for(idx=0;idx<len;idx++) SC.Object._extend(this, extensions[idx]) ;
+    for(idx=0;idx<len;idx++) SC.__object_extend(this, extensions[idx]) ;
     SC.generateGuid(this) ; // add guid
     this.init() ; // call real init
     return this ; // done!
@@ -538,7 +343,7 @@ SC.Object.prototype = {
   /** @private */
   toString: function() {
     if (!this.__toString) {
-      this.__toString = "%@:%@".fmt(this.constructor.objectClassName(), SC.guidFor(this));
+      this.__toString = "%@:%@".fmt(SC.__object_className(this.constructor), SC.guidFor(this));
     } 
     return this.__toString ;
   },
@@ -703,6 +508,211 @@ SC.Object.prototype.constructor = SC.Object;
 
 // Add observable to mixin
 SC.mixin(SC.Object.prototype, SC.Observable) ;
+
+/* 
+  Private helper methods.  These are not kept as part of the class
+  definition because SC.Object is copied frequently and we want to keep the
+  number of class methods to a minimum.
+*/
+SC.mixin({
+
+  __object_extend: function(base, ext) {
+    // get some common vars
+    var idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
+    
+    // first, save any concat props.  use old or new array or concat
+    idx = (cprops) ? cprops.length : 0 ;
+    var concats = (idx>0) ? {} : null;
+    while(--idx>=0) {
+      var key = cprops[idx], p1 = base[key], p2 = ext[key];
+      concats[key] = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
+    }
+
+    // setup arrays for bindings, observers, and properties.  Normally, just
+    // save the arrays from the base.  If these need to be changed during 
+    // processing, then they will be cloned first.
+    var bindings = base._bindings, clonedBindings = NO;
+    var observers = base._observers, clonedObservers = NO;
+    var properties = base._properties, clonedProperties = NO;
+    var initMixins = base.__initMixins, clonedInitMixins = NO ;
+
+    // outlets are treated a little differently because you can manually 
+    // name outlets in the passed in hash. If this is the case, then clone
+    // the array first.
+    var outlets = base.outlets, clonedOutlets = NO ;
+    if (ext.outlets) { 
+      outlets = (outlets || SC.A).concat(ext.outlets);
+      clonedOutlets = YES ;
+    }
+    
+    // now copy properties, add superclass to func.
+    for(var key in ext) {
+
+      // avoid copying builtin methods
+      if (!ext.hasOwnProperty(key)) continue ; 
+
+      // get the value.  use concats if defined
+      var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
+
+      // Possibly add to a bindings.
+      if (key.slice(-7) === "Binding") {
+        if (!clonedBindings) {
+          bindings = (bindings || SC.A).slice() ;
+          clonedBindings = YES ;
+        }
+
+        if (bindings === null) bindings = (base._bindings || SC.A).slice();
+        bindings[bindings.length] = key ;
+        
+      // Also add observers, outlets, and properties for functions...
+      } else if (value && (value instanceof Function)) {
+
+        // add super to funcs.  Be sure not to set the base of a func to 
+        // itself to avoid infinite loops.
+        if (!value.superclass && (value !== (cur=base[key]))) {
+          value.superclass = value.base = cur || k;
+        }
+
+        // handle observers
+        if (value.propertyPaths) {
+          if (!clonedObservers) {
+            observers = (observers || SC.A).slice() ;
+            clonedObservers = YES ;
+          }
+          observers[observers.length] = key ;
+          
+        // handle computed properties
+        } else if (value.dependentKeys) {
+          if (!clonedProperties) {
+            properties = (properties || SC.A).slice() ;
+            clonedProperties = YES ;
+          }
+          properties[properties.length] = key ;
+          
+        // handle outlets
+        } else if (value.autoconfiguredOutlet) {
+          if (!clonedOutlets) {
+            outlets = (outlets || SC.A).slice();
+            clonedOutlets = YES ;
+          }
+          outlets[outlets.length] = key ;
+          
+        // save initMixins in array
+        } else if (key === 'initMixin') {
+          if (!clonedInitMixins) {
+            initMixins = (initMixins || SC.A).slice() ;
+            clonedInitMixins = YES ;
+          }
+          initMixins[initMixins.length] = value ;
+        }
+      }
+
+      // copy property
+      base[key] = value ;
+    }
+
+    // copy bindings, observers, and properties 
+    base._bindings = bindings || [];
+    base._observers = observers || [] ;
+    base._properties = properties || [] ;
+    base.__initMixins = initMixins || [] ;
+    base.outlets = outlets || [];
+
+    // toString is usually skipped.  Don't do that!
+    if (ext.hasOwnProperty('toString')) base.toString = ext.toString;
+    
+    return base ;
+  },
+
+  /** @private
+    Returns the name of this class.  If the name is not known, triggers
+    a search.  This can be expensive the first time it is called.
+  */
+  __object_className: function(obj) {
+    if (!SC.isReady) return ''; // class names are not available until ready
+    if (!obj.__className) SC.__object_findClassNames() ;
+    if (obj.__className) return obj.__className ;
+
+    // if no direct classname was found, walk up class chain looking for a 
+    // match.
+    var ret = this ;
+    while(ret && !ret.__className) ret = ret.superclass; 
+    return (ret && ret.__className) ? ret.__className : 'Anonymous';
+  },
+
+  /** @private
+    This is a way of performing brute-force introspection.  This searches 
+    through all the top-level properties looking for classes.  When it finds
+    one, it saves the class path name.
+  */
+  __object_findClassNames: function() {
+    
+    if (SC.__object_foundObjectClassNames) return ;
+    SC.__object_foundObjectClassNames = true ;
+    
+    var seen = [] ;
+    var searchObject = function(root, object, levels) {
+      levels-- ;
+
+      // not the fastest, but safe
+      if (seen.indexOf(object) >= 0) return ;
+      seen.push(object) ;
+
+      for(var key in object) {
+        if (key == '__scope__') continue ;
+        if (key == 'superclass') continue ;
+        if (!key.match(/^[A-Z0-9]/)) continue ;
+
+        var path = (root) ? [root,key].join('.') : key ;
+        var value = object[key] ;
+
+
+        switch(SC.$type(value)) {
+        case SC.T_CLASS:
+          if (!value.__className) value.__className = path;
+          if (levels>=0) searchObject(path, value, levels) ;
+          break ;
+
+        case SC.T_OBJECT:
+          if (levels>=0) searchObject(path, value, levels) ;
+          break ;
+
+        case SC.T_HASH:
+          if (((root != null) || (path=='SC')) && (levels>=0)) searchObject(path, value, levels) ;
+          break ;
+
+        default:
+          break;
+        }
+      }
+    } ;
+    
+    searchObject(null, window, 2) ;
+    
+    // Internet Explorer doesn's loop over global variables...
+    if ( SC.browser.isIE ) {
+      searchObject('SC', SC, 2) ; // get names for the SC classes
+      
+      // get names for the model classes, including nested namespaces (untested)
+      for ( var i = 0; i < SC.Server.servers.length; i++ ) {
+        var server = SC.Server.servers[i];
+        if (server.prefix) {
+          for (var prefixLoc = 0; prefixLoc < server.prefix.length; prefixLoc++) {
+            var prefixParts = server.prefix[prefixLoc].split('.');
+            var namespace = window;
+            var namespaceName;
+            for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
+              namespace = namespace[prefixParts[prefixPartsLoc]] ;
+              namepaceName = prefixParts[prefixPartsLoc];
+            }
+            searchObject(namepaceName, namespace, 2) ;
+          }
+        }
+      }
+    }
+  }
+    
+}) ;
 
 function logChange(target,key,value) {
   console.log("CHANGE: %@[%@] = %@".fmt(target, key, target.get(key)));
