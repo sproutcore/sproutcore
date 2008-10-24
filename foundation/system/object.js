@@ -57,7 +57,16 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   
   /**
     Creates a new subclass of the receiver, adding any passed properties to
-    the instance definition.
+    the instance definition of the new class.  You should use this method
+    when you plan to create several objects based on a class with similar 
+    properties.
+    
+    h2. Init
+    
+    If you define an init() method, it will be called when you create 
+    instances of your new class.  Since SproutCore uses the init() method to
+    do important setup, you must be sure to always call sc_super() somewhere
+    in your init() to allow the normal setup to proceed.
     
     @params {Hash} props the methods of properties you want to add
     @returns {Class} A new object class
