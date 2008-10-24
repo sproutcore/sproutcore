@@ -366,6 +366,12 @@ SC.Observable = {
     this._kvo_revision = (this._kvo_revision || 0) + 1; 
     var level = this._kvo_changeLevel || 0 ;
 
+    // clear any cached value
+    var func = this[key] ;
+    if (func && (func instanceof Function) && func.isCacheable) {
+      func.__value = func.__lastSetValue = undefined ;
+    }
+    
     // save in the change set if queuing changes
     var suspended ;
     if ((level > 0) || (suspended=SC.Observers.isObserveringSuspended)) {
