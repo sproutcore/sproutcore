@@ -681,6 +681,51 @@ SC.mixin(Function.prototype,
     this.isProperty = true; return this; 
   },
   
+  /**
+    You can call this method on a computed property to indicate that the 
+    property is cacheable (or not cacheable).  By default all computed 
+    properties are not cached.  Enabling this feature will allow SproutCore
+    to cache the return value of your computed property and to use that
+    value until one of your dependent properties changes or until you 
+    invoke propertyDidChange() and name the computed property itself.
+    
+    If you do not specify this option, computed properties are assumed to be
+    not cacheable.
+    
+    @param {Boolean} aFlag optionally indicate cacheable or no, default YES
+    @returns {Function} reciever
+  */
+  cacheable: function(aFlag) {
+    this.isProperty = YES;  // also make a property just in case
+    if (!this.dependentKeys) this.dependentKeys = [] ;
+    this.isCacheable = (aFlag === undefined) ? YES : aFlag ;
+    return this;
+  },
+  
+  /**
+    Indicates that the computed property is volatile.  Normally SproutCore 
+    assumes that your computed property is indempotent.  That is, calling 
+    set() on your property more than once with the same value has the same
+    effect as calling it only once.  
+    
+    All non-computed properties are indempotent and normally you should make
+    your computed properties behave the same way.  However, if you need to
+    make your property change its return value everytime your method is
+    called, you may chain this to your property to make it volatile.
+    
+    If you do not specify this option, properties are assumed to be 
+    non-volatile. 
+    
+    @param {Boolean} aFlag optionally indicate state, default to YES
+    @returns {Function} receiver
+  */
+  indempotent: function(aFlag) {
+    this.isProperty = YES;  // also make a property just in case
+    if (!this.dependentKeys) this.dependentKeys = [] ;
+    this.isVolatile = !((aFlag === undefined) ? NO : aFlag) ;
+    return this;
+  },
+  
   /**  
     Declare that a function should observe an object at the named path.  Note
     that the path is used only to construct the observation one time.

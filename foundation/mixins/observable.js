@@ -172,7 +172,7 @@ SC.Observable = {
     if (ret === undefined) {
       return this.unknownProperty(key) ;
     } else if (ret && ret.isProperty) {
-      return ret.call(this,key) ;
+      return (ret.isCacheable && ret.__value !== undefined) ? ret.__value : ret.call(this,key) ;
     } else return ret ;
   },
 
@@ -224,22 +224,50 @@ SC.Observable = {
     @returns {this}
   */
   set: function(key, value) {
-    var func = this[key] ;
-    var ret = value ;
+    var func = this[key], ret = value, dependents ;
     
     var notify = this.automaticallyNotifiesObserversFor(key) ;
     
-    if (notify) this.propertyWillChange(key) ;
-    
     // set the value.
     if (func && func.isProperty) {
-      ret = func.call(this,key,value) ;
+      if (func.isVolatile || (func.__lastSetValue !== value)) {
+        func.__lastSetValue = value ;
+        if (notify) this.propertyWillChange(key) ;
+        ret = func.call(this,key,value) ;
+
+        // update cached value
+        if (func.isCacheable) func.__value = ret ;
+
+        if (notify) this.propertyDidChange(key, ret) ;
+        
+      }
+
     } else if (func === undefined) {
-      ret = this.unknownProperty(key,value) ;
-    } else ret = this[key] = value ;
+      if (notify) this.propertyWillChange(key) ;
+      this.unknownProperty(key,value) ;
+      if (notify) this.propertyDidChange(key, ret) ;
+
+    } else {
+      if (this[key] !== value) {
+        if (notify) this.propertyWillChange(key) ;
+        ret = this[key] = value ;
+        if (notify) this.propertyDidChange(key, ret) ;
+      }
+    }
     
-    // post out notifications.
-    if (notify) this.propertyDidChange(key, ret) ;
+    // if there are any dependent keys and they use caching, then clear the
+    // cache.
+    if (dependents = this._kvo_cachedDependents) {
+      dependents = this._kvo_cachedDependents[key] ;
+      if (dependents && dependents.length > 0) {
+        var idx = dependents.length;
+        while(--idx>=0) {
+          func = dependents[idx];
+          func.__value = func.__lastSetValue = undefined;
+        }
+      }
+    }
+    
     return this ;
   },
 
@@ -375,6 +403,13 @@ SC.Observable = {
     var dependents = this._kvo_dependents ;
     if (!dependents) this._kvo_dependents = dependents = {} ;
 
+    // the cached dependents hash contains computed properties that are 
+    // dependent and cached.  It is important not to define 
+    // _kvo_cachedDependents until this feature is actually used for perf
+    // reasons.
+    var cached = this._kvo_cachedDependents ;
+    var dep, func, array, arrayIdx, queue;
+    
     // note that we store dependents as simple arrays instead of using set.
     // we assume that in general you won't call registerDependentKey() more
     // than once for a particular base key.  Even if you do, the added cost
@@ -383,23 +418,43 @@ SC.Observable = {
     // for each key, build array of dependents, add this key...
     // note that we ignore the first argument since it is the key...
     while(--idx >= 1) {
-      var dep = arguments[idx] ;
+      dep = arguments[idx] ;
       
       // handle the case where the user passes arrays of keys...
       if (SC.$type(dep) === SC.T_ARRAY) {
-        var array = dep ;  var arrayIdx = array.length;
+        array = dep ;  arrayIdx = array.length;
         while(--arrayIdx >= 0) {
-          var dep = array[arrayIdx] ;
-          var queue = dependents[dep] ;
+          dep = array[arrayIdx] ;
+          
+          // add to dependents
+          queue = dependents[dep] ;
           if (!queue) queue = dependents[dep] = [] ;
           queue.push(key) ;
+
+          // add function 
+          func = this[key];
+          if (func && (func instanceof Function) && func.isCacheable) {
+            if (!cached) this._kvo_cachedDependents = cached = {};
+            queue = cached[dep] ;
+            if (!queue) queue = cached[dep] = [] ;
+            queue.push(func) ;
+          }
         }
         
       // otherwise, just add the key.
       } else {
-        var queue = dependents[dep] ;
+        queue = dependents[dep] ;
         if (!queue) queue = dependents[dep] = [] ;
         queue.push(key) ;
+          
+        // add to cached dependents if needed
+        func = this[key];
+        if (func && (func instanceof Function) && func.isCacheable) {
+          if (!cached) this._kvo_cachedDependents = cached = {};
+          queue = cached[dep] ;
+          if (!queue) queue = cached[dep] = [] ;
+          queue.push(func) ;
+        }
       }
     }
   },
