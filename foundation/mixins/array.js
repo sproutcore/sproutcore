@@ -196,6 +196,28 @@ SC.Array = {
       if (!SC.isEqual(ary.objectAt(loc), this.objectAt(loc))) return false ;
     }
     return true ;
+  },
+  
+  /**
+    Generates a new array with the contents of the old array, sans any null
+    values.
+    
+    @returns {Array}
+  */
+  compact: function() { return this.without(null); },
+  
+  /**
+    Generates a new array with the contents of the old array, sans the passed
+    value.
+    
+    @param {Object} value
+    @returns {Array}
+  */
+  without: function(value) {
+    if (this.indexOf(value) < 0) return this; // value not present.
+    var ret = [] ;
+    this.forEach(function(k) { if (k !== value) ret[ret.length] = k; }) ;
+    return ret ;
   }
     
 } ;
