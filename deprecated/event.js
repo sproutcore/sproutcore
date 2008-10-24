@@ -54,6 +54,6 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 });
 
 // These enhancements were once provided on the native Event class also.
-"getCharCode getCharString pointerLocation ALT_KEY CTRL_KEY SHIFT_KEY".split().forEach(function(key){
+"getCharCode getCharString pointerLocation ALT_KEY CTRL_KEY SHIFT_KEY".split(' ').forEach(function(key){
   Event[key] = SC.Event[key] ;
 }) ;

@@ -698,6 +698,9 @@ SC.Object.prototype = {
 
 } ;
 
+// bootstrap the constructor for SC.Object.
+SC.Object.prototype.constructor = SC.Object;
+
 // Add observable to mixin
 SC.mixin(SC.Object.prototype, SC.Observable) ;
 
