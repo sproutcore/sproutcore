@@ -670,7 +670,7 @@ SC.Reducers = {
 
     // ok, found the reducer.  Let's build the computed property and install
     var func = SC._buildReducerFor(reducerKey, reducerProperty);
-    var p = (this._type) ? this._type : this.constructor.prototype ;
+    var p = this.constructor.prototype ;
     
     if (p) {
       p[key] = func ;

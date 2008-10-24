@@ -211,6 +211,8 @@ SC.mixin(/** @scope SC */ {
     return ret ;
   },
 
+  guidKey: "_sc_guid_" + (new Date().getTime()),
+  
   /**
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
@@ -224,7 +226,8 @@ SC.mixin(/** @scope SC */ {
   guidFor: function(obj) {
     if (obj === undefined) return "(undefined)" ;
     if (obj === null) return '(null)' ;
-    if (obj._guid) return obj._guid ;
+    var guidKey = this.guidKey ;
+    if (obj[guidKey]) return obj[guidKey] ;
     
     switch(SC.$type(obj)) {
       case SC.T_NUMBER:
@@ -237,11 +240,24 @@ SC.mixin(/** @scope SC */ {
         return (obj) ? "(true)" : "(false)" ;
         break;
       default:
-        return obj._guid = SC.generateGuid();
+        return SC.generateGuid(obj);
     }
   },
   
-  generateGuid: function() { return ("@" + (SC._nextGUID++)); },
+  /**
+    Generates a new guid, optionally saving the guid to the object that you
+    pass in.  You will rarely need to use this method.  Instead you should
+    call SC.guidFor(obj), which return an existing guid if available.
+    
+    @param {Object} obj the object to assign the guid to
+    @returns {String} the guid
+  */
+  generateGuid: function(obj) { 
+    var ret = ("@" + (SC._nextGUID++)); 
+    if (obj) obj[SC.guidKey] = ret ;
+    return ret ;
+  },
+  
   _nextGUID: 0, _numberGuids: [], _stringGuids: {},
 
   /**
@@ -291,6 +307,9 @@ SC.mixin(/** @scope SC */ {
     Empty function.  Useful for some operations. 
   */
   K: function() { return this; },
+  
+  /** Empty array.  Useful for some optimizations. */
+  A: [],
   
   /**
     Creates a new object with the passed object as its prototype.

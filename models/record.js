@@ -524,7 +524,7 @@ SC.Record = SC.Object.extend(
       if (value === null) value = "(null)" ;
       return [key,value].join('=') ;
     }) ;
-    return this._type.toString() + '({ ' + ret.join(', ') + ' })' ;
+    return this.constructor.toString() + '({ ' + ret.join(', ') + ' })' ;
   },
   
   propertyObserver: function(observing,target,key,value) {
@@ -661,7 +661,10 @@ SC.Record = SC.Object.extend(
   },
   
   // used by the store
-  _storeKey: function() { return this._type._storeKey(); }  
+  _storeKey: function() { 
+    if (!this.constructor._storeKey) debugger ;
+    return this.constructor._storeKey(); 
+  }  
   
      
 }) ;

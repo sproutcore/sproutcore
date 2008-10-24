@@ -4,7 +4,6 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/system/benchmark') ;
 require('foundation/mixins/observable') ;
 require('foundation/mixins/array') ;
 
@@ -35,9 +34,10 @@ SC.BENCHMARK_OBJECTS = NO;
   
   @extends SC.Observable 
   @author Charles Jolley
+  @constructor
   @since SproutCore 1.0
 */
-SC.Object = function() { return this; };
+SC.Object = function(props) { return this.__init(props); };
 
 SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 
@@ -50,10 +50,14 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     @returns {Object} receiver
   */
   mixin: function(props) {
-    var len = props, loc ;
+    var len = arguments.length, loc ;
     for(loc =0;loc<len;loc++) SC.mixin(this, arguments[loc]);
     return this ;
   },
+  
+  // ..........................................
+  // CREATING CLASSES AND INSTANCES
+  //
   
   /**
     Creates a new subclass of the receiver, adding any passed properties to
@@ -72,36 +76,140 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     @returns {Class} A new object class
   */
   extend: function(props) {   
-    
-    if (SC.BENCHMARK_OBJECTS) SC.Benchmark.start('SC.Object.extend') ;
-     
-    // build function.  copy class methods on to it.
-    var ret = function(noinit) { 
-      if (noinit && (typeof(noinit) == 'string') && (noinit == SC.Object._noinit_)) return this ;
-      var ret = SC.Object._init.apply(this,SC.$A(arguments)); 
-      return ret ;
-    };
-    for(var prop in this) { ret[prop] = this[prop]; }
+    var bench = SC.BENCHMARK_OBJECTS ;
+    if (bench) SC.Benchmark.start('SC.Object.extend') ;
 
-    // extend the prototype with passed arguments.
-    var base = new this(SC.Object._noinit_) ;
-
-//    var base = SC.Object._extend({},this.prototype) ;
-    var extensions = SC.$A(arguments) ;
-    for(var loc=0;loc<extensions.length;loc++) {
-      base = SC.Object._extend(base, extensions[loc]);
+    // build a new constructor and copy class methods.  Do this before adding
+    // any other properties so they are not overwritten by the copy.
+    var prop, ret = function(props) { return this.__init(props); } ;
+    for(prop in this) {
+      if (!this.hasOwnProperty(prop)) continue ;
+      ret[prop] = this[prop];
     }
-    ret.prototype = base ;
-    
-    // return new extension
-    ret._guid = SC.generateGuid() ; // each time we extend we get a new guid
-    ret._type = this ;
-     
-    if (SC.BENCHMARK_OBJECTS) SC.Benchmark.end('SC.Object.extend') ;
-    
+    if (this.hasOwnProperty('toString')) ret.toString = this.toString;
+
+    // now setup superclass, guid
+    ret.superclass = this ;
+    SC.generateGuid(ret); // setup guid
+
+    // setup new prototype and add properties to ti
+    var base = ret.prototype = SC.beget(this.prototype);
+    var idx, len = arguments.length;
+    for(idx=0;idx<len;idx++) SC.Object._extend(base, arguments[idx]) ;
+    base.constructor = ret; // save constructor
+
+    if (bench) SC.Benchmark.end('SC.Object.extend') ;
     return ret ;
   },
 
+  _extend: function(base, ext) {
+    // get some common vars
+    var idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
+    
+    // first, save any concat props.  use old or new array or concat
+    idx = (cprops) ? cprops.length : 0 ;
+    var concats = (idx>0) ? {} : null;
+    while(--idx>=0) {
+      var key = cprops[idx], p1 = base[key], p2 = ext[key];
+      concats[key] = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
+    }
+
+    // setup arrays for bindings, observers, and properties.  Normally, just
+    // save the arrays from the base.  If these need to be changed during 
+    // processing, then they will be cloned first.
+    var bindings = base._bindings, clonedBindings = NO;
+    var observers = base._observers, clonedObservers = NO;
+    var properties = base._properties, clonedProperties = NO;
+    var initMixins = base.__initMixins, clonedInitMixins = NO ;
+
+    // outlets are treated a little differently because you can manually 
+    // name outlets in the passed in hash. If this is the case, then clone
+    // the array first.
+    var outlets = base.outlets, clonedOutlets = NO ;
+    if (ext.outlets) { 
+      outlets = (outlets || SC.A).concat(ext.outlets);
+      clonedOutlets = YES ;
+    }
+    
+    // now copy properties, add superclass to func.
+    for(var key in ext) {
+
+      // avoid copying builtin methods
+      if (!ext.hasOwnProperty(key)) continue ; 
+
+      // get the value.  use concats if defined
+      var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
+
+      // Possibly add to a bindings.
+      if (key.slice(-7) === "Binding") {
+        if (!clonedBindings) {
+          bindings = (bindings || SC.A).slice() ;
+          clonedBindings = YES ;
+        }
+
+        if (bindings === null) bindings = (base._bindings || SC.A).slice();
+        bindings[bindings.length] = key ;
+        
+      // Also add observers, outlets, and properties for functions...
+      } else if (value && (value instanceof Function)) {
+
+        // add super to funcs.  Be sure not to set the base of a func to 
+        // itself to avoid infinite loops.
+        if (!value.superclass && (value !== (cur=base[key]))) {
+          value.superclass = value.base = cur || k;
+        }
+
+        // handle observers
+        if (value.propertyPaths) {
+          if (!clonedObservers) {
+            observers = (observers || SC.A).slice() ;
+            clonedObservers = YES ;
+          }
+          observers[observers.length] = key ;
+          
+        // handle computed properties
+        } else if (value.dependentKeys) {
+          if (!clonedProperties) {
+            properties = (properties || SC.A).slice() ;
+            clonedProperties = YES ;
+          }
+          properties[properties.length] = key ;
+          
+        // handle outlets
+        } else if (value.autoconfiguredOutlet) {
+          if (!clonedOutlets) {
+            outlets = (outlets || SC.A).slice();
+            clonedOutlets = YES ;
+          }
+          outlets[outlets.length] = key ;
+          
+        // save initMixins in array
+        } else if (key === 'initMixin') {
+          if (!clonedInitMixins) {
+            initMixins = (initMixins || SC.A).slice() ;
+            clonedInitMixins = YES ;
+          }
+          initMixins[initMixins.length] = value ;
+        }
+      }
+
+      // copy property
+      base[key] = value ;
+    }
+
+    // copy bindings, observers, and properties 
+    base._bindings = bindings || [];
+    base._observers = observers || [] ;
+    base._properties = properties || [] ;
+    base.__initMixins = initMixins || [] ;
+    base.outlets = outlets || [];
+
+    // toString is usually skipped.  Don't do that!
+    if (ext.hasOwnProperty('toString')) base.toString = ext.toString;
+    
+    return base ;
+  },
+    
   /**
     Creates a new instance of the class.
 
@@ -119,11 +227,8 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     @param {Hash} props optional hash of method or properties to add to the instance.
     @returns {SC.Object} new instance of the receiver class.
   */
-  create: function(props) {
-    var ret = new this(SC.$A(arguments),this) ;
-    return ret ;
-  },
-    
+  create: function(props) { return new this(arguments); },
+
   /**
     Takes an array of hashes and returns newly created instances.
     
@@ -131,11 +236,10 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     instantiates objects from them.
     
     @params {Array} array Array of hashes with properties to assigned to each object.
-    @returns {Array} array of instantiated objects.
+    @returns {Array} instantiated objects.
   */
-  createArray: function(array) {
-    var obj = this ;
-    return array.map(function(props) { return obj.create(props); }) ;
+  createEach: function(array) {
+    return array.map(function(props) { return this.create(props); }, this);
   },
 
   /**
@@ -163,12 +267,14 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     a search.  This can be expensive the first time it is called.
   */
   objectClassName: function() {
-    if (!SC._onloadQueueFlushed) return ''; // class names are not available until SC.didLoad is called
+    if (!SC.isReady) return ''; // class names are not available until ready
     if (!this._objectClassName) this._findObjectClassNames() ;
     if (this._objectClassName) return this._objectClassName ;
+
+    // walk up the superclass chain, looking for 
     var ret = this ;
-    while(ret && !ret._objectClassName) ret = ret._type; 
-    return (ret && ret._objectClassName) ? ret._objectClassName : 'Anonymous' ;
+    while(ret && !ret._objectClassName) ret = ret.superclass; 
+    return (ret && ret._objectClassName) ? ret._objectClassName : 'Anonymous';
   },
 
   /** @private
@@ -191,7 +297,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 
       for(var key in object) {
         if (key == '__scope__') continue ;
-        if (key == '_type') continue ;
+        if (key == 'superclass') continue ;
         if (!key.match(/^[A-Z0-9]/)) continue ;
 
         var path = (root) ? [root,key].join('.') : key ;
@@ -248,142 +354,108 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   // ..........................................
   // PROPERTY SUPPORT METHODS
   //
-  // These methods have moved to the root SC namespace.  They are still
-  // linked here for compatibility.
-  
-  tupleForPropertyPath: SC.tupleForPropertyPath,
-  objectForPropertyPath: SC.objectForPropertyPath,
 
-  
-  // ..........................................
-  // INTERNAL SUPPORT METHODS
-  //
-  _init: function(extensions,type) {
+  /** 
+    Returns YES if the receiver is a subclass of the named class.  If the 
+    receiver is the class passed, this will return NO since the class is not
+    a subclass of itself.  See also kindOf().
     
-    var ret = this ;
-    for(var loc=0;loc<extensions.length;loc++) {
-      ret = SC.Object._extend(ret,extensions[loc]) ;
-    }
-    ret._guid = SC.generateGuid() ;
-    ret._type = type ;
-    ret.init() ;
-    
-    return ret ;
-  },
-
-  // This will extend the base object with the properties passed in the second
-  // var, maintaining super's for the functions and concatinating cprops.
-  _extend: function(base,ext) { return this._extendAllProps(false, base, ext); },
-  
-  _extendAllProps: function(allProperties, base,ext) {
-    var cprops = base.concatenatedProperties ; var f = Prototype.emptyFunction ;
-    
-    // first, save any concat props.
-    var concats = {} ;
-    if (cprops) for(var cloc=0;cloc<cprops.length;cloc++) {
-      var p = cprops[cloc]; var p1 = base[p]; var p2 = ext[p] ;
-      p1 = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
-      concats[p] = p1 ;
-    }
-    
-    // deal with observers, bindings, and properties only if they are not 
-    // defined already in the ext.  If they are defined in ext, they will be
-    // concated using the above code.
-    var bindings = (ext._bindings) ? null : (base._bindings || []).slice() ;
-    var observers = (ext._observers) ? null : (base._observers || []).slice();
-    var properties = (ext._properties) ? null : (base._properties || []).slice() ;
-    var outlets = (ext.outlets) ? null : (base.outlets || []).slice() ;
-    
-    // now copy properties, add superclass to func.
-    for(var key in ext) {
-      // avoid copying builtin methods
-      if (!allProperties && !ext.hasOwnProperty(key)) continue ; 
-
-      // add super to funcs.  Be sure not to set the base of a func to itself
-      // to avoid infinite loops.
-      var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
-      if (value && (value instanceof Function) && (!value.base)) {
-        if (value != base[key]) value.base = base[key] || f;          
-      }
-      
-      // Possibly add to a bindings.
-      var keyLen = key.length ;
-      if (bindings && (key.slice(keyLen-7,keyLen) == "Binding")) {
-        bindings.push(key) ;
-        
-      // Also add observers, outlets, and properties for functions...
-      } else if (value && (value instanceof Function)) {
-        if (observers && value.propertyPaths) {
-          observers.push(key) ;
-        } else if (properties && value.dependentKeys) {
-          properties.push(key) ;
-        } else if (outlets && value.autoconfiguredOutlet) {
-          outlets.push(key) ;
-        }
-      }
-
-      // copy property
-      base[key] = value ;
-    }
-
-    // copy bindings, observers, and properties if defined.
-    if (bindings) base._bindings = bindings;
-    if (observers) base._observers = observers ;
-    if (properties) base._properties = properties ;
-    if (outlets && outlets.length > 0) base.outlets = outlets ;
-
-    //console.log('bindings: %@ -- observers: %@ -- properties: %@'.format(base._bindings,base._observers,base._properties)) ;
-    
-    return base ;
-  },
-  
-  // Returns true if the receiver is a subclass of the named class.  If the
-  // receiver is the class passed, this will return false.  See kindOf().
+    @param {Class} scClass class to compare
+    @returns {Boolean} 
+  */
   subclassOf: function(scClass) {
-    if (this == scClass) return false ;
-    var t = this._type ;
-    while(t) {
-      if (t == scClass) return true ;
-      t = t._type ;
-    }
-    return false ;
+    if (this === scClass) return NO ;
+    var t = this ;
+    while(t = t.superclass) if (t === scClass) return YES ;
+    return NO ;
   },
-  
-  // Returns true if the receiver is the passed class or is any subclass.
+
+  /**
+    Returns YES if the receiver is the passed class or is a subclass of the 
+    passed class.  See also subclassOf().
+    
+    @param {Class} scClass class to compare
+    @returns {Boolean} 
+  */
   kindOf: function(scClass) { 
-    if (this == scClass) return true ;
-    return this.subclassOf(scClass); 
+    return (this === scClass) || this.subclassOf(scClass) ;
   }
   
 }) ;
-
-SC.idt = { count: 0, t: 0.0, keys: 0, observers: 0, bindings: 0, pv: 0, observers_t: 0, bindings_t: 0, pv_t: 0, conf_t: 0, b1_t: 0, b2_t: 0, b3_t: 0, e_count: 0, e_t: 0, v_count: 0, v_t: 0, vc_t: 0 ,active: false } ;
-
-SC.report = function() {
-  var c = SC.idt.count ;
-  var e = SC.idt.e_count ;
-  var v = SC.idt.v_count ;
-  var ret = [] ;
-  ret.push('CREATED: ' + c + ' (avg time: '+(Math.floor(SC.idt.t * 100 / c) / 100)+' msec)') ;
-  ret.push('EXTENDED: ' + e + ' (avg time: '+(Math.floor(SC.idt.e_t * 100 / e) / 100)+' msec)') ;
-  ret.push('AVG KEYS: ' + (Math.floor(SC.idt.keys * 100 / c) / 100)) ;
-  ret.push('AVG OBSERVERS: ' + (Math.floor(SC.idt.observers * 100 / c) / 100)  + ' ('+ (Math.floor(SC.idt.observers_t * 100 / c) / 100) + ' msec)') ;
-  ret.push('AVG BINDINGS: ' + (Math.floor(SC.idt.bindings * 100 / c) / 100)  + ' ('+ (Math.floor(SC.idt.bindings_t * 100 / c) / 100) + ' msec)') ;
-  ret.push('AVG PV: ' + (Math.floor(SC.idt.pv * 100 / c) / 100)  + ' ('+ (Math.floor(SC.idt.pv_t * 100 / c) / 100) + ' msec)') ;
-  ret.push('AVG CONFIGURE OUTLETS: ' + (Math.floor(SC.idt.conf_t * 100 / c) / 100)  + ' msec') ;
-  ret.push('AVG B1: ' + (Math.floor(SC.idt.b1_t * 100 / c) / 100)  + ' msec') ;
-  ret.push('EXT: ' + SC.idt.ext_c + ' (avg time: ' + (Math.floor(SC.idt.ext_t * 100 / SC.idt.ext_c) / 100)  + ' msec)') ;
-  ret.push('VIEWS: ' + v + ' (avg time: ' + (Math.floor(SC.idt.v_t * 100 / v) / 100)  + ' msec)') ;
-  ret.push('VIEW CREATE: ' + (Math.floor(SC.idt.vc_t * 100 / v) / 100)  + ' msec)') ;
-  console.log(ret.join("\n")) ;
-  return ret.join("\n") ;
-} ;
 
 // ..........................................
 // DEFAULT OBJECT INSTANCE
 // 
 SC.Object.prototype = {
   
+  /** @private
+    This is the first method invoked on a new instance.  It will first apply
+    any added properties to the new instance and then calls the real init()
+    method.
+    
+    @param {Array} extensions an array-like object with hashes to apply.
+    @returns {Object} receiver
+  */
+  __init: function(extensions) {
+    // apply any new properties
+    var idx, len = (extensions) ? extensions.length : 0;
+    for(idx=0;idx<len;idx++) SC.Object._extend(this, extensions[idx]) ;
+    SC.generateGuid(this) ; // add guid
+    this.init() ; // call real init
+    return this ; // done!
+  },
+
+  /** 
+    You can call this method on an object to mixin one or more hashes of 
+    properties on the receiver object.  In addition to simply copying 
+    properties, this method will also prepare the properties for use in 
+    bindings, computed properties, etc.
+    
+    If you plan to use this method, you should call it before you call
+    the inherited init method from SC.Object or else your instance may not 
+    function properly.  
+    
+    @param {Hash} ext a hash to copy.  Only one.
+    @returns {Object} receiver
+  */
+  mixin: function() {
+    var idx, len = arguments.length;
+    for(idx=0;idx<len;idx++) SC.mixin(this, arguments[idx]) ;
+    
+    // call initMixin
+    for(idx=0;idx<len;idx++) {
+      var init = arguments[idx].initMixin ;
+      if (init) init.call(this) ;
+    }
+    return this ;
+  },
+
+  /**
+    This method is invoked automatically whenever a new object is 
+    instantiated.  You can override this method as you like to setup your
+    new object.  
+    
+    Within your object, be sure to call sc_super() to ensure that the built-in
+    init method is also called or your observers and computed properties may
+    not be configured.
+    
+    Although the default init() method returns the receiver, the return value
+    is ignored.
+    
+    @returns {Object} reciever
+  */
+  init: function() {
+    
+    this.initObservable();
+    
+    // Call 'initMixin' methods to automatically setup modules.
+    var idx, inits = this.__initMixins, len = (inits) ? inits.length : 0 ;
+    for(var idx=0;idx < len; idx++) inits[idx].call(this);
+    
+    return this ;
+  },
+  
+
   /**
     Always YES since this is an object and not a class.
   */
@@ -395,9 +467,8 @@ SC.Object.prototype = {
     @param methodName {String} the property name to check
     @returns {Boolean}
   */
-  respondsTo: function( methodName )
-  {
-    return !!(methodName && this[methodName] && (SC.$type(this[methodName]) == SC.T_FUNCTION));
+  respondsTo: function( methodName ) {
+    return !!(methodName && this[methodName] && (SC.typeOf(this[methodName]) == SC.T_FUNCTION));
   },
   
   /**
@@ -408,65 +479,35 @@ SC.Object.prototype = {
     @param args {*arguments} arbitrary arguments to pass along to the method.
     @returns {Object} NO if method could not be performed or method result.
   */
-  tryToPerform: function( methodName, args )
-  {
-    if ( !methodName ) return false;
-    
-    var args = SC.$A(arguments);
-    var name = args.shift();
-    if (this.respondsTo(name))
-    {
-      return this[name].apply(this,args);
-    }
-    return false;
-  },
-  
-  /**
-   this function is called automatically when a new object instance is
-   created.  You can use this to configure your child elements if you want.
-   Be sure to invoke the base method.
-  */
-  init: function() {
-    
-    this.initObservable();
-    
-    // Call 'initMixin' methods to automatically setup modules.
-    if (this.initMixin) {
-      var inc = Array.from(this.initMixin) ;
-      for(var idx=0; idx < inc.length; idx++) inc[idx].call(this);
-    }
+  tryToPerform: function( methodName, args ) {
+    if ( !methodName ) return NO;
+    var args = SC.$A(arguments); methodName = args.shift();
+    return (this.respondsTo(methodName)) ? this[methodName].apply(this,args) : NO;
   },
   
   /**  
     EXPERIMENTAL: You can use this to call super in any method.  
     
-    This currently does not work in some versions of Safari.  Instead you
+    This currently does not work in some Safari 2 or earlier.  Instead you
     should use:
     
-    argments.callee.base.apply(this, arguments); to call super.
+    sc_super();
     
     @params args {*args} any arguments you want to pass along.
-    @returns {void}
+    @returns {Object} return value from super
   */
-  $super: function(args) {
-    var caller = SC.Object.prototype.$super.caller; 
-    if (!caller) throw "$super cannot determine the caller method" ;
-    if (caller.base) caller.base.apply(this, arguments) ;
+  superclass: function(args) {
+    var caller = arguments.callee.caller; 
+    if (!caller) throw "superclass cannot determine the caller method" ;
+    return (caller.superclass) ? caller.superclass.apply(this, arguments) : null;
   },
   
-  /**  
-    Add passed properties to the object's class.
-    
-    @param props {Hash} properties to append.
-    @returns {void}
-  */
-  mixin: function() { return SC.Object.mixin.apply(this,arguments) ; },
-
   /**
     Returns all the keys defined on this object, excluding any defined in
     parent classes unless you pass all.
     
     @param {Boolean} all OPTIONAL: if YES return all keys, NO return only keys belonging to object itself.  Defaults to NO.
+    @returns {Array} keys
   */
   keys: function(all) {
     var ret = []; for(var key in this) { 
@@ -475,14 +516,14 @@ SC.Object.prototype = {
   },
 
   /**  
-    returns true if the receiver is an instance of the named class.  See also
+    returns YES if the receiver is an instance of the named class.  See also
     kindOf().
     
     @param {Class} scClass the class
     @returns {Boolean}
   */
   instanceOf: function(scClass) {
-    return this._type == scClass ;  
+    return this.constructor === scClass ;  
   },
   
   /**  
@@ -492,19 +533,12 @@ SC.Object.prototype = {
     @param scClass {Class} the class
     @returns {Boolean}
   */
-  kindOf: function(scClass) {
-    var t = this._type ;
-    while(t) { 
-      if (t == scClass) return true ;
-      t = t._type ;
-    }  
-    return false ;
-  },
+  kindOf: function(scClass) { return this.constructor.kindOf(scClass); },
 
   /** @private */
   toString: function() {
     if (!this.__toString) {
-      this.__toString = "%@:%@".fmt(this._type.objectClassName(), SC.guidFor(this));
+      this.__toString = "%@:%@".fmt(this.constructor.objectClassName(), SC.guidFor(this));
     } 
     return this.__toString ;
   },
@@ -642,7 +676,7 @@ SC.Object.prototype = {
     if (interval === undefined) interval = 1 ;
     var f = methodName ;
     if (arguments.length > 2) {
-      var args =SC.$A(arguments).slice(2,arguments.length);
+      var args =SC.$A(arguments).slice(2);
       args.unshift(this);
       if (SC.$type(f) === SC.T_STRING) f = this[methodName] ;
       f = f.bind.apply(f, args) ;
@@ -660,12 +694,12 @@ SC.Object.prototype = {
     
     @property
   */
-  concatenatedProperties: ['concatenatedProperties','outlets','_bindings','_observers','_properties', 'initMixin']  
+  concatenatedProperties: ['concatenatedProperties']  
 
 } ;
 
-Object.extend(SC.Object.prototype, SC.Observable) ;
-
+// Add observable to mixin
+SC.mixin(SC.Object.prototype, SC.Observable) ;
 
 function logChange(target,key,value) {
   console.log("CHANGE: %@[%@] = %@".fmt(target, key, target.get(key)));

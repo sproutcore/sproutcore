@@ -192,7 +192,7 @@ SC.Store = SC.Object.create(
       var ret = [] ; var loc = (records) ? records.length : 0;
       while(--loc >= 0) {
         var rec = records[loc] ;
-        if ((rec._type == recordType) || (rec._type.coreRecordType == recordType)) {
+        if ((rec.constructor == recordType) || (rec.constructor.coreRecordType == recordType)) {
           if (rec.matchConditions(conditions)) ret.push(rec) ;
         }
       }
@@ -325,7 +325,7 @@ SC.Store = SC.Object.create(
             while(--rloc >= 0) {
               var record = records[rloc] ;
               // notify only if record type matches.
-              if (col.recordType == record._type) {
+              if (col.recordType == record.constructor) {
                 col.recordDidChange(record) ;
               }
             }

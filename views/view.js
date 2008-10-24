@@ -2007,7 +2007,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   //   var idName = el.id ;
   //   idName = (idName && idName.length>0) ? 'id=%@'.fmt(idName) : null;
   // 
-  //   return "%@:%@<%@>".fmt(this._type, SC.guidFor(this), [tagName,idName, className].compact().join(' ')) ;
+  //   return "%@:%@<%@>".fmt(this.constructor, SC.guidFor(this), [tagName,idName, className].compact().join(' ')) ;
   // }
     
 }) ;
@@ -2034,11 +2034,6 @@ SC.View.mixin({
   viewFor: function(el,config) {
     if (el) el = $(el) ;
 
-    var r = SC.idt.active ; var vStart ;
-    if (r) SC.idt.v_count++;
-
-    if (r) vStart = new Date().getTime() ;
-    
     // find or build the element.
     if (!el) {    
       var emptyElement = this.prototype._cachedEmptyElement || this.prototype.emptyElement; 
@@ -2069,16 +2064,13 @@ SC.View.mixin({
         } else el = SC.NodeDescriptor.create(emptyElement) ;
       }
     }
-    if (r) SC.idt.vc_t += (new Date().getTime()) - vStart ;
 
     // configure only once.
     if (el && el._configured) return SC.View.findViewForElement(el); 
     
     // Now that we have found an element, instantiate the view.
     var args = SC.$A(arguments) ; args[0] = { rootElement: el } ;
-    if (r) vStart = new Date().getTime();
     var ret = new this(args,this) ; // create instance.
-    if (r) SC.idt.v_t += (new Date().getTime()) - vStart;
     el._configured = SC.guidFor(ret) ;
 
     // return the view.
