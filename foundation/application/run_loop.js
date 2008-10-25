@@ -65,61 +65,6 @@ SC.runLoop = SC.Object.create({
   maxRunTime: 3000,
   
   /**
-    Called by an observable object to schedule an observer to be notified.
-    
-    @param target {Object} the target object
-    @param action {Function} the method to call
-    @param args {Array} array of arguments to pass on
-    @returns {void}
-  */
-  notifyObserver: function(target, action, args) {
-    if (!this._notifications) this._notifications = [] ;
-    this._notifications.push({ target: target, action: action, args: args });
-  },
-  
-  /**
-    Tries to flush observer notifications.  The idea is that this will
-    continue to remove observers until all of the notifications have flushed
-    or until the max execution time has passed.  Called automatically from
-    endRunLoop().
-    
-    The way this works, it does not unshift pending notifications but
-    instead just sets them to null until the entire queue is flushed.  Then
-    it will reset the queue to a new array.  This is faster than shifting().
-    
-    @returns {void}
-  */
-  deliverNotifications: function() {
-    if (!this._notifications || this._notifications.length <=0) return;
-    if (this._notifying) return ; // do not allow recursion
-    this._notifying = YES ;
-    
-    var start = this.get('startTime') ;
-    var max = start + this.get('maxRunTime') ;
-    var loc = 0;
-    while((Date.now() < max) && (loc < this._notifications.length)) {
-      var notify = this._notifications[loc] ;
-      this._notifications[loc] = null;
-      loc++ ; // IMPORTANT: Make sure you increment so that we always go on.
-
-      if (notify) {
-        var args = notify.args;
-        notify.action.call(notify.target, args[0], args[1], args[2], args[3]);
-      }
-    }
-    
-    // if we made it through and the queue is empty, reset it
-    // otherwise, leave the queue in place and schedule another runloop.
-    if (loc >= this._notifications.length) {
-      this._notifications = [];
-    } else {
-      this.invokeLater(this.deliverNotifications) ;
-    }
-    
-    this._notifying = NO ;
-  },
-  
-  /**
     Call this method whenver you begin executing code.  
   
     This is typically invoked automatically for you from event handlers and 
@@ -142,9 +87,6 @@ SC.runLoop = SC.Object.create({
     @returns {void}
   */
   endRunLoop: function() {
-    // send any pending notifications.
-    //this.deliverNotifications() ;
-    
     // flush any expired timers, possibly cancelling the timeout.
     this._flushExpiredTimers() ;
     
