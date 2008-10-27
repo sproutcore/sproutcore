@@ -4,6 +4,7 @@
 // ========================================================================
 
 require('foundation/enumerable/set');
+require('foundation/private/observer_set') ;
 
 /**
   @namespace 

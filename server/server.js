@@ -4,6 +4,7 @@
 // ========================================================================
 
 require('core') ;
+require('model/store');
 
 SC.URL_ENCODED_FORMAT = 'url-encoded' ;
 SC.JSON_FORMAT = 'json';
@@ -77,7 +78,7 @@ SC.Server = SC.Object.extend({
     var cacheCode = params.cacheCode; delete params.cacheCode ;
     var url = params.url; delete params.url;
 
-    opts.requestHeaders = {'Accept': 'application/json, text/javascript, application/xml, text/xml, text/html, */*'}
+    opts.requestHeaders = {'Accept': 'application/json, text/javascript, application/xml, text/xml, text/html, */*'} ;
     if (accept) opts.requestHeaders['Accept'] = accept ;
     if (cacheCode) opts.requestHeaders['Sproutit-Cache'] = cacheCode ;
     opts.method = method || 'get' ;
@@ -90,7 +91,7 @@ SC.Server = SC.Object.extend({
     }    
     
     // adds a custom HTTP header for remote requests
-    opts.requestHeaders = {'X-SproutCore-Version' : '1.0'}
+    opts.requestHeaders = {'X-SproutCore-Version' : '1.0'} ;
 
     // convert parameters.
     var parameters = this._toQueryString(params) ;
@@ -222,7 +223,7 @@ SC.Server = SC.Object.extend({
       var server = this ; var context = {} ;
       var data = curRecords.map(function(rec) {
         var recData = server._decamelizeData(rec.getPropertyData()) ;
-        SC.guidFor(recData) = SC.guidFor(rec) ;
+        recData._guid = SC.guidFor(rec) ;
         context[SC.guidFor(rec)] = rec ;
         return recData ;
       }) ;
