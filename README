@@ -1,0 +1,16 @@
+SproutCore JavaScript Application Framework
+
+SproutCore is a framework for building desktop-like applications in the web without the use of plugins.  With SproutCore, you build rich, interactive
+applications in the web in less code than most simple web pages require today.
+
+The easiest way to get started with SproutCore is using the BlueRibbon build 
+tools included with the SproutCore package when you install it from the Ruby 
+Gems.  Please see the Getting Started documentation on the SproutCore website
+for more information.
+
+http://www.sproutcore.com
+
+If you would like to contact the authors, you can reach the current maintainer
+at charles@sproutit.com
+
+

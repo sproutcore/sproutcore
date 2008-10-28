@@ -1,0 +1,366 @@
+<% # ========================================================================
+   # SC.View innerFrame Unit Test
+   #
+   # The innerFrame represents the frame less any padding or scroll bars.
+   # It should update whenever the frame updates.  Verify this.
+   #
+   # ========================================================================
+%>
+<% content_for('final') do %>
+
+<script>
+
+Test.context("CASE 1: Auto-layout view with no padding & no border", {
+  
+  // IMPORTANT:  This test validates that innerFrame works even on elements in
+  // IE when hasLayout = false.  Make sure you do not edit the CSS or other
+  // properties for this test in such a way that it would give the test 
+  // element hasLayout.  
+  "frame should == innerFrame": function() {
+
+    // verify hasLayout is false in IE.
+    if (SC.Platform.IE) {
+      var hasLayout = v.rootElement.currentStyle.hasLayout ;
+      assertEqual(hasLayout, false, 'element.hasLayout MUST be false in IE');
+    }
+    
+    SC.rectsEqual(v.get('frame'), v.get('innerFrame')).shouldEqual(true) ;
+  },
+  
+  "frame & innerFrame should change when CSS changed and viewFrameDidChange() is called": function() {
+    var origFrame = this.v.get('frame') ;
+    var origInnerFrame = this.v.get('innerFrame') ;
+    
+    this.v.addClassName('half') ;
+    this.v.viewFrameDidChange() ;
+    
+    SC.rectsEqual(this.v.get('frame'), origFrame).shouldEqual(false) ;    
+    SC.rectsEqual(this.v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;   
+    
+    this.v.removeClassName('half') ; //reset 
+  },
+  
+  setup: function() { this.v = SC.page.get('case1'); }
+  
+});
+
+
+// CASE 2: Auto-layout of view with padding
+// - same as Case 1, except innerFrame = frame less padding
+CASE2_OFFSET = 2;
+Test.context("CASE 2: Auto-layout view with padding & border", {
+  
+  "innerFrame should == frame less border": function() {
+    var f = v.get('frame') ;
+    f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
+    f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
+    //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+    
+    SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
+  },
+  
+  "frame & innerFrame should change when CSS changed and viewFrameDidChange is called.; innerFrame should maintain proportion": function() {
+    var origFrame = v.get('frame') ;
+    var origInnerFrame = v.get('innerFrame') ;
+
+    // verify that frames change
+    v.addClassName('half') ;
+    v.viewFrameDidChange() ;
+    
+    SC.rectsEqual(v.get('frame'), origFrame).shouldEqual(false) ;    
+    SC.rectsEqual(v.get('innerFrame'), origInnerFrame).shouldEqual(false) ;    
+
+    // verify that innerFrame changes correctly.
+    var f = this.v.get('frame') ;
+    f.x += CASE2_OFFSET; f.y += CASE2_OFFSET;
+    f.width -= (CASE2_OFFSET*2); f.height -= (CASE2_OFFSET*2) ;
+    SC.rectsEqual(f, v.get('innerFrame')).shouldEqual(true) ;
+    
+    v.removeClassName('half') ;
+    
+  },
+  
+  "changing border should change innerFrame": function() {
+    v.setStyle({ border: '5px red solid' }) ;
+    v.viewFrameDidChange() ;
+    var f = v.get('frame') ;
+    f.x += 5; f.y += 5;
+    f.width -= 10; f.height -= 10 ;
+    
+    var got = v.get('innerFrame') ;
+    console.log('expected: %@ got: %@'.fmt($H(f).inspect(), $H(got).inspect()));
+    SC.rectsEqual(f, got).shouldEqual(true) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case2'); }
+  
+});
+
+// CASE 3: Manual-layout view with some padding and border
+// - innerFrame should update at frame is changed.
+CASE3_OFFSET = 2;
+CASE3_OFFSET_THICK = 5 ;
+
+Test.context("CASE 3: manual-layout view with some padding and no border", {
+  
+  "innerFrame should == frame less border": function() {
+     var f = this.v.get('frame') ;
+     f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
+     f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
+     
+     SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+   },
+
+  "after frame change, innerFrame should == frame less border, viewFrameDidChange is not required.": function() {
+    var f ;
+    
+    this.v.set('frame', f = { width: 50, x: 10, y: 10, height: 50 }) ;
+    f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
+    f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
+    
+    console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+    console.log('v=%@'.fmt(v.rootElement)) ;
+    
+    SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+  },
+  
+  "changing CSS to change width should not impact innerFrame if viewFrameDidChange is called": function() {
+    var f = this.v.get('frame') ;
+    f.x += CASE3_OFFSET; f.y += CASE3_OFFSET;
+    f.width -= (CASE3_OFFSET*2); f.height -= (CASE3_OFFSET*2) ;
+  
+    this.v.addClassName('half') ;
+    this.v.viewFrameDidChange() ;
+    
+    //console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+    
+    SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+  },
+  
+  "changing CSS to change border width should impact innerFrame if viewFrameDidChange() is called": function() {
+  
+    this.v.get('frame') ;
+    this.v.get('innerFrame'); // make sure the old value is cached.
+    
+    this.v.addClassName('thick-border') ;
+    this.v.viewFrameDidChange() ;
+  
+    // calculate the expected new value
+    var f = this.v.get('frame') ;
+    f.x += CASE3_OFFSET_THICK; f.y += CASE3_OFFSET_THICK;
+    f.width -= (CASE3_OFFSET_THICK*2); f.height -= (CASE3_OFFSET_THICK*2) ;
+  
+    console.log('f: %@ if: %@'.fmt($H(f).inspect(), $H(this.v.get('innerFrame')).inspect()));
+    
+    SC.rectsEqual(f, this.v.get('innerFrame')).shouldEqual(true) ;
+  },
+    
+  setup: function() { this.v = SC.page.get('case3'); }
+  
+});
+
+// CASE 4: Child view inside of view with overflow = hidden
+// NOTE: This test case deals with a specific bug in FireFox.
+Test.context("CASE 4: Positioned Child view inside of view with overflow = hidden", {
+
+  "inner frame origin should be 1,1 & size should match width less border": function() {
+    var f = this.v.child.get('innerFrame') ;
+    f.x.shouldEqual(1) ;
+    f.y.shouldEqual(1) ;
+    f.width.shouldEqual(60) ;
+  },
+  
+  "nested innerframe origin should be 1,1 inside of parent": function() {
+    console.log('running');
+    var f = this.v.child.nestedChild.get('innerFrame') ;
+    f.x.shouldEqual(1) ;
+    f.y.shouldEqual(1) ;
+    console.log('done');
+  },
+  
+  "setting child frame should reflect in new frame value + border offset": function() {
+    this.v.child.set('frame', { x: 10, y: 10 }) ;
+    var f = this.v.child.get('innerFrame') ;
+    f.x.shouldEqual(11) ;
+    f.y.shouldEqual(11) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case4'); }
+  
+}) ;
+
+// CASE 5: Child view inside of view with overflow = hidden
+Test.context("CASE 5: Non-positioned Child view inside of view with overflow = hidden", {
+
+  "inner frame origin should be 1,1 & size should match width less border": function() {
+    var f = this.v.child.get('innerFrame') ;
+    f.x.shouldEqual(1) ;
+    f.y.shouldEqual(1) ;
+  },
+  
+  "nested innerframe origin should be offset from case root.": function() {
+    var f = this.v.child.nestedChild.get('innerFrame') ;
+    f.x.shouldEqual(2) ;
+    f.y.shouldEqual(2) ;
+  },
+  
+  "setting child frame should not move child frame or effect innerFrame": function() {
+    this.v.child.set('frame', { x: 10, y: 10 }) ;
+    var f = this.v.child.get('innerFrame') ;
+    f.x.shouldEqual(1) ;
+    f.y.shouldEqual(1) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case5'); }
+  
+}) ;
+
+Test.context("CASE 6: Relative positioned Child view inside of view with overflow = hidden", {
+
+  "inner frame origin should be 1,1 & size should match width less border": function() {
+    var f = this.v.child.get('innerFrame') ;
+    f.x.shouldEqual(1) ;
+    f.y.shouldEqual(1) ;
+    f.width.shouldEqual(60) ;
+  },
+  
+  "nested innerframe origin should be 1,1 inside of parent": function() {
+    var f = this.v.child.nestedChild.get('innerFrame') ;
+    f.x.shouldEqual(1) ;
+    f.y.shouldEqual(1) ;
+  },
+  
+  "setting child frame should reflect in new frame value + border offset": function() {
+    this.v.child.set('frame', { x: 10, y: 10 }) ;
+    var f = this.v.child.get('innerFrame') ;
+    f.x.shouldEqual(11) ;
+    f.y.shouldEqual(11) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case6'); }
+  
+}) ;
+
+main = function() { SC.page.awake(); };
+
+</script>
+
+<% end %>
+
+<% # Create the views for the various use cases. %>
+<% content_for('page_javascript') do %>
+<script>
+</script>
+<% end %>
+
+<% content_for('body') do %>
+
+<style>
+
+.case { background-color: white; }
+.case .child { border: 1px red solid; }
+
+.base {
+  float: left;
+  width: 200px;
+  height: 100px;
+  border: 1px #aaa solid;
+  position: relative;
+  margin: 2px;
+}
+
+.cases { position: absolute; bottom: 0 ; left: 0; right: 0; border-top: 1px #ccc solid; }
+
+.base label {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+}
+
+.half { width: 50%; }
+
+.case2, .case3 { padding: 10px; border: 2px blue solid; position: absolute; }
+
+.case.thick-border { border: 5px green solid; }
+
+.case4 { 
+  overflow: hidden; 
+  position: relative; 
+  border-left: 5px blue solid; 
+  height: 60px;
+}
+
+.case5 { 
+  overflow: auto; 
+  position: relative; 
+  border-left: 5px blue solid; 
+  height: 60px;
+}
+
+.case4 .child {
+  position: absolute;
+  width: 60px;
+}
+
+.case6 .child {
+  position: relative;
+  width: 60px;
+}
+
+
+.nested_child { border: 1px green solid; }
+
+</style>
+
+<div class="cases">
+<div class="base">
+<label>Case 1</label>
+<% view :case1, :class => 'case' do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 2</label>
+<% view :case2, :class => 'case' do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 3</label>
+<% view :case3, :class => 'case' do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 4</label>
+<% view :case4, :class => 'case' do %>
+  <% view :child, :outlet => true do %>
+    <%= view :nested_child, :outlet => true, :inner_html => 'Nested' %>
+  <% end %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 5</label>
+<% view :case5, :class => 'case' do %>
+  <% view :child, :outlet => true do %>
+    <%= view :nested_child, :outlet => true, :inner_html => 'Nested' %>
+  <% end %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 6</label>
+<% view :case6, :class => 'case' do %>
+  <% view :child, :outlet => true do %>
+    <%= view :nested_child, :outlet => true, :inner_html => 'Nested' %>
+  <% end %>
+<% end %>
+</div>
+
+</div>
+
+<% end %>

@@ -1,0 +1,145 @@
+/* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/core-1207528979.css
+	http://localhost:4020/static/sproutcore/en/_cache/core-1207680408.css
+	http://localhost:4020/static/sproutcore/en/_cache/core-1208585577.css
+*/
+
+/* =============================================
+   Core Styles
+   
+   These styles are required by various views.  You should keep these in your views even if you write your own theme.
+*/
+
+.sc-hide-overflow * {
+  overflow: hidden !important;
+}
+
+/* @group SC.Drag */
+
+.sc-ghost-view {
+  	position: absolute;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	opacity: 0.45;
+	-moz-opacity: .45 ;
+	filter: alpha(opacity=45);
+	z-index: 1000000;
+	cursor: default ;
+}
+
+/* @end */
+
+/* @group SC.ScrollView */
+
+.sc-scroll-view {
+	overflow:  hidden;
+	position: relative;
+}
+
+.sc-scroll-view.sc-scroll-vertical {
+	overflow-y: auto ;
+}
+
+.sc-scroll-view.sc-scroll-horizontal {
+	overflow-x: auto ;
+}
+
+/* Always absolutely position children of a scroll view since the scroll view will lay them out. */
+.sc-scroll-view > * {
+	position: absolute ;
+}
+
+/* @end */
+
+
+/* @group SC.CollectionView */
+
+.sc-collection-view .sc-collection-item {
+	cursor: pointer ;
+	position: absolute ;
+}
+
+/* @end */
+
+/* @group SC.ListItemView */
+
+.sc-list-item-view {
+  overflow: hidden;
+}
+
+.sc-list-item-view .sc-icon {
+	width: 16px;
+	height: 16px;
+	vertical-align: middle ;
+	position: relative ;
+	top:  -1px;
+	margin-right: 5px;
+}
+
+.sc-list-item-view .sc-count {
+	position: absolute  ;
+	right: 3px ;
+	margin-right: 2px;
+}
+
+.sc-list-item-view .sc-branch {
+	position: absolute;
+	display:  block;
+	right: 0;
+	width: 14px;
+	top: 0;
+}
+
+.sc-list-item-view.sc-has-branch .sc-count {
+	right: 14px;
+}
+
+.sc-list-item-view .sc-label {
+  text-overflow: ellipse;
+}
+
+/* @end */
+
+/* @group SC.SourceListView */
+
+.sc-source-list-group .sc-source-list-label.no-disclosure img {
+	display:  none ;
+}
+
+/* @end */
+
+/* @group SC.InlineTextFieldView */
+
+.sc-inline-text-field-view {
+	position: absolute ;
+	z-index: 10000000;
+	padding: 0;
+	margin: 0;
+}
+
+/* sizer needs to be able to resize
+   vertically so that we can compute the
+   new size for the text. */
+.sc-inline-text-field-view .sizer {
+	position: absolute;
+	left:  0;
+	top:  0;
+	width: 100%;
+}
+
+.sc-inline-text-field-view .inner-field {
+	position: absolute ;
+	left: 0;
+	top:  0;
+	width: 100%;
+	height:  100%;
+	border: none ;
+	overflow:  hidden ;
+	resize: none;
+}
+
+/* @end */
+
+
+

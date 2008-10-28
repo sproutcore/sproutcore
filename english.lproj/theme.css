@@ -1,0 +1,502 @@
+/* @override 
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208227908.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208343214.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208497760.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208500445.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208631591.css
+	http://localhost:4020/static/sproutcore/en/_cache/theme-1208633924.css
+*/
+
+/* =========================================
+   SproutCore UI Theme
+   
+   All of the rules in this CSS file will be 
+   applied only if you use the SproutCore theme.
+   =========================================
+*/
+
+/* @group sc-theme */
+
+body.sc-theme {
+	font: 13px/18px Helvetica, Verdana, sans-serif;
+	background-color: #f0f0f0 ;
+	padding: 0px;
+}
+
+.sc-theme h1 {
+	margin: 0;
+	padding: 0 ;
+	margin-bottom: 10px;
+}
+
+.sc-theme label {
+	font-weight: bold ;
+}
+
+/* @end */
+
+/* @group SC.ScrollView */
+
+.sc-theme .sc-scroll-view {
+	border: 1px #aaa solid;
+}
+
+/* @end */
+
+/* @group SC.CollectionView */
+
+.sc-theme .sc-collection-view {
+	text-decoration: none ;
+	color: #000;
+	border-top: 1px white solid;
+}
+
+.sc-theme .sc-collection-view .sc-collection-item {
+	border-top: 1px solid white;
+}
+
+.sc-theme .sc-collection-view .sc-collection-item.sel {
+	background-color: #ddd;
+	border-top: 1px solid #eee;
+}
+
+.sc-theme.focus .sc-collection-view.focus .sc-collection-item.sel {
+	background-color: #40007e;
+	color: white ;
+	border-top: 1px solid #84788f;
+}
+
+/* @end */
+
+/* @group SC.ListView */
+
+.sc-theme .sc-list-view {
+	background-color: white ;
+}
+
+.sc-theme .sc-list-view .sc-collection-item {
+	display: block ;
+	padding: 0 6px;
+	line-height: 22px;
+}
+
+.sc-theme .list-insertion-point {
+	border: 1px #4e4977 solid;
+	position: absolute ;
+	z-index: 1000;
+}
+
+.sc-theme .list-insertion-point .anchor {
+	position: absolute ;
+	width: 7px;
+	height: 7px;
+	left: -6px;
+	top: -4px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
+}
+
+/* @end */
+
+/* @group SC.GridView */
+
+.sc-theme .sc-grid-view {
+	background-color: white ;
+}
+
+.sc-theme .grid-insertion-point {
+	border: 1px #4e4977 solid;
+	position: absolute ;
+	z-index: 1000;
+}
+
+.sc-theme .grid-insertion-point .anchor {
+	position: absolute ;
+	width: 7px;
+	height: 7px;
+	left: -4px;
+	top: -6px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
+}
+
+/* @end */
+
+/* @group SC.SourceListView */
+
+.sc-theme .sc-source-list-view {
+	background-color: #f0f0f0 ;
+	border:  none ;
+	color: #363636;
+}
+
+.sc-theme.focus .sc-source-list-view {
+	background-color: #e6e3ef;
+	color: black ;
+}
+
+.sc-theme .sc-collection-view.sc-source-list-view .sc-collection-item {
+	border-top: 1px solid #f0f0f0;
+	font-size: 12px;
+}
+
+.sc-theme.focus .sc-collection-view.sc-source-list-view .sc-collection-item {
+	border-top: 1px solid #e6e3ef;
+}
+
+.sc-theme .sc-collection-view.sc-source-list-view .sc-collection-item.sel {
+	background-color: #ddd;
+	border-top: 1px solid #eee;
+	font-weight: bold ;
+}
+
+.sc-theme.focus .sc-collection-view.sc-source-list-view .sc-collection-item.sel {
+	background: static_url('images/sc-theme-sprite.png') 0 0px;
+	color: white ;
+	border-top: 1px solid #5a3f62;
+}
+
+.sc-theme .sc-source-list-view .sc-collection-item {
+	padding: 0 4px 0 18px;
+	line-height: 31px;
+}
+
+.sc-theme .sc-source-list-group {
+  position: absolute;
+}
+
+
+.sc-theme .sc-source-list-group .sc-source-list-label {
+	line-height: 32px;
+	padding-left: 1px;
+	text-transform: uppercase;
+	font-size: 11px;
+	font-weight: bold ;
+  text-overflow:hidden;
+}
+
+.sc-theme .sc-collection-view .sc-source-list-group .sc-source-list-label.sel {
+    background-color: transparent;
+    border-top: none ;
+}
+
+.sc-theme.focus .sc-source-list-group .sc-source-list-label,
+.sc-theme.focus .sc-collection-view .sc-source-list-group .sc-source-list-label.sel {
+	color: #241d38;
+}
+
+
+/* @end */
+
+/* @group SC.ListItemView */
+
+.sc-theme .sc-source-list-view .sc-count {
+	height: 18px;
+	display: block;
+	top: 6px;
+	padding-left: 9px;
+	background: no-repeat static_url('images/sc-theme-sprite.png') left -51px;
+}
+
+.sc-theme .sc-source-list-view .sc-count .inner {
+	display: block ;
+	padding-right: 9px;
+	background: no-repeat static_url('images/sc-theme-sprite.png') right -33px;
+	min-width: 10px ;
+	text-align: center ;
+	font-weight: bold ;
+	font-size: 11px;
+	line-height: 19px;
+	vertical-align: middle ;
+	height: 18px;
+	max-height: 18px;
+	color: white;
+}
+
+.sc-theme .sc-source-list-view .sel .sc-count,
+.sc-theme.blur .sc-source-list-view .sc-count {
+	background: no-repeat static_url('images/sc-theme-sprite.png') left -87px;
+}
+
+.sc-theme .sc-source-list-view .sel .sc-count .inner,
+.sc-theme.blur .sc-source-list-view .sc-count .inner {
+	color: #372a3c;
+	background: no-repeat static_url('images/sc-theme-sprite.png') right -69px;
+}
+
+.sc-theme .sc-source-list-view .drop-target {
+  outline: 2px purple solid;
+}
+
+
+/* @end */
+
+/* @group SC.SplitView */
+
+.sc-theme .sc-split-view {
+  overflow: hidden !important;
+}
+
+.sc-theme .sc-split-view.horizontal > .sc-split-divider-view {
+	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
+	border-left: 1px #888 solid;
+	border-right: 1px #888 solid;
+	z-index: 5;
+}
+
+.sc-theme .sc-split-view.vertical > .sc-split-divider-view {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0px -1397px;
+	border-top: 1px #888 solid;
+	border-bottom: 1px #888 solid;
+	z-index: 5;
+}
+
+.sc-theme .sc-split-view.thin > .sc-split-divider-view {
+  border: 0;
+  background: 0;
+  background-color: #888;
+}
+
+/* @end */
+
+/* @group Root Form */
+
+textarea.show-hint, input.show-hint {
+	color: #888;
+}
+
+.radio.vertical,
+.radio.vertical .button.radio {
+	display: block ;	
+}
+
+.radio.horizontal,
+.radio.horizontal .button.radio {
+	display: inline ;
+}
+
+.radio.vertical {
+  text-align: left ;
+}
+
+/* @end */
+
+/* @group sc-theme Form */
+
+.sc-theme .invalid {
+	border: 2px red solid ;
+}
+
+.sc-theme ul.errors {
+	color:  red ;
+	list-style-type: none ;
+	font-size: 11px;
+}
+
+.sc-theme form ul.errors {
+	margin:  0;
+	padding: 0; 
+	color: red ;
+}
+
+.sc-theme input {
+	font-size: 12px; 
+}
+
+/* @end */
+
+/* @group My Group */
+
+
+
+/* @end */
+
+/* @group Typical Workspace */
+
+.sc-theme .sc-app-workspace {
+	position: absolute ;
+	left: 0;
+	right: 0;
+	top:  0;
+	bottom: 0;
+	overflow: auto ;
+}
+
+.sc-theme .sc-app-workspace.header {
+	top:  36px;
+}
+
+.sc-theme .sc-app-workspace.footer {
+	bottom: 36px;
+}
+
+.sc-theme .sc-footer {
+	position: absolute ;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 39px;
+	background:  static_url('images/sc-theme-sprite.png') repeat-x left -1057px;
+	z-index: 10;
+}
+
+.sc-theme .sc-header {
+	position: absolute ;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 39px;
+	background:  static_url('images/sc-theme-sprite.png') repeat-x left -1062px;
+	z-index: 10;
+}
+
+.sc-theme .sc-header > * {
+	height: 23px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	top: 2px;
+}
+
+.sc-theme .sc-footer > * {
+	height: 23px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	bottom: 0;
+}
+
+.sc-theme .sc-footer .left,
+.sc-theme .sc-header .left {	
+	left: 0; 
+	text-align: left ;
+	padding-left: 8px;
+	position: absolute ;
+}
+
+.sc-theme .sc-footer .right,
+.sc-theme .sc-header .right {	
+	right: 0; 
+	text-align: left ;
+	padding-right: 15px;
+	position: absolute ;
+}
+
+.sc-theme .sc-footer .center,
+.sc-theme .sc-header .center {
+	text-align: center ;
+	margin-top: 4px;
+}
+
+.sc-theme .sc-footer .sc-label-view,
+.sc-theme .sc-header .sc-label-view {
+	line-height: 23px;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+/* @end */
+
+/* @group SC.SliderView */
+
+.sc-theme .sc-slider-view {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	cursor: default;
+	display: -moz-inline-box;
+	display: inline-block;
+	height: 18px;
+	vertical-align: middle ;
+	position: relative ;
+	padding-left: 48px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat ;
+}
+
+.sc-theme.blur .sc-slider-view,
+.sc-theme.focus .sc-slider-view.disabled {
+	background-position: left -945px;
+}
+
+.sc-theme.focus .sc-slider-view {
+	background-position: left -897px;
+}
+
+.sc-theme .sc-slider-view .outer {
+	display: block;
+	height: 18px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat ;
+	padding-right: 48px;
+	position: relative ;
+}
+
+.sc-theme.focus .sc-slider-view .outer {
+	background-position: right -929px ;
+}
+
+.sc-theme.blur .sc-slider-view .outer,
+.sc-theme.focus .sc-slider-view.disabled .outer {
+	background-position: right -977px ;
+}
+
+.sc-theme .sc-slider-view .inner {
+	display: block;
+	height: 18px;
+	background: static_url('images/sc-theme-sprite.png') repeat-x ;
+	width: 98px;
+	position: relative ;
+}
+
+.sc-theme.blur .sc-slider-view .inner,
+.sc-theme.focus .sc-slider-view.disabled .inner {
+	background-position: right -961px ;
+}
+
+.sc-theme.focus .sc-slider-view .inner {
+	background-position: right -913px ;
+}
+
+.sc-theme .sc-slider-view .sc-handle {
+	height: 18px;
+	width: 18px;
+	vertical-align: middle ;
+	position: absolute ;
+	margin-left: -9px;
+	left:  50%;
+	top: 0;
+	background: static_url('images/sc-theme-sprite.png') no-repeat
+}
+
+.sc-theme.focus .sc-slider-view .sc-handle {
+	background-position: -24px -825px ;
+}
+
+.sc-theme.blur .sc-slider-view .sc-handle,
+.sc-theme.focus .sc-slider-view.disabled .sc-handle {
+	background-position: -24px -873px
+}
+
+.sc-theme.focus .sc-slider-view.active .sc-handle {
+	background-position: -24px -849px ;
+}
+
+/* @end */
+
+/* @group SC.InlineTextFieldView */
+
+.sc-theme .sc-inline-text-field-view {
+}
+
+.sc-theme .sc-inline-text-field-view .inner-field {
+	border: 1px solid #888;
+	-webkit-box-shadow: #555 0px 1px 5px ;
+	background-color: white ;
+}
+
+.sc-theme .sc-inline-text-field-view .inner-field.invalid {
+	outline: 2px red solid;
+}
+
+/* @end */
+
+
+
+
+
+

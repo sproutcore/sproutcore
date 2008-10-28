@@ -1,0 +1,467 @@
+<% # ========================================================================
+   # SC.View scrollFrame Unit Test
+   #
+   # scrollFrame represents the frame within the view represented by scrollable
+   # content.  If you view is not scrollable, the scrollFrame should always 
+   # be eqaul to innerFrame size with a 0,0 origin.
+   #
+   # ========================================================================
+%>
+<% content_for('final') do %>
+
+<script>
+
+CHILD_HEIGHT = 152 ; // +2 since we have a border
+CHILD_WIDTH = 302; // +2 since we have a border
+
+// CASE 1: non-scrollable view
+Test.context("CASE 1: Non-scrollable view - all view fits within content", {
+
+  "scrollFrame origin should == 0,0; size should == frame.size": function() {
+    var f = this.v.get('frame') ;
+    f.x = f.y = 0 ;
+
+    // console.log('----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should change scrollFrame size": function() {    
+    var f = this.v.get('frame') ;
+    f.x = f.y = 0 ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    this.v.set('frame', { width: 50, height: 50 }) ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(false) ;
+    
+    var f = this.v.get('frame') ;
+    f.x = f.y = 0 ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should notify change on scrollFrame": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    this.v.set('frame', { width: 55 }) ;
+    didNotify.shouldEqual(true) ;
+  },
+
+  setup: function() { this.v = SC.page.get('case1'); }
+  
+});
+
+// CASE 2: Non-scrollable view with hidden overflow content
+Test.context("CASE 2: Non-scrollable view with hidden overflow content", {
+
+  "scrollFrame origin should == 0,0; size should == innerFrame": function() {
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    
+    // console.log('CASE 2 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+
+  "resizing frame should change scrollFrame width but not height": function() {    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    this.v.set('frame', { width: 50, height: 50 }) ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(false) ;
+    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should notify change on scrollFrame": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    this.v.set('frame', { width: 55 }) ;
+    didNotify.shouldEqual(true) ;
+  },
+  
+  "changing the scrollFrame should scroll": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+
+    this.v.set('scrollFrame', { y: -20, x: -20 }) ;
+
+    this.v.get('scrollFrame').y.shouldEqual(-20) ;
+    this.v.get('scrollFrame').x.shouldEqual(0) ;
+    didNotify.shouldEqual(true) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case2'); }
+  
+});
+
+// CASE 3: Scrollable view with hidden overflow content
+Test.context("CASE 3: Scrollable view with hidden overflow content", {
+
+  "scrollFrame origin should == 0,0; size should == innerFrame": function() {
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    
+    // console.log('CASE 3 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+
+  "resizing frame should change scrollFrame width but not height": function() {    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    this.v.set('frame', { width: 50, height: 50 }) ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(false) ;
+    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should notify change on scrollFrame": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    this.v.set('frame', { width: 55 }) ;
+    didNotify.shouldEqual(true) ;
+  },
+
+  "changing the scrollFrame should scroll": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+
+    this.v.set('scrollFrame', { y: -20, x: -20 }) ;
+
+    this.v.get('scrollFrame').y.shouldEqual(-20) ;
+    this.v.get('scrollFrame').x.shouldEqual(0) ;
+    didNotify.shouldEqual(true) ;
+  },
+  
+
+  setup: function() { this.v = SC.page.get('case3'); }
+  
+});
+
+// CASE 4: Scrollable view with scrollbar and vertical overflow content
+Test.context("CASE 4: Scrollable view with scrollbar and vertical overflow content", {
+
+  "scrollFrame origin should == 0,0; size should == innerFrame": function() {
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    
+    // console.log('CASE 4 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+
+  "resizing frame should change scrollFrame width but not height": function() {    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    this.v.set('frame', { width: 50, height: 50 }) ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(false) ;
+    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should notify change on scrollFrame": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    this.v.set('frame', { width: 55 }) ;
+    didNotify.shouldEqual(true) ;
+  },
+
+  "scrolling should trigger notification and change value": function() {
+    var f= this.v.get('scrollFrame') ;
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    
+    // fake a scroll
+    this.v.rootElement.scrollTop = 10 ;
+    this.v._onscroll() ;
+    
+    didNotify.shouldEqual(true) ;
+    SC.rectsEqual(this.v.get('scrollFrame'), f).shouldEqual(false) ;
+    this.v.get('scrollFrame').y.shouldEqual(-10) ;
+  },
+
+  "changing the scrollFrame should scroll": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+
+    this.v.set('scrollFrame', { y: -20, x: -20 }) ;
+
+    this.v.get('scrollFrame').y.shouldEqual(-20) ;
+    this.v.get('scrollFrame').x.shouldEqual(0) ;
+    didNotify.shouldEqual(true) ;
+  },
+  
+  setup: function() { this.v = SC.page.get('case4'); }
+  
+});
+
+Test.context("CASE 5: Scrollable view with scrollbar and horizontal overflow content", {
+
+  "scrollFrame origin should == 0,0; size should == innerFrame.height + child width": function() {
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
+    
+    // console.log('CASE 5 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+
+  "resizing frame should change scrollFrame height but not width": function() {    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    this.v.set('frame', { width: 50, height: 50 }) ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(false) ;
+    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should notify change on scrollFrame": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    this.v.set('frame', { width: 55 }) ;
+    didNotify.shouldEqual(true) ;
+  },
+
+
+  "scrolling should trigger notification and change value": function() {
+    var f= this.v.get('scrollFrame') ;
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    
+    // fake a scroll
+    this.v.rootElement.scrollLeft = 10 ;
+    this.v._onscroll() ;
+    
+    didNotify.shouldEqual(true) ;
+    SC.rectsEqual(this.v.get('scrollFrame'), f).shouldEqual(false) ;
+    this.v.get('scrollFrame').x.shouldEqual(-10) ;
+  },
+
+  "changing the scrollFrame should scroll": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+
+    this.v.set('scrollFrame', { y: -20, x: -20 }) ;
+
+    this.v.get('scrollFrame').x.shouldEqual(-20) ;
+    this.v.get('scrollFrame').y.shouldEqual(0) ;
+    didNotify.shouldEqual(true) ;
+  },
+  
+
+  setup: function() { this.v = SC.page.get('case5'); }
+  
+});
+
+Test.context("CASE 6: Scrollable view with scrollbar and horizontal overflow content", {
+
+  "scrollFrame origin should == 0,0; size should == fix height of child": function() {
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
+    f.height = CHILD_HEIGHT ;
+    
+    // console.log('CASE 6 ----') ;
+    // console.log('f:' + $H(f).inspect()) ;
+    // console.log('scroll:' + $H(this.v.get('scrollFrame')).inspect()) ;
+    // console.log('innerFrame:' + $H(this.v.get('innerFrame')).inspect()) ;
+    // console.log('frame:' + $H(this.v.get('frame')).inspect()) ;
+    
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+
+  "resizing frame should change not change scrollFrame": function() {    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
+    f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    this.v.set('frame', { width: 50, height: 50 }) ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+    
+    var f = this.v.get('innerFrame') ;
+    f.x = f.y = 0 ; f.width = CHILD_WIDTH ;
+    f.height = CHILD_HEIGHT ;
+    SC.rectsEqual(f, this.v.get('scrollFrame')).shouldEqual(true) ;
+  },
+  
+  "resizing frame should notify change on scrollFrame": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    this.v.set('frame', { width: 55 }) ;
+    didNotify.shouldEqual(true) ;
+  },
+
+  "scrolling should trigger notification and change value": function() {
+    var f= this.v.get('scrollFrame') ;
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+    
+    // fake a scroll
+    this.v.rootElement.scrollTop = 10 ;
+    this.v.rootElement.scrollLeft = 10 ;
+    this.v._onscroll() ;
+    
+    didNotify.shouldEqual(true) ;
+    SC.rectsEqual(this.v.get('scrollFrame'), f).shouldEqual(false) ;
+    this.v.get('scrollFrame').y.shouldEqual(-10) ;
+    this.v.get('scrollFrame').x.shouldEqual(-10) ;
+  },
+
+
+  "changing the scrollFrame should scroll": function() {
+    var didNotify = false ;
+    this.v.addObserver('scrollFrame', function() { didNotify = true; }) ;
+
+    this.v.set('scrollFrame', { y: -20, x: -20 }) ;
+
+    this.v.get('scrollFrame').y.shouldEqual(-20) ;
+    this.v.get('scrollFrame').x.shouldEqual(-20) ;
+    didNotify.shouldEqual(true) ;
+  },
+  
+
+  setup: function() { this.v = SC.page.get('case6'); }
+  
+});
+
+main = function() { SC.page.awake(); };
+
+</script>
+
+<% end %>
+
+<% content_for('body') do %>
+
+<style>
+
+.case { 
+  background-color: white; 
+  position: absolute; 
+  width: 190px; 
+  height: 90px; 
+  border: 1px blue solid;
+}
+
+.case .child { border: 1px red solid;  }
+
+.base {
+  float: left;
+  width: 200px;
+  height: 100px;
+  border: 1px #aaa solid;
+  position: relative;
+  margin: 2px;
+}
+
+.cases { 
+  position: absolute; 
+  bottom: 0 ; 
+  left: 0; 
+  right: 0; 
+  border-top: 1px #ccc solid; 
+  background-color: #f0f0f0; 
+}
+
+.base label {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+}
+
+.case2, .case3 { overflow: hidden; }
+.case4, .case5, .case6 { overflow: auto; }
+
+.case2 .child,
+.case3 .child,
+.case4 .child,
+.case6 .child {
+  height: 150px;
+}
+
+.case5 .child,
+.case6 .child {
+  width: 300px;
+}
+
+</style>
+
+<div class="cases">
+<div class="base">
+<label>Case 1</label>
+<% view :case1, :class => 'case' do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 2</label>
+<% view :case2, :class => 'case' do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 3</label>
+<% view :case3, :class => 'case', :properties => { :is_scrollable => true } do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 4</label>
+<% view :case4, :class => 'case', :properties => { :is_scrollable => true } do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 5</label>
+<% view :case5, :class => 'case', :properties => { :is_scrollable => true } do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+<div class="base">
+  <label>Case 6</label>
+<% view :case6, :class => 'case', :properties => { :is_scrollable => true } do %>
+  <%= view :child, :outlet => true, :inner_html => 'Child' %>
+<% end %>
+</div>
+
+</div>
+
+<% end %>

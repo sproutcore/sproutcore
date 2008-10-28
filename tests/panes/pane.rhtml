@@ -1,0 +1,88 @@
+<% content_for('final') do %>
+<script>
+
+Test.context("A new SC.PaneView instance", {
+
+  "Should identify itself as a SC.Pane": function()
+  {
+    this.pane.get('isPane').shouldEqual(true);
+  },
+  "Should not have a pane of it's own": function()
+  {
+    (this.pane.get('pane') === null).shouldEqual(true);
+  },
+
+  "Should not be keyPane or mainPane": function()
+  {
+    this.pane.get('isKeyPane').shouldEqual(false);
+    this.pane.get('isMainPane').shouldEqual(false);
+  },
+  "Should allow itself to be keyPane or mainPane": function()
+  {
+    this.pane.get('canBecomeKeyPane').shouldEqual(true);
+    this.pane.get('canBecomeMainPane').shouldEqual(true);
+  },
+  "Should run callback methods when changing keyPane or mainPane status": function()
+  {
+    var otherPane = SC.PaneView.viewFor(null);
+
+    this.pane._didBecomeKeyPaneCalled   = 0;
+    this.pane._willResignKeyPaneCalled  = 0;
+    this.pane._didBecomeMainPaneCalled  = 0;
+    this.pane._willResignMainPaneCalled = 0;
+    
+    this.pane.didBecomeKeyPane   = function() { this._didBecomeKeyPaneCalled++;   };
+    this.pane.willResignKeyPane  = function() { this._willResignKeyPaneCalled++;  };
+    this.pane.didBecomeMainPane  = function() { this._didBecomeMainPaneCalled++;  };
+    this.pane.willResignMainPane = function() { this._willResignMainPaneCalled++; };
+
+    // making keyPane
+    this.pane._didBecomeKeyPaneCalled.shouldEqual(0);
+    this.pane.makeKeyPane();
+    this.pane._didBecomeKeyPaneCalled.shouldEqual(1);
+    this.pane.makeKeyPane();
+    this.pane._didBecomeKeyPaneCalled.shouldEqual(1);
+    // resigning keyPane
+    this.pane._willResignKeyPaneCalled.shouldEqual(0);
+    otherPane.makeKeyPane();
+    this.pane._willResignKeyPaneCalled.shouldEqual(1);
+    // making mainPane
+    this.pane._didBecomeMainPaneCalled.shouldEqual(0);
+    this.pane.makeMainPane();
+    this.pane._didBecomeMainPaneCalled.shouldEqual(1);
+    this.pane.makeMainPane();
+    this.pane._didBecomeMainPaneCalled.shouldEqual(1);
+    // resigning mainPane
+    this.pane._willResignMainPaneCalled.shouldEqual(0);
+    otherPane.makeMainPane();
+    this.pane._willResignMainPaneCalled.shouldEqual(1);
+  },
+
+  "Should have a null firstResponder": function()
+  {
+    (this.pane.get('firstResponder') === null).shouldEqual(true);
+  },
+  "Should have a null defaultResponder": function()
+  {
+    (this.pane.get('defaultResponder') === null).shouldEqual(true);
+  },
+  "Should flag a view as 'isFirstResponder' when setting the firstResponder property": function()
+  {
+    var view = SC.View.create();
+    view.get('isFirstResponder').shouldEqual(false);
+    this.pane.set('firstResponder', view);
+    view.get('isFirstResponder').shouldEqual(true);
+  },
+  
+  setup: function()
+  {
+    this.pane = SC.PaneView.viewFor(null);
+  },
+  teardown: function()
+  {
+    delete this.pane;
+  }
+});
+
+</script>
+<% end %>

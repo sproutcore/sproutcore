@@ -1,0 +1,44 @@
+// NOTE: This file is named with a .javascript extension to avoid having this
+// file combined into the joined javascript.js file for this framework.
+
+// This bootstrap file can be included at the top of your index.html to detect
+// the browser, language, and platform.  You can then call 
+// SC.setupBrowserClassNames() in a script tag after the body is defined to 
+// load the class names into the body.
+var SC = SC || {} ;
+SC.browser = (function() {
+
+  var userAgent = navigator.userAgent.toLowerCase();
+  var version = (userAgent.match( /.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [])[1] ;
+
+  var browser = {
+    version: version,
+    webkit: (/webkit/).test( userAgent ) ? version : 0,
+    opera: (/opera/).test( userAgent ) ? version : 0,
+    msie: (/msie/).test( userAgent ) && !(/opera/).test( userAgent ) ? version : 0,
+    mozilla: (/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent ) ? version : 0,
+    mobileSafari: (/apple.*mobile.*safari/).test(userAgent) ? version : 0,
+    windows: !!(/(windows)/).test(userAgent),
+    mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent))
+  };
+
+  return browser ;
+
+})();
+
+SC.setupBodyClassNames = function() {
+  var el = document.body ;
+  if (!el) return ;
+  
+  // Add class name for the current browser, platform, and language
+  var browser = (SC.browser.webkit) ? 'webkit' : (SC.browser.opera) ? 'opera' : (SC.browser.mozilla) ? 'mozilla' : (SC.browser.msie) ? 'msie' : 'unknown-browser' ;
+  var platform = (SC.browser.windows) ? 'windows' : (SC.browser.mac) ? 'mac' : 'other-platform' ;
+  
+  var classNames = (el.className) ? el.className.split(' ') : [] ;
+  classNames.push(browser) ;
+  classNames.push(platform) ;
+  if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
+  el.className = classNames.join(' ') ;
+} ;
+
+

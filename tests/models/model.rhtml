@@ -1,0 +1,373 @@
+<% # ========================================================================
+   # Model Unit Test
+   # ========================================================================
+%>
+<% content_for('final') do %>
+
+<script>
+
+//
+//  core.js stub
+//
+ModelTest = SC.Object.create({
+
+  server: SC.Server.create({ prefix: ['ModelTest'] }),
+
+  FIXTURES: []
+  
+}) ;
+
+//
+//  fixtures stub
+//
+ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
+  
+  { guid: '1', 
+    type: 'Todo', 
+    name: "Something to do",
+    todoList: '1' // the guid of the todo list object this todo is related to
+  },
+
+  { guid: '2', 
+    type: 'Todo', 
+    name: "Something else to do",
+    todoList: '1'
+  },
+
+  { guid: '3', 
+    type: 'Todo', 
+    name: "Gee, I'm busy.",
+    todoList: '2'
+  }
+
+]);
+
+ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
+  
+  { guid: '1',
+    type: 'TodoList', 
+    name: "My List"
+  },
+
+  { guid: '2',
+    type: 'TodoList', 
+    name: "My List 2"
+  }
+  
+]);
+
+//
+// model classes
+//
+ModelTest.Todo = SC.Record.extend({
+  
+  todoListType: 'ModelTest.TodoList'
+  
+}) ;
+
+ModelTest.TodoList = SC.Record.extend({
+  
+  todos: SC.Record.hasMany('ModelTest.Todo', 'todoList')
+  
+}) ;
+
+//
+// main.js stub
+//
+ModelTest.server.preload(ModelTest.FIXTURES) ;
+
+Test.context("Test model comparisons with numeric guids", {
+  
+  setup: function()
+  {
+    this.todoList1 = ModelTest.TodoList.find('1');
+    this.todoList2 = ModelTest.TodoList.find('2');
+    this.todo1 = ModelTest.Todo.find('1');
+    this.todo2 = ModelTest.Todo.find('2');
+    this.todo3 = ModelTest.Todo.find('3');
+  },
+  
+  teardown: function()
+  {
+    delete this.todoList1;
+    delete this.todoList2;
+    delete this.todo1;
+    delete this.todo2;
+    delete this.todo3;
+  },
+
+  "Records should exist in Store": function()
+  {
+    assertNotNull(this.todoList1);
+    assertNotNull(this.todoList2);
+    assertNotNull(this.todo1);
+    assertNotNull(this.todo2);
+    assertNotNull(this.todo3);
+  },
+  
+  "Records should have correct guid": function()
+  {
+    assertEqual(1, this.todoList1.get('guid'));
+    assertEqual(2, this.todoList2.get('guid'));
+    assertEqual(1, this.todo1.get('guid'));
+    assertEqual(2, this.todo2.get('guid'));
+    assertEqual(3, this.todo3.get('guid'));
+  },
+  
+  "Todo 1 and 2 should be related to TodoList 1": function()
+  {
+    assertIdentical(this.todoList1, this.todo1.get('todoList'));
+    assertIdentical(this.todoList1, this.todo2.get('todoList'));
+  },
+
+  "Todo 3 should not be related to TodoList 1": function()
+  {
+    assertNotIdentical(this.todoList1, this.todo3.get('todoList'));
+  },
+
+  "Todo 3 should be related to TodoList 2": function()
+  {
+    assertIdentical(this.todoList2, this.todo3.get('todoList'));
+  },
+
+  "Todo 1 and 2 should not be related to TodoList 2": function()
+  {
+    assertNotIdentical(this.todoList2, this.todo1.get('todoList'));
+    assertNotIdentical(this.todoList2, this.todo2.get('todoList'));
+  },
+  
+  "TodoList 1 should be related to Todo 1 and 2": function()
+  {
+    var records = this.todoList1.get('todos').get('records');
+    var todosWeWanted = SC.Set.create([this.todo1, this.todo2]);
+    var todosWeGot = SC.Set.create();
+    var loc = records.length;
+    
+    while(--loc >= 0) {
+      var obj = records[loc];
+      
+      assert( todosWeGot.add(obj), "should be no duplicates" );
+      assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
+    }
+  },
+
+  "TodoList 2 should be related to Todo 3": function()
+  {
+    var records = this.todoList2.get('todos').get('records');
+    var todosWeWanted = SC.Set.create([this.todo3]);
+    var todosWeGot = SC.Set.create();
+    var loc = records.length;
+    
+    while(--loc >= 0) {
+      var obj = records[loc];
+      
+      assert( todosWeGot.add(obj), "should be no duplicates" );
+      assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
+    }
+  },
+
+  "Todos should be collectable using guids": function()
+  {
+    var c = SC.Collection.create({ recordType: ModelTest.Todo, conditions: { todoList: 1 } });
+    c.refresh();
+    var records = c.records();
+    var todosWeWanted = SC.Set.create([this.todo1, this.todo2]);
+    var todosWeGot = SC.Set.create();
+    var loc = records.length;
+    
+    while(--loc >= 0) {
+      var obj = records[loc];
+      
+      assert( todosWeGot.add(obj), "should be no duplicates" );
+      assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
+    }
+  },
+
+  "toString() should show model class name": function()
+  {
+    var re = /^ModelTest.Todo/;
+    var str = this.todo1.toString();
+    assert( str.match(re), "Todo 1 toString() should start with ModelTest.Todo, actually starts with " + str);
+  }
+
+});
+
+</script>
+
+<script>
+
+//
+//  core.js stub
+//
+ModelTest2 = SC.Object.create({
+
+  server: SC.Server.create({ prefix: ['ModelTest2'] }),
+
+  FIXTURES: []
+  
+}) ;
+
+//
+//  fixtures stub
+//
+ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
+  
+  { guid: '1', 
+    type: 'Todo', 
+    name: "Something to do",
+    todoList: '1' // the guid of the todo list object this todo is related to
+  },
+
+  { guid: '2', 
+    type: 'Todo', 
+    name: "Something else to do",
+    todoList: '1'
+  },
+
+  { guid: '3', 
+    type: 'Todo', 
+    name: "Gee, I'm busy.",
+    todoList: '2'
+  }
+
+]);
+
+ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
+  
+  { guid: '1',
+    type: 'TodoList', 
+    name: "My List"
+  },
+
+  { guid: '2',
+    type: 'TodoList', 
+    name: "My List 2"
+  }
+  
+]);
+
+//
+// model classes
+//
+ModelTest2.Todo = SC.Record.extend({
+  
+  todoListType: 'ModelTest2.TodoList'
+  
+}) ;
+
+ModelTest2.TodoList = SC.Record.extend({
+  
+  todos: SC.Record.hasMany('ModelTest2.Todo', 'todoList')
+  
+}) ;
+
+//
+// main.js stub
+//
+ModelTest2.server.preload(ModelTest2.FIXTURES) ;
+
+Test.context("Test model comparisons with string guids", {
+  
+  setup: function()
+  {
+    this.todoList1 = ModelTest2.TodoList.find('1');
+    this.todoList2 = ModelTest2.TodoList.find('2');
+    this.todo1 = ModelTest2.Todo.find('1');
+    this.todo2 = ModelTest2.Todo.find('2');
+    this.todo3 = ModelTest2.Todo.find('3');
+  },
+  
+  teardown: function()
+  {
+    delete this.todoList1;
+    delete this.todoList2;
+    delete this.todo1;
+    delete this.todo2;
+  },
+
+  "Objects should exist in Store": function()
+  {
+    assertNotNull(this.todoList1);
+    assertNotNull(this.todoList2);
+    assertNotNull(this.todo1);
+    assertNotNull(this.todo2);
+    assertNotNull(this.todo3);
+  },
+  
+  "Todo 1 and 2 should be related to TodoList 1": function()
+  {
+    assertIdentical(this.todoList1, this.todo1.get('todoList'));
+    assertIdentical(this.todoList1, this.todo2.get('todoList'));
+  },
+  
+  "Todo 3 should not be related to TodoList 1": function()
+  {
+    assertNotIdentical(this.todoList1, this.todo3.get('todoList'));
+  },
+  
+  "Todo 3 should be related to TodoList 2": function()
+  {
+    assertIdentical(this.todoList2, this.todo3.get('todoList'));
+  },
+  
+  "Todo 1 and 2 should not be related to TodoList 2": function()
+  {
+    assertNotIdentical(this.todoList2, this.todo1.get('todoList'));
+    assertNotIdentical(this.todoList2, this.todo2.get('todoList'));
+  },
+  
+  "TodoList 1 should be related to Todo 1 and 2": function()
+  {
+    var records = this.todoList1.get('todos').get('records');
+    var todosWeWanted = SC.Set.create([this.todo1, this.todo2]);
+    var todosWeGot = SC.Set.create();
+    var loc = records.length;
+    
+    // assert( todosWeWanted.contains(this.todo1), "verify SC.Set works properly" );
+    // assert( todosWeWanted.contains(this.todo2), "verify SC.Set works properly" );
+    
+    while(--loc >= 0) {
+      var obj = records[loc];
+      
+      assert( todosWeGot.add(obj), "should be no duplicates" );
+      assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
+    }
+  },
+
+  "TodoList 2 should be related to Todo 3": function()
+  {
+    var records = this.todoList2.get('todos').get('records');
+    var todosWeWanted = SC.Set.create([this.todo3]);
+    var todosWeGot = SC.Set.create();
+    var loc = records.length;
+    
+    while(--loc >= 0) {
+      var obj = records[loc];
+      
+      assert( todosWeGot.add(obj), "should be no duplicates" );
+      assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
+    }
+  },
+
+  "Todos should be collectable using guids": function()
+  {
+    var c = SC.Collection.create({ recordType: ModelTest2.Todo, conditions: { todoList: '1' } });
+    c.refresh();
+    var records = c.records();
+    var todosWeWanted = SC.Set.create([this.todo1, this.todo2]);
+    var todosWeGot = SC.Set.create();
+    var loc = records.length;
+
+    while(--loc >= 0) {
+      var obj = records[loc];
+
+      assert( todosWeGot.add(obj), "should be no duplicates" );
+      assert( todosWeWanted.contains(obj), "should be in set of objects we're expecting to get" ); 
+    }
+  }
+
+});
+
+</script>
+
+<% end %>
