@@ -5,7 +5,7 @@
 
 require('views/view') ;
 require('views/label') ;
-require('mixins/collection_view_delegate') ;
+require('foundation/mixins/collection_view_delegate') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
@@ -408,6 +408,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
 
       var range = this.get('nowShowingRange') ;
+      if (!range) return [] ; 
       var content = this.get('content') || [] ;
       this._itemViews = [] ;
       for(var idx=0;idx<range.length;idx++) {
@@ -1591,8 +1592,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (!content) return NO;  // nothing to do
     
     // determine the method to use
-    var hasDestroyObject = $type(content.destroyObject) === T_FUNCTION ;
-    var hasRemoveObject = $type(content.removeObject) === T_FUNCTION ;
+    var hasDestroyObject = SC.$type(content.destroyObject) === SC.T_FUNCTION ;
+    var hasRemoveObject = SC.$type(content.removeObject) === SC.T_FUNCTION ;
     if (!hasDestroyObject && !hasRemoveObject) return NO; // nothing to do
     
     // suspend property notifications and remove the objects...
@@ -2239,7 +2240,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // get the computed insertion index and possibly drop operation.
     // prefer to drop ON.
     var idx = this.insertionIndexForLocation(loc, SC.DROP_ON) ;
-    if ($type(idx) === T_ARRAY) {
+    if (SC.$type(idx) === SC.T_ARRAY) {
       dropOp = idx[1] ;
       idx = idx[0] ;
     }
@@ -2269,7 +2270,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       } else {
         dropOp = SC.DROP_BEFORE ;
         idx = this.insertionIndexForLocation(loc, SC.DROP_BEFORE) ;
-        if ($type(idx) === T_ARRAY) {
+        if (SC.$type(idx) === SC.T_ARRAY) {
           dropOp = idx[1] ;
           idx = idx[0] ;
         }
@@ -2691,7 +2692,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var target = this.get('target') || null;
     if (action) {
       // if the action is a function, just call it
-      if ($type(action) == T_FUNCTION) return this.action(view, evt) ;
+      if (SC.$type(action) == SC.T_FUNCTION) return this.action(view, evt) ;
       
       // otherwise, use the new sendAction style
       SC.app.sendAction(action, target, this) ;
@@ -2703,11 +2704,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
     // if the target view has its own internal action handler,
     // trigger that.
-    } else if ($type(view._action) == T_FUNCTION) {
+    } else if (SC.$type(view._action) == SC.T_FUNCTION) {
       return view._action(evt) ;
       
     // otherwise call the action method to support older styles.
-    } else if ($type(view.action) == T_FUNCTION) {
+    } else if (SC.$type(view.action) == SC.T_FUNCTION) {
       return view.action(evt) ;
     }
   },
@@ -2726,23 +2727,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Whenever content changes, update children and also start observing
     new [] property.
   */
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (SC.isEqual(content, this._content)) return ; // nothing to do
 
-    if (!this._boundContentPropertyObserver) {
-      this._boundContentPropertyObserver = this._contentPropertyObserver.bind(this) ;
-    }
-    var func = this._boundContentPropertyObserver ;
+    var func = this._contentPropertyDidChange ;
 
     // remove old observer, add new observer, and trigger content property change
-    if (this._content) this._content.removeObserver('[]', func) ;
-    if (content) content.addObserver('[]', func) ;
+    if (this._content) this._content.removeObserver('[]', this, func) ;
+    if (content) content.addObserver('[]', this, func) ;
     this._content = content; //cache
     this._contentPropertyRevision = null ;
     
     var rev = (content) ? content.propertyRevision : -1 ;
-    this._contentPropertyObserver(this, '[]', content, rev) ; 
+    this._contentPropertyDidChange(this, '[]', content, rev) ; 
   }.observes('content'),
   
   /** @private
@@ -2752,17 +2750,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var sel = this.get('selection') ;
     if (SC.isEqual(sel, this._selection)) return ; // nothing to do
 
-    if (!this._boundSelectionPropertyObserver) {
-      this._boundSelectionPropertyObserver = this._selectionPropertyObserver.bind(this) ;
-    }
-    var func = this._boundSelectionPropertyObserver ;
+    var func = this._selectionPropertyDidChange ;
     
-    if (this._selection) this._selection.removeObserver('[]', func) ;
-    if (sel) sel.addObserver('[]', func) ;
+    if (this._selection) this._selection.removeObserver('[]', this, func) ;
+    if (sel) sel.addObserver('[]', this, func) ;
     this._selection = sel ;
     this._selectionPropertyRevision = null ;
     var propertyRevision = (sel) ? sel.propertyRevision : null;
-    this._selectionPropertyObserver(this, '[]', sel, propertyRevision) ;
+    this._selectionPropertyDidChange(this, '[]', sel, propertyRevision) ;
   }.observes('selection'),
   
   // called on content change *and* content.[] change...
@@ -2773,7 +2768,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // -- update layout on all item views.
   // -- optional: determine the first item view that does not match.
   //
-  _contentPropertyObserver: function(target, key, value, rev) {    
+  _contentPropertyDidChange: function(target, key, value, rev) {    
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
       this._updatingContent = true ;
@@ -2785,7 +2780,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   // called on selection change and selection.[] change...
   // update selection states if this is a new propertyRevision
-  _selectionPropertyObserver: function(target, key, value, rev) {
+  _selectionPropertyDidChange: function(target, key, value, rev) {
     if (!this._updatingSel && (!rev || (rev != this._selectionPropertyRevision))) {
       this._selectionPropertyRevision = rev ;
       this._updatingSel = true ;

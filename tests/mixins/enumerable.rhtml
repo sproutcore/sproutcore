@@ -138,7 +138,7 @@ var EnumerableTests = {
     }, this);
     assertEqual(result, NO) ;
   },
-
+  
   "should return false if all functions for some() returns false": function() {
     var idx = 0;
     
@@ -174,7 +174,7 @@ var EnumerableTests = {
     }, this);
     assertEqual(result, YES) ;
   },
-
+  
     
   "should mapProperty for all items": function() {
     var mapped = src.mapProperty("first") ;
@@ -190,41 +190,41 @@ var EnumerableTests = {
     filtered.length.shouldEqual(1) ;
     filtered[0].first.shouldEqual("Jenna") ;
   },
-
+  
   "should filterProperty with default bool": function() {
     var filtered = src.filterProperty("californian") ;
     filtered.length.shouldEqual(1) ;
     filtered[0].first.shouldEqual("Jenna") ;
   },
-
-
+  
+  
   
   "everyProperty should return true if all properties macth": function() {
     var ret = src.everyProperty('visited', 'Prague') ;
     assertEqual(YES, ret, "visited") ;
   },
-
+  
   "everyProperty should return true if all properties true": function() {
     var ret = src.everyProperty('ready') ;
     assertEqual(YES, ret, "ready") ;
   },
-
+  
   "everyProperty should return false if any properties false": function() {
     var ret = src.everyProperty('gender', 'male') ;
     assertEqual(NO, ret, "ready") ;
   },
   
-
+  
   "someProperty should return false if all properties not match": function() {
     var ret = src.someProperty('visited', 'Timbuktu') ;
     assertEqual(NO, ret, "visited") ;
   },
-
+  
   "someProperty should return false if all properties false": function() {
     var ret = src.someProperty('doneTravelling') ;
     assertEqual(NO, ret, "doneTravelling") ;
   },
-
+  
   "someProperty should return true if any properties true": function() {
     var ret = src.someProperty('first', 'Charles') ;
     assertEqual(YES, ret, "first") ;
@@ -265,8 +265,9 @@ var EnumerableTests = {
     assertEqual("TEST", src.get("@test")) ;
     assertEqual("prop", src.get("@test(prop)")) ;
   },
+  
   "should trigger observer of reduced prop when array changes once property retrieved once": function() {
-
+  
     // get the property...this will install the reducer property...
     src.get("@max(balance)") ;
     
@@ -293,7 +294,7 @@ var EnumerableTests = {
     
     // observed value should now be set because the reduced property observer
     // was triggered when we changed the array contents.
-    assertEqual(5, observedValue) ;
+    assertEqual(5, observedValue, "observedValue") ;
   },
   
   "should trigger observer of reduced prop when array changes - even if you never retrieved the property before": function() {
@@ -317,7 +318,7 @@ var EnumerableTests = {
     
     // observed value should now be set because the reduced property observer
     // was triggered when we changed the array contents.
-    assertEqual(5, observedValue) ;
+    assertEqual(5, observedValue, "observedValue") ;
   }
   
 }; 
@@ -399,23 +400,81 @@ var CommonArray = [
     balance: 4
   } ] ;
 
-Test.context("Real Array", SC.mixin(EnumerableTests, {
+Test.context("Real Array", SC.mixin({
   
-  setup: function() { src = CommonArray.clone(); },
+  setup: function() { 
+    src = CommonArray.clone(); 
+  },
   
-  teardown: function() { src = null ; }
+  teardown: function() { 
+    delete src ; 
+    
+    delete Array.prototype["@max(balance)"] ; // remove cached value
+    delete Array.prototype["@min(balance)"] ;
+  },
 
-}));
+  /*
+    This is a particular problem because reduced properties are registered
+    as dependent keys, which are not automatically configured in native 
+    Arrays (where the SC.Object.init method is not run).  
+  
+    The fix for this problem was to add an initObservable() method to 
+    SC.Observable that will configure bindings and dependent keys.  This
+    method is called from SC.Object.init() and it is called in
+    SC.Observable._notifyPropertyChanges if it has not been called already.
+  
+    SC.Enumerable was in turn modified to register reducers as dependent 
+    keys so that now they will be registered on the Array before any 
+    property change notifications are sent.
+  */
+  "should notify observers even if reduced property is cached on prototype": function() {
+    
+    // make sure reduced property is cached
+    src.get("@max(balance)") ;
+    
+    // now make a clone and observe
+    src = CommonArray.clone() ;
+    
+    // get the property...this will install the reducer property...
+    src.get("@max(balance)") ;
+    
+    // install observer
+    var observedValue = null ;
+    src.addObserver("@max(balance)", function() { 
+      observedValue = src.get("@max(balance)");
+    }) ;
+    
+    src.addProbe('[]') ;
+    src.addProbe('@max(balance)');
+    
+    // add record to array
+    src.pushObject({ 
+      first: "John", 
+      gender: "male", 
+      californian: NO, 
+      ready: YES, 
+      visited: "Paris", 
+      balance: 5
+    }) ;
+    
+    //SC.NotificationQueue.flush() ; // force observers to trigger
+    
+    // observed value should now be set because the reduced property observer
+    // was triggered when we changed the array contents.
+    assertEqual(5, observedValue, "observedValue") ;
+  }
 
-Test.context("DummyEnumerable", SC.mixin(EnumerableTests, {
+}, EnumerableTests));
+
+Test.context("DummyEnumerable", SC.mixin({
   
   setup: function() { 
     src = DummyEnumerable.create({ content: CommonArray }) ;
   },
   
-  teardown: function() { src = null ; }
+  teardown: function() { delete src ; }
 
-}));
+}, EnumerableTests));
 
 </script>
 <% end %>

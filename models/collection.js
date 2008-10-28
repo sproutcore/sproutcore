@@ -257,9 +257,9 @@ SC.Collection = SC.Object.extend(
   // This method simply indicates that the records property has changed and saved
   // the record for later processing.
   recordDidChange: function(rec) {
-    if (!rec && !rec._guid) return ; // probably an error, but recover anyway.
+    if (!rec && !SC.guidFor(rec)) return ; // probably an error, but recover anyway.
     if (!this._changedRecords) this._changedRecords = {} ;
-    this._changedRecords[rec._guid] = rec ;
+    this._changedRecords[SC.guidFor(rec)] = rec ;
     this.propertyWillChange('records') ;
     this.propertyDidChange('records') ;
     this.propertyWillChange('count') ;
@@ -299,7 +299,7 @@ SC.Collection = SC.Object.extend(
       // is this record one of the changed?
       // if so, then the record may need to be removed from its current position if it is deleted,
       // no longer belongs to the group, or is out of order.
-      if (changed[working._guid]) {
+      if (changed[SC.guidFor(working)]) {
 
         var belongs = (!working.get('isDeleted')) && working.matchConditions(conditions) ;
         if (belongs) {

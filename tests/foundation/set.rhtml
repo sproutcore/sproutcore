@@ -143,6 +143,20 @@ Test.context("SC.Set.add + SC.Set.contains", {
     set.add(undefined) ;
     assertEqual(set.length, 0) ;
     assertEqual(set.contains(undefined), NO) ;
+  },
+  
+  "adding an item, removing it, adding another item": function() {
+    var item1 = "item1" ;
+    var item2 = "item2" ;
+  
+    set.add(item1) ; // add to set
+    set.remove(item1) ; //remove from set
+    set.add(item2) ;
+    
+    assertEqual(NO, set.contains(item1), "set.contains(item1)") ;
+    
+    set.add(item1) ; // re-add to set
+    assertEqual(2, set.length, "set.length");
   }
   
 });

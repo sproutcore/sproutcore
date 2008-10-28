@@ -4,9 +4,9 @@
 // ========================================================================
 
 require('controllers/controller') ;
-require('mixins/array') ;
-require('mixins/selection_support') ;
-require('foundation/binding') ;
+require('foundation/mixins/array') ;
+require('foundation/mixins/selection_support') ;
+require('foundation/system/binding') ;
 
 /** @class
 
@@ -128,14 +128,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     // compute the objectType
     if (!objectType) objectType = this.get('exampleContentObject') ;
-    if ($type(objectType) === T_STRING) {
-      objectType = SC.Object.objectForPropertyPath(objectType) ;
+    if (SC.$type(objectType) === SC.T_STRING) {
+      objectType = SC.objectForPropertyPath(objectType) ;
     }
     if (objectType == null) {
       throw "Invalid object type was provided" ;
     }
     
-    if ($type(objectType.newObject) !== T_FUNCTION) {
+    if (SC.$type(objectType.newObject) !== SC.T_FUNCTION) {
       throw "content object type does not support newRecord()" ;
     }
     
@@ -157,26 +157,29 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @private
     @observes content
   */
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (SC.isEqual(content, this._content)) return ; // nothing to do
 
-    if (!this._boundContentPropertyObserver) {
-      this._boundContentPropertyObserver = this._contentPropertyObserver.bind(this) ;
-    }
-    var func = this._boundContentPropertyObserver ;
+    var func = this._contentPropertyDidChange ;
 
     // remove old observer, add new observer, and trigger content property change
-    if (this._content && this._content.removeObserver) this._content.removeObserver('[]', func) ;
-    if (content && content.addObserver) content.addObserver('[]', func) ;
+    if (this._content && this._content.removeObserver) {
+      this._content.removeObserver('[]', this, func) ;
+    } 
+    
+    if (content && content.addObserver) {
+      content.addObserver('[]', this, func) ;
+    }
+    
     this._content = content; //cache
     this._contentPropertyRevision = null ;
     
     var rev = (content) ? content.propertyRevision : -1 ;
-    this._contentPropertyObserver(this, '[]', content, rev) ; 
+    this._contentPropertyDidChange(content, '[]', content, rev) ; 
   }.observes('content'),
 
-  _contentPropertyObserver: function(target, key, value, rev) {  
+  _contentPropertyDidChange: function(target, key, value, rev) {  
       
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
@@ -368,7 +371,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       var idx = this._createdObjects.length ;
       while(--idx >= 0) {
         var obj = this._createdObjects[idx] ;
-        if ($type(obj.destroy) === T_FUNCTION) obj.destroy() ;
+        if (SC.$type(obj.destroy) === SC.T_FUNCTION) obj.destroy() ;
       }
       this._createdObjects.length = 0 ;
     }
@@ -383,7 +386,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (!this.useControllersForContent) return obj;
     
     var controllers = this._objControllers = this._objControllers || {} ;
-    var guid = SC.getGUID(obj) ;
+    var guid = SC.guidFor(obj) ;
     var ret = controllers[guid] ;
     if (!ret) {
       ret = controllers[guid] = this.controllerForValue(obj) ;
@@ -403,7 +406,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   
   init: function() {
     sc_super() ;
-    if (this.get('content')) this._contentObserver() ;
+    if (this.get('content')) this._contentDidChange() ;
   }
 
 });

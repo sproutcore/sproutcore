@@ -4,8 +4,9 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/responder');
+require('foundation/application/responder');
 require('panes/pane');
+require('foundation/system/browser');
 
 SC.CAPTURE_BACKSPACE_KEY = NO ;
 
@@ -115,7 +116,7 @@ SC.window = SC.PaneView.extend({
   _onkeydown: function(evt)
   {
     // Firefox does NOT handle delete here...
-    if (SC.Platform.Firefox > 0 && (evt.which === 8)) {
+    if (SC.browser.mozilla > 0 && (evt.which === 8)) {
       return true ;
     }
     
@@ -135,7 +136,7 @@ SC.window = SC.PaneView.extend({
   {
 
     // handled in _onkeydown
-    if (SC.Platform.Firefox > 0 && (evt.which === 8)) {
+    if (SC.browser.mozilla > 0 && (evt.which === 8)) {
       var ret = this._sendEvent('keyDown', evt);
 
     } else {
@@ -223,7 +224,7 @@ SC.window = SC.PaneView.extend({
     {
       Event.stop(evt);
       ret = false ;
-      if(this._mouseDownView.mouseDragged && $type(this._mouseDownView.mouseDragged) == T_FUNCTION) {
+      if(this._mouseDownView.mouseDragged && SC.$type(this._mouseDownView.mouseDragged) == SC.T_FUNCTION) {
         //IE7: if the mouseDownView handles the mouseDragged event, set mouseCanDrag
         //to true.  TODO: make an optional "allowBrowserSelect" property that
         // would do the same thing; for now let's just prevent it in this case
@@ -275,7 +276,7 @@ SC.window = SC.PaneView.extend({
   },
 
   _ondblclick: function(evt){
-    if(SC.isIE())
+    if(SC.browser.isIE)
     {
       this._clickCount = 2;
       this._onmouseup(evt);
@@ -401,16 +402,16 @@ SC.window = SC.PaneView.extend({
       if (func)
       {
         var f = func.bindAsEventListener(win) ;
-        if (e === 'keypress' && SC.CAPTURE_BACKSPACE_KEY && SC.Platform.Firefox > 0)
+        if (e === 'keypress' && SC.CAPTURE_BACKSPACE_KEY && SC.browser.mozilla > 0)
         {
           document.onkeypress = f ;
         }
-        else if (e === 'selectstart' && SC.Platform.IE > 0)
+        else if (e === 'selectstart' && SC.browser.msie > 0)
         {
           //capture onselectstart events in IE (proprietary)
           document.body.onselectstart = f;
         }
-        else if (e === 'drag' && SC.Platform.IE > 0)
+        else if (e === 'drag' && SC.browser.msie > 0)
         {
           document.body.ondrag = f;
         }

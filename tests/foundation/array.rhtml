@@ -30,7 +30,7 @@ ArrayTests = function(factoryFunc) {
         var keys = SC.$A(arguments) ;
         var loc = keys.length ;
         while(--loc >= 0) {
-          this.a.addObserver(keys[loc], this.observer) ;
+          this.a.addObserver(keys[loc], this, this.observer) ;
         }
       };
       
@@ -47,7 +47,7 @@ ArrayTests = function(factoryFunc) {
       
       this.a.length.shouldEqual(1) ;
       this.a.objectAt(0).shouldEqual('X') ;
-      this.didNotify('[]').shouldEqual(YES) ;
+      assertEqual(YES, this.didNotify('[]'), 'didNotify([])') ;
     },
     
     "[A,B,C,D].replace(1,2,X) => [A,X,D] + notify": function() {

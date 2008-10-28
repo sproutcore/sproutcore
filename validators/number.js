@@ -25,12 +25,12 @@ SC.Validator.Number = SC.Validator.extend(
   places: 0,
   
   fieldValueForObject: function(object, form, field) {
-    switch($type(object)) {
-      case T_NUMBER:
+    switch(SC.$type(object)) {
+      case SC.T_NUMBER:
         object = object.toFixed(this.get('places')) ;
         break ;
-      case T_NULL:
-      case T_UNDEFINED:
+      case SC.T_NULL:
+      case SC.T_UNDEFINED:
         object = '';
         break ;
     }
@@ -38,8 +38,8 @@ SC.Validator.Number = SC.Validator.extend(
   },
 
   objectForFieldValue: function(value, form, field) {
-    switch($type(value)) {
-      case T_STRING:
+    switch(SC.$type(value)) {
+      case SC.T_STRING:
         if (value.length == '') {
           value = null ;
         } else if (this.get('places') > 0) {
@@ -48,8 +48,8 @@ SC.Validator.Number = SC.Validator.extend(
           value = parseInt(value,0) ;
         }
         break ;
-      case T_NULL:
-      case T_UNDEFINED:
+      case SC.T_NULL:
+      case SC.T_UNDEFINED:
         value = null ;
         break ;
     }

@@ -4,10 +4,10 @@
 // ========================================================================
 
 require('views/view') ;
-require('mixins/control') ;
-require('mixins/delegate_support');
+require('foundation/mixins/control') ;
+require('foundation/mixins/delegate_support');
 require('views/inline_text_field');
-require('mixins/inline_editor_delegate');
+require('foundation/mixins/inline_editor_delegate');
 
 /**
   @class
@@ -77,13 +77,13 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     // 1. apply the formatter
     var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
-      var formattedValue = ($type(formatter) == T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
+      var formattedValue = (SC.$type(formatter) == SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;
     }
     
     // 2. If the returned value is an array, convert items to strings and 
     // join with commas.
-    if ($type(value) == T_ARRAY) {
+    if (SC.$type(value) == SC.T_ARRAY) {
       var ary = [];
       for(var idx=0;idx<value.get('length');idx++) {
         var x = value.objectAt(idx) ;

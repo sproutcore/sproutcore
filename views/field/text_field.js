@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/field/field') ;
-require('mixins/editable') ;
+require('foundation/mixins/editable') ;
 
 /**
   @class
@@ -193,7 +193,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     if (this.get('isVisibleInWindow') && this._isFocused) {
       this.rootElement.focus() ;
       
-      if(SC.isIE()){
+      if(SC.browser.isIE){
         var selector = function() {
           Element.select(arguments.callee.it);
         };

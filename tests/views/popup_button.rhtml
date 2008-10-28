@@ -58,24 +58,36 @@ Test.context("A SC.PopupButtonView with a properly configured menu", {
   "Should toggle the menu's visibility when triggering the action": function()
   {
     // for some reason this actually equals true... not sure why...
-    this.button.get('menu').get('isVisible').shouldEqual(false);
+    assertEqual(NO, this.button.get('menu').get('isVisible'), "button.menu.isVisible 1") ;
     this.button.action();
-    this.button.get('menu').get('isVisible').shouldEqual(true);
+    SC.Binding.flushPendingChanges(); // menus use a binding...
+
+    assertEqual(YES, this.button.get('menu').get('isVisible'), "button.menu.isVisible 2") ;
     this.button.action();
-    this.button.get('menu').get('isVisible').shouldEqual(false);
+    SC.Binding.flushPendingChanges(); // menus use a binding...
+
+    assertEqual(NO, this.button.get('menu').get('isVisible'), "button.menu.isVisible 3") ;
   },
   "Should have it's isSelected state bound to the menu's visibility": function()
   {
     // either by triggering the action...
     this.button.get('isSelected').shouldEqual(false);
+
     this.button.action();
+    SC.Binding.flushPendingChanges(); // menus use a binding...
     this.button.get('isSelected').shouldEqual(true);
+
     this.button.action();
+    SC.Binding.flushPendingChanges(); // menus use a binding...
     this.button.get('isSelected').shouldEqual(false);
+
     // or by showing/hiding the menu...
     this.button.get('menu').set('isVisible', true);
+    SC.Binding.flushPendingChanges(); // menus use a binding...
     this.button.get('isSelected').shouldEqual(true);
+    
     this.button.get('menu').set('isVisible', false);
+    SC.Binding.flushPendingChanges(); // menus use a binding...
     this.button.get('isSelected').shouldEqual(false);
   },
   "Should send performKeyEquivalent messages to it's menu": function()

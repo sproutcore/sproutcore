@@ -100,7 +100,7 @@ SC.FormView = SC.View.extend({
       this._errors = [] ;
       this.get('fieldKeys').each(function(k) {
         var value = fview.get(k) ;
-        if ($type(value) == T_ERROR) fview._errors.push(value) ;
+        if (SC.$type(value) == SC.T_ERROR) fview._errors.push(value) ;
       }) ;
     }
     
@@ -305,7 +305,7 @@ SC.FormView = SC.View.extend({
     this.propertyDidChange(key,this.getValueForField(key)) ;    
     
     // and add us as an observer.
-    field.addObserver('value', this._fieldValueObserver_b()) ;
+    field.addObserver('value', this, this._fieldValueObserver) ;
     field.set('ownerForm',this) ;
     
     this.propertyWillChange('fieldKeys') ;
@@ -318,7 +318,7 @@ SC.FormView = SC.View.extend({
     // first remove the form as an observer to this field.
     var field = this._fields[key] ;
     if (field) {
-      field.removeObserver('value', this._fieldValueObserver_b());
+      field.removeObserver('value', this, this._fieldValueObserver);
       field.set('ownerForm',null) ;
     }
     
@@ -399,8 +399,8 @@ SC.FormView = SC.View.extend({
         field.set('value',value) ;
         
         // notify errors if the newValue changed to or from an error.
-        var isOldError = $type(oldValue) == T_ERROR ;
-        var isNewError = $type(value) == T_ERROR ;
+        var isOldError = SC.$type(oldValue) == SC.T_ERROR ;
+        var isNewError = SC.$type(value) == SC.T_ERROR ;
 
         if (isOldError != isNewError) {
           this.propertyWillChange('errors') ;
@@ -500,8 +500,8 @@ SC.FormView = SC.View.extend({
     this.propertyDidChange(key, value) ;
 
     // notify errors if the newValue changed to or from an error.
-    var isOldError = $type(oldValue) == T_ERROR ;
-    var isNewError = $type(value) == T_ERROR ;
+    var isOldError = SC.$type(oldValue) == SC.T_ERROR ;
+    var isNewError = SC.$type(value) == SC.T_ERROR ;
     
     if (isOldError != isNewError) {
       this.propertyWillChange('errors') ;
@@ -513,11 +513,6 @@ SC.FormView = SC.View.extend({
     if (!this.get('isDirty')) this.set('isDirty',true) ;
 
     this.endPropertyChanges() ;
-  },
-
-  // returns a bound observer function...
-  _fieldValueObserver_b: function() {
-    return this._bound_fieldValueObserver = (this._bound_fieldValueObserver || this._fieldValueObserver.bind(this)) ;
   },
 
   // this observer gets called anytime any property changes on the content
@@ -543,11 +538,6 @@ SC.FormView = SC.View.extend({
     } // else if...
   },
 
-  // returns the bound observer function...
-  _contentPropertyObserver_b: function() {
-    return this._bound_contentPropertyObserver = (this._bound_contentPropertyObserver || this._contentPropertyObserver.bind(this)) ;
-  },
-  
   _isEnabledObserver: function() {
     var fields = this._fields ;
     if (!fields) return ;
@@ -566,19 +556,19 @@ SC.FormView = SC.View.extend({
   
   // Automatically observe the content properties and add/remove form as 
   // observer.
-  _contentObserver: function() {
+  _contentDidChange: function() {
     var content = this.get('content') ;
     if (content == this._content) return ; // bail if content is same.
     
-    var func = this._contentPropertyObserver_b() ;
+    var func = this._contentPropertyObserver ;
     
     // if there was an older content, remove our observer.
-    if (this._content) this._content.removeObserver('*',func) ;
+    if (this._content) this._content.removeObserver('*', this, func) ;
     
     // now, add observer to new content
     this._content = content ;
     if (!content) return ; // EXIT POINT
-    content.addObserver('*', func) ; 
+    content.addObserver('*', this, func) ; 
 
     // reset the form to the content values
     this.reset() ;

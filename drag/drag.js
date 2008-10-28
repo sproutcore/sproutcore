@@ -184,7 +184,7 @@ SC.Drag = SC.Object.extend(
     // if all else fails, check to see if the source object is a data source.
     } else {
       var source = this.get('source') ;
-      if (source && $type(source.dragDataForType) == T_FUNCTION) {
+      if (source && SC.$type(source.dragDataForType) == SC.T_FUNCTION) {
         return source.dragDataForType(dataType, this) ;
         
       // no data source found. :(
@@ -505,7 +505,7 @@ SC.Drag = SC.Object.extend(
   // drop target.  Returns null if no matching target is found.
   _findNextDropTarget: function(target) {
     while ((target = target.parentNode) && (target != SC.window)) {
-      if (SC.Drag._dropTargets[target._guid]) return target ;
+      if (SC.Drag._dropTargets[SC.guidFor(target)]) return target ;
     }
     return null ;
   },
@@ -695,7 +695,7 @@ SC.Drag = SC.Object.extend(
   // return null if none is found.
   _findNextScrollableView: function(view) {
     while ((view = view.parentNode) && (view != SC.window)) {
-      if (SC.Drag._scrollableViews[view._guid]) return view ;
+      if (SC.Drag._scrollableViews[SC.guidFor(view)]) return view ;
     }
     return null ;
   }  
@@ -728,7 +728,7 @@ SC.Drag.mixin(
     during a drag.
   */
   addScrollableView: function(target) {
-    this._scrollableViews[target._guid] = target ;  
+    this._scrollableViews[SC.guidFor(target)] = target ;  
   },
 
   /**
@@ -736,7 +736,7 @@ SC.Drag.mixin(
     during a drag.
   */
   removeScrollableView: function(target) {
-    delete this._scrollableViews[target._guid] ;  
+    delete this._scrollableViews[SC.guidFor(target)] ;  
   },
   
   /**
@@ -747,7 +747,7 @@ SC.Drag.mixin(
     yourself.
   */
   addDropTarget: function(target) {
-    this._dropTargets[target._guid] = target ;
+    this._dropTargets[SC.guidFor(target)] = target ;
   },
 
   /**
@@ -757,7 +757,7 @@ SC.Drag.mixin(
     hierarchy.  You generally will not need to call it yourself.
   */
   removeDropTarget: function(target) {
-    delete this._dropTargets[target._guid] ;
+    delete this._dropTargets[SC.guidFor(target)] ;
   },
 
   /**

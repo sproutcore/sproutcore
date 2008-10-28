@@ -19,7 +19,7 @@ Test.context("CASE 1: Auto-layout view with no padding & no border", {
   "frame should == innerFrame": function() {
 
     // verify hasLayout is false in IE.
-    if (SC.Platform.IE) {
+    if (SC.browser.msie) {
       var hasLayout = v.rootElement.currentStyle.hasLayout ;
       assertEqual(hasLayout, false, 'element.hasLayout MUST be false in IE');
     }

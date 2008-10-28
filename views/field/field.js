@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('views/view') ;
-require('mixins/control') ;
-require('mixins/validatable') ;
+require('foundation/mixins/control') ;
+require('foundation/mixins/validatable') ;
 
 /**
   @class
@@ -197,7 +197,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // on the field if the value is changed.
   _valueObserver: function() {
     var value = this.get('value') ;
-    var isError = $type(value) == T_ERROR ;
+    var isError = SC.$type(value) == SC.T_ERROR ;
     if (!isError && (value != this._getFieldValue())) {
       this._setFieldValue(value) ;
     } 

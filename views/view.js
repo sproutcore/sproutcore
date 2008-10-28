@@ -3,13 +3,17 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/object') ;
-require('foundation/responder') ;
-require('foundation/node_descriptor') ;
-require('foundation/binding');
-require('foundation/path_module');
+require('foundation/system/browser');
 
-require('mixins/delegate_support') ;
+require('foundation/system/object') ;
+require('foundation/application/responder') ;
+require('deprecated/node_descriptor') ;
+require('foundation/system/binding');
+require('deprecated/path_module');
+require('foundation/mixins/delegate_support') ;
+require('foundation/mixins/string') ;
+require('deprecated/animator') ;
+
 
 SC.BENCHMARK_OUTLETS = NO ;
 SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
@@ -958,7 +962,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset
-      if (SC.Platform.Firefox) {
+      if (SC.browser.mozilla) {
         var parent = el.offsetParent ;
         var overflow = (parent) ? Element.getStyle(parent, 'overflow') : 'visible' ;
         if (overflow && overflow !== 'visible') {
@@ -971,7 +975,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       // fix the x & y with the clientTop/clientLeft
       var clientLeft, clientTop ;
       
-      if (SC.Platform.IE) {
+      if (SC.browser.msie) {
         if (!el.width) {
           clientLeft = parseInt(this.getStyle('border-left-width'),0) || 0 ;
         } else clientLeft = el.clientLeft ;
@@ -1103,7 +1107,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset
-      if (SC.Platform.Firefox) {
+      if (SC.browser.mozilla) {
         var parent = el.offsetParent ;
         var overflow = (parent) ? Element.getStyle(parent, 'overflow') : 'visible' ;
         if (overflow && overflow !== 'visible') {
@@ -1285,7 +1289,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if (this._scrollFrame == null) {
       var el = this.rootElement ;
       var func;
-      if (SC.isIE()) {
+      if (SC.browser.isIE) {
         func = function() {
           var borderTopWidth = 0;
           var borderBottomWidth = 0;
@@ -1691,7 +1695,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       
       // Safari2 has a bad habit of sometimes not actually changing its 
       // innerHTML. This will make sure the innerHTML get's changed properly.
-      if (SC.isSafari() && !SC.isSafari3()) {
+      if (SC.browser.isSafari && !(SC.browser.safari >= 3)) {
         var el = (this.containerElement || this.rootElement) ; var reps = 0 ;
         var f = function() {
           el.innerHTML = '' ; el.innerHTML = value ;
@@ -1746,7 +1750,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if(toolTip && (toolTip != '')) this._updateToolTipObserver();
 
     // if container element is a string, convert it to an actual DOM element.
-    if (this.containerElement && ($type(this.containerElement) === T_STRING)) {
+    if (this.containerElement && (SC.$type(this.containerElement) === SC.T_STRING)) {
       this.containerElement = this.$sel(this.containerElement);
     }
 
@@ -1817,7 +1821,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   _attachRootElement: function(el) {
     if (this.rootElement) this.rootElement._configured = null ;
     this.rootElement = el ; 
-    el._configured = this._guid ;
+    el._configured = SC.guidFor(this) ;
   },
   
   // This method is called internally after you add or remove a child view.
@@ -2003,7 +2007,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   //   var idName = el.id ;
   //   idName = (idName && idName.length>0) ? 'id=%@'.fmt(idName) : null;
   // 
-  //   return "%@:%@<%@>".fmt(this._type, this._guid, [tagName,idName, className].compact().join(' ')) ;
+  //   return "%@:%@<%@>".fmt(this.constructor, SC.guidFor(this), [tagName,idName, className].compact().join(' ')) ;
   // }
     
 }) ;
@@ -2030,11 +2034,6 @@ SC.View.mixin({
   viewFor: function(el,config) {
     if (el) el = $(el) ;
 
-    var r = SC.idt.active ; var vStart ;
-    if (r) SC.idt.v_count++;
-
-    if (r) vStart = new Date().getTime() ;
-    
     // find or build the element.
     if (!el) {    
       var emptyElement = this.prototype._cachedEmptyElement || this.prototype.emptyElement; 
@@ -2065,20 +2064,17 @@ SC.View.mixin({
         } else el = SC.NodeDescriptor.create(emptyElement) ;
       }
     }
-    if (r) SC.idt.vc_t += (new Date().getTime()) - vStart ;
 
     // configure only once.
     if (el && el._configured) return SC.View.findViewForElement(el); 
     
     // Now that we have found an element, instantiate the view.
     var args = SC.$A(arguments) ; args[0] = { rootElement: el } ;
-    if (r) vStart = new Date().getTime();
     var ret = new this(args,this) ; // create instance.
-    if (r) SC.idt.v_t += (new Date().getTime()) - vStart;
-    el._configured = ret._guid ;
+    el._configured = SC.guidFor(ret) ;
 
     // return the view.
-    SC.View._view[ret._guid] = ret ;
+    SC.View._view[SC.guidFor(ret)] = ret ;
     return ret ;    
   },
   
@@ -2193,7 +2189,7 @@ SC.View.mixin({
 }) ;
 
 // IE Specfic Overrides
-if (SC.Platform.IE) {
+if (SC.browser.msie) {
   SC.View.prototype.getStyle = function(style) {
     var element = this.rootElement ;
 

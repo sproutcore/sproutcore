@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/object') ;
+require('foundation/system/object') ;
 require('models/store') ;
 
 /**
@@ -158,7 +158,7 @@ SC.Record = SC.Object.extend(
 
   generateTempPrimaryKey: function()
   {
-    return "@" + SC.getGUID(this);
+    return "@" + SC.guidFor(this);
   },
 
   /**
@@ -439,7 +439,7 @@ SC.Record = SC.Object.extend(
       }
     
     // handle records.
-    } else value = (value && value._guid) ? value._guid : value ;
+    } else value = SC.guidFor(value) ;
     return value ;
   },
   
@@ -480,7 +480,7 @@ SC.Record = SC.Object.extend(
     // The passed in value appears to be another record instance.
     // just check for equality with the record as an optimization.
     if (value && value.primaryKey) { 
-      if ($type(recValue) === T_ARRAY) {
+      if (SC.$type(recValue) === SC.T_ARRAY) {
         loc = recValue.length ;
         while(--loc >= 0) { 
           if (recValue === value) return true; 
@@ -489,7 +489,7 @@ SC.Record = SC.Object.extend(
 
     // Otherwise, do a more in-depth compare
     } else { 
-      if ($type(recValue) === T_ARRAY) {
+      if (SC.$type(recValue) === SC.T_ARRAY) {
         loc = recValue.length ;
         while(--loc >= 0) { 
           if (this._matchValue(recValue[loc],value)) return true; 
@@ -524,14 +524,14 @@ SC.Record = SC.Object.extend(
       if (value === null) value = "(null)" ;
       return [key,value].join('=') ;
     }) ;
-    return this._type.toString() + '({ ' + ret.join(', ') + ' })' ;
+    return this.constructor.toString() + '({ ' + ret.join(', ') + ' })' ;
   },
   
   propertyObserver: function(observing,target,key,value) {
     //if ((target == this) && this.properties.include(key)) this.incrementProperty('changeCount') ;
   },
   
-  _cprops: ['properties'],
+  concatenatedProperties: ['properties'],
 
   /**
     This method should be used by the server to push updated data into a
@@ -593,7 +593,7 @@ SC.Record = SC.Object.extend(
     }
     
     catch(e) {
-      console.log(this._guid + ': Exception raised on UPDATE: ' + e) ;
+      console.log(SC.guidFor(this) + ': Exception raised on UPDATE: ' + e) ;
     }
 
     this.endPropertyChanges() ;   
@@ -661,7 +661,10 @@ SC.Record = SC.Object.extend(
   },
   
   // used by the store
-  _storeKey: function() { return this._type._storeKey(); }  
+  _storeKey: function() { 
+    if (!this.constructor._storeKey) debugger ;
+    return this.constructor._storeKey(); 
+  }  
   
      
 }) ;
@@ -724,7 +727,7 @@ SC.Record.mixin(
 
   // used by the store
   _storeKey: function() {
-    return (this.coreRecordType) ? this.coreRecordType._guid : this._guid ;
+    return (this.coreRecordType) ? SC.guidFor(this.coreRecordType) : SC.guidFor(this) ;
   },
   
   primaryKey: function() { return this.prototype.primaryKey; },

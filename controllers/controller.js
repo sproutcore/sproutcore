@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/object') ;
+require('foundation/system/object') ;
 
 /** 
   @class   SC.Controller
@@ -125,13 +125,13 @@ SC.Controller = SC.Object.extend(
   */
   controllerForValue: function(value) {
     var ret = null ;
-    switch($type(value)) {
-      case T_OBJECT:
+    switch(SC.$type(value)) {
+      case SC.T_OBJECT:
         if (value.kindOf(SC.Collection)) {
           ret = SC.CollectionController ;          
         } else ret = SC.ObjectController ;
         break ;
-      case T_ARRAY:
+      case SC.T_ARRAY:
         ret = SC.ArrayController ;
         break ;
       default:
@@ -173,7 +173,7 @@ SC.Controller = SC.Object.extend(
       // changes you might make at one time will be batched.
       } else if (this.get('commitChangesImmediately')) {
         if (!this._commitTimeout) {
-          this._commitTimeout = this.commitChanges.bind(this).defer();
+          this._commitTimeout = this.commitChanges.invokeLater(this);
         }
       }
     }

@@ -32,7 +32,7 @@ Test.context("object.get()", {
   
   "should return the function for a non-computed property": function() {
     var value = object.get("method") ;
-    assertEqual($type(value), T_FUNCTION) ;
+    assertEqual(SC.$type(value), SC.T_FUNCTION) ;
   },
   
   "should return null when property value is null": function() {
@@ -96,14 +96,14 @@ Test.context("object.set()", {
   "should call computed properties passing value and return this": function() {
     var ret = object.set("computed", "changed") ;
     assertEqual(object._computed, "changed") ;
-    assertEqual($type(object.computed), T_FUNCTION) ;
+    assertEqual(SC.$type(object.computed), SC.T_FUNCTION) ;
     assertEqual(ret, object) ;
   },
   
   "should replace the function for a non-computed property and return this": function() {
     var ret = object.set("method", "changed") ;
     assertEqual(object._method, "method") ; // make sure this was NOT run
-    assertNotEqual($type(object.method), T_FUNCTION) ;
+    assertNotEqual(SC.$type(object.method), SC.T_FUNCTION) ;
     assertEqual(ret, object) ;
   },
   

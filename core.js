@@ -57,11 +57,8 @@ var SproutCore = SproutCore || SC ;
   Adds properties to a target object.
   
   Takes the root object and adds the attributes for any additional 
-  arguments passed.  This can also perform a deep copy if the first param
-  is a bool that is YES.  This is generally not very safe though and not
-  advised.
+  arguments passed.
 
-  @param deep {Boolean} optional parameter.  If true, triggers a deep copy.
   @param target {Object} the target object to extend
   @param properties {Object} one or more objects with properties to copy.
   @returns {Object} the target object.
@@ -72,48 +69,21 @@ SC.mixin = function() {
   var target = arguments[0] || {};
   var idx = 1;
   var length = arguments.length ;
-  var deep = NO ;
   var options ;
 
   // Handle case where we have only one item...extend SC
   if (length === 1) {
     target = this || {};
     idx=0;
-  
-  // Handle a deep copy situation
-  } else if ((target===YES) || (target===NO)) {
-    deep = target;
-    target = arguments[1] || {};
-    idx = 2; // skip the boolean and the target
-  }
-
-  // Handle case when target is a string or something (possible in deep 
-  // copy)
-  if ( typeof target != "object" && typeof target != "function" ) {
-    target = {};
-  }
-
-  // extend SC itself if only one argument is passed
-  if ( length === idx ) {
-    target = this;
-    idx = idx-1;
   }
 
   for ( ; idx < length; idx++ ) {
     if (!(options = arguments[idx])) continue ;
     for(var key in options) {
       if (!options.hasOwnProperty(key)) continue ;
-      
       var src = target[key];
       var copy = options[key] ;
       if (target===copy) continue ; // prevent never-ending loop
-      
-      // Recurse if we're merging object values
-      if ( deep && copy && (typeof copy === "object") && !copy.nodeType ) {
-        copy = SC.extend(deep, 
-          src || (copy.length != null ? [ ] : { }), copy) ;
-      }
-      
       if (copy !== undefined) target[key] = copy ;
     }
   }
@@ -150,118 +120,6 @@ SC.mixin(/** @scope SC */ {
   // CORE HELPER METHODS
   //   
 
-
-  /**
-    Creates a clone of the passed object.  This function can take just about
-    any type of object and create a clone of it, including primitive values
-    (which are not actually cloned because they are immutable).
-    
-    If the passed object implements the clone() method, then this function
-    will simply call that method and return the result.
-    
-    @param object {Object} the object to clone
-    @returns {Object} the cloned object
-  */
-  clone: function(object) {
-    var ret = object ;
-    switch (SC.typeOf(object)) {
-    case T_ARRAY:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else ret = object.slice() ;
-      break ;
-    
-    case T_HASH:
-    case T_OBJECT:
-      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
-        ret = object.clone() ;
-      } else {
-        ret = {} ;
-        for(var key in object) ret[key] = object[key] ;
-      }
-    }
-    
-    return ret ;
-  },
-  
-  /**  
-    Call this method during setup of your app to queue up methods to be 
-    called once the entire document has finished loading.  If you call this
-    method once the document has already loaded, then the function will be
-    called immediately.
-    
-    Any function you register with this method will be called just before
-    main.
-    
-    @param target {Object} optional target object.  Or just pass a method.
-    @param method {Function} the method to call.
-    @return {void}
-  */
-  callOnLoad: function(target, method) { 
-    
-    // normalize parameters
-    if (method === undefined) { method = target; target = null; }
-    if (typeof(method) === 'string') {
-      if (target) {
-        method = target[method] ;
-      } else {
-        throw "You must pass a function to callOnLoad() (got: "+method+")";
-      }
-    }
-
-    // invoke the method if the queue is flushed.
-    if (SC._onloadQueueFlushed) method.apply(target || window.document) ;
-    var queue = SC._onloadQueue = (SC._onloadQueue || []) ;
-    queue.push([target, method]) ;
-  },
-
-  // To flush the callOnLoad queue, you need to set window.onload=SC.didLoad
-  didLoad: function() { 
-    SC.app = SC.Application.create();
-    SC.app.run();
-    
-    // set the current language
-    var b = $tag('body');
-    Element.addClassName(b, String.currentLanguage().toLowerCase()) ;
-
-    // call the onloadQueue.
-    var queue ;
-    SC.runLoop.beginRunLoop() ;
-    if (window.callOnLoad) {
-      if (window.callOnLoad instanceof Array) {
-        queue = window.callOnLoad ;
-      } else if (window.callOnLoad instanceof Function) {
-        queue = [window, window.callOnLoad] ;
-      }
-    } else queue = [] ;
-    queue = queue.concat(SC._onloadQueue) ;
-    var func = null ;
-    while(func = queue.shift()) {
-      if (SC.typeOf(func) === T_FUNCTION) {
-        func.call(document) ;
-      } else func[1].call(func[0] || document) ;
-    }
-      
-    SC._onloadQueueFlushed = true ;
-        
-    // start the app; call main.
-    if (window.main && (main instanceof Function)) main() ; // start app.
-    
-    // finally handle any routes if any.
-    if (typeof Routes != 'undefined') {
-      Routes.doRoutes() ; // old style.
-    } else if (typeof SC.Routes != 'undefined') {
-      SC.Routes.ping() ; // handle routes, if modules is installed.
-    }
-    
-    SC.runLoop.endRunLoop();
-    
-		//remove possible IE7 leak
-		b = null;
-		queue = null;
-		func = null;
-  },
-  
   /**
     Returns a consistant type for the passed item.
     
@@ -285,25 +143,25 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the type
   */  
   typeOf: function(item) {
-    if (item === undefined) return T_UNDEFINED ;
-    if (item === null) return T_NULL ; 
+    if (item === undefined) return SC.T_UNDEFINED ;
+    if (item === null) return SC.T_NULL ; 
     var ret = typeof(item) ;
     if (ret == "object") {
       if (item instanceof Array) {
-        ret = T_ARRAY ;
+        ret = SC.T_ARRAY ;
       } else if (item instanceof Function) {
-        ret = (item.isClass) ? T_CLASS : T_FUNCTION ;
+        ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION ;
         
       // NB: typeOf() may be called before SC.Error has had a chance to load
       // so this code checks for the presence of SC.Error first just to make
       // sure.  No error instance can exist before the class loads anyway so
       // this is safe.
       } else if (SC.Error && (item instanceof SC.Error)) {
-        ret = T_ERROR ;        
+        ret = SC.T_ERROR ;        
       } else if (item.isObject === true) {
-        ret = T_OBJECT ;
-      } else ret = T_HASH ;
-    } else if (ret === T_FUNCTION) ret = (item.isClass) ? T_CLASS : T_FUNCTION;
+        ret = SC.T_OBJECT ;
+      } else ret = SC.T_HASH ;
+    } else if (ret === SC.T_FUNCTION) ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION;
     return ret ;
   },
   
@@ -317,9 +175,9 @@ SC.mixin(/** @scope SC */ {
     @param obj {Object} the object to test
     @returns {Boolean} 
   */
-  isArray: function( obj )
-  {
-    return ($type(obj) === T_ARRAY) || (obj && ((obj.length!==undefined) || obj.objectAt));
+  isArray: function(obj) {
+    var t = SC.$type(obj);
+    return (t === SC.T_ARRAY) || ((t !== SC.T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
   },
   
   /**
@@ -344,7 +202,7 @@ SC.mixin(/** @scope SC */ {
     if (obj.toArray) return obj.toArray() ;
     
     // not array-like
-    if (obj.length===undefined || $type(obj) === SC.T_FUNCTION) return [obj];
+    if (obj.length===undefined || SC.$type(obj) === SC.T_FUNCTION) return [obj];
 
     // when all else fails, do a manual convert...
     var len = obj.length;
@@ -353,35 +211,53 @@ SC.mixin(/** @scope SC */ {
     return ret ;
   },
 
+  guidKey: "_sc_guid_" + (new Date().getTime()),
+  
   /**
     Returns a unique GUID for the object.  If the object does not yet have
     a guid, one will be assigned to it.  You can call this on any object,
     SC.Object-based or not, but be aware that it will add a _guid property.
     
-    @param obj {Object} any object, string, number or primitive
+    You can also use this method on DOM Element objects.
+    
+    @param obj {Object} any object, string, number, Element, or primitive
     @returns {String} the unique guid for this instance.
   */
   guidFor: function(obj) {
     if (obj === undefined) return "(undefined)" ;
     if (obj === null) return '(null)' ;
-    if (obj._guid) return obj._guid ;
+    var guidKey = this.guidKey ;
+    if (obj[guidKey]) return obj[guidKey] ;
     
-    switch($type(obj)) {
-      case T_NUMBER:
+    switch(SC.$type(obj)) {
+      case SC.T_NUMBER:
         return this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj);
         break ;
-      case T_STRING:
+      case SC.T_STRING:
         return this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj);
         break ;
-      case T_BOOL:
+      case SC.T_BOOL:
         return (obj) ? "(true)" : "(false)" ;
         break;
       default:
-        return obj._guid = SC.generateGuid();
+        return SC.generateGuid(obj);
     }
   },
   
-  generateGuid: function() { return ("@" + (SC._nextGUID++)); },
+  /**
+    Generates a new guid, optionally saving the guid to the object that you
+    pass in.  You will rarely need to use this method.  Instead you should
+    call SC.guidFor(obj), which return an existing guid if available.
+    
+    @param {Object} obj the object to assign the guid to
+    @returns {String} the guid
+  */
+  generateGuid: function(obj) { 
+    var ret = ("@" + (SC._nextGUID++)); 
+    if (obj) obj[SC.guidKey] = ret ;
+    return ret ;
+  },
+  
   _nextGUID: 0, _numberGuids: [], _stringGuids: {},
 
   /**
@@ -401,7 +277,7 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the hash code for this instance.
   */
   hashFor: function(obj) {
-    return (obj && obj.hash && $type(obj.hash) === T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
+    return (obj && obj.hash && SC.$type(obj.hash) === SC.T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
   },
 
   /**
@@ -423,102 +299,249 @@ SC.mixin(/** @scope SC */ {
     } else return SC.hashFor(a) === SC.hashFor(b) ;
   },
 
+  _numberGuids: [],
+  
+  _stringGuids: {},
+  
+  /** 
+    Empty function.  Useful for some operations. 
+  */
+  K: function() { return this; },
+  
+  /** Empty array.  Useful for some optimizations. */
+  A: [],
+  
   /**
-    Convenience method to inspect an object by converting it to a hash.
+    Creates a new object with the passed object as its prototype.
+    
+    This method uses JavaScript's native inheritence method to create a new 
+    object.    
+    
+    You cannot use beget() to create new SC.Object-based objects, but you
+    can use it to beget Arrays, Hashes, Sets and objects you build yourself.
+    Note that when you beget() a new object, this method will also call the
+    didBeget() method on the object you passed in if it is defined.  You can
+    use this method to perform any other setup needed.
+    
+    In general, you will not use beget() often as SC.Object is much more 
+    useful, but for certain rare algorithms, this method can be very useful.
+    
+    For more information on using beget(), see the section on beget() in 
+    Crockford's JavaScript: The Good Parts.
+    
+    @param obj {Object} the object to beget
+    @returns {Object} the new object.
+  */
+  beget: function(obj) {
+    if (obj == null) return null ;
+    var k = SC.K; k.prototype = obj ;
+    var ret = new k();
+    k.prototype = null ; // avoid leaks
+    if (SC.$type(obj.didBeget) === SC.T_FUNCTION) ret = obj.didBeget(ret); 
+    return ret ;
+  },
+  
+  /**
+    Creates a clone of the passed object.  This function can take just about
+    any type of object and create a clone of it, including primitive values
+    (which are not actually cloned because they are immutable).
+    
+    If the passed object implements the clone() method, then this function
+    will simply call that method and return the result.
+    
+    @param object {Object} the object to clone
+    @returns {Object} the cloned object
+  */
+  clone: function(object) {
+    var ret = object ;
+    switch (SC.typeOf(object)) {
+    case SC.T_ARRAY:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else ret = object.slice() ;
+      break ;
+    
+    case SC.T_HASH:
+    case SC.T_OBJECT:
+      if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
+        ret = object.clone() ;
+      } else {
+        ret = {} ;
+        for(var key in object) ret[key] = object[key] ;
+      }
+    }
+    
+    return ret ;
+  },
+  
+  /**
+    Convenience method to inspect an object.  This method will attempt to 
+    convert the object into a useful string description.
   */
   inspect: function(obj) {
-    return $H(obj).inspect() ;  
+    var ret = [] ;
+    for(var key in obj) {
+      if (v === 'toString') continue ; // ignore useless items
+      var v = obj[key] ;
+      if (SC.typeOf(v) === SC.T_FUNCTION) v = "function() { ... }" ;
+      ret.push(key + ": " + v) ;
+    }
+    return "{" + ret.join(" , ") + "}" ;
   },
-  
-  /** Browser and Platform info. */
-  Platform: {
+
+  /**
+    Returns a tuple containing the object and key for the specified property 
+    path.  If no object could be found to match the property path, then 
+    returns null.
     
-    /** The current IE version number or 0 if not IE. */
-    IE: function() {
-      if (Prototype.Browser.IE) {
-        return (navigator.appVersion.match(/\bMSIE.*7\.\b/)) ? 7 : 6 ;
-      } else return 0 ;
-    }(),
+    This is the standard method used throughout SproutCore to resolve property
+    paths.
     
-    /** The current Safari major version number of 0 if not Safari */
-    Safari: function() {
-      if (Prototype.Browser.WebKit) {
-        var vers = parseInt(navigator.appVersion.replace(/^.*?AppleWebKit\/(\d+).*?$/,'$1'),0) ;
-        return (vers > 420) ? 3 : 2 ;
-      } return 0 ;
-    }(),
+    @param path {String} the property path
+    @param root {Object} optional parameter specifying the place to start
+    @returns {Array} array with [object, property] if found or null
+  */
+  tupleForPropertyPath: function(path, root) {
     
-    /** The current Firefox major version number or 0 if not Firefox */
-    Firefox: function() {
-      var ret = 0;
-      if (Prototype.Browser.Gecko) {
-        if(navigator.userAgent.indexOf("Firefox") != -1)
-        {
-          ret = parseFloat((navigator.userAgent.match(/Firefox\/(.)/)[1]) || 0);
-        }
-        if (ret < 1) ret = 2; // default to version 2 if it is a Gecko browser.
-      } 
-      return ret ;
-    }(),    
-      
-    isWindows: function() {
-      return !!(navigator.appVersion.match(/(Windows)/)) ;
-    }(),
+    // if the passed path is itself a tuple, return it
+    if (SC.$type(path) === SC.T_ARRAY) return path ;
+
+    // find the key.  It is the last . or first *
+    var key ;
+    var stopAt = path.indexOf('*') ;
+    if (stopAt < 0) stopAt = path.lastIndexOf('.') ;
+    key = (stopAt >= 0) ? path.slice(stopAt+1) : path ;
     
-    isMac: function() {
-      if(Prototype.Browser.Gecko) {
-        return !!(navigator.appVersion.match(/(Macintosh)/));
-      } else {
-        return !!(navigator.appVersion.match(/(Mac OS X)/)) ;    
+    // convert path to object.
+    var obj = this.objectForPropertyPath(path, root, stopAt) ;
+    return (obj && key) ? [obj,key] : null ;
+  },
+
+  /** 
+    Finds the object for the passed path or array of path components.  This is 
+    the standard method used in SproutCore to traverse object paths.
+    
+    @param path {String} the path
+    @param root {Object} optional root object.  window is used otherwise
+    @param stopAt {Integer} optional point to stop searching the path.
+    @returns {Object} the found object or undefined.
+  */
+  objectForPropertyPath: function(path, root, stopAt) {
+
+    if (!root) root = window ;
+    
+    // faster method for strings
+    if (SC.$type(path) === SC.T_STRING) {
+      if (stopAt === undefined) stopAt = path.length ;
+      var loc = 0 ;
+      while((root) && (loc < stopAt)) {
+        var nextDotAt = path.indexOf('.', loc) ;
+        if ((nextDotAt < 0) || (nextDotAt > stopAt)) nextDotAt = stopAt;
+        var key = path.slice(loc, nextDotAt);
+        root = (root.get) ? root.get(key) : root[key] ;
+        loc = nextDotAt+1; 
       }
-    }()
+      if (loc < stopAt) root = undefined; // hit a dead end. :(
+        
+    // older method using an array
+    } else {
+
+      var loc = 0, max = path.length, key = null;
+      while((loc < max) && root) {
+        key = path[loc++];
+        if (key) root = (root.get) ? root.get(key) : root[key] ;
+      }
+      if (loc < max) root = undefined ;
+    }
     
+    return root ;
   },
   
-  // DEPRECATED.  here for compatibility only.
-  /** @private */
-  isIE: function() { 
-    return SC.Platform.IE > 0 ;
-  },
-
-  /** @private */
-  isSafari: function() {
-    return SC.Platform.Safari > 0 ;
-  },
-  
-  /** @private */
-  isSafari3: function() {
-    return SC.Platform.Safari >= 3 ;
-  },
-  
-  /** @private */
-  isIE7: function() {
-    return SC.Platform.IE >= 7 ;
-  },
-
-  /** @private */
-  isIE6: function() {
-    return (SC.Platform.IE >= 6) && (SC.Platform.IE < 7) ;
-  },
-
-  /** @private */
-  isWindows: function() {
-    return SC.Platform.isWindows;
-  },
-
-  /** @private */
-  isMacOSX: function() {
-    return SC.Platform.isMac ;
+  /**
+    This function will restore the few global functions defined by SproutCore
+    to their original values.  You can call this method if the globals 
+    defined by SproutCore conflict with another library you are using.  The
+    current global methods restored by this method are:
+    
+    - $type()
+    - $I()
+    
+    @returns {SC} SproutCore namespace
+  */
+  noConflict: function() {
+    $type = SC._originalGlobals.$type ;
+    $I = SC._originalGlobals.$I ;
+    $A = SC._originalGlobals.$A ;
   },
   
-  /** @private */
-  isFireFox: function() {
-    return SC.Platform.Firefox > 0 ;
+  /**
+    Reads or writes data from a global cache.  You can use this facility to
+    store information about an object without actually adding properties to
+    the object itself.  This is needed especially when working with DOM,
+    which can leak easily in IE.
+    
+    To read data, simply pass in the reference element (used as a key) and
+    the name of the value to read.  To write, also include the data.
+    
+    You can also just pass an object to retrieve the entire cache.
+    
+    @param elem {Object} An object or Element to use as scope
+    @param name {String} Optional name of the value to read/write
+    @param data {Object} Optional data.  If passed, write.
+    @returns {Object} the value of the named data
+  */
+  data: function(elem, name, data) {
+    elem = (elem === window) ? "@window" : elem ;
+    var hash = SC.hashFor(elem) ; // get the hash key
+    
+    // Generate the data cache if needed
+    var cache = SC._data_cache ;
+    if (!cache) SC._data_cache = cache = {} ;
+    
+    // Now get cache for element
+    var elemCache = cache[hash] ;
+    if (name && !elemCache) cache[hash] = elemCache = {} ;
+    
+    // Write data if provided 
+    if (elemCache && (data !== undefined)) elemCache[name] = data ;
+    
+    return (name) ? elemCache[name] : elemCache ;
   },
   
-  /** @private */
-  isFireFox2: function() {
-    return SC.Platform.Firefox >= 2 ;
+  /**
+    Removes data from the global cache.  This is used throughout the
+    framework to hold data without creating memory leaks.
+    
+    You can remove either a single item on the cache or all of the cached 
+    data for an object.
+    
+    @param elem {Object} An object or Element to use as scope
+    @param name {String} optional name to remove. 
+    @returns {Object} the value or cache that was removed
+  */
+  removeData: function(elem, name) {
+    elem = (elem === window) ? "@window" : elem ;
+    var hash = SC.hashFor(elem) ;
+    
+    // return undefined if no cache is defined
+    var cache = SC._data_cache ;
+    if (!cache) return undefined ;
+    
+    // return undefined if the elem cache is undefined
+    var elemCache = cache[hash] ;
+    if (!elemCache) return undefined;
+    
+    // get the return value
+    var ret = (name) ? elemCache[name] : elemCache ;
+    
+    // and delete as appropriate
+    if (name) {
+      delete elemCache[name] ;
+    } else {
+      delete cache[hash] ;
+    }
+    
+    return ret ;
   }
   
 });
@@ -526,111 +549,221 @@ SC.mixin(/** @scope SC */ {
 /** Alias for SC.typeOf() */
 SC.$type = SC.typeOf ;
   
-/** @deprecated  Use guidFor() instead. */
-SC.getGUID = SC.guidFor ;
-
-// Save the Platform.Browser name.
-SC.Platform.Browser = function() {
-  if (SC.Platform.IE >0) {
-    return 'IE';
-  } else if (SC.Platform.Safari > 0) {
-    return 'Safari';
-  } else if (SC.Platform.Firefox >0) {
-    return 'Firefox'; 
-  }
-}() ;
-
-// Export the type variables into the global space.
-var T_ERROR = SC.T_ERROR ;
-var T_OBJECT = SC.T_OBJECT ;
-var T_NULL = SC.T_NULL ;
-var T_CLASS = SC.T_CLASS ;
-var T_HASH = SC.T_HASH ;
-var T_FUNCTION = SC.T_FUNCTION ;
-var T_UNDEFINED = SC.T_UNDEFINED ;
-var T_NUMBER = SC.T_NUMBER ;
-var T_BOOL = SC.T_BOOL ;
-var T_ARRAY = SC.T_ARRAY ;
-var T_STRING = SC.T_STRING ;
-
+/** @private Provided for compatibility with old HTML templates. */
+SC.didLoad = SC.K ;
 
 // ........................................
 // GLOBAL EXPORTS
 //   
-// Global exports will be made optional in the future so you can avoid 
-// polluting the global namespace.
-
-$type = SC.typeOf ;
+// These can be restored using SC.restoreGlobals();
+var $type, $I, $A ;
+SC._originalGlobals = { $type: $type,  $I: $I, $A: $A } ;
+$type = SC.typeOf; 
 $I = SC.inspect ;
-
-// Legacy.  Will retire.
-SC.mixin(Object,{
-
-  // this will serialize a general JSON object into a URI.
-  serialize: function(obj) {
-    var ret = [] ;
-    for(var key in obj) {
-      var value = obj[key] ;
-      if (typeof value == 'number') { value = '' + value ; }
-      if (!(typeof value == 'string')) { value = value.join(','); }
-      ret.push(encodeURIComponent(key) + "=" + encodeURIComponent(value)) ;
-    }
-    return ret.join('&') ;
-  }
-  
-}) ;
-
-
-// This will add or remove the class name based on the flag, allowing you to
-// treat it like a bool setting.  Simplifies the common case where you need
-// to make a class name match a bool.
-Element.setClassName = function(element,className,flag) {
-  if(SC.isIE())
-  {
-    if (flag) { 
-      Element.addClassName(element,className); 
-    } else {
-      Element.removeClassName(element,className) ;
-    }
-  } 
-  else
-  {
-    if (flag) { 
-      element.addClassName(className); 
-    } else {
-      element.removeClassName(className) ;
-    }
-  } 
-} ;
+$A = SC.$A ;
 
 // ........................................
-// EVENT EXTENSIONS
-// 
-Object.extend(Event,{
-  // get the character code for key pressed events.
-  getCharCode: function(e) {
-    return (e.keyCode) ? e.keyCode : ((e.which)?e.which:0) ; 
-  },
+// FUNCTION ENHANCEMENTS
+//
+// Enhance function.
+SC.mixin(Function.prototype,
+/** @scope Function.prototype */ {
   
-  // get the pressed char as a string.
-  getCharString: function(e) {
-    return String.fromCharCode(Event.getCharCode(e)) ;
-  },
-  
-  pointerLocation: function(event) {
-    var ret = {
-      x: event.pageX || (event.clientX +
-        (document.documentElement.scrollLeft || document.body.scrollLeft)),
-      y: event.pageY || (event.clientY +
-        (document.documentElement.scrollTop || document.body.scrollTop))
-      
-    };
-    return ret ;
-  },
-  
-  ALT_KEY: '_ALT',
-  CTRL_KEY: '_CTRL',
-  SHIFT_KEY: '_SHIFT'
-  
-});
+  /**
+    Indicates that the function should be treated as a computed property.
+    
+    Computed properties are methods that you want to treat as if they were
+    static properties.  When you use get() or set() on a computed property,
+    the object will call the property method and return its value instead of 
+    returning the method itself.  This makes it easy to create "virtual 
+    properties" that are computed dynamically from other properties.
+    
+    Consider the following example:
+    
+    {{{
+      contact = SC.Object.create({
 
+        firstName: "Charles",
+        lastName: "Jolley",
+        
+        // This is a computed property!
+        fullName: function() {
+          return this.getEach('firstName','lastName').compact().join(' ') ;
+        }.property('firstName', 'lastName'),
+        
+        // this is not
+        getFullName: function() {
+          return this.getEach('firstName','lastName').compact().join(' ') ;
+        }
+      });
+
+      contact.get('firstName') ;
+      --> "Charles"
+      
+      contact.get('fullName') ;
+      --> "Charles Jolley"
+      
+      contact.get('getFullName') ;
+      --> function()
+    }}}
+    
+    Note that when you get the fullName property, SproutCore will call the
+    fullName() function and return its value whereas when you get() a property
+    that contains a regular method (such as getFullName above), then the 
+    function itself will be returned instead.
+    
+    h2. Using Dependent Keys
+
+    Computed properties are often computed dynamically from other member 
+    properties.  Whenever those properties change, you need to notify any
+    object that is observing the computed property that the computed property
+    has changed also.  We call these properties the computed property is based
+    upon "dependent keys".
+    
+    For example, in the contact object above, the fullName property depends on
+    the firstName and lastName property.  If either property value changes,
+    any observer watching the fullName property will need to be notified as 
+    well.
+    
+    You inform SproutCore of these dependent keys by passing the key names
+    as parameters to the property() function.  Whenever the value of any key
+    you name here changes, the computed property will be marked as changed
+    also.
+    
+    You should always register dependent keys for computed properties to 
+    ensure they update.
+    
+    h2. Using Computed Properties as Setters
+    
+    Computed properties can be used to modify the state of an object as well
+    as to return a value.  Unlike many other key-value system, you use the 
+    same method to both get and set values on a computed property.  To 
+    write a setter, simply declare two extra parameters: key and value.
+    
+    Whenever your property function is called as a setter, the value 
+    parameter will be set.  Whenever your property is called as a getter the
+    value parameter will be undefined.
+    
+    For example, the following object will split any full name that you set
+    into a first name and last name components and save them.
+    
+    {{{
+      contact = SC.Object.create({
+        
+        fullName: function(key, value) {
+          if (value !== undefined) {
+            var parts = value.split(' ') ;
+            this.beginPropertyChanges()
+              .set('firstName', parts[0])
+              .set('lastName', parts[1])
+            .endPropertyChanges() ;
+          }
+          return this.getEach('firstName', 'lastName').compact().join(' ');
+        }.property('firstName','lastName')
+        
+      }) ;
+      
+    }}}
+    
+    bq. *Why Use The Same Method for Getters and Setters?*  Most property-
+    based frameworks expect you to write two methods for each property but
+    SproutCore only uses one.  We do this because most of the time when
+    you write a setter is is basically a getter plus some extra work.  There 
+    is little added benefit in writing both methods when you can conditionally
+    exclude part of it.  This helps to keep your code more compact and easier
+    to maintain.
+    
+    @param dependentKeys {String...} optional set of dependent keys
+    @returns {Function} the declared function instance
+  */
+  property: function() {
+    this.dependentKeys = SC.$A(arguments) ; 
+    this.isProperty = true; return this; 
+  },
+  
+  /**
+    You can call this method on a computed property to indicate that the 
+    property is cacheable (or not cacheable).  By default all computed 
+    properties are not cached.  Enabling this feature will allow SproutCore
+    to cache the return value of your computed property and to use that
+    value until one of your dependent properties changes or until you 
+    invoke propertyDidChange() and name the computed property itself.
+    
+    If you do not specify this option, computed properties are assumed to be
+    not cacheable.
+    
+    @param {Boolean} aFlag optionally indicate cacheable or no, default YES
+    @returns {Function} reciever
+  */
+  cacheable: function(aFlag) {
+    this.isProperty = YES;  // also make a property just in case
+    if (!this.dependentKeys) this.dependentKeys = [] ;
+    this.isCacheable = (aFlag === undefined) ? YES : aFlag ;
+    return this;
+  },
+  
+  /**
+    Indicates that the computed property is volatile.  Normally SproutCore 
+    assumes that your computed property is indempotent.  That is, calling 
+    set() on your property more than once with the same value has the same
+    effect as calling it only once.  
+    
+    All non-computed properties are indempotent and normally you should make
+    your computed properties behave the same way.  However, if you need to
+    make your property change its return value everytime your method is
+    called, you may chain this to your property to make it volatile.
+    
+    If you do not specify this option, properties are assumed to be 
+    non-volatile. 
+    
+    @param {Boolean} aFlag optionally indicate state, default to YES
+    @returns {Function} receiver
+  */
+  indempotent: function(aFlag) {
+    this.isProperty = YES;  // also make a property just in case
+    if (!this.dependentKeys) this.dependentKeys = [] ;
+    this.isVolatile = !((aFlag === undefined) ? NO : aFlag) ;
+    return this;
+  },
+  
+  /**  
+    Declare that a function should observe an object at the named path.  Note
+    that the path is used only to construct the observation one time.
+  */
+  observes: function(propertyPaths) { 
+    this.propertyPaths = SC.$A(arguments); 
+    return this;
+  },
+  
+  typeConverter: function() {
+    this.isTypeConverter = true; return this ;
+  },
+  
+  /**
+    Creates a timer that will execute the function after a specified 
+    period of time.
+    
+    If you pass an optional set of arguments, the arguments will be passed
+    to the function as well.  Otherwise the function should have the 
+    signature:
+    
+    {{{
+      function functionName(timer)
+    }}}
+
+    @param target {Object} optional target object to use as this
+    @param interval {Number} the time to wait, in msec
+    @returns {SC.Timer} scheduled timer
+  */
+  invokeLater: function(target, interval) {
+    if (interval === undefined) interval = 1 ;
+    var f = this;
+    if (arguments.length > 2) {
+      var args = SC.$A(arguments).slice(2,arguments.length);
+      args.unshift(target);
+      f = f.bind.apply(f, args) ;
+    }
+    return SC.Timer.schedule({ target: target, action: f, interval: interval });
+  }    
+  
+}) ;

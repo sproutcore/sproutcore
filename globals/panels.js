@@ -5,6 +5,7 @@
 
 require('views/view') ;
 require('views/container') ;
+require('foundation/system/ready') ;
 
 /**
   @class Manages the panels on a page.
@@ -143,13 +144,13 @@ SC.PanelView = SC.View.extend(
     var bodyNode = $tag('body');
     if (this.rootElement.parentNode != bodyNode) bodyNode.appendChild(this.rootElement) ;
     this.setStyle(this.panelStyle) ;
-    if (!SC.isIE7() && bodyNode) Element.addClassName(bodyNode, 'under-panel') ;
+    if (!(SC.browser.msie >= 7) && bodyNode) Element.addClassName(bodyNode, 'under-panel') ;
   },
   
   hideView: function() {
     var bodyNode = $tag('body');
     this.setStyle({ zIndex: '-10000', visibility: 'hidden' }) ;
-    if (!SC.isIE7() && bodyNode) Element.removeClassName(bodyNode, 'under-panel') ;
+    if (!(SC.browser.msie >= 7) && bodyNode) Element.removeClassName(bodyNode, 'under-panel') ;
   },
   
   // if the user clicks outside the top popup, then dismiss the popup unless
@@ -176,7 +177,7 @@ SC.PanelView = SC.View.extend(
     
 }) ;
 
-SC.callOnLoad(function() { 
+SC.ready(function() { 
   if (!SC.page) SC.page = SC.Page.create() ;
   SC.page.panels = SC.PanelView.outletFor(null); 
 }) ;

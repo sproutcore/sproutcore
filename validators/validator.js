@@ -3,7 +3,7 @@
 // Author: Charles Jolley
 // ==========================================================================
 
-require('foundation/object');
+require('foundation/system/object');
 
 /**
   @class
@@ -260,7 +260,7 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
     } else if (validatorKey.isClass) {
       validator = validatorKey.create() ;
       
-    } else if ($type(validatorKey) == T_STRING) {
+    } else if (SC.$type(validatorKey) == SC.T_STRING) {
 
       // extract optional key name
       var name = null ;

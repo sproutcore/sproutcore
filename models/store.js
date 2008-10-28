@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/object') ;
+require('foundation/system/object') ;
 
 /**
   @class
@@ -121,7 +121,7 @@ SC.Store = SC.Object.create(
     this._quickCache[guid] = records;
 
     // and start observing it.
-    rec.addObserver('*',this._boundRecordObserver) ;
+    rec.addObserver('*',this, this.recordDidChange) ;
     this.recordDidChange(rec) ;
   },
 
@@ -146,7 +146,7 @@ SC.Store = SC.Object.create(
     }
 
     // and stop observing it.
-    rec.removeObserver('*',this._boundRecordObserver) ;
+    rec.removeObserver('*',this, this.recordDidChange) ;
     this.recordDidChange(rec) ; // this will remove from cols since destroyed.
   },
 
@@ -192,7 +192,7 @@ SC.Store = SC.Object.create(
       var ret = [] ; var loc = (records) ? records.length : 0;
       while(--loc >= 0) {
         var rec = records[loc] ;
-        if ((rec._type == recordType) || (rec._type.coreRecordType == recordType)) {
+        if ((rec.constructor == recordType) || (rec.constructor.coreRecordType == recordType)) {
           if (rec.matchConditions(conditions)) ret.push(rec) ;
         }
       }
@@ -294,7 +294,7 @@ SC.Store = SC.Object.create(
     var guid    = rec._storeKey(),
         changed = this.get('_changedRecords') || {},
         records = changed[guid] || {} ;
-    records[rec._guid] = rec ;
+    records[SC.guidFor(rec)] = rec ;
 
     changed[guid] = records ;    
     this.set('_changedRecords',changed) ;
@@ -325,7 +325,7 @@ SC.Store = SC.Object.create(
             while(--rloc >= 0) {
               var record = records[rloc] ;
               // notify only if record type matches.
-              if (col.recordType == record._type) {
+              if (col.recordType == record.constructor) {
                 col.recordDidChange(record) ;
               }
             }
@@ -342,11 +342,6 @@ SC.Store = SC.Object.create(
     // then clear changed records to start again.
     this._changedRecords = {} ;
     
-  }.observes('_changedRecords'),
-  
-  init: function() {
-    arguments.callee.base.call(this) ;
-    this._boundRecordObserver = this.recordDidChange.bind(this) ;
-  }
+  }.observes('_changedRecords')
     
 }) ;
