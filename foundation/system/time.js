@@ -5,12 +5,112 @@
 
 /**
   The time library provides a common way for working with time offsets.
+
+  #1 - Fast, not-chained
   
-  t = SC.time(123)
+  t = SC.time.month(123) ;
+  
+  #2 - Chained
+  
+  t = SC.time(123).month(3).day(12).year(2003).done();
+
+  t = SC.time(123).month(3) ;
 */
 SC.time = function(timeoffset) {
+  var ret = SC.beget(fn) ;
+  ret.value = timeOffset ;
+  return ret ;
+} ;
+
+(function() {
+
+  var date = new Date();
+  
+  SC.mixin(SC.time, /** @scope SC.time @static */ { 
+
+    month: function(offset, newMonth) {
+      date.setTime(offset) ;
+      if (newMonth === undefined) return date.getMonth() ;
+      date.setMonth(newMonth) ;
+      return date.getTime() ;
+    },
+    
+    /**
+      Converts an offset in local time into an offset in UTC time.
+      
+      @param {Time} offset the local time offset
+      @returns {Time} the new offset
+    */
+    utc: function(offset) {
+      date.setTime(offset) ;
+      return offset + (date.getTimezoneOffset()*60*1000);  
+    },
+    
+    local: function(offset) {
+      date.setTime(offset) ;
+      return offset - (date.getTimezoneOffset()*60*1000);  
+    },
+    
+    parse: function(string) {
+      
+    },
+    
+    format: function(offset) {
+      
+    }
+
+  }) ;
+  
+})() ;
+
+SC.time.fmt = SC.time.format ;
+
+SC.time.fn = {
+  
+  done: function() { return this.value ; }
   
 } ;
+
+"month day year".split(' ').forEach(function(key) {
+  SC.time.fn[key] = function(newTime) {
+    if (newTime === undefined) {
+      return SC.time[key](this.value);
+    } else {
+      this.value = SC.time[key](this.value, newTime) ;
+      return this ;  
+    }
+  } ;
+}) ;
+
+//-----
+
+// Test.context("test basic Date mapping functions", {
+//   "month() should return month, month(value) should set month": function() {
+//     //...
+//   }
+// }) ;
+// 
+// Test.context("test basic Date mapping functions", (function() {
+//   var methods = "month day".split(' ') ;
+//   var tests = {} ;
+//   methods.forEach(function(name) {
+//     var testName = "%@() should return %@, %@(value) should set %@".fmt(name,name,name,name) ;
+//     
+//     tests[testName] = function() {
+//       var date = new Date() ;
+//       var time = date.getTime() ;
+// 
+//       var value = date["get%@".fmt(name.capitalize())]() ;
+//       assertEqual(value, SC.time[name](), "get");
+//       
+//       var value = date["set%@".fmt(name.capitalize())](3).getTime() ;
+//       assertEqual(value, SC.time[name](3), "set");
+//       
+//     } ;
+//   });
+//   
+//   return tests ;
+// })()) ;
 
 
 // Extensions to the Date object. Comes from JavaScript Toolbox at:
@@ -49,6 +149,14 @@ SC.time = function(timeoffset) {
 var MONTH_NAMES=new Array('January','February','March','April','May','June','July','August','September','October','November','December','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
 var DAY_NAMES=new Array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun','Mon','Tue','Wed','Thu','Fri','Sat');
 function LZ(x) {return(x<0||x>9?"":"0")+x;}
+
+SC.Locale.define('en', {
+  longMonthNames: 'January February March April May'.split(' '),
+  shortMonthNames: [],
+  
+  shortDateFormat: 'dd/mm/yy',
+  longDateFormat: ''
+}) ;
 
 Object.extend(Date,{
   
@@ -114,6 +222,8 @@ Object.extend(Date,{
   	var mm=now.getMinutes();
   	var ss=now.getSeconds();
   	var ampm="";
+
+    var locale = SC.Locale.currentLocale; 
 
   	while (i_format < format.length) {
   		// Get next token from format string
