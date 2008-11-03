@@ -218,6 +218,25 @@ SC.Array = {
     var ret = [] ;
     this.forEach(function(k) { if (k !== value) ret[ret.length] = k; }) ;
     return ret ;
+  },
+  
+  /**
+    Generates a new array with only unique values from the contents of the
+    old array.
+    
+    @returns {Array}
+  */
+  uniq: function() {
+    var found = {}; // use this to keep track of what is added.
+    var ret = [] ;
+    this.forEach(function(k){
+      var hash = SC.hashFor(k);
+      if (!found[hash]) {
+        found[hash] = YES; ret[ret.length] = k;
+      } 
+    });
+    found = null;
+    return ret ;
   }
     
 } ;

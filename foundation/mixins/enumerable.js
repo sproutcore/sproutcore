@@ -131,6 +131,61 @@ SC.Enumerable = {
   },
   
   /**
+    Retrieves the named value on each member object.  This is more efficient
+    than using one of the wrapper methods defined here.  Objects that 
+    implement SC.Observable will use the get() method, otherwise the property
+    will be accessed directly.
+    
+    @param {String} key the key to retrieve
+    @returns {Array} extracted values
+  */
+  getEach: function(key) {
+    var len = (this.get)? this.get('length') : this.length ;
+    var ret = [] ;
+
+    var last = null ;
+    var context = SC.Enumerator._popContext();
+    for(var idx=0;idx<len;idx++) {
+      var next = this.nextObject(idx, last, context) ;
+      var obj = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      ret[ret.length] = obj;
+      last = next ;
+    }
+    last = null;
+    context = SC.Enumerator._pushContext(context);
+    return ret ;
+  },
+
+  /**
+    Sets the value on the named property for each member.  This is more
+    efficient than using other methods defined on this helper.  If the object
+    implements SC.Observable, the value will be changed to set(), otherwise
+    it will be set directly.  null objects are skipped.
+    
+    @param {String} key the key to set
+    @param {Object} value the object to set
+    @returns {Object} receiver
+  */
+  setEach: function(key, value) {
+    var len = (this.get)? this.get('length') : this.length ;
+
+    var last = null ;
+    var context = SC.Enumerator._popContext();
+    for(var idx=0;idx<len;idx++) {
+      var next = this.nextObject(idx, last, context) ;
+      if (next) {
+        if (next.set) {
+          next.set(key, value) ;
+        } else next[key] = value ;
+      }
+      last = next ;
+    }
+    last = null;
+    context = SC.Enumerator._pushContext(context);
+    return this ;
+  },
+  
+  /**
     Maps all of the items in the enumeration to another value, returning 
     a new array.  This method corresponds to map() defined in JavaScript 1.6.
     
@@ -895,7 +950,31 @@ SC.mixin(Array.prototype, SC.Reducers) ;
         ret.push(next) ;
       }
       return ret ;
+    },
+    
+    getEach: function(key) {
+      var ret = [];
+      var len = this.length ;
+      for(var idx=0;idx<len;idx++) {
+        var obj = this[idx];
+        ret[idx] = (obj) ? ((obj.get) ? obj.get(key) : obj[key]) : null;
+      }
+      return ret ;
+    },
+    
+    setEach: function(key, value) {
+      var len = this.length;
+      for(var idx=0;idx<len;idx++) {
+        var obj = this[idx];
+        if (obj) {
+          if (obj.set) {
+            obj.set(key, value);
+          } else obj[key] = value ;
+        }
+      }
+      return this ;
     }
+    
   }; 
   
   // These methods will only be applied if they are not already defined b/c 
