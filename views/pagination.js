@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 require('controllers/collection') ;
 require('views/button/button') ;
 

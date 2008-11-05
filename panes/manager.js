@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 
 // The PaneManager is responsible for displaying pane that appear over your
 // regular content.  You can register your own pane types by calling 

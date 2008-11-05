@@ -2,7 +2,7 @@
 // SC.ListItemView
 // ==========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 require('foundation/mixins/delegate_support');
 require('foundation/mixins/control') ;
 require('views/button/disclosure');

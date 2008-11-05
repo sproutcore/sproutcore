@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 require('foundation/mixins/control') ;
 
 lc_cnt = 0 ;

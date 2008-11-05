@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 require('foundation/mixins/control') ;
 require('foundation/mixins/delegate_support');
 require('views/inline_text_field');

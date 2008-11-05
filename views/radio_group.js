@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 
 // RadioGroupView manages a collection of buttons as a single value.  To 
 // use this view, just assign your buttons as outlets. This will use the

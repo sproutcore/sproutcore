@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core') ;
-require('views/view') ;
+require('views/classic_view') ;
 
 SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
 SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x0007 ;

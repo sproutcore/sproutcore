@@ -3,7 +3,7 @@
 // ==========================================================================
 
 require('core') ;
-require('views/view') ;
+require('views/classic_view') ;
 require('foundation/mixins/control');
 require('foundation/mixins/inline_editor_delegate');
 

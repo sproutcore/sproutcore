@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/view') ;
+require('views/classic_view') ;
 require('views/container') ;
 
 SC.TAB_VIEW_TAB_REGEXP = /Tab$/ ;
