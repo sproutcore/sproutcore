@@ -11,7 +11,7 @@ require('views/view') ;
 //
 // One instance of the PaneManager view is created the first time you try
 // to show a pane.
-SC.PaneManager = SC.View.extend({
+SC.PaneManager = SC.ClassicView.extend({
 
   emptyElement: '<div id="panes"></div>',
   

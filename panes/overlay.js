@@ -179,7 +179,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
   containerView: SC.ContainerView.extend({
     outlets: ['rootView'],
 
-    rootView: SC.View.extend({
+    rootView: SC.ClassicView.extend({
       // absorb all clicks so the pane will not hide.
       click: function() { return true; }
     }).outletFor('.pane-root?'),

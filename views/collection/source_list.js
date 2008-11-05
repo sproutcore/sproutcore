@@ -341,7 +341,7 @@ SC.SourceListView = SC.CollectionView.extend(
   
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   
-  insertionPointClass: SC.View.extend({
+  insertionPointClass: SC.ClassicView.extend({
     emptyElement: '<div class="list-insertion-point"><span class="anchor"></span></div>'
   }),
   

@@ -20,7 +20,7 @@ SC.window = SC.PaneView.extend({
   firstViewForEvent: function(evt) {
     var el = Event.element(evt) ;
     while(el && (el != document) && (!el._configured)) el = el.parentNode ;
-    if (el) el = SC.View.findViewForElement(el) ;
+    if (el) el = SC.ClassicView.findViewForElement(el) ;
     if (el == this) el = null ;
   	return el ;
   },

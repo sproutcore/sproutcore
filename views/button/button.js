@@ -18,13 +18,13 @@ SC.TOGGLE_OFF_BEHAVIOR = "off" ;
   A button handles simple link functions.  It can be set to a selected,
   enabled or disabled state.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   @author Charles Jolley
   @version 1.0
   
 */
-SC.ButtonView = SC.View.extend(SC.Control,
+SC.ButtonView = SC.ClassicView.extend(SC.Control,
 /** @scope SC.ButtonView.prototype */ {
   
   emptyElement: '<a href="javascript:;" class="sc-button-view regular"><span class="button-inner"><span class="label"></span></span></a>',

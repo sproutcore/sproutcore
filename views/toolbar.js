@@ -5,7 +5,7 @@
 
 // A menu is not a view exactly, but you can use it to bundle together 
 // buttons and then validate them as a whole.
-SC.Toolbar = SC.View.extend({
+SC.Toolbar = SC.ClassicView.extend({
   
   // override with an array of outlet functions.
   buttons: [],

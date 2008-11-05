@@ -20,12 +20,12 @@ require('views/split');
   This view must be a direct child of the split view it works with. It must
   be surrounded by two other views.
 
-  @extends SC.View
+  @extends SC.ClassicView
 
   @author Charles Jolley
   @author Lawrence Pit
 */
-SC.SplitDividerView = SC.View.extend(
+SC.SplitDividerView = SC.ClassicView.extend(
 /** @scope SC.SplitDividerView.prototype */ {
 
   emptyElement: '<div class="sc-split-divider-view"></div>',

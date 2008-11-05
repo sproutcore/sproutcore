@@ -49,11 +49,11 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   property if you want to monitor selection. (be sure to set the isEnabled
   property to allow selection.)
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.CollectionViewDelegate
   
 */
-SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
+SC.CollectionView = SC.ClassicView.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
@@ -272,9 +272,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     you should be sure to actually call the same method on the collection view 
     to give it the chance to perform its own selection housekeeping.
   
-    @type {SC.View}
+    @type {SC.ClassicView}
   */
-  exampleView: SC.View,
+  exampleView: SC.ClassicView,
 
   /**
     The view class to use when displaying item views in groups.
@@ -296,13 +296,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     If groupBy is null, then this property will not be used.  The default 
     class provided here simply displays the group value in an H1 tag.
   
-    @type {SC.View}
+    @type {SC.ClassicView}
   */
-  exampleGroupView: SC.View.extend({
+  exampleGroupView: SC.ClassicView.extend({
     emptyElement: '<div><h1></h1><div class="well"></div></div>',
     outlets: ['labelView','itemView'],
     labelView: SC.LabelView.outletFor('h1?'),
-    itemView: SC.View.outletFor('.well?')
+    itemView: SC.ClassicView.outletFor('.well?')
   }),
   
   /**
@@ -453,7 +453,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     your items are stored in group views.  This is faster than searching
     the child view hierarchy yourself.
     
-    @param {SC.View} view The view to search for.
+    @param {SC.ClassicView} view The view to search for.
 
     @returns {Boolean} True if the view is an item view in the receiver.
   */
@@ -474,7 +474,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @param {Point} loc   The current mouse location in the coordinate of the 
       collection view
       
-    @returns {SC.View} The item view under the collection
+    @returns {SC.ClassicView} The item view under the collection
   */
   itemViewAtLocation: function(loc) {
     var itemView = this._itemViewRoot ;
@@ -529,7 +529,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return null.
     
     @param {Object} obj The content object. 
-    @returns {SC.View} The item view or null
+    @returns {SC.ClassicView} The item view or null
   */
   itemViewForContent: function(obj) {
     var key = (obj) ? SC.guidFor(obj) : '0';
@@ -544,7 +544,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     null.
     
     @param {Object} value The group value.
-    @param {SC.View} The group view or null
+    @param {SC.ClassicView} The group view or null
   */
   groupViewForGroupValue: function(groupValue) {
     return this._groupViewsByValue[groupValue] ;
@@ -557,7 +557,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     their labelView while newer groupViews expect their groupValue to be set.
     This method takes into account both approaches.
     
-    @param {SC.View} groupView the group view.
+    @param {SC.ClassicView} groupView the group view.
     @returns {Object} the value of the group view or null.
   */
   groupValueForGroupView: function(groupView) {
@@ -932,7 +932,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     firstLayout is true, you can simply set the new layout without checking
     first.
     
-    @param {SC.View} groupView the view to size and position.
+    @param {SC.ClassicView} groupView the view to size and position.
     @param {Object} groupValue the value the groupView represents.
     @param {Number} contentIndexHint the index of a content object.
     @param {Bool} firstLayout True if this is the first the view has been laid out. 
@@ -947,7 +947,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     layoutResize() method.  You should use this method to size and position
     the itemView.
     
-    @param {SC.View} itemViewthe item view to layout
+    @param {SC.ClassicView} itemViewthe item view to layout
     @param {Number} contentIndex the index of the content this layout represents.
     @param {Bool} firstLayout true if this is the first time it has been laid out.
   */
@@ -1036,11 +1036,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     assumes that manual layout will ensure the items appear visually in the 
     proper order anyway.
 
-    @param {SC.View} itemView The item view to remove
+    @param {SC.ClassicView} itemView The item view to remove
     @param {String} groupBy the value used for grouping or null if grouping is 
       disabled.
     
-    @returns {SC.View} the new itemView.
+    @returns {SC.ClassicView} the new itemView.
   */
   _insertItemViewFor: function(content, groupBy, contentIndex) {
 
@@ -1103,11 +1103,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     If the itemView belongs to a groupView and this leaves the groupView empty 
     as well, then the groupView will be moved to the zombieGroupViews hash.
     
-    @param {SC.View} itemView The item view to remove
+    @param {SC.ClassicView} itemView The item view to remove
     @param {String} groupBy the value used for grouping or null if grouping is 
       disabled.
     
-    @returns {SC.View} The itemView that was removed.
+    @returns {SC.ClassicView} The itemView that was removed.
   */
   _removeItemView: function(itemView, groupBy) {
     
@@ -1179,7 +1179,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     the groupViews in the hierarchy.  It assumes that manual layout will 
     ensure the items appear visually in the proper order anyway.
     
-    @returns {SC.View} the new groupView.
+    @returns {SC.ClassicView} the new groupView.
   */
   _insertGroupViewFor: function(groupValue, contentIndex) {
     var ret =  this._groupViewsByValue[groupValue] ; 
@@ -1497,7 +1497,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   /**
     Scroll the rootElement (if needed) to ensure that the item is visible.
-    @param {SC.View} view The item view to scroll to
+    @param {SC.ClassicView} view The item view to scroll to
     @returns {void}
   */
   scrollToItemView: function( view )
@@ -2553,7 +2553,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     The default implementation of this method does nothing.
     
-    @param itemView {SC.View} view the insertion point should appear directly before. If null, show insertion point at end.
+    @param itemView {SC.ClassicView} view the insertion point should appear directly before. If null, show insertion point at end.
     @param dropOperation {Number} the drop operation.  will be SC.DROP_BEFORE or SC.DROP_ON
     
     @returns {void}
@@ -2573,7 +2573,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     yourself, the default implementation will call this method whenever the
     drop operation is SC.DROP_BEFORE.
     
-    @param itemView {SC.View} the item view to show before.
+    @param itemView {SC.ClassicView} the item view to show before.
     @returns {void}
   */
   showInsertionPointBefore: function(itemView) {},
@@ -2604,7 +2604,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
      the drag.
   */
   ghostViewFor: function(dragContent) {
-    var view = SC.View.create() ;
+    var view = SC.ClassicView.create() ;
     view.setStyle({ position: 'absolute', overflow: 'hidden' });
     
     var viewFrame = this.convertFrameToView(this.get('frame'), null) ;
@@ -2642,7 +2642,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
     // Now we have a view, create another view that will wrap the other view 
     // and position it inside.
-    var wrapper = SC.View.create() ;
+    var wrapper = SC.ClassicView.create() ;
     wrapper.setStyle({ position: 'absolute', overflow: 'hidden' }) ;
     wrapper.set('frame', { 
       x: viewFrame.x+minX, y: viewFrame.y+minY, 

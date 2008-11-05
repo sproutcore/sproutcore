@@ -48,7 +48,7 @@ SC.CollectionViewTest = {
     this.view = SC.CollectionView.create(props);
     this.view.addClassName('test-collection') ;
     
-    var container = SC.View.extend({
+    var container = SC.ClassicView.extend({
       emptyElement: '<div class="test-container"></div>'
     }).create() ;
     

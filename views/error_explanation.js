@@ -12,11 +12,11 @@ require('views/label');
   one or more errors related to a form or field.  This view will set itself
   to visible only if it has errors.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   
 */
-SC.ErrorExplanationView = SC.View.extend(SC.Control,
+SC.ErrorExplanationView = SC.ClassicView.extend(SC.Control,
 /** @scope SC.ErrorExplanationView.prototype */ {
 
   emptyElement: '<ul class="errors"></ul>',

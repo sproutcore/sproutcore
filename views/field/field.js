@@ -19,13 +19,13 @@ require('foundation/mixins/validatable') ;
   handles blending the browser input methods with the editing and events 
   handling provided by the framework.  
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   @extends SC.Validatable
   @author Charles Jolley
   @version 1.0
 */
-SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
+SC.FieldView = SC.ClassicView.extend(SC.Control, SC.Validatable,
 /** @scope SC.FieldView.prototype */ {
 
   // PUBLIC PROPERTIES

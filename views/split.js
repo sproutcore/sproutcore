@@ -76,13 +76,13 @@ SC.VERTICAL = 'vertical' ;
   @property {Boolean} isCollapsed YES if the child view is collapsed, NO
   otherwise.
 
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.DelegateSupport
 
   @author Charles Jolley
   @author Lawrence Pit
 */
-SC.SplitView = SC.View.extend(SC.DelegateSupport,
+SC.SplitView = SC.ClassicView.extend(SC.DelegateSupport,
 /** @scope SC.SplitView.prototype */ {
 
   emptyElement: '<div class="sc-split-view"></div>',
@@ -112,7 +112,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
   /**
     Returns the thickness for a given view.
 
-    @param {SC.View} view the view to get.
+    @param {SC.ClassicView} view the view to get.
     @returns the view with the width.
   */
   getThicknessForView: function(view) {
@@ -125,7 +125,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     Sets the thickness of the named view and then lays out the rest of the
     views.
 
-    @param {SC.View} view the view to adjust. Must not be a divider.
+    @param {SC.ClassicView} view the view to adjust. Must not be a divider.
     @param {Number} proposedThickness the new desired thickness
     @returns the actual thickness
   */
@@ -275,7 +275,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     property canCollapse set to NO, otherwise it returns YES.
 
     @param {SC.SplitView} splitView the split view
-    @param {SC.View} view the view we want to collapse.
+    @param {SC.ClassicView} view the view we want to collapse.
     @returns {Boolean} YES to allow collapse.
   */
   splitViewCanCollapse: function(splitView, view) {
@@ -292,7 +292,7 @@ SC.SplitView = SC.View.extend(SC.DelegateSupport,
     visible area.
 
     @param {SC.SplitView} splitView the split view
-    @param {SC.View} view the view in question
+    @param {SC.ClassicView} view the view in question
     @param {Number} proposedThickness the proposed thickness.
     @returns the allowed thickness
   */

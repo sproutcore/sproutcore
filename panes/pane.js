@@ -27,11 +27,11 @@ SC.KEYVIEW_SELECTING_PREVIOUS  = 2;
   You will rarely use the SC.PaneView directly.  Instead, you should use
   one of the subclasses included in SproutCore or create your own.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @since SproutCore 1.0
 */
   
-SC.PaneView = SC.View.extend({
+SC.PaneView = SC.ClassicView.extend({
 
   // panes do not belong to other panes...
   pane: null,

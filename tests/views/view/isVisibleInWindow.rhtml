@@ -1,5 +1,5 @@
 <% # ========================================================================
-   # SC.View isVisibleInWindow Unit Test
+   # SC.ClassicView isVisibleInWindow Unit Test
    # ========================================================================
 %>
 <% content_for('final') do %>
@@ -30,7 +30,7 @@ Test.context("CASE 1: View created outside of window", {
   },
   
   setup: function() { 
-    v = SC.View.extend({
+    v = SC.ClassicView.extend({
       emptyElement: '<div class="case"></div>'
     }).create(); 
   }
@@ -64,7 +64,7 @@ Test.context("CASE 2: View in body", {
   
   setup: function() { 
     v = SC.page.get('case2');
-    offscreen = SC.View.create() ; 
+    offscreen = SC.ClassicView.create() ; 
   }
 });
 
@@ -91,7 +91,7 @@ Test.context("CASE 3: View created in resources", {
   
   setup: function() { 
     v = SC.page.get('case3');
-    offscreen = SC.View.create() ; 
+    offscreen = SC.ClassicView.create() ; 
   }
 
 });

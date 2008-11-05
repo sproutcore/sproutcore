@@ -59,7 +59,7 @@ SC.Validator = SC.Object.extend(
   
   @param {Object} object The object to transform
   @param {SC.FormView} form The form this field belongs to. (optional)
-  @param {SC.View} view The view the value is required for.
+  @param {SC.ClassicView} view The view the value is required for.
   @returns {Object} a value (usually a string) suitable for display
 */
   fieldValueForObject: function(object, form, view) { return object; },
@@ -74,7 +74,7 @@ SC.Validator = SC.Object.extend(
     
     @param {String} value the field value.  (Usually a String).
     @param {SC.FormView} form The form this field belongs to. (optional)
-    @param {SC.View} view The view this value was pulled from.
+    @param {SC.ClassicView} view The view this value was pulled from.
     @returns {Object} an object suitable for consumption by the app.
   */
   objectForFieldValue: function(value, form, view) { return value; },
@@ -91,7 +91,7 @@ SC.Validator = SC.Object.extend(
     if the field is not valid.
 
     @param {SC.FormView} form the form this view belongs to
-    @param {SC.View} field the field to validate.  Responds to fieldValue.
+    @param {SC.ClassicView} field the field to validate.  Responds to fieldValue.
     @returns {Boolean} YES if field is valid.
   */
   validate: function(form, field) { return true; },
@@ -105,7 +105,7 @@ SC.Validator = SC.Object.extend(
     false.
   
     @param {SC.FormView} form the form this view belongs to
-    @param {SC.View} field the field to validate.  Responds to fieldValue.
+    @param {SC.ClassicView} field the field to validate.  Responds to fieldValue.
     @returns {SC.Error} an error object
   */
   validateError: function(form, field) { 
@@ -126,7 +126,7 @@ SC.Validator = SC.Object.extend(
     SC.Validator.OK if validation succeeded or an error object if it fails.
   
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
     @param {Object} oldValue: the value of the field before the change
 
     @returns SC.Validator.OK or an error object.
@@ -144,7 +144,7 @@ SC.Validator = SC.Object.extend(
     validateChange() method.
   
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
 
     @returns SC.Validator.OK or an error object.
   
@@ -165,7 +165,7 @@ SC.Validator = SC.Object.extend(
     SC.Validator.OK then any showing errors will be hidden.
   
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
 
     @returns SC.Validator.OK, SC.Validator.NO_CHANGE or an error object.
   */  
@@ -183,7 +183,7 @@ SC.Validator = SC.Object.extend(
     validation on the field.  Instead use validatePartial().
   
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
     @param {String} char the characters being added
     
     @returns {Boolean} YES if allowed, NO otherwise
@@ -199,7 +199,7 @@ SC.Validator = SC.Object.extend(
     You can use this to do any setup that you need.  The default does nothing.
     
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
   */
   attachTo: function(form,field) { },
 
@@ -208,7 +208,7 @@ SC.Validator = SC.Object.extend(
     tear down any setup you did for the attachTo() method.
     
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
   */
   detachFrom: function(form, field) {}
 
@@ -244,7 +244,7 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
       brackets. i.e. 'password[pwd]'.
 
     @param {SC.FormView} form the form for the field
-    @param {SC.View} field the field to validate
+    @param {SC.ClassicView} field the field to validate
     @param {Object} validatorKey the key to validate
     
     @returns {SC.Validaotr} validator instance or null

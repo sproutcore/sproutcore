@@ -391,7 +391,7 @@ SC.Drag = SC.Object.extend(
   // PRIVATE PROPERTIES AND METHODS
   //
   
-  _ghostViewClass: SC.View.extend({ 
+  _ghostViewClass: SC.ClassicView.extend({ 
     emptyElement: '<div class="sc-ghost-view"></div>'
   }),
   

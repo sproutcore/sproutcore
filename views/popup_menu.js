@@ -12,9 +12,9 @@ require('views/view') ;
   view's popup() method.  Pass in the root element and event so that is can
   be positioned.
   
-  @extends SC.View
+  @extends SC.ClassicView
 */
-SC.PopupMenuView = SC.View.extend({
+SC.PopupMenuView = SC.ClassicView.extend({
   emptyElement: "<ul></ul>",
   
   acceptsFirstResponder: true,

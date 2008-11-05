@@ -13,7 +13,7 @@ require('views/container') ;
   a ScrollView is preferrable because it will also notify child views anytime
   the view is scrolled.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @author  Charles Jolley  
   @version 1.0
 */

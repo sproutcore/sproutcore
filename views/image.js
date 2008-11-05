@@ -28,11 +28,11 @@ SC.BLANK_IMAGE_URL = static_url('blank.gif');
   your page load time if you use a lot of images including a image loading
   queue and automatic support for CSS spriting.
 
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   @author Charles Jolley
 */
-SC.ImageView = SC.View.extend(SC.Control, 
+SC.ImageView = SC.ClassicView.extend(SC.Control, 
 /** @scope SC.ImageView.prototype */ {
   
   /** Image views contain an img tag. */

@@ -23,9 +23,9 @@ require('views/view') ;
       be set to fill 100%
   .progress.disabled = show as disabled. 
 
-  @extends SC.View
+  @extends SC.ClassicView
 */
-SC.ProgressView = SC.View.extend({
+SC.ProgressView = SC.ClassicView.extend({
   
   // ........................................
   // PROPERTIES
@@ -81,7 +81,7 @@ SC.ProgressView = SC.View.extend({
   emptyElement: '<div class="progress outer"><div class="outer-head"></div><div class="inner"><div class="inner-head"></div><div class="inner-tail"></div></div><div class="outer-tail"></div></div>',
   
   outlets: ['innerView'],
-  innerView: SC.View.outletFor('.inner?'),
+  innerView: SC.ClassicView.outletFor('.inner?'),
   
   // ........................................
   // INTERNAL SUPPORT

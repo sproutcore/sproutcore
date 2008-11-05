@@ -4,7 +4,7 @@
 # you pass in.  More complex components can be found in the 
 # view_kit.
 
-# Render an SC.View.  This is also the base for all other view helpers.
+# Render an SC.ClassicView.  This is also the base for all other view helpers.
 #
 # :tag      the wrapper tag. default: 'div'
 # :class    css class names. maybe a string or array.
@@ -89,7 +89,7 @@ view_helper :view do
     end
   end
         
-  view('SC.View') { properties }
+  view('SC.ClassicView') { properties }
 
   # deal with css classnames and styles.
   # Note that you can append either arrays or single strings or symbols 
@@ -131,7 +131,7 @@ view_helper :view do
   end
 end
 
-# Render an SC.LabelView.  Inherits from SC.View
+# Render an SC.LabelView.  Inherits from SC.ClassicView
 #
 # :formatter    Name of a formatter.
 # :localize     (bindable) localize string
@@ -153,7 +153,7 @@ view_helper :label_view do
   @inner_html = @value unless @value.nil?
 end
 
-# Render an SC.SpinnerView. Inherits from SC.View. You should bind 
+# Render an SC.SpinnerView. Inherits from SC.ClassicView. You should bind 
 # :visible usually.
 #
 # :src        Set the src of the spinner img. Defaults to 

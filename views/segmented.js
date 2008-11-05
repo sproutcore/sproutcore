@@ -16,10 +16,10 @@ require('views/view') ;
   Also, on configure, if the buttons in the segment view do not have actions
   set, then the button will be configured to change the select state.
 
-  @extends SC.View
+  @extends SC.ClassicView
   @since SproutCore 1.0
 */
-SC.SegmentedView = SC.View.extend(
+SC.SegmentedView = SC.ClassicView.extend(
 /** @scope SC.SegmentedView.prototype */ {
   
   /**

@@ -263,7 +263,7 @@ value.  This makes it possible to do method chaining.
 - Use Element instead of element for IE compatability in 
   Element.setClassName()
     
-- Added SC.View#destroy() to remove views from internal caches. insertBefore, 
+- Added SC.ClassicView#destroy() to remove views from internal caches. insertBefore, 
   removeChild, etc. also now return the view instance so you can chain them.
 
 - Popup menu was setting the width on each of the child menu items in addition
@@ -347,7 +347,7 @@ is used by a parent class.  Changed to _optframe
 
 * Improved some documentation here and there.
 
-* [FIX] SC.View will recache its frames when isVisibleInWindow changes.  This 
+* [FIX] SC.ClassicView will recache its frames when isVisibleInWindow changes.  This 
   will help to ensure we always have the correct dimensions when bringing 
   views on and offscreen. -- All unit tests now pass again.
 
@@ -590,7 +590,7 @@ group value is null.  Items will still be shown; they will just appear to be
   generic a.button or a.regular.
 
 * Added new addClassName, removeClassName, setClassName and hasClassName
-  methods on SC.View that are 7x faster than prototype's version.
+  methods on SC.ClassicView that are 7x faster than prototype's version.
 
 * Integrated SC.Control into SC.ButtonView
 
@@ -612,7 +612,7 @@ own application, courtesy of IconDrawer (http://www.icondrawer.com).
 * Generalized SC.Control's observer so that you can now use it to observe
   changes to multiple properties on content.  This should capture a very 
   common pattern requires by collection item views.  Most control-list 
-  SC.Views will eventually adopt this mixin.
+  SC.ClassicViews will eventually adopt this mixin.
 
 * Added ListItemView which will be used for rendering content in list views 
   and source list views.  ListViewItem can render a name, icon, and optional
@@ -663,7 +663,7 @@ own application, courtesy of IconDrawer (http://www.icondrawer.com).
   handling selection states, enabled and focus states.
 
 * Removed support for :resize_options property in view helper, since 
-  auto-resizing is no longer supported in SC.View (it never worked right 
+  auto-resizing is no longer supported in SC.ClassicView (it never worked right 
   anyway and was not functionally very usable.)
 
 * innerText property now uses TextNodes, making it about 50% faster than 

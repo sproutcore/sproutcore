@@ -79,12 +79,12 @@ require('foundation/mixins/inline_editor_delegate');
   discardEditing().  This method will generally suceed unless your delegate
   refuses it as well.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.DelegateSupport
   @extends SC.InlineEditorDelegate
   @since SproutCore 1.0
 */
-SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDelegate,
+SC.InlineTextFieldView = SC.ClassicView.extend(SC.DelegateSupport, SC.InlineEditorDelegate,
 /** @scope SC.InlineTextFieldView.prototype */ {
 
   /**
@@ -361,7 +361,7 @@ SC.InlineTextFieldView = SC.View.extend(SC.DelegateSupport, SC.InlineEditorDeleg
 
   }).outletFor('.inner-field?'),
   
-  sizer: SC.View.outletFor('.sizer?')
+  sizer: SC.ClassicView.outletFor('.sizer?')
 
 });
 

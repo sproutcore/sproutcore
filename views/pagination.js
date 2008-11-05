@@ -15,9 +15,9 @@ require('views/button/button') ;
   for switching between them.  It includes a forward arrow, back arrow, and
   a popup.
   
-  @extends SC.View
+  @extends SC.ClassicView
 */
-SC.PaginationView = SC.View.extend({
+SC.PaginationView = SC.ClassicView.extend({
 
   // ......................................
   // PROPERTIES

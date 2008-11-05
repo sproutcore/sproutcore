@@ -25,7 +25,7 @@ SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
   application.  You can use views to render visible content on your page,
   provide animations, and to capture and respond to events.  
 
-  You can use SC.View directly to manage DOM elements or you can extend one
+  You can use SC.ClassicView directly to manage DOM elements or you can extend one
   of the many subclasses provided by SproutCore.  This documentation describes
   the general concepts you need to understand when working with views, though
   most often you will want to work with one of the subclasses instead.
@@ -39,8 +39,8 @@ SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
   @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
-SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
-/** @scope SC.View.prototype */ {
+SC.ClassicView = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
+/** @scope SC.ClassicView.prototype */ {
 
   // ..........................................
   // VIEW API
@@ -62,10 +62,10 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     If the specified view already belongs to another parent, it will be 
     removed from that view first.
     
-    @param view {SC.View} the view to insert as a child node.
-    @param beforeView {SC.View} view to insert before, or null to insert at 
+    @param view {SC.ClassicView} the view to insert as a child node.
+    @param beforeView {SC.ClassicView} view to insert before, or null to insert at 
      end
-    @returns {SC.View} the receiver
+    @returns {SC.ClassicView} the receiver
   */
   insertBefore: function(view, beforeView) { 
     this._insertBefore(view,beforeView,true);
@@ -132,8 +132,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     This will also remove the view's DOM element from the recievers DOM.
     
-    @param view {SC.View} the view to remove
-    @returns {SC.View} the receiver
+    @param view {SC.ClassicView} the view to remove
+    @returns {SC.ClassicView} the receiver
   */
   removeChild: function(view) {
     if (!view) return ;
@@ -186,9 +186,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     If the specified view already belongs to another parent, it will be 
     removed from that view first.
 
-    @param view {SC.View} the view to insert in the DOM
-    @param view {SC.View} the view to remove from the DOM.
-    @returns {SC.View} the receiver
+    @param view {SC.ClassicView} the view to insert in the DOM
+    @param view {SC.ClassicView} the view to remove from the DOM.
+    @returns {SC.ClassicView} the receiver
   */
   replaceChild: function(view, oldView) {
     this.insertBefore(view,oldView) ; this.removeChild(oldView) ;
@@ -222,7 +222,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   */
   destroy: function() {
     this.removeFromParent() ;
-    delete SC.View._view[SC.guidFor(this)];
+    delete SC.ClassicView._view[SC.guidFor(this)];
     return null ;
   },
   
@@ -230,8 +230,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     Appends the specified view to the end of the receivers childNodes array.  
     This is equivalent to calling insertBefore(view, null);
     
-    @param view {SC.View} the view to insert
-    @returns {SC.View} the receiver 
+    @param view {SC.ClassicView} the view to insert
+    @returns {SC.ClassicView} the receiver 
   */
   appendChild: function(view) {
     this.insertBefore(view,null) ;   
@@ -253,7 +253,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     any children, this property will be null.
      
     @field
-    @type SC.View
+    @type SC.ClassicView
   */
   firstChild: null,
   
@@ -262,7 +262,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     this property will be null.
      
     @field
-    @type SC.View
+    @type SC.ClassicView
   */
   lastChild: null,
   
@@ -272,7 +272,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     belong to a parent view this property will be null.
      
     @field
-    @type SC.View
+    @type SC.ClassicView
   */
   nextSibling: null,
 
@@ -282,7 +282,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     receiver does not belong to a parent view this property will be null.
      
     @field
-    @type SC.View
+    @type SC.ClassicView
   */
   previousSibling: null,
 
@@ -291,7 +291,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     then this property is null.
      
     @field
-    @type SC.View
+    @type SC.ClassicView
   */
   parentNode: null,
   
@@ -306,7 +306,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     onscreen, this property will be null.
     
     @field
-    @type SC.View
+    @type SC.ClassicView
   */
   pane: function()
   {
@@ -336,8 +336,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     reset any cached values that are impacted by being added to a view.  The 
     default implementation does nothing.
     
-    @param parent {SC.View} the new parent
-    @paran beforeView {SC.View} the view in the parent's childNodes array that 
+    @param parent {SC.ClassicView} the new parent
+    @paran beforeView {SC.ClassicView} the view in the parent's childNodes array that 
       will follow this view once it is added.  If the view is being added to 
       the end of the array, this will be null.
     @returns {void}
@@ -352,8 +352,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     reset any cached values that are impacted by being added to a view.  The 
     default implementation does nothing.
     
-    @param parent {SC.View} the new parent
-    @paran beforeView {SC.View} the view in the parent's childNodes array that 
+    @param parent {SC.ClassicView} the new parent
+    @paran beforeView {SC.ClassicView} the view in the parent's childNodes array that 
       will follow this view once it is added.  If the view is being added to 
       the end of the array, this will be null.
     @returns {void}
@@ -380,7 +380,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     view belonging to the current parentNode.  The default implementation does 
     nothing.
 
-    @param oldParent {SC.View} the old parent view
+    @param oldParent {SC.ClassicView} the old parent view
     @returns {void}
   */
   didRemoveFromParent: function(oldParent) {},
@@ -392,8 +392,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     The default implementation does nothing.
     
-    @param child {SC.View} the view to be added
-    @param beforeView {SC.View} and existing child view that will follow the 
+    @param child {SC.ClassicView} the view to be added
+    @param beforeView {SC.ClassicView} and existing child view that will follow the 
       child view in the array once it is added.  If adding to the end of the 
       array, this param will be null.
     @returns {void}
@@ -407,8 +407,8 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     The default implementation does nothing.
     
-    @param child {SC.View} the view that was added
-    @param beforeView {SC.View} and existing child view that will follow the 
+    @param child {SC.ClassicView} the view that was added
+    @param beforeView {SC.ClassicView} and existing child view that will follow the 
       child view in the array once it is added.  If adding to the end of the 
       array, this param will be null.
     @returns {void}
@@ -422,7 +422,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     The default implementation does nothing.
     
-    @param child {SC.View} the view to be removed
+    @param child {SC.ClassicView} the view to be removed
     @returns {void}
   */
   willRemoveChild: function(child) {},
@@ -434,7 +434,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     
     The default implementation does nothing.
     
-    @param child {SC.View} the view that was removed
+    @param child {SC.ClassicView} the view that was removed
     @returns {void}
   */
   didRemoveChild: function(child) {},
@@ -693,7 +693,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   // support.  Values are typically assumed to be in px.
   
   /**
-    SC.View's unknown property is used to implement a large class of 
+    SC.ClassicView's unknown property is used to implement a large class of 
     properties beginning with the the world "style".  You can get or set
     any of these properties to edit individual CSS style properties.
   */
@@ -741,7 +741,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     This is the DOM element actually managed by this view.  This will be set
     by the view when it is created.  You should rarely need to access this 
     property directly.  When you do access it, you should only do so from 
-    within methods you write on your SC.View subclasses, never from outside
+    within methods you write on your SC.ClassicView subclasses, never from outside
     the view.
     
     Unlike most properties, you do not need to use get()/set() to access this
@@ -762,7 +762,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     currently safe to edit this property once the view has been created.
     
     Like rootElement, you should only access this property from within
-    methods you write on an SC.View subclass, never from outside the view.
+    methods you write on an SC.ClassicView subclass, never from outside the view.
     Unlike most properties, it is not necessary to use get()/set().
     
     @field
@@ -793,7 +793,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   */
   needsClippingFrame: function() {
     if (this._needsClippingFrame == null) {
-      var ret = this.clippingFrameDidChange != SC.View.prototype.clippingFrameDidChange;
+      var ret = this.clippingFrameDidChange != SC.ClassicView.prototype.clippingFrameDidChange;
       var view = this.get('firstChild') ;
       while(!ret && view) {
         ret = view.get('needsClippingFrame') ;
@@ -844,9 +844,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     always up-to-date anyway, set this property to true.
   */
   hasManualLayout: function() {
-    return (this.resizeChildrenWithOldSize != SC.View.prototype.resizeChildrenWithOldSize) ||
-    (this.resizeWithOldParentSize != SC.View.prototype.resizeWithOldParentSize) ||
-    (this.clippingFrameDidChange != SC.View.prototype.clippingFrameDidChange) ;
+    return (this.resizeChildrenWithOldSize != SC.ClassicView.prototype.resizeChildrenWithOldSize) ||
+    (this.resizeWithOldParentSize != SC.ClassicView.prototype.resizeWithOldParentSize) ||
+    (this.clippingFrameDidChange != SC.ClassicView.prototype.clippingFrameDidChange) ;
   }.property(),
     
   /**
@@ -861,7 +861,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     Note that if your view is not visible on the screen, this may not work.
     
     @param {Point} f The point or frame to convert
-    @param {SC.View} targetView The view to convert from.  Pass null to convert from window coordinates.
+    @param {SC.ClassicView} targetView The view to convert from.  Pass null to convert from window coordinates.
       
     @returns {Point} The converted point or frame
   */
@@ -889,7 +889,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     Note that if your view is not visible on the screen, this may not work.
     
     @param {Point} f The point or frame to convert
-    @param {SC.View} targetView The view to convert to.  Pass null to convert to window coordinates.
+    @param {SC.ClassicView} targetView The view to convert to.  Pass null to convert to window coordinates.
       
     @returns {Point} The converted point or frame
   */
@@ -958,7 +958,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       // The _collectInnerFrame function is set at the bottom of this file
       // based on the browser type.
       var el = this.rootElement ;
-      f = this._collectFrame(SC.View._collectInnerFrame) ;
+      f = this._collectFrame(SC.ClassicView._collectInnerFrame) ;
 
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset
@@ -1064,9 +1064,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       if (value.width !== undefined) {
         didResize = true ;
         var padding = 0 ;
-        var idx = SC.View.WIDTH_PADDING_STYLES.length;
+        var idx = SC.ClassicView.WIDTH_PADDING_STYLES.length;
         while(--idx >= 0) {
-          padding += parseInt(this.getStyle(SC.View.WIDTH_PADDING_STYLES[idx]), 0) || 0;
+          padding += parseInt(this.getStyle(SC.ClassicView.WIDTH_PADDING_STYLES[idx]), 0) || 0;
         }
         var width = Math.floor(f.width) - padding ;
         if (!isNaN(width)) style.width = width.toString() + 'px' ;
@@ -1076,9 +1076,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
       if (value.height !== undefined) {
         didResize = true ;
         var padding = 0 ;
-        var idx = SC.View.HEIGHT_PADDING_STYLES.length;
+        var idx = SC.ClassicView.HEIGHT_PADDING_STYLES.length;
         while(--idx >= 0) {
-          padding += parseInt(this.getStyle(SC.View.HEIGHT_PADDING_STYLES[idx]), 0) || 0;
+          padding += parseInt(this.getStyle(SC.ClassicView.HEIGHT_PADDING_STYLES[idx]), 0) || 0;
         }
         var height = Math.floor(f.height) - padding ;
         if(!isNaN(height)) style.height = height.toString() + 'px' ;
@@ -1612,7 +1612,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     You can specify the HTML as a string of text, using the NodeDescriptor, or
     by pointing directly to an element.
     
-    Note that as an optimization, SC.View will actually convert the value of 
+    Note that as an optimization, SC.ClassicView will actually convert the value of 
     this property to an actual DOM structure the first time you create a view 
     and then clone the DOM structure for future views.  
     
@@ -1742,9 +1742,9 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     arguments.callee.base.call(this) ;
 
     // configure them outlets.
-    if (SC.BENCHMARK_CONFIGURE_OUTLETS) SC.Benchmark.start('SC.View.configureOutlets') ;
+    if (SC.BENCHMARK_CONFIGURE_OUTLETS) SC.Benchmark.start('SC.ClassicView.configureOutlets') ;
     this.configureOutlets() ;
-    if (SC.BENCHMARK_CONFIGURE_OUTLETS) SC.Benchmark.end('SC.View.configureOutlets') ;
+    if (SC.BENCHMARK_CONFIGURE_OUTLETS) SC.Benchmark.end('SC.ClassicView.configureOutlets') ;
 
     var toolTip = this.get('toolTip') ;
     if(toolTip && (toolTip != '')) this._updateToolTipObserver();
@@ -1759,7 +1759,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
     
     // add scrollable handler
-    if (this.isScrollable) this.rootElement.onscroll = SC.View._onscroll ;
+    if (this.isScrollable) this.rootElement.onscroll = SC.ClassicView._onscroll ;
     
     // setup isVisibleInWindow ;
     this.isVisibleInWindow = (this.parentNode) ? this.parentNode.get('isVisibleInWindow') : NO;
@@ -2013,7 +2013,7 @@ SC.View = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
 }) ;
   
 // Class Methods
-SC.View.mixin({  
+SC.ClassicView.mixin({  
 
   // this is the global registry of views.  It's used to map elements back
   // to the views that own them.
@@ -2021,7 +2021,7 @@ SC.View.mixin({
   
   findViewForElement: function(el) {
     var guid = el._configured ;
-    return (guid) ? SC.View._view[guid] : null ;  
+    return (guid) ? SC.ClassicView._view[guid] : null ;  
   },
   
   // ..........................................
@@ -2066,7 +2066,7 @@ SC.View.mixin({
     }
 
     // configure only once.
-    if (el && el._configured) return SC.View.findViewForElement(el); 
+    if (el && el._configured) return SC.ClassicView.findViewForElement(el); 
     
     // Now that we have found an element, instantiate the view.
     var args = SC.$A(arguments) ; args[0] = { rootElement: el } ;
@@ -2074,7 +2074,7 @@ SC.View.mixin({
     el._configured = SC.guidFor(ret) ;
 
     // return the view.
-    SC.View._view[SC.guidFor(ret)] = ret ;
+    SC.ClassicView._view[SC.guidFor(ret)] = ret ;
     return ret ;    
   },
   
@@ -2190,7 +2190,7 @@ SC.View.mixin({
 
 // IE Specfic Overrides
 if (SC.browser.msie) {
-  SC.View.prototype.getStyle = function(style) {
+  SC.ClassicView.prototype.getStyle = function(style) {
     var element = this.rootElement ;
 
     // collect value
@@ -2244,7 +2244,7 @@ if (SC.browser.msie) {
   // Normally the value we want for the width/height is stored in clientWidth/
   // height but in IE this is only good if the element hasLayout.  In this
   // case always use the scrollWidth/Height.
-  SC.View._collectInnerFrame = function() {
+  SC.ClassicView._collectInnerFrame = function() {
     var el = this.rootElement ;
     var hasLayout = (el.currentStyle) ? el.currentStyle.hasLayout : false ;
     var borderTopWidth = parseInt(el.currentStyle.borderTopWidth, 0) || 0 ;
@@ -2266,7 +2266,7 @@ if (SC.browser.msie) {
   // This method should return the smaller of the scrollWidth/height (which
   // will be set if the element is scrollable), or the clientWdith/height 
   // (which is set if the element is not scrollable).
-  SC.View._collectInnerFrame = function() {
+  SC.ClassicView._collectInnerFrame = function() {
     var el = this.rootElement ;
     return { 
       x: el.offsetLeft, 
@@ -2279,16 +2279,16 @@ if (SC.browser.msie) {
 
 
 // this handler goes through the guid to avoid any potential memory leaks
-SC.View._onscroll = function(evt) { $view(this)._onscroll(evt); } ;
+SC.ClassicView._onscroll = function(evt) { $view(this)._onscroll(evt); } ;
 
-SC.View.WIDTH_PADDING_STYLES = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'];
+SC.ClassicView.WIDTH_PADDING_STYLES = ['paddingLeft', 'paddingRight', 'borderLeftWidth', 'borderRightWidth'];
 
-SC.View.HEIGHT_PADDING_STYLES = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth'];
+SC.ClassicView.HEIGHT_PADDING_STYLES = ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth'];
 
-SC.View.SCROLL_WIDTH_PADDING_STYLES = ['borderLeftWidth', 'borderRightWidth'];
-SC.View.SCROLL_HEIGHT_PADDING_STYLES = ['borderTopWidth', 'borderBottomWidth'];
+SC.ClassicView.SCROLL_WIDTH_PADDING_STYLES = ['borderLeftWidth', 'borderRightWidth'];
+SC.ClassicView.SCROLL_HEIGHT_PADDING_STYLES = ['borderTopWidth', 'borderBottomWidth'];
 
-SC.View.elementFor = SC.View.viewFor ; // Old Sprout Compatibility.
+SC.ClassicView.elementFor = SC.ClassicView.viewFor ; // Old Sprout Compatibility.
 
 // This div is used to create nodes.  It should normally remain empty.
 SC._ViewCreator = document.createElement('div') ;

@@ -162,7 +162,7 @@ SC.GridView = SC.CollectionView.extend(
   },
   
   
-  insertionPointClass: SC.View.extend({
+  insertionPointClass: SC.ClassicView.extend({
     emptyElement: '<div class="grid-insertion-point"><span class="anchor"></span></div>'
   }),
   

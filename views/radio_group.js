@@ -8,7 +8,7 @@ require('views/view') ;
 // RadioGroupView manages a collection of buttons as a single value.  To 
 // use this view, just assign your buttons as outlets. This will use the
 // toggleOnValue you have already set.
-SC.RadioGroupView = SC.View.extend({
+SC.RadioGroupView = SC.ClassicView.extend({
    
    // this is the current value or values of the radio group view.  The
    // items in the radio group will be selected based on this value.

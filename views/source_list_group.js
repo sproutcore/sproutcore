@@ -12,13 +12,13 @@ require('views/button/disclosure');
   Displays a group view in a source list.  Handles displaying a disclosure
   triangle which can be used to show/hide children.
 
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.DelegateSupport
   @author   Charles Jolley 
   @version 0.1
 */
 
-SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
+SC.SourceListGroupView = SC.ClassicView.extend(SC.Control, SC.DelegateSupport, {
   
   emptyElement: ['<div class="sc-source-list-group">',
     '<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure no-disclosure">',

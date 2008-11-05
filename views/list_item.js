@@ -15,14 +15,14 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
 
   Displays a list item with a label, optional icon, count, and right icon.
 
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   @extends SC.InlineEditorDelegate
   @extends SC.Editable
   @author  Charles Jolley  
   @since SproutCore 1.0
 */
-SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
+SC.ListItemView = SC.ClassicView.extend(SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.ListItemView.prototype */ {
   
   /** A ListItemView has an img tag, label, count, optional right button, and

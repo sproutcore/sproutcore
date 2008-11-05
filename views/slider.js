@@ -15,13 +15,13 @@ require('foundation/mixins/control');
   display.  You can also set the maximumValue and minValue properties to determine
   the mapping of the control to its children.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   
   @author    Charles Jolley  
   @version 1.0
 */
-SC.SliderView = SC.View.extend(SC.Control,
+SC.SliderView = SC.ClassicView.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
 
   emptyElement: '<span class="sc-slider-view"><span class="inner"><img src="%@" class="sc-handle" /></span></span>'.fmt(static_url('blank')),

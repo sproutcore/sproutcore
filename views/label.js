@@ -17,14 +17,14 @@ require('foundation/mixins/inline_editor_delegate');
   You use a label view anytime you need to display a static string of text 
   or to display text that may need to be edited using only an inline control.
   
-  @extends SC.View
+  @extends SC.ClassicView
   @extends SC.Control
   @extends SC.DelegateSupport
   @extends SC.InlineEditorDelegate
   @extends SC.Editable
   @since SproutCore 1.0
 */
-SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
+SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.LabelView.prototype */ {
 
   emptyElement: '<span class="sc-label-view"></span>',

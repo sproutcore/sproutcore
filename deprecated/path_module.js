@@ -344,14 +344,14 @@ SC._PathModule = {
   // find an element and configure it as the named view if it is not already
   // configured.
   $$view: function(el, selector, viewClass, levels, max, nest) {
-    //if (!viewClass) viewClass = SC.View;
+    //if (!viewClass) viewClass = SC.ClassicView;
     var ret ;
     if (selector && (typeof(selector) != 'string')) {
       ret = [selector] ;
     } else {
       ret = SC._PathModule.$$S(el,selector,levels,max,nest) ;
     }
-    if (ret) ret = ret.map(function(x) { return (viewClass) ? viewClass.viewFor(x) : SC.View.findViewForElement(x); }) ;
+    if (ret) ret = ret.map(function(x) { return (viewClass) ? viewClass.viewFor(x) : SC.ClassicView.findViewForElement(x); }) ;
     return ret ;
   },
 

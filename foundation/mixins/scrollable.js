@@ -122,7 +122,7 @@ SC.Scrollable = {
     
     Frame must be relative to the receiver's offsetParent.
     
-    @param {SC.View} view the view you want to make visible
+    @param {SC.ClassicView} view the view you want to make visible
   */
   scrollToVisible: function(view) {
 

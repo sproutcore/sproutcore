@@ -11,11 +11,11 @@ require('views/image') ;
   a single imageView, the image cell will automatically position the image
   inside of the view to reflect the actual size of the image on load.
 
-  @extends SC.View
+  @extends SC.ClassicView
   @author    AuthorName  
   @version 0.1
 */
-SC.ImageCellView = SC.View.extend(SC.Control,
+SC.ImageCellView = SC.ClassicView.extend(SC.Control,
 /** @scope SC.ImageCellView.prototype */ {
 
   emptyElement: '<div class="image-cell sc-collection-item"><img src="%@"  style="position:relative;" /></div>'.fmt(static_url('blank')),

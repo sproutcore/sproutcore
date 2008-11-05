@@ -32,7 +32,7 @@ SC.mixin(Object,
   
   Since SproutCore no long requires the Prototype library, this extension to
   Prototype is also no longer supported.  You can use setClassName() on 
-  SC.View, or the sproutcore-jquery framework instead.
+  SC.ClassicView, or the sproutcore-jquery framework instead.
 */
 Element.setClassName = function(element,className,flag) {
   if(SC.browser.isIE)

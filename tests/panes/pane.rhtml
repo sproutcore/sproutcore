@@ -68,7 +68,7 @@ Test.context("A new SC.PaneView instance", {
   },
   "Should flag a view as 'isFirstResponder' when setting the firstResponder property": function()
   {
-    var view = SC.View.create();
+    var view = SC.ClassicView.create();
     view.get('isFirstResponder').shouldEqual(false);
     this.pane.set('firstResponder', view);
     view.get('isFirstResponder').shouldEqual(true);

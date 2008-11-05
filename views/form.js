@@ -46,7 +46,7 @@ require('views/field/text_field') ;
   Controller objects that provide this same buffering in a more robust way.
 
 */
-SC.FormView = SC.View.extend({
+SC.FormView = SC.ClassicView.extend({
 
   // PROPERTIES
   

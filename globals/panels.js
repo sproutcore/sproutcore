@@ -14,9 +14,9 @@ require('foundation/system/ready') ;
   customize how panels are shown in your application, override the showPanel()
   and hidePanel() methods.
 
-  @extends SC.View
+  @extends SC.ClassicView
 */
-SC.PanelView = SC.View.extend(
+SC.PanelView = SC.ClassicView.extend(
   /** @scope SC.PanelView.prototype */
   {
   
@@ -29,7 +29,7 @@ SC.PanelView = SC.View.extend(
     emptyElement: '<div class="panel"><div class="root"></div><div class="top-left-edge"></div><div class="top-edge"></div><div class="top-right-edge"></div><div class="right-edge"></div><div class="bottom-right-edge"></div><div class="bottom-edge"></div><div class="bottom-left-edge"></div><div class="left-edge"></div></div>',
     
     outlets: ['rootView'],
-    rootView: SC.View.outletFor('.root?')
+    rootView: SC.ClassicView.outletFor('.root?')
   }),
   
   // this is filled with instances of the the wrapperView so we don't have

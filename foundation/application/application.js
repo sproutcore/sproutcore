@@ -28,7 +28,7 @@ SC.Application = SC.Responder.extend(
     some other such element, you may set this to some other value.
     
     @field
-    @type {SC.View}
+    @type {SC.ClassicView}
   */
   keyPane: function( key, value )
   {
@@ -51,7 +51,7 @@ SC.Application = SC.Responder.extend(
     another key pane is positioned over it.
     
     @field
-    @type {SC.View}
+    @type {SC.ClassicView}
   */
   mainPane: function( key, value )
   {

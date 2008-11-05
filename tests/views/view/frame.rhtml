@@ -1,5 +1,5 @@
 <% # ========================================================================
-   # SC.View Frame/Rects Unit Test
+   # SC.ClassicView Frame/Rects Unit Test
    #
    # This test validates the various frame properties for a view given 
    # different configurations.
@@ -224,7 +224,7 @@ Test.context("CASE 7: Create view (not in the window)", {
     SC.rectsEqual(f,vf).shouldEqual(true) ;
   },
   
-  setup: function() { this.v = SC.View.extend({
+  setup: function() { this.v = SC.ClassicView.extend({
     emptyElement: '<div style="width: 30px; height: 30px; left: 10px; top: 10px; position: absolute;"></div>'
   }).create(); }
   
