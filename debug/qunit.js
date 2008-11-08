@@ -97,8 +97,9 @@ function runTest() {
   //config.ajaxSettings = $.ajaxSettings;
   synchronize(function() {
     console.log("*** Tests completed in %@ milliseconds.".fmt(Date.now()-started)) ;
-    console.log("*** %@ tests of %@ failed".fmt(config.stats.bad||0, config.stats.all)) ;
-    console.log(config.stats.bad ? "*** FAIL ***" : "*** PASS ***") ;
+    console.log("*** %@: %@ tests of %@ failed".fmt(
+      config.stats.bad ? "FAIL" : "PASS",
+      config.stats.bad||0, config.stats.all)) ;
 
     // $('<p id="testresult" class="result">').html(['Tests completed in ',
     //  +new Date - started, ' milliseconds.<br/>',
