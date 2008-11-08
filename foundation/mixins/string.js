@@ -47,7 +47,8 @@ SC.String = {
     var idx  = 0; // the current index for non-numerical replacements
     return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
       argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
-      return (args[argIndex] || '').toString(); 
+      s =args[argIndex];
+      return ((s===null) ? '(null)' : (s==undefined) ? '' : s).toString(); 
     }) ;
   },
 
