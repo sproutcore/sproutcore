@@ -53,7 +53,7 @@ SC.PaginationView = SC.ClassicView.extend({
 
   outlets: ['prevButton','nextButton','pageButton'],
   
-  prevButton: SC.ButtonView.extend({
+  prevButton: SC.ClassicButtonView.extend({
     action: function() { this.owner.decrementProperty('currentPage'); },
     isEnabledBinding: "*owner.hasPreviousPage"
   })

@@ -8,11 +8,11 @@ require('views/button/button');
 
   Disclosure triangle button.
 
-  @extends SC.ButtonView
+  @extends SC.ClassicButtonView
   @author    Charles Jolley 
   @version 1.0
 */
-SC.DisclosureView = SC.ButtonView.extend(
+SC.DisclosureView = SC.ClassicButtonView.extend(
 /** @scope SC.DisclosureView.prototype */ {
 
   emptyElement: '<a href="javascript:;" class="sc-disclosure-view sc-button-view button disclosure"><img src="%@" class="button" /><span class="label"></span></a>'.fmt(static_url('blank')),

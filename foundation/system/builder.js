@@ -7,25 +7,25 @@
   This is a generic builder.  You can use the create() or createFor() methods
   to actually create your own builder.
 
-  SC.Menu.builder = SC.builderFor(SC.Menu, {
+  SC.Menu.build = SC.builder({
     
   });
   
-  @param {Hash} props one or more hashes of properties
+  @param {Hash} helpers one or more hashes of helper properties
   @returns {Function} a builder function.
 */
-SC.builder = function(defaultClass, props) {
-  
-  // determine if default class was passed
-  var start = 1; 
-  if (SC.typeOf(defaultClass) !== SC.T_CLASS) {
-    defaultClass = null; start = 0 ;
-  }
+SC.builder = function(helpers) {
   
   // create the constructor for a new builder and copy on helpers
-  var construct = function(content, props) {
-    debugger ;
-    if (props === undefined && SC.typeOf(content) === SC.T_HASH) {
+  var construct = function(defaultClass, content, props) {
+    
+    // save default class used for builder
+    if (!this.defaultClass) this.defaultClass = defaultClass ;
+    
+    // if first parameter after default class was an instance of the class,
+    // then set that as content.  Otherwise, create a new instance of the 
+    // class.
+    if (props === undefined && (content instanceof this.defaultClass)) {
       props = content ; content = null ;
     }
     

@@ -15,11 +15,11 @@ require('views/button/button');
   has other features not found in platform-native controls.  If you want to 
   use the platform native version instead, see SC.RadioFieldView.
 
-  @extends SC.ButtonView
+  @extends SC.ClassicButtonView
   @author    Charles Jolley 
   @version 1.0
 */
-SC.RadioView = SC.ButtonView.extend(
+SC.RadioView = SC.ClassicButtonView.extend(
 /** @scope SC.RadioView.prototype */ {
 
   emptyElement: '<a href="javascript:;" class="sc-radio-view sc-button-view button radio"><img src="%@" class="button" /><span class="label"></span></a>'.fmt(static_url('blank')),

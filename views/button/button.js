@@ -24,8 +24,8 @@ SC.TOGGLE_OFF_BEHAVIOR = "off" ;
   @version 1.0
   
 */
-SC.ButtonView = SC.ClassicView.extend(SC.Control,
-/** @scope SC.ButtonView.prototype */ {
+SC.ClassicButtonView = SC.ClassicView.extend(SC.Control,
+/** @scope SC.ClassicButtonView.prototype */ {
   
   emptyElement: '<a href="javascript:;" class="sc-button-view regular"><span class="button-inner"><span class="label"></span></span></a>',
   

@@ -122,7 +122,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
   // when you hit return from within a dialog or panel, look for a child 
   // view with isDefault => true
   insertNewline: function(sender, evt) {
-    var button = this._findViewWithKeyIn('isDefault', SC.ButtonView, this) ;
+    var button = this._findViewWithKeyIn('isDefault', SC.ClassicButtonView, this) ;
     if (button) {
       button.triggerAction(evt) ;
       return true ;
@@ -130,7 +130,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
   },
   
   cancel: function(sender, evt) {
-    var button = this._findViewWithKeyIn('isCancel', SC.ButtonView, this) ;    
+    var button = this._findViewWithKeyIn('isCancel', SC.ClassicButtonView, this) ;    
     if (button) {
       button.triggerAction(evt) ;
       return true ;

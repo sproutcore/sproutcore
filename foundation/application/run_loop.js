@@ -95,11 +95,11 @@ SC.runLoop = SC.Object.create({
     SC.Binding.flushPendingChanges() ;
 
     // Possibly go ahead and ask any changed views to re-render?
-    // --
+    SC.View.flushPendingQueues() ; 
     
     this._start = null ;
   },
-
+    
   /**
     The time the current run loop began executing.
     

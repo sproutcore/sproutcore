@@ -61,7 +61,7 @@ SC.SegmentedView = SC.ClassicView.extend(
     this.segments.each(function(key) {
       var seg = view[key] ;
       var selectKey = key.slice(0,-6) ;
-      if (seg && (seg.action == SC.ButtonView.prototype.action)) seg.action = function() {
+      if (seg && (seg.action == SC.ClassicButtonView.prototype.action)) seg.action = function() {
         if (this.owner.get('allowsEmptySelection')) {
           newKey = (this.owner.get('value') == selectKey) ? null : selectKey;
         } else newKey = selectKey;

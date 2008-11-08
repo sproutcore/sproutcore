@@ -8,7 +8,7 @@ require('views/button/button') ;
 // A filter button sets a filter property to whatever you specifiy.  It 
 // also binds to the same property and updates its isSelected state based
 // on that.
-SC.FilterButtonView = SC.ButtonView.extend({
+SC.FilterButtonView = SC.ClassicButtonView.extend({
   
   filterValue: null, // relay to this property.
 

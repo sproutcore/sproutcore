@@ -75,6 +75,8 @@ SC.mixin({
   /** @private handlers scheduled to execute on ready. */
   _readyQueue: [],
 
+  isReady: NO,
+  
   /** @private invoked when the document becomes ready. */
   _didBecomeReady: function() {
     // Only call once
@@ -102,7 +104,7 @@ SC.mixin({
     SC.runLoop.beginRunLoop();
     
     // If there are handlers scheduled, execute them.
-    var queue = this._readyQueue, idx = (queue) ? queue.length : 0 ;
+    var queue = SC._readyQueue, idx = (queue) ? queue.length : 0 ;
     while(--idx >= 0) {
       var handler = queue[idx] ;
       var target = handler[0] || document ;
@@ -111,7 +113,7 @@ SC.mixin({
     }
     
     // clear the queue
-    this._readyQueue = null ;
+    SC._readyQueue = null ;
     
     // trigger any bound ready events
     SC.Event.trigger("ready", null, document, NO) ;

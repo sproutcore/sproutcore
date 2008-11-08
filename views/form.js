@@ -285,11 +285,11 @@ SC.FormView = SC.ClassicView.extend({
     // if this field is a submitButton or resetButton and the actio is
     // not set, set it...
     var form = this ;
-    if (key == 'submitButton' && (field.action == SC.ButtonView.prototype.action)) {
+    if (key == 'submitButton' && (field.action == SC.ClassicButtonView.prototype.action)) {
       field.action = function() { form.commit(); } ;
     }
     
-    if (key =="resetButton" && (field.action == SC.ButtonView.prototype.action)) {
+    if (key =="resetButton" && (field.action == SC.ClassicButtonView.prototype.action)) {
       field.action = function() { form.reset(); } ;    
     }
     

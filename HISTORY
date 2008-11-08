@@ -176,7 +176,7 @@
 
 == sproutcore 0.9.12
 
-- SC.ButtonView & SC.MenuItemView now removes and adds the 'active' class name
+- SC.ClassicButtonView & SC.MenuItemView now removes and adds the 'active' class name
   on mouseExited and mouseEntered when the mouse is pressed to provide better 
   indication of whether an action will occur on mouse up. (Thanks schwa23)
 
@@ -592,10 +592,10 @@ group value is null.  Items will still be shown; they will just appear to be
 * Added new addClassName, removeClassName, setClassName and hasClassName
   methods on SC.ClassicView that are 7x faster than prototype's version.
 
-* Integrated SC.Control into SC.ButtonView
+* Integrated SC.Control into SC.ClassicButtonView
 
-* Changed SC.ButtonView.labelText and SC.ButtonView.labelSelector to 
-  SC.ButtonView.title and SC.ButtonView.titleSelector to be more consistant 
+* Changed SC.ClassicButtonView.labelText and SC.ClassicButtonView.labelSelector to 
+  SC.ClassicButtonView.title and SC.ClassicButtonView.titleSelector to be more consistant 
   with current naming conventions.
 
 * [FIX] Some doc tags were wrong in SC.ScrollView and others.

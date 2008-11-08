@@ -765,7 +765,7 @@ SC.Observable = {
         }
 
         // if there is a default property observer, call that also
-        if (this.propertyObserver) this.propertyObserver(null, this, key, null, rev);
+        if (this.propertyObserver) this.propertyObserver(this, key, null, rev);
       } // while(changes.length>0)
 
       // changes set should be empty. save this set so it can be reused later

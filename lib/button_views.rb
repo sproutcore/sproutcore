@@ -91,7 +91,7 @@ view_helper :button_view do
     (x == :mixed) ? 'SC.MIXED_STATE' : x
   end
 
-  view 'SC.ButtonView'
+  view 'SC.ClassicButtonView'
 
   # HTML
   var :title

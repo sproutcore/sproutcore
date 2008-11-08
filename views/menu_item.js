@@ -11,10 +11,10 @@ require('views/classic_view') ;
   of button that will automatically close the popup menu when it is
   pressed.
   
-  @extends SC.ButtonView
+  @extends SC.ClassicButtonView
   
 */
-SC.MenuItemView = SC.ButtonView.extend({
+SC.MenuItemView = SC.ClassicButtonView.extend({
 
   emptyElement: [
   '<li class="button menu-item">',

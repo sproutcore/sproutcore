@@ -15,11 +15,11 @@ require('views/button/button');
   has other features not found in platform-native controls.  If you want to 
   use the platform native version instead, see SC.CheckboxFieldView.
 
-  @extends SC.ButtonView
+  @extends SC.ClassicButtonView
   @author    Charles Jolley 
   @version 1.0
 */
-SC.CheckboxView = SC.ButtonView.extend(
+SC.CheckboxView = SC.ClassicButtonView.extend(
 /** @scope SC.CheckboxView.prototype */ {
 
   emptyElement: '<a href="javascript:;" class="sc-checkbox-view sc-button-view button checkbox"><img src="%@" class="button" /><span class="label"></span></a>'.fmt(static_url('blank')),

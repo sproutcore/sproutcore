@@ -3,15 +3,15 @@ require('views/button/button') ;
 /**
   @class
 
-  @extends SC.ButtonView
+  @extends SC.ClassicButtonView
   @author Skip Baney
   @copyright 2006-2008, Sprout Systems, Inc. and contributors.
   @version 1.0
 */
-SC.PopupButtonView = SC.ButtonView.extend({
+SC.PopupButtonView = SC.ClassicButtonView.extend({
 
   /**
-    Overriding the default SC.ButtonView#performKeyEquivalent method to pass 
+    Overriding the default SC.ClassicButtonView#performKeyEquivalent method to pass 
     it onto the menu
 
     @param {string} keystring method name corresponding to the keys pressed 
