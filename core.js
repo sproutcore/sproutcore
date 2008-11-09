@@ -201,13 +201,15 @@ SC.mixin(/** @scope SC */ {
     // enumerable
     if (obj.toArray) return obj.toArray() ;
     
-    // not array-like
-    if (obj.length===undefined || SC.$type(obj) === SC.T_FUNCTION) return [obj];
+    // not array-like if no .length property or if function, string, or window
+    var len = obj.length, type = SC.typeOf(obj);
+    if (len==null || (type === SC.T_FUNCTION) || (type === SC.T_STRING) || (obj.setInterval)) {
+      return [obj];
+    }
 
     // when all else fails, do a manual convert...
-    var len = obj.length;
     var ret = [] ;
-    for(var idx=0;idx<len;idx++) ret[idx] = obj[idx];
+    while(--len >= 0) ret[len] = obj[len];
     return ret ;
   },
 
