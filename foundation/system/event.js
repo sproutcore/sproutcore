@@ -61,7 +61,7 @@ SC.Event = function(originalEvent) {
   }
 
   // Add which for key events
-  if (!this.which && ((this.charCode || event.charCode === 0) ? this.charCode : this.keyCode)) {
+  if (!this.which && ((this.charCode || originalEvent.charCode === 0) ? this.charCode : this.keyCode)) {
     this.which = this.charCode || this.keyCode;
   }
 
