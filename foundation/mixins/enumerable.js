@@ -321,6 +321,76 @@ SC.Enumerable = {
   },
     
   /**
+    Returns the first item in the array for which the callback returns YES.
+    This method works similar to the filter() method defined in JavaScript 1.6
+    except that it will stop working on the array once a match is found.
+
+    The callback method you provide should have the following signature (all
+    parameters are optional):
+
+    {{{
+      function(item, index, enumerable) ;      
+    }}}
+
+    - *item* is the current item in the iteration.
+    - *index* is the current index in the iteration
+    - *enumerable* is the enumerable object itself.
+
+    It should return the YES to include the item in the results, NO otherwise.
+
+    Note that in addition to a callback, you can also pass an optional target
+    object that will be set as "this" on the context.  This is a good way
+    to give your iterator function access to the current object.
+
+    @params callback {Function} the callback to execute
+    @params target {Object} the target object to use
+    @returns {Object} Found item or null.
+  */
+  find: function(callback, target) {
+    if (typeof callback !== "function") throw new TypeError() ;
+    var len = (this.get) ? this.get('length') : this.length ;
+    if (target === undefined) target = null;
+    
+    var next, found = NO, ret = null ;
+    var context = SC.Enumerator._popContext();
+    for(var idx=0;idx<len && !found;idx++) {
+      next = this.nextObject(idx, last, context) ;
+      if (found = callback.call(target, next, idx, this)) ret = next ;
+      last = next ;
+    }
+    next = last = null ;
+    context = SC.Enumerator._pushContext(context);
+    return ret ;
+  },
+
+  /**
+    Returns an the first item with a property matching the passed value.  You
+    can pass an optional second argument with the target value.  Otherwise
+    this will match any property that evaluates to true.
+    
+    This method works much like the more generic find() method.
+    
+    @params key {String} the property to test
+    @param value {String} optional value to test against.
+    @returns {Object} found item or null
+  */
+  findProperty: function(key, value) {
+    var len = (this.get) ? this.get('length') : this.length ;
+    var found = NO, ret = null, last = null, next, cur ;
+    var context = SC.Enumerator._popContext();
+    for(var idx=0;idx<len && !found;idx++) {
+      next = this.nextObject(idx, last, context) ;
+      cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      found = (value === undefined) ? !!cur : SC.isEqual(cur, value);
+      if (found) ret = next ;
+      last = next ;
+    }
+    last = next = null ;
+    context = SC.Enumerator._pushContext(context);
+    return ret ;
+  },
+      
+  /**
     Returns YES if the passed function returns YES for every item in the
     enumeration.  This corresponds with the every() method in JavaScript 1.6.
     
@@ -636,7 +706,6 @@ SC.Enumerable = {
 SC._buildReducerFor = function(reducerKey, reducerProperty) {
   return function(key, value) {
     var reducer = this[reducerKey] ;
-    console.log("reducer = %@".fmt(reducer)) ;
     
     if (SC.typeOf(reducer) !== SC.T_FUNCTION) {
       return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
@@ -875,6 +944,32 @@ SC.mixin(Array.prototype, SC.Reducers) ;
       return ret ;
     },    
     
+    find: function(callback, target) {
+      if (typeof callback !== "function") throw new TypeError() ;
+      var len = this.length ;
+      if (target === undefined) target = null;
+
+      var next, ret = null, found = NO;
+      for(var idx=0;idx<len && !found;idx++) {
+        next = this[idx] ;
+        if(found = callback.call(target, next, idx, this)) ret = next ;
+      }
+      next = null;
+      return ret ;
+    },
+
+    findProperty: function(key, value) {
+      var len = this.length ;
+      var next, cur, found=NO, ret=null;
+      for(var idx=0;idx<len && !found;idx++) {
+        cur = (next=this[idx]) ? ((next.get) ? next.get(key): next[key]):null;
+        found = (value === undefined) ? !!cur : SC.isEqual(cur, value);
+        if (found) ret = next ;
+      }
+      next=null;
+      return ret ;
+    },    
+
     everyProperty: function(key, value) {
       var len = this.length ;
       var ret  = YES;
