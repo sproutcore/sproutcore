@@ -35,8 +35,7 @@ SC.ready(function() {
   // $('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
   //  $('li.pass')[this.checked ? 'hide' : 'show']();
   // });
-  console.log("running tests!") ;
-  runTest();  
+  if (config.queue.length>0) runTest();  
 }) ;
 
 function synchronize(callback) {

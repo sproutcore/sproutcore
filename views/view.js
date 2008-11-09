@@ -416,6 +416,8 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
 
 SC.View.mixin(/** @scope SC.View @static */ {
 
+  views: {},
+  
   /** 
     Returns a new view builder.  The builder can collect properties to apply
     to the view when it is created.

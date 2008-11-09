@@ -5,6 +5,7 @@
 
 require('core');
 require('system/mixins/enumerable');
+require('foundation/system/builder') ;
 
 /**
   CoreQuery is a simplified DOM manipulation library used internally by 
@@ -14,22 +15,80 @@ require('system/mixins/enumerable');
   
   CoreQuery itself is a subset of jQuery with some additional plugins.  If
   you have jQuery already loaded when SproutCore loads, in fact, it will 
-  replace CoreQuery with the full jQuery library and install CoreQuery
-  plugins.
+  replace CoreQuery with the full jQuery library and install any CoreQuery
+  plugins, including support for the SC.Enumerable mixin.
   
   Much of this code is adapted from jQuery 1.2.6, which is available under an
   MIT license just like SproutCore.
+  
+  h1. Using CoreQuery
+  
+  You can work with CoreQuery much like you would work with jQuery.  The core
+  manipulation object is exposed as SC.$.  To find some elements on the page
+  you just pass in a selector like this:
+  
+  {{{
+    var cq = SC.$('p');
+  }}}
+  
+  The object returned from this call is a CoreQuery object that implements 
+  SC.Enumerable as well as a number of other useful manipulation methods.  
+  Often times we call this object the "matched set", because it usually an
+  array of elements matching the selector key you passed.
+  
+  To work with the matched set, just call the various helper methods on it.
+  Here are some of the more useful ones:
+  
+  {{{
+    // change all of the text red
+    cq.css('color','red');
+    
+    // hide/show the set
+    cq.hide();  cq.show();
+    
+    // set the text content of the set
+    cq.text("Hello World!");
+    
+  }}}
+  
+  Of course, you can also chain these methods, just like jQuery.  Here is 
+  how you might find all of the headings in your page, change their text and
+  color:
+  
+  {{{
+    SC.$('h1').text('Hello World!').css('color','red');
+  }}}
+  
+  h1. Using CoreQuery with Views
+  
+  Usually you will not want to just blindly edit the HTML content in your
+  application.  Instead, you will use CoreQuery to update the portion of the
+  page managed by your SC.View instances.  Every SC.View instance has a $()
+  property just like SC.$().  The difference is that this function will start
+  searching from the root of the view.  For example, you could use the 
+  following code in your updateDisplay method to set your content and color:
+  
+  {{{
+    updateDisplay: function() {
+      this.$().text(this.get('value')).css('color','red');
+    }
+  }}}
+  
+  You could also work on content within your view, for example this will 
+  change the title on your view held in the span.title element:
+  
+  {{{
+    updateDisplay: function() {
+      this.$('span.title').text('Hello World');
+      this.$().setClassName('sc-enabled', YES) ;
+    }
+  }}}
 
   @class
+  @extends SC.Builder.fn
 */
 SC.CoreQuery = (function() {
   // Define CoreQuery inside of its own scope to support some jQuery idioms.
-  
-  var CoreQuery = function( selector, context ) {
-    // The CoreQuery object is actually just the init constructor 'enhanced'
-    return new SC.CoreQuery.fn.init( selector, context );
-  };
-  var CQ = CoreQuery; // shortform
   
   // A simple way to check for HTML strings or ID strings
   // (both of which we optimize for)
@@ -88,11 +147,13 @@ SC.CoreQuery = (function() {
     return elem[0] && parseInt( CQ.curCSS(elem[0], prop, true), 10 ) || 0;
   } ;
 
+  var CoreQuery, CQ ;
+  
   // implement core methods here from jQuery that we want available all the
   // time.  Use this area to implement jQuery-compatible methods ONLY.
   // New methods should be added at the bottom of the file, where they will
   // be installed as plugins on CoreQuery or jQuery. 
-  CQ.fn = CoreQuery.protoype = /** @scope SC.CoreQuery.prototype */ {
+  CQ = CoreQuery = SC.Builder.create( /** @scope SC.CoreQuery.fn */ {
     
     /** Indicates that this is a jQuery-like object. */
     jquery: 'SC.CoreQuery',
@@ -171,21 +232,6 @@ SC.CoreQuery = (function() {
     */
     get: function( num ) {
       return num == undefined ? CQ.makeArray(this) : this[num];
-    },
-    
-    /** 
-      Take an array of elements and push it onto the stack (making it the
-      new matched set.)  The receiver will be saved so it can be popped later.
-    */
-    pushStack: function( elems ) {
-      // Build a new CoreQuery matched element set
-      var ret = CQ(elems);
-
-      // Add the old object onto the stack (as a reference)
-      ret.prevObject = this;
-
-      // Return the newly-formed element set
-      return ret;
     },
 
     /** 
@@ -657,19 +703,14 @@ SC.CoreQuery = (function() {
       return this.after( value ).remove();
     },
 
-
     removeData: function( key ){
       return this.each(function(){ SC.removeData( this, key ); });
-    },
-
-    end: function() {
-      return this.prevObject || CQ( [] );
     }
 
-  } ;
+  }) ;
   
   // add useful helper methods to CoreQuery
-  SC.mixin(CoreQuery, /** @scope SC.CoreQuery */ {
+  CoreQuery.mixin(/** @scope SC.CoreQuery */ {
     
     nodeName: function( elem, name ) {
       return elem.nodeName && elem.nodeName.toUpperCase() == name.toUpperCase();
@@ -1696,7 +1737,7 @@ SC.CoreQuery = (function() {
     return results;
   };
 
-  SC.mixin(CoreQuery.fn, {
+  CoreQuery.fn.mixin({
     position: function() {
       var left = 0, top = 0, results;
 
@@ -1774,7 +1815,7 @@ SC.$ = (typeof jQuery == "undefined") ? SC.CoreQuery : jQuery ;
 
 // Add some plugins to CoreQuery.  If jQuery is installed, it will get these
 // also.
-SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
+SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   
   /** @private - better loggin */
   toString: function() {
@@ -1816,12 +1857,26 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
       var guid = this[SC.guidKey] ;
       return (guid) ? SC.View.views[guid] : null ;  
     });
+  },
+  
+  /**
+    Add or remove the class name based on the boolean passed.  This is often
+    more useful then using the more fixed addClass() and removeClass() 
+    methods.
+  */
+  setClass: function(className, shouldAdd) {
+    return (shouldAdd) ? this.addClass(className) : this.removeClass(className); 
   }
+  
 });
 
 /** 
   Make CoreQuery enumerable.  Since some methods need to be disambiguated,
   we will implement some wrapper functions here. 
+  
+  Note that SC.Enumerable is implemented on SC.Builder, which means the
+  CoreQuery object inherits this automatically.  jQuery does not extend from
+  SC.Builder though, so we reapply SC.Enumerable just to be safe.
 */
 (function() {
   var original = {};
@@ -1860,10 +1915,12 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
         original.map.call(this, callback);
     }
   };
-  
-  // now loop through Enumerable and update fn.  If a wrapper is found, use
-  // that instead
-  var fn = SC.$.fn, enumerable = SC.Enumerable ;
+
+  // loop through an update some enumerable methods.  If this is CoreQuery,
+  // we just need to patch up the wrapped methods.  If this is jQuery, we
+  // need to go through the entire set of SC.Enumerable.
+  var isCoreQuery = SC.$.jquery === 'SC.CoreQuery';
+  var fn = SC.$.fn, enumerable = isCoreQuery ? wrappers : SC.Enumerable ;
   for(var key in enumerable) {
     if (!enumerable.hasOwnProperty(key)) continue ;
     var value = enumerable[key];
