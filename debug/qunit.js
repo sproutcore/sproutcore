@@ -93,13 +93,16 @@ function validTest( name ) {
 function runTest() {
   config.blocking = false;
   var started = +new Date;
-  //config.fixture = document.getElementById('main').innerHTML;
+  
   //config.ajaxSettings = $.ajaxSettings;
   synchronize(function() {
     console.log("*** Tests completed in %@ milliseconds.".fmt(Date.now()-started)) ;
-    console.log("*** %@: %@ tests of %@ failed".fmt(
-      config.stats.bad ? "FAIL" : "PASS",
-      config.stats.bad||0, config.stats.all)) ;
+    if (config.stats.bad) {
+      console.log("*** FAILED: %@ tests of %@ failed".fmt(
+        config.stats.bad, config.stats.all)) ;
+    } else {
+      console.log("*** SUCCESS: All %@ tests passed".fmt(config.stats.all));
+    }
 
     // $('<p id="testresult" class="result">').html(['Tests completed in ',
     //  +new Date - started, ' milliseconds.<br/>',
@@ -110,7 +113,21 @@ function runTest() {
   });
 }
 
+function htmlbody(string) {
+  synchronize(function() {
+    var html = SC.CoreQuery(string) ;
+    var body = SC.CoreQuery('body')[0];
+    html.each(function() { body.appendChild(this); });
+  }) ;
+}
+
+// call this instead of test() to temporarily disable a test.
+function notest(name, callback, nowait) {
+  
+}
+
 function test(name, callback, nowait) {
+  
   if(config.currentModule)
     name = config.currentModule + " module: " + name;
   var lifecycle = SC.mixin({
@@ -122,6 +139,10 @@ function test(name, callback, nowait) {
     return;
     
   synchronize(function() {
+    // reset the HTML fixture if needed.
+    var main = document.getElementById('main') ;
+    config.fixture = (main) ? main.innerHTML : null;
+
     config.Test = [];
     try {
       lifecycle.setup();
@@ -162,7 +183,7 @@ function test(name, callback, nowait) {
     
     var li = "", state = "pass";
     for ( var i = 0; i < config.Test.length; i++ ) {
-      ol.push("~ %@: %@".fmt((config.Test[i][0] ? "pass" : "fail"), (config.Test[i][1]))) ;
+      ol.push(" ~ %@: %@".fmt((config.Test[i][0] ? "pass" : "FAIL"), (config.Test[i][1]))) ;
       // var li = document.createElement("li");
       // li.className = config.Test[i][0] ? "pass" : "fail";
       // li.appendChild( document.createTextNode(config.Test[i][1]) );
@@ -178,6 +199,7 @@ function test(name, callback, nowait) {
 
     console.log("%@ (fail: %@ pass: %@ total: %@)".fmt(name, bad || 0, good || 0, config.Test.length || 0)) ;
     ol.forEach(function(x) { console.log(x); });
+    console.log('');
     
     // var li = document.createElement("li");
     // li.className = state;
@@ -226,10 +248,9 @@ function expect(asserts) {
  * Resets the test setup. Useful for tests that modify the DOM.
  */
 function reset() {
-  //console.log("~~ WARNING: reset() not yet implemented") ;
-  // $("#main").html( config.fixture );
-  //   $.event.global = {};
-  //   $.ajaxSettings = $.extend({}, config.ajaxSettings);
+  if (config.fixture) SC.$("#main").html( config.fixture );
+  //SC.$.event.global = {};
+  //SC.$.ajaxSettings = $.extend({}, config.ajaxSettings);
 }
 
 /**
@@ -252,8 +273,9 @@ function isSet(a, b, msg) {
               var str = a[i].nodeName;
               if ( str ) {
                   str = str.toLowerCase();
-                  if ( a[i].id )
-                      str += "#" + a[i].id;
+                  if ( a[i].id ) {
+                    str += "#" + a[i].id;
+                  } else str += '#' + a[i].tagName ;
               } else
                   str = a[i];
               r.push( str );
@@ -312,12 +334,12 @@ function q() {
  * @result returns true if "//[a]" return two elements with the IDs 'foo' and 'baar'
  */
 function t(a,b,c) {
-  console.error("t() is not currently implemented") ;
-  // var f = $(b);
-  // var s = "";
-  // for ( var i = 0; i < f.length; i++ )
-  //  s += (s && ",") + '"' + f[i].id + '"';
-  // isSet(f, q.apply(q,c), a + " (" + b + ")");
+  var f = SC.$(b);
+  var s = "";
+  for ( var i = 0; i < f.length; i++ ) {
+    s += (s && ",") + '"' + f[i].id + '"';
+  }
+  isSet(f, q.apply(q,c), a + " (" + b + ")");
 }
 
 /**
@@ -500,6 +522,7 @@ function equiv() {
 // public API as global methods
 SC.mixin(window, {
   test: test,
+  notest: notest,
   module: module,
   expect: expect,
   ok: ok,
@@ -507,12 +530,14 @@ SC.mixin(window, {
   start: start,
   stop: stop,
   reset: reset,
+  htmlbody: htmlbody,
   isLocal: isLocal,
   same: function(a, b, message) {
     push(equiv(a, b), a, b, message);
   },
   QUnit: {
-    equiv: equiv
+    equiv: equiv,
+    config: config
   },
   // legacy methods below
   isSet: isSet,
