@@ -126,20 +126,21 @@ SC.CoreQuery = (function() {
     return val;
   } ;
 
+  var expando = SC.guidKey, uuid = 0, windowData = {},
+    // exclude the following css properties to add px
+    exclude = /z-?index|font-?weight|opacity|zoom|line-?height/i,
+    // cache defaultView
+    defaultView = document.defaultView || {};
+
   // A helper method for determining if an element's values are broken
-  var styleIsBorked = function styleIsBorked( elem, defaultView ) {
+  var styleIsBorked = function styleIsBorked( elem ) {
     if ( !SC.browser.safari ) return false;
 
     // defaultView is cached
     var ret = defaultView.getComputedStyle( elem, null );
     return !ret || ret.getPropertyValue("color") == "";
   } ;
-  
-  var expando = SC.guidKey, uuid = 0, windowData = {},
-    // exclude the following css properties to add px
-    exclude = /z-?index|font-?weight|opacity|zoom|line-?height/i,
-    // cache defaultView
-    defaultView = document.defaultView || {};
+
   
 
   // Helper function used by the dimensions and offset modules
@@ -1605,6 +1606,7 @@ SC.CoreQuery = (function() {
           return this.css(type, (size.constructor==String) ? size : size+"px");
         }
       }
+      return ret ;
     };
     
     var tl = i ? "Left"  : "Top",  // top or left
@@ -1850,7 +1852,7 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   
   /** 
     Attempts to find the views managing the passed DOM elements and returns
-    them.
+    them. 
   */
   view: function() {
     return this.map(function() { 
