@@ -251,7 +251,10 @@ SC.String = {
   */
   trim: function () {
     return this.replace(/^\s+|\s+$/g,"");
-  }
+  },
+  
+  /** Splits the string into words, separated by spaces.  */
+  w: function() { return this.split(' '); }
     
 } ;
 
