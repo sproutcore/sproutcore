@@ -680,6 +680,8 @@ SC.mixin(Function.prototype,
   */
   property: function() {
     this.dependentKeys = SC.$A(arguments) ; 
+    this.cacheKey = "__cache__" + SC.guidFor(this) ;
+    this.lastSetValueKey = "__lastValue__" + SC.guidFor(this) ;
     this.isProperty = true; return this; 
   },
   
