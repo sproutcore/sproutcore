@@ -173,7 +173,9 @@ SC.Observable = {
     if (ret === undefined) {
       return this.unknownProperty(key) ;
     } else if (ret && ret.isProperty) {
-      return (ret.isCacheable && ret.__value !== undefined) ? ret.__value : ret.call(this,key) ;
+      if (ret.isCacheable) {
+        return (this[ret.cacheKey] !== undefined) ? this[ret.cacheKey] : (this[ret.cacheKey] = ret.call(this,key)) ;
+      } else return ret.call(this,key);
     } else return ret ;
   },
 
@@ -231,13 +233,13 @@ SC.Observable = {
     
     // set the value.
     if (func && func.isProperty) {
-      if (func.isVolatile || (func.__lastSetValue !== value)) {
-        func.__lastSetValue = value ;
+      if (func.isVolatile || (this[func.lastSetValueKey] !== value)) {
+        this[func.lastSetValueKey] = value ;
         if (notify) this.propertyWillChange(key) ;
         ret = func.call(this,key,value) ;
 
         // update cached value
-        if (func.isCacheable) func.__value = ret ;
+        if (func.isCacheable) this[func.cacheKey] = ret ;
 
         if (notify) this.propertyDidChange(key, ret) ;
         
@@ -264,7 +266,7 @@ SC.Observable = {
         var idx = dependents.length;
         while(--idx>=0) {
           func = dependents[idx];
-          func.__value = func.__lastSetValue = undefined;
+          this[func.cacheKey] = this[func.lastSetValueKey] = undefined;
         }
       }
     }
@@ -370,7 +372,7 @@ SC.Observable = {
     // clear any cached value
     var func = this[key] ;
     if (func && (func instanceof Function) && func.isCacheable) {
-      func.__value = func.__lastSetValue = undefined ;
+      this[func.cacheKey] = this[func.lastSetValueKey] = undefined ;
     }
     
     // save in the change set if queuing changes
