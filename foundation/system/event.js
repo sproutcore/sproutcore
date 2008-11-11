@@ -374,7 +374,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // get the handlers for this event type
     handlers = (SC.data(this, "events") || {})[event.type];
-    if (handlers) return NO ; // nothing to do
+    if (!handlers) return NO ; // nothing to do
 
     // invoke all handlers
     for (var key in handlers ) {
