@@ -517,6 +517,8 @@ SC.mixin(SC.Object.prototype, SC.Observable) ;
 SC.mixin({
 
   __object_extend: function(base, ext) {
+    if (ext==null) return base; // nothing to do
+    
     // get some common vars
     var idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
     
