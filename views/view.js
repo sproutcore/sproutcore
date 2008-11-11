@@ -6,8 +6,8 @@
 require('foundation/system/browser');
 require('foundation/mixins/delegate_support') ;
 require('foundation/mixins/string') ;
-
 require('foundation/system/object') ;
+require('foundation/system/core_query');
 
 /** @private */
 SC.DISPLAY_LOCATION_QUEUE = 'updateDisplayLocationIfNeeded';
@@ -46,8 +46,15 @@ SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
 */
 SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
 
-  concatenatedProperties: ['outlets'],
+  concatenatedProperties: ['outlets','displayProperties'],
   
+  /** @property The current root view. */
+  rootView: function() {
+    var view = this;
+    while(view && !view.isRootView) view = view.get('parentView');
+    return view;
+  }.property('parentView'),
+    
   /**
     If the view is currently inserted into the DOM of a parent view, this
     property will point to the parent of the view.
@@ -95,6 +102,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
 
     // The DOM will need some fixing up, note this on the view.
     view.displayLocationDidChange() ;
+    view.displayLayoutDidChange() ;
 
     // notify views
     if (this.didAddChild) this.didAddChild(this, beforeView) ;
@@ -113,7 +121,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
   */
   removeChild: function(view) {
     if (!view) return this; // nothing to do
-    if (view.parentNode != this) {
+    if (view.parentView !== this) {
       throw "%@.removeChild(%@) must belong to parent".fmt(this,view);
     }
 
@@ -122,7 +130,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     if (this.willRemoveChild) this.willRemoveChild(view) ;
 
     // update parent node
-    view.set('parentNode', null) ;
+    view.set('parentView', null) ;
     
     // remove view from childViews array.
     var childViews = this.get('childViews') ;
@@ -188,7 +196,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     @returns {SC.View} the receiver 
   */
   appendChild: function(view) {
-    return this.appendChild(view);
+    return this.insertBefore(view, null);
   },
     
   /** 
@@ -198,18 +206,20 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
   */
   displayLocationDidChange: function() {
     this.set('displayLocationNeedsUpdate', YES) ;
-    SC.runLoop.viewDisplayLocationNeedsUpdate(this) ;
+    this._recomputeIsVisibleInWindow() ;
+    SC.View.scheduleInRunLoop(SC.DISPLAY_LOCATION_QUEUE, this);
     return this ;
-  },
+  }.observes('isVisible'),
   
   /**
     This method will update the display location, but only if it needs an 
     update.  
   */
   updateDisplayLocationIfNeeded: function() {
-    if (!this.get('displayLocationNeedsUpdate')) return this;
+    if (!this.get('displayLocationNeedsUpdate')) return YES;
     this.set('displayLocationNeedsUpdate', NO) ;
-    return this.updateDisplayLocation() ;
+    this.updateDisplayLocation() ;
+    return YES ;
   },
 
   /**
@@ -251,7 +261,55 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     } else {
       if (node.parentNode) node.parentNode.removeChild(node);
     }
+    
+    // finally, update visibility of element as needed if we are in a parent
+    if (parentView) {
+      var $ = this.$(), isVisible = this.get('isVisible') ;
+      (isVisible) ? $.show() : $.hide(); 
+      if (!isVisible && this.get('isVisibleInWindow')) {
+        this._recomputeIsVisibleInWindow();
+        // do this only after we have gone offscreen.
+      }
+    }
+    
+    parentNode = parentView = node = null ; // avoid memory leaks
     return this ; 
+  },
+  
+  
+  /**
+    Determines if the view is visible on the screen, even if it is in the
+    view hierarchy.  This is considered part of the layout and so changing
+    it will trigger a layout update.
+  */
+  isVisible: YES,
+  
+  /**
+    This property is true only if the view and all of its parent views are
+    currently visible in the window.  It updates automatically.
+  */
+  isVisibleInWindow: NO,
+  
+  /**
+    Internal method called whenever the isVisibleInWindow property might
+    have changed.  This will recompute the value for the property and, if 
+    necessary, notify all child views as well.
+  */
+  _recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+    var last = this.get('isVisibleInWindow') ;
+    var cur = this.get('isVisible'), parentView ;
+    if (cur) {
+      cur = (parentViewIsVisible === undefined) ? 
+       ((parentView=this.get('parentView')) ? 
+         parentView.get('isVisibleInWindow') : NO) : parentViewIsVisible ;
+    }
+    
+    // if the state has changed, update it and notify children
+    if (last != cur) {
+      this.set('isVisibleInWindow', cur) ;
+      var childViews = this.get('childViews'), idx = childViews.length;
+      while(--idx>=0) childViews[idx]._recomputeIsVisibleInWindow(cur);
+    }
   },
   
   // .......................................................
@@ -269,6 +327,12 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
     this.configureChildViews() ;
     if (!this.rootElement) this.prepareDisplay() ;
+    
+    // register display property observers
+    var dp = this.get('displayProperties'), idx = dp.length;
+    while(--idx >= 0) {
+      this.addObserver(dp[idx], this, this.displayDidChange);
+    }
   },
   
   
@@ -316,7 +380,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     delete SC.View.views[SC.guidFor(this)];
 
     // can cleanup rootElement and containerElement (if set)
-    this.rootElement = this.containerElement = null ;
+    this.rootElement = this.containerElement = this._CQ = null ;
     
     // mark as destroyed so we don't do this again
     this.set('isDestroyed', YES) ;
@@ -345,7 +409,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     // child views
     // build a new array of child views to replace the old one
     loc = (childViews) ? childViews.length : 0 ;
-    if (loc>0) views = [] ; // only create if needed to avoid memory
+    views = [] ; // only create if needed to avoid memory
     while(--loc >= 0) {
       var builder = childViews[loc] ;
       if (builder && builder.createChildView) {
@@ -379,9 +443,10 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     // because we are interested in comparing the actual value of the 
     // property, not the output.
     if (this.emptyElement === this.constructor.prototype.emptyElement) {
-      if (!this._cachedEmptyElement) {
+      if (!this._cachedEmptyElement || (this._emptyElementCachedForClassGuid !== SC.guidFor(this.constructor))) {
         var html = this.get('emptyElement');
         this.constructor.prototype._cachedEmptyElement = SC.View.generateElement(html) ;
+        this.constructor.prototype._emptyElementCachedForClassGuid = SC.guidFor(this.constructor) ;
       }
       root = this._cachedEmptyElement.cloneNode(true);
       
@@ -394,6 +459,9 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     
     // save this guid on the DOM element for reverse lookups.
     if (root) root[SC.guidKey] = SC.guidFor(this) ;
+    
+    // also, update the layout to match the frame
+    this.updateDisplayLayout();
     
     // now add DOM for child views if needed.
     // get the containerElement or use rootElement -- append to this
@@ -408,9 +476,455 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     root = container = element = null; 
   },
   
+  /** 
+    Returns a CoreQuery object that selects elements starting with the 
+    views rootElement.  You can pass a selector to this or pass no parameters
+    to get a CQ object the selects the view's rootElement.
+    
+    @param {String} selector
+    @param {Object} context not usually needed
+    @returns {SC.CoreQuery} CoreQuery or jQuery object
+  */
+  $: function(selector, context) {
+    if (arguments.length===0) {
+      if(!this._CQ) this._CQ = SC.$(this.rootElement);
+      return this._CQ;
+    } else return SC.$(selector, (context || this.rootElement)) ;
+  },
+  
   containerElement: null,
   
-  emptyElement: '<div class="sc-view"></div>'  
+  emptyElement: '<div class="sc-view"></div>',
+  
+  /** 
+    This method is invoked whenever the display state of the view has changed.
+    You should override this method to update your DOM element to match the
+    current state of the view.
+    
+    Unlike prepareDisplay(), this method will be called at least once whenever
+    your app is started and thereafter as often as needed.  It will not be
+    optimized out during the build process.
+    
+    The default implementation does nothing.
+    
+    @returns {SC.View} receiver
+  */
+  updateDisplay: function() {
+    
+  },
+
+  /** 
+    Call this method whenever the view's state changes in such as way that
+    requires the views display to be updated.  This will schedule the view
+    for display at the end of the runloop.
+  */
+  displayDidChange: function() {
+    this.set('displayNeedsUpdate', YES) ;
+    SC.View.scheduleInRunLoop(SC.DISPLAY_UPDATE_QUEUE, this);
+    return this ;
+  },
+  
+  displayNeedsUpdate: NO,
+  
+  /**
+    This method will update the display location, but only if it needs an 
+    update.  Returns YES if the method was able to execute, NO if it needs
+    to be called again later.
+  */
+  updateDisplayIfNeeded: function() {
+    if (!this.get('displayNeedsUpdate')) return YES;
+    if (!this.get('isVisibleInWindow')) return NO ;
+    this.set('displayNeedsUpdate', NO) ;
+    this.updateDisplay() ;
+    return YES;
+  },
+  
+  /** 
+    You can set this array to include any properties that should immediately
+    invalidate the display.  The display will be automatically invalidated
+    when one of these properties change.
+  */
+  displayProperties: [],
+  
+  // ...........................................
+  // LAYOUT
+  //
+
+  /** 
+    This convenience method will take the current layout, apply any changes
+    you pass and set it again.  It is more convenient than having to do this
+    yourself sometimes.
+    
+    You can pass just a key/value pair or a hash with several pairs.  You can
+    also pass a null value to delete a property.
+    
+    @param {String|Hash} key
+    @param {Object} value
+    @returns {SC.View} receiver
+  */
+  adjust: function(key, value) {
+    var layout = SC.clone(this.get('layout')) ;
+    
+    // handle string case
+    if (SC.typeOf(key) === SC.T_STRING) {
+      if (value == null) {
+        delete layout[key];
+      } else layout[key] = value ;
+      
+    // handle hash -- do it this way to avoid creating memory unles needed
+    } else {
+      var hash = key;
+      for(key in hash) {
+        if (!hash.hasOwnProperty(key)) continue;
+        value = hash[key];
+        if (value == null) {
+          delete layout[key] ;
+        } else layout[key] = value ;
+      }
+    }
+    
+    // now set adjusted layout
+    this.set('layout', layout) ;
+    
+    return this ;
+  },
+  
+  /** 
+    The layout describes how you want your view to be positions on the 
+    screen.  You can also maybe define a transform function.
+    
+    top/left - bottom/right - centerX/centerY
+    
+    Layout is designed to maximize reliance on the browser's rendering 
+    engine to keep your app up to date.
+  */
+  layout: { top: 0, left: 0, width: 100, height: 100 },
+
+  /**
+    Converts a frame from the receiver's offset to the target offset.  Both
+    the receiver and the target must belong to the same rootView.  If you pass
+    null, the conversion will be to the rootView level.
+  */
+  convertFrameToView: function(frame, targetView) {
+    var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f;
+
+    // walk up this side
+    while(next = view.get('parentView')) {
+      f = view.get('frame'); myX += f.x; myY += f.y ;
+      view = next ; 
+    }
+
+    // walk up other size
+    if (targetView) {
+      view = targetView ;
+      while(next = view.get('parentView')) {
+        f = view.get('frame'); targetX += f.x; targetY += f.y ;
+        view = next ; 
+      }
+    }
+    
+    // now we can figure how to translate the origin.
+    myX = frame.x + myX - targetX ;
+    myY = frame.y + myY - targetY ;
+    return { x: myX, y: myY, width: frame.width, height: frame.height };
+  },
+
+  /**
+    Converts a frame offset in the coordinates of another view system to 
+    the reciever's view.
+  */
+  convertFrameFromView: function(frame, targetView) {
+    var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f;
+
+    // walk up this side
+    while(next = view.get('parentView')) {
+      f = view.get('frame'); myX += f.x; myY += f.y ;
+      view = next ; 
+    }
+
+    // walk up other size
+    if (targetView) {
+      view = targetView ;
+      while(next = view.get('parentView')) {
+        f = view.get('frame'); targetX += f.x; targetY += f.y ;
+        view = next ; 
+      }
+    }
+    
+    // now we can figure how to translate the origin.
+    myX = frame.x - myX + targetX ;
+    myY = frame.y - myY + targetY ;
+    return { x: myX, y: myY, width: frame.width, height: frame.height };
+  },
+  
+  /**
+    Frame describes the current bounding rect for your view.  This is always
+    measured from the top-left corner of the parent view.
+  */
+  frame: function() {
+    var layout = this.get('layout') ;
+    var f = {}, pdim = null ;
+
+    // handle left aligned and left/right 
+    if (layout.left !== undefined) {
+      f.x = Math.floor(layout.left) ;
+      if (layout.width !== undefined) {
+        f.width = Math.floor(layout.width) ;
+      } else { // better have layout.right!
+        pdim = this.computeParentDimensions(layout);
+        f.width = Math.floor(pdim.width - f.x - (layout.right || 0)) ;
+      }
+      
+    // handle right aligned
+    } else if (layout.right !== undefined) {
+      if (!pdim) pdim = this.computeParentDimensions(layout);
+      f.width = Math.floor(layout.width || 0) ;
+      f.x = Math.floor(pdim.width - layout.right - f.width) ;
+
+    // handle centered
+    } else if (layout.centerX !== undefined) {
+      if (!pdim) pdim = this.computeParentDimensions(layout); 
+      f.width = Math.floor(layout.width || 0);
+      f.x = Math.floor((pdim.width - f.width)/2 + layout.centerX);
+    } else {
+      f.x = 0 ; // fallback
+      if (layout.width === undefined) {
+        if (!pdim) pdim = this.computeParentDimensions(layout); 
+        f.width = Math.floor(pdim.width) ;
+      } else f.width = layout.width;
+    }
+
+
+    // handle top aligned and top/bottom 
+    if (layout.top !== undefined) {
+      f.y = Math.floor(layout.top) ;
+      if (layout.height !== undefined) {
+        f.height = Math.floor(layout.height) ;
+      } else { // better have layout.bottm!
+        pdim = this.computeParentDimensions(layout);
+        f.height = Math.floor(pdim.height - f.y - (layout.bottom || 0)) ;
+      }
+      
+    // handle bottom aligned
+    } else if (layout.bottom !== undefined) {
+      if (!pdim) pdim = this.computeParentDimensions(layout);
+      f.height = Math.floor(layout.height || 0) ;
+      f.y = Math.floor(pdim.height - layout.bottom - f.height) ;
+
+    // handle centered
+    } else if (layout.centerY !== undefined) {
+      if (!pdim) pdim = this.computeParentDimensions(layout); 
+      f.height = Math.floor(layout.height || 0);
+      f.y = Math.floor((pdim.height - f.height)/2 + layout.centerY);
+
+    // fallback
+    } else {
+      f.y = 0 ; // fallback
+      if (layout.height === undefined) {
+        if (!pdim) pdim = this.computeParentDimensions(layout); 
+        f.height = Math.floor(pdim.height) ;
+      } else f.height = layout.height;
+    }
+
+    return f;
+  }.property().cacheable(),
+  
+  /**
+    The clipping frame returns the visible portion of the view, taking into
+    account the current scroll position, etc.  Keep in mind that the 
+    clippingFrame is in the context of the view itself, not it's parent view.
+    
+    - changes on scroll, on parent clipping frame changing, on resize, and
+      frame change.  basically all the freaking time
+
+    - if when you scroll off, views are removed anyway, maybe I only need to
+      worry about the clippingFrame for the view itself.  I could do that with
+      just the visible bounds....
+  */
+  clippingFrame: function() {
+    
+  }.property().cacheable(),
+  
+  /**
+    The bounds returns the current offset & size of the view.  This will
+    normally be equal in size to the frame unless you have scrollable 
+    content.  It can also indicate the current scroll offset.  You change this
+    value by scrolling around.  You scroll around by calling the scrollTo()
+    methods.
+    
+    - changes on scroll, and frame change
+  */
+  bounds: function() {
+    
+  }.property().cacheable(),
+  
+  /**
+    LayoutStyle describes the current styles to be written to your element
+    based on the layout you defined.  Both layoutStyle and frame reset when
+    you edit the layout propert.y  Both are read only.
+  */
+  /** 
+    Computes the layout style settings needed for the current anchor.
+  */
+  layoutStyle: function() {
+    var layout = this.get('layout'), ret = {}, pdim = null;
+    ret.position = 'absolute' ;
+
+    // X DIRECTION
+    
+    // handle left aligned and left/right
+    if (layout.left !== undefined) {
+      ret.left = Math.floor(layout.left);
+      if (layout.width !== undefined) {
+        ret.width = Math.floor(layout.width) ;
+        ret.right = null ;
+      } else {
+        ret.width = null ;
+        ret.right = Math.floor(layout.right || 0) ;
+      }
+      ret.marginLeft = 0 ;
+      
+    // handle right aligned
+    } else if (layout.right !== undefined) {
+      ret.left = null ;
+      ret.right = Math.floor(layout.right) ;
+      ret.width = Math.floor(layout.width || 0) ;
+      ret.marginLeft = 0 ;
+      
+    // handle centered
+    } else if (layout.centerX !== undefined) {
+      ret.left = "50%";
+      ret.width = Math.floor(layout.width || 0) ;
+      ret.marginLeft = Math.floor(layout.centerX - ret.width/2) ;
+      ret.right = null ;
+    
+    // fallback, full width.
+    } else {
+      ret.left = 0;
+      ret.right = 0;
+      ret.width = null ;
+      ret.marginLeft= 0;
+    }
+
+    // Y DIRECTION
+    
+    // handle left aligned and left/right
+    if (layout.top !== undefined) {
+      ret.top = Math.floor(layout.top);
+      if (layout.height !== undefined) {
+        ret.height = Math.floor(layout.height) ;
+        ret.bottom = null ;
+      } else {
+        ret.height = null ;
+        ret.bottom = Math.floor(layout.bottom || 0) ;
+      }
+      ret.marginTop = 0 ;
+      
+    // handle right aligned
+    } else if (layout.bottom !== undefined) {
+      ret.top = null ;
+      ret.bottom = Math.floor(layout.bottom) ;
+      ret.height = Math.floor(layout.height || 0) ;
+      ret.marginTop = 0 ;
+      
+    // handle centered
+    } else if (layout.centerY !== undefined) {
+      ret.top = "50%";
+      ret.height = Math.floor(layout.height || 0) ;
+      ret.marginTop = Math.floor(layout.centerY - ret.height/2) ;
+      ret.bottom = null ;
+    
+    // fallback, full width.
+    } else {
+      ret.top = 0;
+      ret.bottom = 0;
+      ret.height = null ;
+      ret.marginTop= 0;
+    }
+    
+    return ret ;
+  }.property().cacheable(),
+
+  
+  computeParentDimensions: function(frame) {
+    var pv = this.get('parentView'), pframe = (pv) ? pv.get('frame') : null;
+    return {
+      width: (pframe) ? pframe.width : SC.maxX(frame),
+      height: (pframe) ? pframe.height : SC.maxY(frame)
+    } ;
+  },
+  
+  /** 
+    This method may be called on your view whenever the parent view resizes.
+
+    The default version of this method will reset the frame and then call 
+    viewDidResize().  You will not usually override this method, but you may
+    override the viewDidResize() method.
+  */
+  parentViewDidResize: function() {
+    var layout = this.get('layout') ;
+
+    // only resizes if the layout does something other than left/top - fixed
+    // size.
+    var isFixed = (layout.left!==undefined) && (layout.top!==undefined) && (layout.width !== undefined) && (layout.height !== undefined);
+
+    if (!isFixed) {
+      this.notifyPropertyChange('frame') ;
+      this.viewDidResize();
+    }
+  },
+  
+  /**
+    This method is invoked on your view when the view resizes due to a layout
+    change or due to the parent view resizing.  You can override this method
+    to implement your own layout if you like, such as performing a grid 
+    layout.
+    
+    The default implementation simply calls parentViewDidResize on all of
+    your children.
+  */
+  viewDidResize: function() {
+    this.get('childViews').invoke('parentViewDidResize') ;
+  }.observes('layout'),  
+
+  /** 
+    This method is called whenever a property changes that invalidates the 
+    layout of the view.  Changing the layout will do this automatically, but 
+    you can add others if you want.
+  */
+  displayLayoutDidChange: function() {
+
+    this.beginPropertyChanges() ;
+    this.set('displayLayoutNeedsUpdate', YES);
+    this.notifyPropertyChange('frame') ;
+    this.notifyPropertyChange('layoutStyle') ;
+    this.endPropertyChanges() ;
+    
+    SC.View.scheduleInRunLoop(SC.DISPLAY_LAYOUT_QUEUE, this);
+    return this ;
+  }.observes('layout'),
+  
+  /**
+    This method will update the display layout, but only if it needs an 
+    update.  
+  */
+  updateDisplayLayoutIfNeeded: function() {
+    if (!this.get('displayLayoutNeedsUpdate')) return YES;
+    if (!this.get('isVisibleInWindow')) return NO ;
+    this.set('displayLayoutNeedsUpdate', NO) ;
+    this.updateDisplayLayout() ;
+    return YES ;
+  },
+
+  /**
+    This method is called whenever the display layout has become invalid and
+    the view needs its display updated again.  This will generally only 
+    happen once at the end of the run loop.
+  */
+  updateDisplayLayout: function() {
+    var $ = this.$(), layoutStyle = this.get('layoutStyle'); // get style
+    $.css(layoutStyle) ; // todo: add animation here.
+  }
   
 }); 
 
@@ -418,46 +932,12 @@ SC.View.mixin(/** @scope SC.View @static */ {
 
   views: {},
   
-  /** 
-    Returns a new view builder.  The builder can collect properties to apply
-    to the view when it is created.
-
-    @param {Hash} attrs to apply to view
-    @param {Array} path to DOM element in parent, if known
-    @returns {Builder} builder object.
-  */
-  build: function(attrs, path) {
-    // get the new object
-    var ret= SC.beget(SC.View.build.fn) ;
-    ret.viewClass = this ; 
-    ret.attrs = attrs;
-    ret.rootElementPath = path ;
-    return ret ;
-  },
-  
   /**
     Called by the runloop at the end of the runloop to update any scheduled
-    view queues.
+    view queues.  Returns YES if some items were flushed from the queue.
   */
   flushPendingQueues: function() {
-    var queue, methodName, queues = this._queues, names = this._queueOrder ;
-    var idx, hasQueues = YES, len = queues.length;
-    
-    // loop through the queues and process them.  Keep doing this until there
-    // are no more views left in the queue.  This way if one view causes 
-    // another one to need an update, they will all get processed.
-    while(hasQueues) {
-      hasQueues = NO; // set to YES only if a queue is found and executed
-      for(idx=0;idx<len;idx++) {
-        var methodName = names[idx]; 
-        if ((queue=queues[name]) && (queue.length>0)) {
-          hasQueues = YES ;
-          delete queues[name] ; // remove queue 
-          queue.invoke(methodName) ; // call method on all views
-        }
-      }
-    }
-    
+    this.runLoopQueue.flush() ;
     return this;
   },
   
@@ -465,27 +945,67 @@ SC.View.mixin(/** @scope SC.View @static */ {
     Called by view instances to add them to a queue with the specified named.
   */
   scheduleInRunLoop: function(queueName, view) {
-    var queue = this._queues[queueName] ;
-    if (!queue) queue = this._queues[queueName] = SC.Set.create();
-    queue.add(view) ;
+    this.runLoopQueue.add(queueName, view);
   },
   
-  _queues: {},
-  _queueOrder: [SC.DISPLAY_LOCATION_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
-  
+  /** @private
+  Manages the queue of views that need to have some method executed. */
+  runLoopQueue: {
+    add: function(queueName, view) {
+      var queue = this[queueName] ;
+      if (!queue) queue = this[queueName] = SC.Set.create();
+      queue.add(view) ;
+    },
+    
+    // flushes all queues in order.  This method will loop until no queues
+    // are left to flush
+    flush: function() {
+      var needsFlush = YES, order = this.order, len = order.length, idx;
+      while(needsFlush) {
+        needsFlush = NO;
+        for(idx=0;idx<len;idx++) {
+          if (this.flushQueue(order[idx])) needsFlush = YES;
+        }
+      }
+    },
+
+    // flush a single queue.  Any views that cannot execute will be put 
+    // back into the queue.
+    flushQueue: function(queueName) {
+      var didExec = NO, queue = this[queueName], view ;
+      if (!queue) return NO ;
+      
+      delete this[queueName] ;// reset queue
+      while(view = queue.pop()) {
+        if (view[queueName]()) {
+          didExec = YES ;
+        } else this.add(queueName, view);
+      }
+      return didExec;
+    },
+    
+    order: [SC.DISPLAY_LOCATION_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
+  }
+    
 }) ;
 
-SC.View.build.fn = {
+SC.View.build = SC.Builder.create({
   
   isViewBuilder: YES, // walk like a duck
+
+  init: function(attrs, path) {
+    this.attrs = attrs;
+    this.rootElementPath = path ;
+    return this ;
+  },
   
   /** 
     Creates a new instance of the view based on the currently loaded config.
     This will create a new DOM element.  Add any last minute attrs here.
   */
   create: function(attrs) {
-    SC.mixin(this.attrs, attrs) ;
-    return this.viewClass.create(attrs) ;
+    if (attrs) SC.mixin(this.attrs, attrs) ;
+    return this.defaultClass.create(this.attrs) ;
   },
   
   /**
@@ -514,7 +1034,7 @@ SC.View.build.fn = {
     attrs.owner = owner ;
     attrs.parentView = parentView;
 
-    return this.viewClass.create(attrs) ;
+    return this.defaultClass.create(attrs) ;
   },
   
   /**
@@ -528,8 +1048,19 @@ SC.View.build.fn = {
     return this.viewClass.create(attrs) ;  
   }
   
-} ;
+}) ;
 
+SC.mixin(SC.View.prototype, {
+  
+  designHtml: function() {
+    var ret, el = document.createElement('div') ;
+    el.appendChild(this.rootElement.cloneNode(true));
+    ret = el.innerHTML ;
+    delete el ;
+    return ret ;
+  }
+  
+}) ;
 
 // .......................................................
 // DOM GENERATION
