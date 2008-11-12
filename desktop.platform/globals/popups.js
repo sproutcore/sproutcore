@@ -5,7 +5,7 @@
 
 require('views/view') ;
 require('views/container') ;
-require('globals/panels') ;
+require('desktop.platform/globals/panels') ;
 require('foundation/system/ready') ;
 
 // This singleton manages the popups on the page.  It will show an element
