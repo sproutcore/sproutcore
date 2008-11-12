@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('panes/overlay') ;
+require('desktop.platform/panes/overlay') ;
 
 // A panel should be used for long-term modal interfaces.  For example, you
 // might use a panel for preferences or configuration settings.  These are 
