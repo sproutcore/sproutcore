@@ -9,10 +9,39 @@ require('foundation/system/object') ;
   @class
   
   Routes makes it possible to load a location in the browser.
-  
+
+	This is useful when application need to change state depending upon the URL change.
+	Applications can support deep-linking using routes, which means user can type specific 
+	URL to see certain state of the app e.g.
+	http://localhost:4020/routes_demo#Documents/Photographs
+	
+	To use Routes, first add routes by using SC.route.add(route, target, method).
+	@route - Route is the part of the URL that come after hash (#).
+	@target - Object whose route handler needs to be invoked.
+	@method - Method that is the route handler.
+	
+	This registers the route to the routes system. When application's URL matches a registered route, 
+	system triggers the route handler. Route handler should contain the app logic to bring the app to 
+	the required state.
+	
+	Second thing to do with routes is to set location. Whenever you want to register any URL location
+	in browser history you can use SC.routes.set('location', 'some_path');
+	This will register the URL to browser history and also change the URL of the application.
+	Ideally when you set the location you would like route handler to get invoked. You should have
+	a route registered to match this pattern of the location.
+	
+	ex.
+	SC.routes.add(':', RoutesDemo, 'routeHandler');
+	This route would match any URL change. Whatever comes after # would get passed as parameter.
+	RouteDemo is the object that contains method 'routeHandler'.
+	
+	SC.routes.set('location', 'Documents/Photographs');
+	Doing this changes the location to #Documents/Photographs. Part after #, Documents/Photographs
+	in this case, gets passed as parameter to route handler.
+	
   @extends SC.Object
 */
-SC.Routes = SC.Object.create(
+SC.routes = SC.Object.create(
 /** @scope SC.Routes.prototype */ {
 
   // set this property to your current app lication
@@ -76,12 +105,21 @@ SC.Routes = SC.Object.create(
   //
   // parameters can also be passed using &.
   // static/route&param1=value&param2=value2
-  //
-  addRoute: function(route, func) {
+
+  add: function(route, target, method) {
+		// normalize the target/method
+		if (SC.typeOf(target) === SC.T_FUNCTION) {
+		  method = target; target = null ;
+		} else if (SC.typeOf(method) === SC.T_STRING) {
+		  method = target[method] ;
+		}
+		
     var parts = route.split('/') ;
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
-    this._routes.addRoute(parts,func) ;
+    this._routes.addRoute(parts, method) ;
+		return this;
   },
+
   
   // eval routes.
   gotoRoute: function(route) {
@@ -247,15 +285,20 @@ SC.Routes = SC.Object.create(
   },
   
   _setupHistory: function() {
-    this.invokeLater(this._checkWindowLocation, 1000) ;
+    // this.invokeLater(this._checkWindowLocation, 1000) ;
+		setInterval (this._checkWindowLocation.bind(this), 100);
   },
   
   _checkWindowLocation: function() {
     var loc = this.get('location') ;
     var cloc = location.hash ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-    if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
-    this.invokeLater(this._checkWindowLocation, 100) ;
+    if (cloc != loc) {
+			SC.runLoop.beginRunLoop();
+			this.set('location',(cloc) ? cloc : '') ;
+			SC.runLoop.endRunLoop();
+		}
+    // this.invokeLater(this._checkWindowLocation, 100) ;
   },
   
   _setWindowLocation: function(loc) {
