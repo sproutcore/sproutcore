@@ -52,3 +52,7 @@ Element.setClassName = function(element,className,flag) {
     }
   } 
 } ;
+
+
+SC.Routes = SC.routes;
+SC.Routes.addRoute = SC.routes.add;
