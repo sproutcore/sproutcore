@@ -24,14 +24,14 @@ SC.KEYVIEW_SELECTING_PREVIOUS  = 2;
   Whenever you set the view's isVisible property to true, it will display
   inside of the pane view automatically.
   
-  You will rarely use the SC.PaneView directly.  Instead, you should use
+  You will rarely use the SC.ClassicPaneView directly.  Instead, you should use
   one of the subclasses included in SproutCore or create your own.
   
   @extends SC.ClassicView
   @since SproutCore 1.0
 */
   
-SC.PaneView = SC.ClassicView.extend({
+SC.ClassicPaneView = SC.ClassicView.extend({
 
   // panes do not belong to other panes...
   pane: null,

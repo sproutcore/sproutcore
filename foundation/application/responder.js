@@ -19,8 +19,8 @@ require('foundation/application/input_manager');
   @extends SC.Object
   
 */
-SC.Responder = SC.Object.extend(
-  /** @scope SC.Responder.prototype */
+SC.ClassicResponder = SC.Object.extend(
+  /** @scope SC.ClassicResponder.prototype */
   {
     
   // .......................................................................
@@ -104,11 +104,11 @@ SC.Responder = SC.Object.extend(
   /**
     Set this value to an SC.InputManager instance if you want to use a 
     custom input manager for this specific instance.  If you want to override
-    the input manager used for all responders, replace SC.Responder.inputManager.
+    the input manager used for all responders, replace SC.ClassicResponder.inputManager.
   */
   inputManager: function()
   {
-    return SC.Responder.inputManager;
+    return SC.ClassicResponder.inputManager;
   }.property(),
 
   /**
@@ -163,7 +163,7 @@ SC.Responder = SC.Object.extend(
   /**
   * Attempt to perform a method. If either the method does not exist, or the method returns false, send the request to the nextResponder.
   * @param {String} method The name of the method to perform
-  * @return {SC.Responder} The responder that handled the command, or false
+  * @return {SC.ClassicResponder} The responder that handled the command, or false
   */
   doCommand: function(method)
   {
@@ -308,6 +308,6 @@ SC.Responder = SC.Object.extend(
   
 });
 
-SC.Responder.mixin({
+SC.ClassicResponder.mixin({
   inputManager: SC.InputManager.create()
 }) ;

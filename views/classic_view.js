@@ -34,12 +34,12 @@ SC.BENCHMARK_CONFIGURE_OUTLETS = NO ;
   
   h2. Handling Events
   
-  @extends SC.Responder
+  @extends SC.ClassicResponder
   @extends SC.PathModule
   @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
-SC.ClassicView = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
+SC.ClassicView = SC.ClassicResponder.extend(SC.PathModule,  SC.DelegateSupport,
 /** @scope SC.ClassicView.prototype */ {
 
   // ..........................................
@@ -481,7 +481,7 @@ SC.ClassicView = SC.Responder.extend(SC.PathModule,  SC.DelegateSupport,
   },
   
   // ..........................................
-  // SC.Responder implementation 
+  // SC.ClassicResponder implementation 
   //
   
   nextResponder: function()

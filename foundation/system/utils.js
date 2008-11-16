@@ -123,7 +123,7 @@ SC.mixin(
             (point.y <= SC.maxY(f)) ;
   },
   
-  /** Return true if the two frames match.
+  /** Return true if the two frames match.  You can also pass only points or sizes.
   
     @param r1 {Rect} the first rect
     @param r2 {Rect} the second rect
@@ -134,10 +134,10 @@ SC.mixin(
     if (!r1 || !r2) return (r1 == r2) ;
     
     if (delta == null) delta = 0.1;
-    if (Math.abs(r1.y - r2.y) > delta) return false ; 
-    if (Math.abs(r1.x - r2.x) > delta) return false ; 
-    if (Math.abs(r1.width - r2.width) > delta) return false ; 
-    if (Math.abs(r1.height - r2.height) > delta) return false ; 
+    if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return NO ; 
+    if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return NO ; 
+    if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return NO ; 
+    if ((r1.height != r2.height) && (Math.abs(r1.height - r2.height) > delta)) return NO ; 
     return true ;
   },
   

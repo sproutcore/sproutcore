@@ -14,7 +14,7 @@ require('foundation/system/object') ;
   behavior, you can always write your own.
 
   An instance of this input manager is created as a property of
-  SC.Responder.  To overide the inputManager used for all responders, replace
+  SC.ClassicResponder.  To overide the inputManager used for all responders, replace
   this property with your own instance.  To override the inputManager used 
   only for one responder, set the inputManager property on your specific 
   instance.

@@ -14,7 +14,7 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
 // load.  Window listens for mouse and keyboard events and routes them to the
 // first responder.  Using the firstResponder method you can control who gets
 // to respond to keyboard events.
-SC.window = SC.PaneView.extend({
+SC.window = SC.ClassicPaneView.extend({
   
   // This finds the first view responding to the event.
   firstViewForEvent: function(evt) {

@@ -1,7 +1,7 @@
 <% content_for('final') do %>
 <script>
 
-Test.context("A new SC.PaneView instance", {
+Test.context("A new SC.ClassicPaneView instance", {
 
   "Should identify itself as a SC.Pane": function()
   {
@@ -24,7 +24,7 @@ Test.context("A new SC.PaneView instance", {
   },
   "Should run callback methods when changing keyPane or mainPane status": function()
   {
-    var otherPane = SC.PaneView.viewFor(null);
+    var otherPane = SC.ClassicPaneView.viewFor(null);
 
     this.pane._didBecomeKeyPaneCalled   = 0;
     this.pane._willResignKeyPaneCalled  = 0;
@@ -76,7 +76,7 @@ Test.context("A new SC.PaneView instance", {
   
   setup: function()
   {
-    this.pane = SC.PaneView.viewFor(null);
+    this.pane = SC.ClassicPaneView.viewFor(null);
   },
   teardown: function()
   {

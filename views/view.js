@@ -9,6 +9,8 @@ require('foundation/mixins/string') ;
 require('foundation/system/object') ;
 require('foundation/system/core_query');
 
+SC.viewKey = SC.guidKey + "_view" ;
+
 /** @private */
 SC.DISPLAY_LOCATION_QUEUE = 'updateDisplayLocationIfNeeded';
 
@@ -48,10 +50,10 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
 
   concatenatedProperties: ['outlets','displayProperties'],
   
-  /** @property The current root view. */
-  rootView: function() {
+  /** @property The current pane. */
+  pane: function() {
     var view = this;
-    while(view && !view.isRootView) view = view.get('parentView');
+    while(view && !view.isPane) view = view.get('parentView');
     return view;
   }.property('parentView'),
     
@@ -311,6 +313,64 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
       while(--idx>=0) childViews[idx]._recomputeIsVisibleInWindow(cur);
     }
   },
+
+  // .......................................................
+  // SC.RESPONDER SUPPORT
+  //
+
+  /** @property
+    The nextResponder is usually the parentView.
+  */
+  nextResponder: function() {
+    this.get('parentView');
+  }.property('parentView').cacheable(),
+
+  /**
+    Recursively travels down the view hierarchy looking for a view that implements the key equivalent (returning to YES to indicate it handled the event).  You can override this method to handle specific key equivalents yourself.
+    
+    The keystring is a string description of the key combination pressed.  The evt is the event itself.    If you handle the equivalent, return YES.  Otherwise, you should just return sc_super.
+    
+    @param {String} keystring
+    @param {SC.Event} evt
+    @returns {Boolean}
+  */
+  performKeyEquivalent: function(keystring, evt) {
+    var ret = null, childViews = this.get('childViews'), len = childViews.length, idx=-1;
+    while(!ret && (++idx<len)) {
+      ret = child.performKeyEquivalent(keystring, evt);
+    }
+    return ret ;
+  },
+
+  mouseDown: function(evt) {
+    console.log('%@ - mouseDown'.fmt(this));
+    return YES ;
+  },
+
+  mouseUp: function(evt) {
+    console.log('%@ - mouseUp'.fmt(this));
+    return YES ;
+  },
+
+  mouseMoved: function(evt) {
+    console.log('%@ - mouseMoved'.fmt(this));
+    return YES ;
+  },
+
+  mouseDragged: function(evt) {
+    console.log('%@ - mouseDragged'.fmt(this));
+    return YES ;
+  },
+
+  mouseEntered: function(evt) {
+    console.log('%@ - mouseEntered'.fmt(this));
+    return YES ;
+  },
+
+  mouseExited: function(evt) {
+    console.log('%@ - mouseExited'.fmt(this));
+    return YES ;
+  },
   
   // .......................................................
   // CORE DISPLAY METHODS
@@ -327,6 +387,9 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
     this.configureChildViews() ;
     if (!this.rootElement) this.prepareDisplay() ;
+
+    // save this guid on the DOM element for reverse lookups.
+    if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
     
     // register display property observers
     var dp = this.get('displayProperties'), idx = dp.length;
@@ -458,7 +521,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     this.rootElement = root ;
     
     // save this guid on the DOM element for reverse lookups.
-    if (root) root[SC.guidKey] = SC.guidFor(this) ;
+    if (root) root[SC.viewKey] = SC.guidFor(this) ;
     
     // also, update the layout to match the frame
     this.updateDisplayLayout();
@@ -602,8 +665,8 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
 
   /**
     Converts a frame from the receiver's offset to the target offset.  Both
-    the receiver and the target must belong to the same rootView.  If you pass
-    null, the conversion will be to the rootView level.
+    the receiver and the target must belong to the same pane.  If you pass
+    null, the conversion will be to the pane level.
   */
   convertFrameToView: function(frame, targetView) {
     var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f;

@@ -273,21 +273,23 @@ SC.Object.prototype = {
     @returns {Boolean}
   */
   respondsTo: function( methodName ) {
-    return !!(methodName && this[methodName] && (SC.typeOf(this[methodName]) == SC.T_FUNCTION));
+    return !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
   },
   
   /**
-    If the passed property is a method, then it will be executed with the
-    passed arguments.  Otherwise, returns NO.
+    Attemps to invoked the named method, passing the included two arguments.  
+    Returns NO if the method is either not implemented or if the handler returns 
+    NO (indicating that it did not handle the event).  This method is invoked to 
+    deliver actions from menu items and to deliver events.  You can override 
+    this method to provide additional handling if you prefer.
     
-    @param methodName {String} the method name to try to perform.
-    @param args {*arguments} arbitrary arguments to pass along to the method.
-    @returns {Object} NO if method could not be performed or method result.
+    @param {String} methodName
+    @param {Object} arg1
+    @param {Object} arg2
+    @returns {Boolean} YES if handled, NO if not handled
   */
-  tryToPerform: function( methodName, args ) {
-    if ( !methodName ) return NO;
-    var args = SC.$A(arguments); methodName = args.shift();
-    return (this.respondsTo(methodName)) ? this[methodName].apply(this,args) : NO;
+  tryToPerform: function(methodName, arg1, arg2) {
+    return !!(this.respondsTo(methodName) && (this[methodName](arg1, arg2)));
   },
   
   /**  

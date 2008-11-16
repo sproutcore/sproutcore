@@ -14,10 +14,10 @@ require('views/container') ;
 // you can also create your own types of panes yourself.  The pane view
 // automatically groups all panes of a similar type together. 
 //
-// To create your own type of pane, create a subclass of SC.PaneView and then
+// To create your own type of pane, create a subclass of SC.ClassicPaneView and then
 // register it with the SC.PaneManager:
 //
-// SC.PaneManager.registerPane('paneType', SC.PaneView);
+// SC.PaneManager.registerPane('paneType', SC.ClassicPaneView);
 //
 // You can then make views show in the panes by settings the paneType 
 // property on the view and set 'isVisible' to true.
@@ -25,7 +25,7 @@ require('views/container') ;
 // Note that PaneView instances are reused by the pane manager.  You should
 // design your view be reused in this way.
 //
-SC.OverlayPaneView = SC.PaneView.extend({
+SC.OverlayPaneView = SC.ClassicPaneView.extend({
 
   // This property will be set to the content view when you are asked to
   // display it.
@@ -154,7 +154,7 @@ SC.OverlayPaneView = SC.PaneView.extend({
   },
   
   focusFirstKeyView: function() {
-    var fr = this._findViewWithKeyIn('acceptsFirstResponder', SC.Responder, this, true) ;
+    var fr = this._findViewWithKeyIn('acceptsFirstResponder', SC.ClassicResponder, this, true) ;
     if (!fr) fr = this;
     fr.becomeFirstResponder() ;
   },

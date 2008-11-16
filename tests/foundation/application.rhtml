@@ -56,7 +56,7 @@ Test.context("SC.Application", {
   {
     ( SC.app.get('mainPane') == SC.window ).shouldEqual(true);
 
-    var pane = SC.PaneView.viewFor(null);
+    var pane = SC.ClassicPaneView.viewFor(null);
     SC.app.set('keyPane', pane);
     ( SC.app.get('mainPane') == SC.window ).shouldEqual(true);
   },

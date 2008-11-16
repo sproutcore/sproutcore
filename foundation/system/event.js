@@ -139,7 +139,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     much simpler in design.  Notably, it does not support namespaced events
     and you can only pass a single type at a time.
     
-    If you need more advanced event handling, consider the SC.Responder 
+    If you need more advanced event handling, consider the SC.ClassicResponder 
     functionality provided by SproutCore or use your favorite DOM library.
 
     @param {Element} elem a DOM element, window, or document object
@@ -204,7 +204,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     much simpler in design.  Notably, it does not support namespaced events
     and you can only pass a single type at a time.
     
-    If you need more advanced event handling, consider the SC.Responder 
+    If you need more advanced event handling, consider the SC.ClassicResponder 
     functionality provided by SproutCore or use your favorite DOM library.
     
     @param {Element} elem a DOM element, window, or document object
@@ -287,7 +287,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     much simpler.  Notably namespaced events are not supported and you cannot
     trigger events globally.
     
-    If you need more advanced event handling, consider the SC.Responder 
+    If you need more advanced event handling, consider the SC.ClassicResponder 
     functionality provided by SproutCore or use your favorite DOM library.
 
     @param elem {Element} the target element
@@ -370,7 +370,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // normalize event across browsers.  The new event will actually wrap the
     // real event with a normalized API.
-    event = arguments[0] = SC.Event._normalizeEvent(event || window.event) ;
+    event = arguments[0] = SC.Event.normalizeEvent(event || window.event) ;
 
     // get the handlers for this event type
     handlers = (SC.data(this, "events") || {})[event.type];
@@ -585,7 +585,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   // implement preventDefault() in a cross platform way
   
   /** @private Take an incoming event and convert it to a normalized event. */
-  _normalizeEvent: function(event) {
+  normalizeEvent: function(event) {
     return (event.normalized) ? event : SC.Event.create(event) ;
   },
   
@@ -598,6 +598,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
 SC.Event.prototype = {
 
+  /**
+    Set to YES if you have called either preventDefault() or stopPropogation().  This allows a generic event handler to notice if you want to provide detailed control over how the browser handles the real event.
+  */
+  hasCustomEventHandling: NO,
+  
   /** 
     Implements W3C standard.  Will prevent the browser from performing its
     default action on this event.
@@ -610,6 +615,7 @@ SC.Event.prototype = {
       if (evt.preventDefault) evt.preventDefault() ;
       evt.returnValue = NO ; // IE
     }
+    this.hasCustomEventHandling = YES ;
     return this ;
   },
 
@@ -624,6 +630,7 @@ SC.Event.prototype = {
       if (evt.stopPropogation) evt.stopPropagation() ;
       evt.cancelBubble = YES ; // IE
     }
+    this.hasCustomEventHandling = YES ; 
     return this ;
   },
 

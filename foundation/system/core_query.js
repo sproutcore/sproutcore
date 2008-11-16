@@ -1856,8 +1856,11 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   */
   view: function() {
     return this.map(function() { 
-      var guid = this[SC.guidKey] ;
-      return (guid) ? SC.View.views[guid] : null ;  
+      var ret, guidKey = SC.viewKey, dom = this;
+      while(dom && (dom !== document) && (!dom[guidKey])) dom = dom.parentNode;
+      ret = (dom) ? SC.View.views[dom[guidKey]] : null;
+      dom =null;
+      return ret ;
     });
   },
   

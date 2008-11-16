@@ -225,6 +225,12 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
   */
   _valueDidChange: function() {
 
+    var isVisibleInWindow = this.get('isVisibleInWindow');
+    if (!isVisibleInWindow) {
+      this._valueDidChangeWhileNotVisible = YES ;
+      return ;
+    }
+    
     var value = this.get('value') ;
     if (value === this._value) return; // nothing to do
     this._value = value ;
@@ -237,7 +243,14 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
       this.set('innerText', value || '') ;
     } else this.set('innerHTML', value || '') ;
 
-  }.observes('value')
+  }.observes('value'),
+  
+  _isVisibleInWindowDidChange: function() {
+    if (this.get('isVisibleInWindow') && this._valueDidChangeWhileNotVisible){
+      this._valueDidChangeWhileNotVisible = NO;
+      this._valueDidChange() ;
+    }
+  }.observes('isVisibleInWindow')
   
 
 });

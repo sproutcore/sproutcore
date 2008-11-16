@@ -15,10 +15,10 @@ require('foundation/application/responder');
   and actions are routed through this object.
  
   
-  @extends SC.Responder
+  @extends SC.ClassicResponder
   @since SproutCore 1.0
 */
-SC.Application = SC.Responder.extend( 
+SC.Application = SC.ClassicResponder.extend( 
 /** @scope SC.Application.prototype */ {
 
   /**
@@ -87,7 +87,7 @@ SC.Application = SC.Responder.extend(
   /**
   * Route an action message to the appropriate responder
   * @param {String} action The action to perform - this is a method name.
-  * @param {SC.Responder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
+  * @param {SC.ClassicResponder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
   * @param {Object} sender The sender of the action
   * @returns return value info
   * @type Array
@@ -178,7 +178,7 @@ SC.Application = SC.Responder.extend(
     // unable to resolve a target... mouseDown on an element not in the view chain, key responder is null, etc...
     if (!target) return null;
 
-    // calling doCommand will crawl up the responder chain until someone handles it or it hits the end of the chain (SC.PaneView).
+    // calling doCommand will crawl up the responder chain until someone handles it or it hits the end of the chain (SC.ClassicPaneView).
     handler = target.doCommand( evt._type, evt );
     
     // unhandled keyDown event...
@@ -198,7 +198,7 @@ SC.Application = SC.Responder.extend(
   _attemptKeyEquivalent: function( evt )
   {
     // keystring is a method name representing the keys pressed (i.e 'alt_shift_escape')
-    var keystring = SC.Responder.inputManager.codesForEvent(evt).first();
+    var keystring = SC.ClassicResponder.inputManager.codesForEvent(evt).first();
     
     // inputManager couldn't build a keystring for this key event... nothing to do...
     if (!keystring) return false;
@@ -214,7 +214,7 @@ SC.Application = SC.Responder.extend(
   _attemptKeyInterfaceControl: function( evt )
   {
     // keystring is a method name representing the keys pressed (i.e 'alt_shift_escape')
-    var keystring = SC.Responder.inputManager.codesForEvent(evt).first();
+    var keystring = SC.ClassicResponder.inputManager.codesForEvent(evt).first();
 
     //console.log( '[SC.Application#_attemptKeyInterfaceControl] keystring: %s, evt: %o', keystring, evt );
 
