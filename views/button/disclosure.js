@@ -8,14 +8,13 @@ require('views/button/button');
 
   Disclosure triangle button.
 
-  @extends SC.ClassicButtonView
-  @author    Charles Jolley 
-  @version 1.0
+  @extends SC.ButtonView
+  @since SproutCore
 */
-SC.DisclosureView = SC.ClassicButtonView.extend(
+SC.DisclosureView = SC.ButtonView.extend(
 /** @scope SC.DisclosureView.prototype */ {
 
-  emptyElement: '<a href="javascript:;" class="sc-disclosure-view sc-button-view button disclosure"><img src="%@" class="button" /><span class="label"></span></a>'.fmt(static_url('blank')),
+  emptyElement: '<a href="javascript:;" class="sc-disclosure-view sc-button-view sc-view button disclosure"><img src="%@" class="button" /><span class="sc-button-label label"></span></a>'.fmt(static_url('blank')),
   
   buttonBehavior: SC.TOGGLE_BEHAVIOR,
 
@@ -30,13 +29,11 @@ SC.DisclosureView = SC.ClassicButtonView.extend(
   */
   toggleOffValue: NO,
 
-  valueBindingDefault: SC.Binding.Bool,
+  valueBindingDefault: SC.Binding.bool(),
   
   init: function() {
     sc_super() ;
-    if (this.get('value') == this.get('toggleOnValue')) {
-      this.set('isSelected', true) ;
-    }
+    this.set('isSelected', this.get('value') === this.get('toggleOnValue'));
   }
   
 }) ;
