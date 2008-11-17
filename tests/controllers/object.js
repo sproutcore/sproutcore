@@ -1,10 +1,6 @@
-<% # ========================================================================
-   # SC.ObjectController Unit Test
-   # ========================================================================
-%>
-<% content_for('final') do %>
-
-<script>
+// ========================================================================
+// Controller Tests
+// ========================================================================
 
 // An ObjectController will make a content object or an array of content objects 
 Test.context("SC.ObjectController", {
@@ -373,7 +369,3 @@ Test.context("SC.ObjectController", {
       
     }
 }) ;
-
-</script>
-
-<% end %>

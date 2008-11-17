@@ -1,6 +1,6 @@
-<% content_for('final') do %>
-
-<script>
+// ========================================================================
+// SC.Timer Tests
+// ========================================================================
 
 Test.context("Timer.isPaused", {
 
@@ -64,7 +64,3 @@ Test.context("Timer.isPaused", {
   // using invalidate on a repeating timer is tested in schedule().
 
 });
-
-</script>
-
-<% end %>

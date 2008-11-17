@@ -1,6 +1,6 @@
-<% content_for('final') do %>
-
-<script type="text/javascript" charset="utf-8">
+// ========================================================================
+// Controller Tests
+// ========================================================================
 
 Test.context("SC.ArrayController", {
     
@@ -120,7 +120,3 @@ Test.context("SC.ArrayController", {
   }
 
 });
-
-</script>
-
-<% end %>

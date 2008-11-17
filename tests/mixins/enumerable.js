@@ -1,5 +1,6 @@
-<% content_for('final') do %>
-<script>
+// ========================================================================
+// SC.Enumerable Tests
+// ========================================================================
 
 // Define some standard tests.  We need to test both on a custom enumerable
 // and on a real Array.
@@ -475,6 +476,3 @@ Test.context("DummyEnumerable", SC.mixin({
   teardown: function() { delete src ; }
 
 }, EnumerableTests));
-
-</script>
-<% end %>

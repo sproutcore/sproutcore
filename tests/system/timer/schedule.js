@@ -1,6 +1,6 @@
-<% content_for('final') do %>
-
-<script>
+// ========================================================================
+// SC.Timer Tests
+// ========================================================================
 
 Test.context("Timer.schedule single timer", {
 
@@ -139,7 +139,3 @@ Test.context("Timer.schedule single timer", {
   }
 
 });
-
-</script>
-
-<% end %>

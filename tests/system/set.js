@@ -1,5 +1,6 @@
-<% content_for('final') do %>
-<script>
+// ========================================================================
+// SC.Set Tests
+// ========================================================================
 
 Test.context("creating SC.Set instances", {
   
@@ -263,6 +264,3 @@ Test.context("SC.Set.remove + SC.Set.contains", {
   }
   
 });
-
-</script>
-<% end %>

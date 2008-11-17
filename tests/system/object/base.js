@@ -1,5 +1,6 @@
-<% content_for('final') do %>
-<script>
+// ========================================================================
+// SC.Object Base Tests
+// ========================================================================
 
 Test.context("A new SC.Object instance", {
   
@@ -65,5 +66,3 @@ Test.context("A new SC.Object instance", {
 
 });
 
-</script>
-<% end %>

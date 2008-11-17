@@ -1,6 +1,6 @@
-<% content_for('final') do %>
-
-<script>
+// ========================================================================
+// SC.Timer Tests
+// ========================================================================
 
 Test.context("Timer.invalidate", {
 
@@ -28,6 +28,3 @@ Test.context("Timer.invalidate", {
 
 });
 
-</script>
-
-<% end %>

@@ -1,5 +1,6 @@
-<% content_for('final') do %>
-<script>
+// ========================================================================
+// SC.SparseArray Tests
+// ========================================================================
 
 Test.context("SC.SparseArray calls delegate", {
   
@@ -10,7 +11,3 @@ Test.context("SC.SparseArray calls delegate", {
 
 });
 
-
-
-</script>
-<% end %>

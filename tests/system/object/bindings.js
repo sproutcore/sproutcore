@@ -1,5 +1,6 @@
-<% content_for('final') do %>
-<script>
+// ========================================================================
+// SC.Object bindings Tests
+// ========================================================================
 
 Test.context("bind() method", {
   
@@ -340,5 +341,4 @@ Test.context("fooBindingDefault: SC.Binding.bool() (new style)", {
   }
   
 });
-</script>
-<% end %>
+

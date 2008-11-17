@@ -1,6 +1,6 @@
-<% content_for('final') do %>
-
-<script>
+// ========================================================================
+// SC.Timer Tests
+// ========================================================================
 
 Test.context("SC.Object.invokeLater", {
 
@@ -139,7 +139,3 @@ Test.context("Prototype.invokeLater", {
 
 
 });
-
-</script>
-
-<% end %>

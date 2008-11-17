@@ -1,10 +1,6 @@
-<% # ========================================================================
-   # Array Unit Test
-   # ========================================================================
-%>
-<% content_for('final') do %>
-
-<script>
+// ========================================================================
+// Array Unit Tests
+// ========================================================================
 
 // This is a generic set of tests.  To apply these, create a new contact, and
 // call this function passing in a factory function to build your element.
@@ -215,6 +211,3 @@ Test.context("DummyArray", ArrayTests(function() {
   return DummyArray.create()  ;
 }));
 
-</script>
-
-<% end %>

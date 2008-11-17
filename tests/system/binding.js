@@ -1,5 +1,6 @@
-<% content_for('final') do %>
-<script>
+// ========================================================================
+// SC.Binding Tests
+// ========================================================================
 
 Test.context("basic object binding", {
   
@@ -106,6 +107,3 @@ Test.context("chained binding", {
   
 });
 
-
-</script>
-<% end %>
