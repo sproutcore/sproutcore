@@ -9,7 +9,7 @@
  *
  */
 
-require('foundation/system/ready');
+require('system/ready');
 
 (function() {
   

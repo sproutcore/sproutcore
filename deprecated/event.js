@@ -3,7 +3,7 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('foundation/system/event') ;
+require('system/event') ;
 
 // This file defines some basic extensions to the built-in Event object to
 // provide some common utility functions.

@@ -5,7 +5,7 @@
 
 require('core');
 require('system/mixins/enumerable');
-require('foundation/system/builder') ;
+require('system/builder') ;
 
 /**
   CoreQuery is a simplified DOM manipulation library used internally by 

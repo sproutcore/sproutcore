@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/system/object') ;
-require('foundation/application/input_manager');
+require('system/object') ;
+require('application/input_manager');
 
 /** @static
 

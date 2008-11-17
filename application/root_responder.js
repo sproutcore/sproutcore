@@ -3,8 +3,8 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/system/ready');
-require('foundation/application/input_manager');
+require('system/ready');
+require('application/input_manager');
 
 /** Set to NO to leave the backspace key under the control of the browser.*/
 SC.CAPTURE_BACKSPACE_KEY = NO ;

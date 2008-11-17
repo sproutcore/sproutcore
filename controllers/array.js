@@ -6,7 +6,7 @@
 require('controllers/controller') ;
 require('mixins/array') ;
 require('mixins/selection_support') ;
-require('foundation/system/binding') ;
+require('system/binding') ;
 
 /** @class
 

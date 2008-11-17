@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/application/root_responder');
+require('application/root_responder');
 
 /**
   Order layer for regular Panels.  Panels appear in front of the main view, but behind palettes, popups.

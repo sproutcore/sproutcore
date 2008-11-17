@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/application/root_responder');
+require('application/root_responder');
 
 // Swap in platform-specific subclass.  Class-cluster FTW!
 SC.RootResponder = SC.RootResponder.extend({

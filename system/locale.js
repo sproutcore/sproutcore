@@ -3,7 +3,7 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('foundation/system/object');
+require('system/object');
 
 /**
   The Locale defined information about a specific locale, including date and

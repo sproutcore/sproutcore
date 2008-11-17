@@ -3,12 +3,12 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/system/browser');
+require('system/browser');
 
-require('foundation/system/object') ;
-require('foundation/application/responder') ;
+require('system/object') ;
+require('application/responder') ;
 require('deprecated/node_descriptor') ;
-require('foundation/system/binding');
+require('system/binding');
 require('deprecated/path_module');
 require('mixins/delegate_support') ;
 require('mixins/string') ;

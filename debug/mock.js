@@ -1,5 +1,5 @@
 require('core');
-require('foundation/system/object');
+require('system/object');
 
 /**
   @namespace Mocks for unit testing

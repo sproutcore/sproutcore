@@ -6,7 +6,7 @@
 require('deprecated/views/classic_view') ;
 require('views/container') ;
 require('desktop.platform/globals/panels') ;
-require('foundation/system/ready') ;
+require('system/ready') ;
 
 // This singleton manages the popups on the page.  It will show an element
 // called 'popups', which is appended to the end of the body node.  To show

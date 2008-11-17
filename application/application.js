@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core');
-require('foundation/application/responder');
+require('application/responder');
 
 /** 
 

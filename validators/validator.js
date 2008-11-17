@@ -3,7 +3,7 @@
 // Author: Charles Jolley
 // ==========================================================================
 
-require('foundation/system/object');
+require('system/object');
 
 /**
   @class

@@ -3,12 +3,12 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/system/browser');
+require('system/browser');
 require('mixins/delegate_support') ;
 require('mixins/string') ;
-require('foundation/system/object') ;
-require('foundation/system/core_query');
-require('foundation/system/event');
+require('system/object') ;
+require('system/core_query');
+require('system/event');
 
 SC.viewKey = SC.guidKey + "_view" ;
 

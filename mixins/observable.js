@@ -3,8 +3,8 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('foundation/enumerable/set');
-require('foundation/private/observer_set') ;
+require('system/set');
+require('private/observer_set') ;
 
 /**
   @namespace 
