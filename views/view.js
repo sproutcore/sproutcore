@@ -8,6 +8,7 @@ require('foundation/mixins/delegate_support') ;
 require('foundation/mixins/string') ;
 require('foundation/system/object') ;
 require('foundation/system/core_query');
+require('foundation/system/event');
 
 SC.viewKey = SC.guidKey + "_view" ;
 
@@ -342,36 +343,6 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     return ret ;
   },
 
-  mouseDown: function(evt) {
-    console.log('%@ - mouseDown'.fmt(this));
-    return YES ;
-  },
-
-  mouseUp: function(evt) {
-    console.log('%@ - mouseUp'.fmt(this));
-    return YES ;
-  },
-
-  mouseMoved: function(evt) {
-    console.log('%@ - mouseMoved'.fmt(this));
-    return YES ;
-  },
-
-  mouseDragged: function(evt) {
-    console.log('%@ - mouseDragged'.fmt(this));
-    return YES ;
-  },
-
-  mouseEntered: function(evt) {
-    console.log('%@ - mouseEntered'.fmt(this));
-    return YES ;
-  },
-
-  mouseExited: function(evt) {
-    console.log('%@ - mouseExited'.fmt(this));
-    return YES ;
-  },
-  
   // .......................................................
   // CORE DISPLAY METHODS
   //

@@ -1871,6 +1871,25 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   */
   setClass: function(className, shouldAdd) {
     return (shouldAdd) ? this.addClass(className) : this.removeClass(className); 
+  },
+  
+  /**
+    Returns YES if any of the matched elements have the passed element or CQ object as a child element.
+  */
+  hasChild: function(el) {
+    el = SC.$(el); // make into CQ object
+    var ret, elCur, myCur, idx, len = el.length;
+    var loc = this.length;
+    while(!ret && (--loc >= 0)) {
+      myCur = this[loc];
+      for(idx=0; !ret && (idx<len); idx++) {
+        elCur = el[idx];
+        while(elCur && (elCur !== myCur)) elCur = elCur.parentNode;
+        ret = elCur === myCur ;
+      }
+    }
+    myCur = elCur = null ; // clear memory
+    return ret ;
   }
   
 });

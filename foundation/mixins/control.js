@@ -63,9 +63,6 @@ SC.Control = {
   
   initMixin: function() {
     this._contentDidChange(); // setup content observing if needed.
-    this.isSelectedObserver() ;
-    this.isEnabledObserver() ;
-    this.isFocusedObserver(); 
   },
   
   /** 
@@ -74,7 +71,7 @@ SC.Control = {
     This property is observable and bindable.
   */
   isSelected: false,
-  isSelectedBindingDefault: SC.Binding.OneWayBool,
+  isSelectedBindingDefault: SC.Binding.oneWay().bool(),
 
   /** 
     Set to true when the item is enabled. 
@@ -82,7 +79,7 @@ SC.Control = {
     This property is observable and bindable.
   */
   isEnabled: true,
-  isEnabledBindingDefault: SC.Binding.OneWayBool,
+  isEnabledBindingDefault: SC.Binding.oneWay().bool(),
   
   /**
     The value represented by this control.
@@ -189,40 +186,25 @@ SC.Control = {
     root element of your view based on the state. You can override this with
     your own behavior if you prefer.
   */
-  isSelectedObserver: function() {
-    var sel = this.get('isSelected') ;
-    this.setClassName('mixed', sel == SC.MIXED_STATE) ;
-    this.setClassName('sel', sel && (sel != SC.MIXED_STATE)) ;
-  }.observes('isSelected'),
+  controlDisplayObserver: function() {
+    this.displayDidChange();
+  }.observes('isSelected', 'isEnabled', 'isFirstResponder'),
   
   /**
-    Default observer for the isEnabled state.
-    
-    The default will simply add or remove a "disabled" class name to the root 
-    element of your view based on the state.  You can override this with your
-    own behavior if you prefer.
+    Invoke this method in your updateDisplay() method to update any basic control CSS classes.
   */
-  isEnabledObserver: function() {
-    var disabled = !this.get('isEnabled') ;
-    this.setClassName('disabled', disabled);
-
-    // set disabled attr as well if relevant
-    if (this.rootElement && (this.rootElement.disabled !== undefined) && (this.rootElement.disabled != disabled)) {
-      this.rootElement.disabled = disabled ;
+  updateControlDisplay: function() {
+    var sel = this.get('isSelected'), disabled = !this.get('isEnabled');
+    this.$().setClass('mixed', sel === SC.MIXED_STATE)
+      .setClass('sel', sel && (sel !== SC.MIXED_STATE))
+      .setClass('disabled', disabled)
+      .setClass('focus', this.get('isFirstResponder'));
+      
+    if (this.rootElement && this.rootElement.disabled !== undefined) {
+      this.$().attr('disabled', disabled) ;
     }
-  }.observes('isEnabled'),
+  },
 
-  /**
-    Default observer for the isFirstResponder state.
-    
-    The default will add or remove a "focus" class name ot the root element
-    of your view based on the state.  You can override this with your own
-    behavior if you prefer.
-  */
-  isFocusedObserver: function() {
-    this.setClassName('focus', !!this.get('isFirstResponder')) ;
-  }.observes('isFirstResponder'),
-  
   // This should be null so that if content is also null, the
   // _contentDidChange won't do anything on init.
   _content: null,

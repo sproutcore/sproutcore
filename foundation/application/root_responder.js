@@ -151,10 +151,11 @@ SC.RootResponder = SC.Object.extend({
     @param {String} action The action to perform - this is a method name.
     @param {SC.ClassicResponder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
     @param {Object} sender The sender of the action
+    @param {SC.Pane} pane
     @returns YES if action was performed, NO otherwise
   */
-  sendAction: function( action, target, sender ) {
-    var target = this.targetForAction(action, target, sender);
+  sendAction: function( action, target, sender, pane) {
+    var target = this.targetForAction(action, target, sender, pane);
     return target && target.tryToPerform(action, sender) ;
   },
   
@@ -182,9 +183,10 @@ SC.RootResponder = SC.Object.extend({
     @param {Object|String} target or null if no target is specified
     @param {String} method name for target
     @param {Object} sender optional sender
+    @param {SC.Pane} optional pane
     @returns {Object} target object or null if none found
   */
-  targetForAction: function(methodName, target, sender) {
+  targetForAction: function(methodName, target, sender, pane) {
 
     // no action, no target...
     if (!method || (SC.typeOf(method) != SC.T_STRING)) return null;
@@ -200,7 +202,8 @@ SC.RootResponder = SC.Object.extend({
     // ok, no target was passed... try to find one in the responder chain
     var focusedPane = this.get('focusedPane'), keyPane = this.get('keyPane'), mainPane = this.get('mainPane');
     
-    if (keyPane) target = this._responderFor(keyPane, methodName);
+    if (pane) target = this._responderFor(pane, methodName);
+    if (!target && keyPane && (keyPane !== pane)) target = this._responderFor(keyPane, methodName);
     if (!target && focusedPane && (focusedPane !== keyPane)) {
       target = this._responderFor(focusedPane, methodName) ;
     }
