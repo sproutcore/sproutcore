@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/classic_view') ;
+require('views/view') ;
 require('foundation/mixins/control') ;
 require('foundation/mixins/delegate_support');
 require('views/inline_text_field');
@@ -17,14 +17,14 @@ require('foundation/mixins/inline_editor_delegate');
   You use a label view anytime you need to display a static string of text 
   or to display text that may need to be edited using only an inline control.
   
-  @extends SC.ClassicView
+  @extends SC.View
   @extends SC.Control
   @extends SC.DelegateSupport
   @extends SC.InlineEditorDelegate
   @extends SC.Editable
   @since SproutCore 1.0
 */
-SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
+SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.LabelView.prototype */ {
 
   emptyElement: '<span class="sc-label-view"></span>',
@@ -36,6 +36,7 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
     settings on the owner view.
   */
   escapeHTML: true,
+  escapeHTMLBindingDefault: SC.Binding.oneWay().bool(),
 
   /**
     If true, then the value will be localized.
@@ -44,6 +45,7 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
     settings in the owner view.
   */
   localize: false,
+  localizeBindingDefault: SC.Binding.oneWay().bool(),
   
   /**
     Set this to a validator or to a function and the value
@@ -77,13 +79,13 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
     // 1. apply the formatter
     var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
-      var formattedValue = (SC.$type(formatter) == SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
+      var formattedValue = (SC.typeOf(formatter) === SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (formattedValue != null) value = formattedValue ;
     }
     
     // 2. If the returned value is an array, convert items to strings and 
     // join with commas.
-    if (SC.$type(value) == SC.T_ARRAY) {
+    if (SC.typeOf(value) === SC.T_ARRAY) {
       var ary = [];
       for(var idx=0;idx<value.get('length');idx++) {
         var x = value.objectAt(idx) ;
@@ -100,23 +102,18 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
     if (value && this.getDelegateProperty(this.displayDelegate, 'localize')) value = value.loc() ;
     
     return value ;
-  }.property('value'),
+  }.property('value', 'localize', 'formatter').cacheable(),
   
   /**
     enables editing using the inline editor
   */
   isEditable: NO,
+  isEditableBindingDefault: SC.Binding.bool(),
 
   /**
     YES if currently editing label view.
   */
   isEditing: NO,
-
-
-  /**
-    set to true to have the value you set automatically localized.
-  */
-  localize: false,
   
   /**
     Validator to use during inline editing.
@@ -193,8 +190,8 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
     Hide the label view while the inline editor covers it.
   */
   inlineEditorDidBeginEditing: function(inlineEditor) {
-    this._oldOpacity = this.getStyle('opacity') ;
-    this.setStyle({ opacity: 0.0 }) ;
+    this._oldOpacity = this.$().css('opacity') ;
+    this.$().css('opacity', 0.0);
   },
 
   /** @private
@@ -209,48 +206,26 @@ SC.LabelView = SC.ClassicView.extend(SC.DelegateSupport, SC.Control, SC.InlineEd
   */
   inlineEditorDidEndEditing: function(inlineEditor, finalValue) {
     this.setIfChanged('value', finalValue) ;
-    this.setStyle({ opacity: this._oldOpacity }) ;
+    this.$().css('opacity', this._oldOpacity);
     this._oldOpacity = null ;
     this.set('isEditing', NO) ;
   },
 
-  /** 
-    @private
-    
-    Invoked whenever the monitored value on the content object 
-    changes.
-    
-    The value processed is either the contentValueKey, if set, or 
-    it is the content object itself.
-  */
-  _valueDidChange: function() {
-
-    var isVisibleInWindow = this.get('isVisibleInWindow');
-    if (!isVisibleInWindow) {
-      this._valueDidChangeWhileNotVisible = YES ;
-      return ;
-    }
-    
-    var value = this.get('value') ;
-    if (value === this._value) return; // nothing to do
-    this._value = value ;
-
-    // get display value
-    value = this.get('displayValue') ;
-    
-    // Escape HTML
+  displayProperties: ['displayValue'],
+  
+  updateDisplay: function() {
+    var ret = sc_super();
+    var value = this.get('displayValue');
     if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
-      this.set('innerText', value || '') ;
-    } else this.set('innerHTML', value || '') ;
-
-  }.observes('value'),
+      this.$().text(value || '');
+    } else this.$().html(value || '') ;
+    return ret ;
+  },
   
-  _isVisibleInWindowDidChange: function() {
-    if (this.get('isVisibleInWindow') && this._valueDidChangeWhileNotVisible){
-      this._valueDidChangeWhileNotVisible = NO;
-      this._valueDidChange() ;
-    }
-  }.observes('isVisibleInWindow')
-  
+  prepareDisplay: function() {
+    var ret = sc_super();
+    this.updateDisplay();
+    return ret ;
+  }
 
 });
