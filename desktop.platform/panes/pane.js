@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/classic_view');
+require('deprecated/views/classic_view');
 
 SC.KEYVIEW_SELECTING_NONE      = 0;
 SC.KEYVIEW_SELECTING_NEXT      = 1;

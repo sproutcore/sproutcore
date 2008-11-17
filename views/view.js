@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('foundation/system/browser');
-require('foundation/mixins/delegate_support') ;
-require('foundation/mixins/string') ;
+require('mixins/delegate_support') ;
+require('mixins/string') ;
 require('foundation/system/object') ;
 require('foundation/system/core_query');
 require('foundation/system/event');

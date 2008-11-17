@@ -2,8 +2,8 @@
 // SC.SliderView
 // ==========================================================================
 
-require('views/classic_view');
-require('foundation/mixins/control');
+require('deprecated/views/classic_view');
+require('mixins/control');
 
 /** @class
 

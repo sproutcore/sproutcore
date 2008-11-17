@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/classic_view') ;
+require('deprecated/views/classic_view') ;
 require('views/container') ;
 require('desktop.platform/globals/panels') ;
 require('foundation/system/ready') ;

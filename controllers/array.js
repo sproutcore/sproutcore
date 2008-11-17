@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('controllers/controller') ;
-require('foundation/mixins/array') ;
-require('foundation/mixins/selection_support') ;
+require('mixins/array') ;
+require('mixins/selection_support') ;
 require('foundation/system/binding') ;
 
 /** @class

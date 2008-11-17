@@ -4,10 +4,10 @@
 // ========================================================================
 
 require('views/view') ;
-require('foundation/mixins/control') ;
-require('foundation/mixins/delegate_support');
+require('mixins/control') ;
+require('mixins/delegate_support');
 require('views/inline_text_field');
-require('foundation/mixins/inline_editor_delegate');
+require('mixins/inline_editor_delegate');
 
 /**
   @class

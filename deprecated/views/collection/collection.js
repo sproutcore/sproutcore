@@ -3,9 +3,9 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/classic_view') ;
+require('deprecated/views/classic_view') ;
 require('views/label') ;
-require('foundation/mixins/collection_view_delegate') ;
+require('mixins/collection_view_delegate') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;

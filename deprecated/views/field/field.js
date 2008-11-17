@@ -3,9 +3,9 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/classic_view') ;
-require('foundation/mixins/control') ;
-require('foundation/mixins/validatable') ;
+require('deprecated/views/classic_view') ;
+require('mixins/control') ;
+require('mixins/validatable') ;
 
 /**
   @class

@@ -3,9 +3,9 @@
 // ==========================================================================
 
 require('core') ;
-require('views/classic_view') ;
-require('foundation/mixins/control');
-require('foundation/mixins/inline_editor_delegate');
+require('deprecated/views/classic_view') ;
+require('mixins/control');
+require('mixins/inline_editor_delegate');
 
 SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
