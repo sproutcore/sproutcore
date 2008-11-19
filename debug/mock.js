@@ -40,3 +40,17 @@ SC.Mock.KeyEvent = SC.Mock.DOMEvent.extend(
   metaKey:  false
 });
 
+
+// make reverse keycode lookup for using in unit tests...
+SC.KEY_CODES = {};
+for (var i=0, n=256; i < n; i++)
+{
+  if (SC.MODIFIER_KEYS[i] !== undefined) {
+    SC.KEY_CODES[ SC.MODIFIER_KEYS[i] ] = i;
+  } else if (SC.FUNCTION_KEYS[i] !== undefined) {
+    SC.KEY_CODES[ SC.FUNCTION_KEYS[i] ] = i;
+  } else if (SC.PRINTABLE_KEYS[i] !== undefined) {
+    SC.KEY_CODES[ SC.PRINTABLE_KEYS[i] ] = i;
+  }
+}
+

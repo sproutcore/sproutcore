@@ -86,10 +86,6 @@ SC.mixin({
     // setup locale
     SC.Locale.createCurrentLocale();
     
-    // First, start SC.Application
-    SC.app = SC.Application.create() ;
-    SC.app.run() ;
-
     // if there is a body tag on the document, set the language
     if (document && document.getElementsByTagName) {
       var body = document.getElementsByTagName('body')[0];

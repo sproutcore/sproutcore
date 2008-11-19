@@ -53,11 +53,15 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
   orderBefore: function(pane, beforePane) {
     var currentFocus = this.get('focusedPane');
     var panes = this.get('orderedPanes').without(pane);
+    var len, idx, currentOrder, newFocus ;
 
     // adjust the beforePane to match orderLayer
     var orderLayer = pane.get('orderLayer');
     if (beforePane) {
-      var len = panes.length, idx = panes.indexOf(beforePane), currentOrder = beforePane.get('orderLayer');
+      len = panes.length;
+      idx = panes.indexOf(beforePane);
+      currentOrder = beforePane.get('orderLayer');
+      
       if (currentOrder<orderLayer) {
         while((beforePane.get('orderLayer')<orderLayer) && (++idx<len)) beforePane = panes[idx];
         if (idx>=len) beforePane = null ; // insert at end if needed 
@@ -68,7 +72,7 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
     
     // otherwise, find the highest pane matching the order...
     } else {
-      var idx = panes.length, currentOrder ;
+      idx = panes.length ;
       while((--idx >= 0) && !beforePane) {
         beforePane = panes[idx] ;
         if (beforePane.get('orderLayer') > orderLayer) beforePane = null; // try next one
@@ -80,12 +84,12 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
     
     // adjust array
     if (beforePane) {
-      var idx = panes.indexOf(beforePane);
+      idx = panes.indexOf(beforePane);
       panes.insertAt(idx, pane);
     } else panes.push(pane);
     this.set('orderedPanes', panes); // update
 
-    var newFocus = this.get('focusedPane'); 
+    newFocus = this.get('focusedPane'); 
     if (newFocus !== currentFocus) {
       if (currentFocus) currentFocus.blurTo(newFocus);
       if (newFocus) newFocus.focusFrom(currentFocus);
@@ -119,7 +123,7 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
       
     // if the front is not changing, just check for key view.  Go back to main...
     } else if (currentKey === pane) {
-      this.makeKeyPane(nil);
+      this.makeKeyPane(null);
     }
     
     this.panes.remove(pane) ; // remove pane from set of panes...
@@ -145,18 +149,65 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
     // handle these two events specially in IE
     'drag selectstart'.w().forEach(function(keyName) {
       var method = this[keyName] ;
-      if (method) if (SC.browser.msie) {
-        var responder = this ;
-        document.body['on' + keyName] = function(e) { return method.call(responder, SC.Event.normalizeEvent(e)); };
-        SC.Event.add(window, 'unload', this, function() { document.body['on' + keyName] = null; }); // be sure to cleanup memory leaks
-      } else {
-        SC.Event.add(document, keyName, this, method);
+      if (method) {
+        if (SC.browser.msie) {
+          var responder = this ;
+          document.body['on' + keyName] = function(e) { 
+            return method.call(responder, SC.Event.normalizeEvent(e)); 
+          };
+
+          // be sure to cleanup memory leaks
+           SC.Event.add(window, 'unload', this, function() { 
+            document.body['on' + keyName] = null; 
+          });
+          
+        } else {
+          SC.Event.add(document, keyName, this, method);
+        }
       }
+      
     }, this);
     
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
     this.focus(); // assume the window is focused when you load.
+  },
+
+  /**
+    Invoked on a keyDown event that is not handled by any actual value.  This 
+    will get the key equivalent string and then walk down the keyPane, then 
+    the focusedPane, then the mainPane, looking for someone to handle it.  
+    Note that this will walk DOWN the view hierarchy, not up it like most.
+    
+    @returns {Object} Object that handled evet or null
+  */ 
+  attemptKeyEquivalent: function(evt) {
+    var ret = null ;
+    
+    // keystring is a method name representing the keys pressed (i.e 
+    // 'alt_shift_escape')
+    var keystring = evt.commandCodes()[0];
+    
+    // couldn't build a keystring for this key event, nothing to do
+    if (!keystring) return NO;
+    
+    var keyPane  = this.get('keyPane'), mainPane = this.get('mainPane'), 
+        mainMenu = this.get('mainMenu');
+
+    // try the keyPane
+    if (keyPane) ret = keyPane.performKeyEquivalent(keystring, evt) ;
+    
+    // if not, then try the main pane
+    if (!ret && mainPane && (mainPane!==keyPane)) {
+      ret = mainPane.performKeyEquivalent(keystring, evt);
+    }
+
+    // if not, then try the main menu
+    if (!ret && mainMenu) {
+      ret = mainMenu.performKeyEquivalent(keystring, evt);
+    }
+    
+    return ret ;
   },
 
   /** @property The last known window size. */
@@ -278,7 +329,7 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
     }
     
     // no one handled the mouseup... try doubleclick...
-    if (!handler && (this._clickCount == 2)) {
+    if (!handler && (this._clickCount === 2)) {
       handler = this.sendEvent('doubleClick', evt, this._mouseDownView);
     }
     
@@ -322,7 +373,7 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
     
     // work up the view chain.  Notify of mouse entered and
     // mouseMoved if implemented.
-    while(view && (view != this)) {
+    while(view && (view !== this)) {
       var entered = view.mouseOver || view.didMouseOver || view.mouseEntered;
       var moved = view.mouseMoved || view.mouseDidMove  ;
 
@@ -372,5 +423,6 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
   },
   
   drag: function() { return false; }
+  
     
 }) ;

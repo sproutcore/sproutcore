@@ -88,16 +88,6 @@ SC.Pane = SC.View.extend({
   */
   rootResponder: null,  
   
-  /** @property
-    The default responder.  Set this to point to a responder object that can respond to events when no other view in the hierarchy handles them.
-  */
-  defaultResponder: null,
-  
-  /** @property
-    The first responder.  This is the first view that should receive action events.  Whenever you click on a view, it will usually become firstResponder.  It may optionally also choose to become key view.
-  */
-  firstResponder: null,
-  
   /** Last known window size. */
   currentWindowSize: null,
   
@@ -119,15 +109,53 @@ SC.Pane = SC.View.extend({
     this.set('currentWindowSize', newSize) ;
     this.parentViewDidResize(); // start notifications.
   },
+  
+  /**
+    Attempts to send the event down the responder chain for this pane.  If you pass a target, this method will begin with the target and work up the responder chain.  Otherwise, it will begin with the current firstResponder and walk up the chain looking for any responder that implements a handler for the passed method and returns YES when executed.
+    
+    @param {String} action
+    @param {SC.Event} evt
+    @param {Object} target
+    @returns {Object} object that handled the event
+  */
+  sendEvent: function(action, evt, target) {
+    var handler ;
+    
+    // walk up the responder chain looking for a method to handle the event
+    if (!target) target = this.get('firstResponder') ;
+    while(target && !target.tryToPerform(action, evt)) {
+
+      // even if someone tries to fill in the nextResponder on the pane, stop
+      // searching when we hit the pane.
+      target = (target === this) ? null : target.get('nextResponder') ;
+    }
+    
+    // if no handler was found in the responder chain, try the default
+    if (!target && (target = this.get('defaultResponder'))) {
+      target = target.tryToPerform(action, evt) ? target : null ;
+    }
+    
+    return target ;
+  },
 
   // .......................................................
-  // HANDLE KEY VIEW AND KEYBOARD EVENTS
+  // HANDLE FIRST RESPONDER AND KEY RESPONDER STATUS
   //
 
   /** @property
+    The default responder.  Set this to point to a responder object that can respond to events when no other view in the hierarchy handles them.
+  */
+  defaultResponder: null,
+  
+  /** @property
+    The first responder.  This is the first view that should receive action events.  Whenever you click on a view, it will usually become firstResponder. 
+  */
+  firstResponder: null,
+  
+  /** @property
     If YES, this pane can become the key pane.  You may want to set this to NO for certain types of panes.  For example, a palette may never want to become key.  The default value is YES
   */
-  acceptsKeyFocus: YES,
+  acceptsKeyPane: YES,
   
   /** @property
     This is set to YES when your pane is currently the target of key events. 
@@ -138,7 +166,7 @@ SC.Pane = SC.View.extend({
   
     @returns {SC.Pane} receiver
   */
-  focusKeyPane: function() {
+  becomeKeyPane: function() {
     if (this.get('isKeyPane')) return this ;
     if (this.rootResponder) this.rootResponder.makeKeyPane(this) ;
     return this ;
@@ -149,50 +177,69 @@ SC.Pane = SC.View.extend({
     
     @returns {SC.Pane} receiver
   */
-  blurKeyPane: function() {
+  resignKeyPane: function() {
     if (!this.get('isKeyPane')) return this ;
     if (this.rootResponder) this.rootResponder.makeKeyPane(null);
     return this ;
   },
   
   /**
-    The key view.  This is the view that will receive keyboard events first, before sending the event up the responder chain via the firstResponder.
-  */
-  keyView: null,
-
-  /**
-    Makes the passed view the new key view for this pane.  Note that this view must exist in the responder chain for this pane to work properly.  This will notify the current keyView that it is about to lose it's key view status.
+    Makes the passed view (or any object that implements SC.Responder) into 
+    the new firstResponder for this pane.  This will cause the current first
+    responder to lose its responder status and possibly keyResponder status as
+    well.
     
     @param {SC.View} view
     @returns {SC.Pane} receiver
   */
-  makeKeyView: function(view) {
-    var currentKey = this.get('keyView'), isKeyPane = this.get('isKeyPane');
-    if (currentKey === view) return this; // nothing to do
-
-    // if we are currently key pane, then notify key views of change.
+  makeFirstResponder: function(view) {
+    var current=this.get('firstResponder'), isKeyPane=this.get('isKeyPane');
+    if (current === view) return this ; // nothing to do
+    
+    // notify current of firstResponder change
+    if (current) current.willLoseFirstResponder();
+    
+    // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
-      if (currentKey) currentKey.willBlurKeyTo(view) ;
-      if (view) view.willFocusKeyFrom(currentKey) ;
+      if (current) current.willLoseKeyResponderTo(view) ;
+      if (view) view.willBecomeKeyResponderFrom(current) ;
     }
     
     // change setting
-    this.set('keyView', view) ;
+    if (current) {
+      current.beginPropertyChanges()
+        .set('isFirstResponder', NO).set('isKeyResponder', NO)
+      .endPropertyChanges();
+    }
+
+    this.set('firstResponder', view) ;
+    
+    if (view) {
+      view.beginPropertyChanges()
+        .set('isFirstResponder', YES).set('isKeyResponder', isKeyPane)
+      .endPropertyChanges();
+    }
     
     // and notify again if needed.
     if (isKeyPane) {
-      if (view) view.didFocusKeyFrom(currentKey) ;
-      if (currentKey) currentKey.didBlurKeyTo(view) ; 
+      if (view) view.didBecomeKeyResponderFrom(current) ; 
+      if (current) current.didLoseKeyResponderTo(view) ;
     }
+    
+    if (view) view.didBecomeFirstResponder();
     return this ;
   },
   
   /** @private method forwards status changes in a generic way. */
   _forwardKeyChange: function(shouldForward, methodName, pane) {
-    var keyView;
-    if (shouldForward && (keyView = this.get('keyView'))) {
-      var newKeyView = (pane) ? pane.get('keyView') : null ;
-      kewView[methodName](newKeyView);
+    var keyView, responder, newKeyView, isKey;
+    if (shouldForward && (responder = this.get('firstResponder'))) {
+      newKeyView = (pane) ? pane.get('firstResponder') : null ;
+      keyView[methodName](newKeyView);
+      
+      if ((isKey !== undefined) && responder) {
+        responder.set('isKeyResponder', isKey);
+      }
     } 
   },
   
@@ -202,8 +249,8 @@ SC.Pane = SC.View.extend({
     @param {SC.Pane} pane
     @returns {SC.Pane} reciever
   */
-  willBlurKeyTo: function(pane) {
-    this._forwardKeyChange(this.get('isKeyPane'), 'willBlurKeyTo', pane);
+  willLoseKeyPaneTo: function(pane) {
+    this._forwardKeyChange(this.get('isKeyPane'), 'willLoseKeyResponderTo', pane, NO);
     return this ;
   },
   
@@ -213,8 +260,8 @@ SC.Pane = SC.View.extend({
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
   */
-  willFocusKeyFrom: function(pane) {
-    this._forwardKeyChange(!this.get('isKeyPane'), 'willFocusKeyFrom', pane);
+  willBecomeKeyPaneFrom: function(pane) {
+    this._forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane);
     return this ;
   },
 
@@ -225,10 +272,10 @@ SC.Pane = SC.View.extend({
     @param {SC.Pane} pane
     @returns {SC.Pane} reciever
   */
-  didBlurKeyTo: function(pane) {
+  didLoseKeyPaneTo: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', NO);
-    this._forwardKeyChange(isKeyPane, 'didBlurKeyTo', pane);
+    this._forwardKeyChange(isKeyPane, 'didLoseKeyResponderTo', pane);
     return this ;
   },
   
@@ -239,10 +286,10 @@ SC.Pane = SC.View.extend({
     @returns {SC.Pane} receiver
 
   */
-  didFocusKeyFrom: function(pane) {
+  didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
-    this._forwardKeyChange(!isKeyPane, 'didFocusKeyFrom', pane);
+    this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
   
@@ -302,7 +349,7 @@ SC.Pane = SC.View.extend({
     this.rootResponder = responder = null ;
 
     // clean up some of my own properties    
-    this.set('isVisibleInWindow', NO) ;
+    this.set('isPaneAttached', NO) ;
     this.displayLocationDidChange() ;
   },
 
@@ -353,26 +400,38 @@ SC.Pane = SC.View.extend({
   paneDidAttach: function() {
 
     // hook into root responder
-    var responder = this.rootResponder = SC.RootResponder.responder;
+    var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
     if (this.get('isKeyPane')) responder.makeKeyPane(this);
     
     // update my own location
-    this.set('isVisibleInWindow', YES) ;
+    this.set('isPaneAttached', YES) ;
     this.displayLocationDidChange() ;
     return this ;
   },
+  
+  /** @property
+    YES when the pane is currently attached to a document DOM.  Read only.
+  */
+  isPaneAttached: NO,
 
-  // behaves a little differently in pane b/c it does not have a parent
-  _recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+  /**
+    Updates the isVisibleInWindow state on the pane and its childViews if 
+    necessary.  This works much like SC.View's default implementation, but it
+    does not need a parentView to function.
+    
+    @param {Boolean} parentViewIsVisible (ignored)
+    @returns {SC.Pane} receiver
+  */
+  recomputeIsVisibleInWindow: function(parentViewIsVisible) {
     var last = this.get('isVisibleInWindow') ;
-    var cur = this.get('isVisible') ;
+    var cur = this.get('isPaneAttached') && this.get('isVisible') ;
     
     // if the state has changed, update it and notify children
     if (last != cur) {
       this.set('isVisibleInWindow', cur) ;
       var childViews = this.get('childViews'), idx = childViews.length;
-      while(--idx>=0) childViews[idx]._recomputeIsVisibleInWindow(cur);
+      while(--idx>=0) childViews[idx].recomputeIsVisibleInWindow(cur);
     }
   },
   
@@ -381,10 +440,11 @@ SC.Pane = SC.View.extend({
     // because we don't need it for panes.
     
     // update visibility of element as needed
-    var $ = this.$(), isVisible = this.get('isVisible') ;
-    (isVisible) ? $.show() : $.hide(); 
+    var v, isVisible = this.get('isVisible') ;
+    v = isVisible ? this.$().show() : this.$().hide();
+    
     if (!isVisible && this.get('isVisibleInWindow')) {
-      this._recomputeIsVisibleInWindow();
+      this.recomputeIsVisibleInWindow();
       // do this only after we have gone offscreen.
     }
     

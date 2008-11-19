@@ -169,9 +169,9 @@ SC.ClassicResponder = SC.Object.extend(
   {
     var responder = this;
     var args      = SC.$A(arguments);
-    var method    = args.shift();
     var aliases   = this._commandAliases[method];
     var handled   = false;
+    method    = args.shift();
     
     do {
       // attempt to handle the method
@@ -195,7 +195,7 @@ SC.ClassicResponder = SC.Object.extend(
   {
     // if the method does not explicitly return a false-y value (false, "", 0), it's considered "handled"
     // WARNING: returning null, or void is *not* == false
-    return (responder.respondsTo(method) && (responder[method].apply(responder, args) != false));
+    return (responder.respondsTo(method) && (responder[method].apply(responder, args) !== false));
   },
   /** @private */
   _commandAliases: {
@@ -309,5 +309,5 @@ SC.ClassicResponder = SC.Object.extend(
 });
 
 SC.ClassicResponder.mixin({
-  inputManager: SC.InputManager.create()
+  inputManager: SC.Object.create()
 }) ;

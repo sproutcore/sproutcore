@@ -46,7 +46,7 @@ SC.Event = function(originalEvent) {
   if (!this.target) this.target = this.srcElement || document; 
 
   // check if target is a textnode (safari)
-  if (this.target.nodeType == 3 ) this.target = this.target.parentNode;
+  if (this.target.nodeType === 3 ) this.target = this.target.parentNode;
 
   // Add relatedTarget, if necessary
   if (!this.relatedTarget && this.fromElement) {
@@ -54,7 +54,7 @@ SC.Event = function(originalEvent) {
   }
 
   // Calculate pageX/Y if missing and clientX/Y available
-  if ( this.pageX == null && this.clientX != null ) {
+  if (((this.pageX===null) || (this.pageX===undefined)) && ((this.clientX !== null) && (this.clientX !==undefined))) {
     var doc = document.documentElement, body = document.body;
     this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
     this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);
@@ -71,7 +71,7 @@ SC.Event = function(originalEvent) {
   // Add which for click: 1 == left; 2 == middle; 3 == right
   // Note: button is not normalized, so don't use it
   if (!this.which && this.button) {
-    this.which = (this.button & 1 ? 1 : ( this.button & 2 ? 3 : ( this.button & 4 ? 2 : 0 ) ));
+    this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
   }
   
   return this; 
@@ -226,7 +226,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (!events) return this ; // nothing to do if no events are registered
 
     // if no type is provided, remove all types for this element.
-    if (eventType == undefined) {
+    if (eventType === undefined) {
       for(eventType in events) this.remove(elem, eventType) ;
 
     // otherwise, remove the handler for this specific eventType if found
@@ -249,8 +249,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         // check to see if there are handlers left on this event/eventType.
         // if not, then cleanup the handlers.
         key = null ;
-        for(var key in handlers) break ;
-        if (key == null) cleanupHandlers = YES ;
+        for(key in handlers) break ;
+        if (key===null) cleanupHandlers = YES ;
 
       // otherwise, just cleanup all handlers
       } else cleanupHandlers = YES ;
@@ -304,7 +304,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Normalize to an array
     args = SC.$A(args) ;
 
-    var ret, fn = SC.typeOf(elem[eventType] || null) === T_FUNCTION ;
+    var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION ;
 
     // Get the event to pass, creating a fake one if necessary
     var event = args[0];
@@ -366,11 +366,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if ((typeof SC === "undefined") || SC.Event.triggered) return YES ;
     
     // returned undefined or NO
-    var val, ret, namespace, all, handlers;
+    var val, ret, namespace, all, handlers, args;
 
     // normalize event across browsers.  The new event will actually wrap the
     // real event with a normalized API.
-    event = arguments[0] = SC.Event.normalizeEvent(event || window.event) ;
+    args = SC.$A(arguments);
+    args[0] = event = SC.Event.normalizeEvent(event || window.event);
 
     // get the handlers for this event type
     handlers = (SC.data(this, "events") || {})[event.type];
@@ -387,7 +388,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       event.data = event.context = handler[2];
 
       var target = handler[0] || this ;
-      ret = method.apply( target, arguments );
+      ret = method.apply( target, args );
       if (val !== NO) val = ret;
 
       // if method returned NO, do not continue.  Stop propogation and
@@ -447,7 +448,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       },
 
       teardown: function() {
-        if ( jQuery.browser.msie ) return NO;
+        if ( SC.browser.msie ) return NO;
         SC.Event.remove(this, 'mouseover', SC.Event.special.mouseover.handler);
         return YES;
       },
@@ -537,7 +538,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       var guid = SC.guidFor(elem) ;
       this._elements[guid] = elem;
       
-      var listener = SC.data(elem, "listener") || SC.data(elem, "listener", 
+      listener = SC.data(elem, "listener") || SC.data(elem, "listener", 
        function() {
          return SC.Event.handle.apply(SC.Event._elements[guid], arguments); 
       }) ;
@@ -570,10 +571,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     var listener, special = SC.Event.special[eventType] ;
     if (!special || (special.teardown.call(elem)===NO)) {
       listener = SC.data(elem, "listener") ;
-      if (listener) if (elem.removeEventListener) {
-        elem.removeEventListener(eventType, listener, NO);
-      } else if (elem.detachEvent) {
-        elem.detachEvent("on" + eventType, listener);
+      if (listener) {
+        if (elem.removeEventListener) {
+          elem.removeEventListener(eventType, listener, NO);
+        } else if (elem.detachEvent) {
+          elem.detachEvent("on" + eventType, listener);
+        }
       }
     }
     
@@ -586,7 +589,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
-    return (event.normalized) ? event : SC.Event.create(event) ;
+    return event.normalized ? event : SC.Event.create(event) ;
   },
   
   _global: {},
@@ -650,6 +653,39 @@ SC.Event.prototype = {
   /** Returns the pressed character (found in this.which) as a string. */
   getCharString: function() { 
     return String.fromCharCode(this.which) ;
+  },
+  
+  /** Returns character codes for the event.  The first value is the normalized code string, with any shift or ctrl characters added to the begining.  The second value is the char string by itself.
+  
+    @returns {Array}
+  */
+  commandCodes: function() {
+    var code=this.keyCode, ret=null, key=null, modifiers='', lowercase ;
+    
+    // handle function keys.
+    if (code) {
+      ret = SC.FUNCTION_KEYS[code] ;
+      if (!ret && (this.altKey || this.ctrlKey)) ret =SC.PRINTABLE_KEYS[code];
+      if (ret) {
+        if (this.altKey) modifiers += 'alt_' ;
+        if (this.ctrlKey) modifiers += 'ctrl_' ;
+        if (this.shiftKey) modifiers += 'shift_' ;
+      }
+    }
+
+    // otherwise just go get the right key.
+    if (!ret) {
+      code = this.which ;
+      key = ret = String.fromCharCode(code) ;
+      lowercase = ret.toLowerCase() ;
+      if (ret != lowercase) {
+        modifiers = 'shift_' ;
+        ret = lowercase ;
+      } else ret = null ;
+    }
+
+    if (ret) ret = modifiers + ret ;
+    return [ret, key] ;
   }
     
 } ;
@@ -669,3 +705,25 @@ SC.Event.fire = SC.Event.trigger;
 // This avoids leaks in IE and issues with mouseout or other handlers on 
 // other browsers.
 SC.Event.add(window, 'unload', SC.Event, SC.Event.unload) ;
+
+SC.MODIFIER_KEYS = {
+  16:'shift', 17:'ctrl', 18: 'alt'
+};
+
+SC.FUNCTION_KEYS = {
+  8: 'backspace',  9: 'tab',  13: 'return',  19: 'pause',  27: 'escape',  
+  33: 'pageup', 34: 'pagedown', 35: 'end', 36: 'home', 
+  37: 'left', 38: 'up', 39: 'right', 40: 'down', 44: 'printscreen', 
+  45: 'insert', 46: 'delete', 112: 'f1', 113: 'f2', 114: 'f3', 115: 'f4', 
+  116: 'f5', 117: 'f7', 119: 'f8', 120: 'f9', 121: 'f10', 122: 'f11', 
+  123: 'f12', 144: 'numlock', 145: 'scrolllock'
+} ;
+
+SC.PRINTABLE_KEYS = {
+  32: ' ', 48:"0", 49:"1", 50:"2", 51:"3", 52:"4", 53:"5", 54:"6", 55:"7",
+  56:"8", 57:"9", 59:";", 61:"=", 65:"a", 66:"b", 67:"c", 68:"d", 69:"e",
+  70:"f", 71:"g", 72:"h", 73:"i", 74:"j", 75:"k", 76:"l", 77:"m", 78:"n",
+  79:"o", 80:"p", 81:"q", 82:"r", 83:"s", 84:"t", 85:"u", 86:"v", 87:"w",
+  88:"x", 89:"y", 90:"z", 107:"+", 109:"-", 110:".", 188:",", 190:".",
+  191:"/", 192:"`", 219:"[", 220:"\\", 221:"]", 222:"\""
+} ;

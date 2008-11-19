@@ -9,6 +9,7 @@ require('mixins/string') ;
 require('system/object') ;
 require('system/core_query');
 require('system/event');
+require('mixins/responder') ;
 
 SC.viewKey = SC.guidKey + "_view" ;
 
@@ -45,9 +46,12 @@ SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
   d = dialog.create();
   
   @extends SC.Object
+  @extends SC.Responder
+  @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
-SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
+SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
+/** @scope SC.View.prototype */ {
 
   concatenatedProperties: ['outlets','displayProperties'],
   
@@ -209,7 +213,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
   */
   displayLocationDidChange: function() {
     this.set('displayLocationNeedsUpdate', YES) ;
-    this._recomputeIsVisibleInWindow() ;
+    this.recomputeIsVisibleInWindow() ;
     SC.View.scheduleInRunLoop(SC.DISPLAY_LOCATION_QUEUE, this);
     return this ;
   }.observes('isVisible'),
@@ -256,7 +260,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
       var nextNode = (nextView) ? nextView.rootElement : null ;
     
       // add to parentNode if needed
-      if ((node.parentNode!==parentNode) || (node.nextSibling!=nextNode)) {
+      if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
         parentNode.insertBefore(node, nextNode) ;
       }
       
@@ -264,13 +268,13 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     } else {
       if (node.parentNode) node.parentNode.removeChild(node);
     }
-    
+
     // finally, update visibility of element as needed if we are in a parent
     if (parentView) {
       var $ = this.$(), isVisible = this.get('isVisible') ;
-      (isVisible) ? $.show() : $.hide(); 
+      ((isVisible) ? $.show() : $.hide()); 
       if (!isVisible && this.get('isVisibleInWindow')) {
-        this._recomputeIsVisibleInWindow();
+        this.recomputeIsVisibleInWindow();
         // do this only after we have gone offscreen.
       }
     }
@@ -294,13 +298,19 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
   isVisibleInWindow: NO,
   
   /**
-    Internal method called whenever the isVisibleInWindow property might
-    have changed.  This will recompute the value for the property and, if 
-    necessary, notify all child views as well.
+    Recomputes the isVisibleInWindow property based on the visibility of the  view and its parent.  If the recomputed value differs from the current isVisibleInWindow state, this method will also call recomputIsVisibleInWindow() on its child views as well.  As an optional optimization, you can pass the isVisibleInWindow state of the parentView if you already know it.
+    
+    You will not generally need to call or override this method yourself.  It is used by the SC.View hierarchy to relay window visibility changes up and down the chain.
+    
+    @property {Boolean} parentViewIsVisible
+    @returns {SC.View} receiver 
   */
-  _recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+  recomputeIsVisibleInWindow: function(parentViewIsVisible) {
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isVisible'), parentView ;
+    
+    // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
+    // this approach only goes up to the parentView if necessary.
     if (cur) {
       cur = (parentViewIsVisible === undefined) ? 
        ((parentView=this.get('parentView')) ? 
@@ -308,11 +318,13 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     }
     
     // if the state has changed, update it and notify children
-    if (last != cur) {
+    if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
       var childViews = this.get('childViews'), idx = childViews.length;
-      while(--idx>=0) childViews[idx]._recomputeIsVisibleInWindow(cur);
+      while(--idx>=0) childViews[idx].recomputeIsVisibleInWindow(cur);
     }
+    
+    return this ;
   },
 
   // .......................................................
@@ -338,7 +350,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
   performKeyEquivalent: function(keystring, evt) {
     var ret = null, childViews = this.get('childViews'), len = childViews.length, idx=-1;
     while(!ret && (++idx<len)) {
-      ret = child.performKeyEquivalent(keystring, evt);
+      ret = childViews[idx].performKeyEquivalent(keystring, evt);
     }
     return ret ;
   },
@@ -357,19 +369,22 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
     this.configureChildViews() ;
-    if (!this.rootElement) this.prepareDisplay() ;
+    
+    // if no rootElement is provided, generate the display HTML for the view.
+    if (!this.rootElement) this.prepareDisplay();
 
     // save this guid on the DOM element for reverse lookups.
     if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
     
-    // register display property observers
+    // register display property observers .. this could be optimized into the
+    // class creation mechanism if local observers did not require explicit 
+    // setup.
     var dp = this.get('displayProperties'), idx = dp.length;
     while(--idx >= 0) {
       this.addObserver(dp[idx], this, this.displayDidChange);
     }
   },
-  
-  
+
   /** 
     You must call this method on a view to destroy the view (and all of 
     its child views).  This will remove the view from any parent node, then
@@ -407,7 +422,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     if (childViews.length > 0) {
       childViews = childViews.slice() ;
       var loc = childViews.length;
-      while(--loc >= 0) childViews[loc]._destroyWithoutRemovingDom() ;
+      while(--loc >= 0) childViews[loc]._destroy() ;
     }
     
     // next remove view from global hash
@@ -426,15 +441,15 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
   */
   configureChildViews: function() {
     var outlets = this.get('outlets'), childViews = this.get('childViews');
-    var views, loc, designMode = this.designMode ;
+    var views, loc, builder, key, designMode = this.designMode ;
 
     this.beginPropertyChanges() ;
     
     // outlets
     loc = (outlets) ? outlets.length : 0 ;
     while(--loc >= 0) {
-      var key = outlets[loc] ;
-      var builder = this.get(key) ;
+      key = outlets[loc] ;
+      builder = this.get(key) ;
       if (builder && builder.createChildView) {
         this.set(key, builder.createChildView(this, null, designMode)) ;
       }
@@ -445,7 +460,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     loc = (childViews) ? childViews.length : 0 ;
     views = [] ; // only create if needed to avoid memory
     while(--loc >= 0) {
-      var builder = childViews[loc] ;
+      builder = childViews[loc] ;
       if (builder && builder.createChildView) {
         views[loc] = builder.createChildView(this, this, designMode) ;
       }
@@ -470,7 +485,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     insert any childViews DOM elements into the rootElement.
   */
   prepareDisplay: function() {
-    var root, element ;
+    var root, element, html ;
     
     // if emptyElement is not overridden by the instance, then use a cached
     // DOM from the class.  Note that we don't use get() in the test below 
@@ -478,7 +493,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     // property, not the output.
     if (this.emptyElement === this.constructor.prototype.emptyElement) {
       if (!this._cachedEmptyElement || (this._emptyElementCachedForClassGuid !== SC.guidFor(this.constructor))) {
-        var html = this.get('emptyElement');
+        html = this.get('emptyElement');
         this.constructor.prototype._cachedEmptyElement = SC.View.generateElement(html) ;
         this.constructor.prototype._emptyElementCachedForClassGuid = SC.guidFor(this.constructor) ;
       }
@@ -486,7 +501,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
       
     // otherwise, we can't cache the DOM because it is overridden by instance
     } else {
-      var html = this.get('emptyElement');
+      html = this.get('emptyElement');
       root = SC.View.generateElement(html) ;
     }
     this.rootElement = root ;
@@ -601,7 +616,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
     
     // handle string case
     if (SC.typeOf(key) === SC.T_STRING) {
-      if (value == null) {
+      if (!value) {
         delete layout[key];
       } else layout[key] = value ;
       
@@ -611,7 +626,7 @@ SC.View = SC.Object.extend(/** @scope SC.View.prototype */ {
       for(key in hash) {
         if (!hash.hasOwnProperty(key)) continue;
         value = hash[key];
-        if (value == null) {
+        if (!value) {
           delete layout[key] ;
         } else layout[key] = value ;
       }
@@ -1023,78 +1038,6 @@ SC.View.mixin(/** @scope SC.View @static */ {
     
 }) ;
 
-SC.View.build = SC.Builder.create({
-  
-  isViewBuilder: YES, // walk like a duck
-
-  init: function(attrs, path) {
-    this.attrs = attrs;
-    this.rootElementPath = path ;
-    return this ;
-  },
-  
-  /** 
-    Creates a new instance of the view based on the currently loaded config.
-    This will create a new DOM element.  Add any last minute attrs here.
-  */
-  create: function(attrs) {
-    if (attrs) SC.mixin(this.attrs, attrs) ;
-    return this.defaultClass.create(this.attrs) ;
-  },
-  
-  /**
-    Creates a new instance of the view with the passed view as the parent
-    view.  If the parentView has a DOM element, then follow the path to
-    find the matching DOM.
-    
-    This is called internally by views.
-  */
-  createChildView: function(owner, parentView, designMode) { 
-    
-    // try to find a matching DOM element by tracing the path
-    var root = owner.rootElement ;
-    var path = this.rootElementPath, idx=0, len = (path) ? path.length : 0;
-    while((idx<len) && root) root = root.childNodes[path[idx++]];
-    
-    // Now add this to the attributes and create.
-    var attrs = this.attrs || {} ;
-
-    if (designMode) {
-      attrs.designAttributes = SC.clone(attrs) ; // save attributes
-      attrs.designMode = YES;
-    }
-
-    attrs.rootElement = root ;
-    attrs.owner = owner ;
-    attrs.parentView = parentView;
-
-    return this.defaultClass.create(attrs) ;
-  },
-  
-  /**
-    Creates a new instance of the view in design mode.  This will cause any
-    outlets created by the view to be setup in design mode also.
-  */
-  design: function() {
-    var attrs = this.attrs || {} ;
-    attrs.designAttributes = SC.clone(attrs) ;
-    attrs.designMode = YES ;
-    return this.viewClass.create(attrs) ;  
-  }
-  
-}) ;
-
-SC.mixin(SC.View.prototype, {
-  
-  designHtml: function() {
-    var ret, el = document.createElement('div') ;
-    el.appendChild(this.rootElement.cloneNode(true));
-    ret = el.innerHTML ;
-    delete el ;
-    return ret ;
-  }
-  
-}) ;
 
 // .......................................................
 // DOM GENERATION

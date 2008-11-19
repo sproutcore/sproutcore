@@ -1816,7 +1816,7 @@ SC.CoreQuery = (function() {
 SC.$ = (typeof jQuery == "undefined") ? SC.CoreQuery : jQuery ;
 
 // Add some plugins to CoreQuery.  If jQuery is installed, it will get these
-// also.
+// also. -- test in system/core_query/additions
 SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   
   /** @private - better loggin */
@@ -1876,7 +1876,7 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   /**
     Returns YES if any of the matched elements have the passed element or CQ object as a child element.
   */
-  hasChild: function(el) {
+  within: function(el) {
     el = SC.$(el); // make into CQ object
     var ret, elCur, myCur, idx, len = el.length;
     var loc = this.length;

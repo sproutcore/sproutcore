@@ -25,7 +25,7 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
   
   - Direct events.  Such as mouse and touch events.  These are routed to the nearest view managing the target DOM elment.
   - Keyboard events.  These are sent to the keyPane, which will send it 
-    to the current keyView.
+    to the current firstResponder.
   - resize. This event is sent to all panes.
   - shortcuts.  Shortcuts are sent to the focusedPane first, which will go down its view hierarchy.  Then they go to the mainPane, which will go down its view hierarchy.  Then they go to the mainMenu.  Usually any handler that picks this up will then try to do a sendAction().
   - actions.  Actions are sent down the responder chain.  They go to focusedPane -> mainPane.  Each of these will start at the firstResponder and work their way up the chain.
@@ -82,7 +82,7 @@ SC.RootResponder = SC.Object.extend({
   //
 
   /** @property
-    The current key view.  This view receives keyboard events, shortcuts, and actions.  This view is usually the highest ordered pane or the mainPane.
+    The current key pane.  This pane receives keyboard events, shortcuts, and actions first.  This pane is usually the highest ordered pane or the mainPane.
   */
   keyPane: null,
 
@@ -93,24 +93,29 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.RootResponder} Receiver
   */
   makeKeyPane: function(pane) {
-    if (!pane.get('acceptsKeyFocus')) pane = null ;
+    if (pane && !pane.get('acceptsKeyFocus')) return this ;
+
+    // if null was passed, try to make mainPane key instead.
     if (!pane) {
       pane = this.get('mainPane') ;
       if (!pane.get('acceptsKeyFocus')) pane = null ;
     }
 
+    var current = this.get('keyPane') ;
+    if (current === pane) return this; // nothing to do
+
     // now notify old and new key views of change after edit    
-    var currentKey = this.get('keyPane') ;
-    if (currentKey !== pane) {
-      if (currentKey) currentKey.willBlurKeyTo(pane) ;
-      if (pane) pane.willFocusKeyFrom(currentKey);
-      this.set('keyPane', pane) ;
-      if (pane) pane.didFocusKeyFrom(currentKey);
-      if (currentKey) currentKey.didBlurKeyTo(pane);
-    }
+    if (current) current.willLoseKeyPaneTo(pane) ;
+    if (pane) pane.willBecomeKeyPaneFrom(current);
+
+    this.set('keyPane', pane) ;
+    
+    if (pane) pane.didBecomeKeyPaneFrom(current);
+    if (current) current.didLoseKeyPaneTo(pane);
+
     return this ;
   },
-    
+  
   // .......................................................
   // ROOT VIEW ORDER
   //
@@ -149,13 +154,13 @@ SC.RootResponder = SC.Object.extend({
   /**
     Route an action message to the appropriate responder
     @param {String} action The action to perform - this is a method name.
-    @param {SC.ClassicResponder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
+    @param {SC.Responder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
     @param {Object} sender The sender of the action
     @param {SC.Pane} pane
     @returns YES if action was performed, NO otherwise
   */
   sendAction: function( action, target, sender, pane) {
-    var target = this.targetForAction(action, target, sender, pane);
+    target = this.targetForAction(action, target, sender, pane);
     return target && target.tryToPerform(action, sender) ;
   },
   
@@ -189,14 +194,14 @@ SC.RootResponder = SC.Object.extend({
   targetForAction: function(methodName, target, sender, pane) {
 
     // no action, no target...
-    if (!method || (SC.typeOf(method) != SC.T_STRING)) return null;
+    if (!methodName || (SC.typeOf(methodName) !== SC.T_STRING)) return null;
 
     // an explicit target was passed...
     if (target) {
       if (SC.typeOf(target) === SC.T_STRING) {
         target = SC.objectForPropertyPath(target) ;
       }
-      return target.respondsTo(action) ? target : null ;
+      return target.respondsTo(methodName) ? target : null ;
     }
 
     // ok, no target was passed... try to find one in the responder chain
@@ -213,7 +218,7 @@ SC.RootResponder = SC.Object.extend({
 
     // last stop, this defaultResponder
     target = this.get('defaultResponder');
-    if (target.respondsTo(action)) return target;
+    if (target.respondsTo(methodName)) return target;
 
     return null;
   },
@@ -226,140 +231,28 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.View} view instance or null
   */
   targetViewForEvent: function(evt) {
-    return (evt.target) ? SC.$(evt.target).view()[0] : null ;
+    return evt.target ? SC.$(evt.target).view()[0] : null ;
   },
   
   /**
-    Attempts to send a targeted event.  This is the handler you should use for mouse and touch events.  This will send the event to the target method or it will send it to the firstResponder. Returns YES if the browser should be allowe to handle the event using its normal process, NO otherwise.
+    Attempts to send an event down the responder chain.  This method will invoke the sendEvent() method on either the keyPane or on the pane owning the target view you pass in.
     
-    @param {String} eventType
+    @param {String} action
     @param {SC.Event} evt
     @param {Object} target
     @returns {Object} object that handled the event or null if not handled
   */
   sendEvent: function(action, evt, target) {
-    var handler, pane ;
-
     SC.runLoop.beginRunLoop();
-    
-    // special case -- if an explicit target is passed, just try to perform on 
-    // it.
-    if (target) {
-      handler = (target.tryToPerform(action, evt)) ? target : null ;
-      
-    } else if (pane = this.get('focusedPane') || this.get('mainPane')) {
-      
-      // try to determine the target.  Go to the keyPane keyView or 
-      // defaultResponder.
-      if (pane) {
-        target = pane.get('firstResponder')||pane.get('defaultResponder')||pane; 
-      }
-
-      // walk up responder chain until we find someone who will handle it
-      while(!handler && target) {
-        handler = (target.tryToPerform(action, evt)) ? target : null;
-        target = target.get('nextResponder');
-      } ;
-
-      if (!handler && (target = this.get('defaultResponder'))) {
-        handler = (target.tryToPerform(action, evt)) ? target : null ;
-      }
-    }
-
-    SC.runLoop.endRunLoop() ;
-    
-    return handler;
-  },    
-
-  /**
-    Attempts to send a key-like event.  The event will be sent to the named 
-    target object or the responder will attempt to send to the keyPane's 
-    keyView.  Returns YES if the browser should be allowe to handle the event 
-    using its normal process, NO otherwise.
-    
-    @param {String} eventType
-    @param {SC.Event} evt
-    @param {Object} target
-    @returns {Object} the object that handled the event
-  */
-  sendKeyEvent: function(action, evt, target)
-  {
-    var handler, pane;
-
-    SC.runLoop.beginRunLoop();
-    
-    // special case -- if an explicit target is passed, just try to perform on 
-    // it.
-    if (target) {
-      handler = (target.tryToPerform(action, evt)) ? target : null;
-
-    // otherwise, try to find the right target
-    } else if (pane = this.get('keyPane')) {
-      
-      // try to determine the target.  Go to the keyPane keyView or 
-      // defaultResponder.
-      target = pane.get('keyView') || pane.get('defaultResponder') || pane; 
-
-      // walk up responder chain until we find someone who will handle it
-      while(!handler && target) {
-        handler = target.tryToPerform(action, evt) ? target : null;
-        target = target.get('nextResponder');
-      } ;
-
-      // unhandled keyDown event...
-      if (!handler && action === 'keyDown') {
-        handler = this.attemptKeyEquivalent(evt) ;
-      }
-
-      if (!handler && (target = this.get('defaultResponder'))) {
-        handled = target.tryToPerform(action, evt) ? target : null;
-      }
-    }
-
+    var pane = (target) ? target.get('pane') : (this.get('keyPane') || this.get('mainPane'));
+    var ret = (pane) ? pane.sendEvent(action, evt, target) : null ;
     SC.runLoop.endRunLoop();
-    
-    // if we have a keyPane and a keyView but we still did not handle the event, 
-    // then return NO to stop the browser from doing its own thing.
-    return handler;
-  },
-
-  /**
-    Invoked on a keyDown event that is not handled by any actual value.  This 
-    will get the key equivalent string and then walk down the keyPane, then the 
-    focusedPane, then the mainPane, looking for someone to handle it.  Note that 
-    this will walk DOWN the view hierarchy, not up it like most.
-    
-    @returns {Object} Object that handled evet or null
-  */ 
-  attemptKeyEquivalent: function(evt) {
-    var ret = null ;
-    
-    // keystring is a method name representing the keys pressed (i.e 
-    // 'alt_shift_escape')
-    var keystring = this.inputManager.codesForEvent(evt)[0];
-    
-    // inputManager couldn't build a keystring for this key event, nothing to do
-    if (!keystring) return NO;
-    
-    var focusedPane = this.get('focusedPane'), keyPane  = this.get('keyPane'), 
-        mainPane = this.get('mainPane'), mainMenu = this.get('mainMenu');
-    
-    if (keyPane) ret = keyPane.performKeyEquivalent(keystring, evt) ;
-    
-    if (!ret && focusedPane && (focusedPane !== keyPane)) {
-      ret = focusedPane.performKeyEquivalent(keystring, evt) ;
-    }
-     
-    if (!ret && mainPane && (mainPane!==keyPane) && (mainPane!==focusedPane)) {
-      ret = mainPane.performKeyEquivalent(keystring, evt);
-    }
-    
-    if (!ret && mainMenu) {
-      ret = mainMenu.performKeyEquivalent(keystring, evt);
-    }
-    
     return ret ;
   },
+  
+
+  // do nothing in generic implementation.  Used in desktop platform.
+  attemptKeyEquivalent: function(evt) { return null; }, 
   
   // .......................................................
   // EVENT LISTENER SETUP
@@ -393,7 +286,11 @@ SC.RootResponder = SC.Object.extend({
     if (this.keypress) {
       if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.mozilla) {
         var responder = this ;
-        document.onkeypress = function(e) { return method.call(responder, SC.Event.normalizeEvent(e)); };
+        document.onkeypress = function(e) { 
+          e = SC.Event.normalizeEvent(e);
+          return responder.keypress.call(responder, e); 
+        };
+        
         SC.Event.add(window, 'unload', this, function() { document.onkeypress = null; }); // be sure to cleanup memory leaks
   
       // Otherwise, just add a normal event handler. 
@@ -404,7 +301,6 @@ SC.RootResponder = SC.Object.extend({
   init: function() {
     sc_super();
     this.panes = SC.Set.create();
-    this.inputManager = SC.InputManager.create();
   },
   
   // .......................................................
@@ -414,57 +310,92 @@ SC.RootResponder = SC.Object.extend({
   _lastModifiers: null,
 
   /** @private
-    Modifier key changes are notified with a keydown event in most browsers.  We turn this into a 
-    flagsChanged keyboard event.
+    Modifier key changes are notified with a keydown event in most browsers.  
+    We turn this into a flagsChanged keyboard event.  Normally this does not
+    stop the normal browser behavior.
   */  
   _handleModifierChanges: function(evt) {
     // if the modifier keys have changed, then notify the first responder.
-    var m = this._lastModifiers = this._lastModifiers || { alt: false, ctrl: false, shift: false };
+    var m;
+    m = this._lastModifiers = (this._lastModifiers || { alt: false, ctrl: false, shift: false });
 
     var changed = false;
-    if (evt.altKey != m.alt) { m.alt = evt.altKey; changed=true; }
-    if (evt.ctrlKey != m.ctrl) { m.ctrl = evt.ctrlKey; changed=true; }
-    if (evt.shiftKey != m.shift) { m.shift = evt.shiftKey; changed=true;}
+    if (evt.altKey !== m.alt) { m.alt = evt.altKey; changed=true; }
+    if (evt.ctrlKey !== m.ctrl) { m.ctrl = evt.ctrlKey; changed=true; }
+    if (evt.shiftKey !== m.shift) { m.shift = evt.shiftKey; changed=true;}
     evt.modifiers = m; // save on event
 
-    return (changed) ? (this.sendKeyEvent('flagsChanged', evt) ? evt.hasCustomEventHandling : YES) : YES ;
+    return (changed) ? (this.sendEvent('flagsChanged', evt) ? evt.hasCustomEventHandling : YES) : YES ;
   },
 
-  // util code factored out of keypress and keydown handlers
+  /** @private
+    Determines if the keyDown event is a nonprintable or function key. These
+    kinds of events are processed as keyboard shortcuts.  If no shortcut
+    handles the event, then it will be sent as a regular keyDown event.
+  */
   _isFunctionOrNonPrintableKey: function(evt) {
-    return !!(evt.altKey || evt.ctrlKey || SC.FUNCTION_KEYS[evt.keyCode]);
+    return !!(evt.altKey || evt.ctrlKey || evt.metaKey || SC.FUNCTION_KEYS[evt.keyCode]);
   },
 
+  /** @private 
+    Determines if the event simply reflects a modifier key change.  These 
+    events may generate a flagsChanged event, but are otherwise ignored.
+  */
   _isModifierKey: function(evt) {
     return !!SC.MODIFIER_KEYS[evt.keyCode];
   },
 
+  /** @private
+    The keydown event occurs whenever the physically depressed key changes.
+    This event is used to deliver the flagsChanged event and to with function
+    keys and keyboard shortcuts.
+    
+    All actions that might cause an actual insertion of text are handled in
+    the keypress event.
+  */
   keydown: function(evt) {
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla > 0 && (evt.which === 8)) return true ;
     
     // modifier keys are handled separately by the 'flagsChanged' event
-    // send event for modifier key changes, but only stop processing if this is only a modifier change
+    // send event for modifier key changes, but only stop processing if this 
+    // is only a modifier change
     var ret = this._handleModifierChanges(evt);
     if (this._isModifierKey(evt)) return ret;
     
-    // let normal browser processing do its thing.
+    // if this is a function or non-printable key, try to use this as a key
+    // equivalent.  Otherwise, send as a keyDown event so that the focused
+    // responder can do something useful with the event.
     if (this._isFunctionOrNonPrintableKey(evt)) {
-      return this.sendKeyEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      ret = this.attemptKeyEquivalent(evt) ;
+      if (ret) return NO; // handled, no more events for this keydown
+      
+      // otherwise, send as keyDown event.  If no one was interested in this
+      // keyDown event (probably the case), just let the browser do its own
+      // processing.
+      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
     return YES; // allow normal processing...
   },
   
+  /** @private
+    The keypress event occurs after the user has typed something useful that
+    the browser would like to insert.  Unlike keydown, the input codes here 
+    have been processed to reflect that actual text you might want to insert.
+    
+    Normally ignore any function or non-printable key events.  Otherwise, just
+    trigger a keyDown.
+  */
   keypress: function(evt) {
     // delete is handled in keydown() for most browsers
     if (SC.browser.mozilla > 0 && (evt.which === 8)) {
-      return this.sendKeyEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
 
     // normal processing.  send keyDown for printable keys...
     } else {
       if (this._isFunctionOrNonPrintableKey(evt)) return YES; 
-      if (evt.charCode != undefined && evt.charCode == 0) return YES;
-      return this.sendKeyEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      if (evt.charCode !== undefined && evt.charCode === 0) return YES;
+      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
   },
   
@@ -473,7 +404,7 @@ SC.RootResponder = SC.Object.extend({
     // send event for modifier key changes, but only stop processing if this is only a modifier change
     var ret = this._handleModifierChanges(evt);
     if (this._isModifierKey(evt)) return ret;
-    return this.sendKeyEvent('keyUp', evt) ? evt.hasCustomEventHandling:YES;
+    return this.sendEvent('keyUp', evt) ? evt.hasCustomEventHandling:YES;
   }
     
 });
@@ -482,5 +413,6 @@ SC.RootResponder = SC.Object.extend({
   Invoked when the document is ready, but before main is called.  Creates an instances and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
-  (SC.RootResponder.responder = SC.RootResponder.create()).setup();
+  var r = SC.RootResponder.create();
+  SC.RootResponder.responder = r; r.setup();
 });

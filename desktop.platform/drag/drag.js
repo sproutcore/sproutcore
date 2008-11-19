@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core') ;
-require('deprecated/views/classic_view') ;
+require('views/view') ;
 
 SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
 SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x0007 ;
@@ -391,7 +391,7 @@ SC.Drag = SC.Object.extend(
   // PRIVATE PROPERTIES AND METHODS
   //
   
-  _ghostViewClass: SC.ClassicView.extend({ 
+  _ghostViewClass: SC.View.extend({ 
     emptyElement: '<div class="sc-ghost-view"></div>'
   }),
   

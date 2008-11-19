@@ -395,7 +395,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   mouseUp: function(evt) {
     if (this._isMouseDown) this.set('isActive', NO); // track independently in case isEnabled has changed
     this._isMouseDown = false;
-    var inside = SC.$().hasChild(evt.target) ;
+    var inside = SC.$().within(evt.target) ;
     if (inside && this.get('isEnabled')) this._action(evt) ;
     return true ;
   },
