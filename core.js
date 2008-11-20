@@ -247,6 +247,21 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
+    Returns the cachekey for the named key + prefix. Uses a cache internally
+    for performance.
+  */
+  keyFor: (function() {
+    var cache = {};
+    return function keyFor(prefix, key) {
+      var ret, pcache = cache[prefix];
+      if (!pcache) pcache = cache[prefix] = {}; // get cache for prefix
+      ret = pcache[key];
+      if (!ret) ret = pcache[key] = prefix + "_" + key ;
+      return ret ;
+    } ;
+  })(),
+  
+  /**
     Generates a new guid, optionally saving the guid to the object that you
     pass in.  You will rarely need to use this method.  Instead you should
     call SC.guidFor(obj), which return an existing guid if available.
@@ -735,7 +750,23 @@ SC.mixin(Function.prototype,
     that the path is used only to construct the observation one time.
   */
   observes: function(propertyPaths) { 
-    this.propertyPaths = SC.$A(arguments); 
+    
+    // sort property paths into local paths (i.e just a property name) and
+    // full paths (i.e. those with a . or * in them)
+    var loc = arguments.length;
+    while(--loc >= 0) {
+      var path = arguments[loc], paths = null, local = null;
+      // local
+      if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
+        if (!local) local = this.localPropertyPaths = [];
+        local.push(path);
+        
+      // regular
+      } else {
+        if (!paths) paths = this.propertyPaths = [];
+        paths.push(path) ;
+      }
+    }
     return this;
   },
   

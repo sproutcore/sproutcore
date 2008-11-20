@@ -20,7 +20,7 @@ SC._ObserverSet = {
   // adds the named target/method observer to the set.  The method must be
   // a function, not a string.
   add: function(target, method) {
-    var targetGuid = SC.guidFor(target) ;
+    var targetGuid = (target) ? SC.guidFor(target) : "__this__";
     
     // get the set of methods
     var methods = this[targetGuid] ;
@@ -41,7 +41,7 @@ SC._ObserverSet = {
   //
   // returns YES if the items was removed, NO if it was not found.
   remove: function(target, method) {
-    var targetGuid = SC.guidFor(target) ;
+    var targetGuid = (target) ? SC.guidFor(target) : "__this__";
     
     // get the set of methods
     var methods = this[targetGuid] ;    
@@ -83,7 +83,30 @@ SC._ObserverSet = {
 
     this._membersCacheIsValid = YES ;
     return ret ;
-  }
+  },
+  
+  // Returns a new instance of the set with the contents cloned.
+  clone: function() {
+    var oldSet, newSet, key, ret = SC._ObserverSet.create() ;
+    for(key in this) {
+      if (!this.hasOwnProperty(key)) continue ;
+      oldSet = this[key];
+      if (oldSet && oldSet.isTargetSet) {
+        newSet = oldSet.clone();
+        newSet.target = oldSet.target ;
+        ret[key] = newSet ;
+      }
+    }
+    ret.targets = this.targets ;
+    ret._membersCacheIsValid = NO ;
+    return ret ;
+  },
+  
+  // Creates a new instance of the observer set.
+  create: function() { return SC.beget(this); }
   
 } ;
+
+SC._ObserverSet.slice = SC._ObserverSet.clone ;
+
 

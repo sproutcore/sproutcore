@@ -6,6 +6,8 @@
 require('system/set');
 require('private/observer_set') ;
 
+/*globals logChange */
+
 /**
   @namespace 
   
@@ -106,7 +108,15 @@ require('private/observer_set') ;
     }
     
   }}}
-
+  
+  h1. Implementation Details
+  
+  Internally, SproutCore keeps track of observable information by adding a
+  number of properties to the object adopting the observable.  All of these
+  properties begin with "_kvo_" to separate them from the rest of your object.
+  
+  @static
+  @since SproutCore 1.0
 */
 SC.Observable = {
 
@@ -320,7 +330,8 @@ SC.Observable = {
     @returns {this}
   */
   endPropertyChanges: function() {
-    var level = this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1 ;
+    this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1 ;
+    var level = this._kvo_changeLevel;
     if ((level<=0) && this._kvo_changes && (this._kvo_changes.length>0)) {
       this._notifyPropertyObservers() ;
     } 
@@ -471,6 +482,27 @@ SC.Observable = {
   // ..........................................
   // OBSERVERS
   // 
+  
+  _kvo_for: function(kvoKey, type) {
+    var ret = this[kvoKey] ;
+
+    if (!this._kvo_cloned) this._kvo_cloned = {} ;
+    
+    // if the item does not exist, create it.  Unless type is passed, 
+    // assume array.
+    if (!ret) {
+      ret = this[kvoKey] = (type === undefined) ? [] : type.create();
+      this._kvo_cloned[kvoKey] = YES ;
+      
+    // if item does exist but has not been cloned, then clone it.  Note
+    // that all types must implement slice().0
+    } else if (!this._kvo_cloned[kvoKey]) {
+      ret = this[kvoKey] = ret.slice();
+      this._kvo_cloned[kvoKey] = YES; 
+    }
+    
+    return ret ;
+  },
 
   /**  
     Adds an observer on a property.
@@ -489,13 +521,15 @@ SC.Observable = {
   */
   addObserver: function(key,target,method) {
     
+    var kvoKey, chain, chains, observers;
+    
     // normalize.  if a function is passed to target, make it the method.
     if (method === undefined) {
       method = target; target = this ;
     }
-    if (target == null) target = this ;
+    if (!target) target = this ;
     if (SC.$type(method) === SC.T_STRING) method = target[method] ;
-    if (method == null) throw "You must pass a method to addObserver()" ;
+    if (!method) throw "You must pass a method to addObserver()" ;
 
     // Normalize key...
     key = key.toString() ;
@@ -503,15 +537,11 @@ SC.Observable = {
       
       // create the chain and save it for later so we can tear it down if 
       // needed.
-      var chain = SC._ChainObserver.createChain(this, key, target, method);
+      chain = SC._ChainObserver.createChain(this, key, target, method);
       chain.masterTarget = target;  chain.masterMethod = method ;
       
       // Save in set for chain observers.
-      var chainObservers = this._kvo_chainObservers ;
-      if (!chainObservers) chainObservers = this._kvo_chainObservers = {};
-      var chains = chainObservers[key] ;
-      if (!chains) chains = chainObservers[key] = [];
-      chains.push(chain) ;
+      this._kvo_for(SC.keyFor('_kvo_chains', key)).push(chain);
       
     // Create observers if needed...
     } else {
@@ -522,54 +552,60 @@ SC.Observable = {
       if ((this[key] === undefined) && (key.indexOf('@') === 0)) {
         this.get(key) ;
       }
-      
-      var observers = this._kvo_observers ;
-      if (!observers) this._kvo_observers = observers = {} ;
 
-      var observerSet = observers[key] ;
-      if (!observerSet) {
-        observers[key] = observerSet = SC.beget(SC._ObserverSet);
-      }
-      observerSet.add(target, method) ; 
+      if (target === this) target = null ; // use null for observers only.
+      kvoKey = SC.keyFor('_kvo_observers', key);
+      this._kvo_for(kvoKey, SC._ObserverSet).add(target, method);
+      this._kvo_for('_kvo_observed_keys', SC.Set).add(key) ;
     }
     
     return this;
-
   },
 
   removeObserver: function(key, target, method) {
+    
+    var kvoKey, chains, chain, observers, idx ;
     
     // normalize.  if a function is passed to target, make it the method.
     if (method === undefined) {
       method = target; target = this ;
     }
-    if (target == null) target = this ;
+    if (!target) target = this ;
     if (SC.$type(method) === SC.T_STRING) method = target[method] ;
-    if (method == null) throw "You must pass a method to addObserver()" ;
+    if (!method) throw "You must pass a method to addObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
     key = key.toString() ;
     if (key.indexOf('.') >= 0) {
       
       // try to find matching chains
-      var chainObservers = this._kvo_chainObservers ;
-      var chains = (chainObservers) ? chainObservers[key] : null;
-      if (chains) {
-        var idx = chains.length;
+      kvoKey = SC.keyFor('_kvo_chains', key);
+      if (chains = this[kvoKey]) {
+        
+        // if chains have not been cloned yet, do so now.
+        chains = this._kvo_for(kvoKey) ;
+        
+        // remove any chains
+        idx = chains.length;
         while(--idx >= 0) {
-          var chain = chains[idx] ;
+          chain = chains[idx];
           if (chain && (chain.masterTarget===target) && (chain.masterMethod===method)) {
             chains[idx] = chain.destroyChain() ;
           }
         }
       }
-
+      
     // otherwise, just like a normal observer.
     } else {
-      var observers = this._kvo_observers ;
-      if (observers) {
-        var observerSet = observers[key] ;
-        if (observerSet) observerSet.remove(target, method) ;
+      if (target === this) target = null ; // use null for observers only.
+      kvoKey = SC.keyFor('_kvo_observers', key) ;
+      if (observers = this[kvoKey]) {
+        // if observers have not been cloned yet, do so now
+        observers = this._kvo_for(kvoKey) ;
+        observers.remove(target, method) ;
+        if (observers.targets <= 0) {
+          this._kvo_for('_kvo_observed_keys', SC.Set).remove(key);
+        }
       }
     }
     
@@ -639,20 +675,24 @@ SC.Observable = {
 
     // Add Bindings
     this.bindings = [] ;
-    if (keys = this._bindings) for(loc=0;loc<keys.length;loc++) {
-      // get propertyKey
-      key = keys[loc] ; value = this[key] ;
-      var propertyKey = key.slice(0,-7) ; // contentBinding => content
-      this[key] = this.bind(propertyKey, value) ;
+    if (keys = this._bindings) {
+      for(loc=0;loc<keys.length;loc++) {
+        // get propertyKey
+        key = keys[loc] ; value = this[key] ;
+        var propertyKey = key.slice(0,-7) ; // contentBinding => content
+        this[key] = this.bind(propertyKey, value) ;
+      }
     }
 
     // Add Properties
-    if (keys = this._properties) for(loc=0;loc<keys.length;loc++) {
-      key = keys[loc] ; value = this[key] ;
-      if (value && value.dependentKeys && (value.dependentKeys.length > 0)) {
-        args = value.dependentKeys.slice() ;
-        args.unshift(key) ;
-        this.registerDependentKey.apply(this,args) ;
+    if (keys = this._properties) {
+      for(loc=0;loc<keys.length;loc++) {
+        key = keys[loc] ; value = this[key] ;
+        if (value && value.dependentKeys && (value.dependentKeys.length>0)) {
+          var args = value.dependentKeys.slice() ;
+          args.unshift(key) ;
+          this.registerDependentKey.apply(this,args) ;
+        }
       }
     }
     
@@ -671,14 +711,8 @@ SC.Observable = {
     @returns {Array} array of Observer objects, describing the observer.
   */
   observersForKey: function(key) {
-    var toStr = function() { return "<%@>.%@".fmt(this.target, this.method); };
-    var ret ;
-    var observers = this._kvo_observers ;
-    if (observers) {
-      var observerSet = observers[key] ;
-      if (observerSet) ret = observerSet.getMembers() ;
-    }
-    return ret || [] ;
+    var observers = this._kvo_for('_kvo_observers', key) ;
+    return observers.getMembers() || [] ;
   },
   
   // this private method actually notifies the observers for any keys in the
@@ -689,22 +723,20 @@ SC.Observable = {
     
     SC.Observers.flush() ; // hookup as many observers as possible.
 
-    // get the observers.  If there are none, nothing to do!
-    var observers = this._kvo_observers ;
-    if (!observers) return NO; 
+    var observers, changes, dependents, starObservers, idx, keys, rev ;
+    var members, membersLength, member, memberLoc, target, method ;
 
     // Get any starObservers -- they will be notified of all changes.
-    var starObservers = observers['*'] ;
+    starObservers =  this['_kvo_observers_*'] ;
     
     // prevent notifications from being sent until complete
     this._kvo_changeLevel = (this._kvo_changeLevel || 0) + 1; 
 
     // keep sending notifications as long as there are changes
-    var changes, dependents ;
-    while(((changes = this._kvo_changes) && (changes.length > 0)) || (key != undefined)) {
+    while(((changes = this._kvo_changes) && (changes.length > 0)) || key) {
       
       // increment revision
-      var rev = this.propertyRevision++;
+      rev = this.propertyRevision++;
       
       // save the current set of changes and swap out the kvo_changes so that
       // any set() calls by observers will be saved in a new set.
@@ -717,21 +749,19 @@ SC.Observable = {
       // once finished, clear the key so the loop will end.
       if (key === '*') {
         changes.add('*') ;
-        for(var key in observers) {
-          if (!observers.hasOwnProperty(key)) continue; 
-          changes.add(key) ;
-        }
+        changes.addEach(this._kvo_for('_kvo_observed_keys', SC.Set));
+
       } else if (key) changes.add(key) ;
 
       // Now go through the set and add all dependent keys...
       if (dependents = this._kvo_dependents) {
-        var idx = 0 ;
+        idx = 0 ;
 
         // note that each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
         while(idx < changes.length) {
-          var key = changes[idx] ;
-          var keys = dependents[key] ;
+          key = changes[idx] ;
+          keys = dependents[key] ;
           if (keys) changes.addEach(keys) ;
           idx++ ;
         }
@@ -739,40 +769,56 @@ SC.Observable = {
 
       // now iterate through all changed keys and notify observers.
       while(changes.length > 0) {
-        var key = changes.pop() ; // the changed key
+        key = changes.pop() ; // the changed key
 
         // find any observers and notify them...
-        var observerSet = observers[key] ;
-        var members, membersLength, member, memberLoc, target, method ;
-        if (observerSet) {
-          members = observerSet.getMembers() ;
+        observers = this[SC.keyFor('_kvo_observers', key)];
+        if (observers) {
+          members = observers.getMembers() ;
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
             if (member[2] === rev) continue ; // skip notified items.
-            target = member[0]; method = member[1] ; member[2] = rev;
+            target = member[0] || this; method = member[1] ; member[2] = rev;
             method.call(target, this, key, null, rev) ;
           }
         }
 
+        // look for local observers.  Local observers are added by SC.Object
+        // as an optimization to avoid having to add observers for every 
+        // instance when you are just observing your local object.
+        members = this[SC.keyFor('_kvo_local', key)];
+        if (members) {
+          membersLength = members.length ;
+          for(memberLoc=0;memberLoc<membersLength;memberLoc++) {
+            member = members[memberLoc];
+            method = this[member] ; // try to find observer function
+            if (method) method.call(this, this, key, null, rev);
+          }
+        }
+        
         // if there are starObservers, do the same thing for them
-        if (starObservers && key !== '*') {
+        if (starObservers && key !== '*') {          
           members = starObservers.getMembers() ;
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
-            target = member[0]; method = member[1] ;
+            target = member[0] || this; method = member[1] ;
             method.call(target, this, key, null, rev) ;
           }
         }
 
         // if there is a default property observer, call that also
-        if (this.propertyObserver) this.propertyObserver(this, key, null, rev);
+        if (this.propertyObserver) {
+          this.propertyObserver(this, key, null, rev);
+        }
       } // while(changes.length>0)
 
       // changes set should be empty. save this set so it can be reused later
       this._kvo_altChanges = changes ;
-      key = null ; // key is no longer needed; clear it to avoid infinite loops
+      
+      // key is no longer needed; clear it to avoid infinite loops
+      key = null ; 
       
     } // while (changes)
     
@@ -888,7 +934,7 @@ SC.Observable = {
   setPath: function(path, value) {
     if (path.indexOf('.') >= 0) {
       var tuple = SC.tupleForPropertyPath(path, this) ;
-      if (tuple[0] == null) return null ;
+      if (!tuple[0]) return null ;
       tuple[0].set(tuple[1], value) ;
     } else this.set(path, value) ; // shortcut
     return this;
@@ -906,7 +952,7 @@ SC.Observable = {
   setPathIfChanged: function(path, value) {
     if (path.indexOf('.') >= 0) {
       var tuple = SC.tupleForPropertyPath(path, this) ;
-      if (tuple[0] == null) return null ;
+      if (!tuple[0]) return null ;
       if (tuple[0].get(tuple[1]) !== value) {
         tuple[0].set(tuple[1], value) ;
       }
@@ -1068,7 +1114,7 @@ SC.Observable = {
     
     // convert the method to a function if needed...
     if (SC.$type(method) === SC.T_STRING) method = target[method] ;
-    if (method == null) throw "You must pass a valid method to observeOnce()";
+    if (!method) throw "You must pass a valid method to observeOnce()";
 
     var timeoutObject = null ;
 
@@ -1090,10 +1136,12 @@ SC.Observable = {
 
     // now add observer
     target.addObserver(key, target, handler) ;
-    if (timeout) timeoutObject = function() {
-      handler(null, target, key, target.get(key), target.propertyRevision, true) ;
-      handler = target = method = timeoutObject = null;
-    }.invokeLater(this, timeout) ;
+    if (timeout) {
+      timeoutObject = function() {
+        handler(null, target, key, target.get(key), target.propertyRevision, true) ;
+        handler = target = method = timeoutObject = null;
+      }.invokeLater(this, timeout) ;
+    }
 
     handler.cancel = function() { 
       target.removeObserver(key, target, handler); 
@@ -1121,11 +1169,13 @@ SC.Observers = {
   // Attempt to add the named observer.  If the observer cannot be found, put
   // it into a queue for later.
   addObserver: function(propertyPath, target, method, pathRoot) {
+    var tuple ;
+    
     // try to get the tuple for this.
     if (SC.$type(propertyPath) === SC.T_STRING) {
-      var tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
+      tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     } else {
-      var tuple = propertyPath; 
+      tuple = propertyPath; 
     }
     
     // if a tuple was found, add the observer immediately...
@@ -1141,15 +1191,16 @@ SC.Observers = {
   // Remove the observer.  If it is already in the queue, remove it.  Also
   // if already found on the object, remove that.
   removeObserver: function(propertyPath, target, method, pathRoot) {
-    var tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
+    var idx, queue, tuple, item;
+    
+    tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     if (tuple) {
       tuple[0].removeObserver(tuple[1], target, method) ;
     } 
 
-    var idx = this.queue.length ;
-    var queue = this.queue ;
+    idx = this.queue.length; queue = this.queue ;
     while(--idx >= 0) {
-      var item = queue[idx] ;
+      item = queue[idx] ;
       if ((item[0] === propertyPath) && (item[1] === target) && (item[2] == method) && (item[3] === pathRoot)) queue[idx] = null ;
     }
   },
@@ -1157,7 +1208,7 @@ SC.Observers = {
   // Flush the queue.  Attempt to add any saved observers.
   flush: function() {
     var oldQueue = this.queue ;
-    var newQueue = this.queue = [] ; 
+    var newQueue = (this.queue = []) ; 
     var idx = oldQueue.length ;
     while(--idx >= 0) {
       var item = oldQueue[idx] ;
@@ -1185,13 +1236,14 @@ SC.Observers = {
   // resume change notifications.  This will call notifications to be
   // delivered for all pending objects.
   resumePropertyObserving: function() {
+    var pending ;
     if(--this.isObservingSuspended <= 0) {
-      var pending = this._pending ;
+      pending = this._pending ;
       this._pending = SC.Set.create() ;
       while(pending.length > 0) {
         pending.pop()._notifyPropertyObservers() ;
       }
-      delete pending ; 
+      pending = null ;
     }
   }
   

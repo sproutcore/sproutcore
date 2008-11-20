@@ -196,6 +196,13 @@ SC.Set.prototype = {
     while(--idx >= 0) this.remove(objects[idx]) ;
   },  
 
+  /**
+   Clones the set into a new set.  
+  */
+  clone: function() {
+    return SC.Set.create(this)    
+  },
+
   // .......................................
   // PRIVATE 
   _each: function(iterator) {
@@ -205,9 +212,11 @@ SC.Set.prototype = {
   
   toString: function() {
     return "SC.Set<%@>".fmt(SC.$A(this)) ;
-  }
+  }  
   
 } ;
+
+SC.Set.prototype.slice = SC.Set.prototype.clone ;
 
 // Make this enumerable and observable
 SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable) ;
