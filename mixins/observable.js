@@ -664,9 +664,16 @@ SC.Observable = {
           // available.
           } else {
             var root = null ;
+            
+            // handle special cases for observers that look to the local root
             if (dotIndex === 0) {
               root = this; path = path.slice(1) ;
+            } else if (dotIndex===4 && path.slice(0,5) === 'this.') {
+              root = this; path = path.slice(5) ;
+            } else if (dotIndex<0 && path.length===4 && path === 'this') {
+              root = this; path = '';
             }
+            
             SC.Observers.addObserver(path, this, observer, root); 
           }
         }

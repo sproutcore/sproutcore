@@ -54,7 +54,7 @@ SC.Event = function(originalEvent) {
   }
 
   // Calculate pageX/Y if missing and clientX/Y available
-  if (((this.pageX===null) || (this.pageX===undefined)) && ((this.clientX !== null) && (this.clientX !==undefined))) {
+  if (SC.none(this.pageX) && !SC.none(this.clientX)) {
     var doc = document.documentElement, body = document.body;
     this.pageX = this.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) - (doc.clientLeft || 0);
     this.pageY = this.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) - (doc.clientTop || 0);

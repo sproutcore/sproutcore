@@ -7,6 +7,8 @@ require('core') ;
 require('mixins/observable') ;
 require('mixins/array') ;
 
+/*globals $$sel */
+
 SC.BENCHMARK_OBJECTS = NO;
 
 /** @class
@@ -93,7 +95,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     SC.generateGuid(ret); // setup guid
 
     // setup new prototype and add properties to ti
-    var base = ret.prototype = SC.beget(this.prototype);
+    var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
     for(idx=0;idx<len;idx++) SC.__object_extend(base, arguments[idx]) ;
     base.constructor = ret; // save constructor
@@ -119,7 +121,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     @param {Hash} props optional hash of method or properties to add to the instance.
     @returns {SC.Object} new instance of the receiver class.
   */
-  create: function(props) { return new this(arguments); },
+  create: function(props) { var C=this; return new C(arguments); },
 
   /**
     Takes an array of hashes and returns newly created instances.
@@ -255,7 +257,7 @@ SC.Object.prototype = {
     
     // Call 'initMixin' methods to automatically setup modules.
     var idx, inits = this.__initMixins, len = (inits) ? inits.length : 0 ;
-    for(var idx=0;idx < len; idx++) inits[idx].call(this);
+    for(idx=0;idx < len; idx++) inits[idx].call(this);
     
     return this ;
   },
@@ -289,7 +291,7 @@ SC.Object.prototype = {
     @returns {Boolean} YES if handled, NO if not handled
   */
   tryToPerform: function(methodName, arg1, arg2) {
-    return !!(this.respondsTo(methodName) && (this[methodName](arg1, arg2)));
+    return this.respondsTo(methodName) && this[methodName](arg1, arg2);
   },
   
   /**  
@@ -306,7 +308,7 @@ SC.Object.prototype = {
   superclass: function(args) {
     var caller = arguments.callee.caller; 
     if (!caller) throw "superclass cannot determine the caller method" ;
-    return (caller.superclass) ? caller.superclass.apply(this, arguments) : null;
+    return caller.superclass ? caller.superclass.apply(this, arguments) : null;
   },
   
   /**
@@ -317,9 +319,11 @@ SC.Object.prototype = {
     @returns {Array} keys
   */
   keys: function(all) {
-    var ret = []; for(var key in this) { 
+    var ret = []; 
+    for(var key in this) { 
       if (all || ret.hasOwnProperty(key)) ret.push(key); 
-    }; return ret ;  
+    } 
+    return ret ;  
   },
 
   /**  
@@ -365,10 +369,13 @@ SC.Object.prototype = {
     @returns {void}
   */
   awake: function(key) { 
+    
+    var obj, stack, working, next;
+    
     // if a key is passed, convert that from an outlet and awake it. otherwise
     // awake self.
     if (key !== undefined) {
-      var obj = this.outlet(key) ;
+      obj = this.outlet(key) ;
       if (obj) obj.awake() ;
       return ;
     }
@@ -384,12 +391,10 @@ SC.Object.prototype = {
     this.bindings.invoke('sync') ; 
     
     if (this.outlets && this.outlets.length) {
-      var stack = [] ;
-      var working = [this, this.outlets.slice()] ;
+      stack = []; working = [this, this.outlets.slice()] ;
       while(working) {
         // find the next item to work on.
-        var next = working[1].pop() ;
-        var obj = working[0] ;
+        next = working[1].pop(); obj = working[0] ;
         
         // an item was found in the array. Process it.
         if (next) {
@@ -442,7 +447,7 @@ SC.Object.prototype = {
     var value = this[key] ; // get the current value.
 
     // if its an outlet, then configure it first.
-    if (value && (value instanceof Function) && value.isOutlet == true) {
+    if (value && (value instanceof Function) && value.isOutlet) {
       if (!this._originalOutlets) this._originalOutlets = {} ;
       this._originalOutlets[key] = value ;
 
@@ -453,7 +458,7 @@ SC.Object.prototype = {
       if (!this._originalOutlets) this._originalOutlets = {} ;
       this._originalOutlets[key] = value ;
 
-      value = (this.$$sel) ? this.$$sel(value) : $$sel(value) ;
+      value = this.$$sel ? this.$$sel(value) : $$sel(value) ;
       if (value) value = (value.length > 0) ? ((value.length == 1) ? value[0] : value) : null ;
       this.set(key, value) ;
     }
@@ -519,19 +524,20 @@ SC.mixin(SC.Object.prototype, SC.Observable) ;
 SC.mixin({
 
   __object_extend: function(base, ext) {
-    if (ext==null) return base; // nothing to do
+    if (!ext) return base; // nothing to do
     
     // set _kvo_cloned for later use
     base._kvo_cloned = null;
     
     // get some common vars
-    var idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
+    var key, idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
+    var p1,p2;
     
     // first, save any concat props.  use old or new array or concat
     idx = (cprops) ? cprops.length : 0 ;
     var concats = (idx>0) ? {} : null;
     while(--idx>=0) {
-      var key = cprops[idx], p1 = base[key], p2 = ext[key];
+      key = cprops[idx]; p1 = base[key]; p2 = ext[key];
       concats[key] = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
     }
 
@@ -554,7 +560,7 @@ SC.mixin({
     }
     
     // now copy properties, add superclass to func.
-    for(var key in ext) {
+    for(key in ext) {
 
       if (key === '_kvo_cloned') continue; // do not copy
       
@@ -696,7 +702,7 @@ SC.mixin({
           break ;
 
         case SC.T_HASH:
-          if (((root != null) || (path=='SC')) && (levels>=0)) searchObject(path, value, levels) ;
+          if (((root) || (path==='SC')) && (levels>=0)) searchObject(path, value, levels) ;
           break ;
 
         default:
@@ -721,9 +727,9 @@ SC.mixin({
             var namespaceName;
             for (var prefixPartsLoc = 0; prefixPartsLoc < prefixParts.length; prefixPartsLoc++) {
               namespace = namespace[prefixParts[prefixPartsLoc]] ;
-              namepaceName = prefixParts[prefixPartsLoc];
+              namespaceName = prefixParts[prefixPartsLoc];
             }
-            searchObject(namepaceName, namespace, 2) ;
+            searchObject(namespaceName, namespace, 2) ;
           }
         }
       }

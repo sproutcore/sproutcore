@@ -4,6 +4,8 @@
 // copyright 2006-2008, Sprout Systems, Inc.
 // ==========================================================================
 
+/*global $type, $I, $A */
+
 // this is used by the JavascriptCompile class on the server side.  You can
 // use this to automatically determine the order javascript files need to be
 // included in.  On the client side, this is a NOP.
@@ -150,7 +152,7 @@ SC.mixin(/** @scope SC */ {
       if (item instanceof Array) {
         ret = SC.T_ARRAY ;
       } else if (item instanceof Function) {
-        ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION ;
+        ret = item.isClass ? SC.T_CLASS : SC.T_FUNCTION ;
         
       // NB: typeOf() may be called before SC.Error has had a chance to load
       // so this code checks for the presence of SC.Error first just to make
@@ -163,6 +165,15 @@ SC.mixin(/** @scope SC */ {
       } else ret = SC.T_HASH ;
     } else if (ret === SC.T_FUNCTION) ret = (item.isClass) ? SC.T_CLASS : SC.T_FUNCTION;
     return ret ;
+  },
+  
+  /**
+    Returns YES if the passed value is null or undefined.  This avoids errors
+    from JSLint complaining about use of ==, which can be technically 
+    confusing.
+  */
+  none: function(obj) {
+    return obj===null || obj===undefined;  
   },
   
   /**
@@ -193,7 +204,7 @@ SC.mixin(/** @scope SC */ {
   $A: function(obj) {
     
     // null or undefined
-    if (obj == null) return [] ;
+    if (SC.none(obj)) return [] ;
     
     // primitive
     if (obj.slice instanceof Function) return obj.slice() ; 
@@ -203,7 +214,7 @@ SC.mixin(/** @scope SC */ {
     
     // not array-like if no .length property or if function, string, or window
     var len = obj.length, type = SC.typeOf(obj);
-    if (len==null || (type === SC.T_FUNCTION) || (type === SC.T_STRING) || (obj.setInterval)) {
+    if ((len===null) || (len===undefined) || (type === SC.T_FUNCTION) || (type === SC.T_STRING) || obj.setInterval) {
       return [obj];
     }
 
@@ -213,7 +224,7 @@ SC.mixin(/** @scope SC */ {
     return ret ;
   },
 
-  guidKey: "_sc_guid_" + (new Date().getTime()),
+  guidKey: "_sc_guid_" + new Date().getTime(),
   
   /**
     Returns a unique GUID for the object.  If the object does not yet have
@@ -233,14 +244,11 @@ SC.mixin(/** @scope SC */ {
     
     switch(SC.$type(obj)) {
       case SC.T_NUMBER:
-        return this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj);
-        break ;
+        return (this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj));
       case SC.T_STRING:
-        return this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj);
-        break ;
+        return (this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj));
       case SC.T_BOOL:
         return (obj) ? "(true)" : "(false)" ;
-        break;
       default:
         return SC.generateGuid(obj);
     }
@@ -250,7 +258,7 @@ SC.mixin(/** @scope SC */ {
     Returns the cachekey for the named key + prefix. Uses a cache internally
     for performance.
   */
-  keyFor: (function() {
+  keyFor: function() {
     var cache = {};
     return function keyFor(prefix, key) {
       var ret, pcache = cache[prefix];
@@ -259,7 +267,7 @@ SC.mixin(/** @scope SC */ {
       if (!ret) ret = pcache[key] = prefix + "_" + key ;
       return ret ;
     } ;
-  })(),
+  }(),
   
   /**
     Generates a new guid, optionally saving the guid to the object that you
@@ -350,10 +358,10 @@ SC.mixin(/** @scope SC */ {
     @returns {Object} the new object.
   */
   beget: function(obj) {
-    if (obj == null) return null ;
-    var k = SC.K; k.prototype = obj ;
-    var ret = new k();
-    k.prototype = null ; // avoid leaks
+    if (SC.none(obj)) return null ;
+    var K = SC.K; K.prototype = obj ;
+    var ret = new K();
+    K.prototype = null ; // avoid leaks
     if (SC.$type(obj.didBeget) === SC.T_FUNCTION) ret = obj.didBeget(ret); 
     return ret ;
   },
@@ -396,10 +404,10 @@ SC.mixin(/** @scope SC */ {
     convert the object into a useful string description.
   */
   inspect: function(obj) {
-    var ret = [] ;
+    var v, ret = [] ;
     for(var key in obj) {
+      v = obj[key] ;
       if (v === 'toString') continue ; // ignore useless items
-      var v = obj[key] ;
       if (SC.typeOf(v) === SC.T_FUNCTION) v = "function() { ... }" ;
       ret.push(key + ": " + v) ;
     }
@@ -445,17 +453,19 @@ SC.mixin(/** @scope SC */ {
   */
   objectForPropertyPath: function(path, root, stopAt) {
 
+    var loc, nextDotAt, key, max ;
+    
     if (!root) root = window ;
     
     // faster method for strings
     if (SC.$type(path) === SC.T_STRING) {
       if (stopAt === undefined) stopAt = path.length ;
-      var loc = 0 ;
+      loc = 0 ;
       while((root) && (loc < stopAt)) {
-        var nextDotAt = path.indexOf('.', loc) ;
+        nextDotAt = path.indexOf('.', loc) ;
         if ((nextDotAt < 0) || (nextDotAt > stopAt)) nextDotAt = stopAt;
-        var key = path.slice(loc, nextDotAt);
-        root = (root.get) ? root.get(key) : root[key] ;
+        key = path.slice(loc, nextDotAt);
+        root = root.get ? root.get(key) : root[key] ;
         loc = nextDotAt+1; 
       }
       if (loc < stopAt) root = undefined; // hit a dead end. :(
@@ -463,7 +473,7 @@ SC.mixin(/** @scope SC */ {
     // older method using an array
     } else {
 
-      var loc = 0, max = path.length, key = null;
+      loc = 0; max = path.length; key = null;
       while((loc < max) && root) {
         key = path[loc++];
         if (key) root = (root.get) ? root.get(key) : root[key] ;

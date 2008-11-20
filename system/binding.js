@@ -322,6 +322,7 @@ SC.Binding = {
     @returns {SC.Binding} this
   */
   connect: function() {
+    var path, root ;
     
     // If the binding is already connected, do nothing.
     if (this.isConnected) return this ;
@@ -333,12 +334,11 @@ SC.Binding = {
     //
     // contentBinding: "*owner.value"
     //
-    var path = this._fromPropertyPath ;
-    var root = this._fromRoot ;
+    path = this._fromPropertyPath; root = this._fromRoot ;
     if (SC.$type(path) === SC.T_STRING) {
       
-      // if the first character is a '.', this is a static path.  make the toRoot
-      // the default root.
+      // if the first character is a '.', this is a static path.  make the 
+      // toRoot the default root.
       if (path.indexOf('.') === 0) {
         path = path.slice(1);
         if (!root) root = this._toRoot ;
@@ -354,8 +354,7 @@ SC.Binding = {
     
     // try to connect the to side
     if (!this._oneWay) {
-      var path = this._toPropertyPath ;
-      var root = this._toRoot ;
+      path = this._toPropertyPath; root = this._toRoot ;
       SC.Observers.addObserver(path, this, this.toPropertyDidChange, root) ;  
     }
     
@@ -553,11 +552,12 @@ SC.Binding = {
   _computeBindingTargets: function() {
     if (!this._fromTarget) {
 
-      // if the fromPropertyPath begins with a . or * then we may use the toRoot
-      // as the root object.  Similar code exists in connect() so if you make a
-      // change to one be sure to update the other.
-      var path = this._fromPropertyPath ;
-      var root = this._fromRoot ;
+      var path, root, tuple ;
+      
+      // if the fromPropertyPath begins with a . or * then we may use the 
+      // toRoot as the root object.  Similar code exists in connect() so if 
+      // you make a change to one be sure to update the other.
+      path = this._fromPropertyPath; root = this._fromRoot ;
       if (SC.$type(path) === SC.T_STRING) {
         
         // static path beginning with the toRoot
@@ -572,16 +572,15 @@ SC.Binding = {
         }
       }
       
-      var tuple = SC.tupleForPropertyPath(path, root) ;
+      tuple = SC.tupleForPropertyPath(path, root) ;
       if (tuple) {
         this._fromTarget = tuple[0]; this._fromPropertyKey = tuple[1] ;
       }
     }
 
     if (!this._toTarget) {
-      var path = this._toPropertyPath ;
-      var root = this._toRoot ;
-      var tuple = SC.tupleForPropertyPath(path, root) ;
+      path = this._toPropertyPath; root = this._toRoot ;
+      tuple = SC.tupleForPropertyPath(path, root) ;
       if (tuple) {
         this._toTarget = tuple[0]; this._toPropertyKey = tuple[1] ;
       }
@@ -591,8 +590,8 @@ SC.Binding = {
   /**
     Configures the binding as one way.  A one-way binding will relay changes
     on the "from" side to the "to" side, but not the other way around.  This
-    means that if you change the "to" side directly, the "from" side may have a
-    different value.
+    means that if you change the "to" side directly, the "from" side may have 
+    a different value.
     
     @param fromPath {String} optional from path to connect.
     @param aFlag {Boolean} Optionally pass NO to set the binding back to two-way
@@ -711,7 +710,7 @@ SC.Binding = {
     }
     return this.from(fromPath).transform(function(value, isForward) {
       if (SC.isArray(value)) {
-        value = (value.length > 1) ? placeholder : (value.length <= 0) ? null : (value.objectAt) ? value.objectAt(0) : value[0];
+        value = (value.length>1) ? placeholder : (value.length<=0) ? null : (value.objectAt ? value.objectAt(0) : value[0]);
       }
       return value ;
     }) ;
@@ -728,7 +727,7 @@ SC.Binding = {
   notEmpty: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
     return this.from(fromPath).transform(function(value, isForward) {
-      if ((value === null) || (value === undefined) || (value === '') || (SC.isArray(value) && value.length === 0)) {
+      if (SC.none(value) || (value === '') || (SC.isArray(value) && value.length === 0)) {
         value = placeholder ;
       }
       return value ;
@@ -746,7 +745,7 @@ SC.Binding = {
   notNull: function(fromPath, placeholder) {
     if (placeholder === undefined) placeholder = SC.EMPTY_PLACEHOLDER ;
     return this.from(fromPath).transform(function(value, isForward) {
-      if ((value === null) || (value === undefined)) value = placeholder ;
+      if (SC.none(value)) value = placeholder ;
       return value ;
     }) ;
   },
@@ -804,14 +803,14 @@ SC.Binding = {
   isNull: function(fromPath) {
     return this.from(fromPath).transform(function(v) { 
       var t = SC.$type(v) ;
-      return (t === SC.T_ERROR) ? v : v == null ;
+      return (t === SC.T_ERROR) ? v : SC.none(v) ;
     });
   },
   
   toString: function() {
-    var from = (this._fromRoot) ? "<%@>:%@".fmt(this._fromRoot,this._fromPropertyPath) : this._fromPropertyPath;
+    var from = this._fromRoot ? "<%@>:%@".fmt(this._fromRoot,this._fromPropertyPath) : this._fromPropertyPath;
 
-    var to = (this._toRoot) ? "<%@>:%@".fmt(this._toRoot,this._toPropertyPath) : this._toPropertyPath;
+    var to = this._toRoot ? "<%@>:%@".fmt(this._toRoot,this._toPropertyPath) : this._toPropertyPath;
     
     return "SC.Binding%@(%@ -> %@)".fmt(SC.guidFor(this), from, to) ;
   }  

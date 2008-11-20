@@ -3,16 +3,13 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('system/ready') ;
-require('deprecated/path_module') ;
-
 /**
   @class SC.Page
-  
-  The Page object is used to store a set of views that can be lazily 
-  configured on page load.  Page assumes that all of its properties are
-  basically outlets and will try to configure them as such.
 
+  A Page object is used to store a set of views that can be lazily configured
+  as needed.  The page object works by overloading the get() method.  The
+  first time you try to get the page
+  
   @extends SC.Object
 */
 SC.Page = SC.Object.extend(
