@@ -519,6 +519,9 @@ SC.mixin({
   __object_extend: function(base, ext) {
     if (ext==null) return base; // nothing to do
     
+    // set _kvo_cloned for later use
+    base._kvo_cloned = null;
+    
     // get some common vars
     var idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
     
@@ -537,6 +540,7 @@ SC.mixin({
     var observers = base._observers, clonedObservers = NO;
     var properties = base._properties, clonedProperties = NO;
     var initMixins = base.__initMixins, clonedInitMixins = NO ;
+    var paths, pathLoc ;
 
     // outlets are treated a little differently because you can manually 
     // name outlets in the passed in hash. If this is the case, then clone
@@ -550,6 +554,8 @@ SC.mixin({
     // now copy properties, add superclass to func.
     for(var key in ext) {
 
+      if (key === '_kvo_cloned') continue; // do not copy
+      
       // avoid copying builtin methods
       if (!ext.hasOwnProperty(key)) continue ; 
 
@@ -575,13 +581,21 @@ SC.mixin({
           value.superclass = value.base = cur || k;
         }
 
-        // handle observers
+        // handle regular observers
         if (value.propertyPaths) {
           if (!clonedObservers) {
             observers = (observers || SC.A).slice() ;
             clonedObservers = YES ;
           }
           observers[observers.length] = key ;
+
+        // handle local properties
+        } else if (paths = value.localPropertyPaths) {
+          pathLoc = paths.length;
+          while(--pathLoc >= 0) {
+            paths = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.Set);
+            paths.add(key);
+          }
           
         // handle computed properties
         } else if (value.dependentKeys) {
