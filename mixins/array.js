@@ -3,7 +3,7 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('foundation/mixins/enumerable') ;
+require('mixins/enumerable') ;
 
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 

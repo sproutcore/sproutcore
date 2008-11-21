@@ -3,8 +3,8 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('foundation/mixins/enumerable') ;
-require('foundation/mixins/observable') ;
+require('mixins/enumerable') ;
+require('mixins/observable') ;
 
 /**
   @class 

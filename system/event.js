@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core');
-require('foundation/system/core_query') ;
+require('system/core_query') ;
 
 /**
   The event class provides a simple cross-platform library for capturing and

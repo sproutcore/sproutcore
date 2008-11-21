@@ -4,9 +4,9 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/application/responder');
+require('application/responder');
 require('desktop.platform/panes/pane');
-require('foundation/system/browser');
+require('system/browser');
 
 SC.CAPTURE_BACKSPACE_KEY = NO ;
 

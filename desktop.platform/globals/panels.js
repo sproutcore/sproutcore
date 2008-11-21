@@ -5,7 +5,7 @@
 
 require('views/view') ;
 require('views/container') ;
-require('foundation/system/ready') ;
+require('system/ready') ;
 
 /**
   @class Manages the panels on a page.

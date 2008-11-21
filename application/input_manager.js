@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('core') ;
-require('foundation/system/object') ;
+require('system/object') ;
 
 /** @class
 

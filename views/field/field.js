@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('views/view') ;
-require('foundation/mixins/control') ;
-require('foundation/mixins/validatable') ;
+require('mixins/control') ;
+require('mixins/validatable') ;
 
 /**
   @class
