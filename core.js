@@ -439,6 +439,7 @@ SC.mixin(/** @scope SC */ {
     
     // convert path to object.
     var obj = this.objectForPropertyPath(path, root, stopAt) ;
+    console.log("tuple: %@ - %@".fmt(obj, key));
     return (obj && key) ? [obj,key] : null ;
   },
 

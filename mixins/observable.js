@@ -1177,6 +1177,8 @@ SC.Observers = {
   // it into a queue for later.
   addObserver: function(propertyPath, target, method, pathRoot) {
     var tuple ;
+
+    console.log("addObserver(%@, %@)".fmt(propertyPath, pathRoot));
     
     // try to get the tuple for this.
     if (SC.$type(propertyPath) === SC.T_STRING) {
@@ -1184,7 +1186,9 @@ SC.Observers = {
     } else {
       tuple = propertyPath; 
     }
-    
+
+    console.log('tuple: %@,%@ - %@'.fmt(tuple[0], tuple[1], propertyPath)) ;
+
     // if a tuple was found, add the observer immediately...
     if (tuple) {
       tuple[0].addObserver(tuple[1],target, method) ;

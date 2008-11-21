@@ -372,14 +372,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
   /** @private 
     Setup a view, but do not finish waking it up. 
-    - configure outlets
+    - configure childViews
     - generate DOM + plug in outlets/childViews unless rootElement is defined
     - register the view with the global views hash, which is used for mgmt
   */
   init: function() {
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
-    this.configureChildViews() ;
+    this.configureChildViews() ; // setup child Views
     
     // if no rootElement is provided, generate the display HTML for the view.
     if (!this.rootElement) this.prepareDisplay();
@@ -396,6 +396,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
   },
 
+  /**
+    Wakes up the view.  The default implementation immediately syncs any 
+    bindings, which may cause the view to need its display updated.  You can
+    override this method to perform any additional setup.  Be sure to call
+    sc_super to setup bindings and to call awake on childViews.
+  */
+  awake: function() {
+    
+  },
+    
   /** 
     You must call this method on a view to destroy the view (and all of 
     its child views).  This will remove the view from any parent node, then
@@ -440,7 +450,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     delete SC.View.views[SC.guidFor(this)];
 
     // can cleanup rootElement and containerElement (if set)
-    this.rootElement = this.containerElement = this._CQ = null ;
+    delete this.rootElement; delete this.containerElement; delete this._CQ;
+    delete this.page;
     
     // mark as destroyed so we don't do this again
     this.set('isDestroyed', YES) ;
@@ -448,33 +459,32 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /** 
-    This method will automatically instantiate any child views & outlets
+    This method will step through the childViews looking for any builder 
+    objects.  The builders will be executed to setup the childViews and add 
+    them to the parent view automatically.  If the parentView already has a 
+    rootElement, the childViews will expect to find their HTML already in the
+    DOM.
+
+    @returns {void}
   */
   configureChildViews: function() {
-    var outlets = this.get('outlets'), childViews = this.get('childViews');
-    var views, loc, builder, key ;
+    var childViews = this.get('childViews');
+    var views, loc, view ;
 
     this.beginPropertyChanges() ;
     
-    // outlets
-    loc = (outlets) ? outlets.length : 0 ;
-    while(--loc >= 0) {
-      key = outlets[loc] ;
-      builder = this.get(key) ;
-      if (builder && builder.createChildView) {
-        this.set(key, builder.createChildView(this, null)) ;
-      }
-    }
-
-    // child views
     // build a new array of child views to replace the old one
     loc = (childViews) ? childViews.length : 0 ;
-    views = [] ; // only create if needed to avoid memory
+    views = [];
     while(--loc >= 0) {
-      builder = childViews[loc] ;
-      if (builder && builder.createChildView) {
-        views[loc] = builder.createChildView(this, this) ;
+      view = childViews[loc] ;
+      
+      // if builder, run the builder...
+      if (view && view.isViewBuilder) {
+        view = view.createChildView(this, this) ;
       }
+      views[loc] = view; // save view value
+      
     }
     if (views) this.set('childViews', views) ;
     
@@ -1061,7 +1071,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
 */
 SC.outlet = function(path) {
   return function() {
-    SC.objectForPropertyPath(path, this) ;
+    return SC.objectForPropertyPath(path, this) ;
   }.property().cacheable() ;
 };
 

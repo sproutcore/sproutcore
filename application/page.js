@@ -12,54 +12,46 @@
   
   @extends SC.Object
 */
-SC.Page = SC.Object.extend(
-  /** @scope SC.Page.prototype */
-  {
+SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
   
   get: function(key) {
     var value = this[key] ;
-    if (value && (value instanceof Function) && (value.isOutlet)) {
-      var ret = this.outlet(key) ;
-      if (SC.window && !ret.parentNode) {
-        SC.window._insertBefore(ret, null, false) ;
-        SC.window._rebuildChildNodes();
-      }
-      ret.awake() ;
-      return ret ;
+    if (value && value.isViewBuilder) {
+      this[key] = value = value.create({ page: this }) ;
+      return value ;
     } else return sc_super() ;
   },
   
-  // in addition to activating bindings, calling awake on the page object
-  // will cause any outlet properties to be loaded.
+  /**
+    Finds all views defined on this page instances and builds them.  This is 
+    a quick, brute force way to wake up all of the views in a page object.  It
+    is not generally recommended. Instead, you should use get() or getPath() 
+    to retrieve views and rely on the lazy creation process to set them up.
+    
+    @return {SC.Page} receiver
+  */
   awake: function() {
-    arguments.callee.base.call(this) ;
+    // step through all views and build them
     for(var key in this) {
-      if (this.hasOwnProperty(key) && this[key] && this[key].isOutlet) {
-        this.get(key) ; // convert to outlet.
-      } 
+      if (!this.hasOwnProperty(key)) continue ;
+      var value = this[key] ;
+      if (value && value.isViewBuilder) {
+        this[key] = value = value.create({ page: this }) ;
+      }
     }
+    return this;
   },
-  
-  init: function() {
-    sc_super() ;
-    var el = this.rootElement = $('resources') ;
-    SC.ready(function() {
-      if (el && el.parentNode) el.parentNode.removeChild(el) ;
-			el = null;
-    }) ;
-  },
-  
-  // returns the property, but only if it is already configured.
+
+  /**
+    Returns the named property unless the property is a view that has not yet
+    been configured.  In that case it will return undefined.  You can use this
+    method to safely get a view without waking it up.
+  */
   getIfConfigured: function(key) {
-    var value = this[key] ;
-    if (value && (value instanceof Function) && (value.isOutlet)) {
-      return null ;
-    } else return value ;
-  },
-  
-  _insertBefore: function() {},
-  _rebuildChildNodes: function() {}
-  
+    var ret = this[key] ;
+    return (ret && ret.isViewBuilder) ? null : this.get(key);
+  }
+    
 }) ;
 
 Object.extend(SC.Page.prototype, SC.PathModule) ;
