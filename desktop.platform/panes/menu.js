@@ -3,17 +3,17 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('panes/overlay') ;
+require('desktop.platform/panes/overlay') ;
 
-SC.PICKER_PANE = 'picker';
-SC.PickerPaneView = SC.OverlayPaneView.extend({
-  
-  emptyElement: '<div class="pane picker-pane"><div class="shadow pane-wrapper picker-pane-wrapper"><div class="pane-root"></div><div class="top-left-edge"></div><div class="top-edge"></div><div class="top-right-edge"></div><div class="right-edge"></div><div class="bottom-right-edge"></div><div class="bottom-edge"></div><div class="bottom-left-edge"></div><div class="left-edge"></div></div></div>',
-  
-  layer: 300,
-  
+SC.MENU_PANE = 'menu';
+SC.MenuPaneView = SC.OverlayPaneView.extend({
+
+  emptyElement: '<div class="pane menu-pane"><div class="shadow pane-wrapper"><div class="pane-root"></div><div class="top-left-edge"></div><div class="top-edge"></div><div class="top-right-edge"></div><div class="right-edge"></div><div class="bottom-right-edge"></div><div class="bottom-edge"></div><div class="bottom-left-edge"></div><div class="left-edge"></div></div></div>',
+
+  layer: 400,
+
   isModal: false,
-
+  
   // The ideal position for a picker pane is just below the anchor that 
   // triggered it.  Find that ideal position, then call adjustPosition.
   positionPane: function() {
@@ -33,14 +33,13 @@ SC.PickerPaneView = SC.OverlayPaneView.extend({
     } else {
       var wsize = SC.window.get('size') ;
       var psize = picker.get('size') ;
-      origin = {};
+      origin = {} ;
       origin.x = (wsize.width - psize.width) / 2 ;
       origin.y = (wsize.height - psize.height) / 2 ;
     }
     
     picker.set('origin',origin) ;
   }
-  
   
 }) ;
 
