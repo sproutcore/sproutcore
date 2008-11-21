@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('desktop.platform/panes/overlay') ;
+require('panes/overlay') ;
 
 SC.MENU_PANE = 'menu';
 SC.MenuPaneView = SC.OverlayPaneView.extend({

@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('desktop.platform/panes/pane') ;
+require('panes/pane') ;
 require('views/container') ;
 
 // Panes are views that appear over the top of your regular content such as
