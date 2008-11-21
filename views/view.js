@@ -55,12 +55,23 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
   concatenatedProperties: ['outlets','displayProperties'],
   
-  /** @property The current pane. */
+  /** 
+    The current pane. 
+    @property {SC.Pane}
+  */
   pane: function() {
     var view = this;
     while(view && !view.isPane) view = view.get('parentView');
     return view;
-  }.property('parentView'),
+  }.property('parentView').cacheable(),
+  
+  /**
+    The page this view was instantiated from.  This is set by the page object
+    during instantiation.
+    
+    @property {SC.Page}
+  */
+  page: null,
     
   /**
     If the view is currently inserted into the DOM of a parent view, this
@@ -441,7 +452,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   configureChildViews: function() {
     var outlets = this.get('outlets'), childViews = this.get('childViews');
-    var views, loc, builder, key, designMode = this.designMode ;
+    var views, loc, builder, key ;
 
     this.beginPropertyChanges() ;
     
@@ -451,7 +462,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       key = outlets[loc] ;
       builder = this.get(key) ;
       if (builder && builder.createChildView) {
-        this.set(key, builder.createChildView(this, null, designMode)) ;
+        this.set(key, builder.createChildView(this, null)) ;
       }
     }
 
@@ -462,7 +473,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     while(--loc >= 0) {
       builder = childViews[loc] ;
       if (builder && builder.createChildView) {
-        views[loc] = builder.createChildView(this, this, designMode) ;
+        views[loc] = builder.createChildView(this, this) ;
       }
     }
     if (views) this.set('childViews', views) ;
@@ -1037,6 +1048,22 @@ SC.View.mixin(/** @scope SC.View @static */ {
   }
     
 }) ;
+
+// .......................................................
+// OUTLET BUILDER
+//
+
+/** 
+  Generates a computed property that will look up the passed property path
+  the first time you try to get the value.  Use this whenever you want to 
+  define an outlet that points to another view or object.  The root object
+  used for the path will be the receiver.
+*/
+SC.outlet = function(path) {
+  return function() {
+    SC.objectForPropertyPath(path, this) ;
+  }.property().cacheable() ;
+};
 
 
 // .......................................................

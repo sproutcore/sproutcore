@@ -76,8 +76,17 @@ require('views/view');
 */
 SC.Pane = SC.View.extend({
 
-  /** Returns YES for easy detection of when you reached the pane. */
+  /** 
+    Returns YES for easy detection of when you reached the pane. 
+    @property {Boolean}
+  */
   isPane: YES,
+  
+  /** 
+    Set to the current page when the pane is instantiated from a page object.
+    @property {SC.Page}
+  */
+  page: null,
   
   // .......................................................
   // ROOT RESPONDER SUPPORT
@@ -85,6 +94,7 @@ SC.Pane = SC.View.extend({
 
   /**
     The rootResponder for this pane.  Whenever you add a pane to a document, this property will be set to the rootResponder that is now forwarding events to the pane.
+    @property {SC.Responder}
   */
   rootResponder: null,  
   

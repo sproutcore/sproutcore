@@ -816,6 +816,16 @@ SC.Binding = {
   }  
 } ;
 
+/** 
+  Shorthand method to define a binding.  This is the same as calling:
+  
+  {{{
+    SC.binding(path) = SC.Binding.from(path)
+  }}}
+*/
+SC.binding = function(path, root) { return SC.Binding.from(path,root); } ;
+
+
 // ......................................
 // DEPRECATED
 //

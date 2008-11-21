@@ -11,6 +11,9 @@ require('views/view');
   Builds a new view based on the passed instance.  The return object can be 
   used to actually generate a view or possibly its components when serializing
   a design.
+
+  Note that you can run a builder only once.  When the builder runs it will
+  teardown its own contents.
   
   @param {Hash} attrs to assign to view
   @param {Array} optional path when bulding with HTML
@@ -27,18 +30,31 @@ SC.View.build = SC.Builder.create({
   },
   
   /** 
+    Set to NO once the builder has actually been run.  If you try to run the
+    builder again (using create() or design()), the builder will raise an 
+    exception.
+    
+    @property {Boolean}
+  */
+  canBuild: YES,
+  
+  /** 
     Creates a new instance of the view based on the currently loaded config.
     This will create a new DOM element.  Add any last minute attrs here.
   */
   create: function(attrs) {
-    if (attrs) SC.mixin(this.attrs, attrs) ;
-    return this.defaultClass.create(this.attrs) ;
+    if (!this.canBuild) throw "This builder has already run." ;
+    this.canBuild = NO ; // do not allow another call
+    
+    if (attrs) SC.mixin(this.attrs, attrs) ; // add last minute attrs
+    var ret = this.defaultClass.create(this.attrs) ; // create view.
+    this.attrs = attrs = null ; // teardown
+    return ret ;
   },
   
   /**
     Creates a new instance of the view with the passed view as the parent
-    view.  If the parentView has a DOM element, then follow the path to
-    find the matching DOM.
+    view.
     
     This is called internally by views.
   */
@@ -52,27 +68,11 @@ SC.View.build = SC.Builder.create({
     // Now add this to the attributes and create.
     var attrs = this.attrs || {} ;
 
-    if (designMode) {
-      attrs.designAttributes = SC.clone(attrs) ; // save attributes
-      attrs.designMode = YES;
-    }
-
     attrs.rootElement = root ;
     attrs.owner = owner ;
     attrs.parentView = parentView;
 
     return this.defaultClass.create(attrs) ;
-  },
-  
-  /**
-    Creates a new instance of the view in design mode.  This will cause any
-    outlets created by the view to be setup in design mode also.
-  */
-  design: function() {
-    var attrs = this.attrs || {} ;
-    attrs.designAttributes = SC.clone(attrs) ;
-    attrs.designMode = YES ;
-    return this.viewClass.create(attrs) ;  
   }
   
 }) ;
