@@ -98,7 +98,9 @@ SC.View.build = SC.Builder.create({
     // try to find a matching DOM element by tracing the path
     var root = owner.rootElement ;
     var path = this.rootElementPath, idx=0, len = (path) ? path.length : 0;
-    while((idx<len) && root) root = root.childNodes[path[idx++]];
+    while((idx<len) && root) {
+      root = root.childNodes[path[idx++]];
+    }
     
     // Now add this to the attributes and create.
     var attrs = this.attrs || {} ;

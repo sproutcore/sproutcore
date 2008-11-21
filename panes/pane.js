@@ -348,8 +348,8 @@ SC.Pane = SC.View.extend({
 
     // add to the DOM
     var dom = this.rootElement ;
-    if (dom.parentNode) dom.parentNode.removeChild(el);
-    dom = null ;
+    if (dom.parentNode) dom.parentNode.removeChild(dom);
+    dom = null;
     
     // remove from the RootResponder also
     var responder = this.rootResponder ;

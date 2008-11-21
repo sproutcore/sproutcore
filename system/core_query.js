@@ -875,14 +875,11 @@ SC.CoreQuery = (function() {
           elem = CQ.makeArray( div.childNodes );
         }
 
-        if ( elem.length === 0 && (!CQ.nodeName( elem, "form" ) && !CQ.nodeName( elem, "select" )) )
-          return;
+        if (elem.length === 0 && (!CQ.nodeName( elem, "form" ) && !CQ.nodeName( elem, "select" ))) return;
 
-        if ( elem[0] == undefined || CQ.nodeName( elem, "form" ) || elem.options )
-          ret.push( elem );
+        if (elem[0] == undefined || CQ.nodeName( elem, "form" ) || elem.options) ret.push( elem );
 
-        else
-          ret = CQ.merge( ret, elem );
+        else ret = CQ.merge( ret, elem );
 
       });
 

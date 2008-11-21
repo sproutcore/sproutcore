@@ -403,7 +403,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     sc_super to setup bindings and to call awake on childViews.
   */
   awake: function() {
-    
+    // step through bindings and sync them.  Note that this may not 
+    // immediately trigger the binding, but it will ensure the binding 
+    // is checked at the end of the run loop, once the view's have been 
+    // completely built.
+    var bindings = this.bindings, loc = (bindings) ? bindings.length : 0;
+    while(--loc >= 0) bindings[loc].sync(); 
   },
     
   /** 
@@ -515,15 +520,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (this.emptyElement === this.constructor.prototype.emptyElement) {
       if (!this._cachedEmptyElement || (this._emptyElementCachedForClassGuid !== SC.guidFor(this.constructor))) {
         html = this.get('emptyElement');
-        this.constructor.prototype._cachedEmptyElement = SC.View.generateElement(html) ;
-        this.constructor.prototype._emptyElementCachedForClassGuid = SC.guidFor(this.constructor) ;
+        this.constructor.prototype._cachedEmptyElement = SC.$(html).get(0);         this.constructor.prototype._emptyElementCachedForClassGuid = SC.guidFor(this.constructor) ;
       }
       root = this._cachedEmptyElement.cloneNode(true);
       
     // otherwise, we can't cache the DOM because it is overridden by instance
     } else {
       html = this.get('emptyElement');
-      root = SC.View.generateElement(html) ;
+      root = SC.$(html).get(0) ;
     }
     this.rootElement = root ;
     
@@ -1075,24 +1079,19 @@ SC.outlet = function(path) {
   }.property().cacheable() ;
 };
 
-
-// .......................................................
-// DOM GENERATION
-// Generates new DOM elements from the passed HTML.  This uses a cached div
-// that must be cleaned up on page unload.
-
-/** generates the DOM element for some HTML */
-SC.View.generateElement = function(html) {
-  if (!this._domFactory) this._domFactory = document.createElement('div');
-  if (!this._domCache) this._domCache = document.createElement('div') ;
-  this._domFactory.innerHTML = html ;
-  var ret = this._domFactory.firstChild ;
-  this._domCache.appendChild(ret) ; // keep around for memory mgmt
-  return ret ;
-};
-
 /** @private on unload clear cached divs. */
 SC.View.unload = function() {
-  SC.View._domFactory = SC.View._domCache = null; // cleanup memory
+  
+  // delete view items this way to ensure the views are cleared.  The hash
+  // itself may be owned by multiple view subclasses.
+  var views = SC.View.views;
+  if (views) {
+    for(var key in views) {
+      if (!views.hasOwnProperty(key)) continue ;
+      delete views[key];
+    }
+  }
+  
 } ;
+
 SC.Event.add(window, 'unload', SC.View, SC.View.unload) ;

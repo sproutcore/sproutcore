@@ -17,6 +17,12 @@ SC.LOG_BINDING_NOTIFICATIONS = NO ;
   binding.
 */
 SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
+
+/**
+  Performance parameter.  This will benchmark the time spend configuring each
+  binding.  
+*/
+SC.BENCHMARK_BINDING_SETUP = NO;
   
 /** 
   Default placeholder for multiple values in bindings.
@@ -322,15 +328,32 @@ SC.Binding = {
     @returns {SC.Binding} this
   */
   connect: function() {
-    var path, root ;
-    
     // If the binding is already connected, do nothing.
     if (this.isConnected) return this ;
+    this.isConnected = YES ;
+    this._connectionPending = YES ; // its connected but not really...    
+    SC.Binding._connectQueue.add(this) ;
+    return this; 
+  },
+  
+  /** @private
+    Actually connects the binding.  This is done at the end of the runloop
+    to give you time to setup your entire object graph before the bindings 
+    try to activate.
+  */
+  _connect: function() {
+    if (!this._connectionPending) return; //nothing to do
+    this._connectionPending = NO ;
 
+    var path, root ;
+    var bench = SC.BENCHMARK_BINDING_SETUP;
+
+    if (bench) SC.Benchmark.start("SC.Binding.connect()");
+    
     // try to connect the from side.
     // as a special behavior, if the from property path begins with either a 
-    // . or * and the fromRoot is null, use the toRoot instead.  This allows for 
-    // support for the SC.Object shorthand:
+    // . or * and the fromRoot is null, use the toRoot instead.  This allows 
+    // for support for the SC.Object shorthand:
     //
     // contentBinding: "*owner.value"
     //
@@ -357,9 +380,16 @@ SC.Binding = {
       path = this._toPropertyPath; root = this._toRoot ;
       SC.Observers.addObserver(path, this, this.toPropertyDidChange, root) ;  
     }
-    
-    this.isConnected = YES ;
-    return this; 
+
+    if (bench) SC.Benchmark.end("SC.Binding.connect()");
+
+    // now try to sync if needed
+    if (this._syncOnConnect) {
+      this._syncOnConnect = NO ;
+      if (bench) SC.Benchmark.start("SC.Binding.connect().sync");
+      this.sync();
+      if (bench) SC.Benchmark.end("SC.Binding.connect().sync");
+    }
   },
   
   /**
@@ -370,10 +400,17 @@ SC.Binding = {
   */
   disconnect: function() {
     if (!this.isConnected) return this; // nothing to do.
-
-    SC.Observers.removeObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, this._fromRoot) ;
-    if (!this._oneWay) {
-      SC.Observers.removeObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;
+    
+    // if connection is still pending, just cancel
+    if (this._connectionPending) {
+      this._connectionPending = NO ;
+      
+    // connection is completed, disconnect.
+    } else {
+      SC.Observers.removeObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, this._fromRoot) ;
+      if (!this._oneWay) {
+        SC.Observers.removeObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;
+      }
     }
     
     this.isConnected = NO ;
@@ -443,6 +480,8 @@ SC.Binding = {
     this._transformedBindingValue = v;
   },
   
+  _connectQueue: SC.Set.create(),
+  _alternateConnectQueue: SC.Set.create(),
   _changeQueue: SC.Set.create(),
   _alternateChangeQueue: SC.Set.create(),
   _changePending: NO,
@@ -460,8 +499,15 @@ SC.Binding = {
 
     var log = SC.LOG_BINDING_NOTIFICATIONS ;
     
+    // connect any bindings
+    var queue, binding ;
+    while((queue = this._connectQueue).length >0) {
+      this._connectQueue = this._alternateConnectQueue ;
+      this._alternateConnectQueue = queue ;
+      while(binding = queue.pop()) binding._connect() ;
+    }
+    
     // keep doing this as long as there are changes to flush.
-    var queue ;
     while((queue = this._changeQueue).length > 0) {
       if (log) console.log("Begin: Trigger changed bindings") ;
 
@@ -473,7 +519,6 @@ SC.Binding = {
       // next, apply any bindings in the current queue.  This may cause 
       // additional bindings to trigger, which will end up in the new active 
       // queue.
-      var binding ;
       while(binding = queue.pop()) binding.applyBindingValue() ;
       
       // now loop back and see if there are additional changes pending in the
@@ -523,31 +568,46 @@ SC.Binding = {
 
   /**
     Calling this method on a binding will cause it to check the value of the 
-    from side of the binding matches the current expected value of the binding.
-    If not, it will relay the change as if the from side's value has just changed.
+    from side of the binding matches the current expected value of the 
+    binding. If not, it will relay the change as if the from side's value has 
+    just changed.
     
-    This method is useful when you are dynamically connecting bindings to a network
-    of objects that may have already been initialized.
+    This method is useful when you are dynamically connecting bindings to a 
+    network of objects that may have already been initialized.
   */
   sync: function() {
 
-    this._computeBindingTargets() ;
-    var target = this._fromTarget ;
-    var key = this._fromPropertyKey ;
-    if (!target || !key) return ; // nothing to do
-
-    // get the new value
-    var v = target.getPath(key) ;
+    // do nothing if not connected
+    if (!this.isConnected) return this;
     
-    // if the new value is different from the current binding value, then 
-    // schedule to register an update.
-    if (v !== this._bindingValue) {
-      this._setBindingValue(v) ;
-      this._changePending = YES ;
-      SC.Binding._changeQueue.add(this) ; // save for later.  
+    // connection is pending, just note that we should sync also
+    if (this._connectionPending) {
+      this._syncOnConnect = YES ;
+      
+    // we are connected, go ahead and sync
+    } else {
+      this._computeBindingTargets() ;
+      var target = this._fromTarget ;
+      var key = this._fromPropertyKey ;
+      if (!target || !key) return this ; // nothing to do
+
+      // get the new value
+      var v = target.getPath(key) ;
+
+      // if the new value is different from the current binding value, then 
+      // schedule to register an update.
+      if (v !== this._bindingValue) {
+        this._setBindingValue(v) ;
+        this._changePending = YES ;
+        SC.Binding._changeQueue.add(this) ; // save for later.  
+      }
     }
     
+    return this ;
   },
+  
+  // set if you call sync() when the binding connection is still pending.
+  _syncOnConnect: NO,
   
   _computeBindingTargets: function() {
     if (!this._fromTarget) {

@@ -681,7 +681,7 @@ SC.Observable = {
     }
 
     // Add Bindings
-    this.bindings = [] ;
+    this.bindings = []; // will be filled in by the bind() method.
     if (keys = this._bindings) {
       for(loc=0;loc<keys.length;loc++) {
         // get propertyKey
@@ -1178,16 +1178,12 @@ SC.Observers = {
   addObserver: function(propertyPath, target, method, pathRoot) {
     var tuple ;
 
-    console.log("addObserver(%@, %@)".fmt(propertyPath, pathRoot));
-    
     // try to get the tuple for this.
     if (SC.$type(propertyPath) === SC.T_STRING) {
       tuple = SC.tupleForPropertyPath(propertyPath, pathRoot) ;
     } else {
       tuple = propertyPath; 
     }
-
-    console.log('tuple: %@,%@ - %@'.fmt(tuple[0], tuple[1], propertyPath)) ;
 
     // if a tuple was found, add the observer immediately...
     if (tuple) {
