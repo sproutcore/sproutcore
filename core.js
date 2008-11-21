@@ -732,6 +732,16 @@ SC.mixin(Function.prototype,
   },
   
   /**
+    Makes the computed property as an outlet.  Outlets can be setup en-masse
+    when the object is first instantiated by calling initOutlets(). (This
+    method is defined in SC.Observable).
+  */
+  outlet: function(aFlag) {
+    this.autoconfiguredOutlet = (aFlag === undefined) ? YES : aFlag;
+    return this ;
+  },
+  
+  /**
     Indicates that the computed property is volatile.  Normally SproutCore 
     assumes that your computed property is indempotent.  That is, calling 
     set() on your property more than once with the same value has the same

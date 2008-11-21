@@ -148,7 +148,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     var obj = this ;
     return function() {
       var ret = obj.create() ; ret.owner = this ; return ret ;
-    } ;
+    }.property().cacheable().outlet() ;
   },
   
   /**
@@ -359,65 +359,15 @@ SC.Object.prototype = {
   // 
 
   /**  
-    Activates any outlet connections in the the object.  This is called 
-    automatically for views typically.
+    Activates any outlet connections in object and syncs any bindings.  This
+    method is called automatically for view classes but may be used for any
+    object.
     
-    A view may contain outlets.  Outlets are a way to find and connect to
-    elements within the view.
-    
-    @param key {String} optional single key to awake.
     @returns {void}
   */
   awake: function(key) { 
-    
-    var obj, stack, working, next;
-    
-    // if a key is passed, convert that from an outlet and awake it. otherwise
-    // awake self.
-    if (key !== undefined) {
-      obj = this.outlet(key) ;
-      if (obj) obj.awake() ;
-      return ;
-    }
-
-    if (this._awake) return ;
-    this._awake = true ;
-    
-    SC.Observers.suspendPropertyObserving() ;
-    
-    // it would be cool to do this in a recursive way, but sadly we cannot
-    // without a stack overflow problem. Just loop through outlets and collect
-    // items to awake.
-    this.bindings.invoke('sync') ; 
-    
-    if (this.outlets && this.outlets.length) {
-      stack = []; working = [this, this.outlets.slice()] ;
-      while(working) {
-        // find the next item to work on.
-        next = working[1].pop(); obj = working[0] ;
-        
-        // an item was found in the array. Process it.
-        if (next) {
-          next = obj[next] ;
-          if (next) {
-            // awake these bindings.
-            if (next.bindings) next.bindings.invoke('sync') ;
-            
-            // next has outlets itself. Start a new context and process them.
-            if (next.outlets && next.outlets.length > 0) {
-              stack.push(working) ;
-              working = [next,next.outlets.slice()] ;
-            }
-          }
-          
-        // no more items found in the current array. pop the stack.
-        } else working = stack.pop() ;
-      }
-    }
-    
-    SC.Binding.flushPendingChanges() ;
-    SC.Observers.resumePropertyObserving() ;
-    
+    this.outlets.forEach(function(key) { this.get(key); },this) ;
+    this.bindings.invoke('sync'); 
   },
   
   /**  
@@ -431,40 +381,6 @@ SC.Object.prototype = {
     @field
   */
   outlets: [],
-
-  /**
-    Just like get() except it will also create an outlet-packaged view if that 
-    is the value of the property.
-    
-    This method works just like get() except if the value of the property
-    is an outlet-packaged View, the view will be created first.  You can use
-    this to create lazy outlets.
-    
-    @param {String} key The key to read as an outlet.
-    @returns {Object} the value of the key, possibly an awakened outlet.
-  */        
-  outlet: function(key) {
-    var value = this[key] ; // get the current value.
-
-    // if its an outlet, then configure it first.
-    if (value && (value instanceof Function) && value.isOutlet) {
-      if (!this._originalOutlets) this._originalOutlets = {} ;
-      this._originalOutlets[key] = value ;
-
-      // create the outlet by calling the outlet function.  this should be the owner view.
-      value = value.call(this) ;
-      this.set(key, value) ;
-    } else if (typeof(value) == "string") {
-      if (!this._originalOutlets) this._originalOutlets = {} ;
-      this._originalOutlets[key] = value ;
-
-      value = this.$$sel ? this.$$sel(value) : $$sel(value) ;
-      if (value) value = (value.length > 0) ? ((value.length == 1) ? value[0] : value) : null ;
-      this.set(key, value) ;
-    }
-
-    return value ;
-  },
 
   /**
     Invokes the named method after the specified period of time.

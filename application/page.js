@@ -50,6 +50,18 @@ SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
   getIfConfigured: function(key) {
     var ret = this[key] ;
     return (ret && ret.isViewBuilder) ? null : this.get(key);
+  },
+  
+  /**
+    Applies a localization to every view builder defined on the page.  You must call this before you construct a view to apply the localization.
+  */
+  loc: function(loc) {
+    for(var key in loc) {
+      if (!loc.hasOwnProperty(key)) continue ;
+      var builder = this[key];
+      if (!builder || !builder.isViewBuilder) continue; 
+      builder.loc(loc[key]);
+    }
   }
     
 }) ;

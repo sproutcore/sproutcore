@@ -403,12 +403,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     sc_super to setup bindings and to call awake on childViews.
   */
   awake: function() {
-    // step through bindings and sync them.  Note that this may not 
-    // immediately trigger the binding, but it will ensure the binding 
-    // is checked at the end of the run loop, once the view's have been 
-    // completely built.
-    var bindings = this.bindings, loc = (bindings) ? bindings.length : 0;
-    while(--loc >= 0) bindings[loc].sync(); 
+    sc_super();
+    var childViews = this.get('childViews');
+    if (childViews) childViews.invoke('awake');
   },
     
   /** 
@@ -420,6 +417,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
      
+    sc_super();
+    
     // remove from parent if found
     this.removeFromParentView() ;
 
@@ -1076,7 +1075,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
 SC.outlet = function(path) {
   return function() {
     return SC.objectForPropertyPath(path, this) ;
-  }.property().cacheable() ;
+  }.property().cacheable().outlet();
 };
 
 /** @private on unload clear cached divs. */
