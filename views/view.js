@@ -10,8 +10,8 @@ require('foundation/application/responder') ;
 require('deprecated/node_descriptor') ;
 require('foundation/system/binding');
 require('deprecated/path_module');
-require('mixins/delegate_support') ;
-require('mixins/string') ;
+require('foundation/mixins/delegate_support') ;
+require('foundation/mixins/string') ;
 require('deprecated/animator') ;
 
 
