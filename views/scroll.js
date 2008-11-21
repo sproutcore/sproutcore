@@ -2,7 +2,7 @@
 // SC.ScrollView
 // ==========================================================================
 
-require('foundation/mixins/scrollable') ;
+require('mixins/scrollable') ;
 require('views/container') ;
 
 /** 

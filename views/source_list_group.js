@@ -3,8 +3,8 @@
 // ==========================================================================
 
 require('views/view') ;
-require('foundation/mixins/delegate_support');
-require('foundation/mixins/control') ;
+require('mixins/delegate_support');
+require('mixins/control') ;
 require('views/button/disclosure');
 
 /** @class

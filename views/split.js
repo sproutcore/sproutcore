@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/view') ;
-require('foundation/mixins/delegate_support');
+require('mixins/delegate_support');
 
 SC.HORIZONTAL = 'horizontal' ;
 SC.VERTICAL = 'vertical' ;

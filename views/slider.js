@@ -3,7 +3,7 @@
 // ==========================================================================
 
 require('views/view');
-require('foundation/mixins/control');
+require('mixins/control');
 
 /** @class
 
