@@ -3,13 +3,23 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+/*global ViewBuilder */
+
 require('views/view');
 
 /** 
-  A Designer instance is created for each view that is setup in design mode.
-  The designer is given the opportunity to handle all incoming mouse or 
-  keyboard events before it is passed onto the view itself.  This gives you
-  the ability to show custom handles, etc.
+  A Designer class provides the core editing functionality you need to edit
+  a view in the UI.  When your app loads in design.mode, a peer Designer 
+  instance is created for every view for which the class method hasDesigner
+  is YES.
+  
+  Whenever you put your app into design mode, all events will be routed first
+  to the peer designer for an object, which will have an opportunity to 
+  prosent a design UI.
+  
+  @class
+  @extends SC.Object
+  @since SproutCore 1.0
 */
 SC.View.Designer = SC.Object.extend({
 
@@ -29,6 +39,53 @@ SC.View.Designer = SC.Object.extend({
   designProperties: ['layout'],
   
   concatenatedProperties: ['designProperties'],
+  
+  /**
+    Generates the JavaScript to rebuild a view.
+  */
+  encode: function() {
+    var attrs = SC.clone(this.attributes), view =this.view ;
+    var childViews = [];
+    view.childViews.forEach(function(view) {
+      if (view.designer) childViews.push(view.designer.encode());
+    },this);
+    if (childViews.length>0) attrs.childViews = childViews ;
+    attrs = this.encodeAttributes(attrs) ;
+    return "%@.build(%@)".fmt(this.viewClass.toString(), attrs);
+  },
+  
+  encodeAttributes: function(attrs) {
+    var ret = null ;
+    switch(SC.typeOf(attrs)) {
+    case SC.T_STRING:
+      ret = attrs;
+      break ;
+    case SC.T_ARRAY:
+      ret = '[%@]'.fmt(attrs.map(function(x) { 
+        return this.encodeAttributes(x); 
+      },this).join(','));
+      break ;
+    case SC.T_HASH:
+      ret = [];
+      for(var key in attrs) {
+        if (!attrs.hasOwnProperty(key)) continue ;
+        if (key === 'rootElement') continue ;
+        if (key === 'childViews') continue ;
+        ret.push([key, this.encodeAttributes(attrs[key])].join(':')) ;
+      }
+      ret = "{%@}".fmt(ret.join(','));
+      break ;
+    case SC.T_NULL:
+      ret = 'null';
+      break;
+    case SC.T_UNDEFINED:
+      ret = 'undefined';
+      break ;
+    default:
+      ret = attrs.toString();
+    }
+    return ret ;
+  },
   
   // ......................................
   // PRIVATE METHODS
@@ -74,6 +131,11 @@ SC.View.Designer = SC.Object.extend({
     if (view) view.set(key, value) ;
   }.observes('layout'),
   
+  isSelectedDidChange: function() {
+    var isSel = this.get('isSelected');
+    this.view.$().css('outline', (isSel) ? '1px red solid' : 'none');  
+  }.observes('isSelected'),
+  
   tryToPerform: function(methodName, arg1, arg2) {
     // only handle event if we are in design mode
     var page = this.view ? this.view.get('page') : null ;
@@ -89,7 +151,7 @@ SC.View.Designer = SC.Object.extend({
   },
     
   mouseDown: function(evt) {
-    
+    ViewBuilder.masterController.select([this], (evt.altKey || evt.shiftKey));
   }
   
 }) ;

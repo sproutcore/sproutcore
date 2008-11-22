@@ -53,14 +53,14 @@ SC.mixin(SC.View.build.prototype, {
     // add designer if page is in design mode
     var page = ret.get('page');
     if (page && page.get('needsDesigner')) {
-      while(viewClass && !viewClass.Designer) {
-        viewClass = viewClass.superclass;
-      }
-      var DesignerClass = (viewClass) ? viewClass.Designer : SC.View.Designer;
+      var cur = viewClass;
+      while(cur && !viewClass.Designer) cur = cur.superclass;
+      var DesignerClass = (cur) ? cur.Designer : SC.View.Designer;
       ret.designer = DesignerClass.create({
         attributes: this.designAttrs,
         localized: this.localizedAttrs,
-        view: ret 
+        view: ret,
+        viewClass: viewClass
       });
     }
     return ret ;
