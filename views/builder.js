@@ -51,7 +51,8 @@ SC.View.build = SC.Builder.create({
   loc: function(loc) {
     var childViews = loc[childViews];
     delete loc.childViews; // clear out child views before applying to attrs
-    SC.mixin(this.attrs, loc);
+    
+    this.localizeAttributes(loc) ;
     
     // apply localization recursively to childViews
     var builders = this.attrs.childViews, idx = builders.length;
@@ -63,6 +64,43 @@ SC.View.build = SC.Builder.create({
     
     return this; // done!
   },
+
+  /**
+    Internal method actually applies localization to the local attributes.
+    This method is overloaded in design mode.
+  */
+  localizeAttributes: function(loc) {
+    return SC.mixin(this.attrs, loc);
+  },
+  
+  /**
+    Internal method called just before a view is created to prepare the
+    attributes, mixining in any final extra attrs.  This is overloaded in
+    design mode.
+  */
+  prepareAttributes: function(extra) {
+    var attrs = this.attrs ;
+    if (attrs) {
+      if (extra) SC.mixin(attrs, extra);
+    } else attrs = extra || {} ;
+    this.attrs = attrs ;
+    return attrs ;
+  },
+  
+  /**
+    Internal method to cleanup memory consumed by internal attributes.  This
+    is overloaded in design mode.
+  */
+  destroyAttributes: function() {
+    delete this.attrs;
+  },
+  
+  /** 
+    Actually creates the view.  This is overloaded by the designer.
+  */
+  createView: function(viewClass, attrs) { 
+    return viewClass.create(attrs); 
+  },
   
   /** 
     Creates a new instance of the view based on the currently loaded config.
@@ -72,15 +110,11 @@ SC.View.build = SC.Builder.create({
     if (!this.canBuild) throw "This builder has already run." ;
     this.canBuild = NO ; // do not allow another call
 
-    // apply last minute attrs
-    var attrs = this.attrs ;
-    if (attrs) {
-      if (extra) SC.mixin(attrs, extra);
-    } else attrs = extra || {} ;
-
     // create view
-    var ret = this.defaultClass.create(attrs);
-    delete this.attrs; attrs = extra = null ; // teardown
+    var attrs = this.prepareAttributes(extra);
+    var ret = this.createView(this.defaultClass, attrs);
+    this.destroyAttributes(); // teardown extra attributes
+    attrs = extra = null;
     
     // finally wake up view.
     if (ret) ret.awake();
@@ -103,15 +137,17 @@ SC.View.build = SC.Builder.create({
     }
     
     // Now add this to the attributes and create.
-    var attrs = this.attrs || {} ;
-    attrs.rootElement = root ;
-    attrs.owner = owner ;
-    attrs.parentView = parentView;
-    attrs.page = page || (parentView && parentView.page) ;
+    var attrs = this.prepareAttributes({
+      rootElement: root,
+      owner: owner,
+      parentView: parentView,
+      page: page || (parentView && parentView.page)
+    }) ;
 
     // Create the view and cleanup
-    var ret = this.defaultClass.create(attrs) ;
-    delete this.attrs; attrs = root = owner = parentView = null; // cleanup
+    var ret = this.createView(this.defaultClass, attrs);
+    this.destroyAttributes();
+    attrs = root = owner = parentView = null; // cleanup
     
     return ret ;
   }

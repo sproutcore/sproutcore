@@ -78,6 +78,20 @@ require('private/observer_set') ;
   This will call the 'targetAction' method on the targetObject to be called
   whenever the value of the propertyKey changes.
   
+  h2. Observer Parameters
+  
+  An observer function typically does not need to accept any parameters, 
+  however you can accept certain arguments when writing generic observers. 
+  An observer function can have the following arguments:
+  
+  {{{
+    propertyObserver(target, key, value, revision) ;
+  }}}
+  
+  - *target* - This is the object whose value changed.  Usually this.
+  - *key* - The key of the value that changed
+  - *value* - this property is no longer used.  It will always be null
+  - *revision* - this is the revision of the target object
   
   h2. Implementing Manual Change Notifications
   

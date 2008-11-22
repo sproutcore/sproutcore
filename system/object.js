@@ -439,6 +439,10 @@ SC.mixin(SC.Object.prototype, SC.Observable) ;
 */
 SC.mixin({
 
+  /** @private
+    Augments the base object with the added property hashes.  This will also
+    register observers and computed properties.
+  */
   __object_extend: function(base, ext) {
     if (!ext) return base; // nothing to do
     
