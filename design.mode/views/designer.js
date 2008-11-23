@@ -39,54 +39,7 @@ SC.View.Designer = SC.Object.extend({
   designProperties: ['layout'],
   
   concatenatedProperties: ['designProperties'],
-  
-  /**
-    Generates the JavaScript to rebuild a view.
-  */
-  encode: function() {
-    var attrs = SC.clone(this.attributes), view =this.view ;
-    var childViews = [];
-    view.childViews.forEach(function(view) {
-      if (view.designer) childViews.push(view.designer.encode());
-    },this);
-    if (childViews.length>0) attrs.childViews = childViews ;
-    attrs = this.encodeAttributes(attrs) ;
-    return "%@.build(%@)".fmt(this.viewClass.toString(), attrs);
-  },
-  
-  encodeAttributes: function(attrs) {
-    var ret = null ;
-    switch(SC.typeOf(attrs)) {
-    case SC.T_STRING:
-      ret = attrs;
-      break ;
-    case SC.T_ARRAY:
-      ret = '[%@]'.fmt(attrs.map(function(x) { 
-        return this.encodeAttributes(x); 
-      },this).join(','));
-      break ;
-    case SC.T_HASH:
-      ret = [];
-      for(var key in attrs) {
-        if (!attrs.hasOwnProperty(key)) continue ;
-        if (key === 'rootElement') continue ;
-        if (key === 'childViews') continue ;
-        ret.push([key, this.encodeAttributes(attrs[key])].join(':')) ;
-      }
-      ret = "{%@}".fmt(ret.join(','));
-      break ;
-    case SC.T_NULL:
-      ret = 'null';
-      break;
-    case SC.T_UNDEFINED:
-      ret = 'undefined';
-      break ;
-    default:
-      ret = attrs.toString();
-    }
-    return ret ;
-  },
-  
+    
   // ......................................
   // PRIVATE METHODS
   //

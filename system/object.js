@@ -152,7 +152,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   },
   
   /**
-    Alway YES since this is a class.
+    Always YES since this is a class.
   */
   isClass: YES,
   
@@ -579,7 +579,7 @@ SC.mixin({
 
     // if no direct classname was found, walk up class chain looking for a 
     // match.
-    var ret = this ;
+    var ret = obj ;
     while(ret && !ret.__className) ret = ret.superclass; 
     return (ret && ret.__className) ? ret.__className : 'Anonymous';
   },

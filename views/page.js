@@ -16,7 +16,7 @@ SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
   
   get: function(key) {
     var value = this[key] ;
-    if (value && value.isViewBuilder) {
+    if (value && value.isClass) {
       this[key] = value = value.create({ page: this }) ;
       return value ;
     } else return sc_super() ;

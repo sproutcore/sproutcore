@@ -377,20 +377,40 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     - register the view with the global views hash, which is used for mgmt
   */
   init: function() {
+    var parentView, path, root, idx, len, dp;
+    
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
-    this.configureChildViews() ; // setup child Views
     
     // if no rootElement is provided, generate the display HTML for the view.
-    if (!this.rootElement) this.prepareDisplay();
+    if (!this.rootElement) {
+      
+      // if a rootElementPath is provided and we have a parentView with HTML
+      // already, try to find the rootElement in that template.  Otherwise,
+      // generate the HTML ourselves...
+      parentView = this.get('parentView');
+      path = this.rootElementPath;
+      root = (parentView) ? parentView.rootElement : null;      
+      if (parentView && path && root) {
+        idx=0; 
+        len = path.length;
+        while(root && idx<len) root = root.childNodes[path[idx++]];
+        if (root) this.rootElement = root;
+        
+      } else this.prepareDisplay();
+      parentView = path = root = null;
+    }
 
     // save this guid on the DOM element for reverse lookups.
     if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
+
+    this.createChildViews() ; // setup child Views
     
     // register display property observers .. this could be optimized into the
     // class creation mechanism if local observers did not require explicit 
     // setup.
-    var dp = this.get('displayProperties'), idx = dp.length;
+    dp = this.get('displayProperties'); 
+    idx = dp.length;
     while(--idx >= 0) {
       this.addObserver(dp[idx], this, this.displayDidChange);
     }
@@ -463,15 +483,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /** 
-    This method will step through the childViews looking for any builder 
-    objects.  The builders will be executed to setup the childViews and add 
-    them to the parent view automatically.  If the parentView already has a 
-    rootElement, the childViews will expect to find their HTML already in the
-    DOM.
+    Steps through your childViews array looking for any view classes.  If any
+    are found, it will instantiate them for you.  If you would like to allow
+    child views to be held in properties other than the childViews array, you
+    can override this method to create those as well.  Note that when you 
+    create a childView, you should use the createChildView() method instead 
+    of calling create() directly on the child view.
 
-    @returns {void}
+    @returns {SC.View} receiver
   */
-  configureChildViews: function() {
+  createChildViews: function() {
     var childViews = this.get('childViews');
     var views, loc, view ;
 
@@ -482,17 +503,46 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     views = [];
     while(--loc >= 0) {
       view = childViews[loc] ;
-      
-      // if builder, run the builder...
-      if (view && view.isViewBuilder) {
-        view = view.createChildView(this, this) ;
+      if (view && view.isClass) {
+        view = this.createChildView(view) ; // instantiate if needed
       }
-      views[loc] = view; // save view value
-      
+      views[loc] =view ;
     }
     if (views) this.set('childViews', views) ;
     
     this.endPropertyChanges();
+    return this ;
+  },
+  
+  /**
+    Instantiates a view to be added to the childViews array during view 
+    initialization.  You generally will not call this method directly unless
+    you are overriding createChildViews().  Note that this method will 
+    automatically configure the correct settings on the new view instance 
+    to act as a child of the parent.
+    
+    @param {Class} viewClass
+    @param {Hash} attrs optional attributes to add
+    @returns {SC.View} new instance
+  */
+  createChildView: function(view, attrs) {
+    // attrs should always exist...
+    if (!attrs) attrs = {} ;
+    
+    // try to find a matching DOM element by tracing the path
+    var root = this.rootElement ;
+    var path = view.prototype.rootElementPath || attrs.rootElementPath;
+    var idx=0, len = (path) ? path.length : 0 ;
+    while((idx<len) && root) root = root.childNodes[path[idx++]];
+
+    if (root) attrs.rootElement = root ;
+    attrs.owner = attrs.parentView = this ;
+    if (!attrs.page) attrs.page = this.page ;
+    
+    // Now add this to the attributes and create.
+    view = view.create(attrs) ;
+    root = attrs = path = null  ; // clean up
+    return view ;
   },
   
   /**
@@ -568,6 +618,31 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   containerElement: null,
   
   emptyElement: '<div class="sc-view"></div>',
+  
+  /**
+    Dumps the HTML needs for the emptyElement when restoring this view 
+    hierarchy later.  This is mostly used by the view builder but may be
+    useful at other times.
+  */
+  computeEmptyElement: function() {
+    var root = this.rootElement ;
+    if (!root) return '' ;
+    
+    // if rootElement is in parent, remove from parent so we can place in our
+    // own div.
+    var parentNode = root.parentNode, next = root.nextSibling ;
+    if (parentNode) parentNode.removeChild(root) ;
+    
+    var b = SC.$('<div></div>').append(root) ;
+    var ret = b.html(); // get innerHTML
+
+    if (parentNode) {
+      parentNode.insertBefore(root, next) ;
+    } else SC.$(root).remove() ;
+    
+    b = root = parentNode = next = null ; // avoid memory leaks
+    return ret ; // return string
+  },
   
   /** 
     This method is invoked whenever the display state of the view has changed.
@@ -1003,6 +1078,52 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
 SC.View.mixin(/** @scope SC.View @static */ {
 
+  /** 
+    This method works just like extend() except that it will also preserve
+    the passed attributes in case you want to use a view builder later, if 
+    needed.
+    
+    @param {Hash} attrs Attributes to add to view
+    @returns {Class} SC.View subclass to create
+    @function
+  */ 
+  design: SC.View.extend,
+
+  /**
+    Applies the passed localization hash to the component views.  Call this
+    method before you call create().  Returns the receiver.  Typically you
+    will do something like this:
+    
+    view = SC.View.design({...}).loc(localizationHash).create();
+    
+    @param {Hash} loc 
+    @returns {SC.View} receiver
+  */
+  loc: function(loc) {
+    var childLocs = loc.childViews;
+    delete loc.childViews; // clear out child views before applying to attrs
+    
+    this.applyLocalizedAttributes(loc) ;
+    
+    // apply localization recursively to childViews
+    var childViews = this.prototype.childViews, idx = childViews.length;
+    while(--idx>=0) {
+      var viewClass = childViews[idx];
+      loc = childLocs[idx];
+      if (loc && viewClass && viewClass.loc) viewClass.loc(loc) ;
+    }
+    
+    return this; // done!
+  },
+  
+  /**
+    Internal method actually updates the localizated attributes on the view
+    class.  This is overloaded in design mode to also save the attributes.
+  */
+  applyLocalizedAttributes: function(loc) {
+    SC.mixin(this.prototype, loc) ;
+  },
+  
   views: {},
   
   /**
@@ -1073,9 +1194,9 @@ SC.View.mixin(/** @scope SC.View @static */ {
   used for the path will be the receiver.
 */
 SC.outlet = function(path) {
-  return function() {
-    return SC.objectForPropertyPath(path, this) ;
-  }.property().cacheable().outlet();
+  return function(key) {
+    return (this[key] =  SC.objectForPropertyPath(path, this)) ;
+  }.property().outlet();
 };
 
 /** @private on unload clear cached divs. */
