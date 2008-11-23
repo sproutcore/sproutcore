@@ -381,6 +381,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
+    this.createChildViews() ; // setup child Views
     
     // if no rootElement is provided, generate the display HTML for the view.
     if (!this.rootElement) {
@@ -403,8 +404,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // save this guid on the DOM element for reverse lookups.
     if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
-
-    this.createChildViews() ; // setup child Views
     
     // register display property observers .. this could be optimized into the
     // class creation mechanism if local observers did not require explicit 
@@ -1089,6 +1088,24 @@ SC.View.mixin(/** @scope SC.View @static */ {
   */ 
   design: SC.View.extend,
 
+  /**
+    Creates a view instance, first finding the DOM element you name and then
+    using that as the root element.  You should not use this method very 
+    often, but it is sometimes useful if you want to attach to already 
+    existing HTML.
+    
+    @param {String|Element} element
+    @param {Hash} attrs
+    @returns {SC.View} instance
+  */
+  viewFor: function(element, attrs) {
+    var args = SC.$A(arguments); // prepare to edit
+    args[0] = { rootElement: SC.$(element).get(0) } ;
+    var ret = this.create.apply(this, arguments) ;
+    args = args[0] = null;
+    return ret ;
+  },
+    
   /**
     Applies the passed localization hash to the component views.  Call this
     method before you call create().  Returns the receiver.  Typically you
