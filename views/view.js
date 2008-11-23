@@ -1100,7 +1100,9 @@ SC.View.mixin(/** @scope SC.View @static */ {
   */
   viewFor: function(element, attrs) {
     var args = SC.$A(arguments); // prepare to edit
-    args[0] = { rootElement: SC.$(element).get(0) } ;
+    if (SC.none(element)) {
+      args.shift(); // remove if no element passed
+    } else args[0] = { rootElement: SC.$(element).get(0) } ;
     var ret = this.create.apply(this, arguments) ;
     args = args[0] = null;
     return ret ;
