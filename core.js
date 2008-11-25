@@ -400,6 +400,34 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
+    Returns all of the keys defined on an object or hash.  This is useful
+    when inspecting objects for debugging.
+    
+    @param {Object} obj
+    @returns {Array} array of keys
+  */
+  keys: function(obj) {
+    var ret = [];
+    for(var key in obj) ret.push(key);
+    return ret;
+  },
+  
+  /**
+    Returns all of the values defined on an object, hash, or array.  This is
+    a useful way to quickly extract the values from an array.  If the item
+    you pass is array-like, the item itself will be returned.
+    
+    @param {Object} obj
+    @returns {SC.Array} iterable object
+  */
+  values: function(obj) {
+    if (SC.isArray(obj)) return obj;
+    var ret = [];
+    for(var key in obj) ret.push(obj[key]) ;
+    return ret ;
+  },
+  
+  /**
     Convenience method to inspect an object.  This method will attempt to 
     convert the object into a useful string description.
   */
@@ -773,9 +801,9 @@ SC.mixin(Function.prototype,
     
     // sort property paths into local paths (i.e just a property name) and
     // full paths (i.e. those with a . or * in them)
-    var loc = arguments.length;
+    var loc = arguments.length, local = null, paths = null;
     while(--loc >= 0) {
-      var path = arguments[loc], paths = null, local = null;
+      var path = arguments[loc] ;
       // local
       if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
         if (!local) local = this.localPropertyPaths = [];
