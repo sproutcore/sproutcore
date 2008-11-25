@@ -256,7 +256,7 @@ SC.Object.prototype = {
     this.initObservable();
     
     // Call 'initMixin' methods to automatically setup modules.
-    var idx, inits = this.__initMixins, len = (inits) ? inits.length : 0 ;
+    var idx, inits = this.initMixin, len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
     
     return this ;
@@ -422,7 +422,7 @@ SC.Object.prototype = {
     
     @property
   */
-  concatenatedProperties: ['concatenatedProperties']  
+  concatenatedProperties: ['concatenatedProperties', 'initMixin']  
 
 } ;
 
@@ -450,7 +450,7 @@ SC.mixin({
     base._kvo_cloned = null;
     
     // get some common vars
-    var key, idx, len, cur, cprops = base.concatenatedProperties, k = SC.K ;
+    var key, idx, len, cur, cprops = base.concatenatedProperties, K = SC.K ;
     var p1,p2;
     
     // first, save any concat props.  use old or new array or concat
@@ -458,7 +458,14 @@ SC.mixin({
     var concats = (idx>0) ? {} : null;
     while(--idx>=0) {
       key = cprops[idx]; p1 = base[key]; p2 = ext[key];
-      concats[key] = (p1 && p2) ? Array.from(p1).concat(p2) : (p1 || p2) ;
+
+      if (p1) {
+        if (!(p1 instanceof Array)) p1 = SC.$A(p1);
+        concats[key] = (p2) ? p1.concat(p2) : p2 ;
+      } else {
+        if (!(p2 instanceof Array)) p2 = SC.$A(p2);
+        concats[key] = p2 ;
+      }
     }
 
     // setup arrays for bindings, observers, and properties.  Normally, just
@@ -467,8 +474,7 @@ SC.mixin({
     var bindings = base._bindings, clonedBindings = NO;
     var observers = base._observers, clonedObservers = NO;
     var properties = base._properties, clonedProperties = NO;
-    var initMixins = base.__initMixins, clonedInitMixins = NO ;
-    var paths, pathLoc ;
+    var paths, pathLoc, local ;
 
     // outlets are treated a little differently because you can manually 
     // name outlets in the passed in hash. If this is the case, then clone
@@ -506,7 +512,7 @@ SC.mixin({
         // add super to funcs.  Be sure not to set the base of a func to 
         // itself to avoid infinite loops.
         if (!value.superclass && (value !== (cur=base[key]))) {
-          value.superclass = value.base = cur || k;
+          value.superclass = value.base = cur || K;
         }
 
         // handle regular observers
@@ -521,8 +527,8 @@ SC.mixin({
         } else if (paths = value.localPropertyPaths) {
           pathLoc = paths.length;
           while(--pathLoc >= 0) {
-            paths = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.Set);
-            paths.add(key);
+            local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.Set);
+            local.add(key);
           }
           
         // handle computed properties
@@ -539,15 +545,7 @@ SC.mixin({
             outlets = (outlets || SC.A).slice();
             clonedOutlets = YES ;
           }
-          outlets[outlets.length] = key ;
-          
-        // save initMixins in array
-        } else if (key === 'initMixin') {
-          if (!clonedInitMixins) {
-            initMixins = (initMixins || SC.A).slice() ;
-            clonedInitMixins = YES ;
-          }
-          initMixins[initMixins.length] = value ;
+          outlets[outlets.length] = key ;          
         }
       }
 
@@ -559,7 +557,6 @@ SC.mixin({
     base._bindings = bindings || [];
     base._observers = observers || [] ;
     base._properties = properties || [] ;
-    base.__initMixins = initMixins || [] ;
     base.outlets = outlets || [];
 
     // toString is usually skipped.  Don't do that!
