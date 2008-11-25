@@ -9,6 +9,10 @@ require('mixins/delegate_support');
 require('views/inline_text_field');
 require('mixins/inline_editor_delegate');
 
+SC.ALIGN_LEFT = 'left';
+SC.ALIGN_RIGHT = 'right';
+SC.ALIGN_CENTER = 'center';
+
 /**
   @class
   
@@ -27,7 +31,7 @@ require('mixins/inline_editor_delegate');
 SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.LabelView.prototype */ {
 
-  emptyElement: '<span class="sc-label-view"></span>',
+  styleClass: ['sc-label-view'],
 
   /**
     If true, value will be escaped to avoid scripting attacks.
@@ -66,6 +70,11 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
   value: '',
   
   /**
+    Set the alignment of the label view.
+  */
+  textAlign: SC.ALIGN_LEFT,
+  
+  /**
     [RO] The value that will actually be displayed.
     
     This property is dynamically computed by applying localization, 
@@ -80,7 +89,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
     if (formatter) {
       var formattedValue = (SC.typeOf(formatter) === SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
-      if (formattedValue != null) value = formattedValue ;
+      if (!SC.none(formattedValue)) value = formattedValue ;
     }
     
     // 2. If the returned value is an array, convert items to strings and 
@@ -89,14 +98,14 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
       var ary = [];
       for(var idx=0;idx<value.get('length');idx++) {
         var x = value.objectAt(idx) ;
-        if (x != null && x.toString) x = x.toString() ;
+        if (!SC.none(x) && x.toString) x = x.toString() ;
         ary.push(x) ;
       }
       value = ary.join(',') ;
     }
     
     // 3. If value is not a string, convert to string. (handles 0)
-    if (value != null && value.toString) value = value.toString() ;
+    if (!SC.none(value) && value.toString) value = value.toString() ;
     
     // 4. Localize
     if (value && this.getDelegateProperty(this.displayDelegate, 'localize')) value = value.loc() ;
@@ -211,7 +220,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     this.set('isEditing', NO) ;
   },
 
-  displayProperties: ['displayValue'],
+  displayProperties: ['displayValue', 'textAlign'],
   
   updateDisplay: function() {
     var ret = sc_super();
@@ -219,6 +228,10 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
       this.$().text(value || '');
     } else this.$().html(value || '') ;
+    
+    var textAlign = this.get('textAlign');
+    if (textAlign) this.$().css('text-align', textAlign) ;
+    
     return ret ;
   },
   

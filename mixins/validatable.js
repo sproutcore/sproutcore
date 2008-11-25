@@ -13,7 +13,7 @@
 SC.Validatable = {
   
   initMixin: function() {
-    this._validatorObserver() ;
+    this._validatable_validatorDidChange() ;
   },
   
   /**
@@ -45,7 +45,7 @@ SC.Validatable = {
     @field
   */
   isValid: function() { 
-    return SC.$type(this.get('value')) != SC.T_ERROR; 
+    return SC.$type(this.get('value')) !== SC.T_ERROR; 
   }.property('value'),
   
   /**
@@ -139,7 +139,7 @@ SC.Validatable = {
   }.observes('isValid'),
   
   // invoked whenever the attached validator changes.
-  _validatorObserver: function() {
+  _validatable_validatorDidChange: function() {
     var form = this.get('ownerForm') ;
     var val = SC.Validator.findFor(form, this, this.get('validator')) ;
     if (val != this._validator) {

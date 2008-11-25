@@ -3,6 +3,8 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+require('system/binding');
+
 /**
   Indicates a value has a mixed state of both on and off.
 */
@@ -62,7 +64,7 @@ SC.MIXED_STATE = '__MIXED__' ;
 SC.Control = {
   
   initMixin: function() {
-    this._contentDidChange(); // setup content observing if needed.
+    this._control_contentDidChange(); // setup content observing if needed.
   },
   
   /** 
@@ -178,7 +180,53 @@ SC.Control = {
     content.set(this._contentValueKey, value) ;
     
   }.observes('value'),
+
+  /**
+    The name of the property this control should display if it is part of an
+    SC.FormView.
   
+    If you add a control as part of an SC.FormView, then the form view will 
+    automatically bind the value to the property key you name here on the 
+    content object.
+    
+    @property {String}
+  */
+  fieldKey: null,
+  
+  /**
+    The human readable label you want shown for errors.  May be a loc string.
+  
+    If your field fails validation, then this is the name that will be shown
+    in the error explanation.  If you do not set this property, then the 
+    fieldKey or the class name will be used to generate a human readable name.
+    
+    @property {String}
+  */  
+  fieldLabel: null,
+  
+  /**
+    The human readable label for this control for use in error strings.  This
+    property is computed dynamically using the following rules:
+    
+    # If the fieldLabel is defined, that property is localized and returned.
+    # Otherwise, if the keyField is defined, try to localize using the string "ErrorLabel.{fieldKeyName}".  If a localized name cannot be found, use a humanized form of the fieldKey.
+    # Try to localize using the string "ErrorLabel.{ClassName}"
+    # Return a humanized form of the class name.
+    
+    @property {String}
+  */  
+  errorLabel: function() {
+    var ret, fk, def ;
+    if (ret = this.get('fieldLabel')) return ret ;
+    
+    // if field label is not provided, compute something...
+    fk = this.get('fieldKey') || this.constructor.toString() ;
+    def = (fk || '').humanize().capitalize() ;
+    return "ErrorLabel.%@".fmt(fk)
+      .locWithDefault("FieldKey.%@".fmt(fk).locWithDefault(def)) ;
+      
+  }.property('fieldLabel','fieldKey').cacheable(),
+
   /**
     Default observer for selected state changes
     
@@ -188,39 +236,56 @@ SC.Control = {
   */
   controlDisplayObserver: function() {
     this.displayDidChange();
-  }.observes('isSelected', 'isEnabled', 'isFirstResponder'),
+    console.log('controlDisplayObserver');
+  }.observes('isEnabled', 'isSelected', 'isFirstResponder'),
   
+  /**
+    Set to YES if your control HTML has input elements.  This will cause the
+    updateControlDisplay code to find your input elements and update their 
+    state when needed.
+    
+    @property {Boolean}
+  */
+  hasInputElements: NO,
+
   /**
     Invoke this method in your updateDisplay() method to update any basic control CSS classes.
   */
-  updateControlDisplay: function() {
+  updateDisplayMixin: function() {
     var sel = this.get('isSelected'), disabled = !this.get('isEnabled');
+    
+    // update the CSS classes for the control
     this.$().setClass('mixed', sel === SC.MIXED_STATE)
       .setClass('sel', sel && (sel !== SC.MIXED_STATE))
       .setClass('disabled', disabled)
       .setClass('focus', this.get('isFirstResponder'));
+
+      console.log('updateDisplay');
+
       
-    if (this.rootElement && this.rootElement.disabled !== undefined) {
-      this.$().attr('disabled', disabled) ;
+    // if the control also hasInputElements, fix them up as well.
+    if (this.get('hasInputElements')) {
+      this.$('input').andSelf().filter('input')
+        .attr('disabled', disabled).attr('checked', !!sel);
     }
   },
 
   // This should be null so that if content is also null, the
   // _contentDidChange won't do anything on init.
-  _content: null,
+  _control_content: null,
   
   /** @private
     Observes when a content object has changed and handles notifying 
     changes to the value of the content object.
   */
-  _contentDidChange: function() {
+  _control_contentDidChange: function() {
     var content = this.get('content') ;
-    if (this._content == content) return; // nothing changed
+    if (this._control_content == content) return; // nothing changed
     
     var f = this.contentPropertyDidChange ;
 
     // remove an observer from the old content if necessary
-    if (this._content && this._content.removeObserver) {
+    if (this._content && this._control_content.removeObserver) {
       this._content.removeObserver('*', this, f) ;
     }
 

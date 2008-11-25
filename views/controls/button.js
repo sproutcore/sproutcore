@@ -3,6 +3,8 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
+/*jslint evil:true */
+
 require('views/view') ;
 require('mixins/control') ;
 
@@ -24,7 +26,9 @@ SC.TOGGLE_OFF_BEHAVIOR = "off" ;
 SC.ButtonView = SC.View.extend(SC.Control,
 /** @scope SC.ButtonView.prototype */ {
   
-  emptyElement: '<a href="javascript:;" class="sc-view sc-button-view regular"><span class="sc-button-inner button-inner"><span class="sc-button-label label"></span></span></a>',                                                                                                                                                                                                                                                                                     
+  emptyElement: '<a href="javascript:;" role="button"><span class="sc-button-inner button-inner"><span class="sc-button-label label"></span></span></a>',                                                                                                                                                                                                                                                                                     
+  
+  styleClass: ['sc-button-view'],
   
   // PROPERTIES
   
@@ -166,13 +170,12 @@ SC.ButtonView = SC.View.extend(SC.Control,
     
     // set the href on the element
     var href = this.get('href');
-    if (!href || (href.length === 0)) href = "javascript:;";
+    if (!href || (href.length === 0)) href = "javascript"+":;";
     if (this.get('href') !== this._display_href) {
       this._display_href = href ;
       this.$().attr('href', href);
     }
 
-    this.updateControlDisplay();
     this.$().setClass('active',this.get('isActive'))
       .setClass('def', this.get('isDefault'))
       .setClass('cancel', this.get('isCancel'));

@@ -22,6 +22,9 @@ SC.DISPLAY_LAYOUT_QUEUE   = 'updateDisplayLayoutIfNeeded';
 /** @private */
 SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
 
+/** @private Properties that require the empty element to be recached. */
+SC.EMPTY_ELEMENT_PROPERTIES = 'emptyElement tagName styleClass'.w();
+
 /** 
   @class
   
@@ -53,7 +56,7 @@ SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: ['outlets','displayProperties'],
+  concatenatedProperties: ['outlets','displayProperties', 'styleClass', 'updateDisplayMixin', 'prepareDisplayMixin'],
   
   /** 
     The current pane. 
@@ -165,6 +168,19 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return this ;
   },
   
+  /**
+    Removes all children from the parentView.  
+    
+    @returns {SC.View} receiver 
+  */
+  removeAllChildren: function() {
+    var childViews = this.get('childViews'), view ;
+    while(view = childViews.objectAt(childViews.get('length')-1)) {
+      this.removeChild(view) ;
+    }
+    return this ;
+  },
+  
   /** 
     Removes the view from its parentView, if one is found.  Otherwise
     does nothing.
@@ -259,7 +275,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // parents...
     var parentView = this.get('parentView') ;
-    var parentNode = (parentView) ? (parentView.get('containerElement') || parentView.rootElement) : null ;
+    var parentNode = (parentView) ? parentView.$container().get(0) : null ;
     
     
     // if we should belong to a parent, make sure we are added to the right
@@ -381,6 +397,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
+    
+    // setup child views.  be sure to clone the child views array first
+    this.childViews = this.childViews ? this.childViews.slice() : [];
     this.createChildViews() ; // setup child Views
     
     // if no rootElement is provided, generate the display HTML for the view.
@@ -473,7 +492,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     delete SC.View.views[SC.guidFor(this)];
 
     // can cleanup rootElement and containerElement (if set)
-    delete this.rootElement; delete this.containerElement; delete this._CQ;
+    delete this.rootElement; delete this._CQ;
     delete this.page;
     
     // mark as destroyed so we don't do this again
@@ -496,18 +515,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var views, loc, view ;
 
     this.beginPropertyChanges() ;
-    
-    // build a new array of child views to replace the old one
+
+    // swap the array
     loc = (childViews) ? childViews.length : 0 ;
-    views = [];
     while(--loc >= 0) {
       view = childViews[loc] ;
       if (view && view.isClass) {
         view = this.createChildView(view) ; // instantiate if needed
       }
-      views[loc] =view ;
+      childViews[loc] =view ;
     }
-    if (views) this.set('childViews', views) ;
     
     this.endPropertyChanges();
     return this ;
@@ -559,26 +576,35 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     insert any childViews DOM elements into the rootElement.
   */
   prepareDisplay: function() {
-    var root, element, html ;
+    var root, element, html, con =this.constructor, cq, styleClass ;
     
     // if emptyElement is not overridden by the instance, then use a cached
     // DOM from the class.  Note that we don't use get() in the test below 
     // because we are interested in comparing the actual value of the 
     // property, not the output.
-    if (this.emptyElement === this.constructor.prototype.emptyElement) {
-      if (!this._cachedEmptyElement || (this._emptyElementCachedForClassGuid !== SC.guidFor(this.constructor))) {
-        html = this.get('emptyElement');
-        this.constructor.prototype._cachedEmptyElement = SC.$(html).get(0);         this.constructor.prototype._emptyElementCachedForClassGuid = SC.guidFor(this.constructor) ;
+    var differs = SC.EMPTY_ELEMENT_PROPERTIES.find(function(k){
+      return this[k] !== this.constructor.prototype[k];
+    },this);    
+    
+    if (!differs) {
+      if (!this._cachedEmptyElement || (this._emptyElementCachedForClassGuid !== SC.guidFor(con))) {
+        styleClass = this.get('styleClass').join(' ');
+        html = this.get('emptyElement').fmt(this.get('tagName'));
+        cq = SC.$(html).addClass(styleClass);
+        con.prototype._cachedEmptyElement = cq.get(0);        
+        con.prototype._emptyElementCachedForClassGuid = SC.guidFor(con) ;
       }
+
       root = this._cachedEmptyElement.cloneNode(true);
       
     // otherwise, we can't cache the DOM because it is overridden by instance
     } else {
-      html = this.get('emptyElement');
-      root = SC.$(html).get(0) ;
+      styleClass = this.get('styleClass').join(' ');
+      html = this.get('emptyElement').fmt(this.get('tagName'));
+      root = SC.$(html).addClass(styleClass).get(0);
     }
     this.rootElement = root ;
-    
+
     // save this guid on the DOM element for reverse lookups.
     if (root) root[SC.viewKey] = SC.guidFor(this) ;
     
@@ -587,7 +613,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // now add DOM for child views if needed.
     // get the containerElement or use rootElement -- append to this
-    var container = this.get('containerElement') || this.rootElement ;
+    var container = this.$container().get(0);
     var idx, childViews = this.get('childViews'), max = childViews.length;
     for(idx=0;idx<max;idx++) {
       element = childViews[idx].rootElement;
@@ -596,6 +622,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // clear out some local variables that hold DOM to avoid memory leaks
     root = container = element = null; 
+
+    var mixins = this.prepareDisplayMixin, len = (mixins) ? mixins.length : 0;
+    for(idx=0;idx<len;idx++) mixins[idx].call(this);
   },
   
   /** 
@@ -614,9 +643,46 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     } else return SC.$(selector, (context || this.rootElement)) ;
   },
   
-  containerElement: null,
+  /**
+    Returns a CoreQuery object that selects the elements starting with the 
+    view's containerElement.  You can pass a selector to this or pass no 
+    parameters to get a CQ object that selects the view's containerElement.
+    
+    For many views, their container element and root element are the same.  This means that calling view.$() and view.$container() will yield the same results.  However, if the view has a containerSelector property set, then the container will differ.
+  */
+  $container: function(selector, context) {
+    var sel = this.get('containerSelector') ;
+    if (arguments.length === 0) {
+      return (sel) ? this.$(sel) : this.$() ;
+    } else {
+      return (sel) ? this.$(selector, context || this.$(sel).get(0)) : this.$(selector,context);
+    }
+  },
+
+  /**
+    If you want elements inserted anywhere other than the rootElement of your
+    view, you should name a selector to find the matching elements here.
+  */
+  containerSelector: null,
+
+  /**
+    Describe the template HTML for new elements.  This will be used to create 
+    new HTML when you generate your view programatically.
+  */
+  emptyElement: '<%@1></%@1>',
   
-  emptyElement: '<div class="sc-view"></div>',
+  /**
+    Optional tag name for the emptyElement.  Use %@1 in your empty element
+    string to replace with the tag name.
+  */
+  tagName: 'div',
+  
+  /** 
+    Optional css class name to add to the root element of the view when it 
+    is first generated.  Use this property to bind the output HTML to some 
+    CSS.
+  */
+  styleClass: ['sc-view'],
   
   /**
     Dumps the HTML needs for the emptyElement when restoring this view 
@@ -657,7 +723,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateDisplay: function() {
-    
+    var mixins = this.updateDisplayMixin, len = (mixins) ? mixins.length : 0;
+    for(var idx=0;idx<len;idx++) mixins[idx].call(this);
   },
 
   /** 

@@ -2,7 +2,7 @@
 // SC.CheckboxView
 // ==========================================================================
 
-require('views/button/button');
+require('views/controls/button');
 
 /** @class
 

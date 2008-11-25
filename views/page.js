@@ -18,6 +18,7 @@ SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
     var value = this[key] ;
     if (value && value.isClass) {
       this[key] = value = value.create({ page: this }) ;
+      value.awake() ;
       return value ;
     } else return sc_super() ;
   },
