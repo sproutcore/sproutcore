@@ -13,6 +13,9 @@ SC.ALIGN_LEFT = 'left';
 SC.ALIGN_RIGHT = 'right';
 SC.ALIGN_CENTER = 'center';
 
+SC.REGULAR_FONT = 'normal';
+SC.BOLD_FONT = 'bold';
+
 /**
   @class
   
@@ -33,6 +36,11 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
 
   styleClass: ['sc-label-view'],
 
+  /**
+    Specify the font weight for this.  You may pass SC.REGULAR_FONT, or SC.BOLD_FONT.
+  */
+  fontWeight: SC.REGULAR_FONT,
+  
   /**
     If true, value will be escaped to avoid scripting attacks.
     
@@ -68,6 +76,12 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     @field {String}
   */
   value: '',
+  
+  /**
+    An optional icon to display to the left of the label.  Set this value
+    to either a CSS class name (for spriting) or an image URL.
+  */
+  icon: null,
   
   /**
     Set the alignment of the label view.
@@ -220,17 +234,31 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     this.set('isEditing', NO) ;
   },
 
-  displayProperties: ['displayValue', 'textAlign'],
+  displayProperties: ['displayValue', 'textAlign', 'fontWeight', 'icon'],
   
   updateDisplay: function() {
     var ret = sc_super();
     var value = this.get('displayValue');
-    if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
-      this.$().text(value || '');
-    } else this.$().html(value || '') ;
+    var icon = this.get('icon') ;
+    if ((icon !== this._label_lastIcon) || (value !== this._label_lastDisplayValue)) {
+
+      this._label_lastDisplayValue = value ;
+      this._label_lastIcon = icon ;
+      if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
+        this.$().text(value || '');
+      } else this.$().html(value || '') ;
+
+      // insert an icon img if needed.
+      if (icon) {
+        var url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+        var className = (url === icon) ? '' : icon ;
+        icon = SC.$('<img src="%@" alt="" class="icon %@" />'.fmt(url, className)) ;
+        this.$().prepend(icon) ;
+      }
+    }
     
-    var textAlign = this.get('textAlign');
-    if (textAlign) this.$().css('text-align', textAlign) ;
+    
+    this.$().css('text-align', this.get('textAlign')).css('font-weight', this.get('fontWeight'));
     
     return ret ;
   },

@@ -96,6 +96,8 @@ SC.mixin({
       }
     }
 
+    SC.Benchmark.start('ready') ;
+    
     // Begin runloop
     SC.runLoop.beginRunLoop();
     
@@ -122,6 +124,9 @@ SC.mixin({
     
     // end run loop.  This is probably where a lot of bindings will trigger
     SC.runLoop.endRunLoop() ; 
+    
+    SC.Benchmark.end('ready') ;
+    SC.Benchmark.log();
   },
   
   /** 

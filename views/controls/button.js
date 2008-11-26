@@ -7,6 +7,8 @@
 
 require('views/view') ;
 require('mixins/control') ;
+require('mixins/delegate_support');
+require('mixins/button');
 
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';
@@ -16,67 +18,22 @@ SC.TOGGLE_OFF_BEHAVIOR = "off" ;
 
 /** @class
 
-  A button handles simple link functions.  It can be set to a selected,
-  enabled or disabled state.
+  Implements a push-button-style button.  This class is used to implement 
+  both standard push buttons and tab-style controls.  See also SC.CheckboxView
+  and SC.RadioView which are implemented as field views, but can also be 
+  treated as buttons.
   
   @extends SC.View
   @extends SC.Control
+  @extends SC.Button
   @since SproutCore 1.0  
 */
-SC.ButtonView = SC.View.extend(SC.Control,
+SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
 /** @scope SC.ButtonView.prototype */ {
   
-  emptyElement: '<a href="javascript:;" role="button"><span class="sc-button-inner button-inner"><span class="sc-button-label label"></span></span></a>',                                                                                                                                                                                                                                                                                     
-  
+  emptyElement: '<%@1 role="button"><span class="sc-button-inner"><label class="sc-button-label"></label></span></%@1>',                                                                                                                                                                                                                                                                                     
+  tagName: 'a',
   styleClass: ['sc-button-view'],
-  
-  // PROPERTIES
-  
-  /**
-    Used to automatically update the state of the button view for toggle style
-    buttons.
-    
-    for toggle style buttons, you can set the value and it will be used to
-    automatically update the state of the button view.  The value will also
-    change as the user selects to deselects.  The button will make its best
-    effort to convert this value into a reasonable selection state:
-  
-    null, false, 0 -> isSelected = false
-    any other single value -> isSelected = true
-    array -> if all values are the same state: that state.  otherwise MIXED.
-    
-    @type Object
-
-  */  
-  value: false,
-  
-  /**
-    Value of a selected toggle button.
-  
-    for a toggle button, set this to any object value you want.  The button
-    will be selected if the value property equals the targetValue.  If the
-    value is an array of multiple items that contains the targetValue, then
-    the button will be set to a mixed state.
-
-    default is false
-    
-    @type Object
-  */
-  toggleOnValue: true,
-
-  /**
-    Value of an unselected toggle button.
-  
-    For a toggle button, set this to any object value you want.  When the
-    user toggle's the button off, the value of the button will be set to this
-    value.
-  
-    default is false 
-  
-    @type Object
-
-  */
-  toggleOffValue: false,
   
   /**
     optionally set this to the theme you want this button to have.  
@@ -87,45 +44,20 @@ SC.ButtonView = SC.View.extend(SC.Control,
     
     The default SproutCore theme supports "regular", "checkbox", and "radio"
   */
-  theme: 'regular',
+  theme: 'square',
   
   /**
     Optionally set the behavioral mode of this button.  
   
     Possible values are:
 
-    {{{
-     SC.PUSH_BEHAVIOR: ('push')
-       Pressing the button will trigger an action tied to the button. Does
-       not change the value of the button.
-  
-     SC.TOGGLE_BEHAVIOR: ('toggle')
-       Pressing the button will invert the current value of the button. If
-       the button has a mixed value, it will be set to true.
-  
-     SC.TOGGLE_ON_BEHAVIOR: ('on')
-       Pressing the button will set the current state to true no matter the
-       previous value.
-  
-     SC.TOGGLE_OFF_BEHAVIOR: ('off')
-       Pressing the button will set the current state to false no matter the
-       previous value.
-    }}}
+    - *SC.PUSH_BEHAVIOR* Pressing the button will trigger an action tied to the button. Does not change the value of the button.
+    - *SC.TOGGLE_BEHAVIOR* Pressing the button will invert the current value of the button. If the button has a mixed value, it will be set to true.
+    - *SC.TOGGLE_ON_BEHAVIOR* Pressing the button will set the current state to true no matter the previous value.
+    - *SC.TOGGLE_OFF_BEHAVIOR* Pressing the button will set the current state to false no matter the previous value.
   
   */  
   buttonBehavior: SC.PUSH_BEHAVIOR,
-  
-  /**
-    If NO the button will be disabled. 
-    
-    @type Bool
-  */  
-  isEnabled: YES,
-  
-  /**
-    button's selection state.  Returns YES, NO, or SC.MIXED_STATE
-  */
-  isSelected: NO,
 
   /**
     If YES, then this button will be triggered when you hit return.
@@ -143,69 +75,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
   */  
   isCancel: NO,
   isCancelBindingDefault: SC.Binding.oneWay().bool(),
-  
-  /**
-    If YES, then the title will be localized.
-  */
-  localize: NO,
-  localizeBindingDefault: SC.Binding.bool(),
-  
-  /**
-    The selector path to the element that contains the button title.   You should only set this property when you first configure the button.  Changing it will not cause the button to redisplay.
-  */
-  titleSelector: '.sc-button-label',
 
-  displayProperties: ['title', 'href', 'isActive'],
-
-  updateDisplay: function() {
-    
-    sc_super();
-    
-    // get the title of the button.  if the display title has changed, then update the HTML.
-    var title = this.get('displayTitle') ;
-    if (title !== this._display_title) {
-      this._display_title = title ;
-      this.$(this.get('titleSelector') || 'label').text(title);  
-    }
-    
-    // set the href on the element
-    var href = this.get('href');
-    if (!href || (href.length === 0)) href = "javascript"+":;";
-    if (this.get('href') !== this._display_href) {
-      this._display_href = href ;
-      this.$().attr('href', href);
-    }
-
-    this.$().setClass('active',this.get('isActive'))
-      .setClass('def', this.get('isDefault'))
-      .setClass('cancel', this.get('isCancel'));
-  },
-   
-  /** @private
-    When first generating a button, set the href and static values... 
-  */
-  prepareDisplay: function() {
-    var ret = sc_super();
-    this.$().addClass(this.get('theme') || 'regular');
-    this.updateDisplay() ;
-    return ret ;
-  },
-  
-  /**
-    The button title.  If localize is YES, then this should be the localization key to display.  Otherwise, this will be the actual string displayed in the title.  This property is observable and bindable.
-    
-    @property {String}
-  */  
-  title: '',
-
-  /**
-    The computed display title.  This is generated by localizing the title property if necessary.
-  */
-  displayTitle: function() {
-    var ret = this.get('title');
-    return (ret && this.get('localize')) ? ret.loc() : (ret || '');
-  }.property('title','localize').cacheable(),
-  
   /**
     The button href value.  This can be used to create localized button href values.  Setting an empty or null href will set it to javascript:;
   */
@@ -243,34 +113,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     @type Object
   */
   target: null,
-
-  /**
-    The key equivalent that should trigger this button on the page.
-  */
-  keyEquivalent: null,
   
-  /** @private {String} used to store a previously defined key equiv */
-  _defaultKeyEquivalent: null,
-  
-  performKeyEquivalent: function( keystring, evt )
-  {
-    if (!this.get('isEnabled')) return false;
-    var keyEquivalent = this.get('keyEquivalent');
-    if (keyEquivalent && (keyEquivalent === keystring))
-    {
-      // button has defined a keyEquivalent and it matches!
-      // if triggering succeeded, true will be returned and the operation will be handeled 
-      // (i.e performKeyEquivalent will cease crawling the view tree)
-      return this.triggerAction(evt);
-    }
-    return false;
-  },
-
-  /**
-    Set to YES while the button is currently in the process of executing its own action.  Causes the display to update.
-  */
-  isActive: NO,
-      
   /**
     fakes a click... evt is optional.  
     
@@ -295,8 +138,8 @@ SC.ButtonView = SC.View.extend(SC.Control,
 
   // ................................................................
   // INTERNAL SUPPORT
-  
-  /** @private */
+
+  /** @private - save keyEquivalent for later use */
   init: function() {
     sc_super();
     
@@ -304,44 +147,42 @@ SC.ButtonView = SC.View.extend(SC.Control,
     if(this.get("keyEquivalent")) this._defaultKeyEquivalent = this.get("keyEquivalent"); 
   },
 
-  // determines the target selected state
-  _computeSelectedStateFromValue: function(value) {
-    var targetValue = this.get('toggleOnValue') ;
-    var state ;
+  // display properties that should automatically cause a refresh.
+  // isCancel and isDefault also cause a refresh but this is implemented as 
+  // a separate observer (see below)
+  displayProperties: ['href'],
+
+  updateDisplay: function() {
+    sc_super();
     
-    if (SC.$type(value) == SC.T_ARRAY) {
-      if (value.length == 1) {
-        state = (value[0] == targetValue) ;
-      } else {
-        state = (value.indexOf(targetValue) >= 0) ? SC.MIXED_STATE : false ;
+    // set the href on the element
+    if (this.get('tagName') === 'a') {
+      var href = this.get('href');
+      if (!href || (href.length === 0)) href = "javascript"+":;";
+      if (this.get('href') !== this._display_href) {
+        this._display_href = href ;
+        this.$().attr('href', href);
       }
-    } else {
-      state = (value == targetValue) ;
     }
-    return state ;
+
+    this.$().setClass({ 
+      def: this.get('isDefault'), cancel: this.get('isCancel') 
+    });
+  },
+   
+  /** @private
+    When first generating a button, set the href and static values... 
+  */
+  prepareDisplay: function() {
+    var ret = sc_super();
+    this.$().addClass(this.get('theme') || 'regular');
+    this.updateDisplay() ;
+    return ret ;
   },
   
-  /** @private
-    Whenever the button value changes, update the selected state to match.
-  */
-  _buttonValueDidChange: function() {
-    var value = this.get('value');  
-    var state = this._computeSelectedStateFromValue(value);
-    this.set('isSelected', state) ; // set new state...
-  }.observes('value'),
+  /** @private {String} used to store a previously defined key equiv */
+  _defaultKeyEquivalent: null,
   
-  /** @private
-    Whenever the selected state is changed, make sure the button value is also updated.  Note that this may be called because the value has just changed.  In that case this should do nothing.
-  */
-  _isSelectedDidChange: function() {
-    var newState = this.get('isSelected');
-    var curState = this._computeSelectedStateFromValue(this.get('value'));
-    if (curState !== newState) {
-      var valueKey = (newState) ? 'toggleOnValue' : 'toggleOffValue' ;
-      this.set('value', this.get(valueKey));
-    }
-  }.observes('isSelected'),
-
   /** @private
     Whenever the isDefault or isCancel property changes, update the display and change the keyEquivalent.
   */  
@@ -362,7 +203,6 @@ SC.ButtonView = SC.View.extend(SC.Control,
     }
       
   }.observes('isDefault', 'isCancel'),
-    
     
   isMouseDown: false, 
 
@@ -416,7 +256,7 @@ SC.ButtonView = SC.View.extend(SC.Control,
     // When toggling, try to invert like values. i.e. 1 => 0, etc.
     case SC.TOGGLE_BEHAVIOR:
       var sel = this.get('isSelected') ;
-      if (sel == YES) {
+      if (sel) {
         this.set('value', this.get('toggleOffValue')) ;
       } else {
         this.set('value', this.get('toggleOnValue')) ;
@@ -473,3 +313,4 @@ SC.ButtonView = SC.View.extend(SC.Control,
   }
   
 }) ;
+

@@ -10,6 +10,16 @@ require('system/binding');
 */
 SC.MIXED_STATE = '__MIXED__' ;
 
+/** Option for standard control size. */
+SC.REGULAR_CONTROL_SIZE = 'sc-regular-size';
+
+/** Option for small control size. */
+SC.SMALL_CONTROL_SIZE = 'sc-small-size';
+
+/** Option for tiny control size */
+SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
+
+
 /**
   @namespace
 
@@ -68,11 +78,12 @@ SC.Control = {
   },
   
   /** 
-    Set to true when the item is selected. 
+    The selected state of this control.  Possible options are YES, NO or 
+    SC.MIXED_STATE.
     
-    This property is observable and bindable.
+    @property {Boolean}
   */
-  isSelected: false,
+  isSelected: NO,
   isSelectedBindingDefault: SC.Binding.oneWay().bool(),
 
   /** 
@@ -80,9 +91,22 @@ SC.Control = {
     
     This property is observable and bindable.
   */
-  isEnabled: true,
+  isEnabled: YES,
   isEnabledBindingDefault: SC.Binding.oneWay().bool(),
   
+  /**
+    Set to true when the item is currently active.  Usually this means the 
+    mouse is current pressed and hovering over the control, however the 
+    specific implementation my vary depending on the control.
+    
+    Changing this property value by default will cause the Control mixin to
+    add/remove an 'active' class name to the root element.
+    
+    @property {Boolean}
+  */
+  isActive: NO,
+  isActiveBindingDefault: SC.Binding.oneWay().bool(),
+
   /**
     The value represented by this control.
     
@@ -228,25 +252,21 @@ SC.Control = {
   }.property('fieldLabel','fieldKey').cacheable(),
 
   /**
+    The control size.  This will set a CSS style on the element that can be 
+    used by the current theme to vary the appearance of the control.
+  */
+  controlSize: SC.REGULAR_CONTROL_SIZE,
+  
+  /**
     Default observer for selected state changes
     
     The default will simply add either a "mixed" or "sel" class name to the
     root element of your view based on the state. You can override this with
     your own behavior if you prefer.
   */
-  controlDisplayObserver: function() {
+  _control_displayObserver: function(target, key) {
     this.displayDidChange();
-    console.log('controlDisplayObserver');
-  }.observes('isEnabled', 'isSelected', 'isFirstResponder'),
-  
-  /**
-    Set to YES if your control HTML has input elements.  This will cause the
-    updateControlDisplay code to find your input elements and update their 
-    state when needed.
-    
-    @property {Boolean}
-  */
-  hasInputElements: NO,
+  }.observes('isEnabled', 'isSelected', 'isFirstResponder', 'isActive'),
 
   /**
     Invoke this method in your updateDisplay() method to update any basic control CSS classes.
@@ -254,20 +274,25 @@ SC.Control = {
   updateDisplayMixin: function() {
     var sel = this.get('isSelected'), disabled = !this.get('isEnabled');
     
-    // update the CSS classes for the control
-    this.$().setClass('mixed', sel === SC.MIXED_STATE)
-      .setClass('sel', sel && (sel !== SC.MIXED_STATE))
-      .setClass('disabled', disabled)
-      .setClass('focus', this.get('isFirstResponder'));
+    // update the CSS classes for the control.  note we reuse the same hash
+    // to avoid consuming more memory
+    var names = SC._CONTROL_CLASSNAMES ;
+    names.mixed = sel === SC.MIXED_STATE;
+    names.sel = sel && (sel !== SC.MIXED_STATE) ;
+    names.disabled = disabled ;
+    names.focus = this.get('isFirstResponder') ;
+    names.active = this.get('isActive') ;
+    
+    var size = this.get('controlSize') ;
+    names[SC.REGULAR_CONTROL_SIZE] = size === SC.REGULAR_CONTROL_SIZE;
+    names[SC.SMALL_CONTROL_SIZE] =   size === SC.SMALL_CONTROL_SIZE;
+    names[SC.TINY_CONTROL_SIZE] =    size === SC.TINY_CONTROL_SIZE;
+    
+    this.$().setClass(names);
 
-      console.log('updateDisplay');
-
-      
-    // if the control also hasInputElements, fix them up as well.
-    if (this.get('hasInputElements')) {
-      this.$('input').andSelf().filter('input')
-        .attr('disabled', disabled).attr('checked', !!sel);
-    }
+    // if the control implements the $input() helper, then fixup the input
+    // tags
+    if (this.$input) this.$input().attr('disabled', disabled);
   },
 
   // This should be null so that if content is also null, the
@@ -280,7 +305,7 @@ SC.Control = {
   */
   _control_contentDidChange: function() {
     var content = this.get('content') ;
-    if (this._control_content == content) return; // nothing changed
+    if (this._control_content === content) return; // nothing changed
     
     var f = this.contentPropertyDidChange ;
 
@@ -292,7 +317,6 @@ SC.Control = {
     // cache for future use
     var del = this.displayDelegate ;
     this._contentValueKey = this.getDelegateProperty(del, 'contentValueKey');
-
     
     // add observer to new content if necessary.
     this._content = content ;
@@ -306,3 +330,6 @@ SC.Control = {
   }.observes('content')
       
 };
+
+SC._CONTROL_CLASSNAMES = {};
+

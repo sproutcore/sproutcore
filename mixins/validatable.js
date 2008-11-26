@@ -45,7 +45,7 @@ SC.Validatable = {
     @field
   */
   isValid: function() { 
-    return SC.$type(this.get('value')) !== SC.T_ERROR; 
+    return SC.typeOf(this.get('value')) !== SC.T_ERROR; 
   }.property('value'),
   
   /**
@@ -91,7 +91,7 @@ SC.Validatable = {
     SC.Validator.OK
   */
   performValidateSubmit: function() {
-    return (this._validator) ? this._validator.validateSubmit(this.get('ownerForm'), this) : SC.Validator.OK;
+    return this._validator ? this._validator.validateSubmit(this.get('ownerForm'), this) : SC.Validator.OK;
   },
   
   /**
@@ -112,7 +112,7 @@ SC.Validatable = {
     @returns converted object
   */
   objectForFieldValue: function(fieldValue) {
-    return (this._validator) ? this._validator.objectForFieldValue(fieldValue, this.get('ownerForm'), this) : fieldValue ;
+    return this._validator ? this._validator.objectForFieldValue(fieldValue, this.get('ownerForm'), this) : fieldValue ;
   },
   
   /**
@@ -124,19 +124,20 @@ SC.Validatable = {
     @returns converted field value
   */
   fieldValueForObject: function(object) {
-    return (this._validator) ? this._validator.fieldValueForObject(object, this.get('ownerForm'), this) : object ;
+    return this._validator ? this._validator.fieldValueForObject(object, this.get('ownerForm'), this) : object ;
   },
   
-  /**
-    Default observer for isValid property.
-    
-    The default implementation will add/remove a valid class name to the
-    root element of your view.
-  */
-  isValidObserver: function() {
-    var invalid = !this.get('isValid') ;
-    this.setClassName('invalid', invalid) ;
+  _validatable_displayObserver: function() {
+    this.displayDidChange();
   }.observes('isValid'),
+  
+  updateDisplayMixin: function() {
+    var valid = this.get('isValid') ;
+    if (valid !== this._validatable_lastValid) {
+      this._validatable_lastValid = valid ;
+      this.$().setClass('invalid', !valid);  
+    }
+  },
   
   // invoked whenever the attached validator changes.
   _validatable_validatorDidChange: function() {

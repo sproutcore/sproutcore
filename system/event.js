@@ -150,6 +150,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @returns {Object} receiver
   */
   add: function(elem, eventType, target, method, context) {
+
+    // if a CQ object is passed in, either call add on each item in the 
+    // matched set, or simply get the first element and use that.
+    if (elem && elem.isCoreQuery) {
+      if (elem.length > 0) {
+        elem.forEach(function(e) { 
+          this.add(e, eventType, target, method, context);
+        }, this);
+        return this;
+      } else elem = elem.get(0);
+    }
+    if (!elem) return this; // nothing to do
     
     // cannot register events on text nodes, etc.
     if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.Event;
@@ -214,6 +226,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @returns {Object} receiver
   */
   remove: function(elem, eventType, target, method) {
+
+    // if a CQ object is passed in, either call add on each item in the 
+    // matched set, or simply get the first element and use that.
+    if (elem && elem.isCoreQuery) {
+      if (elem.length > 0) {
+        elem.forEach(function(e) { 
+          this.remove(e, eventType, target, method);
+        }, this);
+        return this;
+      } else elem = elem.get(0);
+    }
+    if (!elem) return this; // nothing to do
     
     // don't do events on text and comment nodes
     if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.Event;
@@ -297,6 +321,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @returns {Boolean} Return value of trigger or undefined if not fired
   */
   trigger: function(elem, eventType, args, donative) {
+
+    // if a CQ object is passed in, either call add on each item in the 
+    // matched set, or simply get the first element and use that.
+    if (elem && elem.isCoreQuery) {
+      if (elem.length > 0) {
+        elem.forEach(function(e) { 
+          this.trigger(e, eventType, args, donative);
+        }, this);
+        return this;
+      } else elem = elem.get(0);
+    }
+    if (!elem) return this; // nothing to do
 
     // don't do events on text and comment nodes
     if ( elem.nodeType == 3 || elem.nodeType == 8 ) return undefined;
@@ -605,6 +641,17 @@ SC.Event.prototype = {
     Set to YES if you have called either preventDefault() or stopPropogation().  This allows a generic event handler to notice if you want to provide detailed control over how the browser handles the real event.
   */
   hasCustomEventHandling: NO,
+  
+  /**
+    Indicates that you want to allow the normal default behavior.  Sets
+    the hasCustomEventHandling property to YES but does not cancel the event.
+    
+    @returns {SC.Event} receiver
+  */
+  allowDefault: function() {
+    this.hasCustomEventHandling = YES ;
+    return this ;  
+  },
   
   /** 
     Implements W3C standard.  Will prevent the browser from performing its

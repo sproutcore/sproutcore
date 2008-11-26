@@ -14,8 +14,11 @@ require('views/controls/button');
 SC.DisclosureView = SC.ButtonView.extend(
 /** @scope SC.DisclosureView.prototype */ {
 
-  emptyElement: '<a href="javascript:;" class="sc-disclosure-view sc-button-view sc-view button disclosure"><img src="%@" class="button" /><span class="sc-button-label label"></span></a>'.fmt(static_url('blank')),
+  emptyElement: '<%@1 role="button"><img src="'+static_url('blank')+'" alt=""/ class="button"><label class="sc-button-label"></label></%@1>',
+  tagName: 'a',
+  styleClass: 'sc-disclosure-view',
   
+  theme: 'disclosure',
   buttonBehavior: SC.TOGGLE_BEHAVIOR,
 
   /**
@@ -29,11 +32,5 @@ SC.DisclosureView = SC.ButtonView.extend(
   */
   toggleOffValue: NO,
 
-  valueBindingDefault: SC.Binding.bool(),
-  
-  init: function() {
-    sc_super() ;
-    this.set('isSelected', this.get('value') === this.get('toggleOnValue'));
-  }
-  
+  valueBindingDefault: SC.Binding.bool()  
 }) ;

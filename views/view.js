@@ -25,28 +25,20 @@ SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
 /** @private Properties that require the empty element to be recached. */
 SC.EMPTY_ELEMENT_PROPERTIES = 'emptyElement tagName styleClass'.w();
 
+/** Select a horizontal layout for various views.*/
+SC.LAYOUT_HORIZONTAL = 'sc-layout-horizontal';
+
+/** Select a vertical layout for various views.*/
+SC.LAYOUT_VERTICAL = 'sc-layout-vertical';
+
 /** 
   @class
   
-  var dialog = SC.View.build({
-    childViews: [
-      SC.ButtonView.build({
-        title: "OK",
-        frame: { x: 250, y: 300, width: 80, height: 23 },
-        anchor: (SC.ANCHOR_BOTTOM | SC.ANCHOR_RIGHT)
-      }, [0]),
-      
-      SC.ButtonView.build({
-        title: "Cancel",
-        frame: { x: 150, y: 300, width: 80, height: 23 },
-        anchor: (SC.ANCHOR_BOTTOM | SC.ANCHOR_RIGHT)
-      }), [1]],
-      
-    frame: { x: 0, y: 0, width: 400, height: 350 },
-    anchor: SC.ANCHOR_CENTER
-  }) ;
+  Base class for managing a view.  View's provide two functions:
   
-  d = dialog.create();
+  1. They translate state and events into drawing instructions for the web browser and
+  
+  2. They act as first responders for incoming keyboard, mouse, and touch events.
   
   @extends SC.Object
   @extends SC.Responder
@@ -417,7 +409,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         while(root && idx<len) root = root.childNodes[path[idx++]];
         if (root) this.rootElement = root;
         
-      } else this.prepareDisplay();
+      } else {
+        this.prepareDisplay();
+        if (this.get('updateDisplayOnPrepare')) this.updateDisplay() ;
+      }
+
       parentView = path = root = null;
     }
 
@@ -591,6 +587,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         styleClass = this.get('styleClass').join(' ');
         html = this.get('emptyElement').fmt(this.get('tagName'));
         cq = SC.$(html).addClass(styleClass);
+        cq.setClass('allow-select', this.get('isTextSelectable')); 
+        
         con.prototype._cachedEmptyElement = cq.get(0);        
         con.prototype._emptyElementCachedForClassGuid = SC.guidFor(con) ;
       }
@@ -601,7 +599,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     } else {
       styleClass = this.get('styleClass').join(' ');
       html = this.get('emptyElement').fmt(this.get('tagName'));
-      root = SC.$(html).addClass(styleClass).get(0);
+      cq = SC.$(html).addClass(styleClass);
+      cq.setClass('no-select', !this.get('isTextSelectable')); 
+      root = cq.get(0);
     }
     this.rootElement = root ;
 
@@ -621,11 +621,20 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     
     // clear out some local variables that hold DOM to avoid memory leaks
-    root = container = element = null; 
+    root = container = element = cq = null; 
 
+    // call all prepareDisplayMixins...
     var mixins = this.prepareDisplayMixin, len = (mixins) ? mixins.length : 0;
     for(idx=0;idx<len;idx++) mixins[idx].call(this);
   },
+  
+  /**
+    By default, when you have to prepare the display, it will also be updated
+    once even before any properties or observers are setup.  This is usually
+    the behavior you want, but if you do something significantly different 
+    during the prepareDisplay method, you may want to turn this off.
+  */
+  updateDisplayOnPrepare: YES,
   
   /** 
     Returns a CoreQuery object that selects elements starting with the 
@@ -683,6 +692,20 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     CSS.
   */
   styleClass: ['sc-view'],
+  
+  /**
+    Determines if the user can select text within the view.  Normally this is
+    set to NO to disable text selection.  You should set this to YES if you
+    are creating a view that includes editable text.  Otherwise, settings this
+    to YES will probably make your controls harder to use and it is not 
+    recommended.
+    
+    This property is used when first preparing the view's display.  If you
+    change it once the view has been created, it will have no effect.
+    
+    @property {Boolean}
+  */
+  isTextSelectable: NO,
   
   /**
     Dumps the HTML needs for the emptyElement when restoring this view 
@@ -781,7 +804,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // handle string case
     if (SC.typeOf(key) === SC.T_STRING) {
-      if (!value) {
+      if (SC.none(value)) {
         delete layout[key];
       } else layout[key] = value ;
       
@@ -982,7 +1005,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   layoutStyle: function() {
     var layout = this.get('layout'), ret = {}, pdim = null;
-    ret.position = 'absolute' ;
+    //ret.position = 'absolute' ;
 
     // X DIRECTION
     

@@ -1885,7 +1885,7 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
       if (isHash) {
         for(var key in className) {
           if (!className.hasOwnProperty(key)) continue ;
-          didChange = didChange || fix(classNames, key, className[key]);
+          didChange = fix(classNames, key, className[key]) || didChange;
         } 
       } else didChange = fix(classNames, className, shouldAdd);
 

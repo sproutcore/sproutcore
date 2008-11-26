@@ -97,7 +97,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     // setup new prototype and add properties to ti
     var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
-    for(idx=0;idx<len;idx++) SC.__object_extend(base, arguments[idx]) ;
+    for(idx=0;idx<len;idx++) SC._object_extend(base, arguments[idx]) ;
     base.constructor = ret; // save constructor
 
     if (bench) SC.Benchmark.end('SC.Object.extend') ;
@@ -156,7 +156,7 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   */
   isClass: YES,
   
-  toString: function() { return SC.__object_className(this); },
+  toString: function() { return SC._object_className(this); },
   
   // ..........................................
   // PROPERTY SUPPORT METHODS
@@ -206,9 +206,14 @@ SC.Object.prototype = {
   __init: function(extensions) {
     // apply any new properties
     var idx, len = (extensions) ? extensions.length : 0;
-    for(idx=0;idx<len;idx++) SC.__object_extend(this, extensions[idx]) ;
+    for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx]) ;
     SC.generateGuid(this) ; // add guid
     this.init() ; // call real init
+
+    // Call 'initMixin' methods to automatically setup modules.
+    var inits = this.initMixin; len = (inits) ? inits.length : 0 ;
+    for(idx=0;idx < len; idx++) inits[idx].call(this);
+
     return this ; // done!
   },
 
@@ -252,16 +257,34 @@ SC.Object.prototype = {
     @returns {Object} reciever
   */
   init: function() {
-    
     this.initObservable();
+    return this ;
+  },
+
+  /**
+    Set to NO once this object has been destroyed. 
+  */
+  isDestroyed: NO,
+  
+  /**
+    Call this method when you are finished with an object to teardown its
+    contents.  Because JavaScript is garbage collected, you do not usually 
+    need to call this method.  However, you may choose to do so for certain
+    objects, especially views, in order to let them reclaim memory they 
+    consume immediately.
     
-    // Call 'initMixin' methods to automatically setup modules.
-    var idx, inits = this.initMixin, len = (inits) ? inits.length : 0 ;
+    @returns {SC.Object} receiver
+  */
+  destroy: function() {
+    if (this.get('isDestroyed')) return this; // nothing to do
+    this.set('isDestroyed', YES);
+
+    // destroy any mixins
+    var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
     
     return this ;
   },
-  
 
   /**
     Always YES since this is an object and not a class.
@@ -349,7 +372,7 @@ SC.Object.prototype = {
   /** @private */
   toString: function() {
     if (!this.__toString) {
-      this.__toString = "%@:%@".fmt(SC.__object_className(this.constructor), SC.guidFor(this));
+      this.__toString = "%@:%@".fmt(SC._object_className(this.constructor), SC.guidFor(this));
     } 
     return this.__toString ;
   },
@@ -422,7 +445,7 @@ SC.Object.prototype = {
     
     @property
   */
-  concatenatedProperties: ['concatenatedProperties', 'initMixin']  
+  concatenatedProperties: ['concatenatedProperties', 'initMixin', 'destroyMixin']  
 
 } ;
 
@@ -443,7 +466,7 @@ SC.mixin({
     Augments the base object with the added property hashes.  This will also
     register observers and computed properties.
   */
-  __object_extend: function(base, ext) {
+  _object_extend: function(base, ext) {
     if (!ext) return base; // nothing to do
     
     // set _kvo_cloned for later use
@@ -569,9 +592,9 @@ SC.mixin({
     Returns the name of this class.  If the name is not known, triggers
     a search.  This can be expensive the first time it is called.
   */
-  __object_className: function(obj) {
+  _object_className: function(obj) {
     if (!SC.isReady) return ''; // class names are not available until ready
-    if (!obj.__className) SC.__object_findClassNames() ;
+    if (!obj.__className) SC._object_findClassNames() ;
     if (obj.__className) return obj.__className ;
 
     // if no direct classname was found, walk up class chain looking for a 
@@ -586,10 +609,10 @@ SC.mixin({
     through all the top-level properties looking for classes.  When it finds
     one, it saves the class path name.
   */
-  __object_findClassNames: function() {
+  _object_findClassNames: function() {
     
-    if (SC.__object_foundObjectClassNames) return ;
-    SC.__object_foundObjectClassNames = true ;
+    if (SC._object_foundObjectClassNames) return ;
+    SC._object_foundObjectClassNames = true ;
     
     var seen = [] ;
     var searchObject = function(root, object, levels) {
