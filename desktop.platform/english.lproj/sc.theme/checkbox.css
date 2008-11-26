@@ -1,0 +1,81 @@
+/* SC.CheckboxView - sc-theme */
+
+.sc-theme .sc-checkbox-view {
+	line-height: 18px;
+	vertical-align: middle;
+}
+
+.sc-theme .sc-checkbox-view .sc-button-label {
+	position: absolute ;
+	left: 20px;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	line-height: 18px;
+}
+
+.sc-theme .sc-checkbox-view.icon img.icon {
+	position: relative;
+	vertical-align: middle;
+	top: -2px;
+	margin-left: 2px;
+	margin-right: 4px;
+	height: 16px;
+	width: 16px;
+}
+
+
+.sc-theme .sc-checkbox-view.disabled {
+	color: #999;
+}
+
+/* @group Checkbox Image */
+
+/* Set the opacity of the input to 0 so it will take hits but not appear. */
+.sc-theme .sc-checkbox-view input {
+	opacity: 0.0;
+}
+
+.sc-theme .sc-checkbox-view img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -728px;
+	width: 16px;
+	height: 16px;
+	position: absolute ;
+	left: 1px; 
+	top: 1px;
+}
+
+.sc-theme .sc-checkbox-view.sel img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0px -728px;
+}
+
+.sc-theme .sc-checkbox-view.mixed img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -744px;
+}
+
+.sc-theme .sc-checkbox-view.disabled img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -760px;
+} 
+
+.sc-theme .sc-checkbox-view.sel.disabled img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0px -760px;
+}
+
+.sc-theme .sc-checkbox-view.mixed.disabled img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -760px;
+}
+
+.sc-theme .sc-checkbox-view.active img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0px -744px;
+} 
+
+.sc-theme .sc-checkbox-view.sel.active img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -728px;
+}
+
+.sc-theme .sc-checkbox-view.mixed.active img.button {
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -744px;
+}
+
+/* @end */
+

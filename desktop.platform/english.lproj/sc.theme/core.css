@@ -1,0 +1,12 @@
+/* 
+  This is the main SproutCore theme.  If you would prefer not to use this 
+  theme, just set the theme option in your sc-config to another theme name.
+*/
+
+/* Always use Helvetica and this background color. */
+body.sc-theme {
+	font: 13px/18px Helvetica, Verdana, sans-serif;
+	background-color: #f0f0f0 ;
+	padding: 0px;
+}
+
