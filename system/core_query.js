@@ -1202,7 +1202,7 @@ SC.CoreQuery = (function() {
         return CQ.inArray( className, (elem.className || elem).toString().split(/\s+/) ) > -1;
       }
     },
-
+    
     /** @private A method for quickly swapping in/out CSS properties to get 
       correct calculations */
     swap: function( elem, options, callback, direction, arg ) {
@@ -1816,6 +1816,8 @@ SC.$ = (typeof jQuery == "undefined") ? SC.CoreQuery : jQuery ;
 // also. -- test in system/core_query/additions
 SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   
+  isCoreQuery: YES, // walk like a duck
+  
   /** @private - better loggin */
   toString: function() {
     var values = [];
@@ -1862,12 +1864,47 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   },
   
   /**
-    Add or remove the class name based on the boolean passed.  This is often
-    more useful then using the more fixed addClass() and removeClass() 
-    methods.
+    You can either pass a single class name and a boolean indicating whether
+    the value should be added or removed, or you can pass a hash with all
+    the class names you want to add or remove with a boolean indicating 
+    whether they should be there or not.
+    
+    This is far more efficient than using addClass/removeClass.
   */
   setClass: function(className, shouldAdd) {
-    return (shouldAdd) ? this.addClass(className) : this.removeClass(className); 
+    if (SC.none(className)) return this; //nothing to do
+    var isHash = SC.typeOf(className) !== SC.T_STRING ;
+    var fix = this._fixupClass, key;
+    this.each(function() {
+      if (this.nodeType !== 1) return; // nothing to do
+      
+      // collect the class name from the element and build an array
+      var classNames = this.className.split(/\s+/), didChange = NO;
+      
+      // loop through hash or just fix single className
+      if (isHash) {
+        for(var key in className) {
+          if (!className.hasOwnProperty(key)) continue ;
+          didChange = didChange || fix(classNames, key, className[key]);
+        } 
+      } else didChange = fix(classNames, className, shouldAdd);
+
+      // if classNames were changed, join them and set...
+      if (didChange) this.className = classNames.join(' ');
+    });
+    return this ;
+  },
+
+  /** @private used by setClass */
+  _fixupClass: function(classNames, name, shouldAdd) {
+    var indexOf = classNames.indexOf(name);
+    // if should add, add class...
+    if (shouldAdd) {
+      if (indexOf < 0) { classNames.push(name); return YES ; }
+      
+    // otherwise, null out class name (this will leave some extra spaces)
+    } else if (indexOf >= 0) { classNames[indexOf]=null; return YES; }
+    return NO ;
   },
   
   /**
