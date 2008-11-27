@@ -74,15 +74,18 @@ a.sc-segment:active, a.sc-segment:focus {
 }
 
 /* SELECTED */
+.sc-theme .sc-segmented-view a.sc-segment.active .sc-button-inner,
 .sc-theme .sc-segmented-view a.sc-segment.sel .sc-button-inner {
 	background: static_url('images/sc-theme-sprite.png') repeat-x right -1196px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel {
+.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel,
+.sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.active {
 	background: static_url('images/sc-theme-sprite.png') no-repeat right -1219px;
 }
 
-.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.sel {
+.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.sel,
+.sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.active {
 	background: static_url('images/sc-theme-sprite.png') no-repeat left -1173px;
 }
 

@@ -195,7 +195,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // if the item is a string, build the array using defaults...
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        cur = [item.humanize().titleize(), item, YES, null, idx] ;
+        cur = [item.humanize().titleize(), item, YES, null, null, idx] ;
         
       // if the item is not an array, try to use the itemKeys.
       } else if (itemType !== SC.T_ARRAY) {
@@ -259,7 +259,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   // RENDERING/DISPLAY SUPPORT
   // 
   
-  displayProperties: ['displayItems', 'value'],
+  displayProperties: ['displayItems', 'value', 'activeIndex'],
   
   prepareDisplay: function() {
     var ret = sc_super() ;
@@ -268,7 +268,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   },
   
   updateDisplay: function() { 
-    
     sc_super();
     
     // collect some data 
@@ -299,7 +298,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     while(--loc>=0) {
       item = items[loc];
       names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
-      names.active = (activeIndex == loc);
+      names.active = (activeIndex === loc);
       SC.$(cq.get(loc)).setClass(names);
     }
     names = items = value = items = null; // cleanup
@@ -338,7 +337,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       // either get the width or autodetect from label
       tmp = SC.$(cq.get(idx));
-      width = item[5] || tmp.find('label').get(0).offsetWidth;
+      width = item[4] || tmp.find('label').get(0).offsetWidth;
       tmp.setClass(names).css('width', width);
 
       // collect total width
@@ -357,6 +356,153 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     cq = tmp = names = null; // do some cleanup
     
+  },
+  
+  // ..........................................................
+  // EVENT HANDLING
+  // 
+  
+  /** 
+    Determines the index into the displayItems array where the passed mouse
+    event occurred.
+  */
+  displayItemIndexForEvent: function(evt) {
+    var elem = SC.$(evt.target) ;
+    if (!elem || elem===document) return -1; // nothing found
+
+    // start at the target event and go upwards until we reach either the 
+    // root responder or find an anchor.sc-segment.
+    var root = this.$(), match = null ;
+    while(!match && (elem.length>0) && (elem.get(0)!==root.get(0))) {
+      if (elem.hasClass('sc-segment') && elem.attr('tagName')==='A') {
+        match = elem;
+      } else elem = elem.parent();
+    }
+    
+    elem = root = null;
+    
+    // if a match was found, return the index of the match in subtags
+    return (match) ? this.$('a.sc-segment').index(match) : -1;
+  },
+  
+  mouseDown: function(evt) {
+    if (!this.get('isEnabled')) return YES; // nothing to do
+    var idx = this.displayItemIndexForEvent(evt);
+    
+    // if mouse was pressed on a button, then start detecting pressed events
+    if (idx>=0) {
+      this._isMouseDown = YES ;
+      this.set('activeIndex', idx);
+    }
+    
+    return YES ;
+  },
+  
+  mouseUp: function(evt) {
+    var idx = this.displayItemIndexForEvent(evt);
+    
+    // if mouse was pressed on a button then detect where we where when we
+    // release and use that one.
+    if (this._isMouseDown && (idx>=0)) this.triggerItemAtIndex(idx);
+    
+    // cleanup
+    this._isMouseDown = NO ;
+    this.set('activeIndex', -1);
+    return YES ;
+  },
+  
+  mouseMoved: function(evt) {
+    var idx = this.displayItemIndexForEvent(evt);
+    if (this._isMouseDown) this.set('activeIndex', idx);
+    return YES;
+  },
+  
+  mouseOver: function(evt) {
+    // if mouse was pressed down initially, start detection again
+    var idx = this.displayItemIndexForEvent(evt);
+    if (this._isMouseDown) this.set('activeIndex', idx);
+    return YES;
+  },
+  
+  mouseOut: function(evt) {
+    // if mouse was down, hide active index
+    if (this._isMouseDown) this.set('activeIndex', -1);
+    return YES ;
+  },
+  
+  /** 
+    Simulates the user clicking on the segment at the specified index. This
+    will update the value if possible and fire the action.
+  */
+  triggerItemAtIndex: function(idx) {
+    var items = this.get('displayItems') ;
+    var item = items.objectAt(idx);
+    if (!item[2]) return this; // nothing to do!
+
+    var empty = this.get('allowsEmptySelection');
+    var mult = this.get('allowsMultipleSelection');
+    
+    // get new value... bail if not enabled
+    var sel = item[1];
+    var value = this.get('value') ;
+    if (!SC.isArray(value)) value = [value]; // force to array
+    
+    // if we do not allow multiple selection, either replace the current
+    // selection or deselect it
+    if (!mult) {
+      // if we allow empty selection and the current value is the same as
+      // the selected value, then deselect it.
+      if (empty && (value.get('length')===1) && (value.objectAt(0)===sel)){
+        value = [];
+      
+      // otherwise, simply replace the value.
+      } else value = [sel] ;
+      
+    // if we do allow multiple selection, then add or remove item to the
+    // array.
+    } else {
+      if (value.indexOf(sel) >= 0) {
+        if (value.get('length')>1 || (value.objectAt(0)!==sel) || empty) {
+          value = value.without(sel);
+        }
+      } else value = value.concat([sel]) ;
+    }
+    
+    // normalize back to non-array form
+    switch(value.get('length')) {
+      case 0:
+        value = null;
+        break;
+      case 1:
+        value = value.objectAt(0);
+        break;
+      default:
+        break;
+    }
+    
+    // set the new value
+    this.set('value', value);
+    
+    // also, trigger target if needed.
+    var actionKey = this.get('itemActionKey');
+    var targetKey = this.get('itemTargetKey');
+    var action, target = null;
+    var resp = this.getPath('pane.rootResponder');
+    if (actionKey && (item = this.get('items').objectAt(item[5]))) {
+      // get the source item from the item array.  use the index stored...
+      action = item.get ? item.get(actionKey) : item[actionKey];
+      if (targetKey) {
+        target = item.get ? item.get(targetKey) : item[targetKey];
+      }
+      
+      if (resp) resp.sendAction(action, target, this, this.get('pane'));
+    }
+    
+    // if an action/target is defined on self use that also
+    action =this.get('action');
+    if (action && resp) {
+      resp.sendAction(action, this.get('target'), this, this.get('pane'));
+    }
   }
     
 }) ;
