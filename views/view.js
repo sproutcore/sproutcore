@@ -378,6 +378,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       this.set('isVisibleInWindow', cur) ;
       var childViews = this.get('childViews'), idx = childViews.length;
       while(--idx>=0) childViews[idx].recomputeIsVisibleInWindow(cur);
+      
+      // if we were firstResponder, resign firstResponder also
+      if (!cur && this.get('isFirstResponder')) {
+        this.resignFirstResponder();
+      }
+      
     }
     
     return this ;
