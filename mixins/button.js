@@ -42,7 +42,7 @@ SC.Button = {
     
     @property {Object}
   */  
-  value: false,
+  value: null,
   
   /**
     Value of a selected toggle button.
@@ -271,7 +271,9 @@ SC.Button = {
   },
   
   prepareDisplayMixin: function() {
-    this._button_valueDidChange();  
+    // if value is not null, update isSelected to match value.  If value is
+    // null, we assume you may be using isSelected only.  
+    if (!SC.none(this.get('value'))) this._button_valueDidChange();  
   },
   
   /** @private

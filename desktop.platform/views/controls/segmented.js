@@ -214,6 +214,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         
         // special case 2...if value key is null, use item itself
         if (!keys[1]) cur[1] = item;
+        
+        // special case 3...if isEnabled is null, default to yes.
+        if (!keys[2]) cur[2] = YES ; 
       }
       
       // finally, be sure to loc the title if needed
@@ -326,7 +329,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     }).join('');    
     
     // now generate said HTML and then fixup class names
-    var cq = this.$().html(html).find('a.sc-segment'), 
+    var cq = this.$().html(html).find('a.sc-segment'), hasIcon,
       max = cq.length, names = {}, last = max-1, idx, item, width,tmp,tot=0;
     for(idx=0;idx<max;idx++) {
       item = items[idx];
@@ -337,7 +340,12 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
       // either get the width or autodetect from label
       tmp = SC.$(cq.get(idx));
-      width = item[4] || tmp.find('label').get(0).offsetWidth;
+      if (item[4]) {
+        width = item[4] ;
+      } else { 
+        tmp.css('width', 100000) ; //tmp set long to get full width of label..
+        width = tmp.find('label').get(0).offsetWidth;
+      }
       tmp.setClass(names).css('width', width);
 
       // collect total width

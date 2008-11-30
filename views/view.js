@@ -4,12 +4,14 @@
 // ========================================================================
 
 require('system/browser');
-require('mixins/delegate_support') ;
-require('mixins/string') ;
 require('system/object') ;
 require('system/core_query');
 require('system/event');
+require('system/binding');
+
 require('mixins/responder') ;
+require('mixins/delegate_support') ;
+require('mixins/string') ;
 
 SC.viewKey = SC.guidKey + "_view" ;
 
@@ -30,6 +32,9 @@ SC.LAYOUT_HORIZONTAL = 'sc-layout-horizontal';
 
 /** Select a vertical layout for various views.*/
 SC.LAYOUT_VERTICAL = 'sc-layout-vertical';
+
+/** @private */
+SC._VIEW_DEFAULT_DIMS = 'marginTop marginLeft'.w();
 
 /** 
   @class
@@ -79,6 +84,30 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   
   /** Outlets */
   outlets: [],
+
+  /** 
+    Set to true when the item is enabled. 
+
+    Changing this property by default calls the 
+    updateChildViewEnabledStates(), which will simply change the isEnabled 
+    property on all child views as well.  You can add your own observer on
+    this property to make specific changes to the appearance of your view as 
+    well. 
+    
+    Note that if you apply the SC.Control mixin, changing this property will
+    also automatically add or mode a 'disabled' CSS class name as well.
+    
+    This property is observable and bindable.
+    
+    @property {Boolean}
+  */
+  isEnabled: YES,
+  isEnabledBindingDefault: SC.Binding.oneWay().bool(),
+  
+  updateChildViewEnabledStates: function() {
+    var isEnabled = this.get('isEnabled');
+    this.get('childViews').invoke('set','isEnabled', isEnabled);
+  }.observes('isEnabled'),
   
   /**
     Insert the view into the the receiver's childNodes array.
@@ -431,10 +460,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
 
   /**
-    Wakes up the view.  The default implementation immediately syncs any 
-    bindings, which may cause the view to need its display updated.  You can
-    override this method to perform any additional setup.  Be sure to call
-    sc_super to setup bindings and to call awake on childViews.
+    Wakes up the view. The default implementation immediately syncs any bindings, which may cause the view to need its display updated. You can override this method to perform any additional setup. Be sure to call sc_super to setup bindings and to call awake on childViews.
+    
+    @returns {void}
   */
   awake: function() {
     sc_super();
@@ -443,10 +471,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
     
   /** 
-    You must call this method on a view to destroy the view (and all of 
-    its child views).  This will remove the view from any parent node, then
-    make sure that the DOM element managed by the view can be released by the
-    memory manager.
+    You must call this method on a view to destroy the view (and all of its child views). This will remove the view from any parent node, then make sure that the DOM element managed by the view can be released by the memory manager.
   */
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
@@ -497,12 +522,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /** 
-    Steps through your childViews array looking for any view classes.  If any
-    are found, it will instantiate them for you.  If you would like to allow
-    child views to be held in properties other than the childViews array, you
-    can override this method to create those as well.  Note that when you 
-    create a childView, you should use the createChildView() method instead 
-    of calling create() directly on the child view.
+    This method is called when your view is first created to setup any child views that are already defined on your class.  If any are found, it will instantiate them for you.
+    
+    The default implementation of this method simply steps through your childViews array, which is expects to either be empty or to contain View designs that can be instantiated
+    
+    Alternatively, you can implement this method yourself in your own subclasses to look for views defined on specific properties and then build a childViews array yourself.
+    
+    Note that when you implement this method yourself, you should never instantiate views directly.  Instead, you should use this.createChildView() method instead.  This method can be much faster in a production environment than creating views yourself.
 
     @returns {SC.View} receiver
   */
@@ -527,11 +553,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
-    Instantiates a view to be added to the childViews array during view 
-    initialization.  You generally will not call this method directly unless
-    you are overriding createChildViews().  Note that this method will 
-    automatically configure the correct settings on the new view instance 
-    to act as a child of the parent.
+    Instantiates a view to be added to the childViews array during view initialization. You generally will not call this method directly unless you are overriding createChildViews(). Note that this method will automatically configure the correct settings on the new view instance to act as a child of the parent.
     
     @param {Class} viewClass
     @param {Hash} attrs optional attributes to add
@@ -835,7 +857,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     Layout is designed to maximize reliance on the browser's rendering 
     engine to keep your app up to date.
   */
-  layout: { top: 0, left: 0, width: 100, height: 100 },
+  layout: { top: 0, left: 0, bottom: 0, right: 0 },
 
   /**
     Converts a frame from the receiver's offset to the target offset.  Both
@@ -1079,6 +1101,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginTop= 0;
     }
     
+    // set default values to null to allow built-in CSS to shine through
+    SC._VIEW_DEFAULT_DIMS.forEach(function(x) {
+      if (ret[x]===0) ret[x]=null;
+    },this);
+
     return ret ;
   }.property().cacheable(),
 

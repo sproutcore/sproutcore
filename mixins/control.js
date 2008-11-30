@@ -86,14 +86,6 @@ SC.Control = {
   isSelected: NO,
   isSelectedBindingDefault: SC.Binding.oneWay().bool(),
 
-  /** 
-    Set to true when the item is enabled. 
-    
-    This property is observable and bindable.
-  */
-  isEnabled: YES,
-  isEnabledBindingDefault: SC.Binding.oneWay().bool(),
-  
   /**
     Set to true when the item is currently active.  Usually this means the 
     mouse is current pressed and hovering over the control, however the 
@@ -163,16 +155,39 @@ SC.Control = {
     @param {String} key the property that changes
   */
   contentPropertyDidChange: function(target, key) {
-    if (!!this._contentValueKey && ((key == this._contentValueKey) || (key == '*'))) {
-      var content = this.get('content') ;
-      var value = (content) ? content.get(this._contentValueKey) : null;
-      if (value != this._contentValue) {
-        this._contentValue = value ;
-        this.set('value', value) ;
-      }
-    }
+    return this.updatePropertyFromContent('value', key, 'contentValueKey');
   },
 
+  /**
+    Helper method you can use from your own implementation of 
+    contentPropertyDidChange().  This method will look up the content key to
+    extract a property and then update the property if needed.  If you do
+    not pass the content key or the content object, they will be computed 
+    for you.  It is more efficient, however, for you to compute these values
+    yourself if you expect this method to be called frequently.
+    
+    @param {String} prop local property to update
+    @param {String} key the contentproperty that changed
+    @param {String} contentKey the local property that contains the key
+    @param {Object} content
+    @returns {SC.Control} receiver
+  */
+  updatePropertyFromContent: function(prop, key, contentKey, content) {
+    var all = key === '*';
+    if (contentKey === undefined) {
+      contentKey = "content%@Key".fmt(prop.capitalize());
+    }
+    if (content === undefined) content = this.get('content');
+    
+    // get actual content key
+    contentKey = this.get(contentKey);
+    if (contentKey && (all || key === contentKey)) {
+      var v = (content) ? (content.get ? content.get(contentKey) : content[contentKey]) : null ;
+      this.set(prop, v);
+    }
+    return this ;
+  },
+  
   /**
     Relays changes to the value back to the content object if you are using
     a content object.

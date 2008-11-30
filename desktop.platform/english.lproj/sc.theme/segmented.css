@@ -13,8 +13,17 @@
 	text-align: center ;
 }
 
-a.sc-segment:active, a.sc-segment:focus {
+.sc-theme a.sc-segment:active, a.sc-segment:focus {
 	outline: none;
+}
+
+.sc-theme a.sc-segment img.icon {
+	position: relative;
+	vertical-align: middle;
+	top: -2px;
+	margin-right: 2px;
+	height: 16px;
+	width: 16px;
 }
 
 /* @group Layout */
@@ -29,6 +38,7 @@ a.sc-segment:active, a.sc-segment:focus {
 	padding-left: 10px;
 	padding-right: 10px;
 	border-right: 1px #555 solid;
+	text-shadow: #b0b0b0 0px 1px 0px;
 }
 
 .sc-theme .sc-segmented-view .sc-button-inner {
@@ -44,7 +54,7 @@ a.sc-segment:active, a.sc-segment:focus {
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment .sc-button-inner {
-	left: 4px;
+	left: 8px;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment {
@@ -52,7 +62,7 @@ a.sc-segment:active, a.sc-segment:focus {
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment .sc-button-inner {
-	right: 4px;
+	right: 8px;
 }
 
 /* @end */
@@ -77,6 +87,7 @@ a.sc-segment:active, a.sc-segment:focus {
 .sc-theme .sc-segmented-view a.sc-segment.active .sc-button-inner,
 .sc-theme .sc-segmented-view a.sc-segment.sel .sc-button-inner {
 	background: static_url('images/sc-theme-sprite.png') repeat-x right -1196px;
+	text-shadow: #909090 0px 1px 0px;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel,

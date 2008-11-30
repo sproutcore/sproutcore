@@ -103,7 +103,11 @@ SC.ContainerView = SC.View.extend(
     // otherwise, if nowShowing is a non-empty string, try to find it...
     var content = null;
     if (nowShowing && nowShowing.length>0) {
-      content = SC.objectForPropertyPath(nowShowing, this.get('page'));
+      if (nowShowing.indexOf('.')>0) {
+        content = SC.objectForPropertyPath(nowShowing, null);
+      } else {
+        content = SC.objectForPropertyPath(nowShowing, this.get('page'));
+      }
     }
     
     // only allow views

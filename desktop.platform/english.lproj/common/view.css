@@ -7,21 +7,21 @@
  - clip overflow
 */
 .sc-view {
-  cursor: default;
-  overflow: hidden;
-  position: absolute; /* all views are absolutely positioned. */
-
-  -moz-user-select: none;
-	-khtml-user-select: none;
-	user-select: none;
+  cursor:             default;
+  overflow:           hidden;
+  position:           absolute; /* all views are absolutely positioned. */
+  -moz-user-select:   none;
+  -khtml-user-select: none;
+  user-select:        none;
+  margin:             0px;
 }
 
 /* Views do not allow text selection unless you set isTextSelectable to YES.*/
 .sc-view.allow-select {
   -moz-user-select: text;
-	-khtml-user-select: text;
-	user-select: text;
-	cursor:  text;
+  -khtml-user-select: text;
+  user-select: text;
+  cursor:  text;
 }
 
 /* Make sure focus outlines do not appear.  These don't look good. */
