@@ -45,6 +45,14 @@ SC._VIEW_DEFAULT_DIMS = 'marginTop marginLeft'.w();
   
   2. They act as first responders for incoming keyboard, mouse, and touch events.
   
+  h2. View Initialization
+  
+  When a view is setup, there are several methods you can override that will be called at different times depending on how your view is created.  Here is a guide to which method you want to override and when:
+  
+  - *prepareDisplay:* override this method for perform one-time setup on your view's HTML, such as copying in CSS class names and rendering structural HTML based on configuration options.  This method will only be called once when the view is created and the HTML it produces may be saved and reused at runtime, avoiding a call to this method again.
+  - *updateDisplay:* override this method to update your HTML to reflect any changes to the state of your view.  This method will also be called once on view init unless you set updateContentOnPrepare to NO.  
+  - *init:* override this method for any general object setup (such as observers, starting timers and animations, etc) that you need to happen everytime the view is created, regardless of whether or not its HTML has been cached.
+  
   @extends SC.Object
   @extends SC.Responder
   @extends SC.DelegateSupport

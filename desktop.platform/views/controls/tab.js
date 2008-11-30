@@ -43,6 +43,14 @@ SC.TabView = SC.View.extend(
   
   tabLocation: SC.TOP_LOCATION,
   
+  /** 
+    If set, then the tab location will be automatically saved in the user
+    defaults.  Browsers that support localStorage will automatically store
+    this information locally.
+  */
+  userDefaultKey: null,
+  
+  
   // ..........................................................
   // FORWARDING PROPERTIES
   // 
@@ -55,6 +63,15 @@ SC.TabView = SC.View.extend(
     return this ;
   }.observes('nowShowing'),
 
+  _tab_saveUserDefault: function() {
+    // if user default is set, save also
+    var v = this.get('nowShowing');
+    var defaultKey = this.get('userDefaultKey');
+    if (defaultKey) {
+      SC.userDefaults.set([defaultKey,'nowShowing'].join(':'), v);
+    }
+  }.observes('nowShowing'),
+  
   _tab_itemsDidChange: function() {
     this.get('segmentedView').set('items', this.get('items'));
     return this ;    
@@ -63,6 +80,21 @@ SC.TabView = SC.View.extend(
   prepareDisplay: function() {
     sc_super();
     this._tab_nowShowingDidChange()._tab_itemsDidChange();
+  },
+  
+  /** @private
+    Restore userDefault key if set.
+  */
+  init: function() {
+    sc_super();
+
+    var defaultKey = this.get('userDefaultKey');
+    if (defaultKey) {
+      defaultKey = [defaultKey,'nowShowing'].join(':');
+      var nowShowing = SC.userDefaults.get(defaultKey);
+      if (!SC.none(nowShowing)) this.set('nowShowing', nowShowing);
+    }
+
   },
   
   createChildViews: function() {

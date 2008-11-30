@@ -1,0 +1,62 @@
+/* @override http://localhost:4020/static/sproutcore/en/desktop/_cache/sc.theme/1228020574/slider.css */
+
+/* @group SC.SliderView */
+
+.sc-theme .sc-slider-view {
+	height: 21px;
+}
+
+.sc-theme.blur .sc-slider-view,
+.sc-theme.focus .sc-slider-view.disabled {
+}
+
+.sc-theme.focus .sc-slider-view {
+}
+
+/* sc-inner is the slider bar */
+.sc-theme .sc-slider-view .sc-inner {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	height: 5px;
+	top: 6px;
+	background: static_url('images/sc-theme-sprite.png') repeat-x ;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.sc-theme.blur .sc-slider-view .sc-inner,
+.sc-theme.focus .sc-slider-view.disabled .sc-inner {
+	background-position: right -1428px ;
+	border: 1px #ccc solid;
+}
+
+.sc-theme.focus .sc-slider-view .sc-inner {
+	background-position: right -1450px ;
+	border: 1px #999 solid;
+}
+
+.sc-theme .sc-slider-view .sc-handle {
+	height: 18px;
+	width: 18px;
+	margin-left: -9px;
+	top: -6px;
+	position: absolute ;
+	background: static_url('images/sc-theme-sprite.png') no-repeat
+}
+
+.sc-theme.focus .sc-slider-view .sc-handle {
+	background-position: -24px -825px ;
+}
+
+.sc-theme.blur .sc-slider-view .sc-handle,
+.sc-theme.focus .sc-slider-view.disabled .sc-handle {
+	background-position: -24px -873px
+}
+
+.sc-theme.focus .sc-slider-view.active .sc-handle {
+	background-position: -24px -849px ;
+}
+
+/* @end */

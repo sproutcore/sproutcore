@@ -160,14 +160,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   },
   
   contentPropertyDidChange: function(target, key) {
-    var all = key === '*';
     var content = this.get('content');
-    var valueKey = this.get('contentValueKey'),
-      minimumKey = this.get('contentMinimumKey'),
-      maximumKey = this.get('contentMaximumKey'),
-      isIndeterminateKey = this.get('contentIsIndeterminateKey');
-    var v ;
-      
     this.beginPropertyChanges()
       .updatePropertyFromContent('value', key, 'contentValueKey', content)
       .updatePropertyFromContent('minimum', key, 'contentMinimumKey', content)
