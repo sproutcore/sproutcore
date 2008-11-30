@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/controls/field');
-require('mixins/button');
+require('views/mixins/button');
 
 /** @class
 

@@ -3,10 +3,10 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('mixins/enumerable') ;
-require('mixins/array') ;
-require('mixins/observable') ;
-require('mixins/delegate') ;
+require('system/mixins/enumerable') ;
+require('system/mixins/array') ;
+require('system/mixins/observable') ;
+require('system/mixins/delegate') ;
 
 /**
   @class

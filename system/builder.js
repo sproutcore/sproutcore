@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('mixins/enumerable') ;
+require('system/mixins/enumerable') ;
 
 /**
   The Builder class makes it easy to create new chained-builder API's such as

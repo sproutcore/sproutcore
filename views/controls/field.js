@@ -4,9 +4,9 @@
 // ========================================================================
 
 require('views/view') ;
-require('mixins/control') ;
-require('mixins/validatable') ;
-require('mixins/delegate_suppport');
+require('views/mixins/control') ;
+require('views/mixins/validatable') ;
+require('system/mixins/delegate_suppport');
 
 /** @class
 

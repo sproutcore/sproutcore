@@ -4,10 +4,10 @@
 // ========================================================================
 
 require('views/view') ;
-require('mixins/control') ;
-require('mixins/delegate_support');
+require('views/mixins/control') ;
+require('system/mixins/delegate_support');
 require('views/inline_text_field');
-require('mixins/inline_editor_delegate');
+require('views/mixins/inline_editor_delegate');
 
 SC.ALIGN_LEFT = 'left';
 SC.ALIGN_RIGHT = 'right';

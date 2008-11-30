@@ -4,8 +4,8 @@
 // ========================================================================
 
 require('core') ;
-require('mixins/observable') ;
-require('mixins/array') ;
+require('system/mixins/observable') ;
+require('system/mixins/array') ;
 
 /*globals $$sel */
 

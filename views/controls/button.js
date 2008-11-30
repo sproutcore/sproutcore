@@ -6,9 +6,9 @@
 /*jslint evil:true */
 
 require('views/view') ;
-require('mixins/control') ;
-require('mixins/delegate_support');
-require('mixins/button');
+require('views/mixins/control') ;
+require('system/mixins/delegate_support');
+require('views/mixins/button');
 
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';

@@ -3,7 +3,7 @@
 // copyright 2006-2008, Sprout Systems, Inc. and contributors.
 // ==========================================================================
 
-require('mixins/string');
+require('system/mixins/string');
 
 // deprecated, mostly useless API, that was blindly copied from Prototype
 SC.mixin(String.prototype, {

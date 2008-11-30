@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('mixins/selection_support') ;
+require('system/mixins/selection_support') ;
 require('controllers/object') ;
 
 /** @class

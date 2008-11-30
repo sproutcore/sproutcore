@@ -9,9 +9,9 @@ require('system/core_query');
 require('system/event');
 require('system/binding');
 
-require('mixins/responder') ;
-require('mixins/delegate_support') ;
-require('mixins/string') ;
+require('views/mixins/responder') ;
+require('system/mixins/delegate_support') ;
+require('system/mixins/string') ;
 
 SC.viewKey = SC.guidKey + "_view" ;
 
