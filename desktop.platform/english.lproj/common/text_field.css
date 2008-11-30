@@ -1,0 +1,25 @@
+/* Common SC.TextFieldView styles - needed to work properly */
+
+.sc-text-field-view input {
+	margin: 0;
+	position:  absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+.sc-text-field-view .sc-hint {
+	z-index: 1;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 3px;
+}
+
+.sc-text-field-view.focus .sc-hint,
+.sc-text-field-view.not-empty .sc-hint {
+  display: none ;
+}
