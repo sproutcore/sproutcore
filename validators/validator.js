@@ -33,8 +33,7 @@ require('system/object');
      value has not changed and then call form.errorFor(field,str) ;
 
   @extends SC.Object
-  @author Charles Jolley
-  @version 1.0
+  @since SproutCore 1.0
 */
 SC.Validator = SC.Object.extend(
 /** @scope SC.Validator.prototype */ {
