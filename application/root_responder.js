@@ -367,13 +367,18 @@ SC.RootResponder = SC.Object.extend({
     // equivalent.  Otherwise, send as a keyDown event so that the focused
     // responder can do something useful with the event.
     if (this._isFunctionOrNonPrintableKey(evt)) {
-      ret = this.attemptKeyEquivalent(evt) ;
-      if (ret) return NO; // handled, no more events for this keydown
-      
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
-      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      ret = this.sendEvent('keyDown', evt) ;
+
+      // attempt key equivalent if key not handled
+      if (!ret) {
+        ret = this.attemptKeyEquivalent(evt) ;
+        return !ret ;
+      } else {
+        return evt.hasCustomEventHandling ;
+      }
     }
     return YES; // allow normal processing...
   },
