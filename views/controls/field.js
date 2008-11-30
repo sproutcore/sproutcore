@@ -28,12 +28,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
 /** @scipe SC.FieldView.prototype */ {
 
   /**
-    The raw value of the field, ignoring validation.  
-  
-    You generally should not override this.  Instead override setFieldValue() 
-    and getFieldValue().
-  
-    @field
+    The raw value of the field itself.  this is the value to be applied to
+    the field after the normal value is passed through any validators to
+    format it.
+    
+    @property {String}
   */  
   fieldValue: function(key,value) {
     if (value !== undefined) this._field_setFieldValue(value) ;
@@ -109,10 +108,12 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   fieldValueDidChange: function(partialChange) {
 
+    this.notifyPropertyChange('fieldValue');
+    
     // get the field value and set it.
     // if ret is an error, use that instead of the field value.
     var ret = this.performValidate ? this.performValidate(partialChange) : YES;
-    if (ret === SC.Validator.NO_CHANGE) return ret ;
+    if (ret === SC.VALIDATE_NO_CHANGE) return ret ;
 
     this.propertyWillChange('fieldValue');
 
@@ -126,7 +127,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     var ok = SC.$ok(ret);
     var value = ok ? this._field_getFieldValue() : ret ;
     if (!partialChange && ok) this._field_setFieldValue(value) ;
-    if (value != this.get('value')) this.set('value',value) ;
+    this.set('value',value) ;
     
     this.propertyDidChange('fieldValue');
     
@@ -204,10 +205,14 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.
   _field_setFieldValue: function(newValue) {
+    
+    this.propertyWillChange('fieldValue');
     if (this.fieldValueForObject) {
       newValue = this.fieldValueForObject(newValue) ;
     }
-    return this.setFieldValue(newValue) ;
+    var ret = this.setFieldValue(newValue) ;
+    this.propertyDidChange('fieldValue');
+    return ret ;
   },
   
   _field_getFieldValue: function() {

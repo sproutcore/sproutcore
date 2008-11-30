@@ -5,6 +5,9 @@
 
 require('system/object');
 
+SC.VALIDATE_OK = YES;
+SC.VALIDATE_NO_CHANGE = NO;
+
 /**
   @class
   
@@ -58,7 +61,7 @@ SC.Validator = SC.Object.extend(
   
   @param {Object} object The object to transform
   @param {SC.FormView} form The form this field belongs to. (optional)
-  @param {SC.ClassicView} view The view the value is required for.
+  @param {SC.View} view The view the value is required for.
   @returns {Object} a value (usually a string) suitable for display
 */
   fieldValueForObject: function(object, form, view) { return object; },
@@ -73,7 +76,7 @@ SC.Validator = SC.Object.extend(
     
     @param {String} value the field value.  (Usually a String).
     @param {SC.FormView} form The form this field belongs to. (optional)
-    @param {SC.ClassicView} view The view this value was pulled from.
+    @param {SC.View} view The view this value was pulled from.
     @returns {Object} an object suitable for consumption by the app.
   */
   objectForFieldValue: function(value, form, view) { return value; },
@@ -85,12 +88,10 @@ SC.Validator = SC.Object.extend(
   /**
     Validate the field value.  
     
-    You can implement standard behavior for your validator by using the
-    vaidate and validateError methods.  validate() should return false
-    if the field is not valid.
+    You can implement standard behavior for your validator by using the validate() and validateError() methods.  validate() should return NO if the field is not valid, YES otherwise.  If you return NO from this method, then the validateError() method will be called so you can generate an error object describing the specific problem.
 
     @param {SC.FormView} form the form this view belongs to
-    @param {SC.ClassicView} field the field to validate.  Responds to fieldValue.
+    @param {SC.View} field the field to validate.  Responds to fieldValue.
     @returns {Boolean} YES if field is valid.
   */
   validate: function(form, field) { return true; },
@@ -98,17 +99,16 @@ SC.Validator = SC.Object.extend(
   /**
     Returns an error object if the field is invalid.
   
-    This is the other standard validator method that can be used to impement
-    basic validation.  This should return an error object explaining why
-    the field is not valid.  It will only be called if validate() returned
-    false.
+    This is the other standard validator method that can be used to impement basic validation.  Return an error object explaining why the field is not valid.  It will only be called if validate() returned NO.
+    
+    The default implementation of htis method returns a generic error message with the loc string "Invalid.Generate({fieldValue})".  You can simply define this loc string in strings.js if you prefer or you can override this method to provide a more specific error message.
   
     @param {SC.FormView} form the form this view belongs to
-    @param {SC.ClassicView} field the field to validate.  Responds to fieldValue.
+    @param {SC.View} field the field to validate.  Responds to fieldValue.
     @returns {SC.Error} an error object
   */
   validateError: function(form, field) { 
-    return $error(
+    return SC.$error(
       "Invalid.General(%@)".loc(field.get('fieldValue')),
       field.get('fieldKey')) ; 
   },
@@ -119,20 +119,20 @@ SC.Validator = SC.Object.extend(
 
   /**
     Invoked just before the user ends editing of the field.
-  
-    The default implementation calls your validate() method and then
-    validateError() if valiate() returns NO.  This method should return 
-    SC.Validator.OK if validation succeeded or an error object if it fails.
+
+    This is a primitive validation method.  You can implement the two higher-level methods (validate() and validateError()) if you prefer.
+    
+    The default implementation calls your validate() method and then validateError() if valiate() returns NO.  This method should return SC.VALIDATE_OK if validation succeeded or an error object if it fails.
   
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
     @param {Object} oldValue: the value of the field before the change
 
-    @returns SC.Validator.OK or an error object.
+    @returns SC.VALIDATE_OK or an error object.
   
   */
   validateChange: function(form, field, oldValue) { 
-    return (this.validate(form,field)) ? SC.Validator.OK : this.validateError(form, field);
+    return this.validate(form,field) ? SC.VALIDATE_OK : this.validateError(form, field);
   },
 
   /**
@@ -143,13 +143,13 @@ SC.Validator = SC.Object.extend(
     validateChange() method.
   
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
 
-    @returns SC.Validator.OK or an error object.
+    @returns SC.VALIDATE_OK or an error object.
   
   */  
   validateSubmit: function(form, field) { 
-    return (this.validate(form,field)) ? SC.Validator.OK : this.validateError(form, field);
+    return this.validate(form,field) ? SC.VALIDATE_OK : this.validateError(form, field);
   },
 
   /**
@@ -159,19 +159,19 @@ SC.Validator = SC.Object.extend(
     needed. The default will validate a partial only if there was already an 
     error. This allows the user to try to get it right before you bug them.
   
-    Unlike the other methods, you should return SC.Validator.NO_CHANGE if you
+    Unlike the other methods, you should return SC.VALIDATE_NO_CHANGE if you
     did not actually validate the partial string.  If you return 
-    SC.Validator.OK then any showing errors will be hidden.
+    SC.VALIDATE_OK then any showing errors will be hidden.
   
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
 
-    @returns SC.Validator.OK, SC.Validator.NO_CHANGE or an error object.
+    @returns SC.VALIDATE_OK, SC.VALIDATE_NO_CHANGE or an error object.
   */  
   validatePartial: function(form, field) { 
     if (!field.get('isValid')) {
-      return (this.validate(form,field)) ? SC.Validator.OK : this.validateError(form, field);
-    } else return SC.Validator.NO_CHANGE ;
+      return this.validate(form,field) ? SC.VALIDATE_OK : this.validateError(form, field);
+    } else return SC.VALIDATE_NO_CHANGE ;
   },
   
   /**
@@ -182,12 +182,12 @@ SC.Validator = SC.Object.extend(
     validation on the field.  Instead use validatePartial().
   
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
     @param {String} char the characters being added
     
     @returns {Boolean} YES if allowed, NO otherwise
   */
-  validateKeypress: function(form, field,charStr) { return true; },
+  validateKeyDown: function(form, field,charStr) { return true; },
 
   // .....................................
   // OTHER METHODS
@@ -198,7 +198,7 @@ SC.Validator = SC.Object.extend(
     You can use this to do any setup that you need.  The default does nothing.
     
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
   */
   attachTo: function(form,field) { },
 
@@ -207,7 +207,7 @@ SC.Validator = SC.Object.extend(
     tear down any setup you did for the attachTo() method.
     
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
   */
   detachFrom: function(form, field) {}
 
@@ -243,10 +243,10 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
       brackets. i.e. 'password[pwd]'.
 
     @param {SC.FormView} form the form for the field
-    @param {SC.ClassicView} field the field to validate
+    @param {SC.View} field the field to validate
     @param {Object} validatorKey the key to validate
     
-    @returns {SC.Validaotr} validator instance or null
+    @returns {SC.Validator} validator instance or null
   */  
   findFor: function(form,field, validatorKey) {
     
@@ -259,7 +259,7 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
     } else if (validatorKey.isClass) {
       validator = validatorKey.create() ;
       
-    } else if (SC.$type(validatorKey) == SC.T_STRING) {
+    } else if (SC.$type(validatorKey) === SC.T_STRING) {
 
       // extract optional key name
       var name = null ;
@@ -269,22 +269,20 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
       }
       
       // convert the validatorKey name into a class.
-      validatorKey = ('-' + validatorKey).camelize() ;
+      validatorKey = validatorKey.classify() ;
       var validatorClass = SC.Validator[validatorKey] ;
-      if (validatorClass == null) {
+      if (SC.none(validatorClass)) {
         throw "validator %@ not found for %@".fmt(validatorKey, field) ;
-        return null ;
       } else if (name) {
 
         // if a key was also passed, then find the validator in the list of
         // validators for the form.  Otherwise, just create a new instance.
         if (!form) {
           throw "named validator (%@) could not be found for field %@ because the field does not belong to a form".fmt(name,field) ;
-          return null ;
         }
         
         if (!form._validatorHash) form._validatorHash = {} ;
-        var validator = (name) ? form._validatorHash[name] : null ;
+        validator = (name) ? form._validatorHash[name] : null ;
         if (!validator) validator = validatorClass.create() ;
         if (name) form._validatorHash[name] = validator ;
       } else validator = validatorClass.create() ;

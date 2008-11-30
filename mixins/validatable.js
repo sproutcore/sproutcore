@@ -58,15 +58,15 @@ SC.Validatable = {
   /**
     Attempts to validate the receiver. 
     
-    Runs the validator and returns SC.Validator.OK, SC.Validator.NO_CHANGE,
+    Runs the validator and returns SC.VALIDATE_OK, SC.VALIDATE_NO_CHANGE,
     or an error object.  If no validator is installed, this method will
-    always return SC.Validator.OK.
+    always return SC.VALIDATE_OK.
 
     @param {Boolean} partialChange YES if this is a partial edit.
-    @returns SC.Validator.OK, error, or SC.Validator.NO_CHANGE
+    @returns SC.VALIDATE_OK, error, or SC.VALIDATE_NO_CHANGE
   */
   performValidate: function(partialChange) {
-    var ret = SC.Validator.OK ;
+    var ret = SC.VALIDATE_OK ;
 
     if (this._validator) {
       var form = this.get('ownerForm') ;
@@ -77,8 +77,8 @@ SC.Validatable = {
         // field is valid anyway.  If it is not valid, then don't update the
         // value.  This way the user can have partially constructed values 
         // without the validator trying to convert it to an object.
-        if ((ret == SC.Validator.NO_CHANGE) && (this._validator.validateChange(form, this) == SC.Validator.OK)) {
-          ret = SC.Validator.OK; 
+        if ((ret == SC.VALIDATE_NO_CHANGE) && (this._validator.validateChange(form, this) == SC.VALIDATE_OK)) {
+          ret = SC.VALIDATE_OK; 
         }
       } else ret = this._validator.validateChange(form, this) ;
     }
@@ -88,11 +88,34 @@ SC.Validatable = {
   /**
     Runs validateSubmit.  You should use this in your implementation of 
     validateSubmit.  If no validator is installed, this always returns
-    SC.Validator.OK
+    SC.VALIDATE_OK
   */
   performValidateSubmit: function() {
-    return this._validator ? this._validator.validateSubmit(this.get('ownerForm'), this) : SC.Validator.OK;
+    return this._validator ? this._validator.validateSubmit(this.get('ownerForm'), this) : SC.VALIDATE_OK;
   },
+  
+  /**
+    Runs a keypress validation.  Returns YES if the keypress should be 
+    allowed, NO otherwise.  If no validator is defined, always returns YES.
+    
+    @param {String} charStr the key string
+    @returns {Boolean}
+  */
+  performValidateKeyDown: function(evt) {
+    // ignore anything with ctrl or meta key press
+    var charStr = evt.getCharString();
+    if (!charStr) return YES ;
+    return this._validator ? this._validator.validateKeyDown(this.get('ownerForm'), this, charStr) : YES;
+  },
+  
+  /**
+    Returns the validator object, if one has been created.
+    
+    @property {SC.Validator} the object
+  */
+  validatorObject: function() {
+    return this._validator;
+  }.property(),
   
   /**
     Invoked by the owner form just before submission.  Override with your 
@@ -144,9 +167,11 @@ SC.Validatable = {
     var form = this.get('ownerForm') ;
     var val = SC.Validator.findFor(form, this, this.get('validator')) ;
     if (val != this._validator) {
+      this.propertyWillChange('validatorObject');
       if (this._validator) this._validator.detachFrom(form, this) ;
       this._validator = val;
       if (this._validator) this._validator.attachTo(form, this) ;
+      this.propertyDidChange('validatorObject');
     }  
   }.observes('validator', 'ownerForm')
       

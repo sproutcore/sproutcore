@@ -700,7 +700,7 @@ SC.Event.prototype = {
 
   /** Returns the pressed character (found in this.which) as a string. */
   getCharString: function() { 
-    return String.fromCharCode(this.which) ;
+    return (this.charCode>0) ? String.fromCharCode(this.which) : null;
   },
   
   /** Returns character codes for the event.  The first value is the normalized code string, with any shift or ctrl characters added to the begining.  The second value is the char string by itself.

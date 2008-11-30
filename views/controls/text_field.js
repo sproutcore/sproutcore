@@ -56,9 +56,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this.$('.sc-hint').text(hint);
     }
     
-    var value = this.get('value');
+    var v = this.getFieldValue(); // get the raw value from input
     this.$().setClass({
-     'not-empty': (!SC.none(value) && value.length>0),
+     'not-empty': (v && v.length>0),
      'focus': this.get('isEditing')
     });
   },
@@ -142,13 +142,28 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   
   _isFocused: false,
   
+  /** @private
+    Simply allow keyDown & keyUp to pass through to the default web browser
+    implementation.
+  */
   keyDown: function(evt) { 
-    evt.allowDefault(); 
+    
+    // validate keyDown...
+    if (this.performValidateKeyDown(evt)) {
+      this._isKeyDown = YES ;
+      evt.allowDefault(); 
+    } else {
+      evt.stop();
+    }
+    
     return YES; 
   },
   
   keyUp: function(evt) { 
-    this.invokeLater(this.fieldValueDidChange, 1); // notify change
+    if (this._isKeyDown) {
+      this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
+    }
+    this._isKeyDown = NO;
     evt.allowDefault(); 
     return YES; 
   },

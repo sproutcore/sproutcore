@@ -38,6 +38,10 @@ SC.Validator.Number = SC.Validator.extend(
   },
 
   objectForFieldValue: function(value, form, field) {
+    
+    // strip out commas
+    value = value.replace(/,/g,'');
+    
     switch(SC.$type(value)) {
       case SC.T_STRING:
         if (value.length == '') {
@@ -63,7 +67,15 @@ SC.Validator.Number = SC.Validator.extend(
   
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
-    return $error("Invalid.Number(%@)".loc(label), label) ;
-  }
+    return SC.$error("Invalid.Number(%@)".loc(label), label) ;
+  },
+  
+  /** 
+    Allow only numbers, dashes, period, and commas
+  */
+  validateKeyDown: function(form, field, charStr) {
+    return !!charStr.match(/[0-9\.,\-]/);
+  },
+  
     
 }) ;

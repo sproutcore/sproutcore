@@ -313,7 +313,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     // cannot commit changes to null content.  Return an error.
     if (!content) {
-      return $error("No Content");
+      return SC.$error("No Content");
     }
     
     if (content.beginPropertyChanges) content.beginPropertyChanges();

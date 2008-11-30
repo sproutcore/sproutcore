@@ -5,7 +5,7 @@
 
 require('validators/validator') ;
 
-/**
+/** @class
   Validate a field value as a credit card number. 
   
   This validator will perform a basic check to ensure the credit card number
@@ -17,10 +17,8 @@ require('validators/validator') ;
   Basic credit card validation courtesy David Leppek 
   (https://www.azcode.com/Mod10)
 
-  @class
   @extends SC.Validator
-  @author Charles Jolley
-  @version 1.0
+  @since SproutCore 1.0
 */
 SC.Validator.CreditCard = SC.Validator.extend(
 /** @scope SC.Validator.CreditCard.prototype */ {
@@ -48,10 +46,21 @@ SC.Validator.CreditCard = SC.Validator.extend(
   
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
-    return $error("Invalid.CreditCard(%@)".loc(label), label);
+    return SC.$error("Invalid.CreditCard(%@)".loc(label), label);
+  },
+  
+  /** 
+    Allow only numbers, dashes, and spaces 
+  */
+  validateKeyDown: function(form, field, charStr) {
+    return !!charStr.match(/[0-9\- ]/);
   },
   
   checkNumber: function(ccNumb) {
+    
+    // remove any spaces or dashes
+    ccNumb = ccNumb.replace(/[^0-9]/g,'');
+    
     var valid = "0123456789";  // Valid digits in a credit card number
     var len = ccNumb.length;  // The length of the submitted cc number
     var iCCN = parseInt(ccNumb,0);  // integer of ccNumb
@@ -74,7 +83,7 @@ SC.Validator.CreditCard = SC.Validator.extend(
     if(!bNum) bResult = false;
 
     // Determine if it is the proper length 
-    if((len == 0)&&(bResult)){  // nothing, field is blank AND passed above # check
+    if((len === 0)&&(bResult)){  // nothing, field is blank AND passed above # check
       bResult = false;
     } else{  // ccNumb is a number and the proper length - let's see if it is a valid card number
       if(len >= 15){  // 15 or 16 for Amex or V/MC
@@ -99,7 +108,7 @@ SC.Validator.CreditCard = SC.Validator.extend(
         iCCN = iCCN / 10;  // subtracts right most digit from ccNum
         iTotal += calc;  // running total of the card number as we loop
       }  // END OF LOOP
-      if ((iTotal%10)==0){  // check to see if the sum Mod 10 is zero
+      if ((iTotal%10)===0){  // check to see if the sum Mod 10 is zero
         bResult = true;  // This IS (or could be) a valid credit card number.
       } else {
         bResult = false;  // This could NOT be a valid credit card number

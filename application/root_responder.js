@@ -334,7 +334,7 @@ SC.RootResponder = SC.Object.extend({
     handles the event, then it will be sent as a regular keyDown event.
   */
   _isFunctionOrNonPrintableKey: function(evt) {
-    return !!(evt.altKey || evt.ctrlKey || evt.metaKey || SC.FUNCTION_KEYS[evt.keyCode]);
+    return !!(evt.altKey || evt.ctrlKey || evt.metaKey || ((evt.charCode !== evt.which) && SC.FUNCTION_KEYS[evt.which]));
   },
 
   /** @private 
@@ -342,7 +342,7 @@ SC.RootResponder = SC.Object.extend({
     events may generate a flagsChanged event, but are otherwise ignored.
   */
   _isModifierKey: function(evt) {
-    return !!SC.MODIFIER_KEYS[evt.keyCode];
+    return !!SC.MODIFIER_KEYS[evt.charCode];
   },
 
   /** @private
@@ -362,7 +362,7 @@ SC.RootResponder = SC.Object.extend({
     // is only a modifier change
     var ret = this._handleModifierChanges(evt);
     if (this._isModifierKey(evt)) return ret;
-    
+
     // if this is a function or non-printable key, try to use this as a key
     // equivalent.  Otherwise, send as a keyDown event so that the focused
     // responder can do something useful with the event.

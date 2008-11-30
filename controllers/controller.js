@@ -224,7 +224,7 @@ SC.Controller = SC.Object.extend(
     commit.  Return true if you succeeded or false or an error if you failed.
   */
   performCommitChanges: function() {
-    return $error('performCommitChanges is not implemented') ;
+    return SC.$error('performCommitChanges is not implemented') ;
   },
   
   /**
@@ -244,7 +244,7 @@ SC.Controller = SC.Object.extend(
     failed.
   */
   performDiscardChanges: function() {
-    return $error('performDiscardChanges is not implemented');
+    return SC.$error('performDiscardChanges is not implemented');
   },
   
   // ....................................

@@ -142,7 +142,7 @@ SC.ObjectController = SC.Controller.extend(
     
     // cannot commit changes to empty content.  Return an error.
     if (!content) {
-      return $error("No Content") ;
+      return SC.$error("No Content") ;
 
     // if content is an array, then loop through each item in the array and
     // get the changed values.

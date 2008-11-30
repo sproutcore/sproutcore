@@ -23,7 +23,7 @@ SC.Validator.Password = SC.Validator.extend(
 /** @scope SC.Validator.Password.prototype */ {
 
   attachTo: function(form,field) {
-    argments.callee.base.call(this,form,field) ;
+    sc_super();
     if (!this.fields) this.fields = [] ;
     this.fields.push(field) ;
   },
@@ -60,7 +60,7 @@ SC.Validator.Password = SC.Validator.extend(
       var msg = (valid) ? null : ((f == topField) ? err : '') ;
       form.setErrorFor(f,msg) ;
     }) ;
-    return (valid) ? SC.Validator.OK : err ;
+    return (valid) ? SC.VALIDATE_OK : err ;
   },
   
   validateChange: function(form, field, oldValue) { 
@@ -83,7 +83,7 @@ SC.Validator.Password = SC.Validator.extend(
     var isInvalid = !this._field.get('isValid') ;
     if (isInvalid) {
       return this.updateFields(form, this.validate(false)) ;
-    } else return SC.Validator.NO_CHANGE ;
+    } else return SC.VALIDATE_NO_CHANGE ;
   }
     
 }) ;

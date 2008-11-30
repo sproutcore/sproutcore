@@ -10,3 +10,7 @@ body.sc-theme {
 	padding: 0px;
 }
 
+
+.sc-view.invalid {
+  outline: 2px red solid;
+}

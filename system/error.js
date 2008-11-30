@@ -41,7 +41,11 @@ SC.Error = SC.Object.extend(
   /**
     Human readable name of the item with the error.
   */
-  label: null
+  label: null,
+  
+  toString: function() {
+    return "SC.Error:%@:%@ (%@)".fmt(SC.guidFor(this), this.description, this.code);
+  }
 }) ;
 
 /**

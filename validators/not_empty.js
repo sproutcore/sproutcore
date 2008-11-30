@@ -28,7 +28,7 @@ SC.Validator.NotEmpty = SC.Validator.extend(
   
   validateError: function(form, field) {
     var label = field.get('errorLabel') || 'Field' ;
-    return $error("Invalid.NotEmpty(%@)".loc(label.capitalize()), field.get('errorLabel'));
+    return SC.$error("Invalid.NotEmpty(%@)".loc(label.capitalize()), field.get('errorLabel'));
   }
     
 }) ;
