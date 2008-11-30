@@ -134,11 +134,11 @@ SC.Responder = {
     } 
 
     //if(cmd == "space") chr = " ";
-    if ( chr && responder.respondsTo('insertText')) {
+    if ( chr && this.respondsTo('insertText')) {
       // if we haven't returned yet and there is plain text, then do an insert 
       // of the text.  Since this is not an action, do not send it up the 
       // responder chain.
-     return responder.insertText(chr);
+     return this.insertText(chr);
     }
 
     return null ; //nothing to do.
