@@ -130,7 +130,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     continue to propagate and NO if you want it to stop.  Returning NO will
     both stop bubbling of the event and will prevent any default action 
     taken by the browser.  You can also control these two behaviors separately
-    by calling the stopPropogation() or preventDefault() methods on the event
+    by calling the stopPropagation() or preventDefault() methods on the event
     itself, returning YES from your method.
     
     h2. Limitations
@@ -425,6 +425,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
       var target = handler[0] || this ;
       ret = method.apply( target, args );
+      
       if (val !== NO) val = ret;
 
       // if method returned NO, do not continue.  Stop propogation and
@@ -638,7 +639,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 SC.Event.prototype = {
 
   /**
-    Set to YES if you have called either preventDefault() or stopPropogation().  This allows a generic event handler to notice if you want to provide detailed control over how the browser handles the real event.
+    Set to YES if you have called either preventDefault() or stopPropagation().  This allows a generic event handler to notice if you want to provide detailed control over how the browser handles the real event.
   */
   hasCustomEventHandling: NO,
   
@@ -677,7 +678,7 @@ SC.Event.prototype = {
   stopPropagation: function() {
     var evt = this.originalEvent ;
     if (evt) {
-      if (evt.stopPropogation) evt.stopPropagation() ;
+      if (evt.stopPropagation) evt.stopPropagation() ;
       evt.cancelBubble = YES ; // IE
     }
     this.hasCustomEventHandling = YES ; 
@@ -691,7 +692,7 @@ SC.Event.prototype = {
     @returns {SC.Event} receiver
   */
   stop: function() {
-    return this.preventDefault().stopPropogation();
+    return this.preventDefault().stopPropagation();
   },
   
   /** Always YES to indicate the event was normalized. */
