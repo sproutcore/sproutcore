@@ -70,7 +70,7 @@ SC.UserDefaults = SC.Object.extend({
     // namespace keyname
     if (keyName.indexOf('/')) {
       var domain = this.get('appDomain') || 'app';
-      keyName = [domain, keyName].join('/');
+      keyName = [domain, keyName].join(':');
     } 
     
     var user = this.get('userDomain') || '' ;
@@ -80,8 +80,13 @@ SC.UserDefaults = SC.Object.extend({
     if (this._written) ret = this._written[userKeyName];
     
     // attempt to read from localStorage
-    if (window.localStorage) {
-      ret = window.localStorage[["SC.UserDefaults",userKeyName].join('@')];
+    var localStorage = window.localStorage ;
+    if (!localStorage && window.globalStorage) {
+      localStorage = window.globalStorage[window.location.hostname];
+    }
+    if (localStorage) {
+      console.log('userKeyName = %@ local=%@'.fmt(userKeyName, localStorage));
+      ret = localStorage[["SC.UserDefaults",userKeyName].join('@')];
     }
     
     // if not found in localStorage, try to notify delegate
@@ -110,7 +115,7 @@ SC.UserDefaults = SC.Object.extend({
     // namespace keyname
     if (keyName.indexOf('/')) {
       var domain = this.get('appDomain') || 'app';
-      keyName = [domain, keyName].join('/');
+      keyName = [domain, keyName].join(':');
     } 
     
     var user = this.get('userDomain') || '' ;
@@ -122,8 +127,12 @@ SC.UserDefaults = SC.Object.extend({
     written[userKeyName] = value ;
     
     // save to local storage
-    if (window.localStorage) {
-      window.localStorage[["SC.UserDefaults",userKeyName].join('@')] = value;
+    var localStorage = window.localStorage ;
+    if (!localStorage && window.globalStorage) {
+      localStorage = window.globalStorage[window.location.hostname];
+    }
+    if (localStorage) {
+      localStorage[["SC.UserDefaults",userKeyName].join('@')] = value;
     }
     
     // also notify delegate
