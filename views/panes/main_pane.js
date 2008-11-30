@@ -31,5 +31,7 @@ SC.MainPane = SC.Pane.extend({
     return ret ;
   },
   
+  acceptsKeyFocus: YES,
+  
   emptyElement: '<div class="sc-pane sc-main-pane"></div>'
 });
