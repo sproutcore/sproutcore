@@ -3,7 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('panes/pane');
+require('views/panes/pane');
 
 /** @class
 

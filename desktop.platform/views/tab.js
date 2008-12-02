@@ -5,7 +5,7 @@
 
 require('views/view') ;
 require('views/controls/container');
-require('desktop.platform/views/controls/segmented');
+require('desktop.platform/views/segmented');
 
 SC.TOP_LOCATION = 'top';
 SC.BOTTOM_LOCATION = 'bottom';
