@@ -58,6 +58,8 @@ SC.Validator.CreditCard = SC.Validator.extend(
   
   checkNumber: function(ccNumb) {
     
+    if (!ccNumb || ccNumb.length===0) return YES; // do not validate empty
+    
     // remove any spaces or dashes
     ccNumb = ccNumb.replace(/[^0-9]/g,'');
     
