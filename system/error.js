@@ -66,6 +66,11 @@ SC.Error.desc = function(description, label, code) {
 
 /**
   Shorthand form of the SC.Error.desc method.
+
+  @param description {String} human readable description of the error
+  @param label {String} human readable name of the item with the error
+  @param code {Number} an error code to use for testing.
+  @returns {SC.Error} new error instance.
 */
 SC.$error = function(description, label, c) { 
   return SC.Error.desc(description,label, c); 
