@@ -1,0 +1,26 @@
+/* SC.ScrollerView */
+
+.sc-scroller-view .sc-inner {
+  position: absolute;
+  left:0;
+  top: 0;
+}
+
+.sc-scroller-view.sc-horizontal {
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.sc-scroller-view.sc-horizontal .sc-inner {
+  bottom: 0;
+}
+
+
+.sc-scroller-view.sc-vertical {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.sc-scroller-view.sc-vertical .sc-inner {
+  right: 0;
+}
