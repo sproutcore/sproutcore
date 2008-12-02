@@ -5,16 +5,16 @@
 
 require('views/view') ;
 require('views/mixins/control') ;
-require('system/mixins/delegate_support');
-require('views/inline_text_field');
 require('views/mixins/inline_editor_delegate');
+
+require('views/inline_text_field');
 
 SC.ALIGN_LEFT = 'left';
 SC.ALIGN_RIGHT = 'right';
 SC.ALIGN_CENTER = 'center';
 
-SC.REGULAR_FONT = 'normal';
-SC.BOLD_FONT = 'bold';
+SC.REGULAR_WEIGHT = 'normal';
+SC.BOLD_WEIGHT = 'bold';
 
 /**
   @class
@@ -26,20 +26,18 @@ SC.BOLD_FONT = 'bold';
   
   @extends SC.View
   @extends SC.Control
-  @extends SC.DelegateSupport
   @extends SC.InlineEditorDelegate
-  @extends SC.Editable
   @since SproutCore 1.0
 */
-SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDelegate,
+SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.LabelView.prototype */ {
 
   styleClass: ['sc-label-view'],
 
   /**
-    Specify the font weight for this.  You may pass SC.REGULAR_FONT, or SC.BOLD_FONT.
+    Specify the font weight for this.  You may pass SC.REGULAR_WEIGHT, or SC.BOLD_WEIGHT.
   */
-  fontWeight: SC.REGULAR_FONT,
+  fontWeight: SC.REGULAR_WEIGHT,
   
   /**
     If true, value will be escaped to avoid scripting attacks.
@@ -128,7 +126,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
   }.property('value', 'localize', 'formatter').cacheable(),
   
   /**
-    enables editing using the inline editor
+    Enables editing using the inline editor.
   */
   isEditable: NO,
   isEditableBindingDefault: SC.Binding.bool(),
@@ -164,8 +162,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     
     @return {Boolean} YES if did begin editing
   */
-  beginEditing: function()
-  {
+  beginEditing: function() {
     if (this.get('isEditing')) return YES ;
     if (!this.get('isEditable')) return NO ;
     
@@ -240,8 +237,8 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
     var ret = sc_super();
     var value = this.get('displayValue');
     var icon = this.get('icon') ;
-    if ((icon !== this._label_lastIcon) || (value !== this._label_lastDisplayValue)) {
 
+    if ((icon !== this._label_lastIcon) || (value !== this._label_lastDisplayValue)) {
       this._label_lastDisplayValue = value ;
       this._label_lastIcon = icon ;
       if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
@@ -257,9 +254,7 @@ SC.LabelView = SC.View.extend(SC.DelegateSupport, SC.Control, SC.InlineEditorDel
       }
     }
     
-    
     this.$().css('text-align', this.get('textAlign')).css('font-weight', this.get('fontWeight'));
-    
     return ret ;
   },
   
