@@ -453,6 +453,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         if (root) this.rootElement = root;
         
       } else {
+        console.log('%@: prepareDisplay'.fmt(this));
         this.prepareDisplay();
         if (this.get('updateDisplayOnPrepare')) this.updateDisplay() ;
       }
@@ -1004,19 +1005,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   
   /**
     The clipping frame returns the visible portion of the view, taking into
-    account the current scroll position, etc.  Keep in mind that the 
+    account the clippingFrame of the parent view.  Keep in mind that the 
     clippingFrame is in the context of the view itself, not it's parent view.
     
-    - changes on scroll, on parent clipping frame changing, on resize, and
-      frame change.  basically all the freaking time
-
-    - if when you scroll off, views are removed anyway, maybe I only need to
-      worry about the clippingFrame for the view itself.  I could do that with
-      just the visible bounds....
+    Normally this will be calculate based on the intersection of your own 
+    clippignFrame and your parentView's clippingFrame.  SC.ClipView may also
+    shift this by a certain amount.    
   */
   clippingFrame: function() {
-    
-  }.property().cacheable(),
+    var pv= this.get('parentView'), ret = this.get('frame');
+    if (pv) {
+     pv = pv.get('frame'); pv.x=pv.y=0;
+     ret = SC.intersectRects(pv, ret);
+    }
+    return ret ;
+  }.property('parentView', 'frame').cacheable(),
   
   /**
     The bounds returns the current offset & size of the view.  This will
