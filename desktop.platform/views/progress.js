@@ -116,10 +116,17 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   // start/stop running animation based on isRunning state.
   animateProgressBar: function() {
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
-      this.displayDidChange();
-      this.animateProgressBar.invokeLater(this, 1000/60);
+      this._animateProgressBar(500); // wait to start to avoid probs
     }
   }.observes('isRunning', 'isVisibleInWindow'),
+
+  _animateProgressBar: function(delay) {  
+    if (delay===0) delay =1000/30;
+    if (this.get('isRunning') && this.get('isVisibleInWindow')) {
+      this.displayDidChange();
+      this.invokeLater(this._animateProgressBar, delay, 0);
+    }
+  },
   
   displayProperties: 'value minimum maximum isIndeterminate'.w(),
   
@@ -131,7 +138,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     var isEnabled = this.get('isEnabled');
     
     
-    var offset = (isIndeterminate && isRunning) ? (-16+Math.floor(Date.now()/100)%16) : 0;
+    var offset = (isIndeterminate && isRunning) ? (-16+Math.floor(Date.now()/75)%16) : 0;
     
     // compute value for setting the width of the inner progress
     var value ;
