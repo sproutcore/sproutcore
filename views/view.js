@@ -637,7 +637,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       styleClass = this.get('styleClass').join(' ');
       html = this.get('emptyElement').fmt(this.get('tagName'));
       cq = SC.$(html).addClass(styleClass);
-      cq.setClass('no-select', !this.get('isTextSelectable')); 
+      cq.setClass('allow-select', this.get('isTextSelectable'));
       root = cq.get(0);
     }
     this.rootElement = root ;
@@ -818,7 +818,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     invalidate the display.  The display will be automatically invalidated
     when one of these properties change.
   */
-  displayProperties: ['isTextSelectable'],
+  displayProperties: [],
   
   // ...........................................
   // LAYOUT
