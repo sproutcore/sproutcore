@@ -818,7 +818,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     invalidate the display.  The display will be automatically invalidated
     when one of these properties change.
   */
-  displayProperties: [],
+  displayProperties: ['isTextSelectable'],
   
   // ...........................................
   // LAYOUT
