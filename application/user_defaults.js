@@ -27,7 +27,7 @@ require('system/object');
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.UserDefaults = SC.Object.extend({
+SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   
   /** 
     the default domain for the user.  This will be used to store keys in
