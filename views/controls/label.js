@@ -256,12 +256,5 @@ SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     
     this.$().css('text-align', this.get('textAlign')).css('font-weight', this.get('fontWeight'));
     return ret ;
-  },
-  
-  prepareDisplay: function() {
-    var ret = sc_super();
-    this.updateDisplay();
-    return ret ;
   }
-
 });
