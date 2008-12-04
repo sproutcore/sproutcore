@@ -24,52 +24,75 @@ SC.ScrollView = SC.View.extend({
   // 
   
   /** 
-    The content view you want the scroll view to manage. This will be 
-    assigned to the contentView of the clipView also.
+    The content view you want the scroll view to manage. This will be assigned to the contentView of the clipView also.
   */
   contentView: null,
 
   /**
-    The clipping view.  Define your own subclass here if you prefer.  It will
-    be instantiated when the view is setup.  Note that the layout for the 
-    view must be defined by you when the view is created.
+    The current horizontal scroll offset. Changing this value will update both the contentView and the horizontal scroller, if there is one.
   */
-  clipView: SC.ClipView,
-  
-  /** If YES then a horizontal scroller will be created. */
-  canScrollHorizontal: YES,
+  horizontalScrollOffset: 0,
 
-  /** 
-    If YES then the horizontal scroller is visible.  Note that this differs
-    from canScrollHorizontal, which determines if a scroller is created at
-    all.
+  /**
+    The current vertical scroll offset.  Changing this value will update both the contentView and the vertical scroller, if there is one.
   */
-  isHorizontalScrollerVisible: YES,
+  verticalScrollOffset: 0,
+  
+  // ..........................................................
+  // SCROLLERS
+  // 
   
   /** 
-    Override with your own horizontal scroller class if you prefer.
+    YES if the view shuld maintain a horizontal scroller.   This property must be set when the view is created.
+    
+    @property {Boolean}
+  */
+  hasHorizontalScroller: YES,
+  
+  /**
+    The horizontal scroller view class. This will be replaced with a view instance when the ScrollView is created unless hasHorizontalScroller is NO.
+    
+    @property {SC.View}
   */
   horizontalScrollerView: SC.ScrollerView,
   
-  horizontalScrollOffset: 0,
-  
-  /** If YES, then a vertical scroller will be created. */
-  canScrollVertical: YES,
+  /**
+    YES if the horizontal scroller should be visible.  You can change this property value anytime to show or hide the horizontal scroller.  If you do not want to use a horizontal scroller at all, you should instead set hasHorizontalScroller to NO to avoid creating a scroller view in the first place.
+    
+    @property {Boolean}
+  */
+  isHorizontalScrollerVisible: YES,
 
   /** 
-    If YES then the vertical scroller is visible.  Note that this differs
-    from canScrollVertical, which determines if a scroller is created at
-    all.
+    YES if the view shuld maintain a vertical scroller.   This property must be set when the view is created.
+    
+    @property {Boolean}
   */
-  isVerticalScrollerVisible: YES,
+  hasVerticalScroller: YES,
   
   /**
-    Override with your own vertical scroller class if you prefer.
+    The vertical scroller view class. This will be replaced with a view instance when the ScrollView is created unless hasVerticalScroller is NO.
+    
+    @property {SC.View}
   */
   verticalScrollerView: SC.ScrollerView,
   
-  verticalScrollOffset: 0,
-
+  /**
+    YES if the vertical scroller should be visible.  You can change this property value anytime to show or hide the vertical scroller.  If you do not want to use a vertical scroller at all, you should instead set hasVerticalScroller to NO to avoid creating a scroller view in the first place.
+    
+    @property {Boolean}
+  */
+  isVerticalScrollerVisible: YES,
+  
+  // ..........................................................
+  // CUSTOM VIEWS
+  // 
+  
+  /**
+    The container view that will contain your main content view.
+  */
+  containerView: SC.ContainerView,
+  
   // ..........................................................
   // METHODS
   // 
