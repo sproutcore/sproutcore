@@ -8,7 +8,7 @@ require('views/view');
 SC.View._create = SC.View.create; 
 
 SC.View.mixin({
-
+  
   /**
     In design mode, save the designAttributes for any views created with the 
     design method.
@@ -41,6 +41,9 @@ SC.View.mixin({
         view: ret,
         viewClass: this
       });
+      
+      // in design mode, a control's text is always selectable
+      ret.$().setClass('allow-select', YES);
     }
     return ret ;
   },

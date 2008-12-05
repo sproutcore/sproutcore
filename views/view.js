@@ -41,17 +41,32 @@ SC._VIEW_DEFAULT_DIMS = 'marginTop marginLeft'.w();
   
   Base class for managing a view.  View's provide two functions:
   
-  1. They translate state and events into drawing instructions for the web browser and
+  1. They translate state and events into drawing instructions for the 
+     web browser and
   
-  2. They act as first responders for incoming keyboard, mouse, and touch events.
+  2. They act as first responders for incoming keyboard, mouse, and 
+     touch events.
   
   h2. View Initialization
   
-  When a view is setup, there are several methods you can override that will be called at different times depending on how your view is created.  Here is a guide to which method you want to override and when:
+  When a view is setup, there are several methods you can override that 
+  will be called at different times depending on how your view is created.
+  Here is a guide to which method you want to override and when:
   
-  - *prepareDisplay:* override this method for perform one-time setup on your view's HTML, such as copying in CSS class names and rendering structural HTML based on configuration options.  This method will only be called once when the view is created and the HTML it produces may be saved and reused at runtime, avoiding a call to this method again.
-  - *updateDisplay:* override this method to update your HTML to reflect any changes to the state of your view.  This method will also be called once on view init unless you set updateContentOnPrepare to NO.  
-  - *init:* override this method for any general object setup (such as observers, starting timers and animations, etc) that you need to happen everytime the view is created, regardless of whether or not its HTML has been cached.
+  - *prepareDisplay:* override this method for perform one-time setup on 
+    your view's HTML, such as copying in CSS class names and rendering 
+    structural HTML based on configuration options.  This method will only 
+    be called once when the view is created and the HTML it produces may be 
+    saved and reused at runtime, avoiding a call to this method again.
+    
+  - *updateDisplay:* override this method to update your HTML to reflect 
+    any changes to the state of your view.  This method will also be called 
+    once on view init unless you set updateContentOnPrepare to NO.
+    
+  - *init:* override this method for any general object setup (such as 
+    observers, starting timers and animations, etc) that you need to happen 
+    everytime the view is created, regardless of whether or not its HTML has 
+    been cached.
   
   @extends SC.Object
   @extends SC.Responder
@@ -354,9 +369,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   isVisibleInWindow: NO,
   
   /**
-    Recomputes the isVisibleInWindow property based on the visibility of the  view and its parent.  If the recomputed value differs from the current isVisibleInWindow state, this method will also call recomputIsVisibleInWindow() on its child views as well.  As an optional optimization, you can pass the isVisibleInWindow state of the parentView if you already know it.
+    Recomputes the isVisibleInWindow property based on the visibility of the 
+    view and its parent.  If the recomputed value differs from the current 
+    isVisibleInWindow state, this method will also call 
+    recomputIsVisibleInWindow() on its child views as well.  As an optional 
+    optimization, you can pass the isVisibleInWindow state of the parentView 
+    if you already know it.
     
-    You will not generally need to call or override this method yourself.  It is used by the SC.View hierarchy to relay window visibility changes up and down the chain.
+    You will not generally need to call or override this method yourself. It 
+    is used by the SC.View hierarchy to relay window visibility changes up 
+    and down the chain.
     
     @property {Boolean} parentViewIsVisible
     @returns {SC.View} receiver 
@@ -401,9 +423,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   }.property('parentView').cacheable(),
 
   /**
-    Recursively travels down the view hierarchy looking for a view that implements the key equivalent (returning to YES to indicate it handled the event).  You can override this method to handle specific key equivalents yourself.
+    Recursively travels down the view hierarchy looking for a view that 
+    implements the key equivalent (returning to YES to indicate it handled 
+    the event).  You can override this method to handle specific key 
+    equivalents yourself.
     
-    The keystring is a string description of the key combination pressed.  The evt is the event itself.    If you handle the equivalent, return YES.  Otherwise, you should just return sc_super.
+    The keystring is a string description of the key combination pressed.
+    The evt is the event itself. If you handle the equivalent, return YES.
+    Otherwise, you should just return sc_super.
     
     @param {String} keystring
     @param {SC.Event} evt
@@ -475,7 +502,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
 
   /**
-    Wakes up the view. The default implementation immediately syncs any bindings, which may cause the view to need its display updated. You can override this method to perform any additional setup. Be sure to call sc_super to setup bindings and to call awake on childViews.
+    Wakes up the view. The default implementation immediately syncs any 
+    bindings, which may cause the view to need its display updated. You 
+    can override this method to perform any additional setup. Be sure to 
+    call sc_super to setup bindings and to call awake on childViews.
     
     @returns {void}
   */
@@ -486,7 +516,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
     
   /** 
-    You must call this method on a view to destroy the view (and all of its child views). This will remove the view from any parent node, then make sure that the DOM element managed by the view can be released by the memory manager.
+    You must call this method on a view to destroy the view (and all of its 
+    child views). This will remove the view from any parent node, then make 
+    sure that the DOM element managed by the view can be released by the 
+    memory manager.
   */
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
@@ -537,13 +570,22 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /** 
-    This method is called when your view is first created to setup any child views that are already defined on your class.  If any are found, it will instantiate them for you.
+    This method is called when your view is first created to setup any 
+    child views that are already defined on your class.  If any are 
+    found, it will instantiate them for you.
     
-    The default implementation of this method simply steps through your childViews array, which is expects to either be empty or to contain View designs that can be instantiated
+    The default implementation of this method simply steps through your 
+    childViews array, which is expects to either be empty or to contain 
+    View designs that can be instantiated
     
-    Alternatively, you can implement this method yourself in your own subclasses to look for views defined on specific properties and then build a childViews array yourself.
+    Alternatively, you can implement this method yourself in your own 
+    subclasses to look for views defined on specific properties and then 
+    build a childViews array yourself.
     
-    Note that when you implement this method yourself, you should never instantiate views directly.  Instead, you should use this.createChildView() method instead.  This method can be much faster in a production environment than creating views yourself.
+    Note that when you implement this method yourself, you should never 
+    instantiate views directly.  Instead, you should use 
+    this.createChildView() method instead.  This method can be much faster 
+    in a production environment than creating views yourself.
 
     @returns {SC.View} receiver
   */
@@ -568,7 +610,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
-    Instantiates a view to be added to the childViews array during view initialization. You generally will not call this method directly unless you are overriding createChildViews(). Note that this method will automatically configure the correct settings on the new view instance to act as a child of the parent.
+    Instantiates a view to be added to the childViews array during view 
+    initialization. You generally will not call this method directly unless 
+    you are overriding createChildViews(). Note that this method will 
+    automatically configure the correct settings on the new view instance to 
+    act as a child of the parent.
     
     @param {Class} viewClass
     @param {Hash} attrs optional attributes to add
@@ -637,7 +683,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       styleClass = this.get('styleClass').join(' ');
       html = this.get('emptyElement').fmt(this.get('tagName'));
       cq = SC.$(html).addClass(styleClass);
-      cq.setClass('no-select', !this.get('isTextSelectable')); 
+      cq.setClass('allow-select', this.get('isTextSelectable'));
       root = cq.get(0);
     }
     this.rootElement = root ;
@@ -694,7 +740,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     view's containerElement.  You can pass a selector to this or pass no 
     parameters to get a CQ object that selects the view's containerElement.
     
-    For many views, their container element and root element are the same.  This means that calling view.$() and view.$container() will yield the same results.  However, if the view has a containerSelector property set, then the container will differ.
+    For many views, their container element and root element are the same.
+    This means that calling view.$() and view.$container() will yield the 
+    same results.  However, if the view has a containerSelector property set, 
+    then the container will differ.
   */
   $container: function(selector, context) {
     var sel = this.get('containerSelector') ;
@@ -845,7 +894,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         delete layout[key];
       } else layout[key] = value ;
       
-    // handle hash -- do it this way to avoid creating memory unles needed
+    // handle hash -- do it this way to avoid creating memory unless needed
     } else {
       var hash = key;
       for(key in hash) {
@@ -1037,7 +1086,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   /**
     LayoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
-    you edit the layout propert.y  Both are read only.
+    you edit the layout property.  Both are read only.
   */
   /** 
     Computes the layout style settings needed for the current anchor.
