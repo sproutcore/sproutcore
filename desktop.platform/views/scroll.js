@@ -4,7 +4,7 @@
 // ========================================================================
 
 require('views/view') ;
-require('desktop.platform/views/clip');
+require('views/container');
 require('desktop.platform/views/scroller');
 
 /** @class
@@ -110,7 +110,7 @@ SC.ScrollView = SC.View.extend({
     var vscroll = this.get('verticalScrollerView');
     var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
     var hasVertical = vscroll && this.get('isVerticalScrollerVisible');
-    var clip = this.get('clipView') ;
+    var clip = this.get('containerView') ;
     var clipLayout = { left: 0, top: 0 };
     var t ;
     
