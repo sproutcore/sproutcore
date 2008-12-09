@@ -30,11 +30,11 @@ config.filters = location.search.length > 1 && SC.CoreQuery.map( location.search
 var isLocal = !!(window.location.protocol == 'file:');
 
 SC.ready(function() { 
-  // $('#userAgent').html(navigator.userAgent);
-  // var head = $('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').insertAfter("#userAgent");
-  // $('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
-  //  $('li.pass')[this.checked ? 'hide' : 'show']();
-  // });
+  SC.$('<div id="userAgent"></div>').html(navigator.userAgent).appendTo('body');
+  //var head = SC.$('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').appendTo("body");
+  //SC.$('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
+  // SC.$('li.pass')[this.checked ? 'hide' : 'show']();
+  //});
   if (config.queue.length>0) runTest();  
 }) ;
 
@@ -103,12 +103,13 @@ function runTest() {
       console.log("*** SUCCESS: All %@ tests passed".fmt(config.stats.all));
     }
 
-    // $('<p id="testresult" class="result">').html(['Tests completed in ',
-    //  +new Date - started, ' milliseconds.<br/>',
-    //  '<span class="bad">', config.stats.bad, '</span> tests of <span class="all">', config.stats.all, '</span> failed.</p>']
-    //  .join(''))
-    //  .appendTo("body");
-    // $("#banner").addClass(config.stats.bad ? "fail" : "pass");
+    var color = (config.stats.bad >0) ? 'red' : 'green'
+    SC.$('<p id="testresult" class="result">').html(['Tests completed in ',
+      +new Date - started, ' milliseconds.<br/>',
+      '<span class="bad">', config.stats.bad, '</span> tests of <span class="all">', config.stats.all, '</span> failed.</p>']
+      .join('')).css('color', color)
+    .prependTo("body");
+    SC.$("#banner").addClass(config.stats.bad ? "fail" : "pass");
   });
 }
 
@@ -176,17 +177,19 @@ function test(name, callback, nowait) {
     config.expected = null;
     
     var good = 0, bad = 0;
-    // var ol = document.createElement("ol");
-    // ol.style.display = "none";
-    var ol = [] ;
+    var ol = document.createElement("ol");
+    //ol.style.display = "none";
+    //var ol = [] ;
     
     var li = "", state = "pass";
     for ( var i = 0; i < config.Test.length; i++ ) {
-      ol.push(" ~ %@: %@".fmt((config.Test[i][0] ? "pass" : "FAIL"), (config.Test[i][1]))) ;
-      // var li = document.createElement("li");
-      // li.className = config.Test[i][0] ? "pass" : "fail";
-      // li.appendChild( document.createTextNode(config.Test[i][1]) );
-      // ol.appendChild( li );
+      //ol.push(" ~ %@: %@".fmt((config.Test[i][0] ? "pass" : "FAIL"), (config.Test[i][1]))) ;
+      li = document.createElement("li");
+      li.className = config.Test[i][0] ? "pass" : "fail";
+      li.appendChild( document.createTextNode(config.Test[i][1]) );
+      ol.appendChild( li );
+      
+      SC.$(li).css('color', config.Test[i][0] ? 'black' : 'red');
       
       config.stats.all++;
       if ( !config.Test[i][0] ) {
@@ -196,17 +199,20 @@ function test(name, callback, nowait) {
       } else good++;
     }
 
-    console.log("%@ (fail: %@ pass: %@ total: %@)".fmt(name, bad || 0, good || 0, config.Test.length || 0)) ;
-    ol.forEach(function(x) { console.log(x); });
-    console.log('');
+    //console.log("%@ (fail: %@ pass: %@ total: %@)".fmt(name, bad || 0, good || 0, config.Test.length || 0)) ;
+    //ol.forEach(function(x) { console.log(x); });
+    //console.log('');
     
-    // var li = document.createElement("li");
-    // li.className = state;
-    //  
-    // var b = document.createElement("strong");
-    // b.innerHTML = name + " <b style='color:black;'>(<b class='fail'>" + bad + "</b>, <b class='pass'>" + good + "</b>, " + config.Test.length + ")</b>";
+    var li = document.createElement("li");
+    li.className = state;
+      
+    var b = document.createElement("strong");
+    var color = (bad>0) ? "red" : "black";
+    b.innerHTML = name + " <b style='color:black;'>(<b class='fail'>" + bad + "</b>, <b class='pass'>" + good + "</b>, " + config.Test.length + ")</b>";
+    SC.$(b).css('color', color);
+    
     // b.onclick = function(){
-    //  var n = this.nextSibling;
+    // var n = this.nextSibling;
     //  if ( $.css( n, "display" ) == "none" )
     //    n.style.display = "block";
     //  else
@@ -219,12 +225,18 @@ function test(name, callback, nowait) {
     //    location.href = location.href.match(/^(.+?)(\?.*)?$/)[1] + "?" + encodeURIComponent($.trim(target.text()));
     //  }
     // });
-    // li.appendChild( b );
-    // li.appendChild( ol );
-    //  
-    // document.getElementById("tests").appendChild( li );
+    li.appendChild( b );
+    li.appendChild( ol );
+      
+    var testdiv = SC.$('#tests') ;
+    if (testdiv.length === 0) {
+      testdiv = SC.$('<div id="tests"></div>');
+      testdiv.appendTo('body');
+    }
+    testdiv.append(SC.$(li));
+    //document.getElementById("tests").appendChild( li );
     
-    // if(bad) {
+    //if(bad) {
     //  $("#filter").attr("disabled", null);
     // }
   });
