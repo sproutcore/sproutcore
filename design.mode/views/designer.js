@@ -10,8 +10,8 @@ require('views/view');
 /** 
   A Designer class provides the core editing functionality you need to edit
   a view in the UI.  When your app loads in design.mode, a peer Designer 
-  instance is created for every view for which the class method hasDesigner
-  is YES.
+  instance is created for every view using the class method Designer or
+  SC.View.Designer if the view class does not define a Designer class.
   
   Whenever you put your app into design mode, all events will be routed first
   to the peer designer for an object, which will have an opportunity to 
@@ -66,17 +66,17 @@ SC.View.Designer = SC.Object.extend({
 
   /** 
     Invoked whenever a design property changes.  This will copy the property
-    to the designAttributes method.  It will also set the same property on 
+    to the attributes hash.  It will also set the same property on 
     the target view.
   */
   designPropertyDidChange: function(target, key) {
     var value = this.get(key) ;
     var attrs = this.attributes, view =this.view;
     
-    // save in designAttributes
+    // save in attributes
     if (attrs) {
       this.propertyWillChange('attributes') ;
-      attrs[key] = value ; // save in designAttributes
+      attrs[key] = value ; // save in attributes
       this.propertyDidChange('attributes') ;
     }
     
@@ -90,9 +90,10 @@ SC.View.Designer = SC.Object.extend({
   }.observes('isSelected'),
   
   tryToPerform: function(methodName, arg1, arg2) {
+    console.log('tryToPerform called');
     // only handle event if we are in design mode
     var page = this.view ? this.view.get('page') : null ;
-    var isDesignMode = page ? page.get('isDesignMode') : NO ;
+    var isDesignMode = page ? page.get('needsDesigner') || page.get('isDesignMode') : NO ;
 
     // if we are in design mode, route event handling to the designer
     // otherwise, invoke default method.
@@ -104,7 +105,9 @@ SC.View.Designer = SC.Object.extend({
   },
     
   mouseDown: function(evt) {
-    ViewBuilder.masterController.select([this], (evt.altKey || evt.shiftKey));
+    console.log('mouseDown called');
+    this.set('isSelected', YES);
+    // ViewBuilder.masterController.select([this], (evt.altKey || evt.shiftKey));
   }
   
 }) ;
