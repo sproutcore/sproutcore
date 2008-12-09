@@ -413,6 +413,9 @@ SC.Pane = SC.View.extend({
     var responder = (this.rootResponder = SC.RootResponder.responder);
     responder.panes.add(this);
     if (this.get('isKeyPane')) responder.makeKeyPane(this);
+  
+    // set currentWindowSize
+    this.set('currentWindowSize', responder.computeWindowSize()) ;
     
     // update my own location
     this.set('isPaneAttached', YES) ;

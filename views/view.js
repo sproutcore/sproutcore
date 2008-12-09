@@ -1105,7 +1105,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   layoutStyle: function() {
     var layout = this.get('layout'), ret = {}, pdim = null;
-    //ret.position = 'absolute' ;
 
     // X DIRECTION
     
