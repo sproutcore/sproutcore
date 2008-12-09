@@ -480,7 +480,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         if (root) this.rootElement = root;
         
       } else {
-        console.log('%@: prepareDisplay'.fmt(this));
         this.prepareDisplay();
         if (this.get('updateDisplayOnPrepare')) this.updateDisplay() ;
       }
@@ -527,7 +526,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     sc_super();
     
     // remove from parent if found
-    this.removeFromParentView() ;
+    this.removeFromParent() ;
 
     // now save rootElement and call primitive destroy method.  This will
     // cleanup children but not actually remove the DOM from any view it
@@ -989,7 +988,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var f = {}, pdim = null ;
 
     // handle left aligned and left/right 
-    if (layout.left !== undefined) {
+    if (!SC.none(layout.left)) {
       f.x = Math.floor(layout.left) ;
       if (layout.width !== undefined) {
         f.width = Math.floor(layout.width) ;
@@ -999,19 +998,24 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
       
     // handle right aligned
-    } else if (layout.right !== undefined) {
+    } else if (!SC.none(layout.right)) {
       if (!pdim) pdim = this.computeParentDimensions(layout);
-      f.width = Math.floor(layout.width || 0) ;
-      f.x = Math.floor(pdim.width - layout.right - f.width) ;
+      if (SC.none(layout.width)) {
+        f.width = pdim.width - layout.right ;
+        f.x = 0;
+      } else {
+        f.width = Math.floor(layout.width || 0) ;
+        f.x = Math.floor(pdim.width - layout.right - f.width) ;
+      }
 
     // handle centered
-    } else if (layout.centerX !== undefined) {
+    } else if (!SC.none(layout.centerX)) {
       if (!pdim) pdim = this.computeParentDimensions(layout); 
       f.width = Math.floor(layout.width || 0);
       f.x = Math.floor((pdim.width - f.width)/2 + layout.centerX);
     } else {
       f.x = 0 ; // fallback
-      if (layout.width === undefined) {
+      if (SC.none(layout.width)) {
         if (!pdim) pdim = this.computeParentDimensions(layout); 
         f.width = Math.floor(pdim.width) ;
       } else f.width = layout.width;
@@ -1019,7 +1023,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
 
     // handle top aligned and top/bottom 
-    if (layout.top !== undefined) {
+    if (!SC.none(layout.top)) {
       f.y = Math.floor(layout.top) ;
       if (layout.height !== undefined) {
         f.height = Math.floor(layout.height) ;
@@ -1029,13 +1033,18 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
       
     // handle bottom aligned
-    } else if (layout.bottom !== undefined) {
+    } else if (!SC.none(layout.bottom)) {
       if (!pdim) pdim = this.computeParentDimensions(layout);
-      f.height = Math.floor(layout.height || 0) ;
-      f.y = Math.floor(pdim.height - layout.bottom - f.height) ;
+      if (SC.none(layout.height)) {
+        f.height = pdim.height - layout.bottom;
+        f.y = 0;
+      } else {
+        f.height = Math.floor(layout.height || 0) ;
+        f.y = Math.floor(pdim.height - layout.bottom - f.height) ;
+      }
 
     // handle centered
-    } else if (layout.centerY !== undefined) {
+    } else if (!SC.none(layout.centerY)) {
       if (!pdim) pdim = this.computeParentDimensions(layout); 
       f.height = Math.floor(layout.height || 0);
       f.y = Math.floor((pdim.height - f.height)/2 + layout.centerY);
@@ -1043,12 +1052,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // fallback
     } else {
       f.y = 0 ; // fallback
-      if (layout.height === undefined) {
+      if (SC.none(layout.height)) {
         if (!pdim) pdim = this.computeParentDimensions(layout); 
         f.height = Math.floor(pdim.height) ;
       } else f.height = layout.height;
     }
 
+    // make sure width/height are never < 0
+    if (f.height < 0) f.height = 0;
+    if (f.width < 0) f.width = 0;
     return f;
   }.property().cacheable(),
   
@@ -1098,7 +1110,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // X DIRECTION
     
     // handle left aligned and left/right
-    if (layout.left !== undefined) {
+    if (!SC.none(layout.left)) {
       ret.left = Math.floor(layout.left);
       if (layout.width !== undefined) {
         ret.width = Math.floor(layout.width) ;
@@ -1110,19 +1122,32 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginLeft = 0 ;
       
     // handle right aligned
-    } else if (layout.right !== undefined) {
-      ret.left = null ;
+    } else if (!SC.none(layout.right)) {
       ret.right = Math.floor(layout.right) ;
-      ret.width = Math.floor(layout.width || 0) ;
       ret.marginLeft = 0 ;
+
+      if (SC.none(layout.width)) {
+        ret.left = 0;
+        ret.width = null;
+      } else {
+        ret.left = null ;
+        ret.width = Math.floor(layout.width || 0) ;
+      }
       
     // handle centered
-    } else if (layout.centerX !== undefined) {
+    } else if (!SC.none(layout.centerX)) {
       ret.left = "50%";
       ret.width = Math.floor(layout.width || 0) ;
       ret.marginLeft = Math.floor(layout.centerX - ret.width/2) ;
       ret.right = null ;
     
+    // if width defined, assume top/left of zero
+    } else if (!SC.none(layout.width)) {
+      ret.left =  0;
+      ret.right = null;
+      ret.width = Math.floor(layout.width);
+      ret.marginLeft = 0;
+      
     // fallback, full width.
     } else {
       ret.left = 0;
@@ -1134,7 +1159,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // Y DIRECTION
     
     // handle left aligned and left/right
-    if (layout.top !== undefined) {
+    if (!SC.none(layout.top)) {
       ret.top = Math.floor(layout.top);
       if (layout.height !== undefined) {
         ret.height = Math.floor(layout.height) ;
@@ -1146,19 +1171,30 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginTop = 0 ;
       
     // handle right aligned
-    } else if (layout.bottom !== undefined) {
-      ret.top = null ;
-      ret.bottom = Math.floor(layout.bottom) ;
-      ret.height = Math.floor(layout.height || 0) ;
+    } else if (!SC.none(layout.bottom)) {
       ret.marginTop = 0 ;
+      ret.bottom = Math.floor(layout.bottom) ;
+      if (SC.none(layout.height)) {
+        ret.top = 0;
+        ret.height = null ;
+      } else {
+        ret.top = null ;
+        ret.height = Math.floor(layout.height || 0) ;
+      }
       
     // handle centered
-    } else if (layout.centerY !== undefined) {
+    } else if (!SC.none(layout.centerY)) {
       ret.top = "50%";
       ret.height = Math.floor(layout.height || 0) ;
       ret.marginTop = Math.floor(layout.centerY - ret.height/2) ;
       ret.bottom = null ;
     
+    } else if (!SC.none(layout.height)) {
+      ret.top = 0;
+      ret.bottom = null;
+      ret.height = Math.floor(layout.height || 0);
+      ret.marginTop = 0;
+      
     // fallback, full width.
     } else {
       ret.top = 0;
@@ -1168,9 +1204,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     
     // set default values to null to allow built-in CSS to shine through
-    SC._VIEW_DEFAULT_DIMS.forEach(function(x) {
+    // currently applies only to marginLeft & marginTop
+    var dims = SC._VIEW_DEFAULT_DIMS, loc = dims.length, x;
+    while(--loc >=0) {
+      x = dims[loc];
       if (ret[x]===0) ret[x]=null;
-    },this);
+    }
 
     return ret ;
   }.property().cacheable(),
@@ -1179,8 +1218,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   computeParentDimensions: function(frame) {
     var pv = this.get('parentView'), pframe = (pv) ? pv.get('frame') : null;
     return {
-      width: (pframe) ? pframe.width : SC.maxX(frame),
-      height: (pframe) ? pframe.height : SC.maxY(frame)
+      width: ((pframe) ? pframe.width : ((frame.left||0)+(frame.width||0)+(frame.right||0))) || 0,
+      height: ((pframe) ? pframe.height : ((frame.top||0)+(frame.height||0)+(frame.bottom||0))) || 0
     } ;
   },
   
