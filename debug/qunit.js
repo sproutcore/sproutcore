@@ -30,7 +30,7 @@ config.filters = location.search.length > 1 && SC.CoreQuery.map( location.search
 var isLocal = !!(window.location.protocol == 'file:');
 
 SC.ready(function() { 
-  SC.$('<div id="userAgent"></div>').html(navigator.userAgent).appendTo('body');
+  //SC.$('<div id="userAgent"></div>').html(navigator.userAgent).appendTo('body');
   //var head = SC.$('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').appendTo("body");
   //SC.$('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
   // SC.$('li.pass')[this.checked ? 'hide' : 'show']();
