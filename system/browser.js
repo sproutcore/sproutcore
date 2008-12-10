@@ -54,7 +54,7 @@ SC.browser = (function() {
 
     /**
       The current browser name.  This is useful for switch statements. */
-    browser: (browser.msie) ? 'msie' : (browser.mozilla) ? 'mozilla' : (browser.safari) ? 'safari' : (browser.opera) ? 'opera' : 'unknown'
+    current: (browser.msie) ? 'msie' : (browser.mozilla) ? 'mozilla' : (browser.safari) ? 'safari' : (browser.opera) ? 'opera' : 'unknown'
     
   }) ;
   
