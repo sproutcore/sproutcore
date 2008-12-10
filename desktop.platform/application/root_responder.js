@@ -25,7 +25,8 @@ SC.POPUP_ORDER_LAYER = 0x3000 ;
   supports mouse events and window resize events in addition to the built
   in keyboard handling provided by the base class.
 */
-SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype */ {
+SC.RootResponder = SC.RootResponder.extend(
+/** @scope SC.RootResponder.prototype */ {
 
   platform: 'desktop',
 
