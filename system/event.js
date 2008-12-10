@@ -74,6 +74,30 @@ SC.Event = function(originalEvent) {
     this.which = ((this.button & 1) ? 1 : ((this.button & 2) ? 3 : ( (this.button & 4) ? 2 : 0 ) ));
   }
   
+  // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
+  if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
+    this.wheelDelta = this.wheelDeltaY = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDelta)/120;
+    this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0)/120 ;
+    
+  // normalize wheelDelta for Firefox
+  // note that we multiple the delta on FF to make it's acceleration more 
+  // natural.
+  } else if (!SC.none(originalEvent.detail)) {
+    var detail = Math.floor(originalEvent.detail * 2);
+    if (originalEvent.axis && (originalEvent.axis === originalEvent.HORIZONTAL_AXIS)) {
+      this.wheelDeltaX = detail;
+      this.wheelDeltaY = this.wheelDelta = 0;
+    } else {
+      this.wheelDeltaY = this.wheelDelta = detail ;
+      this.wheelDeltaX = 0 ;
+    }
+    
+  // handle all other legacy browser
+  } else {
+    this.wheelDelta = this.wheelDeltaY = SC.browser.msie ? 0-originalEvent.wheelDelta : originalEvent.wheelDelta ;
+    this.wheelDeltaX = 0 ;
+  }
+  
   return this; 
 } ;
 
@@ -632,7 +656,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   _global: {},
 
   /** @private properties to copy from native event onto the event */
-  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view wheelDelta which".split(" ")
+  _props: "altKey attrChange attrName bubbles button cancelable charCode clientX clientY ctrlKey currentTarget data detail eventPhase fromElement handler keyCode metaKey newValue originalTarget pageX pageY prevValue relatedNode relatedTarget screenX screenY shiftKey srcElement target timeStamp toElement type view which".split(" ")
   
 }) ;
 
