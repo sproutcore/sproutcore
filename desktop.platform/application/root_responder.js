@@ -165,8 +165,11 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
           SC.Event.add(document, keyName, this, method);
         }
       }
-      
     }, this);
+    
+    // handle mousewheel specifically for FireFox
+    var mousewheel = SC.browser.mozilla ? 'DOMMouseScroll' : 'mousewheel';
+    SC.Event.add(document, mousewheel, this, this.mousewheel);
     
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
@@ -347,6 +350,12 @@ SC.RootResponder = SC.RootResponder.extend(/** @scope SC.RootResponder.prototype
       this._clickCount = 2;
       this._onmouseup(evt);
     }
+  },
+  
+  mousewheel: function(evt) {
+    var view = this.targetViewForEvent(evt) ;
+    var handler = this.sendEvent('mouseWheel', evt, view) ;
+    return (handler) ? evt.hasCustomEventHandling : YES ;
   },
   
   _lastHovered: null,
