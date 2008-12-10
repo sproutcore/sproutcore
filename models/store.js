@@ -55,7 +55,7 @@ SC.Store = SC.Object.create(
     this.beginPropertyChanges() ;
 
     //SC.Benchmark._bench(function() { 
-    dataHashes.each(function(data) {
+    dataHashes.forEach(function(data) {
       var rt = data.recordType || recordType; 
       if (data.recordType !== undefined) delete data.recordType;
       
@@ -94,7 +94,7 @@ SC.Store = SC.Object.create(
   
   destroyRecords: function(recs) {
     var store = this ;
-    recs.each(function(r) { 
+    recs.forEach(function(r) { 
       r.set('isDeleted',true); store.removeRecord(r);
     });
   },

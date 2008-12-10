@@ -57,7 +57,7 @@ SC.routes = SC.Object.create(
         var parts = (value.route) ? value.route.split('&') : [''] ;
         var route = parts.shift() ;
         var params = {} ;
-        parts.each(function(p) {
+        parts.forEach(function(p) {
           var bits = p.split('=') ;
           params[bits[0]] = bits[1] ;
         }) ;
@@ -133,7 +133,7 @@ SC.routes = SC.Object.create(
     var parts = route.split('&') ;
     if (parts && parts.length > 0) {
       route = parts.shift() ;
-      parts.each(function(part) {
+      parts.forEach(function(part) {
         var param = part.split('=') ;
         if (param && param.length > 1) params[param[0]] = decodeURIComponent(param[1]) ;
       }) ;
@@ -146,9 +146,12 @@ SC.routes = SC.Object.create(
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
 
     routeHandler = this._routes.functionForRoute(parts,params) ;
-		target = routeHandler._target;
-		method = routeHandler._method;
-		method.call(target, params);
+    
+    if (routeHandler) {
+  		target = routeHandler._target;
+  		method = routeHandler._method;
+  		method.call(target, params);
+  	}
 
     //else console.log('could not find route for: "'+route+'"') ;
   },

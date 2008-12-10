@@ -78,20 +78,10 @@ SC.Server = SC.Object.extend({
     var accept = params.accept ; delete params.accept ;
     var cacheCode = params.cacheCode; delete params.cacheCode ;
     // enable JSON for every operation
-<<<<<<< HEAD:server/server.js
     var records = params.records ;
     if ((this.get('postFormat') == SC.JSON_FORMAT) && records) {
       params.records = (this.get('escapeJSON')) ? escape(records.toJSONString()) : records.toJSONString() ;
     }
-=======
-    if((this.get('postFormat') == SC.JSON_FORMAT) && (params.records)){
-      if(this.get('escapeJSON')){
-         params.records = escape(SC.json.encode(params.records));
-      } else {
-         params.records = SC.json.encode(params.records);  
-      }  
-     }
->>>>>>> d57368a... Replaced json.js with json2.js in SC.json:server/server.js
     var url = params.url; delete params.url;
     
     opts.requestHeaders = {'Accept': 'application/json, text/javascript, application/xml, text/xml, text/html, */*'} ;
@@ -265,7 +255,7 @@ SC.Server = SC.Object.extend({
     
     // first go through and assign the primaryKey to each record.
     if (!context) context = {} ;
-    json.each(function(data) {
+    json.forEach(function(data) {
       var guid = SC.guidFor(data) ;
       var rec = (guid) ? context[guid] : null ;
       if (rec) {
@@ -300,7 +290,7 @@ SC.Server = SC.Object.extend({
       // collect resource ids, sort records into hash, and get cacheCode.
       var cacheCode = null ; var ids = [] ; var context = {} ;
       var primaryKey = curRecords[0].get('primaryKey') ; // assumes all the same
-      curRecords.each(function(r) {
+      curRecords.forEach(function(r) {
         cacheCode = cacheCode || r._cacheCode ;
         var key = r.get(primaryKey);
         if (key) { ids.push(key); context[key] = r; }
@@ -428,7 +418,7 @@ SC.Server = SC.Object.extend({
       var curRecords = records[resource] ;
 
       if (resource == '*') {
-        curRecords.each(function(rec){
+        curRecords.forEach(function(rec){
           rec.set('isDeleted',true) ;
           SC.Store.removeRecord(rec) ;
         });
@@ -439,7 +429,7 @@ SC.Server = SC.Object.extend({
       var ids = [] ; var key ;
       var primaryKey = curRecords[0].get('primaryKey') ;
 
-      curRecords.each(function(rec) {
+      curRecords.forEach(function(rec) {
         if ((key = rec.get(primaryKey)) && (!rec.get('newRecord'))) {
           ids.push(key) ; 
         }
@@ -544,7 +534,7 @@ SC.Server = SC.Object.extend({
   // places records from array into hash, sorted by resourceURL.
   _recordsByResource: function(records) {
     var ret = {} ;
-    records.each(function(rec) {
+    records.forEach(function(rec) {
       var recs = ret[rec.resourceURL || '*'] || [] ;
       recs.push(rec)  ;
       ret[rec.resourceURL || '*'] = recs ;

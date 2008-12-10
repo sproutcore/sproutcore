@@ -4,6 +4,8 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
+require('application/routes') ;
+
 // Legacy.  Will retire.
 SC.mixin(Object,
 /** @scope Object */ {
