@@ -78,10 +78,20 @@ SC.Server = SC.Object.extend({
     var accept = params.accept ; delete params.accept ;
     var cacheCode = params.cacheCode; delete params.cacheCode ;
     // enable JSON for every operation
+<<<<<<< HEAD:server/server.js
     var records = params.records ;
     if ((this.get('postFormat') == SC.JSON_FORMAT) && records) {
       params.records = (this.get('escapeJSON')) ? escape(records.toJSONString()) : records.toJSONString() ;
     }
+=======
+    if((this.get('postFormat') == SC.JSON_FORMAT) && (params.records)){
+      if(this.get('escapeJSON')){
+         params.records = escape(SC.json.encode(params.records));
+      } else {
+         params.records = SC.json.encode(params.records);  
+      }  
+     }
+>>>>>>> d57368a... Replaced json.js with json2.js in SC.json:server/server.js
     var url = params.url; delete params.url;
     
     opts.requestHeaders = {'Accept': 'application/json, text/javascript, application/xml, text/xml, text/html, */*'} ;
