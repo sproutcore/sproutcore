@@ -745,7 +745,7 @@ SC.Observable = {
     SC.Observers.flush() ; // hookup as many observers as possible.
 
     var observers, changes, dependents, starObservers, idx, keys, rev ;
-    var members, membersLength, member, memberLoc, target, method ;
+    var members, membersLength, member, memberLoc, target, method, loc, func ;
 
     // Get any starObservers -- they will be notified of all changes.
     starObservers =  this['_kvo_observers_*'] ;
@@ -776,17 +776,25 @@ SC.Observable = {
 
       // Now go through the set and add all dependent keys...
       if (dependents = this._kvo_dependents) {
-        idx = 0 ;
 
-        // note that each time we loop, we check the changes length, this
+        // NOTE: each time we loop, we check the changes length, this
         // way any dependent keys added to the set will also be evaluated...
-        while(idx < changes.length) {
+        for(idx=0;idx<changes.length;idx++) {
           key = changes[idx] ;
           keys = dependents[key] ;
-          if (keys) changes.addEach(keys) ;
-          idx++ ;
-        }
-      }
+          
+          // for each dependent key, add to set of changes.  Also, if key
+          // value is a cacheable property, clear the cached value...
+          if (keys && (loc = keys.length)) {
+            while(--loc >= 0) {
+              changes.add(key = keys[loc]);
+              if ((func = this[key]) && func.isCacheable) {
+                this[func.cacheKey] = undefined;
+              } // if (func=)
+            } // while (--loc)
+          } // if (keys && 
+        } // for(idx...
+      } // if (dependents...)
 
       // now iterate through all changed keys and notify observers.
       while(changes.length > 0) {
