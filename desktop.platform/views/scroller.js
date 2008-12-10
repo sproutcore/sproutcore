@@ -67,6 +67,28 @@ SC.ScrollerView = SC.View.extend({
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
   
+  /**
+    Returns the owner view property the scroller should modify.  If this property is non-null and the owner view defines this property, then the scroller will automatically update this property whenever its own value changes.
+    
+    The default value of this property is computed based on the layoutDirection.  You can override this property to provide your own calculation if necessary or to return null if you want to disable this behavior.
+    
+    @property {String}
+  */
+  ownerScrollValueKey: function() {
+    var key = null;
+    switch(this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+        key = 'verticalScrollOffset';
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        key = 'horizontalScrollOffset' ;
+        break;
+      default:
+        key = null ;
+    }
+    return key ;  
+  }.property('layoutDirection').cacheable(),
+  
   // ..........................................................
   // INTERNAL SUPPORT
   // 
@@ -96,7 +118,7 @@ SC.ScrollerView = SC.View.extend({
     var enabled = this.get('isEnabled'), value = this.get('value');
     
     // calculate required size...
-    var size = (enabled) ? max-min : 0 ;
+    var size = (enabled) ? max-min-2 : 0 ;
     switch(dir) {
       case SC.LAYOUT_VERTICAL:
         this.$('.sc-inner').css('height', size);
@@ -130,10 +152,10 @@ SC.ScrollerView = SC.View.extend({
     from updating.
   */
   scrollDidChange: function() {
-    this.invokeLater(this._scrollDidChange, 1);
+    this.invokeLater(this._scroll_scrollDidChange, 1);
   },
   
-  _scrollDidChange: function() {
+  _scroll_scrollDidChange: function() {
     if (!this.get('isEnabled')) return ; // nothing to do.
     var dir = this.get('layoutDirection');
     var loc = 0;
@@ -151,5 +173,14 @@ SC.ScrollerView = SC.View.extend({
     }
     
     this.set('value', loc + this.get('minimum'));
-  }  
+  },
+
+  /** @private Notify owner if it has a *ScrollOffset value */
+  _scroller_valueDidChange: function() {
+    var key = this.get('ownerScrollValueKey');
+    if (key && this.owner && (this.owner[key] !== undefined)) {
+      this.owner.setIfChanged(key, this.get('value'));
+    }
+  }.observes('value')
+  
 }) ;

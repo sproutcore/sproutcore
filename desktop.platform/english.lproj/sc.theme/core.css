@@ -11,6 +11,26 @@ body.sc-theme {
 }
 
 
-.sc-view.invalid {
+body.sc-theme .sc-view.invalid {
   outline: 2px red solid;
 }
+
+/* @group Border Styles */
+
+body.sc-theme .sc-view.sc-bezel-border {
+  border-left:   1px #999 solid;
+  border-top:    1px #666 solid;
+  border-bottom: 1px #fff solid;
+  border-right:  1px #fff solid;
+}
+
+body.sc-theme .sc-view.sc-black-border {
+  border: 1px black solid; 
+}
+
+body.sc-theme .sc-view.sc-gray-border {
+  border: 1px #888 solid; 
+}
+
+/* @end */
+

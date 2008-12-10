@@ -38,14 +38,16 @@ SC.ContainerView = SC.View.extend(
 
   /** 
     The content view to display.  This will become the only child view of
-    the view.
+    the view.  Note that if you set the nowShowing property to any value other
+    than 'null', the container view will automatically change the contentView
+    to reflect view indicated by the value.
     
     @property {SC.View}
   */
-  content: null,
+  contentView: null,
   
   /** @private */
-  contentBindingDefault: SC.Binding.single(),
+  contentViewBindingDefault: SC.Binding.single(),
   
   /**
     Replaces any child views with the passed new content.  
@@ -57,6 +59,7 @@ SC.ContainerView = SC.View.extend(
     @param {SC.View} newContent the new content view or null.
   */
   replaceContent: function(newContent) {
+    console.log('replaceContent');
     this.removeAllChildren() ;
     if (newContent) this.appendChild(newContent) ;
   },
@@ -64,15 +67,14 @@ SC.ContainerView = SC.View.extend(
   /** @private */
   createChildViews: function() {
     
-    // if content is defined, then create the content
-    var content = this.get('content'), nowShowing ;
-    if (content) {
-      content = this.createChildView(content) ;
-      this.beginPropertyChanges()
-        .set('content', content).set('childViews', [content])
-      .endPropertyChanges();
-    } 
+    console.log('createChildViews');
     
+    // if content is defined, then create the content
+    var view = this.contentView ;
+    if (view) {
+      view = this.contentView = this.createChildView(view) ;
+      this.childViews = [view] ;
+    } 
   },
   
   /**
@@ -114,7 +116,7 @@ SC.ContainerView = SC.View.extend(
     if (content && !(content instanceof SC.View)) content = null;
     
     // set content
-    this.set('content', content) ;
+    this.set('contentView', content) ;
   }.observes('nowShowing'),
   
   /**
@@ -122,8 +124,8 @@ SC.ContainerView = SC.View.extend(
     call replaceContent.  Override replaceContent to change how the view is
     swapped out.
   */
-  contentDidChange: function() {
-    this.replaceContent(this.get('content'));
-  }.observes('content')
+  contentViewDidChange: function() {
+    this.replaceContent(this.get('contentView'));
+  }.observes('contentView')
   
 }) ;

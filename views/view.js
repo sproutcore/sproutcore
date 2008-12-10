@@ -330,12 +330,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       var nextView = siblings.objectAt(siblings.indexOf(this)+1);
       var nextNode = (nextView) ? nextView.rootElement : null ;
     
-      // add to parentNode if needed
+      // add to parentNode if needed.  If we do add, then also notify view
+      // that its parentView has resized since joining a parentView has the
+      // same effect.
       if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
         parentNode.insertBefore(node, nextNode) ;
+        this.parentViewDidResize();
       }
       
-    // if we do not belong to a parent, then remove if needed
+    // if we do not belong to a parent, then remove if needed.  Do not notify
+    // view that parentViewDidResize since we are moving ourselves from a 
+    // parentNode.  No good can come of it.
     } else {
       if (node.parentNode) node.parentNode.removeChild(node);
     }
@@ -419,7 +424,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     The nextResponder is usually the parentView.
   */
   nextResponder: function() {
-    this.get('parentView');
+    return this.get('parentView');
   }.property('parentView').cacheable(),
 
   /**
@@ -1074,26 +1079,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     shift this by a certain amount.    
   */
   clippingFrame: function() {
-    var pv= this.get('parentView'), ret = this.get('frame');
+    var pv= this.get('parentView'), f = this.get('frame'), ret = f ;
     if (pv) {
-     pv = pv.get('frame'); pv.x=pv.y=0;
-     ret = SC.intersectRects(pv, ret);
+     pv = pv.get('clippingFrame');
+     ret = SC.intersectRects(pv, f);
     }
+    ret.x -= f.x; ret.y -= f.y;
     return ret ;
   }.property('parentView', 'frame').cacheable(),
-  
-  /**
-    The bounds returns the current offset & size of the view.  This will
-    normally be equal in size to the frame unless you have scrollable 
-    content.  It can also indicate the current scroll offset.  You change this
-    value by scrolling around.  You scroll around by calling the scrollTo()
-    methods.
-    
-    - changes on scroll, and frame change
-  */
-  bounds: function() {
-    
-  }.property().cacheable(),
   
   /**
     LayoutStyle describes the current styles to be written to your element
