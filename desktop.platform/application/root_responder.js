@@ -247,6 +247,12 @@ SC.RootResponder = SC.RootResponder.extend(
     @returns {Boolean}
   */
   resize: function() {
+    this._resize();
+    //this.invokeLater(this._resize, 10);
+    return YES; //always allow normal processing to continue.
+  },
+  
+  _resize: function() {
     // calculate new window size...
     var newSize = this.computeWindowSize(), oldSize = this.get('currentWindowSize');
     this.set('currentWindowSize', newSize); // update size
@@ -257,7 +263,6 @@ SC.RootResponder = SC.RootResponder.extend(
       this.panes.invoke('windowSizeDidChange', oldSize, newSize) ;
       SC.runLoop.endRunLoop();
     }    
-    return YES; //always allow normal processing to continue.
   },
   
   /** 

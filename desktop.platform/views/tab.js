@@ -73,36 +73,40 @@ SC.TabView = SC.View.extend(
   }.observes('nowShowing'),
   
   _tab_itemsDidChange: function() {
+    console.log('_tab_itemsDidChange');
+    
     this.get('segmentedView').set('items', this.get('items'));
     return this ;    
   }.observes('items'),
 
-  prepareDisplay: function() {
-    sc_super();
-    this._tab_nowShowingDidChange()._tab_itemsDidChange();
-  },
-  
   /** @private
     Restore userDefault key if set.
   */
   init: function() {
     sc_super();
+    this._tab_nowShowingDidChange()._tab_itemsDidChange();
+  },
 
+  awake: function() {
+    sc_super();
     var defaultKey = this.get('userDefaultKey');
     if (defaultKey) {
       defaultKey = [defaultKey,'nowShowing'].join(':');
       var nowShowing = SC.userDefaults.get(defaultKey);
       if (!SC.none(nowShowing)) this.set('nowShowing', nowShowing);
-    }
-
+    }  
   },
   
   createChildViews: function() {
     var childViews = [], view; 
-    view = this.containerView = this.createChildView(this.containerView) ;
+    view = this.containerView = this.createChildView(this.containerView, { 
+      rootElementPath: [0] 
+    }) ;
     childViews.push(view);
     
-    view = this.segmentedView = this.createChildView(this.segmentedView) ;
+    view = this.segmentedView = this.createChildView(this.segmentedView, { 
+      rootElementPath: [1] 
+    }) ;
     childViews.push(view);
 
     this.set('childViews', childViews);
@@ -125,7 +129,6 @@ SC.TabView = SC.View.extend(
       the parent view and adjust the internal frame accordingly.
     */
     prepareDisplay: function() {
-      var ret = sc_super();
       
       var pv = this.get('parentView');
       var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
@@ -135,6 +138,7 @@ SC.TabView = SC.View.extend(
         this.adjust('bottom',11);
       }
       
+      var ret = sc_super();
       return ret ;
     }
   }),
@@ -169,15 +173,16 @@ SC.TabView = SC.View.extend(
       } else {
         this.adjust('bottom',0);
       }
-      
+      return sc_super();
+    },
+    
+    init: function() {
+      // before we setup the rest of the view, copy key config properties 
+      // from the owner view...
+      var pv = this.get('parentView');
       if (pv) {
-        this.beginPropertyChanges();
-        SC._TAB_ITEM_KEYS.forEach(function(k) { 
-          this.set(k, pv.get(k)); 
-        }, this);
-        this.endPropertyChanges();
+        SC._TAB_ITEM_KEYS.forEach(function(k) { this[k] = pv.get(k); }, this);
       }
-
       return sc_super();
     }
   })

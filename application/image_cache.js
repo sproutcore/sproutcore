@@ -6,10 +6,11 @@
 require('core') ;
 require('system/object');
 require('system/error');
+require('system/locale');
 
-SC.IMAGE_ABORTED_ERROR = SC.$error("SC.Image.AbortedError".loc(), "Image", -100) ;
+SC.IMAGE_ABORTED_ERROR = SC.$error("SC.Image.AbortedError", "Image", -100) ;
 
-SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError".loc(), "Image", -101) ;
+SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
 
 /**
   @class

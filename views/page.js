@@ -18,7 +18,7 @@ SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
     var value = this[key] ;
     if (value && value.isClass) {
       this[key] = value = value.create({ page: this }) ;
-      value.awake() ;
+      if (!this.get('inDesignMode')) value.awake() ;
       return value ;
     } else return sc_super() ;
   },
@@ -36,7 +36,7 @@ SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
     for(var key in this) {
       if (!this.hasOwnProperty(key)) continue ;
       var value = this[key] ;
-      if (value && value.isViewBuilder) {
+      if (value && value.isViewClass) {
         this[key] = value = value.create({ page: this }) ;
       }
     }
@@ -50,21 +50,36 @@ SC.Page = SC.Object.extend( /** @scope SC.Page.prototype */ {
   */
   getIfConfigured: function(key) {
     var ret = this[key] ;
-    return (ret && ret.isViewBuilder) ? null : this.get(key);
+    return (ret && ret.isViewClass) ? null : this.get(key);
   },
-  
+
   /**
     Applies a localization to every view builder defined on the page.  You must call this before you construct a view to apply the localization.
   */
-  loc: function(loc) {
-    for(var key in loc) {
-      if (!loc.hasOwnProperty(key)) continue ;
-      var builder = this[key];
-      if (!builder || !builder.isViewBuilder) continue; 
-      builder.loc(loc[key]);
+  loc: function(locs) {
+    for(var key in locs) {
+      if (!locs.hasOwnProperty(key)) continue ;
+      var view = this[key] ;
+      if (!view || !view.isViewClass) continue ;
+      view.loc(locs[key]);
     }
-  }
+    return this ;
+  },
+  
+  //needsDesigner: YES,
+  
+  //inDesignMode: YES
     
 }) ;
 
-Object.extend(SC.Page.prototype, SC.PathModule) ;
+// ..........................................................
+// SUPPORT FOR LOADING PAGE DESIGNS
+// 
+
+/** Calling design() on a page is the same as calling create() */
+SC.Page.design = SC.Page.create ;
+
+/** Calling localization returns passed attrs. */
+SC.Page.localization = function(attrs) { return attrs; };
+
+

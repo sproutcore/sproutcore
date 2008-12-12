@@ -105,8 +105,8 @@ SC.Pane = SC.View.extend({
   computeParentDimensions: function(frame) {
     var pframe = this.get('currentWindowSize');
     return {
-      width: (pframe) ? pframe.width : SC.maxX(frame),
-      height: (pframe) ? pframe.height : SC.maxY(frame)
+      width: (pframe) ? pframe.width : 1000,
+      height: (pframe) ? pframe.height : 1000
     } ;
   },
 

@@ -4,7 +4,7 @@
 // copyright 2006-2008, Sprout Systems, Inc.
 // ==========================================================================
 
-/*global $type, $I, $A */
+/*global $type, $I, $A, NodeList */
 
 // this is used by the JavascriptCompile class on the server side.  You can
 // use this to automatically determine the order javascript files need to be
@@ -214,7 +214,7 @@ SC.mixin(/** @scope SC */ {
     
     // not array-like if no .length property or if function, string, or window
     var len = obj.length, type = SC.typeOf(obj);
-    if ((len===null) || (len===undefined) || (type === SC.T_FUNCTION) || (type === SC.T_STRING) || obj.setInterval) {
+    if ((len===null) || (len===undefined) || ((type === SC.T_FUNCTION) && !(obj instanceof NodeList)) || (type === SC.T_STRING) || obj.setInterval) {
       return [obj];
     }
 
@@ -413,21 +413,6 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
-    Returns all of the values defined on an object, hash, or array.  This is
-    a useful way to quickly extract the values from an array.  If the item
-    you pass is array-like, the item itself will be returned.
-    
-    @param {Object} obj
-    @returns {SC.Array} iterable object
-  */
-  values: function(obj) {
-    if (SC.isArray(obj)) return obj;
-    var ret = [];
-    for(var key in obj) ret.push(obj[key]) ;
-    return ret ;
-  },
-  
-  /**
     Convenience method to inspect an object.  This method will attempt to 
     convert the object into a useful string description.
   */
@@ -597,6 +582,48 @@ SC.mixin(/** @scope SC */ {
     }
     
     return ret ;
+  },
+  
+  /**
+    Create or update a SproutCore namespace.  If you also pass a constructor
+    function, this function will be called with the new namespace object as
+    the first parameter so you can set it up within a private closure.
+    
+    If a namespace does not already exist, this method will create it.
+    Otherwise, it will work with the existing namespace.  A namespace is 
+    simply a SproutCore object instance.
+    
+    @param name {String} name of namespace
+    @param op {Function|Hash} applied to namespace.
+    @returns {SC.Object} the namespace
+  */
+  namespace: function(name, op) {
+    // walk path to find or create...
+    var obj, loc = 0, len = name.length, next, key, root = window;
+    while(loc<len) {
+      next = name.indexOf('.'); 
+      if (next < 0) next = len ;
+      key = name.slice(loc, next); 
+      obj = root[key];
+      if (!obj) obj = root[key] = SC.Object.create();
+      loc = next+1;
+    }
+    
+    // obj now containts the namespace.  If a function was passed, execute it
+    // if a hash was passed, copy its properties.
+    switch(SC.typeOf(op)) {
+      case SC.T_FUNCTION:
+        op(obj);
+        break;
+      case SC.T_HASH:
+        SC.mixin(obj, op);
+        break;
+      default:
+        // do nothing;
+    }
+    
+    // and return obj
+    return obj;
   }
   
 });

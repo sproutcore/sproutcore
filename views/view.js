@@ -293,7 +293,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     This method will update the display location, but only if it needs an 
     update.  
   */
-  updateDisplayLocationIfNeeded: function() {
+  updateDisplayLocationIfNeeded: function(force) {
     if (!this.get('displayLocationNeedsUpdate')) return YES;
     this.set('displayLocationNeedsUpdate', NO) ;
     this.updateDisplayLocation() ;
@@ -486,7 +486,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         
       } else {
         this.prepareDisplay();
-        if (this.get('updateDisplayOnPrepare')) this.updateDisplay() ;
+        if (this.get('updateDisplayOnPrepare')) this.displayDidChange() ;
       }
 
       parentView = path = root = null;
@@ -659,6 +659,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     insert any childViews DOM elements into the rootElement.
   */
   prepareDisplay: function() {
+    
+    //console.log('%@:prepareDisplay'.fmt(this));
+    
     var root, element, html, con =this.constructor, cq, styleClass ;
     
     // if emptyElement is not overridden by the instance, then use a cached
@@ -803,6 +806,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     useful at other times.
   */
   computeEmptyElement: function() {
+    
+    // make sure any pending display updates are handled -- even if offscreen
+    this.performDisplayUpdates(YES); 
+    
     var root = this.rootElement ;
     if (!root) return '' ;
     
@@ -836,6 +843,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateDisplay: function() {
+    //console.log('%@: updateDisplay()'.fmt(this));
+    
     var mixins = this.updateDisplayMixin, len = (mixins) ? mixins.length : 0;
     for(var idx=0;idx<len;idx++) mixins[idx].call(this);
   },
@@ -858,9 +867,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     update.  Returns YES if the method was able to execute, NO if it needs
     to be called again later.
   */
-  updateDisplayIfNeeded: function() {
+  updateDisplayIfNeeded: function(force) {
     if (!this.get('displayNeedsUpdate')) return YES;
-    if (!this.get('isVisibleInWindow')) return NO ;
+    if (!force & !this.get('isVisibleInWindow')) return NO ;
     this.set('displayNeedsUpdate', NO) ;
     this.updateDisplay() ;
     return YES;
@@ -1088,6 +1097,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return ret ;
   }.property('parentView', 'frame').cacheable(),
   
+  /** @private
+    Whenever the clippingFrame changes, this observer will fire, notifying
+    child views that their frames have also changed.
+  */
+  _view_clippingFrameDidChange: function() {
+    this.get('childViews').invoke('notifyPropertyChange', 'clippingFrame');
+  }.observes('clippingFrame'),
+  
   /**
     LayoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
@@ -1269,9 +1286,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     This method will update the display layout, but only if it needs an 
     update.  
   */
-  updateDisplayLayoutIfNeeded: function() {
+  updateDisplayLayoutIfNeeded: function(force) {
     if (!this.get('displayLayoutNeedsUpdate')) return YES;
-    if (!this.get('isVisibleInWindow')) return NO ;
+    if (!force && !this.get('isVisibleInWindow')) return NO ;
     this.set('displayLayoutNeedsUpdate', NO) ;
     this.updateDisplayLayout() ;
     return YES ;
@@ -1285,12 +1302,34 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   updateDisplayLayout: function() {
     var $ = this.$(), layoutStyle = this.get('layoutStyle'); // get style
     $.css(layoutStyle) ; // todo: add animation here.
+  },
+  
+  /**
+    Force immediate update of all display-related items that are pending in
+    the receiver and its child views.  If you pass YES for the force flag,
+    then the display will be updated even if the view is offscreen.  This 
+    will force a display if no update is needed.
+    
+    @param force {Boolean}
+    @returns {SC.View} receiver
+  */
+  performDisplayUpdates: function(force) {
+    this.updateDisplayLocationIfNeeded(force);
+    this.updateDisplayLayoutIfNeeded(force);
+    this.updateDisplayIfNeeded(force);
+    
+    var childViews = this.get('childViews'), loc = childViews.length;
+    while(--loc>=0) childViews[loc].performDisplayUpdates(force);
+    return this ;
   }
   
 }); 
 
 SC.View.mixin(/** @scope SC.View @static */ {
 
+  /** @private walk like a duck -- used by SC.Page */
+  isViewClass: YES,
+  
   /** 
     This method works just like extend() except that it will also preserve
     the passed attributes in case you want to use a view builder later, if 
@@ -1300,8 +1339,24 @@ SC.View.mixin(/** @scope SC.View @static */ {
     @returns {Class} SC.View subclass to create
     @function
   */ 
-  design: SC.View.extend,
+  design: function() {
+    var ret = this.extend.apply(this, arguments);
+    if (SC.ViewDesigner) {
+      SC.ViewDesigner.didLoadDesign(ret, this, SC.$A(arguments));
+    }
+    return ret ;
+  },
 
+  /**
+    Used to construct a localization for a view.  The default implementation
+    will simply return the passed attributes.
+  */
+  localization: function(attrs, rootElement) { 
+    // add rootElement
+    if (rootElement) attrs.rootElement = SC.$(rootElement).get(0);
+    return attrs; 
+  },
+  
   /**
     Creates a view instance, first finding the DOM element you name and then
     using that as the root element.  You should not use this method very 
@@ -1323,6 +1378,18 @@ SC.View.mixin(/** @scope SC.View @static */ {
   },
     
   /**
+    Create a new view with the passed attributes hash.  If you have the 
+    Designer module loaded, this will also create a peer designer if needed.
+  */
+  create: function() {
+    var C=this, ret = new C(arguments); 
+    if (SC.ViewDesigner) {
+      SC.ViewDesigner.didCreateView(ret, SC.$A(arguments));
+    }
+    return ret ; 
+  },
+  
+  /**
     Applies the passed localization hash to the component views.  Call this
     method before you call create().  Returns the receiver.  Typically you
     will do something like this:
@@ -1330,6 +1397,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
     view = SC.View.design({...}).loc(localizationHash).create();
     
     @param {Hash} loc 
+    @param rootElement {String} optional rootElement with prepped HTML
     @returns {SC.View} receiver
   */
   loc: function(loc) {
@@ -1337,6 +1405,9 @@ SC.View.mixin(/** @scope SC.View @static */ {
     delete loc.childViews; // clear out child views before applying to attrs
     
     this.applyLocalizedAttributes(loc) ;
+    if (SC.ViewDesigner) {
+      SC.ViewDesigner.didLoadLocalization(this, SC.$A(arguments));
+    }
     
     // apply localization recursively to childViews
     var childViews = this.prototype.childViews, idx = childViews.length;
