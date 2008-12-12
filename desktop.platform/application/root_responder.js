@@ -389,14 +389,11 @@ SC.RootResponder = SC.RootResponder.extend(
     // work up the view chain.  Notify of mouse entered and
     // mouseMoved if implemented.
     while(view && (view !== this)) {
-      var entered = view.mouseOver || view.didMouseOver || view.mouseEntered;
-      var moved = view.mouseMoved || view.mouseDidMove  ;
-
       if (lh.include(view)) {
-        if (moved) moved.call(view,evt) ;
+        view.tryToPerform('mouseMoved', evt);
         nh.push(view) ;
       } else {
-        if (entered) entered.call(view,evt) ;
+        view.tryToPerform('mouseEntered', evt);
         nh.push(view) ;
       }
       
@@ -407,16 +404,16 @@ SC.RootResponder = SC.RootResponder.extend(
     // in this chain and notify of mouseExited.
     for(var loc=0; loc < lh.length; loc++) {
       view = lh[loc] ;
-      var exited = view.mouseOut || view.didMouseOut || view.mouseExited ;
-      if (exited && !nh.include(view)) exited.call(view, evt) ;
+      var exited = view.respondsTo('mouseExited') ;
+      if (exited && !nh.include(view)) view.tryToPerform('mouseExited',evt);
     }
     
     this._lastHovered = nh; 
     
     // also, if a mouseDownView exists, call the mouseDragged action, if it 
     // exists.
-    if (this._mouseDownView && this._mouseDownView.respondsTo('mouseDragged')) {
-      this._mouseDownView.mouseDragged(evt) ;
+    if (this._mouseDownView) {
+      this._mouseDownView.tryToPerform('mouseDragged', evt);
     }
     
     SC.runLoop.endRunLoop();
