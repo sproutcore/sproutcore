@@ -29,7 +29,19 @@ SC.Page.prototype.emitDesign = function() {
 };
 
 /**
-  Extend SC.View to emit the localization for the current configuration of the
+  Extend SC.Page to create a PageDesignController on demand.
+  
+  @property {SC.PageDesignController}
+*/
+SC.Page.prototype.designController = function() {
+  if (!this._designController) {
+    this._designController = SC.PageDesignController.create({ page: this });
+  }
+  return this._designController ;
+}.property().cacheable();
+
+/**
+  Extend SC.Page to emit the localization for the current configuration of the
   view and all of its subviews.
 */
 SC.Page.prototype.emitLocalization = function(design) {

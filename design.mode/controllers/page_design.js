@@ -3,10 +3,19 @@
 // copyright 2008 Sprout Systems, Inc.
 // ========================================================================
 
-/*global ViewBuilder */
-require('design.mode/core');
-
-ViewBuilder.masterController = SC.Object.create({
+/** @class
+  An instance of this controller is created for every page where designers 
+  are involved.  The Designer's themselves will register with the 
+  controller so that you can hook to the controller to manage the views and
+  their editors.
+  
+  Among other things, this controller implements global selection support for
+  the designers.
+  
+  @extends SC.Object
+  @since SproutCore 1.0
+*/
+SC.PageDesignController = SC.Object.extend({
   
   /** The current view builder selection. */
   selection: [],
@@ -51,13 +60,38 @@ ViewBuilder.masterController = SC.Object.create({
     this._selection = sel ;
     
     // set the isSelected state on new selection.
-    sel.invoke('setIfChanged', 'isSelected', YES);
+    sel.invoke('set', 'designIsSelected', YES);
     
     // remove the isSelected state for old selection not in new selection.
     oldSel.forEach(function(s){ 
-      if (!set.contains(s)) s.setIfChanged('isSelected', NO);
+      if (!set.contains(s)) s.set('designIsSelected', NO);
     }, this);
     
-  }.observes('selection')
+  }.observes('selection'),
+  
+  
+  // ..........................................................
+  // DESIGNERS
+  // 
+  
+  /** All of the designers on the current page. */
+  designers: null,
+
+  /**  
+    Called by each designer when it is created to register itself with the
+    controller.  You can use this to know which designers are currently in 
+    the document to delete them as needed.
+  */
+  registerDesigner: function(designer) {
+    this.get('designers').add(designer);
+  },
+  
+  // ..........................................................
+  // INTERNAL SUPPORT
+  // 
+  init: function() {
+    this.designers = new SC.Set();
+    sc_super();
+  }
   
 }) ;

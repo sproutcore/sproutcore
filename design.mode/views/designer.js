@@ -35,6 +35,26 @@ SC.ViewDesigner = SC.Object.extend({
   /** Set to YES if the view is currently selected for editing. */
   designIsSelected: NO,
 
+  /**
+    The current page.  Comes from the view.
+    
+    @property {SC.Page}
+  */
+  page: function() {
+    var v = this.get('view');
+    return (v) ? v.get('page') : null;
+  }.property('view').cacheable(),
+  
+  /**
+    The design controller from the page.  Comes from page
+    
+    @property {SC.PageDesignController}
+  */
+  designController: function() {
+    var p = this.get('page');
+    return (p) ? p.get('designController') : null ;  
+  }.property('page').cacheable(),
+  
   /** 
     If set to NO, the default childView encoding will not run.  You can use
     this option, for example, if your view creates its own childViews.
@@ -259,6 +279,11 @@ SC.ViewDesigner = SC.Object.extend({
     
     // now add observer for property changes on view to relay change out.
     this.viewDidChange();
+    
+    // and register with designController, if defined...
+    var c= this.get('designController');
+    if (c) c.registerDesigner(this) ;
+    
   },
 
   destroy: function() {
@@ -288,8 +313,17 @@ SC.ViewDesigner = SC.Object.extend({
   },
     
   mouseDown: function(evt) {
-    console.log('mouseDown called');
-    this.set('designIsSelected', YES);
+    console.log('%@: mouseDown'.fmt(this));
+    return YES ;
+  },
+  
+  mouseDragged: function(evt) {
+    console.log('%@: mouseDragged'.fmt(this));
+    return YES ;
+  },
+  
+  mouseUp: function(evt) {
+    console.log('%@: mouseUp'.fmt(this));
     return YES ;
   }
   
@@ -356,6 +390,17 @@ SC.ViewDesigner.mixin({
 // FIXUP SC.View
 // 
 
+SC.View.prototype._orig_respondsTo = SC.View.prototype.respondsTo;
+
+/**
+  If the view has a designer, then patch respondsTo...
+*/
+SC.View.prototype.respondsTo = function( methodName ) {
+  var ret = !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
+  if (this.designer) ret = ret || this.designer.respondsTo(methodName);
+  return ret ;
+} ;
+
 /** 
   If the view has a designer, give it an opportunity to handle an event 
   before passing it on to the main view.
@@ -364,7 +409,8 @@ SC.View.prototype.tryToPerform = function(methodName, arg1, arg2) {
   if (this.designer) {
     return this.designer.tryToPerform(methodName, arg1, arg2);
   } else {
-    return SC.Object.prototype.tryToPerform.apply(this, arguments);
+    return this._orig_respondsTo(methodName) && this[methodName](arg1, arg2);
   }
 } ;
+
 
