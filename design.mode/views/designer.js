@@ -35,6 +35,9 @@ SC.ViewDesigner = SC.Object.extend({
   /** Set to YES if the view is currently selected for editing. */
   designIsSelected: NO,
 
+  /** Set to YES if this particular designer should not be enabled. */
+  designIsEnabled: YES,
+  
   /**
     The current page.  Comes from the view.
     
@@ -293,12 +296,10 @@ SC.ViewDesigner = SC.Object.extend({
   
   designIsSelectedDidChange: function() {
     var isSel = this.get('designIsSelected');
-    this.view.$().css('outline', (isSel) ? '1px red solid' : 'none');  
+    this.view.$().css('outline', (isSel) ? '2px #721492 dashed' : 'none');  
   }.observes('designIsSelected'),
   
   tryToPerform: function(methodName, arg1, arg2) {
-    console.log('tryToPerform called');
-
     // only handle event if we are in design mode
     var page = this.view ? this.view.get('page') : null ;
     var isDesignMode = page ? page.get('needsDesigner') || page.get('isDesignMode') : NO ;
@@ -312,17 +313,102 @@ SC.ViewDesigner = SC.Object.extend({
     }
   },
     
+  HOTZONE_THICKNESS: 10,
+  HEAD_ZONE: 'head', 
+  TAIL_ZONE: 'tail',
+  NO_ZONE: 'center',
+  
+  _zoneForOffset: function(offset, f, min, max) {
+    return this.NO_ZONE;
+    var thick = this.HOTZONE_THICKNESS ;
+    return (offset<=(min+thick)) ? this.HEAD_ZONE : (offset>(max-thick)) ? this.TAIL_ZONE : this.NO_ZONE;
+  },
+  
+  /**
+    Select on mouseDown.  If metaKey or shiftKey is pressed, add to
+    selection.
+  */
   mouseDown: function(evt) {
-    console.log('%@: mouseDown'.fmt(this));
+    if (!this.get('designIsEnabled')) return NO ;
+    this.get('designController').select(this, evt.metaKey || evt.shiftKey);
+    
+    var v, i, f, offset, min, max, thick; 
+    
+    // save mouseDown information...
+    v = this.get('view');
+    if (!v) return YES; // nothing to do...
+    
+    i = (this._mouseDownInfo = SC.clone(v.get('layout')));
+    i.pageX = evt.pageX; i.pageY = evt.pageY ;
+
+    f = v.convertFrameToView(v.get('frame'), null);
+    
+    // handle X hotzone
+    i.zoneX = this._zoneForOffset(i.pageX, SC.minX(f), SC.maxX(f));
+    i.zoneY = this._zoneForOffset(i.pageY, SC.minY(f), SC.maxY(f));
+    
     return YES ;
   },
   
   mouseDragged: function(evt) {
-    console.log('%@: mouseDragged'.fmt(this));
+    if (!this.get('designIsEnabled')) return NO ;
+
+    // adjust the layout...
+    var i = this._mouseDownInfo ;
+    var deltaX = evt.pageX - i.pageX, deltaY = evt.pageY - i.pageY;
+
+    var view = this.get('view');
+    var f = view.convertFrameToView(view.get('frame'), null);
+ 
+    console.log('zoneX = %@ - zoneY = %@'.fmt(i.zoneX, i.zoneY));
+    
+    // handle X direction
+    switch(i.zoneX) {
+    case this.HEAD_ZONE:
+      break ;
+    
+    case this.TAIL_ZONE:
+      break ;
+    
+    default:
+      if (!SC.none(i.width)) {
+        if (!SC.none(i.left)) {
+          view.adjust('left', i.left + deltaX);
+        } else if (!SC.none(i.right)) {
+          view.adjust('right', i.right - deltaX) ;
+        } else if (!SC.none(i.centerX)) {
+          view.adjust('centerX', i.centerX + deltaX);
+        }
+      }
+      break ;
+    }
+
+    // handle Y direction
+    switch(i.zoneY) {
+    case this.HEAD_ZONE:
+      break ;
+    case this.TAIL_ZONE:
+        break ;
+    default:
+      if(!SC.none(i.height)) {
+        if (!SC.none(i.top)) {
+          view.adjust('top', i.top + deltaY);
+        } else if (!SC.none(i.bottom)) {
+          view.adjust('bottom', i.bottom - deltaY) ;
+        } else if (!SC.none(i.centerY)) {
+          view.adjust('centerY', i.centerY + deltaY);
+        }
+      }
+      break ;
+    }
+    
+
+    
     return YES ;
   },
   
   mouseUp: function(evt) {
+    if (!this.get('designIsEnabled')) return NO ;
     console.log('%@: mouseUp'.fmt(this));
     return YES ;
   }

@@ -18,22 +18,25 @@
 SC.PageDesignController = SC.Object.extend({
   
   /** The current view builder selection. */
-  selection: [],
+  selection: null,
   
   /** 
     Updates the selection either by adding the item or by reseting the 
     selection.  Calling this method with no parameters will reset the 
     selection.
+    
+    The passed selection must be a Designer object.
   */
   select: function(sel, extend) {
-    if (extend) {
-      sel = (this.get('selection')||[]).concat(sel||[]).compact().uniq();
-    }
+    var base = (extend ? this.get('selection') : []) || [];
+    sel = base.concat(sel||[]).compact().uniq();
     this.set('selection', sel) ;
   },
   
   /**
     Removes the passed items from the current selection.
+    
+    The passed selection must be a Designer object.
   */
   deselect: function(sel) {
     
@@ -91,6 +94,7 @@ SC.PageDesignController = SC.Object.extend({
   // 
   init: function() {
     this.designers = new SC.Set();
+    this.sel = [];
     sc_super();
   }
   
