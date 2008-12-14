@@ -4,13 +4,14 @@
 // ========================================================================
 
 require('design.mode/views/designer');
-require('desktop.platform/views/tab');
+require('design.mode/views/mixins/button');
+require('views/controls/button');
 
-SC.TabView.Designer = SC.ViewDesigner.extend(
-/** @scope SC.TabView.Designer.prototype */ {
+SC.ButtonView.Designer = SC.ViewDesigner.extend( SC.Button.Designer,
+/** @scope SC.ButtonView.Designer.prototype */ {
   
   encodeChildViews: NO,
   
-  designProperties: 'nowShowing items itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey tabLocation userDefaultKey'.w()
+  designProperties: 'theme buttonBehavior href'.w()
   
 });

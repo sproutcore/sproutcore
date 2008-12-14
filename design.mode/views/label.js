@@ -6,7 +6,9 @@
 require('design.mode/views/designer');
 require('views/controls/label');
 
-SC.LabelView.Designer = SC.ViewDesigner.extend({
+SC.LabelView.Designer = SC.ViewDesigner.extend(
+/** @scope SC.LabelView.Designer.prototype */ {
+  
   encodeChildViews: NO,
   
   designProperties: 'value escapeHTML'.w()

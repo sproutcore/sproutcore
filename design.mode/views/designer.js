@@ -33,7 +33,8 @@ require('views/view');
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.ViewDesigner = SC.Object.extend({
+SC.ViewDesigner = SC.Object.extend(
+/** @scope SC.ViewDesigner.prototype */ {
 
   /** The view managed by this designer. */
   view: null,

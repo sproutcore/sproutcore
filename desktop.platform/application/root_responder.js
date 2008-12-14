@@ -476,7 +476,13 @@ SC.RootResponder = SC.RootResponder.extend(
     }
   },
   
-  drag: function() { return false; }
+  drag: function() { return false; },
   
+  // FIXME: in FF, we need to cover any iframes with a view so that we can receive mousemoved events over them...
+  startCapturingMouseEvents: function(view) {
+    this._captureView = view;
+  },
+  
+  stopCapturingMouseEvents: function() { this._captureView = null; }
     
 }) ;

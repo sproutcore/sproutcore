@@ -162,6 +162,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   childViews: [],
   
+<<<<<<< HEAD:views/view.js
+=======
+  /** Outlets */
+  outlets: [],
+  
+  /** Split view, if there is one */
+  splitView: null,
+
+>>>>>>> split view support (buggy):views/view.js
   /** 
     Set to true when the item is enabled. 
 
@@ -1255,7 +1264,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     
     return f;
-  },
+  }.property('layout').cacheable(),
   
   /**
     The clipping frame returns the visible portion of the view, taking into
@@ -1411,7 +1420,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
 
     return ret ;
-  }.property().cacheable(),
+  }.property('layout').cacheable(),
 
   
   computeParentDimensions: function(frame) {
@@ -1443,6 +1452,35 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
+    This method is invoked on your view when the view is about to begin a
+    live resize session, such as a split view being resized. During the live
+    resize session, you may choose to delay expensive drawing operations until
+    the live resize in complete.
+    
+    @returns {void}
+  */
+  viewWillStartLiveResize: function() {
+    var ary = this.get('childViews');
+    for ( var idx = 0, len = ary.length; idx < len; idx++ ) {
+      ary[idx].viewWillStartLiveResize();
+    }
+  },
+
+  /**
+    This method is invoked on your view when the view has completed a live resize 
+    session, such as a split view being resized. Any expensive drawing you have
+    delayed can be done at this point, by calling this.displayDidChange().
+    
+    @returns {void}
+  */
+  viewDidEndLiveResize: function() {
+    var ary = this.get('childViews');
+    for ( var idx = 0, len = ary.length; idx < len; idx++ ) {
+      ary[idx].viewDidEndLiveResize();
+    }
+  },
+
+  /**
     This method is invoked on your view when the view resizes due to a layout
     change or due to the parent view resizing.  You can override this method
     to implement your own layout if you like, such as performing a grid 
@@ -1461,7 +1499,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     you can add others if you want.
   */
   displayLayoutDidChange: function() {
-
+    // console.log('displayLayoutDidChange');
     this.beginPropertyChanges() ;
     this.set('displayLayoutNeedsUpdate', YES);
     this.notifyPropertyChange('frame') ;
@@ -1490,6 +1528,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     happen once at the end of the run loop.
   */
   updateDisplayLayout: function() {
+    // console.log('updateDisplayLayout');
     var $ = this.$(), layoutStyle = this.get('layoutStyle'); // get style
     $.css(layoutStyle) ; // todo: add animation here.
   },
@@ -1749,7 +1788,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
 */
 SC.outlet = function(path) {
   return function(key) {
-    return (this[key] =  SC.objectForPropertyPath(path, this)) ;
+    return (this[key] = SC.objectForPropertyPath(path, this)) ;
   }.property().outlet();
 };
 
