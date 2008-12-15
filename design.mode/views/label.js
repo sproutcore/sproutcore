@@ -3,7 +3,8 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('desktop.platform/views/tab');
+require('design.mode/views/designer');
+require('views/controls/label');
 
 SC.LabelView.Designer = SC.ViewDesigner.extend({
   encodeChildViews: NO,
