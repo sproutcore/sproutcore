@@ -243,6 +243,7 @@ SC.SplitView = SC.View.extend(
             layout.right = bottomRightThickness ;
             delete layout.centerX ;
             delete layout.centerY ;
+            break ;
           case SC.RESIZE_BOTTOM_RIGHT:
             layout.left = topLeftThickness ;
             delete layout.right ;
@@ -251,6 +252,8 @@ SC.SplitView = SC.View.extend(
             break ;
         }
       } else {
+        // console.log('setting vertical divider layout');
+        // console.log('autoresizeBehavior is %@'.fmt(autoresizeBehavior));
         delete layout.width ;
         layout.height = dividerThickness ;
         layout.left = 0 ;
@@ -267,6 +270,7 @@ SC.SplitView = SC.View.extend(
             layout.bottom = bottomRightThickness ;
             delete layout.centerX ;
             delete layout.centerY ;
+            break ;
           case SC.RESIZE_BOTTOM_RIGHT:
             layout.top = topLeftThickness ;
             delete layout.bottom ;
