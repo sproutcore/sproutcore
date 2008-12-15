@@ -5,15 +5,14 @@
 
 require('foundation/application/view') ;
 
-SC.HORIZONTAL_LAYOUT = 'horizontal' ;
-SC.VERTICAL_LAYOUT = 'vertical' ;
-
-SC.RESIZE_BOTH = 'both' ;
-SC.RESIZE_TOP_LEFT = 'top-left' ;
-SC.RESIZE_BOTTOM_RIGHT = 'bottom-right' ;
+SC.RESIZE_BOTH = 'resize-both' ;
+SC.RESIZE_TOP_LEFT = 'resize-top-left' ;
+SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
 
 /**
   @class
+  
+  FIXME: Docs are out of date.
 
   A split view is used to show views that the user can resize or collapse.
   To use the split view, you need to add a top left view followed by an
@@ -98,9 +97,9 @@ SC.SplitView = SC.View.extend(
   delegate: null,
 
   /**
-    [RO] Direction of layout.  Must be SC.HORIZONTAL_LAYOUT || SC.VERTICAL_LAYOUT.
+    [RO] Direction of layout.  Must be SC.LAYOUT_HORIZONTAL || SC.LAYOUT_VERTICAL.
   */
-  layoutDirection: SC.HORIZONTAL_LAYOUT,
+  layoutDirection: SC.LAYOUT_HORIZONTAL,
   
   /**
     Set to NO to disable collapsing for all views.
@@ -135,7 +134,7 @@ SC.SplitView = SC.View.extend(
   thicknessForView: function(view) {
     var direction = this.get('layoutDirection') ;
     var ret = view.get('frame') ;
-    return (direction === SC.HORIZONTAL_LAYOUT) ? ret.width : ret.height ;
+    return (direction === SC.LAYOUT_HORIZONTAL) ? ret.width : ret.height ;
   },
   
   /**
@@ -159,7 +158,7 @@ SC.SplitView = SC.View.extend(
     if (this._needsFirstLayout) {
       this._needsFirstLayout = NO ;
       var direction = this.get('layoutDirection') ;
-      var splitViewThickness = (direction == SC.HORIZONTAL_LAYOUT) ? this.get('frame').width : this.get('frame').height ;
+      var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
       
       var dividerView = this.get('dividerView') ;
@@ -179,7 +178,7 @@ SC.SplitView = SC.View.extend(
     var direction = this.get('layoutDirection') ;
     var topLeftThickness = this._desiredTopLeftThickness ;
     var dividerThickness = this.get('dividerThickness') ;
-    var splitViewThickness = (direction == SC.HORIZONTAL_LAYOUT) ? this.get('frame').width : this.get('frame').height ;
+    var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
     var bottomRightThickness = splitViewThickness - dividerThickness - topLeftThickness ;
     var autoresizeBehavior = this.get('autoresizeBehavior') ;
     var layout ;
@@ -189,7 +188,7 @@ SC.SplitView = SC.View.extend(
     isCollapsed = topLeftView.get('isCollapsed') || NO ;
     topLeftView.setIfChanged('isVisible', !isCollapsed) ;
     layout = topLeftView.get('layout');
-    if (direction == SC.HORIZONTAL_LAYOUT) {
+    if (direction == SC.LAYOUT_HORIZONTAL) {
       layout.top = 0 ;
       layout.left = 0 ;
       layout.bottom = 0 ;
@@ -227,7 +226,7 @@ SC.SplitView = SC.View.extend(
     // split divider view
     if (dividerView) {
       layout = dividerView.get('layout');
-      if (direction == SC.HORIZONTAL_LAYOUT) {
+      if (direction == SC.LAYOUT_HORIZONTAL) {
         layout.width = dividerThickness;
         delete layout.height ;
         layout.top = 0 ;
@@ -285,7 +284,7 @@ SC.SplitView = SC.View.extend(
     isCollapsed = bottomRightView.get('isCollapsed') || NO ;
     bottomRightView.setIfChanged('isVisible', !isCollapsed) ;
     layout = bottomRightView.get('layout');
-    if (direction == SC.HORIZONTAL_LAYOUT) {
+    if (direction == SC.LAYOUT_HORIZONTAL) {
       layout.top = 0 ;
       layout.bottom = 0 ;
       layout.right = 0 ;
@@ -361,7 +360,7 @@ SC.SplitView = SC.View.extend(
   
   mouseDragged: function(evt) {
     // console.log('mouseDragged');
-    var offset = (this._direction == SC.HORIZONTAL_LAYOUT) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
+    var offset = (this._direction == SC.LAYOUT_HORIZONTAL) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
     this._updateTopLeftThickness(offset) ;
     return YES;
   },
