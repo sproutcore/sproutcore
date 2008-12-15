@@ -20,6 +20,15 @@ require('views/view');
 
   Likewise, the designer palettes provided by the view builder will focus on 
   the designer instead of the view itself.
+  
+  h2. Designer UI
+  
+  The basic ViewDesigner class automatically handles the UI interaction for
+  layout.  You can also double click on the view to perform a default action.
+  
+  For views with isContainerView set to YES, double clicking on the view will
+  automatically "focus" the view.  This allows you to select the view's 
+  children instead of the view itself.
 
   @extends SC.Object
   @since SproutCore 1.0
@@ -313,14 +322,18 @@ SC.ViewDesigner = SC.Object.extend({
     }
   },
     
-  HOTZONE_THICKNESS: 10,
+  // ..........................................................
+  // MOUSE HANDLING
+  // 
+  
+  HOTZONE_THICKNESS: 5,
   HEAD_ZONE: 'head', 
   TAIL_ZONE: 'tail',
   NO_ZONE: 'center',
   
-  _zoneForOffset: function(offset, f, min, max) {
-    return this.NO_ZONE;
+  _zoneForOffset: function(offset, min, max) {
     var thick = this.HOTZONE_THICKNESS ;
+    
     return (offset<=(min+thick)) ? this.HEAD_ZONE : (offset>(max-thick)) ? this.TAIL_ZONE : this.NO_ZONE;
   },
   
@@ -332,7 +345,7 @@ SC.ViewDesigner = SC.Object.extend({
     if (!this.get('designIsEnabled')) return NO ;
     this.get('designController').select(this, evt.metaKey || evt.shiftKey);
     
-    var v, i, f, offset, min, max, thick; 
+    var v, i, f, offset; 
     
     // save mouseDown information...
     v = this.get('view');
@@ -340,7 +353,6 @@ SC.ViewDesigner = SC.Object.extend({
     
     i = (this._mouseDownInfo = SC.clone(v.get('layout')));
     i.pageX = evt.pageX; i.pageY = evt.pageY ;
-
     f = v.convertFrameToView(v.get('frame'), null);
     
     // handle X hotzone
@@ -348,6 +360,58 @@ SC.ViewDesigner = SC.Object.extend({
     i.zoneY = this._zoneForOffset(i.pageY, SC.minY(f), SC.maxY(f));
     
     return YES ;
+  },
+  
+  _adjustViewLayoutOnDrag: function(view, curZone, altZone, delta, i, headKey, tailKey, centerKey, sizeKey) {
+    
+    // collect some useful values...
+    var HEAD_ZONE = this.HEAD_ZONE, TAIL_ZONE = this.TAIL_ZONE ;
+    var inAltZone = (altZone === HEAD_ZONE) || (altZone === TAIL_ZONE);
+    var head = i[headKey], tail = i[tailKey], center = i[centerKey], 
+        size = i[sizeKey];
+        
+    switch(curZone) {
+    case HEAD_ZONE:
+      // if head aligned, shift head origin...
+      if (!SC.none(head)) {
+        view.adjust(headKey, head + delta) ;
+
+      // if we have a SIZE but no HEAD, assume centered or TAIL aligned
+      } else if (!SC.none(size)) {
+
+        // if centered, adjust by 2x so edge will track properly...
+        if (!SC.none(center)) delta = delta * 2 ;
+        view.adjust(sizeKey, size - delta);
+      }
+      break;
+
+    case TAIL_ZONE:
+      // if tail aligned, this tail origin...
+      if (!SC.none(tail)) {
+        view.adjust(tailKey, tail + delta) ;
+        
+      // if we have a SIZE but not TAIL, assume centered or HEAD aligned
+      } else if (!SC.none(size)) {
+        if (!SC.none(center)) delta = delta * 2 ;
+        view.adjust(sizeKey, size + delta) ;
+      }
+      break;
+
+    // if we are not in an X hotzone, move in X dir unless we are in a 
+    // Y hotzone or if the view is anchored to the left/right edges (in which
+    // case you can't move around...you have to resize edges)
+    default:
+      if (!inAltZone && !SC.none(size)) {
+        if (!SC.none(head)) {
+          view.adjust(headKey, head + delta);
+        } else if (!SC.none(tail)) {
+          view.adjust(tailKey, tail - delta) ;
+        } else if (!SC.none(center)) {
+          view.adjust(centerKey, center + delta);
+        }
+      }
+      break ;
+    }
   },
   
   mouseDragged: function(evt) {
@@ -358,58 +422,43 @@ SC.ViewDesigner = SC.Object.extend({
     var deltaX = evt.pageX - i.pageX, deltaY = evt.pageY - i.pageY;
 
     var view = this.get('view');
-    var f = view.convertFrameToView(view.get('frame'), null);
- 
-    console.log('zoneX = %@ - zoneY = %@'.fmt(i.zoneX, i.zoneY));
+    this._adjustViewLayoutOnDrag(view, i.zoneX, i.zoneY, deltaX, i, 'left', 'right', 'centerX', 'width') ;
+    this._adjustViewLayoutOnDrag(view, i.zoneY, i.zoneX, deltaY, i, 'top', 'bottom', 'centerY', 'height') ;
     
-    // handle X direction
-    switch(i.zoneX) {
-    case this.HEAD_ZONE:
-      break ;
-    
-    case this.TAIL_ZONE:
-      break ;
-    
-    default:
-      if (!SC.none(i.width)) {
-        if (!SC.none(i.left)) {
-          view.adjust('left', i.left + deltaX);
-        } else if (!SC.none(i.right)) {
-          view.adjust('right', i.right - deltaX) ;
-        } else if (!SC.none(i.centerX)) {
-          view.adjust('centerX', i.centerX + deltaX);
-        }
-      }
-      break ;
-    }
-
-    // handle Y direction
-    switch(i.zoneY) {
-    case this.HEAD_ZONE:
-      break ;
-    case this.TAIL_ZONE:
-        break ;
-    default:
-      if(!SC.none(i.height)) {
-        if (!SC.none(i.top)) {
-          view.adjust('top', i.top + deltaY);
-        } else if (!SC.none(i.bottom)) {
-          view.adjust('bottom', i.bottom - deltaY) ;
-        } else if (!SC.none(i.centerY)) {
-          view.adjust('centerY', i.centerY + deltaY);
-        }
-      }
-      break ;
-    }
-    
-
-    
+    // update the cursor...make sure we stick with the current zone...
+    this.mouseMoved(evt, i.zoneX, i.zoneY);
     return YES ;
   },
   
   mouseUp: function(evt) {
     if (!this.get('designIsEnabled')) return NO ;
     console.log('%@: mouseUp'.fmt(this));
+    return YES ;
+  },
+  
+  // Change the CURSOR for the view...
+  mouseMoved: function(evt, zoneX, zoneY) {
+    if (!this.get('designIsSelected')) return NO ;
+    
+    var HEAD_ZONE = this.HEAD_ZONE, TAIL_ZONE =this.TAIL_ZONE ;
+    var view, f, zoneX, zoneY, cursor ;
+    
+    view = this.get('view');
+    f = view.convertFrameToView(view.get('frame'), null);
+    if (!zoneX) zoneX = this._zoneForOffset(evt.pageX, SC.minX(f), SC.maxX(f));
+    if (!zoneY) zoneY = this._zoneForOffset(evt.pageY, SC.minY(f), SC.maxY(f));
+
+    if (zoneX === HEAD_ZONE) {
+      cursor = (zoneY === HEAD_ZONE) ? 'nw-resize' : (zoneY === TAIL_ZONE) ? 'sw-resize' : 'w-resize' ;
+    } else if (zoneX === TAIL_ZONE) {
+      cursor = (zoneY === HEAD_ZONE) ? 'ne-resize' : (zoneY === TAIL_ZONE) ? 'se-resize' : 'e-resize' ;
+    } else {
+      cursor = (zoneY === HEAD_ZONE) ? 'n-resize' : (zoneY === TAIL_ZONE) ? 's-resize' : null ;
+    }
+    
+    // set cursor value...
+    view.$().css('cursor', cursor) ;
+    
     return YES ;
   }
   

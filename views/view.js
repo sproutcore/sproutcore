@@ -946,7 +946,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // walk up this side
     while(next = view.get('parentView')) {
-      f = view.get('frame'); myX += f.x; myY += f.y ;
+      f = next.get('frame'); myX += f.x; myY += f.y ;
       view = next ; 
     }
 
@@ -954,7 +954,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (targetView) {
       view = targetView ;
       while(next = view.get('parentView')) {
-        f = view.get('frame'); targetX += f.x; targetY += f.y ;
+        f = next.get('frame'); targetX += f.x; targetY += f.y ;
         view = next ; 
       }
     }
