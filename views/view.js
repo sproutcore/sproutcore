@@ -1340,13 +1340,76 @@ SC.View.mixin(/** @scope SC.View @static */ {
     @function
   */ 
   design: function() {
+    if (this.isDesign) return this; // only run design one time
     var ret = this.extend.apply(this, arguments);
+    ret.isDesign = YES ;
     if (SC.ViewDesigner) {
       SC.ViewDesigner.didLoadDesign(ret, this, SC.$A(arguments));
     }
     return ret ;
   },
 
+  /**
+    Helper applies the layout to the prototype. 
+  */
+  layout: function(layout) {
+    this.prototype.layout = layout ;
+    return this ;
+  },
+  
+  /**
+    Helper applies the styleClass to the prototype
+  */
+  styleClass: function(sc) {
+    sc = (this.prototype.styleClass || []).concat(sc);
+    this.prototype.styleClass = sc;
+    return this ;
+  },
+  
+  /**
+    Help applies the tagName
+  */
+  tagName: function(tg) {
+    this.prototype.tagName = tg;
+    return this ;
+  },
+  
+  /**
+    Helper adds the childView
+  */
+  childView: function(cv) {
+    var childViews = this.prototype.childViews || [];
+    if (childViews === this.superclass.prototype.childViews) childViews = [];
+    childViews.push(cv) ;
+    this.prototype.childViews = childViews;
+    return this ;
+  },
+  
+  /**
+    Helper adds a binding to a design
+  */
+  bind: function(keyName, path) {
+    var p = this.prototype, s = this.superclass.prototype;
+    var bindings = p._bindings ;
+    if (!bindings || bindings === s._bindings) {
+      bindings = p._bindings = (bindings || []).slice() ;
+    }  
+    
+    keyName = keyName + "Binding";
+    p[keyName] = path ;
+    bindings.push(keyName);
+    
+    return this ;
+  },
+
+  /**
+    Helper sets a generic property on a design.
+  */
+  prop: function(keyName, value) {
+    this.prototype[keyName] = value;
+    return this ;
+  },
+  
   /**
     Used to construct a localization for a view.  The default implementation
     will simply return the passed attributes.
