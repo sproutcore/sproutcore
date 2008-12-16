@@ -360,7 +360,7 @@ SC.Pane = SC.View.extend({
 
     // clean up some of my own properties    
     this.set('isPaneAttached', NO) ;
-    this.displayLocationDidChange() ;
+    this.parentViewDidChange() ;
   },
 
   /** 
@@ -419,7 +419,7 @@ SC.Pane = SC.View.extend({
     
     // update my own location
     this.set('isPaneAttached', YES) ;
-    this.displayLocationDidChange() ;
+    this.parentViewDidChange() ;
     return this ;
   },
   

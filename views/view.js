@@ -102,12 +102,20 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   parentView: null,
 
-  /** Child Views */
+  // ..........................................................
+  // CHILD VIEW SUPPORT
+  // 
+  
+  /** 
+    Array of child views.  You should never edit this array directly unless
+    you are implementing createChildViews().  Most of the time, you should
+    use the accessor methods such as appendChild(), insertBefore() and 
+    removeChild().
+    
+    @property {Array} 
+  */
   childViews: [],
   
-  /** Outlets */
-  outlets: [],
-
   /** 
     Set to true when the item is enabled. 
 
@@ -166,7 +174,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     childViews.insertAt(idx, view) ;
 
     // The DOM will need some fixing up, note this on the view.
-    view.displayLocationDidChange() ;
+    view.parentViewDidChange() ;
     view.displayLayoutDidChange() ;
 
     // notify views
@@ -203,7 +211,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (idx>=0) childViews.removeAt(idx);
 
     // The DOM will need some fixing up, note this on the view.
-    view.displayLocationDidChange() ;
+    view.parentViewDidChange() ;
 
     // notify views
     if (view.didRemoveFromParent) view.didRemoveFromParent(this) ;
@@ -278,11 +286,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
     
   /** 
-    This method is called on a view whenever it's location in the display
-    hierarchy changes.  It will register the view to update its DOM location
-    at the end of the runloop.
+    This method is called whenever the receiver's parentView has changed.  
+    The default implementation of this method marks the view's display 
+    location as dirty so that it will update at the end of the run loop.
+    
+    You will not usually need to override or call this method yourself, though
+    if you manually patch the parentView hierarchy for some reason, you should
+    call this method to notify the view that it's parentView has changed.
+    
+    @returns {SC.View} receiver
   */
-  displayLocationDidChange: function() {
+  parentViewDidChange: function() {
     this.set('displayLocationNeedsUpdate', YES) ;
     this.recomputeIsVisibleInWindow() ;
     SC.View.scheduleInRunLoop(SC.DISPLAY_LOCATION_QUEUE, this);
@@ -290,8 +304,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   }.observes('isVisible'),
   
   /**
-    This method will update the display location, but only if it needs an 
-    update.  
+    Set to YES when the view's display location is dirty.  You can call 
+    updateDisplayLocationIfNeeded() to clear this flag if it is set.
+    
+    @property {Boolean}
+  */
+  displayLocationNeedsUpdate: NO,
+  
+  /**
+    Calls updateDisplayLocation(), but only if the view's display location
+    currently needs to be updated.  This method is called automatically at 
+    the end of a run loop if you have called parentViewDidChange() at some
+    point.
+    
+    @property {Boolean} force This property is ignored.
+    @returns {Boolean} YES if the location was updated 
   */
   updateDisplayLocationIfNeeded: function(force) {
     if (!this.get('displayLocationNeedsUpdate')) return YES;
@@ -650,9 +677,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     state of the view.  The resulting DOM will be dumped to a file and 
     reloaded during a production environment so do not depend on this method 
     being called.
-    
-    If you need to add outlets into the DOM of the parent at any place, you
-    should override this method also.
     
     The default implementation will simply create DOM from the emptyElement
     property defined on the view and set it as the rootElement.  It will also
