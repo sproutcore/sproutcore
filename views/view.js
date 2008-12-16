@@ -144,7 +144,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
   /** 
     The current split view this view is embedded in (may be null). 
-    @property {SC.Pane}
+    @property {SC.SplitView}
   */
   splitView: function() {
     console.log('splitView called');
