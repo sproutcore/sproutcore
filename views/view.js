@@ -147,7 +147,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {SC.SplitView}
   */
   splitView: function() {
-    console.log('splitView called');
+    // console.log('splitView called');
     var view = this;
     while(view && !view.isSplitView) view = view.get('parentView');
     return view;
