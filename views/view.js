@@ -142,6 +142,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   page: null,
     
+  /** 
+    The current split view this view is embedded in (may be null). 
+    @property {SC.Pane}
+  */
+  splitView: function() {
+    console.log('splitView called');
+    var view = this;
+    while(view && !view.isSplitView) view = view.get('parentView');
+    return view;
+  }.property('parentView').cacheable(),
+  
   /**
     If the view is currently inserted into the DOM of a parent view, this
     property will point to the parent of the view.
@@ -162,15 +173,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   childViews: [],
   
-<<<<<<< HEAD:views/view.js
-=======
   /** Outlets */
   outlets: [],
   
-  /** Split view, if there is one */
-  splitView: null,
-
->>>>>>> split view support (buggy):views/view.js
   /** 
     Set to true when the item is enabled. 
 

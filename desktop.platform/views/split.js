@@ -117,6 +117,11 @@ SC.SplitView = SC.View.extend(
     at startup.
   */
   topLeftDefaultThickness: 0.5,
+  
+  /**
+    Yes, we're a split view.
+  */
+  isSplitView: YES,
 
   /**
     Used by split divider to decide if the view can be collapsed.
@@ -160,14 +165,6 @@ SC.SplitView = SC.View.extend(
       var direction = this.get('layoutDirection') ;
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
-      
-      var dividerView = this.get('dividerView') ;
-      if (dividerView) dividerView.set('splitView', this) ;
-      
-      var ary = this.get('thumbViews') || [];
-      for (var idx = 0, len = ary.length; idx < len; ++idx) {
-        ary[idx].set('splitView', this);
-      }
     }
     
     // console.log('this._desiredTopLeftThickness is %@'.fmt(this._desiredTopLeftThickness));
@@ -194,6 +191,8 @@ SC.SplitView = SC.View.extend(
       layout.bottom = 0 ;
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
+          throw "SC.RESIZE_BOTH is currently unsupported.";
+          break ;
         case SC.RESIZE_TOP_LEFT:
           layout.right = bottomRightThickness + dividerThickness ;
           delete layout.width ;
@@ -209,6 +208,8 @@ SC.SplitView = SC.View.extend(
       layout.right = 0 ;
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
+          throw "SC.RESIZE_BOTH is currently unsupported.";
+          break ;
         case SC.RESIZE_TOP_LEFT:
           layout.bottom = bottomRightThickness + dividerThickness ;
           delete layout.height ;
@@ -233,10 +234,11 @@ SC.SplitView = SC.View.extend(
         layout.bottom = 0 ;
         switch (autoresizeBehavior) {
           case SC.RESIZE_BOTH:
-            delete layout.left ;
-            delete layout.right ;
-            layout.centerX = topLeftThickness + (dividerThickness / 2) ;
-            delete layout.centerY ;
+            throw "SC.RESIZE_BOTH is currently unsupported.";
+            // delete layout.left ;
+            // delete layout.right ;
+            // layout.centerX = topLeftThickness + (dividerThickness / 2) ;
+            // delete layout.centerY ;
             break ;
           case SC.RESIZE_TOP_LEFT:
             delete layout.left ;
@@ -260,10 +262,11 @@ SC.SplitView = SC.View.extend(
         layout.right = 0 ;
         switch (autoresizeBehavior) {
           case SC.RESIZE_BOTH:
-            delete layout.top ;
-            delete layout.bottom ;
-            delete layout.centerX ;
-            layout.centerY = topLeftThickness + (dividerThickness / 2) ;
+            throw "SC.RESIZE_BOTH is currently unsupported.";
+            // delete layout.top ;
+            // delete layout.bottom ;
+            // delete layout.centerX ;
+            // layout.centerY = topLeftThickness + (dividerThickness / 2) ;
             break ;
           case SC.RESIZE_TOP_LEFT:
             delete layout.top ;
@@ -294,6 +297,8 @@ SC.SplitView = SC.View.extend(
       layout.right = 0 ;
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
+          throw "SC.RESIZE_BOTH is currently unsupported.";
+          break ;
         case SC.RESIZE_BOTTOM_RIGHT:
           layout.left = topLeftThickness + dividerThickness ;
           delete layout.width ;
@@ -309,6 +314,8 @@ SC.SplitView = SC.View.extend(
       layout.bottom = 0 ;
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
+          throw "SC.RESIZE_BOTH is currently unsupported.";
+          break ;
         case SC.RESIZE_BOTTOM_RIGHT:
           layout.top = topLeftThickness + dividerThickness ;
           delete layout.height ;
@@ -364,7 +371,7 @@ SC.SplitView = SC.View.extend(
   
   mouseDragged: function(evt) {
     // console.log('mouseDragged');
-    var offset = (this._direction == SC.LAYOUT_HORIZONTAL) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
+    var offset = (this._layoutDirection == SC.LAYOUT_HORIZONTAL) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
     this._updateTopLeftThickness(offset) ;
     return YES;
   },
@@ -462,11 +469,11 @@ SC.SplitView = SC.View.extend(
     var tlThickness = this.thicknessForView(topLeftView) ;
     var brThickness = this.thicknessForView(bottomRightView) ;
     if (topLeftView.get('isCollapsed') || tlThickness == topLeftView.get("minThickness") || brThickness == bottomRightView.get("maxThickness")) {
-      this._thumbView.$().css('cursor', this._direction == SC.HORIZONTAL ? "e-resize" : "s-resize" ) ;
+      this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "e-resize" : "s-resize" ) ;
     } else if (bottomRightView.get('isCollapsed') || tlThickness == topLeftView.get("maxThickness") || brThickness == bottomRightView.get("minThickness")) {
-      this._thumbView.$().css('cursor', this._direction == SC.HORIZONTAL ? "w-resize" : "n-resize" ) ;
+      this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "w-resize" : "n-resize" ) ;
     } else {
-      this._thumbView.$().css('cursor', this._direction == SC.HORIZONTAL ? "ew-resize" : "ns-resize" ) ;
+      this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "ew-resize" : "ns-resize" ) ;
     }
   },
 
