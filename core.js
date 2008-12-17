@@ -400,6 +400,18 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
+    Returns a new object combining the values of all passed hashes.
+  
+    @param object {Object} one or more objects
+    @returns {Object} new Object
+  */
+  merge: function() {
+    var ret = {}, len = arguments.length, idx;
+    for(idx=0;idx<len;idx++) SC.mixin(ret, arguments[idx]);
+    return ret ;
+  },
+  
+  /**
     Returns all of the keys defined on an object or hash.  This is useful
     when inspecting objects for debugging.
     
