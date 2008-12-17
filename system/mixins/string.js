@@ -66,6 +66,7 @@ SC.String = {
     // NB: This could be implemented as a wrapper to locWithDefault() but
     // it would add some overhead to deal with the arguments and adds stack
     // frames, so we are keeping the implementation separate.
+    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
     var str = SC.Locale.currentLocale.locWithDefault(this) || this;
     return str.fmt.apply(str,arguments) ;
   },
@@ -79,6 +80,7 @@ SC.String = {
     @returns {String} localized and formatted string
   */
   locWithDefault: function(def) {
+    if(!SC.Locale.currentLocale) SC.Locale.createCurrentLocale();
     var str = SC.Locale.currentLocale.locWithDefault(def) || this;
     var args = SC.$A(arguments); args.shift(); // remove def param
     return str.fmt.apply(str,args) ;

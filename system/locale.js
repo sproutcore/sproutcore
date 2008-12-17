@@ -117,7 +117,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     var preferred = (String.preferredLanguage !== undefined) ? String.preferredLanguage : this.preferredLanguage ;
 
     // determine the language
-    var lang = ((autodetect) ? this.browser.language : null) || preferred || this.browser.language || 'en';
+    var lang = ((autodetect) ? SC.browser.language : null) || preferred || SC.browser.language || 'en';
     lang = SC.Locale.normalizeLanguage(lang) ;
 
     // get the locale class.  If a class cannot be found, fall back to generic
@@ -201,7 +201,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     // make sure the target strings hash exists and belongs to the locale
     var strings = this.prototype.strings ;
     if (strings) {
-      if (!this.prototype.hasOwnProperty(strings)) {
+      if (!this.prototype.hasOwnProperty('strings')) {
         this.prototype.strings = SC.clone(strings) ;
       }
     } else strings = this.prototype.strings = {} ;
