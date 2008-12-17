@@ -4,11 +4,12 @@
 // ========================================================================
 
 require('system/object');
+/*global Ajax */
 
 /** @class
   
   A stub object represents a lazily-loaded module.  Whenever you define a 
-  lazily loaded module in SproutCore using the sc_module() directive, a Stub
+  lazily loaded module in SproutCore using the sc_stub() directive, a Stub
   object will be automatically created at the path you name in the module.
   
   You can work with this Stub object by calling the invokeLater() method.  
@@ -19,13 +20,21 @@ require('system/object');
 SC.StubObject = SC.Object.extend({
   
   /** walk like a duck */
-  isDeferredObject: YES,
+  isStubObject: YES,
   
   /**
-    The path of the module to load.  The module must be a JavaScript file 
-    that can be eval'd.
+    The property path this stub object is installed at.  Also used to
+    determine the load path.
   */
-  moduleUrl: '',
+  propertyPath: '',
+  
+  /**
+    The moduleUrl.  The default version of this is usually the propertyPath
+    name.
+  */
+  moduleUrl: function() {
+    return this.get('propertyPath') + '.js';
+  }.property('propertyPath').cacheable(),
   
   /**
     Before you access any property on an object that may be deferred, you
@@ -33,9 +42,21 @@ SC.StubObject = SC.Object.extend({
     be loaded before your callback method is invoked.  Otherwise, your 
     callback method will be invoked immediately.
   */
-  invokeLater: function(propertyPath, target, method) {
+  invokeWith: function(propertyPath, target, method) {
+    
+    var objectPath = this.get('propertyPath');
+    
     // Load this Object... once loaded, call invokeLater() on the loaded 
-    // object...
+    var req = new Ajax.Request({ 
+      url: this.get('moduleUrl'),
+      onComplete: function() {
+        // get loaded obj and invoke...
+        var obj = SC.objectForPropertyPath(objectPath); 
+        obj.invokeWith(propertyPath, target, method);
+        obj = objectPath = propertyPath = target = method = null; //noleaks
+      }
+    });
+    req= null;
   }
 
 });

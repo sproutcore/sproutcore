@@ -10,6 +10,12 @@ require('system/binding');
 */
 SC.MIXED_STATE = '__MIXED__' ;
 
+/** Option for HUGE control size. */
+SC.HUGE_CONTROL_SIZE = 'sc-huge-size';
+
+/** Option for large control size. */
+SC.LARGE_CONTROL_SIZE = 'sc-large-size';
+
 /** Option for standard control size. */
 SC.REGULAR_CONTROL_SIZE = 'sc-regular-size';
 
@@ -19,6 +25,7 @@ SC.SMALL_CONTROL_SIZE = 'sc-small-size';
 /** Option for tiny control size */
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 
+SC.CONTROL_SIZES = [SC.HUGE_CONTROL_SIZE, SC.LARGE_CONTROL_SIZE, SC.REGULAR_CONTROL_SIZE, SC.SMALL_CONTROL_SIZE, SC.TINY_CONTROL_SIZE];
 
 /**
   @namespace
@@ -298,10 +305,13 @@ SC.Control = {
     names.focus = this.get('isFirstResponder') ;
     names.active = this.get('isActive') ;
     
-    var size = this.get('controlSize') ;
-    names[SC.REGULAR_CONTROL_SIZE] = size === SC.REGULAR_CONTROL_SIZE;
-    names[SC.SMALL_CONTROL_SIZE] =   size === SC.SMALL_CONTROL_SIZE;
-    names[SC.TINY_CONTROL_SIZE] =    size === SC.TINY_CONTROL_SIZE;
+    // set control size (removing all others)
+    var size = this.get('controlSize'), sizes = SC.CONTROL_SIZES; 
+    var loc = sizes.length, s;
+    while(--loc>=0) {
+      s = sizes[loc];
+      names[s] = (size === s);
+    }
     
     this.$().setClass(names);
 
