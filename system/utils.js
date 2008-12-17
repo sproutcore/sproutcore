@@ -252,7 +252,7 @@ SC.mixin(
 
     element = el;
     while (element) {
-      if (!Prototype.Browser.Opera || element.tagName == 'BODY') {
+      if (!SC.browser.opera || element.tagName == 'BODY') {
         valueT -= element.scrollTop  || 0;
         valueL -= element.scrollLeft || 0;
       }
