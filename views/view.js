@@ -36,6 +36,52 @@ SC.LAYOUT_VERTICAL = 'sc-layout-vertical';
 /** @private */
 SC._VIEW_DEFAULT_DIMS = 'marginTop marginLeft'.w();
 
+/**
+  Layout properties needed to anchor a view to the top.
+*/
+SC.ANCHOR_TOP = { top: 0 };
+
+/**
+  Layout properties needed to anchor a view to the left.
+*/
+SC.ANCHOR_LEFT = { left: 0 };
+
+/*
+  Layout properties to anchor a view to the top left 
+*/
+SC.ANCHOR_TOP_LEFT = { top: 0, left: 0 };
+
+/**
+  Layout properties to anchoe view to the bottom.
+*/
+SC.ANCHOR_BOTTOM = { bottom: 0 };
+
+/**
+  Layout properties to anchor a view to the right.
+*/
+SC.ANCHOR_RIGHT = { right: 0 } ;
+
+/**
+  Layout properties to anchor a view to the bottom right.
+*/
+SC.ANCHOR_BOTTOM_RIGHT = { bottom: 0, right: 0 };
+
+/**
+  Layout properties to take up the full width of a parent view.
+*/
+SC.FULL_WIDTH = { left: 0, right: 0 };
+
+/**
+  Layout properties to take up the full height of a parent view.
+*/
+SC.FULL_HEIGHT = { top: 0, bottom: 0 };
+
+/**
+  Layout properties to center.  Note that you must also specify a width and
+  height for this to work.
+*/
+SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
+
 /** 
   @class
   
