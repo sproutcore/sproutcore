@@ -87,7 +87,7 @@ SC.CollectionViewTest = {
 } ;
 
 Test.context("CASE 1: No scrolling, no incremental rendering, no custom layout", 
-  Object.extend(SC.StandardTests,{
+  SC.mixin(SC.StandardTests,{
   
   setup: function() {
     SC.CollectionViewTest.setup(this, {
@@ -106,7 +106,7 @@ Test.context("CASE 1: No scrolling, no incremental rendering, no custom layout",
 }));
 
 Test.context("CASE 2: No scrolling, no incremental rendering, custom layout", 
-  Object.extend(SC.StandardTests,{
+  SC.mixin(SC.StandardTests,{
   
   setup: function() {
     SC.CollectionViewTest.setup(this, {
@@ -146,7 +146,7 @@ Test.context("CASE 2: No scrolling, no incremental rendering, custom layout",
 
 
 Test.context("CASE 3: Autoscrolling, no incremental rendering, no custom layout", 
-  Object.extend(SC.StandardTests,{
+  SC.mixin(SC.StandardTests,{
   
   setup: function() {
     SC.CollectionViewTest.setup(this, {
@@ -168,7 +168,7 @@ Test.context("CASE 3: Autoscrolling, no incremental rendering, no custom layout"
 }));
 
 Test.context("CASE 4: Autoscrolling, no incremental rendering, custom layout", 
-  Object.extend(SC.StandardTests,{
+  SC.mixin(SC.StandardTests,{
   
   setup: function() {
     SC.CollectionViewTest.setup(this, {

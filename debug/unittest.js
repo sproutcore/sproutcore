@@ -9,7 +9,7 @@
 
 // experimental, Firefox-only
 Event.simulateMouse = function(element, eventName) {
-  var options = Object.extend({
+  var options = SC.mixin({
     pointerX: 0,
     pointerY: 0,
     buttons:  0,
@@ -45,7 +45,7 @@ Event.simulateMouse = function(element, eventName) {
 // You need to downgrade to 1.0.4 for now to get this working
 // See https://bugzilla.mozilla.org/show_bug.cgi?id=289940 for the fix that fixed too much
 Event.simulateKey = function(element, eventName) {
-  var options = Object.extend({
+  var options = SC.mixin({
     ctrlKey: false,
     altKey: false,
     shiftKey: false,
@@ -151,7 +151,7 @@ document.setTestStatus = function(stat) {
 Test.Unit.Runner = Class.create();
 Test.Unit.Runner.prototype = {
   initialize: function(testcases) {
-    this.options = Object.extend({
+    this.options = SC.mixin({
       testLog: 'testlog'
     }, arguments[1] || {});
     this.options.resultsURL = this.parseResultsURLQueryParameter();
@@ -505,7 +505,7 @@ Test.Unit.Assertions.prototype = {
 } ;
 
 Test.Unit.Testcase = Class.create();
-Object.extend(Object.extend(Test.Unit.Testcase.prototype, Test.Unit.Assertions.prototype), {
+SC.mixin(SC.mixin(Test.Unit.Testcase.prototype, Test.Unit.Assertions.prototype), {
   initialize: function(name, test, setup, teardown) {
     Test.Unit.Assertions.prototype.initialize.bind(this)();
     this.name           = name;
@@ -580,7 +580,7 @@ Test.setupBDDExtensionMethods = function(){
   });
   
   [Array.prototype, String.prototype, Number.prototype, Boolean.prototype].each(
-    function(p){ Object.extend(p, Test.BDDMethods); }
+    function(p){ SC.mixin(p, Test.BDDMethods); }
   );
 } ;
 

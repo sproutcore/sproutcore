@@ -159,7 +159,7 @@ SC.Locale.define('en', {
   longDateFormat: ''
 }) ;
 
-Object.extend(Date,{
+SC.mixin(Date,{
   
   // returns the current time as an offset
   now: function() {
@@ -408,7 +408,7 @@ Object.extend(Date,{
 
 }) ;
 
-Object.extend(Date.prototype, {
+SC.mixin(Date.prototype, {
   
   // ------------------------------------------------------------------
   // formatDate (date_object, format)

@@ -651,7 +651,7 @@ function Accordion(options) {
 Accordion.prototype = {
 	// apply defaults
 	setOptions: function(options) {
-		this.options = Object.extend({
+		this.options = SC.mixin({
 			// REQUIRED: an array of elements to use as the accordion sections
 			sections: null,
 			// a function that locates an activator button element given a section element.

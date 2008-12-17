@@ -375,7 +375,7 @@ if (SC.BENCHMARK_SELECTOR) {
 }
 
 // longer form aliases of the functions.
-Object.extend(SC._PathModule, {
+SC.mixin(SC._PathModule, {
   $$class: SC._PathModule.$$C,
   $$tag: SC._PathModule.$$T,
   $$sel: SC._PathModule.$$S,
@@ -388,7 +388,7 @@ Object.extend(SC._PathModule, {
 }) ;
 
 // longer form aliases of the functions.
-Object.extend(SC.PathModule, {
+SC.mixin(SC.PathModule, {
   $$class: SC.PathModule.$$C,
   $$tag: SC.PathModule.$$T,
   $$sel: SC.PathModule.$$S,
@@ -403,26 +403,26 @@ Object.extend(SC.PathModule, {
 // Add _PathModule to the appropriate elements.  Add to Element.Methods which
 // will cause it to be copied onto elements automatically in IE when you 
 // call IE.
-Object.extend(Element.Methods,SC._PathModule) ;
-Object.extend(Element,SC._PathModule) ;
+SC.mixin(Element.Methods,SC._PathModule) ;
+SC.mixin(Element,SC._PathModule) ;
 
 // applies to Element.
 if (typeof HTMLElement != 'undefined') {
-  Object.extend(HTMLElement.prototype,SC.PathModule) ;
+  SC.mixin(HTMLElement.prototype,SC.PathModule) ;
 }
 
 // applies to document
-Object.extend(document,SC.PathModule) ;
+SC.mixin(document,SC.PathModule) ;
 
 // applies to window.
-Object.extend(Object.extend(window,SC.PathModule), {
+SC.mixin(SC.mixin(window,SC.PathModule), {
   $$func: function(func, levels, max, nest) {
     return document.$$func(func,levels,max,nest) ;
   }
 });
 
 // applies to arrays. Note the override of $$func to act on the group.
-Object.extend(Object.extend(Array.prototype,SC.PathModule), {
+SC.mixin(SC.mixin(Array.prototype,SC.PathModule), {
   $$func: function(func, levels, max, nest) {
     var ret = [] ;
     for(var loc=0;loc<this.length;loc++) {
