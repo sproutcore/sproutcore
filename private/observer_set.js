@@ -18,7 +18,7 @@ SC._ObserverSet = {
   _membersCacheIsValid: NO,
   
   // adds the named target/method observer to the set.  The method must be
-  // a function, not a string.
+  // a function, not a string..
   add: function(target, method) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
     
@@ -58,6 +58,20 @@ SC._ObserverSet = {
     this._membersCacheIsValid = NO;
     
     return YES ;
+  },
+  
+  // Invokes the target/method pairs in the receiver.  Used by SC.RunLoop
+  invokeMethods: function() {
+    // iterate through the set, look for sets.
+    for(var key in this) {
+      if (!this.hasOwnProperty(key)) continue ;
+      var value = this[key] ;
+      if (value && value.isTargetSet) {
+        var idx = value.length;
+        var target = value.target ;
+        while(--idx>=0) value[idx].call(target);
+      }
+    }
   },
   
   // Returns an array of target/method pairs.  This is cached.

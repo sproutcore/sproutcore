@@ -489,14 +489,15 @@ SC.Binding = {
   /**
     Call this method on SC.Binding to flush all bindings with changed pending.
     
-    @returns {SC.Binding} this
+    @returns {Boolean} YES if changes were flushed.
   */
   flushPendingChanges: function() {
     
     // don't allow flushing more than one at a time
-    if (this._isFlushing) return ; 
+    if (this._isFlushing) return NO; 
     this._isFlushing = YES ;
 
+    var didFlush = NO ;
     var log = SC.LOG_BINDING_NOTIFICATIONS ;
     
     // connect any bindings
@@ -506,11 +507,13 @@ SC.Binding = {
       this._alternateConnectQueue = queue ;
       while(binding = queue.pop()) binding._connect() ;
     }
-    
-    // keep doing this as long as there are changes to flush.
-    while((queue = this._changeQueue).length > 0) {
+
+    // loop through the changed queue...
+    if((queue = this._changeQueue).length > 0) {
       if (log) console.log("Begin: Trigger changed bindings") ;
 
+      didFlush = YES ;
+      
       // first, swap the change queues.  This way any binding changes that
       // happen while we flush the current queue can be queued up.
       this._changeQueue = this._alternateChangeQueue ;
@@ -522,15 +525,15 @@ SC.Binding = {
       while(binding = queue.pop()) binding.applyBindingValue() ;
       
       // now loop back and see if there are additional changes pending in the
-      // active queue.  Repeat this until all bindings that need to trigger have
-      // triggered.
+      // active queue.  Repeat this until all bindings that need to trigger 
+      // have triggered.
       if (log) console.log("End: Trigger changed bindings") ;
     }
 
 
     // clean up
     this._isFlushing = NO ;
-    return this ;
+    return didFlush ;
   },
   
   /**

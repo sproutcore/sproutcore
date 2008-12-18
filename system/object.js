@@ -436,6 +436,17 @@ SC.Object.prototype = {
   },
 
   /**
+    Invokes the passed method or method name one time during the runloop.
+    
+    @param {Funciton} method
+    @returns {SC.Object} receiver
+  */
+  invokeOnce: function(method) {
+    SC.runLoop.invokeOnce(this, method);
+    return this ;
+  },
+  
+  /**
     Lookup the named property path and then invoke the passed function, 
     passing the resulting value to the function.
     

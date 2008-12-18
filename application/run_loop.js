@@ -59,6 +59,8 @@ require('core') ;
 */
 SC.runLoop = SC.Object.create({
   
+  runLevel: 0,
+  
   /**
     Maximum time we allow things to run before taking a break.
   */
@@ -71,7 +73,7 @@ SC.runLoop = SC.Object.create({
     the timeout handler.  If you call setTimeout() or setInterval() yourself, 
     you may need to invoke this yourself.
   
-    @returns {void}
+    @returns {SC.RunLoop} receiver
   */
   beginRunLoop: function() {
     this._start = Date.now() ;  
@@ -87,19 +89,67 @@ SC.runLoop = SC.Object.create({
     @returns {void}
   */
   endRunLoop: function() {
-    // flush any expired timers, possibly cancelling the timeout.
-    this._flushExpiredTimers() ;
     
-    // flush any pending changed bindings.  This could actually trigger a lot 
-    // of code to execute.
-    SC.Binding.flushPendingChanges() ;
+    // at the end of a runloop, flush all the delayed actions we may have 
+    // stored up.  Note that if any of these queues actually run, we will 
+    // step through all of them again.  This way any changes get flushed
+    // out completely.
+    var didChange ;
+    
+    do {
+      didChange = NO ;
+      
+      // flush any expired timers, possibly cancelling the timeout.
+      // no need to check for didChange here since the other items will run
+      // anyway...
+      this._flushExpiredTimers();
+      
+      // flush any pending changed bindings.  This could actually trigger a 
+      // lot of code to execute.
+      didChange = didChange || SC.Binding.flushPendingChanges();
 
-    // Possibly go ahead and ask any changed views to re-render?
-    SC.View.flushPendingQueues() ; 
-    
+      // flush any invokeOnce() methods
+      didChange = didChange || this._flushInvokeQueue();
+      
+      // Go ahead and ask any changed views to re-render
+      didChange = didChange || SC.View.flushPendingQueues();
+    } while(didChange) ;
     this._start = null ;
   },
     
+  _flushInvokeQueue: function() {
+    var queue = this._invokeQueue, hadContent = NO, len, idx, handler ;
+    if (queue && queue.length > 0) {
+      this._invokeQueue = null; // reset queue.
+      hadContent = queue.targets>0; // has targets?
+      if (hadContent) queue.invokeMethods();
+    }
+    return hadContent ;
+  },
+  
+  /**
+    Invokes the passed target/method pair once at the end of the runloop.
+    You can call this method as many times as you like and the method will
+    only be invoked once.  
+    
+    Usually you will not call this method directly but use invokeOnce() 
+    defined on SC.Object.
+    
+    @param {Object} target
+    @param {Function} method
+    @returns {SC.RunLoop} receiver
+  */
+  invokeOnce: function(target, method) {
+    // normalize
+    if (method === undefined) { 
+      method = target; target = this ;
+    }
+    if (SC.typeOf(method) === SC.T_STRING) method = target[method];
+    if (!this._invokeQueue) this._invokeQueue = SC._ObserverSet.create();
+    this._invokeQueue.add(target, method);
+    return this ;
+  },
+  
   /**
     The time the current run loop began executing.
     
