@@ -57,6 +57,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
+  styleClass: 'sc-collection-view',
+  
   // ......................................
   // PROPERTIES
   //

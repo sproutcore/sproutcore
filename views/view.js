@@ -1299,6 +1299,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginLeft= 0;
     }
 
+    // handle min/max
+    ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
+    ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
+
     // Y DIRECTION
     
     // handle left aligned and left/right
@@ -1345,6 +1349,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.height = null ;
       ret.marginTop= 0;
     }
+
+    // handle min/max
+    ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
+    ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
+
+    // if zIndex is set, use it.  otherwise let default shine through
+    ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
     
     // set default values to null to allow built-in CSS to shine through
     // currently applies only to marginLeft & marginTop
