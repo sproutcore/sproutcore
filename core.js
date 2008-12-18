@@ -187,39 +187,45 @@ SC.mixin(/** @scope SC */ {
     @returns {Boolean} 
   */
   isArray: function(obj) {
-    var t = SC.$type(obj);
-    return (t === SC.T_ARRAY) || ((t !== SC.T_STRING) && obj && ((obj.length !== undefined) || obj.objectAt)) ;
+    var len = (obj ? obj.length : null), type = SC.typeOf(obj);
+    return !(SC.none(len) || 
+      ((type === SC.T_FUNCTION) && !(obj instanceof NodeList)) || 
+      (type === SC.T_STRING) || obj.setInterval) || obj.objectAt ;
+  },
+  
+  /**
+    Makes an object into an Array if it is not array or array-like already.
+    Unlike SC.$A(), this method will not clone the object if it is already
+    an array.
+  */
+  makeArray: function(obj) {
+    return SC.isArray(obj) ? obj : SC.$A(obj);
   },
   
   /**
     Converts the passed object to an Array.  If the object appears to be 
     array-like, a new array will be cloned from it.  Otherwise, a new array
     will be created with the item itself as the only item in the array.
-    
-    This is an alias for Array.from() as well.
-    
+        
     @param object {Object} any enumerable or array-like object.
     @returns {Array} Array of items
   */
   $A: function(obj) {
     
-    // null or undefined
+    // null or undefined -- fast path
     if (SC.none(obj)) return [] ;
     
-    // primitive
+    // primitive -- fast path
     if (obj.slice instanceof Function) return obj.slice() ; 
     
-    // enumerable
+    // enumerable -- fast path
     if (obj.toArray) return obj.toArray() ;
-    
-    // not array-like if no .length property or if function, string, or window
-    var len = obj.length, type = SC.typeOf(obj);
-    if ((len===null) || (len===undefined) || ((type === SC.T_FUNCTION) && !(obj instanceof NodeList)) || (type === SC.T_STRING) || obj.setInterval) {
-      return [obj];
-    }
+
+    // if not array-like, then just wrap in array.
+    if (!SC.isArray(obj)) return [obj];
 
     // when all else fails, do a manual convert...
-    var ret = [] ;
+    var ret = [], len = obj.length;
     while(--len >= 0) ret[len] = obj[len];
     return ret ;
   },
