@@ -1170,11 +1170,16 @@ SC.mixin(Array.prototype, SC.Reducers) ;
   };
   
   // Apply methods if missing...
-  // Also override prototype for now.  Our methods are functionally identical
-  // and don't break the browsers.
   for(var key in mixinIfMissing) {
     if (!mixinIfMissing.hasOwnProperty(key)) continue ;
-    Array.prototype[key] = mixinIfMissing[key] ;
+    
+    // The mixinIfMissing methods should be applied if they are not defined.
+    // If Prototype 1.6 is included, some of these methods will be defined
+    // already, but we want to override them anyway in this special case 
+    // because our version is faster and functionally identitical.
+    if (!Array.prototype[key] || ((typeof Prototype === 'object') && Prototype.Version.match(/^1\.6/))) {
+      Array.prototype[key] = mixinIfMissing[key] ;
+    }
   }
   
   // Apply other methods...
