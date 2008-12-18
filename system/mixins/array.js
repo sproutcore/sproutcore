@@ -300,7 +300,3 @@ SC.Array.slice = function(beginIndex, endIndex) {
   
 })() ;
 
-// Returns the passed item as an array.  If the item is already an array,
-// it is returned as is.  If it is not an array, it is placed into one.  If
-// it is null, an empty array is returned.
-Array.from = SC.$A ;

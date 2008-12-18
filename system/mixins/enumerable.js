@@ -679,9 +679,7 @@ SC.Enumerable = {
     Simply converts the enumerable into a genuine array.  The order, of
     course, is not gauranteed.  Corresponds to the method implemented by 
     Prototype.
-    
-    You can also call Array.from().
-    
+        
     @returns {Array} the enumerable as an array.
   */
   toArray: function() {
