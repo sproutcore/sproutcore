@@ -964,18 +964,28 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     You can pass just a key/value pair or a hash with several pairs.  You can
     also pass a null value to delete a property.
     
+    This method will avoid actually setting the layout if the value you pass
+    does not edit the layout.
+    
     @param {String|Hash} key
     @param {Object} value
     @returns {SC.View} receiver
   */
   adjust: function(key, value) {
-    var layout = SC.clone(this.get('layout')) ;
+    var layout = SC.clone(this.get('layout')), didChange = NO, cur;
+    
+    if (key === undefined) return this ; // nothing to do.
     
     // handle string case
     if (SC.typeOf(key) === SC.T_STRING) {
+      cur = layout[key];
       if (SC.none(value)) {
+        if (cur !== undefined) didChange = YES ;
         delete layout[key];
-      } else layout[key] = value ;
+      } else {
+        if (cur !== value) didChange = YES ;
+        layout[key] = value ;
+      }
       
     // handle hash -- do it this way to avoid creating memory unless needed
     } else {
@@ -983,23 +993,48 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       for(key in hash) {
         if (!hash.hasOwnProperty(key)) continue;
         value = hash[key];
-        if (!value) {
+        cur = layout[key] ;
+        
+        if (value === null) {
+          if (cur !== undefined) didChange = YES ;
           delete layout[key] ;
-        } else layout[key] = value ;
+        } else if (value !== undefined) {
+          if (cur !== value) didChange = YES ;
+          layout[key] = value ;
+        }
       }
     }
     
     // now set adjusted layout
-    this.set('layout', layout) ;
+    if (didChange) this.set('layout', layout) ;
     
     return this ;
   },
   
   /** 
     The layout describes how you want your view to be positions on the 
-    screen.  You can also maybe define a transform function.
+    screen.  You can define the following properties:
     
-    top/left - bottom/right - centerX/centerY
+    - left: the left edge
+    - top: the top edge
+    - right: the right edge
+    - bottom: the bottom edge
+    - height: the height
+    - width: the width
+    - centerX: an offset from center X 
+    - centerY: an offset from center Y
+    - minWidth: a minimum width
+    - minHeight: a minimum height
+    - maxWidth: a maximum width
+    - maxHeight: a maximum height
+    
+    Note that you can only use certain combinations to set layout.  For 
+    example, you may set left/right or left/width, but not left/width/right,
+    since that combination doesn't make sense.
+    
+    Likewise, you may set a minWidth/minHeight, or maxWidth/maxHeight, but
+    if you also set the width/height explicitly, then those constraints won't
+    matter as much.
     
     Layout is designed to maximize reliance on the browser's rendering 
     engine to keep your app up to date.
@@ -1066,10 +1101,31 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   /**
     Frame describes the current bounding rect for your view.  This is always
     measured from the top-left corner of the parent view.
+    
+    @property {Rect}
   */
   frame: function() {
+    return this.computeFrameWithParentFrame(null);
+  }.property().cacheable(),
+  
+  /**
+    Computes what the frame of this view would be if the parent were resized
+    to the passed dimensions.  You can use this method to project the size of
+    a frame based on the resize behavior of the parent.
+    
+    This method is used especially by the scroll view to automatically 
+    calculate when scrollviews should be visible.
+  
+    Passing null for the parent dimensions will use the actual current 
+    parent dimensions.  This is the same method used to calculate the current
+    frame when it changes.
+    
+    @param {Rect} pdim the projected parent dimensions
+    @returns {Rect} the computed frame
+  */
+  computeFrameWithParentFrame: function(pdim) {
     var layout = this.get('layout') ;
-    var f = {}, pdim = null ;
+    var f = {} ;
 
     // handle left aligned and left/right 
     if (!SC.none(layout.left)) {
@@ -1077,7 +1133,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       if (layout.width !== undefined) {
         f.width = Math.floor(layout.width) ;
       } else { // better have layout.right!
-        pdim = this.computeParentDimensions(layout);
+        if (!pdim) pdim = this.computeParentDimensions(layout);
         f.width = Math.floor(pdim.width - f.x - (layout.right || 0)) ;
       }
       
@@ -1112,7 +1168,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       if (layout.height !== undefined) {
         f.height = Math.floor(layout.height) ;
       } else { // better have layout.bottm!
-        pdim = this.computeParentDimensions(layout);
+        if (!pdim) pdim = this.computeParentDimensions(layout);
         f.height = Math.floor(pdim.height - f.y - (layout.bottom || 0)) ;
       }
       
@@ -1142,11 +1198,19 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       } else f.height = layout.height;
     }
 
+    // make sure the width/height fix min/max...
+    if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight)) f.height = layout.maxHeight;
+    if (!SC.none(layout.minHeight) && (f.height < layout.minHeight)) f.height = layout.minHeight;
+    if (!SC.none(layout.maxWidth) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
+    if (!SC.none(layout.minWidth) && (f.width < layout.minWidth)) f.width = layout.minWidth;
+
     // make sure width/height are never < 0
     if (f.height < 0) f.height = 0;
     if (f.width < 0) f.width = 0;
+    
+    
     return f;
-  }.property().cacheable(),
+  },
   
   /**
     The clipping frame returns the visible portion of the view, taking into
@@ -1568,8 +1632,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
     view queues.  Returns YES if some items were flushed from the queue.
   */
   flushPendingQueues: function() {
-    this.runLoopQueue.flush() ;
-    return this;
+    return this.runLoopQueue.flush() ;
   },
   
   /**
@@ -1588,16 +1651,14 @@ SC.View.mixin(/** @scope SC.View @static */ {
       queue.add(view) ;
     },
     
-    // flushes all queues in order.  This method will loop until no queues
-    // are left to flush
+    // flushes all queues in order.  Return YES if any of the queus actually
+    // had something to do, so that this will repeat.
     flush: function() {
-      var needsFlush = YES, order = this.order, len = order.length, idx;
-      while(needsFlush) {
-        needsFlush = NO;
-        for(idx=0;idx<len;idx++) {
-          if (this.flushQueue(order[idx])) needsFlush = YES;
-        }
+      var needsFlush = NO, order = this.order, len = order.length, idx;
+      for(idx=0;idx<len;idx++) {
+        if (this.flushQueue(order[idx])) needsFlush = YES;
       }
+      return needsFlush;
     },
 
     // flush a single queue.  Any views that cannot execute will be put 
