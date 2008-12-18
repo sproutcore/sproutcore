@@ -80,7 +80,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   content: [],
   
   /** @private */
-  contentBindingDefault: SC.Binding.MultipleNotEmpty,
+  contentBindingDefault: SC.Binding.multiple().notEmpty(),
   
   /**  
     The array of currently selected objects.  
@@ -105,7 +105,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   selection: [],
   
   /** @private */
-  selectionBindingDefault: SC.Binding.Multiple,
+  selectionBindingDefault: SC.Binding.multiple(),
 
   /**
     Delegate used to implement fine-grained control over collection view 
@@ -130,7 +130,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   isSelectable: true,
   
   /** @private */
-  isSelectableBindingDefault: SC.Binding.Bool,
+  isSelectableBindingDefault: SC.Binding.bool(),
   
   /**
     Enable or disable the view.  
@@ -145,7 +145,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   isEnabled: true,
   
   /** @private */
-  isEnabledBindingDefault: SC.Binding.Bool,
+  isEnabledBindingDefault: SC.Binding.bool(),
 
   /**
     Allow user to edit content views.
@@ -158,7 +158,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   isEditable: true,
   
   /** @private */
-  isEditableBindingDefault: SC.Binding.Bool,
+  isEditableBindingDefault: SC.Binding.bool(),
   
   /**
     Allow user to reorder items using drag and drop.
@@ -170,7 +170,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   canReorderContent: false,
   
   /** @private */
-  canReorderContentBindingDefault: SC.Binding.Bool,
+  canReorderContentBindingDefault: SC.Binding.bool(),
 
   /**
     Allow the user to delete items using the delete key
@@ -181,7 +181,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   canDeleteContent: NO,
   
   /** @private */
-  canDeleteContentBindingDefault: SC.Binding.Bool,
+  canDeleteContentBindingDefault: SC.Binding.bool(),
   
   /**
     Accept drops for data other than reordering.
@@ -272,9 +272,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     you should be sure to actually call the same method on the collection view 
     to give it the chance to perform its own selection housekeeping.
   
-    @type {SC.View}
+    @property {SC.View}
   */
-  exampleView: SC.View,
+  exampleView: SC.LabelView,
 
   /**
     The view class to use when displaying item views in groups.
@@ -283,27 +283,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     an instance of this view class with the item views that belong to the 
     group as child nodes for each distinct group value it encounters.
   
-    Your groupView should have two outlets:
-  
-    {{{
-      labelView: The view to display the group label.  The group value will be 
-      set as the content property of this view.
-    
-      itemView: This is the view the item views will be added to as children 
-      to this view.
-    }}}
-  
     If groupBy is null, then this property will not be used.  The default 
     class provided here simply displays the group value in an H1 tag.
   
-    @type {SC.View}
+    @property {SC.View}
   */
-  exampleGroupView: SC.View.extend({
-    emptyElement: '<div><h1></h1><div class="well"></div></div>',
-    outlets: ['labelView','itemView'],
-    labelView: SC.LabelView, //.outletFor('h1?'),
-    itemView: SC.View//.outletFor('.well?')
-  }),
+  exampleGroupView: SC.View,
   
   /**
     Invoked when the user double clicks on an item (or single clicks of 
@@ -322,7 +307,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     deprecated for future use.  You should generally use the responder chain 
     to handle your action for you.
     
-    @type {String}
+    @property {String}
   */  
   action: null,
 
@@ -337,33 +322,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     This property is ignored if you use the deprecated approach of making the
     action property a function.
     
-    @type {String|Object}
+    @property {String|Object}
   */
   target: null,
   
   /**
-    Set to true whenever the content changes and remains true until
-    the content has been rerendered.  
+    Set to YES whenever the content needs to update its children.  If you 
+    set this property, it will cause the view to update its children at the
+    end of the runloop or the next time it becomes visible.
     
-    You can also set this to true yourself to be notified when it is 
-    completed.
+    Generally you will not need to change this property.  Instead you should
+    call methods such as contentPropertyDidChange() or updateChildren()
+    directly instead.
+    
+    @property {Boolean}
   */
-  isDirty: false,
+  isDirty: NO,
   
-  /**
-    The maximum time the collection view will spend updating its
-    views before it takes a break from the update.  
-  
-    This keeps your browser from freezing or displaying a slow script 
-    warning while the render code works. Number is in msec.
-  
-    Future versions of CollectionView may ignore this property as newer
-    rendering techniques make it no longer necessary.
-  */
-  maxRenderTime: 0,
-
   /** 
-    Property to on content items to use for display.
+    Property on content items to use for display.
 
     Built-in item views such as the LabelViews and ImageViews will use the
     value of this property as a key on the content object to determine the
@@ -377,6 +354,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     get this behavior automatically by including the SC.Control mixin on your
     view.  You can also ignore this property if you like.  The collection view
     itself does not use this property to impact rendering.
+    
+    @property {String}
   */
   contentValueKey: null,
 
@@ -393,100 +372,70 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     using the arrow keys.
     
     If your collection view is simply a vertical list of items then you do not 
-    need to edit this property.
+    need to change this property.
+    
+    @property {Number}
   */
   itemsPerRow: 1,
 
   /**  
-    Property returns all of the item views, regardless of group view.
+    Property returns all of the item views, regardless of group view.  This
+    property is somewhat expensive to compute so you should avoid calling it
+    unless necessary.
 
-    @field
-    @returns {Array} the item views.
+    @property {Array}
   */
   itemViews: function() {
-    if (!this._itemViews) {
-      
-
-      var range = this.get('nowShowingRange') ;
-      if (!range) return [] ; 
-      var content = this.get('content') || [] ;
-      this._itemViews = [] ;
-      for(var idx=0;idx<range.length;idx++) {
-        var cur = content.objectAt(idx) ;
-        this._itemViews.push(this.itemViewForContent(cur)) ;
-      }
+    var ret = [], range = this.get('nowShowingRange') ;
+    if (!range || range.length===0) return ret ; 
+    var content = this.get('content') || [] ;
+    for(var idx=0;idx<range.length;idx++) {
+      var cur = content.objectAt(idx) ;
+      ret.push(this.itemViewForContent(cur)) ;
     }
-    return this._itemViews;
-  }.property(),
+    return ret ;
+  }.property('nowShowingRange', 'content').cacheable(),
 
   /**
     Property returns all of the rendered group views in order of their 
-    appearance with the content.
+    appearance.
+    
+    @property {Array}
   */
   groupViews: function() {
-    if (!this._groupViews) {
-      var groupBy = this.get('groupBy') ;
-      if (groupBy) {
-        var range = this.get('nowShowingRange') ;
-        var content = this.get('content') || [] ;
-        var groupValue = undefined ;
-        this._groupViews = [] ;
+    var ret = [], groupBy = this.get('groupBy') ;
+    if (groupBy) {
+      var range = this.get('nowShowingRange') ;
+      var content = this.get('content') || [] ;
+      var groupValue = undefined ;
 
-        for(var idx=0;idx<range.length;idx++) {
-          var cur = content.objectAt(idx) ;
-          var curGroupValue = (cur) ? cur.get(groupBy) : null ;
-          if (curGroupValue != groupValue) {
-            groupValue = curGroupValue ;
-            this._groupViews.push(this.groupViewForGroupValue(groupValue)) ;
-          }
+      for(var idx=0;idx<range.length;idx++) {
+        var cur = content.objectAt(idx) ;
+        var curGroupValue = (cur) ? cur.get(groupBy) : null ;
+        if (curGroupValue != groupValue) {
+          groupValue = curGroupValue ;
+          ret.push(this.groupViewForGroupValue(groupValue)) ;
         }
-        
       }
     }
-    return this._groupViews; 
-  }.property(),
+    return ret ;
+  }.property('nowShowingRange', 'content', 'groupBy').cacheable(),
   
   /**
-    Returns true if the passed view belongs to the collection.
+    Returns YES if the passed view belongs to the collection.
     
     This method uses the internal hash of item views and works even if 
     your items are stored in group views.  This is faster than searching
     the child view hierarchy yourself.
     
-    @param {SC.ClassicView} view The view to search for.
-
-    @returns {Boolean} True if the view is an item view in the receiver.
+    @param {SC.View} view the view to search for.
+    @returns {Boolean} YES if the view belongs to the receiver
   */
   hasItemView: function(view) {
     if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
     return !!this._itemViewsByGuid[SC.guidFor(view)] ;
   },
 
-  /** 
-    Find the item view underneath the passed mouse location.
-    
-    The default implementation of this method simply searches each item view's
-    frame to find one that includes the location.  If you are doing your own
-    layout, you may be able to perform this calculation more quickly.  If so,
-    consider overriding this method for better performance during drag 
-    operations.
-    
-    @param {Point} loc   The current mouse location in the coordinate of the 
-      collection view
-      
-    @returns {SC.ClassicView} The item view under the collection
-  */
-  itemViewAtLocation: function(loc) {
-    var itemView = this._itemViewRoot ;
-    while(itemView) {
-      var frame = itemView.get('frame');
-      if (SC.pointInRect(loc, frame)) return itemView ;
-    }
-    return null; // not in an itemView right now.
-  },
-  
-
-  
   /** 
     Find the first content item view for the passed event.
     
@@ -497,25 +446,26 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     This method only works for mouseDown & mouseUp events.  mouseMoved events 
     do not have a target.
     
-    @param {Event} evt An event
-    
+    @param {SC.Event} evt An event
+    @returns {SC.View} the item view or null
   */
-  itemViewForEvent: function(evt)
-  {
-    var view = SC.window.firstViewForEvent( evt );
-    
+  itemViewForEvent: function(evt) {
+    var responder = this.getPath('pane.rootResponder') ;
+    var view = responder ? responder.targetViewForEvent(evt) : null;
     if (!view) return null; // workaround for error on IE8, see Ticket #169
     
     // work up the view hierarchy to find a match...
     do {
-      // item clicked was the ContainerView itself... i.e. the user clicked outside the child items
-      // nothing to return...
+      // item clicked was the ContainerView itself... i.e. the user clicked 
+      // outside the child items nothing to return...
       if ( view == this ) return null;
       
-      // sweet!... the view is not only in the collection, but it says we can hit it.
-      // hit it and quit it... 
-      if ( this.hasItemView(view) && (!view.hitTest || view.hitTest(evt)) ) return view;
-    } while ( view = view.get('parentNode') );
+      // sweet!... the view is not only in the collection, but it says we can 
+      // hit it. hit it and quit it... 
+      if (this.hasItemView(view) && (!view.hitTest || view.hitTest(evt))) {
+        return view;
+      } 
+    } while (view = view.get('parentView'));
     
     // nothing was found... 
     return null;
@@ -529,7 +479,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return null.
     
     @param {Object} obj The content object. 
-    @returns {SC.ClassicView} The item view or null
+    @returns {SC.View} The item view or null
   */
   itemViewForContent: function(obj) {
     var key = (obj) ? SC.guidFor(obj) : '0';
@@ -544,7 +494,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     null.
     
     @param {Object} value The group value.
-    @param {SC.ClassicView} The group view or null
+    @param {SC.View} The group view or null
   */
   groupViewForGroupValue: function(groupValue) {
     return this._groupViewsByValue[groupValue] ;
@@ -553,20 +503,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   /**
     Returns the groupValue for the passed group view.
     
-    Older-style groupViews expect the group value to be set directly on 
-    their labelView while newer groupViews expect their groupValue to be set.
-    This method takes into account both approaches.
-    
-    @param {SC.ClassicView} groupView the group view.
+    @param {SC.View} groupView the group view.
     @returns {Object} the value of the group view or null.
   */
   groupValueForGroupView: function(groupView) {
-    if (!groupView) return null ;
-    var ret ;
-    if (groupView.groupValue === undefined) {
-      ret = groupView.get('content') ;
-    } else ret = groupView.get('groupValue') ;
-    return ret ;
+    return groupView ? groupView.get('groupValue') : null ;
   },
   
   /**
@@ -587,7 +528,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {Range} a range of objects
   */
   groupRangeForContentIndex: function(contentIndex) {
-    var content = Array.from(this.get('content')) ;
+    var content = SC.makeArray(this.get('content')) ; // assume an array
     var len = content.get('length') ;
     var groupBy = this.get('groupBy') ;
     if (!groupBy) return { start: 0, length: len } ;
@@ -615,288 +556,163 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return { start: min, length: max-min } ;
   },
 
-  // Determines the group value at a specified index.
+  /**
+    Determines the group value at the specified content index.  Returns null
+    if grouping is disabled.
+    
+    @param {Number} contentIndex
+    @returns {Object} group value.
+  */
   groupValueAtContentIndex: function(contentIndex) {
     var groupBy = this.get('groupBy') ;
-    var content = Array.from(this.get('content')).objectAt(contentIndex) ;
+    var content = SC.makeArray(this.get('content')).objectAt(contentIndex) ;
     return (groupBy && content && content.get) ? content.get(groupBy) : null;
   },
-    
-  // ......................................
-  // GENERATING CHILDREN
-  //
+
+  // ..........................................................
+  // CONTENT CHANGES
+  // 
   
-  /**
-    Update the itemViews in the receiver to match the currently visible 
-    content objects.  Normally this method assumes the content objects 
-    themselves have not changed and only updates the views if the range of 
-    visible content has changed.  If you pass true to the fullUpdate property, 
-    then the entire set of itemViews will be revalidated in case any content 
-    objects have changed.
-    
-    @param {Bool} fullUpdate (Optional) if set to true, assumes content has
-      changed and will perform a full update.
-    
+  /** @private
+    Whenever content array changes, start observing the [] property.  Also 
+    set childrenNeedFullUpdate to YES, which will trigger an update.
   */
-  updateChildren: function(fullUpdate) {
-    var f ;
+  _collection_contentDidChange: function() {
+    var content = this.get('content') ;
+    if (content === this._content) return this; // nothing to do
 
-    // if the collection is not presently visible in the window, then there is 
-    // really nothing to do here.  Just mark the view as dirty and return.
-    if (!this.get('isVisibleInWindow')) {
-      this.set('isDirty', true) ;
-      this._needsFullUpdate = this._needsFullUpdate || fullUpdate ;
-      return; 
-    }
+    var func = this._collection_contentPropertyDidChange ;
 
-    if (SC.BENCHMARK_UPDATE_CHILDREN) {
-      var bkey = '%@.updateChildren(%@)'.fmt(this, (fullUpdate) ? 'FULL' : 'FAST') ;
-      SC.Benchmark.start(bkey);
-    }
-
-    this.beginPropertyChanges() ; // avoid sending notifications
+    // remove old observer, add new observer
+    if (this._content) this._content.removeObserver('[]', this, func) ;
+    if (content) content.addObserver('[]', this, func) ;
     
-    // STEP 1: Update frame size if needed.  Required to compute the 
-    // clippingFrame.
-    if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
-      var parent = this.get('parentNode') ;
-      if (parent) parent.viewFrameWillChange() ;
-      this.set('frame', f) ;
-      if (parent) parent.viewFrameDidChange() ;
-      
-      if ((f = this.computeFrame()) && !SC.rectsEqual(f, this.get('frame'))) {
-        this.set('frame', f) ;
-      } 
-    } 
-
-    // Save the current clipping frame.  If the frame methods are called again
-    // later but the frame has not actually changed, we don't want to run
-    // updateChildren again.
-    var clippingFrame = (this._lastClippingFrame = this.get('clippingFrame'));
-	
-    // STEP 2: Calculate the new range of content to display in 
-    // the clipping frame.  Determine if we need to do a full update or
-    // not.
-   
-    var range = this.contentRangeInFrame(clippingFrame) ;
-    var content = Array.from(this.get('content'));
-     
-    //make sure the range isn't greater than the content length 
-    //this will prevent trying to render items that aren't really there.
-    range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
-
-    var nowShowingRange = this.get('nowShowingRange') ;
-    fullUpdate = fullUpdate || (this.get('isDirty') && this._needsFullUpdate) || (SC.intersectRanges(range, nowShowingRange).length <= 0) ;
-    this.set('nowShowingRange', range) ;
-
-    // STEP 3: Update item views.
-    var groupBy = this.get('groupBy') ;
-    var didChange = false ;
-    var key, itemView, c, start, length;
+    // cache
+    this._content = content;
+    this._contentPropertyRevision = null ;
     
-    // If this is a fullUpdate, then rebuild the itemViewsByContent hash
-    // from scratch.  This is necessary if the content or the visible range
-    // might have changed.
-    if (fullUpdate) {
-     
-      var itemViewsByContent = {} ; // this will replace the current hash.
-      
-      // iterate through all of the views and insert them.  If the view 
-      // already exists, it will simply be reused.
-      var idx = SC.maxRange(range) ;
-      while(--idx >= range.start) {
-        c = content.objectAt(idx) ;
-        key = SC.guidFor(c) ;
-        itemView = this._insertItemViewFor(c, groupBy, idx) ;
+    // trigger property change handler...
+    var rev = (content) ? content.propertyRevision : -1 ;
+    this._collection_contentPropertyDidChange(this, '[]', content, rev) ; 
+  }.observes('content'),
 
-        if(itemView)
-        {
-          // add item view to new hash and remove from old hash.
-          itemViewsByContent[key] = itemView;
-
-          delete this._itemViewsByContent[key];
-        }
-      }
-      
-      // Now iterate through the old hash.  Any left over item views should
-      // be removed.
-      for(key in this._itemViewsByContent) {
-        if (!this._itemViewsByContent.hasOwnProperty(key)) continue ;
-        itemView = this._itemViewsByContent[key] ;
-        this._removeItemView(itemView, groupBy) ;
-      }
-      
-      // Swap out remaining content items.
-      this._itemViewsByContent = itemViewsByContent ;
-      didChange = true;
-      
-    // If a fullUpdate is not required, then we assume no content has changed
-    // and we just need to add or remove some views to bring the ranges up
-    // to date.
-    } else {
-      // Find changed range at the top.  Note that the length here may be 
-      // negative.  Negative means views should be removed.
-      start = range.start ;
-      length = (nowShowingRange.start - start) ;
-      if (length !== 0) {
-        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
-        didChange = true ;
-      }
-      
-      // Find the changed range at the bottom.  Note that the length here may
-      // also be negative. Negative means views should be removed.
-      start = SC.maxRange(nowShowingRange) ;
-      length = SC.maxRange(range) - start ;
-      if (length !== 0) {
-        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
-        didChange = true ;
-      }
+  /** @private
+    Called whenever the content array or any items in the content array 
+    changes.  update children if this is a new property revision.
+  */
+  _collection_contentPropertyDidChange: function(target, key, value, rev) {    
+    if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
+      this._contentPropertyRevision = rev ;
+      this._updatingContent = true ;
+      this.contentPropertyDidChange(target, key);
+      this._updatingContent = false ;
     }
-
-    // Recache frames just in case this changed the scroll height.
-    this.recacheFrames() ;
-
-    // Set this to true once children have been rendered.  Whenever the 
-    // content changes, we don't want resize or clipping frame changes to 
-    // cause a refresh until the content has been rendered for the first time.
-    this._hasChildren = range.length>0 ;
-    this.set('isDirty',false); 
-
-    // Clean out some cached items and notify their changes.
-    // NOTE: This must be called after _hasChildren has been set or 
-    // updateSelectionStates() may not run.
-    if (didChange) {
-      this._flushZombieGroupViews() ;
-      this.updateSelectionStates() ;
-      
-      this._itemViews = null ;
-      this.notifyPropertyChange('itemViews') ;
-      
-      this._groupViews = null ;
-      this.notifyPropertyChange('groupViews') ;
-    }
-
-    this.endPropertyChanges() ;
-    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end(bkey);    
   },
 
   /**
-    Rebuild all the child item views in the collection view.
-    
-    This will remove all the child views from the collection view and rebuild 
-    them from scratch.  This method is generally expensive, but if you have 
-    made a substantial number of changes to the content array, this may be the 
-    most efficient way to perform the update.
-    
-    In general the collection view will automatically keep the item views in 
-    sync with the content objects for you.  You should not need to call this 
-    method very often.
-    
-    @returns {void}
+    Invoked whenever a the content array changes.  The default implementation
+    will possibly recompute the view's layout size and the marks it as dirty
+    so that it can update its children.
   */
-  rebuildChildren: function() {
-    
-    this.beginPropertyChanges() ;
-    
-    // iterate through itemViews and remove them
-    while(this._itemViewRoot) this._removeItemViewFromChain(this._itemViewRoot) ;
-    
-    // iterate through groupViews and remove them .. if grouping is disabled,
-    // _groupViewRoot will be null anyway.
-    while(this._groupViewRoot) this._removeGroupView(this._groupViewRoot) ;
-    
-    // now updateChildren.
-    this._hasChildren = false ;
-    this.updateChildren() ;
-    
-    this.endPropertyChanges() ;
+  contentPropertyDidChange: function(target, key) {
+    this.adjust(this.computeLayout()) ;
+    this.set('isDirty', YES);
+    return this ;
   },
   
   /**
-    Update the selection state for the item views to reflect the selection 
-    array.
-    
-    This will update the isSelected property of all item views so that only 
-    those representing content objects found in the selection array are 
-    selected.
-    
-    This method is called automatically whenever your content or selection 
-    properties changed.  You should not need to call or override it often.
+    Anytime isDirty changes to YES or our visibility in window changes,
+    schedule a full update.
   */
-  updateSelectionStates: function() {
-    var key, idx, cur, itemView, isSelected ;
-
-    if (!this._hasChildren) return ;
-    var selection = this.get('selection') || [];
-
-    // First, for efficiency, turn the selection into a hash by GUID.  This 
-    // way, we'll only have to perform a linear search over the children.
-    // This hash is cached and flushed each time the selection changes.
-    var selectionHash = this._selectionHash ;
-    if (!selectionHash) {
-      selectionHash = {} ;
-      idx = selection.get('length') ;
-      while(--idx >= 0) {
-        cur = selection.objectAt(idx) ;
-        key = SC.guidFor(cur) ;
-        selectionHash[key] = true ;
-      }
-      this._selectionHash = selectionHash ;
-    }
-
-    // Iterate over the item views and set their selection property.
-    for(key in this._itemViewsByContent) {
-      if (!this._itemViewsByContent.hasOwnProperty(key)) continue ;
-      itemView = this._itemViewsByContent[key] ;
-      isSelected = (key) ? selectionHash[key] : false ;
-      if (itemView.get('isSelected') != isSelected) {
-        itemView.set('isSelected', isSelected) ;
-      }
-    }
-  },
-    
+  _collection_isDirtyDidChange: function() {
+    if (this.get('isVisibleInWindow') && this.get('isDirty')) {
+      this.invokeOnce(this._fullUpdateChildren);
+    }  
+  }.observes('isDirty', 'isVisibleInWindow'),
+  
+  _fullUpdateChildren: function() { return this.updateChildren(YES); },
+  
+  // ..........................................................
+  // NOW SHOWING RANGE
+  // 
   
   /**
-    Calls updateChildren whenever the view is resized, unless you have not 
-    implemented custom layout or incremental rendering.
-    
-    UPDATE:
-    -- add/remove any children as needed
-    -- update layout on all itemViews unless you have a more efficient
+    The currently visible range.  This is invalidated anytime the clipping
+    frame changes or anytime the view is resized.  This in turn may cause
+    the collection view to do a 'fast' revalidation of its content.
   */
-  resizeChildrenWithOldSize: function(oldSize) {
-    if (!this._hasChildren) return ;
-    this.updateChildren() ; // add/remove any new views.
-    this.layoutResize() ; // perform layout on all of the views if needed.
-  },
+  nowShowingRange: function() {
 
-  /**
-    Whenever your clipping frame changes, determine new range to display.  If 
-    new range is a change, then it will update the children and relayout.
+    // note that we keep a cached clippingFrame and cached nowShowingRange.
+    // if the clipping frame has not actually changed, we avoid the cost of
+    // actually recomputing the contentRangeInFrame.
+    //
+    // Also, if contentRangeInFrame returns null
+    var cf = this.get('clippingFrame');
+    var old = this._nowShowingRange_clippingFrame; // old cf
+    var range = this._nowShowingRange_cachedRange ; // old range
     
-    UPDATE:
-    -- add/remove any children as needed
-    -- update layout on added children only
-  */
-  clippingFrameDidChange: function() {
-    if (!this._hasChildren) return ;
-    SC.Benchmark.start('%@.clippingFrameDidChange'.fmt(this.toString())) ;
-    if (!SC.rectsEqual(this._lastClippingFrame, this.get('clippingFrame'))) {
-          if (this._hasChildren) this.updateChildren() ;
-        }
-    SC.Benchmark.end('%@.clippingFrameDidChange'.fmt(this.toString())) ;
-  },
+    if (!range || !old || !SC.rectsEqual(cf, old)) {
+      this._nowShowingRange_clippingFrame = cf ; // save
 
-  /**
-    Override to return the computed frame dimensions of the collection view.
+      // ask the subclass to compute the content range in frame...
+      range = this.contentRangeInFrame(cf) ;
+      var content = SC.makeArray(this.get('content'));
+
+      if (!range) range = { start: 0, length: 0 }; // default
+       
+      // make sure the range isn't greater than the content length 
+      // this will prevent trying to render items that aren't really there.
+      range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
+      
+      // save range...
+      this._nowShowingRange_cachedRange = range ;
+    }
     
-    These dimensions are automatically applied at the end of a call to  
-    updateChildren() if they change at all.  This method is critical for 
-    support of incremental rendering.
+    return range ;
+  }.property('content', 'clippingFrame').cacheable(),
   
-    @returns {Rect} width and/or height you want this collection view to have.
+  /**
+    Call this method if the nowShowingRange should be recalculated for some
+    reason.  Usually the nowShowingRange will invalidate and recalculate on 
+    its own but you can force the property to need an update if you 
+    prefer.
   */
-  computeFrame: function() { return null; },
+  invalidateNowShowingRange: function() {
+    this.notifyPropertyDidChange('nowShowingRange');
+  },
+  
+  /**
+    Observer triggers whenever the nowShowingRange changes.  If the range has
+    actually changed and we are on screen, then schedule fast update. 
+    Otherwise, just mark as dirty.
+  */
+  nowShowingRangeDidChange: function() {
+    var range = this.get('nowShowingRange'), old = this._collection_nowShowingRange ;
+    if (!old || !SC.rangesEqual(range, old)) {
+      this._collection_nowShowingRange = range ;
+      if (this.get('isVisibleInWindow')) {
+        this.invokeOnce(this.updateChildren); // 'fast' update
+      } else this.set('isDirty', YES);
+    }
+  }.observes('nowShowingRange'),
+  
+  // ..........................................................
+  // SUBCLASS METHODS
+  // 
+  
+  /**
+    Override to return the computed layout dimensions of the collection view.
+    You can omit any dimensions you don't care about setting in your 
+    computed value.
+    
+    This layout is automatically applied whenever the content changes.
+    
+    If you don't care about computing the layout at all, you can return null.
+  
+    @returns {Hash} layout properties
+  */
+  computeLayout: function() { return null; },
   
   /**
     Override to return the range of items to render for a given frame.
@@ -905,16 +721,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     rendering.  The range you return here will be used to limit the number of 
     actual item views that are created by the collection view.
     
-    @param {Rect} frame The frame you should use to determine the range.
+    If you do not want to support incremental rendering, just return null.
     
+    @param {Rect} frame The frame you should use to determine the range.
     @returns {Range} A hash that indicates the range of content objects to 
       render.  ({ start: X, length: Y }) 
   */  
-  contentRangeInFrame: function(frame) {
-    var content = this.get('content') ;
-    var len = ((content && content.get) ? content.get('length') : 0) || 0 ;
-    return { start: 0, length: len };
-  },
+  contentRangeInFrame: function(frame) { return null; },
 
 
   /**
@@ -935,7 +748,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     firstLayout is true, you can simply set the new layout without checking
     first.
     
-    @param {SC.ClassicView} groupView the view to size and position.
+    @param {SC.View} groupView the view to size and position.
     @param {Object} groupValue the value the groupView represents.
     @param {Number} contentIndexHint the index of a content object.
     @param {Bool} firstLayout True if this is the first the view has been laid out. 
@@ -950,7 +763,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     layoutResize() method.  You should use this method to size and position
     the itemView.
     
-    @param {SC.ClassicView} itemViewthe item view to layout
+    @param {SC.View} itemViewthe item view to layout
     @param {Number} contentIndex the index of the content this layout represents.
     @param {Bool} firstLayout true if this is the first time it has been laid out.
   */
@@ -968,7 +781,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     yourself.
   */
   layoutResize: function() {
-    if (!this._hasChildren) return ; // ignore calls before first render
+    if (this.get('isDirty')) return this; //nothing to do...
+    
     var nowShowingRange = this.get('nowShowingRange') ;
     var groupBy = this.get('groupBy') ;
     var groupValue = undefined ;
@@ -996,7 +810,201 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       this.layoutItemView(itemView, idx, false) ;
     }
   },
+  
+  /** 
+    Overrides the default view implementation.  Calls layoutResize() first 
+    to give you the chance to relayout your children.  The notifies children.
+  */
+  viewDidResize: function() { 
+    this.layoutResize();  
+    return sc_super();
+  }.observes('layout'),
+  
+  // ......................................
+  // GENERATING CHILDREN
+  //
+  
+  /**
+    Update the itemViews in the receiver to match the currently visible 
+    content objects.  Normally this method assumes the content objects 
+    themselves have not changed and only updates the views if the range of 
+    visible content has changed.  If you pass true to the fullUpdate property, 
+    then the entire set of itemViews will be revalidated in case any content 
+    objects have changed.
     
+    You will not normally need to do anything with this method, though you
+    may call this method to force the collection view to update or override
+    this method to change the way updating is performed.
+        
+    updateChildren is called whenever the nowShowingRange changes, the 
+    content changes or a property on a content item changes.
+    @param {Bool} fullUpdate (Optional) if set to true, assumes content has
+      changed and will perform a full update.
+    @returns {SC.CollectionView} reciever
+    
+  */
+  updateChildren: function(fullUpdate) {
+    var f ;
+
+    // force fullUpdate if we are currently dirty.
+    if (this.get('isDirty')) fullUpdate = YES;
+
+    if (SC.BENCHMARK_UPDATE_CHILDREN) {
+      var bkey = '%@.updateChildren(%@)'.fmt(this, (fullUpdate) ? 'FULL' : 'FAST') ;
+      SC.Benchmark.start(bkey);
+    }
+
+    this.beginPropertyChanges() ; // avoid sending notifications
+    
+    var content = SC.makeArray(this.get('content'));
+
+    // get the target nowShowingRange and the current range.  Save the value
+    var range = this.get('nowShowingRange') ;
+    var curRange = this._currentNowShowingRange ; 
+    this._currentNowShowingRange = range ;
+
+    var groupBy = this.get('groupBy'), didChange = false ;
+    var key, itemView, c, start, length;
+    
+    // If this is a fullUpdate, then rebuild the itemViewsByContent hash
+    // from scratch.  This is necessary if the content or the visible range
+    // might have changed.
+    if (fullUpdate) {
+     
+      var itemViewsByContent = {} ; // this will replace the current hash.
+      var curItemViewsByContent = this._itemViewsByContent ;
+      
+      // iterate through all of the views and insert them.  If the view 
+      // already exists, it will simply be reused.
+      var idx = SC.maxRange(range) ;
+      while(--idx >= range.start) {
+        c = content.objectAt(idx) ;
+        key = SC.guidFor(c) ;
+        itemView = this._insertItemViewFor(c, groupBy, idx) ;
+
+        if (itemView) {
+          // add item view to new hash and remove from old hash.
+          itemViewsByContent[key] = itemView;
+          delete curItemViewsByContent[key];
+        }
+      }
+      
+      // Now iterate through the old hash.  Any left over item views should
+      // be removed.
+      for(key in curItemViewsByContent) {
+        if (!curItemViewsByContent.hasOwnProperty(key)) continue ;
+        itemView = curItemViewsByContent[key] ;
+        this._removeItemView(itemView, groupBy) ;
+      }
+      
+      // Swap out remaining content items.
+      curItemViewsByContent = null ; // release memory...
+      this._itemViewsByContent = itemViewsByContent ;
+      didChange = true;
+      
+    // If a fullUpdate is not required, then we assume no content has changed
+    // and we just need to add or remove some views to bring the ranges up
+    // to date.
+    } else {
+      // Find changed range at the top.  Note that the length here may be 
+      // negative.  Negative means views should be removed.
+      start = range.start ;
+      length = (curRange.start - start) ;
+      if (length !== 0) {
+        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+        didChange = true ;
+      }
+      
+      // Find the changed range at the bottom.  Note that the length here may
+      // also be negative. Negative means views should be removed.
+      start = SC.maxRange(curRange) ;
+      length = SC.maxRange(range) - start ;
+      if (length !== 0) {
+        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+        didChange = true ;
+      }
+    }
+
+    // Clear dirty state
+    this.set('isDirty', NO);
+    
+    // Clean out some cached items and notify their changes.
+    // NOTE: This must be called after isDirty is cleared or 
+    // updateSelectionStates() may not run.
+    if (didChange) {
+      this._flushZombieGroupViews() ;
+      this.updateSelectionStates() ;
+      this.notifyPropertyChange('itemViews') ;
+      this.notifyPropertyChange('groupViews') ;
+    }
+
+    this.endPropertyChanges() ;
+    if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end(bkey);    
+  },
+
+  /**
+    Rebuild all the child item views in the collection view.
+    
+    This will remove all the child views from the collection view and rebuild 
+    them from scratch.  This method is generally expensive, but if you have 
+    made a substantial number of changes to the content array, this may be the 
+    most efficient way to perform the update.
+    
+    In general the collection view will automatically keep the item views in 
+    sync with the content objects for you.  You should not need to call this 
+    method very often.
+    
+    @returns {void}
+  */
+  rebuildChildren: function() { this.updateChildren(YES); },
+  
+  /**
+    Update the selection state for the item views to reflect the selection 
+    array.
+    
+    This will update the isSelected property of all item views so that only 
+    those representing content objects found in the selection array are 
+    selected.
+    
+    This method is called automatically whenever your content or selection 
+    properties changed.  You should not need to call or override it often.
+  */
+  updateSelectionStates: function() {
+    var key, idx, cur, itemView, isSelected ;
+
+    if (this.get('isDirty')) return ;
+    var selection = this.get('selection') || [];
+
+    // First, for efficiency, turn the selection into a hash by GUID.  This 
+    // way, we'll only have to perform a linear search over the children.
+    // This hash is cached and flushed each time the selection changes.
+    var selectionHash = this._selectionHash ;
+    if (!selectionHash) {
+      selectionHash = {} ;
+      idx = selection.get('length') ;
+      while(--idx >= 0) {
+        cur = selection.objectAt(idx) ;
+        key = SC.guidFor(cur) ;
+        selectionHash[key] = true ;
+      }
+      this._selectionHash = selectionHash ;
+    }
+
+    // Iterate over the item views and set their selection property.
+    var itemViewsByContent = this._itemViewsByContent ;
+    for(key in itemViewsByContent) {
+      if (!itemViewsByContent.hasOwnProperty(key)) continue ;
+      itemView = itemViewsByContent[key] ;
+      isSelected = (key) ? selectionHash[key] : false ;
+      if (itemView.get('isSelected') != isSelected) {
+        itemView.set('isSelected', isSelected) ;
+      }
+    }
+  },
+
+  // ..........................................................
+  // INTERNAL CHILD VIEW SUPPORT
+  // 
   
   // Ordered array of item views currently on display.  This array 
   // is reset whenever the item views are regenerated.
@@ -1040,11 +1048,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     assumes that manual layout will ensure the items appear visually in the 
     proper order anyway.
 
-    @param {SC.ClassicView} itemView The item view to remove
-    @param {String} groupBy the value used for grouping or null if grouping is 
-      disabled.
+    @param {Object} content The content to insert an item view for.
+    @param {String} groupBy the value used for grouping or null if grouping is disabled.
+    @param {Number} contentIndex hint.
     
-    @returns {SC.ClassicView} the new itemView.
+    @returns {SC.View} the new itemView.
   */
   _insertItemViewFor: function(content, groupBy, contentIndex) {
 
@@ -1059,7 +1067,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       ret = this._itemViewPool.pop() || this.get('exampleView').create({ 
         owner: this, displayDelegate: this 
       }) ;
-      ret.addClassName('sc-collection-item') ; // add class name for display
+      ret.$().addClass('sc-collection-item') ; // add class name for display
       
       // set content and add to content hash
       ret.set('content', content) ;
@@ -1074,7 +1082,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var canGroup = !!(groupBy && content) ;
     var groupValue = (canGroup) ? content.get(groupBy) : null;  
     var parentView = (canGroup) ? this._insertGroupViewFor(groupValue, contentIndex) : this ;
-    var curParentView = ret.get('parentNode') ;
+    var curParentView = ret.get('parentView') ;
     
     if (curParentView != parentView) {
       
@@ -1107,22 +1115,22 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     If the itemView belongs to a groupView and this leaves the groupView empty 
     as well, then the groupView will be moved to the zombieGroupViews hash.
     
-    @param {SC.ClassicView} itemView The item view to remove
+    @param {SC.View} itemView The item view to remove
     @param {String} groupBy the value used for grouping or null if grouping is 
       disabled.
     
-    @returns {SC.ClassicView} The itemView that was removed.
+    @returns {SC.View} The itemView that was removed.
   */
   _removeItemView: function(itemView, groupBy) {
     
     // If we are grouping, then decrement the groupViewCount.  If the new 
     // count is zero, save groupView for later removal.
     var groupView = null, groupValue, content, key ;
-    if (groupBy && (groupView = itemView.get('parentNode'))) {
-      if (--this._groupViewCounts[SC.guidFor(groupView)] > 0) groupView = null ; 
+    if (groupBy && (groupView = itemView.get('parentView'))) {
+      if (--this._groupViewCounts[SC.guidFor(groupView)] > 0) groupView=null; 
       if (groupView) {
         content = itemView.get('content') ;
-        groupValue = (content) ? content.get(groupBy) : null ;
+        groupValue = content ? content.get(groupBy) : null ;
       }
     }
     
@@ -1154,7 +1162,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // zero length means do nothing.
     if (length === 0) return ;
 
-    var content = this.get('content') || [] ;
+    var content = SC.makeArray(this.get('content')) ;
     
     // negative length == remove item views
     if (length < 0) {
@@ -1182,11 +1190,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     the receiver.  This method does not take into account the actual ORDER of
     the groupViews in the hierarchy.  It assumes that manual layout will 
     ensure the items appear visually in the proper order anyway.
-    
-    @returns {SC.ClassicView} the new groupView.
+
+    @param {Object} groupValue value for group
+    @param {Number} contentIndex hint
+    @returns {SC.View} the new groupView.
   */
   _insertGroupViewFor: function(groupValue, contentIndex) {
-    var ret =  this._groupViewsByValue[groupValue] ; 
+    var key = SC.guidFor(groupValue) ;
+    var ret =  this._groupViewsByValue[key] ; 
+    
     // if (ret) return ret ; // nothing to do
     
     var firstLayout = false ;
@@ -1194,10 +1206,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // if the group was not found, check the zombie pool.  If found in zombie
     // pool, restore it to the regular group view hash.
     if (!ret && this._zombieGroupViews) {
-      ret = this._zombieGroupViews[groupValue] ;
+      ret = this._zombieGroupViews[key] ;
       if (ret) {
-        delete this._zombieGroupViews[groupValue] ;
-        this._groupViewsByValue[groupValue] = ret ;
+        delete this._zombieGroupViews[key] ;
+        this._groupViewsByValue[key] = ret ;
         this._groupViewCounts[SC.guidFor(ret)] = 0 ;
       }
     }
@@ -1207,24 +1219,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       ret = this._groupViewPool.pop() || this.get('exampleGroupView').create({
          owner: this, displayDelegate: this 
       });
-      ret.addClassName('sc-collection-group') ;
-
-      // set the groupValue on the groupView.  Older groupViews expect us to 
-      // set this directly on the labelView.  Newer groupViews should have a 
-      // groupValue property.
-      if (ret.groupValue !== undefined) {
-        ret.set('groupValue', groupValue) ;
-      } else ret.set('content', groupValue) ;
+      ret.$().addClass('sc-collection-group');
+      ret.set('groupValue', groupValue);
       
       // save in cache
-      this._groupViewsByValue[groupValue] = ret ;
+      this._groupViewsByValue[key] = ret ;
       this._groupViewCounts[SC.guidFor(ret)] = 0 ;
       firstLayout = true; 
     }
     
     // If the group view does not already belong to the receiver, add it.
     if (!ret) throw "Could not create a groupView for value: %@".fmt(groupValue) ;
-    if (ret.get('parentNode') != this) this.appendChild(ret) ;
+    if (ret.get('parentView') != this) this.appendChild(ret) ;
     
     // Layout the group View
     this.layoutGroupView(ret, groupValue, contentIndex, firstLayout) ;
@@ -1241,13 +1247,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     _flushZombieGroupViews() to actually remove them from the receiver.
   */
   _removeGroupView: function(groupView, groupValue) {
+    var key = SC.guidFor(groupValue) ;
     if (SC.ZOMBIE_GROUPS_ENABLED) {
-      this._zombieGroupViews[groupValue] = groupView ;
+      this._zombieGroupViews[key] = groupView ;
     } else {
-      this._finalRemoveGroupView(groupView) ;
+      this._finalRemoveGroupView(key) ;
     }
     
-    delete this._groupViewsByValue[groupValue] ;
+    delete this._groupViewsByValue[key] ;
     delete this._groupViewCounts[SC.guidFor(groupView)] ;
     return groupView ;
   },
@@ -1259,9 +1266,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   _flushZombieGroupViews: function() {
     if (!SC.ZOMBIE_GROUPS_ENABLED) return ; // nothing to do
     
-    for(var key in this._zombieGroupViews) {
-      if (!this._zombieGroupViews.hasOwnProperty(key)) continue ;
-      var groupView = this._zombieGroupViews[key] ;
+    var zombies = this._zombieGroupViews;
+    for(var key in zombies) {
+      if (!zombies.hasOwnProperty(key)) continue ;
+      var groupView = zombies[key] ;
       this._finalRemoveGroupView(groupView) ;
     } 
     this._zombieGroupViews = {} ; // reset
@@ -1273,41 +1281,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   _finalRemoveGroupView: function(groupView) {
     groupView.removeFromParent() ;
-
-    // set the groupValue on the groupView.  Older groupViews expect us to set 
-    // this directly on the labelView.  Newer groupViews should have a 
-    // groupValue property.
-    if (groupView.groupValue !== undefined) {
-      groupView.set('groupValue', null) ;
-    } else groupView.set('content', null) ;
-    
+    groupView.set('groupValue', null);
     this._groupViewPool.push(groupView) ;
     return groupView ;
-  },
-  
-  /** @private
-    Removes the rootElement from the DOM temporarily if needed to optimize performance.
-  */
-  _removeRootElementFromDom: function() {
-    if (!SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER) return ;
-    if (this._cachedRootElementParent === undefined) {
-      var parent = (this._cachedRootElementParent = this.rootElement.parentNode) ;
-      this._cachedRootElementNextSibling = this.rootElement.nextSibling ;
-      if (parent) parent.removeChild(this.rootElement) ;
-    }
-  },
-  
-  /** @private
-    Re-adds root element into DOM if necessary.  Inverts _removeRootElementFromDom().
-  */
-  _restoreRootElementInDom: function() {
-    if (!SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER) return ;
-    if (this._cachedRootElementParent) {
-      this._cachedRootElementParent.insertBefore(this.rootElement, this._cachedRootElementNextSibling);
-    }
-    this._cachedRootElementParent = this._cachedRootElementNextSibling = null ;
-  },
-  
+  },  
     
   // ......................................
   // SELECTION
@@ -1488,12 +1465,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var content, itemView, contentIndex, groupBy;
     
     // find the itemView.  if not present, add one.
-    content = Array.from(this.get('content'));
+    content = SC.makeArray(this.get('content'));
     if (content.indexOf(record) < 0) return ; // do nothing if not in content.
     
     itemView = this.itemViewForContent(record) ;
     if (!itemView) {
-      content = Array.from(this.get('content')) ;
+      content = SC.makeArray(this.get('content')) ;
       contentIndex = content.indexOf(record) ;
       groupBy = this.get('groupBy');
       itemView = this._insertItemViewFor(record, groupBy, contentIndex); 
@@ -1565,13 +1542,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // perform some basic checks...
     if (!this.get('canDeleteContent')) return NO;  
-    var sel = Array.from(this.get('selection'));
+    var sel = SC.makeArray(this.get('selection'));
     if (!sel || sel.get('length') === 0) return NO ;
 
     // let the delegate decide what to actually delete.  If this returns an
     // empty array or null, just do nothing.
     sel = this.invokeDelegateMethod(this.delegate, 'collectionViewShouldDeleteContent', this, sel) ;
-    sel = Array.from(sel) ; // ensure this is an array
+    sel = SC.makeArray(sel) ; // ensure this is an array
     if (!sel || sel.get('length') === 0) return YES ;
 
     // now have the delegate (or us) perform the deletion.  The collection
@@ -2736,26 +2713,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   }.observes('canReorderContent', 'isDropTarget'),
 
   /** @private
-    Whenever content changes, update children and also start observing
-    new [] property.
-  */
-  _contentDidChange: function() {
-    var content = this.get('content') ;
-    if (SC.isEqual(content, this._content)) return ; // nothing to do
-
-    var func = this._contentPropertyDidChange ;
-
-    // remove old observer, add new observer, and trigger content property change
-    if (this._content) this._content.removeObserver('[]', this, func) ;
-    if (content) content.addObserver('[]', this, func) ;
-    this._content = content; //cache
-    this._contentPropertyRevision = null ;
-    
-    var rev = (content) ? content.propertyRevision : -1 ;
-    this._contentPropertyDidChange(this, '[]', content, rev) ; 
-  }.observes('content'),
-  
-  /** @private
     Whenever the selection changes, update the itemViews.
   */
   _selectionObserver: function() {
@@ -2771,25 +2728,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var propertyRevision = (sel) ? sel.propertyRevision : null;
     this._selectionPropertyDidChange(this, '[]', sel, propertyRevision) ;
   }.observes('selection'),
-  
-  // called on content change *and* content.[] change...
-  // update children if this is a new propertyRevision
-  //
-  // UPDATE:
-  // -- recheck all item views, add/remove children as needed
-  // -- update layout on all item views.
-  // -- optional: determine the first item view that does not match.
-  //
-  _contentPropertyDidChange: function(target, key, value, rev) {    
-    if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
-      this._contentPropertyRevision = rev ;
-      this._updatingContent = true ;
-      this._hasChildren = false ;
-      this.updateChildren(true) ;
-      this._updatingContent = false ;
-    }
-  },
-  
+
+
   // called on selection change and selection.[] change...
   // update selection states if this is a new propertyRevision
   _selectionPropertyDidChange: function(target, key, value, rev) {
@@ -2802,11 +2742,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
   },
 
-  // If isVisibleInWindow status changes, updateChildren if we are dirty.
-  _isVisibleInWindowObserver: function() {
-    if (this.get('isDirty')) this.updateChildren() ;
-  }.observes('isVisibleInWindow'),
-  
   // ======================================================================
   // DEPRECATED APIS (Still available for compatibility)
   
