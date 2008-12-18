@@ -1851,7 +1851,10 @@ SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
   
   /** 
     Attempts to find the views managing the passed DOM elements and returns
-    them. 
+    them.   This will start with the matched element and walk up the DOM until
+    it finds an element managed by a view.
+    
+    @returns {Array} array of views or null.
   */
   view: function() {
     return this.map(function() { 
