@@ -59,16 +59,12 @@ SC.ContainerView = SC.View.extend(
     @param {SC.View} newContent the new content view or null.
   */
   replaceContent: function(newContent) {
-    console.log('replaceContent');
     this.removeAllChildren() ;
     if (newContent) this.appendChild(newContent) ;
   },
 
   /** @private */
   createChildViews: function() {
-    
-    console.log('createChildViews');
-    
     // if content is defined, then create the content
     var view = this.contentView ;
     if (view) {

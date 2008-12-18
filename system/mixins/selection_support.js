@@ -32,8 +32,8 @@ SC.SelectionSupport = {
     selection always remains up-to-date and valid.
   */
   updateSelectionAfterContentChange: function() {
-    var objects = Array.from(this.get('arrangedObjects')) ;
-    var currentSelection = Array.from(this.get('selection')) ;
+    var objects = SC.makeArray(this.get('arrangedObjects')) ;
+    var currentSelection = SC.makeArray(this.get('selection')) ;
     var sel = [] ;
 
     // the new selection is the current selection that exists in 
@@ -87,7 +87,7 @@ SC.SelectionSupport = {
     if (value !== undefined) {
       
       // always force to an array
-      value = Array.from(value) ;
+      value = SC.makeArray(value) ;
     
       var allowsSelection         = this.get('allowsSelection');
       var allowsEmptySelection    = this.get('allowsEmptySelection');

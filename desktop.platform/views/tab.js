@@ -73,8 +73,6 @@ SC.TabView = SC.View.extend(
   }.observes('nowShowing'),
   
   _tab_itemsDidChange: function() {
-    console.log('_tab_itemsDidChange');
-    
     this.get('segmentedView').set('items', this.get('items'));
     return this ;    
   }.observes('items'),

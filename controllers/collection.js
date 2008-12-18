@@ -191,7 +191,7 @@ SC.CollectionController = SC.ObjectController.extend(SC.SelectionSupport,
   // potentially the selection.
   _recordsDidChange: function(target,key,value) {
     var old = this.get('arrangedObjects') ;
-    value = Array.from(this.get('records')) ;
+    value = SC.makeArray(this.get('records')) ;
 
     this.set('arrangedObjects',value.slice()) ;
     
