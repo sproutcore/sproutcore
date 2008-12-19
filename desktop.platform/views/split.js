@@ -350,6 +350,8 @@ SC.SplitView = SC.View.extend(
     @returns {Boolean}
   */
   mouseDownInThumbView: function(evt, thumbView) {
+    evt.handler = this ; // capture future mouse event
+    
     console.log('mouseDownInThumbView');
     // cache for later
     this._mouseDownX = evt.pageX ;
@@ -363,9 +365,12 @@ SC.SplitView = SC.View.extend(
     this._layoutDirection = this.get('layoutDirection') ;
     
     // we're not the source view of the mouseDown:, so we need to capture events manually to receive them
-    SC.RootResponder.responder.startCapturingMouseEvents(this) ;
+    // SC.RootResponder.responder.startCapturingMouseEvents(this) ;
     this.viewWillStartLiveResize() ;
     this._inLiveResize = YES ;
+    
+    // add DIV
+    
     return YES ;
   },
   
@@ -381,7 +386,7 @@ SC.SplitView = SC.View.extend(
     this._thumbView = null ; // avoid memory leaks
     this._inLiveResize = NO ;
     this.viewDidEndLiveResize() ;
-    SC.RootResponder.responder.stopCapturingMouseEvents() ;
+    // SC.RootResponder.responder.stopCapturingMouseEvents() ;
     return YES ;
   },
 
@@ -455,6 +460,7 @@ SC.SplitView = SC.View.extend(
       topLeftView.set('isCollapsed', thickness == 0) ;
       bottomRightView.set('isCollapsed', thickness >= maxAvailable) ;
       
+      // this.set('displayNeedsUpdate', YES);
       this.adjustLayout();
       this.displayDidChange(); // updates cursor
     }

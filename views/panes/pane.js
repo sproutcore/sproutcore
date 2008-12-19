@@ -151,8 +151,8 @@ SC.Pane = SC.View.extend({
     if (!target && (target = this.get('defaultResponder'))) {
       target = target.tryToPerform(action, evt) ? target : null ;
     }
-    
-    return target ;
+        
+    return evt.handler || target ;
   },
 
   // .......................................................

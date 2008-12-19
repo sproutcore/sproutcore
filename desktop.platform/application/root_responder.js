@@ -372,14 +372,16 @@ SC.RootResponder = SC.RootResponder.extend(
       handler = this.sendEvent('mouseUp', evt, this._mouseDownView);
     }
     
+    var view = this.targetViewForEvent(evt) ;
+
     // no one handled the mouseup... try doubleclick...
     if (!handler && (this._clickCount === 2)) {
-      handler = this.sendEvent('doubleClick', evt, this._mouseDownView);
+      handler = this.sendEvent('doubleClick', evt, view);
     }
     
     // no one handled the doubleclick... try click...
     if (!handler) {
-      handler = this.sendEvent('click', evt, this._mouseDownView) ;
+      handler = this.sendEvent('click', evt, view) ;
     }
     this._mouseCanDrag = NO; this._mouseDownView = null ;
     
