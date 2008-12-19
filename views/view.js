@@ -17,9 +17,14 @@ SC.viewKey = SC.guidKey + "_view" ;
 
 /** @private */
 SC.DISPLAY_LOCATION_QUEUE = 'updateDisplayLocationIfNeeded';
+// SC.VIEW_HIERARCHY_QUEUE = 'updateViewHierarchyIfNeeded'; // <-- How about using this name? -E
+
+/** @private */
+SC.UPDATE_LAYOUT_QUEUE   = 'updateLayoutIfNeeded';
 
 /** @private */
 SC.DISPLAY_LAYOUT_QUEUE   = 'updateDisplayLayoutIfNeeded';
+// SC.APPLY_LAYOUT_QUEUE   = 'applyLayoutIfNeeded'; // <-- How about using this name? -E
 
 /** @private */
 SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
@@ -122,7 +127,7 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: ['outlets','displayProperties', 'styleClass', 'updateDisplayMixin', 'prepareDisplayMixin'],
+  concatenatedProperties: ['outlets','displayProperties', 'layoutProperties', 'styleClass', 'updateLayoutMixin', 'updateDisplayMixin', 'prepareDisplayMixin'],
   
   /** 
     The current pane. 
@@ -552,7 +557,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     - register the view with the global views hash, which is used for mgmt
   */
   init: function() {
-    var parentView, path, root, idx, len, dp;
+    var parentView, path, root, idx, len, lp, dp;
     
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
@@ -586,6 +591,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // save this guid on the DOM element for reverse lookups.
     if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
+    
+    // register layout property observers .. this could be optimized into the
+    // class creation mechanism if local observers did not require explicit 
+    // setup.
+    lp = this.get('layoutProperties'); 
+    idx = lp.length;
+    while(--idx >= 0) {
+      this.addObserver(lp[idx], this, this.layoutDidChange);
+    }
     
     // register display property observers .. this could be optimized into the
     // class creation mechanism if local observers did not require explicit 
@@ -798,6 +812,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // save this guid on the DOM element for reverse lookups.
     if (root) root[SC.viewKey] = SC.guidFor(this) ;
     
+    // update the child view layout to match the frame
+    this.updateLayout();
+    
     // also, update the layout to match the frame
     this.updateDisplayLayout();
     
@@ -986,6 +1003,55 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   // LAYOUT
   //
 
+  /** 
+    This method is invoked whenever the layout of the view's child views has 
+    changed. You should override this method to update your child views to match 
+    the current state of the view.
+    
+    The default implementation does nothing.
+    
+    @returns {SC.View} receiver
+  */
+  updateLayout: function() {
+    //console.log('%@: updateLayout()'.fmt(this));
+    
+    var mixins = this.updateLayoutMixin, len = (mixins) ? mixins.length : 0;
+    for(var idx=0;idx<len;idx++) mixins[idx].call(this);
+  },
+
+  /** 
+    Call this method whenever the child view layout changes in such as way that
+    requires the view's child view layout to be updated.  This will schedule the 
+    view for layout at the end of the runloop.
+  */
+  layoutDidChange: function() {
+    this.set('layoutNeedsUpdate', YES) ;
+    SC.View.scheduleInRunLoop(SC.UPDATE_LAYOUT_QUEUE, this);
+    return this ;
+  },
+  
+  layoutNeedsUpdate: NO,
+  
+  /**
+    This method will update the display location, but only if it needs an 
+    update.  Returns YES if the method was able to execute, NO if it needs
+    to be called again later.
+  */
+  updateLayoutIfNeeded: function(force) {
+    if (!this.get('layoutNeedsUpdate')) return YES;
+    if (!force & !this.get('isVisibleInWindow')) return NO ;
+    this.set('layoutNeedsUpdate', NO) ;
+    this.updateLayout() ;
+    return YES;
+  },
+  
+  /** 
+    You can set this array to include any properties that should immediately
+    invalidate the layout.  The layout will be automatically invalidated
+    when one of these properties change.
+  */
+  layoutProperties: [],
+  
   /** 
     This convenience method will take the current layout, apply any changes
     you pass and set it again.  It is more convenient than having to do this
@@ -1776,7 +1842,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
       return didExec;
     },
     
-    order: [SC.DISPLAY_LOCATION_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
+    order: [SC.DISPLAY_LOCATION_QUEUE, SC.UPDATE_LAYOUT_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
   }
     
 }) ;
