@@ -583,6 +583,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         
       } else {
         this.prepareDisplay();
+        if (this.get('updateLayoutOnPrepare')) this.layoutDidChange() ;
         if (this.get('updateDisplayOnPrepare')) this.displayDidChange() ;
       }
 
@@ -812,9 +813,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // save this guid on the DOM element for reverse lookups.
     if (root) root[SC.viewKey] = SC.guidFor(this) ;
     
-    // update the child view layout to match the frame
-    this.updateLayout();
-    
     // also, update the layout to match the frame
     this.updateDisplayLayout();
     
@@ -834,6 +832,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var mixins = this.prepareDisplayMixin, len = (mixins) ? mixins.length : 0;
     for(idx=0;idx<len;idx++) mixins[idx].call(this);
   },
+  
+  /**
+    By default, when you have to layout the display, it will also be laid out
+    once even before any properties or observers are setup.  This is usually
+    the behavior you want, but if you do something significantly different 
+    during the prepareDisplay method, you may want to turn this off.
+  */
+  updateLayoutOnPrepare: YES,
   
   /**
     By default, when you have to prepare the display, it will also be updated
@@ -1231,7 +1237,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null);
-  }.property().cacheable(),
+  }.property('layout').cacheable(),
   
   /**
     Computes what the frame of this view would be if the parent were resized
@@ -1335,7 +1341,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     
     return f;
-  }.property('layout').cacheable(),
+  },
   
   /**
     The clipping frame returns the visible portion of the view, taking into

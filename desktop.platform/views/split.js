@@ -89,7 +89,7 @@ SC.SplitView = SC.View.extend(
 
   styleClass: ['sc-split-view'],  
 
-  layoutProperies: 'layoutDirection dividerThickness autoresizeBehavior'.w(),
+  layoutProperties: 'layoutDirection dividerThickness autoresizeBehavior'.w(),
 
   /**
     delegate for controlling split view behavior.
@@ -157,10 +157,11 @@ SC.SplitView = SC.View.extend(
     to make sure they are arranged properly.  This will set up the views so
     that they can resize appropriately.
   */
-  adjustLayout: function() {
-    // console.log('adjustLayout');
+  updateLayout: function() {
+    // console.log('updateLayout');
     
     if (this._needsFirstLayout) {
+      console.log('doing first updateLayout');
       this._needsFirstLayout = NO ;
       var direction = this.get('layoutDirection') ;
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
@@ -336,7 +337,8 @@ SC.SplitView = SC.View.extend(
   },
   
   updateDisplay: function() {
-    this.adjustLayout();
+    // console.log('updateDisplay');
+    // this.adjustLayout();
     if (this._inLiveResize) this._setCursorStyle() ;
   },
 
@@ -396,7 +398,7 @@ SC.SplitView = SC.View.extend(
     var bottomRightView = this._bottomRightView ;
     var topLeftViewThickness = this.thicknessForView(topLeftView); // the current thickness, not the original thickness
     var bottomRightViewThickness = this.thicknessForView(bottomRightView);
-
+    
     var minAvailable = this._dividerThickness ;
     var maxAvailable = 0;
     if (!topLeftView.get("isCollapsed")) maxAvailable += topLeftViewThickness ;
@@ -461,7 +463,8 @@ SC.SplitView = SC.View.extend(
       bottomRightView.set('isCollapsed', thickness >= maxAvailable) ;
       
       // this.set('displayNeedsUpdate', YES);
-      this.adjustLayout();
+      // this.adjustLayout();
+      this.layoutDidChange(); // updates child layouts
       this.displayDidChange(); // updates cursor
     }
   },
