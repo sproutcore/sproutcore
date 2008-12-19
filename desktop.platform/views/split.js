@@ -89,7 +89,7 @@ SC.SplitView = SC.View.extend(
 
   styleClass: ['sc-split-view'],  
 
-  layoutProperties: 'layoutDirection dividerThickness autoresizeBehavior'.w(),
+  childLayoutProperties: 'layoutDirection dividerThickness autoresizeBehavior'.w(),
 
   /**
     delegate for controlling split view behavior.
@@ -174,7 +174,7 @@ SC.SplitView = SC.View.extend(
     to make sure they are arranged properly.  This will set up the views so
     that they can resize appropriately.
   */
-  updateLayout: function() {
+  updateChildLayout: function() {
     // console.log('updateLayout');
     
     if (this._split_needsFirstLayout) {
@@ -481,7 +481,7 @@ SC.SplitView = SC.View.extend(
       
       // this.set('displayNeedsUpdate', YES);
       // this.adjustLayout();
-      this.layoutDidChange(); // updates child layouts
+      this.childLayoutDidChange(); // updates child layouts
       this.displayDidChange(); // updates cursor
     }
   },
