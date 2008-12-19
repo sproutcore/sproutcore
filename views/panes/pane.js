@@ -152,7 +152,7 @@ SC.Pane = SC.View.extend({
       target = target.tryToPerform(action, evt) ? target : null ;
     }
         
-    return evt.handler || target ;
+    return evt.mouseHandler || target ;
   },
 
   // .......................................................
