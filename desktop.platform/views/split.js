@@ -147,7 +147,7 @@ SC.SplitView = SC.View.extend(
   */
   init: function() {
     sc_super() ;
-    this._needsFirstLayout = YES ;
+    this._split_needsFirstLayout = YES ;
   },
   
   /**
@@ -160,7 +160,7 @@ SC.SplitView = SC.View.extend(
   updateLayout: function() {
     // console.log('updateLayout');
     
-    if (this._needsFirstLayout) {
+    if (this._split_needsFirstLayout) {
       console.log('doing first updateLayout');
       this._needsFirstLayout = NO ;
       var direction = this.get('layoutDirection') ;
