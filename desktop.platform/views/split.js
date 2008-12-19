@@ -183,6 +183,8 @@ SC.SplitView = SC.View.extend(
       var direction = this.get('layoutDirection') ;
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
+      
+      // TODO: handle min and max sizing and collapse settings *grrr*
     }
     
     // console.log('this._desiredTopLeftThickness is %@'.fmt(this._desiredTopLeftThickness));
@@ -428,14 +430,15 @@ SC.SplitView = SC.View.extend(
     var thickness = proposedThickness;
 
     // constrain to thickness set on top/left
-    var max = topLeftView.get('maxThickness') ;
-    var min = topLeftView.get('minThickness') ;
+    var max = this.get('topLeftMaxThickness') ;
+    var min = this.get('topLeftMinThickness') ;
+    
     if (max != null) thickness = Math.min(max, thickness) ;
     if (min != null) thickness = Math.max(min, thickness) ;
 
     // constrain to thickness set on bottom/right
-    max = bottomRightView.get('maxThickness') ;
-    min = bottomRightView.get('minThickness') ;
+    max = this.get('bottomRightMaxThickness') ;
+    min = this.get('bottomRightMinThickness') ;
     bottomRightThickness = maxAvailable - thickness ;
     if (max != null) bottomRightThickness = Math.min(max, bottomRightThickness) ;
     if (min != null) bottomRightThickness = Math.max(min, bottomRightThickness) ;
