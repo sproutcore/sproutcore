@@ -150,6 +150,23 @@ SC.SplitView = SC.View.extend(
     this._split_needsFirstLayout = YES ;
   },
   
+  createChildViews: function() {
+    var childViews = [], view;
+    var viewAry = ['topLeftView', 'dividerView', 'bottomRightView'], idx, len;
+    
+    for (idx=0, len=viewAry.length; idx<len; ++idx) {
+      if (view = this.get(viewAry[idx])) {
+        view = this[viewAry[idx]] = this.createChildView(view, { 
+          rootElementPath: [idx] 
+        }) ;
+        childViews.push(view);
+      }
+    }
+    
+    this.set('childViews', childViews);
+    return this; 
+  },
+  
   /**
     Layout the views.
 
@@ -162,7 +179,7 @@ SC.SplitView = SC.View.extend(
     
     if (this._split_needsFirstLayout) {
       console.log('doing first updateLayout');
-      this._needsFirstLayout = NO ;
+      this._split_needsFirstLayout = NO ;
       var direction = this.get('layoutDirection') ;
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
