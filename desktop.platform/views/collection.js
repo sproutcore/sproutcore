@@ -628,6 +628,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   _collection_isDirtyDidChange: function() {
     if (this.get('isVisibleInWindow') && this.get('isDirty')) {
+      console.log('%@:_collection_isDirtyDidChange()'.fmt(this));
       this.invokeOnce(this._fullUpdateChildren);
     }  
   }.observes('isDirty', 'isVisibleInWindow'),
@@ -817,7 +818,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Overrides the default view implementation.  Calls layoutResize() first 
     to give you the chance to relayout your children.  The notifies children.
   */
-  viewDidResize: function() { 
+  viewDidResize: function() {
+    console.log('viewDidResize') ; 
     this.layoutResize();  
     return sc_super();
   }.observes('layout'),

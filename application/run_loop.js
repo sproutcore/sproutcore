@@ -119,9 +119,9 @@ SC.runLoop = SC.Object.create({
     
   _flushInvokeQueue: function() {
     var queue = this._invokeQueue, hadContent = NO, len, idx, handler ;
-    if (queue && queue.length > 0) {
+    if (queue && queue.targets > 0) {
       this._invokeQueue = null; // reset queue.
-      hadContent = queue.targets>0; // has targets?
+      hadContent = YES; // has targets!
       if (hadContent) queue.invokeMethods();
     }
     return hadContent ;

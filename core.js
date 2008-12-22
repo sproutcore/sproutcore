@@ -190,7 +190,7 @@ SC.mixin(/** @scope SC */ {
     var len = (obj ? obj.length : null), type = SC.typeOf(obj);
     return !(SC.none(len) || 
       ((type === SC.T_FUNCTION) && !(obj instanceof NodeList)) || 
-      (type === SC.T_STRING) || obj.setInterval) || obj.objectAt ;
+      (type === SC.T_STRING) || obj.setInterval) || (obj && obj.objectAt) ;
   },
   
   /**

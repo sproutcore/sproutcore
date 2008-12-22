@@ -187,7 +187,7 @@ SC.Control = {
     if (content === undefined) content = this.get('content');
     
     // get actual content key
-    contentKey = this.get(contentKey);
+    contentKey = this[contentKey] ? this.get(contentKey) : this.getDelegateProperty(this.displayDelegate, contentKey);
     if (contentKey && (all || key === contentKey)) {
       var v = (content) ? (content.get ? content.get(contentKey) : content[contentKey]) : null ;
       this.set(prop, v);

@@ -64,7 +64,7 @@ SC.ListView = SC.CollectionView.extend(
     
     You can override this as you wish.
   */
-  exampleView: SC.ListItemView,
+  exampleView: SC.LabelView,
   
   /**
     The default layout for the list view simply fills the entire parentView.
@@ -170,11 +170,12 @@ SC.ListView = SC.CollectionView.extend(
     The default version of this property is set to YES unless you set a 
     delegate or a contentRowHeightKey.
   */
-  hasUniformRowHeights: function(key, value) {
-    if (value !== undefined) this._list_hasUniformRowHeights = value ;
-    value = this._list_hasUniformRowHeights;
-    return SC.none(value) ? !((this.delegate && this.delegate.collectionViewHeightForRowAtContentIndex) || this.contentRowHeightKey) : value ;
-  }.property('delegate', 'contentRowHeightKey').cacheable(),
+  hasUniformRowHeights: YES,
+  // function(key, value) {
+  //     if (value !== undefined) this._list_hasUniformRowHeights = value ;
+  //     value = this._list_hasUniformRowHeights;
+  //     return SC.none(value) ? !((this.delegate && this.delegate.collectionViewHeightForRowAtContentIndex) || this.contentRowHeightKey) : value ;
+  //   }.property('delegate', 'contentRowHeightKey').cacheable(),
 
   /**
     Calculates the offset for the row at the specified index.  Based on the 
@@ -327,7 +328,9 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   insertionPointClass: SC.View.extend({
-    emptyElement: '<div class="list-insertion-point"><span class="anchor"></span></div>'
+    emptyElement: '<div><span class="anchor"></span></div>',
+    styleClass: 'sc-list-insertion-point',
+    layout: SC.merge(SC.FULL_WIDTH, { top: 0, height: 5 })
   }),
 
   showInsertionPoint: function(itemView, dropOperation) {
