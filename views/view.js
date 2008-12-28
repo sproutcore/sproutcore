@@ -172,7 +172,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     well. 
     
     Note that if you apply the SC.Control mixin, changing this property will
-    also automatically add or mode a 'disabled' CSS class name as well.
+    also automatically add or remove a 'disabled' CSS class name as well.
     
     This property is observable and bindable.
     
@@ -407,6 +407,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       // that its parentView has resized since joining a parentView has the
       // same effect.
       if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
+        
+        // before we add to parent node, make sure that the nextNode is 
+        // already in the DOM.
+        if (nextView && nextNode) nextView.updateDisplayLocationIfNeeded();
+        
         parentNode.insertBefore(node, nextNode) ;
         this.parentViewDidResize();
       }
