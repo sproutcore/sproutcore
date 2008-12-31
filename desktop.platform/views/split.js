@@ -122,6 +122,11 @@ SC.SplitView = SC.View.extend(
     Yes, we're a split view.
   */
   isSplitView: YES,
+  
+  // add default views
+  topLeftView: SC.View,
+  dividerView: SC.SplitDividerView,
+  bottomRightView: SC.View,
 
   /**
     Used by split divider to decide if the view can be collapsed.
