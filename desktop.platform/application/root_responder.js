@@ -312,7 +312,6 @@ SC.RootResponder = SC.RootResponder.extend(
       this._clickCount = 1 ; 
     }
     evt.clickCount = this._clickCount ;
-
     var view = this.targetViewForEvent(evt) ;
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
@@ -338,7 +337,8 @@ SC.RootResponder = SC.RootResponder.extend(
     }
     
     // no one handled the mouseup... try doubleclick...
-    if (!handler && (this._clickCount === 2)) {
+    //if ( !handler && (this._clickCount === 2)) {
+    if(this._clickCount === 2){
       handler = this.sendEvent('doubleClick', evt, this._mouseDownView);
     }
     

@@ -819,7 +819,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     to give you the chance to relayout your children.  The notifies children.
   */
   viewDidResize: function() {
-    console.log('viewDidResize') ; 
+    //console.log('viewDidResize') ; 
     this.layoutResize();  
     return sc_super();
   }.observes('layout'),
