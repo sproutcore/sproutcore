@@ -414,8 +414,38 @@ SC.SplitView = SC.View.extend(
     this.viewDidEndLiveResize() ;
     // SC.RootResponder.responder.stopCapturingMouseEvents() ;
     return YES ;
+    // return NO ; // pretend we didn't handle the event so that doubleClick is called on thumb views
   },
 
+  doubleClickInThumbView: function(evt, thumbView) {
+    var view = this._topLeftView ;
+    var isCollapsed = view.get('isCollapsed') || NO ;
+    if (!isCollapsed && !this.canCollapseView(view)) {
+      view = this._bottomRightView ;
+      isCollapsed = view.get('isCollapsed') || NO ;
+      if (!isCollapsed && !this.canCollapseView(view)) return NO;
+    }
+    
+    if (!isCollapsed) {
+      // remember thickness in it's uncollapsed state
+      this._uncollapsedThickness = this.getThicknessForView(view)  ;
+      // and collapse
+      // this.setThicknessForView(view, 0) ;
+      (view === this._topLeftView) ? this._topLeftViewThickness = 0 : this._bottomRightViewThickness = 0 ;
+      // if however the splitview decided not to collapse, clear:
+      if (!view.get("isCollapsed")) {
+        this._uncollapsedThickness = null;
+      }
+    } else {
+      // uncollapse to the last thickness in it's uncollapsed state
+      // this._splitView.setThicknessForView(view, view._uncollapsedThickness) ;
+      (view === this._topLeftView) ? this._topLeftViewThickness = this._uncollapsedThickness : this._bottomRightViewThickness = this._uncollapsedThickness ;
+      view._uncollapsedThickness = null ;
+    }
+    this._setCursorStyle() ;
+    return true ;
+  },
+  
   /** @private */
   _updateTopLeftThickness: function(offset) {
     var topLeftView = this._topLeftView ;

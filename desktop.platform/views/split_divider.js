@@ -37,29 +37,32 @@ SC.SplitDividerView = SC.View.extend(
   
   // FIXME: how does this work with event capture?
   doubleClick: function(evt) {
-    var view = this._tlView ;
-    var isCollapsed = view.get('isCollapsed') || NO ;
-    if (!isCollapsed && !this._splitView.canCollapseView(view)) {
-      view = this._brView ;
-      isCollapsed = view.get('isCollapsed') || NO ;
-      if (!isCollapsed && !this._splitView.canCollapseView(view)) return;
-    }
-
-    if (!isCollapsed) {
-      // remember thickness in it's uncollapsed state
-      view._uncollapsedThickness = this._splitView.getThicknessForView(view)  ;
-      // and collapse
-      this._splitView.setThicknessForView(view, 0) ;
-      // if however the splitview decided not to collapse, clear:
-      if (!view.get("isCollapsed")) {
-        view._uncollapsedThickness = null;
-      }
-    } else {
-      // uncollapse to the last thickness in it's uncollapsed state
-      this._splitView.setThicknessForView(view, view._uncollapsedThickness) ;
-      view._uncollapsedThickness = null ;
-    }
-    this._setCursorStyle() ;
+    console.log('doubleClick in split divider');
+    var splitView = this.get('splitView');
+    return (splitView) ? splitView.doubleClickInThumbView(evt, this) : sc_super();
+    // var view = this._tlView ;
+    // var isCollapsed = view.get('isCollapsed') || NO ;
+    // if (!isCollapsed && !this._splitView.canCollapseView(view)) {
+    //   view = this._brView ;
+    //   isCollapsed = view.get('isCollapsed') || NO ;
+    //   if (!isCollapsed && !this._splitView.canCollapseView(view)) return;
+    // }
+    // 
+    // if (!isCollapsed) {
+    //   // remember thickness in it's uncollapsed state
+    //   view._uncollapsedThickness = this._splitView.getThicknessForView(view)  ;
+    //   // and collapse
+    //   this._splitView.setThicknessForView(view, 0) ;
+    //   // if however the splitview decided not to collapse, clear:
+    //   if (!view.get("isCollapsed")) {
+    //     view._uncollapsedThickness = null;
+    //   }
+    // } else {
+    //   // uncollapse to the last thickness in it's uncollapsed state
+    //   this._splitView.setThicknessForView(view, view._uncollapsedThickness) ;
+    //   view._uncollapsedThickness = null ;
+    // }
+    // this._setCursorStyle() ;
     return true ;
   }
   

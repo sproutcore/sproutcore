@@ -375,7 +375,7 @@ SC.RootResponder = SC.RootResponder.extend(
     var view = this.targetViewForEvent(evt) ;
 
     // no one handled the mouseup... try doubleclick...
-    if (!handler && (this._clickCount === 2)) {
+    if ((!handler || this._mouseDownView) && (this._clickCount === 2)) {
       handler = this.sendEvent('doubleClick', evt, view);
     }
     
