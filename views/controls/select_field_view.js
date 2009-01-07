@@ -294,7 +294,7 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   _isFocusedObserver: function() {
     var isFocused = this.get('isFocused');
-    this.setClassName('focus', isFocused);
+    //this.setClassName('focus', isFocused);
   }.observes('isFocused'),
 
 
