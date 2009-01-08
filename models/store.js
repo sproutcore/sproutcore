@@ -98,6 +98,8 @@ SC.Store = SC.Object.create(
   // ....................................
   // Record Helpers
   //
+  // Boolean Flag to tell whether the store is dirty
+  hasChanges: false,
   
   /**
     Add a record instance to the store.  The record will now be monitored for
@@ -298,6 +300,7 @@ SC.Store = SC.Object.create(
 
     changed[guid] = records ;    
     this.set('_changedRecords',changed) ;
+    this.set('hasChanged', YES);
   },
   
   // invoked whenever the changedRecords hash is updated. This will notify
@@ -341,7 +344,7 @@ SC.Store = SC.Object.create(
     
     // then clear changed records to start again.
     this._changedRecords = {} ;
-    
+    this.set('hasChanged', NO);
   }.observes('_changedRecords')
     
 }) ;
