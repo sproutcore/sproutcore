@@ -86,7 +86,10 @@ SC.Store = SC.Object.create(
     this.commitRecords(recs); 
   },
   
-  commitRecords: function(recs) { recs.invoke('set','isDirty','false'); },
+  commitRecords: function(recs) {
+     
+    recs.invoke('set','isDirty','false'); 
+    },
   
   destroyRecords: function(recs) {
     var store = this ;
@@ -99,7 +102,7 @@ SC.Store = SC.Object.create(
   // Record Helpers
   //
   // Boolean Flag to tell whether the store is dirty
-  hasChanged: false,
+  hasChanged: NO,
   
   /**
     Add a record instance to the store.  The record will now be monitored for
@@ -150,6 +153,17 @@ SC.Store = SC.Object.create(
     // and stop observing it.
     rec.removeObserver('*',this, this.recordDidChange) ;
     this.recordDidChange(rec) ; // this will remove from cols since destroyed.
+  },
+  
+  cleanRecord: function(rec) {
+    var guid = rec._storeKey();
+    var dirty = this.get('_dirtyRecords') || {};
+    delete dirty[guid];
+    var count = 0;
+    for(var elem in dirty){
+      count = count + 1;
+    }
+    if (count > 0) this.set('hasChanged', NO);
   },
 
   /**
@@ -286,7 +300,7 @@ SC.Store = SC.Object.create(
   // ....................................
   // PRIVATE
   //
-  _records: {}, _changedRecords: null, _collections: {},
+  _records: {}, _changedRecords: null, _collections: {}, _dirtyRecords: {},
   
   /** @private
     called whenever properties on a record change.
@@ -295,11 +309,16 @@ SC.Store = SC.Object.create(
     // add to changed records.  This will eventually notify collections.
     var guid    = rec._storeKey(),
         changed = this.get('_changedRecords') || {},
+        dirty = this.get('_dirtyRecords') || {},
         records = changed[guid] || {} ;
     records[SC.guidFor(rec)] = rec ;
 
     changed[guid] = records ;    
     this.set('_changedRecords',changed) ;
+    
+    // Set the global record changes
+    dirty[guid] = rec;
+    this.set('_dirtyRecords', dirty); 
     this.set('hasChanged', YES);
   },
   
@@ -344,7 +363,7 @@ SC.Store = SC.Object.create(
     
     // then clear changed records to start again.
     this._changedRecords = {} ;
-    this.set('hasChanged', NO);
+    //this.set('hasChanged', NO);
   }.observes('_changedRecords')
     
 }) ;
