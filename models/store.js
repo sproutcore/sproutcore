@@ -99,7 +99,7 @@ SC.Store = SC.Object.create(
   // Record Helpers
   //
   // Boolean Flag to tell whether the store is dirty
-  hasChanged: false,
+  hasChanged: NO,
   
   /**
     Add a record instance to the store.  The record will now be monitored for
