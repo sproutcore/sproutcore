@@ -66,6 +66,7 @@ SC.Store = SC.Object.create(
       if (data.destroyURL) rec.destroyURL = data.destroyURL;
       rec.updateAttributes(data, isLoaded, isLoaded) ;
       if (rec.needsAddToStore) store.addRecord(rec) ;
+      store.cleanRecord(rec);
       ret.push(rec) ;
     });
 //    },'dataHashes') ;  
