@@ -117,7 +117,7 @@ SC.ScrollView = SC.View.extend({
   // 
   
   /** 
-    YES if the view shuld maintain a horizontal scroller.   This property must be set when the view is created.
+    YES if the view should maintain a horizontal scroller.   This property must be set when the view is created.
     
     @property {Boolean}
   */

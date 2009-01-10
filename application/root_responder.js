@@ -11,24 +11,38 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
 
 /** @class
 
-  The RootResponder captures events coming from a web browser and routes them to the correct view in the view hierarchy.  One RootResponder instance  exists for each DOMWindow/DOMDocument you deal with.  (Only one unless you are trying to open multiple windows.)
+  The RootResponder captures events coming from a web browser and routes them 
+  to the correct view in the view hierarchy.  One RootResponder instance  exists 
+  for each DOMWindow/DOMDocument you deal with.  (Only one unless you are trying 
+  to open multiple windows.)
   
-  Usually you do not work with a RootResponder directly.  Instead you will work with Pane objects,w hich register themselves with the RootResponder as needed to receive events.
+  Usually you do not work with a RootResponder directly.  Instead you will work 
+  with Pane objects, which register themselves with the RootResponder as needed 
+  to receive events.
 
   h1. RootResponder and Platforms
   
-  RootResponder is implemented differently on the desktop and mobile platforms using a technique called a "class cluster".  That is, although you get a RootResponder instance at some point, you will likely be working with a subclass of RootResponder that implements functionality unique to that platform.
+  RootResponder is implemented differently on the desktop and mobile platforms 
+  using a technique called a "class cluster".  That is, although you get a 
+  RootResponder instance at some point, you will likely be working with a 
+  subclass of RootResponder that implements functionality unique to that platform.
   
   h1. Event Types 
     
   RootResponders can route four types of events:
   
-  - Direct events.  Such as mouse and touch events.  These are routed to the nearest view managing the target DOM elment.
+  - Direct events.  Such as mouse and touch events.  These are routed to the 
+    nearest view managing the target DOM elment.
   - Keyboard events.  These are sent to the keyPane, which will send it 
     to the current firstResponder.
   - resize. This event is sent to all panes.
-  - shortcuts.  Shortcuts are sent to the focusedPane first, which will go down its view hierarchy.  Then they go to the mainPane, which will go down its view hierarchy.  Then they go to the mainMenu.  Usually any handler that picks this up will then try to do a sendAction().
-  - actions.  Actions are sent down the responder chain.  They go to focusedPane -> mainPane.  Each of these will start at the firstResponder and work their way up the chain.
+  - shortcuts.  Shortcuts are sent to the focusedPane first, which will go down 
+    its view hierarchy.  Then they go to the mainPane, which will go down its 
+    view hierarchy.  Then they go to the mainMenu.  Usually any handler that 
+    picks this up will then try to do a sendAction().
+  - actions.  Actions are sent down the responder chain.  They go to 
+    focusedPane -> mainPane.  Each of these will start at the firstResponder and 
+    work their way up the chain.
   
   Differences between Mobile + Desktop RootResponder
   
@@ -43,16 +57,24 @@ SC.RootResponder = SC.Object.extend({
   //
 
   /** @property
-    The main pane.  This pane receives shortcuts and actions if the focusedPane does not respond to them.  There can be only one main pane.  You can swap main panes by calling makeMainPane() here.
+    The main pane.  This pane receives shortcuts and actions if the focusedPane 
+    does not respond to them.  There can be only one main pane.  You can swap 
+    main panes by calling makeMainPane() here.
     
-    Usually you will not need to edit the main pane directly.  Instead, you should use a MainPane subclass, which will automatically make itself main when you append it to the document.
+    Usually you will not need to edit the main pane directly.  Instead, you 
+    should use a MainPane subclass, which will automatically make itself main 
+    when you append it to the document.
   */
   mainPane: null,
 
   /** 
-    Swaps the main pane.  If the current main pane is also the key pane, then the new main pane will also be made key view automatically.  In addition to simply updating the mainPane property, this method will also notify the panes themselves that they will lose/gain their mainView status.
+    Swaps the main pane.  If the current main pane is also the key pane, then the 
+    new main pane will also be made key view automatically.  In addition to simply 
+    updating the mainPane property, this method will also notify the panes 
+    themselves that they will lose/gain their mainView status.
     
-    Note that this method does not actually change the Pane's place in the document body.  That will be handled by the Pane itself.
+    Note that this method does not actually change the Pane's place in the 
+    document body.  That will be handled by the Pane itself.
     
     @param {SC.Pane} pane
     @returns {SC.RootResponder} receiver
@@ -82,12 +104,15 @@ SC.RootResponder = SC.Object.extend({
   //
 
   /** @property
-    The current key pane.  This pane receives keyboard events, shortcuts, and actions first.  This pane is usually the highest ordered pane or the mainPane.
+    The current key pane.  This pane receives keyboard events, shortcuts, and 
+    actions first.  This pane is usually the highest ordered pane or the mainPane.
   */
   keyPane: null,
 
   /**
-    Makes the passed pane the new key pane.  If you pass nil or if the pane does not accept key focus, then key focus will transfer to the mainPane.  This will notify both the old pane and the new root View that key focus has changed.
+    Makes the passed pane the new key pane.  If you pass nil or if the pane does 
+    not accept key focus, then key focus will transfer to the mainPane.  This 
+    will notify both the old pane and the new root View that key focus has changed.
     
     @param {SC.Pane} pane
     @returns {SC.RootResponder} Receiver
@@ -121,24 +146,26 @@ SC.RootResponder = SC.Object.extend({
   //
 
   /** @property
-    A set of all panes currently managed by the RootResponder.  To put a view under management, just add it to this set.
+    A set of all panes currently managed by the RootResponder.  To put a view 
+    under management, just add it to this set.
   */
   panes: null,
 
   /**
-    Called by a pane whenever the pane is added to the document.  This will add the pane to
-    the set.
+    Called by a pane whenever the pane is added to the document.  This will 
+    add the pane to the set.
   */
   addPane: function(pane) { this.panes.add(pane); },
   
   /**
-    Called by a pane whenever the pane is removed from a document.  This will remove the pane
-    from the set.
+    Called by a pane whenever the pane is removed from a document.  This will 
+    remove the pane from the set.
   */
   removePane: function(pane) { this.panes.remove(pane); },
   
   /** @property
-    The current focused view.  This will receive actions sent down the chain.  This only needs to be set for platforms that support multiple, layered panes.
+    The current focused view.  This will receive actions sent down the chain.  
+    This only needs to be set for platforms that support multiple, layered panes.
   */
   focusedPane: null,
 
@@ -147,7 +174,8 @@ SC.RootResponder = SC.Object.extend({
   //
   
   /** @property
-    Set this to a delegate object that can respond to actions as they are sent down the responder chain. 
+    Set this to a delegate object that can respond to actions as they are sent 
+    down the responder chain. 
   */
   defaultResponder: null,
 
@@ -235,7 +263,9 @@ SC.RootResponder = SC.Object.extend({
   },
   
   /**
-    Attempts to send an event down the responder chain.  This method will invoke the sendEvent() method on either the keyPane or on the pane owning the target view you pass in.
+    Attempts to send an event down the responder chain.  This method will invoke 
+    the sendEvent() method on either the keyPane or on the pane owning the target 
+    view you pass in.
     
     @param {String} action
     @param {SC.Event} evt
@@ -259,7 +289,11 @@ SC.RootResponder = SC.Object.extend({
   //
 
   /**
-    Default method to add an event listener for the named event.  If you simply need to add listeners for a type of event, you can use this method as shorthand.  Pass an array of event types to listen for and the element to listen in.  A listener will only be added if a handler is actually installed on the RootResponder of the same name.
+    Default method to add an event listener for the named event.  If you simply 
+    need to add listeners for a type of event, you can use this method as 
+    shorthand.  Pass an array of event types to listen for and the element to 
+    listen in.  A listener will only be added if a handler is actually installed 
+    on the RootResponder of the same name.
     
     @param {Array} keyNames
     @param {Element} target
@@ -275,7 +309,10 @@ SC.RootResponder = SC.Object.extend({
   },
   
   /** 
-    Called when the document is ready to begin handling events.  Setup event listeners in this method that you are interested in observing for your particular platform.  The default method configures listeners for keyboard events only.  Be sure to call sc_super().
+    Called when the document is ready to begin handling events.  Setup event 
+    listeners in this method that you are interested in observing for your 
+    particular platform.  The default method configures listeners for keyboard 
+    events only.  Be sure to call sc_super().
     
     @returns {void}
   */
@@ -415,7 +452,8 @@ SC.RootResponder = SC.Object.extend({
 });
 
 /* 
-  Invoked when the document is ready, but before main is called.  Creates an instances and sets up event listeners as needed.
+  Invoked when the document is ready, but before main is called.  Creates 
+  an instances and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
   var r = SC.RootResponder.create();

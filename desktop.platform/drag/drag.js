@@ -128,7 +128,6 @@ SC.Drag = SC.Object.extend(
     @field {Array} available data types
   */
   dataTypes: function() {
-    
     // first try to use the data source.
     if (this.dataSource) return this.dataSource.get('dragDataTypes') ;
     
@@ -172,7 +171,6 @@ SC.Drag = SC.Object.extend(
     @returns {Object} The generated data.
   */
   dataForType: function(dataType) {
-    
     // first try to use the data Source.
     if (this.dataSource) {
       return this.dataSource.dragDataForType(dataType, this) ;
@@ -229,13 +227,12 @@ SC.Drag = SC.Object.extend(
   
   // this will actually start the drag process.
   startDrag: function() {
-    
     // create the ghost view and position.
     this._createGhostView() ;
     
     // compute the offset from the original mouse location.
     var origin = this.dragView.convertFrameToView(this.dragView.get('frame'), null);
-    var pointer = Event.pointerLocation(this.event) ;
+    var pointer = { x: this.event.pageX, y: this.event.pageY } ;
     
     window.dragEvent = this.event ;
     
@@ -246,7 +243,8 @@ SC.Drag = SC.Object.extend(
     
     // notify window a drag is in process. mouseDragged notifications will
     // go to the drag instead.
-    SC.window.dragDidStart(this) ;
+    // SC.window.dragDidStart(this) ;
+    this._ghostView.rootResponder.dragDidStart(this);
     
     if (this.source && this.source.dragDidBegin) {
       this.source.dragDidBegin(this, pointer) ;
@@ -263,8 +261,8 @@ SC.Drag = SC.Object.extend(
     notifies it.
   */
   mouseDragged: function(evt) {
-    
-    var loc = Event.pointerLocation(evt) ;
+    // console.log('mouseDragged in %@'.fmt(this));
+    var loc = { x: evt.pageX, y: evt.pageY } ; // Event.pointerLocation(evt) ;
     var scrolled = this._autoscroll(evt) ;
     
     // ignore duplicate calls.
@@ -345,7 +343,8 @@ SC.Drag = SC.Object.extend(
     executes the drop target protocol to try to complete the drag operation.
   */
   mouseUp: function(evt) {
-    var loc = Event.pointerLocation(evt) ;
+    // console.log('mouseUp called on %@'.fmt(this));
+    var loc = { x: evt.pageX, y: evt.pageY } ; // Event.pointerLocation(evt) ;
 
     // try to have the drop target perform the drop...
     var target = this._lastTarget ;
@@ -369,14 +368,15 @@ SC.Drag = SC.Object.extend(
     if (target && target.dragEnded) target.dragEnded(this, evt) ;
     this._lastTarget = null ;
     
-    // clean up ghost view.  if sldeBack is true, then do the animation.
-    if ((op == SC.DRAG_NONE) && this.get('slideBack')) {
-      var loc = this.dragView.convertFrameToView(this.dragView.get('origin'), null) ;
-      this._ghostView.transitionTo(1.0, 
-        "left: %@px; top: %@px".fmt(loc.x, loc.y), 
-        { duration: 200, onComplete: cleanupFunc }) ;
-        
-    } else cleanupFunc() ;
+    // clean up ghost view.  if slideBack is true, then do the animation.
+    // if ((op == SC.DRAG_NONE) && this.get('slideBack')) {
+    //   var loc = this.dragView.convertFrameToView(this.dragView.get('frame'), null) ;
+    //   this._ghostView.transitionTo(1.0, 
+    //     "left: %@px; top: %@px".fmt(loc.x, loc.y), 
+    //     { duration: 200, onComplete: cleanupFunc }) ;
+    //     
+    // } else cleanupFunc() ;
+    cleanupFunc() ;
     
     // notify the source that everything has completed.
     if (this.source && this.source.dragDidEnd) {
@@ -384,46 +384,53 @@ SC.Drag = SC.Object.extend(
     }
     
     this._dragInProgress = NO ; // required by autoscroll.
-    
   },
   
   // ..........................................
   // PRIVATE PROPERTIES AND METHODS
   //
   
-  _ghostViewClass: SC.View.extend({ 
-    emptyElement: '<div class="sc-ghost-view"></div>'
+  _ghostViewClass: SC.Pane.extend({ 
+    styleClass: 'sc-ghost-view',
   }),
   
   // positions the ghost view underneath the mouse with the initial offset
   // recorded by when the drag started.
   _positionGhostView: function(evt) {
-    var loc = Event.pointerLocation(evt) ;
+    var loc = { x: evt.pageX, y: evt.pageY } ; // Event.pointerLocation(evt) ;
     loc.x -= this.ghostOffset.x ;
     loc.y -= this.ghostOffset.y ;
-    loc = this._ghostView.convertFrameFromView(loc, null) ;
-    this._ghostView.set('origin', loc) ;   
+    // loc = this._ghostView.convertFrameFromView(loc, null) ;
+    // this._ghostView.set('origin', loc) ;   
+    this._ghostView.adjust({ top: loc.y, left: loc.x }) ;   
   },
   
   // this will create the ghostView and add it to the main HTML document.
   // it will also position it underneath the current mouse location.
   _createGhostView: function() {
-    
     // create the elements by cloning the dragView.
     var el = this.dragView.rootElement.cloneNode(true) ;
     
     // create the ghost view instance add ghost class name.
-    this._ghostView = this._ghostViewClass.viewFor(el) ;
-    this._ghostView.owner = this ;
-    this._ghostView.addClassName('sc-ghost-view') ;
+    this._ghostView = this._ghostViewClass.viewFor(el, { owner: this }) ;
+    // this._ghostView.addClassName('sc-ghost-view') ;
+    // console.log('this._ghostView is %@'.fmt(this._ghostView));
+    this._ghostView.$().addClass('sc-ghost-view') ;
     
-    // add to bottom of main document body and to window.
-    SC.window.appendChild(this._ghostView) ;
+    // set width and height
+    var f = this.dragView.get('frame');
+    this._ghostView.adjust({ width: f.width, height: f.height }) ;
+    
+    // add to window.
+    // SC.window.appendChild(this._ghostView) ;
+    this._ghostView.append() ; // this._ghostView is an SC.Pane
   },
 
-  _destroyGhostView: function() {  
+  _destroyGhostView: function() {
+    // console.log('_destroyGhostView called on %@'.fmt(this));
     if (this._ghostView) {
-      this._ghostView.removeFromParent() ;
+      // this._ghostView.removeFromParent() ;
+      this._ghostView.remove() ; // this._ghostView is an SC.Pane
       this._ghostView = null ; // this will allow the GC to collect it.
     }
   },
@@ -482,7 +489,7 @@ SC.Drag = SC.Object.extend(
   // target area.
   _findDropTarget: function(evt) {
     var dt = this._getOrderedDropTargets() ;
-    var loc = Event.pointerLocation(evt) ;
+    var loc = { x: evt.pageX, y: evt.pageY } ; // Event.pointerLocation(evt) ;
 
     var ret = null ;
     for(var idx=0;idx<dt.length;idx++) {
@@ -531,7 +538,7 @@ SC.Drag = SC.Object.extend(
     // - there must be room left to scroll in that direction. 
     
     // NOTE: an event is passed only when called from mouseDragged
-    var loc = (evt) ? Event.pointerLocation(evt) : this._lastMouseLocation ;
+    var loc = (evt) ? { x: evt.pageX, y: evt.pageY } : this._lastMouseLocation ;
     if (!loc) return false ;
     this._lastMouseLocation = loc ;
 
@@ -642,7 +649,7 @@ SC.Drag = SC.Object.extend(
 
   // Returns an array of scrollable views, sorted with nested scrollable
   // views at the top of the array.  The first time this method is called
-  // during a drag, it will reconstrut this array using the current ste of
+  // during a drag, it will reconstrut this array using the current state of
   // scrollable views.  Afterwards it uses the cached set until the drop
   // completes.
   _scrollableViews: function() {
@@ -705,14 +712,12 @@ SC.Drag = SC.Object.extend(
 
 SC.Drag.mixin(
 /** @scope SC.Drag */ {
-  
    
   /**  
    This is the method you use to initiate a new drag.  See class documentation 
    for more info on the options taken by this method.
    
    @params {Hash} ops a hash of options.  See documentation above.
-   
   */
   start: function(ops) {
     var ret = this.create(ops) ;
