@@ -321,7 +321,6 @@ SC.RootResponder = SC.RootResponder.extend(
     // console.log('dragDidStart called in %@ with %@'.fmt(this, drag));
     // this._mouseDownView = drag ;
     this._drag = drag ;
-    this._inDrag = YES ;
   },
   
   mousedown: function(evt) {
@@ -339,9 +338,7 @@ SC.RootResponder = SC.RootResponder.extend(
     evt.clickCount = this._clickCount ;
 
     var view = this.targetViewForEvent(evt) ;
-    var mouseDownView = this.sendEvent('mouseDown', evt, view) ;
-    if (!this._inDrag) this._mouseDownView = mouseDownView ;
-    view = this._mouseDownView ;
+    view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
     // console.log('mousedown ended in %@'.fmt(this));
     return view ? evt.hasCustomEventHandling : YES;
@@ -384,7 +381,6 @@ SC.RootResponder = SC.RootResponder.extend(
     if (!handler) {
       handler = this.sendEvent('click', evt, this._mouseDownView) ;
     }
-    // this._mouseCanDrag = NO; this._mouseDownView = null, this._inDrag = NO ;
     this._mouseCanDrag = NO; this._mouseDownView = null ;
     
     return (handler) ? evt.hasCustomEventHandling : YES ;
