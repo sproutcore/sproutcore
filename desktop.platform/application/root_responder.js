@@ -319,7 +319,8 @@ SC.RootResponder = SC.RootResponder.extend(
   
   dragDidStart: function(drag) {
     // console.log('dragDidStart called in %@ with %@'.fmt(this, drag));
-    this._mouseDownView = drag ;
+    // this._mouseDownView = drag ;
+    this._drag = drag ;
     this._inDrag = YES ;
   },
   
@@ -355,6 +356,12 @@ SC.RootResponder = SC.RootResponder.extend(
   */
   mouseup: function(evt) {
     // console.log('mouseup called in %@ with this._mouseDownView = %@'.fmt(this, this._mouseDownView));
+    
+    if (this._drag) {
+      this._drag.tryToPerform('mouseUp', evt) ;
+      this._drag = null ;
+    }
+    
     var handler = null;
     this._lastMouseUpAt = Date.now();
 
@@ -364,7 +371,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // attempt the mouseup call only if there's a target.
     // don't want a mouseup going to anyone unless they handled the mousedown...
     if (this._mouseDownView) {
-      this._mouseDownView.tryToPerform('mouseUp', evt);
+      // this._mouseDownView.tryToPerform('mouseUp', evt);
       handler = this.sendEvent('mouseUp', evt, this._mouseDownView);
     }
     
@@ -377,7 +384,8 @@ SC.RootResponder = SC.RootResponder.extend(
     if (!handler) {
       handler = this.sendEvent('click', evt, this._mouseDownView) ;
     }
-    this._mouseCanDrag = NO; this._mouseDownView = null, this._inDrag = NO ;
+    // this._mouseCanDrag = NO; this._mouseDownView = null, this._inDrag = NO ;
+    this._mouseCanDrag = NO; this._mouseDownView = null ;
     
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
@@ -411,41 +419,47 @@ SC.RootResponder = SC.RootResponder.extend(
 
     // make sure the view gets focus no matter what.  FF is inconsistant 
     // about this.
-    this.focus(); 
+    this.focus();
     
-    var lh = this._lastHovered || [] ;
-    var nh = [] ;
-    var view = this.targetViewForEvent(evt) ;
+    // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
+    // drags send their own events, e.g. drag[Moved|Entered|Exited]
+    if (this._drag) {
+      this._drag.tryToPerform('mouseDragged', evt);
+    } else {
+      var lh = this._lastHovered || [] ;
+      var nh = [] ;
+      var view = this.targetViewForEvent(evt) ;
     
-    // work up the view chain.  Notify of mouse entered and
-    // mouseMoved if implemented.
-    while(view && (view !== this)) {
-      if (lh.include(view)) {
-        view.tryToPerform('mouseMoved', evt);
-        nh.push(view) ;
-      } else {
-        view.tryToPerform('mouseEntered', evt);
-        nh.push(view) ;
-      }
+      // work up the view chain.  Notify of mouse entered and
+      // mouseMoved if implemented.
+      while(view && (view !== this)) {
+        if (lh.include(view)) {
+          view.tryToPerform('mouseMoved', evt);
+          nh.push(view) ;
+        } else {
+          view.tryToPerform('mouseEntered', evt);
+          nh.push(view) ;
+        }
       
-      view = view.get('nextResponder');
-    }
+        view = view.get('nextResponder');
+      }
 
-    // now find those views last hovered over that were no longer found 
-    // in this chain and notify of mouseExited.
-    for(var loc=0; loc < lh.length; loc++) {
-      view = lh[loc] ;
-      var exited = view.respondsTo('mouseExited') ;
-      if (exited && !nh.include(view)) view.tryToPerform('mouseExited',evt);
-    }
+      // now find those views last hovered over that were no longer found 
+      // in this chain and notify of mouseExited.
+      for(var loc=0; loc < lh.length; loc++) {
+        view = lh[loc] ;
+        var exited = view.respondsTo('mouseExited') ;
+        if (exited && !nh.include(view)) view.tryToPerform('mouseExited',evt);
+      }
     
-    this._lastHovered = nh; 
+      this._lastHovered = nh; 
     
-    // also, if a mouseDownView exists, call the mouseDragged action, if it 
-    // exists.
-    if (this._mouseDownView) {
-      // console.log('mousemove called in %@, this._mouseDownView is %@'.fmt(this, this._mouseDownView));
-      this._mouseDownView.tryToPerform('mouseDragged', evt);
+      // also, if a mouseDownView exists, call the mouseDragged action, if it 
+      // exists.
+      if (this._mouseDownView) {
+        // console.log('mousemove called in %@, this._mouseDownView is %@'.fmt(this, this._mouseDownView));
+        this._mouseDownView.tryToPerform('mouseDragged', evt);
+      }
     }
     
     SC.runLoop.endRunLoop();
@@ -456,7 +470,7 @@ SC.RootResponder = SC.RootResponder.extend(
   // a bit more useful; right now it's just to prevent bugs when dragging
   // and dropping.
   
-  _mouseCanDrag: true,
+  _mouseCanDrag: YES,
   
   selectstart: function() {
     if(this._mouseCanDrag) {

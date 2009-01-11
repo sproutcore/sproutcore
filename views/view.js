@@ -581,6 +581,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     while(--idx >= 0) {
       this.addObserver(dp[idx], this, this.displayDidChange);
     }
+    
+    // register for drags
+    if (this.get('isDropTarget')) SC.Drag.addDropTarget(this) ;
   },
 
   /**
@@ -622,6 +625,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       rootElement.parentNode.removeChild(rootElement) ;
     } 
     
+    // unregister for drags
+    if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
+
     return this; // done with cleanup
   },
   
@@ -1056,7 +1062,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // walk up this side
     while(next = view.get('parentView')) {
-      f = next.get('frame'); myX += f.x; myY += f.y ;
+      f = next.get('frame'); /* console.log($I(f)); */ myX += f.x; myY += f.y ;
       view = next ; 
     }
 
@@ -1073,6 +1079,35 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     myX = frame.x + myX - targetX ;
     myY = frame.y + myY - targetY ;
     return { x: myX, y: myY, width: frame.width, height: frame.height };
+  },
+
+  /**
+    Converts a clipping frame from the receiver's offset to the target offset. 
+    Both the receiver and the target must belong to the same pane.  If you pass
+    null, the conversion will be to the pane level.
+  */
+  convertClippingFrameToView: function(clippingFrame, targetView) {
+    var myX=0, myY=0, targetX=0, targetY=0, view = this, next = this, f;
+    
+    // walk up this side
+    do {
+      f = next.get('frame'); /* console.log($I(f)); */ myX += f.x; myY += f.y ;
+      view = next ; 
+    } while (next = view.get('parentView'))
+
+    // walk up other size
+    if (targetView) {
+      view = targetView ;
+      while(next = view.get('parentView')) {
+        f = next.get('frame'); targetX += f.x; targetY += f.y ;
+        view = next ; 
+      }
+    }
+    
+    // now we can figure how to translate the origin.
+    myX = clippingFrame.x + myX - targetX ;
+    myY = clippingFrame.y + myY - targetY ;
+    return { x: myX, y: myY, width: clippingFrame.width, height: clippingFrame.height };
   },
 
   /**
@@ -1223,7 +1258,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     clippingFrame is in the context of the view itself, not it's parent view.
     
     Normally this will be calculate based on the intersection of your own 
-    clippignFrame and your parentView's clippingFrame.  SC.ClipView may also
+    clippingFrame and your parentView's clippingFrame.  SC.ClipView may also
     shift this by a certain amount.    
   */
   clippingFrame: function() {

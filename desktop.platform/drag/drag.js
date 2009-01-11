@@ -280,6 +280,8 @@ SC.Drag = SC.Object.extend(
     var target = this._findDropTarget(evt) ; // deepest drop target
     var op = SC.DRAG_NONE ;
     
+    // console.log('target in %@.mouseDragged() is %@'.fmt(this, target));
+    
     while (target && (target != last) && (op == SC.DRAG_NONE)) {
       
       // make sure the drag source will permit a drop operation on the named target.
@@ -390,9 +392,9 @@ SC.Drag = SC.Object.extend(
   // PRIVATE PROPERTIES AND METHODS
   //
   
-  _ghostViewClass: SC.Pane.extend({ 
-    styleClass: 'sc-ghost-view',
-  }),
+  // _ghostViewClass: SC.Pane.extend({ 
+  //   styleClass: 'sc-ghost-view',
+  // }),
   
   // positions the ghost view underneath the mouse with the initial offset
   // recorded by when the drag started.
@@ -412,7 +414,7 @@ SC.Drag = SC.Object.extend(
     var el = this.dragView.rootElement.cloneNode(true) ;
     
     // create the ghost view instance add ghost class name.
-    this._ghostView = this._ghostViewClass.viewFor(el, { owner: this }) ;
+    this._ghostView = SC.Pane.viewFor(el, { owner: this }) ;
     // this._ghostView.addClassName('sc-ghost-view') ;
     // console.log('this._ghostView is %@'.fmt(this._ghostView));
     this._ghostView.$().addClass('sc-ghost-view') ;
@@ -465,7 +467,8 @@ SC.Drag = SC.Object.extend(
       var ret = depth[guid];
       if (!ret) {
         ret = 1 ;
-        while((x = x.parentNode) && (x !== SC.window)) {
+        // while((x = x.parentNode) && (x !== SC.window)) {
+          while(x = x.get('parentView')) {
           if (dt[SC.guidFor(x)] !== undefined) ret++ ;
         }
         depth[guid] = ret ;
@@ -482,6 +485,8 @@ SC.Drag = SC.Object.extend(
 
     this._cachedDropTargets = ret ;
     
+    console.log('dropTargets are %@'.fmt(ret));
+    
     return ret ;
   },
   
@@ -494,12 +499,15 @@ SC.Drag = SC.Object.extend(
     var ret = null ;
     for(var idx=0;idx<dt.length;idx++) {
       var t = dt[idx] ;
+      
+      // t.recomputeIsVisibleInWindow();
+      // console.log('%@ isVisibileInWindow = %@'.fmt(t, t.get('isVisibileInWindow')));
+      // 
+      // if(!t.get('isVisibleInWindow')) continue ;
+      
+      // get clippingFrame, converted to the pane.
+      var f = t.convertClippingFrameToView(t.get('clippingFrame'), null) ;
 
-      if(!t.get('isVisibleInWindow')) continue ;
-      
-      // get frame, converted to view.
-      var f = t.convertFrameToView(t.get('clippingFrame'), null) ;
-      
       // check to see if loc is inside.  If so, then make this the drop
       // target unless there is a drop target and the current one 
       // is not deeper.
@@ -511,7 +519,8 @@ SC.Drag = SC.Object.extend(
   // Search the parent nodes of the target to find another view matching the 
   // drop target.  Returns null if no matching target is found.
   _findNextDropTarget: function(target) {
-    while ((target = target.parentNode) && (target != SC.window)) {
+    // while ((target = target.parentNode) && (target != SC.window)) {
+    while (target = target.get('parentView')) {
       if (SC.Drag._dropTargets[SC.guidFor(target)]) return target ;
     }
     return null ;
@@ -752,6 +761,7 @@ SC.Drag.mixin(
     yourself.
   */
   addDropTarget: function(target) {
+    console.log('addDropTarget called on %@ with %@'.fmt(this, target));
     this._dropTargets[SC.guidFor(target)] = target ;
   },
 
@@ -762,6 +772,7 @@ SC.Drag.mixin(
     hierarchy.  You generally will not need to call it yourself.
   */
   removeDropTarget: function(target) {
+    console.log('removeDropTarget called on %@ with %@'.fmt(this, target));
     delete this._dropTargets[SC.guidFor(target)] ;
   },
 
