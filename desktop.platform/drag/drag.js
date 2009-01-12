@@ -474,6 +474,8 @@ SC.Drag = SC.Object.extend(
   //
   // Returns true if a scroll was performed
   _autoscroll: function(evt) {
+    return NO ; // TODO FIXME
+    
     // If drag has ended, exit
     if (!this._dragInProgress) return NO;
     

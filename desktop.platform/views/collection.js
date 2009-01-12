@@ -628,7 +628,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   _collection_isDirtyDidChange: function() {
     if (this.get('isVisibleInWindow') && this.get('isDirty')) {
-      console.log('%@:_collection_isDirtyDidChange()'.fmt(this));
+      // console.log('%@:_collection_isDirtyDidChange()'.fmt(this));
       this.invokeOnce(this._fullUpdateChildren);
     }  
   }.observes('isDirty', 'isVisibleInWindow'),
@@ -819,7 +819,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     to give you the chance to relayout your children.  The notifies children.
   */
   viewDidResize: function() {
-    console.log('viewDidResize') ; 
+    // console.log('viewDidResize') ; 
     this.layoutResize();  
     return sc_super();
   }.observes('layout'),
@@ -2020,19 +2020,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     collection view instance.  You can use this data type to detect reorders
     if necessary.
     
-    @field
+    @property
     @type {String}
   */
   reorderDataType: function() {
-    if (!this._reorderDataTypeKey) {
-      this._reorderDataTypeKey = "SC.CollectionView.Reorder.%@".fmt(SC.guidFor(this)) ;
-    }
-    return this._reorderDataTypeKey ;
-  }.property(),
-  
-  _reorderDataType: function() {
-    return this.get('reorderDataType') ;
-  },
+    return 'SC.CollectionView.Reorder.%@'.fmt(SC.guidFor(this)) ;
+  }.property().cacheable(),
   
   /**
     This property is set to the array of content objects that are the subject
@@ -2177,11 +2170,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     this method will consult the collection view delegate if one has been
     provided.  It also respects the canReoderContent method.
   */
-  dragDataForType: function(dataType, drag) {
+  dragDataForType: function(drag, dataType) {
     
     // if this is a reorder, then return drag content.
     if (this.get('canReorderContent')) {
-      if (dataType === this.get('reorderDataType')) return this.get('dragContent') ;
+      if (dataType === this.get('reorderDataType')) {
+        // console.log('dragContent is %@'.fmt(this.get('dragContent')));
+        return this.get('dragContent') ;
+      }
     }
     
     // otherwise, just pass along to the delegate.
@@ -2192,7 +2188,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Implements the SC.DropTarget interface.  The default implementation will
     consult the collection view delegate, if you implement those methods.
   */
-  dragEntered: function(drag, evt) {
+  computeDragOperations: function(drag, evt) {
 
     // the proposed drag operation is DRAG_REORDER only if we can reorder
     // content and the drag contains reorder content.
@@ -2234,7 +2230,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // prefer to drop ON.
     var idx = this.insertionIndexForLocation(loc, SC.DROP_ON) ;
     if (SC.$type(idx) === SC.T_ARRAY) {
-      dropOp = idx[1] ;
+      dropOp = idx[1] ; // order matters here
       idx = idx[0] ;
     }
 
@@ -2242,7 +2238,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // delegate method.  If the delegate method does not support dropping on,
     // then it will return DRAG_NONE, in which case we will try again with
     // drop before.
-    if (dropOp === SC.DROP_ON) {
+    if (dropOp == SC.DROP_ON) {
+      // console.log('dropOp === SC.DROP_ON');
       
       // Now save the insertion index and the dropOp.  This may be changed by
       // the collection delegate.
@@ -2255,6 +2252,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
       // The delegate is OK with a drop on also, so just return.
       if (dragOp !== SC.DRAG_NONE) {
+        // console.log('[idx, dropOp, dragOp] is [%@, %@, %@]'.fmt(idx, dropOp, dragOp));
         return [idx, dropOp, dragOp] ;
         
       // The delegate is NOT OK with a drop on, try to get the insertion
@@ -2264,11 +2262,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         dropOp = SC.DROP_BEFORE ;
         idx = this.insertionIndexForLocation(loc, SC.DROP_BEFORE) ;
         if (SC.$type(idx) === SC.T_ARRAY) {
-          dropOp = idx[1] ;
+          dropOp = idx[1] ; // order matters here
           idx = idx[0] ;
         }
       }
     }
+    
+    // console.log('this is a redorder drag, dropOp is %@'.fmt(dropOp)) ;
 
     // if this is a reorder drag, set the proposed op to SC.DRAG_REORDER and
     // validate the insertion point.  This only works if the insertion point
@@ -2277,7 +2277,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
       var objects = drag.dataForType(this.get('reorderDataType')) ;
       if (objects) {
+        // console.log('found objects');
         var content = this.get('content') || [] ;
+        // console.log('objects is %@, content is %@'.fmt(objects, content));
 
         // if the insertion index is in between two items in the drag itself, 
         // then this is not allowed.  Either use the last insertion index or 
@@ -2303,6 +2305,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       }
     }
 
+    // console.log('the dragOp is %@'.fmt(dragOp)) ;
+
     // Now save the insertion index and the dropOp.  This may be changed by
     // the collection delegate.
     this.set('proposedInsertionIndex', idx) ;
@@ -2323,12 +2327,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     content on its own.
   */
   dragUpdated: function(drag, evt) {
-
+    // console.log('dragUpdated called in %@'.fmt(this));
     var state = this._computeDropOperationState(drag, evt) ;
+    // console.log('state is %@'.fmt(state));
     var idx = state[0], dropOp = state[1], dragOp = state[2] ;
     
-    // if the insertion index or dropOp have changed, update the insertion
-    // point
+    // if the insertion index or dropOp have changed, update the insertion point
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
         var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
@@ -2337,14 +2341,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
       this._lastInsertionIndex = idx ;
       this._lastDropOperation = dropOp ;
-
     } else {
       this.hideInsertionPoint() ;
       this._lastInsertionIndex = this._lastDropOperation = null ;
     }
 
-    // Normalize drag operation to the standard kinds accepted by the drag
-    // system.
+    // Normalize drag operation to the standard kinds accepted by the drag system.
     return (dragOp === SC.DRAG_REORDER) ? SC.DRAG_MOVE : dragOp;  
   },
 
@@ -2596,54 +2598,68 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @param dragContent {Array} Array of content objects that will be used in 
      the drag.
   */
+  // ghostViewFor: function(dragContent) {
+  //   var view = SC.ClassicView.create() ;
+  //   view.setStyle({ position: 'absolute', overflow: 'hidden' });
+  //   
+  //   var viewFrame = this.convertFrameToView(this.get('frame'), null) ;
+  //   view.set('frame', viewFrame) ;
+  //   
+  //   var idx = dragContent.length ;
+  //   var maxX = 0; var maxY = 0 ; var minX =100000; var minY = 100000 ;
+  //   
+  //   while(--idx >= 0) {
+  //     var itemView = this.itemViewForContent(dragContent[idx]) ;
+  //     if (!itemView) continue ;
+  // 
+  //     var f = itemView.get('frame') ;
+  //     f = this.convertFrameFromView(f, itemView) ;
+  //     
+  //     var dom = itemView.rootElement ;
+  //     if (!dom) continue ;
+  //     
+  //     // save the maxX & maxY.  This will be used to trim the size 
+  //     // of the ghost view later.
+  //     if (SC.maxX(f) > maxX) maxX = SC.maxX(f) ;
+  //     if (SC.maxY(f) > maxY) maxY = SC.maxY(f) ;
+  //     if (SC.minX(f) < minX) minX = SC.minX(f) ;
+  //     if (SC.minY(f) < minY) minY = SC.minY(f) ;
+  // 
+  //     // Clone the contents of this node.  We should probably apply the 
+  //     // computed style to the cloned nodes in order to make sure they match 
+  //     // even if the CSS styles do not match.  Make sure the items are 
+  //     // properly positioned.
+  //     dom = dom.cloneNode(true) ;
+  // 
+  //     SC.Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
+  //     view.rootElement.appendChild(dom) ;
+  //   }
+  // 
+  //   // Now we have a view, create another view that will wrap the other view 
+  //   // and position it inside.
+  //   var wrapper = SC.ClassicView.create() ;
+  //   wrapper.setStyle({ position: 'absolute', overflow: 'hidden' }) ;
+  //   wrapper.set('frame', { 
+  //     x: viewFrame.x+minX, y: viewFrame.y+minY, 
+  //     width: (maxX-minX+1), height: (maxY-minY+1) 
+  //   }) ;
+  //   wrapper.appendChild(view) ;
+  //   view.set('frame', { x: 0-minX, y: 0-minY }) ;
+  //   return wrapper ;
+  // },
+  
   ghostViewFor: function(dragContent) {
-    var view = SC.ClassicView.create() ;
-    view.setStyle({ position: 'absolute', overflow: 'hidden' });
+    var view = SC.View.create() ;
     
-    var viewFrame = this.convertFrameToView(this.get('frame'), null) ;
-    view.set('frame', viewFrame) ;
-    
-    var idx = dragContent.length ;
-    var maxX = 0; var maxY = 0 ; var minX =100000; var minY = 100000 ;
-    
-    while(--idx >= 0) {
-      var itemView = this.itemViewForContent(dragContent[idx]) ;
-      if (!itemView) continue ;
-
-      var f = itemView.get('frame') ;
-      f = this.convertFrameFromView(f, itemView) ;
-      
-      var dom = itemView.rootElement ;
-      if (!dom) continue ;
-      
-      // save the maxX & maxY.  This will be used to trim the size 
-      // of the ghost view later.
-      if (SC.maxX(f) > maxX) maxX = SC.maxX(f) ;
-      if (SC.maxY(f) > maxY) maxY = SC.maxY(f) ;
-      if (SC.minX(f) < minX) minX = SC.minX(f) ;
-      if (SC.minY(f) < minY) minY = SC.minY(f) ;
-
-      // Clone the contents of this node.  We should probably apply the 
-      // computed style to the cloned nodes in order to make sure they match 
-      // even if the CSS styles do not match.  Make sure the items are 
-      // properly positioned.
-      dom = dom.cloneNode(true) ;
-
-      SC.Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
-      view.rootElement.appendChild(dom) ;
+    var ary = dragContent ;
+    for (var idx=0, len=ary.length; idx<len; idx++) {
+      var itemView = this.itemViewForContent(ary[idx]) ;
+      if (itemView) view.$().append(itemView.rootElement.cloneNode(true)) ;
     }
-
-    // Now we have a view, create another view that will wrap the other view 
-    // and position it inside.
-    var wrapper = SC.ClassicView.create() ;
-    wrapper.setStyle({ position: 'absolute', overflow: 'hidden' }) ;
-    wrapper.set('frame', { 
-      x: viewFrame.x+minX, y: viewFrame.y+minY, 
-      width: (maxX-minX+1), height: (maxY-minY+1) 
-    }) ;
-    wrapper.appendChild(view) ;
-    view.set('frame', { x: 0-minX, y: 0-minY }) ;
-    return wrapper ;
+    
+    var frame = this.convertClippingFrameToView(this.get('clippingFrame'), null) ;
+    view.adjust({ top: frame.y, left: frame.x, width: frame.width, height: frame.height }) ;
+    return view ;
   },
   
   /**

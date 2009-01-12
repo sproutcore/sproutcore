@@ -35,18 +35,18 @@
 	line-height: 22px;
 }
 
-.sc-theme .list-insertion-point {
-	border: 1px #4e4977 solid;
-	position: absolute ;
+.sc-theme .sc-list-insertion-point {
+  overflow: visible;
+  background-color: #4e4977;
 	z-index: 1000;
 }
 
-.sc-theme .list-insertion-point .anchor {
-	position: absolute ;
-	width: 7px;
-	height: 7px;
-	left: -6px;
-	top: -4px;
+.sc-theme .sc-list-insertion-point .anchor {
+  position: absolute ;
+  width: 8px;
+  top: -3px;
+  left: -3px;
+  height: 8px;
 	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
 }
 
