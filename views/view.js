@@ -586,7 +586,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (this.get('isDropTarget')) SC.Drag.addDropTarget(this) ;
     
     // register scroll views for autoscroll during drags
-    if (this.get('isScrollView')) SC.Drag.addScrollableView(this) ;
+    if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
   },
 
   /**
@@ -632,7 +632,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
 
     // unregister for autoscroll during drags
-    if (this.get('isScrollView')) SC.Drag.removeScrollableView(this) ;
+    if (this.get('isScrollable')) SC.Drag.removeScrollableView(this) ;
     return this; // done with cleanup
   },
   

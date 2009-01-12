@@ -30,7 +30,7 @@ SC.ScrollView = SC.View.extend({
   // PROPERTIES
   // 
   
-  isScrollView: YES,
+  isScrollable: YES,
   
   /** 
     The content view you want the scroll view to manage. This will be assigned to the contentView of the clipView also.
