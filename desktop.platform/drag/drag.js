@@ -173,7 +173,7 @@ SC.Drag = SC.Object.extend(
   dataForType: function(dataType) {
     // first try to use the data Source.
     if (this.dataSource) {
-      return this.dataSource.dragDataForType(dataType, this) ;
+      return this.dataSource.dragDataForType(this, dataType) ;
       
     // then try to use the data hash.
     } else if (this.data) {
@@ -183,7 +183,7 @@ SC.Drag = SC.Object.extend(
     } else {
       var source = this.get('source') ;
       if (source && SC.$type(source.dragDataForType) == SC.T_FUNCTION) {
-        return source.dragDataForType(dataType, this) ;
+        return source.dragDataForType(this, dataType) ;
         
       // no data source found. :(
       } else return null ;
@@ -284,7 +284,7 @@ SC.Drag = SC.Object.extend(
     while (target && (target != last) && (op == SC.DRAG_NONE)) {
       // make sure the drag source will permit a drop operation on the named target
       if (target && source && source.dragSourceOperationMaskFor) {
-        op = source.dragSourceOperationMaskFor(target, this) ;
+        op = source.dragSourceOperationMaskFor(this, target) ;
       } else op = SC.DRAG_ANY ; // assume drops are allowed
       
       this.sourceDropOperations = op ;
@@ -329,8 +329,8 @@ SC.Drag = SC.Object.extend(
     var target = this._lastTarget, op = this.dropOperations;
     
     // try to have the drop target perform the drop...
-    if (target && target.acceptDragOperation && target.acceptDragOperation(op, this)) {
-      op = (target.performDragOperation) ? target.performDragOperation(op, this) : SC.DRAG_NONE ;  
+    if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {
+      op = (target.performDragOperation) ? target.performDragOperation(this, op) : SC.DRAG_NONE ;  
     } else {
       op = SC.DRAG_NONE;
     }

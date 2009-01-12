@@ -53,8 +53,8 @@ SC.DropTarget = {
   
     The default implementation does nothing.
     
-    @param {SC.Drag} drag The current drag object
-    @param {Event}   evt  The most recent mouse move event.  Use to get location 
+    @param {SC.Drag} drag The current drag object.
+    @param {SC.Event}   evt  The most recent mouse move event.  Use to get location 
   */
   dragStarted: function(drag, evt) {},
   
@@ -64,8 +64,8 @@ SC.DropTarget = {
   
     The default implementation does nothing.
     
-    @param drag {SC.Drag} The current drag object
-    @param evt {Event} The most recent mouse move event.  Use to get 
+    @param drag {SC.Drag} The current drag object.
+    @param evt {SC.Event} The most recent mouse move event.  Use to get 
       location 
   */
   dragEntered: function(drag, evt) {},
@@ -83,9 +83,8 @@ SC.DropTarget = {
 
     The default implementation does nothing.
     
-    @param {SC.Drag} drag The current drag object
-    @param {Event}   evt  The most recent mouse move event.  Use to get  
-      location 
+    @param {SC.Drag} drag The current drag object.
+    @param {SC.Event} evt The most recent mouse move event. Use to get location. 
   */
   dragUpdated: function(drag, evt) {},
 
@@ -99,7 +98,7 @@ SC.DropTarget = {
     The default implementation does nothing.
     
     @param {SC.Drag} drag The current drag object
-    @param {Event}   evt  The most recent mouse move event.  Use to get location 
+    @param {SC.Event}   evt  The most recent mouse move event. Use to get location.
   */
   dragExited: function(drag, evt) {},
  
@@ -113,7 +112,7 @@ SC.DropTarget = {
     The default implementation does nothing.
     
     @param {SC.Drag} drag The current drag object
-    @param {Event}   evt  The most recent mouse move event.  Use to get location 
+    @param {SC.Event}   evt  The most recent mouse move event. Use to get location.
   */
   dragEnded: function(drag, evt) {},
   
@@ -128,8 +127,8 @@ SC.DropTarget = {
     
     The default implementation returns SC.DRAG_NONE
     
-    @param drag {SC.Drag} The current drag object
-    @param evt {Event} The most recent mouse move event.  Use to get 
+    @param {SC.Drag} drag The current drag object
+    @param {SC.Event} evt The most recent mouse move event.  Use to get 
       location 
     @returns {DragOps} A mask of all the drag operations allowed or 
       SC.DRAG_NONE
@@ -146,33 +145,33 @@ SC.DropTarget = {
     
     The default implementation returns YES.
 
-    @param {DragOp} operation The proposed drag operation. A drag constant
-    @param {SC.Drag} drag     The drag instance managing this drag
+    @param {SC.Drag} drag The drag instance managing this drag
+    @param {DragOp} op The proposed drag operation. A drag constant
     
     @return {Boolean} YES if operation is OK, NO to cancel.
   */  
-  acceptDragOperation: function(operation, drag) { return YES; },
+  acceptDragOperation: function(drag, op) { return YES; },
 
   // /** @private deprecated */
-  // prepareForDragOperation: function(operation, drag) { return this.acceptDragOperation() ; },
+  // prepareForDragOperation: function(operation, drag) { return this.acceptDragOperation(drag, operation) ; },
   
   /**  
     Called to actually perform the drag operation.  
 
     Overide this method to actually perform the drag operation.  This method
-    is only called if you returned true to acceptDragOperation(). 
+    is only called if you returned YES in acceptDragOperation(). 
     
     Return the operation that was actually performed or SC.DRAG_NONE if the 
     operation was aborted.
   
     The default implementation returns SC.DRAG_NONE
 
-    @param {DragOp} operation The proposed drag operation. A drag constant
-    @param {SC.Drag} drag     The drag instance managing this drag
+    @param {SC.Drag} drag The drag instance managing this drag
+    @param {DragOp} op The proposed drag operation. A drag constant.
     
     @return {DragOp} Drag Operation actually performed
   */
-  performDragOperation: function(operation, drag) { return SC.DRAG_NONE; },
+  performDragOperation: function(drag, op) { return SC.DRAG_NONE; },
   
   // /** 
   //   Called after a drag operation has completed or failed
@@ -187,7 +186,7 @@ SC.DropTarget = {
   //   The default implementation does nothing.
   // 
   //   @param {DragOp} operation The drag operation that was performed (or SC.DRAG_NONE)
-  //   @param {SC.Drag} drag     The drag instance managing this drag
+  //   @param {SC.Drag} drag The drag instance managing this drag
   // */  
   // concludeDragOperation: function(operation, drag) { this.cleanupDragOperation() ; }
   

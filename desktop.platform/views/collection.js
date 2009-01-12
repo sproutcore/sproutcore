@@ -2369,14 +2369,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   /**
     Implements the SC.DropTarget protocol.
   */
-  prepareForDragOperation: function(op, drag) { return YES; },
+  acceptDragOperation: function(drag, op) { return YES; },
   
   /**
     Implements the SC.DropTarget protocol.  Consults the collection view
     delegate to actually perform the operation unless the operation is 
     reordering content.
   */
-  performDragOperation: function(op, drag) { 
+  performDragOperation: function(drag, op) { 
     
     // Get the correct insertion point, drop operation, etc.
     var state = this._computeDropOperationState(drag, null, op) ;
