@@ -6,12 +6,14 @@
 require('application/root_responder');
 
 /**
-  Order layer for regular Panels.  Panels appear in front of the main view, but behind palettes, popups.
+  Order layer for regular Panels.  Panels appear in front of the main view, 
+  but behind palettes, popups.
 */
 SC.PANEL_ORDER_LAYER = 0x1000 ;
 
 /** 
-  Order layer for Palettes.  Palettes appear in front of the main view and panels, but behind popups.
+  Order layer for Palettes.  Palettes appear in front of the main view and 
+  panels, but behind popups.
 */
 SC.PALETTE_ORDER_LAYER = 0x2000 ;
 
@@ -31,7 +33,8 @@ SC.RootResponder = SC.RootResponder.extend(
   platform: 'desktop',
 
   /** @property
-    The current front view.  This view should have the highest z-index of all the other views.
+    The current front view.  This view should have the highest z-index of all 
+    the other views.
   */
   focusedPane: function() {
     var views = this.get('orderedPanes');
@@ -40,12 +43,18 @@ SC.RootResponder = SC.RootResponder.extend(
   
   
   /** @property
-    Array of panes currently displayed that can be reordered.  This property when you orderBack() or orderOut() a pane to determine the next frontmost pane.
+    Array of panes currently displayed that can be reordered.  This property 
+    changes when you orderBack() or orderOut() a pane to determine the next 
+    frontmost pane.
   */
   orderedPanes: null,
 
   /**
-    Inserts the passed panes into the orderedPanes array before the named pane array.  Pass null to order at the front.  If this changes the frontmost view, then focus will also be shifted.  The pane you request must have the same orderLayer property at the pane you are passing in.  If it does not, the pane will be placed nearest to the target as possible.
+    Inserts the passed panes into the orderedPanes array before the named pane 
+    array.  Pass null to order at the front.  If this changes the frontmost 
+    view, then focus will also be shifted.  The pane you request must have the 
+    same orderLayer property at the pane you are passing in.  If it does not, 
+    the pane will be placed nearest to the target as possible.
     
     @param {SC.Pane} pane
     @param {SC.Pane} beforePane
@@ -101,7 +110,10 @@ SC.RootResponder = SC.RootResponder.extend(
   },
 
   /**
-    Removes the named pane from the orderedPanes array.  If the pane was also focused, it will also blur the pane and focus the next view.  If the view is key, it will also determine the next view to make key by going down the list of ordered panes, finally ending with the mainPane.
+    Removes the named pane from the orderedPanes array.  If the pane was also 
+    focused, it will also blur the pane and focus the next view.  If the view 
+    is key, it will also determine the next view to make key by going down the 
+    list of ordered panes, finally ending with the mainPane.
     
     @param {SC.Pane} pane
     @param {SC.Pane} beforePane
@@ -275,7 +287,10 @@ SC.RootResponder = SC.RootResponder.extend(
   */
   hasFocus: NO,
 
-  /** Handle window focus.  Change hasFocus and add sc-focus CSS class (removing sc-blur).  Also notify panes. */  
+  /**
+    Handle window focus.  Change hasFocus and add sc-focus CSS class 
+    (removing sc-blur).  Also notify panes.
+  */  
   focus: function() {
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
@@ -287,7 +302,10 @@ SC.RootResponder = SC.RootResponder.extend(
     return YES ; // allow default
   },
 
-  /** Handle window focus.  Change hasFocus and add sc-focus CSS class (removing sc-blur).  Also notify panes. */  
+  /**
+    Handle window focus.  Change hasFocus and add sc-focus CSS class (removing 
+    sc-blur).  Also notify panes.
+  */  
   blur: function() {
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
@@ -297,6 +315,12 @@ SC.RootResponder = SC.RootResponder.extend(
       SC.runLoop.endRunLoop();
     }
     return YES ; // allow default
+  },
+  
+  dragDidStart: function(drag) {
+    // console.log('dragDidStart called in %@ with %@'.fmt(this, drag));
+    // this._mouseDownView = drag ;
+    this._drag = drag ;
   },
   
   mousedown: function(evt) {
@@ -315,15 +339,25 @@ SC.RootResponder = SC.RootResponder.extend(
     var view = this.targetViewForEvent(evt) ;
     view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
     if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
+    // console.log('mousedown ended in %@'.fmt(this));
     return view ? evt.hasCustomEventHandling : YES;
   },
   
-  // mouseUp only gets delivered to the view that handled the mouseDown evt.
-  // we also handle click and double click notifications through here to 
-  // ensure consistant delivery.  Note that if mouseDownView is not
-  // implemented, then no mouseUp event will be sent, but a click will be 
-  // send.
+  /**
+    mouseUp only gets delivered to the view that handled the mouseDown evt.
+    we also handle click and double click notifications through here to 
+    ensure consistant delivery.  Note that if mouseDownView is not
+    implemented, then no mouseUp event will be sent, but a click will be 
+    sent.
+  */
   mouseup: function(evt) {
+    // console.log('mouseup called in %@ with this._mouseDownView = %@'.fmt(this, this._mouseDownView));
+    
+    if (this._drag) {
+      this._drag.tryToPerform('mouseUp', evt) ;
+      this._drag = null ;
+    }
+    
     var handler = null;
     this._lastMouseUpAt = Date.now();
 
@@ -333,6 +367,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // attempt the mouseup call only if there's a target.
     // don't want a mouseup going to anyone unless they handled the mousedown...
     if (this._mouseDownView) {
+      // this._mouseDownView.tryToPerform('mouseUp', evt);
       handler = this.sendEvent('mouseUp', evt, this._mouseDownView);
     }
     
@@ -346,7 +381,7 @@ SC.RootResponder = SC.RootResponder.extend(
     if (!handler) {
       handler = this.sendEvent('click', evt, this._mouseDownView) ;
     }
-    this._mouseCanDrag = NO; this._mouseDownView = null;
+    this._mouseCanDrag = NO; this._mouseDownView = null ;
     
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
@@ -365,55 +400,62 @@ SC.RootResponder = SC.RootResponder.extend(
   },
   
   _lastHovered: null,
-
-  // this will sent mouseOver, mouseOut, and mouseMoved to the views you
-  // hover over.  To receive these events, you must implement the method.
-  // If any subviews implement them and return true, then you won't receive
-  // any notices.
-  //
-  // if there is a target mouseDown view, then mouse moved events will also
-  // trigger calls to mouseDragged.
-  //
+  
+  /**
+   This will send mouseOver, mouseOut, and mouseMoved to the views you
+   hover over.  To receive these events, you must implement the method.
+   If any subviews implement them and return true, then you won't receive
+   any notices.
+   
+   If there is a target mouseDown view, then mouse moved events will also
+   trigger calls to mouseDragged.
+  */
   mousemove: function(evt) {
-
     SC.runLoop.beginRunLoop();
 
     // make sure the view gets focus no matter what.  FF is inconsistant 
     // about this.
-    this.focus(); 
+    this.focus();
     
-    var lh = this._lastHovered || [] ;
-    var nh = [] ;
-    var view = this.targetViewForEvent(evt) ;
+    // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
+    // drags send their own events, e.g. drag[Moved|Entered|Exited]
+    if (this._drag) {
+      this._drag.tryToPerform('mouseDragged', evt);
+    } else {
+      var lh = this._lastHovered || [] ;
+      var nh = [] ;
+      var view = this.targetViewForEvent(evt) ;
     
-    // work up the view chain.  Notify of mouse entered and
-    // mouseMoved if implemented.
-    while(view && (view !== this)) {
-      if (lh.include(view)) {
-        view.tryToPerform('mouseMoved', evt);
-        nh.push(view) ;
-      } else {
-        view.tryToPerform('mouseEntered', evt);
-        nh.push(view) ;
-      }
+      // work up the view chain.  Notify of mouse entered and
+      // mouseMoved if implemented.
+      while(view && (view !== this)) {
+        if (lh.include(view)) {
+          view.tryToPerform('mouseMoved', evt);
+          nh.push(view) ;
+        } else {
+          view.tryToPerform('mouseEntered', evt);
+          nh.push(view) ;
+        }
       
-      view = view.get('nextResponder');
-    }
+        view = view.get('nextResponder');
+      }
 
-    // now find those views last hovered over that were no longer found 
-    // in this chain and notify of mouseExited.
-    for(var loc=0; loc < lh.length; loc++) {
-      view = lh[loc] ;
-      var exited = view.respondsTo('mouseExited') ;
-      if (exited && !nh.include(view)) view.tryToPerform('mouseExited',evt);
-    }
+      // now find those views last hovered over that were no longer found 
+      // in this chain and notify of mouseExited.
+      for(var loc=0; loc < lh.length; loc++) {
+        view = lh[loc] ;
+        var exited = view.respondsTo('mouseExited') ;
+        if (exited && !nh.include(view)) view.tryToPerform('mouseExited',evt);
+      }
     
-    this._lastHovered = nh; 
+      this._lastHovered = nh; 
     
-    // also, if a mouseDownView exists, call the mouseDragged action, if it 
-    // exists.
-    if (this._mouseDownView) {
-      this._mouseDownView.tryToPerform('mouseDragged', evt);
+      // also, if a mouseDownView exists, call the mouseDragged action, if it 
+      // exists.
+      if (this._mouseDownView) {
+        // console.log('mousemove called in %@, this._mouseDownView is %@'.fmt(this, this._mouseDownView));
+        this._mouseDownView.tryToPerform('mouseDragged', evt);
+      }
     }
     
     SC.runLoop.endRunLoop();
@@ -424,7 +466,7 @@ SC.RootResponder = SC.RootResponder.extend(
   // a bit more useful; right now it's just to prevent bugs when dragging
   // and dropping.
   
-  _mouseCanDrag: true,
+  _mouseCanDrag: YES,
   
   selectstart: function() {
     if(this._mouseCanDrag) {

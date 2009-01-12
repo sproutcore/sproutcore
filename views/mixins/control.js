@@ -335,7 +335,7 @@ SC.Control = {
     var f = this.contentPropertyDidChange ;
 
     // remove an observer from the old content if necessary
-    if (this._content && this._control_content.removeObserver) {
+    if (this._content && this._control_content && this._control_content.removeObserver) {
       this._content.removeObserver('*', this, f) ;
     }
 

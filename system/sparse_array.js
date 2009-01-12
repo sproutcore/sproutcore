@@ -26,6 +26,18 @@ SC.SparseArray = function(length) {
 } ;
 
 SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.DelegateSupport, {
+  
+  indexOf: function(obj) {
+    var content = this._sa_content ;
+    if (!content) content = this._sa_content = [] ;
+    return content.indexOf(obj) ;
+  },
+  
+  clone: function() {
+    var clone = new SC.SparseArray(this.length) ;
+    clone._sa_content = this._sa_content.clone() ;
+    return clone ;
+  },
 
   /**
     Use this method to update the content at a specified index.  This will 
@@ -44,41 +56,45 @@ SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.D
     return this ;
   },
   
+  // delegate methods
+  sparseArrayDidReplace: function(sary, idx, amt, objects) {},
+  sparseArrayDidRequestIndex: function(sary, idx) {},
+  sparseArrayDidFlush: function(sary) {},
   
   /** @private */
-    replace: function(idx, amt, objects) {
-      var content = this._sa_content ;
-      if (!content) content = this._sa_content = [] ;
-      content.replace(idx, amt, objects) ;
-      this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReplace', this, idx. amt, objects) ;
-      this.enumerableContentDidChange() ;
-      return this ;
-    },
+  replace: function(idx, amt, objects) {
+    var content = this._sa_content ;
+    if (!content) content = this._sa_content = [] ;
+    content.replace(idx, amt, objects) ;
+    this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReplace', this, idx, amt, objects) ;
+    this.enumerableContentDidChange() ;
+    return this ;
+  },
 
   /** @private */
-    objectAt: function(idx) {
-      var content = this._sa_content, ret ;
-      if (!content) content = this._sa_content = [] ;
-      ret= content[idx] ;
-      if (ret === undefined) { 
-        this.invokeDelegateMethod(this.delegate, 'sparseArrayDidRequestIndex', this, idx) ;
-      }
-      ret = content[idx];
-      return ret ;
-    },
+  objectAt: function(idx) {
+    var content = this._sa_content, ret ;
+    if (!content) content = this._sa_content = [] ;
+    ret= content[idx] ;
+    if (ret === undefined) { 
+      this.invokeDelegateMethod(this.delegate, 'sparseArrayDidRequestIndex', this, idx) ;
+    }
+    ret = content[idx];
+    return ret ;
+  },
 
-    // removes content array
-    flush: function() {
-      this._sa_content = null ;
-      this.enumerableContentDidChange() ;
-      this.invokeDelegateMethod(this.delegate, 'sparseArrayDidFlush', this);
-      return this ;
-    },
+  // removes content array
+  flush: function() {
+    this._sa_content = null ;
+    this.enumerableContentDidChange() ;
+    this.invokeDelegateMethod(this.delegate, 'sparseArrayDidFlush', this);
+    return this ;
+  },
     
-    /** TODO: explain */
-    delegate: null,
-    
-    _sa_content: null
+  /** TODO: explain */
+  delegate: null,
+
+  _sa_content: null
     
 }) ;
 

@@ -30,6 +30,8 @@ SC.ScrollView = SC.View.extend({
   // PROPERTIES
   // 
   
+  isScrollable: YES,
+  
   /** 
     The content view you want the scroll view to manage. This will be assigned to the contentView of the clipView also.
   */
@@ -117,7 +119,7 @@ SC.ScrollView = SC.View.extend({
   // 
   
   /** 
-    YES if the view shuld maintain a horizontal scroller.   This property must be set when the view is created.
+    YES if the view should maintain a horizontal scroller.   This property must be set when the view is created.
     
     @property {Boolean}
   */

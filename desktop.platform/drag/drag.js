@@ -30,8 +30,8 @@ SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20 ;
   
    - *dragView: (req)*  This should point to a view that will be used as the 
      source image for the drag. The drag operation will clone the DOM elements 
-     for this view and add the class name 'drag-image' to the outermost 
-     element.
+     for this view and parent them under the drag pane, which has the class 
+     name 'sc-ghost-view'.
   
    - *ghost:  YES | NO*  If YES or not passed, then drag view image will show, 
      but the source dragView will not be hidden.  set to NO to make it appear 
@@ -106,7 +106,7 @@ SC.Drag = SC.Object.extend(
   
     This is updated as long as the mouse button is pressed.
   */
-  location: null,
+  location: {},
 
   // ..........................................
   // DRAG DATA
@@ -128,26 +128,26 @@ SC.Drag = SC.Object.extend(
     @field {Array} available data types
   */
   dataTypes: function() {
-    
     // first try to use the data source.
-    if (this.dataSource) return this.dataSource.get('dragDataTypes') ;
+    if (this.dataSource) return this.dataSource.get('dragDataTypes') || [] ;
     
     // if that fails, get the keys from the data hash.
-    if (this.data) {
+    var hash = this.data ;
+    if (hash) {
       var ret = [];
-      for(var key in this._data) {
-        if (this.data.hasOwnProperty(key)) ret.push(key) ;
+      for (var key in hash) {
+        if (hash.hasOwnProperty(key)) ret.push(key) ;
       }
       return ret ;
     }    
     
     // if that fails, then check to see if the source object is a dataSource.
     var source = this.get('source') ;
-    if (source && source.dragDataTypes) return source.get('dragDataTypes') ;
+    if (source && source.dragDataTypes) return source.get('dragDataTypes') || [] ;
     
     // no data types found. :(
     return [] ; 
-  }.property(),
+  }.property().cacheable(),
   
   /**
     Checks for a named data type in the drag.
@@ -156,8 +156,7 @@ SC.Drag = SC.Object.extend(
     @returns {Boolean} YES if data type is present in dataTypes array.
   */
   hasDataType: function(dataType) {
-    var dataTypes = this.get('dataTypes') || [] ;
-    return (dataTypes.indexOf(dataType) >= 0) ;  
+    return (this.get('dataTypes').indexOf(dataType) >= 0) ;  
   },
   
   /**
@@ -172,10 +171,9 @@ SC.Drag = SC.Object.extend(
     @returns {Object} The generated data.
   */
   dataForType: function(dataType) {
-    
     // first try to use the data Source.
     if (this.dataSource) {
-      return this.dataSource.dragDataForType(dataType, this) ;
+      return this.dataSource.dragDataForType(this, dataType) ;
       
     // then try to use the data hash.
     } else if (this.data) {
@@ -185,7 +183,7 @@ SC.Drag = SC.Object.extend(
     } else {
       var source = this.get('source') ;
       if (source && SC.$type(source.dragDataForType) == SC.T_FUNCTION) {
-        return source.dragDataForType(dataType, this) ;
+        return source.dragDataForType(this, dataType) ;
         
       // no data source found. :(
       } else return null ;
@@ -229,32 +227,31 @@ SC.Drag = SC.Object.extend(
   
   // this will actually start the drag process.
   startDrag: function() {
-    
-    // create the ghost view and position.
+    // create the ghost view
     this._createGhostView() ;
     
-    // compute the offset from the original mouse location.
-    var origin = this.dragView.convertFrameToView(this.dragView.get('frame'), null);
-    var pointer = Event.pointerLocation(this.event) ;
-    
-    window.dragEvent = this.event ;
-    
-    this.ghostOffset = { x: (pointer.x-origin.x), y: (pointer.y-origin.y) };
+    // compute the ghost offset from the original mouse location
+    var dragView = this.dragView ;
+    var origin = dragView.convertFrameToView(dragView.get('frame'), null) ;
+    var pointer = { x: this.event.pageX, y: this.event.pageY } ;
+    this.ghostOffset = { x: (pointer.x-origin.x), y: (pointer.y-origin.y) } ;
 
-    // position the ghost view.
+    // position the ghost view
     this._positionGhostView(this.event) ;
     
-    // notify window a drag is in process. mouseDragged notifications will
-    // go to the drag instead.
-    SC.window.dragDidStart(this) ;
+    // notify root responder that a drag is in process
+    this._ghostView.rootResponder.dragDidStart(this);
     
-    if (this.source && this.source.dragDidBegin) {
-      this.source.dragDidBegin(this, pointer) ;
+    var source = this.source ;
+    if (source && source.dragDidBegin) source.dragDidBegin(this, pointer) ;
+    
+    // let all drop targets know that a drag has started
+    var ary = this._dropTargets() ;
+    for (var idx=0, len=ary.length; idx<len; idx++) {
+      ary[idx].tryToPerform('dragStarted', this.event) ;
     }
   },
   
-  _lastLoc: {},
-
   /**  
     @private
     
@@ -263,79 +260,62 @@ SC.Drag = SC.Object.extend(
     notifies it.
   */
   mouseDragged: function(evt) {
-    
-    var loc = Event.pointerLocation(evt) ;
     var scrolled = this._autoscroll(evt) ;
+    var loc = this.get('location') ;
+    if (!scrolled && (evt.pageX == loc.x) && (evt.pageY == loc.y)) {
+      return ; // quickly ignore duplicate calls
+    } 
     
-    // ignore duplicate calls.
-    if (!scrolled && (loc.x == this._lastLoc.x) && (loc.y == this._lastLoc.y)) return ;
-    this._lastLoc = loc ;
-    this.set('location', loc) ;
-
+    // cache the current location to avoid processing duplicate mouseDragged calls
+    this.set('location', { x: evt.pageX, y: evt.pageY }) ;
+    
+    // reposition the ghostView
     this._positionGhostView(evt) ;
-    var last = this._lastTarget ;
 
     // STEP 1: Determine the deepest drop target that allows an operation.
     // if the drop target selected the last time this method was called differs
     // from the deepest target found, then go up the chain until we either hit the
     // last one or find one that will allow a drag operation
+    var source = this.source ;
+    var last = this._lastTarget ;
     var target = this._findDropTarget(evt) ; // deepest drop target
     var op = SC.DRAG_NONE ;
     
     while (target && (target != last) && (op == SC.DRAG_NONE)) {
+      // make sure the drag source will permit a drop operation on the named target
+      if (target && source && source.dragSourceOperationMaskFor) {
+        op = source.dragSourceOperationMaskFor(this, target) ;
+      } else op = SC.DRAG_ANY ; // assume drops are allowed
       
-      // make sure the drag source will permit a drop operation on the named target.
-      // if source does not implement this callback, just assume a drop is allowed
-      // by the source.
-      if (target && this.source && this.source.dragSourceOperationMaskFor) {
-        op = this.source.dragSourceOperationMaskFor(target, this) ;
-      } else op = SC.DRAG_ANY ;
+      this.sourceDropOperations = op ;
 
-      // now, let's see if the target will accept the drag.  If it does not respond
-      // to dragEntered, then assume NO drag opts.
-      if ((op != SC.DRAG_NONE) && target && target.dragEntered) {
-        op = op & target.dragEntered(this, evt) ;
-      } else op = SC.DRAG_NONE ;
+      // now, let's see if the target will accept the drag
+      if ((op != SC.DRAG_NONE) && target && target.computeDragOperations) {
+        op = op & target.computeDragOperations(this, evt) ;
+      } else op = SC.DRAG_NONE ; // assume drops AREN'T allowed
+      
+      this.dropOperations = op ;
 
-      // if DRAG_NONE, then look for the next parent that is a drop zone.
+      // if DRAG_NONE, then look for the next parent that is a drop zone
       if (op == SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
     }
 
-    // STEP 2: Refocus the drop target.
-    // If a new drop target was found then this part of the method will exit the
-    // last drag target and start the new one.
+    // STEP 2: Refocus the drop target if needed
     if (target != last) {
-
-      // if the new target does not match the last target, exit that target.
       if (last && last.dragExited) last.dragExited(this, evt) ;
-
-      if (target && this.source && this.source.dragSourceOperationMaskFor) {
-        op = this.source.dragSourceOperationMaskFor(target, this) ;
-      } else op = SC.DRAG_ANY ;
-
-      // save new op and set target to null if op = DRAG_NONE
-      this.sourceDropOperations = op ;
       
-      // now notify the new target, if there is one.  Save the allowed drop
-      // operations as the logical AND between the ops allowed by the source
-      // and target.
-      if (target && target.dragEntered) {
-        this.dropOperations = op & target.dragEntered(this, evt) ;
-      } else this.dropOperations = SC.DRAG_NONE ;
-
-      if (this.dropOperations == SC.DRAG_NONE) target = null ;
-    
-    // if nothing has changed, send dragUpdated
+      if (target) {
+        if (target.dragEntered) target.dragEntered(this, evt) ;
+        if (target.dragUpdated) target.dragUpdated(this, evt) ;
+      }
+      
+      this._lastTarget = target ;
     } else {
       if (target && target.dragUpdated) target.dragUpdated(this, evt) ;
     }
      
-    // notify source that the drag moved.
-    if (this.source && this.source.dragDidMove) {
-      this.source.dragDidMove(this, loc) ;
-    }   
-    
-    this._lastTarget = target ;
+    // notify source that the drag moved
+    if (source && source.dragDidMove) source.dragDidMove(this, loc) ;
   },
   
   /**
@@ -345,90 +325,65 @@ SC.Drag = SC.Object.extend(
     executes the drop target protocol to try to complete the drag operation.
   */
   mouseUp: function(evt) {
-    var loc = Event.pointerLocation(evt) ;
-
-    // try to have the drop target perform the drop...
-    var target = this._lastTarget ;
-    var op = this.dropOperations;
+    var loc = { x: evt.pageX, y: evt.pageY } ;
+    var target = this._lastTarget, op = this.dropOperations;
     
-    if (target && target.prepareForDragOperation(op, this)) {
-      op = target.performDragOperation(op, this) ;  
+    // try to have the drop target perform the drop...
+    if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {
+      op = (target.performDragOperation) ? target.performDragOperation(this, op) : SC.DRAG_NONE ;  
     } else {
       op = SC.DRAG_NONE;
     }
     
-    // create cleanupFunc.  This function will be called at the end of this
-    // function or after the ghostView slides back to its origin.
-    var drag = this ;
-    var cleanupFunc = function() {
-      if (target) target.concludeDragOperation(op, this) ;  
-      drag._destroyGhostView() ;
-    };
+    // notify last drop target that the drag exited, to allow it to cleanup
+    if (target && target.dragExited) target.dragExited(this, evt) ;
     
-    // notify drop target.
-    if (target && target.dragEnded) target.dragEnded(this, evt) ;
-    this._lastTarget = null ;
-    
-    // clean up ghost view.  if sldeBack is true, then do the animation.
-    if ((op == SC.DRAG_NONE) && this.get('slideBack')) {
-      var loc = this.dragView.convertFrameToView(this.dragView.get('origin'), null) ;
-      this._ghostView.transitionTo(1.0, 
-        "left: %@px; top: %@px".fmt(loc.x, loc.y), 
-        { duration: 200, onComplete: cleanupFunc }) ;
-        
-    } else cleanupFunc() ;
-    
-    // notify the source that everything has completed.
-    if (this.source && this.source.dragDidEnd) {
-      this.source.dragDidEnd(this, loc, op) ;
+    // notify all drop targets that the drag ended
+    var ary = this._dropTargets() ;
+    for (var idx=0, len=ary.length; idx<len; idx++) {
+      ary[idx].tryToPerform('dragEnded', evt) ;
     }
     
-    this._dragInProgress = NO ; // required by autoscroll.
+    // destroy the ghost view
+    this._destroyGhostView() ;
     
+    // notify the source that everything has completed
+    var source = this.source ;
+    if (source && source.dragDidEnd) source.dragDidEnd(this, loc, op) ;
+    
+    this._lastTarget = null ;
+    this._dragInProgress = NO ; // required by autoscroll, which is invoked by a timer
   },
   
   // ..........................................
   // PRIVATE PROPERTIES AND METHODS
   //
   
-  _ghostViewClass: SC.View.extend({ 
-    emptyElement: '<div class="sc-ghost-view"></div>'
-  }),
+  _ghostView: null,
   
+  // this will create the ghostView and add it to the document.
+  _createGhostView: function() {
+    var view = this._ghostView = SC.Pane.create({ owner: this }) ;
+    view.$().addClass('sc-ghost-view').append(this.dragView.rootElement.cloneNode(true)) ;
+    view.adjust(this.dragView.get('frame')) ;
+    view.append() ;  // add to window
+  },
+
   // positions the ghost view underneath the mouse with the initial offset
   // recorded by when the drag started.
   _positionGhostView: function(evt) {
-    var loc = Event.pointerLocation(evt) ;
+    var loc = { x: evt.pageX, y: evt.pageY } ;
     loc.x -= this.ghostOffset.x ;
     loc.y -= this.ghostOffset.y ;
-    loc = this._ghostView.convertFrameFromView(loc, null) ;
-    this._ghostView.set('origin', loc) ;   
+    this._ghostView.adjust({ top: loc.y, left: loc.x }) ;   
   },
   
-  // this will create the ghostView and add it to the main HTML document.
-  // it will also position it underneath the current mouse location.
-  _createGhostView: function() {
-    
-    // create the elements by cloning the dragView.
-    var el = this.dragView.rootElement.cloneNode(true) ;
-    
-    // create the ghost view instance add ghost class name.
-    this._ghostView = this._ghostViewClass.viewFor(el) ;
-    this._ghostView.owner = this ;
-    this._ghostView.addClassName('sc-ghost-view') ;
-    
-    // add to bottom of main document body and to window.
-    SC.window.appendChild(this._ghostView) ;
-  },
-
-  _destroyGhostView: function() {  
+  _destroyGhostView: function() {
     if (this._ghostView) {
-      this._ghostView.removeFromParent() ;
+      this._ghostView.remove() ;
       this._ghostView = null ; // this will allow the GC to collect it.
     }
   },
-  
-  _ghostView: null,
   
   // Return an array of drop targets, sorted with any nested drop targets
   // at the top of the array.  The first time this method is called during
@@ -438,34 +393,35 @@ SC.Drag = SC.Object.extend(
   //
   // This means that if you change the view hierarchy of your drop targets
   // during a drag, it will probably be wrong.
-  _getOrderedDropTargets: function() {
+  _dropTargets: function() {
     if (this._cachedDropTargets) return this._cachedDropTargets ;
-    var ret = [];
-    
+
     // build array of drop targets
-    var dt = SC.Drag._dropTargets ;
-    for(var key in dt) {
-      if (!dt.hasOwnProperty(key)) continue ;
-      ret.push(dt[key]) ;      
+    var ret = [] ;
+    var hash = SC.Drag._dropTargets ;
+    for (var key in hash) {
+      if (hash.hasOwnProperty(key)) ret.push(hash[key]) ;
     }
 
     // views must be sorted so that drop targets with the deepest nesting 
     // levels appear first in the array.  The getDepthFor().
     var depth = {} ;
+    var dropTargets = SC.Drag._dropTargets ;
     var getDepthFor = function(x) {
       if (!x) return 0 ;
       var guid = SC.guidFor(x);
       var ret = depth[guid];
       if (!ret) {
         ret = 1 ;
-        while((x = x.parentNode) && (x !== SC.window)) {
-          if (dt[SC.guidFor(x)] !== undefined) ret++ ;
+        while (x = x.get('parentView')) {
+          if (dropTargets[SC.guidFor(x)] !== undefined) ret++ ;
         }
         depth[guid] = ret ;
       }
       return ret ;
     } ;
-
+    
+    // sort array of drop targets
     ret.sort(function(a,b) {
       if (a===b) return 0;
       a = getDepthFor(a) ;
@@ -474,29 +430,26 @@ SC.Drag = SC.Object.extend(
     }) ;
 
     this._cachedDropTargets = ret ;
-    
     return ret ;
   },
   
-  // This will search through the drop targets, looking for one in the 
-  // target area.
+  // This will search through the drop targets, looking for one in the target area.
   _findDropTarget: function(evt) {
-    var dt = this._getOrderedDropTargets() ;
-    var loc = Event.pointerLocation(evt) ;
-
-    var ret = null ;
-    for(var idx=0;idx<dt.length;idx++) {
-      var t = dt[idx] ;
-
-      if(!t.get('isVisibleInWindow')) continue ;
+    var loc = { x: evt.pageX, y: evt.pageY } ;
+    
+    var target, frame ;
+    var ary = this._dropTargets() ;
+    for (var idx=0, len=ary.length; idx<len; idx++) {
+      target = ary[idx] ;
       
-      // get frame, converted to view.
-      var f = t.convertFrameToView(t.get('clippingFrame'), null) ;
+      // FIXME if (!target.get('isVisibleInWindow')) continue ;
       
-      // check to see if loc is inside.  If so, then make this the drop
-      // target unless there is a drop target and the current one 
-      // is not deeper.
-      if (SC.pointInRect(loc, f)) return t;
+      // get clippingFrame, converted to the pane.
+      frame = target.convertClippingFrameToView(target.get('clippingFrame'), null) ;
+
+      // check to see if loc is inside.  If so, then make this the drop target unless 
+      // there is a drop target and the current one is not deeper.
+      if (SC.pointInRect(loc, frame)) return target;
     } 
     return null ;
   },
@@ -504,8 +457,9 @@ SC.Drag = SC.Object.extend(
   // Search the parent nodes of the target to find another view matching the 
   // drop target.  Returns null if no matching target is found.
   _findNextDropTarget: function(target) {
-    while ((target = target.parentNode) && (target != SC.window)) {
-      if (SC.Drag._dropTargets[SC.guidFor(target)]) return target ;
+    var dropTargets = SC.Drag._dropTargets ;
+    while (target = target.get('parentView')) {
+      if (dropTargets[SC.guidFor(target)]) return target ;
     }
     return null ;
   },
@@ -520,9 +474,10 @@ SC.Drag = SC.Object.extend(
   //
   // Returns true if a scroll was performed
   _autoscroll: function(evt) {
-  
+    return NO ; // TODO FIXME
+    
     // If drag has ended, exit
-    if (!this._dragInProgress) return ;
+    if (!this._dragInProgress) return NO;
     
     // STEP 1: Find the first view that we can actually scroll.  This view 
     // must be:
@@ -531,10 +486,7 @@ SC.Drag = SC.Object.extend(
     // - there must be room left to scroll in that direction. 
     
     // NOTE: an event is passed only when called from mouseDragged
-    var loc = (evt) ? Event.pointerLocation(evt) : this._lastMouseLocation ;
-    if (!loc) return false ;
-    this._lastMouseLocation = loc ;
-
+    var loc = (evt) ? { x: evt.pageX, y: evt.pageY } : this.get('location') ;
     var view = this._findScrollableView(loc) ;
     
     // these will become either 1 or -1 to indicate scroll direction or 0 for no scroll.
@@ -542,7 +494,7 @@ SC.Drag = SC.Object.extend(
     var min, max, edge ;
     var scrollableView = null;
 
-    while(view && !scrollableView) {
+    while (view && !scrollableView) {
       
       // quick check...can we scroll this view right now?
       verticalScroll = view.get('hasVerticalScroller') ? 1 : 0;
@@ -555,7 +507,6 @@ SC.Drag = SC.Object.extend(
         var innerSize = view.get('innerFrame') ;
         var scrollFrame = view.get('scrollFrame') ;
       }
-      
       
       if (verticalScroll != 0) {
         
@@ -630,63 +581,59 @@ SC.Drag = SC.Object.extend(
       } ;
 
       scrollableView.scrollBy(scroll) ;
-      
     }
 
     // If a scrollable view was found, then reschedule
     if (scrollableView) {
       this.invokeLater('_autoscroll', 100, null);
-      return true ;
-    } else return false ;
+      return YES ;
+    } else return NO ;
   },
 
   // Returns an array of scrollable views, sorted with nested scrollable
   // views at the top of the array.  The first time this method is called
-  // during a drag, it will reconstrut this array using the current ste of
+  // during a drag, it will reconstrut this array using the current state of
   // scrollable views.  Afterwards it uses the cached set until the drop
   // completes.
   _scrollableViews: function() {
     if (this._cachedScrollableView) return this._cachedScrollableView ;
-    var ret = [];
     
-    // build array of drop targets
-    var dt = SC.Drag._scrollableViews ;
-    for(var key in dt) {
-      if (!dt.hasOwnProperty(key)) continue ;
-      ret.push(dt[key]) ;      
+    // build array of scrollable views
+    var ret = [] ;
+    var hash = SC.Drag._scrollableViews ;
+    for (var key in hash) {
+      if (hash.hasOwnProperty(key)) ret.push(hash[key]) ;
     }
     
-    // now resort.  This custom function will sort nested drop targets
+    // now resort.  This custom function will sort nested scrollable views
     // at the start of the list.
     ret = ret.sort(function(a,b) {
       var view = a;
-      while((view = view.parentNode) && (view != SC.window)) {
+      while (view = view.get('parentView')) {
         if (b == view) return -1 ;
       }
       return 1; 
     }) ;
 
     this._cachedScrollableView = ret ;
-    
     return ret ;
   },
   
   // This will search through the scrollable views, looking for one in the 
   // target area.
   _findScrollableView: function(loc) {
-    var dt = this._scrollableViews() ;
-
-    var ret = null ;
-    for(var idx=0;idx<dt.length;idx++) {
-      var t = dt[idx] ;
-
-      if(!t.get('isVisibleInWindow')) continue ;
+    var target, frame ;
+    var ary = this._scrollableViews() ;
+    for (var idx=0, len=ary.length; idx<len; idx++) {
+      target = ary[idx] ;
       
-      // get frame, converted to view.
-      var f = t.convertFrameToView(t.get('frame'), null) ;
+      // FIXME if (!target.get('isVisibleInWindow')) continue ;
       
-      // check to see if loc is inside.  
-      if (SC.pointInRect(loc, f)) return t;
+      // get clippingFrame, converted to the pane
+      frame = target.convertClippingFrameToView(target.get('clippingFrame'), null) ;
+
+      // check to see if loc is inside
+      if (SC.pointInRect(loc, frame)) return target;
     } 
     return null ;
   },
@@ -694,25 +641,23 @@ SC.Drag = SC.Object.extend(
   // Search the parent nodes of the target to find another scrollable view.
   // return null if none is found.
   _findNextScrollableView: function(view) {
-    while ((view = view.parentNode) && (view != SC.window)) {
-      if (SC.Drag._scrollableViews[SC.guidFor(view)]) return view ;
+    var scrollableViews = SC.Drag._scrollableViews ;
+    while (view = view.get('parentView')) {
+      if (scrollableViews[SC.guidFor(view)]) return view ;
     }
     return null ;
   }  
-    
   
 }) ;
 
 SC.Drag.mixin(
 /** @scope SC.Drag */ {
-  
    
   /**  
    This is the method you use to initiate a new drag.  See class documentation 
    for more info on the options taken by this method.
    
    @params {Hash} ops a hash of options.  See documentation above.
-   
   */
   start: function(ops) {
     var ret = this.create(ops) ;
@@ -723,6 +668,29 @@ SC.Drag.mixin(
   _dropTargets: {},
   _scrollableViews: {},
   
+  /**
+    Register the view object as a drop target.
+    
+    This method is called automatically whenever a view is created with the
+    isDropTarget property set to YES.  You generally will not need to call it
+    yourself.
+  */
+  addDropTarget: function(target) {
+    // console.log('addDropTarget called on %@ with %@'.fmt(this, target));
+    this._dropTargets[SC.guidFor(target)] = target ;
+  },
+
+  /**
+    Unregister the view object as a drop target.
+    
+    This method is called automatically whenever a view is removed from the 
+    hierarchy.  You generally will not need to call it yourself.
+  */
+  removeDropTarget: function(target) {
+    // console.log('removeDropTarget called on %@ with %@'.fmt(this, target));
+    delete this._dropTargets[SC.guidFor(target)] ;
+  },
+
   /**
     Register the view object as a scrollable view.  These views will auto-scroll
     during a drag.
@@ -737,52 +705,6 @@ SC.Drag.mixin(
   */
   removeScrollableView: function(target) {
     delete this._scrollableViews[SC.guidFor(target)] ;  
-  },
-  
-  /**
-    Register the view object as a drop target.
-    
-    This method is called automatically whenever a view is created with the
-    isDropTarget property set to YES.  You generally will not need to call it
-    yourself.
-  */
-  addDropTarget: function(target) {
-    this._dropTargets[SC.guidFor(target)] = target ;
-  },
-
-  /**
-    Remove a view from the list of drop targets.
-    
-    This method is called automatically whenever a view is removed from the 
-    hierarchy.  You generally will not need to call it yourself.
-  */
-  removeDropTarget: function(target) {
-    delete this._dropTargets[SC.guidFor(target)] ;
-  },
-
-  /**
-    Convenience method to turn a operation mask into a descriptive string.
-  */
-  inspectOperation: function(op) {
-    var ret = [] ;
-    if (op === SC.DRAG_NONE) {
-      ret = ['DRAG_NONE'];
-    } else if (op === SC.DRAG_ANY) {
-      ret = ['DRAG_ANY'] ;
-    } else {
-      if (op & SC.DRAG_LINK) {
-        ret.push('DRAG_LINK') ;
-      }
-
-      if (op & SC.DRAG_COPY) {
-        ret.push('DRAG_COPY') ;
-      }
-
-      if (op & SC.DRAG_MOVE) {
-        ret.push('DRAG_MOVE') ;
-      }
-    }
-    return ret.join('|') ;
   }
 
 });

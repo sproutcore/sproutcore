@@ -330,24 +330,23 @@ SC.ListView = SC.CollectionView.extend(
   insertionPointClass: SC.View.extend({
     emptyElement: '<div><span class="anchor"></span></div>',
     styleClass: 'sc-list-insertion-point',
-    layout: SC.merge(SC.FULL_WIDTH, { top: 0, height: 5 })
+    layout: { top: -6, height: 2, left: 4, right: 2 }
   }),
 
   showInsertionPoint: function(itemView, dropOperation) {
     if (!itemView) return ;
-
+    
     // if drop on, then just add a class...
     if (dropOperation === SC.DROP_ON) {
       if (itemView !== this._dropOnInsertionPoint) {
         this.hideInsertionPoint() ;
-        itemView.addClassName('drop-target') ;
+        itemView.$().addClass('drop-target') ;
         this._dropOnInsertionPoint = itemView ;
       }
       
     } else {
-      
       if (this._dropOnInsertionPoint) {
-        this._dropOnInsertionPoint.removeClassName('drop-target') ;
+        this._dropOnInsertionPoint.$().removeClass('drop-target') ;
         this._dropOnInsertionPoint = null ;
       }
     
@@ -356,12 +355,13 @@ SC.ListView = SC.CollectionView.extend(
       }
     
       var insertionPoint = this._insertionPointView ;
-      var f = { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
-      insertionPoint.set('frame', f) ;
-
-      if (insertionPoint.parentNode != itemView.parentNode) {
-        itemView.parentNode.appendChild(insertionPoint) ;
+      if (insertionPoint.get('parentView') !== itemView.get('parentView')) {
+        itemView.get('parentView').appendChild(insertionPoint) ;
       }
+      
+      // var frame = itemView.get('frame') ;
+      // console.log($I(frame));
+      insertionPoint.adjust({ top: itemView.get('frame').y }) ;
     }
     
   },
@@ -369,7 +369,7 @@ SC.ListView = SC.CollectionView.extend(
   hideInsertionPoint: function() {
     var insertionPoint = this._insertionPointView ;
     if (insertionPoint) insertionPoint.removeFromParent() ;
-
+    
     if (this._dropOnInsertionPoint) {
       this._dropOnInsertionPoint.removeClassName('drop-target') ;
       this._dropOnInsertionPoint = null ;
@@ -377,9 +377,10 @@ SC.ListView = SC.CollectionView.extend(
   },
 
   // We can do this much faster programatically using the rowHeight
-  insertionIndexForLocation: function(loc, dropOperation) {  
-    var f = this.get('innerFrame') ;
-    var sf = this.get('scrollFrame') ;
+  insertionIndexForLocation: function(loc, dropOperation) {
+    // console.log('insertionIndexForLocation called on %@'.fmt(this));
+    var f = this.get('clippingFrame') ;
+    var sf = f ; // FIXME this.get('scrollFrame') ;
     var rowHeight = this.get('rowHeight') || 0 ;
 
     // find the row and offset to work with
@@ -401,6 +402,7 @@ SC.ListView = SC.CollectionView.extend(
       if (percentage > 0.45) ret++ ;
     }
     
+    // console.log('[ret, retOp] is [%@, %@]'.fmt(ret, retOp));
     return [ret, retOp] ;
   }
   

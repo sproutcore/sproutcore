@@ -15,7 +15,7 @@ require('desktop.platform/drag/drag') ;
 */
 SC.DragDataSource = {
 
-  /**
+  /** @property
     Implement this property as an array of data types you want to support
     for drag operations.
   */
@@ -25,15 +25,13 @@ SC.DragDataSource = {
     Implement this method to return the data in the format passed.  Return
     null if the requested data type cannot be generated.
   
+    @param {SC.Drag} drag The Drag instance managing this drag.
     @param {Object} dataType The proposed dataType to return.  This will 
       always be one of the data types declared in dragDataTypes.
     
-    @param {SC.Drag} drag The Drag instance managing this drag.
-    
     @returns The data object for the specified type
-  
   */
-  dragDataForType: function(dataType, drag) { return null; }
+  dragDataForType: function(drag, dataType) { return null; }
   
 };
 

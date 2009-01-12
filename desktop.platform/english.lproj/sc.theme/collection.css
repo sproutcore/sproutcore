@@ -1,0 +1,53 @@
+/* @group SC.CollectionView */
+
+.sc-theme .sc-collection-view {
+	text-decoration: none ;
+	color: #000;
+	border-top: 1px white solid;
+}
+
+.sc-theme .sc-collection-view .sc-collection-item {
+	border-top: 1px solid white;
+}
+
+.sc-theme .sc-collection-view .sc-collection-item.sel {
+	background-color: #ddd;
+	border-top: 1px solid #eee;
+}
+
+.sc-theme.focus .sc-collection-view.focus .sc-collection-item.sel {
+	background-color: #40007e;
+	color: white ;
+	border-top: 1px solid #84788f;
+}
+
+/* @end */
+
+/* @group SC.ListView */
+
+.sc-theme .sc-list-view {
+	background-color: white ;
+}
+
+.sc-theme .sc-list-view .sc-collection-item {
+	display: block ;
+	padding: 0 6px;
+	line-height: 22px;
+}
+
+.sc-theme .sc-list-insertion-point {
+  overflow: visible;
+  background-color: #4e4977;
+	z-index: 1000;
+}
+
+.sc-theme .sc-list-insertion-point .anchor {
+  position: absolute ;
+  width: 8px;
+  top: -3px;
+  left: -3px;
+  height: 8px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
+}
+
+/* @end */
