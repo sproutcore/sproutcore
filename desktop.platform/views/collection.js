@@ -2434,10 +2434,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return this.get('canReorderContent') ;
   },
   
-  concludeDragOperation: function(op, drag) {
-    this.hideInsertionPoint() ;
-    this._lastInsertionIndex = null ;
-  },
+  // concludeDragOperation: function(op, drag) {
+  //   this.hideInsertionPoint() ;
+  //   this._lastInsertionIndex = null ;
+  // },
 
   /** 
     The insertion orientation.  This is used to determine which

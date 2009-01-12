@@ -15,7 +15,7 @@ require('desktop.platform/drag/drag') ;
 */
 SC.DragDataSource = {
 
-  /**
+  /** @property
     Implement this property as an array of data types you want to support
     for drag operations.
   */
