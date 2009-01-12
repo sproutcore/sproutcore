@@ -1170,14 +1170,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // negative length == remove item views
     if (length < 0) {
-      // TEMPORARY OPTIMIZATION:  Do not remove views when they go out of
-      // range.  This way they don't need to be created/addred later on.
-      //
-      // while(++length < 0) {
-      //   var c = content.objectAt(start + length) ;
-      //   var itemView = this.itemViewForContent(c) ;
-      //   if (itemView) this._removeItemView(itemView, groupBy) ;
-      // }
+      while(++length < 0) {
+        var c = content.objectAt(start + length) ;
+        var itemView = this.itemViewForContent(c) ;
+        if (itemView) this._removeItemView(itemView, groupBy) ;
+      }
       
     // positive length == add item views.
     } else if (length > 0) {
@@ -1246,7 +1243,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Called whenever a groupView is no longer being used.
     
     Theoretically, this method removes a group view from the receiver and 
-    stores it in the pool for later use.  In actuality, this will just moved 
+    stores it in the pool for later use.  In actuality, this will just move
     the view to the zombieGroupView pool.  You must call 
     _flushZombieGroupViews() to actually remove them from the receiver.
   */

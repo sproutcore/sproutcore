@@ -355,17 +355,13 @@ SC.ListView = SC.CollectionView.extend(
       }
     
       var insertionPoint = this._insertionPointView ;
-      // var f = { height: 0, x: 8, y: itemView.get('frame').y, width: itemView.owner.get('frame').width };
-      // insertionPoint.set('frame', f) ;
-      insertionPoint.adjust({ top: itemView.get('frame').y }) ;
-
-      // if (insertionPoint.parentNode != itemView.parentNode) {
-      //   itemView.parentNode.appendChild(insertionPoint) ;
-      // }
       if (insertionPoint.get('parentView') !== itemView.get('parentView')) {
-        // console.log('appending insertionPoint to parentView') ;
         itemView.get('parentView').appendChild(insertionPoint) ;
       }
+      
+      // var frame = itemView.get('frame') ;
+      // console.log($I(frame));
+      insertionPoint.adjust({ top: itemView.get('frame').y }) ;
     }
     
   },
