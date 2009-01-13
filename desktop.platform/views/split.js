@@ -376,7 +376,11 @@ SC.SplitView = SC.View.extend(
     @returns {Boolean}
   */
   mouseDownInThumbView: function(evt, thumbView) {
-    evt.mouseHandler = this ; // capture future mouse event
+    // evt.mouseHandler = this ; // capture future mouse event
+    var responder = this.getPath('pane.rootResponder') ;
+    if (!responder) return ; // nothing to do
+      
+    responder.dragDidStart(this) ;
     
     console.log('mouseDownInThumbView');
     // cache for later
