@@ -369,20 +369,19 @@ SC.SplitView = SC.View.extend(
   /**
     Update the split view's layout based on mouse movement.
     
-    Call this method in the mouseDragged: method of your thumb view. The split view
+    Call this method in the mouseDown: method of your thumb view. The split view
     will begin tracking the mouse and will update its own layout to reflect the movement 
     of the mouse. As a result, the position of your thumb view will also be updated.
     
     @returns {Boolean}
   */
   mouseDownInThumbView: function(evt, thumbView) {
-    // evt.mouseHandler = this ; // capture future mouse event
     var responder = this.getPath('pane.rootResponder') ;
-    if (!responder) return ; // nothing to do
+    if (!responder) return NO ; // nothing to do
       
+    // we're not the source view of the mouseDown:, so we need to capture events manually to receive them
     responder.dragDidStart(this) ;
     
-    console.log('mouseDownInThumbView');
     // cache for later
     this._mouseDownX = evt.pageX ;
     this._mouseDownY = evt.pageY ;
@@ -394,34 +393,29 @@ SC.SplitView = SC.View.extend(
     this._dividerThickness = this.get('dividerThickness') ;
     this._layoutDirection = this.get('layoutDirection') ;
     
-    // we're not the source view of the mouseDown:, so we need to capture events manually to receive them
-    // SC.RootResponder.responder.startCapturingMouseEvents(this) ;
     this.viewWillStartLiveResize() ;
     this._inLiveResize = YES ;
-    
-    // add DIV
     
     return YES ;
   },
   
   mouseDragged: function(evt) {
-    // console.log('mouseDragged');
+    // console.log('mouseDragged invoked on %@'.fmt(this));
     var offset = (this._layoutDirection == SC.LAYOUT_HORIZONTAL) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
     this._updateTopLeftThickness(offset) ;
     return YES;
   },
   
   mouseUp: function(evt) {
-    console.log('mouseUp');
+    // console.log('mouseUp invoked on %@'.fmt(this));
     this._thumbView = null ; // avoid memory leaks
     this._inLiveResize = NO ;
     this.viewDidEndLiveResize() ;
-    // SC.RootResponder.responder.stopCapturingMouseEvents() ;
     return YES ;
-    // return NO ; // pretend we didn't handle the event so that doubleClick is called on thumb views
   },
 
   doubleClickInThumbView: function(evt, thumbView) {
+    console.log('doubleClickInThumbView invoked on %@'.fmt(this));
     var view = this._topLeftView ;
     var isCollapsed = view.get('isCollapsed') || NO ;
     if (!isCollapsed && !this.canCollapseView(view)) {
