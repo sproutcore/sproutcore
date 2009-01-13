@@ -630,7 +630,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (this.get('isVisibleInWindow') && this.get('isDirty')) {
       // console.log('%@:_collection_isDirtyDidChange()'.fmt(this));
       this.invokeOnce(this._fullUpdateChildren);
-    }  
+    }
   }.observes('isDirty', 'isVisibleInWindow'),
   
   _fullUpdateChildren: function() { return this.updateChildren(YES); },

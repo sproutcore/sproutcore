@@ -1307,9 +1307,9 @@ SC.CoreQuery = (function() {
         if (name == "opacity" && ret == "") ret = "1";
 
       } else if (elem.currentStyle) {
-        var camelCase = name.camelize();
+        // var camelCase = name.camelize();
 
-        ret = elem.currentStyle[ name ] || elem.currentStyle[ camelCase ];
+        ret = elem.currentStyle[ name ] || elem.currentStyle[ name.camelize() ];
 
         // From the awesome hack by Dean Edwards
         // http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291

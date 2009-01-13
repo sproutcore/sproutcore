@@ -93,7 +93,10 @@ SC.Pane = SC.View.extend({
   //
 
   /**
-    The rootResponder for this pane.  Whenever you add a pane to a document, this property will be set to the rootResponder that is now forwarding events to the pane.
+    The rootResponder for this pane.  Whenever you add a pane to a document, this 
+    property will be set to the rootResponder that is now forwarding events to 
+    the pane.
+    
     @property {SC.Responder}
   */
   rootResponder: null,  
@@ -121,7 +124,11 @@ SC.Pane = SC.View.extend({
   },
   
   /**
-    Attempts to send the event down the responder chain for this pane.  If you pass a target, this method will begin with the target and work up the responder chain.  Otherwise, it will begin with the current firstResponder and walk up the chain looking for any responder that implements a handler for the passed method and returns YES when executed.
+    Attempts to send the event down the responder chain for this pane.  If you 
+    pass a target, this method will begin with the target and work up the 
+    responder chain.  Otherwise, it will begin with the current firstResponder 
+    and walk up the chain looking for any responder that implements a handler 
+    for the passed method and returns YES when executed.
     
     @param {String} action
     @param {SC.Event} evt
@@ -153,17 +160,21 @@ SC.Pane = SC.View.extend({
   //
 
   /** @property
-    The default responder.  Set this to point to a responder object that can respond to events when no other view in the hierarchy handles them.
+    The default responder.  Set this to point to a responder object that can 
+    respond to events when no other view in the hierarchy handles them.
   */
   defaultResponder: null,
   
   /** @property
-    The first responder.  This is the first view that should receive action events.  Whenever you click on a view, it will usually become firstResponder. 
+    The first responder.  This is the first view that should receive action 
+    events.  Whenever you click on a view, it will usually become firstResponder. 
   */
   firstResponder: null,
   
   /** @property
-    If YES, this pane can become the key pane.  You may want to set this to NO for certain types of panes.  For example, a palette may never want to become key.  The default value is YES
+    If YES, this pane can become the key pane.  You may want to set this to NO 
+    for certain types of panes.  For example, a palette may never want to 
+    become key.  The default value is YES.
   */
   acceptsKeyPane: YES,
   
@@ -172,7 +183,9 @@ SC.Pane = SC.View.extend({
   */
   isKeyPane: NO,
 
-  /** Make the pane receive key events.  Until you call this method, the keyView set for this pane will not receive key events. 
+  /**
+    Make the pane receive key events.  Until you call this method, the 
+    keyView set for this pane will not receive key events. 
   
     @returns {SC.Pane} receiver
   */
@@ -183,7 +196,8 @@ SC.Pane = SC.View.extend({
   },
   
   /**
-    Remove the pane view status from the pane.  This will simply set the keyPane on the rootResponder to null.
+    Remove the pane view status from the pane.  This will simply set the 
+    keyPane on the rootResponder to null.
     
     @returns {SC.Pane} receiver
   */
@@ -254,7 +268,9 @@ SC.Pane = SC.View.extend({
   },
   
   /**
-    Called just before the pane loses it's keyPane status.  This will notify the current keyView, if there is one, that it is about to lose focus, giving it one last opportunity to save its state. 
+    Called just before the pane loses it's keyPane status.  This will notify 
+    the current keyView, if there is one, that it is about to lose focus, 
+    giving it one last opportunity to save its state. 
     
     @param {SC.Pane} pane
     @returns {SC.Pane} reciever
@@ -265,7 +281,10 @@ SC.Pane = SC.View.extend({
   },
   
   /**
-    Called just before the pane becomes keyPane.  Notifies the current keyView that it is about to gain focus.  The keyView can use this opportunity to prepare itself, possibly stealing any value it might need to steal from the current key view.
+    Called just before the pane becomes keyPane.  Notifies the current keyView 
+    that it is about to gain focus.  The keyView can use this opportunity to 
+    prepare itself, possibly stealing any value it might need to steal from the 
+    current key view.
     
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
@@ -277,7 +296,9 @@ SC.Pane = SC.View.extend({
 
 
   /**
-    Called just after the pane has lost its keyPane status.  Notifies the current keyView of the change.  The keyView can use this method to do any final cleanup and changes its own display value if needed.
+    Called just after the pane has lost its keyPane status.  Notifies the 
+    current keyView of the change.  The keyView can use this method to do any 
+    final cleanup and changes its own display value if needed.
     
     @param {SC.Pane} pane
     @returns {SC.Pane} reciever
@@ -290,7 +311,9 @@ SC.Pane = SC.View.extend({
   },
   
   /**
-    Called just after the keyPane focus has changed to the receiver.  Notifies the keyView of its new status.  The keyView should use this method to update its display and actually set focus on itself at the browser level if needed.
+    Called just after the keyPane focus has changed to the receiver.  Notifies 
+    the keyView of its new status.  The keyView should use this method to update 
+    its display and actually set focus on itself at the browser level if needed.
     
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
@@ -310,7 +333,9 @@ SC.Pane = SC.View.extend({
   isMainPane: NO,
   
   /**
-    Invoked when the view is about to lose its mainPane status.  The default implementation will also remove the pane from the document since you can't have more than one mainPane in the document at a time.
+    Invoked when the view is about to lose its mainPane status.  The default 
+    implementation will also remove the pane from the document since you can't 
+    have more than one mainPane in the document at a time.
   */
   blurMainTo: function(pane) {
     this.set('isMainPane', NO) ;
@@ -318,7 +343,10 @@ SC.Pane = SC.View.extend({
   },
   
   /** 
-    Invokes when the view is about to become the new mainPane.  The default implementation simply updates the isMainPane property.  In your subclass, you should make sure your pane has been added to the document before trying to make it the mainPane.  See SC.MainPane for more information.
+    Invokes when the view is about to become the new mainPane.  The default 
+    implementation simply updates the isMainPane property.  In your subclass, 
+    you should make sure your pane has been added to the document before 
+    trying to make it the mainPane.  See SC.MainPane for more information.
   */
   focusMainFrom: function(pane) {
     this.set('isMainPane', YES);
@@ -329,7 +357,8 @@ SC.Pane = SC.View.extend({
   //  
   
   /**
-    Inserts the pane at the end of the document.  This will also add the pane to the rootResponder.
+    Inserts the pane at the end of the document.  This will also add the pane 
+    to the rootResponder.
     
     @param {SC.RootResponder} rootResponder
     @returns {SC.Pane} receiver
@@ -364,7 +393,11 @@ SC.Pane = SC.View.extend({
   },
 
   /** 
-    Inserts the pane into the DOM as the last child of the passed DOM element.  You can pass in either a CoreQuery object or a selector, which will be converted to a CQ object.  You can optionally pass in the rootResponder to use for this operation.  Normally you will not need to pass this as the default responder is suitable.
+    Inserts the pane into the DOM as the last child of the passed DOM element. 
+    You can pass in either a CoreQuery object or a selector, which will be 
+    converted to a CQ object.  You can optionally pass in the rootResponder 
+    to use for this operation.  Normally you will not need to pass this as 
+    the default responder is suitable.
     
     @param {String|CoreQuery} sel
     @returns {SC.Pane} receiver
@@ -405,7 +438,9 @@ SC.Pane = SC.View.extend({
   removeFromParent: function() { },
   
   /** @private
-    Called when the pane is attached to a DOM element in a window, this will change the view status to be visible in the window and also register with the rootResponder.
+    Called when the pane is attached to a DOM element in a window, this will 
+    change the view status to be visible in the window and also register 
+    with the rootResponder.
   */
   paneDidAttach: function() {
 
