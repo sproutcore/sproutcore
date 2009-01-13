@@ -116,14 +116,14 @@ SC.routes = SC.Object.create(
 		
     var parts = route.split('/') ;
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
-    this._routes.addRoute(parts, method) ;
+    this._routes.addRoute(parts, target, method) ;
 		return this;
   },
 
   
   // eval routes.
   gotoRoute: function(route) {
-    var params = {} ; var parts, route, func ;
+    var params = {} ; var parts, route, routeHandler, target, method ;
 
     // save this route for window location sensing
     this._lastRoute = route ;
@@ -143,8 +143,12 @@ SC.routes = SC.Object.create(
     
     // step 3: evaluate route.
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
-    func = this._routes.functionForRoute(parts,params) ;
-    if (func) func(params) ;
+
+    routeHandler = this._routes.functionForRoute(parts,params) ;
+		target = routeHandler._target;
+		method = routeHandler._method;
+		method.call(target, params);
+
     //else console.log('could not find route for: "'+route+'"') ;
   },
   
@@ -316,8 +320,11 @@ SC.routes = SC.Object.create(
   // This object handles a single route level.  
   _Route: SC.Object.extend({
     
-    // a route that ends here gets this func.
-    _func: null,
+    // route handler class.
+		_target: null,
+		
+		// route handler
+		_method: null,
     
     // staticly named routes.
     _static: null,
@@ -328,10 +335,12 @@ SC.routes = SC.Object.create(
     // set the wildcard route name here.
     _wildcard: null,
     
-    addRoute: function(parts, func) {
+    addRoute: function(parts, target, method) {
+
       if (!parts || parts.length == 0) {
-        this._func = func ;
-        
+				this._target = target;
+				this._method = method;
+				
       // add to route table.
       } else {
         var part = parts.shift() ; // get next route.
@@ -351,7 +360,8 @@ SC.routes = SC.Object.create(
           case '*':
             part = part.slice(1,part.length) ;
             this._wildcard = part ;
-            this._func = func ;
+						this._target = target;				
+						this._method = method;
             break ;
             
           // setup a normal static route.
@@ -363,15 +373,16 @@ SC.routes = SC.Object.create(
         }
         
         // if we need to go another level deeper, call nextRoute
-        if (nextRoute) nextRoute.addRoute(parts,func) ;
+        if (nextRoute) nextRoute.addRoute(parts, target, method) ;
       }
     },
     
     // process the next level of the route and pass on.
     functionForRoute: function(parts, params) {
+
       // if parts it empty, then we are here, so return func
       if (!parts || parts.length == 0) {
-        return this._func ;
+        return this ;				
         
       // process the next part
       } else {
@@ -402,7 +413,7 @@ SC.routes = SC.Object.create(
         if ((ret == null) && this._wildcard) {
           parts.unshift(part) ;
           if (params) params[this._wildcard] = parts.join('/') ;
-          ret = this._func ;
+					ret = this;
         }
         
         return ret ;
