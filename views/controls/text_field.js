@@ -68,7 +68,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     
   // ..........................................................
   // HANDLE NATIVE CONTROL EVENTS
-  //
+  // 
   
   init: function() {
     sc_super();
@@ -124,12 +124,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // hide the hint text.
   /** @private */
   willBecomeKeyResponderFrom: function(keyView) {
-     // focus the text field.
+    // focus the text field.
     if (!this._isFocused) {
       this._isFocused = YES ;
       if (this.get('isVisibleInWindow')) {
         this.$input().get(0).focus();
-        // this.invokeLater(this._selectRootElement, 1) ;
         this.invokeOnce(this._selectRootElement) ;
       }
     }
