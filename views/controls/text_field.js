@@ -87,6 +87,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   fieldDidFocus: function(evt) {
     if (!this._isFocused) {
       this._isFocused = YES ;
+      
+      // FireFox fix -- without this, text is shown unselected.
+      // TODO: need to undo firefox fix during a scroll, live resize, or window 
+      // resize and reapply on completion.
+      if (SC.browser.mozilla) {
+        var f = this.convertFrameToView(this.get('frame'), null) ;
+        var top = f.y, left = f.x, width = f.width, height = f.height ;
+        top += 1, left += 1, width -= 4, height -= 6 ; // brittle, but the layout is correct :(
+        var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
+        this.$input().attr('style', style) ;
+      }
+      
       this.beginEditing();
     }
   },
@@ -94,10 +106,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   fieldDidBlur: function() {
     if (this._isFocused) {
       this._isFocused = NO ;
+      if (SC.browser.mozilla) this.$input().attr('style', '') ; // undo FireFox fix
       this.commitEditing();
     }
   },
-
+  
   /** tied to the isEnabled state */
   acceptsFirstResponder: function() {
     return this.get('isEnabled');
@@ -116,7 +129,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       this._isFocused = YES ;
       if (this.get('isVisibleInWindow')) {
         this.$input().get(0).focus();
-        this.invokeLater(this._selectRootElement, 1) ;
+        this.invokeOnce(this._selectRootElement) ;
       }
     }
   },

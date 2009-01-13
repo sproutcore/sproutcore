@@ -52,7 +52,7 @@ SC.ContainerView = SC.View.extend(
   /**
     Replaces any child views with the passed new content.  
     
-    This method is automatically called whenever your content property 
+    This method is automatically called whenever your contentView property 
     changes.  You can override it if you want to provide some behavior other
     than the default.
     
@@ -65,7 +65,7 @@ SC.ContainerView = SC.View.extend(
 
   /** @private */
   createChildViews: function() {
-    // if content is defined, then create the content
+    // if contentView is defined, then create the content
     var view = this.contentView ;
     if (view) {
       view = this.contentView = this.createChildView(view) ;

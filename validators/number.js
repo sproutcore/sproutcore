@@ -75,7 +75,5 @@ SC.Validator.Number = SC.Validator.extend(
   */
   validateKeyDown: function(form, field, charStr) {
     return !!charStr.match(/[0-9\.,\-]/);
-  }
-  
-    
+  }    
 }) ;

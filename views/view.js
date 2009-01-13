@@ -17,9 +17,14 @@ SC.viewKey = SC.guidKey + "_view" ;
 
 /** @private */
 SC.DISPLAY_LOCATION_QUEUE = 'updateDisplayLocationIfNeeded';
+// SC.VIEW_HIERARCHY_QUEUE = 'updateViewHierarchyIfNeeded'; // <-- How about using this name? -E
+
+/** @private */
+SC.UPDATE_CHILD_LAYOUT_QUEUE   = 'updateChildLayoutIfNeeded';
 
 /** @private */
 SC.DISPLAY_LAYOUT_QUEUE   = 'updateDisplayLayoutIfNeeded';
+// SC.APPLY_LAYOUT_QUEUE   = 'applyLayoutIfNeeded'; // <-- How about using this name? -E
 
 /** @private */
 SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
@@ -122,7 +127,7 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: ['outlets','displayProperties', 'styleClass', 'updateDisplayMixin', 'prepareDisplayMixin'],
+  concatenatedProperties: ['outlets','displayProperties', 'layoutProperties', 'styleClass', 'updateChildLayoutMixin', 'updateDisplayMixin', 'prepareDisplayMixin'],
   
   /** 
     The current pane. 
@@ -142,6 +147,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   page: null,
     
+  /** 
+    The current split view this view is embedded in (may be null). 
+    @property {SC.SplitView}
+  */
+  splitView: function() {
+    // console.log('splitView called');
+    var view = this;
+    while(view && !view.isSplitView) view = view.get('parentView');
+    return view;
+  }.property('parentView').cacheable(),
+  
   /**
     If the view is currently inserted into the DOM of a parent view, this
     property will point to the parent of the view.
@@ -161,6 +177,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Array} 
   */
   childViews: [],
+  
+  /** Outlets */
+  outlets: [],
   
   /** 
     Set to true when the item is enabled. 
@@ -538,7 +557,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     - register the view with the global views hash, which is used for mgmt
   */
   init: function() {
-    var parentView, path, root, idx, len, dp;
+    var parentView, path, root, idx, len, lp, dp;
     
     sc_super();
     SC.View.views[SC.guidFor(this)] = this; // register w/ views
@@ -564,6 +583,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         
       } else {
         this.prepareDisplay();
+        if (this.get('updateChildLayoutOnPrepare')) this.childLayoutDidChange() ;
         if (this.get('updateDisplayOnPrepare')) this.displayDidChange() ;
       }
 
@@ -572,6 +592,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // save this guid on the DOM element for reverse lookups.
     if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
+    
+    // register layout property observers .. this could be optimized into the
+    // class creation mechanism if local observers did not require explicit 
+    // setup.
+    lp = this.get('childLayoutProperties'); 
+    idx = lp.length;
+    while(--idx >= 0) {
+      this.addObserver(lp[idx], this, this.childLayoutDidChange);
+    }
     
     // register display property observers .. this could be optimized into the
     // class creation mechanism if local observers did not require explicit 
@@ -805,6 +834,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
+    By default, when you have to layout the display, it will also be laid out
+    once even before any properties or observers are setup.  This is usually
+    the behavior you want, but if you do something significantly different 
+    during the prepareDisplay method, you may want to turn this off.
+  */
+  updateChildLayoutOnPrepare: YES,
+  
+  /**
     By default, when you have to prepare the display, it will also be updated
     once even before any properties or observers are setup.  This is usually
     the behavior you want, but if you do something significantly different 
@@ -972,6 +1009,55 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   // LAYOUT
   //
 
+  /** 
+    This method is invoked whenever the layout of the view's child views has 
+    changed. You should override this method to update your child views to match 
+    the current state of the view.
+    
+    The default implementation does nothing.
+    
+    @returns {SC.View} receiver
+  */
+  updateChildLayout: function() {
+    //console.log('%@: updateLayout()'.fmt(this));
+    
+    var mixins = this.updateChildLayoutMixin, len = (mixins) ? mixins.length : 0;
+    for(var idx=0;idx<len;idx++) mixins[idx].call(this);
+  },
+
+  /** 
+    Call this method whenever the child view layout changes in such as way that
+    requires the view's child view layout to be updated.  This will schedule the 
+    view for layout at the end of the runloop.
+  */
+  childLayoutDidChange: function() {
+    this.set('childLayoutNeedsUpdate', YES) ;
+    SC.View.scheduleInRunLoop(SC.UPDATE_CHILD_LAYOUT_QUEUE, this);
+    return this ;
+  },
+  
+  childLayoutNeedsUpdate: NO,
+  
+  /**
+    This method will update the display location, but only if it needs an 
+    update.  Returns YES if the method was able to execute, NO if it needs
+    to be called again later.
+  */
+  updateChildLayoutIfNeeded: function(force) {
+    if (!this.get('childLayoutNeedsUpdate')) return YES;
+    if (!force & !this.get('isVisibleInWindow')) return NO ;
+    this.set('childLayoutNeedsUpdate', NO) ;
+    this.updateChildLayout() ;
+    return YES;
+  },
+  
+  /** 
+    You can set this array to include any properties that should immediately
+    invalidate the layout.  The layout will be automatically invalidated
+    when one of these properties change.
+  */
+  childLayoutProperties: [],
+  
   /** 
     This convenience method will take the current layout, apply any changes
     you pass and set it again.  It is more convenient than having to do this
@@ -1151,7 +1237,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null);
-  }.property().cacheable(),
+  }.property('layout').cacheable(),
   
   /**
     Computes what the frame of this view would be if the parent were resized
@@ -1411,7 +1497,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
 
     return ret ;
-  }.property().cacheable(),
+  }.property('layout').cacheable(),
 
   
   computeParentDimensions: function(frame) {
@@ -1443,6 +1529,35 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
+    This method is invoked on your view when the view is about to begin a
+    live resize session, such as a split view being resized. During the live
+    resize session, you may choose to delay expensive drawing operations until
+    the live resize in complete.
+    
+    @returns {void}
+  */
+  viewWillStartLiveResize: function() {
+    var ary = this.get('childViews');
+    for ( var idx = 0, len = ary.length; idx < len; idx++ ) {
+      ary[idx].viewWillStartLiveResize();
+    }
+  },
+
+  /**
+    This method is invoked on your view when the view has completed a live resize 
+    session, such as a split view being resized. Any expensive drawing you have
+    delayed can be done at this point, by calling this.displayDidChange().
+    
+    @returns {void}
+  */
+  viewDidEndLiveResize: function() {
+    var ary = this.get('childViews');
+    for ( var idx = 0, len = ary.length; idx < len; idx++ ) {
+      ary[idx].viewDidEndLiveResize();
+    }
+  },
+
+  /**
     This method is invoked on your view when the view resizes due to a layout
     change or due to the parent view resizing.  You can override this method
     to implement your own layout if you like, such as performing a grid 
@@ -1461,7 +1576,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     you can add others if you want.
   */
   displayLayoutDidChange: function() {
-
+    // console.log('displayLayoutDidChange');
     this.beginPropertyChanges() ;
     this.set('displayLayoutNeedsUpdate', YES);
     this.notifyPropertyChange('frame') ;
@@ -1490,6 +1605,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     happen once at the end of the run loop.
   */
   updateDisplayLayout: function() {
+    // console.log('updateDisplayLayout');
     var $ = this.$(), layoutStyle = this.get('layoutStyle'); // get style
     $.css(layoutStyle) ; // todo: add animation here.
   },
@@ -1732,7 +1848,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
       return didExec;
     },
     
-    order: [SC.DISPLAY_LOCATION_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
+    order: [SC.DISPLAY_LOCATION_QUEUE, SC.UPDATE_CHILD_LAYOUT_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
   }
     
 }) ;
@@ -1749,7 +1865,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
 */
 SC.outlet = function(path) {
   return function(key) {
-    return (this[key] =  SC.objectForPropertyPath(path, this)) ;
+    return (this[key] = SC.objectForPropertyPath(path, this)) ;
   }.property().outlet();
 };
 

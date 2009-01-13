@@ -650,7 +650,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
-    return event.normalized ? event : SC.Event.create(event) ;
+    if (event == window.event)
+      return SC.Event.create(event) ; // IE can't do event.normalized on an Event object
+    else
+      return event.normalized ? event : SC.Event.create(event) ;
   },
   
   _global: {},

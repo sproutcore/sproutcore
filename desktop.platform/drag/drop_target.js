@@ -171,7 +171,7 @@ SC.DropTarget = {
     
     @return {DragOp} Drag Operation actually performed
   */
-  performDragOperation: function(drag, op) { return SC.DRAG_NONE; },
+  performDragOperation: function(drag, op) { return SC.DRAG_NONE; }
   
   // /** 
   //   Called after a drag operation has completed or failed

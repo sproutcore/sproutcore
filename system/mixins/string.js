@@ -165,7 +165,6 @@ SC.String = {
     var first = ret.charAt(0), lower = first.toLowerCase() ;
     return (first !== lower) ? (lower + ret.slice(1)) : ret ;
   },
-
   
   /**
     Converts the string into a class name.  This method will camelize your 

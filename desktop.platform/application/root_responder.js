@@ -166,7 +166,8 @@ SC.RootResponder = SC.RootResponder.extend(
         if (SC.browser.msie) {
           var responder = this ;
           document.body['on' + keyName] = function(e) { 
-            return method.call(responder, SC.Event.normalizeEvent(e)); 
+            // return method.call(responder, SC.Event.normalizeEvent(e)); 
+            return method.call(responder, SC.Event.normalizeEvent(event || window.event)); // this is IE :(
           };
 
           // be sure to cleanup memory leaks
@@ -371,15 +372,16 @@ SC.RootResponder = SC.RootResponder.extend(
       handler = this.sendEvent('mouseUp', evt, this._mouseDownView);
     }
     
+    var view = this.targetViewForEvent(evt) ;
+
     // no one handled the mouseup... try doubleclick...
-    //if ( !handler && (this._clickCount === 2)) {
-    if(this._clickCount === 2){
-      handler = this.sendEvent('doubleClick', evt, this._mouseDownView);
+    if ((!handler || this._mouseDownView) && (this._clickCount === 2)) {
+      handler = this.sendEvent('doubleClick', evt, view);
     }
     
     // no one handled the doubleclick... try click...
     if (!handler) {
-      handler = this.sendEvent('click', evt, this._mouseDownView) ;
+      handler = this.sendEvent('click', evt, view) ;
     }
     this._mouseCanDrag = NO; this._mouseDownView = null ;
     
@@ -389,9 +391,12 @@ SC.RootResponder = SC.RootResponder.extend(
   dblclick: function(evt){
     if(SC.browser.isIE) {
       this._clickCount = 2;
-      this._onmouseup(evt);
+      // this._onmouseup(evt);
+      this.mouseup(evt);
     }
   },
+  
+  
   
   mousewheel: function(evt) {
     var view = this.targetViewForEvent(evt) ;
@@ -476,7 +481,13 @@ SC.RootResponder = SC.RootResponder.extend(
     }
   },
   
-  drag: function() { return false; }
+  drag: function() { return false; },
   
+  // FIXME: in FF, we need to cover any iframes with a view so that we can receive mousemoved events over them...
+  startCapturingMouseEvents: function(view) {
+    this._captureView = view;
+  },
+  
+  stopCapturingMouseEvents: function() { this._captureView = null; }
     
 }) ;
