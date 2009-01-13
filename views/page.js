@@ -83,7 +83,7 @@ SC.Page = SC.Object.extend(
       view.loc(locs[key]);
     }
     return this ;
-  },
+  }
   
   //needsDesigner: YES,
   

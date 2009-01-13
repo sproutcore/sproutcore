@@ -166,7 +166,8 @@ SC.RootResponder = SC.RootResponder.extend(
         if (SC.browser.msie) {
           var responder = this ;
           document.body['on' + keyName] = function(e) { 
-            return method.call(responder, SC.Event.normalizeEvent(e)); 
+            // return method.call(responder, SC.Event.normalizeEvent(e)); 
+            return method.call(responder, SC.Event.normalizeEvent(event || window.event)); // this is IE :(
           };
 
           // be sure to cleanup memory leaks
@@ -391,9 +392,12 @@ SC.RootResponder = SC.RootResponder.extend(
   dblclick: function(evt){
     if(SC.browser.isIE) {
       this._clickCount = 2;
-      this._onmouseup(evt);
+      // this._onmouseup(evt);
+      this.mouseup(evt);
     }
   },
+  
+  
   
   mousewheel: function(evt) {
     var view = this.targetViewForEvent(evt) ;
