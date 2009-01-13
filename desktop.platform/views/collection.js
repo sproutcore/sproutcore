@@ -584,7 +584,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (content === this._content) return this; // nothing to do
 
     var func = this._collection_contentPropertyDidChange ;
-
     // remove old observer, add new observer
     if (this._content) this._content.removeObserver('[]', this, func) ;
     if (content) content.addObserver('[]', this, func) ;
