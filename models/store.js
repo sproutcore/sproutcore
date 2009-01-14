@@ -66,9 +66,9 @@ SC.Store = SC.Object.create(
       if (data.destroyURL) rec.destroyURL = data.destroyURL;
       rec.updateAttributes(data, isLoaded, isLoaded) ;
       if (rec.needsAddToStore) store.addRecord(rec) ;
+      store.cleanRecord(rec);
       ret.push(rec) ;
     });
-//    },'dataHashes') ;  
 
     this.endPropertyChanges() ;
     this.set('updateRecordsInProgress',false) ;
@@ -86,7 +86,10 @@ SC.Store = SC.Object.create(
     this.commitRecords(recs); 
   },
   
-  commitRecords: function(recs) { recs.invoke('set','isDirty','false'); },
+  commitRecords: function(recs) {
+     
+    recs.invoke('set','isDirty','false'); 
+    },
   
   destroyRecords: function(recs) {
     var store = this ;
@@ -98,6 +101,8 @@ SC.Store = SC.Object.create(
   // ....................................
   // Record Helpers
   //
+  // Boolean Flag to tell whether the store is dirty
+  hasChanged: NO,
   
   /**
     Add a record instance to the store.  The record will now be monitored for
@@ -149,6 +154,17 @@ SC.Store = SC.Object.create(
     rec.removeObserver('*',this, this.recordDidChange) ;
     this.recordDidChange(rec) ; // this will remove from cols since destroyed.
   },
+  
+  cleanRecord: function(rec) {
+    var guid = rec._storeKey();
+    var dirty = this.get('_dirtyRecords') || {};
+    delete dirty[guid];
+    var count = 0;
+    for(var elem in dirty){
+      count = count + 1;
+    }
+    if (count > 0) this.set('hasChanged', NO);
+  },
 
   /**
     Since records are cached by primaryKey, whenever that key changes we need 
@@ -173,7 +189,6 @@ SC.Store = SC.Object.create(
     
     return rec;
   },
-
 
   /**
     You can pass any number of condition hashes to this, ending with a
@@ -227,7 +242,7 @@ SC.Store = SC.Object.create(
     return ret ;
   },
   
-  /**
+  /** @property
     Returns an array of all records in the store.  Mostly used for storing.
   */
   records: function() {
@@ -284,7 +299,7 @@ SC.Store = SC.Object.create(
   // ....................................
   // PRIVATE
   //
-  _records: {}, _changedRecords: null, _collections: {},
+  _records: {}, _changedRecords: {}, _collections: {}, _dirtyRecords: {},
   
   /** @private
     called whenever properties on a record change.
@@ -293,11 +308,17 @@ SC.Store = SC.Object.create(
     // add to changed records.  This will eventually notify collections.
     var guid    = rec._storeKey(),
         changed = this.get('_changedRecords') || {},
+        dirty = this.get('_dirtyRecords') || {},
         records = changed[guid] || {} ;
     records[SC.guidFor(rec)] = rec ;
 
     changed[guid] = records ;    
     this.set('_changedRecords',changed) ;
+    
+    // Set the global record changes
+    dirty[guid] = rec;
+    this.set('_dirtyRecords', dirty); 
+    this.set('hasChanged', YES);
   },
   
   // invoked whenever the changedRecords hash is updated. This will notify
@@ -341,7 +362,7 @@ SC.Store = SC.Object.create(
     
     // then clear changed records to start again.
     this._changedRecords = {} ;
-    
+    //this.set('hasChanged', NO);
   }.observes('_changedRecords')
     
 }) ;
