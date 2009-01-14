@@ -360,30 +360,44 @@ SC.RootResponder = SC.RootResponder.extend(
       this._drag = null ;
     }
     
-    var handler = null;
-    this._lastMouseUpAt = Date.now();
+    var handler = null, view = this._mouseDownView ;
+    this._lastMouseUpAt = Date.now() ;
 
     // record click count.
     evt.clickCount = this._clickCount ;
     
     // attempt the mouseup call only if there's a target.
     // don't want a mouseup going to anyone unless they handled the mousedown...
-    if (this._mouseDownView) {
-      // this._mouseDownView.tryToPerform('mouseUp', evt);
-      handler = this.sendEvent('mouseUp', evt, this._mouseDownView);
+    if (view) {
+      handler = this.sendEvent('mouseUp', evt, view) ;
+      
+      // try doubleClick
+      if (!handler && (this._clickCount === 2)) {
+        handler = this.sendEvent('doubleClick', evt, view) ;
+      }
+      
+      // try singleClick
+      if (!handler) {
+        handler = this.sendEvent('click', evt, view) ;
+      }
     }
     
-    var view = this.targetViewForEvent(evt) ;
-
-    // no one handled the mouseup... try doubleclick...
-    if ((!handler || this._mouseDownView) && (this._clickCount === 2)) {
-      handler = this.sendEvent('doubleClick', evt, view);
-    }
-    
-    // no one handled the doubleclick... try click...
+    // try whoever's under the mouse if we haven't handle the mouse up yet
     if (!handler) {
-      handler = this.sendEvent('click', evt, view) ;
+      view = this.targetViewForEvent(evt) ;
+      
+      // try doubleClick
+      if (this._clickCount === 2) {
+        handler = this.sendEvent('doubleClick', evt, view);
+      }
+      
+      // try singleClick
+      if (!handler) {
+        handler = this.sendEvent('click', evt, view) ;
+      }
     }
+    
+    // cleanup
     this._mouseCanDrag = NO; this._mouseDownView = null ;
     
     return (handler) ? evt.hasCustomEventHandling : YES ;
