@@ -375,7 +375,7 @@ SC.ViewDesigner = SC.Object.extend(
     case HEAD_ZONE:
       // if head aligned, shift head origin...
       if (!SC.none(head)) {
-        view.adjust(headKey, head + delta) ;
+        view.adjust(headKey, head - delta) ;
 
       // if we have a SIZE but no HEAD, assume centered or TAIL aligned
       } else if (!SC.none(size)) {
