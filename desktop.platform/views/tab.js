@@ -40,8 +40,6 @@ SC.TabView = SC.View.extend(
   itemIsEnabledKey: null,
   itemIconKey: null,
   itemWidthKey: null,
-  segmentLayout: null,
-  containerLayout: null,
   
   tabLocation: SC.TOP_LOCATION,
   
@@ -78,22 +76,13 @@ SC.TabView = SC.View.extend(
     this.get('segmentedView').set('items', this.get('items'));
     return this ;    
   }.observes('items'),
-  
-  _segmentLayoutDidChange: function(){
-    this.get('segmentedView').set('layout',this.get('segmentLayout'));
-    return this;
-  }.observes('segmentLayout'),
 
-  _containerLayoutDidChange: function(){
-    this.get('containerView').set('layout',this.get('containerLayout'));
-    return this;
-  }.observes('containerLayout'),
   /** @private
     Restore userDefault key if set.
   */
   init: function() {
     sc_super();
-    this._tab_nowShowingDidChange()._tab_itemsDidChange()._segmentLayoutDidChange()._containerLayoutDidChange();
+    this._tab_nowShowingDidChange()._tab_itemsDidChange();
   },
 
   awake: function() {

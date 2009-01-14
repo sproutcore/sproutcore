@@ -299,7 +299,7 @@ SC.Store = SC.Object.create(
   // ....................................
   // PRIVATE
   //
-  _records: {}, _changedRecords: null, _collections: {}, _dirtyRecords: {},
+  _records: {}, _changedRecords: {}, _collections: {}, _dirtyRecords: {},
   
   /** @private
     called whenever properties on a record change.

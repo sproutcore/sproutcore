@@ -44,7 +44,7 @@ SC.Validator.Number = SC.Validator.extend(
     
     switch(SC.$type(value)) {
       case SC.T_STRING:
-        if (value.length === '') {
+        if (value.length == '') {
           value = null ;
         } else if (this.get('places') > 0) {
           value = parseFloat(value) ;
@@ -62,7 +62,7 @@ SC.Validator.Number = SC.Validator.extend(
   
   validate: function(form, field) { 
     var value = field.get('fieldValue') ;
-    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
+    return (value == '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
   },
   
   validateError: function(form, field) {
@@ -75,5 +75,6 @@ SC.Validator.Number = SC.Validator.extend(
   */
   validateKeyDown: function(form, field, charStr) {
     return !!charStr.match(/[0-9\.,\-]/);
-  }    
+  }
+    
 }) ;

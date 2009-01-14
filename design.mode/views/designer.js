@@ -97,7 +97,7 @@ SC.ViewDesigner = SC.Object.extend(
     encodeLocalizedProperties().
   */
   encodeSimpleProperties: function(props, coder) {
-    //console.log('encodeSimple: %@'.fmt(props));
+    console.log('encodeSimple: %@'.fmt(props));
     
     var view = this.get('view'), proto = this.get('viewClass').prototype ;
     props.forEach(function(prop) {
@@ -132,7 +132,7 @@ SC.ViewDesigner = SC.Object.extend(
 
     // finally, emit the rootElementPath.
     var view = this.get('view'), parentView = view.get('parentView');
-    //console.log('parentView = %@'.fmt(parentView));
+    console.log('parentView = %@'.fmt(parentView));
     if (parentView) {
       var el = view.rootElement, parentRoot = parentView.rootElement;
       var path = [], nodes ;
@@ -334,7 +334,7 @@ SC.ViewDesigner = SC.Object.extend(
   
   _zoneForOffset: function(offset, min, max) {
     var thick = this.HOTZONE_THICKNESS ;
-    //console.log('offset %@'.fmt(offset))
+    
     return (offset<=(min+thick)) ? this.HEAD_ZONE : (offset>(max-thick)) ? this.TAIL_ZONE : this.NO_ZONE;
   },
   
@@ -342,7 +342,6 @@ SC.ViewDesigner = SC.Object.extend(
     Select on mouseDown.  If metaKey or shiftKey is pressed, add to
     selection.
   */
-
   mouseDown: function(evt) {
     if (!this.get('designIsEnabled')) return NO ;
     this.get('designController').select(this, evt.metaKey || evt.shiftKey);
@@ -360,7 +359,7 @@ SC.ViewDesigner = SC.Object.extend(
     // handle X hotzone
     i.zoneX = this._zoneForOffset(i.pageX, SC.minX(f), SC.maxX(f));
     i.zoneY = this._zoneForOffset(i.pageY, SC.minY(f), SC.maxY(f));
-    //console.log('izoneX: %@  izoneY %@'.fmt(i.zoneX,i.zoneY));
+    
     return YES ;
   },
   
@@ -371,8 +370,7 @@ SC.ViewDesigner = SC.Object.extend(
     var inAltZone = (altZone === HEAD_ZONE) || (altZone === TAIL_ZONE);
     var head = i[headKey], tail = i[tailKey], center = i[centerKey], 
         size = i[sizeKey];
-  
-    //console.log('current zone %@'.fmt(curZone))    
+        
     switch(curZone) {
     case HEAD_ZONE:
       // if head aligned, shift head origin...
@@ -419,6 +417,7 @@ SC.ViewDesigner = SC.Object.extend(
   
   mouseDragged: function(evt) {
     if (!this.get('designIsEnabled')) return NO ;
+
     // adjust the layout...
     var i = this._mouseDownInfo ;
     var deltaX = evt.pageX - i.pageX, deltaY = evt.pageY - i.pageY;
@@ -434,8 +433,7 @@ SC.ViewDesigner = SC.Object.extend(
   
   mouseUp: function(evt) {
     if (!this.get('designIsEnabled')) return NO ;
-    //console.log('%@: mouseUp'.fmt(this));
-    
+    console.log('%@: mouseUp'.fmt(this));
     return YES ;
   },
   
