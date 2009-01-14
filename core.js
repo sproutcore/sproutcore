@@ -177,7 +177,8 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
-    Returns YES if the passed object is an array or array-like.
+    Returns YES if the passed object is an array or array-like. Instances
+    of the NodeList class return NO.
     
     Unlike SC.$type this method returns true even if the passed object is 
     not formally array but appears to be array-like (i.e. has a length 
@@ -187,11 +188,10 @@ SC.mixin(/** @scope SC */ {
     @returns {Boolean} 
   */
   isArray: function(obj) {
+    if (obj && obj.objectAt) return YES ; // fast path
+
     var len = (obj ? obj.length : null), type = SC.typeOf(obj);
-    return !(SC.none(len) || 
-      // ((type === SC.T_FUNCTION) && !(obj instanceof NodeList)) || 
-      ((type === SC.T_FUNCTION) && (obj instanceof Array)) || 
-      (type === SC.T_STRING) || obj.setInterval) || (obj && obj.objectAt) ;
+    return !(SC.none(len) || (type === SC.T_FUNCTION) || (type === SC.T_STRING) || obj.setInterval) ;
   },
   
   /**
