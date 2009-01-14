@@ -319,6 +319,7 @@ SC.Store = SC.Object.create(
     dirty[guid] = rec;
     this.set('_dirtyRecords', dirty); 
     this.set('hasChanged', YES);
+    this.invokeOnce(this._changedRecordsObserver);
   },
   
   // invoked whenever the changedRecords hash is updated. This will notify
