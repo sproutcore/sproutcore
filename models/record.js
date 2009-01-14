@@ -785,8 +785,7 @@ SC.Record.Date = function(value,direction) {
   } else if (typeof(value) == "string") {
     // try to parse date. trim any decimal numbers at end since Rails sends
     // this sometimes.
-    var ret = Date.parseDate(value.replace(/\.\d+$/,'')) ;
-    if (!ret) ret = new Date(value);
+    var ret = new Date( Date.parse(value.replace(/\.\d+$/,'')) );
     if (ret) value = ret ;
   }
   return value ;
