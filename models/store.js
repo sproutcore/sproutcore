@@ -69,7 +69,6 @@ SC.Store = SC.Object.create(
       store.cleanRecord(rec);
       ret.push(rec) ;
     });
-//    },'dataHashes') ;  
 
     this.endPropertyChanges() ;
     this.set('updateRecordsInProgress',false) ;
@@ -191,7 +190,6 @@ SC.Store = SC.Object.create(
     return rec;
   },
 
-
   /**
     You can pass any number of condition hashes to this, ending with a
     recordType.  It will AND the results of each condition hash.
@@ -244,7 +242,7 @@ SC.Store = SC.Object.create(
     return ret ;
   },
   
-  /**
+  /** @property
     Returns an array of all records in the store.  Mostly used for storing.
   */
   records: function() {
