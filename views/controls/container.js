@@ -32,7 +32,7 @@ SC.ContainerView = SC.View.extend(
     (e.g. "MyApp.anotherPage.anotherView"), then the path will be followed 
     from the top-level.
     
-    @property {String}
+    @property {String, SC.View}
   */
   nowShowing: null,
 
@@ -93,20 +93,25 @@ SC.ContainerView = SC.View.extend(
   */
   nowShowingDidChange: function() {
     var nowShowing = this.get('nowShowing') ;
-    
-    // if nowShowing was set because the content was set directly, then 
-    // do nothing.
-    if (nowShowing === SC.CONTENT_SET_DIRECTLY) return ;
-    
-    // otherwise, if nowShowing is a non-empty string, try to find it...
     var content = null;
-    if (nowShowing && nowShowing.length>0) {
-      if (nowShowing.indexOf('.')>0) {
-        content = SC.objectForPropertyPath(nowShowing, null);
-      } else {
-        content = SC.objectForPropertyPath(nowShowing, this.get('page'));
+    //its a property path
+    if($type(nowShowing) === T_STRING){
+      // if nowShowing was set because the content was set directly, then 
+      // do nothing.
+      if (nowShowing === SC.CONTENT_SET_DIRECTLY) return ;
+
+      // otherwise, if nowShowing is a non-empty string, try to find it...
+      if (nowShowing && nowShowing.length>0) {
+        if (nowShowing.indexOf('.')>0) {
+          content = SC.objectForPropertyPath(nowShowing, null);
+        } else {
+          content = SC.objectForPropertyPath(nowShowing, this.get('page'));
+        }
       }
+    }else{ //its a view
+      content = nowShowing;
     }
+
     
     // only allow views
     if (content && !(content instanceof SC.View)) content = null;
