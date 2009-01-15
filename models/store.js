@@ -66,7 +66,7 @@ SC.Store = SC.Object.create(
       if (data.destroyURL) rec.destroyURL = data.destroyURL;
       rec.updateAttributes(data, isLoaded, isLoaded) ;
       if (rec.needsAddToStore) store.addRecord(rec) ;
-      store.cleanRecord(rec);
+      if (rec.get('changeCount') === 0) store.cleanRecord(rec);
       ret.push(rec) ;
     });
 
@@ -163,7 +163,10 @@ SC.Store = SC.Object.create(
     for(var elem in dirty){
       count = count + 1;
     }
-    if (count > 0) this.set('hasChanged', NO);
+    if (count === 0) {
+      this.set('hasChanged', NO);
+      console.log('hasChanged == NO'); 
+    }
   },
 
   /**
@@ -317,8 +320,9 @@ SC.Store = SC.Object.create(
     
     // Set the global record changes
     dirty[guid] = rec;
-    this.set('_dirtyRecords', dirty); 
+    this.set('_dirtyRecords', dirty);
     this.set('hasChanged', YES);
+    //console.log('hasChanged == YES'); 
     this.invokeOnce(this._changedRecordsObserver);
   },
   
