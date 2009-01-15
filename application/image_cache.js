@@ -113,7 +113,6 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
     @returns {SC.imageCache} receiver
   */
   loadImage: function(url, target, method, isBackgroundFlag) {
-    console.log('imageCache#loadImage() called...');
     // normalize params
     var type = SC.typeOf(target);
     if (SC.none(method) && SC.typeOf(target)===SC.T_FUNCTION) {
@@ -366,6 +365,9 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
   imageStatusDidChange: function(entry, status) {
     // var entry = this._imageEntryFor(url, NO);
     if (!entry) return; // nothing to do...
+    
+    var url = entry.url ;
+    
     // notify handlers.
     var value ;
     switch(status) {
