@@ -383,8 +383,8 @@ SC.Pane = SC.View.extend({
     
     // remove from the RootResponder also
     var responder = this.rootResponder ;
+    if (this.get('isKeyPane')) responder.makeKeyPane(null) ; // orders matter, remove keyPane first
     if (this.get('isMainPane')) responder.makeMainPane(null);
-    if (this.get('isKeyPane')) responder.makeKeyPane(null) ;
     responder.panes.remove(this) ;
     this.rootResponder = responder = null ;
 
