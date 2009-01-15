@@ -15,15 +15,23 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
 /**
   @class
   
-  The image cache can be used to control the order of loading images into the browser cache.
+  The image cache can be used to control the order of loading images into the
+   browser cache.
   
-  Images queues are necessary because browsers impose strict limits on the number of concurrent connections that can be open at any one time to any one host. By controlling the order and timing of your loads using this image queue, you can improve the percieved performance of your application by ensuring the images you need most load first.
+  Images queues are necessary because browsers impose strict limits on the 
+  number of concurrent connections that can be open at any one time to any one 
+  host. By controlling the order and timing of your loads using this image queue, 
+  you can improve the percieved performance of your application by ensuring the 
+  images you need most load first.
   
-  Note that if you use the SC.ImageView class, it will use this image cache for you automatically.
+  Note that if you use the SC.ImageView class, it will use this image cache for
+  you automatically.
   
   h1. Loading Images
   
-  When you need to display an image, simply call the loadImage() method with the URL of the image, along with a target/method callback. The signature of your callback should be:
+  When you need to display an image, simply call the loadImage() method with the
+  URL of the image, along with a target/method callback. The signature of your 
+  callback should be:
   
   {{{
     imageDidLoad: function(imageUrl, imageOrError) {
@@ -31,23 +39,37 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
     }
   }}}
 
-  The "imageOrError" parameter will contain either an image object or an error object if the image could not be loaded for some reason.  If you receive an error object, it will be one of SC.IMAGE_ABORTED_ERROR or SC.IMAGE_FAILED_ERROR.
+  The "imageOrError" parameter will contain either an image object or an error 
+  object if the image could not be loaded for some reason.  If you receive an 
+  error object, it will be one of SC.IMAGE_ABORTED_ERROR or SC.IMAGE_FAILED_ERROR.
   
-  You can also optionally specify that the image should be loaded in the background.  Background images are loaded with a lower priority than foreground images.
+  You can also optionally specify that the image should be loaded in the 
+  background.  Background images are loaded with a lower priority than foreground 
+  images.
   
   h1. Aborting Image Loads
   
-  If you request an image load but then no longer require the image for some reason, you should notify the imageCache by calling the releaseImage() method.  Pass the URL, target and method that you included in your original loadImage() request.  
+  If you request an image load but then no longer require the image for some 
+  reason, you should notify the imageCache by calling the releaseImage() method.  
+  Pass the URL, target and method that you included in your original loadImage() 
+  request.  
   
-  If you have requested an image before, you should always call releaseImage() when you are finished with it, even if the image has already loaded.  This will allow the imageCache to properly manage its own internal resources.
+  If you have requested an image before, you should always call releaseImage() 
+  when you are finished with it, even if the image has already loaded.  This 
+  will allow the imageCache to properly manage its own internal resources.
   
-  This method may remove the image from the queue of images that need or load or it may abort an image load in progress to make room for other images.  If the image is already loaded, this method will have no effect.
+  This method may remove the image from the queue of images that need or load or 
+  it may abort an image load in progress to make room for other images.  If the 
+  image is already loaded, this method will have no effect.
   
   h1. Reloading an Image
   
-  If you have already loaded an image, the imageCache will avoid loading the image again.  However, if you need to force the imageCache to reload the image for some reason, you can do so by calling reloadImage(), passing the URL. 
+  If you have already loaded an image, the imageCache will avoid loading the 
+  image again.  However, if you need to force the imageCache to reload the image 
+  for some reason, you can do so by calling reloadImage(), passing the URL. 
   
-  This will cause the image cache to attempt to load the image again the next time you call loadImage on it.
+  This will cause the image cache to attempt to load the image again the next 
+  time you call loadImage on it.
   
   @extends SC.Object
   @since SproutCore 1.0
@@ -69,13 +91,20 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
   /**
     Loads an image from the server, calling your target/method when complete.
     
-    You should always pass at least a URL and optionally a target/method.  If you do not pass the target/method, the image will be loaded in background priority.  Usually, however, you will want to pass a callback to be notified when the image has loaded.  Your callback should have a signature like:
+    You should always pass at least a URL and optionally a target/method.  If 
+    you do not pass the target/method, the image will be loaded in background 
+    priority.  Usually, however, you will want to pass a callback to be 
+    notified when the image has loaded.  Your callback should have a signature 
+    like:
 
-  {{{
-    imageDidLoad: function(imageUrl, imageOrError) { .. }
-  }}}
+    {{{
+      imageDidLoad: function(imageUrl, imageOrError) { .. }
+    }}}
     
-    If you do pass a target/method you can optionally also choose to load the image either in the foreground or in the background.  The image cache prioritizes foreground images over background images.  This does not impact how many images load at one time.
+    If you do pass a target/method you can optionally also choose to load the 
+    image either in the foreground or in the background.  The image cache 
+    prioritizes foreground images over background images.  This does not impact 
+    how many images load at one time.
     
     @param {String} url
     @param {Object} target
@@ -185,7 +214,8 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
     // if we have an entry, then initiate an image load with the proper 
     // callbacks.
     if (entry) {
-      var img = (entry.image = new Image()) ;
+      // var img = (entry.image = new Image()) ;
+      var img = entry.image ;
       img.onabort = this._imageDidAbort ;
       img.onerror = this._imageDidError ;
       img.onload = this._imageDidLoad ;
@@ -210,9 +240,11 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
     if (createIfNeeded === undefined) createIfNeeded = YES;
     var entry = this._images[url] ;
     if (!entry && createIfNeeded) {
+      var img = new Image() ;
       entry = this._images[url] = { 
-        url: url, status: this.IMAGE_WAITING, callbacks: [], retainCount: 0 
+        url: url, status: this.IMAGE_WAITING, callbacks: [], retainCount: 0, image: img
       };
+      img.entry = entry ; // provide a link back to the image
     }
     return entry ;
   },
@@ -304,7 +336,8 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
     // browser decides not to follow up.
     if (this._loading.indexOf(entry) >= 0) {
       queue.image.abort();
-      this.imageStatusDidChange(entry.url, this.ABORTED);
+      // this.imageStatusDidChange(entry.url, this.ABORTED);
+      this.imageStatusDidChange(entry, this.ABORTED);
     }
     
     return this ;
@@ -312,22 +345,26 @@ SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
   
   /** @private invoked by Image().  Note that this is the image instance */
   _imageDidAbort: function() {
-    SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.ABORTED);
+    // SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.ABORTED);
+    SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ABORTED);
   },
   
   _imageDidError: function() {
-    SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.ERROR);
+    // SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.ERROR);
+    SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.ERROR);
   },
   
   _imageDidLoad: function() {
-    SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.LOADED);
+    // SC.imageCache.imageStatusDidChange(this.src, SC.imageCache.LOADED);
+    SC.imageCache.imageStatusDidChange(this.entry, SC.imageCache.LOADED);
   },
 
   /** @private called whenever the image loading status changes.  Notifies
     items in the queue and then cleans up the entry.
   */
-  imageStatusDidChange: function(url, status) {
-    var entry = this._imageEntryFor(url, NO);
+  // imageStatusDidChange: function(url, status) {
+  imageStatusDidChange: function(entry, status) {
+    // var entry = this._imageEntryFor(url, NO);
     if (!entry) return; // nothing to do...
     // notify handlers.
     var value ;
