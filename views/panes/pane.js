@@ -259,7 +259,8 @@ SC.Pane = SC.View.extend({
     var keyView, responder, newKeyView, isKey;
     if (shouldForward && (responder = this.get('firstResponder'))) {
       newKeyView = (pane) ? pane.get('firstResponder') : null ;
-      keyView[methodName](newKeyView);
+      keyView = this.get('firstResponder') ;
+      if (keyView) keyView[methodName](newKeyView);
       
       if ((isKey !== undefined) && responder) {
         responder.set('isKeyResponder', isKey);
