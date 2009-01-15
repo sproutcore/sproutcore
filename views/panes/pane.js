@@ -340,7 +340,7 @@ SC.Pane = SC.View.extend({
   */
   blurMainTo: function(pane) {
     this.set('isMainPane', NO) ;
-    this.remove() ;
+    // this.remove() ;
   },
   
   /** 
