@@ -298,6 +298,15 @@ SC.Store = SC.Object.create(
     if (opts.callback) opts.callback(records,count) ; 
   },
   
+  dirtyRecords: function(){
+    var dirty = this.get('_dirtyRecords') || {};
+    var returnAry = [];
+    for(var elem in dirty){
+      if (dirty[elem] !== null) returnAry.push(dirty[elem]);
+    }
+    return returnAry;
+  }.property(),
+  
   // ....................................
   // PRIVATE
   //
