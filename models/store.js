@@ -66,7 +66,7 @@ SC.Store = SC.Object.create(
       if (data.destroyURL) rec.destroyURL = data.destroyURL;
       rec.updateAttributes(data, isLoaded, isLoaded) ;
       if (rec.needsAddToStore) store.addRecord(rec) ;
-      if (rec.get('changeCount') === 0) store.cleanRecord(rec);
+      if (rec.changeCount === 0) store.cleanRecord(rec);
       ret.push(rec) ;
     });
 
