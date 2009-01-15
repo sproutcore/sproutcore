@@ -404,7 +404,8 @@ SC.RootResponder = SC.RootResponder.extend(
   },
 
   dblclick: function(evt){
-    if(SC.browser.isIE) {
+    console.log('dblclick called') ;
+    if (SC.browser.isIE) {
       this._clickCount = 2;
       // this._onmouseup(evt);
       this.mouseup(evt);

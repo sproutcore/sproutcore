@@ -46,6 +46,8 @@ SC.DialogPane = SC.Pane.extend({
   */
   dialogView: null,
   
+  mouseDown: function(evt) { return YES; },
+  
   /** @private */
   dialogViewBindingDefault: SC.Binding.single(),
   

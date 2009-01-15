@@ -19,7 +19,7 @@ require('views/mixins/editable') ;
 SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 /** @scope SC.TextFieldView.prototype */ {
   
-  emptyElement: '<%@1><span class="sc-hint"></span><input type="text" /></%@1>',
+  emptyElement: '<%@1><span class="sc-hint"></span><span class="sc-input"><input type="text" /></span></%@1>',
   tagName: 'label',
   styleClass: 'sc-text-field-view',
   
@@ -94,7 +94,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       if (SC.browser.mozilla) {
         var f = this.convertFrameToView(this.get('frame'), null) ;
         var top = f.y, left = f.x, width = f.width, height = f.height ;
-        top += 1, left += 1, width -= 4, height -= 6 ; // brittle, but the layout is correct :(
+        top += 3, left += 3, width -= 6, height -= 6 ; // brittle, but the layout is correct :(
         var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
         this.$input().attr('style', style) ;
       }
