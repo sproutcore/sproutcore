@@ -165,7 +165,6 @@ SC.Store = SC.Object.create(
     }
     if (count === 0) {
       this.set('hasChanged', NO);
-      console.log('hasChanged == NO'); 
     }
   },
 

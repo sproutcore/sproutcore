@@ -281,8 +281,8 @@ SC.Record = SC.Object.extend(
     
     if (changed) {
       this.beginPropertyChanges() ;
-      this.set('changeCount',0) ;
       this.set('isLoaded',isLoaded) ;
+      this.set('changeCount',0) ;
       this.allPropertiesDidChange() ;
       this.endPropertyChanges() ;
 
@@ -664,8 +664,7 @@ SC.Record = SC.Object.extend(
   _storeKey: function() { 
     if (!this.constructor._storeKey) debugger ;
     return this.constructor._storeKey(); 
-  }  
-  
+  }
      
 }) ;
 
