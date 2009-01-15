@@ -93,6 +93,9 @@ SC.ImageView = SC.View.extend(SC.Control,
   updateDisplay: function() {
     // the image source is the value if the status is LOADED or blank
     var status = this.get('status'), value = this.get('value');
+    
+    if (status === SC.IMAGE_STATE_NONE && value) this._image_valueDidChange() ; // setup initial state
+    
     var src = (status === SC.IMAGE_STATE_LOADED) ? value : SC.BLANK_IMAGE_URL;
     var className = ['sc-view',this.get('styleClass')];
     if (status === SC.IMAGE_STATE_SPRITE) className.push(value);
@@ -107,7 +110,7 @@ SC.ImageView = SC.View.extend(SC.Control,
     var value = this.get('value'), isUrl = SC.ImageView.valueIsUrl(value);
     
     // if the old image is still loading, cancel it
-    if (this._loadingUrl) SC.imageCache.abortImage(this._loadingUrl);
+    // if (this._loadingUrl) SC.imageCache.abortImage(this._loadingUrl);
     
     // now update local state as needed....
     if (isUrl && this.get('useImageCache')) {
@@ -148,6 +151,6 @@ SC.ImageView = SC.View.extend(SC.Control,
   name.
 */
 SC.ImageView.valueIsUrl = function(value) {
-  return value.indexOf('/') >= 0 ;
+  return value ? value.indexOf('/') >= 0 : NO ;
 } ;
 

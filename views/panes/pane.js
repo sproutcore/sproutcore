@@ -259,7 +259,8 @@ SC.Pane = SC.View.extend({
     var keyView, responder, newKeyView, isKey;
     if (shouldForward && (responder = this.get('firstResponder'))) {
       newKeyView = (pane) ? pane.get('firstResponder') : null ;
-      keyView[methodName](newKeyView);
+      keyView = this.get('firstResponder') ;
+      if (keyView) keyView[methodName](newKeyView);
       
       if ((isKey !== undefined) && responder) {
         responder.set('isKeyResponder', isKey);
@@ -339,7 +340,7 @@ SC.Pane = SC.View.extend({
   */
   blurMainTo: function(pane) {
     this.set('isMainPane', NO) ;
-    this.remove() ;
+    // this.remove() ;
   },
   
   /** 
@@ -382,8 +383,8 @@ SC.Pane = SC.View.extend({
     
     // remove from the RootResponder also
     var responder = this.rootResponder ;
+    if (this.get('isKeyPane')) responder.makeKeyPane(null) ; // orders matter, remove keyPane first
     if (this.get('isMainPane')) responder.makeMainPane(null);
-    if (this.get('isKeyPane')) responder.makeKeyPane(null) ;
     responder.panes.remove(this) ;
     this.rootResponder = responder = null ;
 
