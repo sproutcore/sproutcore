@@ -115,20 +115,22 @@ SC.ImageView = SC.View.extend(SC.Control,
     // now update local state as needed....
     if (isUrl && this.get('useImageCache')) {
       var isBackground = this.get('isVisibleInWindow') || this.get('canLoadInBackground');
+      
+      this._loadingUrl = value ; // note that we're loading...
       SC.imageCache.loadImage(value, this, this.imageDidLoad, isBackground);
-
-      this.set('status', SC.IMAGE_STATE_LOADING);
-      this._loadingUrl = value ;
+      
+      // only mark us as loading if we are still loading...
+      if (this._loadingUrl) this.set('status', SC.IMAGE_STATE_LOADING);
       
     // otherwise, just set state immediately
     } else {
+      this._loadingUrl = null ; // not loading...
       this.set('status', (isUrl) ? SC.IMAGE_STATE_LOADED : SC.IMAGE_STATE_SPRITE);
       this.displayDidChange(); // call manually in case status did not change
       // (e.g value changes from one sprite to another)
     }
-    
   }.observes('value'),
-
+  
   /** 
     Called when the imageCache indicates that the image has loaded. 
     Changing the image state will update the display.
