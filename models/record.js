@@ -664,7 +664,15 @@ SC.Record = SC.Object.extend(
   _storeKey: function() { 
     if (!this.constructor._storeKey) debugger ;
     return this.constructor._storeKey(); 
-  }
+  },
+  
+  // Store Cleaner function
+  _cleanRecordInStore: function(){
+    var cleanCount = this.get('changeCount');
+    if (cleanCount === 0) {
+      SC.Store.cleanRecord(this);
+    }
+  }.observes('changeCount')
      
 }) ;
 
