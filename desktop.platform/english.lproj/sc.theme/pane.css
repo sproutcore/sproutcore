@@ -1,3 +1,4 @@
 .sc-theme .sc-dialog-pane {
+  z-index: 2000;
   background: static_url('panels/overlay') repeat;
 }

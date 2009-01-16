@@ -34,6 +34,11 @@ SC.DialogPane = SC.Pane.extend({
   
   acceptsKeyFocus: YES,
   
+  // mouseDown: function(evt) {
+  //   console.log('mouseDown invoked on %@'.fmt(this));
+  //   return YES ;
+  // },
+  
   /**
     Set this to the view you want to act as the dialog within the dialog pane.
     

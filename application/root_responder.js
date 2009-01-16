@@ -246,7 +246,7 @@ SC.RootResponder = SC.Object.extend({
 
     // last stop, this defaultResponder
     target = this.get('defaultResponder');
-    if (target.respondsTo(methodName)) return target;
+    if (target && target.respondsTo(methodName)) return target;
 
     return null;
   },
