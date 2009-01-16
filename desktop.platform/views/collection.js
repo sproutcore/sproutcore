@@ -618,7 +618,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   contentPropertyDidChange: function(target, key) {
     this.adjust(this.computeLayout()) ;
-    this.set('isDirty', YES);
+    this.set('isDirty', YES) ;
+    this.invalidateNowShowingRange() ;
     return this ;
   },
   
@@ -655,12 +656,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var old = this._nowShowingRange_clippingFrame; // old cf
     var range = this._nowShowingRange_cachedRange ; // old range
     
-    if (!range || !old || !SC.rectsEqual(cf, old)) {
+    // if (!range || !old || !SC.rectsEqual(cf, old) || !this._nowShowingIsValid) {
       this._nowShowingRange_clippingFrame = cf ; // save
+      // this._nowShowingIsValid = YES ;
 
       // ask the subclass to compute the content range in frame...
       range = this.contentRangeInFrame(cf) ;
       var content = SC.makeArray(this.get('content'));
+      
+      // console.log('nowShowingRange content length is %@'.fmt(content.get('length')));
 
       if (!range) range = { start: 0, length: 0 }; // default
        
@@ -670,7 +674,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
       // save range...
       this._nowShowingRange_cachedRange = range ;
-    }
+    // }
+    
+    // console.log('nowShowing range of %@ is {%@, %@}'.fmt(this, range.start, range.length));
     
     return range ;
   }.property('content', 'clippingFrame').cacheable(),
@@ -682,7 +688,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     prefer.
   */
   invalidateNowShowingRange: function() {
-    this.notifyPropertyDidChange('nowShowingRange');
+    this.notifyPropertyChange('nowShowingRange');
   },
   
   /**
@@ -848,6 +854,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
   */
   updateChildren: function(fullUpdate) {
+    // console.log('updateChildren invoked on %@, fullUpdate is %@'.fmt(this, fullUpdate));
     var f ;
 
     // force fullUpdate if we are currently dirty.
@@ -881,6 +888,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       // iterate through all of the views and insert them.  If the view 
       // already exists, it will simply be reused.
       var idx = SC.maxRange(range) ;
+      
+      // console.log('range is {%@, %@}'.fmt(range.start, range.length));
       while(--idx >= range.start) {
         c = content.objectAt(idx) ;
         key = SC.guidFor(c) ;
@@ -2417,6 +2426,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       // now insert objects at new location
       content.replace(idx, 0, objects) ;
       content.endPropertyChanges(); // restart notifications
+      
+      // TODO: fix me, we need to correct the height cache after a drag
+      // this.invalidateNowShowingRange() ;
+      // this._list_rowOffsets = null ; // hack
+      // this.updateChildren(YES) ;
       
       // make the op into its actual value
       op = SC.DRAG_MOVE ;

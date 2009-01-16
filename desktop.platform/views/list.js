@@ -109,11 +109,15 @@ SC.ListView = SC.CollectionView.extend(
     @returns {Number} rowHeight
   */
   collectionViewHeightForRowAtContentIndex: function(collectionView, index) {
+    // console.log('collectionViewHeightForRowAtContentIndex invoked in %@ with index %@'.fmt(this, index));
+    // console.log('contentRowHeightKey is %@'.fmt(this.get('contentRowHeightKey')));
     // just test for presence of a rowHeightKey..to implement fast path...
     if (!this.contentRowHeightKey) return this.get('rowHeight');
-    var key = this.get('contentRowHeightKey'), content = this.get('content');
+    var key = this.get('contentRowHeightKey'), content = this.get('content'), rowHeight;
     if (content) content = content.objectAt(index);
-    return content ? content.get(key) : this.get('rowHeight');
+    rowHeight = content ? content.get(key) : this.get('rowHeight');
+    // console.log('content.get(key) is %@'.fmt(content ? content.get(key) : undefined));
+    return rowHeight ;
   },
   
   /**
@@ -183,6 +187,8 @@ SC.ListView = SC.CollectionView.extend(
     it will simply do some math...
   */
   offsetForRowAtContentIndex: function(index) {
+    if (index === 0) return 0 ;
+    
     // do some simple math if we have uniform row heights...
     if (this.get('hasUniformRowHeights')) {
       return this.get('rowHeight') * index ;
@@ -214,16 +220,21 @@ SC.ListView = SC.CollectionView.extend(
       // now, work our way forward, building the cache of offsets.  Use
       // cached heights...
       if (ret===undefined) ret = offsets[cur] = 0 ;
-      while(cur < index) {
-        cur = cur + 1; // go to next offset
-        
+      while (cur < index) {
         // get height...recache if needed....
-        height = this._list_heightForRowAtContentIndex(index) ;
+        // height = this._list_heightForRowAtContentIndex(index) ;
+        height = this._list_heightForRowAtContentIndex(cur) ;
+        
+        // console.log('index %@ has height %@'.fmt(cur, height));
         
         // add to ret and save in cache
         ret = ret + height ;
+        
+        cur++; // go to next offset
         offsets[cur] = ret ;
       }
+      
+      // console.log('index %@ is offset %@'.fmt(index, ret)) ;
       
       return ret ;
     }
@@ -245,6 +256,7 @@ SC.ListView = SC.CollectionView.extend(
     faster.
   */
   _list_heightForRowAtContentIndex: function(index) {
+    // console.log('_list_heightForRowAtContentIndex invoked on %@ with index %@'.fmt(this, index));
     var heights = this._list_rowHeights;
     if (!heights) heights = this._list_rowHeights = [] ;
 
@@ -252,6 +264,8 @@ SC.ListView = SC.CollectionView.extend(
     if (height===undefined) {
       height = heights[index] = this.invokeDelegateMethod(this.delegate, 'collectionViewHeightForRowAtContentIndex', this, index) || 0 ;
     }
+    
+    // console.log('height in _list_heightForRowAtContentIndex is %@'.fmt(height));
 
     return height ;
   },
@@ -285,6 +299,7 @@ SC.ListView = SC.CollectionView.extend(
     compute all row offsets leading up to the frame.
   */
   contentRangeInFrame: function(frame) {
+    // console.log('contentRangeInFrame invoked on %@ with frame {%@, %@, %@, %@}'.fmt(this, frame.x, frame.y, frame.width, frame.height));
     var min, max, ret, rowHeight ;
     var minY = SC.minY(frame), maxY = SC.maxY(frame);
     // use some simple math...
@@ -297,21 +312,29 @@ SC.ListView = SC.CollectionView.extend(
     } else {
       var content = this.get('content');
       var len = (content ? content.get('length') : 0), offset = 0;
+
+      // console.log('contentRangeInFrame content length is %@'.fmt(len));
+
       min = null; 
       max = 0;
       do {
         offset += this.offsetForRowAtContentIndex(max); // add offset.
+        // console.log('offset is now %@'.fmt(offset));
         if ((min===null) && (offset >= minY)) min = max; // set min
+        max++ ;
       } while (max<len && offset < maxY);
     }
     
     // convert to range...
-    ret = { start: min, length: max - min } ; 
+    ret = { start: min, length: max - min } ;
+    
+    // console.log('ret is {%@, %@}'.fmt(ret.start, ret.length));
     return ret ;
   },
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
+    // console.log('layoutItemView invoked on %@'.fmt(this));
 
     // use cached hash to reduce memory allocs
     var layout = this._list_cachedItemViewLayoutHash ;
@@ -322,9 +345,10 @@ SC.ListView = SC.CollectionView.extend(
     // set top & height...
     layout.top = this.offsetForRowAtContentIndex(contentIndex);
     layout.height = this.heightForRowAtContentIndex(contentIndex);
-    layout.zIndex = contentIndex;
+    // layout.zIndex = contentIndex;
     
-    itemView.adjust(layout);
+    itemView.adjust(layout) ;
+    // itemView.set('layout', layout) ; // TODO: why does this not work????
   },
   
   insertionPointClass: SC.View.extend({
