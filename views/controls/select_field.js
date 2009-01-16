@@ -70,7 +70,7 @@ SC.SelectFieldView = SC.FieldView.extend(
     @returns YES if the item should be enabled, NO otherwise
   */  
   validateMenuItem: function(itemValue, itemName) {
-   return true ;
+    return true ;
   },
 
   /**
@@ -81,16 +81,16 @@ SC.SelectFieldView = SC.FieldView.extend(
     @returns sorted array of objects
   */
   sortObjects: function(objects) {
-   var nameKey = this.get('sortKey') || this.get('nameKey') ;
-   objects = objects.sort(function(a,b) {
-     if (nameKey) {
-       a = a.get ? a.get(nameKey) : a[nameKey] ;
-       b = b.get ? b.get(nameKey) : b[nameKey] ;
-     }
-     return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-   }) ;
+    var nameKey = this.get('sortKey') || this.get('nameKey') ;
+    objects = objects.sort(function(a,b) {
+      if (nameKey) {
+        a = a.get ? a.get(nameKey) : a[nameKey] ;
+        b = b.get ? b.get(nameKey) : b[nameKey] ;
+      }
+      return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
+    }) ;
 
-   return objects ;
+    return objects ;
   },
 
   /**
@@ -98,187 +98,167 @@ SC.SelectFieldView = SC.FieldView.extend(
     need to do this since the menu will be rebuilt as its data changes.
   */
   rebuildMenu: function() {
-   this._rebuildMenu() ;
+    // get list of objects.
+    var nameKey = this.get('nameKey') ;
+    var valueKey = this.get('valueKey') ;
+    var objects = this.get('objects') ;
+    var fieldValue = this.get('value') ;
+   
+    // get the localization flag.
+    var shouldLocalize = this.get('localize'); 
+   
+    // convert fieldValue to guid, if it is an object.
+    if (!valueKey && fieldValue) fieldValue = SC.guidFor(fieldValue) ;
+    if ((fieldValue === null) || (fieldValue === '')) fieldValue = '***' ;
+   
+    if (objects) {
+      objects = Array.from(objects) ; // make array.
+      objects = this.sortObjects(objects) ; // sort'em.
+      var html = [] ;       
+   
+      var emptyName = this.get('emptyName') ;
+      if (emptyName) {
+        if (shouldLocalize) emptyName = emptyName.loc() ;
+        html.push('<option value="***">%@</option>'.fmt(emptyName)) ;
+        html.push('<option disabled="disabled"></option>') ;
+      }
+   
+      // generate option elements.
+      objects.forEach(function(object) {
+        if (object) {
+   
+          // either get the name from the object or convert object to string.
+          var name = nameKey ? (object.get ? object.get(nameKey) : object[nameKey]) : object.toString() ;
+   
+          // localize name if specified.
+          if(shouldLocalize)
+          {
+            name = name.loc();
+          }
+   
+          // get the value using the valueKey or the object if no valueKey.
+          // then convert to a string or use _guid if one of available.
+          var value = (valueKey) ? (object.get ? object.get(valueKey) : object[valueKey]) : object ;
+          if (value) value = (SC.guidFor(value)) ? SC.guidFor(value) : value.toString() ;
+   
+          // render HTML
+          var disable = (this.validateMenuItem && this.validateMenuItem(value, name)) ? '' : 'disabled="disabled" ' ;
+          html.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
+   
+        // null value means separator.
+        } else {
+          html.push('<option disabled="disabled"></option>') ;
+        }
+      }, this );
+   
+      // replace the contents of this HTML element.
+      this.$input().html(html.join(""));//this.update(html.join("")); //TODO: this won't work
+      this.setFieldValue(fieldValue);
+   
+    } else {
+      this.set('value',null);
+    }
   },
-
+   
   // .......................................
   // PRIVATE
   //
-  
+   
   $input: function() { return this.$(); },
-  
-
-  /** @private */
+   
+  /* @private */
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
     } else return sc_super();
   },
-
+   
   // when fetching the raw value, convert back to an object if needed...
   /** @private */
-  // getFieldValue: function() {
-  //  var value = this.getFieldValue(); // get raw value... 
-  //  var valueKey = this.get('valueKey') ;
-  //  var objects = this.get('objects') ;
-  //  
-  //  // Handle empty selection.
-  //  if (value == '***') {
-  //    value = null ;
-  // 
-  //  // If no value key was set and there are objects then match back to an
-  //  // object.
-  //  } else if (value && objects) {
-  //    objects = Array.from(objects) ;
-  //    var loc = objects.length ;
-  //    var found = null ; // matching object goes here.
-  //    while(!found && (--loc >= 0)) {
-  //      var object = objects[loc] ;
-  //    
-  //      // get value using valueKey if there is one or use object
-  //      // map to _guid or toString.
-  //      if (valueKey) object = (object.get) ? object.get(valueKey) : object[valueKey] ;
-  //      var ov = (object) ? (SC.guidFor(object) ? SC.guidFor(object) : object.toString()) : null ;
-  //    
-  //      // use this object value if it matches.
-  //      if (value == ov) found = object ;
-  //    }
-  //  }
-  //  
-  //  return valueKey ? value : found ;
-  // },
-
-  // when setting the raw value, convert from object...
-  /** @private */
-  // setFieldValue: function(nv) {
-  //  if (nv) {
-  //    nv = SC.guidFor(nv) ? SC.guidFor(nv) : nv.toString() ;
-  //  } else {
-  //    nv = "***" ;
-  //  }
-  //  if (this.getFieldValue() != nv) this.setFieldValue(nv);
-  // },
-
-  // this method is called anytime the objects property or any of its member
-  // objects change.
-  _rebuildMenu: function() {     
-   // get list of objects.
-   var nameKey = this.get('nameKey') ;
-   var valueKey = this.get('valueKey') ;
-   var objects = this.get('objects') ;
-   var fieldValue = this.get('value') ;
-   
-   // get the localization flag.
-   var shouldLocalize = this.get('localize'); 
-   
-   // convert fieldValue to guid, if it is an object.
-   if (!valueKey && fieldValue) fieldValue = SC.guidFor(fieldValue) ;
-   if ((fieldValue === null) || (fieldValue === '')) fieldValue = '***' ;
-
-   if (objects) {
-     objects = Array.from(objects) ; // make array.
-     objects = this.sortObjects(objects) ; // sort'em.
-     var html = [] ;       
-
-     var emptyName = this.get('emptyName') ;
-     if (emptyName) {
-       if (shouldLocalize) emptyName = emptyName.loc() ;
-       html.push('<option value="***">%@</option>'.fmt(emptyName)) ;
-       html.push('<option disabled="disabled"></option>') ;
-     }
-
-     // generate option elements.
-     objects.forEach(function(object) {
-       if (object) {
-       
-         // either get the name from the object or convert object to string.
-         var name = nameKey ? (object.get ? object.get(nameKey) : object[nameKey]) : object.toString() ;
-
-         // localize name if specified.
-         if(shouldLocalize)
-         {
-           name = name.loc();
-         }
-
-         // get the value using the valueKey or the object if no valueKey.
-         // then convert to a string or use _guid if one of available.
-         var value = (valueKey) ? (object.get ? object.get(valueKey) : object[valueKey]) : object ;
-         if (value) value = (SC.guidFor(value)) ? SC.guidFor(value) : value.toString() ;
-       
-         // render HTML
-         var disable = (this.validateMenuItem && this.validateMenuItem(value, name)) ? '' : 'disabled="disabled" ' ;
-         html.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
-   
-       // null value means separator.
-       } else {
-         html.push('<option disabled="disabled"></option>') ;
-       }
-     }, this );
-
-     // replace the contents of this HTML element.
-     this.$input().html(html.join(""));//this.update(html.join("")); //TODO: this won't work
-     this.setFieldValue(fieldValue);
-
-   } else {
-     this.set('value',null);
-   }
+  getFieldValue: function() {
+    var value = sc_super(); // get raw value... 
+    var valueKey = this.get('valueKey') ;
+    var objects = this.get('objects') ;
+    
+    // Handle empty selection.
+    if (value == '***') {
+      value = null ;
+    
+    // If no value key was set and there are objects then match back to an
+    // object.
+    } else if (value && objects) {
+      objects = Array.from(objects) ;
+      var loc = objects.length ;
+      var found = null ; // matching object goes here.
+      while(!found && (--loc >= 0)) {
+        var object = objects[loc] ;
+      
+        // get value using valueKey if there is one or use object
+        // map to _guid or toString.
+        if (valueKey) object = (object.get) ? object.get(valueKey) : object[valueKey] ;
+        var ov = (object) ? (SC.guidFor(object) ? SC.guidFor(object) : object.toString()) : null ;
+      
+        // use this object value if it matches.
+        if (value == ov) found = object ;
+      }
+    }
+    
+    return valueKey ? value : found ;
   },
-
+  
   // object changes to the objects array of objects if possible.
   _objectsObserver: function() {
-
-   if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
-     var loc ;
-     var objects = Array.from(this.get('objects')) ;
-     var func = this._objectsItemObserver ;
-   
-     // stop observing old objects.
-     if (this._objects) {
-       loc = this._objects.length ;
-       while(--loc >= 0) {
-         var object = this._objects[loc] ;
-         if (object && object.removeObserver) {
-           if (this._nameKey && this._valueKey) {
-             object.removeObserver(this._nameKey, this, func) ;
-             object.removeObserver(this._valueKey, this, func) ;
-           } else {
-             object.removeObserver('*', this, func) ;
-           } // if (this._nameKey)
-         } // if (object &&...)
-       } // while(--loc)
-     } // if (this._objects)
-
-     // start observing new objects.
-     this._objects = objects ;
-     this._nameKey = this.get('nameKey') ;
-     this._valueKey = this.get('valueKey') ;
-   
-     if (this._objects) {
-       loc = this._objects.length ;
-       while(--loc >= 0) {
-         var object = this._objects[loc] ;
-         if (object && object.addObserver) {
-           if (this._nameKey && this._valueKey) {
-             object.addObserver(this._nameKey, this, func) ;
-             object.addObserver(this._valueKey, this, func) ;
-           } else {
-             object.addObserver('*', this, func) ;
-           } // if (this._nameKey)
-         } // if (object &&...)
-       } // while(--loc)
-     } // if (this._objects)
-
-    this._rebuildMenu() ;
-   } // if (this.didChangeFor...)
+    if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
+      var loc ;
+      var objects = Array.from(this.get('objects')) ;
+      var func = this._objectsItemObserver ;
+    
+      // stop observing old objects.
+      if (this._objects) {
+        loc = this._objects.length ;
+        while(--loc >= 0) {
+          var object = this._objects[loc] ;
+          if (object && object.removeObserver) {
+            if (this._nameKey && this._valueKey) {
+              object.removeObserver(this._nameKey, this, func) ;
+              object.removeObserver(this._valueKey, this, func) ;
+            } else {
+              object.removeObserver('*', this, func) ;
+            } // if (this._nameKey)
+          } // if (object &&...)
+        } // while(--loc)
+      } // if (this._objects)
+    
+      // start observing new objects.
+      this._objects = objects ;
+      this._nameKey = this.get('nameKey') ;
+      this._valueKey = this.get('valueKey') ;
+    
+      if (this._objects) {
+        loc = this._objects.length ;
+        while(--loc >= 0) {
+          var object = this._objects[loc] ;
+          if (object && object.addObserver) {
+            if (this._nameKey && this._valueKey) {
+              object.addObserver(this._nameKey, this, func) ;
+              object.addObserver(this._valueKey, this, func) ;
+            } else {
+              object.addObserver('*', this, func) ;
+            } // if (this._nameKey)
+          } // if (object &&...)
+        } // while(--loc)
+      } // if (this._objects)
+    
+     this.rebuildMenu() ;
+    } // if (this.didChangeFor...)
   }.observes('objects','nameKey','valueKey'),
 
   // this is invoked anytime an item we are interested in in the menu changes
   // rebuild the menu when this happens, but only one time.
   _objectsItemObserver: function(item, key, value) {
     if (item.didChangeFor(SC.guidFor(this), key)) {
-      // console.log('rebuildMenu') ;
-      this._rebuildMenu() ;
+      this.rebuildMenu() ;
     }
   },
 
@@ -293,15 +273,12 @@ SC.SelectFieldView = SC.FieldView.extend(
   },
 
   _isFocusedObserver: function() {
-    var isFocused = this.get('isFocused');
-    //this.setClassName('focus', isFocused);
+    this.get('isFocused') ? this.$().addClass('focus') : this.$().removeClass('focus') ;
   }.observes('isFocused'),
 
-
   init: function() {
-    //arguments.callee.base.call(this);
     sc_super();
-    this._rebuildMenu();
+    this.rebuildMenu();
     
     var input = this.$();
     
@@ -309,6 +286,7 @@ SC.SelectFieldView = SC.FieldView.extend(
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
     SC.Event.add(input, 'focus',this, this.fieldDidFocus);
   },
+  
   destroy: function() {
     var input = this.$input();
     SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
