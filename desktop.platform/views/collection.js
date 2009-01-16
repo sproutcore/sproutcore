@@ -2693,15 +2693,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // Perform the action.  Supports legacy behavior as well as newer style
   // action dispatch.
   _action: function(view, evt) {
-    
+    // console.log('_action invoked on %@ with view %@, evt %@'.fmt(this, view, evt));
     var action = this.get('action');
     var target = this.get('target') || null;
+    // console.log('action %@, target %@'.fmt(action, target));
     if (action) {
       // if the action is a function, just call it
       if (SC.$type(action) == SC.T_FUNCTION) return this.action(view, evt) ;
       
       // otherwise, use the new sendAction style
-      SC.app.sendAction(action, target, this) ;
+      var pane = this.get('pane') ;
+      if (pane) pane.rootResponder.sendAction(action, target, this, pane);
+      // SC.app.sendAction(action, target, this) ;
       
     // if no action is specified, then trigger the support action,
     // if supported.
