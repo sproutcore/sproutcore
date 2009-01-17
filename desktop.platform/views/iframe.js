@@ -21,6 +21,7 @@ SC.IFrameView = SC.View.extend({
   contentBindingDefault: SC.Binding.single().notEmpty(),
   
   contentUrlKey: null,
+  contentUrlKeyBindingDefault: SC.Binding.single(),
   
   displayProperties: ['content'],
 
