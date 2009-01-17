@@ -279,6 +279,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   exampleView: SC.LabelView,
 
   /**
+    If set, this key will be used to get the example view for a given
+    content object.
+  */
+  contentExampleViewKey: null,
+  
+  /**
     The view class to use when displaying item views in groups.
   
     If the groupBy property is not null, then the collection view will create
@@ -1068,7 +1074,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {SC.View} the new itemView.
   */
   _insertItemViewFor: function(content, groupBy, contentIndex) {
-
     // first look for a matching record.
     var key = SC.guidFor(content) ;
     var ret = this._itemViewsByContent[key];
@@ -1077,16 +1082,22 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // if no record was found, pull an item view from the pool or create one.
     // set the content.
     if (!ret) {
-      ret = this._itemViewPool.pop() || this.get('exampleView').create({ 
-        owner: this, displayDelegate: this 
-      }) ;
-      ret.$().addClass('sc-collection-item') ; // add class name for display
+      var exampleViewKey = this.get('contentExampleViewKey') ;
+      var ExampleView = (exampleViewKey) ? content.get(exampleViewKey) : this.get('exampleView') ;
       
-      // set content and add to content hash
-      ret.set('content', content) ;
-      this._itemViewsByContent[key] = ret ;
-      this._itemViewsByGuid[SC.guidFor(ret)] = ret ;
-      firstLayout = true ;
+      if (ExampleView) {
+        ret = ExampleView.create({ 
+          owner: this,
+          displayDelegate: this
+        }) ;
+        ret.$().addClass('sc-collection-item') ; // add class name for display
+      
+        // set content and add to content hash
+        ret.set('content', content) ;
+        this._itemViewsByContent[key] = ret ;
+        this._itemViewsByGuid[SC.guidFor(ret)] = ret ;
+        firstLayout = true ;
+      }
     }
     if (!ret) throw "Could not create itemView for content: %@".fmt(content);
 
