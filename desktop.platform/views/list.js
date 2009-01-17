@@ -133,10 +133,10 @@ SC.ListView = SC.CollectionView.extend(
     whole range.
     
     @param {Range} range or null.
-    @returns {SC.ListView} reciever
+    @returns {SC.CollectionView} reciever
   */
   rowHeightsDidChangeInRange: function(range) {
-    
+    // console.log('rowHeightsDidChangeInRange called on %@ with range %@'.fmt(this, $I(range)));
     // if no range is passed, just wipe the cached...
     if (!range) {
       this._list_rowOffsets = this._list_rowHeights = null ;

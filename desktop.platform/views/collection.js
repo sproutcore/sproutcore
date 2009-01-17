@@ -2439,10 +2439,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       content.replace(idx, 0, objects) ;
       content.endPropertyChanges(); // restart notifications
       
-      // TODO: fix me, we need to correct the height cache after a drag
-      // this.invalidateNowShowingRange() ;
-      // this._list_rowOffsets = null ; // hack
-      // this.updateChildren(YES) ;
+      this.rowHeightsDidChangeInRange({ start: idx-1, length: content.get('length')-idx+1 }) ;
       
       // make the op into its actual value
       op = SC.DRAG_MOVE ;
@@ -2464,6 +2461,23 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   //   this._lastInsertionIndex = null ;
   // },
 
+  /**
+    If some state changes that causes the row height for a range of rows 
+    then you should call this method to notify the view that it needs to
+    recalculate the row heights for the collection.
+    
+    Anytime your content array changes, the rows are invalidated 
+    automatically so you only need to use this for cases where your rows
+    heights may change without changing the content array itself.
+    
+    If all rows heights have changed, you can pass null to invalidate the
+    whole range.
+    
+    @param {Range} range or null.
+    @returns {SC.CollectionView} reciever
+  */
+  rowHeightsDidChangeInRange: function(range) {},
+  
   /** 
     The insertion orientation.  This is used to determine which
     dimension we should pay attention to when determining insertion point for
