@@ -136,6 +136,8 @@ SC.ListView = SC.CollectionView.extend(
     @returns {SC.CollectionView} reciever
   */
   rowHeightsDidChangeInRange: function(range) {
+    if (this.get('hasUniformRowHeights')) return ; // nothing to do...
+    
     // console.log('rowHeightsDidChangeInRange called on %@ with range %@'.fmt(this, $I(range)));
     // if no range is passed, just wipe the cached...
     if (!range) {
