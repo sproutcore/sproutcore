@@ -146,7 +146,7 @@ SC.ListView = SC.CollectionView.extend(
     // set to undefined unless max range exceeds length, in which case you
     // just truncate.
     } else {
-      var min = Math.max(0,SC.minRange(range)) ;
+      var min = Math.max(0,range.start) ;
       var offsets = this._list_rowOffsets, heights = this._list_rowHeights;
       if (offsets) offsets.length = min ;
       if (heights) {
@@ -326,7 +326,7 @@ SC.ListView = SC.CollectionView.extend(
     }
     
     // convert to range...
-    ret = { start: min, length: max - min } ;
+    ret = { start: min, length: max - min + 1 } ;
     
     // console.log('ret is {%@, %@}'.fmt(ret.start, ret.length));
     return ret ;
@@ -356,9 +356,32 @@ SC.ListView = SC.CollectionView.extend(
     styleClass: 'sc-list-insertion-point',
     layout: { top: -6, height: 2, left: 4, right: 2 }
   }),
-
+  
+  // TODO refactor code, remove duplication
   showInsertionPoint: function(itemView, dropOperation) {
-    if (!itemView) return ;
+    if (!itemView) {
+      // show insertion point below final itemView
+      var content = this.get('content') ;
+      content = content.objectAt(content.get('length')-1) ;
+      itemView = this.itemViewForContent(content) ;
+      
+      if (!itemView) return ;
+      
+      var f = itemView.get('frame') ;
+      var top = f.y, height = f.height ;
+
+      if (!this._insertionPointView) {
+        this._insertionPointView = this.insertionPointClass.create() ;
+      }
+    
+      var insertionPoint = this._insertionPointView ;
+      if (insertionPoint.get('parentView') !== itemView.get('parentView')) {
+        itemView.get('parentView').appendChild(insertionPoint) ;
+      }
+      
+      insertionPoint.adjust({ top: top + height }) ;
+      return ;
+    }
     
     // if drop on, then just add a class...
     if (dropOperation === SC.DROP_ON) {
@@ -383,9 +406,7 @@ SC.ListView = SC.CollectionView.extend(
         itemView.get('parentView').appendChild(insertionPoint) ;
       }
       
-      // console.log('itemView is %@'.fmt(itemView));
       var frame = itemView.get('frame') ;
-      // console.log($I(frame));
       insertionPoint.adjust({ top: itemView.get('frame').y }) ;
     }
     

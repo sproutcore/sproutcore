@@ -2427,10 +2427,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       content.beginPropertyChanges(); // suspend notifications
 
       // find the old index and remove it.
+      var old ;
       var objectsIdx = objects.get('length') ;
       while(--objectsIdx >= 0) {
         var obj = objects.objectAt(objectsIdx) ;
-        var old = content.indexOf(obj) ;
+        old = content.indexOf(obj) ;
         if (old >= 0) content.removeAt(old) ;
         if ((old >= 0) && (old < idx)) idx--; //adjust idx
       }
@@ -2439,7 +2440,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       content.replace(idx, 0, objects) ;
       content.endPropertyChanges(); // restart notifications
       
-      this.rowHeightsDidChangeInRange({ start: idx-1, length: content.get('length')-idx+1 }) ;
+      var outOfDateIndices = Math.min(old, idx) ;
+      if (outOfDateIndices < 0 ) outOfDateIndices = 0 ;
+      
+      this.rowHeightsDidChangeInRange({ start: outOfDateIndices, length: content.get('length')-outOfDateIndices }) ;
       
       // make the op into its actual value
       op = SC.DRAG_MOVE ;
