@@ -2126,7 +2126,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       if (this.get('dragDataTypes').get('length') > 0) {
         // Build the drag view to use for the ghost drag.  This 
         // should essentially contain any visible drag items.
-        var view = this.ghostViewFor(dragContent) ;
+        // var view = this.ghostViewFor(dragContent) ;
+        var view = this.dragViewFor(dragContent) ;
 
         // Initiate the drag
         SC.Drag.start({
@@ -2670,7 +2671,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   //   return wrapper ;
   // },
   
-  ghostViewFor: function(dragContent) {
+  // ghostViewFor: function(dragContent) {
+    dragViewFor: function(dragContent) {
     var view = SC.View.create() ;
     
     var ary = dragContent ;

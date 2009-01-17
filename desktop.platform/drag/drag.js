@@ -365,6 +365,8 @@ SC.Drag = SC.Object.extend(
   _createGhostView: function() {
     var view = this._ghostView = SC.Pane.create({ owner: this }) ;
     view.$().addClass('sc-ghost-view').append(this.dragView.rootElement.cloneNode(true)) ;
+    // var f = this.dragView.get('frame') ;
+    // console.log('dragView %@ frame is { top: %@, left: %@, width: %@, height: %@ }'.fmt(this.dragView, f.y, f.x, f.width, f.height)) ;
     view.adjust(this.dragView.get('frame')) ;
     view.append() ;  // add to window
   },

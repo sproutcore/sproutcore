@@ -383,7 +383,8 @@ SC.ListView = SC.CollectionView.extend(
         itemView.get('parentView').appendChild(insertionPoint) ;
       }
       
-      // var frame = itemView.get('frame') ;
+      // console.log('itemView is %@'.fmt(itemView));
+      var frame = itemView.get('frame') ;
       // console.log($I(frame));
       insertionPoint.adjust({ top: itemView.get('frame').y }) ;
     }
@@ -405,29 +406,69 @@ SC.ListView = SC.CollectionView.extend(
     // console.log('insertionIndexForLocation called on %@'.fmt(this));
     var f = this.get('clippingFrame') ;
     var sf = f ; // FIXME this.get('scrollFrame') ;
-    var rowHeight = this.get('rowHeight') || 0 ;
-
-    // find the row and offset to work with
-    var offset = loc.y - f.y - sf.y ;
     var retOp = SC.DROP_BEFORE ;
-    var ret = Math.floor(offset / this.get('rowHeight')) ;
-     
-    // find the percent through the row...
-    var percentage = (offset / rowHeight) - ret ;
+
+    // find the rowHeight and offset to work with
+    var offset = loc.y - f.y - sf.y ;
+    var rowOffset, rowHeight, idx ;
     
+    // do some simple math if we have uniform row heights...
+    if (this.get('hasUniformRowHeights')) {
+      rowHeight = this.get('rowHeight') || 0 ;
+      idx = Math.floor(offset / rowHeight) ;
+      rowOffset = idx * rowHeight ;
+    // otherwise, use the rowOffsets cache...
+    } else {
+      // get caches
+      var offsets = this._list_rowOffsets;
+      if (!offsets) offsets = this._list_rowOffsets = [] ;
+      
+      // console.log('offset of pointer is %@'.fmt(offset));
+      // console.log('offsets are %@'.fmt(offsets.join(', ')));
+
+      // OK, now try the fast path...if undefined, loop backwards until we
+      // find an offset that IS cached...
+      var len = offsets.length, cur = len, ret;
+
+      // if the cached value was undefined, loop backwards through the offsets
+      // hash looking for a cached value to start from
+      while (cur>0) {
+        ret = offsets[--cur];
+        if (ret < offset) break ;
+      }
+      
+      rowOffset = offset[cur] ;
+      rowHeight = this._list_heightForRowAtContentIndex(cur) ;
+
+      // console.log('rowHeight is %@'.fmt(rowHeight));
+      
+      idx = cur ;
+    }
+    
+    // find the percent through the row...
+    var percentage = ((offset - rowOffset) / rowHeight) ;
+    
+    // console.log('percentage is %@'.fmt(percentage));
+
     // if the dropOperation is SC.DROP_ON and we are in the center 60%
     // then return the current item.
     if (dropOperation === SC.DROP_ON) {
-      if (percentage > 0.80) ret++ ;
+      if (percentage > 0.80) idx++ ;
       if ((percentage >= 0.20) && (percentage <= 0.80)) {
         retOp = SC.DROP_ON;
       }
     } else {
-      if (percentage > 0.45) ret++ ;
+      if (percentage > 0.45) idx++ ;
+    }
+    
+    if (idx !== this._idx || retOp !== this._retOp) {
+      // console.log('insertionIndex is %@, op is %@'.fmt(idx, retOp));
+      this._idx = idx ;
+      this._retOp = retOp ;
     }
     
     // console.log('[ret, retOp] is [%@, %@]'.fmt(ret, retOp));
-    return [ret, retOp] ;
+    return [idx, retOp] ;
   }
   
 }) ;
