@@ -310,6 +310,13 @@ SC.ListView = SC.CollectionView.extend(
       min = Math.max(0,Math.floor(minY / rowHeight)-1) ;
       max = Math.ceil(maxY / rowHeight) ;
       
+      var content = this.get('content') ;
+      min = Math.min(min, content.get('length')) ;
+      max = Math.min(max, content.get('length')) ;
+      
+      // convert to range...
+      ret = { start: min, length: max - min } ;
+
     // otherwise, get the cached row offsets...
     } else {
       var content = this.get('content');
@@ -325,14 +332,14 @@ SC.ListView = SC.CollectionView.extend(
         if ((min===null) && (offset >= minY)) min = max; // set min
         max++ ;
       } while (max<len && offset < maxY);
+    
+      // convert to range...
+      ret = { start: min, length: max - min + 1 } ;
     }
     
-    // convert to range...
-    ret = { start: min, length: max - min + 1 } ;
-    
-    // console.log('ret is {%@, %@}'.fmt(ret.start, ret.length));
+    // console.log('contentRangeInFrame is {%@, %@}'.fmt(ret.start, ret.length));
     return ret ;
-  },
+  }.property('content', 'clippingFrame').cacheable(),
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {

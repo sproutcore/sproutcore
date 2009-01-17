@@ -82,7 +82,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   content: [],
   
   /** @private */
-  contentBindingDefault: SC.Binding.multiple().notEmpty(),
+  // contentBindingDefault: SC.Binding.multiple().notEmpty(),
+  contentBindingDefault: SC.Binding.multiple(),
   
   /**  
     The array of currently selected objects.  
