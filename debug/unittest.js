@@ -531,20 +531,20 @@ Object.extend(Object.extend(Test.Unit.Testcase.prototype, Test.Unit.Assertions.p
     this.timeToWait = time;
   },
   run: function() {
-    //try {
-      //try {
+    try {
+      try {
         if (!this.isWaiting) this.setup.bind(this)();
         this.isWaiting = false;
         this.test.bind(this)();
-      //} catch(e) {
-      //  throw e; // required for IE compatibility.
-      //} finally {
+      } catch(e) {
+        throw e; // required for IE compatibility.
+      } finally {
         if(!this.isWaiting) {
           this.teardown.bind(this)();
         }
-      //}
-    //}
-    //catch(e) { this.error(e); }
+      }
+    }
+    catch(e) { this.error(e); }
   }
 });
 
