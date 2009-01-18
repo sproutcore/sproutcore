@@ -34,3 +34,6 @@ body.sc-theme .sc-view.sc-gray-border {
 
 /* @end */
 
+.sc-theme div.sc-iframe-view {
+  background-color: white;
+}
