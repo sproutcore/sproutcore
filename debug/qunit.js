@@ -25,17 +25,19 @@ var config = {
 };
 
 //restrict modules/tests by get parameters
-config.filters = location.search.length > 1 && SC.CoreQuery.map( location.search.slice(1).split('&'), decodeURIComponent );
+// FIXME: disabled because this interacts negatively with the nonce we send from the sc_qunit client; need to revisit...
+// config.filters = location.search.length > 1 && SC.CoreQuery.map( location.search.slice(1).split('&'), decodeURIComponent );
 
 var isLocal = !!(window.location.protocol == 'file:');
 
 SC.ready(function() { 
-  //SC.$('<div id="userAgent"></div>').html(navigator.userAgent).appendTo('body');
-  //var head = SC.$('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').appendTo("body");
-  //SC.$('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
-  // SC.$('li.pass')[this.checked ? 'hide' : 'show']();
-  //});
-  if (config.queue.length>0) runTest();  
+  // SC.$('<div id="userAgent"></div>').html(navigator.userAgent).appendTo('body') ;
+  // var head = SC.$('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').appendTo("body") ;
+  // SC.$('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
+  //   SC.$('li.pass')[this.checked ? 'hide' : 'show']() ;
+  // });
+  
+  if (config.queue.length>0) runTest() ;  
 }) ;
 
 function synchronize(callback) {
@@ -73,7 +75,7 @@ function validTest( name ) {
   var filters = config.filters;
   if( !filters )
     return true;
-
+  
   var i = filters.length,
     run = false;
   while( i-- ){
@@ -86,6 +88,8 @@ function validTest( name ) {
     if( not )
       run = true;
   }
+  // console.log('validTest returned %@ for "%@"'.fmt(run, name));
+  
   return run;
 }
 
@@ -104,10 +108,16 @@ function runTest() {
     }
 
     var color = (config.stats.bad >0) ? 'red' : 'green'
-    SC.$('<p id="testresult" class="result">').html(['Tests completed in ',
-      +new Date - started, ' milliseconds.<br/>',
-      '<span class="bad">', config.stats.bad, '</span> tests of <span class="all">', config.stats.all, '</span> failed.</p>']
-      .join('')).css('color', color)
+    SC.$('<p id="testresult" class="result">').html(
+      ['<span class="bad">'
+      , +config.stats.all - +config.stats.bad
+      , '</span> of <span class="all">'
+      , config.stats.all
+      , '</span> tests passed (<strong>'
+      , (+new Date - started)/1000
+      , '</strong> seconds)</p>'
+      ].join('')
+      ).css('color', color)
     .prependTo("body");
     SC.$("#banner").addClass(config.stats.bad ? "fail" : "pass");
   });
