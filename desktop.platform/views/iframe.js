@@ -25,14 +25,19 @@ SC.IFrameView = SC.View.extend({
   contentUrlKeyBindingDefault: SC.Binding.single(),
   
   displayProperties: ['content'],
-
+  
+  $iframe: function() { return this.$('iframe') ; },
+  
+  delegate: null,
+  
+  iFrameViewWillLoadUrl: function(view, url) { return url; },
+  iFrameViewDidLoadUrl: function(view, url) {},
+  
   updateDisplay: function() {
     var content = this.get('content') ;
     var urlKey = this.get('contentUrlKey') ;
     var src = '';
     
-    console.log(content);
-  
     switch (content) {
       case SC.MULTIPLE_PLACEHOLDER:
       case SC.EMPTY_PLACEHOLDER:
@@ -44,9 +49,11 @@ SC.IFrameView = SC.View.extend({
         break;
     }
     
-    console.log(src) ;
-    
-    this.$('iframe').attr('src', src) ;      
+    src = this.invokeDelegateMethod(this.delegate, 'iFrameViewWillLoadUrl', this, src) || '' ;
+    var iframe = this.$iframe() ;
+    iframe.attr('src', 'javascript:;') ; // clear out the previous src, to force a reload
+    iframe.attr('src', src) ;
+    this.invokeDelegateMethod(this.delegate, 'iFrameViewDidLoadUrl', this, src) ;
   },
 
   /** @private */
