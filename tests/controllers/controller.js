@@ -1,267 +1,268 @@
 // ========================================================================
 // Controller Tests
 // ========================================================================
+/*globals module test ok isObj equals expects */
 
-ControllerSetup = function() {
+// stub in required method implementations.
+var klass = SC.Controller.extend({
   
-  // stub in required method implementations.
-  this.klass = SC.Controller.extend({
-    
-    // used to configure different tests.
-    isCommitEnabled: YES,  isDiscardEnabled: YES,
-    isCommitSuccessful: YES, isDiscardSuccessful: YES,
-
-    changesCommitted: NO,  changesDiscarded: NO,
-    
-    commitChangesImmediately: NO,
-    
-    canCommitChanges: function() { return this.get('isCommitEnabled') ; },
-    performCommitChanges: function() { 
-      return this.changesCommitted = this.get('isCommitSuccessful') ; 
-    },
-
-    canDiscardChanges: function() { return this.get('isDiscardEnabled') ; },
-    performDiscardChanges: function() { 
-      return this.changesDiscarded = this.get('isDiscardSuccessful') ; 
-    }
-    
-  }) ;
-
-  // create dummy
-  this.c = this.klass.create() ;
-
- } ;
-
-Test.context("Single SC.Controller", {
+  // used to configure different tests.
+  isCommitEnabled: YES,
+  isDiscardEnabled: YES,
+  isCommitSuccessful: YES,
+  isDiscardSuccessful: YES,
   
-  "hasChanges should be true after change": function() {
-      this.c.get('hasChanges').shouldEqual(NO) ;
-      this.c.editorDidChange() ;
-      this.c.get('hasChanges').shouldEqual(YES) ;
+  changesCommitted: NO, 
+  changesDiscarded: NO,
+  
+  commitChangesImmediately: NO,
+  
+  canCommitChanges: function() {
+    return this.get('isCommitEnabled') ;
   },
   
-  "hasChanges should be false after commit": function() {
-      this.c.editorDidChange() ;
-      this.c.get('hasChanges').shouldEqual(YES) ;
-      this.c.commitChanges() ;
-      this.c.get('hasChanges').shouldEqual(NO) ;
+  performCommitChanges: function() { 
+    return this.changesCommitted = this.get('isCommitSuccessful') ; 
   },
   
-  "hasChanges should be false after discard": function() {
-      this.c.editorDidChange() ;
-      this.c.get('hasChanges').shouldEqual(YES) ;
-      this.c.discardChanges() ;
-      this.c.get('hasChanges').shouldEqual(NO) ;
+  canDiscardChanges: function() {
+    return this.get('isDiscardEnabled') ;
   },
   
-  "hasChanges should be true if commit fails": function() {
-    this.c.editorDidChange() ;
-    
-    // disable canCommit
-    this.c.isCommitEnabled = NO ;
-    this.c.commitChanges().shouldNotEqual(YES) ;
-    this.c.get('hasChanges').shouldEqual(YES) ;
-    
-    // disable performCommit
-    this.c.isCommitEnabled = YES ;  this.c.isCommitSuccessful = NO ;
-    this.c.commitChanges().shouldNotEqual(YES) ;
-    this.c.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "hasChanges should be true if discard fails": function() {
-    this.c.editorDidChange() ;
-    
-    // disable canCommit
-    this.c.isDiscardEnabled = NO ;
-    this.c.discardChanges().shouldNotEqual(YES) ;
-    this.c.get('hasChanges').shouldEqual(YES) ;
-    
-    // disable performCommit
-    this.c.isDiscardEnabled = YES ;  this.c.isDiscardSuccessful = NO ;
-    this.c.discardChanges().shouldNotEqual(YES) ;
-    this.c.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "commit should fail if there are no changes to commit": function() {
-    this.c.get('hasChanges').shouldEqual(NO) ;
-    $ok(this.c.commitChanges()).shouldEqual(NO) ;
-  },
-
-  "discard should fail if there are no changes to commit": function() {
-    this.c.get('hasChanges').shouldEqual(NO) ;
-    $ok(this.c.discardChanges()).shouldEqual(NO) ;
-  },
-  
-  "changes should commit immediately if enabled": function() {
-    this.c.set('commitChangesImmediately', YES) ;
-    this.c.editorDidChange() ;
-    assertNotEqual(null, this.c._commitTimeout, '_commitTimeout');
-  },
-
-  "changes should NOT commit immediately UNLESS enabled": function() {
-    this.c.set('commitChangesImmediately', NO) ;
-    this.c.editorDidChange() ;
-    (this.c._commitTimeout == null).shouldEqual(YES) ;
-  },
-  
-  setup: function() {
-    ControllerSetup.call(this) ;
+  performDiscardChanges: function() { 
+    return this.changesDiscarded = this.get('isDiscardSuccessful') ; 
   }
   
-}) ;
+});
 
-Test.context("Chained SC.Controllers", {
-  
-  "root.hasChanges should be true after child.change": function() {
-      this.root.get('hasChanges').shouldEqual(NO) ;
-      this.child.editorDidChange() ;
-      this.root.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "child.hasChanges should be FALSE after root.commit": function() {
-      this.child.editorDidChange() ;
-      this.child.get('hasChanges').shouldEqual(YES) ;
-      this.root.commitChanges() ;
-      this.child.get('hasChanges').shouldEqual(NO) ;
-  },
+var c, root, child, child2 ; // global variables
 
-  "child.hasChanges should be FALSE after root.discard": function() {
-      this.child.editorDidChange() ;
-      this.child.get('hasChanges').shouldEqual(YES) ;
-      this.root.discardChanges() ;
-      this.child.get('hasChanges').shouldEqual(NO) ;
-  },
+module("Single SC.Controller", {
   
-  "root.hasChanges should be FALSE after child.commit if root DOES NOT have other changes": function() {
-      // edit child only
-      this.child.editorDidChange() ;
-      this.root.get('hasChanges').shouldEqual(YES) ;
-  
-      this.child.commitChanges() ;
-      this.root.get('hasChanges').shouldEqual(NO) ;
-  },  
-  
-  "root.hasChanges should be TRUE after child.commit if root DOES have other changes": function() {
-      // edit child and root
-      this.child.editorDidChange() ;
-      this.root.editorDidChange() ;
-      
-      this.root.get('hasChanges').shouldEqual(YES) ;
-      this.child.commitChanges() ;
-      this.root.get('hasChanges').shouldEqual(YES) ;
-  },  
-  
-  "root.hasChanges should be FALSE after child.discard if root DOES NOT have other changes": function() {
-      // edit child only
-      this.child.editorDidChange() ;
-      
-      this.root.get('hasChanges').shouldEqual(YES) ;
-      this.child.discardChanges() ;
-      this.root.get('hasChanges').shouldEqual(NO) ;
-  },
-  
-  "root.hasChanges should be TRUE after child.discard if root DOES have other changes": function() {
-      // edit child and root
-      this.child.editorDidChange() ;
-      this.root.editorDidChange() ;
-      
-      this.root.get('hasChanges').shouldEqual(YES) ;
-      this.child.discardChanges() ;
-      this.root.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  
-  "child.hasChanges should be TRUE if another child cannot commit": function() {
-    // edit child and child2
-    this.child.editorDidChange() ;
-    this.child2.editorDidChange() ;
-    
-    // disable canCommit in child2
-    this.child2.isCommitEnabled = NO ;
-    
-    // now try to commit.  child not be committed.
-    $ok(this.root.commitChanges()).shouldEqual(NO) ;
-    
-    // verify child.
-    this.child.changesCommitted.shouldEqual(NO) ;
-    this.child.get('hasChanges').shouldEqual(YES) ;
-    this.root.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "child.hasChanges should be TRUE if another child cannot discard": function() {
-    // edit child and child2
-    this.child.editorDidChange() ;
-    this.child2.editorDidChange() ;
-    
-    // disable canCommit in child2
-    this.child2.isDiscardEnabled = NO ;
-    
-    // now try to commit.  child not be committed.
-    $ok(this.root.discardChanges()).shouldEqual(NO) ;
-    
-    // verify child.
-    this.child.changesDiscarded.shouldEqual(NO) ;
-    this.child.get('hasChanges').shouldEqual(YES) ;
-    this.root.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "root.hasChanges should be TRUE if any child fails to commit": function() {
-    // NOTE: Commits are not atomic.  IN this case, child2 fails while child1 succeeds.
-    // the hasChanges state of child2 and root must both be TRUE in this case, but 
-    // child1's state is undefined.  It may have commited or it may not.
-  
-    this.child.editorDidChange() ;
-    this.child2.editorDidChange() ;
-    this.child2.isCommitSuccessful = NO ;
-    
-    $ok(this.root.commitChanges()).shouldEqual(NO) ;
-    this.root.get('hasChanges').shouldEqual(YES) ;
-    this.child2.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "root.hasChanges should be TRUE if any child fails to discard": function() {
-    // NOTE: Commits are not atomic.  IN this case, child2 fails while child1 succeeds.
-    // the hasChanges state of child2 and root must both be TRUE in this case, but 
-    // child1's state is undefined.  It may have commited or it may not.
-  
-    this.child.editorDidChange() ;
-    this.child2.editorDidChange() ;
-    this.child2.isDiscardSuccessful = NO ;
-    
-    $ok(this.root.discardChanges()).shouldEqual(NO) ;
-    this.root.get('hasChanges').shouldEqual(YES) ;
-    this.child2.get('hasChanges').shouldEqual(YES) ;
-  },
-  
-  "child.commitChangesImmediately should be inherited from the root": function()
-  {
-    var Klass = SC.Controller.extend({ commitChangesImmediately: NO });
-    
-    // child created with context passed...
-    var root  = Klass.create({ commitChangesImmediately: YES });
-    var child = Klass.create({ context: root });
-    root.get('commitChangesImmediately').shouldEqual(YES);
-    child.get('commitChangesImmediately').shouldEqual(YES);
-    
-    // context set after creation...
-    var root  = Klass.create({ commitChangesImmediately: YES });
-    var child = Klass.create();
-    root.get('commitChangesImmediately').shouldEqual(YES);
-    child.get('commitChangesImmediately').shouldEqual(NO);
-    child.set('context', root);
-    child.get('commitChangesImmediately').shouldEqual(YES);
-  },
-
-
-  // this.root is the root controller, 
-  // this.child belongs to the root parent.
-  // this.child2 belongs to the root parent also.  This is used only for a few tests.
   setup: function() {
-    ControllerSetup.call(this) ;
-    this.root = this.c;
-    this.child = this.klass.create({ context: this.root }) ;
-    this.child2 = this.klass.create({ context: this.root }) ;
+    c = klass.create() ;
   }
   
-}) ;
+});
 
+test("hasChanges should be true after change", function() {
+  equals(c.get('hasChanges'), NO) ;
+  c.editorDidChange() ;
+  equals(c.get('hasChanges'), YES) ;
+});
+
+test("hasChanges should be false after commit", function() {
+  c.editorDidChange() ;
+  equals(c.get('hasChanges'), YES) ;
+  c.commitChanges() ;
+  equals(c.get('hasChanges'), NO) ;
+});
+
+test("hasChanges should be false after discard", function() {
+  c.editorDidChange() ;
+  equals(c.get('hasChanges'), YES) ;
+  c.discardChanges() ;
+  equals(c.get('hasChanges'), NO) ;
+});
+
+test("hasChanges should be true if commit fails", function() {
+  c.editorDidChange() ;
+  
+  // disable canCommit
+  c.isCommitEnabled = NO ;
+  equals(c.commitChanges(), NO) ;
+  equals(c.get('hasChanges'), YES) ;
+  
+  // disable performCommit
+  c.isCommitEnabled = YES ;  c.isCommitSuccessful = NO ;
+  equals(c.commitChanges(), NO) ;
+  equals(c.get('hasChanges'), YES) ;
+});
+
+test("hasChanges should be true if discard fails", function() {
+  c.editorDidChange() ;
+  
+  // disable canCommit
+  c.isDiscardEnabled = NO ;
+  equals(c.discardChanges(), NO) ;
+  equals(c.get('hasChanges'), YES) ;
+  
+  // disable performCommit
+  c.isDiscardEnabled = YES ;  c.isDiscardSuccessful = NO ;
+  equals(c.discardChanges(), NO) ;
+  equals(c.get('hasChanges'), YES) ;
+});
+
+test("commit should fail if there are no changes to commit", function() {
+  equals(c.get('hasChanges'), NO) ;
+  equals($ok(c.commitChanges()), NO) ;
+});
+
+test("discard should fail if there are no changes to commit", function() {
+  equals(c.get('hasChanges'), NO) ;
+  equals($ok(c.discardChanges()), NO) ;
+});
+
+test("changes should commit immediately if enabled", function() {
+  c.set('commitChangesImmediately', YES) ;
+  c.editorDidChange() ;
+  ok(null !== c._commitTimeout, '_commitTimeout') ;
+});
+
+test("changes should NOT commit immediately UNLESS enabled", function() {
+  c.set('commitChangesImmediately', NO) ;
+  c.editorDidChange() ;
+  equals((c._commitTimeout == null), YES) ;
+});
+
+module("Chained SC.Controllers", {
+  
+  // root is the root controller, 
+  // child belongs to the root parent.
+  // child2 belongs to the root parent also.  This is used only for a few tests.
+  setup: function() {
+    c = klass.create() ;
+    root = c;
+    child = klass.create({ context: root }) ;
+    child2 = klass.create({ context: root }) ;
+  }
+  
+});
+
+test("root.hasChanges should be true after child.change", function() {
+  equals(root.get('hasChanges'), NO) ;
+  child.editorDidChange() ;
+  equals(root.get('hasChanges'), YES) ;
+});
+
+test("child.hasChanges should be FALSE after root.commit", function() {
+  child.editorDidChange() ;
+  equals(child.get('hasChanges'), YES) ;
+  root.commitChanges() ;
+  equals(child.get('hasChanges'), NO) ;
+});
+
+test("child.hasChanges should be FALSE after root.discard", function() {
+  child.editorDidChange() ;
+  equals(child.get('hasChanges'), YES) ;
+  root.discardChanges() ;
+  equals(child.get('hasChanges'), NO) ;
+});
+
+test("root.hasChanges should be FALSE after child.commit if root DOES NOT have other changes", function() {
+  // edit child only
+  child.editorDidChange() ;
+  equals(root.get('hasChanges'), YES) ;
+
+  child.commitChanges() ;
+  equals(root.get('hasChanges'), NO) ;
+});
+
+test("root.hasChanges should be TRUE after child.commit if root DOES have other changes", function() {
+  // edit child and root
+  child.editorDidChange() ;
+  root.editorDidChange() ;
+  
+  equals(root.get('hasChanges'), YES) ;
+  child.commitChanges() ;
+  equals(root.get('hasChanges'), YES) ;
+});
+
+test("root.hasChanges should be FALSE after child.discard if root DOES NOT have other changes", function() {
+  // edit child only
+  child.editorDidChange() ;
+  
+  equals(root.get('hasChanges'), YES) ;
+  child.discardChanges() ;
+  equals(root.get('hasChanges'), NO) ;
+});
+
+test("root.hasChanges should be TRUE after child.discard if root DOES have other changes", function() {
+  // edit child and root
+  child.editorDidChange() ;
+  root.editorDidChange() ;
+  
+  equals(root.get('hasChanges'), YES) ;
+  child.discardChanges() ;
+  equals(root.get('hasChanges'), YES) ;
+});
+
+test("child.hasChanges should be TRUE if another child cannot commit", function() {
+  // edit child and child2
+  child.editorDidChange() ;
+  child2.editorDidChange() ;
+  
+  // disable canCommit in child2
+  child2.isCommitEnabled = NO ;
+  
+  // now try to commit.  child not be committed.
+  equals($ok(root.commitChanges()), NO) ;
+  
+  // verify child.
+  equals(child.changesCommitted, NO) ;
+  equals(child.get('hasChanges'), YES) ;
+  equals(root.get('hasChanges'), YES) ;
+});
+
+test("child.hasChanges should be TRUE if another child cannot discard", function() {
+  // edit child and child2
+  child.editorDidChange() ;
+  child2.editorDidChange() ;
+  
+  // disable canCommit in child2
+  child2.isDiscardEnabled = NO ;
+  
+  // now try to commit.  child not be committed.
+  equals($ok(root.discardChanges()), NO) ;
+  
+  // verify child.
+  equals(child.changesDiscarded, NO) ;
+  equals(child.get('hasChanges'), YES) ;
+  equals(root.get('hasChanges'), YES) ;
+});
+
+test("root.hasChanges should be TRUE if any child fails to commit", function() {
+  // NOTE: Commits are not atomic.  IN this case, child2 fails while child1 succeeds.
+  // the hasChanges state of child2 and root must both be TRUE in this case, but 
+  // child1's state is undefined.  It may have commited or it may not.
+  
+  child.editorDidChange() ;
+  child2.editorDidChange() ;
+  child2.isCommitSuccessful = NO ;
+  
+  equals($ok(root.commitChanges()), NO) ;
+  equals(root.get('hasChanges'), YES) ;
+  equals(child2.get('hasChanges'), YES) ;
+});
+
+test("root.hasChanges should be TRUE if any child fails to discard", function() {
+  // NOTE: Commits are not atomic.  IN this case, child2 fails while child1 succeeds.
+  // the hasChanges state of child2 and root must both be TRUE in this case, but 
+  // child1's state is undefined.  It may have commited or it may not.
+  
+  child.editorDidChange() ;
+  child2.editorDidChange() ;
+  child2.isDiscardSuccessful = NO ;
+  
+  equals($ok(root.discardChanges()), NO) ;
+  equals(root.get('hasChanges'), YES) ;
+  equals(child2.get('hasChanges'), YES) ;
+});
+
+test("child.commitChangesImmediately should be inherited from the root", function() {
+  var Klass = SC.Controller.extend({ commitChangesImmediately: NO });
+  
+  // child created with context passed...
+  var root  = Klass.create({ commitChangesImmediately: YES });
+  var child = Klass.create({ context: root });
+  equals(root.get('commitChangesImmediately'), YES);
+  equals(child.get('commitChangesImmediately'), YES);
+  
+  // context set after creation...
+  var root  = Klass.create({ commitChangesImmediately: YES });
+  var child = Klass.create();
+  equals(root.get('commitChangesImmediately'), YES);
+  equals(child.get('commitChangesImmediately'), NO);
+  child.set('context', root);
+  equals(child.get('commitChangesImmediately'), YES);
+});
