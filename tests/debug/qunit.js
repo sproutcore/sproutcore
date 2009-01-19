@@ -14,7 +14,7 @@ test("tests should not run until SproutCore is ready", function() {
   equals(SC.isReady, true, "SC.isReady");
 });
 
-test("tests should not run until the root reponder has been setup", function() {
-  console.log('test is running');
+test("tests should not run until the root responder has been setup", function() {
+  expect(1);
   ok(SC.RootResponder.responder, "SC.RootResponder.responder");
 });
