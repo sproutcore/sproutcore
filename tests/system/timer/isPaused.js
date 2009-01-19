@@ -1,66 +1,77 @@
 // ========================================================================
-// SC.Timer Tests
+// SC.Timer.isPaused Tests
 // ========================================================================
+/*globals module test ok isObj equals expects */
 
-Test.context("Timer.isPaused", {
+module("Timer.isPaused") ;
 
-  "setting isPaused should stop firing": function() {
-    
-    var firedCount = 0 ;
-    
-    SC.runLoop.beginRunLoop() ;
-    var start = SC.runLoop.get('startTime') ;
-    var t = SC.Timer.schedule({
-      target: this,
-      action: function() { firedCount++ ; },
-      interval: 100,
-      repeats: YES
-    });
-    SC.runLoop.endRunLoop() ;
-
-    // wait for timer to fire twice, then pause it.
-    var tries1 = 10 ;
-    var f1 = function() {
-      if(firedCount<2) {
-        if (--tries1 >= 0) {
-          wait(100, f1) ;
-        } else assertEqual(NO, YES, 'Timer never fired 2 times - f1') ;
-      } else {
-        assertEqual(NO, t.get('isPaused'), 'should start with isPaused = NO');
-        t.set('isPaused', YES) ;
-        firedCount = 0 ; // Reset count here.
-        wait(300, f2) ;
-      }
-    };
-    
-    // once timer paused, make sure it did not fire again.
-    var f2 = function() {
-      assertEqual(0, firedCount, 'timer kept firing!') ;
-      assertEqual(YES, t.get('isPaused'), 'timer is not paused') ;
-      t.set('isPaused', NO) ;
-      
-      wait(300, f3) ;
-    } ;
-    
-    // once timer has verified paused, unpause and make sure it fires again.
-    var tries2 = 10 ;
-    var f3 = function() {
-      if (firedCount <= 2) {
-        if (--tries1 >= 0) {
-          wait(100, f3) ;
-        } else assertEqual(NO, YES, "Timer did not resume") ;
-        
-      // timer fired, clean up.
-      } else {
-        t.invalidate() ;
-        assertEqual(NO, t.get('isPaused'), 'timer did not unpause') ;
-      }
-    };
-    
-    wait(300, f1) ;
-    
-  }
+test("setting isPaused should stop firing", function() {
   
-  // using invalidate on a repeating timer is tested in schedule().
-
+  var firedCount = 0 ;
+  
+  SC.runLoop.beginRunLoop() ;
+  var start = SC.runLoop.get('startTime') ;
+  var t = SC.Timer.schedule({
+    target: this,
+    action: function() { firedCount++ ; },
+    interval: 100,
+    repeats: YES
+  });
+  SC.runLoop.endRunLoop() ;
+  
+  // wait for timer to fire twice, then pause it.
+  var tries1 = 10 ;
+  var f1 = function f1() {
+    if(firedCount<2) {
+      if (--tries1 >= 0) {
+        // wait(100, f1) ;
+        setTimeout(f1, 100) ;
+      } else {
+        equals(NO, YES, 'Timer never fired 2 times - f1') ;
+        window.start() ; // starts the test runner
+      }
+    } else {
+      equals(NO, t.get('isPaused'), 'should start with isPaused = NO');
+      t.set('isPaused', YES) ;
+      firedCount = 0 ; // Reset count here.
+      // wait(300, f2) ;
+      setTimeout(f2, 300) ;
+    }
+  };
+  
+  // once timer paused, make sure it did not fire again.
+  var f2 = function f2() {
+    equals(0, firedCount, 'timer kept firing!') ;
+    equals(YES, t.get('isPaused'), 'timer is not paused') ;
+    t.set('isPaused', NO) ;
+    
+    // wait(300, f3) ;
+    setTimeout(f3, 300) ;
+  } ;
+  
+  // once timer has verified paused, unpause and make sure it fires again.
+  var tries2 = 10 ;
+  var f3 = function f3() {
+    if (firedCount <= 2) {
+      if (--tries2 >= 0) {
+        // wait(100, f3) ;
+        setTimeout(f3, 100) ;
+      } else {
+        equals(NO, YES, "Timer did not resume") ;
+        window.start() ; // starts the test runner
+      }
+      
+    // timer fired, clean up.
+    } else {
+      t.invalidate() ;
+      equals(NO, t.get('isPaused'), 'timer did not unpause') ;
+      window.start() ; // starts the test runner
+    }
+  };
+  
+  // wait(300, f1) ;
+  stop() ; // stops the test runner
+  setTimeout(f1, 300) ;
 });
+
+// using invalidate on a repeating timer is tested in schedule().
