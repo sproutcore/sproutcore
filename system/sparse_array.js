@@ -20,7 +20,7 @@ require('system/mixins/delegate') ;
   @since SproutCore 1.0
 */
 SC.SparseArray = function(length) {
-  this.length = length ;
+  this.length = length || 0 ;
   this.initObservable() ;
   return this ;
 } ;
@@ -63,9 +63,17 @@ SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.D
   
   /** @private */
   replace: function(idx, amt, objects) {
+    var objects = objects || [] ;
     var content = this._sa_content ;
     if (!content) content = this._sa_content = [] ;
     content.replace(idx, amt, objects) ;
+    
+    // update length
+    var len = this.length ;
+    if (idx > len) this.length = len + +objects.get('length') ;
+    else if ((idx+amt) > len)  this.length = idx + +objects.get('length') ; // we blew away some existing items
+    else this.length = (len - amt) + +objects.get('length') ;
+    
     this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReplace', this, idx, amt, objects) ;
     this.enumerableContentDidChange() ;
     return this ;
