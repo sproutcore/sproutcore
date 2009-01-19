@@ -31,7 +31,7 @@ var config = {
 
 var isLocal = !!(window.location.protocol == 'file:');
 
-SC.ready(function() { 
+SC.afterReady( function() { 
   // SC.$('<div id="userAgent"></div>').html(navigator.userAgent).appendTo('body') ;
   // var head = SC.$('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').appendTo("body") ;
   // SC.$('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
