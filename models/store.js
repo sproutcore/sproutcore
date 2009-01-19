@@ -330,13 +330,12 @@ SC.Store = SC.Object.create(
     dirty[guid] = rec;
     this.set('_dirtyRecords', dirty);
     this.set('hasChanged', YES);
-    //console.log('hasChanged == YES'); 
-    this.invokeOnce(this._changedRecordsObserver);
+    this._changedRecordsObserver() ;
   },
   
   // invoked whenever the changedRecords hash is updated. This will notify
   // collections.
-  _changedRecordsObserver: function() { 
+  _changedRecordsObserver: function() {
     // process changedRecords to notify collections.
     for(var guid in this._changedRecords) {
       var collections = this._collections[guid] ;
