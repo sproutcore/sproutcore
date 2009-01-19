@@ -24,7 +24,6 @@ test("setting isPaused should stop firing", function() {
   var f1 = function f1() {
     if(firedCount<2) {
       if (--tries1 >= 0) {
-        // wait(100, f1) ;
         setTimeout(f1, 100) ;
       } else {
         equals(NO, YES, 'Timer never fired 2 times - f1') ;
@@ -34,7 +33,6 @@ test("setting isPaused should stop firing", function() {
       equals(NO, t.get('isPaused'), 'should start with isPaused = NO');
       t.set('isPaused', YES) ;
       firedCount = 0 ; // Reset count here.
-      // wait(300, f2) ;
       setTimeout(f2, 300) ;
     }
   };
@@ -44,8 +42,6 @@ test("setting isPaused should stop firing", function() {
     equals(0, firedCount, 'timer kept firing!') ;
     equals(YES, t.get('isPaused'), 'timer is not paused') ;
     t.set('isPaused', NO) ;
-    
-    // wait(300, f3) ;
     setTimeout(f3, 300) ;
   } ;
   
@@ -54,7 +50,6 @@ test("setting isPaused should stop firing", function() {
   var f3 = function f3() {
     if (firedCount <= 2) {
       if (--tries2 >= 0) {
-        // wait(100, f3) ;
         setTimeout(f3, 100) ;
       } else {
         equals(NO, YES, "Timer did not resume") ;
@@ -69,7 +64,6 @@ test("setting isPaused should stop firing", function() {
     }
   };
   
-  // wait(300, f1) ;
   stop() ; // stops the test runner
   setTimeout(f1, 300) ;
 });
