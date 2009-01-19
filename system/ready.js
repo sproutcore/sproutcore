@@ -83,7 +83,6 @@ SC.mixin({
   _didBecomeReady: function() {
     // Only call once
     if (SC.isReady) return ;
-    // SC.isReady = YES ;
     
     // setup locale
     SC.Locale.createCurrentLocale();
@@ -140,7 +139,7 @@ SC.mixin({
     SC.Event.trigger("ready", null, document, NO) ;
     
     // Now execute main, if defined
-    if ((typeof main != "undefined") && (main instanceof Function)) main();
+    if ((typeof main != "undefined") && (main instanceof Function) && !(SC.suppressMain)) main();
     
     // handle routes, if modules is installed.
     if (SC.Routes && SC.Routes.ping) SC.Routes.ping() ; 
