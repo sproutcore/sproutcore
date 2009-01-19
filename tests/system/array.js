@@ -32,7 +32,7 @@ DummyArray = SC.Object.extend(SC.Array, {
 
 // This is a generic set of tests.  To apply these, create a new contact, and
 // call this function passing in a factory function to build your element.
-module("Array, SC.SparseArray and DummyArray", {
+module("Array, DummyArray and SC.SparseArray", {
 
   setup: function() {
     arrays = [[], DummyArray.create(), SC.SparseArray.create()] ;
