@@ -1,371 +1,366 @@
 // ========================================================================
 // Controller Tests
 // ========================================================================
+/*globals module test ok isObj equals expects */
+
+var c, single, multiple, single_a, empty_a, dummy_a ;// global variables
 
 // An ObjectController will make a content object or an array of content objects 
-Test.context("SC.ObjectController", {
-    
-    "hasNoContent should be true when content != null and false otherwise": function() {
-      this.c.set('content', null) ;
-      this.c.get('hasNoContent').shouldEqual(YES) ;
-      
-      this.c.set('content', this.single) ;
-      this.c.get('hasNoContent').shouldEqual(NO) ;  
-    },
-    
-    "hasSingleContent should be true only when content is a single object": function() {
-      this.c.set('content', null) ;
-      this.c.get('hasSingleContent').shouldEqual(NO) ;
-      
-      this.c.set('content', this.single) ;
-      this.c.get('hasSingleContent').shouldEqual(YES) ;
-      
-      this.c.set('content', this.single_a) ;
-      this.c.get('hasSingleContent').shouldEqual(YES) ;
-      
-      this.c.set('content', this.multiple) ;
-      this.c.get('hasSingleContent').shouldEqual(NO) ;
-    },
-    
-    "hasMultipleContent should be true when content = array with multiple items": function() {
-      this.c.set('content', null) ;
-      this.c.get('hasMultipleContent').shouldEqual(NO) ;
-      
-      this.c.set('content', this.single) ;
-      this.c.get('hasMultipleContent').shouldEqual(NO) ;
-      
-      this.c.set('content', this.single_a) ;
-      this.c.get('hasMultipleContent').shouldEqual(NO) ;
-
-      this.c.set('content', this.multiple) ;
-      this.c.get('hasMultipleContent').shouldEqual(YES) ;
-    },
-    
-    "GET EMPTY: properties should return null": function() {  
-      this.c.set('content', null) ;
-      (this.c.get('test') == null).shouldEqual(YES) ;
-      (this.c.get('value') == null).shouldEqual(YES) ;
-      (this.c.get('flag') == null).shouldEqual(YES) ;
-      (this.c.get('array') == null).shouldEqual(YES) ;
-    },
-
-    "GET EMPTY ARRAY: properties should return null": function() {  
-      this.c.set('content', this.empty_a) ;
-      (this.c.get('test') == null).shouldEqual(YES) ;
-      (this.c.get('value') == null).shouldEqual(YES) ;
-      (this.c.get('flag') == null).shouldEqual(YES) ;
-      (this.c.get('array') == null).shouldEqual(YES) ;
-    },
-    
-    "GET SINGLE: should return properties of content": function() {
-      this.c.set('content', this.single) ;
-
-      this.c.get('test').shouldEqual('NAME0') ;
-      this.c.get('value').shouldEqual(0) ;
-      this.c.get('flag').shouldEqual(YES) ;
-      this.c.get('array').shouldEqualEnum([0,0,0]) ;
-    },
-
-    "GET SINGLE ARRAY: should return properties of first content object": function() {
-      this.c.set('content', this.single_a) ;
-
-      this.c.get('test').shouldEqual('NAME0') ;
-      this.c.get('value').shouldEqual(0) ;
-      this.c.get('flag').shouldEqual(YES) ;
-      this.c.get('array').shouldEqualEnum([0,0,0]) ;
-    },
-    
-    "GET MULTIPLE: should return arrays with values from each content object": function() {
-      this.c.set('content', this.multiple) ;
-      
-      this.c.get('test').shouldEqualEnum(['NAME0', 'NAME1']) ;
-      this.c.get('value').shouldEqualEnum([0,1]) ;
-      this.c.get('flag').shouldEqualEnum([YES, NO]) ;
-      
-      // get('array').shouldEqual() [ [0,0,0], [1,1,1] ];
-      var ar = this.c.get('array') ;
-      ar.length.shouldEqual(2) ;
-      ar[0].shouldEqualEnum([0,0,0]) ;
-      ar[1].shouldEqualEnum([1,1,1]) ;
-    },
-
-    "GET CONTROLLER FOR VALUE: should return a controller for the requested value if one exists": function()
-    {
-      this.c.set('content', this.single);
-      
-      this.c.get('test').shouldEqual('NAME0');
-      this.c.get('testController').shouldEqual('NAME0');
-      
-      this.c.get('value').shouldEqual(0);
-      this.c.get('valueController').shouldEqual(0);
-
-      this.c.get('flag').shouldEqual(YES);
-      this.c.get('flagController').shouldEqual(YES);
-
-      this.c.get('array').shouldEqualEnum([0,0,0]);
-      this.c.get('arrayController').instanceOf( SC.ArrayController ).shouldEqual(YES);
-
-      this.c.get('object').instanceOf( SC.Object ).shouldEqual(YES);
-      this.c.get('objectController').instanceOf( SC.ObjectController ).shouldEqual(YES);
-    },
-
-    "SET should notify observers of valueController properties": function()
-    {
-      this.c.set('content', this.single);
-
-      var observer = new Test.Observer;
-      this.c.addObserver( 'objectController', observer );
-      this.c.set('object', SC.Object.create({ test: "NAME12" }));
-      observer.notified.shouldEqual(1);
-    },
-
-    "SET value should reset the valueController property": function()
-    {
-      this.c.set('content', this.single);
-      
-      this.c.set('array', this.single_a);
-      this.c.get('arrayController').get('length').shouldEqual(1);
-      this.c.set('array', this.empty_a);
-      this.c.get('arrayController').get('length').shouldEqual(0);
-    },
-
-    "SET controller content should reset all valueController properties": function()
-    {
-      this.c.set('content', SC.Object.create({ array: [1,2,3] }));
-      this.c.get('arrayController').get('length').shouldEqual(3);
-
-      this.c.set('content', SC.Object.create({ array: [1] }));
-      this.c.get('arrayController').get('length').shouldEqual(1);
-    },
-
-    "SET with no autocommit should store in controller, but not in source object": function() {
-      
-      this.c.set('content', this.single) ;
-      this.c.get('test').shouldEqual('NAME0') ;
+module("SC.ObjectController", {
   
-      // edit the content, but don't save.
-      this.c.set('test', 'NAME1') ;
+  setup: function() {
+    c = SC.ObjectController.create() ;
+    
+    single = SC.Object.create({ 
+      test: 'NAME0', value: 0, flag: YES, array: [0,0,0],
+      object: SC.Object.create({ test: 'NAME1', value: 1, flag: NO, array: [1,1,1] }),
+      
+      commitChanges: function() {
+        this.didCommitChanges = YES ;
+      },
+      
+      didCommitChanges: NO
+    }) ;
+    
+    multiple = [
+      SC.Object.create({ test: 'NAME0', value: 0, flag: YES, array: [0,0,0] }),
+      SC.Object.create({ test: 'NAME1', value: 1, flag: NO, array: [1,1,1] })
+    ] ;
+    
+    single_a = [
+      SC.Object.create({ test: 'NAME0', value: 0, flag: YES, array: [0,0,0] })
+    ] ;
+    
+    empty_a = [] ;
+    
+    dummy_a = SC.Object.create(SC.Array, {
+      length: 2,
+      
+      replace: function(idx, amt, objects) {
+        this._items.replace(idx,amt,objects) ;
+        set('length', this._items.length) ;
+      },
+      
+      objectAt: function(idx) {
+        return this._items.objectAt(idx) ;
+      },
+      
+      _items: multiple
+    }) ;
+    
+  }
   
-      this.c.get('hasChanges').shouldEqual(YES) ;
-      this.c.get('test').shouldEqual('NAME1') ;
-      this.single.get('test').shouldEqual('NAME0') ;
+});
 
-      // save content.
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      
-      this.c.get('hasChanges').shouldEqual(NO) ;
-      this.c.get('test').shouldEqual('NAME1') ;
-      this.single.get('test').shouldEqual('NAME1') ;
-     },
+test("hasNoContent should be true when content != null and false otherwise", function() {
+  c.set('content', null) ;
+  equals(c.get('hasNoContent'), YES) ;
+  
+  c.set('content', single) ;
+  equals(c.get('hasNoContent'), NO) ;  
+});
+
+test("hasSingleContent should be true only when content is a single object", function() {
+  c.set('content', null) ;
+  equals(c.get('hasSingleContent'), NO) ;
+  
+  c.set('content', single) ;
+  equals(c.get('hasSingleContent'), YES) ;
+  
+  c.set('content', single_a) ;
+  equals(c.get('hasSingleContent'), YES) ;
+  
+  c.set('content', multiple) ;
+  equals(c.get('hasSingleContent'), NO) ;
+});
+
+test("hasMultipleContent should be true when content = array with multiple items", function() {
+  c.set('content', null) ;
+  equals(c.get('hasMultipleContent'), NO) ;
+  
+  c.set('content', single) ;
+  equals(c.get('hasMultipleContent'), NO) ;
+  
+  c.set('content', single_a) ;
+  equals(c.get('hasMultipleContent'), NO) ;
+
+  c.set('content', multiple) ;
+  equals(c.get('hasMultipleContent'), YES) ;
+});
+
+test("GET EMPTY: properties should return null", function() {
+  c.set('content', null) ;
+  equals((c.get('test') == null), YES) ;
+  equals((c.get('value') == null), YES) ;
+  equals((c.get('flag') == null), YES) ;
+  equals((c.get('array') == null), YES) ;
+});
+
+test("GET EMPTY ARRAY: properties should return null", function() {
+  c.set('content', empty_a) ;
+  equals((c.get('test') == null), YES) ;
+  equals((c.get('value') == null), YES) ;
+  equals((c.get('flag') == null), YES) ;
+  equals((c.get('array') == null), YES) ;
+});
+
+test("GET SINGLE: should return properties of content", function() {
+  c.set('content', single) ;
+
+  equals(c.get('test'), 'NAME0') ;
+  equals(c.get('value'), 0) ;
+  equals(c.get('flag'), YES) ;
+  same(c.get('array'), [0,0,0]) ;
+});
+
+test("GET SINGLE ARRAY: should return properties of first content object", function() {
+  c.set('content', single_a) ;
+
+  equals(c.get('test'), 'NAME0') ;
+  equals(c.get('value'), 0) ;
+  equals(c.get('flag'), YES) ;
+  same(c.get('array'), [0,0,0]) ;
+});
+
+test("GET MULTIPLE: should return arrays with values from each content object", function() {
+  c.set('content', multiple) ;
+  
+  same(c.get('test'), ['NAME0', 'NAME1']) ;
+  same(c.get('value'), [0,1]) ;
+  same(c.get('flag'), [YES, NO]) ;
+  
+  var ar = c.get('array') ;
+  equals(ar.length, 2) ;
+  same(ar[0], [0,0,0]) ;
+  same(ar[1], [1,1,1]) ;
+});
+
+test("GET CONTROLLER FOR VALUE: should return a controller for the requested value if one exists", function() {
+  c.set('content', single);
+  
+  equals(c.get('test'), 'NAME0');
+  equals(c.get('testController'), 'NAME0');
+  
+  equals(c.get('value'), 0);
+  equals(c.get('valueController'), 0);
+
+  equals(c.get('flag'), YES);
+  equals(c.get('flagController'), YES);
+
+  same(c.get('array'), [0,0,0]);
+  equals(c.get('arrayController').instanceOf( SC.ArrayController ), YES);
+
+  equals(c.get('object').instanceOf( SC.Object ), YES);
+  equals(c.get('objectController').instanceOf( SC.ObjectController ), YES);
+});
+
+test("SET should notify observers of valueController properties", function() {
+  c.set('content', single);
+
+  var observer = new Test.Observer;
+  c.addObserver( 'objectController', observer );
+  c.set('object', SC.Object.create({ test: "NAME12" }));
+  equals(observer.notified, 1);
+});
+
+test("SET value should reset the valueController property", function() {
+  c.set('content', single);
+  
+  c.set('array', single_a);
+  equals(c.get('arrayController').get('length'), 1);
+  c.set('array', empty_a);
+  equals(c.get('arrayController').get('length'), 0);
+});
+
+test("SET controller content should reset all valueController properties", function() {
+  c.set('content', SC.Object.create({ array: [1,2,3] }));
+  equals(c.get('arrayController').get('length'), 3);
+  
+  c.set('content', SC.Object.create({ array: [1] }));
+  equals(c.get('arrayController').get('length'), 1);
+});
+
+test("SET with no autocommit should store in controller, but not in source object", function() {
+  
+  c.set('content', single) ;
+  equals(c.get('test'), 'NAME0') ;
+  
+  // edit the content, but don't save.
+  c.set('test', 'NAME1') ;
+  
+  equals(c.get('hasChanges'), YES) ;
+  equals(c.get('test'), 'NAME1') ;
+  equals(single.get('test'), 'NAME0') ;
+  
+  // save content.
+  equals($ok(c.commitChanges()), YES) ;
+  
+  equals(c.get('hasChanges'), NO) ;
+  equals(c.get('test'), 'NAME1') ;
+  equals(single.get('test'), 'NAME1') ;
+});
+
+test("SET on null content should allow set but return error on commit", function() {
+  c.set('content', null) ;
+  c.set('test', 'NAME1') ;
+  
+  equals($ok(c.commitChanges()), NO) ;
+});
+
+test("SET on empty array content should allow set but return error on commit", function() {
+  c.set('content', empty_a) ;
+  c.set('test', 'NAME1') ;
+  
+  equals($ok(c.commitChanges()), NO) ;
+});
+
+test("SET on single array should copy values to object on commit", function() {
+  c.set('content', single) ;
+  c.set('test','NAME1') ;
+  
+  equals($ok(c.commitChanges()), YES) ;
+  equals(single.get('test'), 'NAME1') ;      
+});
+
+test("SET on single-item array should copy values to object on commit", function() {
+  c.set('content', single_a) ;
+  c.set('test','NAME1') ;
+  
+  equals($ok(c.commitChanges()), YES) ;
+  equals(single_a[0].get('test'), 'NAME1') ;      
+});
+
+test("SET on multiple with array values should copy value to content object at the same index", function() {
+  c.set('content', multiple) ;
+  c.set('test', ['NAME2','NAME3'] ) ;
+  
+  equals($ok(c.commitChanges()), YES) ;
+  equals(multiple[0].get('test'), 'NAME2') ;
+  equals(multiple[1].get('test'), 'NAME3') ;
+});
+
+test("SET on multiple with a non-array value should copy same value to each content object", function() {
+  c.set('content', multiple) ;
+  c.set('test', 'NAME2') ;
+  
+  equals($ok(c.commitChanges()), YES) ;
+  equals(multiple[0].get('test'), 'NAME2') ;
+  equals(multiple[1].get('test'), 'NAME2') ;
+});
+
+test("Calling performDiscardChanges() should notify property observers of a change", function() {
+  var observer = new Test.Observer;
+
+  c.set('content', single);
+  c.addObserver( 'test', observer );
+
+  // set the property
+  c.set('test', 'NAME2');
+  equals(c.get('hasChanges'), YES);
+  equals(observer.notified, 1);
+
+  c.performDiscardChanges();
+  equals(c.get('hasChanges'), NO);
+  equals(observer.notified, 2);
+});
+
+test("Support commitChanges() on content objects", function() {
+  c.set('content', single) ;
+  c.set('test', 'NAME2') ;
+  
+  equals($ok(c.commitChanges()), YES) ;
+  equals(single.didCommitChanges, YES) ;
+});
+
+// FAILS NOW
+test("Should update both values when commitChanges() on content objects", function() {
+  cc = SC.CollectionController.create({
+    allowsEmptySelection: false,
+    allowsMultipleSelection: false
+  });
+  var oc = SC.ObjectController.create({
+    contentBinding: 'cc.selection',
+    commitChangesImmediately: false
+  });
+  var Contact = SC.Record.extend({});
+  
+  var rcrds = Contact.collection();
+  cc.set('content', rcrds);
+  rcrds.refresh();
+  var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
+  
+  // verify that the collection updated
+  equals(rcrds.count(), 1);
+  
+  // make sure bindings have processed
+  SC.Binding.flushPendingChanges() ;
+  
+  oc.set('test', 'NAME2');
+  oc.set('value', 123);
+  
+  equals(YES, $ok(oc.commitChanges()), "$ok(oc.commitChanges())");
+  equals("NAME2", single.get('test'), "single.get(test)");
+  equals(123, single.get('value'), "single.get(value)");
+});
+
+test("Support content objects that implement SC.Array but are not arrays", function() {
+  c.set('content', dummy_a) ;
+  
+  // test initial content
+  same(c.get('test'), ['NAME0', 'NAME1']) ;
+  same(c.get('value'), [0,1]) ;
+  same(c.get('flag'), [YES, NO]) ;
+  
+  var ar = c.get('array') ;
+  equals(ar.length, 2) ;
+  same(ar[0], [0,0,0]) ;
+  same(ar[1], [1,1,1]) ;
+  
+  // test changing contents
+  c.set('test', 'NAME2') ;
+  equals($ok(c.commitChanges()), YES) ;
+  equals(dummy_a.objectAt(0).get('test'), 'NAME2') ;
+});
+
+test("Support content objects that are not Observable", function() {
+  var obj = { 
+    test: 'NAME0', value: 0, flag: YES, array: [0,0,0],
     
-    "SET on null content should allow set but return error on commit": function() {
-      this.c.set('content', null) ;
-      this.c.set('test', 'NAME1') ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(NO) ;
+    commitChanges: function() {
+      this.didCommitChanges = YES ;
     },
     
-    "SET on empty array content should allow set but return error on commit": function() {
-      this.c.set('content', this.empty_a) ;
-      this.c.set('test', 'NAME1') ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(NO) ;
-      
-    },
-    
-    "SET on single array should copy values to object on commit": function() {
-      this.c.set('content', this.single) ;
-      this.c.set('test','NAME1') ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      this.single.get('test').shouldEqual('NAME1') ;      
-    },
-    
-    "SET on single-item array should copy values to object on commit": function() {
-      this.c.set('content', this.single_a) ;
-      this.c.set('test','NAME1') ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      this.single_a[0].get('test').shouldEqual('NAME1') ;      
-    },
-    
-    "SET on multiple with array values should copy value to content object at the same index": function() {
-      this.c.set('content', this.multiple) ;
-      this.c.set('test', ['NAME2','NAME3'] ) ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      this.multiple[0].get('test').shouldEqual('NAME2') ;
-      this.multiple[1].get('test').shouldEqual('NAME3') ;
-    },
-    
-    "SET on multiple with a non-array value should copy same value to each content object": function() {
-      this.c.set('content', this.multiple) ;
-      this.c.set('test', 'NAME2') ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      this.multiple[0].get('test').shouldEqual('NAME2') ;
-      this.multiple[1].get('test').shouldEqual('NAME2') ;
-    },
+    didCommitChanges: NO
+  } ;
+  
+  c.set('content', obj);
+  equals(c.get('test'), 'NAME0') ;
+  
+  c.set('test', 'NAME1') ;
+  equals($ok(c.commitChanges()), YES) ;
+  
+  equals(obj.test, 'NAME1') ;
+  equals(obj.didCommitChanges, YES) ;      
+});
 
-    "Calling performDiscardChanges() should notify property observers of a change": function()
-    {
-      var observer = new Test.Observer;
+test("Should not set content properties when setting controller properties", function() {
+   c.set('content', SC.Object.create()) ;
+   c.set('nonContentProp', 'test') ;
+   equals(c.getPath('content.nonContentProp'), null) ;
+   
+   delete c.nonContentProp;
+});
 
-      this.c.set('content', this.single);
-      this.c.addObserver( 'test', observer );
-
-      // set the property
-      this.c.set('test', 'NAME2');
-      this.c.get('hasChanges').shouldEqual(YES);
-      observer.notified.shouldEqual(1);
-
-      this.c.performDiscardChanges();
-      this.c.get('hasChanges').shouldEqual(NO);
-      observer.notified.shouldEqual(2);
-    },
-
-    "Support commitChanges() on content objects": function() {
-      this.c.set('content', this.single) ;
-      this.c.set('test', 'NAME2') ;
-      
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      this.single.didCommitChanges.shouldEqual(YES) ;
-    },
-    
-    "Should update both values when commitChanges() on content objects" : function() {
-      cc = SC.CollectionController.create({
-        allowsEmptySelection: false,
-        allowsMultipleSelection: false
-      });
-      var oc = SC.ObjectController.create({
-        contentBinding: 'cc.selection',
-        commitChangesImmediately: false
-      });
-      var Contact = SC.Record.extend({});
-      
-      var rcrds = Contact.collection();
-      cc.set('content', rcrds);
-      rcrds.refresh();
-      var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
-      
-      // verify that the collection updated
-      rcrds.count().shouldEqual(1);
-      
-      // make sure bindings have processed
-      SC.Binding.flushPendingChanges() ;
-      
-      oc.set('test', 'NAME2');
-      oc.set('value', 123);
-      
-      assertEqual(YES, $ok(oc.commitChanges()), "$ok(oc.commitChanges())");
-      assertEqual("NAME2", single.get('test'), "single.get(test)");
-      assertEqual(123, single.get('value'), "single.get(value)");
-    },
-    
-    "Support content objects that implement SC.Array but are not arrays": function() {
-      this.c.set('content', this.dummy_a) ;
-
-      // test initial content
-      this.c.get('test').shouldEqualEnum(['NAME0', 'NAME1']) ;
-      this.c.get('value').shouldEqualEnum([0,1]) ;
-      this.c.get('flag').shouldEqualEnum([YES, NO]) ;
-      
-      // get('array').shouldEqual(): [ [0,0,0], [1,1,1] ];
-      var ar = this.c.get('array') ;
-      ar.length.shouldEqual(2) ;
-      ar[0].shouldEqualEnum([0,0,0]) ;
-      ar[1].shouldEqualEnum([1,1,1]) ;
-
-
-      // test changing contents
-      this.c.set('test', 'NAME2') ;
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      this.dummy_a.objectAt(0).get('test').shouldEqual('NAME2') ;
-      this.dummy_a.objectAt(0).get('test').shouldEqual('NAME2') ;
-     },
-    
-    "Support content objects that are not Observable": function() {
-      var obj = { 
-        test: 'NAME0', value: 0, flag: YES, array: [0,0,0],
-        
-        commitChanges: function() {
-          this.didCommitChanges = YES ;
-        },
-        
-        didCommitChanges: NO
-      } ;
-      
-      this.c.set('content', obj);
-      this.c.get('test').shouldEqual('NAME0') ;
-      
-      this.c.set('test', 'NAME1') ;
-      $ok(this.c.commitChanges()).shouldEqual(YES) ;
-      
-      obj.test.shouldEqual('NAME1') ;
-      obj.didCommitChanges.shouldEqual(YES) ;      
-    },
-
-    "Should not set content properties when setting controller properties": function () {
-       this.c.set('content', SC.Object.create());
-       this.c.set('nonContentProp', 'test');
-       assertNull(this.c.getPath('content.nonContentProp'));
-
-       delete this.c.nonContentProp;
-     },
-
-    "Support observing non-content properties": function () {
-      var observer = new Test.Observer;
-
-      this.c.addObserver('nonContentProp', observer);
-
-      this.c.set('nonContentProp', 'test');
-      observer.notified.shouldEqual(1);
-
-      // Make sure we didn't pass this property on to content.
-      assertNull(this.c.get('content'));
-
-      delete this.c.nonContentProp;
-    },
-
-    setup: function() {
-      this.c = SC.ObjectController.create() ;
-      
-      this.single = SC.Object.create({ 
-        test: 'NAME0', value: 0, flag: YES, array: [0,0,0],
-        object: SC.Object.create({ test: 'NAME1', value: 1, flag: NO, array: [1,1,1] }),
-        
-        commitChanges: function() {
-          this.didCommitChanges = YES ;
-        },
-        
-        didCommitChanges: NO
-      }) ;
-      
-      this.multiple = [
-        SC.Object.create({ test: 'NAME0', value: 0, flag: YES, array: [0,0,0] }),
-        SC.Object.create({ test: 'NAME1', value: 1, flag: NO, array: [1,1,1] })
-      ] ;
-      
-      this.single_a = [
-        SC.Object.create({ test: 'NAME0', value: 0, flag: YES, array: [0,0,0] })
-      ] ;
-      
-      this.empty_a = [] ;
-      
-      this.dummy_a = SC.Object.create(SC.Array, {
-        length: 2,
-        
-        replace: function(idx, amt, objects) {
-          this._items.replace(idx,amt,objects) ;
-          this.set('length', this._items.length) ;
-        },
-        
-        objectAt: function(idx) {
-          return this._items.objectAt(idx) ;
-        },
-        
-        _items: this.multiple
-      }) ;
-      
-    }
-}) ;
+test("Support observing non-content properties", function() {
+  var observer = new Test.Observer;
+  
+  c.addObserver('nonContentProp', observer);
+  
+  c.set('nonContentProp', 'test');
+  equals(observer.notified, 1);
+  
+  // Make sure we didn't pass property on to content.
+  equals(c.get('content'), null);
+  
+  delete c.nonContentProp;
+});
