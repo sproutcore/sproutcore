@@ -1,13 +1,12 @@
 // ========================================================================
 // SC.SparseArray Tests
 // ========================================================================
+/*globals module test ok isObj equals expects */
 
-Test.context("SC.SparseArray calls delegate", {
-  
-  "new SparseArray has expected length": function() {
-    var ary = SC.SparseArray.create(10000) ;
-    assertEqual(10000, ary.get('length'), "length") ;
-  }
+module("SC.SparseArray") ;
 
+test("new SparseArray has expected length", function() {
+  var ary = SC.SparseArray.create(10000) ;
+  equals(10000, ary.get('length'), "length") ;
 });
 
