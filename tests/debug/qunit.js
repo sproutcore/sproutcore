@@ -18,3 +18,7 @@ test("tests should not run until the root responder has been setup", function() 
   expect(1);
   ok(SC.RootResponder.responder, "SC.RootResponder.responder");
 });
+
+test("SC.suppressMain should be true", function() {
+  ok(SC.suppressMain, 'was NOT set to true') ;
+});
