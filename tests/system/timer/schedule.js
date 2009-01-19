@@ -1,141 +1,156 @@
 // ========================================================================
-// SC.Timer Tests
+// SC.Timer.schedule() Tests
 // ========================================================================
+/*globals module test ok isObj equals expects */
 
-Test.context("Timer.schedule single timer", {
+module("Timer.schedule single timer") ;
 
-  "single timer should execute once and invalidate": function() {
-    var fired = [] ;
-    
-    SC.runLoop.beginRunLoop() ;
-    var start = SC.runLoop.get('startTime') ;
-    var t = SC.Timer.schedule({
-      target: this,
-      action: function() { fired.push(Date.now()); },
-      interval: 100, 
-      repeats: NO
-    });
-    SC.runLoop.endRunLoop() ;
-
-    var checks = 10 ;
-    var f = function() {
-      
-      if (fired.length == 0 && --checks > 0) {
-        wait(100, f); return ;
-      }
-      
-      // should only fire once
-      assertEqual(1, fired.length, 'fired count') ;
-      
-      // timer should no longer be valid
-      assertEqual(NO, t.get('isValid'), 'isValid');
+test("single timer should execute once and invalidate", function() {
+  var fired = [] ;
   
-    } ;
-    
-    wait(300, f);
-  },
-
-  "repeating timer with no limit should repeat until terminated": function() {
-    var fired = [] ;
-
-    // schedule repeating timer
-    SC.runLoop.beginRunLoop() ;
-    var start = SC.runLoop.get('startTime') ;
-    var runs = 4 ;
-    
-    var t = SC.Timer.schedule({
-      target: this,
-      action: function() { 
-        fired.push(Date.now()); 
-        if (--runs <= 0) t.invalidate(); 
-      },
-      interval: 100, 
-      repeats: YES
-    });
-    SC.runLoop.endRunLoop() ;
-
-    // We can't gaurantee when timeouts will execute in the browser so we 
-    // have to be a little flexible about testing repeated loops like this.
-    var checks = 10 ;
-    var f = function() {
-
-      if (--checks < 0) assertEqual(YES, NO, 'Check Count Exceeded') ;
-      if (runs > 0) {
-        wait(100, f) ; // wait until timer fires 4 times.
-      } else {
-        var diffs = fired.map(function(x) { return x - start; });
-        assertEqual(4, fired.length, 'fired count: %@'.fmt(diffs.join(', '))) ;
-        assertEqual(NO, t.get('isValid'), 'isValid') ;
-      }
-    };
-    wait(600, f);
-    
-  },
+  SC.runLoop.beginRunLoop() ;
+  var start = SC.runLoop.get('startTime') ;
+  var t = SC.Timer.schedule({
+    target: this,
+    action: function() { fired.push(Date.now()); },
+    interval: 100, 
+    repeats: NO
+  });
+  SC.runLoop.endRunLoop() ;
   
-  "repeating timer should terminate after expiration": function() {
-    var fired = [] ;
-
-    // schedule repeating timer
-    SC.runLoop.beginRunLoop() ;
-    var start = SC.runLoop.get('startTime') ;
-    var runs = 4 ;
+  var checks = 10 ;
+  var f = function f() {
     
-    var t = SC.Timer.schedule({
-      target: this,
-      action: function() { 
-        fired.push(Date.now()); 
-      },
-      interval: 100, 
-      repeats: YES,
-      until: start + 500
-    });
-    SC.runLoop.endRunLoop() ;
-
-    // We can't gaurantee when timeouts will execute in the browser so we 
-    // have to be a little flexible about testing repeated loops like this.
-    var checks = 10 ;
-    var f = function() {
-      if (--checks < 0) assertEqual(YES, NO, 'Timer never invalidated :') ;
-      if ((checks > 0) && t.get('isValid')) {
-        wait(100, f); 
-      } else {
-        var diffs = fired.map(function(x) { return x - start; });
-        assertEqual(NO, t.get('isValid'), 'Timer did not terminate: %@'.fmt(diffs.join(', '))) ;
-      }
-    };
-    wait(600, f);
-  },
+    if (fired.length == 0 && --checks > 0) {
+      // wait(100, f);
+      setTimeout(f, 100) ; 
+      return ;
+    }
+    
+    // should only fire once
+    equals(1, fired.length, 'fired count') ;
+    
+    // timer should no longer be valid
+    equals(NO, t.get('isValid'), 'isValid');
+    
+    window.start() ; // starts the test runner
+  } ;
   
-  "scheduling multiple timers at the same time should cause them to fire at same time": function() {
+  stop() ; // stops the test runner
+  setTimeout(f, 300) ;
+});
+
+test("repeating timer with no limit should repeat until terminated", function() {
+  var fired = [] ;
+  
+  // schedule repeating timer
+  SC.runLoop.beginRunLoop() ;
+  var start = SC.runLoop.get('startTime') ;
+  var runs = 4 ;
+  
+  var t = SC.Timer.schedule({
+    target: this,
+    action: function() { 
+      fired.push(Date.now()); 
+      if (--runs <= 0) t.invalidate(); 
+    },
+    interval: 100, 
+    repeats: YES
+  });
+  SC.runLoop.endRunLoop() ;
+  
+  // We can't gaurantee when timeouts will execute in the browser so we 
+  // have to be a little flexible about testing repeated loops like this.
+  var checks = 10 ;
+  var f = function f() {
     
-    var f1 = 0; var f2 = 0;
-    SC.runLoop.beginRunLoop() ;
-    var start = SC.runLoop.get('startTime') ;
+    if (--checks < 0) assertEqual(YES, NO, 'Check Count Exceeded') ;
+    if (runs > 0) {
+      // wait(100, f) ; // wait until timer fires 4 times.
+      setTimeout(f, 100) ;
+    } else {
+      var diffs = fired.map(function(x) { return x - start; });
+      equals(4, fired.length, 'fired count: %@'.fmt(diffs.join(', '))) ;
+      equals(NO, t.get('isValid'), 'isValid') ;
+      window.start() ; // starts the test runner
+    }
+  };
+  
+  stop() ; // stops the test runner
+  setTimeout(f, 600) ;
+});
 
-    var t1 = SC.Timer.schedule({
-      target: this, 
-      action: function() { f1 = SC.runLoop.get('startTime'); },
-      interval: 100
-    });
+test("repeating timer should terminate after expiration", function() {
+  var fired = [] ;
+  
+  // schedule repeating timer
+  SC.runLoop.beginRunLoop() ;
+  var start = SC.runLoop.get('startTime') ;
+  var runs = 4 ;
+  
+  var t = SC.Timer.schedule({
+    target: this,
+    action: function() { 
+      fired.push(Date.now()); 
+    },
+    interval: 100, 
+    repeats: YES,
+    until: start + 500
+  });
+  SC.runLoop.endRunLoop() ;
+  
+  // We can't gaurantee when timeouts will execute in the browser so we 
+  // have to be a little flexible about testing repeated loops like this.
+  var checks = 10 ;
+  var f = function f() {
+    if (--checks < 0) assertEqual(YES, NO, 'Timer never invalidated :') ;
+    if ((checks > 0) && t.get('isValid')) {
+      wait(100, f);
+      setTimeout(f, 100) ;
+    } else {
+      var diffs = fired.map(function(x) { return x - start; });
+      equals(NO, t.get('isValid'), 'Timer did not terminate: %@'.fmt(diffs.join(', '))) ;
+      window.start() ; // starts the test runner
+    }
+  };
+  
+  stop() ; // stops the test runner
+  setTimeout(f, 600) ;
+});
 
-    var t2 = SC.Timer.schedule({
-      target: this, 
-      action: function() { f2 = SC.runLoop.get('startTime'); },
-      interval: 100
-    });
-
-    // be lenient on execution time since we can't control the browser.
-    var tries = 10 ;
-    var f = function() {
-      if ((f1 == 0 || f2 == 0) && --tries >= 0) {
-        wait(100, f) ; return ;
-      }
-      
-      assertEqual(f1, f2, 'execution time f1 == f2');
-      assertEqual(NO, t1.get('isValid'), 't1.isValid') ;
-      assertEqual(NO, t2.get('isValid'), 't2.isValid') ;
-    } ;
-    wait(200, f) ;
-  }
-
+test("scheduling multiple timers at the same time should cause them to fire at same time", function() {
+  
+  var f1 = 0; var f2 = 0;
+  SC.runLoop.beginRunLoop() ;
+  var start = SC.runLoop.get('startTime') ;
+  
+  var t1 = SC.Timer.schedule({
+    target: this, 
+    action: function() { f1 = SC.runLoop.get('startTime'); },
+    interval: 100
+  });
+  
+  var t2 = SC.Timer.schedule({
+    target: this, 
+    action: function() { f2 = SC.runLoop.get('startTime'); },
+    interval: 100
+  });
+  
+  // be lenient on execution time since we can't control the browser.
+  var tries = 10 ;
+  var f = function f() {
+    if ((f1 == 0 || f2 == 0) && --tries >= 0) {
+      // wait(100, f) ;
+      setTimeout(f, 100) ;
+      return ;
+    }
+    
+    equals(f1, f2, 'execution time f1 == f2');
+    equals(NO, t1.get('isValid'), 't1.isValid') ;
+    equals(NO, t2.get('isValid'), 't2.isValid') ;
+    window.start() ; // starts the test runner
+  } ;
+  
+  stop() ; // stops the test runner
+  setTimeout(f, 200) ;
 });
