@@ -1,0 +1,20 @@
+// ========================================================================
+// RootResponder Tests
+// ========================================================================
+/*globals module test ok isObj equals expects */
+
+/**
+  This file is slightly subtle, in that we want to make sure SproutCore is 
+  set up properly before any QUnit tests are run. Therefore...
+*/
+
+module("QUnit") ;
+
+test("tests should not run until SproutCore is ready", function() {
+  equals(SC.isReady, true, "SC.isReady");
+});
+
+test("tests should not run until the root reponder has been setup", function() {
+  console.log('test is running');
+  ok(SC.RootResponder.responder, "SC.RootResponder.responder");
+});

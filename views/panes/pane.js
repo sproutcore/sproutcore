@@ -504,6 +504,7 @@ SC.Pane = SC.View.extend({
     var hasRootElement = !!this.rootElement ;
     sc_super() ;
     if (hasRootElement) this.paneDidAttach() ;
+    // this.paneDidAttach() ;
   },
   
   emptyElement: '<div class="sc-pane"></div>'

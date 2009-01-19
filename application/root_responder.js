@@ -453,9 +453,10 @@ SC.RootResponder = SC.Object.extend({
 
 /* 
   Invoked when the document is ready, but before main is called.  Creates 
-  an instances and sets up event listeners as needed.
+  an instance and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
+  console.log('SC.RootResponder.ready called');
   var r = SC.RootResponder.create();
   SC.RootResponder.responder = r; r.setup();
 });

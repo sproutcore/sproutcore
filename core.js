@@ -524,6 +524,7 @@ SC.mixin(/** @scope SC */ {
     
     - $type()
     - $I()
+    - $A()
     
     @returns {SC} SproutCore namespace
   */
@@ -531,6 +532,7 @@ SC.mixin(/** @scope SC */ {
     $type = SC._originalGlobals.$type ;
     $I = SC._originalGlobals.$I ;
     $A = SC._originalGlobals.$A ;
+    return this ;
   },
   
   /**

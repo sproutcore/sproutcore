@@ -1,13 +1,17 @@
 // ========================================================================
 // View childView Unit Tests
 // ========================================================================
-
-/*globals module test ok isObj equals */
+/*globals module test ok isObj equals expects */
 
 /* NOTES
-   The childViews array is used to automatically propogate certain state changes such as resizing, visibility, and enabled up and down the view hierarchy.  It is also used to control the position of the rootElement manged by the view in the DOM tree.
+   The childViews array is used to automatically propogate certain state changes 
+   such as resizing, visibility, and enabled up and down the view hierarchy.  It 
+   is also used to control the position of the rootElement manged by the view in 
+   the DOM tree.
    
-   Whenever a call one of the methods to add/remove a child in the view hierarchy, the childViews array should update immediately but the actual DOM position of the view should only change once at the end of the runloop.
+   Whenever a call one of the methods to add/remove a child in the view 
+   hierarchy, the childViews array should update immediately but the actual DOM 
+   position of the view should only change once at the end of the runloop.
 */
 var parent, childA, childB ;
 
@@ -197,7 +201,8 @@ test("replaceChild should replace one childView for the other", function() {
 
 module("Edge Cases");
 
-test("Adding two child views together can cause DOM exception if one child's display location is updated and the next child view is not yet added to DOM", function() {
+test("Adding two child views together can cause DOM exception if one child's\
+ display location is updated and the next child view is not yet added to DOM", function() {
   
   // setup the hierarchy...
   var parent = SC.View.create();

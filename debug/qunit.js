@@ -10,6 +10,7 @@
  */
 
 require('system/ready');
+require('application/root_reponder');
 
 (function() {
   
