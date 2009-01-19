@@ -1,9 +1,9 @@
 // ========================================================================
-// Controller Tests
+// ObjectController Tests
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
-var c, single, multiple, single_a, empty_a, dummy_a ;// global variables
+var c, single, multiple, single_a, empty_a, dummy_a ; // global variables
 
 // An ObjectController will make a content object or an array of content objects 
 module("SC.ObjectController", {
@@ -20,7 +20,7 @@ module("SC.ObjectController", {
       },
       
       didCommitChanges: NO
-    }) ;
+    });
     
     multiple = [
       SC.Object.create({ test: 'NAME0', value: 0, flag: YES, array: [0,0,0] }),
@@ -46,7 +46,7 @@ module("SC.ObjectController", {
       },
       
       _items: multiple
-    }) ;
+    });
     
   }
   
@@ -83,7 +83,7 @@ test("hasMultipleContent should be true when content = array with multiple items
   
   c.set('content', single_a) ;
   equals(c.get('hasMultipleContent'), NO) ;
-
+  
   c.set('content', multiple) ;
   equals(c.get('hasMultipleContent'), YES) ;
 });
@@ -106,7 +106,7 @@ test("GET EMPTY ARRAY: properties should return null", function() {
 
 test("GET SINGLE: should return properties of content", function() {
   c.set('content', single) ;
-
+  
   equals(c.get('test'), 'NAME0') ;
   equals(c.get('value'), 0) ;
   equals(c.get('flag'), YES) ;
@@ -115,7 +115,7 @@ test("GET SINGLE: should return properties of content", function() {
 
 test("GET SINGLE ARRAY: should return properties of first content object", function() {
   c.set('content', single_a) ;
-
+  
   equals(c.get('test'), 'NAME0') ;
   equals(c.get('value'), 0) ;
   equals(c.get('flag'), YES) ;
@@ -136,48 +136,48 @@ test("GET MULTIPLE: should return arrays with values from each content object", 
 });
 
 test("GET CONTROLLER FOR VALUE: should return a controller for the requested value if one exists", function() {
-  c.set('content', single);
+  c.set('content', single) ;
   
-  equals(c.get('test'), 'NAME0');
-  equals(c.get('testController'), 'NAME0');
+  equals(c.get('test'), 'NAME0') ;
+  equals(c.get('testController'), 'NAME0') ;
   
-  equals(c.get('value'), 0);
-  equals(c.get('valueController'), 0);
-
-  equals(c.get('flag'), YES);
-  equals(c.get('flagController'), YES);
-
-  same(c.get('array'), [0,0,0]);
-  equals(c.get('arrayController').instanceOf( SC.ArrayController ), YES);
-
-  equals(c.get('object').instanceOf( SC.Object ), YES);
-  equals(c.get('objectController').instanceOf( SC.ObjectController ), YES);
+  equals(c.get('value'), 0) ;
+  equals(c.get('valueController'), 0) ;
+  
+  equals(c.get('flag'), YES) ;
+  equals(c.get('flagController'), YES) ;
+  
+  same(c.get('array'), [0,0,0]) ;
+  equals(c.get('arrayController').instanceOf( SC.ArrayController ), YES) ;
+  
+  equals(c.get('object').instanceOf( SC.Object ), YES) ;
+  equals(c.get('objectController').instanceOf( SC.ObjectController ), YES) ;
 });
 
 test("SET should notify observers of valueController properties", function() {
-  c.set('content', single);
-
+  c.set('content', single) ;
+  
   var observer = new Test.Observer;
-  c.addObserver( 'objectController', observer );
-  c.set('object', SC.Object.create({ test: "NAME12" }));
-  equals(observer.notified, 1);
+  c.addObserver( 'objectController', observer ) ;
+  c.set('object', SC.Object.create({ test: "NAME12" })) ;
+  equals(observer.notified, 1) ;
 });
 
 test("SET value should reset the valueController property", function() {
-  c.set('content', single);
+  c.set('content', single) ;
   
-  c.set('array', single_a);
-  equals(c.get('arrayController').get('length'), 1);
-  c.set('array', empty_a);
-  equals(c.get('arrayController').get('length'), 0);
+  c.set('array', single_a) ;
+  equals(c.get('arrayController').get('length'), 1) ;
+  c.set('array', empty_a) ;
+  equals(c.get('arrayController').get('length'), 0) ;
 });
 
 test("SET controller content should reset all valueController properties", function() {
-  c.set('content', SC.Object.create({ array: [1,2,3] }));
-  equals(c.get('arrayController').get('length'), 3);
+  c.set('content', SC.Object.create({ array: [1,2,3] })) ;
+  equals(c.get('arrayController').get('length'), 3) ;
   
-  c.set('content', SC.Object.create({ array: [1] }));
-  equals(c.get('arrayController').get('length'), 1);
+  c.set('content', SC.Object.create({ array: [1] })) ;
+  equals(c.get('arrayController').get('length'), 1) ;
 });
 
 test("SET with no autocommit should store in controller, but not in source object", function() {
@@ -219,7 +219,7 @@ test("SET on single array should copy values to object on commit", function() {
   c.set('test','NAME1') ;
   
   equals($ok(c.commitChanges()), YES) ;
-  equals(single.get('test'), 'NAME1') ;      
+  equals(single.get('test'), 'NAME1') ;
 });
 
 test("SET on single-item array should copy values to object on commit", function() {
@@ -227,7 +227,7 @@ test("SET on single-item array should copy values to object on commit", function
   c.set('test','NAME1') ;
   
   equals($ok(c.commitChanges()), YES) ;
-  equals(single_a[0].get('test'), 'NAME1') ;      
+  equals(single_a[0].get('test'), 'NAME1') ;
 });
 
 test("SET on multiple with array values should copy value to content object at the same index", function() {
@@ -250,18 +250,18 @@ test("SET on multiple with a non-array value should copy same value to each cont
 
 test("Calling performDiscardChanges() should notify property observers of a change", function() {
   var observer = new Test.Observer;
-
-  c.set('content', single);
-  c.addObserver( 'test', observer );
-
+  
+  c.set('content', single) ;
+  c.addObserver( 'test', observer ) ;
+  
   // set the property
-  c.set('test', 'NAME2');
-  equals(c.get('hasChanges'), YES);
-  equals(observer.notified, 1);
-
-  c.performDiscardChanges();
-  equals(c.get('hasChanges'), NO);
-  equals(observer.notified, 2);
+  c.set('test', 'NAME2') ;
+  equals(c.get('hasChanges'), YES) ;
+  equals(observer.notified, 1) ;
+  
+  c.performDiscardChanges() ;
+  equals(c.get('hasChanges'), NO) ;
+  equals(observer.notified, 2) ;
 });
 
 test("Support commitChanges() on content objects", function() {
@@ -272,7 +272,6 @@ test("Support commitChanges() on content objects", function() {
   equals(single.didCommitChanges, YES) ;
 });
 
-// FAILS NOW
 test("Should update both values when commitChanges() on content objects", function() {
   cc = SC.CollectionController.create({
     allowsEmptySelection: false,
@@ -284,23 +283,23 @@ test("Should update both values when commitChanges() on content objects", functi
   });
   var Contact = SC.Record.extend({});
   
-  var rcrds = Contact.collection();
-  cc.set('content', rcrds);
-  rcrds.refresh();
+  var rcrds = Contact.collection() ;
+  cc.set('content', rcrds) ;
+  rcrds.refresh() ;
   var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
   
   // verify that the collection updated
-  equals(rcrds.count(), 1);
+  equals(rcrds.count(), 1) ;
   
   // make sure bindings have processed
   SC.Binding.flushPendingChanges() ;
   
-  oc.set('test', 'NAME2');
-  oc.set('value', 123);
+  oc.set('test', 'NAME2') ;
+  oc.set('value', 123) ;
   
-  equals(YES, $ok(oc.commitChanges()), "$ok(oc.commitChanges())");
-  equals("NAME2", single.get('test'), "single.get(test)");
-  equals(123, single.get('value'), "single.get(value)");
+  equals(YES, $ok(oc.commitChanges()), "$ok(oc.commitChanges())") ;
+  equals("NAME2", single.get('test'), "single.get(test)") ;
+  equals(123, single.get('value'), "single.get(value)") ;
 });
 
 test("Support content objects that implement SC.Array but are not arrays", function() {
@@ -333,14 +332,14 @@ test("Support content objects that are not Observable", function() {
     didCommitChanges: NO
   } ;
   
-  c.set('content', obj);
+  c.set('content', obj) ;
   equals(c.get('test'), 'NAME0') ;
   
   c.set('test', 'NAME1') ;
   equals($ok(c.commitChanges()), YES) ;
   
   equals(obj.test, 'NAME1') ;
-  equals(obj.didCommitChanges, YES) ;      
+  equals(obj.didCommitChanges, YES) ;
 });
 
 test("Should not set content properties when setting controller properties", function() {
@@ -354,13 +353,13 @@ test("Should not set content properties when setting controller properties", fun
 test("Support observing non-content properties", function() {
   var observer = new Test.Observer;
   
-  c.addObserver('nonContentProp', observer);
+  c.addObserver('nonContentProp', observer) ;
   
-  c.set('nonContentProp', 'test');
-  equals(observer.notified, 1);
+  c.set('nonContentProp', 'test') ;
+  equals(observer.notified, 1) ;
   
   // Make sure we didn't pass property on to content.
-  equals(c.get('content'), null);
+  equals(c.get('content'), null) ;
   
   delete c.nonContentProp;
 });
