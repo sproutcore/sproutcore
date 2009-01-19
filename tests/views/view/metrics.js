@@ -19,7 +19,7 @@ var FRAME = { x: 10, y: 10, width: 30, height: 30 } ;
 
 var pane, view ; // test globals
 
-module('SC.View.isVisibleInWindow CASE 1: View created outside of main pane', {
+module("isVisibleInWindow", {
   
   setup: function() {
     pane = SC.MainPane.create() ;
@@ -35,21 +35,24 @@ module('SC.View.isVisibleInWindow CASE 1: View created outside of main pane', {
   
 });
 
-test("initial isVisibleInWindow should be false", function() {
-  equals(view.get('isVisibleInWindow'), false) ;
+test("a new view should not be visible initially", function() {
+  ok(!view.get('isVisibleInWindow'), "view.get('isVisibleInWindow') === NO") ;
 });
 
-test("adding to main pane should make it true", function() {
-  equals(pane.get('isVisibleInWindow'), true) ;
+test("adding a new view to a visible pane should make it visible", function() {
+  ok(!view.get('isVisibleInWindow'), "view.get('isVisibleInWindow') === NO") ;
+  ok(pane.get('isVisibleInWindow'), "pane.get('isVisibleInWindow') === YES") ;
   
   pane.appendChild(view) ;
-  equals(view.get('isVisibleInWindow'), true) ;
+  ok(view.get('isVisibleInWindow'), "after pane.appendChild(view), view.get('isVisibleInWindow') === YES") ;
 });
 
-test("removing from main pane should make it false again", function() {
+test("removing a view from a visible pane should make it invisible again", function() {
+  ok(!view.get('isVisibleInWindow'), "view.get('isVisibleInWindow') === NO") ;
+  ok(pane.get('isVisibleInWindow'), "pane.get('isVisibleInWindow') === YES") ;
   pane.appendChild(view) ;
-  equals(view.get('isVisibleInWindow'), true) ;
+  ok(view.get('isVisibleInWindow'), "after pane.appendChild(view), view.get('isVisibleInWindow') === YES") ;
   
   view.removeFromParent() ;
-  equals(view.get('isVisibleInWindow'), false) ;
+  ok(!view.get('isVisibleInWindow'), "after view.removeFromParent(), view.get('isVisibleInWindow') === NO") ;
 });
