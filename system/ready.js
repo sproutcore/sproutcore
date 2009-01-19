@@ -74,6 +74,8 @@ SC.mixin({
 
   /** @private handlers scheduled to execute on ready. */
   _readyQueue: [],
+  
+  _afterReadyQueue: [],
 
   isReady: NO,
   
@@ -81,7 +83,7 @@ SC.mixin({
   _didBecomeReady: function() {
     // Only call once
     if (SC.isReady) return ;
-    SC.isReady = YES ;
+    // SC.isReady = YES ;
     
     // setup locale
     SC.Locale.createCurrentLocale();
@@ -101,16 +103,38 @@ SC.mixin({
     // Begin runloop
     SC.runLoop.beginRunLoop();
     
-    var handler, ary = SC._readyQueue || [] ;
-    for (var idx=0, len=ary.length; idx<len; idx++) {
-      handler = ary[idx] ;
-      var target = handler[0] || document ;
-      var method = handler[1] ;
-      if (method) method.call(target) ;
-    }
+    // correctly handle queueing new SC.ready() calls
+    do {
+      var handler, ary = SC._readyQueue ;
+      SC._readyQueue = [] ; // reset
+      for (var idx=0, len=ary.length; idx<len; idx++) {
+        handler = ary[idx] ;
+        var target = handler[0] || document ;
+        var method = handler[1] ;
+        if (method) method.call(target) ;
+      }
+    } while (SC._readyQueue.length > 0)
+    
+    // okay, now we're ready (any SC.ready() calls will now be called immediately)
+    SC.isReady = YES ;
     
     // clear the queue
     SC._readyQueue = null ;
+    
+    // process afterReady queue
+    do {
+      var handler, ary = SC._afterReadyQueue ;
+      SC._afterReadyQueue = [] ; // reset
+      for (var idx=0, len=ary.length; idx<len; idx++) {
+        handler = ary[idx] ;
+        var target = handler[0] || document ;
+        var method = handler[1] ;
+        if (method) method.call(target) ;
+      }
+    } while (SC._afterReadyQueue.length > 0)
+    
+    // clear the queue
+    SC._afterReadyQueue = null ;
     
     // trigger any bound ready events
     SC.Event.trigger("ready", null, document, NO) ;
@@ -132,6 +156,8 @@ SC.mixin({
     Add the passed target and method to the queue of methods to invoke when
     the document is ready.  These methods will be called after the document
     has loaded and parsed, but before the main() function is called.
+    
+    Methods are called in the order they are added.
   
     If you add a ready handler when the main document is already ready, then
     your handler will be called immediately.
@@ -141,6 +167,29 @@ SC.mixin({
     @returns {SC}
   */
   ready: function(target, method) {
+    return this._ready(target, method, this._readyQueue) ;
+  },
+  
+  /** 
+    Add the passed target and method to the queue of methods to invoke when
+    after SproutCore is ready.  These methods will be called after SproutCore
+    has completed its setup, but before the main() function is called.
+    
+    Methods are called in the order they are added.
+  
+    If you add an after ready handler when SproutCore is already ready, then
+    your handler will be called immediately.
+    
+    @param target {Object} optional target object
+    @param method {Funciton} method name or function to execute
+    @returns {SC}
+  */
+  afterReady: function(target, method) {
+    return this._ready(target, method, this._afterReadyQueue) ;
+  },
+  
+  /** @private */
+  _ready: function(target, method, queue) {
     // normalize
     if (method === undefined) {
       method = target; target = null ;
@@ -154,7 +203,7 @@ SC.mixin({
     if (this.isReady) return method.call(target || document) ;
     
     // otherwise, add to queue.
-    this._readyQueue.push([target, method]) ;
+    queue.push([target, method]) ;
     return this ; 
   }
   
