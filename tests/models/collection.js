@@ -120,7 +120,6 @@ test("Collections should NOT contain records that have NOT been added to the sto
   equals(this.employees.get('records').length, originalLength) ;
 });
 
-// FAILS
 test("Collections should contain records that have been added to the store", function() {
   this.employees.refresh() ;
   var originalLength = this.employees.get('records').length ;

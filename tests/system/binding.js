@@ -107,7 +107,6 @@ module("chained binding", {
   
 });
 
-// FAILS
 test("changing first output should propograte to third after flush", function() {
   first.set("output", "change") ;
   equals("change", first.get("output"), "first.output") ;

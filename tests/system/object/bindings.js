@@ -36,7 +36,6 @@ module("bind() method", {
   
 });
   
-// FAILS
 test("bind(TestNamespace.fromObject.bar) should follow absolute path", function() {
   // create binding
   testObject.bind("foo", "TestNamespace.fromObject.bar") ;
@@ -50,7 +49,6 @@ test("bind(TestNamespace.fromObject.bar) should follow absolute path", function(
   equals("changedValue", testObject.get("foo"), "testObject.foo");
 });
   
-// FAILS
 test("bind(.bar) should bind to relative path", function() {
   // create binding
   testObject.bind("foo", ".bar") ;
@@ -63,7 +61,6 @@ test("bind(.bar) should bind to relative path", function() {
   equals("changedValue", testObject.get("foo"), "testObject.foo");
 });
 
-// FAILS
 test("bind(SC.Binding.Bool(TestNamespace.fromObject.bar)) should create binding with bool transform", function() {
   // create binding
   testObject.bind("foo", SC.Binding.Bool("TestNamespace.fromObject.bar")) ;
@@ -81,7 +78,6 @@ test("bind(SC.Binding.Bool(TestNamespace.fromObject.bar)) should create binding 
   equals(NO, testObject.get("foo"), "testObject.foo == NO");
 });
 
-// FAILS
 test("bind(TestNamespace.fromObject*extraObject.foo) should create chained binding", function() {
   testObject.bind("foo", "TestNamespace.fromObject*extraObject.foo");
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
@@ -92,7 +88,6 @@ test("bind(TestNamespace.fromObject*extraObject.foo) should create chained bindi
   equals("extraObjectValue", testObject.get("foo"), "testObject.foo") ;
 });
 
-// FAILS
 test("bind(*extraObject.foo) should create locally chained binding", function() {
   testObject.bind("foo", "*extraObject.foo");
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
@@ -136,7 +131,6 @@ module("fooBinding method", {
   
 });
 
-// FAILS
 test("fooBinding: TestNamespace.fromObject.bar should follow absolute path", function() {
   // create binding
   testObject = TestObject.create({
@@ -151,7 +145,6 @@ test("fooBinding: TestNamespace.fromObject.bar should follow absolute path", fun
   equals("changedValue", testObject.get("foo"), "testObject.foo");
 });
 
-// FAILS
 test("fooBinding: .bar should bind to relative path", function() {
   
   testObject = TestObject.create({
@@ -166,7 +159,6 @@ test("fooBinding: .bar should bind to relative path", function() {
   equals("changedValue", testObject.get("foo"), "testObject.foo");
 });
 
-// FAILS
 test("fooBinding: SC.Binding.Bool(TestNamespace.fromObject.bar should create binding with bool transform", function() {
   
   testObject = TestObject.create({
@@ -186,7 +178,6 @@ test("fooBinding: SC.Binding.Bool(TestNamespace.fromObject.bar should create bin
   equals(NO, testObject.get("foo"), "testObject.foo == NO");
 });
 
-// FAILS
 test("fooBinding: TestNamespace.fromObject*extraObject.foo should create chained binding", function() {
   
   testObject = TestObject.create({
@@ -200,7 +191,6 @@ test("fooBinding: TestNamespace.fromObject*extraObject.foo should create chained
   equals("extraObjectValue", testObject.get("foo"), "testObject.foo") ;
 });
 
-// FAILS
 test("fooBinding: *extraObject.foo should create locally chained binding", function() {
   
   testObject = TestObject.create({
@@ -243,7 +233,6 @@ module("fooBindingDefault: SC.Binding.Bool (old style)", {
   
 });
 
-// FAILS
 test("fooBinding: TestNamespace.fromObject.bar should have bool binding", function() {
   // create binding
   testObject = TestObject.create({
@@ -263,7 +252,6 @@ test("fooBinding: TestNamespace.fromObject.bar should have bool binding", functi
   equals(NO, testObject.get("foo"), "testObject.foo == NO");
 });
 
-// FAILS
 test("fooBinding: SC.Binding.Not(TestNamespace.fromObject.bar should override default", function() {
   
   testObject = TestObject.create({

@@ -5,7 +5,6 @@
 
 module("SC.Object.invokeLater") ;
 
-// FAILS
 test("should invoke method string after specified time", function() {
   SC.runLoop.beginRunLoop() ;
   var fired = NO ;
@@ -52,7 +51,6 @@ test("should invoke method instance after specified time", function() {
   setTimeout(f, 300) ;
 });
 
-// FAILS
 test("should invoke method string immediately if no time passed", function() {
   SC.runLoop.beginRunLoop() ;
   var fired = NO ;
