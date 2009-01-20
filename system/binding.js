@@ -510,24 +510,24 @@ SC.Binding = {
     
     // loop through the changed queue...
     while ((queue = this._changeQueue).length > 0) {
-        if (log) console.log("Begin: Trigger changed bindings") ;
+      if (log) console.log("Begin: Trigger changed bindings") ;
       
-        didFlush = YES ;
+      didFlush = YES ;
       
-        // first, swap the change queues.  This way any binding changes that
-        // happen while we flush the current queue can be queued up.
-        this._changeQueue = this._alternateChangeQueue ;
-        this._alternateChangeQueue = queue ;
+      // first, swap the change queues.  This way any binding changes that
+      // happen while we flush the current queue can be queued up.
+      this._changeQueue = this._alternateChangeQueue ;
+      this._alternateChangeQueue = queue ;
       
-        // next, apply any bindings in the current queue.  This may cause 
-        // additional bindings to trigger, which will end up in the new active 
-        // queue.
-        while(binding = queue.pop()) binding.applyBindingValue() ;
+      // next, apply any bindings in the current queue.  This may cause 
+      // additional bindings to trigger, which will end up in the new active 
+      // queue.
+      while(binding = queue.pop()) binding.applyBindingValue() ;
       
-        // now loop back and see if there are additional changes pending in the
-        // active queue.  Repeat this until all bindings that need to trigger 
-        // have triggered.
-        if (log) console.log("End: Trigger changed bindings") ;
+      // now loop back and see if there are additional changes pending in the
+      // active queue.  Repeat this until all bindings that need to trigger 
+      // have triggered.
+      if (log) console.log("End: Trigger changed bindings") ;
     }
     
     // clean up
