@@ -405,3 +405,18 @@ test("Support observing non-content properties", function() {
   
   delete c.nonContentProp;
 });
+
+test("Content changes fire observer on non-content properties", function () {
+  c.nonContentProp = null ;
+  var notified = 0 ;
+  var observer = function () {
+     if (notified === 0) c.set('content', SC.Object.create()) ;
+     notified++; 
+  }.bind(c) ;
+  c.addObserver('nonContentProp', observer) ;
+  
+  c.set('nonContentProp', 'test') ;
+  equals(notified, 2) ;
+  
+  delete c.nonContentProp ;
+});
