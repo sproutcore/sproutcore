@@ -1,6 +1,8 @@
-// ==========================================================================
-// SC.PathModule
-// Author: Charles Jolley
+// ========================================================================
+// SproutCore -- JavaScript Application Framework
+// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
+// Portions copyright ©2008 Apple, Inc.  All rights reserved.
+// ========================================================================
 //
 // When creating a web app, you often need to find elements in your page to
 // configure them on load.  These elements are often marked with a class or

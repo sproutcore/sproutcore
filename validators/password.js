@@ -1,6 +1,8 @@
-// ==========================================================================
-// Not Empty Validator
-// Author: Charles Jolley
+// ========================================================================
+// SproutCore -- JavaScript Application Framework
+// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
+// Portions copyright ©2008 Apple, Inc.  All rights reserved.
+// ========================================================================
 //
 // This requires all password fields in the form to match.  The normal
 // validation only tries to match if all password fields are not empty.

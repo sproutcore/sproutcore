@@ -1,7 +1,8 @@
-// ==========================================================================
+// ========================================================================
 // SproutCore -- JavaScript Application Framework
-// copyright 2006-2008, Sprout Systems, Inc. and contributors.
-// ==========================================================================
+// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
+// Portions copyright ©2008 Apple, Inc.  All rights reserved.
+// ========================================================================
 
 require('core') ;
 require('system/enumerator');
