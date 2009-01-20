@@ -303,7 +303,7 @@ SC.Timer = SC.Object.extend(
 
     // otherwise, try to execute action direction on target or send down
     // responder chain.
-    } else SC.app.sendAction(this.action, this.target, this) ;
+    } else SC.RootResponder.responder.sendAction(this.action, this.target, this) ;
   },
   
   /**
