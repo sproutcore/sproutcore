@@ -1174,9 +1174,7 @@ SC.mixin(Array.prototype, SC.Reducers) ;
   // and don't break the browsers.
   for(var key in mixinIfMissing) {
     if (!mixinIfMissing.hasOwnProperty(key)) continue ;
-    if (!Array.prototype[key]) {
-      Array.prototype[key] = mixinIfMissing[key] ;
-    }
+    Array.prototype[key] = mixinIfMissing[key] ;
   }
   
   // Apply other methods...
