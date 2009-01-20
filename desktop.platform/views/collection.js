@@ -1529,7 +1529,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var base = (extendSelection) ? this.get('selection') : [] ;
     var sel = [];
 
-    items = [items].flatten();
+    // items = [items].flatten();
+    items = SC.makeArray(items);
     for (var i = 0, len = items.length; i < len; i++) {
       if (this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, items[i])) {
         sel.push(items[i]);
@@ -1760,7 +1761,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
     // collection some basic setup info
     var selection  = this.get('selection') || [];
-    var isSelected = selection.include(mouseDownContent);
+    var isSelected = (selection.indexOf(mouseDownContent) !== -1);
     var modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
     if (mouseDownView.checkboxView && (SC.Event.element(ev) == ev.checkboxView.rootElement)) {
       modifierKeyPressed = true ;

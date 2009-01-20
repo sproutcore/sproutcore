@@ -293,8 +293,8 @@ SC.routes = SC.Object.create(
   },
   
   _setupHistory: function() {
-    // this.invokeLater(this._checkWindowLocation, 1000) ;
-		setInterval (this._checkWindowLocation.bind(this), 100);
+    var that = this ;
+    this._checkWindowLocation.invokeLater(this, 1000) ;
   },
   
   _checkWindowLocation: function() {

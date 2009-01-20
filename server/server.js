@@ -103,26 +103,64 @@ SC.Server = SC.Object.extend({
     var parameters = this._toQueryString(params) ;
     if (parameters && parameters.length > 0) opts.parameters = parameters ;
     
-    var request = null ; //will container the ajax request
+    var request ; // save for later
     
     // Save callback functions.
-    opts.onSuccess = function(transport) {
-      var cacheCode = request.getHeader('Last-Modified') ;
-      if ((transport.status == '200') && (transport.responseText == '304 Not Modified')) {
-        if (onNotModified) onNotModified(transport.status, transport, cacheCode,context);
-      } else {
-        if (onSuccess) onSuccess(transport.status, transport, cacheCode,context);
-      }
+    opts.onSuccess = function(request) {
+      // var cacheCode = request.getHeader('Last-Modified') ;
+      // if ((transport.status == '200') && (transport.responseText == '304 Not Modified')) {
+      //   if (onNotModified) onNotModified(transport.status, transport, cacheCode,context);
+      // } else {
+        if (onSuccess) onSuccess(request.status, request, cacheCode,context);
+      // }
     } ;
     
-    opts.onFailure = function(transport) {
-      var cacheCode = request.getHeader('Last-Modified') ;
-      if (onFailure) onFailure(transport.status, transport, cacheCode,context);
+    opts.onFailure = function(request) {
+      // var cacheCode = request.getHeader('Last-Modified') ;
+      if (onFailure) onFailure(request.status, request, cacheCode,context);
     } ; 
     
     console.log('REQUEST: %@ %@'.fmt(opts.method, url)) ;
     
-    request = new Ajax.Request(url,opts) ;
+    var that = this ;
+    var processRequestChange = function() {
+      if (request.readyState == 4) {
+          if (request.status == 200) opts.onSuccess.apply(that, [request]) ;
+          else opts.onFailure.apply(that, [request]) ;
+      }
+    };
+    
+    var ajaxRequest = function(url, opts) {
+      var opts = opts || {} ;
+      request = false;
+      
+      if (window.XMLHttpRequest && !(window.ActiveXObject)) {
+        try {
+          request = new XMLHttpRequest();
+        } catch(e) {
+          request = false;
+        }
+      // branch for IE/Windows ActiveX version
+      } else if (window.ActiveXObject) {
+        try {
+          request = new ActiveXObject("Msxml2.XMLHTTP");
+        } catch(e) {
+          try {
+            request = new ActiveXObject("Microsoft.XMLHTTP");
+          } catch(e) {
+            request = false;
+          }
+        }
+      }
+      
+      if (request) {
+        request.onreadystatechange = processRequestChange ;
+        request.open(opts.method, url, true) ;
+        request.send(opts.parameters || '') ;
+      }
+    }
+    
+    ajaxRequest(url, opts) ;
   },
 
   /**

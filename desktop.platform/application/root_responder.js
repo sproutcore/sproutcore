@@ -451,7 +451,7 @@ SC.RootResponder = SC.RootResponder.extend(
       // work up the view chain.  Notify of mouse entered and
       // mouseMoved if implemented.
       while(view && (view !== this)) {
-        if (lh.include(view)) {
+        if (lh.indexOf(view) !== -1) {
           view.tryToPerform('mouseMoved', evt);
           nh.push(view) ;
         } else {
@@ -467,7 +467,7 @@ SC.RootResponder = SC.RootResponder.extend(
       for(var loc=0; loc < lh.length; loc++) {
         view = lh[loc] ;
         var exited = view.respondsTo('mouseExited') ;
-        if (exited && !nh.include(view)) view.tryToPerform('mouseExited',evt);
+        if (exited && !(nh.indexOf(view) !== -1)) view.tryToPerform('mouseExited',evt);
       }
     
       this._lastHovered = nh; 
