@@ -431,7 +431,9 @@ SC.Object.prototype = {
       var args =SC.$A(arguments).slice(2);
       args.unshift(this);
       if (SC.$type(f) === SC.T_STRING) f = this[methodName] ;
-      f = f.bind.apply(f, args) ;
+      // f = f.bind.apply(f, args) ;
+      var that = this, func = f ;
+      f = function() { return func.apply(that, args.slice(1)); } ;
     }
     return SC.Timer.schedule({ target: this, action: f, interval: interval });
   },

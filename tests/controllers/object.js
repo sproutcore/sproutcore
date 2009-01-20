@@ -157,10 +157,15 @@ test("GET CONTROLLER FOR VALUE: should return a controller for the requested val
 test("SET should notify observers of valueController properties", function() {
   c.set('content', single) ;
   
-  var observer = new Test.Observer;
-  c.addObserver( 'objectController', observer ) ;
+  var observer = SC.Object.create({
+    valueDidChange: function() {
+      this.notified = YES ;
+    }
+  });
+
+  c.addObserver('object', observer, observer.valueDidChange) ;
   c.set('object', SC.Object.create({ test: "NAME12" })) ;
-  equals(observer.notified, 1) ;
+  equals(observer.notified, YES) ;
 });
 
 test("SET value should reset the valueController property", function() {
@@ -249,10 +254,15 @@ test("SET on multiple with a non-array value should copy same value to each cont
 });
 
 test("Calling performDiscardChanges() should notify property observers of a change", function() {
-  var observer = new Test.Observer;
+  var observer = SC.Object.create({
+    notified: 0,
+    valueDidChange: function() {
+      this.notified = this.notified + 1 ;
+    }
+  });
   
   c.set('content', single) ;
-  c.addObserver( 'test', observer ) ;
+  c.addObserver('test', observer, observer.valueDidChange) ;
   
   // set the property
   c.set('test', 'NAME2') ;
@@ -393,9 +403,14 @@ test("Should not set content properties when setting controller properties", fun
 });
 
 test("Support observing non-content properties", function() {
-  var observer = new Test.Observer;
+  var observer = SC.Object.create({
+    notified: 0,
+    valueDidChange: function() {
+      this.notified = this.notified + 1 ;
+    }
+  });
   
-  c.addObserver('nonContentProp', observer) ;
+  c.addObserver('nonContentProp', observer, observer.valueDidChange) ;
   
   c.set('nonContentProp', 'test') ;
   equals(observer.notified, 1) ;
@@ -412,8 +427,8 @@ test("Content changes fire observer on non-content properties", function () {
   var observer = function () {
      if (notified === 0) c.set('content', SC.Object.create()) ;
      notified++; 
-  }.bind(c) ;
-  c.addObserver('nonContentProp', observer) ;
+  }
+  c.addObserver('nonContentProp', c, observer) ;
   
   c.set('nonContentProp', 'test') ;
   equals(notified, 2) ;

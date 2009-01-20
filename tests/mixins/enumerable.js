@@ -90,7 +90,7 @@ var CommonArray = [
 module("Real Array & DummyEnumerable", {
   
   setup: function() { 
-    enumerables = [CommonArray.clone(), DummyEnumerable.create({ content: CommonArray })] ;
+    enumerables = [SC.$A(CommonArray), DummyEnumerable.create({ content: CommonArray })] ;
   },
   
   teardown: function() {
@@ -525,7 +525,7 @@ var source ; // global variables
 module("Real Array", {
   
   setup: function() { 
-    source = CommonArray.clone(); 
+    source = SC.$A(CommonArray); 
   },
   
   teardown: function() { 
@@ -556,7 +556,7 @@ test("should notify observers even if reduced property is cached on prototype", 
   source.get("@max(balance)") ;
   
   // now make a clone and observe
-  source = CommonArray.clone() ;
+  source = SC.$A(CommonArray) ;
   
   // get the property...this will install the reducer property...
   source.get("@max(balance)") ;

@@ -45,7 +45,7 @@ module("Array, DummyArray and SC.SparseArray", {
         this.observer = function(target, key, value) {
           that.notified[key] = true ;
           that.notifiedValue[key] = value ;
-        }.bind(this) ;
+        } ;
       
         this.resetObservers = function() {
           this.notified = {} ;
@@ -88,7 +88,7 @@ test("[A,B,C,D].replace(1,2,X) => [A,X,D] + notify", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0,0, $w('A B C D')) ;
+    observer.a.replace(0,0, 'A B C D'.w()) ;
     observer.observe('[]') ;
     
     observer.a.replace(1,2,['X']) ;
@@ -105,10 +105,10 @@ test("[A,B,C,D].replace(1,2,[X,Y]) => [A,X,Y,D] + notify", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0,0, $w('A B C D')) ;
+    observer.a.replace(0,0, 'A B C D'.w()) ;
     observer.observe('[]') ;
     
-    observer.a.replace(1,2, $w('X Y')) ;
+    observer.a.replace(1,2, 'X Y'.w()) ;
     
     equals(observer.a.get('length'), 4) ;
     equals(observer.a.objectAt(0), 'A') ;
@@ -123,10 +123,10 @@ test("[A,B].replace(1,0,[X,Y]) => [A,X,Y,B] + notify", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0,0, $w('A B')) ;
+    observer.a.replace(0,0, 'A B'.w()) ;
     observer.observe('[]') ;
     
-    observer.a.replace(1,0, $w('X Y')) ;
+    observer.a.replace(1,0, 'X Y'.w()) ;
     
     equals(observer.a.get('length'), 4) ;
     equals(observer.a.objectAt(0), 'A') ;
@@ -141,7 +141,7 @@ test("[A,B,C,D].replace(2,2) => [A,B] + notify", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0,0, $w('A B C D')) ;
+    observer.a.replace(0,0, 'A B C D'.w()) ;
     observer.observe('[]') ;
     
     observer.a.replace(2,2) ;
@@ -172,7 +172,7 @@ test("[].removeObject(obj) should remove regardless of index position", function
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
     // spec for bug in Rev:402 where removeObject was skipping index 0 when scanning the array
-    observer.a.set('[]', $w('A B C')) ;
+    observer.a.set('[]', 'A B C'.w()) ;
     equals(observer.a.get('length'), 3) ;
     
     observer.a.removeObject('C') ;
@@ -198,7 +198,7 @@ test("[A,B,C].objectAt(5) => undefined", function() {
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
     equals(observer.a.get('length'), 0) ;
-    observer.a.set('[]', $w('A B C')) ;
+    observer.a.set('[]', 'A B C'.w()) ;
     equals(observer.a.get('length'), 3) ;
     equals(observer.a.objectAt(0), 'A') ;
     equals((observer.a.objectAt(5) === undefined), YES) ;
@@ -209,10 +209,10 @@ test("[A,B,C].set('[]',[X,Y]) => [X,Y] + notify", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0,0, $w('A B C')) ;
+    observer.a.replace(0,0, 'A B C'.w()) ;
     observer.observe('[]') ;
     
-    observer.a.set('[]', $w('X Y')) ;
+    observer.a.set('[]', 'X Y'.w()) ;
     
     equals(observer.a.get('length'), 2) ;
     equals(observer.a.objectAt(0), 'X') ;
@@ -225,7 +225,7 @@ test("[A,B,C] should be Enumerable", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0, 0, $w('A B C')) ;
+    observer.a.replace(0, 0, 'A B C'.w()) ;
     
     var cnt = 0 ;
     var items = [] ;
@@ -244,15 +244,15 @@ test("ary.isEqual() should return true when array contents match", function() {
   var ary2 = arrays ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
-    observer.a.replace(0,0, $w('A B C')) ;
+    observer.a.replace(0,0, 'A B C'.w()) ;
     
-    var ary = $w('A B C') ; // test against a different object.
+    var ary = 'A B C'.w() ; // test against a different object.
     equals(observer.a.isEqual(ary), true) ;
     
-    ary = $w('A B') ;
+    ary = 'A B'.w() ;
     equals(observer.a.isEqual(ary), false) ;
     
-    ary = $w('X Y Z') ;
+    ary = 'X Y Z'.w() ;
     equals(observer.a.isEqual(ary), false) ;
     
     equals(observer.a.isEqual(observer.a), true) ;

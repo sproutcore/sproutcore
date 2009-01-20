@@ -36,7 +36,7 @@ SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.D
   
   clone: function() {
     var clone = new SC.SparseArray(this.length) ;
-    clone._sa_content = this._sa_content.clone() ;
+    clone._sa_content = SC.A$(this._sa_content) ;
     return clone ;
   },
 

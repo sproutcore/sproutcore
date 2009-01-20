@@ -892,7 +892,9 @@ SC.mixin(Function.prototype,
     if (arguments.length > 2) {
       var args = SC.$A(arguments).slice(2,arguments.length);
       args.unshift(target);
-      f = f.bind.apply(f, args) ;
+      // f = f.bind.apply(f, args) ;
+      var that = this, func = f ;
+      f = function() { return func.apply(that, args.slice(1)); } ;
     }
     return SC.Timer.schedule({ target: target, action: f, interval: interval });
   }    

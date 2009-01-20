@@ -158,11 +158,14 @@ SC.Collection = SC.Object.extend(
     right away, depending on the dataSource.
   */
   refresh: function() {
+    var that = this ;
     var recordType = this.get('recordType') || SC.Record ;
     var offset = (this._limit > 0) ? this._offset : 0 ;
     
     if (!this._boundRefreshFunc) {
-      this._boundRefreshFunc = this._refreshDidComplete.bind(this) ;
+      this._boundRefreshFunc = function() {
+        that._refreshDidComplete.apply(that, arguments) ;
+      }
     }    
     
     // start refresh
