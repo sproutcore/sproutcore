@@ -1,0 +1,225 @@
+SC.Request = SC.Object.extend({
+    isAsynchronous: true,
+    response: null,
+    error: null,
+    transportClass: null,
+    isJSON: false,
+    
+	init: function(){
+		sc_super();
+		
+		this._headers = {};
+	},
+	header: function(key, value){
+		 if(typeof key == "object" && !value){
+			for(var headerKey in key){
+				this.header(headerKey,key[headerKey]);
+			}
+			return this;
+		}
+		
+		if(typeof key == "string" && !value){
+			return this._headers[key];
+		}
+		
+		this.propertyWillChange("headers");
+
+		//set value for key
+		this._headers[key] = value;
+
+		this.propertyDidChange("headers");
+		return this;
+	},
+	send: function(){
+		var request = this; //SC.clone(this);
+		SC.Request.manager.sendRequest(request);
+		return request;
+	},
+	response: function(){
+	    var response = this.get("rawResponse");
+	    if(!response || !$ok(response)){
+	        return response;
+	    }
+	    
+        if(this.get("isJSON")){
+            var source = response.responseText;
+            var json = SC.json.decode(source);
+            //TODO cache this value?
+            return json;
+        }
+        
+        if(response.responseXML) return response.responseXML;
+        return response.responseText;
+	}.property("rawResponse")
+});
+
+SC.Request.getUrl = function(address){
+	var req = new SC.Request();
+	req.set("address",address);
+	req.set("type","GET");
+	
+	return req;
+};
+
+SC.Request.postUrl = function(address){
+	var req = new SC.Request();
+	req.set("address",address);
+	req.set("type","POST");
+	
+	return req;
+};
+
+SC.Request.manager = SC.Object.create(SC.DelegateSupport, {
+	maxRequests: 2,
+	
+	currentRequests: [],
+	queue: [],
+
+	canLoadAnotherRequest: function(){
+		return (this.get("numberOfCurrentRequests") < this.get("maxRequests"));
+	}.property("numberOfCurrentRequests"),
+	
+	numberOfCurrentRequests: function(){
+		return this.get("currentRequests").length;
+	}.property("currentRequests"),
+	numberOfRequests: function(){
+		return this.get("queue").length;
+	}.property("queue"),
+	
+	sendRequest: function(request){
+		if(!request) return;
+		
+		this.propertyWillChange("queue");
+		this.get("queue").pushObject(request);
+		this.propertyDidChange("queue");
+
+		this.fireRequestIfNeeded();
+	},
+	
+	fireRequestIfNeeded: function(){
+		if(this.canLoadAnotherRequest()){
+			this.propertyWillChange("queue");
+			var request = this.get("queue").popObject();
+			this.propertyDidChange("queue");
+			
+			if(request){
+			    var transportClass = request.get("transportClass");
+			    if(!transportClass) transportClass = this.get("transportClass");
+			    if(transportClass){
+                    var transport = this.transportClass.create({ request: request });
+				    if(transport){
+				        request.set("transport", transport);
+				        this._transportDidOpen(transport);
+			        }
+		        }
+			}
+		}
+	},
+	
+	_transportDidOpen: function(transport){
+	    this.propertyWillChange("currentRequests");
+		this.get("currentRequests").pushObject(transport);
+		this.propertyDidChange("currentRequests");
+		
+		transport.fire();
+	},
+	
+	transportDidClose: function(request){
+	    this.propertyWillChange("currentRequests");
+		this.get("currentRequests").removeObject(request);
+		this.propertyDidChange("currentRequests");	    
+	}
+});
+
+// abstract superclass, creates no-op objects
+SC.RequestTransport = SC.Object.extend({
+  fire: function() {
+    SC.Request.manager.transportDidClose(this);
+  }
+});
+
+SC.XHRRequestTransport = SC.RequestTransport.extend({
+	fire: function(){
+		var tryThese = function(){
+			for(var i=0; i < arguments.length; i++){
+				try{
+					var item = arguments[i]();
+					return item;
+				}catch(e){};
+			}
+			return false;
+		}
+		var rawRequest = tryThese(
+			function() {return new XMLHttpRequest()},
+			function() {return new ActiveXObject('Msxml2.XMLHTTP')},
+			function() {return new ActiveXObject('Microsoft.XMLHTTP')}
+		);
+		
+		var request = this.get("request");
+		
+		var headers = request.get("headers");
+		for(var headerKey in headers){
+			rawRequest.setRequestHeader(headerKey, headers[headerKey]);
+		}
+		
+		rawRequest.source = request;
+		
+		var async = (request.get("isAsynchronous") ? true : false);
+		
+		if(async){
+		    SC.Event.add(rawRequest, "readystatechange", this, this.handleReadyStateChange, rawRequest);
+	    }
+		
+		rawRequest.open(
+			request.get("type"),
+			request.get("address"),
+			async
+		);
+		
+		rawRequest.send(request.get("body"));
+		
+		if(!async){
+		    this.finishRequest(rawRequest);
+	    }
+		
+		return rawRequest;
+	},
+	didSucceed: function(request){
+        var status = null;
+        try {
+            status = request.status || 0;
+        } catch (e) {}
+        return !status || (status >= 200 && status < 300);	    
+	},
+	finishRequest: function(request){
+	    var readyState = request.readyState;
+
+        var didSucceed = !request ? false : this.didSucceed(request);
+        
+        if (readyState == 4) {
+             request._complete = true;
+
+            if(didSucceed){
+                var response = request;
+                request.source.set('rawResponse', response);
+            }else{
+                var error = SC.$error("HTTP Request failed", "Fail", -1);
+                error.set("request",request);
+                request.source.set('rawResponse', error);
+            }
+            
+            SC.Request.manager.transportDidClose(this);
+         }
+
+         if (readyState == 4) {
+           // avoid memory leak in MSIE: clean up
+           request.onreadystatechange = function(){};
+         }
+	},
+	handleReadyStateChange: function(readyStateEvent){
+	    var request = readyStateEvent.context;
+        return this.finishRequest(request);
+	}
+});
+
+SC.Request.manager.set("transportClass", SC.XHRRequestTransport);
