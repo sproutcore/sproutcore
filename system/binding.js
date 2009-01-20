@@ -507,30 +507,29 @@ SC.Binding = {
       this._alternateConnectQueue = queue ;
       while(binding = queue.pop()) binding._connect() ;
     }
-
+    
     // loop through the changed queue...
-    if((queue = this._changeQueue).length > 0) {
-      if (log) console.log("Begin: Trigger changed bindings") ;
-
-      didFlush = YES ;
+    while ((queue = this._changeQueue).length > 0) {
+        if (log) console.log("Begin: Trigger changed bindings") ;
       
-      // first, swap the change queues.  This way any binding changes that
-      // happen while we flush the current queue can be queued up.
-      this._changeQueue = this._alternateChangeQueue ;
-      this._alternateChangeQueue = queue ;
+        didFlush = YES ;
       
-      // next, apply any bindings in the current queue.  This may cause 
-      // additional bindings to trigger, which will end up in the new active 
-      // queue.
-      while(binding = queue.pop()) binding.applyBindingValue() ;
+        // first, swap the change queues.  This way any binding changes that
+        // happen while we flush the current queue can be queued up.
+        this._changeQueue = this._alternateChangeQueue ;
+        this._alternateChangeQueue = queue ;
       
-      // now loop back and see if there are additional changes pending in the
-      // active queue.  Repeat this until all bindings that need to trigger 
-      // have triggered.
-      if (log) console.log("End: Trigger changed bindings") ;
+        // next, apply any bindings in the current queue.  This may cause 
+        // additional bindings to trigger, which will end up in the new active 
+        // queue.
+        while(binding = queue.pop()) binding.applyBindingValue() ;
+      
+        // now loop back and see if there are additional changes pending in the
+        // active queue.  Repeat this until all bindings that need to trigger 
+        // have triggered.
+        if (log) console.log("End: Trigger changed bindings") ;
     }
-
-
+    
     // clean up
     this._isFlushing = NO ;
     return didFlush ;

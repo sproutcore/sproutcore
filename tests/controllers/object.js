@@ -273,23 +273,57 @@ test("Support commitChanges() on content objects", function() {
 });
 
 test("Should update both values when commitChanges() on content objects", function() {
-  cc = SC.CollectionController.create({
-    allowsEmptySelection: false,
-    allowsMultipleSelection: false
-  });
-  var oc = SC.ObjectController.create({
-    contentBinding: 'cc.selection',
-    commitChangesImmediately: false
-  });
-  var Contact = SC.Record.extend({});
-  
-  var rcrds = Contact.collection() ;
-  cc.set('content', rcrds) ;
-  rcrds.refresh() ;
-  var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
-  
-  // verify that the collection updated
-  equals(rcrds.count(), 1) ;
+  SC.runLoop.beginRunLoop() ;
+    
+    var cc = window.cc = SC.CollectionController.create({
+      allowsEmptySelection: false,
+      allowsMultipleSelection: false
+    });
+    
+    // verify we can resolve our binding path
+    isObj(SC.objectForPropertyPath('cc'), cc, "SC.objectForPropertyPath('cc') found collection controller") ;
+    
+    var _contentDidChangeCalled = NO ;
+    var oc = SC.ObjectController.create({
+      contentBinding: 'cc.selection',
+      commitChangesImmediately: false,
+      
+      _contentDidChange: function() {
+        _contentDidChangeCalled = YES ;
+        return arguments.callee.base.apply(this, arguments) ;
+      }
+    });
+    Contact = SC.Record.extend({});
+    
+    // need to actually connect the bindings!
+    SC.Binding.flushPendingChanges() ;
+    
+    // verify that the collecition has no selection
+    ok(SC.none(cc.getPath('selection')), "collection controller has null or undefined selection") ;
+    
+    var rcrds = Contact.collection() ;
+    cc.set('content', rcrds) ;
+    rcrds.refresh() ;
+    var single = Contact.newRecord({'test' : 'NAME1', 'value' : 0});
+    
+    // verify that the collection updated
+    equals(rcrds.count(), 1, "collection count is now 1") ;
+    
+    // verify that the collection controller sees the changes
+    equals(cc.get('count'), 1, "collection controller return one for .get('count')") ;
+    
+    // verify that the collecition now has a selection
+    equals(cc.getPath('selection.length'), 1, "collection controller has one selected object") ;
+    
+    // make sure bindings have processed
+    SC.Binding.flushPendingChanges() ;
+    
+    // verify that the object controller's content was updated from the selection
+    // test internal implementation
+    ok(_contentDidChangeCalled, 'object controller did not get the changes') ;
+    ok(oc.get('content') !== null, "oc.get('content') should not be null") ;
+    
+  SC.runLoop.endRunLoop() ;
   
   // make sure bindings have processed
   SC.Binding.flushPendingChanges() ;
@@ -297,9 +331,17 @@ test("Should update both values when commitChanges() on content objects", functi
   oc.set('test', 'NAME2') ;
   oc.set('value', 123) ;
   
+  // test internal implementation
+  var changes = oc._changes ;
+  equals('NAME2', changes['test'], "oc._changes['test']") ;
+  equals(123, changes['value'], "oc._changes['value']") ;
+  
+  equals(YES, oc.get('hasChanges'), "oc.get('hasChanges')") ;
   equals(YES, $ok(oc.commitChanges()), "$ok(oc.commitChanges())") ;
   equals("NAME2", single.get('test'), "single.get(test)") ;
   equals(123, single.get('value'), "single.get(value)") ;
+  
+  delete cc, oc, Contact ; // cleanup
 });
 
 test("Support content objects that implement SC.Array but are not arrays", function() {

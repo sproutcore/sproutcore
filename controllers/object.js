@@ -56,7 +56,8 @@ SC.ObjectController = SC.Controller.extend(
     set this to some value and the object controller will project 
     its properties.
   */
-  content: null,  
+  content: null,
+  contentBindingDefault: SC.Binding.multiple(),
 
   /**
     This will be set to true if the object currently does not have any
