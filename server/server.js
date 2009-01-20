@@ -66,7 +66,7 @@ SC.Server = SC.Object.extend({
   // url -- override the default url building with this url.
   //
   request: function(resource, action, ids, params, method) {
-
+    
     // Get Settings and Options
     if (!params) params = {} ;
     var opts = {} ;
@@ -76,15 +76,20 @@ SC.Server = SC.Object.extend({
     var context = params.requestContext ; delete params.requestContext ;
     var accept = params.accept ; delete params.accept ;
     var cacheCode = params.cacheCode; delete params.cacheCode ;
+    // enable JSON for every operation
+    var records = params.records ;
+    if ((this.get('postFormat') == SC.JSON_FORMAT) && records) {
+      params.records = (this.get('escapeJSON')) ? escape(records.toJSONString()) : records.toJSONString() ;
+    }
     var url = params.url; delete params.url;
-
+    
     opts.requestHeaders = {'Accept': 'application/json, text/javascript, application/xml, text/xml, text/html, */*'} ;
     if (accept) opts.requestHeaders['Accept'] = accept ;
     if (cacheCode) opts.requestHeaders['Sproutit-Cache'] = cacheCode ;
     opts.method = method || 'get' ;
-
+    
     if (!url) url = this.urlFor(resource, action, ids, params, opts.method) ;
-
+    
     // handle ids
     if (ids && ids.length > 1) {
       params.ids = [ids].flatten().join(',') ;
@@ -92,7 +97,7 @@ SC.Server = SC.Object.extend({
     
     // adds a custom HTTP header for remote requests
     opts.requestHeaders = {'X-SproutCore-Version' : '1.0'} ;
-
+    
     // convert parameters.
     var parameters = this._toQueryString(params) ;
     if (parameters && parameters.length > 0) opts.parameters = parameters ;
