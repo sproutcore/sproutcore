@@ -218,7 +218,15 @@ SC.Array = {
     @returns {Array}
   */
   without: function(value) {
-    if (this.indexOf(value) < 0) return this; // value not present.
+    // array:indexOf() is not available in costello
+    var found = false ;
+    for (var idx=0, len=this.length; idx<len; idx++) {
+      if (this[idx] === value) {
+        found = true ;
+        break ;
+      }
+    }
+    if (!found) return this; // value not present.
     var ret = [] ;
     this.forEach(function(k) { if (k !== value) ret[ret.length] = k; }) ;
     return ret ;
