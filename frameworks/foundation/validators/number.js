@@ -26,7 +26,7 @@ SC.Validator.Number = SC.Validator.extend(
   places: 0,
   
   fieldValueForObject: function(object, form, field) {
-    switch(SC.$type(object)) {
+    switch(SC.typeOf(object)) {
       case SC.T_NUMBER:
         object = object.toFixed(this.get('places')) ;
         break ;
@@ -43,7 +43,7 @@ SC.Validator.Number = SC.Validator.extend(
     // strip out commas
     value = value.replace(/,/g,'');
     
-    switch(SC.$type(value)) {
+    switch(SC.typeOf(value)) {
       case SC.T_STRING:
         if (value.length == '') {
           value = null ;

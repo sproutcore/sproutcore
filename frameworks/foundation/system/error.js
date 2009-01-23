@@ -82,7 +82,7 @@ var $error = SC.$error ; // export globally
   Returns YES if the passed value is an error object, otherwise NO.
 */
 SC.$ok = function(ret) {
-  return (ret !== false) && (SC.$type(ret) != SC.T_ERROR) ;
+  return (ret !== false) && (SC.typeOf(ret) != SC.T_ERROR) ;
 };
 var $ok = SC.$ok ; // export globally.
 

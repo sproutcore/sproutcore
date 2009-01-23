@@ -41,3 +41,21 @@ SC.mixin(/** @scope SC */ {
 // it is returned as is.  If it is not an array, it is placed into one.  If
 // it is null, an empty array is returned.
 Array.from = SC.$A ;
+
+// ........................................
+// GLOBAL EXPORTS
+//   
+var $type, $I, $A ;
+$type = SC.typeOf; 
+$I = SC.inspect ;
+$A = SC.$A ;
+
+/**
+  Makes the computed property as an outlet.  Outlets can be setup en-masse
+  when the object is first instantiated by calling initOutlets(). (This
+  method is defined in SC.Observable).
+*/
+Function.prototype.outlet = function(aFlag) {
+  this.autoconfiguredOutlet = (aFlag === undefined) ? YES : aFlag;
+  return this ;
+} ;

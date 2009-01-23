@@ -129,14 +129,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     // compute the objectType
     if (!objectType) objectType = this.get('exampleContentObject') ;
-    if (SC.$type(objectType) === SC.T_STRING) {
+    if (SC.typeOf(objectType) === SC.T_STRING) {
       objectType = SC.objectForPropertyPath(objectType) ;
     }
     if (objectType == null) {
       throw "Invalid object type was provided" ;
     }
     
-    if (SC.$type(objectType.newObject) !== SC.T_FUNCTION) {
+    if (SC.typeOf(objectType.newObject) !== SC.T_FUNCTION) {
       throw "content object type does not support newRecord()" ;
     }
     
@@ -372,7 +372,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       var idx = this._createdObjects.length ;
       while(--idx >= 0) {
         var obj = this._createdObjects[idx] ;
-        if (SC.$type(obj.destroy) === SC.T_FUNCTION) obj.destroy() ;
+        if (SC.typeOf(obj.destroy) === SC.T_FUNCTION) obj.destroy() ;
       }
       this._createdObjects.length = 0 ;
     }

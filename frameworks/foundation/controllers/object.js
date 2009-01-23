@@ -108,7 +108,7 @@ SC.ObjectController = SC.Controller.extend(
   */
   destroy: function() {
     var content = this.get('content') ;
-    if (content && SC.$type(content.destroy) === SC.T_FUNCTION) content.destroy();
+    if (content && SC.typeOf(content.destroy) === SC.T_FUNCTION) content.destroy();
     this.set('content', null) ;  
   },
   

@@ -295,8 +295,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   _hasLegacyActionHandler: function()
   {
     var action = this.get('action');
-    if (action && (SC.$type(action) == SC.T_FUNCTION)) return true;
-    if (action && (SC.$type(action) == SC.T_STRING) && (action.indexOf('.') != -1)) return true;
+    if (action && (SC.typeOf(action) == SC.T_FUNCTION)) return true;
+    if (action && (SC.typeOf(action) == SC.T_STRING) && (action.indexOf('.') != -1)) return true;
     return false;
   },
 
@@ -306,8 +306,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     if (!this._hasLegacyActionHandler()) return false;
     
     var action = this.get('action');
-    if (SC.$type(action) == SC.T_FUNCTION) this.action(evt);
-    if (SC.$type(action) == SC.T_STRING) {
+    if (SC.typeOf(action) == SC.T_FUNCTION) this.action(evt);
+    if (SC.typeOf(action) == SC.T_STRING) {
       eval("this.action = function(e) { return "+ action +"(this, e); };");
       this.action(evt);
     }

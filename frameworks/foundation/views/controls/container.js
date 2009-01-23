@@ -96,7 +96,7 @@ SC.ContainerView = SC.View.extend(
     var nowShowing = this.get('nowShowing') ;
     var content = null;
     //its a property path
-    if($type(nowShowing) === T_STRING){
+    if(SC.typeOf(nowShowing) === T_STRING){
       // if nowShowing was set because the content was set directly, then 
       // do nothing.
       if (nowShowing === SC.CONTENT_SET_DIRECTLY) return ;

@@ -4,7 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('system/set');
 require('private/observer_set') ;
 
 /*globals logChange */
@@ -456,7 +455,7 @@ SC.Observable = {
       dep = arguments[idx] ;
       
       // handle the case where the user passes arrays of keys...
-      if (SC.$type(dep) === SC.T_ARRAY) {
+      if (SC.typeOf(dep) === SC.T_ARRAY) {
         array = dep ;  arrayIdx = array.length;
         while(--arrayIdx >= 0) {
           dep = array[arrayIdx] ;
@@ -543,7 +542,7 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (!target) target = this ;
-    if (SC.$type(method) === SC.T_STRING) method = target[method] ;
+    if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
     if (!method) throw "You must pass a method to addObserver()" ;
 
     // Normalize key...
@@ -586,7 +585,7 @@ SC.Observable = {
       method = target; target = this ;
     }
     if (!target) target = this ;
-    if (SC.$type(method) === SC.T_STRING) method = target[method] ;
+    if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
     if (!method) throw "You must pass a method to addObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
@@ -864,18 +863,26 @@ SC.Observable = {
   /**  
     Manually add a new binding to an object.  This is the same as doing
     the more familiar propertyBinding: 'property.path' approach.
+    
+    @param {String} toKey the key to bind to
+    @param {Object} target target or property path to bind from
+    @param {String|Function} method method for target to bind from
+    @returns {SC.Binding} new binding instance
   */
-  bind: function(toKey, fromPropertyPath) {
+  bind: function(toKey, target, method) {
 
     var binding ;
 
+    // normalize...
+    if (method !== undefined) target = [target, method];
+
     // if a string or array (i.e. tuple) is passed, convert this into a
     // binding.  If a binding default was provided, use that.
-    var pathType = SC.$type(fromPropertyPath) ;
+    var pathType = SC.typeOf(target) ;
     if (pathType === SC.T_STRING || pathType === SC.T_ARRAY) {
       binding = this[toKey + 'BindingDefault'] || SC.Binding;
-      binding = binding.beget().from(fromPropertyPath) ;
-    } else binding = fromPropertyPath ;
+      binding = binding.beget().from(target) ;
+    } else binding = target ;
 
     // finish configuring the binding and then connect it.
     binding = binding.to(toKey, this).connect() ;
@@ -1133,9 +1140,9 @@ SC.Observable = {
   observeOnce: function(key, target, method, timeout) {
     
     // fixup the params
-    var targetType = SC.$type(target) ;
+    var targetType = SC.typeOf(target) ;
     if (targetType === SC.T_FUNCTION) {
-      if ((SC.$type(method) === SC.T_NUMBER) && (timeout === undefined)) {
+      if ((SC.typeOf(method) === SC.T_NUMBER) && (timeout === undefined)) {
         timeout = method ;
       }
       method = target ;
@@ -1143,7 +1150,7 @@ SC.Observable = {
     }
     
     // convert the method to a function if needed...
-    if (SC.$type(method) === SC.T_STRING) method = target[method] ;
+    if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
     if (!method) throw "You must pass a valid method to observeOnce()";
 
     var timeoutObject = null ;

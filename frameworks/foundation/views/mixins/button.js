@@ -246,7 +246,7 @@ SC.Button = {
     var targetValue = this.get('toggleOnValue') ;
     var state, next ;
     
-    if (SC.$type(value) === SC.T_ARRAY) {
+    if (SC.typeOf(value) === SC.T_ARRAY) {
 
       // treat a single item array like a single value
       if (value.length === 1) {

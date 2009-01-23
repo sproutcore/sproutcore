@@ -528,12 +528,12 @@ SC.Server = SC.Object.extend({
   _prepareDataForRecords: function(data, server, defaultType) {
     if (data === null) {
         return null;
-    } else if (SC.$type(data) == SC.T_ARRAY) {
+    } else if (SC.typeOf(data) == SC.T_ARRAY) {
       var that = this;
       return data.map( function(d) {
         return that._prepareDataForRecords(d, server, defaultType) ;
       }) ;
-    } else if (SC.$type(data) == SC.T_HASH) { 
+    } else if (SC.typeOf(data) == SC.T_HASH) { 
       data = server._camelizeData(data) ; // camelize the keys received back.
       if (data.id) {
         // convert the 'id' property to 'guid'

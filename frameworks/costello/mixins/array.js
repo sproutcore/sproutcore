@@ -4,7 +4,10 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('system/mixins/enumerable') ;
+// note: SC.Observable also enhances array.  make sure we are called after
+// SC.Observable so our version of unknownProperty wins.
+require('mixins/observable') ;
+require('mixins/enumerable') ;
 
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 

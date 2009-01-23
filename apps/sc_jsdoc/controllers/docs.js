@@ -59,7 +59,7 @@ JsDoc.docsController = SC.Object.create({
   _reloadSuccess: function(status, transport) {
     var json = transport.responseText ;
     var records = eval(json) ;
-    if ($type(records) != T_ARRAY) {
+    if (SC.typeOf(records) != T_ARRAY) {
       return this._reloadFailure(status, transport) ;
     }
     

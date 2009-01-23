@@ -183,7 +183,7 @@ SC.Drag = SC.Object.extend(
     // if all else fails, check to see if the source object is a data source.
     } else {
       var source = this.get('source') ;
-      if (source && SC.$type(source.dragDataForType) == SC.T_FUNCTION) {
+      if (source && SC.typeOf(source.dragDataForType) == SC.T_FUNCTION) {
         return source.dragDataForType(this, dataType) ;
         
       // no data source found. :(

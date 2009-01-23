@@ -99,7 +99,7 @@ QUnit.runnerController = SC.Object.create({
     
     console.log('JSON: %@'.fmt(json)) ;
     
-    if ($type(records) != T_ARRAY) {
+    if (SC.typeOf(records) != T_ARRAY) {
       return this._reloadFailure(status, transport) ;
     }
     

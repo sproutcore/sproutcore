@@ -38,7 +38,7 @@ test("should call computed properties and return their result", function() {
 
 test("should return the function for a non-computed property", function() {
   var value = object.get("method") ;
-  equals(SC.$type(value), SC.T_FUNCTION) ;
+  equals(SC.typeOf(value), SC.T_FUNCTION) ;
 });
 
 test("should return null when property value is null", function() {
@@ -102,14 +102,14 @@ test("should change normal properties and return this", function() {
 test("should call computed properties passing value and return this", function() {
   var ret = object.set("computed", "changed") ;
   equals(object._computed, "changed") ;
-  equals(SC.$type(object.computed), SC.T_FUNCTION) ;
+  equals(SC.typeOf(object.computed), SC.T_FUNCTION) ;
   equals(ret, object) ;
 });
 
 test("should replace the function for a non-computed property and return this", function() {
   var ret = object.set("method", "changed") ;
   equals(object._method, "method") ; // make sure this was NOT run
-  ok(SC.$type(object.method) !== SC.T_FUNCTION) ;
+  ok(SC.typeOf(object.method) !== SC.T_FUNCTION) ;
   equals(ret, object) ;
 });
 

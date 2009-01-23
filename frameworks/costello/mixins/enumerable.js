@@ -706,7 +706,6 @@ SC.Enumerable = {
 SC._buildReducerFor = function(reducerKey, reducerProperty) {
   return function(key, value) {
     var reducer = this[reducerKey] ;
-    
     if (SC.typeOf(reducer) !== SC.T_FUNCTION) {
       return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
     } else {
@@ -714,7 +713,6 @@ SC._buildReducerFor = function(reducerKey, reducerProperty) {
       // one implemented in the receiver.  The receiver might be a native 
       // implementation that does not support reducerProperty.
       var ret = SC.Enumerable.reduce.call(this, reducer, null, reducerProperty) ;
-      console.log("RET = %@".fmt(ret)) ;
       return ret ;
     }
   }.property('[]') ;
@@ -780,7 +778,7 @@ SC.Reducers = {
     
     var reducerKey = matches[1]; // = 'max' if key = '@max(balance)'
     var reducerProperty = matches[3] ; // = 'balance' if key = '@max(balance)'
-    var reducerKey = "reduce%@".fmt(reducerKey.capitalize()) ; 
+    var reducerKey = "reduce" + reducerKey.slice(0,1).toUpperCase() + reducerKey.slice(1);
     var reducer = this[reducerKey] ;
 
     // if there is no reduce function defined for this key, then we can't 

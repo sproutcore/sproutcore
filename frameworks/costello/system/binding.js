@@ -113,7 +113,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   
   {{{
     valueBinding: SC.Binding.transform(function(value, binding) {
-      return ((SC.$type(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value;      
+      return ((SC.typeOf(value) === SC.T_NUMBER) && (value < 10)) ? 10 : value;      
     }).from("MyApp.someController.value")
   }}}
   
@@ -126,7 +126,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   {{{
     SC.Binding.notLessThan = function(minValue) {
       return this.transform(function(value, binding) {
-        return ((SC.$type(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value ;
+        return ((SC.typeOf(value) === SC.T_NUMBER) && (value < minValue)) ? minValue : value ;
       }) ;
     } ;
   }}}
@@ -359,7 +359,7 @@ SC.Binding = {
     // contentBinding: "*owner.value"
     //
     path = this._fromPropertyPath; root = this._fromRoot ;
-    if (SC.$type(path) === SC.T_STRING) {
+    if (SC.typeOf(path) === SC.T_STRING) {
       
       // if the first character is a '.', this is a static path.  make the 
       // toRoot the default root.
@@ -476,7 +476,7 @@ SC.Binding = {
 
     // if error objects are not allowed, and the value is an error, then
     // change it to null.
-    if (this._noError && SC.$type(v) === SC.T_ERROR) v = null ;
+    if (this._noError && SC.typeOf(v) === SC.T_ERROR) v = null ;
     
     this._transformedBindingValue = v;
   },
@@ -621,7 +621,7 @@ SC.Binding = {
       // toRoot as the root object.  Similar code exists in connect() so if 
       // you make a change to one be sure to update the other.
       path = this._fromPropertyPath; root = this._fromRoot ;
-      if (SC.$type(path) === SC.T_STRING) {
+      if (SC.typeOf(path) === SC.T_STRING) {
         
         // static path beginning with the toRoot
         if (path.indexOf('.') === 0) {
@@ -663,7 +663,7 @@ SC.Binding = {
   oneWay: function(fromPath, aFlag) {
     
     // If fromPath is a bool but aFlag is undefined, swap.
-    if ((aFlag === undefined) && (SC.$type(fromPath) === SC.T_BOOL)) {
+    if ((aFlag === undefined) && (SC.typeOf(fromPath) === SC.T_BOOL)) {
       aFlag = fromPath; fromPath = null ;
     }
     
@@ -735,7 +735,7 @@ SC.Binding = {
   */
   noError: function(fromPath, aFlag) {
     // If fromPath is a bool but aFlag is undefined, swap.
-    if ((aFlag === undefined) && (SC.$type(fromPath) === SC.T_BOOL)) {
+    if ((aFlag === undefined) && (SC.typeOf(fromPath) === SC.T_BOOL)) {
       aFlag = fromPath; fromPath = null ;
     }
     
@@ -837,7 +837,7 @@ SC.Binding = {
   */
   bool: function(fromPath) {
     return this.from(fromPath).transform(function(v) {
-      var t = SC.$type(v) ;
+      var t = SC.typeOf(v) ;
       if (t === SC.T_ERROR) return v ;
       return (t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v ;
     }) ;
@@ -852,7 +852,7 @@ SC.Binding = {
   */
   not: function(fromPath) {
     return this.from(fromPath).transform(function(v) {
-      var t = SC.$type(v) ;
+      var t = SC.typeOf(v) ;
       if (t === SC.T_ERROR) return v ;
       return !((t == SC.T_ARRAY) ? (v.length > 0) : (v === '') ? NO : !!v) ;
     }) ;
@@ -865,7 +865,7 @@ SC.Binding = {
   */
   isNull: function(fromPath) {
     return this.from(fromPath).transform(function(v) { 
-      var t = SC.$type(v) ;
+      var t = SC.typeOf(v) ;
       return (t === SC.T_ERROR) ? v : SC.none(v) ;
     });
   },
@@ -887,42 +887,4 @@ SC.Binding = {
   }}}
 */
 SC.binding = function(path, root) { return SC.Binding.from(path,root); } ;
-
-
-// ......................................
-// DEPRECATED
-//
-// The transforms below are deprecated but still available for backwards 
-// compatibility.  Instead of using these methods, however, you should use
-// the helpers.  For example, where before you would have done:
-//
-//  contentBinding: SC.Binding.Single('MyApp.myController.count') ;
-//
-// you should do:
-//
-//  contentBinding. SC.Binding.from('MyApp.myController.count').single();
-//
-// and for defaults:
-//
-//  contentBindingDefault: SC.Binding.single()
-//
-SC.Binding.From = SC.Binding.NoChange = SC.Binding.builder();
-
-SC.Binding.Single = SC.Binding.single().builder() ;
-SC.Binding.SingleNull = SC.Binding.single(null).builder() ;
-SC.Binding.SingleNoError = SC.Binding.Single.beget().noError().builder() ;
-SC.Binding.SingleNullNoError = SC.Binding.SingleNull.beget().noError().builder() ;
-SC.Binding.Multiple = SC.Binding.multiple().builder() ;
-SC.Binding.MultipleNoError = SC.Binding.multiple().noError().builder() ;
-
-SC.Binding.Bool = SC.Binding.bool().builder() ;
-SC.Binding.Not = SC.Binding.bool().not().builder() ;
-SC.Binding.NotNull = SC.Binding.isNull().not().builder() ;
-SC.Binding.IsNull = SC.Binding.isNull().builder() ;
-
-// No Error versions.
-SC.Binding.BoolNoError = SC.Binding.Bool.beget().noError().builder();
-SC.Binding.NotNullNoError = SC.Binding.NotNull.beget().noError().builder();
-SC.Binding.NotNoError = SC.Binding.Not.beget().noError().builder();
-SC.Binding.IsNullNoError = SC.Binding.IsNull.beget().noError().builder() ;
 
