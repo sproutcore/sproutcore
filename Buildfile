@@ -8,6 +8,10 @@
 # of these settings, you should make changes to your project Buildfile 
 # instead.
 
+config :all, 
+  :layout      => 'sproutcore:lib/index.rhtml',
+  :test_layout => 'sproutcore:lib/test.rhtml'
+  
 config :costello,   :required => []
 config :core_query, :required => []
 config :foundation, :required => [:costello]
