@@ -4,20 +4,38 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('system/mixins/enumerable') ;
-require('system/mixins/array') ;
-require('system/mixins/observable') ;
-require('system/mixins/delegate') ;
+sc_require('mixins/enumerable') ;
+sc_require('mixins/array') ;
+sc_require('mixins/observable') ;
+sc_require('mixins/delegate_support') ;
 
 /**
   @class
 
-  Description goes here
-
-  array = SC.SparseArray.create(100000) ;
+  A dynamically filled array.  A SparseArray makes it easy for you to create 
+  very large arrays of data but then to defer actually populating that array
+  until it is actually needed.  This is often much faster than generating an
+  array up front and paying the cost to load your data then.
+  
+  Although technically all arrays in JavaScript are "sparse" (in the sense 
+  that you can read and write properties are arbitrary indexes), this array
+  keeps track of which elements in the array have been populated already 
+  and which ones have not.  If you try to get a value at an index that has 
+  not yet been populated, the SparseArray will notify a delegate object first
+  giving the delegate a chance to populate the component.
+  
+  Most of the time, you will use a SparseArray to incrementally load data 
+  from the server.  For example, if you have a contact list with 3,000
+  contacts in it, you may create a SparseArray with a length of 3,000 and set
+  that as the content for a ListView.  As the ListView tries to display the
+  visible contacts, it will request them from the SparseArray, which will in
+  turn notify your delegate, giving you a chance to load the contact data from
+  the server.
   
   @extends SC.Enumerable
   @extends SC.Array
+  @extends SC.Observable
+  @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
 SC.SparseArray = function(length) {

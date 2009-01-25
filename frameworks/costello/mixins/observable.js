@@ -1111,8 +1111,8 @@ SC.Observable = {
     return this ;
   },
 
-  addProbe: function(key) { this.addObserver(key,logChange); },
-  removeProbe: function(key) { this.removeObserver(key,logChange); },
+  addProbe: function(key) { this.addObserver(key,SC.logChange); },
+  removeProbe: function(key) { this.removeObserver(key,SC.logChange); },
 
   /**
     Logs the named properties to the console.
@@ -1192,4 +1192,10 @@ SC.Observable = {
     
 } ;
 
+/** @private used by addProbe/removeProbe */
+SC.logChange = function logChange(target, key, value) {
+  console.log("CHANGE: %@[%@] => %@".fmt(target, key, value)) ;
+};
+
+// Make all Array's observable
 SC.mixin(Array.prototype, SC.Observable) ;

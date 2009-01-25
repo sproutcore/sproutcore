@@ -1,7 +1,11 @@
+// NOTE: This version of jQuery has a line added at the end that remaps it to
+// Q$, for private use by Qunit only.  This way the jQuery library used by 
+// Qunit will not interfere with any other jQuery libs you might load.
+// You should be able to merge this file with new versions of jQuery with 
+// minor effort.
+
 (function(){
 /*!
- * NOTE: THIS LIBRARY IS IMPORTED AS Q$ FOR USE BY QUNIT.  IT DOES NOT REPLACE 
- * ANY EXISTING JQUERY LIBRARY.
  *
  * jQuery 1.2.6 - New Wave Javascript
  *

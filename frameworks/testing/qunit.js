@@ -9,7 +9,11 @@
  *
  */
 
-sc_require('debug/jquery');
+// NOTE: This version of Qunit has been tweaked slightly to use a private 
+// version of jQuery (called Q$).  You should be able to merge this file with
+// changes from the main Qunit though with only minor effort.
+sc_require('jquery');
+
 
 (function($) {
 

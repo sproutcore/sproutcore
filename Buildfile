@@ -9,8 +9,10 @@
 # instead.
 
 config :all, 
-  :layout      => 'sproutcore:lib/index.rhtml',
-  :test_layout => 'sproutcore:lib/test.rhtml'
+  :layout         => 'sproutcore:lib/index.rhtml',
+  :test_layout    => 'sproutcore:lib/test.rhtml',
+  :test_required  => '/sproutcore/testing',
+  :debug_required => '/sproutcore/debug'
   
 config :costello,   :required => []
 config :core_query, :required => []
@@ -25,3 +27,9 @@ config :mobile,
 
 config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
+
+config :testing, 
+  :required => [], :test_required => [], :debug_required => []
+  
+config :debug,
+  :required => [], :test_required => [], :debug_required => []

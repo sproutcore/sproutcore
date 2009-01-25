@@ -61,9 +61,9 @@ test("bind(.bar) should bind to relative path", function() {
   equals("changedValue", testObject.get("foo"), "testObject.foo");
 });
 
-test("bind(SC.Binding.Bool(TestNamespace.fromObject.bar)) should create binding with bool transform", function() {
+test("SC.Binding.bool(TestNamespace.fromObject.bar)) should create binding with bool transform", function() {
   // create binding
-  testObject.bind("foo", SC.Binding.Bool("TestNamespace.fromObject.bar")) ;
+  testObject.bind("foo", SC.Binding.bool("TestNamespace.fromObject.bar")) ;
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
   
   // now make a change to see if the binding triggers.
@@ -159,10 +159,10 @@ test("fooBinding: .bar should bind to relative path", function() {
   equals("changedValue", testObject.get("foo"), "testObject.foo");
 });
 
-test("fooBinding: SC.Binding.Bool(TestNamespace.fromObject.bar should create binding with bool transform", function() {
+test("fooBinding: SC.Binding.bool(TestNamespace.fromObject.bar should create binding with bool transform", function() {
   
   testObject = TestObject.create({
-    fooBinding: SC.Binding.Bool("TestNamespace.fromObject.bar") 
+    fooBinding: SC.Binding.bool("TestNamespace.fromObject.bar") 
   }) ;
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
   
@@ -252,10 +252,10 @@ test("fooBinding: TestNamespace.fromObject.bar should have bool binding", functi
   equals(NO, testObject.get("foo"), "testObject.foo == NO");
 });
 
-test("fooBinding: SC.Binding.Not(TestNamespace.fromObject.bar should override default", function() {
+test("fooBinding: SC.Binding.not(TestNamespace.fromObject.bar should override default", function() {
   
   testObject = TestObject.create({
-    fooBinding: SC.Binding.Not("TestNamespace.fromObject.bar") 
+    fooBinding: SC.Binding.not("TestNamespace.fromObject.bar") 
   }) ;
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
   
@@ -319,10 +319,10 @@ test("fooBinding: TestNamespace.fromObject.bar should have bool binding", functi
   equals(NO, testObject.get("foo"), "testObject.foo == NO");
 });
 
-test("fooBinding: SC.Binding.Not(TestNamespace.fromObject.bar should override default", function() {
+test("fooBinding: SC.Binding.not(TestNamespace.fromObject.bar should override default", function() {
   
   testObject = TestObject.create({
-    fooBinding: SC.Binding.Not("TestNamespace.fromObject.bar") 
+    fooBinding: SC.Binding.not("TestNamespace.fromObject.bar") 
   }) ;
   SC.Binding.flushPendingChanges() ; // actually sets up up the binding
   
