@@ -1,7 +1,8 @@
 /*! @license
 ==========================================================================
 SproutCore Costello -- Property Observing Library
-copyright 2006-2009, Sprout Systems, Inc., Apple, Inc. and contributors.
+Copyright ©2006-2009, Sprout Systems, Inc. and contributors.
+Portions copyright ©2008-2009 Apple, Inc. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a 
 copy of this software and associated documentation files (the "Software"), 
