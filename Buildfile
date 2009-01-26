@@ -10,14 +10,13 @@
 
 config :all, 
   :layout         => 'sproutcore:lib/index.rhtml',
-  :test_layout    => 'sproutcore:lib/test.rhtml',
+  :test_layout    => 'sproutcore:lib/index.rhtml',
   :test_required  => '/sproutcore/testing',
   :debug_required => ['/sproutcore/debug']
   
 config :costello,   :required => []
-config :core_query, :required => []
 config :foundation, :required => [:costello]
-config :datastore,  :required => [:costello]
+config :datastore,  :required => [:foundation, :costello]
 
 config :desktop,    
   :required => [:costello, :datastore, :foundation, :core_query]
@@ -28,8 +27,16 @@ config :mobile,
 config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
 
-config :testing, 
-  :required => [], :test_required => [], :debug_required => []
-  
-config :debug,
-  :required => [], :test_required => [], :debug_required => []
+# Setup special frameworks and themese that do not need to include std
+# dependencies
+%w(testing debug standard_theme empty_theme).each do |target_name|
+  config target_name,
+    :required => [], :test_required => [], :debug_required => []
+end
+
+# setup theme name
+config :empty_theme, :theme_name => 'empty-theme'
+
+# Exception: standard_theme is based on the empty_theme
+config :standard_theme, 
+  :required => :empty_theme, :theme_name => 'sc-theme'
