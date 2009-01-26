@@ -12,7 +12,7 @@ config :all,
   :layout         => 'sproutcore:lib/index.rhtml',
   :test_layout    => 'sproutcore:lib/test.rhtml',
   :test_required  => '/sproutcore/testing',
-  :debug_required => '/sproutcore/debug'
+  :debug_required => ['/sproutcore/debug']
   
 config :costello,   :required => []
 config :core_query, :required => []
