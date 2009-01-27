@@ -10,7 +10,7 @@ test("setting isPaused should stop firing", function() {
   var firedCount = 0 ;
   
   SC.RunLoop.begin() ;
-  var start = SC.runLoop.get('startTime') ;
+  var start = SC.RunLoop.currentRunLoop.get('startTime') ;
   var t = SC.Timer.schedule({
     target: this,
     action: function() { firedCount++ ; },

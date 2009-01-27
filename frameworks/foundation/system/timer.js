@@ -25,7 +25,7 @@
   browser considerably.
   
   Timers, on the other handle, are scheduled cooperatively using the 
-  SC.runLoop, which uses exactly one timeout to fire itself when needed and 
+  SC.RunLoop, which uses exactly one timeout to fire itself when needed and 
   then executes by timers that need to fire on its own.  This approach can
   be many timers faster than using timers and gaurantees that timers scheduled
   to execute at the same time generally will do so, keeping animations and
@@ -299,7 +299,7 @@ SC.Timer = SC.Object.extend(
     // if start time was not set explicitly when the timer was created, 
     // get it from the run loop.  This way timer scheduling will always
     // occur in sync.
-    if (!this.startTime) this.set('startTime', SC.runLoop.get('startTime')) ;
+    if (!this.startTime) this.set('startTime', SC.RunLoop.currentRunLoop.get('startTime')) ;
 
     // now schedule the timer if the last fire time was < the next valid 
     // fire time.  The first time lastFireTime is 0, so this will always go.

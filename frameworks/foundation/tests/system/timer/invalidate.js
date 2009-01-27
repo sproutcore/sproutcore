@@ -20,7 +20,7 @@ test("invalidate immediately should never execute", function() {
   var fired = NO ;
   
   SC.RunLoop.begin() ;
-  var start = SC.runLoop.get('startTime') ;
+  var start = SC.RunLoop.currentRunLoop.get('startTime') ;
   var t = SC.Timer.schedule({
     target: this,
     action: function() { fired = YES ; },

@@ -1814,7 +1814,7 @@ SC.$ = (typeof jQuery == "undefined") ? SC.CoreQuery : jQuery ;
 
 // Add some plugins to CoreQuery.  If jQuery is installed, it will get these
 // also. -- test in system/core_query/additions
-SC.$.fn.mixin(/** @scope SC.CoreQuery.prototype */ {
+SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   
   isCoreQuery: YES, // walk like a duck
   

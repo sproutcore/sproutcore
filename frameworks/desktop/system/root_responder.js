@@ -273,9 +273,9 @@ SC.RootResponder = SC.RootResponder.extend(
 
     if (!SC.rectsEqual(newSize, oldSize)) {
       // notify panes
-      SC.runLoop.beginRunLoop();
+      SC.RunLoop.begin();
       this.panes.invoke('windowSizeDidChange', oldSize, newSize) ;
-      SC.runLoop.endRunLoop();
+      SC.RunLoop.end();
     }    
   },
   
@@ -297,9 +297,9 @@ SC.RootResponder = SC.RootResponder.extend(
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
 
-      SC.runLoop.beginRunLoop();
+      SC.RunLoop.begin();
       this.set('hasFocus', YES);
-      SC.runLoop.endRunLoop();
+      SC.RunLoop.end();
     }
     return YES ; // allow default
   },
@@ -312,9 +312,9 @@ SC.RootResponder = SC.RootResponder.extend(
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
 
-      SC.runLoop.beginRunLoop();
+      SC.RunLoop.begin();
       this.set('hasFocus', NO);
-      SC.runLoop.endRunLoop();
+      SC.RunLoop.end();
     }
     return YES ; // allow default
   },
@@ -433,7 +433,7 @@ SC.RootResponder = SC.RootResponder.extend(
    trigger calls to mouseDragged.
   */
   mousemove: function(evt) {
-    SC.runLoop.beginRunLoop();
+    SC.RunLoop.begin();
 
     // make sure the view gets focus no matter what.  FF is inconsistant 
     // about this.
@@ -480,7 +480,7 @@ SC.RootResponder = SC.RootResponder.extend(
       }
     }
     
-    SC.runLoop.endRunLoop();
+    SC.RunLoop.end();
   },
 
   // these methods are used to prevent unnecessary text-selection in IE,

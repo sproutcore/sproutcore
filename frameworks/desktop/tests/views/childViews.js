@@ -26,13 +26,13 @@ var testingDomChangeFor = function(testView, finalParentView, func) {
   // save parentNode for testView root
   var parentNode = testView.rootElement.parentNode ;
   
-  SC.runLoop.beginRunLoop();
+  SC.RunLoop.begin();
   func(); // exec test.
   
   // verify that parentNode has not changed
   ok(testView.rootElement.parentNode === parentNode, "testView.rootElement.parentNode should not change yet!") ;  
   
-  SC.runLoop.endRunLoop();
+  SC.RunLoop.end();
   ok(testView.rootElement.parentNode !== parentNode, "testView.rootElement.parentNode did not change after run loop");
   
   // if a finalParentView was passed, verify parentView..
@@ -92,9 +92,9 @@ test("insertBefore() -- adding", function() {
 });
 
 test("insertBefore() -- moving", function() {
-  SC.runLoop.beginRunLoop();
+  SC.RunLoop.begin();
   childB.appendChild(childA) ;
-  SC.runLoop.endRunLoop();
+  SC.RunLoop.end();
   
   equals(childA.get('parentView'), childB, 'childA.parent == childB');
   
@@ -110,9 +110,9 @@ test("insertBefore() -- moving", function() {
 });
 
 test("removeChild(childA)", function() {
-  SC.runLoop.beginRunLoop();
+  SC.RunLoop.begin();
   parent.appendChild(childA).appendChild(childB) ;
-  SC.runLoop.endRunLoop();
+  SC.RunLoop.end();
   
   testingDomChangeFor(childA, function() {
     // verify precondition
@@ -141,9 +141,9 @@ test("removeChild(childA)", function() {
 // removeAllChildren
 test("removeAllChildren", function() {
   // setup initial...
-  SC.runLoop.beginRunLoop();
+  SC.RunLoop.begin();
   parent.appendChild(childA).appendChild(childB) ;
-  SC.runLoop.endRunLoop();
+  SC.RunLoop.end();
   
   testingDomChangeFor(childA, function() {
     // verify precondition
@@ -163,9 +163,9 @@ test("removeAllChildren", function() {
 
 test("removeFromParent", function() {
   // setup initial...
-  SC.runLoop.beginRunLoop();
+  SC.RunLoop.begin();
   parent.appendChild(childA).appendChild(childB) ;
-  SC.runLoop.endRunLoop();
+  SC.RunLoop.end();
   
   testingDomChangeFor(childA, function() {
     // verify precondition

@@ -102,10 +102,10 @@ SC.time.fn = {
 //       var time = date.getTime() ;
 // 
 //       var value = date["get%@".fmt(name.capitalize())]() ;
-//       assertEqual(value, SC.time[name](), "get");
+//       equals(value, SC.time[name](), "get");
 //       
 //       var value = date["set%@".fmt(name.capitalize())](3).getTime() ;
-//       assertEqual(value, SC.time[name](3), "set");
+//       equals(value, SC.time[name](3), "set");
 //       
 //     } ;
 //   });

@@ -22,11 +22,11 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   
   "Should scroll to the selected item": function()
   {
-    assertEqual(0, testCollectionView.get('rootElement').scrollTop, "scrollTop") ;
+    equals(0, testCollectionView.get('rootElement').scrollTop, "scrollTop") ;
     testCollectionView.scrollToContent( testCollection.get('records').last() );
 
-    assertEqual(3, testCollectionView.get('itemViews').length, 'itemViews.length') ;
-    assertEqual(30, scrollView.get('rootElement').scrollTop, "scrollTop 2") ;
+    equals(3, testCollectionView.get('itemViews').length, 'itemViews.length') ;
+    equals(30, scrollView.get('rootElement').scrollTop, "scrollTop 2") ;
   },
   
   setup: function()
@@ -108,7 +108,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   
   "Should contain the same number of visible item views as it's controller has records": function()
   {
-    assertEqual(2, testCollectionView.get("itemViews").length, "itemViews.length") ;
+    equals(2, testCollectionView.get("itemViews").length, "itemViews.length") ;
   },
   
   "Should update it's item views as it's controller is updated": function()
@@ -118,14 +118,14 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
        return (itemView) ? itemView.get('content').get('guid') : null ;
      } ;
      
-     assertEqual('1001', valueOfFirstItemView(), 'valueOfFirstItemView'); ;
+     equals('1001', valueOfFirstItemView(), 'valueOfFirstItemView'); ;
      
      var rec = SC.Record.create({ guid: '0999', name: 'item zero' });
      SC.Store.addRecord( rec );
      SC.Binding.flushPendingChanges();
      
-     assertEqual('0999', valueOfFirstItemView(), 'valueOfFirstItemView'); ;
-     assertEqual(2, testCollectionView.get('itemViews').length, 'itemViews.length 2') ;
+     equals('0999', valueOfFirstItemView(), 'valueOfFirstItemView'); ;
+     equals(2, testCollectionView.get('itemViews').length, 'itemViews.length 2') ;
      
      rec.destroy();
      SC.Store.removeRecord(rec);

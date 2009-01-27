@@ -104,8 +104,8 @@ Test.context("CASE 3: Manual-layout of view with padding & border", {
     var el = v.rootElement ;
 
     //debugger ;
-    assertEqual(Math.round(v.get('styleWidth')), f.width-24, 'width') ;
-    assertEqual(Math.round(v.get('styleHeight')), f.height-24, 'height') ;
+    equals(Math.round(v.get('styleWidth')), f.width-24, 'width') ;
+    equals(Math.round(v.get('styleHeight')), f.height-24, 'height') ;
   },
   
   "changing frame size should subtract padding and border": function() {

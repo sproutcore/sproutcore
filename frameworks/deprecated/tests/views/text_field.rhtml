@@ -11,10 +11,10 @@ Test.context("A SC.TextFieldView", {
     var keynames = $w('backspace delete home end left right up down');
     for (var i=0, n=keynames.length; i < n; i++)
     {
-      var event = SC.Mock.KeyEvent.create({ 
-        type: 'keydown', 
-        keyCode: SC.KEY_CODES[ keynames[i] ] 
-      });
+      // var event = SC.Mock.KeyEvent.create({ 
+      //         type: 'keydown', 
+      //         keyCode: SC.KEY_CODES[ keynames[i] ] 
+      //       });
       SC.window._onkeydown(event).shouldEqual(true);
       event.stopped.shouldEqual(false);
     }

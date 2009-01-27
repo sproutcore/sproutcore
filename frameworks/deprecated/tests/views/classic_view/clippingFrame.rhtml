@@ -204,10 +204,10 @@ Test.context("CASE 3: A scrollable view with extra height - nested child view ca
     window.case3 = this ;
     
     console.log("ncf = %@ - cf = %@".fmt($I(ncf), $I(cf))) ;
-    //assertEqual(true, SC.rectsEqual(ncf,cf), 'rectsEqual') ;
+    //equals(true, SC.rectsEqual(ncf,cf), 'rectsEqual') ;
     
     // force notifications
-    assertEqual(true, didChange, 'didChange') ;
+    equals(true, didChange, 'didChange') ;
     
     // reset
     this.v.set('scrollFrame', { y: 0 }) ;

@@ -58,15 +58,15 @@ Test.context("A SC.PopupButtonView with a properly configured menu", {
   "Should toggle the menu's visibility when triggering the action": function()
   {
     // for some reason this actually equals true... not sure why...
-    assertEqual(NO, this.button.get('menu').get('isVisible'), "button.menu.isVisible 1") ;
+    equals(NO, this.button.get('menu').get('isVisible'), "button.menu.isVisible 1") ;
     this.button.action();
     SC.Binding.flushPendingChanges(); // menus use a binding...
 
-    assertEqual(YES, this.button.get('menu').get('isVisible'), "button.menu.isVisible 2") ;
+    equals(YES, this.button.get('menu').get('isVisible'), "button.menu.isVisible 2") ;
     this.button.action();
     SC.Binding.flushPendingChanges(); // menus use a binding...
 
-    assertEqual(NO, this.button.get('menu').get('isVisible'), "button.menu.isVisible 3") ;
+    equals(NO, this.button.get('menu').get('isVisible'), "button.menu.isVisible 3") ;
   },
   "Should have it's isSelected state bound to the menu's visibility": function()
   {
