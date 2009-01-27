@@ -1,19 +1,20 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 require('views/view');
 
 /** @class
   A Pane is like a regular view except that it does not need to live within a 
   parent view.  You usually use a Pane to form the root of a view hierarchy in 
-  your application, such as your main application view or for floating palettes, 
-  popups, menus, etc.
+  your application, such as your main application view or for floating 
+  palettes, popups, menus, etc.
   
-  Usually you will not work directly with the SC.Pane class, but with one of its 
-  subclasses such as SC.MainPane, SC.DialogPane, or SC.PopupPane.
+  Usually you will not work directly with the SC.Pane class, but with one of 
+  its subclasses such as SC.MainPane, SC.DialogPane, or SC.PopupPane.
 
   h1. Showing a Pane
   
@@ -25,52 +26,54 @@ require('views/view');
      myPane.append(); // adds the pane to the document
   }}}
   
-  This will insert your pane into the end of your HTML document body, causing it 
-  to display on screen.  It will also register your pane with the 
-  SC.RootResponder for the document so you can start to receive keyboard, mouse, 
-  and touch events.
+  This will insert your pane into the end of your HTML document body, causing 
+  it to display on screen.  It will also register your pane with the 
+  SC.RootResponder for the document so you can start to receive keyboard, 
+  mouse, and touch events.
   
-  If you need more specific control for where you pane appears in the document, 
-  you can use several other insertion methods such as appendTo(), prependTo(), 
-  before() and after().  These methods all take a CoreQuery object or a selector 
-  to indicate where in your HTML document you would like you pane to be 
-  inserted.
+  If you need more specific control for where you pane appears in the 
+  document, you can use several other insertion methods such as appendTo(), 
+  prependTo(), before() and after().  These methods all take a CoreQuery 
+  object or a selector to indicate where in your HTML document you would like 
+  you pane to be inserted.
   
   Once a pane is inserted into the document, it will be sized and positioned 
-  according to the layout you have specified.  It will then automatically resize 
-  with the window if needed, relaying resize notifications to children as well.
+  according to the layout you have specified.  It will then automatically 
+  resize with the window if needed, relaying resize notifications to children 
+  as well.
   
   h1. Hiding a Pane
   
   When you are finished with a pane, you can hide the pane by calling the 
-  remove() method.  This method will actually remove the Pane from the document 
-  body, as well as deregistering it from the RootResponder so that it no longer 
-  receives events.
+  remove() method.  This method will actually remove the Pane from the 
+  document body, as well as deregistering it from the RootResponder so that it 
+  no longer receives events.
   
   The isVisibleInWindow method will also change to NO for the Pane and all of 
   its childViews and the views will no longer have their updateDisplay methods 
   called.  
   
-  You can readd a pane to the document again any time in the future by using any 
-  of the insertion methods defined in the previous section.
+  You can readd a pane to the document again any time in the future by using 
+  any of the insertion methods defined in the previous section.
   
   h1. Receiving Events
   
   Your pane and its child views will automatically receive any mouse or touch 
   events as long as it is on the screen.  To receive keyboard events, however, 
-  you must focus the keyboard on your pane by calling makeKeyPane() on the pane 
-  itself.  This will cause the RootResponder to route keyboard events to your 
-  pane.  The pane, in turn, will route those events to its current keyView, if 
-  there is any.
+  you must focus the keyboard on your pane by calling makeKeyPane() on the 
+  pane itself.  This will cause the RootResponder to route keyboard events to 
+  your pane.  The pane, in turn, will route those events to its current 
+  keyView, if there is any.
   
-  Note that all SC.Views (anything that implements SC.ClassicResponder, really) 
-  will be notified when it is about or gain or lose keyboard focus.  These 
-  notifications are sent both when the view is made keyView of a particular pane 
-  and when the pane is made keyPane for the entire application.
+  Note that all SC.Views (anything that implements SC.ClassicResponder, 
+  really) will be notified when it is about or gain or lose keyboard focus.  
+  These notifications are sent both when the view is made keyView of a 
+  particular pane and when the pane is made keyPane for the entire 
+  application.
   
-  You can prevent your Pane from becoming key by setting the acceptsKeyFocus to 
-  NO on the pane.  This is useful when creating palettes and other popups that 
-  should not steal keyboard control from another view.
+  You can prevent your Pane from becoming key by setting the acceptsKeyFocus 
+  to NO on the pane.  This is useful when creating palettes and other popups 
+  that should not steal keyboard control from another view.
 
   @extends SC.View
   @since SproutCore 1.0

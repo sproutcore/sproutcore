@@ -1,11 +1,11 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 require('system/ready');
-require('application/input_manager');
 
 /** Set to NO to leave the backspace key under the control of the browser.*/
 SC.CAPTURE_BACKSPACE_KEY = NO ;
@@ -274,10 +274,10 @@ SC.RootResponder = SC.Object.extend({
     @returns {Object} object that handled the event or null if not handled
   */
   sendEvent: function(action, evt, target) {
-    SC.runLoop.beginRunLoop();
+    SC.RunLoop.begin();
     var pane = (target) ? target.get('pane') : (this.get('keyPane') || this.get('mainPane'));
     var ret = (pane) ? pane.sendEvent(action, evt, target) : null ;
-    SC.runLoop.endRunLoop();
+    SC.RunLoop.end();
     return ret ;
   },
   

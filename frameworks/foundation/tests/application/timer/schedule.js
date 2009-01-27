@@ -8,7 +8,7 @@ module("Timer.schedule single timer") ;
 test("single timer should execute once and invalidate", function() {
   var fired = [] ;
   
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
   var start = SC.runLoop.get('startTime') ;
   var t = SC.Timer.schedule({
     target: this,
@@ -16,7 +16,7 @@ test("single timer should execute once and invalidate", function() {
     interval: 100, 
     repeats: NO
   });
-  SC.runLoop.endRunLoop() ;
+  SC.RunLoop.end() ;
   
   var checks = 10 ;
   var f = function f() {
@@ -44,7 +44,7 @@ test("repeating timer with no limit should repeat until terminated", function() 
   var fired = [] ;
   
   // schedule repeating timer
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
   var start = SC.runLoop.get('startTime') ;
   var runs = 4 ;
   
@@ -57,7 +57,7 @@ test("repeating timer with no limit should repeat until terminated", function() 
     interval: 100, 
     repeats: YES
   });
-  SC.runLoop.endRunLoop() ;
+  SC.RunLoop.end() ;
   
   // We can't gaurantee when timeouts will execute in the browser so we 
   // have to be a little flexible about testing repeated loops like this.
@@ -84,7 +84,7 @@ test("repeating timer should terminate after expiration", function() {
   var fired = [] ;
   
   // schedule repeating timer
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
   var start = SC.runLoop.get('startTime') ;
   var runs = 4 ;
   
@@ -97,7 +97,7 @@ test("repeating timer should terminate after expiration", function() {
     repeats: YES,
     until: start + 500
   });
-  SC.runLoop.endRunLoop() ;
+  SC.RunLoop.end() ;
   
   // We can't gaurantee when timeouts will execute in the browser so we 
   // have to be a little flexible about testing repeated loops like this.
@@ -121,7 +121,7 @@ test("repeating timer should terminate after expiration", function() {
 test("scheduling multiple timers at the same time should cause them to fire at same time", function() {
   
   var f1 = 0; var f2 = 0;
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
   var start = SC.runLoop.get('startTime') ;
   
   var t1 = SC.Timer.schedule({

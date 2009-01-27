@@ -1,15 +1,14 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 // These are helpful utility functions for calculating range and rect values
 require('system/browser');
 
-SC.mixin( 
-/** @scope SC */
-{
+SC.mixin( /** @scope SC */ {
 
   _downloadFrames: 0, // count of download frames inserted into document
   

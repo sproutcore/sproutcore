@@ -1,10 +1,11 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('views/view') ;
+sc_require('views/view') ;
 
 /** 
   @class
@@ -96,7 +97,7 @@ SC.ContainerView = SC.View.extend(
     var nowShowing = this.get('nowShowing') ;
     var content = null;
     //its a property path
-    if(SC.typeOf(nowShowing) === T_STRING){
+    if(SC.typeOf(nowShowing) === SC.T_STRING){
       // if nowShowing was set because the content was set directly, then 
       // do nothing.
       if (nowShowing === SC.CONTENT_SET_DIRECTLY) return ;

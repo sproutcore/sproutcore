@@ -1,11 +1,12 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('views/controls/field') ;
-require('views/mixins/editable') ;
+sc_require('views/field') ;
+sc_require('mixins/editable') ;
 
 /**
   @class
@@ -95,7 +96,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
       if (SC.browser.mozilla) {
         var f = this.convertFrameToView(this.get('frame'), null) ;
         var top = f.y, left = f.x, width = f.width, height = f.height ;
-        top += 3, left += 3, width -= 6, height -= 6 ; // brittle, but the layout is correct :(
+
+        // brittle, but the layout is correct :(
+        top += 3; left += 3; width -= 6; height -= 6; 
+        
         var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
         this.$input().attr('style', style) ;
       }

@@ -1,12 +1,12 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('system/mixins/enumerable') ;
+/** @class
 
-/**
   The Builder class makes it easy to create new chained-builder API's such as
   those provided by CoreQuery or jQuery.  Usually you will not create a new
   builder yourself, but you will often use instances of the Builder object to
@@ -125,7 +125,7 @@ SC.Builder.fn = {
   */
   init: function(content) {
     if (content !== undefined) {
-      if (SC.typeOf(content) === T_ARRAY) {
+      if (SC.typeOf(content) === SC.T_ARRAY) {
         var loc=content.length;
         while(--loc >= 0) {
           this[loc] = content.objectAt ? content.objectAt(loc) : content[loc];
@@ -171,7 +171,7 @@ SC.Builder.fn = {
   // toString describes the builder
   toString: function() { 
     return "%@$(%@)".fmt(this.defaultClass.toString(), 
-      SC.$A(this).invoke('toString').join(',')); 
+      SC.A(this).invoke('toString').join(',')); 
   },
   
   /** You can enhance the fn using this mixin method. */

@@ -590,6 +590,32 @@ SC.Object.prototype = {
     return this._object_toString ;
   },
 
+  /**  
+    Activates any outlet connections in object and syncs any bindings.  This
+    method is called automatically for view classes but may be used for any
+    object.
+    
+    @returns {void}
+  */
+  awake: function(key) { 
+    this.outlets.forEach(function(key) { this.get(key); },this) ;
+    this.bindings.invoke('sync'); 
+  },
+
+  /**
+    Invokes the passed method or method name one time during the runloop.  You
+    can use this method to schedule methods that need to execute but may be 
+    too expensive to execute more than once, such as methods that update the
+    DOM.
+    
+    @param {Funciton|String} method method or method name
+    @returns {SC.Object} receiver
+  */
+  invokeOnce: function(method) {
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method);
+    return this ;
+  },
+  
   /**
     The properties named in this array will be concatenated in subclasses
     instead of replaced.  This allows you to name special properties that

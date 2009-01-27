@@ -1,8 +1,9 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 require('controllers/controller') ;
 
@@ -89,7 +90,7 @@ SC.ObjectController = SC.Controller.extend(
     Set to true if the controller has any content, even an empty array.
   */
   hasContent: function() {
-    return this.get('content') != null ;
+    return this.get('content') ;
   }.property('content'),
 
   /**
@@ -125,15 +126,16 @@ SC.ObjectController = SC.Controller.extend(
     
     var content = this.get('content') ;
     var ret = true ;
+    var key, loc;
 
     // empty arrays are treated like null values, arrays.len=1 treated like 
     // single objects.
     var isArray = false ;
     if (SC.isArray(content)) {
       var len = this._lengthFor(content) ;
-      if (len == 0) {
+      if (len === 0) {
         content = null ; 
-      } else if (len == 1) {
+      } else if (len === 1) {
         content = this._objectAt(0, content) ;
       } else if (this.get('allowsMultipleContent')) {
         isArray = true ;
@@ -150,7 +152,7 @@ SC.ObjectController = SC.Controller.extend(
     // get the changed values.
     } else if (isArray) {
       
-      var loc = this._lengthFor(content) ;
+      loc = this._lengthFor(content) ;
       while(--loc >= 0) {
         var object = this._objectAt(loc, content) ;
         if (!object) continue ;
@@ -158,7 +160,7 @@ SC.ObjectController = SC.Controller.extend(
         if (object.beginPropertyChanges) object.beginPropertyChanges(); 
         
         // loop through all the keys in changes and get the values...
-        for(var key in this._changes) {
+        for(key in this._changes) {
           if (!this._changes.hasOwnProperty(key)) continue ;
           var value = this._changes[key];
           
@@ -186,15 +188,19 @@ SC.ObjectController = SC.Controller.extend(
       // save the set of changes to apply them.  Nothing should clear it but
       // just in case.
       var changes = this._changes ;
-      for(var key in changes) {
+      for(key in changes) {
         if (!changes.hasOwnProperty(key)) continue;
         
         var oldValue = content.get ? content.get(key) : content[key];
         var newValue = changes[key];
         
-        if (oldValue == null && newValue == '') newValue = null;
+        if (SC.none(oldValue) && newValue === '') newValue = null;
         if (newValue != oldValue) {
-          (content.set) ? content.set('isDirty', YES) : (content.isDirty=YES);
+          if (content.set) {
+            content.set('isDirty', YES);
+          } else {
+            content.isDirty=YES;
+          } 
         }
         
         if (content.set) {
@@ -209,7 +215,7 @@ SC.ObjectController = SC.Controller.extend(
     }
     
     // if commit was successful, dump changes hash and clear editor.
-    if ($ok(ret)) {
+    if (SC.$ok(ret)) {
       this._changes = {} ;
       //this._valueControllers = {};
       this.editorDidClearChanges() ;
@@ -299,7 +305,7 @@ SC.ObjectController = SC.Controller.extend(
 
     if (SC.isArray(obj))
     {
-      var value = [];
+      value = [];
       var len = this._lengthFor(obj);
       if (len > 1)
       {
@@ -308,7 +314,7 @@ SC.ObjectController = SC.Controller.extend(
         if (this.get('allowsMultipleContent')) {
           for(var idx=0; idx < len; idx++) {
             var item = this._objectAt(idx, obj) ;
-            value.push((item) ? ((item.get) ? item.get(key) : item[key]) : null) ;
+            value.push(item ? (item.get ? item.get(key) : item[key]) : null) ;
           }
         } else {
           value = null;
@@ -318,7 +324,7 @@ SC.ObjectController = SC.Controller.extend(
       {
         // if content is array with one item, collect from first obj.
         obj = this._objectAt(0,obj) ;
-        value = (obj.get) ? obj.get(key) : obj[key] ;
+        value = obj.get ? obj.get(key) : obj[key] ;
       }
       else
       {
@@ -329,7 +335,7 @@ SC.ObjectController = SC.Controller.extend(
     else
     {
       // content is a single item. Just get the property.
-      value = (obj.get) ? obj.get(key) : obj[key] ;
+      value = obj.get ? obj.get(key) : obj[key] ;
     }
     return value;
   },
@@ -346,7 +352,7 @@ SC.ObjectController = SC.Controller.extend(
         // if we have uncommitted changes, then discard the changes or raise
         // an exception.
         var er = this.discardChanges() ;
-        if (!$ok(er)) throw(er) ;
+        if (!SC.$ok(er)) throw(er) ;
       } else {
         // no changes, but we want to ensure that we flush the cache 
         // of any SC.Controllers we have for the content
@@ -376,7 +382,7 @@ SC.ObjectController = SC.Controller.extend(
       }
 
       // determine the content type.
-      var count = (!value) ? 0 : (SC.isArray(value)) ? this._lengthFor(value) : 1 ;
+      var count = !value ? 0 : (SC.isArray(value) ? this._lengthFor(value) : 1) ;
       
       // New content is configured, update controller stats
       this.beginPropertyChanges() ;
@@ -404,11 +410,11 @@ SC.ObjectController = SC.Controller.extend(
   },
   
   _lengthFor: function(obj) {
-    return ((obj.get) ? obj.get('length') : obj.length) || 0;
+    return (obj.get ? obj.get('length') : obj.length) || 0;
   },
   
   _objectAt: function(idx, obj) {
-    return (obj.objectAt) ? obj.objectAt(idx) : ((obj.get) ? obj.get(idx) : obj[idx]) ;
+    return obj.objectAt ? obj.objectAt(idx) : (obj.get ? obj.get(idx) : obj[idx]) ;
   }
       
 }) ;

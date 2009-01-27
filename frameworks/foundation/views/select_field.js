@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('views/controls/field');
+sc_require('views/field');
 
 /**
   @class
@@ -238,7 +238,7 @@ SC.SelectFieldView = SC.FieldView.extend(
       if (this._objects) {
         loc = this._objects.length ;
         while(--loc >= 0) {
-          var object = this._objects[loc] ;
+          object = this._objects[loc] ;
           if (object && object.addObserver) {
             if (this._nameKey && this._valueKey) {
               object.addObserver(this._nameKey, this, func) ;
@@ -273,7 +273,7 @@ SC.SelectFieldView = SC.FieldView.extend(
   },
 
   _isFocusedObserver: function() {
-    this.get('isFocused') ? this.$().addClass('focus') : this.$().removeClass('focus') ;
+    this.$().setClass('focus', this.get('isFocused'));
   }.observes('isFocused'),
 
   init: function() {

@@ -1,0 +1,53 @@
+<% 
+# ==========================================================================
+# Project:   SproutCore - JavaScript Application Framework
+# Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+#            Portions ©2008-2009 Apple, Inc. All rights reserved.
+# License:   Licened under MIT license (see license.js)
+# ==========================================================================
+#
+# This file contains bootstrap code to be included at the top of standard 
+# SproutCore apps.  This code will autodetect the browser and then adds
+# a class name to the 'body' tag.  You can use this class name to customize
+# the CSS rules to be applied to your page based on browser.  The class name
+# contains the name webkit|mozilla|ie + the major version number
+#
+-%>
+<% content_for('bootstrap') do %>
+var SC = SC || {};
+SC.browser = (function() {
+  var userAgent = navigator.userAgent.toLowerCase();
+  var version = (userAgent.match( /.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [])[1] ;
+
+  var browser = {
+    version: version,
+    safari: (/webkit/).test( userAgent ) ? version : 0,
+    opera: (/opera/).test( userAgent ) ? version : 0,
+    msie: (/msie/).test( userAgent ) && !(/opera/).test( userAgent ) ? version : 0,
+    mozilla: (/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent ) ? version : 0,
+    mobileSafari: (/apple.*mobile.*safari/).test(userAgent) ? version : 0,
+    windows: !!(/(windows)/).test(userAgent),
+    mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
+    language: ((navigator.language || navigator.browserLanguage).split('-', 1)[0])
+  };
+  
+    browser.current = (browser.msie) ? 'msie' : (browser.mozilla) ? 'mozilla' : (browser.safari) ? 'safari' : (browser.opera) ? 'opera' : 'unknown' ;
+  return browser ;
+})();
+
+SC.setupBodyClassNames = function() {
+  var el = document.body ;
+  if (!el) return ;
+  var browser = SC.browser.current ;
+  var platform = (SC.browser.windows) ? 'windows' : (SC.browser.mac) ? 'mac' : 'other-platform' ;
+  var classNames = (el.className) ? el.className.split(' ') : [] ;
+  classNames.push(browser) ;
+  classNames.push(platform) ;
+  if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
+  el.className = classNames.join(' ') ;
+} ;
+
+<% end %>
+<% content_for('setup_body_class_names') do %>
+if (SC.setupBodyClassNames) SC.setupBodyClassNames() ;
+<% end -%>  

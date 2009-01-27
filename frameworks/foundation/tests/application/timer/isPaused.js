@@ -9,7 +9,7 @@ test("setting isPaused should stop firing", function() {
   
   var firedCount = 0 ;
   
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
   var start = SC.runLoop.get('startTime') ;
   var t = SC.Timer.schedule({
     target: this,
@@ -17,7 +17,7 @@ test("setting isPaused should stop firing", function() {
     interval: 100,
     repeats: YES
   });
-  SC.runLoop.endRunLoop() ;
+  SC.RunLoop.end() ;
   
   // wait for timer to fire twice, then pause it.
   var tries1 = 10 ;

@@ -19,7 +19,7 @@ test("invalidate immediately should never execute", function() {
   
   var fired = NO ;
   
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
   var start = SC.runLoop.get('startTime') ;
   var t = SC.Timer.schedule({
     target: this,
@@ -27,7 +27,7 @@ test("invalidate immediately should never execute", function() {
     interval: 100
   });
   t.invalidate() ;
-  SC.runLoop.endRunLoop() ;
+  SC.RunLoop.end() ;
   
   stop(2500) ; // stops the test runner, fails after 2500ms
   setTimeout(function() {

@@ -1,21 +1,17 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
-//
-// Force a field to be an email address.
-//
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('validators/validator') ;
+sc_require('validators/validator') ;
 
 /**
   Requires a valid email format.
   
   @class
   @extends SC.Validator
-  @author Charles Jolley
   @version 1.0
 */
 SC.Validator.Email = SC.Validator.extend(

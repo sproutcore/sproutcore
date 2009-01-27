@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
+sc_require('private/observer_set');
 
 /**
   @class
@@ -50,7 +50,8 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   beginRunLoop: function() {
-    this._start = new Date().getTime() ; // can't use Date.now() in costello  
+    this._start = new Date().getTime() ; // can't use Date.now() in costello 
+    return this ; 
   },
 
   /**
@@ -60,7 +61,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     the timeout handler.  If you call setTimeout() or setInterval() yourself
     you may need to invoke this yourself.
 
-    @returns {void}
+    @returns {SC.RunLoop} receiver
   */
   endRunLoop: function() {
 
@@ -74,19 +75,62 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       didChange = this.flushApplicationQueues() ;
     } while(didChange) ;
     this._start = null ;
+    return this ; 
   },
 
   /**
-    This method will flushing any changes that were deferred until the end of
-    the current run loop.  The default implementation will simply flush any
-    pending changed bindings, but you could override this method to provide
-    added functionality if you prefer.  For example, the full SproutCore 
-    framework patches this function to support timers, etc.
+    Invokes the passed target/method pair once at the end of the runloop.
+    You can call this method as many times as you like and the method will
+    only be invoked once.  
+    
+    Usually you will not call this method directly but use invokeOnce() 
+    defined on SC.Object.
+    
+    @param {Object} target
+    @param {Function} method
+    @returns {SC.RunLoop} receiver
+  */
+  invokeOnce: function(target, method) {
+    // normalize
+    if (method === undefined) { 
+      method = target; target = this ;
+    }
+    if (SC.typeOf(method) === SC.T_STRING) method = target[method];
+    if (!this._invokeQueue) this._invokeQueue = SC._ObserverSet.create();
+    this._invokeQueue.add(target, method);
+    return this ;
+  },
+
+  /**
+    Executes any pending events at the end of the run loop.  This method is 
+    called automatically at the end of a run loop to flush any pending 
+    queue changes.
+    
+    The default method will invoke any one time methods and then sync any 
+    bindings that might have changed.  You can override this method in a 
+    subclass if you like to handle additional cleanup. 
+    
+    This method must return YES if it found any items pending in its queues
+    to take action on.  endRunLoop will invoke this method repeatedly until
+    the method returns NO.  This way if any if your final executing code
+    causes additional queues to trigger, then can be flushed again.
+    
+    @returns {Boolean} YES if items were found in any queue, NO otherwise
   */
   flushApplicationQueues: function() {
-      // flush any pending changed bindings.  This could actually trigger a 
-      // lot of code to execute.
-      return SC.Binding.flushPendingChanges();
+    var hadContent = NO ;
+    
+    // execute any methods in the invokeQueue.
+    var queue = this._invokeQueue;
+    if (queue && queue.targets > 0) {
+      this._invokeQueue = null; // reset so that a new queue will be created
+      hadContent = YES ; // needs to execute again
+      queue.invokeMethods();
+    }
+    
+    // flush any pending changed bindings.  This could actually trigger a 
+    // lot of code to execute.
+    return SC.Binding.flushPendingChanges() || hadContent ;
   }
 
 }) ;
@@ -103,18 +147,32 @@ SC.RunLoop.currentRunLoop = null;
 */
 SC.RunLoop.runLoopClass = SC.RunLoop;
 
+/** 
+  Begins a new run loop on the currentRunLoop.  If you are already in a 
+  runloop, this method has no effect.
+  
+  @returns {SC.RunLoop} receiver
+*/
 SC.RunLoop.begin = function() {    
   var runLoop = this.currentRunLoop;
   if (!runLoop) runLoop = this.currentRunLoop = this.runLoopClass.create();
   runLoop.beginRunLoop();
+  return this ;
 };
 
+/**
+  Ends the run loop on the currentRunLoop.  This will deliver any final 
+  pending notifications and schedule any additional necessary cleanup.
+  
+  @returns {SC.RunLoop} receiver
+*/
 SC.RunLoop.end = function() {
   var runLoop = this.currentRunLoop;
   if (!runLoop) {
     throw "SC.RunLoop.end() called outside of a runloop!";
   }
   runLoop.endRunLoop();
+  return this ;
 } ;
 
 

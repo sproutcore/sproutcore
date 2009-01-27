@@ -1,10 +1,9 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
-
-require('core');
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 /** Detects the current browser type. Borrowed from jQuery + prototype */
 SC.browser = (function() {
@@ -30,13 +29,13 @@ SC.browser = (function() {
     mozilla: (/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent ) ? version : 0,
     
     /** non-zero if this is mobile safari */
-    mobileSafari: (/Apple.*Mobile.*Safari/).test(userAgent) ? version : 0,
+    mobileSafari: (/apple.*mobile.*safari/).test(userAgent) ? version : 0,
     
     /** non-zero if we are on windows */
-    windows: !!(/(Windows)/).test(userAgent),
+    windows: !!(/(windows)/).test(userAgent),
     
-    /** non-zero if we are on a max */
-    mac: !!((/(Macintosh)/).test(userAgent) || (/(Mac OS X)/).test(userAgent)),
+    /** non-zero if we are on a mac */
+    mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
     
     language: ((navigator.language || navigator.browserLanguage).split('-', 1)[0])
   };

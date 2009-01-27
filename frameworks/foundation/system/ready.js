@@ -1,10 +1,13 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('system/event') ;
+/*global main */
+
+sc_require('system/event') ;
 
 SC.mixin({
   _isReadyBound: NO,
@@ -22,28 +25,31 @@ SC.mixin({
 
     // If IE is used and is not in a frame
     // Continually check to see if the document is ready
-    if (SC.browser.msie && (window === top)) (function(){
-      if (SC.isReady) return;
-      try {
-        // If IE is used, use the trick by Diego Perini
-        // http://javascript.nwbox.com/IEContentLoaded/
-        document.documentElement.doScroll("left");
-      } catch( error ) {
-        setTimeout( arguments.callee, 0 );
-        return;
-      }
-      // and execute any waiting functions
-      SC._didBecomeReady();
-    })();
+    if (SC.browser.msie && (window === top)) {
+      (function() {
+        if (SC.isReady) return;
+        try {
+          // If IE is used, use the trick by Diego Perini
+          // http://javascript.nwbox.com/IEContentLoaded/
+          document.documentElement.doScroll("left");
+        } catch( error ) {
+          setTimeout( arguments.callee, 0 );
+          return;
+        }
+        // and execute any waiting functions
+        SC._didBecomeReady();
+      })();
+    }
 
     if ( SC.browser.opera ) {
       document.addEventListener( "DOMContentLoaded", function () {
         if (SC.isReady) return;
-        for (var i = 0; i < document.styleSheets.length; i++)
+        for (var i = 0; i < document.styleSheets.length; i++) {
           if (document.styleSheets[i].disabled) {
             setTimeout( arguments.callee, 0 );
             return;
           }
+        }
         // and execute any waiting functions
         SC._didBecomeReady();
       }, NO);
@@ -93,7 +99,7 @@ SC.mixin({
       var body = document.getElementsByTagName('body')[0];
       if (body) {
         var className = body.className ;
-        var language = String.currentLanguage().toLowerCase() ;
+        var language = SC.Locale.currentLanguage.toLowerCase() ;
         body.className = (className && className.length>0) ? [className, language].join(' ') : language ;
       }
     }
@@ -101,52 +107,39 @@ SC.mixin({
     SC.Benchmark.start('ready') ;
     
     // Begin runloop
-    SC.runLoop.beginRunLoop();
+    SC.RunLoop.begin();
     
+    var handler, ary, idx, len ;
+
     // correctly handle queueing new SC.ready() calls
     do {
-      var handler, ary = SC._readyQueue ;
+      ary = SC._readyQueue ;
       SC._readyQueue = [] ; // reset
-      for (var idx=0, len=ary.length; idx<len; idx++) {
+      for (idx=0, len=ary.length; idx<len; idx++) {
         handler = ary[idx] ;
         var target = handler[0] || document ;
         var method = handler[1] ;
         if (method) method.call(target) ;
       }
-    } while (SC._readyQueue.length > 0)
-    
+    } while (SC._readyQueue.length > 0) ;
+
     // okay, now we're ready (any SC.ready() calls will now be called immediately)
     SC.isReady = YES ;
     
     // clear the queue
     SC._readyQueue = null ;
     
-    // process afterReady queue
-    do {
-      var handler, ary = SC._afterReadyQueue ;
-      SC._afterReadyQueue = [] ; // reset
-      for (var idx=0, len=ary.length; idx<len; idx++) {
-        handler = ary[idx] ;
-        var target = handler[0] || document ;
-        var method = handler[1] ;
-        if (method) method.call(target) ;
-      }
-    } while (SC._afterReadyQueue.length > 0)
-    
-    // clear the queue
-    SC._afterReadyQueue = null ;
-    
     // trigger any bound ready events
     SC.Event.trigger("ready", null, document, NO) ;
     
     // Now execute main, if defined
-    if ((typeof main != "undefined") && (main instanceof Function) && !(SC.suppressMain)) main();
+    if ((typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
     
     // handle routes, if modules is installed.
     if (SC.Routes && SC.Routes.ping) SC.Routes.ping() ; 
     
     // end run loop.  This is probably where a lot of bindings will trigger
-    SC.runLoop.endRunLoop() ; 
+    SC.RunLoop.end() ; 
     
     SC.Benchmark.end('ready') ;
     SC.Benchmark.log();
@@ -163,33 +156,12 @@ SC.mixin({
     your handler will be called immediately.
     
     @param target {Object} optional target object
-    @param method {Funciton} method name or function to execute
+    @param method {Function} method name or function to execute
     @returns {SC}
   */
   ready: function(target, method) {
-    return this._ready(target, method, this._readyQueue) ;
-  },
-  
-  /** 
-    Add the passed target and method to the queue of methods to invoke when
-    after SproutCore is ready.  These methods will be called after SproutCore
-    has completed its setup, but before the main() function is called.
+    var queue = this._readyQueue;
     
-    Methods are called in the order they are added.
-  
-    If you add an after ready handler when SproutCore is already ready, then
-    your handler will be called immediately.
-    
-    @param target {Object} optional target object
-    @param method {Funciton} method name or function to execute
-    @returns {SC}
-  */
-  afterReady: function(target, method) {
-    return this._ready(target, method, this._afterReadyQueue) ;
-  },
-  
-  /** @private */
-  _ready: function(target, method, queue) {
     // normalize
     if (method === undefined) {
       method = target; target = null ;

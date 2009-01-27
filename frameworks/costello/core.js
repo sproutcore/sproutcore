@@ -354,6 +354,8 @@ SC.mixin(/** @scope SC */ {
   /** Empty array.  Useful for some optimizations. */
   EMPTY_ARRAY: [],
 
+  EMPTY_HASH: {},
+  
   /**
     Creates a new object with the passed object as its prototype.
 

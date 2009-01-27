@@ -1,32 +1,13 @@
-SC.mixin(SC.Object, {
-  // ..........................................
-  // OUTLETS
-  // 
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-  /**  
-    Activates any outlet connections in object and syncs any bindings.  This
-    method is called automatically for view classes but may be used for any
-    object.
-    
-    @returns {void}
-  */
-  awake: function(key) { 
-    this.outlets.forEach(function(key) { this.get(key); },this) ;
-    this.bindings.invoke('sync'); 
-  },
+// Extensions to the core SC.Object class
+SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
   
-  /**  
-    Array of outlets to awake automatically.
-    
-    If you have outlets defined on a class, add this array with their
-    property names to have them awake automatically.  This array is merged
-    with the parent class outlet's array automatically when you call extend().
-    
-    @type {Array}
-    @field
-  */
-  outlets: [],
-
   /**
     Invokes the named method after the specified period of time.
     
@@ -57,17 +38,6 @@ SC.mixin(SC.Object, {
       f = function() { return func.apply(that, args.slice(1)); } ;
     }
     return SC.Timer.schedule({ target: this, action: f, interval: interval });
-  },
-
-  /**
-    Invokes the passed method or method name one time during the runloop.
-    
-    @param {Funciton} method
-    @returns {SC.Object} receiver
-  */
-  invokeOnce: function(method) {
-    SC.runLoop.invokeOnce(this, method);
-    return this ;
   },
   
   /**
@@ -107,4 +77,5 @@ SC.mixin(SC.Object, {
     method.call(target, v, this);
     return this ;
   }
-}) ;
+  
+});

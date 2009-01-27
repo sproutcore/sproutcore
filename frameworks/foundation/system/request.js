@@ -1,10 +1,10 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
-
-require('core') ;
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+/*global ActiveXObject */
 
 SC.Request = SC.Object.extend({
   
@@ -49,7 +49,7 @@ SC.Request = SC.Object.extend({
   
   response: function() {
     var response = this.get("rawResponse") ;
-    if (!response || !$ok(response)) {
+    if (!response || !SC.$ok(response)) {
         return response ;
     }
     
@@ -67,7 +67,7 @@ SC.Request = SC.Object.extend({
 });
 
 SC.Request.getUrl = function(address) {
-  var req = new SC.Request() ;
+  var req = SC.Request.create() ;
   req.set('address', address) ;
   req.set('type', 'GET') ;
   
@@ -75,7 +75,7 @@ SC.Request.getUrl = function(address) {
 };
 
 SC.Request.postUrl = function(address) {
-  var req = new SC.Request() ;
+  var req = SC.Request.create() ;
   req.set('address',address) ;
   req.set('type', 'POST') ;
   
@@ -165,15 +165,15 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
         try {
           var item = arguments[i]() ;
           return item ;
-        } catch (e) {} ;
+        } catch (e) {}
       }
       return NO;
-    }
+    };
     
     var rawRequest = tryThese(
-      function() { return new XMLHttpRequest() },
-      function() { return new ActiveXObject('Msxml2.XMLHTTP') },
-      function() { return new ActiveXObject('Microsoft.XMLHTTP') }
+      function() { return new XMLHttpRequest(); },
+      function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
+      function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
     );
     
     var request = this.get('request') ;

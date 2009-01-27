@@ -1,15 +1,15 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 /*jslint evil:true */
 
-require('views/view') ;
-require('views/mixins/control') ;
-require('system/mixins/delegate_support');
-require('views/mixins/button');
+sc_require('views/view') ;
+sc_require('mixins/control') ;
+sc_require('mixins/button');
 
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';

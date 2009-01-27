@@ -1,11 +1,10 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('core') ;
-require('system/object');
 require('system/error');
 require('system/locale');
 
@@ -21,18 +20,18 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   
   Images queues are necessary because browsers impose strict limits on the 
   number of concurrent connections that can be open at any one time to any one 
-  host. By controlling the order and timing of your loads using this image queue, 
-  you can improve the percieved performance of your application by ensuring the 
-  images you need most load first.
+  host. By controlling the order and timing of your loads using this image 
+  queue, you can improve the percieved performance of your application by 
+  ensuring the images you need most load first.
   
-  Note that if you use the SC.ImageView class, it will use this image cache for
-  you automatically.
+  Note that if you use the SC.ImageView class, it will use this image cache 
+  for you automatically.
   
   h1. Loading Images
   
-  When you need to display an image, simply call the loadImage() method with the
-  URL of the image, along with a target/method callback. The signature of your 
-  callback should be:
+  When you need to display an image, simply call the loadImage() method with 
+  the URL of the image, along with a target/method callback. The signature of 
+  your callback should be:
   
   {{{
     imageDidLoad: function(imageUrl, imageOrError) {
@@ -42,32 +41,34 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
 
   The "imageOrError" parameter will contain either an image object or an error 
   object if the image could not be loaded for some reason.  If you receive an 
-  error object, it will be one of SC.IMAGE_ABORTED_ERROR or SC.IMAGE_FAILED_ERROR.
+  error object, it will be one of SC.IMAGE_ABORTED_ERROR or 
+  SC.IMAGE_FAILED_ERROR.
   
   You can also optionally specify that the image should be loaded in the 
-  background.  Background images are loaded with a lower priority than foreground 
-  images.
+  background.  Background images are loaded with a lower priority than 
+  foreground images.
   
   h1. Aborting Image Loads
   
   If you request an image load but then no longer require the image for some 
-  reason, you should notify the imageCache by calling the releaseImage() method.  
-  Pass the URL, target and method that you included in your original loadImage() 
-  request.  
+  reason, you should notify the imageCache by calling the releaseImage() 
+  method.  Pass the URL, target and method that you included in your original 
+  loadImage() request.  
   
   If you have requested an image before, you should always call releaseImage() 
   when you are finished with it, even if the image has already loaded.  This 
   will allow the imageCache to properly manage its own internal resources.
   
-  This method may remove the image from the queue of images that need or load or 
-  it may abort an image load in progress to make room for other images.  If the 
-  image is already loaded, this method will have no effect.
+  This method may remove the image from the queue of images that need or load 
+  or it may abort an image load in progress to make room for other images.  If 
+  the image is already loaded, this method will have no effect.
   
   h1. Reloading an Image
   
   If you have already loaded an image, the imageCache will avoid loading the 
-  image again.  However, if you need to force the imageCache to reload the image 
-  for some reason, you can do so by calling reloadImage(), passing the URL. 
+  image again.  However, if you need to force the imageCache to reload the 
+  image for some reason, you can do so by calling reloadImage(), passing the 
+  URL. 
   
   This will cause the image cache to attempt to load the image again the next 
   time you call loadImage on it.
@@ -75,7 +76,7 @@ SC.IMAGE_FAILED_ERROR = SC.$error("SC.Image.FailedError", "Image", -101) ;
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.imageCache = SC.Object.create(/** @scipe SC.imageCache.prototype */ {
+SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
 
   /**
     The maximum number of images that can load from a single hostname at any

@@ -1,11 +1,11 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('core');
-require('system/core_query') ;
+sc_require('system/core_query') ;
 
 /**
   The event class provides a simple cross-platform library for capturing and
@@ -651,10 +651,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
-    if (event == window.event)
-      return SC.Event.create(event) ; // IE can't do event.normalized on an Event object
-    else
+    if (event == window.event) {
+      // IE can't do event.normalized on an Event object
+      return SC.Event.create(event) ; 
+    } else {
       return event.normalized ? event : SC.Event.create(event) ;
+    }
   },
   
   _global: {},

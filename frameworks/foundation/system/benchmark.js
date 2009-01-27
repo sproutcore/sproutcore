@@ -1,12 +1,9 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
-
-require('core') ;
-require('foundation/ext/date');
-require('foundation/deprecated/string') ;
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 /** @namespace SC.Benchmark
 
@@ -127,7 +124,7 @@ SC.Benchmark = {
   install: function(object,method, topLevelOnly) {
     
     // vae the original method.
-    var __func = object['b__' + method] = object[method] ;
+    var __func = (object['b__' + method] = object[method]) ;
     
     // replace with this helper.
     object[method] = function() {
@@ -161,20 +158,20 @@ SC.Benchmark = {
     
     // find the longest stat name...
     var maxLen = 0 ;
-    for(var key in this.stats) {
+    for(key in this.stats) {
       if (!this.stats.hasOwnProperty(key)) continue ;
       if (key.length > maxLen) maxLen = key.length;
     }
     
     // now gen report...
     var keys = [] ;
-    for(var key in this.stats) {
+    for(key in this.stats) {
       if (!this.stats.hasOwnProperty(key)) continue ;
       keys.push(key) ;
     }
     keys = keys.sort() ;
-    var max = keys.length ;
-    for(var idx=0;idx<max;idx++) {
+    var idx, max = keys.length ;
+    for(idx=0;idx<max;idx++) {
       ret.push(this._genReport(keys[idx], maxLen)) ;
     }
     return ret.join("\n") ;
@@ -226,9 +223,11 @@ SC.Benchmark = {
   // creates it.
   _statFor: function(key) {
     var ret = this.stats[key] ;
-    if (!ret) ret = this.stats[key] = {
-      runs: 0, amt: 0, name: key, _starts: []      
-    };
+    if (!ret) {
+      ret = this.stats[key] = {
+        runs: 0, amt: 0, name: key, _starts: []      
+      };
+    }
     return ret ;
   },
   

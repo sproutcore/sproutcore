@@ -4,9 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('core') ;
-require('system/object');
-
 /**
   @class
 
@@ -147,6 +144,15 @@ SC.Timer = SC.Object.extend(
   action: null,
   
   /**
+    Set if the timer should be created from a memory pool.  Normally you will
+    want to leave this set, but if you plan to use bindings or observers with
+    this timer, then you must set isPooled to NO to avoid reusing your timer.
+    
+    @property {Boolean}
+  */
+  isPooled: YES,
+  
+  /**
     The time interval in milliseconds.
     
     You generally set this when you create the timer.  If you do not set it
@@ -229,21 +235,84 @@ SC.Timer = SC.Object.extend(
     @field
     @type {Boolean}
   */
-  isValid: function() {
-    return !this._invalid ;
-  }.property('isPaused'),
+  isValid: YES,
   
   /**
-    Returns the next time offset when the property will fire.
-    
-    This property changes automatically after a timer has fired.  If the 
-    timer is invalid this will return 0.
-    
-    @field
-    @type {Number}
+    Set to the current time when the timer last fired.  Used to find the 
+    next 'frame' to execute.
   */
-  fireTime: null,
+  lastFireTime: 0,
   
+  /**
+    Computed property returns the next time the timer should fire.  This 
+    property resets each time the timer fires.  Returns -1 if the timer 
+    cannot fire again.
+    
+    @property {Time}
+  */
+  fireTime: function() {
+    if (!this.get('isValid')) return -1 ;  // not valid - can't fire
+    
+    // can't fire w/o startTime (set when schedule() is called).
+    var start = this.get('startTime');
+    if (!start || start === 0) return -1; 
+
+    // fire interval after start.
+    var interval = this.get('interval'), last = this.get('lastFireTime');
+    if (last < start) last = start; // first time to fire
+    
+    // find the next time to fire
+    var next ;
+    if (this.get('repeats')) {
+      if (interval === 0) { // 0 means fire as fast as possible.
+        next = last ; // time to fire immediately!
+        
+      // find the next full interval after start from last fire time.
+      } else {
+        next = start + (Math.floor((last - start) / interval)+1)*interval;
+      }
+      
+    // otherwise, fire only once interval after start
+    } else next = start + interval ;
+    
+    // can never have a fireTime after until
+    var until = this.get('until');
+    if (until && until>0 && next>until) next = until;
+    
+    return next ;
+  }.property('interval', 'startTime', 'repeats', 'until', 'isValid', 'lastFireTime').cacheable(),
+  
+  /**
+    Schedules the timer to execute in the runloop. 
+    
+    This method is called automatically if you create the timer using the
+    schedule() class method.  If you create the timer manually, you will
+    need to call this method yourself for the timer to execute.
+    
+    @returns {SC.Timer} The receiver
+  */
+  schedule: function() {
+    if (!this.get('isValid')) return this; // nothing to do
+    
+    this.beginPropertyChanges();
+    
+    // if start time was not set explicitly when the timer was created, 
+    // get it from the run loop.  This way timer scheduling will always
+    // occur in sync.
+    if (!this.startTime) this.set('startTime', SC.runLoop.get('startTime')) ;
+
+    // now schedule the timer if the last fire time was < the next valid 
+    // fire time.  The first time lastFireTime is 0, so this will always go.
+    var next = this.get('fireTime'), last = this.get('lastFireTime');
+    if (next >= last) {
+      this.set('isScheduled', YES);
+      SC.RunLoop.currentRunLoop.scheduleTimer(this, next);
+    }
+    
+    this.endPropertyChanges() ;
+    
+    return this ;
+  },
   /**
     Invalidates the timer so that it will not execute again.  If a timer has
     been scheduled, it will be removed from the run loop immediately.
@@ -251,11 +320,14 @@ SC.Timer = SC.Object.extend(
     @returns {SC.Timer} The receiver
   */
   invalidate: function() {
-    this.propertyWillChange('isValid') ;
-    this._invalid = YES ;
-    SC.runLoop.cancelTimer(this) ;
-    this.propertyDidChange('isValid') ;
+    this.bringPropertyChanges();
+    this.set('isValid', NO);
+    SC.RunLoop.currentRunLoop.cancelTimer(this);
     this.action = this.target = null ; // avoid memory leaks
+    this.endPropertyChanges();
+    
+    // return to pool...
+    if (this.get('isPooled')) SC.Timer.returnTimerToPool(this);
     return this ;
   },
   
@@ -268,15 +340,20 @@ SC.Timer = SC.Object.extend(
     @returns {void}
   */
   fire: function() {
-    
-    // whenever the timer fires, calculate the next fireTime immediately.
-    var nextFireTime = this._computeNextFireTime();
-    
+
+    // this will cause the fireTime to recompute
+    var last = this.set('lastFireTime', Date.now());
+    var next = this.get('fireTime');
+
     // now perform the fire action unless paused.
     if (!this.get('isPaused')) this.performAction() ;
     
      // reschedule the timer if needed...
-     (nextFireTime>0) ? this.schedule() : this.invalidate();
+     if (next > last) {
+       this.schedule();
+     } else {
+       this.invalidate();
+     }
   },
 
   /**
@@ -295,7 +372,7 @@ SC.Timer = SC.Object.extend(
       var property = path.pop() ;
 
       var target = SC.objectForPropertyPath(path, window) ;
-      var action = (target.get) ? target.get(property) : target[property];
+      var action = target.get ? target.get(property) : target[property];
       if (action && SC.typeOf(action) == SC.T_FUNCTION) {
         action.call(target, this) ;
       } else {
@@ -307,40 +384,8 @@ SC.Timer = SC.Object.extend(
     } else SC.RootResponder.responder.sendAction(this.action, this.target, this) ;
   },
   
-  /**
-    Schedules the timer to execute in the runloop. 
-    
-    This method is called automatically if you create the timer using the
-    schedule() class method.  If you create the timer manually, you will
-    need to call this method yourself for the timer to execute.
-    
-    @returns {SC.Timer} The receiver
-  */
-  schedule: function() {
-
-    this.beginPropertyChanges();
-    
-    // if start time was not set explicitly when the timer was created, 
-    // get it from the run loop.  This way timer scheduling will always
-    // occur in sync.
-    if (!this.startTime) this.set('startTime', SC.runLoop.get('startTime')) ;
-    
-    // If this is the first time the timer was scheduled, compute the fireTime
-    var fireTime = (this.fireTime) ? this.get('fireTime') : this._computeNextFireTime() ; // sets the fire time...
-    
-    // now schedule the timer if needed.
-    if (!this._invalid) {
-      this.set('isScheduled', YES) ;
-      SC.runLoop.scheduleTimer(this, fireTime) ;
-    }
-    
-    this.endPropertyChanges() ;
-    
-    return this ;
-  },
-  
   init: function() {
-    arguments.callee.base.call(this) ;
+    sc_super();
     
     // convert startTime and until to times if they are dates.
     if (this.startTime instanceof Date) {
@@ -352,40 +397,96 @@ SC.Timer = SC.Object.extend(
     }
   },
   
-  // if the paused state changes, notify the runloop so that it can 
-  // reschedule its timeout.
-  _isPausedObserver: function() {
-    SC.runLoop.timerPausedStateDidChange(this) ;
-  }.observes('isPaused'),
-
-  /** @private
-    Computes the next fireTime and updates the property.
+  /** @private - Default values to reset reused timers to. */
+  RESET_DEFAULTS: {
+    target: null, action: null, 
+    isPooled: YES, isPaused: NO, isScheduled: NO, isValid: YES,
+    interval: 0, repeats: NO, until: null,
+    startTime: null, lastFireTime: 0
+  },
+  
+  /** 
+    Resets the timer settings with the new settings.  This is the method 
+    called by the Timer pool when a timer is reused.  You will not normally
+    call this method yourself, though you could override it if you need to 
+    reset additonal properties when a timer is reused.
     
-    @returns the next fire time (also set on fireTime property)
+    @params {Hash} props properties to copy over
+    @returns {SC.Timer} receiver
   */
-  _computeNextFireTime: function() {
+  reset: function(props) {
+    if (!props) props = SC.EMPTY_HASH;
     
-    var fireTime = 0 ;
-    if (!this._invalid && this.get('isValid')) {
+    // note: we copy these properties manually just to make them fast.  we 
+    // don't expect you to use observers on a timer object if you are using 
+    // pooling anyway so this won't matter.  Still notify of property change
+    // on fireTime to clear its cache.
+    this.propertyWillChange('fireTime');
+    var defaults = this.RESET_DEFAULTS ;
+    for(var key in defaults) {
+      if (!defaults.hasOwnProperty(key)) continue ; 
+      this[key] = SC.none(props[key]) ? defaults[key] : props[key];
+    }
+    this.propertyDidChange('fireTime');
+    return this ;
+  },
+    
+  // ..........................................................
+  // TIMER QUEUE SUPPORT
+  // 
 
-      var now = Date.now() ;
-      var start = this.get('startTime') || now ;
-      var until = this.get('until') ;
-      
-      // only calculate if we have not passed unitl.
-      if ((!until) || (until === 0) || (now < until)) {
+  /** @private - removes the timer from its current timerQueue if needed. 
+    return value is the new "root" timer.
+  */
+  removeFromTimerQueue: function(timerQueueRoot) {
+    var prev = this._timerQueuePrevious, next = this._timerQueueNext ;
+    if (!prev && !next) return timerQueueRoot ; // not in a queue...
+    
+    // else, patch up to remove...
+    if (prev) prev._timerQueueNext = next ;
+    if (next) next._timerQueuePrevious = prev ;
+    this._timerQueuePrevious = this._timerQueueNext = null ;
+    return (timerQueueRoot == this) ? next : timerQueueRoot ;
+  },
+  
+  /** @private - schedules the timer in the queue based on the runtime. */
+  scheduleInTimerQueue: function(timerQueueRoot, runTime) {
+    this._timerQueueRunTime = runTime ;
+    
+    // find the place to begin
+    var beforeNode = timerQueueRoot;
+    var afterNode = null ;
+    while(beforeNode && beforeNode._timerQueueRunTime < runTime) {
+      afterNode = beforeNode ;
+      beforeNode = beforeNode._timerQueueNext;
+    }
 
-        var interval = this.get('interval') ;
-        var repeats = this.get('repeats') ;
-        var cycle = Math.ceil(((now - start) / interval)+0.01) ;
-        if (cycle < 1) cycle = 1 ;
-        
-        fireTime = ((cycle <= 1) || repeats) ? start + (cycle * interval) : 0;
-      }
+    if (afterNode) {
+      afterNode._timerQueueNext = this ;
+      this._timerQueuePrevious = afterNode ;
     }
     
-    this.setIfChanged('fireTime', fireTime) ;
-    return fireTime ;
+    if (beforeNode) {
+      beforeNode._timerQueuePrevious = this ;
+      this._timerQueueNext = beforeNode ;
+    }
+    
+    // I am the new root if beforeNode === root
+    return (beforeNode === timerQueueRoot) ? this : timerQueueRoot ;
+  },
+  
+  /** @private 
+    adds the receiver to the passed array of expired timers based on the 
+    current time and then recursively calls the next timer.  Returns the
+    first timer that is not expired.  This is faster than iterating through
+    the timers because it does some faster cleanup of the nodes.
+  */
+  collectExpiredTimers: function(timers, now) {
+    if (this._timerQueueRunTime > now) return this ; // not expired!
+    timers.push(this);  // add to queue.. fixup next. assume we are root.
+    var next = this._timerQueueNext ;
+    this._timerQueueNext = next._timerQueuePrevious = null ;
+    return next.collectExpiredTimers(timers, now);
   }
   
 }) ;
@@ -396,11 +497,45 @@ SC.Timer = SC.Object.extend(
   Created a new timer with the passed properties and schedules it to 
   execute.  This is the same as calling SC.Time.create({ props }).schedule().
   
+  Note that unless you explicitly set isPooled to NO, this timer will be 
+  pulled from a shared memory pool of timers.  You cannot using bindings or
+  observers on these timers as they may be reused for future timers at any
+  time.
+  
   @params {Hash} props Any properties you want to set on the timer.
   @returns {SC.Timer} new timer instance.
 */
 SC.Timer.schedule = function(props) {
-  return this.create(props).schedule() ;
+  // get the timer.
+  var timer ;
+  if (!props || SC.none(props.isPooled) || props.isPooled) {
+    timer = this.timerFromPool(props);
+  } else timer = this.create(props);
+  return timer.schedule();
 } ;
+
+/**
+  Returns a new timer from the timer pool, copying the passed properties onto
+  the timer instance.  If the timer pool is currently empty, this will return
+  a new instance.
+*/
+SC.Timer.timerFromPool = function(props) {
+  var timers = this._timerPool;
+  if (!timers) timers = this._timerPool = [] ;
+  var timer = timers.pop();
+  if (!timer) timer = this.create() ;
+  SC.mixin(timer, props);
+  return timer ;
+};
+
+/** 
+  Returns a timer instance to the timer pool for later use.  This is done
+  automatically when a timer is invalidated if isPooled is YES.
+*/
+SC.Timer.returnTimerToPool = function(timer) {
+  if (this._timerPool) this._timerPool = [];
+  this._timerPool.push(timer);
+  return this ;
+};
 
 

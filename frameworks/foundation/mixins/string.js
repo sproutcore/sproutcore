@@ -1,8 +1,9 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 // These are basic enhancements to the string class used throughout 
 // SproutCore.
@@ -49,7 +50,7 @@ SC.String = {
     return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
       argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
       s =args[argIndex];
-      return ((s===null) ? '(null)' : (s==undefined) ? '' : s).toString(); 
+      return ((s===null) ? '(null)' : (s===undefined) ? '' : s).toString(); 
     }) ;
   },
 
@@ -242,7 +243,7 @@ SC.String = {
     @returns {String} the humanized string.
   */
   humanize: function() {
-    return this.decamelize().replace(/[-_]/g,' ') ;
+    return this.decamelize().replace(/[\-_]/g,' ') ;
   },
   
   /**

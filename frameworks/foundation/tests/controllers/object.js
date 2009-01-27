@@ -283,7 +283,7 @@ test("Support commitChanges() on content objects", function() {
 });
 
 test("Should update both values when commitChanges() on content objects", function() {
-  SC.runLoop.beginRunLoop() ;
+  SC.RunLoop.begin() ;
     
     var cc = window.cc = SC.CollectionController.create({
       allowsEmptySelection: false,
@@ -333,7 +333,7 @@ test("Should update both values when commitChanges() on content objects", functi
     ok(_contentDidChangeCalled, 'object controller did not get the changes') ;
     ok(oc.get('content') !== null, "oc.get('content') should not be null") ;
     
-  SC.runLoop.endRunLoop() ;
+  SC.RunLoop.end() ;
   
   // make sure bindings have processed
   SC.Binding.flushPendingChanges() ;

@@ -1,14 +1,12 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-require('views/view') ;
-require('views/mixins/control') ;
-require('views/mixins/inline_editor_delegate');
-
-require('views/inline_text_field');
+sc_require('views/view') ;
+sc_require('mixins/control') ;
 
 SC.ALIGN_LEFT = 'left';
 SC.ALIGN_RIGHT = 'right';
@@ -30,7 +28,7 @@ SC.BOLD_WEIGHT = 'bold';
   @extends SC.InlineEditorDelegate
   @since SproutCore 1.0
 */
-SC.LabelView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
+SC.LabelView = SC.View.extend(SC.Control,
 /** @scope SC.LabelView.prototype */ {
 
   styleClass: ['sc-label-view'],

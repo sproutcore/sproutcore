@@ -1,18 +1,16 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 require('system/browser');
-require('system/object') ;
 require('system/core_query');
 require('system/event');
-require('system/binding');
 
-require('views/mixins/responder') ;
-require('system/mixins/delegate_support') ;
-require('system/mixins/string') ;
+require('mixins/responder') ;
+require('mixins/string') ;
 
 SC.viewKey = SC.guidKey + "_view" ;
 
@@ -1183,9 +1181,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // walk up this side
     do {
-      f = next.get('frame'); /* console.log($I(f)); */ myX += f.x; myY += f.y ;
+      f = next.get('frame'); 
+      myX += f.x; myY += f.y ;
       view = next ; 
-    } while (next = view.get('parentView'))
+    } while (next = view.get('parentView')) ;
 
     // walk up other size
     if (targetView) {

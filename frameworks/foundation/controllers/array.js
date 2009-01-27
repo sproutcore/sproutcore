@@ -5,9 +5,7 @@
 // ========================================================================
 
 require('controllers/controller') ;
-require('system/mixins/array') ;
-require('system/mixins/selection_support') ;
-require('system/binding') ;
+require('mixins/selection_support') ;
 
 /** @class
 
@@ -66,7 +64,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Set to true if the controller has any content, even an empty array.
   */
   hasContent: function() {
-    return this.get('content') != null ;
+    return !SC.none(this.get('content')) ;
   }.property('content'),
   
   /**
@@ -132,7 +130,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (SC.typeOf(objectType) === SC.T_STRING) {
       objectType = SC.objectForPropertyPath(objectType) ;
     }
-    if (objectType == null) {
+    if (SC.none(objectType)) {
       throw "Invalid object type was provided" ;
     }
     
@@ -311,6 +309,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   {
     var content = this.get('content');
     var ret     = true;
+    var idx ;
     
     // cannot commit changes to null content.  Return an error.
     if (!content) {
@@ -324,7 +323,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (this._changelog) {
       var changelog = this._changelog ;
       var max = changelog.length;
-      for(var idx=0;idx<max;idx++) {
+      for(idx=0;idx<max;idx++) {
         var change = changelog[idx];
         content.replace(change.idx, change.amt, change.objects) ;
       }
@@ -334,7 +333,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // finally, destroy any removed objects if necessary.  Make 
     // sure the objects have not been re-added before doing this.
     if (this.get('destroyOnRemoval') && this._deletions && this._deletions.length>0) {
-      var idx = this._deletions.length;
+      idx = this._deletions.length;
       while(--idx >= 0) {
         var obj = this._deletions[idx] ;
         if (obj && obj.destroy && (content.indexOf(obj) < 0)) {
@@ -351,7 +350,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (content.endPropertyChanges) content.endPropertyChanges();
     if (content.commitChanges) ret = content.commitChanges();
     
-    if ($ok(ret)) {
+    if (SC.$ok(ret)) {
       this.contentCloneReset();
       this.editorDidClearChanges();
     }
@@ -386,7 +385,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   _objectControllerFor: function(obj) {
     if (!this.useControllersForContent) return obj;
     
-    var controllers = this._objControllers = this._objControllers || {} ;
+    var controllers = (this._objControllers = this._objControllers || {}) ;
     var guid = SC.guidFor(obj) ;
     var ret = controllers[guid] ;
     if (!ret) {
