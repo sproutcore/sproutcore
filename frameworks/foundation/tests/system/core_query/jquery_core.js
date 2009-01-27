@@ -1160,7 +1160,7 @@ test("addClass(String)", function() {
 
 test("removeClass(String) - simple", function() {
  expect(4);
- var div = SC.$("div").addClass("test").removeClass("test"),
+ var div = SC.$("div", SC.$('#main')).addClass("test").removeClass("test"),
    pass = true;
  for ( var i = 0; i < div.size(); i++ ) {
    if ( div.get(i).className.indexOf("test") != -1 ) pass = false;
@@ -1168,7 +1168,7 @@ test("removeClass(String) - simple", function() {
  ok( pass, "Remove Class" );
 
  reset();
- var div = SC.$("div").addClass("test").addClass("foo").addClass("bar");
+ var div = SC.$("div", SC.$('#main')).addClass("test").addClass("foo").addClass("bar");
  div.removeClass("test").removeClass("bar").removeClass("foo");
  var pass = true;
  for ( var i = 0; i < div.size(); i++ ) {

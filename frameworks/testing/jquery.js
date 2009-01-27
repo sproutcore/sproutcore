@@ -3556,4 +3556,4 @@ jQuery.each([ "Height", "Width" ], function(i, name){
 });})();
 
 // Map this version of jQuery to Q$ for use by QUnit
-var Q$ = jQuery.noConflict();
+var Q$ = jQuery.noConflict(true);

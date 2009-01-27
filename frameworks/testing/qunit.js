@@ -232,6 +232,7 @@ $.extend(window, {
 	start: start,
 	stop: stop,
 	reset: reset,
+	synchronize: synchronize,
 	isLocal: config.isLocal,
 	same: function(a, b, message) {
 		push(equiv(a, b), a, b, message);
@@ -260,10 +261,6 @@ $.extend(window, {
 $(window).load(function() {
   if($('#userAgent').length == 0) {
     $('body').append($('<div id="userAgent"></div>'));
-  }
-
-  if($('#main').length == 0) {
-    $('body').append($('<div id="main"></div>'));
   }
 
   if ($('#tests').length == 0) {
@@ -332,7 +329,7 @@ function validTest( name ) {
 function runTest() {
 	config.blocking = false;
 	var started = +new Date;
-	config.fixture = document.getElementById('main').innerHTML;
+	
 	config.ajaxSettings = $.ajaxSettings;
 	synchronize(function() {
 		$('<p id="testresult" class="result"/>').html(['Tests completed in ',
@@ -381,6 +378,12 @@ function test(name, callback) {
 		return;
 	
 	synchronize(function() {
+	  
+	  // save main fixture...
+	  var mainEl = document.getElementById('main');
+  	config.fixture = mainEl ? mainEl.innerHTML : '';
+  	mainEl = null;
+  	
 		config.assertions = [];
 		config.expected = null;
 		try {

@@ -265,7 +265,7 @@ SC.CoreQuery = (function() {
     */
     filter: function( selector ) {
       return this.pushStack(
-        (SC.typeOf(selector) === T_FUNCTION) &&
+        (SC.typeOf(selector) === SC.T_FUNCTION) &&
         CQ.grep(this, function(elem, i){
           return selector.call( elem, i );
         }) || CQ.multiFilter( selector, this ) );
