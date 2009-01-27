@@ -1,0 +1,526 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
+/**
+  @class
+
+  SegmentedView is a special type of button that can display multiple
+  segments.  Each segment has a value assigned to it.  When the user clicks
+  on the segment, the value of that segment will become the new value of 
+  the control.
+  
+  You can also optionally configure a target/action that will fire whenever
+  the user clicks on an item.  This will give your code an opportunity to take
+  some action depending on the new value.  (of course, you can always bind to
+  the value as well, which is generally the preferred approach.)
+  
+  h1. Defining Your Segments
+  
+  You define your segments by providing a items array, much like you provide
+  to a RadioView.  Your items array can be as simple as an array of strings 
+  or as complex as full model objects.  Based on how you configure your
+  itemKey properties, the segmented view will read the properties it needs 
+  from the array and construct the button.
+  
+  You can define the following properties on objects you pass in:
+  
+  | *itemTitleKey* | the title of the button |
+  | *itemValueKey* | the value of the button |
+  | *itemWidthKey* | the preferred width. if omitted, it autodetects |
+  | *itemIconKey*  | an icon |
+  | *itemActionKey* | an optional action to fire when pressed |
+  | *itemTargetKey* | an optional target for the action |
+
+  @extends SC.View
+  @since SproutCore 1.0
+*/
+SC.SegmentedView = SC.View.extend(SC.Control,
+/** @scope SC.SegmentedView.prototype */ {
+  
+  styleClass: 'sc-segmented-view',
+  
+  /**
+    The value of the segmented view.
+    
+    The SegmentedView's value will always be the value of the currently
+    selected button.  Setting this value will change the selected button. 
+    If you set this value to something that has no matching button, then
+    no buttons will be selected.
+    
+    @field {Object}
+  */
+  value: null,
+
+  /**
+    Set to YES to enabled the segmented view, NO to disabled it.
+  */
+  isEnabled: YES, 
+
+  /**
+    If YES, clicking a selected button again will deselect it, setting the
+    segmented views value to null.  Defaults to NO.
+  */
+  allowsEmptySelection: NO,  
+  
+  /**
+    If YES, then clicking on a tab will not deselect the other segments, it
+    will simply add or remove it from the selection.
+  */
+  allowsMultipleSelection: NO,
+
+  /**
+    If YES, titles will be localized before display.
+  */
+  localize: YES,
+  
+  /**
+    Change the layout direction to make this a vertical set of tabs instead
+    of horizontal ones.
+  */
+  layoutDirection: SC.LAYOUT_HORIZONTAL,
+  
+  // ..........................................................
+  // SEGMENT DEFINITION
+  //
+   
+  /**
+    The array of items to display.  This can be a simple array of strings,
+    objects or hashes.  If you pass objects or hashes, you must also set the
+    various itemKey properties to tell the SegmentedView how to extract the
+    information it needs.
+    
+    @property {Array}
+  */
+  items: [],
+
+  /** 
+    The key that contains the title for each item.
+    
+    @property {String}
+  */
+  itemTitleKey: null,
+  
+  /** 
+    The key that contains the value for each item.
+    
+    @property {String}
+  */
+  itemValueKey: null,
+  
+  /** 
+    A key that determines if this item in particular is enabled.  Note if the
+    control in general is not enabled, no items will be enabled, even if the
+    item's enabled property returns YES.
+    
+    @property {String}
+  */
+  itemIsEnabledKey: null,
+
+  /** 
+    The key that contains the icon for each item.  If omitted, no icons will
+    be displayed.
+    
+    @property {String}
+  */
+  itemIconKey: null,
+
+  /** 
+    The key that contains the desired width for each item.  If omitted, the
+    width will autosize.
+  
+    @property {String}
+  */
+  itemWidthKey: null,
+  
+  /** 
+    The key that contains the action for this item.  If defined, then 
+    selecting this item will fire the action in addition to changing the 
+    value.  See also itemTargetKey.
+    
+    @property {String}
+  */
+  itemActionKey: null,
+
+  /** 
+    The key that contains the target for this item.  If this and itemActionKey
+    are defined, then this will be the target of the action fired. 
+    
+    @property {String}
+  */
+  itemTargetKey: null,
+
+  /** 
+    The key that contains the key equivalent for each item.  If defined then
+    pressing that key equivalent will be like selecting the tab.  Also, 
+    pressing the Alt or Option key for 3 seconds will display the key 
+    equivalent in the tab.
+  */
+  itemKeyEquivalentKey: null,
+
+  /**
+    The array of itemKeys that will be searched to build the displayItems
+    array.  This is used internally but the class.  You will not generally
+    need to access or edit this array.
+    
+    @property {Array}
+  */
+  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey'.w(),
+  
+  /**
+    This computed property is generated from the items array based on the 
+    itemKey properties that you set.  The return value is an array of arrays
+    that contain private information used by the SegmentedView to render. 
+    
+    You will not generally need to access or edit this property.
+    
+    @property {Array}
+  */
+  displayItems: function() {
+    var items = this.get('items'), loc = this.get('localize') ;
+    var keys=null, itemType, cur ;
+    var ret = [], max = items.get('length'), idx, item ;
+    var fetchKeys = SC._segmented_fetchKeys;
+    var fetchItem = SC._segmented_fetchItem;
+    
+    // loop through items and collect data
+    for(idx=0;idx<max;idx++) {
+      item = items.objectAt(idx) ;
+      if (SC.none(item)) continue; //skip is null or undefined
+
+      // if the item is a string, build the array using defaults...
+      itemType = SC.typeOf(item);
+      if (itemType === SC.T_STRING) {
+        cur = [item.humanize().titleize(), item, YES, null, null, idx] ;
+        
+      // if the item is not an array, try to use the itemKeys.
+      } else if (itemType !== SC.T_ARRAY) {
+        
+        // get the itemKeys the first time
+        if (keys===null) {
+          keys = this.itemKeys.map(fetchKeys,this);
+        }
+        
+        // now loop through the keys and try to get the values on the item
+        cur = keys.map(fetchItem, item);
+        cur[cur.length] = idx; // save current index
+        
+        // special case 1...if title key is null, try to make into string
+        if (!keys[0] && item.toString) cur[0] = item.toString();
+        
+        // special case 2...if value key is null, use item itself
+        if (!keys[1]) cur[1] = item;
+        
+        // special case 3...if isEnabled is null, default to yes.
+        if (!keys[2]) cur[2] = YES ; 
+      }
+      
+      // finally, be sure to loc the title if needed
+      if (loc && cur[0]) cur[0] = cur[0].loc();
+      
+      // add to return array
+      ret[ret.length] = cur;
+    }
+    
+    // all done, return!
+    return ret ;
+  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
+  
+  /** If the items array itself changes, add/remove observer on item... */
+  itemsDidChange: function() { 
+    if (this._items) {
+      this._items.removeObserver('[]',this,this.itemContentDidChange) ;
+    } 
+    this._items = this.get('items') ;
+    if (this._items) {
+      this._items.addObserver('[]', this, this.itemContentDidChange) ;
+    }
+    this.itemContentDidChange();
+  }.observes('items'),
+  
+  /** 
+    Invoked whenever the item array or an item in the array is changed.  This method will reginerate the list of items.
+  */
+  itemContentDidChange: function() {
+    this.notifyPropertyChange('displayItems');
+  },
+  
+  init: function() {
+    sc_super();
+    this.itemsDidChange() ;
+  },
+
+  /** @private the first time updateDisplay is run, if this is NO, it will
+   not generate the display items.  This is set to YES in prepareDisplay. */
+  _seg_needsFirstDisplay: NO,
+  
+  // ..........................................................
+  // RENDERING/DISPLAY SUPPORT
+  // 
+  
+  displayProperties: ['displayItems', 'value', 'activeIndex'],
+  
+  prepareDisplay: function() {
+    var ret = sc_super() ;
+    this.$().addClass(this.get('layoutDirection'));  
+    this._seg_needsFirstDisplay = YES ;
+  },
+  
+  updateDisplay: function() { 
+    sc_super();
+    
+    // collect some data 
+    var items = this.get('displayItems');
+    
+    // save and set this to NO for future calls
+    var needsFirstDisplay = this._seg_needsFirstDisplay;
+    this._seg_needsFirstDisplay = NO ;
+    
+    // regenerate the buttons only if the new display items differs from the
+    // last cached version of it needsFirstDisplay is YES.
+    var last = this._seg_displayItems;
+    if ((!last && needsFirstDisplay) || (items !== last)) {
+      this._seg_displayItems = items; // save for future
+      this.renderDisplayItems(items) ;
+    }
+
+    // update selection and active state
+    var activeIndex = this.get('activeIndex');
+    var value = this.get('value');
+    var isArray = SC.isArray(value);
+    if (isArray && value.get('length')===1) {
+      value = value.objectAt(0); isArray = NO ;
+    }
+    var names = {}; // reuse
+    
+    var loc = items.length, cq = this.$('a.sc-segment'), item;
+    while(--loc>=0) {
+      item = items[loc];
+      names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
+      names.active = (activeIndex === loc);
+      SC.$(cq.get(loc)).setClass(names);
+    }
+    names = items = value = items = null; // cleanup
+    
+  },
+  
+  /**
+    Actually generates the segment HTML for the display items.  This method 
+    is called the first time a view is constructed and any time the display
+    items change thereafter.  This will construct the HTML but will not set
+    any "transient" states such as the global isEnabled property or selection.
+  */
+  renderDisplayItems: function(items) {
+    
+    // first build HTML for items
+    var html = items.map(function(item, index) {
+      var title = item[0], icon = item[3], url, className;
+      if (icon) {
+        url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+        className = (url === icon) ? '' : icon ;
+        icon = '<img src="%@" alt="" class="icon %@" />'.fmt(url,className);
+      } else icon = '';
+      
+      return '<a href="javascript:;" class="sc-segment sc-middle-segment" role="tab"><span class="sc-button-inner"><label class="sc-button-label">%@%@</label></span></a>'.fmt(icon, title);
+    }).join('');    
+    
+    // now generate said HTML and then fixup class names
+    var cq = this.$().html(html).find('a.sc-segment'), hasIcon,
+      max = cq.length, names = {}, last = max-1, idx, item, width,tmp,tot=0;
+    for(idx=0;idx<max;idx++) {
+      item = items[idx];
+      names.disabled = !item[2] ; //add disabled if item is disabled
+      names['sc-last-segment'] = (idx===last);
+      names['sc-first-segment'] = (idx===0);
+      names['sc-middle-segment'] = (idx!==0) && (idx!==last);
+
+      // either get the width or autodetect from label
+      tmp = SC.$(cq.get(idx));
+      if (item[4]) {
+        width = item[4] ;
+      } else { 
+        tmp.css('width', 100000) ; //tmp set long to get full width of label..
+        width = tmp.find('label').get(0).offsetWidth;
+      }
+      tmp.setClass(names).css('width', width);
+
+      // collect total width
+      tot += tmp.get(0).offsetWidth;
+    }
+    
+    // next, we need to center the views.  pick a new left and change the 
+    // offset margin.  The CSS sets the left side to 50% so this will perma-
+    // center the content.
+    var left = 0-Math.floor(tot/2) ;
+    for(idx=0;idx<max;idx++) {
+      tmp = SC.$(cq.get(idx));
+      tmp.css('margin-left', left);
+      left += tmp.get(0).offsetWidth;
+    }
+    
+    cq = tmp = names = null; // do some cleanup
+    
+  },
+  
+  // ..........................................................
+  // EVENT HANDLING
+  // 
+  
+  /** 
+    Determines the index into the displayItems array where the passed mouse
+    event occurred.
+  */
+  displayItemIndexForEvent: function(evt) {
+    var elem = SC.$(evt.target) ;
+    if (!elem || elem===document) return -1; // nothing found
+
+    // start at the target event and go upwards until we reach either the 
+    // root responder or find an anchor.sc-segment.
+    var root = this.$(), match = null ;
+    while(!match && (elem.length>0) && (elem.get(0)!==root.get(0))) {
+      if (elem.hasClass('sc-segment') && elem.attr('tagName')==='A') {
+        match = elem;
+      } else elem = elem.parent();
+    }
+    
+    elem = root = null;
+    
+    // if a match was found, return the index of the match in subtags
+    return (match) ? this.$('a.sc-segment').index(match) : -1;
+  },
+  
+  mouseDown: function(evt) {
+    if (!this.get('isEnabled')) return YES; // nothing to do
+    var idx = this.displayItemIndexForEvent(evt);
+    
+    // if mouse was pressed on a button, then start detecting pressed events
+    if (idx>=0) {
+      this._isMouseDown = YES ;
+      this.set('activeIndex', idx);
+    }
+    
+    return YES ;
+  },
+  
+  mouseUp: function(evt) {
+    var idx = this.displayItemIndexForEvent(evt);
+    
+    // if mouse was pressed on a button then detect where we where when we
+    // release and use that one.
+    if (this._isMouseDown && (idx>=0)) this.triggerItemAtIndex(idx);
+    
+    // cleanup
+    this._isMouseDown = NO ;
+    this.set('activeIndex', -1);
+    return YES ;
+  },
+  
+  mouseMoved: function(evt) {
+    var idx = this.displayItemIndexForEvent(evt);
+    if (this._isMouseDown) this.set('activeIndex', idx);
+    return YES;
+  },
+  
+  mouseOver: function(evt) {
+    // if mouse was pressed down initially, start detection again
+    var idx = this.displayItemIndexForEvent(evt);
+    if (this._isMouseDown) this.set('activeIndex', idx);
+    return YES;
+  },
+  
+  mouseOut: function(evt) {
+    // if mouse was down, hide active index
+    if (this._isMouseDown) this.set('activeIndex', -1);
+    return YES ;
+  },
+  
+  /** 
+    Simulates the user clicking on the segment at the specified index. This
+    will update the value if possible and fire the action.
+  */
+  triggerItemAtIndex: function(idx) {
+    var items = this.get('displayItems') ;
+    var item = items.objectAt(idx);
+    if (!item[2]) return this; // nothing to do!
+
+    var empty = this.get('allowsEmptySelection');
+    var mult = this.get('allowsMultipleSelection');
+    
+    // get new value... bail if not enabled
+    var sel = item[1];
+    var value = this.get('value') ;
+    if (!SC.isArray(value)) value = [value]; // force to array
+    
+    // if we do not allow multiple selection, either replace the current
+    // selection or deselect it
+    if (!mult) {
+      // if we allow empty selection and the current value is the same as
+      // the selected value, then deselect it.
+      if (empty && (value.get('length')===1) && (value.objectAt(0)===sel)){
+        value = [];
+      
+      // otherwise, simply replace the value.
+      } else value = [sel] ;
+      
+    // if we do allow multiple selection, then add or remove item to the
+    // array.
+    } else {
+      if (value.indexOf(sel) >= 0) {
+        if (value.get('length')>1 || (value.objectAt(0)!==sel) || empty) {
+          value = value.without(sel);
+        }
+      } else value = value.concat([sel]) ;
+    }
+    
+    // normalize back to non-array form
+    switch(value.get('length')) {
+      case 0:
+        value = null;
+        break;
+      case 1:
+        value = value.objectAt(0);
+        break;
+      default:
+        break;
+    }
+    
+    // set the new value
+    this.set('value', value);
+    
+    // also, trigger target if needed.
+    var actionKey = this.get('itemActionKey');
+    var targetKey = this.get('itemTargetKey');
+    var action, target = null;
+    var resp = this.getPath('pane.rootResponder');
+    if (actionKey && (item = this.get('items').objectAt(item[5]))) {
+      // get the source item from the item array.  use the index stored...
+      action = item.get ? item.get(actionKey) : item[actionKey];
+      if (targetKey) {
+        target = item.get ? item.get(targetKey) : item[targetKey];
+      }
+      
+      if (resp) resp.sendAction(action, target, this, this.get('pane'));
+    }
+    
+    // if an action/target is defined on self use that also
+    action =this.get('action');
+    if (action && resp) {
+      resp.sendAction(action, this.get('target'), this, this.get('pane'));
+    }
+  }
+    
+}) ;
+
+// Helpers defined here to avoid creating lots of closures...
+SC._segmented_fetchKeys = function(k) { return this.get(k); };
+SC._segmented_fetchItem = function(k) { 
+  if (!k) return null;
+  return this.get ? this.get(k) : this[k]; 
+};
+
+
+
+
