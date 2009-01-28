@@ -145,7 +145,7 @@ SC.RunLoop = SC.RunLoop.extend(
       if (this._timeoutAt !== nextTimeoutAt) { // need to reschedule
         if (this._timeout) clearTimeout(this._timeout); // clear existing...
         // reschedule
-        var delay = nextTimeoutAt - Date.now();
+        var delay = Math.max(0, nextTimeoutAt - Date.now());
         this._timeout = setTimeout(this._timeoutDidFire, delay);
         this._timeoutAt = nextTimeoutAt ;
       }
@@ -168,3 +168,5 @@ SC.RunLoop = SC.RunLoop.extend(
   }
   
 });
+
+SC.RunLoop.currentRunLoop = SC.RunLoop.create();

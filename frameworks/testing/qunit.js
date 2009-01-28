@@ -283,6 +283,7 @@ function synchronize(callback) {
 }
 
 function process() {
+  window.config = config ;
 	while(config.queue.length && !config.blocking) {
 		config.queue.shift()();
 	}

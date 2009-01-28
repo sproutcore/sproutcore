@@ -320,7 +320,7 @@ SC.Timer = SC.Object.extend(
     @returns {SC.Timer} The receiver
   */
   invalidate: function() {
-    this.bringPropertyChanges();
+    this.beginPropertyChanges();
     this.set('isValid', NO);
     SC.RunLoop.currentRunLoop.cancelTimer(this);
     this.action = this.target = null ; // avoid memory leaks
@@ -342,7 +342,9 @@ SC.Timer = SC.Object.extend(
   fire: function() {
 
     // this will cause the fireTime to recompute
-    var last = this.set('lastFireTime', Date.now());
+    var last = Date.now();
+    this.set('lastFireTime', last);
+
     var next = this.get('fireTime');
 
     // now perform the fire action unless paused.
@@ -361,27 +363,33 @@ SC.Timer = SC.Object.extend(
     to change how the timer fires its action.
   */
   performAction: function() {
+    var typeOfAction = SC.typeOf(this.action);
+    
     // if the action is a function, just try to call it.
-    if (SC.typeOf(this.action) == SC.T_FUNCTION) {
+    if (typeOfAction == SC.T_FUNCTION) {
       this.action.call((this.target || this), this) ;
 
     // otherwise, action should be a string.  If it has a period, treat it
     // like a property path.
-    } else if (this.action.indexOf('.') >= 0) {
-      var path = this.action.split('.') ;
-      var property = path.pop() ;
+    } else if (typeOfAction === SC.T_STRING) {
+      if (this.action.indexOf('.') >= 0) {
+        var path = this.action.split('.') ;
+        var property = path.pop() ;
 
-      var target = SC.objectForPropertyPath(path, window) ;
-      var action = target.get ? target.get(property) : target[property];
-      if (action && SC.typeOf(action) == SC.T_FUNCTION) {
-        action.call(target, this) ;
+        var target = SC.objectForPropertyPath(path, window) ;
+        var action = target.get ? target.get(property) : target[property];
+        if (action && SC.typeOf(action) == SC.T_FUNCTION) {
+          action.call(target, this) ;
+        } else {
+          throw '%@: Timer could not find a function at %@'.fmt(this, this.action) ;
+        }
+
+      // otherwise, try to execute action direction on target or send down
+      // responder chain.
       } else {
-        throw '%@: Timer could not find a function at %@'.fmt(this, this.action) ;
+        SC.RootResponder.responder.sendAction(this.action, this.target, this);
       }
-
-    // otherwise, try to execute action direction on target or send down
-    // responder chain.
-    } else SC.RootResponder.responder.sendAction(this.action, this.target, this) ;
+    }
   },
   
   init: function() {
@@ -485,8 +493,9 @@ SC.Timer = SC.Object.extend(
     if (this._timerQueueRunTime > now) return this ; // not expired!
     timers.push(this);  // add to queue.. fixup next. assume we are root.
     var next = this._timerQueueNext ;
-    this._timerQueueNext = next._timerQueuePrevious = null ;
-    return next.collectExpiredTimers(timers, now);
+    this._timerQueueNext = null;
+    if (next) next._timerQueuePrevious = null;
+    return next ? next.collectExpiredTimers(timers, now) : null; 
   }
   
 }) ;
@@ -523,9 +532,8 @@ SC.Timer.timerFromPool = function(props) {
   var timers = this._timerPool;
   if (!timers) timers = this._timerPool = [] ;
   var timer = timers.pop();
-  if (!timer) timer = this.create() ;
-  SC.mixin(timer, props);
-  return timer ;
+  if (!timer) timer = this.create();
+  return timer.reset(props) ;
 };
 
 /** 

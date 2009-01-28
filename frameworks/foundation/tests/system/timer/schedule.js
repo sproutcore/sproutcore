@@ -21,7 +21,7 @@ test("single timer should execute once and invalidate", function() {
   var checks = 10 ;
   var f = function f() {
     
-    if (fired.length == 0 && --checks > 0) {
+    if (fired.length === 0 && --checks > 0) {
       // wait(100, f);
       setTimeout(f, 100) ; 
       return ;
@@ -64,7 +64,11 @@ test("repeating timer with no limit should repeat until terminated", function() 
   var checks = 10 ;
   var f = function f() {
     
-    if (--checks < 0) equals(YES, NO, 'Check Count Exceeded') ;
+    if (--checks < 0) {
+      window.start();
+      equals(YES, NO, 'Check Count Exceeded') ;
+    }
+    
     if (runs > 0) {
       // wait(100, f) ; // wait until timer fires 4 times.
       setTimeout(f, 100) ;
@@ -103,7 +107,11 @@ test("repeating timer should terminate after expiration", function() {
   // have to be a little flexible about testing repeated loops like this.
   var checks = 10 ;
   var f = function f() {
-    if (--checks < 0) equals(YES, NO, 'Timer never invalidated :') ;
+    if (--checks < 0) {
+      window.start();
+      equals(YES, NO, 'Timer never invalidated :') ;
+    }
+    
     if ((checks > 0) && t.get('isValid')) {
       wait(100, f);
       setTimeout(f, 100) ;
@@ -126,20 +134,26 @@ test("scheduling multiple timers at the same time should cause them to fire at s
   
   var t1 = SC.Timer.schedule({
     target: this, 
-    action: function() { f1 = SC.RunLoop.currentRunLoop.get('startTime'); },
+    action: function() { 
+      f1 = SC.RunLoop.currentRunLoop.get('startTime'); 
+    },
     interval: 100
   });
   
   var t2 = SC.Timer.schedule({
     target: this, 
-    action: function() { f2 = SC.RunLoop.currentRunLoop.get('startTime'); },
+    action: function() { 
+      f2 = SC.RunLoop.currentRunLoop.get('startTime'); 
+    },
     interval: 100
   });
+
+  SC.RunLoop.end();
   
   // be lenient on execution time since we can't control the browser.
   var tries = 10 ;
   var f = function f() {
-    if ((f1 == 0 || f2 == 0) && --tries >= 0) {
+    if ((f1 === 0 || f2 === 0) && --tries >= 0) {
       // wait(100, f) ;
       setTimeout(f, 100) ;
       return ;
