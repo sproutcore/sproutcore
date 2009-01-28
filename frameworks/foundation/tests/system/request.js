@@ -8,7 +8,7 @@ var url, request, contents ;
 module("SC.Request", {
   
   setup: function() {
-    url = "/static/sproutcore/en/desktop/_src/desktop.platform/english.lproj/file_exists.json" ; // static_url("file_exists.json") ;
+    url = sc_static("file_exists.json"); //"/static/sproutcore/en/desktop/_src/desktop.platform/english.lproj/file_exists.json" ;
     request = SC.Request.getUrl(url) ;
     contents = null ;
   },
@@ -38,7 +38,9 @@ test("Test Asynchronous GET Request", function() {
   stop() ; // stops the test runner
   setTimeout( function(){
     ok(contents !== null) ;
-    equals('{"message": "Yay!"}', contents) ;
+    ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
+    
+    if (SC.$ok(contents)) equals('{"message": "Yay!"}', contents) ;
     window.start() ; // starts the test runner
   }, 1000);
 });
@@ -51,7 +53,8 @@ test("Test Synchronous GET Request", function() {
   contents = request.get("response");
   
   ok(contents !== null) ;
-  equals('{"message": "Yay!"}', contents) ;
+  ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
+  if (SC.$ok(contents)) equals('{"message": "Yay!"}', contents) ;
 });
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
@@ -66,7 +69,8 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
   stop() ; // stops the test runner
   setTimeout( function(){
     ok(contents !== null) ;
-    same({"message": "Yay!"}, contents) ;
+    ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
+    if (SC.$ok(contents)) same({"message": "Yay!"}, contents) ;
     window.start() ; // starts the test runner
   }, 1000);
 });
@@ -80,5 +84,6 @@ test("Test Synchronous GET Request, auto-deserializing JSON", function() {
   var contents = request.get("response");
   
   ok(contents !== null) ;
-  same({"message": "Yay!"}, contents) ;
+  ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
+  if (SC.$ok(contents)) same({"message": "Yay!"}, contents) ;
 });

@@ -5,6 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+/*global Q$ synchronize */
 // additional methods for use with qunit
 
 /**
@@ -16,6 +17,19 @@ function htmlbody(string) {
   synchronize(function() {
     var html = Q$(string) ;
     var body = Q$('body')[0];
+    
+    // first, find the first element with id 'htmlbody-begin'  if exists,
+    // remove everything after that to reset...
+    var begin = Q$('body #htmlbody-begin')[0];
+    if (!begin) {
+      begin = Q$('<div id="htmlbody-begin"></div>')[0];
+      body.appendChild(begin);
+    } else {
+      while(begin.nextSibling) body.removeChild(begin.nextSibling);
+    }
+    begin = null; 
+    
+    // now append new content
     html.each(function() { body.appendChild(this); });
   }) ;
 }
