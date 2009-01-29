@@ -4,8 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('application/root_responder');
-
 /**
   Order layer for regular Panels.  Panels appear in front of the main view, 
   but behind palettes, popups.

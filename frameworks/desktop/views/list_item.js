@@ -4,11 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('core') ;
-require('deprecated/views/classic_view') ;
-require('mixins/control');
-require('mixins/inline_editor_delegate');
-
 SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
 SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';

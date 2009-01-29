@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/mixins/collection_view_delegate') ;
+sc_require('mixins/collection_view_delegate') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;

@@ -3,8 +3,6 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('system/locale');
-
 // English Strings.
 SC.stringsFor('English', {
   "Invalid.CreditCard(%@)": "%@ is not a valid credit card number",
