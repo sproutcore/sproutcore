@@ -10,60 +10,9 @@ var CollectionTest, employees, anne, bob, alice, rachel, michael, barbara, richa
 //
 CollectionTest = SC.Object.create({
   
-  server: SC.Server.create({ prefix: ['CollectionTest'] }),
-  
   FIXTURES: []
   
 }) ;
-
-//
-//  fixtures stub
-//
-CollectionTest.FIXTURES = CollectionTest.FIXTURES.concat([
-  
-  { guid: '1', 
-    type: 'Employee', 
-    name: "Anne",
-    sex:  "Female"
-  },
-  
-  { guid: '2', 
-    type: 'Employee', 
-    name: "Bob",
-    sex:  "Male"
-  },
-  
-  { guid: '3', 
-    type: 'Employee', 
-    name: "Alice",
-    sex:  "Female"
-  },
-  
-  { guid: '4', 
-    type: 'Employee', 
-    name: "Rachel",
-    sex:  "Female"
-  },
-  
-  { guid: '5', 
-    type: 'Employee', 
-    name: "Michael",
-    sex:  "Male"
-  },
-  
-  { guid: '6', 
-    type: 'Employee', 
-    name: "Barbara",
-    sex:  "Female"
-  },
-  
-  { guid: '7', 
-    type: 'Employee', 
-    name: "Richard",
-    sex:  "Male"
-  }
-  
-]);
 
 //
 // model classes
@@ -72,10 +21,60 @@ CollectionTest.Employee = SC.Record.extend({
   
 }) ;
 
+
+//
+//  fixtures stub
+//
+CollectionTest.FIXTURES = CollectionTest.FIXTURES.concat([
+  
+  { guid: '1', 
+    recordType: CollectionTest.Employee,
+    name: "Anne",
+    sex:  "Female"
+  },
+  
+  { guid: '2', 
+    recordType: CollectionTest.Employee,
+    name: "Bob",
+    sex:  "Male"
+  },
+  
+  { guid: '3', 
+    recordType: CollectionTest.Employee,
+    name: "Alice",
+    sex:  "Female"
+  },
+  
+  { guid: '4', 
+    recordType: CollectionTest.Employee,
+    name: "Rachel",
+    sex:  "Female"
+  },
+  
+  { guid: '5', 
+    recordType: CollectionTest.Employee,
+    name: "Michael",
+    sex:  "Male"
+  },
+  
+  { guid: '6', 
+    recordType: CollectionTest.Employee,
+    name: "Barbara",
+    sex:  "Female"
+  },
+  
+  { guid: '7', 
+    recordType: CollectionTest.Employee,
+    name: "Richard",
+    sex:  "Male"
+  }
+  
+]);
+
 //
 // main.js stub
 //
-CollectionTest.server.preload(CollectionTest.FIXTURES) ;
+SC.Store.updateRecords(CollectionTest.FIXTURES) ;
 
 module("Test basic functions of a collection", {
   

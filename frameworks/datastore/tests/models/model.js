@@ -10,55 +10,9 @@ var ModelTest, todoList1, todoList2, todo1, todo2, todo3 ; // global variables
 //
 ModelTest = SC.Object.create({
 
-  server: SC.Server.create({ prefix: ['ModelTest'] }),
-
   FIXTURES: []
   
 }) ;
-
-//
-//  fixtures stub
-//
-ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
-  
-  {
-    guid: '1', 
-    type: 'Todo', 
-    name: "Something to do",
-    todoList: '1' // the guid of the todo list object todo is related to
-  },
-  
-  {
-    guid: '2', 
-    type: 'Todo', 
-    name: "Something else to do",
-    todoList: '1'
-  },
-  
-  {
-    guid: '3', 
-    type: 'Todo', 
-    name: "Gee, I'm busy.",
-    todoList: '2'
-  }
-  
-]);
-
-ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
-  
-  {
-    guid: '1',
-    type: 'TodoList', 
-    name: "My List"
-  },
-  
-  {
-    guid: '2',
-    type: 'TodoList', 
-    name: "My List 2"
-  }
-  
-]);
 
 //
 // model classes
@@ -75,10 +29,55 @@ ModelTest.TodoList = SC.Record.extend({
   
 });
 
+
+//
+//  fixtures stub
+//
+ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
+  
+  {
+    guid: '1', 
+    recordType: ModelTest.Todo, 
+    name: "Something to do",
+    todoList: '1' // the guid of the todo list object todo is related to
+  },
+  
+  {
+    guid: '2', 
+    recordType: ModelTest.Todo, 
+    name: "Something else to do",
+    todoList: '1'
+  },
+  
+  {
+    guid: '3', 
+    recordType: ModelTest.Todo, 
+    name: "Gee, I'm busy.",
+    todoList: '2'
+  }
+  
+]);
+
+ModelTest.FIXTURES = ModelTest.FIXTURES.concat([
+  
+  {
+    guid: '1',
+    recordType: ModelTest.TodoList, 
+    name: "My List"
+  },
+  
+  {
+    guid: '2',
+    recordType: ModelTest.TodoList, 
+    name: "My List 2"
+  }
+  
+]);
+
 //
 // main.js stub
 //
-ModelTest.server.preload(ModelTest.FIXTURES) ;
+SC.Store.updateRecords(ModelTest.FIXTURES);
 
 module("Test model comparisons with numeric guids", {
   
@@ -179,7 +178,7 @@ test("Todos should be collectable using guids", function() {
 });
 
 test("toString() should show model class name", function() {
-  var re = /^ModelTest.Todo/;
+  var re = /^ModelTest\.Todo/;
   var str = todo1.toString();
   ok( str.match(re), "Todo 1 toString() should start with ModelTest.Todo, actually starts with " + str);
 });
@@ -191,53 +190,9 @@ var ModelTest2 ; // global variables
 //
 ModelTest2 = SC.Object.create({
   
-  server: SC.Server.create({ prefix: ['ModelTest2'] }),
-  
   FIXTURES: []
   
 });
-
-//
-//  fixtures stub
-//
-ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
-  
-  {
-    guid: '1', 
-    type: 'Todo', 
-    name: "Something to do",
-    todoList: '1' // the guid of the todo list object todo is related to
-  },
-  
-  {
-    guid: '2', 
-    type: 'Todo', 
-    name: "Something else to do",
-    todoList: '1'
-  },
-  
-  {
-    guid: '3', 
-    type: 'Todo', 
-    name: "Gee, I'm busy.",
-    todoList: '2'
-  }
-  
-]);
-
-ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
-  
-  { guid: '1',
-    type: 'TodoList', 
-    name: "My List"
-  },
-  
-  { guid: '2',
-    type: 'TodoList', 
-    name: "My List 2"
-  }
-  
-]);
 
 //
 // model classes
@@ -255,9 +210,53 @@ ModelTest2.TodoList = SC.Record.extend({
 });
 
 //
+//  fixtures stub
+//
+ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
+  
+  {
+    guid: '1', 
+    recordType: ModelTest2.Todo, 
+    name: "Something to do",
+    todoList: '1' // the guid of the todo list object todo is related to
+  },
+  
+  {
+    guid: '2', 
+    recordType: ModelTest2.Todo, 
+    name: "Something else to do",
+    todoList: '1'
+  },
+  
+  {
+    guid: '3', 
+    recordType: ModelTest2.Todo, 
+    name: "Gee, I'm busy.",
+    todoList: '2'
+  }
+  
+]);
+
+ModelTest2.FIXTURES = ModelTest2.FIXTURES.concat([
+  
+  { guid: '1',
+    recordType: ModelTest2.TodoList, 
+    name: "My List"
+  },
+  
+  { guid: '2',
+    recordType: ModelTest2.TodoList, 
+    name: "My List 2"
+  }
+  
+]);
+
+
+
+//
 // main.js stub
 //
-ModelTest2.server.preload(ModelTest2.FIXTURES) ;
+SC.Store.updateRecords(ModelTest2.FIXTURES);
 
 module("Test model comparisons with string guids", {
   
