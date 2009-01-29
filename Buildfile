@@ -19,10 +19,10 @@ config :foundation, :required => [:costello]
 config :datastore,  :required => [:foundation, :costello]
 
 config :desktop,    
-  :required => [:costello, :datastore, :foundation, :core_query]
+  :required => [:costello, :datastore, :foundation]
 
 config :mobile,    
-  :required => [:costello, :datastore, :foundation, :core_query]
+  :required => [:costello, :datastore, :foundation]
 
 config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
