@@ -51,7 +51,9 @@ SC.DelegateSupport = {
   invokeDelegateMethod: function(delegate, methodName, args) {
     args = SC.$A(arguments); args = args.slice(2, args.length) ;
     if (!delegate || !delegate[methodName]) delegate = this ;
-    return delegate[methodName].apply(delegate, args) ;
+    
+    var method = delegate[methodName];
+    return method ? method.apply(delegate, args) : null;
   },
   
   /**
@@ -62,7 +64,7 @@ SC.DelegateSupport = {
     @param {String} key the property to get.
   */
   getDelegateProperty: function(delegate, key) {
-    return (delegate && (delegate[key] != null)) ? delegate.get(key) : this.get(key) ;
+    return (delegate && (delegate[key] !== undefined)) ? delegate.get(key) : this.get(key) ;
   }
   
 };

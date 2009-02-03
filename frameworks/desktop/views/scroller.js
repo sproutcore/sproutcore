@@ -152,10 +152,17 @@ SC.ScrollerView = SC.View.extend({
     from updating.
   */
   scrollDidChange: function() {
-    this.invokeLater(this._scroll_scrollDidChange, 1);
+    // schedule scrollDidChange to execute later if not already scheduled...
+    if (!this._scrollTimer) {
+      SC.RunLoop.begin();
+      this._scrollTimer = this.invokeLater(this._scroll_scrollDidChange, 1);
+      SC.RunLoop.end();
+    }
   },
   
   _scroll_scrollDidChange: function() {
+    this._scrollTimer = null; // clear so we can fire again
+    
     if (!this.get('isEnabled')) return ; // nothing to do.
     var dir = this.get('layoutDirection');
     var loc = 0;

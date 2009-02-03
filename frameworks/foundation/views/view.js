@@ -1496,6 +1496,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       if (ret[x]===0) ret[x]=null;
     }
 
+    // convert any numbers into a number + "px".
+    for(var key in ret) {
+      var value = ret[key];
+      if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
+    }
     return ret ;
   }.property('layout').cacheable(),
 
@@ -1605,9 +1610,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     happen once at the end of the run loop.
   */
   updateDisplayLayout: function() {
-    // console.log('updateDisplayLayout');
-    var $ = this.$(), layoutStyle = this.get('layoutStyle'); // get style
-    $.css(layoutStyle) ; // todo: add animation here.
+    // apply layout settings manually.  Do not use CoreQuery css() method
+    // because it is too slow.  Since this is used to handle scrolling, it 
+    // is important to make it very fast...
+    var $ = this.$(), layoutStyle = this.get('layoutStyle'), key, value;
+    $.each(function() {
+      for(var key in layoutStyle) {
+        value = layoutStyle[key];  
+        this.style[key] = value ;
+      }
+    });
+    //$.css(layoutStyle) ; // todo: add animation here.
   },
   
   /**
