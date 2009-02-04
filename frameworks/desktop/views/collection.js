@@ -1979,11 +1979,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var contentLength = content.get('length');
     var top = this._indexOfSelectionTop();
 
-    while (proposedIndex > 0 &&
+    while (proposedIndex >= 0 &&
            this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
       proposedIndex--;
     }
-    return (proposedIndex > 0) ? proposedIndex : top;
+    return (proposedIndex >= 0) ? proposedIndex : top;
   },
 
   // if content value is editable and we have one item selected, then edit.
