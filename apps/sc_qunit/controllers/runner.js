@@ -173,7 +173,7 @@ QUnit.runnerController = SC.Object.create({
     // If test passed, go onto the next test.
     if (testState == QUnit.TEST_PASSED) {
       var tests = this.get('arrangedObjects') || [];
-      var test = this.get('selectedTest') || tests.first();
+      var test = this.get('selectedTest') || tests[0];
       
       // find the idx of the next item.
       var idx = tests.indexOf(test) ;

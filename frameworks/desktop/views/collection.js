@@ -371,7 +371,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   /**
     Enables keyboard-based navigate, deletion, etc. if set to true.
   */
-  acceptsFirstResponder: false,
+  acceptsFirstResponder: NO,
   
   /**
     If your layout uses a grid or horizontal-based layout, then make sure this 
@@ -1400,7 +1400,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items.first());
+      this.scrollToContent(items[0]);
       this.selectItems(items);
     }
     
@@ -1464,7 +1464,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items.first());
+      this.scrollToContent(items[0]);
       this.selectItems(items);
     }
     
@@ -1897,8 +1897,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var contentLowerBounds = 0;
     var contentUpperBounds = (content.get('length') - 1);
 
-    var selectionBeginIndex = content.indexOf(selection.first());
-    var selectionEndIndex   = content.indexOf(selection.last());
+    var selectionBeginIndex = content.indexOf(selection[0]);
+    var selectionEndIndex   = content.indexOf(selection[selection.length-1]);
 
     var previousMouseDownIndex = content.indexOf(this._previousMouseDownContent);
     // _previousMouseDownContent couldn't be found... either it hasn't been set yet or the record has been deleted by the user

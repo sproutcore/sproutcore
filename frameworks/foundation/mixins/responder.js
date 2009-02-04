@@ -121,7 +121,7 @@ SC.Responder = {
 
     // if this is a command key, try to do something about it.
     if (cmd) {
-      var methodName = SC.MODIFIED_KEY_BINDINGS[cmd] || SC.BASE_KEY_BINDINGS[cmd.split('_').last()];
+      var methodName = SC.MODIFIED_KEY_BINDINGS[cmd] || SC.BASE_KEY_BINDINGS[cmd.split('_').pop()];
       if (methodName) {
         var target = this, pane = this.get('pane'), handler = null;
         while(target && !(handler = target.tryToPerform(methodName, event))){

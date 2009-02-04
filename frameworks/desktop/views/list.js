@@ -73,6 +73,8 @@ SC.ListView = SC.CollectionView.extend(
   */
   layout: SC.merge(SC.FILL_WIDTH, SC.FILL_HEIGHT),
   
+  acceptsFirstResponder: YES,
+  
   // ..........................................................
   // ROW HEIGHT SUPPORT
   // 

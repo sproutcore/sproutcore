@@ -23,7 +23,7 @@ Test.context("A grouped SC.SourceListView with its content set to a SC.Collectio
   "Item views should be the same width as the SC.CollectionView": function()
   {
     var widthOfFirstItemView = function() {
-      var itemView = testSourceListView.get('itemViews').first() ;
+      var itemView = testSourceListView.get('itemViews')[0] ;
       return (itemView) ? itemView.get('frame').width : null ;
     } ;
     
@@ -37,7 +37,7 @@ Test.context("A grouped SC.SourceListView with its content set to a SC.Collectio
 	"Group views should be the same width as the SC.CollectionView": function()
 	{
 	    var widthOfFirstGroupView = function() {
-	      var groupView = testSourceListView.get('groupViews').first() ;
+	      var groupView = testSourceListView.get('groupViews')[0] ;
 	      return (groupView) ? groupView.get('frame').width : null ;
 	    } ;
 	    
@@ -84,7 +84,7 @@ Test.context("A grouped SC.SourceListView with its content set to a SC.Collectio
   "Item views should be the same width as the SC.CollectionView": function()
   {
     var widthOfFirstItemView = function() {
-      var itemView = testSourceListView.get('itemViews').first() ;
+      var itemView = testSourceListView.get('itemViews')[0] ;
       return (itemView) ? itemView.get('frame').width : null ;
     } ;
     
@@ -98,7 +98,7 @@ Test.context("A grouped SC.SourceListView with its content set to a SC.Collectio
 	"Group views should be the same width as the SC.CollectionView": function()
 	{
     var widthOfFirstGroupView = function() {
-      var groupView = testSourceListView.get('groupViews').first() ;
+      var groupView = testSourceListView.get('groupViews')[0] ;
       return (groupView) ? groupView.get('frame').width : null ;
     } ;
     
