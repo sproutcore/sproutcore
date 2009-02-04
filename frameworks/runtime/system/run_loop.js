@@ -50,7 +50,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   beginRunLoop: function() {
-    this._start = new Date().getTime() ; // can't use Date.now() in costello 
+    this._start = new Date().getTime() ; // can't use Date.now() in runtime 
     return this ; 
   },
 

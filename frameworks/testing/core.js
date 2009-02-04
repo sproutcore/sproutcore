@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-// these compiler directives are normally defined in costello's core.  But
+// these compiler directives are normally defined in runtime's core.  But
 // since the testing framework needs to be totally independent, we redefine
 // them here also.
 var require = require || function sc_require() {};

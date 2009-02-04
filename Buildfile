@@ -14,15 +14,15 @@ config :all,
   :test_required  => '/sproutcore/testing',
   :debug_required => ['/sproutcore/debug']
   
-config :costello,   :required => []
-config :foundation, :required => [:costello]
-config :datastore,  :required => [:foundation, :costello]
+config :runtime,   :required => []
+config :foundation, :required => [:runtime]
+config :datastore,  :required => [:foundation, :runtime]
 
 config :desktop,    
-  :required => [:costello, :datastore, :foundation]
+  :required => [:runtime, :datastore, :foundation]
 
 config :mobile,    
-  :required => [:costello, :datastore, :foundation]
+  :required => [:runtime, :datastore, :foundation]
 
 config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
