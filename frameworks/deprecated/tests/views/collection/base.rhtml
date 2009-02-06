@@ -114,7 +114,7 @@ Test.context("A SC.CollectionView with it's content set to a SC.CollectionContro
   "Should update it's item views as it's controller is updated": function()
    {
      var valueOfFirstItemView = function() {
-       var itemView = testCollectionView.get('itemViews').first() ;
+       var itemView = testCollectionView.get('itemViews')[0] ;
        return (itemView) ? itemView.get('content').get('guid') : null ;
      } ;
      

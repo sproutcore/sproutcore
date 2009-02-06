@@ -219,7 +219,7 @@ SC.Array = {
     @returns {Array}
   */
   without: function(value) {
-    // array:indexOf() is not available in costello
+    // array:indexOf() is not available in runtime
     var found = false ;
     for (var idx=0, len=this.length; idx<len; idx++) {
       if (this[idx] === value) {

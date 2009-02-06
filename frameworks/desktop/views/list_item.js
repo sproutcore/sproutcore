@@ -102,15 +102,16 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
   
   contentPropertyDidChange: function() {
     if (this.get('isEditing')) this.discardEditing() ;
-    this.render() ;  
+    this.displayDidChange();
   },
   
   
   /**
-    Regenerates the innerHTML for this view and updates it if necessary.
+    Fills the passed html-array with strings that can be joined to form the
+    innerHTML of the receiver element.  Also populates an array of classNames
+    to set on the outer element.
   */
-  render: function() {
-    var html = [] ;
+  render: function(html, classNames) {
     var content = this.get('content') ;
     var del = this.displayDelegate ;
     
@@ -146,21 +147,33 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     if (actionClassName) {
        html.push(this.renderActionHtml(actionClassName));
     }
-    this.setClassName('sc-has-action', actionClassName) ;
+    if (actionClassName) classNames.push('sc-has-action')
     
     // handle branch
     if (this.getDelegateProperty(del, 'hasContentBranch')) {
       var branchKey = this.getDelegateProperty(del, 'contentIsBranchKey');
       var hasBranch = (branchKey && content && content.get) ? content.get(branchKey) : false ;
       html.push(this.renderBranchHtml(hasBranch));
-      this.setClassName('sc-has-branch', true) ;
-    } else this.setClassName('sc-has-branch', false) ;
+      classNames.push('sc-has-branch');
+    } ;
+  },
+
+  updateDisplay: function() {
+    // collect HTML + classNames
+    var html = [], classNames = this.styleClass.slice();
+    this.render(html, classNames);
     
+    var elem = this.get('rootElement');
     html = html.join('') ;
     if (html != this._lastRenderedHtml) {
       this._lastRenderedHtml = html ;
-      this.set('innerHTML', html) ;
+      elem.innerHTML = html ;
     }
+        
+    elem.className = classNames.join(' ');
+    elem = null; //avoid memory leak
+    
+    sc_super();
   },
   
   /**
@@ -510,7 +523,7 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      // force a refresh, otherwise the label will never be visible again
      // b/c its opacity is 0.
      this._lastRenderedHtml = null;
-     this.render() ;
+     this.displayDidChange();
    }   
   
 }) ;

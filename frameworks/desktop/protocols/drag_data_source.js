@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('desktop.platform/drag/drag') ;
+require('system/drag') ;
 
 
 /**
