@@ -113,3 +113,35 @@ test("guid should not parse to a number", function() {
   equals(YES, isNaN(parseInt(SC.guidFor(null), 0))) ;
   equals(YES, isNaN(parseInt(SC.guidFor(undefined), 0))) ;
 });
+
+module("Arrays", {
+	
+	setup: function() {
+	    array1 = ['a','b','c'] ;
+	    array1copy = array1 ;
+		array2 = ['1','2','3'];
+	    array2copy = ['1','2','3'] ;
+	}
+}) ;
+
+test("same array instance should have same guide every time", function(){
+	equals(SC.guidFor(array1), SC.guidFor(array1));
+	equals(SC.guidFor(array2), SC.guidFor(array2));
+});
+
+test("two array instances with same value, by assigning one to the other.", function() {
+	equals(SC.guidFor(array1), SC.guidFor(array1copy)) ;
+});
+
+test("two array instances with same value, by assigning the same value", function() {
+	ok(SC.guidFor(array2) !== SC.guidFor(array2copy)) ;
+});
+
+test("two instances with different value should have different guid", function() {
+  ok(SC.guidFor(array1) !==  SC.guidFor(array2)) ;
+  ok(SC.guidFor(array1copy) !==  SC.guidFor(array2copy)) ;
+});
+
+test("guid should not parse to a number", function() {
+  equals(YES, isNaN(parseInt(SC.guidFor(array1), 0))) ;
+});
