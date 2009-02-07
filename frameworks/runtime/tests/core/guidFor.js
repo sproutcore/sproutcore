@@ -1,6 +1,10 @@
-// ========================================================================
-// SC.guidFor Tests
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore Costello - Property Observing Library
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
 /*globals module test ok isObj equals expects */
 
 var objectA, objectB ; // global variables
@@ -94,6 +98,8 @@ test("true should have different guid than false", function() {
 });
 
 test("guid should not parse to a number", function() {
+  // CAJ: What is the extra '0' param here.  The format for this method is:
+  // equals(item1, item2, 'message describing test');
   equals(YES, isNaN(parseInt(SC.guidFor(true), 0))) ;
   equals(YES, isNaN(parseInt(SC.guidFor(false), 0))) ;
 });
@@ -133,7 +139,7 @@ test("two array instances with same value, by assigning one to the other.", func
 	equals(SC.guidFor(array1), SC.guidFor(array1copy)) ;
 });
 
-test("two array instances with same value, by assigning the same value", function() {
+test("two array instances with same value, by assigning the same value should not have same guid", function() {
 	ok(SC.guidFor(array2) !== SC.guidFor(array2copy)) ;
 });
 

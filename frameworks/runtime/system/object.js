@@ -120,6 +120,7 @@ SC._object_extend = function _object_extend(base, ext) {
         while(--pathLoc >= 0) {
           local = base._kvo_for(SC.keyFor('_kvo_local', paths[pathLoc]), SC.Set);
           local.add(key);
+          base._kvo_for('_kvo_observed_keys', SC.Set).add(paths[pathLoc]) ;
         }
 
       // handle computed properties

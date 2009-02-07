@@ -167,16 +167,13 @@ test("Binding value1 such that it will recieve only single values", function() {
 	bon1.destroy();
 });
 
-test("Single binding using notEmpty and notLessThan function.", function() {
+test("Single binding using notEmpty function.", function() {
 	bond = Bon1.create ({
-	  value2Binding: SC.Binding.from("TestNamespace.bon2.val2").notLessThan(10),
-	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr")//.notEmpty("(empty)")
+	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null, "(empty)")
 	});
 	SC.Binding.flushPendingChanges();
-	bon2.set("var2", 9);
 	bon2.set("arr", []);
 	SC.Binding.flushPendingChanges();
-	equals(9, bond.get("value2"));
 	equals("(empty)",bond.get("array1"));
 });
 

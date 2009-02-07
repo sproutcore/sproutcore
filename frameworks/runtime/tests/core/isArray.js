@@ -1,9 +1,13 @@
-// ========================================================================
-// SC.isArray Tests
-// ========================================================================
-/*globals module test */
+// ==========================================================================
+// Project:   SproutCore Costello - Property Observing Library
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-var objectA,objectB,objectC; //global variables
+/*globals module test equals */
+
+var objectA, objectB, objectC, objectD, objectE; //global variables
 
 module("Array Check" , {
 	
@@ -24,6 +28,7 @@ test("should check if a given object is an array or not " ,function(){
 	equals(SC.isArray(objectE),false);
 });
 
+// CAJ: This should go into its own file.  makeArray.js
 module("Make Array ", {
   setup: function() {
     var objectA = [1,2,3,4,5] ;  
@@ -47,6 +52,9 @@ test("should return an array for the object passed ",function(){
 	ret = SC.makeArray(arrayA);
 	equals(SC.isArray(ret),true) ;
 });
+
+// CAJ: This should go into its own file.  keys.js
+module("SC.keys");
 
 test("should get a key array for a specified object ",function(){
 	var object1 = {};

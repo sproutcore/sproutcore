@@ -1,6 +1,10 @@
-// ========================================================================
-// SC.Observable Tests
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore Costello - Property Observing Library
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
 /*globals module test ok isObj equals expects */
 
 var object ; // global variables
@@ -168,6 +172,11 @@ module("Observable objects & object properties ", {
   
 });
 
+// CAJ:
+// it's not clear here what you are testing from your description.  make it 
+// clear you are testing the incrementProperty() and decrementProperty().
+// the way these test descriptions are written if someone sees them in the
+// test runner, they won't know what methods you are testing.
 test('should increment and decrement the value of a property',function(){
   	var newValue = object.incrementProperty('numberVal');
     equals(25,newValue);
@@ -176,23 +185,56 @@ test('should increment and decrement the value of a property',function(){
     equals(23,newValue);
 });
 
+// CAJ:
+// same as above.  you should mention the names of the method you are testing 
+// in the test description so that someone who is viewing the unit test 
+// results can tell what it is.
 test('should toggle with value of a property',function(){
   	equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal')); 
     equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
     equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));
 });
 
+// CAJ: This test doesn't make much sense.  It's testing the method you 
+// defines on the example object above.  You actually need to set the property
+// and verify that an observer does not fire on it when this function returns
+// false.
 test('should not notify the observers automatically',function(){
   	equals(NO,object.automaticallyNotifiesObserversFor('normal')); 
 });
 
-test("should get all the values for the keys",function(){
+// CAJ:  This is not how getEach should work.  In fact, that this works is 
+// probably a bug.  You should need to call:
+//   object.getEach('value', 'zeroValue');
+// to get the results you are testing for here.
+//
+// In fact, you should add another test to verify that calling 
+// object.getEach() with no params will return an empty array (since no keys
+// were passed)
+//
+test("getEach(): should get all the values for the keys",function(){
      var valueArray = object.getEach();
      equals(valueArray[0],'value');
      equals(valueArray[1],'zeroValue');
 });
 
-test("should add an observer",function(){
+// CAJ:  This test is wrong.  You should add an observer by passing the 
+// object and then the method you want invoked. For example:
+//
+//  object.addObserver('observedProperty', object, object.newObserver);  <-- no ()!
+//
+// then, to trigger the observer, you need to change the property value by 
+// using set:
+//
+//  object.set('observedProperty', 'beingObserved') ;
+//
+// calling set() on an object triggers the observer in addition to changing
+// the value.
+//
+// it looks like you test this properly belo actually (see 'should register 
+// an observer for a property')  so you could probably just remove this test.
+//
+test("addObserver(): should add an observer",function(){
 	object.addObserver('observedProperty',object,object.newObserver());
 	object.observedProperty = 'beingObserved';
 	equals(object.abnormal,'changedValueObserved') ;
@@ -223,19 +265,6 @@ test("should register an observer for a property", function() {
 	ObjectC.set('normal','newValue');
 	equals(ObjectC.normal1, 'newZeroValue');
 });
-
-test("should register an observer for a property - Special case of reduced property", function() {
-	
-});
-
-test("should register an observer for a property change for once or for the specified time interval", function() {
-	// ObjectC.observeOnce('normal2', ObjectC,'observeOnceAction',15);
-	// ObjectC.set('normal2','newValue');
-	// equals(ObjectC.incrementor, 11);
-	// ObjectC.set('normal2','AnotherNewValue');
-	// equals(ObjectC.incrementor, 11);
-});
-
 
 module("object.removeObserver()", {	
 	setup: function() {
@@ -270,7 +299,7 @@ test("should unregister an observer for a property", function() {
 
 
 test("should unregister an observer for a property - special case when key has a '.' in it.", function() {
-		
+		// CAJ:  I provided info in my last email about what you should put here.
 });
 
 
