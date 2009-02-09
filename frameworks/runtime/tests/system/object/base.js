@@ -64,3 +64,69 @@ test("Should advertise changes once per request to SC.Object#didChangeFor when s
   equals(obj.didChangeFor( this, 'foo' ), true) ;
   equals(obj.didChangeFor( this, 'foo' ), false) ;
 });
+
+test("When the object is destroyed the 'isDestroyed' status should change accordingly", function() {
+	equals(obj.get('isDestroyed'), NO);
+	obj.destroy();
+	equals(obj.get('isDestroyed'), YES);
+});
+
+
+module("SC.Object instance extended", {  
+  setup: function() {
+    obj = SC.Object.extend();
+	obj1 = obj.create();
+	don = SC.Object.extend();
+	don1 = don.create();
+  },
+  
+  teardown: function() {
+    obj = undefined ;
+    obj1 = undefined ;
+    don = undefined ;
+    don1 = undefined ;
+  }
+  
+});
+
+test("Checking the instance of method for an object", function() {
+	equals(obj1.instanceOf(obj), YES);
+	equals(obj1.instanceOf(don), NO);
+});
+
+test("Checking the kind of method for an object", function() {
+	equals(obj1.kindOf(obj), YES);
+	equals(obj1.kindOf(don), NO);
+});
+
+
+module("SC.Object superclass", {  
+  setup: function() {
+    obj = SC.Object.extend ({
+	  method1: function() {
+		return "hello";
+	  }
+	});
+	obj1 = obj.extend();
+	don = obj1.create ({
+	  method2: function() {
+		  return this.superclass();
+		}
+	});
+  },
+
+  teardown: function() {
+	obj = undefined ;
+    obj1 = undefined ;
+    don = undefined ;
+  }
+});
+
+test("Checking the superclass method for an existing function", function() {
+	equals(don.method2().method1(), "hello");
+});
+
+test("Checking the subclassOf function on an object and its subclass", function(){
+	equals(obj1.subclassOf(obj), YES);
+	equals(obj.subclassOf(obj1), NO);
+});
