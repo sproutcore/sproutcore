@@ -169,12 +169,12 @@ test("Binding value1 such that it will recieve only single values", function() {
 
 test("Single binding using notEmpty function.", function() {
 	bond = Bon1.create ({
-	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null, "(empty)")
+	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null,'(EMPTY)')
 	});
 	SC.Binding.flushPendingChanges();
 	bon2.set("arr", []);
 	SC.Binding.flushPendingChanges();
-	equals("(empty)",bond.get("array1"));
+	equals("(EMPTY)",bond.get("array1"));
 });
 
 test("Binding with transforms, function to check the type of value", function() {

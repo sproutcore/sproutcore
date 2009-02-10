@@ -1,10 +1,6 @@
-// ==========================================================================
-// Project:   SproutCore Costello - Property Observing Library
-// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
-//            Portions ©2008-2009 Apple, Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
-// ==========================================================================
-
+// ========================================================================
+// SC.isEqual Tests
+// ========================================================================
 /*globals module test */
 
 module("String's - isEqual", {
@@ -49,9 +45,8 @@ module("Array's - isEqual",{
 	
 });
 	
-test("array should be equal on if they were same instance", function(){
-	equals(SC.isEqual(objectA,objectB),false);
-	equals(SC.isEqual(objectB,objectB),true);
+test("array should be equal  ",function(){
+	equals(SC.isEqual(objectA,objectB),true);
 	equals(SC.isEqual(objectA,objectC),false);
 	
 });	

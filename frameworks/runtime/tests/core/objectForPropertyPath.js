@@ -1,10 +1,6 @@
-// ==========================================================================
-// Project:   SproutCore Costello - Property Observing Library
-// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
-//            Portions ©2008-2009 Apple, Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
-// ==========================================================================
-
+// ========================================================================
+// SC.objectForPropertyPath Tests
+// ========================================================================
 /*globals module test ok isObj equals expects */
 
 // An ObjectController will make a content object or an array of content objects 
