@@ -32,6 +32,22 @@
     buildit = SC.$();
   }}}
   
+  If you define an init() method on a builder, it will be invoked wheneve the
+  builder is called as a function, including any passed params.  Your init()
+  method MUST return this, unlike regular SC objects.  i.e.
+  
+  {{{
+    SC.$ = SC.Builder.create({
+      init: function(args) { 
+        this.args = SC.A(args);
+        return this;
+      }
+    });
+    
+    buildit = SC.$('a', 'b');
+    buildit.args => ['a','b']
+  }}}
+  
   In addition to defining a function like this, all builder objects also have
   an 'fn' property that contains a hash of all of the helper methods defined
   on the builder function.  Once a builder has been created, you can add 

@@ -1873,6 +1873,10 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
     whether they should be there or not.
     
     This is far more efficient than using addClass/removeClass.
+    
+    @param {String|Hash} className class name or hash of classNames + bools
+    @param {Boolean} shouldAdd for class name if a string was passed
+    @returns {SC.CoreQuery} receiver
   */
   setClass: function(className, shouldAdd) {
     if (SC.none(className)) return this; //nothing to do
