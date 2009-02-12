@@ -12,6 +12,10 @@ var context = null;
 module("SC.RenderContext#tag", {
   setup: function() {
     context = SC.RenderContext() ;
+  },
+  
+  teardown: function() {
+    context = null ;
   }
 });
 
@@ -22,6 +26,7 @@ test("should emit a self closing tag.  like calling begin().end()", function() {
 
 test("should respect passed opts when emitting", function() {
   context.tag("foo", { id: "bar" });
+  equals(context.length, 1);
   equals("<foo id=\"bar\"  />", context.get(0));
 });
 

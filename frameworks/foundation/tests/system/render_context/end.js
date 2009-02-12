@@ -113,4 +113,14 @@ test("does NOT emit self closing tag if it has content, even if opts.selfClosing
   equals(context.get(2), "</div>", "has closing tag");
 });
 
+test("it should make sure to clear reused temporary attributes object", function() {
+  
+  // generate one tag...
+  context.begin("div", { id: "foo", styles: { foo: "bar" }, classNames: "foo bar".w() }).push("line").end(); 
+  
+  // generate second tag...will reuse internal temporary attrs object.
+  context.begin('div', { id: "bar" }).end();
+  var str = context.get(context.length-1);
+  equals("<div id=\"bar\"  />", str);
+});
 

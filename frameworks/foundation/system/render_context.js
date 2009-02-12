@@ -194,6 +194,12 @@ SC.RenderContext = SC.Builder.create({
         tag.push('" ') ;
       }
       
+      // if we are using the DEFAULT_ATTRS temporary object, make sure we 
+      // reset.
+      if (attrs === this._DEFAULT_ATTRS) {
+        delete attrs.style;  delete attrs['class']; delete attrs.id;
+      }
+      
     }
     
     // this is self closing if there is no content in between and selfClosing
