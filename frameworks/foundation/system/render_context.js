@@ -278,6 +278,23 @@ SC.RenderContext = SC.Builder.create({
   },
   
   /**
+    Returns YES if there us a currentTag and that tag currently has the 
+    className in its set of classNames.  NO otherwise.
+    
+    @param {String} className the class name
+    @returns {Boolean}
+  */
+  hasClass: function(className) {
+    var currentTag = this.currentTag ;
+    if (!currentTag) return NO ;
+    
+    var classNames = currentTag.classNames;
+    if (!classNames) return NO ;
+    
+    return classNames.indexOf(className) >= 0;  
+  },
+  
+  /**
     Adds the specified className to the current tag, if it does not already
     exist.  This method has no effect if there is no open tag.
     
@@ -396,7 +413,11 @@ SC.RenderContext = SC.Builder.create({
     
     // simple form
     if (typeof nameOrStyles === SC.T_STRING) {
-      styles[nameOrStyles] = value ;
+      if (value === undefined) { // reader
+        return styles[nameOrStyles];
+      } else { // writer
+        styles[nameOrStyles] = value ;
+      }
       
     // bulk form
     } else {
@@ -429,7 +450,11 @@ SC.RenderContext = SC.Builder.create({
     
     // simple form
     if (typeof nameOrAttrs === SC.T_STRING) {
-      attrs[nameOrAttrs] = value ;
+      if (value === undefined) { // getter
+        return attrs[nameOrAttrs];
+      } else { // setter
+        attrs[nameOrAttrs] = value ;
+      }
       
     // bulk form
     } else {
