@@ -219,7 +219,7 @@ SC.Array = {
     @returns {Array}
   */
   without: function(value) {
-    // array:indexOf() is not available in runtime
+    // array:indexOf() is not available in costello
     var found = false ;
     for (var idx=0, len=this.length; idx<len; idx++) {
       if (this[idx] === value) {
@@ -307,6 +307,15 @@ SC.Array.slice = function(beginIndex, endIndex) {
         ret = (value === undefined) ? this.invoke('get', key) : null ;
       }
       return ret ;
+    },
+    
+    indexOf: function (obj) {
+      for(var i=0, ilen=this.length; i<ilen; i++){
+        if(this[i]===obj){
+          return i;
+        }
+      }
+      return -1;
     }
     
   }) ;
