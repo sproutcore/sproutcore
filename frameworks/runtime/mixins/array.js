@@ -307,6 +307,15 @@ SC.Array.slice = function(beginIndex, endIndex) {
         ret = (value === undefined) ? this.invoke('get', key) : null ;
       }
       return ret ;
+    },
+    
+    indexOf: function (obj) {
+      for(var i=0, ilen=this.length; i<ilen; i++){
+        if(this[i]===obj){
+          return i;
+        }
+      }
+      return -1;
     }
     
   }) ;

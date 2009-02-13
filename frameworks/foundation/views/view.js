@@ -1617,7 +1617,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     $.each(function() {
       for(var key in layoutStyle) {
         value = layoutStyle[key];  
-        this.style[key] = value ;
+        if(key==='zIndex' && !value)
+          this.style[key] = '' ;
+        else
+          this.style[key] = value ;
       }
     });
     //$.css(layoutStyle) ; // todo: add animation here.
