@@ -88,7 +88,7 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 
 /** @private - custom array used for child views */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
-SC.EMPTY_CHILD_VIEWS_ARRAY.needsClones = YES;
+SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 
 /** 
   @class
@@ -306,7 +306,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // The DOM will need some fixing up, note this on the view.
     view.parentViewDidChange() ;
-    view.displayLayoutDidChange() ;
+    view.layoutDidChange() ;
 
     // notify views
     if (this.didAddChild) this.didAddChild(this, beforeView) ;
@@ -478,7 +478,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {String}
     @readOnly
   */
-  layerId: null,
+  layerId: function() {
+    return SC.guidFor(this);
+  }.property().cacheable(),
   
   /**
     Attempts to discover the layer in the parent layer.  The default 
@@ -491,7 +493,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {DOMElement} the discovered layer
   */
   findLayerInParentLayer: function(parentLayer) {
-    var layerId = this.layerId ? this.get('layerId') : SC.guidFor(this);
+    var layerId = this.get('layerId');
     
     // first, let's try the fast path...
     var elem = document.getElementById(layerId);
@@ -592,11 +594,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   updateLayer: function() {
     var context = this.renderContext(this.get('layer')) ;
-    this.renderContext(context, NO);
+    this.prepareContext(context, NO);
     context.update();
     return this;
   },
   
+  /**
+    Creates a new renderContext with the passed tagName or element.  You
+    can override this method to provide further customization to the context
+    if needed.  Normally you will not need to call or override this method.
+    
+    @returns {SC.RenderContext}
+  */
+  renderContext: function(tagNameOrElement) {
+    return SC.RenderContext(tagNameOrElement);
+  },
 
   /**
     Creates the layer by creating a renderContext and invoking the view's
@@ -613,8 +625,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   createLayer: function() {
     if (this.get('layer')) return this; // nothing to do
     
-    var context = this.renderContext() ;
-    this.renderContext(context, YES);
+    var context = this.renderContext(this.get('tagName'));
+
+    // now prepare the contet like normal.
+    this.prepareContext(context, YES);
     this.set('layer', context.element());
     
     // now notify the view and its child views..
@@ -657,8 +671,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
     this.set('layer', null);
     
-    // notify self if needed
-    if (this.didDestroyLayer) this.didDestroyLayer(layer);
+    if (this.didDestroyLayer) this.didDestroyLayer();
     return this;
   },
   
@@ -690,15 +703,48 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @param {Boolean} firstTime YES if this is creating a layer
     @returns {void}
   */
-  renderContext: function(context, firstTime) {
-    var mixins, len, idx;
+  prepareContext: function(context, firstTime) {
+    var mixins, len, idx, layerId;
+    
+    // do some initial setup only needed at create time.
+    if (firstTime) {
+      layerId = this.layerId ? this.get('layerId') : SC.guidFor(this);
+      context.id(layerId).classNames(this.get('classNames'), YES);
+      this.renderLayout(context); 
+    }
+    
+    // do some standard setup...
+    if (this.get('isTextSelectable')) context.addClass('text-selectable');
+    if (!this.get('isEnabled')) context.addClass('disabled');
+    
     this.render(context, firstTime);
     if (mixins = this.renderMixin) {
       len = mixins.length;
       for(idx=0;idx<len;idx++) mixins[idx].call(this, context, firstTime);
     }
   },
-  
+
+  /**
+    Your render method should invoke this method to render any child views,
+    especially if this is the first time the view will be rendered.  This will
+    walk down the childView chain, rendering all of the children in a nested
+    way.
+    
+    @param {SC.RenderContext} context the context
+    @param {Boolean} firstName true if the layer is being created
+    @returns {SC.RenderContext} the render context
+  */
+  renderChildViews: function(context, firstTime) {
+    var cv = this.get('childViews'), len = cv.length, idx, view;
+    for(idx=0;idx<len;idx++) {
+      view = cv[idx];
+      context = context.begin(view.get('tagName'));
+      view.prepareContext(context, firstTime);
+      context = context.end();
+    }
+    return context ;  
+  },
+    
   /**
     Invoked whenever your view needs to be rendered, including when the view's
     layer is first created and any time in the future when it needs to be 
@@ -712,13 +758,58 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     you need to completely re-render the view or only update the surrounding
     HTML.  
     
+    The default implementation of this method simply calls renderChildViews()
+    if this is the first time you are rendering, or null otherwise.
+    
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
     @returns {void}
   */
   render: function(context, firstTime) {
-    
+    if (firstTime) this.renderChildViews(context, firstTime);
   },
+  
+  // ..........................................................
+  // STANDARD RENDER PROPERTIES
+  // 
+  
+  /** 
+    Tag name for the view's outer element.  The tag name is only used when
+    a layer is first created.  If you change the tagName for an element, you
+    must destroy and recreate the view layer.
+
+    @property {String}
+  */
+  tagName: 'div',
+  
+  /**
+    Standard CSS class names to apply to the view's outer element.  This 
+    property automatically inherits any class names defined by the view's
+    superclasses as well.  
+    
+    @property {Array}
+  */
+  classNames: ['sc-view'],
+  
+  /**
+    Determines if the user can select text within the view.  Normally this is
+    set to NO to disable text selection.  You should set this to YES if you
+    are creating a view that includes editable text.  Otherwise, settings this
+    to YES will probably make your controls harder to use and it is not 
+    recommended.
+
+    @property {Boolean}
+  */
+  isTextSelectable: NO,
+  
+  /** 
+    You can set this array to include any properties that should immediately
+    invalidate the display.  The display will be automatically invalidated
+    when one of these properties change.
+    
+    @property {Array}
+  */
+  displayProperties: [],
   
   // ..........................................................
   // LAYER LOCATION
@@ -856,51 +947,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var parentView, path, root, idx, len, lp, dp;
     
     sc_super();
-    SC.View.views[SC.guidFor(this)] = this; // register w/ views
+
+    SC.View.views[this.get('layerId')] = this; // register for event handling
     
     // setup child views.  be sure to clone the child views array first
     this.childViews = this.childViews ? this.childViews.slice() : [];
     this.createChildViews() ; // setup child Views
     
-    // if no rootElement is provided, generate the display HTML for the view.
-    if (!this.rootElement) {
-      
-      // if a rootElementPath is provided and we have a parentView with HTML
-      // already, try to find the rootElement in that template.  Otherwise,
-      // generate the HTML ourselves...
-      parentView = this.get('parentView');
-      path = this.rootElementPath;
-      root = (parentView) ? parentView.rootElement : null;      
-      if (parentView && path && root) {
-        idx=0; 
-        len = path.length;
-        while(root && idx<len) root = root.childNodes[path[idx++]];
-        if (root) this.rootElement = root;
-        
-      } else {
-        this.prepareDisplay();
-        if (this.get('updateChildLayoutOnPrepare')) this.childLayoutDidChange() ;
-        if (this.get('updateDisplayOnPrepare')) this.displayDidChange() ;
-      }
-
-      parentView = path = root = null;
-    }
-
-    // save this guid on the DOM element for reverse lookups.
-    if (this.rootElement) this.rootElement[SC.viewKey] = SC.guidFor(this) ;
-    
-    // register layout property observers .. this could be optimized into the
-    // class creation mechanism if local observers did not require explicit 
-    // setup.
-    lp = this.get('childLayoutProperties'); 
-    idx = lp.length;
-    while(--idx >= 0) {
-      this.addObserver(lp[idx], this, this.childLayoutDidChange);
-    }
-    
-    // register display property observers .. this could be optimized into the
-    // class creation mechanism if local observers did not require explicit 
-    // setup.
+    // register display property observers ..
+    // TODO: Optimize into class setup 
     dp = this.get('displayProperties'); 
     idx = dp.length;
     while(--idx >= 0) {
@@ -920,12 +975,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     can override this method to perform any additional setup. Be sure to 
     call sc_super to setup bindings and to call awake on childViews.
     
+    It is best to awake a view before you add it to the DOM.  This way when
+    the DOM is generated, it will have the correct initial values and will
+    not require any additional setup.
+    
     @returns {void}
   */
   awake: function() {
     sc_super();
-    var childViews = this.get('childViews');
-    if (childViews) childViews.invoke('awake');
+    var childViews = this.get('childViews'), len = childViews.length, idx;
+    for(idx=0;idx<len;idx++) childViews[idx].awake();
   },
     
   /** 
@@ -942,16 +1001,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // remove from parent if found
     this.removeFromParent() ;
 
-    // now save rootElement and call primitive destroy method.  This will
+    // now save layer and call primitive destroy method.  This will
     // cleanup children but not actually remove the DOM from any view it
     // might be in etc.  This way we only do this once for the top view.
-    var rootElement = this.rootElement ;
+    var layer = this.get('layer') ;
     this._destroy(); // core destroy method
 
-    // if rootElement still belongs to a parent somewhere, remove it
-    if (rootElement.parentNode) {
-      rootElement.parentNode.removeChild(rootElement) ;
-    } 
+    // if layer still belongs to a parent somewhere, remove it
+    if (layer.parentNode) layer.parentNode.removeChild(layer) ;
     
     // unregister for drags
     if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
@@ -964,22 +1021,23 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   isDestroyed: NO,
   
   _destroy: function() {
+    
     // if destroyed, do nothing
     if (this.get('isDestroyed')) return this ;
     
     // first destroy any children.
-    var childViews = this.get('childViews') ;
-    if (childViews.length > 0) {
+    var childViews = this.get('childViews'), len = childViews.length, idx ;
+    if (len) {
       childViews = childViews.slice() ;
-      var loc = childViews.length;
-      while(--loc >= 0) childViews[loc]._destroy() ;
+      for(idx=0;idx<len;idx++) childViews[idx]._destroy() ;
     }
     
     // next remove view from global hash
-    delete SC.View.views[SC.guidFor(this)];
+    delete SC.View.views[this.get('layerId')];
 
-    // can cleanup rootElement and containerElement (if set)
-    delete this.rootElement; delete this._CQ;
+    // can cleanup layer (if set)
+    this.set('layer', null);
+    delete this._CQ; 
     delete this.page;
     
     // mark as destroyed so we don't do this again
@@ -1008,19 +1066,18 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   createChildViews: function() {
-    var childViews = this.get('childViews');
-    var views, loc, view ;
+    var childViews = this.get('childViews'), len = childViews.length, idx;
+    var views, view ;
 
     this.beginPropertyChanges() ;
 
     // swap the array
-    loc = (childViews) ? childViews.length : 0 ;
-    while(--loc >= 0) {
-      view = childViews[loc] ;
+    for(idx=0;idx<len;idx++) {
+      view = childViews[idx] ;
       if (view && view.isClass) {
         view = this.createChildView(view) ; // instantiate if needed
       }
-      childViews[loc] =view ;
+      childViews[idx] = view ;
     }
     
     this.endPropertyChanges();
@@ -1041,319 +1098,18 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   createChildView: function(view, attrs) {
     // attrs should always exist...
     if (!attrs) attrs = {} ;
-    
-    // try to find a matching DOM element by tracing the path
-    var root = this.rootElement ;
-    var path = view.prototype.rootElementPath || attrs.rootElementPath;
-    var idx=0, len = (path) ? path.length : 0 ;
-    while((idx<len) && root) root = root.childNodes[path[idx++]];
-
-    if (root) attrs.rootElement = root ;
     attrs.owner = attrs.parentView = this ;
     if (!attrs.page) attrs.page = this.page ;
     
     // Now add this to the attributes and create.
     view = view.create(attrs) ;
-    root = attrs = path = null  ; // clean up
     return view ;
   },
-  
-  /**
-    This method is called when the view is created without a root element.
-    You should override this method to setup the DOM according to the initial
-    state of the view.  The resulting DOM will be dumped to a file and 
-    reloaded during a production environment so do not depend on this method 
-    being called.
-    
-    The default implementation will simply create DOM from the emptyElement
-    property defined on the view and set it as the rootElement.  It will also
-    insert any childViews DOM elements into the rootElement.
-  */
-  prepareDisplay: function() {
-    
-    //console.log('%@:prepareDisplay'.fmt(this));
-    
-    var root, element, html, con =this.constructor, cq, styleClass ;
-    
-    // if emptyElement is not overridden by the instance, then use a cached
-    // DOM from the class.  Note that we don't use get() in the test below 
-    // because we are interested in comparing the actual value of the 
-    // property, not the output.
-    var differs = SC.EMPTY_ELEMENT_PROPERTIES.find(function(k){
-      return this[k] !== this.constructor.prototype[k];
-    },this);    
-    
-    if (!differs) {
-      if (!this._cachedEmptyElement || (this._emptyElementCachedForClassGuid !== SC.guidFor(con))) {
-        styleClass = this.get('styleClass').join(' ');
-        html = this.get('emptyElement').fmt(this.get('tagName'));
-        cq = SC.$(html).addClass(styleClass);
-        cq.setClass('allow-select', this.get('isTextSelectable')); 
-        
-        con.prototype._cachedEmptyElement = cq.get(0);        
-        con.prototype._emptyElementCachedForClassGuid = SC.guidFor(con) ;
-      }
-
-      root = this._cachedEmptyElement.cloneNode(true);
-      
-    // otherwise, we can't cache the DOM because it is overridden by instance
-    } else {
-      styleClass = this.get('styleClass').join(' ');
-      html = this.get('emptyElement').fmt(this.get('tagName'));
-      cq = SC.$(html).addClass(styleClass);
-      cq.setClass('allow-select', this.get('isTextSelectable'));
-      root = cq.get(0);
-    }
-    this.rootElement = root ;
-
-    // save this guid on the DOM element for reverse lookups.
-    if (root) root[SC.viewKey] = SC.guidFor(this) ;
-    
-    // also, update the layout to match the frame
-    this.updateDisplayLayout();
-    
-    // now add DOM for child views if needed.
-    // get the containerElement or use rootElement -- append to this
-    var container = this.$container().get(0);
-    var idx, childViews = this.get('childViews'), max = childViews.length;
-    for(idx=0;idx<max;idx++) {
-      element = childViews[idx].rootElement;
-      if (element) container.appendChild(element) ;
-    }
-    
-    // clear out some local variables that hold DOM to avoid memory leaks
-    root = container = element = cq = null; 
-
-    // call all prepareDisplayMixins...
-    var mixins = this.prepareDisplayMixin, len = (mixins) ? mixins.length : 0;
-    for(idx=0;idx<len;idx++) mixins[idx].call(this);
-  },
-  
-  /**
-    By default, when you have to layout the display, it will also be laid out
-    once even before any properties or observers are setup.  This is usually
-    the behavior you want, but if you do something significantly different 
-    during the prepareDisplay method, you may want to turn this off.
-  */
-  updateChildLayoutOnPrepare: YES,
-  
-  /**
-    By default, when you have to prepare the display, it will also be updated
-    once even before any properties or observers are setup.  This is usually
-    the behavior you want, but if you do something significantly different 
-    during the prepareDisplay method, you may want to turn this off.
-  */
-  updateDisplayOnPrepare: YES,
-  
-  /** 
-    Returns a CoreQuery object that selects elements starting with the 
-    views rootElement.  You can pass a selector to this or pass no parameters
-    to get a CQ object the selects the view's rootElement.
-    
-    @param {String} selector
-    @param {Object} context not usually needed
-    @returns {SC.CoreQuery} CoreQuery or jQuery object
-  */
-  $: function(selector, context) {
-    if (arguments.length===0) {
-      if(!this._CQ) this._CQ = SC.$(this.rootElement);
-      return this._CQ;
-    } else return SC.$(selector, (context || this.rootElement)) ;
-  },
-  
-  /**
-    Returns a CoreQuery object that selects the elements starting with the 
-    view's containerElement.  You can pass a selector to this or pass no 
-    parameters to get a CQ object that selects the view's containerElement.
-    
-    For many views, their container element and root element are the same.
-    This means that calling view.$() and view.$container() will yield the 
-    same results.  However, if the view has a containerSelector property set, 
-    then the container will differ.
-  */
-  $container: function(selector, context) {
-    var sel = this.get('containerSelector') ;
-    if (arguments.length === 0) {
-      return (sel) ? this.$(sel) : this.$() ;
-    } else {
-      return (sel) ? this.$(selector, context || this.$(sel).get(0)) : this.$(selector,context);
-    }
-  },
-
-  /**
-    If you want elements inserted anywhere other than the rootElement of your
-    view, you should name a selector to find the matching elements here.
-  */
-  containerSelector: null,
-
-  /**
-    Describe the template HTML for new elements.  This will be used to create 
-    new HTML when you generate your view programatically.
-  */
-  emptyElement: '<%@1></%@1>',
-  
-  /**
-    Optional tag name for the emptyElement.  Use %@1 in your empty element
-    string to replace with the tag name.
-  */
-  tagName: 'div',
-  
-  /** 
-    Optional css class name to add to the root element of the view when it 
-    is first generated.  Use this property to bind the output HTML to some 
-    CSS.
-  */
-  styleClass: ['sc-view'],
-  
-  /**
-    Determines if the user can select text within the view.  Normally this is
-    set to NO to disable text selection.  You should set this to YES if you
-    are creating a view that includes editable text.  Otherwise, settings this
-    to YES will probably make your controls harder to use and it is not 
-    recommended.
-    
-    This property is used when first preparing the view's display.  If you
-    change it once the view has been created, it will have no effect.
-    
-    @property {Boolean}
-  */
-  isTextSelectable: NO,
-  
-  /**
-    Dumps the HTML needs for the emptyElement when restoring this view 
-    hierarchy later.  This is mostly used by the view builder but may be
-    useful at other times.
-  */
-  computeEmptyElement: function() {
-    
-    // make sure any pending display updates are handled -- even if offscreen
-    this.performDisplayUpdates(YES); 
-    
-    var root = this.rootElement ;
-    if (!root) return '' ;
-    
-    // if rootElement is in parent, remove from parent so we can place in our
-    // own div.
-    var parentNode = root.parentNode, next = root.nextSibling ;
-    if (parentNode) parentNode.removeChild(root) ;
-    
-    var b = SC.$('<div></div>').append(root) ;
-    var ret = b.html(); // get innerHTML
-
-    if (parentNode) {
-      parentNode.insertBefore(root, next) ;
-    } else SC.$(root).remove() ;
-    
-    b = root = parentNode = next = null ; // avoid memory leaks
-    return ret ; // return string
-  },
-  
-  /** 
-    This method is invoked whenever the display state of the view has changed.
-    You should override this method to update your DOM element to match the
-    current state of the view.
-    
-    Unlike prepareDisplay(), this method will be called at least once whenever
-    your app is started and thereafter as often as needed.  It will not be
-    optimized out during the build process.
-    
-    The default implementation does nothing.
-    
-    @returns {SC.View} receiver
-  */
-  updateDisplay: function() {
-    //console.log('%@: updateDisplay()'.fmt(this));
-    
-    var mixins = this.updateDisplayMixin, len = (mixins) ? mixins.length : 0;
-    for(var idx=0;idx<len;idx++) mixins[idx].call(this);
-  },
-
-  /** 
-    Call this method whenever the view's state changes in such as way that
-    requires the views display to be updated.  This will schedule the view
-    for display at the end of the runloop.
-  */
-  displayDidChange: function() {
-    this.set('displayNeedsUpdate', YES) ;
-    SC.View.scheduleInRunLoop(SC.DISPLAY_UPDATE_QUEUE, this);
-    return this ;
-  },
-  
-  displayNeedsUpdate: NO,
-  
-  /**
-    This method will update the display location, but only if it needs an 
-    update.  Returns YES if the method was able to execute, NO if it needs
-    to be called again later.
-  */
-  updateDisplayIfNeeded: function(force) {
-    if (!this.get('displayNeedsUpdate')) return YES;
-    if (!force & !this.get('isVisibleInWindow')) return NO ;
-    this.set('displayNeedsUpdate', NO) ;
-    this.updateDisplay() ;
-    return YES;
-  },
-  
-  /** 
-    You can set this array to include any properties that should immediately
-    invalidate the display.  The display will be automatically invalidated
-    when one of these properties change.
-  */
-  displayProperties: [],
   
   // ...........................................
   // LAYOUT
   //
 
-  /** 
-    This method is invoked whenever the layout of the view's child views has 
-    changed. You should override this method to update your child views to match 
-    the current state of the view.
-    
-    The default implementation does nothing.
-    
-    @returns {SC.View} receiver
-  */
-  updateChildLayout: function() {
-    //console.log('%@: updateLayout()'.fmt(this));
-    
-    var mixins = this.updateChildLayoutMixin, len = (mixins) ? mixins.length : 0;
-    for(var idx=0;idx<len;idx++) mixins[idx].call(this);
-  },
-
-  /** 
-    Call this method whenever the child view layout changes in such as way that
-    requires the view's child view layout to be updated.  This will schedule the 
-    view for layout at the end of the runloop.
-  */
-  childLayoutDidChange: function() {
-    this.set('childLayoutNeedsUpdate', YES) ;
-    SC.View.scheduleInRunLoop(SC.UPDATE_CHILD_LAYOUT_QUEUE, this);
-    return this ;
-  },
-  
-  childLayoutNeedsUpdate: NO,
-  
-  /**
-    This method will update the display location, but only if it needs an 
-    update.  Returns YES if the method was able to execute, NO if it needs
-    to be called again later.
-  */
-  updateChildLayoutIfNeeded: function(force) {
-    if (!this.get('childLayoutNeedsUpdate')) return YES;
-    if (!force & !this.get('isVisibleInWindow')) return NO ;
-    this.set('childLayoutNeedsUpdate', NO) ;
-    this.updateChildLayout() ;
-    return YES;
-  },
-  
-  /** 
-    You can set this array to include any properties that should immediately
-    invalidate the layout.  The layout will be automatically invalidated
-    when one of these properties change.
-  */
-  childLayoutProperties: [],
-  
   /** 
     This convenience method will take the current layout, apply any changes
     you pass and set it again.  It is more convenient than having to do this
@@ -1439,234 +1195,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
 
-  /**
-    Converts a frame from the receiver's offset to the target offset.  Both
-    the receiver and the target must belong to the same pane.  If you pass
-    null, the conversion will be to the pane level.
-  */
-  convertFrameToView: function(frame, targetView) {
-    var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f;
-
-    // walk up this side
-    while(next = view.get('parentView')) {
-      f = next.get('frame'); /* console.log($I(f)); */ myX += f.x; myY += f.y ;
-      view = next ; 
-    }
-
-    // walk up other size
-    if (targetView) {
-      view = targetView ;
-      while(next = view.get('parentView')) {
-        f = next.get('frame'); targetX += f.x; targetY += f.y ;
-        view = next ; 
-      }
-    }
-    
-    // now we can figure how to translate the origin.
-    myX = frame.x + myX - targetX ;
-    myY = frame.y + myY - targetY ;
-    return { x: myX, y: myY, width: frame.width, height: frame.height };
-  },
-
-  /**
-    Converts a clipping frame from the receiver's offset to the target offset. 
-    Both the receiver and the target must belong to the same pane.  If you pass
-    null, the conversion will be to the pane level.
-  */
-  convertClippingFrameToView: function(clippingFrame, targetView) {
-    var myX=0, myY=0, targetX=0, targetY=0, view = this, next = this, f;
-    
-    // walk up this side
-    do {
-      f = next.get('frame'); 
-      myX += f.x; myY += f.y ;
-      view = next ; 
-    } while (next = view.get('parentView')) ;
-
-    // walk up other size
-    if (targetView) {
-      view = targetView ;
-      while(next = view.get('parentView')) {
-        f = next.get('frame'); targetX += f.x; targetY += f.y ;
-        view = next ; 
-      }
-    }
-    
-    // now we can figure how to translate the origin.
-    myX = clippingFrame.x + myX - targetX ;
-    myY = clippingFrame.y + myY - targetY ;
-    return { x: myX, y: myY, width: clippingFrame.width, height: clippingFrame.height };
-  },
-
-  /**
-    Converts a frame offset in the coordinates of another view system to 
-    the reciever's view.
-  */
-  convertFrameFromView: function(frame, targetView) {
-    var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f;
-
-    // walk up this side
-    while(next = view.get('parentView')) {
-      f = view.get('frame'); myX += f.x; myY += f.y ;
-      view = next ; 
-    }
-
-    // walk up other size
-    if (targetView) {
-      view = targetView ;
-      while(next = view.get('parentView')) {
-        f = view.get('frame'); targetX += f.x; targetY += f.y ;
-        view = next ; 
-      }
-    }
-    
-    // now we can figure how to translate the origin.
-    myX = frame.x - myX + targetX ;
-    myY = frame.y - myY + targetY ;
-    return { x: myX, y: myY, width: frame.width, height: frame.height };
-  },
-  
-  /**
-    Frame describes the current bounding rect for your view.  This is always
-    measured from the top-left corner of the parent view.
-    
-    @property {Rect}
-  */
-  frame: function() {
-    return this.computeFrameWithParentFrame(null);
-  }.property('layout').cacheable(),
-  
-  /**
-    Computes what the frame of this view would be if the parent were resized
-    to the passed dimensions.  You can use this method to project the size of
-    a frame based on the resize behavior of the parent.
-    
-    This method is used especially by the scroll view to automatically 
-    calculate when scrollviews should be visible.
-  
-    Passing null for the parent dimensions will use the actual current 
-    parent dimensions.  This is the same method used to calculate the current
-    frame when it changes.
-    
-    @param {Rect} pdim the projected parent dimensions
-    @returns {Rect} the computed frame
-  */
-  computeFrameWithParentFrame: function(pdim) {
-    var layout = this.get('layout') ;
-    var f = {} ;
-
-    // handle left aligned and left/right 
-    if (!SC.none(layout.left)) {
-      f.x = Math.floor(layout.left) ;
-      if (layout.width !== undefined) {
-        f.width = Math.floor(layout.width) ;
-      } else { // better have layout.right!
-        if (!pdim) pdim = this.computeParentDimensions(layout);
-        f.width = Math.floor(pdim.width - f.x - (layout.right || 0)) ;
-      }
-      
-    // handle right aligned
-    } else if (!SC.none(layout.right)) {
-      if (!pdim) pdim = this.computeParentDimensions(layout);
-      if (SC.none(layout.width)) {
-        f.width = pdim.width - layout.right ;
-        f.x = 0;
-      } else {
-        f.width = Math.floor(layout.width || 0) ;
-        f.x = Math.floor(pdim.width - layout.right - f.width) ;
-      }
-
-    // handle centered
-    } else if (!SC.none(layout.centerX)) {
-      if (!pdim) pdim = this.computeParentDimensions(layout); 
-      f.width = Math.floor(layout.width || 0);
-      f.x = Math.floor((pdim.width - f.width)/2 + layout.centerX);
-    } else {
-      f.x = 0 ; // fallback
-      if (SC.none(layout.width)) {
-        if (!pdim) pdim = this.computeParentDimensions(layout); 
-        f.width = Math.floor(pdim.width) ;
-      } else f.width = layout.width;
-    }
-
-
-    // handle top aligned and top/bottom 
-    if (!SC.none(layout.top)) {
-      f.y = Math.floor(layout.top) ;
-      if (layout.height !== undefined) {
-        f.height = Math.floor(layout.height) ;
-      } else { // better have layout.bottm!
-        if (!pdim) pdim = this.computeParentDimensions(layout);
-        f.height = Math.floor(pdim.height - f.y - (layout.bottom || 0)) ;
-      }
-      
-    // handle bottom aligned
-    } else if (!SC.none(layout.bottom)) {
-      if (!pdim) pdim = this.computeParentDimensions(layout);
-      if (SC.none(layout.height)) {
-        f.height = pdim.height - layout.bottom;
-        f.y = 0;
-      } else {
-        f.height = Math.floor(layout.height || 0) ;
-        f.y = Math.floor(pdim.height - layout.bottom - f.height) ;
-      }
-
-    // handle centered
-    } else if (!SC.none(layout.centerY)) {
-      if (!pdim) pdim = this.computeParentDimensions(layout); 
-      f.height = Math.floor(layout.height || 0);
-      f.y = Math.floor((pdim.height - f.height)/2 + layout.centerY);
-
-    // fallback
-    } else {
-      f.y = 0 ; // fallback
-      if (SC.none(layout.height)) {
-        if (!pdim) pdim = this.computeParentDimensions(layout); 
-        f.height = Math.floor(pdim.height) ;
-      } else f.height = layout.height;
-    }
-
-    // make sure the width/height fix min/max...
-    if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight)) f.height = layout.maxHeight;
-    if (!SC.none(layout.minHeight) && (f.height < layout.minHeight)) f.height = layout.minHeight;
-    if (!SC.none(layout.maxWidth) && (f.width > layout.maxWidth)) f.width = layout.maxWidth;
-    if (!SC.none(layout.minWidth) && (f.width < layout.minWidth)) f.width = layout.minWidth;
-
-    // make sure width/height are never < 0
-    if (f.height < 0) f.height = 0;
-    if (f.width < 0) f.width = 0;
-    
-    
-    return f;
-  },
-  
-  /**
-    The clipping frame returns the visible portion of the view, taking into
-    account the clippingFrame of the parent view.  Keep in mind that the 
-    clippingFrame is in the context of the view itself, not it's parent view.
-    
-    Normally this will be calculate based on the intersection of your own 
-    clippingFrame and your parentView's clippingFrame.  SC.ClipView may also
-    shift this by a certain amount.    
-  */
-  clippingFrame: function() {
-    var pv= this.get('parentView'), f = this.get('frame'), ret = f ;
-    if (pv) {
-     pv = pv.get('clippingFrame');
-     ret = SC.intersectRects(pv, f);
-    }
-    ret.x -= f.x; ret.y -= f.y;
-    return ret ;
-  }.property('parentView', 'frame').cacheable(),
-  
-  /** @private
-    Whenever the clippingFrame changes, this observer will fire, notifying
-    child views that their frames have also changed.
-  */
-  _view_clippingFrameDidChange: function() {
-    this.get('childViews').invoke('notifyPropertyChange', 'clippingFrame');
-  }.observes('clippingFrame'),
-  
   /**
     LayoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
@@ -1800,144 +1328,122 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     return ret ;
   }.property('layout').cacheable(),
-
-  
-  computeParentDimensions: function(frame) {
-    var pv = this.get('parentView'), pframe = (pv) ? pv.get('frame') : null;
-    return {
-      width: ((pframe) ? pframe.width : ((frame.left||0)+(frame.width||0)+(frame.right||0))) || 0,
-      height: ((pframe) ? pframe.height : ((frame.top||0)+(frame.height||0)+(frame.bottom||0))) || 0
-    } ;
-  },
-  
-  /** 
-    This method may be called on your view whenever the parent view resizes.
-
-    The default version of this method will reset the frame and then call 
-    viewDidResize().  You will not usually override this method, but you may
-    override the viewDidResize() method.
-  */
-  parentViewDidResize: function() {
-    var layout = this.get('layout') ;
-
-    // only resizes if the layout does something other than left/top - fixed
-    // size.
-    var isFixed = (layout.left!==undefined) && (layout.top!==undefined) && (layout.width !== undefined) && (layout.height !== undefined);
-
-    if (!isFixed) {
-      this.notifyPropertyChange('frame') ;
-      this.viewDidResize();
-    }
-  },
   
   /**
-    This method is invoked on your view when the view is about to begin a
-    live resize session, such as a split view being resized. During the live
-    resize session, you may choose to delay expensive drawing operations until
-    the live resize in complete.
-    
-    @returns {void}
+    The view responsible for laying out this view.  The default version 
+    returns the current parent view.
   */
-  viewWillStartLiveResize: function() {
-    var ary = this.get('childViews');
-    for ( var idx = 0, len = ary.length; idx < len; idx++ ) {
-      ary[idx].viewWillStartLiveResize();
-    }
-  },
-
-  /**
-    This method is invoked on your view when the view has completed a live resize 
-    session, such as a split view being resized. Any expensive drawing you have
-    delayed can be done at this point, by calling this.displayDidChange().
-    
-    @returns {void}
-  */
-  viewDidEndLiveResize: function() {
-    var ary = this.get('childViews');
-    for ( var idx = 0, len = ary.length; idx < len; idx++ ) {
-      ary[idx].viewDidEndLiveResize();
-    }
-  },
-
-  /**
-    This method is invoked on your view when the view resizes due to a layout
-    change or due to the parent view resizing.  You can override this method
-    to implement your own layout if you like, such as performing a grid 
-    layout.
-    
-    The default implementation simply calls parentViewDidResize on all of
-    your children.
-  */
-  viewDidResize: function() {
-    this.get('childViews').invoke('parentViewDidResize') ;
-  }.observes('layout'),  
-
+  layoutView: function() {
+    return this.get('parentView') ;
+  }.property('parentView').cacheable(),
+  
   /** 
     This method is called whenever a property changes that invalidates the 
     layout of the view.  Changing the layout will do this automatically, but 
     you can add others if you want.
   */
-  displayLayoutDidChange: function() {
+  layoutDidChange: function() {
     // console.log('displayLayoutDidChange');
     this.beginPropertyChanges() ;
-    this.set('displayLayoutNeedsUpdate', YES);
-    this.notifyPropertyChange('frame') ;
+    if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;
     this.endPropertyChanges() ;
     
-    SC.View.scheduleInRunLoop(SC.DISPLAY_LAYOUT_QUEUE, this);
+    // notify layoutView...
+    var layoutView = this.get('layoutView');
+    if (layoutView) layoutView.layoutDidChangeFor(this) ;
+    
     return this ;
   }.observes('layout'),
   
   /**
-    This method will update the display layout, but only if it needs an 
-    update.  
+    This this property to YES whenever the view needs to layout its child
+    views.  Normally this property is set automatically whenever the layout
+    property for a child view changes.
+    
+    @property {Boolean}
   */
-  updateDisplayLayoutIfNeeded: function(force) {
-    if (!this.get('displayLayoutNeedsUpdate')) return YES;
-    if (!force && !this.get('isVisibleInWindow')) return NO ;
-    this.set('displayLayoutNeedsUpdate', NO) ;
-    this.updateDisplayLayout() ;
-    return YES ;
-  },
+  needsLayout: NO,
 
+  _view_needsLayoutDidChange: function() {
+    if (this.get('needsLayout')) this.invokeOnce(layoutView.layoutIfNeeded);
+  }.property('needsLayout'),
+  
   /**
-    This method is called whenever the display layout has become invalid and
-    the view needs its display updated again.  This will generally only 
-    happen once at the end of the run loop.
+    Invoked by a child view whenever its layout changes.  The default 
+    implementation of this method records the child view in a set for later
+    processing and then sets needsLayout to YES to cause layout to be called
+    later.
+    
+    You can override this method to do your own layout and you do not need
+    to call sc_super().  However, be sure you set needsLayout to YES if you
+    need your layout() method to run at the end of the run loop.
+    
+    @param {SC.View} childView the view whose layout has changed.
+    @returns {void}
   */
-  updateDisplayLayout: function() {
-    // apply layout settings manually.  Do not use CoreQuery css() method
-    // because it is too slow.  Since this is used to handle scrolling, it 
-    // is important to make it very fast...
-    var $ = this.$(), layoutStyle = this.get('layoutStyle'), key, value;
-    $.each(function() {
-      for(var key in layoutStyle) {
-        value = layoutStyle[key];  
-        this.style[key] = (key === 'zIndex' && !value) ? '' : value ;
-      }
-    });
-    //$.css(layoutStyle) ; // todo: add animation here.
+  layoutDidChangeFor: function(childView) {
+    var set = this._needLayoutViews ;
+    if (!set) set = this._needLayoutViews = SC.Set.create();
+    set.add(childView);
+    this.set('needsLayout', YES);
   },
   
   /**
-    Force immediate update of all display-related items that are pending in
-    the receiver and its child views.  If you pass YES for the force flag,
-    then the display will be updated even if the view is offscreen.  This 
-    will force a display if no update is needed.
+    Called your layout method if the view currently needs to layout some
+    child views.
     
-    @param force {Boolean}
+    @param {Boolean} isVisible if true assume view is visible even if it is not.
     @returns {SC.View} receiver
   */
-  performDisplayUpdates: function(force) {
-    this.updateDisplayLocationIfNeeded(force);
-    this.updateDisplayLayoutIfNeeded(force);
-    this.updateDisplayIfNeeded(force);
-    
-    var childViews = this.get('childViews'), loc = childViews.length;
-    while(--loc>=0) childViews[loc].performDisplayUpdates(force);
+  layoutIfNeeded: function(isVisible) {
+    if (!isVisible) isVisible = this.get('isVisibleInWindow');
+    if (isVisible && this.get('needsLayout')) {
+      this.set('needsLayout', NO);
+      this.layoutChildViews();
+    }
     return this ;
+  },
+
+  /**
+    Applies the current layout to the layer.  This method is usually only
+    called once per runloop.  You can override this method to provide your 
+    own layout updating method if you want, though usually the better option
+    is to override the layout method from the parent view.
+    
+    The default implementation of this method simply calls the applyLayout()
+    method on the views that need layout.
+    
+    @returns {void}
+  */
+  layoutChildViews: function() {
+    var set = this._needLayoutViews, len = set ? set.length : 0, idx;
+    var view, context, layer;
+    for(idx=0;idx<len;idx++) {
+      view = set[idx];
+      if(!(layer = view.get('layer'))) continue ; // nothing to do
+      
+      context = view.renderContext(layer);
+      view.renderLayout(context);
+      context.update();
+    }
+    view = context = layer = null ; // cleanup
+    set.clear(); // reset & reuse
+  },
+  
+  /**
+    Default method called by the layout view to actually apply the current
+    layout to the layer.  The default implementation simply assigns the 
+    current layoutStyle to the layer.  This method is also called whenever
+    the layer is first created.
+    
+    @param {SC.RenderContext} the render context
+    @returns {void}
+  */
+  renderLayout: function(context) {
+    context.addStyle(this.get('layoutStyle'));
   }
+    
   
 }); 
 

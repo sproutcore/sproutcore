@@ -251,11 +251,11 @@ SC.LabelView = SC.View.extend(SC.Control,
     context.push(value);
     
     // and setup alignment and font-weight on styles
-    context.css('text-align',  this.get('textAlign'))
-           .css('font-weight', this.get('fontWeight'));
+    context.addStyle('text-align',  this.get('textAlign'))
+           .addStyle('font-weight', this.get('fontWeight'));
            
     // if we are editing, set the opacity to 0
-    if (this.get('isEditing')) context.css('opacity', 0.0);
+    if (this.get('isEditing')) context.addStyle('opacity', 0.0);
   }
   
 });
