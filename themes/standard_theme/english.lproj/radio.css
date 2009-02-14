@@ -19,9 +19,13 @@
 }
 
 .sc-theme .sc-radio-view .sc-radio-button input {
-	position: relative;
-	margin-left: -18px;
+	width: 16px;
+	height: 16px;
+  position: absolute;
+	margin-left: -20px;
 	opacity: 0.0;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
 }
 
 .sc-theme .sc-radio-view.sc-layout-vertical .sc-radio-button {
