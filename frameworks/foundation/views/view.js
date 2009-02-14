@@ -86,6 +86,10 @@ SC.FULL_HEIGHT = { top: 0, bottom: 0 };
 */
 SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 
+/** @private - custom array used for child views */
+SC.EMPTY_CHILD_VIEWS_ARRAY = [];
+SC.EMPTY_CHILD_VIEWS_ARRAY.needsClones = YES;
+
 /** 
   @class
   
@@ -126,7 +130,7 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: ['outlets','displayProperties', 'layoutProperties', 'styleClass', 'updateChildLayoutMixin', 'updateDisplayMixin', 'prepareDisplayMixin'],
+  concatenatedProperties: 'outlets layerProperties layoutProperties styleClass renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
   
   /** 
     The current pane. 
@@ -163,23 +167,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   parentView: null,
 
-  // ..........................................................
-  // CHILD VIEW SUPPORT
-  // 
-  
-  /** 
-    Array of child views.  You should never edit this array directly unless
-    you are implementing createChildViews().  Most of the time, you should
-    use the accessor methods such as appendChild(), insertBefore() and 
-    removeChild().
-    
-    @property {Array} 
-  */
-  childViews: [],
-  
-  /** Outlets */
-  outlets: [],
-  
   /** 
     Set to true when the item is enabled. 
 
@@ -203,6 +190,85 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var isEnabled = this.get('isEnabled');
     this.get('childViews').invoke('set','isEnabled', isEnabled);
   }.observes('isEnabled'),
+  
+  // ..........................................................
+  // IS VISIBLE IN WINDOW SUPPORT
+  // 
+  
+  /**
+    Determines if the view is visible on the screen, even if it is in the
+    view hierarchy.  This is considered part of the layout and so changing
+    it will trigger a layout update.
+    
+    @property {Boolean}
+  */
+  isVisible: YES,
+  
+  /**
+    YES only if the view and all of its parent views are currently visible
+    in the window.  This property is used to optimize certain behaviors in
+    the view.  For example, updates to the view layer are not performed 
+    if the view until the view becomes visible in the window.
+  */
+  isVisibleInWindow: NO,
+  
+  /**
+    Recomputes the isVisibleInWindow property based on the visibility of the 
+    view and its parent.  If the recomputed value differs from the current 
+    isVisibleInWindow state, this method will also call 
+    recomputIsVisibleInWindow() on its child views as well.  As an optional 
+    optimization, you can pass the isVisibleInWindow state of the parentView 
+    if you already know it.
+    
+    You will not generally need to call or override this method yourself. It 
+    is used by the SC.View hierarchy to relay window visibility changes up 
+    and down the chain.
+    
+    @property {Boolean} parentViewIsVisible
+    @returns {SC.View} receiver 
+  */
+  recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+    var last = this.get('isVisibleInWindow') ;
+    var cur = this.get('isVisible'), parentView ;
+    
+    // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
+    // this approach only goes up to the parentView if necessary.
+    if (cur) {
+      cur = (parentViewIsVisible === undefined) ? 
+       ((parentView=this.get('parentView')) ? 
+         parentView.get('isVisibleInWindow') : NO) : parentViewIsVisible ;
+    }
+    
+    // if the state has changed, update it and notify children
+    if (last !== cur) {
+      this.set('isVisibleInWindow', cur) ;
+      var childViews = this.get('childViews'), len = childViews.length, idx;
+      for(idx=0;idx<len;idx++) {
+        childViews[idx].recomputeIsVisibleInWindow(cur);
+      }
+      
+      // if we were firstResponder, resign firstResponder also if no longer
+      // visible.
+      if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
+      
+    }
+    
+    return this ;
+  },
+  
+  // ..........................................................
+  // CHILD VIEW SUPPORT
+  // 
+  
+  /** 
+    Array of child views.  You should never edit this array directly unless
+    you are implementing createChildViews().  Most of the time, you should
+    use the accessor methods such as appendChild(), insertBefore() and 
+    removeChild().
+    
+    @property {Array} 
+  */
+  childViews: SC.EMPTY_CHILD_VIEWS_ARRAY,
   
   /**
     Insert the view into the the receiver's childNodes array.
@@ -233,6 +299,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // add to childView's array.
     var idx, childViews = this.get('childViews') ;
+    if (childViews.needsClone) this.set(childViews = []);
     idx = (beforeView) ? childViews.indexOf(beforeView) : childViews.length;
     if (idx<0) idx = childViews.length ;
     childViews.insertAt(idx, view) ;
@@ -361,22 +428,312 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   parentViewDidChange: function() {
-    this.set('displayLocationNeedsUpdate', YES) ;
+    var hasLayer = !!this.get('layer'); // do we have a layer?
+    if (hasLayer) this.set('layerLocationNeedsUpdate', YES) ;
     this.recomputeIsVisibleInWindow() ;
-    SC.View.scheduleInRunLoop(SC.DISPLAY_LOCATION_QUEUE, this);
+    if (hasLayer) this.invokeOnce(this.updateLayerLocationIfNeeded);
     return this ;
   }.observes('isVisible'),
   
+  // ..........................................................
+  // LAYER SUPPORT
+  // 
+  
   /**
-    Set to YES when the view's display location is dirty.  You can call 
-    updateDisplayLocationIfNeeded() to clear this flag if it is set.
+    Returns the current layer for the view.  The layer for a view is only 
+    generated when the view first becomes visible in the window and even 
+    then it will not be computed until you request this layer property.
+    
+    If the layer is not actually set on the view itself, then the layer will
+    be found by calling this.findLayerInParentLayer().
+    
+    You can also set the layer by calling set on this property.
+    
+    @property {DOMElement} the layer
+  */
+  layer: function(key, value) {
+    if (value !== undefined) {
+      this._view_layer = value ;
+      
+    // no layer...attempt to discover it...  
+    } else {
+      value = this._view_layer;
+      if (!value) {
+        var parent = this.get('parentView');
+        if (parent) parent = parent.get('layer');
+        if (parent) {
+          this._view_layer = value = this.findLayerInParentLayer(parent);
+        }
+        parent = null;
+      }
+    }
+    return value ;
+  }.property('isVisibleInWindow').cacheable(),
+
+  /**
+    The ID to use when trying to locate the layer in the DOM.  If you do not
+    set the layerId explicitly, then the view's GUID will be used instead.
+    This ID must be set at the time the view is created.
+    
+    @property {String}
+    @readOnly
+  */
+  layerId: null,
+  
+  /**
+    Attempts to discover the layer in the parent layer.  The default 
+    implementation looks for an element with an ID of layerId (or the view's
+    guid if layerId is null).  You can override this method to provide your
+    own form of lookup.  For example, if you want to discover your layer using
+    a CSS class name instead of an ID.
+    
+    @param {DOMElement} parentLayer the parent's DOM layer
+    @returns {DOMElement} the discovered layer
+  */
+  findLayerInParentLayer: function(parentLayer) {
+    var layerId = this.layerId ? this.get('layerId') : SC.guidFor(this);
+    
+    // first, let's try the fast path...
+    var elem = document.getElementById(layerId);
+    if (SC.browser.msie && elem && elem.id !== layerId) elem = null; // IE bug
+    
+    // if browser supports querySelector use that.
+    if (!elem && parentLayer.querySelector) {
+      elem = parentLayer.querySelector('#' + layerId);
+    }
+    
+    // if no element was found the fast way, search down the parentLayer for
+    // the element.  This code should not be invoked very often.  Usually a
+    // DOM element will be discovered by the first method above.
+    if (!elem) {
+      elem = parentLayer.firstChild;
+      while(elem && (elem.id !== layerId)) {
+        // try to get first child or next sibling if no children
+        var next = elem.firstChild || elem.nextSibling ;
+
+        // if no next sibling, then get next sibling of parent.  Walk up 
+        // until we find parent with next sibling or find ourselves back at
+        // the beginning.
+        while(!next && elem && ((elem = elem.parentNode) !== parentLayer)) {
+          next = elem.nextSibling ;
+        }
+
+        elem = next ;
+      }
+    }
+    
+    return elem;
+  },
+
+  /**
+    Setting this property to YES will cause the updateLayerIfNeeded method
+    to be invoked at the end of the runloop.  You can also force a view to
+    update sooner by calling updateLayerIfNeeded() directly.  The method will
+    update the layer only if this property is YES.
     
     @property {Boolean}
   */
-  displayLocationNeedsUpdate: NO,
+  layerNeedsUpdate: NO,
+  
+  /** @private
+    schedules the updateLayerIfNeeded method to run at the end of the runloop
+    if layerNeedsUpdate is set to YES.
+  */  
+  _view_layerNeedsUpdateDidChange: function() {
+    if (this.get('layerNeedsUpdate')) {
+      this.invokeOnce(this.updateLayerIfNeeded);
+    }
+  }.observes('layerNeedsUpdate'),
   
   /**
-    Calls updateDisplayLocation(), but only if the view's display location
+    Updates the layer only if the view is visible onscreen and if 
+    layerNeedsUpdate is set to YES.  Normally you will not invoke this method
+    directly.  Instead you set the layerNeedsUpdate property to YES and this
+    method will be called once at the end of the runloop.
+    
+    If you need to update view's layer sooner than the end of the runloop, you
+    can call this method directly.  If your view is not visible in the window
+    but you want it to update anyway, then call this method, passing YES for
+    the 'force' parameter.
+    
+    You should not override this method.  Instead override updateLayer() or
+    render().
+    
+    @param {Boolean} isVisible if true assume view is visible even if it is not.
+    @returns {SC.View} receiver
+  */
+  updateLayerIfNeeded: function(isVisible) {
+    if (!isVisible) isVisible = this.get('isVisibleInWindow');
+    if (isVisible && this.get('layerNeedsUpdate')) {
+      this.beginPropertyChanges();
+      this.set('layerNeedsUpdate', NO);
+      this.updateLayer();
+      this.endPropertyChanges();
+    }
+    return this ;
+  },
+  
+  /**
+    This is the core method invoked to update a view layer whenever it has 
+    changed.  This method simply creates a render context focused on the 
+    layer element and then calls your render() method.
+    
+    You will not usually call or override this method directly.  Instead you
+    should set the layerNeedsUpdate property to YES to cause this method to
+    run at the end of the run loop, or you can call updateLayerIfNeeded()
+    to force the layer to update immediately.  
+    
+    Instead of overriding this method, consider overidding the render() method
+    instead, which is called both when creating and updating a layer.  If you
+    do not want your render() method called when updating a layer, then you
+    should override this method instead.
+    
+    @returns {SC.View} receiver 
+  */
+  updateLayer: function() {
+    var context = this.renderContext(this.get('layer')) ;
+    this.renderContext(context, NO);
+    context.update();
+    return this;
+  },
+  
+
+  /**
+    Creates the layer by creating a renderContext and invoking the view's
+    render() method.  This will only create the layer if the layer does not
+    already exist.
+
+    When you create a layer, it is expected that your render() method will
+    also render the HTML for all child views as well.  This method will 
+    notify the view along with any of its childViews that its layer has been
+    created.
+    
+    @returns {SC.View} receiver
+  */
+  createLayer: function() {
+    if (this.get('layer')) return this; // nothing to do
+    
+    var context = this.renderContext() ;
+    this.renderContext(context, YES);
+    this.set('layer', context.element());
+    
+    // now notify the view and its child views..
+    this._notifyDidCreateLayer();
+    
+    return this ;
+  },
+  
+  /** @private - 
+    invokes the receivers didCreateLayer() method if it exists and then
+    invokes the same on all child views.
+  */
+  _notifyDidCreateLayer: function() {
+    if (this.didCreateLayer) this.didCreateLayer();
+    var mixins = this.didCreateLayerMixin, len, idx;
+    if (mixins) {
+      len = mixins.length;
+      for(idx=0;idx<len;idx++) mixins[idx].call(this);
+    }
+    
+    var childViews = this.get('childViews'); len = childViews.length;
+    for(idx=0;idx<len;idx++) childViews[idx]._notifyDidCreateLayer();
+  },
+  
+  /**
+    Destroys the current layer if it exists.  The next time you invoke
+    createLayer() the layer will be recreated.  If no layer exists, this 
+    method has no effect.
+    
+    @returns {SC.View} receiver
+  */
+  destroyLayer: function() {
+    var layer = this.get('layer');
+    if (!layer) return this; // nothing to do
+    
+    // notify about destroy if needed
+    this._notifyWillDestroyLayer();
+    
+    // remove layer and cleanup
+    if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
+    this.set('layer', null);
+    
+    // notify self if needed
+    if (this.didDestroyLayer) this.didDestroyLayer(layer);
+    return this;
+  },
+  
+  /** @private 
+    calls willDestroyLayer() method if it exists and then 
+    invokes the same on all childViews.
+  */
+  _notifyWillDestroyLayer: function() {
+    if (this.willDestroyLayer) this.willDestroyLayer();
+    var mixins = this.willDestroyLayerMixin, len, idx;
+    if (mixins) {
+      len = mixins.length;
+      for(idx=0;idx<len;idx++) mixins[idx].call(this);
+    }
+    
+    var childViews = this.get('childViews'); len = childViews.length;
+    for(idx=0;idx<len;idx++) childViews[idx]._notifyWillDestroyLayer();  
+  },
+  
+  /**
+    Invoked by createLayer() and updateLayer() to actually render a context.
+    This method calls the render() method on your view along with any 
+    renderMixin() methods supplied by mixins you might have added.
+    
+    You should not override this method directly.  However, you might call
+    this method if you choose to override updateLayer() or createLayer().
+    
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} firstTime YES if this is creating a layer
+    @returns {void}
+  */
+  renderContext: function(context, firstTime) {
+    var mixins, len, idx;
+    this.render(context, firstTime);
+    if (mixins = this.renderMixin) {
+      len = mixins.length;
+      for(idx=0;idx<len;idx++) mixins[idx].call(this, context, firstTime);
+    }
+  },
+  
+  /**
+    Invoked whenever your view needs to be rendered, including when the view's
+    layer is first created and any time in the future when it needs to be 
+    updated.
+    
+    You will normally override this method in your subclassed views to 
+    provide whatever drawing functionality you will need in order to 
+    render your content.  
+    
+    You can use the passed firstTime property to determine whether or not 
+    you need to completely re-render the view or only update the surrounding
+    HTML.  
+    
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} firstTime YES if this is creating a layer
+    @returns {void}
+  */
+  render: function(context, firstTime) {
+    
+  },
+  
+  // ..........................................................
+  // LAYER LOCATION
+  // 
+  
+  /**
+    Set to YES when the view's layer location is dirty.  You can call 
+    updateLayerLocationIfNeeded() to clear this flag if it is set.
+    
+    @property {Boolean}
+  */
+  layerLocationNeedsUpdate: NO,
+  
+  /**
+    Calls updateLayerLocation(), but only if the view's layer location
     currently needs to be updated.  This method is called automatically at 
     the end of a run loop if you have called parentViewDidChange() at some
     point.
@@ -384,25 +741,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Boolean} force This property is ignored.
     @returns {Boolean} YES if the location was updated 
   */
-  updateDisplayLocationIfNeeded: function(force) {
-    if (!this.get('displayLocationNeedsUpdate')) return YES;
-    this.set('displayLocationNeedsUpdate', NO) ;
-    this.updateDisplayLocation() ;
+  updateLayerLocationIfNeeded: function(force) {
+    if (!this.get('layerLocationNeedsUpdate')) return YES;
+    this.set('layerLocationNeedsUpdate', NO) ;
+    this.updateLayerLocation() ;
     return YES ;
   },
 
   /**
-    This method is called to actually update a view's DOM element in the 
-    display tree to match the current settings on the view.  This method is
-    usually only called one time at the end of a run loop and only if the 
-    view's location has changed in the view hierarchy.
-    
-    You will not usually need to override this method, but you can if you 
-    need to perform some custom display location work.
+    This method is called when a view with an existing layer changes its 
+    location in the view hierarchy.  This method will update the underlying
+    DOM-location of the layer so that it reflects the new location.
     
     @returns {SC.View} receiver
   */
-  updateDisplayLocation: function() {
+  updateLayerLocation: function() {
     // collect some useful value
     // if there is no node for some reason, just exit
     var node = this.rootElement ;
@@ -456,62 +809,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   
-  /**
-    Determines if the view is visible on the screen, even if it is in the
-    view hierarchy.  This is considered part of the layout and so changing
-    it will trigger a layout update.
-  */
-  isVisible: YES,
-  
-  /**
-    This property is true only if the view and all of its parent views are
-    currently visible in the window.  It updates automatically.
-  */
-  isVisibleInWindow: NO,
-  
-  /**
-    Recomputes the isVisibleInWindow property based on the visibility of the 
-    view and its parent.  If the recomputed value differs from the current 
-    isVisibleInWindow state, this method will also call 
-    recomputIsVisibleInWindow() on its child views as well.  As an optional 
-    optimization, you can pass the isVisibleInWindow state of the parentView 
-    if you already know it.
-    
-    You will not generally need to call or override this method yourself. It 
-    is used by the SC.View hierarchy to relay window visibility changes up 
-    and down the chain.
-    
-    @property {Boolean} parentViewIsVisible
-    @returns {SC.View} receiver 
-  */
-  recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    var last = this.get('isVisibleInWindow') ;
-    var cur = this.get('isVisible'), parentView ;
-    
-    // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
-    // this approach only goes up to the parentView if necessary.
-    if (cur) {
-      cur = (parentViewIsVisible === undefined) ? 
-       ((parentView=this.get('parentView')) ? 
-         parentView.get('isVisibleInWindow') : NO) : parentViewIsVisible ;
-    }
-    
-    // if the state has changed, update it and notify children
-    if (last !== cur) {
-      this.set('isVisibleInWindow', cur) ;
-      var childViews = this.get('childViews'), idx = childViews.length;
-      while(--idx>=0) childViews[idx].recomputeIsVisibleInWindow(cur);
-      
-      // if we were firstResponder, resign firstResponder also
-      if (!cur && this.get('isFirstResponder')) {
-        this.resignFirstResponder();
-      }
-      
-    }
-    
-    return this ;
-  },
-
   // .......................................................
   // SC.RESPONDER SUPPORT
   //
@@ -1617,10 +1914,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     $.each(function() {
       for(var key in layoutStyle) {
         value = layoutStyle[key];  
-        if(key==='zIndex' && !value)
-          this.style[key] = '' ;
-        else
-          this.style[key] = value ;
+        this.style[key] = (key === 'zIndex' && !value) ? '' : value ;
       }
     });
     //$.css(layoutStyle) ; // todo: add animation here.

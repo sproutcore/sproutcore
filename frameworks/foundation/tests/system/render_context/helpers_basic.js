@@ -5,24 +5,24 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context */
+/*global module test equals context ok isSet */
 
 var context = null;
 
-module("SC.RenderContext#join", {
+// ..........................................................
+// id()
+// 
+module("SC.RenderContext#id", {
   setup: function() {
-    context = SC.RenderContext().push("line1", "line2") ;
-  },
-  
-  teardown: function() {
-    context = null;
+    context = SC.RenderContext().id('foo') ;
   }
 });
 
-test("it should return joined lines with no separator string by default", function() {
-  equals(context.join(), '<div>line1line2</div>');
+test("id() returns the current id for the tag", function() {
+  equals(context.id(), 'foo', 'get id');
 });
 
-test("it should return joined lines with separator string if passed", function() {
-  equals(context.join(","), "<div>,line1,line2,</div>") ;
+test("id(bar) alters the current id", function() {
+  equals(context.id("bar"), context, "Returns receiver");
+  equals(context.id(), 'bar', 'changed to bar');
 });

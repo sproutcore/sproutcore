@@ -8,7 +8,14 @@
 sc_require('system/builder');
 
 /**
-  A RenderContext is a builder that can be used to generate HTML for views.
+  @namespace
+  
+  A RenderContext is a builder that can be used to generate HTML for views or
+  to update an existing element.  Rather than making changes to an element
+  directly, you use a RenderContext to queue up changes to the element, 
+  finally applying those changes or rendering the new element when you are
+  finished.
+  
   You will not usually create a render context yourself but you will be passed
   a render context as the first parameter of your render() method on custom
   views.
@@ -26,28 +33,99 @@ sc_require('system/builder');
   context.begin() <-- begins a new tag context
   context.end() <-- ends the tag context...
 */
-SC.RenderContext = SC.Builder.create({
+SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
+  
+  /** 
+    When you create a context you should pass either a tag name or an element
+    that should be used as the basis for building the context.  If you pass
+    an element, then the element will be inspected for class names, styles
+    and other attributes.  You can also call update() or replace() to 
+    modify the element with you context contents.
+    
+    If you do not pass any parameters, then we assume the tag name is 'div'.
+    
+    A second parameter, parentContext, is used internally for chaining.  You
+    should never pass a second argument.
+    
+    @param {String|DOMElement} tagNameOrElement 
+    @returns {SC.RenderContext} receiver
+  */
+  init: function(tagNameOrElement, prevContext) {
+    if (tagNameOrElement === undefined) tagNameOrElement = 'div';
+    
+    // if a prevContext was passed, setup with that first...
+    if (prevContext) {
+      this.prevObject = prevContext ;
+      this.strings = prevContext.strings ;
+      this.offset = prevContext.length ;
+    } 
+    
+    // if tagName is string, just setup for rendering new tagName
+    if (SC.typeOf(tagNameOrElement) === SC.T_STRING) {
+      this._tagName = tagNameOrElement.toLowerCase();
+      this._needsTag = YES ; // used to determine if end() needs to wrap tag
+      
+      // increase length of all contexts to leave space for opening tag
+      var c = this;
+      while(c) { c.length++; c = c.prevObject; }
+      
+      if (!this.strings) this.strings = [] ;
+      this.strings.push(null);
+      if (this._tagName === 'script') this._selfClosing = NO; // special case
+      
+    } else {
+      this._elem = tagNameOrElement ;
+      this._needsTag = NO ;
+      this.length = 0 ;
+    }
+    
+    return this ;
+  },
+  
+  // ..........................................................
+  // PROPERTIES
+  // 
   
   // NOTE: We store this as an actual array of strings so that browsers that
   // support dense arrays will use them.
   /** 
     The current working array of strings.
+    
+    @property {Array}
   */
   strings: null,
   
-  /**  the current number of strings in the context */
+  /** 
+    this initial offset into the strings array where this context instance
+    has its opening tag.
+    
+    @property {Number}
+  */
+  offset: 0,
+  
+  /**  
+    the current number of strings owned by the context, including the opening
+    tag.
+    
+    @property {Number}
+  */
   length: 0,
+
+  // ..........................................................
+  // CORE STRING API
+  // 
   
   /**
     Returns the string at the designated index.  If you do not pass anything
-    returns the string array.
+    returns the string array.  This index is an offset from the start of the
+    strings owned by this context.
     
     @param {Number} idx the index
     @returns {String|Array}
   */
   get: function(idx) {
     var strings = this.strings || [];
-    return (idx === undefined) ? strings : strings[idx];
+    return (idx === undefined) ? strings.slice(this.offset, this.length) : strings[idx+this.offset];
   },
   
   /**
@@ -58,15 +136,33 @@ SC.RenderContext = SC.Builder.create({
     @returns {SC.RenderContext} receiver
   */
   push: function(line) {
-    var strings = this.strings;
+    var strings = this.strings, len = arguments.length;
     if (!strings) this.strings = strings = []; // create array lazily
     
-    if (arguments.length > 1) {
+    if (len > 1) {
       strings.push.apply(strings, arguments) ;
     } else strings.push(line);
     
-    this.length = strings.length;
+    // adjust string length for context and all parents...
+    var c = this;
+    while(c) { c.length += len; c = c.prevObject; }
+    
     return this;
+  },
+  
+  /**
+    Pushes the passed string onto the array, but first escapes the string
+    to ensure that no user-entered HTML is processed as HTML.
+    
+    @param {String} line one or mroe lines of text to add
+    @returns {SC.RenderContext} receiver
+  */
+  text: function(line) {
+    var len = arguments.length, idx=0;
+    for(idx=0;idx<len;idx++) {
+      this.push(SC.RenderContext.escapeHTML(arguments[idx]));
+    }
+    return this ;
   },
   
   /**
@@ -77,15 +173,38 @@ SC.RenderContext = SC.Builder.create({
     @returns {String} joined string
   */
   join: function(joinChar) {
-    while (this.currentTag) this.end();
+
+    // generate tag if needed...
+    if (this._needsTag) this.end();
+    
     var strings = this.strings;
     return strings ? strings.join(joinChar || '') : '' ;
   },
   
+  // ..........................................................
+  // GENERATING
+  // 
+  
   /**
-    Renders the HTML into an offscreen element and returns it.
+    Begins a new render context based on the passed tagName or element.
+    Generate said context using end().
+    
+    @returns {SC.RenderContext} new context
+  */
+  begin: function(tagNameOrElement) {
+    return SC.RenderContext(tagNameOrElement, this);
+  },
+  
+  /**
+    If the current context targets an element, this method returns the 
+    element.  If the context does not target an element, this method will 
+    render the context into an offscreen element and return it.
+    
+    @returns {DOMElement} the element
   */
   element: function() {  
+    if (this._elem) return this._elem;
+    
     // create factory div if needed
     var ret ;
     if (!SC.RenderContext.factory) {
@@ -97,38 +216,75 @@ SC.RenderContext = SC.Builder.create({
   },
   
   /**
-    Begins a new tag editing context.  This will save a spot on the 
-    stack for the opening tag.  The tag will be filled in when you end the
-    tag.  In the mean time you can push html that will be added to the 
-    tag body, including other tags.
+    If an element was set on this context when it was created, this method 
+    will actually apply any changes to the element itself.  If you have not
+    written any inner html into the context, then the innerHTML of the 
+    element will not be changed, otherwise it will be replaced with the new
+    innerHTML.
     
-    @param {String} tagName optional tag name.  default 'div'
-    @param {Hash} opts optional tag options.  defaults to empty options.
-    @returns {SC.RenderContext} receiver 
+    Also, any attributes, id, classNames or styles you've set will be 
+    updated as well.  This also ends the editing context session and cleans
+    up.
+    
+    @returns {SC.RenderContext} previous context or null if top 
   */
-  begin: function(tagName, opts) {
-    // save opts and tagName.  if string is passed for className make into 
-    // array.  Always downcase tagName
-    if (opts === undefined) opts = {};
-    opts.tagName = (tagName || 'div').toLowerCase() ;
-    if (opts.className && (typeof opts.className === SC.T_STRING)) {
-      opts.className = opts.className.w();
+  update: function() {
+    var elem = this._elem, key, value, styles;  
+    
+    if (!elem) {
+      throw "Cannot update context because there is no source element"; 
     }
-
-    // tag tag's spot on the stack...
-    opts.tagIndex = this.length;
-    this.push(null);
-
-    // some tags cannot be selfclosing,  make sure they are not...
-    if (opts.tagName === 'script') opts.selfClosing = NO ;
     
-    // add tag to tag stack
-    opts.parentTag = this.currentTag ;
-    this.currentTag = opts; 
+    // replace innerHTML
+    if (this.length>0) elem.innerHTML = this.join();
     
-    return this ;
+    // note: each of the items below only apply if the private variable has
+    // been set to something other than null (indicating they were used at
+    // some point during the build)
+    
+    // if we have attrs, apply them
+    if (this._attrsDidChange && (value = this._attrs)) {
+      for(key in value) {
+        if (!value.hasOwnProperty(key)) continue;
+        if (value[key] === null) { // remove empty attrs
+          elem.removeAttribute(key);
+        } else {
+          elem.setAttribute(key, value[key]);
+        }
+      }
+    }
+    
+    // class="foo bar"
+    if (this._classNamesDidChange && (value = this._classNames)) {
+      elem.setAttribute('class', value.join(' '));
+    }
+    
+    // id="foo"
+    if (this._idDidChange && (value = this._id)) {
+      elem.setAttribute('id', value);
+    }
+    
+    // style="a:b; c:d;"
+    if (this._stylesDidChange && (styles = this._styles)) {
+      var pair = this._STYLE_PAIR_ARRAY, joined = this._JOIN_ARRAY;
+      for(key in styles) {
+        if (!styles.hasOwnProperty(key)) continue ;
+        value = styles[key];
+        if (value === null) continue; // skip empty styles
+        if (typeof value === SC.T_NUMBER) value = value.toString() + "px";
+        pair[0] = key; pair[1] = value;
+        joined.push(pair.join(': '));
+      }
+      
+      elem.setAttribute('style', joined.join('; '));
+      joined.length = 0; // reset temporary object
+    }
+    
+    // now cleanup element...
+    elem = this._elem = null ;
+    return this.prevObject || this ; 
   },
-
+  
   // these are temporary objects are reused by end() to avoid memory allocs.
   _DEFAULT_ATTRS: {},
   _TAG_ARRAY: [],
@@ -139,25 +295,27 @@ SC.RenderContext = SC.Builder.create({
     Ends the current tag editing context.  This will generate the tag string
     including any attributes you might have set along with a closing tag.
     
+    The generated HTML will be added to the render context strings.  This will
+    also return the previous context if there is one or the receiver.
+    
     If you do not have a current tag, this does nothing.
      
-    @returns {SC.RenderContext} receiver
+    @returns {SC.RenderContext} 
   */
   end: function() {
     // NOTE: If you modify this method, be careful to consider memory usage
     // and performance here.  This method is called frequently during renders
     // and we want it to be as fast as possible.
-    var opts = this.currentTag;
-    if (!opts) return this;
 
     // generate opening tag.
     
     // get attributes first.  Copy in className + styles...
-    var tag = this._TAG_ARRAY, pair, joined, key, id = opts.id ;
-    var attrs = opts.attrs, className = opts.classNames, styles = opts.styles;
+    var tag = this._TAG_ARRAY, pair, joined, key ;
+    var attrs = this._attrs, className = this._classNames ;
+    var id = this._id, styles = this._styles;
     
     // add tag to tag array
-    tag[0] = '<';  tag[1] = opts.tagName ;
+    tag[0] = '<';  tag[1] = this._tagName ;
     
     // add any attributes...
     if (attrs || className || styles || id) {
@@ -174,6 +332,8 @@ SC.RenderContext = SC.Builder.create({
           if(!styles.hasOwnProperty(key)) continue ;
           pair[0] = key ;
           pair[1] = styles[key];
+          if (pair[1] === null) continue; // skip empty styles
+          
           if(typeof pair[1] === SC.T_NUMBER) pair[1] = "%@px".fmt(pair[1]);
           joined.push(pair.join(': '));
         }
@@ -188,6 +348,7 @@ SC.RenderContext = SC.Builder.create({
       tag.push(' '); // add space for joining0
       for(key in attrs) {
         if (!attrs.hasOwnProperty(key)) continue ;
+        if (attrs[key] === null) continue ; // skip empty attrs
         tag.push(key);
         tag.push('="');
         tag.push(attrs[key]) ;
@@ -205,28 +366,29 @@ SC.RenderContext = SC.Builder.create({
     // this is self closing if there is no content in between and selfClosing
     // is not set to false.
     var strings = this.strings;
-    var selfClosing = (opts.selfClosing === NO) ? NO : (opts.tagIndex === this.strings.length-1) ;
+    var selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1) ;
     tag.push(selfClosing ? ' />' : '>') ;
     
-    // join,save and reset temporary object
-    strings[opts.tagIndex] = tag.join('');
-    tag.length = 0 ;
+    strings[this.offset] = tag.join('');
+    tag.length = 0 ; // reset temporary object
     
     // now generate closing tag if needed...
     if (!selfClosing) {
       tag[0] = '</' ;
-      tag[1] = opts.tagName;
+      tag[1] = this._tagName;
       tag[2] = '>';
       strings.push(tag.join(''));
-      this.length = strings.length ;
+      
+      // increase length of receiver and all parents
+      var c = this;
+      while(c) { c.length++; c = c.prevObject; }
       tag.length = 0; // reset temporary object again
     }
     
-    // pop tag context and return...
-    this.currentTag = opts.parentTag;
-    opts.parentTag = null;
+    // if there was a source element, cleanup to avoid memory leaks
+    this._elem = null;
     
-    return this ;
+    return this.prevObject || this ;
   },
   
   /**
@@ -240,16 +402,42 @@ SC.RenderContext = SC.Builder.create({
     return this.begin(tagName, opts).end();
   },
     
+  // ..........................................................
+  // BASIC HELPERS
+  // 
+  
   /**
-    Sets the ID for the current tag.  If there is no currentTag this method
-    has no effect.
+    Reads outer tagName if no param is passed, sets tagName otherwise.
     
-    @param {String} idName the id
-    @returns {SC.RenderContext} receiver
+    @param {String} tagName pass to set tag name.
+    @returns {String|SC.RenderContext} tag name or receiver
+  */
+  tagName: function(tagName) {
+    if (tagName === undefined) {
+      if (!this._tagName && this._elem) this._tagName = this._elem.tagName;
+      return this._tagName;
+    } else {
+      this._tagName = tagName;
+      this._tagNameDidChange = YES;
+      return this ;
+    }
+  },
+  
+  /**
+    Reads the outer tag id if no param is passed, sets the id otherwise.
+    
+    @param {String} idName the id or set
+    @returns {String|SC.RenderContext} id or receiver
   */
   id: function(idName) {
-    if (this.currentTag) this.currentTag.id = idName ;
-    return this ;
+    if (idName === undefined) {
+      if (!this._id && this._elem) this._id = this._elem.id;
+      return this._id ;
+    } else {
+      this._id = idName;
+      this._idDidChange = YES;
+      return this;
+    }
   },
   
   // ..........................................................
@@ -257,41 +445,53 @@ SC.RenderContext = SC.Builder.create({
   // 
   
   /**
-    Returns the current classNames array so you can do work on it directly.
+    Reads the current classNames array or sets the array if a param is passed.
+    Note that if you get the classNames array and then modify it, you MUST 
+    call this method again to set the array or else it may not be copied to
+    the element.
+
+    If you do pass a classNames array, you can also pass YES for the 
+    cloneOnModify param.  This will cause the context to clone the class names
+    before making any further edits.  This is useful is you have a shared 
+    array of class names you want to start with but edits should not change
+    the shared array.
     
-    @returns {Array} classNames array
+    @param {Array} classNames array 
+    @param {Boolean} cloneOnModifiy
+    @returns {Array|SC.RenderContext} classNames array or receiver
   */
-  classNames: function() {
-    var currentTag = this.currentTag ;
-    if (!currentTag) return null ; // nothing to do
-    
-    var classNames = currentTag.classNames;
-    if (!classNames) classNames = currentTag.classNames = [] ;
-    
-    // optimizaton: clone class names...see SC.View
-    if (currentTag.cloneClassNames) {
-      classNames = currentTag.classNames = classNames.slice();
-      currentTag.cloneClassNames = NO ;
+  classNames: function(classNames, cloneOnModify) {
+    if (classNames === undefined) {
+      if (!this._classNames && this._elem) {
+        this._classNames = (this._elem.getAttribute('class')||'').split(' ');
+      }
+      
+      if (this._cloneClassNames) {
+        this._classNames = (this._classNames || []).slice();
+        this._cloneClassNames = NO ;
+      }
+
+      // if there are no class names, create an empty array but don't modify.
+      if (!this._classNames) this._classNames = [];
+      
+      return this._classNames ;
+    } else {
+      this._classNames = classNames ;
+      this._cloneClassNames = cloneOnModify || NO ;
+      this._classNamesDidChange = YES ;
+      return this ;
     }
-    
-    return classNames ;
   },
   
   /**
-    Returns YES if there us a currentTag and that tag currently has the 
-    className in its set of classNames.  NO otherwise.
+    Returns YES if the outer tag current has the passed class name, NO 
+    otherwise.
     
     @param {String} className the class name
     @returns {Boolean}
   */
   hasClass: function(className) {
-    var currentTag = this.currentTag ;
-    if (!currentTag) return NO ;
-    
-    var classNames = currentTag.classNames;
-    if (!classNames) return NO ;
-    
-    return classNames.indexOf(className) >= 0;  
+    return this.classNames().indexOf(className) >= 0;  
   },
   
   /**
@@ -302,18 +502,11 @@ SC.RenderContext = SC.Builder.create({
     @returns {SC.RenderContext} receiver
   */
   addClass: function(className) {
-    var currentTag = this.currentTag ;
-    if (!currentTag) return this ;
-    var classNames = currentTag.classNames;
-    if (!classNames) classNames = currentTag.classNames = [] ;
-    
-    // optimizaton: clone class names...see SC.View
-    if (currentTag.cloneClassNames) {
-      classNames = currentTag.classNames = classNames.slice();
-      currentTag.cloneClassNames = NO ;
+    var classNames = this.classNames() ; // handles cloning ,etc.
+    if (classNames.indexOf(className)<0) {
+      classNames.push(className);
+      this._classNamesDidChange = YES ;
     }
-    
-    if (classNames.indexOf(className) < 0) classNames.push(className);
     return this;
   },
   
@@ -325,24 +518,24 @@ SC.RenderContext = SC.Builder.create({
     @returns {SC.RenderContext} receiver
   */
   removeClass: function(className) {
-    var currentTag = this.currentTag ;
-    if (!currentTag) return this ;
-    
-    var classNames = currentTag.classNames;
-    if (!classNames) return this; // nothing to do
-
-    // optimizaton: clone class names...see SC.View
-    if (currentTag.cloneClassNames) {
-      classNames = currentTag.classNames = classNames.slice();
-      currentTag.cloneClassNames = NO ;
+    var classNames = this._classNames, idx;
+    if (!classNames && this._elem) {
+      classNames = this._classNames = 
+        (this._elem.getAttribute('class')||'').split(' ');
     }
 
+    if (classNames && (idx=classNames.indexOf(className))>=0) {
+      if (this._cloneClassNames) {
+        classNames = this._classNames = classNames.slice();
+        this._cloneClassNames = NO ;
+      }
 
-    // if className is found, just null it out.  This will end up adding an
-    // extra space to the generated HTML but it is faster than trying to 
-    // recompact the array.
-    var idx = classNames.indexOf(className);
-    if (idx>=0) classNames[idx]= null;
+      // if className is found, just null it out.  This will end up adding an
+      // extra space to the generated HTML but it is faster than trying to 
+      // recompact the array.
+      classNames[idx] = null;
+      this._classNamesDidChange = YES ;
+    }
     
     return this;
   },
@@ -360,10 +553,7 @@ SC.RenderContext = SC.Builder.create({
     @returns {SC.RenderContext} receiver
   */
   setClass: function(className, shouldAdd) {
-    var currentTag = this.currentTag;
-    if (!currentTag) return this ;
-    
-    var classNames, idx, key;
+    var classNames, idx, key, didChange;
     
     // simple form
     if (shouldAdd !== undefined) {
@@ -371,24 +561,30 @@ SC.RenderContext = SC.Builder.create({
       
     // bulk form
     } else {
-      classNames = currentTag.classNames ;
-      if (!classNames) currentTag.classNames = classNames = [];
+      
+      classNames = this._classNames ;
+      if (!classNames && this._elem) {
+        classNames = this._classNames = 
+          (this._elem.getAttribute('class')||'').split(' ');
+      }
+      if (!classNames) classNames = this._classNames = [];
     
-      // optimizaton: clone class names...see SC.View
-      if (currentTag.cloneClassNames) {
-        classNames = currentTag.classNames = classNames.slice();
-        currentTag.cloneClassNames = NO ;
+      if (this._cloneClassNames) {
+        classNames = this._classNames = classNames.slice();
+        this._cloneClassNames = NO ;
       }
 
+      didChange = NO;
       for(key in className) {
         if (!className.hasOwnProperty(key)) continue ;
         idx = classNames.indexOf(key);
         if (className[key]) {
-          if (idx<0) classNames.push(key);
+          if (idx<0) { classNames.push(key); didChange = YES; }
         } else {
-          if (idx>=0) classNames[idx] = null;
+          if (idx>=0) { classNames[idx] = null; didChange = YES; }
         }
       }
+      if (didChange) this._classNamesDidChange = YES;
     }
     
     return this ;
@@ -398,36 +594,132 @@ SC.RenderContext = SC.Builder.create({
   // CSS Styles Support
   // 
     
+  _STYLE_REGEX: /\s*([^:\s]+)\s*:\s*([^;\s]+)\s*;?/g,
+  
+  /**
+    Retrieves or sets the current styles for the outer tag.  If you retrieve
+    the styles hash to edit it, you must set the hash again in order for it 
+    to be applied to the element on rendering.
+    
+    Optionally you can also pass YES to the cloneOnModify param to cause the
+    styles has to be cloned before it is edited.  This is useful if you want
+    to start with a shared style hash and then optionally modify it for each
+    context.
+    
+    @param {Hash} styles styles hash
+    @param {Boolean} cloneOnModify
+    @returns {Hash|SC.RenderContext} styles hash or receiver
+  */
+  styles: function(styles, cloneOnModify) {
+    var attr, regex, match;
+    
+    if (styles === undefined) {
+      
+      // no styles are defined yet but we do have a source element.  Lazily
+      // extract styles from element.
+      if (!this._styles && this._elem) {
+        // parse style...
+        attr = this._elem.getAttribute('style');
+        if (attr && (attr = attr.toString()).length>0) {
+          styles = {};
+          
+          regex = this._STYLE_REGEX ;
+          regex.lastIndex = 0;
+          while(match = regex.exec(attr)) styles[match[1]] = match[2];
+          
+          this._styles = styles;
+          this._cloneStyles = NO;
+          
+        } else {
+          this._styles = {};
+        }
+        
+      // if there is no element or we do have styles, possibly clone them
+      // before returning.
+      } else {
+        if (!this._styles) {
+          this._styles = {};
+        } else {
+          if (this._cloneStyles) {
+            this._styles = SC.beget(this._styles);
+            this._cloneStyles = NO ;
+          }
+        }
+      }
+      
+      return this._styles ;
+      
+    // set the styles if passed.
+    } else {
+      this._styles = styles ;
+      this._cloneStyles = cloneOnModify || NO ;
+      this._stylesDidChange = YES ;
+      return this ;
+    }
+  },
+  
   /**
     Apply the passed styles to the tag.  You can pass either a single key
-    value pair or a hash of styles. 
+    value pair or a hash of styles.  Note that if you set a style on an 
+    existing element, it will replace any existing styles on the element.
     
     @param {String|Hash} nameOrStyles the style name or a hash of styles
     @param {String|Number} value style value if string name was passed
     @returns {SC.RenderContext} receiver
   */
-  css: function(nameOrStyles, value) {
-    if (!this.currentTag) return this ;
-    var key, styles = this.currentTag.styles;
-    if (!styles) this.currentTag.styles = styles = {} ;
+  addStyle: function(nameOrStyles, value) {
+    
+    // get the current hash of styles.  This will extract the styles and 
+    // clone them if needed.  This will get the actual styles hash so we can
+    // edit it directly.
+    var key, didChange = NO, styles = this.styles();
     
     // simple form
     if (typeof nameOrStyles === SC.T_STRING) {
       if (value === undefined) { // reader
         return styles[nameOrStyles];
       } else { // writer
-        styles[nameOrStyles] = value ;
+        if (styles[nameOrStyles] !== value) {
+          styles[nameOrStyles] = value ;
+          this._stylesDidChange = YES ;
+        }
       }
       
     // bulk form
     } else {
       for(key in nameOrStyles) {
         if (!nameOrStyles.hasOwnProperty(key)) continue ;
-        styles[key] = nameOrStyles[key] ;
+        value = nameOrStyles[key];
+        if (styles[key] !== value) {
+          styles[key] = value;
+          didChange = YES;
+        }
       }
+      if (didChange) this._stylesDidChange = YES ;
     }
     
     return this ;
+  },
+  
+  /**
+    Removes the named style from the style hash.
+    
+    Note that if you delete a style, the style will not actually be removed
+    from the style hash.  Instead, its value will be set to null.
+    
+    @param {String} styleName
+    @returns {SC.RenderContext} receiver
+  */
+  removeStyle: function(styleName) {
+    // avoid case where no styles have been defined
+    if (!this._styles && !this._elem) return this;
+    
+    // get styles hash.  this will clone if needed.
+    var styles = this.styles();
+    if (styles[styleName]) {
+      styles[styleName] = null;
+      this._stylesDidChange = YES ;
+    }
   },
   
   // ..........................................................
@@ -436,35 +728,77 @@ SC.RenderContext = SC.Builder.create({
   
   /**
     Sets the named attribute on the tag.  Note that if you set the 'class'
-    attribute or the 'styles' attribute, it will be overwritten by any 
-    explicit class or css styles you set using helpers.
+    attribute or the 'styles' attribute, it will be ignored.  Use the 
+    relevant class name and style methods instead.
     
     @param {String|Hash} nameOrAttrs the attr name or hash of attrs.
     @param {String} value attribute value if attribute name was passed
     @returns {SC.RenderContext} receiver
   */
   attr: function(nameOrAttrs, value) {
-    if (!this.currentTag) return this ;
-    var key, attrs = this.currentTag.attrs;
-    if (!attrs) this.currentTag.attrs = attrs = {} ;
+    var key, attrs = this._attrs, didChange = NO ;
+    if (!attrs) this._attrs = attrs = {} ;
     
     // simple form
     if (typeof nameOrAttrs === SC.T_STRING) {
       if (value === undefined) { // getter
         return attrs[nameOrAttrs];
       } else { // setter
-        attrs[nameOrAttrs] = value ;
+        if (attrs[nameOrAttrs] !== value) {
+          attrs[nameOrAttrs] = value ;
+          this._attrsDidChange = YES ;
+        }
       }
       
     // bulk form
     } else {
       for(key in nameOrAttrs) {
         if (!nameOrAttrs.hasOwnProperty(key)) continue ;
-        attrs[key] = nameOrAttrs[key] ;
+        value = nameOrAttrs[key];
+        if (attrs[key] !== value) {
+          attrs[key] = value ;
+          didChange = YES ;
+        }
       }
+      if (didChange) this._attrsDidChange = YES ;
     }
     
     return this ;
   }
   
 });
+
+/**
+  html is an alias for push().  Makes thie object more CoreQuery like
+*/
+SC.RenderContext.fn.html = SC.RenderContext.fn.push;
+
+/**
+  css is an alias for addStyle().  This this object more CoreQuery like.
+*/
+SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
+
+/** 
+  Helper method escapes the passed string to ensure HTML is displayed as 
+  plain text.  You should make sure you pass all user-entered data through
+  this method to avoid errors.  You can also do this with the text() helper
+  method on a render context.
+*/
+SC.RenderContext.escapeHTML = function(text) {
+  var elem, node, ret ;
+  
+  elem = this.escapeHTMLElement;
+  if (!elem) elem = this.escapeHTMLElement = document.createElement('div');
+  
+  node = this.escapeTextNode;
+  if (!node) {
+    node = this.escapeTextNode = document.createTextNode('');
+    elem.appendChild(node);
+  }
+  
+  node.data = text ;
+  ret = elem.innerHTML ;
+  node = elem = null;
+  
+  return ret ;
+};

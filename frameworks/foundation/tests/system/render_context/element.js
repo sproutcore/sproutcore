@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context */
+/*global module test equals context ok */
 
 var context = null;
 
@@ -20,7 +20,7 @@ module("SC.RenderContext#element", {
 });
 
 test("converts context to a DOM element and returns root element if there is one", function() {
-  context.push('<div id="foo"></div>');
+  context.id('foo');
   var elem = context.element();
   ok(elem, 'elem not null');
   equals(elem.tagName.toString().toLowerCase(), 'div', 'is div');
@@ -29,6 +29,7 @@ test("converts context to a DOM element and returns root element if there is one
 });
 
 test("returns null if context does not generate valid element", function() {
+  context = SC.RenderContext(null);
   var elem = context.element();
   equals(elem, null, 'should be null');
   elem = null;

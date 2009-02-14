@@ -120,9 +120,12 @@ SC.LabelView = SC.View.extend(SC.Control,
     
     // 4. Localize
     if (value && this.getDelegateProperty(this.displayDelegate, 'localize')) value = value.loc() ;
+
+    // 5. escapeHTML if needed
+    if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
     
     return value ;
-  }.property('value', 'localize', 'formatter').cacheable(),
+  }.property('value', 'localize', 'formatter', 'escapeHTML').cacheable(),
   
   /**
     Enables editing using the inline editor.
@@ -232,28 +235,27 @@ SC.LabelView = SC.View.extend(SC.Control,
 
   displayProperties: ['displayValue', 'textAlign', 'fontWeight', 'icon'],
   
-  updateDisplay: function() {
-    var ret = sc_super();
+  render: function(context, firstTime) {
     var value = this.get('displayValue');
     var icon = this.get('icon') ;
 
-    if ((icon !== this._label_lastIcon) || (value !== this._label_lastDisplayValue)) {
-      this._label_lastDisplayValue = value ;
-      this._label_lastIcon = icon ;
-      if (this.getDelegateProperty(this.displayDelegate, 'escapeHTML')) {
-        this.$().text(value || '');
-      } else this.$().html(value || '') ;
-
-      // insert an icon img if needed.
-      if (icon) {
-        var url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
-        var className = (url === icon) ? '' : icon ;
-        icon = SC.$('<img src="%@" alt="" class="icon %@" />'.fmt(url, className)) ;
-        this.$().prepend(icon) ;
-      }
+    // add icon if needed
+    if (icon) {
+      var url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+      var className = (url === icon) ? '' : icon ;
+      icon = '<img src="%@" alt="" class="icon %@" />'.fmt(url, className) ;
+      context.push(icon);
     }
     
-    this.$().css('text-align', this.get('textAlign')).css('font-weight', this.get('fontWeight'));
-    return ret ;
+    // add display value
+    context.push(value);
+    
+    // and setup alignment and font-weight on styles
+    context.css('text-align',  this.get('textAlign'))
+           .css('font-weight', this.get('fontWeight'));
+           
+    // if we are editing, set the opacity to 0
+    if (this.get('isEditing')) context.css('opacity', 0.0);
   }
+  
 });
