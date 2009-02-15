@@ -21,16 +21,17 @@ test("should select previous item stepby numberOfItems", function() {
 		for (var idx = array.length - 1; idx >= 0; idx--) {
 			// set current selection to array idx
 			collectionView.set('selection', [collectionView.get('content').get(idx)]) ;
+			var c = collectionView.get('selection')[0].item;
 			
 			// perform selectPreviousItem with numberOfItems
 			collectionView.selectPreviousItem(false, n) ;
 
 			if (idx >= n) {
 				// idx is >= stepby numberOfItems, a selectPreviousItem will be equal to current idx minus stepby numberOfItems
-				equals(collectionView.selection[0].item, array[idx-n].item) ;
+				equals(collectionView.selection[0].item, array[idx-n].item, 'selection(%@ of 5) should step back by n(%@) items'.fmt(c,n)) ;
 			} else {
 				// idx is < stepby numberOfItems, a selectPreviousItem will be equal to current idx
-				equals(collectionView.selection[0].item, array[idx].item) ;
+				equals(collectionView.selection[0].item, array[idx].item, 'selection(%@ of 5) should try to step back by n(%@) items'.fmt(c,n)) ;
 			}
 		} ;
 	}) ;
