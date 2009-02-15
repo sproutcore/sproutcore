@@ -370,18 +370,19 @@ SC.Pane = SC.View.extend({
 
   */
   append: function() { 
-    return this.appendTo('body') ;
+    var body = document.getElementsByTagName('body')[0];
+    return this.appendTo(body) ;
   },
 
   /**
-    Removes the pane from the dsocument.  This will remove the
+    Removes the pane from the document.  This will remove the
     DOM node and deregister you from the document window.
   */
   remove: function() {
     if (!this.get('isVisibleInWindow')) return this; // nothing to do
 
-    // add to the DOM
-    var dom = this.rootElement ;
+    // remove layer...
+    var dom = this.get('layer') ;
     if (dom.parentNode) dom.parentNode.removeChild(dom);
     dom = null;
     
@@ -404,36 +405,65 @@ SC.Pane = SC.View.extend({
     to use for this operation.  Normally you will not need to pass this as 
     the default responder is suitable.
     
-    @param {String|CoreQuery} sel
+    @param {DOMElement} elem the element to append to
     @returns {SC.Pane} receiver
   */
-  appendTo: function(sel) {
-    SC.$(sel).append(this.$()) ; // add to DOM
+  appendTo: function(elem) {
+    var layer = this.get('layer');
+    if (!layer) layer =this.createLayer().get('layer'); 
+    elem.insertBefore(layer, null); // add to DOM
+    elem = layer = null ;
+
     return this.paneDidAttach(); // do the rest of the setup
   },
 
   /** 
-    inserts the pane's rootElement into the top of the passed DOM element
+    inserts the pane's rootElement into the top of the passed DOM element.
+    
+    @param {DOMElement} elem the element to append to
+    @returns {SC.Pane} receiver
   */
-  prependTo: function(sel) {
-    SC.$(sel).prepend(this.$()) ; // add to DOM
+  prependTo: function(elem) {
+    var layer = this.get('layer');
+    if (!layer) layer =this.createLayer().get('layer'); 
+    elem.insertBefore(layer, elem.firstChild); // add to DOM
+    elem = layer = null ;
+
     return this.paneDidAttach(); // do the rest of the setup
   },
 
   /** 
     inserts the pane's rootElement into the hierarchy before the passed element.
+    
+    @param {DOMElement} elem the element to append to
+    @returns {SC.Pane} receiver
   */
-  before: function(sel) {
-    this.$().before(SC.$(sel));
+  before: function(elem) {
+    var layer = this.get('layer');
+    if (!layer) layer =this.createLayer().get('layer');
+    
+    var parent = elem.parentNode ; 
+    parent.insertBefore(layer, elem); // add to DOM
+    parent = elem = layer = null ;
+
     return this.paneDidAttach(); // do the rest of the setup
   },
 
   /** 
     inserts the pane's rootElement into the hierarchy after the passed 
     element.
+    
+    @param {DOMElement} elem the element to append to
+    @returns {SC.Pane} receiver
   */
-  after: function(sel) {
-    this.$().after(SC.$(sel));
+  after: function(elem) {
+    var layer = this.get('layer');
+    if (!layer) layer =this.createLayer().get('layer'); 
+    
+    var parent = elem.parentNode ;
+    elem.insertBefore(layer, elem.nextSibling); // add to DOM
+    parent = elem = layer = null ;
+
     return this.paneDidAttach(); // do the rest of the setup
   },
   
@@ -505,13 +535,14 @@ SC.Pane = SC.View.extend({
   },
 
   init: function() {
-    var hasRootElement = !!this.rootElement ;
+    // if a layer was set manually then we will just attach to existing 
+    // HTML.
+    var hasLayer = !!this.get('layer') ;
     sc_super() ;
-    if (hasRootElement) this.paneDidAttach() ;
-    // this.paneDidAttach() ;
+    if (hasLayer) this.paneDidAttach();
   },
-  
-  emptyElement: '<div class="sc-pane"></div>'
+
+  classNames: 'sc-pane'.w()
   
 }) ;
 
