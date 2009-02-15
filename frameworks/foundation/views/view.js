@@ -428,10 +428,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   parentViewDidChange: function() {
+    this.recomputeIsVisibleInWindow() ;
+
     var hasLayer = !!this.get('layer'); // do we have a layer?
     if (hasLayer) this.set('layerLocationNeedsUpdate', YES) ;
-    this.recomputeIsVisibleInWindow() ;
     if (hasLayer) this.invokeOnce(this.updateLayerLocationIfNeeded);
+
     return this ;
   }.observes('isVisible'),
   
@@ -470,6 +472,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return value ;
   }.property('isVisibleInWindow').cacheable(),
 
+  /**
+    Returns the DOM element that should be used to hold child views when they
+    are added/remove via DOM manipulation.  The default implementation simply
+    returns the layer itself.  You can override this to return a DOM element
+    within the layer.
+  */
+  containerLayer: function() {
+    return this.get('layer');
+  }.property('layer').cachable(),
+  
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
     set the layerId explicitly, then the view's GUID will be used instead.
@@ -654,44 +666,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
-    Destroys the current layer if it exists.  The next time you invoke
-    createLayer() the layer will be recreated.  If no layer exists, this 
-    method has no effect.
-    
-    @returns {SC.View} receiver
-  */
-  destroyLayer: function() {
-    var layer = this.get('layer');
-    if (!layer) return this; // nothing to do
-    
-    // notify about destroy if needed
-    this._notifyWillDestroyLayer();
-    
-    // remove layer and cleanup
-    if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
-    this.set('layer', null);
-    
-    if (this.didDestroyLayer) this.didDestroyLayer();
-    return this;
-  },
-  
-  /** @private 
-    calls willDestroyLayer() method if it exists and then 
-    invokes the same on all childViews.
-  */
-  _notifyWillDestroyLayer: function() {
-    if (this.willDestroyLayer) this.willDestroyLayer();
-    var mixins = this.willDestroyLayerMixin, len, idx;
-    if (mixins) {
-      len = mixins.length;
-      for(idx=0;idx<len;idx++) mixins[idx].call(this);
-    }
-    
-    var childViews = this.get('childViews'); len = childViews.length;
-    for(idx=0;idx<len;idx++) childViews[idx]._notifyWillDestroyLayer();  
-  },
-  
-  /**
     Invoked by createLayer() and updateLayer() to actually render a context.
     This method calls the render() method on your view along with any 
     renderMixin() methods supplied by mixins you might have added.
@@ -840,61 +814,61 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
 
   /**
-    This method is called when a view with an existing layer changes its 
-    location in the view hierarchy.  This method will update the underlying
-    DOM-location of the layer so that it reflects the new location.
+    This method is called when a view changes its location in the view 
+    hierarchy.  This method will update the underlying DOM-location of the 
+    layer so that it reflects the new location.
     
     @returns {SC.View} receiver
   */
   updateLayerLocation: function() {
     // collect some useful value
     // if there is no node for some reason, just exit
-    var node = this.rootElement ;
-    if (!node) return this; // nothing to do
-    
-    // parents...
-    var parentView = this.get('parentView') ;
-    var parentNode = (parentView) ? parentView.$container().get(0) : null ;
-    
-    
-    // if we should belong to a parent, make sure we are added to the right
-    // place in the array.  Note that we assume parentNode is only non-null if
-    // parentView is also non-null.
-    if (parentNode) {
+    var node = this.get('layer') ;
+    var parentView = this.get('parentView');
+    var parentNode = parentView ? parentView.get('containerLayer') : null;
+
+    // remove node from current parentNode if the node does not match the 
+    // new parent node.
+    if (node && node.parentNode && node.parentNode !== parentNode) {
+      node.parentNode.removeChild(node);
+    }
+
+    // CASE 1: no new parentView.  just remove from parent (above).
+    if (!parentView) {
+      if (node && node.parentNode) node.parentNode.removeChild(node);
+      
+    // CASE 2: parentView has no layer, view has layer.  destroy layer
+    // CASE 3: parentView has no layer, view has no layer, nothing to do
+    } else if (!parentNode) {
+      if (node) {
+        if (node.parentNode) node.parentNode.removeChild(node);
+        this.destroyLayer();
+      }
+      
+    // CASE 4: parentView has layer, view has no layer.  create layer & add
+    // CASE 5: parentView has layer, view has layer.  move layer
+    } else {
+      if (!node) { this.createLayer();  node = this.get('layer'); }
+      
       var siblings = parentView.get('childViews') ;
       var nextView = siblings.objectAt(siblings.indexOf(this)+1);
-      var nextNode = (nextView) ? nextView.rootElement : null ;
+      var nextNode = (nextView) ? nextView.get('layer') : null ;
     
+      // before we add to parent node, make sure that the nextNode exists...
+      if (nextView && !nextNode) {
+        nextView.updateDisplayLocationIfNeeded();
+        nextNode = nextView.get('layer');
+      }
+      
       // add to parentNode if needed.  If we do add, then also notify view
       // that its parentView has resized since joining a parentView has the
       // same effect.
       if ((node.parentNode!==parentNode) || (node.nextSibling!==nextNode)) {
-        
-        // before we add to parent node, make sure that the nextNode is 
-        // already in the DOM.
-        if (nextView && nextNode) nextView.updateDisplayLocationIfNeeded();
-        
         parentNode.insertBefore(node, nextNode) ;
-        this.parentViewDidResize();
+        if (this.parentViewDidResize) this.parentViewDidResize();
       }
-      
-    // if we do not belong to a parent, then remove if needed.  Do not notify
-    // view that parentViewDidResize since we are moving ourselves from a 
-    // parentNode.  No good can come of it.
-    } else {
-      if (node.parentNode) node.parentNode.removeChild(node);
     }
 
-    // finally, update visibility of element as needed if we are in a parent
-    if (parentView) {
-      var $ = this.$(), isVisible = this.get('isVisible') ;
-      ((isVisible) ? $.show() : $.hide()); 
-      if (!isVisible && this.get('isVisibleInWindow')) {
-        this.recomputeIsVisibleInWindow();
-        // do this only after we have gone offscreen.
-      }
-    }
-    
     parentNode = parentView = node = null ; // avoid memory leaks
     return this ; 
   },

@@ -4,8 +4,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same */
+/*global module test equals context ok same Q$ */
 
+// ..........................................................
+// createLayer()
+// 
 module("SC.View#createLayer");
 
 test("returns the receiver", function() {
@@ -59,3 +62,36 @@ test("invokes didCreateLayer() on receiver and all child views", function() {
   equals(mixinCount, 2, 'did invoke all mixin methods');
 });
 
+test("generated layer include HTML from child views as well", function() {
+  var v = SC.View.create({
+    childViews: [ SC.View.create({ layerId: "foo" })]
+  });
+  
+  v.createLayer();
+  ok(Q$('#foo', v.get('layer')).get(0), 'has element with child layerId');
+});
+
+test("does NOT assign layer to child views immediately", function() {
+  var v = SC.View.create({
+    childViews: [ SC.View.create({ layerId: "foo" })]
+  });
+  v.createLayer();
+  ok(!v.childViews[0]._view_layer, 'has no layer yet');
+});
+
+// ..........................................................
+// USE CASES
+// 
+
+// when view is first created, createLayer is NOT called
+
+// when view is added to parent view, and parent view is already visible in
+// window, layer is created just before adding it to the DOM
+
+// when a pane is added to the window, the pane layer is created.
+
+// when a pane with an exiting layer is removed from the DOM, the layer is removed from the DOM, but it is not destroyed.
+
+// what if we move a view from a parentView that has a layer to a parentView that does NOT have a layer.   But we already have DOM so...this is bad.
+
+// what if a move a view from a parentView that does NOT have a layer to a parentView that DOES have a layer.
