@@ -1007,7 +1007,7 @@ SC.Observable = {
     @returns {Array} Values of property keys.
   */
   getEach: function() {
-    var keys = SC.$A(arguments).flatten() ;
+    var keys = SC.A(arguments).flatten() ;
     var ret = [];
     for(var idx=0; idx<keys.length;idx++) {
       ret[ret.length] = this.getPath(keys[idx]);
@@ -1126,67 +1126,6 @@ SC.Observable = {
       var prop = props[idx] ;
       console.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop)) ;
     }
-  },
-  
-  /**  
-    This method will listen for the observed value to change one time and 
-    then will remove itself.  You can also set an optional timeout that
-    will cause the function to be triggered (and the observer removed) after
-    a set amount of time even if the value never changes.  The function
-    can expect an extra parameter, 'didTimeout', set to true.
-  
-    The returned value is the function actually set as the observer. You
-    can manually remove this observer by calling the cancel() method on it.
-  */
-  observeOnce: function(key, target, method, timeout) {
-    
-    // fixup the params
-    var targetType = SC.typeOf(target) ;
-    if (targetType === SC.T_FUNCTION) {
-      if ((SC.typeOf(method) === SC.T_NUMBER) && (timeout === undefined)) {
-        timeout = method ;
-      }
-      method = target ;
-      target = this ;
-    }
-    
-    // convert the method to a function if needed...
-    if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
-    if (!method) throw "You must pass a valid method to observeOnce()";
-
-    var timeoutObject = null ;
-
-    // define a custom observer that will call the target method and remove
-    // itself as an observer.
-    var handler = function(observer, target, property, value, rev, didTimeout) {
-      // invoke method...
-      method.call(this, observer, target, property, value, rev, didTimeout);
-      
-      // remove observer...
-      target.removeObserver(key, this, handler) ;
-      
-      // if there is a timeout, invalidate it.
-      if (timeoutObject) { timeoutObject.invalidate();}
-      
-      // avoid memory leaks
-      handler = target = method = timeoutObject = null;
-    } ;
-
-    // now add observer
-    target.addObserver(key, target, handler) ;
-    if (timeout) {
-      timeoutObject = function() {
-        handler(null, target, key, target.get(key), target.propertyRevision, true) ;
-        handler = target = method = timeoutObject = null;
-      }.invokeLater(this, timeout) ;
-    }
-
-    handler.cancel = function() { 
-      target.removeObserver(key, target, handler); 
-      handler = target = method = timeoutObject = null;
-    } ;
-
-    return handler ;
   },
 
   propertyRevision: 1

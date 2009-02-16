@@ -1,26 +1,47 @@
 module("object.propertyChanges()", {	
 	setup: function() {
 		ObjectA = SC.Object.create({
-			normal: 'value',
-			normal1: 'zeroValue',
+			foo  : 'fooValue',
+			prop : 'propValue',
 						
 			action: function() {
-				this.normal1= 'newValue';
-			}.observes('normal'),
+				this.prop= 'changedPropValue';
+			}.observes('foo'),
 			
-			normal2: 'dependentValue',
-			normal3: 'notifiedValue',
+			newFoo : 'newFooValue',
+			newProp: 'newPropValue',
 			
 			notifyAction: function() {
-				this.normal3= 'newDependentValue';
-			}.observes('normal2'),
+				this.newProp = 'changedNewPropValue';
+			}.observes('newFoo'),
 			
 			notifyAllAction: function() {
-				this.normal2= 'newZeroValue';
-				alert('notifyall');
-			}.observes('normal1')			
+				this.newFoo = 'changedNewFooValue';
+			}.observes('prop')			
 		});
-   	}
+  	}
+});
+
+
+test("should observe the changes within the nested begin / end property changes", function() {
+  	
+	//start the outer nest
+	ObjectA.beginPropertyChanges();
+		// Inner nest
+		ObjectA.beginPropertyChanges();
+  			ObjectA.set('foo', 'changeFooValue');
+			equals(ObjectA.prop, "propValue") ;
+  		ObjectA.endPropertyChanges();
+ 		
+		//end inner nest
+		ObjectA.set('prop', 'changePropValue');
+		equals(ObjectA.newFoo, "newFooValue") ;
+	//close the outer nest
+	ObjectA.endPropertyChanges();
+	
+	equals(ObjectA.prop, "changedPropValue") ;
+	equals(ObjectA.newFoo, "changedNewFooValue") ;
+	
 });
 
 test("should increment the indicator before begining the changes to the object", function() {
@@ -31,56 +52,51 @@ test("should increment the indicator before begining the changes to the object",
     equals(ObjectA.endPropertyChanges()._kvo_changeLevel, 0) ;
 });
 
+test("should observe the changes within the begin and end property changes", function() {
+  	
+	ObjectA.beginPropertyChanges();
+  	ObjectA.set('foo', 'changeFooValue');
+  	
+	equals(ObjectA.prop, "propValue") ;
+  	ObjectA.endPropertyChanges();
+  	
+	equals(ObjectA.prop, "changedPropValue") ;
+});
+
 test("should indicate that the property of an object has just changed", function() {
-	equals(ObjectA.propertyWillChange('normal'),ObjectA) ;
-	ObjectA.normal = 'newValue';
-	equals(ObjectA.propertyDidChange('normal', null),ObjectA) ;
-	equals(ObjectA.normal1,'newValue') ;
+	// inidicate that proprty of foo will change to its subscribers
+	ObjectA.propertyWillChange('foo') ;
+	
+	//Value of the prop is unchanged yet as this will be changed when foo changes
+	equals(ObjectA.prop, 'propValue' ) ;
+	
+	//change the value of foo.
+	ObjectA.foo = 'changeFooValue';
+	
+	// Indicate the subscribers of foo that the value has just changed
+	ObjectA.propertyDidChange('foo', null) ;
+	
+	// Values of prop has just changed
+	equals(ObjectA.prop,'changedPropValue') ;
 });
 
 test("should notify that the property of an object has changed", function() {
-	ObjectA.notifyPropertyChange('normal2','value');
-	equals(ObjectA.normal3,'newDependentValue') ;
+	// Notify to its subscriber that the values of 'newFoo' will be changed. In this
+	// case the observer is "newProp". Therefore this will call the notifyAction function
+	// and value of "newProp" will be changed.
+	ObjectA.notifyPropertyChange('newFoo','fooValue');
+	
+	//value of newProp changed.
+	equals(ObjectA.newProp,'changedNewPropValue') ;
 });
 
 test("should notify all observers that their property might have changed", function() {
+	//When this function is called, all the subscribers are notified that something has
+	//Changed. So when allPropertiesDidChange() is called, all the subscribers get invoked. 
 	ObjectA.allPropertiesDidChange();
-	equals(ObjectA.normal2,'newZeroValue') ;
+	
+	//All the values changed.
+	equals(ObjectA.prop,'changedPropValue') ;
+	equals(ObjectA.newProp,'changedNewPropValue') ;
+	equals(ObjectA.newFoo,'changedNewFooValue') ;
 });
-
-module("object.registerDependentKeys()", {	
-	setup: function() {
-		ObjectB = SC.Object.create({
-			normal: 'value',
-			normal1: 'zeroValue',
-			normal2: 'dependentValue',
-			
-			init: function() {
-				sc_super();
-				ArrayKeys = ['normal','normal2'];
-				this.registerDependentKey(ArrayKeys);
-				this.registerDependentKey('normal1');
-			},
-
-			action: function() {
-				this.normal1= 'newValue';
-			}.observes('normal'),
-		
-			computed: function() {
-				this.normal2='newZeroValue';
-				return this.normal2;
-			}.property()
-		});
-   	}
-});
-
-test("should indicate the change if the dependent key value changes - When registered as array of keys", function() {
-	ObjectB.set('normal','newValue');
-	equals(ObjectB.normal2, 'newZeroValue');
-});
-
-test("should indicate the change if the dependent key value changes - When registered as a key string", function() {
-	ObjectB.set('normal1','newValue');
-	equals(ObjectB.normal2, 'newZeroValue');
-});
-
