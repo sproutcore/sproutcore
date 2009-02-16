@@ -1,3 +1,8 @@
+// ========================================================================
+// SC.Observable (properyChanges) Tests
+// ========================================================================
+/*globals module test ok isObj equals expects */
+
 module("object.propertyChanges()", {	
 	setup: function() {
 		ObjectA = SC.Object.create({
