@@ -33,9 +33,8 @@ require('views/view');
   
   If you need more specific control for where you pane appears in the 
   document, you can use several other insertion methods such as appendTo(), 
-  prependTo(), before() and after().  These methods all take a CoreQuery 
-  object or a selector to indicate where in your HTML document you would like 
-  you pane to be inserted.
+  prependTo(), before() and after().  These methods all take a an element to 
+  indicate where in your HTML document you would like you pane to be inserted.
   
   Once a pane is inserted into the document, it will be sized and positioned 
   according to the layout you have specified.  It will then automatically 
