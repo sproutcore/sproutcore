@@ -124,6 +124,7 @@ SC.Builder.fn = {
     @returns {SC.Builder} receiver
   */
   init: function(content) {
+	//alert(this.content + "########### "+SC.typeOf(content));
     if (content !== undefined) {
       if (SC.typeOf(content) === SC.T_ARRAY) {
         var loc=content.length;

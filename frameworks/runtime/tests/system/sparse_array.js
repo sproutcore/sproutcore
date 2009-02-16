@@ -10,16 +10,22 @@ test("new SparseArray has expected length", function() {
   equals(10000, ary.get('length'), "length") ;
 });
 
-test("fetching the object at index", function() {
+test("fetching the index of the object", function() {
 	var ary = SC.SparseArray.create(10);
 	var arr = ["I'll","be","there","4u"];
 	ary = arr;
 	equals(2 ,ary.indexOf('there'), "Index of 'there' is");
 });
 
+test("fetching the index of objects absent from the array", function() {
+	var ary = SC.SparseArray.create(6);
+	ary = ["you","give","love","a","bad","name"];
+	equals(-1, ary.indexOf("bon"), "Index for objects out of bounds");
+});
+
 test("creating a clone of a sparse array", function() {
 	var ary = SC.SparseArray.create(10);
-	var arr = ["captain","crash","and the","beauty","queen","from Mars"];
+	var arr = ["captain","crash","and","the","beauty","queen","from","Mars"];
 	ary = arr;
 	// var cpy = ary.clone();
 });
@@ -32,13 +38,29 @@ test("Update the sparse array using provideContentAtIndex", function() {
 	obj = "now";
 	ary.provideContentAtIndex(1, obj);
 	equals(obj, ary._sa_content[1],"Content at 1st index");
+	obj = "ever";
+	ary.provideContentAtIndex(1, obj);
+	equals(obj, ary._sa_content[1],"Updating the 1st index");
 });
 
-test("SC.flush + sparsh array flushed",function(){
-	var spArr = SC.SparseArray.create(3);
-	var arr = [1,"hello",true];
-	//spArr.flush();
-	equals(0,spArr.length,'length of sparse array');
+test("Updating the array beyond its limits using provideContentAtIndex", function() {
+	var ary = SC.SparseArray.create(2);
+	var obj = "hula";
+	var ret = ary.provideContentAtIndex(2, obj);
+	equals(2, ary.length, "Sparse array length");
+	equals(obj, ary._sa_content[2],"Checking the third index");
+});
+
+test("flush() should remove the sparse array content",function(){
+	var spArray = SC.SparseArray.create(3) ;
+	obj = 'value1';
+	obj1 = 'value2';
+	obj2 = 'value3';
+	spArray.provideContentAtIndex(0,obj);
+	spArray.provideContentAtIndex(1,obj);
+	spArray.provideContentAtIndex(2,obj);
+	spArray.flush();
+	equals(null,spArray._sa_content);
 });
 
 test("objectAt() should get the object at the specified index",function() {
@@ -52,34 +74,45 @@ test("objectAt() should get the object at the specified index",function() {
 	equals(arr[3],spArray.objectAt(3),'fourth object');
 });
 
+test("objectAt() should get the object at an index outside the arrays limits",function() {
+	var spArray = SC.SparseArray.create(4) ;
+	var arr = [SC.Object.create({ dummy: YES }),"Sproutcore",2,true];
+	spArray = arr;
+	equals(4,spArray.length,'the length');
+	equals(null,spArray.objectAt(4),'object at beyond arrays limits');
+});
+
 module("SC.replace",{
 	setup: function() {
-		// create objects...
+		// create objects
 		numbers= [1,2,3] ;
 		new_numbers = [4,5,6];
 	}
 });
 
-test("element to be added is at idx > length of array ", function() {
+test("replace() to replace elements in a sparse arrray", function() {
 	var ary = SC.SparseArray.create(5) ;
 	equals(5, ary.get('length'), "length") ;
 	ary = numbers;
 	ary.replace(7,3,new_numbers,"put the new number at idx>len ");
 	equals(6, ary.get('length'), "length") ;
+	
+	var ary1 = SC.SparseArray.create(5) ;
+	equals(5, ary1.get('length'), "length") ;
+	numbers= [1,2,3] ;
+	ary1 = numbers;
+	alert(numbers);
+	alert(ary1.length+"$$$$$ "+ary1);
+	ary1.replace(4,3,new_numbers,"put the new number at idx < len ");
+	equals(7, ary1.get('length'), "length") ;
+	
+	var ary2 = SC.SparseArray.create(5) ;
+	equals(5, ary2.get('length'), "length") ;
+	numbers= [1,2,3] ;
+	ary2 = numbers;
+	ary2.replace(2,3,new_numbers,"put the new number overlapping existing numbers ");
+	equals(7, ary2.get('length'), "length") ;
+	
 });
 
-test("element to be added is such that amt + idx > length of array ", function() {
-	var ary = SC.SparseArray.create(5) ;
-	equals(5, ary.get('length'), "length") ;
-	ary = numbers;
-	ary.replace(4,3,new_numbers,"put the new number at idx < len ");
-	equals(6, ary.get('length'), "length") ;
-});
 
-test("element to be added is at idx > length of array ", function() {
-	var ary = SC.SparseArray.create(5) ;
-	equals(5, ary.get('length'), "length") ;
-	ary = numbers;
-	ary.replace(2,3,new_numbers,"put the new number overlapping existing numbers ");
-	equals(5, ary.get('length'), "length") ;
-});
