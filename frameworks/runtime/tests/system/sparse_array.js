@@ -101,8 +101,6 @@ test("replace() to replace elements in a sparse arrray", function() {
 	equals(5, ary1.get('length'), "length") ;
 	numbers= [1,2,3] ;
 	ary1 = numbers;
-	alert(numbers);
-	alert(ary1.length+"$$$$$ "+ary1);
 	ary1.replace(4,3,new_numbers,"put the new number at idx < len ");
 	equals(7, ary1.get('length'), "length") ;
 	
