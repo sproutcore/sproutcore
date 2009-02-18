@@ -171,8 +171,7 @@ SC.Builder.fn = {
   
   // toString describes the builder
   toString: function() { 
-    return "%@$(%@)".fmt(this.defaultClass.toString(), 
-      SC.A(this).invoke('toString').join(',')); 
+    return "%@$(%@)".fmt(this.defaultClass.toString(), SC.A(this).invoke('toString').join(',')); 
   },
   
   /** You can enhance the fn using this mixin method. */
