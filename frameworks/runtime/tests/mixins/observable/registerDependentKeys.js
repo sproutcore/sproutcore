@@ -26,7 +26,7 @@
 		}
 	});
 
-	
+	/*
 	test("should indicate the registered property changes if the dependent key value changes", function() {
 		// now, change the firstName...
 		RegisterObject.set('firstName', 'Jane');
@@ -66,4 +66,4 @@
 		// fullName should fire.
 		equals(RegisterObject.get('observedValue'), 'Jane Johnson');
 	});
-	
+	*/
