@@ -77,7 +77,7 @@ require('views/view');
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.Pane = SC.View.extend({
+SC.Pane = SC.View.extend(SC.FrameSupport, {
 
   /** 
     Returns YES for easy detection of when you reached the pane. 
@@ -541,7 +541,7 @@ SC.Pane = SC.View.extend({
     if (hasLayer) this.paneDidAttach();
   },
 
-  classNames: 'sc-pane'.w()
+  styleClass: 'sc-pane'.w()
   
 }) ;
 
