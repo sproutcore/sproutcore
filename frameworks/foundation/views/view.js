@@ -736,14 +736,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {void}
   */
   prepareContext: function(context, firstTime) {
-    var mixins, len, idx, layerId, classArray;
-    debugger;
+    var mixins, len, idx, layerId ;
     // do some initial setup only needed at create time.
     if (firstTime) {
       layerId = this.layerId ? this.get('layerId') : SC.guidFor(this);
-      classArray = this.get('classNames');
-      classArray = classArray.concat(this.styleClass); 
-      context.id(layerId).classNames(classArray, YES);
+      context.id(layerId).classNames(this.get('classNames'), YES);
       this.renderLayout(context); 
     }
     
@@ -883,7 +880,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   updateLayerLocation: function() {
     // collect some useful value
     // if there is no node for some reason, just exit
-    return this;
     var node = this.get('layer') ;
     var parentView = this.get('parentView');
     var parentNode = parentView ? parentView.get('containerLayer') : null;
