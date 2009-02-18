@@ -130,7 +130,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: 'outlets layerProperties layoutProperties styleClass renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: 'outlets layerProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
   
   /** 
     The current pane. 
@@ -155,7 +155,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {SC.SplitView}
   */
   splitView: function() {
-    // console.log('splitView called');
     var view = this;
     while(view && !view.isSplitView) view = view.get('parentView');
     return view;
@@ -480,7 +479,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   containerLayer: function() {
     return this.get('layer');
-  }.property('layer').cachable(),
+  }.property('layer').cacheable(),
   
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
@@ -513,7 +512,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // if browser supports querySelector use that.
     if (!elem && parentLayer.querySelector) {
-      elem = parentLayer.querySelector('#' + layerId);
+      // TODO: make querySelector work on all platforms...
+//      elem = parentLayer.querySelector('#' + layerId)[0];
     }
     
     // if no element was found the fast way, search down the parentLayer for
@@ -539,6 +539,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return elem;
   },
 
+  /**
+    This method is invoked whenever a display property changes.  It will
+    set the layerNeedsUpdate method to YES.
+  */
+  displayDidChange: function() {
+    this.set('layerNeedsUpdate', YES);
+  },
+  
   /**
     Setting this property to YES will cause the updateLayerIfNeeded method
     to be invoked at the end of the runloop.  You can also force a view to
@@ -663,6 +671,56 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     var childViews = this.get('childViews'); len = childViews.length;
     for(idx=0;idx<len;idx++) childViews[idx]._notifyDidCreateLayer();
+  },
+
+  /**
+    Destroys any existing layer along with the layer for any child views as 
+    well.  If the view does not currently have a layer, then this method will
+    do nothing.
+    
+    If you implement willDestroyLayer() on your view or if any mixins 
+    implement willDestroLayerMixin(), then this method will be invoked on your 
+    view before your layer is destroyed to give you a chance to clean up any
+    event handlers, etc.
+    
+    If you write a willDestroyLayer() handler, you can assume that your 
+    didCreateLayer() handler was called earlier for the same layer.
+    
+    Normally you will not call or override this method yourself, but you may
+    want to implement the above callbacks when it is run.
+    
+    @returns {SC.View} receiver
+  */
+  destroyLayer: function() {
+    var layer = this.get('layer');
+    if (layer) {
+      // now notify the view and its child views..  if will also set the
+      // layer property to null.
+      this._notifyWillDestroyLayer();
+
+      // do final cleanup
+      if (layer.parentNode) layer.parentNode.removeChild(layer);
+      layer = null;
+    }
+    return this ;
+  },
+  
+  /** @private - 
+    invokes willDestroyLayer() on view and child views.  Then sets layer to
+    null for receiver.
+  */
+  _notifyWillDestroyLayer: function() {
+    if (this.willDestroyLayer) this.willDestroyLayer();
+    var mixins = this.willDestroyLayerMixin, len, idx;
+    if (mixins) {
+      len = mixins.length;
+      for(idx=0;idx<len;idx++) mixins[idx].call(this);
+    }
+    
+    var childViews = this.get('childViews'); len = childViews.length;
+    for(idx=0;idx<len;idx++) childViews[idx]._notifyWillDestroyLayer();
+    
+    this.set('layer', null);
   },
   
   /**
@@ -1317,7 +1375,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     you can add others if you want.
   */
   layoutDidChange: function() {
-    // console.log('displayLayoutDidChange');
     this.beginPropertyChanges() ;
     if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;
@@ -1454,11 +1511,11 @@ SC.View.mixin(/** @scope SC.View @static */ {
   },
   
   /**
-    Helper applies the styleClass to the prototype
+    Helper applies the classNames to the prototype
   */
-  styleClass: function(sc) {
-    sc = (this.prototype.styleClass || []).concat(sc);
-    this.prototype.styleClass = sc;
+  classNames: function(sc) {
+    sc = (this.prototype.classNames || []).concat(sc);
+    this.prototype.classNames = sc;
     return this ;
   },
   

@@ -57,8 +57,10 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (prevContext) {
       this.prevObject = prevContext ;
       this.strings = prevContext.strings ;
-      this.offset = prevContext.length ;
+      this.offset = prevContext.length + prevContext.offset ;
     } 
+
+    if (!this.strings) this.strings = [] ;
     
     // if tagName is string, just setup for rendering new tagName
     if (SC.typeOf(tagNameOrElement) === SC.T_STRING) {
@@ -69,7 +71,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       var c = this;
       while(c) { c.length++; c = c.prevObject; }
       
-      if (!this.strings) this.strings = [] ;
       this.strings.push(null);
       if (this._tagName === 'script') this._selfClosing = NO; // special case
       

@@ -1,0 +1,49 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Apple, Inc. and contributors.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
+/*global module test equals context ok same */
+
+// ..........................................................
+// createChildViews()
+// 
+var view, parentDom, childDom, layerId ;
+module("SC.View#findLayerInParentLayer", {
+  setup: function() {
+    
+    layerId = 'foo';
+    
+    // manually construct a test layer.  next childDom a few layers deep
+    childDom = document.createElement('div');
+    childDom.setAttribute('id', layerId);
+    
+    var intermediate = document.createElement('div');
+    intermediate.appendChild(childDom);
+    
+    parentDom = document.createElement('div');
+    parentDom.appendChild(intermediate);
+    intermediate = null;
+    
+    
+    // setup view w/ layerId
+    view = SC.View.create({ layerId: layerId });
+  },
+  
+  teardown: function() {
+    view = parentDom = childDom = layerId = null;
+  }
+});
+
+test("discovers layer by finding element with matching layerId - when DOM is in document already", function() {
+  document.body.appendChild(parentDom);
+  equals(view.findLayerInParentLayer(parentDom), childDom, 'found childDom');
+  document.body.removeChild(parentDom); // cleanup or else next test may fail
+});
+
+test("discovers layer by finding element with matching layerId - when parent DOM is NOT in document", function() {
+  equals(parentDom.parentNode, null, 'precond - NOT in parent doc');
+  equals(view.findLayerInParentLayer(parentDom), childDom, 'found childDom');
+});
+

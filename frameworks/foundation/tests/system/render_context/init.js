@@ -44,3 +44,12 @@ test("if element is passed, it should save element and not reserve space for str
   equals(context._elem, elem, 'element');
   elem = context._elem = null; //cleanup
 });
+
+test("offset should should use offset + length of parent for self", function() {
+  var context =SC.RenderContext('div');
+  context.offset = 2;
+  context.length = 3;
+  var newContext = SC.RenderContext('div', context);
+  equals(newContext.offset, 5, 'has proper offset');
+});
+

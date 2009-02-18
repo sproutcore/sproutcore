@@ -369,8 +369,7 @@ SC.Pane = SC.View.extend({
 
   */
   append: function() { 
-    var body = document.getElementsByTagName('body')[0];
-    return this.appendTo(body) ;
+    return this.appendTo(document.body) ;
   },
 
   /**
@@ -517,19 +516,9 @@ SC.Pane = SC.View.extend({
     }
   },
   
-  updateDisplayLocation: function() {
+  updateLayerLocation: function() {
     // note: the normal code here to update node location is removed 
     // because we don't need it for panes.
-    
-    // update visibility of element as needed
-    var v, isVisible = this.get('isVisible') ;
-    v = isVisible ? this.$().show() : this.$().hide();
-    
-    if (!isVisible && this.get('isVisibleInWindow')) {
-      this.recomputeIsVisibleInWindow();
-      // do this only after we have gone offscreen.
-    }
-    
     return this ; 
   },
 

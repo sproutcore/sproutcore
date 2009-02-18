@@ -142,6 +142,14 @@ SC.RootResponder = SC.Object.extend({
     return this ;
   },
   
+  /** 
+    Overridden by subclasses to return the window size.  The default simply
+    returns 640 x 480
+  */
+  computeWindowSize: function() { 
+    return { width: 640, height: 480 };
+  },
+
   // .......................................................
   // ROOT VIEW ORDER
   //

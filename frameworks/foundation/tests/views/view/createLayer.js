@@ -64,7 +64,7 @@ test("invokes didCreateLayer() on receiver and all child views", function() {
 
 test("generated layer include HTML from child views as well", function() {
   var v = SC.View.create({
-    childViews: [ SC.View.create({ layerId: "foo" })]
+    childViews: [ SC.View.extemd({ layerId: "foo" })]
   });
   
   v.createLayer();
@@ -73,7 +73,7 @@ test("generated layer include HTML from child views as well", function() {
 
 test("does NOT assign layer to child views immediately", function() {
   var v = SC.View.create({
-    childViews: [ SC.View.create({ layerId: "foo" })]
+    childViews: [ SC.View.extend({ layerId: "foo" })]
   });
   v.createLayer();
   ok(!v.childViews[0]._view_layer, 'has no layer yet');
@@ -92,6 +92,6 @@ test("does NOT assign layer to child views immediately", function() {
 
 // when a pane with an exiting layer is removed from the DOM, the layer is removed from the DOM, but it is not destroyed.
 
-// what if we move a view from a parentView that has a layer to a parentView that does NOT have a layer.   But we already have DOM so...this is bad.
+// what if we move a view from a parentView that has a layer to a parentView that does NOT have a layer.   Delete layer.
 
 // what if a move a view from a parentView that does NOT have a layer to a parentView that DOES have a layer.
