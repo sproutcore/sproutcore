@@ -5,25 +5,490 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+require('core') ;
 /**
   @class
 
-  The Store is where you can find all of your records.  You should also
-  use this to define your various types of records, since this will be
-  used to automatically update from data coming from the server.
 
-  You should create a store for each application.  This allows the records
-  for apps to be kept separate, even if they live in the same page.
+  The DataStore is where you can find all of your records. There can be one
+  'Active' store registered at a time. From this active store, you can chain
+  stores used for editing, etc. Objects are stored as JSON and are materialized
+  as SproutCore record objects on demand.
+  
+  By default, a base "SC.Store" is created for your application. If you have more
+  than one applications running at once, you can manually create other base stores
+  using the isBaseStore property.
+  
+  The reason to keep seperate data stores for each application is to reduce complexity
+  and decrease the chance for data corruption.
+  
+
+  When chaining data stores, changes in the chained store will be probagated to the 
+  parent store and saved if possible (The chained store has a newer version of the object).
+  
+  If you are at the base store, you can specify a parent store that may be a REST or 
+  local storage interface for persistant storage.
 
   @extends SC.Object
   @static
   @since SproutCore 1.0
 */
-SC.Store = SC.Object.create(
-/** @scope SC.Store.prototype */ {
+
+SC.DataStore = SC.Object.extend(
+/** @scope SC.DataStore.prototype */ {
+
+  /**
+    To specify that you're a base store, set this to YES. If is not a base 
+    store, then you cannot save back to persistant storage.
+
+    @property
+    @type {Boolean}
+    @default NO
+  */
+  isBaseStore: NO,
   
   /**
-    Pushes updated data to all the named records.  
+    When a base store is active, you can by default specify if it can resign as
+    the active store or not. By default it is NO, but if certain specialized 
+    circumstances such as when there are more than one application loaded, 
+    it can be usefult to allow a store to resign as active.
+    
+    @property
+    @type {Boolean}
+    @default NO
+  */
+  canResignAsActiveStore: NO,
+
+  /**
+    This is set to YES when there are changes that have not been committed yet.
+
+    @property
+    @type {Boolean}
+    @default NO
+  */
+  hasUncommittedChanges: NO,
+
+
+  /**
+    If YES, use JSON.parse otherwise use eval. This is a performance/security trade off.
+    
+    @property
+    @type {Boolean}
+    @default NO
+  */
+  useJSONParsing: NO,
+
+  /**
+    At times, it is useful to know if the store you're working with is chained or not. This
+    property returns YES if it is chained from a base store, otherwise NO.
+  
+    @property
+    @type {Boolean}
+    @default NO
+  */
+  isChainedStore: function() {
+    return (this.get('parentStore') !== null && !this.get('isBaseStore'));
+  }.property('parentStore').cacheable(),
+
+
+  /**
+    This is a handle to the parent store that you can chain from. Also, if you're
+    a base store, you can specify a parent store that is a handle to perisistant 
+    storage.
+
+    @property
+    @type {SC.DataStore}
+  */
+  parentStore: null,
+
+  /**
+    This is a handle to the based store that you ultimately chain from. 
+
+    @property
+    @type {SC.DataStore}
+  */
+  baseStore: null,
+
+  /**
+    The chainedStores property is an array that contains all the chained stores for 
+    THIS store.
+    
+    @property
+    @type {Array}
+  */
+  chainedStores: [],
+
+  /**
+    This is the change set that is kept for a store. When the store is committed, this hash is
+    used to pass changes down to from chained store stores to their parents. 
+    
+    The changes hash contains the following:
+    
+      "created", "deleted", and "updated" are Arrays that contain change sets in the form:
+    
+        {guid: guid, json: json, rev: revision}
+
+      "createdGuids", "deletedGuids", and "updatedGuids" are hashes that contain 
+       the index into the arrays based on the data guids.
+       
+    @property
+    @type {Object}
+  */
+  changes: {
+    created: [],
+    deleted: [],
+    updated: [],
+    createdGuids: {},
+    deletedGuids: {},
+    updatedGuids: {}
+  },
+  
+  /**
+    This is an internal hash that is used for quick look up of chained stores.
+  
+    @private
+    @property
+    
+    @type {Object}
+  */
+  _chainedStoreGuids: {},
+
+
+  /** 
+    Only one base store can be specified as active at any given time. Each application
+    should only have one base store.
+  
+    @property
+    @private
+    
+    @type {Boolean}
+    @default NO
+  */
+  _isActiveStore: NO,
+  
+  /**
+    Register this store as active. Only works if it is a base store and the currently
+    active store can resign as the active store.
+
+    @returns {Boolean} Returns YES if the store registration was successful.
+  */
+  registerAsActive: function() {
+    if(!this.get('isBaseStore')) return NO;
+    var activeStore = SC.DataStore.prototype.activeStore;
+    if(activeStore !== this) {
+
+      // If there is an active store, try to take control.
+      if(activeStore) {
+        var canResign = SC.DataStore.prototype.activeStore.resignAsActiveStore();
+        if(!canResign) {
+          return NO;
+        }
+      }
+      SC.DataStore.prototype._activeStore = this;
+      this._isActiveStore = YES;
+    }
+    return YES;
+  },
+
+  /**
+    Attempt to resign as the active store. If the "canResignAsActiveStore" property and
+    "isBaseStore" property are set to YES, then resign as active store. 
+    
+    @returns {Boolean} Returns YES if resignation is successful.
+  */
+  resignAsActiveStore: function() {
+    if(this.get('canResignAsActiveStore') && this.get('isBaseStore'))
+    {
+      this._isActiveStore = NO;
+      return YES;
+    }
+    return NO;
+  },
+  
+  
+  /**
+    Create a chained data store form this instance. Adds it to the list of chained stores
+    for this store.
+    
+    @returns {SC.DataStore} Returns a new store that is chained from this one.
+  */
+  createChainedStore: function() {
+    var chainedStore = SC.clone(this);
+    chainedStore.set('parentStore', this);
+    
+    if(this.get('baseStore') === null && this.get('isBaseStore')) {
+      this.set('baseStore', this);
+    }
+    
+    chainedStore.set('baseStore', this.get('baseStore'));
+    
+    this._chainedStoreGuids[SC.guidFor(chainedStore)] = (this.get('chainedStores').push(chainedStore)-1); 
+
+    this.resetChainedStore(chainedStore);
+    return chainedStore;
+  },
+  
+  /**
+    Push the changes TO a child store FROM its parent.
+
+    @param {SC.DataStore} chainedStore The chained store to have its data replaced.
+    @param {Object} changeSet The change set.
+  */
+  updateLocalStore: function(changeSet) {
+    if(changeSet === undefined) return NO;
+    
+    var isSuccess = YES;
+
+    var copy = changeSet.copy;
+    var remove = changeSet.remove;
+    var store = this.store;
+    
+    var purgeGuids = [];
+    
+    var baseStore = this.get('baseStore').store;
+    
+    // Handle creation and updates.
+    for(var i=0, iLen=copy.length; i<iLen; i++) {
+      var item = copy[i];
+      var storeKey = item.storeKey;
+      store[storeKey] = baseStore[storeKey];
+      purgeGuids.push(item.guid);
+    }
+
+    // Handle deletions.
+    for(var i=0, iLen=remove.length; i<iLen; i++) {
+      var item = remove[i];
+      store[item.storeKey] = null;
+      delete store[item.storeKey];
+      purgeGuids.push(item.guid);
+    }
+
+    this._purgeChangeSet(purgeGuids);
+    
+    return this.pushChangesToChainedStores(changeSet);
+  },
+  
+  _clearComponent: function(arr, purgeGuids) {
+    var newArr = [];
+    var newHash = [];
+    for(var i=0, iLen=arr.length; i<iLen; i++) {
+      if(purgeGuids.indexOf(arr[i].guid) === -1) {
+        newHash[arr[i].guid] = (newArr.push(arr[i])-1);
+      }
+    }
+    return [newArr, newHash];
+  },
+  
+  _purgeChangeSet: function(purgeGuids) {
+    var localChanges = this.changes;
+
+    var newCreated = this._clearComponent(localChanges.updated, purgeGuids);
+    var newDeleted = this._clearComponent(localChanges.deleted, purgeGuids);
+    var newUpdated = this._clearComponent(localChanges.created, purgeGuids);
+
+    this.changes = {
+      created: newCreated[0],
+      deleted: newDeleted[0],
+      updated: newUpdated[0],
+      createdGuids: newCreated[1],
+      deletedGuids: newDeleted[1],
+      updatedGuids: newUpdated[1]
+    };
+  },
+  
+  pushChangesToChainedStores: function(changeSet) {
+    var chainedStores = this.get('chainedStores');
+    for(var i=0, iLen=chainedStores.length; i<iLen; i++) {
+      chainedStores[i].updateLocalStore(changeSet);
+    }
+  },
+  
+  /** 
+    Returns the parentStore if there is one.
+    
+    @returns {SC.DataStore} Returns the parent store or NO if there is none.
+  */
+  getParentStore: function() {
+    var pS = this.get('parentStore');
+    if(pS) {
+      return pS;
+    }
+    return NO;
+  },
+  
+  /**
+    Remove a chained store from its parent.
+    
+    @returns {Boolean} Returns YES if the operation was successful.  
+  */
+  removeFromParentStore: function() {
+    
+    // I think this may something that should destroy the store, we don't want dangling stores do we?
+    var pS = this.get('parentStore');
+    if(pS) {
+      return pS.removeChainedStore(this);
+    }
+    return NO;
+  },
+
+  /**
+    Remove a given chained store from its parent.
+
+    @param {SC.DataStore} chainedStore The chained store that is being removed.
+
+    @returns {Boolean} Returns YES if the operation was successful.  
+  */
+  removeChainedStore: function(chainedStore) {
+    if(chainedStore) {
+      var guid = SC.guidFor(chainedStore);
+      var chainedStoreIndex = this._chainedStoreGuids[guid];
+
+      if(chainedStoreIndex !== undefined) {
+        this.get('chainedStores').splice(chainedStoreIndex, 1);
+        delete this._chainedStoreGuids[guid];
+        chainedStore.set('parentStore', null);
+        return YES;
+      }
+    }
+    return NO;
+  },
+
+
+  // If collision, highest revision wins.
+  // If no collision, chained parent change set does not change, it just gets passed down further.
+
+  handleChangesFromChainedStore: function(chainedStore)
+  {
+    if(chainedStore === undefined) return NO;
+
+
+    if(this.get('isBaseStore')) {
+
+
+      var isSuccess = YES;
+
+      var store = this.store;
+      var guidRelation = this.guidRelation;
+      var revisionRelation = this.revisionRelation;
+
+      var created = chainedStore.changes.created;
+      var updated = chainedStore.changes.updated;
+      var deleted = chainedStore.changes.created;
+
+      var createdGuids = chainedStore.changes.createdGuids;
+      var updatedGuids = chainedStore.changes.updatedGuids;
+      var deletedGuids = chainedStore.changes.deletedGuids;
+
+      var globalChanges = {
+        copy: [],
+        remove: []
+      };
+
+      // Handle creation.
+      for(var i=0, iLen=created.length; i<iLen; i++) {
+        var data = created[i];
+        var guid = data.guid;
+        
+        // If the item has been updated before committed, defer until updated array is processed.
+        // If the item has been deleted, then there is no need to store it before deleting it.
+        if(updatedGuids[guid] === undefined && deletedGuids[guid] === undefined)
+        {
+          store[guidRelation[guid]] = {json: data.json, rev: data.rev};
+          globalChanges.copy.push({guid: guid, storeKey: guidRelation[guid]});
+        }
+      }
+
+      // Handle updates.
+      for(var i=0, iLen=updated.length; i<iLen; i++) {
+        var data = updated[i];
+        var guid = data.guid;
+        
+        // If the item is not deleted, then just store it if it is the latest revision.
+        if(deletedGuids[guid] === undefined || deleted[deletedGuids[guid]].rev < data.rev ) {
+          if(data.rev === revisionRelation[guid]) {
+            store[guidRelation[guid]] = {json: data.json, rev: data.rev};
+            globalChanges.copy.push({guid: guid, storeKey: guidRelation[guid]});
+          } else {
+            // What do we do in this case?
+            isSuccess = NO;
+            console.log("SC.DataStore: Attempting to update record %@ but has been marked to be deleted more recently, skipping.".fmt(guid));
+          }
+        }
+      }
+      
+      // Handle deletions.
+      for(var i=0, iLen=deleted.length; i<iLen; i++) {
+        var data = deleted[i];
+        var guid = data.guid;
+        
+        // If the item is to be deleted.
+        if(data.rev === revisionRelation[guid]) {
+          this._destroyRecord(guid);
+          globalChanges.remove.push({guid: guid, storeKey: guidRelation[guid]});
+        } else {
+          // What do we do in this case?
+          isSuccess = NO;
+          console.log("SC.DataStore: Attempting to delete record %@ but has been marked to be updated more recently, skipping.".fmt(guid));
+        }
+      }
+
+      this.pushChangesToChainedStores(globalChanges);
+
+
+      if(this.get('parentStore')) {
+        console.log('push to server persistant store');
+      }
+      
+      
+      
+      
+      return isSuccess;
+    } else if(this.get('parentStore')) {
+      return this.get('parentStore').handleChangesFromChainedStore(chainedStore);
+    }
+    
+    return NO;
+  },
+
+  /**
+    Reset a chained store.
+
+    @param {SC.DataStore} chainedStore The chained store to have its data replaced.
+  */
+  resetChainedStore: function(chainedStore) {
+    chainedStore._chainedStoreGuids = {};
+    chainedStore.chainedStores = [];
+    chainedStore.isBaseStore = NO;
+
+    chainedStore.store = SC.clone(this.store);
+//    chainedStore.guidRelation = SC.clone(this.guidRelation);
+
+    chainedStore._clearChangeSet(); 
+  },
+
+  
+  commitChanges: function() {
+    if(this.get('isBaseStore')) {
+      console.log('push to server object');
+      return YES;
+    } else if(this.get('parentStore')) {
+      return this.get('parentStore').handleChangesFromChainedStore(this);
+    }
+    return NO;
+  },
+  
+  // How to discard changes on base store?
+  discardChanges: function() {
+    if(this.get('isBaseStore')) {
+      this._clearChangeSet();
+    } else if(this.get('parentStore')){
+      this.get('parentStore').resetChainedStore(this);
+    }
+  },
+  
+  
+  /**
+    Creates or updates records in the store.
   
     This method is often called from a server to update the store with the 
     included record objects.
@@ -36,345 +501,282 @@ SC.Store = SC.Object.create(
     - guid: This is a unique identifier for the record. 
     - type: The name of the record type.  I.e. "Contact" or "Photo"
   
-    @param dataHashes {Array} array of hash records.  See discussion.
-    @param dataSource {Object} the data source.  Usually a server object.
-    @param recordType {SC.Record} optional record type, used if type is not 
-      found in the data hashes itself.
-    @param isLoaded {Boolean} YES if the data hashes represent the full set of 
-      data loaded from the server.  NO otherwise.
+    @param {Array|String} dataHashes array of hash records.  See discussion.
+    @param {Boolean} initLoad If YES, don't add created records to changes hash.
 
-    @returns {Array} Array of records that were actually created/updated.
-  */
-  updateRecords: function(dataHashes, dataSource, recordType, isLoaded) {
+    @returns {Boolean} Returns YES if the store operation was successful.
+  */  
+  updateRecords: function(dataHashes, initLoad) {
+
+    var isSuccess = YES;
+
+    // If you're not the active store, don't allow imports.
+    if(!this._isActiveStore) return NO;
     
-    this.set('updateRecordsInProgress',true) ;
-    var store = this ; 
-    var ret = [] ;
-    if (!recordType) recordType = SC.Record ;
+    // First, check if the dataHashes var is a string or an array. 
+    // If it is a string, evaluate it so it can be iterated over.
+    if(typeof dataHashes === 'string') {
+      SC.Benchmark.start('updateRecords: eval');
+      if(this.get('useJSONParsing')) {
+        dataHashes = JSON.parse(dataHashes) ;
+      } else {
+        dataHashes = eval(dataHashes) ;
+      }
+      SC.Benchmark.end('updateRecords: eval');
+    }
+    
+    // One last sanity check to see if the hash is in the proper format.
+    if(typeof dataHashes !== 'object') {
+      return NO;
+    }
+
+    SC.Benchmark.start('updateRecords: loop');
+
     this.beginPropertyChanges() ;
 
-    //SC.Benchmark._bench(function() { 
-    dataHashes.forEach(function(data) {
-      var rt = data.recordType || recordType; 
-      if (data.recordType !== undefined) delete data.recordType;
-      
-      var pkValue = data[rt.primaryKey()] ;      
-      var rec = store.getRecordFor(pkValue,rt,true) ;
-      rec.dataSource = dataSource ;
-      if (data.refreshURL) rec.refreshURL = data.refreshURL;
-      if (data.updateURL) rec.updateURL = data.updateURL;
-      if (data.destroyURL) rec.destroyURL = data.destroyURL;
-      rec.updateAttributes(data, isLoaded, isLoaded) ;
-      if (rec.needsAddToStore) store.addRecord(rec) ;
-      if (rec.changeCount === 0) store.cleanRecord(rec);
-      ret.push(rec) ;
-    });
-
+    for(var i=0, iLen=dataHashes.length; i<iLen; i++) {
+      if(!this.updateRecord(dataHashes[i])) isSuccess = NO;
+    }
+    
     this.endPropertyChanges() ;
-    this.set('updateRecordsInProgress',false) ;
-    return ret ;
+    SC.Benchmark.end('updateRecords: loop');
+    
+    // Return YES to signify successful import.
+    return isSuccess;
+    
   },
-
-  // ....................................
-  // Record dataSource methods
-  //
-
-  refreshRecords: function(records) {},
-  
-  createRecords: function(recs) {
-    recs.invoke('set','newRecord','false') ;
-    this.commitRecords(recs); 
-  },
-  
-  commitRecords: function(recs) {
-     
-    recs.invoke('set','isDirty','false'); 
-    },
-  
-  destroyRecords: function(recs) {
-    var store = this ;
-    recs.forEach(function(r) { 
-      r.set('isDeleted',true); store.removeRecord(r);
-    });
-  },
-  
-  // ....................................
-  // Record Helpers
-  //
-  // Boolean Flag to tell whether the store is dirty
-  hasChanged: NO,
   
   /**
-    Add a record instance to the store.  The record will now be monitored for
-    changes.
+    Routes to the updateRecord function.
+
+    @param {Object} data hash for single record.
+    @param {Boolean} initLoad If YES, don't add created records to changes hash.
+
+    @returns {Boolean} Returns YES if the store operation was successful.
   */
-  addRecord: function(rec) {
-    // save record in a cache
-    rec.needsAddToStore = false;
-    var guid = rec._storeKey();
-    var records = this._records[guid] || [];
-    records.push(rec);
-    this._records[guid] = records; 
-
-    // global record cache
-    if (!this._quickCache) this._quickCache = {};
-
-    // records are cached by Class type
-    var records = this._quickCache[guid] || {};
-    var pkey = rec.get(rec.primaryKey);
-    records[pkey] = rec;
-    this._quickCache[guid] = records;
-
-    // and start observing it.
-    rec.addObserver('*',this, this.recordDidChange) ;
-    this.recordDidChange(rec) ;
-  },
-
-  /**
-    remove a record instance from the store.  The record will no longer be
-    monitored for changes and may be deleted.
-  */  
-  removeRecord: function(rec) {
-    // remove from cache
-    var guid = rec._storeKey();
-    var records = this._records[guid] || [];
-    records = records.without(rec);
-    this._records[guid] = records;
-    
-    // remove from quick cache
-    if (this._quickCache)
-    {
-      var records = this._quickCache[guid] || {};
-      var pkey = rec.get(rec.primaryKey);
-      delete records[pkey];
-      this._quickCache[guid] = records;
-    }
-
-    // and stop observing it.
-    rec.removeObserver('*',this, this.recordDidChange) ;
-    this.recordDidChange(rec) ; // this will remove from cols since destroyed.
+  addRecord: function(data, initLoad) {
+    return updateRecord(data, initLoad);
   },
   
-  cleanRecord: function(rec) {
-    var guid = rec._storeKey();
-    var dirty = this.get('_dirtyRecords') || {};
-    delete dirty[guid];
-    var count = 0;
-    for(var elem in dirty){
-      count = count + 1;
-    }
-    if (count === 0) {
-      this.set('hasChanged', NO);
-    }
-  },
-
   /**
-    Since records are cached by primaryKey, whenever that key changes we need 
-    to re-cache it in the proper place
+    This function creates or updates a record.
     
-    @param {string} oldkey Previous primary key
-    @param {string} newkey New primary key
-    @param {SC.Record} rec The object to relocate
-    @returns {SC.Record} The record passed in
-  **/
-  relocateRecord: function( oldkey, newkey, rec )
+    A record is a data hash that contains at least the following parameters:
+    
+    - guid: This is a unique identifier for the record. 
+    - type: The name of the record type.  I.e. "Contact" or "Photo"
+      
+    @param {Object} data hash for single record.
+    @param {Boolean} initLoad If YES, don't add created records to changes hash.
+
+    @returns {Boolean} Returns YES if the store operation was successful.
+  */
+  updateRecord: function(data, initLoad)
   {
-    if (!this._quickCache) return rec;
+    SC.Benchmark.start('updateRecord');
     
-    var classKey = rec._storeKey();
-    var records  = this._quickCache[classKey] || {};
+    var isSuccess = YES;
+    var store = this.store;
+    var guidRelation = this.guidRelation;
+    var revisionRelation = this.revisionRelation;
+    var changes = this.changes;
+    
+    var storeKey, rec;
+    var type = data.type;
+    var guid = data.guid;
+    
+    if(!type || !guid) {
+      var err = (!type && !guid) ? 'guid and type' : (!guid) ? 'guid' : (!type) ? 'type' : '';
+      console.log("SC.DataStore: Insertion of record failed, missing %@.".fmt(err));
+      isSuccess = NO;
+    }
 
-    records[newkey] = rec;
-    delete records[oldkey];
+    if(guidRelation[guid] !== undefined)
+    {
+      storeKey = guidRelation[guid];
+      if(store[storeKey])
+      {
+        rec = SC.clone(store[storeKey]);
+        rec.rev++;
+        revisionRelation[guid] = (revisionRelation[guid] < rec.rev) ? rec.rev : revisionRelation[guid];
+        rec.json = data;
+        changes.updatedGuids[guid] = (changes.updated.push({guid: guid, json: rec.json, rev: rec.rev})-1);
+      }
+      else
+      {
+        console.log("SC.DataStore: Record key is registed, but no record exists for guid %@.".fmt(guid));
+        isSuccess = NO;
+      }
+    }
+    else
+    {
+      storeKey = this.nextStoreIndex;
+      rec = {json: data, rev: 0};
+      guidRelation[guid] = storeKey;
+      revisionRelation[guid] = 0;
+      this.nextStoreIndex++;
+      this.storeSize++;
+      if(!initLoad)
+      {
+        changes.createdGuids[guid] = (changes.created.push({guid: guid, json: rec.json, rev: rec.rev})-1);
+      }
+    }
+    store[storeKey] = rec;
+    if(isSuccess) {
+      this.set('hasUncommittedChanges', YES);
+    }
     
-    this._quickCache[classKey] = records;
+    SC.Benchmark.end('updateRecord');
     
-    return rec;
+    return isSuccess;    
+  },
+  
+  /**
+    Given array of guids or records, delete them.
+    
+    @param {Array} guids Array of guids or records.
+    
+    @returns {Boolean} Returns YES if the store operation was successful.
+  */
+  deleteRecords: function(guids)
+  {
+    var isSuccess = YES;
+    
+    this.beginPropertyChanges() ;
+
+    for(var i=0, iLen=guids.length; i<iLen; i++) {
+       if(!this.deleteRecord(guids[i])) isSuccess = NO;
+    }
+    this.endPropertyChanges() ;
+    
+    return isSuccess;
+  },
+  
+  /**
+    Given guid or record, delete it.
+    
+    @param {Array} guid A guid or record.
+    
+    @returns {Boolean} Returns YES if the store operation was successful.
+  */
+  deleteRecord: function(guid)
+  {
+    if(typeof guid !== 'string') {
+      guid = guid.get('guid');
+      if(!guid) return NO;
+    }
+    
+    var storeIdx = this.guidRelation[guid];
+    var changes = this.changes;
+    if(storeIdx !== undefined)
+    {
+      var rec = this.store[storeIdx];
+      rec.rev++;
+      if(rec !== undefined)
+      {
+        changes.deletedGuids[guid] = (changes.deleted.push({guid: guid, json: rec.json, rev: rec.rev})-1);
+        this.revisionRelation[guid] = rec.rev;
+        // this.guidRelation[guid] = null;
+        this.store[storeIdx] = null;
+      }
+      // Should we delete the local version in the data store??
+
+      this.set('hasUncommittedChanges', YES);
+      return YES;
+    }
+    return NO;
+  },
+  
+
+  find: function(guid)
+  {
+    if(this.guidRelation[guid] !== undefined)
+    {
+      var storeKey = this.guidRelation[guid];
+      if(this.store[storeKey] !== undefined)
+      {
+        return this.store[storeKey];
+      }
+    }
+    return NO;
+  },
+  
+  
+  /*
+  
+    Private methods.
+  
+  */
+  
+  
+  /**
+    Given guids, destroy records.
+    
+    @private
+  */
+  _destroyRecords: function(guids) {
+    var isSuccess = YES;
+
+    this.beginPropertyChanges() ;
+
+    for(var i=0, iLen=guids.length; i<iLen; i++) {
+      if(!this._destroyRecord(guids[i])) isSuccess = NO;
+    }
+    this.endPropertyChanges() ;
+    
+    return isSuccess;
+  },
+  
+  _destroyRecord: function(guid)
+  {
+    try
+    {
+      var storeIdx = this.guidRelation[guid];
+      var rev = this.store[storeIdx].rev;
+      this.store[storeIdx] = null;
+      delete this.store[storeIdx];
+    
+      this.guidRelation[guid] = null;
+      delete this.guidRelation[guid];
+
+      this.revisionRelation[guid] = null;
+      delete this.revisionRelation[guid];
+      
+      this.storeSize--;
+    }
+    catch(err)
+    {
+      console.log("SC.DataStore: destroyRecord failed for %@ - %@".fmt(guid, err));
+      return NO;
+    }
+    return YES;
   },
 
   /**
-    You can pass any number of condition hashes to this, ending with a
-    recordType.  It will AND the results of each condition hash.
-  */  
-  findRecords: function() {
-    var allConditions = SC.$A(arguments) ;
-    var recordType = allConditions.pop() ;
-    var guid = recordType._storeKey() ;
-
-    // initial set of records.
-    var records = this._records[guid] ;
-    
-    while(allConditions.length > 0) {
-      var conditions = allConditions.pop() ;
-      var ret = [] ; var loc = (records) ? records.length : 0;
-      while(--loc >= 0) {
-        var rec = records[loc] ;
-        if ((rec.constructor == recordType) || (rec.constructor.coreRecordType == recordType)) {
-          if (rec.matchConditions(conditions)) ret.push(rec) ;
-        }
-      }
-      records = ret ;
-    }
-
-    // clone records...
-    return SC.$A(records) ;
-  },
-  
-  // private method used by Record and Store. Returns null if the record does not exist.
-  _getRecordFor: function(pkValue,recordType) {
-    var guid = recordType._storeKey() ;
-    var records = (this._quickCache) ? this._quickCache[guid] : null;
-    var ret = (records) ? records[pkValue] : null ;
-    return ret ;
-  },
-  
-  /**
-    finds the record with the primary key value.  If the record does not 
-    exist, creates it.
+    Reset the change set after a commit or discard operation.
+    @private
   */
-  getRecordFor: function(pkValue,recordType,dontAutoaddRecord) {
-    var ret = this._getRecordFor(pkValue,recordType) ;
-    if (!ret) {
-      var opts = {}; opts[recordType.primaryKey()] = pkValue;
-      ret = recordType.create(opts) ;
-      if (dontAutoaddRecord) {
-        ret.needsAddToStore = true ;
-      } else this.addRecord(ret) ;
-    }
-    return ret ;
-  },
+  _clearChangeSet: function() {
+    this.changes = {
+      created: [],
+      deleted: [],
+      updated: [],
+      createdGuids: {},
+      deletedGuids: {},
+      updatedGuids: {}
+    };
+  }
   
-  /** @property
-    Returns an array of all records in the store.  Mostly used for storing.
-  */
-  records: function() {
-    var ret = [] ;
-    if (this._quickCache) {
-      for(var key in this._quickCache) {
-        var recs = this._quickCache[key] ;
-        for(var recKey in recs) {
-          ret.push(recs[recKey]) ;
-        }
-      }
-    }
-    return ret ;
-  }.property(),
-  
-  // ....................................
-  // Collection Helpers
-  //
-  
-  addCollection: function(collection) {
-    var guid = collection.recordType._storeKey() ;
-    var collections = this._collections[guid] || [] ;
-    collections.push(collection) ;
-    this._collections[guid] = collections ;
-  },
-  
-  removeCollection: function(collection) {
-    var guid = collection.recordType._storeKey() ;
-    var collections = this._collections[guid] || [] ;
-    collections = collections.without(collection) ;
-    this._collections[guid] = collections ;
-  },
-  
-  listFor: function(opts) {
-    var conditions = opts.conditions || {} ;
-    var order = opts.order || ['guid'] ;
-    var records = this.findRecords(conditions,opts.recordType) ;
-    var count = records.length ;
-
-    // sort
-    records = records.sort(function(a,b) { return a.compareTo(b,order); }) ;
-    
-    // slice if needed.
-    if (opts.limit && (opts.limit > 0)) {
-      var start = (opts.offset) ? opts.offset : 0 ;
-      var end = start + opts.limit ;
-      records = records.slice(start,end) ;      
-    }
-    
-    // now run callback.
-    if (opts.callback) opts.callback(records,count) ; 
-  },
-  
-  dirtyRecords: function(){
-    var dirty = this.get('_dirtyRecords') || {};
-    var returnAry = [];
-    for(var elem in dirty){
-      if (dirty[elem] !== null) returnAry.push(dirty[elem]);
-    }
-    return returnAry;
-  }.property(),
-  
-  // ....................................
-  // PRIVATE
-  //
-  _records: {}, _changedRecords: {}, _collections: {}, _dirtyRecords: {},
-  
-  /** @private
-    called whenever properties on a record change.
-  */  
-  recordDidChange: function(rec) {
-    // add to changed records.  This will eventually notify collections.
-    var guid    = rec._storeKey(),
-        changed = this.get('_changedRecords') || {},
-        dirty = this.get('_dirtyRecords') || {},
-        records = changed[guid] || {} ;
-    records[SC.guidFor(rec)] = rec ;
-
-    changed[guid] = records ;    
-    this.set('_changedRecords',changed) ;
-    
-    // Set the global record changes
-    dirty[guid] = rec;
-    this.set('_dirtyRecords', dirty);
-    this.set('hasChanged', YES);
-    this._changedRecordsObserver() ;
-  },
-  
-  // invoked whenever the changedRecords hash is updated. This will notify
-  // collections.
-  _changedRecordsObserver: function() {
-    // process changedRecords to notify collections.
-    for(var guid in this._changedRecords) {
-      var collections = this._collections[guid] ;
-      if (collections && collections.length>0) {
-        
-        // collect records into array.  Faster than using uniq.
-        var records = [] ;
-        for(var key in this._changedRecords[guid]) {
-          records.push(this._changedRecords[guid][key]) ;
-        }
-        var cloc = collections.length ;
-        while(--cloc >= 0) {
-          
-          // for each collection watching this type of record, notify.
-          var col = collections[cloc] ;
-          col.beginPropertyChanges() ;
-          try {
-            // for each record...
-            var rloc = records.length ;
-            while(--rloc >= 0) {
-              var record = records[rloc] ;
-              // notify only if record type matches.
-              if (col.recordType == record.constructor) {
-                col.recordDidChange(record) ;
-              }
-            }
-          }
-          catch (e) {
-            console.log('EXCEPTION: While notifying collection') ;
-          }
-          col.endPropertyChanges() ;
-          
-        }
-      }
-    }
-    
-    // then clear changed records to start again.
-    this._changedRecords = {} ;
-    //this.set('hasChanged', NO);
-  }.observes('_changedRecords')
-    
 }) ;
+
+
+SC.DataStore.prototype.store = [];
+SC.DataStore.prototype.guidRelation = {};
+SC.DataStore.prototype.revisionRelation = {};
+SC.DataStore.prototype.nextStoreIndex = 0;
+SC.DataStore.prototype.storeSize = 0;
+SC.DataStore.prototype.activeStore = null;
+
+
+SC.Store = SC.DataStore.create({isBaseStore: YES});
+SC.Store.registerAsActive();
