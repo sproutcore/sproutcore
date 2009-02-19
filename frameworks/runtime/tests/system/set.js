@@ -268,3 +268,37 @@ test("should ignore removing an object not in the set", function() {
   set.remove(obj) ;
   equals(oldLength, set.length) ;
 });
+
+module("SC.Set.pop + SC.Set.clone", {
+// generate a set with every type of object, but none of the specific
+// ones we add in the tests below...
+	setup: function() {
+		set = SC.Set.create([
+			SC.Object.create({ dummy: YES }),
+			{ isHash: YES },
+			"Not the String",
+			16, false]) ;
+		},
+		
+		teardown: function() {
+			set = undefined ;
+		}
+});
+
+test("the pop() should remove an arbitrary object from the set", function() {
+	var oldLength = set.length ;
+	var obj = set.pop();
+	equals(SC.T_OBJECT,SC.typeOf(obj),'pops up an object');
+	equals(oldLength-1,set.length,'length shorter by 1');
+});
+
+test("the clone() should return an indentical set", function() {
+	var oldLength = set.length ;
+	var obj = set.clone();
+	equals(oldLength,obj.length,'length of the clone should be same');
+	equals(YES,obj.contains(set[0]));
+	equals(YES,obj.contains(set[1]));
+	equals(YES,obj.contains(set[2]));
+	equals(YES,obj.contains(set[3]));
+	equals(YES,obj.contains(set[4]));
+});

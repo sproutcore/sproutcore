@@ -10,7 +10,6 @@
   
   Routes makes it possible to load a location in the browser.
 
-<<<<<<< HEAD:frameworks/foundation/system/routes.js
   This is useful when application need to change state depending upon the URL 
   change. Applications can support deep-linking using routes, which means user 
   can type specific URL to see certain state of the app e.g.
@@ -53,36 +52,6 @@
   Doing this changes the location to #Documents/Photographs. Part after #, 
   Documents/Photographs in this case, gets passed as parameter to route 
   handler.
-  
-=======
-  This is useful when application need to change state depending upon the URL change.
-  Applications can support deep-linking using routes, which means user can type specific 
-  URL to see certain state of the app e.g.
-  http://localhost:4020/routes_demo#Documents/Photographs
-  
-  To use Routes, first add routes by using SC.route.add(route, target, method).
-  @route - Route is the part of the URL that come after hash (#).
-  @target - Object whose route handler needs to be invoked.
-  @method - Method that is the route handler.
-  
-  This registers the route to the routes system. When application's URL matches a registered route, 
-  system triggers the route handler. Route handler should contain the app logic to bring the app to 
-  the required state.
-  
-  Second thing to do with routes is to set location. Whenever you want to register any URL location
-  in browser history you can use SC.routes.set('location', 'some_path');
-  This will register the URL to browser history and also change the URL of the application.
-  Ideally when you set the location you would like route handler to get invoked. You should have
-  a route registered to match this pattern of the location.
-  
-  ex.
-  SC.routes.add(':', RoutesDemo, 'routeHandler');
-  This route would match any URL change. Whatever comes after # would get passed as parameter.
-  RouteDemo is the object that contains method 'routeHandler'.
-  
-  SC.routes.set('location', 'Documents/Photographs');
-  Doing this changes the location to #Documents/Photographs. Part after #, Documents/Photographs
-  in this case, gets passed as parameter to route handler.
   
   @extends SC.Object
   @since SproutCore 1.0
@@ -152,17 +121,17 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
   // static/route&param1=value&param2=value2
 
   add: function(route, target, method) {
-    // normalize the target/method
-    if (SC.typeOf(target) === SC.T_FUNCTION) {
-      method = target; target = null ;
-    } else if (SC.typeOf(method) === SC.T_STRING) {
-      method = target[method] ;
-    }
-    
+		// normalize the target/method
+		if (SC.typeOf(target) === SC.T_FUNCTION) {
+		  method = target; target = null ;
+		} else if (SC.typeOf(method) === SC.T_STRING) {
+		  method = target[method] ;
+		}
+		
     var parts = route.split('/') ;
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
     this._routes.addRoute(parts, target, method) ;
-    return this;
+		return this;
   },
 
   
@@ -190,11 +159,12 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     if (!this._routes) this._routes = SC.Routes._Route.create() ;
 
     routeHandler = this._routes.functionForRoute(parts,params) ;
+    
     if (routeHandler) {
-      target = routeHandler._target;
-      method = routeHandler._method;
-      method.call(target, params);
-    }
+  		target = routeHandler._target;
+  		method = routeHandler._method;
+  		method.call(target, params);
+  	}
 
     //else console.log('could not find route for: "'+route+'"') ;
   },
@@ -336,7 +306,8 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
   },
   
   _setupHistory: function() {
-    setInterval (this._checkWindowLocation.bind(this), 100);
+    var that = this ;
+    this._checkWindowLocation.invokeLater(this, 1000) ;
   },
   
   _checkWindowLocation: function() {
@@ -344,10 +315,10 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     var cloc = location.hash ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
     if (cloc != loc) {
-      SC.RunLoop.begin();
-      this.set('location',(cloc) ? cloc : '') ;
-      SC.RunLoop.end();
-    }
+			SC.RunLoop.begin();
+			this.set('location',(cloc) ? cloc : '') ;
+			SC.RunLoop.end();
+		}
     // this.invokeLater(this._checkWindowLocation, 100) ;
   },
   
@@ -367,10 +338,10 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
   _Route: SC.Object.extend({
     
     // route handler class.
-    _target: null,
-    
-    // route handler
-    _method: null,
+		_target: null,
+		
+		// route handler
+		_method: null,
     
     // staticly named routes.
     _static: null,
@@ -384,9 +355,9 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     addRoute: function(parts, target, method) {
 
       if (!parts || parts.length == 0) {
-        this._target = target;
-        this._method = method;
-        
+				this._target = target;
+				this._method = method;
+				
       // add to route table.
       } else {
         var part = parts.shift() ; // get next route.
@@ -406,8 +377,8 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           case '*':
             part = part.slice(1,part.length) ;
             this._wildcard = part ;
-            this._target = target;        
-            this._method = method;
+						this._target = target;				
+						this._method = method;
             break ;
             
           // setup a normal static route.
@@ -428,7 +399,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
 
       // if parts it empty, then we are here, so return func
       if (!parts || parts.length == 0) {
-        return this ;       
+        return this ;				
         
       // process the next part
       } else {
@@ -459,7 +430,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
         if ((ret == null) && this._wildcard) {
           parts.unshift(part) ;
           if (params) params[this._wildcard] = parts.join('/') ;
-          ret = this;
+					ret = this;
         }
         
         return ret ;

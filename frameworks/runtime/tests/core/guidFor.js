@@ -94,8 +94,8 @@ test("true should have different guid than false", function() {
 });
 
 test("guid should not parse to a number", function() {
-  equals(YES, isNaN(parseInt(SC.guidFor(true), 0))) ;
-  equals(YES, isNaN(parseInt(SC.guidFor(false), 0))) ;
+  equals(YES, isNaN(parseInt(SC.guidFor(true), 0)), 'guid for boolean-true') ;
+  equals(YES, isNaN(parseInt(SC.guidFor(false), 0)), 'guid for boolean-false') ;
 });
 
 module("Null and Undefined") ;

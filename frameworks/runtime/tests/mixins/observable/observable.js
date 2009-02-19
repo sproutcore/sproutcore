@@ -141,10 +141,10 @@ module("Observable objects & object properties ", {
       toggleVal: true,
       observedProperty:'beingWatched',
 	  testRemove:'observerToBeRemoved',	
-
-      automaticallyNotifiesObserversFor: function(key) { 
-	    return NO;
-	  },
+		
+	  automaticallyNotifiesObserversFor : function(key) { 
+	          	    return NO;		
+  	  },	
 	  
 	  getEach: function() {
 	    	var keys = ['normal','abnormal'];
@@ -161,58 +161,57 @@ module("Observable objects & object properties ", {
 	
 	  testObserver:function(){
 			this.abnormal = 'removedObserver';
-	  }
+	  }.observes('normal')
 	
-    });
-  }
+    });	
+	}	 
   
 });
 
-test('should increment and decrement the value of a property',function(){
+test('testing the incrementProperty and decrementProperty function of a property',function(){
   	var newValue = object.incrementProperty('numberVal');
-    equals(25,newValue);
+    equals(25,newValue,'numerical value incremented');
 	object.numberVal = 24;
 	newValue = object.decrementProperty('numberVal');
-    equals(23,newValue);
+    equals(23,newValue,'numerical value decremented');
 });
 
-test('should toggle with value of a property',function(){
+test('testing the toggle function for a property, should be boolean',function(){
   	equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal')); 
     equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
     equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));
 });
 
-test('should not notify the observers automatically',function(){
-  	equals(NO,object.automaticallyNotifiesObserversFor('normal')); 
+test('should not notify the observers of a property automatically',function(){
+	object.set('normal', 'doNotNotifyObserver'); 
+	equals(object.abnormal,'zeroValue')	;
 });
 
-test("should get all the values for the keys",function(){
-     var valueArray = object.getEach();
-     equals(valueArray[0],'value');
-     equals(valueArray[1],'zeroValue');
-});
-
-test("should add an observer",function(){
-	object.addObserver('observedProperty',object,object.newObserver());
-	object.observedProperty = 'beingObserved';
-	equals(object.abnormal,'changedValueObserved') ;
-});
 
 module("object.addObserver()", {	
 	setup: function() {
 				
 		ObjectC = SC.Object.create({
+			
+			ObjectE:SC.Object.create({
+				propertyVal:"chainedProperty"
+			}),
+			
 			normal: 'value',
 			normal1: 'zeroValue',
 			normal2: 'dependentValue',
 			incrementor: 10,
-										
+			
 			action: function() {
 				this.normal1= 'newZeroValue';
 			},
-			
+						
 			observeOnceAction: function() {
 				this.incrementor= this.incrementor+1;
+			},
+							
+			chainedObserver:function(){
+				this.normal2 = 'chainedPropertyObserved' ;
 			}
 		});
    	}
@@ -224,33 +223,38 @@ test("should register an observer for a property", function() {
 	equals(ObjectC.normal1, 'newZeroValue');
 });
 
-test("should register an observer for a property - Special case of reduced property", function() {
-	
-});
-
-test("should register an observer for a property change for once or for the specified time interval", function() {
-	// ObjectC.observeOnce('normal2', ObjectC,'observeOnceAction',15);
-	// ObjectC.set('normal2','newValue');
-	// equals(ObjectC.incrementor, 11);
-	// ObjectC.set('normal2','AnotherNewValue');
-	// equals(ObjectC.incrementor, 11);
+test("should register an observer for a property - Special case of chained property", function() {
+	 ObjectC.addObserver('ObjectE.propertyVal',ObjectC,'chainedObserver');
+	 ObjectC.ObjectE.set('propertyVal',"chainedPropertyValue");
+	 equals('chainedPropertyObserved',ObjectC.normal2);
+	 ObjectC.normal2 = 'dependentValue';
+	 ObjectC.set('ObjectE','');
+	 equals('chainedPropertyObserved',ObjectC.normal2);	
 });
 
 
 module("object.removeObserver()", {	
 	setup: function() {
 		ObjectD = SC.Object.create({
+			
+			ObjectF:SC.Object.create({
+					propertyVal:"chainedProperty"
+			}),
+			
 			normal: 'value',
 			normal1: 'zeroValue',
 			normal2: 'dependentValue',
 			ArrayKeys: ['normal','normal1'],
-						
+							
 			addAction: function() {
 				this.normal1= 'newZeroValue';
 			},
 			
 			removeAction: function() {
 				this.normal2= 'newDependentValue';
+			},
+			removeChainedObserver:function(){
+				this.normal2 = 'chainedPropertyObserved' ;
 			}
 		});
    	}
@@ -270,7 +274,14 @@ test("should unregister an observer for a property", function() {
 
 
 test("should unregister an observer for a property - special case when key has a '.' in it.", function() {
-		
+   	ObjectD.addObserver('ObjectF.propertyVal',ObjectD,'removeChainedObserver');
+	ObjectD.ObjectF.set('propertyVal',"chainedPropertyValue");
+	ObjectD.removeObserver('ObjectF.propertyVal',ObjectD,'removeChainedObserver');
+	ObjectD.normal2 = 'dependentValue';
+	ObjectD.ObjectF.set('propertyVal',"removedPropertyValue");
+	equals('dependentValue',ObjectD.normal2);
+	ObjectD.set('ObjectF','');
+	equals('dependentValue',ObjectD.normal2);	
 });
 
 
