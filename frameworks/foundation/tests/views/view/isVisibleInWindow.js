@@ -56,3 +56,47 @@ test("removing a view from a visible pane should make it invisible again", funct
   view.removeFromParent() ;
   ok(!view.get('isVisibleInWindow'), "after view.removeFromParent(), view.get('isVisibleInWindow') === NO") ;
 });
+
+// .......................................................
+// integration with updateLayer and layoutChildViews 
+//
+test("updateLayer should not be invoked even if layer becomes dirty until isVisibleInWindow changes, then it should invoke", function() {
+
+	var callCount = 0 ;
+	view.updateLayer = function() { callCount++; };
+	ok(!view.get('isVisibleInWindow'), 'precond - view should not be visible to start');
+	
+	SC.RunLoop.begin();
+	view.displayDidChange();
+	SC.RunLoop.end();
+	equals(callCount, 0, 'updateLayer should not run b/c its not visible');
+	
+	SC.RunLoop.begin();
+	pane.appendChild(view); // make visible in window...
+	ok(view.get('isVisibleInWindow'), 'view should now be visible in window');
+	SC.RunLoop.end();
+	equals(callCount, 1, 'updateLayer should exec now b/c isVisibleInWindow is YES');
+});
+
+test("layoutChildViewsIfNeeded should not be invoked even if layer needs layout until isVisibleInWindow changes, then it should invoke", function() {
+
+	var child = SC.View.create();
+	view.appendChild(child);
+	
+	var callCount = 0 ;
+	view.layoutChildViews = function() { callCount++; };
+	ok(!view.get('isVisibleInWindow'), 'precond - view should not be visible to start');
+	
+	SC.RunLoop.begin();
+	view.layoutDidChangeFor(child);
+	SC.RunLoop.end();
+	equals(callCount, 0, 'layoutChildViews should not run b/c its not visible');
+	
+	SC.RunLoop.begin();
+	pane.appendChild(view); // make visible in window...
+	ok(view.get('isVisibleInWindow'), 'view should now be visible in window');
+	SC.RunLoop.end();
+	equals(callCount, 1, 'layoutChildViews should exec now b/c isVisibleInWindow is YES');
+});
+
+  

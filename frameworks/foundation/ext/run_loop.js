@@ -35,20 +35,6 @@ SC.RunLoop = SC.RunLoop.extend(
     return ret; 
   },
   
-  /** @private - override to also notify views. */
-  flushApplicationQueues: function() {
-    // invoke super.  Note that we OR with hadContent last to ensure sc_super
-    // is always run.
-    var hadContent = sc_super() ; 
-    
-    // if nothing else was triggered, go ahead and flush the views as well.
-    // whenever possible we want to avoid updating the view hierarchy until
-    // all app logic is finished executing.
-    if (!hadContent) hadContent = SC.View.flushPendingQueues();
-
-    return hadContent ;
-  },
-
   // ..........................................................
   // TIMER SUPPORT
   // 

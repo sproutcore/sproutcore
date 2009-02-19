@@ -6,30 +6,12 @@
 // ==========================================================================
 
 require('system/browser');
-require('system/core_query');
 require('system/event');
 
 require('mixins/responder') ;
 require('mixins/string') ;
 
 SC.viewKey = SC.guidKey + "_view" ;
-
-/** @private */
-SC.DISPLAY_LOCATION_QUEUE = 'updateDisplayLocationIfNeeded';
-// SC.VIEW_HIERARCHY_QUEUE = 'updateViewHierarchyIfNeeded'; // <-- How about using this name? -E
-
-/** @private */
-SC.UPDATE_CHILD_LAYOUT_QUEUE   = 'updateChildLayoutIfNeeded';
-
-/** @private */
-SC.DISPLAY_LAYOUT_QUEUE   = 'updateDisplayLayoutIfNeeded';
-// SC.APPLY_LAYOUT_QUEUE   = 'applyLayoutIfNeeded'; // <-- How about using this name? -E
-
-/** @private */
-SC.DISPLAY_UPDATE_QUEUE   = 'updateDisplayIfNeeded';
-
-/** @private Properties that require the empty element to be recached. */
-SC.EMPTY_ELEMENT_PROPERTIES = 'emptyElement tagName styleClass'.w();
 
 /** Select a horizontal layout for various views.*/
 SC.LAYOUT_HORIZONTAL = 'sc-layout-horizontal';
@@ -166,15 +148,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   parentView: null,
 
-  /** 
-    Set to true when the item is enabled. 
+  // ..........................................................
+  // IS ENABLED SUPPORT
+  // 
 
-    Changing this property by default calls the 
-    updateChildViewEnabledStates(), which will simply change the isEnabled 
-    property on all child views as well.  You can add your own observer on
-    this property to make specific changes to the appearance of your view as 
-    well. 
-    
+  /** 
+    Set to true when the item is enabled.   Note that changing this value
+    will also alter the isVisibleInWindow property for this view and any
+    child views.
+
     Note that if you apply the SC.Control mixin, changing this property will
     also automatically add or remove a 'disabled' CSS class name as well.
     
@@ -184,11 +166,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   isEnabled: YES,
   isEnabledBindingDefault: SC.Binding.oneWay().bool(),
-  
-  updateChildViewEnabledStates: function() {
-    var isEnabled = this.get('isEnabled');
-    this.get('childViews').invoke('set','isEnabled', isEnabled);
-  }.observes('isEnabled'),
+
+  /**
+    Computed property returns YES if the view and all of its parent views
+    are enabled in the pane.  You should use this property when deciding 
+    whether to respond to an incoming event or not.
+    
+    This property is not observable.
+    
+    @property {Boolean}
+  */
+  isEnabledInPane: function() {
+    var ret = this.get('isEnabled'), pv ;
+    if (ret && (pv = this.get('parentView'))) ret = pv.get('isEnabledInPane');
+    return ret ;
+  }.property('parentView', 'isEnabled'),
   
   // ..........................................................
   // IS VISIBLE IN WINDOW SUPPORT
@@ -241,10 +233,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // if the state has changed, update it and notify children
     if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
+      
+      // if we just became visible, update layer + layout if needed...
+      if (cur && this.get('layerNeedsUpdate')) this.updateLayerIfNeeded();
+      if (cur && this.get('childViewsNeedLayout')) this.layoutChildViewsIfNeeded();
+      
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(cur);
       }
+      
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
@@ -290,7 +288,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
     // remove view from old parent if needed.  Also notify views.
     if (view.get('parentView')) view.removeFromParent() ;
-    if (this.willAddChild) this.willAddChild(this, beforeView) ;
+    if (this.willAddChild) this.willAddChild(view, beforeView) ;
     if (view.willAddToParent) view.willAddToParent(this, beforeView) ;
 
     // set parentView of child
@@ -308,7 +306,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     view.layoutDidChange() ;
 
     // notify views
-    if (this.didAddChild) this.didAddChild(this, beforeView) ;
+    if (this.didAddChild) this.didAddChild(view, beforeView) ;
     if (view.didAddToParent) view.didAddToParent(this, beforeView) ;
     
     view.endPropertyChanges();
@@ -429,9 +427,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   parentViewDidChange: function() {
     this.recomputeIsVisibleInWindow() ;
 
-    var hasLayer = !!this.get('layer'); // do we have a layer?
-    if (hasLayer) this.set('layerLocationNeedsUpdate', YES) ;
-    if (hasLayer) this.invokeOnce(this.updateLayerLocationIfNeeded);
+    this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocationIfNeeded);
 
     return this ;
   }.observes('isVisible'),
@@ -554,6 +551,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     update the layer only if this property is YES.
     
     @property {Boolean}
+    @test in updateLayer
   */
   layerNeedsUpdate: NO,
   
@@ -583,6 +581,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     @param {Boolean} isVisible if true assume view is visible even if it is not.
     @returns {SC.View} receiver
+    @test in updateLayer
   */
   updateLayerIfNeeded: function(isVisible) {
     if (!isVisible) isVisible = this.get('isVisibleInWindow');
@@ -741,12 +740,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (firstTime) {
       layerId = this.layerId ? this.get('layerId') : SC.guidFor(this);
       context.id(layerId).classNames(this.get('classNames'), YES);
-      this.renderLayout(context); 
+      this.renderLayout(context, firstTime); 
     }
     
     // do some standard setup...
     if (this.get('isTextSelectable')) context.addClass('text-selectable');
     if (!this.get('isEnabled')) context.addClass('disabled');
+    if (!this.get('isVisible')) context.addClass('hidden');
     
     this.render(context, firstTime);
     if (mixins = this.renderMixin) {
@@ -764,6 +764,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @param {SC.RenderContext} context the context
     @param {Boolean} firstName true if the layer is being created
     @returns {SC.RenderContext} the render context
+    @test in render
   */
   renderChildViews: function(context, firstTime) {
     var cv = this.get('childViews'), len = cv.length, idx, view;
@@ -861,13 +862,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     point.
     
     @property {Boolean} force This property is ignored.
-    @returns {Boolean} YES if the location was updated 
+    @returns {SC.View} receiver 
+    @test in updateLayerLocation
   */
   updateLayerLocationIfNeeded: function(force) {
-    if (!this.get('layerLocationNeedsUpdate')) return YES;
-    this.set('layerLocationNeedsUpdate', NO) ;
-    this.updateLayerLocation() ;
-    return YES ;
+    if (this.get('layerLocationNeedsUpdate')) {
+      this.set('layerLocationNeedsUpdate', NO) ;
+      this.updateLayerLocation() ;
+    }
+    return this ;
   },
 
   /**
@@ -913,7 +916,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && !nextNode) {
-        nextView.updateDisplayLocationIfNeeded();
+        nextView.updateLayerLocationIfNeeded();
         nextNode = nextView.get('layer');
       }
       
@@ -1125,6 +1128,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @param {Class} viewClass
     @param {Hash} attrs optional attributes to add
     @returns {SC.View} new instance
+    @test in createChildViews
   */
   createChildView: function(view, attrs) {
     // attrs should always exist...
@@ -1223,15 +1227,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     Layout is designed to maximize reliance on the browser's rendering 
     engine to keep your app up to date.
+    
+    @test in layoutStyle
   */
   layout: { top: 0, left: 0, bottom: 0, right: 0 },
 
-  /**
+  /** 
     LayoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
     you edit the layout property.  Both are read only.
-  */
-  /** 
+
     Computes the layout style settings needed for the current anchor.
   */
   layoutStyle: function() {
@@ -1358,7 +1363,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
     }
     return ret ;
-  }.property('layout').cacheable(),
+  }.property().cacheable(),
   
   /**
     The view responsible for laying out this view.  The default version 
@@ -1372,6 +1377,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     This method is called whenever a property changes that invalidates the 
     layout of the view.  Changing the layout will do this automatically, but 
     you can add others if you want.
+    
+    @returns {SC.View} receiver
   */
   layoutDidChange: function() {
     this.beginPropertyChanges() ;
@@ -1381,7 +1388,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // notify layoutView...
     var layoutView = this.get('layoutView');
-    if (layoutView) layoutView.layoutDidChangeFor(this) ;
+    if (layoutView) {
+      layoutView.set('childViewsNeedLayout', YES);
+      layoutView.layoutDidChangeFor(this) ;
+      if (layoutView.get('childViewsNeedLayout')) {
+        layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
+      }
+     }
     
     return this ;
   }.observes('layout'),
@@ -1393,22 +1406,24 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     @property {Boolean}
   */
-  needsLayout: NO,
+  childViewsNeedLayout: NO,
 
-  _view_needsLayoutDidChange: function() {
-    if (this.get('needsLayout')) this.invokeOnce(layoutView.layoutIfNeeded);
-  }.property('needsLayout'),
-  
   /**
-    Invoked by a child view whenever its layout changes.  The default 
-    implementation of this method records the child view in a set for later
-    processing and then sets needsLayout to YES to cause layout to be called
-    later.
+    One of two methods that are invoked whenever one of your childViews 
+    layout changes.  This method is invoked everytime a child view's layout
+    changes to give you a chance to record the information about the view.
+      
+    Since this method may be called many times during a single run loop, you
+    should keep this method pretty short.  The other method called when layout
+    changes, layoutChildViews(), is invoked only once at the end of 
+    the run loop.  You should do any expensive operations (including changing
+    a childView's actual layer) in this other method.
     
-    You can override this method to do your own layout and you do not need
-    to call sc_super().  However, be sure you set needsLayout to YES if you
-    need your layout() method to run at the end of the run loop.
-    
+    Note that if as a result of running this method you decide that you do not
+    need your layoutChildViews() method run later, you can set the 
+    childViewsNeedsLayout property to NO from this method and the layout 
+    method will not be called layer.
+     
     @param {SC.View} childView the view whose layout has changed.
     @returns {void}
   */
@@ -1416,7 +1431,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var set = this._needLayoutViews ;
     if (!set) set = this._needLayoutViews = SC.Set.create();
     set.add(childView);
-    this.set('needsLayout', YES);
   },
   
   /**
@@ -1425,11 +1439,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     @param {Boolean} isVisible if true assume view is visible even if it is not.
     @returns {SC.View} receiver
+    @test in layoutChildViews
   */
-  layoutIfNeeded: function(isVisible) {
+  layoutChildViewsIfNeeded: function(isVisible) {
     if (!isVisible) isVisible = this.get('isVisibleInWindow');
-    if (isVisible && this.get('needsLayout')) {
-      this.set('needsLayout', NO);
+    if (isVisible && this.get('childViewsNeedLayout')) {
+      this.set('childViewsNeedLayout', NO);
       this.layoutChildViews();
     }
     return this ;
@@ -1441,7 +1456,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     own layout updating method if you want, though usually the better option
     is to override the layout method from the parent view.
     
-    The default implementation of this method simply calls the applyLayout()
+    The default implementation of this method simply calls the renderLayout()
     method on the views that need layout.
     
     @returns {void}
@@ -1451,14 +1466,33 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var view, context, layer;
     for(idx=0;idx<len;idx++) {
       view = set[idx];
-      if(!(layer = view.get('layer'))) continue ; // nothing to do
-      
-      context = view.renderContext(layer);
-      view.renderLayout(context);
-      context.update();
+      view.updateLayout();
     }
     view = context = layer = null ; // cleanup
     set.clear(); // reset & reuse
+  },
+  
+  /**
+    Invoked by the layoutChildViews method to update the layout on a 
+    particular view.  This method creates a render context and calls the 
+    renderLayout() method, which is probably what you want to override instead 
+    of this.
+    
+    You will not usually override this method, but you may call it if you 
+    implement layoutChildViews() in a view yourself.
+    
+    @returns {SC.View} receiver
+    @test in layoutChildViews
+  */
+  updateLayout: function() {
+    var layer = this.get('layer'), context;
+    if (layer) {
+      context = this.renderContext(layer);
+      this.renderLayout(context);
+      context.update();
+    }
+    layer = null ;
+    return this ;
   },
   
   /**
@@ -1469,8 +1503,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     @param {SC.RenderContext} the render context
     @returns {void}
+    @test in layoutChildViews
   */
-  renderLayout: function(context) {
+  renderLayout: function(context, firstTime) {
     context.addStyle(this.get('layoutStyle'));
   }
     
@@ -1496,7 +1531,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
     var ret = this.extend.apply(this, arguments);
     ret.isDesign = YES ;
     if (SC.ViewDesigner) {
-      SC.ViewDesigner.didLoadDesign(ret, this, SC.$A(arguments));
+      SC.ViewDesigner.didLoadDesign(ret, this, SC.A(arguments));
     }
     return ret ;
   },
@@ -1531,7 +1566,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
   */
   childView: function(cv) {
     var childViews = this.prototype.childViews || [];
-    if (childViews === this.superclass.prototype.childViews) childViews = [];
+    if (childViews === this.superclass.prototype.childViews) childViews = childViews.slice();
     childViews.push(cv) ;
     this.prototype.childViews = childViews;
     return this ;
@@ -1643,59 +1678,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
     SC.mixin(this.prototype, loc) ;
   },
   
-  views: {},
-  
-  /**
-    Called by the runloop at the end of the runloop to update any scheduled
-    view queues.  Returns YES if some items were flushed from the queue.
-  */
-  flushPendingQueues: function() {
-    return this.runLoopQueue.flush() ;
-  },
-  
-  /**
-    Called by view instances to add them to a queue with the specified named.
-  */
-  scheduleInRunLoop: function(queueName, view) {
-    this.runLoopQueue.add(queueName, view);
-  },
-  
-  /** @private
-  Manages the queue of views that need to have some method executed. */
-  runLoopQueue: {
-    add: function(queueName, view) {
-      var queue = this[queueName] ;
-      if (!queue) queue = this[queueName] = SC.Set.create();
-      queue.add(view) ;
-    },
-    
-    // flushes all queues in order.  Return YES if any of the queus actually
-    // had something to do, so that this will repeat.
-    flush: function() {
-      var needsFlush = NO, order = this.order, len = order.length, idx;
-      for(idx=0;idx<len;idx++) {
-        if (this.flushQueue(order[idx])) needsFlush = YES;
-      }
-      return needsFlush;
-    },
-
-    // flush a single queue.  Any views that cannot execute will be put 
-    // back into the queue.
-    flushQueue: function(queueName) {
-      var didExec = NO, queue = this[queueName], view ;
-      if (!queue) return NO ;
-      
-      delete this[queueName] ;// reset queue
-      while(view = queue.pop()) {
-        if (view[queueName]()) {
-          didExec = YES ;
-        } else this.add(queueName, view);
-      }
-      return didExec;
-    },
-    
-    order: [SC.DISPLAY_LOCATION_QUEUE, SC.UPDATE_CHILD_LAYOUT_QUEUE, SC.DISPLAY_LAYOUT_QUEUE, SC.DISPLAY_UPDATE_QUEUE]
-  }
+  views: {}
     
 }) ;
 

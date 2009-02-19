@@ -64,7 +64,7 @@ test("invokes didCreateLayer() on receiver and all child views", function() {
 
 test("generated layer include HTML from child views as well", function() {
   var v = SC.View.create({
-    childViews: [ SC.View.extemd({ layerId: "foo" })]
+    childViews: [ SC.View.extend({ layerId: "foo" })]
   });
   
   v.createLayer();

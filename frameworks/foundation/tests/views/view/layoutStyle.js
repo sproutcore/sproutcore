@@ -10,42 +10,45 @@ var parent, child;
 
 function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   
-  // make sure we add null properties to style layout.
-  var keys = 'width height top bottom marginLeft marginTop left right'.w();
+  // make sure we add null properties and convert numbers to 'XXpx' to style layout.
+  var keys = 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight'.w();
   keys.forEach(function(key) {
     if (no_s[key]===undefined) no_s[key] = null;
     if (with_s[key]===undefined) with_s[key] = null;  
+
+    if (typeof no_s[key] === 'number') no_s[key] = no_s[key].toString() + 'px';
+    if (typeof with_s[key] === 'number') with_s[key] = no_s[key].toString() + 'px';
   });
   
   // set layout
   child.set('layout', layout) ;
 
   // test
-  isObj(child.get('frame'), no_f, "FRAME NO PARENT: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(no_f))) ;  
-  isObj(child.get('layoutStyle'), no_s, "STYLE NO PARENT: %@ == %@".fmt(SC.inspect(child.get('layoutStyle')), SC.inspect(no_s))) ;  
+  same(child.get('frame'), no_f, "FRAME NO PARENT".fmt(SC.inspect(child.get('frame')), SC.inspect(no_f))) ;  
+  same(child.get('layoutStyle'), no_s, "STYLE NO PARENT".fmt(SC.inspect(child.get('layoutStyle')), SC.inspect(no_s))) ;  
 
   // add parent
   parent.appendChild(child);
   
   // test again
-  isObj(child.get('frame'), with_f, "FRAME WITH PARENT: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(with_f))) ;  
-  isObj(child.get('layoutStyle'), with_s, "STYLE WITH PARENT: %@ == %@".fmt(SC.inspect(child.get('layoutStyle')), SC.inspect(with_s))) ;  
+  same(child.get('frame'), with_f, "FRAME WITH PARENT".fmt(SC.inspect(child.get('frame')), SC.inspect(with_f))) ;  
+  same(child.get('layoutStyle'), with_s, "STYLE WITH PARENT".fmt(SC.inspect(child.get('layoutStyle')), SC.inspect(with_s))) ;  
 }
 
 var commonSetup = {
   setup: function() {
     
     // create basic parent view
-    parent = SC.View.create({
+    parent = SC.View.create(SC.FrameSupport, {
       layout: { top: 0, left: 0, width: 200, height: 200 }
     });
     
     // create child view to test against.
-    child = SC.View.create();
+    child = SC.View.create(SC.FrameSupport);
   },
   
   teardown: function() {
-    parent.destroy(); child.destroy();
+    //parent.destroy(); child.destroy();
     parent = child = null ;
   }
 };
