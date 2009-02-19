@@ -34,13 +34,6 @@ test("Update the sparse array using provideContentAtIndex", function() {
 	equals(obj, ary._sa_content[1],"Content at 1st index");
 });
 
-test("SC.flush + sparsh array flushed",function(){
-	var spArr = SC.SparseArray.create(3);
-	var arr = [1,"hello",true];
-	//spArr.flush();
-	equals(0,spArr.length,'length of sparse array');
-});
-
 test("objectAt() should get the object at the specified index",function() {
 	var spArray = SC.SparseArray.create(4) ;
 	var arr = [SC.Object.create({ dummy: YES }),"Sproutcore",2,true];

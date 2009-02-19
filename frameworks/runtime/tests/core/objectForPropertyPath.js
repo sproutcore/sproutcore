@@ -13,7 +13,7 @@ test("should be able to resolve an object on the window", function() {
   isObj(window['myGlobal'], { test: 'this '}) ;
   
   // verify we can resolve our binding path
-  isObj(SC.objectForPropertyPath('myGlobal'), { test: 'this '}) ;
+  same(SC.objectForPropertyPath('myGlobal'), { test: 'this '}) ;
   
   delete g ;
 });

@@ -23,7 +23,7 @@ module("Checking the tuple for property path",{
 test("should check for the tuple property", function() {
      var object2 = [];
      object2 = SC.tupleForPropertyPath(object.name,'');
-     equals(object2[0],'[object Window]',"the window object");
+     equals(object2[0], window, "the window object");
      equals(object2[1],'SproutCore',"the property name");	
      object2 = SC.tupleForPropertyPath(object.objectA.propertyVal,'object');
 	 equals(object2[0],'object',"the root");
