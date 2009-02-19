@@ -543,7 +543,7 @@ SC.Pane = SC.View.extend(SC.FrameSupport, {
     if (hasLayer) this.paneDidAttach();
   },
 
-  styleClass: 'sc-pane'.w()
+  classNames: 'sc-pane'.w()
   
 }) ;
 

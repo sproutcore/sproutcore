@@ -20,7 +20,7 @@ SC.NATURAL_SCROLLER_THICKNESS = 16;
 SC.ScrollerView = SC.View.extend({
 
   emptyElement: '<%@1><div class="sc-inner"></div></%@1>',
-  styleClass: 'sc-scroller-view',
+  classNames: 'sc-scroller-view',
   
   // ..........................................................
   // PROPERTIES

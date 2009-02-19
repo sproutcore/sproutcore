@@ -24,7 +24,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.Button,
 
   // HTML design options
   emptyElement: '<%@1><img src="'+static_url('blank')+'" class="button" /><input type="checkbox" /><span class="sc-button-label"></span></%@1>',
-  styleClass: ['sc-checkbox-view'],
+  classNames: ['sc-checkbox-view'],
   tagName: 'label',
 
   // ..........................................

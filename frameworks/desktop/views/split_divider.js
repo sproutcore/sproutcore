@@ -30,7 +30,7 @@ sc_require('views/split');
 SC.SplitDividerView = SC.View.extend(
 /** @scope SC.SplitDividerView.prototype */ {
 
-  styleClass: ['sc-split-divider-view'],
+  classNames: ['sc-split-divider-view'],
   
   mouseDown: function(evt) {
     var splitView = this.get('splitView');

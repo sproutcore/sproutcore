@@ -11,7 +11,7 @@ QUnit.bodyPage = SC.Page.create({
     childViews: [
       SC.View.design({
         layout: { top: 0, left: 0, right: 0, height: 40 },
-        styleClass: 'app-header',
+        classNames: 'app-header',
         
         childViews: [
           SC.ImageView.design({
@@ -23,7 +23,7 @@ QUnit.bodyPage = SC.Page.create({
             layout: { top: 10, left: 40, height: 20, right: 300 },
             controlSize: SC.LARGE_CONTROL_SIZE,
             fontWeight: SC.BOLD_WEIGHT,
-            styleClass: 'app-label',
+            classNames: 'app-label',
             valueBinding: 'QUnit.runnerController.displayClientName'
           }),
           
@@ -80,7 +80,7 @@ QUnit.bodyPage = SC.Page.create({
       
       SC.View.design({
         layout: { height: 40, left: 0, right: 0, bottom: 0 },
-        styleClass: 'app-footer',
+        classNames: 'app-footer',
         
         childViews: [
           SC.LabelView.design({

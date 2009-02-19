@@ -271,8 +271,7 @@ SC.FrameSupport = {
     clippingFrame is in the context of the view itself, not it's parent view.
     
     Normally this will be calculate based on the intersection of your own 
-    clippingFrame and your parentView's clippingFrame.  SC.ClipView may also
-    shift this by a certain amount.    
+    clippingFrame and your parentView's clippingFrame.   
   */
   clippingFrame: function() {
     var pv= this.get('parentView'), f = this.get('frame'), ret = f ;

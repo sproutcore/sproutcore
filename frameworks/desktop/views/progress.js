@@ -96,7 +96,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   
   emptyElement: '<%@1><div class="sc-outer-head"></div><div class="sc-inner"><div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div><div class="sc-outer-tail"></div></%@1>',
 
-  styleClass: 'sc-progress-view',
+  classNames: 'sc-progress-view',
   
   // ........................................
   // INTERNAL SUPPORT

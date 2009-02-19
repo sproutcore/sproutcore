@@ -17,7 +17,7 @@ SC.DisclosureView = SC.ButtonView.extend(
 
   emptyElement: '<%@1 role="button"><img src="'+static_url('blank')+'" alt=""/ class="button"><label class="sc-button-label"></label></%@1>',
   tagName: 'a',
-  styleClass: 'sc-disclosure-view',
+  classNames: 'sc-disclosure-view',
   
   theme: 'disclosure',
   buttonBehavior: SC.TOGGLE_BEHAVIOR,

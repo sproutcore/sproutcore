@@ -51,13 +51,13 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   
   @extends SC.ClassicView
   @extends SC.CollectionViewDelegate
-  
+  @extends SC.FrameSupport
 */
-SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
+SC.CollectionView = SC.View.extend(SC.FrameSupport, SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
-  styleClass: 'sc-collection-view',
+  classNames: 'sc-collection-view',
   
   // ......................................
   // PROPERTIES
@@ -1182,21 +1182,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // zero length means do nothing.
     if (length === 0) return ;
     
-    var content = SC.makeArray(this.get('content')) ;
+    var content = SC.makeArray(this.get('content')), c, itemView, idx ;
     
     // negative length == remove item views
     if (length < 0) {
       while(++length < 0) {
-        var c = content.objectAt(start + length) ;
-        var itemView = this.itemViewForContent(c) ;
+        c = content.objectAt(start + length) ;
+        itemView = this.itemViewForContent(c) ;
         if (itemView) this._removeItemView(itemView, groupBy) ;
       }
     
     // positive length == add item views.
     } else if (length > 0) {
       while(--length >= 0) {
-        var idx = start + length ;
-        var c = content.objectAt(idx) ;
+        idx = start + length ;
+        c = content.objectAt(idx) ;
         this._insertItemViewFor(c, groupBy, idx) ;
       }  
     }

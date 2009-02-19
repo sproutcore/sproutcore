@@ -41,7 +41,7 @@ SC.ImageView = SC.View.extend(SC.Control,
   
   /** Image views contain an img tag. */
   emptyElement: '<%@1 src="'+SC.BLANK_IMAGE_URL+'" />',
-  styleClass: 'sc-image-view',
+  classNames: 'sc-image-view',
   tagName: 'img',
   
   /**

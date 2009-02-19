@@ -23,7 +23,7 @@ SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
 
   emptyElement: '<%@1><span class="sc-inner"><img src="'+static_url('blank')+'" class="sc-handle" /></span></%@1>',
-  styleClass: 'sc-slider-view',
+  classNames: 'sc-slider-view',
   
   /** 
     The DOM element that displays the handle.  This element will have its

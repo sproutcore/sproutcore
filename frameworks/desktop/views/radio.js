@@ -19,7 +19,7 @@ SC.RadioView = SC.FieldView.extend(
   // HTML design options
   emptyElement: '<%@1></%@1>',
   tagName: 'div',
-  styleClass: ['sc-radio-view'],
+  classNames: ['sc-radio-view'],
 
   /**
     The value of the currently selected item.

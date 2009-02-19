@@ -24,7 +24,7 @@
 SC.ThumbView = SC.View.extend(
 /** @scope SC.ThumbView.prototype */ {
 
-  styleClass: ['sc-thumb-view'],
+  classNames: ['sc-thumb-view'],
   
   /**
     Enable this thumb view to control its parent split view.

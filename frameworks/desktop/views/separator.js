@@ -17,7 +17,7 @@ SC.SeparatorView = SC.View.extend(
 /** @scope SC.SeparatorView.prototype */ {
 
   emptyElement: '<span><span></span></span>',
-  styleClass: ['sc-separator-view'],
+  classNames: ['sc-separator-view'],
 
   /** 
     Select the direction of the separator line.  Must be one of SC.LAYOUT_VERTICAL or SC.LAYOUT_HORIZONTAL.

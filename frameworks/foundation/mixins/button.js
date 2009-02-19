@@ -272,7 +272,7 @@ SC.Button = {
     return state ;
   },
   
-  prepareDisplayMixin: function() {
+  initMixin: function() {
     // if value is not null, update isSelected to match value.  If value is
     // null, we assume you may be using isSelected only.  
     if (!SC.none(this.get('value'))) this._button_valueDidChange();  

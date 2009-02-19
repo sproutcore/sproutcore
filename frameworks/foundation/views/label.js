@@ -31,7 +31,7 @@ SC.BOLD_WEIGHT = 'bold';
 SC.LabelView = SC.View.extend(SC.Control,
 /** @scope SC.LabelView.prototype */ {
 
-  styleClass: ['sc-label-view'],
+  classNames: ['sc-label-view'],
 
   /**
     Specify the font weight for this.  You may pass SC.REGULAR_WEIGHT, or SC.BOLD_WEIGHT.

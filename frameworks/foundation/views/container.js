@@ -19,8 +19,11 @@ sc_require('views/view') ;
   If you want to change the way the container view swaps in your new view, 
   override the replaceContent() method.
   
+  @extends SC.View
+  @extends SC.FrameSupport
+  @since SproutCore 1.0
 */
-SC.ContainerView = SC.View.extend(
+SC.ContainerView = SC.View.extend(SC.FrameSupport,
 /** @scope SC.ContainerView.prototype */ {
 
   classNames: ['sc-container-view'],

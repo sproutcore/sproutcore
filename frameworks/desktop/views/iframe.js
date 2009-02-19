@@ -13,10 +13,10 @@
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.IFrameView = SC.View.extend({
+SC.IFrameView = SC.View.extend(SC.FrameSupport, {
   
   emptyElement: '<div><iframe style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe></div>',
-  styleClass: 'sc-iframe-view',
+  classNames: 'sc-iframe-view',
 
   content: null,
   contentBindingDefault: SC.Binding.single().notEmpty(),

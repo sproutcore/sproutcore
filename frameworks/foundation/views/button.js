@@ -34,7 +34,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   
   emptyElement: '<%@1 role="button"><span class="sc-button-inner"><label class="sc-button-label"></label></span></%@1>',                                                                                                                                                                                                                                                                                     
   tagName: 'a',
-  styleClass: ['sc-button-view'],
+  classNames: ['sc-button-view'],
   
   /**
     optionally set this to the theme you want this button to have.  

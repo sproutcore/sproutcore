@@ -59,7 +59,7 @@ sc_require('views/list_item') ;
 SC.ListView = SC.CollectionView.extend(
 /** @scope SC.ListView.prototype */ {
   
-  styleClass: 'sc-list-view',
+  classNames: 'sc-list-view',
   
   /**
     The default example item view will render text-based items.
@@ -371,7 +371,7 @@ SC.ListView = SC.CollectionView.extend(
   
   insertionPointClass: SC.View.extend({
     emptyElement: '<div><span class="anchor"></span></div>',
-    styleClass: 'sc-list-insertion-point',
+    classNames: 'sc-list-insertion-point',
     layout: { top: -6, height: 2, left: 4, right: 2 }
   }),
   

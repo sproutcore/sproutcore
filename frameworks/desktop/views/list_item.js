@@ -29,7 +29,7 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
 SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
 /** @scope SC.ListItemView.prototype */ {
   
-  styleClass: 'sc-list-item-view sc-collection-item'.w(),
+  classNames: 'sc-list-item-view sc-collection-item'.w(),
   
   /**
     The content object the list item will display.
