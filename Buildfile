@@ -11,8 +11,8 @@
 config :all, 
   :layout         => 'sproutcore:lib/index.rhtml',
   :test_layout    => 'sproutcore:lib/index.rhtml',
-  :test_required  => '/sproutcore/testing',
-  :debug_required => ['/sproutcore/debug']
+  :test_required  => ['sproutcore/testing', 'sproutcore/empty_theme'],
+  :debug_required => ['sproutcore/debug']
   
 config :runtime,   :required => []
 config :foundation, :required => [:runtime]

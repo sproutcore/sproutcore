@@ -507,13 +507,26 @@ SC.Pane = SC.View.extend(SC.FrameSupport, {
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isPaneAttached') && this.get('isVisible') ;
-    
+
     // if the state has changed, update it and notify children
-    if (last != cur) {
+    if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
-      var childViews = this.get('childViews'), idx = childViews.length;
-      while(--idx>=0) childViews[idx].recomputeIsVisibleInWindow(cur);
+      
+      // if we just became visible, update layer + layout if needed...
+      if (cur && this.get('layerNeedsUpdate')) this.updateLayerIfNeeded();
+      if (cur && this.get('childViewsNeedLayout')) this.layoutChildViewsIfNeeded();
+      
+      var childViews = this.get('childViews'), len = childViews.length, idx;
+      for(idx=0;idx<len;idx++) {
+        childViews[idx].recomputeIsVisibleInWindow(cur);
+      }
+      
+      // if we were firstResponder, resign firstResponder also if no longer
+      // visible.
+      if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
     }
+    
+    return this ;
   },
   
   updateLayerLocation: function() {

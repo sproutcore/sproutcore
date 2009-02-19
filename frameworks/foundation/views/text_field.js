@@ -23,7 +23,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   
   emptyElement: '<%@1><span class="sc-hint"></span><span class="sc-input"><input type="text" /></span></%@1>',
   tagName: 'label',
-  styleClass: 'sc-text-field-view',
+  classNames: ['sc-text-field-view'],
   
   // ..........................................................
   // PROPERTIES

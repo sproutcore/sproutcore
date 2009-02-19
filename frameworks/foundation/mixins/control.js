@@ -25,8 +25,6 @@ SC.SMALL_CONTROL_SIZE = 'sc-small-size';
 /** Option for tiny control size */
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 
-SC.CONTROL_SIZES = [SC.HUGE_CONTROL_SIZE, SC.LARGE_CONTROL_SIZE, SC.REGULAR_CONTROL_SIZE, SC.SMALL_CONTROL_SIZE, SC.TINY_CONTROL_SIZE];
-
 /**
   @namespace
 
@@ -160,6 +158,7 @@ SC.Control = {
     
     @param {Object} target the content object
     @param {String} key the property that changes
+    @test in content
   */
   contentPropertyDidChange: function(target, key) {
     return this.updatePropertyFromContent('value', key, 'contentValueKey');
@@ -209,22 +208,19 @@ SC.Control = {
     well.
   */
   updateContentWithValueObserver: function() {
-    if (!this._contentValueKey) return; // do nothing if disabled
 
-    // get value.  return if value matches current content value.
-    // this avoids infinite loops where setting the value from the content
-    // in turns sets the content and so on.
-    var value = this.get('value') ;
-    if (value == this._contentValue) return ; 
+    var key = this.contentValueKey ? this.get('contentValueKey') : this.getDelegateProperty(this.displayDelegate, 'contentValueKey');
+    var content = this.get('content');
+    if (!key || !content) return ; // do nothing if disabled
 
-    var content = this.get('content') ;
-    if (!content) return; // do nothing if no content.
-    
-    // passed all of our checks, update the content (and the _contentValue
-    // to avoid infinite loops)
-    this._contentValue = value ;
-    content.set(this._contentValueKey, value) ;
-    
+    // get value -- set on content if changed
+    var value = this.get('value');
+    if (typeof content.setIfChanged === SC.T_FUNCTION) {
+      content.setIfChanged(key, value);
+    } else {
+      // avoid re-writing inherited props
+      if (content[key] !== value) content[key] = value ;
+    }
   }.observes('value'),
 
   /**
@@ -279,45 +275,29 @@ SC.Control = {
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
-  /**
-    Default observer for selected state changes
-    
-    The default will simply add either a "mixed" or "sel" class name to the
-    root element of your view based on the state. You can override this with
-    your own behavior if you prefer.
-  */
-  _control_displayObserver: function(target, key) {
-    this.displayDidChange();
-  }.observes('isEnabled', 'isSelected', 'isFirstResponder', 'isActive'),
+  displayProperties: 'isEnabled isSelected isFirstResponder isActive'.w(),
 
+  _CONTROL_TMP_CLASSNAMES: {},
+  
   /**
     Invoke this method in your updateDisplay() method to update any basic control CSS classes.
   */
-  updateDisplayMixin: function() {
+  renderMixin: function(context, firstTime) {
     var sel = this.get('isSelected'), disabled = !this.get('isEnabled');
     
     // update the CSS classes for the control.  note we reuse the same hash
     // to avoid consuming more memory
-    var names = SC._CONTROL_CLASSNAMES ;
+    var names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
     names.mixed = sel === SC.MIXED_STATE;
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
     names.disabled = disabled ;
     names.focus = this.get('isFirstResponder') ;
     names.active = this.get('isActive') ;
-    
-    // set control size (removing all others)
-    var size = this.get('controlSize'), sizes = SC.CONTROL_SIZES; 
-    var loc = sizes.length, s;
-    while(--loc>=0) {
-      s = sizes[loc];
-      names[s] = (size === s);
-    }
-    
-    this.$().setClass(names);
+    context.setClass(names).addClass(this.get('controlSize'));
 
     // if the control implements the $input() helper, then fixup the input
     // tags
-    if (this.$input) this.$input().attr('disabled', disabled);
+    if (!firstTime && this.$input) this.$input().attr('disabled', disabled);
   },
 
   // This should be null so that if content is also null, the
@@ -335,26 +315,17 @@ SC.Control = {
     var f = this.contentPropertyDidChange ;
 
     // remove an observer from the old content if necessary
-    if (this._content && this._control_content && this._control_content.removeObserver) {
-      this._content.removeObserver('*', this, f) ;
-    }
+    var old = this._control_content ;
+    if (old && old.removeObserver) old.removeObserver('*', this, f) ;
 
-    // cache for future use
-    var del = this.displayDelegate ;
-    this._contentValueKey = this.getDelegateProperty(del, 'contentValueKey');
-    
     // add observer to new content if necessary.
-    this._content = content ;
-    if (this._content && this._content.addObserver) {
-      this._content.addObserver('*', this, f) ;
-    }
+    this._control_content = content ;
+    if (content && content.addObserver) content.addObserver('*', this, f) ;
     
     // notify that value did change.
-    this.contentPropertyDidChange(this._content, '*') ;
+    this.contentPropertyDidChange(content, '*') ;
     
   }.observes('content')
       
 };
-
-SC._CONTROL_CLASSNAMES = {};
 

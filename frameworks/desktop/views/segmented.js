@@ -41,7 +41,7 @@
 SC.SegmentedView = SC.View.extend(SC.Control,
 /** @scope SC.SegmentedView.prototype */ {
   
-  styleClass: 'sc-segmented-view',
+  classNames: ['sc-segmented-view'],
   
   /**
     The value of the segmented view.
@@ -163,7 +163,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
 
   /**
     The array of itemKeys that will be searched to build the displayItems
-    array.  This is used internally but the class.  You will not generally
+    array.  This is used internally by the class.  You will not generally
     need to access or edit this array.
     
     @property {Array}

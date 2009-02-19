@@ -468,6 +468,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return value ;
   }.property('isVisibleInWindow').cacheable(),
 
+  $: function(sel) {
+    var layer = this.get('layer');
+    var ret = (!layer) ? SC.$() : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
+    layer = null;
+    return ret ;
+  },
+  
   /**
     Returns the DOM element that should be used to hold child views when they
     are added/remove via DOM manipulation.  The default implementation simply
@@ -1034,16 +1041,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // remove from parent if found
     this.removeFromParent() ;
-
-    // now save layer and call primitive destroy method.  This will
-    // cleanup children but not actually remove the DOM from any view it
-    // might be in etc.  This way we only do this once for the top view.
-    var layer = this.get('layer') ;
     this._destroy(); // core destroy method
 
-    // if layer still belongs to a parent somewhere, remove it
-    if (layer.parentNode) layer.parentNode.removeChild(layer) ;
-    
     // unregister for drags
     if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
 
@@ -1058,6 +1057,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // if destroyed, do nothing
     if (this.get('isDestroyed')) return this ;
+
+    // destroy the layer -- this will avoid each child view destroying 
+    // the layer over and over again...
+    this.destroyLayer(); 
     
     // first destroy any children.
     var childViews = this.get('childViews'), len = childViews.length, idx ;
@@ -1068,9 +1071,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // next remove view from global hash
     delete SC.View.views[this.get('layerId')];
-
-    // can cleanup layer (if set)
-    this.set('layer', null);
     delete this._CQ; 
     delete this.page;
     

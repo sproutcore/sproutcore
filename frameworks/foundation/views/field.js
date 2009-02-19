@@ -137,14 +137,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   // PRIVATE SUPPORT METHODS
   //
-  init: function() {
-    sc_super();
-    this.valueDidChange(); // update field value also...
+  didCreateLayer: function() {
     SC.Event.add(this.$input(), 'change', this, this.fieldValueDidChange) ;
   },
   
-  destroy: function() {
-    sc_super();
+  willDestroyLayer: function() {
     SC.Event.remove(this.$input(), 'change', this, this.fieldValueDidChange); 
   },
 

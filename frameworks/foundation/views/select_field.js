@@ -17,25 +17,25 @@ sc_require('views/field');
   @extends SC.FieldView
   @author Charles Jolley
   @author Mike Ball
-  @version 1.0
+  @since SproutCore 1.0
 */
 SC.SelectFieldView = SC.FieldView.extend(
 /** @scope SC.SelectFieldView.prototype */ {
 
- emptyElement: '<%@1></%@1>',
- tagName: 'select',
- styleClass: 'sc-select-field-view',
+  tagName: 'select',
+  classNames: ['sc-select-field-view'],
+ 
   /**
     An array of items that will form the menu you want to show.
   */ 
- objects: null,
+  objects: [],
 
   /**
     If you set this to a non-null value, then the name shown for each 
     menu item will be pulled from the object using the named property.
     if this is null, the collection objects themselves will be used.
   */
- nameKey: null,
+  nameKey: null,
 
   /**
    If you set this to a non-null value, then the value of this key will
@@ -276,22 +276,18 @@ SC.SelectFieldView = SC.FieldView.extend(
     this.$().setClass('focus', this.get('isFocused'));
   }.observes('isFocused'),
 
-  init: function() {
-    sc_super();
-    this.rebuildMenu();
-    
+  didCreateLayer: function() {
     var input = this.$();
-    
-    //SC.Event.add(input, 'change', this, this._fieldDidFocus);
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
     SC.Event.add(input, 'focus',this, this.fieldDidFocus);
+    return sc_super();
   },
   
-  destroy: function() {
+  willDestroyLayer: function() {
     var input = this.$input();
     SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
     SC.Event.remove(input, 'blur', this, this.fieldDidBlur);
     return sc_super();
-  } 
+  }
  
 });

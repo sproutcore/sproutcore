@@ -23,7 +23,7 @@ sc_require('views/view') ;
 SC.ContainerView = SC.View.extend(
 /** @scope SC.ContainerView.prototype */ {
 
-  classNames: 'sc-container-view'.w(),
+  classNames: ['sc-container-view'],
   
   /**
     Optional path name for the content view.  Set this to a property path 
