@@ -13,7 +13,7 @@ var view, parentDom, childDom, layerId ;
 module("SC.View#findLayerInParentLayer", {
   setup: function() {
     
-    layerId = 'foo';
+    layerId = 'foo-123';
     
     // manually construct a test layer.  next childDom a few layers deep
     childDom = document.createElement('div');
