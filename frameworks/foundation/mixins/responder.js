@@ -15,26 +15,28 @@
 SC.Responder = {
 
   /** @property
-    The pane this responder belongs to.  This is used to determine where you belong to in the responder chain.
+    The pane this responder belongs to.  This is used to determine where you 
+    belong to in the responder chain.
   */
   pane: null,
   
   /** @property
-    This is the nextResponder in the responder chain.  If the receiver does not
-    implement a particular event handler, it will bubble to the next responder.
+    This is the nextResponder in the responder chain.  If the receiver does 
+    not implement a particular event handler, it will bubble to the next 
+    responder.
   */
   nextResponder: null,
   
   /** @property 
-    YES if the view is currently first responder.  This property is always edited 
-    by the pane during its makeFirstResponder() method.
+    YES if the view is currently first responder.  This property is always 
+    edited by the pane during its makeFirstResponder() method.
   */
   isFirstResponder: NO,
   
   /** @property
-    YES if the view is currently first responder and the pane the view belongs to
-    is also key pane.  While this property is set, you should expect to receive 
-    keyboard events.
+    YES if the view is currently first responder and the pane the view belongs 
+    to is also key pane.  While this property is set, you should expect to 
+    receive keyboard events.
   */
   isKeyResponder: NO,
   
@@ -115,13 +117,13 @@ SC.Responder = {
     @returns {Object} object that handled event, if any
   */
   interpretKeyEvents: function(event) {
-    var codes = event.commandCodes();
-    var cmd = codes[0]; var chr = codes[1];
+    var codes = event.commandCodes(), cmd = codes[0], chr = codes[1];
+
     if (!cmd && !chr) return null ;  //nothing to do.
 
     // if this is a command key, try to do something about it.
     if (cmd) {
-      var methodName = SC.MODIFIED_KEY_BINDINGS[cmd] || SC.BASE_KEY_BINDINGS[cmd.split('_').pop()];
+      var methodName = SC.MODIFIED_KEY_BINDINGS[cmd] || SC.BASE_KEY_BINDINGS[cmd.match(/[^_]+$/)[0]];
       if (methodName) {
         var target = this, pane = this.get('pane'), handler = null;
         while(target && !(handler = target.tryToPerform(methodName, event))){
@@ -131,8 +133,7 @@ SC.Responder = {
       }
     } 
 
-    //if(cmd == "space") chr = " ";
-    if ( chr && this.respondsTo('insertText')) {
+    if (chr && this.respondsTo('insertText')) {
       // if we haven't returned yet and there is plain text, then do an insert 
       // of the text.  Since this is not an action, do not send it up the 
       // responder chain.

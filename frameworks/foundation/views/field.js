@@ -26,7 +26,7 @@ sc_require('mixins/validatable') ;
   @since SproutCore 1.0
 */
 SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
-/** @scipe SC.FieldView.prototype */ {
+/** @scope SC.FieldView.prototype */ {
 
   /**
     The raw value of the field itself.  this is the value to be applied to

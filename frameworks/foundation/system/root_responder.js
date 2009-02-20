@@ -13,20 +13,20 @@ SC.CAPTURE_BACKSPACE_KEY = NO ;
 /** @class
 
   The RootResponder captures events coming from a web browser and routes them 
-  to the correct view in the view hierarchy.  One RootResponder instance  exists 
-  for each DOMWindow/DOMDocument you deal with.  (Only one unless you are trying 
-  to open multiple windows.)
-  
-  Usually you do not work with a RootResponder directly.  Instead you will work 
-  with Pane objects, which register themselves with the RootResponder as needed 
-  to receive events.
+  to the correct view in the view hierarchy.  Usually you do not work with a 
+  RootResponder directly.  Instead you will work with Pane objects, which 
+  register themselves with the RootResponder as needed to receive events.
 
   h1. RootResponder and Platforms
   
   RootResponder is implemented differently on the desktop and mobile platforms 
   using a technique called a "class cluster".  That is, although you get a 
   RootResponder instance at some point, you will likely be working with a 
-  subclass of RootResponder that implements functionality unique to that platform.
+  subclass of RootResponder that implements functionality unique to that 
+  platform.
+  
+  The RootResponder you use depends on the active platform you have set and
+  the framework you have loaded.
   
   h1. Event Types 
     

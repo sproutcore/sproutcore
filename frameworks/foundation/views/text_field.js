@@ -21,7 +21,6 @@ sc_require('mixins/editable') ;
 SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 /** @scope SC.TextFieldView.prototype */ {
   
-  emptyElement: '<%@1><span class="sc-hint"></span><span class="sc-input"><input type="text" /></span></%@1>',
   tagName: 'label',
   classNames: ['sc-text-field-view'],
   
@@ -49,20 +48,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // 
   
   displayProperties: 'hint fieldValue isEditing'.w(),
-  updateDisplay: function() {
-    sc_super();
-    
+  
+  render: function(context, firstTime) {
+    var v = this.getFieldValue() ;
+    context.setClass('focus', this.get('isEditing'));
+    context.setClass('not-empty', v && v.length>0);
     var hint = this.get('hint');
-    if (hint !== this._lastHint) {
-      this._lastHint = hint ;
-      this.$('.sc-hint').text(hint);
+    if (firstTime) {
+      context.push('<span class="sc-hint">', hint, '</span>');
+      context.push('<input type="text" />');
+      
+    // if this is not first time rendering, update the hint itself since we
+    // can't just blow away the text field like we might most other controls
+    } else {
+      if (hint !== this._lastHint) {
+        this._lastHint = hint ;
+        this.$('.sc-hint').text(hint);
+      }          
     }
-    
-    var v = this.getFieldValue(); // get the raw value from input
-    this.$().setClass({
-     'not-empty': (v && v.length>0),
-     'focus': this.get('isEditing')
-    });
   },
 
   // more efficient input
@@ -72,18 +75,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   // HANDLE NATIVE CONTROL EVENTS
   // 
   
-  init: function() {
-    sc_super();
+  didCreateLayer: function() {
     var input = this.$input();
     SC.Event.add(input, 'focus', this, this.fieldDidFocus);
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
   },
   
-  destroy: function() {
+  willDestroyLayer: function() {
     var input = this.$input();
     SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
     SC.Event.remove(input, 'blur', this, this.fieldDidBlur);
-    return sc_super();
   },
   
   fieldDidFocus: function(evt) {

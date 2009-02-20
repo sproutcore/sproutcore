@@ -32,7 +32,6 @@ SC.TOGGLE_OFF_BEHAVIOR = "off" ;
 SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
 /** @scope SC.ButtonView.prototype */ {
   
-  emptyElement: '<%@1 role="button"><span class="sc-button-inner"><label class="sc-button-label"></label></span></%@1>',                                                                                                                                                                                                                                                                                     
   tagName: 'a',
   classNames: ['sc-button-view'],
   
