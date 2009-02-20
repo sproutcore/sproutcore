@@ -154,7 +154,6 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   displayProperties: ['href', 'icon', 'title', 'value'],
 
   render: function(context, firstTime) {
-
     if (this.get('tagName') === 'a') {
       var href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript"+":;";

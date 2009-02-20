@@ -129,7 +129,6 @@ SC.Button = {
 
   /** @private - update title display */
   renderMixin: function(context, firstTime) {
-    console.log('mixin');
     var emptyElement= '<span class="sc-button-inner"> <label class="sc-button-label">%@1</label></span>';
     var emptyElement2= '<img src="%@1" alt="" class="%@2" />';
     var emptyElement3= '<span class="inner">%@1</span>';

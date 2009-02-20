@@ -275,7 +275,7 @@ SC.Control = {
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
-  displayProperties: 'isEnabled isSelected isFirstResponder isActive'.w(),
+  displayProperties: ['isEnabled', 'isSelected', 'isFirstResponder', 'isActive'],
 
   _CONTROL_TMP_CLASSNAMES: {},
   
