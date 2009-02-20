@@ -151,35 +151,23 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   // display properties that should automatically cause a refresh.
   // isCancel and isDefault also cause a refresh but this is implemented as 
   // a separate observer (see below)
-  displayProperties: ['href'],
+  displayProperties: ['href', 'icon', 'title', 'value'],
 
-  updateDisplay: function() {
-    sc_super();
-    
-    // set the href on the element
+  render: function(context, firstTime) {
     if (this.get('tagName') === 'a') {
       var href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript"+":;";
       if (this.get('href') !== this._display_href) {
         this._display_href = href ;
-        this.$().attr('href', href);
+        context.attr('href', this._display_href);
       }
     }
-
-    this.$().setClass({ 
-      def: this.get('isDefault'), cancel: this.get('isCancel') 
-    });
-  },
-   
-  /** @private
-    When first generating a button, set the href and static values... 
-  */
-  prepareDisplay: function() {
-    var ret = sc_super();
-    this.$().addClass(this.get('theme') || 'regular');
-    this.updateDisplay() ;
-    return ret ;
-  },
+     context.attr('role', 'button');
+     context.setClass({ 
+       def: this.get('isDefault'), cancel: this.get('isCancel') 
+     });
+     context.addClass(this.get('theme'));  
+   },
   
   /** @private {String} used to store a previously defined key equiv */
   _defaultKeyEquivalent: null,

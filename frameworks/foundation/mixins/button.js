@@ -128,8 +128,13 @@ SC.Button = {
   titleSelector: '.sc-button-label',
 
   /** @private - update title display */
-  updateDisplayMixin: function() {
+  renderMixin: function(context, firstTime) {
+    var emptyElement= '<span class="sc-button-inner"> <label class="sc-button-label">%@1</label></span>';
+    var emptyElement2= '<img src="%@1" alt="" class="%@2" />';
+    var emptyElement3= '<span class="inner">%@1</span>';
+
     var icon = this.get('icon') ;
+    var title = this.get('displayTitle') ;
     var needsTitle = NO;
     
     // get the icon.  If there is an icon, then get the image and update it.
@@ -137,34 +142,28 @@ SC.Button = {
     // title.
     if (icon) {
       var blank = static_url('blank');
-      var img = this.$('img.icon') ;
-      if (img.length === 0) {
-        img = SC.$('<img src=%@ alt="" class="icon" />'.fmt(blank)) ;
-        this.$(this.get('titleSelector') || 'label').text('').prepend(img)
-          .append(SC.$('<span class="inner"></span>'));
-        needsTitle = YES ;
-      }
-      
-      // this is a URL...set it as src
       if (icon.indexOf('/') >= 0) {
-        // wipe any previous sprite and set src
-        img.attr('class', 'icon').attr('src', icon);
-          
-      // this is a sprite. set as class
-      } else img.addClass(icon).attr('src', blank) ;
+        emptyElement2=emptyElement2.fmt(icon, 'icon');
+      }
+      else{
+        emptyElement2=emptyElement2.fmt(blank, icon);
+      }
+      needsTitle = YES ;
     }
-    this.$().setClass('icon', !!icon) ;
-
-    // get the title of the button.  if the display title has changed, then 
-    // update the HTML.
-    var title = this.get('displayTitle') ;
+    context.setClass('icon', !!icon) ;
     if (needsTitle || (title !== this._button_title)) {
       this._button_title = title ;
-      var cq = this.$(this.get('titleSelector') || 'label');
-      if (icon) cq = cq.find('span.inner') ;
-      cq.text(title);  
-    }
-    
+      if (icon) {
+        emptyElement3=emptyElement3.fmt(title);
+        emptyElement=emptyElement.fmt(emptyElement2+emptyElement3);
+      }
+      else
+        emptyElement=emptyElement.fmt(title);
+      
+    } else
+      emptyElement=emptyElement.fmt(title);
+     
+    context.push(emptyElement);
   },
 
   /**
@@ -194,7 +193,7 @@ SC.Button = {
   /** @private - when title changes, dirty display. */
   _button_displayObserver: function() {
     this.displayDidChange();
-  }.observes('title', 'icon'),
+  }.observes('title', 'icon', 'value'),
 
   /**
     The key equivalent that should trigger this button on the page.
