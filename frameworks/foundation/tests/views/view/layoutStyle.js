@@ -39,12 +39,12 @@ var commonSetup = {
   setup: function() {
     
     // create basic parent view
-    parent = SC.View.create(SC.FrameSupport, {
+    parent = SC.View.create({
       layout: { top: 0, left: 0, width: 200, height: 200 }
     });
     
     // create child view to test against.
-    child = SC.View.create(SC.FrameSupport);
+    child = SC.View.create();
   },
   
   teardown: function() {

@@ -20,10 +20,9 @@ sc_require('views/scroller');
   - scroll wheel events
   
   @extends SC.View
-  @extends SC.FrameSupport
   @since SproutCore 1.0
 */
-SC.ScrollView = SC.View.extend(SC.FrameSupport, {
+SC.ScrollView = SC.View.extend({
 
   classNames: 'sc-scroll-view',
   

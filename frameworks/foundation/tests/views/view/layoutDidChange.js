@@ -10,7 +10,7 @@ module("SC.View#layoutDidChange");
 
 test("notifies layoutStyle & frame change", function() {
 
-	var view = SC.View.create(SC.FrameSupport);
+	var view = SC.View.create();
 	var callCount = 0;
 	
 	view.addObserver('layoutStyle', function() { callCount++; });

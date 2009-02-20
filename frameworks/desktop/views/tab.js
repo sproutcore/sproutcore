@@ -18,10 +18,9 @@ SC.BOTTOM_LOCATION = 'bottom';
   view.
   
   @extends SC.View
-  @extends SC.FrameSupport
   @since SproutCore 1.0
 */
-SC.TabView = SC.View.extend(SC.FrameSupport,
+SC.TabView = SC.View.extend(
 /** @scope SC.TabView.prototype */ {
 
   classNames: ['sc-tab-view'],

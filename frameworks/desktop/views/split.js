@@ -79,14 +79,13 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
   otherwise.
 
   @extends SC.View
-  @extends SC.FrameSupport
   @since SproutCore 1.0
   
   @author Charles Jolley
   @author Lawrence Pit
   @author Erich Ocean
 */
-SC.SplitView = SC.View.extend(SC.FrameSupport,
+SC.SplitView = SC.View.extend(
 /** @scope SC.SplitView.prototype */ {
 
   classNames: ['sc-split-view'],  

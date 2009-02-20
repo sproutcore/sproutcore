@@ -20,10 +20,9 @@ sc_require('views/view') ;
   override the replaceContent() method.
   
   @extends SC.View
-  @extends SC.FrameSupport
   @since SproutCore 1.0
 */
-SC.ContainerView = SC.View.extend(SC.FrameSupport,
+SC.ContainerView = SC.View.extend(
 /** @scope SC.ContainerView.prototype */ {
 
   classNames: ['sc-container-view'],

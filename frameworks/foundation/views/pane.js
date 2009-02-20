@@ -77,7 +77,7 @@ require('views/view');
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.Pane = SC.View.extend(SC.FrameSupport, {
+SC.Pane = SC.View.extend({
 
   /** 
     Returns YES for easy detection of when you reached the pane. 

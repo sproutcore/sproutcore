@@ -51,9 +51,8 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   
   @extends SC.ClassicView
   @extends SC.CollectionViewDelegate
-  @extends SC.FrameSupport
 */
-SC.CollectionView = SC.View.extend(SC.FrameSupport, SC.CollectionViewDelegate,
+SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
