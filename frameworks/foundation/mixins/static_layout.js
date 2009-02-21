@@ -42,6 +42,18 @@ SC.StaticLayout = {
   hasStaticLayout: YES,
   
   /**
+    Activates use of brower's static layout.  You can apply this mixin and
+    still use absolute positioning.  To activate static positioning, set this
+    property to YES.
+  */
+  useStaticLayout: NO,
+  
+  /** @private - add sc-static-layout class if needed. */
+  renderMixin: function(context, firstTime) {
+    context.setClass('sc-static-layout', this.get('useStaticLayout'));
+  },
+  
+  /**
     Not available on views with static layout.  Calling this method will raise 
     an exception.
   */

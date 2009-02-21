@@ -1,0 +1,33 @@
+/* SC.ButtonView */
+
+.sc-button-view.sc-static-layout {
+  margin: 0 4px;
+}
+
+.sc-button-view {
+	display: inline-block ;
+	vertical-align: middle;
+}
+
+.sc-button-view span.inner {
+	position: relative;
+	display:  block;
+	height: 100%;
+	margin-right: 12px;
+	text-align: center ;
+}
+
+.sc-button-view label {
+	position: relative;
+	margin-left: 12px;
+	display: block;
+}
+
+.sc-button-view img {
+	vertical-align: middle ;
+	margin-right: 2px;
+	position: relative ;
+	top: -2px;
+	left: -2px;
+}
+

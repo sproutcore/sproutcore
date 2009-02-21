@@ -1,35 +1,29 @@
-/* @override http://localhost:4020/static/sproutcore/empty_theme/en/current/source/button.css?1235211414 */
+/* @override 
+*/
 
 /* SC.ButtonView */
 
 .sc-button-view {
 	background-color: #d0d0d0;
 	border: 1px #666 solid;
+	color: black;
 	text-decoration: none ;
 	font-weight: bold ;
+	
 	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
 	border-radius: 2px;
+	
 }
 
 .sc-button-view label {
-	position: absolute ;
-	left: 8px;
-	right: 8px;
-	line-height: 2px;
-	top: 50%;
-	margin-top: -1px;
-	text-align: center ;
-	color: black;
+	line-height: 21px;
 }
 
 .sc-button-view.disabled,
 .sc-button-view.disabled.active {
 	background-color: #e0e0e0;
 	border: 1px #a0a0a0 solid ;
-}
-
-.sc-button-view.disabled label,
-.sc-button-view.disabled.active label {
 	color: #a0a0a0;
 }
 
@@ -37,9 +31,5 @@
 .sc-button-view.sel {
 	background-color: #333;
 	border: 1px #333 solid ;
-}
-
-.sc-button-view.active label,
-.sc-button-view.sel label {
 	color: white;
 }

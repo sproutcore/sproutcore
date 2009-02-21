@@ -123,47 +123,33 @@ SC.Button = {
   }.property('title','localize').cacheable(),
   
   /**
-    The selector path to the element that contains the button title.   You should only set this property when you first configure the button.  Changing it will not cause the button to redisplay.
+    Classes that include this mixin can invoke this method from their 
+    render method to render the proper title HTML.  This will include an 
+    icon if necessary along with any other standard markup.
   */
-  titleSelector: '.sc-button-label',
-
-  /** @private - update title display */
-  renderMixin: function(context, firstTime) {
-    var emptyElement= '<span class="sc-button-inner"> <label class="sc-button-label">%@1</label></span>';
-    var emptyElement2= '<img src="%@1" alt="" class="%@2" />';
-    var emptyElement3= '<span class="inner">%@1</span>';
-
+  renderTitle: function(context, firstTime) {
     var icon = this.get('icon') ;
+    var image = null ;
     var title = this.get('displayTitle') ;
-    var needsTitle = NO;
-    
+    var needsTitle = title && title.length>0;
+
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
     if (icon) {
       var blank = static_url('blank');
+
+      image = '<img src="%@1" alt="" class="%@2" />' ;
       if (icon.indexOf('/') >= 0) {
-        emptyElement2=emptyElement2.fmt(icon, 'icon');
-      }
-      else{
-        emptyElement2=emptyElement2.fmt(blank, icon);
+        image = image.fmt(icon, 'icon');
+      } else {
+        image = image.fmt(blank, icon);
       }
       needsTitle = YES ;
     }
-    context.setClass('icon', !!icon) ;
-    if (needsTitle || (title !== this._button_title)) {
-      this._button_title = title ;
-      if (icon) {
-        emptyElement3=emptyElement3.fmt(title);
-        emptyElement=emptyElement.fmt(emptyElement2+emptyElement3);
-      }
-      else
-        emptyElement=emptyElement.fmt(title);
-      
-    } else
-      emptyElement=emptyElement.fmt(title);
-     
-    context.push(emptyElement);
+    
+    if (needsTitle) context.begin('label').push(image, title).end();
+    return context ;
   },
 
   /**

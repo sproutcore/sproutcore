@@ -6,8 +6,6 @@
 }
 
 .sc-pane.sc-dialog-pane > .sc-view {
-	border: 1px #888 solid;
-	-webkit-border-radius: 2px;
-	border-radius: 2px;
+	border: 1px #444 solid;
 	background-color: #fafafa ;
 }

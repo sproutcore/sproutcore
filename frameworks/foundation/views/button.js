@@ -10,6 +10,7 @@
 sc_require('views/view') ;
 sc_require('mixins/control') ;
 sc_require('mixins/button');
+sc_require('mixins/static_layout');
 
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';
@@ -29,7 +30,7 @@ SC.TOGGLE_OFF_BEHAVIOR = "off" ;
   @extends SC.Button
   @since SproutCore 1.0  
 */
-SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
+SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 /** @scope SC.ButtonView.prototype */ {
   
   tagName: 'a',
@@ -136,6 +137,18 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
   */
   didTriggerAction: function() {},
 
+  /**
+    The minimum width the button title should consume.  This property is used
+    when generating the HTML styling for the title itself.  The default 
+    width of 80 usually provides a nice looking style, but you can set it to 0
+    if you want to disable minimum title width.
+    
+    Note that the title width does not exactly match the width of the button
+    itself.  Extra padding added by the theme can impact the final total
+    size.
+  */
+  titleMinWidth: 80,
+  
   // ................................................................
   // INTERNAL SUPPORT
 
@@ -147,25 +160,35 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     if(this.get("keyEquivalent")) this._defaultKeyEquivalent = this.get("keyEquivalent"); 
   },
 
+  _TEMPORARY_CLASS_HASH: {},
+  
   // display properties that should automatically cause a refresh.
   // isCancel and isDefault also cause a refresh but this is implemented as 
   // a separate observer (see below)
   displayProperties: ['href', 'icon', 'title', 'value'],
 
   render: function(context, firstTime) {
+    
+    // add href attr if tagName is anchor...
     if (this.get('tagName') === 'a') {
       var href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript"+":;";
-      if (this.get('href') !== this._display_href) {
-        this._display_href = href ;
-        context.attr('href', this._display_href);
-      }
+      context.attr('href', href);
     }
-     context.attr('role', 'button');
-     context.setClass({ 
-       def: this.get('isDefault'), cancel: this.get('isCancel') 
-     });
-     context.addClass(this.get('theme'));  
+    
+    // add some standard attributes & classes.
+    var classes = this._TEMPORARY_CLASS_HASH;
+    classes.def = this.get('isDefault');
+    classes.cancel = this.get('isCancel');
+    classes.icon = !!this.get('icon');
+    context.attr('role', 'button')
+      .setClass(classes).addClass(this.get('theme'));
+
+    // render inner html 
+    context = context.begin('span')
+      .addClass('inner').addStyle('minWidth', this.get('titleMinWidth'));
+      this.renderTitle(context, firstTime) ; // from button mixin
+    context = context.end();
    },
   
   /** @private {String} used to store a previously defined key equiv */
