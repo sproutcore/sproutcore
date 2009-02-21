@@ -4,6 +4,9 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
+/** Set to NO to leave the backspace key under the control of the browser.*/
+SC.CAPTURE_BACKSPACE_KEY = NO ;
+
 /**
   Order layer for regular Panels.  Panels appear in front of the main view, 
   but behind palettes, popups.
@@ -152,12 +155,25 @@ SC.RootResponder = SC.RootResponder.extend(
   //
   
   setup: function() {
-    sc_super();
-
     // handle basic events        
-    this.listenFor('mousedown mouseup click dblclick mouseout mouseover mousemove'.w(), document)
-      .listenFor('resize focus blur'.w(), window);
-    
+    this.listenFor('keydown keyup mousedown mouseup click dblclick mouseout mouseover mousemove'.w(), document)
+        .listenFor('resize focus blur'.w(), window);
+
+    // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
+    if (this.keypress) {
+      if (SC.CAPTURE_BACKSPACE_KEY && SC.browser.mozilla) {
+        var responder = this ;
+        document.onkeypress = function(e) { 
+          e = SC.Event.normalizeEvent(e);
+          return responder.keypress.call(responder, e); 
+        };
+        
+        SC.Event.add(window, 'unload', this, function() { document.onkeypress = null; }); // be sure to cleanup memory leaks
+  
+      // Otherwise, just add a normal event handler. 
+      } else SC.Event.add(document, 'keypress', this, this.keypress);
+    }
+
     // handle these two events specially in IE
     'drag selectstart'.w().forEach(function(keyName) {
       var method = this[keyName] ;
@@ -321,6 +337,115 @@ SC.RootResponder = SC.RootResponder.extend(
     // console.log('dragDidStart called in %@ with %@'.fmt(this, drag));
     // this._mouseDownView = drag ;
     this._drag = drag ;
+  },
+  
+  // .......................................................
+  // KEYBOARD HANDLING
+  //
+
+  _lastModifiers: null,
+
+  /** @private
+    Modifier key changes are notified with a keydown event in most browsers.  
+    We turn this into a flagsChanged keyboard event.  Normally this does not
+    stop the normal browser behavior.
+  */  
+  _handleModifierChanges: function(evt) {
+    // if the modifier keys have changed, then notify the first responder.
+    var m;
+    m = this._lastModifiers = (this._lastModifiers || { alt: false, ctrl: false, shift: false });
+
+    var changed = false;
+    if (evt.altKey !== m.alt) { m.alt = evt.altKey; changed=true; }
+    if (evt.ctrlKey !== m.ctrl) { m.ctrl = evt.ctrlKey; changed=true; }
+    if (evt.shiftKey !== m.shift) { m.shift = evt.shiftKey; changed=true;}
+    evt.modifiers = m; // save on event
+
+    return (changed) ? (this.sendEvent('flagsChanged', evt) ? evt.hasCustomEventHandling : YES) : YES ;
+  },
+
+  /** @private
+    Determines if the keyDown event is a nonprintable or function key. These
+    kinds of events are processed as keyboard shortcuts.  If no shortcut
+    handles the event, then it will be sent as a regular keyDown event.
+  */
+  _isFunctionOrNonPrintableKey: function(evt) {
+    return !!(evt.altKey || evt.ctrlKey || evt.metaKey || ((evt.charCode !== evt.which) && SC.FUNCTION_KEYS[evt.which]));
+  },
+
+  /** @private 
+    Determines if the event simply reflects a modifier key change.  These 
+    events may generate a flagsChanged event, but are otherwise ignored.
+  */
+  _isModifierKey: function(evt) {
+    return !!SC.MODIFIER_KEYS[evt.charCode];
+  },
+
+  /** @private
+    The keydown event occurs whenever the physically depressed key changes.
+    This event is used to deliver the flagsChanged event and to with function
+    keys and keyboard shortcuts.
+    
+    All actions that might cause an actual insertion of text are handled in
+    the keypress event.
+  */
+  keydown: function(evt) {
+    // Firefox does NOT handle delete here...
+    if (SC.browser.mozilla > 0 && (evt.which === 8)) return true ;
+    
+    // modifier keys are handled separately by the 'flagsChanged' event
+    // send event for modifier key changes, but only stop processing if this 
+    // is only a modifier change
+    var ret = this._handleModifierChanges(evt);
+    if (this._isModifierKey(evt)) return ret;
+
+    // if this is a function or non-printable key, try to use this as a key
+    // equivalent.  Otherwise, send as a keyDown event so that the focused
+    // responder can do something useful with the event.
+    if (this._isFunctionOrNonPrintableKey(evt)) {
+      // otherwise, send as keyDown event.  If no one was interested in this
+      // keyDown event (probably the case), just let the browser do its own
+      // processing.
+      ret = this.sendEvent('keyDown', evt) ;
+
+      // attempt key equivalent if key not handled
+      if (!ret) {
+        ret = this.attemptKeyEquivalent(evt) ;
+        return !ret ;
+      } else {
+        return evt.hasCustomEventHandling ;
+      }
+    }
+    return YES; // allow normal processing...
+  },
+  
+  /** @private
+    The keypress event occurs after the user has typed something useful that
+    the browser would like to insert.  Unlike keydown, the input codes here 
+    have been processed to reflect that actual text you might want to insert.
+    
+    Normally ignore any function or non-printable key events.  Otherwise, just
+    trigger a keyDown.
+  */
+  keypress: function(evt) {
+    // delete is handled in keydown() for most browsers
+    if (SC.browser.mozilla > 0 && (evt.which === 8)) {
+      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+
+    // normal processing.  send keyDown for printable keys...
+    } else {
+      if (this._isFunctionOrNonPrintableKey(evt)) return YES; 
+      if (evt.charCode !== undefined && evt.charCode === 0) return YES;
+      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+    }
+  },
+  
+  keyup: function(evt) {
+    // modifier keys are handled separately by the 'flagsChanged' event
+    // send event for modifier key changes, but only stop processing if this is only a modifier change
+    var ret = this._handleModifierChanges(evt);
+    if (this._isModifierKey(evt)) return ret;
+    return this.sendEvent('keyUp', evt) ? evt.hasCustomEventHandling:YES;
   },
   
   mousedown: function(evt) {
