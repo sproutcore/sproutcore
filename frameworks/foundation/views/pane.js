@@ -70,7 +70,7 @@ require('views/view');
   particular pane and when the pane is made keyPane for the entire 
   application.
   
-  You can prevent your Pane from becoming key by setting the acceptsKeyFocus 
+  You can prevent your Pane from becoming key by setting the acceptsKeyPane 
   to NO on the pane.  This is useful when creating palettes and other popups 
   that should not steal keyboard control from another view.
 
@@ -96,9 +96,9 @@ SC.Pane = SC.View.extend({
   //
 
   /**
-    The rootResponder for this pane.  Whenever you add a pane to a document, this 
-    property will be set to the rootResponder that is now forwarding events to 
-    the pane.
+    The rootResponder for this pane.  Whenever you add a pane to a document, 
+    this property will be set to the rootResponder that is now forwarding 
+    events to the pane.
     
     @property {SC.Responder}
   */

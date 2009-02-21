@@ -118,12 +118,12 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.RootResponder} Receiver
   */
   makeKeyPane: function(pane) {
-    if (pane && !pane.get('acceptsKeyFocus')) return this ;
+    if (pane && !pane.get('acceptsKeyPane')) return this ;
 
     // if null was passed, try to make mainPane key instead.
     if (!pane) {
       pane = this.get('mainPane') ;
-      if (!pane.get('acceptsKeyFocus')) pane = null ;
+      if (!pane.get('acceptsKeyPane')) pane = null ;
     }
 
     var current = this.get('keyPane') ;

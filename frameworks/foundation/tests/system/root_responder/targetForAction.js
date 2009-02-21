@@ -29,7 +29,7 @@ var CommonSetup = {
     
     // explicit pane
     pane = SC.Pane.create({ 
-      acceptsKeyFocus: YES,
+      acceptsKeyPane: YES,
       defaultResponder: defaultResponder,
       childViews: [SC.View.extend({
         bar: action,  // implement bar action
@@ -42,13 +42,13 @@ var CommonSetup = {
     });
     
     keyPane = SC.Pane.create({
-      acceptsKeyFocus: YES,
+      acceptsKeyPane: YES,
       keyAction: action
     });
     keyPane.firstResponder = keyPane ;
 
     mainPane = SC.Pane.create({
-      acceptsKeyFocus: YES,
+      acceptsKeyPane: YES,
       mainAction: action
     });
     mainPane.firstResponder = mainPane ;

@@ -41,7 +41,7 @@ SC.MainPane = SC.Pane.extend({
     return ret ;
   },
   
-  acceptsKeyFocus: YES,
+  acceptsKeyPane: YES,
   
   classNames: ['sc-main-pane']
 });
