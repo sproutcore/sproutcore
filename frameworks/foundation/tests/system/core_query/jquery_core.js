@@ -459,7 +459,10 @@ test("attr(String)", function() {
  var body = document.body, $body = SC.$(body);
 
  ok( $body.attr('foo') === undefined, 'Make sure that a non existent attribute returns undefined' );
- ok( $body.attr('nextSibling') === null, 'Make sure a null expando returns null' );
+ 
+ // ignore the Firebug console if present...
+ var nextSibling = $body.attr('nextSibling') ;
+ ok( (($body.attr('nextSibling') === null) || (nextSibling.id == '_firebugConsole')), 'Make sure a null expando returns null' );
  
  body.setAttribute('foo', 'baz');
  equals( $body.attr('foo'), 'baz', 'Make sure the dom attribute is retrieved when no expando is found' );

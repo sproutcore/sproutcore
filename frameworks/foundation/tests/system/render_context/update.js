@@ -159,7 +159,7 @@ test("set class names override class attr", function() {
 module("SC.RenderContext#update - style", {
   setup: function() {
     elem = document.createElement('div');
-    elem.setAttribute("style", "color: red");
+    elem.setAttribute("style", "color: red;");
     context = SC.RenderContext(elem);
   },
   
@@ -171,13 +171,19 @@ module("SC.RenderContext#update - style", {
 test("does not change styles if retrieved but not edited", function() {
   context.styles();
   context.update();
-  equals(elem.getAttribute("style"), "color: red", "style");
+  equals(elem.getAttribute("style"), "color: red;", "style");
 });
 
 test("replaces style name if styles edited", function() {
   context.styles({ color: "black" });
   context.update();
-  equals(elem.getAttribute("style"), "color: black", "attribute");
+  
+  // Browsers return single attribute styles differently, sometimes with a trailing ';'
+  // sometimes, without one. Normalize it here.
+  var style = elem.getAttribute("style");
+  if (!style.match(/;$/)) style += ';' ;
+  
+  equals(style, "color: black;", "attribute");
 });
 
 
@@ -185,6 +191,12 @@ test("set styles override style attr", function() {
   context.attr("style", "color: green");
   context.styles({ color: "black" });
   context.update();
-  equals(elem.getAttribute("style"), "color: black", "attribute");
+  
+  // Browsers return single attribute styles differently, sometimes with a trailing ';'
+  // sometimes, without one. Normalize it here.
+  var style = elem.getAttribute("style");
+  if (!style.match(/;$/)) style += ';' ;
+  
+  equals(style, "color: black;", "attribute");
 });
 

@@ -9,7 +9,7 @@
 SC.Request = SC.Object.extend({
   
   isAsynchronous: true,
-  response: null,
+  rawResponse: null,
   error: null,
   transportClass: null,
   isJSON: false,

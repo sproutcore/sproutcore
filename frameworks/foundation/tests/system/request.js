@@ -37,12 +37,12 @@ test("Test Asynchronous GET Request", function() {
   
   stop() ; // stops the test runner
   setTimeout( function(){
-    ok(contents !== null) ;
+    ok(contents !== null, 'request.send() should return a response') ;
     ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
     
-    if (SC.$ok(contents)) equals('{"message": "Yay!"}', contents) ;
+    if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}') ;
     window.start() ; // starts the test runner
-  }, 1000);
+  }, 3000); // a shorter timeout fails when a lot of unit tests are running...
 });
 
 test("Test Synchronous GET Request", function() {
@@ -54,7 +54,7 @@ test("Test Synchronous GET Request", function() {
   
   ok(contents !== null) ;
   ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
-  if (SC.$ok(contents)) equals('{"message": "Yay!"}', contents) ;
+  if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}') ;
 });
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
