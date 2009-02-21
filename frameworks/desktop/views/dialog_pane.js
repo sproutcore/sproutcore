@@ -27,38 +27,22 @@
 */
 SC.DialogPane = SC.Pane.extend({
 
-  emptyElement: '<div class="sc-pane sc-dialog-pane"></div>',
-
   layout: { left:0, right:0, top:0, bottom:0 },
-  
+  classNames: ['sc-dialog-pane'],
   acceptsKeyPane: YES,
-  
-  // mouseDown: function(evt) {
-  //   console.log('mouseDown invoked on %@'.fmt(this));
-  //   return YES ;
-  // },
+
+  // ..........................................................
+  // CONTENT VIEW
+  // 
   
   /**
     Set this to the view you want to act as the dialog within the dialog pane.
     
-    @type {SC.View}
+    @property {SC.View}
   */
-  dialogView: null,
-  
-  mouseDown: function(evt) { return YES; },
-  
-  /** @private */
-  dialogViewBindingDefault: SC.Binding.single(),
-  
-  /** @private - extends SC.Pane's method */
-  paneDidAttach: function() {
-    var ret = sc_super();
-    var responder = this.rootResponder;
-    responder.makeMainPane(this);
-    responder.makeKeyPane(this);
-    return ret ;
-  },
-  
+  contentView: null,
+  contentViewBindingDefault: SC.Binding.single(),
+
   /**
     Replaces any child views with the passed new content.  
     
@@ -67,6 +51,7 @@ SC.DialogPane = SC.Pane.extend({
     than the default.
     
     @param {SC.View} newContent the new dialog view or null.
+    @returns {void}
   */
   replaceContent: function(newContent) {
     this.removeAllChildren() ;
@@ -76,20 +61,35 @@ SC.DialogPane = SC.Pane.extend({
   /** @private */
   createChildViews: function() {
     // if dialogView is defined, then create the content
-    var view = this.dialogView ;
+    var view = this.contentView ;
     if (view) {
-      view = this.dialogView = this.createChildView(view) ;
+      view = this.contentView = this.createChildView(view) ;
       this.childViews = [view] ;
     }
   },
+
   
   /**
     Invoked whenever the content property changes.  This method will simply
     call replaceContent.  Override replaceContent to change how the view is
     swapped out.
   */
-  dialogViewDidChange: function() {
-    this.replaceContent(this.get('dialogView'));
-  }.observes('dialogView')
+  contentViewDidChange: function() {
+    this.replaceContent(this.get('contentView'));
+  }.observes('contentView'),
+
+  // ..........................................................
+  // INTERNAL SUPPORT
+  //
+   
+  /** @private - extends SC.Pane's method - make dialog keyPane when shown */
+  paneDidAttach: function() {
+    var ret = sc_super();
+    this.get('rootResponder').makeKeyPane(this);
+    return ret ;
+  },
+
+  /** @private - suppress all mouse events on dialog itself. */
+  mouseDown: function(evt) { return YES; }
   
 });

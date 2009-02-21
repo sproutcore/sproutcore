@@ -112,7 +112,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
 
-  concatenatedProperties: 'outlets layerProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
   
   /** 
     The current pane. 
@@ -754,7 +754,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     
     // do some standard setup...
-    if (this.get('isTextSelectable')) context.addClass('text-selectable');
+    if (this.get('isTextSelectable')) context.addClass('allow-select');
     if (!this.get('isEnabled')) context.addClass('disabled');
     if (!this.get('isVisible')) context.addClass('hidden');
     
@@ -2015,7 +2015,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
 SC.outlet = function(path) {
   return function(key) {
     return (this[key] = SC.objectForPropertyPath(path, this)) ;
-  }.property().outlet();
+  }.property();
 };
 
 /** @private on unload clear cached divs. */

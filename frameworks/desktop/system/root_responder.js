@@ -34,6 +34,10 @@ SC.RootResponder = SC.RootResponder.extend(
 
   platform: 'desktop',
 
+  // ..........................................................
+  // ORDERED PANES
+  // 
+  
   /** @property
     The current front view.  This view should have the highest z-index of all 
     the other views.
@@ -107,7 +111,6 @@ SC.RootResponder = SC.RootResponder.extend(
       if (newFocus) newFocus.focusFrom(currentFocus);
     }
     
-    this.panes.add(pane) ; // make sure its in the set...
     return this ;
   },
 
@@ -141,7 +144,6 @@ SC.RootResponder = SC.RootResponder.extend(
       this.makeKeyPane(null);
     }
     
-    this.panes.remove(pane) ; // remove pane from set of panes...
     return this ;
   },
   
@@ -528,7 +530,6 @@ SC.RootResponder = SC.RootResponder.extend(
   },
 
   dblclick: function(evt){
-    console.log('dblclick called') ;
     if (SC.browser.isIE) {
       this._clickCount = 2;
       // this._onmouseup(evt);

@@ -34,3 +34,7 @@
 .sc-view img {
   border: none ;
 }
+
+.sc-view.hidden {
+  display: none;
+}

@@ -1,0 +1,13 @@
+/* @override http://localhost:4020/static/sproutcore/empty_theme/en/current/source/dialog_pane.css?1235210504 */
+
+/** SC.DialogPane Support */
+
+.sc-pane.sc-dialog-pane {
+}
+
+.sc-pane.sc-dialog-pane > .sc-view {
+	border: 1px #888 solid;
+	-webkit-border-radius: 2px;
+	border-radius: 2px;
+	background-color: #fafafa ;
+}

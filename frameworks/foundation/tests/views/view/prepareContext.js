@@ -49,7 +49,7 @@ test("invokes renderLayout if first time", function() {
   context = view.renderContext();
   isFirstTime = NO ;
 	view.prepareContext(context, NO);
-	equals(runCount, 0, 'should not call renderLayout')
+	equals(runCount, 0, 'should not call renderLayout');
 
 });
 
@@ -62,12 +62,12 @@ test("adds text-selectable class if view has isTextSelectable", function() {
   context = view.renderContext();
   view.set('isTextSelectable', YES);
   view.prepareContext(context, YES);
-  ok(context.hasClass('text-selectable'), 'should have text-selectable class');
+  ok(context.hasClass('allow-select'), 'should have text-selectable class');
   
   context = view.renderContext();
   view.set('isTextSelectable', NO);
   view.prepareContext(context, YES);
-  ok(!context.hasClass('text-selectable'), 'should NOT have text-selectable class');
+  ok(!context.hasClass('allow-select'), 'should NOT have text-selectable class');
   
 });
 
