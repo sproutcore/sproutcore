@@ -3,11 +3,6 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
-/**
-  These tests verify that all view metrics -- frame, clippingFrame,
-  isVisibleInWindow, etc. are correct.
-*/
-
 // ..........................................................
 // BASE TESTS
 // 
@@ -25,4 +20,12 @@ test("should attach when calling append()", function() {
   var pane = SC.MainPane.create() ;
   pane.append() ;
   equals(pane.get('isPaneAttached'), YES) ;
+});
+
+test("appending should make pane main & key", function() {
+  var pane = SC.MainPane.create() ;
+  pane.append();
+  var r = pane.get('rootResponder');
+  equals(r.get('mainPane'), pane, 'should become mainPane');
+  equals(r.get('keyPane'), pane, 'should become keyPane');
 });
