@@ -697,6 +697,8 @@ function triggerEvent( elem, type, event ) {
 		typeOf:function( obj ){
 			var type = typeof obj,
 				f = 'function';//we'll use it 3 times, save it
+				
+			if (obj && (obj.isObject || obj.isClass)) return 'scobj';
 			return type != 'object' && type != f ? type :
 				!obj ? 'null' :
 				obj.exec ? 'regexp' :// some browsers (FF) consider regexps functions
@@ -758,6 +760,7 @@ function triggerEvent( elem, type, event ) {
 			array: array,
 			nodelist: array,
 			arguments: array,
+			scobj: function(obj) { return obj.toString(); },
 			object:function( map ){
 				var ret = [ ];
 				this.up();

@@ -58,9 +58,9 @@ SC.RootResponder = SC.Object.extend({
   //
 
   /** @property
-    The main pane.  This pane receives shortcuts and actions if the focusedPane 
-    does not respond to them.  There can be only one main pane.  You can swap 
-    main panes by calling makeMainPane() here.
+    The main pane.  This pane receives shortcuts and actions if the 
+    focusedPane does not respond to them.  There can be only one main pane.  
+    You can swap main panes by calling makeMainPane() here.
     
     Usually you will not need to edit the main pane directly.  Instead, you 
     should use a MainPane subclass, which will automatically make itself main 
@@ -69,10 +69,10 @@ SC.RootResponder = SC.Object.extend({
   mainPane: null,
 
   /** 
-    Swaps the main pane.  If the current main pane is also the key pane, then the 
-    new main pane will also be made key view automatically.  In addition to simply 
-    updating the mainPane property, this method will also notify the panes 
-    themselves that they will lose/gain their mainView status.
+    Swaps the main pane.  If the current main pane is also the key pane, then 
+    the new main pane will also be made key view automatically.  In addition 
+    to simply updating the mainPane property, this method will also notify the 
+    panes themselves that they will lose/gain their mainView status.
     
     Note that this method does not actually change the Pane's place in the 
     document body.  That will be handled by the Pane itself.
@@ -106,14 +106,16 @@ SC.RootResponder = SC.Object.extend({
 
   /** @property
     The current key pane.  This pane receives keyboard events, shortcuts, and 
-    actions first.  This pane is usually the highest ordered pane or the mainPane.
+    actions first.  This pane is usually the highest ordered pane or the 
+    mainPane.
   */
   keyPane: null,
 
   /**
-    Makes the passed pane the new key pane.  If you pass nil or if the pane does 
-    not accept key focus, then key focus will transfer to the mainPane.  This 
-    will notify both the old pane and the new root View that key focus has changed.
+    Makes the passed pane the new key pane.  If you pass nil or if the pane 
+    does not accept key focus, then key focus will transfer to the mainPane.  
+    This will notify both the old pane and the new root View that key focus 
+    has changed.
     
     @param {SC.Pane} pane
     @returns {SC.RootResponder} Receiver
@@ -151,34 +153,6 @@ SC.RootResponder = SC.Object.extend({
   },
 
   // .......................................................
-  // ROOT VIEW ORDER
-  //
-
-  /** @property
-    A set of all panes currently managed by the RootResponder.  To put a view 
-    under management, just add it to this set.
-  */
-  panes: null,
-
-  /**
-    Called by a pane whenever the pane is added to the document.  This will 
-    add the pane to the set.
-  */
-  addPane: function(pane) { this.panes.add(pane); },
-  
-  /**
-    Called by a pane whenever the pane is removed from a document.  This will 
-    remove the pane from the set.
-  */
-  removePane: function(pane) { this.panes.remove(pane); },
-  
-  /** @property
-    The current focused view.  This will receive actions sent down the chain.  
-    This only needs to be set for platforms that support multiple, layered panes.
-  */
-  focusedPane: null,
-
-  // .......................................................
   // ACTIONS
   //
   
@@ -189,12 +163,20 @@ SC.RootResponder = SC.Object.extend({
   defaultResponder: null,
 
   /**
-    Route an action message to the appropriate responder
+    Route an action message to the appropriate responder.  This method will 
+    walk the responder chain, attempting to find a responder that implements 
+    the action name you pass to this method.  
+    
+    This is the main entry point used by low-level event handlers in the 
+    RootResponder to route events to views.  You can use this method to 
+    invoke custom actions or otherwise support custom events yourself.
+    
     @param {String} action The action to perform - this is a method name.
-    @param {SC.Responder} target The object to perform the action upon. Set to null to search the Responder chain for a receiver.
+    @param {SC.Responder} target object to set method to.  set to null to search responder chain
     @param {Object} sender The sender of the action
-    @param {SC.Pane} pane
-    @returns YES if action was performed, NO otherwise
+    @param {SC.Pane} pane optional pane to start search
+    @returns {Boolean} YES if action was performed, NO otherwise
+    @test in targetForAction
   */
   sendAction: function( action, target, sender, pane) {
     target = this.targetForAction(action, target, sender, pane);
@@ -238,26 +220,33 @@ SC.RootResponder = SC.Object.extend({
       if (SC.typeOf(target) === SC.T_STRING) {
         target = SC.objectForPropertyPath(target) ;
       }
-      return target.respondsTo(methodName) ? target : null ;
+      return target && (target.respondsTo ? target.respondsTo(methodName) : (SC.typeOf(target[methodName]) === SC.T_FUNCTION)) ? target : null ;
     }
 
     // ok, no target was passed... try to find one in the responder chain
-    var focusedPane = this.get('focusedPane'), keyPane = this.get('keyPane'), mainPane = this.get('mainPane');
-    
-    if (pane) target = this._responderFor(pane, methodName);
-    if (!target && keyPane && (keyPane !== pane)) target = this._responderFor(keyPane, methodName);
-    if (!target && focusedPane && (focusedPane !== keyPane)) {
-      target = this._responderFor(focusedPane, methodName) ;
-    }
-    if (!target && mainPane && (mainPane !== keyPane) && (mainPane !== focusedPane)) {
-      target = this._responderFor(mainPane, methodName) ;
+    var keyPane = this.get('keyPane'), mainPane = this.get('mainPane');
+
+    // search explicit pane if passed
+    if (pane) {
+      target = this._responderFor(pane, methodName);
+      
+    // if no explicit pane is passed, look on keyPane or mainPane
+    } else {
+      if (keyPane && (keyPane !== pane)) {
+        target = this._responderFor(keyPane, methodName);
+      }
+      if (!target && mainPane && (mainPane !== keyPane)) {
+        target = this._responderFor(mainPane, methodName) ;
+      }
     }
 
     // last stop, this defaultResponder
-    target = this.get('defaultResponder');
-    if (target && target.respondsTo(methodName)) return target;
+    if (!target) {
+      target = this.get('defaultResponder');
+      if (target && !target.respondsTo(methodName)) target = null ;
+    }
 
-    return null;
+    return target;
   },
 
   /**
@@ -272,9 +261,9 @@ SC.RootResponder = SC.Object.extend({
   },
   
   /**
-    Attempts to send an event down the responder chain.  This method will invoke 
-    the sendEvent() method on either the keyPane or on the pane owning the target 
-    view you pass in.
+    Attempts to send an event down the responder chain.  This method will 
+    invoke the sendEvent() method on either the keyPane or on the pane owning 
+    the target view you pass in.
     
     @param {String} action
     @param {SC.Event} evt
@@ -465,7 +454,6 @@ SC.RootResponder = SC.Object.extend({
   an instance and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
-  console.log('SC.RootResponder.ready called');
   var r = SC.RootResponder.create();
   SC.RootResponder.responder = r; r.setup();
 });

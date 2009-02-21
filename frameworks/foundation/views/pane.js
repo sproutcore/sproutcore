@@ -169,6 +169,13 @@ SC.Pane = SC.View.extend({
   defaultResponder: null,
   
   /** @property
+    The next responder for the pane is always its defaultResponder.
+  */
+  nextResponder: function() {
+    return this.get('defaultResponder');
+  }.property('defaultResponder').cacheable(),
+  
+  /** @property
     The first responder.  This is the first view that should receive action 
     events.  Whenever you click on a view, it will usually become firstResponder. 
   */
