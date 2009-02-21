@@ -265,8 +265,8 @@ SC.Pane = SC.View.extend({
   },
   
   /** @private method forwards status changes in a generic way. */
-  _forwardKeyChange: function(shouldForward, methodName, pane) {
-    var keyView, responder, newKeyView, isKey;
+  _forwardKeyChange: function(shouldForward, methodName, pane, isKey) {
+    var keyView, responder, newKeyView;
     if (shouldForward && (responder = this.get('firstResponder'))) {
       newKeyView = (pane) ? pane.get('firstResponder') : null ;
       keyView = this.get('firstResponder') ;
@@ -301,7 +301,7 @@ SC.Pane = SC.View.extend({
     @returns {SC.Pane} receiver
   */
   willBecomeKeyPaneFrom: function(pane) {
-    this._forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane);
+    this._forwardKeyChange(!this.get('isKeyPane'), 'willBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
 
@@ -323,8 +323,9 @@ SC.Pane = SC.View.extend({
   
   /**
     Called just after the keyPane focus has changed to the receiver.  Notifies 
-    the keyView of its new status.  The keyView should use this method to update 
-    its display and actually set focus on itself at the browser level if needed.
+    the keyView of its new status.  The keyView should use this method to 
+    update its display and actually set focus on itself at the browser level 
+    if needed.
     
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
@@ -350,7 +351,6 @@ SC.Pane = SC.View.extend({
   */
   blurMainTo: function(pane) {
     this.set('isMainPane', NO) ;
-    // this.remove() ;
   },
   
   /** 
@@ -395,7 +395,6 @@ SC.Pane = SC.View.extend({
     var responder = this.rootResponder ;
     if (this.get('isKeyPane')) responder.makeKeyPane(null) ; // orders matter, remove keyPane first
     if (this.get('isMainPane')) responder.makeMainPane(null);
-    responder.panes.remove(this) ;
     this.rootResponder = responder = null ;
 
     // clean up some of my own properties    
@@ -486,7 +485,6 @@ SC.Pane = SC.View.extend({
 
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
-    responder.panes.add(this);
     if (this.get('isKeyPane')) responder.makeKeyPane(this);
   
     // set currentWindowSize

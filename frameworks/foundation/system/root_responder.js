@@ -123,7 +123,7 @@ SC.RootResponder = SC.Object.extend({
     // if null was passed, try to make mainPane key instead.
     if (!pane) {
       pane = this.get('mainPane') ;
-      if (!pane.get('acceptsKeyPane')) pane = null ;
+      if (pane && !pane.get('acceptsKeyPane')) pane = null ;
     }
 
     var current = this.get('keyPane') ;

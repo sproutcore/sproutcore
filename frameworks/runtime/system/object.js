@@ -492,7 +492,7 @@ SC.Object.prototype = {
     @returns {Boolean} YES if handled, NO if not handled
   */
   tryToPerform: function(methodName, arg1, arg2) {
-    return this.respondsTo(methodName) && this[methodName](arg1, arg2);
+    return this.respondsTo(methodName) && (this[methodName](arg1, arg2) !== NO);
   },
 
   /**  
