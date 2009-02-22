@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('protocols/collection_view_delegate') ;
+sc_require('mixins/collection_view_delegate') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
@@ -57,7 +57,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
-  styleClass: 'sc-collection-view',
+  classNames: ['sc-collection-view'],
   
   // ......................................
   // PROPERTIES
@@ -371,7 +371,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   /**
     Enables keyboard-based navigate, deletion, etc. if set to true.
   */
-  acceptsFirstResponder: false,
+  acceptsFirstResponder: NO,
   
   /**
     If your layout uses a grid or horizontal-based layout, then make sure this 
@@ -1400,7 +1400,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items.first());
+      this.scrollToContent(items[0]);
       this.selectItems(items);
     }
     
@@ -1464,7 +1464,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items.first());
+      this.scrollToContent(items[0]);
       this.selectItems(items);
     }
     
@@ -1519,9 +1519,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   selectItems: function(items, extendSelection) {
     var base = (extendSelection) ? this.get('selection') : [] ;
-    var sel = [];
+    var sel = [] ;
     
-    items = [items].flatten();
+    items = SC.makeArray(items) ;
     for (var i = 0, len = items.length; i < len; i++) {
       if (this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, items[i])) {
         sel.push(items[i]);
@@ -1754,8 +1754,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
   
     // collection some basic setup info
-    var selection  = this.get('selection') || [];
-    var isSelected = selection.include(mouseDownContent);
+    var selection  = this.get('selection') || [] ;
+    var isSelected = (selection.indexOf(mouseDownContent) !== -1) ;
     var modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
     if (mouseDownView.checkboxView && (SC.Event.element(ev) == ev.checkboxView.rootElement)) {
       modifierKeyPressed = true ;
@@ -1895,8 +1895,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var contentLowerBounds = 0;
     var contentUpperBounds = (content.get('length') - 1);
 
-    var selectionBeginIndex = content.indexOf(selection.first());
-    var selectionEndIndex   = content.indexOf(selection.last());
+    var selectionBeginIndex = content.indexOf(selection[0]) ;
+    var selectionEndIndex = content.indexOf(selection[selection.length-1]) ;
 
     var previousMouseDownIndex = content.indexOf(this._previousMouseDownContent);
     // _previousMouseDownContent couldn't be found... either it hasn't been set yet or the record has been deleted by the user
@@ -1935,18 +1935,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // slice doesn't include the last index passed... silly..
     selectionEndIndex++;
-
+    
     // shouldn't need to sanity check that the selection is in bounds due to 
     // the indexOf checks above...I'll have faith that indexOf hasn't lied to 
     // me...
     return content.slice(selectionBeginIndex, selectionEndIndex);
   },
-
+  
   /*
    Finds the next selectable item, up to content length, by asking the
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
-
+   
    @param {Integer} proposedIndex the desired index to select
    @returns {Integer} the next selectable index. This will always be in the range of the bottom of the current selection index and the proposed index.
    @private
@@ -1955,19 +1955,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var content = this.get('content');
     var contentLength = content.get('length');
     var bottom = this._indexOfSelectionTop();
-
+    
     while (proposedIndex < contentLength &&
       this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
       proposedIndex++;
     }
     return (proposedIndex < contentLength) ? proposedIndex : bottom;
   },
-
+  
   /*
    Finds the previous selectable item, up to the first item, by asking the
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
-
+   
    @param {Integer} proposedIndex the desired index to select
    @returns {Integer} the previous selectable index. This will always be in the range of the top of the current selection index and the proposed index.
    @private
@@ -1976,12 +1976,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var content = this.get('content');
     var contentLength = content.get('length');
     var top = this._indexOfSelectionTop();
-
-    while (proposedIndex > 0 &&
+    
+    while (proposedIndex >= 0 &&
            this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
       proposedIndex--;
     }
-    return (proposedIndex > 0) ? proposedIndex : top;
+    return (proposedIndex >= 0) ? proposedIndex : top ;
   },
 
   // if content value is editable and we have one item selected, then edit.

@@ -1,7 +1,9 @@
-// ========================================================================
-// SproutCore
-// copyright 2006-2008 Sprout Systems, Inc.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
 /**
   Indicates that the collection view expects to accept a drop ON the specified
@@ -167,7 +169,7 @@ SC.CollectionViewDelegate = {
     SC.DRAG_NONE and the dragOperation was SC.DRAG_REORDER, then the default
     reorder behavior will be provided by the collection view.
     
-    @paramview {SC.CollectionView}
+    @param view {SC.CollectionView}
     @param drag {SC.Drag} the current drag object
     @param op {Number} proposed logical OR of allowed drag operations.
     @param proposedInsertionIndex {Number} an index into the content array representing the proposed insertion point.
