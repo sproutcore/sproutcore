@@ -454,23 +454,28 @@ SC.RootResponder = SC.RootResponder.extend(
   },
   
   mousedown: function(evt) {
-
-    // make sure the window gets focus no matter what.  FF is inconsistant 
-    // about this.
-    this.focus();
-
-    // first, save the click count.  Click count resets if your down is
-    // more than 125msec after you last click up.
-    this._clickCount = this._clickCount + 1 ;
-    if (!this._lastMouseUpAt || ((Date.now() - this._lastMouseUpAt) > 200)) {
-      this._clickCount = 1 ; 
+    try {
+      // make sure the window gets focus no matter what.  FF is inconsistant 
+      // about this.
+      this.focus();
+      
+      // first, save the click count.  Click count resets if your down is
+      // more than 125msec after you last click up.
+      this._clickCount = this._clickCount + 1 ;
+      if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
+        this._clickCount = 1 ; 
+      }
+      evt.clickCount = this._clickCount ;
+      
+      var view = this.targetViewForEvent(evt) ;
+      view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
+      if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
+    } catch (e) {
+      console.log('Exception during mousedown: %@'.fmt(e)) ;
+      this._mouseDownView = null ;
+      this._mouseCanDrag = NO ;
+      return NO ;
     }
-    evt.clickCount = this._clickCount ;
-
-    var view = this.targetViewForEvent(evt) ;
-    view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
-    if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
-    // console.log('mousedown ended in %@'.fmt(this));
     return view ? evt.hasCustomEventHandling : YES;
   },
   
@@ -483,55 +488,59 @@ SC.RootResponder = SC.RootResponder.extend(
   */
   mouseup: function(evt) {
     // console.log('mouseup called in %@ with this._mouseDownView = %@'.fmt(this, this._mouseDownView));
-    
-    if (this._drag) {
-      this._drag.tryToPerform('mouseUp', evt) ;
-      this._drag = null ;
-    }
-    
-    var handler = null, view = this._mouseDownView ;
-    this._lastMouseUpAt = Date.now() ;
-
-    // record click count.
-    evt.clickCount = this._clickCount ;
-    
-    // attempt the mouseup call only if there's a target.
-    // don't want a mouseup going to anyone unless they handled the mousedown...
-    if (view) {
-      handler = this.sendEvent('mouseUp', evt, view) ;
-      
-      // try doubleClick
-      if (!handler && (this._clickCount === 2)) {
-        handler = this.sendEvent('doubleClick', evt, view) ;
+    try {
+      if (this._drag) {
+        this._drag.tryToPerform('mouseUp', evt) ;
+        this._drag = null ;
       }
       
-      // try singleClick
+      var handler = null, view = this._mouseDownView ;
+      this._lastMouseUpAt = Date.now() ;
+      
+      // record click count.
+      evt.clickCount = this._clickCount ;
+      
+      // attempt the mouseup call only if there's a target.
+      // don't want a mouseup going to anyone unless they handled the mousedown...
+      if (view) {
+        handler = this.sendEvent('mouseUp', evt, view) ;
+        
+        // try doubleClick
+        if (!handler && (this._clickCount === 2)) {
+          handler = this.sendEvent('doubleClick', evt, view) ;
+        }
+        
+        // try single click
+        if (!handler) {
+          handler = this.sendEvent('click', evt, view) ;
+        }
+      }
+      
+      // try whoever's under the mouse if we haven't handle the mouse up yet
       if (!handler) {
-        handler = this.sendEvent('click', evt, view) ;
-      }
-    }
-    
-    // try whoever's under the mouse if we haven't handle the mouse up yet
-    if (!handler) {
-      view = this.targetViewForEvent(evt) ;
+        view = this.targetViewForEvent(evt) ;
       
-      // try doubleClick
-      if (this._clickCount === 2) {
-        handler = this.sendEvent('doubleClick', evt, view);
+        // try doubleClick
+        if (this._clickCount === 2) {
+          handler = this.sendEvent('doubleClick', evt, view);
+        }
+      
+        // try singleClick
+        if (!handler) {
+          handler = this.sendEvent('click', evt, view) ;
+        }
       }
       
-      // try singleClick
-      if (!handler) {
-        handler = this.sendEvent('click', evt, view) ;
-      }
+      // cleanup
+      this._mouseCanDrag = NO; this._mouseDownView = null ;
+    } catch (e) {
+      console.log('Exception during mouseup: %@'.fmt(e)) ;
+      this._drag = null; this._mouseCanDrag = NO; this._mouseDownView = null ;
+      return NO ;
     }
-    
-    // cleanup
-    this._mouseCanDrag = NO; this._mouseDownView = null ;
-    
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
-
+  
   dblclick: function(evt){
     if (SC.browser.isIE) {
       this._clickCount = 2;
@@ -540,11 +549,14 @@ SC.RootResponder = SC.RootResponder.extend(
     }
   },
   
-  
-  
   mousewheel: function(evt) {
-    var view = this.targetViewForEvent(evt) ;
-    var handler = this.sendEvent('mouseWheel', evt, view) ;
+    try {
+      var view = this.targetViewForEvent(evt) ;
+      var handler = this.sendEvent('mouseWheel', evt, view) ;
+    } catch (e) {
+      console.log('Exception during mousewheel: %@'.fmt(e)) ;
+      return NO ;
+    }
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
   
@@ -561,52 +573,54 @@ SC.RootResponder = SC.RootResponder.extend(
   */
   mousemove: function(evt) {
     SC.RunLoop.begin();
-
-    // make sure the view gets focus no matter what.  FF is inconsistant 
-    // about this.
-    this.focus();
-    
-    // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
-    // drags send their own events, e.g. drag[Moved|Entered|Exited]
-    if (this._drag) {
-      this._drag.tryToPerform('mouseDragged', evt);
-    } else {
-      var lh = this._lastHovered || [] ;
-      var nh = [] ;
-      var view = this.targetViewForEvent(evt) ;
-    
-      // work up the view chain.  Notify of mouse entered and
-      // mouseMoved if implemented.
-      while(view && (view !== this)) {
-        if (lh.indexOf(view) !== -1) {
-          view.tryToPerform('mouseMoved', evt);
-          nh.push(view) ;
-        } else {
-          view.tryToPerform('mouseEntered', evt);
-          nh.push(view) ;
-        }
+    try {
+      // make sure the view gets focus no matter what.  FF is inconsistant 
+      // about this.
+      this.focus();
       
-        view = view.get('nextResponder');
+      // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
+      // drags send their own events, e.g. drag[Moved|Entered|Exited]
+      if (this._drag) {
+        this._drag.tryToPerform('mouseDragged', evt);
+      } else {
+        var lh = this._lastHovered || [] ;
+        var nh = [] ;
+        var view = this.targetViewForEvent(evt) ;
+        
+        // work up the view chain.  Notify of mouse entered and
+        // mouseMoved if implemented.
+        while(view && (view !== this)) {
+          if (lh.indexOf(view) !== -1) {
+            view.tryToPerform('mouseMoved', evt);
+            nh.push(view) ;
+          } else {
+            view.tryToPerform('mouseEntered', evt);
+            nh.push(view) ;
+          }
+          
+          view = view.get('nextResponder');
+        }
+        
+        // now find those views last hovered over that were no longer found 
+        // in this chain and notify of mouseExited.
+        for(var loc=0; loc < lh.length; loc++) {
+          view = lh[loc] ;
+          var exited = view.respondsTo('mouseExited') ;
+          if (exited && !(nh.indexOf(view) !== -1))
+            view.tryToPerform('mouseExited',evt);
+        }
+        
+        this._lastHovered = nh; 
+        
+        // also, if a mouseDownView exists, call the mouseDragged action, if 
+        // it exists.
+        if (this._mouseDownView) {
+          this._mouseDownView.tryToPerform('mouseDragged', evt);
+        }
       }
-
-      // now find those views last hovered over that were no longer found 
-      // in this chain and notify of mouseExited.
-      for(var loc=0; loc < lh.length; loc++) {
-        view = lh[loc] ;
-        var exited = view.respondsTo('mouseExited') ;
-        if (exited && !(nh.indexOf(view) !== -1)) view.tryToPerform('mouseExited',evt);
-      }
-    
-      this._lastHovered = nh; 
-    
-      // also, if a mouseDownView exists, call the mouseDragged action, if it 
-      // exists.
-      if (this._mouseDownView) {
-        // console.log('mousemove called in %@, this._mouseDownView is %@'.fmt(this, this._mouseDownView));
-        this._mouseDownView.tryToPerform('mouseDragged', evt);
-      }
+    } catch (e) {
+      console.log('Exception during mousemove: %@'.fmt(e)) ;
     }
-    
     SC.RunLoop.end();
   },
 
@@ -617,21 +631,8 @@ SC.RootResponder = SC.RootResponder.extend(
   
   _mouseCanDrag: YES,
   
-  selectstart: function() {
-    if(this._mouseCanDrag) {
-      return false;
-    } else {
-      return true;
-    }
-  },
+  selectstart: function() { return (this._mouseCanDrag) ? false : true ; },
   
-  drag: function() { return false; },
+  drag: function() { return false; }
   
-  // FIXME: in FF, we need to cover any iframes with a view so that we can receive mousemoved events over them...
-  startCapturingMouseEvents: function(view) {
-    this._captureView = view;
-  },
-  
-  stopCapturingMouseEvents: function() { this._captureView = null; }
-    
-}) ;
+});
