@@ -191,7 +191,7 @@ test("no target, explicit pane, does not implement action", function() {
   equals(r.targetForAction('mainAction', null, null, pane), null,
     'should not return mainPane');
 
-  equals(r.targetForAction('globalAction', null, null, pane), globalResponder,
+  equals(r.targetForAction('globalAction', null, null, pane), null,
     'should not return global defaultResponder');
 });
 
