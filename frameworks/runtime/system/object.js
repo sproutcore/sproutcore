@@ -613,7 +613,45 @@ SC.Object.prototype = {
     @returns {SC.Object} receiver
   */
   invokeOnce: function(method) {
-    SC.RunLoop.currentRunLoop.invokeOnce(this, method);
+    SC.RunLoop.currentRunLoop.invokeOnce(this, method) ;
+    return this ;
+  },
+  
+  /**
+    Invokes the passed method once at the beginning of the next runloop, 
+    before any other methods (including events) are processed. This is useful
+    for situations where you know you need to update something, but due to
+    the way the run loop works, you can't actually do the update until the
+    run loop has completed.
+    
+    A simple example is setting the selection on a collection controller to a 
+    newly created object. Because the collection controller won't have its
+    content collection updated until later in the run loop, setting the 
+    selection immediately will have no affect. In this situation, you could do
+    this instead:
+    
+    {{{
+      // Creates a new MyRecord object and sets the selection of the
+      // myRecord collection controller to the new object.
+      createObjectAction: function(sender, evt) {
+        // create a new record and add it to the store
+        var obj = MyRecord.newRecord() ;
+        
+        // update the collection controller's selection
+        MyApp.myRecordCollectionController.invokeNext( function() {
+          this.set('selection', [obj]) ;
+        });
+      }
+    }}}
+    
+    You can call invokeNext as many times as you like and the method will
+    only be invoked once.
+    
+    @param {Funciton|String} method method or method name
+    @returns {SC.Object} receiver
+  */
+  invokeNext: function(method) {
+    SC.RunLoop.currentRunLoop.invokeNext(this, method) ;
     return this ;
   },
   
