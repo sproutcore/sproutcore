@@ -5,7 +5,7 @@
 // ========================================================================
 
 SC.DRAG_LINK = 0x0004; SC.DRAG_COPY = 0x0001; SC.DRAG_MOVE = 0x0002;
-SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x0007 ;
+SC.DRAG_NONE = 0x0000; SC.DRAG_ANY = 0x0007 ; // includes SC.DRAG_REORDER as well
 SC.DRAG_AUTOSCROLL_ZONE_THICKNESS = 20 ;
 
 /**
@@ -269,7 +269,7 @@ SC.Drag = SC.Object.extend(
     
     // reposition the ghostView
     this._positionGhostView(evt) ;
-
+    
     // STEP 1: Determine the deepest drop target that allows an operation.
     // if the drop target selected the last time this method was called differs
     // from the deepest target found, then go up the chain until we either hit the
@@ -286,18 +286,18 @@ SC.Drag = SC.Object.extend(
       } else op = SC.DRAG_ANY ; // assume drops are allowed
       
       this.sourceDropOperations = op ;
-
+      
       // now, let's see if the target will accept the drag
       if ((op != SC.DRAG_NONE) && target && target.computeDragOperations) {
         op = op & target.computeDragOperations(this, evt) ;
       } else op = SC.DRAG_NONE ; // assume drops AREN'T allowed
       
       this.dropOperations = op ;
-
+      
       // if DRAG_NONE, then look for the next parent that is a drop zone
       if (op == SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
     }
-
+    
     // STEP 2: Refocus the drop target if needed
     if (target != last) {
       if (last && last.dragExited) last.dragExited(this, evt) ;
@@ -327,19 +327,31 @@ SC.Drag = SC.Object.extend(
     var target = this._lastTarget, op = this.dropOperations;
     
     // try to have the drop target perform the drop...
-    if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {
-      op = (target.performDragOperation) ? target.performDragOperation(this, op) : SC.DRAG_NONE ;  
-    } else {
-      op = SC.DRAG_NONE;
+    try {
+      if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {
+        op = (target.performDragOperation) ? target.performDragOperation(this, op) : SC.DRAG_NONE ;  
+      } else {
+        op = SC.DRAG_NONE;
+      }
+    } catch (e) {
+      console.log('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e)) ;
     }
     
-    // notify last drop target that the drag exited, to allow it to cleanup
-    if (target && target.dragExited) target.dragExited(this, evt) ;
+    try {
+      // notify last drop target that the drag exited, to allow it to cleanup
+      if (target && target.dragExited) target.dragExited(this, evt) ;
+    } catch (e) {
+      onsole.log('Exception in SC.Drag.mouseUp(target.dragExited): %@'.fmt(e)) ;
+    }
     
     // notify all drop targets that the drag ended
     var ary = this._dropTargets() ;
     for (var idx=0, len=ary.length; idx<len; idx++) {
-      ary[idx].tryToPerform('dragEnded', evt) ;
+      try {
+        ary[idx].tryToPerform('dragEnded', evt) ;
+      } catch (e) {
+        console.log('Exception in SC.Drag.mouseUp(dragEnded on %@): %@'.fmt(ary[idx], e)) ;
+      }
     }
     
     // destroy the ghost view
@@ -368,7 +380,7 @@ SC.Drag = SC.Object.extend(
     view.adjust(this.dragView.get('frame')) ;
     view.append() ;  // add to window
   },
-
+  
   // positions the ghost view underneath the mouse with the initial offset
   // recorded by when the drag started.
   _positionGhostView: function(evt) {
@@ -395,14 +407,14 @@ SC.Drag = SC.Object.extend(
   // during a drag, it will probably be wrong.
   _dropTargets: function() {
     if (this._cachedDropTargets) return this._cachedDropTargets ;
-
+    
     // build array of drop targets
     var ret = [] ;
     var hash = SC.Drag._dropTargets ;
     for (var key in hash) {
       if (hash.hasOwnProperty(key)) ret.push(hash[key]) ;
     }
-
+    
     // views must be sorted so that drop targets with the deepest nesting 
     // levels appear first in the array.  The getDepthFor().
     var depth = {} ;
@@ -428,7 +440,7 @@ SC.Drag = SC.Object.extend(
       b = getDepthFor(b) ;
       return (a > b) ? -1 : 1 ;
     }) ;
-
+    
     this._cachedDropTargets = ret ;
     return ret ;
   },
@@ -446,7 +458,7 @@ SC.Drag = SC.Object.extend(
       
       // get clippingFrame, converted to the pane.
       frame = target.convertClippingFrameToView(target.get('clippingFrame'), null) ;
-
+      
       // check to see if loc is inside.  If so, then make this the drop target unless 
       // there is a drop target and the current one is not deeper.
       if (SC.pointInRect(loc, frame)) return target;
@@ -493,7 +505,7 @@ SC.Drag = SC.Object.extend(
     var verticalScroll, horizontalScroll ;
     var min, max, edge ;
     var scrollableView = null;
-
+    
     while (view && !scrollableView) {
       
       // quick check...can we scroll this view right now?
@@ -528,7 +540,7 @@ SC.Drag = SC.Object.extend(
           } else verticalScroll = 0 ;
         }
       }
-
+      
       if (horizontalScroll != 0) {
         // right hotzone?
         max = SC.maxX(f); min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
@@ -547,13 +559,12 @@ SC.Drag = SC.Object.extend(
           } else horizontalScroll = 0 ;
         }
       }
-
+      
       // if we can scroll, then set this.
       if ((verticalScroll != 0) || (horizontalScroll != 0)) {
         scrollableView = view ;
       } else view = this._findNextScrollableView(view) ;
     }
-
     
     // STEP 2: Only scroll if the user remains within the hot-zone for a period of
     // time
@@ -579,17 +590,17 @@ SC.Drag = SC.Object.extend(
         x: horizontalScroll * this._horizontalScrollAmount,
         y: verticalScroll * this._verticalScrollAmount 
       } ;
-
+      
       scrollableView.scrollBy(scroll) ;
     }
-
+    
     // If a scrollable view was found, then reschedule
     if (scrollableView) {
       this.invokeLater('_autoscroll', 100, null);
       return YES ;
     } else return NO ;
   },
-
+  
   // Returns an array of scrollable views, sorted with nested scrollable
   // views at the top of the array.  The first time this method is called
   // during a drag, it will reconstrut this array using the current state of
@@ -614,7 +625,7 @@ SC.Drag = SC.Object.extend(
       }
       return 1; 
     }) ;
-
+    
     this._cachedScrollableView = ret ;
     return ret ;
   },
@@ -631,7 +642,7 @@ SC.Drag = SC.Object.extend(
       
       // get clippingFrame, converted to the pane
       frame = target.convertClippingFrameToView(target.get('clippingFrame'), null) ;
-
+      
       // check to see if loc is inside
       if (SC.pointInRect(loc, frame)) return target;
     } 
@@ -648,7 +659,7 @@ SC.Drag = SC.Object.extend(
     return null ;
   }  
   
-}) ;
+});
 
 SC.Drag.mixin(
 /** @scope SC.Drag */ {
@@ -679,7 +690,7 @@ SC.Drag.mixin(
     // console.log('addDropTarget called on %@ with %@'.fmt(this, target));
     this._dropTargets[SC.guidFor(target)] = target ;
   },
-
+  
   /**
     Unregister the view object as a drop target.
     
@@ -690,7 +701,7 @@ SC.Drag.mixin(
     // console.log('removeDropTarget called on %@ with %@'.fmt(this, target));
     delete this._dropTargets[SC.guidFor(target)] ;
   },
-
+  
   /**
     Register the view object as a scrollable view.  These views will auto-scroll
     during a drag.
@@ -698,7 +709,7 @@ SC.Drag.mixin(
   addScrollableView: function(target) {
     this._scrollableViews[SC.guidFor(target)] = target ;  
   },
-
+  
   /**
     Remove the view object as a scrollable view.  These views will auto-scroll
     during a drag.
