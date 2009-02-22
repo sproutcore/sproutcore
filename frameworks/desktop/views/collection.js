@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/collection_view_delegate') ;
+require('protocols/collection_view_delegate') ;
 
 SC.BENCHMARK_UPDATE_CHILDREN = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
@@ -51,12 +51,13 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   
   @extends SC.ClassicView
   @extends SC.CollectionViewDelegate
+  
 */
 SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
-  classNames: 'sc-collection-view',
+  styleClass: 'sc-collection-view',
   
   // ......................................
   // PROPERTIES
@@ -370,7 +371,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   /**
     Enables keyboard-based navigate, deletion, etc. if set to true.
   */
-  acceptsFirstResponder: NO,
+  acceptsFirstResponder: false,
   
   /**
     If your layout uses a grid or horizontal-based layout, then make sure this 
@@ -1181,21 +1182,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // zero length means do nothing.
     if (length === 0) return ;
     
-    var content = SC.makeArray(this.get('content')), c, itemView, idx ;
+    var content = SC.makeArray(this.get('content')) ;
     
     // negative length == remove item views
     if (length < 0) {
       while(++length < 0) {
-        c = content.objectAt(start + length) ;
-        itemView = this.itemViewForContent(c) ;
+        var c = content.objectAt(start + length) ;
+        var itemView = this.itemViewForContent(c) ;
         if (itemView) this._removeItemView(itemView, groupBy) ;
       }
     
     // positive length == add item views.
     } else if (length > 0) {
       while(--length >= 0) {
-        idx = start + length ;
-        c = content.objectAt(idx) ;
+        var idx = start + length ;
+        var c = content.objectAt(idx) ;
         this._insertItemViewFor(c, groupBy, idx) ;
       }  
     }
@@ -1399,7 +1400,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items[0]);
+      this.scrollToContent(items.first());
       this.selectItems(items);
     }
     
@@ -1463,7 +1464,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items[0]);
+      this.scrollToContent(items.first());
       this.selectItems(items);
     }
     
@@ -1520,9 +1521,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var base = (extendSelection) ? this.get('selection') : [] ;
     var sel = [];
     
-    // items = [items].flatten();
-    items = SC.makeArray(items);
-    
+    items = [items].flatten();
     for (var i = 0, len = items.length; i < len; i++) {
       if (this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, items[i])) {
         sel.push(items[i]);
@@ -1756,7 +1755,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
     // collection some basic setup info
     var selection  = this.get('selection') || [];
-    var isSelected = (selection.indexOf(mouseDownContent) !== -1);
+    var isSelected = selection.include(mouseDownContent);
     var modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
     if (mouseDownView.checkboxView && (SC.Event.element(ev) == ev.checkboxView.rootElement)) {
       modifierKeyPressed = true ;
@@ -1896,8 +1895,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var contentLowerBounds = 0;
     var contentUpperBounds = (content.get('length') - 1);
 
-    var selectionBeginIndex = content.indexOf(selection[0]);
-    var selectionEndIndex   = content.indexOf(selection[selection.length-1]);
+    var selectionBeginIndex = content.indexOf(selection.first());
+    var selectionEndIndex   = content.indexOf(selection.last());
 
     var previousMouseDownIndex = content.indexOf(this._previousMouseDownContent);
     // _previousMouseDownContent couldn't be found... either it hasn't been set yet or the record has been deleted by the user
@@ -1978,11 +1977,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var contentLength = content.get('length');
     var top = this._indexOfSelectionTop();
 
-    while (proposedIndex >= 0 &&
+    while (proposedIndex > 0 &&
            this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
       proposedIndex--;
     }
-    return (proposedIndex >= 0) ? proposedIndex : top;
+    return (proposedIndex > 0) ? proposedIndex : top;
   },
 
   // if content value is editable and we have one item selected, then edit.

@@ -5,8 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/collection') ;
-sc_require('views/list_item') ;
+require('views/collection');
 
 /** @class
   
@@ -58,7 +57,7 @@ sc_require('views/list_item') ;
 SC.ListView = SC.CollectionView.extend(
 /** @scope SC.ListView.prototype */ {
   
-  classNames: 'sc-list-view',
+  styleClass: 'sc-list-view',
   
   /**
     The default example item view will render text-based items.
@@ -71,8 +70,6 @@ SC.ListView = SC.CollectionView.extend(
     The default layout for the list view simply fills the entire parentView.
   */
   layout: SC.merge(SC.FILL_WIDTH, SC.FILL_HEIGHT),
-  
-  acceptsFirstResponder: YES,
   
   // ..........................................................
   // ROW HEIGHT SUPPORT
@@ -370,7 +367,7 @@ SC.ListView = SC.CollectionView.extend(
   
   insertionPointClass: SC.View.extend({
     emptyElement: '<div><span class="anchor"></span></div>',
-    classNames: 'sc-list-insertion-point',
+    styleClass: 'sc-list-insertion-point',
     layout: { top: -6, height: 2, left: 4, right: 2 }
   }),
   

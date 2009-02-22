@@ -1,27 +1,25 @@
-// ==========================================================================
-// Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
-//            Portions ©2008-2009 Apple, Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
-// ==========================================================================
+// ========================================================================
+// SproutCore
+// copyright 2006-2008 Sprout Systems, Inc.
+// ========================================================================
 
 /**
   Indicates that the collection view expects to accept a drop ON the specified
   item.
 */
-SC.DROP_ON = 0x01;
+SC.DROP_ON = 0x01 ;
 
 /**
   Indicates that the collection view expects to accept a drop BEFORE the 
   specified item.
 */
-SC.DROP_BEFORE = 0x02;
+SC.DROP_BEFORE = 0x02 ;
 
 /**
   Indicates that the collection view want's to know which operations would 
   be allowed for either drop operation.
 */
-SC.DROP_ANY = 0x03;
+SC.DROP_ANY = 0x03 ;
 
 /**
   @namespace
@@ -109,8 +107,21 @@ SC.CollectionViewDelegate = {
     @param drag {SC.Drag} the drag object
     @returns {Object} the data object or null if the data could not be provided.
   */
-  collectionViewDragDataForType: function(view, dataType, drag) {  
+  collectionViewDragDataForType: function(view, drag, dataType) {  
     return null ;
+  },
+  
+  /**
+    Called once during a drag the first time view is entered. Return all possible
+    drag operations OR'd together.
+    
+    @param view {SC.CollectionView} the collection view that initiated the drag
+    @param drag {SC.Drag} the drag object
+    @param proposedDragOperations {Number} proposed logical OR of allowed drag operations.
+    @returns {Number} the allowed drag operations. Defaults to op
+  */
+  collectionViewComputeDragOperations: function(view, drag, proposedDragOperations) {
+    return proposedDragOperations ;
   },
   
   /**
@@ -124,13 +135,7 @@ SC.CollectionViewDelegate = {
     general which operations you might support and specifically the operations
     you would support if the user dropped an item over a specific location.
     
-    If the dropOperations parameter is SC.DROP_ANY, then you should simply
-    return the logical-or of all the operations you might possibly support
-    (or you can simply return the value of proposedDragOperation if you
-    support anything.)  In this case, you should make your method as fast as
-    possible since it may be called frequently during a drag.
-    
-    If hte dropOperation parameter is SC.DROP_ON or SC.DROP_BEFORE, then the
+    If the proposedDropOperaration parameter is SC.DROP_ON or SC.DROP_BEFORE, then the
     proposedInsertionPoint will be a non-negative value and you should
     determine the specific operations you will support if the user dropped the
     drag item at that point.
@@ -142,14 +147,14 @@ SC.CollectionViewDelegate = {
     
     @param view {SC.CollectionView} the collection view
     @param drag {SC.Drag} the current drag object
-    @param dropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
+    @param op {Number} proposed logical OR of allowed drag operations.
     @param proposedInsertionIndex {Number} an index into the content array 
       representing the proposed insertion point.
-    @param proposedDragOperations {Number} proposed logical OR of allowed drag operations.
-    @returns the allowed drag operation.  Defaults to proposedDragOperation
+    @param proposedDropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
+    @returns the allowed drag operation.  Defaults to op
   */
-  collectionViewValidateDrop: function(view, drag, dropOperation, proposedInsertionIndex, proposedDragOperation) {
-    return proposedDragOperation ;
+  collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperaration) {
+    return op ;
   },
   
   /**
@@ -162,9 +167,14 @@ SC.CollectionViewDelegate = {
     SC.DRAG_NONE and the dragOperation was SC.DRAG_REORDER, then the default
     reorder behavior will be provided by the collection view.
     
-    @param  view {SC.CollectionView}
+    @paramview {SC.CollectionView}
+    @param drag {SC.Drag} the current drag object
+    @param op {Number} proposed logical OR of allowed drag operations.
+    @param proposedInsertionIndex {Number} an index into the content array representing the proposed insertion point.
+    @param proposedDropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
+    @returns the allowed drag operation.  Defaults to proposedDragOperation
   */
-  collectionViewAcceptDrop: function(view, drag, dropOperation, proposedInsertionIndex, dragOperation) {
+  collectionViewPerformDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperaration) {
     return SC.DRAG_NONE ;
   },
   
@@ -199,15 +209,16 @@ SC.CollectionViewDelegate = {
     @returns {Boolean} YES if the operation succeeded, NO otherwise.
   */
   collectionViewDeleteContent: function(view, items) { return NO; },
-
+  
   /**
     Called by the collection when attempting to select an item.
-
+    
     The default implementation always returns YES.
-
+    
     @param view {SC.CollectionView} the view collection view
     @param item {Object} the item to be selected
     @returns {Boolean} YES to alow, NO to prevent it
   */
   collectionViewShouldSelectItem: function (view, item) { return YES; }
+  
 };
