@@ -473,7 +473,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 
   $: function(sel) {
     var layer = this.get('layer');
-    var ret = (!layer) ? SC.$() : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
+    var ret = layer ? ((sel===undefined) ? SC.$(layer) : SC.$(sel, layer)) : SC.$(null);
     layer = null;
     return ret ;
   },

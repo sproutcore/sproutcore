@@ -395,6 +395,7 @@ SC.Pane = SC.View.extend({
     var responder = this.rootResponder ;
     if (this.get('isKeyPane')) responder.makeKeyPane(null) ; // orders matter, remove keyPane first
     if (this.get('isMainPane')) responder.makeMainPane(null);
+    responder.panes.remove(this);
     this.rootResponder = responder = null ;
 
     // clean up some of my own properties    
@@ -485,6 +486,7 @@ SC.Pane = SC.View.extend({
 
     // hook into root responder
     var responder = (this.rootResponder = SC.RootResponder.responder);
+    responder.panes.add(this);
   
     // set currentWindowSize
     this.set('currentWindowSize', responder.computeWindowSize()) ;

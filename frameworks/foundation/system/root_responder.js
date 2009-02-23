@@ -50,6 +50,17 @@ require('system/ready');
 */
 SC.RootResponder = SC.Object.extend({
 
+  /**
+    Contains a list of all panes currently visible on screen.  Everytime a 
+    pane attaches or detaches, it will update itself in this array.
+  */
+  panes: null,
+  
+  init: function() {
+    sc_super();
+    this.panes = SC.Set.create();
+  },
+  
   // .......................................................
   // MAIN Pane
   //
