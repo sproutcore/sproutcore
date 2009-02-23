@@ -7,7 +7,8 @@
 
 sc_require('mixins/collection_view_delegate') ;
 
-SC.BENCHMARK_UPDATE_CHILDREN = NO ;
+SC.BENCHMARK_UPDATE_CHILDREN = YES ;
+SC.BENCHMARK_RENDER = YES ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /**
@@ -837,6 +838,79 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // GENERATING CHILDREN
   //
   
+  // render: function(context, firstTime) {
+  //   // console.log('updateChildren invoked on %@, fullUpdate is %@'.fmt(this, fullUpdate));
+  //   var f ;
+  //   
+  //   // force fullUpdate if we are currently dirty.
+  //   if (this.get('isDirty')) fullUpdate = YES;
+  //   
+  //   if (SC.BENCHMARK_RENDER) {
+  //     var bkey = '%@.render'.fmt(this) ;
+  //     SC.Benchmark.start(bkey);
+  //   }
+  //   
+  //   this.beginPropertyChanges() ; // avoid sending notifications
+  //   
+  //   var content = SC.makeArray(this.get('content'));
+  //   
+  //   // get the target nowShowingRange and the current range.  Save the value
+  //   var range = this.get('nowShowingRange') ;
+  //   var curRange = this._currentNowShowingRange ; 
+  //   this._currentNowShowingRange = range ;
+  //   
+  //   var groupBy = this.get('groupBy'), didChange = false ;
+  //   var key, itemView, c, start, length;
+  //   var itemViewsByContent = {} ; // this will replace the current hash.
+  //   var curItemViewsByContent = this._itemViewsByContent ;
+  //   
+  //   // iterate through all of the views and insert them.  If the view 
+  //   // already exists, it will simply be reused.
+  //   var idx = SC.maxRange(range) ;
+  //   
+  //   // console.log('range is {%@, %@}'.fmt(range.start, range.length));
+  //   while (--idx >= range.start) {
+  //     c = content.objectAt(idx) ;
+  //     key = SC.guidFor(c) ;
+  //     itemView = this._insertItemViewFor(c, groupBy, idx) ;
+  //     
+  //     if (itemView) {
+  //       // add item view to new hash and remove from old hash.
+  //       itemViewsByContent[key] = itemView;
+  //       delete curItemViewsByContent[key];
+  //     }
+  //   }
+  //   
+  //   // Now iterate through the old hash.  Any left over item views should
+  //   // be removed.
+  //   for(key in curItemViewsByContent) {
+  //     if (!curItemViewsByContent.hasOwnProperty(key)) continue ;
+  //     itemView = curItemViewsByContent[key] ;
+  //     this._removeItemView(itemView, groupBy) ;
+  //   }
+  //   
+  //   // Swap out remaining content items.
+  //   curItemViewsByContent = null ; // release memory...
+  //   this._itemViewsByContent = itemViewsByContent ;
+  //   didChange = true;
+  //   
+  //   // Clear dirty state
+  //   this.set('isDirty', NO);
+  //   
+  //   // Clean out some cached items and notify their changes.
+  //   // NOTE: This must be called after isDirty is cleared or 
+  //   // updateSelectionStates() may not run.
+  //   if (didChange) {
+  //     this._flushZombieGroupViews() ;
+  //     this.updateSelectionStates() ;
+  //     this.notifyPropertyChange('itemViews') ;
+  //     this.notifyPropertyChange('groupViews') ;
+  //   }
+  //   
+  //   this.endPropertyChanges() ;
+  //   if (SC.BENCHMARK_RENDER) SC.Benchmark.end(bkey);    
+  // },
+  
   /**
     Update the itemViews in the receiver to match the currently visible 
     content objects.  Normally this method assumes the content objects 
@@ -882,7 +956,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // If this is a fullUpdate, then rebuild the itemViewsByContent hash
     // from scratch.  This is necessary if the content or the visible range
     // might have changed.
-    if (fullUpdate) {
+    // if (fullUpdate) {
       var itemViewsByContent = {} ; // this will replace the current hash.
       var curItemViewsByContent = this._itemViewsByContent ;
       
@@ -919,25 +993,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // If a fullUpdate is not required, then we assume no content has changed
     // and we just need to add or remove some views to bring the ranges up
     // to date.
-    } else {
-      // Find changed range at the top.  Note that the length here may be 
-      // negative.  Negative means views should be removed.
-      start = range.start ;
-      length = (curRange.start - start) ;
-      if (length !== 0) {
-        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
-        didChange = true ;
-      }
-      
-      // Find the changed range at the bottom.  Note that the length here may
-      // also be negative. Negative means views should be removed.
-      start = SC.maxRange(curRange) ;
-      length = SC.maxRange(range) - start ;
-      if (length !== 0) {
-        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
-        didChange = true ;
-      }
-    }
+    // } else {
+    //   // Find changed range at the top.  Note that the length here may be 
+    //   // negative.  Negative means views should be removed.
+    //   start = range.start ;
+    //   length = (curRange.start - start) ;
+    //   if (length !== 0) {
+    //     this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+    //     didChange = true ;
+    //   }
+    //   
+    //   // Find the changed range at the bottom.  Note that the length here may
+    //   // also be negative. Negative means views should be removed.
+    //   start = SC.maxRange(curRange) ;
+    //   length = SC.maxRange(range) - start ;
+    //   if (length !== 0) {
+    //     this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+    //     didChange = true ;
+    //   }
+    // }
     
     // Clear dirty state
     this.set('isDirty', NO);
