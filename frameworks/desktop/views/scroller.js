@@ -100,7 +100,7 @@ SC.ScrollerView = SC.View.extend({
     Update the scroll location or inner height/width if needed.
   */
   render: function(context, firstTime) {
-    // console.log('%@.render called'.fmt(this));
+    console.log('%@.render called'.fmt(this));
     sc_super();
     
     var dir = this.get('layoutDirection');
@@ -131,10 +131,12 @@ SC.ScrollerView = SC.View.extend({
   },
   
   didCreateLayer: function() {
+    console.log('%@.didCreateLayer called'.fmt(this));
     SC.Event.add(this.$(), 'scroll', this, this.scrollDidChange) ;
   },
   
   didDestroyLayer: function() {
+    console.log('%@.didDestroyLayer called'.fmt(this));
     SC.Event.remove(this.$(), 'scroll', this, this.scrollDidChange) ;
   },
 
@@ -154,6 +156,7 @@ SC.ScrollerView = SC.View.extend({
   },
   
   _scroll_scrollDidChange: function() {
+    console.log('%@._scroll_scrollDidChange called'.fmt(this));
     this._scrollTimer = null; // clear so we can fire again
     
     if (!this.get('isEnabled')) return ; // nothing to do.
@@ -176,7 +179,8 @@ SC.ScrollerView = SC.View.extend({
   },
 
   /** @private Notify owner if it has a *ScrollOffset value */
-  _scroller_valueDidChange: function() {
+  _scroll_scrollDidChange2: function() {
+    console.log('%@._scroll_scrollDidChange2 called'.fmt(this));
     var key = this.get('ownerScrollValueKey');
     if (key && this.owner && (this.owner[key] !== undefined)) {
       this.owner.setIfChanged(key, this.get('value'));
