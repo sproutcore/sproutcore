@@ -22,11 +22,20 @@
 SC.CheckboxView = SC.FieldView.extend(SC.Button,
   /** @scope SC.CheckboxView.prototype */ {
 
-  // HTML design options
-  emptyElement: '<%@1><img src="'+static_url('blank')+'" class="button" /><input type="checkbox" /><span class="sc-button-label"></span></%@1>',
   classNames: ['sc-checkbox-view'],
   tagName: 'label',
 
+  render: function(context, firstTime) {
+    // add checkbox -- set name to view guid to separate it from others
+    if (firstTime) {
+      var blank = sc_static('blank');
+      context.push('<img src="', blank, '" class="button" />');
+      context.push('<input type="checkbox" name="',SC.guidFor(this),'" />');
+      context.push('<span class="label">', this.get('displayTitle'), '</span>');
+      context.attr('name', SC.guidFor(this));
+    }
+  },
+  
   // ..........................................
   // SC.FIELD SUPPORT
   //
@@ -70,13 +79,6 @@ SC.CheckboxView = SC.FieldView.extend(SC.Button,
     var ret = (v === SC.MIXED_STATE) ? this.get('value') : 
       (!!v) ? this.get('toggleOnValue') : this.get('toggleOffValue'); 
       return ret ;
-  },
-  
-  // assign the current guid as a value to the input.
-  prepareDisplay: function() {
-    var ret = sc_super() ;
-    this.$input().attr('value', SC.guidFor(this));
-    return ret ;
   }
     
 }) ;

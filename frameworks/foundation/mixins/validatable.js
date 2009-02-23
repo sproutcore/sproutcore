@@ -136,7 +136,7 @@ SC.Validatable = {
     @param fieldValue the raw value from the field.
     @returns converted object
   */
-  objectForFieldValue: function(fieldValue) {
+  objectForFieldValue: function(fieldValue, partialChange) {
     return this._validator ? this._validator.objectForFieldValue(fieldValue, this.get('ownerForm'), this) : fieldValue ;
   },
   
@@ -156,12 +156,8 @@ SC.Validatable = {
     this.displayDidChange();
   }.observes('isValid'),
   
-  updateDisplayMixin: function() {
-    var valid = this.get('isValid') ;
-    if (valid !== this._validatable_lastValid) {
-      this._validatable_lastValid = valid ;
-      this.$().setClass('invalid', !valid);  
-    }
+  updateLayerMixin: function(context) {
+    context.setClass('invalid', !this.get('isValid'));
   },
   
   // invoked whenever the attached validator changes.

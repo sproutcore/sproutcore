@@ -29,42 +29,21 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
 /** @scope SC.FieldView.prototype */ {
 
   /**
-    The raw value of the field itself.  this is the value to be applied to
-    the field after the normal value is passed through any validators to
-    format it.
+    The raw value of the field itself.  This is computed from the 'value'
+    propery by passing it through any validator you might have set.  This is 
+    the value that will be set on the field itself when the view is updated.
     
     @property {String}
   */  
-  fieldValue: function(key,value) {
-    if (value !== undefined) this._field_setFieldValue(value) ;
-    return this._field_getFieldValue() ;
-  }.property('value').cacheable(),
+  fieldValue: function() {
+    var value = this.get('value');
+    if (SC.typeOf(value) === SC.T_ERROR) value = value.get('value');
+    return this.fieldValueForObject(value);
+  }.property('value', 'validator').cacheable(),
 
-  // ACTIONS
-  // You generally do not need to override these but they may be used.
-
-  /**
-    Called to perform validation on the field just before the form 
-    is submitted.  If you have a validator attached, this will get the
-    validators.
-  */  
-  validateSubmit: function() {
-    var ret = this.performValidateSubmit ? this.performValidateSubmit() : YES;
-    // save the value if needed
-    var value = SC.$ok(ret) ? this._field_getFieldValue() : ret ;
-    if (value != this.get('value')) this.set('value', value) ;
-    return ret ;
-  },
-  
-  // OVERRIDE IN YOUR SUBCLASS
-  // Override these primitives in your subclass as required.
-  
-  /**
-    Override this method to return a CQ object with any input tags you would
-    like to monitor for changes.  The default version returns all input tags
-    in the receiver view, including the rootElement.
-  */
-  $input: function() { return this.$('input').andSelf().filter('input'); },
+  // ..........................................................
+  // PRIMITIVES
+  // 
   
   /**
     Override to set the actual value of the field.
@@ -77,7 +56,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {SC.FieldView} receiver
   */
   setFieldValue: function(newValue) {
-    this.$input().val(newValue);
+    var $input = this.$('input').andSelf().filter('input');
+    $input().val(newValue);
     return this ;
   },
 
@@ -90,9 +70,10 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {String} value
   */
   getFieldValue: function() {
-    return this.$input().val();
+    var $input = this.$('input').andSelf().filter('input');
+    return $input().val();
   },
-
+  
   /**
     Your class should call this method anytime you think the value of the 
     input element may have changed.  This will retrieve the value and update
@@ -101,7 +82,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     If this is a partial change (i.e. the user is still editing the field and
     you expect the value to change further), then be sure to pass YES for the
     partialChange parameter.  This will change the kind of validation done on
-    the value.  Otherwise, the validator may make the field as having an error
+    the value.  Otherwise, the validator may mark the field as having an error
     when the user is still in mid-edit.
   
     @param partialChange (optional) YES if this is a partial change.
@@ -109,41 +90,92 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   fieldValueDidChange: function(partialChange) {
 
-    this.notifyPropertyChange('fieldValue');
+    // collect the field value and convert it back to a value
+    var fieldValue = this.getFieldValue();
+    var value = this.objectForFieldValue(fieldValue, partialChange);
+    this.setIfChanged('value', value);
     
-    // get the field value and set it.
-    // if ret is an error, use that instead of the field value.
-    var ret = this.performValidate ? this.performValidate(partialChange) : YES;
-    if (ret === SC.VALIDATE_NO_CHANGE) return ret ;
-
-    this.propertyWillChange('fieldValue');
-
-    // if the validator says everything is OK, then in addition to posting
-    // out the value, go ahead and pass the value back through itself.
-    // This way if you have a formatter applied, it will reformat.
-    //
-    // Do this BEFORE we set the value so that the valueObserver will not
-    // overreact.
-    //
-    var ok = SC.$ok(ret);
-    var value = ok ? this._field_getFieldValue() : ret ;
-    if (!partialChange && ok) this._field_setFieldValue(value) ;
-    this.set('value',value) ;
+    // validate value if needed...
     
-    this.propertyDidChange('fieldValue');
-    
-    return ret ;
+    // this.notifyPropertyChange('fieldValue');
+    // 
+    // // get the field value and set it.
+    // // if ret is an error, use that instead of the field value.
+    // var ret = this.performValidate ? this.performValidate(partialChange) : YES;
+    // if (ret === SC.VALIDATE_NO_CHANGE) return ret ;
+    // 
+    // this.propertyWillChange('fieldValue');
+    // 
+    // // if the validator says everything is OK, then in addition to posting
+    // // out the value, go ahead and pass the value back through itself.
+    // // This way if you have a formatter applied, it will reformat.
+    // //
+    // // Do this BEFORE we set the value so that the valueObserver will not
+    // // overreact.
+    // //
+    // var ok = SC.$ok(ret);
+    // var value = ok ? this._field_getFieldValue() : ret ;
+    // if (!partialChange && ok) this._field_setFieldValue(value) ;
+    // this.set('value',value) ;
+    // 
+    // this.propertyDidChange('fieldValue');
+    // 
+    // return ret ;
   },
   
-  // PRIVATE SUPPORT METHODS
-  //
+  // ..........................................................
+  // INTERNAL SUPPORT
+  // 
+  
+  /** @private
+    invoked when the value property changes.  Sets the field value...
+  */
+  _field_valueDidChange: function() {
+    this.setFieldValue(this.get('fieldValue'));
+  }.observes('value'),
+
+  /** @private
+    after the layer is created, set the field value and observe events
+  */
   didCreateLayer: function() {
+    this.setFieldValue(this.get('fieldValue'));
     SC.Event.add(this.$input(), 'change', this, this.fieldValueDidChange) ;
   },
   
   willDestroyLayer: function() {
     SC.Event.remove(this.$input(), 'change', this, this.fieldValueDidChange); 
   },
+
+  /** @private
+    when the layer is updated, go ahead and call render like normal.  this 
+    will allow normal CSS class + style updates.  by then also update field
+    value manually.
+    
+    Most subclasses should not regenerate their contents unless necessary.
+  */
+  updateLayer: function() {
+    sc_super();
+    this.setFieldValue(this.get('fieldValue'));
+  },
+  
+  // ACTIONS
+  // You generally do not need to override these but they may be used.
+
+  /**
+    Called to perform validation on the field just before the form 
+    is submitted.  If you have a validator attached, this will get the
+    validators.
+  */  
+  // validateSubmit: function() {
+  //   var ret = this.performValidateSubmit ? this.performValidateSubmit() : YES;
+  //   // save the value if needed
+  //   var value = SC.$ok(ret) ? this._field_getFieldValue() : ret ;
+  //   if (value != this.get('value')) this.set('value', value) ;
+  //   return ret ;
+  // },
+  
+  // OVERRIDE IN YOUR SUBCLASS
+  // Override these primitives in your subclass as required.
 
   /**
     Allow the browser to do its normal event handling for the mouse down
@@ -192,13 +224,13 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   // called whenever the value is set on the object.  Will set the value
   // on the field if the value is changed.
-  valueDidChange: function() {
-    var value = this.get('value') ;
-    var isError = SC.typeOf(value) === SC.T_ERROR ;
-    if (!isError && (value !== this._field_getFieldValue())) {
-      this._field_setFieldValue(value) ;
-    } 
-  }.observes('value'),
+  // valueDidChange: function() {
+  //   var value = this.get('value') ;
+  //   var isError = SC.typeOf(value) === SC.T_ERROR ;
+  //   if (!isError && (value !== this._field_getFieldValue())) {
+  //     this._field_setFieldValue(value) ;
+  //   } 
+  // }.observes('value'),
   
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.

@@ -234,18 +234,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
       
-      // if we just became visible, update layer + layout if needed...
-      if (cur) {
-        if (this.parentViewDidResize) this.parentViewDidResize();
-        if (this.get('layerNeedsUpdate')) this.updateLayerIfNeeded();
-        if (this.get('childViewsNeedLayout')) this.layoutChildViewsIfNeeded();
-      }
-      
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(cur);
       }
-      
+
+      // if we just became visible, update layer + layout if needed...
+      if (cur && this.parentViewDidResize) this.parentViewDidResize();
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
