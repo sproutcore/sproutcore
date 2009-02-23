@@ -290,7 +290,10 @@ SC.RootResponder = SC.RootResponder.extend(
     if (!SC.rectsEqual(newSize, oldSize)) {
       // notify panes
       SC.RunLoop.begin();
-      this.panes.invoke('windowSizeDidChange', oldSize, newSize) ;
+      var panes = this.panes, len = panes.length, idx;
+      for(idx=0;idx<len;idx++) {
+        this.panes[idx].windowSizeDidChange(oldSize, newSize);
+      }
       SC.RunLoop.end();
     }    
   },
