@@ -13,10 +13,10 @@ require('system/ready');
   to the correct view in the view hierarchy.  Usually you do not work with a 
   RootResponder directly.  Instead you will work with Pane objects, which 
   register themselves with the RootResponder as needed to receive events.
-
+  
   h1. RootResponder and Platforms
   
-  RootResponder is implemented differently on the desktop and mobile platforms 
+  RootResponder is implemented differently on the desktop and mobile platforms
   using a technique called a "class cluster".  That is, although you get a 
   RootResponder instance at some point, you will likely be working with a 
   subclass of RootResponder that implements functionality unique to that 
@@ -26,7 +26,7 @@ require('system/ready');
   the framework you have loaded.
   
   h1. Event Types 
-    
+  
   RootResponders can route four types of events:
   
   - Direct events.  Such as mouse and touch events.  These are routed to the 
@@ -34,22 +34,21 @@ require('system/ready');
   - Keyboard events.  These are sent to the keyPane, which will send it 
     to the current firstResponder.
   - resize. This event is sent to all panes.
-  - shortcuts.  Shortcuts are sent to the focusedPane first, which will go down 
-    its view hierarchy.  Then they go to the mainPane, which will go down its 
-    view hierarchy.  Then they go to the mainMenu.  Usually any handler that 
-    picks this up will then try to do a sendAction().
+  - shortcuts.  Shortcuts are sent to the focusedPane first, which will go 
+    down its view hierarchy.  Then they go to the mainPane, which will go down
+    its view hierarchy.  Then they go to the mainMenu.  Usually any handler 
+    that picks this up will then try to do a sendAction().
   - actions.  Actions are sent down the responder chain.  They go to 
-    focusedPane -> mainPane.  Each of these will start at the firstResponder and 
-    work their way up the chain.
+    focusedPane -> mainPane.  Each of these will start at the firstResponder 
+    and work their way up the chain.
   
   Differences between Mobile + Desktop RootResponder
   
   The Desktop root responder can deal with the following kinds of events:
    mousedown, mouseup, mouseover, mouseout, mousemoved
-  
 */
 SC.RootResponder = SC.Object.extend({
-
+  
   /**
     Contains a list of all panes currently visible on screen.  Everytime a 
     pane attaches or detaches, it will update itself in this array.
@@ -63,8 +62,8 @@ SC.RootResponder = SC.Object.extend({
   
   // .......................................................
   // MAIN Pane
-  //
-
+  // 
+  
   /** @property
     The main pane.  This pane receives shortcuts and actions if the 
     focusedPane does not respond to them.  There can be only one main pane.  
@@ -75,11 +74,11 @@ SC.RootResponder = SC.Object.extend({
     when you append it to the document.
   */
   mainPane: null,
-
+  
   /** 
     Swaps the main pane.  If the current main pane is also the key pane, then 
     the new main pane will also be made key view automatically.  In addition 
-    to simply updating the mainPane property, this method will also notify the 
+    to simply updating the mainPane property, this method will also notify the
     panes themselves that they will lose/gain their mainView status.
     
     Note that this method does not actually change the Pane's place in the 
@@ -89,36 +88,36 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.RootResponder} receiver
   */
   makeMainPane: function(pane) {
-    var currentMain = this.get('mainPane');
-    if (currentMain === pane) return this; // nothing to do
+    var currentMain = this.get('mainPane') ;
+    if (currentMain === pane) return this ; // nothing to do
     
-    this.beginPropertyChanges();
-
+    this.beginPropertyChanges() ;
+    
     // change key focus if needed.
-    if (this.get('keyPane') === currentMain) this.makeKeyPane(pane);
-        
+    if (this.get('keyPane') === currentMain) this.makeKeyPane(pane) ;
+    
     // change setting
     this.set('mainPane', pane) ;
-
-    // notify panes.  This will allow them to remove themselves.    
-    if (currentMain) currentMain.blurMainTo(pane);
+    
+    // notify panes.  This will allow them to remove themselves.
+    if (currentMain) currentMain.blurMainTo(pane) ;
     if (pane) pane.focusMainFrom(currentMain) ;
     
-    this.endPropertyChanges();
+    this.endPropertyChanges() ;
     return this ;
   }, 
-
+  
   // .......................................................
   // KEY ROOT VIEW
-  //
-
+  // 
+  
   /** @property
     The current key pane.  This pane receives keyboard events, shortcuts, and 
     actions first.  This pane is usually the highest ordered pane or the 
     mainPane.
   */
   keyPane: null,
-
+  
   /**
     Makes the passed pane the new key pane.  If you pass nil or if the pane 
     does not accept key focus, then key focus will transfer to the mainPane.  
@@ -126,70 +125,75 @@ SC.RootResponder = SC.Object.extend({
     has changed.
     
     @param {SC.Pane} pane
-    @returns {SC.RootResponder} Receiver
+    @returns {SC.RootResponder} receiver
   */
   makeKeyPane: function(pane) {
     if (pane && !pane.get('acceptsKeyPane')) return this ;
-
+    
     // if null was passed, try to make mainPane key instead.
     if (!pane) {
       pane = this.get('mainPane') ;
       if (pane && !pane.get('acceptsKeyPane')) pane = null ;
     }
-
+    
     var current = this.get('keyPane') ;
-    if (current === pane) return this; // nothing to do
-
+    if (current === pane) return this ; // nothing to do
+    
     // now notify old and new key views of change after edit    
     if (current) current.willLoseKeyPaneTo(pane) ;
-    if (pane) pane.willBecomeKeyPaneFrom(current);
-
+    if (pane) pane.willBecomeKeyPaneFrom(current) ;
+    
     this.set('keyPane', pane) ;
     
-    if (pane) pane.didBecomeKeyPaneFrom(current);
-    if (current) current.didLoseKeyPaneTo(pane);
-
+    if (pane) pane.didBecomeKeyPaneFrom(current) ;
+    if (current) current.didLoseKeyPaneTo(pane) ;
+    
     return this ;
   },
   
-  /** 
+  /**
     Overridden by subclasses to return the window size.  The default simply
-    returns 640 x 480
+    returns 640 x 480.
+    
+    @returns {Size} the size of the window in pixels
   */
   computeWindowSize: function() { 
-    return { width: 640, height: 480 };
+    return { width: 640, height: 480 } ;
   },
-
+  
   // .......................................................
   // ACTIONS
-  //
+  // 
   
   /** @property
-    Set this to a delegate object that can respond to actions as they are sent 
-    down the responder chain. 
+    Set this to a delegate object that can respond to actions as they are sent
+    down the responder chain.
   */
   defaultResponder: null,
-
+  
   /**
     Route an action message to the appropriate responder.  This method will 
     walk the responder chain, attempting to find a responder that implements 
-    the action name you pass to this method.  
+    the action name you pass to this method.  Set 'tagret' to null to search 
+    the responder chain.
     
     @param {String} action The action to perform - this is a method name.
-    @param {SC.Responder} target object to set method to.  set to null to search responder chain
+    @param {SC.Responder} target object to set method to (can be null)
     @param {Object} sender The sender of the action
-    @param {SC.Pane} pane optional pane to start search
+    @param {SC.Pane} pane optional pane to start search with
     @returns {Boolean} YES if action was performed, NO otherwise
     @test in targetForAction
   */
   sendAction: function( action, target, sender, pane) {
-    target = this.targetForAction(action, target, sender, pane);
+    target = this.targetForAction(action, target, sender, pane) ;
     return target && target.tryToPerform(action, sender) ;
   },
   
   _responderFor: function(target, methodName) {
     if (target) {
-      target = target.get('firstResponder') || target.get('defaultResponder') || target ;
+      target = target.get('firstResponder') ||
+        target.get('defaultResponder') ||
+        target ;
       do {
         if (target.respondsTo(methodName)) return target ;
       } while (target = target.get('nextResponder')) ;
@@ -205,8 +209,11 @@ SC.RootResponder = SC.Object.extend({
     
     You send actions for user interface events and for menu actions.
     
-    This method returns an object if a starting target was found or null if no 
+    This method returns an object if a starting target was found or null if no
     object could be found that responds to the target action.
+    
+    Passing an explicit target or pane constrains the target lookup to just
+    them; the defaultResponder and other panes are *not* searched.
     
     @param {Object|String} target or null if no target is specified
     @param {String} method name for target
@@ -215,44 +222,61 @@ SC.RootResponder = SC.Object.extend({
     @returns {Object} target object or null if none found
   */
   targetForAction: function(methodName, target, sender, pane) {
-
-    // no action, no target...
-    if (!methodName || (SC.typeOf(methodName) !== SC.T_STRING)) return null;
-
-    // an explicit target was passed...
+    
+    // 1. no action, no target...
+    if (!methodName || (SC.typeOf(methodName) !== SC.T_STRING)) {
+      return null ;
+    }
+    
+    // 2. an explicit target was passed...
     if (target) {
+      if (SC.typeOf(target) === SC.T_STRING)
+        target = SC.objectForPropertyPath(target) ;
+      
+      if (target) {
+        if (target.respondsTo && !target.respondsTo(methodName))
+          target = null ;
+        else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION)
+          target = null ;
+      }
+      
+      return target ;
+    }
+    
+    // 3. an explicit pane was passed...
+    if (pane) {
+      return this._responderFor(pane, methodName) ;
+    }
+    
+    // 4. no target or pane passed... try to find target in the active panes
+    // and the defaultResponder
+    var keyPane = this.get('keyPane'), mainPane = this.get('mainPane') ;
+    
+    // ...check key and main panes first
+    if (keyPane && (keyPane !== pane)) {
+      target = this._responderFor(keyPane, methodName) ;
+    }
+    if (!target && mainPane && (mainPane !== keyPane)) {
+      target = this._responderFor(mainPane, methodName) ;
+    }
+    
+    // ...still no target? check the defaultResponder...
+    if (!target && (target = this.get('defaultResponder'))) {
       if (SC.typeOf(target) === SC.T_STRING) {
         target = SC.objectForPropertyPath(target) ;
+        if (target) this.set('defaultResponder', target) ; // cache if found
       }
-      return target && (target.respondsTo ? target.respondsTo(methodName) : (SC.typeOf(target[methodName]) === SC.T_FUNCTION)) ? target : null ;
-    }
-
-    // ok, no target was passed... try to find one in the responder chain
-    var keyPane = this.get('keyPane'), mainPane = this.get('mainPane');
-
-    // search explicit pane if passed
-    if (pane) {
-      target = this._responderFor(pane, methodName);
-      
-    // if no explicit pane is passed, look on keyPane or mainPane
-    } else {
-      if (keyPane && (keyPane !== pane)) {
-        target = this._responderFor(keyPane, methodName);
-      }
-      if (!target && mainPane && (mainPane !== keyPane)) {
-        target = this._responderFor(mainPane, methodName) ;
+      if (target) {
+        if (target.respondsTo && !target.respondsTo(methodName))
+          target = null ;
+        else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION)
+          target = null ;
       }
     }
-
-    // last stop, this defaultResponder
-    if (!target) {
-      target = this.get('defaultResponder');
-      if (target && !target.respondsTo(methodName)) target = null ;
-    }
-
-    return target;
+    
+    return target ;
   },
-
+  
   /**
     Finds the view that appears to be targeted by the passed event.  This only
     works on events with a valid target property.
@@ -279,18 +303,26 @@ SC.RootResponder = SC.Object.extend({
     @returns {Object} object that handled the event or null if not handled
   */
   sendEvent: function(action, evt, target) {
-    SC.RunLoop.begin();
-    var pane = (target) ? target.get('pane') : (this.get('keyPane') || this.get('mainPane'));
-    var ret = (pane) ? pane.sendEvent(action, evt, target) : null ;
-    SC.RunLoop.end();
+    var pane, ret ;
+     
+    SC.RunLoop.begin() ;
+    
+    // get the target pane
+    if (target) pane = target.get('pane') ;
+    else pane = this.get('keyPane') || this.get('mainPane') ;
+    
+    // if we found a valid pane, send the event to it
+    ret = (pane) ? pane.sendEvent(action, evt, target) : null ;
+    
+    SC.RunLoop.end() ;
+    
     return ret ;
   },
   
-
   // .......................................................
   // EVENT LISTENER SETUP
-  //
-
+  // 
+  
   /**
     Default method to add an event listener for the named event.  If you simply 
     need to add listeners for a type of event, you can use this method as 
@@ -303,11 +335,11 @@ SC.RootResponder = SC.Object.extend({
     @returns {SC.RootResponder} receiver
   */
   listenFor: function(keyNames, target) {
-    keyNames.forEach(function(keyName) {
-      var method = this[keyName];
-      if (method) SC.Event.add(target, keyName, this, method);
-    },this);
-    target = null;
+    keyNames.forEach( function(keyName) {
+      var method = this[keyName] ;
+      if (method) SC.Event.add(target, keyName, this, method) ;
+    },this) ;
+    target = null ;
     return this ;
   },
   
@@ -327,6 +359,6 @@ SC.RootResponder = SC.Object.extend({
   an instance and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
-  var r = SC.RootResponder.create();
-  SC.RootResponder.responder = r; r.setup();
+  var r = SC.RootResponder.responder = SC.RootResponder.create() ;
+  r.setup() ;
 });

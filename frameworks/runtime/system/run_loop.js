@@ -9,11 +9,11 @@ sc_require('private/observer_set');
 
 /**
   @class
-
+  
   The run loop provides a universal system for coordinating events within
   your application.  The run loop processes timers as well as pending 
   observer notifications within your application.
-
+  
   To use a RunLoop within your application, you should make sure your event
   handlers always begin and end with SC.RunLoop.begin() and SC.RunLoop.end()
   
@@ -39,45 +39,46 @@ sc_require('private/observer_set');
   @since SproutCore 1.0
 */
 SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
-
+  
   /**
     Call this method whenver you begin executing code.  
-
+    
     This is typically invoked automatically for you from event handlers and 
     the timeout handler.  If you call setTimeout() or setInterval() yourself, 
     you may need to invoke this yourself.
-
+    
     @returns {SC.RunLoop} receiver
   */
   beginRunLoop: function() {
     this._start = new Date().getTime() ; // can't use Date.now() in runtime 
+    this._flushInvokeNextQueue() ; // call any invokeNext methods first
     return this ; 
   },
-
+  
   /**
     Call this method whenever you are done executing code.
-
+    
     This is typically invoked automatically for you from event handlers and
     the timeout handler.  If you call setTimeout() or setInterval() yourself
     you may need to invoke this yourself.
-
+    
     @returns {SC.RunLoop} receiver
   */
   endRunLoop: function() {
-
+    
     // at the end of a runloop, flush all the delayed actions we may have 
     // stored up.  Note that if any of these queues actually run, we will 
     // step through all of them again.  This way any changes get flushed
     // out completely.
     var didChange ;
-
+    
     do {
       didChange = this.flushApplicationQueues() ;
     } while(didChange) ;
     this._start = null ;
     return this ; 
   },
-
+  
   /**
     Invokes the passed target/method pair once at the end of the runloop.
     You can call this method as many times as you like and the method will
@@ -100,7 +101,32 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     this._invokeQueue.add(target, method);
     return this ;
   },
-
+  
+  /**
+    Invokes the passed target/method pair once at the beginning of the next 
+    runloop, before any other methods (including events) are processed.
+    
+    You can call this method as many times as you like and the method will
+    only be invoked once.
+    
+    Usually you will not call this method directly but use invokeNext() 
+    defined on SC.Object.
+    
+    @param {Object} target
+    @param {Function} method
+    @returns {SC.RunLoop} receiver
+  */
+  invokeNext: function(target, method) {
+    // normalize
+    if (method === undefined) { 
+      method = target; target = this ;
+    }
+    if (SC.typeOf(method) === SC.T_STRING) method = target[method];
+    if (!this._invokeNextQueue) this._invokeNextQueue = SC._ObserverSet.create();
+    this._invokeNextQueue.add(target, method);
+    return this ;
+  },
+  
   /**
     Executes any pending events at the end of the run loop.  This method is 
     called automatically at the end of a run loop to flush any pending 
@@ -131,9 +157,19 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     // flush any pending changed bindings.  This could actually trigger a 
     // lot of code to execute.
     return SC.Binding.flushPendingChanges() || hadContent ;
+  },
+  
+  _flushInvokeNextQueue: function() {
+    var queue = this._invokeNextQueue, hadContent = NO ;
+    if (queue && queue.targets > 0) {
+      this._invokeNextQueue = null; // reset queue.
+      hadContent = YES; // has targets!
+      if (hadContent) queue.invokeMethods();
+    }
+    return hadContent ;
   }
-
-}) ;
+  
+});
 
 /** 
   The current run loop.  This is created automatically the first time you

@@ -5,11 +5,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/collection') ;
-sc_require('views/list_item') ;
+sc_require('views/collection');
+sc_require('views/list_item');
 
 /** @class
-
+  
   A list view renders vertical lists of items.  It is a specialized form of
   collection view that is simpler than the table view, but more refined than
   a generic collection.
@@ -17,9 +17,9 @@ sc_require('views/list_item') ;
   You can use a list view just like a collection view, except that often you
   also should provide a default rowHeight.  Setting this value will allow 
   the ListView to optimize its rendering.
-
+  
   h2. Variable Row Heights
-
+  
   ListView now supports variable row heights 
   The ListView adds support for a single delegate method:
   
@@ -37,7 +37,7 @@ sc_require('views/list_item') ;
   calculate variable rows heights can become very expensive since the list 
   view will essentially have to iterate over every item in the collection to
   collect its row height.  
-
+  
   To work with very large lists, you should consider making your row heights
   uniform.  This will allow the list view to efficiently render content 
   without worrying about the overall performance.
@@ -52,14 +52,13 @@ sc_require('views/list_item') ;
   (Can we also have an 'estimate row heights' property that will simply 
   cheat for very long data sets to make rendering more efficient?)
   
-  
   @extends SC.CollectionView
   @since SproutCore 1.0
 */
 SC.ListView = SC.CollectionView.extend(
 /** @scope SC.ListView.prototype */ {
   
-  classNames: 'sc-list-view',
+  classNames: ['sc-list-view'],
   
   /**
     The default example item view will render text-based items.
@@ -348,7 +347,7 @@ SC.ListView = SC.CollectionView.extend(
     
     // console.log('contentRangeInFrame is {%@, %@}'.fmt(ret.start, ret.length));
     return ret ;
-  }.property('content', 'clippingFrame').cacheable(),
+  },
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {
@@ -371,7 +370,7 @@ SC.ListView = SC.CollectionView.extend(
   
   insertionPointClass: SC.View.extend({
     emptyElement: '<div><span class="anchor"></span></div>',
-    classNames: 'sc-list-insertion-point',
+    classNames: ['sc-list-insertion-point'],
     layout: { top: -6, height: 2, left: 4, right: 2 }
   }),
   

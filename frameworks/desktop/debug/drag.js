@@ -22,13 +22,17 @@ SC.Drag.mixin(
       if (op & SC.DRAG_LINK) {
         ret.push('DRAG_LINK') ;
       }
-
+      
       if (op & SC.DRAG_COPY) {
         ret.push('DRAG_COPY') ;
       }
-
+      
       if (op & SC.DRAG_MOVE) {
         ret.push('DRAG_MOVE') ;
+      }
+      
+      if (op & SC.DRAG_REORDER) {
+        ret.push('DRAG_REORDER') ;
       }
     }
     return ret.join('|') ;

@@ -152,11 +152,6 @@ test("invokes willBeginLiveResize on receiver and any child views that implement
   equals(callCount, 2, 'should invoke willBeginLiveResize when implemented');
 });
 
-test("returns receiver", function() {
-  var view = SC.View.create();
-  equals(view.beginLiveResize(), view, 'returns receiver');
-});
-
 // ..........................................................
 // endLiveResize()
 // 
@@ -178,11 +173,4 @@ test("invokes didEndLiveResize on receiver and any child views that implement it
   view.endLiveResize();
   equals(callCount, 2, 'should invoke didEndLiveResize when implemented');
 });
-
-
-test("returns receiver", function() {
-  var view = SC.View.create();
-  equals(view.endLiveResize(), view, 'returns receiver');
-});
-
 

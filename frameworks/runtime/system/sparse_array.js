@@ -92,9 +92,9 @@ SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.D
     
     // update length
     var len = this.length ;
-    if (idx > len) this.length = len + +objects.get('length') ;
-    else if ((idx+amt) > len)  this.length = idx + +objects.get('length') ;
-    else this.length = (len - amt) + +objects.get('length') ;
+    if (idx > len) this.length = len + objects.get('length') ;
+    else if ((idx+amt) > len)  this.length = idx + objects.get('length') ;
+    else this.length = (len - amt) + objects.get('length') ;
     
     // notify delegate, observers
     this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReplace', this, idx, amt, objects) ;

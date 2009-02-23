@@ -7,7 +7,8 @@
 
 sc_require('mixins/collection_view_delegate') ;
 
-SC.BENCHMARK_UPDATE_CHILDREN = NO ;
+SC.BENCHMARK_UPDATE_CHILDREN = YES ;
+SC.BENCHMARK_RENDER = YES ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /**
@@ -51,12 +52,13 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   
   @extends SC.ClassicView
   @extends SC.CollectionViewDelegate
+  
 */
 SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
 /** @scope SC.CollectionView.prototype */
 {
   
-  classNames: 'sc-collection-view',
+  classNames: ['sc-collection-view'],
   
   // ......................................
   // PROPERTIES
@@ -479,7 +481,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return null;
   },
   
-  
   /**
     Returns the itemView that represents the passed content object.  
     
@@ -703,7 +704,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Otherwise, just mark as dirty.
   */
   nowShowingRangeDidChange: function() {
-    var range = this.get('nowShowingRange'), old = this._collection_nowShowingRange ;
+    var range = this.get('nowShowingRange') ;
+    var old = this._collection_nowShowingRange ;
     if (!old || !SC.rangesEqual(range, old)) {
       this._collection_nowShowingRange = range ;
       if (this.get('isVisibleInWindow')) {
@@ -836,6 +838,79 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // GENERATING CHILDREN
   //
   
+  // render: function(context, firstTime) {
+  //   // console.log('updateChildren invoked on %@, fullUpdate is %@'.fmt(this, fullUpdate));
+  //   var f ;
+  //   
+  //   // force fullUpdate if we are currently dirty.
+  //   if (this.get('isDirty')) fullUpdate = YES;
+  //   
+  //   if (SC.BENCHMARK_RENDER) {
+  //     var bkey = '%@.render'.fmt(this) ;
+  //     SC.Benchmark.start(bkey);
+  //   }
+  //   
+  //   this.beginPropertyChanges() ; // avoid sending notifications
+  //   
+  //   var content = SC.makeArray(this.get('content'));
+  //   
+  //   // get the target nowShowingRange and the current range.  Save the value
+  //   var range = this.get('nowShowingRange') ;
+  //   var curRange = this._currentNowShowingRange ; 
+  //   this._currentNowShowingRange = range ;
+  //   
+  //   var groupBy = this.get('groupBy'), didChange = false ;
+  //   var key, itemView, c, start, length;
+  //   var itemViewsByContent = {} ; // this will replace the current hash.
+  //   var curItemViewsByContent = this._itemViewsByContent ;
+  //   
+  //   // iterate through all of the views and insert them.  If the view 
+  //   // already exists, it will simply be reused.
+  //   var idx = SC.maxRange(range) ;
+  //   
+  //   // console.log('range is {%@, %@}'.fmt(range.start, range.length));
+  //   while (--idx >= range.start) {
+  //     c = content.objectAt(idx) ;
+  //     key = SC.guidFor(c) ;
+  //     itemView = this._insertItemViewFor(c, groupBy, idx) ;
+  //     
+  //     if (itemView) {
+  //       // add item view to new hash and remove from old hash.
+  //       itemViewsByContent[key] = itemView;
+  //       delete curItemViewsByContent[key];
+  //     }
+  //   }
+  //   
+  //   // Now iterate through the old hash.  Any left over item views should
+  //   // be removed.
+  //   for(key in curItemViewsByContent) {
+  //     if (!curItemViewsByContent.hasOwnProperty(key)) continue ;
+  //     itemView = curItemViewsByContent[key] ;
+  //     this._removeItemView(itemView, groupBy) ;
+  //   }
+  //   
+  //   // Swap out remaining content items.
+  //   curItemViewsByContent = null ; // release memory...
+  //   this._itemViewsByContent = itemViewsByContent ;
+  //   didChange = true;
+  //   
+  //   // Clear dirty state
+  //   this.set('isDirty', NO);
+  //   
+  //   // Clean out some cached items and notify their changes.
+  //   // NOTE: This must be called after isDirty is cleared or 
+  //   // updateSelectionStates() may not run.
+  //   if (didChange) {
+  //     this._flushZombieGroupViews() ;
+  //     this.updateSelectionStates() ;
+  //     this.notifyPropertyChange('itemViews') ;
+  //     this.notifyPropertyChange('groupViews') ;
+  //   }
+  //   
+  //   this.endPropertyChanges() ;
+  //   if (SC.BENCHMARK_RENDER) SC.Benchmark.end(bkey);    
+  // },
+  
   /**
     Update the itemViews in the receiver to match the currently visible 
     content objects.  Normally this method assumes the content objects 
@@ -850,10 +925,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         
     updateChildren is called whenever the nowShowingRange changes, the 
     content changes or a property on a content item changes.
-    @param {Bool} fullUpdate (Optional) if set to true, assumes content has
-      changed and will perform a full update.
-    @returns {SC.CollectionView} reciever
     
+    @param {Bool} fullUpdate (Optional) if set to true, assumes content has changed and will perform a full update.
+    @returns {SC.CollectionView} reciever
   */
   updateChildren: function(fullUpdate) {
     // console.log('updateChildren invoked on %@, fullUpdate is %@'.fmt(this, fullUpdate));
@@ -882,8 +956,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // If this is a fullUpdate, then rebuild the itemViewsByContent hash
     // from scratch.  This is necessary if the content or the visible range
     // might have changed.
-    if (fullUpdate) {
-     
+    // if (fullUpdate) {
       var itemViewsByContent = {} ; // this will replace the current hash.
       var curItemViewsByContent = this._itemViewsByContent ;
       
@@ -920,25 +993,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // If a fullUpdate is not required, then we assume no content has changed
     // and we just need to add or remove some views to bring the ranges up
     // to date.
-    } else {
-      // Find changed range at the top.  Note that the length here may be 
-      // negative.  Negative means views should be removed.
-      start = range.start ;
-      length = (curRange.start - start) ;
-      if (length !== 0) {
-        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
-        didChange = true ;
-      }
-      
-      // Find the changed range at the bottom.  Note that the length here may
-      // also be negative. Negative means views should be removed.
-      start = SC.maxRange(curRange) ;
-      length = SC.maxRange(range) - start ;
-      if (length !== 0) {
-        this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
-        didChange = true ;
-      }
-    }
+    // } else {
+    //   // Find changed range at the top.  Note that the length here may be 
+    //   // negative.  Negative means views should be removed.
+    //   start = range.start ;
+    //   length = (curRange.start - start) ;
+    //   if (length !== 0) {
+    //     this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+    //     didChange = true ;
+    //   }
+    //   
+    //   // Find the changed range at the bottom.  Note that the length here may
+    //   // also be negative. Negative means views should be removed.
+    //   start = SC.maxRange(curRange) ;
+    //   length = SC.maxRange(range) - start ;
+    //   if (length !== 0) {
+    //     this._insertOrRemoveItemViewsInRange(start, length, groupBy) ;
+    //     didChange = true ;
+    //   }
+    // }
     
     // Clear dirty state
     this.set('isDirty', NO);
@@ -1181,21 +1254,21 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // zero length means do nothing.
     if (length === 0) return ;
     
-    var content = SC.makeArray(this.get('content')), c, itemView, idx ;
+    var content = SC.makeArray(this.get('content')) ;
     
     // negative length == remove item views
     if (length < 0) {
       while(++length < 0) {
-        c = content.objectAt(start + length) ;
-        itemView = this.itemViewForContent(c) ;
+        var c = content.objectAt(start + length) ;
+        var itemView = this.itemViewForContent(c) ;
         if (itemView) this._removeItemView(itemView, groupBy) ;
       }
     
     // positive length == add item views.
     } else if (length > 0) {
       while(--length >= 0) {
-        idx = start + length ;
-        c = content.objectAt(idx) ;
+        var idx = start + length ;
+        var c = content.objectAt(idx) ;
         this._insertItemViewFor(c, groupBy, idx) ;
       }  
     }
@@ -1497,7 +1570,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @param {SC.ClassicView} view The item view to scroll to
     @returns {void}
   */
-  scrollToItemView: function( view )
+  scrollToItemView: function(view)
   {
     // find first scrollable view.
     var scrollable = this ;
@@ -1518,11 +1591,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   selectItems: function(items, extendSelection) {
     var base = (extendSelection) ? this.get('selection') : [] ;
-    var sel = [];
+    var sel = [] ;
     
-    // items = [items].flatten();
-    items = SC.makeArray(items);
-    
+    items = SC.makeArray(items) ;
     for (var i = 0, len = items.length; i < len; i++) {
       if (this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, items[i])) {
         sel.push(items[i]);
@@ -1755,8 +1826,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
   
     // collection some basic setup info
-    var selection  = this.get('selection') || [];
-    var isSelected = (selection.indexOf(mouseDownContent) !== -1);
+    var selection  = this.get('selection') || [] ;
+    var isSelected = (selection.indexOf(mouseDownContent) !== -1) ;
     var modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
     if (mouseDownView.checkboxView && (SC.Event.element(ev) == ev.checkboxView.rootElement)) {
       modifierKeyPressed = true ;
@@ -1896,8 +1967,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var contentLowerBounds = 0;
     var contentUpperBounds = (content.get('length') - 1);
 
-    var selectionBeginIndex = content.indexOf(selection[0]);
-    var selectionEndIndex   = content.indexOf(selection[selection.length-1]);
+    var selectionBeginIndex = content.indexOf(selection[0]) ;
+    var selectionEndIndex = content.indexOf(selection[selection.length-1]) ;
 
     var previousMouseDownIndex = content.indexOf(this._previousMouseDownContent);
     // _previousMouseDownContent couldn't be found... either it hasn't been set yet or the record has been deleted by the user
@@ -1936,53 +2007,53 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // slice doesn't include the last index passed... silly..
     selectionEndIndex++;
-
+    
     // shouldn't need to sanity check that the selection is in bounds due to 
     // the indexOf checks above...I'll have faith that indexOf hasn't lied to 
     // me...
     return content.slice(selectionBeginIndex, selectionEndIndex);
   },
-
+  
   /*
    Finds the next selectable item, up to content length, by asking the
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
-
+   
    @param {Integer} proposedIndex the desired index to select
    @returns {Integer} the next selectable index. This will always be in the range of the bottom of the current selection index and the proposed index.
    @private
   */
-  _findNextSelectableItemFromIndex: function (proposedIndex) {
+  _findNextSelectableItemFromIndex: function(proposedIndex) {
     var content = this.get('content');
     var contentLength = content.get('length');
     var bottom = this._indexOfSelectionTop();
-
+    
     while (proposedIndex < contentLength &&
       this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
       proposedIndex++;
     }
     return (proposedIndex < contentLength) ? proposedIndex : bottom;
   },
-
+  
   /*
    Finds the previous selectable item, up to the first item, by asking the
    delegate. If a non-selectable item is found, the index is skipped. If
    no item is found, selection index is returned unmodified.
-
+   
    @param {Integer} proposedIndex the desired index to select
    @returns {Integer} the previous selectable index. This will always be in the range of the top of the current selection index and the proposed index.
    @private
   */
-  _findPreviousSelectableItemFromIndex: function (proposedIndex) {
+  _findPreviousSelectableItemFromIndex: function(proposedIndex) {
     var content = this.get('content');
     var contentLength = content.get('length');
     var top = this._indexOfSelectionTop();
-
+    
     while (proposedIndex >= 0 &&
            this.invokeDelegateMethod(this.delegate, 'collectionViewShouldSelectItem', this, content.objectAt(proposedIndex)) === NO) {
       proposedIndex--;
     }
-    return (proposedIndex >= 0) ? proposedIndex : top;
+    return (proposedIndex >= 0) ? proposedIndex : top ;
   },
 
   // if content value is editable and we have one item selected, then edit.
@@ -2640,68 +2711,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {void}
   */
   hideInsertionPoint: function() {},
-
-  /**
-    Override this method to provide your own ghost image for a drag.  
-    
-    Note that the only purpose of this view is to render a visible drag 
-    element.  It is not critical that you make this element bindable, etc.
-    
-    @param dragContent {Array} Array of content objects that will be used in 
-     the drag.
-  */
-  // ghostViewFor: function(dragContent) {
-  //   var view = SC.ClassicView.create() ;
-  //   view.setStyle({ position: 'absolute', overflow: 'hidden' });
-  //   
-  //   var viewFrame = this.convertFrameToView(this.get('frame'), null) ;
-  //   view.set('frame', viewFrame) ;
-  //   
-  //   var idx = dragContent.length ;
-  //   var maxX = 0; var maxY = 0 ; var minX =100000; var minY = 100000 ;
-  //   
-  //   while(--idx >= 0) {
-  //     var itemView = this.itemViewForContent(dragContent[idx]) ;
-  //     if (!itemView) continue ;
-  // 
-  //     var f = itemView.get('frame') ;
-  //     f = this.convertFrameFromView(f, itemView) ;
-  //     
-  //     var dom = itemView.rootElement ;
-  //     if (!dom) continue ;
-  //     
-  //     // save the maxX & maxY.  This will be used to trim the size 
-  //     // of the ghost view later.
-  //     if (SC.maxX(f) > maxX) maxX = SC.maxX(f) ;
-  //     if (SC.maxY(f) > maxY) maxY = SC.maxY(f) ;
-  //     if (SC.minX(f) < minX) minX = SC.minX(f) ;
-  //     if (SC.minY(f) < minY) minY = SC.minY(f) ;
-  // 
-  //     // Clone the contents of this node.  We should probably apply the 
-  //     // computed style to the cloned nodes in order to make sure they match 
-  //     // even if the CSS styles do not match.  Make sure the items are 
-  //     // properly positioned.
-  //     dom = dom.cloneNode(true) ;
-  // 
-  //     SC.Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
-  //     view.rootElement.appendChild(dom) ;
-  //   }
-  // 
-  //   // Now we have a view, create another view that will wrap the other view 
-  //   // and position it inside.
-  //   var wrapper = SC.ClassicView.create() ;
-  //   wrapper.setStyle({ position: 'absolute', overflow: 'hidden' }) ;
-  //   wrapper.set('frame', { 
-  //     x: viewFrame.x+minX, y: viewFrame.y+minY, 
-  //     width: (maxX-minX+1), height: (maxY-minY+1) 
-  //   }) ;
-  //   wrapper.appendChild(view) ;
-  //   view.set('frame', { x: 0-minX, y: 0-minY }) ;
-  //   return wrapper ;
-  // },
   
-  // ghostViewFor: function(dragContent) {
-    dragViewFor: function(dragContent) {
+  dragViewFor: function(dragContent) {
     var view = SC.View.create() ;
     
     var ary = dragContent ;

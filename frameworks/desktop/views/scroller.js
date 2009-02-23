@@ -18,9 +18,10 @@ SC.NATURAL_SCROLLER_THICKNESS = 16;
   @since SproutCore 1.0
 */
 SC.ScrollerView = SC.View.extend({
-
-  emptyElement: '<%@1><div class="sc-inner"></div></%@1>',
-  classNames: 'sc-scroller-view',
+  
+  // emptyElement: '<%@1><div class="sc-inner"></div></%@1>',
+  emptyElement: '<%@1></%@1>',
+  classNames: ['sc-scroller-view'],
   
   // ..........................................................
   // PROPERTIES
@@ -95,39 +96,33 @@ SC.ScrollerView = SC.View.extend({
   
   displayProperties: 'value minimum maximum isEnabled'.w(),
 
-  /** @private 
-    when generating a view, setup the basic layout options for the inner div
-  */
-  prepareDisplay: function() {
-    sc_super() ;
-    var dir = this.get('layoutDirection');
-    this.$().setClass({
-      'sc-horizontal': dir===SC.LAYOUT_HORIZONTAL,
-      'sc-vertical': dir===SC.LAYOUT_VERTICAL
-    });
-  },
-  
   /** @private
     Update the scroll location or inner height/width if needed.
   */
-  updateDisplay: function() {
+  render: function(context, firstTime) {
+    // console.log('%@.render called'.fmt(this));
     sc_super();
     
     var dir = this.get('layoutDirection');
     var min = this.get('minimum'), max = this.get('maximum');
     var enabled = this.get('isEnabled'), value = this.get('value');
     
+    if (firstTime) {
+      context.addClass('sc-horizontal', dir===SC.LAYOUT_HORIZONTAL) ;
+      context.addClass('sc-vertical', dir===SC.LAYOUT_VERTICAL) ;
+    }
+    
     // calculate required size...
     var size = (enabled) ? max-min-2 : 0 ;
-    switch(dir) {
+    switch (dir) {
       case SC.LAYOUT_VERTICAL:
-        this.$('.sc-inner').css('height', size);
-        this.$().get(0).scrollTop = value-min;
+        context.push('<div class="sc-inner" style="height: %@px">'.fmt(size));
+        context.addStyle('scrollTop', value-min) ;
         break;
         
       case SC.LAYOUT_HORIZONTAL:
-        this.$('.sc-inner').css('width', size);
-        this.$().get(0).scrollLeft = value-min;
+        context.push('<div class="sc-inner" style="width: %@px">'.fmt(size));
+        context.addStyle('scrollLeft', value-min) ;
         break;
       
       default:
@@ -135,13 +130,13 @@ SC.ScrollerView = SC.View.extend({
     }
   },
   
-  init: function() {
-    sc_super();
+  didCreateLayer: function() {
+    // console.log('%@.didCreateLayer called'.fmt(this));
     SC.Event.add(this.$(), 'scroll', this, this.scrollDidChange) ;
   },
   
-  destroy: function() {
-    sc_super();
+  didDestroyLayer: function() {
+    // console.log('%@.didDestroyLayer called'.fmt(this));
     SC.Event.remove(this.$(), 'scroll', this, this.scrollDidChange) ;
   },
 
@@ -161,6 +156,7 @@ SC.ScrollerView = SC.View.extend({
   },
   
   _scroll_scrollDidChange: function() {
+    // console.log('%@._scroll_scrollDidChange called'.fmt(this));
     this._scrollTimer = null; // clear so we can fire again
     
     if (!this.get('isEnabled')) return ; // nothing to do.
@@ -183,7 +179,8 @@ SC.ScrollerView = SC.View.extend({
   },
 
   /** @private Notify owner if it has a *ScrollOffset value */
-  _scroller_valueDidChange: function() {
+  _scroll_scrollDidChange2: function() {
+    // console.log('%@._scroll_scrollDidChange2 called'.fmt(this));
     var key = this.get('ownerScrollValueKey');
     if (key && this.owner && (this.owner[key] !== undefined)) {
       this.owner.setIfChanged(key, this.get('value'));
