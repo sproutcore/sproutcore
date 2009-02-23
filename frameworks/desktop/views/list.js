@@ -347,7 +347,7 @@ SC.ListView = SC.CollectionView.extend(
     
     // console.log('contentRangeInFrame is {%@, %@}'.fmt(ret.start, ret.length));
     return ret ;
-  }.property('content', 'clippingFrame').cacheable(),
+  },
   
   /** @private */
   layoutItemView: function(itemView, contentIndex, firstLayout) {

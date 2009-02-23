@@ -286,16 +286,15 @@ SC.RootResponder = SC.RootResponder.extend(
     // calculate new window size...
     var newSize = this.computeWindowSize(), oldSize = this.get('currentWindowSize');
     this.set('currentWindowSize', newSize); // update size
-
+    
     if (!SC.rectsEqual(newSize, oldSize)) {
       // notify panes
-      SC.RunLoop.begin();
-      var panes = this.panes, len = panes.length, idx;
-      for(idx=0;idx<len;idx++) {
-        this.panes[idx].windowSizeDidChange(oldSize, newSize);
+      if (this.panes) {
+        SC.RunLoop.begin() ;
+        this.panes.invoke('windowSizeDidChange', oldSize, newSize) ;
+        SC.RunLoop.end() ;
       }
-      SC.RunLoop.end();
-    }    
+    }
   },
   
   /** 
@@ -307,7 +306,7 @@ SC.RootResponder = SC.RootResponder.extend(
     controls, you should use those classes in your CSS rules instead.
   */
   hasFocus: NO,
-
+  
   /**
     Handle window focus.  Change hasFocus and add sc-focus CSS class 
     (removing sc-blur).  Also notify panes.
@@ -315,14 +314,14 @@ SC.RootResponder = SC.RootResponder.extend(
   focus: function() {
     if (!this.get('hasFocus')) {
       SC.$('body').addClass('sc-focus').removeClass('sc-blur');
-
+      
       SC.RunLoop.begin();
       this.set('hasFocus', YES);
       SC.RunLoop.end();
     }
     return YES ; // allow default
   },
-
+  
   /**
     Handle window focus.  Change hasFocus and add sc-focus CSS class (removing 
     sc-blur).  Also notify panes.
@@ -330,7 +329,7 @@ SC.RootResponder = SC.RootResponder.extend(
   blur: function() {
     if (this.get('hasFocus')) {
       SC.$('body').addClass('sc-blur').removeClass('sc-focus');
-
+      
       SC.RunLoop.begin();
       this.set('hasFocus', NO);
       SC.RunLoop.end();
@@ -346,10 +345,10 @@ SC.RootResponder = SC.RootResponder.extend(
   
   // .......................................................
   // KEYBOARD HANDLING
-  //
-
+  // 
+  
   _lastModifiers: null,
-
+  
   /** @private
     Modifier key changes are notified with a keydown event in most browsers.  
     We turn this into a flagsChanged keyboard event.  Normally this does not
@@ -359,16 +358,16 @@ SC.RootResponder = SC.RootResponder.extend(
     // if the modifier keys have changed, then notify the first responder.
     var m;
     m = this._lastModifiers = (this._lastModifiers || { alt: false, ctrl: false, shift: false });
-
+    
     var changed = false;
     if (evt.altKey !== m.alt) { m.alt = evt.altKey; changed=true; }
     if (evt.ctrlKey !== m.ctrl) { m.ctrl = evt.ctrlKey; changed=true; }
     if (evt.shiftKey !== m.shift) { m.shift = evt.shiftKey; changed=true;}
     evt.modifiers = m; // save on event
-
+    
     return (changed) ? (this.sendEvent('flagsChanged', evt) ? evt.hasCustomEventHandling : YES) : YES ;
   },
-
+  
   /** @private
     Determines if the keyDown event is a nonprintable or function key. These
     kinds of events are processed as keyboard shortcuts.  If no shortcut
@@ -377,7 +376,7 @@ SC.RootResponder = SC.RootResponder.extend(
   _isFunctionOrNonPrintableKey: function(evt) {
     return !!(evt.altKey || evt.ctrlKey || evt.metaKey || ((evt.charCode !== evt.which) && SC.FUNCTION_KEYS[evt.which]));
   },
-
+  
   /** @private 
     Determines if the event simply reflects a modifier key change.  These 
     events may generate a flagsChanged event, but are otherwise ignored.
@@ -385,7 +384,7 @@ SC.RootResponder = SC.RootResponder.extend(
   _isModifierKey: function(evt) {
     return !!SC.MODIFIER_KEYS[evt.charCode];
   },
-
+  
   /** @private
     The keydown event occurs whenever the physically depressed key changes.
     This event is used to deliver the flagsChanged event and to with function
@@ -403,7 +402,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // is only a modifier change
     var ret = this._handleModifierChanges(evt);
     if (this._isModifierKey(evt)) return ret;
-
+    
     // if this is a function or non-printable key, try to use this as a key
     // equivalent.  Otherwise, send as a keyDown event so that the focused
     // responder can do something useful with the event.
@@ -412,7 +411,7 @@ SC.RootResponder = SC.RootResponder.extend(
       // keyDown event (probably the case), just let the browser do its own
       // processing.
       ret = this.sendEvent('keyDown', evt) ;
-
+      
       // attempt key equivalent if key not handled
       if (!ret) {
         ret = this.attemptKeyEquivalent(evt) ;

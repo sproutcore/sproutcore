@@ -480,7 +480,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return null;
   },
   
-  
   /**
     Returns the itemView that represents the passed content object.  
     
@@ -704,7 +703,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Otherwise, just mark as dirty.
   */
   nowShowingRangeDidChange: function() {
-    var range = this.get('nowShowingRange'), old = this._collection_nowShowingRange ;
+    var range = this.get('nowShowingRange') ;
+    var old = this._collection_nowShowingRange ;
     if (!old || !SC.rangesEqual(range, old)) {
       this._collection_nowShowingRange = range ;
       if (this.get('isVisibleInWindow')) {
@@ -851,10 +851,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         
     updateChildren is called whenever the nowShowingRange changes, the 
     content changes or a property on a content item changes.
-    @param {Bool} fullUpdate (Optional) if set to true, assumes content has
-      changed and will perform a full update.
-    @returns {SC.CollectionView} reciever
     
+    @param {Bool} fullUpdate (Optional) if set to true, assumes content has changed and will perform a full update.
+    @returns {SC.CollectionView} reciever
   */
   updateChildren: function(fullUpdate) {
     // console.log('updateChildren invoked on %@, fullUpdate is %@'.fmt(this, fullUpdate));
@@ -884,7 +883,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // from scratch.  This is necessary if the content or the visible range
     // might have changed.
     if (fullUpdate) {
-     
       var itemViewsByContent = {} ; // this will replace the current hash.
       var curItemViewsByContent = this._itemViewsByContent ;
       
@@ -1498,7 +1496,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @param {SC.ClassicView} view The item view to scroll to
     @returns {void}
   */
-  scrollToItemView: function( view )
+  scrollToItemView: function(view)
   {
     // find first scrollable view.
     var scrollable = this ;
@@ -1951,7 +1949,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
    @returns {Integer} the next selectable index. This will always be in the range of the bottom of the current selection index and the proposed index.
    @private
   */
-  _findNextSelectableItemFromIndex: function (proposedIndex) {
+  _findNextSelectableItemFromIndex: function(proposedIndex) {
     var content = this.get('content');
     var contentLength = content.get('length');
     var bottom = this._indexOfSelectionTop();
@@ -1972,7 +1970,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
    @returns {Integer} the previous selectable index. This will always be in the range of the top of the current selection index and the proposed index.
    @private
   */
-  _findPreviousSelectableItemFromIndex: function (proposedIndex) {
+  _findPreviousSelectableItemFromIndex: function(proposedIndex) {
     var content = this.get('content');
     var contentLength = content.get('length');
     var top = this._indexOfSelectionTop();
@@ -2639,68 +2637,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {void}
   */
   hideInsertionPoint: function() {},
-
-  /**
-    Override this method to provide your own ghost image for a drag.  
-    
-    Note that the only purpose of this view is to render a visible drag 
-    element.  It is not critical that you make this element bindable, etc.
-    
-    @param dragContent {Array} Array of content objects that will be used in 
-     the drag.
-  */
-  // ghostViewFor: function(dragContent) {
-  //   var view = SC.ClassicView.create() ;
-  //   view.setStyle({ position: 'absolute', overflow: 'hidden' });
-  //   
-  //   var viewFrame = this.convertFrameToView(this.get('frame'), null) ;
-  //   view.set('frame', viewFrame) ;
-  //   
-  //   var idx = dragContent.length ;
-  //   var maxX = 0; var maxY = 0 ; var minX =100000; var minY = 100000 ;
-  //   
-  //   while(--idx >= 0) {
-  //     var itemView = this.itemViewForContent(dragContent[idx]) ;
-  //     if (!itemView) continue ;
-  // 
-  //     var f = itemView.get('frame') ;
-  //     f = this.convertFrameFromView(f, itemView) ;
-  //     
-  //     var dom = itemView.rootElement ;
-  //     if (!dom) continue ;
-  //     
-  //     // save the maxX & maxY.  This will be used to trim the size 
-  //     // of the ghost view later.
-  //     if (SC.maxX(f) > maxX) maxX = SC.maxX(f) ;
-  //     if (SC.maxY(f) > maxY) maxY = SC.maxY(f) ;
-  //     if (SC.minX(f) < minX) minX = SC.minX(f) ;
-  //     if (SC.minY(f) < minY) minY = SC.minY(f) ;
-  // 
-  //     // Clone the contents of this node.  We should probably apply the 
-  //     // computed style to the cloned nodes in order to make sure they match 
-  //     // even if the CSS styles do not match.  Make sure the items are 
-  //     // properly positioned.
-  //     dom = dom.cloneNode(true) ;
-  // 
-  //     SC.Element.setStyle(dom, { position: "absolute", left: "%@px".fmt(f.x), top: "%@px".fmt(f.y), width: "%@px".fmt(f.width), height: "%@px".fmt(f.height) }) ;
-  //     view.rootElement.appendChild(dom) ;
-  //   }
-  // 
-  //   // Now we have a view, create another view that will wrap the other view 
-  //   // and position it inside.
-  //   var wrapper = SC.ClassicView.create() ;
-  //   wrapper.setStyle({ position: 'absolute', overflow: 'hidden' }) ;
-  //   wrapper.set('frame', { 
-  //     x: viewFrame.x+minX, y: viewFrame.y+minY, 
-  //     width: (maxX-minX+1), height: (maxY-minY+1) 
-  //   }) ;
-  //   wrapper.appendChild(view) ;
-  //   view.set('frame', { x: 0-minX, y: 0-minY }) ;
-  //   return wrapper ;
-  // },
   
-  // ghostViewFor: function(dragContent) {
-    dragViewFor: function(dragContent) {
+  dragViewFor: function(dragContent) {
     var view = SC.View.create() ;
     
     var ary = dragContent ;

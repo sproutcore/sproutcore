@@ -305,7 +305,7 @@ SC.RootResponder = SC.Object.extend({
   sendEvent: function(action, evt, target) {
     var pane, ret ;
      
-    SC.runLoop.beginRunLoop() ;
+    SC.RunLoop.begin() ;
     
     // get the target pane
     if (target) pane = target.get('pane') ;
@@ -314,7 +314,7 @@ SC.RootResponder = SC.Object.extend({
     // if we found a valid pane, send the event to it
     ret = (pane) ? pane.sendEvent(action, evt, target) : null ;
     
-    SC.runLoop.endRunLoop() ;
+    SC.RunLoop.end() ;
     
     return ret ;
   },

@@ -118,9 +118,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {SC.Pane}
   */
   pane: function() {
-    var view = this;
-    while (view && !view.isPane) view = view.get('parentView');
-    return view;
+    var view = this ;
+    while (view && !view.isPane) view = view.get('parentView') ;
+    return view ;
   }.property('parentView').cacheable(),
   
   /**
@@ -136,9 +136,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {SC.SplitView}
   */
   splitView: function() {
-    var view = this;
-    while (view && !view.isSplitView) view = view.get('parentView');
-    return view;
+    var view = this ;
+    while (view && !view.isSplitView) view = view.get('parentView') ;
+    return view ;
   }.property('parentView').cacheable(),
   
   /**
@@ -1074,8 +1074,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return this; // done with cleanup
   },
   
-  isDestroyed: NO,
-  
   _destroy: function() {
     if (this.get('isDestroyed')) return this ; // nothing to do
     
@@ -1455,16 +1453,18 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return f;
   },
   
-  computeParentDimensions: function(f) {
+  computeParentDimensions: function(frame) {
     var ret, pv = this.get('parentView'), pf = (pv) ? pv.get('frame') : null ;
     
-    if (pf)
+    if (pf) {
       ret = { width: pf.width, height: pf.height };
-    else
+    } else {
+      var f = frame ;
       ret = {
         width: (f.left || 0) + (f.width || 0) + (f.right || 0),
         height: (f.top || 0) + (f.height || 0) + (f.bottom || 0)
       };
+    }
     return ret ;
   },
   
@@ -1884,9 +1884,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   renderLayout: function(context, firstTime) {
     context.addStyle(this.get('layoutStyle'));
   }
-    
   
-}); 
+});
 
 SC.View.mixin(/** @scope SC.View @static */ {
 
