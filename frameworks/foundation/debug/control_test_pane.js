@@ -40,14 +40,11 @@ SC.ControlTestPane.add = function(label, view, attrs) {
   this.childView(label);
   
   // now layout view itself...
-  layout = view.prototype.hasOwnProperty('layout') ? view.prototype.layout : this.prototype.layout;
-  layout = SC.clone(layout);
-  layout.left = 150 + padding*2;
-  layout.top = top ;
-  layout.height = height;
-  layout.right = padding ;
-  view.layout(layout);
-  this.childView(view);
+  var wrapper = SC.View.design({
+    layout: { left: 150+padding*2, top: top, right: padding, height: height },
+    childViews: [view]
+  });
+  this.childView(wrapper);
   
   return this;
 };

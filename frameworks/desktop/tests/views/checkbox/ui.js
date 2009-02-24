@@ -5,9 +5,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+/*global module test htmlbody */
 
 module("SC.CheckboxView UI");
 
+htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 test("various UI states of SC.CheckboxView", function() {
 
@@ -26,8 +28,19 @@ test("various UI states of SC.CheckboxView", function() {
     
     .add("disabled - selected", SC.CheckboxView, { 
       isEnabled: NO, value: YES, title: "Hello World" 
+    })
 
+    .add("static layout 1", SC.CheckboxView, {
+      useStaticLayout: YES, 
+      layout: { width: 'auto', right: 'auto' },
+      title: 'Static Layout'
+    })
+
+    .add("static layout 2", SC.CheckboxView, {
+      useStaticLayout: YES, 
+      layout: { width: 'auto', right: 'auto' },
+      title: 'Different Length Title'
     });
 
-  pane.create(); // show on screen    
+  pane = pane.create(); // show on screen    
 });
