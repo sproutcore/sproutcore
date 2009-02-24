@@ -66,6 +66,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {SC.FieldView} receiver
   */
   setFieldValue: function(newValue) {
+    if (SC.none(newValue)) newValue = '' ;
     this.$input().val(newValue);
     return this ;
   },
@@ -80,6 +81,12 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   getFieldValue: function() {
     return this.$input().val();
+  },
+  
+  _field_fieldValueDidChange: function(evt) {
+    SC.RunLoop.begin();
+    this.fieldValueDidChange(NO);
+    SC.RunLoop.end();  
   },
   
   /**
@@ -147,11 +154,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   didCreateLayer: function() {
     this.setFieldValue(this.get('fieldValue'));
-    SC.Event.add(this.$input(), 'change', this, this.fieldValueDidChange) ;
+    SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange) ;
   },
   
   willDestroyLayer: function() {
-    SC.Event.remove(this.$input(), 'change', this, this.fieldValueDidChange); 
+    SC.Event.remove(this.$input(), 'change', this, this._field_fieldValueDidChange); 
   },
 
   /** @private

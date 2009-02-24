@@ -15,7 +15,7 @@
   @extends SC.Editable
   @author Charles Jolley
 */
-SC.TextFieldView = SC.FieldView.extend(SC.Editable,
+SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 /** @scope SC.TextFieldView.prototype */ {
   
   tagName: 'label',
@@ -47,19 +47,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   displayProperties: 'hint fieldValue isEditing'.w(),
   
   render: function(context, firstTime) {
-    var v = this.getFieldValue() ;
-    context.setClass('focus', this.get('isEditing'));
-    context.setClass('not-empty', v && v.length>0);
+    var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
+    var name = SC.guidFor(this);
     var hint = this.get('hint');
+
+    // always have at least an empty string
+    var v = this.get('fieldValue');
+    if (SC.none(v)) v = ''; 
+    
+    // update layer classes always
+    context.setClass('not-empty', v.length>0);
+    
     if (firstTime) {
       context.push('<span class="sc-hint">', hint, '</span>');
-      context.push('<input type="text" />');
+      context.push('<input type="text" name="%@" %@ value="%@" />'.fmt(name, disabled, v));
       
     // if this is not first time rendering, update the hint itself since we
     // can't just blow away the text field like we might most other controls
     } else {
-      if (hint !== this._lastHint) {
-        this._lastHint = hint ;
+      if (hint !== this._textField_currentHint) {
+        this._textField_currentHint = hint ;
         this.$('.sc-hint').text(hint);
       }          
     }
@@ -67,41 +74,43 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
 
   // more efficient input
   $input: function() { return this.$('input'); },
-    
+  
   // ..........................................................
   // HANDLE NATIVE CONTROL EVENTS
   // 
   
   didCreateLayer: function() {
+    sc_super();
+
     var input = this.$input();
-    SC.Event.add(input, 'focus', this, this.fieldDidFocus);
-    SC.Event.add(input, 'blur', this, this.fieldDidBlur);
+    SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
+    SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
   },
   
   willDestroyLayer: function() {
+    sc_super();
+    
     var input = this.$input();
-    SC.Event.remove(input, 'focus', this, this.fieldDidFocus);
-    SC.Event.remove(input, 'blur', this, this.fieldDidBlur);
+    SC.Event.remove(input, 'focus', this, this._textField_fieldDidFocus);
+    SC.Event.remove(input, 'blur',  this, this._textField_fieldDidBlur);
+  },
+  
+  _textField_fieldDidFocus: function(evt) {
+    SC.RunLoop.begin();
+    this.fieldDidFocus();
+    SC.RunLoop.end();
+  },
+
+  _textField_fieldDidBlur: function(evt) {
+    SC.RunLoop.begin();
+    this.fieldDidBlur();
+    SC.RunLoop.end();
   },
   
   fieldDidFocus: function(evt) {
     if (!this._isFocused) {
       this._isFocused = YES ;
-      
-      // FireFox fix -- without this, text is shown unselected.
-      // TODO: need to undo firefox fix during a scroll, live resize, or window 
-      // resize and reapply on completion.
-      if (SC.browser.mozilla) {
-        var f = this.convertFrameToView(this.get('frame'), null) ;
-        var top = f.y, left = f.x, width = f.width, height = f.height ;
-
-        // brittle, but the layout is correct :(
-        top += 3; left += 3; width -= 6; height -= 6; 
-        
-        var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
-        this.$input().attr('style', style) ;
-      }
-      
+      this._applyFirefoxCursorFix();
       this.beginEditing();
     }
   },
@@ -109,9 +118,30 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   fieldDidBlur: function() {
     if (this._isFocused) {
       this._isFocused = NO ;
-      if (SC.browser.mozilla) this.$input().attr('style', '') ; // undo FireFox fix
+      this._removeFirefoxCursorFix();
       this.commitEditing();
     }
+  },
+
+  _applyFirefoxCursorFix: function() {
+    if (SC.browser.mozilla) {
+      var layer = this.get('layer');
+      var p = SC.viewportOffset(this.get('layer')) ;
+      var top    = p.y, 
+          left   = p.x, 
+          width  = layer.offsetWidth, 
+          height = layer.offsetHeight ;
+
+      // brittle, but the layout is correct :(
+      top += 3; left += 3; width -= 6; height -= 6; 
+      
+      var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
+      this.$input().attr('style', style) ;
+    }
+  },
+
+  _removeFirefoxCursorFix: function() {
+    if (SC.browser.mozilla) this.$input().attr('style', '') ;
   },
   
   /** tied to the isEnabled state */
@@ -119,7 +149,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
     return this.get('isEnabled');
   }.property('isEnabled'),
     
-  // First Responder
+  // ..........................................................
+  // FIRST RESPONDER SUPPORT
+  // 
   // When we become first responder, make sure the field gets focus and
   // the hint value is hidden if needed.
 
@@ -149,10 +181,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.Editable,
   didLoseKeyResponderTo: function(keyView) {
     if (this._isFocused) {
       this._isFocused = NO ;
-      return this.$input().get(0).blur() ;
+      this.$input().get(0).blur() ;
     } else {
       this.fieldValueDidChange() ;
-      return true;
     }
   },
   

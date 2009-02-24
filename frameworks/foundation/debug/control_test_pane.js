@@ -9,6 +9,11 @@ sc_require('views/pane');
 
 /*global test */
 
+// TODO: IMPROVE CODE QUALITY.  This code was put together quickly in order to
+// test the SproutCore framework.  It does not match up to the project's 
+// normal documentation, design and coding standards.  Do not rely on this 
+// code as an example of how to build your own applications.
+
 /** @class
   Generates a pane that will display vertically stacked views for testing.
   You can use this class in test mode to easily create a palette with views
@@ -93,15 +98,26 @@ SC.ControlTestPane.add = function(label, view, attrs) {
 
   // compute layout.
   var padding = this.prototype.padding, height = this.prototype.height;
-  var top = this.prototype.top + padding, layout;
+  var top = this.prototype.top + padding*2, layout;
+  if (top === padding*2) top = padding; // reduce padding @ top
+  
+  // if the passed in view has a layout property and the layout has an 
+  // explicit, numerical height, then use that instead.
+  if (view.prototype.layout && (typeof view.prototype.layout.height === SC.T_NUMBER)) height = view.prototype.layout.height;
   
   this.prototype.top = top + height; // make room
   
   // calculate labelView and add it
   layout = { left: padding, width: 150, top: top, height: height };
   var labelView = SC.LabelView.design({
-    value: label + ':', layout: layout, textAlign: SC.ALIGN_RIGHT, fontWeight: SC.BOLD_WEIGHT 
+    value: label + ':', 
+    layout: { left: 0, right: 0, centerY: 0, height: 14 }, 
+    textAlign: SC.ALIGN_RIGHT, 
+    fontWeight: SC.BOLD_WEIGHT 
   });
+
+  // wrap label in parent view in order to center text vertically
+  labelView = SC.View.design().layout(layout).childView(labelView);
   this.childView(labelView);
   
   // now layout view itself...
@@ -139,8 +155,9 @@ SC.ControlTestPane.standardSetup = function() {
   pane instance if there is one.
 */
 SC.ControlTestPane.view = function(viewKey) {
-  if (!this._pane) throw "view() cannot be called on a class";
-  return this._pane.view(viewKey);
+  var pane = this._pane || this._showPane ;
+  if (!pane) throw "view() cannot be called on a class";
+  return pane.view(viewKey);
 };
 
 /**
@@ -150,6 +167,6 @@ SC.ControlTestPane.view = function(viewKey) {
 */
 SC.ControlTestPane.show = function() {
   var pane = this ;
-  test("show control test pane", function() { pane.create(); });
+  test("show control test pane", function() { pane._showPane = pane.create(); });
 };
 
