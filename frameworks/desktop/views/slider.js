@@ -12,12 +12,13 @@
 
   You can use a slider view much like you would any other control.  Simply
   set the value or content/contentValueKey to whatever value you want to 
-  display.  You can also set the maximumValue and minValue properties to determine
-  the mapping of the control to its children.
+  display.  You can also set the maximumValue and minValue properties to 
+  determine the mapping of the control to its children.
   
   @extends SC.View
   @extends SC.Control
   @since SproutCore 1.0
+  @test in progress
 */
 SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {

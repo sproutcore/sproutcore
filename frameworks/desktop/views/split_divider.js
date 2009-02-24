@@ -26,6 +26,7 @@ sc_require('views/split');
   @author Charles Jolley
   @author Lawrence Pit
   @author Erich Ocean
+  @test in split
 */
 SC.SplitDividerView = SC.View.extend(
 /** @scope SC.SplitDividerView.prototype */ {

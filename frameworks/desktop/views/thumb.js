@@ -18,8 +18,8 @@
   its thumbViews array.
 
   @extends SC.View
-
   @author Erich Ocean
+  @test in split
 */
 SC.ThumbView = SC.View.extend(
 /** @scope SC.ThumbView.prototype */ {

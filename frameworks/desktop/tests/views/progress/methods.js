@@ -7,6 +7,5 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.TextFieldView Methods");
-// note: need to test interaction with Validators here
-// possibly move Validator support to TextFieldView specifically.
+module("TODO: Test SC.ProgressView Methods");
+module("TODO: Test SC.SliderView Methods");
