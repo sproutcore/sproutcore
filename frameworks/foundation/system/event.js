@@ -377,6 +377,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
         target: elem,
         preventDefault: function(){ this.cancelled = YES; },
         stopPropagation: function(){ this.bubble = NO; },
+        allowDefault: function() { this.hasCustomEventHandling = YES; },
         timeStamp: Date.now(),
         bubble: (this.NO_BUBBLE.indexOf(eventType)<0) ,
         cancelled: NO,
