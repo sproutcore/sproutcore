@@ -9,7 +9,7 @@ sc_require('views/pane');
 
 SC.ControlTestPane = SC.Pane.extend({
   classNames: ['sc-control-test-pane'],
-  layout: { right: 50, width: 480, top: 50, bottom: 50 },
+  layout: { right: 20, width: 480, top: 75, bottom: 20 },
 
   top:       0,
   height:    20,
