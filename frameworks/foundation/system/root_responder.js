@@ -230,14 +230,16 @@ SC.RootResponder = SC.Object.extend({
     
     // 2. an explicit target was passed...
     if (target) {
-      if (SC.typeOf(target) === SC.T_STRING)
+      if (SC.typeOf(target) === SC.T_STRING) {
         target = SC.objectForPropertyPath(target) ;
+      }
       
       if (target) {
-        if (target.respondsTo && !target.respondsTo(methodName))
+        if (target.respondsTo && !target.respondsTo(methodName)) {
           target = null ;
-        else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION)
+        } else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION) {
           target = null ;
+        }
       }
       
       return target ;
@@ -267,10 +269,11 @@ SC.RootResponder = SC.Object.extend({
         if (target) this.set('defaultResponder', target) ; // cache if found
       }
       if (target) {
-        if (target.respondsTo && !target.respondsTo(methodName))
+        if (target.respondsTo && !target.respondsTo(methodName)) {
           target = null ;
-        else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION)
+        } else if (SC.typeOf(target[methodName]) !== SC.T_FUNCTION) {
           target = null ;
+        }
       }
     }
     
@@ -359,6 +362,7 @@ SC.RootResponder = SC.Object.extend({
   an instance and sets up event listeners as needed.
 */
 SC.ready(SC.RootResponder, SC.RootResponder.ready = function() {
-  var r = SC.RootResponder.responder = SC.RootResponder.create() ;
+  var r;
+  r = SC.RootResponder.responder = SC.RootResponder.create() ;
   r.setup() ;
 });
