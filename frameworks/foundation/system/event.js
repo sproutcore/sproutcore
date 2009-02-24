@@ -326,6 +326,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     return this ;
   },
 
+  NO_BUBBLE: ['blur', 'focus', 'change'],
+  
   /**
     Trigger an event execution immediately.  You can use this method to 
     simulate arbitrary events on arbitary elements.
@@ -363,7 +365,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if ( elem.nodeType == 3 || elem.nodeType == 8 ) return undefined;
     
     // Normalize to an array
-    args = SC.$A(args) ;
+    args = SC.A(args) ;
 
     var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION ;
 
@@ -373,9 +375,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       event = {
         type: eventType,
         target: elem,
-        preventDefault: function(){},
-        stopPropagation: function(){},
+        preventDefault: function(){ this.cancelled = YES; },
+        stopPropagation: function(){ this.bubble = NO; },
         timeStamp: Date.now(),
+        bubble: (this.NO_BUBBLE.indexOf(eventType)<0) ,
+        cancelled: NO,
         normalized: YES
       } ;
       args.unshift(event) ;
@@ -383,8 +387,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     event.type = eventType ;
 
-    // Trigger the event
-    ret = SC.Event.handle.apply(elem, args) ;
+    // Trigger the event - bubble if enabled
+    var current = elem;
+    do {
+      ret = SC.Event.handle.apply(current, args);
+      current = (current===document) ? null : (current.parentNode || document);
+    } while(!ret && event.bubble && current);    
+    current = null ;
 
     // Handle triggering native .onfoo handlers
     var onfoo = elem["on" + eventType] ;
@@ -431,13 +440,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
 
     // normalize event across browsers.  The new event will actually wrap the
     // real event with a normalized API.
-    args = SC.$A(arguments);
+    args = SC.A(arguments);
     args[0] = event = SC.Event.normalizeEvent(event || window.event);
 
     // get the handlers for this event type
     handlers = (SC.data(this, "events") || {})[event.type];
     if (!handlers) return NO ; // nothing to do
-
+    
     // invoke all handlers
     for (var key in handlers ) {
       var handler = handlers[key];
