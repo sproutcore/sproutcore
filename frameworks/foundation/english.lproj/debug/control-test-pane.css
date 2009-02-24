@@ -2,3 +2,7 @@
   border: 1px #888 solid ;
   overflow-y: auto;
 }
+
+.sc-view.sc-control-test-pane .sc-view.wrapper {
+  border: 1px #ccc solid;
+}
