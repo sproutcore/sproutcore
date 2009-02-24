@@ -163,7 +163,12 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   updateLayer: function() {
     sc_super();
-    this.setFieldValue(this.get('fieldValue'));
+    
+    // only change field value if it has changed from the last time we 
+    // set it.  This allows the browser-native field value to change without
+    // this method interfering with it.
+    var fieldValue = this.get('fieldValue');
+    this.setFieldValue(fieldValue);
   },
   
   // ACTIONS

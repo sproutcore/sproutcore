@@ -475,6 +475,7 @@ SC.RootResponder = SC.RootResponder.extend(
       this._mouseCanDrag = NO ;
       return NO ;
     }
+    
     return view ? evt.hasCustomEventHandling : YES;
   },
   
@@ -605,8 +606,9 @@ SC.RootResponder = SC.RootResponder.extend(
         for(var loc=0; loc < lh.length; loc++) {
           view = lh[loc] ;
           var exited = view.respondsTo('mouseExited') ;
-          if (exited && !(nh.indexOf(view) !== -1))
+          if (exited && !(nh.indexOf(view) !== -1)) {
             view.tryToPerform('mouseExited',evt);
+          }
         }
         
         this._lastHovered = nh; 
@@ -630,7 +632,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   _mouseCanDrag: YES,
   
-  selectstart: function() { return (this._mouseCanDrag) ? false : true ; },
+  selectstart: function() { return this._mouseCanDrag ? false : true ; },
   
   drag: function() { return false; }
   

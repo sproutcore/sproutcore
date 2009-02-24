@@ -26,18 +26,27 @@ SC.CheckboxView = SC.FieldView.extend(SC.Button,
   tagName: 'label',
 
   render: function(context, firstTime) {
+    var dt ;
+    
     // add checkbox -- set name to view guid to separate it from others
     if (firstTime) {
+      dt = this._field_currentDisplayTitle = this.get('displayTitle');
+
       var blank = sc_static('blank');
+      var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
       context.push('<img src="', blank, '" class="button" />');
-      context.push('<input type="checkbox" name="',SC.guidFor(this),'" />');
-      context.push('<span class="label">', this.get('displayTitle'), '</span>');
+      context.push('<input type="checkbox" name="%@" %@ />'.fmt(SC.guidFor(this),disabled));
+      context.push('<span class="label">', dt, '</span>');
       context.attr('name', SC.guidFor(this));
-      
+
     // since we don't want to regenerate the contents each time 
     // actually search for and update the displayTitle.
     } else {
-      this.$('.label').text(this.get('displayTitle'));
+      dt = this.get('displayTitle');
+      if (dt !== this._field_currentDisplayTitle) {
+        this._field_currentDisplayTitle = dt;
+        this.$('span.label').text(dt);
+      }
     }
   },
   
