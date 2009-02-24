@@ -93,15 +93,24 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
     observers, starting timers and animations, etc) that you need to happen 
     everytime the view is created, regardless of whether or not its layer 
     exists yet.
-  
-  - *prepareContext:* override this method for perform one-time setup on 
-    your view's HTML, such as copying in CSS class names and rendering 
-    structural HTML based on configuration options.  This method will only 
-    be called once when the view's layer created and the HTML it produces may 
-    be saved and reused at runtime, avoiding a call to this method again.
-  
-  - *render:* override this method to update your HTML to reflect 
-    any changes to the state of your view.
+    
+  - *render:* override this method to generate or update your HTML to reflect
+    the current state of your view.  This method is called both when your view
+    is first created and later anytime it needs to be updated.
+
+  - *didCreateLayer:* the render() method is used to generate new HTML.  
+    Override this method to perform any additional setup on the DOM you might
+    need to do after creating the view.  For example, if you need to listen
+    for events.
+    
+  - *willDestroyLayer:* if you implement didCreateLayer() to setup event 
+    listeners, you should implement this method as well to remove the same 
+    just before the DOM for your view is destroyed.
+    
+  - *updateLayer:* Normally, when a view needs to update its content, it will
+    re-render the view using the render() method.  If you would like to 
+    override this behavior with your own custom updating code, you can 
+    replace updateLayer() with your own implementation instead.
   
   @extends SC.Object
   @extends SC.Responder
@@ -523,8 +532,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var elem = document.getElementById(layerId) ;
     
     // TODO: use code generation to only really do this check on IE
-    if (SC.browser.msie && elem && elem.id !== layerId)
-      elem = null ; // IE bug
+    if (SC.browser.msie && elem && elem.id !== layerId) elem = null ;
     
     // if browser supports querySelector use that.
     if (!elem && parentLayer.querySelector) {
@@ -579,8 +587,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if layerNeedsUpdate is set to YES.
   */  
   _view_layerNeedsUpdateDidChange: function() {
-    if (this.get('layerNeedsUpdate'))
+    if (this.get('layerNeedsUpdate')) {
       this.invokeOnce(this.updateLayerIfNeeded) ;
+    } 
   }.observes('layerNeedsUpdate'),
   
   /**
@@ -1432,14 +1441,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     
     // make sure the width/height fix min/max...
-    if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight))
+    if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight)) {
       f.height = layout.maxHeight ;
-    if (!SC.none(layout.minHeight) && (f.height < layout.minHeight))
+    }
+
+    if (!SC.none(layout.minHeight) && (f.height < layout.minHeight)) {
       f.height = layout.minHeight ;
-    if (!SC.none(layout.maxWidth) && (f.width > layout.maxWidth))
+    }
+
+    if (!SC.none(layout.maxWidth) && (f.width > layout.maxWidth)) {
       f.width = layout.maxWidth ;
-    if (!SC.none(layout.minWidth) && (f.width < layout.minWidth))
+    }
+    
+    if (!SC.none(layout.minWidth) && (f.width < layout.minWidth)) {
       f.width = layout.minWidth ;
+    }
     
     // make sure width/height are never < 0
     if (f.height < 0) f.height = 0 ;
@@ -1565,7 +1581,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     notify the receiver view and any of its children that are interested
     that the resize is about to begin.
     
-    @returns {void}
+    @returns {SC.View} receiver
     @test in viewDidResize
   */
   beginLiveResize: function() {
@@ -1578,6 +1594,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       view = ary[idx] ;
       if (view.beginLiveResize) view.beginLiveResize();
     }
+    return this ;
   },
   
   /**
@@ -1585,7 +1602,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     notify the receiver view and any of its children that are interested
     that the live resize has ended.
     
-    @returns {void}
+    @returns {SC.View} receiver
     @test in viewDidResize
   */
   endLiveResize: function() {
@@ -1598,6 +1615,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // call *after* all children have been notified...
     if (this.didEndLiveResize) this.didEndLiveResize() ;
+    return this ;
   },
   
   /** 
