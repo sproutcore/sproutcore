@@ -58,3 +58,88 @@ test("changing the title should update the span", function() {
   equals(q.text(), view.get('displayTitle'), 'should have display title');
 });
 
+test("isEnabled=NO should add disabled class", function() {
+  SC.RunLoop.begin();
+  view.set('isEnabled', NO);
+  SC.RunLoop.end();
+  
+  ok(view.$().hasClass('disabled'), 'should have disabled class');
+});
+
+
+test("isSelected should alter sel classname and sync with value property", function() {
+
+  // check initial render state
+  ok(view.get('isSelected'), 'isSelected should match value');
+  ok(view.$().hasClass('sel'), 'should have sel class');
+
+  // update value -- make sure isSelected changes.  
+  SC.RunLoop.begin();
+  view.set('value', 0); // make falsy. (but not NO exactly)
+  SC.RunLoop.end();
+  
+  ok(!view.get('isSelected'), 'isSelected should now be NO');
+  ok(!view.$().hasClass('sel'), 'should no longer have sel class');
+  ok(!view.$('input').attr('checked'), 'input should not be checked');
+  
+  // update isSelected -- make sure it edits the value
+  SC.RunLoop.begin();
+  view.set('isSelected', YES);
+  SC.RunLoop.end();
+  
+  ok(view.get('isSelected'), 'isSelected should match value');
+  ok(view.$().hasClass('sel'), 'should have sel class');
+  ok(view.$('input').attr('checked'), 'input should be checked');
+});
+
+test("clicking on the checkbox will change toggle the value", function() {
+
+  ok(view.get('value'), 'precond - value should be YES');
+  view.$('input').get(0).click();
+  ok(!view.get('value'), 'value should now be NO');
+});
+
+
+test("pressing mouseDown and then mouseUp anywhere in the checkbox should toggle the selection", function() {
+
+  var elem = view.get('layer'), input = SC.$('input', elem);
+  
+  SC.Event.trigger(elem, 'mousedown');
+  ok(view.get('isActive'), 'view should be active');
+  ok(view.get('value'), 'value should not change yet');
+  
+  // simulate mouseUp and browser-native change to control
+  SC.Event.trigger(elem,'mouseup');
+  input.attr('checked', NO);
+  SC.Event.trigger(input.get(0),'change');
+  
+  ok(view.get('isActive'), 'view should no longer be active');
+  ok(!view.get('value'), 'value should change to NO');
+  
+  input = elem = null ;
+});
+
+test("isEnabled=NO should add disabled attr to input", function() {
+  
+  SC.RunLoop.begin();
+  view.set('isEnabled', NO);
+  SC.RunLoop.end();
+  
+  ok(view.$input().attr('disabled'), 'should have disabled attr');
+  
+  ok(view.get('value'), 'precond - value should be true');
+  view.$input().get(0).click();
+  ok(view.get('value'), 'value should not change when clicked');
+});
+
+
+
+
+
+
+
+
+
+
+
+

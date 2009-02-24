@@ -33,6 +33,11 @@ SC.CheckboxView = SC.FieldView.extend(SC.Button,
       context.push('<input type="checkbox" name="',SC.guidFor(this),'" />');
       context.push('<span class="label">', this.get('displayTitle'), '</span>');
       context.attr('name', SC.guidFor(this));
+      
+    // since we don't want to regenerate the contents each time 
+    // actually search for and update the displayTitle.
+    } else {
+      this.$('.label').text(this.get('displayTitle'));
     }
   },
   

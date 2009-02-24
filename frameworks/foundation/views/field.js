@@ -46,6 +46,16 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // 
   
   /**
+    Override to return an CoreQuery object that selects the input elements
+    for the view.  If this method is defined, the field view will 
+    automatically edit the attrbutes of the input element to reflect the 
+    current isEnabled state among other things.
+  */
+  $input: function() { 
+    return this.$('input').andSelf().filter('input'); 
+  },
+  
+  /**
     Override to set the actual value of the field.
 
     The default implementation will simple copy the newValue to the value
@@ -56,8 +66,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {SC.FieldView} receiver
   */
   setFieldValue: function(newValue) {
-    var $input = this.$('input').andSelf().filter('input');
-    $input().val(newValue);
+    this.$input().val(newValue);
     return this ;
   },
 
@@ -70,8 +79,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {String} value
   */
   getFieldValue: function() {
-    var $input = this.$('input').andSelf().filter('input');
-    return $input().val();
+    return this.$input().val();
   },
   
   /**

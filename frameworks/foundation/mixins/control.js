@@ -297,7 +297,10 @@ SC.Control = {
 
     // if the control implements the $input() helper, then fixup the input
     // tags
-    if (!firstTime && this.$input) this.$input().attr('disabled', disabled);
+    if (!firstTime && this.$input) {
+      console.log('setting disabled = %@'.fmt(disabled));
+      this.$input().attr('disabled', disabled);
+    }
   },
 
   // This should be null so that if content is also null, the
