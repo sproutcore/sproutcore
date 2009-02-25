@@ -67,7 +67,11 @@
    # This is where your loading screen will appear.  To add a loading screen
    # just declare content_for('loading') in one of your partials.
 -%>
+<% unless @content_for_loading.blank? %>
+<div id="loading">
 <%= @content_for_loading %>
+</div>
+<% end -%>
 <% # 
    # This is where the resources you declare will appear.  By default anything
    # you add to partials will be added to this section unless you specify
