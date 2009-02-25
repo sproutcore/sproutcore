@@ -36,13 +36,21 @@ test("cloneRange() to clone the given range",function(){
 	equals(75,c.length,'Maximum range');
 });
 
-// test("valueInRange() to find if a given value is in range",function(){
-// 	var obj = {start:15,length:75};
-// 	var c = SC.valueInRange(25,obj);
-// 	var d = SC.valueInRange(10,obj);
-// 	equals(true,c,'In range');
-// 	equals(false,d,'Not in range');
-// });
+test("valueInRange() to find if a given value is in range",function(){
+  var obj = {start:15,length:75};
+  var c = SC.valueInRange(25,obj);
+  var d = SC.valueInRange(10,obj);
+  equals(true,c,'In range');
+  equals(false,d,'Not in range');
+});
+
+test("valueInRange() to find if a given value is in range starting at zero",function(){
+  var obj = {start:0,length:5};
+  var c = SC.valueInRange(0,obj);
+  var d = SC.valueInRange(5,obj);
+  equals(true,c,'In range');
+  equals(false,d,'Not in range');
+});
 
 test("intersectRanges() to get the intersection of 2 ranges",function(){
 	var obj1 = {start:15,length:75};

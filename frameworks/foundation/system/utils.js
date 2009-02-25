@@ -272,7 +272,7 @@ SC.mixin( /** @scope SC */ {
   
   /** Returns true if the passed index is in the specified range */
   valueInRange: function(value, range) {
-    return (range > 0) && (value >= range.start) && (value < (range.start + range.length));  
+    return (value >= 0) && (value >= range.start) && (value < (range.start + range.length));  
   },
   
   /** Returns first value of the range. */

@@ -388,63 +388,85 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   itemsPerRow: 1,
   
-  /**  
-    Property returns all of the item views, regardless of group view.  This
-    property is somewhat expensive to compute so you should avoid calling it
-    unless necessary.
-    
-    @property {Array}
-  */
-  itemViews: function() {
-    var ret = [], range = this.get('nowShowingRange') ;
-    if (!range || range.length===0) return ret ; 
-    var content = this.get('content') || [] ;
-    for(var idx=0;idx<range.length;idx++) {
-      var cur = content.objectAt(idx) ;
-      ret.push(this.itemViewForContent(cur)) ;
-    }
-    return ret ;
-  }.property('nowShowingRange', 'content').cacheable(),
+  // /**  
+  //   Property returns all of the item views, regardless of group view.  This
+  //   property is somewhat expensive to compute so you should avoid calling it
+  //   unless necessary.
+  //   
+  //   @property {Array}
+  // */
+  // itemViews: function() {
+  //   var ret = [], range = this.get('nowShowingRange') ;
+  //   if (!range || range.length===0) return ret ; 
+  //   var content = this.get('content') || [] ;
+  //   for(var idx=0;idx<range.length;idx++) {
+  //     var cur = content.objectAt(idx) ;
+  //     ret.push(this.itemViewForContent(cur)) ;
+  //   }
+  //   return ret ;
+  // }.property('nowShowingRange', 'content').cacheable(),
   
-  /**
-    Property returns all of the rendered group views in order of their 
-    appearance.
-    
-    @property {Array}
-  */
-  groupViews: function() {
-    var ret = [], groupBy = this.get('groupBy') ;
-    if (groupBy) {
-      var range = this.get('nowShowingRange') ;
-      var content = this.get('content') || [] ;
-      var groupValue = undefined ;
-      
-      for(var idx=0;idx<range.length;idx++) {
-        var cur = content.objectAt(idx) ;
-        var curGroupValue = (cur) ? cur.get(groupBy) : null ;
-        if (curGroupValue != groupValue) {
-          groupValue = curGroupValue ;
-          ret.push(this.groupViewForGroupValue(groupValue)) ;
-        }
-      }
-    }
-    return ret ;
-  }.property('nowShowingRange', 'content', 'groupBy').cacheable(),
+  // layer: function(key, value) {
+  //   debugger ;
+  //   return sc_super() ;
+  // }.property('isVisibleInWindow').cacheable(),
   
-  /**
-    Returns YES if the passed view belongs to the collection.
-    
-    This method uses the internal hash of item views and works even if 
-    your items are stored in group views.  This is faster than searching
-    the child view hierarchy yourself.
-    
-    @param {SC.View} view the view to search for.
-    @returns {Boolean} YES if the view belongs to the receiver
-  */
-  hasItemView: function(view) {
-    if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
-    return !!this._itemViewsByGuid[SC.guidFor(view)] ;
+  itemViewAtContentIndex: function(contentIndex) {
+    var range = this.get('nowShowingRange') ;
+    var itemView = this.createExampleView() ;
+    var key, content = SC.makeArray(this.get('content')) ;
+    content = content.objectAt(contentIndex) ;
+    if (!content) return null ;
+    else {
+      key = SC.guidFor(this) + '_' + SC.guidFor(content) ;
+      itemView.set('content', content) ;
+      itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
+      itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
+      this.layoutItemView(itemView, contentIndex, YES) ;
+      itemView.set('parentView', this) ;
+      return itemView ;
+    }
   },
+  
+  // /**
+  //   Property returns all of the rendered group views in order of their 
+  //   appearance.
+  //   
+  //   @property {Array}
+  // */
+  // groupViews: function() {
+  //   var ret = [], groupBy = this.get('groupBy') ;
+  //   if (groupBy) {
+  //     var range = this.get('nowShowingRange') ;
+  //     var content = this.get('content') || [] ;
+  //     var groupValue = undefined ;
+  //     
+  //     for(var idx=0;idx<range.length;idx++) {
+  //       var cur = content.objectAt(idx) ;
+  //       var curGroupValue = (cur) ? cur.get(groupBy) : null ;
+  //       if (curGroupValue != groupValue) {
+  //         groupValue = curGroupValue ;
+  //         ret.push(this.groupViewForGroupValue(groupValue)) ;
+  //       }
+  //     }
+  //   }
+  //   return ret ;
+  // }.property('nowShowingRange', 'content', 'groupBy').cacheable(),
+  
+  // /**
+  //   Returns YES if the passed view belongs to the collection.
+  //   
+  //   This method uses the internal hash of item views and works even if 
+  //   your items are stored in group views.  This is faster than searching
+  //   the child view hierarchy yourself.
+  //   
+  //   @param {SC.View} view the view to search for.
+  //   @returns {Boolean} YES if the view belongs to the receiver
+  // */
+  // hasItemView: function(view) {
+  //   if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
+  //   return !!this._itemViewsByGuid[SC.guidFor(view)] ;
+  // },
   
   /** 
     Find the first content item view for the passed event.
@@ -509,15 +531,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return this._groupViewsByValue[groupValue] ;
   },
   
-  /**
-    Returns the groupValue for the passed group view.
-    
-    @param {SC.View} groupView the group view.
-    @returns {Object} the value of the group view or null.
-  */
-  groupValueForGroupView: function(groupView) {
-    return groupView ? groupView.get('groupValue') : null ;
-  },
+  // /**
+  //   Returns the groupValue for the passed group view.
+  //   
+  //   @param {SC.View} groupView the group view.
+  //   @returns {Object} the value of the group view or null.
+  // */
+  // groupValueForGroupView: function(groupView) {
+  //   return groupView ? groupView.get('groupValue') : null ;
+  // },
   
   /**
     Expands the index into a range of content objects that have the same
@@ -842,17 +864,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // GENERATING CHILDREN
   //
   
-  render: function(context, firstTime) {
-    if (SC.BENCHMARK_RENDER) {
-      var bkey = '%@.render'.fmt(this) ;
-      SC.Benchmark.start(bkey);
-    }
-    this.beginPropertyChanges() ; // avoid sending notifications
-    
-    var content = SC.makeArray(this.get('content'));
-    var range = this.get('nowShowingRange') ;
-    var key, itemView, c ;
-    var idx = SC.maxRange(range) ;
+  createExampleView: function() {
     var exampleViewKey = this.get('contentExampleViewKey') ;
     var ExampleView ;
     if (exampleViewKey) {
@@ -862,7 +874,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
     
     if (ExampleView) {
-      itemView = ExampleView.create({
+      return ExampleView.create({
         classNames: ['sc-collection-item'],
         owner: this,
         displayDelegate: this,
@@ -870,12 +882,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         isVisible: YES
       });
     } else throw "You must define an exampleView class to render collection items with" ;
+  },
+  
+  render: function(context, firstTime) {
+    if (SC.BENCHMARK_RENDER) {
+      var bkey = '%@.render'.fmt(this) ;
+      SC.Benchmark.start(bkey);
+    }
+    this.beginPropertyChanges() ; // avoid sending notifications
     
+    var content = SC.makeArray(this.get('content')) ;
+    var selection = SC.makeArray(this.get('selection'));
+    var range = this.get('nowShowingRange') ;
+    var key, itemView = this.createExampleView(), c ;
+    var idx = SC.maxRange(range) ;
+    
+    var baseKey = SC.guidFor(this) + '_' ;
     while (--idx >= range.start) {
       c = content.objectAt(idx) ;
-      key = SC.guidFor(c) ;
+      key = baseKey + SC.guidFor(c) ;
       itemView.set('content', c) ;
-      itemView.set('layerId', key) ;
+      itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+      itemView.layerId = key ; // cannot use .set, layerId is RO
       this.layoutItemView(itemView, idx, YES) ;
       context = context.begin(itemView.get('tagName')) ;
       itemView.prepareContext(context, YES) ;
