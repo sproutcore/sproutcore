@@ -1,113 +1,140 @@
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
-// Copyright: ©3006-2009 Apple, Inc. and contributors.
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            portions copyright @2009 Apple, Inc.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+/*global module test htmlbody ok equals same */
 
-module("SC.ButtonView#render");
+htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
-htmlbody('<style>.sc-view { border: 1px red solid; z-index: -1; position: absolute; }</style>');
-
-test("Render buttons in all states and with the regular and blank theme", function() {
-  
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-  // default button no properties
-  var button = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 20, height: 18 })
-    .prop('theme', 'blank');
+
+var pane = SC.ControlTestPane.design()
+  .add("basic", SC.ButtonView, { 
+  })
+  
+  .add("title", SC.ButtonView, { 
+     title: "Hello World" 
+  })
+   
+  .add("icon", SC.ButtonView, { 
+    icon: iconURL 
+  })
     
-  // default button with a title
-  var button2 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 48, height: 18 })
-    .prop('title', 'title')
-    .prop('theme', 'blank');
-    
-    // default button with a title
-  var button3 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 76, height: 18 })
-    .prop('icon', iconURL)
-    .prop('theme', 'blank');
-  //default button with icon and title
-  var button4 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 104, height: 18 })
-    .prop('title', 'title , icon')
-    .prop('icon', 'http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif')
-    .prop('theme', 'blank');
-  //default button with icon and title disabled
-  var button5 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 180, top: 132, height: 18 })
-    .prop('title', 'title , icon , disabled')
-    .prop('icon', iconURL)
-    .prop('isEnabled', NO)
-    .prop('theme', 'blank');
-  //default button default
-  var button6 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 160, height: 18 })
-    .prop('title', 'isDefault')
-    .prop('icon', iconURL)
-    .prop('isDefault', YES)
-    .prop('theme', 'blank');
-  //default button isSelected
-  var button7 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 188, height: 18 })
-    .prop('title', 'isSelected')
-    .prop('icon', iconURL)
-    .prop('isSelected', YES)
-    .prop('theme', 'blank');
-  //toggle
-  var button8 = SC.ButtonView.design()
-    .layout({ centerX:0, width: 130, top: 216, height: 18 })
-    .prop('title', 'toggle')
-    .prop('icon', iconURL)
-    .prop('buttonBehavior', SC.TOGGLE_BEHAVIOR)
-    .prop('theme', 'blank');
+  .add("title,icon", SC.ButtonView, { 
+    title: "Hello World", icon: iconURL  
+  })
+     
+  .add("title,icon,disabled", SC.ButtonView, { 
+    title: "Hello World", icon: iconURL , isEnabled: NO 
+  })
+  
+  .add("title,icon,default", SC.ButtonView, { 
+    title: "Hello World", icon: iconURL , isDefault: YES 
+  })
+
+  .add("title,icon,selected", SC.ButtonView, { 
+    title: "Hello World", icon: iconURL , isSelected: YES 
+  });
+
+pane.show(); // add a test to show the test pane
 
 
-  // create design
-  var pane = SC.Pane.design()
-    .layout({right: 20, top: 100 , height:250, width:400})
-    .childView(button)
-    .childView(button2)
-    .childView(button3)
-    .childView(button4)
-    .childView(button5)
-    .childView(button6)
-    .childView(button7)
-    .childView(button8);
-    
-  // instantiate pane...
-  pane = pane.create();
-  
-  ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO');
-  for(var i=0; i<pane.childViews.length; i++){
-    var v=pane.childViews[i];
-    ok(!v.get('isVisibleInWindow'), 'view.isVisibleInWindow should be NO');  
-  }
-  
-  //append
-  SC.RunLoop.begin();
-  pane.append();
-  SC.RunLoop.end();
-  
-  for(var i=0; i<pane.childViews.length; i++){
-    var v=pane.childViews[i];
-    ok(v.get('isVisibleInWindow'), 'view.isVisibleInWindow should be YES');  
-  }
-  
-  var v=pane.childViews[0];
-  ok(!v.get('icon'), 'defaultBuuttonView. should not have an icon YES');  
-  ok(!v.get('title'), 'defaultBuuttonView. should not have a title YES');
+module('SC.ButtonView ui', pane.standardSetup());
 
-
-  rawS3HTML='<a href="javascript:;" role="button" id="@94" class="sc-view sc-button-view blank sc-regular-size" style="left: 50%; width: 130px; margin-left: -65px; top: 20px; height: 18px"><span class="inner" style="min-width: 80px"></span></a>';
-  rawFFHTML='<a href="javascript:;" role="button" id="@94" class="sc-view sc-button-view blank sc-regular-size" style="left: 50%; width: 130px; margin-left: -65px; top: 20px; height: 18px;"><span class="inner" style="min-width: 80px;"></span></a>';
-  
-  l=v.get('layer');
-  var isInParentlayer=false;
-
-    if(l.parentNode.innerHTML.indexOf(rawS3HTML)>=0 || l.parentNode.innerHTML.indexOf(rawFFHTML)>=0)
-      isInParentlayer=true;
-    ok(isInParentlayer, 'rawHTML is contained in the innerHTML of the parentNode');  
-  
+test("Check that all button are visible", function() {
+  ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');
+  ok(pane.view('title').get('isVisibleInWindow'), 'title.isVisibleInWindow should be YES');
+  ok(pane.view('icon').get('isVisibleInWindow'), 'icon.isVisibleInWindow should be YES');
+  ok(pane.view('title,icon').get('isVisibleInWindow'), 'title,icon.isVisibleInWindow should be YES');
+  ok(pane.view('title,icon,disabled').get('isVisibleInWindow'), 'title,icon,disabled.isVisibleInWindow should be YES');
+  ok(pane.view('title,icon,default').get('isVisibleInWindow'), 'title,icon,default.isVisibleInWindow should be YES');
+  ok(pane.view('title,icon,selected').get('isVisibleInWindow'), 'title.icon,selected.isVisibleInWindow should be YES');
 });
+  
+
+test("Check that all buttons have the right classes set", function() {
+  var viewElem=pane.view('basic').$();
+  ok(viewElem.hasClass('sc-view'), 'basic.hasClass(sc-view) should be YES');
+  ok(viewElem.hasClass('sc-button-view'), 'basic.hasClass(sc-button-view) should be YES');
+  ok(viewElem.hasClass('sc-regular-size'), 'basic.hasClass(sc-regular-size) should be YES');
+  ok(!viewElem.hasClass('icon'), 'basic.hasClass(icon) should be NO');
+  ok(!viewElem.hasClass('sel'), 'basic.hasClass(sel) should be NO');
+  ok(!viewElem.hasClass('disabled'), 'basic.hasClass(disabled) should be NO');
+  ok(!viewElem.hasClass('def'), 'basic.hasClass(def) should be NO');
+  
+  
+  viewElem=pane.view('title').$();
+  ok(viewElem.hasClass('sc-view'), 'title.hasClass(sc-view) should be YES');
+  ok(viewElem.hasClass('sc-button-view'), 'title.hasClass(sc-button-view) should be YES');
+  ok(viewElem.hasClass('sc-regular-size'), 'title.hasClass(sc-regular-size) should be YES');
+  ok(!viewElem.hasClass('icon'), 'title.hasClass(icon) should be NO');
+  ok(!viewElem.hasClass('sel'), 'title.hasClass(sel) should be NO');
+  ok(!viewElem.hasClass('disabled'), 'title.hasClass(disabled) should be NO');
+  ok(!viewElem.hasClass('def'), 'title.hasClass(def) should be NO');
+
+  viewElem=pane.view('icon').$();
+  ok(viewElem.hasClass('sc-view'), 'icon.hasClass(sc-view) should be YES');
+  ok(viewElem.hasClass('sc-button-view'), 'icon.hasClass(sc-button-view) should be YES');
+  ok(viewElem.hasClass('sc-regular-size'), 'icon.hasClass(sc-regular-size) should be YES');
+  ok(viewElem.hasClass('icon'), 'icon.hasClass(icon) should be YES');
+  ok(!viewElem.hasClass('sel'), 'icon.hasClass(sel) should be NO');
+  ok(!viewElem.hasClass('disabled'), 'icon.hasClass(disabled) should be NO');
+  ok(!viewElem.hasClass('def'), 'icon.hasClass(def) should be NO');
+
+  viewElem=pane.view('title,icon').$();
+  ok(viewElem.hasClass('sc-view'), 'title,icon.hasClass(sc-view) should be YES');
+  ok(viewElem.hasClass('sc-button-view'), 'title,icon.hasClass(sc-button-view) should be YES');
+  ok(viewElem.hasClass('sc-regular-size'), 'title,icon.hasClass(sc-regular-size) should be YES');
+  ok(viewElem.hasClass('icon'), 'title,icon.hasClass(icon) should be YES');
+  ok(!viewElem.hasClass('sel'), 'title,icon.hasClass(sel) should be NO');
+  ok(!viewElem.hasClass('disabled'), 'title,icon.hasClass(disabled) should be NO');
+  ok(!viewElem.hasClass('def'), 'title,icon.hasClass(def) should be NO');
+
+  viewElem=pane.view('title,icon,disabled').$();
+  ok(viewElem.hasClass('sc-view'), 'title,icon,disabled.hasClass(sc-view) should be YES');
+  ok(viewElem.hasClass('sc-button-view'), 'title,icon,disabled.hasClass(sc-button-view) should be YES');
+  ok(viewElem.hasClass('sc-regular-size'), 'title,icon,disabled.hasClass(sc-regular-size) should be YES');
+  ok(viewElem.hasClass('icon'), 'title,icon,disabled.hasClass(icon) should be YES');
+  ok(!viewElem.hasClass('sel'), 'title,icon,disabled.hasClass(sel) should be NO');
+  ok(viewElem.hasClass('disabled'), 'title,icon,disabled.hasClass(disabled) should be YES');
+  ok(!viewElem.hasClass('def'), 'title,icon,disabled.hasClass(def) should be NO');
+
+  viewElem=pane.view('title,icon,default').$();
+  ok(viewElem.hasClass('sc-view'), 'title,icon,default.hasClass(sc-view) should be YES');
+  ok(viewElem.hasClass('sc-button-view'), 'title,icon,default.hasClass(sc-button-view) should be YES');
+  ok(viewElem.hasClass('sc-regular-size'), 'title,icon,default.hasClass(sc-regular-size) should be YES');
+  ok(viewElem.hasClass('icon'), 'title,icon,default.hasClass(icon) should be YES');
+  ok(!viewElem.hasClass('sel'), 'title,icon,default.hasClass(sel) should be NO');
+  ok(!viewElem.hasClass('disabled'), 'title,icon,default.hasClass(disabled) should be NO');
+  ok(viewElem.hasClass('def'), 'title,icon,default.hasClass(def) should be YES');
+  
+  viewElem=pane.view('title,icon,selected').$();
+   ok(viewElem.hasClass('sc-view'), 'title,icon,selected.hasClass(sc-view) should be YES');
+   ok(viewElem.hasClass('sc-button-view'), 'title,icon,selected.hasClass(sc-button-view) should be YES');
+   ok(viewElem.hasClass('sc-regular-size'), 'title,icon,selected.hasClass(sc-regular-size) should be YES');
+   ok(viewElem.hasClass('icon'), 'title,icon,selected.hasClass(icon) should be YES');
+   ok(viewElem.hasClass('sel'), 'title,icon,selected.hasClass(sel) should be YES');
+   ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
+   ok(!viewElem.hasClass('def'), 'title,icon,selected.hasClass(def) should be NO');
+
+});
+
+
+
+test("Check that the title is set or not and if it is in the appropriate element", function() {
+  var viewElem=pane.view('basic').$('span');
+  equals(viewElem.text(), '', 'should not have a title');
+
+  var viewElem=pane.view('title').$('span');
+  equals(viewElem.text(), 'Hello World', 'should not have a title');
+
+
+  var viewElem=pane.view('icon').$('span.label.img');
+  ok((viewElem!=null), 'should have an image corresponding to an icon');
+
+});
+
+
