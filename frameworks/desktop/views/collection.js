@@ -414,6 +414,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var range = this.get('nowShowingRange') ;
     var itemView = this.createExampleView() ;
     var key, content = SC.makeArray(this.get('content')) ;
+    var selection = SC.makeArray(this.get('selection'));
     content = content.objectAt(contentIndex) ;
     if (!content) return null ;
     
@@ -432,6 +433,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       itemView.set('content', content) ;
       itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
       itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
+      itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
       this.layoutItemView(itemView, contentIndex, YES) ;
       itemView.set('parentView', this) ;
       return itemView ;
