@@ -7,8 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
 (function() {
   var content = []
   for (var idx=0, len=20; idx<len; ++idx) {

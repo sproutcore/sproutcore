@@ -540,7 +540,8 @@ SC.ScrollView = SC.View.extend({
   
   init: function() {
     sc_super();
-  
+    
+    debugger ;
     // start observing initial content view.  The content view's frame has
     // already been setup in prepareDisplay so we don't need to call 
     // viewFrameDidChange...
