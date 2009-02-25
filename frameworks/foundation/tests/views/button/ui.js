@@ -45,8 +45,6 @@ pane.show(); // add a test to show the test pane
 
 module('SC.ButtonView ui', pane.standardSetup());
 
-
-
 test("Check that all button are visible", function() {
   ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');
   ok(pane.view('title').get('isVisibleInWindow'), 'title.isVisibleInWindow should be YES');
