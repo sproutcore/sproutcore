@@ -40,7 +40,6 @@ SC.ImageView = SC.View.extend(SC.Control,
 /** @scope SC.ImageView.prototype */ {
   
   /** Image views contain an img tag. */
-  emptyElement: '<%@1 src="'+SC.BLANK_IMAGE_URL+'" />',
   classNames: 'sc-image-view',
   tagName: 'img',
   
@@ -92,16 +91,18 @@ SC.ImageView = SC.View.extend(SC.Control,
   
   displayProperties: 'status'.w(),
   
-  updateDisplay: function() {
+  render: function(context, firstTime) {
     // the image source is the value if the status is LOADED or blank
     var status = this.get('status'), value = this.get('value');
     
     if (status === SC.IMAGE_STATE_NONE && value) this._image_valueDidChange() ; // setup initial state
     
     var src = (status === SC.IMAGE_STATE_LOADED) ? value : SC.BLANK_IMAGE_URL;
-    var className = ['sc-view',this.get('styleClass')];
-    if (status === SC.IMAGE_STATE_SPRITE) className.push(value);
-    this.$().attr('src', src).attr('class', className.join(' '));
+    if (status === SC.IMAGE_STATE_SPRITE) context.addClass(value);
+    context.attr('src', src);
+    
+    
+  //  context.attr('class', className.join(' '));
   },
   
   /** @private - 
