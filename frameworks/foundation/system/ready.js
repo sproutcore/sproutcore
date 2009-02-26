@@ -132,6 +132,9 @@ SC.mixin({
     // trigger any bound ready events
     SC.Event.trigger("ready", null, document, NO) ;
     
+    // Remove any loading div
+    if (SC.removeLoading) SC.$('#loading').remove();
+    
     // Now execute main, if defined
     if ((typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
     
@@ -182,4 +185,5 @@ SC.mixin({
 }) ;
 
 SC._bindReady() ;
+SC.removeLoading = YES;
 
