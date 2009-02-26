@@ -7,8 +7,9 @@
 
 // note: SC.Observable also enhances array.  make sure we are called after
 // SC.Observable so our version of unknownProperty wins.
-require('mixins/observable') ;
-require('mixins/enumerable') ;
+sc_require('mixins/observable') ;
+sc_require('mixins/enumerable') ;
+sc_require('system/range_observer');
 
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 
@@ -219,15 +220,7 @@ SC.Array = {
     @returns {Array}
   */
   without: function(value) {
-    // array:indexOf() is not available in runtime
-    var found = false ;
-    for (var idx=0, len=this.length; idx<len; idx++) {
-      if (this[idx] === value) {
-        found = true ;
-        break ;
-      }
-    }
-    if (!found) return this; // value not present.
+    if (this.indexOf(value)<0) return this; // value not present.
     var ret = [] ;
     this.forEach(function(k) { 
       if (k !== value) ret[ret.length] = k; 
@@ -247,8 +240,63 @@ SC.Array = {
       if (ret.indexOf(k)<0) ret[ret.length] = k;
     });
     return ret ;
-  }
+  },
+  
+  rangeObserverClass: SC.RangeObserver,
+  
+  /**
+    Creates a new range observer on the receiver.  The target/method callback
+    you provide will be invoked anytime any property on the objects in the 
+    specified range changes.  It will also be invoked if the objects in the
+    range itself changes also.
     
+    The callback for a range observer should have the signature:
+    
+    {{{
+      function rangePropertyDidChange(array, objects, key)
+    }}}
+    
+    If the passed key is '[]' it means that the object itself changed.
+    
+    The return value from this method is an opaque reference to the 
+    ranger observer object.  You can use this reference to destroy the 
+    range observer when you are done with it or to update its range.
+  */
+  createRangeObserver: function(start, length, target, method) {
+    var rangeob = this._array_rangeObservers;
+    if (!rangeob) rangeob = this._array_rangeObservers = [] ;
+
+    var C = this.rangeObserverClass ;
+    var ret = C.create(this, start, length, target, method) ;
+    rangeob.push(ret);
+    return ret ;
+  },
+  
+  updateRangeObserver: function(rangeObserver, start, length) {
+    return rangeObserver.update(this, start, length);
+  },
+  
+  destroyRangeObserver: function(rangeObserver) {
+    var ret = rangeObserver.destroy(this);
+    var rangeob = this._array_rangeObservers;
+    if (rangeob) rangeob[rangeob.indexOf(rangeObserver)] = null ; // clear
+    return ret ;
+  },
+  
+  enumerableContentDidChange: function(start, length) {
+    // notify range observers
+    var rangeob = this._array_rangeObservers, len, idx, cur;
+    if (rangeob && (len = rangeob.length)>0) {
+      for(idx=0;idx<len;idx++) { 
+        cur = rangeob[idx];
+        if ((length === undefined) || ((start < (cur.start + cur.length)) && ((start+length) > cur.start))) cur.rangeDidChange();
+      }
+    }
+    
+    this.notifyPropertyChange('[]') ;
+    return this ;
+  }
+  
 } ;
 
 // Add SC.Array to the built-in array before we add SC.Enumerable to SC.Array
@@ -275,6 +323,24 @@ SC.Array.slice = function(beginIndex, endIndex) {
   return ret ;
 }  ;
 
+/**
+  Returns the index for a particular object in the index.
+  
+  @param {Object} object the item to search for
+  @returns {Number} index of -1 if not found
+*/
+SC.Array.indexOf = function(object) {
+  var idx, len = this.get('length');
+  for(idx=0;idx<len;idx++) {
+    if (this.objectAt(idx) === object) return idx ;
+  }
+  return -1;
+};
+
+// Some browsers do not support indexOf natively.  Patch if needed
+if (!Array.prototype.indexOf) {
+  Array.prototype.indexOf = SC.Array.indexOf;
+}
 
 // ......................................................
 // ARRAY SUPPORT
@@ -292,7 +358,12 @@ SC.Array.slice = function(beginIndex, endIndex) {
         var args = [idx, amt].concat(objects) ;
         this.splice.apply(this,args) ;
       }
-      this.enumerableContentDidChange() ;
+
+      // if we replaced exactly the same number of items, then pass only the
+      // replaced range.  Otherwise, pass the full remaining array length 
+      // since everything has shifted
+      if (amt !== objects.length) amt = this.length - idx;
+      this.enumerableContentDidChange(idx, amt) ;
       return this ;
     },
   

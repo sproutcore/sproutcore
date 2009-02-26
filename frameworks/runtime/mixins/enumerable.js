@@ -732,13 +732,18 @@ SC.Reducers = {
 
   /**
     Invoke this method when the contents of your enumerable has changed.
-    This will notify any observers watching for content changes.
+    This will notify any observers watching for content changes.  If your are
+    implementing an ordered enumerable (such as an array), also pass the 
+    start and end values where the content changed so that it can be used to
+    notify range observers.
+    
+    @param {Number} start optional start offset for the content change
+    @param {Number} length optional length of change
+    @returns {Object} receiver 
   */
-  enumerableContentDidChange: function() {
+  enumerableContentDidChange: function(start, length) {
     this.notifyPropertyChange('[]') ;
-    if (this.ownerRecord && this.ownerRecord.recordDidChange) {
-      this.ownerRecord.recordDidChange(this) ;
-    }
+    return this ;
   },
   
   /**
