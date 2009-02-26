@@ -100,9 +100,6 @@ SC.ImageView = SC.View.extend(SC.Control,
     var src = (status === SC.IMAGE_STATE_LOADED) ? value : SC.BLANK_IMAGE_URL;
     if (status === SC.IMAGE_STATE_SPRITE) context.addClass(value);
     context.attr('src', src);
-    
-    
-  //  context.attr('class', className.join(' '));
   },
   
   /** @private - 
