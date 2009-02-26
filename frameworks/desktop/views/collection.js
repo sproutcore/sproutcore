@@ -83,7 +83,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   content: [],
   
   /** @private */
-  // contentBindingDefault: SC.Binding.multiple().notEmpty(),
   contentBindingDefault: SC.Binding.multiple(),
   
   /**
@@ -417,8 +416,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var key, content = SC.makeArray(this.get('content')) ;
     content = content.objectAt(contentIndex) ;
     if (!content) return null ;
+    
+    var guids = this._itemViewGuids, guid;
+    if (!guids) this._itemViewGuids = guids = {};
+    
     else {
-      key = SC.guidFor(this) + '_' + SC.guidFor(content) ;
+      
+      // use cache of item view guids to avoid creating lots of temporary 
+      // objects.
+      guid = SC.guidFor(content);
+      if (!(key = this._itemViewGuids[guid])) {
+        key = this._itemViewGuids[guid] = SC.guidFor(this)+'_'+guid;
+      }
+      
       itemView.set('content', content) ;
       itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
       itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
@@ -864,11 +874,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // GENERATING CHILDREN
   //
   
-  createExampleView: function() {
+  createExampleView: function(content) {
     var exampleViewKey = this.get('contentExampleViewKey') ;
     var ExampleView ;
     if (exampleViewKey) {
-      ExampleView = content.get(exampleViewKey)
+      ExampleView = content.get(exampleViewKey);
     } else {
       ExampleView = this.get('exampleView') ;
     }
@@ -894,7 +904,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var content = SC.makeArray(this.get('content')) ;
     var selection = SC.makeArray(this.get('selection'));
     var range = this.get('nowShowingRange') ;
-    var key, itemView = this.createExampleView(), c ;
+    var key, itemView = this.createExampleView(content), c ;
     var idx = SC.maxRange(range) ;
     
     var baseKey = SC.guidFor(this) + '_' ;
@@ -1275,7 +1285,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     } else if (length > 0) {
       while(--length >= 0) {
         var idx = start + length ;
-        var c = content.objectAt(idx) ;
+        c = content.objectAt(idx) ;
         this._insertItemViewFor(c, groupBy, idx) ;
       }  
     }
