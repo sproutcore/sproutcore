@@ -20,3 +20,22 @@ test("SC.$error creates an error instance with description,label and code",funct
   equals('New Error Instance',d.label,'Label');
   equals(99999,d.code,'Code');
 });
+
+test("SC.$ok should return YES if the passed value is an error object", function() {
+	var denominator = [1,2,0];
+	var numerator =3;
+	var result = [];
+	for(i=0; i<denominator.length ;i++)
+	{
+		if(denominator[i]!=0)
+		{
+			result[i]= numerator/denominator[i];
+		}
+		else
+		{
+			// err = SC.Error.desc('divide by zero error','Divde by zero error',99999);
+			// 			equals(YES,SC.$ok(err),'Is an error');
+			// 			break;
+		}
+	}
+});

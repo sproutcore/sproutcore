@@ -28,7 +28,7 @@ test("Locale.locWithDefault() : localized version of the string or the string if
 	//Based on the input passed it should return the default locale
 	equals(LocaleObject.locWithDefault("en"), "en") ;
 	equals(LocaleObject.locWithDefault("jp", "Japanese"), "Japanese") ;
-	equals(LocaleObject.locWithDefault("ab"), "ab") ;
+	equals(LocaleObject.locWithDefault('deflang'), "dl") ;
 });
 
 test("Locale.addStrings() : Should be able to add the passed hash of strings to the locale's strings table", function() {		
@@ -126,5 +126,5 @@ test("Locale.extend() : Should make sure important properties of Locale object a
 	SC.Locale.locales.mn.addStrings(testLocales);
 	
 	//Result should be true as the new lacales added to the list of default locales
-	//equals(SC.Locale.locales.mn.options().strings.test,'te') ;
+	equals(SC.Locale.locales.mn.options().strings.test,'te') ;
 });
