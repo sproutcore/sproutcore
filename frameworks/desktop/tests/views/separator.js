@@ -7,4 +7,17 @@
 
 /*global module test htmlbody ok equals same stop start */
 
+htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+(function() {
+   var pane = SC.ControlTestPane.design()
+   .add("", SC.SeparatorView, { 
+
+    layoutDirection: SC.LAYOUT_VERTICAL
+   });
+   pane.show(); 
+})();
 module("TODO: Test SC.SeparatorView UI");
+
+
+
+

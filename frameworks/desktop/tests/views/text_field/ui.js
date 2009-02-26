@@ -6,8 +6,8 @@
 // ==========================================================================
 
 /*global module test htmlbody ok equals same stop start */
-
-var pane = SC.ControlTestPane.design()
+(function() {
+  var pane = SC.ControlTestPane.design()
   .add("empty", SC.TextFieldView, { 
     hint: "Full Name", 
     value: ''
@@ -80,12 +80,13 @@ pane.verifyDisabled = function verifyDisabled(view, isDisabled) {
 // ..........................................................
 // TEST INITIAL STATES
 // 
+
 module('SC.TextFieldView ui', pane.standardSetup());
 
 test("empty", function() {
-  var view = pane.view('empty');
-  pane.verifyEmpty(view, 'Full Name');
-  pane.verifyDisabled(view, NO);
+   var view = pane.view('empty');
+   pane.verifyEmpty(view, 'Full Name');
+   pane.verifyDisabled(view, NO);
 });
 
 test("with value", function() {
@@ -191,7 +192,7 @@ test("focus and blurring text field", function() {
   }, 100);  
   
 });
-
+})();
 
 
 

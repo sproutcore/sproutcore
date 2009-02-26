@@ -18,10 +18,16 @@ test("fetching the object at index", function() {
 });
 
 test("creating a clone of a sparse array", function() {
-	var ary = SC.SparseArray.create(10);
-	var arr = ["captain","crash","and the","beauty","queen","from Mars"];
-	ary = arr;
-	// var cpy = ary.clone();
+	var ary = SC.SparseArray.create(6);
+	// var arr = ["captain","crash","and the","beauty","queen","from Mars"];
+	// 	ary = arr;
+	// ary.provideContentAtIndex(0, "captain");
+	// ary.provideContentAtIndex(1, "crash");
+	// ary.provideContentAtIndex(2, "and the");
+	// ary.provideContentAtIndex(3, "beauty");
+	// ary.provideContentAtIndex(4, "queen");
+	// ary.provideContentAtIndex(5, "from Mars");
+	// var cpy = ary.clone(); alert(cpy);
 });
 
 test("Update the sparse array using provideContentAtIndex", function() {

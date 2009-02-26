@@ -269,6 +269,15 @@ test("should ignore removing an object not in the set", function() {
   equals(oldLength, set.length) ;
 });
 
+// test("should remove all the elements in the set", function() {
+// 	var obj = [2,3,4];
+// 	set.add(obj) ;
+// 	var oldLength = set.length ;
+// 	equals(6, oldLength);
+// 	a = set.removeEach(obj);
+// 	equals(0, a.length);
+// });
+
 module("SC.Set.pop + SC.Set.clone", {
 // generate a set with every type of object, but none of the specific
 // ones we add in the tests below...
