@@ -6,3 +6,7 @@
   border-radius: 2px;
   overflow: visible;
 }
+
+.sc-theme .sc-tab-view .sc-container-view .sc-segmented-view{
+  z-index:100;
+}
