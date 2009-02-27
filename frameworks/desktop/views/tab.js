@@ -126,18 +126,15 @@ SC.TabView = SC.View.extend(
       When we need to actually create a container, look for the tab loc from
       the parent view and adjust the internal frame accordingly.
     */
-    prepareDisplay: function() {
-      
+    render: function(context, firstTime) {
       var pv = this.get('parentView');
       var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
       if (tabLoc === SC.TOP_LOCATION) {
-        this.adjust('top', 11);
+        context.addStyle('top', '11px');
       } else {
-        this.adjust('bottom',11);
+        context.addStyle('bottom', '11px');
       }
       
-      var ret = sc_super();
-      return ret ;
     }
   }),
   
@@ -162,16 +159,17 @@ SC.TabView = SC.View.extend(
       the parent view and adjust the internal frame accordingly.  Also copy
       the item key settings from the tab view.
     */
-    prepareDisplay: function() {
+    render: function(context, firstTime) {
+      sc_super();
       // copy some useful properties from the parent view first
       var pv = this.get('parentView');
       var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
       if (tabLoc === SC.TOP_LOCATION) {
-        this.adjust('top', 0);
+        context.addStyle('top', '0px');
       } else {
-        this.adjust('bottom',0);
+        context.addStyle('bottom', '0px');
       }
-      return sc_super();
+      //return sc_super();
     },
     
     init: function() {
