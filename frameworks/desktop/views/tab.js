@@ -165,9 +165,9 @@ SC.TabView = SC.View.extend(
       var pv = this.get('parentView');
       var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
       if (tabLoc === SC.TOP_LOCATION) {
-        context.addStyle('top', '0px');
+        context.addStyle('top', '-12px');
       } else {
-        context.addStyle('bottom', '0px');
+        context.addStyle('bottom', '-12px');
       }
       //return sc_super();
     },
