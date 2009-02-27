@@ -10,7 +10,7 @@
 .sc-theme .sc-segmented-view a.sc-segment {
 	text-decoration: none ;
 	color: black ;
-	text-align: center ;
+	text-align: center;
 }
 
 .sc-theme a.sc-segment:active, a.sc-segment:focus {
@@ -31,7 +31,7 @@
 .sc-theme .sc-segmented-view a.sc-segment {
 	display: block;
 	top: 0;
-	height: 21px;
+	height: 22px;
 	line-height: 22px;
 	border-right: 1px #555 solid;
 	text-shadow: #b0b0b0 0px 1px 0px;
@@ -61,8 +61,8 @@
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment {
-	border:  none ;
 	padding-right: 10px;
+	border:none;
 }
 
 /* @end */
@@ -72,66 +72,66 @@
 /* NORMAL */
 
 .sc-theme .sc-segmented-view a.sc-segment .sc-button-inner {
- 	background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1127px;
+ 	background: #DDDDDD;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment {
- 	background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -1150px;
+ 	background: #DDDDDD;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment {
-	background: static_url('images/sc-theme-sprite.png') no-repeat left -1104px;
+	background: #DDDDDD;
 }
 
 
 /* SELECTED */
 .sc-theme .sc-segmented-view a.sc-segment.active .sc-button-inner,
 .sc-theme .sc-segmented-view a.sc-segment.sel .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') repeat-x right -1196px;
+	background: #999999;
 	text-shadow: #909090 0px 1px 0px;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel,
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.active {
-	background: static_url('images/sc-theme-sprite.png') no-repeat right -1219px;
+	background: #999999;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.sel,
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.active {
-	background: static_url('images/sc-theme-sprite.png') no-repeat left -1173px;
+	background: #999999;
 }
 
 /* DISABLED */
 
 .sc-theme .sc-segmented-view a.sc-segment.disabled .sc-button-inner,
 .sc-theme .sc-segmented-view.disabled a.sc-segment .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') repeat-x right -1265px;
+	background: #FFFFFF;
 	color: #999;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.disabled,
 .sc-theme .sc-segmented-view.disabled a.sc-segment.sc-last-segment {
-	background: static_url('images/sc-theme-sprite.png') repeat-x right -1288px;
+	background: #FFFFFF;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.disabled,
 .sc-theme .sc-segmented-view.disabled a.sc-segment.sc-first-segment {
-	background: static_url('images/sc-theme-sprite.png') repeat-x left -1242px;
+	background: #FFFFFF;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sel .sc-button-inner.disabled,
 .sc-theme .sc-segmented-view.disabled a.sc-segment.sel .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') repeat-x right -1265px;
+	background: #FFFFFF;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-last-segment.sel.disabled,
 .sc-theme .sc-segmented-view.disabled a.sc-segment.sc-last-segment.sel {
-	background: static_url('images/sc-theme-sprite.png') repeat-x right -1288px;
+	background: #FFFFFF;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment.sel.disabled,
 .sc-theme .sc-segmented-view.disabled a.sc-segment.sc-first-segment.sel {
-	background: static_url('images/sc-theme-sprite.png') repeat-x left -1242px;
+	background: #FFFFFF;
 }
 
 

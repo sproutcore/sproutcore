@@ -253,9 +253,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     this.itemsDidChange() ;
   },
 
-  /** @private the first time updateDisplay is run, if this is NO, it will
-   not generate the display items.  This is set to YES in prepareDisplay. */
-  _seg_needsFirstDisplay: NO,
   
   // ..........................................................
   // RENDERING/DISPLAY SUPPORT
@@ -263,48 +260,38 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   displayProperties: ['displayItems', 'value', 'activeIndex'],
   
-  prepareDisplay: function() {
-    var ret = sc_super() ;
-    this.$().addClass(this.get('layoutDirection'));  
-    this._seg_needsFirstDisplay = YES ;
-  },
   
-  updateDisplay: function() { 
-    sc_super();
+  render: function(context, firstTime) { 
     
     // collect some data 
     var items = this.get('displayItems');
     
-    // save and set this to NO for future calls
-    var needsFirstDisplay = this._seg_needsFirstDisplay;
-    this._seg_needsFirstDisplay = NO ;
-    
     // regenerate the buttons only if the new display items differs from the
     // last cached version of it needsFirstDisplay is YES.
     var last = this._seg_displayItems;
-    if ((!last && needsFirstDisplay) || (items !== last)) {
+    if ((!last && firstTime) || (items !== last)) {
       this._seg_displayItems = items; // save for future
-      this.renderDisplayItems(items) ;
-    }
-
+      this.renderDisplayItems(context, items) ;
+      context.addStyle('text-align', 'center');
+    }else{
     // update selection and active state
-    var activeIndex = this.get('activeIndex');
-    var value = this.get('value');
-    var isArray = SC.isArray(value);
-    if (isArray && value.get('length')===1) {
-      value = value.objectAt(0); isArray = NO ;
-    }
-    var names = {}; // reuse
+      var activeIndex = this.get('activeIndex');
+      var value = this.get('value');
+      var isArray = SC.isArray(value);
+      if (isArray && value.get('length')===1) {
+        value = value.objectAt(0); isArray = NO ;
+      }
+      var names = {}; // reuse
     
-    var loc = items.length, cq = this.$('a.sc-segment'), item;
-    while(--loc>=0) {
-      item = items[loc];
-      names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
-      names.active = (activeIndex === loc);
-      SC.$(cq.get(loc)).setClass(names);
+      var loc = items.length, cq = this.$('a.sc-segment'), item;
+      while(--loc>=0) {
+        item = items[loc];
+        names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
+        names.active = (activeIndex === loc);
+        SC.$(cq.get(loc)).setClass(names);
+      }
+      names = items = value = items = null; // cleanup
     }
-    names = items = value = items = null; // cleanup
-    
   },
   
   /**
@@ -313,55 +300,49 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     items change thereafter.  This will construct the HTML but will not set
     any "transient" states such as the global isEnabled property or selection.
   */
-  renderDisplayItems: function(items) {
-    
-    // first build HTML for items
-    var html = items.map(function(item, index) {
+  renderDisplayItems: function(context, items) {
+    //  debugger;
+    // first sbuild HTML for items
+    var item=null;
+    var classes=null  ;
+    var tot=0;
+    var value = this.get('value');
+    var isArray = SC.isArray(value);
+    var activeIndex = this.get('activeIndex');
+    for(var i=0, ilen=items.length; i< ilen; i++){
+      classes=new Array();
+      item=items[i];
       var title = item[0], icon = item[3], url, className;
       if (icon) {
         url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
         className = (url === icon) ? '' : icon ;
-        icon = '<img src="%@" alt="" class="icon %@" />'.fmt(url,className);
-      } else icon = '';
-      
-      return '<a href="javascript:;" class="sc-segment sc-middle-segment" role="tab"><span class="sc-button-inner"><label class="sc-button-label">%@%@</label></span></a>'.fmt(icon, title);
-    }).join('');    
-    
-    // now generate said HTML and then fixup class names
-    var cq = this.$().html(html).find('a.sc-segment'), hasIcon,
-      max = cq.length, names = {}, last = max-1, idx, item, width,tmp,tot=0;
-    for(idx=0;idx<max;idx++) {
-      item = items[idx];
-      names.disabled = !item[2] ; //add disabled if item is disabled
-      names['sc-last-segment'] = (idx===last);
-      names['sc-first-segment'] = (idx===0);
-      names['sc-middle-segment'] = (idx!==0) && (idx!==last);
-
-      // either get the width or autodetect from label
-      tmp = SC.$(cq.get(idx));
-      if (item[4]) {
-        width = item[4] ;
-      } else { 
-        tmp.css('width', 100000) ; //tmp set long to get full width of label..
-        width = tmp.find('label').get(0).offsetWidth;
+        icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
+      } else {
+        icon = '';
       }
-      tmp.setClass(names).css('width', width);
-
-      // collect total width
-      tot += tmp.get(0).offsetWidth;
+      
+      classes.push('sc-segment');
+      if(!item[2])
+        classes.push('disabled');
+      if(i===0)
+        classes.push('sc-first-segment');
+      if(i===(ilen-1))
+        classes.push('sc-last-segment');
+      if(i!==0 && i!==(ilen-1))
+        classes.push('sc-middle-segment');      
+      if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value))
+        classes.push('sel');
+      if(activeIndex === i) 
+        classes.push('active') ;
+      if(item[4])
+        width=item[4];
+      else
+        width=10000;
+      
+      htmlString='<a href="javascript:;" class="'+classes.join(' ')+'" style="width:'+width+'; display:inline-block" role="tab"><span class="sc-button-inner"><label class="sc-button-label">'+icon+title+'</label></span></a>';
+      context.push(htmlString);
     }
     
-    // next, we need to center the views.  pick a new left and change the 
-    // offset margin.  The CSS sets the left side to 50% so this will perma-
-    // center the content.
-    var left = 0-Math.floor(tot/2) ;
-    for(idx=0;idx<max;idx++) {
-      tmp = SC.$(cq.get(idx));
-      tmp.css('margin-left', left);
-      left += tmp.get(0).offsetWidth;
-    }
-    
-    cq = tmp = names = null; // do some cleanup
     
   },
   
