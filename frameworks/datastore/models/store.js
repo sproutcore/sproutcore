@@ -131,18 +131,33 @@ SC.Store = SC.Object.extend(
   */
   dataTypeMap: {},
   
-  
-  instantiatedRecordMap: {
+  /**
+    This hash contains all the instantiated records arranged by type.
+
+    instantiatedRecordMap: {
+      "recordTypeKey":[SC.Record, .... ],
+      ...
+    }
+
+    This property is NOT unique across all stores in the application.
     
+    @property
+    @type {Object}
+  */
+  instantiatedRecordMap: {},
+
+  // used for comparison... TBA.
+  // _compRecordTypeMap: {},
+  
+  /**
+    This is the queue of records that need to be retrieved from the server.
+
+    This property is unique across all stores in the application.
     
-  },
-  
-  _compRecordTypeMap: {},
-  
-  
-  recordsQueue: {
-    
-  },
+    @property
+    @type {Object}
+  */
+  recordsQueue: {},
   
   
   /**
@@ -155,35 +170,45 @@ SC.Store = SC.Object.extend(
   childStores: [],
 
   /**
-    This is the change set that is kept for a record. When the record is committed, this hash is
+    This is the change set that is kept for a store. When the record is committed, this hash is
     used to pass changes down to from child record dataHashes to their parents. 
     
-    The changes hash contains the following:
+    The changes array contains storeKeys that have changed. 
     
-      "created", "deleted", and "updated" are Arrays that contain change sets in the form:
-    
-        {primaryKey: primaryKey, json: json, rev: revision}
-
-      "createdGuids", "deletedGuids", and "updatedGuids" are hashes that contain 
-       the index into the arrays based on the data primaryKeyMap.
-       
     @property
-    @type {Object}
+    @type {Array}
   */
   changes: [],
   
+  /**
+    This is the change set that is kept for a store and is read by the persistent store. When the record is committed, this hash is
+    used to pass changes down to from child record dataHashes to their parents. 
+    
+    The changes object contains arrays of storeKeys that have changes. 
+    
+    persistentChanges: {
+      created: [1,2,4,...],
+      updated: [],
+      deleted: [5,7...]
+    },
+
+    @property
+    @type {Object}
+  */
   persistentChanges: {
     created: [],
     updated: [],
     deleted: []
   },
   
+  
+  
+  
   ////////////////////////////////////////////////////////////////////////////////////
   //
   //  Chained Store Handling.
   //
   ////////////////////////////////////////////////////////////////////////////////////
-  
   
   /**
     Create a child data record form this instance. Adds it to the list of child dataHashes
@@ -194,9 +219,12 @@ SC.Store = SC.Object.extend(
   createChainedStore: function() {
     var childStore = SC.Store.create({parentStore: this});
         
+    childStore.instantiatedRecordMap = {};    
     childStore.dataHashes = SC.beget(this.dataHashes);
     childStore.revisions = SC.beget(this.revisions);
-
+    
+    childStore.reset();
+    
     return childStore;
   },
   
@@ -262,12 +290,17 @@ SC.Store = SC.Object.extend(
     var dataHashes = this.dataHashes;
     var latestRevisions = this.latestRevisions;
     var revisions = this.revisions;
+    var persistentChanges = this.persistentChanges;
+
+    var recKeyTypeMap = this.recKeyTypeMap;
     var instantiatedRecordMap = this.instantiatedRecordMap;
 
     // Get the childStore's properties.
     var changes = childStore.changes;
     var child_dataHashes = childStore.dataHashes;
     var child_revisions = childStore.revisions;
+    var child_persistentChanges = childStore.persistentChanges;
+    var child_instantiatedRecordMap = childStore.instantiatedRecordMap;
 
     // Copy over changes from the childStore to this store.
     for(var i=0, iLen=changes.length; i<iLen; i++) {
@@ -277,15 +310,30 @@ SC.Store = SC.Object.extend(
       // Only do the copy if the revision in childStore is greater than this store's 
       // revision or it is equal to the latest revision.
       if(rev >= revisions[storeKey] && rev === latestRevisions[storeKey]) {
-        dataHashes[storeKey] = child_dataHashes[storeKey];
+        var dataHash = child_dataHashes[storeKey];
+        dataHashes[storeKey] = dataHash;
         revisions[storeKey] = rev;
-        
-        
-        
+
+        var recType = recKeyTypeMap[storeKey];
+        var recTypeKey = SC.guidFor(recType);
+        if(instantiatedRecordMap[recTypeKey] && instantiatedRecordMap[recTypeKey][storeKey]) {
+          var rec = instantiatedRecordMap[recTypeKey][storeKey];
+          rec._attributes = dataHash;
+          rec._cachedAttributes = null;
+        }
+        if(child_instantiatedRecordMap[recTypeKey] && child_instantiatedRecordMap[recTypeKey][storeKey]) {
+          child_instantiatedRecordMap[recTypeKey][storeKey].set('isEditable', NO);
+        }
+
       } else {
         isSuccess = NO;
       }
     }
+
+    // Copy over the persisted changes.
+    persistentChanges.created.concat(child_persistentChanges.created);
+    persistentChanges.updated.concat(child_persistentChanges.updated);
+    persistentChanges.deleted.concat(child_persistentChanges.deleted);
 
     // Reset the childStore so that it matches up with this store.
     childStore.reset();
@@ -302,10 +350,26 @@ SC.Store = SC.Object.extend(
       this.dataHashes = SC.beget(parentStore.dataHashes);
       this.revisions = SC.beget(parentStore.revisions);
     }
-    childStore.changes = []; 
-    childStore.persistentChanges = {
+    this.persistentChanges = {
       created: [], updated: [], deleted: []
     };
+    this.changes = []; 
+
+    var instantiatedRecordMap = this.instantiatedRecordMap;
+
+    // TODO: Still need to restore instantiated records here. They still retain the discarded datahash.
+    // Another option would be to share a global record instance for each dataHash across stores, but that seems a bit bad but WAY less work.
+    var dataHashes = this.dataHashes;
+    for(var key in instantiatedRecordMap)
+    {
+      var typeArray = instantiatedRecordMap[key];
+      for(var i=0, iLen=typeArray.length; i<iLen; i++) {
+        var rec = typeArray[i];
+        rec._attributes = dataHashes[rec._storeKey];
+        rec._cachedAttributes = null;
+      }
+    }
+    
     this.set('hasChanges', NO);
   },
   
@@ -384,7 +448,7 @@ SC.Store = SC.Object.extend(
       recType = recordType;
     }
     if(!primaryKey && !disregardPrimaryKeys) {
-        primaryKey = recordType.primaryKey();
+        primaryKey = recordType.primaryKey;
     }
 
     SC.Benchmark.start('updateRecords: loop');
@@ -470,9 +534,7 @@ SC.Store = SC.Object.extend(
         this.invokeOnce(this._didRetrieveRecords);
       }
     
-    SC.Benchmark.end('updateRecords: post');
-
-    // Return the updated/changes storeKeys.
+    // Return the updated/changed storeKeys.
     return ret;
   },
   
@@ -512,8 +574,14 @@ SC.Store = SC.Object.extend(
     this.set('hasChanges', (changes.length > 0));
     return isSuccess;
   },
-  
 
+  /** 
+    Given a storeKey, return a writeable copy of the dataHash.
+    
+    @param {Integer} storeKey The dataHash's storeKey.
+    
+    @returns {Object} Returns a new instance of the dataHash.
+  */
   getWriteableDataHash: function(storeKey) {
     var ret = this.getDataHash(storeKey);
     if(ret === this.get('parentStore').dataHashes[storeKey])
@@ -523,9 +591,16 @@ SC.Store = SC.Object.extend(
     return ret;
   },
 
+  /** 
+    Given a storeKey, returns the dataHash.
+    
+    @param {Integer} storeKey The dataHash's storeKey.
+    
+    @returns {Object} Returns the dataHash.
+  */
   getDataHash: function(storeKey)
   {
-    if(storeKey) {
+    if(storeKey !== undefined) {
       return this.dataHashes[storeKey];
     }
     return null;
@@ -539,7 +614,7 @@ SC.Store = SC.Object.extend(
 
   
   /**
-    Creates or updates the store's dataHashes then returns an array of SC.Record instances.
+    Creates the store's dataHashes then returns an array of SC.Record instances.
     
     dataArr (required) 
       Array of JSON-compatible hashes.
@@ -585,6 +660,31 @@ SC.Store = SC.Object.extend(
     return ret;
   },
   
+  /**
+    Creates one record and returns it.
+    
+    dataHash (required) 
+     JSON-compatible hash.
+    
+    recordType (optional) 
+      The SC.Record extended class that you want to use. If none is specified, it is assumed to be a base SC.Record.
+    
+    primaryKey  (optional) 
+      This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used.
+    
+    @param {Object} dataHash (required) AJSON-compatible hash.
+    @param {SC.Record} recordType (optional) he SC.Record extended class that you want to use. If none is specified, it is assumed to be a base SC.Record.
+    @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used.
+
+    @returns {SC.Record} Returns the created record.
+  */
+  createRecord: function(dataHash, recordType, primaryKey)
+  {
+    var records = this.createRecords([dataHash], recordType, primaryKey);
+    if(records && records[0]) return records[0];
+    return null;
+  },
+
   /**
     This is used for bulk loading from a persistent store. 
     
@@ -648,7 +748,8 @@ SC.Store = SC.Object.extend(
   makeRecordsEditable: function(records) {
     if(!records) return;
     for(var i=0, iLen=records.length; i<iLen; i++) {
-      record._atttributes = this.getWriteableDataHash(this.storeKeyFor(record.get(record.primaryKey())));
+      var record = records[i];
+      record._attributes = this.getWriteableDataHash(this.storeKeyFor(record.get(record.primaryKey)));
       record.set('isEditable', YES);
     }
   },
@@ -672,9 +773,9 @@ SC.Store = SC.Object.extend(
   */
   recordDidChange: function(record) {
     if(record) {
-      var primaryKey = record.primaryKey();
-      var recordType = record.recordType();
+      var primaryKey = record.primaryKey;
       var storeKey = this.storeKeyFor(record.get(primaryKey));
+      var recordType = this.recKeyTypeMap[storeKey];
       this.updateDataHashes([record._attributes], recordType, primaryKey, NO);
     }
   },
@@ -691,6 +792,10 @@ SC.Store = SC.Object.extend(
     return this.retrieveRecordForGuid(guid, recordType);
   },
 
+  /** 
+    This method is called when there are new records from the persistent 
+    store that needs to be migrated.
+  */
   didRetrieveRecords: function() {
     
     var records = this._retrivedRecords;
@@ -701,18 +806,28 @@ SC.Store = SC.Object.extend(
     
     for(var i=0, iLen=records.length; i<iLen; i++) {
       var record = records[i];
-      var guid = record.get(record.primaryKey());
-      var storeKey = this.storeKeyFor(guid);
+      var guid = record.get(record.primaryKey);
+      var storeKey = record._storeKey;
       var recTypeKey = SC.guidFor(this.recKeyTypeMap[storeKey]);
-      if(primaryKey && recType) {
+      if(guid && recType) {
         record._attributes = this.getDataHash(guid);
         this.instantiatedRecordMap[recTypeKey][storeKey] = record;
+        this.replaceGuid(storeKey, guid);
         recordQueue.removeObject(guid);
         record.set('status', RECORD_LOADED);
+        record.set('newRecord', NO);
       }
     }
   },
 
+  /** 
+    Given a storeKey, materialize the dataHash as part of a record.
+
+    @private
+    @param {Integer} storeKey The storeKey for the dataHash.
+
+    @returns {SC.Record} Returns a record instance.
+  */
   _materializeRecord: function(storeKey) {
     var ret = null;
     if(storeKey !== undefined) {
@@ -738,6 +853,16 @@ SC.Store = SC.Object.extend(
     return ret;
   },
 
+  /**
+    Given an array of records, delete them and when the store is commmited, probagate to the persistent store.
+  
+    @private
+    
+    @param {Array} records Array of SC.Record instances.
+    @param {Boolean} removeDataHashes If YES, delete all the way to the persistent store.
+
+    @returns {Boolean} Returns YES if the delete operation is successful.
+  */
   _removeRecords: function(records, removeDataHashes) {
     if(!records) return;
     var storeKeys = [];
@@ -760,18 +885,28 @@ SC.Store = SC.Object.extend(
   //
   ////////////////////////////////////////////////////////////////////////////////////
 
+  /**
+    Given a guid and a recordType, retrieve the record. 
+    
+    If it does not exist, go all the way back to the persistent store.
+    
+    @param {String} guid The guid for the desired record.
+    @param {SC.Record} recordType The record type.
+
+    @returns {SC.Record} Returns a record instance.
+  */
   find: function(guid, recordType)
   {
     var storeKey = this.primaryKeyMap[guid];
-    var rec = null;
-    if(storeKey) {
-      rec = this._materializeRecord(storeKey);
+    var ret = null;
+    if(storeKey !== undefined) {
+      ret = this._materializeRecord(storeKey);
     } else {
       var parentStore = this.get('parentStore');
       if(guid && parentStore) {
         recordType = parentStore.retrieveRecordForGuid(guid, recordType);
         if(recordType) {
-          rec = recordType.create({
+          ret = recordType.create({
             _attributes: {},
             _storeKey: storeKey,
             parentStore: this, 
@@ -782,9 +917,17 @@ SC.Store = SC.Object.extend(
         }
       }
     }
-    return rec;
+    return ret;
   },
   
+  /**
+    Given a filter and a recordType, retrieve matching records. 
+    
+    @param {SC.Filter} filter The filter containing a query.
+    @param {SC.Record} recordType The record type.
+
+    @returns {Array} Returns an array of matched record instances.
+  */
   findAll: function(filter, recordType)
   {
     return [];
@@ -813,7 +956,7 @@ SC.Store = SC.Object.extend(
   */
   storeKeyFor: function(guid) {
     var storeKey = this.primaryKeyMap[guid];
-    if(!storeKey) {
+    if(storeKey === undefined) {
       storeKey = this.primaryKeyMap[guid] = this._generateStoreKey(); 
     }
     return storeKey;
@@ -825,7 +968,7 @@ SC.Store = SC.Object.extend(
     @returns {Integer} The storeKey.
   */
   replaceGuid: function(storeKey, guid) {
-    if(storeKey) {
+    if(storeKey !== undefined) {
       this.stokeKeyMap[storeKey] = guid;
       this.primaryKeyMap[guid] = storeKey;
     }
@@ -838,8 +981,8 @@ SC.Store = SC.Object.extend(
     @returns {Integer} A new storeKey.
   */
   _generateStoreKey: function() {
-    var storeKey = this.nextStoreIndex;
-    this.nextStoreIndex++;
+    var storeKey = SC.Store.prototype.nextStoreIndex;
+    SC.Store.prototype.nextStoreIndex++;
     return storeKey;
   }
 }) ;
@@ -854,24 +997,22 @@ SC.Store._getDefaultStore = function()
   return store;
 };
 
-SC.Store.updateRecords = function(/*attrs from old api*/)
+SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded)
 {
-  return this._getDefaultStore().updateRecords(/*asd*/);
+  return this._getDefaultStore().loadRecords(dataHashes, recordType);
 };
 
-SC.Store.find = function(primaryKey)
+SC.Store.find = function(guid, recordType)
 {
-  return this._getDefaultStore().find(primaryKey);
+  return this._getDefaultStore().find(guid, recordType);
 };
 
-SC.Store.findAll = function(query)
+SC.Store.findAll = function(filter)
 {
-  return this._getDefaultStore().findAll(query);
+  return this._getDefaultStore().findAll(filter, SC.Record);
 };
 
 SC.Store.prototype.addDataHash = SC.Store.prototype.updateDataHash;
 SC.Store.prototype.addDataHashes = SC.Store.prototype.updateDataHashes;
-
-
 SC.Store.prototype.nextStoreIndex = 0;
 SC.Store.prototype.dataHashesLen = 0;

@@ -38,6 +38,12 @@ sc_require('models/store') ;
   @extends SC.Object
   @since SproutCore 1.0
 */
+
+var RECORD_EMPTY = 0;
+var RECORD_LOADING = 1;
+var RECORD_LOADED = 2;
+var RECORD_ERROR = 3;
+
 SC.Record = SC.Object.extend(
 /** @scope SC.Record.prototype */ {
   
@@ -48,7 +54,7 @@ SC.Record = SC.Object.extend(
   /**
     Override this with the properties you want the record to manage.
     
-    @field
+    @property
     @type {Array}
   */
   properties: ['guid'],
@@ -57,16 +63,25 @@ SC.Record = SC.Object.extend(
     This is the primary key used to distinguish records.  If the keys
     match, the records are assumed to be identical.
     
-    @field
+    @property
     @type {String}
   */
   primaryKey: 'guid',
   
   /**
+    This is the store key for the record, it is used to link it back to the dataHash. If a record is reused, this value will be 
+    replaced.
+    
+    @property
+    @type {Integer}
+  */
+  _storeKey: null,
+  
+  /**
     When a new empty record is created, this will be set to true.  It will be
     set to NO again the first time the record is committed.
     
-    @field
+    @property
     @type {Boolean}
   */
   newRecord: NO,
@@ -74,17 +89,25 @@ SC.Record = SC.Object.extend(
   /**
     Set to non-zero whenever the record has uncommitted changes.
     
-    @field
+    @property
     @type {Number}
   */
   changeCount: 0,
   
   /**
+    The record's status changes as it is loaded from the server.
+    
+    @property
+    @type {Number}
+  */
+  status: RECORD_EMPTY,
+  
+    /**
     Set to true when the record is deleted.  Will cause it to be removed
     from any member collections.  Once no more objects hold references to it,
     the property will be disabled.
     
-    @field
+    @property
     @type {Boolean}
   */
   isDeleted: NO,
@@ -92,7 +115,7 @@ SC.Record = SC.Object.extend(
   /**
     Set to YES when a record is editable. Set to NO when committed.
     
-    @field
+    @property
     @type {Boolean}
   */
   isEditable: NO,
@@ -108,7 +131,7 @@ SC.Record = SC.Object.extend(
     If you are using SC.Server, then put a '%@' where you expect the 
     primaryKey to be inserted to identify the record.
     
-    @field
+    @property
     @type {String}
   */
   resourceURL: null,
@@ -118,7 +141,7 @@ SC.Record = SC.Object.extend(
     Server.  Setting it to the Store will make refresh and commit effectively
     null-ops.
     
-    @field
+    @property
     @type {SC.Store or SC.Server}
   */
   parentStore: SC.Store,
@@ -127,7 +150,7 @@ SC.Record = SC.Object.extend(
     The URL where this record can be refreshed. Usually you would send the value
     for this URL from the server in response to requests from Sproutcore.
     
-    @field
+    @property
     @type {String}
   */
   refreshURL: null,
@@ -136,7 +159,7 @@ SC.Record = SC.Object.extend(
     The URL where this record can be updated. Usually you would send the value
     for this URL from the server in response to requests from Sproutcore.
     
-    @field
+    @property
     @type {String}
   */
   updateURL: null,
@@ -145,7 +168,7 @@ SC.Record = SC.Object.extend(
     The URL where this record can be destroyed. Usually you would send the value
     for this URL from the server in response to requests from Sproutcore.
     
-    @field
+    @property
     @type {String}
   */
   destroyURL: null,
@@ -174,6 +197,20 @@ SC.Record = SC.Object.extend(
     var parentStore = this.get('parentStore');
     if(parentStore) {
       parentStore.commitChanges(); 
+    }
+  },
+  
+  /**
+    Invoked by the UI to tell the model this record should be saved. Override
+    to support server changes.  Note that this is used to support both the
+    create and update components of CRUD.
+  */
+  discard: function() {  
+    // no longer a new record once changes have been committed.
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      parentStore.discardChanges(); 
+      this._cachedAttributes = null;
     }
   },
   
@@ -268,7 +305,7 @@ SC.Record = SC.Object.extend(
   recordDidChange: function() {
     var parentStore = this.get('parentStore');
     if(parentStore) {
-      parentStore.recordDidChange(this, this.recordType());
+      parentStore.recordDidChange(this);
     }
     this.incrementProperty('changeCount') ;
   },
@@ -473,7 +510,7 @@ SC.Record.mixin(
       if (typeof(guid) == 'object') {
         args = SC.$A(arguments) ; args.push(this) ;
         return (ret && ret.length > 0) ? ret[0] : null ;
-      } else return parentStore.find.apply(parentStore,args)  ;SC.Store._getRecordFor(guid,this) ;
+      } else return parentStore.find.apply(parentStore,args);
     }
     return null;
   },
@@ -525,15 +562,7 @@ SC.Record.mixin(
       }
       return this[privateKey] ;
     }.property();
-  },
-  
-  // This will create a new record with the type.  Include the data and an
-  // optional data source.
-  newRecord: function(attrs, parentStore) {
-    if (!parentStore) return null;
-    return parentStore.createRecords([attrs], this.recordType(), this.primaryKey());
   }
-  
   
 }) ;
 
@@ -574,10 +603,6 @@ SC.Record.Flag = function(value, direction) {
 
 SC.Record.Bool = SC.Record.Flag ;
 
-var RECORD_EMPTY = 0;
-var RECORD_LOADING = 1;
-var RECORD_LOADED = 2;
-var RECORD_ERROR = 3;
 
 
 
