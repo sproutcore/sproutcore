@@ -64,12 +64,12 @@ SC.Record = SC.Object.extend(
   
   /**
     When a new empty record is created, this will be set to true.  It will be
-    set to false again the first time the record is committed.
+    set to NO again the first time the record is committed.
     
     @field
     @type {Boolean}
   */
-  newRecord: false,
+  newRecord: NO,
   
   /**
     Set to non-zero whenever the record has uncommitted changes.
@@ -87,7 +87,16 @@ SC.Record = SC.Object.extend(
     @field
     @type {Boolean}
   */
-  isDeleted: false,
+  isDeleted: NO,
+  
+  /**
+    Set to YES when a record is editable. Set to NO when committed.
+    
+    @field
+    @type {Boolean}
+  */
+  isEditable: NO,
+  
   
   // ...............................
   // CRUD OPERATIONS
@@ -112,7 +121,7 @@ SC.Record = SC.Object.extend(
     @field
     @type {SC.Store or SC.Server}
   */
-  dataSource: SC.Store,
+  parentStore: SC.Store,
 
   /**
     The URL where this record can be refreshed. Usually you would send the value
@@ -141,34 +150,18 @@ SC.Record = SC.Object.extend(
   */
   destroyURL: null,
 
-
-  init: function()
-  {
-    sc_super();
-    
-    var primaryKeyName = this.get('primaryKey');
-    if (!this.get(primaryKeyName))
-    {
-      // no primary key passed for a new record.
-      // we'll need to create one so that it can be cached in SC.Store
-      // if this isn't desired behavior, override generateTempPrimaryKey to return false.
-      var value = this.generateTempPrimaryKey();
-      if (value) this.set(primaryKeyName, value);
-    }
-  },
-
-  generateTempPrimaryKey: function()
-  {
-    return "@" + SC.guidFor(this);
-  },
-
   /**
     Invoked by the UI to request the model object be updated from the server.
     
     Override to actually support server changes.
   */
   refresh: function() { 
-    if (!this.get('newRecord')) this.dataSource.refreshRecords([this]); 
+    if (!this.get('newRecord')) {
+      var parentStore = this.get('parentStore');
+      if(parentStore) {
+        parentStore.refreshRecords([this]); 
+      }
+    }
   },
   
   /**
@@ -178,18 +171,39 @@ SC.Record = SC.Object.extend(
   */
   commit: function() {  
     // no longer a new record once changes have been committed.
-    if (this.get('newRecord')) {
-      this.dataSource.createRecords([this]) ;
-    } else {
-      this.dataSource.commitRecords([this]) ;
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      parentStore.commitChanges(); 
     }
   },
   
   /**
     This can delete the record.  The non-server version just sets isDeleted.
   */
-  destroy: function() { this.dataSource.destroyRecords([this]) ; },
+  destroy: function() { 
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      parentStore.destroyRecords([this]); 
+    }
+  },
 
+  /**
+    This can delete the record.  The non-server version just sets isDeleted.
+  */
+  unload: function() { 
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      parentStore.unloadRecords([this]); 
+    }
+  },
+  
+  edit: function() {
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      parentStore.makeRecordsEditable([this]); 
+    }
+  },
+  
   // ...............................
   // ATTRIBUTES
   //
@@ -220,7 +234,7 @@ SC.Record = SC.Object.extend(
       ret = (attr) ? attr[key] : undefined ;
       ret = ret || this[key] ; // also check properties...
       if (ret !== undefined) {
-        var recordType = this._getRecordType(key+'Type') ;
+        var recordType = this.recordType(key+'Type') ;
         ret = this._propertyFromAttribute(ret, recordType) ;
       }
       this._cachedAttributes[key] = ret ;
@@ -236,7 +250,9 @@ SC.Record = SC.Object.extend(
     @returns {Object} the value of the key, or null if it doesn't exist
   **/
   writeAttribute: function(key, value) {
-    var recordType = this._getRecordType(key+'Type') ;
+    if(!this.get('isEditable')) return value;
+    
+    var recordType = this.recordType(key+'Type') ;
     var ret = this._attributeFromProperty(value, recordType) ;
     if (!this._attributes) this._attributes = {} ;
     this._attributes[key] = ret ;
@@ -250,45 +266,11 @@ SC.Record = SC.Object.extend(
     and needing a commit to the server.
   */
   recordDidChange: function() {
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      parentStore.recordDidChange(this, this.recordType());
+    }
     this.incrementProperty('changeCount') ;
-  },
-  
-  /**
-    This will take the incoming set of attributes and update internal set.
-    
-    Note that if the attributes have never been set, then the object you pass 
-    in may become the new set of attribute.  This assumes the attrs you pass 
-    in will not be modified later.  This method also assumes it is coming from 
-    the server, so the change count will be reset.
-  
-    @param {Object} newAttrs the new attributes for the object
-    @param {Boolean} replace should the overwrite the in-place attributes, or  replace them entirely
-    @returns {Boolean} isLoaded is the object loaded?
-  **/
-  updateAttributes: function(newAttrs, replace, isLoaded) {
-    var changed = false ;
-    if (this._attributes && (replace !== true)) {
-      for(var key in newAttrs) {
-        if (!newAttrs.hasOwnProperty(key)) continue ;
-        if (!changed) changed = (this._attributes[key] != newAttrs[key]) ;
-        this._attributes[key] = newAttrs[key] ;
-      }
-    } else {
-      this._attributes = newAttrs ;
-      changed = true ;
-    }
-    
-    this._cachedAttributes = {} ; // reset cache.
-    
-    if (changed) {
-      this.beginPropertyChanges() ;
-      this.set('isLoaded',isLoaded) ;
-      this.set('changeCount',0) ;
-      this.allPropertiesDidChange() ;
-      this.endPropertyChanges() ;
-
-      if (SC.Store) SC.Store.recordDidChange(this) ;
-    }
   },
   
   /**
@@ -370,7 +352,7 @@ SC.Record = SC.Object.extend(
     }
   },
   
-  _getRecordType: function(recordTypeKey) {
+  recordType: function(recordTypeKey) {
     var type = this[recordTypeKey] ;
     if (type && (typeof(type) == "string")) {
       type = eval(type) ; // look up type.
@@ -378,140 +360,7 @@ SC.Record = SC.Object.extend(
     }
     return type ;
   },
-  
-  // ...............................
-  // SORTING AND COMPARING RECORDS
-  //
-  
-  valueForSortKey: function(key) { return this.get(key); },
 
-  /**
-    Compares the receiver to the passed object, using the array of keys to
-    determine the order.  You can use this method as part of a call to sort()
-    on an array.
-    
-    @param object {SC.Record} the other record
-    @param orderBy {Array} array of one or more keys. Optional.
-    @returns {Number} -1, 0, 1
-  */
-  compareTo: function(object, orderBy) {
-    if (!orderBy) orderBy = [this.get('primaryKey')] ;
-    var ret = SC.Record.SORT_SAME ; var loc ;
-    for(loc=0; (ret == SC.Record.SORT_SAME && loc<orderBy.length); loc++) {
-      var key = orderBy[loc] ;
-      
-      // determine order
-      var asc = true ;
-      if (key.match(/ DESC$/)) { 
-        asc = false; key = key.slice(0,-5); 
-      } else if (key.match(/ ASC$/)) {
-        asc = true; key = key.slice(0,-4); 
-      }
-
-      // if key contains a .dot then we need to get the value for the key.
-      var keys = key.split('.') ;
-      key = keys.shift() ;
-      
-      // get values for key.
-      var a = this.valueForSortKey(key) ;
-      var b = object.valueForSortKey(key) ;
-      
-      // convert the values to comparable values.
-      a = this._comparableValueFor(a,keys) ;
-      b = this._comparableValueFor(b,keys) ;
-      
-      // compare values
-      if (asc) {
-        ret = (a<b) ? SC.Record.SORT_BEFORE : ((a>b) ? SC.Record.SORT_AFTER : SC.Record.SORT_SAME) ;
-      } else {
-        ret = (a>b) ? SC.Record.SORT_BEFORE : ((a<b) ? SC.Record.SORT_AFTER : SC.Record.SORT_SAME) ;
-      }
-    }
-    return ret ;
-  },
-  
-  _comparableValueFor: function(value, keys) {
-    if (keys && keys.length > 0) {
-      var key ; var loc = 0 ;
-      while(value && (loc < keys.length)) {
-        key = keys[loc]; 
-        value = (value.get) ? value.get(key) : value[key] ;
-        loc++ ;
-      }
-    
-    // handle records.
-    } else value = SC.guidFor(value) ;
-    return value ;
-  },
-  
-  /**  
-    Used to match records to a set of conditions.  By default, this will
-    call matchCondition on each condition.
-    
-    @param conditions {Hash} hash of conditions
-    @returns {Boolean} true if the receiver matches the hash of conditions.
-  */
-  matchConditions: function(conditions) {
-    for(var key in conditions) {
-      var value = conditions[key] ;
-      if (value instanceof Array) {
-        var loc = value.length ; var isMatch = false ;
-        while(--loc >= 0) {
-          if (this.matchCondition(key,value[loc])) isMatch = true ;
-        }
-        if (!isMatch) return false ;
-      } else if (!this.matchCondition(key,value)) return false ;      
-    }
-    return true ;
-  },
-
-  /**
-    Returns true if the value of key matches the passed value.  This is used
-    by matchConditions().
-     
-    @param key {String} the key name
-    @param value {Object} the value to match agains
-    @returns {Boolean} true if matched
-  */
-  matchCondition: function(key, value) {
-    var recValue = this.get(key) ;    
-    var isMatch ;
-    var loc ;
-
-    // The passed in value appears to be another record instance.
-    // just check for equality with the record as an optimization.
-    if (value && value.primaryKey) { 
-      if (SC.typeOf(recValue) === SC.T_ARRAY) {
-        loc = recValue.length ;
-        while(--loc >= 0) { 
-          if (recValue === value) return true; 
-        }
-      } else return recValue === value ;
-
-    // Otherwise, do a more in-depth compare
-    } else { 
-      if (SC.typeOf(recValue) === SC.T_ARRAY) {
-        loc = recValue.length ;
-        while(--loc >= 0) { 
-          if (this._matchValue(recValue[loc],value)) return true; 
-        }
-      } else return this._matchValue(recValue,value) ;
-    }
-    return false ;
-  },
-
-  _matchValue: function(recValue,value) {
-    // if we get here with recValue as a record, we must compare by guid, so grab it
-    if (recValue && recValue.primaryKey) recValue = recValue.get(recValue.get('primaryKey')) ;
-    var stringify = (value instanceof RegExp);
-    if (stringify)  {
-      if (recValue == null) return false ;
-      return recValue.toString().match(value) ;
-    } else {
-       return recValue==value ;
-    }
-  },
-  
   // ...............................
   // PRIVATE
   //
@@ -527,79 +376,8 @@ SC.Record = SC.Object.extend(
     }) ;
     return this.constructor.toString() + '({ ' + ret.join(', ') + ' })' ;
   },
-  
-  propertyObserver: function(observing,target,key,value) {
-    //if ((target == this) && this.properties.include(key)) this.incrementProperty('changeCount') ;
-  },
-  
+    
   concatenatedProperties: ['properties'],
-
-  /**
-    This method should be used by the server to push updated data into a
-    record.  The data should be a hash with strings and arrays.  This will
-    use any types you define to convert the values into their correct type.
-    Note that references to external objects should be a string with the
-    primaryKey value of the record.
-  
-    @param data {Hash} the data hash
-    @param isLoaded {Boolean} true if the hash contains a full set of data for the record vs just a summary.
-    @returns {void}
-  */  
-  updateProperties: function(data,isLoaded) {
-    var rec = this ;
-    
-    // for each property, if there is a value in the passed data, convert it to
-    // the configured type.
-    this.beginPropertyChanges() ;
-    if (isLoaded) this.set('isLoaded',true) ;
-    try {
-      var loc = this.properties.length ;
-      while(--loc >= 0) {
-        var prop = this.properties[loc] ;
-        var newValue = data[prop] ;
-
-        //if (prop == 'tags') debugger ;
-        
-        // handle null values
-        if (newValue === null) {
-          if (rec.get(prop) != null) rec.set(prop,null) ;
-          
-        // handle defined, non-null values
-        } else if (newValue !== undefined) {
-          
-          var oldValue = rec.get(prop) ;            
-          
-          // get type information
-          var recordType = rec.get(prop + 'Type') ;
-          var typeConverter = this._pickTypeConverter(recordType) ;
-          if (typeConverter) recordType = null ;
- 
-          // if array, convert each object.
-          var isSame ; var rec = this ;
-          if (newValue instanceof Array) {
-            newValue = newValue.map(function(nv) {
-              return rec._convertValueIn(nv,typeConverter,recordType) ;
-            }) ;
-            isSame = newValue.isEqual(oldValue) ;
-          } else {
-            newValue = this._convertValueIn(newValue,typeConverter,recordType);
-            isSame = newValue == oldValue ;
-          }
-          
-          // set value
-          if (!isSame) this.set(prop,newValue) ;
-           
-        }
-      }
-    }
-    
-    catch(e) {
-      console.log(SC.guidFor(this) + ': Exception raised on UPDATE: ' + e) ;
-    }
-
-    this.endPropertyChanges() ;   
-    this.set('changeCount',0) ;        
-  },
   
   // this is used for the update.  It should return a hash with current state
   // of the record.  This uses the types to automatically marshall properties.
@@ -661,12 +439,6 @@ SC.Record = SC.Object.extend(
     } else return value ;
   },
   
-  // used by the store
-  _storeKey: function() { 
-    // if (!this.constructor._storeKey) debugger ;
-    return this.constructor._storeKey(); 
-  },
-  
   // Store Cleaner function
   _cleanRecordInStore: function(){
     var cleanCount = this.get('changeCount');
@@ -675,6 +447,12 @@ SC.Record = SC.Object.extend(
     }
   }.observes('changeCount')
      
+  // // used by the store
+  // _storeKey: function() { 
+  //   // if (!this.constructor._storeKey) debugger ;
+  //   return this.constructor._storeKey(); 
+  // },
+  
 }) ;
 
 // Class Methods
@@ -689,41 +467,29 @@ SC.Record.mixin(
     pass in either a simple guid or one or more hashes of conditions.
   */
   find: function(guid) {
-    var args ;
-    if (typeof(guid) == 'object') {
-      args = SC.$A(arguments) ;
-      args.push(this) ;
-      var ret = SC.Store.findRecords.apply(SC.Store,args) ;
-      return (ret && ret.length > 0) ? ret[0] : null ;
-    } else return SC.Store._getRecordFor(guid,this) ;
-  },
-  
-  findOrCreate: function(guid) {
-    var ret = this.find(guid) ;
-    if (!ret) {
-      var opts = (typeof(guid) == "object") ? guid : { guid: guid } ;
-      ret = this.create(opts) ;
-      SC.Store.addRecord(ret) ;
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      var ret = parentStore.find.apply(parentStore,args) ;
+      if (typeof(guid) == 'object') {
+        args = SC.$A(arguments) ; args.push(this) ;
+        return (ret && ret.length > 0) ? ret[0] : null ;
+      } else return parentStore.find.apply(parentStore,args)  ;SC.Store._getRecordFor(guid,this) ;
     }
-    return ret ;
+    return null;
   },
+
+
   
   // Same as find except returns all records matching the passed conditions.
   findAll: function(filter) {
-    if (!filter) filter = {} ;
-    args = SC.$A(arguments) ; args.push(this) ; // add type
-    return SC.Store.findRecords.apply(SC.Store,args) ;  
+    var ret;
+    var args = SC.$A(arguments) ; args.push(this) ; // add type
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      ret = parentStore.find.apply(parentStore,args) ;
+    }
+    return ret;
   },
-  
-  // Returns a collection with any passed settings and the receiver as a 
-  // record type.
-  collection: function(opts) {
-    if (!opts) opts = {} ;
-    opts.recordType = this;
-    return SC.Collection.create(opts) ;
-  },
-  
-  /// POSSIBLY REMOVE?
   
   // defines coreRecordType as the first level of extension from SC.Record.
   // e.g. for SC.Record > Contact > Person,  the core record type is Contact.
@@ -733,11 +499,6 @@ SC.Record.mixin(
     return ret ;
   },  
 
-  // used by the store
-  _storeKey: function() {
-    return (this.coreRecordType) ? SC.guidFor(this.coreRecordType) : SC.guidFor(this) ;
-  },
-  
   primaryKey: function() { return this.prototype.primaryKey; },
 
   // this is set by extend to point to the core record type used to store
@@ -768,19 +529,12 @@ SC.Record.mixin(
   
   // This will create a new record with the type.  Include the data and an
   // optional data source.
-  newRecord: function(attrs,dataSource) {
-    if (!dataSource) dataSource = SC.Store ;
-    var rec = this.create({ dataSource: dataSource }) ;
-    rec.beginPropertyChanges();
-    rec.set('newRecord',true);
-    for(var key in attrs) {
-      if (attrs.hasOwnProperty(key)) rec.set(key,attrs[key]) ;
-    }
-    rec.endPropertyChanges() ;
-    SC.Store.addRecord(rec) ;
-    return rec; 
+  newRecord: function(attrs, parentStore) {
+    if (!parentStore) return null;
+    return parentStore.createRecords([attrs], this.recordType(), this.primaryKey());
   }
-    
+  
+  
 }) ;
 
 SC.Record.newObject = SC.Record.newRecord; // clone method
@@ -815,8 +569,16 @@ SC.Record.Flag = function(value, direction) {
     return value = (value) ? 't' : 'f' ;
   } else if (typeof(value) == "string") {
     return !('false0'.match(value.toLowerCase())) ;
-  } else return (value) ? true : false ;
+  } else return (value) ? YES : NO ;
 }.typeConverter() ;
 
 SC.Record.Bool = SC.Record.Flag ;
+
+var RECORD_EMPTY = 0;
+var RECORD_LOADING = 1;
+var RECORD_LOADED = 2;
+var RECORD_ERROR = 3;
+
+
+
 
