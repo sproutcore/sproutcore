@@ -622,7 +622,7 @@ function push(result, actual, expected, message) {
 	message = message || (result ? "okay" : "failed");
 	config.assertions.push({
 		result: result,
-		message: result ? message + ": " + expected : message + ", expected: " + jsDump.parse(expected) + " result: " + jsDump.parse(actual)
+		message: result ? message + ": " + jsDump.parse(expected) : message + ", expected: " + jsDump.parse(expected) + " result: " + jsDump.parse(actual)
 	});
 }
 
