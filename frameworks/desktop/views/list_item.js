@@ -1,8 +1,11 @@
-// ========================================================================
-// SproutCore -- JavaScript Application Framework
-// Copyright ©2006-2008, Sprout Systems, Inc. and contributors.
-// Portions copyright ©2008 Apple, Inc.  All rights reserved.
-// ========================================================================
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            portions copyright @2009 Apple, Inc.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
+sc_require('mixins/collection_item');
 
 SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
@@ -22,14 +25,17 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   @extends SC.View
   @extends SC.Control
   @extends SC.InlineEditorDelegate
+  @extends SC.CollectionItem
   @extends SC.Editable
-  @author  Charles Jolley  
+  @extends SC.StaticLayout
+  
   @since SproutCore 1.0
 */
-SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
+SC.ListItemView = SC.View.extend(SC.Control, 
+    SC.InlineEditorDelegate, SC.CollectionItem, SC.StaticLayout,
 /** @scope SC.ListItemView.prototype */ {
   
-  classNames: 'sc-list-item-view sc-collection-item'.w(),
+  classNames: ['sc-list-item-view'],
   
   // ..........................................................
   // KEY PROPERTIES
@@ -150,7 +156,8 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     
     // handle label -- always invoke
     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
-    var label = (labelKey && content && content.get) ? content.get(labelKey) : null ;
+    var label = (labelKey && content && content.get) ? content.get(labelKey) : content ;
+    if (label && SC.typeOf(label) !== SC.T_STRING) label = label.toString();
     if (this.get('escapeHTML')) {
       label = SC.RenderContext.escapeHTML(label);
     }

@@ -7,6 +7,13 @@
 
 /*global module test htmlbody ok equals same stop start */
 
+var pane = SC.ControlTestPane.design()
+  .add("basic", SC.ListItemView.design({ 
+    content: "Basic List Item"
+  })) ;
+
+pane.show();
+
 // ..........................................................
 // Test Basic Setup
 // 
