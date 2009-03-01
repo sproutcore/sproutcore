@@ -31,6 +31,10 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
   
   classNames: 'sc-list-item-view sc-collection-item'.w(),
   
+  // ..........................................................
+  // KEY PROPERTIES
+  // 
+  
   /**
     The content object the list item will display.
   */
@@ -77,6 +81,14 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
   contentValueKey: null,
   
   /**
+    IF true, the label value will be escaped to avoid HTML injection attacks.
+    You should only disable this option if you are sure you will only 
+    display content that is already escaped and you need the added 
+    performance gain.
+  */
+  escapeHTML: YES,
+  
+  /**
     (displayDelegate) The name of the property used to find the count of 
     unread items. 
     
@@ -110,8 +122,12 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
     to set on the outer element.
+    
+    @param {SC.RenderContext} context
+    @param {Boolean} firstTime
+    @returns {void}
   */
-  render: function(html, classNames) {
+  render: function(context, firstTime) {
     var content = this.get('content') ;
     var del = this.displayDelegate ;
     
@@ -119,209 +135,182 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
     var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
     if (checkboxKey) {
       var checkboxValue = (content && content.get) ? content.get(checkboxKey) : false ;
-      html.push(this.renderCheckboxHtml(checkboxValue)) ;
+      this.renderCheckbox(context, checkboxValue);
+      context.addClass('has-checkbox');
     }
 
     // handle icon
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
        var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
        var icon = (iconKey && content && content.get) ? content.get(iconKey) : null ;
-       html.push(this.renderIconHtml(icon));
+      this.renderIcon(context, icon);
+      context.addClass('has-icon');
+      
     }
     
-    // handle label
+    // handle label -- always invoke
     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
     var label = (labelKey && content && content.get) ? content.get(labelKey) : null ;
-    html.push(this.renderLabelHtml(label));
+    if (this.get('escapeHTML')) {
+      label = SC.RenderContext.escapeHTML(label);
+    }
+    
+    this.renderLabel(context, label);
     
     // handle unread count
     var countKey = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
     var count = (countKey && content && content.get) ? content.get(countKey) : null ;
-    if ((count != null) && (count != 0)) {
-      html.push(this.renderCountHtml(count));
-    }
+    if (!SC.none(count) && (count !== 0)) this.renderCount(context, count) ;
     
     // handle action 
     var actionKey = this.getDelegateProperty(del, 'listItemActionProperty') ;
     var actionClassName = (actionKey && content && content.get) ? content.get(actionKey) : null ;
     if (actionClassName) {
-       html.push(this.renderActionHtml(actionClassName));
+      this.renderAction(context, actionClassName);
+      context.addClass('has-action');
     }
-    if (actionClassName) classNames.push('sc-has-action')
     
     // handle branch
     if (this.getDelegateProperty(del, 'hasContentBranch')) {
       var branchKey = this.getDelegateProperty(del, 'contentIsBranchKey');
       var hasBranch = (branchKey && content && content.get) ? content.get(branchKey) : false ;
-      html.push(this.renderBranchHtml(hasBranch));
-      classNames.push('sc-has-branch');
-    } ;
+      this.renderBranch(context, hasBranch);
+      context.addClass('has-branch');
+    }
   },
 
-  updateDisplay: function() {
-    // collect HTML + classNames
-    var html = [], classNames = this.styleClass.slice();
-    this.render(html, classNames);
-    
-    var elem = this.get('rootElement');
-    html = html.join('') ;
-    if (html != this._lastRenderedHtml) {
-      this._lastRenderedHtml = html ;
-      elem.innerHTML = html ;
-    }
-        
-    elem.className = classNames.join(' ');
-    elem = null; //avoid memory leak
-    
-    sc_super();
-  },
-  
   /**
-    Generates the HTML string used to represent the checkbox for your list
-    item.  Override this to return your own custom HTML.  The default version
-    will use the HTML provided by SC.CheckboxView.
+    Adds a checkbox with the appropriate state to the content.  This method
+    will only be called if the list item view is supposed to have a 
+    checkbox.
     
-    @returns {String}
-    @param state {String} the checkbox state.  YES, NO, or SC.MIXED_STATE
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} state YES, NO or SC.MIXED_STATE
+    @returns {void}
   */
-  renderCheckboxHtml: function(state) {
-    var ret ;
-    
-    // Note: this basically takes the HTML from the checkbox view and then
-    // inserts class names as necessary.  This is cached to avoid using too
-    // much memory.
+  renderCheckbox: function(context, state) {
+    context = context.begin('a').attr('href', 'javascript:;')
+      .classNames(SC.CheckboxView.prototype.classNames);
+
+    // set state on html
     if (state === SC.MIXED_STATE) {
-      ret = SC.ListItemView._mixedCheckboxHtml ;
-      if (!ret) {
-        ret = SC.CheckboxView.prototype.emptyElement ;
-        ret = ret.replace('class="', 'class="mixed ') ;
-        SC.ListItemView._mixedCheckboxHtml = ret ;
-      }
-    } else if (state) {
-      ret = SC.ListItemView._selectedCheckboxHtml ;
-      if (!ret) {
-        ret = SC.CheckboxView.prototype.emptyElement ;
-        ret = ret.replace('class="', 'class="sel ') ;
-        SC.ListItemView._selectedCheckboxHtml = ret ;
-      }
-    } else {
-      ret = SC.ListItemView._normalCheckboxHtml ;
-      if (!ret) {
-        ret = SC.CheckboxView.prototype.emptyElement ;
-        SC.ListItemView._normalCheckboxHtml = ret ;
-      }
-    }
-    return ret ;
+      context.addClass('mixed');
+    } else if (state) context.addClass('sel');
+    
+    // now add inner content.  note we do not add a real checkbox because
+    // we don't want to have to setup a change observer on it.
+    var blank = sc_static('blank');
+    context.push('<img src="', blank, '" class="button" />');
+    
+    // apply edit
+    context.end();
   },
   
   /** 
-     renderIconHtml generates the html string used to represent the icon for 
-     your list item.  override this to return your own custom HTML
-     
-     @returns {String}
-     @param icon {String} the icon property based on your view's contentIconKey
+    Generates an icon for the label based on the content.  This method will
+    only be called if the list item view has icons enabled.  You can override
+    this method to display your own type of icon if desired.
+
+    @param {SC.RenderContext} context the render context
+    @param {String} icon a URL or class name.
+    @returns {void}
    */
-   renderIconHtml: function(icon){
-     var html = [];
+   renderIcon: function(context, icon){
      // get a class name and url to include if relevant
      var url = null, className = null ;
      if (icon && SC.ImageView.valueIsUrl(icon)) {
        url = icon; className = '' ;
      } else {
-       className = icon; url = static_url('blank.gif') ;
+       className = icon; url = sc_static('blank.gif') ;
      }
-     html.push('<img class="sc-icon ');
-     html.push(className || '');
-     html.push('" src="');
-     html.push(url || static_url('blank.gif')) ;
-     html.push('" />') ;
-     html=html.join('');
-     return html;
+     
+     // generate the img element...
+     context.begin('img')
+      .addClass('icon').addClass(className)
+      .attr('src', url)
+    .end();
    },
    
    /** 
-       renderLabelHtml generates the html string used to represent the label 
-       for your list item.  override this to return your own custom HTML
-       
-       @returns {String}
-       @param label {String} the label property based on your view's 
-        contentValueKey
-     */
-   renderLabelHtml: function(label){
-     var html = [];
-     html.push('<span class="sc-label">') ;
-     html.push(label || '') ;
-     html.push('</span>') ;
-     return html.join('');    
+     Generates a label based on the content.  You can override this method to 
+     display your own type of icon if desired.
+
+     @param {SC.RenderContext} context the render context
+     @param {String} label the label to display, already HTML escaped.
+     @returns {void}
+   */
+   renderLabel: function(context, label) {
+     context.push('<label>', label || '', '</label>') ;
    },
    
    /**
       Finds and retrieves the element containing the label.  This is used
-      for inline editing.  If you override renderLabelHtml() you probably
-      need to override this as well.
+      for inline editing.  The default implementation returns a CoreQuery
+      selecting any label elements.   If you override renderLabel() you 
+      probably need to override this as well.
+      
+      @returns {SC.CoreQuery} CQ object selecting label elements
   */
-   findLabelElement: function() {
-     return this.$class('sc-label') ;
+   $label: function() {
+     return this.$('label') ;
    },
    
    /** 
-        renderCountHtml generates the html string used to represent the count 
-        (like unread count) for your list item.  override this to return your 
-        own custom HTML
-        
-        @returns {String}
-        @param count {Integer} the label property based on your view's 
-         contentValueKey
+     Generates an unread or other count for the list item.  This method will
+     only be called if the list item view has counts enabled.  You can 
+     override this method to display your own type of counts if desired.
+
+     @param {SC.RenderContext} context the render context
+     @param {Number} count the count
+     @returns {void}
+  */
+   renderCount: function(context, count) {
+     context.push('<span class="count"><span class="inner">')
+      .push(count.toString()).push('</span></span>') ;
+   },
+   
+   /** 
+      Generates the html string used to represent the action item for your 
+      list item.  override this to return your own custom HTML
+
+      @param {SC.RenderContext} context the render context
+      @param {String} actionClassName the name of the action item
+      @returns {void}
     */
-   renderCountHtml: function(count) {
-     var html= [];
-      html.push('<span class="sc-count"><span class="inner">') ;
-       html.push(count.toString()) ;
-       html.push('</span></span>') ;
-       return html.join('');
+   renderAction: function(context, actionClassName){
+     context.push('<img src="',SC.BLANK_IMAGE_URL,'" class="action" />');
    },
    
    /** 
-      renderActionHtml generates the html string used to represent the 
-      action item for your list item.  override this to return your own 
-      custom HTML
-    
-      @returns {String}
-      @param actionClassName {String} the name of the action item.
-    */
-   renderActionHtml: function(actionClassName){
-     var html = [];
-     html.push('<img src="') ;
-     html.push(static_url('blank.gif')) ;
-     html.push('" class="sc-action" />') ;
-     return html.join('');
-   },
-   
-   /** 
-     renderBranchHtml generates the html string used to represent the 
-     branch arrow. override this to return your own custom HTML
-     @returns {String}
-     @arguments {Boolean} whehter the branch is 
+     Generates the string used to represent the branch arrow. override this to 
+     return your own custom HTML
+     
+     @param {SC.RenderContext} context the render context
+     @param {Boolean} hasBranch YES if the item has a branch
+     @returns {void}
    */
    
-   renderBranchHtml: function(hasBranch) {
-     var html = [];
-     html.push('<span class="sc-branch ');
-     html.push(hasBranch ? 'sc-branch-visible' : 'sc-branch-hidden') ;
-     html.push('">&nbsp;</span>');
-     return html.join('');
+   renderBranch: function(context, hasBranch) {
+     context.begin('span').addClass('branch')
+      .addClass(hasBranch ? 'branch-visible' : 'branch-hidden')
+      .push('&nbsp;').end();
    },
-   
+
+   /** 
+    Determines if the event occured inside an element with the specified
+    classname or not.
+  */
    _isInsideElementWithClassName: function(className, evt) {
-     var el = Event.element(evt) ;
-     var rootElement = this.rootElement;
-     var ret = NO ;
-     while(!ret && el && (el !== rootElement)) {
-       if (Element.hasClassName(el, className)) ret = YES ;
-       el = el.parentNode ;
-     }
+     var layer = this.get('layer');
+     if (!layer) return NO ; // no layer yet -- nothing to do
      
-     rootElement = el = null ; //avoid memory leaks
+     var el = SC.$(evt.target) ;
+     var ret = NO, classNames ;
+     while(!ret && el.length>0 && (el.get(0) !== layer)) {
+       if (el.hasClass(className)) ret = YES ;
+       el = el.parent() ;
+     }
+     el = layer = null; //avoid memory leaks
      return ret ;
    },
    
@@ -368,7 +357,7 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      return ret ;
    },
    
-   mouseOut: function(evt) {
+   mouseExited: function(evt) {
      if (this._isMouseDownOnCheckbox) {
        this._removeCheckboxActiveState() ;
        this._isMouseInsideCheckbox = NO ;
@@ -376,7 +365,7 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      return NO ;
    },
    
-   mouseOver: function(evt) {
+   mouseEntered: function(evt) {
      if (this._isMouseDownOnCheckbox) {
        this._addCheckboxActiveState() ;
        this._isMouseInsideCheckbox = YES ;
@@ -385,21 +374,18 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
    },
    
    _addCheckboxActiveState: function() {
-     var el = this.$sel('.sc-checkbox-view') ;
-     if (this.get('isEnabled')) Element.addClassName(el, 'active') ;
-     el = null ;
+     var enabled = this.get('isEnabled');
+     this.$('.sc-checkbox-view').setClassName('active', enabled);
    },
    
    _removeCheckboxActiveState: function() {
-     var el = this.$sel('.sc-checkbox-view') ;
-     Element.removeClassName(el, 'active') ;
-     el = null ;
+     this.$('.sc-checkbox-view').removeClassName('active');
    },
    
    /** 
     Returns true if a click is on the label text itself to enable editing.
     
-    Note that if you override renderLabelHtml(), you probably need to override 
+    Note that if you override renderLabel(), you probably need to override 
     this as well.
   
     @param evt {Event} the mouseUp event.
@@ -413,11 +399,11 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      if (!labelKey) return NO ;
      
      // get the element to check for.
-     var el = this.findLabelElement() ;
+     var el = this.$label().get(0) ;
      if (!el) return NO ; // no label to check for.
      
-     var cur = Event.element(evt) ;
-     while(cur && (cur != (this.rootElement)) && (cur != window)) {
+     var cur = evt.target, layer = this.get('layer') ;
+     while(cur && (cur !== layer) && (cur !== window)) {
        if (cur === el) return YES ;
        cur = cur.parentNode ;
      }
@@ -435,20 +421,20 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
      
      var f = this.get('frame') ;
-     var el = this.findLabelElement() ;
+     var el = this.$label() ;
      if (!el) return NO ;
 
      // if the label has a large line height, try to adjust it to something
      // more reasonable so that it looks right when we show the popup editor.
-     var oldLineHeight = Element.getStyle(el, 'lineHeight') ;
-     var fontSize = parseInt(Element.getStyle(el, 'fontSize'), 0) ;
-     var lineHeight = parseInt(oldLineHeight, 0) ;
+     var oldLineHeight = el.css('lineHeight');
+     var fontSize = el.css('fontSize');
+     var lineHeight = oldLineHeight;
      var lineHeightShift = 0;
      
      if (fontSize && lineHeight) {
        var targetLineHeight = fontSize * 1.5 ;
        if (targetLineHeight < lineHeight) {
-         Element.setStyle(el, { lineHeight: '1.5' }) ;
+         el.css({ lineHeight: '1.5' });
          lineHeightShift = (lineHeight - targetLineHeight) / 2; 
        } else oldLineHeight = null ;
      }
@@ -468,7 +454,7 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
 
      // restore old line height for original item if the old line height 
      // was saved.
-     if (oldLineHeight) Element.setStyle(el, { lineHeight: oldLineHeight }) ;
+     if (oldLineHeight) el.css({ lineHeight: oldLineHeight }) ;
      
      // Done!  If this failed, then set editing back to no.
      return ret ;
@@ -495,9 +481,9 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      Hide the label view while the inline editor covers it.
    */
    inlineEditorDidBeginEditing: function(inlineEditor) {
-     var el = this.findLabelElement() ;
-     this._oldOpacity = Element.getStyle(el, 'opacity') ;
-     Element.setStyle(el, { opacity: 0.0 }) ;
+     var el = this.$label() ;
+     this._oldOpacity = el.css('opacity');
+     el.css('opacity', 0.0) ;
    },
 
    /** @private
@@ -519,10 +505,6 @@ SC.ListItemView = SC.View.extend(SC.Control, SC.InlineEditorDelegate,
      if (labelKey && content && content.set) {
        content.set(labelKey, finalValue) ;
      }
-     
-     // force a refresh, otherwise the label will never be visible again
-     // b/c its opacity is 0.
-     this._lastRenderedHtml = null;
      this.displayDidChange();
    }   
   
