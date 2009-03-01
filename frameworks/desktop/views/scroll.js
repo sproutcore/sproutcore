@@ -493,17 +493,18 @@ SC.ScrollView = SC.View.extend({
     in the regular properties.
   */
   createChildViews: function() {
+    // debugger ;
     var childViews = [] ;
     var view ;
-  
+    
     // create the containerView.  We must always have a container view. 
     // also, setup the contentView as the child of the containerView...
     if (SC.none(view = this.containerView)) view = SC.ContainerView;
-
+    
     childViews.push(this.containerView = this.createChildView(view, {
       contentView: this.contentView
     }));
-  
+    
     // and replace our own contentView...
     this.contentView = this.containerView.get('contentView');
     
@@ -516,7 +517,7 @@ SC.ScrollView = SC.View.extend({
         childViews.push(view);
       } else this.horizontalScrollerView = null ;
     }
-  
+    
     // create a vertical scroller view if needed...
     if (view=this.verticalScrollerView) {
       if (this.get('hasVerticalScroller')) {
@@ -526,12 +527,12 @@ SC.ScrollView = SC.View.extend({
         childViews.push(view);
       } else this.verticalScrollerView = null ;
     }
-  
+    
     // set childViews array.
     this.childViews = childViews ;
   },
   
-  prepareDisplay: function() {
+  didCreateLayer: function() {
     sc_super();
     this.contentViewFrameDidChange() ; // setup initial display...
     this.tile(); // setup initial tiling
@@ -541,7 +542,6 @@ SC.ScrollView = SC.View.extend({
   init: function() {
     sc_super();
     
-    debugger ;
     // start observing initial content view.  The content view's frame has
     // already been setup in prepareDisplay so we don't need to call 
     // viewFrameDidChange...
