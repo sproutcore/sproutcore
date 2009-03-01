@@ -7,4 +7,13 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.ListItemView UI");
+// ..........................................................
+// Test Basic Setup
+// 
+
+module("SC.ListItemView UI");
+
+test("foo", function() {
+  ok(true, "hello");
+});
+

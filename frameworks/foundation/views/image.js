@@ -17,7 +17,7 @@ SC.IMAGE_STATE_SPRITE = 'sprite';
 /**
   URL to a transparent GIF.  Used for spriting.
 */
-SC.BLANK_IMAGE_URL = static_url('blank.gif');
+SC.BLANK_IMAGE_URL = sc_static('blank.gif');
 
 /**
   @class
