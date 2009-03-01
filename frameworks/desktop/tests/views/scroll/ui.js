@@ -7,43 +7,14 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-// htmlbody('<style> .sc-control-test-pane .wrapper { overflow: none; } </style>');
-
 (function() {
   var pane = SC.ControlTestPane.design({ height: 100 })
     .add("basic", SC.ScrollView, {
       
     })
     
-    // .add("disabled", SC.ListView, {
-    //   isEnabled: NO,
-    //   content: content,
-    //   contentValueKey: 'title'
-    // })
-    // 
-    // .add("disabled - single selection", SC.ListView, {
-    //   isEnabled: NO,
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: singleSelection
-    // })
-    // 
-    // .add("single selection", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: singleSelection
-    // })
-    // 
-    // .add("multiple selection, contiguous", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: multiSelectionContiguous
-    // })
-    // 
-    // .add("multiple selection, discontiguous", SC.ListView, {
-    //   content: content,
-    //   contentValueKey: 'title',
-    //   selection: multiSelectionDiscontiguous
+    // .add("disabled", SC.ScrollView, {
+    //   isEnabled: NO
     // })
     
   pane.show(); // add a test to show the test pane
@@ -58,20 +29,22 @@
     ok(!view.$().hasClass('disabled'), 'should not have disabled class');
     ok(!view.$().hasClass('sel'), 'should not have sel class');
     
-    // ok(SC.rangesEqual(view.get('nowShowingRange'), { start: 0, length: 5}), 'now showing range should be 0-4');
-    // 
-    // for (var idx=0, len=20; idx<len; idx++) {
-    //   var itemView = view.itemViewAtContentIndex(idx) ;
-    //   if (idx < 5) {
-    //     ok(itemView, 'should return an itemView for the visible record %@ displayed in the list'.fmt(idx));
-    //     ok(itemView.get('isVisible'), 'itemViews for visible record %@ should have isVisible === YES'.fmt(idx));
-    //     ok(itemView.get('layer'), 'itemViews for visible record %@ should have a layer'.fmt(idx));
-    //   } else {
-    //     ok(itemView, 'should return an itemView for the non-visible record %@ displayed in the list'.fmt(idx));
-    //     ok(!itemView.get('isVisible'), 'itemViews for the non-visible record %@ should have isVisible === NO'.fmt(idx));
-    //     ok(!itemView.get('layer'), 'itemViews for the non-visible record %@ should NOT have a layer'.fmt(idx));
-    //   }
-    // }
+    equals(view.getPath('childViews.length'), 3, 'scroll view should have only three child views');
+
+    var containerView = view.get('containerView') ;
+    ok(containerView, 'scroll views should have a container view');
+    ok(containerView.kindOf(SC.ContainerView), 'default containerView is a kind of SC.ContainerView');
+    ok(containerView.get('contentView') === null, 'default containerView should have a null contentView itself');
+    ok(view.get('contentView') === null, 'scroll view should have no contentView by default');
+    equals(containerView.getPath('childViews.length'), 0, 'containerView should have no child views');
+    
+    var horizontalScrollerView = view.get('horizontalScrollerView');
+    ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
+    ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
+    
+    var verticalScrollerView = view.get('verticalScrollerView');
+    ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
+    ok(verticalScrollerView, 'default scroll view has a vertical scroller');
   });
   
   // test("disabled", function() {
@@ -79,17 +52,5 @@
   //   ok(view.$().hasClass('disabled'), 'should have disabled class');
   //   ok(!view.$().hasClass('sel'), 'should not have sel class');
   // });
-  //  
-  // test("disabled - single selection", function() {
-  //   var view = pane.view('disabled - single selection');
-  //   ok(view.$().hasClass('disabled'), 'should have disabled class');
-  //   ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
-  //  });
-  // 
-  //  test("single selection", function() {
-  //    var view = pane.view('single selection');
-  //    ok(view.itemViewAtContentIndex(0).$().hasClass('sc-collection-item'), 'should have sc-collection-item class');
-  //    ok(view.itemViewAtContentIndex(0).$().hasClass('sel'), 'should have sel class');
-  //   });
-
+   
 })();
