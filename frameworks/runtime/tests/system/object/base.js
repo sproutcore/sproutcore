@@ -1,9 +1,9 @@
 // ========================================================================
 // SC.Object Base Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok isObj equals expects same */
 
-var obj ; // global variables
+var obj, obj1, don, don1 ; // global variables
 
 module("A new SC.Object instance", {
   
@@ -13,7 +13,8 @@ module("A new SC.Object instance", {
       total: 12345,
       aMethodThatExists: function() {},
       aMethodThatReturnsTrue: function() { return true; },
-      aMethodThatReturnsFoobar: function() { return "Foobar"; }
+      aMethodThatReturnsFoobar: function() { return "Foobar"; },
+      aMethodThatReturnsFalse: function() { return NO; }
     });
   },
   
@@ -32,9 +33,11 @@ test("Should return false when asked to perform a method it does not have", func
   equals(obj.tryToPerform('aMethodThatDoesNotExist'), false) ;
 });
 
-test("Should pass back the return value of a method it was asked to perform", function() {
-  equals(obj.tryToPerform('aMethodThatReturnsTrue'), true) ;
-  equals(obj.tryToPerform('aMethodThatReturnsFoobar'), "Foobar") ;
+test("Should pass back the return YES if method returned YES, NO if method not implemented or returned NO", function() {
+  equals(obj.tryToPerform('aMethodThatReturnsTrue'), YES, 'method that returns YES') ;
+  equals(obj.tryToPerform('aMethodThatReturnsFoobar'), YES, 'method that returns non-NO') ;
+  equals(obj.tryToPerform('aMethodThatReturnsFalse'), NO, 'method that returns NO') ;
+  equals(obj.tryToPerform('imaginaryMethod'), NO, 'method that is not implemented') ;
 });
 
 test("Should return it's properties when requested using SC.Object#get", function() {
