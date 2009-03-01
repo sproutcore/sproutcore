@@ -71,13 +71,13 @@
     
     ok(pane.$().hasClass('sc-control-test-pane'), 'should have class sc-control-test-pane');
     
-    ok(pane.get('isVisible'), 'control test pane should be visible after we show it');
-    ok(pane.get('isVisibileInWindow'), 'control tast pane should be visible in the window after we show it');
+    ok(pane.get('isVisible'), 'control test pane should be visible after we create it');
+    ok(pane.get('isVisibleInWindow'), 'control tast pane should be visible in the window after we create it');
     
     pane.remove() ;
     
     ok(!pane.get('isVisible'), 'control test pane should NOT be visible after we remove it');
-    ok(!pane.get('isVisibileInWindow'), 'control tast pane should NOT be visible in the window after we remove it');
+    ok(!pane.get('isVisibleInWindow'), 'control tast pane should NOT be visible in the window after we remove it');
   });
   
   test("adding named children to the pane", function() {
