@@ -264,9 +264,9 @@ SC.mixin(/** @scope SC */ {
 
     switch(this.typeOf(obj)) {
       case SC.T_NUMBER:
-        return (this._numberGuids[obj] = this._numberGuids[obj] || ("#" + obj));
+        return (this._numberGuids[obj] = this._numberGuids[obj] || ("n-" + obj));
       case SC.T_STRING:
-        return (this._stringGuids[obj] = this._stringGuids[obj] || ("$" + obj));
+        return (this._stringGuids[obj] = this._stringGuids[obj] || ("s-" + obj));
       case SC.T_BOOL:
         return (obj) ? "(true)" : "(false)" ;
       default:
@@ -298,7 +298,7 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the guid
   */
   generateGuid: function(obj) { 
-    var ret = ("@" + (this._nextGUID++)); 
+    var ret = ("g-" + (this._nextGUID++)); 
     if (obj) obj[this.guidKey] = ret ;
     return ret ;
   },

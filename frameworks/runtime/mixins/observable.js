@@ -1007,7 +1007,7 @@ SC.Observable = {
     @returns {Array} Values of property keys.
   */
   getEach: function() {
-    var keys = SC.A(arguments).flatten() ;
+    var keys = SC.A(arguments) ;
     var ret = [];
     for(var idx=0; idx<keys.length;idx++) {
       ret[ret.length] = this.getPath(keys[idx]);

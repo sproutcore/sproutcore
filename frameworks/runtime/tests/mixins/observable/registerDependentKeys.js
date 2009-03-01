@@ -1,69 +1,79 @@
-	module("object.registerDependentKeys()", {	
-		setup: function() {
-			RegisterObject = SC.Object.create({
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            portions copyright @2009 Apple, Inc.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
 
-   				// normal properties
-   				firstName:  'John',
-   				lastName:   'Doe',
-				observedValue: '',
+/*globals module test ok equals same */
 
-   				// computed property
-   				fullName: function() {
-      				this.getEach('firstName','lastName').compact().join(' ');
-   				}.property(),
+var object ;
 
-   				// init to setup registerDependentKey...
-   				init: function() {
-     				sc_super();
-     				this.registerDependentKey('fullName', 'firstName', 'lastName');
-   				},
+module("object.registerDependentKeys()", {  
+  setup: function() {
+    object = SC.Object.create({
 
-   				//observer that should fire whenever the 'fullName' property changes
-   				fullNameDidChange:  function() {
-     				this.set('observedValue', this.get('fullName')) ;
-   				}.observes('fullName')
-			});
-		}
-	});
+        // normal properties
+        firstName:  'John',
+        lastName:   'Doe',
+        observedValue: '',
 
-	/*
-	test("should indicate the registered property changes if the dependent key value changes", function() {
-		// now, change the firstName...
-		RegisterObject.set('firstName', 'Jane');
+        // computed property
+        fullName: function() {
+          return this.getEach('firstName','lastName').compact().join(' ');
+        }.property(),
 
-		// since fullName is 'dependent' on firstName, then the observer for  
-		// 'fullName' should fire here because you changed a dependent key.
-		equals(RegisterObject.get('observedValue'), 'Jane Doe');
+        // init to setup registerDependentKey...
+        init: function() {
+          sc_super();
+          this.registerDependentKey('fullName', 'firstName', 'lastName');
+        },
 
-		// now change the lastName
-		RegisterObject.set('lastName', 'Johnson');
+        //observer that should fire whenever the 'fullName' property changes
+        fullNameDidChange:  function() {
+          this.set('observedValue', this.get('fullName')) ;
+        }.observes('fullName')
+    });
+  }
+});
 
-		// again, fullName is 'dependent' on lastName, so observer for  
-		// fullName should fire.
-		equals(RegisterObject.get('observedValue'), 'Jane Johnson');
-	});
-	
-	
-	test("should indicate the registered property changes if the dependent key value changes and change is within begin property loop ", function() {
-		// Wrap the changes with begin property changes call
-		RegisterObject.beginPropertyChanges();
-		
-		// now, change the firstName & lastname...
-		RegisterObject.set('firstName', 'Jane');
-		RegisterObject.set('lastName', 'Johnson');
-		
-		// The observer for fullName should not have fired yet at this  
-		// point because we are inside a propertyChange loop.
-		equals(RegisterObject.get('observedValue'), 'John Doe');
-		
-		//End the property changes loop.
-		RegisterObject.endPropertyChanges();
-		
-		// now change the lastName
-		RegisterObject.set('lastName', 'Johnson');
 
-		// again, fullName is 'dependent' on lastName, so observer for  
-		// fullName should fire.
-		equals(RegisterObject.get('observedValue'), 'Jane Johnson');
-	});
-	*/
+test("should indicate the registered property changes if the dependent key value changes", function() {
+  // now, change the firstName...
+  object.set('firstName', 'Jane');
+
+  // since fullName is 'dependent' on firstName, then the observer for  
+  // 'fullName' should fire here because you changed a dependent key.
+  equals(object.get('observedValue'), 'Jane Doe');
+
+  // now change the lastName
+  object.set('lastName', 'Johnson');
+
+  // again, fullName is 'dependent' on lastName, so observer for  
+  // fullName should fire.
+  equals(object.get('observedValue'), 'Jane Johnson');
+});
+
+
+test("should indicate the registered property changes if the dependent key value changes and change is within begin property loop ", function() {
+  // Wrap the changes with begin property changes call
+  object.beginPropertyChanges();
+  
+  // now, change the firstName & lastname...
+  object.set('firstName', 'Jane');
+  object.set('lastName', 'Johnson');
+  
+  // The observer for fullName should not have fired yet at this  
+  // point because we are inside a propertyChange loop.
+  equals(object.get('observedValue'), '');
+  
+  //End the property changes loop.
+  object.endPropertyChanges();
+  
+  // now change the lastName
+  object.set('lastName', 'Johnson');
+
+  // again, fullName is 'dependent' on lastName, so observer for  
+  // fullName should fire.
+  equals(object.get('observedValue'), 'Jane Johnson');
+});
