@@ -136,52 +136,50 @@ SC.ListItemView = SC.View.extend(SC.Control,
   render: function(context, firstTime) {
     var content = this.get('content') ;
     var del = this.displayDelegate ;
+    var key, value ;
     
     // handle checkbox
-    var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
-    if (checkboxKey) {
-      var checkboxValue = (content && content.get) ? content.get(checkboxKey) : false ;
-      this.renderCheckbox(context, checkboxValue);
+    key = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+    if (key) {
+      value = content ? (content.get ? content.get(key) : content[key]) : NO ;
+      this.renderCheckbox(context, value);
       context.addClass('has-checkbox');
     }
 
     // handle icon
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
-       var iconKey = this.getDelegateProperty(del,'contentIconKey') ;
-       var icon = (iconKey && content && content.get) ? content.get(iconKey) : null ;
-      this.renderIcon(context, icon);
+      key = this.getDelegateProperty(del,'contentIconKey') ;
+      value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+
+      this.renderIcon(context, value);
       context.addClass('has-icon');
-      
     }
     
     // handle label -- always invoke
-    var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
-    var label = (labelKey && content && content.get) ? content.get(labelKey) : content ;
-    if (label && SC.typeOf(label) !== SC.T_STRING) label = label.toString();
-    if (this.get('escapeHTML')) {
-      label = SC.RenderContext.escapeHTML(label);
-    }
-    
-    this.renderLabel(context, label);
+    key = this.getDelegateProperty(del, 'contentValueKey') ;
+    value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
+    if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString();
+    if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
+    this.renderLabel(context, value);
     
     // handle unread count
-    var countKey = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
-    var count = (countKey && content && content.get) ? content.get(countKey) : null ;
-    if (!SC.none(count) && (count !== 0)) this.renderCount(context, count) ;
+    key = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
+    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+    if (!SC.none(value) && (value !== 0)) this.renderCount(context, value) ;
     
     // handle action 
-    var actionKey = this.getDelegateProperty(del, 'listItemActionProperty') ;
-    var actionClassName = (actionKey && content && content.get) ? content.get(actionKey) : null ;
-    if (actionClassName) {
-      this.renderAction(context, actionClassName);
+    key = this.getDelegateProperty(del, 'listItemActionProperty') ;
+    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+    if (value) {
+      this.renderAction(context, value);
       context.addClass('has-action');
     }
     
     // handle branch
     if (this.getDelegateProperty(del, 'hasContentBranch')) {
-      var branchKey = this.getDelegateProperty(del, 'contentIsBranchKey');
-      var hasBranch = (branchKey && content && content.get) ? content.get(branchKey) : false ;
-      this.renderBranch(context, hasBranch);
+      key = this.getDelegateProperty(del, 'contentIsBranchKey');
+      value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
+      this.renderBranch(context, value);
       context.addClass('has-branch');
     }
   },
@@ -223,6 +221,8 @@ SC.ListItemView = SC.View.extend(SC.Control,
     @returns {void}
    */
    renderIcon: function(context, icon){
+     console.log('renderIcon(%@)'.fmt(icon));
+     
      // get a class name and url to include if relevant
      var url = null, className = null ;
      if (icon && SC.ImageView.valueIsUrl(icon)) {
