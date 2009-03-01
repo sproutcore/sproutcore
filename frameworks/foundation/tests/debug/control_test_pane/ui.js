@@ -76,7 +76,7 @@
     
     pane.remove() ;
     
-    ok(!pane.get('isVisible'), 'control test pane should NOT be visible after we remove it');
+    ok(pane.get('isVisible'), 'control test pane still should be visible after we remove it');
     ok(!pane.get('isVisibleInWindow'), 'control tast pane should NOT be visible in the window after we remove it');
   });
   
