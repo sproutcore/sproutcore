@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('views/collection');
-sc_require('views/list_item');
 
 /** @class
   
