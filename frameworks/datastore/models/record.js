@@ -113,13 +113,15 @@ SC.Record = SC.Object.extend(
   isDeleted: NO,
   
   /**
-    Set to YES when a record is editable. Set to NO when committed.
+    @private
+
+    The edit level needs to be 0 in order to commit a record.
     
     @property
-    @type {Boolean}
+    @type {Integer}
   */
-  isEditable: NO,
-  
+  _editLevel: 0,
+
   
   // ...............................
   // CRUD OPERATIONS
@@ -144,7 +146,7 @@ SC.Record = SC.Object.extend(
     @property
     @type {SC.Store or SC.Server}
   */
-  parentStore: SC.Store,
+  store: SC.Store,
 
   /**
     The URL where this record can be refreshed. Usually you would send the value
@@ -180,37 +182,10 @@ SC.Record = SC.Object.extend(
   */
   refresh: function() { 
     if (!this.get('newRecord')) {
-      var parentStore = this.get('parentStore');
-      if(parentStore) {
-        parentStore.refreshRecords([this]); 
+      var store = this.get('store');
+      if(store) {
+        store.refreshRecords([this]); 
       }
-    }
-  },
-  
-  /**
-    Invoked by the UI to tell the model this record should be saved. Override
-    to support server changes.  Note that this is used to support both the
-    create and update components of CRUD.
-  */
-  commit: function() {  
-    // no longer a new record once changes have been committed.
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      parentStore.commitChanges(); 
-    }
-  },
-  
-  /**
-    Invoked by the UI to tell the model this record should be saved. Override
-    to support server changes.  Note that this is used to support both the
-    create and update components of CRUD.
-  */
-  discard: function() {  
-    // no longer a new record once changes have been committed.
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      parentStore.discardChanges(); 
-      this._cachedAttributes = null;
     }
   },
   
@@ -218,26 +193,28 @@ SC.Record = SC.Object.extend(
     This can delete the record.  The non-server version just sets isDeleted.
   */
   destroy: function() { 
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      parentStore.destroyRecords([this]); 
-    }
-  },
-
-  /**
-    This can delete the record.  The non-server version just sets isDeleted.
-  */
-  unload: function() { 
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      parentStore.unloadRecords([this]); 
+    var store = this.get('store');
+    if(store) {
+      store.destroyRecords([this]); 
     }
   },
   
-  edit: function() {
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      parentStore.makeRecordsEditable([this]); 
+  beginEditing: function() {
+    
+    if(this._editLevel === 0) {
+      var store = this.get('store');
+      if(store) {
+        store.makeRecordEditable(this); 
+      }
+    }
+    this._editLevel++;
+  },
+  
+  endEditing: function() {
+    this._editLevel--;
+    if(this._editLevel <= 0) {
+      this._editLevel = 0;
+      this.recordDidChange();
     }
   },
   
@@ -264,18 +241,19 @@ SC.Record = SC.Object.extend(
     @returns {value} the value of the key, or null if it doesn't exist
   **/
   readAttribute: function(key) {
-    if (!this._cachedAttributes) this._cachedAttributes = {} ;
-    var ret = this._cachedAttributes[key] ;
-    if (ret === undefined) {
-      var attr = this._attributes ;
-      ret = (attr) ? attr[key] : undefined ;
-      ret = ret || this[key] ; // also check properties...
-      if (ret !== undefined) {
-        var recordType = this.recordType(key+'Type') ;
-        ret = this._propertyFromAttribute(ret, recordType) ;
-      }
-      this._cachedAttributes[key] = ret ;
+    var store = this.get('store'), storeKey = this._storeKey;
+    var cached = store.cachedAttributes[storeKey];
+    var attr = store.dataHashes[storeKey];
+    if (cached[key] === undefined) return cached[key];
+    if(cached === undefined) cached = {};
+
+    var ret = (attr) ? attr[key] : undefined ;
+    ret = ret || this[key] ; // also check properties...
+    if (ret !== undefined) {
+      var recordType = this.recordType(key+'Type') ;
+      ret = this._propertyFromAttribute(ret, recordType) ;
     }
+    cached[key] = ret;
     return (ret === undefined) ? null : ret;
   },
 
@@ -287,14 +265,20 @@ SC.Record = SC.Object.extend(
     @returns {Object} the value of the key, or null if it doesn't exist
   **/
   writeAttribute: function(key, value) {
-    if(!this.get('isEditable')) return value;
-    
+    this.beginEditing();
     var recordType = this.recordType(key+'Type') ;
     var ret = this._attributeFromProperty(value, recordType) ;
-    if (!this._attributes) this._attributes = {} ;
-    this._attributes[key] = ret ;
-    if (this._cachedAttributes) delete this._cachedAttributes[key];  // clear cache.
-    this.recordDidChange() ;
+
+    var store = this.get('store'), storeKey = this._storeKey;
+    var cached = store.cachedAttributes[storeKey];
+    var attr = store.dataHashes[storeKey];
+    
+    if(!attr) attr = {};
+    if(!cached) cached = {};
+    
+    attr[key] = ret ;
+    if (cached) delete cached[key];  // clear cache.
+    this.endEditing();
     return value ;  
   },
   
@@ -303,9 +287,9 @@ SC.Record = SC.Object.extend(
     and needing a commit to the server.
   */
   recordDidChange: function() {
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      parentStore.recordDidChange(this);
+    var store = this.get('store');
+    if(store) {
+      store.recordDidChange(this);
     }
     this.incrementProperty('changeCount') ;
   },
@@ -316,7 +300,9 @@ SC.Record = SC.Object.extend(
     @returns {Object} the current attributes of the receiver
   **/
   attributes: function() {
-    return Object.clone(this._attributes) ;
+    var store = this.get('store'), storeKey = this._storeKey;
+    var attr = store.dataHashes[storeKey];
+    return SC.clone(attr);
   }.property(),
   
   /**
@@ -504,13 +490,13 @@ SC.Record.mixin(
     pass in either a simple guid or one or more hashes of conditions.
   */
   find: function(guid) {
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      var ret = parentStore.find.apply(parentStore,args) ;
+    var store = this.get('store');
+    if(store) {
+      var ret = store.find.apply(store,args) ;
       if (typeof(guid) == 'object') {
         args = SC.$A(arguments) ; args.push(this) ;
         return (ret && ret.length > 0) ? ret[0] : null ;
-      } else return parentStore.find.apply(parentStore,args);
+      } else return store.find.apply(store,args);
     }
     return null;
   },
@@ -521,9 +507,9 @@ SC.Record.mixin(
   findAll: function(filter) {
     var ret;
     var args = SC.$A(arguments) ; args.push(this) ; // add type
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      ret = parentStore.find.apply(parentStore,args) ;
+    var store = this.get('store');
+    if(store) {
+      ret = store.find.apply(store,args) ;
     }
     return ret;
   },
