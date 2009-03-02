@@ -259,12 +259,17 @@ $.extend(window, {
 });
 
 $(window).load(function() {
+  
+  if ($('#qunit').length === 0) {
+    $('body').append($('<div id="qunit"></div>'));
+  }
+  
   if($('#userAgent').length == 0) {
-    $('body').append($('<div id="userAgent"></div>'));
+    $('#qunit').append($('<div id="userAgent"></div>'));
   }
 
   if ($('#tests').length == 0) {
-    $('body').append($('<ol id="tests"></ol>')) ;
+    $('#qunit').append($('<ol id="tests"></ol>')) ;
   }
   
 	$('#userAgent').html(navigator.userAgent);
@@ -337,7 +342,7 @@ function runTest() {
 			+new Date - started, ' milliseconds.<br/>',
 			'<span class="bad">', config.stats.bad, '</span> tests of <span class="all">', config.stats.all, '</span> failed.']
 			.join(''))
-			.appendTo("body");
+			.appendTo("#qunit");
 		$("#banner").addClass(config.stats.bad ? "fail" : "pass");
 	});
 }

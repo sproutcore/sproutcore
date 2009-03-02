@@ -31,6 +31,33 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     contentIsBranchKey: 'branch'
 
   }))
+
+  .add("full - sel", SC.ListItemView.design({ 
+    content: SC.Object.create({ 
+      icon: "sc-icon-folder-16",
+      title: "List Item", 
+      checkbox: YES,
+      count: 23,
+      branch: YES
+    }),
+
+    isSelected: YES,
+        
+    hasContentIcon:  YES,
+    hasContentBranch: YES,
+
+    contentValueKey: "title",
+    contentLeftActionKey: 'checkbox',
+    leftAction: 'checkbox',
+    
+    contentRightActionKey: 'isLoading',
+    
+    contentCheckboxKey: 'checkbox',
+    contentIconKey:  "icon",
+    contentUnreadCountKey: 'count',
+    contentIsBranchKey: 'branch'
+
+  }))
   
   .add("icon", SC.ListItemView.design({ 
     content: { title: "List Item", icon: "sc-icon-folder-16" },
@@ -48,6 +75,8 @@ var pane = SC.ControlTestPane.design({ height: 32 })
   })) ;
 
 pane.show();
+
+window.pane = pane ;
 
 // ..........................................................
 // Test Basic Setup

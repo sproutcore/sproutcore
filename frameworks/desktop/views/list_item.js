@@ -27,12 +27,11 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   @extends SC.InlineEditorDelegate
   @extends SC.CollectionItem
   @extends SC.Editable
-  @extends SC.StaticLayout
   
   @since SproutCore 1.0
 */
 SC.ListItemView = SC.View.extend(SC.Control, 
-    SC.InlineEditorDelegate, SC.CollectionItem, SC.StaticLayout,
+    SC.InlineEditorDelegate, SC.CollectionItem,
 /** @scope SC.ListItemView.prototype */ {
   
   classNames: ['sc-list-item-view'],
@@ -334,13 +333,16 @@ SC.ListItemView = SC.View.extend(SC.Control,
          this._isMouseDownOnCheckbox = YES ;
          this._isMouseInsideCheckbox = YES ;
          return true ;
-       }
+       } 
      }  
-     
-     return false ; // otherwise let normal handlers do it...
+
+     this.set('isActive', YES);
+     return YES ;
    },
 
    mouseUp: function(evt) {
+     this.set('isActive', NO);
+
      var ret= NO ;
      if (this._isMouseDownOnCheckbox) {
        
@@ -382,11 +384,11 @@ SC.ListItemView = SC.View.extend(SC.Control,
    
    _addCheckboxActiveState: function() {
      var enabled = this.get('isEnabled');
-     this.$('.sc-checkbox-view').setClassName('active', enabled);
+     this.$('.sc-checkbox-view').setClass('active', enabled);
    },
    
    _removeCheckboxActiveState: function() {
-     this.$('.sc-checkbox-view').removeClassName('active');
+     this.$('.sc-checkbox-view').removeClass('active');
    },
    
    /** 
