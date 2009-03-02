@@ -2831,7 +2831,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       if (itemView) view.$().append(itemView.rootElement.cloneNode(true)) ;
     }
     
-    var frame = this.convertClippingFrameToView(this.get('clippingFrame'), null) ;
+    var frame = this.convertFrameToView(this.get('clippingFrame'), null) ;
     view.adjust({ top: frame.y, left: frame.x, width: frame.width, height: frame.height }) ;
     return view ;
   },
