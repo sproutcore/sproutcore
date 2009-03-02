@@ -970,7 +970,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         owner: this,
         displayDelegate: this,
         parentView: this,
-        isVisible: YES
+        isVisible: YES,
+        isMaterialized: YES
       });
     } else throw "You must define an exampleView class to render collection items with" ;
   },

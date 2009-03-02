@@ -1015,16 +1015,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     - generate DOM + plug in outlets/childViews unless rootElement is defined
     - register the view with the global views hash, which is used for mgmt
   */
-  init: function(materializedView) {
+  init: function() {
     var parentView, path, root, idx, len, lp, dp ;
     
     sc_super() ;
     
-    this.materializedView = !!materializedView ;
-    
     // register for event handling now if we're not a materialized view
     // (materialized views register themselves as needed)
-    if (!materializedView) {
+    if (!this.get('isMaterialized')) {
       SC.View.views[this.get('layerId')] = this ;
     }
     
