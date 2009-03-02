@@ -70,8 +70,9 @@ test("should return prevObject if receiver has prevObject", function() {
 });
 
 test("emits self closing tag if tag has no content and c._selfClosing !== NO", function() {
-  context.end();
-  equals(context.get(0), "<div />");
+  var c2 = context.begin('input');
+  c2.end();
+  equals(c2.get(0), "<input />");
 });
 
 test("emits two tags even if tag has no content if opts.selfClosing == NO", function() {
@@ -93,7 +94,7 @@ test("does NOT emit self closing tag if it has content, even if opts.selfClosing
 test("it should make sure to clear reused temporary attributes object", function() {
   
   // generate one tag...
-  context.begin()
+  context.begin('input')
     .id("foo")
     .styles({ foo: "bar" })
     .classNames("foo bar".w())
@@ -101,9 +102,9 @@ test("it should make sure to clear reused temporary attributes object", function
   .end(); 
   
   // generate second tag...will reuse internal temporary attrs object.
-  context.begin().id("bar").end();
+  context.begin('input').id("bar").end();
   var str = context.get(context.length-1);
-  equals(str, "<div id=\"bar\"  />");
+  equals(str, "<input id=\"bar\"  />");
 });
 
 test("it should work when nested more than one level deep", function() {
