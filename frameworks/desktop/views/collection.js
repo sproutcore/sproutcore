@@ -461,21 +461,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   //   return ret ;
   }.property('nowShowingRange', 'content', 'groupBy').cacheable(),
   
-  /**
-    Returns YES if the passed view belongs to the collection.
-    
-    This method uses the internal hash of item views and works even if 
-    your items are stored in group views.  This is faster than searching
-    the child view hierarchy yourself.
-    
-    @param {SC.View} view the view to search for.
-    @returns {Boolean} YES if the view belongs to the receiver
-  */
-  hasItemView: function(view) {
-  //   if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
-  //   return !!this._itemViewsByGuid[SC.guidFor(view)] ;
-  },
-  
   /** 
     Find the first content item view for the passed event.
     
