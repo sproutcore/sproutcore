@@ -104,10 +104,10 @@
     for (var idx=0, len=6; idx<len; ++idx) {
       var view = childViews[idx] ;
       var layer = view.get('layer') ;
-      equals(layer.parentNode.parentNode, paneLayer, 'control test pane childView has layer with correct parentNode');
+      equals(layer.parentNode, paneLayer, 'control test pane childView has layer with correct parentNode');
     }
     
-    // pane.remove() ;
+    pane.remove() ;
   });
   
 })();

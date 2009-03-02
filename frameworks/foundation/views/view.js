@@ -1015,12 +1015,18 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     - generate DOM + plug in outlets/childViews unless rootElement is defined
     - register the view with the global views hash, which is used for mgmt
   */
-  init: function() {
+  init: function(materializedView) {
     var parentView, path, root, idx, len, lp, dp ;
     
     sc_super() ;
     
-    SC.View.views[this.get('layerId')] = this ; // register for event handling
+    this.materializedView = !!materializedView ;
+    
+    // register for event handling now if we're not a materialized view
+    // (materialized views register themselves as needed)
+    if (!materializedView) {
+      SC.View.views[this.get('layerId')] = this ;
+    }
     
     // setup child views.  be sure to clone the child views array first
     this.childViews = this.childViews ? this.childViews.slice() : [] ;
@@ -1515,6 +1521,35 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       if (!cv.hasStaticLayout) cv.notifyPropertyChange('clippingFrame') ;
     }
   }.observes('clippingFrame'),
+  
+  /**
+    Converts a clipping frame from the receiver's offset to the target offset.
+    Both the receiver and the target must belong to the same pane.  If you 
+    pass null, the conversion will be to the pane level.
+  */
+  convertClippingFrameToView: function(clippingFrame, targetView) {
+    var myX=0, myY=0, targetX=0, targetY=0, view = this, next = this, f;
+    
+    // walk up this side
+    do {
+      f = next.get('frame'); /* console.log($I(f)); */ myX += f.x; myY += f.y ;
+      view = next ; 
+    } while (next = view.get('parentView'))
+    
+    // walk up other size
+    if (targetView) {
+      view = targetView ;
+      while(next = view.get('parentView')) {
+        f = next.get('frame'); targetX += f.x; targetY += f.y ;
+        view = next ; 
+      }
+    }
+    
+    // now we can figure how to translate the origin.
+    myX = clippingFrame.x + myX - targetX ;
+    myY = clippingFrame.y + myY - targetY ;
+    return { x: myX, y: myY, width: clippingFrame.width, height: clippingFrame.height };
+  },
   
   /** 
     This method may be called on your view whenever the parent view resizes.

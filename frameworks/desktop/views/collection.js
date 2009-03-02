@@ -387,14 +387,14 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   itemsPerRow: 1,
   
-  // /**  
-  //   Property returns all of the item views, regardless of group view.  This
-  //   property is somewhat expensive to compute so you should avoid calling it
-  //   unless necessary.
-  //   
-  //   @property {Array}
-  // */
-  // itemViews: function() {
+  /**  
+    Property returns all of the item views, regardless of group view.  This
+    property is somewhat expensive to compute so you should avoid calling it
+    unless necessary.
+    
+    @property {Array}
+  */
+  itemViews: function() {
   //   var ret = [], range = this.get('nowShowingRange') ;
   //   if (!range || range.length===0) return ret ; 
   //   var content = this.get('content') || [] ;
@@ -403,7 +403,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   //     ret.push(this.itemViewForContent(cur)) ;
   //   }
   //   return ret ;
-  // }.property('nowShowingRange', 'content').cacheable(),
+  }.property('nowShowingRange', 'content').cacheable(),
   
   // layer: function(key, value) {
   //   debugger ;
@@ -421,32 +421,28 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var guids = this._itemViewGuids, guid;
     if (!guids) this._itemViewGuids = guids = {};
     
-    else {
-      
-      // use cache of item view guids to avoid creating lots of temporary 
-      // objects.
-      guid = SC.guidFor(content);
-      if (!(key = this._itemViewGuids[guid])) {
-        key = this._itemViewGuids[guid] = SC.guidFor(this)+'_'+guid;
-      }
-      
-      itemView.set('content', content) ;
-      itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
-      itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
-      itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
-      this.layoutItemView(itemView, contentIndex, YES) ;
-      itemView.set('parentView', this) ;
-      return itemView ;
+    // use cache of item view guids to avoid creating temporary objects
+    guid = SC.guidFor(content);
+    if (!(key = guids[guid])) {
+      key = guids[guid] = SC.guidFor(this)+'_'+guid;
     }
+    
+    itemView.set('content', content) ;
+    itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
+    itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
+    itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+    this.adjustItemViewLayoutAtContentIndex(itemView, contentIndex, NO) ;
+    itemView.set('parentView', this) ;
+    return itemView ;
   },
   
-  // /**
-  //   Property returns all of the rendered group views in order of their 
-  //   appearance.
-  //   
-  //   @property {Array}
-  // */
-  // groupViews: function() {
+  /**
+    Property returns all of the rendered group views in order of their 
+    appearance.
+    
+    @property {Array}
+  */
+  groupViews: function() {
   //   var ret = [], groupBy = this.get('groupBy') ;
   //   if (groupBy) {
   //     var range = this.get('nowShowingRange') ;
@@ -463,22 +459,22 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   //     }
   //   }
   //   return ret ;
-  // }.property('nowShowingRange', 'content', 'groupBy').cacheable(),
+  }.property('nowShowingRange', 'content', 'groupBy').cacheable(),
   
-  // /**
-  //   Returns YES if the passed view belongs to the collection.
-  //   
-  //   This method uses the internal hash of item views and works even if 
-  //   your items are stored in group views.  This is faster than searching
-  //   the child view hierarchy yourself.
-  //   
-  //   @param {SC.View} view the view to search for.
-  //   @returns {Boolean} YES if the view belongs to the receiver
-  // */
-  // hasItemView: function(view) {
+  /**
+    Returns YES if the passed view belongs to the collection.
+    
+    This method uses the internal hash of item views and works even if 
+    your items are stored in group views.  This is faster than searching
+    the child view hierarchy yourself.
+    
+    @param {SC.View} view the view to search for.
+    @returns {Boolean} YES if the view belongs to the receiver
+  */
+  hasItemView: function(view) {
   //   if (!this._itemViewsByGuid) this._itemViewsByGuid = {} ;
   //   return !!this._itemViewsByGuid[SC.guidFor(view)] ;
-  // },
+  },
   
   /** 
     Find the first content item view for the passed event.
@@ -495,20 +491,65 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   itemViewForEvent: function(evt) {
     var responder = this.getPath('pane.rootResponder') ;
-    var view = responder ? responder.targetViewForEvent(evt) : null;
-    if (!view) return null; // workaround for error on IE8, see Ticket #169
+    
+    if (!responder) return null ; // fast path
+    
+    // need to materialize an itemView under the mouse if possible
+    var baseGuid = SC.guidFor(this) ;
+    var baseGuidLen = baseGuid.length ;
+    var element = evt.target ;
+    var elementId = element.id.slice(0, baseGuidLen) ;
+    while (elementId !== baseGuid) {
+      element = element.parentNode ;
+      elementId = element.id.slice(0, baseGuidLen) ;
+    }
+    
+    if (element.id.length === baseGuidLen) {
+      return null ; // we found ourself, so we're not over a child view
+    }
+    
+    // okay, found the DOM node for the view, go ahead and create it
+    // first, find the content...
+    var contentGuid = element.id.slice(baseGuidLen+1) ;
+    var nowShowingRange = this.get('nowShowingRange') ;
+    var content = SC.makeArray(this.get('content')) ;
+    var idx = SC.minRange(nowShowingRange) ;
+    var max = SC.maxRange(nowShowingRange) ;
+    var c = content.objectAt(idx) ;
+    while (SC.guidFor(c) !== contentGuid) {
+      c = content.objectAt(idx++) ;
+    }
+    
+    // then create the view for that content
+    var itemView = this.createExampleView() ;
+    var selection = SC.makeArray(this.get('selection'));
+    itemView.set('content', c) ;
+    itemView.layerId = element.id ; // cannot use .set here, layerId is RO
+    SC.View.views[itemView.layerId] = itemView ; // register for event handling
+    itemView.set('isVisible', SC.valueInRange(idx, nowShowingRange)) ;
+    itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+    this.adjustItemViewLayoutAtContentIndex(itemView, idx, NO) ;
+    itemView.set('parentView', this) ;
+    
+    // prevent normal, non-materialized view behavior
+    itemView.layerLocationNeedsUpdate = NO ;
+    itemView.childViewsNeedLayout = NO ;
+    itemView.layerNeedsUpdate = NO ;
+    
+    // NOTE: still have to search for view, because itemView could contain
+    // nested views, and the mouseDown should go to them first...
+    var view = responder.targetViewForEvent(evt) ;
+    if (!view) return null ; // workaround for error on IE8, see Ticket #169
     
     // work up the view hierarchy to find a match...
     do {
       // item clicked was the ContainerView itself... i.e. the user clicked 
       // outside the child items nothing to return...
-      if ( view == this ) return null;
+      if ( view == this ) return null ;
       
       // sweet!... the view is not only in the collection, but it says we can 
       // hit it. hit it and quit it... 
-      if (this.hasItemView(view) && (!view.hitTest || view.hitTest(evt))) {
-        return view;
-      } 
+      if (!view.hitTest || view.hitTest(evt)) return view ;
     } while (view = view.get('parentView'));
     
     // nothing was found... 
@@ -681,6 +722,58 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   },
   
   // ..........................................................
+  // SELECTION CHANGES
+  // 
+  
+  /** @private
+    Whenever selection array changes, start observing the [] property.  Also 
+    set childrenNeedFullUpdate to YES, which will trigger an update.
+  */
+  _collection_selectionDidChange: function() {
+    var selection = this.get('selection') ;
+    if (selection === this._selection) return this; // nothing to do
+    
+    var func = this._collection_selectionPropertyDidChange ;
+    
+    // remove old observer, add new observer
+    if (this._selection) this._selection.removeObserver('[]', this, func) ;
+    if (selection) selection.addObserver('[]', this, func) ;
+    
+    // cache
+    this._selection = selection;
+    this._selectionPropertyRevision = null ;
+    
+    // trigger property change handler...
+    var rev = (selection) ? selection.propertyRevision : -1 ;
+    this._collection_selectionPropertyDidChange(this, '[]', selection, rev) ; 
+  }.observes('selection'),
+  
+  /** @private
+    Called whenever the content array or any items in the selection array 
+    changes.  update children if this is a new property revision.
+  */
+  _collection_selectionPropertyDidChange: function(target, key, value, rev) {    
+    if (!this._updatingSelection && (!rev || (rev != this._selectionPropertyRevision))) {
+      this._selectionPropertyRevision = rev ;
+      this._updatingSelection = true ;
+      this.selectionPropertyDidChange(target, key);
+      this._updatingSelection = false ;
+    }
+  },
+  
+  /**
+    Invoked whenever a the selection array changes.  The default 
+    implementation will possibly recompute the view's layout size and the 
+    marks it as dirty so that it can update its children.
+  */
+  selectionPropertyDidChange: function(target, key) {
+    this.adjust(this.computeLayout()) ;
+    this.set('isDirty', YES) ;
+    this.invalidateNowShowingRange() ;
+    return this ;
+  },
+  
+  // ..........................................................
   // NOW SHOWING RANGE
   // 
   
@@ -825,7 +918,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   /**
     This method is called whenever the view is resized.  The default
     implementation will simply iterate through the visible content range and
-    call layoutItemView() and layoutGroupView() on all the views.
+    call adjustItemViewLayoutAtContentIndex() and layoutGroupView() on all the views.
     
     If you would like to provide a more efficient method for updating the
     layout on a resize, you could override this method and do the iterating 
@@ -858,7 +951,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       }
       
       // now layout the itemView itself.
-      this.layoutItemView(itemView, idx, false) ;
+      this.adjustItemViewLayoutAtContentIndex(itemView, idx, false) ;
     }
   },
   
@@ -910,13 +1003,20 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var idx = SC.maxRange(range) ;
     
     var baseKey = SC.guidFor(this) + '_' ;
+    var guids = this._itemViewGuids, guid;
+    if (!guids) this._itemViewGuids = guids = {};
+    
     while (--idx >= range.start) {
       c = content.objectAt(idx) ;
-      key = baseKey + SC.guidFor(c) ;
+      
+      // use cache of item view guids to avoid creating temporary objects
+      guid = SC.guidFor(c);
+      if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+      
       itemView.set('content', c) ;
       itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
       itemView.layerId = key ; // cannot use .set, layerId is RO
-      this.layoutItemView(itemView, idx, YES) ;
+      this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
       context = context.begin(itemView.get('tagName')) ;
       itemView.prepareContext(context, YES) ;
       context = context.end() ;
@@ -1215,7 +1315,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
     
     // Layout itemView.
-    this.layoutItemView(ret, contentIndex, firstLayout) ;
+    this.adjustItemViewLayoutAtContentIndex(ret, contentIndex, firstLayout) ;
     return ret ;
   },
   
@@ -1810,32 +1910,37 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @returns {Boolean} Usually YES.
   */
   mouseDown: function(ev) {
-
+    // console.log('%@.mouseDown(%@)'.fmt(this, ev));
+    // console.log(ev.originalEvent);
+    
     // When the user presses the mouse down, we don't do much just yet.
     // Instead, we just need to save a bunch of state about the mouse down
     // so we can choose the right thing to do later.
-
+    
     // save the original mouse down event for use in dragging.
     this._mouseDownEvent = ev ;
-
+    
     // Toggle selection only triggers on mouse up.  Do nothing.
     if (this.useToggleSelection) return true;
-
+    
     // Make sure that saved mouseDown state is always reset in case we do
     // not get a paired mouseUp. (Only happens if subclass does not call us 
     // like it should)
     this._mouseDownAt = this._shouldSelect = this._shouldDeselect =
       this._shouldReselect = this._refreshSelection = false;
-
+      
+    // debugger ;
     // find the actual view the mouse was pressed down on.  This will call
     // hitTest() on item views so they can implement non-square detection
     // modes. -- once we have an item view, get its content object as well.
-    var mouseDownView    = (this._mouseDownView = this.itemViewForEvent(ev));
+    var mouseDownView = (this._mouseDownView = this.itemViewForEvent(ev));
     var mouseDownContent = 
       (this._mouseDownContent = mouseDownView ? mouseDownView.get('content') : null);
-
+      
     // become first responder if possible.
     this.becomeFirstResponder() ;
+    
+    // console.log(mouseDownView);
     
     // recieved a mouseDown on the collection element, but not on one of the 
     // childItems... unless we do not allow empty selections, set it to empty.
@@ -1843,7 +1948,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       if (this.get('allowDeselectAll')) this.selectItems([], false);
       return true ;
     }
-  
+    
     // collection some basic setup info
     var selection  = this.get('selection') || [] ;
     var isSelected = (selection.indexOf(mouseDownContent) !== -1) ;
@@ -1852,9 +1957,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       modifierKeyPressed = true ;
     }
     this._modifierKeyPressed = modifierKeyPressed ;  
-
+    
     this._mouseDownAt = Date.now();
-
+    
     // holding down a modifier key while clicking a selected item should 
     // deselect that item...deselect and bail.
     if (modifierKeyPressed && isSelected) {

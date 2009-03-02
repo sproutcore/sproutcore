@@ -73,6 +73,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       
       this.strings.push(null);
       if (this._tagName === 'script') this._selfClosing = NO; // special case
+      if (this._tagName === 'div') this._selfClosing = NO; //  illegal in html 4.01
       
     } else {
       this._elem = tagNameOrElement ;
@@ -193,6 +194,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} new context
   */
   begin: function(tagNameOrElement) {
+    // console.log('%@.begin(%@) called'.fmt(this, tagNameOrElement));
     return SC.RenderContext(tagNameOrElement, this);
   },
   
@@ -211,6 +213,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (!SC.RenderContext.factory) {
       SC.RenderContext.factory = document.createElement('div');
     }
+    
+    // console.log('%@#element() called'.fmt(this));
+    // console.log(this.join());
     
     SC.RenderContext.factory.innerHTML = this.join();
     return SC.RenderContext.factory.firstChild ;
@@ -236,6 +241,10 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       // throw "Cannot update context because there is no source element";
       return ;
     }
+    
+    // console.log('%@#update() called'.fmt(this));
+    // if (this.length>0) console.log(this.join());
+    // else console.log('<no length>');
     
     // replace innerHTML
     if (this.length>0) elem.innerHTML = this.join();
@@ -305,6 +314,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} 
   */
   end: function() {
+    // console.log('%@.end() called'.fmt(this));
     // NOTE: If you modify this method, be careful to consider memory usage
     // and performance here.  This method is called frequently during renders
     // and we want it to be as fast as possible.
@@ -370,6 +380,8 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     var strings = this.strings;
     var selfClosing = (this._selfClosing === NO) ? NO : (this.length === 1) ;
     tag.push(selfClosing ? ' />' : '>') ;
+    
+    // console.log('selfClosing == %@'.fmt(selfClosing));
     
     strings[this.offset] = tag.join('');
     tag.length = 0 ; // reset temporary object
