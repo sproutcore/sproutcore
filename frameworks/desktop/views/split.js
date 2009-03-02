@@ -360,8 +360,20 @@ SC.SplitView = SC.View.extend(
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
       
-      // TODO: handle min and max sizing and collapse settings *grrr*
+      // make sure we don't exceed our min and max values, and that collapse 
+      // settings are respected
+      // cached values are required by _updateTopLeftThickness() below...
+      this._topLeftView = this.get('topLeftView') ;
+      this._bottomRightView = this.get('bottomRightView') ;
+      this._topLeftViewThickness = this.thicknessForView(this.get('topLeftView'));
+      this._bottomRightThickness = this.thicknessForView(this.get('bottomRightView'));
+      this._dividerThickness = this.get('dividerThickness') ;
+      this._layoutDirection = this.get('layoutDirection') ;
       
+      // this handles min-max settings and collapse parameters
+      this._updateTopLeftThickness(0) ;
+      
+      // actually set layout for our child views
       this.updateChildLayout() ;
     }
     sc_super() ;
