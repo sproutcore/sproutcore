@@ -130,89 +130,78 @@ SC.SplitView = SC.View.extend(
   topLeftView: SC.View,
   dividerView: SC.SplitDividerView,
   bottomRightView: SC.View,
-
+  
   /**
     Used by split divider to decide if the view can be collapsed.
   */
   canCollapseView: function(view) {
+    // console.log('%@.canCollapseView(%@)'.fmt(this, view));
     return this.invokeDelegateMethod(this.delegate, 'splitViewCanCollapse', this, view) ;
   },
-
+  
   /**
     Returns the thickness for a given view.
-
+    
     @param {SC.View} view the view to get.
     @returns the view with the width.
   */
   thicknessForView: function(view) {
+    // console.log('%@.thicknessForView(%@)'.fmt(this, view));
     var direction = this.get('layoutDirection') ;
     var ret = view.get('frame') ;
     return (direction === SC.LAYOUT_HORIZONTAL) ? ret.width : ret.height ;
   },
   
-  /**
-    
-  */
-  init: function() {
-    sc_super() ;
-    this._split_needsFirstLayout = YES ;
-  },
-  
   createChildViews: function() {
-    var childViews = [], view;
-    var viewAry = ['topLeftView', 'dividerView', 'bottomRightView'], idx, len;
+    // console.log('%@.createChildViews()'.fmt(this));
+    var childViews = [] ;
+    var viewAry = ['topLeftView', 'dividerView', 'bottomRightView'] ;
+    var view, idx, len ;
     
     for (idx=0, len=viewAry.length; idx<len; ++idx) {
       if (view = this.get(viewAry[idx])) {
-        view = this[viewAry[idx]] = this.createChildView(view, { 
-          rootElementPath: [idx] 
+        view = this[viewAry[idx]] = this.createChildView(view, {
+          layoutView: this,
+          rootElementPath: [idx]
         }) ;
-        childViews.push(view);
+        childViews.push(view) ;
       }
     }
     
-    this.set('childViews', childViews);
-    return this; 
+    this.set('childViews', childViews) ;
+    return this ; 
   },
   
   /**
     Layout the views.
-
+    
     This method needs to be called anytime you change the view thicknesses
     to make sure they are arranged properly.  This will set up the views so
     that they can resize appropriately.
   */
   updateChildLayout: function() {
-    // console.log('updateChildLayout invoked on %@'.fmt(this));
-    
-    if (this._split_needsFirstLayout) {
-      console.log('doing first updateLayout');
-      this._split_needsFirstLayout = NO ;
-      var direction = this.get('layoutDirection') ;
-      var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
-      this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
-      
-      // TODO: handle min and max sizing and collapse settings *grrr*
-    }
-    
-    // console.log('this._desiredTopLeftThickness is %@'.fmt(this._desiredTopLeftThickness));
-    
+    // console.log('%@.updateChildLayout()'.fmt(this));
     var topLeftView = this.get('topLeftView') ;
     var bottomRightView = this.get('bottomRightView') ;
     var dividerView = this.get('dividerView') ;
     var direction = this.get('layoutDirection') ;
     var topLeftThickness = this._desiredTopLeftThickness ;
-    var dividerThickness = this.get('dividerThickness') ;
+    var dividerThickness = this.get('dividerThickness') || 7 ;
     var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
     var bottomRightThickness = splitViewThickness - dividerThickness - topLeftThickness ;
     var autoresizeBehavior = this.get('autoresizeBehavior') ;
     var layout ;
     var isCollapsed ;
-
+    
+    // console.log('topLeftThickness == %@'.fmt(topLeftThickness));
+    // console.log('dividerThickness == %@'.fmt(dividerThickness));
+    // console.log('splitViewThickness == %@'.fmt(splitViewThickness));
+    // console.log('bottomRightThickness == %@'.fmt(bottomRightThickness));
+    
     // top/left view
     isCollapsed = topLeftView.get('isCollapsed') || NO ;
     topLeftView.setIfChanged('isVisible', !isCollapsed) ;
-    layout = topLeftView.get('layout');
+    layout = SC.clone(topLeftView.get('layout'));
     if (direction == SC.LAYOUT_HORIZONTAL) {
       layout.top = 0 ;
       layout.left = 0 ;
@@ -248,13 +237,13 @@ SC.SplitView = SC.View.extend(
           break ;
       }
     }
-    // console.log('topLeftView layout %@'.fmt($I(layout)));
+    // console.log('topLeftView layout %@'.fmt(SC.inspect(layout)));
     // console.log(topLeftView);
     topLeftView.set('layout', layout);
-
+    
     // split divider view
     if (dividerView) {
-      layout = dividerView.get('layout');
+      layout = SC.clone(dividerView.get('layout'));
       if (direction == SC.LAYOUT_HORIZONTAL) {
         layout.width = dividerThickness;
         delete layout.height ;
@@ -310,15 +299,15 @@ SC.SplitView = SC.View.extend(
             break ;
         }
       }
-      // console.log('dividerView layout %@'.fmt($I(layout)));
+      // console.log('dividerView layout %@'.fmt(SC.inspect(layout)));
       // console.log(dividerView);
       dividerView.set('layout', layout);
     }
-
+    
     // bottom/right view
     isCollapsed = bottomRightView.get('isCollapsed') || NO ;
     bottomRightView.setIfChanged('isVisible', !isCollapsed) ;
-    layout = bottomRightView.get('layout');
+    layout = SC.clone(bottomRightView.get('layout'));
     if (direction == SC.LAYOUT_HORIZONTAL) {
       layout.top = 0 ;
       layout.bottom = 0 ;
@@ -354,27 +343,54 @@ SC.SplitView = SC.View.extend(
           break ;
       }
     }
-    // console.log('bottomRightView layout %@'.fmt($I(layout)));
+    // console.log('bottomRightView layout %@'.fmt(SC.inspect(layout)));
     // console.log(bottomRightView);
     bottomRightView.set('layout', layout);
     
-    topLeftView.updateDisplayLayout();
-    dividerView.updateDisplayLayout();
-    bottomRightView.updateDisplayLayout();
+    // topLeftView.updateDisplayLayout();
+    // dividerView.updateDisplayLayout();
+    // bottomRightView.updateDisplayLayout();
   },
   
-  updateDisplay: function() {
-    // console.log('updateDisplay invoked on %@'.fmt(this));
-    // this.adjustLayout();
+  renderLayout: function(context, firstTime) {
+    // console.log('%@.renderLayout(%@, %@)'.fmt(this, context, firstTime));
+    // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
+    if (firstTime) {
+      var direction = this.get('layoutDirection') ;
+      var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
+      this._desiredTopLeftThickness = parseInt(splitViewThickness * (this.get('topLeftDefaultThickness') || 0.5)) ;
+      
+      // TODO: handle min and max sizing and collapse settings *grrr*
+      
+      this.updateChildLayout() ;
+    }
+    sc_super() ;
+  },
+  
+  render: function(context, firstTime) {
+    // console.log('%@.render(%@, %@)'.fmt(this, context, firstTime));
+    // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
+    sc_super() ;
+    
     if (this._inLiveResize) this._setCursorStyle() ;
     
-    if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
-      this.$().addClass('horizontal').removeClass('vertical') ;
-    } else {
-      this.$().addClass('vertical').removeClass('horizontal') ;
+    if (firstTime) {
+      var dir = this.get('layoutDirection') ;
+      if (dir===SC.LAYOUT_HORIZONTAL) context.addClass('sc-horizontal') ;
+      else context.addClass('sc-vertical') ;
     }
   },
-
+  
+  // layoutDidChangeFor: function(childView) {
+  //   // console.log('%@.layoutChildViews(%@)'.fmt(this, childView));
+  //   sc_super() ;
+  // },
+  // 
+  // layoutChildViews: function() {
+  //   // console.log('%@.layoutChildViews()'.fmt(this));
+  //   sc_super() ;
+  // },
+  
   /**
     Update the split view's layout based on mouse movement.
     
@@ -385,6 +401,8 @@ SC.SplitView = SC.View.extend(
     @returns {Boolean}
   */
   mouseDownInThumbView: function(evt, thumbView) {
+    // console.log('%@.mouseDownInThumbView(%@, %@)'.fmt(this, evt, thumbView));
+    // console.log(evt.originalEvent);
     var responder = this.getPath('pane.rootResponder') ;
     if (!responder) return NO ; // nothing to do
       
@@ -402,29 +420,32 @@ SC.SplitView = SC.View.extend(
     this._dividerThickness = this.get('dividerThickness') ;
     this._layoutDirection = this.get('layoutDirection') ;
     
-    this.viewWillStartLiveResize() ;
+    this.beginLiveResize() ;
     this._inLiveResize = YES ;
     
     return YES ;
   },
   
   mouseDragged: function(evt) {
-    // console.log('mouseDragged invoked on %@'.fmt(this));
+    // console.log('%@.mouseDragged(%@)'.fmt(this, evt));
+    // console.log(evt.originalEvent);
     var offset = (this._layoutDirection == SC.LAYOUT_HORIZONTAL) ? evt.pageX - this._mouseDownX : evt.pageY - this._mouseDownY ;
     this._updateTopLeftThickness(offset) ;
     return YES;
   },
   
   mouseUp: function(evt) {
-    // console.log('mouseUp invoked on %@'.fmt(this));
+    // console.log('%@.mouseUp(%@, %@)'.fmt(this, evt));
+    // console.log(evt.originalEvent);
     this._thumbView = null ; // avoid memory leaks
     this._inLiveResize = NO ;
-    this.viewDidEndLiveResize() ;
+    this.endLiveResize() ;
     return YES ;
   },
-
+  
   doubleClickInThumbView: function(evt, thumbView) {
-    console.log('doubleClickInThumbView invoked on %@'.fmt(this));
+    // console.log('%@.mouseDragged(%@, %@)'.fmt(this, evt, thumbView));
+    // console.log(evt.originalEvent);
     var view = this._topLeftView ;
     var isCollapsed = view.get('isCollapsed') || NO ;
     if (!isCollapsed && !this.canCollapseView(view)) {
@@ -455,6 +476,8 @@ SC.SplitView = SC.View.extend(
   
   /** @private */
   _updateTopLeftThickness: function(offset) {
+    // console.log('%@._updateTopLeftThickness(%@)'.fmt(this, offset));
+    // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
     var topLeftView = this._topLeftView ;
     var bottomRightView = this._bottomRightView ;
     var topLeftViewThickness = this.thicknessForView(topLeftView); // the current thickness, not the original thickness
@@ -464,20 +487,20 @@ SC.SplitView = SC.View.extend(
     var maxAvailable = 0;
     if (!topLeftView.get("isCollapsed")) maxAvailable += topLeftViewThickness ;
     if (!bottomRightView.get("isCollapsed")) maxAvailable += bottomRightViewThickness ;
-
+    
     var proposedThickness = this._topLeftViewThickness + offset;
     var direction = this._layoutDirection ;
     var bottomRightCanCollapse = this.canCollapseView(bottomRightView);
     
     var thickness = proposedThickness;
-
+    
     // constrain to thickness set on top/left
     var max = this.get('topLeftMaxThickness') ;
     var min = this.get('topLeftMinThickness') ;
     
     if (max != null) thickness = Math.min(max, thickness) ;
     if (min != null) thickness = Math.max(min, thickness) ;
-
+    
     // constrain to thickness set on bottom/right
     max = this.get('bottomRightMaxThickness') ;
     min = this.get('bottomRightMinThickness') ;
@@ -485,21 +508,21 @@ SC.SplitView = SC.View.extend(
     if (max != null) bottomRightThickness = Math.min(max, bottomRightThickness) ;
     if (min != null) bottomRightThickness = Math.max(min, bottomRightThickness) ;
     thickness = maxAvailable - bottomRightThickness ;
-
+    
     // constrain to thickness determined by delegate.
     thickness = this.invokeDelegateMethod(this.delegate, 'splitViewConstrainThickness', this, topLeftView, thickness) ;
-
+    
     // cannot be more than what's available
     thickness = Math.min(thickness, maxAvailable) ;
-
+    
     // cannot be less than zero
     thickness = Math.max(0, thickness) ;
-
+    
     var tlCollapseAtThickness = topLeftView.get('collapseAtThickness') ;
     if (!tlCollapseAtThickness) tlCollapseAtThickness = 0 ;
     var brCollapseAtThickness = bottomRightView.get('collapseAtThickness') ;
     brCollapseAtThickness = (brCollapseAtThickness == null) ? maxAvailable : (maxAvailable - brCollapseAtThickness);
-
+    
     if ((proposedThickness <= tlCollapseAtThickness) && this.canCollapseView(topLeftView)) {
       // want to collapse top/left, check if this doesn't violate the max thickness of bottom/right
       max = bottomRightView.get('maxThickness');
@@ -515,7 +538,7 @@ SC.SplitView = SC.View.extend(
         thickness = maxAvailable;
       }
     }
-
+    
     // now apply constrained value
     if (thickness != this.thicknessForView(topLeftView)) {
       this._desiredTopLeftThickness = thickness ;
@@ -526,16 +549,17 @@ SC.SplitView = SC.View.extend(
       
       // this.set('displayNeedsUpdate', YES);
       // this.adjustLayout();
-      this.childLayoutDidChange(); // updates child layouts
+      this.updateChildLayout(); // updates child layouts
       this.displayDidChange(); // updates cursor
     }
   },
-
+  
   /** @private */
   _setCursorStyle: function() {
+    // console.log('%@._setCursorStyle()'.fmt(this));
     var topLeftView = this._topLeftView ;
     var bottomRightView = this._bottomRightView ;
- 
+    
     // updates the cursor of the thumb view that called mouseDownInThumbView() to reflect the status of the drag
     var tlThickness = this.thicknessForView(topLeftView) ;
     var brThickness = this.thicknessForView(bottomRightView) ;
@@ -547,37 +571,39 @@ SC.SplitView = SC.View.extend(
       this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "ew-resize" : "ns-resize" ) ;
     }
   },
-
+  
   /**
     (DELEGATE) Control whether a view can be collapsed.
-
+    
     The default implemention returns NO if the split view property
     canCollapseViews is set to NO or when the given view has
     property canCollapse set to NO, otherwise it returns YES.
-
+    
     @param {SC.SplitView} splitView the split view
     @param {SC.View} view the view we want to collapse.
     @returns {Boolean} YES to allow collapse.
   */
   splitViewCanCollapse: function(splitView, view) {
+    // console.log('%@.splitViewCanCollapse(%@, %@)'.fmt(this, splitView, view));
     if (splitView.get('canCollapseViews') === NO) return NO ;
     if (view.get('canCollapse') === NO) return NO ;
     return YES ;
   },
-
+  
   /**
     (DELEGATE) Constrain a views allowed thickness.
-
+    
     The default implementation allows any thickness.  The view will
     automatically constrain the view to not allow views to overflow the
     visible area.
-
+    
     @param {SC.SplitView} splitView the split view
     @param {SC.View} view the view in question
     @param {Number} proposedThickness the proposed thickness.
     @returns the allowed thickness
   */
   splitViewConstrainThickness: function(splitView, view, proposedThickness) {
+    // console.log('%@.splitViewConstrainThickness(%@, %@, %@)'.fmt(this, splitView, view, proposedThickness));
     return proposedThickness;
   }
 

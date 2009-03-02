@@ -1809,6 +1809,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
+    // console.log('%@.layoutDidChange()'.fmt(this));
     this.beginPropertyChanges() ;
     if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;

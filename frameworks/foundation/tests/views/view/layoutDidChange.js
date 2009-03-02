@@ -103,7 +103,25 @@ test("is invoked whenever layout property changes", function() {
 	var view = SC.View.create({ layoutView: layoutView });
 
 	view.set('layout', { top: 0, left: 10 });
-	equals(callCount, 1, 'should call layoutDidChange when setting layout');
+	equals(callCount, 1, 'should call layoutDidChangeFor when setting layout of child view');
+
+	
+});
+
+test("is invoked on parentView if no layoutView whenever layout property changes", function() {
+
+	var callCount = 0 ;
+	var parentView = SC.View.create({
+		layoutDidChangeFor: function(changedView){
+			callCount++;
+		}
+	});
+	
+	var view = SC.View.create({});
+	view.set('parentView', parentView);
+
+	view.set('layout', { top: 0, left: 10 });
+	equals(callCount, 1, 'should call layoutDidChangeFor when setting layout of child view');
 
 	
 });
