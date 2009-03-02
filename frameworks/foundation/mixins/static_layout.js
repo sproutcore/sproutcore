@@ -21,16 +21,16 @@
   notifications when your view or parentView are resized.
   
   Normally, if you are allowing the browser to manage the size and positioning
-  of your view anyway, these feature will not be useful to your code anyway.
+  of your view, these feature will not be useful to your code anyway.
   
   h2. Using StaticLayout
   
-  It enable static layout on your view, just include this mixin on the view.
+  To enable static layout on your view, just include this mixin on the view.
   SproutCore's builtin views that are capable of being used in static 
   layouts already incorporate this mixin.  
   
   You can then use CSS or the render() method on your view to setup the 
-  positioning on your view using any kind of form you want.
+  positioning on your view using any browser layout mechanism you want.
   
   @since SproutCore 1.0
 */
