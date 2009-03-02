@@ -72,9 +72,9 @@ SC.GridView = SC.CollectionView.extend(
     return ret ;
   },
 
-  layoutItemView: function(itemView, contentIndex, firstLayout) {
+  adjustItemViewLayoutAtContentIndex: function(itemView, contentIndex, firstLayout) {
     //if (!itemView) debugger ;
-    SC.Benchmark.start('SC.GridView.layoutItemViewsFor') ;
+    SC.Benchmark.start('SC.GridView.adjustItemViewLayoutAtContentIndex') ;
 
     var rowHeight = this.get('rowHeight') || 0 ;
     var parentView = itemView.get('parentView') ;
@@ -92,7 +92,7 @@ SC.GridView = SC.CollectionView.extend(
     if (firstLayout || !SC.rectsEqual(itemView.get('frame'), f)) {
       itemView.set('frame', f) ;      
     }
-    SC.Benchmark.end('SC.GridView.layoutItemViewsFor') ;
+    SC.Benchmark.end('SC.GridView.adjustItemViewLayoutAtContentIndex') ;
   },
 
   /** @private */

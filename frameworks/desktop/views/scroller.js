@@ -41,37 +41,48 @@ SC.ScrollerView = SC.View.extend({
   value: 0,
   
   /**
-    The minimum offset value for the scroller.  When the scroller is at the top/left, it will have this value.
+    The minimum offset value for the scroller.  When the scroller is at the 
+    top/left, it will have this value.
     
     @property
   */
   minimum: 0,
   
   /**
-    The maximum offset value for the scroller.  This will be used to calculate the internal height/width of the scroller itself.
+    The maximum offset value for the scroller.  This will be used to calculate
+    the internal height/width of the scroller itself.
     
     @property
   */
   maximum: 0,
   
   /**
-    YES if enable scrollbar, NO to disable it.  Scrollbars will automatically disable if the maximum scroll width does not exceed their capacity.
+    YES if enable scrollbar, NO to disable it.  Scrollbars will automatically 
+    disable if the maximum scroll width does not exceed their capacity.
     
     @property
   */
   isEnabled: YES,
   
   /**
-    Determine the layout direction.  Determines whether the scrollbar should appear horizontal or vertical.  This must be set when the view is created.  Changing this once the view has been created will have no effect.
+    Determine the layout direction.  Determines whether the scrollbar should 
+    appear horizontal or vertical.  This must be set when the view is created.
+    Changing this once the view has been created will have no effect.
     
     @property
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
   
   /**
-    Returns the owner view property the scroller should modify.  If this property is non-null and the owner view defines this property, then the scroller will automatically update this property whenever its own value changes.
+    Returns the owner view property the scroller should modify.  If this 
+    property is non-null and the owner view defines this property, then the 
+    scroller will automatically update this property whenever its own value 
+    changes.
     
-    The default value of this property is computed based on the layoutDirection.  You can override this property to provide your own calculation if necessary or to return null if you want to disable this behavior.
+    The default value of this property is computed based on the 
+    layoutDirection.  You can override this property to provide your own 
+    calculation if necessary or to return null if you want to disable this 
+    behavior.
     
     @property {String}
   */
@@ -107,21 +118,23 @@ SC.ScrollerView = SC.View.extend({
     var min = this.get('minimum'), max = this.get('maximum');
     var enabled = this.get('isEnabled'), value = this.get('value');
     
+    // console.log(dir) ;
+    
     if (firstTime) {
-      context.addClass('sc-horizontal', dir===SC.LAYOUT_HORIZONTAL) ;
-      context.addClass('sc-vertical', dir===SC.LAYOUT_VERTICAL) ;
+      if (dir===SC.LAYOUT_HORIZONTAL) context.addClass('sc-horizontal') ;
+      else context.addClass('sc-vertical') ;
     }
     
     // calculate required size...
     var size = (enabled) ? max-min-2 : 0 ;
     switch (dir) {
       case SC.LAYOUT_VERTICAL:
-        context.push('<div class="sc-inner" style="height: %@px">'.fmt(size));
+        context.push('<div class="sc-inner" style="height: %@px"></div>'.fmt(size));
         context.addStyle('scrollTop', value-min) ;
         break;
         
       case SC.LAYOUT_HORIZONTAL:
-        context.push('<div class="sc-inner" style="width: %@px">'.fmt(size));
+        context.push('<div class="sc-inner" style="width: %@px"></div>'.fmt(size));
         context.addStyle('scrollLeft', value-min) ;
         break;
       

@@ -253,9 +253,9 @@ SC.SourceListView = SC.CollectionView.extend(
 
   
   /** @private */
-  layoutItemView: function(itemView, contentIndex, firstLayout) {
+  adjustItemViewLayoutAtContentIndex: function(itemView, contentIndex, firstLayout) {
     if (SC.BENCHMARK_SOURCE_LIST_VIEW) {
-      SC.Benchmark.start('SC.SourceListView.layoutItemViewsFor') ;
+      SC.Benchmark.start('SC.SourceListView.adjustItemViewLayoutAtContentIndex') ;
     }
     
     // if itemView's group is not visible, then just set to invisible.
@@ -304,7 +304,7 @@ SC.SourceListView = SC.CollectionView.extend(
   layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {
     
     if (SC.BENCHMARK_SOURCE_LIST_VIEW) {
-      SC.Benchmark.start('SC.SourceListView.layoutGroupView') ;
+      SC.Benchmark.start('SC.SourceListView.adjustItemViewLayoutAtContentIndex') ;
     }
     
     //console.log('layoutGroupView', groupValue) ;

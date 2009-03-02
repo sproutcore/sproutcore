@@ -350,8 +350,9 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   /** @private */
-  layoutItemView: function(itemView, contentIndex, firstLayout) {
-    // console.log('layoutItemView invoked on %@'.fmt(this));
+  // layoutItemView: function(itemView, contentIndex, firstLayout) {
+    adjustItemViewLayoutAtContentIndex: function(itemView, contentIndex, firstLayout) {
+    // console.log('adjustItemViewLayoutAtContentIndex invoked on %@'.fmt(this));
     
     // use cached hash to reduce memory allocs
     var layout = this._list_cachedItemViewLayoutHash ;
@@ -364,7 +365,7 @@ SC.ListView = SC.CollectionView.extend(
     layout.height = this.heightForRowAtContentIndex(contentIndex);
     // layout.zIndex = contentIndex;
     
-    itemView.adjust(layout) ;
+    if (firstLayout) itemView.adjust(layout) ;
     // itemView.set('layout', layout) ; // TODO: why does this not work????
   },
   
