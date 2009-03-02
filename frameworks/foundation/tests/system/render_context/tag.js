@@ -31,3 +31,15 @@ test("should NOT emit self closing tag if tag is script", function() {
   equals(context.get(1), '<script>');
   equals(context.get(2), '<'+'/script>');
 });
+
+test("should NOT emit self closing tag if tag is div", function() {
+  context.tag("div");
+  equals(context.get(1), '<div>');
+  equals(context.get(2), '<'+'/div>');
+});
+
+test("should NOT emit self closing tag if no tag is passed", function() {
+  context.tag();
+  equals(context.get(1), '<div>');
+  equals(context.get(2), '<'+'/div>');
+});
