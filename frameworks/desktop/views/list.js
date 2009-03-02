@@ -61,13 +61,6 @@ SC.ListView = SC.CollectionView.extend(
   classNames: ['sc-list-view'],
   
   /**
-    The default example item view will render text-based items.
-    
-    You can override this as you wish.
-  */
-  exampleView: SC.LabelView,
-  
-  /**
     The default layout for the list view simply fills the entire parentView.
   */
   layout: SC.merge(SC.FILL_WIDTH, SC.FILL_HEIGHT),
