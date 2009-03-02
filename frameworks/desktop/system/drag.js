@@ -457,7 +457,7 @@ SC.Drag = SC.Object.extend(
       // FIXME if (!target.get('isVisibleInWindow')) continue ;
       
       // get clippingFrame, converted to the pane.
-      frame = target.convertClippingFrameToView(target.get('clippingFrame'), null) ;
+      frame = target.convertFrameToView(target.get('clippingFrame'), null) ;
       
       // check to see if loc is inside.  If so, then make this the drop target unless 
       // there is a drop target and the current one is not deeper.
@@ -641,7 +641,7 @@ SC.Drag = SC.Object.extend(
       // FIXME if (!target.get('isVisibleInWindow')) continue ;
       
       // get clippingFrame, converted to the pane
-      frame = target.convertClippingFrameToView(target.get('clippingFrame'), null) ;
+      frame = target.convertFrameToView(target.get('clippingFrame'), null) ;
       
       // check to see if loc is inside
       if (SC.pointInRect(loc, frame)) return target;

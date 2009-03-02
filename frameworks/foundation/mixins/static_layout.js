@@ -63,12 +63,6 @@ SC.StaticLayout = {
     Not available on views with static layout.  Calling this method will raise 
     an exception.
   */
-  convertClippingFrameToView: null,
-
-  /**
-    Not available on views with static layout.  Calling this method will raise 
-    an exception.
-  */
   convertFrameFromView: null,
   
   /**
