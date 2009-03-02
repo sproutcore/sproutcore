@@ -16,8 +16,8 @@ module("SC.RenderContext#tag", {
 });
 
 test("should emit a self closing tag.  like calling begin().end()", function() {
-  context.tag("div");
-  equals(context.get(1), "<div />");
+  context.tag("input");
+  equals(context.get(1), "<input />");
 });
 
 test("should respect passed opts when emitting", function() {
