@@ -277,7 +277,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     @property {SC.View}
   */
-  exampleView: SC.LabelView,
+  exampleView: SC.ListItemView,
   
   /**
     If set, this key will be used to get the example view for a given
