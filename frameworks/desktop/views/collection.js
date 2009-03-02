@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('mixins/collection_view_delegate') ;
+sc_require('views/list_item');
 
 SC.BENCHMARK_UPDATE_CHILDREN = YES ;
 SC.BENCHMARK_RENDER = YES ;
