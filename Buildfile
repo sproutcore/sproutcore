@@ -35,8 +35,14 @@ config :sproutcore, :required => :desktop
 end
 
 # setup theme name
-config :empty_theme, :theme_name => 'empty-theme'
+config :empty_theme, 
+  :theme_name => 'empty-theme',
+  :test_required  => ['sproutcore/testing'],
+  :debug_required => ['sproutcore/debug']
 
 # Exception: standard_theme is based on the empty_theme
 config :standard_theme, 
-  :required => :empty_theme, :theme_name => 'sc-theme'
+  :required => :empty_theme, 
+  :theme_name => 'sc-theme',
+  :test_required  => ['sproutcore/testing'],
+  :debug_required => ['sproutcore/debug']
