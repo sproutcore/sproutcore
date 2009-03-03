@@ -50,18 +50,15 @@ SC.Cursor = SC.Object.extend(
   init: function() {
     sc_super() ;
     
-    // create style rule
+    // create a unique style rule and add it to the shared cursor style sheet
     var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ;
-    // var rule = SC.CSSRule.create({
-    //   selector: '.' + SC.guidFor(this), // a unique selector
-    //   styles: [SC.CSSStyle.create({ style: 'cursor: %@;'.fmt(cursor) })]
-    // })
-    
-    // add it to the shared cursor style sheet
     var ss = this.constructor.sharedStyleSheet() ;
     
-    if (ss.insertRule) {
-      ss.insertRule('.%@ {cursor: %@;}'.fmt(SC.guidFor(this), cursorStyle)) ;
+    if (ss.insertRule) { // WC3
+      ss.insertRule(
+        '.%@ {cursor: %@;}'.fmt(SC.guidFor(this), cursorStyle),
+        ss.cssRules ? ss.cssRules.length : 0
+      ) ;
     } else if (ss.addRule) { // IE
       ss.addRule('.'+SC.guidFor(this), 'cursor: '+cursorStyle) ;
     }
@@ -74,12 +71,30 @@ SC.Cursor = SC.Object.extend(
   cursorStyle: SC.DEFAULT_CURSOR,
   
   cursorStyleDidChange: function() {
-    var cursor = this.get('cursor') || SC.DEFAULT_CURSOR ;
-    var rule = this.get('rule') ;
-    var style = rule.get('styles') || [] ;
-    style = style.objectAt(0) ;
-    if (style) style.set('style', 'cursor: %@;'.fmt(cursor)) ;
+    var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ;
+    var rule = this._rule ;
+    if (rule) {
+      rule.style.cursor = cursorStyle ; // fast path
+      return ;
+    }
+    
+    // slow path, taken only once
+    var selector = '.'+this.get('className') ;
+    var ss = this.constructor.sharedStyleSheet() ;
+    var rules = (ss.cssRules ? ss.cssRules : ss.rules) || [] ;
+    
+    // find our rule, cache it, and update the cursor style property
+    for (var idx=0, len = rules.length; idx<len; ++idx) {
+      rule = rules[idx] ;
+      if (rule.selectorText === selector) {
+        this._rule = rule ; // cache for next time
+        rule.style.cursor = cursorStyle ; // update the cursor
+        break ;
+      }
+    }
   }.observes('cursorStyle'),
+  
+  // TODO implement destroy
   
   /** @property {String} a css class name */
   className: null
@@ -91,11 +106,15 @@ SC.Cursor.sharedStyleSheet = function() {
   var ss = this._styleSheet ;
   if (!ss) {
     // create the stylesheet object the hard way (works everywhere)
-    ss = this._styleSheet = document.createElement('style') ;
+    ss = document.createElement('style') ;
     ss.type = 'text/css' ;
     var head = document.getElementsByTagName('head')[0] ;
     if (!head) head = document.documentElement ; // fix for Opera
     head.appendChild(ss) ;
+    
+    // get the actual stylesheet object, not the DOM element
+    ss = document.styleSheets[document.styleSheets.length-1] ;
+    this._styleSheet = ss ;
   }
   return ss ;
 }
