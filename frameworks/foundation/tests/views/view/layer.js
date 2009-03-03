@@ -92,3 +92,59 @@ test("returns null again if it has layer and layer is destroyed", function() {
 test("returns null again if parent view's layer is destroyed", function() {
   
 });
+
+var pane, view ;
+module("SC.View#$", {
+  setup: function() {
+    pane = SC.Pane.design()
+      .childView(SC.View.design({
+        render: function(context, firstTime) {
+          context.push('<span></span>');
+        }
+      })).create();
+      
+    view = pane.childViews[0];
+    
+    SC.RunLoop.begin();
+    pane.append(); // add to create layer...
+    SC.RunLoop.end();
+  }, 
+  
+  teardown: function() {
+    SC.RunLoop.begin();
+    pane.remove();
+    SC.RunLoop.end();
+  }
+});
+
+test("returns an empty CQ object if no layer", function() {
+  var v = SC.View.create();
+  ok(!v.get('layer'), 'precond - should have no layer');
+  equals(v.$().size(), 0, 'should return empty CQ object');
+  equals(v.$('span').size(), 0, 'should return empty CQ object even if filter passed');
+});
+
+test("returns CQ object selecting layer if provided", function() {
+  ok(view.get('layer'), 'precond - should have layer');
+  
+  var cq = view.$();
+  equals(cq.size(), 1, 'view.$() should have one element');
+  equals(cq.get(0), view.get('layer'), 'element should be layer');
+});
+
+test("returns CQ object selecting element inside layer if provided", function() {
+  ok(view.get('layer'), 'precond - should have layer');
+  
+  var cq = view.$('span');
+  equals(cq.size(), 1, 'view.$() should have one element');
+  equals(cq.get(0).parentNode, view.get('layer'), 'element should be in layer');
+});
+
+test("returns empty CQ object if filter passed that does not match item in parent", function() {
+  ok(view.get('layer'), 'precond - should have layer');
+  
+  var cq = view.$('body'); // would normally work if not scoped to view
+  equals(cq.size(), 0, 'view.$(body) should have no elements');
+});
+
+

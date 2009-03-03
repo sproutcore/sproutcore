@@ -487,10 +487,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   $: function(sel) {
     var ret, layer = this.get('layer') ;
-    
-    if (layer) ret = (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
-    else ret = SC.$() ;
-    
+    // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
+    // return an object selecting hte document.
+    ret = !layer ? SC.$([]) : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
     layer = null ; // avoid memory leak
     return ret ;
   },

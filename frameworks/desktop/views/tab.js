@@ -134,7 +134,7 @@ SC.TabView = SC.View.extend(
       } else {
         context.addStyle('bottom', '11px');
       }
-      
+      this.renderChildViews(context, firstTime);
     }
   }),
   
