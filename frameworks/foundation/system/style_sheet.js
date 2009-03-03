@@ -21,22 +21,24 @@ SC.StyleSheet = SC.Object.extend(
   init: function() {
     sc_super() ;
     
-    if (!this.styleSheet) {
+    var ss = this.styleSheet ;
+    if (!ss) {
       // create the stylesheet object the hard way (works everywhere)
-      this.styleSheet = document.createElement('style') ;
-      this.styleSheet.type = 'text/css' ;
+      ss = this.styleSheet = document.createElement('style') ;
+      ss.type = 'text/css' ;
       var head = document.getElementsByTagName('head')[0] ;
       if (!head) head = document.documentElement ; // fix for Opera
-      head.appendChild(this.styleSheet) ;
+      head.appendChild(ss) ;
     }
     
     // cache this object for later
     var ssObjects = this.constructor.styleSheets ;
     if (!ssObjects) ssObjects = this.constructor.styleSheets = {} ;
-    ssObjects[SC.guidFor(this)] ;
+    ssObjects[SC.guidFor(ss)] ;
     
     // create rules array
-    var array = SC.SparseArray.create(this.styleSheet.rules.length) ;
+    var rules = ss.rules || SC.EMPTY_ARRAY ;
+    var array = SC.SparseArray.create(rules.length) ;
     array.delegate = this ;
     this.rules = array ;
     
@@ -44,6 +46,21 @@ SC.StyleSheet = SC.Object.extend(
   },
   
   /**
+    @property {Boolean} YES if the stylsheet is enabled.
+  */
+  isEnabled: function(key, val) {
+    if (val !== undefined) {
+      this.styleSheet.disabled = !val ;
+    }
+    return !this.styleSheet.disabled ;
+  }.property(),
+  isEnabledBindingDefault: SC.Binding.bool(),
+  
+  /**
+    DO NOT MODIFY THIS OBJECT DIRECTLY!!!! Use the methods defined on this
+    object to update properties of the style sheet; otherwise, your changes 
+    will not be reflected.
+    
     @property {CSSStyleSheet} RO
   */
   styleSheet: null,
@@ -88,6 +105,8 @@ SC.StyleSheet = SC.Object.extend(
     rules.removeObject(rule) ;
   },
   
+  // TODO: implement a destroy method
+  
   /**
     @private
     
@@ -96,7 +115,8 @@ SC.StyleSheet = SC.Object.extend(
   */
   sparseArrayDidRequestIndex: function(array, idx) {
     // sc_assert(this.rules === array) ;
-    var rule = this.styleSheet.rules[idx] ;
+    var rules = this.styleSheet.rules || SC.EMPTY_ARRAY ;
+    var rule = rules[idx] ;
     if (rule) {
       array.provideContentAtIndex(idx, SC.CSSRule.create({ 
         rule: rule,
@@ -118,7 +138,7 @@ SC.mixin(SC.StyleSheet,
   
   /**
     Find a stylesheet object by name or href. If by name, .css will be 
-    appendend automatically.
+    appended automatically.
     
     {{{
       var ss = SC.StyleSheet.find('style.css') ;
@@ -170,6 +190,7 @@ SC.mixin(SC.StyleSheet,
             }
             return ssObject ;
           }
+        }
       }
     }
     return null ; // stylesheet not found
