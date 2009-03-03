@@ -8,15 +8,15 @@
 sc_require('system/css_rule') ;
 
 /**
-  @class SC.StyleSheet
+  @class SC.CSSStyleSheet
 
-  A style sheet object wraps a document style sheet object. SC.StyleSheet will
+  A style sheet object wraps a document style sheet object. SC.CSSStyleSheet will
   re-use stylesheet objects as needed.
   
   @extends SC.Object
 */
-SC.StyleSheet = SC.Object.extend(
-/** @scope SC.StyleSheet.prototype */ {
+SC.CSSStyleSheet = SC.Object.extend(
+/** @scope SC.CSSStyleSheet.prototype */ {
   
   init: function() {
     sc_super() ;
@@ -133,21 +133,21 @@ SC.StyleSheet = SC.Object.extend(
   
 });
 
-SC.mixin(SC.StyleSheet,
-/** SC.StyleSheet */{
+SC.mixin(SC.CSSStyleSheet,
+/** SC.CSSStyleSheet */{
   
   /**
     Find a stylesheet object by name or href. If by name, .css will be 
     appended automatically.
     
     {{{
-      var ss = SC.StyleSheet.find('style.css') ;
-      var ss2 = SC.StyleSheet.find('style') ; // same thing
-      sc_assert(ss === ss2) ; // SC.StyleSheet objects are stable
+      var ss = SC.CSSStyleSheet.find('style.css') ;
+      var ss2 = SC.CSSStyleSheet.find('style') ; // same thing
+      sc_assert(ss === ss2) ; // SC.CSSStyleSheet objects are stable
     }}}
     
     @param {String} nameOrUrl a stylsheet name or href to find
-    @returns {SC.StyleSheet} null if not found
+    @returns {SC.CSSStyleSheet} null if not found
   */
   find: function(nameOrUrl) {
     var isUrl = nameOrUrl ? nameOrUrl.indexOf('/') >= 0 : NO ;

@@ -5,18 +5,25 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/css_style') ;
-
 /**
-  @class SC.CSSRule
+  @class SC.CSSStyle
 
-  A css rule object represents a css rule that is part of a style sheet 
-  object. You can create your own rules and add insert them in style sheets at
-  runtime.
+  A css style object represents a css style that is part of a single css rule 
+  in a single css style sheet.
   
   @extends SC.Object
 */
-SC.CSSRule = SC.Object.extend(
-/** @scope SC.CSSRule.prototype */ {
+SC.CSSStyle = SC.Object.extend(
+/** @scope SC.CSSStyle.prototype */ {
+  
+  /**
+    @property {String} a css string representing the style property
+  */
+  style: '',
+  
+  /**
+    @property {SC.CSSRule} the rule this style is part of
+  */
+  rule: null
   
 });
