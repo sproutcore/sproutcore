@@ -220,7 +220,6 @@ SC.ListItemView = SC.View.extend(SC.Control,
     @returns {void}
    */
    renderIcon: function(context, icon){
-     console.log('renderIcon(%@)'.fmt(icon));
      
      // get a class name and url to include if relevant
      var url = null, className = null ;
@@ -332,12 +331,11 @@ SC.ListItemView = SC.View.extend(SC.Control,
          this._addCheckboxActiveState() ;
          this._isMouseDownOnCheckbox = YES ;
          this._isMouseInsideCheckbox = YES ;
-         return true ;
+         return YES ; // listItem should handle this event
        } 
      }  
 
-     this.set('isActive', YES);
-     return YES ;
+     return NO ; // let the collection view handle this event
    },
 
    mouseUp: function(evt) {
