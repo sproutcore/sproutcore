@@ -40,7 +40,7 @@
 .sc-theme .sc-segmented-view .sc-button-inner {
 	display: block;
 	min-width: 20px;
-	min-height: 20px;
+	min-height: 22px;
 }
 
 .sc-theme .sc-segmented-view a.sc-segment.sc-first-segment {

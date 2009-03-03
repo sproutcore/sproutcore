@@ -7,4 +7,48 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.TabView Methods");
+var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+
+module("SC.TabView", {
+  setup: function() {
+    SC.RunLoop.begin();
+    pane = SC.MainPane.create({
+      childViews: [
+        SC.TabView.extend({
+          nowShowing: 'tab2',
+
+          items: [
+            { title: "tab1", value: "tab1" , icon: iconURL},
+            { title: "tab2", value: "tab2" , icon: iconURL},
+            { title: "tab3", value: "tab3" , icon: iconURL}
+          ],
+
+          itemTitleKey: 'title',
+          itemValueKey: 'value',
+          itemIconKey: 'icon',
+          layout: { left:12, height: 200, right:12, top:12 }
+          
+        })]
+    });
+    pane.append(); // make sure there is a layer...
+    SC.RunLoop.end();
+    
+    view = pane.childViews[0];
+  }, 
+  
+  teardown: function() {
+    pane.remove();
+    pane = view = null ;
+  }
+});
+
+test("Check that all segmentedViews are visible", function() {
+   ok(true, 'hello');
+ });
+
+
+//_tab_nowShowingDidChange: function() {
+
+//_tab_saveUserDefault: function() {
+
+//_tab_itemsDidChange: function() {
