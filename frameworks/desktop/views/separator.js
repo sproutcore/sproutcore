@@ -16,8 +16,8 @@
 SC.SeparatorView = SC.View.extend(
 /** @scope SC.SeparatorView.prototype */ {
 
-  emptyElement: '<span><span></span></span>',
   classNames: ['sc-separator-view'],
+  tagName: 'span',
 
   /** 
     Select the direction of the separator line.  Must be one of SC.LAYOUT_VERTICAL or SC.LAYOUT_HORIZONTAL.
@@ -26,9 +26,12 @@ SC.SeparatorView = SC.View.extend(
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
-  prepareDisplay: function() {
-    var ret = sc_super();
-    this.$().addClass(this.get('layoutDirection'));
+  render: function(context, firstTime) {
+
+    context.push('<span></span>');
+	context.addClass(this.get('layoutDirection'));
   }
+
+
 
 });

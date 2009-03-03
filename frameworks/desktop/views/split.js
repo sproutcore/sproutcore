@@ -363,15 +363,16 @@ SC.SplitView = SC.View.extend(
     bottomRightView.updateDisplayLayout();
   },
   
-  updateDisplay: function() {
+//  updateDisplay: function() {
+	render: function(context, firstTime) {
     // console.log('updateDisplay invoked on %@'.fmt(this));
     // this.adjustLayout();
     if (this._inLiveResize) this._setCursorStyle() ;
     
     if (this.get('layoutDirection') === SC.LAYOUT_HORIZONTAL) {
-      this.$().addClass('horizontal').removeClass('vertical') ;
+      context.addClass('horizontal').removeClass('vertical') ;
     } else {
-      this.$().addClass('vertical').removeClass('horizontal') ;
+      context.addClass('vertical').removeClass('horizontal') ;
     }
   },
 

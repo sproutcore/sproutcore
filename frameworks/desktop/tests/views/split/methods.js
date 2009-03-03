@@ -6,20 +6,23 @@
 // ==========================================================================
 
 /*global module test htmlbody ok equals same stop start */
-var pane, view ;
+var pane, view, thumb ;
 module("SC.SplitView",{
 	setup: function() {
 	    SC.RunLoop.begin();
 	    pane = SC.MainPane.create({
 		  childViews: [
-		   SC.SplitView.extend({
-			
-		   })]
+		    SC.SplitView.extend({
+			  layout: { hieght: 300, width: 200 },
+			  layoutDirection: SC.LAYOUT_HORIZONTAL,
+			  childViews: [ SC.ThumbView.extend() ]
+		    })]
 		});
 		pane.append(); // make sure there is a layer...
 	    SC.RunLoop.end();
 	
 		view = pane.childViews[0];
+		thumb = view.childViews[1];
 	},
     	
 	teardown: function() {
@@ -43,14 +46,20 @@ test("the thickness of the views",function(){
 });
 
 
-// test("updateChildLayout method updates the layout display",function(){
+test("updateChildLayout method updates the layout display",function(){
+	ok(view.$().hasClass('horizontal'), 'should no longer have horizontal class');
+	var q = Q$('span', view.get('layer'));
+//	q.createChildViews();
 // 	view.get('topLeftView').top = 25;
 // 	view.updateChildLayout();
 // 	alert(view.thicknessForView(view.get('topLeftView')));
 // 	SC.RESIZE_BOTH is currently unsupported.	
-// });
+});
 
-
+test("performing the mouse up event", function() {
+	var elem = view.get('layer');
+	SC.Event.trigger(elem, 'mouseUp'); alert(view);
+});
 
 // 	
 // module("TODO: Test SC.SplitDividerView Methods");
