@@ -388,6 +388,7 @@ SC.SplitView = SC.View.extend(
       var dir = this.get('layoutDirection') ;
       if (dir===SC.LAYOUT_HORIZONTAL) context.addClass('sc-horizontal') ;
       else context.addClass('sc-vertical') ;
+    }
   },
   
   // layoutDidChangeFor: function(childView) {
