@@ -112,6 +112,11 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @property {Number}
   */
   length: 0,
+  
+  /**
+    YES if the update is partial; existing DOM nodes should be retained.
+  */
+  partialUpdate: NO,
 
   // ..........................................................
   // CORE STRING API
@@ -222,6 +227,24 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   },
   
   /**
+    Removes an element with the passed id in the currently managed element.
+  */
+  remove: function(elementId) {
+    console.log('remove('+elementId+')');
+    if (!elementId) return ;
+    
+    var el, elem = this._elem ;
+    if (!elem || !elem.getElementById) return ;
+    
+    el = elem.getElementById(elementId) ;
+    if (el) {
+      console.log('removing '+elementId) ;
+      el = elem.removeChild(el) ;
+      delete el ;
+    }
+  },
+  
+  /**
     If an element was set on this context when it was created, this method 
     will actually apply any changes to the element itself.  If you have not
     written any inner html into the context, then the innerHTML of the 
@@ -235,7 +258,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} previous context or null if top 
   */
   update: function() {
-    var elem = this._elem, key, value, styles;  
+    var elem = this._elem, key, value, styles, elem2, n;  
     
     if (!elem) {
       // throw "Cannot update context because there is no source element";
@@ -247,7 +270,20 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // else console.log('<no length>');
     
     // replace innerHTML
-    if (this.length>0) elem.innerHTML = this.join();
+    if (this.length>0) {
+      if (this.partialUpdate) {
+        elem2 = elem.cloneNode(false);
+        elem2.innerHTML = this.join();
+        var ary = elem2.childNodes ;
+        for (var idx=0, len=ary.length; idx<len; ++idx) {
+          n = ary[idx] ; // test for validity to prevent bad pointers (!) in FF and Safari
+          if (n) elem.appendChild(n) ;
+        }
+        delete elem2 ;
+      } else {
+        elem.innerHTML = this.join();
+      }
+    }
     
     // note: each of the items below only apply if the private variable has
     // been set to something other than null (indicating they were used at

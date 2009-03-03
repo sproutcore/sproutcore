@@ -985,9 +985,131 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     var content = SC.makeArray(this.get('content')) ;
     var selection = SC.makeArray(this.get('selection'));
+    var oldRange = this._oldNowShowingRange ;
     var range = this.get('nowShowingRange') ;
+    this._oldNowShowingRange = SC.cloneRange(range) ;
     var key, itemView = this.createExampleView(content), c ;
-    var idx = SC.maxRange(range) ;
+    var range2 ; // only used if the old range fits inside the new range
+    var idx, end, childId ;
+    
+    // keep track of children we've got rendered
+    var childSet = this._childSet ;
+    if (!childSet) childSet = this._childSet = [] ;
+    
+    // used for santity checks during debugging
+    var maxLen = range.length ;
+    
+    console.log('oldRange = ') ;
+    console.log(oldRange) ;
+    console.log('range = ') ;
+    console.log(range) ;
+    
+    // only redaw objects we haven't previously drawn
+    if (oldRange) {
+      // ignore ranges that don't overlap
+      if (range.start >= oldRange.start + oldRange.length) {
+        // full render
+        childSet.length = 0 ;
+      } else if (range.start + range.length <= oldRange.start) {
+        // full render
+        childSet.length = 0 ;
+        
+      // okay, the ranges overlap. are they equal?
+      } else if (SC.rangesEqual(oldRange, range)) {
+        range = { start: 0, length: 0 }; // nothing to render
+        
+      // nope, is the old range inside the new range?
+      } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
+        // need to render two ranges...all pre-existing views are valid
+        context.partialUpdate = YES ;
+        range2 = { start: oldRange.start + oldRange.length, length: range.length - oldRange.length } ;
+        range.length = oldRange.start - range.start ;
+        
+      // nope, is the new range inside the old range?
+      } else if (range.start >= oldRange.start && range.start + range.length <= oldRange.start + oldRange.length) {        
+        // need to remove unused childNodes at both ends...
+        idx = oldRange.start ;
+        end = range.start ;
+        while (idx < end) {
+          childId = childSet[idx] ;
+          if (childId) context.remove(childId) ;
+          delete childSet[idx] ;
+          ++idx ;
+        }
+        
+        idx = range.start + range.length ;
+        end = oldRange.start + oldRange.length ;
+        while (idx < end) {
+          childId = childSet[idx] ;
+          if (childId) context.remove(childId) ;
+          delete childSet[idx] ;
+          ++idx ;
+        }
+        
+        range = { start: 0, length: 0 }; // nothing to render
+        
+      // nope, is the newRange lower than the old range?
+      } else if (range.start < oldRange.start) {
+        context.partialUpdate = YES ;
+        
+        // need to remove unused childNodes at the top of the old range
+        idx = range.start + range.length ;
+        end = oldRange.start + oldRange.length ;
+        while (idx < end) {
+          childId = childSet[idx] ;
+          if (childId) context.remove(childId) ;
+          delete childSet[idx] ;
+          ++idx ;
+        }
+        
+        range.length = Math.min(range.length, oldRange.start - range.start) ;
+        
+      // nope, so the newRange is higher than the old range  
+      } else {
+        context.partialUpdate = YES ;
+        
+        // need to remove unused childNodes at the bottom of the old range
+        idx = oldRange.start ;
+        end = range.start ;
+        while (idx < end) {
+          childId = childSet[idx] ;
+          if (childId) context.remove(childId) ;
+          delete childSet[idx] ;
+          ++idx ;
+        }
+        
+        range.length = range.start + range.length - oldRange.length ;
+        range.start = oldRange.start + oldRange.length ;
+      }
+    }
+    
+    // sanity check our ranges
+    // if (range.length < 0) range.length = 0 ;
+    // if (range.length > maxLen) range.length = maxLen ;
+    // if (range.start < 0) range.start = 0 ;
+    // if (range2) {
+    //   if (range2.length < 0) range2.length = 0 ;
+    //   if (range2.length > maxLen) range2.length = maxLen ;
+    //   if (range2.start < 0) range2.start = 0 ;
+    // }
+    if (range.length < 0) throw range.length ;
+    if (range.length > maxLen) throw range.length ;
+    if (range.start < 0) throw range.start ;
+    if (range2) {
+      if (range2.length < 0) throw range2.length ;
+      if (range2.length > maxLen) throw range2.length ;
+      if (range2.start < 0) throw range2.start ;
+    }
+    
+    console.log('rendering = ') ;
+    console.log(range) ;
+    if (range2) {
+      console.log('also rendering = ') ;
+      console.log(range2) ;
+    }
+    console.log('******************************') ;
+    
+    idx = SC.maxRange(range) ;
     
     var baseKey = SC.guidFor(this) + '_' ;
     var guids = this._itemViewGuids, guid;
@@ -1003,10 +1125,33 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       itemView.set('content', c) ;
       itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
       itemView.layerId = key ; // cannot use .set, layerId is RO
+      if (childSet[idx]) throw key ; // should not re-render a child in the index!
+      childSet[idx] = key ;
       this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
       context = context.begin(itemView.get('tagName')) ;
       itemView.prepareContext(context, YES) ;
       context = context.end() ;
+    }
+    
+    if (range2) {
+      idx = SC.maxRange(range2) ;
+      while (--idx >= range2.start) {
+        c = content.objectAt(idx) ;
+        
+        // use cache of item view guids to avoid creating temporary objects
+        guid = SC.guidFor(c);
+        if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+        
+        itemView.set('content', c) ;
+        itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+        itemView.layerId = key ; // cannot use .set, layerId is RO
+        if (childSet[idx]) throw key + ' at index ' + idx ; // should not re-render a child in the index!
+        childSet[idx] = key ;
+        this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
+        context = context.begin(itemView.get('tagName')) ;
+        itemView.prepareContext(context, YES) ;
+        context = context.end() ;
+      }
     }
     
     this.set('isDirty', NO);

@@ -302,6 +302,16 @@ SC.mixin( /** @scope SC */ {
     return { start: min, length: max-min };
   },
   
+  /** Returns the difference of the two ranges or SC.RANGE_NOT_FOUND */
+  subtractRanges: function(r1, r2) {
+    if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
+    if ((r1.length < 0) || (r2.length < 0)) return SC.RANGE_NOT_FOUND;
+    var max = Math.max(SC.minRange(r1), SC.minRange(r2)) ;
+    var min = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
+    if (max < min) return SC.RANGE_NOT_FOUND ;
+    return { start: min, length: max-min };
+  },
+  
   /** Returns a clone of the range. */
   cloneRange: function(r) { 
     return { start: r.start, length: r.length }; 
