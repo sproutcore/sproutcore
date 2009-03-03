@@ -7,6 +7,7 @@
 
 require('system/browser');
 require('system/event');
+require('system/cursor');
 
 require('mixins/responder') ;
 require('mixins/string') ;
@@ -781,6 +782,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (!this.get('isEnabled')) context.addClass('disabled') ;
     if (!this.get('isVisible')) context.addClass('hidden') ;
     
+    var cursor = this.get('cursor') ;
+    if (cursor) context.addClass(cursor.get('className')) ;
+    
     this.render(context, firstTime) ;
     if (mixins = this.renderMixin) {
       len = mixins.length;
@@ -877,6 +881,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @readOnly
   */
   displayProperties: [],
+  
+  /**
+    You can set this to an SC.Cursor instance; it's className will 
+    automatically be added to the layer's classNames. The cursor is only used 
+    when a layer is first created.  If you change the cursor for an element, 
+    you must destroy and recreate the view layer.
+    
+    @property {SC.Cursor}
+  */
+  cursor: null,
   
   // ..........................................................
   // LAYER LOCATION

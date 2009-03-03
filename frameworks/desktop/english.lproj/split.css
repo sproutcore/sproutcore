@@ -24,12 +24,6 @@
   right: auto;
 }
 */
-.sc-split-view.sc-horizontal > .sc-split-divider-view {
-	cursor: ew-resize;
-/*  width: 3px;
-  left: 150px;
-  right: auto;
-*/}
 
 /*.sc-split-view.horizontal.thin > .sc-split-divider-view {
   left: 150px;
@@ -63,13 +57,6 @@
   bottom: auto;
 }
 */
-.sc-split-view.sc-vertical > .sc-split-divider-view {
-	cursor: ns-resize;
-/*  height: 3px;
-  top: 150px;
-  bottom: auto;
-*/}
-
 /*.sc-split-view.vertical.thin > .sc-split-divider-view {
   top: 150px;
   height: 1px;

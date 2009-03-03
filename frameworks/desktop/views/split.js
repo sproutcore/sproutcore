@@ -36,38 +36,38 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
       
     })
   }}}
-
+  
   When the user clicks and drags on a split divider view, it will
   automatically resize the views immediately before and after the split
   divider view. You can constrain the resizing allowed by the split view
   either by setting a minThickness and maxThickness property on the views
   themselves or by implementing the method splitViewConstrainThickness on
   a delegate object.
-
+  
   In addition to resizing views, users can also collapse views by double
   clicking on a split divider view.  When a view is collapsed, it's isVisible
   property is set to NO and its space it removed from the view.  Double
   clicking on a divider again will restore a collapsed view.  A user can also
   start to drag the divider to show the collapsed view.
-
+  
   You can programmatically control collapsing behavior using various properties
   on either the split view or its child views, and/or by implementing the
   method splitViewCanCollapse on a delegate object.
-
+  
   Finally, SplitViews can layout their child views either horizontally or
   vertically.  To choose the direction of layout set the layoutDirection
   property on the view (or the :direction option with the view helper).
   This property should be set when the view is created. Changing it
   dynamically will have an unknown effect.
-
+  
   @property {Boolean} layoutDirection Either SC.HORIZONTAL or SC.VERTICAL.
   Defaults to SC.HORIZONTAL. Use the :direction option with the split_view
-  viewhelper. 
-
+  viewhelper.
+  
   @property {Boolean} canCollapseViews Set to NO when you don't want any of
   the child views to collapse. Defaults to YES. Use the :can_collapse_views
   option with the split_view viewhelper.
-
+  
   In addition, the top/left and bottom/right child views can have these
   properties:
   
@@ -80,18 +80,18 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
 */
 SC.SplitView = SC.View.extend(
 /** @scope SC.SplitView.prototype */ {
-
-  classNames: ['sc-split-view'],  
-
+  
+  classNames: ['sc-split-view'],
+  
   childLayoutProperties: 'layoutDirection dividerThickness autoresizeBehavior'.w(),
   
   displayProperties: ['layoutDirection'],
-
+  
   /**
     delegate for controlling split view behavior.
   */
   delegate: null,
-
+  
   /**
     Direction of layout.  Must be SC.LAYOUT_HORIZONTAL or SC.LAYOUT_VERTICAL.
     
@@ -132,6 +132,11 @@ SC.SplitView = SC.View.extend(
   topLeftView: SC.View,
   dividerView: SC.SplitDividerView,
   bottomRightView: SC.View,
+  
+  /**
+    @property {SC.Cursor} the cursor thumb view should use for themselves
+  */
+  thumbViewCursor: null,
   
   /**
     Used by split divider to decide if the view can be collapsed.
@@ -352,10 +357,15 @@ SC.SplitView = SC.View.extend(
     // bottomRightView.updateDisplayLayout();
   },
   
+  /** @private */
   renderLayout: function(context, firstTime) {
     // console.log('%@.renderLayout(%@, %@)'.fmt(this, context, firstTime));
     // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
     if (firstTime) {
+      if (!this.get('thumbViewCursor')) {
+        this.set('thumbViewCursor', SC.Cursor.create()) ;
+      }
+      
       var direction = this.get('layoutDirection') ;
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       
@@ -379,12 +389,16 @@ SC.SplitView = SC.View.extend(
       // this handles min-max settings and collapse parameters
       this._updateTopLeftThickness(0) ;
       
+      // update the cursor used by thumb views
+      this._setCursorStyle() ;
+      
       // actually set layout for our child views
       this.updateChildLayout() ;
     }
     sc_super() ;
   },
   
+  /** @private */
   render: function(context, firstTime) {
     // console.log('%@.render(%@, %@)'.fmt(this, context, firstTime));
     // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
@@ -585,16 +599,17 @@ SC.SplitView = SC.View.extend(
     // console.log('%@._setCursorStyle()'.fmt(this));
     var topLeftView = this._topLeftView ;
     var bottomRightView = this._bottomRightView ;
+    var thumbViewCursor = this.get('thumbViewCursor') ;
     
     // updates the cursor of the thumb view that called mouseDownInThumbView() to reflect the status of the drag
     var tlThickness = this.thicknessForView(topLeftView) ;
     var brThickness = this.thicknessForView(bottomRightView) ;
-    if (topLeftView.get('isCollapsed') || tlThickness == topLeftView.get("minThickness") || brThickness == bottomRightView.get("maxThickness")) {
-      this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "e-resize" : "s-resize" ) ;
-    } else if (bottomRightView.get('isCollapsed') || tlThickness == topLeftView.get("maxThickness") || brThickness == bottomRightView.get("minThickness")) {
-      this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "w-resize" : "n-resize" ) ;
+    if (topLeftView.get('isCollapsed') || tlThickness == this.get("topLeftMinThickness") || brThickness == this.get("bottomRightMaxThickness")) {
+      thumbViewCursor.set('cursorStyle', this._layoutDirection == SC.LAYOUT_HORIZONTAL ? "e-resize" : "s-resize") ;
+    } else if (bottomRightView.get('isCollapsed') || tlThickness == this.get("topLeftMaxThickness") || brThickness == this.get("bottomRightMinThickness")) {
+      thumbViewCursor.set('cursorStyle', this._layoutDirection == SC.LAYOUT_HORIZONTAL ? "w-resize" : "n-resize") ;
     } else {
-      this._thumbView.$().css('cursor', this._layoutDirection == SC.HORIZONTAL ? "ew-resize" : "ns-resize" ) ;
+      thumbViewCursor.set('cursorStyle', this._layoutDirection == SC.LAYOUT_HORIZONTAL ? "ew-resize" : "ns-resize") ;
     }
   },
   

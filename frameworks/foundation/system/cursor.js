@@ -74,7 +74,7 @@ SC.Cursor = SC.Object.extend(
     @readOnly
     @property {String} the css class name updated by this cursor
   */
-  className: null
+  className: null,
   
   /**
     @property {String} the cursor value, can be 'url("path/to/cursor")'
@@ -104,7 +104,7 @@ SC.Cursor = SC.Object.extend(
         break ;
       }
     }
-  }.observes('cursorStyle'),
+  }.observes('cursorStyle')
   
   // TODO implement destroy
   

@@ -31,7 +31,14 @@ SC.ThumbView = SC.View.extend(
   */
   isEnabled: YES,
   isEnabledBindingDefault: SC.Binding.bool(),
-
+  
+  /** @private */
+  prepareContext: function(context, firstTime) {
+    var splitView = this.get('splitView') ;
+    if (splitView) this.set('cursor', splitView.get('thumbViewCursor')) ;
+    return sc_super() ;
+  },
+  
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return NO ;
     
