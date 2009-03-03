@@ -648,4 +648,4 @@ SC.SplitView = SC.View.extend(
     return proposedThickness;
   }
 
-}) ;
+});
