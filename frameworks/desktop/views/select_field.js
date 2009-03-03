@@ -95,7 +95,8 @@ SC.SelectFieldView = SC.FieldView.extend(
     call this method to rebuild the menu manually.  Normally you should not
     need to do this since the menu will be rebuilt as its data changes.
   */
-  rebuildMenu: function() {
+  rebuildMenu: function(context) {
+
     // get list of objects.
     var nameKey = this.get('nameKey') ;
     var valueKey = this.get('valueKey') ;
@@ -110,15 +111,14 @@ SC.SelectFieldView = SC.FieldView.extend(
     if ((fieldValue === null) || (fieldValue === '')) fieldValue = '***' ;
    
     if (objects) {
-      objects = Array.from(objects) ; // make array.
       objects = this.sortObjects(objects) ; // sort'em.
-      var html = [] ;       
+      // var html = [] ;       
    
       var emptyName = this.get('emptyName') ;
       if (emptyName) {
         if (shouldLocalize) emptyName = emptyName.loc() ;
-        html.push('<option value="***">%@</option>'.fmt(emptyName)) ;
-        html.push('<option disabled="disabled"></option>') ;
+        context.push('<option value="***">%@</option>'.fmt(emptyName)) ;
+        context.push('<option disabled="disabled"></option>') ;
       }
    
       // generate option elements.
@@ -141,16 +141,16 @@ SC.SelectFieldView = SC.FieldView.extend(
    
           // render HTML
           var disable = (this.validateMenuItem && this.validateMenuItem(value, name)) ? '' : 'disabled="disabled" ' ;
-          html.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
+          context.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
    
         // null value means separator.
         } else {
-          html.push('<option disabled="disabled"></option>') ;
+          context.push('<option disabled="disabled"></option>') ;
         }
       }, this );
    
       // replace the contents of this HTML element.
-      this.$input().html(html.join(""));//this.update(html.join("")); //TODO: this won't work
+      // this.$input().html(context.join(""));//this.update(html.join("")); //TODO: this won't work
       this.setFieldValue(fieldValue);
    
     } else {
@@ -186,7 +186,7 @@ SC.SelectFieldView = SC.FieldView.extend(
     // If no value key was set and there are objects then match back to an
     // object.
     } else if (value && objects) {
-      objects = Array.from(objects) ;
+      // objects = Array.from(objects) ;
       var loc = objects.length ;
       var found = null ; // matching object goes here.
       while(!found && (--loc >= 0)) {
@@ -206,10 +206,10 @@ SC.SelectFieldView = SC.FieldView.extend(
   },
   
   // object changes to the objects array of objects if possible.
-  _objectsObserver: function() {
-    if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
+  render: function(context, firstTime) {
+    // if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
       var loc ;
-      var objects = Array.from(this.get('objects')) ;
+      var objects = this.get('objects') ;
       var func = this._objectsItemObserver ;
     
       // stop observing old objects.
@@ -247,10 +247,11 @@ SC.SelectFieldView = SC.FieldView.extend(
           } // if (object &&...)
         } // while(--loc)
       } // if (this._objects)
-    
-     this.rebuildMenu() ;
-    } // if (this.didChangeFor...)
-  }.observes('objects','nameKey','valueKey'),
+     this.rebuildMenu(context) ;
+    // } // if (this.didChangeFor...)
+  },
+
+displayProperties: ['objects','nameKey','valueKey'],
 
   // this is invoked anytime an item we are interested in in the menu changes
   // rebuild the menu when this happens, but only one time.

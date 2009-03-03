@@ -38,7 +38,7 @@ module("SC.SelectFieldView",{
 });
 
 test("renders a select field input tag with appropriate attributes", function() {
-    equals(view.get('tagName'), 'select', 'should have type as text');	
+	equals(view.get('tagName'), 'select', 'should have type as text');	
 	var q = Q$('select', view.get('layer'));
 	equals(view.$().attr('id'), SC.guidFor(view), 'should have id as view_guid');
 });

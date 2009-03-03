@@ -28,9 +28,6 @@ var pane = SC.ControlTestPane.design()
 
   .add("sortedStringOptions", SC.SelectFieldView, { 
     objects:["Apple","Sproutcore 1.0","Development","Charles"],
-	// nameKey:['a','b'],
-	// valueKey:[1,2],
-	// objects:[1,2],
 	useStaticLayout: YES, 
     layout: { width: 'auto', right: 'auto' }
   })
