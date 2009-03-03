@@ -15,7 +15,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   var pane = SC.ControlTestPane.design()
     
-    .add("tabView", SC.TabView, { 
+    .add("tabView1", SC.TabView, { 
       nowShowing: 'tab2',
 
       items: [
@@ -27,10 +27,36 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       itemTitleKey: 'title',
       itemValueKey: 'value',
       itemIconKey: 'icon',
-      layout: { left:12, height: 200, right:12, top:12, bottom:12 }
+      layout: { left:12, height: 200, right:12, top:12 }
       
-  //    userDefaultKey: "mainPane"
-  });
+  })
+  
+  .add("tabView2", SC.TabView, { 
+    nowShowing: 'tab3',
+
+    items: [
+      { title: "tab1", value: "tab1" },
+      { title: "tab2", value: "tab2" },
+      { title: "tab3", value: "tab3" }
+    ],
+    
+    itemTitleKey: 'title',
+    itemValueKey: 'value',
+    layout: { left:12, height: 200, right:12, top:12 }
+    
+    })
+    .add("tabView3", SC.TabView, { 
+      
+      items: [
+        { title: "tab1", value: "tab1" },
+        { title: "tab2", value: "tab2" },
+        { title: "tab3", value: "tab3" }
+      ],
+      
+      itemTitleKey: 'title',
+      itemValueKey: 'value',
+      layout: { left:12, height: 200, right:12, top:12}
+    });
     
   pane.show(); // add a test to show the test pane
 
@@ -39,8 +65,24 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   // 
   module('SC.TabView ui', pane.standardSetup());
   
-  test("basic", function() {
-    ok(true, 'hello');
-  });
+  test("Check that all tabViews are visible", function() {
+    ok(pane.view('tabView1').get('isVisibleInWindow'), 'tabView1.isVisibleInWindow should be YES');
+    ok(pane.view('tabView2').get('isVisibleInWindow'), 'tabView2.isVisibleInWindow should be YES');
+    ok(pane.view('tabView3').get('isVisibleInWindow'), 'tabView3.isVisibleInWindow should be YES');
+   });
+   
+   
+   test("Check that the tabView has the right classes set", function() {
+     var viewElem=pane.view('tabView1').$();
+     var views=pane.view('tabView1').$('div');
+     ok(viewElem.hasClass('sc-view'), 'tabView1.hasClass(sc-view) should be YES');
+     ok(viewElem.hasClass('sc-tab-view'), 'tabView1.hasClass(sc-tab-view) should be YES');
+     ok(views[1].className.indexOf('sc-segmented-view')>=0, 'tabView1 should contain a segmented view');
+     ok(views[0].className.indexOf('sc-container-view')>=0, 'tabView1 should contain a container view');
+     ok(views[1].childNodes.length==3, 'tabView1 should have 3 options');
+     
+
+   });
+  
 
 })();

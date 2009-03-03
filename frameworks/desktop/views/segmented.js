@@ -301,18 +301,40 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     any "transient" states such as the global isEnabled property or selection.
   */
   renderDisplayItems: function(context, items) {
-    //  debugger;
-    // first sbuild HTML for items
-    var item=null;
-    var classes=null  ;
-    var tot=0;
+    var title = null, icon = null, url=null, className=null, ic=null, item=null;
     var value = this.get('value');
     var isArray = SC.isArray(value);
     var activeIndex = this.get('activeIndex');
-    for(var i=0, ilen=items.length; i< ilen; i++){
-      classes=new Array();
+    var len= items.length;
+    for(var i=0; i< len; i++){
+      ic = context.begin('a').attr('href', 'javascript:;');
       item=items[i];
-      var title = item[0], icon = item[3], url, className;
+      title = item[0]; 
+      icon = item[3];
+      ic.addStyle('display', 'inline-block');
+      ic.addClass('sc-segment');
+      if(!item[2]){
+        ic.addClass('disabled');
+      }
+      if(i===0){
+        ic.addClass('sc-first-segment');
+      }
+      if(i===(len-1)){
+        ic.addClass('sc-last-segment');
+      }
+      if(i!==0 && i!==(len-1)){
+        ic.addClass('sc-middle-segment');
+      }      
+      if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value)){
+        ic.addClass('sel');
+      }
+      if(activeIndex === i) {
+        ic.addClass('active') ;
+      }
+      if(item[4]){
+        width=item[4];
+        ic.addStyle('width', width+'px');
+      }
       if (icon) {
         url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
         className = (url === icon) ? '' : icon ;
@@ -320,32 +342,12 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       } else {
         icon = '';
       }
-      
-      classes.push('sc-segment');
-      if(!item[2])
-        classes.push('disabled');
-      if(i===0)
-        classes.push('sc-first-segment');
-      if(i===(ilen-1))
-        classes.push('sc-last-segment');
-      if(i!==0 && i!==(ilen-1))
-        classes.push('sc-middle-segment');      
-      if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value))
-        classes.push('sel');
-      if(activeIndex === i) 
-        classes.push('active') ;
-      if(item[4])
-        width=item[4];
-      else
-        width=10000;
-      
-      htmlString='<a href="javascript:;" class="'+classes.join(' ')+'" style="width:'+width+'; display:inline-block" role="tab"><span class="sc-button-inner"><label class="sc-button-label">'+icon+title+'</label></span></a>';
-      context.push(htmlString);
-    }
-    
-    
-  },
-  
+      ic.push('<span class="sc-button-inner"><label class="sc-button-label">');
+      ic.push(icon+title);
+      ic.push('</label></span>');
+      ic.end();
+    }   
+  },  
   // ..........................................................
   // EVENT HANDLING
   // 
