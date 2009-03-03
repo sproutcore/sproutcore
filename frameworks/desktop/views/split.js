@@ -209,7 +209,6 @@ SC.SplitView = SC.View.extend(
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
           throw "SC.RESIZE_BOTH is currently unsupported.";
-          break ;
         case SC.RESIZE_TOP_LEFT:
           layout.right = bottomRightThickness + dividerThickness ;
           delete layout.width ;
@@ -226,7 +225,6 @@ SC.SplitView = SC.View.extend(
       switch (autoresizeBehavior) {
         case SC.RESIZE_BOTH:
           throw "SC.RESIZE_BOTH is currently unsupported.";
-          break ;
         case SC.RESIZE_TOP_LEFT:
           layout.bottom = bottomRightThickness + dividerThickness ;
           delete layout.height ;
@@ -256,7 +254,7 @@ SC.SplitView = SC.View.extend(
             // delete layout.right ;
             // layout.centerX = topLeftThickness + (dividerThickness / 2) ;
             // delete layout.centerY ;
-            break ;
+            //break ;
           case SC.RESIZE_TOP_LEFT:
             delete layout.left ;
             layout.right = bottomRightThickness ;
@@ -284,7 +282,7 @@ SC.SplitView = SC.View.extend(
             // delete layout.bottom ;
             // delete layout.centerX ;
             // layout.centerY = topLeftThickness + (dividerThickness / 2) ;
-            break ;
+            //break ;
           case SC.RESIZE_TOP_LEFT:
             delete layout.top ;
             layout.bottom = bottomRightThickness ;
@@ -390,7 +388,6 @@ SC.SplitView = SC.View.extend(
       var dir = this.get('layoutDirection') ;
       if (dir===SC.LAYOUT_HORIZONTAL) context.addClass('sc-horizontal') ;
       else context.addClass('sc-vertical') ;
-    }
   },
   
   // layoutDidChangeFor: function(childView) {

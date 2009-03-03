@@ -7,9 +7,6 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-//module("TODO: Test SC.SplitView UI");
-
-
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 (function() {
@@ -38,7 +35,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     ok(!view.$().hasClass('vertical'), 'should not be vertically divided');
     ok(!view.$().hasClass('collapsable'), 'should not be collapsable');
 	equals(view.get('layoutDirection'),SC.LAYOUT_HORIZONTAL,"the view is divided horizontally");
-	var view = pane.view('vertical');
+	view = pane.view('vertical');
     ok(!view.$().hasClass('horizontal'), 'should not be horizontally divided');
 	ok(!view.$().hasClass('collapsable'), 'should not be collapsable');
 	equals(view.get('layoutDirection'),SC.LAYOUT_VERTICAL,"the view is divided vertically");
