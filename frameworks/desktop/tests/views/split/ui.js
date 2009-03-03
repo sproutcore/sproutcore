@@ -7,6 +7,18 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.SplitView UI");
+(function() {
+  var pane = SC.ControlTestPane.design()
+  .add("empty", SC.SplitView, { 
+	layout: { height: 300 },
+	topLeftView:SC.TextFieldView,
+  	dividerView: SC.SplitDividerView,
+  	bottomRightView: SC.TextFieldView
+  });
+pane.show(); 
+
+
+module("TODO: Test SC.SplitView UI", pane.standardSetup());
 module("TODO: Test SC.SplitDividerView UI");
 module("TODO: Test SC.ThumbView UI");
+})();

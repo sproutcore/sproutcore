@@ -15,7 +15,7 @@
 SC.DisclosureView = SC.ButtonView.extend(
 /** @scope SC.DisclosureView.prototype */ {
 
-  emptyElement: '<%@1 role="button"><img src="'+static_url('blank')+'" alt=""/ class="button"><label class="sc-button-label"></label></%@1>',
+//  emptyElement: '<%@1 role="button"><img src="'+static_url('blank')+'" alt=""/ class="button"><label class="sc-button-label"></label></%@1>',
   tagName: 'a',
   classNames: 'sc-disclosure-view',
   
@@ -33,5 +33,15 @@ SC.DisclosureView = SC.ButtonView.extend(
   */
   toggleOffValue: NO,
 
-  valueBindingDefault: SC.Binding.bool()  
+  valueBindingDefault: SC.Binding.bool() ,
+
+  render: function(context, firstTime) {
+    var blank = static_url('blank');
+	context.push('<img src="', blank, '" class="button" alt="" />');
+	context.push('<span class="label"></span>');
+	context.attr('id', SC.guidFor(this));
+//	context.addClass(this.get('layoutDirection'));
+  }
+	
+ 
 }) ;
