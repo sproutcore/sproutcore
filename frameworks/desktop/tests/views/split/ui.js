@@ -33,26 +33,23 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   // 
   module('SC.SplitView ui', pane.standardSetup());
 
-  test("Horizontal SplitView", function() {
+  test("Horizontal and Vertical SplitView", function() {
   	var view = pane.view('horizontal');
     ok(!view.$().hasClass('vertical'), 'should not be vertically divided');
     ok(!view.$().hasClass('collapsable'), 'should not be collapsable');
 	equals(view.get('layoutDirection'),SC.LAYOUT_HORIZONTAL,"the view is divided horizontally");
-	
-		});
-  test("Vertical SplitView", function() {
 	var view = pane.view('vertical');
     ok(!view.$().hasClass('horizontal'), 'should not be horizontally divided');
 	ok(!view.$().hasClass('collapsable'), 'should not be collapsable');
 	equals(view.get('layoutDirection'),SC.LAYOUT_VERTICAL,"the view is divided vertically");
-	
-		});
+  });
+
   test("can the view collapse", function() {
 	var view = pane.view('collapsable');
     ok(!view.$().hasClass('vertical'), 'should not be have vertical class');
 	equals(view.get('layoutDirection'),SC.LAYOUT_HORIZONTAL);
 	equals(view.get('canCollapseViews'),YES,"the view should be collapsable");
-		});		
-  })();
+  });		
+ })();
 
 
