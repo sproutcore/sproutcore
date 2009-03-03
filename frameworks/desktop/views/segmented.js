@@ -269,7 +269,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // regenerate the buttons only if the new display items differs from the
     // last cached version of it needsFirstDisplay is YES.
     var last = this._seg_displayItems;
-    if ((!last && firstTime) || (items !== last)) {
+    if (firstTime || (items !== last)) {
       this._seg_displayItems = items; // save for future
       this.renderDisplayItems(context, items) ;
       context.addStyle('text-align', 'center');
