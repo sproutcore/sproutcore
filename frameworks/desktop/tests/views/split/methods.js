@@ -15,23 +15,14 @@ module("SC.SplitView",{
 		    SC.SplitView.extend({
 			  layout: { hieght: 300, width: 200 },
 			  layoutDirection: SC.LAYOUT_HORIZONTAL,
-<<<<<<< HEAD:frameworks/desktop/tests/views/split/methods.js
 			  topLeftView: SC.ThumbView
-//			  childViews: [ SC.ThumbView.create() ]
-=======
-			  childViews: [ SC.ThumbView.extend() ]
->>>>>>> Files for check-in 03 March 2009:frameworks/desktop/tests/views/split/methods.js
-		    })]
+		  })]
 		});
 		pane.append(); // make sure there is a layer...
 	    SC.RunLoop.end();
 	
 		view = pane.childViews[0];
-<<<<<<< HEAD:frameworks/desktop/tests/views/split/methods.js
 		thumb = view.childViews[0];
-=======
-		thumb = view.childViews[1];
->>>>>>> Files for check-in 03 March 2009:frameworks/desktop/tests/views/split/methods.js
 	},
     	
 	teardown: function() {
@@ -64,13 +55,8 @@ test("updateChildLayout method updates the layout display",function(){
 });
 
 test("performing the mouse up event", function() {
-<<<<<<< HEAD:frameworks/desktop/tests/views/split/methods.js
 	var elem = thumb.get('layer'); alert(thumb);
 	SC.Event.trigger(elem, 'mouseUp');
-=======
-	var elem = view.get('layer');
-	SC.Event.trigger(elem, 'mouseUp'); alert(view);
->>>>>>> Files for check-in 03 March 2009:frameworks/desktop/tests/views/split/methods.js
 });
 
 // 	
