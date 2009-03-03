@@ -5,8 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/css_style_sheet') ;
-
 // standard browser cursor definitions
 SC.SYSTEM_CURSOR = 'default' ;
 SC.AUTO_CURSOR = SC.DEFAULT_CURSOR = 'auto' ;
@@ -68,8 +66,22 @@ SC.Cursor = SC.Object.extend(
     return this ;
   },
   
+  /**
+    This property is the connection between cursors and views. The default
+    SC.View behavior is to add this className to a view's layer if it has
+    its cursor property defined.
+    
+    @readOnly
+    @property {String} the css class name updated by this cursor
+  */
+  className: null
+  
+  /**
+    @property {String} the cursor value, can be 'url("path/to/cursor")'
+  */
   cursorStyle: SC.DEFAULT_CURSOR,
   
+  /** @private */
   cursorStyleDidChange: function() {
     var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ;
     var rule = this._rule ;
@@ -95,9 +107,6 @@ SC.Cursor = SC.Object.extend(
   }.observes('cursorStyle'),
   
   // TODO implement destroy
-  
-  /** @property {String} a css class name */
-  className: null
   
 });
 

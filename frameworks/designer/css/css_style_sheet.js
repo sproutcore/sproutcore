@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/css_rule') ;
+sc_require('css/css_rule') ;
 
 /**
   @class SC.CSSStyleSheet
