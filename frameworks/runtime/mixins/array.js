@@ -304,8 +304,19 @@ SC.Array.slice = function(beginIndex, endIndex) {
         ret = (value === undefined) ? this.invoke('get', key) : null ;
       }
       return ret ;
-    }
+    },
     
+    
+    //indexOf is not implemente in IE for Array
+    indexOf: function(obj) {
+      var len=this.length;
+      for(var i=0; i<len; i++){
+        if(this[i]===obj){
+      	  return i;
+      	}
+      }
+      return -1;
+    }
   }) ;
   
 })() ;
