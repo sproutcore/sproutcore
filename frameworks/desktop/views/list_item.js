@@ -118,6 +118,8 @@ SC.ListItemView = SC.View.extend(SC.Control,
   isEditing: NO,
   
   contentPropertyDidChange: function() {
+    console.log('contentPropertyDidChange(%@)'.fmt(SC.A(arguments).join(',')));
+    
     if (this.get('isEditing')) this.discardEditing() ;
     this.displayDidChange();
   },
@@ -199,7 +201,7 @@ SC.ListItemView = SC.View.extend(SC.Control,
     // set state on html
     if (state === SC.MIXED_STATE) {
       context.addClass('mixed');
-    } else if (state) context.addClass('sel');
+    } else context.setClass('sel', state);
     
     // now add inner content.  note we do not add a real checkbox because
     // we don't want to have to setup a change observer on it.
@@ -218,301 +220,309 @@ SC.ListItemView = SC.View.extend(SC.Control,
     @param {SC.RenderContext} context the render context
     @param {String} icon a URL or class name.
     @returns {void}
-   */
-   renderIcon: function(context, icon){
-     
-     // get a class name and url to include if relevant
-     var url = null, className = null ;
-     if (icon && SC.ImageView.valueIsUrl(icon)) {
-       url = icon; className = '' ;
-     } else {
-       className = icon; url = sc_static('blank.gif') ;
-     }
-     
-     // generate the img element...
-     context.begin('img')
+  */
+  renderIcon: function(context, icon){
+
+    // get a class name and url to include if relevant
+    var url = null, className = null ;
+    if (icon && SC.ImageView.valueIsUrl(icon)) {
+      url = icon; className = '' ;
+    } else {
+      className = icon; url = sc_static('blank.gif') ;
+    }
+
+    // generate the img element...
+    context.begin('img')
       .addClass('icon').addClass(className)
       .attr('src', url)
     .end();
-   },
-   
-   /** 
-     Generates a label based on the content.  You can override this method to 
-     display your own type of icon if desired.
+  },
 
-     @param {SC.RenderContext} context the render context
-     @param {String} label the label to display, already HTML escaped.
-     @returns {void}
-   */
-   renderLabel: function(context, label) {
-     context.push('<label>', label || '', '</label>') ;
-   },
-   
-   /**
-      Finds and retrieves the element containing the label.  This is used
-      for inline editing.  The default implementation returns a CoreQuery
-      selecting any label elements.   If you override renderLabel() you 
-      probably need to override this as well.
-      
-      @returns {SC.CoreQuery} CQ object selecting label elements
-  */
-   $label: function() {
-     return this.$('label') ;
-   },
-   
-   /** 
-     Generates an unread or other count for the list item.  This method will
-     only be called if the list item view has counts enabled.  You can 
-     override this method to display your own type of counts if desired.
+  /** 
+   Generates a label based on the content.  You can override this method to 
+   display your own type of icon if desired.
 
-     @param {SC.RenderContext} context the render context
-     @param {Number} count the count
-     @returns {void}
+   @param {SC.RenderContext} context the render context
+   @param {String} label the label to display, already HTML escaped.
+   @returns {void}
   */
-   renderCount: function(context, count) {
-     context.push('<span class="count"><span class="inner">')
+  renderLabel: function(context, label) {
+    context.push('<label>', label || '', '</label>') ;
+  },
+
+  /**
+    Finds and retrieves the element containing the label.  This is used
+    for inline editing.  The default implementation returns a CoreQuery
+    selecting any label elements.   If you override renderLabel() you 
+    probably need to override this as well.
+  
+    @returns {SC.CoreQuery} CQ object selecting label elements
+  */
+  $label: function() {
+    return this.$('label') ;
+  },
+
+  /** 
+   Generates an unread or other count for the list item.  This method will
+   only be called if the list item view has counts enabled.  You can 
+   override this method to display your own type of counts if desired.
+
+   @param {SC.RenderContext} context the render context
+   @param {Number} count the count
+   @returns {void}
+  */
+  renderCount: function(context, count) {
+    context.push('<span class="count"><span class="inner">')
       .push(count.toString()).push('</span></span>') ;
-   },
-   
-   /** 
-      Generates the html string used to represent the action item for your 
-      list item.  override this to return your own custom HTML
+  },
 
-      @param {SC.RenderContext} context the render context
-      @param {String} actionClassName the name of the action item
-      @returns {void}
-    */
-   renderAction: function(context, actionClassName){
-     context.push('<img src="',SC.BLANK_IMAGE_URL,'" class="action" />');
-   },
-   
-   /** 
-     Generates the string used to represent the branch arrow. override this to 
-     return your own custom HTML
-     
-     @param {SC.RenderContext} context the render context
-     @param {Boolean} hasBranch YES if the item has a branch
-     @returns {void}
-   */
-   
-   renderBranch: function(context, hasBranch) {
-     context.begin('span').addClass('branch')
+  /** 
+    Generates the html string used to represent the action item for your 
+    list item.  override this to return your own custom HTML
+
+    @param {SC.RenderContext} context the render context
+    @param {String} actionClassName the name of the action item
+    @returns {void}
+  */
+  renderAction: function(context, actionClassName){
+    context.push('<img src="',SC.BLANK_IMAGE_URL,'" class="action" />');
+  },
+
+  /** 
+   Generates the string used to represent the branch arrow. override this to 
+   return your own custom HTML
+ 
+   @param {SC.RenderContext} context the render context
+   @param {Boolean} hasBranch YES if the item has a branch
+   @returns {void}
+  */
+
+  renderBranch: function(context, hasBranch) {
+    context.begin('span').addClass('branch')
       .addClass(hasBranch ? 'branch-visible' : 'branch-hidden')
       .push('&nbsp;').end();
-   },
+  },
 
-   /** 
+  /** 
     Determines if the event occured inside an element with the specified
     classname or not.
   */
-   _isInsideElementWithClassName: function(className, evt) {
-     var layer = this.get('layer');
-     if (!layer) return NO ; // no layer yet -- nothing to do
-     
-     var el = SC.$(evt.target) ;
-     var ret = NO, classNames ;
-     while(!ret && el.length>0 && (el.get(0) !== layer)) {
-       if (el.hasClass(className)) ret = YES ;
-       el = el.parent() ;
-     }
-     el = layer = null; //avoid memory leaks
-     return ret ;
-   },
-   
-   /** @private 
-    mouseDown is handled only for clicks on the checkbox view or or action
-    button.
-   */
-   mouseDown: function(evt) {
-     var del = this.displayDelegate ;
-     var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
-     if (checkboxKey) {
-       if (this._isInsideElementWithClassName('sc-checkbox-view', evt)) {
-         this._addCheckboxActiveState() ;
-         this._isMouseDownOnCheckbox = YES ;
-         this._isMouseInsideCheckbox = YES ;
-         return YES ; // listItem should handle this event
-       } 
-     }  
+  _isInsideElementWithClassName: function(className, evt) {
+    var layer = this.get('layer');
+    if (!layer) return NO ; // no layer yet -- nothing to do
 
-     return NO ; // let the collection view handle this event
-   },
+    var el = SC.$(evt.target) ;
+    var ret = NO, classNames ;
+    while(!ret && el.length>0 && (el.get(0) !== layer)) {
+      if (el.hasClass(className)) ret = YES ;
+      el = el.parent() ;
+    }
+    el = layer = null; //avoid memory leaks
+    return ret ;
+  },
 
-   mouseUp: function(evt) {
-     this.set('isActive', NO);
-
-     var ret= NO ;
-     if (this._isMouseDownOnCheckbox) {
-       
-       // update only if mouse inside on mouse up...
-       if (this._isMouseInsideCheckbox) {
-         var del = this.displayDelegate ;
-         var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
-         var content = this.get('content') ;
-         if (content && content.get) {
-           var value = content.get(checkboxKey) ;
-           value = (value === SC.MIXED_STATE) ? YES : !value ;
-           content.set(checkboxKey, value) ;
-         }
-       }
-
-       this._removeCheckboxActiveState() ;
-       ret = YES ;
-     } 
-
-     this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
-     return ret ;
-   },
-   
-   mouseExited: function(evt) {
-     if (this._isMouseDownOnCheckbox) {
-       this._removeCheckboxActiveState() ;
-       this._isMouseInsideCheckbox = NO ;
-     }  
-     return NO ;
-   },
-   
-   mouseEntered: function(evt) {
-     if (this._isMouseDownOnCheckbox) {
-       this._addCheckboxActiveState() ;
-       this._isMouseInsideCheckbox = YES ;
-     }  
-     return NO ;
-   },
-   
-   _addCheckboxActiveState: function() {
-     var enabled = this.get('isEnabled');
-     this.$('.sc-checkbox-view').setClass('active', enabled);
-   },
-   
-   _removeCheckboxActiveState: function() {
-     this.$('.sc-checkbox-view').removeClass('active');
-   },
-   
-   /** 
-    Returns true if a click is on the label text itself to enable editing.
-    
-    Note that if you override renderLabel(), you probably need to override 
-    this as well.
+  /** @private
+    Returns YES if the list item has a checkbox and the event occurred 
+    inside of it.
+  */
+  _isInsideCheckbox: function(evt) {
+    var del = this.displayDelegate ;
+    var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+    return checkboxKey && this._isInsideElementWithClassName('sc-checkbox-view', evt);
+  },
   
-    @param evt {Event} the mouseUp event.
-    @returns {Boolean} YES if the mouse was on the content element itself.
-   */
-   contentHitTest: function(evt) {
-     
-     // if not content value is returned, not much to do.
-     var del = this.displayDelegate ;
-     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
-     if (!labelKey) return NO ;
-     
-     // get the element to check for.
-     var el = this.$label().get(0) ;
-     if (!el) return NO ; // no label to check for.
-     
-     var cur = evt.target, layer = this.get('layer') ;
-     while(cur && (cur !== layer) && (cur !== window)) {
-       if (cur === el) return YES ;
-       cur = cur.parentNode ;
+  /** @private 
+  mouseDown is handled only for clicks on the checkbox view or or action
+  button.
+  */
+  mouseDown: function(evt) {
+    // if occurred inside checkbox, item view should handle the event.
+    if (this._isInsideCheckbox(evt)) {
+      this._addCheckboxActiveState() ;
+      this._isMouseDownOnCheckbox = YES ;
+      this._isMouseInsideCheckbox = YES ;
+      return YES ; // listItem should handle this event
+    }  
+    return NO ; // let the collection view handle this event
+  },
+
+  mouseUp: function(evt) {
+   var ret= NO ;
+   // if mouse was down in checkbox -- then handle mouse up, otherwise 
+   // allow parent view to handle event.
+   if (this._isMouseDownOnCheckbox) {
+   
+     // update only if mouse inside on mouse up...
+     if (this._isInsideCheckbox(evt)) {
+       var del = this.displayDelegate ;
+       var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+       var content = this.get('content') ;
+       if (content && content.get) {
+         var value = content.get(checkboxKey) ;
+         value = (value === SC.MIXED_STATE) ? YES : !value ;
+         content.set(checkboxKey, value) ; // update content
+         this.displayDidChange(); // repaint view...
+       }
      }
-     
-     return NO;
-   },
-   
-   beginEditing: function() {
-     
-     if (this.get('isEditing')) return YES ;
-     
-     var content = this.get('content') ;
-     var del = this.displayDelegate ;
-     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
-     var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
-     
-     var f = this.get('frame') ;
-     var el = this.$label() ;
-     if (!el) return NO ;
 
-     // if the label has a large line height, try to adjust it to something
-     // more reasonable so that it looks right when we show the popup editor.
-     var oldLineHeight = el.css('lineHeight');
-     var fontSize = el.css('fontSize');
-     var lineHeight = oldLineHeight;
-     var lineHeightShift = 0;
-     
-     if (fontSize && lineHeight) {
-       var targetLineHeight = fontSize * 1.5 ;
-       if (targetLineHeight < lineHeight) {
-         el.css({ lineHeight: '1.5' });
-         lineHeightShift = (lineHeight - targetLineHeight) / 2; 
-       } else oldLineHeight = null ;
-     }
-     
-     f.x += el.offsetLeft ;
-     f.y += el.offsetTop + lineHeightShift - 2;
-     f.height = el.offsetHeight ;
-     f.width = (f.width - 30 - el.offsetLeft) ;
-     f = this.convertFrameToView(f, null) ;
-     
-     var ret = SC.InlineTextFieldView.beginEditing({
-       frame: f, 
-       exampleElement: el, 
-       delegate: this, 
-       value: v
-     }) ;
+     this._removeCheckboxActiveState() ;
+     ret = YES ;
+   } 
 
-     // restore old line height for original item if the old line height 
-     // was saved.
-     if (oldLineHeight) el.css({ lineHeight: oldLineHeight }) ;
-     
-     // Done!  If this failed, then set editing back to no.
-     return ret ;
-   },
-   
-   commitEditing: function() {
-     if (!this.get('isEditing')) return YES ;
-     return SC.InlineTextFieldView.commitEditing();
-   },
-   
-   discardEditing: function() {
-     if (!this.get('isEditing')) return YES ;
-     return SC.InlineTextFieldView.discardEditing();
-   },
-   
-   /** @private
-     Set editing to true so edits will no longer be allowed.
-   */
-   inlineEditorWillBeginEditing: function(inlineEditor) {
-     this.set('isEditing', YES);
-   },
+   // clear cached info
+   this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
+   return ret ;
+  },
 
-   /** @private 
-     Hide the label view while the inline editor covers it.
-   */
-   inlineEditorDidBeginEditing: function(inlineEditor) {
-     var el = this.$label() ;
-     this._oldOpacity = el.css('opacity');
-     el.css('opacity', 0.0) ;
-   },
+  mouseExited: function(evt) {
+   if (this._isMouseDownOnCheckbox) {
+     this._removeCheckboxActiveState() ;
+     this._isMouseInsideCheckbox = NO ;
+   }  
+   return NO ;
+  },
 
-   /** @private
-     Could check with a validator someday...
-   */
-   inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
-     return YES ;
-   },
+  mouseEntered: function(evt) {
+   if (this._isMouseDownOnCheckbox) {
+     this._addCheckboxActiveState() ;
+     this._isMouseInsideCheckbox = YES ;
+   }  
+   return NO ;
+  },
 
-   /** @private
-     Update the field value and make it visible again.
-   */
-   inlineEditorDidEndEditing: function(inlineEditor, finalValue) {
-     this.set('isEditing', NO) ;
+  _addCheckboxActiveState: function() {
+   var enabled = this.get('isEnabled');
+   this.$('.sc-checkbox-view').setClass('active', enabled);
+  },
 
-     var content = this.get('content') ;
-     var del = this.displayDelegate ;
-     var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
-     if (labelKey && content && content.set) {
-       content.set(labelKey, finalValue) ;
-     }
-     this.displayDidChange();
-   }   
+  _removeCheckboxActiveState: function() {
+   this.$('.sc-checkbox-view').removeClass('active');
+  },
+
+  /** 
+  Returns true if a click is on the label text itself to enable editing.
+
+  Note that if you override renderLabel(), you probably need to override 
+  this as well.
+
+  @param evt {Event} the mouseUp event.
+  @returns {Boolean} YES if the mouse was on the content element itself.
+  */
+  contentHitTest: function(evt) {
+ 
+   // if not content value is returned, not much to do.
+   var del = this.displayDelegate ;
+   var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+   if (!labelKey) return NO ;
+ 
+   // get the element to check for.
+   var el = this.$label().get(0) ;
+   if (!el) return NO ; // no label to check for.
+ 
+   var cur = evt.target, layer = this.get('layer') ;
+   while(cur && (cur !== layer) && (cur !== window)) {
+     if (cur === el) return YES ;
+     cur = cur.parentNode ;
+   }
+ 
+   return NO;
+  },
+
+  beginEditing: function() {
+ 
+   if (this.get('isEditing')) return YES ;
+ 
+   var content = this.get('content') ;
+   var del = this.displayDelegate ;
+   var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+   var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
+ 
+   var f = this.get('frame') ;
+   var el = this.$label() ;
+   if (!el) return NO ;
+
+   // if the label has a large line height, try to adjust it to something
+   // more reasonable so that it looks right when we show the popup editor.
+   var oldLineHeight = el.css('lineHeight');
+   var fontSize = el.css('fontSize');
+   var lineHeight = oldLineHeight;
+   var lineHeightShift = 0;
+ 
+   if (fontSize && lineHeight) {
+     var targetLineHeight = fontSize * 1.5 ;
+     if (targetLineHeight < lineHeight) {
+       el.css({ lineHeight: '1.5' });
+       lineHeightShift = (lineHeight - targetLineHeight) / 2; 
+     } else oldLineHeight = null ;
+   }
+ 
+   f.x += el.offsetLeft ;
+   f.y += el.offsetTop + lineHeightShift - 2;
+   f.height = el.offsetHeight ;
+   f.width = (f.width - 30 - el.offsetLeft) ;
+   f = this.convertFrameToView(f, null) ;
+ 
+   var ret = SC.InlineTextFieldView.beginEditing({
+     frame: f, 
+     exampleElement: el, 
+     delegate: this, 
+     value: v
+   }) ;
+
+   // restore old line height for original item if the old line height 
+   // was saved.
+   if (oldLineHeight) el.css({ lineHeight: oldLineHeight }) ;
+ 
+   // Done!  If this failed, then set editing back to no.
+   return ret ;
+  },
+
+  commitEditing: function() {
+   if (!this.get('isEditing')) return YES ;
+   return SC.InlineTextFieldView.commitEditing();
+  },
+
+  discardEditing: function() {
+   if (!this.get('isEditing')) return YES ;
+   return SC.InlineTextFieldView.discardEditing();
+  },
+
+  /** @private
+   Set editing to true so edits will no longer be allowed.
+  */
+  inlineEditorWillBeginEditing: function(inlineEditor) {
+   this.set('isEditing', YES);
+  },
+
+  /** @private 
+   Hide the label view while the inline editor covers it.
+  */
+  inlineEditorDidBeginEditing: function(inlineEditor) {
+   var el = this.$label() ;
+   this._oldOpacity = el.css('opacity');
+   el.css('opacity', 0.0) ;
+  },
+
+  /** @private
+   Could check with a validator someday...
+  */
+  inlineEditorShouldEndEditing: function(inlineEditor, finalValue) {
+   return YES ;
+  },
+
+  /** @private
+   Update the field value and make it visible again.
+  */
+  inlineEditorDidEndEditing: function(inlineEditor, finalValue) {
+    this.set('isEditing', NO) ;
+
+    var content = this.get('content') ;
+    var del = this.displayDelegate ;
+    var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+    if (labelKey && content && content.set) {
+     content.set(labelKey, finalValue) ;
+    }
+    this.displayDidChange();
+  }   
   
 }) ;

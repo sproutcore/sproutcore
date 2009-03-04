@@ -168,7 +168,7 @@ module("Observable objects & object properties ", {
   
 });
 
-test('testing the incrementProperty and decrementProperty function of a property',function(){
+test('incrementProperty and decrementProperty',function(){
   	var newValue = object.incrementProperty('numberVal');
     equals(25,newValue,'numerical value incremented');
 	object.numberVal = 24;
@@ -176,7 +176,7 @@ test('testing the incrementProperty and decrementProperty function of a property
     equals(23,newValue,'numerical value decremented');
 });
 
-test('testing the toggle function for a property, should be boolean',function(){
+test('toggle function, should be boolean',function(){
   	equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal')); 
     equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
     equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));

@@ -285,7 +285,7 @@ SC.mixin(/** @scope SC */ {
     var ret, pcache = this._keyCache[prefix];
     if (!pcache) pcache = this._keyCache[prefix] = {}; // get cache for prefix
     ret = pcache[key];
-    if (!ret) ret = pcache[key] = prefix + key ;
+    if (!ret) ret = pcache[key] = prefix + '_' + key ;
     return ret ;
   },
 
