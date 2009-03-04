@@ -6,29 +6,25 @@
 // ==========================================================================
 
 /*global module test htmlbody ok equals same stop start */
-var pane, view, thumb ;
+
+var pane, view ;
+
 module("SC.SplitView",{
-	setup: function() {
-	    SC.RunLoop.begin();
-	    pane = SC.MainPane.create({
-		  childViews: [
-		    SC.SplitView.extend({
-			  layout: { hieght: 300, width: 200 },
-			  layoutDirection: SC.LAYOUT_HORIZONTAL,
-			  topLeftView: SC.ThumbView
-		  })]
-		});
-		pane.append(); // make sure there is a layer...
-	    SC.RunLoop.end();
+  setup: function() {
+    SC.RunLoop.begin();
+	pane = SC.MainPane.create({
+	  childViews: [ SC.SplitView.extend() ]
+	});
+	pane.append(); // make sure there is a layer...	    
+	SC.RunLoop.end();
 	
-		view = pane.childViews[0];
-		thumb = view.childViews[0];
-	},
+	view = pane.childViews[0];
+  },
     	
-	teardown: function() {
-    	pane.remove();
-    	pane = view = null ;
-  	}		
+  teardown: function() {
+    pane.remove();
+    pane = view = null ;
+  }		
 });
 
 test("the views are collapsible", function() {
@@ -55,7 +51,7 @@ test("updateChildLayout method updates the layout display",function(){
 });
 
 test("performing the mouse up event", function() {
-	var elem = thumb.get('layer'); alert(thumb);
+	var elem = thumb.get('layer'); alert(divider);
 	SC.Event.trigger(elem, 'mouseUp');
 });
 

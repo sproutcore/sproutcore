@@ -41,7 +41,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 	equals(view.get('layoutDirection'),SC.LAYOUT_VERTICAL,"the view is divided vertically");
   });
 
-  test("can the view collapse", function() {
+  test("can collapse split view", function() {
 	var view = pane.view('collapsable');
     ok(!view.$().hasClass('vertical'), 'should not be have vertical class');
 	equals(view.get('layoutDirection'),SC.LAYOUT_HORIZONTAL);
