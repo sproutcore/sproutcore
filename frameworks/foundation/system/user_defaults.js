@@ -84,7 +84,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       localStorage = window.globalStorage[window.location.hostname];
     }
     if (localStorage) {
-      console.log('userKeyName = %@ local=%@'.fmt(userKeyName, localStorage));
+      //console.log('userKeyName = %@ local=%@'.fmt(userKeyName, localStorage));
       ret = localStorage[["SC.UserDefaults",userKeyName].join('@')];
     }
     
