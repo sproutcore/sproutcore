@@ -160,7 +160,7 @@ SC.Array = {
   */
   popObject: function() {
     var len = this.get('length') ;
-    if (len == 0) return null ;
+    if (len === 0) return null ;
     
     var ret = this.objectAt(len-1) ;
     this.removeAt(len-1) ;
@@ -172,7 +172,7 @@ SC.Array = {
     like shift() but it is KVO-compliant.
   */
   shiftObject: function() {
-    if (this.get('length') == 0) return null ;
+    if (this.get('length') === 0) return null ;
     var ret = this.objectAt(0) ;
     this.removeAt(0) ;
     return ret ;
@@ -229,7 +229,9 @@ SC.Array = {
     }
     if (!found) return this; // value not present.
     var ret = [] ;
-    this.forEach(function(k) { if (k !== value) ret[ret.length] = k; }) ;
+    this.forEach(function(k) { 
+      if (k !== value) ret[ret.length] = k; 
+    }) ;
     return ret ;
   },
   
@@ -240,15 +242,10 @@ SC.Array = {
     @returns {Array}
   */
   uniq: function() {
-    var found = {}; // use this to keep track of what is added.
     var ret = [] ;
     this.forEach(function(k){
-      var hash = SC.hashFor(k);
-      if (!found[hash]) {
-        found[hash] = YES; ret[ret.length] = k;
-      } 
+      if (ret.indexOf(k)<0) ret[ret.length] = k;
     });
-    found = null;
     return ret ;
   }
     
@@ -272,8 +269,8 @@ SC.Array = SC.mixin({}, SC.Enumerable, SC.Array) ;
 SC.Array.slice = function(beginIndex, endIndex) {
   var ret = []; 
   var length = this.get('length') ;
-  if (beginIndex == null) beginIndex = 0 ;
-  if ((endIndex == null) || (endIndex > length)) endIndex = length ;
+  if (SC.none(beginIndex)) beginIndex = 0 ;
+  if (SC.none(endIndex) || (endIndex > length)) endIndex = length ;
   while(beginIndex < endIndex) ret[ret.length] = this.objectAt(beginIndex++) ;
   return ret ;
 }  ;
@@ -289,7 +286,7 @@ SC.Array.slice = function(beginIndex, endIndex) {
 
     // primitive for array support.
     replace: function(idx, amt, objects) {
-      if (!objects || objects.length == 0) {
+      if (!objects || objects.length === 0) {
         this.splice(idx, amt) ;
       } else {
         var args = [idx, amt].concat(objects) ;
