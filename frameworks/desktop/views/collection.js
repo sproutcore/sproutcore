@@ -697,16 +697,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     schedule a full update.
   */
   _collection_isDirtyDidChange: function() {
-    if (this.get('isVisibleInWindow') && this.get('isDirty')) {
-      // console.log('%@:_collection_isDirtyDidChange()'.fmt(this));
-      this.invokeOnce(this._fullUpdateChildren);
+    // don't test isVisibleInWindow here for a 10% perf gain
+    if (this.get('isDirty')) {
+      // using invokeOnce here doubles rendering speed!
+      this.invokeOnce(this.displayDidChange) ;
     }
   }.observes('isDirty', 'isVisibleInWindow'),
-  
-  _fullUpdateChildren: function() {
-    // return this.updateChildren(YES) ;
-    this.displayDidChange() ;
-  },
   
   // ..........................................................
   // SELECTION CHANGES
