@@ -542,7 +542,7 @@ SC.CoreQuery = (function() {
     clone: function() {
       // Do the clone
       var ret = this.map(function(){
-        if ( SC.browser.msie && !SC.isXMLDoc(this) ) {
+        if ( SC.browser.msie && !CQ.isXMLDoc(this) ) {
           // IE copies events bound via attachEvent when
           // using cloneNode. Calling detachEvent on the
           // clone will also remove the events from the orignal
@@ -554,7 +554,7 @@ SC.CoreQuery = (function() {
           var clone = this.cloneNode(true),
             container = document.createElement("div");
           container.appendChild(clone);
-          return SC.clean([container.innerHTML])[0];
+          return CQ.clean([container.innerHTML])[0];
         } else return this.cloneNode(true);
       });
 
@@ -993,7 +993,7 @@ SC.CoreQuery = (function() {
                 found = document.getElementById(val) ;
                 
                 // if this is IE, verify that it didn't search by name
-                if (SC.browser.msie && next && next.getAttribute('id')!==val){
+                if (SC.browser.msie && found && found.getAttribute('id')!==val){
                   found = NO; // clear
                 } else {
                   if (found) next.push(found) ;
