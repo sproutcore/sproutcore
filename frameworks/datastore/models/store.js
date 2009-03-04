@@ -76,16 +76,6 @@ SC.Store = SC.Object.extend(
   */
   revisions: [],
 
-  // /**
-  //   This array contains the last revisions for the dataHashes indexed by the storeKey.
-  // 
-  //   This property is unique across all stores in the application.
-  //   
-  //   @property
-  //   @type {Array}
-  // */
-  // latestRevisions: [],
-  // 
   /**
     This hash contains the storeKeys indexed by the primaryKey guid.
 
@@ -157,7 +147,7 @@ SC.Store = SC.Object.extend(
     @property
     @type {Object}
   */
-  recordsQueue: {},
+  retrievedRecQueue: [],
   
   
   /**
@@ -398,10 +388,11 @@ SC.Store = SC.Object.extend(
     @param {Array} dataArr (required) Array of JSON-compatible hashes.
     @param {SC.Record|Array} recordType (optional) The SC.Record extended class that you want to use or an array of SC.Record classes that match the dataArr item per item.
     @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used. If set to NO, no primaryKey is used.
+    @param {Boolean} isLoadAction  (optional) If set to YES, then don't record changes.
 
     @returns {Array} Returns an array containing the storeKeys that were updated or created.
   */  
-  updateDataHashes: function(dataArr, recordType, primaryKey) {
+  updateDataHashes: function(dataArr, recordType, primaryKey, isLoadAction) {
 
     // One last sanity check to see if the hash is in the proper format.
     if(SC.typeOf(dataArr) !== SC.T_ARRAY) {
@@ -412,10 +403,9 @@ SC.Store = SC.Object.extend(
     var cachedAttributes = this.cachedAttributes;
     var primaryKeyMap = this.primaryKeyMap;
     var revisions = this.revisions;
-    ///var latestRevisions = this.latestRevisions;
     var changes = this.changes;
     var retrievedRecords = [];
-    var recordsQueue = this.recordsQueue;
+    var retrievedRecQueue = this.retrievedRecQueue;
     var storeKeyMap = this.storeKeyMap;
     var recKeyTypeMap = this.recKeyTypeMap;
     var dataTypeMap = this.dataTypeMap;
@@ -434,15 +424,21 @@ SC.Store = SC.Object.extend(
         recordTypeIsArray = NO ;
         recordType = recordType[0];
       }
-    }
+    } 
+    
     if (!recordTypeIsArray) {
       recTypeKey = SC.guidFor(recordType);
       recType = recordType;
     }
     
     // If the primaryKey is undefined, default to get the key from the record type.
-    if(primaryKey === undefined) {
+    if(!recordTypeIsArray && primaryKey === undefined) {
         primaryKey = recType.primaryKey;
+
+        // Default to 'guid' if not set.
+        if(!primaryKey) {
+          primaryKey = 'guid';
+        }
     }
 
     SC.Benchmark.start('updateRecords: loop');
@@ -459,6 +455,7 @@ SC.Store = SC.Object.extend(
       if(recordTypeIsArray) {
         recType = recordType[i];
         recTypeKey = SC.guidFor(recType);
+        primaryKey = recType.primaryKey;
       } 
 
       // If you want to disregard the primaryKeys, generate one blindly.
@@ -468,6 +465,12 @@ SC.Store = SC.Object.extend(
 
         // Otherwise, grab the guid and relate it to a storeKey.
       } else {
+
+        // Default to 'guid' if it is not set.
+        if(!primaryKey) {
+          primaryKey = 'guid';
+        }
+
         guid = data[primaryKey];
         storeKey = this.storeKeyFor(guid);
         if(!primaryKey) {
@@ -482,9 +485,10 @@ SC.Store = SC.Object.extend(
       // If the storeKey is already set, then update the dataHash and increment the revision.
       if(dataHashes[storeKey] !== undefined) {
         rev = revisions[storeKey] = (revisions[storeKey]+1);
-        //if(latestRevisions[storeKey] < rev) latestRevisions[storeKey] = rev;
         dataHashes[storeKey] = data;
-        pUpdated.push(storeKey);
+        if(!isLoadAction) {
+          pUpdated.push(storeKey);
+        }
 
       // If there is no storeKey, then create a new dataHash and add all the meta data.
       } else {
@@ -496,7 +500,6 @@ SC.Store = SC.Object.extend(
         }
 
         // Set the meta data.
-        //latestRevisions[storeKey] = 0;
         revisions[storeKey] = 0;
         dataHashes[storeKey] = data;
         recKeyTypeMap[storeKey] = recType;
@@ -506,12 +509,15 @@ SC.Store = SC.Object.extend(
       delete cachedAttributes[storeKey];
 
       // Push the created or updated storeKeys so that they are known during the commit process.
-      changes.push(storeKey);
+      if(!isLoadAction) {
+        changes.push(storeKey);
+      }
+      
       ret.push(storeKey);
      
       // If the storeKey is regsitered as being an outstanding record from the server, save it so it can be handled.
-      if(!disregardPrimaryKeys && recordsQueue[storeKey] !== undefined) {
-        retrievedRecords.push(recordsQueue[storeKey]);
+      if(retrievedRecQueue.indexOf(storeKey) !== -1) {
+        retrievedRecords.push(storeKey);
       }
 
       SC.Benchmark.end('updateRecord');
@@ -522,10 +528,9 @@ SC.Store = SC.Object.extend(
       // If there are changes, mark the store to have changes.
       this.set('hasChanges', (changes.length > 0));
     
-      // If thera retrieved records that need to be marked as such, invoke that operation so they can be cached.
+      // If there are retrieved records that need to be marked as such, invoke that operation so they can be cached.
       if(retrievedRecords.length > 0) {
-        this._retrivedRecords = retrievedRecords; 
-        this.invokeOnce(this._didRetrieveRecords);
+        this._didRetrieveRecords(retrievedRecords);
       }
     
     // Return the updated/changed storeKeys.
@@ -640,7 +645,7 @@ SC.Store = SC.Object.extend(
     var pCreated = this.persistentChanges.created;
 
     // Create the data hashes.
-    var createdStoreKeys = this.updateDataHashes(dataHashes, recordType, NO);
+    var createdStoreKeys = this.updateDataHashes(dataHashes, recordType, NO, NO);
 
     // If it was sucessful and there are storeKeys returned, materialize the records and return them.
     if(createdStoreKeys) {
@@ -706,8 +711,7 @@ SC.Store = SC.Object.extend(
     
     var ret = null;
     if(parentStore && parentStore.get('isPersistent')) {
-      ret = this.updateDataHashes(dataArr, recordType, primaryKey);
-      this.changes = [];
+      ret = this.updateDataHashes(dataArr, recordType, primaryKey, YES);
     }
     return ret;
   },
@@ -776,7 +780,7 @@ SC.Store = SC.Object.extend(
   recordDidChange: function(record) {
     if(record) {
       var primaryKey = record.primaryKey;
-      this.updateDataHashes([this.dataHashes[storeKey]], this.recKeyTypeMap[storeKey], record.primaryKey);
+      this.updateDataHashes([this.dataHashes[storeKey]], this.recKeyTypeMap[storeKey], record.primaryKey, NO);
     }
   },
   
@@ -793,24 +797,48 @@ SC.Store = SC.Object.extend(
   },
 
   /** 
+    This method is called when there are newly retrieved records from the persistent 
+    store that needs to be migrated.
+  */
+  _didRetrieveRecords: function(storeKeys) {
+
+    if(!storeKeys || !storeKeys.length) return NO;
+    
+    var retrievedRecQueue = this.retrievedRecQueue;
+    var recKeyTypeMap = this.recKeyTypeMap;
+    var instantiatedRecordMap = this.instantiatedRecordMap;
+    for(var i=0, iLen=storeKeys.length; i<iLen; i++) {
+
+      var storeKey = storeKeys[i];
+      var recType = recKeyTypeMap[storeKey];
+      var recTypeKey = SC.guidFor(recType);
+
+      if(instantiatedRecordMap[recTypeKey] && instantiatedRecordMap[recTypeKey][storeKey]) {
+        var record = instantiatedRecordMap[recTypeKey][storeKey];
+        var guid = record.get(record.primaryKey);
+        if(guid) {
+          retrievedRecQueue.removeObject(guid);
+          record.set('status', RECORD_LOADED);
+          record.set('newRecord', NO);
+        }
+      }
+    }
+  },
+
+  /** 
     This method is called when there are new records from the persistent 
     store that needs to be migrated.
   */
-  didRetrieveRecords: function() {
+  didCreateRecords: function(records, dataHashes, guids) {
     
-    var records = this._retrivedRecords;
-
     if(!records || !records.length) return NO;
-    
-    var recordsQueue = this.recordsQueue;
-    
+
     for(var i=0, iLen=records.length; i<iLen; i++) {
       var record = records[i];
-      var guid = record.get(record.primaryKey);
+      var guid = guids[i];
       var storeKey = record._storeKey;
       var recTypeKey = SC.guidFor(this.recKeyTypeMap[storeKey]);
       if(guid && recType) {
-        this.instantiatedRecordMap[recTypeKey][storeKey] = record;
         this.replaceGuid(storeKey, guid);
         recordQueue.removeObject(guid);
         record.set('status', RECORD_LOADED);
@@ -818,7 +846,7 @@ SC.Store = SC.Object.extend(
       }
     }
   },
-
+  
   /** 
     Given a storeKey, materialize the dataHash as part of a record.
 
@@ -904,13 +932,23 @@ SC.Store = SC.Object.extend(
       if(guid && parentStore) {
         recordType = parentStore.retrieveRecordForGuid(guid, recordType);
         if(recordType) {
+          var recTypeKey = SC.guidFor(recordType);
+          storeKey = this._generateStoreKey();
+          this.primaryKeyMap[guid] = storeKey;
+          this.storeKeyMap[storeKey] = guid;
           ret = recordType.create({
             _storeKey: storeKey,
             store: this, 
             status: RECORD_LOADING,
             newRecord: YES
           });
-          this.recordsQueue[storeKey] = rec;
+          
+          if(!this.instantiatedRecordMap[recTypeKey]) {
+            this.instantiatedRecordMap[recTypeKey] = [];
+          }
+          this.instantiatedRecordMap[recTypeKey][storeKey] = ret;
+          
+          this.retrievedRecQueue.push(storeKey);
         }
       }
     }
@@ -920,16 +958,27 @@ SC.Store = SC.Object.extend(
   /**
     Given a filter and a recordType, retrieve matching records. 
     
-    @param {SC.Filter} filter The filter containing a query.
+    @param {SC.Query} query The qeuery containing a query.
     @param {SC.Record} recordType The record type.
 
     @returns {Array} Returns an array of matched record instances.
   */
-  findAll: function(filter, recordType)
+  findAll: function(query, recordType)
   {
-    return [];
+    var q;
+    if(!this._queries[query]) {
+      this._queries[query] = SC.Query.create({queryString: query});
+    }
+    
+    var q = this._queries[query];
+    
   },
   
+  // 
+  // _queries: {},
+  // 
+  // _indicies: {},
+
   
   ////////////////////////////////////////////////////////////////////////////////////
   //

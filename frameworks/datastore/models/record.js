@@ -244,8 +244,8 @@ SC.Record = SC.Object.extend(
     var store = this.get('store'), storeKey = this._storeKey;
     var cached = store.cachedAttributes[storeKey];
     var attr = store.dataHashes[storeKey];
-    if (cached[key] === undefined) return cached[key];
     if(cached === undefined) cached = {};
+    if (cached[key] !== undefined) return cached[key];
 
     var ret = (attr) ? attr[key] : undefined ;
     ret = ret || this[key] ; // also check properties...
@@ -253,7 +253,7 @@ SC.Record = SC.Object.extend(
       var recordType = this.recordType(key+'Type') ;
       ret = this._propertyFromAttribute(ret, recordType) ;
     }
-    cached[key] = ret;
+    store.cachedAttributes[storeKey] = cached[key] = ret;
     return (ret === undefined) ? null : ret;
   },
 
@@ -390,7 +390,10 @@ SC.Record = SC.Object.extend(
   
   toString: function() {
     var that = this ;  
-    var ret = this.get('properties').map(function(key) {
+    var store = this.get('store'), storeKey = this._storeKey;
+    var cached = store.cachedAttributes[storeKey];
+
+    var ret = cached.map(function(key) {
       var value = that.get(key) ; 
       if (typeof(value) == "string") value = '"' + value + '"' ;
       if (value === undefined) value = "(undefined)" ;
@@ -489,14 +492,9 @@ SC.Record.mixin(
     Used to find the first object matching the specified conditions.  You can 
     pass in either a simple guid or one or more hashes of conditions.
   */
-  find: function(guid) {
-    var store = this.get('store');
+  find: function(guid, store) {
     if(store) {
-      var ret = store.find.apply(store,args) ;
-      if (typeof(guid) == 'object') {
-        args = SC.$A(arguments) ; args.push(this) ;
-        return (ret && ret.length > 0) ? ret[0] : null ;
-      } else return store.find.apply(store,args);
+      return store.find(guid, this) ;
     }
     return null;
   },
@@ -522,7 +520,7 @@ SC.Record.mixin(
     return ret ;
   },  
 
-  primaryKey: function() { return this.prototype.primaryKey; },
+//  primaryKey: function() { return this.prototype.primaryKey; },
 
   // this is set by extend to point to the core record type used to store
   // the record in the pool.  The coreRecordType is always the first record
