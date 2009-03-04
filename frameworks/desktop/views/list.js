@@ -189,9 +189,16 @@ SC.ListView = SC.CollectionView.extend(
   offsetForRowAtContentIndex: function(index) {
     if (index === 0) return 0 ;
     
+    // if (index >= 100000) {
+    //   console.log("index out of range: " + index) ;
+    //   return 0 ;
+    // }
+    
     // do some simple math if we have uniform row heights...
     if (this.get('hasUniformRowHeights')) {
-      return this.get('rowHeight') * index ;
+      var height = this.get('rowHeight') * index ;
+      // console.log('calculating offsetForRowAtContentIndex using uniform row heights, index is %@, offset is %@'.fmt(index, height));
+      return height;
       
     // otherwise, use the rowOffsets cache...
     } else {
@@ -304,7 +311,7 @@ SC.ListView = SC.CollectionView.extend(
     var minY = SC.minY(frame), maxY = SC.maxY(frame);
     // use some simple math...
     if (this.get('hasUniformRowHeights')) {
-      rowHeight = this.get('rowHeight') || 0 ;
+      rowHeight = this.get('rowHeight') || 20 ;
       min = Math.max(0,Math.floor(minY / rowHeight)-1) ;
       max = Math.ceil(maxY / rowHeight) ;
       
@@ -314,6 +321,8 @@ SC.ListView = SC.CollectionView.extend(
       
       // convert to range...
       ret = { start: min, length: max - min } ;
+      
+      if (ret.length !== 0 && ret.length < 10) debugger ;
       
     // otherwise, get the cached row offsets...
     } else {
@@ -344,19 +353,21 @@ SC.ListView = SC.CollectionView.extend(
   /** @private */
   // layoutItemView: function(itemView, contentIndex, firstLayout) {
     adjustItemViewLayoutAtContentIndex: function(itemView, contentIndex, firstLayout) {
-    // console.log('adjustItemViewLayoutAtContentIndex invoked on %@'.fmt(this));
+    // console.log('%@.adjustItemViewLayoutAtContentIndex(%@, %@, %@)'.fmt(this, itemView, contentIndex, firstLayout));
     
     // use cached hash to reduce memory allocs
-    var layout = this._list_cachedItemViewLayoutHash ;
-    if (!layout) {
-      layout = this._list_cachedItemViewLayoutHash = { left: 0, right: 0 };
-    }
+    // var layout = this._list_cachedItemViewLayoutHash ;
+    // if (!layout) {
+    //   layout = this._list_cachedItemViewLayoutHash = { left: 0, right: 0 };
+    // }
+    var layout = { left: 0, right: 0 };
     
     // set top & height...
     layout.top = this.offsetForRowAtContentIndex(contentIndex);
     layout.height = this.heightForRowAtContentIndex(contentIndex);
     // layout.zIndex = contentIndex;
     
+    // console.log(layout) ;
     if (firstLayout) itemView.adjust(layout) ;
     // itemView.set('layout', layout) ; // TODO: why does this not work????
   },

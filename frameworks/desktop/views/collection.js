@@ -10,6 +10,7 @@ sc_require('views/list_item');
 
 SC.BENCHMARK_UPDATE_CHILDREN = YES ;
 SC.BENCHMARK_RENDER = YES ;
+SC.DEBUG_PARTIAL_RENDER = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /**
@@ -776,6 +777,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     //
     // Also, if contentRangeInFrame returns null
     var cf = this.get('clippingFrame');
+    // console.log('clippingFrame = ');
+    // console.log(cf);
     var old = this._nowShowingRange_clippingFrame; // old cf
     var range = this._nowShowingRange_cachedRange ; // old range
     
@@ -785,6 +788,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
       // ask the subclass to compute the content range in frame...
       range = this.contentRangeInFrame(cf) ;
+      // console.log('contentRangeInFrame = ') ;
+      // console.log(range) ;
       var content = SC.makeArray(this.get('content'));
       
       // console.log('nowShowingRange content length is %@'.fmt(content.get('length')));
@@ -999,10 +1004,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // used for santity checks during debugging
     var maxLen = range.length ;
     
-    console.log('oldRange = ') ;
-    console.log(oldRange) ;
-    console.log('range = ') ;
-    console.log(range) ;
+    if (SC.DEBUG_PARTIAL_RENDER) {
+      console.log('oldRange = ') ;
+      console.log(oldRange) ;
+      console.log('range = ') ;
+      console.log(range) ;
+    }
     
     // only redaw objects we haven't previously drawn
     if (oldRange) {
@@ -1022,7 +1029,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
         // need to render two ranges...all pre-existing views are valid
         context.partialUpdate = YES ;
-        range2 = { start: oldRange.start + oldRange.length, length: range.length - oldRange.length } ;
+        range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
         range.length = oldRange.start - range.start ;
         
       // nope, is the new range inside the old range?
@@ -1031,8 +1038,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         idx = oldRange.start ;
         end = range.start ;
         while (idx < end) {
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 1');
           childId = childSet[idx] ;
           if (childId) context.remove(childId) ;
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
           delete childSet[idx] ;
           ++idx ;
         }
@@ -1040,8 +1049,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         idx = range.start + range.length ;
         end = oldRange.start + oldRange.length ;
         while (idx < end) {
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 2');
           childId = childSet[idx] ;
           if (childId) context.remove(childId) ;
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
           delete childSet[idx] ;
           ++idx ;
         }
@@ -1056,8 +1067,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         idx = range.start + range.length ;
         end = oldRange.start + oldRange.length ;
         while (idx < end) {
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 3');
           childId = childSet[idx] ;
           if (childId) context.remove(childId) ;
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
           delete childSet[idx] ;
           ++idx ;
         }
@@ -1072,42 +1085,36 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         idx = oldRange.start ;
         end = range.start ;
         while (idx < end) {
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 4');
           childId = childSet[idx] ;
           if (childId) context.remove(childId) ;
+          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
           delete childSet[idx] ;
           ++idx ;
         }
         
-        range.length = range.start + range.length - oldRange.length ;
+        end = range.start + range.length ;
         range.start = oldRange.start + oldRange.length ;
+        range.length = end - range.start ;
       }
     }
     
     // sanity check our ranges
-    // if (range.length < 0) range.length = 0 ;
-    // if (range.length > maxLen) range.length = maxLen ;
-    // if (range.start < 0) range.start = 0 ;
-    // if (range2) {
-    //   if (range2.length < 0) range2.length = 0 ;
-    //   if (range2.length > maxLen) range2.length = maxLen ;
-    //   if (range2.start < 0) range2.start = 0 ;
-    // }
-    if (range.length < 0) throw range.length ;
-    if (range.length > maxLen) throw range.length ;
-    if (range.start < 0) throw range.start ;
+    if (range.length < 0) throw "range.length is " + range.length ;
+    if (range.length > maxLen) throw "range.length is " + range.length + ', max length is ' + maxLen ;
+    if (range.start < 0) throw "range.start is " + range.start ;
     if (range2) {
-      if (range2.length < 0) throw range2.length ;
-      if (range2.length > maxLen) throw range2.length ;
-      if (range2.start < 0) throw range2.start ;
+      if (range2.length < 0) throw "range2.length is " + range2.length ;
+      if (range2.length > maxLen) throw "range2.length is " + range2.length + ', max length is ' + maxLen ;
+      if (range2.start < 0) throw "range2.start is " + range2.start ;
     }
     
-    console.log('rendering = ') ;
-    console.log(range) ;
-    if (range2) {
+    if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering = ') ;
+    if (SC.DEBUG_PARTIAL_RENDER) console.log(range) ;
+    if (SC.DEBUG_PARTIAL_RENDER && range2) {
       console.log('also rendering = ') ;
       console.log(range2) ;
     }
-    console.log('******************************') ;
     
     idx = SC.maxRange(range) ;
     
@@ -1117,6 +1124,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     while (--idx >= range.start) {
       c = content.objectAt(idx) ;
+      if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering content(%@) at index %@'.fmt(c.unread, idx));
       
       // use cache of item view guids to avoid creating temporary objects
       guid = SC.guidFor(c);
@@ -1125,7 +1133,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       itemView.set('content', c) ;
       itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
       itemView.layerId = key ; // cannot use .set, layerId is RO
-      if (childSet[idx]) throw key ; // should not re-render a child in the index!
+      if (childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
       childSet[idx] = key ;
       this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
       context = context.begin(itemView.get('tagName')) ;
@@ -1137,6 +1145,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       idx = SC.maxRange(range2) ;
       while (--idx >= range2.start) {
         c = content.objectAt(idx) ;
+        if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering content(%@) at index %@'.fmt(c.unread, idx));
         
         // use cache of item view guids to avoid creating temporary objects
         guid = SC.guidFor(c);
@@ -1145,7 +1154,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         itemView.set('content', c) ;
         itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
         itemView.layerId = key ; // cannot use .set, layerId is RO
-        if (childSet[idx]) throw key + ' at index ' + idx ; // should not re-render a child in the index!
+        if (childSet[idx]) debugger ; // throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
         childSet[idx] = key ;
         this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
         context = context.begin(itemView.get('tagName')) ;
@@ -1153,6 +1162,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         context = context.end() ;
       }
     }
+    
+    if (SC.DEBUG_PARTIAL_RENDER) console.log('******************************') ;
     
     this.set('isDirty', NO);
     this.endPropertyChanges() ;

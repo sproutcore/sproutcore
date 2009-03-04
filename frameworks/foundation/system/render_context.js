@@ -230,15 +230,14 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     Removes an element with the passed id in the currently managed element.
   */
   remove: function(elementId) {
-    console.log('remove('+elementId+')');
+    // console.log('remove('+elementId+')');
     if (!elementId) return ;
     
     var el, elem = this._elem ;
-    if (!elem || !elem.getElementById) return ;
+    if (!elem || !elem.removeChild) return ;
     
-    el = elem.getElementById(elementId) ;
+    el = document.getElementById(elementId) ;
     if (el) {
-      console.log('removing '+elementId) ;
       el = elem.removeChild(el) ;
       delete el ;
     }
@@ -258,7 +257,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} previous context or null if top 
   */
   update: function() {
-    var elem = this._elem, key, value, styles, elem2, n;  
+    var elem = this._elem, key, value, styles, elem2, n, n2;  
     
     if (!elem) {
       // throw "Cannot update context because there is no source element";
@@ -274,10 +273,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       if (this.partialUpdate) {
         elem2 = elem.cloneNode(false);
         elem2.innerHTML = this.join();
-        var ary = elem2.childNodes ;
-        for (var idx=0, len=ary.length; idx<len; ++idx) {
-          n = ary[idx] ; // test for validity to prevent bad pointers (!) in FF and Safari
-          if (n) elem.appendChild(n) ;
+        n = elem2.firstChild ;
+        n2 = n.nextSibling ;
+        while (n) {
+          elem.appendChild(n) ;
+          n = n2 ;
+          n2 = n ? n.nextSibling : null ;
         }
         delete elem2 ;
       } else {

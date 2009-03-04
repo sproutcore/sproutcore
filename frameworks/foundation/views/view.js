@@ -1240,6 +1240,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
     }
     
+    // if (didChange) {
+    //   console.log('did change layout') ;
+    //   console.log(layout) ;
+    // }
+    
     // now set adjusted layout
     if (didChange) this.set('layout', layout) ;
     
@@ -1922,6 +1927,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
+    // console.log(this.get('layoutStyle'));
     context.addStyle(this.get('layoutStyle'));
   }
   
