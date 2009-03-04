@@ -1023,7 +1023,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         
       // okay, the ranges overlap. are they equal?
       } else if (SC.rangesEqual(oldRange, range)) {
-        range = { start: 0, length: 0 }; // nothing to render
+        range = SC.EMPTY_RANGE ; // nothing to render
         
       // nope, is the old range inside the new range?
       } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
@@ -1057,7 +1057,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
           ++idx ;
         }
         
-        range = { start: 0, length: 0 }; // nothing to render
+        range = SC.EMPTY_RANGE ; // nothing to render
         
       // nope, is the newRange lower than the old range?
       } else if (range.start < oldRange.start) {

@@ -356,6 +356,7 @@ SC.mixin(/** @scope SC */ {
 
   EMPTY_HASH: {},
   
+  EMPTY_RANGE: {start: 0, length: 0},
   /**
     Creates a new object with the passed object as its prototype.
 
