@@ -222,10 +222,10 @@ SC.mixin( /** @scope SC */ {
       // bizarely for FireFox if your offsetParent has a border, then it can 
       // impact the offset. 
       if (SC.browser.mozilla) {
-        var overflow = Element.getStyle(element, 'overflow') ;
+        var overflow = SC.$(element).attr('overflow') ;
         if (overflow !== 'visible') {
-          var left = parseInt(Element.getStyle(element, 'borderLeftWidth'),0) || 0 ;
-          var top = parseInt(Element.getStyle(element, 'borderTopWidth'),0) || 0 ;
+          var left = parseInt(SC.$(element).attr('borderLeftWidth'),0) || 0 ;
+          var top = parseInt(SC.$(element).attr('borderTopWidth'),0) || 0 ;
           if (el !== element) {
             left *= 2; top *= 2 ;
           }
@@ -243,7 +243,7 @@ SC.mixin( /** @scope SC */ {
 
       // Safari fix
       if (element.offsetParent == document.body &&
-        Element.getStyle(element, 'position') == 'absolute') break;
+        SC.$(element).attr('position') == 'absolute') break;
 
       element = element.offsetParent ;
 
