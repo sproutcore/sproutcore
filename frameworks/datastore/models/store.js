@@ -10,17 +10,19 @@ require('core') ;
   @class
 
 
-  The Store is where you can find all of your dataHashes. Stores can be chained for editing
-  purposes and committed back one chain level at a time all the way back to the perisistent
-  store.
+  The Store is where you can find all of your dataHashes. Stores can be 
+  chained for editing purposes and committed back one chain level at a time 
+  all the way back to the perisistent store.
   
-  Data objects are recordd as JSON and are materialized as SproutCore record objects on demand.
+  Data objects are recordd as JSON and are materialized as SproutCore record
+  objects on demand.
 
-  When chaining data dataHashes, changes in the child record will be probagated to the 
-  parent record and saved if possible (The child record has a newer version of the object).
+  When chaining data dataHashes, changes in the child record will be 
+  probagated to the parent record and saved if possible (The child record has
+  a newer version of the object).
   
-  If you are at the base store, you can specify a parentStore that may be a REST or 
-  local storage interface for persistant storage.
+  If you are at the base store, you can specify a parentStore that may be a 
+  REST or local storage interface for persistant storage.
 
   @extends SC.Object
   @static
@@ -31,7 +33,8 @@ SC.Store = SC.Object.extend(
 /** @scope SC.Store.prototype */ {
 
   /**
-    This is set to YES when there are changes that have not been committed yet.
+    This is set to YES when there are changes that have not been committed 
+    yet.
 
     @property
     @type {Boolean}
@@ -40,9 +43,9 @@ SC.Store = SC.Object.extend(
   hasChanges: NO,
 
   /**
-    This is a handle to the parent record that you can chain from. Also, if you're
-    a base record, you can specify a parent record that is a handle to perisistant 
-    storage.
+    This is a handle to the parent record that you can chain from. Also, if
+    you're a base record, you can specify a parent record that is a handle 
+    to perisistant storage.
 
     @property
     @type {SC.Store}
@@ -52,7 +55,8 @@ SC.Store = SC.Object.extend(
   /**
     This is the store of dataHashes index by the storeKey. 
     
-    This property is NOT unique across stores in a chain until changes are committed.
+    This property is NOT unique across stores in a chain until changes are 
+    committed.
     
     @property
     @type {Array}
@@ -62,7 +66,8 @@ SC.Store = SC.Object.extend(
   /**
     This is the cached of dataHashes indexed by the storeKey. 
     
-    This property is NOT unique across stores in a chain until changes are committed.
+    This property is NOT unique across stores in a chain until changes are 
+    committed.
     
     @property
     @type {Array}
@@ -70,9 +75,11 @@ SC.Store = SC.Object.extend(
   cachedAttributes: {},
 
   /**
-    This array contains the revisions for the dataHashes indexed by the storeKey.
+    This array contains the revisions for the dataHashes indexed by the 
+    storeKey.
 
-    This property is NOT unique across stores in a chain until changes are committed.
+    This property is NOT unique across stores in a chain until changes are 
+    committed.
     
     @property
     @type {Array}
@@ -212,32 +219,11 @@ SC.Store = SC.Object.extend(
   */
   createChainedStore: function() {
     var childStore = SC.Store.create({parentStore: this});
-        
-    childStore.instantiatedRecordMap = {};    
-    childStore.dataHashes = SC.beget(this.dataHashes);
-    childStore.revisions = SC.beget(this.revisions);
-    childStore.cachedAttributes = {};
-    childStore.reset();
-    this.addStore(childStore);
+    this.childStores.push(childStore);
+    childStore.set('parentStore', this);
     return childStore;
   },
   
-  /**
-    Given a new childStore, add it to this store.
-
-    @param {SC.Store} childStore The child record that is being added.
-
-    @returns {Boolean} Returns YES if the operation was successful.  
-  */
-  addStore: function(childStore) {
-    if(childStore) {
-      this.childStores.push(childStore);
-      childStore.set('parentStore', this);
-      return YES;
-    }
-    return NO;
-  },
-
   /**
     Remove a child record from its parent.
     
@@ -1086,7 +1072,26 @@ SC.Store = SC.Object.extend(
   
   init: function() {
     sc_super();
+    
+    this.cachedAttributes = {};
+    this.instantiatedRecordMap = {};
+    this.childStores = [];
+    this.retrievedRecQueue = [];
+
     this.reset();
+
+    if(this.get('isTransient')) {
+      var parentStore = this.get('parentStore');
+      this.primaryKeyMap = parentStore.primaryKeyMap;
+      this.storeKeyMap = parentStore.storeKeyMap;
+      this.recKeyTypeMap = parentStore.recKeyTypeMap;
+      this.dataTypeMap = parentStore.dataTypeMap;
+    } else {
+      this.primaryKeyMap = {};
+      this.storeKeyMap = [];
+      this.recKeyTypeMap = [];
+      this.dataTypeMap = {};
+    }
   }
 }) ;
 
