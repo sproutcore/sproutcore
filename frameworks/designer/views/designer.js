@@ -6,8 +6,6 @@
 
 /*global ViewBuilder */
 
-require('views/view');
-
 /** @class
 
   A Designer class provides the core editing functionality you need to edit
