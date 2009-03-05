@@ -14,7 +14,7 @@ require('views/view');
   palettes, popups, menus, etc.
   
   Usually you will not work directly with the SC.Pane class, but with one of 
-  its subclasses such as SC.MainPane, SC.DialogPane, or SC.PopupPane.
+  its subclasses such as SC.MainPane, SC.Panel, or SC.PopupPane.
 
   h1. Showing a Pane
   

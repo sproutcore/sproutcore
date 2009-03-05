@@ -7,4 +7,4 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.DialogPane UI");
+module("TODO: Test SC.Panel UI");

@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('views/dialog_pane');
+require('views/panel');
 
 /** 
   Passed to delegate when alert panel is dismissed by pressing OK button 
@@ -95,10 +95,10 @@ SC.EXTRA_STATUS = 'extra';
     SC.AlertPanel.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again", "Cancel", "More Info...", MyApp.calendarController);
   }}}
   
-  @extends SC.DialogPane
+  @extends SC.Panel
   @since SproutCore 1.0
 */
-SC.AlertPanel = SC.DialogPane.extend({
+SC.AlertPanel = SC.Panel.extend({
   
   classNames: 'sc-alert-panel',
   
