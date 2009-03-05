@@ -1,10 +1,10 @@
 /* SC.TextFieldView */
 
-.sc-theme .sc-text-field-view input {
+.sc-text-field-view input {
 	font-size: 13px;
 }
 
-.sc-theme .sc-text-field-view .sc-hint {
+.sc-text-field-view .sc-hint {
   padding: 3px;
 	color: #aaa ;
 	font-size: 13px;
