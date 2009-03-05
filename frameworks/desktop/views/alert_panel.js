@@ -8,19 +8,26 @@
 require('views/panel');
 
 /** 
-  Passed to delegate when alert panel is dismissed by pressing OK button 
+  button1 : 1st button from the right. default:OK
+  button2 : 2nd button from the right. Optional. Could be Cancel or 2nd action.
+  button3 : 1st button from the left. Optional. Could be Cancel or alternative option.
 */
-SC.OK_STATUS = 'ok';
 
 /** 
-  Passed to delegate when alert panel is dismissed by pressing Cancel button 
+  Passed to delegate when alert panel is dismissed by pressing button 1
 */
-SC.CANCEL_STATUS = 'cancel';
+SC.BUTTON1_STATUS = 'button1';
 
 /** 
-  Passed to delegate when alert panel is dismissed by pressing Extra button 
+  Passed to delegate when alert panel is dismissed by pressing button 2
 */
-SC.EXTRA_STATUS = 'extra';
+SC.BUTTON2_STATUS = 'button2';
+
+/** 
+  Passed to delegate when alert panel is dismissed by pressing button 3
+*/
+SC.BUTTON3_STATUS = 'button3';
+
 
 /**
   Displays a preformatted modal alert panel.
@@ -44,7 +51,7 @@ SC.EXTRA_STATUS = 'extra';
   - *show()* - displays an alert with a customizable icon to the left
   
   In addition to passing a message and description, you can also customize
-  the title of the OK button and add an optional Cancel or Extra button.  Just
+  the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).  Just
   pass these titles of these buttons to enable them or null to disable then.
   
   Additionally, you can pass a delegate object as the last parameter.  This
@@ -75,15 +82,15 @@ SC.EXTRA_STATUS = 'extra';
     MyApp.calendarController = SC.Object.create({
       alertPanelDidDismiss: function(panel, status) {
         switch(status) {
-          case SC.OK_STATUS:
+          case SC.BUTTON1_STATUS:
             this.tryAgain();
             break;
             
-          case SC.CANCEL_STATUS:
+          case SC.BUTTON2_STATUS:
             // do nothing
             break;
             
-          case SC.EXTRA_STATUS:
+          case SC.BUTTON3_STATUS:
             this.showMoreInfo();
             break;
         }
@@ -110,7 +117,7 @@ SC.AlertPanel = SC.Panel.extend({
       alertPanelDidDismiss: function(panel, status)
     }}}
     
-    The status will be on of SC.OK_STATUS, SC.CANCEL_STATUS or SC.EXTRA_STATUS
+    The status will be on of SC.BUTTON1_STATUS, SC.BUTTON2_STATUS or SC.BUTTON3_STATUS
     depending on which button was clicked.
     
     @property {Object}
@@ -151,25 +158,25 @@ SC.AlertPanel = SC.Panel.extend({
   }.property('description').cacheable(),
   
   /**
-    The button view for the OK button.
+    The button view for the button 1 (OK).
     
     @property {SC.ButtonView}
   */
-  okButton: SC.outlet('contentView.childViews.1.childViews.1'),
+  buttonOne: SC.outlet('contentView.childViews.1.childViews.1'),
 
   /**
-    The button view for the Cancel button.
+    The button view for the button 2 (Cancel).
     
     @property {SC.ButtonView}
   */
-  cancelButton: SC.outlet('contentView.childViews.1.childViews.0'),
+  buttonTwo: SC.outlet('contentView.childViews.1.childViews.0'),
 
   /**
-    The button view for the Extra button.
+    The button view for the button 3 (Extra).
     
     @property {SC.ButtonView}
   */
-  extraButton: SC.outlet('contentView.childViews.2'),
+  buttonThree: SC.outlet('contentView.childViews.2'),
   
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
@@ -193,7 +200,7 @@ SC.AlertPanel = SC.Panel.extend({
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
-            actionKey: SC.CANCEL_STATUS,
+            actionKey: SC.BUTTON2_STATUS,
             localize: YES,
             titleMinWidth: 80,
             layout: { right: 0, height: 21, width: 'auto', bottom: 0 },
@@ -204,7 +211,7 @@ SC.AlertPanel = SC.Panel.extend({
 
           SC.ButtonView.extend({
             useStaticLayout: YES,
-            actionKey: SC.OK_STATUS,
+            actionKey: SC.BUTTON1_STATUS,
             localize: YES,
             titleMinWidth: 80,
             layout: { right: 0, height: 21, width: 'auto', bottom: 0 },
@@ -214,7 +221,7 @@ SC.AlertPanel = SC.Panel.extend({
       }),
       
       SC.ButtonView.extend({
-        actionKey: SC.EXTRA_STATUS,
+        actionKey: SC.BUTTON3_STATUS,
         localize: YES,
         titleMinWidth: 80,
         layout: { bottom: 14, height: 21, left: 16, width: 'auto' },
@@ -272,14 +279,14 @@ SC.AlertPanel._normalizeArguments = function(args) {
   
   @param {String} message the primary message
   @param {String} description an optional detailed description
-  @param {String} okButtonTitle optional unlocalized title for the OK button
-  @param {String} cancelButtonTitle optional unlocalized title for Cancel button
-  @param {String} extraButtonTitle optional unlocalized title for extra button
+  @param {String} button1Title optional unlocalized title for button 1 (OK)
+  @param {String} button2Title optional unlocalized title for button 2 (Cancel)
+  @param {String} button3Title optional unlocalized title for button 3 (extra)
   @param {String} iconUrl optional URL or class name for icon.
   @param {Object} delegate optional delegate to notify when panel is dismissed
   @returns {SC.AlertPanel} new alert panel
 */
-SC.AlertPanel.show = function(message, description, okButtonTitle, cancelButtonTitle, extraButtonTitle, iconUrl, delegate) {
+SC.AlertPanel.show = function(message, description, button1Title, button2Title, button3Title, iconUrl, delegate) {
   
   // get the delegate and normalize the rest of the params
   var args = this._normalizeArguments(arguments);
@@ -294,7 +301,7 @@ SC.AlertPanel.show = function(message, description, okButtonTitle, cancelButtonT
   });
   
   // customize buttons as needed
-  var buttonKeys = 'okButton cancelButton extraButton'.w(), button, title;
+  var buttonKeys = 'buttonOne buttonTwo buttonThree'.w(), button, title;
   for(var idx=0;idx<3;idx++) {
     button = ret.get(buttonKeys[idx]);
     title = args[idx + 2];
@@ -309,7 +316,7 @@ SC.AlertPanel.show = function(message, description, okButtonTitle, cancelButtonT
   
   @returns {SC.AlertPanel} the panel
 */
-SC.AlertPanel.warn = function(message, description, okButtonTitle,  cancelButtonTitle, extraButtonTitle, delegate) {
+SC.AlertPanel.warn = function(message, description, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[5] = 'sc-icon-alert-48';
   return this.show.apply(this, args);
@@ -321,7 +328,7 @@ SC.AlertPanel.warn = function(message, description, okButtonTitle,  cancelButton
   
   @returns {SC.AlertPanel} the panel
 */
-SC.AlertPanel.info = function(message, description, okButtonTitle,  cancelButtonTitle, extraButtonTitle, delegate) {
+SC.AlertPanel.info = function(message, description, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[5] = 'sc-icon-info-48';
   return this.show.apply(this, args);
@@ -332,7 +339,7 @@ SC.AlertPanel.info = function(message, description, okButtonTitle,  cancelButton
   
   @returns {SC.AlertPanel} the panel
 */
-SC.AlertPanel.error = function(message, description, okButtonTitle,  cancelButtonTitle, extraButtonTitle, delegate) {
+SC.AlertPanel.error = function(message, description, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[5] = 'sc-icon-error-48';
   return this.show.apply(this, args);
