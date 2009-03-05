@@ -199,6 +199,11 @@ SC.Record = SC.Object.extend(
     }
   },
   
+  /**
+    This is automatically called when using set on a property. However, if you want to
+    prevent the store from being updated with every set, you can get edits from being propagated
+    by calling beginEditing() first then ending the editing session with endEditing().
+  */
   beginEditing: function() {
     if(this._editLevel === 0) {
       var store = this.get('store');
@@ -208,7 +213,12 @@ SC.Record = SC.Object.extend(
     }
     this._editLevel++;
   },
-  
+
+  /**
+    This is automatically called when using set on a property. However, if you want to
+    prevent the store from being updated with every set, you can get edits from being propagated
+    by calling beginEditing() function first then ending the editing session with endEditing().
+  */
   endEditing: function() {
     this._editLevel--;
     if(this._editLevel <= 0) {
