@@ -200,7 +200,6 @@ SC.Record = SC.Object.extend(
   },
   
   beginEditing: function() {
-    
     if(this._editLevel === 0) {
       var store = this.get('store');
       if(store) {

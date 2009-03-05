@@ -216,17 +216,335 @@ test("materialization: find record with command  MyApp.store.find('123', MyApp.A
 
 });
 
-test("record: materialize guid='4995bc653ae78', test set() on record. then commit changes.", function() {
+test("record: materialize guid='4995bc653ae78', test using set() on record without beginEditing() call. then commitChanges on store.", function() {
   var record = MyApp.store.find('4995bc653ae78', MyApp.Author);
   ok(typeof record === 'object', "record returned is of type 'object'");
   ok(record.get('fullName') == "Erskine Aultman 2", "record.get('fullName') should equal 'Erskine Aultman 2'");
 
+  ok(MyApp.store.revisions[record._storeKey] === 0, "Before editing record, revision in store should be 0.");
+
   record.set('fullName', 'Bob Jones');
   ok(record.get('fullName') == "Bob Jones", "record.set('fullName', 'Bob Jones'), fullName should equal 'Bob Jones'");
+  ok(record._editLevel === 0, "after a set operation without using explicit beginEditing(), _editLevel should return to 0. ACTUAL: " + record._editLevel);
+
+  ok(MyApp.store.revisions[record._storeKey] === 1, "After first edit, revision in store should be 1. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+
+  record.set('fullName', 'Bobby Jones');
+  ok(record.get('fullName') == "Bobby Jones", "record.set('fullName', 'Bobby Jones'), fullName should equal 'Bobby Jones'");
+  ok(record._editLevel === 0, "after a set operation without using explicit beginEditing(), _editLevel should return to 0. ACTUAL: " + record._editLevel);
+
+  ok(MyApp.store.revisions[record._storeKey] === 2, "After second edit, revision in store should be 2. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+
+  ok(MyApp.store.changes.length == 2, "BEFORE commit, 2 changes should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 2, "BEFORE commit, 2 persistentChanges.updated should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit, YES should be returned to signify success."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
 
 });
 
+test("record: materialize guid='4995bc653af24', test using set() on record WITH beginEditing() and endEditing() calls. then commitChanges store.", function() {
+  var record = MyApp.store.find('4995bc653af24', MyApp.Author);
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Hailey Berkheimer 3", "record.get('fullName') should equal 'Hailey Berkheimer 3'");
 
+  ok(MyApp.store.revisions[record._storeKey] === 0, "Before editing record, revision in store should be 0.");
+
+  record.beginEditing();
+  
+  record.set('fullName', 'Bob Jones');
+  ok(record.get('fullName') == "Bob Jones", "record.set('fullName', 'Bob Jones'), fullName should equal 'Bob Jones'");
+  ok(record._editLevel === 1, "after a set operation with explicit beginEditing(), _editLevel should be to 1. ACTUAL: " + record._editLevel);
+
+  ok(MyApp.store.revisions[record._storeKey] === 0, "After first edit, revision in store should be 0. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+
+  record.set('fullName', 'Bobby Jones');
+  ok(record.get('fullName') == "Bobby Jones", "record.set('fullName', 'Bobby Jones'), fullName should equal 'Bobby Jones'");
+  ok(record._editLevel === 1, "after a set operation with explicit beginEditing(), _editLevel should be to 1. ACTUAL: " + record._editLevel);
+
+  ok(MyApp.store.revisions[record._storeKey] === 0, "After second edit, revision in store should be 0. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+  
+  record.endEditing();
+
+  ok(MyApp.store.revisions[record._storeKey] === 1, "AFTER calling record.endEditing(), revision in store should be 1. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+  ok(record._editLevel === 0, "AFTER calling record.endEditing() with explicit beginEditing(), _editLevel should be to 0. ACTUAL: " + record._editLevel);
+
+  
+  ok(MyApp.store.changes.length == 1, "BEFORE commit, 1 changes should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 1, "BEFORE commit, 1 persistentChanges.updated should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit, YES should be returned to signify success."); 
+
+
+  ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
+
+});
+
+test("record: materialize guid='4995bc653b043', test using set() on record without beginEditing() call. then discardChanges on store.", function() {
+  var record = MyApp.store.find('4995bc653b043', MyApp.Author);
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Clitus Mccallum 2", "record.get('fullName') should equal 'Clitus Mccallum 2'");
+
+  ok(MyApp.store.revisions[record._storeKey] === 0, "Before editing record, revision in store should be 0.");
+
+  record.set('fullName', 'Bob Jones');
+  ok(record.get('fullName') == "Bob Jones", "record.set('fullName', 'Bob Jones'), fullName should equal 'Bob Jones'");
+  ok(record._editLevel === 0, "after a set operation without using explicit beginEditing(), _editLevel should return to 0. ACTUAL: " + record._editLevel);
+
+  ok(MyApp.store.revisions[record._storeKey] === 1, "After first edit, revision in store should be 1. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+
+  record.set('fullName', 'Bobby Jones');
+  ok(record.get('fullName') == "Bobby Jones", "record.set('fullName', 'Bobby Jones'), fullName should equal 'Bobby Jones'");
+  ok(record._editLevel === 0, "after a set operation without using explicit beginEditing(), _editLevel should return to 0. ACTUAL: " + record._editLevel);
+
+  ok(MyApp.store.revisions[record._storeKey] === 2, "After second edit, revision in store should be 2. ACTUAL: " + MyApp.store.revisions[record._storeKey]);
+
+  ok(MyApp.store.changes.length == 2, "BEFORE discard, 2 changes should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 2, "BEFORE discard, 2 persistentChanges.updated should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE discard, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.discardChanges();
+
+  ok(success == NO, "AFTER discard, NO should be returned to signify error because you're in a store that is attached to a persistentStore."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER discard and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER discard and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER discard and reset, hasChanges property on store is set to NO."); 
+
+});
+
+test("record: destroy existing record with guid='4995bc653b043' by calling store.destroyRecords([record]) then commitChanges.", function() {
+  var record = MyApp.store.find('4995bc653b043', MyApp.Author);
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Bobby Jones", "record.get('fullName'), fullName should equal 'Bobby Jones'");
+
+  MyApp.store.destroyRecords([record]);
+
+  ok(record.get('fullName') === null, "record.get('fullName'), fullName should equal to null.");
+
+  ok(MyApp.store.changes.length == 1, "BEFORE commit, 1 change should have been recorded."); 
+  ok(MyApp.store.persistentChanges.deleted.length == 1, "BEFORE commit, 1 persistentChanges.deleted should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit, YES should be returned to signify success."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
+
+});
+
+test("record: destroy existing record with guid='4995bc653af24' by calling record.destroy() then commitChanges.", function() {
+  var record = MyApp.store.find('4995bc653af24', MyApp.Author);
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Bobby Jones", "record.get('fullName'), fullName should equal 'Bobby Jones'");
+
+  record.destroy();
+
+  ok(record.get('fullName') === null, "record.get('fullName'), fullName should equal to null.");
+
+  ok(MyApp.store.changes.length == 1, "BEFORE commit, 1 change should have been recorded."); 
+  ok(MyApp.store.persistentChanges.deleted.length == 1, "BEFORE commit, 1 persistentChanges.deleted should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit, YES should be returned to signify success."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
+
+});
+
+test("record: destroy existing record with guid='4995bc653ae78' by calling record.destroy() then discardChanges.", function() {
+  var record = MyApp.store.find('4995bc653ae78', MyApp.Author);
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Bobby Jones", "record.get('fullName'), fullName should equal 'Bobby Jones'");
+
+  record.destroy();
+
+  ok(record.get('fullName') === null, "record.get('fullName'), fullName should equal to null.");
+
+  ok(MyApp.store.changes.length == 1, "BEFORE commit, 1 change should have been recorded."); 
+  ok(MyApp.store.persistentChanges.deleted.length == 1, "BEFORE commit, 1 persistentChanges.deleted should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.discardChanges();
+
+  ok(success == NO, "AFTER discard, NO should be returned to signify error because you're in a store that is attached to a persistentStore.");
+  ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
+
+});
+
+test("record: create new record using MyApp.store.createRecord({fullName: 'John Locke'}, MyApp.Author) then commitChanges. See guid from server.", function() {
+  
+  var record = MyApp.store.createRecord({fullName: 'John Locke'}, MyApp.Author);
+
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "John Locke", "record.get('fullName'), fullName should equal 'John Locke'");
+  ok(record.get('guid') == null, "record.get('guid'), guid be equal to null.");
+
+  ok(MyApp.store.changes.length == 1, "BEFORE commit, 1 change should have been recorded."); 
+  ok(MyApp.store.persistentChanges.created.length == 1, "BEFORE commit, 1 persistentChanges.created should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit, YES should be returned to signify success."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
+
+  ok(record.get('status') === RECORD_LOADING, "record.get('status') should === RECORD_LOADING");
+  ok(record.get('newRecord') === YES, "record.get('newRecord') should === YES");
+
+  MyApp.persistentStore.simulateResponseFromServer(51);
+
+  ok(record.get('fullName') == "John Locke", "record.get('fullName'), fullName should equal 'John Locke'");
+  ok(record.get('bookTitle') == "A Letter Concerning Toleration", "record.get('bookTitle'), bookTitle should equal 'A Letter Concerning Toleration'");
+  ok(record.get('guid') == "abcdefg", "record.get('guid'), guid should equal 'abcdefg'");
+  ok(MyApp.store.primaryKeyMap['abcdefg'] == 51, "MyApp.store.primaryKeyMap['abcdefg'] == 51");
+  ok(MyApp.store.storeKeyMap[51] == 'abcdefg', "MyApp.store.storeKeyMap[51] == 'abcdefg'");
+
+  ok(record.get('status') === RECORD_LOADED, "record.get('status') should === RECORD_LOADED");
+  ok(record.get('newRecord') === NO, "record.get('newRecord') should === NO");
+
+});
+
+test("chaining: create new chained store off from MyApp.store", function() {
+  MyApp.chainedStore = MyApp.store.createChainedStore();
+  ok(MyApp.chainedStore.get('parentStore')=== MyApp.store, "MyApp.chainedStore's parentStore should be MyApp.store.");
+  ok(MyApp.chainedStore=== MyApp.store.childStores[0], "MyApp.store's first childStore should be MyApp.chainedStore.");
+});
+
+test("chaining: new record in chainedStore. commit it, commit parentStore", function() {
+  var record = MyApp.chainedStore.createRecord({fullName: 'Jim Locke'}, MyApp.Author);
+  
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Jim Locke", "record.get('fullName'), fullName should equal 'Jim Locke'");
+  ok(record.get('guid') == null, "record.get('guid'), guid be equal to null.");
+
+  ok(MyApp.chainedStore.dataHashes[52] !== undefined, "created dataHashes should exist with storeKey 52 in chainedStore");
+  ok(MyApp.store.dataHashes[52] === undefined, "created dataHashes should NOT exist with storeKey 52 in store");
+
+  ok(MyApp.chainedStore.changes.length == 1, "BEFORE commit, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.created.length == 1, "BEFORE commit, 1 persistentChanges.created  in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "BEFORE commit, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "BEFORE commit and reset of changes in parentStore should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.created.length == 0, "BEFORE commit and reset of persistentChanges.created in parentStore should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "BEFORE commit and reset, hasChanges property in parentStore is set to NO."); 
+
+  var success = MyApp.chainedStore.commitChanges();
+  ok(success == YES, "AFTER commit of chainedStore, YES should be returned to signify success."); 
+
+  ok(MyApp.chainedStore.changes.length == 0, "AFTER commit, 0 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.created.length == 0, "AFTER commit, 1 persistentChanges.created  in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === NO, "AFTER commit, hasChanges property on chainedStore is set to NO."); 
+
+  ok(MyApp.store.changes.length == 0, "BEFORE commit, 0 change  in parentStore should have been recorded."); 
+  ok(MyApp.store.persistentChanges.created.length == 1, "BEFORE commit, 1 persistentChanges.created in parentStore should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "BEFORE commit, hasChanges property on parentStore is set to NO."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit of parentStore, YES should be returned to signify success."); 
+
+  MyApp.persistentStore.simulateResponseFromServer(52);
+
+  ok(record.get('fullName') == "Jim Locke", "record.get('fullName'), fullName should equal 'Jim Locke'");
+  ok(record.get('bookTitle') == "A Letter Concerning Toleration Part Deux", "record.get('bookTitle'), bookTitle should equal 'A Letter Concerning Toleration Part Deux'");
+  ok(record.get('guid') == "abc", "record.get('guid'), guid should equal 'abcdefg'");
+  ok(MyApp.store.primaryKeyMap['abc'] == 52, "MyApp.store.primaryKeyMap['abc'] == 52");
+  ok(MyApp.store.storeKeyMap[52] == 'abc', "MyApp.store.storeKeyMap[52] == 'abc'");
+
+  ok(record.get('status') === RECORD_LOADED, "record.get('status') should === RECORD_LOADED");
+  ok(record.get('newRecord') === NO, "record.get('newRecord') should === NO");
+
+  
+  var rec = MyApp.store.find('abc');
+  ok(typeof rec === 'object', "check store to see if record is there. rec MyApp.store.find('abc') is of type 'object'");
+  ok(rec === record, 'rec from store should be the same object as record from chainedStore');
+  
+});
+
+test("chaining: new record in chainedStore. commit it, discard parentStore. should cause error", function() {
+  var record = MyApp.chainedStore.createRecord({fullName: 'Jim Bob'}, MyApp.Author);
+  
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Jim Bob", "record.get('fullName'), fullName should equal 'Jim Bob'");
+  ok(record.get('guid') == null, "record.get('guid'), guid be equal to null.");
+
+  ok(MyApp.chainedStore.dataHashes[53] !== undefined, "created dataHashes should exist with storeKey 53 in chainedStore");
+  ok(MyApp.store.dataHashes[53] === undefined, "created dataHashes should NOT exist with storeKey 53 in store");
+
+  ok(MyApp.chainedStore.changes.length == 1, "BEFORE commit, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.created.length == 1, "BEFORE commit, 1 persistentChanges.created  in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "BEFORE commit, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "BEFORE commit and reset of changes in parentStore should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.created.length == 0, "BEFORE commit and reset of persistentChanges.created in parentStore should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "BEFORE commit and reset, hasChanges property in parentStore is set to NO."); 
+
+  var success = MyApp.chainedStore.commitChanges();
+  ok(success == YES, "AFTER commit of chainedStore, YES should be returned to signify success."); 
+
+  ok(MyApp.chainedStore.changes.length == 0, "AFTER commit, 0 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.created.length == 0, "AFTER commit, 1 persistentChanges.created  in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === NO, "AFTER commit, hasChanges property on chainedStore is set to NO."); 
+
+  ok(MyApp.store.changes.length == 0, "BEFORE commit, 0 change  in parentStore should have been recorded."); 
+  ok(MyApp.store.persistentChanges.created.length == 1, "BEFORE commit, 1 persistentChanges.created in parentStore should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "BEFORE commit, hasChanges property on parentStore is set to NO."); 
+
+  var success = MyApp.store.discardChanges();
+  ok(success == NO, "AFTER commit of parentStore, NO should be returned to signify error because it cannot be discarded. Record still remains but not probagated to server."); 
+});
+
+test("chaining: new record in chainedStore. discard it, chainedStore restored and record does not exist in chainedStore.", function() {
+  var record = MyApp.chainedStore.createRecord({fullName: 'Bill Adama'}, MyApp.Author);
+  
+  ok(typeof record === 'object', "record returned is of type 'object'");
+  ok(record.get('fullName') == "Bill Adama", "record.get('fullName'), fullName should equal 'Bill Adama'");
+  ok(record.get('guid') == null, "record.get('guid'), guid be equal to null.");
+
+  ok(MyApp.chainedStore.dataHashes[54] !== undefined, "created dataHashes should exist with storeKey 54 in chainedStore");
+  ok(MyApp.store.dataHashes[54] === undefined, "created dataHashes should NOT exist with storeKey 54 in store");
+
+  ok(MyApp.chainedStore.changes.length == 1, "BEFORE discard, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.created.length == 1, "BEFORE discard, 1 persistentChanges.created  in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "BEFORE discard, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "BEFORE discard and reset of changes in parentStore should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.created.length == 0, "BEFORE discard and reset of persistentChanges.created in parentStore should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "BEFORE discard and reset, hasChanges property in parentStore is set to NO."); 
+
+  var success = MyApp.chainedStore.discardChanges();
+  ok(success == YES, "AFTER discard of chainedStore, YES should be returned to signify success."); 
+
+  ok(MyApp.chainedStore.dataHashes[54] === undefined, "created dataHash should NOT exist with storeKey 54 in chainedStore");
+  ok(MyApp.store.dataHashes[54] === undefined, "created dataHash should NOT exist with storeKey 54 in store");
+
+  ok(MyApp.chainedStore.changes.length == 0, "AFTER discard, 0 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.created.length == 0, "AFTER discard, 1 persistentChanges.created  in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === NO, "AFTER discard, hasChanges property on chainedStore is set to NO."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER discard and reset of changes in parentStore should result in a length of 0."); 
+  ok(MyApp.store.persistentChanges.created.length == 0, "AFTER discard and reset of persistentChanges.created in parentStore should result in a length of 0."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER discard and reset, hasChanges property in parentStore is set to NO."); 
+
+});
 
 /*
   
@@ -237,18 +555,21 @@ test("record: materialize guid='4995bc653ae78', test set() on record. then commi
   //rematerialize record given one guid. check that it is the same record.
   
   //materialize record that does not exist. See it retireved from the server.
-  update record using set. commands. see revisions. commit. see changes.
-  update record using set. commands. discard. see no changes.
-  destroy record. see it be gone? then commit. see it passed to server.
-  destroy record. then discard. see it still be there. should be reverted.
-  create new record. set params. save to server using commit. see new guid come in.
-  create chained store. chained store is in the parentStore's array. chainedStore has parentStore set.
+  //update record using set. commands. see revisions. commit. see changes.
+  //update record using set. commands. discard. see no changes.
+  
+  //destroy record. see it be gone? then commit. see it passed to server.
+  //destroy record. then discard. see it still be there. should be reverted.
+  //create new record. set params. save to server using commit. see new guid come in.
+//  create chained store. chained store is in the parentStore's array. chainedStore has parentStore set.
+//create new record as child of chainedStore. See that it does not exist in parentStore. commit. See it in parent store. See it passed to server.
+
   get record and update it. see that parentStore and chainedStore have different instances of dataHash. commit it. check if they are the same chained to parent.
   get record and update it. see that parentStore and chainedStore have different instances of dataHash. discard it. check if they are the same. parent to chained.
   get record in parentStore and cainedStore. update chainedStore record.. see that parentStore and chainedStore have different instances of dataHash AND record.  commit it. check if they are the same chained to parent.
   get record in parentStore and cainedStore. update chainedStore record.. see that parentStore and chainedStore have different instances of dataHash AND record.  discard it. ccheck if they are the same. parent to chained.
-  create new record as child of chainedStore. See that it does not exist in parentStore. commit. See it in parent store. See it passed to server.
-  create new record as child of chainedStore. See that it does not exist in parentStore. discard. See it NOT parent store or chained store. See it NOT passed to the server.
+ 
+ // create new record as child of chainedStore. See that it does not exist in parentStore. discard. See it NOT parent store or chained store. See it NOT passed to the server.
   
   
   create new record in parentStore. commit. See it in childStore.
