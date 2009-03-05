@@ -10,23 +10,16 @@ require('core') ;
   @class
 
 
-  The Store is where you can find all of your dataHashes. There can be one
-  'Active' record registered at a time. From this active record, you can chain
-  dataHashes used for editing, etc. Objects are recordd as JSON and are materialized
-  as SproutCore record objects on demand.
+  The Store is where you can find all of your dataHashes. Stores can be chained for editing
+  purposes and committed back one chain level at a time all the way back to the perisistent
+  store.
   
-  By default, a base "SC.Store" is created for your application. If you have more
-  than one applications running at once, you can manually create other base dataHashes
-  using the isBaseStore property.
-  
-  The reason to keep seperate data dataHashes for each application is to reduce complexity
-  and decrease the chance for data corruption.
-  
+  Data objects are recordd as JSON and are materialized as SproutCore record objects on demand.
 
   When chaining data dataHashes, changes in the child record will be probagated to the 
   parent record and saved if possible (The child record has a newer version of the object).
   
-  If you are at the base record, you can specify a parent record that may be a REST or 
+  If you are at the base store, you can specify a parentStore that may be a REST or 
   local storage interface for persistant storage.
 
   @extends SC.Object
@@ -65,6 +58,16 @@ SC.Store = SC.Object.extend(
     @type {Array}
   */
   dataHashes: {},
+
+  /**
+    This is the cached of dataHashes indexed by the storeKey. 
+    
+    This property is NOT unique across stores in a chain until changes are committed.
+    
+    @property
+    @type {Array}
+  */
+  cachedAttributes: {},
 
   /**
     This array contains the revisions for the dataHashes indexed by the storeKey.
@@ -135,9 +138,6 @@ SC.Store = SC.Object.extend(
     @type {Object}
   */
   instantiatedRecordMap: {},
-
-  // used for comparison... TBA.
-  // _compRecordTypeMap: {},
   
   /**
     This is the queue of records that need to be retrieved from the server.
@@ -187,9 +187,12 @@ SC.Store = SC.Object.extend(
   */
   persistentChanges: null,
   
-  cachedAttributes: {},
+  /**
+    If the store has a parentStore and it is not a persistent store, this will return YES.
   
-  
+    @property
+    @type {Boolean}
+  */
   isTransient: function() {
     return (this.get('parentStore') && !this.get('parentStore').get('isPersistent'));
   }.property('parentStore').cacheable(),
@@ -365,6 +368,8 @@ SC.Store = SC.Object.extend(
   
   /**
     Propagate this store's changes to it's parent.
+
+    @returns {Boolean} Returns YES if the operation was successful otherwise, returns NO.
   */
   commitChanges: function() {
     var parentStore = this.get('parentStore');
@@ -381,6 +386,8 @@ SC.Store = SC.Object.extend(
 
   /**
     Discard the changes made to this store and reset the store.
+    
+    @returns {Boolean} Returns YES if the operation was successful otherwise, returns NO.
   */
   discardChanges: function() {
     this.reset();
@@ -628,7 +635,7 @@ SC.Store = SC.Object.extend(
     
     @param {Integer} storeKey The dataHash's storeKey.
     
-    @returns {Object} Returns the dataHash.
+    @returns {Object} Returns the dataHash or null.
   */
   getDataHash: function(storeKey)
   {
@@ -708,7 +715,7 @@ SC.Store = SC.Object.extend(
     @param {SC.Record} recordType (optional) he SC.Record extended class that you want to use. If none is specified, it is assumed to be a base SC.Record.
     @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used.
 
-    @returns {SC.Record} Returns the created record.
+    @returns {SC.Record} Returns the created record or null.
   */
   createRecord: function(dataHash, recordType, primaryKey)
   {
@@ -737,7 +744,7 @@ SC.Store = SC.Object.extend(
     @param {SC.Record|Array} recordType (optional) The SC.Record extended class that you want to use or an array of SC.Record classes that match the dataArr item per item.
     @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used.
 
-    @returns {Array} Returns YES if the record operation was successful.
+    @returns {Array} Returns the storeKeys of the updated dataHashes.
   */
   loadRecords: function(dataArr, recordType, primaryKey) {
     var parentStore = this.get('parentStore');
@@ -797,6 +804,8 @@ SC.Store = SC.Object.extend(
     Given an array of records, refresh them from their persistent store.
   
     @param {Array} records Array of SC.Record instances.
+    
+    @returns {Array} Returns the records that were refreshed.
   */
   refreshRecords: function(records) {
     var parentStore = this.get('parentStore');
@@ -833,6 +842,12 @@ SC.Store = SC.Object.extend(
   /** 
     This method is called when there are newly retrieved records from the persistent 
     store that needs to be migrated.
+
+    @private 
+    
+    @param {Array} storeKeys Array containing the storeKeys for the records that were created.
+    @param {Array} guids (optional) Array containing the guids for the records that were created.
+    @param {Array} dataArr (optional) Array contianing the dataHahes for the records that were created.
   */
   _didRetrieveRecords: function(storeKeys, guids, dataArr) {
     
@@ -871,6 +886,10 @@ SC.Store = SC.Object.extend(
   /** 
     This method is called when there are new records from the persistent 
     store that needs to be migrated.
+
+    @param {Array} storeKeys Array containing the storeKeys for the records that were created.
+    @param {Array} guids Array containing the guids for the records that were created.
+    @param {Array} dataArr Array contianing the dataHahes for the records that were created.
   */
   didCreateRecords: function(storeKeys, guids, dataArr) {
     return this._didRetrieveRecords(storeKeys, guids, dataArr);
@@ -881,6 +900,7 @@ SC.Store = SC.Object.extend(
 
     @private
     @param {Integer} storeKey The storeKey for the dataHash.
+    @param {Boolean} isNewRecord If YES, then set the RECORD_LOADING and newRecord props to YES.
 
     @returns {SC.Record} Returns a record instance.
   */
@@ -985,30 +1005,32 @@ SC.Store = SC.Object.extend(
     return ret;
   },
   
+  
+  _queries: {},
+  
   /**
     Given a filter and a recordType, retrieve matching records. 
     
-    @param {SC.Query} query The qeuery containing a query.
-    @param {SC.Record} recordType The record type.
-
+    @param {String} query The query containing a query.
+    @param {Mixed} arguements The arguments for the query.
+    
     @returns {Array} Returns an array of matched record instances.
   */
-  findAll: function(query, recordType)
+  findAll: function(queryString)
   {
-    var q;
-    if(!this._queries[query]) {
-      this._queries[query] = SC.Query.create({queryString: query});
+    if(!queryString) return [];
+    
+    if(this._queries[queryString]) 
+    {
+      // Load from index.
+      console.log('existing query.');
+    } else {
+      // Parse queryString to get index.
+      console.log('new query, need to parse.');
     }
-    
-    var q = this._queries[query];
-    
+
   },
   
-  // 
-  // _queries: {},
-  // 
-  // _indicies: {},
-
   
   ////////////////////////////////////////////////////////////////////////////////////
   //
