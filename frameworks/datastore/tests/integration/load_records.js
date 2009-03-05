@@ -312,9 +312,14 @@ test("record: materialize guid='4995bc653b043', test using set() on record witho
   ok(MyApp.store.persistentChanges.updated.length == 2, "BEFORE discard, 2 persistentChanges.updated should have been recorded."); 
   ok(MyApp.store.get('hasChanges') === YES, "BEFORE discard, hasChanges property on store is set to YES."); 
 
-  var success = MyApp.store.discardChanges();
-
-  ok(success == NO, "AFTER discard, NO should be returned to signify error because you're in a store that is attached to a persistentStore."); 
+  var didThrow = NO;
+  try {
+    var success = MyApp.store.discardChanges();
+    ok(success == NO, "AFTER discard, NO should be returned to signify error because you're in a store that is attached to a persistentStore."); 
+  } catch(e) {
+    didThrow = YES;
+  }
+  ok(didThrow == YES, "AFTER discardChanges of parentStore, FATAL error was thrown."); 
 
   ok(MyApp.store.changes.length == 0, "AFTER discard and reset of changes should result in a length of 0."); 
   ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER discard and reset of persistentChanges.updated should result in a length of 0."); 
@@ -379,9 +384,14 @@ test("record: destroy existing record with guid='4995bc653ae78' by calling recor
   ok(MyApp.store.persistentChanges.deleted.length == 1, "BEFORE commit, 1 persistentChanges.deleted should have been recorded."); 
   ok(MyApp.store.get('hasChanges') === YES, "BEFORE commit, hasChanges property on store is set to YES."); 
 
-  var success = MyApp.store.discardChanges();
+  var didThrow = NO;
+  try {
+    var success = MyApp.store.discardChanges();
+    ok(success == NO, "AFTER discard, NO should be returned to signify error because you're in a store that is attached to a persistentStore.");
+  } catch(e) {
+    didThrow = YES;
+  }
 
-  ok(success == NO, "AFTER discard, NO should be returned to signify error because you're in a store that is attached to a persistentStore.");
   ok(MyApp.store.changes.length == 0, "AFTER commit and reset of changes should result in a length of 0."); 
   ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
   ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
@@ -507,9 +517,15 @@ test("chaining: new record in chainedStore. commit it, discard parentStore. shou
   ok(MyApp.store.changes.length == 0, "BEFORE commit, 0 change  in parentStore should have been recorded."); 
   ok(MyApp.store.persistentChanges.created.length == 1, "BEFORE commit, 1 persistentChanges.created in parentStore should have been recorded."); 
   ok(MyApp.store.get('hasChanges') === NO, "BEFORE commit, hasChanges property on parentStore is set to NO."); 
-
-  var success = MyApp.store.discardChanges();
-  ok(success == NO, "AFTER commit of parentStore, NO should be returned to signify error because it cannot be discarded. Record still remains but not probagated to server."); 
+  
+  var didThrow = NO;
+  try {
+    var success = MyApp.store.discardChanges();
+    ok(success == NO, "AFTER discardChanges of parentStore, NO should be returned to signify error because it cannot be discarded. Record still remains but not probagated to server."); 
+  } catch(e) {
+    didThrow = YES;
+  }
+  ok(didThrow == YES, "AFTER discardChanges of parentStore, FATAL error was thrown."); 
 });
 
 test("chaining: new record in chainedStore. discard it, chainedStore restored and record does not exist in chainedStore.", function() {
@@ -546,6 +562,232 @@ test("chaining: new record in chainedStore. discard it, chainedStore restored an
 
 });
 
+
+test("chaining: get record in chainedStore AND store. update it in chainedStore. commit. then commit to persistentStore.", function() {
+  var chainedStoreRecord = MyApp.chainedStore.find("4995bc653b11d");
+  var storeRecord = MyApp.store.find("4995bc653b11d");
+  
+  ok(chainedStoreRecord !== storeRecord, "BEFORE UPDATE: chainedStoreRecord should not equal storeRecord");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "BEFORE UPDATE: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "BEFORE UPDATE: chainedStoreRecord and storeRecord should point to the same dataHash");
+
+  chainedStoreRecord.set('fullName', 'Kara Thrace');
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER UPDATE:  chainedStoreRecord.set('fullName', 'Kara Thrace').. chainedStoreRecord and storeRecord should NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Janette Koepple 2', "AFTER UPDATE: storeRecord.get('fullName') should equal original value 'Janette Koepple 2'");
+  ok(chainedStoreRecord.get('fullName') == 'Kara Thrace', "AFTER UPDATE: chainedStoreRecord.get('fullName') should equal new value 'Kara Thrace'");
+
+  ok(MyApp.chainedStore.changes.length == 1, "AFTER UPDATE, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 1, "AFTER UPDATE, 1 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "AFTER UPDATE, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER UPDATE, 0 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER UPDATE, 0 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER UPDATE, hasChanges property on store is set to NO."); 
+
+  var success = MyApp.chainedStore.commitChanges();
+  ok(success == YES, "AFTER commit of chainedStore, YES should be returned to signify success."); 
+
+  ok(chainedStoreRecord !== storeRecord, "AFTER COMMIT: chainedStoreRecord should still not equal storeRecord.");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "AFTER COMMIT: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "AFTER COMMIT: chainedStoreRecord and storeRecord should point to the same dataHash");
+  
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit of store, YES should be returned to signify success."); 
+
+  ok(storeRecord.get('fullName') == 'Kara Thrace', "AFTER COMMIT: storeRecord.get('fullName') should equal original value 'Kara Thrace'");
+  ok(chainedStoreRecord.get('fullName') == 'Kara Thrace', "AFTER COMMIT: chainedStoreRecord.get('fullName') should equal original value 'Kara Thrace'");
+
+});
+
+test("chaining: get record in chainedStore AND store. update it in chainedStore. discard.", function() {
+  var chainedStoreRecord = MyApp.chainedStore.find("4995bc653b173");
+  var storeRecord = MyApp.store.find("4995bc653b173");
+  
+  ok(chainedStoreRecord !== storeRecord, "BEFORE UPDATE: chainedStoreRecord should not equal storeRecord");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "BEFORE UPDATE: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "BEFORE UPDATE: chainedStoreRecord and storeRecord should point to the same dataHash");
+
+  chainedStoreRecord.set('fullName', 'Karl Agathon');
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER UPDATE:  chainedStoreRecord.set('fullName', 'Karl Agathon').. chainedStoreRecord and storeRecord should NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Leyton Jyllian 4', "AFTER UPDATE: storeRecord.get('fullName') should equal original value 'Leyton Jyllian 4'");
+  ok(chainedStoreRecord.get('fullName') == 'Karl Agathon', "AFTER UPDATE: chainedStoreRecord.get('fullName') should equal new value 'Karl Agathon'");
+
+  ok(MyApp.chainedStore.changes.length == 1, "AFTER UPDATE, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 1, "AFTER UPDATE, 1 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "AFTER UPDATE, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER UPDATE, 0 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER UPDATE, 0 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER UPDATE, hasChanges property on store is set to NO."); 
+
+  var success = MyApp.chainedStore.discardChanges();
+  ok(success == YES, "AFTER discard of chainedStore, YES should be returned to signify success."); 
+
+  ok(MyApp.chainedStore.changes.length == 0, "AFTER DISCARD, 0 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 0, "AFTER DISCARD, 0 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === NO, "AFTER DISCARD, hasChanges property on chainedStore is set to NO."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER UPDATE, 0 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER UPDATE, 0 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER UPDATE, hasChanges property on store is set to NO."); 
+
+  ok(chainedStoreRecord !== storeRecord, "AFTER DISCARD: chainedStoreRecord should still not equal storeRecord.");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "AFTER DISCARD: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "AFTER DISCARD: chainedStoreRecord and storeRecord should point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Leyton Jyllian 4', "AFTER DISCARD: storeRecord.get('fullName') should equal original value 'Leyton Jyllian 4'");
+  ok(chainedStoreRecord.get('fullName') == 'Leyton Jyllian 4', "AFTER DISCARD: chainedStoreRecord.get('fullName') should equal original value 'Leyton Jyllian 4'");
+  
+});
+
+test("chaining: get record in chainedStore AND store. commit edit in chainedStore. then discard store to the persistentStore", function() {
+  var chainedStoreRecord = MyApp.chainedStore.find("4995bc653b008");
+  var storeRecord = MyApp.store.find("4995bc653b008");
+  
+  ok(chainedStoreRecord !== storeRecord, "BEFORE UPDATE: chainedStoreRecord should not equal storeRecord");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "BEFORE UPDATE: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "BEFORE UPDATE: chainedStoreRecord and storeRecord should point to the same dataHash");
+
+  chainedStoreRecord.set('fullName', 'Felix Gaeta');
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER UPDATE:  chainedStoreRecord.set('fullName', 'Felix Gaeta').. chainedStoreRecord and storeRecord should NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Alfreda Rahl 3', "AFTER UPDATE: storeRecord.get('fullName') should equal original value 'Alfreda Rahl 3'");
+  ok(chainedStoreRecord.get('fullName') == 'Felix Gaeta', "AFTER UPDATE: chainedStoreRecord.get('fullName') should equal original value 'Felix Gaeta'");
+
+  ok(MyApp.chainedStore.changes.length == 1, "AFTER UPDATE, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 1, "AFTER UPDATE, 1 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "AFTER UPDATE, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER UPDATE, 0 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER UPDATE, 0 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER UPDATE, hasChanges property on store is set to NO."); 
+
+  var success = MyApp.chainedStore.commitChanges();
+  ok(success == YES, "AFTER commit of chainedStore, YES should be returned to signify success."); 
+
+  ok(chainedStoreRecord !== storeRecord, "AFTER COMMIT: chainedStoreRecord should still not equal storeRecord.");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "AFTER COMMIT: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "AFTER COMMIT: chainedStoreRecord and storeRecord should point to the same dataHash");
+  
+  var didThrow = NO;
+  try {
+    var success = MyApp.store.discardChanges();
+    ok(success == NO, "AFTER discardChanges of parentStore, NO should be returned to signify error because it cannot be discarded. Record still remains but not probagated to server."); 
+  } catch(e) {
+    didThrow = YES;
+  }
+  ok(didThrow == YES, "AFTER discardChanges of parentStore, FATAL error was thrown."); 
+
+
+  ok(storeRecord.get('fullName') == 'Felix Gaeta', "AFTER COMMIT: storeRecord.get('fullName') should equal original value 'Felix Gaeta'");
+  ok(chainedStoreRecord.get('fullName') == 'Felix Gaeta', "AFTER COMMIT: chainedStoreRecord.get('fullName') should equal original value 'Felix Gaeta'");
+});
+
+test("chaining: get record in chainedStore AND store. update it in store. commit. then commit chainedStore. record in chainedStore should be restored.", function() {
+  var chainedStoreRecord = MyApp.chainedStore.find("4995bc653b075");
+  var storeRecord = MyApp.store.find("4995bc653b075");
+  
+  ok(chainedStoreRecord !== storeRecord, "BEFORE UPDATE: chainedStoreRecord should not equal storeRecord");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "BEFORE UPDATE: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "BEFORE UPDATE: chainedStoreRecord and storeRecord should point to the same dataHash");
+
+  storeRecord.set('fullName', 'Saul Tigh');
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER UPDATE:  store.set('fullName', 'Saul Tigh').. chainedStoreRecord and storeRecord should NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Saul Tigh', "AFTER UPDATE: storeRecord.get('fullName') should equal new value 'Saul Tigh'");
+  ok(chainedStoreRecord.get('fullName') == 'Kerri Mayers 3', "AFTER UPDATE: chainedStoreRecord.get('fullName') should equal original value 'Kerri Mayers 3'");
+
+  ok(MyApp.chainedStore.changes.length == 0, "AFTER UPDATE, 0 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 0, "AFTER UPDATE, 0 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === NO, "AFTER UPDATE, hasChanges property on chainedStore is set to NO."); 
+
+  ok(MyApp.store.changes.length == 1, "AFTER UPDATE, 1 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 1, "AFTER UPDATE, 1 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "AFTER UPDATE, hasChanges property on store is set to YES."); 
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit of store, YES should be returned to signify success."); 
+
+  ok(MyApp.chainedStore.changes.length == 0, "AFTER DISCARD, 0 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 0, "AFTER DISCARD, 0 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === NO, "AFTER DISCARD, hasChanges property on chainedStore is set to NO."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER UPDATE, 0 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER UPDATE, 0 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER UPDATE, hasChanges property on store is set to NO."); 
+
+  ok(chainedStoreRecord !== storeRecord, "AFTER COMMIT: chainedStoreRecord should still not equal storeRecord.");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "AFTER COMMIT: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER COMMIT: chainedStoreRecord and storeRecord should still NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Saul Tigh', "AFTER COMMIT: storeRecord.get('fullName') should equal new value 'Saul Tigh'");
+  ok(chainedStoreRecord.get('fullName') == 'Kerri Mayers 3', "AFTER COMMIT: chainedStoreRecord.get('fullName') should equal original value 'Kerri Mayers 3'");
+  
+  var success = MyApp.chainedStore.commitChanges();
+  ok(success == YES, "AFTER commit of chainedStore, YES should be returned but nothing really happened since there is no changeset. It just blows away and restores from parentStore"); 
+  
+  ok(storeRecord.get('fullName') == 'Saul Tigh', "AFTER COMMIT: storeRecord.get('fullName') should equal new value 'Saul Tigh'");
+  ok(chainedStoreRecord.get('fullName') == 'Saul Tigh', "AFTER COMMIT: chainedStoreRecord.get('fullName') should equal original value 'Saul Tigh'");
+  
+});
+
+test("chaining: get record in chainedStore AND store. update it in store twice. update once in chainedStore. commit store. then commit chainedStore. record in chainedStore should be restored but error is raised.", function() {
+  var chainedStoreRecord = MyApp.chainedStore.find("4995bc653af3b");
+  var storeRecord = MyApp.store.find("4995bc653af3b");
+  
+  ok(chainedStoreRecord !== storeRecord, "BEFORE UPDATE: chainedStoreRecord should not equal storeRecord");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "BEFORE UPDATE: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] === MyApp.store.dataHashes[storeRecord._storeKey], "BEFORE UPDATE: chainedStoreRecord and storeRecord should point to the same dataHash");
+
+  storeRecord.set('fullName', 'Saul Tigh');
+  storeRecord.set('bookTitle', 'Cylons: Friend or Foe?');
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER UPDATE:  store.set('fullName', 'Saul Tigh').. chainedStoreRecord and storeRecord should NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Saul Tigh', "AFTER UPDATE: storeRecord.get('fullName') should equal new value 'Saul Tigh'");
+  ok(chainedStoreRecord.get('fullName') == 'Shanelle Fry 2', "AFTER UPDATE: chainedStoreRecord.get('fullName') should equal original value 'Shanelle Fry 2'");
+
+  chainedStoreRecord.set('fullName', 'Sharon Valerii');
+  ok(chainedStoreRecord.get('fullName') == 'Sharon Valerii', "AFTER UPDATE of chainedStore: chainedStoreRecord.get('fullName') should equal other value 'Sharon Valerii'");
+
+  ok(MyApp.chainedStore.changes.length == 1, "AFTER UPDATE, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 1, "AFTER UPDATE, 1 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "AFTER UPDATE, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 2, "AFTER UPDATE, 2 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 2, "AFTER UPDATE, 2 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === YES, "AFTER UPDATE, hasChanges property on store is set to YES."); 
+
+  ok(MyApp.store.revisions[25] == 2, "AFTER UPDATE, the revision count in store should be 2.");
+  ok(MyApp.chainedStore.revisions[25] == 1, "AFTER UPDATE, the revision count in chainedStore should be 1.");
+
+  var success = MyApp.store.commitChanges();
+  ok(success == YES, "AFTER commit of store, YES should be returned to signify success."); 
+
+  ok(MyApp.chainedStore.changes.length == 1, "AFTER COMMIT, 1 change in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.persistentChanges.updated.length == 1, "AFTER COMMMIT, 1 persistentChanges.updated in chainedStore should have been recorded."); 
+  ok(MyApp.chainedStore.get('hasChanges') === YES, "AFTER COMMMIT, hasChanges property on chainedStore is set to YES."); 
+
+  ok(MyApp.store.changes.length == 0, "AFTER COMMIT, 0 change in store should have been recorded."); 
+  ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER COMMIT, 0 persistentChanges.updated in store should have been recorded."); 
+  ok(MyApp.store.get('hasChanges') === NO, "AFTER COMMIT, hasChanges property on store is set to NO."); 
+
+  ok(chainedStoreRecord !== storeRecord, "AFTER COMMIT: chainedStoreRecord should still not equal storeRecord.");
+  ok(chainedStoreRecord._storeKey == storeRecord._storeKey, "AFTER COMMIT: chainedStoreRecord._storeKey should equal storeRecord._storeKey");
+  ok( MyApp.chainedStore.dataHashes[chainedStoreRecord._storeKey] !== MyApp.store.dataHashes[storeRecord._storeKey], "AFTER COMMIT: chainedStoreRecord and storeRecord should still NOT point to the same dataHash");
+  
+  ok(storeRecord.get('fullName') == 'Saul Tigh', "AFTER COMMIT: storeRecord.get('fullName') should equal new value 'Saul Tigh'");
+  ok(chainedStoreRecord.get('fullName') == 'Sharon Valerii', "AFTER COMMIT: chainedStoreRecord.get('fullName') should equal other value 'Sharon Valerii'");
+  
+  var success = MyApp.chainedStore.commitChanges();
+  ok(success == NO, "AFTER commit of chainedStore, NO should be returned since the chainedRecord is out of date. It is just blown away and restored from parentStore"); 
+  
+  ok(storeRecord.get('fullName') == 'Saul Tigh', "AFTER COMMIT: storeRecord.get('fullName') should equal new value 'Saul Tigh'");
+  ok(chainedStoreRecord.get('fullName') == 'Saul Tigh', "AFTER COMMIT: chainedStoreRecord.get('fullName') should equal original value 'Saul Tigh'");
+});
+
+
 /*
   
   //load updated dataHash through loadRecord. see updated revisions. Check for no changeset.
@@ -568,6 +810,8 @@ test("chaining: new record in chainedStore. discard it, chainedStore restored an
   get record and update it. see that parentStore and chainedStore have different instances of dataHash. discard it. check if they are the same. parent to chained.
   get record in parentStore and cainedStore. update chainedStore record.. see that parentStore and chainedStore have different instances of dataHash AND record.  commit it. check if they are the same chained to parent.
   get record in parentStore and cainedStore. update chainedStore record.. see that parentStore and chainedStore have different instances of dataHash AND record.  discard it. ccheck if they are the same. parent to chained.
+ 
+ 
  
  // create new record as child of chainedStore. See that it does not exist in parentStore. discard. See it NOT parent store or chained store. See it NOT passed to the server.
   

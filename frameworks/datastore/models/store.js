@@ -302,16 +302,19 @@ SC.Store = SC.Object.extend(
       // revision or it is equal to the latest revision.
       if(revisions[storeKey] === undefined || rev >= revisions[storeKey]) {
         var dataHash = child_dataHashes[storeKey];
+        revisions[storeKey] = rev;
         dataHashes[storeKey] = dataHash;
+
         delete cachedAttributes[storeKey]; 
-        
         var recType = recKeyTypeMap[storeKey];
         var recTypeKey = SC.guidFor(recType);
         if(child_instantiatedRecordMap[recTypeKey] && child_instantiatedRecordMap[recTypeKey][storeKey]) {
           if(!instantiatedRecordMap[recTypeKey]) {
             instantiatedRecordMap[recTypeKey] = [];
           }
-          instantiatedRecordMap[recTypeKey][storeKey] = child_instantiatedRecordMap[recTypeKey][storeKey];
+          if(!instantiatedRecordMap[recTypeKey][storeKey]) {
+            instantiatedRecordMap[recTypeKey][storeKey] = child_instantiatedRecordMap[recTypeKey][storeKey];
+          }
         }
       } else {
         isSuccess = NO;
@@ -335,7 +338,7 @@ SC.Store = SC.Object.extend(
       var parentStore = this.get('parentStore');
       if(parentStore && !parentStore.get('isPersistent')) {
         this.dataHashes = SC.beget(parentStore.dataHashes);
-        this.revisions = SC.beget(parentStore.revisions);
+        this.revisions = SC.clone(parentStore.revisions);
       }
     }
 
@@ -365,15 +368,15 @@ SC.Store = SC.Object.extend(
   */
   commitChanges: function() {
     var parentStore = this.get('parentStore');
+    var isSuccess = NO;
     if(parentStore) {
       
       // Reset this store so that it matches up with its parentStore.
-      if(parentStore.commitChangesFromStore(this)) {
-        this.reset();
-        return YES;
-      }
+      var isSuccess = parentStore.commitChangesFromStore(this);
+      this.reset();
+
     }
-    return NO;
+    return isSuccess;
   },
 
   /**
@@ -383,7 +386,7 @@ SC.Store = SC.Object.extend(
     this.reset();
     
     if(!this.get('isTransient')) {
-      console.error("SC.Store: discardChanges on store that is attached to a persistentStore is not allowed!");
+      throw("SC.Store: discardChanges on store that is attached to a persistentStore is not allowed!");
       return NO;
     }
     return YES;
@@ -613,7 +616,7 @@ SC.Store = SC.Object.extend(
   */
   getWriteableDataHash: function(storeKey) {
     var ret = this.getDataHash(storeKey);
-    if(this.get('isTransient') && ret === this.get('parentStore').dataHashes[storeKey])
+    if(!this.get('isTransient') || ret === this.get('parentStore').dataHashes[storeKey])
     {
       ret = this.dataHashes[storeKey] = SC.clone(ret);
     }
@@ -859,8 +862,7 @@ SC.Store = SC.Object.extend(
             delete cachedAttributes[storeKey] ;
           }
         }
-        record.set('status', RECORD_LOADED);
-        record.set('newRecord', NO);
+        record.beginPropertyChanges().set('status', RECORD_LOADED).set('newRecord', NO).allPropertiesDidChange().endPropertyChanges();
       }
     }
     return YES;
