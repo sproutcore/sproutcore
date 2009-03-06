@@ -39,10 +39,11 @@ sc_require('models/store') ;
   @since SproutCore 1.0
 */
 
-var RECORD_EMPTY = 0;
-var RECORD_LOADING = 1;
-var RECORD_LOADED = 2;
-var RECORD_ERROR = 3;
+SC.RECORD_NEW = 0;
+SC.RECORD_LOADING = 1;
+SC.RECORD_LOADED = 2;
+SC.RECORD_ERROR = 3;
+SC.RECORD_DELETED = 4;
 
 SC.Record = SC.Object.extend(
 /** @scope SC.Record.prototype */ {
@@ -50,14 +51,6 @@ SC.Record = SC.Object.extend(
   // ...............................
   // PROPERTIES
   //
-
-  /**
-    Override this with the properties you want the record to manage.
-    
-    @property
-    @type {Array}
-  */
-  properties: ['guid'],
   
   /**
     This is the primary key used to distinguish records.  If the keys
@@ -69,15 +62,6 @@ SC.Record = SC.Object.extend(
   primaryKey: 'guid',
   
   /**
-    This is the store key for the record, it is used to link it back to the dataHash. If a record is reused, this value will be 
-    replaced.
-    
-    @property
-    @type {Integer}
-  */
-  _storeKey: null,
-  
-  /**
     When a new empty record is created, this will be set to true.  It will be
     set to NO again the first time the record is committed.
     
@@ -87,30 +71,12 @@ SC.Record = SC.Object.extend(
   newRecord: NO,
   
   /**
-    Set to non-zero whenever the record has uncommitted changes.
-    
-    @property
-    @type {Number}
-  */
-  changeCount: 0,
-  
-  /**
     The record's status changes as it is loaded from the server.
     
     @property
     @type {Number}
   */
-  status: RECORD_EMPTY,
-  
-    /**
-    Set to true when the record is deleted.  Will cause it to be removed
-    from any member collections.  Once no more objects hold references to it,
-    the property will be disabled.
-    
-    @property
-    @type {Boolean}
-  */
-  isDeleted: NO,
+  status: SC.RECORD_EMPTY,
   
   /**
     @private
@@ -122,22 +88,22 @@ SC.Record = SC.Object.extend(
   */
   _editLevel: 0,
 
+  /**
+    @private
+
+    This is the store key for the record, it is used to link it back to the 
+    dataHash. If a record is reused, this value will be replaced.
+    
+    @property
+    @type {Integer}
+  */
+  _storeKey: null,
+
   
   // ...............................
   // CRUD OPERATIONS
   //
 
-  /**
-    Set this URL to point to the type of resource this record is. 
-    
-    If you are using SC.Server, then put a '%@' where you expect the 
-    primaryKey to be inserted to identify the record.
-    
-    @property
-    @type {String}
-  */
-  resourceURL: null,
-  
   /**
     The item providing the data for this.  Set to either the store or a
     Server.  Setting it to the Store will make refresh and commit effectively
@@ -147,33 +113,6 @@ SC.Record = SC.Object.extend(
     @type {SC.Store or SC.Server}
   */
   store: SC.Store,
-
-  /**
-    The URL where this record can be refreshed. Usually you would send the value
-    for this URL from the server in response to requests from Sproutcore.
-    
-    @property
-    @type {String}
-  */
-  refreshURL: null,
-
-  /**
-    The URL where this record can be updated. Usually you would send the value
-    for this URL from the server in response to requests from Sproutcore.
-    
-    @property
-    @type {String}
-  */
-  updateURL: null,
-
-  /**
-    The URL where this record can be destroyed. Usually you would send the value
-    for this URL from the server in response to requests from Sproutcore.
-    
-    @property
-    @type {String}
-  */
-  destroyURL: null,
 
   /**
     Invoked by the UI to request the model object be updated from the server.
@@ -200,9 +139,10 @@ SC.Record = SC.Object.extend(
   },
   
   /**
-    This is automatically called when using set on a property. However, if you want to
-    prevent the store from being updated with every set, you can get edits from being propagated
-    by calling beginEditing() first then ending the editing session with endEditing().
+    This is automatically called when using set on a property. However, if you
+    want to prevent the store from being updated with every set, you can get 
+    edits from being propagated by calling beginEditing() first then ending 
+    the editing session with endEditing().
   */
   beginEditing: function() {
     if(this._editLevel === 0) {
@@ -215,9 +155,10 @@ SC.Record = SC.Object.extend(
   },
 
   /**
-    This is automatically called when using set on a property. However, if you want to
-    prevent the store from being updated with every set, you can get edits from being propagated
-    by calling beginEditing() function first then ending the editing session with endEditing().
+    This is automatically called when using set on a property. However, if you
+    want to prevent the store from being updated with every set, you can get 
+    edits from being propagated by calling beginEditing() function first then 
+    ending the editing session with endEditing().
   */
   endEditing: function() {
     this._editLevel--;
@@ -300,11 +241,11 @@ SC.Record = SC.Object.extend(
     if(store) {
       store.recordDidChange(this);
     }
-    this.incrementProperty('changeCount') ;
   },
   
   /**
-    This will return the current set of attributes as a hash you can send back to the server.
+    This will return the current set of attributes as a hash you can send 
+    back to the server.
   
     @returns {Object} the current attributes of the receiver
   **/
@@ -340,7 +281,9 @@ SC.Record = SC.Object.extend(
       this.writeAttribute(key,value);
       
       // no need to relocate if there wasn't an old key...
-      if ((key == primaryKeyName) && oldPrimaryKey) SC.Store.relocateRecord( oldPrimaryKey, newPrimaryKey, this );
+      if ((key == primaryKeyName) && oldPrimaryKey) {
+        SC.Store.relocateRecord( oldPrimaryKey, newPrimaryKey, this );
+      }
       
     } else {
       value = this.readAttribute(key);
@@ -472,21 +415,7 @@ SC.Record = SC.Object.extend(
     if (recordType) {
       return SC.Store.getRecordFor(value,recordType) ;
     } else return value ;
-  },
-  
-  // Store Cleaner function
-  _cleanRecordInStore: function(){
-    var cleanCount = this.get('changeCount');
-    if (cleanCount === 0) {
-      SC.Store.cleanRecord(this);
-    }
-  }.observes('changeCount')
-     
-  // // used by the store
-  // _storeKey: function() { 
-  //   // if (!this.constructor._storeKey) debugger ;
-  //   return this.constructor._storeKey(); 
-  // },
+  }
   
 }) ;
 
@@ -507,8 +436,6 @@ SC.Record.mixin(
     }
     return null;
   },
-
-
   
   // Same as find except returns all records matching the passed conditions.
   findAll: function(filter) {

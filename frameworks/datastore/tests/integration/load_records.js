@@ -204,12 +204,12 @@ test("materialization: find record with command  MyApp.store.find('123', MyApp.A
   ok(typeof record === 'object', "record returned is of type 'object'");
   ok(record._storeKey === 50, "record._storeKey should equal 50");
   ok(record.get('guid') === null, "record.get('guid') should === null");
-  ok(record.get('status') === RECORD_LOADING, "record.get('status') should === RECORD_LOADING");
+  ok(record.get('status') === SC.RECORD_LOADING, "record.get('status') should === SC.RECORD_LOADING");
   
   MyApp.persistentStore.simulateResponseFromServer('123');
   
   ok(record.get('guid') === '123', "record.get('guid') should === '123'");
-  ok(record.get('status') === RECORD_LOADED, "record.get('status') should === RECORD_LOADED");
+  ok(record.get('status') === SC.RECORD_LOADED, "record.get('status') should === SC.RECORD_LOADED");
   ok(record.get('fullName') === 'Mr. From Server', "record.get('fullName') should === 'Mr. From Server'");
   ok(record._storeKey === 50, "record._storeKey should equal 50");
   ok(MyApp.store.revisions[50] === 0, "revision should equal 0");
@@ -417,7 +417,7 @@ test("record: create new record using MyApp.store.createRecord({fullName: 'John 
   ok(MyApp.store.persistentChanges.updated.length == 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
   ok(MyApp.store.get('hasChanges') === NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
 
-  ok(record.get('status') === RECORD_LOADING, "record.get('status') should === RECORD_LOADING");
+  ok(record.get('status') === SC.RECORD_NEW, "record.get('status') should === SC.RECORD_NEW");
   ok(record.get('newRecord') === YES, "record.get('newRecord') should === YES");
 
   MyApp.persistentStore.simulateResponseFromServer(51);
@@ -428,7 +428,7 @@ test("record: create new record using MyApp.store.createRecord({fullName: 'John 
   ok(MyApp.store.primaryKeyMap['abcdefg'] == 51, "MyApp.store.primaryKeyMap['abcdefg'] == 51");
   ok(MyApp.store.storeKeyMap[51] == 'abcdefg', "MyApp.store.storeKeyMap[51] == 'abcdefg'");
 
-  ok(record.get('status') === RECORD_LOADED, "record.get('status') should === RECORD_LOADED");
+  ok(record.get('status') === SC.RECORD_LOADED, "record.get('status') should === SC.RECORD_LOADED");
   ok(record.get('newRecord') === NO, "record.get('newRecord') should === NO");
 
 });
@@ -479,7 +479,7 @@ test("chaining: new record in chainedStore. commit it, commit parentStore", func
   ok(MyApp.store.primaryKeyMap['abc'] == 52, "MyApp.store.primaryKeyMap['abc'] == 52");
   ok(MyApp.store.storeKeyMap[52] == 'abc', "MyApp.store.storeKeyMap[52] == 'abc'");
 
-  ok(record.get('status') === RECORD_LOADED, "record.get('status') should === RECORD_LOADED");
+  ok(record.get('status') === SC.RECORD_LOADED, "record.get('status') should === SC.RECORD_LOADED");
   ok(record.get('newRecord') === NO, "record.get('newRecord') should === NO");
 
   
