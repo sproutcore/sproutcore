@@ -12,7 +12,6 @@ require('views/panel');
   button2 : 2nd button from the right. Optional. Could be Cancel or 2nd action.
   button3 : 1st button from the left. Optional. Could be Cancel or alternative option.
 */
-
 /** 
   Passed to delegate when alert panel is dismissed by pressing button 1
 */
@@ -27,7 +26,6 @@ SC.BUTTON2_STATUS = 'button2';
   Passed to delegate when alert panel is dismissed by pressing button 3
 */
 SC.BUTTON3_STATUS = 'button3';
-
 
 /**
   Displays a preformatted modal alert panel.
