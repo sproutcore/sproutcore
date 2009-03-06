@@ -28,6 +28,9 @@ SC.RadioView = SC.FieldView.extend(
   
   layoutDirection: SC.LAYOUT_VERTICAL,
   
+  // escape the HTML in label text or not
+  escapeHTML: YES,
+  
   // ..........................................................
   // ITEMS ARRAY
   // 
@@ -42,10 +45,18 @@ SC.RadioView = SC.FieldView.extend(
   
   itemIconKey: null,
   
+  /** @private - 
+    Will iterate the items property to return an array with items that is 
+    indexed in the following structure:
+      [0] => Title (or label)
+      [1] => Value
+      [2] => Enabled (YES default)
+      [3] => Icon (image URL)
+  */
   displayItems: function() {
     var items = this.get('items'), loc = this.get('localize'),
-      titleKey=this.get('itemTitleKey'), valueKey=this.get('itemValueKey'),
-      isEnabledKey = this.get('itemIsEnabledKey'),
+      titleKey = this.get('itemTitleKey'), valueKey = this.get('itemValueKey'),
+      isEnabledKey = this.get('itemIsEnabledKey'), 
       iconKey = this.get('itemIconKey');
       
     var ret = [], max = (items)? items.length : 0 ;
@@ -90,11 +101,11 @@ SC.RadioView = SC.FieldView.extend(
   }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey').cacheable(),
   
   /** If the items array itself changes, add/remove observer on item... */
-  itemsDidChange: function() { 
+  itemsDidChange: function() {
     if (this._items) {
       this._items.removeObserver('[]',this,this.itemContentDidChange) ;
     } 
-    this._items = this.get('items') ;
+    this._items = this.get('items');
     if (this._items) {
       this._items.addObserver('[]', this, this.itemContentDidChange) ;
     }
@@ -102,15 +113,11 @@ SC.RadioView = SC.FieldView.extend(
   }.observes('items'),
   
   /** 
-    Invoked whenever the item array or an item in the array is changed.  This method will reginerate the list of items.
+    Invoked whenever the item array or an item in the array is changed.
+    This method will regenerate the list of items.
   */
   itemContentDidChange: function() {
     this.notifyPropertyChange('displayItems');
-  },
-  
-  init: function() {
-    sc_super();
-    this.itemsDidChange() ;
   },
 
   // ..........................................................
@@ -120,22 +127,25 @@ SC.RadioView = SC.FieldView.extend(
   $input: function() { return this.$('input'); },
   
   displayProperties: ['value', 'displayItems'],
-
-  prepareDisplay: function() {
-    var ret = sc_super() ;
-    this.$().addClass(this.get('layoutDirection'));  
-  },
-
-  updateDisplay: function() {
-    
+  
+  render: function(context, firstTime) {
     // if necessary, regenerate the radio buttons
-    var item, idx, items = this.get('displayItems');
-    if (items !== this._lastDisplayItems) {
-      this._lastDisplayItems = items;
-      
+    var item, idx, selectionState, items = this.get('displayItems'), 
+      value = this.get('value'), isArray = SC.isArray(value);
+    
+    context.addClass(this.get('layoutDirection'));
+    
+    // isArray is set only when there are two active checkboxes 
+    // which can only happen with mixed state
+    if (isArray && value.length<=0) {
+      value = value[0]; isArray = NO;
+    }
+    
+    if (firstTime) {
       // generate tags from this.
-      var name = SC.guidFor(this) ; // name for this group
-      var html = items.map(function(item, index) {
+      var name = SC.guidFor(this); // name for this group
+      for(idx=0;idx<items.length;idx++) {
+        var item = items[idx];
         
         // get the icon from the item, if one exists...
         var icon = item[3];
@@ -145,46 +155,76 @@ SC.RadioView = SC.FieldView.extend(
           icon = '<img src="%@" class="icon %@" alt="" />'.fmt(url, className);
         } else icon = '';
         
-        return '<label class="sc-radio-button"><img src="'+static_url('blank')+'" class="button" /><input type="radio" value="%@" name="%@" /><span class="sc-button-label">%@%@</span></label>'.fmt(index, name, icon, item[0]) ;
-      }).join("");
-
+        var selectionStateClassNames = this._getSelectionState(item, value, isArray, false);
+        var disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled"' : '';
+        
+        var labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
+        
+        context.push('<label class="sc-radio-button%@">'.fmt(selectionStateClassNames));
+        // value is index value so we can refer back to object value
+        context.push('<img src="'+static_url('blank')+'" class="button" /><input type="radio" value="%@" name="%@" %@ />'.fmt(idx, name, disabled));
+        context.push('<span class="sc-button-label">%@%@</span></label>'.fmt(icon, labelText));
+      }
+      
       // first remove listener on existing radio buttons
-      SC.Event.remove(this.$input(), 'change', this, this.fieldValueDidChange); 
-      this.$().html(html);
-      SC.Event.add(this.$input(), 'change', this, this.fieldValueDidChange) ;
       this._field_setFieldValue(this.get('value'));
     }
-    
-    var ret = sc_super();
+    else {
+      // update the selection state on all of the DOM elements.  The options are
+      // sel or mixed.  These are used to display the proper setting...
+      this.$input().forEach(function(input) {
+        
+        input = this.$(input);
+        idx = parseInt(input.val(),0);
+        item = (idx>=0) ? items[idx] : null;
+        
+        input.attr('disabled', (!item[2]) ? 'disabled' : null);
+        selectionState = this._getSelectionState(item, value, isArray, true);
 
-    // update the selection state on all of the DOM elements.  The options are
-    // sel or mixed.  These are used to display the proper setting...
-    var value = this.get('value'), isArray = SC.isArray(value), sel, val;
-    if (isArray && value.length<=0) {
-      value = value[0]; isArray = NO; 
+        // set class of label
+        input.parent().setClass(selectionState);
+        
+        // avoid memory leaks
+        input = val = idx = selectionState = null;
+      }, this);
+    
     }
     
-    this.$input().forEach(function(input) {
-      input = SC.$(input); 
-      idx = parseInt(input.val(),0);
-      val = (idx>=0) ? items[idx] : null;
-
-      // determine if the current item is selected
-      if (val) {
-        sel = (isArray) ? (value.indexOf(val[1])>=0) : (value===val[1]);
-      } else sel = NO;
+  },
+  
+  /** @private - 
+    Will figure out what class names to assign each radio button.
+    This method can be invoked either as part of render() either when:
+    1. firstTime is set and we need to assign the class names as a string
+    2. we already have the DOM rendered but we just need to update class names
+       assigned to the the input field parent
+  */
+  _getSelectionState: function(item, value, isArray, shouldReturnObject) {
+      var sel, classNameString = "", classNames;
       
-      // now update class...
-      input.attr('disabled', (!val[2]) ? 'disabled' : null) ;
-      input.parent().setClass({
-        sel: (sel && !isArray), mixed: (sel && isArray), disabled: (!val[2]) 
-      }) ;
-        
-      // avoid memory leaks
-      input = val = idx = null;
-    }) ;
-    
-    return ret ;
+      // determine if the current item is selected
+      if (item) {
+        sel = (isArray) ? (value.indexOf(item[1])>=0) : (value===item[1]);
+      } else {
+        sel = NO;
+      }
+      
+      // now set class names
+      classNames = {
+        sel: (sel && !isArray), mixed: (sel && isArray), disabled: (!item[2]) 
+      }
+      
+      if(shouldReturnObject) {
+        return classNames;
+      } else {
+        // convert object values to string
+        for(key in classNames) {
+          if(!classNames.hasOwnProperty(key)) continue;
+          if(classNames[key]) classNameString += " " + key;
+        }
+        return classNameString;
+      }
+      
   },
 
   getFieldValue: function() {
@@ -193,16 +233,15 @@ SC.RadioView = SC.FieldView.extend(
     val = items[parseInt(val,0)];
     
     // if no items are selected there is a saved mixed value, return that...
-    return val ? val[1] : this._mixedValue ;
+    return val ? val[1] : this._mixedValue;
   },
   
   setFieldValue: function(v) {
-
     // if setting a mixed value, actually clear everything and save mixed
     // value
     if (SC.isArray(v)) {
       if (v.get('length')>1) {
-        this._mixedValue = v ;
+        this._mixedValue = v;
         v = undefined ;
       } else v = v.objectAt(0);
     }
@@ -211,20 +250,20 @@ SC.RadioView = SC.FieldView.extend(
     // array matching that value.
     var items, idx;
     if (v === undefined) {
-      idx = -1 ;
+      idx = -1;
     } else {
       items = this.get('displayItems');
       idx = items.indexOf(items.find(function(x) { return x[1] === v; }));
     }
     
-    // now loop through input elements.  set their checked value accordingly
+    // now loop through input elements. set their checked value accordingly
     this.$input().forEach(function(input) {
       input = SC.$(input);
-      input.attr('checked', parseInt(input.val(),0) === idx) ;
+      input.attr('checked', parseInt(input.val(),0) === idx);
       input = null;
     });
     
-    return this ;
+    return this;
   }
 
-}) ;
+});
