@@ -8,16 +8,26 @@
 /*global module test htmlbody ok equals same stop start */
 
 (function() {
-  var pane = SC.ControlTestPane.design({ height: 100 })
+    var appleURL='http://weblogs.baltimoresun.com/business/consuminginterests/blog/apple-logo1.jpg';
+    var iv=SC.ImageView.design({value: appleURL, layout: {height:400, width:400}});
+    var pane = SC.ControlTestPane.design({ height: 100 })
     .add("basic", SC.ScrollView, {
-      
+  
+    })
+
+    .add("basic2", SC.ScrollView, {
+        contentView: iv
+    })
+
+    .add("basic3", SC.ScrollView, {
+      contentView: iv
     })
     
-    // .add("disabled", SC.ScrollView, {
-    //   isEnabled: NO
-    // })
-    
-  pane.show(); // add a test to show the test pane
+    .add("disabled", SC.ScrollView, {
+      isEnabled: NO
+    });
+
+    pane.show(); // add a test to show the test pane
 
   // ..........................................................
   // TEST VIEWS
@@ -47,10 +57,54 @@
     ok(verticalScrollerView, 'default scroll view has a vertical scroller');
   });
   
-  // test("disabled", function() {
-  //   var view = pane.view('disabled');
-  //   ok(view.$().hasClass('disabled'), 'should have disabled class');
-  //   ok(!view.$().hasClass('sel'), 'should not have sel class');
-  // });
+  
+  
+  test("basic2", function() {
+    var view = pane.view('basic2');
+    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');    
+        
+    var horizontalScrollerView = view.get('horizontalScrollerView');
+    ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
+    ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
+    ok(horizontalScrollerView.$().hasClass('sc-horizontal'), 'should have sc-horizontal class');        
+	  var maxHScroll = view.maximumHorizontalScrollOffset();    
+	  ok((maxHScroll > 0), 'Max horizontal scroll should be greater than zero');
+    
+    var verticalScrollerView = view.get('verticalScrollerView');
+    ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
+    ok(verticalScrollerView, 'default scroll view has a vertical scroller');
+    ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');    
+	  var maxVScroll = view.maximumVerticalScrollOffset();    
+	  ok((maxVScroll > 0), 'Max vertical scroll should be greater than zero');
+    
+  });
+   
+  test("basic3", function() {
+    var view = pane.view('basic3');
+    view.set('isHorizontalScrollerVisible',NO);
+    ok(!view.get('canScrollHorizontal'),'cannot scroll in horizontal direction');
+    ok(view.$().hasClass('sc-scroll-view'), 'should have sc-scroll-view class');    
+    var horizontalScrollerView = view.get('horizontalScrollerView');
+    ok(view.get('hasHorizontalScroller'), 'default scroll view wants a horizontal scroller');
+    ok(horizontalScrollerView, 'default scroll view has a horizontal scroller');
+    ok(horizontalScrollerView.$().hasClass('sc-horizontal'), 'should have sc-horizontal class');        
+    var maxHScroll = view.maximumHorizontalScrollOffset();    
+    equals(maxHScroll , 0, 'Max horizontal scroll should be equal to zero');
+
+    view.set('isVerticalScrollerVisible',NO);
+    ok(!view.get('canScrollVertical'),'cannot scroll in vertical direction');
+    var verticalScrollerView = view.get('verticalScrollerView');
+    ok(view.get('hasVerticalScroller'), 'default scroll view wants a vertical scroller');
+    ok(verticalScrollerView, 'default scroll view has a vertical scroller');
+    ok(verticalScrollerView.$().hasClass('sc-vertical'), 'should have sc-vertical class');    
+    var maxVScroll = view.maximumVerticalScrollOffset();    
+    equals(maxVScroll ,0, 'Max vertical scroll should be equal to zero');
+  });
+
+  test("disabled", function() {
+     var view = pane.view('disabled'); 
+     ok(view.$().hasClass('disabled'), 'should have disabled class');
+     ok(!view.$().hasClass('sel'), 'should not have sel class');
+   });
    
 })();
