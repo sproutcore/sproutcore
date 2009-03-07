@@ -39,7 +39,7 @@ SC.BUTTON3_STATUS = 'button3';
   
   The easiest way to display an alert panel is to use one of the various 
   class methods defined on SC.AlertPanel, passing the message and an optional
-  detailed description.  
+  detailed description and caption.  
   
   There are four variations of this method can you can invoke:  
   
@@ -48,7 +48,7 @@ SC.BUTTON3_STATUS = 'button3';
   - *info()* - displays an alert with an info icon to the left
   - *show()* - displays an alert with a customizable icon to the left
   
-  In addition to passing a message and description, you can also customize
+  In addition to passing a message, description and caption, you can also customize
   the title of the button 1 (OK) and add an optional button 2 and 3 (Cancel or Extra).  Just
   pass these titles of these buttons to enable them or null to disable then.
   
@@ -206,8 +206,8 @@ SC.AlertPanel = SC.Panel.extend({
           var blank = sc_static('blank') ;
           context.push('<img src="%@" class="icon %@" />'.fmt(blank, pane.get('icon')));
           context.begin('h1').text(pane.get('message') || '').end();
-          context.push(pane.get('displayDescription' || ''));
-          context.push(pane.get('displayCaption' || ''));
+          context.push(pane.get('displayDescription') || '');
+          context.push(pane.get('displayCaption') || '');
         }
       }),
 
@@ -260,7 +260,7 @@ SC.AlertPanel = SC.Panel.extend({
   },
   
   /** @private 
-    Executes whenever one of the icon, message or description is changed.
+    Executes whenever one of the icon, message, description or caption is changed.
     This simply causes the UI to refresh.
   */
   alertInfoDidChange: function() {
@@ -353,7 +353,7 @@ SC.AlertPanel.info = function(message, description, caption, button1Title, butto
 };
 
 /**
-  Displays a warning error panel.  See SC.AlertPanel.show() for complete details. 
+  Displays a warning allert panel.  See SC.AlertPanel.show() for complete details. 
   
   @returns {SC.AlertPanel} the panel
 */
