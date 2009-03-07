@@ -93,6 +93,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   // ........................................
   // STRUCTURE
   //
+
   classNames: 'sc-progress-view',
   
   // ........................................
