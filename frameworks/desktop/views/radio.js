@@ -17,7 +17,6 @@ SC.RadioView = SC.FieldView.extend(
   /** @scope SC.RadioView.prototype */ {
 
   // HTML design options
-  emptyElement: '<%@1></%@1>',
   tagName: 'div',
   classNames: ['sc-radio-view'],
 

@@ -93,9 +93,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   // ........................................
   // STRUCTURE
   //
-  
-  emptyElement: '<%@1><div class="sc-outer-head"></div><div class="sc-inner"><div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div><div class="sc-outer-tail"></div></%@1>',
-
+  tagName: 'div',
   classNames: 'sc-progress-view',
   
   // ........................................
@@ -129,23 +127,21 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   
   displayProperties: 'value minimum maximum isIndeterminate'.w(),
   
-  updateDisplay: function() {
-    var ret = sc_super() ;
+  render: function(context, firstTime) {
     
     var isIndeterminate = this.get('isIndeterminate') ;
     var isRunning = this.get('isRunning');
     var isEnabled = this.get('isEnabled');
-    
-    
+  
     var offset = (isIndeterminate && isRunning) ? (-16+Math.floor(Date.now()/75)%16) : 0;
-    
+  
     // compute value for setting the width of the inner progress
     var value ;
     if (!isEnabled) {
       value = "0%" ;
     } else if (isIndeterminate) {
       value = "120%";
-    }else {
+    } else {
       var minimum = this.get('minimum') || 0.0 ;
       var maximum = this.get('maximum') || 1.0 ;
       value = this.get('value') || 0.0 ;
@@ -155,14 +151,24 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       if(isNaN(value)) value = 0.0;
       value = (value * 100) + "%" ;
     }
-    
-    this.$().setClass({
+
+    var classNames = {
       'sc-indeterminate': isIndeterminate,
       'sc-empty': (value <= 0),
       'sc-complete': (value >= 100)
-    }).find('.sc-inner').css('width', value).css('left',offset);
+    };
     
-    return ret ;
+    if(firstTime) {
+      context.push('<div class="sc-outer-head"></div>');
+      context.push('<div class="sc-inner%@" style="width: %@;left: %@">'.fmt(this._createClassNameString(classNames), value, offset));
+      context.push('<div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div>');
+      context.push('<div class="sc-outer-tail"></div>');
+    }
+    else {
+      context.setClass(classNames);
+      this.$('.sc-inner').css('width', value).css('left',offset);
+    }
+    
   },
   
   contentPropertyDidChange: function(target, key) {
@@ -173,6 +179,15 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       .updatePropertyFromContent('maximum', key, 'contentMaximumKey', content)
       .updatePropertyFromContent('isIndeterminate', key, 'contentIsIndeterminateKey', content)
     .endPropertyChanges();
-  }  
+  },
+  
+  _createClassNameString: function(classNames) {
+    var classNameString = "";
+    for(key in classNames) {
+      if(!classNames.hasOwnProperty(key)) continue;
+      if(classNames[key]) classNameString += " " + key;
+    }
+    return classNameString;
+  }
   
 }) ;
