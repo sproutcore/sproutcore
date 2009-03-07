@@ -266,7 +266,7 @@ SC.AlertPanel = SC.Panel.extend({
   alertInfoDidChange: function() {
     var v = this.getPath('contentView.childViews.0');
     if (v) v.displayDidChange(); // re-render message
-  }.observes('icon', 'message', 'displayDescription')
+  }.observes('icon', 'message', 'displayDescription', 'displayCaption')
 });
 
 /** @private
