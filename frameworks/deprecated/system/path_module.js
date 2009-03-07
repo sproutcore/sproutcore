@@ -15,7 +15,6 @@
 // ==========================================================================
 
 require('core') ;
-require('system/benchmark') ;
 
 // Constants
 SC.BENCHMARK_SELECTOR = NO ;

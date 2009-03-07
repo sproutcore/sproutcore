@@ -4,8 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('core');
-
 /* Core additions to SC */
 
 SC.mixin(/** @scope SC */ {

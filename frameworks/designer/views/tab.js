@@ -5,7 +5,6 @@
 // ========================================================================
 
 require('views/designer');
-require('views/tab');
 
 SC.TabView.Designer = SC.ViewDesigner.extend(
 /** @scope SC.TabView.Designer.prototype */ {

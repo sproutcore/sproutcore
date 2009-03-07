@@ -249,6 +249,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+    // console.log('%@.recomputeIsVisibleInWindow(%@)'.fmt(this, parentViewIsVisible ? 'YES' : 'NO'));
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isVisible'), parentView ;
     
