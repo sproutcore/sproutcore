@@ -152,8 +152,25 @@ SC.AlertPanel = SC.Panel.extend({
     if (!desc || desc.length === 0) return desc ;
     
     desc = SC.RenderContext.escapeHTML(desc); // remove HTML
-    return '<p>' + desc.split('\n').join('</p><p>') + '</p>';
+    return '<p class="description">' + desc.split('\n').join('</p><p class="description">') + '</p>';
   }.property('description').cacheable(),
+
+  /**
+    An optional detailed caption.  Use this string to provide further 
+    fine print explanation of the condition and, optionally, ways the user can resolve
+    the problem.
+    
+    @property {String}
+  */
+  caption: "",
+  
+  displayCaption: function() {
+    var caption = this.get('caption');
+    if (!caption || caption.length === 0) return caption ;
+    
+    caption = SC.RenderContext.escapeHTML(caption); // remove HTML
+    return '<p class="caption">' + caption.split('\n').join('</p><p class="caption">') + '</p>';
+  }.property('caption').cacheable(),
   
   /**
     The button view for the button 1 (OK).
@@ -190,6 +207,7 @@ SC.AlertPanel = SC.Panel.extend({
           context.push('<img src="%@" class="icon %@" />'.fmt(blank, pane.get('icon')));
           context.begin('h1').text(pane.get('message') || '').end();
           context.push(pane.get('displayDescription' || ''));
+          context.push(pane.get('displayCaption' || ''));
         }
       }),
 
@@ -260,7 +278,7 @@ SC.AlertPanel._normalizeArguments = function(args) {
   if (SC.typeOf(delegate) !== SC.T_STRING) {
     args[len-1] = null;
   } else delegate = null ;
-  args[6] = delegate ;
+  args[7] = delegate ;
   return args ;
 };
 
@@ -277,6 +295,7 @@ SC.AlertPanel._normalizeArguments = function(args) {
   
   @param {String} message the primary message
   @param {String} description an optional detailed description
+  @param {String} caption an optional detailed fine print caption
   @param {String} button1Title optional unlocalized title for button 1 (OK)
   @param {String} button2Title optional unlocalized title for button 2 (Cancel)
   @param {String} button3Title optional unlocalized title for button 3 (extra)
@@ -284,7 +303,7 @@ SC.AlertPanel._normalizeArguments = function(args) {
   @param {Object} delegate optional delegate to notify when panel is dismissed
   @returns {SC.AlertPanel} new alert panel
 */
-SC.AlertPanel.show = function(message, description, button1Title, button2Title, button3Title, iconUrl, delegate) {
+SC.AlertPanel.show = function(message, description, caption, button1Title, button2Title, button3Title, iconUrl, delegate) {
   
   // get the delegate and normalize the rest of the params
   var args = this._normalizeArguments(arguments);
@@ -294,15 +313,16 @@ SC.AlertPanel.show = function(message, description, button1Title, button2Title, 
   var ret = this.create({
     message: args[0] || '',
     description: args[1] || null,
-    icon: args[5] || 'sc-icon-alert-48',
-    delegate: args[6]
+    caption: args[2] || null,
+    icon: args[6] || 'sc-icon-alert-48',
+    delegate: args[7]
   });
   
   // customize buttons as needed
   var buttonKeys = 'buttonOne buttonTwo buttonThree'.w(), button, title;
   for(var idx=0;idx<3;idx++) {
     button = ret.get(buttonKeys[idx]);
-    title = args[idx + 2];
+    title = args[idx + 3];
     if (title) button.set('title', title).set('isVisible', YES);
   }
   
@@ -314,9 +334,9 @@ SC.AlertPanel.show = function(message, description, button1Title, button2Title, 
   
   @returns {SC.AlertPanel} the panel
 */
-SC.AlertPanel.warn = function(message, description, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPanel.warn = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
-  args[5] = 'sc-icon-alert-48';
+  args[6] = 'sc-icon-alert-48';
   return this.show.apply(this, args);
 };
 
@@ -326,9 +346,9 @@ SC.AlertPanel.warn = function(message, description, button1Title, button2Title, 
   
   @returns {SC.AlertPanel} the panel
 */
-SC.AlertPanel.info = function(message, description, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPanel.info = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
-  args[5] = 'sc-icon-info-48';
+  args[6] = 'sc-icon-info-48';
   return this.show.apply(this, args);
 };
 
@@ -337,8 +357,8 @@ SC.AlertPanel.info = function(message, description, button1Title, button2Title, 
   
   @returns {SC.AlertPanel} the panel
 */
-SC.AlertPanel.error = function(message, description, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPanel.error = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
-  args[5] = 'sc-icon-error-48';
+  args[6] = 'sc-icon-error-48';
   return this.show.apply(this, args);
 };

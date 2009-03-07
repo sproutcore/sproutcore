@@ -11,7 +11,7 @@ module("SC.AlertPanel UI");
 
 var pane ;
 
-function evaluatePanel(pane, message, description, button1Title, button2Title, button3Title, iconClass) {
+function evaluatePanel(pane, message, description, caption, button1Title, button2Title, button3Title, iconClass) {
 	// wrapper
 	ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
 	ok(pane.$().hasClass('sc-alert-panel'), 'pane should have sc-alert-panel class');
@@ -29,10 +29,17 @@ function evaluatePanel(pane, message, description, button1Title, button2Title, b
 	equals(pane.childViews[0].childViews[0].$('h1').text(), 'AlertPanel.message', 'pane.div.info.h1 should have title');
 
 	if (description) {
-		ok(pane.childViews[0].childViews[0].$('p'), 'pane.div.info.p existance should be YES');
-		equals(pane.childViews[0].childViews[0].$('p').text(), 'AlertPanel.description', 'pane.div.info.p should have description');
+		ok(pane.childViews[0].childViews[0].$('p.description'), 'pane.div.info.description existance should be YES');
+		equals(pane.childViews[0].childViews[0].$('p.description').text(), 'AlertPanel.description', 'pane.div.info.description should have description');
 	} else {
-		equals(pane.childViews[0].childViews[0].$('p').length, 0, 'pane.div.info should have 0 p');
+		equals(pane.childViews[0].childViews[0].$('p.description').length, 0, 'pane.div.info should have 0 description');
+	}
+
+	if (caption) {
+		ok(pane.childViews[0].childViews[0].$('p.caption'), 'pane.div.info.caption existance should be YES');
+		equals(pane.childViews[0].childViews[0].$('p.caption').text(), 'AlertPanel.caption', 'pane.div.info.caption should have caption');
+	} else {
+		equals(pane.childViews[0].childViews[0].$('p.caption').length, 0, 'pane.div.info should have 0 caption');
 	}
 	
 	// buttons
@@ -61,45 +68,45 @@ function evaluatePanel(pane, message, description, button1Title, button2Title, b
 	}
 }
 
-test("AlertPanel.show with icon, message, description and 3 buttons", function() {
-  pane = SC.AlertPanel.show("AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', this);      
-	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24');
+test("AlertPanel.show with icon, message, description, caption and 3 buttons", function() {
+  pane = SC.AlertPanel.show("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24', this);      
+	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-tools-24');
   pane.dismiss();
 });
 
-test("AlertPanel.warn with icon, message, description and 3 buttons", function() {
-  pane = SC.AlertPanel.warn("AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
-	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-alert-48');
+test("AlertPanel.warn with icon, message, description, caption and 3 buttons", function() {
+  pane = SC.AlertPanel.warn("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
+	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-alert-48');
   pane.dismiss();
 });
 
-test("AlertPanel.error with icon, message, description and 3 buttons", function() {
-  pane = SC.AlertPanel.error("AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
-	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-error-48');
+test("AlertPanel.error with icon, message, description, caption and 3 buttons", function() {
+  pane = SC.AlertPanel.error("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
+	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-error-48');
   pane.dismiss();
 });
 
-test("AlertPanel.info with icon, message, description and 3 buttons", function() {
-  pane = SC.AlertPanel.info("AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
-	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');
+test("AlertPanel.info with icon, message, description, caption and 3 buttons", function() {
+  pane = SC.AlertPanel.info("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
+	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');
   pane.dismiss();
 });
 
 test("AlertPanel.info with icon, message and 1 default button (omit all optional parameters)", function() {
   pane = SC.AlertPanel.info("AlertPanel.message");      
-	evaluatePanel(pane, "AlertPanel.message", null, null, null, null, 'sc-icon-info-48');
+	evaluatePanel(pane, "AlertPanel.message", null, null, null, null, null, 'sc-icon-info-48');
   pane.dismiss();
 });
 
-test("AlertPanel.info with icon, message and 3 buttons (passing null to optional description)", function() {
-  pane = SC.AlertPanel.info("AlertPanel.message", null, "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
-	evaluatePanel(pane, "AlertPanel.message", null, "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');
+test("AlertPanel.info with icon, message and 3 buttons (passing null to optional description and caption)", function() {
+  pane = SC.AlertPanel.info("AlertPanel.message", null, null, "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
+	evaluatePanel(pane, "AlertPanel.message", null, null, "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');
   pane.dismiss();
 });
 
-test("AlertPanel.info with icon, message, description and 1 button (passing null to 3 buttons)", function() {
-  pane = SC.AlertPanel.info("AlertPanel.message", 'AlertPanel.description', null, null, null, this);      
-	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', null, null, null, 'sc-icon-info-48');
+test("AlertPanel.info with icon, message, description, caption and 1 button (passing null to 3 buttons)", function() {
+  pane = SC.AlertPanel.info("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', null, null, null, this);      
+	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', null, null, null, 'sc-icon-info-48');
   pane.dismiss();
 });
 
@@ -108,11 +115,11 @@ test("users interaction with mutiple alert panels with 1-3 buttons", function() 
   var delegate = SC.Object.create({
     
     threeButtonAlertPanel: function() {
-      pane = SC.AlertPanel.warn("AlertPanel.warn title", 'Click OK to see this alert panel again. Click Other... to see other alert panels.  \nClick cancel to dismiss.', "OK", "Cancel", 'Other...', this);      
+      pane = SC.AlertPanel.warn("AlertPanel.warn title", 'Click OK to see this alert panel again.  \nClick Other... to see other alert panels.', 'Click cancel to dismiss.', "OK", "Cancel", 'Other...', this);      
     },
 
     twoButtonAlertPanel: function() {
-      pane = SC.AlertPanel.error("AlertPanel.error title", 'Click OK to see one button alert panel.  \nClick cancel to dismiss.', "OK", "Cancel", delegate);      
+      pane = SC.AlertPanel.error("AlertPanel.error title", 'Click OK to see one button alert panel.', 'Click cancel to dismiss.', "OK", "Cancel", delegate);      
     },
 
     oneButtonAlertPanel: function() {

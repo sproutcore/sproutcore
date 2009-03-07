@@ -24,9 +24,16 @@
 	font-family: inherit ;
 }
 
-.sc-alert-panel .info p {
+.sc-alert-panel .info p.description {
 	padding: 0;
 	margin: 6px 0px;
 	font-size: 13px;
+	margin-right: 20px;
+}
+
+.sc-alert-panel .info p.caption {
+	padding: 0;
+	margin: 6px 0px;
+	font-size: 11px;
 	margin-right: 20px;
 }
