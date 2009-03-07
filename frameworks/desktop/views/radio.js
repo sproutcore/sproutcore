@@ -17,7 +17,6 @@ SC.RadioView = SC.FieldView.extend(
   /** @scope SC.RadioView.prototype */ {
 
   // HTML design options
-  tagName: 'div',
   classNames: ['sc-radio-view'],
 
   /**
@@ -155,14 +154,26 @@ SC.RadioView = SC.FieldView.extend(
         } else icon = '';
         
         var selectionStateClassNames = this._getSelectionState(item, value, isArray, false);
-        var disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled"' : '';
+        var disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled" ' : '';
         
         var labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
         
-        context.push('<label class="sc-radio-button%@">'.fmt(selectionStateClassNames));
+        // push all string instead of doing concatenation (IE optimization)
+        context.push('<label class="sc-radio-button ');
+        context.push(selectionStateClassNames);
+        context.push('"><img src="');
+        context.push(static_url('blank'));
+        context.push('" class="button" /><input type="radio" value="');
         // value is index value so we can refer back to object value
-        context.push('<img src="'+static_url('blank')+'" class="button" /><input type="radio" value="%@" name="%@" %@ />'.fmt(idx, name, disabled));
-        context.push('<span class="sc-button-label">%@%@</span></label>'.fmt(icon, labelText));
+        context.push(idx);
+        context.push('" name="');
+        context.push(name);
+        context.push('" ');
+        context.push(disabled);
+        context.push('/><span class="sc-button-label">');
+        context.push(icon);
+        context.push(labelText);
+        context.push('</span></label>');
       }
       
       // first remove listener on existing radio buttons
@@ -199,7 +210,7 @@ SC.RadioView = SC.FieldView.extend(
        assigned to the the input field parent
   */
   _getSelectionState: function(item, value, isArray, shouldReturnObject) {
-      var sel, classNameString = "", classNames;
+      var sel, classNames;
       
       // determine if the current item is selected
       if (item) {
@@ -217,11 +228,12 @@ SC.RadioView = SC.FieldView.extend(
         return classNames;
       } else {
         // convert object values to string
+        var classNameArray = [];
         for(key in classNames) {
           if(!classNames.hasOwnProperty(key)) continue;
-          if(classNames[key]) classNameString += " " + key;
+          if(classNames[key]) classNameArray.push(key);
         }
-        return classNameString;
+        return classNameArray.join(" ");
       }
       
   },

@@ -93,7 +93,6 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   // ........................................
   // STRUCTURE
   //
-  tagName: 'div',
   classNames: 'sc-progress-view',
   
   // ........................................
@@ -159,10 +158,14 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     };
     
     if(firstTime) {
-      context.push('<div class="sc-outer-head"></div>');
-      context.push('<div class="sc-inner%@" style="width: %@;left: %@">'.fmt(this._createClassNameString(classNames), value, offset));
-      context.push('<div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div>');
-      context.push('<div class="sc-outer-tail"></div>');
+      // push all string instead of doing concatenation (IE optimization)
+      context.push('<div class="sc-outer-head"></div><div class="sc-inner ');
+      context.push(this._createClassNameString(classNames));
+      context.push('" style="width: ');
+      context.push(value);
+      context.push(';left: ');
+      context.push(offset);
+      context.push('"><div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div><div class="sc-outer-tail"></div>');
     }
     else {
       context.setClass(classNames);
@@ -182,12 +185,12 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   },
   
   _createClassNameString: function(classNames) {
-    var classNameString = "";
+    var classNameArray = [];
     for(key in classNames) {
       if(!classNames.hasOwnProperty(key)) continue;
-      if(classNames[key]) classNameString += " " + key;
+      if(classNames[key]) classNameArray.push(key);
     }
-    return classNameString;
+    return classNameArray.join(" ");
   }
   
 }) ;
