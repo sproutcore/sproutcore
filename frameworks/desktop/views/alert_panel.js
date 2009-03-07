@@ -208,6 +208,7 @@ SC.AlertPanel = SC.Panel.extend({
           context.begin('h1').text(pane.get('message') || '').end();
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');
+          context.push('<div class="seperator" />');
         }
       }),
 
