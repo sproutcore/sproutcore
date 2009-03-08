@@ -407,6 +407,7 @@ SC.Pane = SC.View.extend({
     // clean up some of my own properties 
     this.set('isPaneAttached', NO) ;
     this.parentViewDidChange() ;
+    return this ;
   },
   
   /**
