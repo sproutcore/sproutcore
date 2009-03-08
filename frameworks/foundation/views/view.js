@@ -294,10 +294,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       // visibility...
       this.set('layerNeedsUpdate', YES) ;
       
-      // always update our layer regardless, because that handles DOM 
-      // visibility...
-      this.set('layerNeedsUpdate', YES) ;
-      
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
