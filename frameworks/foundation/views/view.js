@@ -1038,7 +1038,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateLayerLocation: function() {
-    //console.log('%@.updateLayerLocation()'.fmt(this));
+    // console.log('%@.updateLayerLocation()'.fmt(this));
     // collect some useful value
     // if there is no node for some reason, just exit
     var node = this.get('layer') ;
