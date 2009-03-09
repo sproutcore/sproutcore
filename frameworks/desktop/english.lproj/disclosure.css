@@ -32,11 +32,11 @@
 
 
 
-.sc-theme .sc-button-view.sc-disclosure-view.sel img.button {
+.sc-button-view.sc-disclosure-view.sel img.button {
 	background-position: 32px 16px ;
 }
 
-.sc-theme .sc-button-view.sc-disclosure-view img.button {
+.sc-button-view.sc-disclosure-view img.button {
 	background-position: 64px 16px ;
 }
 
@@ -46,11 +46,11 @@
 
 /* @group disabled */
 
-.sc-theme .sc-button-view.sc-disclosure-view.sel.disabled img.button {
+.sc-button-view.sc-disclosure-view.sel.disabled img.button {
 	background-position: 32px 16px ;
 }
 
-.sc-theme .sc-button-view.sc-disclosure-view.disabled img.button {
+.sc-button-view.sc-disclosure-view.disabled img.button {
 	background-position: 64px 16px ;
 }
 
@@ -58,7 +58,7 @@
 
 /* @group active */
 
-.sc-theme .sc-button-view.sc-disclosure-view.sel.active img.button {
+.sc-button-view.sc-disclosure-view.sel.active img.button {
 	background-position: 32px 16px ;
 }
 
@@ -68,11 +68,4 @@
 
 /* @end */
 
-
-
-/* @end */
-
-
-
-/* @end */
 
