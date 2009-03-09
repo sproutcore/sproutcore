@@ -148,7 +148,7 @@ SC.Button = {
       needsTitle = YES ;
     }
     
-    if (needsTitle) context.begin('label').push(image, title).end();
+    if (needsTitle) context.begin('label').addClass('sc-button-label').push(image, title).end();
     return context ;
   },
 

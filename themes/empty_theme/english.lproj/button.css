@@ -18,6 +18,7 @@
 
 .sc-button-view label {
 	line-height: 21px;
+	text-align: center;
 }
 
 .sc-button-view.disabled,

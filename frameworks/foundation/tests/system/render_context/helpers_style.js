@@ -51,7 +51,9 @@ test("extracts styles from element on first retrieval", function() {
   context = SC.RenderContext(elem);
   
   var result = context.styles();
-  same(result, { color: 'black', height: '20px' }, 'extracted style');
+  
+  
+  same(result, { color: 'black', height: '20px' }, 'extracted style. This is failing in IE8 because it return styles like cOLOR.');
   
   equals(context.styles(), result, "should reuse same instance thereafter");
 });

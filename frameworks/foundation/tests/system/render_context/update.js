@@ -171,7 +171,10 @@ module("SC.RenderContext#update - style", {
 test("does not change styles if retrieved but not edited", function() {
   context.styles();
   context.update();
-  equals(elem.getAttribute("style"), "color: red;", "style");
+  var style = elem.getAttribute("style");
+  if (!style.match(/;$/)) style += ';' ;
+  
+  equals(style.toLowerCase(), "color: red;", "style");
 });
 
 test("replaces style name if styles edited", function() {
@@ -183,7 +186,7 @@ test("replaces style name if styles edited", function() {
   var style = elem.getAttribute("style");
   if (!style.match(/;$/)) style += ';' ;
   
-  equals(style, "color: black;", "attribute");
+  equals(style.toLowerCase(), "color: black;", "attribute");
 });
 
 
@@ -197,6 +200,6 @@ test("set styles override style attr", function() {
   var style = elem.getAttribute("style");
   if (!style.match(/;$/)) style += ';' ;
   
-  equals(style, "color: black;", "attribute");
+  equals(style.toLowerCase(), "color: black;", "attribute");
 });
 
