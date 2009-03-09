@@ -1,0 +1,55 @@
+/* SC.DisclosureView - sc-theme */
+
+/* @group disclosure */
+
+/* @group basic */
+
+.sc-theme .sc-button-view.sc-disclosure-view img.button {
+	width: 12px;
+	height: 12px;
+	left: 0;
+	top: 3px;
+	background-image: static_url('images/sc-theme-sprite.png') ;
+} 
+
+
+.sc-theme .sc-button-view.sc-disclosure-view.sel img.button {
+	background-position: 0px -1008px ;
+}
+
+.sc-theme .sc-button-view.sc-disclosure-view img.button {
+	background-position: -16px -1025px ;
+}
+
+
+
+/* @end */
+
+/* @group disabled */
+
+.sc-theme .sc-button-view.sc-disclosure-view.sel.disabled img.button {
+	background-position: 0px -1024px ;
+}
+
+.sc-theme .sc-button-view.sc-disclosure-view.disabled img.button {
+	background-position: -16px -1041px ;
+}
+
+/* @end */
+
+/* @group active */
+
+.sc-theme .sc-button-view.sc-disclosure-view.sel.active img.button {
+	background-position: -16px -1008px ;
+}
+
+.sc-theme .sc-button-view.sc-disclosure-view.active img.button {
+	background-position: -0px -1041px ;
+}
+
+/* @end */
+
+
+
+/* @end */
+
