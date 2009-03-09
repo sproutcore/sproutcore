@@ -24,6 +24,8 @@ SC.TabView = SC.View.extend(
 /** @scope SC.TabView.prototype */ {
 
   classNames: ['sc-tab-view'],
+  
+  displayProperties: ['nowShowing'],
 
   // ..........................................................
   // PROPERTIES
@@ -86,13 +88,14 @@ SC.TabView = SC.View.extend(
   },
 
   awake: function() {
-    sc_super();
+    sc_super();  
     var defaultKey = this.get('userDefaultKey');
     if (defaultKey) {
       defaultKey = [defaultKey,'nowShowing'].join(':');
       var nowShowing = SC.userDefaults.get(defaultKey);
       if (!SC.none(nowShowing)) this.set('nowShowing', nowShowing);
-    }  
+    }
+
   },
   
   createChildViews: function() {
@@ -169,7 +172,6 @@ SC.TabView = SC.View.extend(
       } else {
         context.addStyle('bottom', '0px');
       }
-      //return sc_super();
     },
     
     init: function() {
