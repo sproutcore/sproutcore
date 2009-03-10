@@ -6,18 +6,18 @@
 
 /** @class
 
-  Most SproutCore applications need modal dialogs. The default way to use the 
-  dialog pane is to simply add it to your page like this:
+  Most SproutCore applications need modal panels. The default way to use the 
+  panel pane is to simply add it to your page like this:
   
   {{{
     SC.Panel.create({
-      dialogView: SC.View.extend({
+      contentView: SC.View.extend({
         layout: { width: 400, height: 200, centerX: 0, centerY: 0 }
       })
     }).append();
   }}}
   
-  This will cause your dialog to display.  The default layout for a DialogPane 
+  This will cause your panel to display.  The default layout for a Panel 
   is to cover the entire document window with a semi-opaque background, and to 
   resize with the window.
   
@@ -36,7 +36,7 @@ SC.Panel = SC.Pane.extend({
   // 
   
   /**
-    Set this to the view you want to act as the dialog within the dialog pane.
+    Set this to the view you want to act as the content within the panel.
     
     @property {SC.View}
   */
@@ -46,11 +46,11 @@ SC.Panel = SC.Pane.extend({
   /**
     Replaces any child views with the passed new content.  
     
-    This method is automatically called whenever your dialogView property 
+    This method is automatically called whenever your contentView property 
     changes.  You can override it if you want to provide some behavior other
     than the default.
     
-    @param {SC.View} newContent the new dialog view or null.
+    @param {SC.View} newContent the new panel view or null.
     @returns {void}
   */
   replaceContent: function(newContent) {
@@ -60,7 +60,7 @@ SC.Panel = SC.Pane.extend({
 
   /** @private */
   createChildViews: function() {
-    // if dialogView is defined, then create the content
+    // if contentView is defined, then create the content
     var view = this.contentView ;
     if (view) {
       view = this.contentView = this.createChildView(view) ;
@@ -82,14 +82,14 @@ SC.Panel = SC.Pane.extend({
   // INTERNAL SUPPORT
   //
    
-  /** @private - extends SC.Pane's method - make dialog keyPane when shown */
+  /** @private - extends SC.Pane's method - make panel keyPane when shown */
   paneDidAttach: function() {
     var ret = sc_super();
     this.get('rootResponder').makeKeyPane(this);
     return ret ;
   },
 
-  /** @private - suppress all mouse events on dialog itself. */
+  /** @private - suppress all mouse events on panel itself. */
   mouseDown: function(evt) { return YES; }
   
 });
