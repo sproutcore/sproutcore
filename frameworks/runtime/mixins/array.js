@@ -242,6 +242,14 @@ SC.Array = {
     return ret ;
   },
   
+  /**
+    SC.CollectionView compatibility. SC.Array does not caculate groups by 
+    default.
+    
+    @type SC.Array
+  */
+  groups: [],
+  
   rangeObserverClass: SC.RangeObserver,
   
   /**
