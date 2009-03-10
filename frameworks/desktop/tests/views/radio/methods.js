@@ -92,11 +92,24 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   // simulate mouseUp and browser-native change to control
   SC.Event.trigger(elem,'mouseup');
   input.attr('checked', NO);
+  // loose focus of the element since it was changed
   SC.Event.trigger(input.get(1),'change');
   
-  // TODO: figure out why these fail
-  //ok(view.get('isActive'), 'view should no longer be active');
-  //equals(view.get('value'), 'Green', 'value should change');
+  ok(!view.get('isActive'), 'view should no longer be active');
+  equals(view.get('value'), undefined, 'value should be undefined (none checked)');
   
   input = elem = null ;
+});
+
+test("isEnabled=NO should add disabled attr to input", function() {
+  
+  SC.RunLoop.begin();
+  view.set('isEnabled', NO);
+  SC.RunLoop.end();
+  
+  ok(view.$input().attr('disabled'), 'should have disabled attr');
+  
+  ok(view.get('value'), 'precond - value should be true');
+  view.$input().get(1).click();
+  ok(view.get('value'), 'value should not change when clicked');
 });

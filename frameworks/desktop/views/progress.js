@@ -29,7 +29,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
 
   /**
     Bind this to the current value of the progress bar.  Note that by default 
-    an empty value will disable the progress bar and a multiple value too make 
+    an empty value will disable the progress bar and a multiple value will make 
     it indeterminate.
   */
   value: 0.50,
@@ -118,7 +118,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   }.observes('isRunning', 'isVisibleInWindow'),
 
   _animateProgressBar: function(delay) {  
-    if (delay===0) delay =1000/30;
+    if (delay===0) delay = 1000/30;
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
       this.displayDidChange();
       this.invokeLater(this._animateProgressBar, delay, 0);
@@ -136,7 +136,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     var offset = (isIndeterminate && isRunning) ? (-16+Math.floor(Date.now()/75)%16) : 0;
   
     // compute value for setting the width of the inner progress
-    var value ;
+    var value;
     if (!isEnabled) {
       value = "0%" ;
     } else if (isIndeterminate) {
@@ -149,6 +149,10 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       if (value > 1.0) value = 1.0 ;
 
       if(isNaN(value)) value = 0.0;
+      // cannot be smaller then minimum
+      if(value<minimum) value = 0.0;
+      // cannot be larger then maximum
+      if(value>maximum) value = 1.0;
       value = (value * 100) + "%" ;
     }
 

@@ -22,8 +22,7 @@
 */
 SC.SliderView = SC.View.extend(SC.Control,
 /** @scope SC.SliderView.prototype */ {
-
-  emptyElement: '<%@1><span class="sc-inner"><img src="'+static_url('blank')+'" class="sc-handle" /></span></%@1>',
+  
   classNames: 'sc-slider-view',
   
   /** 
@@ -40,7 +39,6 @@ SC.SliderView = SC.View.extend(SC.Control,
   */
   value: 0.50,
   valueBindingDefault: SC.Binding.single().notEmpty(),
-  
   
   /**
     The minimum value of the progress.
@@ -85,26 +83,36 @@ SC.SliderView = SC.View.extend(SC.Control,
   
   displayProperties: 'value minimum maximum'.w(),
   
-  updateDisplay: function() {
+  render: function(context, firstTime) {
     sc_super();
     
-    var min = this.get('minimum') ;
-    var max = this.get('maximum') ;
-    var value = this.get('value') ;
+    var min = this.get('minimum');
+    var max = this.get('maximum');
+    var value = this.get('value');
 
     // determine the constrained value.  Must fit within min & max
-    value = Math.min(Math.max(value, min), max) ;
+    value = Math.min(Math.max(value, min), max);
 
     // limit to step value
-    var step = this.get('step') ;
+    var step = this.get('step');
     if (!SC.none(step) && step !== 0) {
-      value = Math.round(value / step) * step ;
+      value = Math.round(value / step) * step;
     }
     
     // determine the percent across
-    value = Math.floor((value - min) / (max - min) * 100) ;
-
-    this.$(this.get('handleSelector')).css('left', value + "%") ;
+    value = Math.floor((value - min) / (max - min) * 100);
+    
+    if(firstTime) {
+      context.push('<span class="sc-inner"><img src="');
+      context.push(static_url('blank'));
+      context.push('" class="sc-handle" style="left: ');
+      context.push(value);
+      context.push('%" /></span>');
+    }
+    else {
+      this.$(this.get('handleSelector')).css('left', value + "%");
+    }
+    
   },
   
   _isMouseDown: NO,
@@ -146,7 +154,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     // convert to percentage
     loc = loc / width ;
     
-    var min=this.get('minimum'),max=this.get('maximum');  
+    var min = this.get('minimum'),max=this.get('maximum');  
     var step = this.get('step'), v=this.get('value');
 
     // convert to value using minimum/maximum then constrain to steps
@@ -168,5 +176,4 @@ SC.SliderView = SC.View.extend(SC.Control,
     .endPropertyChanges();
   }  
   
-  
-}) ;
+});
