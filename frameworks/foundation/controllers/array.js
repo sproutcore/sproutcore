@@ -76,14 +76,14 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /**
     Property key to use to group objects.
     
-    If groupBy is set to a non-null value, then the collection view will
-    automatically display item views in groups based on the value of the 
-    passed property key.  The exampleGroupView will be used to display the 
-    items in groups.
+    If groupBy is set to a non-null value, then the array controller will
+    automatically partion the content array into groups based on the value of 
+    the passed property key.  The exampleGroup will be used to create the
+    objects in the groups array.
     
     If this property is set, you MUST ensure the items in the content array 
-    are already sorted by the group key.  Otherwise item view groups might 
-    appear more than once.
+    are already sorted by the group key.  Otherwise groups might appear more 
+    than once.
     
     @type String
   */
@@ -97,7 +97,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     @type Class
   */
-  groupExampleClass: SC.Object,
+  exampleGroup: SC.Object,
   
   /**
     The groups, if any, for the current content array.
@@ -118,7 +118,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     // okay, calculate the groups...
     var previousGroup, currentGroup, groupStart = 0 ;
-    var obj, groups = [], GroupClass = this.get('groupExampleClass') ;
+    var obj, groups = [], GroupClass = this.get('exampleGroup') ;
     
     // initialize the discover groups loop
     previousGroup = content.objectAt(0).get(groupByKey) ;
