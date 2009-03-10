@@ -67,7 +67,7 @@ SC.ListView = SC.CollectionView.extend(
   acceptsFirstResponder: YES,
   
   // ..........................................................
-  // ROW/GROUP HEIGHT SUPPORT
+  // ROW HEIGHT SUPPORT
   // 
   
   /** 
@@ -182,87 +182,16 @@ SC.ListView = SC.CollectionView.extend(
   //   }.property('delegate', 'rowHeightKey').cacheable(),
   
   /**
-    Set to YES if your list view should have uniform group heights.  This will
-    enable an optimization that avoids inspecting actual group objects 
-    when calculating the size of the view.
-    
-    The default version of this property is set to YES unless you set a 
-    delegate or a rowHeightKey.
-  */
-  hasUniformGroupHeights: YES,
-  
-  /** 
-    The common group height for list view groups.
-    
-    If you set this property, then the ListView will be able to use this
-    property to perform absolute layout of its children and to minimize t
-    number of actual views it has to create.
-    
-    The value should be an integer expressed in pixels.
-    
-    You can alternatively set either the groupHeightKey or implement
-    the collectionViewHeightForGroupAtGroupIndex() delegate method.
-  */
-  groupHeight: 20,
-  
-  /**
-    If set, this key will be used to calculate the row height for a given
-    content object.
-  */
-  groupHeightKey: null,
-  
-  /**
-    This optional delegate method will be called for each group in your 
-    content groups, giving you a chance to decide what group height to use for
-    the group at the named index.
-    
-    The default version will return either the fixed groupHeight you 
-    specified or will lookup the group height on the content's groups object 
-    using the rowHeightKey.
-    
-    @params {SC.CollectionView} the requesting collection view
-    @params {Number} the index into the group array
-    @returns {Number} groupHeight
-  */
-  collectionViewHeightForGroupAtIndex: function(collectionView, groupIndex) {
-    // console.log('collectionViewHeightForGroupAtIndex invoked in %@ with index %@'.fmt(this, groupIndex));
-    // console.log('groupHeightKey is %@'.fmt(this.get('groupHeightKey')));
-    // just test for presence of a groupHeightKey..to implement fast path...
-    if (!this.groupHeightKey) return this.get('groupHeight');
-    var key = this.get('groupHeightKey'), groups = this.get('groups'), groupHeight;
-    if (groups) groups = groups.objectAt(groupIndex);
-    groupHeight = groups ? groups.get(key) : this.get('groupHeight');
-    // console.log('groups.get(key) is %@'.fmt(groups ? groups.get(key) : undefined));
-    return groupHeight ;
-  },
-  
-  /**
     Calculates the offset for the row at the specified index.  Based on the 
     current setting this may compute the row heights for previous items or 
     it will simply do some math...
   */
   offsetForRowAtContentIndex: function(index) {
-    // if (index === 0) return 0 ;
+    if (index === 0) return 0 ;
     
     // do some simple math if we have uniform row heights...
     if (this.get('hasUniformRowHeights')) {
       var height = this.get('rowHeight') * index ;
-      
-      if (this.get('hasUniformGroupHeights')) {
-        var groupHeight = this.get('groupHeight') ;
-        
-        var content = this.get('content') ;
-        var groups = content.get('groups') ;
-        if (groups.get('length') > 0) {
-          var group, itemRange, len = groups.get('length') ;
-          for (var idx=0; idx<len; ++idx) {
-            group = groups.objectAt(idx) ;
-            height += groupHeight ;
-            if (SC.valueInRange(index, group.itemRange)) break ;
-          }
-        }
-      }
-      
       // console.log('calculating offsetForRowAtContentIndex using uniform row heights, index is %@, offset is %@'.fmt(index, height));
       return height;
       
