@@ -38,7 +38,7 @@ SC.SourceListView = SC.ListView.extend(
   hasUniformGroupHeights: YES,
   
   /** 
-    The common group height for list view groups.
+    The common group height for source list group views.
     
     If you set this property, then the ListView will be able to use this
     property to perform absolute layout of its children and to minimize t
@@ -49,7 +49,7 @@ SC.SourceListView = SC.ListView.extend(
     You can alternatively set either the groupHeightKey or implement
     the collectionViewHeightForGroupAtGroupIndex() delegate method.
   */
-  groupHeight: 20,
+  groupHeight: 32,
   
   /**
     If set, this key will be used to calculate the row height for a given
@@ -155,7 +155,7 @@ SC.SourceListView = SC.ListView.extend(
       
       return ret ;
     }
-  }
+  },
   
   // emptyElement: '<div class="sc-source-list-view"></div>',
   // 
@@ -261,14 +261,14 @@ SC.SourceListView = SC.ListView.extend(
   //   value of this property.
   // */
   // groupVisibleKey: null,
-  // 
-  // /** 
-  //   The common row height for list view items.
-  //   
-  //   The value should be an integer expressed in pixels.
-  // */
-  // rowHeight: 32,
-  // 
+  
+  /** 
+    The common row height for list view items.
+    
+    The value should be an integer expressed in pixels.
+  */
+  rowHeight: 32,
+  
   // /**
   //   Source list view items are usually list item views.  You can override 
   //   this if you wish.
