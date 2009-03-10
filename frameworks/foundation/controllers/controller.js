@@ -5,16 +5,16 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/** 
-  @class   SC.Controller
-
+/**
+  @class
+  
   The controller base class provides some common functions you will need
   for controllers in your applications, especially related to maintaining
   an editing context.
-
+  
   In general you will not use this class, but you can use a subclass such
   as ObjectController, CollectionController, or ArrayController.
-
+  
   h2. EDITING CONTEXTS
   
   One major function of a controller is to mediate between changes in the
@@ -22,15 +22,14 @@
   changes you make in the UI to be applied to a model object directly.  
   Instead, you often will want to collect changes to an object and then
   apply them only when the user is ready to commit their changes.
-
+  
   The editing contact support in the controller class will help you
   provide this capability.
   
   @extends SC.Object
 */
 SC.Controller = SC.Object.extend(
-  /** @scope SC.Controller.prototype  */
-  {  
+/** @scope SC.Controller.prototype */ {
   
   /**
     The controller will set this property to true whenever there are 
@@ -38,50 +37,28 @@ SC.Controller = SC.Object.extend(
     the controller itself has uncommitted changes or when any dependent
     editors have uncommitted changes.  In your own subclass, call 
     this.objectDidChange(this) to register changes.
-
+    
     @type Boolean
   */
-  hasChanges: false,
+  hasChanges: NO,
   
   /**
     This is the controller's parent controller usually.  The controller will
     notify this controller when its changes are committed or discarded.
-
+    
     @type SC.Controller
   */
   context: null,
   
   /**
-    If this is false, then the controller will only commit changes when you
+    If this is NO, then the controller will only commit changes when you
     explicitly call commitChanges.  Otherwise it will commit them
-    immediately.  You usually want this set to false.  It is initially set to
-    true for compatibility.
-
+    immediately.  You usually want this set to NO.  It is initially set to
+    YES for compatibility.
+    
     @type Boolean
   */
-  commitChangesImmediately: true,
-  
-  /**
-  * Sets the commitChangesImmediately to the parent context's value if a context was passed.
-  * The Controller also observes changes to the context property and adjusts the commitChangesImmediately prop
-  */
-  init: function()
-  {
-    sc_super();
-    this._contextObserver();
-  },
-  
-  /**
-  * @private
-  */
-  _contextObserver: function()
-  {
-    if ( this.context )
-    {
-      // inherit the parent contexts inherit property
-      this.commitChangesImmediately = this.context.commitChangesImmediately;
-    }
-  }.observes('context'),
+  commitChangesImmediately: YES,
   
   /**
     If the controller has uncommitted changes, call this method to 
@@ -110,7 +87,7 @@ SC.Controller = SC.Object.extend(
   /**
     This method will return an appropriate controller object for the 
     value of the property you name.  This will return one of:
-  
+    
     <table>
     <tr> <th>Value Type</th>        <th>Returns</th> </tr>
     <tr> <td>Array-compatible</td>  <td>SC.ArrayController</td></tr>
@@ -118,10 +95,9 @@ SC.Controller = SC.Object.extend(
     <tr> <td>Kind of SC.Object</td> <td>SC.ObjectController</td></tr>
     <tr> <td>other</td>             <td>value</td></tr>
     </table>
-  
+    
     This is a helper method used by subclasses to create the appropriate 
     type of controller.
-  
   */
   controllerForValue: function(value) {
     var ret = null ;
@@ -138,13 +114,13 @@ SC.Controller = SC.Object.extend(
         ret = null ;
     }
     
-    return (ret) ? ret.create({ content: value, context: this }) : value;
+    return (ret) ? ret.create({ content: value, context: this }) : value ;
   },
   
   /**
     Call this method whenever you have uncommitted changes.  This will
     handle notifying your parent context as well.
-  
+    
     @param {SC.Controller} editor 
       This is the object that has uncommitted changes.  Normally you should 
       not pass a value.  If you do pass an object, then that object will  
@@ -159,10 +135,10 @@ SC.Controller = SC.Object.extend(
       if (!this._dirtyEditors) this._dirtyEditors = SC.Set.create();
       this._dirtyEditors.add(editor) ;
     } else {
-      this._hasLocalChanges = true ;
+      this._hasLocalChanges = YES ;
     }
     if (!this.get('hasChanges')) {
-      this.set('hasChanges', true) ;
+      this.set('hasChanges', YES) ;
       
       // if we have a parent context notify them
       if (this.context) {
@@ -195,7 +171,7 @@ SC.Controller = SC.Object.extend(
       if (this._clearingChanges) return ;
       if (this._dirtyEditors) this._dirtyEditors.remove(editor) ;
     } else {
-      this._hasLocalChanges = false ;
+      this._hasLocalChanges = NO ;
     }
     
     // _dirtyEditors may be undefined so use !! to force this to a bool value.
@@ -215,7 +191,7 @@ SC.Controller = SC.Object.extend(
     true as well.
   */  
   canCommitChanges: function() {
-    return true ;
+    return YES ;
   },
   
   /**
@@ -234,7 +210,7 @@ SC.Controller = SC.Object.extend(
     cannot discard the change.
   */
   canDiscardChanges: function() {
-    return true ;
+    return YES ;
   },
   
   /**
@@ -250,13 +226,28 @@ SC.Controller = SC.Object.extend(
   // ....................................
   // PRIVATE
   
+  /** @private */
+  init: function() {
+    sc_super() ;
+    this._contextObserver() ;
+  },
+  
+  /** @private */
+  _contextObserver: function() {
+    if (this.context) {
+      // inherit the parent contexts inherit property
+      this.commitChangesImmediately = this.context.commitChangesImmediately ;
+    }
+  }.observes('context'),
+  
+  /** @private */
   _canCommitChanges: function() {
-    if (!this.get('hasChanges')) return false ;
+    if (!this.get('hasChanges')) return NO ;
     
     // validate editors.
-    var ret = true ;
+    var ret = YES ;
     if (this._dirtyEditors) {
-      ret = this._dirtyEditors.invokeWhile(true, '_canCommitChanges') ;
+      ret = this._dirtyEditors.invokeWhile(YES, '_canCommitChanges') ;
       if (!$ok(ret)) return ret ;
     }
     
@@ -264,34 +255,36 @@ SC.Controller = SC.Object.extend(
     return this.canCommitChanges() ;
   },
   
+  /** @private */
   _performCommitChanges: function() {
     if (!this.get('hasChanges')) return true ;
     
     // first commit any editors.  If not successful, return. otherwise,
     // clear editors.
-    var ret = true ;
+    var ret = YES ;
     if (this._dirtyEditors) {
-      this._clearingChanges = true ;
-      ret = this._dirtyEditors.invokeWhile(true, '_performCommitChanges') ;
-      this._clearingChanges = false ;
+      this._clearingChanges = YES ;
+      ret = this._dirtyEditors.invokeWhile(YES, '_performCommitChanges') ;
+      this._clearingChanges = NO ;
       
       if ($ok(ret)) {
         this._dirtyEditors = null ;
       } else return ret ;
     }
-
+    
     // now commit changes for the receiver.
     ret = this.performCommitChanges() ;
     if ($ok(ret)) this.editorDidClearChanges() ;
     return ret ;
   },
-
+  
+  /** @private */
   _canDiscardChanges: function() {
     if (!this.get('hasChanges')) return false ;
     // validate editors.
-    var ret = true ;
+    var ret = YES ;
     if (this._dirtyEditors) {
-      ret = this._dirtyEditors.invokeWhile(true, '_canDiscardChanges') ;
+      ret = this._dirtyEditors.invokeWhile(YES, '_canDiscardChanges') ;
       if (!$ok(ret)) return ret ;
     }
     
@@ -299,16 +292,17 @@ SC.Controller = SC.Object.extend(
     return this.canDiscardChanges() ;
   },
   
+  /** @private */
   _performDiscardChanges: function() {
-    if (!this.get('hasChanges')) return true ;
+    if (!this.get('hasChanges')) return YES ;
     
     // first discard changes for any editors.  If not successful, return. 
     // otherwise, clear editors.
-    var ret = true ;
+    var ret = YES ;
     if (this._dirtyEditors) {
-      this._clearingChanges = true ;
-      ret = this._dirtyEditors.invokeWhile(true, '_performDiscardChanges') ;
-      this._clearingChanges = false ;
+      this._clearingChanges = YES ;
+      ret = this._dirtyEditors.invokeWhile(YES, '_performDiscardChanges') ;
+      this._clearingChanges = NO ;
       if ($ok(ret)) {
         this._dirtyEditors = null ;
       } else return ret ;
@@ -320,4 +314,4 @@ SC.Controller = SC.Object.extend(
     return ret ;
   }
   
-}) ;
+});

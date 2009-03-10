@@ -4,25 +4,27 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('controllers/controller') ;
-require('mixins/selection_support') ;
+require('controllers/controller');
+require('mixins/selection_support');
 
-/** @class
-
-An Array Controller provides a way to project the contents of an array
-out to a view.  You can use this object any place you might use an
-array.  Changes to the array will not propogate to the content array
-until you call commitChanges().
-
-@extends SC.Controller
-@extends SC.Array
-@extends SC.SelectionSupport
-@since SproutCore 1.0
-
+/**
+  @class
+  
+  An Array Controller provides a way to project the contents of an array
+  out to a view.  You can use this object any place you might use an
+  array.  Changes to the array will not propogate to the content array
+  until you call commitChanges().
+  
+  @extends SC.Controller
+  @extends SC.Array
+  @extends SC.SelectionSupport
+  @author Charles Jolley
+  @author Erich Ocean
+  @version 1.0
+  @since SproutCore 1.0
 */
 SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
-/** @scope SC.ArrayController.prototype */
-{
+/** @scope SC.ArrayController.prototype */ {
   
   /**
     If YES the will return controllers for content objects.
@@ -31,44 +33,128 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     but you do not want to wrap the values of the array in controller objects
     then you should set this property to NO.
     
-    @field
-    @type {Boolean}
+    @type Boolean
   */
   useControllersForContent: NO,
   
   /**
-    Provides compatibility with CollectionControllers.
-    @field
-    @type {SC.ArrayController}
+    Provides compatibility with collection controllers.
+    
+    @property
+    @type SC.ArrayController
   */
   arrangedObjects: function() { return this; }.property('content'),
-
+  
   /**
     The content array managed by this controller.  
-  
+    
     In general you can treat an instance of ArrayController as if it were 
     the array held in this property.  Any changes you make to the controller
     that are not specifically implemented in the controller will pass through
     to the Array.
-  
-    Also if you set commitsChangesImmediately to false, the controller will
+    
+    Also if you set commitsChangesImmediately to NO, the controller will
     buffer changes against this.
-
-    @property
-    @type {Array}
+    
+    @type SC.Array
   */
   content: null,
-  contentBindingDefault: SC.Binding.Multiple,
-
+  
+  /** @private */
+  contentBindingDefault: SC.Binding.multiple(),
+  
   /**
-    Set to true if the controller has any content, even an empty array.
+    Set to YES if the controller has any content, even an empty array.
+    
+    @property
+    @type Boolean
   */
   hasContent: function() {
     return !SC.none(this.get('content')) ;
   }.property('content'),
   
   /**
-    Set to true if you want objects removed from the array to also be
+    Property key to use to group objects.
+    
+    If groupBy is set to a non-null value, then the collection view will
+    automatically display item views in groups based on the value of the 
+    passed property key.  The exampleGroupView will be used to display the 
+    items in groups.
+    
+    If this property is set, you MUST ensure the items in the content array 
+    are already sorted by the group key.  Otherwise item view groups might 
+    appear more than once.
+    
+    @type String
+  */
+  groupByKey: null,
+  
+  /**
+    When grouping, create objects using this class. SC.ArrayController will 
+    set 'value' to the value of the groupByKey, and 'itemRange' to an 
+    SC.Range of the item indexes in the group, and 'owner' to this array
+    controller.
+    
+    @type Class
+  */
+  groupExampleClass: SC.Object,
+  
+  /**
+    The groups, if any, for the current content array.
+    
+    @property
+    @type SC.Array
+  */
+  groups: function(key, val) {
+    if (val) throw "SC.ArrayController groups are read-only." ;
+    
+    var groupByKey = this.get('groupByKey') ;
+    if (!groupByKey) return SC.EMPTY_ARRAY ; // no groups
+    
+    var content = this.get('content') ;
+    if (!content || content.get('length') === 0) {
+      return SC.EMPTY_ARRAY ; // no groups...
+    }
+    
+    // okay, calculate the groups...
+    var previousGroup, currentGroup, groupStart = 0 ;
+    var obj, groups = [], GroupClass = this.get('groupExampleClass') ;
+    
+    // initialize the discover groups loop
+    previousGroup = content.objectAt(0).get(groupByKey) ;
+    
+    // discover groups...
+    for (var idx=0, len=content.get('length'); idx<len; ++idx) {
+      obj = content.objectAt(idx) ;
+      currentGroup = obj.get(groupByKey) ;
+      
+      // did our group change?
+      if (previousGroup !== currentGroup) {
+        // save the current group
+        groups.push(GroupClass.create({
+          value: previousGroup,
+          itemRange: { start: groupStart, length: idx - groupStart },
+          owner: this
+        }));
+        
+        // and move on to the next group
+        previousGroup = currentGroup ;
+        groupStart = idx ;
+      }
+    }
+    
+    // close the last and final group
+    groups.push(GroupClass.create({
+      value: previousGroup,
+      itemRange: { start: groupStart, length: idx - groupStart },
+      owner: this
+    }));
+    
+    return groups ;
+  }.property('content', 'groupByKey').cacheable(),
+  
+  /**
+    Set to YES if you want objects removed from the array to also be
     deleted.  This is a convenient way to manage lists of items owned
     by a parent record object.
     
@@ -76,31 +162,29 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     removeObject() will still destroy the object in question as well as 
     removing it from the parent array.
     
-    @field
     @type {Boolean}
   */
   destroyOnRemoval: NO,
-
+  
   /**
     Defines the default class to use when creating new content. 
     
     This property should either contains a class or a string that resolves
     to a class that responds to the newRecord() method.
-  
-    @property
+    
     @type {Class}
   */
   exampleContentObject: null,
   
   /**
     Creates a new record instance and adds it to the end of the current array.
-
+    
     This method works just like insertNewObjectAt() but always appends.
-
+    
     @param attributes {Hash} optional hash of attributes to pass to the new obejct.
     @param objectType {Class} optional class of object to create.
     @returns {Object} the newly created object (also added to the array)
-  */ 
+  */
   newObject: function(attributes, objectType) {
     return this.insertNewObjectAt(null, attributes, objectType) ;
   },
@@ -108,7 +192,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /**
     Creates a new content object and inserts it at the passed index or appends
     it at the end of the array if you pass null.
-
+    
     This method takes an optional hash of attributes which will be set on
     the new record.  You can also pass an optional objectType.  If you do 
     not pass the objectType, you must instead set the exampleContentObject to 
@@ -117,7 +201,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     Objects created using this method will be destroyed automatically if you
     have set commitsChangesImmediately to false and call discardChanges().
-
+    
     @param index {Number} the index to insert at or null to append.
     @param attributes {Hash} optional hash of attributes to pass to the new obejct.
     @param objectType {Class} optional class of object to create.
@@ -151,17 +235,17 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return obj ;
   },
   
-  /**
+  /** @private
     Watches changes to the content property updates the contentClone.
-    @private
+    
     @observes content
   */
   _contentDidChange: function() {
     var content = this.get('content') ;
     if (SC.isEqual(content, this._content)) return ; // nothing to do
-
+    
     var func = this._contentPropertyDidChange ;
-
+    
     // remove old observer, add new observer, and trigger content property change
     if (this._content && this._content.removeObserver) {
       this._content.removeObserver('[]', this, func) ;
@@ -177,38 +261,35 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     var rev = (content) ? content.propertyRevision : -1 ;
     this._contentPropertyDidChange(content, '[]', content, rev) ; 
   }.observes('content'),
-
+  
   _contentPropertyDidChange: function(target, key, value, rev) {  
-      
-    if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
+     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
-
+      
       this._updatingContent = true ;
-
+      
       this.beginPropertyChanges();
       this.contentCloneReset();
       this.enumerableContentDidChange() ;
       this.notifyPropertyChange('length') ;
       this.updateSelectionAfterContentChange();
       this.endPropertyChanges() ;
-
+      
       this._updatingContent = false ;
-
     }
   },
   
   /**
     The array content that (when committed) will be merged back into the 
     content property. All array methods will take place on this object.
-
-    @field
-    @type {SC.Array}
+    
+    @property
+    @type SC.Array
   */
   contentClone: null,
-
-  /**
+  
+  /** @private
     Clones the content property into the contentClone property.
-    @private
   */
   contentCloneReset: function() {
     this._changelog = [];
@@ -216,7 +297,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   },
 
   /**
-   SC.Array interface implimentation.
+   SC.Array interface implementation.
    
    @param idx {Number} Starting index in the array to replace.  If idx >= 
      length, then append to the end of the array.
@@ -228,9 +309,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
      inserted into the array at *idx* 
   */
   replace: function(idx, amt, objects) {
-
     var content = this.get('content') ;
-
+    
     // in case the passed objects are controllers, convert to source objects.
     var copyIdx = objects.length ;
     var sourceObjects = objects ;
@@ -246,7 +326,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (!contentClone) {
       this.set('contentClone', contentClone = SC.$A(content)) ;
     }
-
+    
     // now, record the removed objects.  This may be used later.
     if (this.get('destroyOnRemoval')) {
       if (!this._deletions) this._deletions = [] ;
@@ -254,7 +334,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         this._deletions.push(content.objectAt(idx + i));
       }
     }
-
+    
     // and record additions
     if (!this._changelog) this._changelog = []; 
     this._changelog.push({ idx: idx, amt: amt, objects: sourceObjects });
@@ -288,13 +368,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     var ret = this._getSourceContent() ;
     return (ret && ret.get) ? (ret.get('length') || 0) : 0 ;
   }.property(),
-
+  
   /**
     Returns the index in the array of the specified object.
     
     This can handle both controller wrapper objects and source content objects.
   */
-  indexOf: function( obj ) {
+  indexOf: function(obj) {
     return this._getSourceContent().indexOf(this._sourceObjectFor(obj)) ;
   },
   
@@ -302,11 +382,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return this.get('contentClone') || this.get('content') || [];
   },
   
-  /** 
-  * @private
-  */
-  performCommitChanges: function()
-  {
+  /** @private */
+  performCommitChanges: function() {
     var content = this.get('content');
     var ret     = true;
     var idx ;
@@ -317,8 +394,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
     
     if (content.beginPropertyChanges) content.beginPropertyChanges();
-
-
+    
     // apply all the changes made to the clone
     if (this._changelog) {
       var changelog = this._changelog ;
@@ -329,7 +405,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       }
       this._changelog.length = 0 ; // reset changelog
     }
-
+    
     // finally, destroy any removed objects if necessary.  Make 
     // sure the objects have not been re-added before doing this.
     if (this.get('destroyOnRemoval') && this._deletions && this._deletions.length>0) {
@@ -357,11 +433,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     return ret;
   },
-  /** 
-  * @private
-  */
-  performDiscardChanges: function()
-  {
+  
+  /** @private */
+  performDiscardChanges: function() {
     this.contentCloneReset();
     this.editorDidClearChanges();
     
@@ -397,16 +471,19 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   
   /** @private
     Returns the source object for the passed value.  If the passed value is a 
-    controller, this will map back to the sourceo object.  Otherwise the object itself
-    will be returned.
+    controller, this will map back to the sourceo object.  Otherwise the 
+    object itself will be returned.
   */
   _sourceObjectFor: function(obj) {
-    return (obj && obj.kindOf && obj.kindOf(SC.Controller)) ? obj.get('content') : obj ;
+    return (obj && obj.kindOf && obj.kindOf(SC.Controller)) ?
+      obj.get('content') :
+      obj ;
   },
   
+  /** @private */
   init: function() {
     sc_super() ;
     if (this.get('content')) this._contentDidChange() ;
   }
-
+  
 });

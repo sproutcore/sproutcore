@@ -1,21 +1,28 @@
 // ==========================================================================
-// SC.ListItemView
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
 sc_require('views/disclosure');
 
-/** @class
-
+/**
+  @class
+  
   Displays a group view in a source list.  Handles displaying a disclosure
   triangle which can be used to show/hide children.
-
+  
   @extends SC.View
-  @extends SC.DelegateSupport
-  @author   Charles Jolley 
-  @version 0.1
+  @extends SC.Control
+  @author Charles Jolley
+  @author Erich Ocean
+  @version 1.0
+  @since 0.9
 */
 
-SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
+SC.SourceListGroupView = SC.View.extend(SC.Control,
+/** @scope SC.SourceListGroupView.prototoyp */ {
   
   emptyElement: ['<div class="sc-source-list-group">',
     '<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure no-disclosure">',
@@ -25,12 +32,16 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
   
   /**
     The group value to display for this group.
+    
+    @type SC.Object
   */
   content: null,
   
   /**
     The current group visibility.  Used by the source list to determine 
     the layout size of the group.
+    
+    @type Boolean
   */
   isGroupVisible: YES,
   
@@ -40,13 +51,27 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
     Group views will typically hide their header if the content is set to 
     null.  You can also override this method to always hide the header if 
     you want and the SourceListView will not leave room for it.
+    
+    @type Boolean
   */
   hasGroupTitle: YES,
   
+  /**
+    The content property key to use as the group view's title.
+    
+    @type String
+  */
   groupTitleKey: null,
   
+  /**
+    The content property key to use to determine if the group's children are 
+    visible or not.
+    
+    @type String
+  */
   groupVisibleKey: null,
   
+  /** @private */
   contentPropertyDidChange: function(target, key) {
     var content = this.get('content') ;
     var labelView = this.outlet('labelView') ;
@@ -75,22 +100,23 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
     // set the group visibility if changed
     var groupVisibleKey = this.getDelegateProperty(this.displayDelegate, 'groupVisibleKey') ;
     if ((key == '*') || (groupVisibleKey && (key == groupVisibleKey))) {
-
       if (groupVisibleKey) {
-        
         labelView.removeClassName('no-disclosure') ;
-
-        var isVisible = (content && content.get) ? !!content.get(groupVisibleKey) : YES ;
+        
+        var isVisible = (content && content.get) ?
+          !!content.get(groupVisibleKey) :
+          YES ;
         if (isVisible != this.get('isGroupVisible')) {
           this.set('isGroupVisible', isVisible) ;
           labelView.set('value', isVisible) ;
         }
-        
       } else labelView.addClassName('no-disclosure') ;
     }
   },
   
-  // called when the user clicks on the disclosure triangle
+  /** @private
+    Called when the user clicks on the disclosure triangle
+  */
   disclosureValueDidChange: function(newValue) {
     if (newValue == this.get('isGroupVisible')) return; // nothing to do
     
@@ -112,16 +138,20 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.DelegateSupport, {
     
     /** 
       Always default to open disclosures.
+      
+      @type Boolean
     */
     value: YES,
     
-    // if the disclosure value changes, call the owner's method.  Note
-    // normally you would do this with a binding, but since this is a semi-
-    // private class anyway, there is no reason to go to all that trouble.
+    /** @private
+      If the disclosure value changes, call the owner's method.  Note
+      normally you would do this with a binding, but since this is a semi-
+      private class anyway, there is no reason to go to all that trouble.
+    */
     _valueObserver: function() {
-      if (this.owner) this.owner.disclosureValueDidChange(this.get('value'));
+      if (this.owner) this.owner.disclosureValueDidChange(this.get('value')) ;
     }.observes('value')
     
   })
   
-}) ;
+});

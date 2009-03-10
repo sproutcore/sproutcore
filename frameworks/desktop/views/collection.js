@@ -80,7 +80,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Usually you will want to bind this property to a controller property 
     that actually contains the array of objects you to display.
     
-    @type Array
+    @type SC.Array
   */
   content: [],
   
@@ -124,15 +124,15 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   delegate: null,
   
   /** 
-    Allow user to select content using the mouse and keyboard 
-  
-    Set this property to NO to disallow the user from selecting items.
-    If you have items in your selection property, they will still be reflected
+    Allow user to select content using the mouse and keyboard.
+    
+    Set this property to NO to disallow the user from selecting items. If you 
+    have items in your selection property, they will still be reflected
     visually.
     
-    @type {Bool}
+    @type Boolean
   */
-  isSelectable: true,
+  isSelectable: YES,
   
   /** @private */
   isSelectableBindingDefault: SC.Binding.bool(),
@@ -145,7 +145,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     the collection view will also be not selectable or editable, regardless of the  
     settings for isEditable & isSelectable.
     
-    @type {Bool}
+    @type Boolean
   */
   isEnabled: YES,
   
@@ -159,6 +159,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     reflect the same value of this property.  Whenever isEditable is false, 
     the user will not be able to reorder, add, or delete items regardless of 
     the canReorderContent and canDeleteContent and isDropTarget properties.
+    
+    @type Boolean
   */
   isEditable: YES,
   
@@ -171,8 +173,10 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     If true, the user will can use drag and drop to reorder items in the list.
     If you also accept drops, this will allow the user to drop items into 
     specific points in the list.  Otherwise items will be added to the end.
+    
+    @type Boolean
   */
-  canReorderContent: false,
+  canReorderContent: NO,
   
   /** @private */
   canReorderContentBindingDefault: SC.Binding.bool(),
@@ -182,6 +186,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     If true the user will be allowed to delete selected items using the delete
     key.  Otherwise deletes will not be permitted.
+    
+    @type Boolean
   */
   canDeleteContent: NO,
   
@@ -194,6 +200,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     Setting this property to return true when the view is instantiated will 
     cause it to be registered as a drop target, activating the other drop 
     machinery.
+    
+    @type Boolean
   */
   isDropTarget: NO,
   
@@ -220,7 +228,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     Use this if you are using the collection view as a menu of items.
     
-    @type {Boolean}
+    @type Boolean
   */  
   actOnSelect: NO,
   
@@ -234,25 +242,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     the mouse is released, so you can perform, for instance, a drag operation
     without actually selecting the target item.  
     
-    @type {Boolean}
+    @type Boolean
   */  
   selectOnMouseDown: YES,
   
-  /**
-    Property key to use to group objects.
-    
-    If groupBy is set to a non-null value, then the collection view will
-    automatically display item views in groups based on the value of the 
-    passed property key.  The exampleGroupView will be used to display the 
-    items in groups.
-    
-    If this property is set, you MUST ensure the items in the content array 
-    are already sorted by the group key.  Otherwise item view groups might 
-    appear more than once.
-    
-    @type {String}
-  */
-  groupBy: null,
+  // /**
+  //   Property key to use to group objects.
+  //   
+  //   If groupBy is set to a non-null value, then the collection view will
+  //   automatically display item views in groups based on the value of the 
+  //   passed property key.  The exampleGroupView will be used to display the 
+  //   items in groups.
+  //   
+  //   If this property is set, you MUST ensure the items in the content array 
+  //   are already sorted by the group key.  Otherwise item view groups might 
+  //   appear more than once.
+  //   
+  //   @type String
+  // */
+  // groupBy: null,
   
   /**
     The view class to use when creating new item views.
