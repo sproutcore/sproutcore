@@ -243,8 +243,8 @@ SC.Array = {
   },
   
   /**
-    SC.CollectionView compatibility. SC.Array does not caculate groups by 
-    default.
+    SC.CollectionView compatibility. SC.Array does not calculate groups by 
+    default. Use SC.ArrayController and/or SC.ResultSet instead.
     
     @type SC.Array
   */
