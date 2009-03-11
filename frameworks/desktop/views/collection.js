@@ -975,7 +975,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (SC.ENABLE_COLLECTION_PARTIAL_RENDER) {
       // used for santity checks during debugging
       if (SC.SANITY_CHECK_PARTIAL_RENDER) var maxLen = range.length ;
-    
+      
       if (SC.DEBUG_PARTIAL_RENDER) {
         console.log('oldRange = ') ;
         console.log(oldRange) ;
@@ -984,6 +984,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       }
       
       // if we're dirty, redraw everything visible
+      // (selection changed, content changed, etc.)
       if (this.get('isDirty')) {
         childSet.length = 0 ; // full render
         
@@ -1842,23 +1843,31 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         sel.push(items[i]);
       }
     }
-    sel = sel.concat(base).uniq() ;
     
-    // if you are not extending the selection, then clear the selection 
-    // anchor.
+    var set = SC.Set.create(base), obj ;
+    set.addEach(sel) ; // sel contains selectable items
+    sel.length = 0 ; // we don't want duplicates in the selection, so clear it
+    while (obj = set.pop()) sel.push(obj) ; // now fill it back up..
+    
+    // if we're not extending the selection, clear the selection anchor
     this._selectionAnchor = null ;
-    this.set('selection',sel) ;  
+    this.set('selection', sel) ;  
   },
   
   /** 
     Removes the items from the selection.
   */
   deselectItems: function(items) {
-    items = [items].flatten() ;
-    var base = this.get('selection') || [] ; 
-    var sel = base.map(function(i) { return items.include(i) ? null : i; });
-    sel = sel.compact() ;
-    this.set('selection',sel) ;
+    var base = SC.makeArray(this.get('selection')) ;
+    var sel = [] ;
+    
+    items = SC.makeArray(items) ;
+    
+    var set = SC.Set.create(base), obj ;
+    set.removeEach(items) ;
+    while (obj = set.pop()) sel.push(obj) ;
+    
+    this.set('selection', sel) ;  
   },
   
   /**
