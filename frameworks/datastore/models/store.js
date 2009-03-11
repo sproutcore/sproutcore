@@ -114,7 +114,7 @@ SC.Store = SC.Object.extend(
     @property
     @type {Array}
   */
-  recKeyTypeMap: [],
+  recKeyTypeMap: {},
 
   /**
     This hash contains all the data types stored in the store and within that,
@@ -131,6 +131,8 @@ SC.Store = SC.Object.extend(
     @type {Array}
   */
   dataTypeMap: {},
+
+  compTypeMap: {},
   
   /**
     This hash contains all the instantiated records arranged by type.
@@ -685,7 +687,7 @@ SC.Store = SC.Object.extend(
       ret = [];
       for(var i=0, iLen = createdStoreKeys.length; i<iLen; i++) {
         var storeKey = createdStoreKeys[i];
-        ret.push(this._materializeRecord(storeKey, YES)); 
+        ret.push(this.materializeRecord(storeKey, YES)); 
         pCreated.push(storeKey);
       }
     }
@@ -875,7 +877,7 @@ SC.Store = SC.Object.extend(
 
     @returns {SC.Record} Returns a record instance.
   */
-  _materializeRecord: function(storeKey, isNewRecord) {
+  materializeRecord: function(storeKey, isNewRecord) {
     var ret = null;
     if(storeKey !== undefined) {
       var dataHash = this.getDataHash(storeKey);
@@ -950,7 +952,7 @@ SC.Store = SC.Object.extend(
     var storeKey = this.primaryKeyMap[guid];
     var ret = null;
     if(storeKey !== undefined) {
-      ret = this._materializeRecord(storeKey);
+      ret = this.materializeRecord(storeKey);
     } else {
       var parentStore = this.get('parentStore');
       if(guid && parentStore) {
@@ -985,16 +987,18 @@ SC.Store = SC.Object.extend(
   /**
     Given a filter and a recordType, retrieve matching records. 
     
+    @param {SC.Record} recordType The query containing a query.
     @param {String} query The query containing a query.
     @param {Mixed} arguments The arguments for the query.
     
     @returns {Array} Returns an array of matched record instances.
   */
-  findAll: function(queryString)
+  findAll: function(recordType, queryString)
   {
     if(!queryString) return null;
     
     var args = SC.$A(arguments);
+    recordType = args.shift();
     queryString = args.shift();
     
     var query = null;
@@ -1002,35 +1006,78 @@ SC.Store = SC.Object.extend(
     {
       query = this._queries[queryString];
     } else {
-      this._queries[queryString] = query = SC.Query.create({store: this});
+      this._queries[queryString] = query = SC.Query.create({store: this, delegate: this});
     }
-    query.prepareQuery(queryString, args);
-    this.provideRecordsForQuery(query);
+    query.parse(recordType, queryString, args);
+    this.prepareQuery(query);
     return query;
   },
   
+  provideLengthForQuery: function(query) {
+    if(this.parentStore) {
+      this.parentStore.provideLengthForQuery(query);
+    }
+  },
+
   provideRecordsForQuery: function(query) {
-    this.get('parentStore').provideRecordsForQuery(query);
+    if(this.parentStore) {
+      this.parentStore.provideRecordsForQuery(query);
+    }
+  },
+
+  prepareQuery: function(query) {
+    if(this.parentStore) {
+      this.parentStore.prepareQuery(query);
+    }
   },
   
   performQuery: function(query) {
     var conditions = query.get('conditions') ;
     var truthFunction = query.get('truthFunction');
+    var recordType = query.get('recordType');
+    var needRecord = query.get('needRecord');
+    var rec = null;
+    
+    if(!recordType) {
+      return [];
+    }  
+    
+    if(needRecord) {
+      rec = this.createCompRecord(recordType);
+    }
+    
     var dataHashes = this.dataHashes;
-    var storeKeyMap = this.storeKeyMap;
+    var storeKeyMap = this.dataTypeMap[SC.guidFor(recordType)];
     var storeKeys = [];
     
     if(truthFunction === null) {
       truthFunction = function() { return YES; };
     }
     
-    for(var storeKey in storeKeyMap) {
-      var dataHash = dataHashes[storeKey];
-      if(truthFunction(dataHash, conditions)) {
+    for(var i=0, iLen=storeKeyMap.length; i<iLen; i++ ) {
+      var storeKey = storeKeyMap[i];
+      if(needRecord) {
+      rec._storeKey = storeKey;
+      } else {
+        rec = dataHashes[storeKey];
+      }
+
+      if(truthFunction(rec, conditions)) {
         storeKeys.push(storeKey);
       }
     }
     return storeKeys;
+  },
+  
+  createCompRecord:function(recordType) {
+    var recTypeGuid = SC.guidFor(recordType);
+    var rec = null;
+    if(this.compTypeMap[recTypeGuid]) {
+      rec = this.compTypeMap[recTypeGuid];
+    } else {
+      this.compTypeMap[recTypeGuid] = rec = recordType.create({store: this});
+    }
+    return rec;
   },
   
   ////////////////////////////////////////////////////////////////////////////
@@ -1103,8 +1150,8 @@ SC.Store = SC.Object.extend(
       this.dataTypeMap = parentStore.dataTypeMap;
     } else {
       this.primaryKeyMap = {};
-      this.storeKeyMap = [];
-      this.recKeyTypeMap = [];
+      this.storeKeyMap = {};
+      this.recKeyTypeMap = {};
       this.dataTypeMap = {};
     }
   }

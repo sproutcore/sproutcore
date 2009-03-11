@@ -111,7 +111,25 @@ SC.PersistentStore = SC.Object.extend(
     return recordType;
   },
   
-  provideRecordsForQuery: function(query) {
+  provideLengthForQuery: function(query) {
+    if(this.parentStore) {
+      this.parentStore.provideLengthForQuery(query);
+    } else {
+      if(query) {
+        query.performQuery();
+      }
+    }
+  },
+
+  prepareQuery: function(query) {
+    if(this.parentStore) {
+      this.parentStore.prepareQuery(query);
+    } else {
+      console.log("prep persistent store for query");
+    }
+  },
+  
+  provideRecordsForQuery: function(query, range) {
     if(query) {
       query.performQuery();
     }

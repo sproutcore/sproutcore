@@ -17,36 +17,61 @@ require('core') ;
   @since SproutCore 1.0
 */
 
-SC.Query = SC.Object.extend( SC.SparseArray,
+SC.Query = SC.SparseArray.extend(
 /** @scope SC.Query.prototype */ {
 
   queryString: '',
   truthFunction: null,
   conditions: null,
   store: null,
-  delegate: null,
-  isDirty: NO,
-  shouldUpdateAutomatically: NO, 
+  // delegate: null,  
+  recordType: null,
+  needRecord: false,
   
+  length: 0,
   
-  parseQueryString: function(queryString) {
+  createTruthFunction: function(queryString) {
     this.set('queryString', queryString);
+    
+    /* Need parsing here from Thomas.. curently hacked. */
+    var hackComponents = [queryString.split('=')[0]];
+    
     var components = queryString.split('=');
-    this.truthFunction = function(dataHash, conditions) {
-        if(!dataHash) return NO;
-        // console.log(dataHash[components[0]]);
-        // console.log(components[0]);
-        // console.log(conditions[0]);
-        // console.log((dataHash[components[0]] == conditions[0]));
+    
+    var needRecord = this.willNeedRecord(hackComponents);
+    this.set('needRecord', needRecord);
 
-        return (dataHash[components[0]] == conditions[0]);
-    };
+    if(needRecord) {
+      this.truthFunction = function(rec, conditions) {
+          if(!rec) return NO;
+          return (rec.get(components[0]) == conditions[0]);
+      };
+    } else {
+      this.truthFunction = function(rec, conditions) {
+          if(!rec) return NO;
+          return (rec[components[0]] == conditions[0]);
+      };
+    }
   },
   
-  prepareQuery: function(queryString, conditions) {
-    this.parseQueryString(queryString);
+  willNeedRecord: function(components) {
+    
+    var rec = this.get('delegate').createCompRecord(this.get('recordType'));
+    var needRecord = NO;
+    for(var i=0, iLen=components.length; i<iLen; i++) {
+      if(rec[components[i]]) {
+        needRecord = YES;
+      }
+    }
+    console.log('needRecord: ' + needRecord);
+    return needRecord;
+  },
+
+  
+  parse: function(recordType, queryString, conditions) {
+    this.set('recordType', recordType);
+    this.createTruthFunction(queryString);
     this.loadConditions(conditions);
-    this.set('isDirty', YES);
   },
   
   loadConditions: function(conditions) {
@@ -56,28 +81,24 @@ SC.Query = SC.Object.extend( SC.SparseArray,
     this.set('conditions', conditions);
   },
   
-  performQuery: function(delegate) {
-    if(delegate) {
-      this.set('delegate', delegate);
-    }
-    var store = (this.get('delegate')) ? this.get('delegate') : this.get('store');
+  performQuery: function() {
+    var store = this.get('delegate');
 
     if(!store) return null;
     
     this.beginPropertyChanges();
     
     this._storeKeysForQuery = store.performQuery(this);
+    this.set('length', this._storeKeysForQuery.length);
 
-    this.set('isDirty', NO);
+  //  this.enumerableContentDidChange() ;
     this.endPropertyChanges();
- //   this._contentDidChange();
+    return this;
   },
 
-  isDirtyObserver: function() {
-    if(this.get('shouldUpdateAutomatically')) {
-      this.invokeOnce(this.performQuery);
-    }
-  }.observes('isDirty'),
+  recordsDidChange: function() {
+    this.invokeOnce(this.performQuery);
+  },
   
   objectAt: function(idx)
   {
@@ -87,21 +108,15 @@ SC.Query = SC.Object.extend( SC.SparseArray,
   },
 
   fetchContentAtIndex: function(idx) {
-    var store = (this.get('delegate')) ? this.get('delegate') : this.get('store');
+    var store = this.get('delegate') ;
     var storeKey = this._storeKeysForQuery[idx];
     var ret = null; 
     if(store && storeKey) {
-      ret = store._materializeRecord(storeKey);
-      this.provideContentAtIndex(idx, ret); 
+      ret = store.materializeRecord(storeKey);
     }
     return ret;
   },
-  
-  length: function( key, value ) {
-    var ret = this._storeKeysForQuery ;
-    return (ret && ret.get) ? (ret.length || 0) : 0 ;
-  }.property(),
-  
+    
   _storeKeysForQuery: null,
   
   init: function() {

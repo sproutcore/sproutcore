@@ -6,19 +6,27 @@
 
 var MyApp = {};
 
-
-
 MyApp = SC.Object.create();
 MyApp.store = SC.Store.create();
 //MyApp.persistentStore = SC.Server.create();
-MyApp.Author = SC.Record.extend();
+MyApp.Author = SC.Record.extend({
+  isCylon: function() {
+    switch(this.get('fullName')) {
+      case "Saul Tigh":
+      case "Galen Tyrol":
+        return YES;
+      default: 
+        return NO;
+    }
+  }.property()
+});
 
 
 MyApp.persistentStore = SC.PersistentStore.create({
   simulateResponseFromServer: function(guid) {
     var json = [];
     if(guid === '123') {
-      json = [ {"type": "Author", "guid": "123","fullName": "Mr. From Server", "bookTitle": "The Fear of the Spiders", "address":" London University, 142 Castro St, London, UK"}];
+      json = [ {"type": "Author", "guid": "123","fullName": "Galen Tyrol", "bookTitle": "The Fear of the Spiders", "address":" London University, 142 Castro St, London, UK"}];
     }
     if(guid === 51) {
       this.get('childStore').didCreateRecords([51], ['abcdefg'], [{guid: 'abcdefg', fullName: "John Locke", bookTitle: "A Letter Concerning Toleration"}]);
@@ -234,7 +242,7 @@ test("materialization: find record with command  MyApp.store.find('123', MyApp.A
   
   ok(record.get('guid') === '123', "record.get('guid') should === '123'");
   ok(record.get('status') === SC.RECORD_LOADED, "record.get('status') should === SC.RECORD_LOADED");
-  ok(record.get('fullName') === 'Mr. From Server', "record.get('fullName') should === 'Mr. From Server'");
+  ok(record.get('fullName') === 'Galen Tyrol', "record.get('fullName') should === 'Galen Tyrol'");
   ok(record._storeKey === 50, "record._storeKey should equal 50");
   ok(MyApp.store.revisions[50] === 0, "revision should equal 0");
 

@@ -39,13 +39,20 @@ sc_require('mixins/delegate_support') ;
   @extends SC.DelegateSupport
   @since SproutCore 1.0
 */
-SC.SparseArray = function(length) {
-  this.length = length || 0 ;
-  this.initObservable() ;
-  return this ;
-} ;
+// SC.SparseArray = function(length) {
+//   this.length = length || 0 ;
+//   this.initObservable() ;
+//   return this ;
+// } ;
 
-SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.DelegateSupport, {
+SC.SparseArray = SC.extend(SC.Object, SC.Observable, SC.Enumerable, SC.Array, SC.DelegateSupport, {
+  
+  length: 0,
+  
+  init: function() {
+    sc_super();
+    this.initObservable();
+  },
   
   indexOf: function(obj) {
     var content = this._sa_content ;
@@ -129,4 +136,4 @@ SC.SparseArray.prototype = SC.merge(SC.Observable, SC.Enumerable, SC.Array, SC.D
     
 }) ;
 
-SC.SparseArray.create = function(len) { return new SC.SparseArray(len); };
+// SC.SparseArray.create = function(len) { return new SC.SparseArray(len); };
