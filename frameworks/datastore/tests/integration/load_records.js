@@ -10,9 +10,33 @@ var MyApp = {};
 
 MyApp = SC.Object.create();
 MyApp.store = SC.Store.create();
-MyApp.persistentStore = SC.PersistentStore.create();
+//MyApp.persistentStore = SC.Server.create();
 MyApp.Author = SC.Record.extend();
-MyApp.persistentStore.addInMemoryStore(MyApp.store); //.set('parentStore', MyApp.persistentStore);
+
+
+MyApp.persistentStore = SC.PersistentStore.create({
+  simulateResponseFromServer: function(guid) {
+    var json = [];
+    if(guid === '123') {
+      json = [ {"type": "Author", "guid": "123","fullName": "Mr. From Server", "bookTitle": "The Fear of the Spiders", "address":" London University, 142 Castro St, London, UK"}];
+    }
+    if(guid === 51) {
+      this.get('childStore').didCreateRecords([51], ['abcdefg'], [{guid: 'abcdefg', fullName: "John Locke", bookTitle: "A Letter Concerning Toleration"}]);
+
+      return;
+    }
+    if(guid === 52) {
+      this.get('childStore').didCreateRecords([52], ['abc'], [{guid: 'abc', fullName: "Jim Locke", bookTitle: "A Letter Concerning Toleration Part Deux"}]);
+
+      return;
+    }
+    
+    this.get('childStore').loadRecords(json, MyApp.Author);
+    
+  }
+});
+
+MyApp.persistentStore.addStore(MyApp.store); //.set('parentStore', MyApp.persistentStore);
 
 module("SC.Store", {
   
@@ -45,8 +69,8 @@ test("MyApp.store sees that parentStore is persistent", function() {
   equals(YES, MyApp.store.get('parentStore').get('isPersistent')) ;
 });
 
-test("MyApp.peristentStore sees its inMemoryStore is MyApp.store", function() {
-  ok(MyApp.persistentStore.get('inMemoryStore') === MyApp.store, ".MyApp.persistentStore.get('inMemoryStore') should === MyApp.store" ) ;
+test("MyApp.peristentStore sees its childStore is MyApp.store", function() {
+  ok(MyApp.persistentStore.get('childStore') === MyApp.store, ".MyApp.persistentStore.get('childStore') should === MyApp.store" ) ;
 });
 
 test("loadRecords: call loadRecords(json0_9, MyApp.Author), should return array with 10 unique storeKeys 0-9", function() {

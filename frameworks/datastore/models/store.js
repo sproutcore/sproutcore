@@ -104,7 +104,7 @@ SC.Store = SC.Object.extend(
     @property
     @type {Array}
   */
-  storeKeyMap: [],
+  storeKeyMap: {},
 
   /**
     This hash contains the recordTypeKey per dataHash indexed by the storeKey.
@@ -986,25 +986,52 @@ SC.Store = SC.Object.extend(
     Given a filter and a recordType, retrieve matching records. 
     
     @param {String} query The query containing a query.
-    @param {Mixed} arguements The arguments for the query.
+    @param {Mixed} arguments The arguments for the query.
     
     @returns {Array} Returns an array of matched record instances.
   */
   findAll: function(queryString)
   {
-    if(!queryString) return [];
+    if(!queryString) return null;
     
+    var args = SC.$A(arguments);
+    queryString = args.shift();
+    
+    var query = null;
     if(this._queries[queryString]) 
     {
-      // Load from index.
-      console.log('existing query.');
+      query = this._queries[queryString];
     } else {
-      // Parse queryString to get index.
-      console.log('new query, need to parse.');
+      this._queries[queryString] = query = SC.Query.create({store: this});
     }
-
+    query.prepareQuery(queryString, args);
+    this.provideRecordsForQuery(query);
+    return query;
   },
   
+  provideRecordsForQuery: function(query) {
+    this.get('parentStore').provideRecordsForQuery(query);
+  },
+  
+  performQuery: function(query) {
+    var conditions = query.get('conditions') ;
+    var truthFunction = query.get('truthFunction');
+    var dataHashes = this.dataHashes;
+    var storeKeyMap = this.storeKeyMap;
+    var storeKeys = [];
+    
+    if(truthFunction === null) {
+      truthFunction = function() { return YES; };
+    }
+    
+    for(var storeKey in storeKeyMap) {
+      var dataHash = dataHashes[storeKey];
+      if(truthFunction(dataHash, conditions)) {
+        storeKeys.push(storeKey);
+      }
+    }
+    return storeKeys;
+  },
   
   ////////////////////////////////////////////////////////////////////////////
   //
