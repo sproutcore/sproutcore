@@ -23,6 +23,20 @@ SC.BENCHMARK_SOURCE_LIST_VIEW = YES ;
 SC.SourceListView = SC.ListView.extend(
 /** @scope SC.SourceListView.prototype */ {
   
+  /**
+    The view class to use when displaying item views in groups.
+    
+    If the groupBy property is not null, then the collection view will create
+    an instance of this view class with the item views that belong to the 
+    group as child nodes for each distinct group value it encounters.
+    
+    If groupBy is null, then this property will not be used.  The default 
+    class provided here simply displays the group value in an H1 tag.
+    
+    @property {SC.View}
+  */
+  exampleGroupView: SC.SourceListGroupView,
+  
   // ..........................................................
   // GROUP HEIGHT SUPPORT
   // 
@@ -196,6 +210,65 @@ SC.SourceListView = SC.ListView.extend(
         this.displayDidChange() ;
       }
     }
+  },
+  
+  /**
+    Expands the index into a range of content objects that have the same
+    group value.
+    
+    This method searches backward and forward through your content array for  
+    objects that have the same group value as the object at the index you 
+    pass in.  You can use this method when implementing layoutGroupView to 
+    determine the range of the content that belongs to the group.  
+    
+    Since this method simply searches through the content array, it is really
+    only suitable for content arrays of a few hundred items or less.  If you
+    expect to have a larger size of content array, then you may need to do
+    something custom in your data model to calculate this range in less time.
+    
+    @param {Number} contentIndex index of a content object
+    @returns {Range} a range of objects
+  */
+  groupRangeForContentIndex: function(contentIndex) {
+    // var content = SC.makeArray(this.get('content')) ; // assume an array
+    // var len = content.get('length') ;
+    // var groupBy = this.get('groupBy') ;
+    // if (!groupBy) return { start: 0, length: len } ;
+    // 
+    // var min = contentIndex, max = contentIndex ;
+    // var cur = content.objectAt(contentIndex) ;
+    // var groupValue = (cur) ? cur.get(groupBy) : null ;
+    // var curGroupValue ;
+    // 
+    // // find first item at bottom that does not match.  add one to get start
+    // while(--min >= 0) {
+    //   cur = content.objectAt(min) ;
+    //   curGroupValue = (cur) ? cur.get(groupBy) : null ;
+    //   if (curGroupValue !== groupValue) break ;
+    // }
+    // min++ ;
+    // 
+    // // find first item at top that does not match.  keep value to calc range
+    // while(++max < len) {
+    //   cur = content.objectAt(max) ;
+    //   curGroupValue = (cur) ? cur.get(groupBy) : null ;
+    //   if (curGroupValue !== groupValue) break ;
+    // }
+    // 
+    // return { start: min, length: max-min } ;
+  },
+  
+  /**
+    Determines the group value at the specified content index.  Returns null
+    if grouping is disabled.
+    
+    @param {Number} contentIndex
+    @returns {Object} group value.
+  */
+  groupValueAtContentIndex: function(contentIndex) {
+    // var groupBy = this.get('groupBy') ;
+    // var content = SC.makeArray(this.get('content')).objectAt(contentIndex) ;
+    // return (groupBy && content && content.get) ? content.get(groupBy) : null;
   },
   
   // emptyElement: '<div class="sc-source-list-view"></div>',

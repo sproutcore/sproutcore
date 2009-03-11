@@ -278,7 +278,7 @@ SC.ListView = SC.CollectionView.extend(
   
   insertionOrientation: SC.VERTICAL_ORIENTATION,
   
-  /** 
+  /** @private
     Overrides default CollectionView method to compute the minimim height
     of the list view.
   */
@@ -295,7 +295,7 @@ SC.ListView = SC.CollectionView.extend(
     return ret; 
   },
   
-  /**
+  /** @private
     Calculates the visible content range in the specified frame.  If 
     uniform rows are set, this will use some simple math.  Otherwise it will
     compute all row offsets leading up to the frame.
@@ -346,25 +346,15 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   /** @private */
-  // layoutItemView: function(itemView, contentIndex, firstLayout) {
-    adjustItemViewLayoutAtContentIndex: function(itemView, contentIndex, firstLayout) {
-    // console.log('%@.adjustItemViewLayoutAtContentIndex(%@, %@, %@)'.fmt(this, itemView, contentIndex, firstLayout));
-    
-    // use cached hash to reduce memory allocs
-    // var layout = this._list_cachedItemViewLayoutHash ;
-    // if (!layout) {
-    //   layout = this._list_cachedItemViewLayoutHash = { left: 0, right: 0 };
-    // }
-    var layout = { left: 0, right: 0 };
+  itemViewLayoutAtContentIndex: function(itemView, contentIndex) {
+    // console.log('%@.itemViewLayoutAtContentIndex(%@, %@)'.fmt(this, itemView, contentIndex));
+    var layout = { left: 0, right: 0 } ;
     
     // set top & height...
-    layout.top = this.offsetForRowAtContentIndex(contentIndex);
-    layout.height = this.heightForRowAtContentIndex(contentIndex);
-    // layout.zIndex = contentIndex;
+    layout.top = this.offsetForRowAtContentIndex(contentIndex) ;
+    layout.height = this.heightForRowAtContentIndex(contentIndex) ;
     
-    // console.log(layout) ;
-    if (firstLayout) itemView.adjust(layout) ;
-    // itemView.set('layout', layout) ; // TODO: why does this not work????
+    return layout ;
   },
   
   insertionPointClass: SC.View.extend({

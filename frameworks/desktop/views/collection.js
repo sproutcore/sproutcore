@@ -248,22 +248,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */  
   selectOnMouseDown: YES,
   
-  // /**
-  //   Property key to use to group objects.
-  //   
-  //   If groupBy is set to a non-null value, then the collection view will
-  //   automatically display item views in groups based on the value of the 
-  //   passed property key.  The exampleGroupView will be used to display the 
-  //   items in groups.
-  //   
-  //   If this property is set, you MUST ensure the items in the content array 
-  //   are already sorted by the group key.  Otherwise item view groups might 
-  //   appear more than once.
-  //   
-  //   @type String
-  // */
-  // groupBy: null,
-  
   /**
     The view class to use when creating new item views.
     
@@ -296,20 +280,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     content object.
   */
   contentExampleViewKey: null,
-  
-  // /**
-  //   The view class to use when displaying item views in groups.
-  //   
-  //   If the groupBy property is not null, then the collection view will create
-  //   an instance of this view class with the item views that belong to the 
-  //   group as child nodes for each distinct group value it encounters.
-  //   
-  //   If groupBy is null, then this property will not be used.  The default 
-  //   class provided here simply displays the group value in an H1 tag.
-  //   
-  //   @property {SC.View}
-  // */
-  // exampleGroupView: SC.View,
   
   /**
     Invoked when the user double clicks on an item (or single clicks of 
@@ -399,170 +369,57 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   */
   itemsPerRow: 1,
   
-  itemViewAtContentIndex: function(contentIndex) {
-    var range = this.get('nowShowingRange') ;
-    var itemView = this.createExampleView() ;
-    var key, content = SC.makeArray(this.get('content')) ;
-    var selection = SC.makeArray(this.get('selection')) ;
-    content = content.objectAt(contentIndex) ;
-    if (!content) return null ;
-    
-    var guids = this._itemViewGuids, guid;
-    if (!guids) this._itemViewGuids = guids = {};
-    
-    // use cache of item view guids to avoid creating temporary objects
-    guid = SC.guidFor(content);
-    if (!(key = guids[guid])) {
-      key = guids[guid] = SC.guidFor(this)+'_'+guid;
-    }
-    
-    itemView.set('content', content) ;
-    itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
-    itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
-    itemView.set('isSelected', (selection.indexOf(content) == -1) ? NO : YES) ;
-    this.adjustItemViewLayoutAtContentIndex(itemView, contentIndex, NO) ;
-    itemView.set('parentView', this) ;
-    return itemView ;
-  },
-  
-  /** 
-    Find the first content item view for the passed event.
-    
-    This method will go up the view chain, starting with the view that was the 
-    target of the passed event, looking for a child item.  This will become 
-    the view that is selected by the mouse event.
-    
-    This method only works for mouseDown & mouseUp events.  mouseMoved events 
-    do not have a target.
-    
-    @param {SC.Event} evt An event
-    @returns {SC.View} the item view or null
-  */
-  itemViewForEvent: function(evt) {
-    var responder = this.getPath('pane.rootResponder') ;
-    
-    if (!responder) return null ; // fast path
-    
-    // need to materialize an itemView under the mouse if possible
-    var baseGuid = SC.guidFor(this) ;
-    var baseGuidLen = baseGuid.length ;
-    var element = evt.target ;
-    var elementId = element.id.slice(0, baseGuidLen) ;
-    while (elementId !== baseGuid) {
-      element = element.parentNode ;
-      elementId = element.id.slice(0, baseGuidLen) ;
-    }
-    
-    if (element.id.length === baseGuidLen) {
-      return null ; // we found ourself, so we're not over a child view
-    }
-    
-    // okay, found the DOM node for the view, go ahead and create it
-    // first, find the content...
-    var contentGuid = element.id.slice(baseGuidLen+1) ;
-    var nowShowingRange = this.get('nowShowingRange') ;
-    var content = SC.makeArray(this.get('content')) ;
-    var idx = SC.minRange(nowShowingRange) ;
-    var max = SC.maxRange(nowShowingRange) ;
-    var c = content.objectAt(idx) ;
-    while (SC.guidFor(c) !== contentGuid) {
-      c = content.objectAt(idx++) ;
-    }
-    
-    // then create the view for that content
-    var itemView = this.createExampleView() ;
-    var selection = SC.makeArray(this.get('selection'));
-    itemView.set('content', c) ;
-    itemView.layerId = element.id ; // cannot use .set here, layerId is RO
-    SC.View.views[itemView.layerId] = itemView ; // register for event handling
-    itemView.set('isVisible', SC.valueInRange(idx, nowShowingRange)) ;
-    itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
-    this.adjustItemViewLayoutAtContentIndex(itemView, idx, NO) ;
-    itemView.set('parentView', this) ;
-    
-    // prevent normal, non-materialized view behavior
-    itemView.layerLocationNeedsUpdate = NO ;
-    itemView.childViewsNeedLayout = NO ;
-    itemView.layerNeedsUpdate = NO ;
-    
-    // NOTE: still have to search for view, because itemView could contain
-    // nested views, and the mouseDown should go to them first...
-    var view = responder.targetViewForEvent(evt) ;
-    if (!view) return null ; // workaround for error on IE8, see Ticket #169
-    
-    // work up the view hierarchy to find a match...
-    do {
-      // item clicked was the ContainerView itself... i.e. the user clicked 
-      // outside the child items nothing to return...
-      if ( view == this ) return null ;
-      
-      // sweet!... the view is not only in the collection, but it says we can 
-      // hit it. hit it and quit it... 
-      if (!view.hitTest || view.hitTest(evt)) return view ;
-    } while (view = view.get('parentView'));
-    
-    // nothing was found... 
-    return null;
-  },
+  // ..........................................................
+  // SUBCLASS METHODS
+  // 
   
   /**
-    Expands the index into a range of content objects that have the same
-    group value.
+    Override to return the computed layout dimensions of the collection view.
+    You can omit any dimensions you don't care about setting in your 
+    computed value.
     
-    This method searches backward and forward through your content array for  
-    objects that have the same group value as the object at the index you 
-    pass in.  You can use this method when implementing layoutGroupView to 
-    determine the range of the content that belongs to the group.  
+    This layout is automatically applied whenever the content changes.
     
-    Since this method simply searches through the content array, it is really
-    only suitable for content arrays of a few hundred items or less.  If you
-    expect to have a larger size of content array, then you may need to do
-    something custom in your data model to calculate this range in less time.
+    If you don't care about computing the layout at all, you can return null.
     
-    @param {Number} contentIndex index of a content object
-    @returns {Range} a range of objects
+    @returns {Hash} layout properties
   */
-  groupRangeForContentIndex: function(contentIndex) {
-    // var content = SC.makeArray(this.get('content')) ; // assume an array
-    // var len = content.get('length') ;
-    // var groupBy = this.get('groupBy') ;
-    // if (!groupBy) return { start: 0, length: len } ;
-    // 
-    // var min = contentIndex, max = contentIndex ;
-    // var cur = content.objectAt(contentIndex) ;
-    // var groupValue = (cur) ? cur.get(groupBy) : null ;
-    // var curGroupValue ;
-    // 
-    // // find first item at bottom that does not match.  add one to get start
-    // while(--min >= 0) {
-    //   cur = content.objectAt(min) ;
-    //   curGroupValue = (cur) ? cur.get(groupBy) : null ;
-    //   if (curGroupValue !== groupValue) break ;
-    // }
-    // min++ ;
-    // 
-    // // find first item at top that does not match.  keep value to calc range
-    // while(++max < len) {
-    //   cur = content.objectAt(max) ;
-    //   curGroupValue = (cur) ? cur.get(groupBy) : null ;
-    //   if (curGroupValue !== groupValue) break ;
-    // }
-    // 
-    // return { start: min, length: max-min } ;
-  },
+  computeLayout: function() { return null; },
   
   /**
-    Determines the group value at the specified content index.  Returns null
-    if grouping is disabled.
+    Override to return the range of items to render for a given frame.
     
-    @param {Number} contentIndex
-    @returns {Object} group value.
+    You can override this method to implement support for incremenetal 
+    rendering.  The range you return here will be used to limit the number of 
+    actual item views that are created by the collection view.
+    
+    If you do not want to support incremental rendering, just return null.
+    
+    @param {Rect} frame The frame you should use to determine the range.
+    @returns {Range} A hash that indicates the range of content objects to 
+      render.  ({ start: X, length: Y }) 
+  */  
+  contentRangeInFrame: function(frame) { return null; },
+  
+  /**
+    Override to adjust the position of the itemView's layout property at the
+    specified content index.
+    
+    Note: if useAdjust is NO, you should set the view's layout property in 
+    such a way that no change notifications are triggered. For example,
+    
+    {{{
+      var newLayout = this.myComputeLayoutForIndex(contentIndex) ;
+      if (useAdjust) itemView.adjust(newLayout) ;
+      else itemView.layout = newLayout ; // DON'T TRIGGER OBSERVERS!!!
+    }}}
+    
+    @param {SC.View} itemView the item view to adjust
+    @param {Number} contentIndex the index of content beind rendered by
+      itemView
+    @returns {Rect} a layout rectangle
   */
-  groupValueAtContentIndex: function(contentIndex) {
-    // var groupBy = this.get('groupBy') ;
-    // var content = SC.makeArray(this.get('content')).objectAt(contentIndex) ;
-    // return (groupBy && content && content.get) ? content.get(groupBy) : null;
-  },
+  itemViewLayoutAtContentIndex: function(itemView, contentIndex) {},
   
   // ..........................................................
   // CONTENT CHANGES
@@ -728,41 +585,119 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
   }.observes('nowShowingRange'),
   
-  // ..........................................................
-  // SUBCLASS METHODS
-  // 
-  
-  /**
-    Override to return the computed layout dimensions of the collection view.
-    You can omit any dimensions you don't care about setting in your 
-    computed value.
-    
-    This layout is automatically applied whenever the content changes.
-    
-    If you don't care about computing the layout at all, you can return null.
-    
-    @returns {Hash} layout properties
-  */
-  computeLayout: function() { return null; },
-  
-  /**
-    Override to return the range of items to render for a given frame.
-    
-    You can override this method to implement support for incremenetal 
-    rendering.  The range you return here will be used to limit the number of 
-    actual item views that are created by the collection view.
-    
-    If you do not want to support incremental rendering, just return null.
-    
-    @param {Rect} frame The frame you should use to determine the range.
-    @returns {Range} A hash that indicates the range of content objects to 
-      render.  ({ start: X, length: Y }) 
-  */  
-  contentRangeInFrame: function(frame) { return null; },
-  
   // ......................................
-  // GENERATING CHILDREN
+  // RENDERING
   //
+  
+  itemViewAtContentIndex: function(contentIndex) {
+    var range = this.get('nowShowingRange') ;
+    var itemView = this.createExampleView() ;
+    var key, content = SC.makeArray(this.get('content')) ;
+    var selection = SC.makeArray(this.get('selection')) ;
+    content = content.objectAt(contentIndex) ;
+    if (!content) return null ;
+    
+    var guids = this._itemViewGuids, guid;
+    if (!guids) this._itemViewGuids = guids = {};
+    
+    // use cache of item view guids to avoid creating temporary objects
+    guid = SC.guidFor(content);
+    if (!(key = guids[guid])) {
+      key = guids[guid] = SC.guidFor(this)+'_'+guid;
+    }
+    
+    itemView.set('content', content) ;
+    itemView.layerId = key ; // NOTE: cannot use .set here, layerId is RO
+    itemView.set('isVisible', SC.valueInRange(contentIndex, range)) ;
+    itemView.set('isSelected', (selection.indexOf(content) == -1) ? NO : YES) ;
+    
+    // NOTE: *must* set the layout silently...
+    itemView.layout = this.itemViewLayoutAtContentIndex(itemView, contentIndex) ;
+    itemView.set('parentView', this) ;
+    return itemView ;
+  },
+  
+  /** 
+    Find the first content item view for the passed event.
+    
+    This method will go up the view chain, starting with the view that was the 
+    target of the passed event, looking for a child item.  This will become 
+    the view that is selected by the mouse event.
+    
+    This method only works for mouseDown & mouseUp events.  mouseMoved events 
+    do not have a target.
+    
+    @param {SC.Event} evt An event
+    @returns {SC.View} the item view or null
+  */
+  itemViewForEvent: function(evt) {
+    var responder = this.getPath('pane.rootResponder') ;
+    
+    if (!responder) return null ; // fast path
+    
+    // need to materialize an itemView under the mouse if possible
+    var baseGuid = SC.guidFor(this) ;
+    var baseGuidLen = baseGuid.length ;
+    var element = evt.target ;
+    var elementId = element.id.slice(0, baseGuidLen) ;
+    while (elementId !== baseGuid) {
+      element = element.parentNode ;
+      elementId = element.id.slice(0, baseGuidLen) ;
+    }
+    
+    if (element.id.length === baseGuidLen) {
+      return null ; // we found ourself, so we're not over a child view
+    }
+    
+    // okay, found the DOM node for the view, go ahead and create it
+    // first, find the content...
+    var contentGuid = element.id.slice(baseGuidLen+1) ;
+    var nowShowingRange = this.get('nowShowingRange') ;
+    var content = SC.makeArray(this.get('content')) ;
+    var idx = SC.minRange(nowShowingRange) ;
+    var max = SC.maxRange(nowShowingRange) ;
+    var c = content.objectAt(idx) ;
+    while (SC.guidFor(c) !== contentGuid) {
+      c = content.objectAt(idx++) ;
+    }
+    
+    // then create the view for that content
+    var itemView = this.createExampleView() ;
+    var selection = SC.makeArray(this.get('selection'));
+    itemView.set('content', c) ;
+    itemView.layerId = element.id ; // cannot use .set here, layerId is RO
+    SC.View.views[itemView.layerId] = itemView ; // register for event handling
+    itemView.set('isVisible', SC.valueInRange(idx, nowShowingRange)) ;
+    itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+    
+    // NOTE: *must* set the layout silently...
+    itemView.layout = this.itemViewLayoutAtContentIndex(itemView, idx) ;
+    itemView.set('parentView', this) ;
+    
+    // prevent normal, non-materialized view behavior
+    itemView.layerLocationNeedsUpdate = NO ;
+    itemView.childViewsNeedLayout = NO ;
+    itemView.layerNeedsUpdate = NO ;
+    
+    // NOTE: still have to search for view, because itemView could contain
+    // nested views, and the mouseDown should go to them first...
+    var view = responder.targetViewForEvent(evt) ;
+    if (!view) return null ; // workaround for error on IE8, see Ticket #169
+    
+    // work up the view hierarchy to find a match...
+    do {
+      // item clicked was the ContainerView itself... i.e. the user clicked 
+      // outside the child items nothing to return...
+      if ( view == this ) return null ;
+      
+      // sweet!... the view is not only in the collection, but it says we can 
+      // hit it. hit it and quit it... 
+      if (!view.hitTest || view.hitTest(evt)) return view ;
+    } while (view = view.get('parentView'));
+    
+    // nothing was found... 
+    return null;
+  },
   
   createExampleView: function(content) {
     var exampleViewKey = this.get('contentExampleViewKey') ;
@@ -947,7 +882,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       itemView.layerId = key ; // cannot use .set, layerId is RO
       if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
       childSet[idx] = key ;
-      this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
+      itemView.adjust(this.itemViewLayoutAtContentIndex(itemView, idx)) ;
       context = context.begin(itemView.get('tagName')) ;
       itemView.prepareContext(context, YES) ;
       context = context.end() ;
@@ -968,7 +903,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         itemView.layerId = key ; // cannot use .set, layerId is RO
         if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
         childSet[idx] = key ;
-        this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
+        itemView.adjust(this.itemViewLayoutAtContentIndex(itemView, idx)) ;
         context = context.begin(itemView.get('tagName')) ;
         itemView.prepareContext(context, YES) ;
         context = context.end() ;
