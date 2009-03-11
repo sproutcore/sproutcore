@@ -8,9 +8,9 @@
 /*global module test htmlbody ok equals same stop start */
 
 (function() {
-  var appleURL='http://weblogs.baltimoresun.com/business/consuminginterests/blog/apple-logo1.jpg';
-  var imageView=SC.ImageView.design({value:appleURL, layout: {height:400, width:320,top:10,left:10}});
-  var imageView1=SC.ImageView.design({value:appleURL, layout: {height:50, width:400,top:10,left:10}});	
+  var scURL='http://www.sproutcore.com/wp-content/themes/sproutcore/images/download.png';
+  var imageView=SC.ImageView.design({value:scURL, layout: {height:400, width:320,top:10,left:10}});
+  var imageView1=SC.ImageView.design({value:scURL, layout: {height:50, width:400,top:10,left:10}});	
   var pane = SC.ControlTestPane.design({ height: 100 })  	
   .add("basic horizontal", SC.ScrollerView, {
     layoutDirection: SC.LAYOUT_HORIZONTAL

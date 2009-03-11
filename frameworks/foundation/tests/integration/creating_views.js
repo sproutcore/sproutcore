@@ -70,7 +70,6 @@ test("layer creation and management", function() {
   ok(!pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be NO');
   ok(!cv1.get('isVisibleInWindow'), 'cv1.isVisibleInWindow should be NO');
   ok(!cv2.get('isVisibleInWindow'), 'cv2.isVisibleInWindow should be NO');
-  debugger;
   // -----
   // OK, let's add this baby to the window
   SC.RunLoop.begin();

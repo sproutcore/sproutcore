@@ -148,7 +148,7 @@ module("Custom Binding", {
   teardown: function() { 
     delete Bon1 ;
     delete bon2 ;
-	delete TestNamespace;
+	//delete TestNamespace;
   }
 });
 
@@ -168,6 +168,7 @@ test("Binding value1 such that it will recieve only single values", function() {
 });
 
 test("Single binding using notEmpty function.", function() {
+	//debugger;
 	bond = Bon1.create ({
 	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null,'(EMPTY)')
 	});

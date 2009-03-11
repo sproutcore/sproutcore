@@ -190,7 +190,7 @@ SC.RadioView = SC.FieldView.extend(
   
   render: function(context, firstTime) {
     // if necessary, regenerate the radio buttons
-    var item, idx, selectionState, items = this.get('displayItems'), 
+    var item, idx, icon, name, itemsLength, url, className, disabled, labelText, selectionState, items = this.get('displayItems'), 
       value = this.get('value'), isArray = SC.isArray(value);
     
     context.addClass(this.get('layoutDirection'));
@@ -203,22 +203,23 @@ SC.RadioView = SC.FieldView.extend(
     
     if (firstTime) {
       // generate tags from this.
-      var name = SC.guidFor(this); // name for this group
-      for(idx=0;idx<items.length;idx++) {
-        var item = items[idx];
+      name = SC.guidFor(this); // name for this group
+      itemsLength = items.length;
+      for(idx=0;idx<itemsLength;idx++) {
+        item = items[idx];
         
         // get the icon from the item, if one exists...
-        var icon = item[3];
+        icon = item[3];
         if (icon) {
-          var url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
-          var className = (url === icon) ? '' : icon ;
+          url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+          className = (url === icon) ? '' : icon ;
           icon = '<img src="%@" class="icon %@" alt="" />'.fmt(url, className);
         } else icon = '';
         
-        var selectionStateClassNames = this._getSelectionState(item, value, isArray, false);
-        var disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled" ' : '';
+        selectionStateClassNames = this._getSelectionState(item, value, isArray, false);
+        disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled" ' : '';
         
-        var labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
+        labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
         
         // push all string instead of doing concatenation (IE optimization)
         context.push('<label class="sc-radio-button ');

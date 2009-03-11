@@ -8,8 +8,8 @@
 /*global module test htmlbody ok equals same stop start */
 
 (function() {
-    var appleURL='http://weblogs.baltimoresun.com/business/consuminginterests/blog/apple-logo1.jpg';
-    var iv=SC.ImageView.design({value: appleURL, layout: {height:400, width:400}});
+    var scURL='http://www.sproutcore.com/wp-content/themes/sproutcore/images/download.png';
+    var iv=SC.ImageView.design({value: scURL, layout: {height:400, width:400}});
     var pane = SC.ControlTestPane.design({ height: 100 })
     .add("basic", SC.ScrollView, {
   

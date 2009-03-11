@@ -9,10 +9,11 @@
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
+(function() {
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
 
-var pane = SC.ControlTestPane.design()
-  .add("basic", SC.ButtonView, { 
+  var pane = SC.ControlTestPane.design()
+  .add("basic", SC.ButtonView, {  
   })
   
   .add("title", SC.ButtonView, { 
@@ -137,4 +138,4 @@ test("Check that the title is set or not and if it is in the appropriate element
 
 });
 
-
+})();

@@ -5,8 +5,6 @@
 .sc-theme .sc-progress-view {
 	border: 1px solid #625560;
 	background-color: #cfc8d0;
-	-webkit-border-radius: 2px;
-	border-radius: 2px;
 }
 
 .sc-theme .sc-progress-view.disabled {
@@ -15,19 +13,11 @@
 }
 
 .sc-theme .sc-progress-view .sc-inner {
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	bottom: 0px;
  	background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1130px;
 	border-right: 1px solid #625560;
 }
 
 .sc-theme .sc-progress-view.sc-indeterminate .sc-inner {
  	background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1470px;
- 	border: 0;
 }
 
-.sc-theme .sc-progress-view.sc-empty .sc-inner {
-	border: none;
-}

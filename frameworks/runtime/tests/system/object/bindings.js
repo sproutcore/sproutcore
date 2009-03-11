@@ -31,7 +31,7 @@ module("bind() method", {
     delete testObject ; 
     delete fromObject ;
     delete extraObject ;
-    delete TestNamespace ;
+  //  delete TestNamespace ;
   }
   
 });
@@ -126,7 +126,7 @@ module("fooBinding method", {
     delete TestObject ;
     delete fromObject ;
     delete extraObject ;
-    delete TestNamespace ;
+  //  delete TestNamespace ;
   }
   
 });
@@ -228,7 +228,7 @@ module("fooBindingDefault: SC.Binding.Bool (old style)", {
   teardown: function() { 
     delete TestObject ;
     delete fromObject ;
-    delete TestNamespace ;
+ //   delete TestNamespace ;
   }
   
 });
@@ -295,7 +295,7 @@ module("fooBindingDefault: SC.Binding.bool() (new style)", {
   teardown: function() { 
     delete TestObject ;
     delete fromObject ;
-    delete TestNamespace ;
+   // delete TestNamespace ;
   }
   
 });

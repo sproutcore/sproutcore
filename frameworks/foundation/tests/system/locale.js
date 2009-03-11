@@ -78,7 +78,6 @@ test("Locale.toString() : Should retrun the current language set with the guid v
 	
 	//Result should retrun the chinese object
 	equals(SC.Locale.locales.mx.currentLocale.isObject, true) ;
-	
 	//Result should convert the chinese object into a string
 	equals(SC.Locale.locales.mx.toString(), 'SC.Locale[mx]') ;
 });
@@ -121,10 +120,9 @@ test("Locale.extend() : Should make sure important properties of Locale object a
 	
 	//hash of new languages
 	testLocales = { test: 'te', newtest: 'nt'};
-
 	//Added the new languages to the existing list of locales through the new locale object
 	SC.Locale.locales.mn.addStrings(testLocales);
-	debugger;
+	
 	//Result should be true as the new lacales added to the list of default locales
 	equals(SC.Locale.locales.mn.options().strings.test,'te') ;
 });

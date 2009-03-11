@@ -206,7 +206,7 @@ SC.Locale.mixin(/** @scope SC.Locale */ {
     } else strings = this.prototype.strings = {} ;
     
     // add strings hash
-    if (stringsHash) SC.mixin(strings, stringsHash) ;
+    if (stringsHash)  this.prototype.strings = SC.mixin(strings, stringsHash) ;
     this.prototype.hasStrings = YES ;
     return this;
   },

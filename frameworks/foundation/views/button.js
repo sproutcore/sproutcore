@@ -185,6 +185,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       .setClass(classes).addClass(this.get('theme'));
 
     // render inner html 
+    debugger;
     context = context.begin('span')
       .addClass('sc-button-inner').addStyle('minWidth', this.get('titleMinWidth'));
       this.renderTitle(context, firstTime) ; // from button mixin
