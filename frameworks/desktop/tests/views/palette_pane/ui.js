@@ -7,4 +7,30 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.PalettePane UI");
+module("SC.PalettePane UI");
+
+var pane ;
+
+test("verify palette pane content container is visible at correct location with right size", function() { 
+  pane = SC.PalettePane.create({
+	  layout: { width: 402, height: 202, right: 0, top: 0 },
+    contentView: SC.View.extend({
+      layout: { width: 400, height: 200, right: 0, top: 0 }
+    })
+  });
+  pane.append();
+
+	ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
+	ok(pane.$().hasClass('sc-palette-pane'), 'pane should have sc-palette-pane class');
+	ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
+	ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
+	
+  var ret = pane.childViews[0].layoutStyle();
+
+	equals(ret.top, '0px', 'pane.div should be initiated at default position top');
+	equals(ret.right, '0px', 'pane.div should be initiated at default position right');
+	equals(ret.width, '400px', 'pane.div should have width 400px');
+	equals(ret.height, '200px', 'pane.div should have height 200px');
+
+  //pane.remove();
+}) ;
