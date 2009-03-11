@@ -11,31 +11,55 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 var pane = SC.ControlTestPane.design()
 
-  .add("basic", SC.ProgressView, {
+  .add("progress basic", SC.ProgressView, {
     value: 25,
     minimum: 0,
     maximum: 100
   })
-  .add("disabled", SC.ProgressView, {
+  .add("progress disabled", SC.ProgressView, {
     value: 25,
     minimum: 0,
     maximum: 100,
     isEnabled: NO
   })
-  .add("basic value 0", SC.ProgressView, {
+  .add("progress basic value 0", SC.ProgressView, {
     value: 0,
     minimum: 0,
     maximum: 100
   })
-  .add("basic value 100", SC.ProgressView, {
+  .add("progress basic value 100", SC.ProgressView, {
     value: 100,
     minimum: 0,
     maximum: 100
   })
-  .add("basic max 50", SC.ProgressView, {
+  .add("progress basic max 50", SC.ProgressView, {
     value: 25,
     minimum: 0,
     maximum: 50
+  })
+  
+  // Slider View UI
+  .add("slider basic", SC.SliderView, {
+    value: 50, 
+    minimum: 0, 
+    maximum: 100
+  })
+  .add("slider disabled", SC.SliderView, {
+    value: 50, 
+    minimum: 0, 
+    maximum: 100,
+    isEnabled: NO
+  })
+  .add("slider value 100", SC.SliderView, {
+    value: 100, 
+    minimum: 0, 
+    maximum: 100
+  })
+  .add("slider basic step 20", SC.SliderView, {
+    value: 50, 
+    minimum: 0, 
+    maximum: 100,
+    step: 20
   });
 
 pane.show(); // add a test to show the test pane
@@ -47,7 +71,7 @@ module("SC.ProgressView UI", pane.standardSetup());
 
 test("basic", function() {
   
-  var view = pane.view('basic');
+  var view = pane.view('progress basic');
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
@@ -55,46 +79,51 @@ test("basic", function() {
   ok(view.$('.sc-outer-tail'), 'should have sc-outer-tail class');
   ok(view.$('.sc-inner-head'), 'should have sc-inner-head class');
   ok(view.$('.sc-inner-tail'), 'should have sc-inner-tail class');
+  equals(view.$('.sc-inner').css("width"), "25%", 'width should be 25%');
   equals(view.$('.sc-inner').width(), 79, 'pixel width should be 79');
   
 });
 
 test("disabled", function() {
   
-  var view = pane.view('disabled');
+  var view = pane.view('progress disabled');
   
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
+  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width should be 0');
   
 });
 
 test("basic value 0", function() {
   
-  var view = pane.view('basic value 0');
+  var view = pane.view('progress basic value 0');
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
+  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width should be 0');
   
 });
 
 test("basic value 100", function() {
   
-  var view = pane.view('basic value 100');
+  var view = pane.view('progress basic value 100');
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
+  equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
   equals(view.$('.sc-inner').width(), 316, 'pixel width should be 316');
   
 });
 
 test("basic max 50", function() {
   
-  var view = pane.view('basic max 50');
+  var view = pane.view('progress basic max 50');
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
+  equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
   equals(view.$('.sc-inner').width(), 158, 'pixel width should be 158');
   
 });
@@ -104,53 +133,58 @@ test("basic max 50", function() {
 //
 
 test("changing value from empty -> value", function() {
-  var view = pane.view('basic value 0');
+  var view = pane.view('progress basic value 0');
   
   equals(view.$('.sc-inner').width(), 0, 'precon - pixel width should be 0');
   SC.RunLoop.begin();
   view.set('value', 50);
   SC.RunLoop.end();
+  equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
   equals(view.$('.sc-inner').width(), 158, 'pixel width should be 158');
 });
 
 test("changing value from full -> empty", function() {
-  var view = pane.view('basic value 100');
+  var view = pane.view('progress basic value 100');
   
   equals(view.$('.sc-inner').width(), 316, 'precon - pixel width should be 316');
   SC.RunLoop.begin();
   view.set('value', 0);
   SC.RunLoop.end();
+  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width should be 0');
 });
 
 
 test("changing value from full -> negative number", function() {
-  var view = pane.view('basic value 100');
+  var view = pane.view('progress basic value 100');
   
   equals(view.$('.sc-inner').width(), 316, 'precon - pixel width should be 316');
   SC.RunLoop.begin();
   view.set('value', -10);
   SC.RunLoop.end();
+  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width should be 0');
 });
 
 test("changing value to over maximum", function() {
-  var view = pane.view('basic');
+  var view = pane.view('progress basic');
   
   equals(view.$('.sc-inner').width(), 79, 'precon - pixel width should be 79');
   SC.RunLoop.begin();
   view.set('value', 110);
   SC.RunLoop.end();
+  equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
   equals(view.$('.sc-inner').width(), 316, 'pixel width should be 316');
 });
 
 test("changing value to a string", function() {
-  var view = pane.view('basic');
+  var view = pane.view('progress basic');
   
   equals(view.$('.sc-inner').width(), 79, 'precon - pixel width should be 79');
   SC.RunLoop.begin();
   view.set('value', 'aString');
   SC.RunLoop.end();
+  equals(view.$('.sc-inner').css("width"), "0%", 'width should be 0%');
   equals(view.$('.sc-inner').width(), 0, 'pixel width should be 0');
 });
 
@@ -161,3 +195,46 @@ test("changing value to a string", function() {
 
 module("SC.SliderView UI");
 
+test("basic", function() {
+  
+  var view = pane.view('slider basic');
+  
+  ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
+  ok(view.$('.sc-inner'), 'should have sc-inner class');
+  ok(view.$('.sc-handle'), 'should have sc-handle class');
+  equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
+
+});
+
+test("disabled", function() {
+  
+  var view = pane.view('slider disabled');
+  
+  ok(view.$().hasClass('disabled'), 'should have disabled class');
+  ok(view.$('.sc-inner'), 'should have sc-inner class');
+  ok(view.$('.sc-handle'), 'should have sc-handle class');
+  equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
+  
+});
+
+test("basic value 100", function() {
+  
+  var view = pane.view('slider value 100');
+  
+  ok(!view.$().hasClass('disabled'), 'should have disabled class');
+  ok(view.$('.sc-inner'), 'should have sc-inner class');
+  ok(view.$('.sc-handle'), 'should have sc-handle class');
+  equals(view.$('.sc-handle').css('left'), '100%', 'left of sc-handle should be 100%');
+  
+});
+
+test("basic step 20", function() {
+  
+  var view = pane.view('slider basic step 20');
+  
+  ok(!view.$().hasClass('disabled'), 'should have disabled class');
+  ok(view.$('.sc-inner'), 'should have sc-inner class');
+  ok(view.$('.sc-handle'), 'should have sc-handle class');
+  equals(view.$('.sc-handle').css('left'), '60%', 'left of sc-handle should be 60%');
+  
+});

@@ -35,7 +35,6 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   value: 0.50,
   valueBindingDefault: SC.Binding.single().notEmpty(),
   
-  
   /**
     The minimum value of the progress.
   */ 
@@ -129,7 +128,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   
   render: function(context, firstTime) {
     
-    var isIndeterminate = this.get('isIndeterminate') ;
+    var isIndeterminate = this.get('isIndeterminate');
     var isRunning = this.get('isRunning');
     var isEnabled = this.get('isEnabled');
   
@@ -142,18 +141,18 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     } else if (isIndeterminate) {
       value = "120%";
     } else {
-      var minimum = this.get('minimum') || 0.0 ;
-      var maximum = this.get('maximum') || 1.0 ;
-      value = this.get('value') || 0.0 ;
-      value = (value - minimum) / (maximum - minimum) ; 
-      if (value > 1.0) value = 1.0 ;
+      var minimum = this.get('minimum') || 0.0;
+      var maximum = this.get('maximum') || 1.0;
+      value = this.get('value') || 0.0;
+      value = (value - minimum) / (maximum - minimum);
+      if (value > 1.0) value = 1.0;
 
       if(isNaN(value)) value = 0.0;
       // cannot be smaller then minimum
       if(value<minimum) value = 0.0;
       // cannot be larger then maximum
       if(value>maximum) value = 1.0;
-      value = (value * 100) + "%" ;
+      value = (value * 100) + "%";
     }
 
     var classNames = {
