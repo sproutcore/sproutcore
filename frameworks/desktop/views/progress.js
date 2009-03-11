@@ -10,12 +10,23 @@
 
   Displays a progress bar.  You can display both a defined and an 
   indeterminate progressbar.  The progress bar itself is designed to be styled
-  using CSS classes. with the following structure:
+  using CSS classes with the following structure:
   
   <div class="sc-progress-view"><div class="inner"></div></div>
   
   The outer can form the boundary of the bar while the inner will be adjusted 
   to fit the percentage of the progress.
+  
+  Creating a ProgressView accepts a number of properties, for example:
+  {
+    value: 50, 
+    minimum: 0, 
+    maximum: 100,
+    isIndeterminate: NO,
+    isEnabled: YES
+  }
+  
+  Default isEnabled value is YES.
 
   @extends SC.View
   @extends SC.Control
