@@ -95,8 +95,7 @@ SC.SourceListView = SC.ListView.extend(
       if (this.get('hasUniformGroupHeights')) {
         var groupHeight = this.get('groupHeight') ;
         
-        var content = this.get('content') ;
-        var groups = content.get('groups') ;
+        var groups = this.getPath('content.groups') || [] ;
         if (groups.get('length') > 0) {
           var group, itemRange, len = groups.get('length') ;
           for (var idx=0; idx<len; ++idx) {
@@ -154,6 +153,48 @@ SC.SourceListView = SC.ListView.extend(
       // console.log('index %@ is offset %@'.fmt(index, ret)) ;
       
       return ret ;
+    }
+  },
+  
+  /**
+    An array containing the contracted groups, if any, by ground index for the
+    current content array.
+    
+    @readOnly
+    @property
+    @type SC.Array
+  */
+  contractedGroups: function() {
+    if (val) throw "The SC.SourceListView contractedGroups property is read-only." ;
+    
+    var ary = this._contractedGroups ;
+    if (!ary) ary = this._contractedGroups = [] ;
+    
+    // All groups default to "expanded", so an empty array reflects this.
+    return ary ;
+  }.property(),
+  
+  /** @private
+    Called by groups when their expansion property changes.
+  */
+  groupDidChangeExpansion: function(group, isExpanded) {
+    if (!group) return ;
+    
+    var groups = this.getPath('content.groups') || [] ;
+    var groupIndex = groups.indexOf(group) ;
+    
+    if (groupIndex >= 0) {
+      var ary = this._contractedGroups ;
+      if (!ary) ary = this._contractedGroups = [] ;
+      
+      // only change our display if isExpanded changes
+      if (isExpanded && ary[groupIndex]) {
+        delete ary[groupIndex] ; // saves memory vs. storing NO
+        this.displayDidChange() ;
+      } else if (!ary[groupIndex]) {
+        ary[groupIndex] = YES ;
+        this.displayDidChange() ;
+      }
     }
   },
   

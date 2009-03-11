@@ -102,11 +102,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /**
     The groups, if any, for the current content array.
     
+    @readOnly
     @property
     @type SC.Array
   */
   groups: function(key, val) {
-    if (val) throw "SC.ArrayController groups are read-only." ;
+    if (val) throw "The SC.ArrayController groups property is read-only." ;
     
     var groupByKey = this.get('groupByKey') ;
     if (!groupByKey) return SC.EMPTY_ARRAY ; // no groups

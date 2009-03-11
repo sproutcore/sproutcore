@@ -10,7 +10,9 @@ sc_require('views/list_item');
 
 SC.BENCHMARK_UPDATE_CHILDREN = YES ;
 SC.BENCHMARK_RENDER = YES ;
+SC.ENABLE_COLLECTION_PARTIAL_RENDER = NO ;
 SC.DEBUG_PARTIAL_RENDER = NO ;
+SC.SANITY_CHECK_PARTIAL_RENDER = NO ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /**
@@ -871,94 +873,93 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       render.  ({ start: X, length: Y }) 
   */  
   contentRangeInFrame: function(frame) { return null; },
-
-
-  /**
-    This method is called whenever a group view is added or during the 
-    layoutResize() method.  You should use this method to size and position 
-    the group view.
-    
-    The included contentIndexHint can be used to help you determine the range
-    of content that should be included in the group.  If you are renderings a
-    list of items 100 or less, you can get the range of content belonging to
-    the group using the contentRangeForGroup() method.  If you are managing
-    a much larger set of content, you should probably implement your own 
-    data model.
-    
-    Your layout method should can optionally also use the firstLayout to 
-    further optimize itself.  Normally, you will want to only change a view's
-    actual frame if it does not match your calculated size.  However, if 
-    firstLayout is true, you can simply set the new layout without checking
-    first.
-    
-    @param {SC.View} groupView the view to size and position.
-    @param {Object} groupValue the value the groupView represents.
-    @param {Number} contentIndexHint the index of a content object.
-    @param {Bool} firstLayout True if this is the first the view has been laid out. 
-    
-  */
-  layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {},
   
-  /**
-    This method is called whenever an itemView is added or during the 
-    layoutResize() method.  You should use this method to size and position
-    the itemView.
-    
-    @param {SC.View} itemViewthe item view to layout
-    @param {Number} contentIndex the index of the content this layout represents.
-    @param {Bool} firstLayout true if this is the first time it has been laid out.
-  */
-  layoutItemView: function(itemView, contentIndex, firstLayout) {},
-  
-  /**
-    This method is called whenever the view is resized.  The default
-    implementation will simply iterate through the visible content range and
-    call adjustItemViewLayoutAtContentIndex() and layoutGroupView() on all the views.
-    
-    If you would like to provide a more efficient method for updating the
-    layout on a resize, you could override this method and do the iterating 
-    yourself.
-  */
-  layoutResize: function() {
-    if (this.get('isDirty')) return this; //nothing to do...
-    
-    var nowShowingRange = this.get('nowShowingRange') ;
-    var groupBy = this.get('groupBy') ;
-    var groupValue = undefined ;
-    var content = this.get('content') || [] ;
-    var curGroupValue ;
-    
-    var idx = SC.maxRange(nowShowingRange) ;
-    while(--idx >= nowShowingRange.start) {
-      var cur = content.objectAt(idx) ;
-      var itemView = this.itemViewForContent(cur) ;
-      
-      // should never happen, but recover just in case.
-      if (!itemView) continue ; 
-      
-      // if grouping is enabled, get the group value and layout based on that.
-      if (groupBy && ((curGroupValue = (cur) ? cur.get(groupBy) : null) !== groupValue)) {
-        groupValue = curGroupValue ;
-        var groupView = this.groupViewForGroupValue(groupValue) ;
-        if (groupView) {
-          this.layoutGroupView(groupView, groupValue, idx, false) ;
-        }
-      }
-      
-      // now layout the itemView itself.
-      this.adjustItemViewLayoutAtContentIndex(itemView, idx, false) ;
-    }
-  },
-  
-  /** 
-    Overrides the default view implementation.  Calls layoutResize() first 
-    to give you the chance to relayout your children.  The notifies children.
-  */
-  viewDidResize: function() {
-    // console.log('viewDidResize') ; 
-    this.layoutResize();  
-    return sc_super();
-  }.observes('layout'),
+  // /**
+  //   This method is called whenever a group view is added or during the 
+  //   layoutResize() method.  You should use this method to size and position 
+  //   the group view.
+  //   
+  //   The included contentIndexHint can be used to help you determine the range
+  //   of content that should be included in the group.  If you are renderings a
+  //   list of items 100 or less, you can get the range of content belonging to
+  //   the group using the contentRangeForGroup() method.  If you are managing
+  //   a much larger set of content, you should probably implement your own 
+  //   data model.
+  //   
+  //   Your layout method should can optionally also use the firstLayout to 
+  //   further optimize itself.  Normally, you will want to only change a view's
+  //   actual frame if it does not match your calculated size.  However, if 
+  //   firstLayout is true, you can simply set the new layout without checking
+  //   first.
+  //   
+  //   @param {SC.View} groupView the view to size and position.
+  //   @param {Object} groupValue the value the groupView represents.
+  //   @param {Number} contentIndexHint the index of a content object.
+  //   @param {Bool} firstLayout True if this is the first the view has been laid out. 
+  //   
+  // */
+  // layoutGroupView: function(groupView, groupValue, contentIndexHint, firstLayout) {},
+  // 
+  // /**
+  //   This method is called whenever an itemView is added or during the 
+  //   layoutResize() method.  You should use this method to size and position
+  //   the itemView.
+  //   
+  //   @param {SC.View} itemViewthe item view to layout
+  //   @param {Number} contentIndex the index of the content this layout represents.
+  //   @param {Bool} firstLayout true if this is the first time it has been laid out.
+  // */
+  // layoutItemView: function(itemView, contentIndex, firstLayout) {},
+  // 
+  // /**
+  //   This method is called whenever the view is resized.  The default
+  //   implementation will simply iterate through the visible content range and
+  //   call adjustItemViewLayoutAtContentIndex() and layoutGroupView() on all the views.
+  //   
+  //   If you would like to provide a more efficient method for updating the
+  //   layout on a resize, you could override this method and do the iterating 
+  //   yourself.
+  // */
+  // layoutResize: function() {
+  //   if (this.get('isDirty')) return this; //nothing to do...
+  //   
+  //   var nowShowingRange = this.get('nowShowingRange') ;
+  //   var groupBy = this.get('groupBy') ;
+  //   var groupValue = undefined ;
+  //   var content = this.get('content') || [] ;
+  //   var curGroupValue ;
+  //   
+  //   var idx = SC.maxRange(nowShowingRange) ;
+  //   while(--idx >= nowShowingRange.start) {
+  //     var cur = content.objectAt(idx) ;
+  //     var itemView = this.itemViewForContent(cur) ;
+  //     
+  //     // should never happen, but recover just in case.
+  //     if (!itemView) continue ; 
+  //     
+  //     // if grouping is enabled, get the group value and layout based on that.
+  //     if (groupBy && ((curGroupValue = (cur) ? cur.get(groupBy) : null) !== groupValue)) {
+  //       groupValue = curGroupValue ;
+  //       var groupView = this.groupViewForGroupValue(groupValue) ;
+  //       if (groupView) {
+  //         this.layoutGroupView(groupView, groupValue, idx, false) ;
+  //       }
+  //     }
+  //     
+  //     // now layout the itemView itself.
+  //     this.adjustItemViewLayoutAtContentIndex(itemView, idx, false) ;
+  //   }
+  // },
+  // 
+  // /** 
+  //   Overrides the default view implementation.  Calls layoutResize() first 
+  //   to give you the chance to relayout your children.  The notifies children.
+  // */
+  // viewDidResize: function() {
+  //   // console.log('viewDidResize') ; 
+  //   this.layoutResize();  
+  //   return sc_super();
+  // }.observes('layout'),
   
   // ......................................
   // GENERATING CHILDREN
@@ -966,12 +967,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   createExampleView: function(content) {
     var exampleViewKey = this.get('contentExampleViewKey') ;
-    var ExampleView ;
-    if (exampleViewKey) {
-      ExampleView = content.get(exampleViewKey);
-    } else {
-      ExampleView = this.get('exampleView') ;
-    }
+    var ExampleView = (exampleViewKey) ?
+      content.get(exampleViewKey) :
+      this.get('exampleView') ;
     
     if (ExampleView) {
       return ExampleView.create({
@@ -1005,119 +1003,125 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var childSet = this._childSet ;
     if (!childSet) childSet = this._childSet = [] ;
     
-    // used for santity checks during debugging
-    var maxLen = range.length ;
+    if (SC.ENABLE_COLLECTION_PARTIAL_RENDER) {
+      // used for santity checks during debugging
+      if (SC.SANITY_CHECK_PARTIAL_RENDER) var maxLen = range.length ;
     
-    if (SC.DEBUG_PARTIAL_RENDER) {
-      console.log('oldRange = ') ;
-      console.log(oldRange) ;
-      console.log('range = ') ;
-      console.log(range) ;
-    }
-    
-    // only redaw objects we haven't previously drawn
-    if (oldRange) {
-      // ignore ranges that don't overlap
-      if (range.start >= oldRange.start + oldRange.length) {
-        // full render
-        childSet.length = 0 ;
-      } else if (range.start + range.length <= oldRange.start) {
-        // full render
-        childSet.length = 0 ;
-        
-      // okay, the ranges overlap. are they equal?
-      } else if (SC.rangesEqual(oldRange, range)) {
-        range = SC.EMPTY_RANGE ; // nothing to render
-        
-      // nope, is the old range inside the new range?
-      } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
-        // need to render two ranges...all pre-existing views are valid
-        context.partialUpdate = YES ;
-        range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
-        range.length = oldRange.start - range.start ;
-        
-      // nope, is the new range inside the old range?
-      } else if (range.start >= oldRange.start && range.start + range.length <= oldRange.start + oldRange.length) {        
-        // need to remove unused childNodes at both ends...
-        idx = oldRange.start ;
-        end = range.start ;
-        while (idx < end) {
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 1');
-          childId = childSet[idx] ;
-          if (childId) context.remove(childId) ;
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-          delete childSet[idx] ;
-          ++idx ;
-        }
-        
-        idx = range.start + range.length ;
-        end = oldRange.start + oldRange.length ;
-        while (idx < end) {
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 2');
-          childId = childSet[idx] ;
-          if (childId) context.remove(childId) ;
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-          delete childSet[idx] ;
-          ++idx ;
-        }
-        
-        range = SC.EMPTY_RANGE ; // nothing to render
-        
-      // nope, is the newRange lower than the old range?
-      } else if (range.start < oldRange.start) {
-        context.partialUpdate = YES ;
-        
-        // need to remove unused childNodes at the top of the old range
-        idx = range.start + range.length ;
-        end = oldRange.start + oldRange.length ;
-        while (idx < end) {
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 3');
-          childId = childSet[idx] ;
-          if (childId) context.remove(childId) ;
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-          delete childSet[idx] ;
-          ++idx ;
-        }
-        
-        range.length = Math.min(range.length, oldRange.start - range.start) ;
-        
-      // nope, so the newRange is higher than the old range  
-      } else {
-        context.partialUpdate = YES ;
-        
-        // need to remove unused childNodes at the bottom of the old range
-        idx = oldRange.start ;
-        end = range.start ;
-        while (idx < end) {
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on 4');
-          childId = childSet[idx] ;
-          if (childId) context.remove(childId) ;
-          if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-          delete childSet[idx] ;
-          ++idx ;
-        }
-        
-        end = range.start + range.length ;
-        range.start = oldRange.start + oldRange.length ;
-        range.length = end - range.start ;
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('oldRange = ') ;
+        console.log(oldRange) ;
+        console.log('range = ') ;
+        console.log(range) ;
       }
-    }
     
-    // sanity check our ranges
-    if (range.length < 0) throw "range.length is " + range.length ;
-    if (range.length > maxLen) throw "range.length is " + range.length + ', max length is ' + maxLen ;
-    if (range.start < 0) throw "range.start is " + range.start ;
-    if (range2) {
-      if (range2.length < 0) throw "range2.length is " + range2.length ;
-      if (range2.length > maxLen) throw "range2.length is " + range2.length + ', max length is ' + maxLen ;
-      if (range2.start < 0) throw "range2.start is " + range2.start ;
-    }
+      // only redaw objects we haven't previously drawn
+      if (oldRange) {
+        // ignore ranges that don't overlap above..
+        if (range.start >= oldRange.start + oldRange.length) {
+          childSet.length = 0 ; // full render
+        
+        // and below...
+        } else if (range.start + range.length <= oldRange.start) {
+          childSet.length = 0 ; // full render
+        
+        // okay, the ranges do overlap. are they equal?
+        } else if (SC.rangesEqual(oldRange, range)) {
+          range = SC.EMPTY_RANGE ; // nothing to render
+        
+        // nope, is the old range inside the new range?
+        } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
+          // need to render two ranges...all pre-existing views are valid
+          context.partialUpdate = YES ;
+          range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
+          range.length = oldRange.start - range.start ;
+        
+        // nope, is the new range inside the old range?
+        } else if (range.start >= oldRange.start && range.start + range.length <= oldRange.start + oldRange.length) {        
+          // need to remove unused childNodes at both ends, start with bottom...
+          idx = oldRange.start ;
+          end = range.start ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom range');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          // now remove unused childNodes at the top of the range...
+          idx = range.start + range.length ;
+          end = oldRange.start + oldRange.length ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top range');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          range = SC.EMPTY_RANGE ; // nothing to render
+        
+        // nope, is the new range lower than the old range?
+        } else if (range.start < oldRange.start) {
+          context.partialUpdate = YES ;
+        
+          // need to remove unused childNodes at the top of the old range
+          idx = range.start + range.length ;
+          end = oldRange.start + oldRange.length ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top only');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          range.length = Math.min(range.length, oldRange.start - range.start) ;
+        
+        // nope, so the new range is higher than the old range
+        } else {
+          context.partialUpdate = YES ;
+        
+          // need to remove unused childNodes at the bottom of the old range
+          idx = oldRange.start ;
+          end = range.start ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom only');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          end = range.start + range.length ;
+          range.start = oldRange.start + oldRange.length ;
+          range.length = end - range.start ;
+        }
+      }
     
-    if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering = ') ;
-    if (SC.DEBUG_PARTIAL_RENDER) console.log(range) ;
-    if (SC.DEBUG_PARTIAL_RENDER && range2) {
-      console.log('also rendering = ') ;
-      console.log(range2) ;
+      if (SC.SANITY_CHECK_PARTIAL_RENDER) {
+        if (range.length < 0) throw "range.length is " + range.length ;
+        if (range.length > maxLen) throw "range.length is " + range.length + ', max length is ' + maxLen ;
+        if (range.start < 0) throw "range.start is " + range.start ;
+        if (range2) {
+          if (range2.length < 0) throw "range2.length is " + range2.length ;
+          if (range2.length > maxLen) throw "range2.length is " + range2.length + ', max length is ' + maxLen ;
+          if (range2.start < 0) throw "range2.start is " + range2.start ;
+        }
+      }
+    
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('rendering = ') ;
+        console.log(range) ;
+        if (range2) {
+          console.log('also rendering = ') ;
+          console.log(range2) ;
+        }
+      }
     }
     
     idx = SC.maxRange(range) ;
@@ -1137,7 +1141,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       itemView.set('content', c) ;
       itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
       itemView.layerId = key ; // cannot use .set, layerId is RO
-      if (childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
+      if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
       childSet[idx] = key ;
       this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
       context = context.begin(itemView.get('tagName')) ;
@@ -1158,7 +1162,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         itemView.set('content', c) ;
         itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
         itemView.layerId = key ; // cannot use .set, layerId is RO
-        if (childSet[idx]) debugger ; // throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
+        if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
         childSet[idx] = key ;
         this.adjustItemViewLayoutAtContentIndex(itemView, idx, YES) ;
         context = context.begin(itemView.get('tagName')) ;
@@ -1292,25 +1296,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   //   this.endPropertyChanges() ;
   //   if (SC.BENCHMARK_UPDATE_CHILDREN) SC.Benchmark.end(bkey);    
   // },
-  
-  /**
-    Rebuild all the child item views in the collection view.
-    
-    This will remove all the child views from the collection view and rebuild 
-    them from scratch.  This method is generally expensive, but if you have 
-    made a substantial number of changes to the content array, this may be the 
-    most efficient way to perform the update.
-    
-    In general the collection view will automatically keep the item views in 
-    sync with the content objects for you.  You should not need to call this 
-    method very often.
-    
-    @returns {void}
-  */
-  rebuildChildren: function() {
-    // this.updateChildren(YES) ;
-    this.displayDidChange() ;
-  },
+  // 
+  // /**
+  //   Rebuild all the child item views in the collection view.
+  //   
+  //   This will remove all the child views from the collection view and rebuild 
+  //   them from scratch.  This method is generally expensive, but if you have 
+  //   made a substantial number of changes to the content array, this may be the 
+  //   most efficient way to perform the update.
+  //   
+  //   In general the collection view will automatically keep the item views in 
+  //   sync with the content objects for you.  You should not need to call this 
+  //   method very often.
+  //   
+  //   @returns {void}
+  // */
+  // rebuildChildren: function() {
+  //   // this.updateChildren(YES) ;
+  //   this.displayDidChange() ;
+  // },
   
   /**
     Update the selection state for the item views to reflect the selection 

@@ -11,7 +11,8 @@ SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
 SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
 
-/** @class
+/**
+  @class
   
   Many times list items need to display a lot more than just a label of text.
   You often need to include checkboxes, icons, extra counts and an action or 
@@ -42,6 +43,8 @@ SC.ListItemView = SC.View.extend(
   
   /**
     The content object the list item will display.
+    
+    @type SC.Object
   */
   content: null,
   
@@ -143,12 +146,12 @@ SC.ListItemView = SC.View.extend(
       this.renderCheckbox(context, value);
       context.addClass('has-checkbox');
     }
-
+    
     // handle icon
     if (this.getDelegateProperty(del, 'hasContentIcon')) {
       key = this.getDelegateProperty(del,'contentIconKey') ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-
+      
       this.renderIcon(context, value);
       context.addClass('has-icon');
     }
@@ -202,8 +205,7 @@ SC.ListItemView = SC.View.extend(
     
     // now add inner content.  note we do not add a real checkbox because
     // we don't want to have to setup a change observer on it.
-    var blank = sc_static('blank');
-    context.push('<img src="', blank, '" class="button" />');
+    context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" />');
     
     // apply edit
     context.end();
@@ -224,7 +226,7 @@ SC.ListItemView = SC.View.extend(
     if (icon && SC.ImageView.valueIsUrl(icon)) {
       url = icon; className = '' ;
     } else {
-      className = icon; url = sc_static('blank.gif') ;
+      className = icon; url = SC.BLANK_IMAGE_URL ;
     }
     
     // generate the img element...
@@ -516,6 +518,6 @@ SC.ListItemView = SC.View.extend(
      content.set(labelKey, finalValue) ;
     }
     this.displayDidChange();
-  }   
+  }
   
 });

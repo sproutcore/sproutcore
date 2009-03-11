@@ -5,6 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('mixins/collection_group');
 sc_require('views/disclosure');
 
 /**
@@ -21,25 +22,27 @@ sc_require('views/disclosure');
   @since 0.9
 */
 
-SC.SourceListGroupView = SC.View.extend(SC.Control,
-/** @scope SC.SourceListGroupView.prototoyp */ {
+SC.SourceListGroupView = SC.View.extend(
+  SC.Control,
+  SC.CollectionGroup,
+/** @scope SC.SourceListGroupView.prototoype */ {
   
-  emptyElement: ['<div class="sc-source-list-group">',
-    '<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure no-disclosure">',
-    '<img src="%@" class="button" />'.fmt(static_url('blank')),
-    '<span class="label"></span></a>',
-  '</div>'].join(''),
+  classNames: ['sc-source-list-group'],
+  
+  // ..........................................................
+  // KEY PROPERTIES
+  // 
   
   /**
-    The group value to display for this group.
+    The content object the source list group will display.
     
     @type SC.Object
   */
   content: null,
   
   /**
-    The current group visibility.  Used by the source list to determine 
-    the layout size of the group.
+    The current group visibility.  Used by the source list to determine the 
+    layout size of the group.
     
     @type Boolean
   */
@@ -70,6 +73,17 @@ SC.SourceListGroupView = SC.View.extend(SC.Control,
     @type String
   */
   groupVisibleKey: null,
+  
+  render: function(context, firstTime) {
+    context.push('<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure no-disclosure">') ;
+    context.push('<img src="%@" class="button" />'.fmt(sc_static('blank'))) ;
+    context.push('<span class="label"></span></a>') ;
+  },
+  
+  /** @private */
+  createChildViews: function() {
+    
+  },
   
   /** @private */
   contentPropertyDidChange: function(target, key) {

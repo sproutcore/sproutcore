@@ -5,29 +5,27 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/**
-  Indicates a value has a mixed state of both on and off.
-*/
+/** Indicates a value has a mixed state of both on and off. */
 SC.MIXED_STATE = '__MIXED__' ;
 
 /** Option for HUGE control size. */
-SC.HUGE_CONTROL_SIZE = 'sc-huge-size';
+SC.HUGE_CONTROL_SIZE = 'sc-huge-size' ;
 
 /** Option for large control size. */
-SC.LARGE_CONTROL_SIZE = 'sc-large-size';
+SC.LARGE_CONTROL_SIZE = 'sc-large-size' ;
 
 /** Option for standard control size. */
-SC.REGULAR_CONTROL_SIZE = 'sc-regular-size';
+SC.REGULAR_CONTROL_SIZE = 'sc-regular-size' ;
 
 /** Option for small control size. */
-SC.SMALL_CONTROL_SIZE = 'sc-small-size';
+SC.SMALL_CONTROL_SIZE = 'sc-small-size' ;
 
 /** Option for tiny control size */
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 
 /**
   @namespace
-
+  
   A Control is a view that also implements some basic state functionality.
   Apply this mixin to any view that you want to have standard control
   functionality including showing a selected state, enabled state, focus
@@ -50,7 +48,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   "content" and "contentValueKey" properties of the control.  The 
   "content" property is the content object you want to manage, while the 
   "contentValueKey" is the name of the property on the content object 
-  you want the control to display.  
+  you want the control to display.
   
   The default implementation of the Control mixin will essentially map the
   contentValueKey of a content object to the value property of the 
@@ -75,35 +73,40 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
   to show.  Anytime your control is shown as part of a collection view, the
   collection view will be automatically set as its displayDelegate.
   
+  @since SproutCore 1.0
 */
 SC.Control = {
   
   initMixin: function() {
-    this._control_contentDidChange(); // setup content observing if needed.
+    this._control_contentDidChange() ; // setup content observing if needed.
   },
   
   /** 
     The selected state of this control.  Possible options are YES, NO or 
     SC.MIXED_STATE.
     
-    @property {Boolean}
+    @type Boolean or SC.MIXED_STATE
   */
   isSelected: NO,
+  
+  /** @private */
   isSelectedBindingDefault: SC.Binding.oneWay().bool(),
-
+  
   /**
-    Set to true when the item is currently active.  Usually this means the 
+    Set to YES when the item is currently active.  Usually this means the 
     mouse is current pressed and hovering over the control, however the 
     specific implementation my vary depending on the control.
     
     Changing this property value by default will cause the Control mixin to
     add/remove an 'active' class name to the root element.
     
-    @property {Boolean}
+    @type Boolean
   */
   isActive: NO,
+  
+  /** @private */
   isActiveBindingDefault: SC.Binding.oneWay().bool(),
-
+  
   /**
     The value represented by this control.
     
@@ -134,6 +137,8 @@ SC.Control = {
     Note that unless you are using this control as part of a form or 
     collection view, then it would be better to instead bind the value of
     the control directly to a controller property.
+    
+    @type SC.Object
   */
   content: null,
   
@@ -142,9 +147,11 @@ SC.Control = {
     value of this control.  This property should only be set before the
     content object is first set.  If you have a displayDelegate, then
     you can also use the contentValueKey of the displayDelegate.
+    
+    @type String
   */
   contentValueKey: null,
-
+  
   /**
     Invoked whenever any property on the content object changes.  
     
@@ -163,7 +170,7 @@ SC.Control = {
   contentPropertyDidChange: function(target, key) {
     return this.updatePropertyFromContent('value', key, 'contentValueKey');
   },
-
+  
   /**
     Helper method you can use from your own implementation of 
     contentPropertyDidChange().  This method will look up the content key to
@@ -186,10 +193,15 @@ SC.Control = {
     if (content === undefined) content = this.get('content');
     
     // get actual content key
-    contentKey = this[contentKey] ? this.get(contentKey) : this.getDelegateProperty(this.displayDelegate, contentKey);
+    contentKey = this[contentKey] ?
+      this.get(contentKey) :
+      this.getDelegateProperty(this.displayDelegate, contentKey) ;
+    
     if (contentKey && (all || key === contentKey)) {
-      var v = (content) ? (content.get ? content.get(contentKey) : content[contentKey]) : null ;
-      this.set(prop, v);
+      var v = (content) ?
+        (content.get ? content.get(contentKey) : content[contentKey]) :
+        null ;
+      this.set(prop, v) ;
     }
     return this ;
   },
@@ -208,11 +220,13 @@ SC.Control = {
     well.
   */
   updateContentWithValueObserver: function() {
-
-    var key = this.contentValueKey ? this.get('contentValueKey') : this.getDelegateProperty(this.displayDelegate, 'contentValueKey');
-    var content = this.get('content');
+    var key = this.contentValueKey ?
+      this.get('contentValueKey') :
+      this.getDelegateProperty(this.displayDelegate, 'contentValueKey') ;
+    
+    var content = this.get('content') ;
     if (!key || !content) return ; // do nothing if disabled
-
+    
     // get value -- set on content if changed
     var value = this.get('value');
     if (typeof content.setIfChanged === SC.T_FUNCTION) {
@@ -222,28 +236,28 @@ SC.Control = {
       if (content[key] !== value) content[key] = value ;
     }
   }.observes('value'),
-
+  
   /**
     The name of the property this control should display if it is part of an
     SC.FormView.
-  
+    
     If you add a control as part of an SC.FormView, then the form view will 
     automatically bind the value to the property key you name here on the 
     content object.
     
-    @property {String}
+    @type String
   */
   fieldKey: null,
   
   /**
     The human readable label you want shown for errors.  May be a loc string.
-  
+    
     If your field fails validation, then this is the name that will be shown
     in the error explanation.  If you do not set this property, then the 
     fieldKey or the class name will be used to generate a human readable name.
     
-    @property {String}
-  */  
+    @type String
+  */
   fieldLabel: null,
   
   /**
@@ -251,12 +265,14 @@ SC.Control = {
     property is computed dynamically using the following rules:
     
     # If the fieldLabel is defined, that property is localized and returned.
-    # Otherwise, if the keyField is defined, try to localize using the string "ErrorLabel.{fieldKeyName}".  If a localized name cannot be found, use a humanized form of the fieldKey.
+    # Otherwise, if the keyField is defined, try to localize using the string 
+    # "ErrorLabel.{fieldKeyName}".  If a localized name cannot be found, use a
+    # humanized form of the fieldKey.
     # Try to localize using the string "ErrorLabel.{ClassName}"
     # Return a humanized form of the class name.
     
-    @property {String}
-  */  
+    @type String
+  */
   errorLabel: function() {
     var ret, fk, def ;
     if (ret = this.get('fieldLabel')) return ret ;
@@ -275,12 +291,14 @@ SC.Control = {
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
-  displayProperties: ['isEnabled', 'isSelected', 'isFirstResponder', 'isActive'],
-
+  displayProperties: 'isEnabled isSelected isFirstResponder isActive'.w(),
+  
+  /** @private */
   _CONTROL_TMP_CLASSNAMES: {},
   
   /**
-    Invoke this method in your updateDisplay() method to update any basic control CSS classes.
+    Invoke this method in your updateDisplay() method to update any basic 
+    control CSS classes.
   */
   renderMixin: function(context, firstTime) {
     var sel = this.get('isSelected'), disabled = !this.get('isEnabled');
@@ -294,16 +312,18 @@ SC.Control = {
     names.focus = this.get('isFirstResponder') ;
     names.active = this.get('isActive') ;
     context.setClass(names).addClass(this.get('controlSize'));
-
+    
     // if the control implements the $input() helper, then fixup the input
     // tags
     if (!firstTime && this.$input) {
       this.$input().attr('disabled', disabled);
     }
   },
-
-  // This should be null so that if content is also null, the
-  // _contentDidChange won't do anything on init.
+  
+  /** @private
+    This should be null so that if content is also null, the
+    _contentDidChange won't do anything on init.
+  */
   _control_content: null,
   
   /** @private
@@ -315,11 +335,11 @@ SC.Control = {
     if (this._control_content === content) return; // nothing changed
     
     var f = this.contentPropertyDidChange ;
-
+    
     // remove an observer from the old content if necessary
     var old = this._control_content ;
     if (old && old.removeObserver) old.removeObserver('*', this, f) ;
-
+    
     // add observer to new content if necessary.
     this._control_content = content ;
     if (content && content.addObserver) content.addObserver('*', this, f) ;
@@ -328,6 +348,5 @@ SC.Control = {
     this.contentPropertyDidChange(content, '*') ;
     
   }.observes('content')
-      
+  
 };
-

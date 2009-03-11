@@ -5,21 +5,22 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/** @class
-
+/**
+  @class
+  
   Disclosure triangle button.
-
+  
   @extends SC.ButtonView
   @since SproutCore
 */
 SC.DisclosureView = SC.ButtonView.extend(
 /** @scope SC.DisclosureView.prototype */ {
-
-  classNames: 'sc-disclosure-view',
+  
+  classNames: ['sc-disclosure-view'],
   
   theme: 'disclosure',
   buttonBehavior: SC.TOGGLE_BEHAVIOR,
-
+  
   /**
     This is the value that will be set when the disclosure triangle is toggled
     open.
@@ -30,13 +31,14 @@ SC.DisclosureView = SC.ButtonView.extend(
     The value that will be set when the disclosure triangle is toggled closed.
   */
   toggleOffValue: NO,
-
+  
+  /** @private */
   valueBindingDefault: SC.Binding.bool() ,
-
+  
+  /** @private */
   render: function(context, firstTime) {
-    var blank = static_url('blank');
-    context.push('<img src="', blank, '" class="button" alt="" />');
+    context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" alt="" />');
     context.push('<label>',this.get('displayTitle'),'</label>');
   }
- 
-}) ;
+  
+});
