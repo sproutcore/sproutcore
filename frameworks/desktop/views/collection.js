@@ -10,9 +10,9 @@ sc_require('views/list_item');
 
 SC.BENCHMARK_UPDATE_CHILDREN = YES ;
 SC.BENCHMARK_RENDER = YES ;
-SC.ENABLE_COLLECTION_PARTIAL_RENDER = NO ;
+SC.ENABLE_COLLECTION_PARTIAL_RENDER = YES ;
 SC.DEBUG_PARTIAL_RENDER = NO ;
-SC.SANITY_CHECK_PARTIAL_RENDER = NO ;
+SC.SANITY_CHECK_PARTIAL_RENDER = YES ;
 SC.VALIDATE_COLLECTION_CONSISTANCY = NO ;
 
 /**
@@ -776,41 +776,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     the collection view to do a 'fast' revalidation of its content.
   */
   nowShowingRange: function() {
-    
-    // note that we keep a cached clippingFrame and cached nowShowingRange.
-    // if the clipping frame has not actually changed, we avoid the cost of
-    // actually recomputing the contentRangeInFrame.
-    //
-    // Also, if contentRangeInFrame returns null
-    var cf = this.get('clippingFrame');
-    // console.log('clippingFrame = ');
-    // console.log(cf);
-    var old = this._nowShowingRange_clippingFrame; // old cf
-    var range = this._nowShowingRange_cachedRange ; // old range
-    
-    // if (!range || !old || !SC.rectsEqual(cf, old) || !this._nowShowingIsValid) {
-      this._nowShowingRange_clippingFrame = cf ; // save
-      // this._nowShowingIsValid = YES ;
-      
-      // ask the subclass to compute the content range in frame...
-      range = this.contentRangeInFrame(cf) ;
-      // console.log('contentRangeInFrame = ') ;
-      // console.log(range) ;
-      var content = SC.makeArray(this.get('content'));
-      
-      // console.log('nowShowingRange content length is %@'.fmt(content.get('length')));
-      
-      if (!range) range = { start: 0, length: 0 }; // default
-       
-      // make sure the range isn't greater than the content length 
-      // this will prevent trying to render items that aren't really there.
-      range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
-      
-      // save range...
-      this._nowShowingRange_cachedRange = range ;
-    // }
-    
-    // console.log('nowShowing range of %@ is {%@, %@}'.fmt(this, range.start, range.length));
+    var range = this.contentRangeInFrame(this.get('clippingFrame')) ;
+    if (!range) range = { start: 0, length: 0 } ; // default
+     
+    // make sure the range isn't greater than the content length 
+    var content = SC.makeArray(this.get('content'));
+    range.length = Math.min(SC.maxRange(range), content.get('length')) - range.start ;
     
     return range ;
   }.property('content', 'clippingFrame').cacheable(),
@@ -835,10 +806,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var old = this._collection_nowShowingRange ;
     if (!old || !SC.rangesEqual(range, old)) {
       this._collection_nowShowingRange = range ;
-      if (this.get('isVisibleInWindow')) {
-        // this.invokeOnce(this.updateChildren); // 'fast' update
-        this.displayDidChange() ;
-      } else this.set('isDirty', YES);
+      if (this.get('isVisibleInWindow')) this.displayDidChange() ;
+      else this.set('isDirty', YES);
     }
   }.observes('nowShowingRange'),
   
@@ -1013,9 +982,13 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
         console.log('range = ') ;
         console.log(range) ;
       }
-    
-      // only redaw objects we haven't previously drawn
-      if (oldRange) {
+      
+      // if we're dirty, redraw everything visible
+      if (this.get('isDirty')) {
+        childSet.length = 0 ; // full render
+        
+      // else, only redaw objects we haven't previously drawn
+      } else if (oldRange) {
         // ignore ranges that don't overlap above..
         if (range.start >= oldRange.start + oldRange.length) {
           childSet.length = 0 ; // full render
