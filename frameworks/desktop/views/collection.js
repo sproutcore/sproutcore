@@ -869,8 +869,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var guids = this._itemViewGuids, guid;
     if (!guids) this._itemViewGuids = guids = {};
     
-    // TODO: USE SC.IndexSet, not separate ranges, when it's ready...
-    // This will also make it possible to partial updates during content
+    // TODO: Use SC.IndexSet, not separate ranges, once it's ready.
+    // This will also make it possible to do partial updates during content
     // and selection changes. Now we always do a full update.
     
     while (--idx >= range.start) {
