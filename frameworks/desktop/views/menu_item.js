@@ -18,6 +18,17 @@ SC.MenuItemView = SC.ListItemView.extend({
   childView: SC.MenuList, 
   
   /**
+    This will set the contents for the child view if the menu item has a branch
+  */
+  childViewContent: null,
+
+  /**
+    This property will set the action meant to be performed for the menu
+	only if it does not have a branch
+  */
+  menuItemAction: null,
+
+  /**
     (displayDelegate) Returns true if the menu item has a child (branch).
     
     If false, the space for the branch arrow will be collapsed.
@@ -61,7 +72,7 @@ SC.MenuItemView = SC.ListItemView.extend({
     this.renderLabel(context, value);
 
     // handle action 
-    key = this.getDelegateProperty(del, 'menuItemActionProperty') ;
+    key = this.getDelegateProperty(del, 'menuItemAction') ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (value) {
       this.renderAction(context, value);
@@ -126,17 +137,15 @@ SC.MenuItemView = SC.ListItemView.extend({
   mouseUp: function(evt) {
     /*do sumthing to set child menu items.*/
 	if(this.get('hasChild')){
-		//Pops out the child menu items
+		//Pops out the child menu items with contents from the childViewContent property.
 	}
 	else{
-		//performs the action it was meant to perform
+		//performs the action set by the renderAction method.
 	}
   },
 
   mouseMoved: function(evt) {
-	if(this.get('classNames') == "sc-view,sc-collection-item,sc-list-item-view,sc-menu-item-view") {
-		//Set the CSS class so that the menu is higlighted.
-	}
+	//Set the CSS class so that the menu is higlighted.
   }
   
 }) ;

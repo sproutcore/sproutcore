@@ -51,7 +51,7 @@ test("updateChildLayout method updates the layout display",function(){
 });
 
 test("performing the mouse up event", function() {
-	var elem = thumb.get('layer'); alert(divider);
+	var elem = thumb.get('layer');
 	SC.Event.trigger(elem, 'mouseUp');
 });
 

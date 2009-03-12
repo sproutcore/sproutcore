@@ -377,7 +377,7 @@ SC.SplitView = SC.View.extend(
     sc_super() ;
   },
   
-  render: function(context, firstTime) {alert("hi");
+  render: function(context, firstTime) {
     // console.log('%@.render(%@, %@)'.fmt(this, context, firstTime));
     // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
     sc_super() ;
