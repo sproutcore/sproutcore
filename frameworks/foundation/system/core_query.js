@@ -425,9 +425,11 @@ SC.CoreQuery = (function() {
     },
     
     html: function( value ) {
-      if (value === undefined) return (this[0]) ? this[0].innerHTML : null;
-      this.each(function() { this.innerHTML = value; });
-      return this;
+      return value === undefined ?
+      			(this[0] ?
+      				this[0].innerHTML.replace(/ CQ\d+="(?:\d+|null)"/g, "") :
+      				null) :
+      			this.empty().append( value );
       // return value == undefined ?
       //  (this[0] ? this[0].innerHTML : null) :
       //  this.empty().append( value );
