@@ -273,6 +273,214 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   // ..........................................................
+  // RENDERING
+  // 
+  
+  render: function(context, firstTime) {
+    if (SC.BENCHMARK_RENDER) {
+      var bkey = '%@.render'.fmt(this) ;
+      SC.Benchmark.start(bkey);
+    }
+    this.beginPropertyChanges() ; // avoid sending notifications
+    
+    var content = SC.makeArray(this.get('content')) ;
+    var selection = SC.makeArray(this.get('selection'));
+    var oldRange = this._oldNowShowingRange ;
+    var range = this.get('nowShowingRange') ;
+    this._oldNowShowingRange = SC.cloneRange(range) ;
+    var key, itemView = this.createExampleView(content), c ;
+    var range2 ; // only used if the old range fits inside the new range
+    var idx, end, childId ;
+    
+    // keep track of children we've got rendered
+    var childSet = this._childSet ;
+    if (!childSet) childSet = this._childSet = [] ;
+    
+    if (SC.ENABLE_COLLECTION_PARTIAL_RENDER) {
+      // used for santity checks during debugging
+      if (SC.SANITY_CHECK_PARTIAL_RENDER) var maxLen = range.length ;
+      
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('oldRange = ') ;
+        console.log(oldRange) ;
+        console.log('range = ') ;
+        console.log(range) ;
+      }
+      
+      // if we're dirty, redraw everything visible
+      // (selection changed, content changed, etc.)
+      if (this.get('isDirty')) {
+        childSet.length = 0 ; // full render
+        
+      // else, only redaw objects we haven't previously drawn
+      } else if (oldRange) {
+        // ignore ranges that don't overlap above..
+        if (range.start >= oldRange.start + oldRange.length) {
+          childSet.length = 0 ; // full render
+        
+        // and below...
+        } else if (range.start + range.length <= oldRange.start) {
+          childSet.length = 0 ; // full render
+        
+        // okay, the ranges do overlap. are they equal?
+        } else if (SC.rangesEqual(oldRange, range)) {
+          range = SC.EMPTY_RANGE ; // nothing to render
+        
+        // nope, is the old range inside the new range?
+        } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
+          // need to render two ranges...all pre-existing views are valid
+          context.partialUpdate = YES ;
+          range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
+          range.length = oldRange.start - range.start ;
+        
+        // nope, is the new range inside the old range?
+        } else if (range.start >= oldRange.start && range.start + range.length <= oldRange.start + oldRange.length) {        
+          // need to remove unused childNodes at both ends, start with bottom...
+          idx = oldRange.start ;
+          end = range.start ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom range');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          // now remove unused childNodes at the top of the range...
+          idx = range.start + range.length ;
+          end = oldRange.start + oldRange.length ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top range');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          range = SC.EMPTY_RANGE ; // nothing to render
+        
+        // nope, is the new range lower than the old range?
+        } else if (range.start < oldRange.start) {
+          context.partialUpdate = YES ;
+        
+          // need to remove unused childNodes at the top of the old range
+          idx = range.start + range.length ;
+          end = oldRange.start + oldRange.length ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top only');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          range.length = Math.min(range.length, oldRange.start - range.start) ;
+        
+        // nope, so the new range is higher than the old range
+        } else {
+          context.partialUpdate = YES ;
+        
+          // need to remove unused childNodes at the bottom of the old range
+          idx = oldRange.start ;
+          end = range.start ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom only');
+            childId = childSet[idx] ;
+            if (childId) context.remove(childId) ;
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
+            delete childSet[idx] ;
+            ++idx ;
+          }
+        
+          end = range.start + range.length ;
+          range.start = oldRange.start + oldRange.length ;
+          range.length = end - range.start ;
+        }
+      }
+    
+      if (SC.SANITY_CHECK_PARTIAL_RENDER) {
+        if (range.length < 0) throw "range.length is " + range.length ;
+        if (range.length > maxLen) throw "range.length is " + range.length + ', max length is ' + maxLen ;
+        if (range.start < 0) throw "range.start is " + range.start ;
+        if (range2) {
+          if (range2.length < 0) throw "range2.length is " + range2.length ;
+          if (range2.length > maxLen) throw "range2.length is " + range2.length + ', max length is ' + maxLen ;
+          if (range2.start < 0) throw "range2.start is " + range2.start ;
+        }
+      }
+    
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('rendering = ') ;
+        console.log(range) ;
+        if (range2) {
+          console.log('also rendering = ') ;
+          console.log(range2) ;
+        }
+      }
+    }
+    
+    idx = SC.maxRange(range) ;
+    
+    var baseKey = SC.guidFor(this) + '_' ;
+    var guids = this._itemViewGuids, guid;
+    if (!guids) this._itemViewGuids = guids = {};
+    
+    // TODO: Use SC.IndexSet, not separate ranges, once it's ready.
+    // This will also make it possible to do partial updates during content
+    // and selection changes. Now we always do a full update.
+    
+    while (--idx >= range.start) {
+      c = content.objectAt(idx) ;
+      if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering content(%@) at index %@'.fmt(c.unread, idx));
+      
+      // use cache of item view guids to avoid creating temporary objects
+      guid = SC.guidFor(c);
+      if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+      
+      itemView.set('content', c) ;
+      itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+      itemView.layerId = key ; // cannot use .set, layerId is RO
+      if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
+      childSet[idx] = key ;
+      itemView.adjust(this.itemViewLayoutAtContentIndex(itemView, idx)) ;
+      context = context.begin(itemView.get('tagName')) ;
+      itemView.prepareContext(context, YES) ;
+      context = context.end() ;
+    }
+    
+    if (range2) {
+      idx = SC.maxRange(range2) ;
+      while (--idx >= range2.start) {
+        c = content.objectAt(idx) ;
+        if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering content(%@) at index %@'.fmt(c.unread, idx));
+        
+        // use cache of item view guids to avoid creating temporary objects
+        guid = SC.guidFor(c);
+        if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+        
+        itemView.set('content', c) ;
+        itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+        itemView.layerId = key ; // cannot use .set, layerId is RO
+        if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
+        childSet[idx] = key ;
+        itemView.adjust(this.itemViewLayoutAtContentIndex(itemView, idx)) ;
+        context = context.begin(itemView.get('tagName')) ;
+        itemView.prepareContext(context, YES) ;
+        context = context.end() ;
+      }
+    }
+    
+    if (SC.DEBUG_PARTIAL_RENDER) console.log('******************************') ;
+    
+    this.set('isDirty', NO);
+    this.endPropertyChanges() ;
+    if (SC.BENCHMARK_RENDER) SC.Benchmark.end(bkey);    
+  },
+  
+  // ..........................................................
   // SUBCLASS SUPPORT
   // 
   
@@ -326,19 +534,23 @@ SC.ListView = SC.CollectionView.extend(
       
       // console.log('contentRangeInFrame content length is %@'.fmt(len));
       
+      // console.log('minY = ' + minY) ;
+      // console.log('maxY = ' + maxY) ;
+      
       min = null; 
       max = 0;
       do {
-        offset += this.offsetForRowAtContentIndex(max); // add offset.
+        offset = this.offsetForRowAtContentIndex(max); // add offset.
         // console.log('offset is now %@'.fmt(offset));
         if ((min===null) && (offset >= minY)) min = max; // set min
         max++ ;
       } while (max<len && offset < maxY);
       
+      // console.log('min = ' + min) ;
+      // console.log('max = ' + max) ;
+      
       // convert to range...
-      // FIXME: why is this so flaky? *grrr*
-      // ret = { start: Math.max(min-1, 0), length: Math.max(max - min + 2, max) } ;
-      ret = { start: min, length: max - min + 1 } ;
+      ret = { start: Math.max(min-1, 0), length: Math.min(max - min + 2, len) } ;
     }
     
     // console.log('contentRangeInFrame is {%@, %@}'.fmt(ret.start, ret.length));

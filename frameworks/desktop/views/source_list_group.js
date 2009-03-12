@@ -22,9 +22,7 @@ sc_require('views/disclosure');
   @since 0.9
 */
 
-SC.SourceListGroupView = SC.View.extend(
-  SC.Control,
-  SC.CollectionGroup,
+SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
 /** @scope SC.SourceListGroupView.prototoype */ {
   
   classNames: ['sc-source-list-group'],
