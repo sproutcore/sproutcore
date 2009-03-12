@@ -27,7 +27,11 @@ SC.MenuItemView = SC.ListItemView.extend({
   /**
     This will set the contents for the child view if the menu item has a branch
   */
+<<<<<<< HEAD:frameworks/desktop/views/menu_item.js
   childViewContent: null,  //still may be needed to set child menu items
+=======
+  childViewContent: null,
+>>>>>>> Added on 12 March 2009:frameworks/desktop/views/menu_item.js
 
   /**
     This property will set the action meant to be performed for the menu
@@ -178,9 +182,12 @@ SC.MenuItemView = SC.ListItemView.extend({
 
   mouseMoved: function(evt) {
 	//Set the CSS class so that the menu is higlighted.
+<<<<<<< HEAD:frameworks/desktop/views/menu_item.js
 	if(this.get('classNames') == "sc-view,sc-collection-item,sc-list-item-view,sc-menu-item-view") {
 		//Set the CSS class so that the menu is higlighted.
 	}
+=======
+>>>>>>> Added on 12 March 2009:frameworks/desktop/views/menu_item.js
   }
   
 }) ;
