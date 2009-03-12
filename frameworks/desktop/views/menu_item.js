@@ -1,4 +1,5 @@
-SC.MenuItemView = SC.ListItemView.extend(SC.ListView, {
+
+SC.MenuItemView = SC.ListItemView.extend({
 /** @scope SC.MenuItemView.prototype */
   classNames: ['sc-menu-item-view'],
   
@@ -177,6 +178,9 @@ SC.MenuItemView = SC.ListItemView.extend(SC.ListView, {
 
   mouseMoved: function(evt) {
 	//Set the CSS class so that the menu is higlighted.
+	if(this.get('classNames') == "sc-view,sc-collection-item,sc-list-item-view,sc-menu-item-view") {
+		//Set the CSS class so that the menu is higlighted.
+	}
   }
   
 }) ;

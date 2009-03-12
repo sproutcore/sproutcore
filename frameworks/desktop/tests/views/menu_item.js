@@ -7,14 +7,9 @@ var pane = SC.ControlTestPane.design({ height: 32 })
       title: "List Item",
       branch: YES 
     }),
-    
-
     hasChild: YES,
-
     contentValueKey: "title",
-
     contentIconKey:  "icon",
-
     contentIsBranchKey: 'branch'
 
   }));
