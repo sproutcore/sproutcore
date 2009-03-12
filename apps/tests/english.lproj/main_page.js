@@ -46,7 +46,7 @@ TestRunner.mainPage = SC.Page.design({
     // This is the toolbar view that appears at the bottom.  We include two
     // child views that alight right and left so that we can add buttons to 
     // them and let them layout themselves.
-    toolbarView: SC.View.design({
+    toolbarView: SC.ToolbarView.design({
 
       layout: { left: 0, bottom: 0, right: 0, height: 48 },
 
@@ -73,3 +73,5 @@ TestRunner.mainPage = SC.Page.design({
   })
 
 });
+
+

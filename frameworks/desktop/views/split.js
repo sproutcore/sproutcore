@@ -14,26 +14,27 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
 /**
   @class
   
-  TODO: Docs are out of date.
-
   A split view is used to show views that the user can resize or collapse.
-  To use the split view, you need to add a top left view followed by an
-  instance of SC.SplitDividerView followed by a bottom right view.
-
-  For example:
-
+  To use a split view you need to set a topLeftView, a bottomRightView and,
+  optionally, a splitDividerView.  You can also set various other properties
+  to control the minimum and maximum thickness allowed for the flexible views.
+  
+  h2. Example
+  
   {{{
-    <% view :workspace_container, :class => 'workspace_container' do %>
-      <% split_view :workspace, :class => 'sc-app-workspace', :direction => :vertical do %>
-        <% view :top_view, :can_collapse => false, :min_thickness => 50 do %>
-          <p>My top view</p>
-        <% end %>
-        <%= split_divider_view %>
-        <% view :bottom_view, :collapse_at_thickness => 100 do %>
-          <p>My bottom view</p>
-        <% end %>
-      <% end%>
-    <% end %>
+    SC.SplitView.design({
+      
+      // the left view...
+      topLeftView: SC.View.design({
+        // view contents
+      }),
+      
+      // the right view
+      bottomRightView: SC.View.design({
+        // view contents
+      })
+      
+    })
   }}}
 
   When the user clicks and drags on a split divider view, it will
@@ -70,16 +71,6 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
   In addition, the top/left and bottom/right child views can have these
   properties:
   
-  @property {Number} minThickness The minimum thickness of the child view
-  @property {Number} maxThickness The maximum thickness of the child view
-  @property {Number} collapseAtThickness When the divider is dragged beyond
-  the point where the thickness of this view would become less than the value
-  of this property, then collapse the view.
-  @property {Boolean} canCollapse Set to NO when you don't want the child view
-  to collapse. Defaults to YES.
-  @property {Boolean} isCollapsed YES if the child view is collapsed, NO
-  otherwise.
-
   @extends SC.View
   @since SproutCore 1.0
   
@@ -102,7 +93,9 @@ SC.SplitView = SC.View.extend(
   delegate: null,
 
   /**
-    [RO] Direction of layout.  Must be SC.LAYOUT_HORIZONTAL || SC.LAYOUT_VERTICAL.
+    Direction of layout.  Must be SC.LAYOUT_HORIZONTAL or SC.LAYOUT_VERTICAL.
+    
+    @property {String}
   */
   layoutDirection: SC.LAYOUT_HORIZONTAL,
   
@@ -112,14 +105,21 @@ SC.SplitView = SC.View.extend(
   canCollapseViews: YES,
   
   /*
-    Configure which view(s) you want to autoresize when this split view's layout
-    changes.
+    Configure which view(s) you want to autoresize when this split view's 
+    layout changes.  Possible options are:
+    
+    | SC.RESIZE_BOTTOM_RIGHT | (default) resizes bottomRightView |
+    | SC.RESIZE_TOP_LEFT | resized topLeftView |
+    
   */
-  autoresizeBehavior: SC.RESIZE_TOP_LEFT,
+  autoresizeBehavior: SC.RESIZE_BOTTOM_RIGHT,
   
   /**
-    A number between 0.0 and 1.0 specify how much of the topLeftView should 
-    show at startup.
+    Specifies how much space the fixed view should use when the view is setup.
+    A number less than one will be treated as a percentage, while a number 
+    greater than one will be treated as a pixel width.
+    
+    @property {Number}
   */
   topLeftDefaultThickness: 0.5,
   
