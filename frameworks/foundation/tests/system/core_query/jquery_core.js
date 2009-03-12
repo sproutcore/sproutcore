@@ -1006,6 +1006,7 @@ test("val(String/Number)", function() {
 var scriptorder = 0;
 
 test("html(String)", function() {
+  
  expect(5);
  var div = SC.$("#main > div");
  div.html("<b>test</b>");
@@ -1016,13 +1017,14 @@ test("html(String)", function() {
  ok( pass, "Set HTML" );
 
  reset();
- // using contents will get comments regular, text, and comment nodes
+ // using contents will get comments regular, text, and comment nodes 
  var j = SC.$("#nonnodes").contents();
+ 
  j.html("<b>bold</b>");
 
  // this is needed, or the expando added by SC.$ unique will yield a different html
  j.find('b').removeData();
- equals( j.html().toLowerCase(), "<b>bold</b>", "Check node,textnode,comment with html()" );
+ ok( (j.html().toLowerCase().match(/<b(\w*|\s*\=*|\"*)*>bold<\/b>/).length>0),  "Check node,textnode,comment with html()" );
 
  SC.$("#main").html("<select/>");
  SC.$("#main select").html("<option>O1</option><option selected='selected'>O2</option><option>O3</option>");
