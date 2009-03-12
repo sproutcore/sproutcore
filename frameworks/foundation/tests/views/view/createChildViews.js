@@ -11,15 +11,18 @@
 // 
 module("SC.View#createChildViews");
 
-test("calls createChildView() for each CLASS in childViews array", function() {
+test("calls createChildView() for each class or string in childViews array", function() {
   var called = [];
   var v = SC.View.create({
     childViews: [
       SC.View.extend({ key: 0 }), // class - should be called
       SC.View.create({ key: 1 }), // NOT class - should NOT be called
-      SC.View.extend({ key: 2 }) // class - should be called 
+      'customClassName'           // string - should be called 
     ],
 
+    // this shuld be used for the 'customClassName' item above
+    customClassName: SC.View.extend({ key: 2 }),
+    
     // patch to record results...
     createChildView: function(childView) {
       called.push(childView.prototype.key);

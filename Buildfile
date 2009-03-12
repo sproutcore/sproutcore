@@ -13,36 +13,41 @@ config :all,
   :test_layout    => 'sproutcore:lib/index.rhtml',
   :test_required  => ['sproutcore/testing', 'sproutcore/empty_theme'],
   :debug_required => ['sproutcore/debug']
-  
-config :runtime,   :required => []
+
+# CORE FRAMEWORKS
+config :runtime,    :required => []
 config :foundation, :required => [:runtime]
 config :datastore,  :required => [:foundation, :runtime]
 
-config :desktop,    
-  :required => [:runtime, :datastore, :foundation]
+# APP-LEVEL FRAMEWORKS
+%w(desktop mobile).each do |app_framework|
+  config app_framework, :required => [:runtime, :datastore, :foundation]
+end
 
-config :mobile,    
-  :required => [:runtime, :datastore, :foundation]
-
+# WRAPPER FRAMEWORKS
 config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
 
-# Setup special frameworks and themese that do not need to include std
-# dependencies
+# SPECIAL FRAMEWORKS AND THEMES
+# These do not require any of the built-in SproutCore frameworks
 %w(testing debug standard_theme empty_theme).each do |target_name|
-  config target_name,
+  config target_name, 
     :required => [], :test_required => [], :debug_required => []
 end
 
-# setup theme name
+# CONFIGURE THEMES
 config :empty_theme, 
   :theme_name => 'empty-theme',
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
-# Exception: standard_theme is based on the empty_theme
 config :standard_theme, 
   :required => :empty_theme, 
   :theme_name => 'sc-theme',
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
+
+# CONFIGURE APPS
+%w(tests docs).each do |app_target|
+  config app_target, :required => [:desktop], :theme => :empty_theme
+end

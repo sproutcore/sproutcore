@@ -1137,11 +1137,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // swap the array
     for (idx=0; idx<len; ++idx) {
-      view = childViews[idx] ;
-      if (view && view.isClass) {
-        view = this.createChildView(view) ; // instantiate if needed
+      if (view = childViews[idx]) {
+        if (typeof view === SC.T_STRING) view = this.get(view) ;
+        if (view.isClass) {
+          view = this.createChildView(view) ; // instantiate if needed
+        } 
       }
-      childViews[idx] = view ;
     }
     
     this.endPropertyChanges() ;
