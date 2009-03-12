@@ -1143,6 +1143,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
           view = this.createChildView(view) ; // instantiate if needed
         } 
       }
+      childViews[idx] = view;
     }
     
     this.endPropertyChanges() ;
