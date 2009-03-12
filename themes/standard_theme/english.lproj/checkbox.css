@@ -24,7 +24,6 @@
 	width: 16px;
 }
 
-
 .sc-theme .sc-checkbox-view.disabled {
 	color: #999;
 }
@@ -37,7 +36,11 @@
 	height: 16px;
 	top:1px; 
 	left: 1px;
+	position: relative;
 	opacity:0.0;
+	vertical-align: middle ;
+	margin: 0;
+	margin-right: 3px;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
 }
@@ -48,7 +51,7 @@
 	height: 16px;
 	position: absolute ;
 	left: 1px; 
-	top: 1px;
+	top: 0px;
 }
 
 .sc-theme .sc-checkbox-view.sel img.button {

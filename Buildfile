@@ -49,5 +49,5 @@ config :standard_theme,
 
 # CONFIGURE APPS
 %w(tests docs).each do |app_target|
-  config app_target, :required => [:desktop], :theme => :empty_theme
+  config app_target, :required => [:desktop], :theme => :standard_theme
 end

@@ -1,5 +1,5 @@
 // ==========================================================================
-// Project:   SproutCore Test Runner - mainPage
+// Project:   SproutCore Test Runner
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2009 Apple, Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
@@ -25,7 +25,7 @@ TestRunner.mainPage = SC.Page.design({
     // to define a childViews array.
     splitView: SC.SplitView.design({
       
-      layout: { left: 0, top: 0, right: 0, bottom: 48 },
+      layout: { left: 0, top: 0, right: 0, bottom: 32 },
       
       topLeftDefaultThickness: 200,  // set default thickness in pixels
       
@@ -48,25 +48,42 @@ TestRunner.mainPage = SC.Page.design({
     // them and let them layout themselves.
     toolbarView: SC.ToolbarView.design({
 
-      layout: { left: 0, bottom: 0, right: 0, height: 48 },
+      layout: { left: 0, bottom: 0, right: 0, height: 36 },
 
       childViews: 'leftView rightView'.w(),
 
-      leftView: SC.View.design({
-        layout: SC.merge(SC.FULL_HEIGHT, { left: 0, width: 'auto' })
+      leftView: SC.LabelView.design({
+        layout: { left: 12, height: 18, width: 200, centerY: 3 },
+        classNames: 'app-title',
+        tagName: 'h1',
+        fontWeight: SC.BOLD_WEIGHT,
+        value: "Test Runner"
       }),
 
       rightView: SC.View.design({
-        layout: { right: 0, width: 'auto', centerY: 0, height: 23 },
+        layout: { right: 0, left: 200, centerY: 3, height: 23 },
         
-        childViews: 'runTestButton'.w(),
+        childViews: 'continuousIntegrationButton runAllTestsButton runTestButton'.w(),
         
         runTestButton: SC.ButtonView.design({
           title: "Run Test",
           action: "TestRunner.testController.runTest",
-          useStaticLayout: YES,
-          layout: { height: 21, top: 0, width: 80, left: 0 }
+          layout: { height: 21, top: 0, width: 100, right: 12 }
+        }),
+        
+        runAllTestsButton: SC.ButtonView.design({
+          title: "Run All",
+          action: "TestRunner.testsController.runAllTests",
+          layout: { height: 21, top: 0, width: 100, right: 120 }
+        }),
+        
+        continuousIntegrationButton: SC.CheckboxView.design({
+          title: "Continuous integration",
+          valueBinding: "TestRunner.testsController.useContinuousIntegration",
+          layout: { height: 18, centerY: 2, width: 170, right: 216 }
         })
+        
+        
       })
       
     })
