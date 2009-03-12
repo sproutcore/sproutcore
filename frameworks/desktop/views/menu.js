@@ -21,6 +21,21 @@ SC.MenuView = SC.View.extend(SC.Control,
  classNames:['sc-menu-view'],
 
  /**
+   Set to YES to enabled the segmented view, NO to disabled it.
+ */
+ isEnabled: YES,
+
+
+ /** 
+   A key that determines if a menuitem in particular is enabled.  Note if the
+   control in general is not enabled, no items will be enabled, even if the
+   item's enabled property returns YES.
+   
+   @property {String}
+ */
+ itemIsEnabledKey: null, 
+
+ /**
     The array of items to display.  This can be a simple array of strings,
     objects or hashes.  If you pass objects or hashes, you must also set the
     various itemKey properties to tell the MenuView how to extract the
@@ -59,14 +74,14 @@ SC.MenuView = SC.View.extend(SC.Control,
 
     @property {Array}
   */
- itemKeys: 'itemIconKey itemWidthKey'.w(),
+ itemKeys: 'itemIconKey itemIsEnabledKey itemWidthKey'.w(),
 
  /**
     This computed property is generated from the items array
  */
  displayItems: function() {
    //get the items
- }.property('items','itemIconKey', 'itemWidthKey').cacheable(),
+ }.property('items','itemIconKey', 'itemIsEnabledKey','itemWidthKey').cacheable(),
 
  
  /*based on the items passed that needs to form the
@@ -121,6 +136,7 @@ creates the menu tab*/
 
   },
 
+  displayProperties: ['displayItems','activeIndex'],
   
   /** If the items array itself changes, add/remove observer on item... */
   itemsDidChange: function() { 
