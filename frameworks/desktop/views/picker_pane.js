@@ -35,12 +35,12 @@ SC.PickerPane = SC.PalettePane.extend({
   
   classNames: 'sc-picker-pane',
   isAnchored: true,
-  // This property will be set to the view that triggered your picker to show
+  // This property will be set to the element (or view.get('layer')) that triggered your picker to show
   // You can use this to properly position your picker.
-  anchorView: null,
+  anchorElement: null,
 
-  popup: function(anchorView, triggerEvent) {
-    this.set('anchorView',anchorView) ;
+  popup: function(anchorViewOrElement, triggerEvent) {
+    this.set('anchorElement',anchorViewOrElement.get('layer') || anchor) ;
     this.positionPane();
     this.append();
   },
@@ -48,23 +48,56 @@ SC.PickerPane = SC.PalettePane.extend({
   // The ideal position for a picker pane is just below the anchor that 
   // triggered it.  Find that ideal position, then call adjustPosition.
   positionPane: function() {
-    var anchor = this.anchorView ;
+    var anchor = this.anchorElement ;
     var picker = this.contentView ;
     var origin ;
     
-    // usually an anchorView will be passed.  The ideal position to appear is
-    // just below the anchorView.  If that is not possible, fitToScreen will
-    // take care of that.
+    // usually an anchorElement will be passed.  The ideal position to appear is
+    // just below the anchorElement. Current default position is fine tunned visual alignment for popupMenu
+    // If that is not possible, fitToScreen will take care of that for other alternative and fallback position.
     if (anchor) {
-	    origin = this.get("frame");
-      origin.x = 250;
-      origin.y = 250 ;
+	    origin = this.computeAnchorRect(anchor);
+      origin.x += 1 ;
+      origin.y += origin.height + 4;
       origin = this.fitPositionToScreen(origin, picker, anchor) ;
+	    picker.set('layout', { width: picker.layout.width, height: picker.layout.height, left: origin.x, top: origin.y });
+    } else {
+	    // if no anchor view has been set for some reason, just center.
+	    picker.set('layout', { width: picker.layout.width, height: picker.layout.height, centerX: 0, centerY: 0 });
     }
-    picker.set('layout', { width: picker.layout.width, height: picker.layout.height, left: origin.x, top: origin.y });
   },
 
+	computeAnchorRect: function(anchor) {
+		var ret = SC.viewportOffset(anchor); // get x & y
+		var cq = SC.$(anchor);
+		ret.width = cq.width();
+		ret.height = cq.height();
+		return ret ;
+	},
+	
   fitPositionToScreen: function(preferredPosition, paneView, anchor) {
     return preferredPosition;    
+  },
+
+  click: function(evt) {
+    var f=this.contentView.get("frame");
+    if(!this.clickInside(f, evt)) this.remove();
+    return true ; 
+  },
+
+  // define the range for clicking inside so the picker won't be clicked away
+  // default is the range of contentView frame. Over-write for adjustments. ex: shadow
+	clickInside: function(frame, evt) {
+		return (evt.pageX >= frame.x && evt.pageX <= (frame.x+frame.width) && evt.pageY >= frame.y && evt.pageY <= (frame.y+frame.height));
+	},
+
+  /** 
+    re-position picker whenever the window resizes. 
+  */
+  windowSizeDidChange: function(oldSize, newSize) {
+	  sc_super();
+    this.positionPane();
   }
+
 });
+
