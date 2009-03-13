@@ -26,7 +26,7 @@ SC.MenuItemView = SC.ListItemView.extend(SC.ListView, {
   /**
     This will set the contents for the child view if the menu item has a branch
   */
-  childViewContent: null,
+  childViewContent: null,  //still may be needed to set child menu items
 
   /**
     This property will set the action meant to be performed for the menu
