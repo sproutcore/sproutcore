@@ -128,11 +128,10 @@ SC.Button = {
     icon if necessary along with any other standard markup.
   */
   renderTitle: function(context, firstTime) {
-    debugger;
     var icon = this.get('icon') ;
     var image = null ;
     var title = this.get('displayTitle') ;
-    var needsTitle = (title!=null && title.length>0);
+    var needsTitle = (!SC.none(title) && title.length>0);
 
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
