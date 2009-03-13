@@ -47,6 +47,12 @@ SC.Request = SC.Object.extend({
     return request ;
   },
   
+  notify: function(target, action) {
+    if (SC.typeOf(action) === SC.T_STRING) action = target[action];
+    this.set('notifyTarget', target).set('notifyAction', action);
+    return this;
+  },
+  
   response: function() {
     var response = this.get("rawResponse") ;
     if (!response || !SC.$ok(response)) {
@@ -62,7 +68,7 @@ SC.Request = SC.Object.extend({
     
     if(response.responseXML) return response.responseXML ;
     return response.responseText ;
-  }.property('rawResponse')
+  }.property('rawResponse').cacheable()
   
 });
 
@@ -103,6 +109,11 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   sendRequest: function(request) {
     if(!request) return;
     
+    request = { 
+      request: request, 
+      action:  request.get('notifyAction'),
+      target:  request.get('notifyTarget') };
+    
     this.propertyWillChange("queue");
     this.get('queue').pushObject(request);
     this.propertyDidChange("queue");
@@ -113,17 +124,17 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   fireRequestIfNeeded: function() {
     if (this.canLoadAnotherRequest()) {
       this.propertyWillChange('queue') ;
-      var request = this.get('queue').popObject() ;
+      var item = this.get('queue').popObject() ;
       this.propertyDidChange('queue') ;
       
-      if (request) {
-        var transportClass = request.get('transportClass') ;
+      if (item) {
+        var transportClass = item.request.get('transportClass') ;
         if (!transportClass) transportClass = this.get('transportClass') ;
         
         if (transportClass) {
-          var transport = this.transportClass.create({ request: request }) ;
+          var transport = this.transportClass.create(item) ;
           if (transport) {
-            request.set('transport', transport) ;
+            item.request.set('transport', transport) ;
             this._transportDidOpen(transport) ;
           }
         }
@@ -218,6 +229,12 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
         var error = SC.$error("HTTP Request failed", "Fail", -1) ;
         error.set("request",request) ;
         request.source.set('rawResponse', error) ;
+      }
+      
+      if (this.target && this.action) {
+        SC.RunLoop.begin();
+        this.action.call(this.target, request.source);
+        SC.RunLoop.end();
       }
       
       SC.Request.manager.transportDidClose(this) ;

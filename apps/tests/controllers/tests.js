@@ -10,11 +10,18 @@
 
   Manages the current selection of tests.
 
-  @extends SC.Object
+  @extends SC.ArrayController
 */
-TestRunner.testsController = SC.Object.create(
+TestRunner.testsController = SC.ArrayController.create(
 /** @scope TestRunner.testsController.prototype */ {
 
+  /**
+    The selected target.  Will be used to load tests.
+  */
+  targetBinding: SC.Binding.single("TestRunner.targetsController.selection"),
+  
+  contentBinding: "*target.tests",
+  
   /**
     Bound to the continuous integration checkbox.  If you start running 
     all tests and this is set to YES, then the runner will loop until it is
@@ -22,15 +29,10 @@ TestRunner.testsController = SC.Object.create(
     
     @property {Boolean}
   */
-  useContinuousIntegration: NO,
+  useContinuousIntegration: NO
   
-  /**
-    Action invoked when you click the Run All Tests button.
-  */
-  runAllTests: function() {
-    console.log("Run all tests!");
-  }
-
 }) ;
 
 TestRunner.testsController.addProbe('useContinuousIntegration');
+TestRunner.testsController.addProbe('target');
+TestRunner.testsController.addProbe('content');

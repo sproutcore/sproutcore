@@ -28,6 +28,8 @@
 TestRunner = SC.Object.create(/** @scope TestRunner.prototype */ {
 
   NAMESPACE: 'TestRunner',
-  VERSION: '1.0.0'
+  VERSION: '1.0.0',
+  
+  FIXTURES: []
 
 }) ;

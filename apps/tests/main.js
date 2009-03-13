@@ -27,8 +27,9 @@ TestRunner.main = function main() {
   // create multiple pages and panes.  
   TestRunner.getPath('mainPage.mainPane').append() ;
 
-  // Step 3. Set the content property on your primary controller.
-  // This will make your app come alive!
+  // Step 3. Load the initial set of targets.  This will make the rest of the 
+  // app come alive!
+  TestRunner.targetsController.refresh();
 
   // TODO: Set the content property on your primary controller
   // ex: .contactsController.set('content',.contacts);

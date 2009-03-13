@@ -33,11 +33,20 @@ TestRunner.mainPage = SC.Page.design({
         
         hasHorizontalScroller: NO, // disable horizontal scrolling
         contentView: SC.ListView.design({
-          layout: SC.merge(SC.FULL_WIDTH, SC.ANCHOR_TOP, { height: 400 })
+          contentBinding: "TestRunner.targetsController.arrangedObjects",
+          selectionBinding: "TestRunner.targetsController.selection",
+          contentValueKey: "name"
         })
       }),
       
-      bottomRightView: SC.WebView.design({
+      bottomRightView: SC.ScrollView.design({
+        
+        hasHorizontalScroller: NO,
+        contentView: SC.ListView.design({
+          contentBinding: "TestRunner.testsController.arrangedObjects",
+          selectionBinding: "TestRUnner.testsController.selection",
+          contentValueKey: "filename"
+        })
         
       })
       
