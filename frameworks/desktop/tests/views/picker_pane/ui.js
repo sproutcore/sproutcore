@@ -26,7 +26,7 @@ test("verify picker pane content container is visible at correct location with r
       layout: { width: 300, height: 200 }
     })
   });
-  pane.popup(anchor.view('anchor'));
+  pane.popup(anchor.view('anchor'), SC.PICKER_POINTER, [3,0,1,2,2]);
 
 	ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
 	ok(pane.$().hasClass('sc-picker-pane'), 'pane should have sc-picker-pane class');
