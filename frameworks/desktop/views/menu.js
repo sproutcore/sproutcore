@@ -106,6 +106,8 @@ creates the menu tab*/
 
  renderDisplayItems: function(context, items) {
    
+	
+    },
     /*
     create a div that holds u'r menu tabs , like in the below snippet
     have a the tabs within <li> tag (the menu view class) and the menu items that should 
@@ -138,7 +140,6 @@ creates the menu tab*/
 	</div>
    */
 
-  },
 
   displayProperties: ['displayItems','activeIndex'],
   
@@ -183,16 +184,7 @@ creates the menu tab*/
   },
   
   createChildViews: function() {
-	  var childViews = [] ;   
-      if (view = this.get('menuItemsView')) {
-       	 view = this.createChildView(view, {
-	          layoutView: this
-	          //rootElementPath: [idx]
-	        }) ;
-	        childViews.push(view) ;
-	  }
-    this.set('childViews', childViews) ;
-    return this ; 
+	  
   }
 
 
