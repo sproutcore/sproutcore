@@ -1,4 +1,4 @@
-SC.MenuItemView = SC.ListItemView.extend({
+SC.MenuItemView = SC.ListItemView.extend(SC.ListView, {
 /** @scope SC.MenuItemView.prototype */
   classNames: ['sc-menu-item-view'],
   
@@ -15,12 +15,18 @@ SC.MenuItemView = SC.ListItemView.extend({
     This returns true if the child view is a menu list view.
     This property can be over written to have other child views as well.
   */
-  childView: SC.MenuList, 
+  childView: SC.MenuList, //may not need after all
+
+  /**
+    This retirns true if the menu item is infact an option. If true it will
+    dispaly an image of a tick mark when the menu item is selected.
+  */
+  isAnOption: NO,
   
   /**
     This will set the contents for the child view if the menu item has a branch
   */
-  childViewContent: null,
+  childViewContent: null,  //still may be needed to set child menu items
 
   /**
     This property will set the action meant to be performed for the menu
@@ -65,6 +71,15 @@ SC.MenuItemView = SC.ListItemView.extend({
     var del = this.displayDelegate ;
     var key, value ;
     
+	// handle icon
+    if (this.getDelegateProperty(del, 'isAnOption')) {
+      key = this.getDelegateProperty(del,'contentIconKey') ;
+      value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+
+      this.renderOption(context, value);
+      context.addClass('is-option');
+    }
+
     // handle label -- always invoke
     key = this.getDelegateProperty(del, 'contentValueKey') ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
@@ -94,13 +109,29 @@ SC.MenuItemView = SC.ListItemView.extend({
 
   },
 
+  renderOption: function(context, image) {
+	// get a class name and url to include if relevant
+    var url = null, className = null ;
+    if (image && SC.ImageView.valueIsUrl(image)) {
+      url = image; className = '' ;
+    } else {
+      className = image; url = sc_static('blank.gif') ;
+    }
+
+    // generate the img element...
+    context.begin('img')
+      .addClass('image').addClass(className)
+      .attr('src', url)
+    .end();
+  },
+
   renderLabel: function(context, label) {
     context.push('<label>', label || '', '</label>') ;
   },
 
   /** 
     Generates the html string used to represent the action item for your 
-    list item.  override this to return your own custom HTML
+    menu item.  override this to return your own custom HTML
 
     @param {SC.RenderContext} context the render context
     @param {String} actionClassName the name of the action item

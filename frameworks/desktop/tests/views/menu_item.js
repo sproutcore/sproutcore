@@ -1,8 +1,6 @@
+htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
+(function() {
 var pane = SC.ControlTestPane.design({ height: 32 })
-  .add("basic", SC.MenuItemView.design({ 
-    content: "List Item"
-  }))
-
   .add("full", SC.MenuItemView.design({ 
     content: SC.Object.create({ 
       // icon: "sc-icon-folder-16",
@@ -21,5 +19,4 @@ var pane = SC.ControlTestPane.design({ height: 32 })
 
   }));
 pane.show();
-
-window.pane = pane ;
+})();

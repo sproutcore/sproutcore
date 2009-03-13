@@ -76,6 +76,10 @@ SC.MenuView = SC.View.extend(SC.Control,
   */
  itemKeys: 'itemIconKey itemIsEnabledKey itemWidthKey'.w(),
 
+ // add default views
+ // should add a default view that holds all the menu items 
+  menuItemsView: SC.View, 
+  
  /**
     This computed property is generated from the items array
  */
@@ -176,6 +180,19 @@ creates the menu tab*/
 
   mouseOut:function(evt){
    // should hide the last visible menu  	
+  },
+  
+  createChildViews: function() {
+	  var childViews = [] ;   
+      if (view = this.get('menuItemsView')) {
+       	 view = this.createChildView(view, {
+	          layoutView: this
+	          //rootElementPath: [idx]
+	        }) ;
+	        childViews.push(view) ;
+	  }
+    this.set('childViews', childViews) ;
+    return this ; 
   }
 
 
