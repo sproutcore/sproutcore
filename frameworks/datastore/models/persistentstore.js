@@ -111,6 +111,37 @@ SC.PersistentStore = SC.Object.extend(
     return recordType;
   },
   
+  _queries: null,
+  
+  /**
+    Given a filter and a recordType, retrieve matching records. 
+    
+    @param {SC.Record} recordType The query containing a query.
+    @param {String} query The query containing a query.
+    @param {Mixed} arguments The arguments for the query.
+    
+    @returns {Array} Returns an array of matched record instances.
+  */
+  findAll: function(recordType, queryString)
+  {
+    if(!queryString) return null;
+    
+    var args = SC.$A(arguments);
+    recordType = args.shift();
+    queryString = args.shift();
+    
+    var query = null;
+    if(this._queries[queryString]) 
+    {
+      query = this._queries[queryString];
+    } else {
+      this._queries[queryString] = query = SC.Query.create({store: this, delegate: this});
+    }
+    query.parse(recordType, queryString, args);
+    this.prepareQuery(query);
+    return query;
+  },
+
   provideLengthForQuery: function(query) {
     if(this.parentStore) {
       this.parentStore.provideLengthForQuery(query);
@@ -125,6 +156,8 @@ SC.PersistentStore = SC.Object.extend(
     if(this.parentStore) {
       this.parentStore.prepareQuery(query);
     } else {
+      //query.set('hasAllRecords', YES);
+
       console.log("prep persistent store for query");
     }
   },
@@ -133,6 +166,12 @@ SC.PersistentStore = SC.Object.extend(
     if(query) {
       query.performQuery();
     }
+  },
+  
+  init: function()
+  {
+    sc_super();
+    this._queries = {};
   }
   
 }) ;

@@ -981,9 +981,6 @@ SC.Store = SC.Object.extend(
     return ret;
   },
   
-  
-  _queries: {},
-  
   /**
     Given a filter and a recordType, retrieve matching records. 
     
@@ -1012,23 +1009,35 @@ SC.Store = SC.Object.extend(
     this.prepareQuery(query);
     return query;
   },
-  
+
+  /**
+    For a in memory store, just perform the query to get the length.
+  */
   provideLengthForQuery: function(query) {
-    if(this.parentStore) {
-      this.parentStore.provideLengthForQuery(query);
-    }
+    query.performQuery();
+    // if(this.parentStore) {
+    //   this.parentStore.provideLengthForQuery(query);
+    // }
   },
 
+  /**
+    For a in memory store, just perform the query to get the records.
+  */
   provideRecordsForQuery: function(query) {
-    if(this.parentStore) {
-      this.parentStore.provideRecordsForQuery(query);
-    }
+    query.performQuery();
+    // if(this.parentStore) {
+    //   this.parentStore.provideRecordsForQuery(query);
+    // }
   },
 
+  /**
+    For a in memory store, just perform the query.
+  */
   prepareQuery: function(query) {
-    if(this.parentStore) {
-      this.parentStore.prepareQuery(query);
-    }
+    query.performQuery();
+    // if(this.parentStore) {
+    //   this.parentStore.prepareQuery(query);
+    // }
   },
   
   performQuery: function(query) {
@@ -1139,7 +1148,8 @@ SC.Store = SC.Object.extend(
     this.instantiatedRecordMap = {};
     this.childStores = [];
     this.retrievedRecQueue = [];
-
+    this._queries = {};
+    
     this.reset();
 
     if(this.get('isTransient')) {
