@@ -14,12 +14,6 @@
 */
 TestRunner.Target = SC.Record.extend(
 /** @scope TestRunner.Target.prototype */ {
-
-  /** name is the human readable target */
-  nameType: String,
-  
-  /** The target type.  Generally one of app, framework, or theme */
-  kindType: String,
   
   /** Load the tests for the target. */
   tests: function() {
