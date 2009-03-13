@@ -23,7 +23,7 @@ var pane ;
 test("verify picker pane content container is visible at correct location with right size", function() { 
   pane = SC.PickerPane.create({
     contentView: SC.View.extend({
-      layout: { width: 400, height: 200 }
+      layout: { width: 300, height: 200 }
     })
   });
   pane.popup(anchor.view('anchor'));
@@ -35,7 +35,7 @@ test("verify picker pane content container is visible at correct location with r
 	
   var ret = pane.childViews[0].layoutStyle();
 
-	equals(ret.width, '400px', 'pane.div should have width 400px');
+	equals(ret.width, '300px', 'pane.div should have width 300px');
 	equals(ret.height, '200px', 'pane.div should have height 200px');
 
   //pane.remove();

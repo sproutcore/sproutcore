@@ -39,27 +39,33 @@ SC.PickerPane = SC.PalettePane.extend({
   // You can use this to properly position your picker.
   anchorElement: null,
 
-  popup: function(anchorViewOrElement, triggerEvent) {
+  popup: function(anchorViewOrElement, triggerEvent, preferDefault, preferFallback) {
     this.set('anchorElement',anchorViewOrElement.get('layer') || anchor) ;
-    this.positionPane();
+    this.positionPane(preferDefault, preferFallback);
     this.append();
   },
 
   // The ideal position for a picker pane is just below the anchor that 
   // triggered it.  Find that ideal position, then call adjustPosition.
-  positionPane: function() {
+  positionPane: function(preferDefault, preferFallback) {
     var anchor = this.anchorElement ;
     var picker = this.contentView ;
     var origin ;
     
-    // usually an anchorElement will be passed.  The ideal position to appear is
-    // just below the anchorElement. Current default position is fine tunned visual alignment for popupMenu
+    // usually an anchorElement will be passed.  The ideal position is decided by preferDefault.
+    // Current default position is fine tunned visual alignment for popupMenu to appear is just below the anchorElement. 
     // If that is not possible, fitToScreen will take care of that for other alternative and fallback position.
     if (anchor) {
-	    origin = this.computeAnchorRect(anchor);
-      origin.x += 1 ;
-      origin.y += origin.height + 4;
-      origin = this.fitPositionToScreen(origin, picker, anchor) ;
+	    anchor = this.computeAnchorRect(anchor);
+	    origin = SC.cloneRect(anchor);
+	    if(preferDefault) {
+		
+	    } else {
+		    // fine tunned visual alignment. optimized for popupMenu
+	      origin.x += 1 ;
+	      origin.y += origin.height + 4;		
+			}
+      origin = this.fitPositionToScreen(origin, picker.get('frame'), anchor, preferFallback) ;
 	    picker.set('layout', { width: picker.layout.width, height: picker.layout.height, left: origin.x, top: origin.y });
     } else {
 	    // if no anchor view has been set for some reason, just center.
@@ -75,8 +81,52 @@ SC.PickerPane = SC.PalettePane.extend({
 		return ret ;
 	},
 	
-  fitPositionToScreen: function(preferredPosition, paneView, anchor) {
-    return preferredPosition;    
+  fitPositionToScreen: function(preferredPosition, f, a, preferFallback) {
+    // get window rect.
+    var w = { x: 0, y: 0, width: SC.$().width(), height: SC.$().height() } ;
+    f.x = preferredPosition.x ; f.y = preferredPosition.y ;
+
+    if(preferFallback) {
+	
+    } else {
+	    // make sure the right edge fits on the screen.  If not, anchor to 
+	    // right edge of anchor or right edge of window, whichever is closer.
+	    if (SC.maxX(f) > w.width) {
+	      var mx = Math.max(SC.maxX(a), f.width) ;
+	      f.x = Math.min(mx, w.width) - f.width ;
+	    }
+
+	    // if the left edge is off of the screen, try to position at left edge
+	    // of anchor.  If that pushes right edge off screen, shift back until 
+	    // right is on screen or left = 0
+	    if (SC.minX(f) < 0) {
+	      f.x = SC.minX(Math.max(a,0)) ;
+	      if (SC.maxX(f) > w.width) {
+	        f.x = Math.max(0, w.width - f.width);
+	      }
+	    }
+
+	    // make sure bottom edge fits on screen.  If not, try to anchor to top
+	    // of anchor or bottom edge of screen.
+	    if (SC.maxY(f) > w.height) {
+	      var mx = Math.max((a.y - f.height), 0) ;
+	      if (mx > w.height) {
+	        f.y = Math.max(0, w.height - f.height) ;
+	      } else f.y = mx ;
+	    }
+
+	    // if Top edge is off screen, try to anchor to bottom of anchor. If that
+	    // pushes off bottom edge, shift up until it is back on screen or top =0
+	    if (SC.minY(f) < 0) {
+	      var mx = Math.min(SC.maxY(a), (w.height - a.height)) ;
+	      f.y = Math.max(mx, 0) ;
+	    }
+
+	    // min left/right padding to the window
+	    if( (f.x + f.width) > (w.width-8) ) f.x = w.width - f.width - 8;
+	    if( f.x < 7 ) f.x = 7;
+		}
+    return f ;
   },
 
   click: function(evt) {
@@ -88,7 +138,7 @@ SC.PickerPane = SC.PalettePane.extend({
   // define the range for clicking inside so the picker won't be clicked away
   // default is the range of contentView frame. Over-write for adjustments. ex: shadow
 	clickInside: function(frame, evt) {
-		return (evt.pageX >= frame.x && evt.pageX <= (frame.x+frame.width) && evt.pageY >= frame.y && evt.pageY <= (frame.y+frame.height));
+		return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
 	},
 
   /** 
