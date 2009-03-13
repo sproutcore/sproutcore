@@ -1,4 +1,4 @@
 .sc-toolbar-view {
-  background: sc_static('images/sc-toolbar-view') repeat-x top left;
+  background: sc_static('images/sc-toolbar-view') repeat-x top left; 
   border: none;
 }

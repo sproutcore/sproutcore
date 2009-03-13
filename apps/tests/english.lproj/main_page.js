@@ -52,38 +52,21 @@ TestRunner.mainPage = SC.Page.design({
 
       childViews: 'leftView rightView'.w(),
 
-      leftView: SC.LabelView.design({
-        layout: { left: 12, height: 18, width: 200, centerY: 3 },
+      leftView: SC.View.design({
+        layout: { left: 0, top: 4, bottom: 0, width: 200 },
         classNames: 'app-title',
         tagName: 'h1',
-        fontWeight: SC.BOLD_WEIGHT,
-        value: "Test Runner"
+        render: function(context, firstTime) {
+          var img_url = sc_static('images/sproutcore-logo');
+          context.push('<img src="%@" />'.fmt(img_url));
+          context.push('<span>', "Test Runner".loc(), "</span>");
+        }
       }),
 
-      rightView: SC.View.design({
-        layout: { right: 0, left: 200, centerY: 3, height: 23 },
-        
-        childViews: 'continuousIntegrationButton runAllTestsButton runTestButton'.w(),
-        
-        runTestButton: SC.ButtonView.design({
-          title: "Run Test",
-          action: "TestRunner.testController.runTest",
-          layout: { height: 21, top: 0, width: 100, right: 12 }
-        }),
-        
-        runAllTestsButton: SC.ButtonView.design({
-          title: "Run All",
-          action: "TestRunner.testsController.runAllTests",
-          layout: { height: 21, top: 0, width: 100, right: 120 }
-        }),
-        
-        continuousIntegrationButton: SC.CheckboxView.design({
-          title: "Continuous integration",
-          valueBinding: "TestRunner.testsController.useContinuousIntegration",
-          layout: { height: 18, centerY: 2, width: 170, right: 216 }
-        })
-        
-        
+      rightView: SC.CheckboxView.design({
+        title: "Continuous Integration",
+        valueBinding: "TestRunner.testsController.useContinuousIntegration",
+        layout: { height: 18, centerY: 2, width: 170, right: 12 }
       })
       
     })

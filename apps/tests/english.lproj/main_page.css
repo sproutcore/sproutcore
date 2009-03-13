@@ -1,4 +1,19 @@
 h1.app-title {
   font-weight: bold;
   font-size: 18px;
+  margin: 0;
+  padding: 0;
+  line-height: 32px;
+  vertical-align: middle;
+  padding-left: 12px;
+  letter-spacing: -1px;
+}
+
+h1.app-title img {
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 2px;
+  position: relative;
+  top: -3px;
 }
