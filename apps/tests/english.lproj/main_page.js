@@ -48,7 +48,7 @@ TestRunner.mainPage = SC.Page.design({
     // them and let them layout themselves.
     toolbarView: SC.ToolbarView.design({
 
-      layout: { left: 0, bottom: 0, right: 0, height: 36 },
+      anchorLocation: SC.ANCHOR_BOTTOM,
 
       childViews: 'leftView rightView'.w(),
 

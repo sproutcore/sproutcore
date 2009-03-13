@@ -29,31 +29,6 @@ SC.ToolbarView = SC.View.extend(
   */
   anchorLocation: null,
 
-  /**
-    View to attach to the left side of the toolbar view.  Set to
-    a View class or design.
-    
-    @property {SC.View}
-  */
-  leftView: null,
-  
-  /**
-    View to attach to the right side of the toolabr view.  Set to a View class
-    or design.
-    
-    @property {SC.View}
-  */
-  rightView: null,
-  
-  /**
-    View to attach to the center of the toolabr view.  Set to a view class or
-    design.  The center view will appear underneath the left or right view 
-    if they overlap.  It must have a fixed width.
-    
-    @property {SC.View}
-  */
-  centerView: null,
-  
   // ..........................................................
   // INTERNAL SUPPORT
   // 
