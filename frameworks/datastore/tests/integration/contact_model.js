@@ -77,7 +77,7 @@ module("Sample Model from an address book app", {
       street2: String,
       city: String,
       state: String,
-      country: String
+      country: String,   
       
       // the contact the address belongs to.
       contact: function() {
