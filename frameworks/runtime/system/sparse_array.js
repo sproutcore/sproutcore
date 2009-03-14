@@ -40,96 +40,243 @@ sc_require('mixins/delegate_support') ;
   @since SproutCore 1.0
 */
 
-SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array, SC.DelegateSupport, 
-  /** @scope SC.SparseArray.prototype */ {  
+SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array, 
+  SC.DelegateSupport, /** @scope SC.SparseArray.prototype */ {  
+
+  // ..........................................................
+  // LENGTH SUPPORT
+  // 
   
-  length: 0,
-  
-  init: function() {
-    sc_super();
-    this.initObservable();
-  },
-  
-  indexOf: function(obj) {
-    var content = this._sa_content ;
-    if (!content) content = this._sa_content = [] ;
-    return content.indexOf(obj) ;
-  },
-  
-  clone: function() {
-    return SC.SparseArray.create({ 
-      length: length, _sa_content: SC.A(this._sa_content)
-    });
-  },
+  /**
+    The length of the sparse array.  The delegate for the array should set 
+    this length.
+    
+    @property {Number}
+  */
+  length: function() {
+    var del = this.delegate ;
+    if (del && SC.none(this._length) && del.sparseArrayDidRequestLength) {      
+      del.sparseArrayDidRequestLength(this);
+    }
+    return this._length || 0 ;
+  }.property().cacheable(),
 
   /**
-    Use this method to update the content at a specified index.  This will 
-    note that the array content has changed without notifying the delegate
-    again of a change.
-    
-    @param {Number} index the index to alter
-    @param {Object} obj the object to insert
-    @returns {SC.SparseArray} reciever
+    Call this method from a delegate to provide a length for the sparse array.
+    If you pass null for this property, it will essentially "reset" the array
+    causing your delegate to be called again the next time another object 
+    requests the array length.
+  
+    @param {Number} length the length or null
+    @returns {SC.SparseArray} receiver
   */
-  provideContentAtIndex: function(index, obj) {
-    var content = this._sa_content ;
-    if (!content) content = this._sa_content = [] ;
-    content[index] = obj;
-    this.enumerableContentDidChange() ;
+  provideLength: function(length) {
+    if (SC.none(length)) this._sa_content = null ;
+    if (length !== this._length) {
+      this._length = length ;
+      this.enumerableContentDidChange() ;
+    }
     return this ;
   },
   
-  // delegate methods
-  sparseArrayDidReplace: function(sary, idx, amt, objects) {},
-  sparseArrayDidRequestIndex: function(sary, idx) {},
-  sparseArrayDidFlush: function(sary) {},
-  
-  /** @private */
-  replace: function(idx, amt, objects) {
-    var objects = objects || [] ;
-    var content = this._sa_content ;
-    if (!content) content = this._sa_content = [] ;
-    
-    // replace content
-    content.replace(idx, amt, objects) ;
-    
-    // update length
-    var len = this.length ;
-    if (idx > len) this.length = len + objects.get('length') ;
-    else if ((idx+amt) > len)  this.length = idx + objects.get('length') ;
-    else this.length = (len - amt) + objects.get('length') ;
-    
-    // notify delegate, observers
-    this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReplace', this, idx, amt, objects) ;
-    this.enumerableContentDidChange() ;
-    return this ;
-  },
+  // ..........................................................
+  // READING CONTENT 
+  // 
 
-  /** @private */
+  /** 
+    The minimum range of elements that should be requested from the delegate.
+    If this value is set to larger than 1, then the sparse array will always
+    fit a requested index into a range of this size and request it.
+    
+    @property {Number}
+  */
+  rangeWindowSize: 1,
+  
+  /** 
+    Returns the object at the specified index.  If the value for the index
+    is currently undefined, invokes the didRequestIndex() method to notify
+    the delegate.
+    
+    @param  {Number} idx the index to get
+    @return {Object} the object
+  */
   objectAt: function(idx) {
     var content = this._sa_content, ret ;
     if (!content) content = this._sa_content = [] ;
-    ret= content[idx] ;
-    if (ret === undefined) { 
-      this.invokeDelegateMethod(this.delegate, 'sparseArrayDidRequestIndex', this, idx) ;
+    if ((ret = content[idx]) === undefined) {
+      this.requestIndex(idx);
+      ret = content[idx]; // just in case the delegate provided immediately
     }
-    ret = content[idx];
     return ret ;
   },
 
-  // removes content array
-  flush: function() {
-    this._sa_content = null ;
-    this.enumerableContentDidChange() ;
-    this.invokeDelegateMethod(this.delegate, 'sparseArrayDidFlush', this);
+  _TMP_RANGE: {},
+  
+  /**
+    Called by objectAt() whenever you request an index that has not yet been
+    loaded.  This will possibly expand the index into a range and then invoke
+    an appropriate method on the delegate to request the data.
+    
+    @param {SC.SparseArray} receiver
+  */
+  requestIndex: function(idx) {
+    var del = this.delegate;
+    if (!del) return this; // nothing to do
+    
+    // adjust window
+    var len = this.get('rangeWindowSize'), start = idx;
+    if (len > 1) start = Math.floor(start / windowSize);
+    if (len < 1) len = 1 ;
+    
+    // invoke appropriate callback
+    if (del.sparseArrayDidRequestRange) {
+      var range = this._TMP_RANGE;
+      range.start = start;
+      range.length = len;
+      del.sparseArrayDidRequestRange(this, range);
+      
+    } else if (del.sparseArrayDidRequestIndex) {
+      while(--len >= 0) del.sparseArrayDidRequestIndex(start + len);
+    }
     return this ;
   },
+  
+  /**
+    This method sets the content for the specified to the objects in the 
+    passed array.  If you change the way SparseArray implements its internal
+    tracking of objects, you should override this method along with 
+    objectAt().
     
-  /** TODO: explain */
-  delegate: null,
+    @param {Range} range the range to apply to
+    @param {Array} array the array of objects to insert
+    @returns {SC.SparseArray} reciever
+  */
+  provideObjectsInRange: function(range, array) {
+    var content = this._sa_content ;
+    if (!content) content = this._sa_content = [] ;
+    var start = range.start, len = range.length;
+    while(--len >= 0) content[start+len] = array[len];
+    this.enumerableContentDidChange() ;
+    return this ;
+  },
 
-  _sa_content: null
+  _TMP_PROVIDE_ARRAY: [],
+  _TMP_PROVIDE_RANGE: { length: 1 },
+  
+  /**
+    Convenience method to provide a single object at a specified index.  Under
+    the covers this calls provideObjectsInRange() so you can override only 
+    that method and this one will still work.
     
+    @param {Number} index the index to insert
+    @param {Object} the object to insert
+    @return {SC.SparseArray} receiver
+  */
+  provideObjectAtIndex: function(index, object) {
+    var array = this._TMP_PROVIDE_ARRAY, range = this._TMP_PROVIDE_RANGE;
+    array[0] = object;
+    range.start = index;
+    return this.provideObjectsInRange(range, array);
+  },
+
+  /**
+    Invalidates the array content in the specified range.  This is not the 
+    same as editing an array.  Rather it will cause the array to reload the
+    content from the delegate again when it is requested.
+    
+    @param {Range} the range
+    @returns {SC.SparseArray} receiver
+  */
+  objectsDidChangeInRange: function(range) {
+
+    // delete cached content
+    var content = this._sa_content ;
+    if (content) {
+      // if range covers entire length of cached content, just reset array
+      if (range.start === 0 && SC.maxRange(range)>=content.length) {
+        this._sa_content = null ;
+        
+      // otherwise, step through the changed parts and delete them.
+      } else {
+        var start = range.start, loc = Math.min(start + range.length, content.length);
+        while (--loc>=start) content[loc] = undefined;
+      }
+    }    
+    this.enumerableContentDidChange(range) ; // notify
+    return this ;
+  },
+  
+  /**
+    Optimized version of indexOf().  Asks the delegate to provide the index 
+    of the specified object.  If the delegate does not implement this method
+    then it will search the internal array directly.
+    
+    @param {Object} obj the object to search for
+    @returns {Number} the discovered index or -1 if not found
+  */
+  indexOf: function(obj) {
+    var del = this.delegate ;
+    if (del && del.sparseArrayDidRequestIndexOf) {
+      return del.del.sparseArrayDidRequestIndexOf(this, obj);
+    } else {
+      var content = this._sa_content ;
+      if (!content) content = this._sa_content = [] ;
+      return content.indexOf(obj) ;
+    }
+  },  
+  
+  // ..........................................................
+  // EDITING
+  // 
+
+  /**
+    Array primitive edits the objects at the specified index unless the 
+    delegate rejects the change.
+    
+    @param {Number} idx the index to begin to replace
+    @param {Number} amt the number of items to replace
+    @param {Array} objects the new objects to set instead
+    @returns {SC.SparseArray} receiver
+  */
+  replace: function(idx, amt, objects) {
+    objects = objects || [] ;
+
+    // if we have a delegate, get permission to make the replacement.
+    var del = this.delegate ;
+    if (del) {
+      if (!del.sparseArrayShouldReplace || 
+          !del.sparseArrayShouldReplace(this, idx, amt, objects)) {
+            return this;
+      }
+    }
+
+    // go ahead and apply to local content.
+    var content = this._sa_content ;
+    if (!content) content = this._sa_content = [] ;
+    content.replace(idx, amt, objects) ;
+    
+    // update length
+    var delta = objects.length - amt ;
+    if (delta>0 && !SC.none(this._length)) {
+      this.propertyWillChange('length');
+      this._length += delta;
+      this.propertyDidChange('length');
+    } 
+
+    this.enumerableContentDidChange() ;
+    return this ;
+  },
+
+  /** 
+    Resets the SparseArray, causing it to reload its content from the 
+    delegate again.
+  */
+  reset: function() {
+    this._sa_content = null ;
+    this._length = null ;
+    this.enumerableContentDidChange() ;
+    this.invokeDelegateMethod(this.delegate, 'sparseArrayDidReset', this);
+    return this ;
+  }
+      
 }) ;
-
-// SC.SparseArray.create = function(len) { return new SC.SparseArray(len); };

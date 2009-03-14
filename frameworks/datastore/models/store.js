@@ -5,7 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
 /**
   @class
 
@@ -211,12 +210,9 @@ SC.Store = SC.Object.extend(
             !this.get('parentStore').get('isPersistent'));
   }.property('parentStore').cacheable(),
   
-  
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  //  Chained Store Handling.
-  //
-  ////////////////////////////////////////////////////////////////////////////
+  // ..........................................................
+  // STORE CHAINING
+  // 
   
   /**
     Create a child data record form this instance. Adds it to the list of 
@@ -378,7 +374,7 @@ SC.Store = SC.Object.extend(
     if(parentStore) {
       
       // Reset this store so that it matches up with its parentStore.
-      var isSuccess = parentStore.commitChangesFromStore(this);
+      isSuccess = parentStore.commitChangesFromStore(this);
       this.reset();
 
     }
@@ -396,17 +392,13 @@ SC.Store = SC.Object.extend(
     
     if(!this.get('isTransient')) {
       throw("SC.Store: discardChanges on store that is attached to a persistentStore is not allowed!");
-      return NO;
     }
     return YES;
   },
 
-  
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  //  Handling of dataHashes.
-  //
-  ////////////////////////////////////////////////////////////////////////////
+  // ..........................................................
+  // CORE DATA HASH API
+  // 
   
   /**
     Creates or updates the store's dataHashes. Does not manipulate SC.Record 
@@ -511,7 +503,7 @@ SC.Store = SC.Object.extend(
       }
       
       if(error) {
-        throw("SC.Store: Insertion of record failed, missing %@.".fmt(error));
+        throw "SC.Store: Insertion of record failed, missing %@.".fmt(error) ;
       }
       
       // If the storeKey is already set, then update the dataHash and 
@@ -599,7 +591,7 @@ SC.Store = SC.Object.extend(
 
       if(dataHash !== undefined)
       {
-        var rev = revisions[storeKey] = revisions[storeKey]+1;
+        var rev = (revisions[storeKey] = revisions[storeKey]+1);
         if(changes.indexOf(storeKey) === -1) {
           changes.push(storeKey);
         }
@@ -642,17 +634,14 @@ SC.Store = SC.Object.extend(
   getDataHash: function(storeKey)
   {
     if(storeKey !== undefined) {
-      return this.dataHashes[storeKey] = this.dataHashes[storeKey];
+      return (this.dataHashes[storeKey] = this.dataHashes[storeKey]);
     }
     return null;
   },
   
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  //  Handling of Records.
-  //
-  ////////////////////////////////////////////////////////////////////////////
-
+  // ..........................................................
+  // RECORDS API
+  // 
   
   /**
     Creates the store's dataHashes then returns an array of SC.Record instances.
@@ -931,11 +920,9 @@ SC.Store = SC.Object.extend(
     return this.removeDataHashes(storeKeys);
   },
   
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  //  Finding records.
-  //
-  ////////////////////////////////////////////////////////////////////////////
+  // ..........................................................
+  // FINDING RECORDS
+  // 
 
   /**
     Given a guid and a recordType, retrieve the record. 
@@ -1088,12 +1075,10 @@ SC.Store = SC.Object.extend(
     }
     return rec;
   },
-  
-  ////////////////////////////////////////////////////////////////////////////
-  //
-  //  Primary Key convenience methods.
-  //
-  ////////////////////////////////////////////////////////////////////////////
+
+  // ..........................................................
+  // PRIMARY KEY CONVENIENCE METHODS
+  // 
 
   /** 
     Given a storeKey, return the primaryKey.
@@ -1105,14 +1090,19 @@ SC.Store = SC.Object.extend(
   },
   
   /** 
-    Given a guid, create a storeKey or return an existing one for the guid.
+    Returns the storeKey for a passed primaryKey.  The storeKey is a transient
+    identifier that can be used to retrieve data for a record.  Unlike 
+    primaryKeys, storeKeys may change from one application reload to the next.
+    
+    You generally will not need to work with storeKey's yourself, though you
+    may need to work with them if you write your own PersistentStore class.
   
     @returns {Integer} The storeKey.
   */
-  storeKeyFor: function(guid) {
-    var storeKey = this.primaryKeyMap[guid];
+  storeKeyFor: function(primaryKey) {
+    var storeKey = this.primaryKeyMap[primaryKey];
     if(storeKey === undefined) {
-      storeKey = this.primaryKeyMap[guid] = this._generateStoreKey(); 
+      storeKey = this.primaryKeyMap[primaryKey] = this._generateStoreKey(); 
     }
     return storeKey;
   },
