@@ -47,6 +47,61 @@ SC.PersistentStore = SC.Object.extend(
   _deletedRecords:[],
   _updatedRecords: [],
   
+  // ..........................................................
+  // FETCHING
+  // 
+
+  /**
+    Asks the receiver if it can handle the fetchKey and params by calling 
+    canFetch().  If returns YES, sets up an SC.RecordArray and then calls 
+    prepareFetch() before returning.  Otherwise, pass along to next store.
+    
+    @param {Object} fetchKey the fetch key
+    @param {Hash} optional additional params
+    @param {SC.Store} the store that started the fetch
+    @returns {SC.RecordArray} result
+  */
+  fetch: function(fetchKey, params, store) {
+    if (store === undefined) store = this ;
+    if (this.canFetch(fetchKey, params, store)) {
+      var ret = SC.RecordArray.create({
+        store: store,
+        fetchKey: fetchKey,
+        fetchParams: params,
+        delegate: this
+      });
+      this.prepareFetch(ret) ;
+      return ret ;
+    } else return sc_super();
+  },
+  
+  /**
+    Implement in your subclass to determine if you can handle the passed 
+    fetchKey and params.  If you can, return YES and the store will setup a 
+    RecordArray for you to populate.
+    
+    @param {Object} fetchKey the fetch key
+    @param {Hash} optional additional params
+    @param {SC.Store} the store that started the fetch
+    @returns {Boolean} YES if this store can handle it.
+  */
+  canFetch: function(fetchkey, params, store) {
+    return NO ;
+  },
+  
+  /**
+    If you return YES to canFetch, then a SC.RecordArray will be setup for
+    you and this method will be called so you can prepare the array in any 
+    way that you want.  The fetchKey and params can be found on the array 
+    as fetchKey and fetchParams.
+    
+    @param {SC.RecordArray} fetch array.
+    @returns {void}
+  */
+  prepareFetch: function(fetchArray) {
+    // do nothing 
+  },
+    
   ////////////////////////////////////////////////////////////////////////////
   //
   //  Child Store Handling.
@@ -90,16 +145,17 @@ SC.PersistentStore = SC.Object.extend(
     var storeKeyMap = childStore.storeKeyMap;
     var recKeyTypeMap = childStore.recKeyTypeMap;
     var instantiatedRecordMap = childStore.instantiatedRecordMap;
-
-    for(var i=0; i<this.createdRecords.length;i++) {
+    var i ;
+    
+    for(i=0; i<this.createdRecords.length;i++) {
       console.log("AJAX create with hash: "+SC.json.encode(dataHashes[this.createdRecords[i]]));
     }
 
-    for(var i=0; i<this.updatedRecords.length;i++) {
+    for(i=0; i<this.updatedRecords.length;i++) {
       console.log("AJAX update for guid: "+storeKeyMap[this.updatedRecords[i]] + " with hash: "+SC.json.encode(dataHashes[this.updatedRecords[i]]));
     }
 
-    for(var i=0; i<this.deletedRecords.length;i++) {
+    for(i=0; i<this.deletedRecords.length;i++) {
       console.log("AJAX delete for guid: "+storeKeyMap[this.deletedRecords[i]] + " with hash: "+SC.json.encode(dataHashes[this.deletedRecords[i]]));
     }
 
