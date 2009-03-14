@@ -6,7 +6,7 @@
 // ==========================================================================
 
 require('core') ;
-require('models/persistentstore') ;
+require('models/persistent_store') ;
 /**
   @class
 
