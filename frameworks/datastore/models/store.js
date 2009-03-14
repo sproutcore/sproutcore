@@ -925,6 +925,37 @@ SC.Store = SC.Object.extend(
   // 
 
   /**
+    Retrieves records from the persistent store.  You should pass in a named
+    query that will be understood by one of the persistent stores you have
+    configured along with any optional parameters needed by the search.
+    
+    The return value is an SC.RecordArray that may be populated dynamically
+    by the server as data becomes available.  You can treat this object just
+    like any other object that implements SC.Array.
+    
+    h2. Query Keys
+    
+    The kind of query key you pass is generally determined by the type of 
+    persistent stores you hook up for your application.  Most stores, however,
+    will accept an SC.Record subclass as the query key.  This will return 
+    a RecordArray matching all instances of that class as is relevant to your
+    application.  
+    
+    Once you retrieve a RecordArray, you can filter the results even further
+    by using the filter() method, which may issue even more specific requests.
+    
+    @param {Object} queryKey key describing the type of records to fetch
+    @param {Hash} params optional additional parameters to pass along
+    @param {SC.Store} store this is a private param.  Do not pass
+    @returns {SC.RecordArray} matching set or null if no server handled it
+  */
+  fetch: function(queryKey, params, store) {  
+    var parentStore = this.get('parentStore');
+    if (store === undefined) store = this ; // first store sets to itself
+    return parentStore ? parentStore.fetch(queryKey, params, store) : null ;
+  },
+  
+  /**
     Given a guid and a recordType, retrieve the record. 
     
     If it does not exist, go all the way back to the persistent store.

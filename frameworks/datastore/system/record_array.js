@@ -37,6 +37,10 @@ SC.RecordArray = SC.SparseArray.extend(
     @property {SC.Store}
   */
   store: null,
+    
+  // ..........................................................
+  // DELEGATE SUPPORT
+  // 
   
   /**
     Primitive simple sets the store keys array to the passed array.  This 
