@@ -6,7 +6,9 @@
 // ==========================================================================
 /** @class
 
-  Used to display an iframe.
+  Used to display an iframe. The contents of the iFrame should be from the 
+  same domain. i.e. the src / content should be from the same domain, in order
+  if you want to access the contents of the iframe.
 
 
   @extends SC.View
@@ -14,29 +16,64 @@
 */
 SC.WebView = SC.View.extend({
 
-  // emptyElement: '<div><iframe style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe></div>',
   classNames: 'sc-iframe-view',
-
   content: null,
   contentBindingDefault: SC.Binding.single().notEmpty(),
-
   contentUrlKey: null,
   contentUrlKeyBindingDefault: SC.Binding.single(),
+  displayProperties: ['content', 'contentUrlKey', 'shouldAutoResize'],
+  delegate: null,
+  
+  
 
-  displayProperties: ['content', 'contentUrlKey'],
+  /**
+  The content of the iframe can be bigger than the size specifed when creating
+  the view. If you want the view to be auto-resized to the dimensions of the 
+  iframe, then set the value of this property to YES.
+  
+  
+  The web view can be auto resized only if the contents are from the same
+  domain as the parent domain.
+  @property{Boolean}
+  */
+  shouldAutoResize: NO,
+
+  
+  
+
+
 
   $iframe: function() {
     return this.$('iframe');
   },
 
-  delegate: null,
+
+
+
+
 
   iFrameViewWillLoadUrl: function(view, url) {
     return url;
   },
   iFrameViewDidLoadUrl: function(view, url) {
-    // TODO: logic to propogate the 
+    console.log('iFrameViewDidLoadUrl%@'.fmt(url));
+    
+    /**
+    resize the view automatically based on the content size, if the flag
+    shouldAutoResize is set to YES
+    */
+    // if ( this.get('shouldAutoResize')){
+    //   var newSize = this._computeContentSize();
+    //   this.height(newSize.height);
+    //   this.width(newSize.width);
+    // } 
   },
+
+
+
+
+
+
 
   render: function(context, firstTime) {
     var content = this.get('content');
@@ -53,18 +90,29 @@ SC.WebView = SC.View.extend({
       break;
     }
 
-    src = this.invokeDelegateMethod(this.delegate, 'iFrameViewWillLoadUrl', this, src) || '';
+    src = this.invokeDelegateMethod(this.delegate, 'iFrameViewWillLoadUrl', 
+    this, src) || '';
 
     if (firstTime) {
-      context.push('<iframe src="' + src + '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe>');
+      context.push('<iframe src="' + src + 
+      '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe>');
     } else {
       var iframe = this.$iframe();
-      iframe.attr('src', 'javascript:;'); // clear out the previous src, to force a reload
+      // clear out the previous src, to force a reload
+      iframe.attr('src', 'javascript:;'); 
       iframe.attr('src', src);
     }
 
     this.invokeDelegateMethod(this.delegate, 'iFrameViewDidLoadUrl', this, src);
+    // console.log(this.$iframe()[0]);
   },
+  
+  
+  
+  
+  
+  
+  
 
   /** @private */
   _contentDidChange: function(target, key, value, propertyRevision) {
@@ -99,6 +147,12 @@ SC.WebView = SC.View.extend({
       this.endPropertyChanges();
     }
   }.observes('content'),
+  
+  
+  
+  
+  
+  
 
   /** @private Invoked when properties on the content object change. */
   _contentPropertyDidChange: function(target, key, value, propertyRevision) {
@@ -106,5 +160,47 @@ SC.WebView = SC.View.extend({
       this.displayDidChange();
     }
   }
+  
+  
+  
+  
+  
+  
+  
 
+  
+  /** Computes the size of the contents of the iframe from the DOM 
+  @returns {Object} a JSON object representing the size in terms of height
+  and width
+  */  
+  // _computeContentSize: function() {
+  //   var size ;
+  //   debugger;
+  //   var iframeElt = this.$iframe();
+  //   var contentDoc =  iframeElt?iframeElt[0].contentDocument: null;
+  //   if (!contentDoc){
+  //     size = {
+  //       width: this.width(),
+  //       height: this.height()
+  //     };
+  //   } else if (window.innerHeight) {
+  //     size = { 
+  //       width: window.innerWidth, 
+  //       height: window.innerHeight 
+  //     } ;
+  // 
+  //   } else if (document.documentElement && document.documentElement.clientHeight) {
+  //     size = { 
+  //       width: document.documentElement.clientWidth, 
+  //       height: document.documentElement.clientHeight 
+  //     } ;
+  // 
+  //   } else if (document.body) {
+  //     size = { 
+  //       width: document.body.clientWidth, 
+  //       height: document.body.clientHeight 
+  //     } ;
+  //   }
+  //   return size;
+  // }
 });
