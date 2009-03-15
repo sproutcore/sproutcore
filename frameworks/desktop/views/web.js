@@ -58,6 +58,9 @@ SC.WebView = SC.View.extend({
   iFrameViewDidLoadUrl: function(view, url) {
     console.log('iFrameViewDidLoadUrl%@'.fmt(url));
     
+    console.log(this.$iframe()[0]);
+    
+    
     /**
     resize the view automatically based on the content size, if the flag
     shouldAutoResize is set to YES
@@ -104,7 +107,8 @@ SC.WebView = SC.View.extend({
     }
 
     this.invokeDelegateMethod(this.delegate, 'iFrameViewDidLoadUrl', this, src);
-    // console.log(this.$iframe()[0]);
+    
+    
   },
   
   
