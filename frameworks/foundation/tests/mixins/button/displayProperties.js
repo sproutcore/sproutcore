@@ -9,7 +9,7 @@
 var view ;
 module("SC.Button#displayProperties", {
   setup: function() {
-    view = SC.ButtonView.create( { 
+    view = SC.View.create(SC.Control, SC.Button, { 
         isVisibleInWindow: YES 
     }).createLayer();
   },

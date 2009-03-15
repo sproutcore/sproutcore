@@ -13,7 +13,7 @@ var view, content ;
 module('SC.Button#contentPropertyDidChange', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.ButtonView.create();
+    view = SC.View.create(SC.Control, SC.Button);
     view.set('title', 'hello world');
   },
   
@@ -81,7 +81,7 @@ test("should fire even on a content object set when the object is created", func
 module('SC.Button#titleRendering', {
   setup: function() {
     content = SC.Object.create();
-    view = SC.ButtonView.create();
+    view = SC.View.create(SC.Control, SC.Button);
     view.set('title', 'hello world');
   },
   
@@ -111,7 +111,7 @@ test("should return the button view context with the title set", function() {
 module("SC.Button#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.ButtonView.create({ content: content });
+    view = SC.View.create(SC.Control, SC.Button, { content: content });
   },
   teardown: function() {
     content = null ;
@@ -161,7 +161,7 @@ test("should be able to get value from a content object that is not SC.Object", 
 module("SC.Button#updatePropertyFromContent()", {
   setup: function() {
     content = SC.Object.create({ foo: "foo", bar: "bar" });
-    view = SC.ButtonView.create({ 
+    view = SC.View.create(SC.Control, SC.Button, { 
       value: "bar",
       content: content,
       contentValueKey: "bar",
