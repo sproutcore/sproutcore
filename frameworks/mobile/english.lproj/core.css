@@ -1,0 +1,12 @@
+/* Core styles needed for iphone apps to operate correctly. */
+
+body 
+{
+	margin: 0px;
+	padding: 0px;
+	background-color: #fff;
+	
+	/* Turn off font resizing */
+	-webkit-text-size-adjust: none; 
+}
+

@@ -24,6 +24,10 @@ config :datastore,  :required => [:foundation, :runtime]
   config app_framework, :required => [:runtime, :datastore, :foundation]
 end
 
+config :mobile, 
+  :layout         => 'sproutcore/mobile:lib/index.rhtml',
+  :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
+
 # WRAPPER FRAMEWORKS
 config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
@@ -38,6 +42,12 @@ end
 # CONFIGURE THEMES
 config :empty_theme, 
   :theme_name => 'empty-theme',
+  :test_required  => ['sproutcore/testing'],
+  :debug_required => ['sproutcore/debug']
+
+config :iphone_theme, 
+  :theme_name     => 'iphone-theme',
+  :required       => [],
   :test_required  => ['sproutcore/testing'],
   :debug_required => ['sproutcore/debug']
 
