@@ -7,11 +7,6 @@
 
 /*jslint evil:true */
 
-sc_require('views/view') ;
-sc_require('mixins/control') ;
-sc_require('mixins/button');
-sc_require('mixins/static_layout');
-
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';
 SC.PUSH_BEHAVIOR =   'push';
