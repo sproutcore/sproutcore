@@ -14,45 +14,49 @@ module("Sample Model from an address book app", {
     });
     
     AB.ContactGroup = SC.Record.extend({
+
       groupNameType: String,
       
-      // fetch all the contacts on demand.  Since this is a fetched property,
-      // it is read only.  Edit the groups array to do more.
-      contacts: function() {
-        return this.get('store').fetch('contacts', { 
-          group: this.get('guid') 
-        });
-      }.property().cacheable(),
-      
-      addContact: function(contact) {
-        var groups = contact.get('groups');
-        if (groups.indexOf(this) < 0) {
-          groups = groups.slice();
-          groups.push(this);
-          contact.set('groups', groups);
-        }
-        return this ;
-      },
-
-      removeContact: function(contact) {
-        var groups = contact.get('groups');
-        if (groups.indexOf(this) >= 0) {
-          groups = groups.without(this);
-          contact.set('groups', groups);
-          this.notifyPropertyChange('contacts');
-        }
-        return this ;
-      }
+      contactsType: SC.Record.toMany({
+        fetch: 'contacts',
+        type:  'AB.Contact',
+        inverse: 'group'
+      })
       
     });
+
+    /* IDEA: Every record has an "owner".  The owner can be a Store or a
+       Collection.  When the record is destroyed or updated, it will notify
+       its owner.
+       
+       A Collection can be inlined, referenced, or fetched.  Inlined means 
+       the full record data is stored in the parent itself.  Referenced means
+       only the primaryKey is stored.  Fetched means the collection is loaded
+       from the store dynamically.
+       
+       A Collection can also indicate that it's records are dependent.  
+       Dependent records are owned exclusively by the parent record.  Deleting
+       parent will delete the collection also.
+       
+       Otherwise deleting the record will remove it from the store only.
+      */
+      
+    /* hm -- a record could have details stored inline for optimization, but 
+       it is not actually owned there.  it should just be loaded into the 
+       store and treated independently.
+    */
     
-    // a contact can belong to a group.  it can also have one or more 
-    // ContactDetails which are things like phones, emails, addresses, etc.
+    // A contact has contactDetails, which is an array of inlined contact 
+    // details.
     AB.Contact = SC.Record.extend({
       
       firstNameType: String,
       lastNameType:  String,
-      emailType:     String,
+      
+      contactDetailsType: SC.Collection.inline({
+        isDependent: YES,
+        recordType:  'AB.ContactDetail'
+      })
       
       // a contact belongs to one or more groups stored as an array on 
       // the contact.  You can change the groups array by replacing the 

@@ -17,7 +17,7 @@ sc_require('models/store') ;
   To create a new model class, in your SproutCore workspace, do:
   
   {{{
-    $ sc-gen model my_app/my_model
+    $ sc-gen model MyApp.MyModel
   }}}
 
   This will create MyApp.MyModel in clients/my_app/models/my_model.js.

@@ -51,72 +51,72 @@ SC.Store = SC.Object.extend(
   */
   parentStore: null,
 
-  /**
+  // ..........................................................
+  // INTERNAL DATA STRUCTURES 
+  // 
+  
+  /** @private
     This is the store of dataHashes index by the storeKey. 
     
-    This property is NOT unique across stores in a chain until changes are 
-    committed.
+    This property is shared by a store and any child stores until you start
+    to make edits to it.
     
-    @property
-    @type {Array}
+    @property {Array}
   */
   dataHashes: {},
 
-  /**
-    This is the cached of dataHashes indexed by the storeKey. 
+  /** @private 
+    When data hash attributes are retrieved through a record, they are 
+    massaged into the proper type and stored here. 
     
-    This property is NOT unique across stores in a chain until changes are 
-    committed.
+    This property is shared by a store and its child stores until you make
+    edits to it.
     
-    @property
-    @type {Array}
+    @property {Array}
   */
   cachedAttributes: {},
 
-  /**
+  /** @private
     This array contains the revisions for the dataHashes indexed by the 
     storeKey.
 
-    This property is NOT unique across stores in a chain until changes are 
-    committed.
+    This property is shared by a store and its child stores until you make
+    edits to it.
     
-    @property
-    @type {Array}
+    @property {Array}
   */
   revisions: [],
 
-  /**
+  /** @private
     This hash contains the storeKeys indexed by the primaryKey guid.
 
-    This property is unique across all stores in the application.
+    This property is shared by all store instances.
     
     @property
     @type {Array}
   */
   primaryKeyMap: {},
 
-  /**
+  /** @private
     This hash contains the primaryKey guids indexed by the storeKey.
 
-    This property is unique across all stores in the application.
+    This property is shared by all store instances.
     
-    @property
-    @type {Array}
+    @property {Array}
   */
   storeKeyMap: {},
 
   /**
     This hash contains the recordTypeKey per dataHash indexed by the storeKey.
 
-    This property is unique across all stores in the application.
+    This property is shared by all store instances.
     
-    @property
-    @type {Array}
+    @property {Array}
   */
   recKeyTypeMap: {},
 
-  /**
-    This hash contains all the data types stored in the store and within that,
+  /** @private
+    This hash contains all the data types stored in the store and within that, 
     there are arrays of storeKeys.
 
     dataTypeMap: {
@@ -124,16 +124,15 @@ SC.Store = SC.Object.extend(
       ...
     }
 
-    This property is unique across all stores in the application.
+    This property is shared by all store instances.
     
-    @property
-    @type {Array}
+    @property {Object}
   */
   dataTypeMap: {},
 
   compTypeMap: {},
   
-  /**
+  /** @private
     This hash contains all the instantiated records arranged by type.
 
     instantiatedRecordMap: {
@@ -141,30 +140,29 @@ SC.Store = SC.Object.extend(
       ...
     }
 
-    This property is NOT unique across all stores in the application.
+    This property is NOT shared by store instances.
     
-    @property
-    @type {Object}
+    @property {Object}
   */
   instantiatedRecordMap: {},
   
-  /**
+  /** @private
     This is the queue of records that need to be retrieved from the server.
+    Records in this queue will be notified automatically when the data hash
+    for the record is added to the Store.
 
-    This property is unique across all stores in the application.
+    This property is shared by all store instances.
     
-    @property
-    @type {Object}
+    @property {Object}
   */
   retrievedRecQueue: [],
   
   
   /**
     The childStores property is an array that contains all the child 
-    dataHashes for THIS record.
+    stores for THIS store.
     
-    @property
-    @type {Array}
+    @property {Array}
   */
   childStores: [],
 
