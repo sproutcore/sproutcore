@@ -8,7 +8,7 @@
 /*global module test htmlbody ok equals same */
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-
+(function() {
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.CheckboxView, { 
     value: NO, isEnabled: YES, title: "Hello World" 
@@ -96,3 +96,4 @@ test("disabled - selected", function() {
   var label = view.$('span.label');
   equals(label.text(), 'Hello World', 'should have label');
 });
+})();

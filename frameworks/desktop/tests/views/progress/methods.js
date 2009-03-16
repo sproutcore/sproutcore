@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /*global module test htmlbody ok equals same stop start */
-
+/*
 module("SC.ProgressView Methods", {
   setup: function() {
     SC.RunLoop.begin();
@@ -127,3 +127,4 @@ test("going below minimum slider limit", function() {
   
   equals(view.$('.sc-handle').css('left'), '0%', 'left of sc-handle should be 0%');
 });
+*/

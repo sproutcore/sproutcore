@@ -18,7 +18,7 @@ SC.GridView = SC.ListView.extend(
   classNames: ['sc-grid-view'],
   
   layout: { left:0, right:0, top:0, bottom:0 },
-  
+
   /** 
     The common row height for grid items.
     
@@ -107,11 +107,20 @@ SC.GridView = SC.ListView.extend(
   },
   
   insertionPointClass: SC.View.extend({
+<<<<<<< HEAD:frameworks/desktop/views/grid.js
     classNames: ['grid-insertion-point'],
     
     render: function(context, firstTime) {
       if (firstTime) context.push('<span class="anchor"></span>') ;
     }
+=======
+      classNames: ['grid-insertion-point'],
+      
+      render:function(context, firstTime) {
+        context.push('<span class="anchor"></span>');
+      }
+//      emptyElement: '<div class="grid-insertion-point"><span class="anchor"></span></div>'
+>>>>>>> slider css for empty theme , moved unit tests inside closures:frameworks/desktop/views/grid.js
   }),
   
   showInsertionPoint: function(itemView, dropOperation) {

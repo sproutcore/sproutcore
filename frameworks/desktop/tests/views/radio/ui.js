@@ -9,6 +9,7 @@
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
+(function() {
 var itemList = [{ title: "Red", value: "red", enabled: YES }, { title: "Green", value: "green" }, { title: "Blue", value: "blue" }];
 
 var pane = SC.ControlTestPane.design()
@@ -62,7 +63,7 @@ pane.show(); // add a test to show the test pane
 // ..........................................................
 // TEST VIEWS
 // 
-module('SC.RadioView UI', pane.standardSetup());
+module('SC.RadioView UI');
 
 test("basic", function() {
   
@@ -200,3 +201,4 @@ test("enabled first", function() {
   });
   
 });
+})();
