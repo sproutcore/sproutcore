@@ -6,6 +6,7 @@
 // ==========================================================================
 
 require('views/panel');
+require('views/button');
 
 /** 
   button1 : 1st button from the right. default:OK
