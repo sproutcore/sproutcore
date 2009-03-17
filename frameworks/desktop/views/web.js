@@ -7,7 +7,7 @@
 /** @class
 
   Used to display an iframe. The contents of the iFrame should be from the 
-  same domain. i.e. the src / content should be from the same domain, in order
+  same domain. (i.e. the src / content should be from the same domain)
   if you want to access the contents of the iframe.
 
 
