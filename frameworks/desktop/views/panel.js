@@ -4,6 +4,18 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
+/** 
+  Shadow views from top-left corner clockwise
+*/
+SC.SHADOW_VIEWS = [SC.View.create(SC.StaticLayout, {classNames: ['top-left-edge'], layout: { top: -6, bottom: 'auto', left: -5, right: 'auto' }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['top-edge'], layout: { top: -5, bottom: 'auto', left: 0, right: 0 }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['top-right-edge'], layout: { top: -6, bottom: 'auto', left: 'auto', right: -5 }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['right-edge'], layout: { top: 3, bottom: 0, left: 'auto', right: -5 }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['bottom-right-edge'], layout: { top: 'auto', bottom: -5, left: 'auto', right: -5 }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['bottom-edge'], layout: { top: 'auto', bottom: -5, left: 5, right: 5 }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['bottom-left-edge'], layout: { top: 'auto', bottom: -5, left: -5, right: 'auto' }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['left-edge'], layout: { top: 3, bottom: 0, left: -5, right: 'auto' }})];
+
 /** @class
 
   Most SproutCore applications need modal panels. The default way to use the 
@@ -65,6 +77,10 @@ SC.Panel = SC.Pane.extend({
     var view = this.contentView ;
     if (view) {
       view = this.contentView = this.createChildView(view) ;
+      for(var i=SC.SHADOW_VIEWS.length-1; i>=0; i--) {
+	      if (i==(SC.SHADOW_VIEWS.length-1)) view.appendChild(SC.SHADOW_VIEWS[i]);
+	      else view.insertBefore(SC.SHADOW_VIEWS[i], SC.SHADOW_VIEWS[i+1]);
+      }
       this.childViews = [view] ;
     }
   },
