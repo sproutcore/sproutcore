@@ -18,18 +18,15 @@ module("Sample Model from a webmail app", {
     // Messages are stored in mailboxes.
     Mail.Mailbox = SC.Record.extend({
 
-      // here is the name of the mailbox
-      name: String.attribute(),
-      
+      name: SC.Record.attribute(String).required(),
+
       // here is the mailbox type.  must be one of INBOX, TRASH, OTHER
-      mailboxType: String.attribute({
-        only: 'INBOX TRASH OTHER'.w()
-      }),
+      mailbox: SC.Record.attribute(String)
+        .required().only('INBOX TRASH OTHER'.w()),
       
       // this is the sortKey that should be used to order the mailbox.
-      sortKey: String.attribute({
-        only: 'subject date attachment'.w()
-      }),
+      sortKey: SC.Record.attribute(String)
+        .required().only('subject date attachment'.w()),
       
       // load the list of messages.  We use the mailbox guid to load the 
       // messages.  Messages use a foreign key to move the message around.
@@ -38,7 +35,7 @@ module("Sample Model from a webmail app", {
       // when you get messages, it will fetch "mailboxMessages" from the 
       // owner store, passing the receiver as the param unless you implement
       // the mailboxMessageParams property.
-      messages: SC.fetch("mailboxMessages", { inverse: "mailboxes" })
+      messages: SC.Collection.fetch('Mail.Message')
     });
     
     // A message has a subject, date, sender, mailboxes, and messageDetail
@@ -46,31 +43,26 @@ module("Sample Model from a webmail app", {
     // guids.
     Mail.Message = SC.Record.extend({
 
-      // subject
-      // senderNames
-      date:        Date.attribute(),
+      date:        SC.Record.attribute(Date),
       
-      mailboxes:   SC.hasMany('Mail.Mailbox', {
+      mailboxes:   SC.Collection.inline({
+        recordType: 'Mail.Mailbox',
         inverse: 'messages',
         isMaster: YES,
         minimum: 1 // you cannot have less than one mailbox.
       }),
       
-      message: SC.hasOne('Mail.MessageDetail', {
-        inverse: "message",
-        dependent: YES
+      // describe the message detail.
+      messageDetail: SC.Record.attribute('Mail.MessageDetail', {
+        inverse: "message", // MessageDetail.message should == this.primaryKey
+        dependent: YES 
       }),
-      
-      body: SC.through('messageDetail'),
-      to:   SC.through('messageDetail'),
-      from: SC.through('messageDetail'),
-      cc:   SC.through('messageDetail'),
-      bcc:  SC.through('messageDetail')
-      
-    });
 
-    Mail.MessageDetail = SC.Record.extend({
-        
+      // access the named property through another property.
+      body:    SC.Record.through('messageDetail'),
+      cc:      SC.Record.through('messageDetail'),
+      bcc:     SC.Record.through('messageDetail'),
+      subject: SC.Record.through('messageDetail')
     });
     
     Mail.Contact = SC.Record.extend({
@@ -78,14 +70,15 @@ module("Sample Model from a webmail app", {
       firstName: String.attribute(),
       lastName: String.attribute(),
       email: String.attribute()
-    })
+    });
+    
     // define server.  RestServer knows how to automatically save records to 
     // the server.  You need to define your fetch requests here though.
     Mail.server = SC.RestServer.create({
       
       // fetch request for mailboxes.
       fetchMailboxes: function(params) {
-        return this.fetchRequest('/ma/mailboxes?alt=json')
+        return this.fetchRequest('/ma/mailboxes?alt=json') ;
       }
     });
 
@@ -105,6 +98,6 @@ test("create a message", function() {
 
   Mail.store.createRecord(Mail.Message, {
     subject: "Foo bar"
-  })
+  }) ;
   
 });

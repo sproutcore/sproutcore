@@ -14,15 +14,36 @@ module("Sample Model from an address book app", {
     });
     
     AB.ContactGroup = SC.Record.extend({
-
-      groupNameType: String,
       
-      contactsType: SC.Record.toMany({
-        fetch: 'contacts',
-        type:  'AB.Contact',
-        inverse: 'group'
+      // creates a computed property that will fetch with a keyname 'contacts'
+      // and params 'group': this.  Collection will be setup with newRecord
+      // to create contact records.
+      contacts: SC.Collection.fetch({
+        inverse: 'group',
+        recordType: 'AB.Contact'
       })
       
+    });
+    
+    // a generic contact detail must always have a label, kind, and value
+    AB.ContactDetail = SC.Record.extend({
+      validateLabel: SC.Record.validate(String).required(),
+      validateKind:  SC.Record.validate(String).required()
+    });
+
+    AB.PhoneNumber   = AB.ContactDetail.extend({
+      kindDefault:  'phone',
+      labelDefault: 'home'
+    });
+    
+    AB.Contact = SC.Record.extend({
+
+      // firstName, lastName, middleName
+      // companyName
+      isCompany: SC.Record.property(Boolean, { defaultValue: NO }),
+      
+      // contact has one or more phones stored in a hash.  
+      phones: SC.Collection.inline({ recordType: 'AB.PhoneNumber' })
     });
 
     /* IDEA: Every record has an "owner".  The owner can be a Store or a

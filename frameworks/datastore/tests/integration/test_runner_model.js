@@ -18,24 +18,29 @@ module("Sample Model from TestRunner Application", {
     // describes a single target.  has target name, target type, and url to 
     // load tests.
     TestRunner.Target = SC.Record.extend({
-      
-      targetName: String.attribute(),
-      targetType: String.attribute(),
+
+      // targetName
+      // targetType
       
       // when we get tests, we should actually load the tests.
-      tests: SC.fetch("TestRunner.Tests", {
-        fetchKey: "link_tests",
-        inverse: "target",
-        isMaster: YES
+      tests: SC.Collection.fetch('TestRunner.Test', {
+        fetchKey: 'link_tests'
       })
+      
     });
     
     // describes a single test.  has a URL to load the test and the test name.
     TestRunner.Test = SC.Record.extend({
-      name: String.attribute(),
-      target: SC.belongsTo("TestRunner.Target", {
-        inverse: "tests"
+      
+      // testName
+      testUrl: SC.Record.attribute(String).key('link_test'),
+      
+      target: SC.Record.attribute('TestRunner.Target', {
+        inverse: tests,
+        isMaster: YES,
+        isEditable: NO
       })
+      
     });
 
   }
