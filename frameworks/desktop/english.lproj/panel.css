@@ -55,3 +55,9 @@
 	background: static_url('images/panels/right-edge.png') repeat-y ;
 	width: 5px;
 }
+
+.sc-pane.sc-panel > .sc-view .pointer {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+	width: 0px;
+	height: 0px;
+}

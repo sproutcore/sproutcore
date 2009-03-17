@@ -1746,6 +1746,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // if zIndex is set, use it.  otherwise let default shine through
     ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
+
+    // if backgroundPosition is set, use it.  otherwise let default shine through
+    ret.backgroundPosition = SC.none(layout.backgroundPosition) ? null : layout.backgroundPosition.toString();
     
     // set default values to null to allow built-in CSS to shine through
     // currently applies only to marginLeft & marginTop

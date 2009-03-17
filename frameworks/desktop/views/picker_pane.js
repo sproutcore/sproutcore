@@ -23,6 +23,13 @@ require('views/palette_pane');
 SC.PICKER_MENU = 'menu';
 SC.PICKER_FIXED = 'fixed';
 SC.PICKER_POINTER = 'pointer';
+/** 
+  Pointer layout for perfect right/left/top/bottom
+*/
+SC.POINTER_LAYOUT = [{ width: 25, height: 51, top: 20, left: -25, backgroundPosition: '0px -64px' },
+                     { width: 25, height: 51, top: 20, right: -25, backgroundPosition: '-32px -64px' },
+                     { width: 51, height: 31, bottom: -31, centerX: 0, backgroundPosition: '0px 0px' },
+                     { width: 51, height: 19, top: -19, centerX: 0, backgroundPosition: '0px -32px' }];
 
 /**
   Displays a non-modal, self anchor positioned picker pane.
@@ -297,30 +304,26 @@ SC.PickerPane = SC.PalettePane.extend({
       this.set('preferMatrix', [0,1,2,3,2]) ;
     }
     var m = this.preferMatrix;
+    var pointer = this.contentView.childViews[this.contentView.childViews.length-1];
 
     // initiated with fallback position
     // Will be used only if the following preferred alternative can not be found
     f.x = prefP1[m[4]][0] ;
     f.y = prefP1[m[4]][1] ;
+    pointer.set('layout', SC.POINTER_LAYOUT[m[4]]);
 
-    if (m[4] != m[0] && cutoffPrefP[m[0]][0]==0 && cutoffPrefP[m[0]][1]==0 && cutoffPrefP[m[0]][2]==0 && cutoffPrefP[m[0]][3]==0) {
-      // The ideal position
-      // alternative 1 in preferMatrix
-      f.x = prefP1[m[0]][0] ;
-      f.y = prefP1[m[0]][1] ;
-    } else if (m[4] != m[1] && cutoffPrefP[m[1]][0]==0 && cutoffPrefP[m[1]][1]==0 && cutoffPrefP[m[1]][2]==0 && cutoffPrefP[m[1]][3]==0) {
-      // alternative 2 in preferMatrix
-      f.x = prefP1[m[1]][0] ;
-      f.y = prefP1[m[1]][1] ;
-    } else if (m[4] != m[2] && cutoffPrefP[m[2]][0]==0 && cutoffPrefP[m[2]][1]==0 && cutoffPrefP[m[2]][2]==0 && cutoffPrefP[m[2]][3]==0) {
-      // alternative 3 in preferMatrix
-      f.x = prefP1[m[2]][0] ;
-      f.y = prefP1[m[2]][1] ;
-    } else if (m[4] != m[3] && cutoffPrefP[m[3]][0]==0 && cutoffPrefP[m[3]][1]==0 && cutoffPrefP[m[3]][2]==0 && cutoffPrefP[m[3]][3]==0) {
-      // alternative 4 in preferMatrix
-      f.x = prefP1[m[3]][0] ;
-      f.y = prefP1[m[3]][1] ;
+    for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
+      if (cutoffPrefP[m[i]][0]==0 && cutoffPrefP[m[i]][1]==0 && cutoffPrefP[m[i]][2]==0 && cutoffPrefP[m[i]][3]==0) {
+	      // alternative i in preferMatrix by priority
+	      if (m[4] != m[i]) {
+		      f.x = prefP1[m[i]][0] ;
+		      f.y = prefP1[m[i]][1] ;
+		      pointer.set('layout', SC.POINTER_LAYOUT[m[i]]);
+	      }
+	      i = SC.POINTER_LAYOUT.length;
+	    }
     }
+
     return f ;    
   },
 

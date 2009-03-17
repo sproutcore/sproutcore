@@ -14,7 +14,8 @@ SC.SHADOW_VIEWS = [SC.View.create(SC.StaticLayout, {classNames: ['top-left-edge'
                    SC.View.create(SC.StaticLayout, {classNames: ['bottom-right-edge'], layout: { top: 'auto', bottom: -5, left: 'auto', right: -5 }}),
                    SC.View.create(SC.StaticLayout, {classNames: ['bottom-edge'], layout: { top: 'auto', bottom: -5, left: 5, right: 5 }}),
                    SC.View.create(SC.StaticLayout, {classNames: ['bottom-left-edge'], layout: { top: 'auto', bottom: -5, left: -5, right: 'auto' }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['left-edge'], layout: { top: 3, bottom: 0, left: -5, right: 'auto' }})];
+                   SC.View.create(SC.StaticLayout, {classNames: ['left-edge'], layout: { top: 3, bottom: 0, left: -5, right: 'auto' }}),
+                   SC.View.create(SC.StaticLayout, {classNames: ['pointer']})];
 
 /** @class
 
