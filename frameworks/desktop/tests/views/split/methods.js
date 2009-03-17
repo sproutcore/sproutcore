@@ -39,21 +39,11 @@ test("the thickness of the views",function(){
 	ok(view.thicknessForView(view.get('bottomRightView')),'thickness of the bottomRightView');
 });
 
-
-test("updateChildLayout method updates the layout display",function(){
-	ok(view.$().hasClass('horizontal'), 'should no longer have horizontal class');
-	var q = Q$('span', view.get('layer'));
-//	q.createChildViews();
-// 	view.get('topLeftView').top = 25;
-// 	view.updateChildLayout();
-// 	alert(view.thicknessForView(view.get('topLeftView')));
-// 	SC.RESIZE_BOTH is currently unsupported.	
-});
-
-test("performing the mouse up event", function() {
-	var elem = thumb.get('layer');
-	SC.Event.trigger(elem, 'mouseUp');
-});
+// 
+// test("performing the mouse up event", function() {
+// 	var elem = thumb.get('layer');
+// 	SC.Event.trigger(elem, 'mouseUp');
+// });
 
 // 	
 // module("TODO: Test SC.SplitDividerView Methods");
