@@ -197,16 +197,12 @@ SC.Store = SC.Object.extend(
   persistentChanges: null,
   
   /**
-    If the store has a parentStore and it is not a persistent store, this will
-    return YES.
+    All stores that are not persistent stores are transient.  This means the
+    contents of this store will disappear when you reload the page.
   
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
-  isTransient: function() {
-    return (this.get('parentStore') && 
-            !this.get('parentStore').get('isPersistent'));
-  }.property('parentStore').cacheable(),
+  isTransient: YES,
   
   // ..........................................................
   // STORE CHAINING
@@ -613,15 +609,53 @@ SC.Store = SC.Object.extend(
     @returns {Object} Returns a new instance of the dataHash.
   */
   getWriteableDataHash: function(storeKey) {
-    var ret = this.getDataHash(storeKey);
-    if(!this.get('isTransient') || 
-       ret === this.get('parentStore').dataHashes[storeKey])
-    {
-      ret = this.dataHashes[storeKey] = SC.clone(ret);
+    // if the data hash is the same as the parent store, then clone it first.
+    var ret = this.dataHashes[storeKey];
+    if (!ret) return undefined ; // nothing to do.
+    
+    var pstore = this.get('parentStore');
+    if (pstore && !pstore.get('isTransient')) {
+      if (ret === pstore.dataHashes[storeKey]) {
+        ret = this.dataHashes[storeKey] = SC.clone(ret) ;
+      }
     }
     return ret;
   },
 
+  /**
+    Returns the passed attribute, cloning it first if needed so that you can
+    modify it.  Use this method to modify arrays and hash values.
+    
+    @param {Integer} storeKey the dataHash store key
+    @param {String}  key the attribute 
+    @returns {Object} the editable attribute or undefined
+  */
+  getWriteableAttribute: function(storeKey, key) {
+    // if the data hash is the same as the parent store, then clone it first.
+    var attrs = this.dataHashes[storeKey], ret, pstore, rtype;
+    if (!attrs) return undefined ; // nothing to do.
+    
+    pstore = this.get('parentStore');
+    ret = attrs[key];
+    if (pstore && !pstore.get('isTransient')) {
+
+      // clone attrs if needed first to make them writeable
+      if (attrs === pstore.dataHashes[storeKey]) {
+        attrs = this.dataHashes[storeKey] = SC.clone(ret) ;
+      }
+      
+      // clone ret value if needed to make it writeable also
+      rtype = SC.typeOf(ret);
+      if (rtype === SC.T_ARRAY) {
+        ret = attrs[key] = ret.slice();
+      } else if (rtype === SC.T_HASH) {
+        ret = attrs[key] = SC.clone(ret) ;
+      }
+    }
+    
+    return ret;
+  },
+  
   /** 
     Given a storeKey, returns the dataHash.
     
@@ -629,12 +663,11 @@ SC.Store = SC.Object.extend(
     
     @returns {Object} Returns the dataHash or null.
   */
-  getDataHash: function(storeKey)
-  {
-    if(storeKey !== undefined) {
-      return (this.dataHashes[storeKey] = this.dataHashes[storeKey]);
-    }
-    return null;
+  readDataHash: function(storeKey) {
+    // since the dataHashes property may have the parent store dataHashes as
+    // a prototype, we set the data hash to make it independent of the 
+    // paran dataHash when you get the hash.
+    return storeKey ? (this.dataHashes[storeKey] = this.dataHashes[storeKey]) : null;
   },
   
   // ..........................................................
@@ -748,7 +781,7 @@ SC.Store = SC.Object.extend(
   */
   makeRecordEditable: function(record) {
     if(!record) return;
-    this.getWriteableDataHash(record._storeKey) ;
+    this.getWriteableDataHash(record.storeKey) ;
   },
   
   /**

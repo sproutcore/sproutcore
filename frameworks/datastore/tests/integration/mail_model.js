@@ -18,15 +18,13 @@ module("Sample Model from a webmail app", {
     // Messages are stored in mailboxes.
     Mail.Mailbox = SC.Record.extend({
 
-      name: SC.Record.attribute(String).required(),
+      name: SC.Record.string().notEmpty(),
 
       // here is the mailbox type.  must be one of INBOX, TRASH, OTHER
-      mailbox: SC.Record.attribute(String)
-        .required().only('INBOX TRASH OTHER'.w()),
+      mailbox: SC.Record.string().notEmpty().only('INBOX TRASH OTHER'.w()),
       
       // this is the sortKey that should be used to order the mailbox.
-      sortKey: SC.Record.attribute(String)
-        .required().only('subject date attachment'.w()),
+      sortKey: SC.Record.string().notEmpty().only('subject date'.w()),
       
       // load the list of messages.  We use the mailbox guid to load the 
       // messages.  Messages use a foreign key to move the message around.
@@ -43,17 +41,16 @@ module("Sample Model from a webmail app", {
     // guids.
     Mail.Message = SC.Record.extend({
 
-      date:        SC.Record.attribute(Date),
+      date:        SC.Record.date().notEmpty(),
       
-      mailboxes:   SC.Collection.inline({
-        recordType: 'Mail.Mailbox',
+      mailboxes:   SC.Record.toMany('Mail.Mailbox', {
         inverse: 'messages',
         isMaster: YES,
         minimum: 1 // you cannot have less than one mailbox.
       }),
       
       // describe the message detail.
-      messageDetail: SC.Record.attribute('Mail.MessageDetail', {
+      messageDetail: SC.Record.toOne('Mail.MessageDetail', {
         inverse: "message", // MessageDetail.message should == this.primaryKey
         dependent: YES 
       }),
@@ -88,9 +85,23 @@ module("Sample Model from a webmail app", {
 test("basic operation", function() {
   
   // automatically loads mailboxes from the server.
+  Mail.mailboxesController = SC.ArrayController.create();
+  
+  Mail.mailboxDetailController = SC.ObjectController.create({
+    contentBinding: 'Mail.mailboxesController.selection'
+  });
+  
+  Mail.messagesController = SC.ArrayController.create({
+    contentBinding: 'Mail.mailboxDetailController.messages',
+    allowsEmptySelection: NO
+  });
+  
+  Mail.messageDetailController = SC.ObjectController.create({
+    contentBinding: 'Mail.messagesController.selection'
+  });
+
   var mailboxes = Mail.store.fetch('mailboxes');
   Mail.mailboxesController.set('content', mailboxes);
-  
   
 });
 

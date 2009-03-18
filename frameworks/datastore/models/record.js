@@ -160,12 +160,6 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   beginEditing: function() {
-    if(this._editLevel === 0) {
-      var store = this.get('store');
-      if(store) {
-        store.makeRecordEditable(this); 
-      }
-    }
     this._editLevel++;
     return this ;
   },
@@ -191,21 +185,20 @@ SC.Record = SC.Object.extend(
     Reads the raw attribute from the underlying data hash.  This method does
     not transform the underlying attribute at all.
   
-    @param {string} key the attribute you want to read
-    @returns {value} the value of the key, or null if it doesn't exist
+    @param {String} key the attribute you want to read
+    @returns {Object} the value of the key, or null if it doesn't exist
   */
   readAttribute: function(key) {
     var store = this.get('store'), storeKey = this.storeKey;
-    var attr = store.dataHashes[storeKey];
-    var ret = attr[key] ;
-    return (ret === undefined) ? null : ret ;
+    var attrs = store.getDataHash(storeKey);
+    return attrs ? attrs[key] : undefined ; 
   },
 
   /**
     Updates the passed attribute with the new value.  This method does not 
     transform the value at all.  If instead you want to modify an array or 
     hash already defined on the underlying json, you should instead get 
-    an editable version of the attribute using readEditableAttribute()
+    an editable version of the attribute using editableAttribute()
   
     @param {String} key the attribute you want to read
     @param {Object} value the attribute you want to read
@@ -214,12 +207,29 @@ SC.Record = SC.Object.extend(
   writeAttribute: function(key, value) {
     this.beginEditing();
     var store = this.get('store'), storeKey = this.storeKey;
-    var attr = store.dataHashes[storeKey];
-    if (!attr) store.dataHashes[storeKey] = attr = {}; 
-
-    attr[key] = value ;
+    var attrs = store.getWriteableDataHash(storeKey);
+    if (!attrs) {
+      throw "Cannot not modify %@ because it is not loaded".fmt(this);
+    }
+    attrs[key] = value;
     this.endEditing();
     return this ;  
+  },
+  
+  /**
+    Reads the value for the passed attribute key.  If the value is an array
+    or hash, then the object will be cloned the first time it is returned.
+    
+    Use this method if you need to retrieve an array or hash that you intend
+    to then edit.  This will only clone the array the first time if it is 
+    needed.
+    
+    @param {String} key the attribute to read
+    @param {Object} the object value
+  */
+  editableAttribute: function(key) {
+    var store = this.get('store'), storeKey = this.storeKey;
+    return store.getWriteableAttribute(storeKey, key) ;
   },
   
   /**
@@ -244,26 +254,19 @@ SC.Record = SC.Object.extend(
     @param {String} key the attribute being get/set
     @param {Object} value the value to set the key to, if present
     @returns {Object} the value
-  **/
-  unknownProperty: function( key, value )
-  {
+  */
+  unknownProperty: function(key, value) {
     if (value !== undefined) {
       
       // if we're modifying the PKEY, then SC.Store needs to relocate where 
       // this record is cached. store the old key, update the value, then let 
       // the store do the housekeeping...
-      var primaryKeyName = this.get('primaryKey');
-      if (key == primaryKeyName)
-      {
-        var oldPrimaryKey  = this.get(key);
-        var newPrimaryKey  = value;
-      }
-      
+      var primaryKey = this.get('primaryKey');
       this.writeAttribute(key,value);
       
       // no need to relocate if there wasn't an old key...
-      if ((key == primaryKeyName) && oldPrimaryKey) {
-        SC.Store.relocateRecord( oldPrimaryKey, newPrimaryKey, this );
+      if (key === primaryKey) {
+        this.get('store').replaceGuid(this.storeKey, value);
       }
       
     } else {
@@ -284,11 +287,7 @@ SC.Record = SC.Object.extend(
 }) ;
 
 // Class Methods
-SC.Record.mixin(
-/** @static SC.Record */ {
-
-  // Constants for sorting
-  SORT_BEFORE: -1, SORT_AFTER: 1, SORT_SAME: 0,
+SC.Record.mixin( /** @scope SC.Record */ {
 
   /** 
     Used to find the first object matching the specified conditions.  You can 
@@ -310,84 +309,6 @@ SC.Record.mixin(
       ret = store.find.apply(store,args) ;
     }
     return ret;
-  },
-  
-  // defines coreRecordType as the first level of extension from SC.Record.
-  // e.g. for SC.Record > Contact > Person,  the core record type is Contact.
-  extend: function() {
-    var ret = SC.Object.extend.apply(this,arguments) ;
-    if (ret.coreRecordType == null) ret.coreRecordType = ret ;
-    return ret ;
-  },  
-
-//  primaryKey: function() { return this.prototype.primaryKey; },
-
-  // this is set by extend to point to the core record type used to store
-  // the record in the pool.  The coreRecordType is always the first record
-  // type created.
-  coreRecordType: null,
-
-  resourceURL: function() { return this.prototype.resourceURL; },
-  
-  // This will add a property function for your record with a collection
-  // of records with the given type that belong to your record.
-  hasMany: function(recordTypeString,conditionKey,opts) {
-    opts = (opts === undefined) ? {} : Object.clone(opts) ;
-    var conditions = opts.conditions || {} ;
-    opts.conditions = conditions ;
-
-    var privateKey = '_' + conditionKey + SC.generateGuid() ;
-    return function() {
-      if (!this[privateKey]) {
-        var recordType = eval(recordTypeString);
-        conditions[conditionKey] = this ;
-        this[privateKey] = recordType.collection(opts) ;
-        this[privateKey].refresh() ; // get the initial data set.
-      }
-      return this[privateKey] ;
-    }.property();
   }
   
 }) ;
-
-SC.Record.newObject = SC.Record.newRecord; // clone method
-
-// Built in Type Converters.  You can also use an SC.Record.
-SC.Record.Date = function(value,direction) {
-  if (direction == 'out') {
-    if (value instanceof Date) value = value.utcFormat() ;
-    
-  } else if (typeof(value) == "string") {
-    // try to parse date. trim any decimal numbers at end since Rails sends
-    // this sometimes.
-    var ret = new Date( Date.parse(value.replace(/\.\d+$/,'')) );
-    if (ret) value = ret ;
-  }
-  return value ;
-}.typeConverter() ;
-
-SC.Record.Number = function(value,direction) {
-  if (direction == 'out') {
-    if (typeof(value) == "number") value = value.toString() ;
-  
-  } else if (typeof(value) == "string") {
-    var ret = (value.match('.')) ? parseFloat(value) : parseInt(value,0) ;
-    if (ret) value = ret ;
-  }
-  return value ;
-}.typeConverter() ;
-
-SC.Record.Flag = function(value, direction) {
-  if (direction == 'out') {
-    return value = (value) ? 't' : 'f' ;
-  } else if (typeof(value) == "string") {
-    return !('false0'.match(value.toLowerCase())) ;
-  } else return (value) ? YES : NO ;
-}.typeConverter() ;
-
-SC.Record.Bool = SC.Record.Flag ;
-
-
-
-
-
