@@ -157,6 +157,10 @@ test("changing value from full -> empty", function() {
 
 test("changing value from full -> negative number", function() {
   var view = pane.view('progress basic value 100');
+	
+  SC.RunLoop.begin();
+  view.set('value', 100);
+  SC.RunLoop.end();
   
   equals(view.$('.sc-inner').width(), 314, 'precon - pixel width should be 316');
   SC.RunLoop.begin();
@@ -180,6 +184,9 @@ test("changing value to over maximum", function() {
 test("changing value to a string", function() {
   var view = pane.view('progress basic');
   
+  SC.RunLoop.begin();
+  view.set('value', 25);
+  SC.RunLoop.end();
   equals(view.$('.sc-inner').width(), 78, 'precon - pixel width should be 79');
   SC.RunLoop.begin();
   view.set('value', 'aString');

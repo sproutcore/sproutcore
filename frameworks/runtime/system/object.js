@@ -730,7 +730,7 @@ function findClassNames() {
   searchObject(null, window, 2) ;
 
   // Internet Explorer doesn's loop over global variables...
-  if ( SC.browser.isIE ) {
+  /*if ( SC.browser.isIE ) {
     searchObject('SC', SC, 2) ; // get names for the SC classes
 
     // get names for the model classes, including nested namespaces (untested)
@@ -749,7 +749,7 @@ function findClassNames() {
         }
       }
     }
-  }
+  }*/
 }
 
 /** @private

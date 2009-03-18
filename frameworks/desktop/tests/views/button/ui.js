@@ -10,7 +10,7 @@
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-
+(function() {
 var pane = SC.ControlTestPane.design()
   .add("basic", SC.ButtonView, { 
   })
@@ -42,7 +42,7 @@ var pane = SC.ControlTestPane.design()
 pane.show(); // add a test to show the test pane
 
 
-module('SC.ButtonView ui', pane.standardSetup());
+module('SC.ButtonView ui');
 
 test("Check that all button are visible", function() {
   ok(pane.view('basic').get('isVisibleInWindow'), 'basic.isVisibleInWindow should be YES');
@@ -137,4 +137,4 @@ test("Check that the title is set or not and if it is in the appropriate element
 
 });
 
-
+})();

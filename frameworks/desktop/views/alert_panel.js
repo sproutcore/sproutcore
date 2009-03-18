@@ -7,7 +7,6 @@
 
 require('views/panel');
 require('views/button');
-
 /** 
   button1 : 1st button from the right. default:OK
   button2 : 2nd button from the right. Optional. Could be Cancel or 2nd action.

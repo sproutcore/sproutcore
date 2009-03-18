@@ -113,7 +113,7 @@ test("pressing mouseDown and then mouseUp anywhere in the checkbox should toggle
   input.attr('checked', NO);
   SC.Event.trigger(input.get(0),'change');
   
-  ok(view.get('isActive'), 'view should no longer be active');
+  ok(!view.get('isActive'), 'view should no longer be active');
   ok(!view.get('value'), 'value should change to NO');
   
   input = elem = null ;
