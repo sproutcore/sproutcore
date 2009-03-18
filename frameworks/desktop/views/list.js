@@ -281,7 +281,7 @@ SC.ListView = SC.CollectionView.extend(
     var content = SC.makeArray(this.get('content')) ;
     var selection = SC.makeArray(this.get('selection'));
     var oldRange = this._oldNowShowingRange ;
-    var range = this.get('nowShowingRange') ;
+    var range = SC.cloneRange(this.get('nowShowingRange')) ;
     this._oldNowShowingRange = SC.cloneRange(range) ;
     var key, itemView = this.createExampleView(content), c ;
     var range2 ; // only used if the old range fits inside the new range
@@ -519,8 +519,6 @@ SC.ListView = SC.CollectionView.extend(
       
       // convert to range...
       ret = { start: min, length: max - min } ;
-      
-      if (ret.length !== 0 && ret.length < 10) debugger ;
       
     // otherwise, get the cached row offsets...
     } else {

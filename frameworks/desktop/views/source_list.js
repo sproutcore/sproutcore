@@ -220,49 +220,400 @@ SC.SourceListView = SC.ListView.extend(
     return height ;
   },
   
-  /**
-    An array containing the contracted groups, if any, by ground index for the
-    current content array.
+  // ..........................................................
+  // RENDERING
+  // 
+  
+  createExampleGroupView: function() {
+    var ExampleGroupView = this.get('exampleGroupView') ;
     
-    @readOnly
-    @property
-    @type SC.Array
-  */
-  contractedGroups: function(key, val) {
-    if (val) {
-      throw "The SC.SourceListView contractedGroups property is read-only." ;
+    if (ExampleGroupView) {
+      return ExampleGroupView.create({
+        classNames: ['sc-collection-group'],
+        owner: this,
+        displayDelegate: this,
+        parentView: this,
+        isVisible: YES,
+        isMaterialized: YES
+      });
+    } else throw "You must define an exampleGroupView class to render collection groups with" ;
+  },
+  
+  render: function(context, firstTime) {
+    var isDirty = this.get('isDirty') ; // sc_super() will clear this...
+    sc_super() ; // render content items
+    
+    // render groups
+    if (SC.BENCHMARK_RENDER) {
+      var bkey = '%@.render(groups)'.fmt(this) ;
+      SC.Benchmark.start(bkey);
+    }
+    this.beginPropertyChanges() ; // avoid sending notifications
+    
+    var content = SC.makeArray(this.get('content')) ;
+    var groups = content.get('groups') || [] ;
+    var oldRange = this._oldNowShowingGroupRange ;
+    var range = SC.cloneRange(this.get('nowShowingRange')) ;
+    this._oldNowShowingGroupRange = SC.cloneRange(range) ;
+    var key, groupView = this.createExampleGroupView(), c, g ;
+    var range2 ; // only used if the old range fits inside the new range
+    var idx, end, groupId, groupIndex ;
+    
+    // keep track of groups we've got rendered
+    var groupSet = this._groupSet ;
+    if (!groupSet) groupSet = this._groupSet = [] ;
+    
+    // figure out which groups should be rendered
+    var newGroupSet = [] ;
+    idx = range.start ;
+    end = range.start + range.length ;
+    while (idx < end) {
+      // is the group for this contentIndex currently being rendered?
+      groupIndex = this.groupIndexForContentIndex(idx) ;
+      if (groupIndex >= 0) {
+        newGroupSet.push(groupIndex) ;
+      }
+      ++idx ;
     }
     
-    var ary = this._contractedGroups ;
-    if (!ary) ary = this._contractedGroups = [] ;
-    
-    // All groups default to "expanded", so an empty array reflects this.
-    return ary ;
-  }.property(),
-  
-  /** @private
-    Called by groups when their expansion property changes.
-  */
-  groupDidChangeExpansion: function(group, isExpanded) {
-    if (!group) return ;
-    
-    var groups = this.getPath('content.groups') || [] ;
-    var groupIndex = groups.indexOf(group) ;
-    
-    if (groupIndex >= 0) {
-      var ary = this._contractedGroups ;
-      if (!ary) ary = this._contractedGroups = [] ;
+    if (SC.ENABLE_COLLECTION_PARTIAL_RENDER) {
+      // used for santity checks during debugging
+      if (SC.SANITY_CHECK_PARTIAL_RENDER) var maxLen = range.length ;
       
-      // only change our display if isExpanded changes
-      if (isExpanded && ary[groupIndex]) {
-        delete ary[groupIndex] ; // saves memory vs. storing NO
-        this.displayDidChange() ;
-      } else if (!ary[groupIndex]) {
-        ary[groupIndex] = YES ;
-        this.displayDidChange() ;
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('oldRange = ') ;
+        console.log(oldRange) ;
+        console.log('range = ') ;
+        console.log(range) ;
+      }
+      
+      // if we're dirty, redraw everything visible
+      // (selection changed, content changed, etc.)
+      if (isDirty) {
+        // console.log('doing a full render') ;
+        groupSet.length = 0 ; // full render
+        
+      // else, only redaw objects we haven't previously drawn
+      } else if (oldRange) {
+        // ignore ranges that don't overlap above..
+        if (range.start >= oldRange.start + oldRange.length) {
+          // console.log('doing a full render') ;
+          groupSet.length = 0 ; // full render
+          
+        // and below...
+        } else if (range.start + range.length <= oldRange.start) {
+          // console.log('doing a full render') ;
+          groupSet.length = 0 ; // full render
+          
+        // okay, the ranges do overlap. are they equal?
+        } else if (SC.rangesEqual(oldRange, range)) {
+          range = SC.EMPTY_RANGE ; // nothing to render
+          
+        // nope, is the old range inside the new range?
+        } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
+          // need to render two ranges...all pre-existing views are valid
+          context.partialUpdate = YES ;
+          range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
+          range.length = oldRange.start - range.start ;
+          
+        // nope, is the new range inside the old range?
+        } else if (range.start >= oldRange.start && range.start + range.length <= oldRange.start + oldRange.length) {        
+          // need to remove unused childNodes at both ends, start with bottom...
+          idx = oldRange.start ;
+          end = range.start ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom range');
+            // is the group for this contentIndex currently being rendered?
+            groupIndex = this.groupIndexForContentIndex(idx) ;
+            if (groupIndex >= 0 && (newGroupSet.indexOf(groupIndex) === -1)) {
+              groupId = groupSet[groupIndex] ;
+              if (groupId) context.remove(groupId) ;
+              if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting group at index %@'.fmt(groupIndex));
+              delete groupSet[groupIndex] ;
+            }
+            ++idx ;
+          }
+          
+          // now remove unused childNodes at the top of the range...
+          idx = range.start + range.length ;
+          end = oldRange.start + oldRange.length ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top range');
+            // is the group for this contentIndex currently being rendered?
+            groupIndex = this.groupIndexForContentIndex(idx) ;
+            if (groupIndex >= 0 && (newGroupSet.indexOf(groupIndex) === -1)) {
+              groupId = groupSet[groupIndex] ;
+              if (groupId) context.remove(groupId) ;
+              if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting group at index %@'.fmt(groupIndex));
+              delete groupSet[groupIndex] ;
+            }
+            ++idx ;
+          }
+          
+          range = SC.EMPTY_RANGE ; // nothing to render
+          
+        // nope, is the new range lower than the old range?
+        } else if (range.start < oldRange.start) {
+          context.partialUpdate = YES ;
+          
+          // need to remove unused childNodes at the top of the old range
+          idx = range.start + range.length ;
+          end = oldRange.start + oldRange.length ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top only');
+            // is the group for this contentIndex currently being rendered?
+            groupIndex = this.groupIndexForContentIndex(idx) ;
+            if (groupIndex >= 0 && (newGroupSet.indexOf(groupIndex) === -1)) {
+              groupId = groupSet[groupIndex] ;
+              if (groupId) context.remove(groupId) ;
+              if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting group at index %@'.fmt(groupIndex));
+              delete groupSet[groupIndex] ;
+            }
+            ++idx ;
+          }
+          
+          range.length = Math.min(range.length, oldRange.start - range.start) ;
+          
+        // nope, so the new range is higher than the old range
+        } else {
+          context.partialUpdate = YES ;
+          
+          // need to remove unused childNodes at the bottom of the old range
+          idx = oldRange.start ;
+          end = range.start ;
+          while (idx < end) {
+            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom only');
+            // is the group for this contentIndex currently being rendered?
+            groupIndex = this.groupIndexForContentIndex(idx) ;
+            if (groupIndex >= 0 && (newGroupSet.indexOf(groupIndex) === -1)) {
+              groupId = groupSet[groupIndex] ;
+              if (groupId) context.remove(groupId) ;
+              if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting group at index %@'.fmt(groupIndex));
+              delete groupSet[groupIndex] ;
+            }
+            ++idx ;
+          }
+          
+          end = range.start + range.length ;
+          range.start = oldRange.start + oldRange.length ;
+          range.length = end - range.start ;
+        }
+      }
+      
+      if (SC.SANITY_CHECK_PARTIAL_RENDER) {
+        if (range.length < 0) throw "range.length is " + range.length ;
+        if (range.length > maxLen) throw "range.length is " + range.length + ', max length is ' + maxLen ;
+        if (range.start < 0) throw "range.start is " + range.start ;
+        if (range2) {
+          if (range2.length < 0) throw "range2.length is " + range2.length ;
+          if (range2.length > maxLen) throw "range2.length is " + range2.length + ', max length is ' + maxLen ;
+          if (range2.start < 0) throw "range2.start is " + range2.start ;
+        }
+      }
+    
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('rendering = ') ;
+        console.log(range) ;
+        if (range2) {
+          console.log('also rendering = ') ;
+          console.log(range2) ;
+        }
       }
     }
+    
+    idx = SC.maxRange(range) ;
+    
+    var baseKey = SC.guidFor(this) + '_' ;
+    var guids = this._groupViewGuids, guid;
+    if (!guids) this._groupViewGuids = guids = {};
+    
+    // TODO: Use SC.IndexSet, not separate ranges, once it's ready.
+    // This will also make it possible to do partial updates during content
+    // and selection changes. Now we always do a full update.
+    
+    var groupLayout ;
+    while (--idx >= range.start) {
+      groupIndex = this.groupIndexForContentIndex(idx) ;
+      
+      if (groupIndex == -1) continue ;
+      // don't re-render already rendered group views
+      if (groupSet[groupIndex]) continue ;
+      
+      g = groups.objectAt(groupIndex) ;
+      
+      // use cache of group view guids to avoid creating temporary objects
+      guid = SC.guidFor(g);
+      if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+      
+      // console.log('groupSet[groupIndex]=%@'.fmt(groupSet[groupIndex])) ;
+      
+      if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering group(%@) at index %@'.fmt(g.get('value'), idx));
+      
+      groupSet[groupIndex] = key ;
+      groupView.set('content', g) ;
+      groupView.layerId = key ; // cannot use .set, layerId is RO
+      
+      // get the layout for the group's first itemView
+      groupLayout = this.itemViewLayoutAtContentIndex(null, g.get('itemRange').start) ;
+      
+      // derive the correct groupView layout
+      groupLayout.height = this.heightForGroupAtIndex(groupIndex) ;
+      groupLayout.top -= groupLayout.height ;
+      
+      // console.log(groupLayout) ;
+      
+      groupView.adjust(groupLayout) ;
+      context = context.begin(groupView.get('tagName')) ;
+      groupView.prepareContext(context, YES) ;
+      context = context.end() ;
+    }
+    
+    if (range2) {
+      idx = SC.maxRange(range2) ;
+      while (--idx >= range2.start) {
+        groupIndex = this.groupIndexForContentIndex(idx) ;
+        if (groupIndex == -1) continue ;
+        
+        g = groups.objectAt(groupIndex) ;
+        
+        // use cache of group view guids to avoid creating temporary objects
+        guid = SC.guidFor(g);
+        if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+        
+        // don't re-render already rendered group views
+        if (groupSet[groupIndex]) continue ;
+        
+        if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering group(%@) at index %@'.fmt(g.get('value'), idx));
+        
+        groupSet[groupIndex] = key ;
+        groupView.set('content', g) ;
+        groupView.layerId = key ; // cannot use .set, layerId is RO
+        
+        // get the layout for the group's first itemView
+        groupLayout = this.itemViewLayoutAtContentIndex(null, g.get('itemRange').start) ;
+        
+        // derive the correct groupView layout
+        groupLayout.height = this.heightForGroupAtIndex(groupIndex) ;
+        groupLayout.top -= groupLayout.height ;
+        groupView.adjust(groupLayout) ;
+        context = context.begin(groupView.get('tagName')) ;
+        groupView.prepareContext(context, YES) ;
+        context = context.end() ;
+      }
+    }
+    
+    if (SC.DEBUG_PARTIAL_RENDER) console.log('******************************') ;
+    
+    this.endPropertyChanges() ;
+    if (SC.BENCHMARK_RENDER) SC.Benchmark.end(bkey);
   },
+  
+  /** @private
+    Calculates the visible content range in the specified frame.  If 
+    uniform rows are set, this will use some simple math.  Otherwise it will
+    compute all row offsets leading up to the frame.
+  */
+  contentRangeInFrame: function(frame) {
+    // console.log('contentRangeInFrame invoked on %@ with frame {%@, %@, %@, %@}'.fmt(this, frame.x, frame.y, frame.width, frame.height));
+    var min, max, ret, rowHeight ;
+    var minY = SC.minY(frame), maxY = SC.maxY(frame);
+    // use some simple math...
+    // if (this.get('hasUniformRowHeights') && this.get('hasUniformGroupHeights')) {
+    //   rowHeight = this.get('rowHeight') || 20 ;
+    //   min = Math.max(0,Math.floor(minY / rowHeight)-1) ;
+    //   max = Math.ceil(maxY / rowHeight) ;
+    //   
+    //   // now take into acccount the groups...
+    //   
+    //   var content = this.get('content') ;
+    //   min = Math.min(min, content.get('length')) ;
+    //   max = Math.min(max, content.get('length')) ;
+    //   
+    //   // convert to range...
+    //   ret = { start: min, length: max - min } ;
+    //   
+    // // otherwise, get the cached row offsets...
+    // } else {
+      var content = this.get('content');
+      var len = (content ? content.get('length') : 0), offset = 0;
+      
+      // console.log('contentRangeInFrame content length is %@'.fmt(len));
+      
+      // console.log('minY = ' + minY) ;
+      // console.log('maxY = ' + maxY) ;
+      
+      min = null; 
+      max = 0;
+      do {
+        offset = this.offsetForRowAtContentIndex(max); // add offset.
+        // console.log('offset is now %@'.fmt(offset));
+        if ((min===null) && (offset >= minY)) min = max; // set min
+        max++ ;
+      } while (max<len && offset < maxY);
+      
+      // console.log('min = ' + min) ;
+      // console.log('max = ' + max) ;
+      
+      // convert to range...
+      ret = { start: Math.max(min-1, 0), length: Math.min(max - min + 2, len) } ;
+    // }
+    // 
+    // var contentIdx = ret.start ;
+    // var group, groups = this.getPath('content.groups') || [] ;
+    // for (var idx=0, len=groups.length; idx<len: ++idx) {
+    //   group = groups[idx] ;
+    //   if (SC.valueInRange(contentIdx, group.get('itemRange'))) {
+    //     
+    //   }
+    // }
+    
+    // console.log('contentRangeInFrame is {%@, %@}'.fmt(ret.start, ret.length));
+    return ret ;
+  },
+  
+  // /**
+  //   An array containing the contracted groups, if any, by ground index for the
+  //   current content array.
+  //   
+  //   @readOnly
+  //   @property
+  //   @type SC.Array
+  // */
+  // contractedGroups: function(key, val) {
+  //   if (val) {
+  //     throw "The SC.SourceListView contractedGroups property is read-only." ;
+  //   }
+  //   
+  //   var ary = this._contractedGroups ;
+  //   if (!ary) ary = this._contractedGroups = [] ;
+  //   
+  //   // All groups default to "expanded", so an empty array reflects this.
+  //   return ary ;
+  // }.property(),
+  // 
+  // /** @private
+  //   Called by groups when their expansion property changes.
+  // */
+  // groupDidChangeExpansion: function(group, isExpanded) {
+  //   if (!group) return ;
+  //   
+  //   var groups = this.getPath('content.groups') || [] ;
+  //   var groupIndex = groups.indexOf(group) ;
+  //   
+  //   if (groupIndex >= 0) {
+  //     var ary = this._contractedGroups ;
+  //     if (!ary) ary = this._contractedGroups = [] ;
+  //     
+  //     // only change our display if isExpanded changes
+  //     if (isExpanded && ary[groupIndex]) {
+  //       delete ary[groupIndex] ; // saves memory vs. storing NO
+  //       this.displayDidChange() ;
+  //     } else if (!ary[groupIndex]) {
+  //       ary[groupIndex] = YES ;
+  //       this.displayDidChange() ;
+  //     }
+  //   }
+  // },
   
   /**
     Expands the index into a range of content objects that have the same
@@ -315,12 +666,20 @@ SC.SourceListView = SC.ListView.extend(
     if grouping is disabled.
     
     @param {Number} contentIndex
-    @returns {Object} group value.
+    @returns {Number} group index.
   */
-  groupValueAtContentIndex: function(contentIndex) {
-    // var groupBy = this.get('groupBy') ;
-    // var content = SC.makeArray(this.get('content')).objectAt(contentIndex) ;
-    // return (groupBy && content && content.get) ? content.get(groupBy) : null;
+  groupIndexForContentIndex: function(contentIndex) {
+    var groupIndex = -1 ;
+    var groups = this.getPath('content.groups') || [] ;
+    var group, itemRange, len = groups.get('length') ;
+    for (var idx=0; idx<len; ++idx) {
+      group = groups.objectAt(idx) ;
+      if (SC.valueInRange(contentIndex, group.itemRange)) {
+        groupIndex = idx ;
+        break ;
+      }
+    }
+    return groupIndex ;
   },
   
   // emptyElement: '<div class="sc-source-list-view"></div>',

@@ -238,7 +238,7 @@ SC.LabelView = SC.View.extend(SC.Control,
   render: function(context, firstTime) {
     var value = this.get('displayValue');
     var icon = this.get('icon') ;
-
+    
     // add icon if needed
     if (icon) {
       var url = (icon.indexOf('/')>=0) ? icon : static_url('blank');

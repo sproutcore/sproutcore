@@ -550,6 +550,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     @type Range
   */
   nowShowingRange: function() {
+    // console.log(this.get('clippingFrame'));
     var r = this.contentRangeInFrame(this.get('clippingFrame')) ;
     if (!r) r = { start: 0, length: 0 } ; // default
      
@@ -659,6 +660,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var c = content.objectAt(idx) ;
     while (SC.guidFor(c) !== contentGuid) {
       c = content.objectAt(idx++) ;
+      if (idx == max) return null ; // couldn't find the content...
     }
     
     // then create the view for that content
