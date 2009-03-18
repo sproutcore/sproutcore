@@ -414,12 +414,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       else itemView.layout = newLayout ; // DON'T TRIGGER OBSERVERS!!!
     }}}
     
-    @param {SC.View} itemView the item view to adjust
     @param {Number} contentIndex the index of content beind rendered by
       itemView
     @returns {Rect} a layout rectangle
   */
-  itemViewLayoutAtContentIndex: function(itemView, contentIndex) {},
+  itemViewLayoutAtContentIndex: function(contentIndex) {},
   
   // ..........................................................
   // CONTENT CHANGES
@@ -613,7 +612,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     itemView.set('isSelected', (selection.indexOf(content) == -1) ? NO : YES) ;
     
     // NOTE: *must* set the layout silently...
-    itemView.layout = this.itemViewLayoutAtContentIndex(itemView, contentIndex) ;
+    itemView.layout = this.itemViewLayoutAtContentIndex(contentIndex) ;
     itemView.set('parentView', this) ;
     return itemView ;
   },
@@ -673,7 +672,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
     
     // NOTE: *must* set the layout silently...
-    itemView.layout = this.itemViewLayoutAtContentIndex(itemView, idx) ;
+    itemView.layout = this.itemViewLayoutAtContentIndex(idx) ;
     itemView.set('parentView', this) ;
     
     // prevent normal, non-materialized view behavior

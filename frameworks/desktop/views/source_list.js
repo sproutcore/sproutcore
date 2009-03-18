@@ -454,7 +454,7 @@ SC.SourceListView = SC.ListView.extend(
       groupView.layerId = key ; // cannot use .set, layerId is RO
       
       // get the layout for the group's first itemView
-      groupLayout = this.itemViewLayoutAtContentIndex(null, g.get('itemRange').start) ;
+      groupLayout = this.itemViewLayoutAtContentIndex(g.get('itemRange').start) ;
       
       // derive the correct groupView layout
       groupLayout.height = this.heightForGroupAtIndex(groupIndex) ;
@@ -490,7 +490,7 @@ SC.SourceListView = SC.ListView.extend(
         groupView.layerId = key ; // cannot use .set, layerId is RO
         
         // get the layout for the group's first itemView
-        groupLayout = this.itemViewLayoutAtContentIndex(null, g.get('itemRange').start) ;
+        groupLayout = this.itemViewLayoutAtContentIndex(g.get('itemRange').start) ;
         
         // derive the correct groupView layout
         groupLayout.height = this.heightForGroupAtIndex(groupIndex) ;

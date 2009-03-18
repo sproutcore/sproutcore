@@ -440,7 +440,7 @@ SC.ListView = SC.CollectionView.extend(
       itemView.layerId = key ; // cannot use .set, layerId is RO
       if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
       childSet[idx] = key ;
-      itemView.adjust(this.itemViewLayoutAtContentIndex(itemView, idx)) ;
+      itemView.adjust(this.itemViewLayoutAtContentIndex(idx)) ;
       context = context.begin(itemView.get('tagName')) ;
       itemView.prepareContext(context, YES) ;
       context = context.end() ;
@@ -461,7 +461,7 @@ SC.ListView = SC.CollectionView.extend(
         itemView.layerId = key ; // cannot use .set, layerId is RO
         if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
         childSet[idx] = key ;
-        itemView.adjust(this.itemViewLayoutAtContentIndex(itemView, idx)) ;
+        itemView.adjust(this.itemViewLayoutAtContentIndex(idx)) ;
         context = context.begin(itemView.get('tagName')) ;
         itemView.prepareContext(context, YES) ;
         context = context.end() ;
@@ -551,8 +551,8 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   /** @private */
-  itemViewLayoutAtContentIndex: function(itemView, contentIndex) {
-    // console.log('%@.itemViewLayoutAtContentIndex(%@, %@)'.fmt(this, itemView, contentIndex));
+  itemViewLayoutAtContentIndex: function(contentIndex) {
+    // console.log('%@.itemViewLayoutAtContentIndex(%@)'.fmt(this, contentIndex));
     var layout = { left: 0, right: 0 } ;
     
     // set top & height...
