@@ -191,9 +191,7 @@ SC.ListView = SC.CollectionView.extend(
     
     // do some simple math if we have uniform row heights...
     if (this.get('hasUniformRowHeights')) {
-      var height = this.get('rowHeight') * index ;
-      // console.log('calculating offsetForRowAtContentIndex using uniform row heights, index is %@, offset is %@'.fmt(index, height));
-      return height;
+      return this.get('rowHeight') * index ;
       
     // otherwise, use the rowOffsets cache...
     } else {
@@ -236,8 +234,6 @@ SC.ListView = SC.CollectionView.extend(
         offsets[cur] = ret ;
       }
       
-      // console.log('index %@ is offset %@'.fmt(index, ret)) ;
-      
       return ret ;
     }
   },
@@ -247,27 +243,27 @@ SC.ListView = SC.CollectionView.extend(
     perform some simple math if hasUniformRowHeights is enabled.  Otherwise
     it will consult the collection view delegate to compute the row heights.
   */
-  heightForRowAtContentIndex: function(index) {
+  heightForRowAtContentIndex: function(contentIndex) {
     if (this.get('hasUniformRowHeights')) {
       return this.get('rowHeight') ;
-    } else return this._list_heightForRowAtContentIndex(index);
+    } else return this._list_heightForRowAtContentIndex(contentIndex);
   },
   
   /** @private
     By-passes the uniform row heights check.  Makes offsetForRow... a little
     faster.
   */
-  _list_heightForRowAtContentIndex: function(index) {
+  _list_heightForRowAtContentIndex: function(contentIndex) {
     // console.log('_list_heightForRowAtContentIndex invoked on %@ with index %@'.fmt(this, index));
     var heights = this._list_rowHeights;
     if (!heights) heights = this._list_rowHeights = [] ;
     
-    var height = (index<heights.length) ? heights[index] : undefined;
+    var height = (contentIndex < heights.length) ?
+      heights[contentIndex] :
+      undefined ;
     if (height===undefined) {
-      height = heights[index] = this.invokeDelegateMethod(this.delegate, 'collectionViewHeightForRowAtContentIndex', this, index) || 0 ;
+      height = heights[contentIndex] = this.invokeDelegateMethod(this.delegate, 'collectionViewHeightForRowAtContentIndex', this, contentIndex) || 0 ;
     }
-    
-    // console.log('height in _list_heightForRowAtContentIndex is %@'.fmt(height));
     
     return height ;
   },

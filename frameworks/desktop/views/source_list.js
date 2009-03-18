@@ -74,100 +74,124 @@ SC.SourceListView = SC.ListView.extend(
   /**
     This optional delegate method will be called for each group in your 
     content groups, giving you a chance to decide what group height to use for
-    the group at the named index.
+    the group at the named groupIndex.
     
     The default version will return either the fixed groupHeight you 
     specified or will lookup the group height on the content's groups object 
-    using the rowHeightKey.
+    using the groupHeightKey.
     
     @params {SC.CollectionView} the requesting collection view
-    @params {Number} the index into the group array
+    @params {Number} groupIndex the index into the group array
     @returns {Number} groupHeight
   */
   collectionViewHeightForGroupAtIndex: function(collectionView, groupIndex) {
-    // console.log('collectionViewHeightForGroupAtIndex invoked in %@ with index %@'.fmt(this, groupIndex));
-    // console.log('groupHeightKey is %@'.fmt(this.get('groupHeightKey')));
-    // just test for presence of a groupHeightKey..to implement fast path...
-    if (!this.groupHeightKey) return this.get('groupHeight');
-    var key = this.get('groupHeightKey'), groups = this.get('groups'), groupHeight;
-    if (groups) groups = groups.objectAt(groupIndex);
-    groupHeight = groups ? groups.get(key) : this.get('groupHeight');
-    // console.log('groups.get(key) is %@'.fmt(groups ? groups.get(key) : undefined));
-    return groupHeight ;
+    if (!this.groupHeightKey) return this.get('groupHeight') ;
+    
+    var group, groups = this.get('groups') ;
+    if (groups) group = groups.objectAt(groupIndex);
+    
+    return group ?
+      group.get(this.get('groupHeightKey')) :
+      this.get('groupHeight') ;
   },
   
   /**
-    Calculates the offset for the row at the specified index.  Based on the 
-    current setting this may compute the row heights for previous items or 
-    it will simply do some math...
+    Calculates the offset for the row at the specified index, taking into 
+    account the height of the groupView for that contentIndex.  Based on the 
+    current setting this may compute the group heights of groups for previous 
+    items or it will simply do some math...
   */
-  offsetForRowAtContentIndex: function(index) {
-    // do some simple math if we have uniform row heights...
-    if (this.get('hasUniformRowHeights')) {
-      var height = this.get('rowHeight') * index ;
+  offsetForRowAtContentIndex: function(contentIndex) {
+    var ret = sc_super() ;
+    
+    // account for group view heights...
+    if (this.get('hasUniformGroupHeights')) {
+      var groupHeight = this.get('groupHeight') ;
       
-      if (this.get('hasUniformGroupHeights')) {
-        var groupHeight = this.get('groupHeight') ;
-        
-        var groups = this.getPath('content.groups') || [] ;
-        if (groups.get('length') > 0) {
-          var group, itemRange, len = groups.get('length') ;
-          for (var idx=0; idx<len; ++idx) {
-            group = groups.objectAt(idx) ;
-            height += groupHeight ;
-            if (SC.valueInRange(index, group.itemRange)) break ;
-          }
+      var groups = this.getPath('content.groups') || [] ;
+      if (groups.get('length') > 0) {
+        var group, itemRange, len = groups.get('length') ;
+        for (var idx=0; idx<len; ++idx) {
+          group = groups.objectAt(idx) ;
+          ret += groupHeight ;
+          if (SC.valueInRange(contentIndex, group.itemRange)) break ;
         }
       }
-      
-      // console.log('calculating offsetForRowAtContentIndex using uniform row heights, index is %@, offset is %@'.fmt(index, height));
-      return height;
-      
-    // otherwise, use the rowOffsets cache...
+    
+    // otherwise, use the groupOffsets cache...
     } else {
-      // get caches
-      var offsets = this._list_rowOffsets;
-      if (!offsets) offsets = this._list_rowOffsets = [] ;
-      
-      // OK, now try the fast path...if undefined, loop backwards until we
-      // find an offset that IS cached...
-      var len = offsets.length, cur = index, height, ret;
-      
-      // get the cached offset.  Note that if the requested index is longer 
-      // than the length of the offsets cache, then just assume the value is
-      // undefined.  We don't want to accidentally read an old value...
-      if (index<len) {
-        ret = offsets[cur];
-      } else {
-        ret = undefined ;
-        cur = len; // start search at current end of offsets...
-      }
-      
-      // if the cached value was undefined, loop backwards through the offsets
-      // hash looking for a cached value to start from
-      while((cur>0) && (ret===undefined)) ret = offsets[--cur];
-      
-      // now, work our way forward, building the cache of offsets.  Use
-      // cached heights...
-      if (ret===undefined) ret = offsets[cur] = 0 ;
-      while (cur < index) {
-        // get height...recache if needed....
-        // height = this._list_heightForRowAtContentIndex(index) ;
-        height = this._list_heightForRowAtContentIndex(cur) ;
-        
-        // console.log('index %@ has height %@'.fmt(cur, height));
-        
-        // add to ret and save in cache
-        ret = ret + height ;
-        
-        cur++; // go to next offset
-        offsets[cur] = ret ;
-      }
-      
-      // console.log('index %@ is offset %@'.fmt(index, ret)) ;
-      
-      return ret ;
+      // // get caches
+      // var offsets = this._source_list_groupOffsets;
+      // if (!offsets) offsets = this._source_list_groupOffsets = [] ;
+      // 
+      // // OK, now try the fast path...if undefined, loop backwards until we
+      // // find an offset that IS cached...
+      // var len = offsets.length, cur = contentIndex, height, ret;
+      // 
+      // // get the cached offset.  Note that if the requested index is longer 
+      // // than the length of the offsets cache, then just assume the value is
+      // // undefined.  We don't want to accidentally read an old value...
+      // if (contentIndex<len) {
+      //   ret = offsets[cur];
+      // } else {
+      //   ret = undefined ;
+      //   cur = len; // start search at current end of offsets...
+      // }
+      // 
+      // // if the cached value was undefined, loop backwards through the offsets
+      // // hash looking for a cached value to start from
+      // while((cur>0) && (ret===undefined)) ret = offsets[--cur];
+      // 
+      // // now, work our way forward, building the cache of offsets.  Use
+      // // cached heights...
+      // if (ret===undefined) ret = offsets[cur] = 0 ;
+      // while (cur < index) {
+      //   // get height...recache if needed....
+      //   // height = this._list_heightForRowAtContentIndex(index) ;
+      //   height = this._source_list_heightForGroupAtIndex(cur) ;
+      //   
+      //   // console.log('index %@ has height %@'.fmt(cur, height));
+      //   
+      //   // add to ret and save in cache
+      //   ret = ret + height ;
+      //   
+      //   cur++; // go to next offset
+      //   offsets[cur] = ret ;
+      // }
     }
+    
+    // console.log('index %@ is offset %@'.fmt(index, ret)) ;
+    return ret ;
+  },
+  
+  /**
+    Calculates the height for the group at groupIndex.  This method will
+    perform some simple math if hasUniformGroupHeights is YES.  Otherwise,
+    it will consult the collection view delegate to compute the group heights.
+  */
+  heightForGroupAtIndex: function(groupIndex) {
+    if (this.get('hasUniformGroupHeights')) {
+      return this.get('groupHeight') ;
+    } else return this._source_list_heightForGroupAtIndex(groupIndex) ;
+  },
+  
+  /** @private
+    By-passes the uniform row heights check.  Makes offsetForRow... a little
+    faster.
+  */
+  _source_list_heightForGroupAtIndex: function(groupIndex) {
+    // console.log('%@._source_list_heightForGroupAtIndex(groupIndex=%@)'.fmt(this, groupIndex)) ;
+    var heights = this._source_list_groupHeights;
+    if (!heights) heights = this._source_list_groupHeights = [] ;
+    
+    var height = (groupIndex < heights.length) ?
+      heights[groupIndex] :
+      undefined ;
+    if (height===undefined) {
+      height = heights[groupIndex] = this.invokeDelegateMethod(this.delegate, 'collectionViewHeightForGroupAtIndex', this, groupIndex) || 0 ;
+    }
+    
+    return height ;
   },
   
   /**
@@ -178,8 +202,10 @@ SC.SourceListView = SC.ListView.extend(
     @property
     @type SC.Array
   */
-  contractedGroups: function() {
-    if (val) throw "The SC.SourceListView contractedGroups property is read-only." ;
+  contractedGroups: function(key, val) {
+    if (val) {
+      throw "The SC.SourceListView contractedGroups property is read-only." ;
+    }
     
     var ary = this._contractedGroups ;
     if (!ary) ary = this._contractedGroups = [] ;
