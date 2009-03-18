@@ -12,10 +12,22 @@
   var pane = SC.ControlTestPane.design()
 
     .add("basic", SC.WebView, {
-      content : "/clock",
+      value : "/clock",
       layout:{width: 250, height: 150}
-      
-    });
+    })
+
+
+    .add("/clock to /view_builder", SC.WebView, {
+      value : "/clock",
+      layout:{width: 250, height: 150}
+    })
+    
+    
+    // .add("autoResizeView", SC.WebView,{
+    //   value : "/clock",
+    //   shouldAutoResize: NO,
+    //   layout: {width:250, height: 150}
+    // });
   
   pane.show(); // add a test to show the test pane
 
@@ -28,26 +40,32 @@
     var view = pane.view('basic');
     var iframe = view.$iframe();
     ok(view,'view should exist');
-    ok(view.get('content'),'should have content property');
+    ok(view.get('value'),'should have value property');
     equals(view.get('shouldAutoResize'), NO, 'should have autoresize off by default, shouldAutoResize');
     var rootElement = view.$();
     ok(rootElement.hasClass('sc-view'), 'should have sc-view css class');
     ok(rootElement.hasClass('sc-iframe-view'), 'should have sc-iframe-view css class');
     equals(rootElement.height(), 150, 'should have height');
     equals(rootElement.width(), 250, 'should have width');
-
+  
     ok(iframe,'should have iframe element');
     equals(iframe.attr('src'),"/clock", "should have source as /clock");
     ok(iframe[0].contentDocument, 'should have content document');
-
+  
   });
   
-  // test('set content to google.com', function() {
-  //   var view = pane.view('basic');
-  //   var iFrame = view.$iframe();
-  //   SC.RunLoop.begin();
-  //   view.set('content', "http://www.google.com");
-  //   SC.RunLoop.end();
-  //   equals(iFrame.attr('src'),"http://www.google.com", "should have source as http://www.google.com");
+  // test('auto resize tests', function(){
+  //   var view = pane.view('autoResizeView');
+  //   
   // });
+  
+  test('change src/value ', function() {
+    var view = pane.view('/clock to /view_builder');
+    var iFrame = view.$iframe();
+    SC.RunLoop.begin();
+    view.set('value', "/view_builder");
+    SC.RunLoop.end();
+    equals(view.get('value'),"/view_builder", "should have value property in view as \'\\view_builder\'");
+    equals(iFrame.attr('src'),"/view_builder", "should have source in the iframe as \'\\view_builder\'");
+  });
 })();
