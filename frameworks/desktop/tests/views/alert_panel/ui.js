@@ -86,6 +86,12 @@ test("AlertPanel.error with icon, message, description, caption and 3 buttons", 
   pane.dismiss();
 });
 
+test("AlertPanel.plain with message, description, caption and 3 buttons", function() {
+  pane = SC.AlertPanel.plain("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
+	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'blank');
+  pane.dismiss();
+});
+
 test("AlertPanel.info with icon, message, description, caption and 3 buttons", function() {
   pane = SC.AlertPanel.info("AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', this);      
 	evaluatePanel(pane, "AlertPanel.message", 'AlertPanel.description', 'AlertPanel.caption', "okButtonTitle", "cancelButtonTitle", 'extraButtonTitle', 'sc-icon-info-48');

@@ -9,6 +9,10 @@
 	padding: 20px 12px 58px 74px;
 }
 
+.sc-alert-panel .info.plain {
+	padding: 20px 12px 58px 16px;
+}
+
 .sc-alert-panel .info img.icon {
 	position: absolute;
 	left: 12px;

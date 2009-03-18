@@ -47,6 +47,7 @@ SC.BUTTON3_STATUS = 'button3';
   - *warn()* - displays an alert panel with a warning icon to the left.
   - *error()* - displays an alert with an error icon to the left
   - *info()* - displays an alert with an info icon to the left
+  - *plain()* - displays an alert w/o any icon
   - *show()* - displays an alert with a customizable icon to the left
   
   In addition to passing a message, description and caption, you can also customize
@@ -205,6 +206,7 @@ SC.AlertPanel = SC.Panel.extend({
         render: function(context, firstTime) {
           var pane = this.get('pane');
           var blank = sc_static('blank') ;
+          if(pane.get('icon') == 'blank') context.addClass('plain');
           context.push('<img src="%@" class="icon %@" />'.fmt(blank, pane.get('icon')));
           context.begin('h1').text(pane.get('message') || '').end();
           context.push(pane.get('displayDescription') || '');
@@ -355,12 +357,23 @@ SC.AlertPanel.info = function(message, description, caption, button1Title, butto
 };
 
 /**
-  Displays a warning allert panel.  See SC.AlertPanel.show() for complete details. 
+  Displays a error allert panel.  See SC.AlertPanel.show() for complete details. 
   
   @returns {SC.AlertPanel} the panel
 */
 SC.AlertPanel.error = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[6] = 'sc-icon-error-48';
+  return this.show.apply(this, args);
+};
+
+/**
+  Displays a plain all-text allert panel w/o icon.  See SC.AlertPanel.show() for complete details. 
+  
+  @returns {SC.AlertPanel} the panel
+*/
+SC.AlertPanel.plain = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
+  var args = this._normalizeArguments(arguments);
+  args[6] = 'blank';
   return this.show.apply(this, args);
 };
