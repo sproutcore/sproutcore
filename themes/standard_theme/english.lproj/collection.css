@@ -31,8 +31,8 @@
 
 .sc-theme .sc-list-view .sc-collection-item {
 	display: block ;
-	padding: 0 6px;
-	line-height: 22px;
+/*  padding: 0 6px;
+*/	line-height: 22px;
 }
 
 .sc-theme .sc-list-insertion-point {
