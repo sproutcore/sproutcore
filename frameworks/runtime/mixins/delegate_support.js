@@ -64,7 +64,7 @@ SC.DelegateSupport = {
     @param {String} key the property to get.
   */
   getDelegateProperty: function(delegate, key) {
-    return (delegate && (delegate[key] !== undefined)) ? delegate.get(key) : this.get(key) ;
+    return (delegate && (delegate[key] !== undefined) && delegate[key]!==null) ? delegate.get(key) : this.get(key) ;
   }
   
 };

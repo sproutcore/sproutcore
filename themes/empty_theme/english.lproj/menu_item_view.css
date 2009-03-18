@@ -1,0 +1,100 @@
+.sc-theme .sc-menu-item-view {
+	position:relative;
+}
+/*
+.sc-menu-item-view.sel {
+	background-color: #666; 
+	color: white ;
+}
+
+.sc-menu-item-view.active {
+	background-color: #333 ;
+	color: white ;
+}
+*/
+
+
+
+// @group Label 
+
+div.sc-menu-item-view label.title{
+	top: 50%;
+	height: 18px;
+	position: relative; 
+	margin-top: -9px;
+	line-height: 18px;
+	left:  4px;
+	right: 4px;
+}
+
+.sc-menu-item-view.has-icon label,
+.sc-menu-item-view.has-checkbox label {
+	left: 24px;
+}
+
+.sc-menu-item-view.has-checkbox.has-icon label {
+	left: 44px;
+}
+
+
+/*
+// @group Icon 
+
+.sc-menu-item-view img.icon {
+	position: absolute ;
+	left: 5px;
+	top: 50%;
+	margin-top: -9px;
+}
+*/
+
+/*
+//group Branch 
+.sc-menu-item-view .branch {
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	display: block;
+	right: 1px;
+	top: 50%;
+	margin-top: -8px;
+	background-image: sc_static('icons/mini_454545'); 
+	background-position: -32px 0;
+}
+
+.sc-menu-item-view.sel .branch,
+.sc-menu-item-view.active .branch {
+	background-image: sc_static('icons/mini_ffffff'); 
+}*/
+
+.sc-theme .sc-menu-item-view a.sc-menuItem{
+	display: block;
+	top: 0;
+	height: 25px;
+	line-height: 22px;
+	border-right: 2px #cccccc solid;
+	border-bottom: 1px #909090 solid;
+	text-shadow: #b0b0b0 0px 1px 0px;
+	text-decoration: none ;
+}
+
+.sc-theme .sc-menu-item-view a.sc-menuItem .sc-button-inner {
+	text-decoration: none ;
+	color: black ;
+	text-align: center;
+}
+
+/* SELECTED */
+.sc-theme .sc-menu-item-view a.sc-menuItem.active .sc-button-inner,
+.sc-theme .sc-menu-item-view a.sc-menuItem.sel .sc-button-inner {
+	background: #909090;
+	text-shadow: #909090 0px 1px 0px;
+}
+
+/*Hovering over menu items*/
+.sc-theme .sc-menu-item-view a.sc-menuItem:hover {
+ 	/*background: #0000ff;*/
+	background: #5A8EC6;
+}
+
+/* @end */

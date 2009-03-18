@@ -54,3 +54,14 @@
 	border: 1px #333 solid ;
 	color: white;
 }
+div.sc-menu-item-view {
+	display:block;
+}
+
+div.sc-menu-item-view label.title{
+	top: 50%;
+	position: relative; 
+	line-height: 18px;
+	left:  4px;
+	right: 4px;
+}
