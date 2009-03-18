@@ -327,12 +327,10 @@ SC.Store = SC.Object.extend(
   */
   reset: function() {
     
-    if(this.get('isTransient')) {
-      var parentStore = this.get('parentStore');
-      if(parentStore && !parentStore.get('isPersistent')) {
-        this.dataHashes = SC.beget(parentStore.dataHashes);
-        this.revisions = SC.clone(parentStore.revisions);
-      }
+    var parentStore = this.get('parentStore');
+    if(parentStore && parentStore.get('isTransient')) {
+      this.dataHashes = SC.beget(parentStore.dataHashes);
+      this.revisions = SC.clone(parentStore.revisions);
     }
 
     this.persistentChanges = {
@@ -349,7 +347,7 @@ SC.Store = SC.Object.extend(
       var typeArray = instantiatedRecordMap[key];
       for(var k in typeArray)
       {
-        delete cachedAttributes[typeArray[k]._storeKey];
+        delete cachedAttributes[typeArray[k].storeKey];
       }
     }
     
@@ -384,8 +382,9 @@ SC.Store = SC.Object.extend(
   discardChanges: function() {
     this.reset();
     
-    if(!this.get('isTransient')) {
-      throw("SC.Store: discardChanges on store that is attached to a persistentStore is not allowed!");
+    var parentStore = this.get('parentStore');
+    if (!parentStore || !parentStore.get('isTransient')) {
+      throw("SC.Store: discardChanges cannot be used on a store that is chained to a persistent store");
     }
     return YES;
   },
@@ -433,13 +432,7 @@ SC.Store = SC.Object.extend(
 
     // If you pass in an array of record types, then this is set to YES 
     // and saved for later use.
-    if (recordTypeIsArray = (SC.typeOf(recordType) === SC.T_ARRAY)) {
-      if (recordType.length === 1) {
-        recordTypeIsArray = NO ;
-        recordType = recordType[0];
-      }
-    } 
-    
+    recordTypeIsArray = SC.typeOf(recordType) === SC.T_ARRAY; 
     if (!recordTypeIsArray) {
       recTypeKey = SC.guidFor(recordType);
       recType = recordType;
@@ -448,12 +441,9 @@ SC.Store = SC.Object.extend(
     // If the primaryKey is undefined, default to get the key from the 
     // record type.
     if(!recordTypeIsArray && primaryKey === undefined) {
-        primaryKey = recType.primaryKey;
-
         // Default to 'guid' if not set.
-        if(!primaryKey) {
-          primaryKey = 'guid';
-        }
+        primaryKey = recType.prototype.primaryKey;
+        if(!primaryKey) primaryKey = 'guid';
     }
 
     SC.Benchmark.start('updateRecords: loop');
@@ -614,7 +604,7 @@ SC.Store = SC.Object.extend(
     if (!ret) return undefined ; // nothing to do.
     
     var pstore = this.get('parentStore');
-    if (pstore && !pstore.get('isTransient')) {
+    if (pstore && pstore.get('isTransient')) {
       if (ret === pstore.dataHashes[storeKey]) {
         ret = this.dataHashes[storeKey] = SC.clone(ret) ;
       }
@@ -663,7 +653,7 @@ SC.Store = SC.Object.extend(
     
     @returns {Object} Returns the dataHash or null.
   */
-  readDataHash: function(storeKey) {
+  getDataHash: function(storeKey) {
     // since the dataHashes property may have the parent store dataHashes as
     // a prototype, we set the data hash to make it independent of the 
     // paran dataHash when you get the hash.
@@ -753,7 +743,7 @@ SC.Store = SC.Object.extend(
     var parentStore = this.get('parentStore');
     
     var ret = null;
-    if(parentStore && parentStore.get('isPersistent')) {
+    if(!parentStore || parentStore.get('isPersistent')) {
       ret = this.updateDataHashes(dataArr, recordType, primaryKey, YES);
     }
     return ret;
@@ -806,7 +796,7 @@ SC.Store = SC.Object.extend(
   recordDidChange: function(record) {
     if(record) {
       var primaryKey = record.primaryKey;
-      var storeKey = record._storeKey;
+      var storeKey = record.storeKey;
       this.updateDataHashes([this.dataHashes[storeKey]], 
             this.recKeyTypeMap[storeKey], record.primaryKey, NO);
     }
@@ -912,7 +902,7 @@ SC.Store = SC.Object.extend(
         } else {
           ret = this.instantiatedRecordMap[recTypeKey][storeKey] = 
           recType.create({
-            _storeKey: storeKey,
+            storeKey: storeKey,
             store: this,
             status: (isNewRecord) ? SC.RECORD_NEW : SC.RECORD_LOADED,
             newRecord: (isNewRecord) ? YES : NO
@@ -941,7 +931,7 @@ SC.Store = SC.Object.extend(
     
     for(var i=0, iLen=records.length; i<iLen; i++) {
       var rec = records[i];
-      var storeKey = rec._storeKey;
+      var storeKey = rec.storeKey;
       rec.set('status', SC.RECORD_DELETED);
       if(removeDataHashes) {
         pDeleted.push(storeKey);
@@ -1012,7 +1002,7 @@ SC.Store = SC.Object.extend(
           this.primaryKeyMap[guid] = storeKey;
           this.storeKeyMap[storeKey] = guid;
           ret = recordType.create({
-            _storeKey: storeKey,
+            storeKey: storeKey,
             store: this, 
             status: SC.RECORD_LOADING,
             newRecord: NO
@@ -1115,7 +1105,7 @@ SC.Store = SC.Object.extend(
     for(var i=0, iLen=storeKeyMap.length; i<iLen; i++ ) {
       var storeKey = storeKeyMap[i];
       if(needRecord) {
-      rec._storeKey = storeKey;
+      rec.storeKey = storeKey;
       } else {
         rec = dataHashes[storeKey];
       }
@@ -1204,8 +1194,9 @@ SC.Store = SC.Object.extend(
     
     this.reset();
 
-    if(this.get('isTransient')) {
-      var parentStore = this.get('parentStore');
+    // when creating a new store, possibly share content with the parent
+    var parentStore = this.get('parentStore');
+    if(parentStore && !parentStore.get('isTransient')) {
       this.primaryKeyMap = parentStore.primaryKeyMap;
       this.storeKeyMap = parentStore.storeKeyMap;
       this.recKeyTypeMap = parentStore.recKeyTypeMap;
