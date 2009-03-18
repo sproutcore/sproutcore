@@ -85,10 +85,11 @@ SC.SourceListView = SC.ListView.extend(
     @returns {Number} groupHeight
   */
   collectionViewHeightForGroupAtIndex: function(collectionView, groupIndex) {
+    // console.log('%@.collectionViewHeightForGroupAtIndex(collectionView=%@, groupIndex=%@)'.fmt(this, collectionView, groupIndex));
     if (!this.groupHeightKey) return this.get('groupHeight') ;
     
-    var group, groups = this.get('groups') ;
-    if (groups) group = groups.objectAt(groupIndex);
+    var group, groups = this.getPath('content.groups') ;
+    if (groups) group = groups.objectAt(groupIndex) ;
     
     return group ?
       group.get(this.get('groupHeightKey')) :
@@ -102,65 +103,88 @@ SC.SourceListView = SC.ListView.extend(
     items or it will simply do some math...
   */
   offsetForRowAtContentIndex: function(contentIndex) {
+    // get normal contentIndex offset
     var ret = sc_super() ;
     
-    // account for group view heights...
+    // now account for group view heights, using simple math if possible...
     if (this.get('hasUniformGroupHeights')) {
       var groupHeight = this.get('groupHeight') ;
       
       var groups = this.getPath('content.groups') || [] ;
-      if (groups.get('length') > 0) {
-        var group, itemRange, len = groups.get('length') ;
-        for (var idx=0; idx<len; ++idx) {
-          group = groups.objectAt(idx) ;
-          ret += groupHeight ;
-          if (SC.valueInRange(contentIndex, group.itemRange)) break ;
-        }
+      var group, itemRange, len = groups.get('length') ;
+      for (var idx=0; idx<len; ++idx) {
+        group = groups.objectAt(idx) ;
+        ret += groupHeight ;
+        if (SC.valueInRange(contentIndex, group.itemRange)) break ;
       }
     
     // otherwise, use the groupOffsets cache...
     } else {
-      // // get caches
-      // var offsets = this._source_list_groupOffsets;
-      // if (!offsets) offsets = this._source_list_groupOffsets = [] ;
-      // 
-      // // OK, now try the fast path...if undefined, loop backwards until we
-      // // find an offset that IS cached...
-      // var len = offsets.length, cur = contentIndex, height, ret;
-      // 
-      // // get the cached offset.  Note that if the requested index is longer 
-      // // than the length of the offsets cache, then just assume the value is
-      // // undefined.  We don't want to accidentally read an old value...
-      // if (contentIndex<len) {
-      //   ret = offsets[cur];
-      // } else {
-      //   ret = undefined ;
-      //   cur = len; // start search at current end of offsets...
-      // }
-      // 
-      // // if the cached value was undefined, loop backwards through the offsets
-      // // hash looking for a cached value to start from
-      // while((cur>0) && (ret===undefined)) ret = offsets[--cur];
-      // 
-      // // now, work our way forward, building the cache of offsets.  Use
-      // // cached heights...
-      // if (ret===undefined) ret = offsets[cur] = 0 ;
-      // while (cur < index) {
-      //   // get height...recache if needed....
-      //   // height = this._list_heightForRowAtContentIndex(index) ;
-      //   height = this._source_list_heightForGroupAtIndex(cur) ;
-      //   
-      //   // console.log('index %@ has height %@'.fmt(cur, height));
-      //   
-      //   // add to ret and save in cache
-      //   ret = ret + height ;
-      //   
-      //   cur++; // go to next offset
-      //   offsets[cur] = ret ;
-      // }
+      // find the index of the group for contentIndex
+      var groupIndex = -1 ;
+      var groups = this.getPath('content.groups') || [] ;
+      var group, itemRange, len = groups.get('length') ;
+      for (var idx=0; idx<len; ++idx) {
+        group = groups.objectAt(idx) ;
+        if (SC.valueInRange(contentIndex, group.itemRange)) {
+          groupIndex = idx ;
+          break ;
+        }
+      }
+      
+      // if we can't find the group, assume all groups
+      // (this resuts in the correct height when the offset of one-past-the-
+      // last-contentIndex is requested)
+      if (groupIndex === -1) groupIndex = len ;
+      
+      // get caches
+      var offsets = this._source_list_groupOffsets;
+      if (!offsets) offsets = this._source_list_groupOffsets = [] ;
+      
+      // OK, now try the fast path...if undefined, loop backwards until we
+      // find an offset that IS cached...
+      var len2 = offsets.length, cur = groupIndex, height, ret2;
+      
+      // get the cached offset.  Note that if the requested index is longer 
+      // than the length of the offsets cache, then just assume the value is
+      // undefined.  We don't want to accidentally read an old value...
+      if (groupIndex < len2) {
+        ret2 = offsets[cur];
+      } else {
+        ret2 = undefined ;
+        cur = len2; // start search at current end of offsets...
+      }
+      
+      // if the cached value was undefined, loop backwards through the offsets
+      // hash looking for a cached value to start from
+      while ((cur>0) && (ret2===undefined)) ret2 = offsets[--cur] ;
+      
+      // now, work our way forward, building the cache of offsets.  Use
+      // cached heights...
+      if (ret2===undefined) ret2 = offsets[cur] = 0 ;
+      while (cur < groupIndex) {
+        // get height...recache if needed....
+        height = this._source_list_heightForGroupAtIndex(cur) ;
+        
+        // console.log('index %@ has height %@'.fmt(cur, height));
+        
+        // add to ret2 and save in cache
+        ret2 = ret2 + height ;
+        
+        cur++; // go to next offset
+        offsets[cur] = ret2 ;
+      }
+      
+      // now update contentIndex offset
+      ret += ret2 ;
+      
+      // also add in the offset for the contentIndex's own group as well,
+      // if it really has a group...
+      if (groupIndex != len) {
+        ret += this._source_list_heightForGroupAtIndex(groupIndex) ;
+      }
     }
     
-    // console.log('index %@ is offset %@'.fmt(index, ret)) ;
     return ret ;
   },
   
@@ -190,6 +214,8 @@ SC.SourceListView = SC.ListView.extend(
     if (height===undefined) {
       height = heights[groupIndex] = this.invokeDelegateMethod(this.delegate, 'collectionViewHeightForGroupAtIndex', this, groupIndex) || 0 ;
     }
+    
+    // console.log('groupIndex=%@, height=%@'.fmt(groupIndex, height));
     
     return height ;
   },

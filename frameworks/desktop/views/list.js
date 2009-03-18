@@ -186,12 +186,12 @@ SC.ListView = SC.CollectionView.extend(
     current setting this may compute the row heights for previous items or 
     it will simply do some math...
   */
-  offsetForRowAtContentIndex: function(index) {
-    if (index === 0) return 0 ;
+  offsetForRowAtContentIndex: function(contentIndex) {
+    if (contentIndex === 0) return 0 ;
     
     // do some simple math if we have uniform row heights...
     if (this.get('hasUniformRowHeights')) {
-      return this.get('rowHeight') * index ;
+      return this.get('rowHeight') * contentIndex ;
       
     // otherwise, use the rowOffsets cache...
     } else {
@@ -201,12 +201,12 @@ SC.ListView = SC.CollectionView.extend(
       
       // OK, now try the fast path...if undefined, loop backwards until we
       // find an offset that IS cached...
-      var len = offsets.length, cur = index, height, ret;
+      var len = offsets.length, cur = contentIndex, height, ret;
       
       // get the cached offset.  Note that if the requested index is longer 
       // than the length of the offsets cache, then just assume the value is
       // undefined.  We don't want to accidentally read an old value...
-      if (index<len) {
+      if (contentIndex < len) {
         ret = offsets[cur];
       } else {
         ret = undefined ;
@@ -220,9 +220,8 @@ SC.ListView = SC.CollectionView.extend(
       // now, work our way forward, building the cache of offsets.  Use
       // cached heights...
       if (ret===undefined) ret = offsets[cur] = 0 ;
-      while (cur < index) {
+      while (cur < contentIndex) {
         // get height...recache if needed....
-        // height = this._list_heightForRowAtContentIndex(index) ;
         height = this._list_heightForRowAtContentIndex(cur) ;
         
         // console.log('index %@ has height %@'.fmt(cur, height));
