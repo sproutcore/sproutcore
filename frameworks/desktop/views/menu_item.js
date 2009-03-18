@@ -162,7 +162,11 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   },
 
   renderLabel: function(context, label) {
+<<<<<<< HEAD:frameworks/desktop/views/menu_item.js
     context.push( label || '') ;
+=======
+    context.push('<label class="title">', label || '', '</label>') ;
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu_item.js
   },
 
 	//   /** 

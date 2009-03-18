@@ -12,29 +12,49 @@ module("SC.MENUVIEW UI");
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+  var method = function() { console.log("done"); };
+ //  var anchor = SC.ControlTestPane.design()
+ //   .add("anchor", SC.ButtonView, { 
+ //      title: "Anchor Button" 
+ //   });
+ // anchor.show();
+ // var menuView = SC.MenuView.create({ 
+ // 	    	items: "Item1 Item2 Item3 Item4 Item5".w(),
+ // 	    	isEnabled: YES,
+ // 			layout:{height: 150, width: 200}
+ // 			}) ;
+ //  var pane = SC.PickerPane.create({
+ //      contentView: menuView
+ //    });
+ //  pane.popup(anchor.view('anchor'), SC.PICKER_MENU);
+ //  pane.show(); // add a test to show the test pane
   var pane = SC.ControlTestPane.design()
     .add ("create a menu from strings",
        		SC.MenuView,{ 
        	    items: "Item1 Item2 Item3 Item4 Item5".w(),
        	    isEnabled: YES,
-       	    layout: { height: 120 },
-       		itemWidth:200
+       	    layout: { height: 150, width: 200 }
        		})
+		
+
 	.add ("create a complete menu",
 			SC.MenuView,{ 
-		    items: [ { title: "Item1",isEnabled:YES, icon: iconURL },
-	          { title: "Item2",isEnabled:NO,icon: iconURL },
-	          { title: "Item3",isEnabled:NO,icon: iconURL }],
+		    items: [ { title: "Item1",isEnabled:YES, icon: iconURL, separator: NO, action: method ,checkbox:YES },
+	          { title: "",isEnabled:NO,icon: null, separator: YES},
+	          { title: "Item2",isEnabled:NO,icon: iconURL, separator: NO }],
 		    isEnabled: YES,
-		    layout: { height: 120, width:200 },
+		    layout: { height: 120, width:150 },
 			itemIsEnabledKey:"isEnabled",
 			itemTitleKey:"title",
 			itemIconKey:"icon",
-			itemWidth:200
+			itemSeparator:'separator',
+			itemAction: 'action',
+			itemCheckboxKey:'checkbox'
+//			itemWidth:150
 			}
 			);
 
-  pane.show(); // add a test to show the test pane
+ pane.show();
  	
 })() ;
 

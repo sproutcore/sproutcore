@@ -12,10 +12,33 @@
 */
 require('views/picker_pane');
 
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 SC.MenuView = SC.View.extend(SC.Control,
  {
  	classNames:['sc-menu-view'],
  
+=======
+SC.MenuView = SC.PickerPane.extend(
+ {
+ 	classNames:['sc-menu-view'],
+ 	// 	
+ 	// 	/* the child items that are to be displayed*/
+ 	// 	//childItems:[[{ item:1 }, { item:2 }, { item:3 }, { item:4 }, { item:5 }]],
+ 	// 	
+ 	// 	contentView: SC.CollectionView.extend({
+ 	//       layout: { width: 300, height: 200 },
+ 	// 	  content : [] 	
+ 	//     }),
+ 	// 	 
+ 	// 	
+ 	// 	render:function(){
+ 	// 		
+ 	// 		
+ 	// 		
+ 	// 	}
+
+
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	/**
 	   Set to YES to enabled the segmented view, NO to disabled it.
 	 */
@@ -29,6 +52,7 @@ SC.MenuView = SC.View.extend(SC.Control,
 
 	   @property {String}
 	 */
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	  itemIsEnabledKey: null, 
 	  /**
 		The key that contains the title for each item.  If omitted, no icons will
@@ -36,6 +60,10 @@ SC.MenuView = SC.View.extend(SC.Control,
 		@property {String}
 	  */
 	   itemTitleKey:null,
+=======
+	 itemIsEnabledKey: null, 
+
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	 /**
 	    The array of items to display.  This can be a simple array of strings,
 	    objects or hashes.  If you pass objects or hashes, you must also set the
@@ -45,6 +73,7 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    @property {Array}
 	  */
 	  items: [],
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	  /** 
 	    The key that contains the value for each item.  If omitted, no icons will
 	    be displayed.
@@ -52,6 +81,9 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    @property {String}
 	  */
 	  itemValueKey:null,
+=======
+
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	  /** 
 	    The key that contains the icon for each item.  If omitted, no icons will
 	    be displayed.
@@ -61,12 +93,22 @@ SC.MenuView = SC.View.extend(SC.Control,
 	  itemIconKey: null,	
 
 	  /** 
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	    The width for each menu item and ultimately the menu itself.
 
 	    @property {String}
 	  */
 	  itemWidth: null,
 	  	
+=======
+	    The key that contains the desired width for each item.  If omitted, the
+	    width will autosize.
+
+	    @property {String}
+	  */
+	  itemWidthKey: null,
+
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	  /**
 	    If YES, titles will be localized before display.
 	  */
@@ -80,7 +122,11 @@ SC.MenuView = SC.View.extend(SC.Control,
 
 	    @property {Array}
 	  */
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	 itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey'.w(),
+=======
+	 itemKeys: 'itemIconKey itemIsEnabledKey itemWidthKey'.w(),
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 
 	 /**
 	    This computed property is generated from the items array
@@ -89,8 +135,13 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    var items = this.get('items'), loc = this.get('localize') ;
 	    var keys=null, itemType, cur ;
 	    var ret = [], max = items.get('length'), idx, item ;
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	    var fetchKeys = SC._menu_fetchKeys;
 	    var fetchItem = SC._menu_fetchItem;
+=======
+	    var fetchKeys = SC._segmented_fetchKeys;
+	    var fetchItem = SC._segmented_fetchItem;
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 
 	    // loop through items and collect data
 	    for(idx=0;idx<max;idx++) {
@@ -133,7 +184,11 @@ SC.MenuView = SC.View.extend(SC.Control,
 
 	    // all done, return!
 	    return ret ;
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	  }.property('items', 'itemTitleKey',  'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
+=======
+	  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 
 	  /** If the items array itself changes, add/remove observer on item... */
 	  itemsDidChange: function() { 
@@ -176,11 +231,16 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    var last = this._seg_displayItems;
 	     if (firstTime || (items !== last)) {
 	         this._seg_displayItems = items; // save for future
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	         context.addStyle('text-align', 'center');
 			 if(this.itemWidth === undefined || this.itemWidth === null){
 				this.itemWidth = this.parentView.get('layout').width||100;
 			}
 			this.renderChildViews(context, firstTime);
+=======
+	         this.renderDisplayItems(context, items) ;
+	         context.addStyle('text-align', 'center');
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	    }
 	   },
 
@@ -190,20 +250,32 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    items change thereafter.  This will construct the HTML but will not set
 	    any "transient" states such as the global isEnabled property or selection.
 	  */
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	  createChildViews: function() {
 		
 		var childViews = [];
 		var items = this.get('displayItems');
+=======
+	  renderDisplayItems: function(context, items) {
+		
+	    var title = null, icon = null, url=null, className=null, ic=null, item=null;
+	    var newIc = null;
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	    var value = this.get('value');
 	    var isArray = SC.isArray(value);
 	    var activeIndex = this.get('activeIndex');
 	    var len= items.length;
 	    var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
+=======
+		
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 		var content = SC.makeArray(items) ;
 		var c ;
 		
 	    for(var i=0; i< len; i++){	
 		 var titleValue = items[i][0];	
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 		 var itemView = this.createChildView(
 				SC.MenuItemView,{
 		  			owner: this,
@@ -224,6 +296,24 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    }  
 		this.set('childViews', childViews);
 	    return this;
+=======
+		 var itemView = SC.MenuItemView.create({
+		  owner: this,
+		  displayDelegate: this,
+		  parentView: this,
+		  isVisible: YES,
+		  isMaterialized: YES,
+		  contentValueKey:'title',
+		  contentIconKey:'icon',
+   		  layout:{height:20},
+		  content:SC.Object.create({ 
+	      icon: "sc-icon-folder-16",
+	      title: titleValue
+	      })
+		 });
+		 this.appendChild(itemView);
+	    }     	
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
 	  },  
 	  // ..........................................................
 	  // EVENT HANDLING
@@ -250,6 +340,7 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    // if a match was found, return the index of the match in subtags
 	    return (match) ? this.$('a.sc-menu').index(match) : -1;
 	  },
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	
 	mouseOut:function(evt){	
 		var menu = this.get('parentNode');
@@ -287,3 +378,37 @@ SC._menu_fetchItem = function(k) {
   if (!k) return null;
   return this.get ? this.get(k) : this[k]; 
 };
+=======
+	
+	click:function(evt)
+	{
+		return true;
+	}
+	
+	  // mouseDown:function(evt){		
+	  // 	  if (!this.get('isEnabled')) return YES; // nothing to do
+	  // 	    var idx = this.displayItemIndexForEvent(evt);
+	  // 	    // if mouse was pressed on a button, then start detecting pressed events
+	  // 	    if (idx>=0) {
+	  // 		      this._isMouseDown = YES ;
+	  // 		      this.set('activeIndex', idx);
+	  // 	   	}
+	  // 	  },
+	  // 
+	  // 	  mouseUp:function(evt){
+	  // 
+	  // 	  },
+	  // 
+	  // 	  mouseOver:function(evt){
+	  // 	    // should show the menu items under the clicked menu item	
+	  // 	  },
+	  // 
+	  // 	  mouseOut:function(evt){
+	  // 	   // should hide the last visible menu  	
+	  // 	  }
+	
+
+
+	
+}) ;
+>>>>>>> made changes to link menu and menu_item:frameworks/desktop/views/menu.js
