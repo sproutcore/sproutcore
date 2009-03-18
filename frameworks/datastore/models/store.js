@@ -667,7 +667,7 @@ SC.Store = SC.Object.extend(
   /**
     Creates the store's dataHashes then returns an array of SC.Record instances.
         
-    @param {Array} dataArr (required) Array of JSON-compatible hashes.
+    @param {Array} dataHashes (required) Array of JSON-compatible hashes.
     @param {SC.Record|Array} recordType (optional) The SC.Record extended class that you want to use or an array of SC.Record classes that match the dataArr item per item.
     @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used.
 
@@ -676,7 +676,7 @@ SC.Store = SC.Object.extend(
   createRecords: function(dataHashes, recordType, primaryKey)
   {
     // If dataHashes are not set correctly, return null.
-    if(!dataHashes || typeof dataHashes !== 'object') return null;
+    if(!dataHashes) throw "You must pass an array of dataHashes";
 
     // If no recordType is set, assume SC.Record.
     if(!recordType) recordType = SC.Record;
@@ -722,8 +722,7 @@ SC.Store = SC.Object.extend(
     }
     
     var records = this.createRecords([dataHash], recordType, primaryKey);
-    if(records && records[0]) return records[0];
-    return null;
+    return records ? records[0] : null;
   },
 
   /**
@@ -1237,4 +1236,4 @@ SC.Store.findAll = function(filter)
 
 SC.Store.prototype.addDataHash = SC.Store.prototype.updateDataHash;
 SC.Store.prototype.addDataHashes = SC.Store.prototype.updateDataHashes;
-SC.Store.prototype.nextStoreIndex = 0;
+SC.Store.prototype.nextStoreIndex = 1;
