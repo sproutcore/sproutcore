@@ -56,95 +56,366 @@ SC.Store = SC.Object.extend(
   // 
   
   /** @private
-    This is the store of dataHashes index by the storeKey. 
+    JSON attribute hash indexed by store key.  
     
-    This property is shared by a store and any child stores until you start
-    to make edits to it.
-    
-    @property {Array}
-  */
-  dataHashes: {},
+    *IMPORTANT: Property is not observable*
 
-  /** @private 
-    When data hash attributes are retrieved through a record, they are 
-    massaged into the proper type and stored here. 
+    Shared by a store and its child stores until you make edits to it.
     
-    This property is shared by a store and its child stores until you make
-    edits to it.
-    
-    @property {Array}
+    @property {Hash}
   */
-  cachedAttributes: {},
+  attributes: {},
 
   /** @private
-    This array contains the revisions for the dataHashes indexed by the 
-    storeKey.
+    The current status of an attirbute hash indexed by store key,  May be one
+    of SC.RECORD_NEW, SC.RECORD_LOADING, SC.RECORD_READY, SC.RECORD_DESTROYED,
+    SC.RECORD_EMPTY, SC.RECORD_ERROR.
 
-    This property is shared by a store and its child stores until you make
-    edits to it.
+    *IMPORTANT: Property is not observable*
+
+    Shared by a store and its child stores until you make edits to it.
     
-    @property {Array}
+    @property {Hash}
   */
-  revisions: [],
-
+  statuses: {},
+    
   /** @private
-    This hash contains the storeKeys indexed by the primaryKey guid.
+    Hash of materialized records indexed by storeKey.  Each store instance 
+    gets its own hash as records are materialized on a per-store basis.
 
-    This property is shared by all store instances.
-    
-    @property
-    @type {Array}
+    *IMPORTANT: Property is not observable*
+
+    @property {Hash}
   */
-  primaryKeyMap: {},
-
-  /** @private
-    This hash contains the primaryKey guids indexed by the storeKey.
-
-    This property is shared by all store instances.
-    
-    @property {Array}
-  */
-  storeKeyMap: {},
-
-  /**
-    This hash contains the recordTypeKey per dataHash indexed by the storeKey.
-
-    This property is shared by all store instances.
-    
-    @property {Array}
-  */
-  recKeyTypeMap: {},
-
-  /** @private
-    This hash contains all the data types stored in the store and within that, 
-    there are arrays of storeKeys.
-
-    dataTypeMap: {
-      "recordTypeKey":[1,5,10, ... ],
-      ...
-    }
-
-    This property is shared by all store instances.
-    
-    @property {Object}
-  */
-  dataTypeMap: {},
-
-  compTypeMap: {},
+  records: {},
   
   /** @private
-    This hash contains all the instantiated records arranged by type.
+    This array contains the revisions for the attributes indexed by the 
+    storeKey.  
+    
+    *IMPORTANT: Property is not observable*
+    
+    Revisions are used to keep track of when an attribute hash has been 
+    changed. Each store gets its own revisions, which override the revisions 
+    of the parent store.
+    
+    Note that this is kept as an array because it will be stored as a dense 
+    array on some browsers, making it faster.
+    
+    @property {Array}
+  */
+  revisions: null,
 
-    instantiatedRecordMap: {
-      "recordTypeKey":[SC.Record, .... ],
-      ...
+  /** @private
+    Array contains the base revision for an attribute hash when it was first
+    cloned from the parent store.  If the attribute hash is edited and 
+    commited, the commit will fail if the parent attributes hash has been 
+    edited since.
+    
+    This is a form of optimistic locking, hence the name.
+    
+    Each store gets its own array of locks, which are selectively populated
+    as needed.
+    
+    Note that this is kept as an array because it will be stored as a dense 
+    array on some browsers, making it faster.
+    
+    @property {Array}
+  */
+  locks: null,
+
+  // ..........................................................
+  // CORE DATA HASH API
+  // 
+  
+  _TMP_ATTRS_ARRAY: [],
+  
+  /**
+    Creates or updates the store's attributes.  This does not create 
+    SC.Record instances, but it will clear their attribute caches as needed.
+    Usually you will not need to work directly with this method.  Instead 
+    you should use the higher-level SC.Record or other APIs.
+
+    Note that for the statuses
+    h2. Example: Loading Attributes From The Server
+    
+    {{{
+      store.updateAttributes(attrs, MyApp.Contact, 'guid', YES)
+    }}}
+    
+    h2. Example: Editing An Existing Attribute Hash
+    
+    {{{
+      store.upateAttributes([attrs], MyApp.Contact, 'guid', NO);
+    }}}
+    
+    @param {Hash|Array} attributes JSON-hash or array of JSON-hashes
+    @param {SC.Record|Array} recordType SC.Record class or array of classes
+    @param {String} statuses new status, array of status or null
+    @param {Boolean} hasPrimaryKey is YES then set primary key. 
+    @param {Boolean} isLocalOnly  (optional) If set to YES, then don't record changes.
+
+    @returns {Array} Array of storeKeys that were updated or created.
+  */  
+  writeAttributes: function(attributes, recordTypes, statuses, hasPrimaryKey, isLocalOnly){
+
+    // normalize attrs data
+    var attrsIsArray, len, curAttrs, i;
+    attrsIsArray = SC.typeOf(attributes) === SC.T_ARRAY;
+    len = attrsIsArray ? attributes.length : 1 ;
+    
+    // normalize recordTypes
+    var recordTypesIsArray, curRecordType;
+    if (!recordTypes) recordTypes = SC.Record; 
+    recordTypesIsArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+    curRecordType = recordTypesIsArray ? null : recordTypes;
+    
+    // discover the primaryKey if not set - get from recordType or default
+    // to 'guid'
+    if (SC.none(hasPrimaryKey)) hasPrimaryKey = YES; // assume yes.
+    var primaryKey = recordTypesIsArray ? null : (curRecordType.prototype.primaryKey || 'guid');
+
+    // discover statuses
+    var statusesIsArray, curStatus;
+    if (!statuses) statuses = SC.RECORD_READY;
+    statusesIsArray = SC.typeOf(statuses) == SC.T_ARRAY;
+    curStatus = statusesIsArray ? null : statuses;
+    
+    if (!isLocalOnly) isLocalOnly = NO ; // assume not local.
+    
+    // get local ref to record-related elements
+    var my_attributes, my_statuses, my_records ;
+    my_attributes = this.attributes;
+    my_statuses   = this.statuses;
+    my_records    = this.records ;
+    
+    // get local ref to locking attrs
+    var rev, my_revisions, parentStore, needsLocking, my_locks, ps_revisions;
+    my_revisions  = this.revisions ;
+    if (!my_revisions) my_revision = this.revisions = [];
+    
+    parentStore   = this.get('parentStore');
+    needsLocking  = parentStore && parentStore.get('isTransient');
+    rev           = SC.Store.generateStoreKey();
+    if (needsLocking) {
+      my_locks    = this.locks;
+      if (!my_locks) my_locks = this.locks = [] ;
+      ps_revisions = parentStore.revisions ;
+      if (!ps_revisions) ps_revisions = parentStore.revisions = [];
     }
 
-    This property is NOT shared by store instances.
+    SC.Benchmark.start('writeAttributes: loop');
+
+    // Iterate per record in the attributes and either update an existing 
+    // dataHash or create a new dataHash.
+    for(i=0; i<len; i++) {
+
+      SC.Benchmark.start('updateRecord');
+
+      var data = attrsIsArray ? attributes[i] : attributes;
+      var rec, rev, storeKey, guid, error;
+
+      // Find the current recordType and primaryKey 
+      if (recordTypeIsArray) {
+        curRecordType = recordTypes[i] || SC.Record;
+        primaryKey = curRecordType.prototype.primaryKey || 'guid';
+      }
+      
+      // Find the current status
+      if (statusesIsArray) curStatus = statuses[i] || SC.RECORD_READY;
+
+      // Now we need the storeKey.  If this attrbutes doesn't have a primary
+      // key yet, generate a storeKey blindly.  Otherwise look it up.
+      if (hasPrimaryKey) {
+        guid = data[primaryKey];
+        if (SC.none(guid)) {
+          throw "SC.Store: could not write attributes without primaryKey: %@".fmt(SC.inspect(data));
+        }
+        storeKey = curRecordType.storeKeyFor(guid);
+      } else storeKey = SC.Store.generateStoreKey();
+      
+      // If we need locking, then save the revision number of the parent 
+      // for the storeKey in locks.  also get parent rev.
+      if (needsLocking && !my_locks[storeKey]) {
+        my_locks[storeKey] = ps_revisions[storeKey] || 1;
+      };
+
+      // set new revision as well
+      my_revisions[storeKey] = rev;
+      
+      // If the storeKey is already set, then update the dataHash and 
+      // increment the revision.
+      if(dataHashes[storeKey] !== undefined) {
+        rev = revisions[storeKey] = (revisions[storeKey]+1);
+        dataHashes[storeKey] = data;
+        if(!isLoadAction) {
+          pUpdated.push(storeKey);
+        }
+
+      // If there is no storeKey, then create a new dataHash and add all 
+      // the meta data.
+      } else {
+
+        // If you need to add the primaryKey info, do it. Otherwise, 
+        // disregard this.
+        if(!disregardPrimaryKeys) {
+          primaryKeyMap[guid] = storeKey;
+          storeKeyMap[storeKey] = guid;
+        }
+
+        // Set the meta data.
+        revisions[storeKey] = 0;
+        dataHashes[storeKey] = data;
+        recKeyTypeMap[storeKey] = recType;
+        if(!dataTypeMap[recTypeKey]) dataTypeMap[recTypeKey] = [];
+        dataTypeMap[recTypeKey].push(storeKey);
+      }
+      delete cachedAttributes[storeKey];
+
+      // Push the created or updated storeKeys so that they are known during 
+      // the commit process.
+      if(!isLoadAction) {
+        changes.push(storeKey);
+      }
+      
+      ret.push(storeKey);
+     
+      // If the storeKey is regsitered as being an outstanding record from the
+      // server, save it so it can be handled.
+      if(retrievedRecQueue.indexOf(storeKey) !== -1) {
+        retrievedRecords.push(storeKey);
+      }
+
+      SC.Benchmark.end('updateRecord');
+    }
+
+      SC.Benchmark.end('updateRecords: loop');
+
+      // If there are changes, mark the store to have changes.
+      this.set('hasChanges', (changes.length > 0));
     
-    @property {Object}
+      // If there are retrieved records that need to be marked as such, invoke
+      // that operation so they can be cached.
+      if(retrievedRecords.length > 0) {
+        this._didRetrieveRecords(retrievedRecords);
+      }
+    
+    // Return the updated/changed storeKeys.
+    return ret;
+  },
+  
+  /**
+    Given array of storeKeys, delete them from the store.
+    
+    @param {Array} data Array of storeKeys.
+    
+    @returns {Boolean} Returns YES if the record operation was successful.
   */
-  instantiatedRecordMap: {},
+  removeDataHashes: function(storeKeys)
+  {
+    var changes = this.changes;
+    var primaryKeyMap = this.primaryKeyMap;
+    var dataHashes = this.dataHashes;
+    var revisions = this.revisions;
+    var dataTypeMap = this.dataTypeMap;
+    var recKeyTypeMap = this.recKeyTypeMap;
+    var isSuccess = YES;
+    
+    for(var i=0, iLen=storeKeys.length; i<iLen; i++) {
+
+      var storeKey = storeKeys[i];
+      var dataHash = dataHashes[storeKey];
+
+      if(dataHash !== undefined)
+      {
+        var rev = (revisions[storeKey] = revisions[storeKey]+1);
+        if(changes.indexOf(storeKey) === -1) {
+          changes.push(storeKey);
+        }
+        dataHashes[storeKey] = null;
+        var key = SC.guidFor(recKeyTypeMap[storeKey]);
+        dataTypeMap[key].removeObject(storeKey);
+        recKeyTypeMap[storeKey] = null;
+      } else {
+        isSuccess = NO;
+      }
+    }
+    this.set('hasChanges', (changes.length > 0));
+    return isSuccess;
+  },
+
+  /** 
+    Given a storeKey, return a writeable copy of the dataHash.
+    
+    @param {Integer} storeKey The dataHash's storeKey.
+    
+    @returns {Object} Returns a new instance of the dataHash.
+  */
+  getWriteableDataHash: function(storeKey) {
+    // if the data hash is the same as the parent store, then clone it first.
+    var ret = this.dataHashes[storeKey];
+    if (!ret) return undefined ; // nothing to do.
+    
+    var pstore = this.get('parentStore');
+    if (pstore && pstore.get('isTransient')) {
+      if (ret === pstore.dataHashes[storeKey]) {
+        ret = this.dataHashes[storeKey] = SC.clone(ret) ;
+      }
+    }
+    return ret;
+  },
+
+  /**
+    Returns the passed attribute, cloning it first if needed so that you can
+    modify it.  Use this method to modify arrays and hash values.
+    
+    @param {Integer} storeKey the dataHash store key
+    @param {String}  key the attribute 
+    @returns {Object} the editable attribute or undefined
+  */
+  getWriteableAttribute: function(storeKey, key) {
+    // if the data hash is the same as the parent store, then clone it first.
+    var attrs = this.dataHashes[storeKey], ret, pstore, rtype;
+    if (!attrs) return undefined ; // nothing to do.
+    
+    pstore = this.get('parentStore');
+    ret = attrs[key];
+    if (pstore && !pstore.get('isTransient')) {
+
+      // clone attrs if needed first to make them writeable
+      if (attrs === pstore.dataHashes[storeKey]) {
+        attrs = this.dataHashes[storeKey] = SC.clone(ret) ;
+      }
+      
+      // clone ret value if needed to make it writeable also
+      rtype = SC.typeOf(ret);
+      if (rtype === SC.T_ARRAY) {
+        ret = attrs[key] = ret.slice();
+      } else if (rtype === SC.T_HASH) {
+        ret = attrs[key] = SC.clone(ret) ;
+      }
+    }
+    
+    return ret;
+  },
+  
+  /** 
+    Given a storeKey, returns the dataHash.
+    
+    @param {Integer} storeKey The dataHash's storeKey.
+    
+    @returns {Object} Returns the dataHash or null.
+  */
+  getDataHash: function(storeKey) {
+    // since the dataHashes property may have the parent store dataHashes as
+    // a prototype, we set the data hash to make it independent of the 
+    // paran dataHash when you get the hash.
+    return storeKey ? (this.dataHashes[storeKey] = this.dataHashes[storeKey]) : null;
+  },
+  
+  // ..........................................................
+  // OTHER PROPERTIES
+  // 
   
   /** @private
     This is the queue of records that need to be retrieved from the server.
@@ -389,276 +660,7 @@ SC.Store = SC.Object.extend(
     return YES;
   },
 
-  // ..........................................................
-  // CORE DATA HASH API
-  // 
-  
-  /**
-    Creates or updates the store's dataHashes. Does not manipulate SC.Record 
-    instances.
-    
-    @param {Array} dataArr (required) Array of JSON-compatible hashes.
-    @param {SC.Record|Array} recordType (optional) The SC.Record extended class that you want to use or an array of SC.Record classes that match the dataArr item per item.
-    @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used. If set to NO, no primaryKey is used.
-    @param {Boolean} isLoadAction  (optional) If set to YES, then don't record changes.
 
-    @returns {Array} Returns an array containing the storeKeys that were updated or created.
-  */  
-  updateDataHashes: function(dataArr, recordType, primaryKey, isLoadAction) {
-
-    // One last sanity check to see if the hash is in the proper format.
-    if(SC.typeOf(dataArr) !== SC.T_ARRAY) {
-      return null;
-    }
-
-    var dataHashes = this.dataHashes;
-    var cachedAttributes = this.cachedAttributes;
-    var primaryKeyMap = this.primaryKeyMap;
-    var revisions = this.revisions;
-    var changes = this.changes;
-    var retrievedRecords = [];
-    var retrievedRecQueue = this.retrievedRecQueue;
-    var storeKeyMap = this.storeKeyMap;
-    var recKeyTypeMap = this.recKeyTypeMap;
-    var dataTypeMap = this.dataTypeMap;
-    var recType, recTypeKey;
-    var pUpdated = this.persistentChanges.updated;
-    var recordTypeIsArray = NO;
-    var ret = [];
-    var disregardPrimaryKeys = (primaryKey === NO);
-
-    // Disambiguate what recordType and primaryKey to use.
-    if(!recordType) recordType = SC.Record;
-
-    // If you pass in an array of record types, then this is set to YES 
-    // and saved for later use.
-    recordTypeIsArray = SC.typeOf(recordType) === SC.T_ARRAY; 
-    if (!recordTypeIsArray) {
-      recTypeKey = SC.guidFor(recordType);
-      recType = recordType;
-    }
-    
-    // If the primaryKey is undefined, default to get the key from the 
-    // record type.
-    if(!recordTypeIsArray && primaryKey === undefined) {
-        // Default to 'guid' if not set.
-        primaryKey = recType.prototype.primaryKey;
-        if(!primaryKey) primaryKey = 'guid';
-    }
-
-    SC.Benchmark.start('updateRecords: loop');
-
-    // Iterate per record in the data array and either update an existing 
-    // dataHash or create a new dataHash.
-    for(var i=0, iLen=dataArr.length; i<iLen; i++) {
-
-      SC.Benchmark.start('updateRecord');
-
-      var data = dataArr[i];
-      var rec, rev, storeKey, guid, error;
-
-      // If you are importing an array of record types, then grab it each 
-      // iteration.
-      if(recordTypeIsArray) {
-        recType = recordType[i];
-        recTypeKey = SC.guidFor(recType);
-        primaryKey = recType.primaryKey;
-
-        // Default to 'guid' if it is not set.
-        if(!primaryKey) {
-          primaryKey = 'guid';
-        }
-      } 
-
-      // If you want to disregard the primaryKeys, generate one blindly.
-      if(disregardPrimaryKeys) {
-        storeKey = this._generateStoreKey();
-        error = (!recType) ? 'type' : null;
-
-        // Otherwise, grab the guid and relate it to a storeKey.
-      } else {
-
-        guid = data[primaryKey];
-        storeKey = this.storeKeyFor(guid);
-        if(!primaryKey) {
-          error = (!guid && !recType) ? 'guid and type' : (!primaryKey) ? 
-                  'guid' : (!recType) ? 'type' : null;
-        }
-      }
-      
-      if(error) {
-        throw "SC.Store: Insertion of record failed, missing %@.".fmt(error) ;
-      }
-      
-      // If the storeKey is already set, then update the dataHash and 
-      // increment the revision.
-      if(dataHashes[storeKey] !== undefined) {
-        rev = revisions[storeKey] = (revisions[storeKey]+1);
-        dataHashes[storeKey] = data;
-        if(!isLoadAction) {
-          pUpdated.push(storeKey);
-        }
-
-      // If there is no storeKey, then create a new dataHash and add all 
-      // the meta data.
-      } else {
-
-        // If you need to add the primaryKey info, do it. Otherwise, 
-        // disregard this.
-        if(!disregardPrimaryKeys) {
-          primaryKeyMap[guid] = storeKey;
-          storeKeyMap[storeKey] = guid;
-        }
-
-        // Set the meta data.
-        revisions[storeKey] = 0;
-        dataHashes[storeKey] = data;
-        recKeyTypeMap[storeKey] = recType;
-        if(!dataTypeMap[recTypeKey]) dataTypeMap[recTypeKey] = [];
-        dataTypeMap[recTypeKey].push(storeKey);
-      }
-      delete cachedAttributes[storeKey];
-
-      // Push the created or updated storeKeys so that they are known during 
-      // the commit process.
-      if(!isLoadAction) {
-        changes.push(storeKey);
-      }
-      
-      ret.push(storeKey);
-     
-      // If the storeKey is regsitered as being an outstanding record from the
-      // server, save it so it can be handled.
-      if(retrievedRecQueue.indexOf(storeKey) !== -1) {
-        retrievedRecords.push(storeKey);
-      }
-
-      SC.Benchmark.end('updateRecord');
-    }
-
-      SC.Benchmark.end('updateRecords: loop');
-
-      // If there are changes, mark the store to have changes.
-      this.set('hasChanges', (changes.length > 0));
-    
-      // If there are retrieved records that need to be marked as such, invoke
-      // that operation so they can be cached.
-      if(retrievedRecords.length > 0) {
-        this._didRetrieveRecords(retrievedRecords);
-      }
-    
-    // Return the updated/changed storeKeys.
-    return ret;
-  },
-  
-  /**
-    Given array of storeKeys, delete them from the store.
-    
-    @param {Array} data Array of storeKeys.
-    
-    @returns {Boolean} Returns YES if the record operation was successful.
-  */
-  removeDataHashes: function(storeKeys)
-  {
-    var changes = this.changes;
-    var primaryKeyMap = this.primaryKeyMap;
-    var dataHashes = this.dataHashes;
-    var revisions = this.revisions;
-    var dataTypeMap = this.dataTypeMap;
-    var recKeyTypeMap = this.recKeyTypeMap;
-    var isSuccess = YES;
-    
-    for(var i=0, iLen=storeKeys.length; i<iLen; i++) {
-
-      var storeKey = storeKeys[i];
-      var dataHash = dataHashes[storeKey];
-
-      if(dataHash !== undefined)
-      {
-        var rev = (revisions[storeKey] = revisions[storeKey]+1);
-        if(changes.indexOf(storeKey) === -1) {
-          changes.push(storeKey);
-        }
-        dataHashes[storeKey] = null;
-        var key = SC.guidFor(recKeyTypeMap[storeKey]);
-        dataTypeMap[key].removeObject(storeKey);
-        recKeyTypeMap[storeKey] = null;
-      } else {
-        isSuccess = NO;
-      }
-    }
-    this.set('hasChanges', (changes.length > 0));
-    return isSuccess;
-  },
-
-  /** 
-    Given a storeKey, return a writeable copy of the dataHash.
-    
-    @param {Integer} storeKey The dataHash's storeKey.
-    
-    @returns {Object} Returns a new instance of the dataHash.
-  */
-  getWriteableDataHash: function(storeKey) {
-    // if the data hash is the same as the parent store, then clone it first.
-    var ret = this.dataHashes[storeKey];
-    if (!ret) return undefined ; // nothing to do.
-    
-    var pstore = this.get('parentStore');
-    if (pstore && pstore.get('isTransient')) {
-      if (ret === pstore.dataHashes[storeKey]) {
-        ret = this.dataHashes[storeKey] = SC.clone(ret) ;
-      }
-    }
-    return ret;
-  },
-
-  /**
-    Returns the passed attribute, cloning it first if needed so that you can
-    modify it.  Use this method to modify arrays and hash values.
-    
-    @param {Integer} storeKey the dataHash store key
-    @param {String}  key the attribute 
-    @returns {Object} the editable attribute or undefined
-  */
-  getWriteableAttribute: function(storeKey, key) {
-    // if the data hash is the same as the parent store, then clone it first.
-    var attrs = this.dataHashes[storeKey], ret, pstore, rtype;
-    if (!attrs) return undefined ; // nothing to do.
-    
-    pstore = this.get('parentStore');
-    ret = attrs[key];
-    if (pstore && !pstore.get('isTransient')) {
-
-      // clone attrs if needed first to make them writeable
-      if (attrs === pstore.dataHashes[storeKey]) {
-        attrs = this.dataHashes[storeKey] = SC.clone(ret) ;
-      }
-      
-      // clone ret value if needed to make it writeable also
-      rtype = SC.typeOf(ret);
-      if (rtype === SC.T_ARRAY) {
-        ret = attrs[key] = ret.slice();
-      } else if (rtype === SC.T_HASH) {
-        ret = attrs[key] = SC.clone(ret) ;
-      }
-    }
-    
-    return ret;
-  },
-  
-  /** 
-    Given a storeKey, returns the dataHash.
-    
-    @param {Integer} storeKey The dataHash's storeKey.
-    
-    @returns {Object} Returns the dataHash or null.
-  */
-  getDataHash: function(storeKey) {
-    // since the dataHashes property may have the parent store dataHashes as
-    // a prototype, we set the data hash to make it independent of the 
-    // paran dataHash when you get the hash.
-    return storeKey ? (this.dataHashes[storeKey] = this.dataHashes[storeKey]) : null;
-  },
   
   // ..........................................................
   // RECORDS API
@@ -1134,53 +1136,37 @@ SC.Store = SC.Object.extend(
   /** 
     Given a storeKey, return the primaryKey.
   
-    @returns {String} The primaryKey guid.
+    @param {Number} storeKey the store key
+    @returns {String} primaryKey value
   */
   primaryKeyFor: function(storeKey) {
-    return this.storeKeyMap[storeKey];
+    return SC.Store.primaryKeyFor(storeKey);
   },
   
-  /** 
-    Returns the storeKey for a passed primaryKey.  The storeKey is a transient
-    identifier that can be used to retrieve data for a record.  Unlike 
-    primaryKeys, storeKeys may change from one application reload to the next.
-    
-    You generally will not need to work with storeKey's yourself, though you
-    may need to work with them if you write your own PersistentStore class.
-  
-    @returns {Integer} The storeKey.
-  */
-  storeKeyFor: function(primaryKey) {
-    var storeKey = this.primaryKeyMap[primaryKey];
-    if(storeKey === undefined) {
-      storeKey = this.primaryKeyMap[primaryKey] = this._generateStoreKey(); 
-    }
-    return storeKey;
-  },
-  
-  /** 
-    Given a storeKey and a NEW guid, migrate the data to the new guid.
-  
-    @returns {Integer} The storeKey.
-  */
-  replaceGuid: function(storeKey, guid) {
-    if(storeKey !== undefined) {
-      this.storeKeyMap[storeKey] = guid;
-      this.primaryKeyMap[guid] = storeKey;
-    }
-  },
-
   /**
-    Generate a new unique storekey.
-
-    @private
-    @returns {Integer} A new storeKey.
+    Given a storeKey, return the recordType.
+    
+    @param {Number} storeKey the store key
+    @returns {SC.Record} record instance
   */
-  _generateStoreKey: function() {
-    var storeKey = SC.Store.prototype.nextStoreIndex;
-    SC.Store.prototype.nextStoreIndex++;
-    return storeKey;
+  recordTypeFor: function(storeKey) {
+    return SC.Store.recordTypeFor(storeKey) ;
   },
+  
+  /**
+    Given a recordType and primaryKey, find the storeKey.
+    
+    @param {SC.Record} recordType the record type
+    @param {String} primaryKey the primary key
+    @returns {Number} storeKey
+  */
+  storeKeyFor: function(recordType, primaryKey) {
+    return recordType.storeKeyFor(primaryKey);
+  },
+
+  // ..........................................................
+  // INTERNAL SUPPORT
+  // 
   
   init: function() {
     sc_super();
@@ -1209,6 +1195,84 @@ SC.Store = SC.Object.extend(
   }
 }) ;
 
+SC.Store.mixin({
+  
+  /** @private
+    This array maps all storeKeys to primary keys.  You will not normally
+    access this method directly.  Instead use the primaryKeyFor() and 
+    storeKeyFor() methods on SC.Record.
+  */
+  primaryKeysByStoreKey: [],
+  
+  /** @private
+    Maps all storeKeys to a recordType.  Once a storeKey is associated with 
+    a primaryKey and recordType that remains constant throughout the lifetime
+    of the application.
+  */
+  recordTypesByStoreKey: [],
+  
+  /** @private
+    The next store key to allocate.  A storeKey must always be greater than 0
+  */
+  nextStoreKey: 1,
+  
+  generateStoreKey: function() { return this.nextStoreKey++; },
+  
+  /** 
+    Given a storeKey returns the primaryKey associated with the key.
+    If not primaryKey is associated with the storeKey, returns null.
+    
+    @param {Number} storeKey the store key
+    @returns {String} the primary key or null
+  */
+  primaryKeyFor: function(storeKey) {
+    return this.primaryKeysByStoreKey[storeKey] ;
+  },
+  
+  /**
+    Given a storeKey returns the SC.Record class associated with the key.
+    If no record type is associated with the store key, returns null.
+    
+    @param {Number} storeKey the store key
+    @returns {String} the primary key or null
+  */
+  recordTypeFor: function(storeKey) {
+    return this.recordTypesByStoreKey[storeKey];
+  },
+  
+  /**
+    Swaps the primaryKey mapped to the given storeKey with the new 
+    primaryKey.  If the storeKey is not currently associated with a record
+    this will raise an exception.
+    
+    @param {Number} storeKey the existing store key
+    @param {String} newPrimaryKey the new primary key
+    @returns {SC.Store} receiver
+  */
+  replacePrimaryKeyFor: function(storeKey, primaryKey) {
+    var recordType = this.recordTypeFor(storeKey);
+    if (!recordType) {
+      throw "replacePrimaryKeyFor: storeKey %@ does not exist".fmt(storeKey);
+    }
+    
+    // map one direction...
+    var oldPrimaryKey = this.primaryKeysByStoreKey[storeKey];
+    this.primaryKeysByStoreKey[storeKey] = primaryKey ;
+    
+    // then the other...
+    var storeKeys = recordType.storeKeysByPrimaryKey ;
+    if (!storeKeys) storeKeys = recordType.storeKeysByPrimaryKey = {};
+    delete storeKeys[oldPrimaryKey];
+    storeKeys[primaryKey] = storeKey;     
+    
+    return this ;
+  }
+    
+});
+
+// ..........................................................
+// COMPATIBILITY
+// 
 
 SC.Store._getDefaultStore = function()
 {

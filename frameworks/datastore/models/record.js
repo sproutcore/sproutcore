@@ -8,6 +8,46 @@
 sc_require('models/store') ;
 
 /**
+  Assigned to a record instance when it is first created but has not yet 
+  been attached to a store.  You should never encounter a record in this state
+  if the Datastore layer is behaving properly.
+*/
+SC.RECORD_EMPTY = 'empty';
+
+/**
+  Assigned to record status when it is first created before it has been 
+  committed to the server.
+*/
+SC.RECORD_NEW     = 'new';
+
+/**
+  Assigned to a record when it is first requested from the server before the
+  data has loaded.  Attempting to get or set attributes in this mode will 
+  raise an exception.
+*/
+SC.RECORD_LOADING = 'loading';
+
+/**
+  Assigned to a record once its data has been loaded from the server or it has
+  been committed to the server.
+*/
+SC.RECORD_READY = 'ready';
+
+/**
+  Assigned to a record when it cannot be loaded from the server for some 
+  reason.  Attempting to get or set attributes in this state will raise an 
+  exception.
+*/
+SC.RECORD_ERROR = 'error';
+
+/**
+  Assigned to a record when it has been destroyed.  Attempting to get or set
+  attributes in this state will raise an exception.
+*/
+SC.RECORD_DESTROYED = 'destroyed';
+
+
+/**
   @class
 
   A Record is the core model class in SproutCore. It is analogous to 
@@ -38,13 +78,6 @@ sc_require('models/store') ;
   @extends SC.Object
   @since SproutCore 1.0
 */
-
-SC.RECORD_NEW = 0;
-SC.RECORD_LOADING = 1;
-SC.RECORD_LOADED = 2;
-SC.RECORD_ERROR = 3;
-SC.RECORD_DELETED = 4;
-
 SC.Record = SC.Object.extend(
 /** @scope SC.Record.prototype */ {
   
@@ -62,17 +95,9 @@ SC.Record = SC.Object.extend(
   primaryKey: 'guid',
   
   /**
-    When a new empty record is created, this will be set to true.  It will be
-    set to NO again the first time the record is committed.
-    
-    @property {Boolean}
-  */
-  newRecord: NO,
-  
-  /**
     The record's status changes as it is loaded from the server.
     
-    @property {Number}
+    @property {String}
   */
   status: SC.RECORD_EMPTY,
 
@@ -100,27 +125,32 @@ SC.Record = SC.Object.extend(
   //
 
   /**
-    Invoked by the UI to request the model object be updated from the server.
+    Refresh the record from the persistent store.  If the record was loaded 
+    from a persistent store, then the store will be asked to reload the 
+    record data from the server.  If the record is new and exists only in 
+    memory then this call will have no effect.
     
-    Override to actually support server changes.
+    @returns {SC.Record} receiver
   */
   refresh: function() { 
     if (!this.get('newRecord')) {
       var store = this.get('store');
-      if(store) {
-        store.refreshRecords([this]); 
-      }
+      if(store) store.refreshRecords([this]); 
     }
+    return this ;
   },
   
   /**
-    This can delete the record.  The non-server version just sets isDeleted.
+    Deletes the record along with any dependent records.  This will mark the 
+    records destroyed in the store as well as changing the isDestroyed 
+    property on the record to YES.  If this is a new record, this will avoid 
+    creating the record in the first place.
+    
+    @returns {SC.Record} receiver
   */
   destroy: function() { 
     var store = this.get('store');
-    if(store) {
-      store.destroyRecords([this]); 
-    }
+    if(store) store.destroyRecords([this]); 
   },
   
   /**
@@ -135,9 +165,7 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function() {
     var store = this.get('store');
-    if(store) {
-      store.recordDidChange(this);
-    }
+    if(store) store.recordDidChange(this);
     return this ;
   },
   
@@ -288,6 +316,29 @@ SC.Record = SC.Object.extend(
 
 // Class Methods
 SC.Record.mixin( /** @scope SC.Record */ {
+
+  /**
+    Given a primaryKey value for the record, returns the associated
+    storeKey.  If the primaryKey has not been assigned a storeKey yet, it 
+    will be added.
+    
+    For the inverse of this method see SC.Store.primaryKeyFor() and 
+    SC.Store.recordKeyFor().
+    
+    @param {String} primaryKey a primaryKey value
+    @returns {Number} a storeKey.
+  */
+  storeKeyFor: function(primaryKey) {
+    var storeKeys = this.storeKeysByPrimaryKey;
+    if (!storeKeys) storeKeys = this.storeKeysByPrimaryKey = {};
+    var ret = storeKeys[primaryKey];
+    if (!ret) {
+      ret = SC.Store.generateStoreKey();
+      SC.Store.primaryKeysByStoreKey[ret] = primaryKey ;
+      storeKeys[primaryKey] = ret ;
+    }
+    return ret ;
+  },
 
   /** 
     Used to find the first object matching the specified conditions.  You can 

@@ -18,13 +18,15 @@ module("Sample Model from a webmail app", {
     // Messages are stored in mailboxes.
     Mail.Mailbox = SC.Record.extend({
 
-      name: SC.Record.string().notEmpty(),
+      name:    SC.Record.attr(String).notEmpty(),
 
       // here is the mailbox type.  must be one of INBOX, TRASH, OTHER
-      mailbox: SC.Record.string().notEmpty().only('INBOX TRASH OTHER'.w()),
+      mailbox: SC.Record.attr(String).notEmpty()
+        .only('INBOX TRASH OTHER'.w()),
       
       // this is the sortKey that should be used to order the mailbox.
-      sortKey: SC.Record.string().notEmpty().only('subject date'.w()),
+      sortKey: SC.Record.attr(String).notEmpty()
+        .only('subject date from to'.w()),
       
       // load the list of messages.  We use the mailbox guid to load the 
       // messages.  Messages use a foreign key to move the message around.
@@ -33,7 +35,7 @@ module("Sample Model from a webmail app", {
       // when you get messages, it will fetch "mailboxMessages" from the 
       // owner store, passing the receiver as the param unless you implement
       // the mailboxMessageParams property.
-      messages: SC.Collection.fetch('Mail.Message')
+      messages: SC.Record.fetch('Mail.Message')
     });
     
     // A message has a subject, date, sender, mailboxes, and messageDetail
@@ -41,7 +43,7 @@ module("Sample Model from a webmail app", {
     // guids.
     Mail.Message = SC.Record.extend({
 
-      date:        SC.Record.date().notEmpty(),
+      date:        SC.Record.attr(Date).notEmpty(),
       
       mailboxes:   SC.Record.toMany('Mail.Mailbox', {
         inverse: 'messages',

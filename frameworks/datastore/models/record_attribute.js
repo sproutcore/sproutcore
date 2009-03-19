@@ -27,9 +27,29 @@ SC.RecordAttribute = {
   */
   extend: function(attrs) {
     var ret = SC.beget(this), len = arguments.length, idx ;
-    for(idx=0;idx<len;idx++) SC.mixin(ret, arugments[idx]);
-    ret._property = null ;
+    for(idx=0;idx<len;idx++) SC.mixin(ret, arguments[idx]);
     return ret ;  
+  },
+  
+  /** 
+    Sets or return the current defaultValue for the attribute.  Usually you 
+    will use this method to pass a static value such as a string or number.
+
+    If you can't compute the defaultValue up front, you can instead pass a 
+    function that will be called to compute the defaultValue whenever it is 
+    needed. The signature for a defaultValue function should be:
+    
+    {{{
+      defaultValue(record, key) { return defaultValue; }
+    }}}
+    
+    @param {Object|Function} value the defaultValue or function
+    @returns {SC.RecordAttribute} receiver or current value if no param 
+  */
+  defaultValue: function(value) {
+    if (value === undefined) return this._defaultValue;
+    this._defaultValue = value;
+    return this ;
   },
   
   // ..........................................................
@@ -53,22 +73,6 @@ SC.RecordAttribute = {
   fromAttribute: function(value) { return value; },
 
   /**
-    Override to validate the current attribute value.  Return NO or an error
-    object if invalid.  Default looks at allowEmptyValue property only.
-  */
-  validate: function(value) {
-    if ((SC.none(value) || (value === '')) && this.get('isRequired')) {
-      return NO;
-    }
-    return YES ;
-  },
-
-  /**
-    Set to YES to require a non-null or non-empty value.
-  */
-  isRequired: NO,
-
-  /**
     The default value.  If the value is undefined, this will be returned 
     instead.  This should be the output value, after conversion, not the json.
     
@@ -86,8 +90,10 @@ SC.RecordAttribute = {
     } else {
       value = record.readAttribute(key);
       if (value === undefined) {
-        value = this.get('defaultValue');
-        if (typeof value === SC.T_FUNCTION) value = value.call(record, key);
+        value = this._defaultValue;
+        if (typeof value === SC.T_FUNCTION) {
+          value=this._defaultValue(record, key);
+        }
       }
     }
     return value ;
@@ -96,19 +102,6 @@ SC.RecordAttribute = {
   /** 
     Make this look like a property so that get() will call it. 
   */
-  isProperty: YES,
+  isProperty: YES
   
-  /**
-    Generates a new computed property handler for the receiver instance.
-  */
-  property: function() {
-    if (!this._property) {
-      var handler = this ;
-      this._property = function(key, value) {
-        return handler._handle(this, key, value)/
-      }.property().cacheable()
-    }
-    return this._property;
-  }
-  
-});
+} ;
