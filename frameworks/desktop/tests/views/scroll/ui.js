@@ -8,8 +8,8 @@
 /*global module test htmlbody ok equals same stop start */
 
 (function() {
-    var scURL='http://www.sproutcore.com/wp-content/themes/sproutcore/images/download.png';
-    var iv=SC.ImageView.design({value: scURL, layout: {height:400, width:400}});
+    var appleURL=static_url('debug/apple-logo1');
+    var iv=SC.ImageView.design({value: appleURL, layout: {height:400, width:400}});
     var pane = SC.ControlTestPane.design({ height: 100 })
     .add("basic", SC.ScrollView, {
   
@@ -20,7 +20,8 @@
     })
 
     .add("basic3", SC.ScrollView, {
-      contentView: iv
+      contentView: iv,
+      isHorizontalScrollerVisible: NO
     })
     
     .add("disabled", SC.ScrollView, {
