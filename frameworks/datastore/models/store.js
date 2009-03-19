@@ -24,10 +24,8 @@
   REST or local storage interface for persistant storage.
 
   @extends SC.Object
-  @static
   @since SproutCore 1.0
 */
-
 SC.Store = SC.Object.extend(
 /** @scope SC.Store.prototype */ {
 
@@ -52,21 +50,13 @@ SC.Store = SC.Object.extend(
   parentStore: null,
 
   /**
-    The childStores property is an array that contains all the child 
-    stores for THIS store.
+    An array of all the chained stores that current rely on the receiver 
+    store.
     
     @property {Array}
   */
-  childStores: null,
+  chainedStores: null,
 
-  /**
-    All stores that are not persistent stores are transient.  This means the
-    contents of this store will disappear when you reload the page.
-  
-    @property {Boolean}
-  */
-  isTransient: YES,
-  
   // ..........................................................
   // SHARED DATA STRUCTURES 
   // 
