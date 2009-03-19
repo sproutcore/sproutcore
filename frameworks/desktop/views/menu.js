@@ -11,6 +11,7 @@
   @since SproutCore 1.0
 */
 require('views/picker_pane');
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 require('views/menu_item');
 
 SC.MenuView = SC.View.extend(SC.Control,
@@ -22,6 +23,19 @@ SC.MenuView = SC.View.extend(SC.Control,
 	Set to YES to enabled the segmented view, NO to disabled it.
   */
   isEnabled: YES,
+=======
+
+SC.MenuView = SC.View.extend(SC.Control,
+ {
+ 	classNames:['sc-menu-view'],
+ 
+	/**
+	   Set to YES to enabled the segmented view, NO to disabled it.
+	 */
+	 isEnabled: YES,
+
+
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 	 /** 
 	   A key that determines if a menuitem in particular is enabled.  Note if the
 	   control in general is not enabled, no items will be enabled, even if the
@@ -85,8 +99,13 @@ SC.MenuView = SC.View.extend(SC.Control,
 
 	    @property {Array}
 	  */
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	 itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparator itemAction itemCheckboxKey'.w(),
 	contentView:null,
+=======
+	 itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey'.w(),
+
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 	 /**
 	    This computed property is generated from the items array
 	 */
@@ -138,7 +157,11 @@ SC.MenuView = SC.View.extend(SC.Control,
 
 	    // all done, return!
 	    return ret ;
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	  }.property('items', 'itemTitleKey',  'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey' ,'itemSeparator' ,'itemAction','itemCheckboxKey').cacheable(),
+=======
+	  }.property('items', 'itemTitleKey',  'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 
 	  /** If the items array itself changes, add/remove observer on item... */
 	  itemsDidChange: function() { 
@@ -180,7 +203,11 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    // last cached version of it needsFirstDisplay is YES.
 	    var last = this._menu_displayItems;
 	     if (firstTime || (items !== last)) {
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	         this._menu_displayItems = items; // save for future
+=======
+	         this._seg_displayItems = items; // save for future
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 	         context.addStyle('text-align', 'center');
 			 if(this.itemWidth === undefined || this.itemWidth === null){
 				this.itemWidth = this.parentView.get('layout').width||100;
@@ -199,6 +226,7 @@ SC.MenuView = SC.View.extend(SC.Control,
 		
 		var childViews = [];
 		var items = this.get('displayItems');
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 		var value = this.get('value');	    
 		var isArray = SC.isArray(value);	    		
 		var activeIndex = this.get('activeIndex');
@@ -212,22 +240,45 @@ SC.MenuView = SC.View.extend(SC.Control,
 				SC.MenuItemView,{
 		  			owner: itemView,
 		  			displayDelegate: itemView,
+=======
+	    var value = this.get('value');
+	    var isArray = SC.isArray(value);
+	    var activeIndex = this.get('activeIndex');
+	    var len= items.length;
+	    var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+		var content = SC.makeArray(items) ;
+		var c ;
+		
+	    for(var i=0; i< len; i++){	
+		 var titleValue = items[i][0];	
+		 var itemView = this.createChildView(
+				SC.MenuItemView,{
+		  			owner: this,
+		  			displayDelegate: this,
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 		  			parentView: this,
 		  			isVisible: YES,
 		  			isMaterialized: YES,
 		  			contentValueKey:'title',
 		  			contentIconKey:'icon',
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 					contentCheckboxKey:'checkbox',
 		            isSeparator:'separator',
 		            action:'action',
+=======
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 					isAnOption:YES,
    		  			layout:{width:this.itemWidth},
 		  			content:SC.Object.create({ 
 	      				icon: items[i][3],
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 	      				title: items[i][0],
 						separator:items[i][4],
 						action:items[i][5],
 						checkbox:items[i][6]
+=======
+	      				title: titleValue
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 	      			}),
 					rootElementPath: [i]});
 		 childViews.push(itemView);
@@ -261,6 +312,7 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    return (match) ? this.$('a.sc-menu').index(match) : -1;
 	  },
 	
+<<<<<<< HEAD:frameworks/desktop/views/menu.js
 		mouseOut:function(evt){	
 			var picker = this.get('parentNode');
 	    	if (picker) picker.set('isVisible', false);
@@ -271,6 +323,15 @@ SC.MenuView = SC.View.extend(SC.Control,
 	    	if (picker) picker.set('isVisible', false);
 			return true;
 		}
+=======
+	mouseOut:function(evt){	
+		var menu = this.get('parentNode');
+	    if (menu) menu.set('isVisible', false);
+	},
+	mouseDown:function(evt){
+		return true;
+	}
+>>>>>>> basic display of the menu,menu item completed, with some actions:frameworks/desktop/views/menu.js
 	  // mouseDown:function(evt){		
 	  // 	  if (!this.get('isEnabled')) return YES; // nothing to do
 	  // 	    var idx = this.displayItemIndexForEvent(evt);
