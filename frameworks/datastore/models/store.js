@@ -262,6 +262,8 @@ SC.Store = SC.Object.extend(
   removeDataHash: function(storeKey, status) {
 
     var rev ;
+    // if we don't already have a dataHash, do nothing.
+    if (!this.dataHashes[storeKey]) return this;
     
      // don't use delete -- that will allow parent dataHash to come through
     this.dataHashes[storeKey] = null;  

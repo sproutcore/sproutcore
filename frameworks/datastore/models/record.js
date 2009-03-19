@@ -12,39 +12,39 @@ sc_require('models/store') ;
   been attached to a store.  You should never encounter a record in this state
   if the Datastore layer is behaving properly.
 */
-SC.RECORD_EMPTY = 'empty';
+SC.RECORD_EMPTY     = 0x01;
 
 /**
   Assigned to record status when it is first created before it has been 
   committed to the server.
 */
-SC.RECORD_NEW     = 'new';
+SC.RECORD_NEW       = 0x02;
 
 /**
   Assigned to a record when it is first requested from the server before the
   data has loaded.  Attempting to get or set attributes in this mode will 
   raise an exception.
 */
-SC.RECORD_LOADING = 'loading';
+SC.RECORD_LOADING   = 0x04;
 
 /**
   Assigned to a record once its data has been loaded from the server or it has
   been committed to the server.
 */
-SC.RECORD_READY = 'ready';
+SC.RECORD_READY     = 0x08;
 
 /**
   Assigned to a record when it cannot be loaded from the server for some 
   reason.  Attempting to get or set attributes in this state will raise an 
   exception.
 */
-SC.RECORD_ERROR = 'error';
+SC.RECORD_ERROR     = 0x10;
 
 /**
   Assigned to a record when it has been destroyed.  Attempting to get or set
   attributes in this state will raise an exception.
 */
-SC.RECORD_DESTROYED = 'destroyed';
+SC.RECORD_DESTROYED = 0x20;
 
 
 /**
@@ -125,6 +125,17 @@ SC.Record = SC.Object.extend(
   //
 
   /**
+    Returns YES if the status matches any of the passed statuses.
+  
+    @return {Boolean}
+  */
+  hasStatus: function(statuses) {
+    var len = arguments.length, idx, s = 0;
+    for(idx=0;idx<len;idx++) s = s | arguments[idx];
+    return this.get('status') & s ;
+  },
+  
+  /**
     Refresh the record from the persistent store.  If the record was loaded 
     from a persistent store, then the store will be asked to reload the 
     record data from the server.  If the record is new and exists only in 
@@ -133,9 +144,8 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   refresh: function() { 
-    if (!this.get('newRecord')) {
-      var store = this.get('store');
-      if(store) store.refreshRecords([this]); 
+    if (this.hasStatus(SC.RECORD_READY, SC.RECORD_ERROR)) {
+      this.get('store').refreshRecord(this);
     }
     return this ;
   },
@@ -149,8 +159,10 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   destroy: function() { 
-    var store = this.get('store');
-    if(store) store.destroyRecords([this]); 
+    if (!this.hasStatus(SC.RECORD_LOADING, SC.RECORD_READY)) {
+      this.get('store').destroyRecord(this);      
+    }
+    return this ;
   },
   
   /**
@@ -164,8 +176,9 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} reciever
   */
   recordDidChange: function() {
-    var store = this.get('store');
-    if(store) store.recordDidChange(this);
+    if (!this.hasStatus(SC.RECORD_DESTROYED, SC.RECORD_EMPTY)) {
+      this.get('store').recordDidChange(this);
+    }
     return this ;
   },
   
