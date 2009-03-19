@@ -11,19 +11,29 @@ module("SC.MENUVIEW UI");
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
-  var anchor = SC.ControlTestPane.design()
-	 .add("anchor", SC.ButtonView, { 
-	 title: "Anchor Button" 
- });
-  var pane = SC.PickerPane.create({contentView: 
-			SC.MenuView.extend({ 
-	    		items: "Item1 Item2 Item3 Item4 Item5".w(),
-	    		isEnabled: YES,
-	    		layout: { height: 120 }
-				})
-	  }).popup(anchor, SC.PICKER_MENU);
- 	
-  
+  var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
+  var pane = SC.ControlTestPane.design()
+    .add ("create a menu from strings",
+       		SC.MenuView,{ 
+       	    items: "Item1 Item2 Item3 Item4 Item5".w(),
+       	    isEnabled: YES,
+       	    layout: { height: 120 },
+       		itemWidth:200
+       		})
+	.add ("create a complete menu",
+			SC.MenuView,{ 
+		    items: [ { title: "Item1",isEnabled:YES, icon: iconURL },
+	          { title: "Item2",isEnabled:NO,icon: iconURL },
+	          { title: "Item3",isEnabled:NO,icon: iconURL }],
+		    isEnabled: YES,
+		    layout: { height: 120, width:200 },
+			itemIsEnabledKey:"isEnabled",
+			itemTitleKey:"title",
+			itemIconKey:"icon",
+			itemWidth:200
+			}
+			);
+
   pane.show(); // add a test to show the test pane
  	
 })() ;

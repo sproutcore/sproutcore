@@ -162,7 +162,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   },
 
   renderLabel: function(context, label) {
-    context.push('<label class="title">', label || '', '</label>') ;
+    context.push( label || '') ;
   },
 
 	//   /** 

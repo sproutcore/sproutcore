@@ -12,26 +12,10 @@
 */
 require('views/picker_pane');
 
-SC.MenuView = SC.PickerPane.extend(
+SC.MenuView = SC.View.extend(SC.Control,
  {
  	classNames:['sc-menu-view'],
- 	// 	
- 	// 	/* the child items that are to be displayed*/
- 	// 	//childItems:[[{ item:1 }, { item:2 }, { item:3 }, { item:4 }, { item:5 }]],
- 	// 	
- 	// 	contentView: SC.CollectionView.extend({
- 	//       layout: { width: 300, height: 200 },
- 	// 	  content : [] 	
- 	//     }),
- 	// 	 
- 	// 	
- 	// 	render:function(){
- 	// 		
- 	// 		
- 	// 		
- 	// 	}
-
-
+ 
 	/**
 	   Set to YES to enabled the segmented view, NO to disabled it.
 	 */
@@ -45,8 +29,13 @@ SC.MenuView = SC.PickerPane.extend(
 
 	   @property {String}
 	 */
-	 itemIsEnabledKey: null, 
-
+	  itemIsEnabledKey: null, 
+	  /**
+		The key that contains the title for each item.  If omitted, no icons will
+    	be displayed.
+		@property {String}
+	  */
+	   itemTitleKey:null,
 	 /**
 	    The array of items to display.  This can be a simple array of strings,
 	    objects or hashes.  If you pass objects or hashes, you must also set the
@@ -56,7 +45,13 @@ SC.MenuView = SC.PickerPane.extend(
 	    @property {Array}
 	  */
 	  items: [],
+	  /** 
+	    The key that contains the value for each item.  If omitted, no icons will
+	    be displayed.
 
+	    @property {String}
+	  */
+	  itemValueKey:null,
 	  /** 
 	    The key that contains the icon for each item.  If omitted, no icons will
 	    be displayed.
@@ -66,13 +61,12 @@ SC.MenuView = SC.PickerPane.extend(
 	  itemIconKey: null,	
 
 	  /** 
-	    The key that contains the desired width for each item.  If omitted, the
-	    width will autosize.
+	    The width for each menu item and ultimately the menu itself.
 
 	    @property {String}
 	  */
-	  itemWidthKey: null,
-
+	  itemWidth: null,
+	  	
 	  /**
 	    If YES, titles will be localized before display.
 	  */
@@ -86,7 +80,7 @@ SC.MenuView = SC.PickerPane.extend(
 
 	    @property {Array}
 	  */
-	 itemKeys: 'itemIconKey itemIsEnabledKey itemWidthKey'.w(),
+	 itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey'.w(),
 
 	 /**
 	    This computed property is generated from the items array
@@ -95,8 +89,8 @@ SC.MenuView = SC.PickerPane.extend(
 	    var items = this.get('items'), loc = this.get('localize') ;
 	    var keys=null, itemType, cur ;
 	    var ret = [], max = items.get('length'), idx, item ;
-	    var fetchKeys = SC._segmented_fetchKeys;
-	    var fetchItem = SC._segmented_fetchItem;
+	    var fetchKeys = SC._menu_fetchKeys;
+	    var fetchItem = SC._menu_fetchItem;
 
 	    // loop through items and collect data
 	    for(idx=0;idx<max;idx++) {
@@ -139,7 +133,7 @@ SC.MenuView = SC.PickerPane.extend(
 
 	    // all done, return!
 	    return ret ;
-	  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
+	  }.property('items', 'itemTitleKey',  'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
 
 	  /** If the items array itself changes, add/remove observer on item... */
 	  itemsDidChange: function() { 
@@ -182,8 +176,11 @@ SC.MenuView = SC.PickerPane.extend(
 	    var last = this._seg_displayItems;
 	     if (firstTime || (items !== last)) {
 	         this._seg_displayItems = items; // save for future
-	         this.renderDisplayItems(context, items) ;
 	         context.addStyle('text-align', 'center');
+			 if(this.itemWidth === undefined || this.itemWidth === null){
+				this.itemWidth = this.parentView.get('layout').width||100;
+			}
+			this.renderChildViews(context, firstTime);
 	    }
 	   },
 
@@ -193,37 +190,40 @@ SC.MenuView = SC.PickerPane.extend(
 	    items change thereafter.  This will construct the HTML but will not set
 	    any "transient" states such as the global isEnabled property or selection.
 	  */
-	  renderDisplayItems: function(context, items) {
+	  createChildViews: function() {
 		
-	    var title = null, icon = null, url=null, className=null, ic=null, item=null;
-	    var newIc = null;
+		var childViews = [];
+		var items = this.get('displayItems');
 	    var value = this.get('value');
 	    var isArray = SC.isArray(value);
 	    var activeIndex = this.get('activeIndex');
 	    var len= items.length;
 	    var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-		
 		var content = SC.makeArray(items) ;
 		var c ;
 		
 	    for(var i=0; i< len; i++){	
 		 var titleValue = items[i][0];	
-		 var itemView = SC.MenuItemView.create({
-		  owner: this,
-		  displayDelegate: this,
-		  parentView: this,
-		  isVisible: YES,
-		  isMaterialized: YES,
-		  contentValueKey:'title',
-		  contentIconKey:'icon',
-   		  layout:{height:20},
-		  content:SC.Object.create({ 
-	      icon: "sc-icon-folder-16",
-	      title: titleValue
-	      })
-		 });
-		 this.appendChild(itemView);
-	    }     	
+		 var itemView = this.createChildView(
+				SC.MenuItemView,{
+		  			owner: this,
+		  			displayDelegate: this,
+		  			parentView: this,
+		  			isVisible: YES,
+		  			isMaterialized: YES,
+		  			contentValueKey:'title',
+		  			contentIconKey:'icon',
+					isAnOption:YES,
+   		  			layout:{width:this.itemWidth},
+		  			content:SC.Object.create({ 
+	      				icon: items[i][3],
+	      				title: titleValue
+	      			}),
+					rootElementPath: [i]});
+		 childViews.push(itemView);
+	    }  
+		this.set('childViews', childViews);
+	    return this;
 	  },  
 	  // ..........................................................
 	  // EVENT HANDLING
@@ -251,11 +251,13 @@ SC.MenuView = SC.PickerPane.extend(
 	    return (match) ? this.$('a.sc-menu').index(match) : -1;
 	  },
 	
-	click:function(evt)
-	{
+	mouseOut:function(evt){	
+		var menu = this.get('parentNode');
+	    if (menu) menu.set('isVisible', false);
+	},
+	mouseDown:function(evt){
 		return true;
 	}
-	
 	  // mouseDown:function(evt){		
 	  // 	  if (!this.get('isEnabled')) return YES; // nothing to do
 	  // 	    var idx = this.displayItemIndexForEvent(evt);
@@ -278,7 +280,10 @@ SC.MenuView = SC.PickerPane.extend(
 	  // 	   // should hide the last visible menu  	
 	  // 	  }
 	
-
-
-	
 }) ;
+
+SC._menu_fetchKeys = function(k) { return this.get(k); };
+SC._menu_fetchItem = function(k) { 
+  if (!k) return null;
+  return this.get ? this.get(k) : this[k]; 
+};
