@@ -524,6 +524,36 @@ SC.Store = SC.Object.extend(
   // RECORDS API
   // 
   
+  // find 
+  // findAll
+  
+  
+  /**
+    Initiates a record retrieval. If your store has a dataSource, this will 
+    call the dataSource to retrieve the record.
+    
+    @param {String} primaryKey a primary key value identifying the record.
+    @param {SC.Record} recordType the expected record type
+    @param {SC.Store} store (optional) store record should be added in
+
+    @returns {SC.Record} Returns a new record instance with the content.
+  */
+  retrieveRecord: function(primaryKey, recordType, store) {
+    var parentStore, dataSource, ret ;
+    parentStore = this.get('parentStore');
+    dataSource = this.get('dataSource');
+    
+    if (!store) store = this ;
+    if (parentStore) {
+      return parentStore.retrieveRecord(primaryKey, recordType, store);
+    } else if (dataSource) {
+      recordType = dataSource.retrieveRecord(primaryKey, recordType);
+      ret = store.materializeRecord(recordType.storeKeyFor(primaryKey), recordType);
+    } else ret = null;
+    return ret ;
+  },
+
+  
   /**
     Creates or updates the store's attributes.  This does not create 
     SC.Record instances, but it will clear their attribute caches as needed.
@@ -835,21 +865,6 @@ SC.Store = SC.Object.extend(
     }
   },
   
-  /**
-    Given a guid and record type, retrieve it from the parent store or 
-    persistent store.
-  
-    @private 
-    
-    @param {String} guid The guid for the desired record.
-    @param {SC.Record} recordType The record type.
-
-    @returns {SC.Record} Returns a record class.
-  */
-  retrieveRecordForGuid: function(guid, recordType) {
-    return this.get('parentStore').retrieveRecordForGuid(guid, recordType);
-  },
-
   /** 
     This method is called when there are newly retrieved records from the persistent 
     store that needs to be migrated.

@@ -145,6 +145,7 @@ SC.Record = SC.Object.extend(
   */
   refresh: function() { 
     if (this.hasStatus(SC.RECORD_READY, SC.RECORD_ERROR)) {
+      var pkey = this.get(this.get('primaryKey'));
       this.get('store').refreshRecord(this);
     }
     return this ;
@@ -231,7 +232,7 @@ SC.Record = SC.Object.extend(
   */
   readAttribute: function(key) {
     var store = this.get('store'), storeKey = this.storeKey;
-    var attrs = store.getDataHash(storeKey);
+    var attrs = store.readDataHash(storeKey);
     return attrs ? attrs[key] : undefined ; 
   },
 
@@ -248,7 +249,7 @@ SC.Record = SC.Object.extend(
   writeAttribute: function(key, value) {
     this.beginEditing();
     var store = this.get('store'), storeKey = this.storeKey;
-    var attrs = store.getWriteableDataHash(storeKey);
+    var attrs = store.readEditableDataHash(storeKey);
     if (!attrs) {
       throw "Cannot not modify %@ because it is not loaded".fmt(this);
     }
