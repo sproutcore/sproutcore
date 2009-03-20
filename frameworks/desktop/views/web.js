@@ -31,7 +31,8 @@ SC.WebView = SC.View.extend(SC.Control, {
   render: function(context, firstTime) {
     var src = this.get('value');
     if (firstTime) {
-      context.push('<iframe src="' + src + '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe>');
+      context.push('<iframe src="' + src + 
+      '" style="position: absolute; width: 100%; height: 100%; border: 0px; margin: 0px; padding: 0p;"></iframe>');
     } else {
       var iframe = this.$('iframe');
       // clear out the previous src, to force a reload
@@ -41,16 +42,23 @@ SC.WebView = SC.View.extend(SC.Control, {
   },
 
   /**
+  Called when the layer gets created. 
   */
   didCreateLayer: function() {
     var f = this.$('iframe');
+    // Attach an onload event to the iframe.
     SC.Event.add(f, 'load', this, this.iframeDidLoad);
   },
 
 
-  /** Computes the size of the contents of the iframe from the DOM 
-  @returns {Object} a JSON object representing the size in terms of height
-  and width
+  /** 
+  Called when iframe onload event is fired.
+  1. Resizes the view to fit the contents of the iframe using the 
+  scroll width and scroll height of the contents of the iframe
+  
+  The iframe contents can be accessed only when the src is from the same
+  domain as the parent document
+  @returns {void}
   */
   iframeDidLoad: function() {
     //fit the iframe to size of the contents.
@@ -61,8 +69,16 @@ SC.WebView = SC.View.extend(SC.Control, {
         contentWindow = iframeElt.contentWindow;
         if(contentWindow && contentWindow.document && contentWindow.document.documentElement){
           var docElement = contentWindow.document.documentElement;
-          this.$().height(docElement.scrollHeight);
-          this.$().width(docElement.scrollWidth);
+          // setting the width before the height gives more accurate results.. 
+          // atleast for the test iframe content i'm using.
+          //TODO: try out document flows other than top to bottom.
+          if (!SC.browser.isIE){
+            this.$().width(docElement.scrollWidth);
+            this.$().height(docElement.scrollHeight);          
+          } else {
+            this.$().width(docElement.scrollWidth + 12);
+            this.$().height(docElement.scrollHeight + 5);          
+          }
         }
       }
     }
