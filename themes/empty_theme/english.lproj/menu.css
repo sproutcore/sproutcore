@@ -1,9 +1,9 @@
 
 .sc-theme .sc-menu-view {
-  display: block;
+	border: 1px #666666 solid;
 }
 
-.sc-theme .sc-menu-view a.sc-menu {
+/*.sc-theme .sc-menu-view a.sc-menu {
 	text-decoration: none ;
 	color: black ;
 	text-align: center;
@@ -20,7 +20,7 @@
 	margin-right: 2px;
 	height: 16px;
 	width: 16px;
-}
+}*/
 
 /* @group Layout */
 
@@ -67,14 +67,14 @@
 
 /* NORMAL */
 
-.sc-theme .sc-menu-view a.sc-menu .sc-button-inner {
+/*.sc-theme .sc-menu-view a.sc-menu .sc-button-inner {
  	background: #DDDDDD;
-}
+}*/
 
-.sc-theme .sc-menu-view a.sc-menu .sc-button-inner:hover {
+/*.sc-theme .sc-menu-view a.sc-menu .sc-button-inner:hover {*/
  	/*background: #0000ff;*/
-	background: #5A8EC6;
-}
+/*	background: #5A8EC6;
+}*/
 
 /*
 .sc-theme .sc-menu-view a.sc-menu.sc-middle-segment {
@@ -87,11 +87,11 @@
 */
 
 /* SELECTED */
-.sc-theme .sc-menu-view a.sc-menu.active .sc-button-inner,
+/*.sc-theme .sc-menu-view a.sc-menu.active .sc-button-inner,
 .sc-theme .sc-menu-view a.sc-menu.sel .sc-button-inner {
 	background: #909090;
 	text-shadow: #909090 0px 1px 0px;
-}
+}*/
 /*
 .sc-theme .sc-menu-view a.sc-menu.sc-last-segment.sel,
 .sc-theme .sc-menu-view a.sc-menu.sc-last-segment.active {
@@ -110,7 +110,7 @@
 
 /* DISABLED */
 
-.sc-theme .sc-menu-view a.sc-menu.disabled .sc-button-inner,
+/*.sc-theme .sc-menu-view a.sc-menu.disabled .sc-button-inner,
 .sc-theme .sc-menu-view.disabled a.sc-menu .sc-button-inner {
 	background: #FFFFFF;
 	color: #999;
@@ -139,7 +139,7 @@
 .sc-theme .sc-menu-view a.sc-menu.sc-first-segment.sel.disabled,
 .sc-theme .sc-menu-view.disabled a.sc-menu.sc-first-segment.sel {
 	background: #FFFFFF;
-}
+}*/
 
 
 /*added custom css classes

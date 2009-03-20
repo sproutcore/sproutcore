@@ -36,19 +36,6 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   */
   childViewContent: null,  //still may be needed to set child menu items
 
-	//   /**
-	//     This property will set the action meant to be performed for the menu
-	// only if it does not have a branch
-	//   */
-	//   menuItemActionKey: null,
-
-  // /**
-  //   (displayDelegate) Returns true if the menu item has a child (branch).
-  //   
-  //   If false, the space for the branch arrow will be collapsed.
-  // */
-  // hasChild: NO,
-  
   /**
     (displayDelegate) The name of the property used for label itself
     
@@ -66,7 +53,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   contentIsBranchKey: null,
 
   /**
-    The name of the property which will set the check mark image for the menu item.
+    The name of the property which will set the icon image for the menu item.
   */
   contentIconKey: null,
 
@@ -74,7 +61,15 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
     The name of the property which will set the image for the short cut keys
   */
   shortCutKey: null,
-
+ /*
+	The name of the property which will set the checkbox image for the menu item.
+  */	
+	contentCheckboxKey:null,
+ /*
+	The name of the property which will set the checkbox state
+  */	
+	isCheckboxChecked:NO,
+	
   /**
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
@@ -84,63 +79,61 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
     @param {Boolean} firstTime
     @returns {void}
   */
-  render: function(context, firstTime) {
+displayProperties: ['contentValueKey', 'contentIconKey', 'shortCutKey'],
+  	render: function(context, firstTime) {
     var content = this.get('content') ;
-    var del = this.displayDelegate ;
+	var del = this.displayDelegate ;
     var key, value ;
 	var ic = context.begin('a').attr('href', 'javascript:;');
+	
 	//handle seperator
-	if(this.getDelegateProperty(del, 'isSeperator')) {
-	  // key = this.getDelegateProperty(del,'contentIconKey') ;
-	  // 	  value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-	  // 
-	  // 	  this.renderImage(context, value);
-	  var separator = SC.SeparatorView.create();
-	  ic = ic.begin(separator.get('tagName')) ;
-	  separator.prepareContext(ic, YES) ;
-	  ic = ic.end() ;
-      // context.addClass('seperator');
-	  return;
-	} else { // handle check mark
-	  if (this.getDelegateProperty(del, 'isAnOption')) {
-	    key = this.getDelegateProperty(del,'contentIconKey') ;
-	    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+	key = this.getDelegateProperty(del, 'isSeparator');
+	value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+	if(value) {
+		ic = ic.begin('span').addClass('separator') ;
+		ic = ic.end() ;
+		return;
+	} else {
+	  	key = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+      	if (key) {
+      		value = content ? (content.get ? content.get(key) : content[key]) : NO ;
+			if(value) {
+				ic.begin('div').addClass('checkbox').end() ;
+			}
+      	}
 
-	    this.renderImage(ic, value);
-	    ic.addClass('has-option');
-	  }
+      	// handle image
+	  	key = this.getDelegateProperty(del,'contentIconKey') ;
+	  	value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+	  	this.renderImage(ic, value);
 
-	  // handle label -- always invoke
-	  key = this.getDelegateProperty(del, 'contentValueKey') ;
-	  value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
-	  if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString();
-	  this.renderLabel(ic, value);
+	  	// handle label -- always invoke
+	  	key = this.getDelegateProperty(del, 'contentValueKey') ;
+	  	value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
+	  	if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString();
+	  	this.renderLabel(ic, value);
 
-	  // handle branch
-	  if (this.getDelegateProperty(del, 'hasChild')) {
-	    key = this.getDelegateProperty(del, 'contentIsBranchKey');
-	    value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
-	    this.renderBranch(ic, value);
-	    ic.addClass('has-branch');
-	    return;
-	  } else { // // handle action
-	  // 	    key = this.getDelegateProperty(del, 'menuItemActionKey') ;
-	  // 	    value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-	  // 	    if (value) {
-	  // 		  this.set('action', this.get('menuItemActionKey'));
-	  // 	      // this.renderAction(context, value);
-	  // 	      context.addClass('has-action');
-	  // 	    }
-	    // handle short cut keys
-		if (this.getDelegateProperty(del, 'shortCutKey')) {
-		  /* handle short cut keys here */	
-		  key = this.getDelegateProperty(del,'shortCutKey') ;
-	      value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+	  	// handle branch
+	  	if (this.getDelegateProperty(del, 'contentIsBranchKey')) {
+	    	key = this.getDelegateProperty(del, 'contentIsBranchKey');
+	    	value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
+	    	this.renderBranch(ic, value);
+	    	ic.addClass('has-branch');
+	    	return;
+	  	} else { // handle action
+			key = this.getDelegateProperty(del, 'action');
+			value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+			if(value && isNaN(value)) this.set('action',value);
 
-	      this.renderShortcut(ic, value);
-	      ic.addClass('shortcutkey');
-		}
-	  }
+			// handle short cut keys
+			if (this.getDelegateProperty(del, 'shortCutKey')) {
+		  		/* handle short cut keys here */	
+		  		key = this.getDelegateProperty(del,'shortCutKey') ;
+	      		value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+	      		this.renderShortcut(ic, value);
+	      		ic.addClass('shortcutkey');
+			}
+	  	}
 	}
 	ic.end();	
   },
@@ -161,6 +154,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
     .end();
   },
 
+   
   renderLabel: function(context, label) {
 <<<<<<< HEAD:frameworks/desktop/views/menu_item.js
 <<<<<<< HEAD:frameworks/desktop/views/menu_item.js
@@ -196,47 +190,46 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   */
 
   renderBranch: function(context, hasBranch) {
-    context.begin('span').addClass('branch')
+	var a = '>';
+    context.begin('span')//.addClass('branch')
       .addClass(hasBranch ? 'branch-visible' : 'branch-hidden')
-      .push('&nbsp;').end();
+      .push(a).end();
   },
   
   /***/
   renderShortcut: function(context, shortcut) { /*alert("short cut");*/ },
+
+  superClass: NO,
+
   mouseUp: function(evt)
   {
+	if(this.get('superClass')) sc_super();	
     this._closeParentMenu();
   },
+
   _closeParentMenu: function()
   {
     var menu = this.get('parentNode');
     if (menu) menu.set('isVisible', false);
   },
-	mouseDown: function(evt) {
-	 	if(this.get('hasChild')) return YES;
-	    return NO ; // let the collection view handle this event
-	  }
-	//   /** @private 
-	//   mouseDown is handled only for clicks on the checkbox view or or action
-	//   button.
-	//   */
-	//   mouseDown: function(evt) {
-	//  	if(this.get('hasChild')) return YES;
-	//     return NO ; // let the collection view handle this event
-	//   },
-	// 
-	//   mouseUp: function(evt) {
-	//     /*do sumthing to set child menu items.*/
-	// if(this.get('hasChild')){
-	// 	//Pops out the child menu items with contents from the childViewContent property.
-	// }
-	// else{
-	// 	//performs the action set by the renderAction method.
-	// }
-	//   },
-	// 
-	//   mouseMoved: function(evt) {
-	// //Set the CSS class so that the menu is higlighted.
-	//   }
+
+  mouseDown: function(evt) {
+	var key = this.get('contentCheckboxKey');
+	var content = this.get('content');
+ 	if(key) {
+		if(content && content.get(key)){
+				this.$('.checkbox').setClass('inactive',YES);
+				content.set(key,NO);
+				}else {
+				this.$('.checkbox').removeClass('inactive');
+				content.set(key,YES);
+				}
+	}
+	
+	if(this.get('contentIsBranchKey')) return YES;
+	this.set('superClass', YES);
+    sc_super();
+  },
+  
   
 }) ;

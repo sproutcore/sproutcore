@@ -1,5 +1,7 @@
 .sc-theme .sc-menu-item-view {
 	position:relative;
+	background: #ffffff none repeat scroll 0 0;
+	border: 0px solid #ffffff;
 }
 /*
 .sc-menu-item-view.sel {
@@ -15,7 +17,7 @@
 
 
 
-// @group Label 
+/*// @group Label 
 
 div.sc-menu-item-view label.title{
 	top: 50%;
@@ -34,7 +36,7 @@ div.sc-menu-item-view label.title{
 
 .sc-menu-item-view.has-checkbox.has-icon label {
 	left: 44px;
-}
+}*/
 
 
 /*
@@ -67,34 +69,74 @@ div.sc-menu-item-view label.title{
 	background-image: sc_static('icons/mini_ffffff'); 
 }*/
 
-.sc-theme .sc-menu-item-view a.sc-menuItem{
+.sc-theme .sc-menu-item-view a{
 	display: block;
 	top: 0;
 	height: 25px;
 	line-height: 22px;
-	border-right: 2px #cccccc solid;
-	border-bottom: 1px #909090 solid;
 	text-shadow: #b0b0b0 0px 1px 0px;
 	text-decoration: none ;
+	text-align: left;
+	color: black;
 }
 
-.sc-theme .sc-menu-item-view a.sc-menuItem .sc-button-inner {
+.sc-theme .sc-menu-item-view span.separator{
+	display: block;
+	height: 1px;
+	border-bottom: 2px #cccccc solid;
+}
+
+.sc-theme .sc-menu-item-view span.branch-visible{
+	left: 25px;
+}
+
+.sc-theme .sc-menu-item-view a.has-option {
+	
+}
+
+.sc-theme .sc-menu-item-view a img {
+	left: 25px;
+	margin-right: 30px;
+	top: 0;
+	vertical-align: middle;
+	
+}
+
+/*.sc-theme .sc-menu-item-view a.sc-menuItem .sc-button-inner {
 	text-decoration: none ;
 	color: black ;
 	text-align: center;
-}
+}*/
 
 /* SELECTED */
-.sc-theme .sc-menu-item-view a.sc-menuItem.active .sc-button-inner,
+/*.sc-theme .sc-menu-item-view a.sc-menuItem.active .sc-button-inner,
 .sc-theme .sc-menu-item-view a.sc-menuItem.sel .sc-button-inner {
 	background: #909090;
 	text-shadow: #909090 0px 1px 0px;
-}
+}*/
 
 /*Hovering over menu items*/
-.sc-theme .sc-menu-item-view a.sc-menuItem:hover {
- 	/*background: #0000ff;*/
+.sc-theme .sc-menu-item-view a:hover {
 	background: #5A8EC6;
 }
 
 /* @end */
+
+.sc-theme .sc-menu-item-view div.checkbox {
+	background-image: sc_static('icons/mini_454545'); 
+	background-position: -66px -147px;
+	position: absolute;
+	display: block;
+	width: 12px;
+	height: 12px;
+	left: 5px;
+	top:  50%;
+	margin-top: -8px;
+	margin-right:16px;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+}
+
+.sc-theme .sc-menu-item-view div.checkbox.inactive {
+	background-image: sc_static('blank.gif'); 
+}
