@@ -26,10 +26,7 @@ SC.PICKER_POINTER = 'pointer';
 /** 
   Pointer layout for perfect right/left/top/bottom
 */
-SC.POINTER_LAYOUT = [{ width: 25, height: 51, top: 20, left: -25, backgroundPosition: '0px -64px' },
-                     { width: 25, height: 51, top: 20, right: -25, backgroundPosition: '-32px -64px' },
-                     { width: 51, height: 31, bottom: -31, centerX: 0, backgroundPosition: '0px 0px' },
-                     { width: 51, height: 19, top: -19, centerX: 0, backgroundPosition: '0px -32px' }];
+SC.POINTER_LAYOUT = ["pointerLeft", "pointerRight", "pointerDown", "pointerUp"];
 
 /**
   Displays a non-modal, self anchor positioned picker pane.
@@ -107,6 +104,10 @@ SC.PickerPane = SC.PalettePane.extend({
   
   classNames: 'sc-picker-pane',
   isAnchored: true,
+  
+  pointerPos: 'pointerUp',
+  
+  displayProperties: ['pointerPos'],
   /**
     This property will be set to the element (or view.get('layer')) that triggered your picker to show
     You can use this to properly position your picker.
@@ -279,6 +280,8 @@ SC.PickerPane = SC.PalettePane.extend({
     re-position rule for triangle pointer picker: take default [0,1,2,3,2] or custom matrix to choose one of four perfect pointer positions.
   */
   fitPositionToScreenPointer: function(w, f, a) {
+    console.log('calculating');
+    debugger;
     // initiate perfect positions matrix
     // 4 perfect positions: right > left > top > bottom
     // 2 coordinates: x, y
@@ -304,13 +307,13 @@ SC.PickerPane = SC.PalettePane.extend({
       this.set('preferMatrix', [0,1,2,3,2]) ;
     }
     var m = this.preferMatrix;
-    var pointer = this.contentView.childViews[this.contentView.childViews.length-1];
+    //var pointer = this.contentView.childViews[this.contentView.childViews.length-1];
 
     // initiated with fallback position
     // Will be used only if the following preferred alternative can not be found
     f.x = prefP1[m[4]][0] ;
     f.y = prefP1[m[4]][1] ;
-    pointer.set('layout', SC.POINTER_LAYOUT[m[4]]);
+    this.set('pointerPos', SC.POINTER_LAYOUT[m[4]]);
 
     for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
       if (cutoffPrefP[m[i]][0]==0 && cutoffPrefP[m[i]][1]==0 && cutoffPrefP[m[i]][2]==0 && cutoffPrefP[m[i]][3]==0) {
@@ -318,14 +321,41 @@ SC.PickerPane = SC.PalettePane.extend({
 	      if (m[4] != m[i]) {
 		      f.x = prefP1[m[i]][0] ;
 		      f.y = prefP1[m[i]][1] ;
-		      pointer.set('layout', SC.POINTER_LAYOUT[m[i]]);
+		      this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
 	      }
 	      i = SC.POINTER_LAYOUT.length;
 	    }
     }
-
+    console.log('pos'+f.x+","+f.y);
     return f ;    
   },
+  
+  render: function(context, firstTime) {
+    console.log('rendering');
+    var s=this.contentView.get('layoutStyle');
+    var ss='';
+    for(key in s) {
+      value = s[key];
+      if (value!==null) {
+        ss=ss+key+': '+value+'; ';
+      }
+    }
+     context.push("<div style='position:absolute; "+ss+"'>");
+     context.push("<div class='top-left-edge'></div>");
+     context.push("<div class='top-edge'></div>");
+     context.push("<div class='top-right-edge'></div>");
+     context.push("<div class='right-edge'></div>");
+     context.push("<div class='bottom-right-edge'></div>");
+     context.push("<div class='bottom-edge'></div>");
+     context.push("<div class='bottom-left-edge'></div>");
+     context.push("<div class='left-edge'></div>");
+     context.push("<div class='"+this.get('pointerPos')+"'></div>");
+     this.renderChildViews(context, firstTime) ;
+     context.push("</div>");
+   },
+
+  
+
 
   /** @private - click away picker. */
   click: function(evt) {

@@ -1,0 +1,49 @@
+
+/** SC.PickerPane Support */
+
+
+
+.sc-pane.sc-panel .pointerDown {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+	position: absolute;
+	width: 51px;
+	height: 31px;
+	bottom: -31px;
+	left:50%;
+}
+
+.sc-pane.sc-panel .pointerUp {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+	position: absolute;
+	width: 51px;
+	height: 31px;
+	top: -19px;
+	left: 50%;
+}
+
+.sc-pane.sc-panel .pointerLeft {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+	position: absolute;
+	width: 25px;
+	height: 51px;
+	top: 20px;
+	left: -25px;
+}
+
+.sc-pane.sc-panel .pointerRight {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+	position: absolute;
+	width: 25px;
+	height: 51px;
+	top: 20px;
+	right: -25px;
+}
+
+
+
+
+
+/*SC.POINTER_LAYOUT = [{ width: 25, height: 51, top: 20, left: -25, backgroundPosition: '0px -64px' },
+                     { width: 25, height: 51, top: 20, right: -25, backgroundPosition: '-32px -64px' },
+                     { width: 51, height: 31, bottom: -31, centerX: 0, backgroundPosition: '0px 0px' },
+                     { width: 51, height: 19, top: -19, centerX: 0, backgroundPosition: '0px -32px' }];*/

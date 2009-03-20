@@ -7,15 +7,6 @@
 /** 
   Shadow views from top-left corner clockwise
 */
-SC.SHADOW_VIEWS = [SC.View.create(SC.StaticLayout, {classNames: ['top-left-edge'], layout: { top: -6, bottom: 'auto', left: -5, right: 'auto' }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['top-edge'], layout: { top: -5, bottom: 'auto', left: 0, right: 0 }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['top-right-edge'], layout: { top: -6, bottom: 'auto', left: 'auto', right: -5 }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['right-edge'], layout: { top: 3, bottom: 0, left: 'auto', right: -5 }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['bottom-right-edge'], layout: { top: 'auto', bottom: -5, left: 'auto', right: -5 }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['bottom-edge'], layout: { top: 'auto', bottom: -5, left: 5, right: 5 }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['bottom-left-edge'], layout: { top: 'auto', bottom: -5, left: -5, right: 'auto' }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['left-edge'], layout: { top: 3, bottom: 0, left: -5, right: 'auto' }}),
-                   SC.View.create(SC.StaticLayout, {classNames: ['pointer']})];
 
 /** @class
 
@@ -67,6 +58,29 @@ SC.Panel = SC.Pane.extend({
     @param {SC.View} newContent the new panel view or null.
     @returns {void}
   */
+  
+  render: function(context, firstTime) {
+     var s=this.contentView.get('layoutStyle');
+     var ss='';
+     for(key in s) {
+       value = s[key];
+       if (value!==null) {
+         ss=ss+key+': '+value+'; ';
+       }
+     }
+      context.push("<div style='position:absolute; "+ss+"'>");
+      context.push("<div class='top-left-edge'></div>");
+      context.push("<div class='top-edge'></div>");
+      context.push("<div class='top-right-edge'></div>");
+      context.push("<div class='right-edge'></div>");
+      context.push("<div class='bottom-right-edge'></div>");
+      context.push("<div class='bottom-edge'></div>");
+      context.push("<div class='bottom-left-edge'></div>");
+      context.push("<div class='left-edge'></div>");
+      this.renderChildViews(context, firstTime) ;
+      context.push("</div>");
+    },
+  
   replaceContent: function(newContent) {
     this.removeAllChildren() ;
     if (newContent) this.appendChild(newContent) ;
@@ -75,15 +89,11 @@ SC.Panel = SC.Pane.extend({
   /** @private */
   createChildViews: function() {
     // if contentView is defined, then create the content
-    var view = this.contentView ;
-    if (view) {
-      view = this.contentView = this.createChildView(view) ;
-      for(var i=SC.SHADOW_VIEWS.length-1; i>=0; i--) {
-	      if (i==(SC.SHADOW_VIEWS.length-1)) view.appendChild(SC.SHADOW_VIEWS[i]);
-	      else view.insertBefore(SC.SHADOW_VIEWS[i], SC.SHADOW_VIEWS[i+1]);
-      }
-      this.childViews = [view] ;
-    }
+     var view = this.contentView ;
+        if (view) {
+          view = this.contentView = this.createChildView(view) ;
+          this.childViews = [view] ;
+        }
   },
 
   

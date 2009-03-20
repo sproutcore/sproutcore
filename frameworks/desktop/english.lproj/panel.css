@@ -3,61 +3,102 @@
 /** SC.Panel Support */
 
 .sc-pane.sc-panel {
+  	overflow: visible;
 }
 
 .sc-pane.sc-panel > .sc-view {
-	border: 0px #444 solid;
-	border-top: 1px #ddd solid;
+	border: 1px #444 solid;
 	background-color: #fafafa ;
-	overflow: visible;
 }
 
-.sc-pane.sc-panel > .sc-view .top-right-edge {
+.sc-pane.sc-panel .top-right-edge {
 	background: static_url('images/panels/top-right-corner.png') no-repeat ;
+	position: absolute;
 	width: 5px;
 	height: 9px;
+  top:-6px;
+  bottom: auto;
+  left: auto;
+  right: -5px;
 }
 
-.sc-pane.sc-panel > .sc-view .top-left-edge {
+.sc-pane.sc-panel .top-left-edge {
 	background: static_url('images/panels/top-left-corner.png') no-repeat ;
-	width: 5px;
+	position: absolute;
+  width: 5px;
 	height: 9px;
+  top:-6px;
+  bottom: auto;
+  left: -5px;
+  right: auto;
 }
 
-.sc-pane.sc-panel > .sc-view .bottom-left-edge {
+.sc-pane.sc-panel .bottom-left-edge {
 	background: static_url('images/panels/bottom-left-corner.png') no-repeat ;
-	width: 10px;
+	position: absolute;
+  width: 10px;
 	height: 5px;
+  top:auto;
+  bottom: -5px;
+  left: -5px;
+  right: auto;
 }
 
-.sc-pane.sc-panel > .sc-view .bottom-right-edge {
+.sc-pane.sc-panel .bottom-right-edge {
 	background: static_url('images/panels/bottom-right-corner.png') no-repeat ;
-	width: 10px;
+	position: absolute;
+  width: 10px;
 	height: 5px;
+  top:auto;
+  bottom: -5px;
+  left: auto;
+  right: -5px;
 }
 
-.sc-pane.sc-panel > .sc-view .top-edge {
+.sc-pane.sc-panel .top-edge {
 	background: static_url('images/panels/top-edge.png') repeat-x ;
-	height: 4px;
+	position: absolute;
+  height: 4px;
+  top:-5px;
+  bottom: auto;
+  left: 0px;
+  right: 0px;
 }
 
-.sc-pane.sc-panel > .sc-view .bottom-edge {
+.sc-pane.sc-panel .bottom-edge {
 	background: static_url('images/panels/bottom-edge.png') repeat-x ;
-	height: 5px;
+	position: absolute;
+  height: 5px;
+  top: auto;
+  bottom: -5px;
+  left: 5px;
+  right: 5px;
 }
 
-.sc-pane.sc-panel > .sc-view .left-edge {
+.sc-pane.sc-panel .left-edge {
 	background: static_url('images/panels/left-edge.png') repeat-y ;
-	width: 5px;
+	position: absolute;
+  width: 5px;
+  top:3px;
+  bottom: 0px;
+  left: -5px;
+  right: auto;
 }
 
-.sc-pane.sc-panel > .sc-view .right-edge {
+.sc-pane.sc-panel .right-edge {
 	background: static_url('images/panels/right-edge.png') repeat-y ;
-	width: 5px;
+	position: absolute;
+  width: 5px;
+  top:3px;
+  bottom: 0px;
+  left: auto;
+  right: -5px;
 }
 
-.sc-pane.sc-panel > .sc-view .pointer {
+.sc-pane.sc-panel .pointer {
 	background: static_url('images/panels/reveal-tabs.png') no-repeat;
 	width: 0px;
 	height: 0px;
 }
+
+

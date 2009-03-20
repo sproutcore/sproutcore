@@ -51,6 +51,7 @@ SC.PalettePane = SC.Panel.extend({
 	    this.set('layout', { width: this.layout.width, height: this.layout.height, left: this._mouseOffsetX + evt.pageX, top: this._mouseOffsetY + evt.pageY });
 	    this.updateLayout();
 	  }
-  }
-
+  },
+  
+ 
 });
