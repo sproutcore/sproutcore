@@ -95,17 +95,32 @@ SC.Record = SC.Object.extend(
   primaryKey: 'guid',
   
   /**
+    Returns the id for the record instance.  The id is used to uniquely 
+    identify this record instance from all others of the same type.  If you 
+    have a primaryKey set on this class, then the id will be the value of the
+    primaryKey property on the underlying JSON hash.
+  */
+  id: function() {
+    return SC.Store.idFor(this.storeKey);
+  }.property('storeKey').cacheable(),
+  
+  /**
     The record's status changes as it is loaded from the server.
     
-    @property {String}
+    @property {Number}
   */
-  status: SC.RECORD_EMPTY,
+  status: function() {
+    return this.store.readStatus(this.storeKey);
+  }.property('storeKey').cacheable(),
 
   /**
     The store that owns this record.  All changes will be buffered into this
     store and committed to the rest of the store chain through here.
     
-    @property {SC.Store | SC.Server}
+    This property is set when the record instance is created and should not be
+    changed or else it will break the record behavior.
+    
+    @property {SC.Store}
   */
   store: null,
 
@@ -165,6 +180,8 @@ SC.Record = SC.Object.extend(
     }
     return this ;
   },
+
+  _TMP_RECORDS_ARY: [],
   
   /**
     You can invoke this method anytime you need to make the record as dirty.
@@ -178,7 +195,7 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function() {
     if (!this.hasStatus(SC.RECORD_DESTROYED, SC.RECORD_EMPTY)) {
-      this.get('store').recordDidChange(this);
+      this.get('store').recordDidChange(null, null, this.storeKey);
     }
     return this ;
   },
@@ -289,6 +306,18 @@ SC.Record = SC.Object.extend(
   }.property(),
   
   /**
+    Called by the store whenever the underlying data hash has changed.  This
+    will notify any observers interested in data hash properties that they
+    have changed.
+    
+    @returns {SC.Record} receiver
+  */
+  storeDidChangeAttributes: function() {
+    // TODO: Notify of property changes more selectively?
+    this.allPropertiesDidChange(); 
+  },
+  
+  /**
     If you try to get/set a property not defined by the record, then this 
     method will be called. It will try to get the value from the set of 
     attributes.
@@ -336,20 +365,20 @@ SC.Record.mixin( /** @scope SC.Record */ {
     storeKey.  If the primaryKey has not been assigned a storeKey yet, it 
     will be added.
     
-    For the inverse of this method see SC.Store.primaryKeyFor() and 
-    SC.Store.recordKeyFor().
+    For the inverse of this method see SC.Store.idFor() and 
+    SC.Store.recordTypeFor().
     
-    @param {String} primaryKey a primaryKey value
+    @param {String} id a record id
     @returns {Number} a storeKey.
   */
-  storeKeyFor: function(primaryKey) {
-    var storeKeys = this.storeKeysByPrimaryKey;
-    if (!storeKeys) storeKeys = this.storeKeysByPrimaryKey = {};
-    var ret = storeKeys[primaryKey];
+  storeKeyFor: function(id) {
+    var storeKeys = this.storeKeysById;
+    if (!storeKeys) storeKeys = this.storeKeysById = {};
+    var ret = storeKeys[id];
     if (!ret) {
       ret = SC.Store.generateStoreKey();
-      SC.Store.primaryKeysByStoreKey[ret] = primaryKey ;
-      storeKeys[primaryKey] = ret ;
+      SC.Store.idsByStoreKey[ret] = id ;
+      storeKeys[id] = ret ;
     }
     return ret ;
   },

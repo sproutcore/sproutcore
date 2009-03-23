@@ -46,7 +46,7 @@ test("writing a new data hash and status", function() {
   ok(!store.revisions[storeKey2], 'store should not have revision yet since that is not set until you call dataHashDidChange() (actual: %@)'.fmt(SC.inspect(store.revisions)));
   
   // should not add to changes
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey2), 'should not yet be in changed store keys');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey2), 'should not yet be in changed store keys');
 });
 
 
@@ -88,7 +88,7 @@ test("replacing a new data hash and status", function() {
   equals(store.revisions[storeKey1], oldrev, 'store have old revision still');
   
   // should not add to changes
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey1), 'should not yet be in changed store keys');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey1), 'should not yet be in changed store keys');
 });
 
 test("replacing an existing data hash with no status", function() {
@@ -127,7 +127,7 @@ test("replacing a data hash multiple times", function() {
   equals(store.revisions[storeKey1], oldrev, 'store have old revision still');
   
   // should not add to changes
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey1), 'should not yet be in changed store keys');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey1), 'should not yet be in changed store keys');
   
   var newLock = store.locks[storeKey1];
 
@@ -143,5 +143,5 @@ test("replacing a data hash multiple times", function() {
   equals(store.revisions[storeKey1], oldrev, 'store have old revision still');
   
   // should not add to changes
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey1), 'should not yet be in changed store keys');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey1), 'should not yet be in changed store keys');
 });

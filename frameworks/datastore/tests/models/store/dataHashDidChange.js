@@ -25,13 +25,13 @@ module("SC.Store#dataHashDidChange", {
 test("called with existing storeKey", function() {
   
   ok(!store.get('hasChanges'), 'precond - hasChanges should be no');
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey), 'precond -changedStoreKeys should not include storeKey');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey), 'precond -changedDataHashes should not include storeKey');
   
   var oldrev= store.revisions[storeKey];
   store.dataHashDidChange(storeKey);
   
   ok(oldrev !== store.revisions[storeKey], 'should change revision (old=%@, new=%@)'.fmt(oldrev, store.revisions[storeKey]));
-  ok(store.changedStoreKeys.contains(storeKey), 'changedStoreKeys should include storeKey');
+  ok(store.changedDataHashes.contains(storeKey), 'changedDataHashes should include storeKey');
   ok(store.get('hasChanges'), 'should set hasChanges to YES');
   
 });
@@ -42,7 +42,7 @@ test("called with chained store", function() {
   store = parent.chain();
   
   ok(!store.get('hasChanges'), 'precond - hasChanges should be no');
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey), 'precond -changedStoreKeys should not include storeKey');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey), 'precond -changedDataHashes should not include storeKey');
   
   var oldrev= store.revisions[storeKey];
   store.dataHashDidChange(storeKey);
@@ -50,7 +50,7 @@ test("called with chained store", function() {
   ok(oldrev !== store.revisions[storeKey], 'should change revision (old=%@, new=%@)'.fmt(oldrev, store.revisions[storeKey]));
   ok(parent.revisions[storeKey] !== store.revisions[storeKey], 'chained store revisions should not equal parent store revision');
   
-  ok(store.changedStoreKeys.contains(storeKey), 'changedStoreKeys should include storeKey');
+  ok(store.changedDataHashes.contains(storeKey), 'changedDataHashes should include storeKey');
   ok(store.get('hasChanges'), 'should set hasChanges to YES');
   
 });
@@ -60,13 +60,13 @@ test("called with imaginary storeKey - should treat like deleted record", functi
   storeKey = 200000 ;
   
   ok(!store.get('hasChanges'), 'precond - hasChanges should be no');
-  ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey), 'precond -changedStoreKeys should not include storeKey');
+  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey), 'precond -changedDataHashes should not include storeKey');
   
   var oldrev= store.revisions[storeKey];
   store.dataHashDidChange(storeKey);
   
   ok(oldrev !== store.revisions[storeKey], 'should change revision (old=%@, new=%@)'.fmt(oldrev, store.revisions[storeKey]));
-  ok(store.changedStoreKeys.contains(storeKey), 'changedStoreKeys should include storeKey');
+  ok(store.changedDataHashes.contains(storeKey), 'changedDataHashes should include storeKey');
   ok(store.get('hasChanges'), 'should set hasChanges to YES');
   
 });
@@ -81,7 +81,7 @@ test("called with muliple storeKeys", function() {
   
   storeKeys.forEach(function(storeKey) {
     ok(!store.get('hasChanges'), 'precond - hasChanges should be no');
-    ok(!store.changedStoreKeys || !store.changedStoreKeys.contains(storeKey), 'precond -changedStoreKeys should not include storeKey');
+    ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey), 'precond -changedDataHashes should not include storeKey');
     oldrevs.push(store.revisions[storeKey]);
   });
 
@@ -91,7 +91,7 @@ test("called with muliple storeKeys", function() {
   storeKeys.forEach(function(storeKey) {
     var oldrev = oldrevs[idx++];
     ok(oldrev !== store.revisions[storeKey], 'should change revision (old=%@, new=%@)'.fmt(oldrev, store.revisions[storeKey]));
-    ok(store.changedStoreKeys.contains(storeKey), 'changedStoreKeys should include storeKey');
+    ok(store.changedDataHashes.contains(storeKey), 'changedDataHashes should include storeKey');
     ok(store.get('hasChanges'), 'should set hasChanges to YES');
   });
   

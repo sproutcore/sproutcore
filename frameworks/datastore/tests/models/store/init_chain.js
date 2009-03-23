@@ -24,7 +24,7 @@ test("initial setup for root store", function() {
   equals(SC.typeOf(store.statuses), SC.T_HASH, 'should have statuses');
   
   ok(!store.locks, 'should not have locks');
-  ok(!store.changedStoreKeys, 'should not have changedStoreKeys');
+  ok(!store.changedDataHashes, 'should not have changedDataHashes');
   ok(!store.editables, 'should not have editables');
 }); 
 
@@ -55,7 +55,7 @@ test("initial setup for chained store", function() {
   equals(store.statuses.foo, 'bar', 'statuses should inherit from parent');
   
   ok(!store.locks, 'should not have locks');
-  ok(!store.changedStoreKeys, 'should not have changedStoreKeys');
+  ok(!store.changedDataHashes, 'should not have changedDataHashes');
   ok(!store.editables, 'should not have editables');
 }); 
 
