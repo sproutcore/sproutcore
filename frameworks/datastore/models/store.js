@@ -574,7 +574,24 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   destroyRecords: function(recordTypes, ids, storeKeys) {
-    // JUAN TODO: Implement
+    var len, isArray, idx, id, recordType, storeKey;
+    if(storeKeys===undefined){
+      len = ids.length;
+      isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+      if (!isArray) recordType = recordTypes;
+      for(idx=0;idx<len;idx++) {
+        if (isArray) recordType = recordTypes[idx] || SC.Record;
+        id = ids ? ids[idx] : undefined ;
+        storeKey = storeKeys ? storeKeys[idx] : undefined ;
+        destroyRecord(recordType, id, storeKey);
+      }
+    }else{
+      len = storeKeys.length;
+      for(idx=0;idx<len;idx++) {
+        storeKey = storeKeys ? storeKeys[idx] : undefined ;
+        destroyRecord(undefined, undefined, storeKey);
+      }
+    }
     return this ;
   },
   
