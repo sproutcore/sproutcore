@@ -7,45 +7,6 @@
 
 sc_require('models/store') ;
 
-/**
-  Assigned to a record instance when it is first created but has not yet 
-  been attached to a store.  You should never encounter a record in this state
-  if the Datastore layer is behaving properly.
-*/
-SC.RECORD_EMPTY     = 0x01;
-
-/**
-  Assigned to record status when it is first created before it has been 
-  committed to the server.
-*/
-SC.RECORD_NEW       = 0x02;
-
-/**
-  Assigned to a record when it is first requested from the server before the
-  data has loaded.  Attempting to get or set attributes in this mode will 
-  raise an exception.
-*/
-SC.RECORD_LOADING   = 0x04;
-
-/**
-  Assigned to a record once its data has been loaded from the server or it has
-  been committed to the server.
-*/
-SC.RECORD_READY     = 0x08;
-
-/**
-  Assigned to a record when it cannot be loaded from the server for some 
-  reason.  Attempting to get or set attributes in this state will raise an 
-  exception.
-*/
-SC.RECORD_ERROR     = 0x10;
-
-/**
-  Assigned to a record when it has been destroyed.  Attempting to get or set
-  attributes in this state will raise an exception.
-*/
-SC.RECORD_DESTROYED = 0x20;
-
 
 /**
   @class
@@ -159,7 +120,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   refresh: function() { 
-    if (this.hasStatus(SC.RECORD_READY, SC.RECORD_ERROR)) {
+    if (this.hasStatus(SC.Record.READY_CLEAN, SC.Record.ERROR)) {
       var pkey = this.get(this.get('primaryKey'));
       this.get('store').refreshRecord(this);
     }
@@ -175,7 +136,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   destroy: function() { 
-    if (!this.hasStatus(SC.RECORD_LOADING, SC.RECORD_READY)) {
+    if (!this.hasStatus(SC.Record.BUSY_LOADING, SC.Record.READY_CLEAN)) {
       this.get('store').destroyRecord(this);      
     }
     return this ;
@@ -194,7 +155,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} reciever
   */
   recordDidChange: function() {
-    if (!this.hasStatus(SC.RECORD_DESTROYED, SC.RECORD_EMPTY)) {
+    if (!this.hasStatus(SC.Record.DESTROYED_CLEAN, SC.RECORD_EMPTY)) {
       this.get('store').recordDidChange(null, null, this.storeKey);
     }
     return this ;
@@ -360,6 +321,36 @@ SC.Record = SC.Object.extend(
 // Class Methods
 SC.Record.mixin( /** @scope SC.Record */ {
 
+  // Record States
+  CLEAN:            0x0001,
+  DIRTY:            0x0002,
+
+  EMPTY:            0x0100,
+  ERROR:            0x1000,
+
+  READY:            0x0200,
+  READY_CLEAN:      0x0201,
+  READY_DIRTY:      0x0202,
+  READY_NEW:        0x0203,
+
+  DESTROYED:        0x0400,
+  DESTROYED_CLEAN:  0x0401,
+  DESTROYED_DIRTY:  0x0402,
+
+  BUSY:             0x0800,
+  BUSY_LOADING:     0x0804,
+  BUSY_CREATING:    0x0808,
+  BUSY_COMMITTING:  0x0810,
+  BUSY_REFRESH:     0x0820,
+  BUSY_REFRESH_CLEAN:  0x0821,
+  BUSY_REFRESH_DIRTY:  0x0822,
+  BUSY_DESTROYING:  0x0840,
+
+  // exceptions that can be raised when processing records
+  BAD_STATE_ERROR:     new Error("Internal Inconsistency"),
+  RECORD_EXISTS_ERROR: new Error("Record Exists"),
+  NOT_FOUND_ERROR:     new Error("Busy"),
+  
   /**
     Given a primaryKey value for the record, returns the associated
     storeKey.  If the primaryKey has not been assigned a storeKey yet, it 

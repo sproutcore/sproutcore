@@ -224,7 +224,7 @@ test("record: create new record using MyApp.store.createRecord({fullName: 'John 
   equals(MyApp.store.persistentChanges.updated.length, 0, "AFTER commit and reset of persistentChanges.updated should result in a length of 0."); 
   equals(MyApp.store.get('hasChanges'), NO, "AFTER commit and reset, hasChanges property on store is set to NO."); 
 
-  equals(record.get('status'), SC.RECORD_NEW, "record.get('status') should === SC.RECORD_NEW");
+  equals(record.get('status'), SC.Record.READY_NEW, "record.get('status') should === SC.Record.READY_NEW");
   equals(record.get('newRecord'), YES, "record.get('newRecord') should === YES");
 
   MyApp.fixtureServer.simulateResponseFromServer('john locke', record.storeKey);

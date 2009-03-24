@@ -20,7 +20,7 @@ module("SC.Store#removeDataHash", {
     storeKey2 = SC.Store.generateStoreKey();
 
     // write existing record
-    store.writeDataHash(storeKey1, json, SC.RECORD_LOADING);
+    store.writeDataHash(storeKey1, json, SC.Record.BUSY_LOADING);
     store.commitChanges();
   }
 });

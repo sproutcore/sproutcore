@@ -20,7 +20,7 @@ module("SC.Store#writeDataHash", {
     storeKey2 = SC.Store.generateStoreKey();
 
     // write existing record
-    store.writeDataHash(storeKey1, json, SC.RECORD_LOADING);
+    store.writeDataHash(storeKey1, json, SC.Record.BUSY_LOADING);
     store.commitChanges();
   }
 });
@@ -33,12 +33,12 @@ test("writing a new data hash and status", function() {
   
   ok(!store.dataHashes[storeKey2], 'precond - should not have record in dataHashes');
   
-  store.writeDataHash(storeKey2, json, SC.RECORD_LOADING);
+  store.writeDataHash(storeKey2, json, SC.Record.BUSY_LOADING);
   
   // check high-level result
   var result = store.readDataHash(storeKey2);
   equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey2), SC.RECORD_LOADING, 'should return status');
+  equals(store.readStatus(storeKey2), SC.Record.BUSY_LOADING, 'should return status');
   
   // check extra internals
   ok(store.editables[storeKey2], 'data hash should be marked editable');
@@ -62,7 +62,7 @@ test("writing a new data hash with no status", function() {
   // check high-level result
   var result = store.readDataHash(storeKey2);
   equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey2), SC.RECORD_NEW, 'should return status');
+  equals(store.readStatus(storeKey2), SC.Record.READY_NEW, 'should return status');
 });
 
 // ..........................................................
@@ -75,12 +75,12 @@ test("replacing a new data hash and status", function() {
   
   var oldrev = store.revisions[storeKey1];
   
-  store.writeDataHash(storeKey1, json, SC.RECORD_LOADING);
+  store.writeDataHash(storeKey1, json, SC.Record.BUSY_LOADING);
   
   // check high-level result
   var result = store.readDataHash(storeKey1);
   equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey1), SC.RECORD_LOADING, 'should return status');
+  equals(store.readStatus(storeKey1), SC.Record.BUSY_LOADING, 'should return status');
   
   // check extra internals
   ok(store.editables[storeKey1], 'data hash should be marked editable');

@@ -44,7 +44,7 @@ test("find record with command  MyApp.store.find('123', MyApp.Author) should fau
   var record = MyApp.store.find('123', MyApp.Author);
   equals(typeof record, 'object', "record type");
   equals(record.get('guid'), null, "record.get('guid')");
-  equals(record.get('status'), SC.RECORD_LOADING, "record.get('status')");
+  equals(record.get('status'), SC.Record.BUSY_LOADING, "record.get('status')");
   
   MyApp.fixtureServer.simulateResponseFromServer('123');
   

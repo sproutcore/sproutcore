@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('models/record');
+
 /**
   @class
 
@@ -74,8 +76,8 @@ SC.Store = SC.Object.extend(
 
   /** @private
     The current status of a data hash indexed by store key,  May be one
-    of SC.RECORD_NEW, SC.RECORD_LOADING, SC.RECORD_READY, SC.RECORD_DESTROYED,
-    SC.RECORD_EMPTY, SC.RECORD_ERROR.
+    of SC.Record.READY_NEW, SC.Record.BUSY_LOADING, SC.Record.READY_CLEAN, SC.Record.DESTROYED_CLEAN,
+    SC.RECORD_EMPTY, SC.Record.ERROR.
 
     *IMPORTANT: Property is not observable*
 
@@ -229,7 +231,7 @@ SC.Store = SC.Object.extend(
     // passed, we want to copy the reference to the status anyway to lock it
     // in.
     if (hash) this.dataHashes[storeKey] = hash;
-    this.statuses[storeKey] = status ? status : (this.statuses[storeKey] || SC.RECORD_NEW);
+    this.statuses[storeKey] = status ? status : (this.statuses[storeKey] || SC.Record.READY_NEW);
     rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
     
     // make sure we lock if needed.
@@ -252,7 +254,7 @@ SC.Store = SC.Object.extend(
     Note that you can optionally pass a new status to go along with this. If
     you do not pass a status, it will change the status to SC.RECORD_EMPTY
     (assuming you just unloaded the record).  If you are deleting the record
-    you may set it to SC.RECORD_DESTROYED.
+    you may set it to SC.Record.DESTROYED_CLEAN.
     
     Be sure to also call dataHashDidChange() to register this change.
     
@@ -544,7 +546,7 @@ SC.Store = SC.Object.extend(
     
     Note that if you try to find a record id that does not exist in memory,
     a dataSource may load it from ths server.  In this case, this method will
-    return a record instance with a status of SC.RECORD_LOADING to indicate
+    return a record instance with a status of SC.Record.BUSY_LOADING to indicate
     that it is still fetching the data from the server.
     
     @param {SC.Record} recordType the expected record type
@@ -561,6 +563,37 @@ SC.Store = SC.Object.extend(
     
     // now we have the storeKey, materialize the record and return it.
     return storeKey ? this.materializeRecord(storeKey) : null ;
+  },
+
+  /**
+    Retrieves records from the persistent store.  You should pass in a named
+    query that will be understood by one of the persistent stores you have
+    configured along with any optional parameters needed by the search.
+    
+    The return value is an SC.RecordArray that may be populated dynamically
+    by the server as data becomes available.  You can treat this object just
+    like any other object that implements SC.Array.
+    
+    h2. Query Keys
+    
+    The kind of query key you pass is generally determined by the type of 
+    persistent stores you hook up for your application.  Most stores, however,
+    will accept an SC.Record subclass as the query key.  This will return 
+    a RecordArray matching all instances of that class as is relevant to your
+    application.  
+    
+    Once you retrieve a RecordArray, you can filter the results even further
+    by using the filter() method, which may issue even more specific requests.
+    
+    @param {Object} queryKey key describing the type of records to fetch
+    @param {Hash} params optional additional parameters to pass along
+    @param {SC.Store} store this is a private param.  Do not pass
+    @returns {SC.RecordArray} matching set or null if no server handled it
+  */
+  fetch: function(queryKey, params, store) {  
+    var parentStore = this.get('parentStore');
+    if (store === undefined) store = this ; // first store sets to itself
+    return parentStore ? parentStore.fetch(queryKey, params, store) : null ;
   },
 
   _TMP_REC_ATTRS: {},
@@ -599,7 +632,7 @@ SC.Store = SC.Object.extend(
   },
 
   // ..........................................................
-  // LOW-LEVEL RECORDS API
+  // CORE RECORDS API
   // 
   // The methods in this section can be used to manipulate records without 
   // actually creating record instances.
@@ -612,18 +645,6 @@ SC.Store = SC.Object.extend(
     Note that the record will not yet be saved back to the server.  To save
     a record to the server, call commitChanges() on the store.
 
-    The behavior of this method will change slightly depending on the 
-    record state:
-    
-    - NEW, LOADING, READY: If the record is already in the data hashes, you
-      cannot create a record with the same id.
-
-    - EMPTY, ERROR: An empty record or an error state can be overwritten
-
-    - DESTROYED: you can overwrite a destroyed record.  If you destroy a 
-      record and then create it again before committing your changes that will 
-      be treated as an update.
-
     @param {SC.Record} recordType the record class to use on creation
     @param {Hash} dataHash the JSON attributes to assign to the hash.
     @param {String} id (optional) id to assign to record
@@ -632,7 +653,7 @@ SC.Store = SC.Object.extend(
   */
   createRecord: function(recordType, dataHash, id) {
 
-    var primaryKey, storeKey, changelog, status, isRecreated = NO, destroyed;
+    var primaryKey, storeKey, status, K = SC.Record, changelog;
     
     // First, try to get an id.  If no id is passed, look it up in the 
     // dataHash.
@@ -645,45 +666,26 @@ SC.Store = SC.Object.extend(
 
     // now, check the state and do the right thing.
     status = this.readStatus(storeKey);
-    switch(status) {
-      // illegal states - throw exception
-      case SC.RECORD_NEW:
-      case SC.RECORD_LOADING:
-      case SC.RECORD_READY:
-        throw "%@(id:%@) already exists".fmt(recordType, id);
-        
-      // destroyed stay - may actually be an update
-      case SC.RECORD_DESTROYED:
-        isRecreated = YES ;
-        status = SC.RECORD_READY ;
-        break; 
-        
-      // otherwise just let pass
-      default:
-        status = SC.RECORD_NEW ;
-        break;
+    
+    // check state
+    // any busy or ready state or destroyed dirty state is not allowed
+    if ((status & K.BUSY)  || 
+        (status & K.READY) || 
+        (status == K.DESTROYED_DIRTY)) { 
+      throw id ? K.RECORD_EXISTS_ERROR : K.BAD_STATE_ERROR;
+      
+    // allow error or destroyed state only with id
+    } else if (!id && (status===SC.DESTROYED_CLEAN || status===SC.ERROR)) {
+      throw K.BAD_STATE_ERROR;
     }
     
     // add dataHash and setup initial status -- also save recordType
-    this.writeDataHash(storeKey, dataHash, status);
+    this.writeDataHash(storeKey, dataHash, K.READY_NEW);
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
-    
-    // add to changelog 
+
+    // Record is now in a committable state -- add storeKey to changelog
     changelog = this.changelog;
-    if (!changelog) changelog = this.changelog = {};
-
-    // if recreating and the storeKey is in the destroyed changelog, then
-    // treat this like an update instead of a create since you can't store a
-    // record in both destroyed & created sets.
-    destroyed = changelog.destroyed ;
-    if (isRecreated && destroyed && destroyed.contains(storeKey)) {      
-      destroyed.remove(storeKey);
-      changelog = changelog.updated || (changelog.updated = SC.Set.create());
-
-    // otherwise, just add to created changelog
-    } else {
-      changelog = changelog.created || (changelog.created = SC.Set.create());
-    }
+    if (!changelog) changelog = SC.Set.create();
     changelog.add(storeKey);
     
     // finally return materialized record
@@ -717,11 +719,9 @@ SC.Store = SC.Object.extend(
   
   /**
     Destroys a record, removing the data hash from the store and adding the
-    record to the destroyed changelog.  Note that you can only destroy a 
-    record that is in the SC.RECORD_NEW, SC.RECORD_LOADING, or SC.RECORD_READY
-    state.  If you try to destroy a record that is already destroyed then
-    this method will have no effect.  If you destroy a record that does not 
-    exist or an error then an exception will be raised.
+    record to the destroyed changelog.  If you try to destroy a record that is 
+    already destroyed then this method will have no effect.  If you destroy a 
+    record that does not exist or an error then an exception will be raised.
     
     @param {SC.Record} recordType the recordType
     @param {String} id the record id
@@ -730,50 +730,67 @@ SC.Store = SC.Object.extend(
   */
   destroyRecord: function(recordType, id, storeKey) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
-    var status = this.readStatus(storeKey), changelog, created, updated;
+    var status = this.readStatus(storeKey), changelog, K = SC.Record;
 
-    // record is already destroyed or does not exist.  destroy
-    if ((status === SC.RECORD_EMPTY) || (status === SC.RECORD_DESTROYED)) {
-      return this ;
-
-    // record is in error state, throw exception
-    } else if (status === SC.RECORD_ERROR) {
-      if (!recordType) recordType = SC.Store.recordTypeFor(storeKey);
-      if (!id) id = SC.Store.idFor(storeKey);
-      throw "Cannot destroy %@(id: %@) because it in error state".fmt(recordType, id);
-
-    }
-
-    // remove the data hash, set new status
-    this.removeDataHash(storeKey, SC.RECORD_DESTROYED);
-
-    changelog = this.changelog;
-    if (!changelog) changelog = this.changelog = {};
-    created = changelog.created;
-
-    // if changelog has record in created set, just remove it
-    if (created && created.contains(storeKey)) {
-      created.remove(storeKey);
+    // handle status - ignore if destroying or destroyed
+    if ((status === K.BUSY_DESTROYING) || (status & K.DESTROYED)) {
+      return this; // nothing to do
       
-    // otherwise, remove from updated changelog if needed and add to destroyed
-    } else {
-      updated = changelog.updated;
-      if (updated && updated.contains(storeKey)) updated.remove(storeKey);
-      changelog = changelog.destroyed || (changelog.destroyed = SC.Set.create());
-      changelog.add(storeKey);
-    }
+    // error out if empty
+    } else if (status === K.EMPTY) {
+      throw K.NOT_FOUND_ERROR ;
+      
+    // error out if busy
+    } else if (status & K.BUSY) {
+      throw K.BUSY_ERROR ;
+      
+    // if new status, destroy but leave in clean state
+    } else if (status === K.READY_NEW) {
+      status = K.DESTROYED_CLEAN ;
+      
+    // otherwise, destroy in dirty state
+    } else status = K.DESTROYED_DIRTY ;
+    
+    // remove the data hash, set new status
+    this.removeDataHash(storeKey, status);
+
+    // add/remove change log
+    changelog = this.changelog;
+    if (!changelog) changelog = this.changelog = SC.Set.create();
+    ((status & K.DIRTY) ? changelog.add(storeKey) : changelog.remove(storeKey));
     
     return this ;
   },
   
   /**
-    Called by a record whenever its attribute contents may have changed.
-    You can call this method yourself to indicate that a record has been 
-    updated and needs to be committed back to the server, passing in the 
-    recordType and id or the storeKey without materializing a record first.
+    Destroys a group of records.  If you have a set of record ids, destroying
+    them this way can be faster than retrieving each record and destroying 
+    it individually.
+    
+    You can pass either a single recordType or an array of recordTypes.  If
+    you pass a single recordType, then the record type will be used for each
+    record.  If you pass an array, then each id must have a matching record 
+    type in the array.
 
-    This method only has an effect on records that are in a READY state.
-    You cannot change a record that is new, destroyed, or still loading.
+    You can optionally pass an array of storeKeys instead of the recordType
+    and ids.  In this case the first two parameters will be ignored.  This
+    is usually only used by low-level internal methods.  You will not usually
+    destroy records this way.
+    
+    @param {SC.Record|Array} recordTypes class or array of classes
+    @param {Array} ids ids to destroy
+    @param {Array} storeKeys (optional) store keys to destroy
+    @returns {SC.Store} receiver
+  */
+  destroyRecords: function(recordTypes, ids, storeKeys) {
+    // JUAN TODO: Implement
+    return this ;
+  },
+  
+  /**
+    Notes that the data for the given record id has changed.  The record will
+    be committed to the server the next time you commit the root store.  Only
+    call this method on a record in a READY state of some type.
     
     @param {SC.Record} recordType the recordType
     @param {String} id the record id
@@ -782,42 +799,190 @@ SC.Store = SC.Object.extend(
   */
   recordDidChange: function(recordType, id, storeKey) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
-    if (this.readStatus(storeKey) !== SC.RECORD_READY) return this;
+    var status = this.readStatus(storeKey), changelog, K = SC.Record;
+
+    // BUSY_LOADING, BUSY_CREATING, BUSY_COMMITTING, BUSY_REFRESH_CLEAN
+    // BUSY_REFRESH_DIRTY, BUSY_DESTROYING
+    if (status & K.BUSY) {
+      throw K.BUSY_ERROR ;
+      
+    // if record is not in ready state, then it is not found.
+    // ERROR, EMPTY, DESTROYED_CLEAN, DESTROYED_DIRTY
+    } else if (!(status & K.READY)) {
+      throw K.NOT_FOUND ;
+      
+    // otherwise, make new status READY_DIRTY unless new.
+    // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
+    } else {
+      if (status !== K.READY_NEW) this.writeStatus(storeKey, K.READY_DIRTY);
+    }
     
-    this.dataHashDidChange(storeKey); // record data hash change
+    // record data hash change
+    this.dataHashDidChange(storeKey);
     
     // record in changelog
-    var changelog = this.changelog, created, updated;
-    if (!changelog) changelog = this.changelog = {} ;
-    created = changelog.created;
-    if (!created || !created.contains(storeKey)) {
-      updated = changelog.updated;
-      if (!updated) updated = changelog.updated = SC.Set.create();
-      updated.add(storeKey);
-    }
+    changelog = this.changelog ;
+    if (!changelog) changelog = this.changelog = SC.Set.create() ;
+    changelog.add(storeKey);
     
     return this ;
   },
 
   /**
-    Initiates a record retrieval. If your store has a datasource, this will
-    call the dataSource to retrieve the record.  Generally you will not need 
-    to call this method yourself.  Instead you can just use find().
+    Mark a group of records as dirty.  The records will be committed to the
+    server the next time you commit changes on the root store.  If you have a 
+    set of record ids, marking them dirty this way can be faster than 
+    retrieving each record and destroying it individually.
+    
+    You can pass either a single recordType or an array of recordTypes.  If
+    you pass a single recordType, then the record type will be used for each
+    record.  If you pass an array, then each id must have a matching record 
+    type in the array.
+
+    You can optionally pass an array of storeKeys instead of the recordType
+    and ids.  In this case the first two parameters will be ignored.  This
+    is usually only used by low-level internal methods.  You will not usually
+    destroy records this way.
+    
+    @param {SC.Record|Array} recordTypes class or array of classes
+    @param {Array} ids ids to destroy
+    @param {Array} storeKeys (optional) store keys to destroy
+    @returns {SC.Store} receiver
+  */
+  recordsDidChange: function(recordTypes, ids, storeKeys) {
+    // JUAN TODO: Implement
+    return this ;
+  },
+
+  /**
+    Retrieves a record from the server.  If the record has already been loaded
+    in the store, then this method will simply return.  Otherwise if your 
+    store has a dataSource, this will call the dataSource to retrieve the 
+    record.  Generally you will not need to call this method yourself.  
+    Instead you can just use find().
     
     This will not actually create a record instance but it will initiate a 
     load of the record from the server.  You can subsequently get a record 
     instance itself using materializeRecord()
     
-    @param {String} id to id of the record to load
-    @param {SC.Record} recordType the expected record type
-
-    @returns {SC.Record} the actual recordType you should use to instantiate.
+    @param {SC.Record|Array} recordTypes class or array of classes
+    @param {Array} ids ids to destroy
+    @param {Array} storeKeys (optional) store keys to destroy
+    @returns {Array} storeKeys to be retrieved
   */
-  retrieveRecord: function(recordType, id) {
-    var source = (this.get('parentStore') || this.get('dataSource'));
-    return source ? source.retrieveRecord(id, recordType) : null ;
+  retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
+
+    // pass up to parentStore if we have one
+    var parentStore = this.get('parentStore');
+    if (parentStore) {
+      return parentStore.retrieveRecords(recordTypes, ids, storeKeys);
+    }
+
+    var isArray, recordType, len, idx, storeKey, status, K = SC.Record, ret;
+    var source = this.get('dataSource');
+    if (!isArray) recordType = recordsTypes;
+
+    // if no storeKeys were passed, map recordTypes + ids
+    len = (storeKeys === undefined) ? ids.length : storeKeys.length;
+    ret = [];
+    for(idx=0;idx<len;idx++) {
+      
+      // collect store key
+      if (storeKeys) {
+        storeKey = storeKeys[idx];
+      } else {
+        if (isArray) recordType = recordsTypes[idx];
+        storeKey = recordTypes.storeKeyFor(ids[idx]);
+      }
+      
+      // collect status and process
+      status = this.readStatus(storeKey);
+      
+      // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
+      if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
+
+        this.writeStatus(K.BUSY_LOADING);
+        ret.push(storeKey);
+
+      // otherwise, ignore record unless isRefresh is YES.
+      } else if (_isRefresh) {
+        
+        // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
+        if (status & K.READY) {
+          this.writeStatus(K.BUSY_REFRESH | (status & 0x03)) ;
+          ret.push(storeKey);
+
+        // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
+        } else if ((status === K.BUSY_DESTROYING) || (status === K.BUSY_CREATING) || (status === K.BUSY_COMMITTING)) {
+          throw K.BUSY_ERROR ;
+
+        // K.DESTROY_DIRTY, bad state...
+        } else if (status === K.DESTROY_DIRTY) {
+          throw K.BAD_STATE_ERROR ;
+          
+        // ignore K.BUSY_LOADING, K.BUSY_REFRESH_CLEAN, K.BUSY_REFRESH_DIRTY
+        }
+      }
+    }
+    
+    // now commit storekeys to dataSource
+    if (source) source.retrieveRecords.call(source, this, ret);
+    return ret ;
   },
 
+  _TMP_RETRIEVE_ARRAY: [],
+  
+  /**
+    JUAN TODO: Add description
+
+    @param {SC.Record} recordType class
+    @param {String} id id to retrieve
+    @param {Number} storeKey (optional) store key
+    @returns {Number} storeKey that was retrieved 
+  */
+  retrieveRecord: function(recordType, id, storeKey, _isRefresh) {
+    
+    var array = this._TMP_RETRIEVE_ARRAY ;
+    if (storeKey !== undefined) {
+      array[0] = storeKey;
+      storeKey = array;
+      id = null ;
+    } else {
+      array[0] = id;
+      id = array;
+    }
+    
+    var ret = this.retrieveRecords(recordType, id, storeKey, _isRefresh);
+    array.length = 0 ;
+    return ret[0];
+  },
+
+  /**
+    Refreshes a record from the server.  If the record has already been loaded
+    in the store, then this method will request a refresh from the dataSource.
+    Otherwise it will attempt to retrieve the record.
+    
+    @param {String} id to id of the record to load
+    @param {SC.Record} recordType the expected record type
+    @param {Number} storeKey (optional) optional store key
+    @returns {Boolean} YES if the retrieval was a success.
+  */
+  refreshRecord: function(recordType, id, storeKey) {
+    return this.retrieveRecord(recordType, id, storeKey, YES);
+  },
+
+  /**
+    JUAN TODO: Add description like other multiple variations.
+
+    @param {SC.Record|Array} recordTypes class or array of classes
+    @param {Array} ids ids to destroy
+    @param {Array} storeKeys (optional) store keys to destroy
+    @returns {Boolean} YES if the retrieval was a success.
+  */
+  refreshRecords: function(recordTypes, ids, storeKeys) {
+    return this.retrieveRecords(recordTypes, ids, storeKeys, YES);
+  },
+    
   /**
     Commits the passed store keys.  Based on the current state of the 
     record, this will ask the data source to perform the appropriate actions
@@ -828,255 +993,145 @@ SC.Store = SC.Object.extend(
 
     @returns {SC.Record} the actual recordType you should use to instantiate.
   */
-  commitRecords: function(recordType, ids) {
+  commitRecords: function(recordTypes, ids, storeKeys) {
+    // TODO: Implement to call dataSource.commitRecords.call()...
+    // If no params are passed, look up storeKeys in the changelog property.
+    // Remove any committed records from changelog property.
+  },
+
+  /**
+    TODO: Document
+    
+    @param {String} id to id of the record to load
+    @param {SC.Record} recordType the expected record type
+
+    @returns {SC.Record} the actual recordType you should use to instantiate.
+  */
+  commitRecord: function(recordType, ids, storeKey) {
+    // TODO: Implement to call commitRecords()
   },
   
+  /**
+    Cancels an inflight request for the passed records.  Depending on the 
+    server implementation, this could cancel an entire request, causing 
+    other records to also transition their current state.
+    
+    // TODO: document
+  */
+  cancelRecords: function(recordType, ids, storeKeys) {
+    // TODO: Implement to call cancelRecord()
+  },
+
+  /**
+    // TODO: document
+  */
+  cancelRecords: function(recordType, ids, storeKeys) {
+    // TODO: Implement to call dataSource.cancel()
+  },
   
   // ..........................................................
-  // DATA SOURCE API
+  // DATA SOURCE CALLBACKS
   // 
-  // Methods used to interact with the dataSource
+  // Mathods called by the data source on the store
 
   /**
-    Called by the dataSource whenever it has created a record.  Pass the 
-    record storeKey along with the record's new id.  This will change the 
-    record state to SC.RECORD_READY.
+    Called by a dataSource when it cancels an inflight operation on a 
+    record.  This will transition the record back to it non-inflight state.
     
-    @param {Number} storeKey the storeKey of the created record
-    @param {String} id the new record id
-    @returns {SC.Store} receiver
+    @param {Number} storeKey record store key to cancel
+    @returns {SC.Store} reciever
   */
-  dataSourceDidCreateRecord: function(storeKey, id) {  
-    this.replaceIdFor(storeKey, id); // fix it up
-    this.writeStatus(storeKey, SC.RECORD_READY);
+  dataSourceDidCancel: function(storeKey) {
+    var status = this.readStatus(storeKey), K = SC.Record;
     
-    // TODO: Notify child stores that the record status and id have changed
-    // TODO: Notify relevant record that status and id have changed
-  },
-  
-  /**
-    Called by the dataSource to load record data into the store.  This will
-    add the record data to the store and update existing records, possibly 
-    notifying the record instances that their content has changed.
-    
-    @param {SC.Record|Array} recordTypes a record type or array of types
-    @param {Array} dataHashes array of data hashes to load
-    @param {Array} id (optional) array of ids for dataHashes
-    @param {Array} statuses (optional) array of statuses
-    @returns {Array} store keys for created records
-  */
-  dataSourceDidLoadRecords: function(recordTypes, dataHashes, ids, statuses) {
-    
-  },
-  
-  /**
-    Creates or updates the store's attributes.  This does not create 
-    SC.Record instances, but it will clear their attribute caches as needed.
-    Usually you will not need to work directly with this method.  Instead 
-    you should use the higher-level SC.Record or other APIs.
-
-    Note that for the statuses
-    h2. Example: Loading Attributes From The Server
-    
-    {{{
-      store.updateAttributes(attrs, MyApp.Contact, 'guid', YES)
-    }}}
-    
-    h2. Example: Editing An Existing Attribute Hash
-    
-    {{{
-      store.upateAttributes([attrs], MyApp.Contact, 'guid', NO);
-    }}}
-    
-    @param {Hash|Array} attributes JSON-hash or array of JSON-hashes
-    @param {SC.Record|Array} recordType SC.Record class or array of classes
-    @param {String} statuses new status, array of status or null
-    @param {Boolean} hasPrimaryKey is YES then set primary key. 
-    @param {Boolean} isLocalOnly  (optional) If set to YES, then don't record changes.
-
-    @returns {Array} Array of storeKeys that were updated or created.
-  */  
-  loadRecords: function(attributes, recordTypes, statuses, hasPrimaryKey, isLocalOnly){
-
-    var recordTypeIsArray;
-    
-    var dataHashes = this.dataHashes;
-    var revisions = this.revisions;
-    var isLoadAction, pUpdated, disregardPrimaryKeys, storeKeyMap ;
-    var primaryKeyMap, recKeyTypeMap, dataTypeMap, recType, recTypeKey;
-    var changes, ret, cachedAttributes, retrievedRecQueue, retrievedRecords;
-    
-    // normalize attrs data
-    var attrsIsArray, len, curAttrs, i;
-    attrsIsArray = SC.typeOf(attributes) === SC.T_ARRAY;
-    len = attrsIsArray ? attributes.length : 1 ;
-    
-    // normalize recordTypes
-    var recordTypesIsArray, curRecordType;
-    if (!recordTypes) recordTypes = SC.Record; 
-    recordTypesIsArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
-    curRecordType = recordTypesIsArray ? null : recordTypes;
-    
-    // discover the primaryKey if not set - get from recordType or default
-    // to 'guid'
-    if (SC.none(hasPrimaryKey)) hasPrimaryKey = YES; // assume yes.
-    var primaryKey = recordTypesIsArray ? null : (curRecordType.prototype.primaryKey || 'guid');
-
-    // discover statuses
-    var statusesIsArray, curStatus;
-    if (!statuses) statuses = SC.RECORD_READY;
-    statusesIsArray = SC.typeOf(statuses) == SC.T_ARRAY;
-    curStatus = statusesIsArray ? null : statuses;
-    
-    if (!isLocalOnly) isLocalOnly = NO ; // assume not local.
-    
-    // get local ref to record-related elements
-    var my_attributes, my_statuses, my_records ;
-    my_attributes = this.attributes;
-    my_statuses   = this.statuses;
-    my_records    = this.records ;
-    
-    // get local ref to locking attrs
-    var rev, my_revisions, parentStore, needsLocking, my_locks, ps_revisions;
-    my_revisions  = this.revisions ;
-    if (!my_revisions) my_revision = this.revisions = [];
-    
-    parentStore   = this.get('parentStore');
-    needsLocking  = parentStore && parentStore.get('isTransient');
-    rev           = SC.Store.generateStoreKey();
-    if (needsLocking) {
-      my_locks    = this.locks;
-      if (!my_locks) my_locks = this.locks = [] ;
-      ps_revisions = parentStore.revisions ;
-      if (!ps_revisions) ps_revisions = parentStore.revisions = [];
-    }
-
-    SC.Benchmark.start('writeAttributes: loop');
-
-    // Iterate per record in the attributes and either update an existing 
-    // dataHash or create a new dataHash.
-    for(i=0; i<len; i++) {
-
-      SC.Benchmark.start('updateRecord');
-
-      var data = attrsIsArray ? attributes[i] : attributes;
-      var rec, storeKey, guid, error;
-
-      // Find the current recordType and primaryKey 
-      if (recordTypeIsArray) {
-        curRecordType = recordTypes[i] || SC.Record;
-        primaryKey = curRecordType.prototype.primaryKey || 'guid';
-      }
+    // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
+    // DESTROYED_DIRTY
+    if (!(status & K.BUSY)) {
+      throw K.BAD_STATE_ERROR; // should never be called in this state
       
-      // Find the current status
-      if (statusesIsArray) curStatus = statuses[i] || SC.RECORD_READY;
-
-      // Now we need the storeKey.  If this attrbutes doesn't have a primary
-      // key yet, generate a storeKey blindly.  Otherwise look it up.
-      if (hasPrimaryKey) {
-        guid = data[primaryKey];
-        if (SC.none(guid)) {
-          throw "SC.Store: could not write attributes without primaryKey: %@".fmt(SC.inspect(data));
-        }
-        storeKey = curRecordType.storeKeyFor(guid);
-      } else storeKey = SC.Store.generateStoreKey();
-      
-      // If we need locking, then save the revision number of the parent 
-      // for the storeKey in locks.  also get parent rev.
-      if (needsLocking && !my_locks[storeKey]) {
-        my_locks[storeKey] = ps_revisions[storeKey] || 1;
-      }
-
-      // set new revision as well
-      my_revisions[storeKey] = rev;
-    
-      // If the storeKey is already set, then update the dataHash and 
-      // increment the revision.
-      if(dataHashes[storeKey] !== undefined) {
-        rev = revisions[storeKey] = (revisions[storeKey]+1);
-        dataHashes[storeKey] = data;
-        if(!isLoadAction) {
-          pUpdated.push(storeKey);
-        }
-
-      // If there is no storeKey, then create a new dataHash and add all 
-      // the meta data.
-      } else {
-
-        // If you need to add the primaryKey info, do it. Otherwise, 
-        // disregard this.
-        if(!disregardPrimaryKeys) {
-          primaryKeyMap[guid] = storeKey;
-          storeKeyMap[storeKey] = guid;
-        }
-
-        // Set the meta data.
-        revisions[storeKey] = 0;
-        dataHashes[storeKey] = data;
-        recKeyTypeMap[storeKey] = recType;
-        if(!dataTypeMap[recTypeKey]) dataTypeMap[recTypeKey] = [];
-        dataTypeMap[recTypeKey].push(storeKey);
-      }
-      delete cachedAttributes[storeKey];
-
-      // Push the created or updated storeKeys so that they are known during 
-      // the commit process.
-      if(!isLoadAction) {
-        changes.push(storeKey);
-      }
-      
-      ret.push(storeKey);
-     
-      // If the storeKey is regsitered as being an outstanding record from the
-      // server, save it so it can be handled.
-      if(retrievedRecQueue.indexOf(storeKey) !== -1) {
-        retrievedRecords.push(storeKey);
-      }
-
-      SC.Benchmark.end('updateRecord');
     }
-
-      SC.Benchmark.end('updateRecords: loop');
-
-      // If there are changes, mark the store to have changes.
-      this.set('hasChanges', (changes.length > 0));
     
-      // If there are retrieved records that need to be marked as such, invoke
-      // that operation so they can be cached.
-      if(retrievedRecords.length > 0) {
-        this._didRetrieveRecords(retrievedRecords);
-      }
+    // otherwise, determine proper state transition
+    switch(status) {
+      case K.BUSY_LOADING:
+        status = K.EMPTY;
+        break ;
+      
+      case K.BUSY_CREATING:
+        status = K.READY_NEW;
+        break;
+        
+      case K.BUSY_COMMITTING:
+        status = K.READY_DIRTY ;
+        break;
+        
+      case K.BUSY_REFRESH_CLEAN:
+        status = K.READY_CLEAN;
+        break;
+        
+      case K.BUSY_REFRESH_DIRTY:
+        status = K.READY_DIRTY ;
+        break ;
+        
+      case K.BUSY_DESTROYING:
+        status = K.DESTROYED_DIRTY ;
+        break;
+        
+      default:
+        throw K.BAD_STATE_ERROR ;
+    } 
+    this.writeStatus(storeKey, status) ;
     
-    // Return the updated/changed storeKeys.
-    return ret;
-  },
-  
-
-  /**
-    Given a single SC.Record instance, make its data editable by copying the 
-    data hash.
-  
-    @private
-    
-    @param {SC.Record} record Single SC.Record instance.
-  */
-  makeRecordEditable: function(record) {
-    if(!record) return;
-    this.getWriteableDataHash(record.storeKey) ;
+    return this ;
   },
   
   /**
-    Given an array of records, refresh them from their persistent store.
-  
-    @param {Array} records Array of SC.Record instances.
+    Called by a data source when it creates or commits a record.  Passing an
+    optional id will remap the storeKey to the new record id.  This is 
+    required when you commit a record that does not have an id yet.
     
-    @returns {Array} Returns the records that were refreshed.
+    @param {Number} storeKey record store key to cancel
+    @returns {SC.Store} reciever
   */
-  refreshRecords: function(records) {
-    var parentStore = this.get('parentStore');
-    if(records && parentStore) {
-      return parentStore.refreshRecords(records);
-    }
+  dataSourceDidComplete: function(storeKey, dataHash, newId) {
+    // TODO: Implement
+  },
+  
+  /**
+    Called by a data source when it has destroyed a record.  This will
+    transition the record to the proper state.
+    
+    @param {Number} storeKey record store key to cancel
+    @returns {SC.Store} reciever
+  */
+  dataSourceDidDestroy: function(storeKey) {
+    // TODO: Implement
+  },
+
+  /**
+    Converts the passed record into an error object.
+    
+    @param {Number} storeKey record store key to cancel
+    @returns {SC.Store} reciever
+  */
+  dataSourceDidError: function(storeKey, error) {
+    // TODO: Implement
+  },
+
+  // ..........................................................
+  // PUSH CHANGES FROM DATA SOURCE
+  // 
+  
+  pushRetrieve: function(recordType, id, dataHash, context, storeKey) {
+    // TODO: Implement
+  },
+  
+  pushDestroy: function(recordType, id, context, storeKey) {
+    // TODO: Implement
+  },
+
+  pushError: function(recordType, id, error, context, storeKey) {
+    // TODO: Implement
   },
   
   // ..........................................................
@@ -1098,194 +1153,7 @@ SC.Store = SC.Object.extend(
       this.statuses   = {};
     }
   },
-   
 
-  // ..........................................................
-  // FINDING RECORDS
-  // 
-
-  /**
-    Retrieves records from the persistent store.  You should pass in a named
-    query that will be understood by one of the persistent stores you have
-    configured along with any optional parameters needed by the search.
-    
-    The return value is an SC.RecordArray that may be populated dynamically
-    by the server as data becomes available.  You can treat this object just
-    like any other object that implements SC.Array.
-    
-    h2. Query Keys
-    
-    The kind of query key you pass is generally determined by the type of 
-    persistent stores you hook up for your application.  Most stores, however,
-    will accept an SC.Record subclass as the query key.  This will return 
-    a RecordArray matching all instances of that class as is relevant to your
-    application.  
-    
-    Once you retrieve a RecordArray, you can filter the results even further
-    by using the filter() method, which may issue even more specific requests.
-    
-    @param {Object} queryKey key describing the type of records to fetch
-    @param {Hash} params optional additional parameters to pass along
-    @param {SC.Store} store this is a private param.  Do not pass
-    @returns {SC.RecordArray} matching set or null if no server handled it
-  */
-  fetch: function(queryKey, params, store) {  
-    var parentStore = this.get('parentStore');
-    if (store === undefined) store = this ; // first store sets to itself
-    return parentStore ? parentStore.fetch(queryKey, params, store) : null ;
-  },
-  
-  /**
-    Given a guid and a recordType, retrieve the record. 
-    
-    If it does not exist, go all the way back to the persistent store.
-    
-    @param {String} guid The guid for the desired record.
-    @param {SC.Record} recordType The record type.
-
-    @returns {SC.Record} Returns a record instance.
-  */
-  find: function(guid, recordType)
-  {
-    var storeKey = this.primaryKeyMap[guid];
-    var ret = null;
-    if(storeKey !== undefined) {
-      ret = this.materializeRecord(storeKey);
-    } else {
-      var parentStore = this.get('parentStore');
-      if(guid && parentStore) {
-        recordType = this.retrieveRecordForGuid(guid, recordType);
-        if(recordType) {
-          var recTypeKey = SC.guidFor(recordType);
-          storeKey = this._generateStoreKey();
-          this.primaryKeyMap[guid] = storeKey;
-          this.storeKeyMap[storeKey] = guid;
-          ret = recordType.create({
-            storeKey: storeKey,
-            store: this, 
-            status: SC.RECORD_LOADING,
-            newRecord: NO
-          });
-          
-          if(!this.instantiatedRecordMap[recTypeKey]) {
-            this.instantiatedRecordMap[recTypeKey] = [];
-          }
-          this.instantiatedRecordMap[recTypeKey][storeKey] = ret;
-          
-          this.retrievedRecQueue.push(storeKey);
-        }
-      }
-    }
-    return ret;
-  },
-  
-  /**
-    Given a filter and a recordType, retrieve matching records. 
-    
-    @param {SC.Record} recordType The query containing a query.
-    @param {String} query The query containing a query.
-    @param {Mixed} arguments The arguments for the query.
-    
-    @returns {Array} Returns an array of matched record instances.
-  */
-  findAll: function(recordType, queryString)
-  {
-    if(!queryString) return null;
-    
-    var args = SC.$A(arguments);
-    recordType = args.shift();
-    queryString = args.shift();
-    
-    var query = null;
-    if(this._queries[queryString]) 
-    {
-      query = this._queries[queryString];
-    } else {
-      this._queries[queryString] = query = SC.Query.create({store: this, delegate: this});
-    }
-    query.parse(recordType, queryString, args);
-    this.prepareQuery(query);
-    return query;
-  },
-
-  /**
-    For a in memory store, just perform the query to get the length.
-  */
-  provideLengthForQuery: function(query) {
-    query.performQuery();
-    // if(this.parentStore) {
-    //   this.parentStore.provideLengthForQuery(query);
-    // }
-  },
-
-  /**
-    For a in memory store, just perform the query to get the records.
-  */
-  provideRecordsForQuery: function(query) {
-    query.performQuery();
-    // if(this.parentStore) {
-    //   this.parentStore.provideRecordsForQuery(query);
-    // }
-  },
-
-  /**
-    For a in memory store, just perform the query.
-  */
-  prepareQuery: function(query) {
-    query.performQuery();
-    // if(this.parentStore) {
-    //   this.parentStore.prepareQuery(query);
-    // }
-  },
-  
-  performQuery: function(query) {
-    var conditions = query.get('conditions') ;
-    var truthFunction = query.get('truthFunction');
-    var recordType = query.get('recordType');
-    var needRecord = query.get('needRecord');
-    var rec = null;
-    
-    if(!recordType) {
-      return [];
-    }  
-    
-    if(needRecord) {
-      rec = this.createCompRecord(recordType);
-    }
-    
-    var dataHashes = this.dataHashes;
-    var storeKeyMap = this.dataTypeMap[SC.guidFor(recordType)];
-    var storeKeys = [];
-    
-    if(truthFunction === null) {
-      truthFunction = function() { return YES; };
-    }
-    
-    for(var i=0, iLen=storeKeyMap.length; i<iLen; i++ ) {
-      var storeKey = storeKeyMap[i];
-      if(needRecord) {
-      rec.storeKey = storeKey;
-      } else {
-        rec = dataHashes[storeKey];
-      }
-
-      if(truthFunction(rec, conditions)) {
-        storeKeys.push(storeKey);
-      }
-    }
-    return storeKeys;
-  },
-  
-  createCompRecord:function(recordType) {
-    var recTypeGuid = SC.guidFor(recordType);
-    var rec = null;
-    if(this.compTypeMap[recTypeGuid]) {
-      rec = this.compTypeMap[recTypeGuid];
-    } else {
-      this.compTypeMap[recTypeGuid] = rec = recordType.create({store: this});
-    }
-    return rec;
-  },
 
   // ..........................................................
   // PRIMARY KEY CONVENIENCE METHODS

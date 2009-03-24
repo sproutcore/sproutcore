@@ -18,7 +18,7 @@ module("SC.Store#readDataHash", {
     
     storeKey = SC.Store.generateStoreKey();
 
-    store.writeDataHash(storeKey, json, SC.RECORD_READY);
+    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
     store.commitChanges();
   }
 });
