@@ -12,8 +12,6 @@
 	height: 40px;
 	top: -20px;
 	right: -20px;
-  bottom: auto;
-  left: auto;
 }
 
 .sc-pane.sc-panel .top-left-edge {
@@ -23,8 +21,6 @@
 	height: 40px;
 	top: -20px;
 	left: -20px;
-  bottom: auto;
-  right: auto;
 }
 
 .sc-pane.sc-panel .bottom-left-edge {
@@ -34,8 +30,6 @@
 	height: 40px;
 	bottom: -20px;
 	left: -20px;
-  top:auto;
-  right: auto;
 }
 
 .sc-pane.sc-panel .bottom-right-edge {
@@ -45,8 +39,6 @@
 	height: 40px;
 	bottom: -20px;
 	right: -20px;
-  top:auto;
-  left: auto;
 }
 
 .sc-pane.sc-panel .top-edge {
@@ -56,7 +48,6 @@
 	top: -20px;
 	right: 20px;
 	left: 20px;
-  bottom: auto;
 }
 
 .sc-pane.sc-panel .bottom-edge {
@@ -66,7 +57,6 @@
 	bottom: -20px;
 	right: 20px;
 	left: 20px;
-  top: auto;
 }
 
 .sc-pane.sc-panel .left-edge {
@@ -76,7 +66,6 @@
 	top: 20px;
 	bottom: 20px;
 	left: -20px;
-  right: auto;
 }
 
 .sc-pane.sc-panel .right-edge {
@@ -86,5 +75,4 @@
 	top: 20px;
 	bottom: 20px;
 	right: -20px;
-  left: auto;
 }
