@@ -14,7 +14,7 @@ require('views/panel');
   
   {{{
     SC.PalettePane.create({
-	    layout: { width: 402, height: 202, right: 0, top: 0 },
+	    layout: { width: 400, height: 200, right: 0, top: 0 },
       contentView: SC.View.extend({
         layout: { width: 400, height: 200, right: 0, top: 0 }
       })
@@ -51,7 +51,7 @@ SC.PalettePane = SC.Panel.extend({
 	    this.set('layout', { width: this.layout.width, height: this.layout.height, left: this._mouseOffsetX + evt.pageX, top: this._mouseOffsetY + evt.pageY });
 	    this.updateLayout();
 	  }
-  },
+  }
   
  
 });

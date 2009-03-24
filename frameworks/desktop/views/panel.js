@@ -60,26 +60,26 @@ SC.Panel = SC.Pane.extend({
   */
   
   render: function(context, firstTime) {
-     var s=this.contentView.get('layoutStyle');
-     var ss='';
-     for(key in s) {
-       value = s[key];
-       if (value!==null) {
-         ss=ss+key+': '+value+'; ';
-       }
-     }
-      context.push("<div style='position:absolute; "+ss+"'>");
-      context.push("<div class='top-left-edge'></div>");
-      context.push("<div class='top-edge'></div>");
-      context.push("<div class='top-right-edge'></div>");
-      context.push("<div class='right-edge'></div>");
-      context.push("<div class='bottom-right-edge'></div>");
-      context.push("<div class='bottom-edge'></div>");
-      context.push("<div class='bottom-left-edge'></div>");
-      context.push("<div class='left-edge'></div>");
-      this.renderChildViews(context, firstTime) ;
-      context.push("</div>");
-    },
+    var s=this.contentView.get('layoutStyle');
+    var ss='';
+    for(key in s) {
+      value = s[key];
+      if (value!==null) {
+        ss=ss+key.dasherize()+': '+value+'; ';
+      }
+    }
+    context.push("<div style='position:absolute; "+ss+"'>");
+    this.renderChildViews(context, firstTime) ;
+    context.push("<div class='top-left-edge'></div>"+
+     "<div class='top-edge'></div>"+
+     "<div class='top-right-edge'></div>"+
+     "<div class='right-edge'></div>"+
+     "<div class='bottom-right-edge'></div>"+
+     "<div class='bottom-edge'></div>"+
+     "<div class='bottom-left-edge'></div>"+
+     "<div class='left-edge'></div>"+
+     "</div>");
+  },
   
   replaceContent: function(newContent) {
     this.removeAllChildren() ;

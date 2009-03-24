@@ -1,28 +1,95 @@
-
 /** SC.PickerPane Support */
 
-
-
-.sc-pane.sc-panel .pointerDown {
-	background: static_url('images/panels/reveal-tabs.png') no-repeat;
-	position: absolute;
-	width: 51px;
-	height: 31px;
-	bottom: -31px;
-	left:50%;
+.sc-pane.sc-panel.sc-palette-pane.sc-picker-pane {
+	overflow: hidden;
 }
 
-.sc-pane.sc-panel .pointerUp {
-	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+.sc-pane.sc-panel.sc-picker-pane .top-right-edge {
+	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -574px;
 	position: absolute;
-	width: 51px;
-	height: 31px;
-	top: -19px;
-	left: 50%;
+	width: 30px;
+	height: 26px;
+	top: -20px;
+	right: -21px;
+  bottom: auto;
+  left: auto;
 }
 
-.sc-pane.sc-panel .pointerLeft {
-	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+.sc-pane.sc-panel.sc-picker-pane .top-left-edge {
+	background: static_url('images/panels/shadow_corners.png') no-repeat -10px -494px;
+	position: absolute;
+	width: 30px;
+	height: 26px;
+	top: -20px;
+	left: -20px;
+  bottom: auto;
+  right: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .bottom-left-edge {
+	background: static_url('images/panels/shadow_corners.png') no-repeat -10px -520px;
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	bottom: -30px;
+	left: -20px;
+  top:auto;
+  right: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .bottom-right-edge {
+	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -600px;
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	bottom: -30px;
+	right: -21px;
+  top:auto;
+  left: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .top-edge {
+	background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px -180px;
+	position: absolute;
+	height: 20px;
+	top: -20px;
+	right: 9px;
+	left: 10px;
+  bottom: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .bottom-edge {
+	background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px -210px;
+	position: absolute;
+	height: 30px;
+	bottom: -30px;
+	right: 9px;
+	left: 10px;
+  top: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .left-edge {
+	background: static_url('images/panels/shadows_repeat_y.png') repeat-y -180px 0px;
+	position: absolute;
+	width: 20px;
+	top: 6px;
+	bottom: 0px;
+	left: -20px;
+  right: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .right-edge {
+	background: static_url('images/panels/shadows_repeat_y.png') repeat-y -210px 0px;
+	position: absolute;
+	width: 20px;
+	top: 6px;
+	bottom: 0px;
+	right: -20px;
+  left: auto;
+}
+
+.sc-pane.sc-panel.sc-picker-pane .perfectRight {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat 0px -64px;
 	position: absolute;
 	width: 25px;
 	height: 51px;
@@ -30,8 +97,8 @@
 	left: -25px;
 }
 
-.sc-pane.sc-panel .pointerRight {
-	background: static_url('images/panels/reveal-tabs.png') no-repeat;
+.sc-pane.sc-panel.sc-picker-pane .perfectLeft {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat -32px -64px;
 	position: absolute;
 	width: 25px;
 	height: 51px;
@@ -39,11 +106,22 @@
 	right: -25px;
 }
 
+.sc-pane.sc-panel.sc-picker-pane .perfectTop {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat 0px 0px;
+	position: absolute;
+	width: 51px;
+	height: 31px;
+	bottom: -41px;
+	left: 50%;
+	margin-left: -25px;
+}
 
-
-
-
-/*SC.POINTER_LAYOUT = [{ width: 25, height: 51, top: 20, left: -25, backgroundPosition: '0px -64px' },
-                     { width: 25, height: 51, top: 20, right: -25, backgroundPosition: '-32px -64px' },
-                     { width: 51, height: 31, bottom: -31, centerX: 0, backgroundPosition: '0px 0px' },
-                     { width: 51, height: 19, top: -19, centerX: 0, backgroundPosition: '0px -32px' }];*/
+.sc-pane.sc-panel.sc-picker-pane .perfectBottom {
+	background: static_url('images/panels/reveal-tabs.png') no-repeat 0px -32px;
+	position: absolute;
+	width: 51px;
+	height: 19px;
+	top: -29px;
+	left: 50%;
+	margin-left: -25px;
+}

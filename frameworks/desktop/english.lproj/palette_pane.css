@@ -1,4 +1,3 @@
-.sc-pane.sc-panel > .sc-view {
-
+.sc-pane.sc-panel.sc-palette-pane {
 	overflow: visible;
 }
