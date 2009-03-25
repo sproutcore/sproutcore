@@ -103,11 +103,10 @@ SC.SliderView = SC.View.extend(SC.Control,
     value = Math.floor((value - min) / (max - min) * 100);
     
     if(firstTime) {
-      context.push('<span class="sc-inner"><img src="');
-      context.push(static_url('blank'));
-      context.push('" class="sc-handle" style="left: ');
-      context.push(value);
-      context.push('%" /></span>');
+      var blankImage = static_url('blank');
+      context.push('<span class="sc-inner">');
+      context.push('<img src="', blankImage, '" class="sc-handle" style="left: ', value, '%" />');
+      context.push('</span>');
     }
     else {
       this.$(this.get('handleSelector')).css('left', value + "%");

@@ -220,23 +220,13 @@ SC.RadioView = SC.FieldView.extend(
         disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled" ' : '';
         
         labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
+        var blankImage = static_url('blank');
         
         // push all string instead of doing concatenation (IE optimization)
-        context.push('<label class="sc-radio-button ');
-        context.push(selectionStateClassNames);
-        context.push('"><img src="');
-        context.push(static_url('blank'));
-        context.push('" class="button" /><input type="radio" value="');
-        // value is index value so we can refer back to object value
-        context.push(idx);
-        context.push('" name="');
-        context.push(name);
-        context.push('" ');
-        context.push(disabled);
-        context.push('/><span class="sc-button-label">');
-        context.push(icon);
-        context.push(labelText);
-        context.push('</span></label>');
+        context.push('<label class="sc-radio-button ', selectionStateClassNames, '">');
+        context.push('<img src="', blankImage, '" class="button" />');
+        context.push('<input type="radio" value="', idx, '" name="', name, '" ', disabled, '/>');
+        context.push('<span class="sc-button-label">', icon, labelText, '</span></label>');
       }
       
       // first remove listener on existing radio buttons
