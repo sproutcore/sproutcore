@@ -222,7 +222,6 @@ SC.RadioView = SC.FieldView.extend(
         labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
         var blankImage = static_url('blank');
         
-        // push all string instead of doing concatenation (IE optimization)
         context.push('<label class="sc-radio-button ', selectionStateClassNames, '">');
         context.push('<img src="', blankImage, '" class="button" />');
         context.push('<input type="radio" value="', idx, '" name="', name, '" ', disabled, '/>');

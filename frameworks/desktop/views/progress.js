@@ -173,7 +173,6 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     };
     
     if(firstTime) {
-      // push all string instead of doing concatenation (IE optimization)
       var classString = this._createClassNameString(classNames);
       context.push('<div class="sc-outer-head"></div>');
       context.push('<div class="sc-inner ', classString, '" style="width: ', value, ';left: ', offset, '">');
