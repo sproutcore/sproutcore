@@ -13,9 +13,9 @@ require('views/palette_pane');
   default: initiated just below the anchor. 
            shift x, y to optimized picker visibility and make sure top-left corner is always visible.
   menu :   same as default rule +
-           default(1,4) or custom offset for default location to fine tunned visual alignment +
+           default(1,4,3) or custom offset below the anchor for default location to fine tunned visual alignment +
            enforce min left(7px)/right(8px) padding to the window
-  fixed :  default(1,4) or custom offset for default location to cope with specific anchor and skip fitPositionToScreen
+  fixed :  default(1,4,3) or custom offset below the anchor for default location to cope with specific anchor and skip fitPositionToScreen
   pointer :take default [0,1,2,3,2] or custom matrix to choose one of four perfect pointer positions.Ex:
            perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
            fallback to perfect top (2)
@@ -56,28 +56,28 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 	  }).popup(anchor);
   }}}
 
-  2. menu with default offset matrix [1,4]:   
+  2. menu below the anchor with default offset matrix [1,4,3]:   
   {{{
 	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
 	  }).popup(anchor, SC.PICKER_MENU);
   }}}
 
-  3. menu with custom offset matrix [2,6]:   
+  3. menu on the right side of anchor with custom offset matrix [2,6,0]:   
   {{{
 	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_MENU, [2,6]);
+	  }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
   }}}
 
-  4. fixed with default offset matrix [1,4]:   
+  4. fixed below the anchor with default offset matrix [1,4,3]:   
   {{{
 	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
 	  }).popup(anchor, SC.PICKER_FIXED);
   }}}
 
-  5. fixed with custom offset matrix [-22,-17]:   
+  5. fixed on the right side of anchor with custom offset matrix [-22,-17,0]:   
   {{{
 	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_FIXED, [-22,-17]);
+	  }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
   }}}
 
   6. pointer with default position pref matrix [0,1,2,3,2]:   
@@ -160,20 +160,20 @@ SC.PickerPane = SC.PalettePane.extend({
     if (anchor) {
 	    anchor = this.computeAnchorRect(anchor);
 	    origin = SC.cloneRect(anchor);
-	    origin.y += origin.height ;
 	    if(this.preferType) {
 		    switch(this.preferType) {
 		      case SC.PICKER_MENU:
 		      case SC.PICKER_FIXED:
-	          if(!this.preferMatrix || this.preferMatrix.length != 2) {
-					    // default fine tunned visual alignment for Menu to appear just below the anchorElement.
-		          this.set('preferMatrix', [1, 4]) ;
+	          if(!this.preferMatrix || this.preferMatrix.length != 3) {
+					    // default below the anchor with fine tunned visual alignment for Menu to appear just below the anchorElement.
+		          this.set('preferMatrix', [1, 4, 3]) ;
 	          }
 				    // fine tunned visual alignment from preferMatrix
-			      origin.x += this.preferMatrix[0] ;
-			      origin.y += this.preferMatrix[1];		
+			      origin.x += ((this.preferMatrix[2]==0) ? origin.width : 0) + this.preferMatrix[0] ;
+			      origin.y += ((this.preferMatrix[2]==3) ? origin.height : 0) + this.preferMatrix[1];		
 		  	    break;
 		      default:
+			      origin.y += origin.height ;
 		  	    break;
 		    }   
 			}
