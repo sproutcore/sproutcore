@@ -176,6 +176,8 @@ SC.PickerPane = SC.PalettePane.extend({
 			      origin.y += origin.height ;
 		  	    break;
 		    }   
+			} else {
+				origin.y += origin.height ;
 			}
       origin = this.fitPositionToScreen(origin, picker.get('frame'), anchor) ;
 	    picker.set('layoutShadow', { width: picker.layout.width, height: picker.layout.height, left: origin.x, top: origin.y });
