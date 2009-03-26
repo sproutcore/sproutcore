@@ -145,8 +145,13 @@ SC.Set.prototype = {
     Add all the items in the passed array.
   */
   addEach: function(objects) {
-    var idx = objects.length ;
-    while(--idx >= 0) this.add(objects[idx]) ;
+    var idx = objects.get('length') ;
+    if (objects.objectAt) {
+      while(--idx >= 0) this.add(objects.objectAt(idx)) ;
+    } else {
+      while(--idx >= 0) this.add(objects[idx]) ;
+    }
+    return this ;
   },  
 
   /**
@@ -196,8 +201,13 @@ SC.Set.prototype = {
     Removes all the items in the passed array.
   */
   removeEach: function(objects) {
-    var idx = objects.length ;
-    while(--idx >= 0) this.remove(objects[idx]) ;
+    var idx = objects.get('length') ;
+    if (objects.objectAt) {
+      while(--idx >= 0) this.remove(objects.objectAt(idx)) ;
+    } else {
+      while(--idx >= 0) this.remove(objects[idx]) ;
+    }
+    return this ;
   },  
 
   /**

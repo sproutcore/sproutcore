@@ -37,7 +37,7 @@ test("reading unmodified record from root store", function() {
 
   ok(store.editables && store.editables[storeKey], 'should mark item as editable');
   
-  ok(!store.changedDataHashes || (store.changedDataHashes.indexOf(storeKey)<0), 'changedDataHashes should not include storeKey since it has not technically changed yet');
+  ok(!store.chainedChanges || (store.chainedChanges.indexOf(storeKey)<0), 'chainedChanges should not include storeKey since it has not technically changed yet');
 });
 
 test("should return null when accessing an unknown storeKey", function() {
@@ -63,5 +63,5 @@ test("reading unmodified record from chained store", function() {
 
   ok(store.editables && store.editables[storeKey], 'should mark item as editable');
     
-  ok(!store.changedDataHashes || (store.changedDataHashes.indexOf(storeKey)<0), 'changedDataHashes should not include storeKey since it has not technically changed yet');
+  ok(!store.chainedChanges || (store.chainedChanges.indexOf(storeKey)<0), 'chainedChanges should not include storeKey since it has not technically changed yet');
 });

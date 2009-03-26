@@ -5,176 +5,141 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('models/record');
+sc_require('models/store');
 
 /**
   @class
 
-
-  The Store is where you can find all of your dataHashes. Stores can be 
-  chained for editing purposes and committed back one chain level at a time 
-  all the way back to a persistent data source.
+  A nested store can buffer changes to a parent store and then commit them
+  all at once.  You usually will use a NestedStore as part of store chaining
+  to stage changes to your object graph before sharing them with the rest of
+  the application.
   
-  Every application you create should generally have its own store objects.
-  Once you create the store, you will rarely need to work with the store
-  directly except to retrieve records and collections.  
+  Normally you will not create a nested store directly.  Instead, you can 
+  retrieve a nested store by using the chain() method.  When you are finished
+  working with the nested store, destroy() will dispose of it.
   
-  Internally, the store will keep track of changes to your json data hashes
-  and manage syncing those changes with your data source.  A data source may
-  be a server, local storage, or any other persistent code.
-
-  @extends SC.Object
+  @extends SC.Store
   @since SproutCore 1.0
 */
-SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
+SC.NestedStore = SC.Store.extend(
+/** @scope SC.NestedStore.prototype */ {
 
   /**
-    An array of all the chained stores that current rely on the receiver 
-    store.
+    This is set to YES when there are changes that have not been committed 
+    yet.
+
+    @property
+    @type {Boolean}
+    @default NO
+  */
+  hasChanges: NO,
+
+  /**
+    This is a handle to the parent record that you can chain from. Also, if
+    you're a base record, you can specify a parent record that is a handle 
+    to perisistant storage.
+
+    @property
+    @type {SC.Store}
+  */
+  parentStore: null,
+
+  /**
+    YES if the view is nested. Walk like a duck
+  */
+  isNested: YES,
+
+  /**
+    If YES, then the attribute hash state will be locked when you first 
+    read the data hash or status.  This means that if you retrieve a record
+    then change the record in the parent store, the changes will not be 
+    visible to your nested store until you commit or discard changes.
     
-    @property {Array}
+    If NO, then the attribute hash will lock only when you write data.
+    
+    Normally you want to lock your attribute hash the first time you read it.
+    This will make your nested store behave most consistently.  However, if
+    you are using multiple sibling nested stores at one time, you may want
+    to turn off this property so that changes from one store will be reflected
+    in the other one immediately.  In this case you will be responsible for
+    ensuring that the sibling stores do not edit the same part of the object
+    graph at the same time.
+    
+    @property {Boolean} 
   */
-  nestedStores: null,
-
-  /**
-    The data source is the persistent storage that will provide data to the
-    store and save changes.  You normally will set your data source when you
-    first create your store in your application.
-  */
-  dataSource: null,
-  
-  /**
-    This type of store is not nested.
-  */
-  isNested: NO,
+  lockOnRead: YES,
   
   // ..........................................................
   // STORE CHAINING
   // 
   
-  /**  
-    Returns a new nested store instance that can be used to buffer changes
-    until you are ready to commit them.  When you are ready to commit your 
-    changes, call commitChanges() or destroyChanges() and then destroy() when
-    you are finished with the chained store altogether.
-    
-    {{{
-      store = MyApp.store.chain();
-      .. edit edit edit
-      store.commitChanges().destroy();
-    }}}
-    
-    @returns {SC.NestedStore} new nested store chained to receiver
+  /**
+    Propagate this store's changes to it's parent.  If the store does not 
+    have a parent, this has no effect other than to clear the change set.
+
+    @param {Boolean} force if YES, does not check for conflicts first
+    @returns {SC.Store} receiver
   */
-  chain: function() {
-    var ret = SC.Store.create({ parentStore: this }) ;
-    var nested = this.nestedStores;
-    if (!nested) nested =this.nestedStores = [];
-    nested.push(ret);
-    return ret ;
+  commitChanges: function(force) {
+    var pstore = this.get('parentStore');
+    if (pstore) {
+      pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
+    }
+    this.reset(); // clear out custom changes 
+    return this ;
   },
-  
-  /** @private
-  
-    Called by a nested store just before it is destroyed so that the parent
-    can remove the store from its list of nested stores.
+
+  /**
+    Discard the changes made to this store and reset the store.
     
     @returns {SC.Store} receiver
   */
-  willDestroyNestedStore: function(nestedStore) {
-    if (this.nestedStores) {
-      this.nestedStores.removeObject(nestedStore);
-    }
+  discardChanges: function() {
+    this.reset();
     return this ;
   },
     
-  // ..........................................................
-  // SHARED DATA STRUCTURES 
-  // 
-  
-  /** @private
-    JSON data hashes indexed by store key.  
+  /**
+    When you are finished working with a chained store, call this method to 
+    tear it down.  This will also discard any pending changes.
     
-    *IMPORTANT: Property is not observable*
-
-    Shared by a store and its child stores until you make edits to it.
-    
-    @property {Hash}
+    @returns {SC.Store} receiver
   */
-  dataHashes: null,
-
-  /** @private
-    The current status of a data hash indexed by store key.
+  destroy: function() {
+    this.discardChanges();
     
-    *IMPORTANT: Property is not observable*
-
-    Shared by a store and its child stores until you make edits to it.
+    var parentStore = this.get('parentStore');
+    if (parentStore) parentStore.willDestroyChildStore(this);
     
-    @property {Hash}
-  */
-  statuses: null,
-    
-  /** @private
-    This array contains the revisions for the attributes indexed by the 
-    storeKey.  
-    
-    *IMPORTANT: Property is not observable*
-    
-    Revisions are used to keep track of when an attribute hash has been 
-    changed. A store shares the revisions data with its parent until it 
-    starts to make changes to it.
-    
-    @property {Hash}
-  */
-  revisions: null,
-
-  /** @private
-    Array contains the base revision for an attribute hash when it was first
-    cloned from the parent store.  If the attribute hash is edited and 
-    commited, the commit will fail if the parent attributes hash has been 
-    edited since.
-    
-    This is a form of optimistic locking, hence the name.
-    
-    Each store gets its own array of locks, which are selectively populated
-    as needed.
-    
-    Note that this is kept as an array because it will be stored as a dense 
-    array on some browsers, making it faster.
-    
-    @property {Array}
-  */
-  locks: null,
+    sc_super();  
+    return this ;
+  },
 
   /**
-    Array contains number indicating whether the related attributes have 
-    been cloned yet or not.
+    Resets a store's data hash contents to match its parent.
     
-    Each store gets it own cloned array.
-  
-    Note that this is kept as an array because it will be stored as a dense 
-    array on some browsers, making it faster.
-    
-    @property {Array}
+    @returns {SC.Store} receiver
   */
-  editables: null,
+  reset: function() {
+
+    // requires a pstore to reset
+    var parentStore = this.get('parentStore');
+    if (!parentStore) throw SC.Store.NO_PARENT_STORE_ERROR;
     
-  /** @private
-    An array that includes the store keys that have changed since the store
-    was last committed.  This array is used to sync data hash changes between
-    chained stores.  For a log changes that may actually be committed back to
-    the server see the changelog property.
+    // inherit data store from parent store.
+    this.dataHashes = SC.beget(parentStore.dataHashes);
+    this.revisions  = SC.beget(parentStore.revisions);
+    this.statuses   = SC.beget(parentStore.statuses);
     
-    @property {Array}
-  */
-  chainedChanges: null,
-  
-  /**
-    Log of changed storeKeys that need to be persisted back to the dataSource.
-  
-    @property {Hash}
-  */
-  changelog: null,
+    // also, reset private temporary objects
+    this.chainedChanges = this.locks = this.editables = null;
+    this.changelog = null ;
+
+    // TODO: Notify record instances
+    
+    this.set('hasChanges', NO);
+  },
   
   // ..........................................................
   // CORE ATTRIBUTE API
@@ -182,6 +147,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // The methods in this layer work on data hashes in the store.  They do not
   // perform any changes that can impact records.  Usually you will not need 
   // to use these methods.
+  
+  /** 
+    Locks the data hash so that it iterates independently from the parent 
+    store.
+  */
+  _lock: function(storeKey) {
+    var ret = this.dataHashes[storeKey], locks = this.locks, rev;
+    if (!ret || (locks && locks[storeKey])) return this ; // already locked
+    
+    // lock attributes hash to the current version.
+    // copy references for prototype-based objects and save the current 
+    // revision number in the locks array so we can check for conflicts when
+    // committing changes later.
+    if (!locks) locks = this.locks = [];
+    this.dataHashes[storeKey] = this.dataHashes[storeKey]; 
+    this.statuses[storeKey] = this.statuses[storeKey];
+    rev = this.revisions[storeKey] = this.revisions[storeKey];
+    locks[storeKey] = rev || 1;    
+    
+    return this ;
+  },
   
   /** 
     Returns the data hash for the given storeKey.  This will also 'lock'
@@ -192,19 +178,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Hash} data hash or null
   */
   readDataHash: function(storeKey) {
-    var ret = this.dataHashes[storeKey], locks = this.locks, rev;
-    if (!ret || (locks && locks[storeKey])) return ret ; // already locked
-    
-    // lock attributes hash to the current version.
-    // copy references for prototype-based objects and save the current 
-    // revision number in the locks array so we can check for conflicts when
-    // committing changes later.
-    if (!locks) locks = this.locks = [];
-    this.dataHashes[storeKey] = this.dataHashes[storeKey]; 
-    this.statuses[storeKey] = this.statuses[storeKey];
-    rev = this.revisions[storeKey] = this.revisions[storeKey];
-    locks[storeKey] = rev || 1;
-    
+    var ret = this.dataHashes[storeKey];
+    if (this.get('lockOnRead') this._lock(storeKey);
     return ret ;
   },
   
@@ -220,9 +195,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Hash} the attributes hash
   */
   readEditableDataHash: function(storeKey) {
+
+    // lock the data hash
+    this._lock(storeKey);
     
     // get the data hash.  use readDataHash() to handle locking
-    var ret = this.readDataHash(storeKey);
+    var ret = this.dataHashes[storeKey];
     if (!ret) return ret ; // nothing to do.
 
     // now if the attributes have not been cloned 
@@ -375,9 +353,195 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     return this ;
   },
+  
+  // ..........................................................
+  // STORE CHAINING
+  // 
+  
+  /**
+    
+    Returns a new chained store instance that can be used to buffer changes
+    until you are ready to commit them.  When you are ready to commit your 
+    changes, call commitChanges() or destroyChanges() and then destroy() when
+    you are finished with the chained store altogether.
+    
+    {{{
+      store = MyApp.store.chain();
+      .. edit edit edit
+      store.commitChanges().destroy();
+    }}}
+    
+    @returns {SC.Store} Returns a new store that is child from this one.
+  */
+  chain: function() {
+    var childStore = SC.Store.create({ parentStore: this });
+    this.childStores.push(childStore);
+    return childStore;
+  },
+  
+  /**
+    When you are finished working with a chained store, call this method to 
+    tear it down.  This will also discard any pending changes.
+    
+    @returns {SC.Store} receiver
+  */
+  destroy: function() {
+    this.discardChanges();
+    
+    var parentStore = this.get('parentStore');
+    if (parentStore) parentStore.willDestroyChildStore(this);
+    
+    sc_super();  
+    return this ;
+  },
+  
+  /** @private
+  
+    Called by a child store just before it is destroyed so that the parent
+    can remove the child from its list of child stores.
+    
+    @returns {SC.Store} receiver
+  */
+  willDestroyChildStore: function(childStore) {
+    this.childStores.removeObject(childStore);
+    return this ;
+  },
+  
+  /** @private
+    Called by a childStore on a parent store to commit any changes from the
+    childStore.  This will copy any changed dataHashes as well as any 
+    persistant change logs.
+    
+    If the parentStore detects a conflict with the optimistic locking, it will
+    raise an exception before it makes any changes.  If you pass the 
+    force flag then this detection phase will be skipped and the changes will
+    be applied even if another resource has modified the store in the mean
+    time.
+  
+    @param {SC.Store} childStore the child store
+    @param {Array} changes the array of changed store keys
+    @param {Boolean} force
+    @returns {SC.Store} receiver
+  */
+  commitChangesFromStore: function(childStore, changes, force)
+  {
+    // first, check for optimistic locking problems
+    var len = changes.length, i, storeKey;
+    var ch_locks = childStore.locks, my_revisions = this.revisions, lock, rev;
+    if (!force && ch_locks && my_revisions) { 
+      for(i=0;i<len;i++) {
+        storeKey = changes[i];
+        lock = ch_locks[storeKey] || 1;
+        rev  = my_revisions[storeKey] || 1;
+        
+        // if the save revision for the item does not match the current rev
+        // the someone has changed the data hash in this store and we have
+        // a conflict. 
+        if (lock < rev) {
+          throw "conflict: storeKey %@ was changed in parent".fmt(storeKey);
+        }
+      }   
+    }
+    
+    // OK, no locking issues.  So let's just copy them changes. 
+    // get local reference to values.
+    var my_dataHashes, ch_dataHashes, ch_revisions, my_statuses, ch_statuses;
+    var my_changes, my_locks, my_editables ;
+    my_dataHashes = this.dataHashes;
+    my_statuses   = this.statuses;
+    my_changes    = this.chainedChanges ;
+    my_locks      = this.locks ;
+    my_editables  = this.editables ;
+
+    // setup some arrays if needed
+    if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
+    if (!my_locks) my_locks = this.locks = [];
+    if (!my_editables) my_editables = this.editables = [] ;
+    
+    ch_dataHashes = childStore.dataHashes;
+    ch_revisions  = childStore.revisions ;
+    ch_statuses   = childStore.statuses;
+
+    for(i=0;i<len;i++) {
+      storeKey = changes[i];
+
+      // save my own lock if needed.
+      if (!my_locks[storeKey]) my_locks[storeKey] = my_revisions[storeKey]||1;
+
+      // now copy changes
+      my_dataHashes[storeKey] = ch_dataHashes[storeKey];
+      my_statuses[storeKey]   = ch_statuses[storeKey];
+      my_revisions[storeKey]  = ch_revisions[storeKey];
+      
+      my_changes.add(storeKey);
+      my_editables[storeKey] = 0 ; // always make dataHash no longer editable
+      
+      // TODO: Notify record instances if they exist that they changed
+    }
+    
+    // TODO: Copy changelog.
+    
+    // Changes copied.  Now mark this store as dirty since we have changes.
+    this.setIfChanged('hasChanges', YES);
+    return this ;
+  },
+
+  /**
+    Resets a store's data hash contents to match its parent.
+    
+    @returns {SC.Store} receiver
+  */
+  reset: function() {
+    
+    // if we have a transient parent store, then we can just respawn from 
+    // its properties
+    var parentStore = this.get('parentStore');
+    if(parentStore && parentStore.get('isTransient')) {
+      this.dataHashes = SC.beget(parentStore.dataHashes);
+      this.revisions  = SC.beget(parentStore.revisions);
+      this.statuses   = SC.beget(parentStore.statuses);
+    }
+    
+    // also, reset private temporary objects
+    this.chainedChanges = this.locks = this.editables = null;
+    this.changelog = null ;
+
+    // notify record instances that they may have changed
+    var records = this.records, idx, len = records ? records.length : 0 ;
+    for(idx=0;idx<len;idx++) records[idx].storeDidChangeAttributes();
+    
+
+    this.set('hasChanges', NO);
+  },
+  
+  /**
+    Propagate this store's changes to it's parent.  If the store does not 
+    have a parent, this has no effect other than to clear the change set.
+
+    @param {Boolean} force if YES, does not check for conflicts first
+    @returns {SC.Store} receiver
+  */
+  commitChanges: function(force) {
+    var parentStore = this.get('parentStore');
+    if (parentStore) {
+      parentStore.commitChangesFromStore(this, this.chainedChanges, force);
+    }
+    this.reset(); // clear out custom changes 
+    return this ;
+  },
+
+  /**
+    Discard the changes made to this store and reset the store.
+    
+    @returns {SC.Store} receiver
+  */
+  discardChanges: function() {
+    this.reset();
+    return this ;
+  },
 
   // ..........................................................
-  // HIGH-LEVEL RECORD API
+  // HIGH-lEVEL RECORD API
   // 
   
   
@@ -981,130 +1145,21 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   init: function() {
     sc_super();
+    this.childStores = [];
+    
     this.reset();
-  },
 
-  /**
-    Resets the store content.  This will clear all internal data for all
-    records, resetting them to an EMPTY state.  You generally do not want
-    to call this method yourself, though you may override it.
-    
-    @returns {SC.Store} receiver
-  */
-  reset: function() {
-    
-    // create a new empty data store
-    this.dataHashes = {} ;
-    this.revisions  = {} ;
-    this.statuses   = {} ;
-
-    // also reset temporary objects
-    this.chainedChanges = this.locks = this.editables = null;
-    this.changelog = null ;
-    
-    // TODO: Notify record instances
-    
-    this.set('hasChanges', NO);    
-  },
-  
-  /** @private
-    Called by a nested store on a parent store to commit any changes from the
-    store.  This will copy any changed dataHashes as well as any persistant 
-    change logs.
-    
-    If the parentStore detects a conflict with the optimistic locking, it will
-    raise an exception before it makes any changes.  If you pass the 
-    force flag then this detection phase will be skipped and the changes will
-    be applied even if another resource has modified the store in the mean
-    time.
-  
-    @param {SC.Store} nestedStore the child store
-    @param {Array} changes the array of changed store keys
-    @param {Boolean} force
-    @returns {SC.Store} receiver
-  */
-  commitChangesFromNestedStore: function(nestedStore, changes, force)
-  {
-    // first, check for optimistic locking problems
-    if (!force) this._verifyLockRevisions(changes, nestedStore.locks);
-    
-    // OK, no locking issues.  So let's just copy them changes. 
-    // get local reference to values.
-    var len = changes.length, i, storeKey ;
-    var my_dataHashes, my_statuses, my_changes, my_locks, my_editables;
-    var my_revisions, ch_dataHashes, ch_statuses, ch_revisions;
-    
-    my_revisions  = this.revisions ;
-    my_dataHashes = this.dataHashes;
-    my_statuses   = this.statuses;
-    my_changes    = this.chainedChanges ;
-    my_locks      = this.locks ;
-    my_editables  = this.editables ;
-
-    // setup some arrays if needed
-    if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
-    if (!my_locks) my_locks = this.locks = [];
-    if (!my_editables) my_editables = this.editables = [] ;
-    
-    ch_dataHashes = nestedStore.dataHashes;
-    ch_revisions  = nestedStore.revisions ;
-    ch_statuses   = nestedStore.statuses;
-
-    for(i=0;i<len;i++) {
-      storeKey = changes[i];
-
-      // save my own lock if needed.
-      if (!my_locks[storeKey]) my_locks[storeKey] = my_revisions[storeKey]||1;
-
-      // now copy changes
-      my_dataHashes[storeKey] = ch_dataHashes[storeKey];
-      my_statuses[storeKey]   = ch_statuses[storeKey];
-      my_revisions[storeKey]  = ch_revisions[storeKey];
-      
-      my_changes.add(storeKey);
-      my_editables[storeKey] = 0 ; // always make dataHash no longer editable
-      
-      // TODO: Notify record instances if they exist that they changed
+    // if we don't have a parent store or the parent store is not transient
+    // then create our own storage.
+    var parentStore = this.get('parentStore');
+    if(!parentStore || !parentStore.get('isTransient')) {
+      this.dataHashes = {};
+      this.revisions  = {};
+      this.statuses   = {};
     }
-
-    // add any records to the changelog for commit handling
-    var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
-    if (ch_changelog) {
-      if (!my_changelog) my_changelog = this.changelog = SC.Set.create();
-      my_changelog.addEach(ch_changelog);
-    }  
-    
-    // Changes copied.  Now mark this store as dirty since we have changes.
-    this.setIfChanged('hasChanges', YES);
-    return this ;
   },
 
-  /** @private
-    Verifies that the passed lock revisions match the current revisions 
-    in the receiver store.  If the lock revisions do not match, then the 
-    store is in a conflict and an exception will be raised.
-    
-    @param {Array}  changes set of changes we are trying to apply
-    @param {SC.Set} locks the locks to verify
-    @returns {SC.Store} receiver
-  */
-  _verifyLockRevisions: function(changes, locks) {
-    var len = changes.length, revs = this.revisions, i, storeKey, lock, rev ;
-    if (locks && revs) {
-      for(i=0;i<len;i++) {
-        storeKey = changes[i];
-        lock = locks[storeKey] || 1;
-        rev  = revs[storeKey] || 1;
 
-        // if the save revision for the item does not match the current rev
-        // the someone has changed the data hash in this store and we have
-        // a conflict. 
-        if (lock < rev) throw SC.Store.CHAIN_CONFLICT_ERROR;
-      }   
-    }
-    return this ;
-  },
-  
   // ..........................................................
   // PRIMARY KEY CONVENIENCE METHODS
   // 
@@ -1143,9 +1198,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 }) ;
 
 SC.Store.mixin({
-  
-  CHAIN_CONFLICT_ERROR: new Error("Nested Store Conflict"),
-  NO_PARENT_STORE_ERROR: new Error("Parent Store Required"),
   
   /** @private
     This array maps all storeKeys to primary keys.  You will not normally

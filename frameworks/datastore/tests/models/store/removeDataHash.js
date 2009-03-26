@@ -39,7 +39,7 @@ test("removing existing data hash", function() {
   equals(store.revisions[storeKey1], oldrev, 'revision should not change');
   ok(store.locks[storeKey1], 'should have lock');
   ok(!store.editables || !store.editables[storeKey1], 'should not be marked editable');
-  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey1), 'changedDataHashes should not include hash yet');
+  ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey1), 'chainedChanges should not include hash yet');
   
   // verify high level round trip
   equals(store.readDataHash(storeKey1), null, 'readDataHash() should return null');
@@ -64,7 +64,7 @@ test("removing edited data hash", function() {
   equals(store.revisions[storeKey1], oldrev, 'revision should not change');
   ok(store.locks[storeKey1], 'should have lock');
   ok(!store.editables || !store.editables[storeKey1], 'should not be marked editable');
-  ok(!store.changedDataHashes || !store.changedDataHashes.contains(storeKey1), 'changedDataHashes should not include hash yet');
+  ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey1), 'chainedChanges should not include hash yet');
   
   // verify high level round trip
   equals(store.readDataHash(storeKey1), null, 'readDataHash() should return null');
