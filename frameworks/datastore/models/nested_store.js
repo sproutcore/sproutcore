@@ -241,22 +241,32 @@ SC.NestedStore = SC.Store.extend(
     store.
   */
   _lock: function(storeKey) {
-    var ret = this.dataHashes[storeKey], locks = this.locks, rev;
-    if (!ret || (locks && locks[storeKey])) return this ; // already locked
+    var ret = this.dataHashes[storeKey], locks = this.locks, rev, editables;
     
-    // lock attributes hash to the current version.
-    // copy references for prototype-based objects and save the current 
-    // revision number in the locks array so we can check for conflicts when
-    // committing changes later.
-    // 
-    // Note that if the parent hash is editable, we will need to clone the 
-    // parent hash.
-    //
+    // already locked -- nothing to do
+    if (!ret || (locks && locks[storeKey])) return this;
+
+    // create locks if needed
     if (!locks) locks = this.locks = [];
-    this.dataHashes[storeKey] = this.dataHashes[storeKey]; 
-    this.statuses[storeKey] = this.statuses[storeKey];
-    rev = this.revisions[storeKey] = this.revisions[storeKey];
+    
+    // if the data hash in the parent store is editable, then clone the hash
+    // for our own use.  Otherwise, just copy a reference to the data hash
+    // in the parent store.
+    var pstore = this.get('parentStore');
+    if (pstore && pstore.editables && pstore.editables[storeKey]) {
+      this.dataHashes[storeKey] = SC.clone(pstore.dataHashes[storeKey]);
+      
+    } else this.dataHashes[storeKey] = pstore.dataHashes[storeKey];
+    
+    // also copy the status + revision
+    this.statuses[storeKey] = pstore.statuses[storeKey];
+    rev = this.revisions[storeKey] = pstore.revisions[storeKey];
+    
+    // save a lock and make it not editable
     locks[storeKey] = rev || 1;    
+    
+    editables = this.editables;
+    if (editables) editables[storeKey] = 0;
     
     return this ;
   },
@@ -288,14 +298,14 @@ SC.NestedStore = SC.Store.extend(
   */
   readEditableDataHash: function(storeKey) {
 
-    // lock the data hash
+    // lock the data hash if needed
     this._lock(storeKey);
-    
-    // get the data hash.  use readDataHash() to handle locking
+
+    // read the value - if there is no hash just return; nothing to do
     var ret = this.dataHashes[storeKey];
     if (!ret) return ret ; // nothing to do.
 
-    // now if the attributes have not been cloned 
+    // clone data hash if not editable
     var editables = this.editables;
     if (!editables) editables = this.editables = [];
     if (!editables[storeKey]) {
@@ -345,7 +355,7 @@ SC.NestedStore = SC.Store.extend(
 
   /**
     Removes the data hash from the store.  This does not imply a deletion of
-    the record.  You could be simply unloading the record.  Eitherway, 
+    the record.  You could be simply unloading the record.  Either way, 
     removing the dataHash will be synced back to the parent store.
     
     Note that you can optionally pass a new status to go along with this. If
