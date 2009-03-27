@@ -574,6 +574,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   destroyRecords: function(recordTypes, ids, storeKeys) {
+    // JUAN TODO: Implement
     var len, isArray, idx, id, recordType, storeKey;
     if(storeKeys===undefined){
       len = ids.length;
@@ -582,14 +583,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       for(idx=0;idx<len;idx++) {
         if (isArray) recordType = recordTypes[idx] || SC.Record;
         id = ids ? ids[idx] : undefined ;
-        storeKey = storeKeys ? storeKeys[idx] : undefined ;
-        destroyRecord(recordType, id, storeKey);
+        this.destroyRecord(recordType, id, undefined);
       }
     }else{
       len = storeKeys.length;
       for(idx=0;idx<len;idx++) {
         storeKey = storeKeys ? storeKeys[idx] : undefined ;
-        destroyRecord(undefined, undefined, storeKey);
+        this.destroyRecord(undefined, undefined, storeKey);
       }
     }
     return this ;
@@ -649,8 +649,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     You can optionally pass an array of storeKeys instead of the recordType
     and ids.  In this case the first two parameters will be ignored.  This
-    is usually only used by low-level internal methods.  You will not usually
-    destroy records this way.
+    is usually only used by low-level internal methods.  
     
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to destroy
@@ -659,15 +658,33 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   recordsDidChange: function(recordTypes, ids, storeKeys) {
     // JUAN TODO: Implement
-    return this ;
+     var len, isArray, idx, id, recordType, storeKey;
+      if(storeKeys===undefined){
+        len = ids.length;
+        isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+        if (!isArray) recordType = recordTypes;
+        for(idx=0;idx<len;idx++) {
+          if (isArray) recordType = recordTypes[idx] || SC.Record;
+          id = ids ? ids[idx] : undefined ;
+          storeKey = storeKeys ? storeKeys[idx] : undefined ;
+          this.recordDidChange(recordType, id, storeKey);
+        }
+      }else{
+        len = storeKeys.length;
+        for(idx=0;idx<len;idx++) {
+          storeKey = storeKeys ? storeKeys[idx] : undefined ;
+          thisrecordDidChange(undefined, undefined, storeKey);
+        }
+      }
+      return this ;  
   },
 
   /**
-    Retrieves a record from the server.  If the record has already been loaded
-    in the store, then this method will simply return.  Otherwise if your 
-    store has a dataSource, this will call the dataSource to retrieve the 
-    record.  Generally you will not need to call this method yourself.  
-    Instead you can just use find().
+    Retrieves a set of records from the server.  If the records has 
+    already been loaded in the store, then this method will simply return.  
+    Otherwise if your store has a dataSource, this will call the 
+    dataSource to retrieve the record.  Generally you will not need to 
+    call this method yourself. Instead you can just use find().
     
     This will not actually create a record instance but it will initiate a 
     load of the record from the server.  You can subsequently get a record 
@@ -688,6 +705,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     var isArray, recordType, len, idx, storeKey, status, K = SC.Record, ret;
     var source = this.get('dataSource');
+    isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
     if (!isArray) recordType = recordsTypes;
 
     // if no storeKeys were passed, map recordTypes + ids
@@ -700,7 +718,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         storeKey = storeKeys[idx];
       } else {
         if (isArray) recordType = recordsTypes[idx];
-        storeKey = recordTypes.storeKeyFor(ids[idx]);
+        storeKey = recordType.storeKeyFor(ids[idx]);
       }
       
       // collect status and process
@@ -741,7 +759,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   _TMP_RETRIEVE_ARRAY: [],
   
   /**
-    JUAN TODO: Add description
+    Retrieves a record from the server.  If the record has already been loaded
+    in the store, then this method will simply return.  Otherwise if your 
+    store has a dataSource, this will call the dataSource to retrieve the 
+    record.  Generally you will not need to call this method yourself.  
+    Instead you can just use find().
+    
+    This will not actually create a record instance but it will initiate a 
+    load of the record from the server.  You can subsequently get a record 
+    instance itself using materializeRecord()
 
     @param {SC.Record} recordType class
     @param {String} id id to retrieve
@@ -780,8 +806,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
-    JUAN TODO: Add description like other multiple variations.
-
+    Refreshes a set of records from the server.  If the records has already been loaded
+    in the store, then this method will request a refresh from the dataSource.
+    Otherwise it will attempt to retrieve them.
+    
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to destroy
     @param {Array} storeKeys (optional) store keys to destroy
@@ -803,20 +831,92 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   commitRecords: function(recordTypes, ids, storeKeys) {
     // TODO: Implement to call dataSource.commitRecords.call()...
+    
+    // pass up to parentStore if we have one
+    var parentStore = this.get('parentStore');
+    if (parentStore) {
+      return parentStore.commitRecords(recordTypes, ids, storeKeys);
+    }
+    
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
+    var isArray, recordType, len, idx, storeKey, status, K = SC.Record;
+    var ret, keysInLog=[], key, source;
+    if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
+      storeKeys=this.changelog;
+    }
+  
+    source = this.get('dataSource');
+    isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+    if (!isArray) recordType = recordTypes;
+
+    // if no storeKeys were passed, map recordTypes + ids
+    len = (storeKeys === undefined) ? ids.length : storeKeys.length;
+    ret = [];
+    for(idx=0;idx<len;idx++) {
+      
+      // collect store key
+      if (storeKeys) {
+        storeKey = storeKeys[idx];
+      } else {
+        if (isArray) recordType = recordsTypes[idx] || SC.Record;
+        storeKey = recordType.storeKeyFor(ids[idx]);
+      }
+      
+      // collect status and process
+      status = this.readStatus(storeKey);
+      
+      if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
+        throw K.NOT_FOUND_ERROR ;
+      }else{
+        if(status===K.READY_NEW){
+          this.writeStatus(K.BUSY_CREATING);
+          ret.push(storeKey);
+        }
+        if(status===K.READY_DIRTY){
+          this.writeStatus(K.BUSY_COMMITING);
+          ret.push(storeKey);
+        }
+        if(status===K.DESTROY_DIRTY){
+          this.writeStatus(K.BUSY_DESTROYING);
+          ret.push(storeKey);
+        }
+        // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITING, 
+        // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
+      }
+    }   
+      
+    // now commit storekeys to dataSource
+    if (source) source.commitRecords.call(source, this, ret);
+    return ret ;
   },
 
   /**
-    TODO: Document
+    Commits the passed store key.  Based on the current state of the 
+    record, this will ask the data source to perform the appropriate action
+    on the store key.
     
     @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
 
     @returns {SC.Record} the actual recordType you should use to instantiate.
   */
-  commitRecord: function(recordType, ids, storeKey) {
+  commitRecord: function(recordType, id, storeKey) {
     // TODO: Implement to call commitRecords()
+    
+    var array = this._TMP_RETRIEVE_ARRAY ;
+    if (storeKey !== undefined) {
+      array[0] = storeKey;
+      storeKey = array;
+      id = null ;
+    } else {
+      array[0] = id;
+      id = array;
+    }
+    
+    var ret = this.commitRecords(recordType, id, storeKey);
+    array.length = 0 ;
+    return ret[0];
   },
   
   /**
@@ -824,17 +924,66 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     server implementation, this could cancel an entire request, causing 
     other records to also transition their current state.
     
-    // TODO: document
+    @param {SC.Record|Array} recordTypes class or array of classes
+    @param {Array} ids ids to destroy
+    @param {Array} storeKeys (optional) store keys to destroy
+    @returns {SC.Store} the store.
   */
-  cancelRecords: function(recordType, ids, storeKeys) {
-    // TODO: Implement to call cancelRecord()
+  cancelRecords: function(recordTypes, ids, storeKeys) {
+    // TODO: Implement to call dataSource.cancel()
+    
+    var len, isArray, idx, id, recordType, storeKey;
+    source = this.get('dataSource');
+    ret=[];
+    if(storeKeys===undefined){
+      len = ids.length;
+      isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+      if (!isArray) recordType = recordTypes;
+      for(idx=0;idx<len;idx++) {
+        if (isArray) recordType = recordTypes[idx] || SC.Record;
+        id = ids ? ids[idx] : undefined ;
+        storeKey = recordType.storeKeyFor(id);
+        if(storekey) ret.push(storekey);
+      }
+    }else{
+      len = storeKeys.length;
+      for(idx=0;idx<len;idx++) {
+        storeKey = storeKeys ? storeKeys[idx] : undefined ;        
+        if(storekey) ret.push(storekey);
+      }
+    }
+    
+    if (source) source.cancelRecords.call(source, this, ret);
+    
+    return this ;
   },
 
   /**
-    // TODO: document
+    Cancels an inflight request for the passed record.  Depending on the 
+    server implementation, this could cancel an entire request, causing 
+    other records to also transition their current state.
+  
+    @param {SC.Record|Array} recordTypes class or array of classes
+    @param {Array} ids ids to destroy
+    @param {Array} storeKeys (optional) store keys to destroy
+    @returns {SC.Store} the store.
   */
-  cancelRecords: function(recordType, ids, storeKeys) {
-    // TODO: Implement to call dataSource.cancel()
+  cancelRecord: function(recordType, id, storeKey) {
+    // TODO: Implement to call cancelRecords()
+    
+    var array = this._TMP_RETRIEVE_ARRAY ;
+    if (storeKey !== undefined) {
+      array[0] = storeKey;
+      storeKey = array;
+      id = null ;
+    } else {
+      array[0] = id;
+      id = array;
+    }
+    
+    var ret = this.cancelRecords(recordType, id, storeKey);
+    array.length = 0 ;
+    return this;
   },
   
   // ..........................................................
@@ -898,11 +1047,35 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     optional id will remap the storeKey to the new record id.  This is 
     required when you commit a record that does not have an id yet.
     
-    @param {Number} storeKey record store key to cancel
+    @param {Number} storeKey record store key to change to READY_CLEAN state
     @returns {SC.Store} reciever
   */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
     // TODO: Implement
+    var status = this.readStatus(storeKey), K = SC.Record;
+    
+    // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
+    // DESTROYED_DIRTY
+    if (!(status & K.BUSY)) {
+      throw K.BAD_STATE_ERROR; // should never be called in this state
+      
+    }
+    
+    // otherwise, determine proper state transition
+    switch(status) {  
+      case K.BUSY_DESTROYING:
+        throw K.BAD_STATE_ERROR ;
+        
+      default:
+        status = K.READY_CLEAN;
+        break ;
+      
+    } 
+    this.writeStatus(storeKey, status) ;
+    if(dataHash!==undefined) this.writeDataHash(storeKey, dataHash, status) ;
+    if(newId!==undefined) this.replaceIdFor(storeKey, newId);
+    
+    return this ;
   },
   
   /**
@@ -914,6 +1087,20 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   dataSourceDidDestroy: function(storeKey) {
     // TODO: Implement
+    var status = this.readStatus(storeKey), K = SC.Record;
+
+    // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
+    // DESTROYED_DIRTY
+    if (!(status & K.BUSY)) {
+      throw K.BAD_STATE_ERROR; // should never be called in this state
+    }
+    // otherwise, determine proper state transition
+    else{
+      status = K.DESTROYED_CLEAN ;
+    } 
+    this.writeStatus(storeKey, status) ;
+
+    return this ;
   },
 
   /**
@@ -924,22 +1111,70 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   dataSourceDidError: function(storeKey, error) {
     // TODO: Implement
+    var status = this.readStatus(storeKey), K = SC.Record;
+
+    // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
+    // DESTROYED_DIRTY
+    if (!(status & K.BUSY)) {
+      throw K.BAD_STATE_ERROR; // should never be called in this state
+    }
+    // otherwise, determine proper state transition
+    else{
+      status = error ;
+    } 
+    this.writeStatus(storeKey, status) ;
+
+    return this ;
   },
 
   // ..........................................................
   // PUSH CHANGES FROM DATA SOURCE
   // 
   
-  pushRetrieve: function(recordType, id, dataHash, context, storeKey) {
+  pushRetrieve: function(recordType, id, dataHash, storeKey) {
     // TODO: Implement
+    if(storeKey===undefined){
+      storeKey = recordType.storeKeyFor(id);
+    }
+    status = this.readStatus(storeKey);
+    if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){ 
+      status = K.READY_CLEAN;
+      if(dataHash===undefined) this.writeStatus(storeKey, status) ;
+      else this.writeDataHash(storeKey, dataHash, status) ;
+      return YES;
+    }
+    //conflicted (ready)
+    return NO;
   },
   
-  pushDestroy: function(recordType, id, context, storeKey) {
+  pushDestroy: function(recordType, id, storeKey) {
     // TODO: Implement
+    if(storeKey===undefined){
+      storeKey = recordType.storeKeyFor(id);
+    }
+    status = this.readStatus(storeKey);
+    if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){
+      status = K.DESTROY_CLEAN;
+      this.writeStatus(storeKey, status) ;
+      return YES;
+    }
+    //conflicted (destroy)
+    return NO;
   },
 
-  pushError: function(recordType, id, error, context, storeKey) {
+  pushError: function(recordType, id, error, storeKey) {
     // TODO: Implement
+    if(storeKey===undefined){
+      storeKey = recordType.storeKeyFor(id);
+    }
+    status = this.readStatus(storeKey);
+    if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){
+      status = error;
+      this.writeStatus(storeKey, status) ;
+      return YES;
+    }
+    //conflicted (error)
+    return NO;
   },
   
   // ..........................................................

@@ -349,7 +349,8 @@ SC.Record.mixin( /** @scope SC.Record */ {
   // exceptions that can be raised when processing records
   BAD_STATE_ERROR:     new Error("Internal Inconsistency"),
   RECORD_EXISTS_ERROR: new Error("Record Exists"),
-  NOT_FOUND_ERROR:     new Error("Busy"),
+  NOT_FOUND_ERROR:     new Error("Not found "),
+  BUSY_ERROR:          new Error("Busy"),
   
   /**
     Given a primaryKey value for the record, returns the associated
