@@ -128,29 +128,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   revisions: null,
 
-  /** @private
-    Array contains the base revision for an attribute hash when it was first
-    cloned from the parent store.  If the attribute hash is edited and 
-    commited, the commit will fail if the parent attributes hash has been 
-    edited since.
-    
-    This is a form of optimistic locking, hence the name.
-    
-    Each store gets its own array of locks, which are selectively populated
-    as needed.
-    
-    Note that this is kept as an array because it will be stored as a dense 
-    array on some browsers, making it faster.
-    
-    @property {Array}
-  */
-  locks: null,
-
   /**
-    Array contains number indicating whether the related attributes have 
-    been cloned yet or not.
-    
-    Each store gets it own cloned array.
+    Array indicates whether a data hash is possibly in use by an external 
+    record for editing.  If a data hash is editable then it may be modified
+    at any time and therefore chained stores may need to clone the 
+    attributes before keeping a copy of them.
   
     Note that this is kept as an array because it will be stored as a dense 
     array on some browsers, making it faster.
@@ -159,18 +141,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   editables: null,
     
-  /** @private
-    An array that includes the store keys that have changed since the store
-    was last committed.  This array is used to sync data hash changes between
-    chained stores.  For a log changes that may actually be committed back to
-    the server see the changelog property.
-    
-    @property {Array}
-  */
-  chainedChanges: null,
-  
   /**
-    Log of changed storeKeys that need to be persisted back to the dataSource.
+    A set of storeKeys that need to be committed back to the data source. If
+    you call commitRecords() without passing any other parameters, the keys
+    in this set will be committed instead.
   
     @property {Hash}
   */
@@ -192,20 +166,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Hash} data hash or null
   */
   readDataHash: function(storeKey) {
-    var ret = this.dataHashes[storeKey], locks = this.locks, rev;
-    if (!ret || (locks && locks[storeKey])) return ret ; // already locked
-    
-    // lock attributes hash to the current version.
-    // copy references for prototype-based objects and save the current 
-    // revision number in the locks array so we can check for conflicts when
-    // committing changes later.
-    if (!locks) locks = this.locks = [];
-    this.dataHashes[storeKey] = this.dataHashes[storeKey]; 
-    this.statuses[storeKey] = this.statuses[storeKey];
-    rev = this.revisions[storeKey] = this.revisions[storeKey];
-    locks[storeKey] = rev || 1;
-    
-    return ret ;
+    return this.dataHashes[storeKey];
   },
   
   /** 
@@ -221,8 +182,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   readEditableDataHash: function(storeKey) {
     
-    // get the data hash.  use readDataHash() to handle locking
-    var ret = this.readDataHash(storeKey);
+    var ret = this.dataHashes[storeKey];
     if (!ret) return ret ; // nothing to do.
 
     // now if the attributes have not been cloned 
@@ -252,18 +212,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   writeDataHash: function(storeKey, hash, status) {
-    var locks = this.locks, rev ;
-    
-    // update dataHashes and optionally status.  Note that if status is not
-    // passed, we want to copy the reference to the status anyway to lock it
-    // in.
+
+    // update dataHashes and optionally status.
     if (hash) this.dataHashes[storeKey] = hash;
-    this.statuses[storeKey] = status ? status : (this.statuses[storeKey] || SC.Record.READY_NEW);
-    rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
-    
-    // make sure we lock if needed.
-    if (!locks) locks = this.locks = [];
-    if (!locks[storeKey]) locks[storeKey] = rev || 1;
+    if (status) this.statuses[storeKey] = status ;
     
     // also note that this hash is now editable
     var editables = this.editables;
@@ -276,7 +228,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Removes the data hash from the store.  This does not imply a deletion of
     the record.  You could be simply unloading the record.  Eitherway, 
-    removing the dataHash will be synced back to the parent store.
+    removing the dataHash will be synced back to the parent store but not to 
+    the server.
     
     Note that you can optionally pass a new status to go along with this. If
     you do not pass a status, it will change the status to SC.RECORD_EMPTY

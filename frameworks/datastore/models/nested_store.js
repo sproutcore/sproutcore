@@ -142,6 +142,94 @@ SC.NestedStore = SC.Store.extend(
   },
   
   // ..........................................................
+  // SHARED DATA STRUCTURES 
+  // 
+  
+  /** @private
+    JSON data hashes indexed by store key.  
+    
+    *IMPORTANT: Property is not observable*
+
+    Shared by a store and its child stores until you make edits to it.
+    
+    @property {Hash}
+  */
+  dataHashes: null,
+
+  /** @private
+    The current status of a data hash indexed by store key.
+    
+    *IMPORTANT: Property is not observable*
+
+    Shared by a store and its child stores until you make edits to it.
+    
+    @property {Hash}
+  */
+  statuses: null,
+    
+  /** @private
+    This array contains the revisions for the attributes indexed by the 
+    storeKey.  
+    
+    *IMPORTANT: Property is not observable*
+    
+    Revisions are used to keep track of when an attribute hash has been 
+    changed. A store shares the revisions data with its parent until it 
+    starts to make changes to it.
+    
+    @property {Hash}
+  */
+  revisions: null,
+
+  /** @private
+    Array contains the base revision for an attribute hash when it was first
+    cloned from the parent store.  If the attribute hash is edited and 
+    commited, the commit will fail if the parent attributes hash has been 
+    edited since.
+    
+    This is a form of optimistic locking, hence the name.
+    
+    Each store gets its own array of locks, which are selectively populated
+    as needed.
+    
+    Note that this is kept as an array because it will be stored as a dense 
+    array on some browsers, making it faster.
+    
+    @property {Array}
+  */
+  locks: null,
+
+  /**
+    Array contains number indicating whether the related attributes have 
+    been cloned yet or not.
+    
+    Each store gets it own cloned array.
+  
+    Note that this is kept as an array because it will be stored as a dense 
+    array on some browsers, making it faster.
+    
+    @property {Array}
+  */
+  editables: null,
+    
+  /** @private
+    An array that includes the store keys that have changed since the store
+    was last committed.  This array is used to sync data hash changes between
+    chained stores.  For a log changes that may actually be committed back to
+    the server see the changelog property.
+    
+    @property {Array}
+  */
+  chainedChanges: null,
+  
+  /**
+    Log of changed storeKeys that need to be persisted back to the dataSource.
+  
+    @property {Hash}
+  */
+  changelog: null,
+  
+  // ..........................................................
   // CORE ATTRIBUTE API
   // 
   // The methods in this layer work on data hashes in the store.  They do not
