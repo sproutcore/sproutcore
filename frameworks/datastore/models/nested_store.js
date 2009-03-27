@@ -248,6 +248,10 @@ SC.NestedStore = SC.Store.extend(
     // copy references for prototype-based objects and save the current 
     // revision number in the locks array so we can check for conflicts when
     // committing changes later.
+    // 
+    // Note that if the parent hash is editable, we will need to clone the 
+    // parent hash.
+    //
     if (!locks) locks = this.locks = [];
     this.dataHashes[storeKey] = this.dataHashes[storeKey]; 
     this.statuses[storeKey] = this.statuses[storeKey];
@@ -267,7 +271,7 @@ SC.NestedStore = SC.Store.extend(
   */
   readDataHash: function(storeKey) {
     var ret = this.dataHashes[storeKey];
-    if (this.get('lockOnRead') this._lock(storeKey);
+    if (this.get('lockOnRead')) this._lock(storeKey);
     return ret ;
   },
   
