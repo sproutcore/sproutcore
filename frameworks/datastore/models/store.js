@@ -157,6 +157,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // perform any changes that can impact records.  Usually you will not need 
   // to use these methods.
   
+  /**
+    Returns the current edit status of a storekey.  May be one of INHERITED,
+    EDITABLE, and LOCKED.  Used mostly for unit testing.
+    
+    @param {Number} storeKey the store key
+    @returns {Number} edit status
+  */
+  storeKeyEditState: function(storeKey) {
+    var editables = this.editables, locks = this.locks;
+    return (editables && editables[storeKey]) ? SC.Store.EDITABLE : (locks && locks[storeKey]) ? SC.Store.LOCKED : SC.Store.INHERITED ;
+  },
+   
   /** 
     Returns the data hash for the given storeKey.  This will also 'lock'
     the hash so that further edits to the parent store will no 
@@ -189,7 +201,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var editables = this.editables;
     if (!editables) editables = this.editables = [];
     if (!editables[storeKey]) {
-      editables[storeKey] = 1 ; // use number to store as dense array
+      editables[storeKey] = 1 ; 
       ret = this.dataHashes[storeKey] = SC.clone(ret);
     }
     return ret;
@@ -245,6 +257,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   removeDataHash: function(storeKey, status) {
 
     var rev ;
+
     // if we don't already have a dataHash, do nothing.
     if (!this.dataHashes[storeKey]) return this;
     
@@ -252,11 +265,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.dataHashes[storeKey] = null;  
     this.statuses[storeKey] = status || SC.RECORD_EMPTY;
     rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
-    
-    // record optimistic lock revision
-    var locks = this.locks;
-    if (!locks) locks = this.locks = [];
-    if (!locks[storeKey]) locks[storeKey] = rev || 1;
     
     // hash is gone and therefore no longer editable
     var editables = this.editables;
@@ -1099,6 +1107,10 @@ SC.Store.mixin({
   
   CHAIN_CONFLICT_ERROR: new Error("Nested Store Conflict"),
   NO_PARENT_STORE_ERROR: new Error("Parent Store Required"),
+
+  EDITABLE:  'editable',
+  LOCKED:    'locked',
+  INHERITED: 'inherited',
   
   /** @private
     This array maps all storeKeys to primary keys.  You will not normally
