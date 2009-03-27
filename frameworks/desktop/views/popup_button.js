@@ -8,75 +8,55 @@
 */
 sc_require('views/button');
 SC.PopupButtonView = SC.ButtonView.extend({
-	
 	/**
-	    Overriding the default SC.ButtonView#performKeyEquivalent method to pass 
-	    it onto the menu
-
-	    @param {string} keystring method name corresponding to the keys pressed 
-	    (i.e alt_shift_z)
-	    @param {DOMMouseEvent} evt mousedown event
-	  */
-	  performKeyEquivalent: function( keystring, evt )
+	  This property shows whether the menu is currently displayed or not
+	*/
+	  keyEquivalent:null,
+	  classNames:['sc-popup-button'],
+	/**
+	  Overriding the default SC.ButtonView#performKeyEquivalent method to pass 
+	  it onto the menu
+    
+	  @param {string} keystring method name corresponding to the keys pressed 
+	  (i.e alt_shift_z)
+	  @param {DOMMouseEvent} evt mousedown event
+	*/
+	  isSelected:NO,
+	  performKeyEquivalent: function( charCode, evt )
 	  {
-	    if (!this.get('isEnabled')) return false;
-
-	    // is it our own keyEquivalent? 
-	    if (arguments.callee.base.apply(this,arguments)) return true;
-
-	    // is it any of our menu items keyEquivalent?
-	    var menu = this.get('menu');
-	    return (!!menu && menu.performKeyEquivalent(keystring, evt));
+	    if (!this.get('isEnabled')) return false ;
+	    var menu = this.get('menu') ;
+	    return (!!menu && menu.performKeyEquivalent(charCode, evt)) ;
 	  },
-	 menuName: null,
-
 	  /**
-	    PopupMenu reference. Will be lazy-loaded from the 'menuName' string.
-	    @type {SC.PopupMenu}
+	    this is the Menu View associated with Popup Button
 	  */
-	  menu: function( key, value )
-	  {
-	    if ( value !== undefined ) 
-	    {
-	      value.set('isVisible', false);
-	      this.set('_menu', value);
-	    }
-	    if ( !this._menu )
-	    {
-	      var menu = SC.page.get(this.get('menuName'));
-	      if (menu) menu.set('isVisible', false);
-	      // calling set so that the isSelectedBinding is triggered
-	      this.set('_menu', menu);
-	    }
-	    return this._menu;
-	  }.property(),
+	  menu: null,
 
-	  /**
-	    Binds the button's selection state to the menu's visibility.
-	    @private
-	  */
-	  isSelectedBinding: '*_menu.isVisible',
+	  // /**
+	  //       Binds the button's selection state to the menu's visibility.
+	  //       @private
+	  //     */
+	  //     isSelectedBinding: '*menu.isVisible',
 	  /**
 	    Button action handler
 	    @param {DOMMouseEvent} evt mouseup event that triggered the action
 	  */
 	  action: function( evt )
 	  {
-	    var menu = this.get('menu');
+	    var menu = this.get('menu') ;
 	    // no menu to toggle... bail...
-	    if (!menu) return false;
-
+	    if (!menu) return false ;
 	    if (!this._didFirstRun) {
-	      // for some reason the menu#isVisible is true the first time we get 
-	      // it... and since this#isSelected is bound to it... we get an incorrect 
-	      // conditional check. hacking it here to keep moving.
-	      menu.popup(this, SC.PICKER_MENU);
-	      this._didFirstRun = true;
+	    // for some reason the menu#isVisible is true the first time we get 
+	    // it... and since this#isSelected is bound to it... we get an incorrect 
+	    // conditional check. hacking it here to keep moving.
+	    menu.popup(this) ;
+	    this._didFirstRun = true ;
 	    } else {
 	      // toggle the menu...
-	      this.get('isSelected') ? menu.set('isVisible', false) : menu.popup(this,SC.PICKER_MENU);
+	      this.get('isSelected') ? menu.set('isVisible', false) : menu.popup(this,SC.PICKER_MENU) ;
 	    }
-
-	    return true;
+      return true;
 	  }
 });

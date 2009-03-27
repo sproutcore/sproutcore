@@ -1,65 +1,88 @@
 .sc-menu-item-view {
-	position:relative;
-	background: #ffffff none repeat scroll 0 0;
-	border: 0px solid #ffffff;
+  position:relative;
+  background: #ffffff none repeat scroll 0 0;
+  border: none;
+  display:block;
 }
 
 .sc-menu-item-view a{
-	display: block;
-	top: 0;
-	height: 25px;
-	line-height: 22px;
-	text-shadow: #b0b0b0 0px 1px 0px;
-	text-decoration: none ;
-	text-align: left;
-	color: black;
+  display: block;
+  top: 0;
+  height: 25px;
+  line-height: 22px;
+  text-shadow: #b0b0b0 0px 1px 0px;
+  text-decoration: none ;
+  text-align: left;
+  color: black;
+}
+
+.sc-menu-item-view.disabled a{
+  color:#A0A0A0;
+}
+.sc-menu-item-view.disabled{
+  background-color:#E0E0E0;
+  border:none;
+  color:#A0A0A0;
 }
 
 .sc-menu-item-view span.separator{
-	display: block;
-	height: 1px;
-	border-bottom: 2px #cccccc solid;
+  display: block;
+  height: 1px;
+  border-bottom: 2px #cccccc solid;
 }
 
 .sc-menu-item-view span.branch-visible{
-	left: 25px;
+  left: 25px;
 }
 
 .sc-menu-item-view a.has-option {
-	
+  
 }
 
 .sc-menu-item-view a img {
-	left: 25px;
-	margin-right: 30px;
-	top: 0;
-	vertical-align: middle;
-	
+  left: 25px;
+  margin-right: 30px;
+  bottom: 25%;
+  vertical-align: middle;
+  
 }
 
+/*for the shortcut keys*/
+.sc-menu-item-view a span.shortCut {
+  position:absolute;
+  left:10px;
+  right:5px;
+  margin-right:5px;
+  text-align:right;
+  font-size: 12px;
+}
 
 /*Hovering over menu items*/
 .sc-menu-item-view a:hover {
-	background: #5A8EC6;
+  background: #5A8EC6;
 }
 
+.sc-menu-item-view.disabled a:hover {
+  background: #E0E0E0;
+}
 /* @end */
 
 .sc-menu-item-view div.checkbox {
-	background-image: sc_static('icons/mini_454545'); 
-	background-position: -66px -147px;
-	position: absolute;
-	display: block;
-	width: 12px;
-	height: 12px;
-	left: 5px;
-	top:  50%;
-	margin-top: -8px;
-	margin-right:16px;
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
+  background-image: sc_static('icons/mini_454545'); 
+  background-position: -66px -147px;
+  position: absolute;
+  display: block;
+  width: 12px;
+  height: 12px;
+  left: 5px;
+  top:  50%;
+  margin-top: -5px;
+  margin-right:16px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
 }
 
+.sc-menu-item-view.disabled div.checkbox
 .sc-menu-item-view div.checkbox.inactive {
-	background-image: sc_static('blank.gif'); 
+  background-image: sc_static('blank.gif'); 
 }

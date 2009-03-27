@@ -371,7 +371,7 @@ SC.PickerPane = SC.PalettePane.extend({
   
 
 
-  /** @private - click away picker. */
+   /** @private - click away picker. */
   click: function(evt) {
     var f=this.contentView.get("frame");
     if(!this.clickInside(f, evt)) this.remove();
