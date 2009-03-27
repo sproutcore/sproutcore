@@ -10,7 +10,7 @@ module("SC.MENUVIEW UI");
   var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
   var method = function() { console.log("done"); };
   var anchor = SC.ControlTestPane.design()
-    .add("anchor", SC.ButtonView, { 
+    .add("anchor", SC.PopupButtonView, { 
 	   title: "Menu",
 	   keyEquivalent:"ctrl_z",
 	   layout:{width:100,height:20}	
