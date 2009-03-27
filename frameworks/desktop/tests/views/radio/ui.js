@@ -200,5 +200,4 @@ test("enabled first", function() {
     idx++;
   });
   
-});
 })();

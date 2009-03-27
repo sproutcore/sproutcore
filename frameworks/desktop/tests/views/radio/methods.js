@@ -82,7 +82,6 @@ test("clicking on a radio button will change toggle the value", function() {
 });
 
 test("pressing mouseDown and then mouseUp anywhere in a radio button should toggle the selection", function() {
-
   var elem = view.get('layer'), input = SC.$('input', elem);
   
   SC.Event.trigger(elem, 'mousedown');
@@ -102,7 +101,6 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
 });
 
 test("isEnabled=NO should add disabled attr to input", function() {
-  
   SC.RunLoop.begin();
   view.set('isEnabled', NO);
   SC.RunLoop.end();

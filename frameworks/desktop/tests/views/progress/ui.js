@@ -203,46 +203,38 @@ test("changing value to a string", function() {
 module("SC.SliderView UI");
 
 test("basic", function() {
-  
   var view = pane.view('slider basic');
   
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
   equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
-
 });
 
 test("disabled", function() {
-  
   var view = pane.view('slider disabled');
   
   ok(view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
   equals(view.$('.sc-handle').css('left'), '50%', 'left of sc-handle should be 50%');
-  
 });
 
 test("basic value 100", function() {
-  
   var view = pane.view('slider value 100');
   
   ok(!view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
   equals(view.$('.sc-handle').css('left'), '100%', 'left of sc-handle should be 100%');
-  
 });
 
 test("basic step 20", function() {
-  
   var view = pane.view('slider basic step 20');
   
   ok(!view.$().hasClass('disabled'), 'should have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   ok(view.$('.sc-handle'), 'should have sc-handle class');
   equals(view.$('.sc-handle').css('left'), '60%', 'left of sc-handle should be 60%');
-  
 });
 })();

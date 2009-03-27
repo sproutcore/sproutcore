@@ -109,7 +109,6 @@ test("going over maximum slider limit", function() {
   
   // TODO: should we allow setting value higher then maximum?
   equals(view.get('value'), 150, 'value should now be 150');
-  
   equals(view.$('.sc-handle').css('left'), '100%', 'left of sc-handle should be 100%');
 });
 
@@ -124,7 +123,6 @@ test("going below minimum slider limit", function() {
   
   // TODO: should we allow setting value lower then minimum?
   equals(view.get('value'), -10, 'value should now be -10');
-  
   equals(view.$('.sc-handle').css('left'), '0%', 'left of sc-handle should be 0%');
 });
 */
