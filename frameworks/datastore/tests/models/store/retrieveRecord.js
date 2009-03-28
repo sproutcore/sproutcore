@@ -5,50 +5,121 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-var store, storeKey, json;
-module("SC.Store#retrieveRecord", {
+
+var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5,storeKey6,storeKey7,storeKey8,json;
+module("SC.Store#commitRecord", {
   setup: function() {
     
     store = SC.Store.create();
     
-    json = {
+    json1 = {
+      guid: "retrieveGUID1",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json2 = {
+      guid: "retrieveGUID2",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json3 = {
+      guid: "retrieveGUID3",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json4 = {
+      guid: "retrieveGUID4",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json5 = {
+      guid: "retrieveGUID5",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json6 = {
+      guid: "retrieveGUID6",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json7 = {
+      guid: "retrieveGUID7",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
+    json8 = {
+      guid: "retrieveGUID8",
       string: "string",
       number: 23,
       bool:   YES
     };
     
-    storeKey = SC.Store.generateStoreKey();
-
-    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+    storeKey1 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey1, json1, SC.Record.EMPTY);
+    storeKey2 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey2, json2, SC.Record.ERROR);
+    storeKey3 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey3, json3, SC.Record.DESTROYED_CLEAN);
+    storeKey4 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey4, json4, SC.Record.BUSY_DESTROYING);
+    storeKey5 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey5, json5, SC.Record.BUSY_CREATING);
+    storeKey6 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey6, json6, SC.Record.BUSY_COMMITING);
+    storeKey7 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey7, json7, SC.Record.DESTROY_DIRTY);
+    storeKey8 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey8, json8, SC.Record.READY_CLEAN);
+    
     store.commitChanges();
-  }
+    }
 });
-
-test("create a record", function() {
+    
+test("retrieve a record", function() {
   var sk;
-  var rec = SC.Record.create();;
-  hash = {
-    guid: "1234abcd",
-    string: "abcd",
-    number: 1,
-    bool:   NO
-    };
-  hash2 = {
-    string: "abcd",
-    number: 1,
-    bool:   NO
-  };
-//  debugger
-  rec = store.createRecord(SC.Record, hash);
-  ok(rec, "a record was created");
-  sk=store.storeKeyFor(SC.Record, rec.id());
-  equals(store.readDataHash(sk), hash, "data hashes are equivalent");
-  equals(rec.id(), "1234abcd", "guids are the same");
-//  store.changelog.contains(sk); 
-  rec = store.createRecord(SC.Record, hash2, "priKey");
-  ok(rec, "a record with a custom id was created");
-  sk=store.storeKeyFor(SC.Record, "priKey");
-  equals(store.readDataHash(sk), hash2, "data hashes are equivalent");
-  equals(rec.id(), "priKey", "guids are the same");
+  var rec = SC.Record.create();
+  store.retrieveRecord(undefined, undefined, storeKey1, YES);
+  status = store.readStatus( storeKey1);
+  equals(SC.Record.BUSY_LOADING, status, "the status shouldn't have changed.");
+  
+  store.retrieveRecord(undefined, undefined, storeKey2, YES);
+  status = store.readStatus( storeKey2);
+  equals(SC.Record.BUSY_LOADING, status, "the status shouldn't have changed.");
+  
+  store.retrieveRecord(undefined, undefined, storeKey3, YES);
+  status = store.readStatus( storeKey3);
+  equals(SC.Record.BUSY_LOADING, status, "the status shouldn't have changed.");
+  
+  try{
+    store.retrieveRecord(undefined, undefined, storeKey4, YES);
+  }catch(error){
+    equals(SC.Record.BUSY_ERROR.message, error.message, "should throw busy error");
+  }
+  try{
+    store.retrieveRecord(undefined, undefined, storeKey5, YES);
+  }catch(error){
+    equals(SC.Record.BUSY_ERROR.message, error.message, "should throw busy error");
+  }
+  try{
+    store.retrieveRecord(undefined, undefined, storeKey6, YES);
+  }catch(error){
+    equals(SC.Record.BUSY_ERROR.message, error.message, "should throw busy error");
+  }
+  try{
+    store.retrieveRecord(undefined, undefined, storeKey7, YES);
+  }catch(error){
+    equals(SC.Record.BAD_STATE_ERROR.message, error.message, "should throw bad_state error");
+  }
+  
+  store.retrieveRecord(undefined, undefined, storeKey3, YES);
+  status = store.readStatus( storeKey3);
+  ok(status & SC.Record.READY, "the status shouldn't have changed.");
   
 });

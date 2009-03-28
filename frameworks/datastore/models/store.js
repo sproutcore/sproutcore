@@ -706,7 +706,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var isArray, recordType, len, idx, storeKey, status, K = SC.Record, ret;
     var source = this.get('dataSource');
     isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
-    if (!isArray) recordType = recordsTypes;
+    if (!isArray) recordType = recordTypes;
 
     // if no storeKeys were passed, map recordTypes + ids
     len = (storeKeys === undefined) ? ids.length : storeKeys.length;
@@ -717,7 +717,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (storeKeys) {
         storeKey = storeKeys[idx];
       } else {
-        if (isArray) recordType = recordsTypes[idx];
+        if (isArray) recordType = recordTypes[idx];
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
       
@@ -859,7 +859,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (storeKeys) {
         storeKey = storeKeys[idx];
       } else {
-        if (isArray) recordType = recordsTypes[idx] || SC.Record;
+        if (isArray) recordType = recordTypes[idx] || SC.Record;
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
       
@@ -949,7 +949,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       len = storeKeys.length;
       for(idx=0;idx<len;idx++) {
         storeKey = storeKeys ? storeKeys[idx] : undefined ;        
-        if(storekey) ret.push(storekey);
+        if(storeKey) ret.push(storeKey);
       }
     }
     
