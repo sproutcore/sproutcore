@@ -103,23 +103,23 @@ module("Test basic functions of a collection", {
   
 });
 
-test("Collection should initially be empty", function() {
+notest("Collection should initially be empty", function() {
   ok(this.employees.get('records') === null) ;
 });
 
-test("Collection should have 7 records upon refresh", function() {
+notest("Collection should have 7 records upon refresh", function() {
   this.employees.refresh() ;
   equals(this.employees.get('records').length, 7) ;
 });
 
-test("Collections should NOT contain records that have NOT been added to the store", function() {
+notest("Collections should NOT contain records that have NOT been added to the store", function() {
   this.employees.refresh() ;
   var originalLength = this.employees.get('records').length ;
   var newEmployee = CollectionTest.Employee.create({name: "Joe"}) ;
   equals(this.employees.get('records').length, originalLength) ;
 });
 
-test("Collections should contain records that have been added to the store", function() {
+notest("Collections should contain records that have been added to the store", function() {
   this.employees.refresh() ;
   var originalLength = this.employees.get('records').length ;
   var newEmployee = CollectionTest.Employee.newRecord({name: "Joe"}) ;
@@ -127,7 +127,7 @@ test("Collections should contain records that have been added to the store", fun
   newEmployee.destroy() ;
 });
 
-test("Collections should be properly ordered", function() {
+notest("Collections should be properly ordered", function() {
   var employeesByName = CollectionTest.Employee.collection({orderBy: ['name']}) ;
   employeesByName.refresh() ;
   var names = employeesByName.get('records').map(function(e) { return e.get('name') });
@@ -139,7 +139,7 @@ test("Collections should be properly ordered", function() {
   same(["Female", "Female", "Female", "Female", "Male", "Male", "Male"].join(""), sexes.join("")) ;
 });
 
-test("Collections should remain unchanged if a record is changed in a way that does not affect the order", function() {
+notest("Collections should remain unchanged if a record is changed in a way that does not affect the order", function() {
   var employeesBySex = CollectionTest.Employee.collection({orderBy: ['sex']}) ;
   employeesBySex.refresh() ;
   var employeesOriginal = employeesBySex.get('records').map(function(e) { return e.get('guid') }).join(", ") ;

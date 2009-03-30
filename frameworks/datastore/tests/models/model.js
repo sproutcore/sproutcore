@@ -99,7 +99,7 @@ module("Test model comparisons with numeric guids", {
   
 });
 
-test("Records should exist in Store", function() {
+notest("Records should exist in Store", function() {
   ok(todoList1 !== null) ;
   ok(todoList2 !== null) ;
   ok(todo1 !== null) ;
@@ -107,7 +107,7 @@ test("Records should exist in Store", function() {
   ok(todo3 !== null) ;
 });
 
-test("Records should have correct guid", function() {
+notest("Records should have correct guid", function() {
   equals(1, todoList1.get('guid')) ;
   equals(2, todoList2.get('guid')) ;
   equals(1, todo1.get('guid')) ;
@@ -115,25 +115,25 @@ test("Records should have correct guid", function() {
   equals(3, todo3.get('guid')) ;
 });
 
-test("Todo 1 and 2 should be related to TodoList 1", function() {
+notest("Todo 1 and 2 should be related to TodoList 1", function() {
   ok(todoList1 === todo1.get('todoList'));
   ok(todoList1 === todo2.get('todoList'));
 });
 
-test("Todo 3 should not be related to TodoList 1", function() {
+notest("Todo 3 should not be related to TodoList 1", function() {
   ok(todoList1 !== todo3.get('todoList'));
 });
 
-test("Todo 3 should be related to TodoList 2", function() {
+notest("Todo 3 should be related to TodoList 2", function() {
   ok(todoList2 === todo3.get('todoList'));
 });
 
-test("Todo 1 and 2 should not be related to TodoList 2", function() {
+notest("Todo 1 and 2 should not be related to TodoList 2", function() {
   ok(todoList2 !== todo1.get('todoList'));
   ok(todoList2 !== todo2.get('todoList'));
 });
 
-test("TodoList 1 should be related to Todo 1 and 2", function() {
+notest("TodoList 1 should be related to Todo 1 and 2", function() {
   var records = todoList1.get('todos').get('records');
   var todosWeWanted = SC.Set.create([todo1, todo2]);
   var todosWeGot = SC.Set.create();
@@ -147,7 +147,7 @@ test("TodoList 1 should be related to Todo 1 and 2", function() {
   }
 });
 
-test("TodoList 2 should be related to Todo 3", function() {
+notest("TodoList 2 should be related to Todo 3", function() {
   var records = todoList2.get('todos').get('records');
   var todosWeWanted = SC.Set.create([todo3]);
   var todosWeGot = SC.Set.create();
@@ -161,7 +161,7 @@ test("TodoList 2 should be related to Todo 3", function() {
   }
 });
 
-test("Todos should be collectable using guids", function() {
+notest("Todos should be collectable using guids", function() {
   var c = SC.Collection.create({ recordType: ModelTest.Todo, conditions: { todoList: 1 } });
   c.refresh();
   var records = c.records();
@@ -177,7 +177,7 @@ test("Todos should be collectable using guids", function() {
   }
 });
 
-test("toString() should show model class name", function() {
+notest("toString() should show model class name", function() {
   var re = /^ModelTest\.Todo/;
   var str = todo1.toString();
   ok( str.match(re), "Todo 1 toString() should start with ModelTest.Todo, actually starts with " + str);
@@ -278,7 +278,7 @@ module("Test model comparisons with string guids", {
   
 });
 
-test("Objects should exist in Store", function() {
+notest("Objects should exist in Store", function() {
   ok(todoList1 !== null) ;
   ok(todoList2 !== null) ;
   ok(todo1 !== null) ;
@@ -286,25 +286,25 @@ test("Objects should exist in Store", function() {
   ok(todo3 !== null) ;
 });
 
-test("Todo 1 and 2 should be related to TodoList 1", function() {
+notest("Todo 1 and 2 should be related to TodoList 1", function() {
   ok(todoList1 === todo1.get('todoList'));
   ok(todoList1 === todo2.get('todoList'));
 });
 
-test("Todo 3 should not be related to TodoList 1", function() {
+notest("Todo 3 should not be related to TodoList 1", function() {
   ok(todoList1 !== todo3.get('todoList'));
 });
 
-test("Todo 3 should be related to TodoList 2", function() {
+notest("Todo 3 should be related to TodoList 2", function() {
   ok(todoList2 === todo3.get('todoList'));
 });
 
-test("Todo 1 and 2 should not be related to TodoList 2", function() {
+notest("Todo 1 and 2 should not be related to TodoList 2", function() {
   ok(todoList2 !== todo1.get('todoList'));
   ok(todoList2 !== todo2.get('todoList'));
 });
 
-test("TodoList 1 should be related to Todo 1 and 2", function() {
+notest("TodoList 1 should be related to Todo 1 and 2", function() {
   var records = todoList1.get('todos').get('records');
   var todosWeWanted = SC.Set.create([todo1, todo2]);
   var todosWeGot = SC.Set.create();
@@ -321,7 +321,7 @@ test("TodoList 1 should be related to Todo 1 and 2", function() {
   }
 });
 
-test("TodoList 2 should be related to Todo 3", function() {
+notest("TodoList 2 should be related to Todo 3", function() {
   var records = todoList2.get('todos').get('records');
   var todosWeWanted = SC.Set.create([todo3]);
   var todosWeGot = SC.Set.create();
@@ -335,7 +335,7 @@ test("TodoList 2 should be related to Todo 3", function() {
   }
 });
 
-test("Todos should be collectable using guids", function() {
+notest("Todos should be collectable using guids", function() {
   var c = SC.Collection.create({ recordType: ModelTest2.Todo, conditions: { todoList: '1' } });
   c.refresh();
   var records = c.records();
