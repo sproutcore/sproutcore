@@ -264,9 +264,13 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   //..........................................
   //Mouse Events Handling
   //..........................................
-
+  mouseUp:function(evt) {
+    //console.log('%@.%@'.fmt(this,"mouseUp"));
+    return NO;
+  },
+  
   mouseDown: function(evt) {
-      this.get('parentView').set('layout',{width:0,height:0}) ;
+    this.get('parentView').set('layout',{width:0,height:0}) ;
     if (!this.isEnabled) return YES ;
     var key = this.get('contentCheckboxKey') ;
     var content = this.get('content') ;
@@ -280,8 +284,9 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
       }
     }
     var menu = this.get('parentView') ;
-    this.get('parentView').remove() ;
-    return NO ;
+    if(menu)
+      menu.remove() ;
+    return YES ;
   },
 
   isCurrent: NO,
@@ -316,31 +321,13 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
     }
     return NO;
   },
-
   
   mouseExited: function(evt) {
-    //console.log('%@.%@'.fmt(this,evt.toString()));
+    //console.log('%@.%@'.fmt(this,"mouseExited"));
     this.isSelected = YES ;
-    this.get('parentView').set('currentItemSelected', null) ; 
+    var menu = this.get('parentView');
+    if(menu) menu.set('currentItemSelected', null) ; 
     return YES ;
-  },
-
-  mouseOver: function(evt) {
-    // if mouse was pressed down initially, start detection again
-    return YES ;
-  },
-  
-  mouseOut:function(evt) {
-    return YES ; 
-  },
-  
-  moveUp:function(sender,evt) {
-    return YES ;
-  },
-
-  moveDown:function(sender,evt) {
-    return YES ;
-  }
-  
+  }  
 
 });

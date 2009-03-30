@@ -22,7 +22,7 @@ SC.MenuView = SC.PickerPane.extend(SC.Control, {
     Set to YES to enabled the menu view, NO to disabled it.
   */
   isEnabled: YES,
-  firstResponder:YES,
+
   /**
     The key that explains whether each item is Enabled. If omitted, no icons will
     be displayed.
@@ -384,18 +384,26 @@ SC.MenuView = SC.PickerPane.extend(SC.Control, {
   //..........................................................
   
   moveUp:function(sender,evt) {
+    //console.log('%@.%@'.fmt(this,evt.toString()));
     return YES ;
   },
 
   moveDown:function(sender,evt) {
+    //console.log('%@.%@'.fmt(this,evt.toString()));
     return YES ;
   },
   
-
+  mouseUp:function(evt) {
+    var f=this.contentView.get("frame");
+    if(!this.clickInside(f, evt)) this.remove();
+    return NO;
+  },
+  
   mouseEntered:function(evt) {
+    //console.log('%@.%@'.fmt(this,evt.toString()));
     var parentView = this.get('parentView') ;
     if(parentView && parentView.kindOf(SC.MenuItemView)) {
-      return NO ;
+      return NO;
     }
   },
   
