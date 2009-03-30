@@ -36,12 +36,12 @@ SC.NestedStore = SC.Store.extend(
   hasChanges: NO,
 
   /**
-    This is a handle to the parent record that you can chain from. Also, if
-    you're a base record, you can specify a parent record that is a handle 
-    to perisistant storage.
-
-    @property
-    @type {SC.Store}
+    The parent store this nested store is chained to.  Nested stores must have
+    a parent store in order to function properly.  Normally, you create a 
+    nested store using the SC.Store#chain() method and this property will be
+    set for you.
+    
+    @property {SC.Store}
   */
   parentStore: null,
 
@@ -69,10 +69,64 @@ SC.NestedStore = SC.Store.extend(
     @property {Boolean} 
   */
   lockOnRead: YES,
-  
+
+  /** @private
+    Array contains the base revision for an attribute hash when it was first
+    cloned from the parent store.  If the attribute hash is edited and 
+    commited, the commit will fail if the parent attributes hash has been 
+    edited since.
+    
+    This is a form of optimistic locking, hence the name.
+    
+    Each store gets its own array of locks, which are selectively populated
+    as needed.
+    
+    Note that this is kept as an array because it will be stored as a dense 
+    array on some browsers, making it faster.
+    
+    @property {Array}
+  */
+  locks: null,
+
+  /** @private
+    An array that includes the store keys that have changed since the store
+    was last committed.  This array is used to sync data hash changes between
+    chained stores.  For a log changes that may actually be committed back to
+    the server see the changelog property.
+    
+    @property {Array}
+  */
+  chainedChanges: null,
+    
   // ..........................................................
   // STORE CHAINING
   // 
+  
+  /**
+    Resets a store's data hash contents to match its parent.
+    
+    @returns {SC.Store} receiver
+  */
+  reset: function() {
+    
+    // if we have a transient parent store, then we can just respawn from 
+    // its properties
+    var parentStore = this.get('parentStore');
+    if(parentStore) {
+      this.dataHashes = SC.beget(parentStore.dataHashes);
+      this.revisions  = SC.beget(parentStore.revisions);
+      this.statuses   = SC.beget(parentStore.statuses);
+    }
+    
+    // also, reset private temporary objects
+    this.chainedChanges = this.locks = this.editables = null;
+    this.changelog = null ;
+
+    // notify record instances that they may have changed
+    // TODO: Notify Records
+
+    this.set('hasChanges', NO);
+  },
   
   /**
     Propagate this store's changes to it's parent.  If the store does not 
@@ -83,9 +137,7 @@ SC.NestedStore = SC.Store.extend(
   */
   commitChanges: function(force) {
     var pstore = this.get('parentStore');
-    if (pstore) {
-      pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
-    }
+    pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
     this.reset(); // clear out custom changes 
     return this ;
   },
@@ -99,7 +151,7 @@ SC.NestedStore = SC.Store.extend(
     this.reset();
     return this ;
   },
-    
+  
   /**
     When you are finished working with a chained store, call this method to 
     tear it down.  This will also discard any pending changes.
@@ -140,45 +192,6 @@ SC.NestedStore = SC.Store.extend(
     
     this.set('hasChanges', NO);
   },
-  
-  // ..........................................................
-  // SHARED DATA STRUCTURES 
-  // 
-  
-  /** @private
-    Array contains the base revision for an attribute hash when it was first
-    cloned from the parent store.  If the attribute hash is edited and 
-    commited, the commit will fail if the parent attributes hash has been 
-    edited since.
-    
-    This is a form of optimistic locking, hence the name.
-    
-    Each store gets its own array of locks, which are selectively populated
-    as needed.
-    
-    Note that this is kept as an array because it will be stored as a dense 
-    array on some browsers, making it faster.
-    
-    @property {Array}
-  */
-  locks: null,
-
-  /** @private
-    An array that includes the store keys that have changed since the store
-    was last committed.  This array is used to sync data hash changes between
-    chained stores.  For a log changes that may actually be committed back to
-    the server see the changelog property.
-    
-    @property {Array}
-  */
-  chainedChanges: null,
-  
-  /**
-    Log of changed storeKeys that need to be persisted back to the dataSource.
-  
-    @property {Hash}
-  */
-  changelog: null,
   
   // ..........................................................
   // CORE ATTRIBUTE API
@@ -324,79 +337,12 @@ SC.NestedStore = SC.Store.extend(
     this.setIfChanged('hasChanges', YES);
     return this ;
   },
-  
-  /**
-    Resets a store's data hash contents to match its parent.
-    
-    @returns {SC.Store} receiver
-  */
-  reset: function() {
-    
-    // if we have a transient parent store, then we can just respawn from 
-    // its properties
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      this.dataHashes = SC.beget(parentStore.dataHashes);
-      this.revisions  = SC.beget(parentStore.revisions);
-      this.statuses   = SC.beget(parentStore.statuses);
-    }
-    
-    // also, reset private temporary objects
-    this.chainedChanges = this.locks = this.editables = null;
-    this.changelog = null ;
-
-    // notify record instances that they may have changed
-    // TODO: Notify Records
-
-    this.set('hasChanges', NO);
-  },
-  
-  /**
-    Propagate this store's changes to it's parent.  If the store does not 
-    have a parent, this has no effect other than to clear the change set.
-
-    @param {Boolean} force if YES, does not check for conflicts first
-    @returns {SC.Store} receiver
-  */
-  commitChanges: function(force) {
-    var parentStore = this.get('parentStore');
-    if (parentStore) {
-      parentStore.commitChangesFromNestedStore(this, this.chainedChanges, force);
-    }
-    this.reset(); // clear out custom changes 
-    return this ;
-  },
-
-  /**
-    Discard the changes made to this store and reset the store.
-    
-    @returns {SC.Store} receiver
-  */
-  discardChanges: function() {
-    this.reset();
-    return this ;
-  },
 
   // ..........................................................
   // SYNCING CHANGES
   // 
   
-  /** @private
-    Called by a nested store on a parent store to commit any changes from the
-    store.  This will copy any changed dataHashes as well as any persistant 
-    change logs.
-    
-    If the parentStore detects a conflict with the optimistic locking, it will
-    raise an exception before it makes any changes.  If you pass the 
-    force flag then this detection phase will be skipped and the changes will
-    be applied even if another resource has modified the store in the mean
-    time.
-  
-    @param {SC.Store} nestedStore the child store
-    @param {Array} changes the array of changed store keys
-    @param {Boolean} force
-    @returns {SC.Store} receiver
-  */
+  /** @private - adapt for nested store */
   commitChangesFromNestedStore: function(nestedStore, changes, force) {
 
     sc_super();
@@ -424,31 +370,7 @@ SC.NestedStore = SC.Store.extend(
   // HIGH-lEVEL RECORD API
   // 
   
-  /**
-    Retrieves records from the persistent store.  You should pass in a named
-    query that will be understood by one of the persistent stores you have
-    configured along with any optional parameters needed by the search.
-    
-    The return value is an SC.RecordArray that may be populated dynamically
-    by the server as data becomes available.  You can treat this object just
-    like any other object that implements SC.Array.
-    
-    h2. Query Keys
-    
-    The kind of query key you pass is generally determined by the type of 
-    persistent stores you hook up for your application.  Most stores, however,
-    will accept an SC.Record subclass as the query key.  This will return 
-    a RecordArray matching all instances of that class as is relevant to your
-    application.  
-    
-    Once you retrieve a RecordArray, you can filter the results even further
-    by using the filter() method, which may issue even more specific requests.
-    
-    @param {Object} queryKey key describing the type of records to fetch
-    @param {Hash} params optional additional parameters to pass along
-    @param {SC.Store} store this is a private param.  Do not pass
-    @returns {SC.RecordArray} matching set or null if no server handled it
-  */
+  /** @private - adapt for nested store */
   fetch: function(queryKey, params, store) {  
     var parentStore = this.get('parentStore');
     if (store === undefined) store = this ; // first store sets to itself
@@ -458,25 +380,8 @@ SC.NestedStore = SC.Store.extend(
   // ..........................................................
   // CORE RECORDS API
   // 
-  // The methods in this section can be used to manipulate records without 
-  // actually creating record instances.
   
-  /**
-    Retrieves a record from the server.  If the record has already been loaded
-    in the store, then this method will simply return.  Otherwise if your 
-    store has a dataSource, this will call the dataSource to retrieve the 
-    record.  Generally you will not need to call this method yourself.  
-    Instead you can just use find().
-    
-    This will not actually create a record instance but it will initiate a 
-    load of the record from the server.  You can subsequently get a record 
-    instance itself using materializeRecord()
-    
-    @param {SC.Record|Array} recordTypes class or array of classes
-    @param {Array} ids ids to destroy
-    @param {Array} storeKeys (optional) store keys to destroy
-    @returns {Array} storeKeys to be retrieved
-  */
+  /** @private - adapt for nested store */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
     var pstore = this.get('parentStore');
     return pstore.retrieveRecords(recordTypes, ids, storeKeys, _isRefresh);
