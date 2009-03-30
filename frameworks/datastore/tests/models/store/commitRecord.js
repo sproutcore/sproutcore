@@ -79,19 +79,19 @@ test("commit a record", function() {
   var rec = SC.Record.create();
   store.commitRecord(undefined, undefined, storeKey1);
   status = store.readStatus( storeKey1);
-  equals(SC.Record.READY_CLEAN, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.READY_CLEAN, "the status shouldn't have changed.");
   
   store.commitRecord(undefined, undefined, storeKey2);
   status = store.readStatus( storeKey2);
-  equals(SC.Record.BUSY_CREATING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_CREATING, "the status shouldn't have changed.");
   
   store.commitRecord(undefined, undefined, storeKey3);
   status = store.readStatus( storeKey3);
-  equals(SC.Record.BUSY_COMMITTING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_COMMITTING, "the status should be SC.Record.BUSY_COMMITTING");
   
   store.commitRecord(undefined, undefined, storeKey4);
   status = store.readStatus( storeKey4);
-  equals(SC.Record.BUSY_DESTROYING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_DESTROYING, "the status should be SC.Record.BUSY_DESTROYING");
    
    
   

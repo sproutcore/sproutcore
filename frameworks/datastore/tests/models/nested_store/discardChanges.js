@@ -22,7 +22,7 @@ module("SC.NestedStore#discardChanges", {
     
     storeKey = SC.Store.generateStoreKey();
 
-    parent.writeDataHash(storeKey, json, SC.READY_CLEAN);
+    parent.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
     parent.editables = null;
     
     store = parent.chain(); // create nested store
@@ -58,7 +58,7 @@ function testStateTransition() {
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'data edit state');
   equals(store.get('hasChanges'), NO, 'hasChanges should be NO');
   equals(store.readDataHash(storeKey), json, 'data hash should return parent hash again');
-  equals(store.readStatus(storeKey), SC.READY_CLEAN, 'should return record status from parent');
+  equals(store.readStatus(storeKey), parent.readStatus(storeKey), 'should return record status from parent');
   ok(!store.chainedChanges || !store.chainedChanges.length, 'should have no chainedChanges queued');
   
   // should NOT invoke commitChangesFromNestedStore

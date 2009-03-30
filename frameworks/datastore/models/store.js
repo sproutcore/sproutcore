@@ -976,12 +976,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   commitRecords: function(recordTypes, ids, storeKeys) {
     // TODO: Implement to call dataSource.commitRecords.call()...
     
-    // pass up to parentStore if we have one
-    var parentStore = this.get('parentStore');
-    if (parentStore) {
-      return parentStore.commitRecords(recordTypes, ids, storeKeys);
-    }
-    
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
     var isArray, recordType, len, idx, storeKey, status, K = SC.Record;
@@ -1019,13 +1013,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
-        }
-        if(status===K.READY_DIRTY){
+        } else if (status===K.READY_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_COMMITING);
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
-        }
-        if(status===K.DESTROY_DIRTY){
+        } else if (status===K.DESTROYED_DIRTY) {
           this.writeStatus(K.BUSY_DESTROYING);
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
