@@ -673,7 +673,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         len = storeKeys.length;
         for(idx=0;idx<len;idx++) {
           storeKey = storeKeys ? storeKeys[idx] : undefined ;
-          thisrecordDidChange(undefined, undefined, storeKey);
+          this.recordDidChange(undefined, undefined, storeKey);
         }
       }
       return this ;  
@@ -933,8 +933,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // TODO: Implement to call dataSource.cancel()
     
     var len, isArray, idx, id, recordType, storeKey;
-    source = this.get('dataSource');
-    ret=[];
+    var source = this.get('dataSource'), ret=[];
     if(storeKeys===undefined){
       len = ids.length;
       isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
@@ -943,7 +942,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (isArray) recordType = recordTypes[idx] || SC.Record;
         id = ids ? ids[idx] : undefined ;
         storeKey = recordType.storeKeyFor(id);
-        if(storekey) ret.push(storekey);
+        if(storeKey) ret.push(storeKey);
       }
     }else{
       len = storeKeys.length;
@@ -1062,15 +1061,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // otherwise, determine proper state transition
-    switch(status) {  
-      case K.BUSY_DESTROYING:
-        throw K.BAD_STATE_ERROR ;
-        
-      default:
-        status = K.READY_CLEAN;
-        break ;
-      
-    } 
+    if(status===K.BUSY_DESTROYING) {
+      throw K.BAD_STATE_ERROR ;
+    } else status = K.READY_CLEAN ;
+
     this.writeStatus(storeKey, status) ;
     if(dataHash!==undefined) this.writeDataHash(storeKey, dataHash, status) ;
     if(newId!==undefined) this.replaceIdFor(storeKey, newId);
@@ -1133,6 +1127,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
     // TODO: Implement
+    var K = SC.Record;
+    
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
     }
@@ -1149,6 +1145,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   pushDestroy: function(recordType, id, storeKey) {
     // TODO: Implement
+    var K = SC.Record;
+
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
     }
@@ -1164,6 +1162,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   pushError: function(recordType, id, error, storeKey) {
     // TODO: Implement
+    var K = SC.Record;
+
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
     }
