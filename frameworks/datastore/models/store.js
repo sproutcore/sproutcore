@@ -341,7 +341,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (records && records[storeKey]) {
       var queue = this.recordNotificationQueue;
       if (!queue) queue = this.recordNotificationQueue = {};
-      queue[storeKey] = statusOnly || NO;
+      queue[storeKey] = queue[storeKey] || !statusOnly;
       this.invokeOnce(this._flushRecordNotificationQueue);
     }
 
@@ -366,9 +366,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for(storeKey in queue) {
       if (!queue.hasOwnProperty(storeKey)) continue ; 
       if (rec = records[storeKey]) {
-        if (queue[storeKey] === YES) {
-          rec.notifyPropertyChange('status');
-        } else rec.allPropertiesDidChange();
+        rec.storeDidChangeProperties(queue[storeKey]) ;
       }
     }
     

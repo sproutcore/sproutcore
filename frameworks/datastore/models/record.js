@@ -101,17 +101,6 @@ SC.Record = SC.Object.extend(
   //
 
   /**
-    Returns YES if the status matches any of the passed statuses.
-  
-    @return {Boolean}
-  */
-  hasStatus: function(statuses) {
-    var len = arguments.length, idx, s = 0;
-    for(idx=0;idx<len;idx++) s = s | arguments[idx];
-    return this.get('status') & s ;
-  },
-  
-  /**
     Refresh the record from the persistent store.  If the record was loaded 
     from a persistent store, then the store will be asked to reload the 
     record data from the server.  If the record is new and exists only in 
@@ -120,10 +109,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   refresh: function() { 
-    if (this.hasStatus(SC.Record.READY_CLEAN, SC.Record.ERROR)) {
-      var pkey = this.get(this.get('primaryKey'));
-      this.get('store').refreshRecord(this);
-    }
+    this.get('store').refreshRecord(null, null, this.get('storeKey'));
     return this ;
   },
   
@@ -136,14 +122,10 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   destroy: function() { 
-    if (!this.hasStatus(SC.Record.BUSY_LOADING, SC.Record.READY_CLEAN)) {
-      this.get('store').destroyRecord(this);      
-    }
+    this.get('store').destroyRecord(null, null, this.get('storeKey'));
     return this ;
   },
 
-  _TMP_RECORDS_ARY: [],
-  
   /**
     You can invoke this method anytime you need to make the record as dirty.
     This will cause the record to be commited when you commitChanges()
@@ -155,9 +137,7 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} reciever
   */
   recordDidChange: function() {
-    if (!this.hasStatus(SC.Record.DESTROYED_CLEAN, SC.RECORD_EMPTY)) {
-      this.get('store').recordDidChange(null, null, this.storeKey);
-    }
+    this.get('store').recordDidChange(null, null, this.get('storeKey'));
     return this ;
   },
   
@@ -237,22 +217,6 @@ SC.Record = SC.Object.extend(
   },
   
   /**
-    Reads the value for the passed attribute key.  If the value is an array
-    or hash, then the object will be cloned the first time it is returned.
-    
-    Use this method if you need to retrieve an array or hash that you intend
-    to then edit.  This will only clone the array the first time if it is 
-    needed.
-    
-    @param {String} key the attribute to read
-    @param {Object} the object value
-  */
-  editableAttribute: function(key) {
-    var store = this.get('store'), storeKey = this.storeKey;
-    return store.getWriteableAttribute(storeKey, key) ;
-  },
-  
-  /**
     This will return the raw attributes that you can edit directly.  If you 
     make changes to this hash, be sure to call beginEditing() before you get
     the attributes and endEditing() aftwards.
@@ -261,9 +225,7 @@ SC.Record = SC.Object.extend(
   **/
   attributes: function() {
     var store = this.get('store'), storeKey = this.storeKey;
-    var attrs = store.dataHashes[storeKey];
-    if (!attrs) attrs = store.dataHashes[storeKey] = {} ;
-    return attrs ;
+    return store.readEditableDataHash(storeKey);
   }.property(),
   
   /**
@@ -273,9 +235,13 @@ SC.Record = SC.Object.extend(
     
     @returns {SC.Record} receiver
   */
-  storeDidChangeAttributes: function() {
-    // TODO: Notify of property changes more selectively?
-    this.allPropertiesDidChange(); 
+  storeDidChangeProperties: function(allProperties) {
+    if (allProperties) {
+      // TODO: Notify of property changes more selectively?
+      this.allPropertiesDidChange(); 
+    } else {
+      this.notifyPropertyChange('status');
+    }
   },
   
   /**
@@ -295,16 +261,14 @@ SC.Record = SC.Object.extend(
       // the store do the housekeeping...
       var primaryKey = this.get('primaryKey');
       this.writeAttribute(key,value);
-      
-      // no need to relocate if there wasn't an old key...
+
+      // update ID if needed
       if (key === primaryKey) {
-        this.get('store').replaceGuid(this.storeKey, value);
+        SC.Store.replaceIdFor(this.get('storeKey'), value);
       }
       
-    } else {
-      value = this.readAttribute(key);
     }
-    return value;
+    return this.readAttribute(key);
   },
   
   // ...............................
