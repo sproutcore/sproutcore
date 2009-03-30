@@ -6,7 +6,10 @@
 /*globals module ok equals same test MyApp */
 
 
-var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5,storeKey6,storeKey7,storeKey8,json;
+var store, storeKey1, storeKey2, storeKey3, storeKey4, storeKey5, storeKey6;
+var storeKey7, storeKey8, json, json1, json2, json3, json4, json5, json6 ;
+var json7, json8;
+
 module("SC.Store#commitRecord", {
   setup: function() {
     
@@ -77,8 +80,6 @@ module("SC.Store#commitRecord", {
     store.writeDataHash(storeKey7, json7, SC.Record.DESTROY_DIRTY);
     storeKey8 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey8, json8, SC.Record.READY_CLEAN);
-    
-    store.commitChanges();
     }
 });
     
@@ -99,23 +100,23 @@ test("retrieve a record", function() {
   
   try{
     store.retrieveRecord(undefined, undefined, storeKey4, YES);
-  }catch(error){
-    equals(SC.Record.BUSY_ERROR.message, error.message, "should throw busy error");
+  }catch(error1){
+    equals(SC.Record.BUSY_ERROR.message, error1.message, "should throw busy error");
   }
   try{
     store.retrieveRecord(undefined, undefined, storeKey5, YES);
-  }catch(error){
-    equals(SC.Record.BUSY_ERROR.message, error.message, "should throw busy error");
+  }catch(error2){
+    equals(SC.Record.BUSY_ERROR.message, error2.message, "should throw busy error");
   }
   try{
     store.retrieveRecord(undefined, undefined, storeKey6, YES);
-  }catch(error){
-    equals(SC.Record.BUSY_ERROR.message, error.message, "should throw busy error");
+  }catch(error3){
+    equals(SC.Record.BUSY_ERROR.message, error3.message, "should throw busy error");
   }
   try{
     store.retrieveRecord(undefined, undefined, storeKey7, YES);
-  }catch(error){
-    equals(SC.Record.BAD_STATE_ERROR.message, error.message, "should throw bad_state error");
+  }catch(error4){
+    equals(SC.Record.BAD_STATE_ERROR.message, error4.message, "should throw bad_state error");
   }
   
   store.retrieveRecord(undefined, undefined, storeKey3, YES);

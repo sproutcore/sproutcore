@@ -6,6 +6,9 @@
 /*globals module ok equals same test MyApp */
 
 var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5, json;
+var json1, json2, json3, json4, json5, json6, json7;
+var storeKey6, storeKey7;
+
 module("SC.Store#cancelRecord", {
   setup: function() {
     
@@ -68,8 +71,6 @@ module("SC.Store#cancelRecord", {
     store.writeDataHash(storeKey6, json6, SC.Record.READY_ERROR);
     storeKey7 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey7, json7, SC.Record.READY_DESTROYED_CLEAN);
-    
-    store.commitChanges();
   }
 });
 

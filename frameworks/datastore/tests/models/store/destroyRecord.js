@@ -5,7 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5, json;
+var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5, storeKey6, json;
+var json1, json2, json3, json4, json5, json6;
+
 module("SC.Store#createRecord", {
   setup: function() {
     
@@ -60,8 +62,6 @@ module("SC.Store#createRecord", {
     store.writeDataHash(storeKey5, json5, SC.Record.READY_NEW);
     storeKey6 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey6, json6, SC.Record.READY_CLEAN);
-    
-    store.commitChanges();
   }
 });
 
@@ -78,13 +78,13 @@ test("destroy a record", function() {
   
   try{
     store.destroyRecord(undefined, undefined, storeKey3);
-  }catch(error){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error.message, "the status shouldn't have changed.");
+  }catch(error1){
+    equals(SC.Record.NOT_FOUND_ERROR.message, error1.message, "the status shouldn't have changed.");
   }
   try{
     store.destroyRecord(undefined, undefined, storeKey4);
-  }catch(error){
-    equals(SC.Record.BUSY_ERROR.message, error.message, "the status shouldn't have changed.");
+  }catch(error2){
+    equals(SC.Record.BUSY_ERROR.message, error2.message, "the status shouldn't have changed.");
     
   }
   store.destroyRecord(undefined, undefined, storeKey5);

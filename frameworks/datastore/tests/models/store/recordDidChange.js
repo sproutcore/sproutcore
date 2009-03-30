@@ -20,7 +20,6 @@ module("SC.Store#recordDidChange", {
     storeKey = SC.Store.generateStoreKey();
 
     store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-    store.commitChanges();
   }
 });
 

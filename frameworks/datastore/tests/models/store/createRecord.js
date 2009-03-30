@@ -5,7 +5,8 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-var store, storeKey, json;
+var store, storeKey, json, hash, hash2;
+
 module("SC.Store#createRecord", {
   setup: function() {
     
@@ -20,13 +21,12 @@ module("SC.Store#createRecord", {
     storeKey = SC.Store.generateStoreKey();
 
     store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-    store.commitChanges();
   }
 });
 
 test("create a record", function() {
   var sk;
-  var rec = SC.Record.create();;
+  var rec = SC.Record.create();
   hash = {
     guid: "1234abcd",
     string: "abcd",

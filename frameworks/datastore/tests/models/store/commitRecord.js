@@ -5,7 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5, json;
+var store, storeKey1, storeKey2, storeKey3, storeKey4, storeKey5, storeKey6;
+var storeKey7, json, json1, json2, json3, json4, json5, json6, json7;
+
 module("SC.Store#commitRecord", {
   setup: function() {
     
@@ -68,8 +70,6 @@ module("SC.Store#commitRecord", {
     store.writeDataHash(storeKey6, json6, SC.Record.READY_ERROR);
     storeKey7 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey7, json7, SC.Record.READY_DESTROYED_CLEAN);
-    
-    store.commitChanges();
   }
 });
 
@@ -97,18 +97,18 @@ test("commit a record", function() {
   
   try{
     store.commitRecord(undefined, undefined, storeKey5);
-  }catch(error){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error.message, "the status shouldn't have changed.");
+  }catch(error1){
+    equals(SC.Record.NOT_FOUND_ERROR.message, error1.message, "the status shouldn't have changed.");
   }
   try{
     store.commitRecord(undefined, undefined, storeKey6);
-  }catch(error){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error.message, "the status shouldn't have changed.");
+  }catch(error2){
+    equals(SC.Record.NOT_FOUND_ERROR.message, error2.message, "the status shouldn't have changed.");
   }
   try{
     store.commitRecord(undefined, undefined, storeKey7);
-  }catch(error){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error.message, "the status shouldn't have changed.");
+  }catch(error3){
+    equals(SC.Record.NOT_FOUND_ERROR.message, error3.message, "the status shouldn't have changed.");
   }
   
 });
