@@ -20,13 +20,13 @@ module("SC.Record#destroy", {
       array: [1,2,3] 
     };
     
-    MyApp.foo = MyApp.store.createRecord(MyApp.json, MyApp.Foo);
+    MyApp.foo = MyApp.store.createRecord(MyApp.Foo, MyApp.json);
     
     // modify store so that everytime refreshRecords() is called it updates 
     // callInfo
     callInfo = null ;
-    MyApp.store.__orig = MyApp.store.destroyRecords;
-    MyApp.store.destroyRecords = function(records) {
+    MyApp.store.__orig = MyApp.store.destroyRecord;
+    MyApp.store.destroyRecord = function(records) {
       callInfo = SC.A(arguments) ; // save method call
       MyApp.store.__orig.apply(MyApp.store, arguments); 
     };
@@ -34,35 +34,37 @@ module("SC.Record#destroy", {
 });
 
 test("calling destroy on a newRecord will mark the record as destroyed and calls destroyRecords on the store", function() {
-  ok(MyApp.foo.get('newRecord'), 'precond Record.newRecord should be YES');
-  ok(MyApp.foo.get('status') !== SC.RECORD_DELETED, 'precond - status is not DELETED');
+  equals(MyApp.foo.get('status'), SC.Record.READY_NEW, 'precond - status is READY_NEW');
 
   MyApp.foo.destroy();
 
-  same(callInfo, [[MyApp.foo]], 'destroyRecords() should not be called');
-  equals(MyApp.foo.get('status'), SC.RECORD_DELETED, 'status should be SC.RECORD_DELETED');
+  same(callInfo, [null, null, MyApp.foo.storeKey], 'destroyRecords() should not be called');
+    
+  equals(MyApp.foo.get('status'), SC.Record.DESTROYED_CLEAN, 'status should be SC.Record.DESTROYED_CLEAN');
 });
 
-test("calling destroy on existing record should call destroyRecords() on store", function() {
-  MyApp.foo.newRecord = NO; // fake it till you make it
-  ok(MyApp.foo.get('status') !== SC.RECORD_DELETED, 'precond - status is not DELETED');
+test("calling destroy on existing record should call destroyRecord() on store", function() {
+
+  // Fake it till you make it...
+  MyApp.store.writeStatus(MyApp.foo.storeKey, SC.Record.READY_CLEAN)
+    .dataHashDidChange(MyApp.foo.storeKey, null, YES);
+    
+  equals(MyApp.foo.get('status'), SC.Record.READY_CLEAN, 'precond - status is READY CLEAN');
 
   MyApp.foo.destroy();
 
-  same(callInfo, [[MyApp.foo]], 'destroyRecords() should not be called');
-  equals(MyApp.foo.get('status'), SC.RECORD_DELETED, 'status should be SC.RECORD_DELETED');
+  same(callInfo, [null, null, MyApp.foo.storeKey], 'destroyRecord() should not be called');
+  equals(MyApp.foo.get('status'), SC.Record.DESTROYED_DIRTY, 'status should be SC.Record.DESTROYED_DIRTY');
 });
 
 test("calling destroy on a record that is already destroyed should do nothing", function() {
 
   // destroy once
   MyApp.foo.destroy();
-  equals(MyApp.foo.get('status'), SC.RECORD_DELETED, 'status should be SC.RECORD_DELETED');
-  callInfo = null ; // reset call info
+  equals(MyApp.foo.get('status'), SC.Record.DESTROYED_CLEAN, 'status should be DESTROYED_CLEAN');
   
   MyApp.foo.destroy();
-  equals(MyApp.foo.get('status'), SC.RECORD_DELETED, 'status should be SC.RECORD_DELETED');
-  equals(callInfo, null, 'store.destroyRecords() should not be called');
+  equals(MyApp.foo.get('status'), SC.Record.DESTROYED_CLEAN, 'status should be DESTROYED_CLEAN');
 });
 
 test("should return receiver", function() {

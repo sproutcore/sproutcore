@@ -235,12 +235,13 @@ SC.Record = SC.Object.extend(
     
     @returns {SC.Record} receiver
   */
-  storeDidChangeProperties: function(allProperties) {
-    if (allProperties) {
-      // TODO: Notify of property changes more selectively?
-      this.allPropertiesDidChange(); 
-    } else {
+  storeDidChangeProperties: function(statusOnly) {
+    if (statusOnly) {
       this.notifyPropertyChange('status');
+    } else {
+      // TODO: Notify of property changes more selectively?
+      this.notifyPropertyChange('status');
+      this.allPropertiesDidChange(); 
     }
   },
   

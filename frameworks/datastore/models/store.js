@@ -255,12 +255,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   removeDataHash: function(storeKey, status) {
-
     var rev ;
     
      // don't use delete -- that will allow parent dataHash to come through
     this.dataHashes[storeKey] = null;  
-    this.statuses[storeKey] = status || SC.RECORD_EMPTY;
+    this.statuses[storeKey] = status || SC.Record.EMPTY;
     rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
     
     // hash is gone and therefore no longer editable
@@ -281,7 +280,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // use readDataHash to handle optimistic locking.  this could be inlined
     // but for now this minimized copy-and-paste code.
     this.readDataHash(storeKey);
-    return this.statuses[storeKey];
+    return this.statuses[storeKey] || SC.Record.EMPTY;
   },
   
   /**
@@ -335,14 +334,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   _notifyRecordPropertyChange: function(storeKey, statusOnly) {
 
-    var records = this.records ;
+    var records = this.records, rec ;
     
     // schedule
-    if (records && records[storeKey]) {
-      var queue = this.recordNotificationQueue;
-      if (!queue) queue = this.recordNotificationQueue = {};
-      queue[storeKey] = queue[storeKey] || !statusOnly;
-      this.invokeOnce(this._flushRecordNotificationQueue);
+    if (records && (rec=records[storeKey])) {
+      rec.storeDidChangeProperties(statusOnly);
     }
 
     // pass along to nested stores
@@ -356,21 +352,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     return this;
-  },
-  
-  _flushRecordNotificationQueue: function() {
-    var queue = this.recordNotificationQueue, records = this.records;
-    if (!queue || !records) return this ; // nothing to do  
-
-    var storeKey, rec ;
-    for(storeKey in queue) {
-      if (!queue.hasOwnProperty(storeKey)) continue ; 
-      if (rec = records[storeKey]) {
-        rec.storeDidChangeProperties(queue[storeKey]) ;
-      }
-    }
-    
-    this.recordNotificationQueue = null ; // done!
   },
   
   /**
