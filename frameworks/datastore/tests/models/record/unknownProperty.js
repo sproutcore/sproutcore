@@ -20,7 +20,7 @@ module("SC.Record#unknownProperty", {
       array: [1,2,3] 
     };
     
-    MyApp.foo = MyApp.store.createRecord(MyApp.json, MyApp.Foo);
+    MyApp.foo = MyApp.store.createRecord(MyApp.Foo, MyApp.json);
   }
 });
 
