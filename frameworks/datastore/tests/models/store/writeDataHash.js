@@ -5,7 +5,10 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-var store, storeKey1, storeKey2, json;
+// NOTE: The test below are based on the Data Hashes state chart.  This models
+// the "write" event in the NestedStore portion of the diagram.
+
+var store, child, storeKey, json;
 module("SC.Store#writeDataHash", {
   setup: function() {
     store = SC.Store.create();
@@ -16,132 +19,112 @@ module("SC.Store#writeDataHash", {
       bool:   YES
     };
     
-    storeKey1 = SC.Store.generateStoreKey();
-    storeKey2 = SC.Store.generateStoreKey();
-
-    // write existing record
-    store.writeDataHash(storeKey1, json, SC.Record.BUSY_LOADING);
-    store.commitChanges();
+    storeKey = SC.Store.generateStoreKey();
+    child = store.chain();  // test multiple levels deep
   }
 });
 
 // ..........................................................
-// ADD NEW
+// BASIC STATE TRANSITIONS
 // 
-test("writing a new data hash and status", function() {
-  json = SC.clone(json); // create new instance for testing
+
+// The transition from each base state performs the same operation, so just
+// run the same test on each state.
+function testWriteDataHash() {
+  var oldrev = store.revisions[storeKey];
   
-  ok(!store.dataHashes[storeKey2], 'precond - should not have record in dataHashes');
+  // perform test
+  var json2 = { foo: "bar" };
+  equals(store.writeDataHash(storeKey, json2, SC.Record.READY_NEW), store, 'should return receiver');
   
-  store.writeDataHash(storeKey2, json, SC.Record.BUSY_LOADING);
+  // verify
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'new edit state should be editable');
   
-  // check high-level result
-  var result = store.readDataHash(storeKey2);
-  equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey2), SC.Record.BUSY_LOADING, 'should return status');
+  equals(store.readDataHash(storeKey), json2, 'should have new json data hash');
+  equals(store.readStatus(storeKey), SC.Record.READY_NEW, 'should have new status');
+
+  equals(store.revisions[storeKey], oldrev, 'should not change revision');
+  if (!SC.none(oldrev)) {
+    ok(store.revisions.hasOwnProperty(storeKey), 'should clone reference to revision');
+  }
+}
+
+
+test("edit state=LOCKED - also writes a NEW hash", function() {
   
-  // check extra internals
-  ok(store.editables[storeKey2], 'data hash should be marked editable');
-  ok(store.locks[storeKey2], 'store should have a lock set');
-  ok(!store.revisions[storeKey2], 'store should not have revision yet since that is not set until you call dataHashDidChange() (actual: %@)'.fmt(SC.inspect(store.revisions)));
+  // test preconditions
+  equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - edit state should be locked');
   
-  // should not add to changes
-  ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey2), 'should not yet be in changed store keys');
+  testWriteDataHash();
 });
 
-
-
-
-test("writing a new data hash with no status", function() {
-  json = SC.clone(json); // create new instance for testing
+test("edit state=EDITABLE - also overwrites an EXISTING hash", function() {
   
-  ok(!store.dataHashes[storeKey2], 'precond - should not have record in dataHashes');
+  // test preconditions
+  store.writeDataHash(storeKey, { foo: "bar" });
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'precond - edit state should be editable');
   
-  store.writeDataHash(storeKey2, json);
-  
-  // check high-level result
-  var result = store.readDataHash(storeKey2);
-  equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey2), SC.Record.READY_NEW, 'should return status');
+  testWriteDataHash();
+
 });
 
 // ..........................................................
-// REPLACE EXISTING
+// PROPOGATING TO NESTED STORES
 // 
-test("replacing a new data hash and status", function() {
-  json = SC.clone(json); // create new instance for testing
+
+test("change should propogate to child if child edit state = INHERITED", function() {
+
+  // verify preconditions
+  equals(child.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - child edit state should be INHERITED');
+
+  // perform change
+  var json2 = { version: 2 };
+  store.writeDataHash(storeKey, json2, SC.Record.READY_NEW);
   
-  ok(store.dataHashes[storeKey1], 'precond - should have record in dataHashes');
-  
-  var oldrev = store.revisions[storeKey1];
-  
-  store.writeDataHash(storeKey1, json, SC.Record.BUSY_LOADING);
-  
-  // check high-level result
-  var result = store.readDataHash(storeKey1);
-  equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey1), SC.Record.BUSY_LOADING, 'should return status');
-  
-  // check extra internals
-  ok(store.editables[storeKey1], 'data hash should be marked editable');
-  ok(store.locks[storeKey1], 'store should have a lock set');
-  equals(store.revisions[storeKey1], oldrev, 'store have old revision still');
-  
-  // should not add to changes
-  ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey1), 'should not yet be in changed store keys');
+  // verify
+  same(child.readDataHash(storeKey), json2, 'child should pick up change');
+  equals(child.readStatus(storeKey), SC.Record.READY_NEW, 'child should pick up new status');
 });
 
-test("replacing an existing data hash with no status", function() {
-  json = SC.clone(json); // create new instance for testing
+
+function testLockedOrEditableChild() {
+  // perform change
+  var json2 = { version: 2 };
+  store.writeDataHash(storeKey, json2, SC.Record.READY_NEW);
   
-  ok(store.dataHashes[storeKey1], 'precond - should have record in dataHashes');
-  var oldStatus = store.readStatus(storeKey1);
+  // verify
+  same(child.readDataHash(storeKey), json, 'child should NOT pick up change');
+  equals(child.readStatus(storeKey), SC.Record.READY_CLEAN, 'child should pick up new status');
+}
+
+
+test("change should not propogate to child if child edit state = LOCKED", function() {
+  store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+  store.editables = null ; // clear to simulate locked mode.
   
-  store.writeDataHash(storeKey1, json);
-  
-  // check high-level result
-  var result = store.readDataHash(storeKey1);
-  equals(result, json, 'should return same json we just wrote');
-  equals(store.readStatus(storeKey1), oldStatus, 'should return old status');
+  // verify preconditions
+  child.readDataHash(storeKey);
+  equals(child.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - child edit state should be LOCKED');
+
+  testLockedOrEditableChild();
 });
 
-// ..........................................................
-// MULTIPLE EDITS
-// 
-test("replacing a data hash multiple times", function() {
-  json = SC.clone(json); // create new instance for testing
-  
-  ok(store.dataHashes[storeKey1], 'precond - should have record in dataHashes');
-  ok(!store.locks || !store.locks[storeKey1], 'precond - should not have lock');
-  ok(!store.editables || !store.editables[storeKey1], 'precond - should not be editable');
-  
-  var oldrev = store.revisions[storeKey1];
-  
-  // first edit
-  store.writeDataHash(storeKey1, json);
-  equals(store.readDataHash(storeKey1), json, 'should return same json');
-  
-  // check extra internals
-  ok(store.editables[storeKey1], 'data hash should be marked editable');
-  ok(store.locks[storeKey1], 'store should have a lock set');
-  equals(store.revisions[storeKey1], oldrev, 'store have old revision still');
-  
-  // should not add to changes
-  ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey1), 'should not yet be in changed store keys');
-  
-  var newLock = store.locks[storeKey1];
+test("change should not propogate to child if child edit state = EDITABLE", function() {
+  store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+  store.editables = null ; // clear to simulate locked mode.
 
+  // verify preconditions
+  child.readEditableDataHash(storeKey);
+  equals(child.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'precond - child edit state should be EDITABLE');
 
-  // second edit
-  var json2 = {} ;
-  store.writeDataHash(storeKey1, json2);
-  equals(store.readDataHash(storeKey1), json2, 'should return new json');
-  
-  // check extra internals
-  ok(store.editables[storeKey1], 'data hash should be marked editable');
-  equals(store.locks[storeKey1], newLock, 'store should have same lock set during first edit');
-  equals(store.revisions[storeKey1], oldrev, 'store have old revision still');
-  
-  // should not add to changes
-  ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey1), 'should not yet be in changed store keys');
+  testLockedOrEditableChild();
 });
+
+
+
+
+
+
+
+
+

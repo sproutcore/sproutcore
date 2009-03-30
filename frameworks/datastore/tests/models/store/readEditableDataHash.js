@@ -5,6 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
+// NOTE: The test below are based on the Data Hashes state chart.  This models
+// the "read_editable" event in the Store portion of the diagram.
+
 var store, storeKey, json;
 module("SC.Store#readEditableDataHash", {
   setup: function() {
@@ -19,49 +22,53 @@ module("SC.Store#readEditableDataHash", {
     storeKey = SC.Store.generateStoreKey();
 
     store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-    store.commitChanges();
   }
 });
 
-test("reading unmodified record from root store", function() {
-  ok(!store.locks || !store.locks[storeKey], 'precond - no lock yet on record');
-  ok(!store.editables || !store.editables[storeKey], 'preccond - record should not be editable yet');
+test("data state=LOCKED", function() {
   
-  var result = store.readEditableDataHash(storeKey);
-  ok(result !== json, 'should not return same json instance');
-  same(result, json, 'new data hash should be a clone of original');
-  
-  ok(store.locks[storeKey], 'should add a lock');
-  ok(store.dataHashes.hasOwnProperty(storeKey), 'should copy reference to json');
-  ok(store.revisions.hasOwnProperty(storeKey), 'should copy reference to revision');
+  // test preconditions
+  store.editables = null ; // manually reset for testing state
+  equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - edit state should be LOCKED');
+  var oldrev = store.revisions[storeKey] ;
 
-  ok(store.editables && store.editables[storeKey], 'should mark item as editable');
+  // perform read
+  var ret = store.readEditableDataHash(storeKey);
   
-  ok(!store.chainedChanges || (store.chainedChanges.indexOf(storeKey)<0), 'chainedChanges should not include storeKey since it has not technically changed yet');
+  // validate
+  same(ret, json, 'should return equivalent json object');
+  ok(!(ret===json), 'should not return same json instance');
+  
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'edit state should be editable');
+  
+  // should not change revisions, but should copy it...
+  equals(store.revisions[storeKey], oldrev, 'should not change revision');
+  if (!SC.none(oldrev)) {
+    ok(store.revisions.hasOwnProperty(storeKey), 'should clone revision reference');
+  }
+  
 });
 
-test("should return null when accessing an unknown storeKey", function() {
-  equals(store.readEditableDataHash(20000000), null, 'shuld return null for non-existant store key');
-});
-
-test("reading unmodified record from chained store", function() {
-  var parent = store;
-  store = parent.chain();
-
-  ok(!store.locks || !store.locks[storeKey], 'precond - no lock yet on record');
-  ok(!store.dataHashes.hasOwnProperty(storeKey), 'precond - record is currently inherited from parent store');
-  ok(!store.statuses.hasOwnProperty(storeKey), 'precond - record is currently inherited from parent store');
+test("data state=EDITABLE", function() {
   
-  var result = store.readEditableDataHash(storeKey);
-  ok(result !== json, 'should not return same json instance');
-  same(result, json, 'new data hash should be a clone of original');
+  // test preconditions
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'precond - edit state should be EDITABLE');
+  var oldrev = store.revisions[storeKey] ;
 
-  ok(store.locks[storeKey], 'should add a lock');
-  ok(store.dataHashes.hasOwnProperty(storeKey), 'should copy reference to json');
-  ok(store.statuses.hasOwnProperty(storeKey), 'should copy reference to status');
-  ok(store.revisions.hasOwnProperty(storeKey), 'should copy reference to revision');
-
-  ok(store.editables && store.editables[storeKey], 'should mark item as editable');
-    
-  ok(!store.chainedChanges || (store.chainedChanges.indexOf(storeKey)<0), 'chainedChanges should not include storeKey since it has not technically changed yet');
+  // perform read
+  var ret = store.readEditableDataHash(storeKey);
+  
+  // validate
+  equals(ret, json, 'should return same editable json instance');
+  
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'edit state should be editable');
+  
+  // should not change revisions, but should copy it...
+  equals(store.revisions[storeKey], oldrev, 'should not change revision');
+  if (!SC.none(oldrev)) {
+    ok(store.revisions.hasOwnProperty(storeKey), 'should clone revision reference');
+  }
+  
 });
+
+

@@ -6,12 +6,12 @@
 /*globals module ok equals same test MyApp */
 
 // NOTE: The test below are based on the Data Hashes state chart.  This models
-// the "remove" event in the Store portion of the diagram.
+// the "write" event in the NestedStore portion of the diagram.
 
-var store, child, storeKey, json;
-module("SC.Store#removeDataHash", {
+var parent, store, child, storeKey, json;
+module("SC.NestedStore#writeDataHash", {
   setup: function() {
-    store = SC.Store.create();
+    parent = SC.Store.create();
     
     json = {
       string: "string",
@@ -21,8 +21,10 @@ module("SC.Store#removeDataHash", {
     
     storeKey = SC.Store.generateStoreKey();
 
-    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
-    store.editables = null; // manually patch to setup test state
+    parent.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+    parent.editables = null; // manually patch to setup test state
+    
+    store = parent.chain(); // create nested store
     child = store.chain();  // test multiple levels deep
   }
 });
@@ -33,17 +35,18 @@ module("SC.Store#removeDataHash", {
 
 // The transition from each base state performs the same operation, so just
 // run the same test on each state.
-function testRemoveDataHash() {
+function testWriteDataHash() {
   var oldrev = store.revisions[storeKey];
   
   // perform test
-  equals(store.removeDataHash(storeKey, SC.Record.DESTROYED_CLEAN), store, 'should return receiver');
+  var json2 = { foo: "bar" };
+  equals(store.writeDataHash(storeKey, json2, SC.Record.READY_NEW), store, 'should return receiver');
   
   // verify
-  equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'new edit state should be locked');
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'new edit state should be editable');
   
-  equals(store.readDataHash(storeKey), null, 'should have NO json data');
-  equals(store.readStatus(storeKey), SC.Record.DESTROYED_CLEAN, 'should have new status');
+  equals(store.readDataHash(storeKey), json2, 'should have new json data hash');
+  equals(store.readStatus(storeKey), SC.Record.READY_NEW, 'should have new status');
 
   equals(store.revisions[storeKey], oldrev, 'should not change revision');
   if (!SC.none(oldrev)) {
@@ -52,12 +55,21 @@ function testRemoveDataHash() {
 }
 
 
+test("edit state=INHERITED", function() {
+  
+  // test preconditions
+  equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - edit state should be inherited');
+  
+  testWriteDataHash();
+});
+
 test("edit state=LOCKED", function() {
   
   // test preconditions
+  store.readDataHash(storeKey);
   equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - edit state should be locked');
   
-  testRemoveDataHash();
+  testWriteDataHash();
 
 });
 
@@ -67,25 +79,26 @@ test("edit state=EDITABLE", function() {
   store.readEditableDataHash(storeKey);
   equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'precond - edit state should be editable');
   
-  testRemoveDataHash();
+  testWriteDataHash();
 
 });
 
 // ..........................................................
-// REMOVE NON-EXISTING 
+// WRITING NEW VS EXISTING
 // 
 
-test("remove a non-existing hash", function() {
+test("writing a new hash", function() {
   storeKey = SC.Store.generateStoreKey(); // new store key!
-  equals(store.readDataHash(storeKey), null, 'precond - store should not have a data hash for store key yet');
+  equals(parent.readDataHash(storeKey), null, 'precond - parent should not have a data hash for store key yet');
+  equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - edit status should be inherited');
   
   // perform write
-  equals(store.removeDataHash(storeKey, SC.Record.DESTROYED_CLEAN), store, 'should return receiver');
+  equals(store.writeDataHash(storeKey, json, SC.Record.READY_NEW), store, 'should return receiver');
   
   // verify change
-  equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'new status should be locked');
-  equals(store.readDataHash(storeKey), null, 'should still be null');
-  equals(store.readStatus(storeKey), SC.Record.DESTROYED_CLEAN, 'should have new record status');
+  equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'new status should be editable');
+  equals(store.readDataHash(storeKey), json, 'should match new json');
+  equals(store.readStatus(storeKey), SC.Record.READY_NEW, 'should have new record status');
 });
 
 // ..........................................................
@@ -98,21 +111,30 @@ test("change should propogate to child if child edit state = INHERITED", functio
   equals(child.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - child edit state should be INHERITED');
 
   // perform change
-  store.removeDataHash(storeKey, SC.Record.DESTROYED_CLEAN);
+  var json2 = { version: 2 };
+  store.writeDataHash(storeKey, json2, SC.Record.READY_NEW);
   
   // verify
-  same(child.readDataHash(storeKey), null, 'child should pick up change');
-  equals(child.readStatus(storeKey), SC.Record.DESTROYED_CLEAN, 'child should pick up new status');
+  same(child.readDataHash(storeKey), json2, 'child should pick up change');
+  equals(parent.readDataHash(storeKey), json, 'parent should still have old json');
+  
+  equals(child.readStatus(storeKey), SC.Record.READY_NEW, 'child should pick up new status');
+  equals(parent.readStatus(storeKey), SC.Record.READY_CLEAN, 'parent should still have old status');
+
 });
 
 
 function testLockedOrEditableChild() {
   // perform change
-  store.removeDataHash(storeKey, SC.Record.DESTROYED_CLEAN);
+  var json2 = { version: 2 };
+  store.writeDataHash(storeKey, json2, SC.Record.READY_NEW);
   
   // verify
   same(child.readDataHash(storeKey), json, 'child should NOT pick up change');
+  equals(parent.readDataHash(storeKey), json, 'parent should still have old json');
+  
   equals(child.readStatus(storeKey), SC.Record.READY_CLEAN, 'child should pick up new status');
+  equals(parent.readStatus(storeKey), SC.Record.READY_CLEAN, 'parent should still have old status');
 }
 
 

@@ -67,7 +67,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.NestedStore} new nested store chained to receiver
   */
   chain: function() {
-    var ret = SC.Store.create({ parentStore: this }) ;
+    var ret = SC.NestedStore.create({ parentStore: this }) ; 
     var nested = this.nestedStores;
     if (!nested) nested =this.nestedStores = [];
     nested.push(ret);
@@ -158,15 +158,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // to use these methods.
   
   /**
-    Returns the current edit status of a storekey.  May be one of INHERITED,
-    EDITABLE, and LOCKED.  Used mostly for unit testing.
+    Returns the current edit status of a storekey.  May be one of EDITABLE or
+    LOCKED.  Used mostly for unit testing.
     
     @param {Number} storeKey the store key
     @returns {Number} edit status
   */
   storeKeyEditState: function(storeKey) {
     var editables = this.editables, locks = this.locks;
-    return (editables && editables[storeKey]) ? SC.Store.EDITABLE : (locks && locks[storeKey]) ? SC.Store.LOCKED : SC.Store.INHERITED ;
+    return (editables && editables[storeKey]) ? SC.Store.EDITABLE : SC.Store.LOCKED ;
   },
    
   /** 
@@ -193,15 +193,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Hash} the attributes hash
   */
   readEditableDataHash: function(storeKey) {
-    
+    // read the value - if there is no hash just return; nothing to do
     var ret = this.dataHashes[storeKey];
     if (!ret) return ret ; // nothing to do.
 
-    // now if the attributes have not been cloned 
+    // clone data hash if not editable
     var editables = this.editables;
     if (!editables) editables = this.editables = [];
     if (!editables[storeKey]) {
-      editables[storeKey] = 1 ; 
+      editables[storeKey] = 1 ; // use number to store as dense array
       ret = this.dataHashes[storeKey] = SC.clone(ret);
     }
     return ret;
@@ -257,9 +257,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   removeDataHash: function(storeKey, status) {
 
     var rev ;
-
-    // if we don't already have a dataHash, do nothing.
-    if (!this.dataHashes[storeKey]) return this;
     
      // don't use delete -- that will allow parent dataHash to come through
     this.dataHashes[storeKey] = null;  
@@ -299,7 +296,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Call this method whenever you modify some editable data hash to register
     with the Store that the attribute values have actually changed.  This will
-    do the book-keeping necessary to track the change across stores.
+    do the book-keeping necessary to track the change across stores including 
+    managing locks.
     
     @param {Number|Array} storeKeys one or more store keys that changed
     @returns {SC.Store} receiver
@@ -322,21 +320,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     for(idx=0;idx<len;idx++) {
       if (isArray) storeKey = storeKeys[idx];
-
       this.revisions[storeKey] = rev;
-
-      // add storeKey to changed set.
-      var changes = this.chainedChanges;
-      if (!changes) changes = this.chainedChanges = SC.Set.create();
-      changes.add(storeKey);
     }
-    
-    // note that we now have changes
-    this.setIfChanged('hasChanges', YES);
     
     return this ;
   },
-
+  
   // ..........................................................
   // HIGH-LEVEL RECORD API
   // 
