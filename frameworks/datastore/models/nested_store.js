@@ -353,10 +353,11 @@ SC.NestedStore = SC.Store.extend(
     var my_locks = this.locks, my_changes = this.chainedChanges,len,storeKey;
     if (!my_locks) my_locks = this.locks = [];
     if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
-    
+
+    len = changes.length ;
     for(i=0;i<len;i++) {
       storeKey = changes[i];
-      if (!my_locks[storeKey]) my_locks[storeKey] = my_revisions[storeKey]||1;
+      if (!my_locks[storeKey]) my_locks[storeKey] = ps_revisions[storeKey]||1;
       my_changes.add(storeKey);
     }
 
