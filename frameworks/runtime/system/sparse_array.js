@@ -257,7 +257,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     
     // update length
     var delta = objects.length - amt ;
-    if (delta>0 && !SC.none(this._length)) {
+    if (delta!==0 && !SC.none(this._length)) {
       this.propertyWillChange('length');
       this._length += delta;
       this.propertyDidChange('length');
@@ -280,3 +280,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   }
       
 }) ;
+
+SC.SparseArray.array = function(len) {
+  return this.create({ _length: len||0 });
+};

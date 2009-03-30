@@ -2,11 +2,11 @@
 // SC.SparseArray Tests
 // ========================================================================
 /*globals module test ok isObj equals expects */
-var objectA = 23, objectB = 12, objectC = 31;
+var objectA = 23, objectB = 12, objectC = 31, numbers, new_numbers;
 module("SC.SparseArray") ;
 
 test("new SparseArray has expected length", function() {
-  var ary = SC.SparseArray.create(10000) ;
+  var ary = SC.SparseArray.array(10000) ;
   equals(10000, ary.get('length'), "length") ;
 });
 
@@ -21,22 +21,22 @@ test("creating a clone of a sparse array", function() {
 	var ary = SC.SparseArray.create(6);
 	// var arr = ["captain","crash","and the","beauty","queen","from Mars"];
 	// 	ary = arr;
-	// ary.provideContentAtIndex(0, "captain");
-	// ary.provideContentAtIndex(1, "crash");
-	// ary.provideContentAtIndex(2, "and the");
-	// ary.provideContentAtIndex(3, "beauty");
-	// ary.provideContentAtIndex(4, "queen");
-	// ary.provideContentAtIndex(5, "from Mars");
+	// ary.provideObjectAtIndex(0, "captain");
+	// ary.provideObjectAtIndex(1, "crash");
+	// ary.provideObjectAtIndex(2, "and the");
+	// ary.provideObjectAtIndex(3, "beauty");
+	// ary.provideObjectAtIndex(4, "queen");
+	// ary.provideObjectAtIndex(5, "from Mars");
 	// var cpy = ary.clone(); alert(cpy);
 });
 
-test("Update the sparse array using provideContentAtIndex", function() {
+test("Update the sparse array using provideObjectAtIndex", function() {
 	var ary = SC.SparseArray.create(2);
 	var obj = "not";
-	ary.provideContentAtIndex(0, obj);
+	ary.provideObjectAtIndex(0, obj);
 	equals(obj, ary._sa_content[0],"Content at 0th index");
 	obj = "now";
-	ary.provideContentAtIndex(1, obj);
+	ary.provideObjectAtIndex(1, obj);
 	equals(obj, ary._sa_content[1],"Content at 1st index");
 });
 
@@ -60,7 +60,7 @@ module("SC.replace",{
 });
 
 test("element to be added is at idx > length of array ", function() {
-	var ary = SC.SparseArray.create(5) ;
+	var ary = SC.SparseArray.array(5) ;
 	equals(5, ary.get('length'), "length") ;
 	ary = numbers;
 	ary.replace(7,3,new_numbers,"put the new number at idx>len ");
@@ -68,7 +68,7 @@ test("element to be added is at idx > length of array ", function() {
 });
 
 test("element to be added is such that amt + idx > length of array ", function() {
-	var ary = SC.SparseArray.create(5) ;
+	var ary = SC.SparseArray.array(5) ;
 	equals(5, ary.get('length'), "length") ;
 	ary = numbers;
 	ary.replace(4,3,new_numbers,"put the new number at idx < len ");
@@ -76,7 +76,7 @@ test("element to be added is such that amt + idx > length of array ", function()
 });
 
 test("element to be added is at idx > length of array ", function() {
-	var ary = SC.SparseArray.create(5) ;
+	var ary = SC.SparseArray.array(5) ;
 	equals(5, ary.get('length'), "length") ;
 	ary = numbers;
 	ary.replace(2,3,new_numbers,"put the new number overlapping existing numbers ");

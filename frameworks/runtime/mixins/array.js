@@ -370,7 +370,8 @@ if (!Array.prototype.indexOf) {
       // if we replaced exactly the same number of items, then pass only the
       // replaced range.  Otherwise, pass the full remaining array length 
       // since everything has shifted
-      if (amt !== objects.length) amt = this.length - idx;
+      var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
+      if (amt !== len) amt = this.length - idx;
       this.enumerableContentDidChange(idx, amt) ;
       return this ;
     },

@@ -6,7 +6,7 @@
 var arrays, observer ; // global variables
 
 // Test the SproutCore Array interface on a custom object.
-DummyArray = SC.Object.extend(SC.Array, {
+var DummyArray = SC.Object.extend(SC.Array, {
   
   length: 0,
   
@@ -33,7 +33,7 @@ DummyArray = SC.Object.extend(SC.Array, {
 module("Array, DummyArray and SC.SparseArray", {
 
   setup: function() {
-    arrays = [[], DummyArray.create(), SC.SparseArray.create()] ;
+    arrays = [[], DummyArray.create(), SC.SparseArray.array()] ;
     
     // this will record observed changes.
     observer = SC.Object.create({
@@ -61,7 +61,7 @@ module("Array, DummyArray and SC.SparseArray", {
         };
       
         this.didNotify = function(key) {
-          return this.notified[key] == true ;
+          return !!this.notified[key] ;
         } ;
         
         this.resetObservers() ;
@@ -78,9 +78,9 @@ test("[].replace(0,0,'X') => ['X'] + notify", function() {
     observer.observe('[]') ;
     observer.a.replace(0,0,['X']) ;
     
-    equals(observer.a.length, 1) ;
-    equals(observer.a.objectAt(0), 'X') ;
-    equals(YES, observer.didNotify('[]'), 'didNotify([])') ;
+    equals(observer.a.get('length'), 1, 'observer.a.length') ;
+    equals(observer.a.objectAt(0), 'X', 'observer.a.objectAt') ;
+    equals(observer.didNotify('[]'), YES, 'didNotify([])') ;
   }
 });
 
@@ -93,10 +93,10 @@ test("[A,B,C,D].replace(1,2,X) => [A,X,D] + notify", function() {
     
     observer.a.replace(1,2,['X']) ;
     
-    equals(observer.a.get('length'), 3) ;
-    equals(observer.a.objectAt(0), 'A') ;
-    equals(observer.a.objectAt(1), 'X') ;
-    equals(observer.a.objectAt(2), 'D') ;
+    equals(observer.a.get('length'), 3, 'a.length - %@'.fmt(SC.A(observer.a))) ;
+    equals(observer.a.objectAt(0), 'A', 'a.objectAt(0)') ;
+    equals(observer.a.objectAt(1), 'X', 'a.objectAt(1)') ;
+    equals(observer.a.objectAt(2), 'D', 'a.objectAt(2)') ;
     equals(observer.didNotify("[]"), YES) ;
   }
 });
@@ -146,9 +146,9 @@ test("[A,B,C,D].replace(2,2) => [A,B] + notify", function() {
     
     observer.a.replace(2,2) ;
     
-    equals(observer.a.get('length'), 2) ;
-    equals(observer.a.objectAt(0), 'A') ;
-    equals(observer.a.objectAt(1), 'B') ;
+    equals(observer.a.get('length'), 2, 'a.length') ;
+    equals(observer.a.objectAt(0), 'A', 'a.objectAt(0)') ;
+    equals(observer.a.objectAt(1), 'B', 'a.objectAt(1)') ;
     equals(observer.didNotify("[]"), YES) ;
   }
 });
@@ -222,17 +222,20 @@ test("[A,B,C].set('[]',[X,Y]) => [X,Y] + notify", function() {
 });
 
 test("[A,B,C] should be Enumerable", function() {
-  var ary2 = arrays ;
+  var ary2 = arrays, cnt, items;
+  
+  var iterator = function( item, idx ) {
+    items.push(item) ;
+    cnt++ ;
+  };
+  
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     observer.a = ary2[idx2] ;
     observer.a.replace(0, 0, 'A B C'.w()) ;
     
-    var cnt = 0 ;
-    var items = [] ;
-    observer.a.forEach(function( item, idx ) {
-      items.push(item) ;
-      cnt++ ;
-    }) ;
+    cnt = 0 ;
+    items = [] ;
+    observer.a.forEach(iterator) ;
     equals(cnt, observer.a.get('length')) ;
     equals('A', items[0]) ;
     equals('B', items[1]) ;
