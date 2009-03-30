@@ -325,6 +325,117 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     return this ;
   },
+
+  /**
+    Resets the store content.  This will clear all internal data for all
+    records, resetting them to an EMPTY state.  You generally do not want
+    to call this method yourself, though you may override it.
+    
+    @returns {SC.Store} receiver
+  */
+  reset: function() {
+    
+    // create a new empty data store
+    this.dataHashes = {} ;
+    this.revisions  = {} ;
+    this.statuses   = {} ;
+
+    // also reset temporary objects
+    this.chainedChanges = this.locks = this.editables = null;
+    this.changelog = null ;
+    
+    // TODO: Notify record instances
+    
+    this.set('hasChanges', NO);    
+  },
+  
+  /** @private
+    Called by a nested store on a parent store to commit any changes from the
+    store.  This will copy any changed dataHashes as well as any persistant 
+    change logs.
+    
+    If the parentStore detects a conflict with the optimistic locking, it will
+    raise an exception before it makes any changes.  If you pass the 
+    force flag then this detection phase will be skipped and the changes will
+    be applied even if another resource has modified the store in the mean
+    time.
+  
+    @param {SC.Store} nestedStore the child store
+    @param {Array} changes the array of changed store keys
+    @param {Boolean} force
+    @returns {SC.Store} receiver
+  */
+  commitChangesFromNestedStore: function(nestedStore, changes, force)
+  {
+    // first, check for optimistic locking problems
+    if (!force) this._verifyLockRevisions(changes, nestedStore.locks);
+    
+    // OK, no locking issues.  So let's just copy them changes. 
+    // get local reference to values.
+    var len = changes.length, i, storeKey ;
+    var my_dataHashes, my_statuses, my_editables, my_revisions;
+    var ch_dataHashes, ch_statuses, ch_revisions;
+    
+    my_revisions  = this.revisions ;
+    my_dataHashes = this.dataHashes;
+    my_statuses   = this.statuses;
+    my_editables  = this.editables ;
+
+    // setup some arrays if needed
+    if (!my_editables) my_editables = this.editables = [] ;
+    
+    ch_dataHashes = nestedStore.dataHashes;
+    ch_revisions  = nestedStore.revisions ;
+    ch_statuses   = nestedStore.statuses;
+
+    for(i=0;i<len;i++) {
+      storeKey = changes[i];
+
+      // now copy changes
+      my_dataHashes[storeKey] = ch_dataHashes[storeKey];
+      my_statuses[storeKey]   = ch_statuses[storeKey];
+      my_revisions[storeKey]  = ch_revisions[storeKey];
+      
+      my_editables[storeKey] = 0 ; // always make dataHash no longer editable
+      
+      // TODO: Notify record instances if they exist that they changed
+    }
+
+    // add any records to the changelog for commit handling
+    var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
+    if (ch_changelog) {
+      if (!my_changelog) my_changelog = this.changelog = SC.Set.create();
+      my_changelog.addEach(ch_changelog);
+    }  
+    
+    return this ;
+  },
+
+  /** @private
+    Verifies that the passed lock revisions match the current revisions 
+    in the receiver store.  If the lock revisions do not match, then the 
+    store is in a conflict and an exception will be raised.
+    
+    @param {Array}  changes set of changes we are trying to apply
+    @param {SC.Set} locks the locks to verify
+    @returns {SC.Store} receiver
+  */
+  _verifyLockRevisions: function(changes, locks) {
+    var len = changes.length, revs = this.revisions, i, storeKey, lock, rev ;
+    if (locks && revs) {
+      for(i=0;i<len;i++) {
+        storeKey = changes[i];
+        lock = locks[storeKey] || 1;
+        rev  = revs[storeKey] || 1;
+
+        // if the save revision for the item does not match the current rev
+        // the someone has changed the data hash in this store and we have
+        // a conflict. 
+        if (lock < rev) throw SC.Store.CHAIN_CONFLICT_ERROR;
+      }   
+    }
+    return this ;
+  },
   
   // ..........................................................
   // HIGH-LEVEL RECORD API
@@ -1186,127 +1297,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.reset();
   },
 
-  /**
-    Resets the store content.  This will clear all internal data for all
-    records, resetting them to an EMPTY state.  You generally do not want
-    to call this method yourself, though you may override it.
-    
-    @returns {SC.Store} receiver
-  */
-  reset: function() {
-    
-    // create a new empty data store
-    this.dataHashes = {} ;
-    this.revisions  = {} ;
-    this.statuses   = {} ;
 
-    // also reset temporary objects
-    this.chainedChanges = this.locks = this.editables = null;
-    this.changelog = null ;
-    
-    // TODO: Notify record instances
-    
-    this.set('hasChanges', NO);    
-  },
-  
-  /** @private
-    Called by a nested store on a parent store to commit any changes from the
-    store.  This will copy any changed dataHashes as well as any persistant 
-    change logs.
-    
-    If the parentStore detects a conflict with the optimistic locking, it will
-    raise an exception before it makes any changes.  If you pass the 
-    force flag then this detection phase will be skipped and the changes will
-    be applied even if another resource has modified the store in the mean
-    time.
-  
-    @param {SC.Store} nestedStore the child store
-    @param {Array} changes the array of changed store keys
-    @param {Boolean} force
-    @returns {SC.Store} receiver
-  */
-  commitChangesFromNestedStore: function(nestedStore, changes, force)
-  {
-    // first, check for optimistic locking problems
-    if (!force) this._verifyLockRevisions(changes, nestedStore.locks);
-    
-    // OK, no locking issues.  So let's just copy them changes. 
-    // get local reference to values.
-    var len = changes.length, i, storeKey ;
-    var my_dataHashes, my_statuses, my_changes, my_locks, my_editables;
-    var my_revisions, ch_dataHashes, ch_statuses, ch_revisions;
-    
-    my_revisions  = this.revisions ;
-    my_dataHashes = this.dataHashes;
-    my_statuses   = this.statuses;
-    my_changes    = this.chainedChanges ;
-    my_locks      = this.locks ;
-    my_editables  = this.editables ;
-
-    // setup some arrays if needed
-    if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
-    if (!my_locks) my_locks = this.locks = [];
-    if (!my_editables) my_editables = this.editables = [] ;
-    
-    ch_dataHashes = nestedStore.dataHashes;
-    ch_revisions  = nestedStore.revisions ;
-    ch_statuses   = nestedStore.statuses;
-
-    for(i=0;i<len;i++) {
-      storeKey = changes[i];
-
-      // save my own lock if needed.
-      if (!my_locks[storeKey]) my_locks[storeKey] = my_revisions[storeKey]||1;
-
-      // now copy changes
-      my_dataHashes[storeKey] = ch_dataHashes[storeKey];
-      my_statuses[storeKey]   = ch_statuses[storeKey];
-      my_revisions[storeKey]  = ch_revisions[storeKey];
-      
-      my_changes.add(storeKey);
-      my_editables[storeKey] = 0 ; // always make dataHash no longer editable
-      
-      // TODO: Notify record instances if they exist that they changed
-    }
-
-    // add any records to the changelog for commit handling
-    var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
-    if (ch_changelog) {
-      if (!my_changelog) my_changelog = this.changelog = SC.Set.create();
-      my_changelog.addEach(ch_changelog);
-    }  
-    
-    // Changes copied.  Now mark this store as dirty since we have changes.
-    this.setIfChanged('hasChanges', YES);
-    return this ;
-  },
-
-  /** @private
-    Verifies that the passed lock revisions match the current revisions 
-    in the receiver store.  If the lock revisions do not match, then the 
-    store is in a conflict and an exception will be raised.
-    
-    @param {Array}  changes set of changes we are trying to apply
-    @param {SC.Set} locks the locks to verify
-    @returns {SC.Store} receiver
-  */
-  _verifyLockRevisions: function(changes, locks) {
-    var len = changes.length, revs = this.revisions, i, storeKey, lock, rev ;
-    if (locks && revs) {
-      for(i=0;i<len;i++) {
-        storeKey = changes[i];
-        lock = locks[storeKey] || 1;
-        rev  = revs[storeKey] || 1;
-
-        // if the save revision for the item does not match the current rev
-        // the someone has changed the data hash in this store and we have
-        // a conflict. 
-        if (lock < rev) throw SC.Store.CHAIN_CONFLICT_ERROR;
-      }   
-    }
-    return this ;
-  },
-  
   // ..........................................................
   // PRIMARY KEY CONVENIENCE METHODS
   // 
