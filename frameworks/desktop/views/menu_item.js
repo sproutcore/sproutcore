@@ -170,13 +170,15 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
       // handle image -- always invoke
       key = this.getDelegateProperty(del, 'contentIconKey') ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-      this.renderImage(ic, value) ;
+      if(value && SC.typeOf(value) !== SC.T_STRING) value = value.toString() ;
+      if(value)
+        this.renderImage(ic, value) ;
 
       // handle label -- always invoke
       key = this.getDelegateProperty(del, 'contentValueKey') ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
       if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString() ;
-       this.renderLabel(ic, value) ;
+      this.renderLabel(ic, value||'') ;
 
       // handle branch
       key = this.getDelegateProperty(del, 'contentIsBranchKey') ;
@@ -228,7 +230,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   },
 
   renderLabel: function(context, label) {
-    context.push( label || '' ) ;
+    context.push("<span class='value'>"+label+"</span>") ;
   },
 
   /** 
@@ -241,9 +243,9 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
   */
 
   renderBranch: function(context, hasBranch) {
-      var a = '>' ;
+    var a = '>' ;
     var url = sc_static('blank.gif') ;
-    context.push('<img class="image" src='+url+' /><span class= "hasBranch">'+a+'</span>') ; 
+    context.push('<span class= "hasBranch">'+a+'</span>') ; 
   },
 
   /** 
@@ -255,8 +257,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
    @returns {void}
   */
   renderShortcut: function(context, shortcut) {
-      var url = sc_static('blank.gif') ; 
-      context.push('<img class="image" src='+url+' /><span class = "shortCut">' + shortcut + '</span>') ;
+    context.push('<span class = "shortCut">' + shortcut + '</span>') ;
   },
 
   superClass: NO,
@@ -284,8 +285,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
       }
     }
     var menu = this.get('parentView') ;
-    if(menu)
-      menu.remove() ;
+    if(menu) menu.remove() ;
     return YES ;
   },
 
