@@ -20,30 +20,23 @@ module("SC.Record#refresh", {
       array: [1,2,3] 
     };
     
-    MyApp.foo = MyApp.store.createRecord(MyApp.json, MyApp.Foo);
+    MyApp.foo = MyApp.store.createRecord(MyApp.Foo, MyApp.json);
     
     // modify store so that everytime refreshRecords() is called it updates 
     // callInfo
     callInfo = null ;
-    MyApp.store.refreshRecords = function(records) {
+    MyApp.store.refreshRecord = function(records) {
       callInfo = SC.A(arguments) ; // save method call
     };
   }
 });
 
-test("calling refresh on a newRecord should do nothing", function() {
-  ok(MyApp.foo.get('newRecord'), 'precond Record.newRecord should be YES');
+test("calling refresh should call refreshRecord() on store", function() {
   MyApp.foo.refresh();
-  equals(callInfo, null, 'refreshRecords() should not be called on parent');
+  same(callInfo, [null,null,MyApp.foo.storeKey], 'refreshRecord() should be called on parent');
 });
 
-test("calling refresh on existing record should call refreshRecords() on store", function() {
-  MyApp.foo.newRecord = NO; // fake it till you make it
-  MyApp.foo.refresh();
-  same(callInfo[0], [MyApp.foo], 'refreshRecords() should be called with record in array as first param');
-});
-
-test("should receiver receiver", function() {
+test("should return receiver", function() {
   equals(MyApp.foo.refresh(), MyApp.foo, 'should return receiver');
 });
 
