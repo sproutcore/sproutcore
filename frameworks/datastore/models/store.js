@@ -300,9 +300,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     managing locks.
     
     @param {Number|Array} storeKeys one or more store keys that changed
+    @param {Number} rev optional new revision number. normally leave null
+    @param {Boolean} statusOnly (optional) YES if only status changed
     @returns {SC.Store} receiver
   */
-  dataHashDidChange: function(storeKeys, rev) {
+  dataHashDidChange: function(storeKeys, rev, statusOnly) {
     
     // update the revision for storeKey.  Use generateStoreKey() because that
     // gaurantees a universally (to this store hierarchy anyway) unique 
@@ -321,11 +323,58 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for(idx=0;idx<len;idx++) {
       if (isArray) storeKey = storeKeys[idx];
       this.revisions[storeKey] = rev;
+      this._notifyRecordPropertyChange(storeKey, statusOnly);
     }
     
     return this ;
   },
 
+  /**
+    Will notify any record instances of the property change at the end of 
+    the run loop.  Also notifies any inherited record instances as well.
+  */
+  _notifyRecordPropertyChange: function(storeKey, statusOnly) {
+
+    var records = this.records ;
+    
+    // schedule
+    if (records && records[storeKey]) {
+      var queue = this.recordNotificationQueue;
+      if (!queue) queue = this.recordNotificationQueue = {};
+      queue[storeKey] = statusOnly || NO;
+      this.invokeOnce(this._flushRecordNotificationQueue);
+    }
+
+    // pass along to nested stores
+    var nestedStores = this.get('nestedStores'), len, idx, store;
+    var K = SC.Store;
+    len = nestedStores ? nestedStores.length : 0 ;
+    for(idx=0;idx<len;idx++) {
+      store = nestedStores[idx];
+      if (store.storeKeyEditState(storeKey) === K.INHERITED) {
+        store._notifyRecordPropertyChange(storeKey, statusOnly);
+      }
+    }
+    return this;
+  },
+  
+  _flushRecordNotificationQueue: function() {
+    var queue = this.recordNotificationQueue, records = this.records;
+    if (!queue || !records) return this ; // nothing to do  
+
+    var storeKey, rec ;
+    for(storeKey in queue) {
+      if (!queue.hasOwnProperty(storeKey)) continue ; 
+      if (rec = records[storeKey]) {
+        if (queue[storeKey] === YES) {
+          rec.notifyPropertyChange('status');
+        } else rec.allPropertiesDidChange();
+      }
+    }
+    
+    this.recordNotificationQueue = null ; // done!
+  },
+  
   /**
     Resets the store content.  This will clear all internal data for all
     records, resetting them to an EMPTY state.  You generally do not want
@@ -343,8 +392,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // also reset temporary objects
     this.chainedChanges = this.locks = this.editables = null;
     this.changelog = null ;
-    
-    // TODO: Notify record instances
+
+    var records = this.records, storeKey;
+    if (records) {
+      for(storeKey in records) {
+        if (!records.hasOwnProperty(storeKey)) continue ;
+        this._notifyRecordPropertyChange(storeKey, NO);
+      }
+    }
     
     this.set('hasChanges', NO);    
   },
@@ -398,7 +453,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       my_editables[storeKey] = 0 ; // always make dataHash no longer editable
       
-      // TODO: Notify record instances if they exist that they changed
+      this._notifyRecordPropertyChange(storeKey, NO);
     }
 
     // add any records to the changelog for commit handling
@@ -517,7 +572,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var records = this.records, ret, recordType, attrs;
     
     // look up in cached records
-    if (!records) records = this.records = []; // load cached records
+    if (!records) records = this.records = {}; // load cached records
     ret = records[storeKey];
     if (ret) return ret;
     
@@ -584,6 +639,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // add dataHash and setup initial status -- also save recordType
     this.writeDataHash(storeKey, dataHash, K.READY_NEW);
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
+    this.dataHashDidChange(storeKey);
 
     // Record is now in a committable state -- add storeKey to changelog
     changelog = this.changelog;
@@ -655,6 +711,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // remove the data hash, set new status
     this.removeDataHash(storeKey, status);
+    this.dataHashDidChange(storeKey);
 
     // add/remove change log
     changelog = this.changelog;
@@ -808,20 +865,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
 
-    // pass up to parentStore if we have one
-    var parentStore = this.get('parentStore');
-    if (parentStore) {
-      return parentStore.retrieveRecords(recordTypes, ids, storeKeys);
-    }
-
     var isArray, recordType, len, idx, storeKey, status, K = SC.Record, ret;
-    var source = this.get('dataSource');
+    var source = this.get('dataSource'), rev;
     isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
     if (!isArray) recordType = recordTypes;
 
     // if no storeKeys were passed, map recordTypes + ids
     len = (storeKeys === undefined) ? ids.length : storeKeys.length;
-    ret = [];
+    ret = []; 
+    rev = SC.Store.generateStoreKey();
     for(idx=0;idx<len;idx++) {
       
       // collect store key
@@ -838,7 +890,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
       if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
 
-        this.writeStatus(K.BUSY_LOADING);
+        this.writeStatus(storeKey, K.BUSY_LOADING);
+        this.dataHashDidChange(storeKey, rev, YES);
         ret.push(storeKey);
 
       // otherwise, ignore record unless isRefresh is YES.
@@ -846,7 +899,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         
         // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
         if (status & K.READY) {
-          this.writeStatus(K.BUSY_REFRESH | (status & 0x03)) ;
+          this.writeStatus(storeKey, K.BUSY_REFRESH | (status & 0x03)) ;
+          this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
 
         // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
@@ -952,7 +1006,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
     var isArray, recordType, len, idx, storeKey, status, K = SC.Record;
-    var ret, keysInLog=[], key, source;
+    var ret, keysInLog=[], key, source, rev;
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
       storeKeys=this.changelog;
     }
@@ -963,7 +1017,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // if no storeKeys were passed, map recordTypes + ids
     len = (storeKeys === undefined) ? ids.length : storeKeys.length;
-    ret = [];
+    ret = []; 
+    rev = SC.Store.generateStoreKey();
+    
     for(idx=0;idx<len;idx++) {
       
       // collect store key
@@ -981,15 +1037,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         throw K.NOT_FOUND_ERROR ;
       }else{
         if(status===K.READY_NEW){
-          this.writeStatus(K.BUSY_CREATING);
+          this.writeStatus(storeKey, K.BUSY_CREATING);
+          this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
         }
         if(status===K.READY_DIRTY){
-          this.writeStatus(K.BUSY_COMMITING);
+          this.writeStatus(storeKey, K.BUSY_COMMITING);
+          this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
         }
         if(status===K.DESTROY_DIRTY){
           this.writeStatus(K.BUSY_DESTROYING);
+          this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
         }
         // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITING, 
@@ -1148,6 +1207,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         throw K.BAD_STATE_ERROR ;
     } 
     this.writeStatus(storeKey, status) ;
+    this.dataHashDidChange(storeKey, null, YES);
     
     return this ;
   },
@@ -1179,6 +1239,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.writeStatus(storeKey, status) ;
     if(dataHash!==undefined) this.writeDataHash(storeKey, dataHash, status) ;
     if(newId!==undefined) this.replaceIdFor(storeKey, newId);
+    this.dataHashDidChange(storeKey);
     
     return this ;
   },
@@ -1203,7 +1264,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     else{
       status = K.DESTROYED_CLEAN ;
     } 
-    this.writeStatus(storeKey, status) ;
+    this.removeDataHash(storeKey, status) ;
+    this.dataHashDidChange(storeKey);
 
     return this ;
   },
@@ -1228,6 +1290,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = error ;
     } 
     this.writeStatus(storeKey, status) ;
+    this.dataHashDidChange(storeKey, null, YES);
 
     return this ;
   },
@@ -1248,6 +1311,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = K.READY_CLEAN;
       if(dataHash===undefined) this.writeStatus(storeKey, status) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
+      this.dataHashDidChange(storeKey);
       return YES;
     }
     //conflicted (ready)
@@ -1264,7 +1328,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     status = this.readStatus(storeKey);
     if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){
       status = K.DESTROY_CLEAN;
-      this.writeStatus(storeKey, status) ;
+      this.removeDataHash(storeKey, status) ;
+      this.dataHashDidChange(storeKey);
       return YES;
     }
     //conflicted (destroy)
@@ -1282,6 +1347,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){
       status = error;
       this.writeStatus(storeKey, status) ;
+      this.dataHashDidChange(storeKey, null, YES);
       return YES;
     }
     //conflicted (error)
