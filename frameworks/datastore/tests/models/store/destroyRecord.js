@@ -100,4 +100,7 @@ test("Check for different states after/before executing destroyRecord", function
   status = store.readStatus( storeKey6);
   equals(status, SC.Record.DESTROYED_DIRTY, "the status should have changed to DESTROYED_DIRTY ");
   
+  equals(store.changelog.length, 1, "The changelog has the following number of entries:");
+  
+  
 });

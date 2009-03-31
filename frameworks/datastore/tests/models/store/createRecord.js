@@ -44,10 +44,14 @@ test("create a record", function() {
   sk=store.storeKeyFor(SC.Record, rec.id());
   equals(store.readDataHash(sk), hash, "data hashes are equivalent");
   equals(rec.id(), "1234abcd", "guids are the same");
+
   rec = store.createRecord(SC.Record, hash2, "priKey");
   ok(rec, "a record with a custom id was created");
   sk=store.storeKeyFor(SC.Record, "priKey");
   equals(store.readDataHash(sk), hash2, "data hashes are equivalent");
   equals(rec.id(), "priKey", "guids are the same");
+  
+  equals(store.changelog.length, 2, "The changelog has the following number of entries:");
+  
   
 });

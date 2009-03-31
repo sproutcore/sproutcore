@@ -441,6 +441,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (!my_changelog) my_changelog = this.changelog = SC.Set.create();
       my_changelog.addEach(ch_changelog);
     }  
+    this.changelog=my_changelog;
     
     return this ;
   },
@@ -624,6 +625,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog = this.changelog;
     if (!changelog) changelog = SC.Set.create();
     changelog.add(storeKey);
+    this.changelog=changelog;
     
     // finally return materialized record
     return this.materializeRecord(storeKey) ;
@@ -696,6 +698,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog = this.changelog;
     if (!changelog) changelog = this.changelog = SC.Set.create();
     ((status & K.DIRTY) ? changelog.add(storeKey) : changelog.remove(storeKey));
+    this.changelog=changelog;
     
     return this ;
   },
@@ -778,6 +781,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog = this.changelog ;
     if (!changelog) changelog = this.changelog = SC.Set.create() ;
     changelog.add(storeKey);
+    this.changelog=changelog;
     
     return this ;
   },
