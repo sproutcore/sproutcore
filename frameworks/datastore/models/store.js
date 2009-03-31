@@ -773,7 +773,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // record data hash change
-    this.dataHashDidChange(storeKey);
+    this.dataHashDidChange(storeKey, null, YES);
     
     // record in changelog
     changelog = this.changelog ;
@@ -1093,7 +1093,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    if (source) source.cancelRecords.call(source, this, ret);
+    if (source) source.cancel.call(source, this, ret);
     
     return this ;
   },
