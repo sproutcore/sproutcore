@@ -122,9 +122,6 @@ SC.NestedStore = SC.Store.extend(
     this.chainedChanges = this.locks = this.editables = null;
     this.changelog = null ;
 
-    // notify record instances that they may have changed
-    // TODO: Notify Records
-
     this.set('hasChanges', NO);
   },
   
@@ -148,6 +145,24 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   discardChanges: function() {
+    
+    // any locked records whose rev or lock rev differs from parent need to
+    // be notified.
+    var records, locks;
+    if ((records = this.records) && (locks = this.locks)) {
+      var pstore = this.get('parentStore'), ps_revisions = pstore.revisions;
+      var revisions = this.revisions, storeKey, lock, rev;
+      for(storeKey in records) {
+        if (!records.hasOwnProperty(storeKey)) continue ;
+        if (!(lock = locks[storeKey])) continue; // not locked.
+
+        rev = ps_revisions[storeKey];
+        if ((rev !== lock) || (revisions[storeKey] > rev)) {
+          this._notifyRecordPropertyChange(storeKey);
+        }
+      }
+    }
+    
     this.reset();
     return this ;
   },

@@ -208,9 +208,7 @@ SC.Record = SC.Object.extend(
     this.beginEditing();
     var store = this.get('store'), storeKey = this.storeKey;
     var attrs = store.readEditableDataHash(storeKey);
-    if (!attrs) {
-      throw "Cannot not modify %@ because it is not loaded".fmt(this);
-    }
+    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
     attrs[key] = value;
     this.endEditing();
     return this ;  
@@ -239,8 +237,6 @@ SC.Record = SC.Object.extend(
     if (statusOnly) {
       this.notifyPropertyChange('status');
     } else {
-      // TODO: Notify of property changes more selectively?
-      this.notifyPropertyChange('status');
       this.allPropertiesDidChange(); 
     }
   },
