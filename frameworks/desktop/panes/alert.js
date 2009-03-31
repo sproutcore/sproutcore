@@ -5,8 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('panes/panel');
-require('views/button');
+sc_require('panes/panel');
+sc_require('views/button');
 /** 
   button1 : 1st button from the right. default:OK
   button2 : 2nd button from the right. Optional. Could be Cancel or 2nd action.

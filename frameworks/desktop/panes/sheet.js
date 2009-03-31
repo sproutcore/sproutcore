@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('panes/panel');
+sc_require('panes/panel');
 
 /**
   Displays a modal sheet pane animated drop down from top.

@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('panes/panel');
+sc_require('panes/panel');
 
 /**
   Displays a non-modal, default positioned, drag&drop-able palette pane.

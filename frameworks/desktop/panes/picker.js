@@ -6,7 +6,7 @@
 // ==========================================================================
 
 
-require('panes/palette');
+sc_require('panes/palette');
 
 /** 
   Popular customized picker position rules:
