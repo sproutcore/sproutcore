@@ -75,52 +75,63 @@ module("SC.Store#commitRecord", {
     storeKey5 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey5, json5, SC.Record.BUSY_CREATING);
     storeKey6 = SC.Store.generateStoreKey();
-    store.writeDataHash(storeKey6, json6, SC.Record.BUSY_COMMITING);
+    store.writeDataHash(storeKey6, json6, SC.Record.BUSY_COMMITTING);
     storeKey7 = SC.Store.generateStoreKey();
-    store.writeDataHash(storeKey7, json7, SC.Record.DESTROY_DIRTY);
+    store.writeDataHash(storeKey7, json7, SC.Record.DESTROYED_DIRTY);
     storeKey8 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey8, json8, SC.Record.READY_CLEAN);
     }
 });
     
-test("retrieve a record", function() {
-  var sk;
-  var rec = SC.Record.create();
+test("Retrieve a record and check for different errors and states", function() {
+
   store.retrieveRecord(undefined, undefined, storeKey1, YES);
   status = store.readStatus( storeKey1);
-  equals(SC.Record.BUSY_LOADING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
   
   store.retrieveRecord(undefined, undefined, storeKey2, YES);
   status = store.readStatus( storeKey2);
-  equals(SC.Record.BUSY_LOADING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
   
   store.retrieveRecord(undefined, undefined, storeKey3, YES);
   status = store.readStatus( storeKey3);
-  equals(SC.Record.BUSY_LOADING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
   
   try{
     store.retrieveRecord(undefined, undefined, storeKey4, YES);
+    msg='';
   }catch(error1){
-    equals(SC.Record.BUSY_ERROR.message, error1.message, "should throw busy error");
+    msg=error1.message;
   }
+  equals(msg, SC.Record.BUSY_ERROR.message, "should throw error");
+
   try{
     store.retrieveRecord(undefined, undefined, storeKey5, YES);
+    msg='';
   }catch(error2){
-    equals(SC.Record.BUSY_ERROR.message, error2.message, "should throw busy error");
+    msg=error2.message;
   }
+  equals(msg, SC.Record.BUSY_ERROR.message, "should throw error");
+  
   try{
     store.retrieveRecord(undefined, undefined, storeKey6, YES);
+    msg='';
   }catch(error3){
-    equals(SC.Record.BUSY_ERROR.message, error3.message, "should throw busy error");
+    msg=error3.message;
   }
+  equals(msg, SC.Record.BUSY_ERROR.message, "should throw error");
+
   try{
     store.retrieveRecord(undefined, undefined, storeKey7, YES);
+    msg='';
   }catch(error4){
-    equals(SC.Record.BAD_STATE_ERROR.message, error4.message, "should throw bad_state error");
+    msg=error4.message;
   }
-  
-  store.retrieveRecord(undefined, undefined, storeKey3, YES);
-  status = store.readStatus( storeKey3);
-  ok(status & SC.Record.READY, "the status shouldn't have changed.");
+  equals(msg, SC.Record.BAD_STATE_ERROR.message, "should throw error");
+
+
+  store.retrieveRecord(undefined, undefined, storeKey8, YES);
+  status = store.readStatus( storeKey8);
+  ok(SC.Record.BUSY_REFRESH | (status & 0x03), "the status changed to BUSY_REFRESH.");
   
 });

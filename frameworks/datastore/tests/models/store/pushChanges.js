@@ -17,12 +17,45 @@ module("SC.Store#pushChanges", {
       bool:   YES
     };
     
-    storeKey = SC.Store.generateStoreKey();
+    storeKey1 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey1, json, SC.Record.EMPTY);
 
-    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+    storeKey2 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey2, json, SC.Record.EMPTY);
+
+    storeKey3 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey3, json, SC.Record.EMPTY);
+
+    storeKey4 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey4, json, SC.Record.BUSY_LOADING);
+
+    storeKey5 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey5, json, SC.Record.BUSY_LOADING);
+
+    storeKey6 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey6, json, SC.Record.BUSY_LOADING);
   }
 });
 
-test("create a record", function() {
- 
+test("Do a pushRetrieve and check if there is conflicts", function() {
+  var res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey1);
+  ok(res, "There is no conflict, pushRetrieve was succesful.");
+  res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey4);
+  ok(!res, "There is a conflict, because of the state, this is expected.");
+
 });
+
+test("Do a pushDestroy and check if there is conflicts", function() {
+  var res = store.pushDestroy(SC.Record, undefined, undefined, storeKey2);
+  ok(res, "There is no conflict, pushDestroy was succesful.");
+  res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey5);
+  ok(!res, "There is a conflict, because of the state, this is expected.");
+});
+
+test("Issue a pushError and check if there is conflicts", function() {
+  var res = store.pushError(SC.Record, undefined, undefined, storeKey3);
+  ok(res, "There is no conflict, pushError was succesful.");
+  res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey6);
+  ok(!res, "There is a conflict, because of the state, this is expected.");
+});
+

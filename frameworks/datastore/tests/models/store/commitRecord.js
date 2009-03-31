@@ -73,18 +73,17 @@ module("SC.Store#commitRecord", {
   }
 });
 
-test("commit a record", function() {
-
-  var sk;
-  var rec = SC.Record.create();
+test("Confirm that all the states are switched as expected after running commitRecord", function() {
+  var throwError=false, msg;
+  
   store.commitRecord(undefined, undefined, storeKey1);
   status = store.readStatus( storeKey1);
-  equals(status, SC.Record.READY_CLEAN, "the status shouldn't have changed.");
+  equals(status, SC.Record.READY_CLEAN, "the status shouldn't have changed. It should be READY_CLEAN ");
   
   store.commitRecord(undefined, undefined, storeKey2);
   status = store.readStatus( storeKey2);
-  equals(status, SC.Record.BUSY_CREATING, "the status shouldn't have changed.");
-  
+  equals(status, SC.Record.BUSY_CREATING, "the status should be SC.Record.BUSY_CREATING");
+
   store.commitRecord(undefined, undefined, storeKey3);
   status = store.readStatus( storeKey3);
   equals(status, SC.Record.BUSY_COMMITTING, "the status should be SC.Record.BUSY_COMMITTING");
@@ -97,18 +96,32 @@ test("commit a record", function() {
   
   try{
     store.commitRecord(undefined, undefined, storeKey5);
+    throwError=false;
+    msg='';
   }catch(error1){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error1.message, "the status shouldn't have changed.");
+    throwError=true;
+    msg=error1.message;
   }
+  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  
   try{
     store.commitRecord(undefined, undefined, storeKey6);
+    throwError=false;
+    msg='';
   }catch(error2){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error2.message, "the status shouldn't have changed.");
+    throwError=true;
+    msg=error2.message;
   }
+  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  
   try{
     store.commitRecord(undefined, undefined, storeKey7);
+    throwError=false;
+    msg='';
   }catch(error3){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error3.message, "the status shouldn't have changed.");
+    throwError=true;
+    msg=error3.message;
   }
+  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
   
 });

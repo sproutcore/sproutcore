@@ -8,7 +8,7 @@
 var store, storeKey1,storeKey2,storeKey3,storeKey4,storeKey5, storeKey6, json;
 var json1, json2, json3, json4, json5, json6;
 
-module("SC.Store#createRecord", {
+module("SC.Store#destroyRecord", {
   setup: function() {
     
     store = SC.Store.create();
@@ -65,34 +65,39 @@ module("SC.Store#createRecord", {
   }
 });
 
-test("destroy a record", function() {
-  var sk;
-  var rec = SC.Record.create();
+test("Check for different states after/before executing destroyRecord", function() {
+  var throwError=false, msg;
+
   store.destroyRecord(undefined, undefined, storeKey1);
   status = store.readStatus( storeKey1);
-  equals(SC.Record.BUSY_DESTROYING, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.BUSY_DESTROYING, "the status shouldn't have changed. It should be BUSY_DESTROYING ");
   
   store.destroyRecord(undefined, undefined, storeKey2);
   status = store.readStatus( storeKey2);
-  equals(SC.Record.DESTROYED, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.DESTROYED, "the status shouldn't have changed. It should be DESTROYED ");
   
   try{
     store.destroyRecord(undefined, undefined, storeKey3);
+    msg='';
   }catch(error1){
-    equals(SC.Record.NOT_FOUND_ERROR.message, error1.message, "the status shouldn't have changed.");
+    msg=error1.message;
   }
+  equals(msg, SC.Record.NOT_FOUND_ERROR.message, "destroyRecord should throw the following error");
+  
   try{
     store.destroyRecord(undefined, undefined, storeKey4);
+    msg='';
   }catch(error2){
-    equals(SC.Record.BUSY_ERROR.message, error2.message, "the status shouldn't have changed.");
-    
+    msg=error2.message;
   }
+  equals(msg, SC.Record.BUSY_ERROR.message, "destroyRecord should throw the following error");
+  
   store.destroyRecord(undefined, undefined, storeKey5);
   status = store.readStatus( storeKey5);
-  equals(SC.Record.DESTROYED_CLEAN, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.DESTROYED_CLEAN, "the status should have changed to DESTROYED_CLEAN ");
   
   store.destroyRecord(undefined, undefined, storeKey6);
   status = store.readStatus( storeKey6);
-  equals(SC.Record.DESTROYED_DIRTY, status, "the status shouldn't have changed.");
+  equals(status, SC.Record.DESTROYED_DIRTY, "the status should have changed to DESTROYED_DIRTY ");
   
 });

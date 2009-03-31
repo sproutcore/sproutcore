@@ -611,7 +611,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       throw id ? K.RECORD_EXISTS_ERROR : K.BAD_STATE_ERROR;
       
     // allow error or destroyed state only with id
-    } else if (!id && (status===SC.DESTROYED_CLEAN || status===SC.ERROR)) {
+    } else if (!id && (status==SC.DESTROYED_CLEAN || status==SC.ERROR)) {
       throw K.BAD_STATE_ERROR;
     }
     
@@ -674,7 +674,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       return this; // nothing to do
       
     // error out if empty
-    } else if (status === K.EMPTY) {
+    } else if (status == K.EMPTY) {
       throw K.NOT_FOUND_ERROR ;
       
     // error out if busy
@@ -682,7 +682,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       throw K.BUSY_ERROR ;
       
     // if new status, destroy but leave in clean state
-    } else if (status === K.READY_NEW) {
+    } else if (status == K.READY_NEW) {
       status = K.DESTROYED_CLEAN ;
       
     // otherwise, destroy in dirty state
@@ -721,7 +721,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   destroyRecords: function(recordTypes, ids, storeKeys) {
-    // JUAN TODO: Implement
     var len, isArray, idx, id, recordType, storeKey;
     if(storeKeys===undefined){
       len = ids.length;
@@ -764,12 +763,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // if record is not in ready state, then it is not found.
     // ERROR, EMPTY, DESTROYED_CLEAN, DESTROYED_DIRTY
     } else if (!(status & K.READY)) {
-      throw K.NOT_FOUND ;
+      throw K.NOT_FOUND_ERROR ;
       
     // otherwise, make new status READY_DIRTY unless new.
     // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
     } else {
-      if (status !== K.READY_NEW) this.writeStatus(storeKey, K.READY_DIRTY);
+      if (status != K.READY_NEW) this.writeStatus(storeKey, K.READY_DIRTY);
     }
     
     // record data hash change
@@ -804,7 +803,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   recordsDidChange: function(recordTypes, ids, storeKeys) {
-    // JUAN TODO: Implement
      var len, isArray, idx, id, recordType, storeKey;
       if(storeKeys===undefined){
         len = ids.length;
@@ -867,7 +865,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = this.readStatus(storeKey);
       
       // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
-      if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
+      if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
 
         this.writeStatus(storeKey, K.BUSY_LOADING);
         this.dataHashDidChange(storeKey, rev, YES);
@@ -883,11 +881,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           ret.push(storeKey);
 
         // K.BUSY_DESTROYING, K.BUSY_COMMITTING, K.BUSY_CREATING
-        } else if ((status === K.BUSY_DESTROYING) || (status === K.BUSY_CREATING) || (status === K.BUSY_COMMITTING)) {
+        } else if ((status == K.BUSY_DESTROYING) || (status == K.BUSY_CREATING) || (status == K.BUSY_COMMITTING)) {
           throw K.BUSY_ERROR ;
 
         // K.DESTROY_DIRTY, bad state...
-        } else if (status === K.DESTROY_DIRTY) {
+        } else if (status == K.DESTROYED_DIRTY) {
           throw K.BAD_STATE_ERROR ;
           
         // ignore K.BUSY_LOADING, K.BUSY_REFRESH_CLEAN, K.BUSY_REFRESH_DIRTY
@@ -974,8 +972,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} the actual recordType you should use to instantiate.
   */
   commitRecords: function(recordTypes, ids, storeKeys) {
-    // TODO: Implement to call dataSource.commitRecords.call()...
-    
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
     var isArray, recordType, len, idx, storeKey, status, K = SC.Record;
@@ -1006,23 +1002,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // collect status and process
       status = this.readStatus(storeKey);
       
-      if ((status === K.EMPTY) || (status === K.ERROR) || (status === K.DESTROYED_CLEAN)) {
+      if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
         throw K.NOT_FOUND_ERROR ;
       }else{
-        if(status===K.READY_NEW){
+        if(status==K.READY_NEW){
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
-        } else if (status===K.READY_DIRTY) {
-          this.writeStatus(storeKey, K.BUSY_COMMITING);
+        } else if (status==K.READY_DIRTY) {
+          this.writeStatus(storeKey, K.BUSY_COMMITTING);
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
-        } else if (status===K.DESTROYED_DIRTY) {
-          this.writeStatus(K.BUSY_DESTROYING);
+        } else if (status==K.DESTROYED_DIRTY) {
+          this.writeStatus(storeKey, K.BUSY_DESTROYING);
           this.dataHashDidChange(storeKey, rev, YES);
           ret.push(storeKey);
         }
-        // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITING, 
+        // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING, 
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
       }
     }   
@@ -1043,8 +1039,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} the actual recordType you should use to instantiate.
   */
   commitRecord: function(recordType, id, storeKey) {
-    // TODO: Implement to call commitRecords()
-    
     var array = this._TMP_RETRIEVE_ARRAY ;
     if (storeKey !== undefined) {
       array[0] = storeKey;
@@ -1071,25 +1065,29 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} the store.
   */
   cancelRecords: function(recordTypes, ids, storeKeys) {
-    // TODO: Implement to call dataSource.cancel()
-    
-    var len, isArray, idx, id, recordType, storeKey;
+    var status, len, isArray, idx, id, recordType, storeKey, K = SC.Record;
     var source = this.get('dataSource'), ret=[];
-    if(storeKeys===undefined){
-      len = ids.length;
-      isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
-      if (!isArray) recordType = recordTypes;
-      for(idx=0;idx<len;idx++) {
-        if (isArray) recordType = recordTypes[idx] || SC.Record;
-        id = ids ? ids[idx] : undefined ;
+    isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+    len = (storeKeys === undefined) ? ids.length : storeKeys.length;
+    
+    for(idx=0;idx<len;idx++) {
+      if (isArray) recordType = recordTypes[idx] || SC.Record;
+      else recordType = recordTypes || SC.Record;
+      
+      id = ids ? ids[idx] : undefined ;
+      
+      if(storeKeys===undefined){
         storeKey = recordType.storeKeyFor(id);
-        if(storeKey) ret.push(storeKey);
-      }
-    }else{
-      len = storeKeys.length;
-      for(idx=0;idx<len;idx++) {
+      }else{
         storeKey = storeKeys ? storeKeys[idx] : undefined ;        
-        if(storeKey) ret.push(storeKey);
+      }
+      if(storeKey) {
+        status = this.readStatus(storeKey);
+
+        if ((status == K.EMPTY) || (status == K.ERROR)) {
+          throw K.NOT_FOUND_ERROR ;
+        }
+        ret.push(storeKey);
       }
     }
     
@@ -1109,8 +1107,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} the store.
   */
   cancelRecord: function(recordType, id, storeKey) {
-    // TODO: Implement to call cancelRecords()
-    
     var array = this._TMP_RETRIEVE_ARRAY ;
     if (storeKey !== undefined) {
       array[0] = storeKey;
@@ -1192,7 +1188,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
-    // TODO: Implement
     var status = this.readStatus(storeKey), K = SC.Record;
     
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
@@ -1203,7 +1198,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // otherwise, determine proper state transition
-    if(status===K.BUSY_DESTROYING) {
+    if(status==K.BUSY_DESTROYING) {
       throw K.BAD_STATE_ERROR ;
     } else status = K.READY_CLEAN ;
 
@@ -1223,7 +1218,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   dataSourceDidDestroy: function(storeKey) {
-    // TODO: Implement
     var status = this.readStatus(storeKey), K = SC.Record;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
@@ -1248,7 +1242,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   dataSourceDidError: function(storeKey, error) {
-    // TODO: Implement
     var status = this.readStatus(storeKey), K = SC.Record;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
@@ -1271,14 +1264,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // 
   
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
-    // TODO: Implement
     var K = SC.Record;
     
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){ 
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){ 
       status = K.READY_CLEAN;
       if(dataHash===undefined) this.writeStatus(storeKey, status) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
@@ -1290,14 +1282,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   pushDestroy: function(recordType, id, storeKey) {
-    // TODO: Implement
     var K = SC.Record;
 
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
       status = K.DESTROY_CLEAN;
       this.removeDataHash(storeKey, status) ;
       this.dataHashDidChange(storeKey);
@@ -1308,14 +1299,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   pushError: function(recordType, id, error, storeKey) {
-    // TODO: Implement
     var K = SC.Record;
 
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status===K.EMPTY || status===K.ERROR || status===K.READY_CLEAN || status===K.DESTROY_CLEAN){
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
       status = error;
       this.writeStatus(storeKey, status) ;
       this.dataHashDidChange(storeKey, null, YES);
