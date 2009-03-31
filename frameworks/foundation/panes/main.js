@@ -43,5 +43,5 @@ SC.MainPane = SC.Pane.extend({
   
   acceptsKeyPane: YES,
   
-  classNames: ['sc-main-pane']
+  classNames: ['sc-main']
 });
