@@ -1,9 +1,13 @@
 // ========================================================================
 // SC.Observable Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok isObj equals expects Namespace */
 
-var object ; // global variables
+var object, ObjectC, ObjectD, objectA, objectB ;
+
+// ..........................................................
+// GET()
+// 
 
 module("object.get()", {
   
@@ -52,6 +56,10 @@ test("should call unknownProperty when value is undefined", function() {
   equals(object.lastUnknownProperty, "unknown") ;
 });
 
+
+// ..........................................................
+// SET()
+// 
 
 module("object.set()", {
   
@@ -129,6 +137,143 @@ test("should call unknownProperty with value when property is undefined", functi
   equals(ret, object) ;
 });
 
+// ..........................................................
+// COMPUTED PROPERTIES
+// 
+
+module("Computed properties", {
+  setup: function() {
+    object = SC.Object.create({
+      
+      // REGULAR
+      
+      computedCalls: [],
+      computed: function(key, value) {
+        this.computedCalls.push(value);
+        return 'computed';
+      }.property(),
+      
+      computedCachedCalls: [],
+      computedCached: function(key, value) {
+        this.computedCachedCalls.push(value);
+        return 'computedCached';
+      }.property().cacheable(),
+      
+      
+      // DEPENDENT KEYS
+      
+      changer: 'foo',
+      
+      dependentCalls: [],
+      dependent: function(key, value) {
+        this.dependentCalls.push(value);
+        return 'dependent';
+      }.property('changer'),
+      
+      dependentCachedCalls: [],
+      dependentCached: function(key, value) {
+        this.dependentCachedCalls.push(value);
+        return 'dependentCached';
+      }.property('changer').cacheable(),
+      
+      
+      // everytime it is recomputed, increments call
+      incCallCount: 0,
+      inc: function() {
+        return this.incCallCount++;
+      }.property('changer').cacheable()
+      
+    })    ;
+  }
+});
+
+test("getting values should call function return value", function() {
+  
+  // get each property twice. Verify return.
+  var keys = 'computed computedCached dependent dependentCached'.w();
+  
+  keys.forEach(function(key) {
+    equals(object.get(key), key, 'Try #1: object.get(%@) should run function'.fmt(key));
+    equals(object.get(key), key, 'Try #2: object.get(%@) should run function'.fmt(key));
+  });
+  
+  // verify each call count.  cached should only be called once
+  'computedCalls dependentCalls'.w().forEach(function(key) {
+    equals(object[key].length, 2, 'non-cached property %@ should be called 2x'.fmt(key));
+  });
+
+  'computedCachedCalls dependentCachedCalls'.w().forEach(function(key) {
+    equals(object[key].length, 1, 'non-cached property %@ should be called 1x'.fmt(key));
+  });
+  
+});
+
+test("setting values should call function return value", function() {
+  
+  // get each property twice. Verify return.
+  var keys = 'computed dependent computedCached dependentCached'.w();
+  var values = 'value1 value2'.w();
+  
+  keys.forEach(function(key) {
+    
+    equals(object.set(key, values[0]), object, 'Try #1: object.set(%@, %@) should run function'.fmt(key, values[0]));
+
+    equals(object.set(key, values[1]), object, 'Try #2: object.set(%@, %@) should run function'.fmt(key, values[1]));
+    equals(object.set(key, values[1]), object, 'Try #3: object.set(%@, %@) should not run function since it is setting same value as before'.fmt(key, values[1]));
+    
+  });
+  
+  
+  // verify each call count.  cached should only be called once
+  keys.forEach(function(key) {
+    var calls = object[key + 'Calls'], idx;
+    equals(calls.length, 2, 'set(%@) should be called 2x'.fmt(key));
+    for(idx=0;idx<2;idx++) {
+      equals(calls[idx], values[idx], 'call #%@ to set(%@) should have passed value %@'.fmt(idx+1, key, values[idx]));
+    }
+  });
+  
+});
+
+test("notify change should clear cache", function() {
+
+  // call get several times to collect call count
+  object.get('computedCached'); // should run func
+  object.get('computedCached'); // should not run func
+
+  object.propertyWillChange('computedCached')
+    .propertyDidChange('computedCached');
+    
+  object.get('computedCached'); // should run again
+  equals(object.computedCachedCalls.length, 2, 'should have invoked method 2x');
+});
+
+test("change dependent should clear cache", function() {
+
+  // call get several times to collect call count
+  var ret1 = object.get('inc'); // should run func
+  equals(object.get('inc'), ret1, 'multiple calls should not run cached prop');
+
+  object.set('changer', 'bar');
+    
+  equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
+});
+
+test("allPropertiesDidChange should clear cache", function() {
+  // note: test this with a computed method that returns a different value
+  // each time to ensure clean function.
+  var ret1 = object.get('inc');
+  equals(object.get('inc'), ret1, 'should not change after first call');
+  
+  // flush all props
+  object.allPropertiesDidChange();
+  equals(object.get('inc'), ret1+1, 'should increment after change');
+});
+
+
+// ..........................................................
+// OBSERVABLE OBJECTS
+// 
 
 module("Observable objects & object properties ", {
   

@@ -194,12 +194,14 @@ SC.Observable = {
     
   */
   get: function(key) {
-    var ret = this[key] ;
+    var ret = this[key], cache ;
     if (ret === undefined) {
       return this.unknownProperty(key) ;
     } else if (ret && ret.isProperty) {
       if (ret.isCacheable) {
-        return (this[ret.cacheKey] !== undefined) ? this[ret.cacheKey] : (this[ret.cacheKey] = ret.call(this,key)) ;
+        cache = this._kvo_cache ;
+        if (!cache) cache = this._kvo_cache = {};
+        return (cache[ret.cacheKey] !== undefined) ? cache[ret.cacheKey] : (cache[ret.cacheKey] = ret.call(this,key)) ;
       } else return ret.call(this,key);
     } else return ret ;
   },
@@ -252,22 +254,23 @@ SC.Observable = {
     @returns {this}
   */
   set: function(key, value) {
-    var func = this[key], ret = value, dependents ;
+    var func = this[key], ret = value, dependents, cache, idx ;
     
     var notify = this.automaticallyNotifiesObserversFor(key) ;
     
     // set the value.
     if (func && func.isProperty) {
-      if (func.isVolatile || (this[func.lastSetValueKey] !== value)) {
-        this[func.lastSetValueKey] = value ;
+      cache = this._kvo_cache;
+      if (func.isVolatile || !cache || (cache[func.lastSetValueKey] !== value)) {
+        if (!cache) cache = this._kvo_cache = {};
+
+        cache[func.lastSetValueKey] = value ;
         if (notify) this.propertyWillChange(key) ;
         ret = func.call(this,key,value) ;
 
         // update cached value
-        if (func.isCacheable) this[func.cacheKey] = ret ;
-
-        if (notify) this.propertyDidChange(key, ret) ;
-        
+        if (func.isCacheable) cache[func.cacheKey] = ret ;
+        if (notify) this.propertyDidChange(key, ret, YES) ;
       }
 
     } else if (func === undefined) {
@@ -288,10 +291,12 @@ SC.Observable = {
     if (dependents = this._kvo_cachedDependents) {
       dependents = this._kvo_cachedDependents[key] ;
       if (dependents && dependents.length > 0) {
-        var idx = dependents.length;
-        while(--idx>=0) {
-          func = dependents[idx];
-          this[func.cacheKey] = this[func.lastSetValueKey] = undefined;
+        idx = dependents.length ;
+        if (cache = this._kvo_cache) {
+          while(--idx>=0) {
+            func = dependents[idx];
+            cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined;
+          }
         }
       }
     }
@@ -390,15 +395,17 @@ SC.Observable = {
     @param value {Object} The new value of the key.  May be null.
     @returns {this}
   */
-  propertyDidChange: function(key,value) {
+  propertyDidChange: function(key,value, _keepCache) {
 
     this._kvo_revision = (this._kvo_revision || 0) + 1; 
     var level = this._kvo_changeLevel || 0 ;
 
     // clear any cached value
-    var func = this[key] ;
-    if (func && (func instanceof Function) && func.isCacheable) {
-      this[func.cacheKey] = this[func.lastSetValueKey] = undefined ;
+    if (!_keepCache) {
+      var func = this[key], cache = this._kvo_cache ;
+      if (cache && func && (func instanceof Function) && func.isCacheable) {
+        cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined ;
+      }
     }
     
     // save in the change set if queuing changes
@@ -1108,6 +1115,7 @@ SC.Observable = {
     @returns {this}
   */
   allPropertiesDidChange: function() {
+    this._kvo_cache = null; //clear cached props
     this._notifyPropertyObservers('*') ;
     return this ;
   },
