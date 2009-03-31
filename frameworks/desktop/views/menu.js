@@ -4,22 +4,23 @@
 //            Portions ©2008-2009 Apple, Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-/**
-  @class
-  @extends SC.View
-  @since SproutCore 1.0
-*/
-require('views/picker_pane');
+require('panes/picker');
 require('views/menu_item');
 
-SC.MenuView = SC.PickerPane.extend(SC.Control, {
-  /** @scope SC.MenuItemView.prototype */
-  classNames: ['sc-menu-view'],
+/**
+  @class
+  @extends SC.PickerPane
+  @since SproutCore 1.0
+*/
+
+SC.MenuPane = SC.PickerPane.extend(SC.Control, {
+  /** @scope SC.MenuPane.prototype */
+  classNames: ['sc-menu'],
 
   tagName:'div',
 
   /**
-    Set to YES to enabled the menu view, NO to disabled it.
+    Set to YES to enabled the menu view, NO to disable it.
   */
   isEnabled: YES,
 
@@ -405,6 +406,7 @@ SC.MenuView = SC.PickerPane.extend(SC.Control, {
     if(parentView && parentView.kindOf(SC.MenuItemView)) {
       return NO;
     }
+    return YES;
   },
   
   /**

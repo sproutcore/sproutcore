@@ -309,7 +309,7 @@ SC.MenuItemView = SC.ButtonView.extend(SC.Control,{
         this.isChildViewVisible = NO ;
       }
       else { 
-        if(subMenu.kindOf(SC.MenuView)) {
+        if(subMenu.kindOf(SC.MenuPane)) {
           subMenu.popup(this,[0,0,0]) ;
           var context = SC.RenderContext(this) ;
           context = context.begin(subMenu.get('tagName')) ;
