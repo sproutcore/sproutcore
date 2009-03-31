@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('views/panel');
+require('panes/panel');
 
 /**
   Displays a modal sheet pane animated drop down from top.
@@ -24,12 +24,12 @@ require('views/panel');
   is to cover the entire document window with a semi-opaque background, and to 
   resize with the window.
   
-  @extends SC.Panel
+  @extends SC.PanelPane
   @since SproutCore 1.0
 */
-SC.SheetPane = SC.Panel.extend({
+SC.SheetPane = SC.PanelPane.extend({
   
-  classNames: 'sc-sheet-pane',
+  classNames: 'sc-sheet',
 
   init: function() {
     sc_super() ;

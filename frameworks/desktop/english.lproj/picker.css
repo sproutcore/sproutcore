@@ -1,10 +1,10 @@
 /** SC.PickerPane Support */
 
-.sc-pane.sc-panel.sc-palette-pane.sc-picker-pane {
+.sc-pane.sc-panel.sc-palette.sc-picker {
 	overflow: hidden;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .top-right-edge {
+.sc-pane.sc-panel.sc-picker .top-right-edge {
 	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -574px;
 	position: absolute;
 	width: 30px;
@@ -13,7 +13,7 @@
 	right: -21px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .top-left-edge {
+.sc-pane.sc-panel.sc-picker .top-left-edge {
 	background: static_url('images/panels/shadow_corners.png') no-repeat -10px -494px;
 	position: absolute;
 	width: 30px;
@@ -22,7 +22,7 @@
 	left: -20px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .bottom-left-edge {
+.sc-pane.sc-panel.sc-picker .bottom-left-edge {
 	background: static_url('images/panels/shadow_corners.png') no-repeat -10px -520px;
 	position: absolute;
 	width: 30px;
@@ -31,7 +31,7 @@
 	left: -20px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .bottom-right-edge {
+.sc-pane.sc-panel.sc-picker .bottom-right-edge {
 	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -600px;
 	position: absolute;
 	width: 30px;
@@ -40,7 +40,7 @@
 	right: -21px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .top-edge {
+.sc-pane.sc-panel.sc-picker .top-edge {
 	background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px -180px;
 	position: absolute;
 	height: 20px;
@@ -49,7 +49,7 @@
 	left: 10px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .bottom-edge {
+.sc-pane.sc-panel.sc-picker .bottom-edge {
 	background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px -210px;
 	position: absolute;
 	height: 30px;
@@ -58,7 +58,7 @@
 	left: 10px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .left-edge {
+.sc-pane.sc-panel.sc-picker .left-edge {
 	background: static_url('images/panels/shadows_repeat_y.png') repeat-y -180px 0px;
 	position: absolute;
 	width: 20px;
@@ -67,7 +67,7 @@
 	left: -20px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .right-edge {
+.sc-pane.sc-panel.sc-picker .right-edge {
 	background: static_url('images/panels/shadows_repeat_y.png') repeat-y -210px 0px;
 	position: absolute;
 	width: 20px;
@@ -76,7 +76,7 @@
 	right: -20px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .perfectRight {
+.sc-pane.sc-panel.sc-picker .perfectRight {
 	background: static_url('images/panels/reveal-tabs.png') no-repeat 0px -64px;
 	position: absolute;
 	width: 25px;
@@ -85,7 +85,7 @@
 	left: -25px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .perfectLeft {
+.sc-pane.sc-panel.sc-picker .perfectLeft {
 	background: static_url('images/panels/reveal-tabs.png') no-repeat -32px -64px;
 	position: absolute;
 	width: 25px;
@@ -94,7 +94,7 @@
 	right: -25px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .perfectTop {
+.sc-pane.sc-panel.sc-picker .perfectTop {
 	background: static_url('images/panels/reveal-tabs.png') no-repeat 0px 0px;
 	position: absolute;
 	width: 51px;
@@ -104,7 +104,7 @@
 	margin-left: -25px;
 }
 
-.sc-pane.sc-panel.sc-picker-pane .perfectBottom {
+.sc-pane.sc-panel.sc-picker .perfectBottom {
 	background: static_url('images/panels/reveal-tabs.png') no-repeat 0px -32px;
 	position: absolute;
 	width: 51px;

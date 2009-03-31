@@ -1,28 +1,28 @@
-.sc-alert-panel {
+.sc-alert {
   background: sc_static('standard-white-fade') repeat ;
 }
 
-.sc-pane.sc-panel.sc-alert-panel > div > .sc-view {
+.sc-pane.sc-panel.sc-alert > div > .sc-view {
 	overflow: visible;
 }
 
-.sc-alert-panel .info {
+.sc-alert .info {
 	position: relative ;
 	min-height: 48px;
 	padding: 20px 12px 58px 74px;
 }
 
-.sc-alert-panel .info.plain {
+.sc-alert .info.plain {
 	padding: 20px 12px 58px 16px;
 }
 
-.sc-alert-panel .info img.icon {
+.sc-alert .info img.icon {
 	position: absolute;
 	left: 12px;
 	top: 14px;
 }
 
-.sc-alert-panel .info h1 {
+.sc-alert .info h1 {
 	background-color: transparent;
 	color: black;
 	margin: 0;
@@ -32,21 +32,21 @@
 	font-family: inherit ;
 }
 
-.sc-alert-panel .info p.description {
+.sc-alert .info p.description {
 	padding: 0;
 	margin: 6px 0px;
 	font-size: 13px;
 	margin-right: 20px;
 }
 
-.sc-alert-panel .info p.caption {
+.sc-alert .info p.caption {
 	padding: 0;
 	margin: 6px 0px;
 	font-size: 11px;
 	margin-right: 20px;
 }
 
-.sc-alert-panel .info .seperator {
+.sc-alert .info .seperator {
 	position: absolute;
 	width: 100%;
 	height: 2px;

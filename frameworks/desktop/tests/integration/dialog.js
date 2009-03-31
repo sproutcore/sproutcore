@@ -16,14 +16,14 @@ test("adding dialog to screen", function() {
   var delegate = SC.Object.create({
     
     couldNotSend: function() {
-      pane = SC.AlertPanel.warn("Email could not be sent", 'There might be a problem with the server or with your internet connection.  Try again in a few minutes.', "Try Again", "Cancel", 'Report Problem...', this);      
+      pane = SC.AlertPane.warn("Email could not be sent", 'There might be a problem with the server or with your internet connection.  Try again in a few minutes.', "Try Again", "Cancel", 'Report Problem...', this);      
     },
     
     showMoreInfo: function() {
-      pane = SC.AlertPanel.info("Sending Email", "Sometimes email doesn't make it.  It's a fact of life.  We all love email, but hey that's how it goes.  \nAnyway, the nice thing is that we can provide this helpful dialog message, with multiple paragraphs and everything because of SproutCore.\nEmail is OK, AlertPanels are great. So just deal m'kay?  Bye bye.", delegate);
+      pane = SC.AlertPane.info("Sending Email", "Sometimes email doesn't make it.  It's a fact of life.  We all love email, but hey that's how it goes.  \nAnyway, the nice thing is that we can provide this helpful dialog message, with multiple paragraphs and everything because of SproutCore.\nEmail is OK, AlertPanes are great. So just deal m'kay?  Bye bye.", delegate);
     },
     
-    alertPanelDidDismiss: function(alert, status) {
+    alertPaneDidDismiss: function(alert, status) {
       console.log("%@.alertDidDismiss - %@".fmt(alert, status));
       switch(status) {
         case SC.OK_STATUS:

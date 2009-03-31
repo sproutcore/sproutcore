@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('views/panel');
+require('panes/panel');
 require('views/button');
 /** 
   button1 : 1st button from the right. default:OK
@@ -13,37 +13,37 @@ require('views/button');
   button3 : 1st button from the left. Optional. Could be Cancel or alternative option.
 */
 /** 
-  Passed to delegate when alert panel is dismissed by pressing button 1
+  Passed to delegate when alert pane is dismissed by pressing button 1
 */
 SC.BUTTON1_STATUS = 'button1';
 
 /** 
-  Passed to delegate when alert panel is dismissed by pressing button 2
+  Passed to delegate when alert pane is dismissed by pressing button 2
 */
 SC.BUTTON2_STATUS = 'button2';
 
 /** 
-  Passed to delegate when alert panel is dismissed by pressing button 3
+  Passed to delegate when alert pane is dismissed by pressing button 3
 */
 SC.BUTTON3_STATUS = 'button3';
 
 /**
-  Displays a preformatted modal alert panel.
+  Displays a preformatted modal alert pane.
   
-  Alert panels are a simple way to provide modal messaging that otherwise 
-  blocks the user's interaction with your application.  Alert panels are 
+  Alert panes are a simple way to provide modal messaging that otherwise 
+  blocks the user's interaction with your application.  Alert panes are 
   useful for showing important error messages and confirmation dialogs.  They
   provide a better user experience than using the OS-level alert dialogs.
   
-  h1. Displaying an Alert Panel
+  h1. Displaying an Alert Pane
   
-  The easiest way to display an alert panel is to use one of the various 
-  class methods defined on SC.AlertPanel, passing the message and an optional
+  The easiest way to display an alert pane is to use one of the various 
+  class methods defined on SC.AlertPane, passing the message and an optional
   detailed description and caption.  
   
   There are four variations of this method can you can invoke:  
   
-  - *warn()* - displays an alert panel with a warning icon to the left.
+  - *warn()* - displays an alert pane with a warning icon to the left.
   - *error()* - displays an alert with an error icon to the left
   - *info()* - displays an alert with an info icon to the left
   - *plain()* - displays an alert w/o any icon
@@ -54,32 +54,32 @@ SC.BUTTON3_STATUS = 'button3';
   pass these titles of these buttons to enable them or null to disable then.
   
   Additionally, you can pass a delegate object as the last parameter.  This
-  delegate's 'alertPanelDidDismiss()' method will be called when the panel
-  is dismissed, passing the panel instance and a key indicating which 
+  delegate's 'alertPaneDidDismiss()' method will be called when the pane
+  is dismissed, passing the pane instance and a key indicating which 
   button was pressed.
   
   h1. Examples
   
-  Show a simple AlertPanel with an OK button:
+  Show a simple AlertPane with an OK button:
   
   {{{
-    SC.AlertPanel.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.");
+    SC.AlertPane.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.");
   }}}
   
-  Show an AlertPanel with a customized OK title (title will be 'Try Again'):
+  Show an AlertPane with a customized OK title (title will be 'Try Again'):
   
   {{{
-    SC.AlertPanel.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again");
+    SC.AlertPane.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again");
   }}}
   
-  Show an AlertPanel with a custom OK, a Cancel button and an Extra button, 
+  Show an AlertPane with a custom OK, a Cancel button and an Extra button, 
   each with custom titles.  Also, pass a delegate that will be invoked when
   the user's dismisses the dialog.
   
   {{{
 
     MyApp.calendarController = SC.Object.create({
-      alertPanelDidDismiss: function(panel, status) {
+      alertPaneDidDismiss: function(pane, status) {
         switch(status) {
           case SC.BUTTON1_STATUS:
             this.tryAgain();
@@ -98,22 +98,22 @@ SC.BUTTON3_STATUS = 'button3';
       ...
     });
     
-    SC.AlertPanel.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again", "Cancel", "More Info...", MyApp.calendarController);
+    SC.AlertPane.warn("Could not load calendar", "Your internet connection may be unavailable or our servers may be down.  Try again in a few minutes.", "Try Again", "Cancel", "More Info...", MyApp.calendarController);
   }}}
   
-  @extends SC.Panel
+  @extends SC.PanelPane
   @since SproutCore 1.0
 */
-SC.AlertPanel = SC.Panel.extend({
+SC.AlertPane = SC.PanelPane.extend({
   
-  classNames: 'sc-alert-panel',
+  classNames: 'sc-alert',
   
   /**
     The delegate to notify when the pane is dismissed.  If you set a 
     delegate, it should respond to the method:
     
     {{{
-      alertPanelDidDismiss: function(panel, status)
+      alertPaneDidDismiss: function(pane, status)
     }}}
     
     The status will be on of SC.BUTTON1_STATUS, SC.BUTTON2_STATUS or SC.BUTTON3_STATUS
@@ -252,12 +252,12 @@ SC.AlertPanel = SC.Panel.extend({
 
   /**
     Action triggered whenever any button is pressed.  Notifies any delegate
-    and then hides the alert panel.
+    and then hides the alert pane.
   */
   dismiss: function(sender) {
     var del = this.delegate;
-    if (del && del.alertPanelDidDismiss) {
-      del.alertPanelDidDismiss(this, sender.get('actionKey'));
+    if (del && del.alertPaneDidDismiss) {
+      del.alertPaneDidDismiss(this, sender.get('actionKey'));
     }
     this.remove(); // hide alert
   },
@@ -275,7 +275,7 @@ SC.AlertPanel = SC.Panel.extend({
 /** @private
   internal method normalizes arguments for processing by helper methods.
 */
-SC.AlertPanel._normalizeArguments = function(args) {
+SC.AlertPane._normalizeArguments = function(args) {
   args = SC.A(args); // convert to real array
   var len = args.length, delegate = args[len-1];
   if (SC.typeOf(delegate) !== SC.T_STRING) {
@@ -286,7 +286,7 @@ SC.AlertPanel._normalizeArguments = function(args) {
 };
 
 /**
-  Displays a new alert panel according to the passed parameters.  Every 
+  Displays a new alert pane according to the passed parameters.  Every 
   parameter except for the message is optional.  You can always pass the 
   delegate as the last parameter and it will be used, even if you omit items
   in between.
@@ -303,16 +303,16 @@ SC.AlertPanel._normalizeArguments = function(args) {
   @param {String} button2Title optional unlocalized title for button 2 (Cancel)
   @param {String} button3Title optional unlocalized title for button 3 (extra)
   @param {String} iconUrl optional URL or class name for icon.
-  @param {Object} delegate optional delegate to notify when panel is dismissed
-  @returns {SC.AlertPanel} new alert panel
+  @param {Object} delegate optional delegate to notify when pane is dismissed
+  @returns {SC.AlertPane} new alert pane
 */
-SC.AlertPanel.show = function(message, description, caption, button1Title, button2Title, button3Title, iconUrl, delegate) {
+SC.AlertPane.show = function(message, description, caption, button1Title, button2Title, button3Title, iconUrl, delegate) {
   
   // get the delegate and normalize the rest of the params
   var args = this._normalizeArguments(arguments);
-  console.log('SC.AlertPanel.show(%@)'.fmt(args.join(',')));
+  console.log('SC.AlertPane.show(%@)'.fmt(args.join(',')));
   
-  // create basic AlertPanel
+  // create basic AlertPane
   var ret = this.create({
     message: args[0] || '',
     description: args[1] || null,
@@ -333,11 +333,11 @@ SC.AlertPanel.show = function(message, description, caption, button1Title, butto
 };
 
 /**
-  Displays a warning alert panel.  See SC.AlertPanel.show() for complete details. 
+  Displays a warning alert pane.  See SC.AlertPane.show() for complete details. 
   
-  @returns {SC.AlertPanel} the panel
+  @returns {SC.AlertPane} the pane
 */
-SC.AlertPanel.warn = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPane.warn = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[6] = 'sc-icon-alert-48';
   return this.show.apply(this, args);
@@ -345,33 +345,33 @@ SC.AlertPanel.warn = function(message, description, caption, button1Title, butto
 
 
 /**
-  Displays a info alert panel.  See SC.AlertPanel.show() for complete details. 
+  Displays a info alert pane.  See SC.AlertPane.show() for complete details. 
   
-  @returns {SC.AlertPanel} the panel
+  @returns {SC.AlertPane} the pane
 */
-SC.AlertPanel.info = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPane.info = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[6] = 'sc-icon-info-48';
   return this.show.apply(this, args);
 };
 
 /**
-  Displays a error allert panel.  See SC.AlertPanel.show() for complete details. 
+  Displays a error allert pane.  See SC.AlertPane.show() for complete details. 
   
-  @returns {SC.AlertPanel} the panel
+  @returns {SC.AlertPane} the pane
 */
-SC.AlertPanel.error = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPane.error = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[6] = 'sc-icon-error-48';
   return this.show.apply(this, args);
 };
 
 /**
-  Displays a plain all-text allert panel w/o icon.  See SC.AlertPanel.show() for complete details. 
+  Displays a plain all-text allert pane w/o icon.  See SC.AlertPane.show() for complete details. 
   
-  @returns {SC.AlertPanel} the panel
+  @returns {SC.AlertPane} the pane
 */
-SC.AlertPanel.plain = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
+SC.AlertPane.plain = function(message, description, caption, button1Title, button2Title, button3Title, delegate) {
   var args = this._normalizeArguments(arguments);
   args[6] = 'blank';
   return this.show.apply(this, args);

@@ -13,7 +13,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
 function evaluatePicker(pane) {
 	ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
-	ok(pane.$().hasClass('sc-picker-pane'), 'pane should have sc-picker-pane class');
+	ok(pane.$().hasClass('sc-picker'), 'pane should have sc-picker class');
 	ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
 	ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
 	

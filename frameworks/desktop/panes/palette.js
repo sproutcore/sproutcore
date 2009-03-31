@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('views/panel');
+require('panes/panel');
 
 /**
   Displays a non-modal, default positioned, drag&drop-able palette pane.
@@ -28,12 +28,12 @@ require('views/panel');
   useful for showing important detail informations with flexsible position.
   They provide a better user experience than modal panel.
   
-  @extends SC.Panel
+  @extends SC.PanelPane
   @since SproutCore 1.0
 */
-SC.PalettePane = SC.Panel.extend({
+SC.PalettePane = SC.PanelPane.extend({
   
-  classNames: 'sc-palette-pane',
+  classNames: 'sc-palette',
   isModal: false,
   isAnchored: false,
   _mouseOffsetX: null,

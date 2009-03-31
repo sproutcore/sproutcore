@@ -7,12 +7,12 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("SC.Panel UI");
+module("SC.PanelPane UI");
 
 var pane ;
 
 test("verify panel content container is visible at correct location with right size", function() { 
-  pane = SC.Panel.create({
+  pane = SC.PanelPane.create({
     contentView: SC.View.extend({
       layout: { width: 400, height: 200, centerX: 0, centerY: 0 }
     })

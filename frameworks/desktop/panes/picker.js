@@ -6,7 +6,7 @@
 // ==========================================================================
 
 
-require('views/palette_pane');
+require('panes/palette');
 
 /** 
   Popular customized picker position rules:
@@ -102,7 +102,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 */
 SC.PickerPane = SC.PalettePane.extend({
   
-  classNames: 'sc-picker-pane',
+  classNames: 'sc-picker',
   isAnchored: true,
   
   pointerPos: 'perfectRight',

@@ -14,7 +14,7 @@
   panel pane is to simply add it to your page like this:
   
   {{{
-    SC.Panel.create({
+    SC.PanelPane.create({
       contentView: SC.View.extend({
         layout: { width: 400, height: 200, centerX: 0, centerY: 0 }
       })
@@ -29,7 +29,7 @@
   @author Erich Ocean
   @since SproutCore 1.0
 */
-SC.Panel = SC.Pane.extend({
+SC.PanelPane = SC.Pane.extend({
 
   layout: { left:0, right:0, top:0, bottom:0 },
   classNames: ['sc-panel'],
