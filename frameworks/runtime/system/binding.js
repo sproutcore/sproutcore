@@ -445,8 +445,8 @@ SC.Binding = {
     - the binding is not one way
     - the value does not match the stored transformedBindingValue
     
-    if the value does not match the transformedBindingValue, then it will become
-    the new bindingValue. 
+    if the value does not match the transformedBindingValue, then it will 
+    become the new bindingValue. 
   */
   toPropertyDidChange: function(target, key) {
     if (this._oneWay) return; // nothing to do
