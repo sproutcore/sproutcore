@@ -325,8 +325,8 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @returns {Number} a storeKey.
   */
   storeKeyFor: function(id) {
-    var storeKeys = this.storeKeysById;
-    if (!storeKeys) storeKeys = this.storeKeysById = {};
+    var storeKeys = this.prototype.storeKeysById;
+    if (!storeKeys) storeKeys = this.prototype.storeKeysById = {};
     var ret = storeKeys[id];
     if (!ret) {
       ret = SC.Store.generateStoreKey();
@@ -337,25 +337,26 @@ SC.Record.mixin( /** @scope SC.Record */ {
   },
 
   /** 
-    Used to find the first object matching the specified conditions.  You can 
-    pass in either a simple guid or one or more hashes of conditions.
+    Returns a record with the named ID in store.
+    
+    @param {SC.Store} store the store
+    @param {String} id the record id
+    @returns {SC.Record} record instance
   */
-  find: function(guid, store) {
-    if(store) {
-      return store.find(guid, this) ;
-    }
-    return null;
+  find: function(store, id) {
+    return store.find(this, id);
   },
-  
-  // Same as find except returns all records matching the passed conditions.
-  findAll: function(filter) {
-    var ret;
-    var args = SC.$A(arguments) ; args.push(this) ; // add type
-    var store = this.get('store');
-    if(store) {
-      ret = store.find.apply(store,args) ;
-    }
-    return ret;
+
+  /**
+    Finds all records in the store with this record type matching the named
+    parameters.  This is the same as calling store.findAll(recordType, params)
+    
+    @param {SC.Store} store the store
+    @param {Hash} params optional params
+    @returns {SC.RecordArray} result set or null
+  */
+  findAll: function(store, params) {
+    return store.findAll(this, params);
   }
   
 }) ;
