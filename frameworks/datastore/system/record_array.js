@@ -36,152 +36,101 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {SC.Array}
   */
   storeKeys: null,
-  
-  // ..........................................................
-  // DELEGATE SUPPORT
-  // 
-  
-  /**
-    Primitive simple sets the store keys array to the passed array.  This 
-    is an optimization that can be used instead of provideStoreKeysInRange()
-    since it avoids copying the entire array.
-    
-    Note that the RecordArray will assume ownership of the storeKeys array 
-    you pass in so you should not edit or retain the array after calling this
-    method.
-    
-    @param {Array} storeKeys array of store keys
-    @returns {SC.RecordArray} receiver
-  */
-  setStoreKeys: function(storeKeys) {
-    this._storeKeys = storeKeys ;
-    this._length    = storeKeys.length ;
-    this.enumerableContentDidChange({ start: 0, length: storeKeys.length });
-    return this ;    
-  },
-  
-  /**
-    Call this method to set a set of storeKeys for the range of objects.  Once
-    you set store keys this way the records they represent will be 
-    materialized as needed for display.
-    
-    @param {Range} range the range to set
-    @param {Array} storeKeys array of store keys to set
-    @returns {SC.RecordArray} receiver 
-  */
-  provideStoreKeysInRange: function(range, storeKeys) {
-    var content = this._storeKeys ;
-    if (!content) content = this._storeKeys = [] ;
-    var start = range.start, len = range.length;
-    while(--len >= 0) content[start+len] = storeKeys[len];
-    this.enumerableContentDidChange() ;
-    return this ;
-  },
-  
-  /**
-    Call this method to load new records into the store, simultaneously 
-    mapping those records into the passed range on the RecordArray.  This 
-    method is a useful way to provide new record content to the RecordArray
-    when you have just loaded it from the server.  
-    
-    If the data hashes you pass in map to existing records they will be 
-    overwritten by the new data.
-    
-    @param {Range} range the range to load into the RecordsArray
-    @param {Array} dataArr (required) Array of JSON-compatible hashes.
-    @param {SC.Record|Array} recordType (optional) The SC.Record extended class that you want to use or an array of SC.Record classes that match the dataArr item per item.
-    @param {String} primaryKey  (optional) This is the primaryKey key for the data hash, if it is not passed in, then 'guid' is used.
-    @returns {SC.RecordArray} receiver
-  */
-  loadRecordsInRange: function(range, dataArr, recordType, primaryKey) {
-    var store = this.get('store');
-    if (!store) throw "%@ cannot be used without a parent store".fmt(this);
-    var storeKeys = store.loadRecords(dataArr, recordType, primaryKey);
-    return this.provideStoreKeysInRange(range, storeKeys) ;
-  },
-  
-  _TMP_PKEY_MAP: [],
-  
-  /**
-    Call this method to specify the records in a particular range by id.
-    This method is best to use if you know the primary key value (i.e. id)
-    of the records that match a particular search but you haven't retrieved
-    the record details for those primary keys yet.
-    
-    When you try to retrieve a record from a record array when the guid only
-    has been set, the RecordArray will return a new SC.Record instance and 
-    then ask your Server object to load the record details automatically.
-    
-    @param {Range} range the range to load into the RecordsArray
-    @param {SC.Record|Array} recordType record class or array of classes
-    @param {Array} ids array of ids to set
-    @returns {SC.RecordArray} receiver 
-  */
-  provideIdsInRange: function(range, recordTypes, ids) {
-    var store = this.get('store');
-    if (!store) throw "%@ cannot be used without a parent store".fmt(this);
 
-    // map primaryKeys to storeKeys
-    var storeKeys = this._TMP_PKEY_MAP, len = ids.length, idx=0;
-    var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY, recordType;
-    if (!isArray) recordType = recordTypes;
+  // ..........................................................
+  // ARRAY PRIMITIVES
+  // 
+
+  /**
+    Returned length is a pass-through to the storeKeys array.
+  */
+  length: function() {
+    var storeKeys = this.get('storeKeys');
+    return storeKeys ? storeKeys.get('length') : 0;
+  }.property('storeKeys').cacheable(),
+
+  /**
+    Looks up the store key in the store keys array and materializes a
+    records.
+  */
+  objectAt: function(idx) {
+    var recs      = this._records, 
+        storeKeys = this.get('storeKeys'),
+        store     = this.get('store'),
+        storeKey, ret ;
     
-    for(idx=0;idx<len;idx++) {
-      if (isArray) recordType = recordTypes[idx];
-      storeKeys[idx] = recordType.storeKeyFor(ids[idx]);
-    }
+    if (!storeKeys || !store) return undefined; // nothing to do
+    if (recs && (ret=recs[idx])) return ret ; // cached
     
-    // now set on storeKeys on receiver
-    var ret = this.provideStoreKeysInRange(range, storeKeys);
-    
-    // and reset storeKeys temporary object
-    storeKeys.length = 0;
+    // not in cache, materialize
+    if (!recs) this._records = recs = [] ; // create cache
+    storeKey = storeKeys.objectAt(idx);
+    if (storeKey) recs[idx] = ret = store.materializeRecord(storeKey);
     return ret ;
+  },
+  
+  /**
+    Pass through to the underlying array.  The passed in objects must be
+    records, which can be converted to storeKeys.
+  */
+  replace: function(idx, amt, recs) {
+    var storeKeys = this.get('storeKeys'), 
+        len       = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
+        i, keys;
+        
+    if (!storeKeys) throw "storeKeys required";
+    
+    // map to store keys
+    keys = [] ;
+    for(i=0;i<len;i++) keys[i] = recs.objectAt(i).get('storeKey');
+    
+    // pass along - if allowed, this should trigger the content observer 
+    storeKeys.replace(idx, amt, keys);
+    return this; 
   },
   
   // ..........................................................
   // INTERNAL SUPPORT
   // 
   
-  /** @private - materialize records if needed. */
-  requestIndex: function(idx) {
-    // first see if we have a storeKey.  If we do, then materialize the 
-    // record before going back to the delegate.
-    var storeKeys = this._storeKeys, storeKey ;
-    if (storeKeys && !SC.none(storeKey = storeKeys[idx])) {
-      var content = this._sa_content ;
-      if (!content) content = this._sa_content = [] ;
-      return (content[idx] = this.get('store').materializeRecord(storeKey));
-    } else return sc_super();
+  /** @private 
+    Invoked whenever the storeKeys array changes.  Observes changes.
+  */
+  _storeKeysDidChange: function() {
+    var storeKeys = this.get('storeKeys');
+    var prev = this._prevStoreKeys, f = this._storeKeysContentDidChange;
+
+    if (storeKeys === prev) return this; // nothing to do
+    
+    if (!prev) {
+      prev.removeObserver('[]', this, f);
+    }
+
+    this._prevStoreKeys = storeKeys;
+
+    if (storeKeys) {
+      storeKeys.addObserver('[]', this, f);
+    }
+    
+    var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
+    this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
+    
   },
   
-  /** @private - when reseting, also reset the internal store key array. */
-  reset: function() {
-    this._storeKeys = null;
-    return sc_super();
-  },
-  
-  /** @private - when objects change in a range, also clear out store keys. */
-  objectsDidChangeInRange: function(range) {
+  /** @private
+    Invoked whenever the content of the storeKeys array changes.  This will
+    dump any cached record lookup and then notify that the enumerable content
+    has changed.
+  */
+  _storeKeysContentDidChange: function(target, key, value, rev) {
+    this._records = null ; // clear cache
     
-    // delete cached content
-    this._sa_content = null ;
-    
-    var content = this._storeKeys ;
-    if (content) {
-      // if range covers entire length of cached content, just reset array
-      if (range.start === 0 && SC.maxRange(range)>=content.length) {
-        this._storeKeys = null ;
-        
-      // otherwise, step through the changed parts and delete them.
-      } else {
-        var start = range.start, loc = Math.min(start + range.length, content.length);
-        while (--loc>=start) content[loc] = undefined;
-      }
-    }    
-    this.enumerableContentDidChange(range) ; // notify
-    return this ;
+    this.beginPropertyChanges()
+      .notifyPropertyChange('length')
+      .enumerableContentDidChange()
+    .endPropertyChanges();
   }
+  
   
 });
 
