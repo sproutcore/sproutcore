@@ -1223,7 +1223,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         recordType = recordTypes.objectAt(idx) || SC.Record;
         primaryKey = recordType.prototype.primaryKey ;
       } 
-      id = (ids) ? ids.objectAt(idx) : dataHashes[primaryKey];
+      id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
       ret[idx] = storeKey = recordType.storeKeyFor(id); // needed to cache
       this.pushRetrieve(recordType, id, dataHash, storeKey);
     }

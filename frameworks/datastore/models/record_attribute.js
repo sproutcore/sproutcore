@@ -150,16 +150,18 @@ SC.RecordAttribute = SC.Object.extend(
     @returns {Object} property value
   */
   call: function(record, key, value) {
+    var attrKey = this.get('key') || key;
+    
     if (value !== undefined) {
-      value = this.fromType(value) ; // convert to attribute.
-      record.writeAttribute(key, value);
+      value = this.fromType(record, key, value) ; // convert to attribute.
+      record.writeAttribute(attrKey, value);
     } else {
-      value = record.readAttribute(key);
+      value = record.readAttribute(attrKey);
       if (SC.none(value) && (value = this.get('defaultValue'))) {
         if (typeof value === SC.T_FUNCTION) {
           value = this.defaultValue(record, key, this);
         }
-      } else value = this.toType(value);
+      } else value = this.toType(record, key, value);
     }
     return value ;
   },
@@ -203,7 +205,7 @@ SC.RecordAttribute = SC.Object.extend(
 */
 SC.RecordAttribute.attr = function(attributeType, opts) {
   if (!opts) opts = {} ;
-  if (!opts.type) opts.type = type || String ;
+  if (!opts.type) opts.type = attributeType || String ;
   return this.create(opts);
 };
 
