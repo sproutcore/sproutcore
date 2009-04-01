@@ -24,11 +24,13 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   
   /**  @private - adapted for to many relationship */
   toType: function(record, key, value) {
+    // TODO: Implement ManyAttribute
     return value ;
   },
 
   /** @private - adapted for to many relationship */
   fromType: function(record, key, value) {
+    // TODO: Implement ManyAttribute
     return value;
   }
   
