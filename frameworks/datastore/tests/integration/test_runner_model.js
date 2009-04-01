@@ -6,7 +6,7 @@
 // ==========================================================================
 /*globals module test ok equals same */
 
-var TestRunnner;
+var TestRunner;
 module("Sample Model from TestRunner Application", { 
   setup: function() {
 
@@ -19,24 +19,27 @@ module("Sample Model from TestRunner Application", {
     // load tests.
     TestRunner.Target = SC.Record.extend({
 
-      // targetName
-      // targetType
+      /** test name */
+      name: SC.Record.attr(String),
       
-      // when we get tests, we should actually load the tests.
-      tests: SC.Collection.fetch('TestRunner.Test', {
-        fetchKey: 'link_tests'
-      })
-      
+      /** test type - one of 'app', 'framework', 'sproutcore' */
+      type: SC.Record.attr(String, { only: 'single group all'.w() }),
+
+      /** Fetches list of tests dynamically */
+      tests: SC.Record.fetch('TestRunner.Test')
+
     });
     
     // describes a single test.  has a URL to load the test and the test name.
     TestRunner.Test = SC.Record.extend({
       
       // testName
-      testUrl: SC.Record.attribute(String).key('link_test'),
+      testUrl: SC.Record.attr({
+        key: 'link_test'
+      }),
       
-      target: SC.Record.attribute('TestRunner.Target', {
-        inverse: tests,
+      target: SC.Record.attr('TestRunner.Target', {
+        inverse: 'tests',
         isMaster: YES,
         isEditable: NO
       })
