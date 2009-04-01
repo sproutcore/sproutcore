@@ -1032,18 +1032,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var source    = this.get('dataSource'),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len       = (storeKeys === undefined) ? ids.length : storeKeys.length,
-        ret       = [],
+        retCreate= [], retUpdate= [], retDestroy = [], 
         rev       = SC.Store.generateStoreKey(),
         K         = SC.Record,
         recordType, idx, storeKey, status, key ;
 
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
+
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
       storeKeys=this.changelog;
     }
-
-    if (!isArray) recordType = recordTypes;
+    
     for(idx=0;idx<len;idx++) {
       
       // collect store key
@@ -1063,15 +1063,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if(status==K.READY_NEW){
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
-          ret.push(storeKey);
+          retCreate.push(storeKey);
         } else if (status==K.READY_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_COMMITTING);
           this.dataHashDidChange(storeKey, rev, YES);
-          ret.push(storeKey);
+          retUpdate.push(storeKey);
         } else if (status==K.DESTROYED_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_DESTROYING);
           this.dataHashDidChange(storeKey, rev, YES);
-          ret.push(storeKey);
+          retDestroy.push(storeKey);
         }
         // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING, 
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
@@ -1079,7 +1079,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }   
       
     // now commit storekeys to dataSource
-    if (source) source.commitRecords.call(source, this, ret);
+    if (source) source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy);
     return ret ;
   },
 

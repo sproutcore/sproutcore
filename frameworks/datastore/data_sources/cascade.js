@@ -35,6 +35,16 @@ SC.CascadeDataSource = SC.DataSource.extend(
   // SC.STORE ENTRY POINTS
   // 
   
+  /**
+    Define which dataSources will be part of the cascading algorithms 
+    
+    @property {}
+  */
+  from: function(dataSource) {
+     this.dataSources.push(dataSource);
+  },
+  
+  
   _handleResponse: function(current, response) {
     if (response === YES) return YES ;
     if (current === NO) return response === NO ? NO : SC.MIXED_STATE ;
