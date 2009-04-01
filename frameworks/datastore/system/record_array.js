@@ -8,26 +8,17 @@
 /**
   @class
 
-  Sparse array that can materialize records on demand from an owner store.
-  Unlike regular sparse arrays, the RecordArray stores its contents as an 
-  array of store keys which are used to create SC.Record instances when you 
-  access specific indexes on the array.
+  A RecordArray wraps an array of storeKeys, converting them into materialized
+  record objects from the owner store on demand.  A Record Array instance is
+  usually returned when you call SC.Store#findAll() or SC.Store#recordsFor().
   
-  To act as a delegate of a RecordArray, you should implement the same 
-  SC.SparseArrayDelegate methods as you would normally.  However, instead of
-  providing objects, you should provide storeKeys using the various helper
-  methods defined on this class.
-  
-  SC.RecordArray instances are returned both when you do a fetch() or a 
-  findAll() on a Store. 
-
-  You can only mutate RecordArrays by adding SC.Record instances.
-  
-  @extends SC.SparseArray
+  @extends SC.Object
+  @extends SC.Enumerable
+  @extends SC.Array
   @since SproutCore 1.0
 */
 
-SC.RecordArray = SC.SparseArray.extend( 
+SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.RecordArray.prototype */ {
     
   /**
@@ -37,7 +28,15 @@ SC.RecordArray = SC.SparseArray.extend(
     @property {SC.Store}
   */
   store: null,
+
+  /**
+    SC.Array object that will provide the store keys for the array.  The 
+    record array will register itself as an observer for this array.
     
+    @property {SC.Array}
+  */
+  storeKeys: null,
+  
   // ..........................................................
   // DELEGATE SUPPORT
   // 

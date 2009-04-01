@@ -531,9 +531,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   findAll: function(queryKey, params, _store) { 
     if (!_store) store = this;
 
-    var source = this.get('dataSource'), ret ;
+    var source = this.get('dataSource'), ret, storeKeys, cacheKey ;
     if (source) {
-      ret = source.fetchRecords.call(source, this, queryKey, params);
+      
+      // ask the dataSource to provide a storeKey array
+      storeKeys = source.fetchRecords.call(source, this, queryKey, params);
+      if (storeKeys) {
+        
+        // if an array was provided, see if a wrapper already exists for 
+        // this store.  Otherwise create it
+        cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
+        ret = this[cacheKey];
+        if (!ret) {
+          ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
+          this[cacheKey] = ret ; // save for future reuse.
+        }
+      }
     }
     return ret ;
   },
@@ -545,7 +558,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this method for testing.
     
     @param {SC.Record} recordType the record type
-    @returns {SC.RecordArray} record array
+    @returns {SC.Array} array instance - usually SC.RecordArray
   */
   recordsFor: function(recordType) {
     var storeKeys = [], storeKeysById = recordType.prototype.storeKeysById; 
@@ -561,8 +574,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    ret = SC.RecordArray.create({ store: this });
-    ret.setStoreKeys(storeKeys);
+    if (storeKeys.length>0) {
+      ret = SC.RecordArray.create({ store: this, storeKeys: storeKeys });
+    } else ret = storeKeys; // empty array
     return ret ;
   },
   
