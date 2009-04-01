@@ -381,26 +381,92 @@ SC.NestedStore = SC.Store.extend(
     
     return this ;
   },
-  
+
   // ..........................................................
-  // HIGH-lEVEL RECORD API
+  // HIGH-LEVEL RECORD API
   // 
   
+  
   /** @private - adapt for nested store */
-  fetch: function(queryKey, params, store) {  
-    var parentStore = this.get('parentStore');
-    if (store === undefined) store = this ; // first store sets to itself
-    return parentStore ? parentStore.fetch(queryKey, params, store) : null ;
+  findAll: function(queryKey, params, _store) { 
+    if (!_store) store = this;
+    return this.get('parentStore').findAll(queryKey, params, _store);
   },
 
   // ..........................................................
   // CORE RECORDS API
   // 
+  // The methods in this section can be used to manipulate records without 
+  // actually creating record instances.
   
   /** @private - adapt for nested store */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
     var pstore = this.get('parentStore');
     return pstore.retrieveRecords(recordTypes, ids, storeKeys, _isRefresh);
+  },
+
+  /** @private - adapt for nested store */
+  commitRecords: function(recordTypes, ids, storeKeys) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+
+  /** @private - adapt for nested store */
+  commitRecord: function(recordType, id, storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+  
+  /** @private - adapt for nested store */
+  cancelRecords: function(recordTypes, ids, storeKeys) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+
+  /** @private - adapt for nested store */
+  cancelRecord: function(recordType, id, storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+  
+  // ..........................................................
+  // DATA SOURCE CALLBACKS
+  // 
+  // Mathods called by the data source on the store
+
+  /** @private - adapt for nested store */
+  dataSourceDidCancel: function(storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+  
+  /** @private - adapt for nested store */
+  dataSourceDidComplete: function(storeKey, dataHash, newId) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+  
+  /** @private - adapt for nested store */
+  dataSourceDidDestroy: function(storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+
+  /** @private - adapt for nested store */
+  dataSourceDidError: function(storeKey, error) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+
+  // ..........................................................
+  // PUSH CHANGES FROM DATA SOURCE
+  // 
+  
+  /** @private - adapt for nested store */
+  pushRetrieve: function(recordType, id, dataHash, storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+  
+  /** @private - adapt for nested store */
+  pushDestroy: function(recordType, id, storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
+  },
+
+  /** @private - adapt for nested store */
+  pushError: function(recordType, id, error, storeKey) {
+    throw SC.Store.NESTED_STORE_UNSUPPORTED_ERROR;
   }
   
 }) ;

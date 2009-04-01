@@ -41,7 +41,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   },
   
   /** @private - just cascades */
-  retrieveRecords: function(dataSource, store, storeKeys) {
+  retrieveRecords: function(store, storeKeys) {
     var sources = this.get('dataSources'), len = sources.length;
     var source, idx, ret = null, cur;
     
@@ -57,7 +57,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   },
 
   /** @private - just cascades */
-  commitRecords: function(dataSource, store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
+  commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
     var sources = this.get('dataSources'), len = sources.length;
     var source, idx, ret = null, cur;
     
@@ -71,9 +71,21 @@ SC.CascadeDataSource = SC.DataSource.extend(
     if (ret === null) ret = NO ;
     return ret ;
   },
+
+  /** @private - just cascades */
+  fetchRecords: function(store, fetchKey, params) {
+    var sources = this.get('dataSources'), len = sources.length;
+    var source, idx, ret = null;
+    
+    for(idx=0;!ret && idx<len;idx++) {
+      source = sources.objectAt(idx);
+      ret = source.fetchRecords(store, fetchKey, params);
+    }
+    return ret ;
+  },
   
   /** @private - just cascades */
-  cancel: function(dataSource, store, storeKeys) {
+  cancel: function(store, storeKeys) {
     var sources = this.get('dataSources'), len = sources.length;
     var source, idx, ret = null, cur;
     

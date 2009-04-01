@@ -479,7 +479,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     Finds a record instance with the specified recordType and id, returning 
-    the record instance.  If no matching record could be found, returns null.
+    the record instance.  If no matching record could be found, asks the 
+    data source to retrieve the record.  If the data source cannot retrieve
+    the record, returns null.
     
     Note that if you try to find a record id that does not exist in memory,
     a dataSource may load it from ths server.  In this case, this method will
@@ -494,8 +496,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // first attempt to find the record in the local store
     var storeKey = recordType.storeKeyFor(id);
     if (this.readStatus(storeKey) === SC.RECORD_EMPTY) {
-      recordType = this.retrieveRecord(recordType, id);
-      storeKey = recordType ? recordType.storeKeyFor(id) : null ;
+      storeKey = this.retrieveRecord(recordType, id);
     }
     
     // now we have the storeKey, materialize the record and return it.
@@ -524,13 +525,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @param {Object} queryKey key describing the type of records to fetch
     @param {Hash} params optional additional parameters to pass along
-    @param {SC.Store} store this is a private param.  Do not pass
+    @param {SC.Store} _store this is a private param.  Do not pass
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  fetch: function(queryKey, params, store) {  
-    var parentStore = this.get('parentStore');
-    if (store === undefined) store = this ; // first store sets to itself
-    return parentStore ? parentStore.fetch(queryKey, params, store) : null ;
+  findAll: function(queryKey, params, _store) { 
+    if (!_store) store = this;
+
+    var source = this.get('dataSource'), ret ;
+    if (source) {
+      ret = source.fetchRecords.call(source, _store, queryKey, params);
+    }
+    return ret ;
   },
 
   _TMP_REC_ATTRS: {},
@@ -898,7 +903,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // now commit storekeys to dataSource
-    if (source) source.retrieveRecords.call(source, this, ret);
+    if (source) {
+      var ok = source.retrieveRecords.call(source, this, ret);
+      if (ok === NO) ret.length = 0; // could not find.
+    }
     return ret ;
   },
 
@@ -1370,6 +1378,7 @@ SC.Store.mixin({
   
   CHAIN_CONFLICT_ERROR: new Error("Nested Store Conflict"),
   NO_PARENT_STORE_ERROR: new Error("Parent Store Required"),
+  NESTED_STORE_UNSUPPORTED_ERROR: new Error("Unsupported In Nested Store"),
 
   EDITABLE:  'editable',
   LOCKED:    'locked',

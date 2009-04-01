@@ -40,7 +40,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {Array} storeKeys array of storeKeys to retrieve
     @returns {Boolean} YES if data source can handle keys
   */
-  retrieveRecords: function(dataSource, store, storeKeys) {
+  retrieveRecords: function(store, storeKeys) {
     return NO;    
   },
 
@@ -65,20 +65,35 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     handle any of the keys, YES if you can handle all of the keys, or
     SC.MIXED_STATE if you can handle some of them.
 
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} createStoreKeys keys to create
     @param {Array} updateStoreKeys keys to update
     @param {Array} destroyStoreKeys keys to destroy
     @returns {Boolean} YES if data source can handle keys
   */
-  commitRecords: function(dataSource, store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
+  commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
     var cret, uret, dret;
-    cret = this.createRecords.call(dataSource, store, createStoreKeys);    
-    uret = this.updateRecords.call(dataSource, store, updateStoreKeys);    
-    dret = this.destroyRecords.call(dataSource, store, destroyStoreKeys); 
+    cret = this.createRecords.call(this, store, createStoreKeys);    
+    uret = this.updateRecords.call(this, store, updateStoreKeys);    
+    dret = this.destroyRecords.call(this, store, destroyStoreKeys); 
     return (cret === uret === dret) ? cret : SC.MIXED_STATE ;
   },
+  
+  /**
+    Invoked by the store whenever it needs to retrieve a record array matching
+    the passed fetch key and parameters.  If you support the passed fetch 
+    options, return a new SC.RecordArray with the results or return the 
+    array empty and populate it later when the data is available.
+    
+    @param {SC.Store} store the requesting store
+    @param {Object} fetchKey key describing the request, may be SC.Record
+    @param {Hash} params optional additonal fetch params
+    @returns {SC.RecordArray} result set with storeKeys
+  */
+  fetchRecords: function(store, fetchKey, params) {
+    return null;  
+  },
+  
   
   /**
     Invoked by the store whenever it needs to cancel one or more records that
@@ -93,12 +108,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     retrieve any of the keys, YES if you can retrieve all of the, or
     SC.MIXED_STATE if you can retrieve some of the.
     
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys array of storeKeys to retrieve
     @returns {Boolean} YES if data source can handle keys
   */
-  cancel: function(dataSource, store, storeKeys) {
+  cancel: function(store, storeKeys) {
     return NO;
   },
   
@@ -116,12 +130,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     handle any of the keys, YES if you can handle all of the keys, or
     SC.MIXED_STATE if you can handle some of them.
 
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
   */
-  updateRecords: function(dataSource, store, storeKeys) {
-    return this._handleEach(dataSource, store, storeKeys, this.updateRecord);
+  updateRecords: function(store, storeKeys) {
+    return this._handleEach(store, storeKeys, this.updateRecord);
   },
   
   /**
@@ -134,12 +147,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     handle any of the keys, YES if you can handle all of the keys, or
     SC.MIXED_STATE if you can handle some of them.
 
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
   */
-  createRecords: function(dataSource, store, storeKeys) {
-    return this._handleEach(dataSource, store, storeKeys, this.createRecord);
+  createRecords: function(store, storeKeys) {
+    return this._handleEach(store, storeKeys, this.createRecord);
   },
 
   /**
@@ -152,21 +164,20 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     handle any of the keys, YES if you can handle all of the keys, or
     SC.MIXED_STATE if you can handle some of them.
 
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
   */
-  destroyRecords: function(dataSource, store, storeKeys) {
-    return this._handleEach(dataSource, store, storeKeys, this.destroyRecord);
+  destroyRecords: function(store, storeKeys) {
+    return this._handleEach(store, storeKeys, this.destroyRecord);
   },
 
   /** @private
     invokes the named action for each store key.  returns proper value
   */
-  _handleEach: function(dataSource, store, storeKeys, action) {
+  _handleEach: function(store, storeKeys, action) {
     var len = storeKeys.length, idx, ret, cur;
     for(idx=0;idx<len;idx++) {
-      cur = action.call(dataSource, store, storeKeys[idx]);
+      cur = action.call(this, store, storeKeys[idx]);
       if (ret === undefined) {
         cur = ret ;
       } else if (ret === YES) {
@@ -190,12 +201,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     To support cascading data stores, be sure to return NO if you cannot 
     handle the passed storeKey or YES if you can.
     
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to update
     @returns {Boolean} YES if handled
   */
-  updateRecord: function(dataSource, store, storeKey) {
+  updateRecord: function(store, storeKey) {
     return NO ;
   },
 
@@ -206,12 +216,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     To support cascading data stores, be sure to return NO if you cannot 
     handle the passed storeKey or YES if you can.
     
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to update
     @returns {Boolean} YES if handled
   */
-  createRecord: function(dataSource, store, storeKey) {
+  createRecord: function(store, storeKey) {
     return NO ;
   },
 
@@ -222,12 +231,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     To support cascading data stores, be sure to return NO if you cannot 
     handle the passed storeKey or YES if you can.
     
-    @param {SC.DataSource} dataSource the receiver
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to update
     @returns {Boolean} YES if handled
   */
-  destroyRecord: function(dataSource, store, storeKey) {
+  destroyRecord: function(store, storeKey) {
     return NO ;
   }  
     
