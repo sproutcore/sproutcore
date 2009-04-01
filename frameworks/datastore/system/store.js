@@ -893,15 +893,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
 
-    var isArray, recordType, len, idx, storeKey, status, K = SC.Record, ret;
-    var source = this.get('dataSource'), rev;
-    isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+    var source  = this.get('dataSource'),
+        isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        len     = (storeKeys === undefined) ? ids.length : storeKeys.length,
+        ret     = [],
+        rev     = SC.Store.generateStoreKey(),
+        K       = SC.Record,
+        recordType, idx, storeKey, status;
+        
     if (!isArray) recordType = recordTypes;
 
     // if no storeKeys were passed, map recordTypes + ids
-    len = (storeKeys === undefined) ? ids.length : storeKeys.length;
-    ret = []; 
-    rev = SC.Store.generateStoreKey();
     for(idx=0;idx<len;idx++) {
       
       // collect store key
@@ -971,8 +973,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Number} storeKey that was retrieved 
   */
   retrieveRecord: function(recordType, id, storeKey, _isRefresh) {
-    
-    var array = this._TMP_RETRIEVE_ARRAY ;
+    var array = this._TMP_RETRIEVE_ARRAY,
+        ret;
+        
     if (storeKey !== undefined) {
       array[0] = storeKey;
       storeKey = array;
@@ -982,7 +985,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    var ret = this.retrieveRecords(recordType, id, storeKey, _isRefresh);
+    ret = this.retrieveRecords(recordType, id, storeKey, _isRefresh);
     array.length = 0 ;
     return ret[0];
   },
@@ -1026,23 +1029,21 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} the actual recordType you should use to instantiate.
   */
   commitRecords: function(recordTypes, ids, storeKeys) {
+    var source    = this.get('dataSource'),
+        isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        len       = (storeKeys === undefined) ? ids.length : storeKeys.length,
+        ret       = [],
+        rev       = SC.Store.generateStoreKey(),
+        K         = SC.Record,
+        recordType, idx, storeKey, status, key ;
+
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
-    var isArray, recordType, len, idx, storeKey, status, K = SC.Record;
-    var ret, keysInLog=[], key, source, rev;
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
       storeKeys=this.changelog;
     }
-  
-    source = this.get('dataSource');
-    isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
-    if (!isArray) recordType = recordTypes;
 
-    // if no storeKeys were passed, map recordTypes + ids
-    len = (storeKeys === undefined) ? ids.length : storeKeys.length;
-    ret = []; 
-    rev = SC.Store.generateStoreKey();
-    
+    if (!isArray) recordType = recordTypes;
     for(idx=0;idx<len;idx++) {
       
       // collect store key
@@ -1093,7 +1094,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} the actual recordType you should use to instantiate.
   */
   commitRecord: function(recordType, id, storeKey) {
-    var array = this._TMP_RETRIEVE_ARRAY ;
+    var array = this._TMP_RETRIEVE_ARRAY,
+        ret ;
+        
     if (storeKey !== undefined) {
       array[0] = storeKey;
       storeKey = array;
@@ -1103,7 +1106,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    var ret = this.commitRecords(recordType, id, storeKey);
+    ret = this.commitRecords(recordType, id, storeKey);
     array.length = 0 ;
     return ret[0];
   },
@@ -1119,11 +1122,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} the store.
   */
   cancelRecords: function(recordTypes, ids, storeKeys) {
-    var status, len, isArray, idx, id, recordType, storeKey, K = SC.Record;
-    var source = this.get('dataSource'), ret=[];
-    isArray = SC.typeOf(recordTypes) === SC.T_ARRAY;
+    var source  = this.get('dataSource'),
+        isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        K       = SC.Record,
+        ret     = [],
+        status, len, idx, id, recordType, storeKey;
+        
     len = (storeKeys === undefined) ? ids.length : storeKeys.length;
-    
     for(idx=0;idx<len;idx++) {
       if (isArray) recordType = recordTypes[idx] || SC.Record;
       else recordType = recordTypes || SC.Record;
@@ -1161,7 +1166,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} the store.
   */
   cancelRecord: function(recordType, id, storeKey) {
-    var array = this._TMP_RETRIEVE_ARRAY ;
+    var array = this._TMP_RETRIEVE_ARRAY,
+        ret ;
+        
     if (storeKey !== undefined) {
       array[0] = storeKey;
       storeKey = array;
@@ -1171,9 +1178,58 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    var ret = this.cancelRecords(recordType, id, storeKey);
+    ret = this.cancelRecords(recordType, id, storeKey);
     array.length = 0 ;
     return this;
+  },
+  
+  /** 
+    Convenience method can be called by the store or other parts of your 
+    application to load records into the store.  This method will take a
+    recordType and an array of data hashes and either add or update the 
+    record in the store. 
+    
+    The loaded records will be in an SC.Record.READY_CLEAN state, indicating
+    they were loaded from the data source and do not need to be committed 
+    back before changing.
+    
+    This method is implemented by calling pushRetrieve().  The standard
+    state constraints for that method apply here.
+    
+    If you are upgrading from a pre SproutCore 1.0 application, this method 
+    is the closest to the old updateRecords().
+    
+    @param {SC.Record} recordTypes the record type or array of record types
+    @param {Array} dataHashes array of data hashes to update
+    @param {Array} ids optional array of ids.  if not passed lookup on hashes
+    @returns {Array} store keys assigned to these ids
+  */
+  loadRecords: function(recordTypes, dataHashes, ids) {
+    var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
+        len     = dataHashes.get('length'),
+        ret     = [],
+        recordType, id, primaryKey, idx, dataHash, storeKey;
+        
+    // save lookup info
+    if (!isArray) {
+      recordType = recordTypes || SC.Record;
+      primaryKey = recordType.prototype.primaryKey ;
+    }
+    
+    // push each record
+    for(idx=0;idx<len;idx++) {
+      dataHash = dataHashes.objectAt(idx);
+      if (isArray) {
+        recordType = recordTypes.objectAt(idx) || SC.Record;
+        primaryKey = recordType.prototype.primaryKey ;
+      } 
+      id = (ids) ? ids.objectAt(idx) : dataHashes[primaryKey];
+      ret[idx] = storeKey = recordType.storeKeyFor(id); // needed to cache
+      this.pushRetrieve(recordType, id, dataHash, storeKey);
+    }
+    
+    // return storeKeys
+    return ret ;
   },
   
   // ..........................................................
@@ -1189,7 +1245,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   dataSourceDidCancel: function(storeKey) {
-    var status = this.readStatus(storeKey), K = SC.Record;
+    var status = this.readStatus(storeKey), 
+        K      = SC.Record;
     
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
