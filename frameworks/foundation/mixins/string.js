@@ -21,38 +21,6 @@ SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
   @since SproutCore 1.0
 */
 SC.String = {
-  
-  // Interpolate string. looks for %@ or %@1; to control the order of params.
-  /**
-    Apply formatting options to the string.  This will look for occurrences
-    of %@ in your string and substitute them with the arguments you pass into
-    this method.  If you want to control the specific order of replacement, 
-    you can add a number after the key as well to indicate which argument 
-    you want to insert.  
-
-    Ordered insertions are most useful when building loc strings where values
-    you need to insert may appear in different orders.
-
-    h3. Examples
-    
-    {{{
-      "Hello %@ %@".fmt('John', 'Doe') => "Hello John Doe"
-      "Hello %@2, %@1".fmt('John', 'Doe') => "Hello Doe, John"
-    }}}
-    
-    @param args {Object...} optional arguments
-    @returns {String} formatted string
-  */
-  fmt: function() {
-    // first, replace any ORDERED replacements.
-    var args = arguments;
-    var idx  = 0; // the current index for non-numerical replacements
-    return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
-      argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
-      s =args[argIndex];
-      return ((s===null) ? '(null)' : (s===undefined) ? '' : s).toString(); 
-    }) ;
-  },
 
   /**
     Localizes the string.  This will look up the reciever string as a key 
@@ -265,3 +233,5 @@ SC.String.strip = SC.String.trim; // convenience alias.
 
 // Apply SC.String mixin to built-in String object
 SC.mixin(String.prototype, SC.String) ;
+SC.String.fmt = String.prototype.fmt; // copy from runtime
+
