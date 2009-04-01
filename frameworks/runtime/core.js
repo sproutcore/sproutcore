@@ -257,8 +257,13 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the unique guid for this instance.
   */
   guidFor: function(obj) {
+    
+    // special cases where we don't want to add a key to object
     if (obj === undefined) return "(undefined)" ;
     if (obj === null) return '(null)' ;
+    if (obj === Object) return '(Object)';
+    if (obj === Array) return '(Array)';
+    
     var guidKey = this.guidKey ;
     if (obj[guidKey]) return obj[guidKey] ;
 
