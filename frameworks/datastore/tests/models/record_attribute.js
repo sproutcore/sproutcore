@@ -87,3 +87,11 @@ test("writing a value should override default value", function() {
   equals(rec.get('defaultValue'), 'not-default', 'newly written value should replace default value');
 });
 
+test("writing to a to-one relationship should update set guid", function() {
+  var rec2 = MyApp.store.find(MyApp.Foo, 2);
+  equals(rec2.get('id'), 2, 'precond - should find record 2');
+  equals(rec2.get('foo'), rec, 'precond - should get rec1 instance for rec2.foo');
+  
+  rec2.set('foo', rec2);
+  equals(rec2.readAttribute('foo'), 2, 'should write ID for set record to foo attribute');
+});
