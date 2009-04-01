@@ -26,34 +26,34 @@ var StandardTestSetup = {
           default: 
             return NO;
         }
-      }.property()
+      }.property('fullName').cacheable()
     });
 
     // define fixture server.
-    MyApp.fixtureServer = SC.FixtureServer.create({
-      simulateResponseFromServer: function(guid, storeKey) {
-        var json = [];
-        if(guid === '123') {
-          json = [ {"type": "Author", "guid": "123","fullName": "Galen Tyrol", "bookTitle": "The Fear of the Spiders", "address":" London University, 142 Castro St, London, UK"}];
-        }
-        if(guid === 'john locke') {
-          this.get('childStore').didCreateRecords([storeKey], ['abcdefg'], [{guid: 'abcdefg', fullName: "John Locke", bookTitle: "A Letter Concerning Toleration"}]);
-
-          return;
-        }
-        if(guid === 'jim locke') {
-          console.log('LOADING JIM LOCKE %@'.fmt(storeKey));
-          this.get('childStore').didCreateRecords([storeKey], ['abc'], [{guid: 'abc', fullName: "Jim Locke", bookTitle: "A Letter Concerning Toleration Part Deux"}]);
-
-          return;
-        }
-
-        this.get('childStore').loadRecords(json, MyApp.Author);
-
-      }
-    });
-
-    MyApp.fixtureServer.addStore(MyApp.store); 
+    // MyApp.fixtureServer = SC.FixtureServer.create({
+    //   simulateResponseFromServer: function(guid, storeKey) {
+    //     var json = [];
+    //     if(guid === '123') {
+    //       json = [ {"type": "Author", "guid": "123","fullName": "Galen Tyrol", "bookTitle": "The Fear of the Spiders", "address":" London University, 142 Castro St, London, UK"}];
+    //     }
+    //     if(guid === 'john locke') {
+    //       this.get('childStore').didCreateRecords([storeKey], ['abcdefg'], [{guid: 'abcdefg', fullName: "John Locke", bookTitle: "A Letter Concerning Toleration"}]);
+    // 
+    //       return;
+    //     }
+    //     if(guid === 'jim locke') {
+    //       console.log('LOADING JIM LOCKE %@'.fmt(storeKey));
+    //       this.get('childStore').didCreateRecords([storeKey], ['abc'], [{guid: 'abc', fullName: "Jim Locke", bookTitle: "A Letter Concerning Toleration Part Deux"}]);
+    // 
+    //       return;
+    //     }
+    // 
+    //     this.get('childStore').loadRecords(json, MyApp.Author);
+    // 
+    //   }
+    // });
+    // 
+    // MyApp.fixtureServer.addStore(MyApp.store); 
     
     
     // verify initial state
