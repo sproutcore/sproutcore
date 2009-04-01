@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('models/record');
+
 /** @class
 
   A RecordAttribute describes a single attribute on a record.  It is used to
@@ -16,92 +18,248 @@
 
   A number of default RecordAttribute types are defined on the SC.Record.
   
+  @extends SC.Object
   @since SproutCore 1.0
 */
-SC.RecordAttribute = {
+SC.RecordAttribute = SC.Object.extend(
+  /** @scope SC.RecordAttribute.prototype */ {
+
+  /**
+    The default value.  If attribute is null or undefined, this default value
+    will be substituted instead.  Note that defaultValues are not converted
+    so the value should be in the output type expected by the attribute.
+    
+    @property {Object}
+  */
+  defaultValue: null,
   
   /**
-    Creates a 'subclass' of the receiver, copying on the applied properties.
-    This uses beget() unlike typical SC.Objects.  This will also wipe the
-    cached property handler.
+    The attribute type.  Must be either an object class or a property path
+    naming a class.  The built in handler allows all native types to pass 
+    through, converts records to ids and dates to UTF strings.
+    
+    If you use the attr() helper method to create a RecordAttribute instance,
+    it will set this property to the first parameter you pass.
+    
+    @property {Object|String}
   */
-  extend: function(attrs) {
-    var ret = SC.beget(this), len = arguments.length, idx ;
-    for(idx=0;idx<len;idx++) SC.mixin(ret, arguments[idx]);
-    return ret ;  
-  },
+  type: String,
   
-  /** 
-    Sets or return the current defaultValue for the attribute.  Usually you 
-    will use this method to pass a static value such as a string or number.
-
-    If you can't compute the defaultValue up front, you can instead pass a 
-    function that will be called to compute the defaultValue whenever it is 
-    needed. The signature for a defaultValue function should be:
+  /**
+    The underlying attribute key name this attribute should manage.  If this
+    property is left empty, then the key will be whatever property name this
+    attribute assigned to on the record.  If you need to provide some kind
+    of alternate mapping, this provides you a way to override it.
     
-    {{{
-      defaultValue(record, key) { return defaultValue; }
-    }}}
-    
-    @param {Object|Function} value the defaultValue or function
-    @returns {SC.RecordAttribute} receiver or current value if no param 
+    @property {String}
   */
-  defaultValue: function(value) {
-    if (value === undefined) return this._defaultValue;
-    this._defaultValue = value;
-    return this ;
-  },
+  key: null,
+  
+  /**
+    If YES, then the attribute is required and will fail validation unless
+    the property is set to a non-null or undefined value.
+    
+    @property {Boolean}
+  */
+  isRequired: NO,
+  
+  /**
+    If NO then attempts to edit the attribute will be ignored.
+    
+    @property {Boolean}
+  */
+  isEditable: YES,  
+  
+  // ..........................................................
+  // HELPER PROPERTIES
+  // 
+  
+  /**
+    Returns the type, resolved to a class.  If the type property is a regular
+    class, returns the type unchanged.  Otherwise attempts to lookup the 
+    type as a property path.
+    
+    @property {Object}
+  */
+  typeClass: function() {
+    var ret = this.get('type');
+    if (SC.typeOf(ret) === SC.T_STRING) ret = SC.objectForPropertyPath(ret);
+    return ret ;
+  }.property('type').cacheable(),
+  
+  /**
+    Finds the transform handler. 
+  */
+  transform: function() {
+    var klass      = this.get('typeClass') || String,
+        transforms = SC.RecordAttribute.transforms,
+        ret ;
+    
+    // walk up class hierarchy looking for a transform handler
+    while(klass && !(ret = transforms[SC.guidFor(klass)])) {
+      klass = klass.superclass ;
+    }
+    
+    return ret ;
+  }.property('typeClass').cacheable(),
   
   // ..........................................................
   // LOW-LEVEL METHODS
   // 
   
   /** 
-    override to convert the passed value into the core attribute value.
+    Converts the passed value into the core attribute value.  This will apply 
+    any format transforms.  You can install standard transforms by adding to
+    the SC.RecordAttribute.transforms hash.  See 
+    SC.RecordAttribute.registerTransform() for more.
     
+    @param {SC.Record} record the record instance
+    @param {String} key the key used to access this attribute on the record
     @param {Object} value the property value
     @returns {Object} attribute value
   */
-  toAttribute: function(value) { return value; },
+  toType: function(record, key, value) {
+    var transform = this.get('transform'),
+        type      = this.get('typeClass');
+    return transform ? transform.to(value, this, type, record, key) : value;        
+  },
 
   /** 
-    override to convert the passed attribute value into the output value.
-    
-    @param {Object} value the attribute
-    @returns {Object} output value
+    Converts the passed value from the core attribute value.  This will apply 
+    any format transforms.  You can install standard transforms by adding to
+    the SC.RecordAttribute.transforms hash.  See 
+    SC.RecordAttribute.registerTransform() for more.
+
+    @param {SC.Record} record the record instance
+    @param {String} key the key used to access this attribute on the record
+    @param {Object} value the property value
+    @returns {Object} attribute value
   */
-  fromAttribute: function(value) { return value; },
+  fromType: function(record, key, value) {
+    var transform = this.get('transform'),
+        type      = this.get('typeClass');
+    return transform ? transform.from(value, this, type, record, key) : value;        
+  },
 
   /**
-    The default value.  If the value is undefined, this will be returned 
-    instead.  This should be the output value, after conversion, not the json.
-    
-    If this property is a function, it will be called on the record.
-  */
-  _defaultValue: undefined,
-  
-  /**
     The core handler.  Called from the property.
+    
+    @param {SC.Record} record the record instance
+    @param {String} key the key used to access this attribute on the record
+    @param {Object} value the property value if called as a setter
+    @returns {Object} property value
   */
   call: function(record, key, value) {
     if (value !== undefined) {
-      value = this.toAttribute(value) ; // convert to attribute.
+      value = this.fromType(value) ; // convert to attribute.
       record.writeAttribute(key, value);
     } else {
       value = record.readAttribute(key);
-      if (value === undefined) {
-        value = this._defaultValue;
+      if (SC.none(value) && (value = this.get('defaultValue'))) {
         if (typeof value === SC.T_FUNCTION) {
-          value=this._defaultValue(record, key);
+          value = this.defaultValue(record, key, this);
         }
-      }
+      } else value = this.toType(value);
     }
     return value ;
   },
+
+  // ..........................................................
+  // INTERNAL SUPPORT
+  // 
   
-  /** 
-    Make this look like a property so that get() will call it. 
-  */
-  isProperty: YES
+  /** @private - Make this look like a property so that get() will call it. */
+  isProperty: YES,
   
-} ;
+  /** @private - Make this look cacheable */
+  isCacheable: YES,
+  
+  /** @private - needed for KVO property() support */
+  dependentKeys: [],
+  
+  /** @private */
+  init: function() {
+    sc_super();
+    // setup some internal properties needed for KVO - faking 'cacheable'
+    this.cacheKey = "__cache__" + SC.guidFor(this) ;
+    this.lastSetValueKey = "__lastValue__" + SC.guidFor(this) ;
+  }
+  
+}) ;
+
+// ..........................................................
+// CLASS METHODS
+// 
+
+/**
+  The default method used to create a record attribute instance.  Unlike 
+  create(), takes an attributeType as the first parameter which will be set 
+  on the attribute itself.  You can pass a string naming a class or a class
+  itself.
+  
+  @param {Object|String} attributeType the assumed attribute type
+  @param {Hash} opts optional additional config options
+  @returns {SC.RecordAttribute} new instance
+*/
+SC.RecordAttribute.attr = function(attributeType, opts) {
+  if (!opts) opts = {} ;
+  if (!opts.type) opts.type = type || String ;
+  return this.create(opts);
+};
+
+/** @private
+  Hash of registered transforms by class guid. 
+*/
+SC.RecordAttribute.transforms = {};
+
+/**
+  Call to register a transform handler for a specific type of object.  The
+  object you pass can be of any type as long as it responds to the following
+  methods:
+
+  | *to(value, attr, klass, record, key)* | converts the passed value (which will be of the class expected by the attribute) into the underlying attribute value |
+  | *from(value, attr, klass, record, key)* | converts the underyling attribute value into a value of the class |
+  
+  @param {Object} klass the type of object you convert
+  @param {Object} transform the transform object
+  @returns {SC.RecordAttribute} receiver
+*/
+SC.RecordAttribute.registerTransform = function(klass, transform) {
+  SC.RecordAttribute.transforms[SC.guidFor(klass)] = transform;  
+};
+
+// ..........................................................
+// STANDARD ATTRIBUTE TRANSFORMS
+// 
+
+// Object, String, Number just pass through.
+
+/** @private - generic converter for SC.Record-type records */
+SC.RecordAttribute.registerTransform(SC.Record, {
+
+  /** @private - convert a record id to a record instance */
+  to: function(id, attr, recordType, parentRecord) {
+    var store = parentRecord.get('store');
+    return store.find(recordType, id);
+  },
+  
+  /** @private - convert a record instance to a record id */
+  from: function(record) { return record.get('id'); }
+});
+
+/** @private - generic converter for Date records */
+SC.RecordAttribute.registerTransform(Date, {
+
+  /** @private - convert a string to a Date */
+  to: function(str) {
+    // TODO: make this more robus
+    return Date.parse(str);
+  },
+  
+  /** @private - convert a date to a string */
+  from: function(date) { 
+    // TODO: Make this more robust; supporting various date formats
+    return date.toString();
+  }
+});
+

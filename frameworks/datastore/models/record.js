@@ -311,6 +311,53 @@ SC.Record.mixin( /** @scope SC.Record */ {
   BUSY_ERROR:          new Error("Busy"),
   
   /**
+    Helper method returns a new SC.RecordAttribute instance to map a simple
+    value or to-one relationship.  At the very least, you should pass the 
+    type class you expect the attribute to have.  You may pass any additional
+    options as well.
+    
+    Use this helper when you define SC.Record subclasses. 
+    
+    h4. Example
+    
+    {{{
+      MyApp.Contact = SC.Record.extend({
+        firstName: SC.Record.attr(String, { isRequired: YES })
+      });
+    }}}
+    
+    @param {Class} type the attribute type
+    @param {Hash} opts the options for the attribute
+    @returns {SC.RecordAttribute} created instance
+  */
+  attr: function(type, opts) { 
+    return SC.RecordAttribute.attr(type, opts); 
+  },
+  
+  /**
+    Returns an SC.RecordAttribute that describes a fetched attribute.  When 
+    you reference this attribute, it will return an SC.RecordArray that uses
+    the type as the fetch key and passes the attribute value as a param.
+    
+    Use this helper when you define SC.Record subclasses. 
+    
+    h4. Example
+    
+    {{{
+      MyApp.Group = SC.Record.extend({
+        contacts: SC.Record.fetch('MyApp.Contact')
+      });
+    }}}
+    
+    @param {SC.Record|String} recordType The type of records to load
+    @param {Hash} opts the options for the attribute
+    @returns {SC.RecordAttribute} created instance
+  */
+  fetch: function(recordType, opts) {
+    return SC.FetchedAttribute.attr(recordType, opts) ;
+  },
+  
+  /**
     Given a primaryKey value for the record, returns the associated
     storeKey.  If the primaryKey has not been assigned a storeKey yet, it 
     will be added.
