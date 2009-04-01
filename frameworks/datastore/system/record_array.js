@@ -56,6 +56,7 @@ SC.RecordArray = SC.SparseArray.extend(
   */
   setStoreKeys: function(storeKeys) {
     this._storeKeys = storeKeys ;
+    this._length    = storeKeys.length ;
     this.enumerableContentDidChange({ start: 0, length: storeKeys.length });
     return this ;    
   },
@@ -103,8 +104,8 @@ SC.RecordArray = SC.SparseArray.extend(
   _TMP_PKEY_MAP: [],
   
   /**
-    Call this method to specify the records in a particular range by guid.
-    This method is best to use if you know the primary key value (i.e. guid)
+    Call this method to specify the records in a particular range by id.
+    This method is best to use if you know the primary key value (i.e. id)
     of the records that match a particular search but you haven't retrieved
     the record details for those primary keys yet.
     
@@ -113,17 +114,22 @@ SC.RecordArray = SC.SparseArray.extend(
     then ask your Server object to load the record details automatically.
     
     @param {Range} range the range to load into the RecordsArray
-    @param {Array} primaryKeys array of primary keys to set
+    @param {SC.Record|Array} recordType record class or array of classes
+    @param {Array} ids array of ids to set
     @returns {SC.RecordArray} receiver 
   */
-  providePrimaryKeysInRange: function(range, primaryKeys) {
+  provideIdsInRange: function(range, recordTypes, ids) {
     var store = this.get('store');
     if (!store) throw "%@ cannot be used without a parent store".fmt(this);
 
     // map primaryKeys to storeKeys
-    var storeKeys = this._TMP_PKEY_MAP, len = primaryKeys.length, idx=0;
+    var storeKeys = this._TMP_PKEY_MAP, len = ids.length, idx=0;
+    var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY, recordType;
+    if (!isArray) recordType = recordTypes;
+    
     for(idx=0;idx<len;idx++) {
-      storeKeys[idx] = store.storeKeyFor(primaryKeys[idx]);
+      if (isArray) recordType = recordTypes[idx];
+      storeKeys[idx] = recordType.storeKeyFor(ids[idx]);
     }
     
     // now set on storeKeys on receiver
