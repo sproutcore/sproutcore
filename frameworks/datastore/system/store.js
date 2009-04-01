@@ -1571,34 +1571,80 @@ SC.Store.mixin({
     
 });
 
+
+SC.Store.prototype.nextStoreIndex = 1;
+
 // ..........................................................
 // COMPATIBILITY
 // 
 
-SC.Store._getDefaultStore = function()
-{
+/** @private
+  global store is used only for deprecated compatibility methods.  Don't use
+  this in real code.
+*/
+SC.Store._getDefaultStore = function() {
   var store = this._store;
-  if(!store) {
-    this._store = store = SC.Store.create();
-  }
+  if(!store) this._store = store = SC.Store.create();
   return store;
 };
 
-SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded)
-{
-  return this._getDefaultStore().loadRecords(dataHashes, recordType);
+/** @deprecated 
+  Included for compatibility, loads data hashes with the named recordType. 
+  If no recordType is passed, expects to find a recordType property in the 
+  data hashes.  dataSource and isLoaded params are ignored.
+  
+  Calls SC.Store#loadRecords() on the default store. Do not use this method in 
+  new code.  
+  
+  @param {Array} dataHashes data hashes to import
+  @param {Object} dataSource ignored
+  @param {SC.Record} recordType default record type
+  @param {Boolean} isLoaded ignored
+  @returns {Array} SC.Record instances for loaded data hashes
+*/
+SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded) {
+  var store = this._getDefaultStore(),
+      len   = dataHashes.length,
+      idx, ret;
+      
+  // if no recordType was passed, build an array of recordTypes from hashes
+  if (!recordType) {
+    recordType = [];
+    for(idx=0;idx<len;idx++) recordType[idx] = dataHashes[idx].recordType;
+  }
+  
+  // call new API.  Returns storeKeys
+  ret = store.loadRecords(recordType, dataHashes);
+  
+  // map to SC.Record instances
+  len = ret.length;
+  for(idx=0;idx<len;idx++) ret[idx] = store.materializeRecord(ret[idx]);
+  
+  return ret ;
 };
 
-SC.Store.find = function(guid, recordType)
-{
-  return this._getDefaultStore().find(guid, recordType);
+/** @deprecated
+  Finds a record with the passed guid on the default store.  This is included
+  only for compatibility.  You should use the newer find() method defined on
+  SC.Store instead.
+  
+  @param {String} guid the guid
+  @param {SC.Record} recordType expected record type
+  @returns {SC.Record} found record
+*/
+SC.Store.find = function(guid, recordType) {
+  return this._getDefaultStore().find(recordType, guid);
 };
 
-SC.Store.findAll = function(filter)
-{
-  return this._getDefaultStore().findAll(filter, SC.Record);
+/** @deprecated 
+  Passes through to findAll on default store.  This is included only for 
+  compatibility.  You should use the newer findAll() defined on SC.Store
+  instead.
+  
+  @param {Hash} filter search parameters
+  @param {SC.Record} recordType type of record to find
+  @returns {SC.RecordArray} result set
+*/
+SC.Store.findAll = function(filter, recordType) {
+  return this._getDefaultStore().findAll(filter, recordType);
 };
-
-SC.Store.prototype.addDataHash = SC.Store.prototype.updateDataHash;
-SC.Store.prototype.addDataHashes = SC.Store.prototype.updateDataHashes;
-SC.Store.prototype.nextStoreIndex = 1;
