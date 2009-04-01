@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for RecordArray
-var MyApp, storeKeys, rec;
+var storeKeys, rec;
 module("SC.RecordArray core methods", {
   setup: function() {
 
@@ -25,12 +25,16 @@ module("SC.RecordArray core methods", {
       // used to test default value
       defaultValue: SC.Record.attr(String, {
         defaultValue: "default"
-      })
+      }),
+      
+      // test toOne relationships
+      foo: SC.Record.attr('MyApp.Foo')
       
     });
     
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, firstName: "John", lastName: "Doe" }
+      { guid: 1, firstName: "John", lastName: "Doe" },
+      { guid: 2, firstName: "Jane", lastName: "Doe", foo: 1 }
     ]);
     
     rec = MyApp.store.find(MyApp.Foo, 1);
@@ -52,6 +56,12 @@ test("returns default value if underyling value is empty", function() {
 
 test("naming a key should read alternate attribute", function() {
   equals(rec.get('otherName'), 'John', 'reading prop otherName should get attr from firstName');
+});
+
+test("getting toOne relationship should map guid to a real record", function() {
+  var rec2 = MyApp.store.find(MyApp.Foo, 2);
+  equals(rec2.get('id'), 2, 'precond - should find record 2');
+  equals(rec2.get('foo'), rec, 'should get rec1 instance for rec2.foo');
 });
 
 // ..........................................................
