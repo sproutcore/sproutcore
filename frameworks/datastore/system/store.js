@@ -822,7 +822,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // record data hash change
-    this.dataHashDidChange(storeKey, null, YES);
+    this.dataHashDidChange(storeKey, null);
     
     // record in changelog
     changelog = this.changelog ;

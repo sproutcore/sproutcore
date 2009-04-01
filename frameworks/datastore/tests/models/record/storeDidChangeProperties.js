@@ -44,7 +44,7 @@ function checkPreconditions() {
 
 function expect(expectedStatusCnt, expectedFooCnt) {
   equals(foo.statusCnt, expectedStatusCnt, 'status should have changed');
-  equals(foo.fooCnt, expectedFooCnt, 'foo should not have changed');
+  equals(foo.fooCnt, expectedFooCnt, 'foo should have changed');
 }
 
 // ..........................................................
