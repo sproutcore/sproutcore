@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('models/store');
+sc_require('system/store');
 
 /**
   @class

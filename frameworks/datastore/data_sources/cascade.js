@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('models/data_source');
+sc_require('data_sources/data_source');
 
 /** @class
 

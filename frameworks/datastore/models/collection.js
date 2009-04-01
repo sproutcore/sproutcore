@@ -6,7 +6,7 @@
 // ==========================================================================
 
 sc_require('models/record') ;
-sc_require('models/store') ;
+sc_require('system/store') ;
 
 /**
   @class

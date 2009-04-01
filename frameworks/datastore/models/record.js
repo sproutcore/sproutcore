@@ -5,9 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('models/store') ;
-
-
 /**
   @class
 
@@ -331,6 +328,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     if (!ret) {
       ret = SC.Store.generateStoreKey();
       SC.Store.idsByStoreKey[ret] = id ;
+      SC.Store.recordTypesByStoreKey[ret] = this ;
       storeKeys[id] = ret ;
     }
     return ret ;

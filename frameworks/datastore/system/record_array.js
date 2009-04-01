@@ -102,7 +102,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     if (storeKeys === prev) return this; // nothing to do
     
-    if (!prev) {
+    if (prev) {
       prev.removeObserver('[]', this, f);
     }
 
@@ -115,7 +115,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
     this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
     
-  },
+  }.observes('storeKeys'),
   
   /** @private
     Invoked whenever the content of the storeKeys array changes.  This will
@@ -129,6 +129,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       .notifyPropertyChange('length')
       .enumerableContentDidChange()
     .endPropertyChanges();
+  },
+  
+  init: function() {
+    sc_super();
+    this._storeKeysDidChange();
   }
   
   
