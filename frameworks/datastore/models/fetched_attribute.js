@@ -11,7 +11,16 @@ sc_require('models/record_attribute');
 /** @class
 
   Describes a single attribute that is fetched dynamically from the server
-  when you request it.
+  when you request it.  Normally getting a property value with this attribute
+  applied will cause call the findAll() method on the record store passing
+  the attribute record type as the query key along with the property value,
+  owner record, and property key name as parameters. 
+  
+  The DataSource you hook up to your store must know how to load this kind 
+  of relationship for this fetched property to work properly.
+  
+  The return value is usually an SC.RecordArray that will populate with the
+  record data so that you can display it.
   
   @extends SC.RecordAttribute
   @since SproutCore 1.0

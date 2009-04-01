@@ -358,6 +358,23 @@ SC.Record.mixin( /** @scope SC.Record */ {
   },
   
   /**
+    Returns an SC.ManyAttribute that describes a record array backed by an 
+    array of guids stored in the underlying JSON.  You can edit the contents
+    of this relationship.
+    
+    If you set the inverse and isMaster: NO key, then editing this array will
+    modify the underlying data, but the inverse key on the matching record
+    will also be edited and that record will be marked as needing a change.
+    
+    @param {SC.Reocrd|String} recordType The type of record to create
+    @param {Hash} opts the options for the attribute
+    @returns {SC.ManyAttribute} created instance
+  */
+  toMany: function(recordType, opts) {
+    return SC.ManyAttribute.attr(recordType, opts);
+  },
+  
+  /**
     Given a primaryKey value for the record, returns the associated
     storeKey.  If the primaryKey has not been assigned a storeKey yet, it 
     will be added.
@@ -405,3 +422,9 @@ SC.Record.mixin( /** @scope SC.Record */ {
   }
   
 }) ;
+
+/** 
+  Alias for SC.Record.attr.  Using this version to describe to-one 
+  relationships can sometimes make your code more understandable.
+*/
+SC.Record.toOne = SC.Record.attr ;
