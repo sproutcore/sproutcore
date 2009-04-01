@@ -533,11 +533,39 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     var source = this.get('dataSource'), ret ;
     if (source) {
-      ret = source.fetchRecords.call(source, _store, queryKey, params);
+      ret = source.fetchRecords.call(source, this, queryKey, params);
     }
     return ret ;
   },
 
+  /**
+    Array of all records currently in the store with the specified
+    type.  This method only reflects the actual records loaded into memory and
+    therefore is not usually needed at runtime.  However you will often use
+    this method for testing.
+    
+    @param {SC.Record} recordType the record type
+    @returns {SC.RecordArray} record array
+  */
+  recordsFor: function(recordType) {
+    var storeKeys = [], storeKeysById = recordType.prototype.storeKeysById; 
+    var id, storeKey, ret;
+    
+    // collect all non-empty store keys
+    if (storeKeysById) {
+      for(id in storeKeysById) {
+        storeKey = storeKeysById[id]; // get the storeKey
+        if (this.readStatus(storeKey) !== SC.RECORD_EMPTY) {
+          storeKeys.push(storeKey);
+        }
+      }
+    }
+    
+    ret = SC.RecordArray.create({ store: this });
+    ret.setStoreKeys(storeKeys);
+    return ret ;
+  },
+  
   _TMP_REC_ATTRS: {},
   
   /** 
