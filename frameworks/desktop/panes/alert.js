@@ -215,14 +215,14 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
 
       SC.View.extend({
-        layout: { bottom: 14, height: 23, right: 14, width: 'auto' },
+        layout: { bottom: 14, height: 'auto', right: 14, width: 'auto' },
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON2_STATUS,
             localize: YES,
             titleMinWidth: 80,
-            layout: { right: 0, height: 21, width: 'auto', bottom: 0 },
+            layout: { right: 0, height: 'auto', width: 'auto', bottom: 0 },
             title: "Cancel", 
             action: "dismiss",
             isVisible: NO
@@ -233,7 +233,7 @@ SC.AlertPane = SC.PanelPane.extend({
             actionKey: SC.BUTTON1_STATUS,
             localize: YES,
             titleMinWidth: 80,
-            layout: { right: 0, height: 21, width: 'auto', bottom: 0 },
+            layout: { right: 0, height: 'auto', width: 'auto', bottom: 0 },
             title: "OK", 
             action: "dismiss"
           })]
@@ -243,7 +243,7 @@ SC.AlertPane = SC.PanelPane.extend({
         actionKey: SC.BUTTON3_STATUS,
         localize: YES,
         titleMinWidth: 80,
-        layout: { bottom: 14, height: 21, left: 16, width: 'auto' },
+        layout: { bottom: 14, height: 'auto', left: 16, width: 'auto' },
         title: "Extra", 
         action: "dismiss",
         isVisible: NO

@@ -5,52 +5,51 @@
 }
 
 .sc-button-view {
-	display: inline-block ;
-	vertical-align: middle;
-	background-color: #d0d0d0;
-	border: 1px #666 solid;
-	color: black;
-	text-decoration: none ;
-	font-weight: bold ;
-	
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
-	border-radius: 2px;
+  display: inline-block ;
+  vertical-align: middle;
+  background-color: #d0d0d0;
+  border: 1px #666 solid;
+  color: black;
+  text-decoration: none ;
+  font-weight: bold ;
+  
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
 }
 
-.sc-button-view span.inner {
-	position: relative;
-	display:  block;
-	height: 100%;
-	margin-right: 12px;
-	text-align: center ;
+.sc-button-view .sc-button-inner {
+  position: relative;
+  display:  block;
+  height: 100%;
+  text-align: center ;
 }
 
 .sc-button-view label {
-	position: relative;
-	display: block;
-	line-height: 21px;
-	text-align: center;
+  position: relative;
+  display: block;
+  line-height: 21px;
+  text-align: center;
 }
 
 .sc-button-view img {
-	vertical-align: middle ;
-	margin-right: 2px;
-	position: relative ;
-	top: -2px;
-	left: -2px;
+  vertical-align: middle ;
+  margin-right: 2px;
+  position: relative ;
+  top: -2px;
+  left: -2px;
 }
 
 .sc-button-view.disabled,
 .sc-button-view.disabled.active {
-	background-color: #e0e0e0;
-	border: 1px #a0a0a0 solid ;
-	color: #a0a0a0;
+  background-color: #e0e0e0;
+  border: 1px #a0a0a0 solid ;
+  color: #a0a0a0;
 }
 
 .sc-button-view.active,
 .sc-button-view.sel {
-	background-color: #333;
-	border: 1px #333 solid ;
-	color: white;
+  background-color: #333;
+  border: 1px #333 solid ;
+  color: white;
 }
