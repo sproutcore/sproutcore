@@ -18,15 +18,21 @@ module("Sample Model from a webmail app", {
     // Messages are stored in mailboxes.
     Mail.Mailbox = SC.Record.extend({
 
-      name:    SC.Record.attr(String).notEmpty(),
+      name:    SC.Record.attr(String, {
+        isRequired: YES
+      }),
 
       // here is the mailbox type.  must be one of INBOX, TRASH, OTHER
-      mailbox: SC.Record.attr(String).notEmpty()
-        .only('INBOX TRASH OTHER'.w()),
+      mailbox: SC.Record.attr(String, {
+        isRequired: YES,
+        only: 'INBOX TRASH OTHER'.w()
+      }),
       
       // this is the sortKey that should be used to order the mailbox.
-      sortKey: SC.Record.attr(String).notEmpty()
-        .only('subject date from to'.w()),
+      sortKey: SC.Record.attr(String, {
+        isRequired: YES,
+        only: 'subject date from to'.w()
+      }),
       
       // load the list of messages.  We use the mailbox guid to load the 
       // messages.  Messages use a foreign key to move the message around.
@@ -43,7 +49,7 @@ module("Sample Model from a webmail app", {
     // guids.
     Mail.Message = SC.Record.extend({
 
-      date:        SC.Record.attr(Date).notEmpty(),
+      date:        SC.Record.attr(Date, { isRequired: YES }),
       
       mailboxes:   SC.Record.toMany('Mail.Mailbox', {
         inverse: 'messages',
@@ -54,7 +60,7 @@ module("Sample Model from a webmail app", {
       // describe the message detail.
       messageDetail: SC.Record.toOne('Mail.MessageDetail', {
         inverse: "message", // MessageDetail.message should == this.primaryKey
-        dependent: YES 
+        isDependent: YES 
       }),
 
       // access the named property through another property.
@@ -65,10 +71,9 @@ module("Sample Model from a webmail app", {
     });
     
     Mail.Contact = SC.Record.extend({
-      
-      firstName: String.attribute(),
-      lastName: String.attribute(),
-      email: String.attribute()
+      firstName: SC.Record.attr(String),
+      lastName:  SC.Record.attr(String),
+      email:     SC.Record.attr(String)
     });
     
     // define server.  RestServer knows how to automatically save records to 
@@ -84,33 +89,3 @@ module("Sample Model from a webmail app", {
   }
 });
 
-test("basic operation", function() {
-  
-  // automatically loads mailboxes from the server.
-  Mail.mailboxesController = SC.ArrayController.create();
-  
-  Mail.mailboxDetailController = SC.ObjectController.create({
-    contentBinding: 'Mail.mailboxesController.selection'
-  });
-  
-  Mail.messagesController = SC.ArrayController.create({
-    contentBinding: 'Mail.mailboxDetailController.messages',
-    allowsEmptySelection: NO
-  });
-  
-  Mail.messageDetailController = SC.ObjectController.create({
-    contentBinding: 'Mail.messagesController.selection'
-  });
-
-  var mailboxes = Mail.store.fetch('mailboxes');
-  Mail.mailboxesController.set('content', mailboxes);
-  
-});
-
-test("create a message", function() {
-
-  Mail.store.createRecord(Mail.Message, {
-    subject: "Foo bar"
-  }) ;
-  
-});
