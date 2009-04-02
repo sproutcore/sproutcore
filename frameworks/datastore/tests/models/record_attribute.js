@@ -22,6 +22,9 @@ module("SC.RecordArray core methods", {
       // test mapping to another internal key
       otherName: SC.Record.attr(String, { key: "firstName" }),
       
+      // test mapping Date
+      date: SC.Record.attr(Date),
+      
       // used to test default value
       defaultValue: SC.Record.attr(String, {
         defaultValue: "default"
@@ -33,7 +36,11 @@ module("SC.RecordArray core methods", {
     });
     
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, firstName: "John", lastName: "Doe" },
+      { guid: 1, 
+        firstName: "John", lastName: "Doe", 
+        date: "2009-03-01T20:30-08:00" 
+      },
+      
       { guid: 2, firstName: "Jane", lastName: "Doe", foo: 1 }
     ]);
     
@@ -62,6 +69,11 @@ test("getting toOne relationship should map guid to a real record", function() {
   var rec2 = MyApp.store.find(MyApp.Foo, 2);
   equals(rec2.get('id'), 2, 'precond - should find record 2');
   equals(rec2.get('foo'), rec, 'should get rec1 instance for rec2.foo');
+});
+
+test("reading date should parse ISO date", function() {
+  var d = new Date(1235968200000); // should be proper date
+  equals(rec.get('date').toString(), d.toString(), 'should have matched date');
 });
 
 // ..........................................................
@@ -94,4 +106,10 @@ test("writing to a to-one relationship should update set guid", function() {
   
   rec2.set('foo', rec2);
   equals(rec2.readAttribute('foo'), 2, 'should write ID for set record to foo attribute');
+});
+
+test("writing a date should generate an ISO date" ,function() {
+  var date = new Date(1238650083966);
+  equals(rec.set('date', date), rec, 'returns reciever');
+  equals(rec.readAttribute('date'), '2009-04-01T22:28:03-07:00', 'should have new time (%@)'.fmt(date.toString()));
 });
