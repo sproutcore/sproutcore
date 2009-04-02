@@ -1026,16 +1026,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
 
-    @returns {SC.Record} the actual recordType you should use to instantiate.
+    @returns {SC.Bool} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys) {
     var source    = this.get('dataSource'),
-        isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,
-        len       = (storeKeys === undefined) ? ids.length : storeKeys.length,
+        isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
         rev       = SC.Store.generateStoreKey(),
         K         = SC.Record,
-        recordType, idx, storeKey, status, key ;
+        recordType, idx, storeKey, status, key, ret ;
 
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
@@ -1043,6 +1042,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
       storeKeys=this.changelog;
     }
+    len = (storeKeys === undefined) ? ids.length : storeKeys.length;
     
     for(idx=0;idx<len;idx++) {
       
@@ -1051,6 +1051,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         storeKey = storeKeys[idx];
       } else {
         if (isArray) recordType = recordTypes[idx] || SC.Record;
+        else recordType = recordTypes;
         storeKey = recordType.storeKeyFor(ids[idx]);
       }
       
@@ -1079,7 +1080,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }   
       
     // now commit storekeys to dataSource
-    if (source) source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy);
+    if (source) ret=source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy);
     return ret ;
   },
 
@@ -1088,15 +1089,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     record, this will ask the data source to perform the appropriate action
     on the store key.
     
+    You have to pass either the id or the storeKey otherwise it will return NO.
+    
     @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
 
-    @returns {SC.Record} the actual recordType you should use to instantiate.
+    @returns {SC.Bool} if the action was succesful.
   */
   commitRecord: function(recordType, id, storeKey) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret ;
-        
+    if (id === undefined) return NO;
     if (storeKey !== undefined) {
       array[0] = storeKey;
       storeKey = array;
@@ -1108,7 +1111,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     ret = this.commitRecords(recordType, id, storeKey);
     array.length = 0 ;
-    return ret[0];
+    return ret;
   },
   
   /**

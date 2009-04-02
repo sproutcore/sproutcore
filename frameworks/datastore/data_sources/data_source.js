@@ -73,10 +73,13 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   */
   commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
     var cret, uret, dret;
-    cret = this.createRecords.call(this, store, createStoreKeys);    
-    uret = this.updateRecords.call(this, store, updateStoreKeys);    
-    dret = this.destroyRecords.call(this, store, destroyStoreKeys); 
-    return (cret === uret === dret) ? cret : SC.MIXED_STATE ;
+    if(createStoreKeys.length>0) cret = this.createRecords.call(this, store, createStoreKeys);    
+    if(updateStoreKeys.length>0) uret = this.updateRecords.call(this, store, updateStoreKeys);    
+    if(destroyStoreKeys.length>0) dret = this.destroyRecords.call(this, store, destroyStoreKeys); 
+    // if(!cret) cret=uret;
+    //     if(!cret) { cret=dret; uret=dret;}
+    //     if(!cret) cret=NO;
+    return (cret === uret === dret) ? (cret || uret || dret) : SC.MIXED_STATE ;
   },
   
   /**
@@ -193,14 +196,14 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     for(idx=0;idx<len;idx++) {
       cur = action.call(this, store, storeKeys[idx]);
       if (ret === undefined) {
-        cur = ret ;
+        ret = cur ;
       } else if (ret === YES) {
         ret = (cur === YES) ? YES : SC.MIXED_STATE ;
       } else if (ret === NO) {
         ret = (cur === NO) ? NO : SC.MIXED_STATE ;
       }
     }
-    return ret ;
+    return ret ? ret : null ;
   },
   
 

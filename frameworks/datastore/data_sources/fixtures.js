@@ -36,7 +36,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
    
   load: function(){
     var res = {}, namespaces = this.get('namespaces'), nloc, recordTypeGUID;
-    var namespace, cur, idx, id, len, data, recordType, pk, indexTmp; 
+    var namespace, cur, idx, id, len, data, recordType, pk, indexTmp, dataHashes =[] ; 
     this.dataInMemory={};
     this.recordTypeIndexes={};
     
@@ -70,6 +70,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
             id=idx;
           }
           res[id]=data;
+          dataHashes.push(data);
           
           //based on the fixtures data , detect the largest GUID and store it
           // if fixtures need to create a new record it will use this index
@@ -84,6 +85,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
             this.recordTypeIndexes[recordTypeGUID]=id;
           }
         }
+        store.loadRecords(recordType, dataHashes) ;
         this.dataInMemory[recordTypeGUID]=res;
       }
     }
@@ -129,6 +131,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     }
     
     if(!this.dataInMemory) this.load();
+    
     recordTypeData = this.dataInMemory[SC.guidFor(recordType)];
   
     for(i in recordTypeData){

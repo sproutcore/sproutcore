@@ -5,7 +5,7 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-var store, storeKey1,storeKey2;
+var store, fds, storeKey1,storeKey2;
 
 window.Sample={};
 window.Sample.File = SC.Record.extend({ test:'hello'});
@@ -27,14 +27,17 @@ window.Sample.File.FIXTURES = [
 
 module("SC.FixturesDataSource", {
   setup: function() {  
-    var fds = SC.FixturesDataSource.create({ namespaces : ['Sample.File']})
+    fds = SC.FixturesDataSource.create({ namespaces : ['Sample.File']})
     store = SC.Store.create({dataSource : fds});
-    var ret=store.findAll(Sample.File);
-    var rec=store.retrieveRecord(Sample.File, "135");    
-  }
-    
+  }    
 });
 
-test("Check for error state handling and make sure that the method executes.", function() {
+test("Verify that integration with the store works", function() {
+
+  var ret=store.findAll(Sample.File);
+  var rec=store.retrieveRecord(Sample.File, "135");    
+  var record=store.find(Sample.File, "14");
+  store.destroyRecord(Sample.File, "136");
+  store.commitRecords();
   
 });
