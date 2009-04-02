@@ -1375,7 +1375,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // 
   
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
-    var K = SC.Record;
+    var K = SC.Record, status;
     
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);

@@ -26,7 +26,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   
   // Contains and array of indexes that will store which will be the newxt
   // id to create new records
-  recordTypeIndexes, null
+  recordTypeIndexes: null,
   
   /** @private
     Invoked by fetchRecords() if the fixtures haven't been loaded.
@@ -35,8 +35,8 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */
    
   load: function(){
-    var res = {}, namespaces = this.get('namespaces'), nloc;
-    var namespace, cur, idx, len, data, recordType, pk, indexTmp; 
+    var res = {}, namespaces = this.get('namespaces'), nloc, recordTypeGUID;
+    var namespace, cur, idx, id, len, data, recordType, pk, indexTmp; 
     this.dataInMemory={};
     this.recordTypeIndexes={};
     
@@ -45,6 +45,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
       namespaceStr = namespaces[nloc];
       namespace = SC.objectForPropertyPath(namespaceStr);
       recordType=namespace;
+      recordTypeGUID=SC.guidFor(recordType);
 
       if(recordType.subclassOf) {
         if(!recordType.subclassOf(SC.Record)) recordType = SC.Record;
@@ -73,16 +74,17 @@ SC.FixturesDataSource = SC.DataSource.extend( {
           //based on the fixtures data , detect the largest GUID and store it
           // if fixtures need to create a new record it will use this index
           // as  the base to generate new ids. 
-          indexTmp = this.recordTypeIndexes[namespaceStr];
+          indexTmp = this.recordTypeIndexes[recordTypeGUID];
+          id=parseInt(id);
           if(indexTmp){
             if(indexTmp<id){
-              indexTmp=id;
+              this.recordTypeIndexes[recordTypeGUID]=id;
             }
           }else{
-            indexTmp=id;
+            this.recordTypeIndexes[recordTypeGUID]=id;
           }
         }
-        this.dataInMemory[namespaceStr]=res;
+        this.dataInMemory[recordTypeGUID]=res;
       }
     }
     rec = null;
@@ -100,20 +102,16 @@ SC.FixturesDataSource = SC.DataSource.extend( {
    */
    
   retrieveRecords: function(store, storeKeys) {
-    var len = storeKeys.length, dataHash;
+    var len = storeKeys.length, dataHash, storeKey;
     for(i=0; i<len; i++){
+      storeKey=storeKeys[i];
       dataHash = this.dataInMemoryforStoreKey(store, storeKey);
-      storeKey=storeKey[i];
       if(dataHash)
-        store.pushRetrieve(undefined, undefined, dataHash,storeKey);
+        store.dataSourceDidComplete(storeKey, dataHash);
     }
     return YES;    
   },
 
- 
- 
-  
-  
   /**
     Invoked by the store whenever it needs to retrieve an array of storeKeys
     matching a specific query.  For the fixtures dataSource params is ignored 
@@ -125,13 +123,13 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @returns {SC.Array} result set with storeKeys.  May be sparse.
   */
   fetchRecords: function(store, recordType, params) {
-    var array = [] , recordTypeData, i;
+    var array = [] , recordTypeData, i, storeKey;
     if(recordType.subclassOf){
       if(!recordType.subclassOf(SC.Record) && recordType!==SC.Record) return null;
     }
     
     if(!this.dataInMemory) this.load();
-    recordTypeData = this.dataInMemory[recordType.toString()];
+    recordTypeData = this.dataInMemory[SC.guidFor(recordType)];
   
     for(i in recordTypeData){
       storeKey=recordType.storeKeyFor(i);
@@ -166,15 +164,16 @@ SC.FixturesDataSource = SC.DataSource.extend( {
 
  
   createRecord: function(store, storeKey) {
-    var id, recordType, hash; 
+    var id, recordType, hash, recordTypeGUID; 
     id=store.idFor(storeKey);
     recordType = store.recordTypeFor(storeKey);
+    recordTypeGUID=SC.guidFor(recordType);
     if(!id) {
-      id=recordTypeIndexes[recordType.toString()]+1;
+      id=recordTypeIndexes[recordTypeGUID]+1;
     }
     hash = store.readDataHash(storeKey);
     hash[recordType.prototype.primaryKey]=id;
-    this.dataInMemory[recordType.toString()][id]=hash;
+    this.dataInMemory[recordTypeGUID][id]=hash;
     store.dataSourceDidComplete(storeKey, hash, id);
     
     return YES ;
@@ -195,7 +194,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   dataInMemoryforStoreKey: function(store, storeKey) {
     var id=store.idFor(storeKey);
     var recordType = store.recordTypeFor(storeKey);
-    return this.dataInMemory[recordType.toString()][id];
+    return this.dataInMemory[SC.guidFor(recordType)][id];
   }
   
 });
