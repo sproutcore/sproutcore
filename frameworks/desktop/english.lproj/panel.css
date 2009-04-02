@@ -1,78 +1,78 @@
 /** SC.Panel Support */
 
 .sc-pane.sc-panel > div > .sc-view {
-	border: 0px #444 solid;
-	background-color: #fafafa ;
+  border: 0px #444 solid;
+  background-color: #fafafa ;
 }
 
 .sc-pane.sc-panel .top-right-edge {
-	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -80px;
-	position: absolute;
-	width: 40px;
-	height: 40px;
-	top: -20px;
-	right: -20px;
+  background: static_url('images/panels/shadow_corners.png') no-repeat 0px -80px;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: -20px;
+  right: -20px;
 }
 
 .sc-pane.sc-panel .top-left-edge {
-	background: static_url('images/panels/shadow_corners.png') no-repeat 0px 0px;
-	position: absolute;
-	width: 40px;
-	height: 40px;
-	top: -20px;
-	left: -20px;
+  background: static_url('images/panels/shadow_corners.png') no-repeat 0px 0px;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: -20px;
+  left: -20px;
 }
 
 .sc-pane.sc-panel .bottom-left-edge {
-	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -40px;
-	position: absolute;
-	width: 40px;
-	height: 40px;
-	bottom: -20px;
-	left: -20px;
+  background: static_url('images/panels/shadow_corners.png') no-repeat 0px -40px;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  bottom: -20px;
+  left: -20px;
 }
 
 .sc-pane.sc-panel .bottom-right-edge {
-	background: static_url('images/panels/shadow_corners.png') no-repeat 0px -120px;
-	position: absolute;
-	width: 40px;
-	height: 40px;
-	bottom: -20px;
-	right: -20px;
+  background: static_url('images/panels/shadow_corners.png') no-repeat 0px -120px;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  bottom: -20px;
+  right: -20px;
 }
 
 .sc-pane.sc-panel .top-edge {
-	background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px 0px;
-	position: absolute;
-	height: 20px;
-	top: -20px;
-	right: 20px;
-	left: 20px;
+  background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px 0px;
+  position: absolute;
+  height: 20px;
+  top: -20px;
+  right: 20px;
+  left: 20px;
 }
 
 .sc-pane.sc-panel .bottom-edge {
-	background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px -30px;
-	position: absolute;
-	height: 20px;
-	bottom: -20px;
-	right: 20px;
-	left: 20px;
+  background: static_url('images/panels/shadows_repeat_x.png') repeat-x 0px -30px;
+  position: absolute;
+  height: 20px;
+  bottom: -20px;
+  right: 20px;
+  left: 20px;
 }
 
 .sc-pane.sc-panel .left-edge {
-	background: static_url('images/panels/shadows_repeat_y.png') repeat-y 0px 0px;
-	position: absolute;
-	width: 20px;
-	top: 20px;
-	bottom: 20px;
-	left: -20px;
+  background: static_url('images/panels/shadows_repeat_y.png') repeat-y 0px 0px;
+  position: absolute;
+  width: 20px;
+  top: 20px;
+  bottom: 20px;
+  left: -20px;
 }
 
 .sc-pane.sc-panel .right-edge {
-	background: static_url('images/panels/shadows_repeat_y.png') repeat-y -30px 0px;
-	position: absolute;
-	width: 20px;
-	top: 20px;
-	bottom: 20px;
-	right: -20px;
+  background: static_url('images/panels/shadows_repeat_y.png') repeat-y -30px 0px;
+  position: absolute;
+  width: 20px;
+  top: 20px;
+  bottom: 20px;
+  right: -20px;
 }

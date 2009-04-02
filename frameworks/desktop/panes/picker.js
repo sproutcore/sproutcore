@@ -34,11 +34,11 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   The default way to use the picker pane is to simply add it to your page like this:
   
   {{{
-	  SC.PickerPane.create({
-	    contentView: SC.View.extend({
-	      layout: { width: 400, height: 200 }
-	    })
-	  }).popup(anchor);
+    SC.PickerPane.create({
+      contentView: SC.View.extend({
+        layout: { width: 400, height: 200 }
+      })
+    }).popup(anchor);
   }}}
   
   This will cause your picker pane to display.
@@ -52,49 +52,49 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   
   1. default:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor);
   }}}
 
   2. menu below the anchor with default offset matrix [1,4,3]:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_MENU);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor, SC.PICKER_MENU);
   }}}
 
   3. menu on the right side of anchor with custom offset matrix [2,6,0]:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
   }}}
 
   4. fixed below the anchor with default offset matrix [1,4,3]:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_FIXED);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor, SC.PICKER_FIXED);
   }}}
 
   5. fixed on the right side of anchor with custom offset matrix [-22,-17,0]:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
   }}}
 
   6. pointer with default position pref matrix [0,1,2,3,2]:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_POINTER);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor, SC.PICKER_POINTER);
   }}}
-	perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
+  perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
   fallback to perfect top (2)
 
   7. pointer with custom position pref matrix [3,0,1,2,2]:   
   {{{
-	  SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
-	  }).popup(anchor, SC.PICKER_POINTER, [3,0,1,2,2]);
+    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    }).popup(anchor, SC.PICKER_POINTER, [3,0,1,2,2]);
   }}}
 
-	perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
+  perfect bottom (3) > perfect right (0) > perfect left (1) > perfect top (2)
   fallback to perfect top (2)
   
   @extends SC.PalettePane
@@ -127,16 +127,16 @@ SC.PickerPane = SC.PalettePane.extend({
   */
   preferMatrix: null,
 
-	layoutShadow: null,
+  layoutShadow: null,
 
-	/**
-	  Displays a new picker pane according to the passed parameters.  
-	  Every parameter except for the anchorViewOrElement is optional.  
+  /**
+    Displays a new picker pane according to the passed parameters.  
+    Every parameter except for the anchorViewOrElement is optional.  
 
-	  @param {Object} anchorViewOrElement You can use this to properly position your picker.
-	  @param {String} preferType an optional to apply popular customized picker position rule
-	  @param {Array} preferMatrix an optional to apply custom offset or position pref matrix for specific preferType
-	*/
+    @param {Object} anchorViewOrElement You can use this to properly position your picker.
+    @param {String} preferType an optional to apply popular customized picker position rule
+    @param {Array} preferMatrix an optional to apply custom offset or position pref matrix for specific preferType
+  */
   popup: function(anchorViewOrElement, preferType, preferMatrix) {
     this.set('anchorElement',anchorViewOrElement.get('layer') || anchor) ;
     if(preferType) this.set('preferType',preferType) ;
@@ -145,11 +145,11 @@ SC.PickerPane = SC.PalettePane.extend({
     this.append();
   },
 
-	/** @private
+  /** @private
     The ideal position for a picker pane is just below the anchor that triggered it + offset of specific preferType    
     Find that ideal position, then call fitPositionToScreen to get final position.
     If anchor is missing, fallback to center.
-  */	
+  */  
   positionPane: function() {
     var anchor = this.anchorElement ;
     var picker = this.contentView ;
@@ -158,79 +158,79 @@ SC.PickerPane = SC.PalettePane.extend({
     // usually an anchorElement will be passed.  The ideal position is just below the anchor + default or custom offset according to preferType.
     // If that is not possible, fitPositionToScreen will take care of that for other alternative and fallback position.
     if (anchor) {
-	    anchor = this.computeAnchorRect(anchor);
-	    origin = SC.cloneRect(anchor);
-	    if(this.preferType) {
-		    switch(this.preferType) {
-		      case SC.PICKER_MENU:
-		      case SC.PICKER_FIXED:
-	          if(!this.preferMatrix || this.preferMatrix.length != 3) {
-					    // default below the anchor with fine tunned visual alignment for Menu to appear just below the anchorElement.
-		          this.set('preferMatrix', [1, 4, 3]) ;
-	          }
-				    // fine tunned visual alignment from preferMatrix
-			      origin.x += ((this.preferMatrix[2]==0) ? origin.width : 0) + this.preferMatrix[0] ;
-			      origin.y += ((this.preferMatrix[2]==3) ? origin.height : 0) + this.preferMatrix[1];		
-		  	    break;
-		      default:
-			      origin.y += origin.height ;
-		  	    break;
-		    }   
-			} else {
-				origin.y += origin.height ;
-			}
+      anchor = this.computeAnchorRect(anchor);
+      origin = SC.cloneRect(anchor);
+      if(this.preferType) {
+        switch(this.preferType) {
+          case SC.PICKER_MENU:
+          case SC.PICKER_FIXED:
+            if(!this.preferMatrix || this.preferMatrix.length != 3) {
+              // default below the anchor with fine tunned visual alignment for Menu to appear just below the anchorElement.
+              this.set('preferMatrix', [1, 4, 3]) ;
+            }
+            // fine tunned visual alignment from preferMatrix
+            origin.x += ((this.preferMatrix[2]==0) ? origin.width : 0) + this.preferMatrix[0] ;
+            origin.y += ((this.preferMatrix[2]==3) ? origin.height : 0) + this.preferMatrix[1];    
+            break;
+          default:
+            origin.y += origin.height ;
+            break;
+        }   
+      } else {
+        origin.y += origin.height ;
+      }
       origin = this.fitPositionToScreen(origin, picker.get('frame'), anchor) ;
-	    picker.set('layoutShadow', { width: picker.layout.width, height: picker.layout.height, left: origin.x, top: origin.y });
+      picker.set('layoutShadow', { width: picker.layout.width, height: picker.layout.height, left: origin.x, top: origin.y });
     } else {
-	    // if no anchor view has been set for some reason, just center.
-	    picker.set('layoutShadow', { width: picker.layout.width, height: picker.layout.height, centerX: 0, centerY: 0 });
+      // if no anchor view has been set for some reason, just center.
+      picker.set('layoutShadow', { width: picker.layout.width, height: picker.layout.height, centerX: 0, centerY: 0 });
     }
   },
 
-	/** @private
+  /** @private
     This method will return ret (x, y, width, height) from a rectangular element
-  */	
-	computeAnchorRect: function(anchor) {
-		var ret = SC.viewportOffset(anchor); // get x & y
-		var cq = SC.$(anchor);
-		ret.width = cq.width();
-		ret.height = cq.height();
-		return ret ;
-	},
+  */  
+  computeAnchorRect: function(anchor) {
+    var ret = SC.viewportOffset(anchor); // get x & y
+    var cq = SC.$(anchor);
+    ret.width = cq.width();
+    ret.height = cq.height();
+    return ret ;
+  },
 
-	/** @private
+  /** @private
     This method will dispatch to the right re-position rule according to preferType
-  */	
+  */  
   fitPositionToScreen: function(preferredPosition, picker, anchor) {
     // get window rect.
     var wret = { x: 0, y: 0, width: SC.$().width(), height: SC.$().height() } ;
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
     if(this.preferType) {
-	    switch(this.preferType) {
-	      case SC.PICKER_MENU:
-	        // apply default + menu re-position rule
-			    picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
-			    picker = this.fitPositionToScreenMenu(wret, picker) ;
-	  	    break;
-	      case SC.PICKER_POINTER:
-	        // apply pointer re-position rule
-			    picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
-	      case SC.PICKER_FIXED:
-	        // skip fitPositionToScreen
-	  	    break;
-	      default:
-	  	    break;
-	    }   	
+      switch(this.preferType) {
+        case SC.PICKER_MENU:
+          // apply default + menu re-position rule
+          picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
+          picker = this.fitPositionToScreenMenu(wret, picker) ;
+          break;
+        case SC.PICKER_POINTER:
+          // apply pointer re-position rule
+          picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
+        case SC.PICKER_FIXED:
+          // skip fitPositionToScreen
+          break;
+        default:
+          break;
+      }     
     } else {
-	    // apply default re-position rule
+      // apply default re-position rule
       picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
-		}
-		this.displayDidChange();
+    }
+    this.displayDidChange();
     return picker ;
   },
 
-	/** @private
+  /** @private
     re-position rule migrated from old SC.OverlayPaneView. 
     shift x, y to optimized picker visibility and make sure top-left corner is always visible.
   */
@@ -270,7 +270,7 @@ SC.PickerPane = SC.PalettePane.extend({
     return f ;    
   },
 
-	/** @private
+  /** @private
     re-position rule optimized for Menu to enforce min left(7px)/right(8px) padding to the window
   */
   fitPositionToScreenMenu: function(w, f) {
@@ -280,7 +280,7 @@ SC.PickerPane = SC.PalettePane.extend({
     return f ;    
   },
 
-	/** @private
+  /** @private
     re-position rule for triangle pointer picker: take default [0,1,2,3,2] or custom matrix to choose one of four perfect pointer positions.
   */
   fitPositionToScreenPointer: function(w, f, a) {
@@ -304,8 +304,8 @@ SC.PickerPane = SC.PalettePane.extend({
                       [prefP1[3][1]>0 ? 0 : 0-prefP1[3][1], prefP2[3][0]<w.width ? 0 : prefP2[3][0]-w.width, prefP2[3][1]<w.height ? 0 : prefP2[3][1]-w.height, prefP1[3][0]>0 ? 0 : 0-prefP1[3][0]]];
 
     if(!this.preferMatrix || this.preferMatrix.length != 5) {
-		  // default re-position rule : perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
-		  // fallback to perfect top (2)
+      // default re-position rule : perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
+      // fallback to perfect top (2)
       this.set('preferMatrix', [0,1,2,3,2]) ;
     }
     var m = this.preferMatrix;
@@ -319,55 +319,55 @@ SC.PickerPane = SC.PalettePane.extend({
 
     for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
       if (cutoffPrefP[m[i]][0]==0 && cutoffPrefP[m[i]][1]==0 && cutoffPrefP[m[i]][2]==0 && cutoffPrefP[m[i]][3]==0) {
-	      // alternative i in preferMatrix by priority
-	      if (m[4] != m[i]) {
-		      f.x = prefP1[m[i]][0] ;
-		      f.y = prefP1[m[i]][1] ;
-		      this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
-	      }
-	      i = SC.POINTER_LAYOUT.length;
-	    }
+        // alternative i in preferMatrix by priority
+        if (m[4] != m[i]) {
+          f.x = prefP1[m[i]][0] ;
+          f.y = prefP1[m[i]][1] ;
+          this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
+        }
+        i = SC.POINTER_LAYOUT.length;
+      }
     }
     return f ;    
   },
   
   
 
-	render: function(context, firstTime) {
-	    var s=this.contentView.get('layoutShadow');
-	    var ss='';
-	    for(key in s) {
-	      value = s[key];
-	      if (value!==null) {
-	        ss=ss+key.dasherize()+': '+value+'; ';
-	      }
-	    }
-	    if(firstTime){
-	     context.push("<div style='position:absolute; "+ss+"'>");
-	     this.renderChildViews(context, firstTime) ;
-	     context.push("<div class='top-left-edge'></div>"+
-	      "<div class='top-edge'></div>"+
-	      "<div class='top-right-edge'></div>"+
-	      "<div class='right-edge'></div>"+
-	      "<div class='bottom-right-edge'></div>"+
-	      "<div class='bottom-edge'></div>"+
-	      "<div class='bottom-left-edge'></div>"+
-	      "<div class='left-edge'></div>"+
-	      ((this.get('preferType') == SC.PICKER_POINTER) ? "<div class='"+this.get('pointerPos')+"'></div>" : '')+
-	      "</div>");
-	    }else{
-	      var divs=this.$('div')
-	      var el=SC.$(divs[0]);
-	      for(key in s) {
-	        value = s[key];
-	        if (value!==null) {
-	          el.css(key, value);
-	        }
-	      }
-	      el=SC.$(divs[10]);
-	      el.attr('class', this.get('pointerPos'));
-	    }
-	   },
+  render: function(context, firstTime) {
+      var s=this.contentView.get('layoutShadow');
+      var ss='';
+      for(key in s) {
+        value = s[key];
+        if (value!==null) {
+          ss=ss+key.dasherize()+': '+value+'; ';
+        }
+      }
+      if(firstTime){
+       context.push("<div style='position:absolute; "+ss+"'>");
+       this.renderChildViews(context, firstTime) ;
+       context.push("<div class='top-left-edge'></div>"+
+        "<div class='top-edge'></div>"+
+        "<div class='top-right-edge'></div>"+
+        "<div class='right-edge'></div>"+
+        "<div class='bottom-right-edge'></div>"+
+        "<div class='bottom-edge'></div>"+
+        "<div class='bottom-left-edge'></div>"+
+        "<div class='left-edge'></div>"+
+        ((this.get('preferType') == SC.PICKER_POINTER) ? "<div class='"+this.get('pointerPos')+"'></div>" : '')+
+        "</div>");
+      }else{
+        var divs=this.$('div')
+        var el=SC.$(divs[0]);
+        for(key in s) {
+          value = s[key];
+          if (value!==null) {
+            el.css(key, value);
+          }
+        }
+        el=SC.$(divs[10]);
+        el.attr('class', this.get('pointerPos'));
+      }
+     },
   
 
 
@@ -378,19 +378,19 @@ SC.PickerPane = SC.PalettePane.extend({
     return true ; 
   },
 
-	/** @private
-	  internal method to define the range for clicking inside so the picker won't be clicked away
-	  default is the range of contentView frame. Over-write for adjustments. ex: shadow
-	*/
-	clickInside: function(frame, evt) {
-		return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
-	},
+  /** @private
+    internal method to define the range for clicking inside so the picker won't be clicked away
+    default is the range of contentView frame. Over-write for adjustments. ex: shadow
+  */
+  clickInside: function(frame, evt) {
+    return SC.pointInRect({ x: evt.pageX, y: evt.pageY }, frame);
+  },
 
   /** 
     Invoked by the root responder. Re-position picker whenever the window resizes. 
   */
   windowSizeDidChange: function(oldSize, newSize) {
-	  sc_super();
+    sc_super();
     this.positionPane();
   }
 

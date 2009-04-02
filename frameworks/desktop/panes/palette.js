@@ -14,7 +14,7 @@ sc_require('panes/panel');
   
   {{{
     SC.PalettePane.create({
-	    layout: { width: 400, height: 200, right: 0, top: 0 },
+      layout: { width: 400, height: 200, right: 0, top: 0 },
       contentView: SC.View.extend({
         layout: { width: 400, height: 200, right: 0, top: 0 }
       })
@@ -47,10 +47,10 @@ SC.PalettePane = SC.PanelPane.extend({
   },
 
   mouseDragged: function(evt) {
-	  if(!this.isAnchored) {
-	    this.set('layout', { width: this.layout.width, height: this.layout.height, left: this._mouseOffsetX + evt.pageX, top: this._mouseOffsetY + evt.pageY });
-	    this.updateLayout();
-	  }
+    if(!this.isAnchored) {
+      this.set('layout', { width: this.layout.width, height: this.layout.height, left: this._mouseOffsetX + evt.pageX, top: this._mouseOffsetY + evt.pageY });
+      this.updateLayout();
+    }
   }
   
  
