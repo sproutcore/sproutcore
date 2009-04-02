@@ -27,7 +27,7 @@ window.Sample.File.FIXTURES = [
 
 module("SC.FixturesDataSource", {
   setup: function() {  
-    debugger; 
+
     var fds = SC.FixturesDataSource.create({ namespaces : ['Sample.File']})
     store = SC.Store.create({dataSource : fds});
     var ret=store.findAll(Sample.File);    
