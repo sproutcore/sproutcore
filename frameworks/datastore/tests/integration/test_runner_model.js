@@ -29,8 +29,13 @@ module("Sample Model from TestRunner Application", {
       tests: SC.Record.fetch('TestRunner.Test')
 
     });
+
+    /* JSON:
     
-    // describes a single test.  has a URL to load the test and the test name.
+     { 
+       link_test:  "url to laod test",
+        },
+    */ 
     TestRunner.Test = SC.Record.extend({
       
       // testName
