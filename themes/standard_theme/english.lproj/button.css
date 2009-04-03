@@ -329,5 +329,129 @@
 
 /* @end */
 
+/* @group basic : capsule */
 
+.sc-theme .sc-button-view.capsule {
+  font-size: 13px;
+  height: 21px;
+  text-shadow: #c0c0c0 0px 1px 0px;
+  text-align: center;
+	background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -358px;
+}
+
+.sc-theme .sc-button-view.capsule .sc-button-inner {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -312px;
+  display: block ;
+  height: 21px;
+  max-height: 21px;
+}
+
+.sc-theme .sc-button-view.capsule .sc-button-label {
+ 	background: transparent static_url('images/sc-theme-sprite.png') repeat-x left -335px;
+  display: block ;
+  text-align: center;
+  padding: 0px 0px 7px 0px;
+  height: 14px;
+  margin-left: 8px;
+  margin-right: 8px;  
+  line-height: 22px;  
+}
+
+/* @end */
+
+/* @group sel - def */
+
+.sc-theme .sc-button-view.capsule.sel,
+.sc-theme .sc-button-view.capsule.def {
+	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -151px;
+}
+
+.sc-theme .sc-button-view.capsule.sel .sc-button-inner,
+.sc-theme .sc-button-view.capsule.def .sc-button-inner {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -105px;
+}
+
+.sc-theme .sc-button-view.capsule.sel .sc-button-label,
+.sc-theme .sc-button-view.capsule.def .sc-button-label {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -128px;
+	text-shadow: #dabec6 0px 1px 0px;
+}
+
+/* @end */
+
+/* @group disabled */
+
+.sc-theme .sc-button-view.capsule.disabled {
+	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -496px;
+}
+
+.sc-theme .sc-button-view.capsule.disabled .sc-button-inner {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -450px;
+}
+
+.sc-theme .sc-button-view.capsule.disabled .sc-button-label {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -473px;
+	color: #999;
+	text-shadow: none ;
+}
+
+/* @end */
+
+/* @group sel.disabled - def.disabled*/
+
+.sc-theme .sc-button-view.capsule.sel.disabled,
+.sc-theme .sc-button-view.capsule.def.disabled {
+	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -289px;
+}
+
+.sc-theme .sc-button-view.capsule.sel.disabled .sc-button-inner,
+.sc-theme .sc-button-view.capsule.def.disabled .sc-button-inner {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -243px;
+}
+
+.sc-theme .sc-button-view.capsule.sel.disabled .sc-button-label,
+.sc-theme .sc-button-view.capsule.def.disabled .sc-button-label {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -266px;
+	color: #999;
+	text-shadow: none ;
+}
+
+/* @end */
+
+/* @group sel.active - def.active */
+
+.sc-theme .sc-button-view.capsule.sel.active,
+.sc-theme .sc-button-view.capsule.def.active {
+	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -220px;
+}
+
+.sc-theme .sc-button-view.capsule.sel.active .sc-button-inner,
+.sc-theme .sc-button-view.capsule.def.active .sc-button-inner {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -174px;
+}
+
+.sc-theme .sc-button-view.capsule.sel.active .sc-button-label,
+.sc-theme .sc-button-view.capsule.def.active .sc-button-label {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -197px;
+	text-shadow: #b884a4 0px 1px 0px;
+}
+
+/* @end */
+
+/* @group active */
+
+.sc-theme .sc-button-view.capsule.active {
+	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -427px;
+}
+
+.sc-theme .sc-button-view.capsule.active .sc-button-inner {
+	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -381px;
+}
+
+.sc-theme .sc-button-view.capsule.active .sc-button-label {
+	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -404px;
+	text-shadow: #b8b8b8 0px 1px 0px;
+}
+
+/* @end */
 
