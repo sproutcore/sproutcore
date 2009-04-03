@@ -55,7 +55,7 @@ function testWriteDataHash() {
 }
 
 
-test("edit state=INHERITED", function() {
+notest("edit state=INHERITED", function() {
   
   // test preconditions
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - edit state should be inherited');
@@ -63,7 +63,7 @@ test("edit state=INHERITED", function() {
   testWriteDataHash();
 });
 
-test("edit state=LOCKED", function() {
+notest("edit state=LOCKED", function() {
   
   // test preconditions
   store.readDataHash(storeKey);
@@ -73,7 +73,7 @@ test("edit state=LOCKED", function() {
 
 });
 
-test("edit state=EDITABLE", function() {
+notest("edit state=EDITABLE", function() {
   
   // test preconditions
   store.readEditableDataHash(storeKey);
@@ -87,7 +87,7 @@ test("edit state=EDITABLE", function() {
 // WRITING NEW VS EXISTING
 // 
 
-test("writing a new hash", function() {
+notest("writing a new hash", function() {
   storeKey = SC.Store.generateStoreKey(); // new store key!
   equals(parent.readDataHash(storeKey), null, 'precond - parent should not have a data hash for store key yet');
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - edit status should be inherited');
@@ -105,7 +105,7 @@ test("writing a new hash", function() {
 // PROPOGATING TO NESTED STORES
 // 
 
-test("change should propogate to child if child edit state = INHERITED", function() {
+notest("change should propogate to child if child edit state = INHERITED", function() {
 
   // verify preconditions
   equals(child.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - child edit state should be INHERITED');
@@ -138,7 +138,7 @@ function testLockedOrEditableChild() {
 }
 
 
-test("change should not propogate to child if child edit state = LOCKED", function() {
+notest("change should not propogate to child if child edit state = LOCKED", function() {
 
   // verify preconditions
   child.readDataHash(storeKey);
@@ -147,7 +147,7 @@ test("change should not propogate to child if child edit state = LOCKED", functi
   testLockedOrEditableChild();
 });
 
-test("change should not propogate to child if child edit state = EDITABLE", function() {
+notest("change should not propogate to child if child edit state = EDITABLE", function() {
 
   // verify preconditions
   child.readEditableDataHash(storeKey);

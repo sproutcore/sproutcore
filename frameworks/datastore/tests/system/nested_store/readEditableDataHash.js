@@ -28,7 +28,7 @@ module("SC.NestedStore#readEditableDataHash", {
   }
 });
 
-test("data state=INHERITED, parent editable = NO", function() {
+notest("data state=INHERITED, parent editable = NO", function() {
   
   // test preconditions
   equals(parent.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - parent edit state should be LOCKED');
@@ -51,7 +51,7 @@ test("data state=INHERITED, parent editable = NO", function() {
   }
 });
 
-test("data state=INHERITED, parent editable = YES", function() {
+notest("data state=INHERITED, parent editable = YES", function() {
   
   // test preconditions
   parent.readEditableDataHash(storeKey);
@@ -76,7 +76,7 @@ test("data state=INHERITED, parent editable = YES", function() {
   
 });
 
-test("data state=LOCKED", function() {
+notest("data state=LOCKED", function() {
   
   // test preconditions
   store.readDataHash(storeKey);
@@ -100,7 +100,7 @@ test("data state=LOCKED", function() {
   
 });
 
-test("data state=EDITABLE", function() {
+notest("data state=EDITABLE", function() {
   
   // test preconditions
   json = store.readEditableDataHash(storeKey); // get editable json

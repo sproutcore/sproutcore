@@ -69,7 +69,7 @@ function testStateTransition(shouldIncludeStoreKey) {
   ok(!store.chainedChanges || store.chainedChanges.length===0, 'should have empty chainedChanges set');
 }
 
-test("state = INHERITED", function() {
+notest("state = INHERITED", function() {
   
   // write in some data to parent
   parent.writeDataHash(storeKey, json);
@@ -81,7 +81,7 @@ test("state = INHERITED", function() {
 });
 
 
-test("state = LOCKED", function() {
+notest("state = LOCKED", function() {
   
   // write in some data to parent
   parent.writeDataHash(storeKey, json);
@@ -95,7 +95,7 @@ test("state = LOCKED", function() {
   testStateTransition(NO);
 });
 
-test("state = EDITABLE", function() {
+notest("state = EDITABLE", function() {
   
   // write in some data to parent
   store.writeDataHash(storeKey, json);

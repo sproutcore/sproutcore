@@ -2013,9 +2013,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    // console.log(this.get('layoutStyle'));
-    context.addStyle(this.get('layoutStyle'));
-  },
+    console.error('renderLayout is not implemented');
+  }
   
   /** walk like a duck */
   isView: YES

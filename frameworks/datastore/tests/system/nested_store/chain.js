@@ -13,7 +13,7 @@
 // 
 module("SC.Store#chain - init");
 
-test("initial setup for chained store", function() {
+notest("initial setup for chained store", function() {
   var parent = SC.Store.create();
   var store  = parent.chain();
   

@@ -108,21 +108,7 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   reset: function() {
-    
-    // if we have a transient parent store, then we can just respawn from 
-    // its properties
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      this.dataHashes = SC.beget(parentStore.dataHashes);
-      this.revisions  = SC.beget(parentStore.revisions);
-      this.statuses   = SC.beget(parentStore.statuses);
-    }
-    
-    // also, reset private temporary objects
-    this.chainedChanges = this.locks = this.editables = null;
-    this.changelog = null ;
-
-    this.set('hasChanges', NO);
+    console.error('not implemented');
   },
   
   /**
@@ -145,26 +131,7 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   discardChanges: function() {
-    
-    // any locked records whose rev or lock rev differs from parent need to
-    // be notified.
-    var records, locks;
-    if ((records = this.records) && (locks = this.locks)) {
-      var pstore = this.get('parentStore'), ps_revisions = pstore.revisions;
-      var revisions = this.revisions, storeKey, lock, rev;
-      for(storeKey in records) {
-        if (!records.hasOwnProperty(storeKey)) continue ;
-        if (!(lock = locks[storeKey])) continue; // not locked.
-
-        rev = ps_revisions[storeKey];
-        if ((rev !== lock) || (revisions[storeKey] > rev)) {
-          this._notifyRecordPropertyChange(storeKey);
-        }
-      }
-    }
-    
-    this.reset();
-    return this ;
+    console.error('not implemented');
   },
   
   /**
@@ -174,13 +141,7 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   destroy: function() {
-    this.discardChanges();
-    
-    var parentStore = this.get('parentStore');
-    if (parentStore) parentStore.willDestroyChildStore(this);
-    
-    sc_super();  
-    return this ;
+    console.error('not implemented');
   },
 
   /**
@@ -189,23 +150,7 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   reset: function() {
-
-    // requires a pstore to reset
-    var parentStore = this.get('parentStore');
-    if (!parentStore) throw SC.Store.NO_PARENT_STORE_ERROR;
-    
-    // inherit data store from parent store.
-    this.dataHashes = SC.beget(parentStore.dataHashes);
-    this.revisions  = SC.beget(parentStore.revisions);
-    this.statuses   = SC.beget(parentStore.statuses);
-    
-    // also, reset private temporary objects
-    this.chainedChanges = this.locks = this.editables = null;
-    this.changelog = null ;
-
-    // TODO: Notify record instances
-    
-    this.set('hasChanges', NO);
+    console.error('not implemented');
   },
   
   // ..........................................................
@@ -223,8 +168,7 @@ SC.NestedStore = SC.Store.extend(
     @returns {Number} edit status
   */
   storeKeyEditState: function(storeKey) {
-    var editables = this.editables, locks = this.locks;
-    return (editables && editables[storeKey]) ? SC.Store.EDITABLE : (locks && locks[storeKey]) ? SC.Store.LOCKED : SC.Store.INHERITED ;
+    console.error('not implemented');
   },
    
   /**  @private
@@ -232,57 +176,17 @@ SC.NestedStore = SC.Store.extend(
     store.
   */
   _lock: function(storeKey) {
-    var locks = this.locks, rev, editables;
-    
-    // already locked -- nothing to do
-    if (locks && locks[storeKey]) return this;
-
-    // create locks if needed
-    if (!locks) locks = this.locks = [];
-
-    // fixup editables
-    editables = this.editables;
-    if (editables) editables[storeKey] = 0;
-    
-    
-    // if the data hash in the parent store is editable, then clone the hash
-    // for our own use.  Otherwise, just copy a reference to the data hash
-    // in the parent store. -- find first non-inherited state
-    var pstore = this.get('parentStore'), editState;
-    while(pstore && (editState=pstore.storeKeyEditState(storeKey)) === SC.Store.INHERITED) {
-      pstore = pstore.get('parentStore');
-    }
-    
-    if (pstore && editState === SC.Store.EDITABLE) {
-      this.dataHashes[storeKey] = SC.clone(pstore.dataHashes[storeKey]);
-      if (!editables) editables = this.editables = [];
-      editables[storeKey] = 1 ; // mark as editable
-      
-    } else this.dataHashes[storeKey] = this.dataHashes[storeKey];
-    
-    // also copy the status + revision
-    this.statuses[storeKey] = this.statuses[storeKey];
-    rev = this.revisions[storeKey] = this.revisions[storeKey];
-    
-    // save a lock and make it not editable
-    locks[storeKey] = rev || 1;    
-    
-    return this ;
+    console.error('not implemented');
   },
   
   /** @private - adds chaining support */
   readDataHash: function(storeKey) {
-    if (this.get('lockOnRead')) this._lock(storeKey);
-    return this.dataHashes[storeKey];
+    console.error('not implemented');
   },
   
   /** @private - adds chaining support */
   readEditableDataHash: function(storeKey) {
-
-    // lock the data hash if needed
-    this._lock(storeKey);
-    
-    return sc_super();
+    console.error('not implemented');
   },
   
   /** @private - adds chaining support - 
@@ -290,67 +194,17 @@ SC.NestedStore = SC.Store.extend(
     much. 
   */
   writeDataHash: function(storeKey, hash, status) {
-    var locks = this.locks, rev ;
-    
-    // update dataHashes and optionally status.  Note that if status is not
-    // passed, we want to copy the reference to the status anyway to lock it
-    // in.
-    if (hash) this.dataHashes[storeKey] = hash;
-    this.statuses[storeKey] = status ? status : (this.statuses[storeKey] || SC.Record.READY_NEW);
-    rev = this.revisions[storeKey] = this.revisions[storeKey]; // copy ref
-    
-    // make sure we lock if needed.
-    if (!locks) locks = this.locks = [];
-    if (!locks[storeKey]) locks[storeKey] = rev || 1;
-    
-    // also note that this hash is now editable
-    var editables = this.editables;
-    if (!editables) editables = this.editables = [];
-    editables[storeKey] = 1 ; // use number for dense array support
-    
-    return this ;
+    console.error('not implemented');
   },
 
   /** @private - adds chaining support */
   removeDataHash: function(storeKey, status) {
-    
-    // record optimistic lock revision
-    var locks = this.locks;
-    if (!locks) locks = this.locks = [];
-    if (!locks[storeKey]) locks[storeKey] = this.revisions[storeKey] || 1;
-
-    return sc_super();
+    console.error('not implemented');
   },
   
   /** @private - book-keeping for a single data hash. */
   dataHashDidChange: function(storeKeys, rev) {
-    
-    // update the revision for storeKey.  Use generateStoreKey() because that
-    // gaurantees a universally (to this store hierarchy anyway) unique 
-    // key value.
-    if (!rev) rev = SC.Store.generateStoreKey();
-    var isArray, len, idx, storeKey;
-    
-    isArray = SC.typeOf(storeKeys) === SC.T_ARRAY;
-    if (isArray) {
-      len = storeKeys.length;
-    } else {
-      len = 1;
-      storeKey = storeKeys;
-    }
-
-    var changes = this.chainedChanges;
-    if (!changes) changes = this.chainedChanges = SC.Set.create();
-    
-    for(idx=0;idx<len;idx++) {
-      if (isArray) storeKey = storeKeys[idx];
-      this._lock(storeKey);
-      this.revisions[storeKey] = rev;
-      changes.add(storeKey);
-    }
-
-    this.setIfChanged('hasChanges', YES);
-    return this ;
+    console.error('not implemented');
   },
 
   // ..........................................................
@@ -359,27 +213,7 @@ SC.NestedStore = SC.Store.extend(
   
   /** @private - adapt for nested store */
   commitChangesFromNestedStore: function(nestedStore, changes, force) {
-
-    sc_super();
-    
-    // save a lock for each store key if it does not have one already
-    // also add each storeKey to my own changes set.
-    var pstore = this.get('parentStore'), ps_revisions = pstore.revisions, i;
-    var my_locks = this.locks, my_changes = this.chainedChanges,len,storeKey;
-    if (!my_locks) my_locks = this.locks = [];
-    if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
-
-    len = changes.length ;
-    for(i=0;i<len;i++) {
-      storeKey = changes[i];
-      if (!my_locks[storeKey]) my_locks[storeKey] = ps_revisions[storeKey]||1;
-      my_changes.add(storeKey);
-    }
-
-    // Finally, mark store as dirty if we have changes
-    this.setIfChanged('hasChanges', my_changes.get('length')>0);
-    
-    return this ;
+    console.error('not implemented');
   },
 
   // ..........................................................
@@ -389,8 +223,7 @@ SC.NestedStore = SC.Store.extend(
   
   /** @private - adapt for nested store */
   findAll: function(queryKey, params, _store) { 
-    if (!_store) store = this;
-    return this.get('parentStore').findAll(queryKey, params, _store);
+    console.error('not implemented');
   },
 
   // ..........................................................
@@ -401,8 +234,7 @@ SC.NestedStore = SC.Store.extend(
   
   /** @private - adapt for nested store */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
-    var pstore = this.get('parentStore');
-    return pstore.retrieveRecords(recordTypes, ids, storeKeys, _isRefresh);
+    console.error('not implemented');
   },
 
   /** @private - adapt for nested store */

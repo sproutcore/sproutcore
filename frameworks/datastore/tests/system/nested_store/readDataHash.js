@@ -33,7 +33,7 @@ module("SC.NestedStore#readDataHash", {
 // BASIC STATE TRANSITIONS
 // 
 
-test("data state=INHERITED, lockOnRead=YES, parent editable=NO", function() {
+notest("data state=INHERITED, lockOnRead=YES, parent editable=NO", function() {
   // preconditions
   equals(store.get('lockOnRead'), YES, 'precond - lockOnRead should be YES');
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - storeKey should be inherited from parent');
@@ -54,7 +54,7 @@ test("data state=INHERITED, lockOnRead=YES, parent editable=NO", function() {
 });
 
 
-test("data state=INHERITED, lockOnRead=NO, parent editable=NO", function() {
+notest("data state=INHERITED, lockOnRead=NO, parent editable=NO", function() {
   // preconditions
   store.set('lockOnRead', NO);
   
@@ -77,7 +77,7 @@ test("data state=INHERITED, lockOnRead=NO, parent editable=NO", function() {
 });
 
 
-test("data state=INHERITED, lockOnRead=YES, parent editable=YES", function() {
+notest("data state=INHERITED, lockOnRead=YES, parent editable=YES", function() {
 
   // preconditions
   
@@ -105,7 +105,7 @@ test("data state=INHERITED, lockOnRead=YES, parent editable=YES", function() {
   }
 });
 
-test("data state=LOCKED", function() {
+notest("data state=LOCKED", function() {
   
   // preconditions
   store.set('lockOnRead', YES); // make sure reading will lock
@@ -127,7 +127,7 @@ test("data state=LOCKED", function() {
   }
 });
 
-test("data state=EDITABLE", function() {
+notest("data state=EDITABLE", function() {
   
   // preconditions
   store.set('lockOnRead', YES); // make sure reading will lock
@@ -149,7 +149,7 @@ test("data state=EDITABLE", function() {
   }
 });
 
-test("should return null when accessing an unknown storeKey", function() {
+notest("should return null when accessing an unknown storeKey", function() {
   equals(store.readDataHash(20000000), null, 'shuld return null for non-existant store key');
   equals(store.storeKeyEditState(20000000), SC.Store.LOCKED, 'should put into locked edit state');
 });
@@ -158,7 +158,7 @@ test("should return null when accessing an unknown storeKey", function() {
 // SPECIAL CASES
 //
 
-test("locking deep nested store when top-level parent is editable and middle store is inherited", function() {
+notest("locking deep nested store when top-level parent is editable and middle store is inherited", function() {
 
   // first, make the parent store data hash editable
   json = parent.readEditableDataHash(storeKey);
