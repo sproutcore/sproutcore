@@ -159,8 +159,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */
   
   updateRecord: function(store, storeKey) {
-    var dim = this.dataInMemoryforStoreKey(store, storeKey);
-    dim = store.readDataHash(storeKey);
+    this.setDataInMemoryforStoreKey(store, storeKey, store.readDataHash(storeKey))
     store.dataSourceDidComplete(storeKey);  
     return YES ;
   },
@@ -171,11 +170,11 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     id=store.idFor(storeKey);
     recordType = store.recordTypeFor(storeKey);
     recordTypeGUID=SC.guidFor(recordType);
+    hash = store.readDataHash(storeKey);
+    hash[recordType.prototype.primaryKey]=id;
     if(!id) {
       id=recordTypeIndexes[recordTypeGUID]+1;
     }
-    hash = store.readDataHash(storeKey);
-    hash[recordType.prototype.primaryKey]=id;
     this.dataInMemory[recordTypeGUID][id]=hash;
     store.dataSourceDidComplete(storeKey, hash, id);
     
@@ -198,6 +197,12 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var id=store.idFor(storeKey);
     var recordType = store.recordTypeFor(storeKey);
     return this.dataInMemory[SC.guidFor(recordType)][id];
-  }
+  },
   
+  setDataInMemoryforStoreKey: function(store, storeKey, data) {
+    var id=store.idFor(storeKey);
+    var recordType = store.recordTypeFor(storeKey);
+    this.dataInMemory[SC.guidFor(recordType)][id]=data;
+    return YES;
+  }
 });

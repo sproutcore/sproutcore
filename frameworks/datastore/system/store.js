@@ -1081,6 +1081,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
     // now commit storekeys to dataSource
     if (source) ret=source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy);
+    //remove all commited changes from changelog
+    if (ret && recordTypes===undefined && ids===undefined && storeKeys===this.changelog){ 
+      this.changelog=null; 
+    }
     return ret ;
   },
 
@@ -1318,7 +1322,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     this.writeStatus(storeKey, status) ;
     if(dataHash!==undefined) this.writeDataHash(storeKey, dataHash, status) ;
-    if(newId!==undefined) this.replaceIdFor(storeKey, newId);
+    if(newId!==undefined) SC.Store.replaceIdFor(storeKey, newId);
     this.dataHashDidChange(storeKey);
     
     return this ;

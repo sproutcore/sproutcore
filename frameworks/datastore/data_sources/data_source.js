@@ -76,9 +76,6 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     if(createStoreKeys.length>0) cret = this.createRecords.call(this, store, createStoreKeys);    
     if(updateStoreKeys.length>0) uret = this.updateRecords.call(this, store, updateStoreKeys);    
     if(destroyStoreKeys.length>0) dret = this.destroyRecords.call(this, store, destroyStoreKeys); 
-    // if(!cret) cret=uret;
-    //     if(!cret) { cret=dret; uret=dret;}
-    //     if(!cret) cret=NO;
     return (cret === uret === dret) ? (cret || uret || dret) : SC.MIXED_STATE ;
   },
   
