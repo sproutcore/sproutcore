@@ -52,7 +52,7 @@ test("select component with options", function() {
 test("sortObjects() sorts the options of the select component", function() {	
 	var obj = view.objects;
 	view.objects = view.sortObjects(obj);
-	console.log('Sorted the options of the select component');
+
 	equals(1,obj.get(0),'should be the first element');
 	equals(2,obj.get(1),'should be the second element');
 	equals(6,obj.get(2),'should be the third element');
@@ -64,7 +64,6 @@ test("rebuildMenu() populates the select component with new data", function() {
 	var newObj = ['Hai,','how','are','you?'];
 	view1.objects = newObj;
 	var obj = view1.objects;
-	console.log('Newly populated select component ');
 	equals('Hai,',obj.get(0),'should be the first element');
 	equals('how',obj.get(1),'should be the second element');
 	equals('are',obj.get(2),'should be the third element');

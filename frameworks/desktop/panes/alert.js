@@ -310,7 +310,6 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
   
   // get the delegate and normalize the rest of the params
   var args = this._normalizeArguments(arguments);
-  console.log('SC.AlertPane.show(%@)'.fmt(args.join(',')));
   
   // create basic AlertPane
   var ret = this.create({
