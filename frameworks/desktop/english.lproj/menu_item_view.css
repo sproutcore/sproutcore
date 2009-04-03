@@ -1,45 +1,47 @@
-.sc-menu-item-view {
+.sc-menu-item {
   position:relative;
-  background: #ffffff none repeat scroll 0 0;
+  background-color: #ffffff none repeat scroll 0 0;
   border: none;
   display:block;
+  font-size: 13px;
+  cursor:default;
 }
 
-.sc-menu-item-view a{
+.sc-menu-item a{
   display: block;
   top: 0;
-  height: 25px;
   line-height: 22px;
   text-shadow: #b0b0b0 0px 1px 0px;
   text-decoration: none ;
   text-align: left;
   color: black;
+  outline: none ;
 }
 
-.sc-menu-item-view.disabled a{
+.sc-menu-item.disabled a{
   color:#A0A0A0;
 }
-.sc-menu-item-view.disabled{
+.sc-menu-item.disabled{
   background-color:#E0E0E0;
   border:none;
   color:#A0A0A0;
 }
 
-.sc-menu-item-view span.separator{
+.sc-menu-item span.separator{
   display: block;
   height: 1px;
   border-bottom: 2px #cccccc solid;
 }
 
-.sc-menu-item-view span.branch-visible{
+.sc-menu-item span.branch-visible{
   left: 25px;
 }
 
-.sc-menu-item-view a.has-option {
+.sc-menu-item a.has-option {
   
 }
 
-.sc-menu-item-view a img {
+.sc-menu-item a img {
   left: 25px;
   bottom: 25%;
   vertical-align: middle;
@@ -47,7 +49,7 @@
 }
 
 /*for the shortcut keys*/
-.sc-menu-item-view a span.shortCut {
+.sc-menu-item a span.shortCut {
   position:absolute;
   right:5px;
   margin-right:15px;
@@ -56,42 +58,42 @@
 }
 
 /*Hovering over menu items*/
-.sc-menu-item-view a:hover {
-  background: #5A8EC6;
+.sc-menu-item.sel, 
+.sc-menu-item a:hover {
+  background-color: #5A8EC6;
 }
 
-.sc-menu-item-view.disabled a:hover {
-  background: #E0E0E0;
+.sc-menu-item.disabled a:hover {
+  background-color: #E0E0E0;
 }
 /* @end */
 
-.sc-menu-item-view div.checkbox {
+.sc-menu-item div.checkbox {
   background-image: sc_static('icons/mini_454545'); 
   background-position: -66px -147px;
   position: absolute;
   display: block;
   width: 12px;
   height: 12px;
-  left: 5px;
-  top:  50%;
-  margin-top: -5px;
-  margin-right:16px;
+  left: 6px;
+  top: 5px;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
 }
 
-.sc-menu-item-view.disabled div.checkbox,
-.sc-menu-item-view div.checkbox.inactive {
+.sc-menu-item.disabled div.checkbox,
+.sc-menu-item div.checkbox.inactive {
   background-image: sc_static('blank.gif'); 
 }
 
-.sc-menu-item-view span.value {
+.sc-menu-item span.value {
   text-align:center;
   margin-left:30px;
 }
 
-.sc-menu-item-view span.hasBranch {
+.sc-menu-item span.hasBranch {
   position:absolute;
   text-align:center;
   right:5px;
 }
+

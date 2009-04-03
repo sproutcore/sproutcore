@@ -1,8 +1,9 @@
-.sc-menu-view {
+.sc-menu {
   border : 1px #666666 solid ;
   -webkit-border-radius : 2px ;
   border-radius : 2px ;
   overflow : visible ;
+  background-color: transparent;
 }
 
 /** SC.Menu Shadow */
