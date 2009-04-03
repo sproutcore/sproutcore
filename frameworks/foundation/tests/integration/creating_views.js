@@ -23,7 +23,6 @@ test("layer creation and management", function() {
       context.begin()
         .push('View %@'.fmt(this.get('cv')))
       .end();
-      console.log('render! %@ - %@'.fmt(this, context.strings));
     }
   });
   

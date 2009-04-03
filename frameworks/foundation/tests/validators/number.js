@@ -10,7 +10,6 @@
 module("SC.Validator.Number ");	
 test("validate() a number", function() {
  var field = SC.$('input');
- console.log('the input field '+SC.$('#email'));  
  //alert(SC.Validator.Number.validate('',field));
 });
 

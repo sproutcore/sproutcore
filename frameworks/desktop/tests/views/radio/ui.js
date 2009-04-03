@@ -9,7 +9,6 @@
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
-(function() {
 var itemList = [{ title: "Red", value: "red", enabled: YES }, { title: "Green", value: "green" }, { title: "Blue", value: "blue" }];
 
 var pane = SC.ControlTestPane.design()
@@ -199,5 +198,5 @@ test("enabled first", function() {
     equals(label.innerHTML, itemList[idx].title, 'radio button #%@ should have original label'.fmt(idx));
     idx++;
   });
-  
-})();
+});
+
