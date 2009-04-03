@@ -1103,7 +1103,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   commitRecord: function(recordType, id, storeKey) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret ;
-    if (id === undefined) return NO;
+    if (id === undefined && storeKey === undefined ) return NO;
     if (storeKey !== undefined) {
       array[0] = storeKey;
       storeKey = array;

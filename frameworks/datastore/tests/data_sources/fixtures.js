@@ -65,11 +65,12 @@ test("Create a record and commit it", function() {
 
 
 test("Update and commit a record", function() {
-var ret=store.findAll(Sample.File);
-  var dataHash2={ guid: '201', name: 'Birthday', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true};
+
+  var ret=store.findAll(Sample.File);
+  var dataHash2={ guid: '13', name: 'Birthday', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true};
   
-  store.writeDataHash(6, dataHash2);
-  store.recordDidChange(Sample.File, undefined, 6); 
+  store.writeDataHash(13, dataHash2, SC.Record.READY_CLEAN);
+  store.recordDidChange(Sample.File, undefined, 13); 
   store.commitRecords();
   
 });

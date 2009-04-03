@@ -77,7 +77,7 @@ module("Sample Model from an address book app", {
       contactDetailsType: SC.Collection.inline({
         isDependent: YES,
         recordType:  'AB.ContactDetail'
-      })
+      }),
       
       // a contact belongs to one or more groups stored as an array on 
       // the contact.  You can change the groups array by replacing the 
