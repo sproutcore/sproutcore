@@ -615,7 +615,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in updateLayer
   */
   updateLayerIfNeeded: function(isVisible) {
-    debugger;
     if (!isVisible) isVisible = this.get('isVisibleInWindow') ;
     if (isVisible && this.get('layerNeedsUpdate')) {
       this.beginPropertyChanges() ;
