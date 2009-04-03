@@ -25,14 +25,18 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
 
   // test
   same(child.get('frame'), no_f, "FRAME NO PARENT".fmt(SC.inspect(child.get('frame')), SC.inspect(no_f))) ;  
-  same(child.get('layoutStyle'), no_s, "STYLE NO PARENT".fmt(SC.inspect(child.get('layoutStyle')), SC.inspect(no_s))) ;  
-
+  keys.forEach(function(key) {
+    equals(child.get('layoutStyle')[key], no_s[key], "STYLE NO PARENT %@".fmt(key)) ;  
+  });
+  
   // add parent
   parent.appendChild(child);
   
   // test again
   same(child.get('frame'), with_f, "FRAME WITH PARENT".fmt(SC.inspect(child.get('frame')), SC.inspect(with_f))) ;  
-  same(child.get('layoutStyle'), with_s, "STYLE WITH PARENT".fmt(SC.inspect(child.get('layoutStyle')), SC.inspect(with_s))) ;  
+  keys.forEach(function(key) {
+    equals(child.get('layoutStyle')[key], with_s[key], "STYLE NO PARENT %@".fmt(key)) ;  
+  });
 }
 
 var commonSetup = {
