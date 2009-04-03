@@ -954,9 +954,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         this.writeStatus(storeKey, K.BUSY_LOADING);
         this.dataHashDidChange(storeKey, rev, YES);
         ret.push(storeKey);
-      
-        // data was added to store, create corresponding record
-        this.materializeRecord(storeKey);
 
       // otherwise, ignore record unless isRefresh is YES.
       } else if (_isRefresh) {
@@ -1427,9 +1424,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(dataHash===undefined) this.writeStatus(storeKey, status) ;
       else this.writeDataHash(storeKey, dataHash, status) ;
       this.dataHashDidChange(storeKey);
-      
-      // data was added to store, create corresponding record
-      this.materializeRecord(storeKey);
       
       return YES;
     }
