@@ -61,7 +61,7 @@ SC.PanelPane = SC.Pane.extend({
   
   render: function(context, firstTime) {
     var s=this.contentView.get('layoutStyle');
-    var ss='';
+    var ss='', value, key;
     for(key in s) {
       value = s[key];
       if (value!==null) {

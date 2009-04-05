@@ -2,6 +2,11 @@
 
 /* SC.LabelView - sc-theme support */
 
+.sc-theme .sc-label-view.sc-large-size {
+	font-size: 18px;
+	line-height: 24px;
+}
+
 .sc-theme .sc-label-view.sc-regular-size {
 	font-size: 13px;
 	line-height: 19px;
