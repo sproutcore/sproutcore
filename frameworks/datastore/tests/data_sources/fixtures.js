@@ -9,7 +9,7 @@ var store, fds, storeKey1,storeKey2;
 
 module("SC.FixturesDataSource", {
   setup: function() {  
-    var Sample = (window.Sample={});
+    var Sample = (window.Sample= SC.Object.create());
     Sample.File = SC.Record.extend({ test:'hello'});
 
     // files
@@ -31,11 +31,9 @@ module("SC.FixturesDataSource", {
 });
 
 test("Verify that fixture load to the store", function() {
-
   var ret=store.findAll(Sample.File);
   var rec=store.retrieveRecord(Sample.File, "135");    
   var sk=store.find(Sample.File, "14");
-  
 });
 
 
@@ -69,5 +67,5 @@ test("Update and commit a record", function() {
   store.writeDataHash(storeKey, dataHash2, SC.Record.READY_CLEAN);
   store.recordDidChange(Sample.File, undefined, storeKey); 
   store.commitRecords();
-  
+    
 });

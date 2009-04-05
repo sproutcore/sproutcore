@@ -49,6 +49,37 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   isNested: NO,
   
   // ..........................................................
+  // DATA SOURCE SUPPORT
+  // 
+  
+  /**
+    Convenience method.  Sets the current data source to the passed property.
+    This will also set the store property on the dataSource to the receiver.
+    
+    @returns {SC.Store} receiver
+  */
+  from: function(dataSource) {
+    this.set('dataSource', dataSource);
+    return this ;
+  },
+  
+  /**
+    Convenience method.  Creates a CascadeDataSource with the passed 
+    data source arguments and sets the CascadeDataSource as the data source 
+    for the receiver.
+    
+    @param {SC.DataSource...} dataSource one or more data source arguments
+    @returns {SC.Store} reciever
+  */
+  cascade: function(dataSource) {
+    var dataSources = SC.A(arguments) ;
+    dataSource = SC.CascadeDataSource.create({
+      dataSources: dataSources 
+    });
+    return this.from(dataSource);
+  },
+  
+  // ..........................................................
   // STORE CHAINING
   // 
   
@@ -87,7 +118,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     return this ;
   },
-    
+
   // ..........................................................
   // SHARED DATA STRUCTURES 
   // 

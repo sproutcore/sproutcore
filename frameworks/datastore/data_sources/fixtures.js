@@ -17,12 +17,6 @@ sc_require('data_sources/data_source');
 SC.FixturesDataSource = SC.DataSource.extend( {
 
   /** 
-    Contains an array of strings with all the fixtures namespaces.  Specify
-    when you create the data source.
-  */
-  namespaces: null,
-  
-  /** 
     Stores all fixture data after loading them for the first time.  Fixtures
     are stored by recordType guid and id.
     
