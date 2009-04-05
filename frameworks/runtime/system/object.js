@@ -318,6 +318,17 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     while(t = t.superclass) if (t === scClass) return YES ;
     return NO ;
   },
+  
+  /**
+    Returns YES if the passed object is a subclass of the receiver.  This is 
+    the inverse of subclassOf() which you call on the class you want to test.
+    
+    @param {Class} scClass class to compare
+    @returns {Boolean}
+  */
+  hasSubclass: function(scClass) {
+    return (scClass && scClass.subclassOf) ? scClass.subclassOf(this) : NO;
+  },
 
   /**
     Returns YES if the receiver is the passed class or is a subclass of the 
@@ -340,8 +351,8 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   */
   kindOf: function(scClass) { 
     return (this === scClass) || this.subclassOf(scClass) ;
-  }
-
+  }  
+  
 }) ;
 
 // ..........................................

@@ -1034,7 +1034,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         retCreate= [], retUpdate= [], retDestroy = [], 
         rev       = SC.Store.generateStoreKey(),
         K         = SC.Record,
-        recordType, idx, storeKey, status, key, ret ;
+        recordType, idx, storeKey, status, key, ret, len ;
 
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
@@ -1321,8 +1321,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else status = K.READY_CLEAN ;
 
     this.writeStatus(storeKey, status) ;
-    if(dataHash!==undefined) this.writeDataHash(storeKey, dataHash, status) ;
-    if(newId!==undefined) SC.Store.replaceIdFor(storeKey, newId);
+    if (dataHash) this.writeDataHash(storeKey, dataHash, status) ;
+    if (newId) SC.Store.replaceIdFor(storeKey, newId);
     this.dataHashDidChange(storeKey);
     
     return this ;
