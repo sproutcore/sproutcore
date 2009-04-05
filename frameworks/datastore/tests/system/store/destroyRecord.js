@@ -66,7 +66,7 @@ module("SC.Store#destroyRecord", {
 });
 
 test("Check for different states after/before executing destroyRecord", function() {
-  var throwError=false, msg;
+  var throwError=false, msg, status;
 
   store.destroyRecord(undefined, undefined, storeKey1);
   status = store.readStatus( storeKey1);

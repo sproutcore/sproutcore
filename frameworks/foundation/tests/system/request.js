@@ -29,6 +29,7 @@ test("Basic Requirements", function() {
 });
 
 test("Test Asynchronous GET Request", function() {
+  debugger;
   request.addObserver("response", function(response) {
       contents = request.get("response") ;
   });

@@ -140,7 +140,7 @@ module("SC.Store#dataSourceCallbacks", {
 });
 
 test("Confirm that dataSourceDidCancel switched the records to the right states", function() {
-  var msg='';
+  var msg='', status;
   try{
     store.dataSourceDidCancel(storeKey1);
     msg='';  
@@ -187,6 +187,7 @@ test("Confirm that dataSourceDidCancel switched the records to the right states"
 
 
 test("Confirm that dataSourceDidComplete switched the records to the right states", function() {
+  var msg='', status;
   try{
     store.dataSourceDidComplete(storeKey9);
     msg='';  
@@ -213,6 +214,7 @@ test("Confirm that dataSourceDidComplete switched the records to the right state
 
 
 test("Confirm that dataSourceDidDestroy switched the records to the right states", function() {
+  var msg='', status;
   try{
     store.dataSourceDidDestroy(storeKey12);  
     msg='';
@@ -230,7 +232,7 @@ test("Confirm that dataSourceDidDestroy switched the records to the right states
 
 
 test("Confirm that dataSourceDidError switched the records to the right states", function() {
-  var msg;
+  var msg='', status;
   try{
     store.dataSourceDidError(storeKey14, SC.Record.BAD_STATE_ERROR);  
     msg='';

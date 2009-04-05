@@ -74,8 +74,8 @@ module("SC.Store#commitRecord", {
 });
 
 test("Confirm that all the states are switched as expected after running commitRecord", function() {
-  var throwError=false, msg;
-  
+  var throwError=false, msg, status;
+
   store.commitRecord(undefined, undefined, storeKey1);
   status = store.readStatus( storeKey1);
   equals(status, SC.Record.READY_CLEAN, "the status shouldn't have changed. It should be READY_CLEAN ");

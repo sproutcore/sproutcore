@@ -10,7 +10,7 @@ var store, storeKey1, storeKey2, storeKey3, storeKey4, storeKey5, storeKey6;
 var storeKey7, storeKey8, json, json1, json2, json3, json4, json5, json6 ;
 var json7, json8;
 
-module("SC.Store#commitRecord", {
+module("SC.Store#retrieveRecord", {
   setup: function() {
     
     store = SC.Store.create();
@@ -84,7 +84,7 @@ module("SC.Store#commitRecord", {
 });
     
 test("Retrieve a record and check for different errors and states", function() {
-
+  var msg, status;
   store.retrieveRecord(undefined, undefined, storeKey1, YES);
   status = store.readStatus( storeKey1);
   equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");

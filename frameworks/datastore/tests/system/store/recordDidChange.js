@@ -49,7 +49,7 @@ module("SC.Store#recordDidChange", {
 });
 
 test("recordDidChange", function() {
-
+  var status;
   try{
     store.recordDidChange(undefined, undefined, storeKey1);
   }catch(error1){

@@ -1431,7 +1431,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   pushDestroy: function(recordType, id, storeKey) {
-    var K = SC.Record;
+    var K = SC.Record, status;
 
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
@@ -1448,7 +1448,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   pushError: function(recordType, id, error, storeKey) {
-    var K = SC.Record;
+    var K = SC.Record, status;
 
     if(storeKey===undefined){
       storeKey = recordType.storeKeyFor(id);
