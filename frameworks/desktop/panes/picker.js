@@ -103,7 +103,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 SC.PickerPane = SC.PalettePane.extend({
   
   classNames: 'sc-picker',
-  isAnchored: true,
+  isAnchored: YES,
   
   pointerPos: 'perfectRight',
   
@@ -120,6 +120,7 @@ SC.PickerPane = SC.PalettePane.extend({
     @property {String}
   */
   preferType: null,
+  
   /**
     default/custom offset or position pref matrix for specific preferType
     
@@ -138,7 +139,9 @@ SC.PickerPane = SC.PalettePane.extend({
     @param {Array} preferMatrix an optional to apply custom offset or position pref matrix for specific preferType
   */
   popup: function(anchorViewOrElement, preferType, preferMatrix) {
-    this.set('anchorElement',anchorViewOrElement.get('layer') || anchor) ;
+    var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
+     
+    this.set('anchorElement',anchor) ;
     if(preferType) this.set('preferType',preferType) ;
     if(preferMatrix) this.set('preferMatrix',preferMatrix) ;
     this.positionPane();
@@ -169,8 +172,8 @@ SC.PickerPane = SC.PalettePane.extend({
               this.set('preferMatrix', [1, 4, 3]) ;
             }
             // fine tunned visual alignment from preferMatrix
-            origin.x += ((this.preferMatrix[2]==0) ? origin.width : 0) + this.preferMatrix[0] ;
-            origin.y += ((this.preferMatrix[2]==3) ? origin.height : 0) + this.preferMatrix[1];    
+            origin.x += ((this.preferMatrix[2]===0) ? origin.width : 0) + this.preferMatrix[0] ;
+            origin.y += ((this.preferMatrix[2]===3) ? origin.height : 0) + this.preferMatrix[1];    
             break;
           default:
             origin.y += origin.height ;
@@ -216,6 +219,8 @@ SC.PickerPane = SC.PalettePane.extend({
         case SC.PICKER_POINTER:
           // apply pointer re-position rule
           picker = this.fitPositionToScreenPointer(wret, picker, anchor) ;
+          break;
+          
         case SC.PICKER_FIXED:
           // skip fitPositionToScreen
           break;
@@ -255,7 +260,7 @@ SC.PickerPane = SC.PalettePane.extend({
     // make sure bottom edge fits on screen.  If not, try to anchor to top
     // of anchor or bottom edge of screen.
     if (SC.maxY(f) > w.height) {
-      var mx = Math.max((a.y - f.height), 0) ;
+      mx = Math.max((a.y - f.height), 0) ;
       if (mx > w.height) {
         f.y = Math.max(0, w.height - f.height) ;
       } else f.y = mx ;
@@ -264,7 +269,7 @@ SC.PickerPane = SC.PalettePane.extend({
     // if Top edge is off screen, try to anchor to bottom of anchor. If that
     // pushes off bottom edge, shift up until it is back on screen or top =0
     if (SC.minY(f) < 0) {
-      var mx = Math.min(SC.maxY(a), (w.height - a.height)) ;
+      mx = Math.min(SC.maxY(a), (w.height - a.height)) ;
       f.y = Math.max(mx, 0) ;
     }
     return f ;    
@@ -318,7 +323,7 @@ SC.PickerPane = SC.PalettePane.extend({
     this.set('pointerPos', SC.POINTER_LAYOUT[m[4]]);
 
     for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
-      if (cutoffPrefP[m[i]][0]==0 && cutoffPrefP[m[i]][1]==0 && cutoffPrefP[m[i]][2]==0 && cutoffPrefP[m[i]][3]==0) {
+      if (cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2]===0 && cutoffPrefP[m[i]][3]===0) {
         // alternative i in preferMatrix by priority
         if (m[4] != m[i]) {
           f.x = prefP1[m[i]][0] ;
@@ -334,44 +339,21 @@ SC.PickerPane = SC.PalettePane.extend({
   
 
   render: function(context, firstTime) {
-      var s=this.contentView.get('layoutShadow');
-      var ss='';
-      for(key in s) {
-        value = s[key];
-        if (value!==null) {
-          ss=ss+key.dasherize()+': '+value+'; ';
-        }
+    sc_super();
+    if (firstTime) {
+      if (this.get('preferType') == SC.PICKER_POINTER) {
+        context.push('<div class="%@"></div>'.fmt(this.get('pointerPos')));
       }
-      if(firstTime){
-       context.push("<div style='position:absolute; "+ss+"'>");
-       this.renderChildViews(context, firstTime) ;
-       context.push("<div class='top-left-edge'></div>"+
-        "<div class='top-edge'></div>"+
-        "<div class='top-right-edge'></div>"+
-        "<div class='right-edge'></div>"+
-        "<div class='bottom-right-edge'></div>"+
-        "<div class='bottom-edge'></div>"+
-        "<div class='bottom-left-edge'></div>"+
-        "<div class='left-edge'></div>"+
-        ((this.get('preferType') == SC.PICKER_POINTER) ? "<div class='"+this.get('pointerPos')+"'></div>" : '')+
-        "</div>");
-      }else{
-        var divs=this.$('div')
-        var el=SC.$(divs[0]);
-        for(key in s) {
-          value = s[key];
-          if (value!==null) {
-            el.css(key, value);
-          }
-        }
-        el=SC.$(divs[10]);
-        el.attr('class', this.get('pointerPos'));
-      }
-     },
+    } else {
+      var divs = this.$('div'),
+          el   = SC.$(divs[10]);
+      el.attr('class', this.get('pointerPos'));
+    }
+  },
   
 
 
-   /** @private - click away picker. */
+  /** @private - click away picker. */
   click: function(evt) {
     var f=this.contentView.get("frame");
     if(!this.clickInside(f, evt)) this.remove();

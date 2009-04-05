@@ -470,10 +470,11 @@ SC.RootResponder = SC.RootResponder.extend(
       view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
       if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
     } catch (e) {
+    
       console.log('Exception during mousedown: %@'.fmt(e)) ;
       this._mouseDownView = null ;
       this._mouseCanDrag = NO ;
-      return NO ;
+      throw e;
     }
     
     return view ? evt.hasCustomEventHandling : YES;
@@ -536,7 +537,7 @@ SC.RootResponder = SC.RootResponder.extend(
     } catch (e) {
       console.log('Exception during mouseup: %@'.fmt(e)) ;
       this._drag = null; this._mouseCanDrag = NO; this._mouseDownView = null ;
-      return NO ;
+      throw e;
     }
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
@@ -555,7 +556,7 @@ SC.RootResponder = SC.RootResponder.extend(
       var handler = this.sendEvent('mouseWheel', evt, view) ;
     } catch (e) {
       console.log('Exception during mousewheel: %@'.fmt(e)) ;
-      return NO ;
+      throw e;
     }
     return (handler) ? evt.hasCustomEventHandling : YES ;
   },
@@ -621,6 +622,7 @@ SC.RootResponder = SC.RootResponder.extend(
       }
     } catch (e) {
       console.log('Exception during mousemove: %@'.fmt(e)) ;
+      throw e;
     }
     SC.RunLoop.end();
   },

@@ -16,7 +16,6 @@ sc_require('panes/panel');
     SC.PalettePane.create({
       layout: { width: 400, height: 200, right: 0, top: 0 },
       contentView: SC.View.extend({
-        layout: { width: 400, height: 200, right: 0, top: 0 }
       })
     }).append();
   }}}
@@ -34,8 +33,15 @@ sc_require('panes/panel');
 SC.PalettePane = SC.PanelPane.extend({
   
   classNames: 'sc-palette',
-  isModal: false,
-  isAnchored: false,
+  
+  /** Palettes are not modal by default */
+  isModal: NO,
+  
+  /** Do not show smoke behind palettes */
+  modalPane: SC.ModalPane,
+  
+  isAnchored: NO,
+  
   _mouseOffsetX: null,
   _mouseOffsetY: null,
 
