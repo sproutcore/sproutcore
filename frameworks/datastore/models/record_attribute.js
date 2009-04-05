@@ -129,7 +129,10 @@ SC.RecordAttribute = SC.Object.extend(
   toType: function(record, key, value) {
     var transform = this.get('transform'),
         type      = this.get('typeClass');
-    return transform ? transform.to(value, this, type, record, key) : value;        
+    if (transform && transform.to) {
+      value = transform.to(value, this, type, record, key) ;
+    }
+    return value ;        
   },
 
   /** 
@@ -146,7 +149,10 @@ SC.RecordAttribute = SC.Object.extend(
   fromType: function(record, key, value) {
     var transform = this.get('transform'),
         type      = this.get('typeClass');
-    return transform ? transform.from(value, this, type, record, key) : value;        
+    if (transform && transform.from) {
+      value = transform.from(value, this, type, record, key);
+    }
+    return value;
   },
 
   /**
@@ -244,6 +250,36 @@ SC.RecordAttribute.registerTransform = function(klass, transform) {
 
 // Object, String, Number just pass through.
 
+/** @private - generic converter for Boolean records */
+SC.RecordAttribute.registerTransform(Boolean, {
+  /** @private - convert an arbitrary object value to a boolean */
+  to: function(obj) {
+    return SC.none(obj) ? null : !!obj;
+  }
+});
+
+/** @private - generic converter for Numbers */
+SC.RecordAttribute.registerTransform(Number, {
+  /** @private - convert an arbitrary object value to a Number */
+  to: function(obj) {
+    return SC.none(obj) ? null : Number(obj) ;
+  }
+});
+
+/** @private - generic converter for Strings */
+SC.RecordAttribute.registerTransform(String, {
+  /** @private - 
+    convert an arbitrary object value to a String 
+    allow null through as that will be checked separately
+  */
+  to: function(obj) {
+    if (!(typeof obj === SC.T_STRING) && !SC.none(obj) && obj.toString) {
+      obj = obj.toString();
+    }
+    return obj;
+  }
+});
+
 /** @private - generic converter for SC.Record-type records */
 SC.RecordAttribute.registerTransform(SC.Record, {
 
@@ -262,13 +298,16 @@ SC.RecordAttribute.registerTransform(Date, {
 
   /** @private - convert a string to a Date */
   to: function(str, attr) {
+    var ret ;
+    
     if (attr.get('useIsoDate')) {
       var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
-             "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\.([0-9]+))?)?" +
+             "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\\.([0-9]+))?)?" +
              "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?",
           d      = str.match(new RegExp(regexp)),
           offset = 0,
-          date   = new Date(d[1], 0, 1);
+          date   = new Date(d[1], 0, 1),
+          time ;
 
       if (d[3]) { date.setMonth(d[3] - 1); }
       if (d[5]) { date.setDate(d[5]); }
