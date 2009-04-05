@@ -62,7 +62,7 @@ SC.ListView = SC.CollectionView.extend(
   /**
     The default layout for the list view simply fills the entire parentView.
   */
-  layout: SC.merge(SC.FILL_WIDTH, SC.FILL_HEIGHT),
+  layout: { left: 0, right: 0, top: 0, height: 400 },
   
   acceptsFirstResponder: YES,
   
@@ -285,7 +285,7 @@ SC.ListView = SC.CollectionView.extend(
     this._oldNowShowingRange = SC.cloneRange(range) ;
     var key, itemView = this.createExampleView(content), c ;
     var range2 ; // only used if the old range fits inside the new range
-    var idx, end, childId ;
+    var idx, end, childId, maxLen ;
     
     // keep track of children we've got rendered
     var childSet = this._childSet ;
@@ -522,7 +522,7 @@ SC.ListView = SC.CollectionView.extend(
       
     // otherwise, get the cached row offsets...
     } else {
-      var content = this.get('content');
+      content = this.get('content');
       var len = (content ? content.get('length') : 0), offset = 0;
       
       // console.log('contentRangeInFrame content length is %@'.fmt(len));
@@ -612,7 +612,7 @@ SC.ListView = SC.CollectionView.extend(
         this._insertionPointView = this.insertionPointClass.create() ;
       }
       
-      var insertionPoint = this._insertionPointView ;
+      insertionPoint = this._insertionPointView ;
       if (insertionPoint.get('parentView') !== itemView.get('parentView')) {
         itemView.get('parentView').appendChild(insertionPoint) ;
       }

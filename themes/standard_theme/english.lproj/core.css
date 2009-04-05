@@ -32,6 +32,14 @@ body.sc-theme .sc-view.sc-gray-border {
   border: 1px #888 solid; 
 }
 
+body.sc-theme .sc-view.sc-bottom-border {
+  border-bottom: 1px #888 solid; 
+}
+
+body.sc-theme .sc-view.sc-top-border {
+  border-top: 1px #888 solid; 
+}
+
 /* @end */
 
 .sc-theme div.sc-web-view {
