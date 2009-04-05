@@ -526,7 +526,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   find: function(recordType, id) {
     // first attempt to find the record in the local store
     var storeKey = recordType.storeKeyFor(id);
-    if (this.readStatus(storeKey) === SC.RECORD_EMPTY) {
+    if (this.readStatus(storeKey) === SC.Record.EMPTY) {
       storeKey = this.retrieveRecord(recordType, id);
     }
     

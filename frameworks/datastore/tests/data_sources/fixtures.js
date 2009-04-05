@@ -25,47 +25,62 @@ module("SC.FixturesDataSource", {
     { guid: '136', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true}
     ];
     
-    fds = SC.FixturesDataSource.create();
-    store = SC.Store.create().from(fds);
+    store = SC.Store.create().from(SC.Record.fixtures);
   }    
 });
 
-test("Verify that fixture load to the store", function() {
-  var ret=store.findAll(Sample.File);
-  var rec=store.retrieveRecord(Sample.File, "135");    
+test("Verify findAll() loads all fixture data", function() {
+  var result = store.findAll(Sample.File);
+  ok(result, 'should return a result');
+  equals(result.get('length'), Sample.File.FIXTURES.get('length'), 'should return records for each item in FIXTURES');
+});
+
+test("Verify find() loads data from store", function() {
   var sk=store.find(Sample.File, "14");
+  equals(sk.get('name'), 'Birthday Invitation.pdf', 'returns record should have name from fixture');
 });
 
 
 test("Destroy a record and commit", function() {
- var ret = store.retrieveRecord(Sample.File, "136");
+  var ret      = store.find(Sample.File, "136"),
+      storeKey = ret.get('storeKey'),
+      fixtures = store.get('dataSource');
+      
+  ok(ret, 'precond - must have record in store');
+  ok(fixtures.fixtureForStoreKey(store, storeKey), 'precond - fixtures should have data for record');
+  
   store.destroyRecord(Sample.File, "136");
   store.commitRecords();
-  
-  
+  ok(!fixtures.fixtureForStoreKey(store, storeKey), 'fixtures should no longer have data for record');
 });
-
 
 test("Create a record and commit it", function() {
 
-  var ret=store.findAll(Sample.File);
-  var dataHash={ guid: '200', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true};
+  var fixtures = store.get('dataSource'),
+      dataHash = { guid: '200', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true },
+      storeKey ;
   
   store.createRecord(Sample.File, dataHash) ;
   store.commitRecords();
-  
-  
+
+  storeKey = Sample.File.storeKeyFor(dataHash.guid);
+  ok(fixtures.fixtureForStoreKey(store, storeKey), 'should have data hash in fixtures');
 });
 
 
 test("Update and commit a record", function() {
 
-  var ret=store.findAll(Sample.File);
-  var dataHash2={ guid: '13', name: 'Birthday', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true};
-  
-  var storeKey = Sample.File.storeKeyFor("13");
-  store.writeDataHash(storeKey, dataHash2, SC.Record.READY_CLEAN);
-  store.recordDidChange(Sample.File, undefined, storeKey); 
+  var rec      = store.find(Sample.File, "10"),
+      storeKey = Sample.File.storeKeyFor("10"),
+      fixtures = store.get('dataSource'), 
+      fixture = fixtures.fixtureForStoreKey(store, storeKey);
+
+  equals(fixture.name, rec.get('name'), 'precond - fixture state should match name');
+
+  rec.set('name', 'foo');
   store.commitRecords();
+  
+  fixture = fixtures.fixtureForStoreKey(store, storeKey);
+  equals(fixture.name, rec.get('name'), 'fixture state should update to match new name');
     
 });

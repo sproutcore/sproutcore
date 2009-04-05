@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('data_sources/data_source');
+sc_require('models/record');
 
 /** @class
 
@@ -16,14 +17,6 @@ sc_require('data_sources/data_source');
 */
 SC.FixturesDataSource = SC.DataSource.extend( {
 
-  /** 
-    Stores all fixture data after loading them for the first time.  Fixtures
-    are stored by recordType guid and id.
-    
-    @property {Hash}
-  */
-  fixtures: null,
-  
   // ..........................................................
   // STANDARD DATA SOURCE METHODS
   // 
@@ -39,7 +32,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var len = storeKeys.length, dataHash, storeKey, i;
     for(i=0; i<len; i++){
       storeKey = storeKeys[i];
-      dataHash = this.fixtureforStoreKey(store, storeKey);
+      dataHash = this.fixtureForStoreKey(store, storeKey);
       if (dataHash) store.dataSourceDidComplete(storeKey, dataHash);
     }
     return YES;    
@@ -79,7 +72,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   },
   
  /**
-    Update the dataHash in this.fixtures
+    Update the dataHash in this._fixtures
   */
   updateRecord: function(store, storeKey) {
     this.setFixtureForStoreKey(store, storeKey, store.readDataHash(storeKey));
@@ -89,7 +82,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
 
 
   /**
-    Adds records to this.fixtures.  If the record does not have an id yet,
+    Adds records to this._fixtures.  If the record does not have an id yet,
     then then calls generateIdFor() and sets that.
     
     @param {SC.Store} store the store
@@ -145,7 +138,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @param {Number} storeKey the storeKey
     @returns {Hash} data hash or null
   */
-  fixtureforStoreKey: function(store, storeKey) {
+  fixtureForStoreKey: function(store, storeKey) {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         fixtures   = this.fixturesFor(recordType);
@@ -177,8 +170,8 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */
   fixturesFor: function(recordType) {
     // get basic fixtures hash.
-    if (!this.fixtures) this.fixtures = {};
-    var fixtures = this.fixtures[SC.guidFor(recordType)];
+    if (!this._fixtures) this._fixtures = {};
+    var fixtures = this._fixtures[SC.guidFor(recordType)];
     if (fixtures) return fixtures ; 
     
     // need to load fixtures.
@@ -187,7 +180,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
         primaryKey = recordType ? recordType.prototype.primaryKey : 'guid',
         idx, dataHash, id ;
 
-    this.fixtures[SC.guidFor(recordType)] = fixtures = {} ; 
+    this._fixtures[SC.guidFor(recordType)] = fixtures = {} ; 
     for(idx=0;idx<len;idx++) {      
       dataHash = dataHashes[idx];
       id = dataHash[primaryKey];
@@ -198,3 +191,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   }
   
 });
+
+// create default instance for use when configuring
+SC.Record.fixtures = SC.FixturesDataSource.create();
