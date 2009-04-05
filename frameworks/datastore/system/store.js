@@ -560,7 +560,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   findAll: function(queryKey, params, _store) { 
-    if (!_store) store = this;
+    if (!_store) _store = this;
 
     var source = this.get('dataSource'), ret, storeKeys, cacheKey ;
     if (source) {

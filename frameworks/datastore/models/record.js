@@ -273,7 +273,7 @@ SC.Record = SC.Object.extend(
     var attrs = this.get('attributes');
     return "%@(%@)".fmt(this.constructor.toString(), SC.inspect(attrs));
   }
-    
+      
 }) ;
 
 // Class Methods

@@ -72,6 +72,21 @@ test("modifying the underlying storeKey should change the returned materialized 
   equals(recs.objectAt(1), rec, 'objectAt(1) should return old record');
 });
 
+test("reading a record not loaded in store should trigger retrieveRecord", function() {
+  var callCount = 0;
+
+  // patch up store to record a call and to make it look like data is not 
+  // loaded.
+  store.removeDataHash(storeKey, SC.Record.EMPTY);
+  store.retrieveRecord = function() { callCount++; };
+  
+  equals(store.readStatus(storeKeys.objectAt(0)), SC.Record.EMPTY, 'precond - storeKey must not be loaded');
+  
+  var rec = recs.objectAt(0);
+  equals(callCount, 1, 'store.retrieveRecord() should have been called');
+});
+
+
 // ..........................................................
 // replace()
 // 
