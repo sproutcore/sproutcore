@@ -4,6 +4,8 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
+sc_require('panes/modal');
+
 /** 
   Shadow views from top-left corner clockwise
 */
@@ -34,8 +36,24 @@ SC.PanelPane = SC.Pane.extend({
   layout: { left:0, right:0, top:0, bottom:0 },
   classNames: ['sc-panel'],
   acceptsKeyPane: YES,
-  isModal: true,
+  
+  /**
+    Indicates that a pane is modal and should not allow clicks to pass
+    though to panes underneath it.  This will usually cause the pane to show
+    the modalPane underneath it.
+    
+    @property {Boolean}
+  */
+  isModal: YES,
 
+  /**
+    The modal pane to place behind this pane if this pane is modal.  This 
+    must be a subclass or a insance of SC.ModalPane.
+  */
+  modalPane: SC.ModalPane.extend({
+    classNames: 'for-sc-panel'
+  }),
+  
   // ..........................................................
   // CONTENT VIEW
   // 
@@ -60,25 +78,17 @@ SC.PanelPane = SC.Pane.extend({
   */
   
   render: function(context, firstTime) {
-    var s=this.contentView.get('layoutStyle');
-    var ss='', value, key;
-    for(key in s) {
-      value = s[key];
-      if (value!==null) {
-        ss=ss+key.dasherize()+': '+value+'; ';
-      }
-    }
-    context.push("<div style='position:absolute; "+ss+"'>");
+
     this.renderChildViews(context, firstTime) ;
-    context.push("<div class='top-left-edge'></div>"+
-     "<div class='top-edge'></div>"+
-     "<div class='top-right-edge'></div>"+
-     "<div class='right-edge'></div>"+
-     "<div class='bottom-right-edge'></div>"+
-     "<div class='bottom-edge'></div>"+
-     "<div class='bottom-left-edge'></div>"+
-     "<div class='left-edge'></div>"+
-     "</div>");
+
+    context.push("<div class='top-left-edge'></div>",
+     "<div class='top-edge'></div>",
+     "<div class='top-right-edge'></div>",
+     "<div class='right-edge'></div>",
+     "<div class='bottom-right-edge'></div>",
+     "<div class='bottom-edge'></div>",
+     "<div class='bottom-left-edge'></div>",
+     "<div class='left-edge'></div>");
   },
   
   replaceContent: function(newContent) {
@@ -109,7 +119,58 @@ SC.PanelPane = SC.Pane.extend({
   // ..........................................................
   // INTERNAL SUPPORT
   //
-   
+  
+  // get the modal pane. 
+  _modalPane: function() {
+    var pane = this.get('modalPane');
+    
+    // instantiate if needed
+    if (pane && pane.isClass) {
+      pane = pane.create();
+      this.set('modalPane', pane); 
+    }
+    
+    return pane ;
+  },
+  
+  /** @private - whenever showing on screen, deal with modal pane as well */
+  appendTo: function(elem) {
+    var pane ;
+    if (!this.get('isVisibleInWindow') && this.get('isModal') && (pane = this._modalPane())) {
+      this._isShowingModal = YES;
+      pane.paneWillAppend(this);
+    }
+    return sc_super();
+  },
+  
+  /** @private - when removing from screen, deal with modal pane as well. */
+  remove: function() {
+    var pane, ret = sc_super();
+    
+    if (this._isShowingModal) {
+      this._isShowingModal = NO ;
+      if (pane = this._modalPane()) pane.paneDidRemove(this);
+    }
+    return ret ;
+  },
+  
+  /** @private - if isModal state changes, update pane state if needed. */
+  _isModalDidChange: function() {
+    var pane, isModal = this.get('isModal');
+    if (isModal) {
+       if (!this._isShowingModal && this.get('isVisibleInWindow') && (pane = this._modalPane())) {
+         this._isShowingModal = YES;
+         pane.paneWillAppend(this);
+       }
+       
+    } else {
+      if (this._isShowingModal && (pane = this._modalPane())) {
+        this._isShowingModal = NO ;
+        pane.paneDidRemove(this); 
+      }
+    }
+  }.observes('isModal'),
+  
   /** @private - extends SC.Pane's method - make panel keyPane when shown */
   paneDidAttach: function() {
     var ret = sc_super();
