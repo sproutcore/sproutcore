@@ -768,7 +768,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {void}
   */
   prepareContext: function(context, firstTime) {
-    var mixins, len, idx, layerId ;
+    var mixins, len, idx, layerId, bgcolor, cursor ;
+    
     // do some initial setup only needed at create time.
     if (firstTime) {
       // TODO: seems like things will break later if SC.guidFor(this) is used
@@ -782,7 +783,10 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (!this.get('isEnabled')) context.addClass('disabled') ;
     if (!this.get('isVisible')) context.addClass('hidden') ;
     
-    var cursor = this.get('cursor') ;
+    bgcolor = this.get('backgroundColor');
+    if (bgcolor) context.addStyle('backgroundColor', bgcolor);
+    
+    cursor = this.get('cursor') ;
     if (cursor) context.addClass(cursor.get('className')) ;
     
     this.render(context, firstTime) ;
@@ -1144,17 +1148,24 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   createChildViews: function() {
-    var childViews = this.get('childViews'), len = childViews.length, idx ;
-    var views, view ;
+    var childViews = this.get('childViews'), 
+        len        = childViews.length, 
+        idx, key, views, view ;
     
     this.beginPropertyChanges() ;
     
     // swap the array
     for (idx=0; idx<len; ++idx) {
-      if (view = childViews[idx]) {
-        if (typeof view === SC.T_STRING) view = this.get(view) ;
+      if (key = (view = childViews[idx])) {
+
+        // is this is a key name, lookup view class
+        if (typeof key === SC.T_STRING) {
+          view = this[key];
+        } else key = null ;
+        
         if (view.isClass) {
           view = this.createChildView(view) ; // instantiate if needed
+          if (key) this[key] = view ; // save on key name if passed
         } 
       }
       childViews[idx] = view;
