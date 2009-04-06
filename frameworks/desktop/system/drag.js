@@ -270,24 +270,10 @@ SC.Drag = SC.Object.extend(
     // console.log({ top: loc.y, left: loc.x });
     
     var dv = this.dragView ;
-    var pane = dv.get('pane') ;
-    var pv = dv.get('parentView') ;
-    var clippingFrame = dv.get('clippingFrame') ;
+    
     // convert to global cooridinates
-    //var f = pv ? pv.convertFrameToView(clippingFrame, null) : clippingFrame ;
-    var f = pv ? pv.convertFrameToView(dv.get('frame'), null) : dv.get('frame') ;
-    var pf = pane ? pane.get('frame') : {x:0, y: 0};
-    
-    dv.adjust({
-      top: f.y + pf.y,
-      left: f.x + pf.x,
-      width: f.width,
-      height: f.height
-    });
-    //get frame in global cords after pane adjustment
-    var dvf = dv.get('frame');
-    
-    var origin = f;//pv.convertFrameToView(dv.get('frame'), null) ;
+    var f = dv.convertFrameToView(dv.get('clippingFrame'), null) ;
+    dv.adjust({ top: f.y, left: f.x, width: f.width, height: f.height });
     
     // console.log("clipping Frame x: %@ y: %@ ".fmt(clippingFrame.x, clippingFrame.y));
     // console.log("dvf x: %@ y: %@ ".fmt(dvf.x, dvf.y));
