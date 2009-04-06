@@ -659,7 +659,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var c = content.objectAt(idx) ;
     while (SC.guidFor(c) !== contentGuid) {
       c = content.objectAt(idx++) ;
-      if (idx == max) return null ; // couldn't find the content...
+      if (idx > max) return null ; // couldn't find the content...
     }
     
     // then create the view for that content
