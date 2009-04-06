@@ -192,8 +192,8 @@ SC.ScrollView = SC.View.extend({
   }.property('isVerticalScrollerVisible').cacheable(),
 
   /**
-    If YES, the horizontal scroller will autohide if the contentView is
-    smaller than the visible area.  You must set hasHorizontalScroller to YES 
+    If YES, the vertical scroller will autohide if the contentView is
+    smaller than the visible area.  You must set hasVerticalScroller to YES 
     for this property to have any effect.  
   */
   autohidesVerticalScroller: YES,
