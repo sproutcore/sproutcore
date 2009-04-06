@@ -1,9 +1,5 @@
 /** SC.PickerPane Support */
 
-.sc-pane.sc-panel.sc-palette.sc-picker {
-  overflow: hidden;
-}
-
 .sc-pane.sc-panel.sc-picker .perfectRight {
   background: static_url('images/panels/sprite-x.png') no-repeat 0px -30px;
   position: absolute;

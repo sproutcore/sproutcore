@@ -78,17 +78,17 @@ SC.PanelPane = SC.Pane.extend({
   */
   
   render: function(context, firstTime) {
-
-    this.renderChildViews(context, firstTime) ;
-
-    context.push("<div class='top-left-edge'></div>",
-     "<div class='top-edge'></div>",
-     "<div class='top-right-edge'></div>",
-     "<div class='right-edge'></div>",
-     "<div class='bottom-right-edge'></div>",
-     "<div class='bottom-edge'></div>",
-     "<div class='bottom-left-edge'></div>",
-     "<div class='left-edge'></div>");
+    if (context.needsContent) {
+      this.renderChildViews(context, firstTime) ;
+      context.push("<div class='top-left-edge'></div>",
+       "<div class='top-edge'></div>",
+       "<div class='top-right-edge'></div>",
+       "<div class='right-edge'></div>",
+       "<div class='bottom-right-edge'></div>",
+       "<div class='bottom-edge'></div>",
+       "<div class='bottom-left-edge'></div>",
+       "<div class='left-edge'></div>");
+    }
   },
   
   replaceContent: function(newContent) {
@@ -126,7 +126,7 @@ SC.PanelPane = SC.Pane.extend({
     
     // instantiate if needed
     if (pane && pane.isClass) {
-      pane = pane.create();
+      pane = pane.create({ owner: this });
       this.set('modalPane', pane); 
     }
     

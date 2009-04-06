@@ -55,6 +55,14 @@ SC.ModalPane = SC.Pane.extend({
       this._openPaneCount = 0 ;
       if (this.get('isVisibleInWindow')) this.remove();
     }
+  },
+  
+  /** 
+    If owner pane implements modalPaneDidClick(), call it on mouse down.
+  */
+  mouseDown: function(evt) {
+    var owner = this.get('owner');
+    if (owner && owner.modalPaneDidClick) owner.modalPaneDidClick(evt);
   }
   
 });

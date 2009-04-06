@@ -63,6 +63,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if (!this.strings) this.strings = [] ;
     
     // if tagName is string, just setup for rendering new tagName
+    this.needsContent = YES ;
     if (SC.typeOf(tagNameOrElement) === SC.T_STRING) {
       this._tagName = tagNameOrElement.toLowerCase();
       this._needsTag = YES ; // used to determine if end() needs to wrap tag
@@ -74,11 +75,11 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       this.strings.push(null);
       if (this._tagName === 'script') this._selfClosing = NO; // special case
       if (this._tagName === 'div') this._selfClosing = NO; //  illegal in html 4.01
-      
     } else {
       this._elem = tagNameOrElement ;
       this._needsTag = NO ;
       this.length = 0 ;
+      this.needsContent = NO ;
     }
     
     return this ;
@@ -118,6 +119,13 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   partialUpdate: NO,
 
+  /**
+    YES if the context needs its content filled in, not just its outer 
+    attributes edited.  This will be set to YES anytime you push strings into
+    the context or if you don't create it with an element to start with.
+  */
+  needsContent: NO,
+  
   // ..........................................................
   // CORE STRING API
   // 
@@ -153,6 +161,8 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // adjust string length for context and all parents...
     var c = this;
     while(c) { c.length += len; c = c.prevObject; }
+    
+    this.needsContent = YES; 
     
     return this;
   },
@@ -239,7 +249,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     el = document.getElementById(elementId) ;
     if (el) {
       el = elem.removeChild(el) ;
-      delete el ;
+      el = null;
     }
   },
   
@@ -280,7 +290,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           n = n2 ;
           n2 = n ? n.nextSibling : null ;
         }
-        delete elem2 ;
+        elem2 = null ;
       } else {
         elem.innerHTML = this.join();
       }
