@@ -157,6 +157,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   parentView: null,
   
+  /**
+    Optional background color.  Will be applied to the view's element if 
+    set.  This property is intended for one-off views that need a background
+    element.  If you plan to create many view instances it is probably better
+    to use CSS.
+  
+    @property {String}
+  */
+  backgroundColor: null,
+  
   // ..........................................................
   // IS ENABLED SUPPORT
   // 
