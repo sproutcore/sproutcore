@@ -35,8 +35,8 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   
   {{{
     SC.PickerPane.create({
+      layout: { width: 400, height: 200 },
       contentView: SC.View.extend({
-        layout: { width: 400, height: 200 }
       })
     }).popup(anchor);
   }}}
@@ -52,37 +52,37 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
   
   1. default:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor);
   }}}
 
   2. menu below the anchor with default offset matrix [1,4,3]:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_MENU);
   }}}
 
   3. menu on the right side of anchor with custom offset matrix [2,6,0]:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_MENU, [2,6,0]);
   }}}
 
   4. fixed below the anchor with default offset matrix [1,4,3]:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_FIXED);
   }}}
 
   5. fixed on the right side of anchor with custom offset matrix [-22,-17,0]:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_FIXED, [-22,-17,0]);
   }}}
 
   6. pointer with default position pref matrix [0,1,2,3,2]:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_POINTER);
   }}}
   perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
@@ -90,7 +90,7 @@ SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom
 
   7. pointer with custom position pref matrix [3,0,1,2,2]:   
   {{{
-    SC.PickerPane.create({contentView: SC.View.extend({layout: { width: 400, height: 200 }})
+    SC.PickerPane.create({layout: { width: 400, height: 200 },contentView: SC.View.extend({})
     }).popup(anchor, SC.PICKER_POINTER, [3,0,1,2,2]);
   }}}
 

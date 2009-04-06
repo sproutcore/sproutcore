@@ -14,8 +14,8 @@ sc_require('panes/panel');
   
   {{{
     SC.SheetPane.create({
+      layout: { width: 400, height: 200, centerX: 0 },
       contentView: SC.View.extend({
-        layout: { width: 400, height: 200, centerX: 0 }
       })
     }).append();
   }}}
@@ -34,7 +34,7 @@ SC.SheetPane = SC.PanelPane.extend({
   init: function() {
     sc_super() ;
 
-/** TODO: Implement Anition   
+/** TODO: Implement Animation   
     this.visibleAnimation = {
       visible: 'top: 0px',
       hidden: 'top: -500px',

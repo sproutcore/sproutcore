@@ -17,8 +17,8 @@ sc_require('panes/modal');
   
   {{{
     SC.PanelPane.create({
+      layout: { width: 400, height: 200, centerX: 0, centerY: 0 },
       contentView: SC.View.extend({
-        layout: { width: 400, height: 200, centerX: 0, centerY: 0 }
       })
     }).append();
   }}}

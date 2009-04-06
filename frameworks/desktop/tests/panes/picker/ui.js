@@ -17,10 +17,10 @@ function evaluatePicker(pane) {
   ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
   ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
   
-  var ret = pane.childViews[0].layoutStyle();
+  var ret = pane.layoutStyle();
 
-  equals(ret.width, '300px', 'pane.div should have width 300px');
-  equals(ret.height, '200px', 'pane.div should have height 200px');
+  equals(ret.width, '300px', 'pane should have width 300px');
+  equals(ret.height, '200px', 'pane should have height 200px');
 }
 
 var anchor = SC.ControlTestPane.design()
@@ -37,8 +37,9 @@ var panePointer ;
 
 test("verify default picker pane content container is visible at correct location with right size", function() { 
   paneDefault = SC.PickerPane.create({
+    layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
-      layout: { width: 300, height: 200 }
+      layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
   paneDefault.popup(anchor.view('anchor'), SC.PICKER);
@@ -48,8 +49,9 @@ test("verify default picker pane content container is visible at correct locatio
 
 test("verify menu picker pane content container is visible at correct location with right size", function() { 
   paneMenu = SC.PickerPane.create({
+    layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
-      layout: { width: 300, height: 200 }
+      layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
   paneMenu.popup(anchor.view('anchor'), SC.PICKER_MENU);
@@ -59,8 +61,9 @@ test("verify menu picker pane content container is visible at correct location w
 
 test("verify fixed picker pane content container is visible at correct location with right size", function() { 
   paneFixed = SC.PickerPane.create({
+    layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
-      layout: { width: 300, height: 200 }
+      layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
   paneFixed.popup(anchor.view('anchor'), SC.PICKER_FIXED);
@@ -70,8 +73,9 @@ test("verify fixed picker pane content container is visible at correct location 
 
 test("verify pointer picker pane content container is visible at correct location with right size", function() { 
   panePointer = SC.PickerPane.create({
+    layout: { width: 300, height: 200 },
     contentView: SC.View.extend({
-      layout: { width: 300, height: 200 }
+      layout: { top: 0, left: 0, bottom: 0, right: 0 }
     })
   });
   panePointer.popup(anchor.view('anchor'), SC.PICKER_POINTER, [3,0,1,2,2]);

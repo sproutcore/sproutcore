@@ -196,7 +196,7 @@ SC.AlertPane = SC.PanelPane.extend({
   
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
-    layout: { centerX: 0, width: 460, top: 100, height: 'auto' },
+    layout: { top: 0, left: 0, width: 460, height: 'auto' },
     
     childViews: [
       SC.View.extend(SC.StaticLayout, {
@@ -316,6 +316,7 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
   
   // create basic AlertPane
   var ret = this.create({
+    layout: { centerX: 0, width: 460, top: 100, height: 'auto' },
     message: args[0] || '',
     description: args[1] || null,
     caption: args[2] || null,
