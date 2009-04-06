@@ -223,7 +223,8 @@ SC.PickerPane = SC.PalettePane.extend({
   */  
   fitPositionToScreen: function(preferredPosition, picker, anchor) {
     // get window rect.
-    var wret = { x: 0, y: 0, width: SC.$().width(), height: SC.$().height() } ;
+    var wsize = this.get('currentWindowSize') || SC.RootResponder.responder.computeWindowSize() ;
+    var wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
     if(this.preferType) {
@@ -359,12 +360,11 @@ SC.PickerPane = SC.PalettePane.extend({
     var ret = sc_super();
     if (context.needsContent) {
       if (this.get('preferType') == SC.PICKER_POINTER) {
-        context.push('<div class="%@"></div>'.fmt(this.get('pointerPos')));
+        context.push('<div class="sc-pointer %@"></div>'.fmt(this.get('pointerPos')));
       }
     } else {
-      // var divs = this.$('div'),
-      //     el   = SC.$(divs[10]);
-      // el.attr('class', this.get('pointerPos'));
+      var el = this.$('.sc-pointer');
+      el.attr('class', "sc-pointer %@".fmt(this.get('pointerPos')));
     }
     return ret ;
   },

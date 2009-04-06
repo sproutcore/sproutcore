@@ -2,6 +2,7 @@
 
 .sc-pane.sc-panel {
   overflow: visible;
+  z-index: 100;
 }
 
 .sc-pane.sc-modal.for-sc-panel {

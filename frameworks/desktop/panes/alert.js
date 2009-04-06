@@ -194,10 +194,13 @@ SC.AlertPane = SC.PanelPane.extend({
   */
   buttonThree: SC.outlet('contentView.childViews.2'),
   
+  layout: { centerX: 0, width: 460, top: 100, height: 'auto' },
+
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
-    layout: { top: 0, left: 0, width: 460, height: 'auto' },
     
+    layout: { left: 0, right: 0, top: 0, height: "auto" },
+		
     childViews: [
       SC.View.extend(SC.StaticLayout, {
         classNames: ['info'],
@@ -210,7 +213,7 @@ SC.AlertPane = SC.PanelPane.extend({
           context.begin('h1').text(pane.get('message') || '').end();
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');
-          context.push('<div class="seperator" />');
+          context.push('<div class="seperator"></div>');
         }
       }),
 
@@ -316,7 +319,6 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
   
   // create basic AlertPane
   var ret = this.create({
-    layout: { centerX: 0, width: 460, top: 100, height: 'auto' },
     message: args[0] || '',
     description: args[1] || null,
     caption: args[2] || null,
@@ -331,8 +333,10 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
     title = args[idx + 3];
     if (title) button.set('title', title).set('isVisible', YES);
   }
-  
-  return ret.append(); // make visible.
+  var show = ret.append() ; // make visible.
+  ret.adjust('height', ret.childViews[0].$().height()) ;
+  ret.updateLayout() ;
+  return show ;
 };
 
 /**
