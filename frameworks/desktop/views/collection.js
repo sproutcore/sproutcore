@@ -29,14 +29,6 @@ SC.HORIZONTAL_ORIENTATION = 'horizontal';
 /** Selection points should be selected using vertical orientation. */
 SC.VERTICAL_ORIENTATION = 'vertical' ;
 
-/** Enables an optimization using zombie group views.  This option is configurable for perf testing purposes.  You should not change it. */
-SC.ZOMBIE_GROUPS_ENABLED = YES ;
-
-/** Enables an optimization that removes the root element from the DOM during 
-a render and then readds it when complete.  This option is configurable for 
-perf testing purposes.  You should not change it. */
-SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
-
 /**
   @class 
   
@@ -59,7 +51,7 @@ SC.REMOVE_COLLECTION_ROOT_ELEMENT_DURING_RENDER = NO ;
   
 */
 SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
-/** @scope SC.CollectionView.prototype */
+/** @scope SC.CollectionView.prototype */ 
 {
   
   classNames: ['sc-collection-view'],
@@ -144,8 +136,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     The collection view will set the isEnabled property of its item views to
     reflect the same view of this property.  Whenever isEnabled is false,
-    the collection view will also be not selectable or editable, regardless of the  
-    settings for isEditable & isSelectable.
+    the collection view will also be not selectable or editable, regardless of 
+    the settings for isEditable & isSelectable.
     
     @type Boolean
   */
@@ -212,7 +204,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     If set to true, then selection will use a toggle instead of the normal
     click behavior.  Command modifiers will be ignored and instead clicking
-    once will enable an item and clicking on it again will disable it.
+    once will select an item and clicking on it again will deselect it.
     
     @type Boolean
   */
@@ -225,12 +217,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     object and double clicking will trigger the action method on the 
     collection view.
     
-    If you set this property to true, then clicking on a view will both select 
+    If you set this property to YES, then clicking on a view will both select 
     it (if isSelected is true) and trigger the action method.  
     
     Use this if you are using the collection view as a menu of items.
     
-    @type Boolean
+    @property {Boolean}
   */  
   actOnSelect: NO,
   
@@ -244,7 +236,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     the mouse is released, so you can perform, for instance, a drag operation
     without actually selecting the target item.  
     
-    @type Boolean
+    @property {Boolean}
   */  
   selectOnMouseDown: YES,
   
@@ -277,7 +269,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   /**
     If set, this key will be used to get the example view for a given
-    content object.
+    content object.  The exampleView property will be ignored.
+    
+    @property {String}
   */
   contentExampleViewKey: null,
   
@@ -402,31 +396,25 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   contentRangeInFrame: function(frame) { return null; },
   
   /**
-    Override to adjust the position of the itemView's layout property at the
-    specified content index.
-    
-    Note: if useAdjust is NO, you should set the view's layout property in 
-    such a way that no change notifications are triggered. For example,
-    
-    {{{
-      var newLayout = this.myComputeLayoutForIndex(contentIndex) ;
-      if (useAdjust) itemView.adjust(newLayout) ;
-      else itemView.layout = newLayout ; // DON'T TRIGGER OBSERVERS!!!
-    }}}
+    Override to compute the layout of the itemView for the content at the 
+    specified index.  This layout will be applied to the view just before it
+    is rendered.
     
     @param {Number} contentIndex the index of content beind rendered by
       itemView
-    @returns {Rect} a layout rectangle
+    @returns {Hash} a view layout
   */
-  itemViewLayoutAtContentIndex: function(contentIndex) {},
+  itemViewLayoutAtContentIndex: function(contentIndex) {
+    throw "itemViewLayoutAtContentIndex must be implemented";
+  },
   
   // ..........................................................
   // CONTENT CHANGES
   // 
   
   /** @private
-    Whenever content array changes, start observing the [] property.  Also 
-    set childrenNeedFullUpdate to YES, which will trigger an update.
+    Whenever content array changes, start observing the [] property.  Also
+    invalidate the entire visible range of content.
   */
   _collection_contentDidChange: function() {
     var content = this.get('content') ;
@@ -545,18 +533,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     frame changes or anytime the view is resized.  This in turn may cause
     the collection view to do a 'fast' revalidation of its content.
     
-    @property
-    @type Range
+    @property {Range}
   */
   nowShowingRange: function() {
     // console.log(this.get('clippingFrame'));
-    var r = this.contentRangeInFrame(this.get('clippingFrame')) ;
-    if (!r) r = { start: 0, length: 0 } ; // default
+    var r = this.contentRangeInFrame(this.get('clippingFrame')),
+        content = SC.makeArray(this.get('content')),
+        len     = content.get('length');
+         
+    if (!r) r = { start: 0, length: len } ; // default - show all
      
     // make sure the range isn't greater than the content length 
-    var content = SC.makeArray(this.get('content'));
-    r.length = Math.min(SC.maxRange(r), content.get('length')) - r.start ;
-    
+    r.length = Math.min(SC.maxRange(r), len) - r.start ;
     return r ;
   }.property('content', 'clippingFrame').cacheable(),
   
@@ -565,9 +553,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     reason.  Usually the nowShowingRange will invalidate and recalculate on 
     its own but you can force the property to need an update if you 
     prefer.
+    
+    @returns {SC.CollectionView} receiver
   */
   invalidateNowShowingRange: function() {
     this.notifyPropertyChange('nowShowingRange') ;
+    return this ;
   },
   
   /** @private
@@ -585,9 +576,9 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     }
   }.observes('nowShowingRange'),
   
-  // ......................................
-  // RENDERING
-  //
+  // ..........................................................
+  // ITEM VIEWS
+  // 
   
   itemViewAtContentIndex: function(contentIndex) {
     var range = this.get('nowShowingRange') ;
