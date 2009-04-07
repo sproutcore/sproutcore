@@ -312,7 +312,7 @@ SC.SourceListView = SC.ListView.extend(
         // nope, is the old range inside the new range?
         } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
           // need to render two ranges...all pre-existing views are valid
-          context.context.updateMode = SC.MODE_APPEND = YES ;
+          context.updateMode = SC.MODE_APPEND ;
           range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
           range.length = oldRange.start - range.start ;
           
@@ -354,7 +354,7 @@ SC.SourceListView = SC.ListView.extend(
           
         // nope, is the new range lower than the old range?
         } else if (range.start < oldRange.start) {
-          context.context.updateMode = SC.MODE_APPEND = YES ;
+          context.updateMode = SC.MODE_APPEND ;
           
           // need to remove unused childNodes at the top of the old range
           idx = range.start + range.length ;
@@ -376,7 +376,7 @@ SC.SourceListView = SC.ListView.extend(
           
         // nope, so the new range is higher than the old range
         } else {
-          context.context.updateMode = SC.MODE_APPEND = YES ;
+          context.updateMode = SC.MODE_APPEND ;
           
           // need to remove unused childNodes at the bottom of the old range
           idx = oldRange.start ;
