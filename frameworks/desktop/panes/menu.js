@@ -22,8 +22,8 @@ SC.MenuPane = SC.PickerPane.extend(
   tagName: 'div',
 
   /**
-    The key that explains whether each item is Enabled. If omitted, no icons will
-    be displayed.
+    The key that explains whether each item is Enabled. If omitted, no icons 
+    will be displayed.
 
     @readOnly
     @type Boolean
@@ -124,7 +124,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @readOnly
     @type String
   */
-  itemBranchKey:null,
+  itemBranchKey: null,
   
   /** 
     The key for setting a branch for the menu item.
@@ -132,7 +132,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @readOnly
     @type String
   */
-  itemShortCutKey:null,
+  itemShortCutKey: null,
   
   /** 
     The key for setting Key Equivalent for the menu item.
@@ -140,7 +140,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @readOnly
     @type String
   */
-  itemKeyEquivalentKey:null,
+  itemKeyEquivalentKey: null,
   
   /** 
     The key for setting Key Equivalent for the menu item.
@@ -148,28 +148,31 @@ SC.MenuPane = SC.PickerPane.extend(
     @readOnly
     @type String
   */
-  itemTargetKey:null,
+  itemTargetKey: null,
   
   /** @private */
   isKeyPane: YES,
 
   /** @private */
-  preferType:SC.PICKER_MENU,
+  preferType: SC.PICKER_MENU,
 
   /**
     Define the current Selected Menu Item.
+
     type SC.MenuItemView
   */
   currentItemSelected : null,
 
   /**
     The final layout for the inside content View
+
     @type Array
   */
   layoutShadow: {},
   
   /*
     The anchor for this Menu
+
     @type ButtonView/MenuItemView
   */
   anchor: null,
@@ -177,6 +180,7 @@ SC.MenuPane = SC.PickerPane.extend(
   displayItemsArray: null,
   
   menuItemViews: [],
+
   /**
     This returns whether the anchor for this pane is of MenuItemView type
     @returns Boolean
@@ -203,13 +207,16 @@ SC.MenuPane = SC.PickerPane.extend(
   
   /**
     This computed property is generated from the items array
+
+    @property
+    @type {String}
   */
   displayItems: function() {
 
     var items = this.get('items') ;
     var loc = this.get('localize') ;
     var keys = null,itemType, cur ;
-    var ret = [] ;
+    var ret = [], rel;
     var max = items.get('length') ;
     var idx, item ;
     var fetchKeys = SC._menu_fetchKeys ;
@@ -220,12 +227,14 @@ SC.MenuPane = SC.PickerPane.extend(
       item = items.objectAt(idx) ;
       if (SC.none(item)) continue ;
       itemType = SC.typeOf(item) ;
+      rel = ret.length;
       if (itemType === SC.T_STRING) {
-        ret[ret.length] = SC.Object.create({ title: item.humanize().titleize(), value: item,
-                            isEnabled: YES, icon: null, isSeparator: null, 
-                            action: null, isCheckbox: NO, menuItemNumber: idx,
-                            isShortCut: NO, isBranch: NO,itemHeight: 20, subMenu: null, 
-                            keyEquivalent: null, target:null });
+        ret[rel] = SC.Object.create({ title: item.humanize().titleize(),   
+	                        value: item, isEnabled: YES, icon: null, 
+	                        isSeparator: null, action: null, isCheckbox: NO, 
+	                        menuItemNumber: idx, isShortCut: NO, isBranch: NO,
+	                        itemHeight: 20, subMenu: null,keyEquivalent: null,
+	                        target:null });
         menuHeight = menuHeight+20 ;
       } else if (itemType !== SC.T_ARRAY) {
           if (keys === null) keys = SC.MENU_ITEM_KEYS.map(fetchKeys, this) ;
@@ -238,7 +247,7 @@ SC.MenuPane = SC.PickerPane.extend(
           if (cur[4]) cur[9] = 5 ;
           menuHeight = menuHeight+cur[9] ;
           if (loc && cur[0]) cur[0] = cur[0].loc() ;
-          ret[ret.length] = SC.Object.create({ title: cur[0], value: cur[1],
+          ret[rel] = SC.Object.create({ title: cur[0], value: cur[1],
                                               isEnabled: cur[2], icon: cur[3], 
                                               isSeparator: cur[4], action: cur[5],
                                               isCheckbox: cur[6], isShortCut: cur[7],
@@ -252,7 +261,9 @@ SC.MenuPane = SC.PickerPane.extend(
     return ret;
   }.property('items').cacheable(),
 
-  /** If the items array itself changes, add/remove observer on item... */
+  /**
+    If the items array itself changes, add/remove observer on item...
+  */
   itemsDidChange: function() {
     if (this._items) {
       this._items.removeObserver('[]', this, this.itemContentDidChange) ;
@@ -293,7 +304,6 @@ SC.MenuPane = SC.PickerPane.extend(
     // last cached version of it needsFirstDisplay is YES.
 
     var last = this.get('_menu_displayItems') ;
-    var parentView = this.parentView ;
     if (firstTime || (items !== last)) {
       if(!this.get('isEnabled') || !this.get('contentView')) return ;
       var contentView = this.get('contentView');
@@ -336,7 +346,7 @@ SC.MenuPane = SC.PickerPane.extend(
     any "transient" states such as the global isEnabled property or selection.
   */
   renderChildren: function(context,items) {
-    if(!this.isEnabled) return ;
+    if(!this.get('isEnabled')) return ;
     var menuItemViews = [];
     var len = items.length ;
     var content = SC.makeArray(items) ;
@@ -420,7 +430,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns {Boolean}  YES if handled, NO otherwise
   */
   performKeyEquivalent: function(keyString,evt) {
-    if(!this.isEnabled) return YES ;
+    if(!this.get('isEnabled')) return YES ;
     var items = this.get('displayItemsArray');
     var len = items.length ;
     for(var idx=0; idx<len; ++idx) {
@@ -474,25 +484,69 @@ SC.MenuPane = SC.PickerPane.extend(
   },
   
   mouseDown: function(evt) {
-    return YES;
+    return YES ;
   },
   
   mouseUp: function(evt) {
-    this.remove();
-    var anchor = this.get('anchor');
-    if(this.isAnchorMenuItemType()) this.sendEvent('mouseUp', evt, anchor);
-    return YES;
+    this.remove() ;
+    var anchor = this.get('anchor') ;
+    if(this.isAnchorMenuItemType()) this.sendEvent('mouseUp', evt, anchor) ;
+    return YES ;
   },
   
-  moveUp: function(childMenu) {
-    //TODO
+  moveDown: function(menuItem) {
+    var currentSelectedMenuItem = this.getNextEnabledMenuItem(menuItem) ;
+    this.set('currentItemSelected',currentSelectedMenuItem) ;
+    if(menuItem) menuItem.resignFirstResponder() ;
+    currentSelectedMenuItem.becomeFirstResponder() ;
+    return YES ;
   },
   
-  moveDown: function(childMenu) {
-    //TODO
+  moveUp: function(menuItem) {
+    var currentSelectedMenuItem = this.getPreviousEnabledMenuItem(menuItem) ;
+    this.set('currentItemSelected',currentSelectedMenuItem) ;
+    if(menuItem) menuItem.resignFirstResponder() ;
+    currentSelectedMenuItem.becomeFirstResponder() ;
+    return YES ;
+  },
+  
+  getPreviousEnabledMenuItem : function(menuItem) {
+    var menuItemViews = this.get('menuItemViews') ;
+    if(menuItemViews) {
+      var len = menuItemViews.length ;
+      var idx = (menuItemViews.indexOf(menuItem) === -1) ? len : menuItemViews.indexOf(menuItem) ;
+      var isEnabled = NO ;
+      var isSeparator = NO ;
+      while(--idx >= 0 && !isEnabled && !isSeparator) {
+        isEnabled = menuItemViews[idx].get('isEnabled') ;
+        var content = menuItemViews[idx].get('content') ;
+        if(content) {
+          isSeparator = content.get(menuItemViews[idx].get('isSeparatorKey'));
+        }
+      }
+      if(idx === -1) idx = len - 1;
+      return menuItemViews[idx];
+    }
+  },
+
+  getNextEnabledMenuItem : function(menuItem) {
+    var menuItemViews = this.get('menuItemViews') ;
+    if(menuItemViews) {
+      var len = menuItemViews.length ;
+      var idx = (menuItemViews.indexOf(menuItem) === -1) ? 0 : menuItemViews.indexOf(menuItem) ;
+      var isEnabled = NO ;
+      var isSeparator = NO ;
+      while(!isEnabled && ++idx < len) {
+        isEnabled = menuItemViews[idx].get('isEnabled') ;
+        var content = menuItemViews[idx].get('content') ;
+        if(content) {
+          isSeparator = content.get(menuItemViews[idx].get('isSeparatorKey'));
+        }
+      }
+      if(idx === len) idx = 0 ;
+      return menuItemViews[idx] ;
+    }
   }
-  
-  
 });
 
 SC._menu_fetchKeys = function(k) {

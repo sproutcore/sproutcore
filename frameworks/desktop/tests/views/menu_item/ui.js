@@ -14,18 +14,18 @@ var pane = SC.ControlTestPane.design({ width:200,height: 32 })
     content: SC.Object.create({ 
       icon: "sc-icon-folder-16",
       title1: "List Item 1",
-      checkbox:YES,
-      shortcut:"Text",
-      keyEquivalent:"alt_shift_z"
+      checkbox: YES,
+      shortcut: "Text",
+      keyEquivalent: "alt_shift_z"
    }),
   isAnOption: YES,
   contentValueKey: "title1",
-  contentIconKey:  "icon",
+  contentIconKey: "icon",
   shortCutKey: "shortcut",
-  contentCheckboxKey:"checkbox",
-  keyEquivalent:"shift_>",
+  contentCheckboxKey: "checkbox",
+  keyEquivalent: "shift_>",
   action: method,
-  isEnabled:NO
+  isEnabled: NO
     // contentIsBranchKey: 'branch'
   }))
   
