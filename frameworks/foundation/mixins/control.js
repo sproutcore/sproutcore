@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('mixins/string');
+
 /** Indicates a value has a mixed state of both on and off. */
 SC.MIXED_STATE = '__MIXED__' ;
 
