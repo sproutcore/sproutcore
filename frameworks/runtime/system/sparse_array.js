@@ -136,7 +136,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
       del.sparseArrayDidRequestRange(this, range);
       
     } else if (del.sparseArrayDidRequestIndex) {
-      while(--len >= 0) del.sparseArrayDidRequestIndex(start + len);
+      while(--len >= 0) del.sparseArrayDidRequestIndex(this, start + len);
     }
     return this ;
   },
