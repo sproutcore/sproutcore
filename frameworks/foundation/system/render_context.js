@@ -7,6 +7,15 @@
 
 sc_require('system/builder');
 
+/** set update mode on context to replace content (preferred) */
+SC.MODE_REPLACE = 'replace';
+
+/** set update mode on context to append content */
+SC.MODE_APPEND = 'append';
+
+/** set update mode on context to prepend content */
+SC.MODE_PREPEND = 'prepend';
+
 /**
   @namespace
   
@@ -115,9 +124,17 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   length: 0,
   
   /**
-    YES if the update is partial; existing DOM nodes should be retained.
+    Specify the method that should be used to update content on the element.
+    In almost all cases you want to replace the content.  Very carefully 
+    managed code (such as in CollectionView) can append or prepend content
+    instead.
+    
+    You probably do not want to change this propery unless you know what you
+    are doing.
+    
+    @property {String}
   */
-  partialUpdate: NO,
+  updateMode: SC.MODE_REPLACE,
 
   /**
     YES if the context needs its content filled in, not just its outer 
@@ -267,7 +284,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} previous context or null if top 
   */
   update: function() {
-    var elem = this._elem, key, value, styles, elem2, n, n2;  
+    var elem = this._elem, 
+        mode = this.updateMode,
+        key, value, styles, factory, cur, next, before;
     
     if (!elem) {
       // throw "Cannot update context because there is no source element";
@@ -280,19 +299,19 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     
     // replace innerHTML
     if (this.length>0) {
-      if (this.partialUpdate) {
-        elem2 = elem.cloneNode(false);
-        elem2.innerHTML = this.join();
-        n = elem2.firstChild ;
-        n2 = n.nextSibling ;
-        while (n) {
-          elem.appendChild(n) ;
-          n = n2 ;
-          n2 = n ? n.nextSibling : null ;
-        }
-        elem2 = null ;
-      } else {
+      if (mode === SC.MODE_REPLACE) {
         elem.innerHTML = this.join();
+      } else {
+        factory = elem.cloneNode(false);
+        factory.innerHTML = this.join() ;
+        before = (mode === SC.MODE_APPEND) ? null : elem.firstChild;
+        cur = factory.firstChild ;
+        while(cur) {
+          next = cur.nextSibling ;
+          elem.insertBefore(cur, next);
+          cur = next ;
+        }
+        cur = next = factory = before = null ; // cleanup 
       }
     }
     
