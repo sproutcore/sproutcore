@@ -306,7 +306,7 @@ SC.MenuItemView = SC.ButtonView.extend(
 
     var a = '>' ;
     var url = sc_static('blank.gif') ;
-    context.push('<span class= "has-branch">'+a+'</span>') ; 
+    context.push('<span class= "hasBranch">'+a+'</span>') ; 
   },
 
   /** 
