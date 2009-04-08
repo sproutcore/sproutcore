@@ -10,13 +10,14 @@ sc_require('models/record_attribute');
 
 /** @class
 
-  TODO: Describe
+  ManyAttribute is a subclass of RecordAttribute and handles to-many 
+  relationships.
   
   @extends SC.RecordAttribute
   @since SproutCore 1.0
 */
 SC.ManyAttribute = SC.RecordAttribute.extend(
-  /** @scipe SC.ManyAttribute.prototype */ {
+  /** @scope SC.ManyAttribute.prototype */ {
   
   // ..........................................................
   // LOW-LEVEL METHODS
@@ -24,13 +25,17 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   
   /**  @private - adapted for to many relationship */
   toType: function(record, key, value) {
-    // TODO: Implement ManyAttribute
-    return value ;
+    var transform = this.get('transform'),
+        type      = this.get('typeClass'),
+        store     = record.get('store');
+
+    if (transform && transform.to) {
+      return SC.ManyArray.create({ store: store, storeIds: value, recordType: type });
+    }
   },
 
   /** @private - adapted for to many relationship */
   fromType: function(record, key, value) {
-    // TODO: Implement ManyAttribute
     return value;
   }
   
