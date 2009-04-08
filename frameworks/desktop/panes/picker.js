@@ -144,7 +144,6 @@ SC.PickerPane = SC.PalettePane.extend({
   popup: function(anchorViewOrElement, preferType, preferMatrix) {
     var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
      
-    this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;

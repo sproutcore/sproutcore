@@ -58,7 +58,7 @@
 }
 
 /*Hovering over menu items*/
-.sc-menu-item.sel, 
+.sc-pane.sc-panel > .sc-view.sc-menu-item.focus, 
 .sc-menu-item a:hover {
   background-color: #5A8EC6;
 }

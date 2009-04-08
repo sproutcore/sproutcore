@@ -20,6 +20,8 @@ SC.MenuPane = SC.PickerPane.extend(
   classNames: ['sc-menu'],
 
   tagName: 'div',
+  
+  isModal: YES,
 
   /**
     The key that explains whether each item is Enabled. If omitted, no icons 
@@ -158,18 +160,16 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /**
     Define the current Selected Menu Item.
-
     type SC.MenuItemView
   */
-  currentItemSelected : null,
+  currentSelectedMenuItem : null,
 
   /**
-    The final layout for the inside content View
-
-    @type Array
+    Define the current Selected Menu Item.
+    type SC.MenuItemView
   */
-  layoutShadow: {},
-  
+  previousSelectedMenuItem : null,
+
   /*
     The anchor for this Menu
 
@@ -182,26 +182,17 @@ SC.MenuPane = SC.PickerPane.extend(
   menuItemViews: [],
 
   /**
-    This returns whether the anchor for this pane is of MenuItemView type
-    @returns Boolean
-  */
-  isAnchorAMenu: function() {
-    var anchor = this.get('anchor');
-    if(anchor && anchor.kindOf('SC.MenuItemView')) {
-      return YES;
-    }  
-    return NO;
-  },
-    
-  /**
     Overwrite the popup function of the pickerPane
   */
   popup: function(anchorViewOrElement, preferMatrix) {
-    this.set('anchorElement',anchorViewOrElement.get('layer')) ;
+    var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
+    this.beginPropertyChanges();
+    this.set('anchorElement',anchor) ;
     this.set('anchor',anchorViewOrElement);
     this.set('preferType',SC.PICKER_MENU) ;
     if(preferMatrix) this.set('preferMatrix',preferMatrix) ;
     this.positionPane() ;
+    this.endPropertyChanges();
     this.append() ;
   },
   
@@ -296,10 +287,9 @@ SC.MenuPane = SC.PickerPane.extend(
       var bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey);
     }
-
     // collect some data 
     var items = this.get('displayItems') ;
-
+    var ret = sc_super();
     // regenerate the buttons only if the new display items differs from the
     // last cached version of it needsFirstDisplay is YES.
 
@@ -307,36 +297,18 @@ SC.MenuPane = SC.PickerPane.extend(
     if (firstTime || (items !== last)) {
       if(!this.get('isEnabled') || !this.get('contentView')) return ;
       var contentView = this.get('contentView');
-      var s = contentView.get('layoutShadow') ;
-      var ss = '' ;
-      for(var key in s) {
-        var value = s[key] ;
-        var menuHeight = this.get('menuHeight');
-        if(key === "height" && menuHeight) value = menuHeight ;
-        if (value !== null) {
-          ss = ss + key +' : ' + value + 'px; ';
-        }
-      }
-      if(ss.length>0) context.push("<div style='position:absolute;"+ss+"'>") ;
+      var menuHeight = this.get('menuHeight');
       this.set('_menu_displayItems',items) ; // save for future
       context.addStyle('text-align', 'center') ;
       var itemWidth = this.get('itemWidth');
       if (SC.none(itemWidth)) {
-        itemWidth = contentView.get('layout').width || itemWidth;
+        itemWidth = this.get('layout').width || 100;
         this.set('itemWidth',itemWidth); 
       }
       this.renderChildren(context,items) ;
-      context.push("<div class='top-left-edge'></div>") ;
-      context.push("<div class='top-edge'></div>") ;
-      context.push("<div class='top-right-edge'></div>") ;
-      context.push("<div class='right-edge'></div>") ;
-      context.push("<div class='bottom-right-edge'></div>") ;
-      context.push("<div class='bottom-edge'></div>") ;
-      context.push("<div class='bottom-left-edge'></div>") ;
-      context.push("<div class='left-edge'></div>") ;
-      context.push("</div>") ;
     }
     if (SC.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey);
+    return ret;
   },
 
   /**
@@ -410,12 +382,28 @@ SC.MenuPane = SC.PickerPane.extend(
   },
   
   /**
+    Get the current selected Menu item
+    
+    @returns void
+  */
+  currentSelectedMenuItemObserver: function(){
+    var currentSelectedMenuItem = this.get('currentSelectedMenuItem') ;
+    var previousSelectedMenuItem = this.get('previousSelectedMenuItem') ;
+    if(previousSelectedMenuItem){
+      var subMenu = previousSelectedMenuItem.isSubMenuAMenuPane() ;
+      if(subMenu) subMenu.remove() ;
+    }
+    if(currentSelectedMenuItem) currentSelectedMenuItem.becomeFirstResponder() ;
+  }.observes('currentSelectedMenuItem'),
+  
+  /**
     This function returns whether the anchor is of type of MenuItemView
+    
     @returns Boolean
   */
   isAnchorMenuItemType: function() {
-    var anchor = this.get('anchor');
-    return (anchor && anchor.kindOf(SC.MenuItemView));
+    var anchor = this.get('anchor') ;
+    return (anchor && anchor.kindOf(SC.MenuItemView)) ;
   },
   
   //..........................................................
@@ -431,14 +419,14 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   performKeyEquivalent: function(keyString,evt) {
     if(!this.get('isEnabled')) return YES ;
-    var items = this.get('displayItemsArray');
+    var items = this.get('displayItemsArray') ;
     var len = items.length ;
     for(var idx=0; idx<len; ++idx) {
-      var item = items[idx];
-      var keyEquivalent = item.get('keyEquivalent');
+      var item = items[idx] ;
+      var keyEquivalent = item.get('keyEquivalent') ;
       var action = item.get('action') ;
       var isEnabled = item.get('isEnabled') ;
-      var target = item.get('itemTarget') || this;
+      var target = item.get('itemTarget') || this ;
       if(keyEquivalent == keyString && isEnabled) {
         return this.performAction(target,action) ;
       }
@@ -478,15 +466,24 @@ SC.MenuPane = SC.PickerPane.extend(
       // otherwise, try to execute action direction on target or send down
       // responder chain.
       } else {
-        SC.RootResponder.responder.sendAction(this.action, this.target, this);
+        SC.RootResponder.responder.sendAction(this.action, this.target, this) ;
       }
     }
   },
   
+  //Mouse and Key Events
+  
+  /** @private */
   mouseDown: function(evt) {
     return YES ;
   },
   
+  /** 
+    @private 
+    
+    Get the anchor and send the event to the anchor in case the 
+    current Menu is a subMenu
+  */
   mouseUp: function(evt) {
     this.remove() ;
     var anchor = this.get('anchor') ;
@@ -494,14 +491,25 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES ;
   },
   
+  /** 
+    @private 
+    
+    This function gets called from the Menu Item in order to set the 
+    current Selected Menu Item and move the selection
+  */
   moveDown: function(menuItem) {
     var currentSelectedMenuItem = this.getNextEnabledMenuItem(menuItem) ;
     this.set('currentItemSelected',currentSelectedMenuItem) ;
     if(menuItem) menuItem.resignFirstResponder() ;
     currentSelectedMenuItem.becomeFirstResponder() ;
-    return YES ;
   },
   
+  /** 
+    @private 
+    
+    This function gets called from the Menu Item in order to set the 
+    current Selected Menu Item and move the selection
+  */
   moveUp: function(menuItem) {
     var currentSelectedMenuItem = this.getPreviousEnabledMenuItem(menuItem) ;
     this.set('currentItemSelected',currentSelectedMenuItem) ;
@@ -510,6 +518,11 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES ;
   },
   
+  /**
+    Get the previous Enabled Menu Item which is not a separator
+    
+    @returns MenuItemView
+  */
   getPreviousEnabledMenuItem : function(menuItem) {
     var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
@@ -529,6 +542,11 @@ SC.MenuPane = SC.PickerPane.extend(
     }
   },
 
+  /**
+    Get the next Enabled Menu Item which is not a separator
+    
+    @returns MenuItemView
+  */
   getNextEnabledMenuItem : function(menuItem) {
     var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
@@ -536,7 +554,7 @@ SC.MenuPane = SC.PickerPane.extend(
       var idx = (menuItemViews.indexOf(menuItem) === -1) ? 0 : menuItemViews.indexOf(menuItem) ;
       var isEnabled = NO ;
       var isSeparator = NO ;
-      while(!isEnabled && ++idx < len) {
+      while(!isEnabled && !isSeparator && ++idx < len) {
         isEnabled = menuItemViews[idx].get('isEnabled') ;
         var content = menuItemViews[idx].get('content') ;
         if(content) {
@@ -546,6 +564,28 @@ SC.MenuPane = SC.PickerPane.extend(
       if(idx === len) idx = 0 ;
       return menuItemViews[idx] ;
     }
+  },
+  
+  /** 
+    @private - click away picker. 
+    
+    Override to pass the event to the parent Menu
+    in case the current Menu is a subMenu
+    
+    @returns Boolean
+  */
+  modalPaneDidClick: function(evt) {
+    var f = this.get("frame");
+    var currentSelectedMenuItem = this.get('currentSelectedMenuItem');
+    if(currentSelectedMenuItem) {
+      var anchor = currentSelectedMenuItem.getAnchor();
+      if(anchor) {
+        var parentMenu =  anchor.parentMenu();
+        if(parentMenu.kindOf(SC.MenuPane)) parentMenu.modalPaneDidClick(evt);
+      }
+    }
+    if(!this.clickInside(f, evt)) this.remove();
+    return YES;
   }
 });
 

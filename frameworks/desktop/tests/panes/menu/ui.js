@@ -22,6 +22,7 @@ anchor.show();
 module("SC.MENUPANE UI");
 test('menu item added ', function() {
   var menu = SC.MenuPane.create({
+              layout: { width: 150, height: 100 },
               items: [ { title: "Item1", isEnabled:YES, icon: iconURL, 
                 separator: NO, action: method ,height:30,
                 checkbox:YES, shortCut: "alt_n", keyEquivalent:"alt_n" },
@@ -29,9 +30,10 @@ test('menu item added ', function() {
                 { title: "Item2", isEnabled:NO, icon: iconURL, separator: NO },
                 { title: "Item3", isEnabled:YES, icon: iconURL, separator: NO , branchItem:YES,
                 subMenu:SC.MenuPane.create({
+                  layout: { width: 150, height: 100 },
                   items:["title1","title2"],
                   contentView:SC.View.extend({
-                    layout: { width: 150, height: 200 }
+                    layout: { top: 0, left: 0, bottom: 0, right: 0 }
                   })
                 })
               }],
@@ -49,7 +51,7 @@ test('menu item added ', function() {
               itemKeyEquivalentKey:'keyEquivalent',
               itemHeightKey:'height',
               contentView:SC.View.extend({
-                layout: { width: 150, height: 200 }})
+                layout: { top: 0, left: 0, bottom: 0, right: 0 }})
               });
   anchor.view('anchor').menu = menu;
 });
