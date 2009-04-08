@@ -1050,9 +1050,18 @@ SC.CollectionView = SC.View.extend(
     }
     
     // okay, found the DOM node for the view, go ahead and create it
-    // first, find the contentIndex
-    if (contentIndex >= this.get('length')) {
-      throw "layout for item view %@ was found when item view does not exist (%@)".fmt(id, this);
+    // first, find the content...
+    var contentGuid = element.id.slice(baseGuidLen+1) ;
+    var nowShowingRange = this.get('nowShowingRange') ;
+    var content = SC.makeArray(this.get('content')) ;
+    var idx = SC.minRange(nowShowingRange) ;
+    var max = SC.maxRange(nowShowingRange) ;
+    
+    var c = content.objectAt(idx) ;
+    while (SC.guidFor(c) !== contentGuid) {
+      idx++ ;
+      if (idx > max) return null ; // couldn't find the content...
+      c = content.objectAt(idx) ;
     }
     
     return this.itemViewForContentIndex(contentIndex, NO);
