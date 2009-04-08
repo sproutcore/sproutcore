@@ -41,7 +41,8 @@ sc_require('views/collection');
   uniform.  This will allow the list view to efficiently render content 
   without worrying about the overall performance.
   
-  Alternatively, you may want to consider overriding the offsetForRowAtContentIndex() and heightForRowAtContentIndex() methods to 
+  Alternatively, you may want to consider overriding the 
+  offsetForRowAtContentIndex() and heightForRowAtContentIndex() methods to 
   perform some faster calculations that do not require inspecting every 
   item in the collection.
   

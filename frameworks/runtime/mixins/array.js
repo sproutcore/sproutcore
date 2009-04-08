@@ -267,8 +267,14 @@ SC.Array = {
     If the passed key is '[]' it means that the object itself changed.
     
     The return value from this method is an opaque reference to the 
-    ranger observer object.  You can use this reference to destroy the 
+    range observer object.  You can use this reference to destroy the 
     range observer when you are done with it or to update its range.
+    
+    @param {Number} start the starting index to observe
+    @param {Number} end the ending index to observe
+    @param {Object} target object to invoke on change
+    @param {String|Function} method the method to invoke
+    @returns {SC.RangeObserver} range observer
   */
   createRangeObserver: function(start, length, target, method) {
     var rangeob = this._array_rangeObservers;
@@ -280,17 +286,41 @@ SC.Array = {
     return ret ;
   },
   
+  /**
+    Moves a range observer so that it observes a new range of objects on the 
+    array.  You must have an existing range observer object from a call to
+    createRangeObserver().
+    
+    The return value should replace the old range observer object that you
+    pass in.
+    
+    @param {SC.RangeObserver} rangeObserver the range observer
+    @param {Number} start the starting index
+    @param {Number} length the new length
+    @returns {SC.RangeObserver} the range observer (or a new one)
+  */
   updateRangeObserver: function(rangeObserver, start, length) {
     return rangeObserver.update(this, start, length);
   },
-  
+
+  /**
+    Removes a range observer from the receiver.  The range observer must
+    already be active on the array.
+    
+    The return value should replace the old range observer object.  It will
+    usually be null.
+    
+    @param {SC.RangeObserver} rangeObserver the range observer
+    @returns {SC.RangeObserver} updated range observer or null
+  */
   destroyRangeObserver: function(rangeObserver) {
     var ret = rangeObserver.destroy(this);
     var rangeob = this._array_rangeObservers;
     if (rangeob) rangeob[rangeob.indexOf(rangeObserver)] = null ; // clear
     return ret ;
   },
-  
+
+  /** @private - override to update range observers */
   enumerableContentDidChange: function(start, length) {
     // notify range observers
     var rangeob = this._array_rangeObservers, len, idx, cur;
