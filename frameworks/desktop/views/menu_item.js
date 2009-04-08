@@ -112,7 +112,7 @@ SC.MenuItemView = SC.ButtonView.extend(
   
   /**
     The name of the property which will set the checkbox state
-
+	
     @type Boolean
   */
   isCheckboxChecked: NO,  
@@ -194,7 +194,7 @@ SC.MenuItemView = SC.ButtonView.extend(
     this.set('itemWidth',itemWidth) ;
     this.set('itemHeight',itemHeight) ;
    
- 	//handle seperator    
+    //handle seperator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty(del, 'isSeparatorKey') ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
@@ -306,7 +306,7 @@ SC.MenuItemView = SC.ButtonView.extend(
 
     var a = '>' ;
     var url = sc_static('blank.gif') ;
-    context.push('<span class= "hasBranch">'+a+'</span>') ; 
+    context.push('<span class= "has-branch">'+a+'</span>') ; 
   },
 
   /** 
@@ -367,7 +367,8 @@ SC.MenuItemView = SC.ButtonView.extend(
   
   
   /**
-    This method will create the sub Menu with the current Menu Item as anchor
+    This method will check whether the current Menu Item is still
+    selected and then create a submenu accordignly.
     
     @param {}
     @returns void
@@ -382,6 +383,8 @@ SC.MenuItemView = SC.ButtonView.extend(
   
   /**
     This method will remove the focus of the current selected menu item.
+
+    @param {}
   */
   loseFocus: function() {
     if(!this.isSubMenuAMenuPane()) {
@@ -391,6 +394,12 @@ SC.MenuItemView = SC.ButtonView.extend(
     }
   },
   
+  /**
+    This method will create the sub Menu with the current Menu Item as anchor
+    
+    @param {}
+    @returns void
+  */
   createSubMenu: function() {
     var subMenu = this.isSubMenuAMenuPane() ;
     if(subMenu) {

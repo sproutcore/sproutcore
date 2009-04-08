@@ -160,13 +160,15 @@ SC.MenuPane = SC.PickerPane.extend(
 
   /**
     Define the current Selected Menu Item.
+
     type SC.MenuItemView
   */
   currentSelectedMenuItem : null,
 
   /**
     Define the current Selected Menu Item.
-    type SC.MenuItemView
+
+    @type SC.MenuItemView
   */
   previousSelectedMenuItem : null,
 
