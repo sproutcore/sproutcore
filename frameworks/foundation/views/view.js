@@ -875,6 +875,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   classNames: ['sc-view'],
   
   /**
+    Tool tip property that will be set to the title attribute on the HTML 
+    rendered element.
+    
+    @property {String}
+  */
+  toolTip: null,
+
+  /**
     Determines if the user can select text within the view.  Normally this is
     set to NO to disable text selection.  You should set this to YES if you
     are creating a view that includes editable text.  Otherwise, settings this
