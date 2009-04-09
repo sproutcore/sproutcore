@@ -413,8 +413,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   // 
   
   /** @private
-    Whenever content array changes, start observing the [] property.  Also
-    invalidate the entire visible range of content.
+    Whenever content array changes, start observing the [] property.  Also 
+    call the contentPropertyDidChange handler.
   */
   _collection_contentDidChange: function() {
     var content = this.get('content') ;
@@ -437,7 +437,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   /** @private
     Called whenever the content array or any items in the content array 
-    changes.  update children if this is a new property revision.
+    changes. mark view as dirty.
   */
   _collection_contentPropertyDidChange: function(target, key, value, rev) {    
     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
