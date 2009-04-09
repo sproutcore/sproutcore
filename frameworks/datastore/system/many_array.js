@@ -8,8 +8,8 @@
 /**
   @class
 
-  A ManyArray is used to map an array of store ids back to their materialized
-  record objects from the owner store on demand.
+  A ManyArray is used to map an array of store ids back to their 
+  record objects which will be materialized from the owner store on demand.
   
   @extends SC.ManyArray
   @since SproutCore 1.0
@@ -28,7 +28,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /**
     SC.Array object that will provide the store ids for the array.  The 
-    record array will register itself as an observer for this array.
+    many array will register itself as an observer for this array.
 
     @property {SC.Array}
   */
@@ -88,7 +88,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   /**
     Pass through to the underlying array.  The passed in objects must be
-    records, which can be converted to storeKeys.
+    records, which can be converted to storeIds.
   */
   replace: function(idx, amt, recs) {
     var storeIds = this.get('storeIds'), 

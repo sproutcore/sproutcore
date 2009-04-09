@@ -5,7 +5,7 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-// test core array-mapping methods for RecordArray
+// test core array-mapping methods for ManyArray with many attributes
 var storeKeys, rec;
 module("SC.RecordArray core methods", {
   setup: function() {
@@ -74,7 +74,21 @@ test("writing to a to-many relationship should update set guids", function() {
   equals(rec3.get('id'), 3, 'precond - should find record 3');
   equals(rec3.get('fooMany').objectAt(0), rec, 'should get rec1 instance for rec3.fooMany');
   
-  rec3.set('fooMany', [2,4]);
+  rec3.set('fooMany', [rec2, rec4]);
   equals(rec3.get('fooMany').objectAt(0), rec2, 'should get rec2 instance for rec3.fooMany');
   equals(rec3.get('fooMany').objectAt(1), rec4, 'should get rec2 instance for rec3.fooMany');
+});
+
+test("pushing an object to a to-many relationship attribute should update set guids", function() {
+  var rec3 = MyApp.store.find(MyApp.Foo, 3);
+  equals(rec3.get('id'), 3, 'precond - should find record 3');
+  equals(rec3.get('fooMany').length(), 2, 'should be 2 foo instances related');
+  
+  rec3.get('fooMany').pushObject(rec4);
+  
+  equals(rec3.get('fooMany').length(), 3, 'should be 3 foo instances related');
+  
+  equals(rec3.get('fooMany').objectAt(0), rec, 'should get rec instance for rec3.fooMany');
+  equals(rec3.get('fooMany').objectAt(1), rec2, 'should get rec2 instance for rec3.fooMany');
+  equals(rec3.get('fooMany').objectAt(2), rec4, 'should get rec4 instance for rec3.fooMany');
 });

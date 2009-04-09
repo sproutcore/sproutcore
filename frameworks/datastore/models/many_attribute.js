@@ -13,6 +13,9 @@ sc_require('models/record_attribute');
   ManyAttribute is a subclass of RecordAttribute and handles to-many 
   relationships.
   
+  When setting ( .set() ) the value of a toMany attribute, make sure
+  to pass in an array of SC.Record objects.
+  
   @extends SC.RecordAttribute
   @since SproutCore 1.0
 */
@@ -36,7 +39,15 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
 
   /** @private - adapted for to many relationship */
   fromType: function(record, key, value) {
-    return value;
+    var ret = [];
+    
+    if(!SC.isArray(value)) throw "Expects toMany attribute to be an array";
+    
+    for(var i=0;i<value.length;i++) {
+      ret[i] = value.objectAt(i).get('id');
+    }
+    
+    return ret;
   }
   
 }) ;

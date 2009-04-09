@@ -31,7 +31,7 @@ module("SC.RecordArray core methods", {
       }),
       
       // test toOne relationships
-      foo: SC.Record.attr('MyApp.Foo')
+      foo: SC.Record.toOne('MyApp.Foo'),
       
     });
     
@@ -42,9 +42,11 @@ module("SC.RecordArray core methods", {
       },
       
       { guid: 2, firstName: "Jane", lastName: "Doe", foo: 1 }
+      
     ]);
     
     rec = MyApp.store.find(MyApp.Foo, 1);
+    rec2 = MyApp.store.find(MyApp.Foo, 2);
     equals(rec.storeKey, storeKeys[0], 'should find record');
   }
 });

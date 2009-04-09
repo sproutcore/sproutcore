@@ -86,7 +86,6 @@ test("reading a record not loaded in store should trigger retrieveRecord", funct
   equals(callCount, 1, 'store.retrieveRecord() should have been called');
 });
 
-
 // ..........................................................
 // replace()
 // 
@@ -101,7 +100,7 @@ test("adding a record to the record array should pass through storeKeys", functi
   
   // add record to beginning of record array
   recs.unshiftObject(rec2);
-
+  
   // verify record array
   equals(recs.get('length'), 2, 'should now have length of 2');
   equals(recs.objectAt(0), rec2, 'recs.objectAt(0) should return new record');
@@ -146,8 +145,7 @@ test("swapping storeKey array should change recordArray and observers", function
   
   // read record once to make it materialized
   equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');  
-
-
+  
   // now swap storeKeys
   obj.cnt = 0 ;
   recs.set('storeKeys', storeKeys2);
@@ -164,12 +162,3 @@ test("swapping storeKey array should change recordArray and observers", function
   equals(recs.objectAt(0), rec, 'recs.objectAt(0) should return pushed rec');  
 
 });
-
-
-
-
-
-
-
-
-
