@@ -43,7 +43,8 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     
     if(!SC.isArray(value)) throw "Expects toMany attribute to be an array";
     
-    for(var i=0;i<value.length;i++) {
+    var len = value.get('length');
+    for(var i=0;i<len;i++) {
       ret[i] = value.objectAt(i).get('id');
     }
     
