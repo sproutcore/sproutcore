@@ -37,6 +37,10 @@ var pane = SC.ControlTestPane.design()
 
   .add("title,icon,selected", SC.ButtonView, { 
     title: "Hello World", icon: iconURL , isSelected: YES 
+  })
+
+  .add("title,toolTip", SC.ButtonView, { 
+    title: "Hello World", toolTip: 'Hello World is my tool tip' 
   });
 
 pane.show(); // add a test to show the test pane
@@ -52,6 +56,7 @@ test("Check that all button are visible", function() {
   ok(pane.view('title,icon,disabled').get('isVisibleInWindow'), 'title,icon,disabled.isVisibleInWindow should be YES');
   ok(pane.view('title,icon,default').get('isVisibleInWindow'), 'title,icon,default.isVisibleInWindow should be YES');
   ok(pane.view('title,icon,selected').get('isVisibleInWindow'), 'title.icon,selected.isVisibleInWindow should be YES');
+  ok(pane.view('title,toolTip').get('isVisibleInWindow'), 'title,toolTip.isVisibleInWindow should be YES');
 });
   
 
@@ -119,6 +124,15 @@ test("Check that all buttons have the right classes set", function() {
    ok(viewElem.hasClass('sel'), 'title,icon,selected.hasClass(sel) should be YES');
    ok(!viewElem.hasClass('disabled'), 'title,icon,selected.hasClass(disabled) should be NO');
    ok(!viewElem.hasClass('def'), 'title,icon,selected.hasClass(def) should be NO');
+   
+   viewElem=pane.view('title,toolTip').$();
+   ok(viewElem.hasClass('sc-view'), 'title,toolTip.hasClass(sc-view) should be YES');
+   ok(viewElem.hasClass('sc-button-view'), 'title,toolTip.hasClass(sc-button-view) should be YES');
+   ok(viewElem.hasClass('sc-regular-size'), 'title,toolTip.hasClass(sc-regular-size) should be YES');
+   ok(!viewElem.hasClass('icon'), 'title,toolTip.hasClass(icon) should be NO');
+   ok(!viewElem.hasClass('sel'), 'title,toolTip.hasClass(sel) should be NO');
+   ok(!viewElem.hasClass('disabled'), 'title,toolTip.hasClass(disabled) should be NO');
+   ok(!viewElem.hasClass('def'), 'title,toolTip.hasClass(def) should be NO');
 
 });
 
@@ -135,6 +149,11 @@ test("Check that the title is set or not and if it is in the appropriate element
   var viewElem=pane.view('icon').$('span.label.img');
   ok((viewElem!=null), 'should have an image corresponding to an icon');
 
+});
+
+test("Check if title,toolTip has the tool tip set", function() {
+  var viewElem=pane.view('title,toolTip').$('a');
+  ok(viewElem.defaultClass[0].title == 'Hello World is my tool tip', 'title,toolTip has the expected tool tip set.');
 });
 
 })();

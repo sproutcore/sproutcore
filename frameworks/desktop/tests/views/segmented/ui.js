@@ -34,7 +34,15 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       value: "Item2",
       layout: { height: 25 }
     })
-    
+    .add("2_items,toolTip", SC.SegmentedView, { 
+      items: [
+      { value: "title1", toolTip: "this is title1's tip" },
+      { value: "title2", toolTip: "this is title2's tip" }],
+      itemTitleKey: 'value',
+      itemValueKey: 'value',
+      itemToolTipKey: 'toolTip',
+      layout: { height: 25 }
+    })
     .add("3_items,1_sel,disabled", SC.SegmentedView, { 
       items: "Item1 Item2 Item3".w(),
       value: "Item2",
@@ -115,6 +123,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     ok(pane.view('3_empty').get('isVisibleInWindow'), '3_empty.isVisibleInWindow should be YES');
     ok(pane.view('3_empty,icon').get('isVisibleInWindow'), '3_empty,icon.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel').get('isVisibleInWindow'), '3_items,1_sel.isVisibleInWindow should be YES');
+    ok(pane.view('2_items,toolTip').get('isVisibleInWindow'), '2_items,toolTip.isVisibleInWindow should be YES');
     ok(pane.view('3_items,1_sel,disabled').get('isVisibleInWindow'), '3_items,1_sel,disabled.isVisibleInWindow should be YES');
     ok(pane.view('3_items,icon,2_sel').get('isVisibleInWindow'), '3_items,icon,2_sel.isVisibleInWindow should be YES');
     ok(pane.view('3_items,2_sel,disabled').get('isVisibleInWindow'), '3_items,2_sel,disabled.isVisibleInWindow should be YES');
@@ -201,6 +210,13 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     }
     ok((count==2), '3_items,2_sel,disabled should have two segments selected.');
 
+  });
+  
+  
+  test("2_items,toolTip has toolTips assigned.", function() {
+    var segments=pane.view('2_items,toolTip').$('a');
+    ok((segments[0].title=="this is title1's tip"), 'first segment has expected tool tip assigned.');
+    ok((segments[1].title=="this is title2's tip"), 'second segment has expected tool tip assigned.');
   });
   
 })();

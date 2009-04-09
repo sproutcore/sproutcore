@@ -194,7 +194,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // if the item is a string, build the array using defaults...
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        cur = [item.humanize().titleize(), item, YES, null, null, idx, null] ;
+        cur = [item.humanize().titleize(), item, YES, null, null,  null, idx] ;
         
       // if the item is not an array, try to use the itemKeys.
       } else if (itemType !== SC.T_ARRAY) {
@@ -222,7 +222,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       if (loc && cur[0]) cur[0] = cur[0].loc();
 
       // finally, be sure to loc the toolTip if needed
-      if (loc && cur[5]) cur[5] = cur[5].loc();
+      if (loc && cur[5] && SC.typeOf(cur[5]) === SC.T_STRING) cur[5] = cur[5].loc();
       
       // add to return array
       ret[ret.length] = cur;
