@@ -800,6 +800,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       anchor = null ;
     }
     
+    var scrollToIndex = selTop ;
+    
     // now build array of new items to select
     var items = [] ;
     while(selTop <= selBottom) {
@@ -808,8 +810,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items[0]);
-      this.selectItems(items);
+      this.scrollToItemViewAtContentIndex(scrollToIndex) ;
+      this.selectItems(items) ;
     }
     
     this._selectionAnchor = anchor ;
@@ -864,16 +866,18 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       anchor = null ;
     }
     
+    var scrollToIndex = selBottom ;
+    
     // now build array of new items to select
     var items = [] ;
     while(selTop <= selBottom) {
       items[items.length] = content.objectAt(selTop++) ;
     }
-
+    
     // ensure that the item is visible and set the selection
     if (items.length > 0) {
-      this.scrollToContent(items[0]);
-      this.selectItems(items);
+      this.scrollToItemViewAtContentIndex(scrollToIndex) ;
+      this.selectItems(items) ;
     }
     
     this._selectionAnchor = anchor ;
@@ -881,24 +885,12 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   
   /**
     Scroll the rootElement (if needed) to ensure that the item is visible.
-    @param {SC.Record} record The record to scroll to
+    @param {Integer} contentIndex The index of the item to scroll to
     @returns {void}
   */
-  scrollToContent: function(record) {
-    var content, itemView, contentIndex, groupBy;
-    
-    // find the itemView.  if not present, add one.
-    content = SC.makeArray(this.get('content'));
-    if (content.indexOf(record) < 0) return ; // do nothing if not in content.
-    
-    itemView = this.itemViewForContent(record) ;
-    if (!itemView) {
-      content = SC.makeArray(this.get('content')) ;
-      contentIndex = content.indexOf(record) ;
-      groupBy = this.get('groupBy');
-      itemView = this._insertItemViewFor(record, groupBy, contentIndex); 
-    }
-    if (itemView) this.scrollToItemView(itemView);
+  scrollToItemViewAtContentIndex: function(contentIndex) {
+    var itemView = this.itemViewAtContentIndex(contentIndex) ;
+    if (itemView) this.scrollToItemView(itemView) ;
   },
   
   /**
