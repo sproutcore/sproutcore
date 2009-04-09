@@ -160,7 +160,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   // display properties that should automatically cause a refresh.
   // isCancel and isDefault also cause a refresh but this is implemented as 
   // a separate observer (see below)
-  displayProperties: ['href', 'icon', 'title', 'value'],
+  displayProperties: ['href', 'icon', 'title', 'value', 'toolTip'],
 
   render: function(context, firstTime) {
     // add href attr if tagName is anchor...
@@ -168,6 +168,12 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       var href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript"+":;";
       context.attr('href', href);
+    }
+
+    // If there is a toolTip set, grab it and localize if necessary.
+    var toolTip = this.get('toolTip') ;
+    if(SC.typeOf(toolTip) === SC.T_STRING) {
+        context.attr('title', this.get('localize') ? toolTip.loc() : toolTip) ;
     }
     
     // add some standard attributes & classes.
