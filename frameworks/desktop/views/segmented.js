@@ -168,7 +168,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     @property {Array}
   */
-  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey'.w(),
+  itemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey'.w(),
   
   /**
     This computed property is generated from the items array based on the 
@@ -194,7 +194,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       // if the item is a string, build the array using defaults...
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
-        cur = [item.humanize().titleize(), item, YES, null, null, idx] ;
+        cur = [item.humanize().titleize(), item, YES, null, null, idx, null] ;
         
       // if the item is not an array, try to use the itemKeys.
       } else if (itemType !== SC.T_ARRAY) {
@@ -220,6 +220,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       
       // finally, be sure to loc the title if needed
       if (loc && cur[0]) cur[0] = cur[0].loc();
+
+      // finally, be sure to loc the toolTip if needed
+      if (loc && cur[5]) cur[5] = cur[5].loc();
       
       // add to return array
       ret[ret.length] = cur;
@@ -227,7 +230,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     // all done, return!
     return ret ;
-  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey').cacheable(),
+  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey').cacheable(),
   
   /** If the items array itself changes, add/remove observer on item... */
   itemsDidChange: function() { 
@@ -301,7 +304,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     any "transient" states such as the global isEnabled property or selection.
   */
   renderDisplayItems: function(context, items) {
-    var title = null, icon = null, url=null, className=null, ic=null, item=null;
+    var title = null, icon = null, url=null, className=null, ic=null, item=null, toolTip=null;
     var value = this.get('value');
     var isArray = SC.isArray(value);
     var activeIndex = this.get('activeIndex');
@@ -311,6 +314,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       item=items[i];
       title = item[0]; 
       icon = item[3];
+      toolTip = item[5];
       ic.addStyle('display', 'inline-block');
       ic.addClass('sc-segment');
       if(!item[2]){
@@ -335,6 +339,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         width=item[4];
         ic.addStyle('width', width+'px');
       }
+
+      if(toolTip) {
+        ic.attr('title', toolTip) ;
+      }
+
       if (icon) {
         url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
         className = (url === icon) ? '' : icon ;
@@ -432,9 +441,10 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var empty = this.get('allowsEmptySelection');
     var mult = this.get('allowsMultipleSelection');
     
-    // get new value... bail if not enabled
+    
+    // get new value... bail if not enabled. Also save original for later.
     var sel = item[1];
-    var value = this.get('value') ;
+    var value = val = this.get('value') ;
     if (!SC.isArray(value)) value = [value]; // force to array
     
     // if we do not allow multiple selection, either replace the current
@@ -470,22 +480,24 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         break;
     }
     
-    // set the new value
-    this.set('value', value);
-    
     // also, trigger target if needed.
     var actionKey = this.get('itemActionKey');
     var targetKey = this.get('itemTargetKey');
     var action, target = null;
     var resp = this.getPath('pane.rootResponder');
-    if (actionKey && (item = this.get('items').objectAt(item[5]))) {
+
+    if (actionKey && (item = this.get('items').objectAt(item[6]))) {
       // get the source item from the item array.  use the index stored...
       action = item.get ? item.get(actionKey) : item[actionKey];
       if (targetKey) {
         target = item.get ? item.get(targetKey) : item[targetKey];
       }
-      
       if (resp) resp.sendAction(action, target, this, this.get('pane'));
+    }
+
+    // Only set value if there is no action and a value is defined.
+    if(!action && val !== undefined) {
+      this.set('value', value);
     }
     
     // if an action/target is defined on self use that also
