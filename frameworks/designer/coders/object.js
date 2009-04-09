@@ -218,7 +218,7 @@ SC.ObjectCoder = SC.Object.extend({
       var ret = [] ;
       for(var key in x) {
         if (!x.hasOwnProperty(key)) continue; // only include added...
-        ret.push("%@: %@".fmt(key, this.encode(x[key], func)));
+        ret.push("%@: %@".fmt(this.encode(key), this.encode(x[key], func)));
       }
       return "{%@}".fmt(ret.join(","));
     });
