@@ -270,10 +270,20 @@ SC.Drag = SC.Object.extend(
     // console.log({ top: loc.y, left: loc.x });
     
     var dv = this.dragView ;
+    var pane = dv.get('pane') ;
+    var pv = dv.get('parentView') ;
+    var clippingFrame = dv.get('clippingFrame') ;
     
     // convert to global cooridinates
-    var f = dv.convertFrameToView(dv.get('clippingFrame'), null) ;
-    dv.adjust({ top: f.y, left: f.x, width: f.width, height: f.height });
+    var f = pv.convertFrameToView(clippingFrame, null) ;
+    var pf = pane.get('frame') ;
+    
+    dv.adjust({
+      top: f.y + pf.y,
+      left: f.x + pf.x,
+      width: f.width,
+      height: f.height
+    });
     
     // console.log("clipping Frame x: %@ y: %@ ".fmt(clippingFrame.x, clippingFrame.y));
     // console.log("dvf x: %@ y: %@ ".fmt(dvf.x, dvf.y));

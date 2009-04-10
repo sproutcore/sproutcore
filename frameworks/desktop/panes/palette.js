@@ -47,7 +47,7 @@ SC.PalettePane = SC.PanelPane.extend({
 
   /** @private - drag&drop palette to new position. */
   mouseDown: function(evt) {
-    var f=this.get("frame");
+    var f=this.get('frame');
     this._mouseOffsetX = f ? (f.x - evt.pageX) : 0;
     this._mouseOffsetY = f ? (f.y - evt.pageY) : 0;
   },
