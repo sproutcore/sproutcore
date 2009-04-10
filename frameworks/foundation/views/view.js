@@ -1337,7 +1337,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // walk up this side
     while (view) {
       f = view.get('frame'); myX += f.x; myY += f.y ;
-      view = view.get('parentView') ; 
+      view = view.get('layoutView') ; 
     }
     
     // walk up other size
@@ -1345,7 +1345,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       view = targetView ;
       while (view) {
         f = view.get('frame'); targetX += f.x; targetY += f.y ;
-        view = view.get('parentView') ; 
+        view = view.get('layoutView') ; 
       }
     }
     
