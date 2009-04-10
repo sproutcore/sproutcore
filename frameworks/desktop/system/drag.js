@@ -275,8 +275,8 @@ SC.Drag = SC.Object.extend(
     var clippingFrame = dv.get('clippingFrame') ;
     
     // convert to global cooridinates
-    var f = pv.convertFrameToView(clippingFrame, null) ;
-    var pf = pane.get('frame') ;
+    var f = pv ? pv.convertFrameToView(clippingFrame, null) : clippingFrame ;
+    var pf = pane ? pane.get('frame') : {x:0, y: 0};
     
     dv.adjust({
       top: f.y + pf.y,
