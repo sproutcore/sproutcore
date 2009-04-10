@@ -633,6 +633,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var elementId = element.id.slice(0, baseGuidLen) ;
     while (elementId !== baseGuid) {
       element = element.parentNode ;
+      if (!element) return null ; // didn't find it!
       elementId = element.id.slice(0, baseGuidLen) ;
     }
     
@@ -997,8 +998,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     if (!content) return NO;  // nothing to do
     
     // determine the method to use
-    var hasDestroyObject = SC.$type(content.destroyObject) === SC.T_FUNCTION ;
-    var hasRemoveObject = SC.$type(content.removeObject) === SC.T_FUNCTION ;
+    var hasDestroyObject = SC.typeOf(content.destroyObject) === SC.T_FUNCTION ;
+    var hasRemoveObject = SC.typeOf(content.removeObject) === SC.T_FUNCTION ;
     if (!hasDestroyObject && !hasRemoveObject) return NO; // nothing to do
     
     // suspend property notifications and remove the objects...
@@ -1545,8 +1546,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       if (this.get('dragDataTypes').get('length') > 0) {
         // Build the drag view to use for the ghost drag.  This 
         // should essentially contain any visible drag items.
-        // var view = this.ghostViewFor(dragContent) ;
-        var view = this.dragViewFor(dragContent) ;
+        //var view = this.ghostViewFor(dragContent) ;
+        var view = this.invokeDelegateMethod(this.delegate, 'dragViewFor', dragContent, this);
         
         // Initiate the drag
         SC.Drag.start({
@@ -1556,7 +1557,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
           ghost: NO,
           slideBack: YES,
           dataSource: this
-        }) ; 
+        }); 
         
         // Also use this opportunity to clean up since mouseUp won't 
         // get called.
@@ -1671,7 +1672,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // get the computed insertion index and possibly drop operation.
     // prefer to drop ON.
     var idx = this.insertionIndexForLocation(loc, SC.DROP_ON) ;
-    if (SC.$type(idx) === SC.T_ARRAY) {
+    if (SC.typeOf(idx) === SC.T_ARRAY) {
       dropOp = idx[1] ; // order matters here
       idx = idx[0] ;
     }
@@ -1703,7 +1704,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       } else {
         dropOp = SC.DROP_BEFORE ;
         idx = this.insertionIndexForLocation(loc, SC.DROP_BEFORE) ;
-        if (SC.$type(idx) === SC.T_ARRAY) {
+        if (SC.typeOf(idx) === SC.T_ARRAY) {
           dropOp = idx[1] ; // order matters here
           idx = idx[0] ;
         }
@@ -1770,7 +1771,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     content on its own.
   */
   dragUpdated: function(drag, evt) {
-    // console.log('dragUpdated called in %@'.fmt(this));
+    // console.log('%@.dragUpdated(drag=%@, evt=%@)'.fmt(this, drag, evt));
     var state = this._computeDropOperationState(drag, evt) ;
     // console.log('state is %@'.fmt(state));
     var idx = state[0], dropOp = state[1], dragOp = state[2] ;
@@ -1778,7 +1779,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // if the insertion index or dropOp have changed, update the insertion point
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
-        var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
+        // var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
+        var itemView = this.itemViewAtContentIndex(idx) ;
         this.showInsertionPoint(itemView, dropOp) ;
       }
       
@@ -1801,15 +1803,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     this.hideInsertionPoint() ;
     this._lastInsertionIndex = this._lastDropOperation = null ;
   },
-  
-  // /**
-  //   Implements the SC.DropTarget protocol.  Hides any visible insertion 
-  //   point and clears some cached values.
-  // */
-  // dragEnded: function() {
-  //   this.hideInsertionPoint() ;
-  //   this._lastInsertionIndex = this._lastDropOperation = null ;
-  // },
   
   /**
     Implements the SC.DropTarget protocol.
@@ -1892,11 +1885,6 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     return this.get('canReorderContent') ;
   },
   
-  // concludeDragOperation: function(op, drag) {
-  //   this.hideInsertionPoint() ;
-  //   this._lastInsertionIndex = null ;
-  // },
-  
   /**
     If some state changes that causes the row height for a range of rows 
     then you should call this method to notify the view that it needs to
@@ -1961,7 +1949,8 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     var orient = this.get('insertionOrientation') ;
     var ret=  null ;
     for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
-      itemView = this.itemViewForContent(content.objectAt(idx));
+      // itemView = this.itemViewForContent(content.objectAt(idx));
+      itemView = this.itemViewAtContentIndex(idx);
       f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
       
       // if we are a horizontal orientation, look for the first item that 
@@ -2063,16 +2052,19 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
   hideInsertionPoint: function() {},
   
   dragViewFor: function(dragContent) {
+    // console.log('%@.dragViewFor(dragContent=%@)'.fmt(this, dragContent)) ;
     var view = SC.View.create() ;
+    var layer = this.get('layer').cloneNode(false) ;
     
-    var ary = dragContent ;
+    view.set('parentView', this) ;
+    view.set('layer', layer) ;
+    
+    var ary = dragContent, content = SC.makeArray(this.get('content')) ;
     for (var idx=0, len=ary.length; idx<len; idx++) {
-      var itemView = this.itemViewForContent(ary[idx]) ;
-      if (itemView) view.$().append(itemView.rootElement.cloneNode(true)) ;
+      var itemView = this.itemViewAtContentIndex(content.indexOf(ary[idx])) ;
+      if (itemView) layer.appendChild(itemView.get('layer').cloneNode(true)) ;
     }
     
-    var frame = this.convertFrameToView(this.get('clippingFrame'), null) ;
-    view.adjust({ top: frame.y, left: frame.x, width: frame.width, height: frame.height }) ;
     return view ;
   },
   
@@ -2099,7 +2091,7 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
     // console.log('action %@, target %@'.fmt(action, target));
     if (action) {
       // if the action is a function, just call it
-      if (SC.$type(action) == SC.T_FUNCTION) return this.action(view, evt) ;
+      if (SC.typeOf(action) == SC.T_FUNCTION) return this.action(view, evt) ;
       
       // otherwise, use the new sendAction style
       var pane = this.get('pane') ;
@@ -2113,11 +2105,11 @@ SC.CollectionView = SC.View.extend(SC.CollectionViewDelegate,
       
     // if the target view has its own internal action handler,
     // trigger that.
-    } else if (SC.$type(view._action) == SC.T_FUNCTION) {
+    } else if (SC.typeOf(view._action) == SC.T_FUNCTION) {
       return view._action(evt) ;
       
     // otherwise call the action method to support older styles.
-    } else if (SC.$type(view.action) == SC.T_FUNCTION) {
+    } else if (SC.typeOf(view.action) == SC.T_FUNCTION) {
       return view.action(evt) ;
     }
   }
