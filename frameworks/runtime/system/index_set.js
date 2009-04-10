@@ -161,8 +161,6 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
       last  = start + length ;
       delta = 0 ;
       
-      debugger ;
-      
       // previous range is not in set.  splice it here
       if (next < 0) { 
         content[cur] = 0-start ;
@@ -175,7 +173,6 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
         
       // previous range is in set.  merge the ranges
       } else {
-        delta -= (start - cur);
         start = cur ;
         if (next > last) {
           delta -= next - last ;
@@ -220,6 +217,7 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
 
       // finally set my own range.
       content[start] = last ;
+      if (last > this._last) this._last = last ;
 
       // adjust length
       this.set('length', this.length + delta);
