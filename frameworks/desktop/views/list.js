@@ -62,7 +62,7 @@ SC.ListView = SC.CollectionView.extend(
   /**
     The default layout for the list view simply fills the entire parentView.
   */
-  layout: { left: 0, right: 0, top: 0, height: 100 },
+  layout: { left: 0, right: 0, top: 0, bottom: 0 },
   
   acceptsFirstResponder: YES,
   
