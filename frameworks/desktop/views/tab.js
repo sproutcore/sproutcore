@@ -99,8 +99,19 @@ SC.TabView = SC.View.extend(
   },
   
   createChildViews: function() {
-    var childViews = [], view; 
-    view = this.containerView = this.createChildView(this.containerView, { 
+    var childViews = [], view, ContainerView ;
+    
+    if (this.get('tabLocation') === SC.TOP_LOCATION) {
+      ContainerView = this.containerView.extend({
+        layout: { top:11, left:0, right:0, bottom: 0 }
+      })
+    } else {
+      ContainerView = this.containerView.extend({
+        layout: { top:0, left:0, right:0, bottom: 11 }
+      })
+    }
+    
+    view = this.containerView = this.createChildView(ContainerView, { 
       rootElementPath: [0] 
     }) ;
     childViews.push(view);
@@ -109,7 +120,7 @@ SC.TabView = SC.View.extend(
       rootElementPath: [1] 
     }) ;
     childViews.push(view);
-
+    
     this.set('childViews', childViews);
     return this; 
   },
@@ -123,23 +134,7 @@ SC.TabView = SC.View.extend(
     custom container view.  You can access this view but you cannot change 
     it.
   */
-  containerView: SC.ContainerView.extend({
-    
-    /** @private
-      When we need to actually create a container, look for the tab loc from
-      the parent view and adjust the internal frame accordingly.
-    */
-    render: function(context, firstTime) {
-      var pv = this.get('parentView');
-      var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
-      if (tabLoc === SC.TOP_LOCATION) {
-        context.addStyle('top', '11px');
-      } else {
-        context.addStyle('bottom', '11px');
-      }
-      this.renderChildViews(context, firstTime);
-    }
-  }),
+  containerView: SC.ContainerView,
   
   /**
     The segmentedView managed by this tab view.  Note that this TabView uses
