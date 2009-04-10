@@ -173,9 +173,26 @@ SC.ListView = SC.CollectionView.extend(
   // ROW PROPERTIES
   // 
   
-  /**
-    Returns the top offset for the specified content index.  This will take
-    into account any custom row heights and group views.
+  render: function(context, firstTime) {
+    // console.log('%@.render(context=%@, firstTime=%@)'.fmt(this, context ,firstTime ? 'YES' : 'NO'));
+    if (SC.BENCHMARK_RENDER) {
+      var bkey = '%@.render'.fmt(this) ;
+      SC.Benchmark.start(bkey);
+    }
+    this.beginPropertyChanges() ; // avoid sending notifications
+    
+    var content = SC.makeArray(this.get('content')) ;
+    var selection = SC.makeArray(this.get('selection'));
+    var oldRange = this._oldNowShowingRange ;
+    var range = SC.cloneRange(this.get('nowShowingRange')) ;
+    this._oldNowShowingRange = SC.cloneRange(range) ;
+    var key, itemView = this.createExampleView(content), c ;
+    var range2 ; // only used if the old range fits inside the new range
+    var idx, end, childId, maxLen ;
+    
+    // keep track of children we've got rendered
+    var childSet = this._childSet ;
+    if (!childSet) childSet = this._childSet = [] ;
     
     @param {Number} idx the content index
     @returns {Number} the row offset
@@ -218,28 +235,64 @@ SC.ListView = SC.CollectionView.extend(
       ret += delta ;
     }
     
-    return ret ;
-  },
-  
-  /**
-    Returns the row height for the specified content index.  This will take
-    into account custom row heights and group rows.
+    idx = SC.maxRange(range) ;
     
-    @param {Number} idx content index
-    @returns {Number} the row height
-  */
-  rowHeightForContentIndex: function(idx) {
-    var del = this.get('rowDelegate'),
-        ret, cache, content, indexes;
+    var baseKey = SC.guidFor(this) + '_' ;
+    var guids = this._itemViewGuids, guid;
+    if (!guids) this._itemViewGuids = guids = {};
     
-    if (del.customRowHeightIndexes && (indexes=del.get('customRowHeightIndexes'))) {
-      cache = this._sclv_heightCache ;
-      if (!cache) {
-        cache = this._sclv_heightCache = [];
-        content = this.get('content');
-        indexes.forEach(function(idx) {
-          cache[idx] = del.contentIndexRowHeight(this, content, idx);
-        }, this);
+    // TODO: Use SC.IndexSet, not separate ranges, once it's ready.
+    // This will also make it possible to do partial updates during content
+    // and selection changes. Now we always do a full update.
+    
+    if (SC.DEBUG_PARTIAL_RENDER) {
+      if (childSet.length === 0) console.log('doing a full render');
+      else console.log('doing a partial render');
+    }
+    
+    while (--idx >= range.start) {
+      c = content.objectAt(idx) ;
+      if (SC.DEBUG_PARTIAL_RENDER) {
+        console.log('rendering content(%@) at index %@, content =>'.fmt(c.unread, idx));
+        console.log(c);
+      }
+      // use cache of item view guids to avoid creating temporary objects
+      guid = SC.guidFor(c);
+      if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+      
+      itemView.set('content', c) ;
+      itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+      itemView.layerId = key ; // cannot use .set, layerId is RO
+      if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
+      childSet[idx] = key ;
+      itemView.adjust(this.itemViewLayoutAtContentIndex(idx)) ;
+      context = context.begin(itemView.get('tagName')) ;
+      itemView.prepareContext(context, YES) ;
+      context = context.end() ;
+    }
+    
+    if (range2) {
+      idx = SC.maxRange(range2) ;
+      while (--idx >= range2.start) {
+        c = content.objectAt(idx) ;
+        if (SC.DEBUG_PARTIAL_RENDER) {
+          console.log('rendering content(%@) at index %@, content =>'.fmt(c.unread, idx));
+          console.log(c);
+        }
+        
+        // use cache of item view guids to avoid creating temporary objects
+        guid = SC.guidFor(c);
+        if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
+        
+        itemView.set('content', c) ;
+        itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
+        itemView.layerId = key ; // cannot use .set, layerId is RO
+        if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
+        childSet[idx] = key ;
+        itemView.adjust(this.itemViewLayoutAtContentIndex(idx)) ;
+        context = context.begin(itemView.get('tagName')) ;
+        itemView.prepareContext(context, YES) ;
+        context = context.end() ;
       }
       
       ret = cache[idx];
