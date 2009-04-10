@@ -70,16 +70,21 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
     @returns {Number} starting index
   */
   rangeStartForIndex: function(index) {    
-    var content = this._content;
+    var content = this._content,
+        ret, next, accel;
     
     // fast cases
     if (index >= this._last) return this._last ;
-    if (content[index] > 0) return index ; // we hit a border
+    if (Math.abs(content[index]) > index) return index ; // we hit a border
     
     // use accelerator to find nearest content range
-    var ret  = content[index - (index % 256)],
-        next = Math.abs(content[ret]);
-    
+    accel = index - (index % 256);
+    ret = content[accel];
+    if (ret<0 || ret>index) ret = accel;
+    next = Math.abs(content[ret]);
+
+    // now step forward through ranges until we find one that includes the
+    // index.
     while (next < index) {
       ret = next ;
       next = Math.abs(content[ret]);
@@ -134,9 +139,9 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
     // special case - appending to end of set
     var last    = this._last,
         content = this._content,
-        hstart, hlength;
+        cur, next, delta, value ;
         
-    if (start > last) {
+    if (start >= last) {
       content[last] = 0-start; // empty!
       content[start] = start+length ;
       content[start+length] = 0; // set end
@@ -144,17 +149,87 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
       this.set('length', this.length + length) ;
       
       // affected range goes from starting range to end of content.
-      hstart = last ;
-      hlength = this._last - hstart;
+      start = last ;
+      length = this._last - start;
       
     // otherwise, merge into existing range
     } else {
 
-      // find the starting range
+      // find nearest starting range.  split or join that range
+      cur   = this.rangeStartForIndex(start);
+      next  = content[cur];
+      last  = start + length ;
+      delta = 0 ;
+      
+      debugger ;
+      
+      // previous range is not in set.  splice it here
+      if (next < 0) { 
+        content[cur] = 0-start ;
+        
+        // if previous range extends beyond this range, splice afterwards also
+        if (Math.abs(next) > last) {
+          content[start] = 0-last;
+          content[last] = next ;
+        } else content[start] = next;
+        
+      // previous range is in set.  merge the ranges
+      } else {
+        delta -= (start - cur);
+        start = cur ;
+        if (next > last) {
+          delta -= next - last ;
+          last = next ;
+        }
+      }
+      
+      // at this point there should be clean starting point for the range.
+      // just walk the ranges, adding up the length delta and then removing
+      // the range until we find a range that passes last
+      cur = start;
+      while (cur < last) {
+        // get next boundary.  splice if needed - if value is 0, we are at end
+        // just skip to last
+        value = content[cur];
+        if (value === 0) {
+          content[last] = 0;
+          next = last ;
+          delta += last - cur ;
+        } else {
+          next  = Math.abs(value);
+          if (next > last) {
+            content[last] = value ;
+            next = last ;
+          }
+
+          // ok, cur range is entirely inside top range.  
+          // add to delta if needed
+          if (value < 0) delta += next - cur ;
+        }
+
+        delete content[cur] ; // and remove range
+        cur = next;
+      }
+      
+      // cur should always === last now.  if the following range is in set,
+      // merge in also - don't adjust delta because these aren't new indexes
+      if ((cur = content[last]) > 0) {
+        delete content[last];     
+        last = cur ;
+      }
+
+      // finally set my own range.
+      content[start] = last ;
+
+      // adjust length
+      this.set('length', this.length + delta);
+      
+      // compute hint range
+      length = last - start ;
     }
     
-    this._hint(hstart, hlength);
-    this.enumerableContentDidChange(start, length);
+    this._hint(start, length);
+    this.enumerableContentDidChange();
     return this;
   },
   
