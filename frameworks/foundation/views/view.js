@@ -657,6 +657,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if layerNeedsUpdate is set to YES.
   */  
   _view_layerNeedsUpdateDidChange: function() {
+    // console.log('%@._view_layerNeedsUpdateDidChange(), this.get(\'layerNeedsUpdate\') =>'.fmt(this));
+    // console.log(this.get('layerNeedsUpdate'));
     if (this.get('layerNeedsUpdate')) {
       this.invokeOnce(this.updateLayerIfNeeded) ;
     }
