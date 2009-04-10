@@ -5,9 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-// test core array-mapping methods for RecordArray
+// test core array-mapping methods for RecordArray with RecordAttribute
 var storeKeys, rec;
-module("SC.RecordArray core methods", {
+module("SC.RecordAttribute core methods", {
   setup: function() {
 
     MyApp = SC.Object.create({
@@ -31,23 +31,41 @@ module("SC.RecordArray core methods", {
       }),
       
       // test toOne relationships
-      foo: SC.Record.toOne('MyApp.Foo'),
+      relatedTo: SC.Record.toOne('MyApp.Foo'),
+      
+      // test toOne relationship with computed type
+      relatedToComputed: SC.Record.toOne(function() {
+        // not using .get() to avoid another transform which will 
+        // trigger an infinite loop
+        return (this.readAttribute('relatedToComputed').indexOf("foo")==0) ? MyApp.Foo : MyApp.Bar;
+      })
       
     });
     
+    MyApp.Bar = SC.Record.extend({});
+    
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, 
+      { guid: 'foo1', 
         firstName: "John", lastName: "Doe", 
         date: "2009-03-01T20:30-08:00" 
       },
       
-      { guid: 2, firstName: "Jane", lastName: "Doe", foo: 1 }
+      { guid: 'foo2', firstName: "Jane", lastName: "Doe", relatedTo: 'foo1' },
+      
+      { guid: 'foo3', firstName: "Alex", lastName: "Doe", relatedToComputed: 'bar1' }
       
     ]);
     
-    rec = MyApp.store.find(MyApp.Foo, 1);
-    rec2 = MyApp.store.find(MyApp.Foo, 2);
+    MyApp.store.loadRecords(MyApp.Bar, [
+      { guid: 'bar1', city: "Chicago" }
+    ]);
+    
+    rec = MyApp.store.find(MyApp.Foo, 'foo1');
+    rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
+    
+    bar = MyApp.store.find(MyApp.Bar, 'bar1');
     equals(rec.storeKey, storeKeys[0], 'should find record');
+    
   }
 });
 
@@ -68,9 +86,15 @@ test("naming a key should read alternate attribute", function() {
 });
 
 test("getting toOne relationship should map guid to a real record", function() {
-  var rec2 = MyApp.store.find(MyApp.Foo, 2);
-  equals(rec2.get('id'), 2, 'precond - should find record 2');
-  equals(rec2.get('foo'), rec, 'should get rec1 instance for rec2.foo');
+  var rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
+  equals(rec2.get('id'), 'foo2', 'precond - should find record 2');
+  equals(rec2.get('relatedTo'), rec, 'should get rec1 instance for rec2.relatedTo');
+});
+
+test("getting toOne relationship from computed attribute should map guid to a real record", function() {
+  var rec3 = MyApp.store.find(MyApp.Foo, 'foo3');
+  equals(rec3.get('id'), 'foo3', 'precond - should find record 3');
+  equals(rec3.get('relatedToComputed'), bar, 'should get bar1 instance for rec3.relatedToComputed');
 });
 
 test("reading date should parse ISO date", function() {
@@ -102,12 +126,21 @@ test("writing a value should override default value", function() {
 });
 
 test("writing to a to-one relationship should update set guid", function() {
-  var rec2 = MyApp.store.find(MyApp.Foo, 2);
-  equals(rec2.get('id'), 2, 'precond - should find record 2');
-  equals(rec2.get('foo'), rec, 'precond - should get rec1 instance for rec2.foo');
+  var rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
+  equals(rec2.get('id'), 'foo2', 'precond - should find record 2');
+  equals(rec2.get('relatedTo'), rec, 'precond - should get rec1 instance for rec2.relatedTo');
   
-  rec2.set('foo', rec2);
-  equals(rec2.readAttribute('foo'), 2, 'should write ID for set record to foo attribute');
+  rec2.set('relatedTo', rec2);
+  equals(rec2.readAttribute('relatedTo'), 'foo2', 'should write ID for set record to relatedTo attribute');
+});
+
+test("writing to a to-one computed relationship should update set guid", function() {
+  var rec3 = MyApp.store.find(MyApp.Foo, 'foo3');
+  equals(rec3.get('id'), 'foo3', 'precond - should find record 2');
+  equals(rec3.get('relatedToComputed'), bar, 'precond - should get bar1 instance for rec3.relatedToComputed');
+  
+  rec3.set('relatedToComputed', rec);
+  equals(rec3.readAttribute('relatedToComputed'), 'foo1', 'should write ID for set record to relatedTo attribute');
 });
 
 test("writing a date should generate an ISO date" ,function() {

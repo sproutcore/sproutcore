@@ -13,6 +13,22 @@ sc_require('models/record');
   generate computed properties on records that can automatically convert data
   types and verify data.
   
+  In addition to having predefined transform types, there is also a way to 
+  set a computed relationship on an attribute. A typical example of this would
+  be if you have record with a parentGuid attribute, but are not able to 
+  determine which record type to map to before looking at the guid (or any
+  other attributes). To set up such a computed property, you can attach a 
+  function in the attribute definition of the SC.Record subclass:
+  
+  {{{
+    relatedToComputed: SC.Record.toOne(function() {
+      return (this.readAttribute('relatedToComputed').indexOf("foo")==0) ? MyApp.Foo : MyApp.Bar;
+    })
+  }}}
+  
+  Notice that we are not using .get() to avoid another transform which would 
+  trigger an infinite loop.
+  
   You usually will not work with RecordAttribute objects directly, though you
   may extend the class in any way that you like to create a custom attribute.
 
@@ -102,10 +118,13 @@ SC.RecordAttribute = SC.Object.extend(
     var klass      = this.get('typeClass') || String,
         transforms = SC.RecordAttribute.transforms,
         ret ;
-    
+        
     // walk up class hierarchy looking for a transform handler
     while(klass && !(ret = transforms[SC.guidFor(klass)])) {
-      klass = klass.superclass ;
+      // check if super has create property to detect SC.Object's
+      if(klass.superclass.hasOwnProperty('create')) klass = klass.superclass ;
+      // otherwise return the default Object transform handler
+      else klass = Object ;
     }
     
     return ret ;
@@ -129,10 +148,11 @@ SC.RecordAttribute = SC.Object.extend(
   toType: function(record, key, value) {
     var transform = this.get('transform'),
         type      = this.get('typeClass');
+    
     if (transform && transform.to) {
       value = transform.to(value, this, type, record, key) ;
     }
-    return value ;        
+    return value ;
   },
 
   /** 
@@ -149,6 +169,7 @@ SC.RecordAttribute = SC.Object.extend(
   fromType: function(record, key, value) {
     var transform = this.get('transform'),
         type      = this.get('typeClass');
+    
     if (transform && transform.from) {
       value = transform.from(value, this, type, record, key);
     }
@@ -285,6 +306,20 @@ SC.RecordAttribute.registerTransform(SC.Record, {
 
   /** @private - convert a record id to a record instance */
   to: function(id, attr, recordType, parentRecord) {
+    var store = parentRecord.get('store');
+    return store.find(recordType, id);
+  },
+  
+  /** @private - convert a record instance to a record id */
+  from: function(record) { return record.get('id'); }
+});
+
+/** @private - generic converter for transforming computed record attributes */
+SC.RecordAttribute.registerTransform(Object, {
+
+  /** @private - convert a record id to a record instance */
+  to: function(id, attr, recordType, parentRecord) {
+    recordType = recordType.apply(parentRecord);
     var store = parentRecord.get('store');
     return store.find(recordType, id);
   },

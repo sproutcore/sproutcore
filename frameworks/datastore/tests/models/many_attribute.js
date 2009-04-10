@@ -5,9 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-// test core array-mapping methods for ManyArray with many attributes
+// test core array-mapping methods for ManyArray with ManyAttribute
 var storeKeys, rec;
-module("SC.RecordArray core methods", {
+module("SC.ManyAttribute core methods", {
   setup: function() {
 
     MyApp = SC.Object.create({
