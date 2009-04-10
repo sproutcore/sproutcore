@@ -273,7 +273,6 @@ SC.Drag = SC.Object.extend(
     var pane = dv.get('pane') ;
     var pv = dv.get('parentView') ;
     var clippingFrame = dv.get('clippingFrame') ;
-    
     // convert to global cooridinates
     var f = pv ? pv.convertFrameToView(clippingFrame, null) : clippingFrame ;
     var pf = pane ? pane.get('frame') : {x:0, y: 0};
@@ -284,6 +283,10 @@ SC.Drag = SC.Object.extend(
       width: f.width,
       height: f.height
     });
+    //get frame in global cords after pane adjustment
+    var dvf = dv.get('frame');
+    
+    var origin = f;//pv.convertFrameToView(dv.get('frame'), null) ;
     
     // console.log("clipping Frame x: %@ y: %@ ".fmt(clippingFrame.x, clippingFrame.y));
     // console.log("dvf x: %@ y: %@ ".fmt(dvf.x, dvf.y));
