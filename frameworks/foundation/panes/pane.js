@@ -115,7 +115,12 @@ SC.Pane = SC.View.extend({
       height: (pframe) ? pframe.height : 1000
     } ;
   },
-
+  
+  /** @private Disable caching due to an known bug in SC. */
+  frame: function() {
+    return this.computeFrameWithParentFrame(null) ;
+  }.property(),
+  
   /** 
     Invoked by the root responder whenever the window resizes.  This should
     simply begin the process of notifying children that the view size has
