@@ -304,7 +304,7 @@ SC.ListView = SC.CollectionView.extend(
       
       // if we're dirty, redraw everything visible
       // (selection changed, content changed, etc.)
-      if (this.get('isDirty')) {
+      if (this.get('isDirty') || firstTime) {
         childSet.length = 0 ; // full render
         
       // else, only redaw objects we haven't previously drawn
