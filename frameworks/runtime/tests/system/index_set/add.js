@@ -5,7 +5,6 @@
 // ==========================================================================
 
 /*global module test equals context ok same */
-
 var set ;
 module("SC.IndexSet#add", {
   setup: function() {
@@ -115,9 +114,18 @@ test("add range matching existing range", function() {
 // ..........................................................
 // OTHER BEHAVIORS
 // 
+
 test("adding a range should trigger an observer notification", function() {
   var callCnt = 0;
   set.addObserver('[]', function() { callCnt++; });
   set.add(10,10);
   equals(callCnt, 1, 'should have called observer once');
+});
+
+test("adding a range over an existing range should not trigger an observer notification", function() {
+  var callCnt = 0;
+  set.add(10,10);
+  set.addObserver('[]', function() { callCnt++; });
+  set.add(15,5);
+  equals(callCnt, 0, 'should not have called observer');
 });

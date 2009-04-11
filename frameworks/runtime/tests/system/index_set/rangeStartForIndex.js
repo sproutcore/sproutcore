@@ -5,7 +5,6 @@
 // ==========================================================================
 
 /*global module test equals context ok same */
-
 var set, start, len ;
 module("SC.IndexSet#rangeStartForIndex", {
   setup: function() {
