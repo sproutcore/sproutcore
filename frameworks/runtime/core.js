@@ -661,10 +661,12 @@ SC.mixin(Function.prototype,
     @returns {Function} the declared function instance
   */
   property: function() {
-    this.dependentKeys = SC.$A(arguments) ; 
-    this.cacheKey = "__cache__" + SC.guidFor(this) ;
-    this.lastSetValueKey = "__lastValue__" + SC.guidFor(this) ;
-    this.isProperty = true; return this; 
+    this.dependentKeys = SC.$A(arguments) ;
+    var guid = SC.guidFor(this) ;
+    this.cacheKey = "__cache__" + guid ;
+    this.lastSetValueKey = "__lastValue__" + guid ;
+    this.isProperty = YES ;
+    return this ;
   },
   
   /**
@@ -682,10 +684,10 @@ SC.mixin(Function.prototype,
     @returns {Function} reciever
   */
   cacheable: function(aFlag) {
-    this.isProperty = YES;  // also make a property just in case
+    this.isProperty = YES ;  // also make a property just in case
     if (!this.dependentKeys) this.dependentKeys = [] ;
     this.isCacheable = (aFlag === undefined) ? YES : aFlag ;
-    return this;
+    return this ;
   },
   
   /**
@@ -708,36 +710,35 @@ SC.mixin(Function.prototype,
   idempotent: function(aFlag) {
     this.isProperty = YES;  // also make a property just in case
     if (!this.dependentKeys) this.dependentKeys = [] ;
-    this.isVolatile = !((aFlag === undefined) ? NO : aFlag) ;
-    return this;
+    this.isVolatile = (aFlag === undefined) ? YES : aFlag ;
+    return this ;
   },
   
-  /**  
+  /**
     Declare that a function should observe an object at the named path.  Note
     that the path is used only to construct the observation one time.
   */
   observes: function(propertyPaths) { 
-    
     // sort property paths into local paths (i.e just a property name) and
     // full paths (i.e. those with a . or * in them)
-    var loc = arguments.length, local = null, paths = null;
+    var loc = arguments.length, local = null, paths = null ;
     while(--loc >= 0) {
       var path = arguments[loc] ;
       // local
       if ((path.indexOf('.')<0) && (path.indexOf('*')<0)) {
-        if (!local) local = this.localPropertyPaths = [];
+        if (!local) local = this.localPropertyPaths = [] ;
         local.push(path);
         
       // regular
       } else {
-        if (!paths) paths = this.propertyPaths = [];
+        if (!paths) paths = this.propertyPaths = [] ;
         paths.push(path) ;
       }
     }
-    return this;
+    return this ;
   }
-    
-}) ;
+  
+});
 
 // ..........................................................
 // STRING ENHANCEMENT
