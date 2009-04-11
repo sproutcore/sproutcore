@@ -13,6 +13,10 @@ module("SC.IndexSet#contains", {
   }
 });
 
+// ..........................................................
+// SINGLE INDEX
+// 
+
 test("handle index in set", function() {
   equals(set.contains(1001), YES, 'index 1001 should be in set %@'.fmt(set));
   equals(set.contains(1009), YES, 'index 1009 should be in set %@'.fmt(set));
@@ -27,5 +31,40 @@ test("handle index not in set", function() {
 
 test("handle index past end of set", function() {
   equals(set.contains(3000), NO, 'index 3000 should not be in set');
+});
+
+// ..........................................................
+// RANGE
+// 
+
+test("handle range inside set", function() {
+  equals(set.contains(1001,4), YES, '1001..1003 should be in set');
+});
+
+test("handle range outside of set", function() {
+  equals(set.contains(100,4), NO, '100..1003 should NOT be in set');
+});
+
+test("handle range partially inside set", function() {
+  equals(set.contains(998,4), NO,'998..1001 should be in set');
+});
+
+// ..........................................................
+// INDEX SET
+// 
+
+test("handle set inside set", function() {
+  var test = SC.IndexSet.create().add(1001,4).add(1005,2);
+  equals(set.contains(test), YES, '%@ should be in %@'.fmt(test, set));
+});
+
+test("handle range outside of set", function() {
+  var test = SC.IndexSet.create().add(100,4).add(105,2);
+  equals(set.contains(test), NO, '%@ should be in %@'.fmt(test, set));
+});
+
+test("handle range partially inside set", function() {
+  var test = SC.IndexSet.create().add(1001,4).add(100,2);
+  equals(set.contains(test), NO, '%@ should be in %@'.fmt(test, set));
 });
 

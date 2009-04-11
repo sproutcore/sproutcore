@@ -110,6 +110,8 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
     if (length === undefined) { 
       if (typeof start === SC.T_NUMBER) {
         length = 1 ;
+      } else if (start instanceof SC.IndexSet) {
+        // TODO
       } else {
         length = start.length; 
         start = start.start;
@@ -509,7 +511,7 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
   toString: function() {
     var str = [];
     this.forEachRange(function(start, length) {
-      str.push(length === 1 ? start : "%@-%@".fmt(start, start + length - 1));
+      str.push(length === 1 ? start : "%@..%@".fmt(start, start + length - 1));
     }, this);
     return "SC.IndexSet<%@>".fmt(str.join(',')) ;
   }  
