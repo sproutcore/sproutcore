@@ -36,8 +36,7 @@ SC.mixin(SC.Object.prototype,
   dispatch: function(evt) {
     var stateKey = this.get('stateKey') ;
     var path = SC._DISPATCH_PATH ;
-    var current, target, handlerKey, superstateKey ; 
-    var res, idx, ixd2, done = NO ;
+    var current, target, handlerKey, superstateKey, res, idx, ixd2 ;
     
     // .......................................................................
     // Step 1. Process the event hierarchically if a state machine is 
@@ -115,7 +114,10 @@ SC.mixin(SC.Object.prototype,
           break figureOutWhatToDo ;
         }
         
+        // ...................................................................
         // (b) Is the handling state the parent of the target state?
+        //
+        
         if (!done && this[target.superstateKey] === current) {
           // don't exit the handling state
           
@@ -229,7 +231,7 @@ SC.mixin(SC.Object.prototype,
         // (g) Are any of the handling state's ancestors an ancestor of
         // the target state?
         
-        do {
+       for (;;) {
           // exit the handing state's superstate
           this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
           
@@ -264,7 +266,7 @@ SC.mixin(SC.Object.prototype,
               } else --idx2 ;
             } while (idx2 > 0)
           }
-        } while (!done)
+        }
       } while(NO)
       
       // .....................................................................
