@@ -66,39 +66,39 @@ SC.mixin(SC.Object.prototype,
     //
     
     if (res === SC.EVT_TRANSITION) {
+      target = this[stateKey] ; // save the target of the transition
+      
+      // .....................................................................
+      // Exit the current state to the state that handled the event...
+      //
+      
+      if (current != this[handlerKey]) {
+        // we don't know the property name for current,
+        // so there is no way to call it directly...
+        current.call(this, SC.EVT_EXIT) ;
+        superstateKey = current.superstateKey ;
+        
+        while (superstateKey && superstateKey !== handlerKey) {
+          this[superstateKey](SC.EVT_EXIT) ;
+          superstateKey = this[superstateKey].superstateKey ;
+        }
+      }
+      
+      // .....................................................................
+      // We've now exited from the original current state up to the state
+      // that actually requested the transition, so make it current now...
+      
+      current = this[handlerKey] ;
+      
+      // .....................................................................
+      // Now figure out--using a carefully orchestrated order of operations--
+      // which states need to be exited and entered. Some states will be
+      // exited during this task. Once the state transition topology has 
+      // been discovered, exit the do-while loop immediately, go to Step 3, 
+      // and finish the job.
+      
       figureOutWhatToDo: // label used to exit do-while loop early
       do {
-        target = this[stateKey] ; // save the target of the transition
-        
-        // ...................................................................
-        // Exit the current state to the state that handled the event...
-        //
-        
-        if (current != this[handlerKey]) {
-          // we don't know the property name for current,
-          // so there is no way to call it directly...
-          current.call(this, SC.EVT_EXIT) ;
-          superstateKey = current.superstateKey ;
-          
-          while (superstateKey && superstateKey !== handlerKey) {
-            this[superstateKey](SC.EVT_EXIT) ;
-            superstateKey = this[superstateKey].superstateKey ;
-          }
-        }
-        
-        // ...................................................................
-        // We've now exited from the original current state up to the state
-        // that actually requested the transition, so make it current now...
-        
-        current = this[handlerKey] ;
-        
-        // ...................................................................
-        // Now figure out using a carefully orchestrated order of operations
-        // which states need to be exited and entered. Some states will be
-        // exited during this task. Once the state transition topology has 
-        // been discovered, exit the do-while loop immediately and finish the
-        // task.
-        
         // ...................................................................
         // (a) Is this a transition to self?
         //
@@ -129,7 +129,8 @@ SC.mixin(SC.Object.prototype,
         }
         
         // ...................................................................
-        // (c) Do the handling state and the target state have the same parent?
+        // (c) Do the handling state and the target state have the same 
+        // parent?
         //
         
         if (current.superstateKey === target.superstateKey) {
