@@ -105,9 +105,9 @@ SC.mixin(SC.Object.prototype,
         
         if (current === target) {
           // exit the handing state
-          this.state(SC.EVT_EXIT) ; // this.state == current
+          this[stateKey](SC.EVT_EXIT) ; // this[stateKey] == current
           
-          // enter the target, aka this.state (actually do it below)
+          // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
           
           // stop trying to figure out what to do...
@@ -121,7 +121,7 @@ SC.mixin(SC.Object.prototype,
         if (!done && this[target.superstateKey] === current) {
           // don't exit the handling state
           
-          // enter the target, aka this.state (actually do it below)
+          // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
           
           // stop trying to figure out what to do...
@@ -137,7 +137,7 @@ SC.mixin(SC.Object.prototype,
           // exit the handing state
           this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
           
-          // enter the target, aka this.state (actually do it below)
+          // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
           
           // stop trying to figure out what to do...
