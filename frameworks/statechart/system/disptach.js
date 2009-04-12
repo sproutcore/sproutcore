@@ -267,10 +267,9 @@ SC.mixin(SC.Object.prototype,
         } while (!done)
       } while(NO)
       
-      
       // .....................................................................
-      // Enter all of the ancestors between target and the least common
-      // ancestor of the handling state and target discovered above...
+      // Step 3. Enter all of the ancestors between target and the least 
+      // common ancestor of the handling state and target discovered above...
       //
       
       do {
@@ -278,13 +277,13 @@ SC.mixin(SC.Object.prototype,
       } while ((--idx) > 0)
       
       // .....................................................................
-      // Now enter the target state itself.
+      // Step 4. Enter the target state itself.
       //
       
       if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
       
       // .....................................................................
-      // Now initialize the target state's substates if necessary.
+      // Step 5. Initialize the target state's substates if necessary.
       //
       
       while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION) {
