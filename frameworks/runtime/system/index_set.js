@@ -105,29 +105,42 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
     @returns {Boolean}
   */
   contains: function(start, length) {
-
+    var content, cur, next, rstart, rnext;
+    
     // normalize input
     if (length === undefined) { 
       if (typeof start === SC.T_NUMBER) {
         length = 1 ;
+        
+      // if passed an index set, check each receiver range
       } else if (start instanceof SC.IndexSet) {
-        // TODO
+        content = start._content ;
+        cur = 0 ;
+        next = content[cur];
+        while (next !== 0) {
+          if ((next>0) && !this.contains(cur, next-cur)) return NO ;
+          cur = Math.abs(next);
+          next = content[cur];
+        }
+        return YES ;
+        
       } else {
         length = start.length; 
         start = start.start;
       }
     }
     
-    var rstart = this.rangeStartForIndex(start),
-        rnext  = this._content[rstart];
+    rstart = this.rangeStartForIndex(start);
+    rnext  = this._content[rstart];
     
     return (rnext>0) && (rstart <= start) && (rnext >= (start+length));
   },
   
   /**
-    Adds the specified range of indexes to the set
+    Adds the specified range of indexes to the set.  You can also pass another
+    IndexSet to union the contents of the index set with the receiver.
     
-    @param {Number} start index or Range
+    @param {Number} start index, Range, or another IndexSet
     @param {Number} length optional length of range. 
     @returns {SC.IndexSet} receiver
   */
@@ -137,6 +150,12 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
     if (length === undefined) { 
       if (typeof start === SC.T_NUMBER) {
         length = 1 ;
+        
+      // if passed an index set, just add each range in the index set.
+      } else if (start instanceof SC.IndexSet) {
+        start.forEachRange(this.add, this);
+        return this;
+        
       } else {
         length = start.length; 
         start = start.start;
@@ -366,7 +385,6 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
     }
   },
 
-  
   /**
     Clears the set 
   */
