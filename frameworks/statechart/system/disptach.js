@@ -101,7 +101,7 @@ SC.mixin(SC.Object.prototype,
         // task.
         
         // ...................................................................
-        // (a) is this a transition to self?
+        // (a) Is this a transition to self?
         //
         
         if (current === target) {
@@ -115,7 +115,7 @@ SC.mixin(SC.Object.prototype,
           break figureOutWhatToDo ;
         }
         
-        // (b) is the handling state the parent of the target state?
+        // (b) Is the handling state the parent of the target state?
         if (!done && this[target.superstateKey] === current) {
           // don't exit the handling state
           
@@ -127,7 +127,7 @@ SC.mixin(SC.Object.prototype,
         }
         
         // ...................................................................
-        // (c) do the handling state and the target state have the same parent?
+        // (c) Do the handling state and the target state have the same parent?
         //
         
         if (current.superstateKey === target.superstateKey) {
@@ -142,7 +142,7 @@ SC.mixin(SC.Object.prototype,
         }
         
         // ...................................................................
-        // (d) is the handling state's parent the target state?
+        // (d) Is the handling state's parent the target state?
         //
         
         if (this[current.superstateKey] === target) {
@@ -157,7 +157,7 @@ SC.mixin(SC.Object.prototype,
         }
         
         // ...................................................................
-        // (e) is the handling state an ancestor of the target?
+        // (e) Is the handling state an ancestor of the target?
         //
         
         // enter both target and its superstate
@@ -185,7 +185,7 @@ SC.mixin(SC.Object.prototype,
         }
         
         // ...................................................................
-        // (f) is the handling state's superstate one of target's ancestors?
+        // (f) Is the handling state's superstate one of target's ancestors?
         //
         
         // exit the handing state
@@ -226,7 +226,7 @@ SC.mixin(SC.Object.prototype,
         }
         
         // ...................................................................
-        // (g) are any of the handling state's ancestors an ancestor of
+        // (g) Are any of the handling state's ancestors an ancestor of
         // the target state?
         
         do {
