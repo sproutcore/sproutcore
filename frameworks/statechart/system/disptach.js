@@ -39,6 +39,11 @@ SC.mixin(SC.Object.prototype,
     var current, target, handlerKey, superstateKey ; 
     var res, idx, ixd2, done = NO ;
     
+    // .......................................................................
+    // Step 1. Process the event hierarchically if a state machine is 
+    // available to send the event to.
+    //
+    
     // save the current state
     current = this[stateKey] ;
     if (!current) return NO ; // fast path -- this object does not use HSMs
@@ -56,77 +61,105 @@ SC.mixin(SC.Object.prototype,
       }
     }
     
-    // was a transition taken? if so, this.state is now set to the target 
-    // state
+    // .......................................................................
+    // Step 2. Was a transition taken? if so, this[stateKey] is now set to the
+    // target state. Figure out (and possibly execute) entry and exit actions.
+    //
+    
     if (res === SC.EVT_TRANSITION) {
-      target = this[stateKey] ; // save the target of the transition
-      
-      // exit current state to transition source...
-      if (current != this[handlerKey]) {
-        // we don't know the property name for current,
-        // so there is no way to call it directly...
-        current.call(this, SC.EVT_EXIT) ;
-        superstateKey = current.superstateKey ;
+      figureOutWhatToDo: // label used to exit do-while loop early
+      do {
+        target = this[stateKey] ; // save the target of the transition
         
-        while (superstateKey && superstateKey !== handlerKey) {
-          this[superstateKey](SC.EVT_EXIT) ;
-          superstateKey = this[superstateKey].superstateKey ;
+        // ...................................................................
+        // Exit the current state to the state that handled the event...
+        //
+        
+        if (current != this[handlerKey]) {
+          // we don't know the property name for current,
+          // so there is no way to call it directly...
+          current.call(this, SC.EVT_EXIT) ;
+          superstateKey = current.superstateKey ;
+          
+          while (superstateKey && superstateKey !== handlerKey) {
+            this[superstateKey](SC.EVT_EXIT) ;
+            superstateKey = this[superstateKey].superstateKey ;
+          }
         }
-      }
-      
-      // we've now exited from the original current state up to the state
-      // that actually requested the transition, so make it current now...
-      current = this[handlerKey] ;
-      
-      // (a) is this a transition to self?
-      if (current === target) {
-        // exit the handing state
-        this.state(SC.EVT_EXIT) ; // this.state == current
         
-        // enter the target, aka this.state (actually do it below)
-        idx = 0 ;
+        // ...................................................................
+        // We've now exited from the original current state up to the state
+        // that actually requested the transition, so make it current now...
         
-        // stop trying to figure out what to do...
-        done = YES ;
-      }
-      
-      // (b) is the handling state the parent of the target state?
-      if (!done && this[target.superstateKey] === current) {
-        // don't exit the handling state
+        current = this[handlerKey] ;
         
-        // enter the target, aka this.state (actually do it below)
-        idx = 0 ;
+        // ...................................................................
+        // Now figure out using a carefully orchestrated order of operations
+        // which states need to be exited and entered. Some states will be
+        // exited during this task. Once the state transition topology has 
+        // been discovered, exit the do-while loop immediately and finish the
+        // task.
         
-        // stop trying to figure out what to do...
-        done = YES ;
-      }
-      
-      // (c) do the handling state and the target state have the same parent?
-      if (!done && current.superstateKey === target.superstateKey) {
-        // exit the handing state
-        this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
+        // ...................................................................
+        // (a) is this a transition to self?
+        //
         
-        // enter the target, aka this.state (actually do it below)
-        idx = 0 ;
+        if (current === target) {
+          // exit the handing state
+          this.state(SC.EVT_EXIT) ; // this.state == current
+          
+          // enter the target, aka this.state (actually do it below)
+          idx = 0 ;
+          
+          // stop trying to figure out what to do...
+          break figureOutWhatToDo ;
+        }
         
-        // stop trying to figure out what to do...
-        done = YES ;
-      }
-      
-      // (d) is the handling state's parent the target state?
-      if (!done && this[current.superstateKey] === target) {
-        // exit the handing state
-        this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
+        // (b) is the handling state the parent of the target state?
+        if (!done && this[target.superstateKey] === current) {
+          // don't exit the handling state
+          
+          // enter the target, aka this.state (actually do it below)
+          idx = 0 ;
+          
+          // stop trying to figure out what to do...
+          break figureOutWhatToDo ;
+        }
         
-        // don't enter the target state -- we're already in it
-        idx = -1 ;
+        // ...................................................................
+        // (c) do the handling state and the target state have the same parent?
+        //
         
-         // stop trying to figure out what to do...
-        done = YES ;
-      }
-      
-      // (e) is the handling state an ancestor of the target?
-      if (!done) {
+        if (current.superstateKey === target.superstateKey) {
+          // exit the handing state
+          this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
+          
+          // enter the target, aka this.state (actually do it below)
+          idx = 0 ;
+          
+          // stop trying to figure out what to do...
+          break figureOutWhatToDo ;
+        }
+        
+        // ...................................................................
+        // (d) is the handling state's parent the target state?
+        //
+        
+        if (this[current.superstateKey] === target) {
+          // exit the handing state
+          this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
+          
+          // don't enter the target state -- we're already in it
+          idx = -1 ;
+          
+           // stop trying to figure out what to do...
+          break figureOutWhatToDo ;
+        }
+        
+        // ...................................................................
+        // (e) is the handling state an ancestor of the target?
+        //
+        
         // enter both target and its superstate
         idx = 1 ;
         superstateKey = path[1] = target.superstateKey ;
@@ -145,18 +178,16 @@ SC.mixin(SC.Object.prototype,
             --idx ;
             
             // stop trying to figure out what to do...
-            done = YES ;
-            
-            // exit the loop
-            superstateKey = undefined ;
+            break figureOutWhatToDo ;
             
           // nope, didn't find the handling state, so keep going up..
           } else superstateKey = this[superstateKey].superstateKey ;
         }
-      }
-      
-      // (f) is the handling state's superstate one of target's ancestors?
-      if (!done) {
+        
+        // ...................................................................
+        // (f) is the handling state's superstate one of target's ancestors?
+        //
+        
         // exit the handing state
         this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
         
@@ -168,7 +199,7 @@ SC.mixin(SC.Object.prototype,
           // FIXME: what should be done here?
           
           // no ancestors to check, stop trying to figure out what to do...
-          done = YES ;
+          break figureOutWhatToDo ;
           
         // yep, see if the handling state's superstate in an ancestor of 
         // the target state
@@ -187,20 +218,17 @@ SC.mixin(SC.Object.prototype,
               idx = idx2 - 1 ;
               
               // stop trying to figure out what to do...
-              done = YES ;
+              break figureOutWhatToDo ;
               
-              // exit the loop
-              idx2 = 0 ;
-            
             // nope, try a lower superstate of target
             } else --idx2 ;
           } while (idx2 > 0)
         }
-      }
-      
-      // (g) are any of the handling state's ancestors an ancestor of
-      // the target state?
-      if (!done) {
+        
+        // ...................................................................
+        // (g) are any of the handling state's ancestors an ancestor of
+        // the target state?
+        
         do {
           // exit the handing state's superstate
           this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
@@ -213,7 +241,7 @@ SC.mixin(SC.Object.prototype,
             // FIXME: what should be done here?
             
             // no ancestors to check, stop trying to figure out what to do...
-            done = YES ;
+            break figureOutWhatToDo ;
             
           // yep, see if the handling state's superstate's superstate is an 
           // ancestor of the target state
@@ -232,26 +260,33 @@ SC.mixin(SC.Object.prototype,
                 idx = idx2 - 1 ;
                 
                 // stop trying to figure out what to do...
-                done = YES ;
-                
-                // break the inner loop
-                idx2 = 0 ;
+                break figureOutWhatToDo ;
               } else --idx2 ;
             } while (idx2 > 0)
           }
         } while (!done)
-      }
+      } while(NO)
       
-      // enter all of the ancestors between target and the least common
+      
+      // .....................................................................
+      // Enter all of the ancestors between target and the least common
       // ancestor of the handling state and target discovered above...
+      //
+      
       do {
         this[path[idx]](SC.EVT_ENTER) ;
       } while ((--idx) > 0)
       
-      // now enter the target state itself
+      // .....................................................................
+      // Now enter the target state itself.
+      //
+      
       if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
       
-      // now initialize the target state's substates if necessary
+      // .....................................................................
+      // Now initialize the target state's substates if necessary.
+      //
+      
       while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION) {
         // enter the target of the transition (a substate)
         idx = 0 ;
@@ -278,10 +313,12 @@ SC.mixin(SC.Object.prototype,
         // the loop continues to apply any default transitions as substates
         // are entered...
       }
+      
+      // if we transitioned, we definitely handled the event...
       return YES ;
     }
     else {
-      // only return NO if we completely ignored the event...
+      // otherwise, return NO if we completely ignored the event...
       return (res === SC.EVT_IGNORED) ? NO : YES ;
     }
   }
