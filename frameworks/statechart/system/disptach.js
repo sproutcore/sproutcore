@@ -11,6 +11,13 @@ SC._DISPATCH_PATH = [0] ; // avoid repeated allocations of this array
 SC.mixin(SC.Object.prototype,
 /** SC.Object.prototype */ {
   
+  /**
+    Specifies which object property hierarchical state machines are stored in.
+    
+    @type String
+  */
+  stateKey: 'state',
+  
   /** @private
     Dispatches events to objects that implement event-handling with 
     hierarchical state machines. SC.RootResponder tries this first; if the 
@@ -27,29 +34,32 @@ SC.mixin(SC.Object.prototype,
     @returns {Boolean} YES if the event was handled
   */
   dispatch: function(evt) {
-   var path = SC._DISPATCH_PATH ;
-   var current, target, handlerKey, superstateKey, res, idx, ixd2, done = NO ;
-   
-   // save the current state
-   current = this.state ;
-   if (!current) return NO ; // fast path -- this object does not use HSMs
-   
-   // okay, process the event hierarchically...
-   res = this.state(evt) ;
-   if (res === undefined) {
-     superstateKey = current.superstateKey ;
-     while (superstateKey) {
-       res = this[superstateKey]() ; // call superstate handler...
-       if (res !== undefined) {
-         handlerKey = superstateKey ;
-         break ;
-       } else superstateKey = this[superstateKey].superstateKey ;
-     }
-   }
-   
-   // was a transition taken? if so, this.state is now set to the target state
-   if (res === SC.EVT_TRANSITION) {
-      target = this.state ; // save the target of the transition
+    var stateKey = this.get('stateKey') ;
+    var path = SC._DISPATCH_PATH ;
+    var current, target, handlerKey, superstateKey ; 
+    var res, idx, ixd2, done = NO ;
+    
+    // save the current state
+    current = this[stateKey] ;
+    if (!current) return NO ; // fast path -- this object does not use HSMs
+    
+    // okay, process the event hierarchically...
+    res = this[stateKey](evt) ;
+    if (res === undefined) {
+      superstateKey = current.superstateKey ;
+      while (superstateKey) {
+        res = this[superstateKey]() ; // call superstate handler...
+        if (res !== undefined) {
+          handlerKey = superstateKey ;
+          break ;
+        } else superstateKey = this[superstateKey].superstateKey ;
+      }
+    }
+    
+    // was a transition taken? if so, this.state is now set to the target 
+    // state
+    if (res === SC.EVT_TRANSITION) {
+      target = this[stateKey] ; // save the target of the transition
       
       // exit current state to transition source...
       if (current != this[handlerKey]) {
@@ -239,10 +249,10 @@ SC.mixin(SC.Object.prototype,
       } while ((--idx) > 0)
       
       // now enter the target state itself
-      if (idx === 0) this.state(SC.EVT_ENTER) ;
+      if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
       
       // now initialize the target state's substates if necessary
-      while (this.state(SC.EVT_INIT) === SC.EVT_TRANSITION) {
+      while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION) {
         // enter the target of the transition (a substate)
         idx = 0 ;
         
@@ -263,17 +273,17 @@ SC.mixin(SC.Object.prototype,
         } while ((--idx) > 0)
         
         // and finally enter the target's substate itself
-        if (idx === 0) this.state(SC.EVT_ENTER) ;
+        if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
         
         // the loop continues to apply any default transitions as substates
         // are entered...
       }
+      return YES ;
     }
-    return YES ;
-  }
-  else {
-    // only return NO if we completely ignored the event...
-    return (res === SC.EVT_IGNORED) ? NO : YES ;
+    else {
+      // only return NO if we completely ignored the event...
+      return (res === SC.EVT_IGNORED) ? NO : YES ;
+    }
   }
   
 });
