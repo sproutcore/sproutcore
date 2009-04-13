@@ -16,8 +16,10 @@ SC.EVT_INIT = { sig: SC.EVT_INIT_SIG } ;
 SC.EVT_IGNORED_RES = 'sc-evt-ignored-res' ;
 SC.EVT_HANDLED_RES = 'sc-evt-handled-res' ;
 SC.EVT_TRANSITION_RES = 'sc-evt-transition-res' ;
+SC.EVT_TERMINATE_RES = 'sc-evt-terminate-res' ;
 
 sc_handled = function() { return SC.EVT_HANDLED_RES; };
+sc_terminate = function() { return SC.EVT_TERMINATE_RES; };
 
 // ........................................
 // FUNCTION ENHANCEMENTS
