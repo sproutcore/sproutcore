@@ -41,8 +41,7 @@ test("Verify loadRecords() loads data", function() {
   var dataSource = SC.DataSource.create({});
   var store = SC.Store.create().from(dataSource);
   for(var i in Application.Data) {
-    console.log('   ' + i);
-    store.loadRecords(eval(i), Application.Data[i]);
+    store.loadRecords(Application[i], Application.Data[i]);
   }
   
   equals(store.find(Application.File, '14').get('name'), 'Birthday Invitation.pdf', 'should return File 14');
