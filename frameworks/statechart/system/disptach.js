@@ -234,7 +234,7 @@ SC.mixin(SC.Object.prototype,
         // (g) Are any of the handling state's ancestors an ancestor of
         // the target state?
         
-       for (;;) {
+        for (;;) {
           // exit the handing state's superstate
           this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
           
