@@ -60,12 +60,14 @@ SC.mixin(SC.Object.prototype,
       }
     }
     
+    if (res === undefined) res = SC.EVT_IGNORED_RES ;
+    
     // .......................................................................
     // Step 2. Was a transition taken? if so, this[stateKey] is now set to the
     // target state. Figure out (and possibly execute) entry and exit actions.
     //
     
-    if (res === SC.EVT_TRANSITION) {
+    if (res === SC.EVT_TRANSITION_RES) {
       target = this[stateKey] ; // save the target of the transition
       
       // .....................................................................
@@ -289,7 +291,7 @@ SC.mixin(SC.Object.prototype,
       // Step 5. Initialize the target state's substates if necessary.
       //
       
-      while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION) {
+      while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
         // enter the target of the transition (a substate)
         idx = 0 ;
         
@@ -321,7 +323,7 @@ SC.mixin(SC.Object.prototype,
     }
     else {
       // otherwise, return NO if we completely ignored the event...
-      return (res === SC.EVT_IGNORED) ? NO : YES ;
+      return (res === SC.EVT_IGNORED_RES) ? NO : YES ;
     }
   }
   
