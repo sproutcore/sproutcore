@@ -45,20 +45,27 @@ require('mixins/observable') ;
   @extends SC.Observable
   @since SproutCore 1.0
 */
-SC.IndexSet = function(ranges) {
-  this.initObservable();
-  if (ranges && ranges instanceof SC.IndexSet) {
-    this._content = ranges._content.slice();
-  } else {
-    this._content = [0];
-    if (ranges) this.addEach(ranges);
-  }
-  return this ;
-} ;
+SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
+/** @scope SC.IndexSet.prototype */ {
 
-SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
+  /**
+    To create a set, pass an array of items instead of a hash.
+  */
+  create: function(ranges) { 
+    var ret = SC.beget(this);
+    ret.initObservable();
+    if (ranges && ranges.isIndexSet) {
+      ret._content = ret._content.slice();
+    } else {
+      ret._content = [0];
+      if (ranges) ret.addEach(ranges);
+    }
+    return ret ;
+  },
 
-  _last: 0 ,
+  isIndexSet: YES,
+  
+  HINT_SIZE: 256,
   
   /**
     Total number of indexes contained in the set
@@ -113,7 +120,7 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
         length = 1 ;
         
       // if passed an index set, check each receiver range
-      } else if (start instanceof SC.IndexSet) {
+      } else if (start && start.isIndexSet) {
         content = start._content ;
         cur = 0 ;
         next = content[cur];
@@ -152,7 +159,7 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
         length = 1 ;
         
       // if passed an index set, just add each range in the index set.
-      } else if (start instanceof SC.IndexSet) {
+      } else if (start && start.isIndexSet) {
         start.forEachRange(this.add, this);
         return this;
         
@@ -532,18 +539,10 @@ SC.IndexSet.prototype = SC.mixin({}, SC.Enumerable, SC.Observable, {
       str.push(length === 1 ? start : "%@..%@".fmt(start, start + length - 1));
     }, this);
     return "SC.IndexSet<%@>".fmt(str.join(',')) ;
-  }  
+  },
+  
+  _last: 0
 
 }) ;
 
-SC.IndexSet.prototype.slice = SC.IndexSet.prototype.clone ;
-
-SC.IndexSet.prototype.push = SC.IndexSet.prototype.unshift = SC.IndexSet.prototype.add ;
-SC.IndexSet.prototype.shift = SC.IndexSet.prototype.pop ;
-
-SC.IndexSet.HINT_SIZE = 256;
-
-/**
-  To create a set, pass an array of items instead of a hash.
-*/
-SC.IndexSet.create = function(items) { return new SC.IndexSet(items); };
+SC.IndexSet.slice = SC.IndexSet.clone ;
