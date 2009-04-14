@@ -8,28 +8,45 @@
 /*globals module test ok equals same */
 
 /**
-*/
-SC.ArrayTest = {
+  Adds a new module of unit tests to verify that the passed object implements
+  the SC.Array interface.  To generate, call the ArrayTests array with a 
+  test descriptor.  Any properties you pass will be applied to the ArrayTests
+  descendent created by the create method.
   
-  create: function(desc, ArrayClass) {
-    var ret = SC.beget(this).mixin({ ArrayClass: ArrayClass }),
-        key, func;
-    
-    module(desc || ArrayClass.toString(), {
-      setup: function() { ret.setup.call(ret); },
-      teardown: function() { ret.teardown.call(ret); }
+  You should pass at least a newObject() method, which should return a new 
+  instance of the object you want to have tested.  You can also implement the
+  destroyObject() method, which should destroy a passed object.
+  
+  {{{
+    SC.ArrayTests.generate("Array", {
+      newObject:  function() { return []; }
     });
-    
-    for(key in ret) {
-      if (!ret.hasOwnProperty(key)) continue ;
-
-      // make sure it looks like a test
-      func = ret[key];
-      if (key.indexOf(" ")<0) continue;
-      if (SC.typeOf(func) !== SC.T_FUNCTION) continue ;
+  }}}
+  
+  Unit tests themselves can be added by calling the define() method.  The
+  function you pass will be invoked whenever the ArrayTests are generated. The
+  parameter passed will be the instance of ArrayTests you should work with.
+  
+  {{{
+    SC.ArrayTests.define(function(T) {
+      T.module("length");
       
-      test(key, function() { func.call(ret); }) ;
+      test("verify length", function() {
+        var ary = T.newObject();
+        equals(ary.get('length'), 0, 'should have 0 initial length');
+      });
     }
+  }}}
+  
+*/
+SC.ArrayTests = {
+  
+  /**
+    Override this object to create a newObject
+  */
+  
+  generate: function(attrs) {
+    var ret = SC.beget(this).mixin(attrs);
     
   }
 }
