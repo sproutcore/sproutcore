@@ -11,6 +11,10 @@ var storeKey7, json, json1, json2, json3, json4, json5, json6, json7;
 module("SC.Store#commitRecord", {
   setup: function() {
     
+    MyRecordType = SC.Record.extend({
+      title: SC.Record.attr(String, { defaultValue: "Untitled"})
+    });
+    
     store = SC.Store.create();
     
     json1 = {
@@ -70,6 +74,7 @@ module("SC.Store#commitRecord", {
     store.writeDataHash(storeKey6, json6, SC.Record.READY_ERROR);
     storeKey7 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey7, json7, SC.Record.READY_DESTROYED_CLEAN);
+
   }
 });
 
@@ -91,8 +96,6 @@ test("Confirm that all the states are switched as expected after running commitR
   store.commitRecord(undefined, undefined, storeKey4);
   status = store.readStatus( storeKey4);
   equals(status, SC.Record.BUSY_DESTROYING, "the status should be SC.Record.BUSY_DESTROYING");
-   
-   
   
   try{
     store.commitRecord(undefined, undefined, storeKey5);
@@ -123,5 +126,15 @@ test("Confirm that all the states are switched as expected after running commitR
     msg=error3.message;
   }
   equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  
+});
+
+
+test("Creating and committing an empty record makes the hashes available", function() {
+  store.createRecord(MyRecordType, null, 'commitGUID8');
+  store.commitRecords();
+  
+  var storeKey = store.storeKeyFor(MyRecordType, 'commitGUID8');
+  ok(store.readDataHash(storeKey), 'data hash should not be empty/undefined');
   
 });
