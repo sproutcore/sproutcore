@@ -25,14 +25,14 @@ SC.mixin(SC.Object.prototype,
     var initialStateKey = this.get('initialStateKey') ;
     var stateKey = this.get('stateKey') ;
     var path = SC._DISPATCH_PATH ;
-    var current, target, handlerKey, superstateKey, res, idx, ixd2 ;
+    var initial, substate, handlerKey, superstateKey, res, idx, ixd2 ;
     
-    current = this[stateKey] = this[initialStateKey] ;
-    if (!current) return this ; // fast path -- this object does not use HSMs
+    initial = this[stateKey] = this[this[initialStateKey]] ;
+    if (!initial) return this ; // fast path -- this object does not use HSMs
     
     // okay, does the initial state have superstates? If so, we need to
     // enter them first...
-    superstateKey = current.superstateKey ;
+    superstateKey = initial.superstateKey ;
     if (superstateKey !== undefined) {
       idx = 0 ;
       while (superstateKey) {
@@ -41,7 +41,6 @@ SC.mixin(SC.Object.prototype,
       }
     }
     
-    // enter the initial state' superstates in order
     do {
       this[path[idx]](SC.EVT_ENTER) ;
     } while ((--idx) > 0)
@@ -49,28 +48,35 @@ SC.mixin(SC.Object.prototype,
     // now enter the initial state
     this[stateKey](SC.EVT_ENTER) ;
     
+    // debugger;
+    
     // initialize the initial states's substates
     while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
+      substate = this[stateKey] ;
+      
       // enter the target of the transition (a substate)
       idx = 0 ;
       
-      // get the superstate of the target of the transition...
-      superstateKey = path[++idx] = current.superstateKey ;
-      current = this[superstateKey] ;
-      
       // walk the state hierarchy until we find our target state, storing
       // state keys along the way
-      while (current !== target) {
-        superstateKey = path[++idx] = current.superstateKey ;
-        current = this[superstateKey] ;
+      while (initial !== substate) {
+        superstateKey = substate.superstateKey ;
+        if (superstateKey === undefined) break ;
+        else {
+          path[++idx]= superstateKey ;
+          substate = this[superstateKey] ;
+        }
       }
       
-      // now enter the target's substates in reverse order...
+      // don't re-enter the initial state
+      --idx ;
+      
+      // now enter the target's substates in top-down order...
       do {
         this[path[idx]](SC.EVT_ENTER) ;
       } while ((--idx) > 0)
       
-      // and finally enter the target's substate itself
+      // and finally enter the target itself
       if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
       
       // the loop continues to apply any default transitions as substates
