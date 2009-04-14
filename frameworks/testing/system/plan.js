@@ -518,10 +518,15 @@ CoreTest.Plan = {
       if (!fn.hasOwnProperty(key)) continue ;
       func = fn[key];
       if (typeof func !== "function") continue ;
-      window[key] = function() { return func.apply(plan, arguments); } ;
+      window[key] = this._bind(func);
       plan[key] = func; 
     }
     return this ;
+  },
+  
+  _bind: function(func) {
+    var plan = this;
+    return function() { return func.apply(plan, arguments); };
   }
   
 };

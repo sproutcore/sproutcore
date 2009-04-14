@@ -14,7 +14,7 @@ test("should get a key array for a specified object ",function(){
 
 	var object2 = [];
 	object2 = SC.keys(object1);
-	equals(object2,'names,age,place');
+	same(object2,['names','age','place']);
 });
 
 
