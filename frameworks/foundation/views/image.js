@@ -107,8 +107,11 @@ SC.ImageView = SC.View.extend(SC.Control,
     an image to load.
   */
   _image_valueDidChange: function() {
-    var value = this.get('value'), isUrl = SC.ImageView.valueIsUrl(value);
-    
+    //var value = this.get('value'), isUrl = SC.ImageView.valueIsUrl(value);
+    var value = this.get('value');
+    console.log('Image Value Changed...%@'.fmt(value));
+    if(value instanceof Array) value = value[0];
+    var isUrl = SC.ImageView.valueIsUrl(value);
     // if the old image is still loading, cancel it
     // if (this._loadingUrl) SC.imageCache.abortImage(this._loadingUrl);
     
