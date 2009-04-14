@@ -94,7 +94,7 @@ CoreTest = {
   OK: 'passed',
   
   /** Test failed */
-  FAILED: 'failed',
+  FAIL: 'failed',
   
   /** Test raised exception */
   ERROR: 'errors',

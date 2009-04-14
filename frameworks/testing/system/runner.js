@@ -76,7 +76,7 @@ CoreTest.Runner = {
     }
 
     if (r.errors > 0) {
-      str += CoreTest.fmt('&nbsp;<span class="errors">%@ error%@</span>', r.failed, (r.failed !== 1 ? 's' : ''));
+      str += CoreTest.fmt('&nbsp;<span class="errors">%@ error%@</span>', r.errors, (r.errors !== 1 ? 's' : ''));
     }
 
     if (r.warnings > 0) {
@@ -103,7 +103,7 @@ CoreTest.Runner = {
     len = assertions.length;
     for(idx=0;idx<len;idx++) {
       cur = assertions[idx];
-      q = Q$(CoreTest.fmt('<tr><td class="desc">%@</td><td class="action %@">%@</td></tr>', cur.message, cur.result, cur.result.toUpperCase()));
+      q = Q$(CoreTest.fmt('<tr><td class="desc">%@</td><td class="action %@">%@</td></tr>', cur.message, cur.result, (cur.result || '').toUpperCase()));
       this.logq.append(q);
     }
   }

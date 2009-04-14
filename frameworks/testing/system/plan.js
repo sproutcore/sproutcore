@@ -180,7 +180,6 @@ CoreTest.Plan = {
     @returns {CoreTest.Plan} receiver
   */
   begin: function() {
-    console.log('begin');
     var del = this.delegate;
     if (del && del.planDidBegin) del.planDidBegin(this);
     return this ;
@@ -447,6 +446,7 @@ CoreTest.Plan = {
     ok: function ok(pass, actual, expected, msg) {
       if (msg === undefined) {
         msg = actual ;
+        if (!msg) msg = pass ? "OK" : "failed";
       } else {
         if (!msg) msg = pass ? "OK" : "failed";
         if (pass) {

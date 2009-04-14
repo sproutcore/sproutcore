@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*globals module test ok isObj equals expects object isSet */
+/*globals module test ok equals expects object same */
 
 var object ;
 
@@ -48,7 +48,7 @@ test("should return a cloned object", function() {
   	equals(SC.clone(objectB), SC.clone(objectB)) ;
 	equals(SC.clone(objectC), SC.clone(objectC)) ;
 	equals(SC.clone(objectE), SC.clone(objectE)) ;
-	isSet(a, b);
+	same(a, b);
 });
 
 test("should return cloned object when the object is null", function() {

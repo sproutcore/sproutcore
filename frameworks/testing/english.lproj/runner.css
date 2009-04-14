@@ -21,11 +21,7 @@
   font-weight: bold;
   margin: 0;
   padding: 6px;
-  position: absolute;
-  right: 0px;
   text-align: right;
-  top: 16px;
-  width: 100%;
 }
 
 .testresult em {
@@ -46,11 +42,15 @@
     min-width: 300px;
   }
 
+.core-test .detail {
+  padding: 20px;
+}
+
 .core-test table {
-    background: #000;
-    border-spacing: 1px;
-    margin: 60px 20px;
-  }
+  background: #000;
+  border-spacing: 1px;
+  width: 100%;
+}
 
 .core-test table td,
 .core-test table th {
@@ -102,4 +102,5 @@
 .core-test td.desc,
 .core-test th.desc {
   text-align: left;
+  width: 90%;
 }
