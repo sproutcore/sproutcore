@@ -1,7 +1,7 @@
 // ========================================================================
 // SC.Object Base Tests
 // ========================================================================
-/*globals module test ok isObj equals expects same */
+/*globals module test ok isObj equals expects same plan */
 
 var obj, obj1, don, don1 ; // global variables
 

@@ -260,24 +260,24 @@ $.extend(window, {
 
 $(window).load(function() {
   
-  if ($('#qunit').length === 0) {
-    $('body').append($('<div id="qunit"></div>'));
-  }
-  
-  if($('#userAgent').length == 0) {
-    $('#qunit').append($('<div id="userAgent"></div>'));
-  }
-
-  if ($('#tests').length == 0) {
-    $('#qunit').append($('<ol id="tests"></ol>')) ;
-  }
-  
-	$('#userAgent').html(navigator.userAgent);
-	var head = $('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').insertAfter("#userAgent");
-	$('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
-		$('li.pass')[this.checked ? 'hide' : 'show']();
-	});
-	runTest();	
+  //   if ($('#qunit').length === 0) {
+  //     $('body').append($('<div id="qunit"></div>'));
+  //   }
+  //   
+  //   if($('#userAgent').length == 0) {
+  //     $('#qunit').append($('<div id="userAgent"></div>'));
+  //   }
+  // 
+  //   if ($('#tests').length == 0) {
+  //     $('#qunit').append($('<ol id="tests"></ol>')) ;
+  //   }
+  //   
+  // $('#userAgent').html(navigator.userAgent);
+  // var head = $('<div class="testrunner-toolbar"><label for="filter">Hide passed tests</label></div>').insertAfter("#userAgent");
+  // $('<input type="checkbox" id="filter" />').attr("disabled", true).prependTo(head).click(function() {
+  //  $('li.pass')[this.checked ? 'hide' : 'show']();
+  // });
+	//runTest();	
 });
 
 function synchronize(callback) {
