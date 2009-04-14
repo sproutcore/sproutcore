@@ -902,7 +902,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Array}
     @readOnly
   */
-  displayProperties: [],
+  displayProperties: ['isVisible'],
   
   /**
     You can set this to an SC.Cursor instance; it's className will 
