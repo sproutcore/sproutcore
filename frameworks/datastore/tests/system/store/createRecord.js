@@ -10,6 +10,10 @@ var store, storeKey, json, hash, hash2;
 module("SC.Store#createRecord", {
   setup: function() {
     
+    MyRecordType = SC.Record.extend({
+      title: SC.Record.attr(String, { defaultValue: "Untitled"})
+    });
+    
     store = SC.Store.create();
     
     json = {
@@ -53,5 +57,14 @@ test("create a record", function() {
   
   equals(store.changelog.length, 2, "The changelog has the following number of entries:");
   
+  
+});
+
+test("Creating an empty (null) record should make the hash available", function() {
+  
+  store.createRecord(MyRecordType, null, 'guid8');
+  var storeKey = store.storeKeyFor(MyRecordType, 'guid8');
+  
+  ok(store.readDataHash(storeKey), 'data hash should not be empty/undefined');
   
 });
