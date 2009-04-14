@@ -40,7 +40,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
     Binds the button's selection state to the menu's visibility.
     @private
   */
-  isSelectedBinding: '*menu.isVisible',
+  //isSelectedBinding: '*menu.isVisible',
   
   /**
     Button action handler

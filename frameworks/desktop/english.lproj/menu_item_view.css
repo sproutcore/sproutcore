@@ -1,4 +1,4 @@
-.sc-menu-item {
+.sc-theme .sc-button-view.sc-menu-item {
   position:relative;
   background-color: #ffffff none repeat scroll 0 0;
   border: none;
@@ -7,7 +7,7 @@
   cursor:default;
 }
 
-.sc-menu-item a{
+.sc-theme .sc-menu-item a{
   display: block;
   top: 0;
   line-height: 22px;
@@ -18,30 +18,31 @@
   outline: none ;
 }
 
-.sc-menu-item.disabled a{
+.sc-theme .sc-menu-item.disabled a{
   color:#A0A0A0;
 }
-.sc-menu-item.disabled{
+
+.sc-theme .sc-menu-item.disabled{
   background-color:#E0E0E0;
   border:none;
   color:#A0A0A0;
 }
 
-.sc-menu-item span.separator{
+.sc-theme .sc-menu-item span.separator{
   display: block;
   height: 1px;
   border-bottom: 2px #cccccc solid;
 }
 
-.sc-menu-item span.branch-visible{
+.sc-theme .sc-menu-item span.branch-visible{
   left: 25px;
 }
 
-.sc-menu-item a.has-option {
+.sc-theme .sc-menu-item a.has-option {
   
 }
 
-.sc-menu-item a img {
+.sc-theme .sc-menu-item a img {
   left: 25px;
   bottom: 25%;
   vertical-align: middle;
@@ -49,7 +50,7 @@
 }
 
 /*for the shortcut keys*/
-.sc-menu-item a span.shortCut {
+.sc-theme .sc-menu-item a span.shortCut {
   position:absolute;
   right:5px;
   margin-right:15px;
@@ -58,17 +59,17 @@
 }
 
 /*Hovering over menu items*/
-.sc-pane.sc-panel > .sc-view.sc-menu-item.focus, 
-.sc-menu-item a:hover {
+.sc-theme .sc-pane.sc-panel > .sc-view.sc-menu-item.focus, 
+.sc-theme .sc-menu-item a:hover {
   background-color: #5A8EC6;
 }
 
-.sc-menu-item.disabled a:hover {
+.sc-theme .sc-menu-item.disabled a:hover {
   background-color: #E0E0E0;
 }
 /* @end */
 
-.sc-menu-item div.checkbox {
+.sc-theme .sc-menu-item div.checkbox {
   background-image: sc_static('icons/mini_454545'); 
   background-position: -66px -147px;
   position: absolute;
@@ -81,17 +82,17 @@
   -moz-border-radius: 2px;
 }
 
-.sc-menu-item.disabled div.checkbox,
-.sc-menu-item div.checkbox.inactive {
+.sc-theme .sc-menu-item.disabled div.checkbox,
+.sc-theme .sc-menu-item div.checkbox.inactive {
   background-image: sc_static('blank.gif'); 
 }
 
-.sc-menu-item span.value {
+.sc-theme .sc-menu-item span.value {
   text-align:center;
   margin-left:30px;
 }
 
-.sc-menu-item span.hasBranch {
+.sc-theme .sc-menu-item span.hasBranch {
   position:absolute;
   text-align:center;
   right:5px;
