@@ -5,7 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*globals CoreTest */
+/*globals CoreTest Q$ */
+
+sc_require('jquery');
 
 /** @class
 
@@ -325,6 +327,32 @@ CoreTest.Plan = {
   },
   
   /**
+    Converts the passed string into HTML and then appends it to the main body 
+    element.  This is a useful way to automatically load fixture HTML into the
+    main page.
+  */
+  htmlbody: function htmlbody(string) {
+    this.synchronize(function() {
+      var html = Q$(string) ;
+      var body = Q$('body')[0];
+
+      // first, find the first element with id 'htmlbody-begin'  if exists,
+      // remove everything after that to reset...
+      var begin = Q$('body #htmlbody-begin')[0];
+      if (!begin) {
+        begin = Q$('<div id="htmlbody-begin"></div>')[0];
+        body.appendChild(begin);
+      } else {
+        while(begin.nextSibling) body.removeChild(begin.nextSibling);
+      }
+      begin = null; 
+
+      // now append new content
+      html.each(function() { body.appendChild(this); });
+    }) ;
+  },
+  
+  /**
     Records the results of a test.  This will add the results to the log
     and notify the delegate.  The passed assertions array should contain 
     hashes with the result and message.
@@ -541,26 +569,28 @@ CoreTest.Plan = {
 // EXPORT BASIC API
 // 
 
-// create a module.  If this is the first time, create the test plan and
-// runner.  This will cause the test to run on page load
-window.module = function(desc, l) {
+CoreTest.defaultPlan = function defaultPlan() {
   var plan = CoreTest.plan;
   if (!plan) {
     CoreTest.runner = CoreTest.Runner.create();
     plan = CoreTest.plan = CoreTest.runner.plan;
   }
-  
-  plan.module(desc, l); 
+  return plan;
+};
+
+// create a module.  If this is the first time, create the test plan and
+// runner.  This will cause the test to run on page load
+window.module = function(desc, l) {
+  CoreTest.defaultPlan().module(desc, l); 
 }; 
 
 // create a test.  If this is the first time, create the test plan and
 // runner.  This will cause the test to run on page load
 window.test = function(desc, func) {
-  var plan = CoreTest.plan;
-  if (!plan) {
-    CoreTest.runner = CoreTest.Runner.create();
-    plan = CoreTest.plan = CoreTest.runner.plan;
-  }
-  
-  plan.test(desc, func); 
+  CoreTest.defaultPlan().test(desc, func); 
+}; 
+
+// reset htmlbody for unit testing
+window.htmlbody = function(string) {
+  CoreTest.defaultPlan().htmlbody(string); 
 }; 
