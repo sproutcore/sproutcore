@@ -118,8 +118,8 @@ CoreTest.Plan = {
     setTimeout(function() {
       if (plan.timeout) clearTimeout(plan.timeout);
       plan.timeout = null; 
-      this.isRunning = true;
-      this.process();
+      plan.isRunning = true;
+      plan.process();
     }, 13);
     return this ;
   },
@@ -532,6 +532,27 @@ CoreTest.Plan = {
     same: function(actual, expected, msg) {
       if (msg === undefined) msg = null ; // make sure ok logs properly
       return this.ok(CoreTest.equiv(actual, expected), actual, expected, msg);
+    },
+    
+    /**
+      Stops the current tests from running.  An optional timeout will 
+      automatically fail the test if it does not restart within the specified
+      period of time.
+      
+      @param {Number} timeout timeout in msec
+      @returns {CoreTest.Plan} receiver
+    */
+    stop: function(timeout) {
+      return this.stop(timeout);
+    },
+    
+    /**
+      Restarts tests running.  Use this to begin tests after you stop tests.
+      
+      @returns {CoreTest.Plan} receiver
+    */
+    start: function() {
+      return this.start();
     }
   
   },
@@ -553,7 +574,7 @@ CoreTest.Plan = {
       func = fn[key];
       if (typeof func !== "function") continue ;
       window[key] = this._bind(func);
-      plan[key] = func; 
+      if (!plan[key]) plan[key] = func; 
     }
     return this ;
   },

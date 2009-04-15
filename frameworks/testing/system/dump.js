@@ -61,11 +61,15 @@
     //type is used mostly internally, you can fix a (custom)type in advance
     _parse: function( obj, type ) {
       
-      // avoid recursive loops
-      this.seen.push(obj);
       
       var parser = this.parsers[ type || this.typeOf(obj) ];
       type = typeof parser;     
+
+      // avoid recursive loops
+      if ((parser === this.parsers.object) && (this.seen.indexOf(obj)>=0)) {
+        return '(recursive)';
+      }
+      this.seen.push(obj);
       
       return type == 'function' ? parser.call( this, obj ) :
            type == 'string' ? parser :
@@ -137,7 +141,6 @@
       'arguments': array,
       scobj: function(obj) { return obj.toString(); },
       object:function( map ){
-        if (this.seen.indexOf(map) >= 0) return "(recursive)";
         
         var ret = [ ];
         this.up();
