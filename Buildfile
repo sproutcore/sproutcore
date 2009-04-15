@@ -17,7 +17,7 @@ config :all,
 # CORE FRAMEWORKS
 config :runtime,    :required => []
 config :foundation, :required => [:runtime]
-config :datastore,  :required => [:foundation, :runtime]
+config :datastore,  :required => [:runtime]
 
 # APP-LEVEL FRAMEWORKS
 %w(desktop mobile).each do |app_framework|
