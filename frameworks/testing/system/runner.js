@@ -47,7 +47,7 @@ CoreTest.Runner = {
       '<div class="useragent">UserAgent</div>',
       '<p class="testresult">',
         '<label class="hide-passed">',
-          '<input type="checkbox" /> Hide passed tests',
+          '<input type="checkbox" checked="checked" /> Hide passed tests',
         '</label>',
         '<span class="status">Running...</span>',
       '</p>',
@@ -67,7 +67,8 @@ CoreTest.Runner = {
     
     // listen to change event
     var runner = this;
-    this.report.find('.hide-passed input').change(function() {
+    this.checkbox = this.report.find('.hide-passed input'); 
+    this.checkbox.change(function() {
       runner.hidePassedTestsDidChange();
     });
     
@@ -75,8 +76,7 @@ CoreTest.Runner = {
   },
   
   hidePassedTestsDidChange: function() {
-    var checked = !!this.report.find('.hide-passed input').val();
-    console.log('hidePassedTestsDidChange: ' + checked);
+    var checked = !!this.checkbox.val();
         
     if (checked) {
       this.logq.addClass('hide-clean');
@@ -105,6 +105,14 @@ CoreTest.Runner = {
       str += CoreTest.fmt('&nbsp;<span class="warnings">%@ warnings%@</span>', r.warnings, (r.warnings !== 1 ? 's' : ''));
     }
 
+    // if all tests passed, disable hiding them.  if some tests failed, hide
+    // them by default.
+    if ((r.failed + r.errors + r.warnings) > 0) {
+      this.hidePassedTestsDidChange(); // should be checked by default
+    } else {
+      this.report.find('.hide-passed').addClass('disabled')
+        .find('input').attr('disabled', true);
+    }     
     result.html(str);
   },
   

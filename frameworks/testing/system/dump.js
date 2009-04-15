@@ -42,7 +42,7 @@
   function array( arr ){
     var i = arr.length, ret = new Array(i);         
     this.up();
-    while( i-- ) ret[i] = this.parse( arr[i] );        
+    while( i-- ) ret[i] = this._parse( arr[i] );        
     this.down();
     return join( '[', ret, ']' );
   }
@@ -50,7 +50,20 @@
   reName = /^function (\w+)/;
   
   jsDump = CoreTest.jsDump = {
-    parse:function( obj, type ){//type is used mostly internally, you can fix a (custom)type in advance
+
+    parse: function(obj, type) {
+      this.seen = [];
+      var ret = this._parse(obj, type);
+      this.seen = null;
+      return ret ;
+    },
+    
+    //type is used mostly internally, you can fix a (custom)type in advance
+    _parse: function( obj, type ) {
+      
+      // avoid recursive loops
+      this.seen.push(obj);
+      
       var parser = this.parsers[ type || this.typeOf(obj) ];
       type = typeof parser;     
       
@@ -116,18 +129,20 @@
         if( name ) ret += ' ' + name;
         ret += '(';
         
-        ret = [ ret, this.parse( fn, 'functionArgs' ), '){'].join('');
-        return join( ret, this.parse(fn,'functionCode'), '}' );
+        ret = [ ret, this._parse( fn, 'functionArgs' ), '){'].join('');
+        return join( ret, this._parse(fn,'functionCode'), '}' );
       },
       array: array,
       nodelist: array,
       'arguments': array,
       scobj: function(obj) { return obj.toString(); },
       object:function( map ){
+        if (this.seen.indexOf(map) >= 0) return "(recursive)";
+        
         var ret = [ ];
         this.up();
         for( var key in map ) {
-          ret.push( this.parse(key,'key') + ': ' + this.parse(map[key]) );
+          ret.push( this._parse(key,'key') + ': ' + this._parse(map[key]) );
         }
         this.down();
         return join( '{', ret, '}' );
@@ -142,7 +157,7 @@
         for( var a in this.DOMAttrs ){
           var val = node[this.DOMAttrs[a]];
           if( val ) {
-            ret += ' ' + a + '=' + this.parse( val, 'attribute' );
+            ret += ' ' + a + '=' + this._parse( val, 'attribute' );
           }
         }
         return ret + close + open + '/' + tag + close;

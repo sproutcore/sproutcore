@@ -417,9 +417,15 @@ CoreTest.Plan = {
     Called by a matcher to record that a test had an error.  Requires a 
     working test property.
   */
-  error: function(msg) {
+  error: function(msg, e) {
     var w = this.working ;
     if (!w) throw "error("+msg+") called outside of a working test";
+    
+    if(e && typeof console != "undefined" && console.error && console.warn ) {
+      console.error(msg);
+      console.error(e);
+    }
+    
     w.assertions.push({ message: msg, result: CoreTest.ERROR });
     return this ;
   },
