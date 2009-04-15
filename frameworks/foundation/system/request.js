@@ -88,6 +88,23 @@ SC.Request.postUrl = function(address) {
   return req ;
 };
 
+SC.Request.deleteUrl = function(address) {
+  var req = SC.Request.create() ;
+  req.set('address',address) ;
+  req.set('type', 'DELETE') ;
+  
+  return req ;
+};
+
+SC.Request.putUrl = function(address, object) {
+  var req = SC.Request.create() ;
+  req.set('address',address) ;
+  req.set('body', object.toString()) ;
+  req.set('type', 'PUT') ;
+  
+  return req ;
+};
+
 SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   maxRequests: 2,
   
