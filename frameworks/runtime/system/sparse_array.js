@@ -78,7 +78,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     }
     return this ;
   },
-  
+
   // ..........................................................
   // READING CONTENT 
   // 
@@ -217,7 +217,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   indexOf: function(obj) {
     var del = this.delegate ;
     if (del && del.sparseArrayDidRequestIndexOf) {
-      return del.del.sparseArrayDidRequestIndexOf(this, obj);
+      return del.sparseArrayDidRequestIndexOf(this, obj);
     } else {
       var content = this._sa_content ;
       if (!content) content = this._sa_content = [] ;

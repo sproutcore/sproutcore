@@ -48,7 +48,7 @@
   h2. Example 
   
   {{{
-    SC.ArrayTests = CoreTest.Suite.extend("Verify SC.Array compliance", {
+    SC.ArrayTests = CoreTest.Suite.create("Verify SC.Array compliance", {
       
       // override to generate a new object that implements SC.Array
       newObject: function() { return null; }
@@ -76,7 +76,7 @@ CoreTest.Suite = /** @scope CoreTest.Suite.prototype */ {
     @param {Hash} attrs one or more attribute hashes
     @returns {CoreTest.Suite} subclass of suite.
   */
-  extend: function(desc, attrs) {
+  create: function(desc, attrs) {
     var len = arguments.length,
         ret = CoreTest.beget(this),
         idx;
@@ -219,7 +219,7 @@ CoreTest.Suite = /** @scope CoreTest.Suite.prototype */ {
   */
   module: function(desc) {
     var T = this ;
-    module(T.desc(this.desc(desc)), {
+    module(T.desc(desc), {
       setup: function() { T.setup(); },
       teardown: function() { T.teardown(); }
     });

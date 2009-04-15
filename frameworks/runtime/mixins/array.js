@@ -122,7 +122,8 @@ SC.Array = {
   },
   
   /**
-    Remove an object at the specified index using the replace() primitive method.
+    Remove an object at the specified index using the replace() primitive 
+    method.
   
     @param {Number} idx index of object to remove
   */
@@ -331,7 +332,7 @@ SC.Array = {
       }
     }
     
-    this.notifyPropertyChange('[]') ;
+    this.notifyPropertyChange('[]').notifyPropertyChange('length') ;
     return this ;
   }
   
