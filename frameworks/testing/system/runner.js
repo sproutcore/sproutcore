@@ -75,8 +75,14 @@ CoreTest.Runner = {
   },
   
   hidePassedTestsDidChange: function() {
-    var checked = this.report.find('.hide-passed input').value();
+    var checked = !!this.report.find('.hide-passed input').val();
     console.log('hidePassedTestsDidChange: ' + checked);
+        
+    if (checked) {
+      this.logq.addClass('hide-clean');
+    } else {
+      this.logq.removeClass('hide-clean');
+    }
   },
   
   planDidFinish: function(plan, r) {
@@ -106,12 +112,14 @@ CoreTest.Runner = {
     var name = test, 
         s    = { passed: 0, failed: 0, errors: 0, warnings: 0 }, 
         len  = assertions.length, 
+        clean = '', 
         idx, cur, q;
     
     for(idx=0;idx<len;idx++) s[assertions[idx].result]++;
+    if ((s.failed + s.errors + s.warnings) === 0) clean = "clean" ;
     
     if (module) name = module + " module: " + test ;
-    q = Q$(CoreTest.fmt('<tr class="test"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', name, s.passed, s.failed, s.errors, s.warnings));
+    q = Q$(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));
     
     //debugger ;
     this.logq.append(q);
@@ -119,7 +127,8 @@ CoreTest.Runner = {
     len = assertions.length;
     for(idx=0;idx<len;idx++) {
       cur = assertions[idx];
-      q = Q$(CoreTest.fmt('<tr><td class="desc">%@</td><td class="action %@">%@</td></tr>', cur.message, cur.result, (cur.result || '').toUpperCase()));
+      clean = cur.result === CoreTest.OK ? 'clean' : 'dirty';
+      q = Q$(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
       this.logq.append(q);
     }
   }

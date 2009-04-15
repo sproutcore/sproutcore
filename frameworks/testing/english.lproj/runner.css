@@ -64,6 +64,10 @@
   width: 100%;
 }
 
+.core-test .hide-clean tr.clean {
+  display: none;
+}
+
 .core-test table td,
 .core-test table th {
     background: #fff;

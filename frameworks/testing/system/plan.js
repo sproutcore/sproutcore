@@ -471,7 +471,7 @@ CoreTest.Plan = {
     */
     equals: function equals(actual, expected, msg) {
       if (msg === undefined) msg = null; // make sure ok logs properly
-      return this.ok(actual === expected, actual, expected, msg);
+      return this.ok(actual == expected, actual, expected, msg);
     },
     
     /**
