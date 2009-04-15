@@ -2,7 +2,7 @@
 // View Layout Unit Tests
 // ========================================================================
 
-/*globals module test ok isObj */
+/*globals module test ok same equals */
 
 /* These unit tests verify:  layout(), frame(), styleLayout() and clippingFrame(). */
 
@@ -211,11 +211,11 @@ function verifyFrameResize(layout, before, after) {
   parent.appendChild(child);
   child.set('layout', layout);
   
-  isObj(child.get('frame'), before, "Before: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(before))) ;
+  same(child.get('frame'), before, "Before: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(before))) ;
   
   parent.adjust('width', 300).adjust('height', 300);
   
-  isObj(child.get('frame'), after, "After: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(after)));
+  same(child.get('frame'), after, "After: %@ == %@".fmt(SC.inspect(child.get('frame')), SC.inspect(after)));
   
 }
 

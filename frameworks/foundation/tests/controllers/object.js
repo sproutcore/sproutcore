@@ -1,7 +1,7 @@
 // ========================================================================
 // ObjectController Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok same equals expects */
 
 var c, single, multiple, single_a, empty_a, dummy_a ; // global variables
 
@@ -291,7 +291,7 @@ test("Should update both values when commitChanges() on content objects", functi
     });
     
     // verify we can resolve our binding path
-    isObj(SC.objectForPropertyPath('cc'), cc, "SC.objectForPropertyPath('cc') found collection controller") ;
+    same(SC.objectForPropertyPath('cc'), cc, "SC.objectForPropertyPath('cc') found collection controller") ;
     
     var _contentDidChangeCalled = NO ;
     var oc = SC.ObjectController.create({

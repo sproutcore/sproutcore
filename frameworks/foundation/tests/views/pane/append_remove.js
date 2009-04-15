@@ -34,7 +34,7 @@ test("adding to document for first time", function() {
 test("readding pane", function() {
   var pane = SC.Pane.create();
   var elem1 = Q$('body').get(0), elem2 = Q$('#appendtest').get(0);
-  ok(elem1 && elem2, 'precond - has elem1 && elem2');
+  ok(elem1 && elem2, 'precond - has elem1 && elem2: elem1=%@ elem2=%@'.fmt(elem1, elem2));
   
   pane.appendTo(elem1);
   var layer = pane.get('layer');

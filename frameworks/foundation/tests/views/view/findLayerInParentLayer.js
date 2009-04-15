@@ -38,7 +38,7 @@ module("SC.View#findLayerInParentLayer", {
 
 test("discovers layer by finding element with matching layerId - when DOM is in document already", function() {
   document.body.appendChild(parentDom);
-  equals(view.findLayerInParentLayer(parentDom), childDom, 'found childDom');
+  equals(view.findLayerInParentLayer(parentDom), childDom, 'should find childDom');
   document.body.removeChild(parentDom); // cleanup or else next test may fail
 });
 
