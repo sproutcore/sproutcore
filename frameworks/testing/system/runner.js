@@ -45,7 +45,12 @@ CoreTest.Runner = {
     // setup the report DOM element.
     this.report = Q$(['<div class="core-test">',
       '<div class="useragent">UserAgent</div>',
-      '<p class="testresult">Running...</p>',
+      '<p class="testresult">',
+        '<label class="hide-passed">',
+          '<input type="checkbox" /> Hide passed tests',
+        '</label>',
+        '<span class="status">Running...</span>',
+      '</p>',
       '<div class="detail">',
         '<table>',
           '<thead><tr>',
@@ -60,11 +65,22 @@ CoreTest.Runner = {
     this.report.find('.useragent').html(navigator.userAgent);
     this.logq = this.report.find('tbody');
     
+    // listen to change event
+    var runner = this;
+    this.report.find('.hide-passed input').change(function() {
+      runner.hidePassedTestsDidChange();
+    });
+    
     Q$('body').append(this.report);
   },
   
+  hidePassedTestsDidChange: function() {
+    var checked = this.report.find('.hide-passed input').value();
+    console.log('hidePassedTestsDidChange: ' + checked);
+  },
+  
   planDidFinish: function(plan, r) {
-    var result = this.report.find('.testresult');
+    var result = this.report.find('.testresult .status');
     var str = CoreTest.fmt('Completed %@ tests in %@ msec. <em><span class="total">%@</span> total assertions: ', r.tests, r.runtime, r.total);
     
     if (r.passed > 0) {

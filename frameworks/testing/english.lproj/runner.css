@@ -22,6 +22,18 @@
   margin: 0;
   padding: 6px;
   text-align: right;
+  position: relative;
+}
+
+.testresult label.hide-passed {
+  position: absolute;
+  display: block;
+  margin: 0;
+  padding: 0;
+  left: 20px;
+  height: 14px;
+  top: 50%;
+  margin-top: -8px;
 }
 
 .testresult em {
@@ -30,7 +42,7 @@
   font-style: normal;
 }
 
-.testresult span {
+.testresult em span {
   border: 1px solid #666;
   display: inline-block;
   font-weight: bold;
