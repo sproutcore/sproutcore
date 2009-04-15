@@ -20,12 +20,12 @@ module("SC.RenderContext#get", {
 });
 
 test("it should return strings array with space for top tag if no params passed and no strings pushed yet", function() {
-  isSet(context.get(), [null]);
+  same(context.get(), [null]);
 });
 
 test("it should return full strings array if no params passed and no strings pushed yet", function() {
   context.push("line1");
-  isSet(context.get(), [null, "line1"]);
+  same(context.get(), [null, "line1"]);
 });
 
 test("it should return individual string if index passed that is within current length", function() {

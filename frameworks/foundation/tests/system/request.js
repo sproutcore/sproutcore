@@ -40,7 +40,7 @@ test("Test Asynchronous GET Request", function() {
     ok(contents !== null, 'request.send() should return a response') ;
     ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
     
-    if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}') ;
+    if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}', "should match retrieved message") ;
     window.start() ; // starts the test runner
   }, 3000); // a shorter timeout fails when a lot of unit tests are running...
 });
@@ -54,7 +54,7 @@ test("Test Synchronous GET Request", function() {
   
   ok(contents !== null) ;
   ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
-  if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}') ;
+  if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}', 'should match retrieved message') ;
 });
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
@@ -83,7 +83,7 @@ test("Test Synchronous GET Request, auto-deserializing JSON", function() {
   
   var contents = request.get("response");
   
-  ok(contents !== null) ;
-  ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
-  if (SC.$ok(contents)) same({"message": "Yay!"}, contents) ;
+  ok(contents !== null, 'contents should not be null') ;
+  ok(SC.$ok(contents), 'contents should not be an error (contents = %@)'.fmt(contents));
+  if (SC.$ok(contents)) same(contents, {"message": "Yay!"}, 'contents should have message') ;
 });

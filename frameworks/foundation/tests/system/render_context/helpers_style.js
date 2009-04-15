@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same isSet */
+/*global module test equals context ok same same */
 
 var context = null;
 

@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok isSet */
+/*global module test equals context ok same */
 
 var context = null;
 
@@ -19,18 +19,18 @@ module("SC.RenderContext#classNames", {
 });
 
 test("returns empty array if no current class names", function() {
-  isSet(context.classNames(), [], 'classNames') ;
+  same(context.classNames(), [], 'classNames') ;
 });
 
 test("classNames(array) updates class names", function() {
   var cl = 'bar baz'.w();
   equals(context.classNames(cl), context, "returns receiver");
-  isSet(context.classNames(), cl, 'class names');
+  same(context.classNames(), cl, 'class names');
 });
 
 test("returns classNames if set", function() {
   context.classNames('bar'.w());
-  isSet(context.classNames(), ['bar'], 'classNames');
+  same(context.classNames(), ['bar'], 'classNames');
 });
 
 test("clone on next retrieval if classNames(foo) set with cloneOnModify=YES", function() {
@@ -39,7 +39,7 @@ test("clone on next retrieval if classNames(foo) set with cloneOnModify=YES", fu
   
   var result = context.classNames();
   ok(result !== cl, "class name is NOT same instance");
-  isSet(result, cl, "but arrays are equivalent");
+  same(result, cl, "but arrays are equivalent");
   
   equals(result, context.classNames(), "2nd retrieval is same instance");
 });
@@ -50,7 +50,7 @@ test("extracts class names from element on first retrieval", function() {
   context = SC.RenderContext(elem);
   
   var result = context.classNames();
-  isSet(result, ['foo', 'bar'], 'extracted class names');
+  same(result, ['foo', 'bar'], 'extracted class names');
   
   equals(context.classNames(), result, "should reuse same instance thereafter");
 });
@@ -93,16 +93,16 @@ test("shoudl return receiver", function() {
 
 test("should add class name to existing classNames array on currentTag", function() {
   context.addClass('bar');
-  isSet(context.classNames(), ['foo', 'bar'], 'has classes');
+  same(context.classNames(), ['foo', 'bar'], 'has classes');
   equals(context._classNamesDidChange, YES, "note did change");
 });
 
 test("should only add class name once - does nothing if name already in array", function() {
-  isSet(context.classNames(), ['foo'], 'precondition - has foo classname');
+  same(context.classNames(), ['foo'], 'precondition - has foo classname');
   context._classNamesDidChange = NO; // reset  to pretend once not modified
   
   context.addClass('foo');
-  isSet(context.classNames(), ['foo'], 'no change');
+  same(context.classNames(), ['foo'], 'no change');
   equals(context._classNamesDidChange, NO, "note did not change");
 });
 
@@ -129,17 +129,17 @@ test('should return receiver', function() {
 test("should do nothing if class name not in array", function() {
   context._classNamesDidChange = NO; // reset to pretend not modified
   context.removeClass('imaginary');
-  isSet(context.classNames(), 'foo bar'.w(), 'did not change');
+  same(context.classNames(), 'foo bar'.w(), 'did not change');
   equals(context._classNamesDidChange, NO, "note did not change");
 });
 
 test("should do nothing if there are no class names", function() {
   context = context.begin();
-  isSet(context.classNames(), [], 'precondition - no class names');
+  same(context.classNames(), [], 'precondition - no class names');
   context._classNamesDidChange = NO; // reset to pretend not modified
   
   context.removeClass('foo');
-  isSet(context.classNames(), [], 'still no class names -- and no errors');
+  same(context.classNames(), [], 'still no class names -- and no errors');
   equals(context._classNamesDidChange, NO, "note did not change");
 });
 
