@@ -366,7 +366,7 @@ test("id", function() {
 	
 	t( "ID selector with non-existant ancestor", "#asdfasdf #foobar", [] ); // bug #986
 
-	isSet( SC.$("body").find("div#form"), [], "ID selector within the context of another element" );
+	same( SC.$("body").find("div#form").length, 0, "ID selector within the context of another element" );
 });
 
 test("class", function() {

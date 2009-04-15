@@ -142,7 +142,8 @@ CoreTest.equiv = function () {
                 var i;
                 var eq = true; // unless we can proove it
                 var aProperties = [], bProperties = []; // collection of strings
-
+                if (b===a) return true;
+                
                 // comparing constructors is more strict than using instanceof
                 if ( a.constructor !== b.constructor) {
                     return false;

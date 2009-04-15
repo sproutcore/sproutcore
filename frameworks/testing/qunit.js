@@ -538,12 +538,9 @@ function isSet(a, b, msg) {
 		for ( var i = 0; i < a.length; i++ )
 			if ( a[i] != b[i] )
 				ret = false;
-	} else
-		ret = false;
-	config.assertions.push({
-		result: ret,
-		message: !ret ? (msg + " expected: " + serialArray(b) + " result: " + serialArray(a)) : msg
-	});
+	} else ret = false;
+		
+	window.ok(ret, a, b, msg);
 }
 
 /**
@@ -591,7 +588,18 @@ function t(a,b,c) {
 	var s = "";
 	for ( var i = 0; i < f.length; i++ )
 		s += (s && ",") + '"' + f[i].id + '"';
-	isSet(f, q.apply(q,c), a + " (" + b + ")");
+
+	var a1 = a, b1 = b;
+	var ret = true;
+	
+	a = f ;
+	b = q.apply(q,c);
+	if ( a && b && a.length != undefined && a.length == b.length ) {
+		for ( var i = 0; i < a.length; i++ ) {
+			if ( a[i] != b[i] ) ret = false;
+		}
+	} else ret = false;
+	window.ok(ret, a, b, a1 + " (" + b1 + ")");
 }
 
 /**

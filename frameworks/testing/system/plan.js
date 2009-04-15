@@ -146,6 +146,18 @@ CoreTest.Plan = {
   },
   
   /**
+    Force the test plan to take a break.  Avoids slow script warnings.  This
+    is called automatically after each test completes.
+  */
+  pause: function() {
+    if (this.isRunning) {
+      this.isRunning = false ;
+      this.start();
+    }
+    return this ;
+  },
+  
+  /**
     Initiates running the tests for the first time.  This will add an item 
     to the queue to call finish() on the plan when the run completes.
 
@@ -234,7 +246,7 @@ CoreTest.Plan = {
 
     @returns {CoreTest.Plan} receiver
   */
-  teardown: function(func) {
+  teardown: function teardown(func) {
     this.currentTeardown = func || CoreTest.K ;
     return this;
   },
@@ -242,7 +254,7 @@ CoreTest.Plan = {
   /**
     Generates a unit test, adding it to the test plan.
   */
-  test: function(desc, func) {
+  test: function test(desc, func) {
     
     if (!this.enabled(this.currentModule, desc)) return this; // skip
 
@@ -322,6 +334,16 @@ CoreTest.Plan = {
       // finally, record result
       this.working = null;
       this.record(w.module, w.test, w.assertions);
+      
+      if (!this.pauseTime) {
+        this.pauseTime = new Date().getTime();
+      } else {
+        var now = new Date().getTime();
+        if ((now - this.pauseTime) > 2000) {
+          this.pause();
+          this.pauseTime = now ;
+        }
+      }
       
     });
   },
@@ -553,6 +575,10 @@ CoreTest.Plan = {
     */
     start: function() {
       return this.start();
+    },
+    
+    reset: function() { 
+      return this.reset(); 
     }
   
   },

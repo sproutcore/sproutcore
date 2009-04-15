@@ -313,7 +313,7 @@ test("SC.CoreQuery()", function() {
  expect(8);
 
  var main = SC.$("#main");
- isSet( SC.$("div p", main).get(), q("sndp", "en", "sap"), "Basic selector with SC.$ object as context" );
+ same( SC.$("div p", main).get(), q("sndp", "en", "sap"), "Basic selector with SC.$ object as context" );
 
  var code = SC.$("<code/>");
  equals( code.length, 1, "Correct number of elements generated for code" );
@@ -366,7 +366,7 @@ test("size()", function() {
 
 test("get()", function() {
  expect(1);
- isSet( SC.$("p").get(), q("firstp","ap","sndp","en","sap","first"), "Get All Elements" );
+ same( SC.$("p").get(), q("firstp","ap","sndp","en","sap","first"), "Get All Elements" );
 });
 
 test("get(Number)", function() {
@@ -376,8 +376,8 @@ test("get(Number)", function() {
 
 test("add(String|Element|Array|undefined)", function() {
  expect(12);
- isSet( SC.$("#sndp").add("#en").add("#sap").get(), q("sndp", "en", "sap"), "Check elements from document" );
- isSet( SC.$("#sndp").add( SC.$("#en")[0] ).add( SC.$("#sap") ).get(), q("sndp", "en", "sap"), "Check elements from document" );
+ same( SC.$("#sndp").add("#en").add("#sap").get(), q("sndp", "en", "sap"), "Check elements from document" );
+ same( SC.$("#sndp").add( SC.$("#en")[0] ).add( SC.$("#sap") ).get(), q("sndp", "en", "sap"), "Check elements from document" );
  ok( SC.$([]).add(SC.$("#form")[0].elements).length >= 13, "Check elements from array" );
 
  var x = SC.$([]).add(SC.$("<p id='x1'>xxx</p>")).add(SC.$("<p id='x2'>xxx</p>"));
@@ -969,7 +969,7 @@ test("val()", function() {
  
  equals( SC.$('#select2').val(), '3', 'Call val() on a single="single" select' );
 
- isSet( SC.$('#select3').val(), ['1', '2'], 'Call val() on a multiple="multiple" select' );
+ same( SC.$('#select3').val(), ['1', '2'], 'Call val() on a multiple="multiple" select' );
 
  equals( SC.$('#option3c').val(), '2', 'Call val() on a option element with value' );
  
@@ -1051,11 +1051,11 @@ test("filter()", function() {
  expect(5);
  
  // psuedo-selectors are not supported
- //isSet( SC.$("#form input").filter(":checked").get(), q("radio2", "check1"), "filter(String)" );
+ //same( SC.$("#form input").filter(":checked").get(), q("radio2", "check1"), "filter(String)" );
 
- isSet( SC.$("p").filter("#ap, #sndp").get(), q("ap", "sndp"), "filter('String, String')" );
- isSet( SC.$("p").filter("#ap,#sndp").get(), q("ap", "sndp"), "filter('String,String')" );
- isSet( SC.$("p").filter(function() { return !SC.$("a", this).length; }).get(), q("sndp", "first"), "filter(Function)" );
+ same( SC.$("p").filter("#ap, #sndp").get(), q("ap", "sndp"), "filter('String, String')" );
+ same( SC.$("p").filter("#ap,#sndp").get(), q("ap", "sndp"), "filter('String,String')" );
+ same( SC.$("p").filter(function() { return !SC.$("a", this).length; }).get(), q("sndp", "first"), "filter(Function)" );
 
  // using contents will get comments regular, text, and comment nodes
  var j = SC.$("#nonnodes").contents();
@@ -1070,16 +1070,16 @@ test("not()", function() {
  equals( SC.$("#main p#ap a").not("#google").length, 3, "not('selector')" );
  equals( SC.$("#main p#ap a").not(document.getElementById("google")).length, 3, "not(DOMElement)" );
 
- isSet( SC.$("p").not(".result").get(), q("firstp", "ap", "sndp", "en", "sap", "first"), "not('.class')" );
+ same( SC.$("p").not(".result").get(), q("firstp", "ap", "sndp", "en", "sap", "first"), "not('.class')" );
 
- isSet( SC.$("p").not("#ap, #sndp, .result").get(), q("firstp", "en", "sap", "first"), "not('selector, selector')" );
+ same( SC.$("p").not("#ap, #sndp, .result").get(), q("firstp", "en", "sap", "first"), "not('selector, selector')" );
 
- isSet( SC.$("p").not(SC.$("#ap, #sndp, .result")).get(), q("firstp", "en", "sap", "first"), "not(SC.$)" );
+ same( SC.$("p").not(SC.$("#ap, #sndp, .result")).get(), q("firstp", "en", "sap", "first"), "not(SC.$)" );
 
  equals( SC.$("p").not(document.getElementsByTagName("p")).length, 0, "not(Array-like DOM collection)" );
 
  // not supported selectors
- //isSet( SC.$("#form option").not("option.emptyopt:contains('Nothing'),[selected],[value='1']").get(), q("option1c", "option1d", "option2c", "option3d", "option3e" ), "not('complex selector')");
+ //same( SC.$("#form option").not("option.emptyopt:contains('Nothing'),[selected],[value='1']").get(), q("option1c", "option1d", "option2c", "option3d", "option3e" ), "not('complex selector')");
 
  var selects = SC.$("#form select");
  isSet( selects.not( selects[1] ), q("select1", "select3"), "filter out DOM element");
@@ -1087,29 +1087,29 @@ test("not()", function() {
 
 test("andSelf()", function() {
  expect(4);
- isSet( SC.$("#en").siblings().andSelf().get(), q("sndp", "sap","en"), "Check for siblings and self" );
- isSet( SC.$("#foo").children().andSelf().get(), q("sndp", "en", "sap", "foo"), "Check for children and self" );
- isSet( SC.$("#en, #sndp").parent().andSelf().get(), q("foo","en","sndp"), "Check for parent and self" );
- isSet( SC.$("#groups").parents("p, div").andSelf().get(), q("ap", "main", "groups"), "Check for parents and self" );
+ same( SC.$("#en").siblings().andSelf().get(), q("sndp", "sap","en"), "Check for siblings and self" );
+ same( SC.$("#foo").children().andSelf().get(), q("sndp", "en", "sap", "foo"), "Check for children and self" );
+ same( SC.$("#en, #sndp").parent().andSelf().get(), q("foo","en","sndp"), "Check for parent and self" );
+ same( SC.$("#groups").parents("p, div").andSelf().get(), q("ap", "main", "groups"), "Check for parents and self" );
 });
 
 test("siblings([String])", function() {
  expect(3);
- isSet( SC.$("#en").siblings().get(), q("sndp", "sap"), "Check for siblings" );
+ same( SC.$("#en").siblings().get(), q("sndp", "sap"), "Check for siblings" );
  // no psuedo-selectors
- //isSet( SC.$("#sndp").siblings(":has(code)").get(), q("sap"), "Check for filtered siblings (has code child element)" );
- //isSet( SC.$("#sndp").siblings(":has(a)").get(), q("en", "sap"), "Check for filtered siblings (has anchor child element)" );
- isSet( SC.$("#foo").siblings("form, b").get(), q("form", "lengthtest", "testForm", "floatTest"), "Check for multiple filters" );
- isSet( SC.$("#en, #sndp").siblings().get(), q("sndp", "sap", "en"), "Check for unique results from siblings" );
+ //same( SC.$("#sndp").siblings(":has(code)").get(), q("sap"), "Check for filtered siblings (has code child element)" );
+ //same( SC.$("#sndp").siblings(":has(a)").get(), q("en", "sap"), "Check for filtered siblings (has anchor child element)" );
+ same( SC.$("#foo").siblings("form, b").get(), q("form", "lengthtest", "testForm", "floatTest"), "Check for multiple filters" );
+ same( SC.$("#en, #sndp").siblings().get(), q("sndp", "sap", "en"), "Check for unique results from siblings" );
 });
 
 test("children([String])", function() {
  expect(2);
- isSet( SC.$("#foo").children().get(), q("sndp", "en", "sap"), "Check for children" );
+ same( SC.$("#foo").children().get(), q("sndp", "en", "sap"), "Check for children" );
  
  // no pseudo-selectors
- //isSet( SC.$("#foo").children(":has(code)").get(), q("sndp", "sap"), "Check for filtered children" );
- isSet( SC.$("#foo").children("#en, #sap").get(), q("en", "sap"), "Check for multiple filters" );
+ //same( SC.$("#foo").children(":has(code)").get(), q("sndp", "sap"), "Check for filtered children" );
+ same( SC.$("#foo").children("#en, #sap").get(), q("en", "sap"), "Check for multiple filters" );
 });
 
 test("parent([String])", function() {
@@ -1118,7 +1118,7 @@ test("parent([String])", function() {
  equals( SC.$("#groups").parent("p")[0].id, "ap", "Filtered parent check" );
  equals( SC.$("#groups").parent("div").length, 0, "Filtered parent check, no match" );
  equals( SC.$("#groups").parent("div, p")[0].id, "ap", "Check for multiple filters" );
- isSet( SC.$("#en, #sndp").parent().get(), q("foo"), "Check for unique results from parent" );
+ same( SC.$("#en, #sndp").parent().get(), q("foo"), "Check for unique results from parent" );
 });
 
 test("parents([String])", function() {
@@ -1126,8 +1126,8 @@ test("parents([String])", function() {
  equals( SC.$("#groups").parents()[0].id, "ap", "Simple parents check" );
  equals( SC.$("#groups").parents("p")[0].id, "ap", "Filtered parents check" );
  equals( SC.$("#groups").parents("div")[0].id, "main", "Filtered parents check2" );
- isSet( SC.$("#groups").parents("p, div").get(), q("ap", "main"), "Check for multiple filters" );
- //isSet( SC.$("#en, #sndp").parents().get(), q("foo", "main", "dl", "body", "html"), "Check for unique results from parents" );
+ same( SC.$("#groups").parents("p, div").get(), q("ap", "main"), "Check for multiple filters" );
+ //same( SC.$("#en, #sndp").parents().get(), q("foo", "main", "dl", "body", "html"), "Check for unique results from parents" );
 });
 
 test("next([String])", function() {
