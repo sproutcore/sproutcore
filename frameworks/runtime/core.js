@@ -690,11 +690,11 @@ SC.mixin(Function.prototype,
   
   /**
     Indicates that the computed property is volatile.  Normally SproutCore 
-    assumes that your computed property is indempotent.  That is, calling 
+    assumes that your computed property is idempotent.  That is, calling 
     set() on your property more than once with the same value has the same
     effect as calling it only once.  
     
-    All non-computed properties are indempotent and normally you should make
+    All non-computed properties are idempotent and normally you should make
     your computed properties behave the same way.  However, if you need to
     make your property change its return value everytime your method is
     called, you may chain this to your property to make it volatile.
@@ -705,7 +705,7 @@ SC.mixin(Function.prototype,
     @param {Boolean} aFlag optionally indicate state, default to YES
     @returns {Function} receiver
   */
-  indempotent: function(aFlag) {
+  idempotent: function(aFlag) {
     this.isProperty = YES;  // also make a property just in case
     if (!this.dependentKeys) this.dependentKeys = [] ;
     this.isVolatile = !((aFlag === undefined) ? NO : aFlag) ;
