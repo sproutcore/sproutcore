@@ -318,7 +318,7 @@ SC.MenuItemView = SC.ButtonView.extend(
    @returns {void}
   */
   renderShortcut: function(context, shortcut) {
-    context.push('<span class = "shortCut">' + shortcut + '</span>') ;
+    context.push('<span class = "shortcut">' + shortcut + '</span>') ;
   },
 
   /**

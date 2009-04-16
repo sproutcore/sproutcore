@@ -75,6 +75,13 @@ SC.MenuPane = SC.PickerPane.extend(
     @type String
   */
   itemWidth: null,
+  
+  /** 
+    The default height for each menu item.
+
+    @type String
+  */
+  itemHeight: 20,
 
   /** 
     The height of the menu and ultimately the menu itself.
@@ -236,8 +243,8 @@ SC.MenuPane = SC.PickerPane.extend(
           if (!keys[0] && item.toString) cur[0] = item.toString() ;
           if (!keys[1]) cur[1] = item ;
           if (!keys[2]) cur[2] = YES ;
-          if (!cur[9]) cur[9] = 20 ;
-          if (cur[4]) cur[9] = 5 ;
+          if (!cur[9]) cur[9] = this.get('itemHeight') ;
+          if (cur[4]) cur[9] = 9 ;
           menuHeight = menuHeight+cur[9] ;
           if (loc && cur[0]) cur[0] = cur[0].loc() ;
           ret[rel] = SC.Object.create({ title: cur[0], value: cur[1],
@@ -246,7 +253,7 @@ SC.MenuPane = SC.PickerPane.extend(
                                               isCheckbox: cur[6], isShortCut: cur[7],
                                               menuItemNumber: cur[9], isBranch: cur[8],
                                               itemHeight: cur[9], subMenu: cur[10], 
-                                              keyEquivalent: cur[11], target:cur[12] });                         
+                                              keyEquivalent: cur[11], target:cur[12] }) ;                         
       }
     }
     this.set('menuHeight',menuHeight);
@@ -337,10 +344,10 @@ SC.MenuPane = SC.PickerPane.extend(
       var isShortCut = item.get('isShortCut') ;
       var isBranch   = item.get('isBranch') ;
       var itemSubMenu = item.get('subMenu') ;
-      var itemHeight = item.get('itemHeight') || 20 ;
+      var itemHeight = item.get('itemHeight') ;
       var itemKeyEquivalent = item.get('keyEquivalent') ;
-      var itemWidth = this.get('itemWidth');
-      var itemTarget = this.get('itemTarget');
+      var itemWidth = this.get('itemWidth') ;
+      var itemTarget = this.get('itemTarget') ;
       var itemView = this.createChildView(
         SC.MenuItemView, {
           owner : itemView,
