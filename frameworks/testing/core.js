@@ -100,6 +100,10 @@ CoreTest = {
   ERROR: 'errors',
   
   /** Test raised warning */
-  WARN: 'warnings'
+  WARN: 'warnings',
+  
+  showUI : false
+  
+  
   
 };

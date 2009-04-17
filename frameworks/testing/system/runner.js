@@ -113,6 +113,7 @@ CoreTest.Runner = {
       this.report.find('.hide-passed').addClass('disabled')
         .find('input').attr('disabled', true);
     }     
+    if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
   },
   

@@ -43,7 +43,7 @@ SC.ControlTestPane = SC.Pane.extend(
 /** @scope SC.ControlTestPane.prototype */ {
   
   classNames: ['sc-control-test-pane'],
-  layout: { right: 20, width: 480, top: 75, bottom: 20 },
+  layout: { right: 5, width: 350, top: 75, bottom: 5 },
 
   /**
     The starting top location for the first row.  This will increment as 
@@ -99,20 +99,21 @@ SC.ControlTestPane.add = function(label, view, attrs) {
   // compute layout.
   var padding = this.prototype.padding, height = this.prototype.height;
   var top = this.prototype.top + padding*2, layout;
+  var labelHeight =14;
   if (top === padding*2) top = padding; // reduce padding @ top
   
   // if the passed in view has a layout property and the layout has an 
   // explicit, numerical height, then use that instead.
   if (view.prototype.layout && (typeof view.prototype.layout.height === SC.T_NUMBER)) height = view.prototype.layout.height;
   
-  this.prototype.top = top + height; // make room
+  this.prototype.top = top + height+labelHeight+(padding*2); // make room
   
   // calculate labelView and add it
-  layout = { left: padding, width: 150, top: top, height: height };
+  layout = { left: padding, width: 150, top: top, height: 20 };
   var labelView = SC.LabelView.design({
     value: label + ':', 
-    layout: { left: 0, right: 0, centerY: 0, height: 14 }, 
-    textAlign: SC.ALIGN_RIGHT, 
+    layout: { left: 0, right: 0, top: 0, height: labelHeight }, 
+   // textAlign: SC.ALIGN_RIGHT, 
     fontWeight: SC.BOLD_WEIGHT 
   });
 
@@ -123,7 +124,7 @@ SC.ControlTestPane.add = function(label, view, attrs) {
   // now layout view itself...
   var wrapper = SC.View.design({
     classNames: ['wrapper'],
-    layout: { left: 150+padding*2, top: top, right: padding, height: height },
+    layout: { left: padding, top: top+labelHeight+padding, right: padding, height: height },
     childViews: [view]
   });
   var idx = this.prototype.childViews.length ;
