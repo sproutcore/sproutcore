@@ -21,7 +21,7 @@ SC._ObserverSet = {
   
   // adds the named target/method observer to the set.  The method must be
   // a function, not a string..
-  add: function(target, method) {
+  add: function(target, method, context) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
     
     // get the set of methods
@@ -32,8 +32,16 @@ SC._ObserverSet = {
       methods.isTargetSet = YES ; // used for getMembers().
       this.targets++ ;
     }
-    
     methods.add(method) ;
+    
+    // context is really useful sometimes but not used that often so this
+    // implementation is intentionally lazy.
+    if (context !== undefined) {
+      var contexts = methods.contexts ;
+      if (!context) contexts = {};
+      contexts[SC.guidFor(method)] = context ;
+    }
+    
     this._membersCacheIsValid = NO ;
   },
   
@@ -53,16 +61,21 @@ SC._ObserverSet = {
     if (methods.length <= 0) {
       methods.target = null;
       methods.isTargetSet = NO ;
+      methods.contexts = null ;
       delete this[targetGuid] ;
       this.targets-- ;
+      
+    } else if (methods.contexts) {
+      delete methods.contexts[SC.guidFor(method)];
     }
-    
+
     this._membersCacheIsValid = NO;
     
     return YES ;
   },
   
   // Invokes the target/method pairs in the receiver.  Used by SC.RunLoop
+  // Note: does not support context
   invokeMethods: function() {
     // iterate through the set, look for sets.
     for(var key in this) {
@@ -93,7 +106,17 @@ SC._ObserverSet = {
       if (value && value.isTargetSet) {
         var idx = value.length;
         var target = value.target ;
-        while(--idx>=0) ret.push([target, value[idx]]) ;
+        
+        // slightly slower - only do if we have contexts
+        var contexts = value.contexts ;
+        if (contexts) {
+          while(--idx>=0) {
+            var method = value[idx] ;
+            ret.push([target, method, contexts[SC.guidFor(method)]]) ;
+          }
+        } else {
+          while(--idx>=0) ret.push([target, method]);
+        }
       }
     }
 
@@ -110,6 +133,7 @@ SC._ObserverSet = {
       if (oldSet && oldSet.isTargetSet) {
         newSet = oldSet.clone();
         newSet.target = oldSet.target ;
+        if (oldSet.contexts) newSet.contexts = SC.clone(oldSet.contexts);
         ret[key] = newSet ;
       }
     }

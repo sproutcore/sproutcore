@@ -536,12 +536,45 @@ SC.Observable = {
     value is set, regardless of whether it has actually changed.  Your
     observer should be prepared to handle that.
     
+    You can also pass an optional context parameter to this method.  The 
+    context will be passed to your observer method whenever it is triggered.
+    Note that if you add the same target/method pair on a key multiple times
+    with different context parameters, your observer will only be called once
+    with the last context you passed.
+    
+    h2. Observer Methods
+    
+    Observer methods you pass should generally have the following signature if
+    you do not pass a "context" parameter:
+    
+    {{{
+      fooDidChange: function(sender, key, value, rev);
+    }}}
+    
+    The sender is the object that changed.  The key is the property that
+    changes.  The value property is currently reserved and unused.  The rev
+    is the last property revision of the object when it changed, which you can
+    use to detect if the key value has really changed or not.
+    
+    If you pass a "context" parameter, the context will be passed before the
+    revision like so:
+    
+    {{{
+      fooDidChange: function(sender, key, value, context, rev);
+    }}}
+    
+    Usually you will not need the value, context or revision parameters at 
+    the end.  In this case, it is common to write observer methods that take
+    only a sender and key value as parameters or, if you aren't interested in
+    any of these values, to write an observer that has no parameters at all.
+    
     @param key {String} the key to observer
     @param target {Object} the target object to invoke
     @param method {String|Function} the method to invoke.
+    @param context {Object} optional context
     @returns {SC.Object} self
   */
-  addObserver: function(key,target,method) {
+  addObserver: function(key, target, method, context) {
     
     var kvoKey, chain, chains, observers;
     
@@ -559,8 +592,9 @@ SC.Observable = {
       
       // create the chain and save it for later so we can tear it down if 
       // needed.
-      chain = SC._ChainObserver.createChain(this, key, target, method);
-      chain.masterTarget = target;  chain.masterMethod = method ;
+      chain = SC._ChainObserver.createChain(this, key, target, method, context);
+      chain.masterTarget = target;  
+      chain.masterMethod = method ;
       
       // Save in set for chain observers.
       this._kvo_for(SC.keyFor('_kvo_chains', key)).push(chain);
@@ -577,13 +611,21 @@ SC.Observable = {
 
       if (target === this) target = null ; // use null for observers only.
       kvoKey = SC.keyFor('_kvo_observers', key);
-      this._kvo_for(kvoKey, SC._ObserverSet).add(target, method);
+      this._kvo_for(kvoKey, SC._ObserverSet).add(target, method, context);
       this._kvo_for('_kvo_observed_keys', SC.Set).add(key) ;
     }
-    
+
+    if (this.didAddObserver) this.didAddObserver(key, target, method);
     return this;
   },
 
+  /**
+    Remove an observer you have previously registered on this object.  Pass
+    the same key, target, and method you passed to addObserver() and your 
+    target will no longer receive notifications.
+    
+    @returns {SC.Observable} reciever
+  */
   removeObserver: function(key, target, method) {
     
     var kvoKey, chains, chain, observers, idx ;
@@ -630,10 +672,29 @@ SC.Observable = {
         }
       }
     }
-    
+
+    if (this.didRemoveObserver) this.didRemoveObserver(key, target, method);
     return this;
   },
   
+  /**
+    Returns YES if the object currently has observers registered for a 
+    particular key.  You can use this method to potentially defer performing
+    an expensive action until someone begins observing a particular property
+    on the object.
+    
+    @param {String} key key to check
+    @returns {Boolean}
+  */
+  hasObserverFor: function(key) {
+    var observers = this[SC.keyFor('_kvo_observers', key)],
+        locals    = this[SC.keyFor('_kvo_local', key)],
+        members ;
+
+    if (locals && locals.length>0) return YES ;
+    if (observers && observers.getMembers().length>0) return YES ;
+    return NO ;
+  },
 
   /**
     This method will register any observers and computed properties saved on
@@ -750,10 +811,11 @@ SC.Observable = {
 
     if (!this._observableInited) this.initObservable() ;
     
-    SC.Observers.flush() ; // hookup as many observers as possible.
+    SC.Observers.flush(this) ; // hookup as many observers as possible.
 
     var observers, changes, dependents, starObservers, idx, keys, rev ;
     var members, membersLength, member, memberLoc, target, method, loc, func ;
+    var context ;
 
     // Get any starObservers -- they will be notified of all changes.
     starObservers =  this['_kvo_observers_*'] ;
@@ -815,9 +877,18 @@ SC.Observable = {
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
-            if (member[2] === rev) continue ; // skip notified items.
-            target = member[0] || this; method = member[1] ; member[2] = rev;
-            method.call(target, this, key, null, rev) ;
+            if (member[3] === rev) continue ; // skip notified items.
+
+            target = member[0] || this; 
+            method = member[1] ; 
+            context = member[2];
+            member[3] = rev;
+            
+            if (context !== undefined) {
+              method.call(target, this, key, null, context, rev);
+            } else {
+              method.call(target, this, key, null, rev) ;
+            }
           }
         }
 
@@ -840,8 +911,15 @@ SC.Observable = {
           membersLength = members.length ;
           for(memberLoc=0;memberLoc < membersLength; memberLoc++) {
             member = members[memberLoc] ;
-            target = member[0] || this; method = member[1] ;
-            method.call(target, this, key, null, rev) ;
+            target = member[0] || this; 
+            method = member[1] ;
+            context = member[2] ;
+            
+            if (context !== undefined) {
+              method.call(target, this, key, null, context, rev);
+            } else {
+              method.call(target, this, key, null, rev) ;
+            }
           }
         }
 

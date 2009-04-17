@@ -63,20 +63,57 @@ SC.Observers = {
     }
   },
   
+  // Range Observers register here to indicate that they may potentially 
+  // need to start observing.
+  addPendingRangeObserver: function(observer) {
+    var ro = this.rangeObservers;
+    if (!ro) ro = this.rangeObservers = SC.Set.create();
+    ro.add(observer);
+    return this ;
+  },
+  
+  _TMP_OUT: [],
+  
   // Flush the queue.  Attempt to add any saved observers.
-  flush: function() {
+  flush: function(object) { 
+       
+    // flush any observers that we tried to setup but didn't have a path yet
     var oldQueue = this.queue ;
-    var newQueue = (this.queue = []) ; 
-    var idx = oldQueue.length ;
-    while(--idx >= 0) {
-      var item = oldQueue[idx] ;
-      if (!item) continue ;
-      
-      var tuple = SC.tupleForPropertyPath(item[0], item[3]);
-      if (tuple) {
-        tuple[0].addObserver(tuple[1], item[1], item[2]) ;
-      } else newQueue.push(item) ;
+    if (oldQueue && oldQueue.length > 0) {
+      var newQueue = (this.queue = []) ; 
+      var idx = oldQueue.length ;
+      while(--idx >= 0) {
+        var item = oldQueue[idx] ;
+        if (!item) continue ;
+
+        var tuple = SC.tupleForPropertyPath(item[0], item[3]);
+        if (tuple) {
+          tuple[0].addObserver(tuple[1], item[1], item[2]) ;
+        } else newQueue.push(item) ;
+      }
     }
+    
+    // if this object needsRangeObserver then see if any pending range 
+    // observers need it.
+    if (object._kvo_needsRangeObserver) {
+      var set = this.rangeObsevers,
+          len = set ? set.get('length') : 0,
+          out = this._TMP_OUT,
+          ro;
+          
+      for(idx=0;idx<len;idx++) {
+        ro = set[idx]; // get the range observer
+        if (ro.setupPending(object)) {
+          out.push(ro); // save to remove later
+        }
+      }
+      
+      // remove any that have setup
+      if (out.length > 0) set.removeEach(out);
+      out.length = 0; // reset
+      object._kvo_needsRangeObserver = NO ;
+    }
+    
   },
   
   isObserveringSuspended: 0,

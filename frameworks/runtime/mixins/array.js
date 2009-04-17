@@ -271,19 +271,26 @@ SC.Array = {
     range observer object.  You can use this reference to destroy the 
     range observer when you are done with it or to update its range.
     
-    @param {Number} start the starting index to observe
-    @param {Number} end the ending index to observe
+    @param {SC.IndexSet} indexes indexes to observe
     @param {Object} target object to invoke on change
     @param {String|Function} method the method to invoke
+    @param {Object} context optional context
     @returns {SC.RangeObserver} range observer
   */
-  createRangeObserver: function(start, length, target, method) {
+  createRangeObserver: function(indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
-    if (!rangeob) rangeob = this._array_rangeObservers = [] ;
+    if (!rangeob) rangeob = this._array_rangeObservers = SC.Set.create() ;
 
     var C = this.rangeObserverClass ;
-    var ret = C.create(this, start, length, target, method) ;
-    rangeob.push(ret);
+    var ret = C.create(this, indexes, target, method, context) ;
+    rangeob.add(ret);
+    
+    // first time a range observer is added, begin observing the [] property
+    if (!this._array_isNotifyingRangeObservers) {
+      this._array_isNotifyingRangeObservers = YES ;
+      this.addObserver('[]', this, this._array_notifyRangeObservers);
+    }
+    
     return ret ;
   },
   
@@ -296,12 +303,11 @@ SC.Array = {
     pass in.
     
     @param {SC.RangeObserver} rangeObserver the range observer
-    @param {Number} start the starting index
-    @param {Number} length the new length
+    @param {SC.IndexSet} indexes new indexes to observe
     @returns {SC.RangeObserver} the range observer (or a new one)
   */
-  updateRangeObserver: function(rangeObserver, start, length) {
-    return rangeObserver.update(this, start, length);
+  updateRangeObserver: function(rangeObserver, indexes) {
+    return rangeObserver.update(this, indexes);
   },
 
   /**
@@ -317,23 +323,43 @@ SC.Array = {
   destroyRangeObserver: function(rangeObserver) {
     var ret = rangeObserver.destroy(this);
     var rangeob = this._array_rangeObservers;
-    if (rangeob) rangeob[rangeob.indexOf(rangeObserver)] = null ; // clear
+    if (rangeob) rangeob.remove(rangeObserver) ; // clear
     return ret ;
   },
 
   /** @private - override to update range observers */
   enumerableContentDidChange: function(start, length) {
-    // notify range observers
-    var rangeob = this._array_rangeObservers, len, idx, cur;
-    if (rangeob && (len = rangeob.length)>0) {
-      for(idx=0;idx<len;idx++) { 
-        cur = rangeob[idx];
-        if ((length === undefined) || ((start < (cur.start + cur.length)) && ((start+length) > cur.start))) cur.rangeDidChange();
+
+    var rangeob = this._array_rangeObservers ;
+    if (rangeob && rangeob.length>0) {
+      // if start/length are not passed, assume everything changed
+      if (start === undefined && length === undefined) {
+        start = 0 ;
+        length = this.get('length');
       }
+      var changes = this._array_rangeChanges;
+      if (!changes) changes = this._array_rangeChanges = SC.IndexSet.create();
+      changes.add(start, length);
     }
     
     this.notifyPropertyChange('[]').notifyPropertyChange('length') ;
     return this ;
+  },
+  
+  /** 
+    Observer fires whenever the '[]' property changes.  If there are 
+    range observers, will notify observers of change.
+  */
+  _array_notifyRangeObservers: function() {
+    var rangeob = this._array_rangeObservers,
+        changes = this._array_rangeChanges,
+        len     = rangeob ? rangeob.length : 0, 
+        idx, cur;
+        
+    if (len > 0 && changes && changes.length > 0) {
+      for(idx=0;idx<len;idx++) rangeob[idx].rangeDidChange(changes);
+      changes.clear(); // reset for later notifications
+    }
   }
   
 } ;

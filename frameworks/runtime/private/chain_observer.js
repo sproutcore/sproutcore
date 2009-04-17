@@ -31,14 +31,14 @@ SC._ChainObserver = function(property) {
 } ;
 
 // This is the primary entry point.  Configures the chain.
-SC._ChainObserver.createChain = function(rootObject, path, target, method) {
+SC._ChainObserver.createChain = function(rootObject, path, target, method, context) {
 
-  var parts = path.split('.') ;
-  
   // First we create the chain.
-  var root ;
-  var tail = root = new SC._ChainObserver(parts[0]) ;
-  var len = parts.length;
+  var parts = path.split('.'),
+      root  = new SC._ChainObserver(parts[0]),
+      tail  = root,
+      len   = parts.length;
+
   for(var idx=1;idx<len;idx++) {
     tail = tail.next = new SC._ChainObserver(parts[idx]) ;
   }
@@ -50,7 +50,7 @@ SC._ChainObserver.createChain = function(rootObject, path, target, method) {
   
   // Finally, set the target/method on the tail so that future changes will
   // trigger.
-  tail.target = target; tail.method = method ;
+  tail.target = target; tail.method = method ; tail.context = context ;
   
   // and return the root to save
   return root ;
@@ -108,10 +108,16 @@ SC._ChainObserver.prototype = {
     if (this.next) this.next.objectDidChange(value) ;
     
     // if we have a target/method, call it.
-    var target = this.target; var method = this.method;
+    var target  = this.target,
+        method  = this.method,
+        context = this.context ;
     if (target && method) {
       var rev = object.propertyRevision ;
-      method.call(target, object, property, value, rev) ;
+      if (context) {
+        method.call(target, object, property, value, context, rev);
+      } else {
+        method.call(target, object, property, value, rev) ;
+      }
     } 
   },
   
@@ -128,7 +134,7 @@ SC._ChainObserver.prototype = {
     if (this.next) this.next.destroyChain() ;
     
     // and clear left overs...
-    this.next = this.target = this.method = this.object = null ;
+    this.next = this.target = this.method = this.object = this.context = null;
     return null ;
   }
   
