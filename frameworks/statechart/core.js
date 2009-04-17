@@ -6,19 +6,19 @@
 // ==========================================================================
 
 SC.EVT_ENTER_SIG = 'sc-evt-enter-sig' ;
-SC.EVT_EXIT_SIG = 'sc-evt-exit-sig' ;
-SC.EVT_INIT_SIG = 'sc-evt-init-sig' ;
+SC.EVT_EXIT_SIG  = 'sc-evt-exit-sig' ;
+SC.EVT_INIT_SIG  = 'sc-evt-init-sig' ;
 
 SC.EVT_ENTER = { sig: SC.EVT_ENTER_SIG } ;
-SC.EVT_EXIT = { sig: SC.EVT_EXIT_SIG } ;
-SC.EVT_INIT = { sig: SC.EVT_INIT_SIG } ;
+SC.EVT_EXIT  = { sig: SC.EVT_EXIT_SIG } ;
+SC.EVT_INIT  = { sig: SC.EVT_INIT_SIG } ;
 
-SC.EVT_IGNORED_RES = 'sc-evt-ignored-res' ;
-SC.EVT_HANDLED_RES = 'sc-evt-handled-res' ;
+SC.EVT_IGNORED_RES    = 'sc-evt-ignored-res' ;
+SC.EVT_HANDLED_RES    = 'sc-evt-handled-res' ;
 SC.EVT_TRANSITION_RES = 'sc-evt-transition-res' ;
-SC.EVT_TERMINATE_RES = 'sc-evt-terminate-res' ;
+SC.EVT_TERMINATE_RES  = 'sc-evt-terminate-res' ;
 
-sc_handled = function() { return SC.EVT_HANDLED_RES; };
+sc_handled   = function() { return SC.EVT_HANDLED_RES; };
 sc_terminate = function() { return SC.EVT_TERMINATE_RES; };
 
 // ........................................
