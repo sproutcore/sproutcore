@@ -80,9 +80,10 @@ SC.Request.getUrl = function(address) {
   return req ;
 };
 
-SC.Request.postUrl = function(address) {
+SC.Request.postUrl = function(address, body) {
   var req = SC.Request.create() ;
   req.set('address',address) ;
+  if(body) req.set('body', body) ;
   req.set('type', 'POST') ;
   
   return req ;
@@ -96,10 +97,10 @@ SC.Request.deleteUrl = function(address) {
   return req ;
 };
 
-SC.Request.putUrl = function(address, object) {
+SC.Request.putUrl = function(address, body) {
   var req = SC.Request.create() ;
   req.set('address',address) ;
-  req.set('body', object.toString()) ;
+  if(body) req.set('body', body) ;
   req.set('type', 'PUT') ;
   
   return req ;
