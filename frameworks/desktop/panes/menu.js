@@ -429,55 +429,20 @@ SC.MenuPane = SC.PickerPane.extend(
   performKeyEquivalent: function(keyString,evt) {
     if(!this.get('isEnabled')) return YES ;
     var items = this.get('displayItemsArray') ;
+    if(!items) return;
     var len = items.length ;
+    var menuItems = this.get('menuItemViews');
     for(var idx=0; idx<len; ++idx) {
       var item = items[idx] ;
       var keyEquivalent = item.get('keyEquivalent') ;
       var action = item.get('action') ;
       var isEnabled = item.get('isEnabled') ;
-      var target = item.get('itemTarget') || this ;
+      var target = item.get('target') || this ;
       if(keyEquivalent == keyString && isEnabled) {
-        return this.performAction(target,action) ;
+        if(menuItems && menuItems[idx]) menuItems[idx].triggerAction(evt);
       }
     }
     return YES ;
-  },
-  
-  /**
-    Actually fires the action.Pass the target and action to
-    the function.
-
-    @param {Object} target
-    @returns {function,string} action  
-  */
-  performAction: function(target,action) {
-
-    var typeOfAction = SC.typeOf(action) ;    
-    // if the action is a function, just try to call it.
-    if (typeOfAction == SC.T_FUNCTION) {
-      action.call((target || this), this) ;
-
-    // otherwise, action should be a string.  If it has a period, treat it
-    // like a property path.
-    } else if (typeOfAction === SC.T_STRING) {
-      if (action.indexOf('.') >= 0) {
-
-        var path = action.split('.') ;
-        var property = path.pop() ;
-        var newTarget = SC.objectForPropertyPath(path, window) ;
-        var newAction = target.get ? target.get(property) : target[property] ;
-        if (newAction && SC.typeOf(newAction) == SC.T_FUNCTION) {
-          newAction.call(newTarget, this) ;
-        } else {
-          throw '%@: Menu could not find a function at %@'.fmt(this, this.action) ;
-        }
-
-      // otherwise, try to execute action direction on target or send down
-      // responder chain.
-      } else {
-        SC.RootResponder.responder.sendAction(this.action, this.target, this) ;
-      }
-    }
   },
   
   //Mouse and Key Events
