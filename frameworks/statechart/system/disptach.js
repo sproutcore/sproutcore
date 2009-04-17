@@ -390,7 +390,7 @@ SC.mixin(SC.Object.prototype,
     var pre = '' ;
     while (--depth >= 0) pre = pre + '  ' ;
     
-    console.log(pre + "-> enter " + state) ;
+    console.log(pre + "-> entering \"" + state + '"') ;
     return this[state](SC.EVT_ENTER) ;
   },
   
@@ -407,7 +407,7 @@ SC.mixin(SC.Object.prototype,
     var pre = '' ;
     while (--depth > 0) pre = pre + '  ' ;
     
-    console.log(pre + "<- exit  " + state) ;
+    console.log(pre + "<- leaving  \"" + state + '"') ;
     return this[state](SC.EVT_EXIT) ;
   },
   
@@ -425,7 +425,7 @@ SC.mixin(SC.Object.prototype,
     while (--depth > 0) pre = pre + '  ' ;
     
     var res = this[state](SC.EVT_INIT), stateKey = this.get('stateKey') ;
-    if (res === SC.EVT_TRANSITION_RES) console.log(pre + "  (taking default transition to " + this[stateKey] + ')') ;
+    if (res === SC.EVT_TRANSITION_RES) console.log(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
     return res ;
   }
   
