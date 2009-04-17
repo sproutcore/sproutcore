@@ -51,9 +51,9 @@ SC.mixin(SC.Object.prototype,
     if (!current) return NO ; // fast path -- this object does not use HSMs
     
     // okay, process the event hierarchically...
-    res = this[stateKey](evt) ;
+    res = this[this[stateKey]](evt) ;
     if (!res) {
-      superstateKey = current.superstateKey ;
+      superstateKey = this[current].superstateKey ;
       while (superstateKey) {
         res = this[superstateKey](evt) ; // call superstate handler...
         if (res) {
@@ -73,7 +73,7 @@ SC.mixin(SC.Object.prototype,
     
     } else if (res === SC.EVT_TRANSITION_RES) {
       target = this[stateKey] ; // save the target of the transition
-      path[0] = target.superstateKey ;
+      path[0] = this[target].superstateKey ;
       
       // debugger ;
       
@@ -82,10 +82,8 @@ SC.mixin(SC.Object.prototype,
       //
       
       if (handlerKey && current != this[handlerKey]) {
-        // we don't know the property name for current,
-        // so there is no way to call it directly...
-        current.call(this, SC.EVT_EXIT) ;
-        superstateKey = current.superstateKey ;
+        this[current](SC.EVT_EXIT) ;
+        superstateKey = this[current].superstateKey ;
         
         while (superstateKey && superstateKey !== handlerKey) {
           this[superstateKey](SC.EVT_EXIT) ;
@@ -97,7 +95,7 @@ SC.mixin(SC.Object.prototype,
       // We've now exited from the original current state up to the state
       // that actually requested the transition, so make it current now...
       
-      if (handlerKey) current = this[handlerKey] ;
+      if (handlerKey) current = handlerKey ;
       
       // debugger ;
       
@@ -117,7 +115,7 @@ SC.mixin(SC.Object.prototype,
         
         if (current === target) {
           // exit the handing state
-          current.call(this, SC.EVT_EXIT) ;
+          this[current](SC.EVT_EXIT) ;
           
           // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
@@ -130,7 +128,7 @@ SC.mixin(SC.Object.prototype,
         // (b) Is the handling state the parent of the target state?
         //
         
-        if (this[target.superstateKey] === current) {
+        if (this[target].superstateKey === current) {
           // don't exit the handling state
           
           // enter the target, aka this[stateKey] (actually do it below)
@@ -145,9 +143,9 @@ SC.mixin(SC.Object.prototype,
         // parent?
         //
         
-        if (current.superstateKey === target.superstateKey) {
+        if (this[current].superstateKey === this[target].superstateKey) {
           // exit the handing state
-          current.call(this, SC.EVT_EXIT) ;
+          this[current](SC.EVT_EXIT) ;
           
           // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
@@ -160,9 +158,9 @@ SC.mixin(SC.Object.prototype,
         // (d) Is the handling state's parent the target state?
         //
         
-        if (this[current.superstateKey] === target) {
+        if (this[current].superstateKey === target) {
           // exit the handing state
-          current.call(this, SC.EVT_EXIT) ;
+          this[current](SC.EVT_EXIT) ;
           
           // don't enter the target state -- we're already in it
           idx = -1 ;
@@ -179,7 +177,7 @@ SC.mixin(SC.Object.prototype,
         
         // enter both target and its superstate
         idx = 1 ;
-        superstateKey = path[1] = target.superstateKey ;
+        superstateKey = path[1] = this[target].superstateKey ;
         
         // loop over the target state's ancestors, looking for the handling 
         // state (store the entry path along the way)
@@ -188,7 +186,7 @@ SC.mixin(SC.Object.prototype,
           path[++idx] = superstateKey ; // store the entry path state key
           
           // is this the handling state?
-          if (this[superstateKey] === current) {
+          if (superstateKey === current) {
             // don't exit the handling state
             
             // don't enter the handling state either...
@@ -208,10 +206,10 @@ SC.mixin(SC.Object.prototype,
         //
         
         // exit the handing state's superstate
-        current.call(this, SC.EVT_EXIT) ;
+        this[current](SC.EVT_EXIT) ;
         
         // update current to the handing state's superstate
-        handlerKey = current.superstateKey ;
+        handlerKey = this[current].superstateKey ;
         
         // does the handling state even have a superstate?
         if (!handlerKey) {
@@ -225,7 +223,7 @@ SC.mixin(SC.Object.prototype,
         // yep, see if the handling state's superstate in an ancestor of 
         // the target state
         } else {
-          current = this[handlerKey] ;
+          current = handlerKey ;
           idx2 = idx ;
           
           // loop over the target state's ancestors, looking for the handling 
@@ -234,7 +232,7 @@ SC.mixin(SC.Object.prototype,
             pathKey = path[idx2] ;
             
             // did we find the handling state's superstate's superstate?
-            if (pathKey && current === this[pathKey]) {
+            if (pathKey && current === pathKey) {
               // don't exit the handling state's superstate
               
               // don't enter the handling state's superstate either...
@@ -259,7 +257,7 @@ SC.mixin(SC.Object.prototype,
           this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
           
           // update the handing state's superstate to it's superstate
-          handlerKey = current.superstateKey ;
+          handlerKey = this[current].superstateKey ;
           
           // does the handling state's superstate even have a superstate?
           if (!handlerKey) {
@@ -272,7 +270,7 @@ SC.mixin(SC.Object.prototype,
           // yep, see if the handling state's superstate's superstate is an 
           // ancestor of the target state
           } else {
-            current = this[handlerKey] ;
+            current = handlerKey ;
             var idx2 = idx ;
             
             // is the handling state's superstate's superstate one of target's
@@ -281,7 +279,7 @@ SC.mixin(SC.Object.prototype,
               pathKey = path[idx2] ;
               
               // did we find the handling state's superstate's superstate?
-              if (pathKey && current === this[pathKey]) {
+              if (pathKey && current === pathKey) {
                 // don't exit the handling state's superstate's superstate
                 
                 // don't enter the handling state's superstate either...
@@ -290,8 +288,8 @@ SC.mixin(SC.Object.prototype,
                 // stop trying to figure out what to do...
                 break figureOutWhatToDo ;
               } else {
-                superstateKey = current.superstateKey ;
-                current = superstateKey ? this[superstateKey] : null ;
+                superstateKey = this[current].superstateKey ;
+                current = superstateKey || null ;
                 --idx2 ;
                 if (!current) {
                   idx = -1 ;
@@ -322,7 +320,7 @@ SC.mixin(SC.Object.prototype,
       }
       
       // enter the target if needed
-      if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
+      if (idx === 0) this[this[stateKey]](SC.EVT_ENTER) ;
       
       // .....................................................................
       // Step 4. Initialize the target state's substates if necessary.
@@ -332,7 +330,7 @@ SC.mixin(SC.Object.prototype,
       
       current = this[stateKey] ;
       
-      while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
+      while (this[this[stateKey]](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
         target = this[stateKey] ;
         
         // enter the target of the transition (a substate)
@@ -340,8 +338,7 @@ SC.mixin(SC.Object.prototype,
         
         if (target !== current) {
           // get the superstate of the target of the transition...
-          superstateKey = path[++idx] = target.superstateKey ;
-          target = this[superstateKey] ;
+          target = path[++idx] = this[target].superstateKey ;
           
           // debugger ;
           
@@ -349,8 +346,7 @@ SC.mixin(SC.Object.prototype,
             // walk the state hierarchy until we find our target state, storing
             // state keys along the way
             while (target !== current) {
-              superstateKey = path[++idx] = target.superstateKey ;
-              target = this[superstateKey] ;
+              target = path[++idx] = this[target].superstateKey ;
             } 
           }
           
@@ -366,7 +362,7 @@ SC.mixin(SC.Object.prototype,
         }
         
         // enter the target if needed
-        if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
+        if (idx === 0) this[this[stateKey]](SC.EVT_ENTER) ;
         
         // the loop continues to apply any default transitions as substates
         // are entered...
