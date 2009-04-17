@@ -116,7 +116,7 @@ SC.Set.prototype = {
     // the current length.
     if (obj === null) return NO ;
     var idx = this[SC.hashFor(obj)] ;
-    return (!SC.none(idx) && (idx < this.length)) ;
+    return (!SC.none(idx) && (idx < this.length) && (this[idx]===obj)) ;
   },
 
   /**

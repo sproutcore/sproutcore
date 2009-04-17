@@ -64,7 +64,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     // otherwise just do a regular add
     } else {
       ret._content = [0];
-      if (start) ret.add(start, length);
+      if (start !== undefined) ret.add(start, length);
     }
     return ret ;
   },

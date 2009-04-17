@@ -50,21 +50,66 @@ if (window.CoreTest) {
 SC.ArraySuite = CoreTest.Suite.create("Verify SC.Array compliance: %@#%@", {
   
   /** 
-    Override to return a regular array containing the object you will add to
-    your array instance when asked to include the named amount.
+    Override to return a set of simple values such as numbers or strings.
+    Return null if your set does not support primitives.
   */
-  expected: function(amt) {
+  simple: function(amt) {
     var ret = [];
     if (amt === undefined) amt = 0;
     while(--amt >= 0) ret[amt] = amt ;
     return ret ;
   },
+
+  /**  Override with the name of the key we should get/set on hashes */
+  hashValueKey: 'foo',
+  
+  /**
+    Override to return hashes of values if supported.  Or return null.
+  */
+  hashes: function(amt) {
+    var ret = [];  
+    if (amt === undefined) amt = 0;
+    while(--amt >= 0) {
+      ret[amt] = {};
+      ret[amt][this.hashValueKey] = amt ;
+    }
+    return ret ;
+  },
+  
+  /** Override with the name of the key we should get/set on objects */
+  objectValueKey: "foo",
+  
+  /**
+    Override to return observable objects if supported.  Or return null.
+  */
+  objects: function(amt) {
+    var ret = [];  
+    if (amt === undefined) amt = 0;
+    while(--amt >= 0) {
+      var o = {};
+      o[this.objectValueKey] = amt ;
+      ret[amt] = SC.Object.create(o);
+    }
+    return ret ;
+  },
+
+  /**
+    Returns an array of content items in your preferred format.  This will
+    be used whenever the test does not care about the specific object content.
+  */
+  expected: function(amt) {
+    return this.simple(amt);
+  },
   
   /**
     Example of how to implement newObject
   */
-  newObject: function(amt) {
-    return this.expected(amt).slice();
+  newObject: function(expected) {
+    if (!expected || SC.typeOf(expected) === SC.T_NUMBER) {
+      expected = this.expected(expected);
+    }
+    
+    return expected.slice();
   },
   
   
@@ -74,6 +119,10 @@ SC.ArraySuite = CoreTest.Suite.create("Verify SC.Array compliance: %@#%@", {
   observer: function(obj) {
     return SC.Object.create({
 
+      // ..........................................................
+      // NORMAL OBSERVER TESTING
+      // 
+      
       observer: function(target, key, value) {
         this.notified[key] = true ;
         this.notifiedValue[key] = value ;
@@ -100,7 +149,55 @@ SC.ArraySuite = CoreTest.Suite.create("Verify SC.Array compliance: %@#%@", {
       init: function() {
         sc_super() ;
         this.resetObservers() ;
+      },
+      
+      // ..........................................................
+      // RANGE OBSERVER TESTING
+      // 
+      
+      callCount: 0,
+
+      // call afterward to verify
+      expectRangeChange: function(source, object, key, indexes, context) {
+        equals(this.callCount, 1, 'expects one callback');
+        
+        if (source !== undefined && source !== NO) {
+          ok(this.source, source, 'source should equal array');
+        }
+        
+        if (object !== undefined && object !== NO) {
+          equals(this.object, object, 'object');
+        }
+        
+        if (key !== undefined && key !== NO) {
+          equals(this.key, key, 'key');
+        }
+        
+        if (indexes !== undefined && indexes !== NO) {
+          if (indexes.isIndexSet) {
+            ok(this.indexes && this.indexes.isIndexSet, 'indexes should be index set');
+            ok(indexes.isEqual(this.indexes), 'indexes should match %@ (actual: %@)'.fmt(indexes, this.indexes));
+          } else equals(this.indexes, indexes, 'indexes');
+        }
+          
+        if (context !== undefined && context !== NO) {
+          equals(this.context, context, 'context should match');
+        }
+        
+      },
+      
+      rangeDidChange: function(source, object, key, indexes, context) {
+        this.callCount++ ;
+        this.source = source ;
+        this.object = object ;
+        this.key    = key ;
+        
+        // clone this because the index set may be reused after this callback
+        // runs.
+        this.indexes = (indexes && indexes.isIndexSet) ? indexes.clone() : indexes;
+        this.context = context ;          
       }
+      
     });  
   },
   

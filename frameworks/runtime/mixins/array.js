@@ -277,7 +277,7 @@ SC.Array = {
     @param {Object} context optional context
     @returns {SC.RangeObserver} range observer
   */
-  createRangeObserver: function(indexes, target, method, context) {
+  addRangeObserver: function(indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
     if (!rangeob) rangeob = this._array_rangeObservers = SC.Set.create() ;
 
@@ -297,7 +297,7 @@ SC.Array = {
   /**
     Moves a range observer so that it observes a new range of objects on the 
     array.  You must have an existing range observer object from a call to
-    createRangeObserver().
+    addRangeObserver().
     
     The return value should replace the old range observer object that you
     pass in.
@@ -320,24 +320,40 @@ SC.Array = {
     @param {SC.RangeObserver} rangeObserver the range observer
     @returns {SC.RangeObserver} updated range observer or null
   */
-  destroyRangeObserver: function(rangeObserver) {
+  removeRangeObserver: function(rangeObserver) {
     var ret = rangeObserver.destroy(this);
     var rangeob = this._array_rangeObservers;
     if (rangeob) rangeob.remove(rangeObserver) ; // clear
     return ret ;
   },
 
-  /** @private - override to update range observers */
-  enumerableContentDidChange: function(start, length) {
-
-    var rangeob = this._array_rangeObservers ;
+  /**
+    Updates observers with content change.  To support range observers, 
+    you must pass three change parameters to this method.  Otherwise this
+    method will assume the entire range has changed.
+    
+    This also assumes you have already updated the length property.
+    @param {Number} start the starting index of the change
+    @param {Number} amt the final range of objects changed
+    @param {Number} delta if you added or removed objects, the delta change
+    @returns {SC.Array} receiver
+  */
+  enumerableContentDidChange: function(start, amt, delta) {
+    var rangeob = this._array_rangeObservers, 
+        length, changes ;
+        
     if (rangeob && rangeob.length>0) {
-      // if start/length are not passed, assume everything changed
-      if (start === undefined && length === undefined) {
-        start = 0 ;
-        length = this.get('length');
+      
+      // normalize input parameters
+      if (start === undefined) start = 0;
+      if (delta === undefined) delta = 0 ;
+      if (delta !== 0 || amt === undefined) {
+        length = this.get('length') - start ;
+      } else {
+        length = amt ;
       }
-      var changes = this._array_rangeChanges;
+      
+      changes = this._array_rangeChanges;
       if (!changes) changes = this._array_rangeChanges = SC.IndexSet.create();
       changes.add(start, length);
     }

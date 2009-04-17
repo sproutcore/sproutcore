@@ -29,9 +29,13 @@ var DummyArray = SC.Object.extend(SC.Array, {
 
     this.beginPropertyChanges() ;
     this.content.replace(idx,amt,objects) ;
-    
+
     this.set('length', this.content.length) ;
-    this.enumerableContentDidChange() ;
+
+    // figure out the range that changed.  If amt + objects are the same, use
+    // amt.  Otherwise use total length.
+    var len = objects ? objects.get('length') : 0;
+    this.enumerableContentDidChange(idx, amt, len - amt) ;
     this.endPropertyChanges() ;
   },
   
@@ -43,11 +47,11 @@ var DummyArray = SC.Object.extend(SC.Array, {
 });
 
 SC.ArraySuite.generate("DummyArray", {
-  newObject: function(amt) {
-    if (amt === undefined) amt = 0;
-    var ret = [];
-    while(--amt >= 0) ret[amt] = amt ;
-    return DummyArray.create({ content: ret, length: ret.length }) ;
+  newObject: function(expected) {
+    if (!expected || typeof expected === SC.T_NUMBER) {
+      expected = this.expected(expected); 
+    }
+    return DummyArray.create({ content: expected, length: expected.length }) ;
   }
 });
 
