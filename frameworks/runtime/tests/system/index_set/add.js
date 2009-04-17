@@ -25,6 +25,7 @@ function iter(s) {
 test("add range to end of set", function() {
   set.add(1000,5);
   equals(set.get('length'), 5, 'should have correct index count');  
+  equals(set.get('max'), 1005, 'max should return 1 past last index');
   same(iter(set), [1000,1001,1002,1003,1004]);
 });
 
@@ -35,6 +36,7 @@ test("add range into middle of empty range", function() {
   // now add second range
   set.add(10,1);
   equals(set.get('length'), 3, 'should have extra length');
+  equals(set.get('max'), 102, 'max should return 1 past last index');
   same(iter(set), [10, 100, 101]);
 });
 
@@ -45,6 +47,7 @@ test("add range overlapping front edge of range", function() {
   // now add second range
   set.add(99,2);
   equals(set.get('length'), 3, 'should have extra length');
+  equals(set.get('max'), 102, 'max should return 1 past last index');
   same(iter(set), [99, 100, 101]);
 });
 
@@ -55,6 +58,7 @@ test("add range overlapping last edge of range", function() {
   // now add overlapping range
   set.add(101,2);
   equals(set.get('length'), 5, 'new set.length');
+  equals(set.get('max'), 202, 'max should return 1 past last index');
   same(iter(set), [100,101,102,200,201], 'should include 101-102');
 });
 
@@ -65,6 +69,7 @@ test("add range overlapping two ranges, merging into one", function() {
   // now add overlapping range
   set.add(101,10);
   equals(set.get('length'), 12, 'new set.length');
+  equals(set.get('max'), 112, 'max should return 1 past last index');
   same(iter(set), [100,101,102,103,104,105,106,107,108,109,110,111], 'should include one range 100-111');
 });
 
@@ -75,6 +80,7 @@ test("add range overlapping three ranges, merging into one", function() {
   // now add overlapping range
   set.add(101,10);
   equals(set.get('length'), 12, 'new set.length');
+  equals(set.get('max'), 112, 'max should return 1 past last index');
   same(iter(set), [100,101,102,103,104,105,106,107,108,109,110,111], 'should include one range 100-111');
 });
 
@@ -85,8 +91,8 @@ test("add range partially overlapping one range and replaing another range, merg
   // now add overlapping range
   set.add(101,10);
   equals(set.get('length'), 11, 'new set.length');
-  console.log(set.inspect());
 
+  equals(set.get('max'), 111, 'max should return 1 past last index');
   same(iter(set), [100,101,102,103,104,105,106,107,108,109,110], 'should include one range 100-110');
 });
 
@@ -97,6 +103,7 @@ test("add range overlapping last index", function() {
   // now add second range
   set.add(101,2);
   equals(set.get('length'), 3, 'should have extra length');
+  equals(set.get('max'), 103, 'max should return 1 past last index');
   same(iter(set), [100, 101, 102]);
 });
 
@@ -107,6 +114,7 @@ test("add range matching existing range", function() {
   // now add second range
   set.add(100,5);
   equals(set.get('length'), 5, 'should not change');
+  equals(set.get('max'), 105, 'max should return 1 past last index');
   same(iter(set), [100, 101, 102, 103, 104]);  
 });
 

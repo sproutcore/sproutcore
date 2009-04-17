@@ -6,7 +6,7 @@
 
 /*global module test equals context ok same notest */
 var set ;
-module("SC.IndexSet#remote", {
+module("SC.IndexSet#remove", {
   setup: function() {
     set = SC.IndexSet.create();
   }
@@ -27,6 +27,7 @@ test("remove a range after end of set", function() {
 
   set.remove(1000, 5);
   equals(set.get('length'), 0, 'should still be empty');  
+  equals(set.get('max'), 0, 'max should return 1 past last index');
   same(iter(set), [], 'should be empty');
 });
 
@@ -36,8 +37,8 @@ test("remove range in middle of an existing range", function() {
   
   set.remove(101,2);
   equals(set.get('length'), 2, 'new length should not include removed range');
+  equals(set.get('max'), 104, 'max should return 1 past last index');
   same(iter(set), [100,103], 'should remove range in the middle'); 
-  console.log(set.inspect()); 
 });
 
 test("remove range overlapping front edge of range", function() {
@@ -47,8 +48,8 @@ test("remove range overlapping front edge of range", function() {
   // now add second range
   set.remove(99,2);
   equals(set.get('length'), 1, 'should have extra length');
+  equals(set.get('max'), 102, 'max should return 1 past last index');
   same(iter(set), [101]);
-  console.log(set.inspect()); 
 });
 
 test("remove range overlapping last edge of range", function() {
@@ -58,8 +59,8 @@ test("remove range overlapping last edge of range", function() {
   // now add overlapping range
   set.remove(101,2);
   equals(set.get('length'), 3, 'new set.length');
+  equals(set.get('max'), 202, 'max should return 1 past last index');
   same(iter(set), [100,200,201], 'should remove 101-102');
-  console.log(set.inspect()); 
 });
 
 test("remove range overlapping two ranges, remove parts of both", function() {
@@ -69,6 +70,7 @@ test("remove range overlapping two ranges, remove parts of both", function() {
   // now add overlapping range
   set.remove(101,10);
   equals(set.get('length'), 2, 'new set.length');
+  equals(set.get('max'), 112, 'max should return 1 past last index');
   same(iter(set), [100,111], 'should remove range 101-110');
 });
 
@@ -79,6 +81,7 @@ test("remove range overlapping three ranges, removing one and parts of the other
   // now add overlapping range
   set.remove(101,10);
   equals(set.get('length'), 2, 'new set.length');
+  equals(set.get('max'), 112, 'max should return 1 past last index');
   same(iter(set), [100,111], 'should remove range 101-110');
 });
 
@@ -89,8 +92,8 @@ test("remove range partially overlapping one range and replacing another range",
   // now add overlapping range
   set.remove(101,10);
   equals(set.get('length'), 1, 'new set.length');
-  console.log(set.inspect());
 
+  equals(set.get('max'), 101, 'max should return 1 past last index');
   same(iter(set), [100], 'should include one range 100-110');
 });
 
@@ -101,6 +104,7 @@ test("remove range overlapping last index", function() {
   // now add second range
   set.remove(101,2);
   equals(set.get('length'), 1, 'should have extra length');
+  equals(set.get('max'), 101, 'max should return 1 past last index');
   same(iter(set), [100]);
 });
 
@@ -111,6 +115,8 @@ test("remove range matching existing range", function() {
   // now add second range
   set.remove(100,5);
   equals(set.get('length'), 0, 'should be empty');
+  equals(set.get('max'), 0, 'max should return 1 past last index');
+  console.log(set.inspect());
   same(iter(set), []);  
 });
 

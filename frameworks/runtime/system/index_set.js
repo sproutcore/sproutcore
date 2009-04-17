@@ -49,16 +49,22 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
 /** @scope SC.IndexSet.prototype */ {
 
   /**
-    To create a set, pass an array of items instead of a hash.
+    To create a set, pass either a start and index or another IndexSet.
   */
-  create: function(ranges) { 
+  create: function(start, length) { 
     var ret = SC.beget(this);
     ret.initObservable();
-    if (ranges && ranges.isIndexSet) {
-      ret._content = ret._content.slice();
+    
+    // optimized method to clone an index set.
+    if (start && start.isIndexSet) {
+      ret._content = start._content.slice();
+      ret.max = start.max; // note - do not use set b/c this is just setup
+      ret.length = start.length; 
+      
+    // otherwise just do a regular add
     } else {
       ret._content = [0];
-      if (ranges) ret.addEach(ranges);
+      if (start) ret.add(start, length);
     }
     return ret ;
   },
@@ -74,6 +80,13 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   */
   length: 0,
 
+  /**
+    One greater than the largest index currently stored in the set.  This 
+    is sometimes useful when determining the total range of items covering
+    the index set.
+  */
+  max: 0,
+  
   /** 
     Returns the starting index of the nearest range for the specified 
     index.
@@ -83,10 +96,11 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   */
   rangeStartForIndex: function(index) {    
     var content = this._content,
+        max     = this.get('max'),
         ret, next, accel;
     
     // fast cases
-    if (index >= this._last) return this._last ;
+    if (index >= max) return max ;
     if (Math.abs(content[index]) > index) return index ; // we hit a border
     
     // use accelerator to find nearest content range
@@ -105,6 +119,24 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   },
     
   /**
+    Returns YES if the passed index set contains the exact same indexes as 
+    the receiver.  If you pass any object other than an index set, returns NO.
+    
+    @param {Object} obj another object.
+    @returns {Boolean}
+  */
+  isEqual: function(obj) {
+    
+    // optimize for some special cases
+    if (obj === this) return YES ;
+    if (!obj || !obj.isIndexSet || (obj.max !== this.max) || (obj.length !== this.length)) return NO;
+
+    // ok, now we need to actually compare the content of the two.  Since they
+    // are both arrays, just use that isEqual.
+    return this._content.isEqual(obj._content);
+  },
+  
+  /**
     Returns YES if the index set contains the named index
     
     @param {Number} start index or range
@@ -121,6 +153,8 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
         
       // if passed an index set, check each receiver range
       } else if (start && start.isIndexSet) {
+        if (start === this) return YES ; // optimization
+
         content = start._content ;
         cur = 0 ;
         next = content[cur];
@@ -141,6 +175,68 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     rnext  = this._content[rstart];
     
     return (rnext>0) && (rstart <= start) && (rnext >= (start+length));
+  },
+
+  /**
+    Returns YES if the index set contains any of the passed indexes.  You
+    can pass a single index, a range or an index set.
+    
+    @param {Number} start index, range, or IndexSet
+    @param {Number} length optional range length
+    @returns {Boolean}
+  */
+  intersects: function(start, length) {
+    var content, cur, next, lim;
+    
+    // normalize input
+    if (length === undefined) { 
+      if (typeof start === SC.T_NUMBER) {
+        length = 1 ;
+        
+      // if passed an index set, check each receiver range
+      } else if (start && start.isIndexSet) {
+        if (start === this) return YES ; // optimization
+
+        content = start._content ;
+        cur = 0 ;
+        next = content[cur];
+        while (next !== 0) {
+          if ((next>0) && this.intersects(cur, next-cur)) return YES ;
+          cur = Math.abs(next);
+          next = content[cur];
+        }
+        return NO ;
+        
+      } else {
+        length = start.length; 
+        start = start.start;
+      }
+    }
+    
+    cur     = this.rangeStartForIndex(start);
+    content = this._content;
+    next    = content[cur];
+    lim     = start + length;
+    while (cur < lim) {
+      if (next === 0) return NO; // no match and at end!
+      if ((next > 0) && (next > start)) return YES ; // found a match
+      cur = Math.abs(next);
+      next = content[cur];
+    }
+    return NO ; // no match
+  },
+
+  /**
+    Returns a new IndexSet without the passed range or indexes.   This is a
+    convenience over simply cloning and removing.  Does some optimizations.
+    
+    @param {Number} start index, range, or IndexSet
+    @param {Number} length optional range length
+    @returns {SC.IndexSet} new index set
+  */
+  without: function(start, index) {
+    if (start === this) return SC.IndexSet.create(); // just need empty set
+    return this.clone().remove(start, index);
   },
   
   /**
@@ -170,20 +266,21 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     }
 
     // special case - appending to end of set
-    var last    = this._last,
+    var max     = this.get('max'),
+        oldmax  = max,
         content = this._content,
         cur, next, delta, value ;
         
-    if (start >= last) {
-      content[last] = 0-start; // empty!
+    if (start >= max) {
+      content[max] = 0-start; // empty!
       content[start] = start+length ;
       content[start+length] = 0; // set end
-      this._last = start + length ;
+      this.set('max', start + length) ;
       this.set('length', this.length + length) ;
       
       // affected range goes from starting range to end of content.
-      start = last ;
-      length = this._last - start;
+      length = start + length - max ;
+      start = max ;
       
     // otherwise, merge into existing range
     } else {
@@ -191,7 +288,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       // find nearest starting range.  split or join that range
       cur   = this.rangeStartForIndex(start);
       next  = content[cur];
-      last  = start + length ;
+      max   = start + length ;
       delta = 0 ;
       
       // previous range is not in set.  splice it here
@@ -199,17 +296,17 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
         content[cur] = 0-start ;
         
         // if previous range extends beyond this range, splice afterwards also
-        if (Math.abs(next) > last) {
-          content[start] = 0-last;
-          content[last] = next ;
+        if (Math.abs(next) > max) {
+          content[start] = 0-max;
+          content[max] = next ;
         } else content[start] = next;
         
       // previous range is in set.  merge the ranges
       } else {
         start = cur ;
-        if (next > last) {
-          delta -= next - last ;
-          last = next ;
+        if (next > max) {
+          delta -= next - max ;
+          max = next ;
         }
       }
       
@@ -217,19 +314,19 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       // just walk the ranges, adding up the length delta and then removing
       // the range until we find a range that passes last
       cur = start;
-      while (cur < last) {
+      while (cur < max) {
         // get next boundary.  splice if needed - if value is 0, we are at end
         // just skip to last
         value = content[cur];
         if (value === 0) {
-          content[last] = 0;
-          next = last ;
-          delta += last - cur ;
+          content[max] = 0;
+          next = max ;
+          delta += max - cur ;
         } else {
           next  = Math.abs(value);
-          if (next > last) {
-            content[last] = value ;
-            next = last ;
+          if (next > max) {
+            content[max] = value ;
+            next = max ;
           }
 
           // ok, cur range is entirely inside top range.  
@@ -243,20 +340,20 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       
       // cur should always === last now.  if the following range is in set,
       // merge in also - don't adjust delta because these aren't new indexes
-      if ((cur = content[last]) > 0) {
-        delete content[last];     
-        last = cur ;
+      if ((cur = content[max]) > 0) {
+        delete content[max];     
+        max = cur ;
       }
 
       // finally set my own range.
-      content[start] = last ;
-      if (last > this._last) this._last = last ;
+      content[start] = max ;
+      if (max > oldmax) this.set('max', max) ;
 
       // adjust length
-      this.set('length', this.length + delta);
+      this.set('length', this.get('length') + delta);
       
       // compute hint range
-      length = last - start ;
+      length = max - start ;
     }
     
     this._hint(start, length);
@@ -284,18 +381,26 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     }
 
     // special case - appending to end of set
-    var last    = this._last,
+    var max     = this.get('max'),
+        oldmax  = max,
         content = this._content,
-        cur, next, delta, value ;
+        cur, next, delta, value, last ;
 
     // if we're past the end, do nothing.
-    if (start >= last) return this;
+    if (start >= max) return this;
 
     // find nearest starting range.  split or join that range
     cur   = this.rangeStartForIndex(start);
     next  = content[cur];
     last  = start + length ;
     delta = 0 ;
+
+    // we are right on a boundary and we had a range or were the end, then
+    // go back one more.
+    if ((start>0) && (cur === start) && (next > 0)) {
+      cur = this.rangeStartForIndex(start-1);
+      next = content[cur] ;
+    }
     
     // previous range is in set.  splice it here
     if (next > 0) { 
@@ -352,12 +457,18 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       last = Math.abs(cur) ;
     }
 
-    // finally set my own range.
-    content[start] = 0-last ;
-    if (last > this._last) this._last = last ;
+    // set my own range - if the next item is 0, then clear it.
+    if (content[last] === 0) {
+      delete content[last];
+      content[start] = 0 ;
+      this.set('max', start); //max has changed
+      
+    } else {
+      content[start] = 0-last ;
+    }
 
     // adjust length
-    this.set('length', this.length - delta);
+    this.set('length', this.get('length') - delta);
     
     // compute hint range
     length = last - start ;
@@ -377,17 +488,24 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
         skip    = SC.IndexSet.HINT_SIZE,
         next    = Math.abs(content[start]), // start of next range
         loc     = start - (start % skip) + skip, // next hint loc
-        lim     = start + length ; // max
+        lim     = start + length ; // stop
         
     while (loc < lim) {
       // make sure we are in current rnage
-      while (next <= loc) {
+      while ((next !== 0) && (next <= loc)) {
         start = next ; 
         next  = Math.abs(content[start]) ;
       }
       
+      // past end
+      if (next === 0) {
+        delete content[loc];
+
       // do not change if on actual boundary
-      if (loc !== start) content[loc] = start ; 
+      } else if (loc !== start) {
+        content[loc] = start ;  // set hint
+      }
+      
       loc += skip;
     }
   },
@@ -399,7 +517,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     var oldlen = this.length;
     this._content.length=1;
     this._content[0] = 0;
-    this.set('length', 0);
+    this.set('length', 0).set('max', 0);
     if (oldlen > 0) this.enumerableContentDidChange();
   },
   
@@ -510,13 +628,14 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   /** @private - support iterators */
   nextObject: function(ignore, idx, context) {
     var content = this._content,
-        next    = context.next; // next boundary
+        next    = context.next,
+        max     = this.get('max'); // next boundary
     
     // seed.
     if (idx === null) {
       idx = next = 0 ;
 
-    } else if (idx >= this._last) {
+    } else if (idx >= max) {
       return null ; // nothing left to do
 
     } else idx++; // look on next index
@@ -541,7 +660,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     return "SC.IndexSet<%@>".fmt(str.join(',')) ;
   },
   
-  _last: 0
+  max: 0
 
 }) ;
 
