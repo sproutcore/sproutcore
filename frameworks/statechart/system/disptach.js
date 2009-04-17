@@ -82,11 +82,11 @@ SC.mixin(SC.Object.prototype,
       //
       
       if (handlerKey && current != this[handlerKey]) {
-        this[current](SC.EVT_EXIT) ;
+        this._sc_statechart_exit(current) ;
         superstateKey = this[current].superstateKey ;
         
         while (superstateKey && superstateKey !== handlerKey) {
-          this[superstateKey](SC.EVT_EXIT) ;
+          this._sc_statechart_exit(superstateKey) ;
           superstateKey = this[superstateKey].superstateKey ;
         }
       }
@@ -115,7 +115,7 @@ SC.mixin(SC.Object.prototype,
         
         if (current === target) {
           // exit the handing state
-          this[current](SC.EVT_EXIT) ;
+          this._sc_statechart_exit(current) ;
           
           // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
@@ -145,7 +145,7 @@ SC.mixin(SC.Object.prototype,
         
         if (this[current].superstateKey === this[target].superstateKey) {
           // exit the handing state
-          this[current](SC.EVT_EXIT) ;
+          this._sc_statechart_exit(current) ;
           
           // enter the target, aka this[stateKey] (actually do it below)
           idx = 0 ;
@@ -160,7 +160,7 @@ SC.mixin(SC.Object.prototype,
         
         if (this[current].superstateKey === target) {
           // exit the handing state
-          this[current](SC.EVT_EXIT) ;
+          this._sc_statechart_exit(current) ;
           
           // don't enter the target state -- we're already in it
           idx = -1 ;
@@ -206,7 +206,7 @@ SC.mixin(SC.Object.prototype,
         //
         
         // exit the handing state's superstate
-        this[current](SC.EVT_EXIT) ;
+        this._sc_statechart_exit(current) ;
         
         // update current to the handing state's superstate
         handlerKey = this[current].superstateKey ;
@@ -254,7 +254,7 @@ SC.mixin(SC.Object.prototype,
         
         for (;;) {
           // exit the handing state's superstate
-          this[handlerKey](SC.EVT_EXIT) ; // this[handlerKey] == current
+          this._sc_statechart_exit(handlerKey) ;
           
           // update the handing state's superstate to it's superstate
           handlerKey = this[current].superstateKey ;
@@ -315,12 +315,12 @@ SC.mixin(SC.Object.prototype,
       
       if (idx > 0) {
         do {
-          this[path[idx]](SC.EVT_ENTER) ;
+          this._sc_statechart_enter(path[idx]) ;
         } while ((--idx) > 0)
       }
       
       // enter the target if needed
-      if (idx === 0) this[this[stateKey]](SC.EVT_ENTER) ;
+      if (idx === 0) this._sc_statechart_enter(this[stateKey]) ;
       
       // .....................................................................
       // Step 4. Initialize the target state's substates if necessary.
@@ -330,7 +330,7 @@ SC.mixin(SC.Object.prototype,
       
       current = this[stateKey] ;
       
-      while (this[this[stateKey]](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
+      while (this._sc_statechart_init(this[stateKey]) === SC.EVT_TRANSITION_RES) {
         target = this[stateKey] ;
         
         // enter the target of the transition (a substate)
@@ -357,12 +357,12 @@ SC.mixin(SC.Object.prototype,
         // now enter the target's superstates in top-down order...
         if (idx > 0) {
           do {
-            this[path[idx]](SC.EVT_ENTER) ;
+            this._sc_statechart_enter(path[idx]) ;
           } while ((--idx) > 0)
         }
         
         // enter the target if needed
-        if (idx === 0) this[this[stateKey]](SC.EVT_ENTER) ;
+        if (idx === 0) this._sc_statechart_enter(this[stateKey]) ;
         
         // the loop continues to apply any default transitions as substates
         // are entered...
@@ -409,8 +409,9 @@ SC.mixin(SC.Object.prototype,
     @returns {SC.EVT_TRANSITION_RES or undefined}
   */
   _sc_statechart_init: function(state) {
-    console.log(".. init substates of " + state) ;
-    return this[state](SC.EVT_INIT) ;
+    var res = this[state](SC.EVT_INIT) ;
+    if (res === SC.EVT_TRANSITION_RES) console.log(".. init substates of " + state) ;
+    return res ;
   }
   
 });
