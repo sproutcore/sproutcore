@@ -12,117 +12,660 @@ require('core') ;
   Description
 
   @extends SC.Object
-  @extends SC.SparseArray
   @static
   @since SproutCore 1.0
 */
 
-SC.Query = SC.SparseArray.extend(
-/** @scope SC.Query.prototype */ {
+SC.Query = SC.Object.extend({
 
-  queryString: '',
-  truthFunction: null,
-  conditions: null,
-  store: null,
-  // delegate: null,  
-  recordType: null,
-  needRecord: false,
-  
-  length: 0,
-  
-  createTruthFunction: function(queryString) {
-    this.set('queryString', queryString);
-    
-    /* Need parsing here from Thomas.. curently hacked. */
-    var hackComponents = [queryString.split('=')[0]];
-    
-    var components = queryString.split('=');
-    
-    var needRecord = this.willNeedRecord(hackComponents);
-    this.set('needRecord', needRecord);
+ 
+  /**
+    Pass a query string (e.g. "foo = bar AND baz = foo"),
+    you can use wild cards like this: "foo = %@ AND baz = %@",
+    optionally pass an array of values for wild cards (e.g. ["goo",2005]).
+    Pass a string specifying the order of the results (e.g. "foo, baz DESC"),
+    if no order is given, the results will be ordered by their guid.
+  */
+  queryString: null,
+  queryValues: [],
+  orderBy:     null,
+ 
+  /** 
+    Override to evaluate whether the passed record instance belongs in the Query result
+    set or not.  Return YES if it belongs, NO otherwise.
+ 
+    @param {SC.Record} record the record to check
+    @returns {Boolean} YES if record belongs, NO otherwise
+  */ 
+  contains: function(record) {
+    // if called for the first time we have to parse the query
+    if (!this.isReady) this.parseQuery();
 
-    if(needRecord) {
-      this.truthFunction = function(rec, conditions) {
-          if(!rec) return NO;
-          return (rec.get(components[0]) == conditions[0]);
+    // if parsing worked we check if record is contained
+    // if parsing failed no record will be contained
+    if ( this.isReady && this.tokenTree.evaluate(record, this.queryValues) )
+      return true;
+    else
+      return false;
+  },
+ 
+  /**
+    Override to compare two records according to any predefined order.  This will be used
+    to sort the result set.  Assume the records you are passed have already been checked
+    for membership via contains().
+ 
+    @param {SC.Record} record1 the first record
+    @param {SC.Record} record2 the second record
+    @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
+  */
+  compare: function(record1, record2) {
+    // not implemented yet
+    return 0;
+  },
+  
+  
+  // ..........................................................
+  // INTERNAL PROPERTIES
+  //
+  
+  isReady:        false,
+  tokenList:      null,
+  usedProperties: null,
+  needsRecord:    false,
+  tokenTree:      null,
+  
+  
+  // ..........................................................
+  // QUERY LANGUAGE DEFINITION
+  //
+  
+  queryGrammar: {
+  
+    generalTypes        : {
+      'UNKNOWN'         : {
+        firstCharacter  : /\S/,
+        notAllowed      : /[\s'"\w\d\(\)]/
+                        },
+      'PROPERTY'        : {
+        firstCharacter  : /[a-zA-Z_]/,
+        notAllowed      : /[^a-zA-Z_0-9]/
+                        },
+      'NUMBER'          : {
+        firstCharacter  : /\d/,
+        notAllowed      : /[^\d\.]/,
+        format          : /^\d+$|^\d+\.\d+$/
+                        },
+      'STRING'          : {
+        firstCharacter  : /['"]/,
+        delimeted       : true
+                        },
+      'OPEN_PAREN'      : {
+        firstCharacter  : /\(/,
+        singleCharacter : true
+                        },
+      'CLOSE_PAREN'     : {
+        firstCharacter  : /\)/,
+        singleCharacter : true
+                        },
+      'WILD_CARD'       : {
+        rememberCount   : true
+                        }
+                        },
+    reservedTypes       : {
+      'WILD_CARD'       : ['%@'],
+      'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY'],
+      'BOOL_OP'         : ['NOT','AND','OR']
+                        }
+  },
+
+  queryLogic: {
+    'PROPERTY'        : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { return r[this.tokenValue] },
+      evaluateNR      : function (r,w) { return r.get(this.tokenValue) }
+                      },
+    'STRING'          : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { return this.tokenValue }
+                      },
+    'NUMBER'          : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { return parseFloat(this.tokenValue) }
+                      },
+    'WILD_CARD'       : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { return w[this.tokenValue] }
+                      },
+    'COMPARATOR'      : {
+      dependsOnValue  : true,
+      '='             : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) == this.rightSide.evaluate(r,w) ) }
+                      },
+      '!='            : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) != this.rightSide.evaluate(r,w) ) }
+                      },
+      '<'             : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) < this.rightSide.evaluate(r,w) ) }
+                      },
+      '<='            : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) <= this.rightSide.evaluate(r,w) ) }
+                      },
+      '>'             : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) > this.rightSide.evaluate(r,w) ) }
+                      },
+      '>='            : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) >= this.rightSide.evaluate(r,w) ) }
+                      },
+      'BEGINS_WITH'   : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) {
+                          var all   = this.leftSide.evaluate(r,w);
+                          var start = this.rightSide.evaluate(r,w);
+                          return ( all.substr(0,start.length) == start );
+                        }
+                      },
+      'ENDS_WITH'     : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) {
+                          var all = this.leftSide.evaluate(r,w);
+                          var end = this.rightSide.evaluate(r,w);
+                          return ( all.substring(all.length-end.length,all.length) == end );
+                        }
+                      },
+      'ANY'           : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) {
+                          var prop   = this.leftSide.evaluate(r,w);
+                          var values = this.rightSide.evaluate(r,w);
+                          var found  = false;
+                          var i      = 0;
+                          while ( found==false && i<values.length ) {
+                            if ( prop == values[i] ) found = true;
+                            i++;
+                          };
+                          return found;
+                        }
+                      },
+                      },                
+    'BOOL_OP'         : {
+      dependsOnValue  : true,
+      'AND'           : {
+        leftType      : 'BOOLEAN',
+        rightType     : 'BOOLEAN',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) && this.rightSide.evaluate(r,w) ) }
+                      },
+      'OR'            : {
+        leftType      : 'BOOLEAN',
+        rightType     : 'BOOLEAN',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) || this.rightSide.evaluate(r,w) ) }
+                      },
+      'NOT'           : {
+        rightType     : 'BOOLEAN',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) { return ( ! this.rightSide.evaluate(r,w) ) }
+                      },
+                      },
+    'OPEN_PAREN'      : 'nothing',
+    'CLOSE_PAREN'     : 'nothing'
+  },
+  
+  
+  // ..........................................................
+  // PARSING THE QUERY
+  //
+  
+  parseQuery: function() {
+
+    this.tokenList      = this.tokenizeString(this.queryString, this.queryGrammar);
+    this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
+    this.needsRecord    = false; // this.willNeedRecord(usedProperties)
+    this.tokenTree      = this.buildTokenTree(this.tokenList, this.queryLogic);
+    
+    if ( !this.tokenTree || this.tokenTree.error )
+      return false;
+    else {
+      this.isReady = true;
+      return true;
+    }
+  },
+  
+  
+  // ..........................................................
+  // TOKENIZER
+  //
+  
+  tokenizeString: function (inputString, grammar) {
+	
+  	// takes a string and returns an array of tokens
+  	// depending on the grammar specified
+	
+  	// currently there is no form of syntax validation !
+	
+	
+    var tokenList           = [];
+    var c                   = null;
+  	var t                   = null;
+    var tokenType           = null;
+    var currentTokenType    = null;
+    var currentTokenValue   = null;
+    var currentDelimeter    = null;
+    var endOfString         = false;
+    var belongsToToken      = false;
+    var skipThisCharacter   = false;
+    var rememberCount       = {};
+  
+  
+    // helper function that adds tokens to the tokenList
+  
+    function addToken (tokenType, tokenValue) {
+      t = grammar.generalTypes[tokenType];
+
+      // handling of special cases
+      // check format
+      if ( t.format && !t.format.test(tokenValue) ) 
+        tokenType = "UNKNOWN";
+      // delimeted token (e.g. by ")
+      if ( t.delimeted ) 
+        skipThisCharacter = true;
+      // reserved type
+      if ( !t.delimeted ) {
+        for ( reservedType in grammar.reservedTypes ) {
+          if ( grammar.reservedTypes[reservedType].indexOf(tokenValue) >= 0 ) {
+            tokenType = reservedType;
+            t = grammar.generalTypes[tokenType];
+          }
+        }
       };
-    } else {
-      this.truthFunction = function(rec, conditions) {
-          if(!rec) return NO;
-          return (rec[components[0]] == conditions[0]);
+      // remembering count type
+      if ( t && t.rememberCount ) {
+        if (!rememberCount[tokenType]) rememberCount[tokenType] = 0;
+        tokenValue = rememberCount[tokenType];
+        rememberCount[tokenType] += 1;
       };
-    }
-  },
+
+      // push token to list
+      tokenList.push( {tokenType: tokenType, tokenValue: tokenValue} );
+
+      // and clean up currentToken
+      currentTokenType  = null;
+      currentTokenValue = null;
+    };
   
-  willNeedRecord: function(components) {
+  
+    // stepping through the string:
     
-    var rec = this.get('delegate').createCompRecord(this.get('recordType'));
-    var needRecord = NO;
-    for(var i=0, iLen=components.length; i<iLen; i++) {
-      if(rec[components[i]]) {
-        needRecord = YES;
-      }
-    }
-    console.log('needRecord: ' + needRecord);
-    return needRecord;
-  },
-
-  
-  parse: function(recordType, queryString, conditions) {
-    this.set('recordType', recordType);
-    this.createTruthFunction(queryString);
-    this.loadConditions(conditions);
-  },
-  
-  loadConditions: function(conditions) {
-    if(!conditions) {
-      conditions = null;
-    }
-    this.set('conditions', conditions);
-  },
-  
-  performQuery: function() {
-    var store = this.get('delegate');
-
-    if(!store) return null;
+    for (var i=0; i < inputString.length; i++) {
+      
+      // end reached?
+      endOfString = (i==inputString.length-1);
+      
+      // current character
+      c = inputString[i];
     
-    this.beginPropertyChanges();
+      // set true after end of delimeted token so that final delimeter is not catched again
+      skipThisCharacter = false;
+        
     
-    this._storeKeysForQuery = store.performQuery(this);
-    this.set('length', this._storeKeysForQuery.length);
-
-  //  this.enumerableContentDidChange() ;
-    this.endPropertyChanges();
-    return this;
-  },
-
-  recordsDidChange: function() {
-    this.invokeOnce(this.performQuery);
+      // if currently inside a token
+    
+      if ( currentTokenType ) {
+      
+        // some helpers
+        t = grammar.generalTypes[currentTokenType];
+        endOfToken  = (t.delimeted) ? (c==currentDelimeter) : (t.notAllowed.test(c));
+      
+        // if still in token
+        if ( !endOfToken )
+          currentTokenValue += c;
+      
+        // if end of token reached
+        if ( endOfToken || endOfString )
+          addToken(currentTokenType, currentTokenValue);
+      
+        // if end of string don't check again
+        if ( endOfString && !endOfToken )
+          skipThisCharacter = true;
+      };
+    
+ 
+    
+      // if not inside a token, look for next one
+    
+      if ( !currentTokenType && !skipThisCharacter ) {
+        // look for matching tokenType
+        for ( tokenType in grammar.generalTypes ) {
+          t = grammar.generalTypes[tokenType];
+          if ( t.firstCharacter && t.firstCharacter.test(c) )
+            currentTokenType = tokenType;
+        };
+        // if tokenType found
+        if ( currentTokenType ) {
+          t = grammar.generalTypes[currentTokenType];
+          currentTokenValue = c;
+          // handling of special cases
+          if ( t.delimeted ) {
+            currentTokenValue = "";
+            currentDelimeter = c;
+          };
+          if ( t.singleCharacter || endOfString )
+            addToken(currentTokenType, currentTokenValue);
+        };
+      };
+    };
+    return tokenList;
   },
   
-  objectAt: function(idx)
-  {
-    if (idx < 0) return undefined ;
-    if (idx >= this.get('length')) return undefined;
-    return this.fetchContentAtIndex(idx);
-  },
-
-  fetchContentAtIndex: function(idx) {
-    var store = this.get('delegate') ;
-    var storeKey = this._storeKeysForQuery[idx];
-    var ret = null; 
-    if(store && storeKey) {
-      ret = store.materializeRecord(storeKey);
-    }
-    return ret;
-  },
-    
-  _storeKeysForQuery: null,
   
-  init: function() {
-    sc_super();
-    this._storeKeysForQuery = [];
+  
+  // ..........................................................
+  // BUILD TOKEN TREE
+  //
+  
+  buildTokenTree: function (tokenList, treeLogic) {
+    
+    /**
+      Takes a list of tokens and returns a tree, depending on the specified tree logic.
+      The returned object will have an error property if building of the tree failed.
+      Check it to get some information about what happend.
+      If everything worked the tree can be evaluated by calling:
+      tree.evaluate(record,queryValues)
+    */
+  
+    var l                    = tokenList.slice();
+    var i                    = 0;
+    var openParenthesisStack = [];
+    var shouldCheckAgain     = false;
+    var error                = [];
+
+  
+  
+    // some helper functions
+  
+    function tokenLogic (position) {
+      var p = position;
+      if ( p < 0 ) return false;
+      var tl = treeLogic[l[p].tokenType];
+      if ( ! tl ) {
+        error.push("logic for token '"+l[p].tokenType+"' is not defined");
+        return false;
+      };
+      if ( tl.dependsOnValue ) tl=tl[l[p].tokenValue];
+      if ( ! tl ) {
+        error.push("logic for token '"+l[p].tokenType+"':'"+l[p].tokenValue+"' is not defined");
+        return false;
+      };
+      // save tokenLogic in token, so that we don't have to look it up again when evaluating the tree
+      /*
+      if ( this.needsRecord && tl.evaluateNR )
+        l[p].evaluate = tl.evaluateNR;
+      else
+        l[p].evaluate = tl.evaluate;
+      */
+      l[p].evaluate = (this.needsRecord && tl.evaluateNR) ? tl.evaluateNR : tl.evaluate;
+      return tl;
+    };
+  
+    function expectedType (side, position) {
+      var p = position;
+      var tl = tokenLogic(p);
+      if ( !tl )            return false;
+      if (side == 'left')   return tl.leftType;
+      if (side == 'right')  return tl.rightType;
+    };
+  
+    function evalType (position) {
+      var p = position;
+      var tl = tokenLogic(p);
+      if ( !tl )  return false;
+      else        return tl.evalType;
+    };
+  
+    function removeToken (position) {
+      l.splice(position, 1);
+      if ( position <= i ) i--;
+    };
+  
+    function preceedingTokenExists (position) {
+      var p = position || i;
+      if ( p > 0 )  return true;
+      else          return false;
+    };
+  
+    function tokenIsMissingChilds (position) {
+      var p = position;
+      if ( p < 0 )  return true;
+      if (( expectedType('left',p) && !l[p].leftSide )
+              || ( expectedType('right',p) && !l[p].rightSide ))
+                    return true;
+      else          return false;
+    };
+  
+    function typesAreMatching (parent, child) {
+      var side = (child < parent) ? 'left' : 'right';
+      if ( parent < 0 || child < 0 )    return false;
+      if ( !expectedType(side,parent) ) return false;
+      if ( !evalType(child) )           return false;
+      else                              return (expectedType(side,parent) == evalType(child));
+    };
+  
+    function preceedingTokenCanBeMadeChild (position) {
+      var p = position;
+      if ( !tokenIsMissingChilds(p) )   return false;
+      if ( !preceedingTokenExists(p) )  return false;
+      if ( typesAreMatching(p,p-1) )    return true;
+      else                              return false;
+    };
+  
+    function preceedingTokenCanBeMadeParent (position) {
+      var p = position;
+      if ( tokenIsMissingChilds(p) )    return false;
+      if ( !preceedingTokenExists(p) )  return false;
+      if ( !tokenIsMissingChilds(p-1) ) return false;
+      if ( typesAreMatching(p-1,p) )    return true;
+      else                              return false;
+    };
+  
+    function makeChild (position) {
+      var p = position;
+      if (p<1) return false;
+      l[p].leftSide = l[p-1];
+      removeToken(p-1);
+    };
+  
+    function makeParent (position) {
+      var p = position;
+      if (p<1) return false;
+      l[p-1].rightSide = l[p];
+      removeToken(p);
+    };
+  
+    function removeParenthesesPair (position) {
+      removeToken(position);
+      removeToken(openParenthesisStack.pop());
+    };
+  
+    // step through the tokenList
+  
+    for (i=0; i < l.length; i++) {
+      shouldCheckAgain = false;
+    
+      if ( l[i].tokenType == 'UNKNOWN' )          error.push('found unknown token: '+l[i].tokenValue);
+      if ( l[i].tokenType == 'OPEN_PAREN' )       openParenthesisStack.push(i);
+      if ( l[i].tokenType == 'CLOSE_PAREN' )      removeParenthesesPair(i);
+      if ( preceedingTokenCanBeMadeChild(i) )     makeChild(i);
+      if ( preceedingTokenCanBeMadeParent(i) )  { makeParent(i);
+                                                  shouldCheckAgain = true; }; 
+      if ( shouldCheckAgain )                     i--;
+    
+    
+    };
+  
+    // error if tokenList l is not a single token
+    if (l.length == 1) l = l[0];
+    else error.push('string did not resolve to a single tree');
+  
+    // return tree or error
+    if (error.length > 0) return {error: error.join(',\n'), tree: l};
+    else return l;
+  
+  },
+  
+  
+  // ..........................................................
+  // OTHER HELPERS
+  //
+  
+  propertiesUsedInQuery: function (tokenList) {
+    var propertyList = [];
+    for (var i=0; i < tokenList.length; i++) {
+      if (tokenList[i].tokenType == 'PROPERTY') propertyList.push(tokenList[i].tokenValue);
+    };
+    return propertyList;
   }
   
 
-}) ;
+});
+
+
+
+
+
+
+// Old code by Peter:
+//
+//SC.Query = SC.SparseArray.extend(
+///** @scope SC.Query.prototype */ {
+//
+//  queryString: '',
+//  truthFunction: null,
+//  conditions: null,
+//  store: null,
+//  // delegate: null,  
+//  recordType: null,
+//  needRecord: false,
+//  
+//  length: 0,
+//  
+//  createTruthFunction: function(queryString) {
+//    this.set('queryString', queryString);
+//    
+//    /* Need parsing here from Thomas.. curently hacked. */
+//    var hackComponents = [queryString.split('=')[0]];
+//    
+//    var components = queryString.split('=');
+//    
+//    var needRecord = this.willNeedRecord(hackComponents);
+//    this.set('needRecord', needRecord);
+//
+//    if(needRecord) {
+//      this.truthFunction = function(rec, conditions) {
+//          if(!rec) return NO;
+//          return (rec.get(components[0]) == conditions[0]);
+//      };
+//    } else {
+//      this.truthFunction = function(rec, conditions) {
+//          if(!rec) return NO;
+//          return (rec[components[0]] == conditions[0]);
+//      };
+//    }
+//  },
+//  
+//  willNeedRecord: function(components) {
+//    
+//    var rec = this.get('delegate').createCompRecord(this.get('recordType'));
+//    var needRecord = NO;
+//    for(var i=0, iLen=components.length; i<iLen; i++) {
+//      if(rec[components[i]]) {
+//        needRecord = YES;
+//      }
+//    }
+//    console.log('needRecord: ' + needRecord);
+//    return needRecord;
+//  },
+//
+//  
+//  parse: function(recordType, queryString, conditions) {
+//    this.set('recordType', recordType);
+//    this.createTruthFunction(queryString);
+//    this.loadConditions(conditions);
+//  },
+//  
+//  loadConditions: function(conditions) {
+//    if(!conditions) {
+//      conditions = null;
+//    }
+//    this.set('conditions', conditions);
+//  },
+//  
+//  performQuery: function() {
+//    var store = this.get('delegate');
+//
+//    if(!store) return null;
+//    
+//    this.beginPropertyChanges();
+//    
+//    this._storeKeysForQuery = store.performQuery(this);
+//    this.set('length', this._storeKeysForQuery.length);
+//
+//  //  this.enumerableContentDidChange() ;
+//    this.endPropertyChanges();
+//    return this;
+//  },
+//
+//  recordsDidChange: function() {
+//    this.invokeOnce(this.performQuery);
+//  },
+//  
+//  objectAt: function(idx)
+//  {
+//    if (idx < 0) return undefined ;
+//    if (idx >= this.get('length')) return undefined;
+//    return this.fetchContentAtIndex(idx);
+//  },
+//
+//  fetchContentAtIndex: function(idx) {
+//    var store = this.get('delegate') ;
+//    var storeKey = this._storeKeysForQuery[idx];
+//    var ret = null; 
+//    if(store && storeKey) {
+//      ret = store.materializeRecord(storeKey);
+//    }
+//    return ret;
+//  },
+//    
+//  _storeKeysForQuery: null,
+//  
+//  init: function() {
+//    sc_super();
+//    this._storeKeysForQuery = [];
+//  }
+//  
+//
+//}) ;
+//
