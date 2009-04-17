@@ -201,11 +201,13 @@ SC.mixin(SC.Object.prototype,
           } else superstateKey = this[superstateKey].superstateKey ;
         }
         
+        // debugger ;
+        
         // ...................................................................
         // (f) Is the handling state's superstate one of target's ancestors?
         //
         
-        // exit the handing state
+        // exit the handing state's superstate
         current.call(this, SC.EVT_EXIT) ;
         
         // update current to the handing state's superstate
@@ -214,7 +216,8 @@ SC.mixin(SC.Object.prototype,
         // does the handling state even have a superstate?
         if (!handlerKey) {
           // FIXME: what should be done here?
-          console.log('(f) handleKey unexpectedly miissing');
+          debugger ;
+          // console.log('(f) handleKey unexpectedly miissing');
           
           // no ancestors to check, stop trying to figure out what to do...
           break figureOutWhatToDo ;
@@ -228,8 +231,10 @@ SC.mixin(SC.Object.prototype,
           // loop over the target state's ancestors, looking for the handling 
           // state's superstate
           do {
-            // did we find the handling state's superstate?
-            if (current.superstateKey === this[path[idx2]]) {
+            pathKey = path[idx2] ;
+            
+            // did we find the handling state's superstate's superstate?
+            if (pathKey && current === this[pathKey]) {
               // don't exit the handling state's superstate
               
               // don't enter the handling state's superstate either...
@@ -258,8 +263,8 @@ SC.mixin(SC.Object.prototype,
           
           // does the handling state's superstate even have a superstate?
           if (!handlerKey) {
-            // FIXME: what should be done here?
-            console.log('(g) handleKey unexpectedly miissing');
+            // don't enter the handling state's superstate
+            debugger ;
             
             // no ancestors to check, stop trying to figure out what to do...
             break figureOutWhatToDo ;
