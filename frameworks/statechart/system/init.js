@@ -44,19 +44,16 @@ SC.mixin(SC.Object.prototype,
     }
     
     do {
-      // this[path[idx]](SC.EVT_ENTER) ;
       this._sc_statechart_enter(path[idx]) ;
     } while ((--idx) > 0)
     
     // now enter the initial state
-    // this[this[stateKey]](SC.EVT_ENTER) ;
     this._sc_statechart_enter(this[stateKey]) ;
     
     // debugger;
     
     // initialize the initial states's substates
-    // while (this[this[stateKey]](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
-      while (this._sc_statechart_init(this[stateKey]) === SC.EVT_TRANSITION_RES) {
+    while (this._sc_statechart_init(this[stateKey]) === SC.EVT_TRANSITION_RES) {
       substate = this[stateKey] ;
       
       // enter the target of the transition (a substate)
@@ -77,12 +74,10 @@ SC.mixin(SC.Object.prototype,
       
       // now enter the target's substates in top-down order...
       do {
-        // this[path[idx]](SC.EVT_ENTER) ;
         this._sc_statechart_enter(path[idx]) ;
       } while ((--idx) > 0)
       
       // and finally enter the target itself
-      // if (idx === 0) this[this[stateKey]](SC.EVT_ENTER) ;
       if (idx === 0) this._sc_statechart_enter(this[stateKey]) ;
       
       // the loop continues to apply any default transitions as substates
