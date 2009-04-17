@@ -27,6 +27,8 @@ SC.mixin(SC.Object.prototype,
     var path = SC._DISPATCH_PATH ;
     var initial, substate, handlerKey, superstateKey, res, idx, ixd2 ;
     
+    this._sc_state_depth = 0 ; // used by logging code...
+    
     // debugger ;
     
     initial = this[stateKey] = this[initialStateKey] ;

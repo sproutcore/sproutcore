@@ -385,7 +385,12 @@ SC.mixin(SC.Object.prototype,
     @returns {SC.EVT_HANDLED_RES or undefined}
   */
   _sc_statechart_enter: function(state) {
-    console.log("-> enter " + state) ;
+    var depth = this._sc_state_depth++ ;
+    
+    var pre = '' ;
+    while (--depth >= 0) pre = pre + '  ' ;
+    
+    console.log(pre + "-> enter " + state) ;
     return this[state](SC.EVT_ENTER) ;
   },
   
@@ -397,7 +402,12 @@ SC.mixin(SC.Object.prototype,
     @returns {SC.EVT_HANDLED_RES or undefined}
   */
   _sc_statechart_exit: function(state) {
-    console.log("<- exit " + state) ;
+    var depth = this._sc_state_depth-- ;
+    
+    var pre = '' ;
+    while (--depth > 0) pre = pre + '  ' ;
+    
+    console.log(pre + "<- exit  " + state) ;
     return this[state](SC.EVT_EXIT) ;
   },
   
@@ -409,8 +419,13 @@ SC.mixin(SC.Object.prototype,
     @returns {SC.EVT_TRANSITION_RES or undefined}
   */
   _sc_statechart_init: function(state) {
-    var res = this[state](SC.EVT_INIT) ;
-    if (res === SC.EVT_TRANSITION_RES) console.log(".. init substates of " + state) ;
+    var depth = this._sc_state_depth ;
+    
+    var pre = '' ;
+    while (--depth > 0) pre = pre + '  ' ;
+    
+    var res = this[state](SC.EVT_INIT), stateKey = this.get('stateKey') ;
+    if (res === SC.EVT_TRANSITION_RES) console.log(pre + "  (taking default transition to " + this[stateKey] + ')') ;
     return res ;
   }
   
