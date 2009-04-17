@@ -115,7 +115,7 @@ SC._ObserverSet = {
             ret.push([target, method, contexts[SC.guidFor(method)]]) ;
           }
         } else {
-          while(--idx>=0) ret.push([target, method]);
+          while(--idx>=0) ret.push([target, value[idx]]);
         }
       }
     }

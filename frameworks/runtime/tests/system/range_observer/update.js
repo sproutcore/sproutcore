@@ -7,7 +7,7 @@
 /*global module test equals context ok same notest */
 
 var source, indexes, observer, obj ; // base array to work with
-module("SC.RangeObserver#create", {
+module("SC.RangeObserver#update", {
   setup: function() {
     
     // create array with 5 SC.Object's in them
@@ -32,15 +32,32 @@ module("SC.RangeObserver#create", {
   }
 });
 
-test("returns new instance", function() {
-  ok(obj && obj.isRangeObserver, 'returns range observer');
+test("returns receuver", function() {
+  ok(obj === obj.update(source, SC.IndexSet.create()), 'should return receiver');
 });
 
-test("sets up observing on objects in index", function() {
+test("switches to observing new range - no previous updated", function() {
+  obj.update(source, SC.IndexSet.create(0));
+  
   var len = source.length, idx;
-  for(idx=0;idx<len;idx++) {
-    source[idx].set('foo', 'baz');
-  }
-  equals(observer.callCount, 2, 'range observer should fire twice');
+  for(idx=0;idx<len;idx++) source[idx].set('foo', 'baz');
+  
+  // since new index set length is different use this as a proxy to verify
+  // that range changed
+  equals(observer.callCount, 1, 'range observer should fire on new range');
+});
+
+test("switches to observing new range - previously updated", function() {
+  var len = source.length, idx;
+  for(idx=0;idx<len;idx++) source[idx].set('foo', 'baz');
+  observer.callCount = 0 ;
+
+  obj.update(source, SC.IndexSet.create(0));
+  
+  for(idx=0;idx<len;idx++) source[idx].set('foo', 'bar');
+  
+  // since new index set length is different use this as a proxy to verify
+  // that range changed
+  equals(observer.callCount, 1, 'range observer should fire on new range');
 });
 

@@ -131,9 +131,18 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     if (obj === this) return YES ;
     if (!obj || !obj.isIndexSet || (obj.max !== this.max) || (obj.length !== this.length)) return NO;
 
-    // ok, now we need to actually compare the content of the two.  Since they
-    // are both arrays, just use that isEqual.
-    return this._content.isEqual(obj._content);
+    // ok, now we need to actually compare the ranges of the two.
+    var lcontent = this._content,
+        rcontent = obj._content,
+        cur      = 0,
+        next     = lcontent[cur];
+    
+    do {
+      if (rcontent[cur] !== next) return NO ;
+      cur = Math.abs(next) ;
+      next = lcontent[cur];
+    } while (cur !== 0);
+    return YES ;
   },
   
   /**
@@ -270,8 +279,34 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
         oldmax  = max,
         content = this._content,
         cur, next, delta, value ;
+
+    if (start === max) {
+
+      // if adding to the end and the end is in set, merge.
+      if (start > 0) {
+        cur = this.rangeStartForIndex(start-1);
+        next = content[cur];
         
-    if (start >= max) {
+        // just extend range at end
+        if (next > 0) { 
+          delete content[max]; // no 0
+          content[cur] = max = start + length ;
+          start = cur ;
+          
+        // previous range was not in set, just tack onto the end
+        } else {
+          content[max] = max = start + length;
+        }
+      } else {
+        content[start] = max = length;
+      }
+      
+      content[max] = 0 ;
+      this.set('max', max);
+      this.set('length', this.length + length) ;
+      length = max - start ;
+      
+    } else if (start > max) {
       content[max] = 0-start; // empty!
       content[start] = start+length ;
       content[start+length] = 0; // set end
@@ -290,6 +325,13 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       next  = content[cur];
       max   = start + length ;
       delta = 0 ;
+
+      // we are right on a boundary and we had a range or were the end, then
+      // go back one more.
+      if ((start>0) && (cur === start) && (next <= 0)) {
+        cur = this.rangeStartForIndex(start-1);
+        next = content[cur] ;
+      }
       
       // previous range is not in set.  splice it here
       if (next < 0) { 

@@ -96,7 +96,7 @@ SC.Observers = {
     // if this object needsRangeObserver then see if any pending range 
     // observers need it.
     if (object._kvo_needsRangeObserver) {
-      var set = this.rangeObsevers,
+      var set = this.rangeObservers,
           len = set ? set.get('length') : 0,
           out = this._TMP_OUT,
           ro;

@@ -137,3 +137,30 @@ test("adding a range over an existing range should not trigger an observer notif
   set.add(15,5);
   equals(callCnt, 0, 'should not have called observer');
 });
+
+test("appending a range to end should merge into last range", function() {
+  set = SC.IndexSet.create(2).add(3);
+  equals(set.rangeStartForIndex(3), 2, 'last two range should merge together (%@)'.fmt(set.inspect()));
+  equals(set.get('max'), 4, 'should have max');
+  equals(set.get('length'), 2, 'should have length');
+
+  set = SC.IndexSet.create(2000, 1000).add(3000, 1000);
+  equals(set.rangeStartForIndex(3990), 2000, 'last two range should merge together (%@)'.fmt(set.inspect()));
+  equals(set.get('max'), 4000, 'should have max');
+  equals(set.get('length'), 2000, 'should have length');
+  
+});
+
+test("appending range to start of empty set should create a single range", function() {
+  set = SC.IndexSet.create().add(0,2);
+  equals(set.rangeStartForIndex(1), 0, 'should have single range (%@)'.fmt(set.inspect()));
+  equals(set.get('length'), 2, 'should have length');
+  equals(set.get('max'), 2, 'should have max');
+  
+  set = SC.IndexSet.create().add(0,2000);
+  equals(set.rangeStartForIndex(1998), 0, 'should have single range (%@)'.fmt(set.inspect()));
+  equals(set.get('length'), 2000, 'should have length');
+  equals(set.get('max'), 2000, 'should have max');
+  
+});
+

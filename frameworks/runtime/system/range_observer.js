@@ -22,6 +22,12 @@
 */
 SC.RangeObserver = /** SC.RangeObserver.prototype */ {
 
+  isRangeObserver: YES,
+  
+  toString: function() { 
+    return this.indexes.toString().replace('IndexSet', 'RangeObserver');
+  },
+  
   /**
     Creates a new range observer owned by the source.  The indexSet you pass
     must identify the indexes you are interested in observing.  The passed
@@ -44,7 +50,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     ret.target = target;
     ret.method = method;
     ret.context = context ;
-    this.beginObserving();
+    ret.beginObserving();
     return ret ;
   },
 
@@ -96,7 +102,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
   */
   beginObserving: function() {
     var observing = this.observing;
-    if (observing) observing = this.observing = SC.Set.create();
+    if (!observing) observing = this.observing = SC.Set.create();
     
     // cache iterator function to keep things fast
     var func = this._beginObservingForEach;
@@ -110,7 +116,12 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
       };
     }
     this.indexes.forEach(func,this);
+
+    // add to pending range observers queue so that if any of these objects
+    // change we will have a chance to setup observing on them.
     this.isObserving = NO ;
+    SC.Observers.addPendingRangeObserver(this);
+
     return this;
   },
   
@@ -149,7 +160,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
             // more than one idx, convert to IndexSet.
             key = this[guid];
             if (key === undefined || key === null) {
-              this[guid] = key ;
+              this[guid] = idx ;
             } else if (key.isIndexSet) {
               key.add(idx);
             } else {
@@ -213,6 +224,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
       this.method.call(this.target, this.source, null, '[]', changes, this.context);
       this.beginObserving(); // setup new ones
     }
+    return this ;
   },
 
   /**

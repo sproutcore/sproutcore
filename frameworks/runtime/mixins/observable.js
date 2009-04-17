@@ -687,6 +687,8 @@ SC.Observable = {
     @returns {Boolean}
   */
   hasObserverFor: function(key) {
+    SC.Observers.flush(this) ; // hookup as many observers as possible.
+    
     var observers = this[SC.keyFor('_kvo_observers', key)],
         locals    = this[SC.keyFor('_kvo_local', key)],
         members ;
