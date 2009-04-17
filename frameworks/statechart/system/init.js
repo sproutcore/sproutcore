@@ -27,12 +27,14 @@ SC.mixin(SC.Object.prototype,
     var path = SC._DISPATCH_PATH ;
     var initial, substate, handlerKey, superstateKey, res, idx, ixd2 ;
     
-    initial = this[stateKey] = this[this[initialStateKey]] ;
+    // debugger ;
+    
+    initial = this[stateKey] = this[initialStateKey] ;
     if (!initial) return this ; // fast path -- this object does not use HSMs
     
     // okay, does the initial state have superstates? If so, we need to
     // enter them first...
-    superstateKey = initial.superstateKey ;
+    superstateKey = this[initial].superstateKey ;
     if (superstateKey !== undefined) {
       idx = 0 ;
       while (superstateKey) {
@@ -46,12 +48,12 @@ SC.mixin(SC.Object.prototype,
     } while ((--idx) > 0)
     
     // now enter the initial state
-    this[stateKey](SC.EVT_ENTER) ;
+    this[this[stateKey]](SC.EVT_ENTER) ;
     
     // debugger;
     
     // initialize the initial states's substates
-    while (this[stateKey](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
+    while (this[this[stateKey]](SC.EVT_INIT) === SC.EVT_TRANSITION_RES) {
       substate = this[stateKey] ;
       
       // enter the target of the transition (a substate)
@@ -60,11 +62,10 @@ SC.mixin(SC.Object.prototype,
       // walk the state hierarchy until we find our target state, storing
       // state keys along the way
       while (initial !== substate) {
-        superstateKey = substate.superstateKey ;
+        superstateKey = this[substate].superstateKey ;
         if (superstateKey === undefined) break ;
         else {
-          path[++idx]= superstateKey ;
-          substate = this[superstateKey] ;
+          substate = path[++idx]= superstateKey ;
         }
       }
       
@@ -77,7 +78,7 @@ SC.mixin(SC.Object.prototype,
       } while ((--idx) > 0)
       
       // and finally enter the target itself
-      if (idx === 0) this[stateKey](SC.EVT_ENTER) ;
+      if (idx === 0) this[this[stateKey]](SC.EVT_ENTER) ;
       
       // the loop continues to apply any default transitions as substates
       // are entered...
