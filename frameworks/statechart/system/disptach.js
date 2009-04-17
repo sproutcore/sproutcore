@@ -375,6 +375,42 @@ SC.mixin(SC.Object.prototype,
       // we did handle the event, but we didn't make a state transition
       return YES ;
     }
+  },
+  
+  /** @private
+    Enters a given state. This method is overriden in debug mode to implement
+    state tracing.
+    
+    @param {String} state a local property containing a state handler
+    @returns {SC.EVT_HANDLED_RES or undefined}
+  */
+  _sc_statechart_enter: function(state) {
+    console.log("-> enter " + state) ;
+    return this[state](SC.EVT_ENTER) ;
+  },
+  
+  /** @private
+    Exits a given state. This method is overriden in debug mode to implement
+    state tracing.
+    
+    @param {String} state a local property containing a state handler
+    @returns {SC.EVT_HANDLED_RES or undefined}
+  */
+  _sc_statechart_exit: function(state) {
+    console.log("<- exit " + state) ;
+    return this[state](SC.EVT_EXIT) ;
+  },
+  
+  /** @private
+    Inits a given state. This method is overriden in debug mode to implement
+    state tracing.
+    
+    @param {String} state a local property containing a state handler
+    @returns {SC.EVT_TRANSITION_RES or undefined}
+  */
+  _sc_statechart_init: function(state) {
+    console.log(".. init substates of " + state) ;
+    return this[state](SC.EVT_INIT) ;
   }
   
 });
