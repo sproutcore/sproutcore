@@ -251,6 +251,8 @@ CoreTest.Plan = {
     return this;
   },
   
+  now: function() { return new Date().getTime(); },
+  
   /**
     Generates a unit test, adding it to the test plan.
   */
@@ -283,7 +285,9 @@ CoreTest.Plan = {
       this.working = working;
       
       try {
+        working.total_begin = working.setup_begin = this.now();
         setup.call(this);
+        working.setup_end = this.now();
       } catch(e) {
         this.error("Setup exception on " + name + ": " + e.message);
       }
@@ -295,7 +299,9 @@ CoreTest.Plan = {
         this.warn("Test not yet implemented: " + name);
       } else {
         try {
+          this.working.test_begin = this.now();
           func.call(this);
+          this.working.test_end = this.now();
         } catch(e) {
           this.error("Died on test #" + (this.working.assertions.length + 1) + ": " + e.message);
         }
@@ -305,7 +311,9 @@ CoreTest.Plan = {
     // cleanup
     this.synchronize(function() {
       try {
+        this.working.teardown_begin = this.now();
         teardown.call(this);
+        this.working.teardown_end = this.now();
       } catch(e) {
         this.error("Teardown exception on " + name + ": " + e.message);
       }
@@ -316,7 +324,9 @@ CoreTest.Plan = {
       
       if (this.reset) {
         try {
+          this.working.reset_begin = this.now();
           this.reset();
+          this.working.total_end = this.working.reset_end = this.now();
         } catch(ex) {
           this.error("Reset exception on " + name + ": " + ex.message) ;
         }
@@ -333,17 +343,19 @@ CoreTest.Plan = {
       
       // finally, record result
       this.working = null;
-      this.record(w.module, w.test, w.assertions);
+      this.record(w.module, w.test, w.assertions, w);
+
+      this.pause();
       
-      if (!this.pauseTime) {
-        this.pauseTime = new Date().getTime();
-      } else {
-        var now = new Date().getTime();
-        if ((now - this.pauseTime) > 2000) {
-          this.pause();
-          this.pauseTime = now ;
-        }
-      }
+      // if (!this.pauseTime) {
+      //   this.pauseTime = new Date().getTime();
+      // } else {
+      //   var now = new Date().getTime();
+      //   if ((now - this.pauseTime) > 2000) {
+      //     this.pause();
+      //     this.pauseTime = now ;
+      //   }
+      // }
       
     });
   },
@@ -379,7 +391,7 @@ CoreTest.Plan = {
     and notify the delegate.  The passed assertions array should contain 
     hashes with the result and message.
   */
-  record: function(module, test, assertions) {
+  record: function(module, test, assertions, timings) {
     var r   = this.results,
         len = assertions.length,
         del = this.delegate,
@@ -397,7 +409,7 @@ CoreTest.Plan = {
     }
     
     if (del && del.planDidRecord) {
-      del.planDidRecord(this, module, test, assertions) ;
+      del.planDidRecord(this, module, test, assertions, timings) ;
     }
     
   },

@@ -147,7 +147,10 @@ test("should run forEach() to go through objects", function() {
       equals(items[idx], src.objectAt(idx)) ;
       equals(indexes[idx], idx) ;
       equals(arrays[idx], src) ;
-      equals(targets[idx], this) ;
+
+      // use this method because equals() is taking too much time to log out
+      // results.  probably an issue with jsDump
+      ok(targets[idx] === this, 'target should always be this') ;
     }
   }
 });

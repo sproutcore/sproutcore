@@ -117,7 +117,7 @@ CoreTest.Runner = {
     result.html(str);
   },
   
-  planDidRecord: function(plan, module, test, assertions) {
+  planDidRecord: function(plan, module, test, assertions, timings) {
     var name = test, 
         s    = { passed: 0, failed: 0, errors: 0, warnings: 0 }, 
         len  = assertions.length, 
@@ -128,6 +128,8 @@ CoreTest.Runner = {
     if ((s.failed + s.errors + s.warnings) === 0) clean = "clean" ;
     
     if (module) name = module + " module: " + test ;
+    name = CoreTest.fmt('%@ - %@msec', name, timings.total_end - timings.total_begin);
+    
     q = Q$(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));
     
     //debugger ;
