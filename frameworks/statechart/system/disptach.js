@@ -51,11 +51,14 @@ SC.mixin(SC.Object.prototype,
     if (!current) return NO ; // fast path -- this object does not use HSMs
     
     // okay, process the event hierarchically...
-    res = this[this[stateKey]](evt) ;
+    // res = this[this[stateKey]](evt) ;
+    var depth = this._sc_state_depth ;
+    res = this._sc_statechart_event(this[stateKey], evt, depth) ;
     if (!res) {
       superstateKey = this[current].superstateKey ;
       while (superstateKey) {
-        res = this[superstateKey](evt) ; // call superstate handler...
+        // res = this[superstateKey](evt) ; // call superstate handler...
+        res = this._sc_statechart_event(superstateKey, evt, --depth) ;
         if (res) {
           handlerKey = superstateKey ;
           break ;
@@ -426,6 +429,28 @@ SC.mixin(SC.Object.prototype,
     
     var res = this[state](SC.EVT_INIT), stateKey = this.get('stateKey') ;
     if (res === SC.EVT_TRANSITION_RES) console.log(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
+    return res ;
+  },
+  
+  /** @private
+    Inits a given state. This method is overriden in debug mode to implement
+    state tracing.
+    
+    @param {String} state a local property containing a state handler
+    @returns {SC.EVT_TRANSITION_RES or undefined}
+  */
+  _sc_statechart_event: function(state, evt, depth) {
+    var pre = '' ;
+    while (--depth > 0) pre = pre + '  ' ;
+    
+    var res = this[state](evt), stateKey = this.get('stateKey') ;
+    if (res) {
+      if (res === SC.EVT_HANDLED_RES) {
+        console.log(pre + '"' + state + '" handled event \'' + evt.sig + '\' (no transition)') ;
+      } else if (res === SC.EVT_TRANSITION_RES) {
+        console.log(pre + '"' + state + '" handled event \'' + evt.sig + '\' with a transition to \"' + this[stateKey] + '"') ;
+      }
+    } else console.log(pre + '"' + state + '" ignored event \'' + evt.sig + "'") ;
     return res ;
   }
   
