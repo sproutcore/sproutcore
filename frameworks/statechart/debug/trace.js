@@ -7,6 +7,14 @@
 
 sc_require('system/dispatch') ;
 
+var _sc_log = function(text) {
+  console.log(text) ;
+};
+
+var _sc_alert = function(text) {
+  alert(text) ;
+};
+
 SC.mixin(SC.Object.prototype,
 /** SC.Object.prototype */ {
   
@@ -23,7 +31,10 @@ SC.mixin(SC.Object.prototype,
     var pre = '' ;
     while (--depth >= 0) pre = pre + '  ' ;
     
-    if (this.get('trace')) console.log(pre + "-> entering \"" + state + '"') ;
+    if (this.get('sc_trace')) {
+      var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
+      fun(pre + "-> entering \"" + state + '"') ;
+    }
     return this[state](SC.EVT_ENTER) ;
   },
   
@@ -40,7 +51,10 @@ SC.mixin(SC.Object.prototype,
     var pre = '' ;
     while (--depth > 0) pre = pre + '  ' ;
     
-    if (this.get('trace')) console.log(pre + "<- leaving  \"" + state + '"') ;
+    if (this.get('sc_trace')) {
+      var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
+      fun(pre + "<- leaving  \"" + state + '"') ;
+    }
     return this[state](SC.EVT_EXIT) ;
   },
   
@@ -58,8 +72,9 @@ SC.mixin(SC.Object.prototype,
     while (--depth > 0) pre = pre + '  ' ;
     
     var res = this[state](SC.EVT_INIT), stateKey = this.get('stateKey') ;
-    if (this.get('trace') && res === SC.EVT_TRANSITION_RES) {
-      console.log(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
+    if (this.get('sc_trace') && res === SC.EVT_TRANSITION_RES) {
+      var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
+      fun(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
     }
     return res ;
   },
@@ -76,13 +91,16 @@ SC.mixin(SC.Object.prototype,
     while (--depth > 0) pre = pre + '  ' ;
     
     var res = this[state](evt), stateKey = this.get('stateKey') ;
-    if (this.get('trace') && res) {
-      if (res === SC.EVT_HANDLED_RES) {
-        console.log(pre + '"' + state + '" handled event \'' + evt.sig + '\' (no transition)') ;
-      } else if (res === SC.EVT_TRANSITION_RES) {
-        console.log(pre + '"' + state + '" handled event \'' + evt.sig + '\' with a transition to \"' + this[stateKey] + '"') ;
-      }
-    } else console.log(pre + '"' + state + '" ignored event \'' + evt.sig + "'") ;
+    if (this.get('sc_trace')) {
+      var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
+      if (res) {
+        if (res === SC.EVT_HANDLED_RES) {
+          fun(pre + '"' + state + '" handled event \'' + evt.sig + '\' (no transition)') ;
+        } else if (res === SC.EVT_TRANSITION_RES) {
+          fun(pre + '"' + state + '" handled event \'' + evt.sig + '\' with a transition to \"' + this[stateKey] + '"') ;
+        }
+      } else fun(pre + '"' + state + '" ignored event \'' + evt.sig + "'") ;
+    }
     return res ;
   }
   
