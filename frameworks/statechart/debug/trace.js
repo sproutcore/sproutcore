@@ -23,7 +23,7 @@ SC.mixin(SC.Object.prototype,
     var pre = '' ;
     while (--depth >= 0) pre = pre + '  ' ;
     
-    console.log(pre + "-> entering \"" + state + '"') ;
+    if (this.get('trace')) console.log(pre + "-> entering \"" + state + '"') ;
     return this[state](SC.EVT_ENTER) ;
   },
   
@@ -40,7 +40,7 @@ SC.mixin(SC.Object.prototype,
     var pre = '' ;
     while (--depth > 0) pre = pre + '  ' ;
     
-    console.log(pre + "<- leaving  \"" + state + '"') ;
+    if (this.get('trace')) console.log(pre + "<- leaving  \"" + state + '"') ;
     return this[state](SC.EVT_EXIT) ;
   },
   
@@ -58,7 +58,9 @@ SC.mixin(SC.Object.prototype,
     while (--depth > 0) pre = pre + '  ' ;
     
     var res = this[state](SC.EVT_INIT), stateKey = this.get('stateKey') ;
-    if (res === SC.EVT_TRANSITION_RES) console.log(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
+    if (this.get('trace') && res === SC.EVT_TRANSITION_RES) {
+      console.log(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
+    }
     return res ;
   },
   
@@ -74,7 +76,7 @@ SC.mixin(SC.Object.prototype,
     while (--depth > 0) pre = pre + '  ' ;
     
     var res = this[state](evt), stateKey = this.get('stateKey') ;
-    if (res) {
+    if (this.get('trace') && res) {
       if (res === SC.EVT_HANDLED_RES) {
         console.log(pre + '"' + state + '" handled event \'' + evt.sig + '\' (no transition)') ;
       } else if (res === SC.EVT_TRANSITION_RES) {
