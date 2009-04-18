@@ -133,7 +133,7 @@ SC.Set.prototype = {
     var guid = SC.hashFor(obj) ;
     var idx = this[guid] ;
     var len = this.length ;
-    if (SC.none(idx) || (idx >= len)) {
+    if (SC.none(idx) || (idx >= len) || (this[idx] !== obj)) {
       this[len] = obj ;
       this[guid] = len ;
       this.length = len+1;
@@ -169,7 +169,8 @@ SC.Set.prototype = {
     var idx = this[guid] ;
     var len = this.length;
 
-    if (SC.none(idx) || (idx >= len)) return this; // not in set.
+    // not in set.
+    if (SC.none(idx) || (idx >= len) || (this[idx] !== obj)) return this; 
 
     // clear the guid key
     delete this[guid] ;

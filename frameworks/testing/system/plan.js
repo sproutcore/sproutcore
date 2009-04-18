@@ -345,17 +345,15 @@ CoreTest.Plan = {
       this.working = null;
       this.record(w.module, w.test, w.assertions, w);
 
-      this.pause();
-      
-      // if (!this.pauseTime) {
-      //   this.pauseTime = new Date().getTime();
-      // } else {
-      //   var now = new Date().getTime();
-      //   if ((now - this.pauseTime) > 2000) {
-      //     this.pause();
-      //     this.pauseTime = now ;
-      //   }
-      // }
+      if (!this.pauseTime) {
+        this.pauseTime = new Date().getTime();
+      } else {
+        var now = new Date().getTime();
+        if ((now - this.pauseTime) > 250) {
+          this.pause();
+          this.pauseTime = now ;
+        }
+      }
       
     });
   },

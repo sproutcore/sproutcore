@@ -46,7 +46,10 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   // ..........................................................
   // LENGTH SUPPORT
   // 
-  
+
+  _requestingLength: 0,  
+  _requestingIndex: 0,
+   
   /**
     The length of the sparse array.  The delegate for the array should set 
     this length.
@@ -55,8 +58,10 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   */
   length: function() {
     var del = this.delegate ;
-    if (del && SC.none(this._length) && del.sparseArrayDidRequestLength) {      
+    if (del && SC.none(this._length) && del.sparseArrayDidRequestLength) {
+      this._requestingLength++ ;
       del.sparseArrayDidRequestLength(this);
+      this._requestingLength-- ;
     }
     return this._length || 0 ;
   }.property().cacheable(),
@@ -74,7 +79,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     if (SC.none(length)) this._sa_content = null ;
     if (length !== this._length) {
       this._length = length ;
-      this.enumerableContentDidChange() ;
+      if (this._requestingLength <= 0) this.enumerableContentDidChange() ;
     }
     return this ;
   },
@@ -129,6 +134,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     if (len < 1) len = 1 ;
     
     // invoke appropriate callback
+    this._requestingIndex++;
     if (del.sparseArrayDidRequestRange) {
       var range = this._TMP_RANGE;
       range.start = start;
@@ -138,6 +144,8 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     } else if (del.sparseArrayDidRequestIndex) {
       while(--len >= 0) del.sparseArrayDidRequestIndex(this, start + len);
     }
+    this._requestingIndex--;
+
     return this ;
   },
   
@@ -156,7 +164,7 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     if (!content) content = this._sa_content = [] ;
     var start = range.start, len = range.length;
     while(--len >= 0) content[start+len] = array[len];
-    this.enumerableContentDidChange() ;
+    if (this._requestingIndex <= 0) this.enumerableContentDidChange() ;
     return this ;
   },
 
@@ -256,14 +264,15 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     content.replace(idx, amt, objects) ;
     
     // update length
-    var delta = objects.length - amt ;
-    if (delta!==0 && !SC.none(this._length)) {
+    var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
+    var delta = len - amt ;
+    if (!SC.none(this._length)) {
       this.propertyWillChange('length');
       this._length += delta;
       this.propertyDidChange('length');
-    } 
+    }
 
-    this.enumerableContentDidChange() ;
+    this.enumerableContentDidChange(idx, amt, delta) ;
     return this ;
   },
 

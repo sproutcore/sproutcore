@@ -38,6 +38,7 @@ test("returns receuver", function() {
 
 test("switches to observing new range - no previous updated", function() {
   obj.update(source, SC.IndexSet.create(0));
+  observer.callCount = 0 ;
   
   var len = source.length, idx;
   for(idx=0;idx<len;idx++) source[idx].set('foo', 'baz');
@@ -53,6 +54,7 @@ test("switches to observing new range - previously updated", function() {
   observer.callCount = 0 ;
 
   obj.update(source, SC.IndexSet.create(0));
+  observer.callCount = 0 ;
   
   for(idx=0;idx<len;idx++) source[idx].set('foo', 'bar');
   

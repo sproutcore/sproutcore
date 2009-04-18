@@ -112,7 +112,11 @@ var DummyDelegate = SC.Object.extend({
 
 SC.ArraySuite.generate("SC.SparseArray", {
   newObject: function(amt) {
-    var del = DummyDelegate.create({ content: this.expected(amt) });
+    if (amt === undefined || typeof amt === SC.T_NUMBER) {
+      amt = this.expected(amt);
+    }
+
+    var del = DummyDelegate.create({ content: amt });
     return SC.SparseArray.create({ delegate: del });
   }
 });

@@ -64,6 +64,7 @@ CoreTest.Runner = {
       
     this.report.find('.useragent').html(navigator.userAgent);
     this.logq = this.report.find('tbody');
+    this.testCount = 0 ;
     
     // listen to change event
     var runner = this;
@@ -142,6 +143,10 @@ CoreTest.Runner = {
       q = Q$(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
       this.logq.append(q);
     }
+    
+    var result = this.report.find('.testresult .status');
+    this.testCount++;
+    result.html(CoreTest.fmt("Running – Completed %@ tests so far.", this.testCount));
   }
   
 };

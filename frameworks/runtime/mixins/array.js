@@ -444,8 +444,7 @@ if (!Array.prototype.indexOf) {
       // replaced range.  Otherwise, pass the full remaining array length 
       // since everything has shifted
       var len = objects ? (objects.get ? objects.get('length') : objects.length) : 0;
-      if (amt !== len) amt = this.length - idx;
-      this.enumerableContentDidChange(idx, amt) ;
+      this.enumerableContentDidChange(idx, amt, len - amt) ;
       return this ;
     },
   

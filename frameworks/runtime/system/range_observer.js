@@ -25,7 +25,8 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
   isRangeObserver: YES,
   
   toString: function() { 
-    return this.indexes.toString().replace('IndexSet', 'RangeObserver');
+    var base = this.indexes ? this.indexes.toString() : "SC.IndexSet<..>";
+    return base.replace('IndexSet', 'RangeObserver(%@)'.fmt(SC.guidFor(this)));
   },
   
   /**
