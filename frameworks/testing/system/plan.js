@@ -151,6 +151,9 @@ CoreTest.Plan = {
   */
   pause: function() {
     if (this.isRunning) {
+      var del = this.delegate;
+      if (del && del.planDidPause) del.planDidPause(this);
+      
       this.isRunning = false ;
       this.start();
     }
