@@ -59,8 +59,16 @@ SC.Query = SC.Object.extend({
     @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
   */
   compare: function(record1, record2) {
-    // not implemented yet
-    return 0;
+    var result = 0;
+    // if called for the first time we have to build the order array
+    if ( this.order.length == 0 ) this.buildOrder();
+    
+    // for every key specified in orderBy
+    for (var i=0; i < this.order.length; i++) {
+      result = this.compareByProperty(record1, record2, this.order[i]);
+      if (result != 0) return result;
+    };
+    return result;
   },
   
   
@@ -68,12 +76,17 @@ SC.Query = SC.Object.extend({
   // INTERNAL PROPERTIES
   //
   
+  // for containment:
+  
   isReady:        false,
   tokenList:      null,
   usedProperties: null,
   needsRecord:    false,
   tokenTree:      null,
   
+  // for comparison:
+  
+  order:          [],
   
   // ..........................................................
   // QUERY LANGUAGE DEFINITION
@@ -526,15 +539,26 @@ SC.Query = SC.Object.extend({
     
     };
   
-    // error if tokenList l is not a single token
+    // error if tokenList l is not a single token now
     if (l.length == 1) l = l[0];
     else error.push('string did not resolve to a single tree');
   
-    // return tree or error
+    // error?
     if (error.length > 0) return {error: error.join(',\n'), tree: l};
+    // everything fine - token list is now a tree and can be returned
     else return l;
   
   },
+  
+  
+  // ..........................................................
+  // ORDERING
+  //
+  
+  compareByProperty: function (record1, record2, property) {
+    
+  },
+  
   
   
   // ..........................................................
