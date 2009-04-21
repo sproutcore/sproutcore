@@ -41,8 +41,9 @@ SC.Request = SC.Object.extend({
     return this ;
   },
   
-  send: function() {
+  send: function(body) {
     var request = this ; // SC.clone(this) ;
+    if(body) request.set('body', body) ;
     SC.Request.manager.sendRequest(request) ;
     return request ;
   },
