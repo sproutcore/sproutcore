@@ -42,15 +42,17 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     @param {Object} target the target
     @param {Function|String} method the method to invoke
     @param {Object} context optional context to include in callback
+    @param {Boolean} isDeep if YES, observe property changes as well
     @returns {SC.RangeObserver} instance
   */
-  create: function(source, indexSet, target, method, context) {
+  create: function(source, indexSet, target, method, context, isDeep) {
     var ret = SC.beget(this);
     ret.source = source;
     ret.indexes = indexSet;
     ret.target = target;
     ret.method = method;
     ret.context = context ;
+    ret.isDeep  = isDeep || NO ;
     ret.beginObserving();
     return ret ;
   },
@@ -102,6 +104,8 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     @returns {SC.RangeObserver} receiver
   */
   beginObserving: function() {
+    if (!this.isDeep) return this; // nothing to do
+    
     var observing = this.observing;
     if (!observing) observing = this.observing = SC.Set.create();
     
@@ -185,6 +189,8 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     @returns {SC.RangeObserver} receiver
   */
   endObserving: function() {
+    if (!this.isDeep) return this; // nothing to do
+    
     var observing = this.observing;
     
     if (this.isObserving) {

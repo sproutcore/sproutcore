@@ -262,7 +262,7 @@ SC.Array = {
     The callback for a range observer should have the signature:
     
     {{{
-      function rangePropertyDidChange(array, objects, key)
+      function rangePropertyDidChange(array, objects, key, indexes, conext)
     }}}
     
     If the passed key is '[]' it means that the object itself changed.
@@ -275,14 +275,15 @@ SC.Array = {
     @param {Object} target object to invoke on change
     @param {String|Function} method the method to invoke
     @param {Object} context optional context
+    @param {Boolean} isDeep set to YES to observe object properties
     @returns {SC.RangeObserver} range observer
   */
-  addRangeObserver: function(indexes, target, method, context) {
+  addRangeObserver: function(indexes, target, method, context, isDeep) {
     var rangeob = this._array_rangeObservers;
     if (!rangeob) rangeob = this._array_rangeObservers = SC.Set.create() ;
 
     var C = this.rangeObserverClass ;
-    var ret = C.create(this, indexes, target, method, context) ;
+    var ret = C.create(this, indexes, target, method, context, isDeep) ;
     rangeob.add(ret);
     
     // first time a range observer is added, begin observing the [] property

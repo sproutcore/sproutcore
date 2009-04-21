@@ -44,7 +44,7 @@ module("SC.RangeObserver#rangeDidChange", {
       
     });
 
-    obj = SC.RangeObserver.create(source, indexes, observer, observer.changeObserver, "context");
+    obj = SC.RangeObserver.create(source, indexes, observer, observer.changeObserver, "context", YES);
     
   }
 });

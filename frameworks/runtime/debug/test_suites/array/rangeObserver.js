@@ -15,15 +15,18 @@ if (window.CoreTest) {
 SC.ArraySuite.define(function(T) {
   
   var expected, array, observer, rangeObserver ;
-  
-  module(T.desc("RangeObserver Methods"), {
+
+  // ..........................................................
+  // MODULE: isDeep = YES 
+  // 
+  module(T.desc("RangeObserver Methods - isDeep YES"), {
     setup: function() {
       expected = T.objects(10);
       array = T.newObject(expected);
 
       observer = T.observer();
       rangeObserver = array.addRangeObserver(SC.IndexSet.create(2,3), 
-                observer, observer.rangeDidChange);
+                observer, observer.rangeDidChange, null, YES);
       
     },
     
@@ -39,7 +42,7 @@ SC.ArraySuite.define(function(T) {
   // ..........................................................
   // EDIT PROPERTIES
   // 
-  
+
   test("editing property on object in range should fire observer", function() {
     var obj = array.objectAt(3);
     obj.set('foo', 'BAR');
@@ -211,6 +214,51 @@ SC.ArraySuite.define(function(T) {
   test("removeAt AFTER range does not fire observer", function() {
     array.removeAt(9);
     equals(observer.callCount, 0, 'observer should not fire');
+  });
+  
+  
+  
+  
+  
+  
+  
+  
+  // ..........................................................
+  // MODULE: isDeep = NO 
+  // 
+  module(T.desc("RangeObserver Methods - isDeep NO"), {
+    setup: function() {
+      expected = T.objects(10);
+      array = T.newObject(expected);
+
+      observer = T.observer();
+      rangeObserver = array.addRangeObserver(SC.IndexSet.create(2,3), 
+                observer, observer.rangeDidChange, null, NO);
+      
+    },
+    
+    teardown: function() {
+      T.destroyObject(array);
+    }
+  });
+  
+  test("editing property on object at any point should not fire observer", function() {
+    
+    var indexes = [0,3,9], 
+        loc     = 3,
+        obj,idx;
+        
+    while(--loc>=0) {
+      idx = indexes[loc];
+      obj = array.objectAt(idx);
+      obj.set('foo', 'BAR');
+      equals(observer.callCount, 0, 'observer should not fire when editing object at index %@'.fmt(idx));
+    }
+  });
+  
+  test("replacing object in range fires observer with index set", function() {
+    array.replace(2, 1, T.objects(1));
+    observer.expectRangeChange(array, null, '[]', SC.IndexSet.create(2,1));
   });
     
   

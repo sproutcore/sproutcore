@@ -27,7 +27,7 @@ module("SC.RangeObserver#create", {
       
     });
 
-    obj = SC.RangeObserver.create(source, indexes, observer, observer.rangeDidChange, "context");
+    obj = SC.RangeObserver.create(source, indexes, observer, observer.rangeDidChange, "context", YES);
     
   }
 });
@@ -36,7 +36,7 @@ test("returns new instance", function() {
   ok(obj && obj.isRangeObserver, 'returns range observer');
 });
 
-test("sets up observing on objects in index", function() {
+test("sets up observing on properties for each object in range in index if isDeep", function() {
   var len = source.length, idx;
   for(idx=0;idx<len;idx++) {
     source[idx].set('foo', 'baz');
@@ -44,3 +44,16 @@ test("sets up observing on objects in index", function() {
   equals(observer.callCount, 2, 'range observer should fire twice');
 });
 
+test("does not observe object properties if isDeep is NO", function() {
+  // remove unneeded observer
+  obj.destroy();
+  
+  // use new observer
+  obj = SC.RangeObserver.create(source, indexes, observer, observer.rangeDidChange, "context", NO);
+  
+  var len = source.length, idx;
+  for(idx=0;idx<len;idx++) {
+    source[idx].set('foo', 'baz');
+  }
+  equals(observer.callCount, 0, 'range observer should not fire');
+});
