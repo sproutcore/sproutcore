@@ -1,0 +1,5 @@
+/** SC.ModalPane Support */
+
+.sc-pane.sc-modal {
+  z-index: 100;
+}
