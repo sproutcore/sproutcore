@@ -1737,6 +1737,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginLeft= 0;
     }
     
+    if (layout.width !== undefined) {
+      if(layout.width.toString().trim()=== "auto"){
+        ret.width='auto';
+      }
+    }
+    
     // handle min/max
     ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
     ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
@@ -1788,6 +1794,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginTop= 0;
     }
     
+    if (layout.height !== undefined) {
+      if(layout.height.toString().trim()=== "auto"){
+        ret.height='auto';
+      }
+    }
+      
     // handle min/max
     ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
     ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
