@@ -164,7 +164,7 @@ CoreTest.Runner = {
         resultStr = this.resultStr,
         result = this.report.find('.testresult .status');
         
-    if (logstr) this.logq.append(Q$(this.logstr.join(''))) ;
+    if (logstr) this.logq.append(this.logstr.join('')) ;
     
     if (resultStr) result.html(resultStr);
     this.resultStr = this.logstr = null ;
