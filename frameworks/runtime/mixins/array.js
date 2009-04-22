@@ -409,11 +409,17 @@ SC.Array.slice = function(beginIndex, endIndex) {
   Returns the index for a particular object in the index.
   
   @param {Object} object the item to search for
+  @param {NUmber} startAt optional starting location to search, default 0
   @returns {Number} index of -1 if not found
 */
-SC.Array.indexOf = function(object) {
+SC.Array.indexOf = function(object, startAt) {
   var idx, len = this.get('length');
-  for(idx=0;idx<len;idx++) {
+  
+  if (startAt === undefined) startAt = 0;
+  else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
+  if (startAt < 0) startAt += len;
+  
+  for(idx=startAt;idx<len;idx++) {
     if (this.objectAt(idx) === object) return idx ;
   }
   return -1;
@@ -457,20 +463,26 @@ if (!Array.prototype.indexOf) {
         ret = (value === undefined) ? this.invoke('get', key) : null ;
       }
       return ret ;
-    },
+    }
+  });
     
-    
-    //indexOf is not implemente in IE for Array
-    indexOf: function(obj) {
-      var len=this.length;
-      for(var i=0; i<len; i++){
-        if(this[i]===obj){
-      	  return i;
-      	}
+  // If browser did not implement indexOf natively, then override with
+  // specialized version
+  var indexOf = Array.prototype.indexOf;
+  if (!indexOf || (indexOf === SC.Array.indexOf)) {
+    Array.prototype.indexOf = function(object, startAt) {
+      var idx, len = this.length;
+
+      if (startAt === undefined) startAt = 0;
+      else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
+      if (startAt < 0) startAt += len;
+
+      for(idx=startAt;idx<len;idx++) {
+        if (this[idx] === object) return idx ;
       }
       return -1;
-    }
-  }) ;
+    } ; 
+  }
   
 })() ;
 
