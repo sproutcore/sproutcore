@@ -597,7 +597,11 @@ SC.Object.prototype = {
   /** @private */
   toString: function() {
     if (!this._object_toString) {
-      this._object_toString = "%@:%@".fmt(SC._object_className(this.constructor), SC.guidFor(this));
+      // only cache the string if the klass name is available
+      var klassName = SC._object_className(this.constructor) ;
+      var string = "%@:%@".fmt(klassName, SC.guidFor(this));
+      if (klassName) this._object_toString = string ;
+      else return string ;
     } 
     return this._object_toString ;
   },
