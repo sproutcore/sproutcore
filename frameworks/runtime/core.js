@@ -208,34 +208,37 @@ SC.mixin(/** @scope SC */ {
   makeArray: function(obj) {
     return SC.isArray(obj) ? obj : SC.$A(obj);
   },
-
+  
   /**
     Converts the passed object to an Array.  If the object appears to be 
     array-like, a new array will be cloned from it.  Otherwise, a new array
     will be created with the item itself as the only item in the array.
-
+    
     @param object {Object} any enumerable or array-like object.
     @returns {Array} Array of items
   */
   A: function(obj) {
-
     // null or undefined -- fast path
     if (SC.none(obj)) return [] ;
-
+    
     // primitive -- fast path
-    if (obj.slice instanceof Function) return obj.slice() ; 
-
+    if (obj.slice instanceof Function) {
+      // do we have a string?
+      if (typeof(obj) === 'string') return [obj] ;
+      else return obj.slice() ;
+    }
+    
     // enumerable -- fast path
     if (obj.toArray) return obj.toArray() ;
-
+    
     // if not array-like, then just wrap in array.
     if (!SC.isArray(obj)) return [obj];
-
+    
     // when all else fails, do a manual convert...
     var ret = [], len = obj.length;
     while(--len >= 0) ret[len] = obj[len];
     return ret ;
-  },  
+  },
   
   // ..........................................................
   // GUIDS & HASHES
