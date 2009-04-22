@@ -22,7 +22,7 @@ test("should return an array for the object passed ",function(){
 	var ret = SC.makeArray(obj);
 	equals(SC.isArray(ret),true);	
 	ret = SC.makeArray(stringA);
-	equals(SC.isArray(ret), false) ;  	
+	equals(SC.isArray(ret), true) ;  	
 	ret = SC.makeArray(numberA);
 	equals(SC.isArray(ret),true) ;  	
 	ret = SC.makeArray(arrayA);
