@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+var revMatches = NO ;
+
 module("object.propertyChanges", {  
   setup: function() {
     ObjectA = SC.Object.create({
@@ -25,7 +27,8 @@ module("object.propertyChanges", {
       }.observes('prop'),
 
       starProp: null,
-      starObserver: function(target, key) {
+      starObserver: function(target, key, value, rev) {
+        revMatches = (rev === target.propertyRevision) ;
         this.starProp = key;
       }
       
@@ -120,4 +123,10 @@ test("star observers", function() {
   
   ObjectA.set('bar', 'foo');
   equals(ObjectA.starProp, 'bar', 'should have fired star observer for bar');
+});
+
+test("revision passed to observers should match .propertyRevision", function() {
+    
+  equals(revMatches, true) ;
+  
 });
