@@ -242,9 +242,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @observes content
   */
   _contentDidChange: function() {
-    console.log('%@._contentDidChange()'.fmt(this));
+    // console.log('%@._contentDidChange()'.fmt(this));
     var content = this.get('content') ;
-    // if (SC.isEqual(content, this._content)) return ; // nothing to do
     if (content === this._content) return ; // nothing to do
     
     var func = this._contentPropertyDidChange ;
