@@ -246,10 +246,19 @@ SC.Record = SC.Object.extend(
     This method will write the conforming hash to the store and return
     the materialized record.
     
+    By normalizing the record, you can use .attributes() and be
+    assured that it will conform to the defined model. For example, this
+    can be useful in the case where you need to send a JSON representation
+    to some server after you have used .createRecord(), since this method
+    will enforce the 'rules' in the model such as their types and default
+    values. You can also include null values in the hash with the 
+    includeNull argument.
+    
+    @param {Boolean} includeNull will write empty (null) attributes
     @returns {SC.Record} the normalized record
   */
   
-  normalize: function() {
+  normalize: function(includeNull) {
     
     var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id');
     var store = this.get('store'), storeKey = this.get('storeKey');
@@ -258,11 +267,15 @@ SC.Record = SC.Object.extend(
     
     for(key in this) {
       // make sure property is a record attribute. if record attribute is a class (SC.Record)
-      // do not add to hash.
-      if(this[key] && this[key]['typeClass'] && 
-        (SC.typeOf(this[key].typeClass())!=='class' || this[key].defaultValue!==null)) {
-        var attrValue = this.get(key);
-        if(attrValue) dataHash[key] = attrValue;
+      // do not add to hash unless includeNull argument is true.
+      if(this[key] && this[key]['typeClass']) {
+        
+        if (SC.typeOf(this[key].typeClass())!=='class' || this[key].defaultValue!==null) {
+          var attrValue = this.get(key);
+          if(attrValue || includeNull) dataHash[key] = attrValue;
+        }
+        else if(includeNull) dataHash[key] = null;
+        
       }
     }
     
