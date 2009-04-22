@@ -426,8 +426,31 @@ SC.Array.indexOf = function(object, startAt) {
 };
 
 // Some browsers do not support indexOf natively.  Patch if needed
-if (!Array.prototype.indexOf) {
-  Array.prototype.indexOf = SC.Array.indexOf;
+if (!Array.prototype.indexOf) Array.prototype.indexOf = SC.Array.indexOf;
+
+/**
+  Returns the last index for a particular object in the index.
+  
+  @param {Object} object the item to search for
+  @param {NUmber} startAt optional starting location to search, default 0
+  @returns {Number} index of -1 if not found
+*/
+SC.Array.lastIndexOf = function(object, startAt) {
+  var idx, len = this.get('length');
+  
+  if (startAt === undefined) startAt = len-1;
+  else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
+  if (startAt < 0) startAt += len;
+  
+  for(idx=startAt;idx>=0;idx--) {
+    if (this.objectAt(idx) === object) return idx ;
+  }
+  return -1;
+};
+
+// Some browsers do not support lastIndexOf natively.  Patch if needed
+if (!Array.prototype.lastIndexOf) {
+  Array.prototype.lastIndexOf = SC.Array.lastIndexOf;
 }
 
 // ......................................................
@@ -482,6 +505,22 @@ if (!Array.prototype.indexOf) {
       }
       return -1;
     } ; 
+  }
+  
+  var lastIndexOf = Array.prototype.lastIndexOf ;
+  if (!lastIndexOf || (lastIndexOf === SC.Array.lastIndexOf)) {
+    Array.prototype.lastIndexOf = function(object, startAt) {
+      var idx, len = this.length;
+
+      if (startAt === undefined) startAt = len-1;
+      else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
+      if (startAt < 0) startAt += len;
+
+      for(idx=startAt;idx>=0;idx--) {
+        if (this[idx] === object) return idx ;
+      }
+      return -1;
+    };
   }
   
 })() ;
