@@ -265,7 +265,7 @@ SC.Record = SC.Object.extend(
         if(attrValue) dataHash[key] = attrValue;
       }
     }
-    console.log(dataHash);
+    
     store.writeDataHash(storeKey, dataHash);
     return store.materializeRecord(storeKey);
   },
