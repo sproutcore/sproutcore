@@ -8,12 +8,11 @@
 sc_require('system/dispatch') ;
 
 var _sc_log = function(text) {
-  if (StatechartDebugger) {
-    this.set('sc_lastMessage', text) ;
-  } else console.log(text) ;
+  console.log(text) ;
 };
 
 var _sc_alert = function(text) {
+  console.log(text) ;
   alert(text) ;
 };
 

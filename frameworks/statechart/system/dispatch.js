@@ -371,6 +371,8 @@ SC.mixin(SC.Object.prototype,
         // are entered...
       }
       
+      this.notifyPropertyChange(stateKey) ;
+      
       // if we transitioned, we definitely handled the event...
       return YES ;
     }
