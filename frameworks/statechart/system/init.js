@@ -86,7 +86,18 @@ SC.mixin(SC.Object.prototype,
       // are entered...
     }
     
+    // add to the global list of statecharts...
+    if (StatechartDebugger) {
+      StatechartDebugger.statecharts.pushObject(this) ;
+    }
+    
     return this ;
+  },
+  
+  destroyStatechart: function() {
+    if (StatechartDebugger) {
+      StatechartDebugger.statecharts.removeObject(this) ;
+    }
   }
   
 });
