@@ -242,8 +242,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @observes content
   */
   _contentDidChange: function() {
+    console.log('%@._contentDidChange()'.fmt(this));
     var content = this.get('content') ;
-    if (SC.isEqual(content, this._content)) return ; // nothing to do
+    // if (SC.isEqual(content, this._content)) return ; // nothing to do
+    if (content === this._content) return ; // nothing to do
     
     var func = this._contentPropertyDidChange ;
     
@@ -264,7 +266,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   }.observes('content'),
   
   _contentPropertyDidChange: function(target, key, value, rev) {  
-     if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
+    // console.log('%@._contentPropertyDidChange(target=%@, key=%@, value=%@, rev=%@)'.fmt(this, target, key, value, rev));
+    if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
       this._contentPropertyRevision = rev ;
       
       this._updatingContent = true ;
@@ -485,6 +488,32 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   init: function() {
     sc_super() ;
     if (this.get('content')) this._contentDidChange() ;
+  },
+  
+  sort: function(callback) {
+    var content = this.get('content') ;
+    if (content && content.sort) content.sort(callback) ;
+    return this ; // we're still the content...
+  },
+  
+  forEach: function(callback, target) {
+    if (typeof callback !== "function") throw new TypeError() ;
+    var content = this.get('content') ;
+    if (!content) return this ;
+    
+    var len = (content.get) ? content.get('length') : content.length ;
+    if (target === undefined) target = null;
+    
+    var last = null ;
+    var context = SC.Enumerator._popContext();
+    for(var idx=0;idx<len;idx++) {
+      var next = content.nextObject(idx, last, context) ;
+      callback.call(target, next, idx, this);
+      last = next ;
+    }
+    last = null ;
+    context = SC.Enumerator._pushContext(context);
+    return this ;
   }
   
 });
