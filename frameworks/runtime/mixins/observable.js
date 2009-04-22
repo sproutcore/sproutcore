@@ -829,7 +829,7 @@ SC.Observable = {
     while(((changes = this._kvo_changes) && (changes.length > 0)) || key) {
       
       // increment revision
-      rev = this.propertyRevision++;
+      rev = ++this.propertyRevision ;
       
       // save the current set of changes and swap out the kvo_changes so that
       // any set() calls by observers will be saved in a new set.
