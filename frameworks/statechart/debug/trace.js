@@ -8,7 +8,9 @@
 sc_require('system/dispatch') ;
 
 var _sc_log = function(text) {
-  console.log(text) ;
+  if (StatechartDebugger) {
+    this.set('sc_lastMessage', text) ;
+  } else console.log(text) ;
 };
 
 var _sc_alert = function(text) {
@@ -33,7 +35,7 @@ SC.mixin(SC.Object.prototype,
     
     if (this.get('sc_trace')) {
       var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
-      fun(pre + "-> entering \"" + state + '"') ;
+      fun.call(this, pre + "-> entering \"" + state + '"') ;
     }
     return this[state](SC.EVT_ENTER) ;
   },
@@ -53,7 +55,7 @@ SC.mixin(SC.Object.prototype,
     
     if (this.get('sc_trace')) {
       var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
-      fun(pre + "<- leaving  \"" + state + '"') ;
+      fun.call(this, pre + "<- leaving  \"" + state + '"') ;
     }
     return this[state](SC.EVT_EXIT) ;
   },
@@ -74,7 +76,7 @@ SC.mixin(SC.Object.prototype,
     var res = this[state](SC.EVT_INIT), stateKey = this.get('stateKey') ;
     if (this.get('sc_trace') && res === SC.EVT_TRANSITION_RES) {
       var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
-      fun(pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
+      fun.call(this, pre + "  (taking default transition to \"" + this[stateKey] + '")') ;
     }
     return res ;
   },
@@ -95,11 +97,11 @@ SC.mixin(SC.Object.prototype,
       var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
       if (res) {
         if (res === SC.EVT_HANDLED_RES) {
-          fun(pre + '"' + state + '" handled event \'' + evt.sig + '\' (no transition)') ;
+          fun.call(this, pre + '"' + state + '" handled event \'' + evt.sig + '\' (no transition)') ;
         } else if (res === SC.EVT_TRANSITION_RES) {
-          fun(pre + '"' + state + '" handled event \'' + evt.sig + '\' with a transition to \"' + this[stateKey] + '"') ;
+          fun.call(this, pre + '"' + state + '" handled event \'' + evt.sig + '\' with a transition to \"' + this[stateKey] + '"') ;
         }
-      } else fun(pre + '"' + state + '" ignored event \'' + evt.sig + "'") ;
+      } else fun.call(this, pre + '"' + state + '" ignored event \'' + evt.sig + "'") ;
     }
     return res ;
   }
