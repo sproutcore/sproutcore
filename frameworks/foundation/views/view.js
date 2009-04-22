@@ -533,7 +533,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
     }
     return value ;
-  }.property('isVisibleInWindow'), // .cacheable(),
+  }.property().indempotent(), // FIXME: [EO] Cacheing is goofing up the view redrawing
+  //}.property('isVisibleInWindow'), // .cacheable(),
   
   /**
     Get a CoreQuery object for this view's layer, or pass in a selector string
