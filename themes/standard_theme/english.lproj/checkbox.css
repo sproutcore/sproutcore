@@ -67,7 +67,7 @@
 } 
 
 .sc-theme .sc-checkbox-view.sel.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0px -760px;
+	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -792px;
 }
 
 .sc-theme .sc-checkbox-view.mixed.disabled img.button {
