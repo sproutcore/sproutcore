@@ -117,6 +117,7 @@ test("layout {centerX, centerY, width, height}", function() {
   performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
+
 // ..........................................................
 // TEST FRAME/STYLEFRAME WITH INVALID LAYOUT VARIATIONS
 // 
@@ -201,6 +202,21 @@ test("layout {top, left, bottom, right, centerX, centerY, height, width} - top/l
   
 }) ;
 
+
+test("layout {centerX, centerY, width:auto, height:auto}", function() {
+
+  var layout = { centerX: 10, centerY: 10, width: 'auto', height: 'auto' };
+  child.set('layout', layout) ;
+  try{
+    child.get('frame');
+  }catch(e){
+    equals(SC.T_ERROR,SC.typeOf(e),'Layout style functions should throw and '+
+    'error if centerx/y and width/height are set at the same time' + e );
+  }
+  
+}) ;
+
+
 // ..........................................................
 // TEST FRAME/STYLEFRAME WHEN PARENT VIEW IS RESIZED
 // 
@@ -245,4 +261,22 @@ test("frame loc shifts with centerX/centerY", function(){
   var before = { x: 80, y: 80, width: 60, height: 60 };
   var after =  { x: 130, y: 130, width: 60, height: 60 };
   verifyFrameResize(layout, before, after);
+});
+
+
+test("frame size shifts with top/left/bottom/right", function(){
+  var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+  var before = { x: 10, y: 10, width: 180, height: 180 };
+  var after =  { x: 10, y: 10, width: 280, height: 280 };
+  parent.appendChild(child);
+  child.set('layout', layout);
+  child.get('frame');
+  parent.adjust('width', 'auto').adjust('height', 'auto');
+      
+  try{
+    child.get('frame');
+  }catch(e){
+    equals(SC.T_ERROR,SC.typeOf(e),'Layout style functions should throw and '+
+    'error if centerx/y and width/height are set at the same time' + e );
+  } 
 });
