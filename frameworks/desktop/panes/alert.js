@@ -218,6 +218,7 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
 
       SC.View.extend({
+        useStaticLayout: YES,
         layout: { bottom: 13, height: 'auto', right: 18, width: 'auto' },
         childViews: [
           SC.ButtonView.extend({
@@ -246,6 +247,7 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
       
       SC.ButtonView.extend({
+        useStaticLayout: YES,
         actionKey: SC.BUTTON3_STATUS,
         localize: YES,
         titleMinWidth: 64,
