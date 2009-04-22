@@ -678,7 +678,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // Next get the storeKey - base on id if available
     storeKey = id ? recordType.storeKeyFor(id) : SC.Store.generateStoreKey();
-
+    
     // now, check the state and do the right thing.
     status = this.readStatus(storeKey);
     

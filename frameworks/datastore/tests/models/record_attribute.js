@@ -25,6 +25,12 @@ module("SC.RecordAttribute core methods", {
       // test mapping Date
       date: SC.Record.attr(Date),
       
+      // test Array
+      anArray: SC.Record.attr(Array),
+      
+      // test Object
+      anObject: SC.Record.attr(Object),
+      
       // used to test default value
       defaultValue: SC.Record.attr(String, {
         defaultValue: "default"
@@ -45,14 +51,32 @@ module("SC.RecordAttribute core methods", {
     MyApp.Bar = SC.Record.extend({});
     
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 'foo1', 
-        firstName: "John", lastName: "Doe", 
-        date: "2009-03-01T20:30-08:00" 
+      { 
+        guid: 'foo1', 
+        firstName: "John", 
+        lastName: "Doe", 
+        date: "2009-03-01T20:30-08:00",
+        anArray: ['one', 'two', 'three'],
+        anObject: { 'key1': 'value1', 'key2': 'value2' }
       },
       
-      { guid: 'foo2', firstName: "Jane", lastName: "Doe", relatedTo: 'foo1' },
+      { 
+        guid: 'foo2', 
+        firstName: "Jane", 
+        lastName: "Doe", 
+        relatedTo: 'foo1',
+        anArray: 'notAnArray',
+        anObject: 'notAnObject'
+      },
       
-      { guid: 'foo3', firstName: "Alex", lastName: "Doe", relatedToComputed: 'bar1' }
+      { 
+        guid: 'foo3', 
+        firstName: "Alex", 
+        lastName: "Doe", 
+        relatedToComputed: 'bar1',
+        anArray: ['one', 'two', 'three'],
+        anObject: { 'key1': 'value1', 'key2': 'value2' }
+      }
       
     ]);
     
@@ -83,6 +107,16 @@ test("returns default value if underyling value is empty", function() {
 
 test("naming a key should read alternate attribute", function() {
   equals(rec.get('otherName'), 'John', 'reading prop otherName should get attr from firstName');
+});
+
+test("getting an array and object", function() {
+  equals(rec.get('anArray').length, 3, 'reading prop anArray should get attr as array');
+  equals((typeof rec.get('anObject')), 'object', 'reading prop anObject should get attr as object');
+});
+
+test("getting an array and object attributes where underlying value is not", function() {
+  equals(rec2.get('anArray').length, 0, 'reading prop anArray should return empty array');
+  equals((typeof rec2.get('anObject')), 'object', 'reading prop anObject should return empty object');
 });
 
 test("getting toOne relationship should map guid to a real record", function() {

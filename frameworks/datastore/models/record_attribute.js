@@ -123,8 +123,8 @@ SC.RecordAttribute = SC.Object.extend(
     while(klass && !(ret = transforms[SC.guidFor(klass)])) {
       // check if super has create property to detect SC.Object's
       if(klass.superclass.hasOwnProperty('create')) klass = klass.superclass ;
-      // otherwise return the default Object transform handler
-      else klass = Object ;
+      // otherwise return the function transform handler
+      else klass = SC.T_FUNCTION ;
     }
     
     return ret ;
@@ -262,7 +262,7 @@ SC.RecordAttribute.transforms = {};
   @returns {SC.RecordAttribute} receiver
 */
 SC.RecordAttribute.registerTransform = function(klass, transform) {
-  SC.RecordAttribute.transforms[SC.guidFor(klass)] = transform;  
+  SC.RecordAttribute.transforms[SC.guidFor(klass)] = transform;
 };
 
 // ..........................................................
@@ -301,6 +301,29 @@ SC.RecordAttribute.registerTransform(String, {
   }
 });
 
+/** @private - generic converter for Array */
+SC.RecordAttribute.registerTransform(Array, {
+  /** @private - check if obj is an array
+  */
+  to: function(obj) {
+    if (!SC.isArray(obj) && !SC.none(obj)) {
+      obj = [];
+    }
+    return obj;
+  }
+});
+
+/** @private - generic converter for Object */
+SC.RecordAttribute.registerTransform(Object, {
+  /** @private - check if obj is an object */
+  to: function(obj) {
+    if (!(typeof obj === 'object') && !SC.none(obj)) {
+      obj = {};
+    }
+    return obj;
+  }
+});
+
 /** @private - generic converter for SC.Record-type records */
 SC.RecordAttribute.registerTransform(SC.Record, {
 
@@ -315,7 +338,7 @@ SC.RecordAttribute.registerTransform(SC.Record, {
 });
 
 /** @private - generic converter for transforming computed record attributes */
-SC.RecordAttribute.registerTransform(Object, {
+SC.RecordAttribute.registerTransform(SC.T_FUNCTION, {
 
   /** @private - convert a record id to a record instance */
   to: function(id, attr, recordType, parentRecord) {

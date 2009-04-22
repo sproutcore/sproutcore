@@ -239,6 +239,38 @@ SC.Record = SC.Object.extend(
   },
   
   /**
+    Normalizing a record will ensure that the underlying hash conforms
+    to the record attributes such as their types (transforms) and default 
+    values. 
+    
+    This method will write the conforming hash to the store and return
+    the materialized record.
+    
+    @returns {SC.Record} the normalized record
+  */
+  
+  normalize: function() {
+    
+    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id');
+    var store = this.get('store'), storeKey = this.get('storeKey');
+    
+    dataHash[primaryKey] = recordId;
+    
+    for(key in this) {
+      // make sure property is a record attribute. if record attribute is a class (SC.Record)
+      // do not add to hash.
+      if(this[key] && this[key]['typeClass'] && 
+        (SC.typeOf(this[key].typeClass())!=='class' || this[key].defaultValue!==null)) {
+        var attrValue = this.get(key);
+        if(attrValue) dataHash[key] = attrValue;
+      }
+    }
+    console.log(dataHash);
+    store.writeDataHash(storeKey, dataHash);
+    return store.materializeRecord(storeKey);
+  },
+  
+  /**
     If you try to get/set a property not defined by the record, then this 
     method will be called. It will try to get the value from the set of 
     attributes.
@@ -389,12 +421,14 @@ SC.Record.mixin( /** @scope SC.Record */ {
     var storeKeys = this.prototype.storeKeysById;
     if (!storeKeys) storeKeys = this.prototype.storeKeysById = {};
     var ret = storeKeys[id];
+    
     if (!ret) {
       ret = SC.Store.generateStoreKey();
       SC.Store.idsByStoreKey[ret] = id ;
       SC.Store.recordTypesByStoreKey[ret] = this ;
       storeKeys[id] = ret ;
     }
+    
     return ret ;
   },
 
