@@ -70,15 +70,3 @@ test("Creating an empty (null) record should make the hash available", function(
   ok(store.readDataHash(storeKey), 'data hash should not be empty/undefined');
   
 });
-
-test("Normalizing a record should change the hash", function() {
-  
-  var record = store.createRecord(MyRecordType, null, 'guid8');
-  console.log(record);
-  
-  for(prop in record) {
-    console.log(prop);
-    console.log(record.hasOwnProperty(prop));
-  }
-  
-});
