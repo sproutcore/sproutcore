@@ -33,10 +33,10 @@ SC.ArraySuite.define(function(T) {
     T.validateAfter(obj, [], observer, YES);
   });
   
-  test("[].removeAt(200,X) => OUT_OF_RANGE_EXCEPTION exception", function() {
+  test("[].removeAt(200) => OUT_OF_RANGE_EXCEPTION exception", function() {
     var didThrow = NO ;
     try {
-      obj.removeAt(200, T.expected(1));
+      obj.removeAt(200);
     } catch (e) {
       equals(e, SC.OUT_OF_RANGE_EXCEPTION, 'should throw SC.OUT_OF_RANGE_EXCEPTION');
       didThrow = YES ;
@@ -74,6 +74,28 @@ SC.ArraySuite.define(function(T) {
     observer.observe('[]', 'length') ;
     
     obj.removeAt(1);
+    T.validateAfter(obj, after, observer, YES);
+  });
+  
+  test("[A,B,C,D].removeAt(1,2) => [A,D] + notify", function() {
+    var before = T.expected(4), 
+        after   = [before[0], before[3]];
+    
+    obj.replace(0,0,before);
+    observer.observe('[]', 'length') ;
+    
+    obj.removeAt(1,2);
+    T.validateAfter(obj, after, observer, YES);
+  });
+
+  test("[A,B,C,D].removeAt(IndexSet<0,2-3>) => [B] + notify", function() {
+    var before = T.expected(4), 
+        after   = [before[1]];
+    
+    obj.replace(0,0,before);
+    observer.observe('[]', 'length') ;
+    
+    obj.removeAt(SC.IndexSet.create(0).add(2,2));
     T.validateAfter(obj, after, observer, YES);
   });
   
