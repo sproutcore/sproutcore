@@ -491,7 +491,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   parentViewDidChange: function() {
-    // console.log('%@.parentViewDidChange()'.fmt(this));
+    //console.log('%@.parentViewDidChange()'.fmt(this));
     this.recomputeIsVisibleInWindow() ;
     
     this.set('layerLocationNeedsUpdate', YES) ;
@@ -562,7 +562,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   containerLayer: function() {
     return this.get('layer') ;
-  }.property('layer').cacheable(),
+  //}.property('layer').cacheable(), 
+  }.property().indempotent(), // FIXME: [EO] Fix the cacheing bug
   
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
@@ -1037,7 +1038,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateLayerLocation: function() {
-    // console.log('%@.updateLayerLocation()'.fmt(this));
+    //console.log('%@.updateLayerLocation()'.fmt(this));
     // collect some useful value
     // if there is no node for some reason, just exit
     var node = this.get('layer') ;
