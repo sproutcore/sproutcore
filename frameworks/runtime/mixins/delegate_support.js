@@ -35,6 +35,31 @@
 SC.DelegateSupport = {  
   
   /**
+    Selects the delegate that implements the specified method name.  Pass one
+    or more delegates.  The receiver is automatically included as a default.
+    
+    This can be more efficient than using invokeDelegateMethod() which has
+    to marshall arguments into a delegate call.
+    
+    @param {String} methodName
+    @param {Object...} delegate one or more delegate arguments
+    @returns {Object} delegate or null
+  */
+  delegateFor: function(methodName) {
+    var idx = 1,
+        len = arguments.length,
+        ret ;
+        
+    while(idx<len) {
+      ret = arguments[idx];
+      if (ret && ret[methodName]) return ret ;
+      idx++;      
+    }
+    
+    return this[methodName] ? this : null;
+  },
+  
+  /**
     Invokes the named method on the delegate that you pass.  If no delegate
     is defined or if the delegate does not implement the method, then a 
     method of the same name on the receiver will be called instead.  
@@ -49,7 +74,7 @@ SC.DelegateSupport = {
     @returns value returned by delegate
   */
   invokeDelegateMethod: function(delegate, methodName, args) {
-    args = SC.$A(arguments); args = args.slice(2, args.length) ;
+    args = SC.A(arguments); args = args.slice(2, args.length) ;
     if (!delegate || !delegate[methodName]) delegate = this ;
     
     var method = delegate[methodName];
