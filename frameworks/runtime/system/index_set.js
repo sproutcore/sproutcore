@@ -645,7 +645,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     }
     
     return this ;
-  },
+  },    
   
   // .......................................
   // PRIVATE 

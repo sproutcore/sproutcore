@@ -123,17 +123,47 @@ SC.Array = {
   
   /**
     Remove an object at the specified index using the replace() primitive 
-    method.
+    method.  You can pass either a single index, a start and a length or an
+    index set.
+    
+    If you pass a single index or a start and length that is beyond the 
+    length this method will throw an SC.OUT_OF_RANGE_EXCEPTION
   
-    @param {Number} idx index of object to remove
+    @param {Number|SC.IndexSet} start index, start of range, or index set
+    @param {Number} length length of passing range
+    @returns {Object} receiver
   */
-  removeAt: function(idx) {
-    if ((idx < 0) || (idx >= this.get('length'))) throw SC.OUT_OF_RANGE_EXCEPTION;
-    var ret = this.objectAt(idx) ;
-    this.replace(idx,1,[]);
-    return ret ;
+  removeAt: function(start, length) {
+
+    var delta = 0, // used to shift range
+        empty = [];
+    
+    if (typeof start === SC.T_NUMBER) {
+
+      if ((start < 0) || (start >= this.get('length'))) {
+        throw SC.OUT_OF_RANGE_EXCEPTION;
+      }
+
+      // fast case
+      if (length === undefined) {
+        this.replace(start,1,empty);
+        return this ;
+      } else {
+        start = SC.IndexSet.create(start, length);
+      }
+    }
+    
+    this.beginPropertyChanges();
+    start.forEachRange(function(start, length) {
+      start -= delta ;
+      delta += length ;
+      this.replace(start, length, empty); // remove!
+    }, this);
+    this.endPropertyChanges();
+    
+    return this ;
   },
-  
+    
   /**
     Search the array of this object, removing any occurrences of it.
     @param {object} obj object to remove
