@@ -223,6 +223,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Boolean}
   */
   isVisible: YES,
+  isVisibleBindingDefault: SC.Binding.bool(),
   
   /**
     YES only if the view and all of its parent views are currently visible
@@ -250,7 +251,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isVisible'), parentView ;
-    
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
     if (cur) {
@@ -451,14 +451,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     @returns {SC.View} receiver
   */
-  parentViewDidChange: function() {
+  parentViewDidChange: function() {    
     this.recomputeIsVisibleInWindow() ;
     
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
     
     return this ;
-  }.observes('isVisible'),
+  },
+  
   
   // ..........................................................
   // LAYER SUPPORT
@@ -796,8 +797,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     // do some standard setup...
     if (this.get('isTextSelectable')) context.addClass('allow-select') ;
+    else context.removeClass('allow-select') ;
     if (!this.get('isEnabled')) context.addClass('disabled') ;
+    else context.removeClass('disabled') ;
     if (!this.get('isVisible')) context.addClass('hidden') ;
+    else context.removeClass('hidden') ;
     
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
