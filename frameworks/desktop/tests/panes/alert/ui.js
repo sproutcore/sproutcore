@@ -49,7 +49,7 @@ function evaluatePane(pane, message, description, caption, button1Title, button2
   
   var button1 = pane.childViews[0].childViews[1].childViews[1];
   var button2 = pane.childViews[0].childViews[1].childViews[0];
-  var button3 = pane.childViews[0].childViews[2];
+  var button3 = pane.childViews[0].childViews[2].childViews[0];
   
   if (button1Title) {
     equals(button1.$('span').text(), button1Title, 'pane.div.div button1 should have custom title %@'.fmt(button1Title));

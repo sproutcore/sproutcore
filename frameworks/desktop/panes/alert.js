@@ -192,7 +192,7 @@ SC.AlertPane = SC.PanelPane.extend({
     
     @property {SC.ButtonView}
   */
-  buttonThree: SC.outlet('contentView.childViews.2'),
+  buttonThree: SC.outlet('contentView.childViews.2.childViews.0'),
   
   layout: { centerX: 0, width: 452, top: 100, height: 'auto' },
 
@@ -246,16 +246,21 @@ SC.AlertPane = SC.PanelPane.extend({
           })]
       }),
       
-      SC.ButtonView.extend({
+      SC.View.extend({
         useStaticLayout: YES,
-        actionKey: SC.BUTTON3_STATUS,
-        localize: YES,
-        titleMinWidth: 64,
         layout: { bottom: 13, height: 'auto', left: 18, width: 'auto' },
-        theme: 'capsule',
-        title: "Extra", 
-        action: "dismiss",
-        isVisible: NO
+        childViews: [
+          SC.ButtonView.extend({
+            useStaticLayout: YES,
+            actionKey: SC.BUTTON3_STATUS,
+            localize: YES,
+            titleMinWidth: 64,
+            layout: { right: 0, height: 'auto', width: 'auto', bottom: 0 },
+            theme: 'capsule',
+            title: "Extra", 
+            action: "dismiss",
+            isVisible: NO
+          })]
       })]
   }),
 
