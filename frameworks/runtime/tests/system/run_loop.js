@@ -38,7 +38,7 @@ test("Should propograte bindings after the RunLoop completes (using SC.RunLoop)"
 		equals(first.get("output"), "change") ;
 		
 		//since binding has not taken into effect the value still remains as change.
-		equals(second.get("output"), "second") ;
+		equals(second.get("output"), "first") ;
 	SC.RunLoop.end(); // allows bindings to trigger...
 	
 	//Value of the output variable changed to 'change'
@@ -66,7 +66,7 @@ test("Should propograte bindings after the RunLoop completes (using SC.beginRunL
 		equals(first.get("output"), "change") ;
 		
 		//since binding has not taken into effect the value still remains as change.
-		equals(second.get("output"), "second") ;
+		equals(second.get("output"), "first") ;
 	SC.endRunLoop; // allows bindings to trigger...
 	SC.Binding.flushPendingChanges() ; // actually sets up the connection
 	
@@ -95,7 +95,7 @@ test("Should propograte bindings after the RunLoop completes (checking invokeOnc
 		equals(first.get("output"), "change") ;
 		
 		//since binding has not taken into effect the value still remains as change.
-		equals(second.get("output"), "second") ;
+		equals(second.get("output"), "first") ;
 		
 		// Call the invokeOnce function to set the function which needs to be called once
 		second.invokeOnce('second','inputDidChange');

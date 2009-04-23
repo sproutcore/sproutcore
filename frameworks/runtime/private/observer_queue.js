@@ -116,7 +116,7 @@ SC.Observers = {
     
   },
   
-  isObserveringSuspended: 0,
+  isObservingSuspended: 0,
   _pending: SC.Set.create(),
   
   objectHasPendingChanges: function(obj) {
@@ -135,9 +135,12 @@ SC.Observers = {
     if(--this.isObservingSuspended <= 0) {
       pending = this._pending ;
       this._pending = SC.Set.create() ;
-      while(pending.length > 0) {
-        pending.pop()._notifyPropertyObservers() ;
+      
+      var idx, len = pending.length;
+      for(idx=0;idx<len;idx++) {
+        pending[idx]._notifyPropertyObservers() ;
       }
+      pending.clear();
       pending = null ;
     }
   }

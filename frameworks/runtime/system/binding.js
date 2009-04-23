@@ -334,6 +334,7 @@ SC.Binding = {
     if (this.isConnected) return this ;
     this.isConnected = YES ;
     this._connectionPending = YES ; // its connected but not really...    
+    this._syncOnConnect = YES ;
     SC.Binding._connectQueue.add(this) ;
     return this; 
   },
@@ -498,6 +499,7 @@ SC.Binding = {
     // don't allow flushing more than one at a time
     if (this._isFlushing) return NO; 
     this._isFlushing = YES ;
+    SC.Observers.suspendPropertyObserving();
 
     var didFlush = NO ;
     var log = SC.LOG_BINDING_NOTIFICATIONS ;
@@ -534,6 +536,8 @@ SC.Binding = {
     
     // clean up
     this._isFlushing = NO ;
+    SC.Observers.resumePropertyObserving();
+
     return didFlush ;
   },
   

@@ -351,8 +351,8 @@ SC.Observable = {
   */
   endPropertyChanges: function() {
     this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1 ;
-    var level = this._kvo_changeLevel;
-    if ((level<=0) && this._kvo_changes && (this._kvo_changes.length>0)) {
+    var level = this._kvo_changeLevel, changes = this._kvo_changes;
+    if ((level<=0) && changes && (changes.length>0) && !SC.Observers.isObservingSuspended) {
       this._notifyPropertyObservers() ;
     } 
     return this ;
@@ -410,7 +410,7 @@ SC.Observable = {
     
     // save in the change set if queuing changes
     var suspended ;
-    if ((level > 0) || (suspended=SC.Observers.isObserveringSuspended)) {
+    if ((level > 0) || (suspended=SC.Observers.isObservingSuspended)) {
       var changes = this._kvo_changes ;
       if (!changes) changes = this._kvo_changes = SC.Set.create() ;
       changes.add(key) ;

@@ -23,6 +23,10 @@ test("binding has actually been setup", function() {
   equals(binding._connectionPending, NO, "binding._connectionPending") ;
 });
 
+test("binding should have synced on connect", function() {
+  equals(toObject.get("value"), "start", "toObject.value should match fromObject.value");
+});
+
 test("changing fromObject should mark binding as dirty", function() {
   fromObject.set("value", "change") ;
   equals(binding._changePending, YES) ;
@@ -30,7 +34,7 @@ test("changing fromObject should mark binding as dirty", function() {
 
 test("fromObject change should propogate to toObject only after flush", function() {
   fromObject.set("value", "change") ;
-  equals(toObject.get("value"), "end") ;
+  equals(toObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
   equals(toObject.get("value"), "change") ;    
 });
@@ -45,6 +49,38 @@ test("toObject change should propogate to fromObject only after flush", function
   equals(fromObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
   equals(fromObject.get("value"), "change") ;    
+});
+
+test("suspended observing during bindings", function() {
+
+  // setup special binding
+  fromObject = SC.Object.create({
+    value1: 'value1',
+    value2: 'value2'
+  });
+  
+  toObject = SC.Object.create({
+    value1: 'value1',
+    value2: 'value2',
+    
+    callCount: 0,
+    
+    observer: function() {
+      equals(this.get('value1'), 'CHANGED', 'value1 when observer fires');
+      equals(this.get('value2'), 'CHANGED', 'value2 when observer fires');
+      this.callCount++;
+    }.observes('value1', 'value2')
+  });
+  
+  toObject.bind('value1', fromObject, 'value1');
+  toObject.bind('value2', fromObject, 'value2');
+
+  // change both value1 + value2, then  flush bindings.  observer should only
+  // fire after bindings are done flushing.
+  fromObject.set('value1', 'CHANGED').set('value2', 'CHANGED');
+  SC.Binding.flushPendingChanges();
+  
+  equals(toObject.callCount, 2, 'should call observer twice');
 });
 
 module("one way binding", {
@@ -65,7 +101,7 @@ test("changing fromObject should mark binding as dirty", function() {
 
 test("fromObject change should propogate after flush", function() {
   fromObject.set("value", "change") ;
-  equals(toObject.get("value"), "end") ;
+  equals(toObject.get("value"), "start") ;
   SC.Binding.flushPendingChanges() ;
   equals(toObject.get("value"), "change") ;    
 });
@@ -112,11 +148,12 @@ test("changing first output should propograte to third after flush", function() 
   equals("change", first.get("output"), "first.output") ;
   ok("change" !== third.get("input"), "third.input") ;
   
-  SC.Binding.flushPendingChanges() ;
+  var didChange = YES;
+  while(didChange) didChange = SC.Binding.flushPendingChanges() ;
   
   // bindings should not have bending changes
-  equals(NO, binding1._changePending, "binding1._changePending === NO") ;
-  equals(NO, binding2._changePending, "binding2._changePending === NO") ;
+  equals(binding1._changePending, NO, "binding1._changePending") ;
+  equals(binding2._changePending, NO, "binding2._changePending") ;
   
   equals("change", first.get("output"), "first.output") ;
   equals("change", second.get("input"), "second.input") ;
