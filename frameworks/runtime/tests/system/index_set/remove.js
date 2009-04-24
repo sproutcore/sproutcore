@@ -171,3 +171,14 @@ test("removing a clone of the same index set should leave an empty set", functio
   equals(set.get('length'), 0, 'set should now be empty');
 });
 
+test("removing an index range outside of target range (specific bug)", function() {
+
+  var set = SC.IndexSet.create(10,3);
+  var set2 = SC.IndexSet.create(0,3);
+  
+  // removing set2 from set should not changed set at all beceause it is 
+  // before the first range, but it causes a problem with the length.
+  set.remove(set2);
+  equals(set.get('length'), 3, 'length should not change');
+});
+

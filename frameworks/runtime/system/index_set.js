@@ -485,7 +485,6 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       start = cur ;
       next  = Math.abs(next);
       if (next > last) {
-        delta -= next - last ;
         last = next ;
       }
     }
