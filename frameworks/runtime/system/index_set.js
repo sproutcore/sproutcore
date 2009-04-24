@@ -58,8 +58,9 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     // optimized method to clone an index set.
     if (start && start.isIndexSet) {
       ret._content = start._content.slice();
-      ret.max = start.max; // note - do not use set b/c this is just setup
+      ret.max = start.max;
       ret.length = start.length; 
+      ret.source = start.source ;
       
     // otherwise just do a regular add
     } else {
@@ -86,6 +87,19 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     the index set.
   */
   max: 0,
+  
+  /**
+    The first index included in the set or -1.
+    
+    @property
+    @type {Number}
+  */
+  min: function() {  
+    var content = this._content, 
+        cur = content[0];
+    return (cur === 0) ? -1 : (cur>0) ? 0 : Math.abs(cur);
+    
+  }.property('[]').cacheable(),
   
   /** 
     Returns the starting index of the nearest range for the specified 
@@ -658,6 +672,170 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     
     return this ;
   },    
+  
+  // ..........................................................
+  // OBJECT API
+  // 
+  
+  /**
+    Optionally set the source property on an index set and then you can 
+    iterate over the actual object values referenced by the index set.  See
+    indexOf(), lastIndexOf(), forEachObject(), addObject() and removeObject().
+  */
+  source: null,
+  
+  /**
+    Returns the first index in the set that matches the passed object.  You
+    must have a source property on the set for this to work.
+    
+    @param {Object} object the object to check 
+    @param {Number} startAt optional starting point
+    @returns {Number} found index or -1 if not in set
+  */
+  indexOf: function(object, startAt) {
+    var source  = this.source;
+    if (!source) throw "%@.indexOf() requires source".fmt(this);
+    
+    var len     = source.get('length'),
+        
+        // start with the first index in the set
+        content = this._content,
+        cur     = content[0]<0 ? Math.abs(content[0]) : 0,
+        idx ;
+        
+    while(cur>=0 && cur<len) {
+      idx = source.indexOf(object, cur);
+      if (idx<0) return -1 ; // not found in source
+      if (this.contains(idx)) return idx; // found in source and in set.
+      cur = idx+1;
+    } 
+    
+    return -1; // not found
+  },
+
+  /**
+    Returns the last index in the set that matches the passed object.  You
+    must have a source property on the set for this to work.
+    
+    @param {Object} object the object to check 
+    @param {Number} startAt optional starting point
+    @returns {Number} found index or -1 if not in set
+  */
+  lastIndexOf: function(object, startAt) {
+    var source  = this.source;
+    if (!source) throw "%@.lastIndexOf() requires source".fmt(this);
+    
+    // start with the last index in the set
+    var len     = source.get('length'),
+        cur     = this.max-1,
+        idx ;
+
+    if (cur >= len) cur = len-1;
+    while (cur>=0) {
+      idx = source.lastIndexOf(object, cur);
+      if (idx<0) return -1 ; // not found in source
+      if (this.contains(idx)) return idx; // found in source and in set.
+      cur = idx+1;
+    } 
+    
+    return -1; // not found
+  },
+  
+  /**
+    Iterates through the objects at each index location in the set.  You must
+    have a source property on the set for this to work.  The callback you pass
+    will be invoked for each object in the set with the following signature:
+    
+    {{{
+      funciton callback(object, index) { ... }
+    }}}
+    
+    If you pass a target, it will be used when the callback is called.
+    
+    @param {Function} callback function to invoke.  
+    @param {Object} target optional content. otherwise uses window
+    @returns {SC.IndexSet} receiver
+  */ 
+  forEachObject: function(callback, target) {
+    var source  = this.source;
+    if (!source) throw "%@.forEachObject() requires source".fmt(this);
+
+    var content = this._content,
+        cur     = 0,
+        idx     = 0,
+        next    = content[cur];
+
+    if (target === undefined) target = null ;
+    while (next !== 0) {
+      
+      while(cur < next) { 
+        callback.call(target, source.objectAt(cur), cur, this); 
+        cur++;
+      }
+      
+      cur  = Math.abs(next);
+      next = content[cur];
+    }
+    return this ;
+  },
+  
+  /**
+    Adds all indexes where the object appears to the set.  If firstOnly is 
+    passed, then it will find only the first index and add it.  If  you know
+    the object only appears in the source array one time, firstOnly may make
+    this method faster.
+    
+    Requires source to work.
+    
+    @param {Object} object the object to add
+    @returns {SC.IndexSet} receiver
+  */
+  addObject: function(object, firstOnly) {
+    var source  = this.source;
+    if (!source) throw "%@.addObject() requires source".fmt(this);
+
+    var len = source.get('length'),
+        cur = 0, idx;
+        
+    while(cur>=0 && cur<len) {
+      idx = source.indexOf(object, cur);
+      if (idx >= 0) { 
+        this.add(idx);
+        if (firstOnly) return this ;
+        cur = idx++;
+      } else return this ;
+    }
+    return this ;    
+  },
+
+  /**
+    Removes all indexes where the object appears to the set.  If firstOnly is 
+    passed, then it will find only the first index and add it.  If  you know
+    the object only appears in the source array one time, firstOnly may make
+    this method faster.
+    
+    Requires source to work.
+    
+    @param {Object} object the object to add
+    @returns {SC.IndexSet} receiver
+  */
+  removeObject: function(object, firstOnly) {
+    var source  = this.source;
+    if (!source) throw "%@.removeObject() requires source".fmt(this);
+
+    var len = source.get('length'),
+        cur = 0, idx;
+        
+    while(cur>=0 && cur<len) {
+      idx = source.indexOf(object, cur);
+      if (idx >= 0) { 
+        this.remove(idx);
+        if (firstOnly) return this ;
+        cur = idx++;
+      } else return this ;
+    }
+    return this ;    
+  },
   
   // .......................................
   // PRIVATE 
