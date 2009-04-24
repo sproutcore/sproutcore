@@ -211,4 +211,18 @@ SC.RunLoop.end = function() {
   return this ;
 } ;
 
+/**
+  Helper method executes the passed function inside of a runloop.  Normally
+  not needed but useful for testing.
+  
+  @param {Function} callback callback to execute
+  @param {Object} target context for callback
+  @returns {SC} receiver
+*/
+SC.run = function(callback, target) {
+  SC.RunLoop.begin();
+  callback.call(target);
+  SC.RunLoop.end();
+};
+
 
