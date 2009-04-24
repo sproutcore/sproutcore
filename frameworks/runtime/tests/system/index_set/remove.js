@@ -19,7 +19,7 @@ function iter(s) {
 }
 
 // ..........................................................
-// BASIC ADDS
+// BASIC REMOVES
 // 
 
 test("remove a range after end of set", function() {
@@ -116,8 +116,31 @@ test("remove range matching existing range", function() {
   set.remove(100,5);
   equals(set.get('length'), 0, 'should be empty');
   equals(set.get('max'), 0, 'max should return 1 past last index');
-  console.log(set.inspect());
   same(iter(set), []);  
+});
+
+// ..........................................................
+// NORMALIZED PARAMETER CASES
+// 
+
+test("remove with no params should do nothing", function() {
+  set.add(10,2).remove();
+  same(iter(set), [10,11]);
+});
+
+test("remove with single number should add index only", function() {
+  set.add(10,2).remove(10);
+  same(iter(set), [11]);
+});
+
+test("remove with range object should add range only", function() {
+  set.add(10,5).remove({ start: 10, length: 2 });
+  same(iter(set), [12,13,14]);
+});
+
+test("remove with index set should add indexes in set", function() {
+  set.add(0,14).remove(SC.IndexSet.create().add(2,2).add(10,2));
+  same(iter(set), [0,1,4,5,6,7,8,9,12,13]);
 });
 
 
@@ -139,5 +162,12 @@ test("removing a non-existant range should not trigger observer notification", f
   set.addObserver('[]', function() { callCnt++; });
   set.remove(10,10); // 10-20 are already empty
   equals(callCnt, 0, 'should NOT have called observer');
+});
+
+test("removing a clone of the same index set should leave an empty set", function() {
+  var set = SC.IndexSet.create(0,2), set2 = set.clone();
+  ok(set.isEqual(set2), 'precond - clone is equal to receiver');
+  set.remove(set2);
+  equals(set.get('length'), 0, 'set should now be empty');
 });
 

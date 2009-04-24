@@ -243,9 +243,9 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     @param {Number} length optional range length
     @returns {SC.IndexSet} new index set
   */
-  without: function(start, index) {
+  without: function(start, length) {
     if (start === this) return SC.IndexSet.create(); // just need empty set
-    return this.clone().remove(start, index);
+    return this.clone().remove(start, length);
   },
   
   /**
@@ -260,11 +260,14 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     
     // normalize input
     if (length === undefined) { 
-      if (typeof start === SC.T_NUMBER) {
+      if (start === null || start === undefined) {
+        return this; // nothing to do
+
+      } else if (typeof start === SC.T_NUMBER) {
         length = 1 ;
         
       // if passed an index set, just add each range in the index set.
-      } else if (start && start.isIndexSet) {
+      } else if (start.isIndexSet) {
         start.forEachRange(this.add, this);
         return this;
         
@@ -406,7 +409,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   /**
     Removes the specified range of indexes from the set
     
-    @param {Number} start index or Range
+    @param {Number} start index, Range, or IndexSet
     @param {Number} length optional length of range. 
     @returns {SC.IndexSet} receiver
   */
@@ -414,8 +417,17 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     
     // normalize input
     if (length === undefined) { 
-      if (typeof start === SC.T_NUMBER) {
+      if (start === null || start === undefined) {
+        return this; // nothing to do
+
+      } else if (typeof start === SC.T_NUMBER) {
         length = 1 ;
+      
+      // if passed an index set, just add each range in the index set.
+      } else if (start.isIndexSet) {
+        start.forEachRange(this.remove, this);
+        return this;
+
       } else {
         length = start.length; 
         start = start.start;

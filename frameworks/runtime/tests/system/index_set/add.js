@@ -118,6 +118,29 @@ test("add range matching existing range", function() {
   same(iter(set), [100, 101, 102, 103, 104]);  
 });
 
+// ..........................................................
+// NORMALIZED PARAMETER CASES
+// 
+
+test("add with no params should do nothing", function() {
+  set.add();
+  same(iter(set), []);
+});
+
+test("add with single number should add index only", function() {
+  set.add(2);
+  same(iter(set), [2]);
+});
+
+test("add with range object should add range only", function() {
+  set.add({ start: 2, length: 2 });
+  same(iter(set), [2,3]);
+});
+
+test("add with index set should add indexes in set", function() {
+  set.add(SC.IndexSet.create().add(2,2).add(10,2));
+  same(iter(set), [2,3,10,11]);
+});
 
 // ..........................................................
 // OTHER BEHAVIORS
