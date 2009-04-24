@@ -190,7 +190,7 @@ SC.MenuItemView = SC.ButtonView.extend(
     var ic ;
     var menu = this.parentMenu() ;
     var itemWidth = this.get('itemWidth') || menu.layout.width ;
-    var itemHeight = this.get('itemHeight') || menu.layout.height ;
+    var itemHeight = this.get('itemHeight') || 20 ;
     this.set('itemWidth',itemWidth) ;
     this.set('itemHeight',itemHeight) ;
    
@@ -199,8 +199,6 @@ SC.MenuItemView = SC.ButtonView.extend(
     key = this.getDelegateProperty(del, 'isSeparatorKey') ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (val) {
-      this.set('itemHeight',5) ;
-      this.adjust({height:this.get('itemHeight')}) ;
       ic = ic.begin('span').addClass('separator') ;
       ic = ic.end() ;
       return ;
