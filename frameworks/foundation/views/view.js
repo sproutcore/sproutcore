@@ -786,22 +786,22 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   prepareContext: function(context, firstTime) {
     var mixins, len, idx, layerId, bgcolor, cursor ;
-    
     // do some initial setup only needed at create time.
     if (firstTime) {
       // TODO: seems like things will break later if SC.guidFor(this) is used
+      
       layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
       context.id(layerId).classNames(this.get('classNames'), YES) ;
       this.renderLayout(context, firstTime) ;
+    }else{
+      context.resetClassNames();
+      context.classNames(this.get('classNames'), YES);  
     }
     
     // do some standard setup...
     if (this.get('isTextSelectable')) context.addClass('allow-select') ;
-    else context.removeClass('allow-select') ;
     if (!this.get('isEnabled')) context.addClass('disabled') ;
-    else context.removeClass('disabled') ;
     if (!this.get('isVisible')) context.addClass('hidden') ;
-    else context.removeClass('hidden') ;
     
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);

@@ -622,6 +622,17 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   },
   
   /**
+    Removes all classnames from the currentContext.  
+    
+    @returns {SC.RenderContext} receiver
+  */
+  resetClassNames: function() {
+    this._classNames = [];
+    this._classNamesDidChange = YES ;
+    return this;
+  },
+  
+  /**
     You can either pass a single class name and a boolean indicating whether
     the value should be added or removed, or you can pass a hash with all
     the class names you want to add or remove with a boolean indicating 
