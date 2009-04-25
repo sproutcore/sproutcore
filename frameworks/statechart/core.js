@@ -21,6 +21,8 @@ SC.EVT_TERMINATE_RES  = 'sc-evt-terminate-res' ;
 sc_handled   = function() { return SC.EVT_HANDLED_RES; };
 sc_terminate = function() { return SC.EVT_TERMINATE_RES; };
 
+var StatechartDebugger = null ;
+
 // ........................................
 // FUNCTION ENHANCEMENTS
 //
