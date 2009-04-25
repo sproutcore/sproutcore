@@ -339,18 +339,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @returns {Hash} simulated event object
   */
   simulateEvent: function(elem, eventType, attrs) {
-    var ret = {
+    var ret = SC.Event.create({
       type: eventType,
       target: elem,
       preventDefault: function(){ this.cancelled = YES; },
       stopPropagation: function(){ this.bubble = NO; },
       allowDefault: function() { this.hasCustomEventHandling = YES; },
       timeStamp: Date.now(),
-      bubble: (this.NO_BUBBLE.indexOf(eventType)<0) ,
+      bubble: (this.NO_BUBBLE.indexOf(eventType)<0),
       cancelled: NO,
       normalized: YES
-    } ;
-    if (attrs) SC.mixin(ret, attrs);
+    });
+    if (attrs) SC.mixin(ret, attrs) ;
     return ret ;
   },
   
@@ -407,9 +407,9 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       event = this.simulateEvent(elem, eventType) ;
       args.unshift(event) ;
     }
-
+    
     event.type = eventType ;
-
+    
     // Trigger the event - bubble if enabled
     var current = elem;
     do {
