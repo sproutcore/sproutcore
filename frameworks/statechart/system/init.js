@@ -34,6 +34,8 @@ SC.mixin(SC.Object.prototype,
     initial = this[stateKey] = this[initialStateKey] ;
     if (!initial) return this ; // fast path -- this object does not use HSMs
     
+    this.hasStatechart = YES ;
+    
     // okay, does the initial state have superstates? If so, we need to
     // enter them first...
     superstateKey = this[initial].superstateKey ;
