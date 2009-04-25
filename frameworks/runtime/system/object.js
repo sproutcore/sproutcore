@@ -378,6 +378,9 @@ SC.Object.prototype = {
     // Call 'initMixin' methods to automatically setup modules.
     var inits = this.initMixin; len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
+    
+     // call statechart init if defined
+    if (this.initStatechart) this.initStatechart() ;
 
     return this ; // done!
   },
@@ -488,7 +491,7 @@ SC.Object.prototype = {
   respondsTo: function( methodName ) {
     return !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
   },
-
+  
   /**
     Attemps to invoked the named method, passing the included two arguments.  
     Returns NO if the method is either not implemented or if the handler 
