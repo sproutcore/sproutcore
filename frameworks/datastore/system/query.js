@@ -37,13 +37,13 @@ SC.Query = SC.Object.extend({
     @param {SC.Record} record the record to check
     @returns {Boolean} YES if record belongs, NO otherwise
   */ 
-  contains: function(record) {
+  contains: function(record,wildCardValues) {
     // if called for the first time we have to parse the query
     if (!this.isReady) this.parseQuery();
 
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
-    if ( this.isReady && this.tokenTree.evaluate(record, this.queryValues) )
+    if ( this.isReady && this.tokenTree.evaluate(record, wildCardValues) )
       return true;
     else
       return false;
