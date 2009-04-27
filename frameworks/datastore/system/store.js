@@ -979,7 +979,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // now commit storekeys to dataSource
     if (source) {
-      var ok = source.retrieveRecords.call(source, this, ret);
+      var ok = source.fetchRecords.call(source, this, SC.Record.STORE_KEYS, ret);
       if (ok === NO) ret.length = 0; // could not find.
     }
     return ret ;
@@ -1534,7 +1534,7 @@ SC.Store.mixin({
     a primaryKey and recordType that remains constant throughout the lifetime
     of the application.
   */
-  recordTypesByStoreKey: [],
+  recordTypesByStoreKey: {},
   
   /** @private
     The next store key to allocate.  A storeKey must always be greater than 0

@@ -21,24 +21,9 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // STANDARD DATA SOURCE METHODS
   // 
   
-  /**
-     Invoked by the store whenever it needs to retrieve an array of records.
-
-     @param {SC.Store} store the requesting store
-     @param {SC.Array} the array with the storeKeys to be retrieved
-     @returns {SC.Bool} return YES because Fixtures supports the function.  
-  */
-  retrieveRecords: function(store, storeKeys) {
-    var len = storeKeys.length, dataHash, storeKey, i;
-    for(i=0; i<len; i++){
-      storeKey = storeKeys[i];
-      dataHash = this.fixtureForStoreKey(store, storeKey);
-      if (dataHash) store.dataSourceDidComplete(storeKey, dataHash);
-    }
-    return YES;    
-  },
 
   /**
+    TODO: revise description
     Invoked by the store whenever it needs to retrieve an array of storeKeys
     matching a specific query.  For the fixtures params are ignored and all 
     storeKeys for the specific recordType are returned.
@@ -47,19 +32,30 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @param {Object} recordType key describing the request, may be SC.Record
     @param {Hash} params optional additonal fetch params
     @returns {SC.Array} result set with storeKeys.  May be sparse.
-  */
-  fetchRecords: function(store, recordType, params) {
-    var ret = [], dataHashes, i, storeKey;
+  */  
+  fetchRecords: function(store, fetchKey, params) {
+    var ret = [], dataHashes, i, storeKey, hashes= [];
     
-    // only support loading records
-    if (!(recordType === SC.Record || SC.Record.hasSubclass(recordType))) {
-      return null ;
-    }
-    
-    dataHashes = this.fixturesFor(recordType);
-    for(i in dataHashes){
-      storeKey = recordType.storeKeyFor(i);
-      ret.push(storeKey);
+    if (fetchKey === SC.Record.STORE_KEYS) {
+      params.forEach(function(sk) {
+        var recordType = SC.Store.recordTypeFor(sk),
+            id = store.idFor(sk),
+            hash=this.fixtureForStoreKey(store, sk);
+        ret.push(sk);
+        store.dataSourceDidComplete(sk, hash, id);
+      }, this);
+    } else {
+      if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
+        return null ;
+      }
+      dataHashes = this.fixturesFor(fetchKey);
+      for(i in dataHashes){
+        storeKey = fetchKey.storeKeyFor(i);
+        hashes.push(dataHashes[i]);
+        ret.push(storeKey);
+      }
+      debugger;
+      store.loadRecords(fetchKey, hashes);
     }
     return ret;
   },

@@ -475,3 +475,5 @@ SC.Record.mixin( /** @scope SC.Record */ {
   relationships can sometimes make your code more understandable.
 */
 SC.Record.toOne = SC.Record.attr ;
+
+SC.Record.STORE_KEYS='STOREKEYS';

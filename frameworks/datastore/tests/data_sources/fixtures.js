@@ -36,6 +36,7 @@ test("Verify findAll() loads all fixture data", function() {
 });
 
 test("Verify find() loads data from store", function() {
+  debugger;
   var sk=store.find(Sample.File, "14");
   equals(sk.get('name'), 'Birthday Invitation.pdf', 'returns record should have name from fixture');
 });
