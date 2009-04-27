@@ -20,11 +20,21 @@ SC.Query = SC.Object.extend({
 
  
   /**
-    Pass a query string (e.g. "foo = bar AND baz = foo"),
-    you can use wild cards like this: "foo = %@ AND baz = %@",
-    optionally pass an array of values for wild cards (e.g. ["goo",2005]).
+    Create a query like this:
+    q = SC.Query.create({queryString: "foo = 'bar' AND baz = 2"})
+    test it with
+    q.contains({foo: 'bar', baz: 2})
+    
+    You can use wild cards like this: "foo = %@ AND baz = %@",
+    test it with
+    q.contains({foo: 'bar', baz: 2},['bar',2])
+
+    Write "name MATCHES %@" and use a regexp as wild card value like this
+    q.contains({name: 'Jane'},[/^Ja/])
+    
     Pass a string specifying the order of the results (e.g. "foo, baz DESC"),
     if no order is given, the results will be ordered by their guid.
+    (order not working yet)
   */
   queryString: null,
   queryValues: [],
@@ -126,7 +136,7 @@ SC.Query = SC.Object.extend({
                         },
     reservedTypes       : {
       'WILD_CARD'       : ['%@'],
-      'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY'],
+      'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY','MATCHES'],
       'BOOL_OP'         : ['NOT','AND','OR']
                         }
   },
@@ -205,6 +215,16 @@ SC.Query = SC.Object.extend({
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
                           return ( all.substring(all.length-end.length,all.length) == end );
+                        }
+                      },
+      'MATCHES'       : {
+        leftType      : 'PRIMITIVE',
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) {
+                          var toMatch = this.leftSide.evaluate(r,w);
+                          var matchWith = this.rightSide.evaluate(r,w);
+                          return matchWith.test(toMatch);
                         }
                       },
       'ANY'           : {
