@@ -19,31 +19,37 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   // SC.STORE ENTRY POINTS
   // 
   
-  /**
-    Invoked by the Store to load or refresh records in the store.  You can 
-    map the storeKeys back to recordType and ids as needed to perform the 
-    retrieval.
-    
-    Typically you will override this method to initial a retrieval for the
-    records and then provide the data to the store using the standard data
-    source callbacks on the store.
-    
-    If you are implementing an in-memory data source, you can provide this 
-    data immediately if you want before returning.
-    
-    To support cascading data stores, be sure to return NO if you cannot 
-    retrieve any of the keys, YES if you can retrieve all of the, or
-    SC.MIXED_STATE if you can retrieve some of the.
-    
-    @param {SC.DataSource} dataSource the receiver
-    @param {SC.Store} store the requesting store
-    @param {Array} storeKeys array of storeKeys to retrieve
-    @returns {Boolean} YES if data source can handle keys
-  */
-  retrieveRecords: function(store, storeKeys) {
-    return NO;    
-  },
 
+  /**
+    TODO: revise description
+    Invoked by the store whenever it needs to retrieve an array of storeKeys
+    matching a specific query.  Your subclass should override this method 
+    to return an array of storeKeys that match the passed fetchKey and 
+    optional params.  Often the fetchKey will actually be an SC.Record 
+    subclass used as a filter or string, but it could be anything you want.
+    
+    If your data source subclass can handle the fetch, it should either return
+    an array of storeKeys immediately or it can return an empty array and 
+    populate it dynamically later one the result set has arrived.  Optionally
+    you can also implement "server-side results" by returning a SparseArray
+    and then dynamically populating the contents of the array as it is 
+    requested.
+    
+    On return, the Store will write your result set in an SC.RecordArray 
+    instance, which will monitor your array for changes and then maps those
+    store keys to actual SC.Record instances.  SC.RecordArray can also use 
+    your underlying storeKeys to create subqueries for client-side searching
+    and filtering.
+    
+    @param {SC.Store} store the requesting store
+    @param {Object} fetchKey key describing the request, may be SC.Record
+    @param {Hash} params optional additonal fetch params
+    @returns {SC.Array} result set with storeKeys.  May be sparse.
+  */
+  fetchRecords: function(store, fetchKey, params) {
+    return null;  
+  },
+  
   /**
     Invoked by the store whenever it has one or more records with pending 
     changes that need to be sent back to the server.  The store keys will be
@@ -79,34 +85,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     return (cret === uret === dret) ? (cret || uret || dret) : SC.MIXED_STATE ;
   },
   
-  /**
-    Invoked by the store whenever it needs to retrieve an array of storeKeys
-    matching a specific query.  Your subclass should override this method 
-    to return an array of storeKeys that match the passed fetchKey and 
-    optional params.  Often the fetchKey will actually be an SC.Record 
-    subclass used as a filter or string, but it could be anything you want.
-    
-    If your data source subclass can handle the fetch, it should either return
-    an array of storeKeys immediately or it can return an empty array and 
-    populate it dynamically later one the result set has arrived.  Optionally
-    you can also implement "server-side results" by returning a SparseArray
-    and then dynamically populating the contents of the array as it is 
-    requested.
-    
-    On return, the Store will write your result set in an SC.RecordArray 
-    instance, which will monitor your array for changes and then maps those
-    store keys to actual SC.Record instances.  SC.RecordArray can also use 
-    your underlying storeKeys to create subqueries for client-side searching
-    and filtering.
-    
-    @param {SC.Store} store the requesting store
-    @param {Object} fetchKey key describing the request, may be SC.Record
-    @param {Hash} params optional additonal fetch params
-    @returns {SC.Array} result set with storeKeys.  May be sparse.
-  */
-  fetchRecords: function(store, fetchKey, params) {
-    return null;  
-  },
+  
   
   
   /**
