@@ -21,7 +21,6 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   
 
   /**
-    TODO: revise description
     Invoked by the store whenever it needs to retrieve an array of storeKeys
     matching a specific query.  Your subclass should override this method 
     to return an array of storeKeys that match the passed fetchKey and 
