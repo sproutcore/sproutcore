@@ -23,7 +23,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   
 
   /**
-    TODO: revise description 
     
     Invoked by the store whenever it needs to load a fresh new batch or records
     or simply refresh based on their storeKeys. This method is invoked from 
