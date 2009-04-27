@@ -223,6 +223,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Boolean}
   */
   isVisible: YES,
+  isVisibleBindingDefault: SC.Binding.bool(),
   
   /**
     YES only if the view and all of its parent views are currently visible
@@ -430,6 +431,25 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   },
   
   /**
+    Replaces the current array of child views with the new array of child 
+    views.
+    
+    @param {Array} views views you want to add
+    @returns {SC.View} receiver
+  */
+  replaceAllChildren: function(views) {
+    var len = views.get('length'), idx;
+    
+    this.beginPropertyChanges();
+    this.destroyLayer().removeAllChildren();
+    for(idx=0;idx<len;idx++) this.appendChild(views.objectAt(idx));
+    this.replaceLayer();
+    this.endPropertyChanges();
+    
+    return this ;
+  },
+  
+  /**
     Appends the specified view to the end of the receivers childViews array.  
     This is equivalent to calling insertBefore(view, null);
     
@@ -585,10 +605,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   
   /**
     This method is invoked whenever a display property changes.  It will set 
-    the layerNeedsUpdate method to YES.
+    the layerNeedsUpdate method to YES.  If you need to perform additional
+    setup whenever the display changes, you can override this method as well.
+    
+    @returns {SC.View} receiver
   */
   displayDidChange: function() {
     this.set('layerNeedsUpdate', YES) ;
+    return this;
   },
   
   /**
@@ -693,7 +717,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     var context = this.renderContext(this.get('tagName')) ;
     
-    // now prepare the contet like normal.
+    // now prepare the content like normal.
     this.prepareContext(context, YES) ;
     this.set('layer', context.element()) ;
     
@@ -752,6 +776,20 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return this ;
   },
   
+  /**
+    Destroys and recreates the current layer.  This can be more efficient than
+    modifying individual child views.
+    
+    @returns {SC.View} receiver
+  */
+  replaceLayer: function() {
+    if (!this.get('layer')) return this; // nothing to do
+    this.destroyLayer();
+
+    this.set('layerLocationNeedsUpdate', YES) ;
+    this.invokeOnce(this.updateLayerLocationIfNeeded) ;
+  },
+    
   /** @private - 
     Invokes willDestroyLayer() on view and child views.  Then sets layer to
     null for receiver.
@@ -789,9 +827,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // do some initial setup only needed at create time.
     if (firstTime) {
       // TODO: seems like things will break later if SC.guidFor(this) is used
+      
       layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
       context.id(layerId).classNames(this.get('classNames'), YES) ;
       this.renderLayout(context, firstTime) ;
+    }else{
+      context.resetClassNames();
+      context.classNames(this.get('classNames'), YES);  
     }
     
     // do some standard setup...
@@ -1431,20 +1473,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   computeFrameWithParentFrame: function(pdim) {
     var layout = this.get('layout') ;
-    var f = {} , error;
-    var useSL = this.get('useStaticLayout');
-    var hasSL = this.get('hasStaticLayout');
-    var stDisabled = (hasSL===undefined || (useSL!==undefined && !useSL));
-    if(layout.width !== undefined && layout.width === SC.LAYOUT_AUTO && stDisabled){
-      error= SC.Error.desc("%@.layout() you cannot use width:auto if"
-            +" staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-      console.error(error);
-      throw error;
+    var f = {} , error, layer, AUTO = SC.LAYOUT_AUTO;
+    var stLayout = this.get('useStaticLayout');
+    
+    if(layout.width !== undefined && layout.width === AUTO && stLayout!==undefined && !stLayout){
+     error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+     console.error(error);
+     throw error;
     }
 
-    if(layout.height !== undefined && layout.height === SC.LAYOUT_AUTO && stDisabled){
-      error= SC.Error.desc("%@.layout() you cannot use height:auto if"
-            + " staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+    if(layout.height !== undefined && layout.height === AUTO && stLayout!==undefined && !stLayout){
+      error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
       console.error(error);
       throw error;
     }
@@ -1453,7 +1492,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (!SC.none(layout.left)) {
       f.x = Math.floor(layout.left) ;
       if (layout.width !== undefined) {
-        if(layout.width === SC.LAYOUT_AUTO) f.width = SC.LAYOUT_AUTO ;
+        if(layout.width === AUTO) f.width = AUTO ;
         else f.width = Math.floor(layout.width) ;
       } else { // better have layout.right!
         if (!pdim) pdim = this.computeParentDimensions(layout) ;
@@ -1467,7 +1506,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         f.width = pdim.width - layout.right ;
         f.x = 0 ;
       } else {
-        if(layout.width === SC.LAYOUT_AUTO) f.width = SC.LAYOUT_AUTO ;
+        if(layout.width === AUTO) f.width = AUTO ;
         else f.width = Math.floor(layout.width || 0) ;
         f.x = Math.floor(pdim.width - layout.right - f.width) ;
       }
@@ -1475,7 +1514,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // handle centered
     } else if (!SC.none(layout.centerX)) {
       if (!pdim) pdim = this.computeParentDimensions(layout) ; 
-      if(layout.width === SC.LAYOUT_AUTO) f.width = SC.LAYOUT_AUTO ;
+      if(layout.width === AUTO) f.width = AUTO ;
       else f.width = Math.floor(layout.width || 0) ;
       f.x = Math.floor((pdim.width - f.width)/2 + layout.centerX) ;
     } else {
@@ -1484,7 +1523,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         if (!pdim) pdim = this.computeParentDimensions(layout) ;
         f.width = Math.floor(pdim.width) ;
       } else {
-        if(layout.width === SC.LAYOUT_AUTO) f.width = SC.LAYOUT_AUTO ;
+        if(layout.width === AUTO) f.width = AUTO ;
         else f.width = Math.floor(layout.width || 0) ;
       }
     }
@@ -1493,7 +1532,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (!SC.none(layout.top)) {
       f.y = Math.floor(layout.top) ;
       if (layout.height !== undefined) {
-        if(layout.height === SC.LAYOUT_AUTO) f.height = SC.LAYOUT_AUTO ;
+        if(layout.height === AUTO) f.height = AUTO ;
         else f.height = Math.floor(layout.height) ;
       } else { // better have layout.bottm!
         if (!pdim) pdim = this.computeParentDimensions(layout) ;
@@ -1507,7 +1546,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         f.height = pdim.height - layout.bottom ;
         f.y = 0 ;
       } else {
-        if(layout.height === SC.LAYOUT_AUTO) f.height = SC.LAYOUT_AUTO ;
+        if(layout.height === AUTO) f.height = AUTO ;
         else f.height = Math.floor(layout.height || 0) ;
         f.y = Math.floor(pdim.height - layout.bottom - f.height) ;
       }
@@ -1515,7 +1554,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // handle centered
     } else if (!SC.none(layout.centerY)) {
       if (!pdim) pdim = this.computeParentDimensions(layout) ; 
-      if(layout.height === SC.LAYOUT_AUTO) f.height = SC.LAYOUT_AUTO ;
+      if(layout.height === AUTO) f.height = AUTO ;
       else f.height = Math.floor(layout.height || 0) ;
       f.y = Math.floor((pdim.height - f.height)/2 + layout.centerY) ;
       
@@ -1526,9 +1565,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         if (!pdim) pdim = this.computeParentDimensions(layout) ; 
         f.height = Math.floor(pdim.height) ;
       } else {
-        if(layout.height === SC.LAYOUT_AUTO) f.height = SC.LAYOUT_AUTO ;
+        if(layout.height === AUTO) f.height = AUTO ;
         else f.height = Math.floor(layout.height || 0) ;
       }
+    }
+    
+    // if width or height were set to auto and we have a layer, try lookup
+    if (f.height === AUTO || f.width === AUTO) {
+      layer = this.get('layer');
+      if (f.height === AUTO) f.height = layer ? layer.clientHeight : 0;
+      if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
     
     // make sure the width/height fix min/max...
