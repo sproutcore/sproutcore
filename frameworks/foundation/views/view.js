@@ -223,7 +223,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Boolean}
   */
   isVisible: YES,
-  isVisibleBindingDefault: SC.Binding.bool(),
   
   /**
     YES only if the view and all of its parent views are currently visible
@@ -251,6 +250,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isVisible'), parentView ;
+    
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
     if (cur) {
@@ -451,15 +451,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     @returns {SC.View} receiver
   */
-  parentViewDidChange: function() {    
+  parentViewDidChange: function() {
     this.recomputeIsVisibleInWindow() ;
     
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
     
     return this ;
-  },
-  
+  }.observes('isVisible'),
   
   // ..........................................................
   // LAYER SUPPORT
@@ -786,16 +785,13 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   prepareContext: function(context, firstTime) {
     var mixins, len, idx, layerId, bgcolor, cursor ;
+    
     // do some initial setup only needed at create time.
     if (firstTime) {
       // TODO: seems like things will break later if SC.guidFor(this) is used
-      
       layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
       context.id(layerId).classNames(this.get('classNames'), YES) ;
       this.renderLayout(context, firstTime) ;
-    }else{
-      context.resetClassNames();
-      context.classNames(this.get('classNames'), YES);  
     }
     
     // do some standard setup...
@@ -1436,16 +1432,19 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   computeFrameWithParentFrame: function(pdim) {
     var layout = this.get('layout') ;
     var f = {} , error;
-    var stLayout = this.get('useStaticLayout');
-    
-    if(layout.width !== undefined && layout.width === SC.LAYOUT_AUTO && stLayout!==undefined && !stLayout){
-     error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-     console.error(error);
-     throw error;
+    var useSL = this.get('useStaticLayout');
+    var hasSL = this.get('hasStaticLayout');
+    var stDisabled = (hasSL===undefined || (useSL!==undefined && !useSL));
+    if(layout.width !== undefined && layout.width === SC.LAYOUT_AUTO && stDisabled){
+      error= SC.Error.desc("%@.layout() you cannot use width:auto if"
+            +" staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+      console.error(error);
+      throw error;
     }
 
-    if(layout.height !== undefined && layout.height === SC.LAYOUT_AUTO && stLayout!==undefined && !stLayout){
-      error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+    if(layout.height !== undefined && layout.height === SC.LAYOUT_AUTO && stDisabled){
+      error= SC.Error.desc("%@.layout() you cannot use height:auto if"
+            + " staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
       console.error(error);
       throw error;
     }
@@ -1722,16 +1721,19 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   layoutStyle: function() {
     var layout = this.get('layout'), ret = {}, pdim = null, error;
-    var stLayout = this.get('useStaticLayout');
-    
-    if(layout.width !== undefined && layout.width === SC.LAYOUT_AUTO && stLayout!==undefined && !stLayout){
-     error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-     console.error(error);
-     throw error;
+    var useSL = this.get('useStaticLayout');
+    var hasSL = this.get('hasStaticLayout');
+    var stDisabled = (hasSL===undefined || (useSL!==undefined && !useSL));
+    if(layout.width !== undefined && layout.width === SC.LAYOUT_AUTO && stDisabled){
+      error= SC.Error.desc("%@.layout() you cannot use width:auto if"
+            +" staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+      console.error(error);
+      throw error;
     }
 
-    if(layout.height !== undefined && layout.height === SC.LAYOUT_AUTO && stLayout!==undefined && !stLayout){
-      error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+    if(layout.height !== undefined && layout.height === SC.LAYOUT_AUTO && stDisabled){
+      error= SC.Error.desc("%@.layout() you cannot use height:auto if"
+            + " staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
       console.error(error);
       throw error;
     }

@@ -204,15 +204,16 @@ test("layout {top, left, bottom, right, centerX, centerY, height, width} - top/l
 
 
 test("layout {centerX, centerY, width:auto, height:auto}", function() {
-
+  var error=null;
   var layout = { centerX: 10, centerY: 10, width: 'auto', height: 'auto' };
   child.set('layout', layout) ;
   try{
     child.get('frame');
   }catch(e){
-    equals(SC.T_ERROR,SC.typeOf(e),'Layout style functions should throw and '+
-    'error if centerx/y and width/height are set at the same time' + e );
+    error=e;
   }
+  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
+  'error if centerx/y and width/height are set at the same time ' + error );
   
 }) ;
 
@@ -265,6 +266,7 @@ test("frame loc shifts with centerX/centerY", function(){
 
 
 test("frame size shifts with top/left/bottom/right", function(){
+  var error=null;
   var layout = { top: 10, left: 10, bottom: 10, right: 10 };
   var before = { x: 10, y: 10, width: 180, height: 180 };
   var after =  { x: 10, y: 10, width: 280, height: 280 };
@@ -272,11 +274,13 @@ test("frame size shifts with top/left/bottom/right", function(){
   child.set('layout', layout);
   child.get('frame');
   parent.adjust('width', 'auto').adjust('height', 'auto');
-      
   try{
     child.get('frame');
   }catch(e){
-    equals(SC.T_ERROR,SC.typeOf(e),'Layout style functions should throw and '+
-    'error if centerx/y and width/height are set at the same time' + e );
-  } 
+    error=e;
+  }
+  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
+  'error if centerx/y and width/height are set at the same time ' + error );
+      
+   
 });
