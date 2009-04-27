@@ -42,15 +42,17 @@ SC.Request = SC.Object.extend({
   },
   
   send: function(body) {
-    var request = this ; // SC.clone(this) ;
+    var request = this ; 
     if(body) request.set('body', body) ;
     SC.Request.manager.sendRequest(request) ;
     return request ;
   },
   
-  notify: function(target, action) {
+  notify: function(target, action, params) {
     if (SC.typeOf(action) === SC.T_STRING) action = target[action];
-    this.set('notifyTarget', target).set('notifyAction', action);
+    this.set('notifyTarget', target)
+    .set('notifyAction', action)
+    .set('notifyParams', params);
     return this;
   },
   
@@ -131,7 +133,8 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
     request = { 
       request: request, 
       action:  request.get('notifyAction'),
-      target:  request.get('notifyTarget') };
+      target:  request.get('notifyTarget'),
+      params:  request.get('notifyParams') };
     
     this.propertyWillChange("queue");
     this.get('queue').pushObject(request);
@@ -252,7 +255,7 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
       
       if (this.target && this.action) {
         SC.RunLoop.begin();
-        this.action.call(this.target, request.source);
+        this.action.call(this.target, request.source, this.params);
         SC.RunLoop.end();
       }
       

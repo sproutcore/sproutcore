@@ -23,15 +23,21 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   
 
   /**
-    TODO: revise description
-    Invoked by the store whenever it needs to retrieve an array of storeKeys
-    matching a specific query.  For the fixtures params are ignored and all 
-    storeKeys for the specific recordType are returned.
+    TODO: revise description 
+    
+    Invoked by the store whenever it needs to load a fresh new batch or records
+    or simply refresh based on their storeKeys. This method is invoked from 
+    the store methods 'findAll' and 'retrieveRecords'. 
+    
+    findAll() will request all records and load them using store.loadRecords(). 
+    retrieveRecords() checks if the record is already loaded and in a clean 
+    state to then just materialize it or if is in an empty state, it will call 
+    this method to load the required record to then materialize it. 
     
     @param {SC.Store} store the requesting store
-    @param {Object} recordType key describing the request, may be SC.Record
+    @param {Object} fetchKey key describing the request, may be SC.Record
     @param {Hash} params optional additonal fetch params
-    @returns {SC.Array} result set with storeKeys.  May be sparse.
+    @returns {SC.Array} result set with storeKeys.  
   */  
   fetchRecords: function(store, fetchKey, params) {
     var ret = [], dataHashes, i, storeKey, hashes= [];
@@ -54,7 +60,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
         hashes.push(dataHashes[i]);
         ret.push(storeKey);
       }
-      debugger;
       store.loadRecords(fetchKey, hashes);
     }
     return ret;
