@@ -24,7 +24,7 @@ test("populates context with layerId & classNames from view if firstTime", funct
   context = view.renderContext();
   view.prepareContext(context, NO);
   ok(context.id() !== 'foo', 'did not set id');
-  ok(!context.hasClass('bar'), 'did not set class name');
+  ok(context.hasClass('bar'), 'did set class name');
 });
 
 test("invokes renderLayout if first time", function() {
