@@ -41,9 +41,18 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     your underlying storeKeys to create subqueries for client-side searching
     and filtering.
     
+    This method is invoked from the store functions 'findAll' and 'retrieveRecords'. 
+    
+    findAll() will request all records and load them using store.loadRecords(). 
+    retrieveRecords() checks if the record is already loaded and in a clean 
+    state to then just materialize it. If the record is in an empty state, it 
+    will call this method to load the required record to then materialize it.
+    
     @param {SC.Store} store the requesting store
-    @param {Object} fetchKey key describing the request, may be SC.Record
-    @param {Hash} params optional additonal fetch params
+    @param {Object} fetchKey key describing the request, may be SC.Record or
+        SC.Record.STORE_KEYS if invoked from store.retrieveRecords
+    @param {Hash} params optional additonal fetch params. storeKeys if invoked
+        from store.retrieveRecords
     @returns {SC.Array} result set with storeKeys.  May be sparse.
   */
   fetchRecords: function(store, fetchKey, params) {
