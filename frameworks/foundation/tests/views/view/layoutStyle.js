@@ -8,6 +8,21 @@
 
 var parent, child;
 
+/*
+  helper method to test the layout of a view.  Applies the passed layout to a
+  view, then compares both its frame and layoutStyle properties both before
+  and after adding the view to a parent view.  
+
+  You can pass frame rects with some properties missing and they will be
+  filled in for you just so you don't have to write so much code.
+  
+  @param {Hash} layout layout hash to test
+  @param {Hash} no_f expected frame for view with no parent
+  @param {Hash} no_s expected layoutStyle for view with no parent
+  @param {Hash} with_f expected frame for view with parent
+  @param {Hash} with_s expected layoutStyle for view with parent
+  @returns {void}
+*/
 function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   
   // make sure we add null properties and convert numbers to 'XXpx' to style layout.
@@ -30,7 +45,9 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   });
   
   // add parent
+  SC.RunLoop.begin();
   parent.appendChild(child);
+  SC.RunLoop.end();
   
   // test again
   same(child.get('frame'), with_f, "FRAME WITH PARENT".fmt(SC.inspect(child.get('frame')), SC.inspect(with_f))) ;  
@@ -39,6 +56,10 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   });
 }
 
+/**
+  Helper setup that creates a parent and child view so that you can do basic
+  tests.
+*/
 var commonSetup = {
   setup: function() {
     
@@ -117,6 +138,29 @@ test("layout {centerX, centerY, width, height}", function() {
   performLayoutTest(layout, no_f, s, with_f, s) ;
 }) ;
 
+test("layout {top, left, width: auto, height: auto}", function() {
+
+  child = SC.View.create({
+    render: function(context) {
+      // needed for auto
+      context.push('<div style="padding: 10px"></div>');
+    }
+  });
+
+  // parent MUST have a layer.
+  parent.createLayer();
+  var layer = parent.get('layer');
+  document.body.appendChild(layer);
+  
+  var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
+  var no_f = { x: 0, y: 0, width: 0, height: 0 };
+  var with_f = { x: 0, y: 0, width: 20, height: 20 };
+  var s = { top: 0, left: 0, width: 'auto', height: 'auto' };
+  
+  performLayoutTest(layout, no_f, s, with_f, s);
+  
+  layer.parentNode.removeChild(layer);
+});
 
 // ..........................................................
 // TEST FRAME/STYLEFRAME WITH INVALID LAYOUT VARIATIONS
