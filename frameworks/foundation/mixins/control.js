@@ -293,7 +293,7 @@ SC.Control = {
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
-  displayProperties: 'isEnabled isSelected isFirstResponder isActive'.w(),
+  displayProperties: 'isSelected isActive controlSize'.w(),
   
   /** @private */
   _CONTROL_TMP_CLASSNAMES: {},
@@ -310,8 +310,6 @@ SC.Control = {
     var names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
     names.mixed = sel === SC.MIXED_STATE;
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
-    names.disabled = disabled ;
-    names.focus = this.get('isFirstResponder') ;
     names.active = this.get('isActive') ;
     context.setClass(names).addClass(this.get('controlSize'));
     
