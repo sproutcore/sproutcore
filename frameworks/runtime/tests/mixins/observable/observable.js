@@ -259,6 +259,24 @@ test("change dependent should clear cache", function() {
   equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
 });
 
+// This verifies a specific bug encountered where observers for computed 
+// properties would fire before their prop caches were cleared.
+test("change dependent should clear cache when observers of dependent are called", function() {
+
+  // call get several times to collect call count
+  var ret1 = object.get('inc'); // should run func
+  equals(object.get('inc'), ret1, 'multiple calls should not run cached prop');
+
+  // add observer to verify change...
+  object.addObserver('inc', this, function() {
+    equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
+  });
+
+  // now run
+  object.set('changer', 'bar');
+    
+});
+
 test("allPropertiesDidChange should clear cache", function() {
   // note: test this with a computed method that returns a different value
   // each time to ensure clean function.
