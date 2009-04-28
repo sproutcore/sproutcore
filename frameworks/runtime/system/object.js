@@ -649,20 +649,20 @@ SC.Object.prototype = {
         var obj = MyRecord.newRecord() ;
         
         // update the collection controller's selection
-        MyApp.myRecordCollectionController.invokeNext( function() {
+        MyApp.myRecordCollectionController.invokeLast( function() {
           this.set('selection', [obj]) ;
         });
       }
     }}}
     
-    You can call invokeNext as many times as you like and the method will
+    You can call invokeLast as many times as you like and the method will
     only be invoked once.
     
     @param {Funciton|String} method method or method name
     @returns {SC.Object} receiver
   */
-  invokeNext: function(method) {
-    SC.RunLoop.currentRunLoop.invokeNext(this, method) ;
+  invokeLast: function(method) {
+    SC.RunLoop.currentRunLoop.invokeLast(this, method) ;
     return this ;
   },
   

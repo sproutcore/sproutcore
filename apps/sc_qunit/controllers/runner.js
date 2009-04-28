@@ -70,7 +70,7 @@ QUnit.runnerController = SC.Object.create({
         // console.log('current selection is %@'.fmt(this.get('selection')));
         // console.log('setting the selection of %@ to %@'.fmt(this, test));
         this.set('selection', test) ;
-      }.invokeLater(this,1000) ; // FIXME: we really need an invokeNextRunLoop call...
+      }.invokeLater(this,1000) ; // FIXME: we really need an invokeLastRunLoop call...
     }
   },
   
