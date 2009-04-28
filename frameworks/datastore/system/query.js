@@ -37,8 +37,8 @@ SC.Query = SC.Object.extend({
     (order not working yet)
   */
   queryString: null,
-  queryValues: [],
   orderBy:     null,
+  recordType:  null,
  
   /** 
     Override to evaluate whether the passed record instance belongs in the Query result
@@ -47,7 +47,7 @@ SC.Query = SC.Object.extend({
     @param {SC.Record} record the record to check
     @returns {Boolean} YES if record belongs, NO otherwise
   */ 
-  contains: function(record,wildCardValues) {
+  contains: function(record, wildCardValues) {
     // if called for the first time we have to parse the query
     if (!this.isReady) this.parseQuery();
 
