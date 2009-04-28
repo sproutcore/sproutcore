@@ -254,10 +254,25 @@ SC.Observable = {
     @returns {this}
   */
   set: function(key, value) {
-    var func = this[key], ret = value, dependents, cache, idx ;
-    
-    var notify = this.automaticallyNotifiesObserversFor(key) ;
-    
+    var func   = this[key], 
+        notify = this.automaticallyNotifiesObserversFor(key),
+        ret    = value, 
+        dependents, cache, idx, dfunc ;
+
+    // if there are any dependent keys and they use caching, then clear the
+    // cache.
+    if (dependents = this._kvo_cachedDependents) {
+      dependents = this._kvo_cachedDependents[key] ;
+      if (dependents && (idx = dependents.length) > 0) {
+        if (cache = this._kvo_cache) {
+          while(--idx>=0) {
+            dfunc = dependents[idx];
+            cache[dfunc.cacheKey] = cache[dfunc.lastSetValueKey] = undefined;
+          }
+        }
+      }
+    }
+
     // set the value.
     if (func && func.isProperty) {
       cache = this._kvo_cache;
@@ -285,22 +300,7 @@ SC.Observable = {
         if (notify) this.propertyDidChange(key, ret) ;
       }
     }
-    
-    // if there are any dependent keys and they use caching, then clear the
-    // cache.
-    if (dependents = this._kvo_cachedDependents) {
-      dependents = this._kvo_cachedDependents[key] ;
-      if (dependents && dependents.length > 0) {
-        idx = dependents.length ;
-        if (cache = this._kvo_cache) {
-          while(--idx>=0) {
-            func = dependents[idx];
-            cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined;
-          }
-        }
-      }
-    }
-    
+
     return this ;
   },
 
