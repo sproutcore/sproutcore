@@ -840,6 +840,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (this.get('isTextSelectable')) context.addClass('allow-select') ;
     if (!this.get('isEnabled')) context.addClass('disabled') ;
     if (!this.get('isVisible')) context.addClass('hidden') ;
+    if (this.get('isFirstResponder')) context.addClass('focus');
     
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
@@ -950,7 +951,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Array}
     @readOnly
   */
-  displayProperties: ['isVisible'],
+  displayProperties: ['isFirstResponder', 'isVisible'],
   
   /**
     You can set this to an SC.Cursor instance; it's className will 
