@@ -59,27 +59,50 @@ SC.FixturesWithQueriesDataSource = SC.DataSource.extend( {
     @param {Hash} params optional additonal fetch params
     @returns {SC.Array} result set with storeKeys.  May be sparse.
   */
-  fetchRecords: function(store, recordType, params) {
-    var ret = [], dataHashes, i, storeKey;
+  fetchRecords: function(store, queryKey, params) {
+    var ret = [], dataHashes, i, storeKey, recordType;
     var query = null;
-    var wildCardValues = null;
     
-    // only support loading records
-    if (!(recordType === SC.Record || SC.Record.hasSubclass(recordType))) {
-      return null ;
-    }
+    if (!params) params = {};
     
-    if ( params && params['queryName'] && this.queries[params['queryName']] ) {
-      query = this.queries[params['queryName']];
-      wildCardValues = params['wildCardValues'];
-    }
-    dataHashes = this.fixturesFor(recordType);
-    for(i in dataHashes){
-      if (query===null || query.contains(dataHashes[i],wildCardValues)) {
+    if (queryKey === SC.Record || SC.Record.hasSubclass(queryKey)) {
+      // loading by recordType now
+      recordType = queryKey;
+      dataHashes = this.fixturesFor(recordType);
+      for(i in dataHashes){
         storeKey = recordType.storeKeyFor(i);
         ret.push(storeKey);
       }
+    } 
+    else if (typeof queryKey == 'string') {
+      // doing a real query now
+      // first check if this is a known query
+      if (this.queries[queryKey]) query = this.queries[queryKey];
+      // if not, make a new query and remember it
+      else {
+        params.queryString = queryKey;
+        query = this.queries[queryKey] = SC.Query.create(params);
+      }
+      
+      // now lets determine which records to check
+      if (query.recordType)
+        // !!! this doesn't work !!!
+        dataHashes = store.recordsFor(recordType);
+      else
+        // !!! this is a hack - but it works !!!
+        dataHashes = store.dataHashes;
+      
+      // now match the dataHashes against the query
+      for(i in dataHashes){
+        if (query.contains(dataHashes[i],params.wildCardValues)) {
+          //storeKey = recordType.storeKeyFor(i);
+          ret.push(i);
+        }
+      }
     }
+    
+    
+    
     return ret;
   },
   
