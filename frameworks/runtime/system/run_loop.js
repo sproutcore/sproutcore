@@ -51,7 +51,6 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   */
   beginRunLoop: function() {
     this._start = new Date().getTime() ; // can't use Date.now() in runtime 
-    this._flushInvokeNextQueue() ; // call any invokeNext methods first
     return this ; 
   },
   
@@ -74,6 +73,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     
     do {
       didChange = this.flushApplicationQueues() ;
+      if (!didChange) didChange = this._flushinvokeLastQueue() ; 
     } while(didChange) ;
     this._start = null ;
     return this ; 
@@ -103,27 +103,29 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   },
   
   /**
-    Invokes the passed target/method pair once at the beginning of the next 
-    runloop, before any other methods (including events) are processed.
+    Invokes the passed target/method pair at the very end of the run loop,
+    once all other delayed invoke queues have been flushed.  Use this to 
+    schedule cleanup methods at the end of the run loop once all other work
+    (including rendering) has finished.
+
+    If you call this with the same target/method pair multiple times it will
+    only invoke the pair only once at the end of the runloop.
     
-    You can call this method as many times as you like and the method will
-    only be invoked once.
-    
-    Usually you will not call this method directly but use invokeNext() 
+    Usually you will not call this method directly but use invokeLast() 
     defined on SC.Object.
     
     @param {Object} target
     @param {Function} method
     @returns {SC.RunLoop} receiver
   */
-  invokeNext: function(target, method) {
+  invokeLast: function(target, method) {
     // normalize
     if (method === undefined) { 
       method = target; target = this ;
     }
     if (SC.typeOf(method) === SC.T_STRING) method = target[method];
-    if (!this._invokeNextQueue) this._invokeNextQueue = SC._ObserverSet.create();
-    this._invokeNextQueue.add(target, method);
+    if (!this._invokeLastQueue) this._invokeLastQueue = SC._ObserverSet.create();
+    this._invokeLastQueue.add(target, method);
     return this ;
   },
   
@@ -159,10 +161,10 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     return SC.Binding.flushPendingChanges() || hadContent ;
   },
   
-  _flushInvokeNextQueue: function() {
-    var queue = this._invokeNextQueue, hadContent = NO ;
+  _flushinvokeLastQueue: function() {
+    var queue = this._invokeLastQueue, hadContent = NO ;
     if (queue && queue.targets > 0) {
-      this._invokeNextQueue = null; // reset queue.
+      this._invokeLastQueue = null; // reset queue.
       hadContent = YES; // has targets!
       if (hadContent) queue.invokeMethods();
     }
