@@ -338,9 +338,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     much simpler.  Notably namespaced events are not supported and you cannot
     trigger events globally.
     
-    If you need more advanced event handling, consider the SC.ClassicResponder 
+    If you need more advanced event handling, consider the SC.Responder 
     functionality provided by SproutCore or use your favorite DOM library.
 
+    h2. Example
+    
+    {{{
+      SC.Event.trigger(view.get('layer'), 'mousedown');
+    }}}
+    
     @param elem {Element} the target element
     @param eventType {String} the event type
     @param args {Array} optional argument or arguments to pass to handler.
