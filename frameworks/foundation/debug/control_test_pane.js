@@ -78,6 +78,15 @@ SC.ControlTestPane = SC.Pane.extend(
     sc_super();
     if (!this._views) this._views = {};
     this.append(); // auto-add to screen
+    
+    // Also adjust unit test results to make space
+    // use setTimeout to avoid screwing with the RunLoop which we might be 
+    // testing.
+    var l = this.get('layout'), w = l.right + l.width;
+    setTimeout(function() {
+      if (!Q$) return ; // nothing to do
+      Q$('.core-test > .detail').css('marginRight', w);
+    }, 100);
   }
 });
 
