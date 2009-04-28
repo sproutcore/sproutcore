@@ -139,8 +139,8 @@ test("layout {centerX, centerY, width, height}", function() {
 }) ;
 
 test("layout {top, left, width: auto, height: auto}", function() {
-
   child = SC.View.create({
+    useStaticLayout: YES,
     render: function(context) {
       // needed for auto
       context.push('<div style="padding: 10px"></div>');
@@ -251,8 +251,9 @@ test("layout {centerX, centerY, width:auto, height:auto}", function() {
   var error=null;
   var layout = { centerX: 10, centerY: 10, width: 'auto', height: 'auto' };
   child.set('layout', layout) ;
+  debugger;
   try{
-    child.get('frame');
+    child.layoutStyle();
   }catch(e){
     error=e;
   }

@@ -1477,15 +1477,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var f = {} , error, layer, AUTO = SC.LAYOUT_AUTO;
     var stLayout = this.get('useStaticLayout');
     
-    if(layout.width !== undefined && layout.width === AUTO && stLayout!==undefined && !stLayout){
+    if(layout.width !== undefined && layout.width === AUTO && !stLayout){
      error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-     console.error(error);
+     console.error(error.toString());
      throw error;
     }
 
-    if(layout.height !== undefined && layout.height === AUTO && stLayout!==undefined && !stLayout){
+    if(layout.height !== undefined && layout.height === AUTO && !stLayout){
       error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
-      console.error(error);
+      console.error(error.toString());
       throw error;
     }
     
@@ -1767,21 +1767,18 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @readOnly
   */
   layoutStyle: function() {
-    var layout = this.get('layout'), ret = {}, pdim = null, error;
-    var useSL = this.get('useStaticLayout');
-    var hasSL = this.get('hasStaticLayout');
-    var stDisabled = (hasSL===undefined || (useSL!==undefined && !useSL));
-    if(layout.width !== undefined && layout.width === SC.LAYOUT_AUTO && stDisabled){
-      error= SC.Error.desc("%@.layout() you cannot use width:auto if"
-            +" staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-      console.error(error);
-      throw error;
+    var layout = this.get('layout'), ret = {}, pdim = null, error, AUTO = SC.LAYOUT_AUTO;
+    var stLayout = this.get('useStaticLayout');
+    
+    if(layout.width !== undefined && layout.width === AUTO && !stLayout){
+     error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+     console.error(error.toString());
+     throw error;
     }
 
-    if(layout.height !== undefined && layout.height === SC.LAYOUT_AUTO && stDisabled){
-      error= SC.Error.desc("%@.layout() you cannot use height:auto if"
-            + " staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
-      console.error(error);
+    if(layout.height !== undefined && layout.height === AUTO && !stLayout){
+      error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+      console.error(error.toString());
       throw error;
     }
 
