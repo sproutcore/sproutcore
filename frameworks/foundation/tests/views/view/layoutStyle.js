@@ -251,7 +251,6 @@ test("layout {centerX, centerY, width:auto, height:auto}", function() {
   var error=null;
   var layout = { centerX: 10, centerY: 10, width: 'auto', height: 'auto' };
   child.set('layout', layout) ;
-  debugger;
   try{
     child.layoutStyle();
   }catch(e){
@@ -313,8 +312,6 @@ test("frame loc shifts with centerX/centerY", function(){
 test("frame size shifts with top/left/bottom/right", function(){
   var error=null;
   var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-  var before = { x: 10, y: 10, width: 180, height: 180 };
-  var after =  { x: 10, y: 10, width: 280, height: 280 };
   parent.appendChild(child);
   child.set('layout', layout);
   child.get('frame');
