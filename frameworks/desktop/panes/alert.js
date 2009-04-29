@@ -194,10 +194,12 @@ SC.AlertPane = SC.PanelPane.extend({
   */
   buttonThree: SC.outlet('contentView.childViews.2.childViews.0'),
   
-  layout: { centerX: 0, width: 452, top: 100, height: 'auto' },
+  layout: { centerX: 0, width: 452, top: 100 },
 
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
+    
+    useStaticLayout: YES,
     
     layout: { left: 0, right: 0, top: 0, height: "auto" },
 		
