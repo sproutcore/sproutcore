@@ -107,7 +107,7 @@ SC.Query = SC.Object.extend({
     generalTypes        : {
       'UNKNOWN'         : {
         firstCharacter  : /\S/,
-        notAllowed      : /[\s'"\w\d\(\)]/
+        notAllowed      : /[\s'"\w\d\(\)\{\}]/
                         },
       'PROPERTY'        : {
         firstCharacter  : /[a-zA-Z_]/,
@@ -120,6 +120,11 @@ SC.Query = SC.Object.extend({
                         },
       'STRING'          : {
         firstCharacter  : /['"]/,
+        delimeted       : true
+                        },
+      'PARAMETER'       : {
+        firstCharacter  : /\{/,
+        lastCharacter   : '}',
         delimeted       : true
                         },
       'OPEN_PAREN'      : {
@@ -156,6 +161,10 @@ SC.Query = SC.Object.extend({
       evaluate        : function (r,w) { return parseFloat(this.tokenValue) }
                       },
     'WILD_CARD'       : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { return w[this.tokenValue] }
+                      },
+    'PARAMETER'       : {
       evalType        : 'PRIMITIVE',
       evaluate        : function (r,w) { return w[this.tokenValue] }
                       },
@@ -404,7 +413,10 @@ SC.Query = SC.Object.extend({
           // handling of special cases
           if ( t.delimeted ) {
             currentTokenValue = "";
-            currentDelimeter = c;
+            if ( t.lastCharacter ) 
+              currentDelimeter = t.lastCharacter;
+            else
+              currentDelimeter = c;
           };
           if ( t.singleCharacter || endOfString )
             addToken(currentTokenType, currentTokenValue);

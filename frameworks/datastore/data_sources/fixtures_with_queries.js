@@ -94,7 +94,7 @@ SC.FixturesWithQueriesDataSource = SC.DataSource.extend( {
       
       // now match the dataHashes against the query
       for(i in dataHashes){
-        if (query.contains(dataHashes[i],params.wildCardValues)) {
+        if (query.contains(dataHashes[i],params.parameters)) {
           //storeKey = recordType.storeKeyFor(i);
           ret.push(i);
         }
