@@ -55,7 +55,6 @@ function performLayoutTest(layout, no_f, no_s, with_f, with_s) {
   // test again
   same(child.get('frame'), with_f, "FRAME WITH PARENT".fmt(SC.inspect(child.get('frame')), SC.inspect(with_f))) ;  
   keys.forEach(function(key) {
-    debugger;
     equals(child.get('layoutStyle')[key], with_s[key], "STYLE NO PARENT %@".fmt(key)) ;  
   });
 }
