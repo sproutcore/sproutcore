@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test parsing of query string
-var store, storeKey, storeId, rec, MyApp;
+var store, storeKey, storeId, rec, MyApp, q;
 module("SC.Query parsing", {
   setup: function() {
     // setup dummy app and store
@@ -31,145 +31,141 @@ module("SC.Query parsing", {
     rec = MyApp.store.materializeRecord(storeKey);
     storeId = rec.get('id');
     
-    
+    q = SC.Query.create();
   }
 });
 
 // ..........................................................
-// LENGTH
+// TOKENIZER
 // 
 
-test("should pass through length", function() {
-  equals(recs.get('length'), storeIds.length, 'rec should pass through length');  
+test("should recocnize all primitives", function() {
+  // PROPERTY
+  q.queryString = "what_to_do_now";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'PROPERTY', 'type should be PROPERTY');
+  equals(q.tokenList[0].tokenValue, 'what_to_do_now', 'value should be what_to_do_now');
+  
+  // BOOLEAN VALUE - false
+  q.queryString = "false";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'BOOL_VAL', 'type should be BOOL_VAL');
+  equals(q.tokenList[0].tokenValue, 'false', 'value should be false');
+  
+  // BOOLEAN VALUE - true
+  q.queryString = "true";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'BOOL_VAL', 'type should be BOOL_VAL');
+  equals(q.tokenList[0].tokenValue, 'true', 'value should be true');
+  
+  // NUMBER - integer
+  q.queryString = "1234";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'NUMBER', 'type should be NUMBER');
+  equals(q.tokenList[0].tokenValue, 1234, 'value should be 1234');
+  
+  // NUMBER - float
+  q.queryString = "12.34";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'NUMBER', 'type should be NUMBER');
+  equals(q.tokenList[0].tokenValue, 12.34, 'value should be 12.34');
+  
+  // STRING - single quoted
+  q.queryString = "'ultravisitor'";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'STRING', 'type should be STRING');
+  equals(q.tokenList[0].tokenValue, 'ultravisitor', 'value should be ultravisitor');
+  
+  // STRING - double quoted
+  q.queryString = '"Feed me weird things"';
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'STRING', 'type should be STRING');
+  equals(q.tokenList[0].tokenValue, 'Feed me weird things', 'value should be Feed me weird things');
+  
+  // PARAMETER
+  q.queryString = "{my_best_friends}";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'PARAMETER', 'type should be PARAMETER');
+  equals(q.tokenList[0].tokenValue, 'my_best_friends', 'value should be my_best_friends');
+  
+  // PARAMETER
+  q.queryString = "{my_best_friends}";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'PARAMETER', 'type should be PARAMETER');
+  equals(q.tokenList[0].tokenValue, 'my_best_friends', 'value should be my_best_friends');
+  
+  // PARENTHESES
+  q.queryString = "()";
+  q.parseQuery();
+  ok(q.tokenList.length == 2, 'list should have two tokens');
+  equals(q.tokenList[0].tokenType, 'OPEN_PAREN', 'type should be OPEN_PAREN');
+  equals(q.tokenList[1].tokenType, 'CLOSE_PAREN', 'type should be CLOSE_PAREN');
+  
+  // WILD CARD
+  q.queryString = "%@";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'WILD_CARD', 'type should be WILD_CARD');
+  equals(q.tokenList[0].tokenValue, 0, 'value should be 0');
+  
+  // COMPARATORS
+  q.queryString = "= != < <= > >= BEGINS_WITH ENDS_WITH ANY MATCHES";
+  q.parseQuery();
+  ok(q.tokenList.length == 10, 'list should have 10 tokens');
+  equals(q.tokenList[0].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[0].tokenValue, '=', 'value should be =');
+  equals(q.tokenList[1].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[1].tokenValue, '!=', 'value should be !=');
+  equals(q.tokenList[2].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[2].tokenValue, '<', 'value should be <');
+  equals(q.tokenList[3].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[3].tokenValue, '<=', 'value should be <=');
+  equals(q.tokenList[4].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[4].tokenValue, '>', 'value should be >');
+  equals(q.tokenList[5].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[5].tokenValue, '>=', 'value should be >=');
+  equals(q.tokenList[6].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[6].tokenValue, 'BEGINS_WITH', 'value should be BEGINS_WITH');
+  equals(q.tokenList[7].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[7].tokenValue, 'ENDS_WITH', 'value should be ENDS_WITH');
+  equals(q.tokenList[8].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[8].tokenValue, 'ANY', 'value should be ANY');
+  equals(q.tokenList[9].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[9].tokenValue, 'MATCHES', 'value should be MATCHES');
+  
+  // BOOLEAN OPERATORS
+  q.queryString = "AND OR NOT";
+  q.parseQuery();
+  ok(q.tokenList.length == 3, 'list should have 3 tokens');
+  equals(q.tokenList[0].tokenType, 'BOOL_OP', 'type should be BOOL_OP');
+  equals(q.tokenList[0].tokenValue, 'AND', 'value should be AND');
+  equals(q.tokenList[1].tokenType, 'BOOL_OP', 'type should be BOOL_OP');
+  equals(q.tokenList[1].tokenValue, 'OR', 'value should be OR');
+  equals(q.tokenList[2].tokenType, 'BOOL_OP', 'type should be BOOL_OP');
+  equals(q.tokenList[2].tokenValue, 'NOT', 'value should be NOT');
+  
+  
+  
+  // ..........................................................
+  // TREE-BUILDING 
+  // 
+  
+  // Just some examples
+  
+  q.queryString = "(firstName MATCHES {firstName} OR lastName BEGINS_WITH 'Lone') AND is_a_beauty = true";
+  q.parseQuery();
+  ok(q.tokenList.length == 13, 'list should have 13 tokens');
+  ok(!q.tokenTree.error, 'there should be no errors');
+  
 });
 
-test("changing storeIds length should change length of rec array also", function() {
 
-  var oldlen = recs.get('length');
-  
-  storeIds.pushObject(SC.Store.generateStoreKey()); // change length
-  
-  ok(storeIds.length > oldlen, 'precond - storeKeys.length should have changed');
-  equals(recs.get('length'), storeIds.length, 'rec should pass through length');    
-});
-
-// ..........................................................
-// objectAt
-// 
-
-test("should materialize record for object", function() {
-  equals(storeIds[0], storeId, 'precond - storeIds[0] should be storeId');
-  equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');
-});
-
-test("reading past end of array length should return undefined", function() {
-  equals(recs.objectAt(2000), undefined, 'recs.objectAt(2000) should be undefined');
-});
-
-test("modifying the underlying storeId should change the returned materialized record", function() {
-  // read record once to make it materialized
-  equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');  
-  
-  // create a new record.
-  var rec2 = MyApp.store.createRecord(MyApp.Foo, { guid: 5, firstName: "Fred" });
-  var storeId2 = rec2.get('id');
-  
-  // add to beginning of storeKey array
-  storeIds.unshiftObject(storeId2);
-  equals(recs.get('length'), 5, 'should now have length of 5');
-  equals(recs.objectAt(0), rec2, 'objectAt(0) should return new record');
-  equals(recs.objectAt(1), rec, 'objectAt(1) should return old record');
-});
-
-test("reading a record not loaded in store should trigger retrieveRecord", function() {
-  var callCount = 0;
-
-  // patch up store to record a call and to make it look like data is not 
-  // loaded.
-  
-  MyApp.store.removeDataHash(storeKey, SC.Record.EMPTY);
-  MyApp.store.retrieveRecord = function() { callCount++; };
-  
-  var rec = recs.objectAt(0);
-  equals(MyApp.store.readStatus(rec), SC.Record.EMPTY, 'precond - storeKey must not be loaded');
-  
-  equals(callCount, 1, 'store.retrieveRecord() should have been called');
-});
-
-// ..........................................................
-// replace()
-// 
-
-test("adding a record to the ManyArray should pass through storeIds", function() {
-
-  // read record once to make it materialized
-  equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');  
-  
-  // create a new record.
-  var rec2 = MyApp.store.createRecord(MyApp.Foo, { guid: 5, firstName: "rec2" });
-  var storeId2 = rec2.get('id');
-  
-  // add record to beginning of record array
-  recs.unshiftObject(rec2);
-  
-  // verify record array
-  equals(recs.get('length'), 5, 'should now have length of 2');
-  equals(recs.objectAt(0), rec2, 'recs.objectAt(0) should return new record');
-  equals(recs.objectAt(1), rec, 'recs.objectAt(1) should return old record');
-  
-  // verify storeKeys
-  equals(storeIds.objectAt(0), storeId2, 'storeKeys[0] should return new storeKey');
-  equals(storeIds.objectAt(1), storeId, 'storeKeys[1] should return old storeKey');
-});
-
-// ..........................................................
-// Property Observing
-// 
-
-test("changing the underlying storeIds should notify observers of records", function() {
-
-  // setup observer
-  var obj = SC.Object.create({
-    cnt: 0,
-    observer: function() { this.cnt++; }
-  });
-  recs.addObserver('[]', obj, obj.observer); 
-  
-  // now modify storeKeys
-  storeIds.pushObject(5);
-  equals(obj.cnt, 1, 'observer should have fired after changing storeKeys');
-});
-
-test("swapping storeIds array should change ManyArray and observers", function() {
-
-  // setup alternate storeKeys
-  var rec2 = MyApp.store.createRecord(MyApp.Foo, { guid: 5, firstName: "rec2" });
-  var storeId2 = rec2.get('id');
-  var storeIds2 = [storeId2];
-
-  // setup observer
-  var obj = SC.Object.create({
-    cnt: 0,
-    observer: function() { this.cnt++; }
-  });
-  recs.addObserver('[]', obj, obj.observer); 
-  
-  // read record once to make it materialized
-  equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');  
-  
-  // now swap storeKeys
-  obj.cnt = 0 ;
-  recs.set('storeIds', storeIds2);
-  
-  // verify observer fired and record changed
-  equals(obj.cnt, 1, 'observer should have fired after swap');
-  equals(recs.objectAt(0), rec2, 'recs.objectAt(0) should return new rec');
-  
-  // modify storeKey2, make sure observer fires and content changes
-  obj.cnt = 0;
-  storeIds2.unshiftObject(storeId);
-  equals(obj.cnt, 1, 'observer should have fired after edit');
-  equals(recs.get('length'), 2, 'should reflect new length');
-  equals(recs.objectAt(0), rec, 'recs.objectAt(0) should return pushed rec');  
-
-});
