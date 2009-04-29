@@ -142,7 +142,8 @@ SC.Query = SC.Object.extend({
     reservedTypes       : {
       'WILD_CARD'       : ['%@'],
       'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY','MATCHES'],
-      'BOOL_OP'         : ['NOT','AND','OR']
+      'BOOL_OP'         : ['NOT','AND','OR'],
+      'BOOL_VAL'        : ['false','true']
                         }
   },
 
@@ -159,6 +160,10 @@ SC.Query = SC.Object.extend({
     'NUMBER'          : {
       evalType        : 'PRIMITIVE',
       evaluate        : function (r,w) { return parseFloat(this.tokenValue) }
+                      },
+    'BOOL_VAL'        : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { if (this.tokenValue == 'true') return true; else return false }
                       },
     'WILD_CARD'       : {
       evalType        : 'PRIMITIVE',
