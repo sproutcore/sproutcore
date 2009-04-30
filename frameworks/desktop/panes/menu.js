@@ -316,7 +316,8 @@ SC.MenuPane = SC.PickerPane.extend(
       }
       this.renderChildren(context,items) ;
     }
-    if (SC.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey);
+    context.addStyle('height',this.menuHeight) ;
+    if (SC.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey) ;
     return ret;
   },
 
