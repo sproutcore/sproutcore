@@ -26,6 +26,13 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[0].tokenType, 'PROPERTY', 'type should be PROPERTY');
   equals(q.tokenList[0].tokenValue, 'what_to_do_now', 'value should be what_to_do_now');
   
+  // PROPERTY - one character
+  q.queryString = "a";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'PROPERTY', 'type should be PROPERTY');
+  equals(q.tokenList[0].tokenValue, 'a', 'value should be "a"');
+  
   // BOOLEAN VALUE - false
   q.queryString = "false";
   q.parseQuery();
@@ -67,6 +74,13 @@ test("should recognize all primitives", function() {
   ok(q.tokenList.length == 1, 'list should have one token');
   equals(q.tokenList[0].tokenType, 'STRING', 'type should be STRING');
   equals(q.tokenList[0].tokenValue, 'Feed me weird things', 'value should be Feed me weird things');
+
+  // STRING - empty
+  q.queryString = "''";
+  q.parseQuery();
+  ok(q.tokenList.length == 1, 'list should have one token');
+  equals(q.tokenList[0].tokenType, 'STRING', 'type should be STRING');
+  equals(q.tokenList[0].tokenValue, '', 'value should be ""');
   
   // PARAMETER
   q.queryString = "{my_best_friends}";

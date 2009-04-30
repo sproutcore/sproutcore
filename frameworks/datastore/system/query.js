@@ -150,7 +150,7 @@ SC.Query = SC.Object.extend({
   queryLogic: {
     'PROPERTY'        : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return r[this.tokenValue] },
+      evaluate        : function (r,w) { return r.get(this.tokenValue) },
       evaluateNR      : function (r,w) { return r.get(this.tokenValue) }
                       },
     'STRING'          : {

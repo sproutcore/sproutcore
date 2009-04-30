@@ -93,9 +93,9 @@ test("should compare all primitives", function() {
 test("boolean operators should work", function() {
   
   // here we see a limitation of the tree builder:
-  // true is considered to be a primitive
+  // boolean values like true are considered to be a primitive
   // and boolean operators only accept comparators as arguments,
-  // "true AND true" will not parse into a tree!
+  // so "true AND true" will not parse into a tree!
   // hence i used a small hack here
   
   q.queryString = "1=1 AND 1=1";
