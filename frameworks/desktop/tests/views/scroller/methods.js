@@ -37,11 +37,14 @@ module("SC.ScrollerView",{
 
 test("listing the displayProperties",function(){
   var obj = view.get('displayProperties');
-  equals(4,obj.length,'the number of dispay properties');
-  equals('value',obj[0],'the offset value property');
-  equals('minimum',obj[1],'the minimum offset value property');
-  equals('maximum',obj[2],'the maximum offset value property');	
-  equals('isEnabled',obj[3],'the isEnabled offset value property');	  
+  equals(6,obj.length,'the number of display properties');
+  equals('isFirstResponder',obj[0],'the offset value property');
+  equals('isVisible',obj[1],'the isVisible value property');
+  equals('value',obj[2],'the value property');	
+  equals('minimum',obj[3],'the minimum value property');	  
+  equals('maximum',obj[4],'the maximum value property');	  
+  equals('isEnabled',obj[5],'the isEnabled offset value property');	  
+
 });
 
 test("testing properties of a scrollerview", function(){
@@ -61,3 +64,4 @@ test("ownerScrollValueKey() function of the scroller view",function(){
   equals('horizontalScrollOffset',view1.ownerScrollValueKey(),'should have a vertical scroll offset');
 });
 
+// JP: TODO : This unit test have to be completed. This test are not really testing much.
