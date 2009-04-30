@@ -47,6 +47,13 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[0].tokenType, 'BOOL_VAL', 'type should be BOOL_VAL');
   equals(q.tokenList[0].tokenValue, 'true', 'value should be true');
   
+  // NULL
+  q.queryString = "null undefined";
+  q.parseQuery();
+  ok(q.tokenList.length == 2, 'list should have 2 tokens');
+  equals(q.tokenList[0].tokenType, 'NULL', 'type should be NULL');
+  equals(q.tokenList[1].tokenType, 'NULL', 'type should be NULL');
+  
   // NUMBER - integer
   q.queryString = "1234";
   q.parseQuery();
@@ -89,12 +96,12 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[0].tokenType, 'PARAMETER', 'type should be PARAMETER');
   equals(q.tokenList[0].tokenValue, 'my_best_friends', 'value should be my_best_friends');
   
-  // PARAMETER
-  q.queryString = "{my_best_friends}";
+  // WILD CARD
+  q.queryString = "%@";
   q.parseQuery();
   ok(q.tokenList.length == 1, 'list should have one token');
-  equals(q.tokenList[0].tokenType, 'PARAMETER', 'type should be PARAMETER');
-  equals(q.tokenList[0].tokenValue, 'my_best_friends', 'value should be my_best_friends');
+  equals(q.tokenList[0].tokenType, 'WILD_CARD', 'type should be WILD_CARD');
+  equals(q.tokenList[0].tokenValue, 0, 'value should be 0');
   
   // PARENTHESES
   q.queryString = "()";
@@ -102,13 +109,6 @@ test("should recognize all primitives", function() {
   ok(q.tokenList.length == 2, 'list should have two tokens');
   equals(q.tokenList[0].tokenType, 'OPEN_PAREN', 'type should be OPEN_PAREN');
   equals(q.tokenList[1].tokenType, 'CLOSE_PAREN', 'type should be CLOSE_PAREN');
-  
-  // WILD CARD
-  q.queryString = "%@";
-  q.parseQuery();
-  ok(q.tokenList.length == 1, 'list should have one token');
-  equals(q.tokenList[0].tokenType, 'WILD_CARD', 'type should be WILD_CARD');
-  equals(q.tokenList[0].tokenValue, 0, 'value should be 0');
   
   // COMPARATORS
   q.queryString = "= != < <= > >= BEGINS_WITH ENDS_WITH ANY MATCHES";

@@ -9,7 +9,7 @@ require('core') ;
 /**
   @class
 
-  Description
+  
 
   @extends SC.Object
   @static
@@ -143,7 +143,8 @@ SC.Query = SC.Object.extend({
       'WILD_CARD'       : ['%@'],
       'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY','MATCHES'],
       'BOOL_OP'         : ['NOT','AND','OR'],
-      'BOOL_VAL'        : ['false','true']
+      'BOOL_VAL'        : ['false','true'],
+      'NULL'            : ['null','undefined']
                         }
   },
 
@@ -164,6 +165,10 @@ SC.Query = SC.Object.extend({
     'BOOL_VAL'        : {
       evalType        : 'PRIMITIVE',
       evaluate        : function (r,w) { if (this.tokenValue == 'true') return true; else return false }
+                      },
+    'NULL'            : {
+      evalType        : 'PRIMITIVE',
+      evaluate        : function (r,w) { return null }
                       },
     'WILD_CARD'       : {
       evalType        : 'PRIMITIVE',

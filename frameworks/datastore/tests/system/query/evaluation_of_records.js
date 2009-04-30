@@ -21,7 +21,7 @@ module("SC.Query evaluation of records", {
     MyApp.store.loadRecords(MyApp.Foo, [
       { guid: 1, firstName: "John", lastName: "Doe" },
       { guid: 2, firstName: "Jane", lastName: "Doe" },
-      { guid: 3, firstName: "Emily", lastName: "Parker" },
+      { guid: 3, firstName: "Emily", lastName: "Parker", bornIn: 1975 },
       { guid: 4, firstName: "Johnny", lastName: "Cash" },
       { guid: 5, firstName: "Bert", lastName: "Berthold" }
     ]);
@@ -46,13 +46,28 @@ test("should get record properties correctly", function() {
   
   q.queryString = "firstName = 'John'";
   q.parseQuery();
-  ok(q.tokenTree.evaluate(rec1) == true, 'John should be in');
-  ok(q.tokenTree.evaluate(rec2) == false, 'Jane should be out');
+  ok(q.tokenTree.evaluate(rec1) == true, 'John should match: firstName = "John"');
+  ok(q.tokenTree.evaluate(rec2) == false, 'Jane should not match: firstName = "John"');
   
   q.queryString = "lastName BEGINS_WITH firstName";
   q.parseQuery();
-  ok(q.tokenTree.evaluate(rec5) == true, 'Bert should be in');
-  ok(q.tokenTree.evaluate(rec2) == false, 'Jane should be out');
+  ok(q.tokenTree.evaluate(rec5) == true, 'Bert Berthold should match: lastName BEGINS_WITH firstName');
+  ok(q.tokenTree.evaluate(rec2) == false, 'Jane Doe should not match: lastName BEGINS_WITH firstName');
 
-});  
+}); 
+
+
+test("should handle undefined record properties correctly", function() {
+  
+  q.queryString = "bornIn = 1975";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate(rec3) == true, 'record with bornIn set should match');
+  ok(q.tokenTree.evaluate(rec2) == false, 'record without bornIn set should not match');
+  
+  q.queryString = "bornIn = null";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate(rec3) == false, 'record with bornIn set different to null should not match');
+  ok(q.tokenTree.evaluate(rec2) == true, 'record without bornIn set should match');
+  
+}); 
   
