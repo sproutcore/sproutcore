@@ -15,10 +15,53 @@ module("SC.Query evaluation", {
 
 
 // ..........................................................
+// PRIMITIVES
+// 
+
+test("should evaluate all primitives", function() {
+  
+  // null
+  q.queryString = "null";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == null, 'null should be null');
+  
+  // undefined
+  q.queryString = "undefined";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == null, 'undefined should be null');
+  
+  // true
+  q.queryString = "true";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == true, 'true should be true');
+  
+  // false
+  q.queryString = "false";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == false, 'false should be false');
+  
+  // integer
+  q.queryString = "1";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == 1, '1 should be 1');
+  
+  // float
+  q.queryString = "1.5";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == 1.5, '1.5 should be 1.5');
+  
+  // string
+  q.queryString = "'Hyperion'";
+  q.parseQuery();
+  ok(q.tokenTree.evaluate() == 'Hyperion', "'Hyperion' should be 'Hyperion'");
+  
+});
+
+// ..........................................................
 // COMPARATORS
 // 
 
-test("should compare all primitives", function() {
+test("should evaluate all comparators", function() {
   
   q.queryString = "true = true";
   q.parseQuery();
