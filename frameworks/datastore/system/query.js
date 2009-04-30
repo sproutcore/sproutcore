@@ -9,6 +9,64 @@ require('core') ;
 /**
   @class
 
+  A Query permits you to write queries on your data store in a SQL-like language.
+  Here is a simple example:
+    q = SC.Query.create({queryString:"firstName = 'Jonny' AND lastName = 'Cash'"})
+  You can check if a certain record matches the query by calling:
+    q.contains(record)
+  Normally you will not use SC.Query directly, instead you will write:
+    r = MyApp.store.findAll("firstName = 'Jonny' AND lastName = 'Cash'")
+  r will be a record array containing all matching records. (This does not work yet!)
+  
+  
+  Features of the query language:
+  
+  Primitives:
+  - record properties (just include a property you want to check)
+  - null, undefined
+  - true, false
+  - numbers (integers and floats)
+  - strings (double or single quoted)
+  
+  Parameters:
+  - %@ (wild card)
+  - {parameterName} (named parameter)
+  Wild cards are used to identify parameters by the order in
+  which they appear in the query string. Named parameters can be
+  used when tracking the order becomes difficult.
+  Both types of parameters can be used by calling:
+    query.contains(record,parameters)
+  where parameters should have the one of the following formats:
+    for wild cards: [firstParam, secondParam, thirdParam]
+    for named params: {firstParamName: firstParamValue, secondParamName: secondParamValue}
+  You cannot use both types of parameters in a single query!
+  
+  Comparators:
+  - =
+  - !=
+  - <
+  - <=
+  - >
+  - >=
+  - BEGINS_WITH (checks if a string starts with another one)
+  - ENDS_WITH (checks if a string ends with another one)
+  - MATCHES (checks if a string is matched by a regexp,
+    you will have to use a parameter to insert the regexp)
+  - ANY (checks if the thing on its left is contained in the array
+    on its right, you will have to use a parameter to insert the array)
+    
+  Boolean Operators:
+  - AND
+  - OR
+  - NOT
+  
+  Parenthesis for grouping:
+  - ( and )
+  
+  
+  Some example queries:
+  
+  TODO add examples
   
 
   @extends SC.Object
@@ -41,8 +99,7 @@ SC.Query = SC.Object.extend({
   recordType:  null,
  
   /** 
-    Override to evaluate whether the passed record instance belongs in the Query result
-    set or not.  Return YES if it belongs, NO otherwise.
+    Returns YES if record is matched by the query, NO otherwise.
  
     @param {SC.Record} record the record to check
     @returns {Boolean} YES if record belongs, NO otherwise
@@ -60,6 +117,7 @@ SC.Query = SC.Object.extend({
   },
  
   /**
+    Not implemented yet!
     Override to compare two records according to any predefined order.  This will be used
     to sort the result set.  Assume the records you are passed have already been checked
     for membership via contains().
