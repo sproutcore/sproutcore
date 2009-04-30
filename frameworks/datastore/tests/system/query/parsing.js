@@ -35,11 +35,12 @@ module("SC.Query parsing", {
   }
 });
 
+
 // ..........................................................
 // TOKENIZER
 // 
 
-test("should recocnize all primitives", function() {
+test("should recognize all primitives", function() {
   // PROPERTY
   q.queryString = "what_to_do_now";
   q.parseQuery();
@@ -153,18 +154,22 @@ test("should recocnize all primitives", function() {
   equals(q.tokenList[2].tokenType, 'BOOL_OP', 'type should be BOOL_OP');
   equals(q.tokenList[2].tokenValue, 'NOT', 'value should be NOT');
   
+}); 
   
   
   // ..........................................................
   // TREE-BUILDING 
   // 
-  
+
+
+test("token tree should build", function() {  
   // Just some examples
   
   q.queryString = "(firstName MATCHES {firstName} OR lastName BEGINS_WITH 'Lone') AND is_a_beauty = true";
   q.parseQuery();
   ok(q.tokenList.length == 13, 'list should have 13 tokens');
   ok(!q.tokenTree.error, 'there should be no errors');
+  ok(q.tokenTree.tokenValue == 'AND', 'tree root shoud be AND');
   
 });
 
