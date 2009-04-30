@@ -133,7 +133,7 @@ test("users interaction with mutiple alert panes with 1-3 buttons", function() {
     },
    
     alertPaneDidDismiss: function(alert, status) {
-      console.log("%@.alertDidDismiss - %@".fmt(alert, status));
+      //console.log("%@.alertDidDismiss - %@".fmt(alert, status));
       switch(status) {
         case SC.BUTTON1_STATUS:
           if(alert.icon && alert.icon.indexOf('alert')!=-1) this.invokeLater(this.threeButtonAlertPane, 1000);

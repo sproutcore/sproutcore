@@ -5,7 +5,7 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp Sample */
 
-var store, Data, File, FileDisk;
+var store, Data, File, FileDisk, Application;
 
 module("SC.Store Core Methods", {
   setup: function() {

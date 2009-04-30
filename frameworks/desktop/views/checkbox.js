@@ -42,6 +42,12 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     // since we don't want to regenerate the contents each time 
     // actually search for and update the displayTitle.
     } else {
+      if(this.get('isEnabled')){
+        this.$input()[0].disabled=NO;
+      }
+      else{
+        this.$input()[0].disabled=YES;
+      }
       dt = this.get('displayTitle');
       if (dt !== this._field_currentDisplayTitle) {
         this._field_currentDisplayTitle = dt;

@@ -24,7 +24,7 @@ test("adding dialog to screen", function() {
     },
     
     alertPaneDidDismiss: function(alert, status) {
-      console.log("%@.alertDidDismiss - %@".fmt(alert, status));
+      //console.log("%@.alertDidDismiss - %@".fmt(alert, status));
       switch(status) {
         case SC.OK_STATUS:
           this.invokeLater(this.couldNotSend, 1000);

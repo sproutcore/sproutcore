@@ -120,7 +120,6 @@ test("pressing mouseDown and then mouseUp anywhere in the checkbox should toggle
 });
 
 test("isEnabled=NO should add disabled attr to input", function() {
-  
   SC.RunLoop.begin();
   view.set('isEnabled', NO);
   SC.RunLoop.end();

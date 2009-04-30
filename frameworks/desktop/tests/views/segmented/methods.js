@@ -51,7 +51,8 @@ test("Check that properties are mapped correctly", function() {
     equals(items[0][2], true, 'Computed properties should match');
     equals(items[0][3], iconURL, 'Computed properties should match');
     equals(items[0][4], null, 'Computed properties should match');
-    equals(items[0][5], 0, 'Computed properties should match');
+    equals(items[0][5], null, 'Computed properties should match');
+    equals(items[0][6], 0, 'Computed properties should match');
     var elem = view.get('layer').childNodes[0];
 
     SC.Event.trigger(elem, 'mousedown');

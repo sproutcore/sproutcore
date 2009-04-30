@@ -90,7 +90,7 @@ CoreTest.Runner = {
     this.flush();
     
     var result = this.report.find('.testresult .status');
-    var str = CoreTest.fmt('Completed %@ tests in %@ msec. <em><span class="total">%@</span> total assertions: ', r.tests, r.runtime, r.total);
+    var str = CoreTest.fmt('<span>Completed %@ tests in %@ msec. </span><span class="total">%@</span> total assertions: ', r.tests, r.runtime, r.total);
     
     if (r.passed > 0) {
       str += CoreTest.fmt('&nbsp;<span class="passed">%@ passed</span>', r.passed);
@@ -135,9 +135,13 @@ CoreTest.Runner = {
     
     // place results into a single string to append all at once.
     var logstr = this.logstr ;
+    var errors =this.errors;
     if (!logstr) logstr = this.logstr = [];
+    if (!errors) errors = this.errors = [];
     logstr.push(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));
-    
+    if(s.failed>0 || s.errors>0){
+      errors.push(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));  
+    }
     //debugger ;
     //this.logq.append(q);
     
@@ -146,6 +150,9 @@ CoreTest.Runner = {
       cur = assertions[idx];
       clean = cur.result === CoreTest.OK ? 'clean' : 'dirty';
       logstr.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
+      if(!cur.result==='dirty'){
+        errors.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
+      }
       //this.logq.append(q);
     }
     
@@ -155,7 +162,7 @@ CoreTest.Runner = {
   
   // called when the plan takes a break.  Good time to flush HTML output.
   planDidPause: function(plan) {
-    this.flush();  
+    if(navigator.userAgent.indexOf('MSIE')==-1) this.flush();  
   },
   
   // flush any pending HTML changes...
