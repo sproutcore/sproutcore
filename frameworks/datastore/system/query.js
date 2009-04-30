@@ -77,23 +77,6 @@ require('core') ;
 SC.Query = SC.Object.extend({
 
  
-  /**
-    Create a query like this:
-    q = SC.Query.create({queryString: "foo = 'bar' AND baz = 2"})
-    test it with
-    q.contains({foo: 'bar', baz: 2})
-    
-    You can use wild cards like this: "foo = %@ AND baz = %@",
-    test it with
-    q.contains({foo: 'bar', baz: 2},['bar',2])
-
-    Write "name MATCHES %@" and use a regexp as wild card value like this
-    q.contains({name: 'Jane'},[/^Ja/])
-    
-    Pass a string specifying the order of the results (e.g. "foo, baz DESC"),
-    if no order is given, the results will be ordered by their guid.
-    (order not working yet)
-  */
   queryString: null,
   orderBy:     null,
   recordType:  null,
