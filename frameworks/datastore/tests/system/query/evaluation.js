@@ -6,31 +6,9 @@
 /*globals module ok equals same test MyApp */
 
 // test parsing of query string
-var store, storeKey, storeId, rec, MyApp, q;
+var q;
 module("SC.Query evaluation", {
-  setup: function() {
-    // setup dummy app and store
-    MyApp = SC.Object.create({
-      store: SC.Store.create()
-    });
-    
-    // setup a dummy model
-    MyApp.Foo = SC.Record.extend({});
-    
-    // load some data
-    MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, firstName: "John", lastName: "Doe" },
-      { guid: 2, firstName: "Jane", lastName: "Doe" },
-      { guid: 3, firstName: "Emily", lastName: "Parker" },
-      { guid: 4, firstName: "Johnny", lastName: "Cash" }
-    ]);
-    
-    storeKey = MyApp.store.storeKeyFor(MyApp.Foo, 1);
-    
-    // get record
-    rec = MyApp.store.materializeRecord(storeKey);
-    storeId = rec.get('id');
-    
+  setup: function() {  
     q = SC.Query.create();
   }
 });
