@@ -33,7 +33,8 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
   
   You can use the methods defined in this module to access and modify array 
   contents in a KVO-friendly way.  You can also be notified whenever the 
-  membership if an array changes by observing the "[]" property.
+  membership if an array changes by changing the syntax of the property to
+  .observes('*myProperty.[]') .
 
   To support SC.Array in your own class, you must override two
   primitives to use it: replace() and objectAt().  
