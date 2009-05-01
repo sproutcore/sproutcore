@@ -270,7 +270,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
 
       // if we just became visible, update layer + layout if needed...
-      if (cur && this.parentViewDidResize) this.parentViewDidResize();
+      if (cur) {
+        if (this.parentViewDidResize) this.parentViewDidResize();
+        if (this.get('layerNeedsUpdate')) {
+          this.invokeOnce(this.updateLayerIfNeeded);
+        }
+        
+        if (this.get('childViewsNeedLayout')) {
+          this.invokeOnce(this.layoutChildViewsIfNeeded);
+        }
+      }
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
