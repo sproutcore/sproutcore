@@ -37,13 +37,14 @@ module("SC.ScrollerView",{
 
 test("listing the displayProperties",function(){
   var obj = view.get('displayProperties');
-  equals(6,obj.length,'the number of display properties');
+  equals(7,obj.length,'the number of display properties');
   equals('isFirstResponder',obj[0],'the offset value property');
   equals('isVisible',obj[1],'the isVisible value property');
-  equals('value',obj[2],'the value property');	
-  equals('minimum',obj[3],'the minimum value property');	  
-  equals('maximum',obj[4],'the maximum value property');	  
-  equals('isEnabled',obj[5],'the isEnabled offset value property');	  
+  equals('isEnabled',obj[2],'the value property');	
+  equals('value',obj[3],'the value property');	
+  equals('minimum',obj[4],'the minimum value property');	  
+  equals('maximum',obj[5],'the maximum value property');	  
+  equals('isEnabled',obj[6],'the isEnabled offset value property');	  
 
 });
 

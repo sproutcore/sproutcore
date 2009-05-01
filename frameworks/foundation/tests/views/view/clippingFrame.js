@@ -24,6 +24,7 @@ module("SC.View#clippingFrame", {
   },
   
   teardown: function() { 
+    pane.remove();
     pane = a = aa = null ;
     SC.RunLoop.end();
   }
