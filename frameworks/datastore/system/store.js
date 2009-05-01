@@ -430,8 +430,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Boolean} force
     @returns {SC.Store} receiver
   */
-  commitChangesFromNestedStore: function(nestedStore, changes, force)
-  {
+  commitChangesFromNestedStore: function(nestedStore, changes, force) {
     // first, check for optimistic locking problems
     if (!force) this._verifyLockRevisions(changes, nestedStore.locks);
     
@@ -549,7 +548,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     persistent stores you hook up for your application.  Most stores, however,
     will accept an SC.Record subclass as the query key.  This will return 
     a RecordArray matching all instances of that class as is relevant to your
-    application.  
+    application.
+    
+    You can also pass a query string as the queryKey, which will be interpreted 
+    by SC.Query, for instance: "firstName = 'John'". You can also pass
+    an SC.Query object as your queryKey.
     
     Once you retrieve a RecordArray, you can filter the results even further
     by using the filter() method, which may issue even more specific requests.
@@ -557,14 +560,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Object} queryKey key describing the type of records to fetch
     @param {Hash} params optional additional parameters to pass along
     @param {SC.Store} _store this is a private param.  Do not pass
+    @param {SC.RecordArray} recordArray optional if you want to find just 
+      within a given record array
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  findAll: function(queryKey, params, _store) { 
+  findAll: function(queryKey, params, _store, recordArray) { 
     if (!_store) _store = this;
-
+    
     var source = this.get('dataSource'), ret, storeKeys, cacheKey ;
-    if (source) {
-      
+    
+    // if queryKey is a string but not defined, it is treated as a query string
+    if((typeof queryKey==='string') && !SC.objectForPropertyPath(queryKey)) {
+      queryKey = SC.Query.create({queryString: queryKey});
+    }
+    
+    if(recordArray) {
+      // giving a recordArray will circumvent the data source for now
+      // TODO: move to common method as we can reuse the same above from data source
+      storeKeys = this.queryRecords(recordArray, queryKey);
+      ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
+    }
+    else if (source) {
       // ask the dataSource to provide a storeKey array
       storeKeys = source.fetchRecords.call(source, this, queryKey, params);
       if (storeKeys) {
@@ -574,12 +590,55 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
         ret = this[cacheKey];
         if (!ret) {
+          // before returning, check if queryKey is SC.Query and run query
+          if(queryKey && queryKey.instanceOf && queryKey.instanceOf(SC.Query)) {
+            storeKeys = this.queryStoreKeys(storeKeys, queryKey);
+          }
+          
           ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
           this[cacheKey] = ret ; // save for future reuse.
         }
       }
     }
     return ret ;
+  },
+  
+  /**
+    Used for finding which store keys matching a give SC.Query. 
+    TODO: Should probably be moved somewhere else.
+    
+    @param {Array} storeKeys to search within
+    @param {SC.Query} query to apply
+    @returns {Array} array instance of store keys matching the SC.Query
+  */
+  
+  queryStoreKeys: function(storeKeys, query) {
+    var ret = [];
+    for(var idx=0,len=storeKeys.length;idx<len;idx++) {
+      var record = this.materializeRecord(storeKeys[idx]);
+      if(query.contains(record)) ret.push(storeKeys[idx]);
+    }
+    return ret;
+  },
+  
+  /**
+    Same as queryStoreKeys just that you can pass records instead.
+    
+    @param {SC.RecordArray} records to search within
+    @param {SC.Query} query to apply
+    @returns {Array} array instance of store keys matching the SC.Query
+  */
+  
+  queryRecords: function(records, query) {
+    var ret = [];
+    for(var idx=0,len=records.get('length');idx<len;idx++) {
+      var record = records.objectAt(idx);
+      if(query.contains(record)) {
+        var storeKey = record.get('storeKey');
+        ret.push(storeKey);
+      }
+    }
+    return ret;
   },
 
   /**
