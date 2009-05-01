@@ -208,7 +208,7 @@ SC.Query = SC.Object.extend({
                         },
     reservedTypes       : {
       'WILD_CARD'       : ['%@'],
-      'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY','MATCHES'],
+      'COMPARATOR'      : ['=','!=','<','<=','>','>=','BEGINS_WITH','ENDS_WITH','ANY','MATCHES, TYPE_IS'],
       'BOOL_OP'         : ['NOT','AND','OR'],
       'BOOL_VAL'        : ['false','true'],
       'NULL'            : ['null','undefined']
@@ -329,6 +329,13 @@ SC.Query = SC.Object.extend({
                           return found;
                         }
                       },
+      'TYPE_IS'       : {
+        rightType     : 'PRIMITIVE',
+        evalType      : 'BOOLEAN',
+        evaluate      : function (r,w) {
+                          return (SC.Store.recordTypeFor(r.storeKey).toString() == this.rightSide.tokenValue);
+        }
+      }
                       },                
     'BOOL_OP'         : {
       dependsOnValue  : true,

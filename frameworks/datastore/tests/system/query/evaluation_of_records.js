@@ -71,3 +71,11 @@ test("should handle undefined record properties correctly", function() {
   
 }); 
   
+  
+test("should handle record types", function() {
+  
+  q.queryString = "TYPE_IS 'MyApp.Foo'";
+  q.parseQuery();
+  ok(q.contains(rec1) == true, 'record should match');
+  
+});

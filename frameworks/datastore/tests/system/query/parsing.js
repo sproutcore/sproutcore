@@ -111,9 +111,9 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[1].tokenType, 'CLOSE_PAREN', 'type should be CLOSE_PAREN');
   
   // COMPARATORS
-  q.queryString = "= != < <= > >= BEGINS_WITH ENDS_WITH ANY MATCHES";
+  q.queryString = "= != < <= > >= BEGINS_WITH ENDS_WITH ANY MATCHES TYPE_IS";
   q.parseQuery();
-  ok(q.tokenList.length == 10, 'list should have 10 tokens');
+  ok(q.tokenList.length == 11, 'list should have 10 tokens');
   equals(q.tokenList[0].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
   equals(q.tokenList[0].tokenValue, '=', 'value should be =');
   equals(q.tokenList[1].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
@@ -134,6 +134,8 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[8].tokenValue, 'ANY', 'value should be ANY');
   equals(q.tokenList[9].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
   equals(q.tokenList[9].tokenValue, 'MATCHES', 'value should be MATCHES');
+  equals(q.tokenList[9].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[9].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
   
   // BOOLEAN OPERATORS
   q.queryString = "AND OR NOT";
