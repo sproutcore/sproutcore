@@ -682,9 +682,48 @@ SC.Query = SC.Object.extend({
 });
 
 
-
-
-
+// Class Methods
+SC.Query.mixin( /** @scope SC.Record */ {
+  /**
+    Will find which store keys match a given SC.Query and return an
+    array of store keys. 
+    
+    @param {Array} storeKeys to search within
+    @param {SC.Query} query to apply
+    @param {SC.Store} store to materialize record from
+    @returns {Array} array instance of store keys matching the SC.Query
+  */
+  
+  containsStoreKeys: function(storeKeys, query, store) {
+    var ret = [];
+    for(var idx=0,len=storeKeys.length;idx<len;idx++) {
+      var record = store.materializeRecord(storeKeys[idx]);
+      if(query.contains(record)) ret.push(storeKeys[idx]);
+    }
+    return ret;
+  },
+  
+  /**
+    Will find which records match a give SC.Query and return an array of 
+    store keys.
+    
+    @param {SC.RecordArray} records to search within
+    @param {SC.Query} query to apply
+    @returns {Array} array instance of store keys matching the SC.Query
+  */
+  
+  containsRecords: function(records, query) {
+    var ret = [];
+    for(var idx=0,len=records.get('length');idx<len;idx++) {
+      var record = records.objectAt(idx);
+      if(query.contains(record)) {
+        var storeKey = record.get('storeKey');
+        ret.push(storeKey);
+      }
+    }
+    return ret;
+  }
+});
 
 // Old code by Peter:
 //

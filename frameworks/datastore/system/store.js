@@ -577,7 +577,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(recordArray) {
       // giving a recordArray will circumvent the data source for now
       // TODO: move to common method as we can reuse the same above from data source
-      storeKeys = this.queryRecords(recordArray, queryKey);
+      storeKeys = SC.Query.containsRecords(recordArray, queryKey);
       ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
     }
     else if (source) {
@@ -592,7 +592,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (!ret) {
           // before returning, check if queryKey is SC.Query and run query
           if(queryKey && queryKey.instanceOf && queryKey.instanceOf(SC.Query)) {
-            storeKeys = this.queryStoreKeys(storeKeys, queryKey);
+            storeKeys = SC.Query.containsStoreKeys(storeKeys, queryKey, _store);
           }
           
           ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
@@ -601,44 +601,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     return ret ;
-  },
-  
-  /**
-    Used for finding which store keys matching a give SC.Query. 
-    TODO: Should probably be moved somewhere else.
-    
-    @param {Array} storeKeys to search within
-    @param {SC.Query} query to apply
-    @returns {Array} array instance of store keys matching the SC.Query
-  */
-  
-  queryStoreKeys: function(storeKeys, query) {
-    var ret = [];
-    for(var idx=0,len=storeKeys.length;idx<len;idx++) {
-      var record = this.materializeRecord(storeKeys[idx]);
-      if(query.contains(record)) ret.push(storeKeys[idx]);
-    }
-    return ret;
-  },
-  
-  /**
-    Same as queryStoreKeys just that you can pass records instead.
-    
-    @param {SC.RecordArray} records to search within
-    @param {SC.Query} query to apply
-    @returns {Array} array instance of store keys matching the SC.Query
-  */
-  
-  queryRecords: function(records, query) {
-    var ret = [];
-    for(var idx=0,len=records.get('length');idx<len;idx++) {
-      var record = records.objectAt(idx);
-      if(query.contains(record)) {
-        var storeKey = record.get('storeKey');
-        ret.push(storeKey);
-      }
-    }
-    return ret;
   },
 
   /**
