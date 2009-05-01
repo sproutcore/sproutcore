@@ -329,6 +329,32 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   NO_BUBBLE: ['blur', 'focus', 'change'],
   
   /**
+    Generates a simulated event object.  This is mostly useful for unit 
+    testing.  You can pass the return value of this property into the 
+    trigger() method to actually send the event.
+    
+    @param {Element} elem the element the event targets
+    @param {String} eventType event type.  mousedown, mouseup, etc
+    @param {Hash} attrs optional additonal attributes to apply to event.
+    @returns {Hash} simulated event object
+  */
+  simulateEvent: function(elem, eventType, attrs) {
+    var ret = {
+      type: eventType,
+      target: elem,
+      preventDefault: function(){ this.cancelled = YES; },
+      stopPropagation: function(){ this.bubble = NO; },
+      allowDefault: function() { this.hasCustomEventHandling = YES; },
+      timeStamp: Date.now(),
+      bubble: (this.NO_BUBBLE.indexOf(eventType)<0) ,
+      cancelled: NO,
+      normalized: YES
+    } ;
+    if (attrs) SC.mixin(ret, attrs);
+    return ret ;
+  },
+  
+  /**
     Trigger an event execution immediately.  You can use this method to 
     simulate arbitrary events on arbitary elements.
 
@@ -378,17 +404,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Get the event to pass, creating a fake one if necessary
     var event = args[0];
     if (!event || !event.preventDefault) {
-      event = {
-        type: eventType,
-        target: elem,
-        preventDefault: function(){ this.cancelled = YES; },
-        stopPropagation: function(){ this.bubble = NO; },
-        allowDefault: function() { this.hasCustomEventHandling = YES; },
-        timeStamp: Date.now(),
-        bubble: (this.NO_BUBBLE.indexOf(eventType)<0) ,
-        cancelled: NO,
-        normalized: YES
-      } ;
+      event = this.simulateEvent(elem, eventType) ;
       args.unshift(event) ;
     }
 
