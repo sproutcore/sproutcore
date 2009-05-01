@@ -220,10 +220,10 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
 
       SC.View.extend({
-        useStaticLayout: YES,
-        layout: { bottom: 13, height: 'auto', right: 18, width: 'auto' },
-        childViews: [
-          SC.ButtonView.extend({
+        layout: { bottom: 13, height: 30, right: 18, width: 200 },
+        childViews: ['cancelButton', 'okButton'],
+        classNames: ['textAlignRight'],
+        cancelButton : SC.ButtonView.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON2_STATUS,
             localize: YES,
@@ -235,29 +235,28 @@ SC.AlertPane = SC.PanelPane.extend({
             isVisible: NO
           }),
 
-          SC.ButtonView.extend({
+        okButton : SC.ButtonView.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON1_STATUS,
             localize: YES,
             titleMinWidth: 64,
-            layout: { right: 0, height: 'auto', width: 'auto', bottom: 0 },
+            layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
             title: "OK", 
             isDefault: YES,
             action: "dismiss"
-          })]
+          })
       }),
       
       SC.View.extend({
-        useStaticLayout: YES,
-        layout: { bottom: 13, height: 'auto', left: 18, width: 'auto' },
+        layout: { bottom: 13, height: 30, left: 18, width: 100 },
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON3_STATUS,
             localize: YES,
             titleMinWidth: 64,
-            layout: { right: 0, height: 'auto', width: 'auto', bottom: 0 },
+            layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
             title: "Extra", 
             action: "dismiss",
