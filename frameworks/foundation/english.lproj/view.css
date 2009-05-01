@@ -38,3 +38,8 @@
 .sc-view.hidden {
   display: none !important;
 }
+
+/* This className is useful when aligning buttons to the right */
+.sc-view.textAlignRight {
+  text-align:right;
+}
