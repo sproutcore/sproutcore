@@ -41,7 +41,7 @@ function setupFrameViews() {
 }
 
 function teardownFrameViews() {
-  //pane.remove() ;
+  pane.remove() ;
   pane = a = aa = aaa = b = bb = null ;
 }
 
