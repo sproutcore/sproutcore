@@ -36,7 +36,7 @@ require('core') ;
   used when tracking the order becomes difficult.
   Both types of parameters can be used by calling:
     query.contains(record,parameters)
-  where parameters should have the one of the following formats:
+  where parameters should have one of the following formats:
     for wild cards: [firstParam, secondParam, thirdParam]
     for named params: {firstParamName: firstParamValue, secondParamName: secondParamValue}
   You cannot use both types of parameters in a single query!
@@ -93,10 +93,7 @@ SC.Query = SC.Object.extend({
 
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
-    if ( this.isReady && this.tokenTree.evaluate(record, wildCardValues) )
-      return true;
-    else
-      return false;
+    return this.isReady && this.tokenTree.evaluate(record, wildCardValues);
   },
  
   /**
@@ -112,15 +109,17 @@ SC.Query = SC.Object.extend({
   compare: function(record1, record2) {
     var result = 0;
     // if called for the first time we have to build the order array
-    if ( this.order.length == 0 ) this.buildOrder();
+    if (!this.isReady) this.parseQuery();
     
     // for every key specified in orderBy
     for (var i=0; i < this.order.length; i++) {
+      // if rec1.
       result = this.compareByProperty(record1, record2, this.order[i]);
       if (result != 0) return result;
     };
     return result;
   },
+  
   
   
   // ..........................................................
@@ -138,6 +137,31 @@ SC.Query = SC.Object.extend({
   // for comparison:
   
   order:          [],
+  
+  
+  
+  // ..........................................................
+  // PARSING THE QUERY
+  //
+  
+  parseQuery: function() {
+
+    this.tokenList      = this.tokenizeString(this.queryString, this.queryGrammar);
+    this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
+    this.needsRecord    = false; // this.willNeedRecord(usedProperties)
+    this.tokenTree      = this.buildTokenTree(this.tokenList, this.queryLogic);
+    this.order          = this.buildOrder(this.orderBy);
+    
+    if ( !this.tokenTree || this.tokenTree.error ) {
+      return false;
+    }  
+    else {
+      this.isReady = true;
+      return true;
+    }
+  },
+  
+  
   
   // ..........................................................
   // QUERY LANGUAGE DEFINITION
@@ -328,25 +352,6 @@ SC.Query = SC.Object.extend({
     'CLOSE_PAREN'     : 'nothing'
   },
   
-  
-  // ..........................................................
-  // PARSING THE QUERY
-  //
-  
-  parseQuery: function() {
-
-    this.tokenList      = this.tokenizeString(this.queryString, this.queryGrammar);
-    this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
-    this.needsRecord    = false; // this.willNeedRecord(usedProperties)
-    this.tokenTree      = this.buildTokenTree(this.tokenList, this.queryLogic);
-    
-    if ( !this.tokenTree || this.tokenTree.error )
-      return false;
-    else {
-      this.isReady = true;
-      return true;
-    }
-  },
   
   
   // ..........................................................
@@ -638,7 +643,24 @@ SC.Query = SC.Object.extend({
   // ORDERING
   //
   
-  compareByProperty: function (record1, record2, property) {
+  buildOrder: function (orderString) {
+    if (!orderString) {
+      return [{property: 'guid', direction: 'ASC'}];
+    }
+    else {
+      var o = orderString.split(',');
+      for (var i=0; i < o.length; i++) {
+        o[i] = o[i].replace(/^\s+|\s+$/,'');
+        o[i] = o[i].replace(/\s+/,',');
+        o[i] = o[i].split(',');
+        o[i] = {property: o[i][0], direction: o[i][1]};
+      };
+      return o;
+    }
+    
+  },
+  
+  compareByProperty: function (record1, record2, order) {
     
   },
   
