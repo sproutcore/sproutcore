@@ -9,7 +9,7 @@ sc_require('models/record');
 sc_require('models/record_attribute');
 
 /** @class
-
+  
   ManyAttribute is a subclass of RecordAttribute and handles to-many 
   relationships.
   
@@ -24,19 +24,19 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   
   // ..........................................................
   // LOW-LEVEL METHODS
-  // 
+  //
   
   /**  @private - adapted for to many relationship */
   toType: function(record, key, value) {
     var transform = this.get('transform'),
         type      = this.get('typeClass'),
         store     = record.get('store');
-
+        
     if (transform && transform.to) {
       return SC.ManyArray.create({ store: store, storeIds: value, recordType: type });
     }
   },
-
+  
   /** @private - adapted for to many relationship */
   fromType: function(record, key, value) {
     var ret = [];
@@ -51,5 +51,4 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     return ret;
   }
   
-}) ;
-
+});
