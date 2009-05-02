@@ -64,11 +64,71 @@ test("should find records based on SC.Query", function() {
 });
 
 test("should find records within a passed record array", function() {
-  
+
   var recArray = MyApp.store.findAll(MyApp.Foo);
   var records = MyApp.store.findAll("firstName = 'Emily'", null, null, recArray);
-
+  
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'Emily', 'name should be Emily');
+
+});
+
+test("changing the original store key array from data source should propagate to record array", function() {
+  
+  var records = MyApp.store.findAll(MyApp.Foo);
+  
+  equals(records.get('length'), 5, 'record length should be 5');
+  
+  var newStoreKeys = MyApp.DataSource.storeKeys;
+  newStoreKeys.pop();
+  
+  // .replace() will call .enumerableContentDidChange()
+  MyApp.DataSource.storeKeys.replace(0,100,newStoreKeys);
+  
+  equals(records.get('length'), 4, 'record length should be 4');
+
+});
+
+test("loading more data into the store should propagate to record array", function() {
+  
+  var records = MyApp.store.findAll(MyApp.Foo);
+  
+  equals(records.get('length'), 5, 'record length before should be 5');
+  
+  newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
+    { guid: 10, firstName: "John", lastName: "Johnson" }
+  ]);
+  
+  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
+  
+  equals(records.get('length'), 6, 'record length after should be 6');
+
+});
+
+test("loading more data into the store should propagate to record array with query", function() {
+  
+  var records = MyApp.store.findAll("firstName = 'John'");
+  
+  equals(records.get('length'), 1, 'record length before should be 1');
+  
+  newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
+    { guid: 10, firstName: "John", lastName: "Johnson" }
+  ]);
+  
+  // .replace() will call .enumerableContentDidChange()
+  // and should fire original SC.Query again
+  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
+  
+  equals(records.get('length'), 2, 'record length after should be 2');
+  
+  /** subsequent updates to store keys should also work */
+  
+  newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
+    { guid: 11, firstName: "John", lastName: "Norman" }
+  ]);
+  
+  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
+  
+  equals(records.get('length'), 3, 'record length after should be 3');
 
 });
