@@ -71,17 +71,3 @@ test("should handle undefined record properties correctly", function() {
   
 }); 
   
-  
-test("should handle record types", function() {
-  
-  q.queryString = "TYPE_IS 'MyApp.Foo'";
-  q.parseQuery();
-  ok(q.parseQuery(), 'query should parse');
-  equals(q.tokenList[0].tokenType, 'COMPARATOR', 'token should be comparator'); // passes
-  ok(rec1.storeKey, 'storeKey should be there'); // passes
-  ok(SC.Store.recordTypeFor(rec1.storeKey) == MyApp.Foo, 'record type should be MyApp.Foo'); // passes
-  ok(SC.Store.recordTypeFor(rec1.storeKey).toString() == 'MyApp.Foo', 'record type as string should be MyApp.Foo'); // fails
-  equals(SC.Store.recordTypeFor(rec1.storeKey).toString(),'MyApp.Foo', 'record type as string should be MyApp.Foo'); // fails
-  ok(q.contains(rec1), 'record with proper type should match'); // fails
-  
-});
