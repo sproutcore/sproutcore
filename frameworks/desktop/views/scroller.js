@@ -19,15 +19,13 @@ SC.NATURAL_SCROLLER_THICKNESS = 16;
 */
 SC.ScrollerView = SC.View.extend({
   
-  // emptyElement: '<%@1><div class="sc-inner"></div></%@1>',
-  emptyElement: '<%@1></%@1>',
   classNames: ['sc-scroller-view'],
   
   // ..........................................................
   // PROPERTIES
   // 
-
-  /** 
+  
+  /**
    Used by the SC.ScrollView to properly layout the scrollers.
   */
   scrollerThickness: SC.NATURAL_SCROLLER_THICKNESS,
@@ -90,7 +88,7 @@ SC.ScrollerView = SC.View.extend({
     var key = null;
     switch(this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        key = 'verticalScrollOffset';
+        key = 'verticalScrollOffset' ;
         break;
       case SC.LAYOUT_HORIZONTAL:
         key = 'horizontalScrollOffset' ;
@@ -105,99 +103,105 @@ SC.ScrollerView = SC.View.extend({
   // INTERNAL SUPPORT
   // 
   
-  displayProperties: 'value minimum maximum isEnabled'.w(),
-
+  displayProperties: 'minimum maximum isEnabled'.w(),
+  
   /** @private
     Update the scroll location or inner height/width if needed.
   */
   render: function(context, firstTime) {
-    // console.log('%@.render called'.fmt(this));
-    sc_super();
+    // console.log('%@.render(context=%@, firstTime=%@)'.fmt(this, context, firstTime?'YES':'NO'));
+    var dir = this.get('layoutDirection') ;
+    var min = this.get('minimum'), max = this.get('maximum') ;
+    var enabled = this.get('isEnabled'), value = this.get('value') ;
     
-    var dir = this.get('layoutDirection');
-    var min = this.get('minimum'), max = this.get('maximum');
-    var enabled = this.get('isEnabled'), value = this.get('value');
-    
-    // console.log(dir) ;
-    
-    if (firstTime) {
-      if (dir===SC.LAYOUT_HORIZONTAL) context.addClass('sc-horizontal') ;
-      else context.addClass('sc-vertical') ;
-    }
-    
-    // calculate required size...
+     // calculate required size...
     var size = (enabled) ? max-min-2 : 0 ;
+    
     switch (dir) {
       case SC.LAYOUT_VERTICAL:
-        context.push('<div class="sc-inner" style="height: %@px"></div>'.fmt(size));
-        context.addStyle('scrollTop', value-min) ;
-        break;
-        
+        // if (firstTime) context.addClass('sc-vertical') ;
+        context.addClass('sc-vertical') ;
+        context.push('<div class="sc-inner" style="height: %@px;">\
+          </div>'.fmt(size)) ;
+        break ;
       case SC.LAYOUT_HORIZONTAL:
-        context.push('<div class="sc-inner" style="width: %@px"></div>'.fmt(size));
-        context.addStyle('scrollLeft', value-min) ;
-        break;
-      
+        // if (firstTime) context.addClass('sc-horizontal') ;
+        context.addClass('sc-horizontal') ;
+        context.push('<div class="sc-inner" style="width: %@px;">\
+          </div>'.fmt(size)) ;
+        break ;
       default:
-        break;
+        throw "You must set a layoutDirection for your scroller class." ;
     }
   },
   
   didCreateLayer: function() {
     // console.log('%@.didCreateLayer called'.fmt(this));
-    SC.Event.add(this.$(), 'scroll', this, this.scrollDidChange) ;
+    var callback = this._sc_scroller_armScrollTimer ;
+    SC.Event.add(this.$(), 'scroll', this, callback) ;
+    
+    // set scrollOffset first time
+    var amt = this.get('value') - this.get('minimum') ;
+    var layer = this.get('layer') ;
+    
+    switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+        layer.scrollTop = amt ;
+        break;
+        
+      case SC.LAYOUT_HORIZONTAL:
+        layer.scrollLeft = amt ;
+        break;
+    }
   },
   
-  didDestroyLayer: function() {
-    // console.log('%@.didDestroyLayer called'.fmt(this));
-    SC.Event.remove(this.$(), 'scroll', this, this.scrollDidChange) ;
+  willDestroyLayer: function() {
+    // console.log('%@.willDestroyLayer()'.fmt(this));
+    var callback = this._sc_scroller_armScrollTimer ;
+    SC.Event.remove(this.$(), 'scroll', this, callback) ;
   },
-
-  /** 
-    Whenever the scroll location changes, simply set a timer to fire to 
-    update the scroll location and then exit.  It's important to minimize the
-    actual work done during an onscroll change since it will block the UI
-    from updating.
-  */
-  scrollDidChange: function() {
-    // schedule scrollDidChange to execute later if not already scheduled...
-    if (!this._scrollTimer) {
+  
+  _sc_scroller_armScrollTimer: function() {
+    if (!this._sc_scrollTimer) {
       SC.RunLoop.begin();
-      this._scrollTimer = this.invokeLater(this._scroll_scrollDidChange, 1);
+      var method = this._sc_scroller_scrollDidChange ;
+      this._sc_scrollTimer = this.invokeLater(method, 1) ;
       SC.RunLoop.end();
     }
   },
   
-  _scroll_scrollDidChange: function() {
-    // console.log('%@._scroll_scrollDidChange called'.fmt(this));
-    this._scrollTimer = null; // clear so we can fire again
+  _sc_scroller_scrollDidChange: function() {
+    // console.log('%@._sc_scroller_scrollDidChange called'.fmt(this));
+    this._sc_scrollTimer = null ; // clear so we can fire again
     
     if (!this.get('isEnabled')) return ; // nothing to do.
-    var dir = this.get('layoutDirection');
-    var loc = 0;
-    switch(dir) {
+    
+    var layer = this.get('layer'), loc = 0 ;
+    switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        loc = this.$().get(0).scrollTop;
-        break;
+        this._sc_scrollValue = loc = layer.scrollTop ;
+        break ;
         
       case SC.LAYOUT_HORIZONTAL:
-        loc = this.$().get(0).scrollLeft;
-        break;
-      
-      default:
-        break;
+        this._sc_scrollValue = loc = layer.scrollLeft ;
+        break ;
     }
     
-    this.set('value', loc + this.get('minimum'));
+    this.set('value', loc + this.get('minimum')) ;
   },
-
-  /** @private Notify owner if it has a *ScrollOffset value */
-  _scroll_scrollDidChange2: function() {
-    // console.log('%@._scroll_scrollDidChange2 called'.fmt(this));
+  
+  /** @private */
+  _sc_scroller_valueDidChange: function() {
+    // console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
+    if (this.get('value') !== this._sc_scrollValue) {
+      this.displayDidChange() ; // re-render
+    }
+    
+    // notify owner if it has a different scroll value
     var key = this.get('ownerScrollValueKey');
     if (key && this.owner && (this.owner[key] !== undefined)) {
-      this.owner.setIfChanged(key, this.get('value'));
+      this.owner.setIfChanged(key, this.get('value')) ;
     }
   }.observes('value')
   
-}) ;
+});
