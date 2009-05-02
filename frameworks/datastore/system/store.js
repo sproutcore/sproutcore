@@ -570,7 +570,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var source = this.get('dataSource'), ret, storeKeys, cacheKey ;
     
     // if queryKey is a string but not defined, it is treated as a query string
-    if((typeof queryKey==='string') && !SC.objectForPropertyPath(queryKey)) {
+    if((SC.typeOf(queryKey) === SC.T_STRING) && !SC.objectForPropertyPath(queryKey)) {
       queryKey = SC.Query.create({queryString: queryKey});
     }
     
