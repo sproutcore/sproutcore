@@ -683,10 +683,10 @@ SC.Query = SC.Object.extend({
 
 
 // Class Methods
-SC.Query.mixin( /** @scope SC.Record */ {
+SC.Query.mixin( /** @scope SC.Query */ {
   /**
-    Will find which store keys match a given SC.Query and return an
-    array of store keys. 
+    Will find which records match a given SC.Query based on their store keys
+    and return an array of store keys. 
     
     @param {Array} storeKeys to search within
     @param {SC.Query} query to apply
@@ -717,8 +717,7 @@ SC.Query.mixin( /** @scope SC.Record */ {
     for(var idx=0,len=records.get('length');idx<len;idx++) {
       var record = records.objectAt(idx);
       if(query.contains(record)) {
-        var storeKey = record.get('storeKey');
-        ret.push(storeKey);
+        ret.push(record.get('storeKey'));
       }
     }
     return ret;

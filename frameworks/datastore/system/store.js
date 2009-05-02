@@ -576,33 +576,45 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     if(recordArray) {
       // giving a recordArray will circumvent the data source for now
-      // TODO: move to common method as we can reuse the same above from data source
       storeKeys = SC.Query.containsRecords(recordArray, queryKey);
-      ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
     }
     else if (source) {
       // ask the dataSource to provide a storeKey array
       storeKeys = source.fetchRecords.call(source, this, queryKey, params);
-      if (storeKeys) {
-        
-        // if an array was provided, see if a wrapper already exists for 
-        // this store.  Otherwise create it
-        cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
-        ret = this[cacheKey];
-        if (!ret) {
-          // before returning, check if queryKey is SC.Query and run query
-          if(queryKey && queryKey.instanceOf && queryKey.instanceOf(SC.Query)) {
-            storeKeys = SC.Query.containsStoreKeys(storeKeys, queryKey, _store);
-          }
-          
-          ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
-          this[cacheKey] = ret ; // save for future reuse.
-        }
+      // if SC.Query is given, only filter out those that match
+      if(queryKey && queryKey.instanceOf && queryKey.instanceOf(SC.Query)) {
+        storeKeys = SC.Query.containsStoreKeys(storeKeys, queryKey, _store);
       }
     }
+    
+    if(storeKeys) ret = this.recordsFromStoreKeys(storeKeys, _store);
     return ret ;
   },
-
+  
+  /**
+    Creates a record array based on passed storeKeys. Will return
+    cache if records are already cached, if not store them for reuse.
+    
+    @param {Array} storeKeys added to returned record array
+    @param {SC.Store} _store
+    @returns {SC.RecordArray} matching set or null if no server handled it
+  */
+  
+  recordsFromStoreKeys: function(storeKeys, _store) {
+    var ret;
+    if (storeKeys) {
+      // if an array was provided, see if a wrapper already exists for 
+      // this store.  Otherwise create it
+      cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
+      ret = this[cacheKey];
+      if (!ret) {
+        ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
+        this[cacheKey] = ret ; // save for future reuse.
+      }
+    }
+    return ret;
+  },
+  
   /**
     Array of all records currently in the store with the specified
     type.  This method only reflects the actual records loaded into memory and
