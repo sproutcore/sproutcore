@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test querying through findAll on the store
-var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
+var MyApp;
 module("SC.Query querying findAll on a store", {
   setup: function() {
     // setup dummy app and store
@@ -95,7 +95,7 @@ test("loading more data into the store should propagate to record array", functi
   
   equals(records.get('length'), 5, 'record length before should be 5');
   
-  newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
+  var newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 10, firstName: "John", lastName: "Johnson" }
   ]);
   
@@ -111,7 +111,7 @@ test("loading more data into the store should propagate to record array with que
   
   equals(records.get('length'), 1, 'record length before should be 1');
   
-  newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
+  var newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 10, firstName: "John", lastName: "Johnson" }
   ]);
   
@@ -121,9 +121,9 @@ test("loading more data into the store should propagate to record array with que
   
   equals(records.get('length'), 2, 'record length after should be 2');
   
-  /** subsequent updates to store keys should also work */
+  // subsequent updates to store keys should also work
   
-  newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
+  var newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 11, firstName: "John", lastName: "Norman" }
   ]);
   
