@@ -147,7 +147,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     // if this record array is based on a queryKey (from findAll) reapply the
     // the query before setting the storeKeys
-    if(this.get('queryKey').instanceOf && this.get('queryKey').instanceOf(SC.Query)) {
+    if(this.get('queryKey') && this.get('queryKey').instanceOf && this.get('queryKey').instanceOf(SC.Query)) {
       var storeKeys = this._prevStoreKeys;
       var newStoreKeys = SC.Query.containsStoreKeys(storeKeys, this.get('queryKey'), this.get('store'));
       this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
