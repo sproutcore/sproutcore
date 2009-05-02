@@ -5,12 +5,12 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('system/browser');
-require('system/event');
-require('system/cursor');
+sc_require('system/browser');
+sc_require('system/event');
+sc_require('system/cursor');
 
-require('mixins/responder') ;
-require('mixins/string') ;
+sc_require('mixins/responder') ;
+sc_require('mixins/string') ;
 
 SC.viewKey = SC.guidKey + "_view" ;
 
@@ -127,7 +127,8 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
   
-  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: 'outlets displayProperties layoutProperties \
+    classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
   
   /** 
     The current pane. 
@@ -535,7 +536,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var ret, layer = this.get('layer') ;
     // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
     // return an object selecting hte document.
-    ret = !layer ? SC.$([]) : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
+    ret = !layer ?
+      SC.$([]) :
+      (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
     layer = null ; // avoid memory leak
     return ret ;
   },
@@ -642,7 +645,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   _view_layerNeedsUpdateDidChange: function() {
     if (this.get('layerNeedsUpdate')) {
       this.invokeOnce(this.updateLayerIfNeeded) ;
-    } 
+    }
   }.observes('layerNeedsUpdate'),
   
   /**
@@ -666,10 +669,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   updateLayerIfNeeded: function(isVisible) {
     if (!isVisible) isVisible = this.get('isVisibleInWindow') ;
     if (isVisible && this.get('layerNeedsUpdate')) {
-      this.beginPropertyChanges() ;
-      this.set('layerNeedsUpdate', NO) ;
-      this.updateLayer() ;
-      this.endPropertyChanges() ;
+      // only update a layer if it already exists
+      if (this.get('layer')) {
+        this.beginPropertyChanges() ;
+        this.set('layerNeedsUpdate', NO) ;
+        this.updateLayer() ;
+        this.endPropertyChanges() ;
+        
+      // clear our layerNeedsUpdate flag so we can respond to changes later
+      } else this.set('layerNeedsUpdate', NO) ;
     }
     return this ;
   },
@@ -1073,7 +1081,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     The nextResponder is usually the parentView.
   */
   nextResponder: function() {
-    return this.get('parentView');
+    return this.get('parentView') ;
   }.property('parentView').cacheable(),
   
   /**
@@ -1091,9 +1099,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {Boolean}
   */
   performKeyEquivalent: function(keystring, evt) {
-    var ret = null, childViews = this.get('childViews'), len = childViews.length, idx=-1;
-    while(!ret && (++idx<len)) {
-      ret = childViews[idx].performKeyEquivalent(keystring, evt);
+    var ret = null,
+        childViews = this.get('childViews'),
+        len = childViews.length,
+        idx = -1 ;
+    while (!ret && (++idx < len)) {
+      ret = childViews[idx].performKeyEquivalent(keystring, evt) ;
     }
     return ret ;
   },
@@ -1127,7 +1138,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // TODO: Optimize into class setup 
     dp = this.get('displayProperties') ; 
     idx = dp.length ;
-    while(--idx >= 0) {
+    while (--idx >= 0) {
       this.addObserver(dp[idx], this, this.displayDidChange) ;
     }
     
@@ -1484,18 +1495,24 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   computeFrameWithParentFrame: function(pdim) {
     var layout = this.get('layout') ;
     var f = {} , error, layer, AUTO = SC.LAYOUT_AUTO;
-    var stLayout = this.get('useStaticLayout');
+    var stLayout = this.get('useStaticLayout') ;
     
-    if(layout.width !== undefined && layout.width === AUTO && !stLayout){
-     error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-     console.error(error.toString());
-     throw error;
+    if (layout.width !== undefined &&
+        layout.width === SC.LAYOUT_AUTO &&
+        stLayout !== undefined && !stLayout) {
+     error = SC.Error.desc("%@.layout() you cannot use width:auto if \
+      staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
+     console.error(error.toString()) ;
+     throw error ;
     }
-
-    if(layout.height !== undefined && layout.height === AUTO && !stLayout){
-      error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
-      console.error(error.toString());
-      throw error;
+    
+    if (layout.height !== undefined &&
+        layout.height === SC.LAYOUT_AUTO &&
+        stLayout !== undefined && !stLayout) {
+      error = SC.Error.desc("%@.layout() you cannot use height:auto if \
+        staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
+      console.error(error.toString())  ;
+      throw error ;
     }
     
     // handle left aligned and left/right 
@@ -1765,7 +1782,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return this ;
   },
   
-  /** 
+  /**
     layoutStyle describes the current styles to be written to your element
     based on the layout you defined.  Both layoutStyle and frame reset when
     you edit the layout property.  Both are read only.
@@ -1779,19 +1796,24 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     var layout = this.get('layout'), ret = {}, pdim = null, error, AUTO = SC.LAYOUT_AUTO;
     var stLayout = this.get('useStaticLayout');
     
-    if(layout.width !== undefined && layout.width === AUTO && !stLayout){
-     error= SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-     console.error(error.toString());
-     throw error;
+    if (layout.width !== undefined &&
+        layout.width === SC.LAYOUT_AUTO &&
+        stLayout !== undefined && !stLayout) {
+     error= SC.Error.desc("%@.layout() you cannot use width:auto if \
+      staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+     console.error(error.toString()) ;
+     throw error ;
     }
-
-    if(layout.height !== undefined && layout.height === AUTO && !stLayout){
-      error= SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
-      console.error(error.toString());
-      throw error;
+    
+    if (layout.height !== undefined &&
+        layout.height === SC.LAYOUT_AUTO &&
+        stLayout !== undefined && !stLayout) {
+      error = SC.Error.desc("%@.layout() you cannot use height:auto if \
+        staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+      console.error(error.toString()) ;
+      throw error ;
     }
-
-
+    
     // X DIRECTION
     
     // handle left aligned and left/right
@@ -1846,8 +1868,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     
     // handle min/max
-    ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth;
-    ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth;
+    ret.minWidth = (layout.minWidth === undefined) ? null : layout.minWidth ;
+    ret.maxWidth = (layout.maxWidth === undefined) ? null : layout.maxWidth ;
     
     // Y DIRECTION
     
@@ -1899,16 +1921,22 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       ret.marginTop= 0;
     }
     
-      
     // handle min/max
-    ret.minHeight = (layout.minHeight === undefined) ? null : layout.minHeight;
-    ret.maxHeight = (layout.maxHeight === undefined) ? null : layout.maxHeight;
+    ret.minHeight = (layout.minHeight === undefined) ?
+      null :
+      layout.minHeight ;
+    ret.maxHeight = (layout.maxHeight === undefined) ?
+      null :
+      layout.maxHeight ;
     
     // if zIndex is set, use it.  otherwise let default shine through
     ret.zIndex = SC.none(layout.zIndex) ? null : layout.zIndex.toString();
-
-    // if backgroundPosition is set, use it.  otherwise let default shine through
-    ret.backgroundPosition = SC.none(layout.backgroundPosition) ? null : layout.backgroundPosition.toString();
+    
+    // if backgroundPosition is set, use it.
+    // otherwise let default shine through
+    ret.backgroundPosition = SC.none(layout.backgroundPosition) ?
+      null :
+      layout.backgroundPosition.toString() ;
     
     // set default values to null to allow built-in CSS to shine through
     // currently applies only to marginLeft & marginTop
@@ -1934,7 +1962,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     return this.get('parentView') ;
   }.property('parentView').cacheable(),
   
-  /** 
+  /**
     This method is called whenever a property changes that invalidates the 
     layout of the view.  Changing the layout will do this automatically, but 
     you can add others if you want.
@@ -1969,7 +1997,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @property {Boolean}
   */
   childViewsNeedLayout: NO,
-
+  
   /**
     One of two methods that are invoked whenever one of your childViews 
     layout changes.  This method is invoked everytime a child view's layout
@@ -2011,7 +2039,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     return this ;
   },
-
+  
   /**
     Applies the current layout to the layer.  This method is usually only
     called once per runloop.  You can override this method to provide your 
@@ -2078,11 +2106,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 });
 
 SC.View.mixin(/** @scope SC.View @static */ {
-
+  
   /** @private walk like a duck -- used by SC.Page */
   isViewClass: YES,
   
-  /** 
+  /**
     This method works just like extend() except that it will also preserve
     the passed attributes in case you want to use a view builder later, if 
     needed.
@@ -2100,7 +2128,7 @@ SC.View.mixin(/** @scope SC.View @static */ {
     }
     return ret ;
   },
-
+  
   /**
     Helper applies the layout to the prototype. 
   */
@@ -2131,7 +2159,9 @@ SC.View.mixin(/** @scope SC.View @static */ {
   */
   childView: function(cv) {
     var childViews = this.prototype.childViews || [];
-    if (childViews === this.superclass.prototype.childViews) childViews = childViews.slice();
+    if (childViews === this.superclass.prototype.childViews) {
+      childViews = childViews.slice();
+    }
     childViews.push(cv) ;
     this.prototype.childViews = childViews;
     return this ;
