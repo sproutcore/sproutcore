@@ -333,7 +333,7 @@ SC.Query = SC.Object.extend({
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
         evaluate      : function (r,w) {
-                          return ( SC.Store.recordTypeFor(r.storeKey).toString() == this.rightSide.evaluate(r,w) );
+                          return ( SC.Store.recordTypeFor(r.storeKey) == SC.objectForPropertyPath(this.rightSide.evaluate(r,w)) );
         }
       }
                       },                
