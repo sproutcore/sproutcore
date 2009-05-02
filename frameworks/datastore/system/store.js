@@ -1592,8 +1592,11 @@ SC.Store.mixin({
     Given a storeKey returns the SC.Record class associated with the key.
     If no record type is associated with the store key, returns null.
     
+    The SC.Record class will only be found if you have already called
+    storeKeyFor() on the record.
+    
     @param {Number} storeKey the store key
-    @returns {String} the primary key or null
+    @returns {SC.Record} the record type
   */
   recordTypeFor: function(storeKey) {
     return this.recordTypesByStoreKey[storeKey];
