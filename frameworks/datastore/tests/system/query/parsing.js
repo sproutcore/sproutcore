@@ -134,8 +134,8 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[8].tokenValue, 'ANY', 'value should be ANY');
   equals(q.tokenList[9].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
   equals(q.tokenList[9].tokenValue, 'MATCHES', 'value should be MATCHES');
-  equals(q.tokenList[9].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
-  equals(q.tokenList[9].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
+  equals(q.tokenList[10].tokenType, 'COMPARATOR', 'type should be COMPARATOR');
+  equals(q.tokenList[10].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
   
   // BOOLEAN OPERATORS
   q.queryString = "AND OR NOT";
