@@ -581,13 +581,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     else if (source) {
       // ask the dataSource to provide a storeKey array
       storeKeys = source.fetchRecords.call(source, this, queryKey, params);
+      
       // if SC.Query is given, only filter out those that match
       if(queryKey && queryKey.instanceOf && queryKey.instanceOf(SC.Query)) {
-        storeKeys = SC.Query.containsStoreKeys(storeKeys, queryKey, _store);
+        storeKeys.replace(0,storeKeys.length,SC.Query.containsStoreKeys(storeKeys, queryKey, _store));
       }
     }
     
-    if(storeKeys) ret = this.recordsFromStoreKeys(storeKeys, _store);
+    if(storeKeys) ret = this.recordsFromStoreKeys(storeKeys, queryKey, _store);
     return ret ;
   },
   
@@ -600,7 +601,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   
-  recordsFromStoreKeys: function(storeKeys, _store) {
+  recordsFromStoreKeys: function(storeKeys, queryKey, _store) {
     var ret;
     if (storeKeys) {
       // if an array was provided, see if a wrapper already exists for 
@@ -608,7 +609,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
       ret = this[cacheKey];
       if (!ret) {
-        ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys});
+        ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
         this[cacheKey] = ret ; // save for future reuse.
       }
     }

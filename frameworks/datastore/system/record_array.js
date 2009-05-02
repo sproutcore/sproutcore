@@ -36,6 +36,16 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {SC.Array}
   */
   storeKeys: null,
+  
+  /**
+    SC.Query object that is set if record array is based on a query.
+    Whenever the store keys content change, the SC.Query will be
+    reapplied so that only matching storeKeys are set on the record
+    array.
+    
+    @property {SC.Query}
+  */
+  queryKey: null,
 
   // ..........................................................
   // ARRAY PRIMITIVES
@@ -105,9 +115,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Invoked whenever the storeKeys array changes.  Observes changes.
   */
   _storeKeysDidChange: function() {
+    
     var storeKeys = this.get('storeKeys');
+    
     var prev = this._prevStoreKeys, f = this._storeKeysContentDidChange;
-
+    
     if (storeKeys === prev) return this; // nothing to do
     
     if (prev) {
@@ -115,7 +127,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
 
     this._prevStoreKeys = storeKeys;
-
+    
     if (storeKeys) {
       storeKeys.addObserver('[]', this, f);
     }
@@ -132,6 +144,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   _storeKeysContentDidChange: function(target, key, value, rev) {
     this._records = null ; // clear cache
+    
+    // if this record array is based on a queryKey (from findAll) reapply the
+    // the query before setting the storeKeys
+    if(this.get('queryKey').instanceOf && this.get('queryKey').instanceOf(SC.Query)) {
+      var storeKeys = this._prevStoreKeys;
+      var newStoreKeys = SC.Query.containsStoreKeys(storeKeys, this.get('queryKey'), this.get('store'));
+      this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
+    }
     
     this.beginPropertyChanges()
       .notifyPropertyChange('length')
