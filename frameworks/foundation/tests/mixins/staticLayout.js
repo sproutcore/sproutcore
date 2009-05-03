@@ -110,22 +110,16 @@ test("Test that auto as a value for width height is set correctly when"
 
 
 
-test("Test that an exception is throw when calling adjust and setting to auto", 
+test("Test that an exception is thrown when calling adjust and setting to auto", 
   function(){
   var error=null;
-  var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-  var before = { x: 10, y: 10, width: 180, height: 180 };
-  var after =  { x: 10, y: 10, width: 280, height: 280 };
-  parent.appendChild(child);
-  child.set('layout', layout);
-  child.get('frame');
   parent.adjust('width', 'auto').adjust('height', 'auto');
   try{
-    child.get('frame');
+    parent.get('layoutStyle');
   }catch(e){
     error=e;
   }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
+  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw an '+
   'error if width/height are set to auto but staticLayout is not enabled' + error );
       
    
