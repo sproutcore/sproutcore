@@ -293,7 +293,7 @@ SC.Control = {
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
-  displayProperties: 'isSelected isActive controlSize'.w(),
+  displayProperties: 'isEnabled isSelected isActive controlSize'.w(),
   
   /** @private */
   _CONTROL_TMP_CLASSNAMES: {},
