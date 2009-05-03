@@ -417,7 +417,7 @@ SC.ScrollView = SC.View.extend({
     additional controls you have added to the view.
   */
   tile: function() {
-    console.log('%@.tile()'.fmt(this));
+    // console.log('%@.tile()'.fmt(this));
     // get horizontal scroller/determine if we should have a scroller
     var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
     var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
