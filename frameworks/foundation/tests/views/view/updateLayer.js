@@ -35,7 +35,9 @@ module("SC.View#updateLayerIfNeeded", {
   setup: function() {
     // setup a fake view class so that updateLayerIfNeeded() will call
     // updateLayer() if needed.  updateLayer() is faked to isolate test
+    var layer = document.createElement('div');
     view = SC.View.create({
+      layer: layer, // fake it...
       isVisibleInWindow: YES,
       layerNeedsUpdate: YES,
       updateLayer: function() { callCount++; }
@@ -120,7 +122,9 @@ module("SC.View#updateLayer - integration");
 
 test("layerNeedsUpdate actually triggers updateLayer", function() {
   var callCount = 0 ;
+  var layer = document.createElement('div');
   var view = SC.View.create({
+    layer: layer, // fake it...
     isVisibleInWindow: YES,
     updateLayer: function() { callCount++; }
   });
