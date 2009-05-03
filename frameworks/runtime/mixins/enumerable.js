@@ -48,6 +48,11 @@ require('system/enumerator');
 */
 SC.Enumerable = {
 
+  /** 
+    Walk like a duck.
+  */
+  isEnumerable: YES,
+  
   /**
     Implement this method to make your class enumerable.
     
@@ -906,6 +911,7 @@ SC.Reducers = {
 // Apply reducers...
 SC.mixin(SC.Enumerable, SC.Reducers) ;
 SC.mixin(Array.prototype, SC.Reducers) ;
+Array.prototype.isEnumerable = YES ;
 
 // ......................................................
 // ARRAY SUPPORT
