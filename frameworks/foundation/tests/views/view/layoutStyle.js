@@ -309,20 +309,20 @@ test("frame loc shifts with centerX/centerY", function(){
 });
 
 
-test("frame size shifts with top/left/bottom/right", function(){
-  var error=null;
-  var layout = { top: 10, left: 10, bottom: 10, right: 10 };
-  parent.appendChild(child);
-  child.set('layout', layout);
-  child.get('frame');
-  parent.adjust('width', 'auto').adjust('height', 'auto');
-  try{
-    child.get('frame');
-  }catch(e){
-    error=e;
-  }
-  equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
-  'error if centerx/y and width/height are set at the same time ' + error );
-      
-   
-});
+// test("frame size shifts with top/left/bottom/right", function(){
+//   var error=null;
+//   var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+//   parent.appendChild(child);
+//   child.set('layout', layout);
+//   child.get('frame');
+//   parent.adjust('width', 'auto').adjust('height', 'auto');
+//   try{
+//     child.get('frame');
+//   }catch(e){
+//     error=e;
+//   }
+//   equals(SC.T_ERROR,SC.typeOf(error),'Layout style functions should throw and '+
+//   'error if centerx/y and width/height are set at the same time ' + error );
+//       
+//    
+// });
