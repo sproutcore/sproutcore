@@ -8,7 +8,7 @@
 /*global module test htmlbody ok equals same stop start */
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
-(function() {
+
 var pane = SC.ControlTestPane.design()
     .add("basic", SC.SelectFieldView, { 
        objects:["1","2","3","4","5"]
@@ -41,9 +41,6 @@ var pane = SC.ControlTestPane.design()
     useStaticLayout: YES, 
     layout: { width: '150', right: '0' }
   });
-
-
-pane.show(); // add a test to show the test pane
 
 // ..........................................................
 // TEST VIEWS
@@ -85,12 +82,11 @@ test("Width 150 Right 0", function() {
   ok(!view.$().hasClass('sel'), 'should not have sel class');
 });
 
-test("redrawMenu", function(){
+test("redraw", function(){
   var view = pane.view('redraw');
   ok(view.get('objects').length === 0, "objects should be empty");
+  SC.RunLoop.begin();
   view.set('objects', [1,6,11,2,8]);
-  ok(view.$('options').length === 5, "objects length should be 5");
+  SC.RunLoop.end();
+  ok(view.$('option').length === 5, "options length should be 5");
 });
-
-
-})();
