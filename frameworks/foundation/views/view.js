@@ -1798,7 +1798,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     if (layout.width !== undefined &&
         layout.width === SC.LAYOUT_AUTO &&
-        stLayout !== undefined && !stLayout) {
+        !stLayout) {
      error= SC.Error.desc("%@.layout() you cannot use width:auto if \
       staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
      console.error(error.toString()) ;
@@ -1807,7 +1807,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     
     if (layout.height !== undefined &&
         layout.height === SC.LAYOUT_AUTO &&
-        stLayout !== undefined && !stLayout) {
+        !stLayout) {
       error = SC.Error.desc("%@.layout() you cannot use height:auto if \
         staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
       console.error(error.toString()) ;
