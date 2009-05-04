@@ -647,7 +647,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     callback should have the signature:
     
     {{{
-      callback(start, length, indexSet) { ... }
+      callback(start, length, indexSet, source) { ... }
     }}}
     
     If you pass a target as a second option, the callback will be called in
@@ -660,11 +660,12 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   forEachRange: function(callback, target) {
     var content = this._content,
         cur     = 0,
-        next    = content[cur];
+        next    = content[cur],
+        source  = this.source;
 
     if (target === undefined) target = null ;
     while (next !== 0) {
-      if (next > 0) callback.call(target, cur, next - cur, this);
+      if (next > 0) callback.call(target, cur, next - cur, this, source);
       cur  = Math.abs(next);
       next = content[cur];
     }
@@ -746,7 +747,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     will be invoked for each object in the set with the following signature:
     
     {{{
-      funciton callback(object, index) { ... }
+      function callback(object, index, source, indexSet) { ... }
     }}}
     
     If you pass a target, it will be used when the callback is called.
@@ -763,12 +764,12 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
         cur     = 0,
         idx     = 0,
         next    = content[cur];
-
+        
     if (target === undefined) target = null ;
     while (next !== 0) {
       
       while(cur < next) { 
-        callback.call(target, source.objectAt(cur), cur, this); 
+        callback.call(target, source.objectAt(cur), cur, source, this); 
         cur++;
       }
       
@@ -845,11 +846,14 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     var content = this._content,
         cur     = 0,
         idx     = 0,
+        source  = this.source,
         next    = content[cur];
 
     if (target === undefined) target = null ;
     while (next !== 0) {
-      while(cur < next) { callback.call(target, cur++, idx++, this); }
+      while(cur < next) { 
+        callback.call(target, cur++, idx++, this, source); 
+      }
       cur  = Math.abs(next);
       next = content[cur];
     }
@@ -867,6 +871,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       idx = next = 0 ;
 
     } else if (idx >= max) {
+      delete context.next; // cleanup context
       return null ; // nothing left to do
 
     } else idx++; // look on next index
