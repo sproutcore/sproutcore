@@ -218,32 +218,32 @@ SC.Query = SC.Object.extend({
   queryLogic: {
     'PROPERTY'        : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return r.get(this.tokenValue) },
-      evaluateNR      : function (r,w) { return r.get(this.tokenValue) }
+      evaluate        : function (r,w) { return r.get(this.tokenValue); },
+      evaluateNR      : function (r,w) { return r.get(this.tokenValue); }
                       },
     'STRING'          : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return this.tokenValue }
+      evaluate        : function (r,w) { return this.tokenValue; }
                       },
     'NUMBER'          : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return parseFloat(this.tokenValue) }
+      evaluate        : function (r,w) { return parseFloat(this.tokenValue); }
                       },
     'BOOL_VAL'        : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { if (this.tokenValue == 'true') return true; else return false }
+      evaluate        : function (r,w) { if (this.tokenValue == 'true') return true; else return false; }
                       },
     'NULL'            : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return null }
+      evaluate        : function (r,w) { return null; }
                       },
     'WILD_CARD'       : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return w[this.tokenValue] }
+      evaluate        : function (r,w) { return w[this.tokenValue]; }
                       },
     'PARAMETER'       : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return w[this.tokenValue] }
+      evaluate        : function (r,w) { return w[this.tokenValue]; }
                       },
     'COMPARATOR'      : {
       dependsOnValue  : true,
@@ -251,37 +251,37 @@ SC.Query = SC.Object.extend({
         leftType      : 'PRIMITIVE',
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) == this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) == this.rightSide.evaluate(r,w) ); }
                       },
       '!='            : {
         leftType      : 'PRIMITIVE',
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) != this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) != this.rightSide.evaluate(r,w) ); }
                       },
       '<'             : {
         leftType      : 'PRIMITIVE',
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) < this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) < this.rightSide.evaluate(r,w) ); }
                       },
       '<='            : {
         leftType      : 'PRIMITIVE',
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) <= this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) <= this.rightSide.evaluate(r,w) ); }
                       },
       '>'             : {
         leftType      : 'PRIMITIVE',
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) > this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) > this.rightSide.evaluate(r,w) ); }
                       },
       '>='            : {
         leftType      : 'PRIMITIVE',
         rightType     : 'PRIMITIVE',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) >= this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) >= this.rightSide.evaluate(r,w) ); }
                       },
       'BEGINS_WITH'   : {
         leftType      : 'PRIMITIVE',
@@ -343,19 +343,19 @@ SC.Query = SC.Object.extend({
         leftType      : 'BOOLEAN',
         rightType     : 'BOOLEAN',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) && this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) && this.rightSide.evaluate(r,w) ); }
                       },
       'OR'            : {
         leftType      : 'BOOLEAN',
         rightType     : 'BOOLEAN',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) || this.rightSide.evaluate(r,w) ) }
+        evaluate      : function (r,w) { return ( this.leftSide.evaluate(r,w) || this.rightSide.evaluate(r,w) ); }
                       },
       'NOT'           : {
         rightType     : 'BOOLEAN',
         evalType      : 'BOOLEAN',
-        evaluate      : function (r,w) { return ( ! this.rightSide.evaluate(r,w) ) }
-                      },
+        evaluate      : function (r,w) { return ( ! this.rightSide.evaluate(r,w) ); }
+                      }
                       },
     'OPEN_PAREN'      : 'nothing',
     'CLOSE_PAREN'     : 'nothing'
