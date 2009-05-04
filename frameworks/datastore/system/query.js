@@ -54,6 +54,8 @@ require('core') ;
     you will have to use a parameter to insert the regexp)
   - ANY (checks if the thing on its left is contained in the array
     on its right, you will have to use a parameter to insert the array)
+  - TYPE_IS (unary operator expecting a string containing the name of a Model class
+    on its right side, only records of this type will match)
     
   Boolean Operators:
   - AND
