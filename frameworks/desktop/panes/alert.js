@@ -220,7 +220,7 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
 
       SC.View.extend({
-        layout: { bottom: 13, height: 24, right: 18, width: 200 },
+        layout: { bottom: 13, height: 24, right: 18, width: 416 },
         childViews: ['cancelButton', 'okButton'],
         classNames: ['textAlignRight'],
         cancelButton : SC.ButtonView.extend({
@@ -249,7 +249,7 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
       
       SC.View.extend({
-        layout: { bottom: 13, height: 24, left: 18, width: 100 },
+        layout: { bottom: 13, height: 24, left: 18, width: 150 },
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
