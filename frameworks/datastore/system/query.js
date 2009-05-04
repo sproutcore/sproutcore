@@ -112,12 +112,18 @@ SC.Query = SC.Object.extend({
     var result = 0;
     // if called for the first time we have to build the order array
     if (!this.isReady) this.parseQuery();
+    // if parsing failed we say everything is equal
+    if (!this.isReady) return 0;
     
-    // for every key specified in orderBy
+    // for every property specified in orderBy
     for (var i=0; i < this.order.length; i++) {
-      // if rec1.
-      result = this.compareByProperty(record1, record2, this.order[i]);
-      if (result != 0) return result;
+      // if
+      result = this.compareByProperty(record1, record2, this.order[i].propertyName);
+      if (result != 0) {
+        // if order is descending we invert the sign of the result
+        if (this.order[i].descending) result = (-1) * result;
+        return result;
+      }
     };
     return result;
   },
@@ -654,25 +660,68 @@ SC.Query = SC.Object.extend({
   
   buildOrder: function (orderString) {
     if (!orderString) {
-      return [{property: 'guid', direction: 'ASC'}];
+      return [{propertyName: 'guid'}];
     }
     else {
       var o = orderString.split(',');
       for (var i=0; i < o.length; i++) {
-        o[i] = o[i].replace(/^\s+|\s+$/,'');
-        o[i] = o[i].replace(/\s+/,',');
-        o[i] = o[i].split(',');
-        o[i] = {property: o[i][0], direction: o[i][1]};
+        var p = o[i];
+        p = p.replace(/^\s+|\s+$/,'');
+        p = p.replace(/\s+/,',');
+        p = p.split(',');
+        o[i] = {propertyName: p[0]};
+        if (p[1] && p[1] == 'DESC') o[i].descending = true;
       };
       return o;
     }
     
   },
   
-  compareByProperty: function (record1, record2, order) {
+  compareByProperty: function (record1, record2, propertyName) {
     
+    return this._compare(record1.get(propertyName),record2.get(propertyName));
   },
   
+  _compare: function (v1, v2) {
+    var orderDefinition = ['null','boolean','number','string','array','object'];
+    
+    getType = function (v) {
+      var t = typeof v;
+      if (t == 'object') {
+        if (t == null) return 'null';
+        if (t instanceof Array) return 'array';
+      }
+    };
+    
+    var type1 = getType (v1);
+    var type2 = getType (v2);
+    
+    
+    if (orderDefinition.indexOf(type1) < orderDefinition.indexOf(type2)) return -1;
+    if (orderDefinition.indexOf(type1) > orderDefinition.indexOf(type2)) return 1;
+    
+    // ok - types are equal - so we have to check inside types now
+    switch (type1) {
+      case 'null':
+        return 0;
+        break;
+      case 'boolean':
+        if (v1<v2) return -1;
+        if (v1>v2) return 1;
+        return 0;
+        break;
+      case 'number':
+        if (v1<v2) return -1;
+        if (v1>v2) return 1;
+        return 0;
+        break;
+      case 'string':
+        if (v1.localeCompare(v2)<0) return -1;
+        if (v1.localeCompare(v2)>0) return 1;
+        return 0;
+        break;
+    };
+  },
   
   
   // ..........................................................
