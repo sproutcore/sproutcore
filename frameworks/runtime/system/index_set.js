@@ -80,7 +80,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     @type number
   */
   length: 0,
-
+  
   /**
     One greater than the largest index currently stored in the set.  This 
     is sometimes useful when determining the total range of items covering
@@ -672,6 +672,92 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     
     return this ;
   },    
+  
+  /**
+    Invokes the callback for each index within the passed start/length range.
+    Otherwise works just like regular forEach().
+    
+    @param {Number} start starting index
+    @param {Number} length length of range
+    @param {Function} callback
+    @param {Object} target
+    @returns {SC.IndexSet} receiver
+  */
+  forEachIn: function(start, length, callback, target) {
+    var content = this._content,
+        cur     = 0,
+        idx     = 0,
+        lim     = start + length,
+        source  = this.source,
+        next    = content[cur];
+
+    if (target === undefined) target = null ;
+    while (next !== 0) {
+      if (cur < start) cur = start ; // skip forward 
+      while((cur < next) && (cur < lim)) { 
+        callback.call(target, cur++, idx++, this, source); 
+      }
+      
+      if (cur >= lim) {
+        cur = next = 0 ;
+      } else {
+        cur  = Math.abs(next);
+        next = content[cur];
+      }
+    }
+    return this ;
+  },
+
+  /**
+    Total number of indexes within the specified range.
+    
+    @param {Number|SC.IndexSet} start index, range object or IndexSet
+    @param {Number} length optional range length
+    @returns {Number} count of indexes
+  */
+  lengthIn: function(start, length) {
+
+    var ret = 0 ;
+    
+    // normalize input
+    if (length === undefined) { 
+      if (start === null || start === undefined) {
+        return 0; // nothing to do
+
+      } else if (typeof start === SC.T_NUMBER) {
+        length = 1 ;
+        
+      // if passed an index set, just add each range in the index set.
+      } else if (start.isIndexSet) {
+        start.forEachRange(function(start, length) { 
+          ret += this.lengthIn(start, length);
+        }, this);
+        return ret;
+        
+      } else {
+        length = start.length; 
+        start = start.start;
+      }
+    }
+
+    // fast path
+    if (this.get('length') === 0) return 0;
+    
+    var content = this._content,
+        cur     = 0,
+        next    = content[cur],
+        lim     = start + length ;
+
+    while (cur<lim && next !== 0) {
+      if (next>0) {
+        ret += (next>lim) ? lim-cur : next-cur;
+      }
+      cur  = Math.abs(next);
+      next = content[cur];
+    }
+    
+    return ret ;
+  },
   
   // ..........................................................
   // OBJECT API
