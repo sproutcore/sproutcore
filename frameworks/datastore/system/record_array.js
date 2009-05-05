@@ -62,6 +62,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Looks up the store key in the store keys array and materializes a
     records.
+    
+    @param {Number} idx index of the object
+    @return {SC.Record} materialized record
   */
   objectAt: function(idx) {
     var recs      = this._records, 
@@ -90,6 +93,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     Pass through to the underlying array.  The passed in objects must be
     records, which can be converted to storeKeys.
+    
+    @param {Number} idx start index
+    @param {Number} amt end index
+    @param {SC.RecordArray} recs to replace with records
+    @return {SC.RecordArray} 'this' after replace
   */
   replace: function(idx, amt, recs) {
     var storeKeys = this.get('storeKeys'), 
@@ -105,6 +113,22 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // pass along - if allowed, this should trigger the content observer 
     storeKeys.replace(idx, amt, keys);
     return this; 
+  },
+  
+  /**
+    Apply the SC.Query again. This is invoked when new records are loaded
+    or changed in the store (or directly on the array with .replace() ) and 
+    and when we need to refresh all SC.Query 'based' record arrays accordingly.
+    
+    @param {Array} storeKeys to evaluate against the query
+  */
+  applyQuery: function(storeKeys) {
+    var newStoreKeys = SC.Query.containsStoreKeys(storeKeys, this.get('queryKey'), this.get('store'));
+    this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
+    
+    // set length property without .set()
+    this.propertyWillChange('length');
+    this.propertyDidChange('length', newStoreKeys.length);
   },
   
   // ..........................................................
@@ -145,12 +169,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   _storeKeysContentDidChange: function(target, key, value, rev) {
     this._records = null ; // clear cache
     
-    // if this record array is based on a queryKey (from findAll) reapply the
-    // the query before setting the storeKeys
-    if(this.get('queryKey') && this.get('queryKey').instanceOf && this.get('queryKey').instanceOf(SC.Query)) {
+    // if this record array is based on a queryKey reapply the
+    // the query before setting the storeKeys to ensure it always conforms
+    if(this.queryKey && this.queryKey.instanceOf && this.queryKey.instanceOf(SC.Query)) {
       var storeKeys = this._prevStoreKeys;
-      var newStoreKeys = SC.Query.containsStoreKeys(storeKeys, this.get('queryKey'), this.get('store'));
-      this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
+      this.applyQuery(storeKeys);
     }
     
     this.beginPropertyChanges()

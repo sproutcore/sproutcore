@@ -707,7 +707,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
     var ret = [];
     for(var idx=0,len=storeKeys.length;idx<len;idx++) {
       var record = store.materializeRecord(storeKeys[idx]);
-      if(query.contains(record)) ret.push(storeKeys[idx]);
+      if(record && query.contains(record)) ret.push(storeKeys[idx]);
     }
     return ret;
   },
@@ -725,7 +725,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
     var ret = [];
     for(var idx=0,len=records.get('length');idx<len;idx++) {
       var record = records.objectAt(idx);
-      if(query.contains(record)) {
+      if(record && query.contains(record)) {
         ret.push(record.get('storeKey'));
       }
     }
