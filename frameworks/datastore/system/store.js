@@ -181,6 +181,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   changelog: null,
   
+  /**
+    A set of SC.RecordArray that have been returned from findAll with an 
+    SC.Query. These will all be notified with _notifyQueries() whenever the store
+    changes.
+  
+    @property {Array}
+  */
+  queriedRecordArrays: [],
+  
   // ..........................................................
   // CORE ATTRIBUTE API
   // 
@@ -356,6 +365,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this._notifyRecordPropertyChange(storeKey, statusOnly);
     }
     
+    this._notifyQueries();
+    
     return this ;
   },
 
@@ -364,7 +375,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     the run loop.  Also notifies any inherited record instances as well.
   */
   _notifyRecordPropertyChange: function(storeKey, statusOnly) {
-
+    
     var records = this.records, rec ;
     
     // schedule
@@ -383,6 +394,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     return this;
+  },
+  
+  /**
+    Will ask all record arrays that have been returned from findAll
+    with an SC.Query to reapply their query with the new storeKeys
+  */
+  
+  _notifyQueries: function() {
+    var storeKeys = allStoreKeys = this.storeKeys();
+    for(var idx=0, len=this.queriedRecordArrays.length;idx<len;idx++) {
+      var recArray = this.queriedRecordArrays[idx];
+      if(recArray) recArray.applyQuery(storeKeys);
+    }
   },
   
   /**
@@ -409,6 +433,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (!records.hasOwnProperty(storeKey)) continue ;
         this._notifyRecordPropertyChange(storeKey, NO);
       }
+      this._notifyQueries();
     }
     
     this.set('hasChanges', NO);    
@@ -464,6 +489,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       this._notifyRecordPropertyChange(storeKey, NO);
     }
+    
+    this._notifyQueries();
 
     // add any records to the changelog for commit handling
     var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
@@ -552,7 +579,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     You can also pass a query string as the queryKey, which will be interpreted 
     by SC.Query, for instance: "firstName = 'John'". You can also pass
-    an SC.Query object as your queryKey.
+    an SC.Query object as your queryKey. If an SC.Query is returned from the
+    data source, the record array returned from the store will automatically
+    update when records are added/changed/removed from the store.
     
     Once you retrieve a RecordArray, you can filter the results even further
     by using the filter() method, which may issue even more specific requests.
@@ -567,7 +596,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   findAll: function(queryKey, params, _store, recordArray) { 
     if (!_store) _store = this;
     
-    var source = this.get('dataSource'), ret, storeKeys, cacheKey ;
+    var source = this.get('dataSource'), ret, storeKeys, sourceRet, cacheKey,
+      allStoreKeys ;
     
     // if queryKey is a string but not defined, it is treated as a query string
     if((SC.typeOf(queryKey) === SC.T_STRING) && !SC.objectForPropertyPath(queryKey)) {
@@ -579,11 +609,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKeys = SC.Query.containsRecords(recordArray, queryKey);
     }
     else if (source) {
-      // ask the dataSource to provide a storeKey array
-      storeKeys = source.fetchRecords.call(source, this, queryKey, params);
+      // call fetchRecords() on the data source. It can respond with either
+      // a storeKey array, a sparse array or a SC.Query object.
+      sourceRet = source.fetchRecords.call(source, this, queryKey, params);
+      if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
+        storeKeys = sourceRet;
+      }
+      else if(sourceRet.instanceOf(SC.Query)) {
+        // get all storeKeys in the store and run the SC.Query on it
+        // TODO: probably should limit this by record type for speed
+        allStoreKeys = this.storeKeys();
+        storeKeys = SC.Query.containsStoreKeys(allStoreKeys, queryKey, _store);
+      }
       
       // if SC.Query is given, only filter out those that match
-      if(queryKey && queryKey.instanceOf && queryKey.instanceOf(SC.Query)) {
+      var isQuery = (queryKey.instanceOf && queryKey.instanceOf(SC.Query));
+      if(storeKeys && isQuery) {
         storeKeys.replace(0,storeKeys.length,SC.Query.containsStoreKeys(storeKeys, queryKey, _store));
       }
     }
@@ -602,16 +643,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   recordsFromStoreKeys: function(storeKeys, queryKey, _store) {
-    var ret;
-    if (storeKeys) {
-      // if an array was provided, see if a wrapper already exists for 
-      // this store.  Otherwise create it
-      cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
-      ret = this[cacheKey];
-      if (!ret) {
-        ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
-        this[cacheKey] = ret ; // save for future reuse.
-      }
+    var ret, isQuery;
+    // if an array was provided, see if a wrapper already exists for 
+    // this store.  Otherwise create it
+    cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
+    ret = this[cacheKey];
+    if (!ret) {
+      ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
+      // store record array if SC.Query so we can notify it when store changes
+      isQuery = (queryKey.instanceOf && queryKey.instanceOf(SC.Query));
+      if(isQuery) this.queriedRecordArrays.push(ret);
+      this[cacheKey] = ret ; // save for future reuse.
     }
     return ret;
   },
@@ -1542,6 +1584,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   storeKeyFor: function(recordType, primaryKey) {
     return recordType.storeKeyFor(primaryKey);
+  },
+  
+  /**
+    Finds all storeKeys currently in the store based on the statuses
+    property, and returns an array.
+    
+    @returns {Array} array of storeKeys
+  */
+  
+  storeKeys: function() {
+    // TODO: this should be cached
+    var ret = [];
+    for(storeKey in this.statuses) {
+      ret.push(parseInt(storeKey, 00));
+    }
+    return ret;
   }
   
 }) ;
