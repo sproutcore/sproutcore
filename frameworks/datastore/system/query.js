@@ -679,22 +679,24 @@ SC.Query = SC.Object.extend({
   
   compareByProperty: function (record1, record2, propertyName) {
     
-    return this._compare(record1.get(propertyName),record2.get(propertyName));
+    return this.compareObjects(record1.get(propertyName),record2.get(propertyName));
   },
   
-  _compare: function (v1, v2) {
-    var orderDefinition = ['null','boolean','number','string','array','object'];
+  compareObjects: function (v1, v2) {
+    var orderDefinition = [SC.T_ERROR, SC.T_UNDEFINED, SC.T_NULL, SC.T_BOOL, SC.T_NUMBER, SC.T_STRING, SC.T_ARRAY, SC.T_HASH, SC.T_OBJECT, SC.T_FUNCTION, SC.T_CLASS];
     
-    getType = function (v) {
-      var t = typeof v;
-      if (t == 'object') {
-        if (t == null) return 'null';
-        if (t instanceof Array) return 'array';
-      }
-    };
     
-    var type1 = getType (v1);
-    var type2 = getType (v2);
+    //function getType (v) {
+    //  var t = typeof v;
+    //  if (t == 'object') {
+    //    if (t == null) return 'null';
+    //    if (t instanceof Array) return 'array';
+    //  }
+    //  return t;
+    //};
+    
+    var type1 = SC.typeOf(v1);
+    var type2 = SC.typeOf(v2);
     
     
     if (orderDefinition.indexOf(type1) < orderDefinition.indexOf(type2)) return -1;
@@ -702,24 +704,23 @@ SC.Query = SC.Object.extend({
     
     // ok - types are equal - so we have to check inside types now
     switch (type1) {
-      case 'null':
-        return 0;
-        break;
-      case 'boolean':
+      case SC.T_BOOL:
         if (v1<v2) return -1;
         if (v1>v2) return 1;
         return 0;
         break;
-      case 'number':
+      case SC.T_NUMBER:
         if (v1<v2) return -1;
         if (v1>v2) return 1;
         return 0;
         break;
-      case 'string':
+      case SC.T_STRING:
         if (v1.localeCompare(v2)<0) return -1;
         if (v1.localeCompare(v2)>0) return 1;
         return 0;
         break;
+      default:
+        return 0;
     };
   },
   
@@ -781,6 +782,13 @@ SC.Query.mixin( /** @scope SC.Query */ {
     return ret;
   }
 });
+
+
+// Global compare function
+
+
+
+
 
 // Old code by Peter:
 //
