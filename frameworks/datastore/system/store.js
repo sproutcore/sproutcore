@@ -584,6 +584,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     a RecordArray matching all instances of that class as is relevant to your
     application.
     
+    When using findAll() the datasource will be getting a fetchRecords() with
+    the SC.Query as fetchKey.
+    
     You can also pass a query string as the queryKey, which will be interpreted 
     by SC.Query, for instance: "firstName = 'John'". You can also pass
     an SC.Query object as your queryKey. If an SC.Query is returned from the
@@ -593,24 +596,34 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Once you retrieve a RecordArray, you can filter the results even further
     by using the filter() method, which may issue even more specific requests.
     
-    @param {Object} queryKey key describing the type of records to fetch
-    @param {Hash} params optional additional parameters to pass along
+    @param {Object|SC.Query} queryKey key describing the type of records to 
+      fetch or a predefined SC.Query object
+    @param {String} queryString optional and will be used to create the
+      SC.Query object
+    @param {String} orderBy optional and will be used to create the
+      SC.Query object
+    @param {Hash} params optional additional parameters to pass along to the
+      data source
     @param {SC.Store} _store this is a private param.  Do not pass
     @param {SC.RecordArray} recordArray optional if you want to find just 
       within a given record array
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  findAll: function(queryKey, params, _store, recordArray) { 
+  findAll: function(queryKey, queryString, orderBy, params, _store, recordArray) { 
     if (!_store) _store = this;
     
     var source = this.get('dataSource'), ret, storeKeys, sourceRet, cacheKey,
       allStoreKeys ;
     
-    // if queryKey is a string but not defined, it is treated as a query string
-    if((SC.typeOf(queryKey) === SC.T_STRING) && !SC.objectForPropertyPath(queryKey)) {
-      queryKey = SC.Query.create({queryString: queryKey});
+    // if queryString or orderBy is given, return an SC.Query object
+    if(queryString || orderBy) {
+      queryKey = SC.Query.create({
+        recordType: queryKey,
+        queryString: queryString,
+        orderBy: orderBy
+      });
     }
-    
+  
     if(recordArray) {
       // giving a recordArray will circumvent the data source for now
       storeKeys = SC.Query.containsRecords(recordArray, queryKey);
@@ -626,7 +639,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       else if(sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
         // get all storeKeys in the store and run the SC.Query on it
         // TODO: probably should limit this by record type for speed
-        allStoreKeys = this.storeKeys();
+        allStoreKeys = this.storeKeysFor(sourceRet.recordType);
         storeKeys = SC.Query.containsStoreKeys(allStoreKeys, queryKey, _store);
       }
       
@@ -1599,13 +1612,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Finds all storeKeys currently in the store based on the statuses
+    Finds all storeKeys of a certain record type based on the statuses
     property, and returns an array.
     
     @returns {Array} array of storeKeys
   */
   
-  storeKeys: function() {
+  storeKeysFor: function() {
     // TODO: this should be cached
     var ret = [], storeKey ;
     for(storeKey in this.statuses) {
