@@ -17,6 +17,9 @@ require('core') ;
   Normally you will not use SC.Query directly, instead you will write:
     r = MyApp.store.findAll("firstName = 'Jonny' AND lastName = 'Cash'")
   r will be a record array containing all matching records. (This does not work yet!)
+  You can give an order which the returned records should be in like this:
+    q = SC.Query.create({ queryString:"firstName = 'Jonny' AND lastName = 'Cash'",
+                          orderBy:"lastName, year DESC" })
   
   
   Features of the query language:
@@ -69,6 +72,8 @@ require('core') ;
   Some example queries:
   
   TODO add examples
+  
+  
   
 
   @extends SC.Object
