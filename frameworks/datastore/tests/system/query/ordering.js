@@ -18,9 +18,9 @@ module("SC.Query ordering", {
     v[5]  = 'a string';
     v[6]  = 'another string';
     v[7]  = 'anöther string';
-    //v[8]  = [1,2];
-    //v[9]  = [1,2,3];
-    //v[10] = [1,3];
+    v[8]  = [1,2];
+    v[9]  = [1,2,3];
+    v[10] = [1,3];
     
     q = SC.Query.create();
     c = q.compareObjects;
