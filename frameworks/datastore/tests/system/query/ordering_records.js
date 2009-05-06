@@ -21,9 +21,9 @@ module("SC.Query comparison/ordering of records", {
     MyApp.store.loadRecords(MyApp.Foo, [
       { guid: 1, firstName: "John", lastName: "Doe", year: 1974 },
       { guid: 2, firstName: "Jane", lastName: "Doe", year: 1975 },
-      { guid: 3, firstName: "Emily", lastName: "Parker", year: 1975 },
-      { guid: 4, firstName: "Johnny", lastName: "Cash" },
-      { guid: 5, firstName: "Bert", lastName: "Berthold" }
+      { guid: 3, firstName: "Emily", lastName: "Parker", year: 1975, active: null },
+      { guid: 4, firstName: "Johnny", lastName: "Cash", active: false },
+      { guid: 5, firstName: "Bert", lastName: "Berthold", active: true }
     ]);
     
     rec1 = MyApp.store.find(MyApp.Foo,1);
@@ -43,47 +43,66 @@ module("SC.Query comparison/ordering of records", {
 // 
 
 test("building the order", function() {
+  // undefined orderBy
+  q.orderBy = null;
+  q.parseQuery();
+  equals(q.order[0].propertyName,'guid', 'propertyName should be guid');
+  equals(q.order[0].descending,false], 'descending should be false');
+  
+  // empty orderBy
+  q.orderBy = "";
+  q.parseQuery();
+  equals(q.order[0].propertyName,'guid', 'propertyName should be guid');
+  equals(q.order[0].descending,false], 'descending should be false');
+  
   // single property
   q.orderBy = "firstName";
   q.parseQuery();
-  equals(q.order[0].propertyName,'firstName'], 'propertyName should be firstName');
+  equals(q.order[0].propertyName,'firstName', 'propertyName should be firstName');
   
   // more properties
   q.orderBy = "lastName, firstName";
   q.parseQuery();
-  equals(q.order[0].propertyName,'lastName'], 'propertyName should be lastName');
-  equals(q.order[1].propertyName,'firstName'], 'propertyName should be firstName');
+  equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
+  equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
   
   // more properties with direction
   q.orderBy = "lastName, firstName, year DESC";
   q.parseQuery();
-  equals(q.order[0].propertyName,'lastName'], 'propertyName should be lastName');
-  equals(q.order[1].propertyName,'firstName'], 'propertyName should be firstName');
-  equals(q.order[1].descending,false], 'descending should be false');
-  equals(q.order[2].propertyName,'year'], 'propertyName should be year');
-  equals(q.order[2].descending,true], 'descending should be true');
+  equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
+  equals(q.order[0].descending,false, 'descending should be false');
+  equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
+  equals(q.order[1].descending,false, 'descending should be false');
+  equals(q.order[2].propertyName,'year', 'propertyName should be year');
+  equals(q.order[2].descending,true, 'descending should be true');
 });
 
+test("comparing non existant properties", function() {
+  q.orderBy = "year";
+  q.parseQuery();
+  ok(q.compare(rec1,rec5) == -1, 'null should be before 1975');
+});
 
-test("ordering numbers should work", function() {
-  
+test("comparing null and boolean properties", function() {
+  q.orderBy = "active";
+  q.parseQuery();
+  ok(q.compare(rec3,rec4) == -1, 'null should be before false');
+  ok(q.compare(rec4,rec5) == -1, 'false should be before true');
+});
+
+test("comparing number properties", function() {
   q.orderBy = "year";
   q.parseQuery();
   ok(q.compare(rec1,rec2) == -1, '1974 should be before 1975');
+  ok(q.compare(rec2,rec3) == 0, '1975 should equal 1975');
   
   q.orderBy = "year DESC";
   q.parseQuery();
   ok(q.compare(rec1,rec2) == 1, '1974 should be after 1975 with DESC');
-  
-  q.orderBy = "year";
-  q.parseQuery();
-  ok(q.compare(rec2,rec3) == 0, '1975 should equal 1975');
-  
 }); 
 
 
-test("ordering strings should work", function() {
-  
+test("comparing string properties", function() {
   q.orderBy = "firstName";
   q.parseQuery();
   ok(q.compare(rec1,rec2) == 1, 'John should be after Jane');
@@ -95,6 +114,5 @@ test("ordering strings should work", function() {
   q.orderBy = "lastName";
   q.parseQuery();
   ok(q.compare(rec1,rec2) == 0, 'Doe should equal Doe');
-  
 }); 
   
