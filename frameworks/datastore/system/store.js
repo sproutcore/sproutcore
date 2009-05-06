@@ -183,12 +183,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     A set of SC.RecordArray that have been returned from findAll with an 
-    SC.Query. These will all be notified with _notifyQueries() whenever the store
-    changes.
+    SC.Query. These will all be notified with _notifyRecordArraysWithQuery() 
+    whenever the store changes.
   
     @property {Array}
   */
-  queriedRecordArrays: [],
+  recordArraysWithQuery: null,
   
   // ..........................................................
   // CORE ATTRIBUTE API
@@ -325,6 +325,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     Writes the current status for a storeKey.
+    
+    @param {Number} storeKey the store key
+    @param {String} newStatus the new status
+    @returns {SC.Store} receiver
   */
   writeStatus: function(storeKey, newStatus) {
     // use writeDataHash for now to handle optimistic lock.  maximize code 
@@ -365,7 +369,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this._notifyRecordPropertyChange(storeKey, statusOnly);
     }
     
-    this._notifyQueries();
+    this._notifyRecordArraysWithQuery();
     
     return this ;
   },
@@ -401,11 +405,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     with an SC.Query to reapply their query with the new storeKeys
   */
   
-  _notifyQueries: function() {
+  _notifyRecordArraysWithQuery: function() {
     var storeKeys = allStoreKeys = this.storeKeys();
-    for(var idx=0, len=this.queriedRecordArrays.length;idx<len;idx++) {
-      var recArray = this.queriedRecordArrays[idx];
-      if(recArray) recArray.applyQuery(storeKeys);
+    var recordArrays = this.recordArraysWithQuery;
+    if(!recordArrays) return;
+    
+    for(var idx=0, len=recordArrays.length;idx<len;idx++) {
+      var recArray = recordArrays[idx];
+      if(recArray) recArray.applyQuery(storeKeys, YES);
     }
   },
   
@@ -433,7 +440,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (!records.hasOwnProperty(storeKey)) continue ;
         this._notifyRecordPropertyChange(storeKey, NO);
       }
-      this._notifyQueries();
+      this._notifyRecordArraysWithQuery();
     }
     
     this.set('hasChanges', NO);    
@@ -490,7 +497,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this._notifyRecordPropertyChange(storeKey, NO);
     }
     
-    this._notifyQueries();
+    this._notifyRecordArraysWithQuery();
 
     // add any records to the changelog for commit handling
     var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
@@ -612,10 +619,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // call fetchRecords() on the data source. It can respond with either
       // a storeKey array, a sparse array or a SC.Query object.
       sourceRet = source.fetchRecords.call(source, this, queryKey, params);
+      
       if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
         storeKeys = sourceRet;
       }
-      else if(sourceRet.instanceOf(SC.Query)) {
+      else if(sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
         // get all storeKeys in the store and run the SC.Query on it
         // TODO: probably should limit this by record type for speed
         allStoreKeys = this.storeKeys();
@@ -652,7 +660,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
       // store record array if SC.Query so we can notify it when store changes
       isQuery = (queryKey.instanceOf && queryKey.instanceOf(SC.Query));
-      if(isQuery) this.queriedRecordArrays.push(ret);
+      if(isQuery) {
+        if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
+        this.recordArraysWithQuery.push(ret);
+      }
       this[cacheKey] = ret ; // save for future reuse.
     }
     return ret;

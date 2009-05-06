@@ -121,14 +121,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     and when we need to refresh all SC.Query 'based' record arrays accordingly.
     
     @param {Array} storeKeys to evaluate against the query
+    @param {Boolean} notify to send length notifyPropertyChange()
   */
-  applyQuery: function(storeKeys) {
+  applyQuery: function(storeKeys, notify) {
     var newStoreKeys = SC.Query.containsStoreKeys(storeKeys, this.get('queryKey'), this.get('store'));
     this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
-    
-    // set length property without .set()
-    this.propertyWillChange('length');
-    this.propertyDidChange('length', newStoreKeys.length);
+    if(notify) this.notifyPropertyChange('length');
   },
   
   // ..........................................................

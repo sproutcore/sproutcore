@@ -194,3 +194,28 @@ test("Loading records after getting empty record array based on SC.Query should 
   equals(records.objectAt(0).get('firstName'), 'Maria', 'name should be Maria');
   
 });
+
+test("Changing a record should make it show up in RecordArrays based on SC.Query", function() {
+  
+  var records = MyApp.store2.findAll("firstName = 'Maria'");
+  equals(records.get('length'), 0, 'record length should be 0');
+  
+  var record = MyApp.store2.find(MyApp.Foo, 1);
+  record.set('firstName', 'Maria');
+  
+  equals(records.get('length'), 1, 'record length should be 1');
+  
+  equals(records.objectAt(0).get('firstName'), 'Maria', 'name should be Maria');
+  
+});
+
+test("Deleting a record should make the RecordArray based on SC.Query update accordingly", function() {
+  
+  var records = MyApp.store2.findAll("firstName = 'John'");
+  equals(records.get('length'), 1, 'record length should be 1');
+  
+  MyApp.store2.destroyRecord(MyApp.Foo, 1);
+  
+  equals(records.get('length'), 0, 'record length should be 0');
+  
+});
