@@ -723,8 +723,11 @@ SC.Query = SC.Object.extend({
           if ( r != 0 ) return r;
           i++;
         };
+        // all elements are equal now
+        // shorter array should be ordered first
         if (v.length < w.length) return -1;
         if (v.length > w.length) return 1;
+        // arrays are equal now
         return 0;
         break;
       default:
