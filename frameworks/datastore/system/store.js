@@ -1658,6 +1658,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(!recordType.storeKeys) return;
     var storeKeys = recordType.storeKeys;
     // TODO: this should be cached
+    
     var ret = [];
     for(storeKey in storeKeys) {
       ret.push(parseInt(storeKey, 00));
