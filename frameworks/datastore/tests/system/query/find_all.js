@@ -25,6 +25,7 @@ module("SC.Query querying findAll on a store", {
     
     MyApp.store = SC.Store.create().from(MyApp.DataSource);
     
+    
     // setup a dummy model
     MyApp.Foo = SC.Record.extend({});
     
@@ -61,7 +62,7 @@ module("SC.Query querying findAll on a store", {
 
 test("should find records based on query string", function() {
   
-  var records = MyApp.store.findAll("firstName = 'John'");
+  var records = MyApp.store.findAll(MyApp.Foo, "firstName = 'John'");
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
 
@@ -69,7 +70,7 @@ test("should find records based on query string", function() {
 
 test("should find records based on SC.Query", function() {
   
-  var q = SC.Query.create({queryString:"firstName = 'Jane'"});
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'Jane'"});
   
   var records = MyApp.store.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
@@ -80,7 +81,7 @@ test("should find records based on SC.Query", function() {
 test("should find records within a passed record array", function() {
 
   var recArray = MyApp.store.findAll(MyApp.Foo);
-  var records = MyApp.store.findAll("firstName = 'Emily'", null, null, recArray);
+  var records = MyApp.store.findAll(MyApp.Foo, "firstName = 'Emily'", null, null, null, recArray);
   
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'Emily', 'name should be Emily');
@@ -121,7 +122,7 @@ test("loading more data into the store should propagate to record array", functi
 
 test("loading more data into the store should propagate to record array with query", function() {
   
-  var records = MyApp.store.findAll("firstName = 'John'");
+  var records = MyApp.store.findAll(MyApp.Foo, "firstName = 'John'");
   
   equals(records.get('length'), 1, 'record length before should be 1');
   
@@ -150,7 +151,7 @@ test("loading more data into the store should propagate to record array with que
 
 test("SC.Query returned from fetchRecords() should return result set", function() {
   
-  var records = MyApp.store2.findAll("firstName = 'John'");
+  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'John'");
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
 
@@ -158,7 +159,7 @@ test("SC.Query returned from fetchRecords() should return result set", function(
 
 test("Loading records after SC.Query is returned in fetchRecords() should show up", function() {
   
-  var records = MyApp.store2.findAll("firstName = 'John'");
+  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'John'");
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
   
@@ -180,7 +181,7 @@ test("Loading records after SC.Query is returned in fetchRecords() should show u
 
 test("Loading records after getting empty record array based on SC.Query should update", function() {
   
-  var records = MyApp.store2.findAll("firstName = 'Maria'");
+  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'Maria'");
   equals(records.get('length'), 0, 'record length should be 0');
   
   var recordsToLoad = [
