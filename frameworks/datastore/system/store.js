@@ -406,7 +406,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   _notifyRecordArraysWithQuery: function() {
-    var storeKeys = allStoreKeys = this.storeKeys();
+    var storeKeys, allStoreKeys = (storeKeys = this.storeKeys());
     var recordArrays = this.recordArraysWithQuery;
     if(!recordArrays) return;
     
@@ -651,7 +651,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   recordsFromStoreKeys: function(storeKeys, queryKey, _store) {
-    var ret, isQuery;
+    var ret, isQuery, cacheKey;
+    
     // if an array was provided, see if a wrapper already exists for 
     // this store.  Otherwise create it
     cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
@@ -1605,9 +1606,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   storeKeys: function() {
     // TODO: this should be cached
-    var ret = [];
+    var ret = [], storeKey ;
     for(storeKey in this.statuses) {
-      ret.push(parseInt(storeKey, 00));
+      ret.push(parseInt(storeKey, 0));
     }
     return ret;
   }
@@ -1668,6 +1669,17 @@ SC.Store.mixin({
   */
   recordTypeFor: function(storeKey) {
     return this.recordTypesByStoreKey[storeKey];
+  },
+  
+  /**
+    Given a storeKey returns the id for the record associated with the key.
+    
+    @param {Number} storeKey the store key
+    @returns {String} the record id or null
+  */
+  idFor: function(storeKey) {
+    var recordType = this.recordTypeFor(storeKey);
+    return recordType ? recordType.idFor(storeKey) : null;
   },
   
   /**
