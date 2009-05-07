@@ -21,26 +21,31 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   
 
   /**
-    Invoked by the store whenever it needs to retrieve an array of storeKeys
-    matching a specific query.  Your subclass should override this method 
-    to return an array of storeKeys that match the passed fetchKey and 
-    optional params.  Often the fetchKey will actually be an SC.Record 
-    subclass used as a filter or string, but it could be anything you want.
+    Invoked by the store whenever it needs to retrieve data matching a specific 
+    query, triggered by findAll() or retrieveRecords(). The fetchKey will most 
+    times be either an SC.Record subclass or an SC.Query object, but it could 
+    be anything you want.
     
-    If your data source subclass can handle the fetch, it should either return
-    an array of storeKeys immediately or it can return an empty array and 
-    populate it dynamically later one the result set has arrived.  Optionally
-    you can also implement "server-side results" by returning a SparseArray
-    and then dynamically populating the contents of the array as it is 
-    requested.
+    If your data source subclass can handle the fetch you should override this 
+    method to return one out of three possible values:
+    1. SC.Array with storeKeys:
+       You can return it immediately or return an empty array and populate it 
+       dynamically later once the result set has arrived with .replace() .
+    2. SC.SparseArray:
+       The data source will be consulted to dynamically populate the contents 
+       of the array as it is requested.
+    3. SC.Query:
+       With this option, the record array returned from the store will 
+       automatically update when records are added, changed, or removed from 
+       the store. This is ideal if want to delegate to your store the job of 
+       keeping the record arrays up to date instead of consulting the 
+       data source every time.
     
     On return, the Store will write your result set in an SC.RecordArray 
     instance, which will monitor your array for changes and then maps those
     store keys to actual SC.Record instances.  SC.RecordArray can also use 
     your underlying storeKeys to create subqueries for client-side searching
     and filtering.
-    
-    This method is invoked from the store functions 'findAll' and 'retrieveRecords'. 
     
     findAll() will request all records and load them using store.loadRecords(). 
     retrieveRecords() checks if the record is already loaded and in a clean 
@@ -52,7 +57,8 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
         SC.Record.STORE_KEYS if invoked from store.retrieveRecords
     @param {Hash} params optional additonal fetch params. storeKeys if invoked
         from store.retrieveRecords
-    @returns {SC.Array} result set with storeKeys.  May be sparse.
+    @returns {SC.Array|SC.Query} result set with storeKeys. In case of SC.Array
+      it may be sparse.
   */
   fetch: function(store, fetchKey, params) {
     return null;  
