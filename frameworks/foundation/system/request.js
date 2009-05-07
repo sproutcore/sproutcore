@@ -211,17 +211,19 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     
     var request = this.get('request') ;
     
-    var headers = request.get('headers') ;
-    for (var headerKey in headers) {
-      rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
-    }
-    
     rawRequest.source = request;
     
     var async = (request.get('isAsynchronous') ? YES : NO) ;
     if (async) SC.Event.add(rawRequest, 'readystatechange', this, this.handleReadyStateChange, rawRequest) ;
     
     rawRequest.open( request.get('type'), request.get('address'), async ) ;
+    
+    // headers need to be set *After* the open call.
+    var headers = request.get('_headers') ;
+    for (var headerKey in headers) {
+      rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
+    }
+    
     rawRequest.send(request.get('body')) ;
     
     if (!async) this.finishRequest(rawRequest) ;
