@@ -38,31 +38,34 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @param {Hash} params optional additonal fetch params
     @returns {SC.Array} result set with storeKeys.  
   */  
-  fetchRecords: function(store, fetchKey, params) {
+  fetch: function(store, fetchKey, params) {
     var ret = [], dataHashes, i, storeKey, hashes= [];
-    
-    if (fetchKey === SC.Record.STORE_KEYS) {
-      params.forEach(function(sk) {
-        var recordType = SC.Store.recordTypeFor(sk),
-            id = store.idFor(sk),
-            hash=this.fixtureForStoreKey(store, sk);
-        ret.push(sk);
-        store.dataSourceDidComplete(sk, hash, id);
-      }, this);
-    } else {
-      if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
-        return null ;
-      }
-      dataHashes = this.fixturesFor(fetchKey);
-      for(i in dataHashes){
-        storeKey = fetchKey.storeKeyFor(i);
-        hashes.push(dataHashes[i]);
-        ret.push(storeKey);
-      }
-      store.loadRecords(fetchKey, hashes);
+    if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
+      return null ;
     }
+    dataHashes = this.fixturesFor(fetchKey);
+    for(i in dataHashes){
+      storeKey = fetchKey.storeKeyFor(i);
+      hashes.push(dataHashes[i]);
+      ret.push(storeKey);
+    }
+    store.loadRecords(fetchKey, hashes);
+    
     return ret;
   },
+  
+  retrieveRecord: function(store, storeKey) {
+    var ret = [], dataHashes, i, storeKey, hashes= [];
+    
+    var recordType = SC.Store.recordTypeFor(storeKey),
+        id = store.idFor(storeKey),
+        hash=this.fixtureForStoreKey(store, storeKey);
+    ret.push(storeKey);
+    store.dataSourceDidComplete(storeKey, hash, id);
+    
+    return ret;
+  },
+  
   
   /**
     Fixture operations complete immediately so you cannot cancel them.

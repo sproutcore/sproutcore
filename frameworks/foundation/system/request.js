@@ -143,6 +143,22 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
     this.fireRequestIfNeeded();
   },
   
+  removeRequest: function(request) {
+    this.get('queue').removeObject(request);
+    return YES;
+  },  
+  
+  cancelAllRequests: function() {
+    var r, xhrRequest;
+    this.set('queue', []);
+    var activeRequests=this.get('currentRequests');
+    while(r=activeRequests.popObject()){
+      xhrRequest = r.get('request');
+      xhrRequest.abort();
+    }
+    return YES;
+  },
+  
   fireRequestIfNeeded: function() {
     if (this.canLoadAnotherRequest()) {
       this.propertyWillChange('queue') ;
@@ -248,13 +264,12 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
       
       if (didSucceed) {
         var response = request ;
-        request.source.set('rawResponse', response) ;
+        request.source.set('rawResponse', response) ; 
       } else {
         var error = SC.$error("HTTP Request failed", "Fail", -1) ;
         error.set("request",request) ;
         request.source.set('rawResponse', error) ;
       }
-      
       if (this.target && this.action) {
         SC.RunLoop.begin();
         this.action.call(this.target, request.source, this.params);
