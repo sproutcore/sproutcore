@@ -66,7 +66,8 @@ module("SC.Query querying findAll on a store", {
 
 test("should find records based on query string", function() {
   
-  var records = MyApp.store.findAll(MyApp.Foo, "firstName = 'John'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'John'"});
+  var records = MyApp.store.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
 
@@ -84,8 +85,10 @@ test("should find records based on SC.Query", function() {
 
 test("should find records within a passed record array", function() {
 
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'Emily'"});
+
   var recArray = MyApp.store.findAll(MyApp.Foo);
-  var records = MyApp.store.findAll(MyApp.Foo, "firstName = 'Emily'", null, null, null, recArray);
+  var records = MyApp.store.findAll(q, null, recArray);
   
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'Emily', 'name should be Emily');
@@ -126,7 +129,9 @@ test("loading more data into the store should propagate to record array", functi
 
 test("loading more data into the store should propagate to record array with query", function() {
   
-  var records = MyApp.store.findAll(MyApp.Foo, "firstName = 'John'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'John'"});
+  
+  var records = MyApp.store.findAll(q);
   
   equals(records.get('length'), 1, 'record length before should be 1');
   
@@ -154,7 +159,9 @@ test("loading more data into the store should propagate to record array with que
 
 test("SC.Query returned from fetchRecords() should return result set", function() {
   
-  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'John'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'John'"});
+  
+  var records = MyApp.store2.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
 
@@ -162,7 +169,9 @@ test("SC.Query returned from fetchRecords() should return result set", function(
 
 test("Loading records after SC.Query is returned in fetchRecords() should show up", function() {
   
-  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'John'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'John'"});
+  
+  var records = MyApp.store2.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
   
@@ -184,7 +193,9 @@ test("Loading records after SC.Query is returned in fetchRecords() should show u
 
 test("Loading records after getting empty record array based on SC.Query should update", function() {
   
-  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'Maria'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'Maria'"});
+  
+  var records = MyApp.store2.findAll(q);
   equals(records.get('length'), 0, 'record length should be 0');
   
   var recordsToLoad = [
@@ -201,7 +212,9 @@ test("Loading records after getting empty record array based on SC.Query should 
 
 test("Changing a record should make it show up in RecordArrays based on SC.Query", function() {
   
-  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'Maria'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'Maria'"});
+  
+  var records = MyApp.store2.findAll(q);
   equals(records.get('length'), 0, 'record length should be 0');
   
   var record = MyApp.store2.find(MyApp.Foo, 1);
@@ -215,7 +228,9 @@ test("Changing a record should make it show up in RecordArrays based on SC.Query
 
 test("Deleting a record should make the RecordArray based on SC.Query update accordingly", function() {
   
-  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'John'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'John'"});
+  
+  var records = MyApp.store2.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   
   MyApp.store2.destroyRecord(MyApp.Foo, 1);
@@ -229,7 +244,9 @@ test("Using findAll with SC.Query on store with no data source should work", fun
   // create a store with no data source
   MyApp.store3 = SC.Store.create();
   
-  var records = MyApp.store3.findAll(MyApp.Foo, "firstName = 'John'");
+  var q = SC.Query.create({recordType: MyApp.Foo, queryString:"firstName = 'John'"});
+  
+  var records = MyApp.store3.findAll(q);
   equals(records.get('length'), 0, 'record length should be 0');
   
   var recordsToLoad = [

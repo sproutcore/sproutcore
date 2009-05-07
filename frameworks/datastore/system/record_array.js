@@ -169,7 +169,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     // if this record array is based on a queryKey reapply the
     // the query before setting the storeKeys to ensure it always conforms
-    if(this.queryKey && this.queryKey.instanceOf && this.queryKey.instanceOf(SC.Query)) {
+    if(SC.instanceOf(this.queryKey, SC.Query)) {
       this.applyQuery();
     }
     
