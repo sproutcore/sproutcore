@@ -87,6 +87,7 @@ SC.Query = SC.Object.extend({
   queryString: null,
   orderBy:     null,
   recordType:  null,
+  parameters:  null,
  
   /** 
     Returns YES if record is matched by the query, NO otherwise.
