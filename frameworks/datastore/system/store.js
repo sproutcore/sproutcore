@@ -673,8 +673,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
         storeKeys = sourceRet;
       }
-      else if(sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
+      else if(sourceRet && sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
         isQuery = YES;
+      }
+      else {
+        throw("Data source fetch() has to return array or SC.Query object");
       }
       
     }
