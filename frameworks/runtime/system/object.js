@@ -763,6 +763,18 @@ function findClassNames() {
   }*/
 }
 
+/**  
+  Same as the instance method, but lets you check instanceOf of any
+  two objects.
+  
+  @param {Object} object the object to check instance of
+  @param {Class} scClass the class
+  @returns {Boolean} if object1 is instance of class
+*/
+SC.instanceOf = function(scObject, scClass) {
+  return (scObject && scObject.constructor === scClass) ;  
+} ;
+
 /** @private
   Returns the name of this class.  If the name is not known, triggers
   a search.  This can be expensive the first time it is called.

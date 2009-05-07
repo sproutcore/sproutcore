@@ -635,31 +635,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @param {Object|SC.Query} queryKey key describing the type of records to 
       fetch or a predefined SC.Query object
-    @param {String} queryString optional and will be used to create the
-      SC.Query object
-    @param {String} orderBy optional and will be used to create the
-      SC.Query object
     @param {Hash} params optional additional parameters to pass along to the
       data source
-    @param {SC.Store} _store this is a private param.  Do not pass
     @param {SC.RecordArray} recordArray optional if you want to find just 
       within a given record array
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  findAll: function(queryKey, queryString, orderBy, params, _store, recordArray) { 
-    if (!_store) _store = this;
-    
-    var source = this.get('dataSource'), ret, storeKeys, sourceRet, cacheKey,
-      isQuery = NO;
-    
-    // if queryString or orderBy is given, create an SC.Query object
-    if(queryString || orderBy) {
-      queryKey = SC.Query.create({
-        recordType: queryKey,
-        queryString: queryString,
-        orderBy: orderBy
-      });
-    }
+  findAll: function(queryKey, params, recordArray) { 
+    var _store = this, source = this.get('dataSource'), ret, storeKeys, 
+      sourceRet, cacheKey;
     
     if(recordArray) {
       // giving a recordArray will circumvent the data source for now
@@ -673,18 +657,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
         storeKeys = sourceRet;
       }
-      else if(sourceRet && sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
-        isQuery = YES;
-      }
-      else {
+      else if(!SC.instanceOf(sourceRet, SC.Query)) {
         throw("Data source fetch() has to return array or SC.Query object");
       }
       
     }
     
-    // if data source returned an SC.Query (isQuery) or queryKey given
-    // to findAll() was SC.Query find the matching store keys based off it    
-    if(!storeKeys && (isQuery || (queryKey.instanceOf && queryKey.instanceOf(SC.Query)))) {
+    // if queryKey given to findAll() was SC.Query execute it on the store
+    if(!storeKeys && SC.instanceOf(queryKey, SC.Query)) {
       storeKeys = SC.Query.storeKeysForQuery(queryKey, _store);
     }
     
@@ -711,8 +691,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!ret) {
       ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
       // store record array if SC.Query so we can notify it when store changes
-      isQuery = (queryKey.instanceOf && queryKey.instanceOf(SC.Query));
-      if(isQuery) {
+      if(SC.instanceOf(queryKey, SC.Query)) {
         if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
         this.recordArraysWithQuery.push(ret);
       }
