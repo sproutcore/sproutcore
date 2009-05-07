@@ -10,7 +10,7 @@ sc_require('debug/select_view');
 SC.StatechartView = SC.View.extend({
   classNames: 'sc-statechart',
   
-  childViews: 'statechartObjects statePath messageLog button trace singleStep'.w(),
+  childViews: 'statechartObjects statePath messageLog trace singleStep'.w(),
   // childViews: 'messageLog trace singleStep'.w(),
   
   statechartObjects: SC.StatechartSelectFieldView.extend({
@@ -35,13 +35,13 @@ SC.StatechartView = SC.View.extend({
     valueBinding: 'StatechartDebugger.statechartController.sc_lastMessage'
   }),
   
-  button: SC.ButtonView.extend({
-    // layout: { top:10, left:190, height: 22, right: 240 },
-    layout: { top:10, width:40, height: 22, right: 250 },
-    
-    target: StatechartDebugger,
-    action: 'addObject'
-  }),
+  // button: SC.ButtonView.extend({
+  //   // layout: { top:10, left:190, height: 22, right: 240 },
+  //   layout: { top:10, width:40, height: 22, right: 250 },
+  //   
+  //   target: StatechartDebugger,
+  //   action: 'addObject'
+  // }),
   
   trace: SC.CheckboxView.extend({
     layout: { top:10, right: 150, height: 22, width: 70 },
