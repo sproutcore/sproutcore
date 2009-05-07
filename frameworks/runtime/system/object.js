@@ -764,8 +764,8 @@ function findClassNames() {
 }
 
 /**  
-  Same as the instance method, but lets you check instanceOf of any
-  two objects.
+  Same as the instance method, but lets you check instanceOf without
+  having to first check if instanceOf exists as a method.
   
   @param {Object} object the object to check instance of
   @param {Class} scClass the class
