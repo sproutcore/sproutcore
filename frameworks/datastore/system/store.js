@@ -190,6 +190,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   recordArraysWithQuery: null,
   
+  /**
+    A mapping of storeKeys per recordType. recordType is is stored as 
+    the numeric guid value of the SC.Record. Primarily used for quickly
+    re-applying SC.Query's that are tied to a specific recordType.
+  
+    @property {Hash}
+  */
+  storeKeysByRecordType: null,
+  
   // ..........................................................
   // CORE ATTRIBUTE API
   // 
@@ -318,8 +327,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   writeStoreKeysByRecordType: function(storeKey, recordType) {
-    if (!recordType.storeKeys) recordType.storeKeys = [];
-    recordType.storeKeys.push(storeKey);
+    if(!this.storeKeysByRecordType) this.storeKeysByRecordType = {};
+    if(!recordType) return;
+    var guid = SC.guidFor(recordType);
+    
+    if(!this.storeKeysByRecordType[guid]) {
+      this.storeKeysByRecordType[guid] = [];
+    }
+    this.storeKeysByRecordType[guid].push(storeKey);
   },
   
   /**
@@ -366,7 +381,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // gaurantees a universally (to this store hierarchy anyway) unique 
     // key value.
     if (!rev) rev = SC.Store.generateStoreKey();
-    var isArray, len, idx, storeKey, recordType, recordTypes = [];
+    var isArray, len, idx, storeKey;
     
     isArray = SC.typeOf(storeKeys) === SC.T_ARRAY;
     if (isArray) {
@@ -380,11 +395,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (isArray) storeKey = storeKeys[idx];
       this.revisions[storeKey] = rev;
       this._notifyRecordPropertyChange(storeKey, statusOnly);
-      recordType = SC.Store.recordTypeFor(storeKey);
-      if(!recordTypes[recordType]) recordTypes.push(recordType);
     }
     
-    this._notifyRecordArraysWithQuery(recordTypes);
+    this._notifyRecordArraysWithQuery();
     
     return this ;
   },
@@ -420,17 +433,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     with an SC.Query to reapply their query with the new storeKeys
   */
   
-  _notifyRecordArraysWithQuery: function(recordTypes) {
-    var storeKeys, recordArrays = this.recordArraysWithQuery;
-    if(!recordArrays || !recordTypes) return;
+  _notifyRecordArraysWithQuery: function() {
+    var recordArrays = this.recordArraysWithQuery;
+    if(!recordArrays) return;
 
     for(var idx=0, len=recordArrays.length;idx<len;idx++) {
       var recArray = recordArrays[idx];
       // if this record array is gone, or does not have a record type 
       // we just updated, then go ahead and reapply the query
-      if(!recArray || recordTypes.indexOf(recArray.queryKey.recordType)===-1) continue;
-      storeKeys = this.storeKeysFor(recArray.queryKey.recordType);
-      recArray.applyQuery(storeKeys, YES);
+      if(recArray) recArray.applyQuery(YES);
     }
   },
   
@@ -452,15 +463,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.chainedChanges = this.locks = this.editables = null;
     this.changelog = null ;
 
-    var records = this.records, storeKey, recordType, recordTypes = [];
+    var records = this.records, storeKey;
     if (records) {
       for(storeKey in records) {
         if (!records.hasOwnProperty(storeKey)) continue ;
         this._notifyRecordPropertyChange(storeKey, NO);
-        recordType = SC.Store.recordTypeFor(storeKey);
-        if(!recordTypes[recordType]) recordTypes.push(recordType);
       }
-      this._notifyRecordArraysWithQuery(recordTypes);
+      this._notifyRecordArraysWithQuery();
     }
     
     this.set('hasChanges', NO);    
@@ -488,7 +497,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // OK, no locking issues.  So let's just copy them changes. 
     // get local reference to values.
-    var len = changes.length, i, storeKey, recordType, recordTypes = [];
+    var len = changes.length, i, storeKey;
     var my_dataHashes, my_statuses, my_editables, my_revisions;
     var ch_dataHashes, ch_statuses, ch_revisions;
     
@@ -515,12 +524,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       my_editables[storeKey] = 0 ; // always make dataHash no longer editable
       
       this._notifyRecordPropertyChange(storeKey, NO);
-      
-      recordType = SC.Store.recordTypeFor(storeKey);
-      if(!recordTypes[recordType]) recordTypes.push(recordType);
     }
     
-    this._notifyRecordArraysWithQuery(recordTypes);
+    this._notifyRecordArraysWithQuery();
 
     // add any records to the changelog for commit handling
     var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
@@ -669,14 +675,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
       else if(sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
         // get all storeKeys in the store and run the SC.Query on it
-        allStoreKeys = this.storeKeysFor(sourceRet.recordType);
-        storeKeys = SC.Query.containsStoreKeys(allStoreKeys, queryKey, _store);
+        storeKeys = SC.Query.matchingStoreKeys(queryKey, _store);
       }
       
       // if SC.Query is given, only filter out those that match
       var isQuery = (queryKey.instanceOf && queryKey.instanceOf(SC.Query));
       if(storeKeys && isQuery) {
-        storeKeys.replace(0,storeKeys.length,SC.Query.containsStoreKeys(storeKeys, queryKey, _store));
+        storeKeys.replace(0,storeKeys.length,SC.Query.matchingStoreKeys(queryKey, _store));
       }
     }
     
@@ -1652,19 +1657,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Finds all storeKeys of a certain record type and returns an array.
     
+    @param {SC.Record} recordType
     @returns {Array} array of storeKeys
   */
   
   storeKeysFor: function(recordType) {
-    if(!recordType.storeKeys) return;
-    var storeKeys = recordType.storeKeys;
-    
-    // TODO: this should be cached
-    var ret = [];
-    for(storeKey in storeKeys) {
-      ret.push(parseInt(storeKey, 00));
-    }
-    return ret;
+    var guid = SC.guidFor(recordType);
+    if(!this.storeKeysByRecordType[guid]) return;
+    return this.storeKeysByRecordType[guid];
   }
   
 }) ;
@@ -1723,17 +1723,6 @@ SC.Store.mixin({
   */
   recordTypeFor: function(storeKey) {
     return this.recordTypesByStoreKey[storeKey];
-  },
-  
-  /**
-    Given a storeKey returns the id for the record associated with the key.
-    
-    @param {Number} storeKey the store key
-    @returns {String} the record id or null
-  */
-  idFor: function(storeKey) {
-    var recordType = this.recordTypeFor(storeKey);
-    return recordType ? recordType.idFor(storeKey) : null;
   },
   
   /**

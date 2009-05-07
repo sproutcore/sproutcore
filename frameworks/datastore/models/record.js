@@ -356,14 +356,6 @@ SC.Record.mixin( /** @scope SC.Record */ {
   BUSY_ERROR:          new Error("Busy"),
   
   /**
-    Array of all storeKeys of this record type
-    
-    @property {SC.Array}
-  */
-  
-  storeKeys: null,
-  
-  /**
     Helper method returns a new SC.RecordAttribute instance to map a simple
     value or to-one relationship.  At the very least, you should pass the 
     type class you expect the attribute to have.  You may pass any additional
