@@ -476,4 +476,3 @@ SC.Record.mixin( /** @scope SC.Record */ {
 */
 SC.Record.toOne = SC.Record.attr ;
 
-SC.Record.STORE_KEYS='STOREKEYS';

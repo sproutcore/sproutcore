@@ -616,9 +616,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKeys = SC.Query.containsRecords(recordArray, queryKey);
     }
     else if (source) {
-      // call fetchRecords() on the data source. It can respond with either
+      // call fetch() on the data source. It can respond with either
       // a storeKey array, a sparse array or a SC.Query object.
-      sourceRet = source.fetchRecords.call(source, this, queryKey, params);
+      sourceRet = source.fetch.call(source, this, queryKey, params);
       
       if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
         storeKeys = sourceRet;
@@ -1065,9 +1065,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    // now commit storekeys to dataSource
+    // now retrieve storekeys from dataSource
     if (source) {
-      var ok = source.fetchRecords.call(source, this, SC.Record.STORE_KEYS, ret);
+      var ok = source.retrieveRecords.call(source, this, ret);
       if (ok === NO) ret.length = 0; // could not find.
     }
     return ret ;

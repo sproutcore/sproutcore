@@ -54,8 +54,12 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
         from store.retrieveRecords
     @returns {SC.Array} result set with storeKeys.  May be sparse.
   */
-  fetchRecords: function(store, fetchKey, params) {
+  fetch: function(store, fetchKey, params) {
     return null;  
+  },
+  
+  retrieveRecords: function(store, storeKeys) {
+    return this._handleEach(store, storeKeys, this.retrieveRecord);  
   },
   
   /**
@@ -207,6 +211,10 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @returns {Boolean} YES if handled
   */
   updateRecord: function(store, storeKey) {
+    return NO ;
+  },
+
+  retrieveRecord: function(store, storeKey) {
     return NO ;
   },
 
