@@ -133,7 +133,7 @@ test("loading more data into the store should propagate to record array with que
   // .replace() will call .enumerableContentDidChange()
   // and should fire original SC.Query again
   MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
-  
+    
   equals(records.get('length'), 2, 'record length after should be 2');
   
   // subsequent updates to store keys should also work
@@ -147,7 +147,6 @@ test("loading more data into the store should propagate to record array with que
   equals(records.get('length'), 3, 'record length after should be 3');
 
 });
-
 
 test("SC.Query returned from fetchRecords() should return result set", function() {
   
@@ -198,7 +197,7 @@ test("Loading records after getting empty record array based on SC.Query should 
 
 test("Changing a record should make it show up in RecordArrays based on SC.Query", function() {
   
-  var records = MyApp.store2.findAll("firstName = 'Maria'");
+  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'Maria'");
   equals(records.get('length'), 0, 'record length should be 0');
   
   var record = MyApp.store2.find(MyApp.Foo, 1);
@@ -212,7 +211,7 @@ test("Changing a record should make it show up in RecordArrays based on SC.Query
 
 test("Deleting a record should make the RecordArray based on SC.Query update accordingly", function() {
   
-  var records = MyApp.store2.findAll("firstName = 'John'");
+  var records = MyApp.store2.findAll(MyApp.Foo, "firstName = 'John'");
   equals(records.get('length'), 1, 'record length should be 1');
   
   MyApp.store2.destroyRecord(MyApp.Foo, 1);
