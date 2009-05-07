@@ -350,6 +350,66 @@ SC.mixin(/** @scope SC */ {
     } else return this.hashFor(a) === this.hashFor(b) ;
   },
   
+  
+  /**
+   This will compare two javascript values of possibly different types.
+   It will tell you which one is greater than the other by returning
+   -1 if the first is smaller than the second,
+    0 if both are equal,
+    1 if the first is greater than the second.
+  
+   The order is calculated based on SC.ORDER_DEFINITION , if types are different.
+   In case they have the same type an appropriate comparison for this type is made.
+
+   @param v {Object} first value to compare
+   @param w {Object} the second value to compare
+   @returns {NUMBER} -1 if v < w, 0 if v = w and 1 if v > w.
+
+  */
+  compare: function (v, w) {
+    
+    var type1 = SC.typeOf(v);
+    var type2 = SC.typeOf(w);
+    var type1Index = SC.ORDER_DEFINITION.indexOf(type1);
+    var type2Index = SC.ORDER_DEFINITION.indexOf(type2);
+    
+    if (type1Index < type2Index) return -1;
+    if (type1Index > type2Index) return 1;
+    
+    // ok - types are equal - so we have to check values now
+    switch (type1) {
+      case SC.T_BOOL:
+      case SC.T_NUMBER:
+        if (v<w) return -1;
+        if (v>w) return 1;
+        return 0;
+        break;
+      case SC.T_STRING:
+        if (v.localeCompare(w)<0) return -1;
+        if (v.localeCompare(w)>0) return 1;
+        return 0;
+        break;
+      case SC.T_ARRAY:
+        var l = Math.min(v.length,w.length);
+        var r = 0;
+        var i = 0;
+        while (r==0 && i < l) {
+          r = arguments.callee(v[i],w[i]);
+          if ( r != 0 ) return r;
+          i++;
+        };
+        // all elements are equal now
+        // shorter array should be ordered first
+        if (v.length < w.length) return -1;
+        if (v.length > w.length) return 1;
+        // arrays are equal now
+        return 0;
+        break;
+      default:
+        return 0;
+    };
+  },
+  
   // ..........................................................
   // OBJECT MANAGEMENT
   // 
@@ -549,6 +609,20 @@ SC.typeOf = SC.typeOf ;
   
 /** @private Provided for compatibility with old HTML templates. */
 SC.didLoad = SC.K ;
+
+/** @private Used by SC.compare */
+SC.ORDER_DEFINITION = [ SC.T_ERROR,
+                        SC.T_UNDEFINED,
+                        SC.T_NULL,
+                        SC.T_BOOL,
+                        SC.T_NUMBER,
+                        SC.T_STRING,
+                        SC.T_ARRAY,
+                        SC.T_HASH,
+                        SC.T_OBJECT,
+                        SC.T_FUNCTION,
+                        SC.T_CLASS ];
+
 
 // ........................................
 // FUNCTION ENHANCEMENTS
