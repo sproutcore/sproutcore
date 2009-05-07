@@ -685,61 +685,10 @@ SC.Query = SC.Object.extend({
   
   compareByProperty: function (record1, record2, propertyName) {
     
-    return this.compareObjects(record1.get(propertyName),record2.get(propertyName));
+    return SC.compare(record1.get(propertyName),record2.get(propertyName));
   },
   
-  compareObjects: function (v, w) {
-    var orderDefinition = [ SC.T_ERROR,
-                            SC.T_UNDEFINED,
-                            SC.T_NULL,
-                            SC.T_BOOL,
-                            SC.T_NUMBER,
-                            SC.T_STRING,
-                            SC.T_ARRAY,
-                            SC.T_HASH,
-                            SC.T_OBJECT,
-                            SC.T_FUNCTION,
-                            SC.T_CLASS ];
-    
-    var type1 = SC.typeOf(v);
-    var type2 = SC.typeOf(w);
-    
-    if (orderDefinition.indexOf(type1) < orderDefinition.indexOf(type2)) return -1;
-    if (orderDefinition.indexOf(type1) > orderDefinition.indexOf(type2)) return 1;
-    
-    // ok - types are equal - so we have to check values now
-    switch (type1) {
-      case SC.T_BOOL:
-      case SC.T_NUMBER:
-        if (v<w) return -1;
-        if (v>w) return 1;
-        return 0;
-        break;
-      case SC.T_STRING:
-        if (v.localeCompare(w)<0) return -1;
-        if (v.localeCompare(w)>0) return 1;
-        return 0;
-        break;
-      case SC.T_ARRAY:
-        var l = Math.min(v.length,w.length);
-        var r = 0;
-        var i = 0;
-        while (r==0 && i < l) {
-          r = arguments.callee(v[i],w[i]);
-          if ( r != 0 ) return r;
-          i++;
-        };
-        // all elements are equal now
-        // shorter array should be ordered first
-        if (v.length < w.length) return -1;
-        if (v.length > w.length) return 1;
-        // arrays are equal now
-        return 0;
-        break;
-      default:
-        return 0;
-    };
-  },
+  
   
   
   // ..........................................................
