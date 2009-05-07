@@ -617,14 +617,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     which will create an SC.Query for you before passing it on as the fetchKey to 
     the data source.
     
-    When using findAll() the datasource will be getting a fetchRecords() with
-    the SC.Query as fetchKey.
+    In your dataSource fetchRecords() method you can return either a store key 
+    array, a sparse array, or an SC.Query object.
     
-    You can also pass a query string as the queryKey, which will be interpreted 
-    by SC.Query, for instance: "firstName = 'John'". You can also pass
-    an SC.Query object as your queryKey. If an SC.Query is returned from the
-    data source, the record array returned from the store will automatically
-    update when records are added/changed/removed from the store.
+    If an SC.Query is returned from the data source, the record array created in
+    findAll() will automatically update when records are added, changed, 
+    or removed from the store.
     
     Once you retrieve a RecordArray, you can filter the results even further
     by using the filter() method, which may issue even more specific requests.
@@ -648,7 +646,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var source = this.get('dataSource'), ret, storeKeys, sourceRet, cacheKey,
       allStoreKeys ;
     
-    // if queryString or orderBy is given, return an SC.Query object
+    // if queryString or orderBy is given, create an SC.Query object
     if(queryString || orderBy) {
       queryKey = SC.Query.create({
         recordType: queryKey,
@@ -656,7 +654,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         orderBy: orderBy
       });
     }
-  
+    
     if(recordArray) {
       // giving a recordArray will circumvent the data source for now
       storeKeys = SC.Query.containsRecords(recordArray, queryKey);
@@ -1652,7 +1650,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /**
     Finds all storeKeys of a certain record type and returns an array.
-
+    
     @returns {Array} array of storeKeys
   */
   
@@ -1661,7 +1659,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var storeKeys = recordType.storeKeys;
     
     // TODO: this should be cached
-    
     var ret = [];
     for(storeKey in storeKeys) {
       ret.push(parseInt(storeKey, 00));
