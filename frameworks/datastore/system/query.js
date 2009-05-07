@@ -702,10 +702,13 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @returns {Array} array instance of store keys matching the SC.Query
   */
   
-  matchingStoreKeys: function(query, store) {
-    var ret = [], recordTypeGuid = SC.guidFor(query.recordType);
+  storeKeysForQuery: function(query, store) {
+    var ret = [], recordTypeGuid = SC.guidFor(query.recordType),
+      storeKeysByRecordType = store.get('storeKeysByRecordType');
     
-    var storeKeys = store.get('storeKeysByRecordType')[recordTypeGuid];
+    if(!storeKeysByRecordType) return ret;
+    
+    var storeKeys = storeKeysByRecordType[recordTypeGuid];
     
     for(var idx=0,len=storeKeys.length;idx<len;idx++) {
       var record = store.materializeRecord(storeKeys[idx]);

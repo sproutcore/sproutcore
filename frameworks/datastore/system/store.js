@@ -650,7 +650,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!_store) _store = this;
     
     var source = this.get('dataSource'), ret, storeKeys, sourceRet, cacheKey,
-      allStoreKeys ;
+      isQuery = NO;
     
     // if queryString or orderBy is given, create an SC.Query object
     if(queryString || orderBy) {
@@ -674,15 +674,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         storeKeys = sourceRet;
       }
       else if(sourceRet.instanceOf && sourceRet.instanceOf(SC.Query)) {
-        // get all storeKeys in the store and run the SC.Query on it
-        storeKeys = SC.Query.matchingStoreKeys(queryKey, _store);
+        isQuery = YES;
       }
       
-      // if SC.Query is given, only filter out those that match
-      var isQuery = (queryKey.instanceOf && queryKey.instanceOf(SC.Query));
-      if(storeKeys && isQuery) {
-        storeKeys.replace(0,storeKeys.length,SC.Query.matchingStoreKeys(queryKey, _store));
-      }
+    }
+    
+    // if data source returned an SC.Query (isQuery) or queryKey given
+    // to findAll() was SC.Query find the matching store keys based off it    
+    if(!storeKeys && (isQuery || (queryKey.instanceOf && queryKey.instanceOf(SC.Query)))) {
+      storeKeys = SC.Query.storeKeysForQuery(queryKey, _store);
     }
     
     if(storeKeys) ret = this.recordsFromStoreKeys(storeKeys, queryKey, _store);

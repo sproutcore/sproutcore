@@ -223,3 +223,24 @@ test("Deleting a record should make the RecordArray based on SC.Query update acc
   equals(records.get('length'), 0, 'record length should be 0');
   
 });
+
+test("Using findAll with SC.Query on store with no data source should work", function() {
+  
+  // create a store with no data source
+  MyApp.store3 = SC.Store.create();
+  
+  var records = MyApp.store3.findAll(MyApp.Foo, "firstName = 'John'");
+  equals(records.get('length'), 0, 'record length should be 0');
+  
+  var recordsToLoad = [
+    { guid: 20, firstName: "John", lastName: "Johnson" },
+    { guid: 21, firstName: "John", lastName: "Anderson" },
+    { guid: 22, firstName: "Barbara", lastName: "Jones" }
+  ];
+  
+  MyApp.store3.loadRecords(MyApp.Foo, recordsToLoad);
+  
+  equals(records.get('length'), 2, 'record length should be 2');
+  
+});
+
