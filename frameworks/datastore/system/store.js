@@ -623,7 +623,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     which will create an SC.Query for you before passing it on as the fetchKey to 
     the data source.
     
-    In your dataSource fetchRecords() method you can return either a store key 
+    In your dataSource fetch() method you can return either a store key 
     array, a sparse array, or an SC.Query object.
     
     If an SC.Query is returned from the data source, the record array created in

@@ -17,7 +17,7 @@ module("SC.Query querying findAll on a store", {
       
       storeKeys: null,
       
-      fetchRecords: function(store, fetchKey, params) {
+      fetch: function(store, fetchKey, params) {
         return this.storeKeys;
       }
       
@@ -47,7 +47,7 @@ module("SC.Query querying findAll on a store", {
     // 
     MyApp.DataSource2 = SC.DataSource.create({
       // just return fetchKey which will be SC.Query
-      fetchRecords: function(store, fetchKey, params) {
+      fetch: function(store, fetchKey, params) {
         return fetchKey;
       }
     });
