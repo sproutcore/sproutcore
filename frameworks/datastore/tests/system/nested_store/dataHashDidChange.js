@@ -58,7 +58,7 @@ function testStateTransition(fromState, toState) {
   equals(store.get('hasChanges'), YES, 'should have changes');
 } 
 
-notest("edit state = INHERITED, parent editable = NO", function() {
+test("edit state = INHERITED, parent editable = NO", function() {
 
   // verify preconditions
   equals(parent.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - parent store edit state is not EDITABLE');
@@ -66,7 +66,7 @@ notest("edit state = INHERITED, parent editable = NO", function() {
   testStateTransition(SC.Store.INHERITED, SC.Store.LOCKED);
 }) ;
 
-notest("edit state = INHERITED, parent editable = YES", function() {
+test("edit state = INHERITED, parent editable = YES", function() {
 
   // verify preconditions
   parent.readEditableDataHash(storeKey);
@@ -75,12 +75,12 @@ notest("edit state = INHERITED, parent editable = YES", function() {
   testStateTransition(SC.Store.INHERITED, SC.Store.EDITABLE);
 }) ;
 
-notest("edit state = LOCKED", function() {
+test("edit state = LOCKED", function() {
   store.readDataHash(storeKey); // lock
   testStateTransition(SC.Store.LOCKED, SC.Store.LOCKED);
 }) ;
 
-notest("edit state = EDITABLE", function() {
+test("edit state = EDITABLE", function() {
   store.readEditableDataHash(storeKey); // make editable
   testStateTransition(SC.Store.EDITABLE, SC.Store.EDITABLE);
 }) ;
@@ -89,7 +89,7 @@ notest("edit state = EDITABLE", function() {
 // SPECIAL CASES
 // 
 
-notest("calling with array of storeKeys will edit all store keys", function() {
+test("calling with array of storeKeys will edit all store keys", function() {
   
   var storeKeys = [storeKey, SC.Store.generateStoreKey()], idx ;
   store.dataHashDidChange(storeKeys, 2000) ;
@@ -99,7 +99,7 @@ notest("calling with array of storeKeys will edit all store keys", function() {
   }
 });
 
-notest("marking change should update revision but leave lock alone", function() {
+test("marking change should update revision but leave lock alone", function() {
   parent.dataHashDidChange(storeKey); // make sure parent has a revision
   store.readDataHash(storeKey); // cause a lock
   store.dataHashDidChange(storeKey); // update revision

@@ -65,20 +65,20 @@ function testStateTransition() {
   equals(args, null, 'should not call commitChangesFromNestedStore');
 }
 
-notest("state = INHERITED", function() {
+test("state = INHERITED", function() {
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - data edit state');
   testStateTransition();
 });
 
 
-notest("state = LOCKED", function() {
+test("state = LOCKED", function() {
   
   store.readDataHash(storeKey); // force to locked mode
   equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - data edit state');
   testStateTransition();
 });
 
-notest("state = EDITABLE", function() {
+test("state = EDITABLE", function() {
   
   // write in some data to store
   store.writeDataHash(storeKey, json);

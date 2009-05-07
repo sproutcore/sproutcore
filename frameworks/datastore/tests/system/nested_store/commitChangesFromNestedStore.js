@@ -29,7 +29,7 @@ module("SC.NestedStore#commitChangesFromNestedStore", {
   }
 });
 
-notest("copies changed data hashes, statuses, and revisions", function() {
+test("copies changed data hashes, statuses, and revisions", function() {
   
   // verify preconditions
   equals(store.readDataHash(storeKey), null, 'precond - should not have data yet');
@@ -45,7 +45,7 @@ notest("copies changed data hashes, statuses, and revisions", function() {
     
 });
 
-notest("adds lock on any items not already locked", function() {
+test("adds lock on any items not already locked", function() {
 
   var storeKey2 = SC.Store.generateStoreKey();
   var json2 = { kind: "json2" };
@@ -72,7 +72,7 @@ notest("adds lock on any items not already locked", function() {
   
 });
 
-notest("adds items in chainedChanges to reciever chainedChanges", function() {
+test("adds items in chainedChanges to reciever chainedChanges", function() {
 
   var key1 = SC.Store.generateStoreKey();
 
@@ -87,7 +87,7 @@ notest("adds items in chainedChanges to reciever chainedChanges", function() {
   ok(store.chainedChanges.contains(storeKey), 'chainedChanges should also contain storeKey');
 });
 
-notest("should set hasChanges to YES if has changes", function() {
+test("should set hasChanges to YES if has changes", function() {
   
   var changes = child.chainedChanges;
   ok(changes.length>0, 'precond - should have some changes in child');
@@ -97,7 +97,7 @@ notest("should set hasChanges to YES if has changes", function() {
   equals(store.get('hasChanges'), YES, 'store should now have changes');
 });
 
-notest("should set hasChanges to NO if no changes", function() {
+test("should set hasChanges to NO if no changes", function() {
   
   child = store.chain() ; // get a new child store
   
@@ -113,7 +113,7 @@ notest("should set hasChanges to NO if no changes", function() {
 // SPECIAL CASES
 // 
 
-notest("committing changes should chain back each step", function() {
+test("committing changes should chain back each step", function() {
 
   // preconditions
   equals(child.readDataHash(storeKey), json, 'precond - child should have data');
