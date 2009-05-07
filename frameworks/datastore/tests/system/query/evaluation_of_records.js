@@ -44,12 +44,12 @@ module("SC.Query evaluation of records", {
 
 test("should get record properties correctly", function() {
   
-  q.queryString = "firstName = 'John'";
+  q.conditions = "firstName = 'John'";
   q.parseQuery();
   ok(q.contains(rec1) == true, 'John should match: firstName = "John"');
   ok(q.contains(rec2) == false, 'Jane should not match: firstName = "John"');
   
-  q.queryString = "lastName BEGINS_WITH firstName";
+  q.conditions = "lastName BEGINS_WITH firstName";
   q.parseQuery();
   ok(q.contains(rec5) == true, 'Bert Berthold should match: lastName BEGINS_WITH firstName');
   ok(q.contains(rec2) == false, 'Jane Doe should not match: lastName BEGINS_WITH firstName');
@@ -59,12 +59,12 @@ test("should get record properties correctly", function() {
 
 test("should handle undefined record properties correctly", function() {
   
-  q.queryString = "bornIn = 1975";
+  q.conditions = "bornIn = 1975";
   q.parseQuery();
   ok(q.contains(rec3) == true, 'record with bornIn set should match');
   ok(q.contains(rec2) == false, 'record without bornIn set should not match');
   
-  q.queryString = "bornIn = null";
+  q.conditions = "bornIn = null";
   q.parseQuery();
   ok(q.contains(rec3) == false, 'record with bornIn set different to null should not match');
   ok(q.contains(rec2) == true, 'record without bornIn set should match');

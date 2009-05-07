@@ -32,12 +32,12 @@ module("SC.Query comparison of record types", {
   
 test("should handle record types", function() {
   
-  q.queryString = "TYPE_IS 'MyApp.Foo'";
+  q.conditions = "TYPE_IS 'MyApp.Foo'";
   q.parseQuery();
   equals(SC.Store.recordTypeFor(rec.storeKey), SC.objectForPropertyPath('MyApp.Foo'), 'record type should be MyApp.Foo');
   ok(q.contains(rec), 'record with proper type should match');
   
-  q.queryString = "TYPE_IS 'MyApp.Baz'";
+  q.conditions = "TYPE_IS 'MyApp.Baz'";
   q.parseQuery();
   ok(!q.contains(rec), 'record with wrong type should not match');
 });
