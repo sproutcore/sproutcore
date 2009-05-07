@@ -615,13 +615,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     You can also pass an SC.Query object as your queryKey, for instance:
     var q = SC.Query.create({ recordType: MyApp.MyModel, 
-      queryString: "firstName = 'John'", orderBy: "lastName ASC"});
+      conditions: "firstName = 'John'", orderBy: "lastName ASC"});
     var records = MyApp.store.findAll(q);
-
-    For convenience, you can also do: 
-    findAll(MyApp.MyModel, "firstName = 'John'", "lastName ASC") 
-    which will create an SC.Query for you before passing it on as the fetchKey to 
-    the data source.
     
     In your dataSource fetch() method you can return either a store key 
     array, a sparse array, or an SC.Query object.

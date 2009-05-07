@@ -11,14 +11,14 @@ require('core') ;
 
   A Query permits you to write queries on your data store in a SQL-like language.
   Here is a simple example:
-    q = SC.Query.create({queryString:"firstName = 'Jonny' AND lastName = 'Cash'"})
+    q = SC.Query.create({conditions:"firstName = 'Jonny' AND lastName = 'Cash'"})
   You can check if a certain record matches the query by calling:
     q.contains(record)
   Normally you will not use SC.Query directly, instead you will write:
     r = MyApp.store.findAll("firstName = 'Jonny' AND lastName = 'Cash'")
   r will be a record array containing all matching records. (This does not work yet!)
   You can give an order which the returned records should be in like this:
-    q = SC.Query.create({ queryString:"firstName = 'Jonny' AND lastName = 'Cash'",
+    q = SC.Query.create({ conditions:"firstName = 'Jonny' AND lastName = 'Cash'",
                           orderBy:"lastName, year DESC" })
   
   
@@ -84,7 +84,7 @@ require('core') ;
 SC.Query = SC.Object.extend({
 
  
-  queryString: null,
+  conditions: null,
   orderBy:     null,
   recordType:  null,
   parameters:  null,
@@ -160,7 +160,7 @@ SC.Query = SC.Object.extend({
   
   parseQuery: function() {
 
-    this.tokenList      = this.tokenizeString(this.queryString, this.queryGrammar);
+    this.tokenList      = this.tokenizeString(this.conditions, this.queryGrammar);
     this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
     this.needsRecord    = false; // this.willNeedRecord(usedProperties)
     this.tokenTree      = this.buildTokenTree(this.tokenList, this.queryLogic);
