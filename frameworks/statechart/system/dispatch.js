@@ -50,6 +50,8 @@ SC.mixin(SC.Object.prototype,
     current = this[stateKey] ;
     if (!current) return NO ; // fast path -- this object does not use HSMs
     
+    this._sc_statechart_dispatch() ; // trace
+    
     // okay, process the event hierarchically...
     // res = this[this[stateKey]](evt) ;
     var depth = this._sc_state_depth ;
@@ -381,6 +383,15 @@ SC.mixin(SC.Object.prototype,
       return YES ;
     }
   },
+  
+  /** @private
+    Sends an event to the given state. This method is overriden in debug mode 
+    to implement state tracing.
+    
+    @param {String} state a local property containing a state handler
+    @returns {SC.EVT_HANDLED_RES, SC.EVT_TRANSITION_RES, or undefined}
+  */
+  _sc_statechart_dispatch: function() {},
   
   /** @private
     Enters a given state. This method is overriden in debug mode to implement

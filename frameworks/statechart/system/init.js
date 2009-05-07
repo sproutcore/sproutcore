@@ -36,6 +36,8 @@ SC.mixin(SC.Object.prototype,
     
     this.hasStatechart = YES ;
     
+    this._sc_statechart_initStatechart() ;
+    
     // okay, does the initial state have superstates? If so, we need to
     // enter them first...
     superstateKey = this[initial].superstateKey ;
@@ -100,6 +102,15 @@ SC.mixin(SC.Object.prototype,
     if (StatechartDebugger) {
       StatechartDebugger.statecharts.removeObject(this) ;
     }
-  }
+  },
+  
+  /** @private
+    Sends an event to the given state. This method is overriden in debug mode 
+    to implement state tracing.
+    
+    @param {String} state a local property containing a state handler
+    @returns {SC.EVT_HANDLED_RES, SC.EVT_TRANSITION_RES, or undefined}
+  */
+  _sc_statechart_initStatechart: function() {}
   
 });

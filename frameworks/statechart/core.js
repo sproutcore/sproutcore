@@ -5,9 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-SC.EVT_ENTER_SIG = 'sc-evt-enter-sig' ;
-SC.EVT_EXIT_SIG  = 'sc-evt-exit-sig' ;
-SC.EVT_INIT_SIG  = 'sc-evt-init-sig' ;
+SC.EVT_ENTER_SIG = 'enter' ;
+SC.EVT_EXIT_SIG  = 'exit' ;
+SC.EVT_INIT_SIG  = 'defaultTransition' ;
 
 SC.EVT_ENTER = { sig: SC.EVT_ENTER_SIG } ;
 SC.EVT_EXIT  = { sig: SC.EVT_EXIT_SIG } ;
