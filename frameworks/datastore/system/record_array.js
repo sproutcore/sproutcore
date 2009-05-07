@@ -123,8 +123,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Array} storeKeys to evaluate against the query
     @param {Boolean} notify to send length notifyPropertyChange()
   */
-  applyQuery: function(storeKeys, notify) {
-    var newStoreKeys = SC.Query.containsStoreKeys(storeKeys, this.get('queryKey'), this.get('store'));
+  applyQuery: function(notify) {
+    var newStoreKeys = SC.Query.matchingStoreKeys(this.get('queryKey'), this.get('store'));
     this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
     if(notify) this.notifyPropertyChange('length');
   },
@@ -170,8 +170,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // if this record array is based on a queryKey reapply the
     // the query before setting the storeKeys to ensure it always conforms
     if(this.queryKey && this.queryKey.instanceOf && this.queryKey.instanceOf(SC.Query)) {
-      var storeKeys = this._prevStoreKeys;
-      this.applyQuery(storeKeys);
+      this.applyQuery();
     }
     
     this.beginPropertyChanges()

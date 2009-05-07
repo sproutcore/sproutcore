@@ -25,9 +25,9 @@ module("SC.Query querying findAll on a store", {
     
     MyApp.store = SC.Store.create().from(MyApp.DataSource);
     
-    
     // setup a dummy model
     MyApp.Foo = SC.Record.extend({});
+    MyApp.Faa = SC.Record.extend({});
     
     var records = [
       { guid: 1, firstName: "John", lastName: "Doe" },
@@ -39,6 +39,8 @@ module("SC.Query querying findAll on a store", {
     
     // load some data
     MyApp.DataSource.storeKeys = MyApp.store.loadRecords(MyApp.Foo, records);
+    // for sanity check, load two record types
+    MyApp.store.loadRecords(MyApp.Faa, records);
     
     // 
     // now set up a second store with data source that returns SC.Query
@@ -51,6 +53,8 @@ module("SC.Query querying findAll on a store", {
     });
     MyApp.store2 = SC.Store.create().from(MyApp.DataSource2);
     MyApp.DataSource2.storeKeys = MyApp.store2.loadRecords(MyApp.Foo, records);
+    // for sanity check, load two record types
+    MyApp.store2.loadRecords(MyApp.Faa, records);
     
   }
 });

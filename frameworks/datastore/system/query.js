@@ -694,8 +694,7 @@ SC.Query = SC.Object.extend({
 // Class Methods
 SC.Query.mixin( /** @scope SC.Query */ {
   /**
-    Will find which records match a given SC.Query based on their store keys
-    and return an array of store keys. 
+    Will find which records match a given SC.Query and return the storeKeys
     
     @param {Array} storeKeys to search within
     @param {SC.Query} query to apply
@@ -703,12 +702,16 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @returns {Array} array instance of store keys matching the SC.Query
   */
   
-  containsStoreKeys: function(storeKeys, query, store) {
-    var ret = [];
+  matchingStoreKeys: function(query, store) {
+    var ret = [], recordTypeGuid = SC.guidFor(query.recordType);
+    
+    var storeKeys = store.get('storeKeysByRecordType')[recordTypeGuid];
+    
     for(var idx=0,len=storeKeys.length;idx<len;idx++) {
       var record = store.materializeRecord(storeKeys[idx]);
       if(record && query.contains(record)) ret.push(storeKeys[idx]);
     }
+    
     return ret;
   },
   
