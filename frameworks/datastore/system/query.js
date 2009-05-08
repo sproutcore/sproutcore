@@ -16,7 +16,7 @@ require('core') ;
     q.contains(record)
   Normally you will not use SC.Query directly, instead you will write:
     r = MyApp.store.findAll("firstName = 'Jonny' AND lastName = 'Cash'")
-  r will be a record array containing all matching records. (This does not work yet!)
+  r will be a record array containing all matching records.
   You can give an order which the returned records should be in like this:
     q = SC.Query.create({ conditions:"firstName = 'Jonny' AND lastName = 'Cash'",
                           orderBy:"lastName, year DESC" })
@@ -84,7 +84,7 @@ require('core') ;
 SC.Query = SC.Object.extend({
 
  
-  conditions: null,
+  conditions:  null,
   orderBy:     null,
   recordType:  null,
   parameters:  null,
@@ -105,17 +105,17 @@ SC.Query = SC.Object.extend({
   },
  
   /**
-    Not implemented yet!
-    Override to compare two records according to any predefined order.  This will be used
-    to sort the result set.  Assume the records you are passed have already been checked
-    for membership via contains().
+    This will tell you which of the two passed records is greater than the other,
+    in respect to the orderBy property of your SC.Query object.
  
     @param {SC.Record} record1 the first record
     @param {SC.Record} record2 the second record
     @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
   */
   compare: function(record1, record2) {
-    var result = 0;
+    var result;
+    var propertyName;
+
     // if called for the first time we have to build the order array
     if (!this.isReady) this.parseQuery();
     // if parsing failed we say everything is equal
@@ -123,15 +123,17 @@ SC.Query = SC.Object.extend({
     
     // for every property specified in orderBy
     for (var i=0; i < this.order.length; i++) {
-      // if
-      result = this.compareByProperty(record1, record2, this.order[i].propertyName);
+      propertyName = this.order[i].propertyName;
+      result = SC.compare(record1.get(propertyName),record2.get(propertyName));
       if (result != 0) {
         // if order is descending we invert the sign of the result
         if (this.order[i].descending) result = (-1) * result;
         return result;
       }
     };
-    return result;
+    // all properties are equal now
+    // get order by guid
+    return SC.compare(record1.get('guid'),record2.get('guid'));
   },
   
   
@@ -160,11 +162,12 @@ SC.Query = SC.Object.extend({
   
   parseQuery: function() {
 
-    this.tokenList      = this.tokenizeString(this.conditions, this.queryGrammar);
-    this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
-    this.needsRecord    = false; // this.willNeedRecord(usedProperties)
-    this.tokenTree      = this.buildTokenTree(this.tokenList, this.queryLogic);
-    this.order          = this.buildOrder(this.orderBy);
+    this.tokenList = this.tokenizeString(this.conditions, this.queryGrammar);
+    this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLogic);
+    this.order     = this.buildOrder(this.orderBy);
+    
+    // maybe we need this later
+    // this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
     
     if ( !this.tokenTree || this.tokenTree.error ) {
       return false;
@@ -230,8 +233,7 @@ SC.Query = SC.Object.extend({
   queryLogic: {
     'PROPERTY'        : {
       evalType        : 'PRIMITIVE',
-      evaluate        : function (r,w) { return r.get(this.tokenValue); },
-      evaluateNR      : function (r,w) { return r.get(this.tokenValue); }
+      evaluate        : function (r,w) { return r.get(this.tokenValue); }
                       },
     'STRING'          : {
       evalType        : 'PRIMITIVE',
@@ -439,6 +441,8 @@ SC.Query = SC.Object.extend({
   
     // stepping through the string:
     
+    if (!inputString) return [];
+    
     for (var i=0; i < inputString.length; i++) {
       
       // end reached?
@@ -517,6 +521,8 @@ SC.Query = SC.Object.extend({
       Check it to get some information about what happend.
       If everything worked the tree can be evaluated by calling:
       tree.evaluate(record,queryValues)
+      If tokenList is empty, a single token will be returned which will evaluate to true
+      for all records.
     */
   
     var l                    = tokenList.slice();
@@ -524,7 +530,10 @@ SC.Query = SC.Object.extend({
     var openParenthesisStack = [];
     var shouldCheckAgain     = false;
     var error                = [];
-
+    
+  
+    // empty tokenList is a special case
+    if (!tokenList || tokenList.length == 0) return {evaluate: function(){return true;}};
   
   
     // some helper functions
@@ -542,14 +551,8 @@ SC.Query = SC.Object.extend({
         error.push("logic for token '"+l[p].tokenType+"':'"+l[p].tokenValue+"' is not defined");
         return false;
       };
-      // save tokenLogic in token, so that we don't have to look it up again when evaluating the tree
-      /*
-      if ( this.needsRecord && tl.evaluateNR )
-        l[p].evaluate = tl.evaluateNR;
-      else
-        l[p].evaluate = tl.evaluate;
-      */
-      l[p].evaluate = (this.needsRecord && tl.evaluateNR) ? tl.evaluateNR : tl.evaluate;
+      // save evaluate in token, so that we don't have to look it up again when evaluating the tree
+      l[p].evaluate = tl.evaluate;
       return tl;
     };
   
@@ -666,7 +669,7 @@ SC.Query = SC.Object.extend({
   
   buildOrder: function (orderString) {
     if (!orderString) {
-      return [{propertyName: 'guid'}];
+      return [];
     }
     else {
       var o = orderString.split(',');
@@ -683,25 +686,18 @@ SC.Query = SC.Object.extend({
     
   },
   
-  compareByProperty: function (record1, record2, propertyName) {
-    
-    return SC.compare(record1.get(propertyName),record2.get(propertyName));
-  },
-  
-  
-  
   
   // ..........................................................
   // OTHER HELPERS
-  //
+  // not used right now
   
-  propertiesUsedInQuery: function (tokenList) {
-    var propertyList = [];
-    for (var i=0; i < tokenList.length; i++) {
-      if (tokenList[i].tokenType == 'PROPERTY') propertyList.push(tokenList[i].tokenValue);
-    };
-    return propertyList;
-  }
+  // propertiesUsedInQuery: function (tokenList) {
+  //   var propertyList = [];
+  //   for (var i=0; i < tokenList.length; i++) {
+  //     if (tokenList[i].tokenType == 'PROPERTY') propertyList.push(tokenList[i].tokenValue);
+  //   };
+  //   return propertyList;
+  // }
   
 
 });
@@ -755,119 +751,3 @@ SC.Query.mixin( /** @scope SC.Query */ {
   }
 });
 
-
-// Global compare function
-
-
-// Old code by Peter:
-//
-//SC.Query = SC.SparseArray.extend(
-///** @scope SC.Query.prototype */ {
-//
-//  queryString: '',
-//  truthFunction: null,
-//  conditions: null,
-//  store: null,
-//  // delegate: null,  
-//  recordType: null,
-//  needRecord: false,
-//  
-//  length: 0,
-//  
-//  createTruthFunction: function(queryString) {
-//    this.set('queryString', queryString);
-//    
-//    /* Need parsing here from Thomas.. curently hacked. */
-//    var hackComponents = [queryString.split('=')[0]];
-//    
-//    var components = queryString.split('=');
-//    
-//    var needRecord = this.willNeedRecord(hackComponents);
-//    this.set('needRecord', needRecord);
-//
-//    if(needRecord) {
-//      this.truthFunction = function(rec, conditions) {
-//          if(!rec) return NO;
-//          return (rec.get(components[0]) == conditions[0]);
-//      };
-//    } else {
-//      this.truthFunction = function(rec, conditions) {
-//          if(!rec) return NO;
-//          return (rec[components[0]] == conditions[0]);
-//      };
-//    }
-//  },
-//  
-//  willNeedRecord: function(components) {
-//    
-//    var rec = this.get('delegate').createCompRecord(this.get('recordType'));
-//    var needRecord = NO;
-//    for(var i=0, iLen=components.length; i<iLen; i++) {
-//      if(rec[components[i]]) {
-//        needRecord = YES;
-//      }
-//    }
-//    console.log('needRecord: ' + needRecord);
-//    return needRecord;
-//  },
-//
-//  
-//  parse: function(recordType, queryString, conditions) {
-//    this.set('recordType', recordType);
-//    this.createTruthFunction(queryString);
-//    this.loadConditions(conditions);
-//  },
-//  
-//  loadConditions: function(conditions) {
-//    if(!conditions) {
-//      conditions = null;
-//    }
-//    this.set('conditions', conditions);
-//  },
-//  
-//  performQuery: function() {
-//    var store = this.get('delegate');
-//
-//    if(!store) return null;
-//    
-//    this.beginPropertyChanges();
-//    
-//    this._storeKeysForQuery = store.performQuery(this);
-//    this.set('length', this._storeKeysForQuery.length);
-//
-//  //  this.enumerableContentDidChange() ;
-//    this.endPropertyChanges();
-//    return this;
-//  },
-//
-//  recordsDidChange: function() {
-//    this.invokeOnce(this.performQuery);
-//  },
-//  
-//  objectAt: function(idx)
-//  {
-//    if (idx < 0) return undefined ;
-//    if (idx >= this.get('length')) return undefined;
-//    return this.fetchContentAtIndex(idx);
-//  },
-//
-//  fetchContentAtIndex: function(idx) {
-//    var store = this.get('delegate') ;
-//    var storeKey = this._storeKeysForQuery[idx];
-//    var ret = null; 
-//    if(store && storeKey) {
-//      ret = store.materializeRecord(storeKey);
-//    }
-//    return ret;
-//  },
-//    
-//  _storeKeysForQuery: null,
-//  
-//  init: function() {
-//    sc_super();
-//    this._storeKeysForQuery = [];
-//  }
-//  
-//
-//}) ;
-//

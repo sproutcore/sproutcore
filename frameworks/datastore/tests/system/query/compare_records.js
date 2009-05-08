@@ -7,7 +7,7 @@
  
 // test parsing of query string
 var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
-module("SC.Query comparison/ordering of records", {
+module("SC.Query comparison of records", {
   setup: function() {
     // setup dummy app and store
     MyApp = SC.Object.create({
@@ -41,19 +41,21 @@ module("SC.Query comparison/ordering of records", {
 // ..........................................................
 // TESTS
 // 
+
+test("parseQuery should work with conditions = null", function(){
+  q.parseQuery();
+});
  
 test("building the order", function() {
   // undefined orderBy
   q.orderBy = null;
   q.parseQuery();
-  equals(q.order[0].propertyName,'guid', 'propertyName should be guid');
-  equals(q.order[0].descending,false], 'descending should be false');
+  equals(q.order.length, 0, 'order should be empty');
   
   // empty orderBy
   q.orderBy = "";
   q.parseQuery();
-  equals(q.order[0].propertyName,'guid', 'propertyName should be guid');
-  equals(q.order[0].descending,false], 'descending should be false');
+  equals(q.order.length, 0, 'order should be empty');
   
   // single property
   q.orderBy = "firstName";
@@ -70,48 +72,55 @@ test("building the order", function() {
   q.orderBy = "lastName, firstName, year DESC";
   q.parseQuery();
   equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
-  equals(q.order[0].descending,false, 'descending should be false');
+  ok(!q.order[0].descending, 'descending should be false');
   equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
-  equals(q.order[1].descending,false, 'descending should be false');
+  ok(!q.order[1].descending, 'descending should be false');
   equals(q.order[2].propertyName,'year', 'propertyName should be year');
-  equals(q.order[2].descending,true, 'descending should be true');
+  ok(q.order[2].descending, 'descending should be true');
 });
- 
+
+test("no order should result in comparison by guid", function() {
+  q.orderBy = null;
+  q.parseQuery();
+  equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
+});
+
 test("comparing non existant properties", function() {
   q.orderBy = "year";
   q.parseQuery();
-  ok(q.compare(rec1,rec5) == -1, 'null should be before 1975');
+  equals(q.compare(rec5,rec1), -1, 'null should be before 1974');
 });
  
 test("comparing null and boolean properties", function() {
   q.orderBy = "active";
   q.parseQuery();
-  ok(q.compare(rec3,rec4) == -1, 'null should be before false');
-  ok(q.compare(rec4,rec5) == -1, 'false should be before true');
+  equals(q.compare(rec3,rec4), -1, 'null should be before false');
+  equals(q.compare(rec4,rec5), -1, 'false should be before true');
 });
  
 test("comparing number properties", function() {
   q.orderBy = "year";
   q.parseQuery();
-  ok(q.compare(rec1,rec2) == -1, '1974 should be before 1975');
-  ok(q.compare(rec2,rec3) == 0, '1975 should equal 1975');
+  equals(q.compare(rec1,rec2), -1, '1974 should be before 1975');
   
   q.orderBy = "year DESC";
   q.parseQuery();
-  ok(q.compare(rec1,rec2) == 1, '1974 should be after 1975 with DESC');
+  equals(q.compare(rec1,rec2), 1, '1974 should be after 1975 with DESC');
 }); 
  
  
 test("comparing string properties", function() {
   q.orderBy = "firstName";
   q.parseQuery();
-  ok(q.compare(rec1,rec2) == 1, 'John should be after Jane');
+  equals(q.compare(rec1,rec2), 1, 'John should be after Jane');
   
   q.orderBy = "firstName DESC";
   q.parseQuery();
-  ok(q.compare(rec1,rec2) == -1, 'John should be before Jane with DESC');
-  
+  equals(q.compare(rec1,rec2), -1, 'John should be before Jane with DESC');
+}); 
+
+test("comparing by equal properties should use guid for order", function() {
   q.orderBy = "lastName";
   q.parseQuery();
-  ok(q.compare(rec1,rec2) == 0, 'Doe should equal Doe');
-}); 
+  equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2')
+});
