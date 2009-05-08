@@ -235,7 +235,7 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     rawRequest.open( request.get('type'), request.get('address'), async ) ;
     
     // headers need to be set *After* the open call.
-    var headers = request.get('_headers') ;
+    var headers = request._headers ;
     for (var headerKey in headers) {
       rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
     }
