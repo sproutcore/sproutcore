@@ -20,6 +20,8 @@ require('core') ;
   You can give an order which the returned records should be in like this:
     q = SC.Query.create({ conditions:"firstName = 'Jonny' AND lastName = 'Cash'",
                           orderBy:"lastName, year DESC" })
+  If no order is given, or records are equal in respect to a given order,
+  records will be ordered by guid.
   
   
   Features of the query language:
