@@ -122,5 +122,5 @@ test("comparing string properties", function() {
 test("comparing by equal properties should use guid for order", function() {
   q.orderBy = "lastName";
   q.parseQuery();
-  equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2')
+  equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
 });
