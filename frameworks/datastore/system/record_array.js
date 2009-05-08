@@ -120,11 +120,42 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     or changed in the store (or directly on the array with .replace() ) and 
     and when we need to refresh all SC.Query 'based' record arrays accordingly.
     
+    Will iterate through all storeKeys in recArray and make sure that
+    if a storeKey given as input was in the recArray but not any longer in 
+    newStoreKeys, remove it, and inversely add it.
+    
     @param {Array} storeKeys to evaluate against the query
+    @param {SC.Set} recordTypes set of record types that changed
     @param {Boolean} notify to send length notifyPropertyChange()
   */
-  applyQuery: function(notify) {
-    var newStoreKeys = SC.Query.storeKeysForQuery(this.get('queryKey'), this.get('store'));
+  applyQuery: function(changedStoreKeys, recordTypes, notify) {
+   
+    // first check if these changes include any of the record types
+    if(recordTypes && recordTypes.contains(this.recordType)) return;
+    
+    var newStoreKeys = this.get('storeKeys'), inChangedStoreKeys, 
+      inMatchingStoreKeys, idx, len, storeKey;
+    var matchingStoreKeys = SC.Query.containsStoreKeys(
+      this.get('queryKey'), changedStoreKeys, this.get('store'));
+     
+    // iterate over all changedStoreKeys. if we have it in our array,
+    // keep it if it is a part of matchingStoreKeys, remove it if not,
+    // or if it is not in rec array add it
+    for(idx=0,len=changedStoreKeys.length;idx<len;idx++) {
+      storeKey = changedStoreKeys[idx];
+      inMatchingStoreKeys = (matchingStoreKeys && 
+        matchingStoreKeys.indexOf(storeKey)!==-1) ? YES: NO;
+      inRecArray = this.storeKeys.indexOf(storeKey)!==-1 ? YES : NO;
+    
+      if(inMatchingStoreKeys && !inRecArray) {
+        newStoreKeys.push(storeKey);
+      }
+      else if(!inMatchingStoreKeys && inRecArray) {
+        newStoreKeys.removeObject(storeKey);
+      }
+      
+    }
+    
     this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
     if(notify) this.notifyPropertyChange('length');
   },
@@ -170,7 +201,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // if this record array is based on a queryKey reapply the
     // the query before setting the storeKeys to ensure it always conforms
     if(SC.instanceOf(this.queryKey, SC.Query)) {
-      this.applyQuery();
+      this.storeKeys = SC.Query.containsStoreKeys(this.queryKey, null, this.store);
+      this.notifyPropertyChange('length');
     }
     
     this.beginPropertyChanges()

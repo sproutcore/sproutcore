@@ -710,19 +710,19 @@ SC.Query.mixin( /** @scope SC.Query */ {
   /**
     Will find which records match a given SC.Query and return the storeKeys
     
-    @param {Array} storeKeys to search within
     @param {SC.Query} query to apply
+    @param {Array} storeKeys to search within
     @param {SC.Store} store to materialize record from
     @returns {Array} array instance of store keys matching the SC.Query
   */
   
-  storeKeysForQuery: function(query, store) {
-    var ret = [], recordTypeGuid = SC.guidFor(query.recordType),
-      storeKeysByRecordType = store.get('storeKeysByRecordType');
+  containsStoreKeys: function(query, storeKeys, store) {
+    var ret = [];
     
-    if(!storeKeysByRecordType) return ret;
-    
-    var storeKeys = storeKeysByRecordType[recordTypeGuid];
+    // if storeKeys is not set, just get all storeKeys for this record type
+    if(!storeKeys) {
+      storeKeys = store.storeKeysFor(query.get('recordType'));
+    }
     
     for(var idx=0,len=storeKeys.length;idx<len;idx++) {
       var record = store.materializeRecord(storeKeys[idx]);

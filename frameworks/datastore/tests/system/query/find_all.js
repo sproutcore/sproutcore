@@ -111,6 +111,7 @@ test("changing the original store key array from data source should propagate to
 
 });
 
+
 test("loading more data into the store should propagate to record array", function() {
   
   var records = MyApp.store.findAll(MyApp.Foo);
@@ -141,8 +142,9 @@ test("loading more data into the store should propagate to record array with que
   
   // .replace() will call .enumerableContentDidChange()
   // and should fire original SC.Query again
+  
   MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
-    
+  
   equals(records.get('length'), 2, 'record length after should be 2');
   
   // subsequent updates to store keys should also work
@@ -154,7 +156,7 @@ test("loading more data into the store should propagate to record array with que
   MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
   
   equals(records.get('length'), 3, 'record length after should be 3');
-
+  
 });
 
 test("SC.Query returned from fetchRecords() should return result set", function() {
@@ -260,4 +262,3 @@ test("Using findAll with SC.Query on store with no data source should work", fun
   equals(records.get('length'), 2, 'record length should be 2');
   
 });
-
