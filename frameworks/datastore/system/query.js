@@ -126,7 +126,14 @@ SC.Query = SC.Object.extend({
     // for every property specified in orderBy
     for (var i=0; i < this.order.length; i++) {
       propertyName = this.order[i].propertyName;
-      result = SC.compare(record1.get(propertyName),record2.get(propertyName));
+      // if this property has a registered comparison use that
+      // if not use default SC.compare()
+      if (SC.Query.comparisons[propertyName]) {
+        result = SC.Query.comparisons[propertyName](record1.get(propertyName),record2.get(propertyName));
+      }
+      else {
+        result = SC.compare(record1.get(propertyName),record2.get(propertyName));
+      }
       if (result != 0) {
         // if order is descending we invert the sign of the result
         if (this.order[i].descending) result = (-1) * result;
@@ -752,4 +759,25 @@ SC.Query.mixin( /** @scope SC.Query */ {
     return ret;
   }
 });
+
+
+/** @private
+  Hash of registered comparisons by propery name. 
+*/
+SC.Query.comparisons = {};
+
+/**
+  Call to register a comparison for a specific property name. The function you pass
+  should accept two values of this property and return -1 if the first is smaller
+  than the second, 0 if they are equal and 1 if the first is greater than the second.
+  
+  @param {String} name of the record property
+  @param {Function} custom comparison function
+  @returns {SC.Query} receiver
+*/
+SC.Query.registerComparison = function(propertyName, comparison) {
+  //var guidForKlass = SC.guidFor(klass);
+  //if (!SC.Query.comparisons[guidForKlass]) SC.Query.comparisons[guidForKlass] = {};
+  SC.Query.comparisons[propertyName] = comparison;
+};
 
