@@ -871,7 +871,6 @@ SC.Query.registerComparison = function(propertyName, comparison) {
   SC.Query.comparisons[propertyName] = comparison;
 };
 
-
 /** @private
   Hash of registered query extensions. 
 */
