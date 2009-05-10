@@ -262,3 +262,18 @@ test("Using findAll with SC.Query on store with no data source should work", fun
   equals(records.get('length'), 2, 'record length should be 2');
   
 });
+
+test("Using orderBy in SC.Query returned from findAll()", function() {
+  
+  var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
+  
+  var records = MyApp.store.findAll(q);
+  equals(records.get('length'), 5, 'record length should be 5');
+  
+  equals(records.objectAt(0).get('firstName'), 'Bert', 'name should be Bert');
+  equals(records.objectAt(1).get('firstName'), 'Emily', 'name should be Emily');
+  equals(records.objectAt(2).get('firstName'), 'Jane', 'name should be Jane');
+  equals(records.objectAt(3).get('firstName'), 'John', 'name should be John');
+  equals(records.objectAt(4).get('firstName'), 'Johnny', 'name should be Johnny');
+  
+});

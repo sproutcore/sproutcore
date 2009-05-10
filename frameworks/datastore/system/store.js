@@ -479,8 +479,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     for(var idx=0, len=recordArrays.length;idx<len;idx++) {
       var recArray = recordArrays[idx];
-      // if this record array is gone, or does not have a record type 
-      // we just updated, then go ahead and reapply the query
+      // if this record array still exists, reapply the query
       if(recArray) recArray.applyQuery(storeKeys, recordTypes, YES);
     }
   },
@@ -683,7 +682,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     if(recordArray) {
       // giving a recordArray will circumvent the data source for now
-      storeKeys = SC.Query.containsRecords(recordArray, queryKey);
+      storeKeys = SC.Query.containsRecords(queryKey, recordArray, _store);
     }
     else if (source) {
       // call fetch() on the data source. It can respond with either
@@ -693,18 +692,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
         storeKeys = sourceRet;
       }
-      else if(!SC.instanceOf(sourceRet, SC.Query)) {
+      else if(SC.instanceOf(sourceRet, SC.Query)) {
+        queryKey = sourceRet;
+      }
+      else {
         throw("Data source fetch() has to return array or SC.Query object");
       }
       
     }
     
-    // if queryKey given to findAll() was SC.Query execute it on the store
+    // if SC.Query returned from data source or no data source was given 
     if(!storeKeys && SC.instanceOf(queryKey, SC.Query)) {
       storeKeys = SC.Query.containsStoreKeys(queryKey, null, _store);
     }
     
-    if(storeKeys) ret = this.recordsFromStoreKeys(storeKeys, queryKey, _store);
+    if(storeKeys) ret = this.recordArrayFromStoreKeys(storeKeys, queryKey, _store);
+    
     return ret ;
   },
   
@@ -717,7 +720,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   
-  recordsFromStoreKeys: function(storeKeys, queryKey, _store) {
+  recordArrayFromStoreKeys: function(storeKeys, queryKey, _store) {
     var ret, isQuery, cacheKey;
     
     // if an array was provided, see if a wrapper already exists for 
@@ -726,7 +729,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     ret = this[cacheKey];
     if (!ret) {
       ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
-      // store record array if SC.Query so we can notify it when store changes
+      // store reference to record array if SC.Query so we can notify it
+      // when store changes
       if(SC.instanceOf(queryKey, SC.Query)) {
         if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
         this.recordArraysWithQuery.push(ret);

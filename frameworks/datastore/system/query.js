@@ -106,6 +106,26 @@ SC.Query = SC.Object.extend({
     return this.isReady && this.tokenTree.evaluate(record, wildCardValues);
   },
  
+  /** 
+    Default sort method that is used when calling applyQueryOrder() on 
+    a record array. Simply materializes two records based on 
+    storekeys before passing on to compare() .
+ 
+    @param {Number} storeKey1 a store key
+    @param {Number} storeKey12 a store key
+    @returns {Boolean} see compare()
+  */
+ 
+  compareStoreKeys: function(storeKey1, storeKey2) {
+    var store = SC.Query._TMP_STORE;
+    var queryKey = SC.Query._TMP_QUERY_KEY;
+    
+    var record1 = store.materializeRecord(storeKey1);
+    var record2 = store.materializeRecord(storeKey2);
+    
+    return queryKey.compare.call(queryKey, record1, record2);
+  },
+ 
   /**
     This will tell you which of the two passed records is greater than the other,
     in respect to the orderBy property of your SC.Query object.
@@ -942,12 +962,13 @@ SC.Query = SC.Object.extend({
 // Class Methods
 SC.Query.mixin( /** @scope SC.Query */ {
   /**
-    Will find which records match a given SC.Query and return the storeKeys
+    Will find which records match a given SC.Query and return the storeKeys.
+    This will also apply the sorting for the query
     
     @param {SC.Query} query to apply
     @param {Array} storeKeys to search within
-    @param {SC.Store} store to materialize record from
-    @returns {Array} array instance of store keys matching the SC.Query
+    @param {SC.Store} store to materialize record from during sort
+    @returns {Array} array instance of store keys matching the SC.Query (sorted)
   */
   
   containsStoreKeys: function(query, storeKeys, store) {
@@ -963,19 +984,22 @@ SC.Query.mixin( /** @scope SC.Query */ {
       if(record && query.contains(record)) ret.push(storeKeys[idx]);
     }
     
+    SC.Query.orderStoreKeys(ret, query, store);
+    
     return ret;
   },
   
   /**
     Will find which records match a give SC.Query and return an array of 
-    store keys.
+    store keys. This will also apply the sorting for the query.
     
-    @param {SC.RecordArray} records to search within
     @param {SC.Query} query to apply
-    @returns {Array} array instance of store keys matching the SC.Query
+    @param {SC.RecordArray} records to search within
+    @param {SC.Store} store to materialize record from
+    @returns {Array} array instance of store keys matching the SC.Query (sorted)
   */
   
-  containsRecords: function(records, query) {
+  containsRecords: function(query, records, store) {
     var ret = [];
     for(var idx=0,len=records.get('length');idx<len;idx++) {
       var record = records.objectAt(idx);
@@ -983,8 +1007,34 @@ SC.Query.mixin( /** @scope SC.Query */ {
         ret.push(record.get('storeKey'));
       }
     }
+    
+    SC.Query.orderStoreKeys(ret, query, store);
+    
     return ret;
+  },
+  
+  /** 
+    Sorts a set of store keys according to the orderBy property
+    of the SC.Query.
+    
+    @param {Array} storeKeys to sort
+    @param {SC.Query} query to use for sorting
+    @param {SC.Store} store to materialize records from
+  */
+  
+  orderStoreKeys: function(storeKeys, query, store) {
+    // apply the sort if there is one
+    if(query.get('orderBy') && storeKeys) {
+      // TODO: hack for now to get around the fact that we cannot pass
+      // additional parameters to .sort()
+      SC.Query._TMP_STORE = store;
+      SC.Query._TMP_QUERY_KEY = query;
+      storeKeys.sort(query.compareStoreKeys);
+      delete SC.Query._TMP_STORE;
+      delete SC.Query._TMP_QUERY_KEY;
+    }
   }
+  
 });
 
 

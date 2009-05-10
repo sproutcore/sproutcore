@@ -134,10 +134,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if(recordTypes && recordTypes.contains(this.recordType)) return;
     
     var newStoreKeys = this.get('storeKeys'), inChangedStoreKeys, 
-      inMatchingStoreKeys, idx, len, storeKey;
-    var matchingStoreKeys = SC.Query.containsStoreKeys(
-      this.get('queryKey'), changedStoreKeys, this.get('store'));
-     
+      inMatchingStoreKeys, idx, len, storeKey, queryKey = this.get('queryKey'),
+      store = this.get('store');
+    var matchingStoreKeys = SC.Query.containsStoreKeys(queryKey, 
+      changedStoreKeys, store);
+    
     // iterate over all changedStoreKeys. if we have it in our array,
     // keep it if it is a part of matchingStoreKeys, remove it if not,
     // or if it is not in rec array add it
@@ -155,6 +156,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       }
       
     }
+    
+    SC.Query.orderStoreKeys(newStoreKeys, queryKey, store);
     
     this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
     if(notify) this.notifyPropertyChange('length');
