@@ -107,9 +107,9 @@ SC.Query = SC.Object.extend({
   },
  
   /** 
-    Default sort method that is used when calling applyQueryOrder() on 
-    a record array. Simply materializes two records based on 
-    storekeys before passing on to compare() .
+    Default sort method that is used when calling containsStoreKeys()
+    or containsRecords() on this query. Simply materializes two records based 
+    on storekeys before passing on to compare() .
  
     @param {Number} storeKey1 a store key
     @param {Number} storeKey12 a store key

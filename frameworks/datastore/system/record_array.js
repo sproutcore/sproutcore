@@ -46,6 +46,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {SC.Query}
   */
   queryKey: null,
+  
+  /** @private
+    Cache of records returned from objectAt() so they don't need to
+    be unneccesarily materialized.
+    
+    @property {SC.Query}
+  */
+  _records: null,
 
   // ..........................................................
   // ARRAY PRIMITIVES
@@ -78,8 +86,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // not in cache, materialize
     if (!recs) this._records = recs = [] ; // create cache
     storeKey = storeKeys.objectAt(idx);
+    
     if (storeKey) {
-      
       // if record is not loaded already, then ask the data source to 
       // retrieve it
       if (store.readStatus(storeKey) === SC.Record.EMPTY) {
@@ -158,6 +166,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     }
     
     SC.Query.orderStoreKeys(newStoreKeys, queryKey, store);
+    // clear cache
+    this._records = null;
     
     this.storeKeys = newStoreKeys.addObserver('[]', this, this._storeKeysContentDidChange);
     if(notify) this.notifyPropertyChange('length');

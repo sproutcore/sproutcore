@@ -277,3 +277,45 @@ test("Using orderBy in SC.Query returned from findAll()", function() {
   equals(records.objectAt(4).get('firstName'), 'Johnny', 'name should be Johnny');
   
 });
+
+test("Using orderBy in SC.Query returned from findAll() and loading more records to original store key array", function() {
+  
+  var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
+  
+  var records = MyApp.store.findAll(q);
+  equals(records.get('length'), 5, 'record length should be 5');
+  
+  equals(records.objectAt(0).get('firstName'), 'Bert', 'name should be Bert');
+  equals(records.objectAt(4).get('firstName'), 'Johnny', 'name should be Johnny');
+  
+  var newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
+    { guid: 11, firstName: "Anna", lastName: "Petterson" }
+  ]);
+  
+  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
+  
+  equals(records.objectAt(0).get('firstName'), 'Anna', 'name should be Anna');
+  equals(records.objectAt(1).get('firstName'), 'Bert', 'name should be Bert');
+  equals(records.objectAt(5).get('firstName'), 'Johnny', 'name should be Johnny');
+  
+});
+
+
+test("Using orderBy in SC.Query and loading more records to the store", function() {
+  
+  var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
+  
+  var records = MyApp.store2.findAll(q);
+  equals(records.get('length'), 5, 'record length should be 5');
+  equals(records.objectAt(0).get('firstName'), 'Bert', 'name should be Bert');
+  
+  MyApp.store2.loadRecords(MyApp.Foo, [
+    { guid: 11, firstName: "Anna", lastName: "Petterson" }
+  ]);
+  
+  equals(records.get('length'), 6, 'record length should be 6');
+  
+  equals(records.objectAt(0).get('firstName'), 'Anna', 'name should be Anna');
+  equals(records.objectAt(5).get('firstName'), 'Johnny', 'name should be Johnny');
+  
+});
