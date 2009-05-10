@@ -97,7 +97,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     var value = this.get('value') ;
     
     // 1. apply the formatter
-    var formatter = this.getDelegateProperty(this.displayDelegate, 'formatter') ;
+    var formatter = this.getDelegateProperty('formatter', this.displayDelegate) ;
     if (formatter) {
       var formattedValue = (SC.typeOf(formatter) === SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (!SC.none(formattedValue)) value = formattedValue ;
@@ -119,7 +119,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     if (!SC.none(value) && value.toString) value = value.toString() ;
     
     // 4. Localize
-    if (value && this.getDelegateProperty(this.displayDelegate, 'localize')) value = value.loc() ;
+    if (value && this.getDelegateProperty('localize', this.displayDelegate)) value = value.loc() ;
 
     // 5. escapeHTML if needed
     if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);

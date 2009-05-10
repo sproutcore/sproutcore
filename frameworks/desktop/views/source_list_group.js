@@ -99,7 +99,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     }
     
    // set the title if that changed.
-    var groupTitleKey = this.getDelegateProperty(this.displayDelegate, 'groupTitleKey') ;
+    var groupTitleKey = this.getDelegateProperty('groupTitleKey', this.displayDelegate) ;
     if ((key == '*') || (groupTitleKey && (key == groupTitleKey))) {
       var title = (content && content.get && groupTitleKey) ? content.get(groupTitleKey) : content;
       if (title != this._title) {
@@ -110,7 +110,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     }
     
     // set the group visibility if changed
-    var groupVisibleKey = this.getDelegateProperty(this.displayDelegate, 'groupVisibleKey') ;
+    var groupVisibleKey = this.getDelegateProperty('groupVisibleKey', this.displayDelegate) ;
     if ((key == '*') || (groupVisibleKey && (key == groupVisibleKey))) {
       if (groupVisibleKey) {
         labelView.removeClassName('no-disclosure') ;
@@ -134,7 +134,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     
     // update group if necessary
     var group = this.get('content') ;
-    var groupVisibleKey = this.getDelegateProperty(this.displayDelegate, 'groupVisibleKey') ;
+    var groupVisibleKey = this.getDelegateProperty('groupVisibleKey', this.displayDelegate) ;
     if (group && group.set && groupVisibleKey) {
       group.set(groupVisibleKey, newValue) ;
     }

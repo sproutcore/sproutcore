@@ -140,7 +140,7 @@ SC.ListItemView = SC.View.extend(
     var key, value ;
     
     // handle checkbox
-    key = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+    key = this.getDelegateProperty('contentCheckboxKey', del) ;
     if (key) {
       value = content ? (content.get ? content.get(key) : content[key]) : NO ;
       this.renderCheckbox(context, value);
@@ -148,8 +148,8 @@ SC.ListItemView = SC.View.extend(
     }
     
     // handle icon
-    if (this.getDelegateProperty(del, 'hasContentIcon')) {
-      key = this.getDelegateProperty(del,'contentIconKey') ;
+    if (this.getDelegateProperty('hasContentIcon', del)) {
+      key = this.getDelegateProperty('contentIconKey', del) ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
       
       this.renderIcon(context, value);
@@ -157,19 +157,19 @@ SC.ListItemView = SC.View.extend(
     }
     
     // handle label -- always invoke
-    key = this.getDelegateProperty(del, 'contentValueKey') ;
+    key = this.getDelegateProperty('contentValueKey', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
     if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString();
     if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
     this.renderLabel(context, value);
     
     // handle unread count
-    key = this.getDelegateProperty(del, 'contentUnreadCountKey') ;
+    key = this.getDelegateProperty('contentUnreadCountKey', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (!SC.none(value) && (value !== 0)) this.renderCount(context, value) ;
     
     // handle action 
-    key = this.getDelegateProperty(del, 'listItemActionProperty') ;
+    key = this.getDelegateProperty('listItemActionProperty', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (value) {
       this.renderAction(context, value);
@@ -177,8 +177,8 @@ SC.ListItemView = SC.View.extend(
     }
     
     // handle branch
-    if (this.getDelegateProperty(del, 'hasContentBranch')) {
-      key = this.getDelegateProperty(del, 'contentIsBranchKey');
+    if (this.getDelegateProperty('hasContentBranch', del)) {
+      key = this.getDelegateProperty('contentIsBranchKey', del);
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
       this.renderBranch(context, value);
       context.addClass('has-branch');
@@ -324,7 +324,7 @@ SC.ListItemView = SC.View.extend(
   */
   _isInsideCheckbox: function(evt) {
     var del = this.displayDelegate ;
-    var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+    var checkboxKey = this.getDelegateProperty('contentCheckboxKey', del) ;
     return checkboxKey && this._isInsideElementWithClassName('sc-checkbox-view', evt);
   },
   
@@ -352,7 +352,7 @@ SC.ListItemView = SC.View.extend(
      // update only if mouse inside on mouse up...
      if (this._isInsideCheckbox(evt)) {
        var del = this.displayDelegate ;
-       var checkboxKey = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+       var checkboxKey = this.getDelegateProperty('contentCheckboxKey', del) ;
        var content = this.get('content') ;
        if (content && content.get) {
          var value = content.get(checkboxKey) ;
@@ -408,7 +408,7 @@ SC.ListItemView = SC.View.extend(
   contentHitTest: function(evt) {
    // if not content value is returned, not much to do.
    var del = this.displayDelegate ;
-   var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+   var labelKey = this.getDelegateProperty('contentValueKey', del) ;
    if (!labelKey) return NO ;
    
    // get the element to check for.
@@ -429,7 +429,7 @@ SC.ListItemView = SC.View.extend(
    
    var content = this.get('content') ;
    var del = this.displayDelegate ;
-   var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+   var labelKey = this.getDelegateProperty('contentValueKey', del) ;
    var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
    
    var f = this.get('frame') ;
@@ -513,7 +513,7 @@ SC.ListItemView = SC.View.extend(
     
     var content = this.get('content') ;
     var del = this.displayDelegate ;
-    var labelKey = this.getDelegateProperty(del, 'contentValueKey') ;
+    var labelKey = this.getDelegateProperty('contentValueKey', del) ;
     if (labelKey && content && content.set) {
      content.set(labelKey, finalValue) ;
     }

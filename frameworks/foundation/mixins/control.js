@@ -197,7 +197,7 @@ SC.Control = {
     // get actual content key
     contentKey = this[contentKey] ?
       this.get(contentKey) :
-      this.getDelegateProperty(this.displayDelegate, contentKey) ;
+      this.getDelegateProperty(contentKey, this.displayDelegate) ;
     
     if (contentKey && (all || key === contentKey)) {
       var v = (content) ?
@@ -224,7 +224,7 @@ SC.Control = {
   updateContentWithValueObserver: function() {
     var key = this.contentValueKey ?
       this.get('contentValueKey') :
-      this.getDelegateProperty(this.displayDelegate, 'contentValueKey') ;
+      this.getDelegateProperty('contentValueKey', this.displayDelegate) ;
     
     var content = this.get('content') ;
     if (!key || !content) return ; // do nothing if disabled

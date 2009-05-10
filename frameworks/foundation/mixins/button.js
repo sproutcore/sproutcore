@@ -160,17 +160,17 @@ SC.Button = {
     var del = this.get('displayDelegate');
     var content = this.get('content'), value ;
 
-    var valueKey = this.getDelegateProperty(del, 'contentValueKey') ;
+    var valueKey = this.getDelegateProperty('contentValueKey', del) ;
     if (valueKey && (key === valueKey || key === '*')) {
       this.set('value', content ? content.get(valueKey) : null) ;
     }
 
-    var titleKey = this.getDelegateProperty(del, 'contentTitleKey') ;
+    var titleKey = this.getDelegateProperty('contentTitleKey', del) ;
     if (titleKey && (key === titleKey || key === '*')) {
       this.set('title', content ? content.get(titleKey) : null) ;
     }
 
-    var iconKey = this.getDelegateProperty(del, 'contentIconKey');
+    var iconKey = this.getDelegateProperty('contentIconKey', del);
     if (iconKey && (key === iconKey || key === '*')) {
       this.set('icon', content ? content.get(iconKey) : null) ;
     }

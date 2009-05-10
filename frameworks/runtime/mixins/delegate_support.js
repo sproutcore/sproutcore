@@ -52,11 +52,11 @@ SC.DelegateSupport = {
         
     while(idx<len) {
       ret = arguments[idx];
-      if (ret && ret[methodName]) return ret ;
+      if (ret && ret[methodName] !== undefined) return ret ;
       idx++;      
     }
     
-    return this[methodName] ? this : null;
+    return (this[methodName] !== undefined) ? this : null;
   },
   
   /**
@@ -82,14 +82,27 @@ SC.DelegateSupport = {
   },
   
   /**
-    Gets the named property from the delegate if the delegate exists and it
-    defines the property.  Otherwise, gets the property from the receiver.
+    Search the named delegates for the passed property.  If one is found, 
+    gets the property value and returns it.  If none of the passed delegates 
+    implement the property, search the receiver for the property as well.
     
-    @param {Object} delegate the delegate or null
     @param {String} key the property to get.
+    @param {Object} delegate one or more delegate
+    @returns {Object} property value or undefined
   */
-  getDelegateProperty: function(delegate, key) {
-    return (delegate && (delegate[key] !== undefined) && delegate[key]!==null) ? delegate.get(key) : this.get(key) ;
+  getDelegateProperty: function(key, delegate) {
+    var idx = 1,
+        len = arguments.length,
+        ret ;
+        
+    while(idx<len) {
+      ret = arguments[idx++];
+      if (ret && ret[key] !== undefined) {
+        return ret.get ? ret.get(key) : ret[key] ;
+      }
+    }
+    
+    return (this[key] !== undefined) ? this.get(key) : undefined ;
   }
   
 };

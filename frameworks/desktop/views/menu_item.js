@@ -196,7 +196,7 @@ SC.MenuItemView = SC.ButtonView.extend(
    
     //handle seperator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
-    key = this.getDelegateProperty(del, 'isSeparatorKey') ;
+    key = this.getDelegateProperty('isSeparatorKey', del) ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (val) {
       ic = ic.begin('span').addClass('separator') ;
@@ -204,7 +204,7 @@ SC.MenuItemView = SC.ButtonView.extend(
       return ;
     } else {
       //handle checkbox
-      key = this.getDelegateProperty(del, 'contentCheckboxKey') ;
+      key = this.getDelegateProperty('contentCheckboxKey', del) ;
       if (key) {
         val = content ? (content.get ? content.get(key) : content[key]) : NO ;
         if (val) {
@@ -213,36 +213,36 @@ SC.MenuItemView = SC.ButtonView.extend(
       }
 
       // handle image -- always invoke
-      key = this.getDelegateProperty(del, 'contentIconKey') ;
+      key = this.getDelegateProperty('contentIconKey', del) ;
       val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
       if(val && SC.typeOf(val) !== SC.T_STRING) val = val.toString() ;
       if(val) this.renderImage(ic, val) ;
 
       // handle label -- always invoke
-      key = this.getDelegateProperty(del, 'contentValueKey') ;
+      key = this.getDelegateProperty('contentValueKey', del) ;
       val = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
       if (val && SC.typeOf(val) !== SC.T_STRING) val = val.toString() ;
       this.renderLabel(ic, val||'') ;
 
       // handle branch
-      key = this.getDelegateProperty(del, 'contentIsBranchKey') ;
+      key = this.getDelegateProperty('contentIsBranchKey', del) ;
       val = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
       if (val) {       
         this.renderBranch(ic, val) ;
         ic.addClass('has-branch') ;
       } else { // handle action
         
-        key = this.getDelegateProperty(del, 'action') ;
+        key = this.getDelegateProperty('action', del) ;
         val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
         if (val && isNaN(val)) this.set('action', val) ;
 
-        key = this.getDelegateProperty(del, 'target') ;
+        key = this.getDelegateProperty('target', del) ;
         val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
         if (val && isNaN(val)) this.set('target', val) ;
 
         // handle short cut keys
-        if (this.getDelegateProperty(del, 'shortCutKey')) {
-          key = this.getDelegateProperty(del, 'shortCutKey') ;
+        if (this.getDelegateProperty('shortCutKey', del)) {
+          key = this.getDelegateProperty('shortCutKey', del) ;
           val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
           if (val) {
             this.renderShortcut(ic, val) ;
@@ -344,7 +344,7 @@ SC.MenuItemView = SC.ButtonView.extend(
   isSeparator: function() {
     var content = this.get('content') ;
     var del = this.displayDelegate ;
-    var key = this.getDelegateProperty(del, 'isSeparatorKey') ;
+    var key = this.getDelegateProperty('isSeparatorKey', del) ;
     var val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (val) return YES ;
     return NO ;
