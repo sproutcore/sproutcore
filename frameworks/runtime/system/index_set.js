@@ -160,6 +160,60 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   },
   
   /**
+    Returns the first index in the set before the passed index or null if 
+    there are no previous indexes in the set.
+    
+    @param {Number} index index to check
+    @returns {Number} index or -1
+  */
+  indexBefore: function(index) {
+    
+    if (index===0) return -1; // fast path
+    index--; // start with previous index
+    
+    var content = this._content, 
+        max     = this.get('max');
+        start   = this.rangeStartForIndex(index);
+    if (!content) return null;
+
+    // loop backwards until we find a range that is in the set.
+    while((start===max) || (content[start]<0)) {
+      if (start === 0) return -1 ; // nothing before; just quit
+      index = start -1 ;
+      start = this.rangeStartForIndex(index);
+    }
+    
+    return index;
+  },
+
+  /**
+    Returns the first index in the set after the passed index or null if 
+    there are no additional indexes in the set.
+    
+    @param {Number} index index to check
+    @returns {Number} index or -1
+  */
+  indexAfter: function(index) {
+    var content = this._content,
+        max     = this.get('max'),
+        start, next ;
+    if (!content || (index>=max)) return -1; // fast path
+    index++; // start with next index
+    
+
+    // loop forwards until we find a range that is in the set.
+    start = this.rangeStartForIndex(index);
+    next  = content[start];
+    while(next<0) {
+      if (next === 0) return -1 ; //nothing after; just quit
+      index = start = Math.abs(next);
+      next  = content[start];
+    }
+    
+    return index;
+  },
+  
+  /**
     Returns YES if the index set contains the named index
     
     @param {Number} start index or range
@@ -272,31 +326,43 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   */
   add: function(start, length) {
     
-    // normalize input
-    if (length === undefined) { 
+    var content, cur, next;
+
+    // normalize IndexSet input
+    if (start && start.isIndexSet) {
+      
+      content = start._content;
+      
+      if (!content) return this; // nothing to do
+      
+      cur = 0 ;
+      next = content[0];
+      while(next !== 0) {
+        if (next>0) this.add(cur, next-cur);
+        cur = Math.abs(next);
+        next = content[cur];
+      }
+      return this ;
+      
+    } else if (length === undefined) { 
+      
       if (start === null || start === undefined) {
         return this; // nothing to do
-
       } else if (typeof start === SC.T_NUMBER) {
         length = 1 ;
-        
-      // if passed an index set, just add each range in the index set.
-      } else if (start.isIndexSet) {
-        start.forEachRange(this.add, this);
-        return this;
-        
       } else {
         length = start.length; 
         start = start.start;
       }
-    }
+    } else if (length === null) length = 1 ;
 
     // special case - appending to end of set
     var max     = this.get('max'),
         oldmax  = max,
-        content = this._content,
-        cur, next, delta, value ;
+        delta, value ;
 
+    content = this._content ;
+    
     if (start === max) {
 
       // if adding to the end and the end is in set, merge.
