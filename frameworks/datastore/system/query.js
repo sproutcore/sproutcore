@@ -639,6 +639,7 @@ SC.Query = SC.Object.extend({
     var currentTokenValue   = null;
     var currentDelimeter    = null;
     var endOfString         = false;
+    var endOfToken          = false;
     var belongsToToken      = false;
     var skipThisCharacter   = false;
     var rememberCount       = {};
