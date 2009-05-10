@@ -172,7 +172,7 @@ SC.Query = SC.Object.extend({
   parseQuery: function() {
 
     this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
-    this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLogic);
+    this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLanguage);
     this.order     = this.buildOrder(this.orderBy);
     
     // maybe we need this later
@@ -393,29 +393,39 @@ SC.Query = SC.Object.extend({
     recordProperty: {
       tokenType:        'PROPERTY',
       firstCharacter:   /[a-zA-Z_]/,
-      notAllowed:       /[^a-zA-Z_0-9]/
+      notAllowed:       /[^a-zA-Z_0-9]/,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return r.get(this.tokenValue); }
     },
     number: {
       tokenType:        'NUMBER',
       firstCharacter:   /\d/,
       notAllowed:       /[^\d\.]/,
-      format:           /^\d+$|^\d+\.\d+$/
+      format:           /^\d+$|^\d+\.\d+$/,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return parseFloat(this.tokenValue); }
     },
     string: {
       tokenType:        'STRING',
       firstCharacter:   /['"]/,
-      delimeted:        true
+      delimeted:        true,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return this.tokenValue; }
     },
     parameter: {
       tokenType:        'PARAMETER',
       firstCharacter:   /\{/,
       lastCharacter:    '}',
-      delimeted:        true
+      delimeted:        true,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
     wildCard: {
       tokenType:        'WILD_CARD',
       rememberCount:    true,
-      reservedWord:     '%@'
+      reservedWord:     '%@',
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
     openParenthesis: {
       tokenType:        'OPEN_PAREN',
@@ -429,75 +439,161 @@ SC.Query = SC.Object.extend({
     },
     and: {
       tokenType:        'BOOL_OP',
-      reservedWord:     'AND'
+      reservedWord:     'AND',
+      leftType:         'BOOLEAN',
+      rightType:        'BOOLEAN',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) && this.rightSide.evaluate(r,w) ); }
     },
     or: {
       tokenType:        'BOOL_OP',
-      reservedWord:     'OR'
+      reservedWord:     'OR',
+      leftType:         'BOOLEAN',
+      rightType:        'BOOLEAN',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) || this.rightSide.evaluate(r,w) ); }
     },
     not: {
       tokenType:        'BOOL_OP',
-      reservedWord:     'NOT'
+      reservedWord:     'NOT',
+      rightType:        'BOOLEAN',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return  ! this.rightSide.evaluate(r,w) ; }
     },
     equals: {
       tokenType:        'COMPARATOR',
-      reservedWord:     '='
+      reservedWord:     '=',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) == this.rightSide.evaluate(r,w) ); }
     },
     notEquals: {
       tokenType:        'COMPARATOR',
-      reservedWord:     '!='
+      reservedWord:     '!=',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) != this.rightSide.evaluate(r,w) ); }
     },
     lesser: {
       tokenType:        'COMPARATOR',
-      reservedWord:     '<'
+      reservedWord:     '<',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) < this.rightSide.evaluate(r,w) ); }
     },
     lesserEquals: {
       tokenType:        'COMPARATOR',
-      reservedWord:     '<='
+      reservedWord:     '<=',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) <= this.rightSide.evaluate(r,w) ); }
     },
     greater: {
       tokenType:        'COMPARATOR',
-      reservedWord:     '>'
+      reservedWord:     '>',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) > this.rightSide.evaluate(r,w) ); }
     },
     greaterEquals: {
       tokenType:        'COMPARATOR',
-      reservedWord:     '>='
+      reservedWord:     '>=',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) >= this.rightSide.evaluate(r,w) ); }
     },
     beginsWith: {
       tokenType:        'COMPARATOR',
-      reservedWord:     'BEGINS_WITH'
+      reservedWord:     'BEGINS_WITH',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          var all   = this.leftSide.evaluate(r,w);
+                          var start = this.rightSide.evaluate(r,w);
+                          return ( all.substr(0,start.length) == start );
+                        }
     },
     endsWith: {
       tokenType:        'COMPARATOR',
-      reservedWord:     'ENDS_WITH'
+      reservedWord:     'ENDS_WITH',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          var all = this.leftSide.evaluate(r,w);
+                          var end = this.rightSide.evaluate(r,w);
+                          return ( all.substring(all.length-end.length,all.length) == end );
+                        }
     },
     any: {
       tokenType:        'COMPARATOR',
-      reservedWord:     'ANY'
+      reservedWord:     'ANY',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          var prop   = this.leftSide.evaluate(r,w);
+                          var values = this.rightSide.evaluate(r,w);
+                          var found  = false;
+                          var i      = 0;
+                          while ( found==false && i<values.length ) {
+                            if ( prop == values[i] ) found = true;
+                            i++;
+                          };
+                          return found;
+                        }
     },
     matches: {
       tokenType:        'COMPARATOR',
-      reservedWord:     'MATCHES'
+      reservedWord:     'MATCHES',
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          var toMatch = this.leftSide.evaluate(r,w);
+                          var matchWith = this.rightSide.evaluate(r,w);
+                          return matchWith.test(toMatch);
+                        }
     },
     typeIs: {
       tokenType:        'COMPARATOR',
-      reservedWord:     'TYPE_IS'
+      reservedWord:     'TYPE_IS',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          return ( SC.Store.recordTypeFor(r.storeKey) == SC.objectForPropertyPath(this.rightSide.evaluate(r,w)) );
+                        }
     },
     _null: {
       tokenType:        'NULL',
-      reservedWord:     'null'
+      reservedWord:     'null',
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return null; }
     },
     _undefined: {
       tokenType:        'NULL',
-      reservedWord:     'undefined'
+      reservedWord:     'undefined',
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return null; }
     },
     _false: {
       tokenType:        'BOOL_VAL',
-      reservedWord:     'false'
+      reservedWord:     'false',
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return false; }
     },
     _true: {
       tokenType:        'BOOL_VAL',
-      reservedWord:     'true'
+      reservedWord:     'true',
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return true; }
     }
   },
   
@@ -672,17 +768,26 @@ SC.Query = SC.Object.extend({
     function tokenLogic (position) {
       var p = position;
       if ( p < 0 ) return false;
-      var tl = treeLogic[l[p].tokenType];
+      
+      for (var token in treeLogic) {
+        if (treeLogic[token].tokenType == l[p].tokenType) {
+          if (treeLogic[token].reservedWord) {
+            if (treeLogic[token].reservedWord == l[p].tokenValue) {
+              tl = treeLogic[token];
+            }
+          }
+          else {
+            tl = treeLogic[token];
+          }
+        }
+      };
       if ( ! tl ) {
         error.push("logic for token '"+l[p].tokenType+"' is not defined");
         return false;
       };
-      if ( tl.dependsOnValue ) tl=tl[l[p].tokenValue];
-      if ( ! tl ) {
-        error.push("logic for token '"+l[p].tokenType+"':'"+l[p].tokenValue+"' is not defined");
-        return false;
-      };
-      // save evaluate in token, so that we don't have to look it up again when evaluating the tree
+
+      // save evaluate in token, so that we don't have
+      // to look it up again when evaluating the tree
       l[p].evaluate = tl.evaluate;
       return tl;
     };
