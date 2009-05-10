@@ -385,11 +385,11 @@ SC.Query = SC.Object.extend({
   },
   
   queryLanguage: {
-    //unknown: {
-    //  tokenType:        'UNKNOWN',
-    //  firstCharacter  : /\S/,
-    //  notAllowed      : /[\s'"\w\d\(\)\{\}]/
-    //},
+    unknown: {
+      tokenType:        'UNKNOWN',
+      firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
+      notAllowed:       /[\s'"\w\d\(\)\{\}]/
+    },
     recordProperty: {
       tokenType:        'PROPERTY',
       firstCharacter:   /[a-zA-Z_]/,
@@ -545,7 +545,8 @@ SC.Query = SC.Object.extend({
       if ( !t.delimeted ) {
         for ( var anotherToken in grammar ) {
           if ( grammar[anotherToken].reservedWord && grammar[anotherToken].reservedWord == tokenValue ) {
-            tokenType = anotherToken.tokenType;
+            //tokenType = anotherToken.tokenType;
+            t = grammar[anotherToken];
             //t = grammar.generalTypes[tokenType];
           }
         }
@@ -558,7 +559,7 @@ SC.Query = SC.Object.extend({
       };
 
       // push token to list
-      tokenList.push( {tokenType: tokenType, tokenValue: tokenValue} );
+      tokenList.push( {tokenType: t.tokenType, tokenValue: tokenValue} );
 
       // and clean up currentToken
       currentToken      = null;
