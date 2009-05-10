@@ -1,0 +1,62 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Apple, Inc. and contributors.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+/*globals module ok equals same test MyApp */
+ 
+var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
+module("SC.Query registered query extensions", {
+  setup: function() {
+    // setup dummy app and store
+    MyApp = SC.Object.create({
+      store: SC.Store.create()
+    });
+    
+    // setup a dummy model
+    MyApp.Foo = SC.Record.extend({});
+    
+    // load some data
+    MyApp.store.loadRecords(MyApp.Foo, [
+      { guid: 1, firstName: "John", lastName: "Doe", year: 1974 },
+      { guid: 2, firstName: "Jane", lastName: "Doe", year: 1975 },
+      { guid: 3, firstName: "Emily", lastName: "Parker", year: 1975, active: null },
+      { guid: 4, firstName: "Johnny", lastName: "Cash", active: false },
+      { guid: 5, firstName: "Bert", lastName: "Berthold", active: true }
+    ]);
+    
+    rec1 = MyApp.store.find(MyApp.Foo,1);
+    rec2 = MyApp.store.find(MyApp.Foo,2);
+    rec3 = MyApp.store.find(MyApp.Foo,3);
+    rec4 = MyApp.store.find(MyApp.Foo,4);
+    rec5 = MyApp.store.find(MyApp.Foo,5);
+    
+    
+    q = SC.Query.create();
+  }
+});
+ 
+ 
+// ..........................................................
+// TESTS
+// 
+
+test("SC.Query.queryExtensions", function(){
+  SC.Query.registerQueryExtension('startsWithJ', {
+    tokenType:    'COMPARISON',
+    reservedWord: 'STARTS_WITH_J',
+    leftType:    'PRIMITIVE',
+    evalType:     'BOOLEAN',
+    evaluate:     function (r,w) {
+                    var word = this.leftSide.evaluate(r,w);
+                    return ( word.substr(0,1) == 'J' );
+    }
+  });
+
+  ok(q.queryLanguage['startsWithJ'], 'extension startsWithJ should be set');
+  q.conditions = "firstName STARTS_WITH_J";
+  q.parseQuery();
+  ok(q.contains(rec2), "Jane should match");
+  ok(!q.contains(rec3), "Emily should not match");
+
+});
