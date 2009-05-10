@@ -407,15 +407,35 @@ SC.Observable = {
 
     this._kvo_revision = (this._kvo_revision || 0) + 1; 
     var level = this._kvo_changeLevel || 0,
-        log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO) ;
+        cachedep, idx, dfunc, cache, func,
+        log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO);
 
-    // clear any cached value
-    if (!_keepCache) {
-      var func = this[key], cache = this._kvo_cache ;
-      if (cache && func && (func instanceof Function) && func.isCacheable) {
-        cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined ;
+    if (this._kvo_cacheable && (cache = this._kvo_cache)) {
+
+      // clear any cached value
+      if (!_keepCache) {
+        func = this[key] ;
+        if (func && (func instanceof Function) && func.isCacheable) {
+          cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined ;
+        }
+      }
+
+      // if there are any dependent keys and they use caching, then clear the
+      // cache.  This is the same code as is in set.  It is inlined for perf.
+      cachedep = this._kvo_cachedep;
+      if (!cachedep || (cachedep = cachedep[key])===undefined) {
+        cachedep = this._kvo_computeCachedDependentsFor(key);
+      }
+
+      if (cachedep) {
+        idx = cachedep.length;
+        while(--idx>=0) {
+          dfunc = cachedep[idx];
+          cache[dfunc.cacheKey] = cache[dfunc.lastSetValueKey] = undefined;
+        }
       }
     }
+
     
     //if (log) console.log("%@%@.propertyDidChange(%@)".fmt(SC.KVO_SPACES,this,key));
     
@@ -475,12 +495,6 @@ SC.Observable = {
     // define dependents if not defined already.
     if (!dependents) this._kvo_dependents = dependents = {} ;
 
-    // activate use of cached only if the key is cacheable.  Otherwise don't
-    // activate machinery for perf reasons.
-    if (func && (func instanceof Function) && func.isCacheable) {
-      this._kvo_cacheable = YES;
-    }
-    
     // for each key, build array of dependents, add this key...
     // note that we ignore the first argument since it is the key...
     while(--idx >= lim) {
@@ -839,9 +853,16 @@ SC.Observable = {
     // Add Properties
     if (keys = this._properties) {
       for(loc=0;loc<keys.length;loc++) {
-        key = keys[loc] ; value = this[key] ;
-        if (value && value.dependentKeys && (value.dependentKeys.length>0)) {
-          this.registerDependentKey(key, value.dependentKeys) ;
+        key = keys[loc];
+        if (value = this[key]) {
+
+          // activate cacheable only if needed for perf reasons
+          if (value.isCacheable) this._kvo_cacheable = YES; 
+
+          // register dependent keys
+          if (value.dependentKeys && (value.dependentKeys.length>0)) {
+            this.registerDependentKey(key, value.dependentKeys) ;
+          }
         }
       }
     }

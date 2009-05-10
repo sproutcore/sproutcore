@@ -265,6 +265,17 @@ test("change dependent should clear cache", function() {
   equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
 });
 
+test("just notifying change of dependent should clear cache", function() {
+
+  // call get several times to collect call count
+  var ret1 = object.get('inc'); // should run func
+  equals(object.get('inc'), ret1, 'multiple calls should not run cached prop');
+
+  object.notifyPropertyChange('changer');
+    
+  equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
+});
+
 test("changing dependent should clear nested cache", function() {
 
   // call get several times to collect call count
@@ -272,6 +283,18 @@ test("changing dependent should clear nested cache", function() {
   equals(object.get('nestedInc'), ret1, 'multiple calls should not run cached prop');
 
   object.set('changer', 'bar');
+    
+  equals(object.get('nestedInc'), ret1+1, 'should increment after dependent key changes'); // should run again
+  
+});
+
+test("just notifying change of dependent should clear nested cache", function() {
+
+  // call get several times to collect call count
+  var ret1 = object.get('nestedInc'); // should run func
+  equals(object.get('nestedInc'), ret1, 'multiple calls should not run cached prop');
+
+  object.notifyPropertyChange('changer');
     
   equals(object.get('nestedInc'), ret1+1, 'should increment after dependent key changes'); // should run again
   
