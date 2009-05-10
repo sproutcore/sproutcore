@@ -52,6 +52,12 @@
   jsDump = CoreTest.jsDump = {
 
     parse: function(obj, type) {
+      if (obj && obj.toString) {
+        var toString = obj.toString;
+        if ((toString !== Object.prototype.toString) && (toString !== Array.toString)) return obj.toString();
+      }
+      if (obj && obj.inspect) return obj.inspect();
+      
       this.seen = [];
       var ret = this._parse(obj, type);
       this.seen = null;

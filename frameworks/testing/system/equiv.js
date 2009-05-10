@@ -186,6 +186,9 @@ CoreTest.equiv = function () {
             } else if (typeof a !== typeof b || a === null || b === null || typeof a === "undefined" || typeof b === "undefined") {
                 return false; // don't lose time with error prone cases
 
+            } else if (b && b.isEqual && b.isEqual instanceof Function) {
+              return b.isEqual(a);
+              
             } else {
                 return bindCallbacks(a, callbacks, [b, a]);
             }
