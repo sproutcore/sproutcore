@@ -265,7 +265,7 @@ SC.Record = SC.Object.extend(
     
     dataHash[primaryKey] = recordId;
     
-    for(key in this) {
+    for(var key in this) {
       // make sure property is a record attribute. if record attribute is a class (SC.Record)
       // do not add to hash unless includeNull argument is true.
       if(this[key] && this[key]['typeClass']) {
@@ -420,6 +420,20 @@ SC.Record.mixin( /** @scope SC.Record */ {
   },
   
   /**
+    Returns all storeKeys mapped by Id for this record type.  This method is
+    used mostly by the SC.Store and the Record to coordinate.  You will rarely
+    need to call this method yourself.
+    
+    @returns {Hash}
+  */
+  storeKeysById: function() {
+    var key = SC.keyFor('storeKey', SC.guidFor(this)),
+        ret = this[key];
+    if (!ret) ret = this[key] = {};
+    return ret;
+  },
+  
+  /**
     Given a primaryKey value for the record, returns the associated
     storeKey.  If the primaryKey has not been assigned a storeKey yet, it 
     will be added.
@@ -431,9 +445,8 @@ SC.Record.mixin( /** @scope SC.Record */ {
     @returns {Number} a storeKey.
   */
   storeKeyFor: function(id) {
-    var storeKeys = this.prototype.storeKeysById;
-    if (!storeKeys) storeKeys = this.prototype.storeKeysById = {};
-    var ret = storeKeys[id];
+    var storeKeys = this.storeKeysById(),
+        ret       = storeKeys[id];
     
     if (!ret) {
       ret = SC.Store.generateStoreKey();

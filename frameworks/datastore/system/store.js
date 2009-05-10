@@ -746,16 +746,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Array} array instance - usually SC.RecordArray
   */
   recordsFor: function(recordType) {
-    var storeKeys = [], storeKeysById = recordType.prototype.storeKeysById; 
-    var id, storeKey, ret;
+    var storeKeys     = [], 
+        storeKeysById = recordType.storeKeysById(),
+        id, storeKey, ret;
     
     // collect all non-empty store keys
-    if (storeKeysById) {
-      for(id in storeKeysById) {
-        storeKey = storeKeysById[id]; // get the storeKey
-        if (this.readStatus(storeKey) !== SC.RECORD_EMPTY) {
-          storeKeys.push(storeKey);
-        }
+    for(id in storeKeysById) {
+      storeKey = storeKeysById[id]; // get the storeKey
+      if (this.readStatus(storeKey) !== SC.RECORD_EMPTY) {
+        storeKeys.push(storeKey);
       }
     }
     
@@ -1769,8 +1768,7 @@ SC.Store.mixin({
     this.idsByStoreKey[storeKey] = primaryKey ;
     
     // then the other...
-    var storeKeys = recordType.storeKeysById ;
-    if (!storeKeys) storeKeys = recordType.storeKeysById = {};
+    var storeKeys = recordType.storeKeysById() ;
     delete storeKeys[oldPrimaryKey];
     storeKeys[primaryKey] = storeKey;     
     
