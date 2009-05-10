@@ -257,18 +257,24 @@ SC.Observable = {
     var func   = this[key], 
         notify = this.automaticallyNotifiesObserversFor(key),
         ret    = value, 
-        dependents, cache, idx, dfunc ;
+        cachedep, cache, idx, dfunc ;
 
     // if there are any dependent keys and they use caching, then clear the
     // cache.
-    if (dependents = this._kvo_cachedDependents) {
-      dependents = this._kvo_cachedDependents[key] ;
-      if (dependents && (idx = dependents.length) > 0) {
-        if (cache = this._kvo_cache) {
-          while(--idx>=0) {
-            dfunc = dependents[idx];
-            cache[dfunc.cacheKey] = cache[dfunc.lastSetValueKey] = undefined;
-          }
+    if (this._kvo_cacheable && (cache = this._kvo_cache)) {
+      // lookup the cached dependents for this key.  if undefined, compute.
+      // note that if cachdep is set to null is means we figure out it has no
+      // cached dependencies already.  this is different from undefined.
+      cachedep = this._kvo_cachedep;
+      if (!cachedep || (cachedep = cachedep[key])===undefined) {
+        cachedep = this._kvo_computeCachedDependentsFor(key);
+      }
+      
+      if (cachedep) {
+        idx = cachedep.length;
+        while(--idx>=0) {
+          dfunc = cachedep[idx];
+          cache[dfunc.cacheKey] = cache[dfunc.lastSetValueKey] = undefined;
         }
       }
     }
@@ -429,7 +435,9 @@ SC.Observable = {
 
   /**
     Use this to indicate that one key changes if other keys it depends on 
-    change.
+    change.  Pass the key that is dependent and additional keys it depends
+    upon.  You can either pass the additional keys inline as arguments or 
+    in a single array.
     
     You generally do not call this method, but instead pass dependent keys to
     your property() method when you declare a computed property.
@@ -437,68 +445,112 @@ SC.Observable = {
     You can call this method during your init to register the keys that should
     trigger a change notification for your computed properties.  
     
-    @param key {String} the dependent key followed by any keys the key depends on.
+    @param {String} key the dependent key
+    @param {Array|String} dependentKeys one or more dependent keys 
     @returns {Object} this
   */  
-  registerDependentKey: function(key) {
-    var idx = arguments.length ;
-    var dependents = this._kvo_dependents ;
+  registerDependentKey: function(key, dependentKeys) {
+    var dependents = this._kvo_dependents,
+        func       = this[key],
+        keys, idx, lim, dep, queue;
+
+    // normalize input.
+    if (SC.typeOf(dependentKeys) === SC.T_ARRAY) {
+      keys = dependentKeys;
+      lim  = 0;
+    } else {
+      keys = arguments;
+      lim  = 1;
+    }
+    idx  = keys.length;
+
+    // define dependents if not defined already.
     if (!dependents) this._kvo_dependents = dependents = {} ;
 
-    // the cached dependents hash contains computed properties that are 
-    // dependent and cached.  It is important not to define 
-    // _kvo_cachedDependents until this feature is actually used for perf
-    // reasons.
-    var cached = this._kvo_cachedDependents ;
-    var dep, func, array, arrayIdx, queue;
-    
-    // note that we store dependents as simple arrays instead of using set.
-    // we assume that in general you won't call registerDependentKey() more
-    // than once for a particular base key.  Even if you do, the added cost
-    // of having dups is minor.
+    // activate use of cached only if the key is cacheable.  Otherwise don't
+    // activate machinery for perf reasons.
+    if (func && (func instanceof Function) && func.isCacheable) {
+      this._kvo_cacheable = YES;
+    }
     
     // for each key, build array of dependents, add this key...
     // note that we ignore the first argument since it is the key...
-    while(--idx >= 1) {
-      dep = arguments[idx] ;
-      
-      // handle the case where the user passes arrays of keys...
-      if (SC.typeOf(dep) === SC.T_ARRAY) {
-        array = dep ;  arrayIdx = array.length;
-        while(--arrayIdx >= 0) {
-          dep = array[arrayIdx] ;
-          
-          // add to dependents
-          queue = dependents[dep] ;
-          if (!queue) queue = dependents[dep] = [] ;
-          queue.push(key) ;
+    while(--idx >= lim) {
+      dep = keys[idx] ;
 
-          // add function 
-          func = this[key];
-          if (func && (func instanceof Function) && func.isCacheable) {
-            if (!cached) this._kvo_cachedDependents = cached = {};
-            queue = cached[dep] ;
-            if (!queue) queue = cached[dep] = [] ;
-            queue.push(func) ;
-          }
-        }
-        
-      // otherwise, just add the key.
-      } else {
-        queue = dependents[dep] ;
-        if (!queue) queue = dependents[dep] = [] ;
-        queue.push(key) ;
-          
-        // add to cached dependents if needed
-        func = this[key];
-        if (func && (func instanceof Function) && func.isCacheable) {
-          if (!cached) this._kvo_cachedDependents = cached = {};
-          queue = cached[dep] ;
-          if (!queue) queue = cached[dep] = [] ;
-          queue.push(func) ;
-        }
-      }
+      // add dependent key to dependents array of key it depends on
+      queue = dependents[dep] ;
+      if (!queue) queue = dependents[dep] = [] ;
+      queue.push(key) ;
     }
+  },
+
+  /** @private 
+  
+    Helper method used by computeCachedDependents.  Just loops over the 
+    array of dependent keys.  If the passed function is cacheable, it will
+    be added to the queue.  Also, recursively call on each keys dependent 
+    keys.
+  
+    @param {Array} queue the queue to add functions to
+    @param {Array} keys the array of dependent keys for this key
+    @param {Hash} dependents the _kvo_dependents cache
+    @param {SC.Set} seen already seen keys
+    @returns {void}
+  */
+  _kvo_addCachedDependents: function(queue, keys, dependents, seen) {
+    var idx = keys.length,
+        func, key, deps ;
+        
+    while(--idx >= 0) {
+      key  = keys[idx];
+      seen.add(key);
+      
+      // if the value for this key is a computed property, then add it to the
+      // set if it is cacheable, and process any of its dependent keys also.
+      func = this[key];
+      if (func && (func instanceof Function) && func.isProperty) {
+        if (func.isCacheable) queue.push(func); // handle this func
+        if ((deps = dependents[key]) && deps.length>0) { // and any dependents
+          this._kvo_addCachedDependents(queue, deps, dependents, seen);
+        }
+      } 
+    }
+        
+  },
+  
+  /** @private
+
+    Called by set() whenever it needs to determine which cached dependent
+    keys to clear.  Recursively searches dependent keys to determine all 
+    cached property direcly or indirectly affected.
+    
+    The return value is also saved for future reference
+    
+    @param {String} key the key to compute
+    @returns {Array}
+  */
+  _kvo_computeCachedDependentsFor: function(key) {
+    var cached     = this._kvo_cachedep,
+        dependents = this._kvo_dependents,
+        keys       = dependents ? dependents[key] : null,
+        queue, seen ;
+    if (!cached) cached = this._kvo_cachedep = {};
+
+    // if there are no dependent keys, then just set and return null to avoid
+    // this mess again.
+    if (!keys || keys.length===0) return cached[key] = null;
+
+    // there are dependent keys, so we need to do the work to find out if 
+    // any of them or their dependent keys are cached.
+    queue = cached[key] = [];
+    seen  = SC._TMP_SEEN_SET = (SC._TMP_SEEN_SET || SC.Set.create());
+    seen.add(key);
+    this._kvo_addCachedDependents(queue, keys, dependents, seen);
+    seen.clear(); // reset
+    
+    if (queue.length === 0) queue = cached[key] = null ; // turns out nothing
+    return queue ;
   },
   
   // ..........................................
@@ -781,9 +833,7 @@ SC.Observable = {
       for(loc=0;loc<keys.length;loc++) {
         key = keys[loc] ; value = this[key] ;
         if (value && value.dependentKeys && (value.dependentKeys.length>0)) {
-          var args = value.dependentKeys.slice() ;
-          args.unshift(key) ;
-          this.registerDependentKey.apply(this,args) ;
+          this.registerDependentKey(key, value.dependentKeys) ;
         }
       }
     }

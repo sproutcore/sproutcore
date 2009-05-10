@@ -176,12 +176,18 @@ module("Computed properties", {
         return 'dependentCached';
       }.property('changer').cacheable(),
       
-      
       // everytime it is recomputed, increments call
       incCallCount: 0,
       inc: function() {
         return this.incCallCount++;
-      }.property('changer').cacheable()
+      }.property('changer').cacheable(),
+
+      // depends on cached property which depends on another property...
+      nestedIncCallCount: 0,
+      nestedInc: function(key, value) {
+        return this.nestedIncCallCount++;
+      }.property('inc').cacheable()
+      
       
     })    ;
   }
@@ -258,6 +264,19 @@ test("change dependent should clear cache", function() {
     
   equals(object.get('inc'), ret1+1, 'should increment after dependent key changes'); // should run again
 });
+
+test("changing dependent should clear nested cache", function() {
+
+  // call get several times to collect call count
+  var ret1 = object.get('nestedInc'); // should run func
+  equals(object.get('nestedInc'), ret1, 'multiple calls should not run cached prop');
+
+  object.set('changer', 'bar');
+    
+  equals(object.get('nestedInc'), ret1+1, 'should increment after dependent key changes'); // should run again
+  
+});
+
 
 // This verifies a specific bug encountered where observers for computed 
 // properties would fire before their prop caches were cleared.
