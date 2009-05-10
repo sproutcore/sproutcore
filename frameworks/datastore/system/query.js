@@ -190,8 +190,6 @@ SC.Query = SC.Object.extend({
   //
   
   parseQuery: function() {
-    
-    
     this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
     this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLanguage);
     this.order     = this.buildOrder(this.orderBy);
@@ -429,6 +427,7 @@ SC.Query = SC.Object.extend({
     }
   },
   
+
   // ..........................................................
   // TOKENIZER
   //
