@@ -103,7 +103,10 @@ SC.Set.prototype = {
   /**
     Clears the set 
   */
-  clear: function() { this.length = 0; },
+  clear: function() { 
+    this.length = 0;
+    return this ;
+  },
 
   /**
     Call this method to test for membership.
@@ -128,7 +131,9 @@ SC.Set.prototype = {
     @returns {Object} this
   */
   add: function(obj) {
-    if (SC.none(obj)) return this; // cannot add null to a set.
+    
+    // cannot add null to a set.
+    if (obj===null || obj===undefined) return this; 
 
     var guid = SC.hashFor(obj) ;
     var idx = this[guid] ;
@@ -138,6 +143,7 @@ SC.Set.prototype = {
       this[guid] = len ;
       this.length = len+1;
     }
+    
     return this ;
   },
 
@@ -218,6 +224,14 @@ SC.Set.prototype = {
     return SC.Set.create(this);    
   },
 
+  /**
+    Return a set to the pool for reallocation.
+  */
+  destroy: function() {
+    SC.Set._pool.push(this.clear());
+    return this;
+  },
+  
   // .......................................
   // PRIVATE 
   //
@@ -240,8 +254,16 @@ SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable) ;
 SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
 SC.Set.prototype.shift = SC.Set.prototype.pop ;
 
+SC.Set._pool = [];
 
 /**
   To create a set, pass an array of items instead of a hash.
 */
-SC.Set.create = function(items) { return new SC.Set(items); };
+SC.Set.create = function(items) { 
+  var pool;
+  if (items === undefined && (pool = SC.Set._pool).length>0) {
+    return pool.pop();
+  } else {
+    return new SC.Set(items);  
+  }
+};

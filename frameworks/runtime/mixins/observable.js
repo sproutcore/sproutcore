@@ -919,8 +919,7 @@ SC.Observable = {
       // save the current set of changes and swap out the kvo_changes so that
       // any set() calls by observers will be saved in a new set.
       if (!changes) changes = SC.Set.create() ;
-      this._kvo_changes = this._kvo_altChanges ;
-      this._kvo_altChanges = null ; 
+      this._kvo_changes = null ;
 
       // Add the passed key to the changes set.  If a '*' was passed, then
       // add all keys in the observers to the set...
@@ -1025,8 +1024,8 @@ SC.Observable = {
         }
       } // while(changes.length>0)
 
-      // changes set should be empty. save this set so it can be reused later
-      this._kvo_altChanges = changes ;
+      // changes set should be empty. release it for reuse
+      if (changes) changes.destroy() ;
       
       // key is no longer needed; clear it to avoid infinite loops
       key = null ; 

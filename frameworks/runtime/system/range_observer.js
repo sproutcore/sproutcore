@@ -92,7 +92,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
   */
   update: function(source, indexSet) {
     this.indexes = indexSet ;
-    this.rangeDidChange();
+    //this.rangeDidChange();
     return this;
   },
   
