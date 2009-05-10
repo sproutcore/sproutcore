@@ -9,9 +9,6 @@
 
 sc_require('debug/test_suites/array/base');
 
-// temporary fix until we decide where to put test-only support code
-if (window.CoreTest) {
-
 SC.ArraySuite.define(function(T) {
   
   var observer, obj ;
@@ -51,5 +48,3 @@ SC.ArraySuite.define(function(T) {
   });
   
 });
-
-}

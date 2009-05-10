@@ -12,7 +12,7 @@ config :all,
   :layout         => 'sproutcore:lib/index.rhtml',
   :test_layout    => 'sproutcore:lib/index.rhtml',
   :test_required  => ['sproutcore/testing', 'sproutcore/empty_theme'],
-  :debug_required => ['sproutcore/debug']
+  :debug_required => ['sproutcore/debug', 'sproutcore/testing']
 
 # CORE FRAMEWORKS
 config :runtime,    :required => []

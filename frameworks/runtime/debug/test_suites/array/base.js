@@ -7,9 +7,6 @@
 
 /*globals module test ok equals same CoreTest */
 
-// temporary fix until we decide where to put test-only support code
-if (window.CoreTest) {
-
 /**
   Adds a new module of unit tests to verify that the passed object implements
   the SC.Array interface.  To generate, call the ArrayTests array with a 
@@ -239,5 +236,3 @@ SC.ArraySuite.define(function(T) {
   });
   
 });
-
-}
