@@ -175,16 +175,15 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   /**
     Will call findAll() on the store, which allows for chaining findAll
-    statements.
+    statements. Note that chaining findAll() will not notify the data
+    source (only the initial findAll will).
     
-    @param {Object|SC.Query} queryKey key describing the type of records to 
-      fetch or a predefined SC.Query object
-    @param {Hash} params optional additional parameters to pass along to the
-      data source
+    @param {SC.Query} queryKey a SC.Query object
+    @returns {SC.RecordArray} 
   */
   
-  findAll: function(queryKey, params) {
-    return this.get('store').findAll(queryKey, params, this);
+  findAll: function(queryKey) {
+    return this.get('store').findAll(queryKey, null, this);
   },
   
   // ..........................................................

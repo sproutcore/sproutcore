@@ -336,3 +336,19 @@ test("Chaining findAll() queries", function() {
   equals(records2.objectAt(0).get('firstName'), 'John', 'name should be John');
   
 });
+
+test("Chaining findAll() queries and loading more records", function() {
+  
+  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"lastName='Doe'"});
+  var q2 = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName='John'"});
+  
+  var records = MyApp.store2.findAll(q).findAll(q2);
+  equals(records.get('length'), 1, 'record length should be 1');
+  
+  MyApp.store2.loadRecords(MyApp.Foo, [
+    { guid: 11, firstName: "John", lastName: "Doe" }
+  ]);
+  
+  equals(records.get('length'), 2, 'record length should be 2');
+  
+});
