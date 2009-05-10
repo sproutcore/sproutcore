@@ -171,7 +171,7 @@ SC.Query = SC.Object.extend({
   
   parseQuery: function() {
 
-    this.tokenList = this.tokenizeString(this.conditions, this.queryGrammar);
+    this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
     this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLogic);
     this.order     = this.buildOrder(this.orderBy);
     
@@ -384,7 +384,122 @@ SC.Query = SC.Object.extend({
     'CLOSE_PAREN'     : 'nothing'
   },
   
-  
+  queryLanguage: {
+    //unknown: {
+    //  tokenType:        'UNKNOWN',
+    //  firstCharacter  : /\S/,
+    //  notAllowed      : /[\s'"\w\d\(\)\{\}]/
+    //},
+    recordProperty: {
+      tokenType:        'PROPERTY',
+      firstCharacter:   /[a-zA-Z_]/,
+      notAllowed:       /[^a-zA-Z_0-9]/
+    },
+    number: {
+      tokenType:        'NUMBER',
+      firstCharacter:   /\d/,
+      notAllowed:       /[^\d\.]/,
+      format:           /^\d+$|^\d+\.\d+$/
+    },
+    string: {
+      tokenType:        'STRING',
+      firstCharacter:   /['"]/,
+      delimeted:        true
+    },
+    parameter: {
+      tokenType:        'PARAMETER',
+      firstCharacter:   /\{/,
+      lastCharacter:    '}',
+      delimeted:        true
+    },
+    wildCard: {
+      tokenType:        'WILD_CARD',
+      rememberCount:    true,
+      reservedWord:     '%@'
+    },
+    openParenthesis: {
+      tokenType:        'OPEN_PAREN',
+      firstCharacter:   /\(/,
+      singleCharacter:  true
+    },
+    closeParenthesis: {
+      tokenType:        'CLOSE_PAREN',
+      firstCharacter:   /\)/,
+      singleCharacter:  true
+    },
+    and: {
+      tokenType:        'BOOL_OP',
+      reservedWord:     'AND'
+    },
+    or: {
+      tokenType:        'BOOL_OP',
+      reservedWord:     'OR'
+    },
+    not: {
+      tokenType:        'BOOL_OP',
+      reservedWord:     'NOT'
+    },
+    equals: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     '='
+    },
+    notEquals: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     '!='
+    },
+    lesser: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     '<'
+    },
+    lesserEquals: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     '<='
+    },
+    greater: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     '>'
+    },
+    greaterEquals: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     '>='
+    },
+    beginsWith: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     'BEGINS_WITH'
+    },
+    endsWith: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     'ENDS_WITH'
+    },
+    any: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     'ANY'
+    },
+    matches: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     'MATCHES'
+    },
+    typeIs: {
+      tokenType:        'COMPARATOR',
+      reservedWord:     'TYPE_IS'
+    },
+    _null: {
+      tokenType:        'NULL',
+      reservedWord:     'null'
+    },
+    _undefined: {
+      tokenType:        'NULL',
+      reservedWord:     'undefined'
+    },
+    _false: {
+      tokenType:        'BOOL_VAL',
+      reservedWord:     'false'
+    },
+    _true: {
+      tokenType:        'BOOL_VAL',
+      reservedWord:     'true'
+    }
+  },
   
   // ..........................................................
   // TOKENIZER
@@ -401,7 +516,9 @@ SC.Query = SC.Object.extend({
     var tokenList           = [];
     var c                   = null;
   	var t                   = null;
+  	var token               = null;
     var tokenType           = null;
+    var currentToken        = null;
     var currentTokenType    = null;
     var currentTokenValue   = null;
     var currentDelimeter    = null;
@@ -413,9 +530,10 @@ SC.Query = SC.Object.extend({
   
     // helper function that adds tokens to the tokenList
   
-    function addToken (tokenType, tokenValue) {
-      t = grammar.generalTypes[tokenType];
-
+    function addToken (token, tokenValue) {
+      t = grammar[token];
+      tokenType = t.tokenType;
+      
       // handling of special cases
       // check format
       if ( t.format && !t.format.test(tokenValue) ) 
@@ -423,26 +541,27 @@ SC.Query = SC.Object.extend({
       // delimeted token (e.g. by ")
       if ( t.delimeted ) 
         skipThisCharacter = true;
-      // reserved type
+      // reserved words
       if ( !t.delimeted ) {
-        for ( reservedType in grammar.reservedTypes ) {
-          if ( grammar.reservedTypes[reservedType].indexOf(tokenValue) >= 0 ) {
-            tokenType = reservedType;
-            t = grammar.generalTypes[tokenType];
+        for ( var anotherToken in grammar ) {
+          if ( grammar[anotherToken].reservedWord && grammar[anotherToken].reservedWord == tokenValue ) {
+            tokenType = anotherToken.tokenType;
+            //t = grammar.generalTypes[tokenType];
           }
         }
       };
       // remembering count type
       if ( t && t.rememberCount ) {
-        if (!rememberCount[tokenType]) rememberCount[tokenType] = 0;
-        tokenValue = rememberCount[tokenType];
-        rememberCount[tokenType] += 1;
+        if (!rememberCount[token]) rememberCount[token] = 0;
+        tokenValue = rememberCount[token];
+        rememberCount[token] += 1;
       };
 
       // push token to list
       tokenList.push( {tokenType: tokenType, tokenValue: tokenValue} );
 
       // and clean up currentToken
+      currentToken      = null;
       currentTokenType  = null;
       currentTokenValue = null;
     };
@@ -466,11 +585,11 @@ SC.Query = SC.Object.extend({
     
       // if currently inside a token
     
-      if ( currentTokenType ) {
+      if ( currentToken ) {
       
         // some helpers
-        t = grammar.generalTypes[currentTokenType];
-        endOfToken  = (t.delimeted) ? (c==currentDelimeter) : (t.notAllowed.test(c));
+        t = grammar[currentToken];
+        endOfToken = (t.delimeted) ? (c==currentDelimeter) : t.notAllowed.test(c);
       
         // if still in token
         if ( !endOfToken )
@@ -478,7 +597,7 @@ SC.Query = SC.Object.extend({
       
         // if end of token reached
         if ( endOfToken || endOfString )
-          addToken(currentTokenType, currentTokenValue);
+          addToken(currentToken, currentTokenValue);
       
         // if end of string don't check again
         if ( endOfString && !endOfToken )
@@ -489,16 +608,18 @@ SC.Query = SC.Object.extend({
     
       // if not inside a token, look for next one
     
-      if ( !currentTokenType && !skipThisCharacter ) {
+      if ( !currentToken && !skipThisCharacter ) {
+        //token = null;
         // look for matching tokenType
-        for ( tokenType in grammar.generalTypes ) {
-          t = grammar.generalTypes[tokenType];
+        for ( token in grammar ) {
+          t = grammar[token];
           if ( t.firstCharacter && t.firstCharacter.test(c) )
-            currentTokenType = tokenType;
+            currentToken = token;
         };
+
         // if tokenType found
-        if ( currentTokenType ) {
-          t = grammar.generalTypes[currentTokenType];
+        if ( currentToken ) {
+          t = grammar[currentToken];
           currentTokenValue = c;
           // handling of special cases
           if ( t.delimeted ) {
@@ -509,7 +630,7 @@ SC.Query = SC.Object.extend({
               currentDelimeter = c;
           };
           if ( t.singleCharacter || endOfString )
-            addToken(currentTokenType, currentTokenValue);
+            addToken(currentToken, currentTokenValue);
         };
       };
     };
@@ -693,7 +814,7 @@ SC.Query = SC.Object.extend({
       return o;
     }
     
-  },
+  }
   
   
   // ..........................................................
