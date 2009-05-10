@@ -190,7 +190,8 @@ SC.Query = SC.Object.extend({
   //
   
   parseQuery: function() {
-
+    
+    
     this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
     this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLanguage);
     this.order     = this.buildOrder(this.orderBy);
@@ -870,3 +871,21 @@ SC.Query.registerComparison = function(propertyName, comparison) {
   SC.Query.comparisons[propertyName] = comparison;
 };
 
+
+/** @private
+  Hash of registered query extensions. 
+*/
+SC.Query.queryExtensions = {};
+
+/**
+  Call to register a comparison for a specific property name. The function you pass
+  should accept two values of this property and return -1 if the first is smaller
+  than the second, 0 if they are equal and 1 if the first is greater than the second.
+  
+  @param {String} name of the record property
+  @param {Function} custom comparison function
+  @returns {SC.Query} receiver
+*/
+SC.Query.registerQueryExtension = function(tokenName, token) {
+  SC.Query.prototype.queryLanguage[tokenName] = token;
+};
