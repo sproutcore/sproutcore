@@ -90,7 +90,8 @@ SC.mixin({
   _didBecomeReady: function() {
     // Only call once
     if (SC.isReady) return ;
-    
+    if (typeof SC.mapDisplayNames === SC.T_FUNCTION) SC.mapDisplayNames();
+     
     // setup locale
     SC.Locale.createCurrentLocale();
     
