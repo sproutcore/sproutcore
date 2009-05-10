@@ -9,6 +9,8 @@ require('private/observer_set') ;
 
 /*globals logChange */
 
+SC.LOG_OBSERVING = NO ;
+
 /**
   @namespace 
   
@@ -404,7 +406,8 @@ SC.Observable = {
   propertyDidChange: function(key,value, _keepCache) {
 
     this._kvo_revision = (this._kvo_revision || 0) + 1; 
-    var level = this._kvo_changeLevel || 0 ;
+    var level = this._kvo_changeLevel || 0,
+        log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO) ;
 
     // clear any cached value
     if (!_keepCache) {
@@ -414,6 +417,8 @@ SC.Observable = {
       }
     }
     
+    //if (log) console.log("%@%@.propertyDidChange(%@)".fmt(SC.KVO_SPACES,this,key));
+    
     // save in the change set if queuing changes
     var suspended ;
     if ((level > 0) || (suspended=SC.Observers.isObservingSuspended)) {
@@ -421,7 +426,10 @@ SC.Observable = {
       if (!changes) changes = this._kvo_changes = SC.Set.create() ;
       changes.add(key) ;
       
-      if (suspended) SC.Observers.objectHasPendingChanges(this) ;
+      if (suspended) {
+        if (log) console.log("%@%@: will not notify observers because observing is suspended".fmt(SC.KVO_SPACES,this));
+        SC.Observers.objectHasPendingChanges(this) ;
+      }
       
     // otherwise notify property observers immediately
     } else this._notifyPropertyObservers(key) ;
@@ -865,10 +873,16 @@ SC.Observable = {
     
     SC.Observers.flush(this) ; // hookup as many observers as possible.
 
+    var log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO) ;
     var observers, changes, dependents, starObservers, idx, keys, rev ;
     var members, membersLength, member, memberLoc, target, method, loc, func ;
-    var context ;
+    var context, spaces ;
 
+    if (log) {
+      spaces = SC.KVO_SPACES = (SC.KVO_SPACES || '') + '  ';
+      console.log('%@%@: notifying observers after change to key "%@"'.fmt(spaces, this, key));
+    }
+    
     // Get any starObservers -- they will be notified of all changes.
     starObservers =  this['_kvo_observers_*'] ;
     
@@ -908,6 +922,9 @@ SC.Observable = {
           // for each dependent key, add to set of changes.  Also, if key
           // value is a cacheable property, clear the cached value...
           if (keys && (loc = keys.length)) {
+            if (log) {
+              console.log("%@...including dependent keys for %@: %@".fmt(spaces, key, keys));
+            }
             while(--loc >= 0) {
               changes.add(key = keys[loc]);
               if ((func = this[key]) && func.isCacheable) {
@@ -936,6 +953,7 @@ SC.Observable = {
             context = member[2];
             member[3] = rev;
             
+            if (log) console.log('%@...firing observer on %@ for key "%@"'.fmt(spaces, target, key));
             if (context !== undefined) {
               method.call(target, this, key, null, context, rev);
             } else {
@@ -953,7 +971,10 @@ SC.Observable = {
           for(memberLoc=0;memberLoc<membersLength;memberLoc++) {
             member = members[memberLoc];
             method = this[member] ; // try to find observer function
-            if (method) method.call(this, this, key, null, rev);
+            if (method) {
+              if (log) console.log('%@...firing local observer %@.%@ for key "%@"'.fmt(spaces, this, member, key));
+              method.call(this, this, key, null, rev);
+            }
           }
         }
         
@@ -967,6 +988,7 @@ SC.Observable = {
             method = member[1] ;
             context = member[2] ;
             
+            if (log) console.log('%@...firing * observer on %@ for key "%@"'.fmt(spaces, target, key));
             if (context !== undefined) {
               method.call(target, this, key, null, context, rev);
             } else {
@@ -977,6 +999,7 @@ SC.Observable = {
 
         // if there is a default property observer, call that also
         if (this.propertyObserver) {
+          if (log) console.log('%@...firing %@.propertyObserver for key "%@"'.fmt(spaces, this, key));
           this.propertyObserver(this, key, null, rev);
         }
       } // while(changes.length>0)
@@ -991,6 +1014,9 @@ SC.Observable = {
     
     // done with loop, reduce change level so that future sets can resume
     this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1; 
+    
+    if (log) SC.KVO_SPACES = spaces.slice(0, -2);
+    
     return YES ; // finished successfully
   },
 
@@ -1190,29 +1216,6 @@ SC.Observable = {
     this.set(key,value);
     return this.get(key) ;
   },
-
-  /**  
-    Generic property observer called whenever a property on the receiver 
-    changes.
-    
-    If you need to observe a large number of properties on your object, it
-    is sometimes more efficient to implement this observer only and then to
-    handle requests yourself.  Although this observer will be triggered 
-    more often than an observer registered on a specific property, it also
-    does not need to be registered which can make it faster to setup your 
-    object instance.
-    
-    You will often implement this observer using a switch statement on the
-    key parameter, taking appropriate action. 
-    
-    @param observer {null} no longer used; usually null
-    @param target {Object} the target of the change.  usually this
-    @param key {String} the name of the property that changed
-    @param value {Object} the new value of the property.
-    @param revision {Number} a revision you can use to quickly detect changes.
-    @returns {void}
-  */
-  propertyObserver: function(observer,target,key,value, revision) {},
 
   /**
     Convenience method to call propertyWillChange/propertyDidChange.

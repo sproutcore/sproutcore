@@ -993,6 +993,12 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   // PRIVATE 
   //
 
+  /** 
+    Usually observing notifications from IndexSet are not useful, so 
+    supress them by default.
+  */
+  LOG_OBSERVING: NO,
+  
   /** @private - optimized call to forEach() */
   forEach: function(callback, target) {
     var content = this._content,
