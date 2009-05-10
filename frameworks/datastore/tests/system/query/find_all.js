@@ -319,3 +319,20 @@ test("Using orderBy in SC.Query and loading more records to the store", function
   equals(records.objectAt(5).get('firstName'), 'Johnny', 'name should be Johnny');
   
 });
+
+test("Chaining findAll() queries", function() {
+  
+  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"lastName='Doe'"});
+  
+  var records = MyApp.store.findAll(q);
+  equals(records.get('length'), 2, 'record length should be 2');
+  
+  var q2 = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName='John'"});
+  
+  var records2 = records.findAll(q2);
+  
+  equals(records2.get('length'), 1, 'record length should be 1');
+  
+  equals(records2.objectAt(0).get('firstName'), 'John', 'name should be John');
+  
+});

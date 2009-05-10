@@ -173,6 +173,20 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if(notify) this.notifyPropertyChange('length');
   },
   
+  /**
+    Will call findAll() on the store, which allows for chaining findAll
+    statements.
+    
+    @param {Object|SC.Query} queryKey key describing the type of records to 
+      fetch or a predefined SC.Query object
+    @param {Hash} params optional additional parameters to pass along to the
+      data source
+  */
+  
+  findAll: function(queryKey, params) {
+    return this.get('store').findAll(queryKey, params, this);
+  },
+  
   // ..........................................................
   // INTERNAL SUPPORT
   // 
