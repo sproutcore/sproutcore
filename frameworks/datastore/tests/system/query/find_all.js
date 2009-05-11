@@ -83,6 +83,17 @@ test("should find records based on SC.Query", function() {
 
 });
 
+test("should find records based on SC.Query without recordType", function() {
+  
+  var q = SC.Query.create({conditions:"firstName = 'Jane'"});
+  
+  var records = MyApp.store.findAll(q);
+  equals(records.get('length'), 2, 'record length should be 2');
+  equals(records.objectAt(0).get('firstName'), 'Jane', 'name should be Jane');
+  equals(records.objectAt(1).get('firstName'), 'Jane', 'name should be Jane');
+
+});
+
 test("should find records within a passed record array", function() {
 
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Emily'"});

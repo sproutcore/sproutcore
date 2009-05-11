@@ -48,3 +48,19 @@ test("Verify loadRecords() loads data", function() {
   
 });
 
+test("Verify storeKeys() gets all store keys", function() {
+  var dataSource = SC.DataSource.create({});
+  var store = SC.Store.create().from(dataSource);
+  var storeKey;
+  for(var i in Application.Data) {
+    store.loadRecords(Application[i], Application.Data[i]);
+  }
+  
+  equals(store.storeKeys().length, 10, 'Length should be 10');
+  
+  storeKey = store.storeKeyFor(Application.File, '10');
+  store.writeStatus(storeKey, SC.Record.EMPTY);
+  equals(store.storeKeys().length, 9, 'Length should be one less now');
+  
+});
+

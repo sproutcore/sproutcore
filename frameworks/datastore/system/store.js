@@ -1693,7 +1693,29 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     return ret;
+  },
+  
+  /**
+    Finds all storeKeys in this store
+    and returns an array.
+    
+    @returns {Array} set of storeKeys
+  */
+  
+  storeKeys: function() {
+    ret = [];
+    if(!this.statuses) return;
+    
+    for(storeKey in this.statuses) {
+      // if status is not empty
+      if(this.statuses[storeKey] != SC.Record.EMPTY) {
+        ret.push(parseInt(storeKey,0));
+      }
+    }
+    
+    return ret;
   }
+  
   
 }) ;
 
