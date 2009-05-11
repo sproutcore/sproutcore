@@ -28,7 +28,7 @@ test("should evaluate all primitives", function() {
   // undefined
   q.conditions = "undefined";
   q.parseQuery();
-  ok(q.tokenTree.evaluate() == null, 'undefined should be null');
+  ok(q.tokenTree.evaluate() == undefined, 'undefined should be undefined');
   
   // true
   q.conditions = "true";

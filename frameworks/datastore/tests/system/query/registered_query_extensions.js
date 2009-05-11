@@ -42,9 +42,9 @@ module("SC.Query registered query extensions", {
 // 
 
 test("SC.Query.queryExtensions", function(){
-  SC.Query.registerQueryExtension('startsWithJ', {
-    tokenType:    'COMPARISON',
-    reservedWord: 'STARTS_WITH_J',
+  SC.Query.registerQueryExtension('STARTS_WITH_J', {
+    //tokenType:    'COMPARISON',
+    reservedWord: true,
     leftType:    'PRIMITIVE',
     evalType:     'BOOLEAN',
     evaluate:     function (r,w) {
@@ -53,7 +53,7 @@ test("SC.Query.queryExtensions", function(){
     }
   });
 
-  ok(q.queryLanguage['startsWithJ'], 'extension startsWithJ should be set');
+  ok(q.queryLanguage['STARTS_WITH_J'], 'extension STARTS_WITH_J should be set');
   q.conditions = "firstName STARTS_WITH_J";
   q.parseQuery();
   ok(q.contains(rec2), "Jane should match");

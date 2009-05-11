@@ -215,132 +215,114 @@ SC.Query = SC.Object.extend({
   
   
   queryLanguage: {
-    unknown: {
-      tokenType:        'UNKNOWN',
+    'UNKNOWN': {
       firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
       notAllowed:       /[\s'"\w\d\(\)\{\}]/
     },
-    recordProperty: {
-      tokenType:        'PROPERTY',
+    'PROPERTY': {
       firstCharacter:   /[a-zA-Z_]/,
       notAllowed:       /[^a-zA-Z_0-9]/,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return r.get(this.tokenValue); }
     },
-    number: {
-      tokenType:        'NUMBER',
+    'NUMBER': {
       firstCharacter:   /\d/,
       notAllowed:       /[^\d\.]/,
       format:           /^\d+$|^\d+\.\d+$/,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return parseFloat(this.tokenValue); }
     },
-    string: {
-      tokenType:        'STRING',
+    'STRING': {
       firstCharacter:   /['"]/,
       delimeted:        true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return this.tokenValue; }
     },
-    parameter: {
-      tokenType:        'PARAMETER',
+    'PARAMETER': {
       firstCharacter:   /\{/,
       lastCharacter:    '}',
       delimeted:        true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
-    wildCard: {
-      tokenType:        'WILD_CARD',
+    '%@': {
       rememberCount:    true,
-      reservedWord:     '%@',
+      reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
-    openParenthesis: {
-      tokenType:        'OPEN_PAREN',
+    'OPEN_PAREN': {
       firstCharacter:   /\(/,
       singleCharacter:  true
     },
-    closeParenthesis: {
-      tokenType:        'CLOSE_PAREN',
+    'CLOSE_PAREN': {
       firstCharacter:   /\)/,
       singleCharacter:  true
     },
-    and: {
-      tokenType:        'BOOL_OP',
-      reservedWord:     'AND',
+    'AND': {
+      reservedWord:     true,
       leftType:         'BOOLEAN',
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) && this.rightSide.evaluate(r,w) ); }
     },
-    or: {
-      tokenType:        'BOOL_OP',
-      reservedWord:     'OR',
+    'OR': {
+      reservedWord:     true,
       leftType:         'BOOLEAN',
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) || this.rightSide.evaluate(r,w) ); }
     },
-    not: {
-      tokenType:        'BOOL_OP',
-      reservedWord:     'NOT',
+    'NOT': {
+      reservedWord:     true,
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return  ! this.rightSide.evaluate(r,w) ; }
     },
-    equals: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     '=',
+    '=': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) == this.rightSide.evaluate(r,w) ); }
     },
-    notEquals: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     '!=',
+    '!=': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) != this.rightSide.evaluate(r,w) ); }
     },
-    lesser: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     '<',
+    '<': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) < this.rightSide.evaluate(r,w) ); }
     },
-    lesserEquals: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     '<=',
+    '<=': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) <= this.rightSide.evaluate(r,w) ); }
     },
-    greater: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     '>',
+    '>': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) > this.rightSide.evaluate(r,w) ); }
     },
-    greaterEquals: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     '>=',
+    '>=': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) >= this.rightSide.evaluate(r,w) ); }
     },
-    beginsWith: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     'BEGINS_WITH',
+    'BEGINS_WITH': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
@@ -350,9 +332,8 @@ SC.Query = SC.Object.extend({
                           return ( all.substr(0,start.length) == start );
                         }
     },
-    endsWith: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     'ENDS_WITH',
+    'ENDS_WITH': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
@@ -362,9 +343,8 @@ SC.Query = SC.Object.extend({
                           return ( all.substring(all.length-end.length,all.length) == end );
                         }
     },
-    any: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     'ANY',
+    'ANY': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
@@ -380,9 +360,8 @@ SC.Query = SC.Object.extend({
                           return found;
                         }
     },
-    matches: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     'MATCHES',
+    'MATCHES': {
+      reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
@@ -392,36 +371,31 @@ SC.Query = SC.Object.extend({
                           return matchWith.test(toMatch);
                         }
     },
-    typeIs: {
-      tokenType:        'COMPARATOR',
-      reservedWord:     'TYPE_IS',
+    'TYPE_IS': {
+      reservedWord:     true,
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) {
                           return ( SC.Store.recordTypeFor(r.storeKey) == SC.objectForPropertyPath(this.rightSide.evaluate(r,w)) );
                         }
     },
-    _null: {
-      tokenType:        'NULL',
-      reservedWord:     'null',
+    'null': {
+      reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return null; }
     },
-    _undefined: {
-      tokenType:        'NULL',
-      reservedWord:     'undefined',
+    'undefined': {
+      reservedWord:     true,
       evalType:         'PRIMITIVE',
-      evaluate:         function (r,w) { return null; }
+      evaluate:         function (r,w) { return undefined; }
     },
-    _false: {
-      tokenType:        'BOOL_VAL',
-      reservedWord:     'false',
+    'false': {
+      reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return false; }
     },
-    _true: {
-      tokenType:        'BOOL_VAL',
-      reservedWord:     'true',
+    'true': {
+      reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return true; }
     }
@@ -458,9 +432,9 @@ SC.Query = SC.Object.extend({
   
     // helper function that adds tokens to the tokenList
   
-    function addToken (token, tokenValue) {
-      t = grammar[token];
-      tokenType = t.tokenType;
+    function addToken (tokenType, tokenValue) {
+      t = grammar[tokenType];
+      //tokenType = t.tokenType;
       
       // handling of special cases
       // check format
@@ -472,22 +446,24 @@ SC.Query = SC.Object.extend({
       // reserved words
       if ( !t.delimeted ) {
         for ( var anotherToken in grammar ) {
-          if ( grammar[anotherToken].reservedWord && grammar[anotherToken].reservedWord == tokenValue ) {
+          if ( grammar[anotherToken].reservedWord && anotherToken == tokenValue ) {
             //tokenType = anotherToken.tokenType;
-            t = grammar[anotherToken];
+            tokenType = anotherToken;
             //t = grammar.generalTypes[tokenType];
           }
         }
       };
+      // reset t
+      t = grammar[tokenType];
       // remembering count type
       if ( t && t.rememberCount ) {
-        if (!rememberCount[token]) rememberCount[token] = 0;
-        tokenValue = rememberCount[token];
-        rememberCount[token] += 1;
+        if (!rememberCount[tokenType]) rememberCount[tokenType] = 0;
+        tokenValue = rememberCount[tokenType];
+        rememberCount[tokenType] += 1;
       };
 
       // push token to list
-      tokenList.push( {tokenType: t.tokenType, tokenValue: tokenValue} );
+      tokenList.push( {tokenType: tokenType, tokenValue: tokenValue} );
 
       // and clean up currentToken
       currentToken      = null;
@@ -601,18 +577,21 @@ SC.Query = SC.Object.extend({
       var p = position;
       if ( p < 0 ) return false;
       
-      for (var token in treeLogic) {
-        if (treeLogic[token].tokenType == l[p].tokenType) {
-          if (treeLogic[token].reservedWord) {
-            if (treeLogic[token].reservedWord == l[p].tokenValue) {
-              tl = treeLogic[token];
-            }
-          }
-          else {
-            tl = treeLogic[token];
-          }
-        }
-      };
+      //for (var token in treeLogic) {
+      //  if (treeLogic[token].tokenType == l[p].tokenType) {
+      //    if (treeLogic[token].reservedWord) {
+      //      if (treeLogic[token].reservedWord == l[p].tokenValue) {
+      //        tl = treeLogic[token];
+      //      }
+      //    }
+      //    else {
+      //      tl = treeLogic[token];
+      //    }
+      //  }
+      //};
+      
+      tl = treeLogic[l[p].tokenType];
+      
       if ( ! tl ) {
         error.push("logic for token '"+l[p].tokenType+"' is not defined");
         return false;
