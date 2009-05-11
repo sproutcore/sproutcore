@@ -50,6 +50,18 @@ test("should return set with multiple ranges removed", function() {
   same(iter(ret), [1,4,5,8,9]);
 });
 
+test("using without should properly hint returned index set", function() {
+  var set = SC.IndexSet.create(10000,5),
+      set2 = SC.IndexSet.create(10000),
+      actual = set.without(set2),
+      loc = SC.IndexSet.HINT_SIZE;
+      
+  while(loc<2000) { // spot check
+    equals(actual._content[loc], 0, 'index set should have hint at loc %@ - set: %@'.fmt(loc, actual.inspect()));
+    loc += SC.IndexSet.HINT_SIZE;
+  }
+});
+
 // ..........................................................
 // NORMALIZED PARAMETER CASES
 // 

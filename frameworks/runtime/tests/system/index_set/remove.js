@@ -181,4 +181,3 @@ test("removing an index range outside of target range (specific bug)", function(
   set.remove(set2);
   equals(set.get('length'), 3, 'length should not change');
 });
-

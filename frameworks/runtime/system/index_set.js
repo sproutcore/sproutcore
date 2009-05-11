@@ -48,6 +48,23 @@ require('mixins/observable') ;
 SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
 /** @scope SC.IndexSet.prototype */ {
 
+  /** @private
+    Walks a content array and copies its contents to a new array.  For large
+    content arrays this is faster than using slice()
+  */
+  _sc_sliceContent: function(c) {
+    if (c.length < 1000) return c.slice(); // use native when faster
+    var cur = 0, ret = [], next = c[0];
+    while(next !== 0) {
+      ret[cur] = next ;
+      cur = (next<0) ? (0-next) : next ;
+      next = c[cur];
+    }
+    ret[cur] = 0;
+    this._hint(0, cur, ret); // hints are not copied manually - add them
+    return ret ;
+  },
+  
   /**
     To create a set, pass either a start and index or another IndexSet.
   */
@@ -57,7 +74,7 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     
     // optimized method to clone an index set.
     if (start && start.isIndexSet) {
-      ret._content = start._content.slice();
+      ret._content = this._sc_sliceContent(start._content);
       ret.max = start.max;
       ret.length = start.length; 
       ret.source = start.source ;
@@ -317,6 +334,42 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   },
   
   /**
+    Replace the index set's current content with the passed index set.  This
+    is faster than clearing the index set adding the values again.
+    
+    @param {Number} start index, Range, or another IndexSet
+    @param {Number} length optional length of range. 
+    @returns {SC.IndexSet} receiver
+  */
+  replace: function(start, length) {
+    
+    if (length === undefined) {
+      if (typeof start === SC.T_NUMBER) {
+        length = 1 ;
+      } else if (start && start.isIndexSet) {
+        this._content = this._sc_sliceContent(start._content);
+        this.beginPropertyChanges()
+          .set('max', start.max)
+          .set('length', start.length)
+          .set('source', start.source)
+          .enumerableContentDidChange()
+        .endPropertyChanges();
+        return this ;
+        
+      } else {
+        length = start.length;
+        start  = start.start;
+      }
+    }
+    
+    var oldlen = this.length;
+    this._content.length=1;
+    this._content[0] = 0;
+    this.length = this.max = 0 ; // reset without notifying since add()
+    return this.add(start, length);
+  },
+  
+  /**
     Adds the specified range of indexes to the set.  You can also pass another
     IndexSet to union the contents of the index set with the receiver.
     
@@ -334,12 +387,14 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
       content = start._content;
       
       if (!content) return this; // nothing to do
+
+      //console.log(start.inspect());
       
       cur = 0 ;
       next = content[0];
       while(next !== 0) {
         if (next>0) this.add(cur, next-cur);
-        cur = Math.abs(next);
+        cur = next<0 ? 0-next : next;
         next = content[cur];
       }
       return this ;
@@ -616,9 +671,10 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     pointing to the nearest range start.  The passed range must start on a
     range boundary.  It can end anywhere.
   */
-  _hint: function(start, length) {
-    var content = this._content,
-        skip    = SC.IndexSet.HINT_SIZE,
+  _hint: function(start, length, content) {
+    if (content === undefined) content = this._content;
+    
+    var skip    = SC.IndexSet.HINT_SIZE,
         next    = Math.abs(content[start]), // start of next range
         loc     = start - (start % skip) + skip, // next hint loc
         lim     = start + length ; // stop
