@@ -153,8 +153,8 @@ SC.Query = SC.Object.extend({
     on storekeys before passing on to compare() .
  
     @param {Number} storeKey1 a store key
-    @param {Number} storeKey12 a store key
-    @returns {Boolean} see compare()
+    @param {Number} storeKey2 a store key
+    @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
   */
  
   compareStoreKeys: function(storeKey1, storeKey2) {
@@ -166,7 +166,7 @@ SC.Query = SC.Object.extend({
     
     return queryKey.compare.call(queryKey, record1, record2);
   },
- 
+  
   /**
     This will tell you which of the two passed records is greater
     than the other, in respect to the orderBy property of your SC.Query object.

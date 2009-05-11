@@ -36,6 +36,13 @@ module("SC.RecordAttribute core methods", {
         defaultValue: "default"
       }),
       
+      // used to test default value
+      defaultComputedValue: SC.Record.attr(Number, {
+        defaultValue: function() {
+          return Math.floor(Math.random()*3+1);
+        }
+      }),
+      
       // test toOne relationships
       relatedTo: SC.Record.toOne('MyApp.Foo'),
       
@@ -134,6 +141,12 @@ test("getting toOne relationship from computed attribute should map guid to a re
 test("reading date should parse ISO date", function() {
   var d = new Date(1235968200000); // should be proper date
   equals(rec.get('date').toString(), d.toString(), 'should have matched date');
+});
+
+test("reading computed default value", function() {
+  var value = rec.get('defaultComputedValue');
+  var validValues = [1,2,3,4];
+  ok(validValues.indexOf(value)!==-1, 'should have a value from 1 through 4');
 });
 
 // ..........................................................

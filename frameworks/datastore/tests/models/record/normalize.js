@@ -28,7 +28,15 @@ module("SC.Record normalize method", {
       }),
       
       // test toOne relationships
-      relatedTo: SC.Record.toOne('MyApp.Foo', { defaultValue: '1' })
+      relatedTo: SC.Record.toOne('MyApp.Foo', { defaultValue: '1' }),
+      
+      // test toOne relationship computed default
+      relatedToComputed: SC.Record.toOne('MyApp.Foo', { 
+        defaultValue: function() {
+          var num = Math.floor(Math.random()*2+1);
+          return 'foo' + num;
+        }
+      })
       
     });
     
@@ -43,7 +51,7 @@ module("SC.Record normalize method", {
       
       { 
         guid: 'foo2', 
-        firstName: "Jane", 
+        firstName: "Jane",
         relatedTo: 'foo1'
       },
       
@@ -74,8 +82,15 @@ test("normalizing a pre-populated record" ,function() {
   rec.normalize();
   
   var sameValue = rec.attributes()['firstName'] === '123';
+  var relatedTo = rec.attributes()['relatedTo'] === '1';
+  var relatedToComputed = rec.attributes()['relatedToComputed'];
+  
+  var computedValues = ['foo1', 'foo2', 'foo3'];
   
   ok(sameValue, 'hash value of firstName after normalizing is 123 string');
+  ok(sameValue, 'hash value of relatedTo should be 1');
+  ok(computedValues.indexOf(relatedToComputed)!==-1, 'hash value of relatedTo should be foo1, foo2 or foo3');
+  
   equals(rec.get('firstName'), '123', 'get value of firstName after normalizing is 123 string');
   
 });
