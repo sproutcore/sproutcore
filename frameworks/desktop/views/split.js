@@ -119,9 +119,11 @@ SC.SplitView = SC.View.extend(
     A number less than one will be treated as a percentage, while a number 
     greater than one will be treated as a pixel width.
     
+    The thickness will be applied to the opposite view defined by autoresizeBehavior.
+    
     @property {Number}
   */
-  topLeftDefaultThickness: 0.5,
+  defaultThickness: 0.5,
   
   /**
     Yes, we're a split view.
@@ -366,23 +368,20 @@ SC.SplitView = SC.View.extend(
         this.set('thumbViewCursor', SC.Cursor.create()) ;
       }
       
-      var direction = this.get('layoutDirection') ;
-      var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
+      var layoutDirection = this.get('layoutDirection') ;
+      var splitViewThickness = (layoutDirection == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
+      var desiredThickness = this.get('defaultThickness') ;
+      var autoResizeBehavior = this.get('autoresizeBehavior') ;
       
-      // if bottomRightDefaultThickness is defined use it (as topLeftDefaultThickness has a default).
-      // then if default thickness is < 1, treat as a percentage, otherwise
-      // treat as actual number.
-      var desired = this.get('bottomRightDefaultThickness') ;
-      if (!SC.none(desired)) {
+      // if default thickness is < 1, convert from percentage to absolute
+      if (SC.none(desiredThickness) || (desiredThickness > 0 && desiredThickness < 1)) {
+        desiredThickness =  Math.floor(splitViewThickness * (desiredThickness || 0.5)) ;
+      }
+      if (autoResizeBehavior === SC.RESIZE_BOTTOM_RIGHT) {
+        this._desiredTopLeftThickness = desiredThickness ;
+      } else { // (autoResizeBehavior === SC.RESIZE_TOP_LEFT)
         var dividerThickness = this.get('dividerThickness') || 7 ;
-        if (desired > 0 && desired < 1) {
-          this._desiredTopLeftThickness =  splitViewThickness - dividerThickness - Math.floor(splitViewThickness * (desired || 0.5)) ;
-        } else this._desiredTopLeftThickness = splitViewThickness - dividerThickness - desired ;
-      } else {
-        desired = this.get('topLeftDefaultThickness') ;
-        if (SC.none(desired) || (desired > 0 && desired < 1)) {
-          this._desiredTopLeftThickness =  Math.floor(splitViewThickness * (desired || 0.5)) ;
-        } else this._desiredTopLeftThickness = desired ;
+        this._desiredTopLeftThickness =  splitViewThickness - dividerThickness - desiredThickness ;
       }
       
       // make sure we don't exceed our min and max values, and that collapse 
