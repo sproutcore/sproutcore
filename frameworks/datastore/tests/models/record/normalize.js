@@ -143,7 +143,7 @@ test("normalizing a new record with toOne should reflect id in data hash" ,funct
   
 });
 
-test("normalizing a new record with toOne should reflect id in data hash" ,function() {
+test("normalizing a new record with toMany should reflect id in data hash" ,function() {
 
   var recHash = { 
     guid: 'foo5', 
