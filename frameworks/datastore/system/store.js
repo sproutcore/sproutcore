@@ -857,7 +857,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     SC.Store.replaceRecordTypeFor(storeKey, recordType);
     this.dataHashDidChange(storeKey);
-
+    
     // Record is now in a committable state -- add storeKey to changelog
     changelog = this.changelog;
     if (!changelog) changelog = SC.Set.create();

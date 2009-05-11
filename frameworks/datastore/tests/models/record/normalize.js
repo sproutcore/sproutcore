@@ -36,7 +36,10 @@ module("SC.Record normalize method", {
           var num = Math.floor(Math.random()*2+1);
           return 'foo' + num;
         }
-      })
+      }),
+      
+      // test toMany relationships
+      relatedToMany: SC.Record.toMany('MyApp.Foo')
       
     });
     
@@ -116,5 +119,47 @@ test("normalizing with includeNull flag" ,function() {
   
   equals(rec3.attributes()['firstName'], null, 'hash value of firstName after normalizing is null');
   equals(rec3.get('firstName'), null, 'get value of firstName after normalizing is null');
+  
+});
+
+test("normalizing a new record with toOne should reflect id in data hash" ,function() {
+
+  var recHash = { 
+    guid: 'foo4', 
+    firstName: "Jack",
+    relatedTo: 'foo1'
+  };
+
+  var newRecord = MyApp.store.createRecord(MyApp.Foo, recHash);
+  MyApp.store.commitRecords();
+  
+  equals(newRecord.attributes()['relatedTo'], 'foo1', 'hash value of relatedTo is foo1');
+  equals(newRecord.get('relatedTo'), rec, 'get value of relatedTo is foo1');
+  
+  newRecord.normalize();
+  
+  equals(newRecord.attributes()['relatedTo'], 'foo1', 'hash value of relatedTo after normalizing is still foo1');
+  equals(newRecord.get('relatedTo'), rec, 'get value of relatedTo after normalizing remains foo1');
+  
+});
+
+test("normalizing a new record with toOne should reflect id in data hash" ,function() {
+
+  var recHash = { 
+    guid: 'foo5', 
+    firstName: "Andrew",
+    relatedToMany: ['foo1', 'foo2']
+  };
+
+  var newRecord = MyApp.store.createRecord(MyApp.Foo, recHash);
+  MyApp.store.commitRecords();
+  
+  ok(SC.typeOf(newRecord.attributes()['relatedToMany'])===SC.T_ARRAY, 'should be a hash');
+  equals(newRecord.get('relatedToMany').get('length'), 2, 'number of relatedToMany is 2');
+  
+  newRecord.normalize();
+  
+  ok(SC.typeOf(newRecord.attributes()['relatedToMany'])===SC.T_ARRAY, 'should still be a hash after normalizing');
+  equals(newRecord.get('relatedToMany').get('length'), 2, 'number of relatedToMany is still 2');
   
 });
