@@ -45,7 +45,7 @@ QUnit.bodyPage = SC.Page.create({
       SC.SplitView.design({
         layout: { top: 36, left: 0, right: 0, bottom: 36 },
         layoutDirection: SC.LAYOUT_HORIZONTAL,
-        topLeftDefaultThickness: 0.2, // a number between 0 and 1.0
+        defaultThickness: 0.2, // a number between 0 and 1.0
         
         topLeftMinThickness: 200,
         canCollapseViews: NO,
