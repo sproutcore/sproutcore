@@ -276,14 +276,13 @@ SC.Record = SC.Object.extend(
           if(attrValue || includeNull) dataHash[key] = attrValue;
         }
         else if(isRecord) {
-
+          
           if(SC.typeOf(this.get(key))===SC.T_OBJECT) {
-            // if relationships are present
-            var ids = this.get(key).getEach('id');
-            dataHash[key] = ids.get('length')>1 ? ids : ids[0];
+            // toMany relationship
+            dataHash[key] = this.get(key).getEach('id');
           }
           else {
-            // otherwise write default
+            // toOne relationship
             dataHash[key] = (this.get(key).get) ? this.get(key).get('id') : this.get(key);
           }
           
