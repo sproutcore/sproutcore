@@ -369,12 +369,21 @@ SC.SplitView = SC.View.extend(
       var direction = this.get('layoutDirection') ;
       var splitViewThickness = (direction == SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ;
       
-      // if topLeftDefaultThickness is < 1, treat as a percentage, otherwise
+      // if bottomRightDefaultThickness is defined use it (as topLeftDefaultThickness has a default).
+      // then if default thickness is < 1, treat as a percentage, otherwise
       // treat as actual number.
-      var desired = this.get('topLeftDefaultThickness');
-      if (SC.none(desired) || (desired > 0 && desired < 1)) {
-        this._desiredTopLeftThickness =  Math.floor(splitViewThickness * (desired || 0.5)) ;
-      } else this._desiredTopLeftThickness = desired ;
+      var desired = this.get('bottomRightDefaultThickness') ;
+      if (!SC.none(desired)) {
+        var dividerThickness = this.get('dividerThickness') || 7 ;
+        if (desired > 0 && desired < 1) {
+          this._desiredTopLeftThickness =  splitViewThickness - dividerThickness - Math.floor(splitViewThickness * (desired || 0.5)) ;
+        } else this._desiredTopLeftThickness = splitViewThickness - dividerThickness - desired ;
+      } else {
+        desired = this.get('topLeftDefaultThickness') ;
+        if (SC.none(desired) || (desired > 0 && desired < 1)) {
+          this._desiredTopLeftThickness =  Math.floor(splitViewThickness * (desired || 0.5)) ;
+        } else this._desiredTopLeftThickness = desired ;
+      }
       
       // make sure we don't exceed our min and max values, and that collapse 
       // settings are respected
