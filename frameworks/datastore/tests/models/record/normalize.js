@@ -40,7 +40,7 @@ module("SC.Record normalize method", {
       
       // test toMany relationships
       relatedToMany: SC.Record.toMany('MyApp.Foo')
-      
+ 
     });
     
     MyApp.Bar = SC.Record.extend({
