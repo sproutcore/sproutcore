@@ -127,8 +127,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
   
-  concatenatedProperties: 'outlets displayProperties layoutProperties \
-    classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
   
   /** 
     The current pane. 
@@ -1278,6 +1277,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // attrs should always exist...
     if (!attrs) attrs = {} ;
     attrs.owner = attrs.parentView = this ;
+    attrs.isVisibleInWindow = this.get('isVisibleInWindow');
     if (!attrs.page) attrs.page = this.page ;
     
     // Now add this to the attributes and create.
@@ -1500,8 +1500,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (layout.width !== undefined &&
         layout.width === SC.LAYOUT_AUTO &&
         stLayout !== undefined && !stLayout) {
-     error = SC.Error.desc("%@.layout() you cannot use width:auto if \
-      staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
+     error = SC.Error.desc("%@.layout() you cannot use width:auto if staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
      console.error(error.toString()) ;
      throw error ;
     }
@@ -1509,8 +1508,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (layout.height !== undefined &&
         layout.height === SC.LAYOUT_AUTO &&
         stLayout !== undefined && !stLayout) {
-      error = SC.Error.desc("%@.layout() you cannot use height:auto if \
-        staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
+      error = SC.Error.desc("%@.layout() you cannot use height:auto if staticLayout is disabled".fmt(this),"%@".fmt(this), -1) ;
       console.error(error.toString())  ;
       throw error ;
     }
@@ -1799,8 +1797,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (layout.width !== undefined &&
         layout.width === SC.LAYOUT_AUTO &&
         !stLayout) {
-     error= SC.Error.desc("%@.layout() you cannot use width:auto if \
-      staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
+     error= SC.Error.desc("%@.layout() you cannot use width:auto if  staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
      console.error(error.toString()) ;
      throw error ;
     }
@@ -1808,8 +1805,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if (layout.height !== undefined &&
         layout.height === SC.LAYOUT_AUTO &&
         !stLayout) {
-      error = SC.Error.desc("%@.layout() you cannot use height:auto if \
-        staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
+      error = SC.Error.desc("%@.layout() you cannot use height:auto if  staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
       console.error(error.toString()) ;
       throw error ;
     }
