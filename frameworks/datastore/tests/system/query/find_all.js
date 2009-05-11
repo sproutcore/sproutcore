@@ -270,11 +270,7 @@ test("Using orderBy in SC.Query returned from findAll()", function() {
   var records = MyApp.store.findAll(q);
   equals(records.get('length'), 5, 'record length should be 5');
   
-  equals(records.objectAt(0).get('firstName'), 'Bert', 'name should be Bert');
-  equals(records.objectAt(1).get('firstName'), 'Emily', 'name should be Emily');
-  equals(records.objectAt(2).get('firstName'), 'Jane', 'name should be Jane');
-  equals(records.objectAt(3).get('firstName'), 'John', 'name should be John');
-  equals(records.objectAt(4).get('firstName'), 'Johnny', 'name should be Johnny');
+  same(records.getEach('firstName'), ["Bert", "Emily", "Jane", "John", "Johnny"], 'first name should be properly sorted');
   
 });
 

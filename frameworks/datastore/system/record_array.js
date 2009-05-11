@@ -128,10 +128,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     or changed in the store (or directly on the array with .replace() ) and 
     and when we need to refresh all SC.Query 'based' record arrays accordingly.
     
-    Will iterate through all storeKeys in recArray and make sure that
-    if a storeKey given as input was in the recArray but not any longer in 
-    newStoreKeys, remove it, and inversely add it.
-    
     @param {Array} storeKeys to evaluate against the query
     @param {SC.Set} recordTypes set of record types that changed
     @param {Boolean} notify to send length notifyPropertyChange()
@@ -147,9 +143,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var matchingStoreKeys = SC.Query.containsStoreKeys(queryKey, 
       changedStoreKeys, store);
     
-    // iterate over all changedStoreKeys. if we have it in our array,
-    // keep it if it is a part of matchingStoreKeys, remove it if not,
-    // or if it is not in rec array add it
+    // Will iterate through all changed store keys and make sure they:
+    //  1. Are added if they are new AND match the query
+    //  2. Are removed if they exist and do NOT match the query
     for(idx=0,len=changedStoreKeys.length;idx<len;idx++) {
       storeKey = changedStoreKeys[idx];
       inMatchingStoreKeys = (matchingStoreKeys && 

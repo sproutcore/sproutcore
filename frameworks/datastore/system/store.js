@@ -681,7 +681,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       sourceRet, cacheKey;
     
     if(recordArray) {
-      // giving a recordArray will circumvent the data source for now
+      // giving a recordArray will circumvent the data source
+      // typically happens when chaining findAll statements
       storeKeys = SC.Query.containsRecords(queryKey, recordArray, _store);
     }
     else if (source) {
