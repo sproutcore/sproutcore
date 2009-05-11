@@ -32,7 +32,7 @@ module("SC.RangeObserver#update", {
   }
 });
 
-test("returns receuver", function() {
+test("returns receiver", function() {
   ok(obj === obj.update(source, SC.IndexSet.create()), 'should return receiver');
 });
 
