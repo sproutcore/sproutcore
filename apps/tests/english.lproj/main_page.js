@@ -27,7 +27,7 @@ TestRunner.mainPage = SC.Page.design({
       
       layout: { left: 0, top: 0, right: 0, bottom: 32 },
       
-      topLeftDefaultThickness: 200,  // set default thickness in pixels
+      defaultThickness: 200,  // set default thickness in pixels
       
       topLeftView: SC.ScrollView.design({
         
