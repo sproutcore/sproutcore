@@ -43,14 +43,13 @@ module("SC.Query registered query extensions", {
 
 test("SC.Query.queryExtensions", function(){
   SC.Query.registerQueryExtension('STARTS_WITH_J', {
-    //tokenType:    'COMPARISON',
     reservedWord: true,
-    leftType:    'PRIMITIVE',
-    evalType:     'BOOLEAN',
-    evaluate:     function (r,w) {
-                    var word = this.leftSide.evaluate(r,w);
-                    return ( word.substr(0,1) == 'J' );
-    }
+    leftType: 'PRIMITIVE',
+    evalType: 'BOOLEAN',
+    evaluate: function (r,w) {
+                var word = this.leftSide.evaluate(r,w);
+                return ( word.substr(0,1) == 'J' );
+              }
   });
 
   ok(q.queryLanguage['STARTS_WITH_J'], 'extension STARTS_WITH_J should be set');
