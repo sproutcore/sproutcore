@@ -63,7 +63,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         storeIds  = this.get('storeIds'),
         store     = this.get('store'),
         recordType = this.get('recordType'),
-        storeKey, ret ;
+        storeKey, ret, storeId ;
         
     if (!storeIds || !store) return undefined; // nothing to do
     if (recs && (ret=recs[idx])) return ret ; // cached
@@ -75,7 +75,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
       // if record is not loaded already, then ask the data source to 
       // retrieve it
-      var storeKey = store.storeKeyFor(recordType, storeId);
+      storeKey = store.storeKeyFor(recordType, storeId);
       
       if (store.readStatus(storeKey) === SC.Record.EMPTY) {
         store.retrieveRecord(recordType, null, storeKey);
@@ -93,7 +93,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   replace: function(idx, amt, recs) {
     var storeIds = this.get('storeIds'), 
         len       = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
-        i, keys;
+        i, keys, ids;
 
     if (!storeIds) throw "storeIds required";
 
