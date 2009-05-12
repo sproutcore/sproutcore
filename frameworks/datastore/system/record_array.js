@@ -223,7 +223,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // if this record array is based on a queryKey reapply the
     // the query before setting the storeKeys to ensure it always conforms
     if(SC.instanceOf(this.queryKey, SC.Query)) {
-      this.storeKeys = SC.Query.containsStoreKeys(this.queryKey, null, this.store);
+      this.storeKeys = SC.Query.containsStoreKeys(this.queryKey, value, this.store);
       this.notifyPropertyChange('length');
     }
     
