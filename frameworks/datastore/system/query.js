@@ -9,17 +9,46 @@ require('core') ;
 /**
   @class
 
-  A Query permits you to write queries on your data store in a SQL-like language.
-  Here is a simple example:
-    q = SC.Query.create({conditions:"firstName = 'Jonny' AND lastName = 'Cash'"})
+  This permits you to perform queries on your data store,
+  written in a SQL-like language. Here is a simple example:
+    
+    q = SC.Query.create({
+      conditions: "firstName = 'Jonny' AND lastName = 'Cash'"
+    })
+    
   You can check if a certain record matches the query by calling:
+  
     q.contains(record)
-  Normally you will not use SC.Query directly, instead you will write:
-    r = MyApp.store.findAll("firstName = 'Jonny' AND lastName = 'Cash'")
+  
+  To find all records of your store, that match query q, use findAll with
+  query q as argument:
+  
+    r = MyApp.store.findAll(q)
+  
   r will be a record array containing all matching records.
-  You can give an order which the returned records should be in like this:
-    q = SC.Query.create({ conditions:"firstName = 'Jonny' AND lastName = 'Cash'",
-                          orderBy:"lastName, year DESC" })
+  To limit the query to a record type of MyApp.MyModel,
+  you can specify the type as a property of the query like this:
+  
+    q = SC.Query.create({ 
+      conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
+      recordType: MyApp.MyModel 
+    })
+  
+  Calling findAll() like above will now return only records of type t.
+  It is recommended to limit your query to a record type, since the query will
+  have to look for matching records in the whole store, if no record type
+  is given.
+  
+  You can give an order, which the resulting records should follow, like this:
+  
+    q = SC.Query.create({ 
+      conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
+      recordType: MyApp.MyModel,
+      orderBy: "lastName, year DESC" 
+    })
+  
+  The default order direction is ascending. You can change it to descending
+  by writing DESC behind the property name like in the example above.
   If no order is given, or records are equal in respect to a given order,
   records will be ordered by guid.
   
@@ -27,7 +56,7 @@ require('core') ;
   Features of the query language:
   
   Primitives:
-  - record properties (just include a property you want to check)
+  - record properties
   - null, undefined
   - true, false
   - numbers (integers and floats)
@@ -39,14 +68,15 @@ require('core') ;
   Wild cards are used to identify parameters by the order in
   which they appear in the query string. Named parameters can be
   used when tracking the order becomes difficult.
-  Both types of parameters can be used by calling:
-    query.contains(record,parameters)
-  where parameters should have one of the following formats:
+  Both types of parameters can be used by giving the parameters
+  as a property to your query object:
+    yourQuery.parameters = yourParameters
+  where yourParameters should have one of the following formats:
     for wild cards: [firstParam, secondParam, thirdParam]
-    for named params: {firstParamName: firstParamValue, secondParamName: secondParamValue}
+    for named params: {name1: param1, mane2: parma2}
   You cannot use both types of parameters in a single query!
   
-  Comparators:
+  Operators:
   - =
   - !=
   - <
@@ -54,13 +84,15 @@ require('core') ;
   - >
   - >=
   - BEGINS_WITH (checks if a string starts with another one)
-  - ENDS_WITH (checks if a string ends with another one)
-  - MATCHES (checks if a string is matched by a regexp,
-    you will have to use a parameter to insert the regexp)
-  - ANY (checks if the thing on its left is contained in the array
-    on its right, you will have to use a parameter to insert the array)
-  - TYPE_IS (unary operator expecting a string containing the name of a Model class
-    on its right side, only records of this type will match)
+  - ENDS_WITH   (checks if a string ends with another one)
+  - MATCHES     (checks if a string is matched by a regexp,
+                you will have to use a parameter to insert the regexp)
+  - ANY         (checks if the thing on its left is contained in the array
+                on its right, you will have to use a parameter
+                to insert the array)
+  - TYPE_IS     (unary operator expecting a string containing the name 
+                of a Model class on its right side, only records of this type
+                will match)
     
   Boolean Operators:
   - AND
@@ -76,7 +108,16 @@ require('core') ;
   TODO add examples
   
   
+  You can extend the query language with your own operators by calling:
   
+  SC.Query.registerQueryExtension('your_operator', your_operator_definition)
+  
+  See details below. As well you can provide your own comparison functions
+  to control ordering of specific record properties like this:
+  
+  SC.Query.registerComparison(property_name, comparison_for_this_property) 
+  
+  Again see below for details.
 
   @extends SC.Object
   @static
@@ -127,12 +168,14 @@ SC.Query = SC.Object.extend({
   },
  
   /**
-    This will tell you which of the two passed records is greater than the other,
-    in respect to the orderBy property of your SC.Query object.
+    This will tell you which of the two passed records is greater
+    than the other, in respect to the orderBy property of your SC.Query object.
  
     @param {SC.Record} record1 the first record
     @param {SC.Record} record2 the second record
-    @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
+    @returns {Number} -1 if record1 < record2, 
+                      +1 if record1 > record2,
+                      0 if equal
   */
   compare: function(record1, record2) {
     var result;
@@ -149,10 +192,12 @@ SC.Query = SC.Object.extend({
       // if this property has a registered comparison use that
       // if not use default SC.compare()
       if (SC.Query.comparisons[propertyName]) {
-        result = SC.Query.comparisons[propertyName](record1.get(propertyName),record2.get(propertyName));
+        result = SC.Query.comparisons[propertyName](
+                  record1.get(propertyName),record2.get(propertyName));
       }
       else {
-        result = SC.compare(record1.get(propertyName),record2.get(propertyName));
+        result = SC.compare(
+                  record1.get(propertyName),record2.get(propertyName));
       }
       if (result != 0) {
         // if order is descending we invert the sign of the result
@@ -167,28 +212,26 @@ SC.Query = SC.Object.extend({
   
   
   
-  // ..........................................................
-  // INTERNAL PROPERTIES
-  //
-  
-  // for containment:
-  
+  /** @private
+    Some internal properties
+  */
   isReady:        false,
   tokenList:      null,
   usedProperties: null,
   needsRecord:    false,
   tokenTree:      null,
-  
-  // for comparison:
-  
   order:          [],
   
   
   
-  // ..........................................................
-  // PARSING THE QUERY
-  //
-  
+  /**
+    This method has to be called before the query object can be used.
+    You will normaly not have to do this, it will be called automatically
+    if you try to evaluate a query.
+    You can however use this function for testing your queries.
+ 
+    @returns {Boolean} true if parsing succeeded, false otherwise
+  */
   parseQuery: function() {
     this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
     this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLanguage);
@@ -213,7 +256,10 @@ SC.Query = SC.Object.extend({
   //
   
   
-  
+  /**
+    This is the definition of the query language. You can extend it
+    by using SC.Query.registerQueryExtension().
+  */
   queryLanguage: {
     'UNKNOWN': {
       firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
@@ -264,62 +310,97 @@ SC.Query = SC.Object.extend({
       leftType:         'BOOLEAN',
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) && this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left && right;
+                        }
     },
     'OR': {
       reservedWord:     true,
       leftType:         'BOOLEAN',
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) || this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left || right;
+                        }
     },
     'NOT': {
       reservedWord:     true,
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return  ! this.rightSide.evaluate(r,w) ; }
+      evaluate:         function (r,w) {
+                          var right = this.rightSide.evaluate(r,w);
+                          return !right;
+                        }
     },
     '=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) == this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left == right;
+                        }
     },
     '!=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) != this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left != right;
+                        }
     },
     '<': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) < this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left < right;
+                        }
     },
     '<=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) <= this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left <= right;
+                        }
     },
     '>': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) > this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left > right;
+                        }
     },
     '>=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
-      evaluate:         function (r,w) { return ( this.leftSide.evaluate(r,w) >= this.rightSide.evaluate(r,w) ); }
+      evaluate:         function (r,w) {
+                          var left  = this.leftSide.evaluate(r,w);
+                          var right = this.rightSide.evaluate(r,w);
+                          return left >= right;
+                        }
     },
     'BEGINS_WITH': {
       reservedWord:     true,
@@ -340,7 +421,8 @@ SC.Query = SC.Object.extend({
       evaluate:         function (r,w) {
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
-                          return ( all.substring(all.length-end.length,all.length) == end );
+                          var suf = all.substring(all.length-end.length,all.length);
+                          return suf == end;
                         }
     },
     'ANY': {
@@ -376,7 +458,10 @@ SC.Query = SC.Object.extend({
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
       evaluate:         function (r,w) {
-                          return ( SC.Store.recordTypeFor(r.storeKey) == SC.objectForPropertyPath(this.rightSide.evaluate(r,w)) );
+                          var actualType = SC.Store.recordTypeFor(r.storeKey);
+                          var right      = this.rightSide.evaluate(r,w);
+                          var expectType = SC.objectForPropertyPath(right);
+                          return actualType == expectType;
                         }
     },
     'null': {
@@ -406,12 +491,16 @@ SC.Query = SC.Object.extend({
   // TOKENIZER
   //
   
+  
+  /**
+    Takes a string and tokenizes it based on the grammar definition
+    provided. Called by parseQuery().
+    
+    @param {String} inputString the string to tokenize
+    @param {Object} grammar the grammar definition (normally queryLanguage)
+    @returns {Array} list of tokens
+  */
   tokenizeString: function (inputString, grammar) {
-	
-  	// takes a string and returns an array of tokens
-  	// depending on the grammar specified
-	
-  	// currently there is no form of syntax validation !
 	
 	
     var tokenList           = [];
@@ -446,10 +535,9 @@ SC.Query = SC.Object.extend({
       // reserved words
       if ( !t.delimeted ) {
         for ( var anotherToken in grammar ) {
-          if ( grammar[anotherToken].reservedWord && anotherToken == tokenValue ) {
-            //tokenType = anotherToken.tokenType;
+          if ( grammar[anotherToken].reservedWord
+               && anotherToken == tokenValue ) {
             tokenType = anotherToken;
-            //t = grammar.generalTypes[tokenType];
           }
         }
       };
@@ -484,7 +572,8 @@ SC.Query = SC.Object.extend({
       // current character
       c = inputString[i];
     
-      // set true after end of delimeted token so that final delimeter is not catched again
+      // set true after end of delimeted token so that
+      // final delimeter is not catched again
       skipThisCharacter = false;
         
     
@@ -494,7 +583,7 @@ SC.Query = SC.Object.extend({
       
         // some helpers
         t = grammar[currentToken];
-        endOfToken = (t.delimeted) ? (c==currentDelimeter) : t.notAllowed.test(c);
+        endOfToken = (t.delimeted) ? c==currentDelimeter : t.notAllowed.test(c);
       
         // if still in token
         if ( !endOfToken )
@@ -514,7 +603,6 @@ SC.Query = SC.Object.extend({
       // if not inside a token, look for next one
     
       if ( !currentToken && !skipThisCharacter ) {
-        //token = null;
         // look for matching tokenType
         for ( token in grammar ) {
           t = grammar[token];
@@ -548,17 +636,23 @@ SC.Query = SC.Object.extend({
   // BUILD TOKEN TREE
   //
   
-  buildTokenTree: function (tokenList, treeLogic) {
+  /**
+    Takes an array of tokens and returns a tree, depending on the
+    specified tree logic. The returned object will have an error property
+    if building of the tree failed. Check it to get some information
+    about what happend.
+    If everything worked the tree can be evaluated by calling:
     
-    /**
-      Takes a list of tokens and returns a tree, depending on the specified tree logic.
-      The returned object will have an error property if building of the tree failed.
-      Check it to get some information about what happend.
-      If everything worked the tree can be evaluated by calling:
-      tree.evaluate(record,queryValues)
-      If tokenList is empty, a single token will be returned which will evaluate to true
-      for all records.
-    */
+      tree.evaluate(record, parameters)
+    
+    If tokenList is empty, a single token will be returned which will
+    evaluate to true for all records.
+    
+    @param {Array} tokenList the list of tokens
+    @param {Object} treeLogic the logic definition (normally queryLanguage)
+    @returns {Object} token tree
+  */
+  buildTokenTree: function (tokenList, treeLogic) {
   
     var l                    = tokenList.slice();
     var i                    = 0;
@@ -568,7 +662,9 @@ SC.Query = SC.Object.extend({
     
   
     // empty tokenList is a special case
-    if (!tokenList || tokenList.length == 0) return {evaluate: function(){return true;}};
+    if (!tokenList || tokenList.length == 0){
+      return {evaluate: function(){return true;}};
+    }
   
   
     // some helper functions
@@ -576,19 +672,6 @@ SC.Query = SC.Object.extend({
     function tokenLogic (position) {
       var p = position;
       if ( p < 0 ) return false;
-      
-      //for (var token in treeLogic) {
-      //  if (treeLogic[token].tokenType == l[p].tokenType) {
-      //    if (treeLogic[token].reservedWord) {
-      //      if (treeLogic[token].reservedWord == l[p].tokenValue) {
-      //        tl = treeLogic[token];
-      //      }
-      //    }
-      //    else {
-      //      tl = treeLogic[token];
-      //    }
-      //  }
-      //};
       
       tl = treeLogic[l[p].tokenType];
       
@@ -640,10 +723,11 @@ SC.Query = SC.Object.extend({
   
     function typesAreMatching (parent, child) {
       var side = (child < parent) ? 'left' : 'right';
-      if ( parent < 0 || child < 0 )    return false;
-      if ( !expectedType(side,parent) ) return false;
-      if ( !evalType(child) )           return false;
-      else                              return (expectedType(side,parent) == evalType(child));
+      if ( parent < 0 || child < 0 )                      return false;
+      if ( !expectedType(side,parent) )                   return false;
+      if ( !evalType(child) )                             return false;
+      if ( expectedType(side,parent) == evalType(child) ) return true;
+      else                                                return false;
     };
   
     function preceedingTokenCanBeMadeChild (position) {
@@ -687,14 +771,24 @@ SC.Query = SC.Object.extend({
     for (i=0; i < l.length; i++) {
       shouldCheckAgain = false;
     
-      if ( l[i].tokenType == 'UNKNOWN' )          error.push('found unknown token: '+l[i].tokenValue);
-      if ( l[i].tokenType == 'OPEN_PAREN' )       openParenthesisStack.push(i);
-      if ( l[i].tokenType == 'CLOSE_PAREN' )      removeParenthesesPair(i);
-      if ( preceedingTokenCanBeMadeChild(i) )     makeChild(i);
-      if ( preceedingTokenCanBeMadeParent(i) )  { makeParent(i);
-                                                  shouldCheckAgain = true; }; 
-      if ( shouldCheckAgain )                     i--;
-    
+      if ( l[i].tokenType == 'UNKNOWN' )
+        error.push('found unknown token: '+l[i].tokenValue);
+      
+      if ( l[i].tokenType == 'OPEN_PAREN' )
+        openParenthesisStack.push(i);
+      
+      if ( l[i].tokenType == 'CLOSE_PAREN' )      
+        removeParenthesesPair(i);
+      
+      if ( preceedingTokenCanBeMadeChild(i) ) 
+        makeChild(i);
+      
+      if ( preceedingTokenCanBeMadeParent(i) ){
+        makeParent(i);
+        shouldCheckAgain = true;
+      } 
+      
+      if ( shouldCheckAgain ) i--;
     
     };
   
@@ -714,6 +808,14 @@ SC.Query = SC.Object.extend({
   // ORDERING
   //
   
+  /**
+    Takes a string containing an order statement and returns an array
+    describing this order for easier processing.
+    Called by parseQuery().
+    
+    @param {String} orderString the string containing the order statement
+    @returns {Array} array of order statement
+  */
   buildOrder: function (orderString) {
     if (!orderString) {
       return [];
@@ -841,32 +943,31 @@ SC.Query.mixin( /** @scope SC.Query */ {
 SC.Query.comparisons = {};
 
 /**
-  Call to register a comparison for a specific property name. The function you pass
-  should accept two values of this property and return -1 if the first is smaller
-  than the second, 0 if they are equal and 1 if the first is greater than the second.
+  Call to register a comparison for a specific property name.
+  The function you pass should accept two values of this property
+  and return -1 if the first is smaller than the second,
+  0 if they are equal and 1 if the first is greater than the second.
   
   @param {String} name of the record property
   @param {Function} custom comparison function
   @returns {SC.Query} receiver
 */
 SC.Query.registerComparison = function(propertyName, comparison) {
-  //var guidForKlass = SC.guidFor(klass);
-  //if (!SC.Query.comparisons[guidForKlass]) SC.Query.comparisons[guidForKlass] = {};
   SC.Query.comparisons[propertyName] = comparison;
 };
 
-/** @private
-  Hash of registered query extensions. 
-*/
-SC.Query.queryExtensions = {};
 
 /**
-  Call to register a comparison for a specific property name. The function you pass
-  should accept two values of this property and return -1 if the first is smaller
-  than the second, 0 if they are equal and 1 if the first is greater than the second.
+  Call to register an extension for the query language.
+  You shoud provide a name for your extension and a definition
+  specifying how it should be parsed and evaluated.
   
-  @param {String} name of the record property
-  @param {Function} custom comparison function
+  Have a look at queryLanguage for examples of definitions.
+  
+  TODO add better documentation here
+  
+  @param {String} tokenName name of the operator
+  @param {Object} token extension definition
   @returns {SC.Query} receiver
 */
 SC.Query.registerQueryExtension = function(tokenName, token) {
