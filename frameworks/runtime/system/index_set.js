@@ -7,8 +7,8 @@
 
 sc_require('mixins/enumerable') ;
 sc_require('mixins/observable') ;
-sc_require('mixins/freezing');
-sc_require('mixins/copying');
+sc_require('mixins/freezable');
+sc_require('mixins/copyable');
 
 /**
   @class 

@@ -181,3 +181,9 @@ test("removing an index range outside of target range (specific bug)", function(
   set.remove(set2);
   equals(set.get('length'), 3, 'length should not change');
 });
+
+test("remove() raises exception when frozen", function() {
+  throws(function() {
+    set.freeze().remove(0,2);    
+  }, SC.FROZEN_ERROR);  
+});
