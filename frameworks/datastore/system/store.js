@@ -1662,7 +1662,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Given a recordType and primaryKey, find the storeKey.
+    Given a recordType and primaryKey, find the storeKey. If the primaryKey 
+    has not been assigned a storeKey yet, it will be added.
     
     @param {SC.Record} recordType the record type
     @param {String} primaryKey the primary key
@@ -1670,6 +1671,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   storeKeyFor: function(recordType, primaryKey) {
     return recordType.storeKeyFor(primaryKey);
+  },
+  
+  /**
+    Given a primaryKey value for the record, returns the associated
+    storeKey.  As opposed to storeKeyFor() however, this method
+    will NOT generate a new storeKey but returned undefined.
+    
+    @param {String} id a record id
+    @returns {Number} a storeKey.
+  */
+  storeKeyExists: function(recordType, primaryKey) {
+    return recordType.storeKeyExists(primaryKey);
   },
   
   /**

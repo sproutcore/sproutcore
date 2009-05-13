@@ -473,6 +473,21 @@ SC.Record.mixin( /** @scope SC.Record */ {
     
     return ret ;
   },
+  
+  /**
+    Given a primaryKey value for the record, returns the associated
+    storeKey.  As opposed to storeKeyFor() however, this method
+    will NOT generate a new storeKey but returned undefined.
+    
+    @param {String} id a record id
+    @returns {Number} a storeKey.
+  */
+  storeKeyExists: function(id) {
+    var storeKeys = this.storeKeysById(),
+        ret       = storeKeys[id];
+    
+    return ret ;
+  },
 
   /** 
     Returns a record with the named ID in store.
