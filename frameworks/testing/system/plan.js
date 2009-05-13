@@ -544,6 +544,35 @@ CoreTest.Plan = {
     },
     
     /**
+      Expects the passed function call to throw an exception of the given
+      type. If you pass null or Error for the expected exception, this will
+      pass if any error is received.  If you pass a string, this will check 
+      message property of the exception.
+      
+      @param {Function} callback the function to execute
+      @param {Error} expected optional, the expected error
+      @param {String} a description
+      @returns {CoreTest.Plan} receiver
+    */
+    throws: function throws(callback, expected, msg) {
+      var actual = false ;
+      
+      try {
+        callback();
+      } catch(e) {
+        actual = (typeof expected === "string") ? e.message : e;        
+      }
+      
+      if (expected===false) {
+        ok(actual===false, CoreTest.fmt("%@ expected no exception, actual %@", msg, actual));
+      } else if (expected===Error || expected===null || expected===true) {
+        ok(!!actual, CoreTest.fmt("%@ expected exception, actual %@", msg, actual));
+      } else {
+        equals(actual, expected, msg);
+      }
+    },
+    
+    /**
       Specify the number of expected assertions to gaurantee that a failed 
       test (no assertions are run at all) don't slip through
 
