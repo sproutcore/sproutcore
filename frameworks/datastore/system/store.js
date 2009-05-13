@@ -928,7 +928,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else status = K.DESTROYED_DIRTY ;
     
     // remove the data hash, set new status
-    this.removeDataHash(storeKey, status);
+    this.writeStatus(storeKey, status);
     this.dataHashDidChange(storeKey);
 
     // add/remove change log
@@ -1694,7 +1694,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   storeKeysFor: function(recordType) {
-    var recType, ret = [];
+    var recType, ret = [], storeKey;
     if(!this.statuses) return;
     
     for(storeKey in SC.Store.recordTypesByStoreKey) {

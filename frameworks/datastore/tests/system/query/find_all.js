@@ -19,6 +19,11 @@ module("SC.Query querying findAll on a store", {
       
       fetch: function(store, fetchKey, params) {
         return this.storeKeys;
+      },
+      
+      destroyRecord: function(store, storeKey){
+        store.dataSourceDidDestroy(storeKey);
+        return YES;
       }
       
     });
@@ -49,6 +54,11 @@ module("SC.Query querying findAll on a store", {
       // just return fetchKey which will be SC.Query
       fetch: function(store, fetchKey, params) {
         return fetchKey;
+      },
+
+      destroyRecord: function(store, storeKey){
+        store.dataSourceDidDestroy(storeKey);
+        return YES;
       }
     });
     MyApp.store2 = SC.Store.create().from(MyApp.DataSource2);
@@ -247,6 +257,7 @@ test("Deleting a record should make the RecordArray based on SC.Query update acc
   equals(records.get('length'), 1, 'record length should be 1');
   
   MyApp.store2.destroyRecord(MyApp.Foo, 1);
+  MyApp.store2.commitRecords();
   
   equals(records.get('length'), 0, 'record length should be 0');
   
