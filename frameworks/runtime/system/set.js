@@ -5,8 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('mixins/enumerable') ;
-require('mixins/observable') ;
+sc_require('mixins/enumerable') ;
+sc_require('mixins/observable') ;
+sc_require('mixins/freezable');
+sc_require('mixins/copyable');
 
 /**
   @class 
@@ -104,6 +106,7 @@ SC.Set.prototype = {
     Clears the set 
   */
   clear: function() { 
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     this.length = 0;
     return this ;
   },
@@ -131,6 +134,7 @@ SC.Set.prototype = {
     @returns {Object} this
   */
   add: function(obj) {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     
     // cannot add null to a set.
     if (obj===null || obj===undefined) return this; 
@@ -151,6 +155,8 @@ SC.Set.prototype = {
     Add all the items in the passed array.
   */
   addEach: function(objects) {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
+
     var idx = objects.get('length') ;
     if (objects.objectAt) {
       while(--idx >= 0) this.add(objects.objectAt(idx)) ;
@@ -169,6 +175,7 @@ SC.Set.prototype = {
     @returns {this} this
   */  
   remove: function(obj) {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
 
     if (SC.none(obj)) return this ;
     var guid = SC.hashFor(obj);
@@ -199,6 +206,7 @@ SC.Set.prototype = {
     @returns {Object} an object from the set or null
   */
   pop: function() {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     var obj = (this.length > 0) ? this[this.length-1] : null ;
     if (obj) this.remove(obj) ;
     return obj ;
@@ -208,6 +216,7 @@ SC.Set.prototype = {
     Removes all the items in the passed array.
   */
   removeEach: function(objects) {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     var idx = objects.get('length') ;
     if (objects.objectAt) {
       while(--idx >= 0) this.remove(objects.objectAt(idx)) ;
@@ -228,6 +237,7 @@ SC.Set.prototype = {
     Return a set to the pool for reallocation.
   */
   destroy: function() {
+    this.isFrozen = NO ; // unfreeze to return to pool
     SC.Set._pool.push(this.clear());
     return this;
   },
@@ -246,10 +256,10 @@ SC.Set.prototype = {
 
 } ;
 
-SC.Set.prototype.slice = SC.Set.prototype.clone ;
-
 // Make this enumerable and observable
-SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable) ;
+SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable, SC.Freezable, SC.Observable) ;
+
+SC.Set.prototype.slice = SC.Set.prototype.copy = SC.Set.prototype.clone ;
 
 SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
 SC.Set.prototype.shift = SC.Set.prototype.pop ;

@@ -486,6 +486,7 @@ if (!Array.prototype.lastIndexOf) {
 
     // primitive for array support.
     replace: function(idx, amt, objects) {
+      if (this.isFrozen) throw SC.FROZEN_ERROR ;
       if (!objects || objects.length === 0) {
         this.splice(idx, amt) ;
       } else {

@@ -5,8 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('mixins/enumerable') ;
-require('mixins/observable') ;
+sc_require('mixins/enumerable') ;
+sc_require('mixins/observable') ;
+sc_require('mixins/freezing');
+sc_require('mixins/copying');
 
 /**
   @class 
@@ -43,9 +45,12 @@ require('mixins/observable') ;
   @extends Object
   @extends SC.Enumerable 
   @extends SC.Observable
+  @extends SC.Copyable
+  @extends SC.Freezable
   @since SproutCore 1.0
 */
-SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
+SC.IndexSet = SC.mixin({}, 
+  SC.Enumerable, SC.Observable, SC.Freezable, SC.Copyable,
 /** @scope SC.IndexSet.prototype */ {
 
   /** @private
@@ -379,6 +384,8 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
   */
   add: function(start, length) {
     
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    
     var content, cur, next;
 
     // normalize IndexSet input
@@ -549,6 +556,8 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     @returns {SC.IndexSet} receiver
   */
   remove: function(start, length) {
+
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     
     // normalize input
     if (length === undefined) { 
@@ -703,6 +712,8 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     Clears the set 
   */
   clear: function() {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
+    
     var oldlen = this.length;
     this._content.length=1;
     this._content[0] = 0;
@@ -714,6 +725,8 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     Add all the ranges in the passed array.
   */
   addEach: function(objects) {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
+
     var idx = objects.get('length') ;
     if (objects.objectAt) {
       while(--idx >= 0) this.add(objects.objectAt(idx)) ;
@@ -727,6 +740,8 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
     Removes all the ranges in the passed array.
   */
   removeEach: function(objects) {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
+
     var idx = objects.get('length') ;
     if (objects.objectAt) {
       while(--idx >= 0) this.remove(objects.objectAt(idx)) ;
@@ -1114,4 +1129,4 @@ SC.IndexSet = SC.mixin({}, SC.Enumerable, SC.Observable,
 
 }) ;
 
-SC.IndexSet.slice = SC.IndexSet.clone ;
+SC.IndexSet.slice = SC.IndexSet.copy = SC.IndexSet.clone ;

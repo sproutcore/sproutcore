@@ -7,6 +7,8 @@
 
 sc_require('system/object');
 sc_require('mixins/enumerable');
+sc_require('mixins/copyable');
+sc_require('mixins/freezable');
 
 /** @class
 
@@ -18,7 +20,7 @@ sc_require('mixins/enumerable');
   @extends SC.Enumerable
   @since SproutCore 1.0
 */
-SC.SelectionSet = SC.Object.extend(SC.Enumerable, {
+SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   
   isSelectionSet: YES,
   
@@ -99,6 +101,8 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, {
   */
   add: function(source, start, length) {
     
+    if (this.isFrozen) throw SC.FROZEN_ERROR ;
+    
     var sets, len, idx, set, oldlen, newlen, setlen;
     
     // normalize
@@ -151,6 +155,8 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, {
     @returns {SC.SelectionSet} receiver
   */
   remove: function(source, start, length) {
+    
+    if (this.isFrozen) throw SC.FROZEN_ERROR ;
     
     var sets, len, idx, set, oldlen, newlen, setlen;
     
@@ -268,6 +274,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, {
     Clears the set.  Removes all IndexSets from the object
   */
   clear: function() {
+    if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (this._sets) this._sets.length = 0 ; // truncate
     this.set('length', 0);
     return this ;
@@ -438,3 +445,5 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, {
   
   
 });
+
+SC.SelectionSet.prototype.copy = SC.SelectionSet.prototype.clone;
