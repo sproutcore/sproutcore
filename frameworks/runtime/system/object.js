@@ -359,12 +359,12 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 // DEFAULT OBJECT INSTANCE
 // 
 SC.Object.prototype = {
-
+  
   /** @private
     This is the first method invoked on a new instance.  It will first apply
     any added properties to the new instance and then calls the real init()
     method.
-
+    
     @param {Array} extensions an array-like object with hashes to apply.
     @returns {Object} receiver
   */
@@ -374,26 +374,29 @@ SC.Object.prototype = {
     for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx]) ;
     SC.generateGuid(this) ; // add guid
     this.init() ; // call real init
-
+    
     // Call 'initMixin' methods to automatically setup modules.
     var inits = this.initMixin; len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
     
-     // call statechart init if defined
-    if (this.initStatechart) this.initStatechart() ;
-
+     // call statechart init if defined, but wait until SproutCore is ready
+    if (this.initStatechart) {
+      if (!SC.isReady) this.invokeOnce(this.initStatechart) ;
+      else this.initStatechart() ;
+    }
+    
     return this ; // done!
   },
-
-  /** 
+  
+  /**
     You can call this method on an object to mixin one or more hashes of 
     properties on the receiver object.  In addition to simply copying 
     properties, this method will also prepare the properties for use in 
     bindings, computed properties, etc.
-
+    
     If you plan to use this method, you should call it before you call
     the inherited init method from SC.Object or else your instance may not 
-    function properly.  
+    function properly.
     
     h2. Example
     
@@ -401,7 +404,7 @@ SC.Object.prototype = {
       // dynamically apply a mixin specified in an object property
       var MyClass = SC.Object.extend({
          extraMixin: null,
-
+         
          init: function() {
            this.mixin(this.extraMixin);
            sc_super();
