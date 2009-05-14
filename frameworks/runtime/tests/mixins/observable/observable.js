@@ -525,3 +525,31 @@ test("should bind property with method parameter as undefined", function() {
   SC.Binding.flushPendingChanges();
   equals("changedValue", objectA.get("name"), "objectA.name is binded");
 });
+
+// ..........................................................
+// SPECIAL CASES
+// 
+
+test("changing chained observer object to null should not raise exception", function() {
+
+  var obj = SC.Object.create({
+    foo: SC.Object.create({
+      bar: SC.Object.create({ bat: "BAT" })
+    })
+  });
+  
+  var callCount = 0;
+  obj.foo.addObserver('bar.bat', obj, function(target, key, value) { 
+    equals(target, null, 'new target value should be null');
+    equals(key, 'bat', 'key should be bat');
+    callCount++; 
+  });
+  
+  SC.run(function() {
+    obj.foo.set('bar', null);
+  });
+
+  //debugger ;
+  equals(callCount, 1, 'changing bar should trigger observer');
+  expect(3);
+});
