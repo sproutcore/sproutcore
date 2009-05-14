@@ -379,12 +379,6 @@ SC.Object.prototype = {
     var inits = this.initMixin; len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
     
-     // call statechart init if defined, but wait until SproutCore is ready
-    if (this.initStatechart) {
-      if (!SC.isReady) this.invokeOnce(this.initStatechart) ;
-      else this.initStatechart() ;
-    }
-    
     return this ; // done!
   },
   
