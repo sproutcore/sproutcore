@@ -604,7 +604,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       elem = parentLayer.firstChild ;
       while (elem && (elem.id !== layerId)) {
         // try to get first child or next sibling if no children
-        var next = elem.firstChild || elem.nextSibling ;
+        var next =  elem.nextSibling || elem.firstChild;
         
         // if no next sibling, then get next sibling of parent.  Walk up 
         // until we find parent with next sibling or find ourselves back at
