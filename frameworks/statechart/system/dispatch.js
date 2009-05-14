@@ -33,6 +33,15 @@ SC.mixin(SC.Object.prototype,
     @returns {Boolean} YES if the event was handled
   */
   dispatch: function(evt) {
+    if (this._isDispatching) {
+      if (this.get('sc_trace')) {
+        console.log('%@ ignored event "%@": already dispatching an event'.fmt(this, evt.sig));
+      }
+      return NO ;
+    }
+    
+    this._isDispatching = YES ;
+    
     var stateKey = this.get('stateKey') ;
     var path = SC._DISPATCH_PATH ;
     var current, target, handlerKey, superstateKey, pathKey, res, idx, idx2 ;
@@ -48,9 +57,12 @@ SC.mixin(SC.Object.prototype,
     
     // save the current state
     current = this[stateKey] ;
-    if (!current) return NO ; // fast path -- this object does not use HSMs
+    if (!current) {
+      this._isDispatching = NO ;
+      return NO ; // fast path -- this object does not use HSMs
+    }
     
-    this._sc_statechart_dispatch() ; // trace
+    this._sc_statechart_dispatch(evt) ; // trace
     
     // okay, process the event hierarchically...
     // res = this[this[stateKey]](evt) ;
@@ -69,6 +81,7 @@ SC.mixin(SC.Object.prototype,
     }
     
     if (!res) {
+      this._isDispatching = NO ;
       return NO ; // we ignored the event
     
     // .......................................................................
@@ -375,10 +388,14 @@ SC.mixin(SC.Object.prototype,
       
       this.notifyPropertyChange(stateKey) ;
       
+      this._isDispatching = NO ;
+      
       // if we transitioned, we definitely handled the event...
       return YES ;
     }
     else {
+      this._isDispatching = NO ;
+      
       // we did handle the event, but we didn't make a state transition
       return YES ;
     }
@@ -391,7 +408,7 @@ SC.mixin(SC.Object.prototype,
     @param {String} state a local property containing a state handler
     @returns {SC.EVT_HANDLED_RES, SC.EVT_TRANSITION_RES, or undefined}
   */
-  _sc_statechart_dispatch: function() {},
+  _sc_statechart_dispatch: function(evt) {},
   
   /** @private
     Enters a given state. This method is overriden in debug mode to implement
