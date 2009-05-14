@@ -123,6 +123,16 @@ test("should get enumerator that iterates through objects", function() {
   }
 });
 
+test("should return firstObject for item with content", function() {
+  var src, ary2 = enumerables ;
+  for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
+    src = ary2[idx2] ;
+    equals(src.firstObject(), CommonArray[0], 'firstObject should return first object');
+  }
+  
+  equals([].firstObject(), undefined, 'firstObject() on empty enumerable should return undefined');
+});
+
 test("should run forEach() to go through objects", function() {
   var src, ary2 = enumerables ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {

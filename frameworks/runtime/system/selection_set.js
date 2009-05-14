@@ -71,11 +71,13 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
                 
     if (index >= len) index = null;
     if (SC.none(index)) {
-      if (canCreate) {
+      if (canCreate && !this.isFrozen) {
+        this.propertyWillChange('sources');
         if (!sets) sets = this._sets = [];
         ret = sets[len] = SC.IndexSet.create();
         ret.source = source ;
         this[guid] = len;
+        this.propertyDidChange('sources');
       }
       
     } else ret = sets ? sets[index] : null;
@@ -205,20 +207,21 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   isEqual: function(obj) {
     if (!obj || !obj.isSelectionSet) return NO ;
     
-    var my_sets  = this._sets,
-        obj_sets = obj._sets,
-        my_len   = my_sets ? my_sets.length : 0,
-        idx, my_set, obj_set;
-    
-    if (my_sets === obj_sets) return YES;
-    if (!obj_sets || (my_len !== obj_sets.length)) return NO ;
-    
-    for(idx=0;idx<my_len;idx++) {   
-      my_set = my_sets[idx];
-      obj_set = obj_set[idx];
-      if (my_set || obj_set) {
-        if (!my_set || !obj_set || !my_set.isEqual(obj_set)) return NO ;
-      }
+    // fast paths
+    if (this._sets === obj._sets) return YES;
+    if (!obj._sets || (obj.get('length') !== this.get('length'))) return NO ;
+    if (this.get('length') === 0) return YES ;
+
+    var sources = this.get('sources'),
+        len     = sources.get('length'),
+        idx, source, my_set, obj_set;
+
+    for(idx=0;idx<len;idx++) {
+      source  = sources[idx];
+      my_set  = this.indexSetForSource(source, NO);
+      obj_set = obj.indexSetForSource(source, NO);
+      if (my_set === obj_set) continue ; // same
+      if (!obj_set || !my_set || !my_set.isEqual(obj_set)) return NO ;
     }
     return YES ;
   },
@@ -304,6 +307,20 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   // ..........................................................
   // ITERATORS
   // 
+  
+  toString: function() {
+    var sets = this._sets || [];
+    sets = sets.map(function(set) { 
+      return set.toString().replace("SC.IndexSet", SC.guidFor(set.source)); 
+    }, this);
+    return "SC.SelectionSet:%@<%@>".fmt(SC.guidFor(this), sets.join(','));  
+  },
+  
+  firstObject: function() {
+    if (this.get('length')===0) return undefined;
+    var sets = this._sets;
+    return sets ? sets[0].firstObject() : undefined;
+  }.property(),
   
   /**
     Implement primitive enumerable support.  Returns each object in the 

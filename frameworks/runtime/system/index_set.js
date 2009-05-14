@@ -123,6 +123,10 @@ SC.IndexSet = SC.mixin({},
     
   }.property('[]').cacheable(),
   
+  firstObject: function() {
+    return (this.get('length')>0) ? this.get('min') : undefined;  
+  }.property(),
+  
   /** 
     Returns the starting index of the nearest range for the specified 
     index.

@@ -89,6 +89,29 @@ SC.Enumerable = {
   },
   
   /**
+    Helper method returns the first object from a collection.  This is usually
+    used by bindings and other parts of the framework to extract a single 
+    object if the enumerable contains only one item.
+    
+    If you override this method, you should implement it so that it will 
+    always return the same value each time it is called.  If your enumerable
+    contains only one object, this method should always return that object.
+    If your enumerable is empty, this method should return undefined.
+    
+    @returns {Object} the object or undefined
+  */
+  firstObject: function() {
+    if (this.get('length')===0) return undefined ;
+    if (this.objectAt) return this.objectAt(0); // support arrays out of box
+    
+    // handle generic enumerables
+    var context = SC.Enumerator._popContext(), ret;
+    ret = this.nextObject(0, null, context);
+    context = SC.Enumerator._pushContext(context);  
+    return ret ;
+  }.property(),
+  
+  /**
     Returns a new enumerator for this object.  See SC.Enumerator for
     documentation on how to use this object.  Enumeration is an alternative
     to using one of the other iterators described here.
@@ -930,6 +953,7 @@ Array.prototype.isEnumerable = YES ;
     // possible.
     nextObject: SC.Enumerable.nextObject,
     enumerator: SC.Enumerable.enumerator,
+    firstObject: SC.Enumerable.firstObject,
 
     // see above...
     mapProperty: function(key) {

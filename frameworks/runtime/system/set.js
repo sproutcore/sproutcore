@@ -102,6 +102,10 @@ SC.Set.prototype = {
   */
   length: 0,
 
+  firstObject: function() {
+    return (this.length>0) ? this[0] : undefined ;
+  }.property(),
+  
   /**
     Clears the set 
   */

@@ -35,7 +35,7 @@ test("cloning frozen object returns unfrozen", function() {
 
 test("copy works like clone", function() {
   same(set.copy(), set, 'should return copy');
-  ok(set.copy() !== set, 'should not return same instance');)
+  ok(set.copy() !== set, 'should not return same instance');
   
   set.freeze();
   equals(set.frozenCopy(), set, 'should return same instance when frozen');

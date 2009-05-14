@@ -777,8 +777,9 @@ SC.Binding = {
       placeholder = SC.MULTIPLE_PLACEHOLDER ;
     }
     return this.from(fromPath).transform(function(value, isForward) {
-      if (SC.isArray(value)) {
-        value = (value.length>1) ? placeholder : (value.length<=0) ? null : (value.objectAt ? value.objectAt(0) : value[0]);
+      if (value && value.isEnumerable) {
+        var len = value.get('length');
+        value = (len>1) ? placeholder : (len<=0) ? null : value.firstObject();
       }
       return value ;
     }) ;
