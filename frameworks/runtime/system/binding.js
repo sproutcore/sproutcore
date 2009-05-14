@@ -425,7 +425,7 @@ SC.Binding = {
     the binding as dirty if the value has changed.
   */
   fromPropertyDidChange: function(target, key) {
-    var v = target.get(key) ;
+    var v = target ? target.get(key) : null;
 
     //console.log("fromPropertyDidChange: %@ v = %@".fmt(this, v)) ;
     

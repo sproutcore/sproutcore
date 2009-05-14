@@ -1173,7 +1173,7 @@ SC.Observable = {
   setPathIfChanged: function(path, value) {
     if (path.indexOf('.') >= 0) {
       var tuple = SC.tupleForPropertyPath(path, this) ;
-      if (!tuple[0]) return null ;
+      if (!tuple || !tuple[0]) return null ;
       if (tuple[0].get(tuple[1]) !== value) {
         tuple[0].set(tuple[1], value) ;
       }
