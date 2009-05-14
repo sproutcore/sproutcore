@@ -23,14 +23,14 @@ SC.StatechartView = SC.View.extend({
   
   statePath: SC.LabelView.extend({
     // layout: { top:10, left:190, height: 22, right: 240 },
-    layout: { top:10, left:190, height: 22, right: 260 },
+    layout: { top:2, left:190, height: 22, right: 260 },
     
     valueBinding: 'StatechartDebugger.statechartController.sc_statePath'
   }),
   
   messageLog: SC.LabelView.extend({
     // layout: { top:10, left:190, height: 22, right: 240 },
-    layout: { top:10, width:350, height: 22, right: 300 },
+    layout: { top:22, left:190, height: 22, right: 260 },
     
     valueBinding: 'StatechartDebugger.statechartController.sc_lastMessage'
   }),
