@@ -44,8 +44,10 @@ SC.mixin(SC.Object.prototype,
     @param {String} state a local property containing a state handler
     @returns {SC.EVT_HANDLED_RES, SC.EVT_TRANSITION_RES, or undefined}
   */
-  _sc_statechart_dispatch: function() {
+  _sc_statechart_dispatch: function(evt) {
     if (this.get('sc_trace')) {
+      if (evt.sig.match(/^mouse+/) && !StatechartDebugger.LOG_MOUSE_EVENTS) return ;
+      
       var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
       fun.call(this, "%@:dispatch()".fmt(this)) ;
     }
@@ -120,14 +122,16 @@ SC.mixin(SC.Object.prototype,
     @returns {SC.EVT_HANDLED_RES, SC.EVT_TRANSITION_RES, or undefined}
   */
   _sc_statechart_event: function(state, evt, depth) {
+    if (evt.sig.match(/^mouse+/) && !StatechartDebugger.LOG_MOUSE_EVENTS) return ;
+    
     var pre = '' ;
     while (--depth > 0) pre = pre + '  ' ;
     
     var res = this[state](evt), stateKey = this.get('stateKey') ;
     if (this.get('sc_trace')) {
       var fun = this.get('sc_singleStep') ? _sc_alert : _sc_log ;
-      var chr = evt.getCharString() ;
-      var sig = (evt.sig === 'keyDown' && chr) ? '%@(%@)'.fmt(evt.sig, chr) : evt.sig ;
+      var chr ;
+      var sig = (evt.sig === 'keyDown' && (chr = evt.getCharString())) ? '%@(%@)'.fmt(evt.sig, chr) : evt.sig ;
       if (res) {
         if (res === SC.EVT_HANDLED_RES) {
           fun.call(this, pre + '"' + state + '" handled event \'' + sig + '\' (no transition)') ;
