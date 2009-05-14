@@ -9,12 +9,12 @@ SC.mixin(SC.Object.prototype,
 /** SC.Object.prototype */ {
   
   /**
-    Specifies which object property stores the intial state of the 
-    hierachical state machine.
+    Adds an observer that dispatches a "propertyChanged" event to the object's
+    statechart.
     
     @param {String} key the property to observe
     @param {SC.Object} target the object you want to observe the key on
-    @returns {SC.Object} this
+    @returns {Function} the actual observer (need to remove later)
   */
   addStatechartObserver: function(key, target) {
     var fun = function(target, key, value, revision) {
@@ -27,8 +27,18 @@ SC.mixin(SC.Object.prototype,
     return fun ;
   },
   
+  /**
+    Adds an observer that dispatches a "propertyChanged" event to the object's
+    statechart.
+    
+    @param {String} key the property to observe
+    @param {SC.Object} target the object you were observing the key on
+    @param {Function} the function object returned from addStatechartObserver
+    @returns {SC.Object} receiver
+  */
   removeStatechartObserver: function(key, target, fun) {
     this.removeObserver(key, target, fun) ;
+    return this ;
   }
   
 });
