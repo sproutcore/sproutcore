@@ -111,7 +111,7 @@ SC._ChainObserver.prototype = {
     var target  = this.target,
         method  = this.method,
         context = this.context ;
-    if (target && method) {
+    if (object && target && method) {
       var rev = object.propertyRevision ;
       if (context) {
         method.call(target, object, property, value, context, rev);
