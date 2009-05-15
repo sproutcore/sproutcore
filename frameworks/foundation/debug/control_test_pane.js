@@ -152,9 +152,17 @@ SC.ControlTestPane.add = function(label, view, attrs) {
 SC.ControlTestPane.standardSetup = function() {
   var pane = this ;
   return {
-    setup: function() { pane._pane = pane.create(); },
+    setup: function() { 
+      SC.RunLoop.begin();
+      pane._pane = pane.create(); 
+      SC.RunLoop.end();
+    },
+    
     teardown: function() {
+      SC.RunLoop.begin();
       if (pane._pane) pane._pane.remove();
+      SC.RunLoop.end();
+      
       pane._pane = null ;
     }
   } ;
@@ -177,6 +185,10 @@ SC.ControlTestPane.view = function(viewKey) {
 */
 SC.ControlTestPane.show = function() {
   var pane = this ;
-  test("show control test pane", function() { pane._showPane = pane.create(); });
+  test("show control test pane", function() { 
+    SC.RunLoop.begin();
+    pane._showPane = pane.create(); 
+    SC.RunLoop.end();
+  });
 };
 

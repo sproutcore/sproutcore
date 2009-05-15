@@ -399,8 +399,6 @@ SC.IndexSet = SC.mixin({},
       
       if (!content) return this; // nothing to do
 
-      //console.log(start.inspect());
-      
       cur = 0 ;
       next = content[0];
       while(next !== 0) {

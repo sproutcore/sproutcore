@@ -146,7 +146,7 @@ SC.Set.prototype = {
     var guid = SC.hashFor(obj) ;
     var idx = this[guid] ;
     var len = this.length ;
-    if (SC.none(idx) || (idx >= len) || (this[idx] !== obj)) {
+    if ((idx===null || idx===undefined) || (idx >= len) || (this[idx]!==obj)){
       this[len] = obj ;
       this[guid] = len ;
       this.length = len+1;

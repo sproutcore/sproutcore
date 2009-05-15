@@ -814,9 +814,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   replaceLayer: function() {
-    if (!this.get('layer')) return this; // nothing to do
     this.destroyLayer();
-
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
   },

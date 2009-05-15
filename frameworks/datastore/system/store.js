@@ -95,12 +95,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       store.commitChanges().destroy();
     }}}
     
+    @param {Hash} attrs optional attributes to set on new store
     @returns {SC.NestedStore} new nested store chained to receiver
   */
-  chain: function() {
-    var ret = SC.NestedStore.create({ parentStore: this }) ; 
-    var nested = this.nestedStores;
-    if (!nested) nested =this.nestedStores = [];
+  chain: function(attrs) {
+    if (!attrs) attrs = {};
+    attrs.parentStore = this;
+    
+    var ret    = SC.NestedStore.create(attrs),
+        nested = this.nestedStores;
+        
+    if (!nested) nested = this.nestedStores = [];
     nested.push(ret);
     return ret ;
   },
@@ -117,6 +122,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this.nestedStores.removeObject(nestedStore);
     }
     return this ;
+  },
+
+  /**
+    Used to determine if a nested store belongs directly or indirectly to the
+    receiver.
+    
+    @param {SC.Store} store store instance
+    @returns {Boolean} YES if belongs
+  */
+  hasNestedStore: function(store) {
+    while(store && (store !== this)) store = store.get('parentStore');
+    return store === this ;
   },
 
   // ..........................................................

@@ -33,6 +33,8 @@
 */
 SC.SelectionSupport = {
   
+  hasSelectionSupport: YES,
+  
   /** 
     Call this method whenever your source content changes to ensure the 
     selection always remains up-to-date and valid.

@@ -91,6 +91,8 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     @returns {SC.RangeObserver} receiver
   */
   update: function(source, indexSet) {
+    if (this.indexes && this.indexes.isEqual(indexSet)) return this ;
+    
     this.indexes = indexSet ;
     this.endObserving().beginObserving();
     return this;

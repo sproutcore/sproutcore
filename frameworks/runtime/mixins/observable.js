@@ -9,7 +9,7 @@ require('private/observer_set') ;
 
 /*globals logChange */
 
-SC.LOG_OBSERVING = NO ;
+SC.LOG_OBSERVERS = NO ;
 
 /**
   @namespace 
@@ -408,7 +408,7 @@ SC.Observable = {
     this._kvo_revision = (this._kvo_revision || 0) + 1; 
     var level = this._kvo_changeLevel || 0,
         cachedep, idx, dfunc, cache, func,
-        log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO);
+        log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO);
 
     if (this._kvo_cacheable && (cache = this._kvo_cache)) {
 
@@ -894,7 +894,7 @@ SC.Observable = {
     
     SC.Observers.flush(this) ; // hookup as many observers as possible.
 
-    var log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO) ;
+    var log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO) ;
     var observers, changes, dependents, starObservers, idx, keys, rev ;
     var members, membersLength, member, memberLoc, target, method, loc, func ;
     var context, spaces ;

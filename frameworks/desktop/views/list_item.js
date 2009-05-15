@@ -5,8 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/collection_item');
-
 SC.LIST_ITEM_ACTION_CANCEL = 'sc-list-item-cancel-action';
 SC.LIST_ITEM_ACTION_REFRESH = 'sc-list-item-cancel-refresh';
 SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
@@ -25,14 +23,14 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   @extends SC.View
   @extends SC.Control
   @extends SC.InlineEditorDelegate
-  @extends SC.CollectionItem
   @extends SC.Editable
+  @extends SC.StaticLayout
   @since SproutCore 1.0
 */
 SC.ListItemView = SC.View.extend(
+    SC.StaticLayout,
     SC.Control,
     SC.InlineEditorDelegate,
-    SC.CollectionItem,
 /** @scope SC.ListItemView.prototype */ {
   
   classNames: ['sc-list-item-view'],
