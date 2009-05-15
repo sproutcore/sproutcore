@@ -63,7 +63,7 @@ SC.ContainerView = SC.View.extend(
     @param {SC.View} newContent the new content view or null.
   */
   replaceContent: function(newContent) {
-    console.log('%@.replaceContent(newContent=%@)'.fmt(this, newContent));
+    //console.log('%@.replaceContent(newContent=%@)'.fmt(this, newContent));
     this.removeAllChildren() ;
     if (newContent) this.appendChild(newContent) ;
   },
@@ -97,7 +97,7 @@ SC.ContainerView = SC.View.extend(
     SC.CONTENT_SET_DIRECTLY
   */
   nowShowingDidChange: function() {
-    console.log('%@.nowShowingDidChange()'.fmt(this));
+    //console.log('%@.nowShowingDidChange()'.fmt(this));
     var nowShowing = this.get('nowShowing') ;
     var content = null;
     //its a property path
