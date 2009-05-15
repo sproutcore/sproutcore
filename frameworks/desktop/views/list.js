@@ -188,14 +188,14 @@ SC.ListView = SC.CollectionView.extend(
         ret, custom, cache, delta, max, content ;
         
     ret = idx * rowHeight;
-    if (del.customRowHeightIndexes) {
+    if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
       
       // prefill the cache with custom rows.
       cache = this._sclv_offsetCache;
       if (!cache) {
         cache = this._sclv_offsetCache = [];
         delta = max = 0 ;
-        del.get('customRowHeightIndexes').forEach(function(idx) {
+        custom.forEach(function(idx) {
           delta += this.rowHeightForContentIndex(idx)-rowHeight;
           cache[idx+1] = delta;
           max = idx ;
@@ -210,11 +210,7 @@ SC.ListView = SC.CollectionView.extend(
         delta = cache[idx] = cache[idx-1];
         if (delta === undefined) {
           max = this._sclv_max;
-          if (idx < max) {
-            custom = del.get('customRowHeightIndexes');
-            max = custom.indexBefore(idx)+1;
-          }
-          
+          if (idx < max) max = custom.indexBefore(idx)+1;
           delta = cache[idx] = cache[max] || 0;
         }
       }
@@ -234,21 +230,21 @@ SC.ListView = SC.CollectionView.extend(
   */
   rowHeightForContentIndex: function(idx) {
     var del = this.get('rowDelegate'),
-        ret, cache, content ;
+        ret, cache, content, indexes;
     
-    if (del.customRowHeightIndexes) {
+    if (del.customRowHeightIndexes && (indexes=del.get('customRowHeightIndexes'))) {
       cache = this._sclv_heightCache ;
       if (!cache) {
         cache = this._sclv_heightCache = [];
         content = this.get('content');
-        del.get('customRowHeightIndexes').forEach(function(idx) {
+        indexes.forEach(function(idx) {
           cache[idx] = del.contentIndexRowHeight(this, content, idx);
         }, this);
       }
       
       ret = cache[idx];
-      if (ret === undefined) ret = this.get('rowHeight');
-    } else ret = this.get('rowHeight');
+      if (ret === undefined) ret = del.get('rowHeight');
+    } else ret = del.get('rowHeight');
     
     return ret ;
   },
@@ -351,13 +347,12 @@ SC.ListView = SC.CollectionView.extend(
     
     // estimate the final row and then get the actual offsets until we are 
     // right. - look at the offset of the _following_ row
-    bottom = this.rowOffsetForContentIndex(start) + rect.height ;
-    end    = start + ((height - (height % rowHeight)) / rowHeight) ;
+    end = start + ((height - (height % rowHeight)) / rowHeight) ;
     if (end > len) end = len;
     offset = this.rowOffsetForContentIndex(end);
     
     // walk backwards until top of row is before or at bottom edge
-    while(end>=start && offset>bottom) {
+    while(end>=start && offset>=bottom) {
       end-- ;
       offset -= this.rowHeightForContentIndex(end);
     }
