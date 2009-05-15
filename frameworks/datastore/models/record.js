@@ -260,14 +260,13 @@ SC.Record = SC.Object.extend(
   
   normalize: function(includeNull) {
     
-    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id');
+    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id'), recHash;
     var store = this.get('store'), storeKey = this.get('storeKey'), attrValue, isRecord;
     
     dataHash[primaryKey] = recordId;
     
     for(var key in this) {
-      // make sure property is a record attribute. if record attribute is a class (SC.Record)
-      // do not add to hash unless includeNull argument is true.
+      // make sure property is a record attribute.
       if(this[key] && this[key]['typeClass']) {
         isRecord = SC.typeOf(this[key].typeClass())==='class';
 
@@ -276,17 +275,17 @@ SC.Record = SC.Object.extend(
           if(attrValue || includeNull) dataHash[key] = attrValue;
         }
         else if(isRecord) {
+          recHash = store.readDataHash(storeKey);
 
-          if(SC.typeOf(this.get(key))===SC.T_OBJECT) {
-            // if relationships are present
-            var ids = this.get(key).getEach('id');
-            dataHash[key] = ids.get('length')>1 ? ids : ids[0];
+          if(recHash[key]) {
+            // write value already there
+            dataHash[key] = recHash[key];
           }
           else {
-            // otherwise write default
-            dataHash[key] = (this.get(key).get) ? this.get(key).get('id') : this.get(key);
+            // or write default
+            dataHash[key] = this[key].get('defaultValue');
           }
-          
+
         }
         else if(includeNull) {
           dataHash[key] = null;
@@ -510,6 +509,27 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   findAll: function(store, params) {
     return store.findAll(this, params);
+  },
+  
+  /**
+    Creates a string representation of the status. This could be one or
+    multiple statuses. This is a helper method and is meant for debug/output
+    purposes only.
+    
+    @param {Number} status (as returned from store.readStatus() )
+    @returns {String}
+  */
+  
+  statusToString: function(status) {
+    var ret = [];
+    
+    for(prop in SC.Record) {
+      if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
+        ret.push(prop);
+      }
+    }
+    
+    return ret.join(" ");
   }
   
 }) ;
