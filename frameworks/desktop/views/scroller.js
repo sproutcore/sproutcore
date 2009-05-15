@@ -160,7 +160,8 @@ SC.ScrollerView = SC.View.extend({
     var callback = this._sc_scroller_scrollDidChange ;
     SC.Event.remove(this.$(), 'scroll', this, callback) ;
   },
-  
+
+  // after 50msec, fire event again
   _sc_scroller_armScrollTimer: function() {
     if (!this._sc_scrollTimer) {
       SC.RunLoop.begin();
@@ -173,7 +174,8 @@ SC.ScrollerView = SC.View.extend({
   _sc_scroller_scrollDidChange: function() {
     
     var now = Date.now(), last = this._sc_lastScroll;
-    if (last && (now-last)<50) return; // nothing to do.
+    if (last && (now-last)<50) return this._sc_scroller_armScrollTimer();
+    this._sc_scrollTimer = null; 
     this._sc_lastScroll = now;
 
     SC.RunLoop.begin();
