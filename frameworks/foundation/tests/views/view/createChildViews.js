@@ -42,6 +42,41 @@ test("calls createChildView() for each class or string in childViews array", fun
   }
 });
 
+test("should not error when there is a dud view name in childViews list.", function() {
+  var called = [];
+  var v = SC.View.create({
+    childViews: [
+      "nonExistantClassNme",       // string - should NOT be called
+        'customClassName'          // string - should be called
+    ],
+    // this shuld be used for the 'customClassName' item above
+    customClassName: SC.View.extend({ key: 2 }),
+    
+    // patch to record results...
+    createChildView: function(childView) {
+      called.push(childView.prototype.key);
+      ok(childView.isClass, "childView: %@ isClass".fmt(childView));
+      return sc_super();
+    }
+  });
+  
+  // createChildViews() is called automatically during create.
+  same(called, [2], 'called createChildView for correct children');
+});
+
+test("should not throw error when there is an extra space in the childViews list", function() {
+  var called = [];
+  var v = SC.View.create({
+    childViews: "customClassName  customKlassName".w(),
+    // this shuld be used for the 'customClassName' item above
+    customClassName: SC.View.extend({ key: 2 }),
+    customKlassName: SC.View.extend({ key: 3 })
+  });
+  
+  ok(true, "called awake without issue.");
+  
+});
+
 test("should not create layer for created child views", function() {
   var v = SC.View.create({
     childViews: [SC.View]
