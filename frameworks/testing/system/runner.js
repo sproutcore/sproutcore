@@ -17,12 +17,15 @@ sc_require('system/plan');
 
   @since SproutCore 1.0
 */
+
+
 CoreTest.Runner = {
   
   /**
     The CoreTest plan.  If not set, a default plan will be created.
   */
   plan: null,
+  errors: null,
   
   create: function() {
     var len = arguments.length,
@@ -118,6 +121,8 @@ CoreTest.Runner = {
     }     
     if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
+    this.errors.push('</tr></tbody></table>');
+    window.errors=this.errors;
   },
   
   planDidRecord: function(plan, module, test, assertions, timings) {
@@ -137,10 +142,10 @@ CoreTest.Runner = {
     var logstr = this.logstr ;
     var errors =this.errors;
     if (!logstr) logstr = this.logstr = [];
-    if (!errors) errors = this.errors = [];
+    if (!this.errors) this.errors = ['<table style="border:1px solid"><thead><tr><th class="desc">'+navigator.userAgent+'</th><th>Result</th></tr></thead><tbody><tr>'];
     logstr.push(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));
     if(s.failed>0 || s.errors>0){
-      errors.push(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));  
+      this.errors.push(CoreTest.fmt('<tr class="test %@"><thstyle="background:grey; color:white" class="desc" colspan="2">%@ (<span class="passed">%@</span>, <span class="failed">%@</span>, <span class="errors">%@</span>, <span class="warnings">%@</span>)</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));  
     }
     //debugger ;
     //this.logq.append(q);
@@ -150,8 +155,8 @@ CoreTest.Runner = {
       cur = assertions[idx];
       clean = cur.result === CoreTest.OK ? 'clean' : 'dirty';
       logstr.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
-      if(!cur.result==='dirty'){
-        errors.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
+      if(clean=='dirty'){
+        this.errors.push(CoreTest.fmt('<tr class="%@"><td class="desc">%@</td><td class="action %@">%@</td></tr>', clean, cur.message, cur.result, (cur.result || '').toUpperCase()));
       }
       //this.logq.append(q);
     }
