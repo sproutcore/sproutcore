@@ -533,7 +533,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
     }
     return value ;
-  }.property().indempotent(), // FIXME: [EO] Cacheing is goofing up the view redrawing
+  }.property().idempotent(), // FIXME: [EO] Cacheing is goofing up the view redrawing
   //}.property('isVisibleInWindow'), // .cacheable(),
   
   /**
@@ -563,7 +563,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   containerLayer: function() {
     return this.get('layer') ;
   //}.property('layer').cacheable(), 
-  }.property().indempotent(), // FIXME: [EO] Fix the cacheing bug
+  }.property().idempotent(), // FIXME: [EO] Fix the cacheing bug
   
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
