@@ -297,14 +297,14 @@ SC.Array = {
     @param {Object} target object to invoke on change
     @param {String|Function} method the method to invoke
     @param {Object} context optional context
-    @param {Boolean} isDeep set to YES to observe object properties
     @returns {SC.RangeObserver} range observer
   */
-  addRangeObserver: function(indexes, target, method, context, isDeep) {
+  addRangeObserver: function(indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
     if (!rangeob) rangeob = this._array_rangeObservers = SC.Set.create() ;
     
     var C = this.rangeObserverClass ;
+    var isDeep = NO; //disable this feature for now
     var ret = C.create(this, indexes, target, method, context, isDeep) ;
     rangeob.add(ret);
     

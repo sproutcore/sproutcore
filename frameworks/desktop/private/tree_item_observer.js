@@ -58,16 +58,7 @@ SC._TreeItemObserver = SC.Object.extend({
     @property
     @type Number
   */
-  disclosureState: function() {
-    var del     = this.get('delegate'),  
-        item    = this.get('item'),
-        parent  = item ? this.get('parent') : null,
-        pitem   = parent ? parent.get('item') : null,
-        index   = pitem ? this.get('index') : null;
-        
-    if (item||parent) return del.treeItemDisclosureState(item, pitem, index);
-    else return SC.BRANCH_OPEN;
-  }.property().cacheable(),
+  disclosureState: SC.BRANCH_OPEN,
 
   /**
     IndexSet of children with branches.  This will ask the delegate to name 
@@ -166,15 +157,7 @@ SC._TreeItemObserver = SC.Object.extend({
     
     return item ;
   },
-  
-  /**
-    Called just before a branch observer is removed.  Should stop any 
-    observering and invalidate any child observers.
-  */
-  destroy: function() {
-    this.invalidateBranchObserversAt(0);
-  },
-  
+
   // ..........................................................
   // BRANCH NODES
   //   
@@ -206,8 +189,7 @@ SC._TreeItemObserver = SC.Object.extend({
       item:     item,
       delegate: del,
       parent:   this,
-      index:  index,
-      children: del.treeItemChildren(item, pitem, index)
+      index:  index
     });
     indexes.add(index); // save for later invalidation
     return ret ;
@@ -232,6 +214,106 @@ SC._TreeItemObserver = SC.Object.extend({
     byIndex.length = index; // truncate to dump extra indexes
     
     return this;
+  },
+  
+  // ..........................................................
+  // INTERNAL METHODS
+  // 
+  
+  init: function() {
+    sc_super();
+    
+    // begin all properties on item if there is one.  This will allow us to
+    // track important property changes.
+    var item = this.get('item'), children = this.get('children');
+    if (item) {
+      item.addObserver('*', this, this._itemPropertyDidChange);
+      this._itemPropertyDidChange(item, '*');
+    } else if (children) this._childrenDidChange();
+  },
+  
+  /**
+    Called just before a branch observer is removed.  Should stop any 
+    observering and invalidate any child observers.
+  */
+  destroy: function() {
+    this.invalidateBranchObserversAt(0);
+  },
+  
+  /**
+    Called whenever a property changes on the item.  Determines if either the
+    children array or the disclosure state has changed and then notifies as 
+    necessary..
+  */
+  _itemPropertyDidChange: function(target, key) {
+    var children = this.get('children'),
+        state    = this.get('disclosureState'),
+        next ;
+        
+    this.beginPropertyChanges();
+    
+    next = this._computeDisclosureState();
+    if (state !== next) this.set('disclosureState', state);
+    
+    next = this._computeChildren();
+    if (children !== next) this.set('children', children);
+    
+    this.endPropertyChanges();
+  },
+  
+  /**
+    Called whenever the children or disclosure state changes.  Begins or ends
+    observing on the children array so that changes can propogate outward.
+  */
+  _childrenDidChange: function() {
+    var state = this.get('disclosureState'),
+        cur   = state === SC.BRANCH_OPEN ? this.get('children') : null,
+        last  = this._children,
+        ro    = this._childrenRangeObserver;
+        
+    if (last === cur) return this; //nothing to do
+    if (ro) last.removeRangeObserer(ro);
+    if (cur) {
+      this._childrenRangeObserver = 
+          cur.addRangeObserver(null, this, this._childrenRangeDidChange);
+    }
+    this._childrenRangeDidChange(cur, null, '[]', null);
+    
+  }.observes("children", "disclosureState"),
+
+  /**
+    Called anytime the actual content of the children has changed.  If this 
+    changes the length property, then notifies the parent that the content
+    might have changed.
+  */
+  _childrenRangeDidChange: function(array, objects, key, indexes) {
+    console.log("childrenRangeDidChange(%@ - indexes: %@)".fmt(this, indexes));
+  },
+  
+  /**
+    Computes the current disclosure state of the item by asking the delegate.
+  */
+  _computeDisclosureState: function() {
+    var del    = this.get('delegate'),  
+        item   = this.get('item'),
+        parent = this.get('parent'),
+        pitem  = parent ? parent.get('item') : null,
+        index  = parent ? this.get('index') : null;
+        
+    if (item||parent) return del.treeItemDisclosureState(item, pitem, index);
+    else return SC.BRANCH_OPEN;
+  },
+  
+  /**
+    Computes the current children property by asking the delegate.
+  */
+  _computeChildren: function() {
+    var del    = this.get('delegate'),
+        item   = this.get('item'),
+        parent = this.get('parent'),
+        pitem  = parent ? parent.get('item') : null,
+        index  = parent ? this.get('index') : -1 ;
+    return del.treeItemChildren(item, pitem, index);
   }
     
 });
