@@ -17,7 +17,7 @@
   TreeNode stores an array which contains either a number pointing to the 
   next place in the array there is a child item or it contains a child item.
 */
-SC._TreeItemObserver = SC.Object.extend({
+SC._TreeItemObserver = SC.Object.extend(SC.Array, {
 
   /**
     The node in the tree this observer will manage.  Set when creating the
@@ -80,28 +80,13 @@ SC._TreeItemObserver = SC.Object.extend({
   
   
   // ..........................................................
-  // BASIC METHODS
+  // SC.ARRAY SUPPORT
   // 
   
   /**
     Get the current length of the tree item including any of its children.
   */
-  length: function() {
-    var ret = this.get('item') ? 1 : 0,
-        children, indexes ;
-        
-    // if disclosure is open, add children count + length of branch observers.
-    if (this.get('disclosureState') === SC.BRANCH_OPEN && (children = this.get('children'))) {
-      ret += children.get('length');
-      if (indexes = this.get('branchIndexes')) {
-        indexes.forEach(function(idx) {
-          var observer = this.branchObserverAt(idx);
-          ret += observer.get('length')-1;
-        }, this);
-      }
-    } 
-    return ret ;
-  }.property().cacheable(),
+  length: 0,
   
   /**
     Get the object at the specified index.  This will talk the tree info
@@ -158,6 +143,74 @@ SC._TreeItemObserver = SC.Object.extend({
     return item ;
   },
 
+  /**
+    Called whenever the content for the passed observer has changed.  Default
+    version notifies the parent if it exists and updates the length.
+    
+    The start, amt and delta params should reflect changes to the children
+    array, not to the expanded range for the wrapper.
+  */
+  observerContentDidChange: function(start, amt, delta) {
+    
+    // clear caches
+    this.invalidateBranchObserversAt(start);
+    this._objectAtCache = null;
+    this.notifyPropertyChange('branchIndexes');
+    
+    var oldlen = this.get('length'),
+        newlen = this._computeLength(),
+        parent = this.get('parent'), set;
+    
+    // update length if needed
+    if (oldlen !== newlen) this.set('length', newlen);
+    
+    // if we have a parent, notify that parent that we have changed.
+    if (!this._notifyParent) return this; // nothing more to do
+    
+    if (parent) {
+      set = SC.IndexSet.create(this.get('index'));
+      parent._childrenRangeDidChange(parent.get('children'), null, '[]', set);
+      
+    // otherwise, note the enumerable content has changed.  note that we need
+    // to convert the passed change to reflect the computed range
+    } else {
+      if (SC.stopIt) debugger ;
+      if (oldlen === newlen) {
+        amt = this.expandChildIndex(start+amt);
+        start = this.expandChildIndex(start);
+        amt = amt - start ;
+        delta = 0 ;
+        
+      } else {
+        start = this.expandChildIndex(start);
+        amt   = newlen - start;
+        delta = newlen - oldlen ;
+      }
+
+      console.log('%@.enumerableContentDidChange(%@,%@,%@)'.fmt(this, start, amt, delta));
+      this.enumerableContentDidChange(start, amt, delta);
+    }
+  },
+
+  /**
+    Accepts a child index and expands it to reflect any nested groups.
+  */
+  expandChildIndex: function(index) {
+    
+    var ret = this.parent ? index+1 : index; // add 1 for item header
+
+    // fast path
+    var branches = this.get('branchIndexes');
+    if (!branches || branches.get('length')===0) return ret;
+    
+    // we have branches, adjust for their length
+    branches.forEachIn(0, index, function(idx) {
+      ret += this.branchObserverAt(idx).get('length')-1;
+    }, this);
+    
+    return ret; // add 1 for item header
+  },
+  
   // ..........................................................
   // BRANCH NODES
   //   
@@ -230,6 +283,7 @@ SC._TreeItemObserver = SC.Object.extend({
       item.addObserver('*', this, this._itemPropertyDidChange);
       this._itemPropertyDidChange(item, '*');
     } else if (children) this._childrenDidChange();
+    this._notifyParent = YES ;
   },
   
   /**
@@ -238,6 +292,8 @@ SC._TreeItemObserver = SC.Object.extend({
   */
   destroy: function() {
     this.invalidateBranchObserversAt(0);
+    this._objectAtCache = null ;
+    sc_super();
   },
   
   /**
@@ -253,10 +309,10 @@ SC._TreeItemObserver = SC.Object.extend({
     this.beginPropertyChanges();
     
     next = this._computeDisclosureState();
-    if (state !== next) this.set('disclosureState', state);
+    if (state !== next) this.set('disclosureState', next);
     
     next = this._computeChildren();
-    if (children !== next) this.set('children', children);
+    if (children !== next) this.set('children', next);
     
     this.endPropertyChanges();
   },
@@ -272,11 +328,13 @@ SC._TreeItemObserver = SC.Object.extend({
         ro    = this._childrenRangeObserver;
         
     if (last === cur) return this; //nothing to do
-    if (ro) last.removeRangeObserer(ro);
+    if (ro) last.removeRangeObserver(ro);
     if (cur) {
       this._childrenRangeObserver = 
           cur.addRangeObserver(null, this, this._childrenRangeDidChange);
-    }
+    } else this._childrenRangeObserver = null;
+    
+    this._children = cur ;
     this._childrenRangeDidChange(cur, null, '[]', null);
     
   }.observes("children", "disclosureState"),
@@ -287,7 +345,14 @@ SC._TreeItemObserver = SC.Object.extend({
     might have changed.
   */
   _childrenRangeDidChange: function(array, objects, key, indexes) {
-    console.log("childrenRangeDidChange(%@ - indexes: %@)".fmt(this, indexes));
+    var children = this.get('children'),
+        len = children ? children.get('length') : 0,
+        min = indexes ? indexes.get('min') : 0,
+        max = indexes ? indexes.get('max') : len,
+        old = this._childrenLen || 0;
+        
+    this._childrenLen = len; // save for future calls
+    this.observerContentDidChange(min, max-min, len-old);
   },
   
   /**
@@ -314,7 +379,32 @@ SC._TreeItemObserver = SC.Object.extend({
         pitem  = parent ? parent.get('item') : null,
         index  = parent ? this.get('index') : -1 ;
     return del.treeItemChildren(item, pitem, index);
+  },
+  
+  /**
+    Computes the length of the array by looking at children.
+  */
+  _computeLength: function() {
+    var ret = this.get('item') ? 1 : 0,
+        children, indexes ;
+        
+    // if disclosure is open, add children count + length of branch observers.
+    if (this.get('disclosureState') === SC.BRANCH_OPEN && (children = this.get('children'))) {
+      ret += children.get('length');
+      if (indexes = this.get('branchIndexes')) {
+        indexes.forEach(function(idx) {
+          var observer = this.branchObserverAt(idx);
+          ret += observer.get('length')-1;
+        }, this);
+      }
+    } 
+    return ret ;
   }
+    
+});
+
+
+SC._TreeArray = SC._TreeItemObserver.extend({
     
 });
 

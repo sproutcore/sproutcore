@@ -31,7 +31,7 @@ var TestObject = SC.Object.extend({
   toString: function() { return "TestObject(%@)".fmt(this.get('title')); }
 });
 
-module("SC._TreeItemObserver - Flat Array Use Case", {
+module("SC._TreeArray - Flat Array Use Case", {
   setup: function() {
     content = "1 2 3 4 5".w().map(function(x) { 
       return TestObject.create({ title: x });
@@ -43,7 +43,7 @@ module("SC._TreeItemObserver - Flat Array Use Case", {
 
     extra = TestObject.create({ title: "EXTRA" });
 
-    obs = SC._TreeItemObserver.create({
+    obs = SC._TreeArray.create({
       delegate: delegate, children: content
     });
   },
@@ -76,52 +76,52 @@ test("length after insert", function() {
   equals(obs.get('length'), 6, 'length should change');  
 });
 
-// test("length after remove", function() {
-//   equals(obs.get('length'), 5, 'precond - should have length of array on create');
+test("length after remove", function() {
+  equals(obs.get('length'), 5, 'precond - should have length of array on create');
+
+  SC.run(function() { content.removeAt(2); });
+  equals(obs.get('length'), 4, 'length should change');  
+});
+
+// ..........................................................
+// OBJECT AT
 // 
-//   SC.run(function() { content.removeAt(2); });
-//   equals(obs.get('length'), 4, 'length should change');  
-// });
-// 
-// // ..........................................................
-// // OBJECT AT
-// // 
-// 
-// function verifyObjectAt(obs, expected, desc) {
-//   var idx, len = expected.get('length'), actual;
-// 
-//   equals(obs.get('length'), len, "%@ - length should match".fmt(desc));
-//   for(idx=0;idx<len;idx++) {
-//     actual = obs.objectAt(idx);
-//     equals(actual, expected[idx], "%@ - observer.objectAt(%@) should match expected".fmt(desc, idx));
-//   }
-// }
-// 
-// test("objectAt on create", function() {
-//   verifyObjectAt(obs, flattened, "on create");
-// });
-// 
-// test("objectAt after replace", function() {
-// 
-//   verifyObjectAt(obs, flattened, "PRECOND"); // verify initial state
-//   
-//   SC.run(function() { content.replace(2,1, [extra]); }); // replace
-//   flattened[2] = extra;
-//   verifyObjectAt(obs, flattened, "on create");
-// });
-// 
-// test("objectAt after insert", function() {
-//   verifyObjectAt(obs, flattened, "PRECOND"); // verify initial state
-// 
-//   SC.run(function() { content.insertAt(2,extra); }); // replace
-//   flattened.insertAt(2, extra);
-//   verifyObjectAt(obs, flattened, "on create");
-// });
-// 
-// test("objectAt after remove", function() {
-//   verifyObjectAt(obs, flattened, "PRECOND"); // verify initial state
-// 
-//   SC.run(function() { content.removeAt(2); }); // replace
-//   flattened.removeAt(2);
-//   verifyObjectAt(obs, flattened, "on create");
-// });
+
+function verifyObjectAt(obs, expected, desc) {
+  var idx, len = expected.get('length'), actual;
+
+  equals(obs.get('length'), len, "%@ - length should match".fmt(desc));
+  for(idx=0;idx<len;idx++) {
+    actual = obs.objectAt(idx);
+    equals(actual, expected[idx], "%@ - observer.objectAt(%@) should match expected".fmt(desc, idx));
+  }
+}
+
+test("objectAt on create", function() {
+  verifyObjectAt(obs, flattened, "on create");
+});
+
+test("objectAt after replace", function() {
+
+  verifyObjectAt(obs, flattened, "PRECOND"); // verify initial state
+  
+  SC.run(function() { content.replace(2,1, [extra]); }); // replace
+  flattened[2] = extra;
+  verifyObjectAt(obs, flattened, "on create");
+});
+
+test("objectAt after insert", function() {
+  verifyObjectAt(obs, flattened, "PRECOND"); // verify initial state
+
+  SC.run(function() { content.insertAt(2,extra); }); // replace
+  flattened.insertAt(2, extra);
+  verifyObjectAt(obs, flattened, "on create");
+});
+
+test("objectAt after remove", function() {
+  verifyObjectAt(obs, flattened, "PRECOND"); // verify initial state
+
+  SC.run(function() { content.removeAt(2); }); // replace
+  flattened.removeAt(2);
+  verifyObjectAt(obs, flattened, "on create");
+});
