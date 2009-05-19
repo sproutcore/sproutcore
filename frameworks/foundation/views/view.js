@@ -584,9 +584,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   findLayerInParentLayer: function(parentLayer) {
     var layerId = this.get('layerId') ;
+    var node, i, ilen,found, elem;
     
     // first, let's try the fast path...
-    var elem = document.getElementById(layerId) ;
+    if(parentLayer.getElementById) elem = parentLayer.getElementById(layerId) ;
+    else elem = document.getElementById(layerId) ;
     
     // TODO: use code generation to only really do this check on IE
     if (SC.browser.msie && elem && elem.id !== layerId) elem = null ;
@@ -600,21 +602,25 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     // if no element was found the fast way, search down the parentLayer for
     // the element.  This code should not be invoked very often.  Usually a
     // DOM element will be discovered by the first method above.
+    // This code uses a BFS algorithm as is expected to find the layer right 
+    // below the parent.
     if (!elem) {
       elem = parentLayer.firstChild ;
-      while (elem && (elem.id !== layerId)) {
-        // try to get first child or next sibling if no children
-        var next =  elem.nextSibling || elem.firstChild;
-        
-        // if no next sibling, then get next sibling of parent.  Walk up 
-        // until we find parent with next sibling or find ourselves back at
-        // the beginning.
-        while (!next && elem && ((elem = elem.parentNode) !== parentLayer)) {
-          next = elem.nextSibling ;
+      var q=[];
+      q.push(parentLayer);
+      while(q.length!==0){
+        node=q[0];
+        q.shift();
+        if(node.id==layerId){
+          found=true;
+          elem=node;
+          break;
+        } 
+        for(i=0, ilen=node.childNodes.length; i<ilen; i++){
+          q.push(node.childNodes[i]);
         }
-        
-        elem = next ;
       }
+      if(!found) elem=null;  
     }
     
     return elem;
