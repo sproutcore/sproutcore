@@ -39,9 +39,10 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @returns {SC.Array} result set with storeKeys.  
   */  
   fetch: function(store, fetchKey, params) {
+    
     var ret = [], dataHashes, i, storeKey, hashes= [];
     if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
-      return null ;
+      return ret ;
     }
     dataHashes = this.fixturesFor(fetchKey);
     for(i in dataHashes){

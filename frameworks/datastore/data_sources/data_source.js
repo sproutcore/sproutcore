@@ -64,8 +64,8 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     return null;  
   },
   
-  retrieveRecords: function(store, storeKeys) {
-    return this._handleEach(store, storeKeys, this.retrieveRecord);  
+  retrieveRecords: function(store, storeKeys, ids) {
+    return this._handleEach(store, storeKeys, this.retrieveRecord, ids);  
   },
   
   /**
@@ -185,10 +185,12 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   /** @private
     invokes the named action for each store key.  returns proper value
   */
-  _handleEach: function(store, storeKeys, action) {
+  _handleEach: function(store, storeKeys, action, ids) {
     var len = storeKeys.length, idx, ret, cur;
+    if(!ids) ids = [];
+    
     for(idx=0;idx<len;idx++) {
-      cur = action.call(this, store, storeKeys[idx]);
+      cur = action.call(this, store, storeKeys[idx], ids[idx]);
       if (ret === undefined) {
         ret = cur ;
       } else if (ret === YES) {
@@ -220,7 +222,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     return NO ;
   },
 
-  retrieveRecord: function(store, storeKey) {
+  retrieveRecord: function(store, storeKey, id) {
     return NO ;
   },
 

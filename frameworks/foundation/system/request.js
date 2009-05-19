@@ -63,10 +63,10 @@ SC.Request = SC.Object.extend({
     }
     
     if (this.get("isJSON")) {
-        var source = response.responseText ;
-        var json = SC.json.decode(source) ;
-        //TODO cache this value?
-        return json ;
+      var source = response.responseText ;
+      var json = SC.json.decode(source) ;
+      //TODO cache this value?
+      return json ;
     }
     
     if(response.responseXML) return response.responseXML ;

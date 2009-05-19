@@ -1077,8 +1077,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     instance itself using materializeRecord()
     
     @param {SC.Record|Array} recordTypes class or array of classes
-    @param {Array} ids ids to destroy
-    @param {Array} storeKeys (optional) store keys to destroy
+    @param {Array} ids ids to retrieve
+    @param {Array} storeKeys (optional) store keys to retrieve
     @returns {Array} storeKeys to be retrieved
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
@@ -1138,12 +1138,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // now retrieve storekeys from dataSource
     if (source) {
-      var ok = source.retrieveRecords.call(source, this, ret);
+      var ok = source.retrieveRecords.call(source, this, ret, ids);
       if (ok === NO) ret.length = 0; // could not find.
     }
     return ret ;
   },
-
+  
   _TMP_RETRIEVE_ARRAY: [],
   
   /**
