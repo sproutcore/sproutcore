@@ -372,6 +372,7 @@ SC.Array = {
       if (delta === undefined) delta = 0 ;
       if (delta !== 0 || amt === undefined) {
         length = this.get('length') - start ;
+        if (delta<0) length -= delta; // cover removed range as well
       } else {
         length = amt ;
       }

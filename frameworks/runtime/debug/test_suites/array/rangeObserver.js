@@ -36,10 +36,12 @@ SC.ArraySuite.define(function(T) {
     ok(rangeObserver && rangeObserver.isRangeObserver, 'returns a range observer object');
   });
 
+  // NOTE: Deep Property Observing is disabled for SproutCore 1.0
+  //
   // // ..........................................................
   // // EDIT PROPERTIES
   // // 
-  // 
+  //
   // test("editing property on object in range should fire observer", function() {
   //   var obj = array.objectAt(3);
   //   obj.set('foo', 'BAR');
@@ -196,14 +198,14 @@ SC.ArraySuite.define(function(T) {
   // REMOVING
   // 
   
-  test("removeAt IN range fires observer with index set covering edit to end of array", function() {
-    var set     = SC.IndexSet.create(3,array.get('length')-4);
+  test("removeAt IN range fires observer with index set covering edit to end of array plus delta", function() {
+    var set     = SC.IndexSet.create(3,array.get('length')-3);
     array.removeAt(3);
     observer.expectRangeChange(array, null, '[]', set);
   });
 
-  test("removeAt BEFORE range fires observer with index set covering edit to end of array", function() {
-    var set     = SC.IndexSet.create(0,array.get('length')-1);
+  test("removeAt BEFORE range fires observer with index set covering edit to end of array plus delta", function() {
+    var set     = SC.IndexSet.create(0,array.get('length'));
     array.removeAt(0);
     observer.expectRangeChange(array, null, '[]', set);
   });
@@ -314,12 +316,17 @@ SC.ArraySuite.define(function(T) {
   // 
   
   test("removeAt fires observer with index set covering edit to end of array", function() {
-    var set     = SC.IndexSet.create(3,array.get('length')-4);
+    var set     = SC.IndexSet.create(3,array.get('length')-3);
     array.removeAt(3);
     observer.expectRangeChange(array, null, '[]', set);
   });
 
-
+  test("popObject fires observer with index set covering removed range", function() {
+    var set = SC.IndexSet.create(array.get('length')-1);
+    array.popObject();
+    observer.expectRangeChange(array, null, '[]', set);
+  });
+  
   
   // ..........................................................
   // MODULE: isDeep = NO 
