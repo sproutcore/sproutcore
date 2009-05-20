@@ -118,6 +118,24 @@ SC.ListItemView = SC.View.extend(
   */
   isEditing: NO,
   
+  /**
+    Indent to use when rendering a list item with an outline level > 0.  The
+    left edge of the list item will be indented by this amount for each 
+    outline level.
+  */
+  outlineIndent: 14,
+  
+  /**
+    Outline level for this list item.  Usually set by the collection view.
+  */
+  outlineLevel: 0,
+  
+  /**
+    Disclosure state for this list item.  Usually set by the collection view
+    when the list item is created.
+  */
+  disclosureState: SC.LEAF_NODE,
+  
   contentPropertyDidChange: function() {
     if (this.get('isEditing')) this.discardEditing() ;
     this.displayDidChange();
@@ -133,15 +151,28 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   render: function(context, firstTime) {
-    var content = this.get('content') ;
-    var del = this.displayDelegate ;
-    var key, value ;
+    var content = this.get('content'),
+        del     = this.displayDelegate,
+        level   = this.get('outlineLevel'),
+        indent  = this.get('outlineIndent'),
+        key, value, working ;
+    
+    // outline level wrapper
+    working = context.begin("div").addClass("sc-outline");
+    if (level>0 && indent>0) working.addStyle("left", indent*level);
+    
+    // handle disclosure triangle
+    value = this.get('disclosureState');
+    if (value !== SC.LEAF_NODE) {
+      this.renderDisclosure(working, value);
+      context.addClass('has-disclosure');
+    }
     
     // handle checkbox
     key = this.getDelegateProperty('contentCheckboxKey', del) ;
     if (key) {
       value = content ? (content.get ? content.get(key) : content[key]) : NO ;
-      this.renderCheckbox(context, value);
+      this.renderCheckbox(working, value);
       context.addClass('has-checkbox');
     }
     
@@ -150,7 +181,7 @@ SC.ListItemView = SC.View.extend(
       key = this.getDelegateProperty('contentIconKey', del) ;
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
       
-      this.renderIcon(context, value);
+      this.renderIcon(working, value);
       context.addClass('has-icon');
     }
     
@@ -159,18 +190,18 @@ SC.ListItemView = SC.View.extend(
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
     if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString();
     if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
-    this.renderLabel(context, value);
+    this.renderLabel(working, value);
     
     // handle unread count
     key = this.getDelegateProperty('contentUnreadCountKey', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-    if (!SC.none(value) && (value !== 0)) this.renderCount(context, value) ;
+    if (!SC.none(value) && (value !== 0)) this.renderCount(working, value) ;
     
     // handle action 
     key = this.getDelegateProperty('listItemActionProperty', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (value) {
-      this.renderAction(context, value);
+      this.renderAction(working, value);
       context.addClass('has-action');
     }
     
@@ -178,9 +209,35 @@ SC.ListItemView = SC.View.extend(
     if (this.getDelegateProperty('hasContentBranch', del)) {
       key = this.getDelegateProperty('contentIsBranchKey', del);
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
-      this.renderBranch(context, value);
+      this.renderBranch(working, value);
       context.addClass('has-branch');
     }
+    
+    context = working.end();
+  },
+  
+  /**
+    Adds a disclosure triangle with the appropriate display to the content.
+    This method will only be called if the disclosure state of the view is
+    something other than SC.LEAF_NODE.
+
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} state YES, NO or SC.MIXED_STATE
+    @returns {void}
+  */
+  renderDisclosure: function(context, state) {
+    var key = (state === SC.BRANCH_OPEN) ? "open" : "closed",
+        cache = this._scli_disclosureHtml,
+        html, tmp;
+        
+    if (!cache) cache = this.constructor.prototype._scli_disclosureHtml = {};
+    html = cache[key];
+
+    if (!html) {
+      html = cache[key] = '<img src="%@" class="disclosure button %@" />'.fmt(SC.BLANK_IMAGE_URL, key);
+    }
+    
+    context.push(html);
   },
   
   /**
@@ -193,20 +250,31 @@ SC.ListItemView = SC.View.extend(
     @returns {void}
   */
   renderCheckbox: function(context, state) {
-    context = context.begin('a').attr('href', 'javascript:;')
-      .classNames(SC.CheckboxView.prototype.classNames);
     
-    // set state on html
-    if (state === SC.MIXED_STATE) {
-      context.addClass('mixed');
-    } else context.setClass('sel', state);
+    var key = (state === SC.MIXED_STATE) ? "mixed" : state ? "sel" : "nosel",
+        cache = this._scli_checkboxHtml,
+        html, tmp;
+        
+    if (!cache) cache = this.constructor.prototype._scli_checkboxHtml = {};
+    html = cache[key];
     
-    // now add inner content.  note we do not add a real checkbox because
-    // we don't want to have to setup a change observer on it.
-    context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" />');
+    if (!html) {
+      tmp = SC.RenderContext('a').attr('href', 'javascript:;')
+        .classNames(SC.CheckboxView.prototype.classNames);
+
+      // set state on html
+      if (state === SC.MIXED_STATE) tmp.addClass('mixed');
+      else tmp.setClass('sel', state);
+
+      // now add inner content.  note we do not add a real checkbox because
+      // we don't want to have to setup a change observer on it.
+      tmp.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" />');
+
+      // apply edit
+      html = cache[key] = tmp.join();
+    }
     
-    // apply edit
-    context.end();
+    context.push(html);
   },
   
   /** 

@@ -94,6 +94,20 @@ var pane = SC.ControlTestPane.design({ height: 32 })
     content: SC.Object.create({ title: "List Item", count: 10 }),
     contentValueKey: "title",
     contentUnreadCountKey:  "count"
+  }))
+  
+  .add("outline - 1", SC.ListItemView.design({ 
+    content: SC.Object.create({ title: "List Item" }),
+    contentValueKey: "title",
+    contentUnreadCountKey:  "count",
+    outlineLevel: 1
+  }))
+  
+  .add("outline - 2", SC.ListItemView.design({ 
+    content: SC.Object.create({ title: "List Item" }),
+    contentValueKey: "title",
+    contentUnreadCountKey:  "count",
+    outlineLevel: 2
   })) ;
 
 pane.show();
@@ -110,7 +124,6 @@ window.pane = pane ;
 function basic(view, sel, disabled) {
   var cq = view.$();
   ok(cq.hasClass('sc-list-item-view'), 'should have sc-list-item-view class');
-  ok(cq.hasClass('sc-collection-item'), 'should have sc-collection-item class');
   
   equals(cq.hasClass('sel'), !!sel, 'expect sel class');
   equals(cq.hasClass('disabled'), !!disabled, 'expect disabled class');
@@ -216,6 +229,22 @@ test('count', function() {
   // no count should show when count = 0;
   count(pane.view('count - 0'), null); 
   count(pane.view('count - 10'), 10);
+});
+
+test("outline - 1", function() {
+  var v = pane.view('outline - 1'),
+      indent = v.get('outlineIndent');
+  ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
+  
+  equals(v.$('.sc-outline').css('left'), indent*1 + "px", 'sc-outline div should be offset by outline ammount');
+});
+
+test("outline - 2", function() {
+  var v = pane.view('outline - 2'),
+      indent = v.get('outlineIndent');
+  ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
+  
+  equals(v.$('.sc-outline').css('left'), indent*2 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
 // ..........................................................
