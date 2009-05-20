@@ -1132,3 +1132,4 @@ SC.IndexSet = SC.mixin({},
 }) ;
 
 SC.IndexSet.slice = SC.IndexSet.copy = SC.IndexSet.clone ;
+SC.IndexSet.EMPTY = SC.IndexSet.create().freeze();

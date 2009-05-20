@@ -6,25 +6,16 @@
 // ==========================================================================
 
 // The TreeItemObserver is tested based on the common use cases.
+/*globals throws */
 
-var content, delegate, flattened, obs, extra, extrachild;
+var content, delegate, flattened, obs, extra, extrachild, root;
 
 // default delegate class.  Does the bare minimum for tree item to function
-var Delegate = SC.Object.extend(SC.TreeItemDelegate, {
+var Delegate = SC.Object.extend(SC.TreeItemContent, {
   
-  content: null, // must contain content array
+  treeItemChildrenKey: "children",
+  treeItemIsExpandedKey: "isExpanded",
   
-  treeItemChildren: function(item, parent, index) {
-    if (index<0) return this.get('content');
-    else if (item) return item.get ? item.get('children') : item.children;
-    else return null;
-  },
-  
-  treeItemDisclosureState: function(item, parent, idx) {
-    if (!item) return SC.LEAF_NODE;
-    else return item.get('isExpanded') ? SC.BRANCH_OPEN : SC.BRANCH_CLOSED;
-  },
-
   // This method is used to record range change info
   
   rangeIndexes: null,
@@ -40,6 +31,43 @@ var Delegate = SC.Object.extend(SC.TreeItemDelegate, {
 var TestObject = SC.Object.extend({
   toString: function() { return "TestObject(%@)".fmt(this.get('title')); }
 });
+
+/**
+  Verifies that the passed observer object has the proper content.  This will
+  iterate over the passed expected array, calling objectAt() on the observer
+  to verify that it matches.  If you passed the expected index set, it will
+  also verify that the range observer on the observer was fire with the 
+  matching set of indexes.
+  
+  Finally, pass an optional description.
+*/
+function verifyObjectAt(obs, expected, eindexes, desc) {
+  var idx, len = expected.get('length'), actual;
+
+  // eindexes is optional
+  if (desc === undefined) {
+    desc = eindexes;
+    eindexes = undefined;
+  }
+  
+  equals(obs.get('length'), len, "%@ - length should match".fmt(desc));
+  for(idx=0;idx<len;idx++) {
+    actual = obs.objectAt(idx);
+    equals(actual, expected[idx], "%@ - observer.objectAt(%@) should match expected".fmt(desc, idx));
+  }
+  
+  if (eindexes !== undefined) {
+    if (eindexes) {
+      ok(delegate.rangeCallCount>0, 'range observer should be called (actual callCount=%@)'.fmt(delegate.rangeCallCount));
+    } else {
+      ok(delegate.rangeCallCount===0, 'range observer should NOT be called (actual callCount=%@)'.fmt(delegate.rangeCallCount));
+    }
+    
+    same(delegate.rangeIndexes, eindexes, 'range observer should be called with expected indexes');
+  }
+  
+}
+
 
 module("SC._TreeItemObserver - Group Use Case", {
   setup: function() {
@@ -71,6 +99,13 @@ module("SC._TreeItemObserver - Group Use Case", {
         })
       })];
       
+    root = TestObject.create({
+      title: "ROOT",
+      children: content,
+      isExpanded: YES
+    });
+
+  
     extra = TestObject.create({ title: "EXTRA" });
     
     extrachild = TestObject.create({
@@ -96,13 +131,10 @@ module("SC._TreeItemObserver - Group Use Case", {
       content[1].children[4],
       content[2]];
       
-    delegate = Delegate.create({ content: content });
+    delegate = Delegate.create();
 
     // create root observer
-    obs = SC._TreeItemObserver.create({
-      delegate: delegate, children: content
-    });
-    
+    obs = SC._TreeItemObserver.create({ delegate: delegate, item: root });
     obs.addRangeObserver(null, delegate, delegate.rangeDidChange);
   },
   
@@ -125,33 +157,6 @@ test("length on create", function() {
 // ..........................................................
 // OBJECT AT
 // 
-
-function verifyObjectAt(obs, expected, eindexes, desc) {
-  var idx, len = expected.get('length'), actual;
-
-  // eindexes is optional
-  if (desc === undefined) {
-    desc = eindexes;
-    eindexes = undefined;
-  }
-  
-  equals(obs.get('length'), len, "%@ - length should match".fmt(desc));
-  for(idx=0;idx<len;idx++) {
-    actual = obs.objectAt(idx);
-    equals(actual, expected[idx], "%@ - observer.objectAt(%@) should match expected".fmt(desc, idx));
-  }
-  
-  if (eindexes !== undefined) {
-    if (eindexes) {
-      ok(delegate.rangeCallCount>0, 'range observer should be called (actual callCount=%@)'.fmt(delegate.rangeCallCount));
-    } else {
-      ok(delegate.rangeCallCount===0, 'range observer should NOT be called (actual callCount=%@)'.fmt(delegate.rangeCallCount));
-    }
-    
-    same(delegate.rangeIndexes, eindexes, 'range observer should be called with expected indexes');
-  }
-  
-}
 
 test("objectAt on create", function() {
   verifyObjectAt(obs, flattened, null, "on create");
@@ -347,5 +352,301 @@ test("removing object at top level with children", function() {
   SC.run(function() { content.removeAt(1); });
   flattened.replace(6,6,null);
   verifyObjectAt(obs, flattened, "after removing top level object");
+});
+
+// ..........................................................
+// MODIFYING OBSERVER -> MODEL, TOP-LEVEL
+// 
+
+test("adding an group to end", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.pushObject(extrachild); });
+  flattened.pushObject(extrachild);
+  flattened.replace(flattened.length, 0, extrachild.children);
+  expected.pushObject(extrachild);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(flattened.length-4,4);
+  verifyObjectAt(obs, flattened, change, 'after pushing object - should have item and its children');
+  
+  // verify content change
+  same(content, expected, 'content should have new extra item');
+});
+
+test("adding regular item to end", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.pushObject(extra); });
+  flattened.pushObject(extra);
+  expected.pushObject(extra);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(flattened.length-1,1);
+  verifyObjectAt(obs, flattened, change, 'after pushing object');
+  
+  // verify content change
+  same(content, expected, 'content should have new extra item');
+});
+
+test("adding an group to beginning", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.insertAt(0, extrachild); });
+  flattened.insertAt(0, extrachild);
+  flattened.replace(1, 0, extrachild.children);
+  expected.insertAt(0,extrachild);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after pushing object - should have item and its children');
+  
+  // verify content change
+  same(content, expected, 'content should have new extra item');
+});
+
+test("adding regular item to beginning", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.insertAt(0, extra); });
+  flattened.insertAt(0, extra);
+  expected.insertAt(0, extra);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after pushing object');
+  
+  // verify content change
+  same(content, expected, 'content should have new extra item');
+});
+
+test("adding an group to middle", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.replace(6, 0, extrachild); });
+  flattened.insertAt(6, extrachild);
+  flattened.replace(7, 0, extrachild.children);
+  expected.insertAt(1,extrachild);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(6,flattened.length-6);
+  verifyObjectAt(obs, flattened, change, 'after pushing object - should have item and its children');
+  
+  // verify content change
+  same(content, expected, 'content should have new extra item');
+});
+
+test("adding regular item to middle", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.insertAt(6, extra); });
+  flattened.insertAt(6, extra);
+  expected.insertAt(1, extra);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(6,flattened.length-6);
+  verifyObjectAt(obs, flattened, change, 'after pushing object');
+  
+  // verify content change
+  same(content, expected, 'content should have new extra item');
+});
+
+test("removing a group item", function() {
+  
+  var expected = content.slice();
+  
+  SC.run(function() { obs.removeAt(6); });
+  flattened.removeAt(6,6);
+  expected.removeAt(1);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(6,flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after removing object - should remove children');
+  
+  // verify content change
+  same(content, expected, 'content should have removed item');
+});
+
+test("removing entire group", function() {
+  
+  var expected = content.slice();
+
+  // note: select entire group here...
+  SC.run(function() { obs.removeAt(6,6); });
+  flattened.removeAt(6,6);
+  expected.removeAt(1);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(6,flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after removing object - should remove children');
+  
+  // verify content change
+  same(content, expected, 'content should have removed item');
+});
+
+test("removing partial group", function() {
+  
+  var expected = content.slice();
+
+  // note: select entire group here...
+  throws(function() {
+    obs.removeAt(3,6);
+  }, Error, "should throw error when trying to remove uneven boundaries");
+
+  // verify no change
+  var change = null;
+  verifyObjectAt(obs, flattened, change, 'after removing object - should remove children');
+  
+  // verify content change
+  same(content, expected, 'content should have removed item');
+});
+
+test("removing group header and some of the children", function() {
+  
+  var expected = content.slice();
+
+  // note: select entire group here...
+  throws(function() {
+    obs.removeAt(6, 3);
+  }, Error, "should throw error when trying to remove uneven boundaries");
+
+  // verify no change
+  var change = null;
+  verifyObjectAt(obs, flattened, change, 'after removing object - should remove children');
+  
+  // verify content change
+  same(content, expected, 'content should have removed item');
+});
+
+// ..........................................................
+// MODIFYING OBSERVER -> MODEL, GROUP-LEVEL
+// 
+
+test("adding regular item to end of group", function() {
+  
+  var expected = content[0].children.slice();
+  
+  SC.run(function() { 
+    obs.replace(6, 0, [extra], SC.DROP_AFTER); 
+  });
+  flattened.replace(6, 0, [extra]);
+  expected.pushObject(extra);
+  
+  // verify round trip - change covers effected group
+  var change = SC.IndexSet.create(0, flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after pushing object');
+  
+  // verify content change
+  same(content[0].children, expected, 'content.children should change');
+});
+
+test("removing regular item to end of group", function() {
+  
+  var base     = content[0].children,
+      expected = base.slice();
+  
+  SC.run(function() { 
+    obs.removeAt(5); 
+  });
+  flattened.removeAt(5);
+  expected.popObject();
+  
+  // verify round trip - change covers effected group
+  var change = SC.IndexSet.create(0, flattened.length+1);
+  verifyObjectAt(obs, flattened, change, 'after removing object');
+  
+  // verify content change
+  same(base, expected, 'content.children should change');
+});
+
+test("adding regular item to beginning", function() {
+
+  var base     = content[0].children,
+      expected = base.slice();
+  
+  SC.run(function() { obs.insertAt(1, extra); });
+  flattened.insertAt(1, extra);
+  expected.insertAt(0, extra);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after pushing object - should have item');
+  
+  // verify content change
+  same(base, expected, 'content should have new extra item');
+});
+
+test("removing regular item to beginning", function() {
+
+  var base     = content[0].children,
+      expected = base.slice();
+  
+  SC.run(function() { obs.removeAt(1); });
+  flattened.removeAt(1);
+  expected.removeAt(0);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length+1);
+  verifyObjectAt(obs, flattened, change, 'after pushing object - should have item');
+  
+  // verify content change
+  same(base, expected, 'content should have new extra item');
+});
+
+test("adding regular item to middle", function() {
+  
+  var base     = content[0].children,
+      expected = base.slice();
+  
+  SC.run(function() { obs.insertAt(3, extra); });
+  flattened.insertAt(3, extra);
+  expected.insertAt(2, extra);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length);
+  verifyObjectAt(obs, flattened, change, 'after adding object');
+  
+  // verify content change
+  same(base, expected, 'content should have new extra item');
+});
+
+test("removing regular item to middle", function() {
+  
+  var base     = content[0].children,
+      expected = base.slice();
+  
+  SC.run(function() { obs.removeAt(3); });
+  flattened.removeAt(3);
+  expected.removeAt(2);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length+1);
+  verifyObjectAt(obs, flattened, change, 'after adding object');
+  
+  // verify content change
+  same(base, expected, 'content should have new extra item');
+});
+
+test("replacing regular items in middle", function() {
+  
+  var base     = content[0].children,
+      expected = base.slice();
+  
+  SC.run(function() { obs.replace(3, 3, [extra]); });
+  flattened.replace(3, 3, [extra]);
+  expected.replace(2, 3, [extra]);
+  
+  // verify round trip
+  var change = SC.IndexSet.create(0,flattened.length+2);
+  verifyObjectAt(obs, flattened, change, 'after replacing object');
+  
+  // verify content change
+  same(base, expected, 'content should have new extra item');
 });
 
