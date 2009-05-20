@@ -179,7 +179,7 @@ SC.NestedStore = SC.Store.extend(
     this.discardChanges();
     
     var parentStore = this.get('parentStore');
-    if (parentStore) parentStore.willDestroyChildStore(this);
+    if (parentStore) parentStore.willDestroyNestedStore(this);
     
     sc_super();  
     return this ;
