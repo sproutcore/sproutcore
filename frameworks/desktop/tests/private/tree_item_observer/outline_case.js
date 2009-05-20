@@ -67,7 +67,7 @@ function verifyObjectAt(obs, expected, eindexes, desc) {
   
 }
 
-module("SC._TreeItemObserver - Outline Use Case", {
+module("SC.TreeItemObserver - Outline Use Case", {
   setup: function() {
     content = [
       TestObject.create({
@@ -161,7 +161,7 @@ module("SC._TreeItemObserver - Outline Use Case", {
         
     delegate = Delegate.create();
 
-    obs = SC._TreeItemObserver.create({ delegate: delegate, item: root });
+    obs = SC.TreeItemObserver.create({ delegate: delegate, item: root });
     obs.addRangeObserver(null, delegate, delegate.rangeDidChange);
 
   },

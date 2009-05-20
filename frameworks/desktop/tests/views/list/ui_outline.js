@@ -22,14 +22,15 @@ var TreeItem = SC.Object.extend(SC.TreeItemContent, {
   
   treeItemChildren: function() {
     var ret = [], loc = this.get('length'), depth = this.get('depth')+1;
-    while(--loc>=0) ret[loc] = TreeItem.create({ parent: this, unread: loc, depth: depth, treeItemIsExpanded: (depth<=3) });
+    if (depth>=3) loc = loc*3
+    while(--loc>=0) ret[loc] = TreeItem.create({ parent: this, unread: loc, depth: depth, treeItemIsExpanded: (depth<2) });
     return ret ;
   }.property().cacheable(),  
   
   treeItemIsExpanded: YES,
   
   treeItemBranchIndexes: function() {
-    return SC.IndexSet.create(0, this.get('length'));
+    return this.depth<3 ? SC.IndexSet.create(0, this.get('length')) : null;
   }
 
 });
@@ -42,7 +43,7 @@ var pane = SC.ControlTestPane.design()
     layout: { left: 0, right: 0, top: 0, height: 300 },
     hasHorizontalScroller: NO,
     contentView: SC.ListView.design({
-      content: SC._TreeItemObserver.create({ item: root, delegate: del }),
+      content: SC.TreeItemObserver.create({ item: root, delegate: del }),
       contentValueKey: "title",
       contentCheckboxKey: "isDone",
       contentUnreadCountKey: "unread",

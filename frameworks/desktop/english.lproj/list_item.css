@@ -9,7 +9,7 @@
 }
 
 .sc-list-item-view.sel {
-	background-color: #666; 
+	background-color: #888; 
 	color: white ;
 }
 
@@ -72,6 +72,24 @@
 
 .sc-list-item-view img.disclosure.open {
 	background-position: 0px -1008px ;
+}
+
+.sc-list-item-view img.disclosure.active {
+	background-position: -0px -1041px ;
+}
+
+.sc-list-item-view img.disclosure.open.active {
+	background-position: -16px -1008px ;
+}
+
+.sc-list-item-view.disabled img.disclosure,
+.sc-list-item-view.disabled img.disclosure.active {
+	background-position: -16px -1041px ;
+}
+
+.sc-list-item-view.disabled img.disclosure.open,
+.sc-list-item-view.disabled img.disclosure.open.active {
+	background-position: 0px -1024px ;
 }
 
 

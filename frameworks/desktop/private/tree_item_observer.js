@@ -25,7 +25,7 @@ sc_require('mixins/collection_content');
   @extends SC.CollectionContent
   @since SproutCore 1.0
 */
-SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
+SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
   /**
     The node in the tree this observer will manage.  Set when creating the
@@ -508,6 +508,93 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     cache[index] = ret ; // save in cache 
     return ret ;
   },
+
+  /**
+    Expands the specified content index.  This will search down until it finds
+    the branchObserver responsible for this item and then calls _collapse on
+    it.
+  */
+  contentIndexExpand: function(view, content, idx) {
+
+    var indexes, cur = idx, children, item;
+    
+    if (content !== this) return; // only care about us
+    if (this.get('isHeaderVisible')) {
+      if (idx===0) {
+        this._expand(this.get('item'));
+        return;
+      } else cur--;
+    } 
+    
+    if (indexes = this.get('branchIndexes')) {
+      indexes.forEach(function(i) {
+        if (i >= cur) return; // past end - nothing to do
+        var observer = this.branchObserverAt(i), len;
+        if (!observer) return ; 
+        
+        len = observer.get('length');
+        if (i+len > cur) {
+          observer.contentIndexExpand(view, observer, cur-i);
+          cur = -1 ; //done
+        } else cur -= len-1;
+        
+      }, this);  
+    }
+    
+    // if we are still inside of the range then maybe pass on to a child item
+    if (cur>=0) {
+      children = this.get('children');  
+      item     = children ? children.objectAt(cur) : null;
+      if (item) this._expand(item, this.get('item'), cur);
+    }
+    console.log('contentIndexExpand(%@, %@, %@)'.fmt(view,content,idx));
+  },
+  
+  /**
+    Called to collapse a content index item if it is currently in an open 
+    disclosure state.  The default implementation does nothing.  
+    
+    @param {SC.CollectionView} view the collection view
+    @param {SC.Array} content the content object
+    @param {Number} idx the content index
+    @returns {void}
+  */
+  contentIndexCollapse: function(view, content, idx) {
+
+    var indexes, children, item, cur = idx;
+        
+    if (content !== this) return; // only care about us
+    if (this.get('isHeaderVisible')) {
+      if (idx===0) {
+        this._collapse(this.get('item'));
+        return;
+      } else cur--;
+    } 
+    
+    
+    if (indexes = this.get('branchIndexes')) {
+      indexes.forEach(function(i) {
+        if (i >= cur) return; // past end - nothing to do
+        var observer = this.branchObserverAt(i), len;
+        if (!observer) return ; 
+        
+        len = observer.get('length');
+        if (i+len > cur) {
+          observer.contentIndexCollapse(view, observer, cur-i);
+          cur = -1 ; //done
+        } else cur -= len-1;
+        
+      }, this);  
+    }
+
+    // if we are still inside of the range then maybe pass on to a child item
+    if (cur>=0) {
+      children = this.get('children');  
+      item     = children ? children.objectAt(cur) : null;
+      if (item) this._collapse(item, this.get('item'), cur);
+    }
+    console.log('contentIndexCollapse(%@, %@, %@)'.fmt(view,content,idx));
+  },
   
   // ..........................................................
   // BRANCH NODES
@@ -534,7 +621,7 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     item   = children ? children.objectAt(index) : null ;
     if (!item) return null ; // can't create an observer for a null item
     
-    byIndex[index] = ret = SC._TreeItemObserver.create({
+    byIndex[index] = ret = SC.TreeItemObserver.create({
       item:     item,
       delegate: this.get('delegate'),
       parentObserver:   this,
@@ -577,7 +664,7 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     // begin all properties on item if there is one.  This will allow us to
     // track important property changes.
     var item = this.get('item');
-    if (!item) throw "SC._TreeItemObserver.item cannot be null";
+    if (!item) throw "SC.TreeItemObserver.item cannot be null";
     
     item.addObserver('*', this, this._itemPropertyDidChange);
     this._itemPropertyDidChange(item, '*');
@@ -589,8 +676,18 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     observering and invalidate any child observers.
   */
   destroy: function() {
+    console.log('%@.destroy'.fmt(this));
     this.invalidateBranchObserversAt(0);
     this._objectAtCache = null ;
+    
+    // cleanup observing
+    var item = this.get('item');
+    if (item) item.removeObserver('*', this, this._itemPropertyDidChange);
+    
+    var children = this._children,
+        ro = this._childrenRangeObserver;
+    if (children && ro) children.removeRangeObserver(ro);
+    
     sc_super();
   },
   
@@ -681,6 +778,66 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       }
       return item.get(key) ? SC.BRANCH_OPEN : SC.BRANCH_CLOSED;
     }
+  },
+  
+  /**
+    Collapse the item at the specified index.  This will either directly 
+    modify the property on the item or call the treeItemCollapse() method.
+  */
+  _collapse: function(item, pitem, index) {
+    var key, del;
+
+    // no item - assume leaf node
+    if (!item || !this._computeChildren(item)) return this;
+    
+    // item implement TreeItemContent - call directly
+    else if (item.isTreeItemContent) {
+      if (pitem === undefined) pitem = this.get('parentItem');
+      if (index === undefined) index = this.get('index');
+      item.treeItemCollapse(pitem, index);
+      
+    // otherwise get treeItemDisclosureStateKey from delegate
+    } else {
+      key = this._treeItemIsExpandedKey ;
+      if (!key) {
+        del = this.get('delegate');
+        key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
+        this._treeItemIsExpandedKey = key ;
+      }
+      item.setIfChanged(key, NO);
+    }
+    
+    return this ;
+  },
+
+  /**
+    Expand the item at the specified index.  This will either directly 
+    modify the property on the item or call the treeItemExpand() method.
+  */
+  _expand: function(item, pitem, index) {
+    var key, del;
+
+    // no item - assume leaf node
+    if (!item || !this._computeChildren(item)) return this;
+    
+    // item implement TreeItemContent - call directly
+    else if (item.isTreeItemContent) {
+      if (pitem === undefined) pitem = this.get('parentItem');
+      if (index === undefined) index = this.get('index');
+      item.treeItemExpand(pitem, index);
+      
+    // otherwise get treeItemDisclosureStateKey from delegate
+    } else {
+      key = this._treeItemIsExpandedKey ;
+      if (!key) {
+        del = this.get('delegate');
+        key = del ? del.get('treeItemIsExpandedKey') : 'treeItemIsExpanded';
+        this._treeItemIsExpandedKey = key ;
+      }
+      item.setIfChanged(key, YES);
+    }
+    
+    return this ;
   },
   
   /**

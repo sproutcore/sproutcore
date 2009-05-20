@@ -69,7 +69,7 @@ function verifyObjectAt(obs, expected, eindexes, desc) {
 }
 
 
-module("SC._TreeItemObserver - Flat Array Use Case", {
+module("SC.TreeItemObserver - Flat Array Use Case", {
   setup: function() {
     content = "1 2 3 4 5".w().map(function(x) { 
       return TestObject.create({ title: x });
@@ -87,7 +87,7 @@ module("SC._TreeItemObserver - Flat Array Use Case", {
 
     extra = TestObject.create({ title: "EXTRA" });
 
-    obs = SC._TreeItemObserver.create({ delegate: delegate, item: root });
+    obs = SC.TreeItemObserver.create({ delegate: delegate, item: root });
     
     obs.addRangeObserver(null, delegate, delegate.rangeDidChange);
   },

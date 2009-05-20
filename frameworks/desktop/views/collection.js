@@ -1045,6 +1045,48 @@ SC.CollectionView = SC.View.extend(
   },
   
   // ..........................................................
+  // DISCLOSURE SUPPORT
+  // 
+  
+  /**
+    Expands any items in the passed selection array that have a disclosure
+    state.
+    
+    @param {SC.IndexSet} indexes the indexes to expand
+    @returns {SC.CollectionView} receiver
+  */
+  expand: function(indexes) {
+    if (!indexes) return this; // nothing to do
+    var del     = this.get('contentDelegate'),
+        content = this.get('content');
+        
+    indexes.forEach(function(i) { 
+      var state = del.contentIndexDisclosureState(this, content, i);
+      if (state === SC.BRANCH_CLOSED) del.contentIndexExpand(this,content,i);
+    }, this);
+    return this;
+  },
+
+  /**
+    Collapses any items in the passed selection array that have a disclosure
+    state.
+    
+    @param {SC.IndexSet} indexes the indexes to expand
+    @returns {SC.CollectionView} receiver
+  */
+  collapse: function(indexes) {
+    if (!indexes) return this; // nothing to do
+    var del     = this.get('contentDelegate'),
+        content = this.get('content');
+        
+    indexes.forEach(function(i) { 
+      var state = del.contentIndexDisclosureState(this, content, i);
+      if (state === SC.BRANCH_OPEN) del.contentIndexCollapse(this,content,i);
+    }, this);
+    return this;
+  },
+  
+  // ..........................................................
   // SELECTION SUPPORT
   // 
   

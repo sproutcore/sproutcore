@@ -69,7 +69,7 @@ function verifyObjectAt(obs, expected, eindexes, desc) {
 }
 
 
-module("SC._TreeItemObserver - Group Use Case", {
+module("SC.TreeItemObserver - Group Use Case", {
   setup: function() {
     content = [
       TestObject.create({
@@ -143,7 +143,7 @@ module("SC._TreeItemObserver - Group Use Case", {
     delegate = Delegate.create();
 
     // create root observer
-    obs = SC._TreeItemObserver.create({ delegate: delegate, item: root });
+    obs = SC.TreeItemObserver.create({ delegate: delegate, item: root });
     obs.addRangeObserver(null, delegate, delegate.rangeDidChange);
   },
   

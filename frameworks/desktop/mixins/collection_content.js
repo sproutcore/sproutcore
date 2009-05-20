@@ -140,6 +140,32 @@ SC.CollectionContent = {
   */
   contentIndexDisclosureState: function(view, content, idx) {
     return SC.LEAF_NODE;    
+  },
+  
+  /**
+    Called to expand a content index item if it is currently in a closed 
+    disclosure state.  The default implementation does nothing.
+    
+    @param {SC.CollectionView} view the collection view
+    @param {SC.Array} content the content object
+    @param {Number} idx the content index
+    @returns {void}
+  */
+  contentIndexExpand: function(view, content, idx) {
+    console.log('contentIndexExpand(%@, %@, %@)'.fmt(view,content,idx));
+  },
+  
+  /**
+    Called to collapse a content index item if it is currently in an open 
+    disclosure state.  The default implementation does nothing.  
+    
+    @param {SC.CollectionView} view the collection view
+    @param {SC.Array} content the content object
+    @param {Number} idx the content index
+    @returns {void}
+  */
+  contentIndexCollapse: function(view, content, idx) {
+    console.log('contentIndexCollapse(%@, %@, %@)'.fmt(view,content,idx));
   }
     
 };

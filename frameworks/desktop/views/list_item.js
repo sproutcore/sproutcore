@@ -395,6 +395,15 @@ SC.ListItemView = SC.View.extend(
   },
   
   /** @private 
+    Returns YES if the list item has a disclosure triangle and the event 
+    occurred inside of it.
+  */
+  _isInsideDisclosure: function(evt) {
+    if (this.get('disclosureSate')===SC.LEAF_NODE) return NO;
+    return this._isInsideElementWithClassName('disclosure', evt);
+  },
+  
+  /** @private 
   mouseDown is handled only for clicks on the checkbox view or or action
   button.
   */
@@ -405,43 +414,80 @@ SC.ListItemView = SC.View.extend(
       this._isMouseDownOnCheckbox = YES ;
       this._isMouseInsideCheckbox = YES ;
       return YES ; // listItem should handle this event
-    }  
+
+    } else if (this._isInsideDisclosure(evt)) {
+      this._addDisclosureActiveState();
+      this._isMouseDownOnDisclosure = YES;
+      this._isMouseInsideDisclosure = YES ;
+      return YES;
+    }
+    
     return NO ; // let the collection view handle this event
   },
   
   mouseUp: function(evt) {
-   var ret= NO ;
-   // if mouse was down in checkbox -- then handle mouse up, otherwise 
-   // allow parent view to handle event.
-   if (this._isMouseDownOnCheckbox) {
+    var ret= NO, del, checkboxKey, content, state, idx, set;
+    
+    // if mouse was down in checkbox -- then handle mouse up, otherwise 
+    // allow parent view to handle event.
+    if (this._isMouseDownOnCheckbox) {
    
-     // update only if mouse inside on mouse up...
-     if (this._isInsideCheckbox(evt)) {
-       var del = this.displayDelegate ;
-       var checkboxKey = this.getDelegateProperty('contentCheckboxKey', del) ;
-       var content = this.get('content') ;
-       if (content && content.get) {
-         var value = content.get(checkboxKey) ;
-         value = (value === SC.MIXED_STATE) ? YES : !value ;
-         content.set(checkboxKey, value) ; // update content
-         this.displayDidChange(); // repaint view...
-       }
-     }
+      // update only if mouse inside on mouse up...
+      if (this._isInsideCheckbox(evt)) {
+        del = this.displayDelegate ;
+        checkboxKey = this.getDelegateProperty('contentCheckboxKey', del);
+        content = this.get('content') ;
+        if (content && content.get) {
+          var value = content.get(checkboxKey) ;
+          value = (value === SC.MIXED_STATE) ? YES : !value ;
+          content.set(checkboxKey, value) ; // update content
+          this.displayDidChange(); // repaint view...
+        }
+      }
+ 
+      this._removeCheckboxActiveState() ;
+      ret = YES ;
+    
+    // if mouse as down on disclosure -- handle mosue up.  otherwise pass on
+    // to parent.
+    } else if (this._isMouseDownOnDisclosure) {
+      if (this._isInsideDisclosure(evt)) {
+        state = this.get('disclosureState');
+        idx   = this.get('contentIndex');
+        set   = idx ? SC.IndexSet.create(idx) : null;
+        del = this.get('displayDelegate');
+        
+        if (state === SC.BRANCH_OPEN) {
+          if (set && del && del.collapse) del.collapse(set);
+          else this.set('disclosureState', SC.BRANCH_CLOSED);
+          this.displayDidChange();
+          
+        } else if (state === SC.BRANCH_CLOSED) {
+          if (set && del && del.expand) del.expand(set);
+          else this.set('disclosureState', SC.BRANCH_OPEN);
+          this.displayDidChange();
+        }
+      }
      
-     this._removeCheckboxActiveState() ;
-     ret = YES ;
-   } 
+      this._removeDisclosureActiveState();
+      ret = YES ;
+    }
    
-   // clear cached info
-   this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
-   return ret ;
+    // clear cached info
+    this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
+    this._isMouseDownOnDisclosure = this._isMouseInsideDisclosure = NO ;
+    return ret ;
   },
   
   mouseExited: function(evt) {
    if (this._isMouseDownOnCheckbox) {
      this._removeCheckboxActiveState() ;
      this._isMouseInsideCheckbox = NO ;
-   }  
+     
+   } else if (this._isMouseDownOnDisclosure) {
+     this._removeDisclosureActiveState();
+     this._isMouseInsideDisclosure = NO ;
+   }
    return NO ;
   },
   
@@ -449,7 +495,11 @@ SC.ListItemView = SC.View.extend(
    if (this._isMouseDownOnCheckbox) {
      this._addCheckboxActiveState() ;
      this._isMouseInsideCheckbox = YES ;
-   }  
+     
+   } else if (this._isMouseDownOnDisclosure) {
+     this._addDisclosureActiveState();
+     this._isMouseInsideDisclosure = YES;
+   }
    return NO ;
   },
   
@@ -460,6 +510,15 @@ SC.ListItemView = SC.View.extend(
   
   _removeCheckboxActiveState: function() {
    this.$('.sc-checkbox-view').removeClass('active');
+  },
+
+  _addDisclosureActiveState: function() {
+   var enabled = this.get('isEnabled');
+   this.$('img.disclosure').setClass('active', enabled);
+  },
+  
+  _removeDisclosureActiveState: function() {
+   this.$('img.disclosure').removeClass('active');
   },
   
   /**

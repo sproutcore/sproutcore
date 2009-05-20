@@ -91,6 +91,32 @@ SC.TreeItemContent = {
   },
   
   /**
+    Collapse the tree item.  The default implementation will change the 
+    treeItemIsExpanded property, but you can override this method to handle
+    collapsing anyway you like.
+    
+    @param {Object} parent the parent item containing this item
+    @param {Number} idx the index of the item in the parent
+    @returns {void}
+  */
+  treeItemCollapse: function(parent, idx) {
+    this.setIfChanged('treeItemIsExpanded', NO);    
+  },
+
+  /**
+    Expand the tree item.  The default implementation will change the 
+    treeItemIsExpanded property, but you can override this method to handle
+    collapsing anyway you like.
+    
+    @param {Object} parent the parent item containing this item
+    @param {Number} idx the index of the item in the parent
+    @returns {void}
+  */
+  treeItemExpand: function(parent, idx) {
+    this.setIfChanged('treeItemIsExpanded', YES);    
+  },
+  
+  /**
     Returns an index set containing the child indexes of the item that are 
     themselves branches.  This will only be called on tree items with a branch
     disclosure state.
