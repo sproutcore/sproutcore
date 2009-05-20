@@ -65,7 +65,7 @@ module("SC.CollectionView.itemViewForContentIndex", {
     });
     
     // add in delegate mixin
-    del = SC.mixin({}, SC.CollectionContentDelegate, del);
+    del = SC.mixin({}, SC.CollectionContent, del);
     
   }
 });

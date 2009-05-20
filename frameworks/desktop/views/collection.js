@@ -6,7 +6,7 @@
 // ==========================================================================
 
 sc_require('mixins/collection_view_delegate') ;
-sc_require('mixins/collection_content_delegate') ;
+sc_require('mixins/collection_content') ;
 sc_require('views/list_item');
 
 /**
@@ -46,12 +46,12 @@ SC.BENCHMARK_RELOAD = NO ;
   
   @extends SC.View
   @extends SC.CollectionViewDelegate
-  @extends SC.CollectionContentDelegate
+  @extends SC.CollectionContent
   @since SproutCore 0.9
 */
 SC.CollectionView = SC.View.extend(
   SC.CollectionViewDelegate,
-  SC.CollectionContentDelegate,
+  SC.CollectionContent,
 /** @scope SC.CollectionView.prototype */ {
   
   classNames: ['sc-collection-view'],

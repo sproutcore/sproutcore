@@ -34,7 +34,7 @@ SC.LEAF_NODE = 0x0020;
   
   @since SproutCore 1.0
 */
-SC.CollectionContentDelegate = {
+SC.CollectionContent = {
 
   /**
     Used to detect the mixin by SC.CollectionView
