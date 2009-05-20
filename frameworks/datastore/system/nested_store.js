@@ -133,9 +133,11 @@ SC.NestedStore = SC.Store.extend(
     @returns {SC.Store} receiver
   */
   commitChanges: function(force) {
-    var pstore = this.get('parentStore');
-    pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
-    this.reset(); // clear out custom changes 
+    if (this.get('hasChanges')) {
+      var pstore = this.get('parentStore');
+      pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
+      this.reset(); // clear out custom changes
+    }
     return this ;
   },
 
