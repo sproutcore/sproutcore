@@ -76,8 +76,11 @@ module("SC._TreeItemObserver - Group Use Case", {
         isGroup: YES,
         title: "A",
         isExpanded: YES,
+        outline: 0,
         children: "0 1 2 3 4".w().map(function(x) { 
-          return TestObject.create({ title: "A.%@".fmt(x) });
+          return TestObject.create({ 
+            title: "A.%@".fmt(x), outline: 1 
+          });
         })
       }),
 
@@ -85,8 +88,11 @@ module("SC._TreeItemObserver - Group Use Case", {
         isGroup: YES,
         title: "B",
         isExpanded: YES,
+        outline: 0,
         children: "0 1 2 3 4".w().map(function(x) { 
-          return TestObject.create({ title: "B.%@".fmt(x) });
+          return TestObject.create({ 
+            title: "B.%@".fmt(x), outline: 1 
+          });
         })
       }),
 
@@ -94,8 +100,11 @@ module("SC._TreeItemObserver - Group Use Case", {
         isGroup: YES,
         title: "C",
         isExpanded: NO,
+        outline: 0,
         children: "0 1 2 3 4".w().map(function(x) { 
-          return TestObject.create({ title: "C.%@".fmt(x) });
+          return TestObject.create({ 
+            title: "C.%@".fmt(x), outline: 1 
+          });
         })
       })];
       
@@ -650,3 +659,61 @@ test("replacing regular items in middle", function() {
   same(base, expected, 'content should have new extra item');
 });
 
+// ..........................................................
+// SC.COLLECTION CONTENT SUPPORT
+// 
+
+test("contentGroupIndexes - not grouped", function() {
+  equals(delegate.get('treeItemIsGrouped'), NO, 'precond - delegate.treeItemIsGrouped == NO');
+  equals(obs.contentGroupIndexes(null, obs), null, 'contentGroupIndexes should be null');
+  
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexIsGroup(null, obs, idx), NO, 'obs.contentIndexIsGroup(null, obs, %@) should be NO'.fmt(idx));
+  }
+});
+
+test("contentGroupIndexes - grouped", function() {
+  delegate.set('treeItemIsGrouped', YES);
+  equals(delegate.get('treeItemIsGrouped'), YES, 'precond - delegate.treeItemIsGrouped == YES');
+  
+  var set = SC.IndexSet.create(0).add(6).add(12);
+  same(obs.contentGroupIndexes(null, obs), set, 'contentGroupIndexes should cover just top leve items');
+  
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexIsGroup(null, obs, idx), set.contains(idx), 'obs.contentIndexIsGroup(null, obs, %@)'.fmt(idx));
+  }
+});
+
+test("contentIndexOutlineLevel", function() {
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    var expected = flattened[idx].outline;
+    
+    equals(obs.contentIndexOutlineLevel(null, obs, idx), expected, 'obs.contentIndexOutlineLevel(null, obs, %@)'.fmt(idx));
+  }
+});
+
+test("contentIndexDisclosureState", function() {
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    var expected = flattened[idx].isExpanded;
+    expected = (expected === NO) ? SC.BRANCH_CLOSED : (expected ? SC.BRANCH_OPEN : SC.LEAF_NODE);
+    
+    var str ;
+    switch(expected) {
+      case SC.BRANCH_CLOSED: 
+        str = "SC.BRANCH_CLOSED";
+        break;
+      case SC.BRANCH_OPEN:
+        str = "SC.BRANCH_OPEN";
+        break;
+      default:
+         str = "SC.LEAF_NODE";
+         break;
+    }
+    
+    equals(obs.contentIndexDisclosureState(null, obs, idx), expected, 'obs.contentIndexDisclosureState(null, obs, %@) should eql %@'.fmt(idx,str));
+  }
+});

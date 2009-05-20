@@ -284,3 +284,42 @@ test("replace object in middle", function() {
   same(content, expected, 'content should have new extra item');
 });
 
+// ..........................................................
+// SC.COLLECTION CONTENT SUPPORT
+// 
+
+test("contentGroupIndexes - not grouped", function() {
+  equals(delegate.get('treeItemIsGrouped'), NO, 'precond - delegate.treeItemIsGrouped == NO');
+  equals(obs.contentGroupIndexes(null, obs), null, 'contentGroupIndexes should be null');
+  
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexIsGroup(null, obs, idx), NO, 'obs.contentIndexIsGroup(null, obs, %@) should be NO'.fmt(idx));
+  }
+});
+
+test("contentGroupIndexes - grouped", function() {
+  delegate.set('treeItemIsGrouped', YES);
+  equals(delegate.get('treeItemIsGrouped'), YES, 'precond - delegate.treeItemIsGrouped == YES');
+  same(obs.contentGroupIndexes(null, obs), SC.IndexSet.create(0, obs.get('length')), 'contentGroupIndexes should cover entire set');
+  
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexIsGroup(null, obs, idx), YES, 'obs.contentIndexIsGroup(null, obs, %@) should be YES'.fmt(idx));
+  }
+});
+
+test("contentIndexOutlineLevel", function() {
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexOutlineLevel(null, obs, idx), 0, 'obs.contentIndexOutlineLevel(null, obs, %@)'.fmt(idx));
+  }
+});
+
+test("contentIndexDisclosureState", function() {
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexDisclosureState(null, obs, idx), SC.LEAF_NODE, 'obs.contentIndexDisclosureState(null, obs, %@) should eql SC.LEAF_NODE'.fmt(idx));
+  }
+});
+

@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('mixins/tree_item_content');
+sc_require('mixins/collection_content');
 
 /**
   @class
@@ -18,8 +19,13 @@ sc_require('mixins/tree_item_content');
   
   TreeNode stores an array which contains either a number pointing to the 
   next place in the array there is a child item or it contains a child item.
+  
+  @extends SC.Object
+  @extends SC.Array
+  @extends SC.CollectionContent
+  @since SproutCore 1.0
 */
-SC._TreeItemObserver = SC.Object.extend(SC.Array, {
+SC._TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
 
   /**
     The node in the tree this observer will manage.  Set when creating the
@@ -61,6 +67,8 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, {
     in the tree, should be null.
   */
   index: null,
+  
+  outlineLevel: 0, 
   
   // ..........................................................
   // EXTRACTED FROM ITEM
@@ -289,7 +297,9 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, {
     
     // clear caches
     this.invalidateBranchObserversAt(start);
-    this._objectAtCache = null;
+    this._objectAtCache = this._outlineLevelCache = null;
+    this._disclosureStateCache = null;
+    this._contentGroupIndexes = NO;
     this.notifyPropertyChange('branchIndexes');
     
     var oldlen = this.get('length'),
@@ -346,6 +356,160 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, {
   },
   
   // ..........................................................
+  // SC.COLLECTION CONTENT SUPPORT
+  // 
+
+  _contentGroupIndexes: NO,
+  
+  /**
+    Called by the collection view to return any group indexes.  The default 
+    implementation will compute the indexes one time based on the delegate 
+    treeItemIsGrouped
+  */
+  contentGroupIndexes: function(view, content) {
+    
+    if (content !== this) return null; // only care about receiver
+
+    var ret = this._contentGroupIndexes;
+    if (ret !== NO) return ret ;
+    
+    // if this is not the root item, never do grouping
+    if (this.get('parentObserver')) return null;
+    
+    var item = this.get('item'), group, indexes, len, cur, loc, children;
+    
+    if (item && item.isTreeItemContent) group = item.get('treeItemIsGrouped');
+    else group = !!this.delegate.get('treeItemIsGrouped');
+    
+    // if grouping is enabled, build an index set with all of our local 
+    // groups.
+    if (group) {
+      ret      = SC.IndexSet.create();
+      indexes  = this.get('branchIndexes');
+      children = this.get('children');
+      len      = children ? children.get('length') : 0;
+      cur = loc = 0;
+      
+      if (indexes) {
+        indexes.forEach(function(i) {
+          ret.add(cur, (i+1)-loc); // add loc -> i to set
+          cur += (i+1)-loc;
+          loc = i+1 ;
+          
+          var observer = this.branchObserverAt(i);
+          if (observer) cur += observer.get('length')-1;
+        }, this);
+      }
+
+      if (loc<len) ret.add(cur, len-loc);
+    } else ret = null;
+    
+    this._contentGroupIndexes = ret ;
+    return ret;
+  },
+  
+  contentIndexIsGroup: function(view, content, idx) {
+    var indexes = this.contentGroupIndexes(view, content);
+    return indexes ? indexes.contains(idx) : NO ;
+  },
+  
+  /**
+    Returns the outline level for the specified index.
+  */
+  contentIndexOutlineLevel: function(view, content, index) {
+    if (content !== this) return -1; // only care about us
+    
+    var cache = this._outlineLevelCache;
+    if (cache && (cache[index] !== undefined)) return cache[index];
+    if (!cache) cache = this._outlineLevelCache = [];
+    
+    var len   = this.get('length'),
+        cur   = index,
+        loc   = 0,
+        ret   = null,
+        indexes, children, observer;
+    
+    if (index >= len) return -1;
+     
+    if (this.get('isHeaderVisible')) {
+      if (index === 0) return cache[0] = this.get('outlineLevel')-1;
+      else cur--;
+    }
+
+    // loop through branch indexes, reducing the offset until it matches 
+    // something we might actually return.
+    if (indexes = this.get('branchIndexes')) {
+      indexes.forEach(function(i) {
+        if ((ret!==null) || (i > cur)) return ; // past end - nothing to do
+
+        var observer = this.branchObserverAt(i), len;
+        if (!observer) return ; // nothing to do
+
+        // if cur lands inside of this observer's length, use objectAt to get
+        // otherwise, just remove len from cur.
+        len = observer.get('length') ;
+        if (i+len > cur) {
+          ret  = observer.contentIndexOutlineLevel(view, observer, cur-i);
+          cur  = -1;
+        } else cur -= len-1 ;
+        
+      },this);
+    }
+    
+    if (cur>=0) ret = this.get('outlineLevel'); // get internal if needed
+    cache[index] = ret ; // save in cache 
+    return ret ;
+  },
+
+  /**
+    Returns the disclosure state for the specified index.
+  */
+  contentIndexDisclosureState: function(view, content, index) {
+    if (content !== this) return -1; // only care about us
+    
+    var cache = this._disclosureStateCache;
+    if (cache && (cache[index] !== undefined)) return cache[index];
+    if (!cache) cache = this._disclosureStateCache = [];
+    
+    var len   = this.get('length'),
+        cur   = index,
+        loc   = 0,
+        ret   = null,
+        indexes, children, observer;
+    
+    if (index >= len) return SC.LEAF_NODE;
+     
+    if (this.get('isHeaderVisible')) {
+      if (index === 0) return cache[0] = this.get('disclosureState');
+      else cur--;
+    }
+
+    // loop through branch indexes, reducing the offset until it matches 
+    // something we might actually return.
+    if (indexes = this.get('branchIndexes')) {
+      indexes.forEach(function(i) {
+        if ((ret!==null) || (i > cur)) return ; // past end - nothing to do
+
+        var observer = this.branchObserverAt(i), len;
+        if (!observer) return ; // nothing to do
+
+        // if cur lands inside of this observer's length, use objectAt to get
+        // otherwise, just remove len from cur.
+        len = observer.get('length') ;
+        if (i+len > cur) {
+          ret  = observer.contentIndexDisclosureState(view, observer, cur-i);
+          cur  = -1;
+        } else cur -= len-1 ;
+        
+      },this);
+    }
+    
+    if (cur>=0) ret = SC.LEAF_NODE; // otherwise its a leaf node
+    cache[index] = ret ; // save in cache 
+    return ret ;
+  },
+  
+  // ..........................................................
   // BRANCH NODES
   //   
 
@@ -374,7 +538,8 @@ SC._TreeItemObserver = SC.Object.extend(SC.Array, {
       item:     item,
       delegate: this.get('delegate'),
       parentObserver:   this,
-      index:  index
+      index:  index,
+      outlineLevel: this.get('outlineLevel')+1
     });
 
     indexes.add(index); // save for later invalidation

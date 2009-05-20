@@ -73,40 +73,43 @@ module("SC._TreeItemObserver - Outline Use Case", {
       TestObject.create({
         title: "A",
         isExpanded: YES,
+        outline: 0,
         
         children: [
-          TestObject.create({ title: "A.i" }),
+          TestObject.create({ title: "A.i", outline: 1 }),
 
           TestObject.create({ title: "A.ii",
+            outline: 1,
             isExpanded: NO,
             children: [
-              TestObject.create({ title: "A.ii.1" }),
-              TestObject.create({ title: "A.ii.2" }),
-              TestObject.create({ title: "A.ii.3" })]
+              TestObject.create({ title: "A.ii.1", outline: 2 }),
+              TestObject.create({ title: "A.ii.2", outline: 2 }),
+              TestObject.create({ title: "A.ii.3", outline: 2 })]
           }),
 
-          TestObject.create({ title: "A.iii" })]
+          TestObject.create({ title: "A.iii", outline: 1 })]
       }),
 
       TestObject.create({
         title: "B",
         isExpanded: YES,
-
+        outline: 0,
         children: [
           TestObject.create({ title: "B.i",
             isExpanded: YES,
+            outline: 1,
             children: [
-              TestObject.create({ title: "B.i.1" }),
-              TestObject.create({ title: "B.i.2" }),
-              TestObject.create({ title: "B.i.3" })]
+              TestObject.create({ title: "B.i.1", outline: 2 }),
+              TestObject.create({ title: "B.i.2", outline: 2 }),
+              TestObject.create({ title: "B.i.3", outline: 2 })]
           }),
 
-          TestObject.create({ title: "B.ii" }),
-          TestObject.create({ title: "B.iii" })]
+          TestObject.create({ title: "B.ii", outline: 1 }),
+          TestObject.create({ title: "B.iii", outline: 1 })]
       }),
 
       TestObject.create({
-        isGroup: NO,
+        outline: 0,
         title: "C"
       })];
 
@@ -399,6 +402,64 @@ test("removing regular item to middle", function() {
   same(base, expected, 'content should have new extra item');
 });
 
+// ..........................................................
+// SC.COLLECTION CONTENT SUPPORT
+// 
+
+test("contentGroupIndexes - not grouped", function() {
+  equals(delegate.get('treeItemIsGrouped'), NO, 'precond - delegate.treeItemIsGrouped == NO');
+  equals(obs.contentGroupIndexes(null, obs), null, 'contentGroupIndexes should be null');
+  
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexIsGroup(null, obs, idx), NO, 'obs.contentIndexIsGroup(null, obs, %@) should be NO'.fmt(idx));
+  }
+});
+
+test("contentGroupIndexes - grouped", function() {
+  delegate.set('treeItemIsGrouped', YES);
+  equals(delegate.get('treeItemIsGrouped'), YES, 'precond - delegate.treeItemIsGrouped == YES');
+  
+  var set = SC.IndexSet.create(0).add(4).add(11);
+  same(obs.contentGroupIndexes(null, obs), set, 'contentGroupIndexes should cover just top leve items');
+  
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    equals(obs.contentIndexIsGroup(null, obs, idx), set.contains(idx), 'obs.contentIndexIsGroup(null, obs, %@) (%@)'.fmt(idx, flattened[idx]));
+  }
+});
+
+test("contentIndexOutlineLevel", function() {
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    var expected = flattened[idx].outline;
+    
+    equals(obs.contentIndexOutlineLevel(null, obs, idx), expected, 'obs.contentIndexOutlineLevel(null, obs, %@) (%@)'.fmt(idx, flattened[idx]));
+  }
+});
+
+test("contentIndexDisclosureState", function() {
+  var idx, len = obs.get('length');
+  for(idx=0;idx<len;idx++) {
+    var expected = flattened[idx].isExpanded;
+    expected = (expected === NO) ? SC.BRANCH_CLOSED : (expected ? SC.BRANCH_OPEN : SC.LEAF_NODE);
+    
+    var str ;
+    switch(expected) {
+      case SC.BRANCH_CLOSED: 
+        str = "SC.BRANCH_CLOSED";
+        break;
+      case SC.BRANCH_OPEN:
+        str = "SC.BRANCH_OPEN";
+        break;
+      default:
+         str = "SC.LEAF_NODE";
+         break;
+    }
+    
+    equals(obs.contentIndexDisclosureState(null, obs, idx), expected, 'obs.contentIndexDisclosureState(null, obs, %@) (%@) should eql %@'.fmt(idx,flattened[idx], str));
+  }
+});
 
 // ..........................................................
 // SPECIAL CASES

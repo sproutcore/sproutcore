@@ -59,6 +59,16 @@ SC.TreeItemContent = {
   treeItemIsExpanded: YES,
   
   /**
+    Indicates whether the tree item should be rendered as a group or not. 
+    This property is only useful on the root item in your tree.  Setting it to
+    YES on any other item will be ignored.
+    
+    @property
+    @type {Boolean}
+  */
+  treeItemIsGrouped: NO,
+  
+  /**
     Returns the disclosure state for the tree item, which appears at the 
     index of the parent's treeItemChildren array.  The response must be one of 
     SC.BRANCH_OPEN, SC.BRANCH_CLOSED or SC.LEAF_NODE.
