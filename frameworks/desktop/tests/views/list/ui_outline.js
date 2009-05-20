@@ -14,7 +14,7 @@ module("SC.ListView - outline list");
 
 var TreeItem = SC.Object.extend(SC.TreeItemContent, {
 
-  length: 2,
+  length: 10,
   
   title: "TREE ITEM",
   
