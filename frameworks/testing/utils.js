@@ -51,5 +51,12 @@ if (!Array.prototype.uniq) {
 }
 
 if (!String.prototype.w) {
-  String.prototype.w = function w() { return this.split(' '); } ;
+  String.prototype.w = function w() { 
+    var ary = [], ary2 = this.split(' '), len = ary2.length ;
+    for (var idx=0; idx<len; ++idx) {
+      var str = ary2[idx] ;
+      if (str.length !== 0) ary.push(str) ; // skip empty strings
+    }
+    return ary ;
+  };
 }
