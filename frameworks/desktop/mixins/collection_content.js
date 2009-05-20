@@ -113,7 +113,7 @@ SC.CollectionContent = {
     Returns the outline level for the item at the specified index.  Can be 
     used to display hierarchical lists.
     
-    Default always returns 0 (top level).
+    Default always returns -1 (no outline).
     
     @param {SC.CollectionView} view the collection view
     @param {SC.Array} content the content object
@@ -121,7 +121,7 @@ SC.CollectionContent = {
     @returns {Boolean} YES, NO, or SC.MIXED_STATE
   */
   contentIndexOutlineLevel: function(view, content, idx) {
-    return 0;
+    return -1;
   },
   
   /**

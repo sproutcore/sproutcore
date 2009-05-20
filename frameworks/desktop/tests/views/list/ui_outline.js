@@ -22,7 +22,7 @@ var TreeItem = SC.Object.extend(SC.TreeItemContent, {
   
   treeItemChildren: function() {
     var ret = [], loc = this.get('length'), depth = this.get('depth')+1;
-    if (depth>=3) loc = loc*3
+    if (depth>3) loc = loc*3
     while(--loc>=0) ret[loc] = TreeItem.create({ parent: this, unread: loc, depth: depth, treeItemIsExpanded: (depth<2) });
     return ret ;
   }.property().cacheable(),  

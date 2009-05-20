@@ -40,19 +40,12 @@
 }
 
 .sc-list-item-view.has-icon label,
-.sc-list-item-view.has-checkbox label,
-.sc-list-item-view.has-disclosure label {
+.sc-list-item-view.has-checkbox label {
 	left: 24px;
 }
 
-.sc-list-item-view.has-checkbox.has-icon label,
-.sc-list-item-view.has-checkbox.has-disclosure label,
-.sc-list-item-view.has-disclosure.has-icon label {
+.sc-list-item-view.has-checkbox.has-icon label {
 	left: 44px;
-}
-
-.sc-list-item-view.has-checkbox.has-icon.has-disclosure label {
-	left: 64px;
 }
 
 /* @end */
@@ -61,7 +54,7 @@
 
 .sc-list-item-view img.disclosure {
 	position: absolute ;
-	left: 7px;
+	left: -11px;
 	top: 50%;
 	margin-top: -6px;
 	width: 14px;
@@ -104,13 +97,8 @@
 	margin-top: -9px;
 }
 
-.sc-list-item-view.has-checkbox img.icon,
-.sc-list-item-view.has-disclosure img.icon {
+.sc-list-item-view.has-checkbox img.icon {
 	left: 25px;
-}
-
-.sc-list-item-view.has-checkbox.has-disclosure img.icon {
-	left: 45px;
 }
 
 /* @end */
@@ -131,10 +119,6 @@
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	background-color: #d0d0d0 ;
-}
-
-.sc-list-item-view.has-disclosure .sc-checkbox-view {
-	left: 25px;
 }
 
 .sc-list-item-view.sel .sc-checkbox-view {

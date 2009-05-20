@@ -123,7 +123,7 @@ SC.ListItemView = SC.View.extend(
     left edge of the list item will be indented by this amount for each 
     outline level.
   */
-  outlineIndent: 14,
+  outlineIndent: 16,
   
   /**
     Outline level for this list item.  Usually set by the collection view.
@@ -159,7 +159,7 @@ SC.ListItemView = SC.View.extend(
     
     // outline level wrapper
     working = context.begin("div").addClass("sc-outline");
-    if (level>0 && indent>0) working.addStyle("left", indent*level);
+    if (level>=0 && indent>0) working.addStyle("left", indent*(level+1));
     
     // handle disclosure triangle
     value = this.get('disclosureState');
@@ -167,6 +167,7 @@ SC.ListItemView = SC.View.extend(
       this.renderDisclosure(working, value);
       context.addClass('has-disclosure');
     }
+    
     
     // handle checkbox
     key = this.getDelegateProperty('contentCheckboxKey', del) ;
