@@ -101,3 +101,29 @@ test("Test if Request body is being auto-serializing to JSON", function() {
   equals(jsonEncoded, '{"content":"garbage"}', "The json object passed in send should be encoded and set as the body");
 });
 
+
+test("Test Multiple Asynchronous GET Request - two immediate, and two in serial", function() {
+  var requestCount = 3;
+  var responseCount = 0;
+
+  var observer = function(response) {
+    responseCount++;
+    if(requestCount<=7) {
+      SC.Request.getUrl(url).addObserver("response", observer).send();
+      requestCount++;
+    }
+  };
+  
+  
+  SC.Request.getUrl(url).notify(this, observer).send();
+  SC.Request.getUrl(url).notify(this, observer).send();
+  SC.Request.getUrl(url).notify(this, observer).send();
+  
+  stop() ; // stops the test runner
+  setTimeout( function(){
+    equals(requestCount, 8, "requestCount should be 4");
+    equals(responseCount, 6, "responseCount should be 4");
+    window.start() ; // starts the test runne
+  }, 3000);
+});
+
