@@ -201,7 +201,7 @@ SC.AlertPane = SC.PanelPane.extend({
   */
   buttonThreeWrapper: SC.outlet('contentView.childViews.2'),
   
-  layout: { centerX: 0, width: 452, top: 100 },
+  layout: { centerX: 0, width: 502, top: 55 },
 
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
@@ -227,7 +227,7 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
 
       SC.View.extend({
-        layout: { bottom: 13, height: 24, right: 18, width: 416 },
+        layout: { bottom: 13, height: 24, right: 18, width: 466 },
         childViews: ['cancelButton', 'okButton'],
         classNames: ['textAlignRight'],
         cancelButton : SC.ButtonView.extend({
