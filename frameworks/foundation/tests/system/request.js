@@ -87,3 +87,17 @@ test("Test Synchronous GET Request, auto-deserializing JSON", function() {
   ok(SC.$ok(contents), 'contents should not be an error (contents = %@)'.fmt(contents));
   if (SC.$ok(contents)) same(contents, {"message": "Yay!"}, 'contents should have message') ;
 });
+
+
+test("Test if Request body is being auto-serializing to JSON", function() {
+  request.set("isAsynchronous", false);
+  request.set("isJSON", true);
+  var objectToPost={"content": "garbage"};
+  
+  request.send(objectToPost);
+  var jsonEncoded = request.get('body');
+  var contents = request.get("response");
+  
+  equals(jsonEncoded, '{"content":"garbage"}', "The json object passed in send should be encoded and set as the body");
+});
+
