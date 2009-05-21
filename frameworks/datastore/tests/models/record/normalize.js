@@ -95,7 +95,7 @@ test("normalizing a pre-populated record" ,function() {
   
   ok(sameValue, 'hash value of firstName after normalizing is 123 string');
   ok(sameValue, 'hash value of relatedTo should be 1');
-  ok(computedValues.indexOf(relatedToComputed)!==-1, 'hash value of relatedTo should be foo1, foo2 or foo3');
+  ok(computedValues.indexOf(relatedToComputed)!==-1, 'hash value of relatedToComputed should be either foo1, foo2 or foo3');
   
   equals(rec.get('firstName'), '123', 'get value of firstName after normalizing is 123 string');
   

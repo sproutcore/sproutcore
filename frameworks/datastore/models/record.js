@@ -260,8 +260,9 @@ SC.Record = SC.Object.extend(
   
   normalize: function(includeNull) {
     
-    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id'), recHash;
-    var store = this.get('store'), storeKey = this.get('storeKey'), attrValue, isRecord;
+    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id'), 
+      recHash, store = this.get('store'), storeKey = this.get('storeKey'), 
+      attrValue, isRecord, defaultVal;
     
     dataHash[primaryKey] = recordId;
     
@@ -283,7 +284,16 @@ SC.Record = SC.Object.extend(
           }
           else {
             // or write default
-            dataHash[key] = this[key].get('defaultValue');
+            defaultVal = this[key].get('defaultValue');
+            if(SC.typeOf(defaultVal)===SC.T_FUNCTION) {
+              // computed
+              dataHash[key] = defaultVal();
+            }
+            else {
+              // plain value
+              dataHash[key] = defaultVal;
+            }
+            
           }
 
         }

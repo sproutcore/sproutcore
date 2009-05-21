@@ -647,28 +647,28 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     h2. Query Keys
     
-    The kind of query key you pass is generally determined by the type of 
-    persistent stores you hook up for your application.  Most stores, however,
-    will accept an SC.Record subclass as the query key.  This will return 
+    The kind of fetchKey you pass is generally determined by the type of 
+    persistent stores you hook up for your application. Most stores, however,
+    will accept an SC.Record subclass as the fetchKey. It is up to your data source
+    to figure out which storeKeys to return based on the fetchKey. This will return 
     a RecordArray matching all instances of that class as is relevant to your
     application, for instance: findAll(MyApp.MyModel)
     
-    You can also pass an SC.Query object as your queryKey, for instance:
+    You can also pass an SC.Query object as your fetchKey, for instance:
     var q = SC.Query.create({ recordType: MyApp.MyModel, 
       conditions: "firstName = 'John'", orderBy: "lastName ASC"});
     var records = MyApp.store.findAll(q);
     
-    In your dataSource fetch() method you can return either a store key 
-    array, a sparse array, or an SC.Query object.
-    
-    If an SC.Query is returned from the data source, the record array created in
+    If an SC.Query is given as fetchKey, the record array created in
     findAll() will automatically update when records are added, changed, 
-    or removed from the store.
+    or removed from the store. When a fetchKey is given, you do not have to 
+    return anything from the data source as you are from then on delegating
+    the responsibility to keep the record array updated to the store.
     
     Once you retrieve a RecordArray, you can filter the results even further
     by using the filter() method, which may issue even more specific requests.
     
-    @param {Object|SC.Query} queryKey key describing the type of records to 
+    @param {Object|SC.Query} fetchKey key describing the type of records to 
       fetch or a predefined SC.Query object
     @param {Hash} params optional additional parameters to pass along to the
       data source
@@ -676,38 +676,29 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       within a given record array
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  findAll: function(queryKey, params, recordArray) { 
-    var _store = this, source = this.get('dataSource'), ret, storeKeys, 
+  findAll: function(fetchKey, params, recordArray) { 
+    var _store = this, source = this.get('dataSource'), ret = [], storeKeys, 
       sourceRet, cacheKey;
     
     if(recordArray) {
       // giving a recordArray will circumvent the data source
       // typically happens when chaining findAll statements
-      storeKeys = SC.Query.containsRecords(queryKey, recordArray, _store);
+      storeKeys = SC.Query.containsRecords(fetchKey, recordArray, _store);
     }
     else if (source) {
-      // call fetch() on the data source. It can respond with either
-      // a storeKey array, a sparse array or a SC.Query object.
-      sourceRet = source.fetch.call(source, this, queryKey, params);
-      
-      if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
+      // call fetch() on the data source.
+      sourceRet = source.fetch.call(source, this, fetchKey, params);
+      if(SC.typeOf(sourceRet)===SC.T_ARRAY) {
         storeKeys = sourceRet;
       }
-      else if(SC.instanceOf(sourceRet, SC.Query)) {
-        queryKey = sourceRet;
-      }
-      else {
-        throw("Data source fetch() has to return array or SC.Query object");
-      }
-      
     }
     
     // if SC.Query returned from data source or no data source was given 
-    if(!storeKeys && SC.instanceOf(queryKey, SC.Query)) {
-      storeKeys = SC.Query.containsStoreKeys(queryKey, null, _store);
+    if(!storeKeys && SC.instanceOf(fetchKey, SC.Query)) {
+      storeKeys = SC.Query.containsStoreKeys(fetchKey, null, _store);
     }
     
-    if(storeKeys) ret = this.recordArrayFromStoreKeys(storeKeys, queryKey, _store);
+    ret = this.recordArrayFromStoreKeys(storeKeys, fetchKey, _store);
     
     return ret ;
   },
@@ -717,22 +708,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     cache if records are already cached, if not store them for reuse.
     
     @param {Array} storeKeys added to returned record array
+    @param {Object|SC.Query} fetchKey
     @param {SC.Store} _store
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   
-  recordArrayFromStoreKeys: function(storeKeys, queryKey, _store) {
+  recordArrayFromStoreKeys: function(storeKeys, fetchKey, _store) {
     var ret, isQuery, cacheKey;
     
     // if an array was provided, see if a wrapper already exists for 
     // this store.  Otherwise create it
-    cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
+    cacheKey = SC.keyFor('__records__', [SC.guidFor(storeKeys), SC.guidFor(fetchKey)].join('_'));
     ret = this[cacheKey];
     if (!ret) {
-      ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
+      ret = SC.RecordArray.create({store: _store, queryKey: fetchKey, storeKeys: storeKeys});
       // store reference to record array if SC.Query so we can notify it
       // when store changes
-      if(SC.instanceOf(queryKey, SC.Query)) {
+      if(SC.instanceOf(fetchKey, SC.Query)) {
         if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
         this.recordArraysWithQuery.push(ret);
       }
