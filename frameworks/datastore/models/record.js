@@ -329,9 +329,33 @@ SC.Record = SC.Object.extend(
   // PRIVATE
   //
   
+  /** @private
+    Creates string representation of record, with status.
+    
+    @returns {String}
+  */
+  
   toString: function() {
     var attrs = this.get('attributes');
-    return "%@(%@)".fmt(this.constructor.toString(), SC.inspect(attrs));
+    return "%@(%@) %@".fmt(this.constructor.toString(), SC.inspect(attrs), this.statusString());
+  },
+  
+  /** @private
+    Creates string representation of record, with status.
+    
+    @returns {String}
+  */
+  
+  statusString: function() {
+    var ret = [], status = this.status();
+    
+    for(prop in SC.Record) {
+      if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
+        ret.push(prop);
+      }
+    }
+    
+    return ret.join(" ");
   }
       
 }) ;
@@ -509,27 +533,6 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   findAll: function(store, params) {
     return store.findAll(this, params);
-  },
-  
-  /**
-    Creates a string representation of the status. This could be one or
-    multiple statuses. This is a helper method and is meant for debug/output
-    purposes only.
-    
-    @param {Number} status (as returned from store.readStatus() )
-    @returns {String}
-  */
-  
-  statusToString: function(status) {
-    var ret = [];
-    
-    for(prop in SC.Record) {
-      if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
-        ret.push(prop);
-      }
-    }
-    
-    return ret.join(" ");
   }
   
 }) ;
