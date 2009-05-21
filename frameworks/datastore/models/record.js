@@ -297,7 +297,8 @@ SC.Record = SC.Object.extend(
           }
 
         }
-        else if(includeNull) {
+        
+        if(includeNull && !dataHash[key]) {
           dataHash[key] = null;
         }
         
