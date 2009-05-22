@@ -6,7 +6,6 @@
 // ==========================================================================
 
 sc_require('mixins/collection_view_delegate') ;
-sc_require('mixins/collection_content') ;
 sc_require('views/list_item');
 
 /**
