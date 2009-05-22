@@ -5,9 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
-require('foundation/date');
-require('foundation/string') ;  
+sc_require('core') ;
 
 /** @namespace SC.Benchmark
 

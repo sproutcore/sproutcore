@@ -368,7 +368,6 @@ test("removing object at top level with children", function() {
 // 
 
 test("adding an group to end", function() {
-  
   var expected = content.slice();
   
   SC.run(function() { obs.pushObject(extrachild); });

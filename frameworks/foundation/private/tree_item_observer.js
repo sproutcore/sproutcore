@@ -547,7 +547,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       item     = children ? children.objectAt(cur) : null;
       if (item) this._expand(item, this.get('item'), cur);
     }
-    console.log('contentIndexExpand(%@, %@, %@)'.fmt(view,content,idx));
   },
   
   /**
@@ -593,7 +592,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
       item     = children ? children.objectAt(cur) : null;
       if (item) this._collapse(item, this.get('item'), cur);
     }
-    console.log('contentIndexCollapse(%@, %@, %@)'.fmt(view,content,idx));
   },
   
   // ..........................................................
@@ -676,7 +674,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     observering and invalidate any child observers.
   */
   destroy: function() {
-    console.log('%@.destroy'.fmt(this));
     this.invalidateBranchObserversAt(0);
     this._objectAtCache = null ;
     

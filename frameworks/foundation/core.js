@@ -5,6 +5,31 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+/**
+  Indicates that the collection view expects to accept a drop ON the specified
+  item.
+*/
+SC.DROP_ON = 0x01 ;
+
+/**
+  Indicates that the collection view expects to accept a drop BEFORE the 
+  specified item.
+*/
+SC.DROP_BEFORE = 0x02 ;
+
+/**
+  Indicates that the collection view expects to accept a drop AFTER the
+  specified item.  This is treated just like SC.DROP_BEFORE is most views
+  except for tree lists.
+*/
+SC.DROP_AFTER = 0x04 ;
+
+/**
+  Indicates that the collection view want's to know which operations would 
+  be allowed for either drop operation.
+*/
+SC.DROP_ANY = 0x07 ;
+
 SC.mixin(/** @scope SC */ {
   
   /**
