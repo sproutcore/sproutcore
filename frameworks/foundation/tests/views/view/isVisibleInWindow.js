@@ -99,4 +99,15 @@ test("layoutChildViewsIfNeeded should not be invoked even if layer needs layout 
 	equals(callCount, 1, 'layoutChildViews should exec now b/c isVisibleInWindow is YES');
 });
 
+test("setting isVisible to NO should trigger a layer update to hide the view", function() {
   
+  SC.RunLoop.begin();
+  pane.appendChild(view);
+  SC.RunLoop.end();
+  
+  SC.RunLoop.begin();
+  view.set('isVisible', NO);
+  SC.RunLoop.end();
+  
+  ok(view.renderContext(view.get('layer')).classNames().indexOf('hidden') >= 0, "layer should have the 'hidden' class");
+});

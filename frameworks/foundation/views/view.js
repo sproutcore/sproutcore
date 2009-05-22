@@ -279,6 +279,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         if (this.get('childViewsNeedLayout')) {
           this.invokeOnce(this.layoutChildViewsIfNeeded);
         }
+        
+      // if we just became invisible, force an update to hide the layer
+      } else {
+        var that = this;
+        this.set('layerNeedsUpdate', YES);
+        this.invokeOnce(function() { that.updateLayerIfNeeded(YES) });
       }
       
       // if we were firstResponder, resign firstResponder also if no longer
