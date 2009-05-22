@@ -228,6 +228,10 @@ SC.ObjectController = SC.Controller.extend(
       
     // setter
     } else {
+      if (!this.get('isEditable')) {
+        throw "%@.%@ is not editable".fmt(this,key);
+      }
+      
       if (content.isEnumerable) content.setEach(key, value);
       else if (content.isObservable) content.set(key, value);
       else content[key] = value;

@@ -48,6 +48,11 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
 SC.Array = {
   
   /**
+    Walk like a duck - use isSCArray to avoid conflicts
+  */
+  isSCArray: YES,
+  
+  /**
     @field {Number} length
     
     Your array must support the length property.  Your replace methods should
