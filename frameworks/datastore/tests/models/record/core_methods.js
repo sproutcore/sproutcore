@@ -25,7 +25,6 @@ module("SC.Record core methods", {
   }
 });
 
-test("statusToString", function() {
-  var status = MyApp.store.readStatus(MyApp.foo);
-  equals(SC.Record.statusToString(status), 'EMPTY', 'status string should be EMPTY');
+test("statusString", function() {
+  equals(MyApp.foo.statusString(), 'READY_NEW', 'status string should be READY_NEW');
 });
