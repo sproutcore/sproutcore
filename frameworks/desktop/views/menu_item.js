@@ -14,7 +14,7 @@ SC.BENCHMARK_MENU_ITEM_RENDER = YES ;
   @extends SC.ButtonView
   @since SproutCore 1.0
 */
-SC.MenuItemView = SC.ButtonView.extend(
+SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
   classNames: ['sc-menu-item'],
   tagName: 'div',
@@ -167,8 +167,8 @@ SC.MenuItemView = SC.ButtonView.extend(
   */
   displayProperties: ['contentValueKey', 'contentIconKey', 'shortCutKey',
                   'contentIsBranchKey','isCheckboxChecked','itemHeight',
-                   'subMenu'],
-
+                   'subMenu','isEnabled','content'],
+  contentDisplayProperties: 'title value icon separator action checkbox shortcut branchItem subMenu'.w(),
   /**
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
@@ -183,7 +183,6 @@ SC.MenuItemView = SC.ButtonView.extend(
       var bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey) ;
     }
-	
     var content = this.get('content') ;
     var del = this.displayDelegate ;
     var key, val ;
@@ -193,7 +192,9 @@ SC.MenuItemView = SC.ButtonView.extend(
     var itemHeight = this.get('itemHeight') || 20 ;
     this.set('itemWidth',itemWidth) ;
     this.set('itemHeight',itemHeight) ;
-   
+    
+    if(!this.get('isEnabled'))
+      context.addClass('disabled') ;
     //handle seperator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty('isSeparatorKey', del) ;
@@ -201,9 +202,10 @@ SC.MenuItemView = SC.ButtonView.extend(
     if (val) {
       ic = ic.begin('span').addClass('separator') ;
       ic = ic.end() ;
+      if (SC.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
       return ;
     } else {
-      //handle checkbox
+      // handle checkbox
       key = this.getDelegateProperty('contentCheckboxKey', del) ;
       if (key) {
         val = content ? (content.get ? content.get(key) : content[key]) : NO ;
