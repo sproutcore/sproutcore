@@ -156,7 +156,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type Boolean
   */
   canRemoveContent: function() {
-    return this.get('isEditable') && this.get('hasContent');
+    var content = this.get('content');
+    if (!content || !this.get('isEditable') || !this.get('hasContent')) return NO ;
+    if (content.isEnumerable && (SC.typeOf(content.removeObject) !== SC.T_FUNCTION)) return NO ;
+    return YES;
   }.property('content', 'isEditable', 'hasContent'),
   
   /**
@@ -187,7 +190,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   */
   canAddContent: function() {
     var content = this.get('content');
-    return content && this.get('isEditable') && content.isEnumerable;
+    return content && this.get('isEditable') && content.isEnumerable && (SC.typeOf(content.addObject) === SC.T_FUNCTION);
   }.property('content', 'isEditable'),
   
   /**
@@ -209,9 +212,49 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   // 
   
   /**
+    Adds an object to the array.  If the content is ordered, this will add the 
+    object to the end of the content array.  The content is not ordered, the
+    location depends on the implementation of the content.
+    
+    If the source content does not support adding an object, then this method 
+    will throw an exception.
+    
+    @param {Object} object the object to add
+    @returns {SC.ArrayController} receiver
   */
   addObject: function(object) {
+    if (!this.get('canAddContent')) throw "%@ cannot add content".fmt(this);
+    
+    var content = this.get('content');
+    if (content.isSCArray) content.pushObject(object);
+    else if (content.addObject) content.addObject(obj);
+    else throw "%@.content does not support addObject".fmt(this);
+    
+    return this;
   },
+  
+  /**
+    Removes the passed object from the array.  If the underyling content 
+    is a single object, then this simply sets the content to null.  Otherwise
+    it will call removeObject() on the content.
+    
+    Also, if destroyOnRemoval is YES, this will actually destroy the object.
+    
+    @param {Object} object the object to remove
+    @returns {SC.ArrayController} receiver
+  */
+  removeObject: function(object) {
+    if (!this.get('canRemoveContent')) {
+      throw "%@ cannot remove content".fmt(this);
+    }
+    
+    var content = this.get('content');
+    if (content.isEnumerable) content.removeObject(object);
+    else this.set('content', null);
+    
+    if (this.get('destroyOnRemoval') && object.destroy) object.destroy();
+    return this; 
+  }
   
   // ..........................................................
   // SC.ARRAY SUPPORT

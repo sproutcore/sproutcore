@@ -6,7 +6,7 @@
 // ==========================================================================
 
 sc_require('core') ;
-
+ 
 /** @namespace SC.Benchmark
 
   This bit of meta-programming magic can install a benchmark handler on any
