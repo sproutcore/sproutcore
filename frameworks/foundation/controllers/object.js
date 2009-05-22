@@ -94,15 +94,8 @@ SC.ObjectController = SC.Controller.extend(
     @type Boolean
   */
   hasContent: function() {
-    var content = this.get('content'),
-        len;
-    if (content && content.get('isEnumerable')) {
-      len = content.get('length');
-      if (len === 1) content = content.firstObject();
-      else if (len===0 || !this.get('allowsMultipleContent')) content = null;
-    }
-    return !SC.none(content);
-  }.property('content', 'allowsMultipleContent'),
+    return !SC.none(this.get('observableContent'));
+  }.property('observableContent'),
   
   /**
     Makes a controller editable or not editable.  The SC.Controller class 
@@ -211,13 +204,27 @@ SC.ObjectController = SC.Controller.extend(
     
     // for all other keys, just pass through to the observable object if 
     // there is one.  Use getEach() and setEach() on enumerable objects.
-    var content = this.get('observableContent');
+    var content = this.get('observableContent'), loc, cur, isSame;
     if (content===null || content===undefined) return undefined; // empty
 
     // getter...
     if (value === undefined) {
-      if (content.isEnumerable) value = content.getEach(key);
-      else value = (content.isObservable) ? content.get(key) : content[key];
+      if (content.isEnumerable) {
+        value = content.getEach(key);
+
+        // iterate over array to see if all values are the same. if so, then
+        // just return that value
+        loc = value.get('length');
+        if (loc>0) {
+          isSame = YES;
+          cur = value.objectAt(0);
+          while((--loc > 0) && isSame) {
+            if (cur !== value.objectAt(loc)) isSame = NO ;
+          }
+          if (isSame) value = cur;
+        } else value = undefined; // empty array.
+
+      } else value = (content.isObservable) ? content.get(key) : content[key];
       
     // setter
     } else {
@@ -258,12 +265,12 @@ SC.ObjectController = SC.Controller.extend(
     // stop observing last item -- if enumerable stop observing set
     if (last) {
       if (last.isEnumerable) last.removeObserver('[]', this, efunc);
-      else last.removeObserver('*', this, func);
+      else if (last.isObservable) last.removeObserver('*', this, func);
     }
     
     if (cur) {
       if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
-      else cur.addObserver('*', this, func);
+      else if (cur.isObservable) cur.addObserver('*', this, func);
     }
 
     // notify!
@@ -287,7 +294,7 @@ SC.ObjectController = SC.Controller.extend(
     // stop observing each old item
     if (set) {
       set.forEach(function(item) {
-        item.removeObserver('*', this, func);
+        if (item.isObservable) item.removeObserver('*', this, func);
       }, this);
       set.clear();
     }
@@ -298,7 +305,7 @@ SC.ObjectController = SC.Controller.extend(
       cur.forEach(function(item) {
         if (set.contains(item)) return ; // nothing to do
         set.add(item);
-        item.addObserver('*', this, func);
+        if (item.isObservable) item.addObserver('*', this, func);
       }, this); 
     } else set = null;
     

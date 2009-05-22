@@ -5,16 +5,20 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-var content, controller;
+var src, content, controller;
 
 // ..........................................................
-// SINGLE OBSERVABLE OBJECT
+// SINGLE OBSERVABLE OBJECT IN SET
 // 
 
-module("SC.ObjectController - single_case - OBSERVABLE OBJECT", {
+module("SC.ObjectController - single_enumerable_case - OBSERVABLE OBJECT", {
   setup: function() {
-    content = SC.Object.create({ foo: "foo1", bar: "bar1" });
-    controller = SC.ObjectController.create({ content: content });
+    src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
+    content    = SC.Set.create().add(src); // use generic enumerable
+    controller = SC.ObjectController.create({ 
+      content: content,
+      allowsMultipleContent: NO 
+    });
   },
   
   teardown: function() {
@@ -32,9 +36,9 @@ test("setting any unknown value should pass through", function() {
   equals(controller.set("bar", "EDIT"), controller, 'controller.set(bar, EDIT) should return self');
   equals(controller.set("baz", "EDIT"), controller, 'controller.set(baz, EDIT) should return self');
   
-  equals(content.get("foo"), "EDIT", 'controller.get(foo)');
-  equals(content.get("bar"), "EDIT", 'controller.get(bar)');
-  equals(content.get("baz"), "EDIT", 'controller.get(bar)');
+  equals(src.get("foo"), "EDIT", 'src.get(foo)');
+  equals(src.get("bar"), "EDIT", 'src.get(bar)');
+  equals(src.get("baz"), "EDIT", 'src.get(bar)');
 });
 
 test("changing a property on the content", function() {
@@ -43,14 +47,15 @@ test("changing a property on the content", function() {
 
   equals(controller.get("foo"), "foo1", "controller.get(foo) before edit should have original value");
 
-  content.set("foo", "EDIT");
+  src.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
   equals(callCount, 1, 'observer on controller should have fired');
 });
 
 test("changing the content from one to another", function() {
   var callCount = 0 ;
-  var content2 = SC.Object.create({ foo: "foo2", bar: "bar2" });
+  var src2 = SC.Object.create({ foo: "foo2", bar: "bar2" });
+  var content2 = [src2]; // use another type of enumerable
   controller.addObserver("foo", function() { callCount++; });
 
   equals(controller.get("foo"), "foo1", "controller.get(foo) before edit should have original value");
@@ -61,7 +66,7 @@ test("changing the content from one to another", function() {
   equals(callCount, 1, 'observer on controller should have fired');
 
   callCount = 0 ;
-  content2.set("foo", "EDIT");
+  src2.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
   equals(callCount, 1, 'observer on controller should have fired');
   
@@ -69,33 +74,6 @@ test("changing the content from one to another", function() {
   content.set("foo", "BAR");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit of non-content object should not change value");
   equals(callCount, 0, 'observer on controller should NOT have fired');
-});
-
-test("changing the content from one single to null and back", function() {
-  var callCount = 0 ;
-  controller.addObserver("foo", function() { callCount++; });
-
-  equals(controller.get("foo"), "foo1", "controller.get(foo) before edit should have original value");
-
-  controller.set("content", null);
-
-  equals(controller.get("foo"), undefined, "controller.get(foo) after content change should be empty");
-  equals(callCount, 1, 'observer on controller should have fired');
-
-  callCount = 0;
-  content.set("foo", "BAR");
-  equals(controller.get("foo"), undefined, "controller.get(foo) after edit of non-content object should not change value");
-  equals(callCount, 0, 'observer on controller should NOT have fired');
-
-  callCount = 0 ;
-  controller.set("content", content);
-  equals(callCount, 1, 'observer on controller should have fired');
-
-  callCount = 0 ;
-  content.set("foo", "EDIT");
-  equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
-  equals(callCount, 1, 'observer on controller should have fired');
-  
 });
 
 test("hasContent", function() {
@@ -114,15 +92,18 @@ test("hasContent", function() {
   ok(callCount > 0, "hasContent observer should fire");
 });
 
-
 // ..........................................................
-// SINGLE NON-OBSERVABLE OBJECT
+// SINGLE OBSERVABLE OBJECT WITH ALLOWS MULTIPLE YES
 // 
 
-module("SC.ObjectController - single_case - NON-OBSERVABLE OBJECT", {
+module("SC.ObjectController - single_enumerable_case - ALLOWS MULTIPLE", {
   setup: function() {
-    content = { foo: "foo1", bar: "bar1" };
-    controller = SC.ObjectController.create({ content: content });
+    src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
+    content    = SC.Set.create().add(src); // use generic enumerable
+    controller = SC.ObjectController.create({ 
+      content: content,
+      allowsMultipleContent: YES 
+    });
   },
   
   teardown: function() {
@@ -140,9 +121,9 @@ test("setting any unknown value should pass through", function() {
   equals(controller.set("bar", "EDIT"), controller, 'controller.set(bar, EDIT) should return self');
   equals(controller.set("baz", "EDIT"), controller, 'controller.set(baz, EDIT) should return self');
   
-  equals(content.foo, "EDIT", 'content.foo');
-  equals(content.bar, "EDIT", 'content.bar');
-  equals(content.baz, "EDIT", 'content.baz');
+  equals(src.get("foo"), "EDIT", 'src.get(foo)');
+  equals(src.get("bar"), "EDIT", 'src.get(bar)');
+  equals(src.get("baz"), "EDIT", 'src.get(bar)');
 });
 
 test("changing a property on the content", function() {
@@ -151,14 +132,15 @@ test("changing a property on the content", function() {
 
   equals(controller.get("foo"), "foo1", "controller.get(foo) before edit should have original value");
 
-  content.foo = "EDIT";
+  src.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
-  equals(callCount, 0, 'observer on controller should not fire because this is not observable');
+  equals(callCount, 1, 'observer on controller should have fired');
 });
 
 test("changing the content from one to another", function() {
   var callCount = 0 ;
-  var content2 = { foo: "foo2", bar: "bar2" };
+  var src2 = SC.Object.create({ foo: "foo2", bar: "bar2" });
+  var content2 = [src2]; // use another type of enumerable
   controller.addObserver("foo", function() { callCount++; });
 
   equals(controller.get("foo"), "foo1", "controller.get(foo) before edit should have original value");
@@ -168,11 +150,15 @@ test("changing the content from one to another", function() {
   equals(controller.get("foo"), "foo2", "controller.get(foo) after content should contain new content");
   equals(callCount, 1, 'observer on controller should have fired');
 
-  content2.foo = "EDIT";
+  callCount = 0 ;
+  src2.set("foo", "EDIT");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit should have updated value");
+  equals(callCount, 1, 'observer on controller should have fired');
   
-  content.foo = "BAR";
+  callCount = 0;
+  content.set("foo", "BAR");
   equals(controller.get("foo"), "EDIT", "controller.get(foo) after edit of non-content object should not change value");
+  equals(callCount, 0, 'observer on controller should NOT have fired');
 });
 
 test("hasContent", function() {
