@@ -137,6 +137,9 @@ SC.LOG_OBSERVERS = NO ;
 */
 SC.Observable = {
 
+  /** walk like that ol' duck */
+  isObservable: YES,
+  
   /**
     Determines whether observers should be automatically notified of changes
     to a key.
