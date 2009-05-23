@@ -207,6 +207,75 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   }.property('content', 'allowSingleContent'),
   
 
+  /**  
+    The actual array this controller is managing.  You should not usually
+    access this property directly; it is mostly used internally.  
+    
+    Most of the time this property is the same as the content property, but 
+    it may differ on occasion.  Particularly if you set the content property
+    to a single object.  Also, if you set the orderBy property this will 
+    represent the ordered array.
+    
+    @property
+    @type SC.Array
+  */
+  observableContent: function() {
+    var content = this.get('content'),
+        orderBy = this.get('orderBy'),
+        ret, func, t, len;
+    
+    if (!content) return null ; // nothing to do
+    if (!orderBy && content.isSCArray) return content; // no wrap
+    if (!orderBy) {
+      throw "%@.orderBy is required for unordered content".fmt(this);     
+    }
+    
+    // build array - then sort it
+    switch(SC.typeOf(orderBy)) {
+    case SC.T_STRING:
+      orderBy = [orderBy];
+      break;
+    case SC.T_FUNCTION:
+      func = orderBy ;
+      break;
+    case SC.T_ARRAY:
+      break;
+    default:
+      throw "%@.orderBy must be Array, String, or Function".fmt(this);
+    }
+    
+    len = orderBy.get('length');
+    
+    // generate comparison function if needed - use orderBy
+    if (!func) {
+      func = function(a,b) {
+        var idx=0, status=0, key, aValue, bValue;
+        for(idx=0;(idx<len)&&(status===0);idx++) {
+          key = orderBy.objectAt(key);
+        
+          if (a) aValue = a ;
+          else if (a.isObservable) aValue = a.get(key);
+          else aValue = a[key];
+
+          if (b) bValue = b ;
+          else if (b.isObservable) bValue = b.get(key);
+          else bValue = b[key];
+        
+          status = SC.compare(aValue, bValue);
+        }
+        return ret ; 
+      };
+    }
+
+    ret = [];
+    content.forEach(function(o) { ret.push(o); });
+    ret.sort(func);
+    
+    func = null ; // avoid memory leaks
+    return ret ;
+    
+  }.property('content', 'allowsSingleContent', 'orderBy').cacheable(),
+
   // ..........................................................
   // METHODS
   // 
@@ -254,14 +323,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     if (this.get('destroyOnRemoval') && object.destroy) object.destroy();
     return this; 
-  }
+  },
   
   // ..........................................................
   // SC.ARRAY SUPPORT
   // 
-  
+
   length: function() {
-    
   }.property(),
   
   objectAt: function(idx) {
