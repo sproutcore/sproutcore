@@ -26,6 +26,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // 
   
   /**
+    The type of the input tag. Default is 'text', can be 'password', for example.
+  */
+  type: 'text',
+  
+  /**
     The hint to display while the field is not active.  Can be a loc key.
   */  
   hint: null,
@@ -50,6 +55,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
     var name = SC.guidFor(this);
     var hint = this.get('hint');
+    var type = this.get('type');
 
     // always have at least an empty string
     var v = this.get('fieldValue');
@@ -60,7 +66,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     if (firstTime) {
       context.push('<span class="sc-hint">', hint, '</span>');
-      context.push('<input type="text" name="%@" %@ value="%@" />'.fmt(name, disabled, v));
+      context.push('<input type="%@" name="%@" %@ value="%@" />'.fmt(type, name, disabled, v));
       
     // if this is not first time rendering, update the hint itself since we
     // can't just blow away the text field like we might most other controls
