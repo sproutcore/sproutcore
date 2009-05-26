@@ -273,7 +273,7 @@ SC.MenuPane = SC.PickerPane.extend(
                                               isCheckbox: cur[6], isShortCut: cur[7],
                                               menuItemNumber: idx, isBranch: cur[8],
                                               itemHeight: cur[9], subMenu: cur[10], 
-                                              keyEquivalent: cur[11], target:cur[12] }) ;                         
+                                              keyEquivalent: cur[11], target: cur[12] }) ;                         
       }
     }
     this.set('menuHeight',menuHeight);
@@ -394,6 +394,8 @@ SC.MenuPane = SC.PickerPane.extend(
       var itemKeyEquivalent = item.get('keyEquivalent') ;
       var itemTarget = item.get('target') ;
       var itemWidth = this.get('itemWidth') ;
+      //var itemTarget = this.get('itemTarget') ;
+      var itemTarget = item.get('target');
       var itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
