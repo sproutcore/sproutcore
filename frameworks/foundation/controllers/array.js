@@ -20,15 +20,6 @@ require('mixins/selection_support');
   "arrangedObjects" of the array controller to the CollectionView's "content"
   property.  This will automatically display the array in the collection view.
 
-  h2. Grouping
-  
-  You can also optionally turn on grouping for your array by setting the 
-  groupBy property on the ArrayController to a non-null value.  Note that when
-  you turn on grouping, the ArrayController will need to search your entire
-  content array to determine the groups.  If you have a large set of content,
-  this can cause a performance problem.  Instead you may want to manage your
-  groups manually by using a TreeController. 
-  
   @extends SC.Controller
   @extends SC.Array
   @extends SC.SelectionSupport
@@ -97,20 +88,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type String|Array|Function
   */
   orderBy: null,
-  
-  /**
-    Used to group the array. 
-    
-    If you set this property with a key name, then the ArrayController will
-    automatically generate a tree of groups for display in a CollectionView.
-    You can get the group tree from the groups property, which will only be
-    non-null when this property is set.
-    
-    @property
-    @type String
-  */
-  groupBy: null,
-  
     
   /**
     Set to YES if you want the controller to wrap non-enumerable content    
@@ -144,8 +121,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type SC.Array
   */
   arrangedObjects: function() {
-    
-  }.property('content', 'orderBy', 'groupBy').cacheable(),
+    return this;
+  }.property().cacheable(),
   
   /**
     Computed property indicates whether or not the array controller can 
@@ -156,10 +133,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type Boolean
   */
   canRemoveContent: function() {
-    var content = this.get('content');
-    if (!content || !this.get('isEditable') || !this.get('hasContent')) return NO ;
-    if (content.isEnumerable && (SC.typeOf(content.removeObject) !== SC.T_FUNCTION)) return NO ;
-    return YES;
+    var content = this.get('content'), ret;
+    ret = !!content && this.get('isEditable') && this.get('hasContent');
+    if (ret) {
+      return content.isEnumerable && 
+             (SC.typeOf(content.removeObject) === SC.T_FUNCTION);
+    } else return NO ;
   }.property('content', 'isEditable', 'hasContent'),
   
   /**
@@ -172,8 +151,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type Boolean
   */
   canReorderContent: function() {
-    var content = this.get('content');
-    return content && this.get('isEditable') && !this.get('orderBy') && content.isSCArray;
+    var content = this.get('content'), ret;
+    ret = !!content && this.get('isEditable') && !this.get('orderBy');
+    return ret && content.isSCArray;
   }.property('content', 'isEditable', 'orderBy'),
   
   /**
@@ -189,8 +169,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type Boolean
   */
   canAddContent: function() {
-    var content = this.get('content');
-    return content && this.get('isEditable') && content.isEnumerable && (SC.typeOf(content.addObject) === SC.T_FUNCTION);
+    var content = this.get('content'), ret ;
+    ret = content && this.get('isEditable') && content.isEnumerable;
+    if (ret) {
+      return (SC.typeOf(content.addObject) === SC.T_FUNCTION) || 
+             (SC.typeOf(content.pushObject) === SC.T_FUNCTION); 
+    } else return NO ;
   }.property('content', 'isEditable'),
   
   /**
@@ -203,78 +187,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   */
   hasContent: function() {
     var content = this.get('content');
-    return content && (content.isEnumerable||this.get('allowSingleContent'));
+    return !!content && 
+           (content.isEnumerable || this.get('allowSingleContent'));
   }.property('content', 'allowSingleContent'),
-  
-
-  /**  
-    The actual array this controller is managing.  You should not usually
-    access this property directly; it is mostly used internally.  
-    
-    Most of the time this property is the same as the content property, but 
-    it may differ on occasion.  Particularly if you set the content property
-    to a single object.  Also, if you set the orderBy property this will 
-    represent the ordered array.
-    
-    @property
-    @type SC.Array
-  */
-  observableContent: function() {
-    var content = this.get('content'),
-        orderBy = this.get('orderBy'),
-        ret, func, t, len;
-    
-    if (!content) return null ; // nothing to do
-    if (!orderBy && content.isSCArray) return content; // no wrap
-    if (!orderBy) {
-      throw "%@.orderBy is required for unordered content".fmt(this);     
-    }
-    
-    // build array - then sort it
-    switch(SC.typeOf(orderBy)) {
-    case SC.T_STRING:
-      orderBy = [orderBy];
-      break;
-    case SC.T_FUNCTION:
-      func = orderBy ;
-      break;
-    case SC.T_ARRAY:
-      break;
-    default:
-      throw "%@.orderBy must be Array, String, or Function".fmt(this);
-    }
-    
-    len = orderBy.get('length');
-    
-    // generate comparison function if needed - use orderBy
-    if (!func) {
-      func = function(a,b) {
-        var idx=0, status=0, key, aValue, bValue;
-        for(idx=0;(idx<len)&&(status===0);idx++) {
-          key = orderBy.objectAt(key);
-        
-          if (a) aValue = a ;
-          else if (a.isObservable) aValue = a.get(key);
-          else aValue = a[key];
-
-          if (b) bValue = b ;
-          else if (b.isObservable) bValue = b.get(key);
-          else bValue = b[key];
-        
-          status = SC.compare(aValue, bValue);
-        }
-        return ret ; 
-      };
-    }
-
-    ret = [];
-    content.forEach(function(o) { ret.push(o); });
-    ret.sort(func);
-    
-    func = null ; // avoid memory leaks
-    return ret ;
-    
-  }.property('content', 'allowsSingleContent', 'orderBy').cacheable(),
 
   // ..........................................................
   // METHODS
@@ -329,15 +244,41 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   // SC.ARRAY SUPPORT
   // 
 
+  /**
+    Compute the length of the array based on the observable content
+  */
   length: function() {
-  }.property(),
-  
+    var content = this._scac_observableContent();
+    return content ? content.get('length') : 0;
+  }.property().cacheable(),
+
+  /**
+    Returns the object at the specified index based on the observable content
+  */
   objectAt: function(idx) {
-    
+    var content = this._scac_observableContent();
+    return content ? content.objectAt(idx) : undefined ;    
   },
   
+  /**
+    Forwards a replace on to the content, but only if reordering is allowed.
+  */
   replace: function(start, amt, objects) {
+
+    // check for various conditions before a replace is allowed
+    if (!objects || objects.get('length')===0) {
+      if (!this.get('canRemoveContent')) {
+        throw "%@ cannot remove objects from the current content".fmt(this);
+      }
+    } else if (!this.get('canReorderContent')) {
+      throw "%@ cannot add or reorder the current content".fmt(this);
+    }    
     
+    // if we can do this, then just forward the change.  This should fire
+    // updates back up the stack, updating rangeObservers, etc.
+    var content = this.get('content'); // note: use content, not observable
+    if (content) content.replace(start, amt, objects);
+    return this; 
   },
   
   // ..........................................................
@@ -349,8 +290,179 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_contentDidChange();
   },
   
-  _scac_contentDidChange: function() {
+  /** @private
+    Cached observable content property.  Set to NO to indicate cache is 
+    invalid.
+  */
+  _scac_cached: NO,
+  
+  /**
+    @private
     
+    Returns the current array this controller is actually managing.  Usually
+    this should be the same as the content property, but sometimes we need to
+    generate something different because the content is not a regular array.
+    
+    Passing YES to the force parameter will force this value to be recomputed.
+  
+    @returns {SC.Array} observable or null
+  */
+  _scac_observableContent: function() {
+    var ret = this._scac_cached;
+    if (ret !== NO) return ret;
+    
+    var content = this.get('content'),
+        orderBy, func, t, len;
+    
+    // empty content
+    if (SC.none(content)) return this._scac_cached = [];
+
+    // wrap non-enumerables
+    if (!content.isEnumerable) {
+      ret = this.get('allowsSingleContent') ? [content] : [];
+      return (this._scac_cached = ret);
+    } 
+    
+    // no-wrap
+    orderBy = this.get('orderBy');
+    if (!orderBy) {
+      if (content.isSCArray) return (this._scac_cached = content) ;
+      else throw "%@.orderBy is required for unordered content".fmt(this);     
+    }
+    
+    // all remaining enumerables must be sorted.
+    
+    // build array - then sort it
+    switch(SC.typeOf(orderBy)) {
+    case SC.T_STRING:
+      orderBy = [orderBy];
+      break;
+    case SC.T_FUNCTION:
+      func = orderBy ;
+      break;
+    case SC.T_ARRAY:
+      break;
+    default:
+      throw "%@.orderBy must be Array, String, or Function".fmt(this);
+    }
+    
+    len = orderBy.get('length');
+    
+    // generate comparison function if needed - use orderBy
+    if (!func) {
+      func = function(a,b) {
+        var idx=0, status=0, key, aValue, bValue;
+        for(idx=0;(idx<len)&&(status===0);idx++) {
+          key = orderBy.objectAt(key);
+        
+          if (a) aValue = a ;
+          else if (a.isObservable) aValue = a.get(key);
+          else aValue = a[key];
+
+          if (b) bValue = b ;
+          else if (b.isObservable) bValue = b.get(key);
+          else bValue = b[key];
+        
+          status = SC.compare(aValue, bValue);
+        }
+        return ret ; 
+      };
+    }
+
+    ret = [];
+    content.forEach(function(o) { ret.push(o); });
+    ret.sort(func);
+    
+    func = null ; // avoid memory leaks
+    return (this._scac_cached = ret) ;
+  },
+  
+  /**
+    Whenever content changes, setup and teardown observers on the content
+    as needed.
+  */
+  _scac_contentDidChange: function() {
+
+    this._scac_cached = NO; // invalidate observable content
+    
+    var cur    = this._scac_observableContent(),
+        orders = !!this.get('orderBy'),
+        last   = this._scac_content,
+        oldlen = this._scac_length || 0,
+        ro     = this._scac_rangeObserver,
+        func   = this._scac_rangeDidChange,
+        efunc  = this._scac_enumerableDidChange,
+        newlen;
+        
+        
+    if (last === cur) return this; // nothing to do
+
+    // teardown old observer
+    if (last) {
+      if (ro && last.isSCArray) last.removeRangeObserver(ro);
+      else if (last.isEnumerable) last.removeObserver('[]', this, efunc);
+    }
+    
+    ro = null;
+    
+    // save new cached values 
+    this._scac_content = cur ;
+    
+    // setup new observers
+    // also, calculate new length.  do it manually instead of using 
+    // get(length) because we want to avoid computed an ordered array.
+    if (cur) {
+      if (!orders && cur.isSCArray) ro = cur.addRangeObserver(null,this,func);
+      else if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
+      newlen = cur.isEnumerable ? cur.get('length') : 1; 
+    } else newlen = SC.none(cur) ? 0 : 1;
+
+    this._scac_rangeObserver = ro;
+    
+
+    // finally, notify enumerable content has changed.
+    this._scac_length = newlen;
+    this.enumerableContentDidChange(0, newlen, newlen - oldlen);
+  },
+  
+  /**
+    Whenever enumerable content changes, need to regenerate the 
+    observableContent and notify that the range has changed.  
+    
+    IMPORTANT: Assumes content is not null and is enumerable
+  */
+  _scac_enumerableDidChange: function() {
+    var content = this.get('content'), // use content directly
+        newlen  = content.get('length'),
+        oldlen  = this._scac_length;
+        
+    this._scac_length = newlen;
+    this.beginPropertyChanges();
+    this._scac_cached = NO; // invalidate
+    this.enumerableContentDidChange(0, newlen, newlen-oldlen);
+    this.endPropertyChanges();
+  },
+  
+  /**
+    Whenever array content changes, need to simply forward notification.
+    
+    Assumes that content is not null and is SC.Array.
+  */
+  _scac_rangeDidChange: function(array, objects, key, indexes) {
+    if (key !== '[]') return ; // nothing to do
+    
+    var content = this.get('content');
+    this._scac_length = content.get('length');
+    this._scac_cached = NO; // invalidate
+    
+    // if array length has changed, just notify every index from min up
+    if (indexes) {
+      this.beginPropertyChanges();
+      indexes.forEachRange(function(start, length) {
+        this.enumerableContentDidChange(start, length, 0);
+      }, this);
+      this.endPropertyChanges();
+    }
   }
   
 });
