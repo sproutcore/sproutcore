@@ -15,5 +15,5 @@ test("should be able to resolve an object on the window", function() {
   // verify we can resolve our binding path
   same(SC.objectForPropertyPath('myGlobal'), { test: 'this '}) ;
   
-  delete window.myGlobal ;
+  window.myGlobal =null ;
 });
