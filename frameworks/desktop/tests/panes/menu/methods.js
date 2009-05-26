@@ -8,3 +8,40 @@
 /*global module test htmlbody ok equals same stop start */
 
 module("TODO: Test SC.MenuPane Methods");
+
+var menu;
+var menuItemTarget;
+var menuItemTargetName = "The Target";
+
+module('SC.MenuPane#MenuItemTargetIsSet', {
+  setup: function() {
+    menuItemTarget = SC.Object.create({
+      myName: menuItemTargetName
+    });
+    
+    menu = SC.MenuPane.create({
+      layout: { width: 80, height: 0 },
+      itemTargetKey: 'myTarget',
+      itemTitleKey: 'myTitle',
+      items: [
+        { myTitle: "Item1", myTarget: menuItemTarget }
+      ],
+      contentView: SC.View.extend({})
+    });
+  },
+  
+  teardown: function() {
+    menuItemTarget.destroy();
+    menuItemTarget = null;
+    menu.destroy();
+    menu = null;
+  }
+});
+
+test("Menu sets item target.", function() {
+  menu.append(); // force a rendering of the menu item child views
+  var target = menu.menuItemViews[0].get('target'); // see if the target propagated through
+  menu.remove(); // remove the menu
+  var success = (target && (target.myName === menuItemTargetName)); // check to see if it's the right target
+  ok(success, "Menu item should have the target we specified.");
+});
