@@ -1222,6 +1222,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
       storeKeys=this.changelog;
     }
+    
+    // if no storeKeys or ids at this point, return
+    if(!storeKeys && !ids) return;
+    
     len = (storeKeys === undefined) ? ids.length : storeKeys.length;
     
     for(idx=0;idx<len;idx++) {

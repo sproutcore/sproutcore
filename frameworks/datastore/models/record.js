@@ -286,19 +286,17 @@ SC.Record = SC.Object.extend(
             // or write default
             defaultVal = this[key].get('defaultValue');
             if(SC.typeOf(defaultVal)===SC.T_FUNCTION) {
-              // computed
+              // computed default value
               dataHash[key] = defaultVal();
             }
             else {
               // plain value
               dataHash[key] = defaultVal;
             }
-            
           }
-
         }
         
-        if(includeNull && !dataHash[key]) {
+        if(includeNull && dataHash[key]===undefined) {
           dataHash[key] = null;
         }
         
