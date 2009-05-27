@@ -537,44 +537,43 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // OK, no locking issues.  So let's just copy them changes. 
     // get local reference to values.
-    var len = changes.length, i, storeKey;
-    var my_dataHashes, my_statuses, my_editables, my_revisions;
-    var ch_dataHashes, ch_statuses, ch_revisions;
+    var len = changes.length, i, storeKey, myDataHashes, myStatuses, 
+      myEditables, myRevisions, chDataHashes, chStatuses, chRevisions;
     
-    my_revisions  = this.revisions ;
-    my_dataHashes = this.dataHashes;
-    my_statuses   = this.statuses;
-    my_editables  = this.editables ;
-
+    myRevisions  = this.revisions ;
+    myDataHashes = this.dataHashes;
+    myStatuses   = this.statuses;
+    myEditables  = this.editables ;
+    
     // setup some arrays if needed
-    if (!my_editables) my_editables = this.editables = [] ;
+    if (!myEditables) myEditables = this.editables = [] ;
     
-    ch_dataHashes = nestedStore.dataHashes;
-    ch_revisions  = nestedStore.revisions ;
-    ch_statuses   = nestedStore.statuses;
+    chDataHashes = nestedStore.dataHashes;
+    chRevisions  = nestedStore.revisions ;
+    chStatuses   = nestedStore.statuses;
 
     SC.RunLoop.begin();
     for(i=0;i<len;i++) {
       storeKey = changes[i];
 
       // now copy changes
-      my_dataHashes[storeKey] = ch_dataHashes[storeKey];
-      my_statuses[storeKey]   = ch_statuses[storeKey];
-      my_revisions[storeKey]  = ch_revisions[storeKey];
+      myDataHashes[storeKey] = chDataHashes[storeKey];
+      myStatuses[storeKey]   = chStatuses[storeKey];
+      myRevisions[storeKey]  = chRevisions[storeKey];
       
-      my_editables[storeKey] = 0 ; // always make dataHash no longer editable
+      myEditables[storeKey] = 0 ; // always make dataHash no longer editable
       
       this._notifyRecordPropertyChange(storeKey, NO);
     }
     SC.RunLoop.end();
     
     // add any records to the changelog for commit handling
-    var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
-    if (ch_changelog) {
-      if (!my_changelog) my_changelog = this.changelog = SC.Set.create();
-      my_changelog.addEach(ch_changelog);
+    var myChangelog = this.changelog, chChangelog = nestedStore.changelog;
+    if (chChangelog) {
+      if (!myChangelog) myChangelog = this.changelog = SC.Set.create();
+      myChangelog.addEach(chChangelog);
     }  
-    this.changelog=my_changelog;
+    this.changelog = myChangelog;
     
     return this ;
   },
@@ -1005,7 +1004,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // record data hash change
     this.dataHashDidChange(storeKey, null);
-    
     // record in changelog
     changelog = this.changelog ;
     if (!changelog) changelog = this.changelog = SC.Set.create() ;

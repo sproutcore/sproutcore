@@ -214,7 +214,7 @@ SC.Record = SC.Object.extend(
   /**
     This will return the raw attributes that you can edit directly.  If you 
     make changes to this hash, be sure to call beginEditing() before you get
-    the attributes and endEditing() aftwards.
+    the attributes and endEditing() afterwards.
   
     @returns {Object} the current attributes of the receiver
   **/
