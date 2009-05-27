@@ -271,6 +271,7 @@ CoreTest.Plan = {
       assertions: []
     };
     
+    var msg;
     var name = desc ;
     if (this.currentModule) name = this.currentModule + " module: " + name;
     
@@ -292,7 +293,8 @@ CoreTest.Plan = {
         setup.call(this);
         working.setup_end = this.now();
       } catch(e) {
-        this.error("Setup exception on " + name + ": " + e.message);
+        msg = (e && e.toString) ? e.toString() : "(unknown error)";
+        this.error("Setup exception on " + name + ": " + msg);
       }
     });
     
@@ -307,7 +309,8 @@ CoreTest.Plan = {
           func.call(this);
           this.working.test_end = this.now();
         } catch(e) {
-          this.error("Died on test #" + (this.working.assertions.length + 1) + ": " + e.message);
+          msg = (e && e.toString) ? e.toString() : "(unknown error)";
+          this.error("Died on test #" + (this.working.assertions.length + 1) + ": " + msg);
         }
       }
     });
@@ -319,7 +322,8 @@ CoreTest.Plan = {
         teardown.call(this);
         this.working.teardown_end = this.now();
       } catch(e) {
-        this.error("Teardown exception on " + name + ": " + e.message);
+        msg = (e && e.toString) ? e.toString() : "(unknown error)";
+        this.error("Teardown exception on " + name + ": " + msg);
       }
     });
     
@@ -332,7 +336,8 @@ CoreTest.Plan = {
           this.reset();
           this.working.total_end = this.working.reset_end = this.now();
         } catch(ex) {
-          this.error("Reset exception on " + name + ": " + ex.message) ;
+          msg = (ex && ex.toString) ? ex.toString() : "(unknown error)";
+          this.error("Reset exception on " + name + ": " + msg) ;
         }
       }
       
