@@ -109,7 +109,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     if (!this.isDeep) return this; // nothing to do
     
     var observing = this.observing;
-    if (!observing) observing = this.observing = SC.Set.create();
+    if (!observing) observing = this.observing = SC.CoreSet.create();
     
     // cache iterator function to keep things fast
     var func = this._beginObservingForEach;

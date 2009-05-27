@@ -27,7 +27,7 @@ SC._ObserverSet = {
     // get the set of methods
     var methods = this[targetGuid] ;
     if (!methods) {
-      methods = this[targetGuid] = SC.Set.create() ;
+      methods = this[targetGuid] = SC.CoreSet.create() ;
       methods.target = target ;
       methods.isTargetSet = YES ; // used for getMembers().
       this.targets++ ;

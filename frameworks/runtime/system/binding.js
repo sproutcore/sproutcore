@@ -483,10 +483,10 @@ SC.Binding = {
     this._transformedBindingValue = v;
   },
   
-  _connectQueue: SC.Set.create(),
-  _alternateConnectQueue: SC.Set.create(),
-  _changeQueue: SC.Set.create(),
-  _alternateChangeQueue: SC.Set.create(),
+  _connectQueue: SC.CoreSet.create(),
+  _alternateConnectQueue: SC.CoreSet.create(),
+  _changeQueue: SC.CoreSet.create(),
+  _alternateChangeQueue: SC.CoreSet.create(),
   _changePending: NO,
 
   /**

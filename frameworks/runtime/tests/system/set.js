@@ -22,23 +22,12 @@ module("creating SC.Set instances", {
   
 });
 
-test("new SC.Set() should create empty set", function() {
-  var set = new SC.Set() ;
-  equals(set.length, 0) ;
-});
-
-test("new SC.Set([1,2,3]) should create set with three items in them", function() {
-  var set = new SC.Set([a,b,c]) ;
-  equals(set.length, 3) ;
-  equals(set.contains(a), YES) ;
-  equals(set.contains(b), YES) ;
-  equals(set.contains(c), YES) ;
-});
-
-test("SC.Set.create() is an alias for new SC.Set()", function() {
+test("SC.Set.create() should create empty set", function() {
   var set = SC.Set.create() ;
   equals(set.length, 0) ;
-  
+});
+
+test("SC.Set.create([1,2,3]) should create set with three items in them", function() {
   var set = SC.Set.create([a,b,c]) ;
   equals(set.length, 3) ;
   equals(set.contains(a), YES) ;
@@ -46,22 +35,12 @@ test("SC.Set.create() is an alias for new SC.Set()", function() {
   equals(set.contains(c), YES) ;
 });
 
-test("new SC.Set() should accept anything that implements SC.Array", function() {
+test("SC.Set.create() should accept anything that implements SC.Array", function() {
   var arrayLikeObject = SC.Object.create(SC.Array, {
     _content: [a,b,c],
     length: 3,
     objectAt: function(idx) { return this._content[idx]; } 
   }) ;
-  
-  var set = SC.Set.create(arrayLikeObject) ;
-  equals(set.length, 3) ;
-  equals(set.contains(a), YES) ;
-  equals(set.contains(b), YES) ;
-  equals(set.contains(c), YES) ;
-});
-
-test("new SC.Set() should accept anything that looks like an array, even if it does not implement SC.Array", function() {
-  var arrayLikeObject = { length: 3, '0': a, '1': b, '2': c } ;
   
   var set = SC.Set.create(arrayLikeObject) ;
   equals(set.length, 3) ;

@@ -306,7 +306,7 @@ SC.Array = {
   */
   addRangeObserver: function(indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
-    if (!rangeob) rangeob = this._array_rangeObservers = SC.Set.create() ;
+    if (!rangeob) rangeob = this._array_rangeObservers = SC.CoreSet.create() ;
     
     var C = this.rangeObserverClass ;
     var isDeep = NO; //disable this feature for now

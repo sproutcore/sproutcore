@@ -360,6 +360,8 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 // 
 SC.Object.prototype = {
   
+  _kvo_enabled: YES,
+  
   /** @private
     This is the first method invoked on a new instance.  It will first apply
     any added properties to the new instance and then calls the real init()
