@@ -211,7 +211,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     var content = this.get('content');
     if (content.isSCArray) content.pushObject(object);
-    else if (content.addObject) content.addObject(obj);
+    else if (content.addObject) content.addObject(object);
     else throw "%@.content does not support addObject".fmt(this);
     
     return this;
@@ -256,6 +256,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Returns the object at the specified index based on the observable content
   */
   objectAt: function(idx) {
+    console.log("%@.objectAt(%@)".fmt(this, idx));
     var content = this._scac_observableContent();
     return content ? content.objectAt(idx) : undefined ;    
   },
@@ -353,19 +354,19 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       func = function(a,b) {
         var idx=0, status=0, key, aValue, bValue;
         for(idx=0;(idx<len)&&(status===0);idx++) {
-          key = orderBy.objectAt(key);
+          key = orderBy.objectAt(idx);
         
-          if (a) aValue = a ;
+          if (!a) aValue = a ;
           else if (a.isObservable) aValue = a.get(key);
           else aValue = a[key];
 
-          if (b) bValue = b ;
+          if (!b) bValue = b ;
           else if (b.isObservable) bValue = b.get(key);
           else bValue = b[key];
         
           status = SC.compare(aValue, bValue);
         }
-        return ret ; 
+        return status ; 
       };
     }
 
@@ -385,7 +386,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     this._scac_cached = NO; // invalidate observable content
     
-    var cur    = this._scac_observableContent(),
+    var cur    = this.get('content'),
         orders = !!this.get('orderBy'),
         last   = this._scac_content,
         oldlen = this._scac_length || 0,
@@ -406,6 +407,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     ro = null;
     
     // save new cached values 
+    this._scac_cached = NO;
     this._scac_content = cur ;
     
     // setup new observers
@@ -436,6 +438,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         newlen  = content.get('length'),
         oldlen  = this._scac_length;
         
+    console.log("_scac_enumerableDidChange");
+    
     this._scac_length = newlen;
     this.beginPropertyChanges();
     this._scac_cached = NO; // invalidate

@@ -16,13 +16,15 @@ var TestObject = SC.Object.extend({
 
 
 // ..........................................................
-// EMPTY
+// EMPTY SET
 // 
 
-module("SC.ArrayController - array_case - EMPTY", {
+module("SC.ArrayController - enum_case - EMPTY SET", {
   setup: function() {
-    content = [];
-    controller = SC.ArrayController.create({ content: content });
+    content = SC.Set.create();
+    controller = SC.ArrayController.create({ 
+      content: content, orderBy: "title" 
+    });
     extra = TestObject.create({ title: "FOO" });
   },
   
@@ -34,7 +36,7 @@ module("SC.ArrayController - array_case - EMPTY", {
 test("state properties", function() {
   equals(controller.get("hasContent"), YES, 'c.hasContent');
   equals(controller.get("canRemoveContent"), YES, "c.canRemoveContent");
-  equals(controller.get("canReorderContent"), YES, "c.canReorderContent");
+  equals(controller.get("canReorderContent"), NO, "c.canReorderContent");
   equals(controller.get("canAddContent"), YES, "c.canAddContent");
 });
 
@@ -45,7 +47,8 @@ test("addObject", function() {
   
   SC.run(function() { controller.addObject(extra); });
   
-  same(content, [extra], 'addObject(extra) should work');
+  var expected = SC.Set.create().add(extra);
+  same(content, expected, 'addObject(extra) should work');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), 1, 'should update length of controller');
 });
@@ -56,7 +59,7 @@ test("removeObject", function() {
   
   SC.run(function() { controller.removeObject(extra); });
   
-  same(content, [], 'removeObject(extra) should have no effect');
+  same(content, SC.Set.create(), 'removeObject(extra) should have no effect');
   equals(callCount, 0, 'should not notify observer since content did not change');
 });
 
@@ -68,12 +71,10 @@ test("basic array READ operations", function() {
 test("basic array WRITE operations", function() {
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
-  controller.replace(0,1,[extra]);
-  
-  same(content, [extra], 'should modify content');
-  equals(callCount, 1, 'should notify observer that content has changed');
-  equals(content.get('length'), 1, 'should update length of controller');
+
+  throws(function() {
+    controller.replace(0,1,[extra]);
+  }, Error, "calling replace on an enumerable should throw");
 });
 
 test("arrangedObjects", function() {
@@ -82,16 +83,19 @@ test("arrangedObjects", function() {
 
 
 // ..........................................................
-// NON-EMPTY ARRAY
+// NON-EMPTY SET
 // 
 
-module("SC.ArrayController - array_case - NON-EMPTY", {
+module("SC.ArrayController - enum_case - NON-EMPTY SET", {
   setup: function() {
-    content = "1 2 3 4 5".w().map(function(x) {
-      return TestObject.create({ title: x });
+    content = SC.Set.create();
+    "1 2 3 4 5".w().forEach(function(x) {
+      content.add(TestObject.create({ title: x }));
     });
     
-    controller = SC.ArrayController.create({ content: content });
+    controller = SC.ArrayController.create({ 
+      content: content, orderBy: "title" 
+    });
     extra = TestObject.create({ title: "FOO" });
   },
   
@@ -103,14 +107,14 @@ module("SC.ArrayController - array_case - NON-EMPTY", {
 test("state properties", function() {
   equals(controller.get("hasContent"), YES, 'c.hasContent');
   equals(controller.get("canRemoveContent"), YES, "c.canRemoveContent");
-  equals(controller.get("canReorderContent"), YES, "c.canReorderContent");
+  equals(controller.get("canReorderContent"), NO, "c.canReorderContent");
   equals(controller.get("canAddContent"), YES, "c.canAddContent");
 });
 
-// addObject should append to end of array + notify observers on Array itself
+// addObject should regenerate ordered + notify observers on Array itself
 test("addObject", function() {
-  var expected = content.slice();
-  expected.push(extra);
+  var expected = content.copy();
+  expected.add(extra);
   
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
@@ -120,43 +124,63 @@ test("addObject", function() {
   same(content, expected, 'addObject(extra) should work');
   equals(callCount, 1, 'should notify observer that content has changed');
   equals(content.get('length'), expected.length, 'should update length of controller');
+  
+  var idx, len = controller.get('length');
+  expected = SC.A(expected).sort(function(a,b) { 
+    return SC.compare(a.get('title'), b.get('title')); 
+  });
+
+  for(idx=0;idx<len;idx++) {
+    equals(controller.objectAt(idx), expected[idx], "controller.objectAt(%@) should be match ordered array %@".fmt(idx,idx));
+  }
+  
 });
 
 test("removeObject", function() {
-  var expected = content.slice(), obj = expected[3];
-  expected.removeObject(obj);
+  var expected = content.copy(), obj = expected.pop();
   
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
+  
+  equals(controller.get('length'), content.get('length'), 'precond - controller should have same length as content to start');
   
   SC.run(function() { controller.removeObject(obj); });
   
   same(content, expected, 'removeObject(extra) should remove object');
   equals(callCount, 1, 'should notify observer that content has changed');
-  equals(content.get('length'), expected.length, 'should update length of controller');
+  equals(content.get('length'), expected.length, 'should update length of content');
+  equals(controller.get('length'), expected.length, 'should update length of controller as well');
+  
+  var idx, len = controller.get('length');
+  expected = SC.A(expected).sort(function(a,b) { 
+    return SC.compare(a.get('title'), b.get('title')); 
+  });
+
+  for(idx=0;idx<len;idx++) {
+    equals(controller.objectAt(idx), expected[idx], "controller.objectAt(%@) should be match ordered array %@".fmt(idx,idx));
+  }
 });
 
 test("basic array READ operations", function() {
   equals(controller.get("length"), content.length, 'length should be empty');
   
-  var loc = content.length+1; // verify 1 past end as well
+  var expected = SC.A(content).sort(function(a,b) { 
+    return SC.compare(a.get('title'), b.get('title')); 
+  });
+  var loc = expected.length+1; // verify 1 past end as well
+
   while(--loc>=0) {
-    equals(controller.objectAt(loc), content[loc], "objectAt(%@) should return same value at content[%@]".fmt(loc, loc));
+    equals(controller.objectAt(loc), expected[loc], "objectAt(%@) should return same value at content[%@]".fmt(loc, loc));
   }
 });
 
 test("basic array WRITE operations", function() {
-  var expected = content.slice();
-  expected.replace(3,1,[extra]);
-  
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
-  
-  controller.replace(3,1,[extra]);
-  
-  same(content, expected, 'should modify content');
-  equals(callCount, 1, 'should notify observer that content has changed');
-  equals(content.get('length'), expected.length, 'should update length of controller');
+
+  throws(function() {
+    controller.replace(0,1,[extra]);
+  }, Error, "calling replace on an enumerable should throw");
 });
 
 test("arrangedObjects", function() {
@@ -167,16 +191,3 @@ test("arrangedObjects", function() {
 // ADD SPECIAL CASES HERE
 // 
 
-
-// ..........................................................
-// VERIFY SC.ARRAY COMPLIANCE
-// 
-
-SC.ArraySuite.generate("SC.ArrayController", {
-  newObject: function(amt) {
-    if (amt === undefined || typeof amt === SC.T_NUMBER) {
-      amt = this.expected(amt);
-    }
-    return SC.ArrayController.create({ content: amt });
-  }
-});
