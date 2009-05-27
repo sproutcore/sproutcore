@@ -35,11 +35,11 @@ module("SC.Query querying findAll on a store", {
     MyApp.Faa = SC.Record.extend({});
     
     var records = [
-      { guid: 1, firstName: "John", lastName: "Doe" },
-      { guid: 2, firstName: "Jane", lastName: "Doe" },
-      { guid: 3, firstName: "Emily", lastName: "Parker", bornIn: 1975 },
-      { guid: 4, firstName: "Johnny", lastName: "Cash" },
-      { guid: 5, firstName: "Bert", lastName: "Berthold" }
+      { guid: 1, firstName: "John", lastName: "Doe", married: true },
+      { guid: 2, firstName: "Jane", lastName: "Doe", married: false },
+      { guid: 3, firstName: "Emily", lastName: "Parker", bornIn: 1975, married: true },
+      { guid: 4, firstName: "Johnny", lastName: "Cash", married: true },
+      { guid: 5, firstName: "Bert", lastName: "Berthold", married: true }
     ];
     
     // load some data
@@ -54,6 +54,15 @@ module("SC.Query querying findAll on a store", {
 // ..........................................................
 // RECORD PROPERTIES
 // 
+
+test("should find records based on boolean", function() {
+  
+  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"married=true"});
+  
+  var records = MyApp.store.findAll(q);
+  equals(records.get('length'), 4, 'record length should be 4');
+  
+});
 
 test("should find records based on query string", function() {
   
