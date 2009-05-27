@@ -96,7 +96,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     
     var ret = this._sctc_arrangedObjects;
     if (ret) ret.destroy();
-    tihs._sctc_arrangedObjects = null;
+    this._sctc_arrangedObjects = null;
     
     this.propertyDidChange('arrangedObjects');
   }.observes('content', 'treeItemIsExpandedKey', 'treeItemChildrenKey', 'treeItemIsGrouped')
