@@ -136,7 +136,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     var content = this.get('content'), ret;
     ret = !!content && this.get('isEditable') && this.get('hasContent');
     if (ret) {
-      return content.isEnumerable && 
+      return !content.isEnumerable || 
              (SC.typeOf(content.removeObject) === SC.T_FUNCTION);
     } else return NO ;
   }.property('content', 'isEditable', 'hasContent'),
@@ -153,7 +153,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   canReorderContent: function() {
     var content = this.get('content'), ret;
     ret = !!content && this.get('isEditable') && !this.get('orderBy');
-    return ret && content.isSCArray;
+    return ret && !!content.isSCArray;
   }.property('content', 'isEditable', 'orderBy'),
   
   /**
@@ -188,7 +188,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   hasContent: function() {
     var content = this.get('content');
     return !!content && 
-           (content.isEnumerable || this.get('allowSingleContent'));
+           (!!content.isEnumerable || !!this.get('allowsSingleContent'));
   }.property('content', 'allowSingleContent'),
 
   // ..........................................................
@@ -234,7 +234,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     var content = this.get('content');
     if (content.isEnumerable) content.removeObject(object);
-    else this.set('content', null);
+    else {
+      this.set('content', null);
+      this.enumerableContentDidChange();
+    }
     
     if (this.get('destroyOnRemoval') && object.destroy) object.destroy();
     return this; 
@@ -256,7 +259,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Returns the object at the specified index based on the observable content
   */
   objectAt: function(idx) {
-    console.log("%@.objectAt(%@)".fmt(this, idx));
     var content = this._scac_observableContent();
     return content ? content.objectAt(idx) : undefined ;    
   },
@@ -438,8 +440,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         newlen  = content.get('length'),
         oldlen  = this._scac_length;
         
-    console.log("_scac_enumerableDidChange");
-    
     this._scac_length = newlen;
     this.beginPropertyChanges();
     this._scac_cached = NO; // invalidate
