@@ -99,7 +99,7 @@ test("clicking on a selected item should clear selection and reselect it it", fu
 
 test("clicking on unselected item should clear selection and select it", function() {
 
-  view.select(SC.IndexSet.create(1,5));;
+  view.select(SC.IndexSet.create(1,5));
   clickOn(view, 7, NO, NO, SC.IndexSet.create(7));
 });
 

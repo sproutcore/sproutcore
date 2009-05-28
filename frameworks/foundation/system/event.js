@@ -343,10 +343,10 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       type: eventType,
       target: elem,
       preventDefault: function(){ this.cancelled = YES; },
-      stopPropagation: function(){ this.bubble = NO; },
+      stopPropagation: function(){ this.bubbles = NO; },
       allowDefault: function() { this.hasCustomEventHandling = YES; },
       timeStamp: Date.now(),
-      bubble: (this.NO_BUBBLE.indexOf(eventType)<0),
+      bubbles: (this.NO_BUBBLE.indexOf(eventType)<0),
       cancelled: NO,
       normalized: YES
     });
@@ -415,7 +415,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     do {
       ret = SC.Event.handle.apply(current, args);
       current = (current===document) ? null : (current.parentNode || document);
-    } while(!ret && event.bubble && current);    
+    } while(!ret && event.bubbles && current);    
     current = null ;
 
     // Handle triggering native .onfoo handlers

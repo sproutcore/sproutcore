@@ -198,7 +198,7 @@ SC.IndexSet = SC.mixin({},
     index--; // start with previous index
     
     var content = this._content, 
-        max     = this.get('max');
+        max     = this.get('max'),
         start   = this.rangeStartForIndex(index);
     if (!content) return null;
 

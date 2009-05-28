@@ -481,3 +481,5 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
 });
 
 SC.SelectionSet.prototype.copy = SC.SelectionSet.prototype.clone;
+SC.SelectionSet.EMPTY = SC.SelectionSet.create().freeze();
+

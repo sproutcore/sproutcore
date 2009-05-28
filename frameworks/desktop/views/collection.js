@@ -1300,7 +1300,7 @@ SC.CollectionView = SC.View.extend(
     var lim     = this.get('length'),
         range   = SC.IndexSet.create(), 
         content = this.get('content'),
-        del = this.delegateFor('isCollectionViewDelegate', this.delegate, content),
+        del     = this.get('selectionDelegate'),
         ret, sel ;
 
     // fast path
@@ -1338,9 +1338,9 @@ SC.CollectionView = SC.View.extend(
    @private
   */
   _findPreviousSelectableItemFromIndex: function(proposedIndex, top) {
-    var range = SC.IndexSet.create(), 
+    var range   = SC.IndexSet.create(), 
         content = this.get('content'),
-        del = this.delegateFor('isCollectionViewDelegate', this.delegate, content),
+        del     = this.get('selectionDelegate'),
         ret ;
     
     // fast path
