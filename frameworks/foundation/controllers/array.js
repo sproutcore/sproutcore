@@ -427,6 +427,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
     this.enumerableContentDidChange(0, newlen, newlen - oldlen);
+    this.updateSelectionAfterContentChange();
   },
   
   /**
@@ -445,6 +446,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_cached = NO; // invalidate
     this.enumerableContentDidChange(0, newlen, newlen-oldlen);
     this.endPropertyChanges();
+    this.updateSelectionAfterContentChange();
   },
   
   /**
@@ -466,6 +468,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         this.enumerableContentDidChange(start, length, 0);
       }, this);
       this.endPropertyChanges();
+      this.updateSelectionAfterContentChange();
     }
   }
   
