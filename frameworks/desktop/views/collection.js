@@ -767,7 +767,7 @@ SC.CollectionView = SC.View.extend(
         nowShowing = this.get('nowShowing'),
         itemViews  = this._sc_itemViews,
         containerView = this.get('containerView') || this,
-        views, idx, cvlen, view, childViews ;
+        views, idx, cvlen, view, childViews, layer ;
 
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
@@ -792,6 +792,16 @@ SC.CollectionView = SC.View.extend(
         if (nowShowing.contains(idx)) {
           view = this.itemViewForContentIndex(idx, YES);
           if (existing && existing.parentView === containerView) {
+    
+            // if the existing view has a layer, remove it immediately from
+            // the parent.  This is necessary because the old and new views 
+            // will use the same layerId
+            layer = existing.get('layer');
+            if (layer && layer.parentNode) {
+              layer.parentNode.removeChild(layer);  
+            } 
+            layer = null ; // avoid leaks
+            
             containerView.replaceChild(view, existing);
           } else {
             containerView.appendChild(view);
