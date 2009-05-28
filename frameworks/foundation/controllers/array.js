@@ -397,7 +397,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         efunc  = this._scac_enumerableDidChange,
         newlen;
         
-        
     if (last === cur) return this; // nothing to do
 
     // teardown old observer
@@ -428,7 +427,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_length = newlen;
     this.enumerableContentDidChange(0, newlen, newlen - oldlen);
     this.updateSelectionAfterContentChange();
-  },
+  }.observes('content'),
   
   /**
     Whenever enumerable content changes, need to regenerate the 
