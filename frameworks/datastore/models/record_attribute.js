@@ -196,8 +196,7 @@ SC.RecordAttribute = SC.Object.extend(
         if (typeof value === SC.T_FUNCTION) {
           value = this.defaultValue(record, key, this);
           // write default value so it doesn't have to be executed again
-          
-          if(record.attributes()) record[attrKey] = value;
+          if(record.attributes()) record.writeAttribute(attrKey, value, true);
         }
       } else value = this.toType(record, key, value);
     }
