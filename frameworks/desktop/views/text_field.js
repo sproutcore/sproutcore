@@ -26,9 +26,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // 
   
   /**
-    The type of the input tag. Default is 'text', can be 'password', for example.
+    If YES, the field will hide its text from display. The default value is NO.
   */
-  type: 'text',
+  isPassword: NO,
   
   /**
     The hint to display while the field is not active.  Can be a loc key.
@@ -55,7 +55,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
     var name = SC.guidFor(this);
     var hint = this.get('hint');
-    var type = this.get('type');
+    var type = this.get('isPassword') ? 'password' : 'text';
 
     // always have at least an empty string
     var v = this.get('fieldValue');
