@@ -384,7 +384,7 @@ SC.Enumerable = {
     var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
 
-    var next, found = NO, ret = null ;
+    var last = null, next, found = NO, ret = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;idx<len && !found;idx++) {
       next = this.nextObject(idx, last, context) ;

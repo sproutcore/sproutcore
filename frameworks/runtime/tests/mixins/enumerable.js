@@ -537,6 +537,12 @@ test("should trigger observer of reduced prop when array changes - even if you n
   }
 });
 
+test("should find the first element matching the criteria", function() {
+  var people = enumerables[1] ;
+  var jenna = people.find(function(person) { return person.gender == 'female'; });
+  equals(jenna.first, 'Jenna');
+});
+
 var source ; // global variables
 
 module("Real Array", {
