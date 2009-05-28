@@ -951,7 +951,7 @@ SC.Observable = {
             cache = this._kvo_cache;
             while(--loc >= 0) {
               changes.add(key = keys[loc]);
-              if (func = this[key]) {
+              if (cache && (func = this[key])) {
                 cache[func.cacheKey]=cache[func.lastSetValueKey]=undefined;
               } // if (func=)
             } // while (--loc)
