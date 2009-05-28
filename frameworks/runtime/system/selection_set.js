@@ -335,8 +335,11 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   
   firstObject: function() {
     if (this.get('length')===0) return undefined;
-    var sets = this._sets;
-    return sets ? sets[0].firstObject() : undefined;
+    var sets = this._sets, 
+        set  = sets ? sets[0] : null,
+        src  = set ? set.source : null,
+        idx  = set ? set.firstObject() : -1;
+    return (src && idx>=0) ? src.objectAt(idx) : undefined;
   }.property(),
   
   /**
