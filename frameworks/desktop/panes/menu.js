@@ -342,7 +342,9 @@ SC.MenuPane = SC.PickerPane.extend(
        "<div class='left-edge'></div>");
     }
     else {
-      this.get('menuItemViews').forEach( function(menuItemView) { menuItemView.updateLayer()}) ;
+      this.get('menuItemViews').forEach( function(menuItemView) { 
+        menuItemView.updateLayer();
+      }, this) ;
     }
     if (SC.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey) ;
     //return ret ;
@@ -468,22 +470,29 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns {Boolean}  YES if handled, NO otherwise
   */
   performKeyEquivalent: function(keyString,evt) {
-    if(!this.get('isEnabled')) return YES ;
-    var items = this.get('displayItemsArray') ;
-    if(!items) return;
-    var len = items.length ;
-    var menuItems = this.get('menuItemViews');
+    var items, len, menuItems, item, keyEquivalent, 
+        action, isEnabled, target;
+    
+    if(!this.get('isEnabled')) return NO ;
+
+    items = this.get('displayItemsArray') ;
+    if (!items) return NO;
+
+    len = items.length ;
+    menuItems = this.get('menuItemViews');
     for(var idx=0; idx<len; ++idx) {
-      var item = items[idx] ;
-      var keyEquivalent = item.get('keyEquivalent') ;
-      var action = item.get('action') ;
-      var isEnabled = item.get('isEnabled') ;
-      var target = item.get('target') || this ;
+      item          = items[idx] ;
+      keyEquivalent = item.get('keyEquivalent') ;
+      action        = item.get('action') ;
+      isEnabled     = item.get('isEnabled') ;
+      target        = item.get('target') || this ;
       if(keyEquivalent == keyString && isEnabled) {
-        if(menuItems && menuItems[idx]) menuItems[idx].triggerAction(evt);
+        if(menuItems && menuItems[idx]) {
+          return menuItems[idx].triggerAction(evt);
+        }
       }
     }
-    return YES ;
+    return NO ;
   },
   
   //Mouse and Key Events

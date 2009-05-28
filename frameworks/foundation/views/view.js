@@ -284,7 +284,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       } else {
         var that = this;
         this.set('layerNeedsUpdate', YES);
-        this.invokeOnce(function() { that.updateLayerIfNeeded(YES) });
+        this.invokeOnce(function() { that.updateLayerIfNeeded(YES); });
       }
       
       // if we were firstResponder, resign firstResponder also if no longer
@@ -1112,7 +1112,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {Boolean}
   */
   performKeyEquivalent: function(keystring, evt) {
-    var ret = null,
+    var ret = NO,
         childViews = this.get('childViews'),
         len = childViews.length,
         idx = -1 ;
