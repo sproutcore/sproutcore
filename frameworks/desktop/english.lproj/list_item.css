@@ -29,6 +29,11 @@
 	line-height: 18px;
 	left:  4px;
 	right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  -moz-binding: sc_static('ellipsis-xbl.xml');
 }
 
 .sc-list-item-view .sc-outline {
