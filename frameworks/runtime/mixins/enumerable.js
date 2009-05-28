@@ -8,6 +8,8 @@
 require('core') ;
 require('system/enumerator');
 
+/*globals Prototype */
+
 /**
   @namespace
 
@@ -85,7 +87,7 @@ SC.Enumerable = {
     @returns {Object} the next object in the iteration or undefined   
   */ 
   nextObject: function(index, previousObject, context) {
-    return (this.objectAt) ? this.objectAt(index) : this[index] ;
+    return this.objectAt ? this.objectAt(index) : this[index] ;
   },
   
   /**
@@ -146,7 +148,7 @@ SC.Enumerable = {
   */
   forEach: function(callback, target) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
     
     var last = null ;
@@ -171,14 +173,14 @@ SC.Enumerable = {
     @returns {Array} extracted values
   */
   getEach: function(key) {
-    var len = (this.get)? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     var ret = [] ;
 
     var last = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;idx<len;idx++) {
       var next = this.nextObject(idx, last, context) ;
-      var obj = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      var obj = next ? (next.get ? next.get(key) : next[key]) : null;
       ret[ret.length] = obj;
       last = next ;
     }
@@ -198,7 +200,7 @@ SC.Enumerable = {
     @returns {Object} receiver
   */
   setEach: function(key, value) {
-    var len = (this.get)? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
 
     var last = null ;
     var context = SC.Enumerator._popContext();
@@ -243,7 +245,7 @@ SC.Enumerable = {
   */
   map: function(callback, target) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
     
     var ret  = [];
@@ -267,13 +269,13 @@ SC.Enumerable = {
     @returns {Array} The mapped array.
   */
   mapProperty: function(key) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     var ret  = [];
     var last = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;idx<len;idx++) {
       var next = this.nextObject(idx, last, context) ;
-      ret[idx] = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      ret[idx] = next ? (next.get ? next.get(key) : next[key]) : null;
       last = next ;
     }
     last = null ;
@@ -309,7 +311,7 @@ SC.Enumerable = {
   */
   filter: function(callback, target) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
     
     var ret  = [];
@@ -335,13 +337,13 @@ SC.Enumerable = {
     @returns {Array} filtered array
   */
   filterProperty: function(key, value) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     var ret  = [];
     var last = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;idx<len;idx++) {
       var next = this.nextObject(idx, last, context) ;
-      var cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
       var matched = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       if (matched) ret.push(next) ;
       last = next ;
@@ -379,9 +381,9 @@ SC.Enumerable = {
   */
   find: function(callback, target) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
-    
+
     var next, found = NO, ret = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;idx<len && !found;idx++) {
@@ -406,12 +408,12 @@ SC.Enumerable = {
     @returns {Object} found item or null
   */
   findProperty: function(key, value) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     var found = NO, ret = null, last = null, next, cur ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;idx<len && !found;idx++) {
       next = this.nextObject(idx, last, context) ;
-      cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      cur = next ? (next.get ? next.get(key) : next[key]) : null;
       found = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       if (found) ret = next ;
       last = next ;
@@ -454,7 +456,7 @@ SC.Enumerable = {
   */
   every: function(callback, target) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
     
     var ret  = YES;
@@ -479,13 +481,13 @@ SC.Enumerable = {
     @returns {Array} filtered array
   */
   everyProperty: function(key, value) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     var ret  = YES;
     var last = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0;ret && (idx<len);idx++) {
       var next = this.nextObject(idx, last, context) ;
-      var cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
       ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       last = next ;
     }
@@ -528,7 +530,7 @@ SC.Enumerable = {
   */
   some: function(callback, target) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (target === undefined) target = null;
     
     var ret  = NO;
@@ -553,13 +555,13 @@ SC.Enumerable = {
     @returns {Boolean} YES 
   */
   someProperty: function(key, value) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     var ret  = NO;
     var last = null ;
     var context = SC.Enumerator._popContext();
     for(var idx=0; !ret && (idx<len); idx++) {
       var next = this.nextObject(idx, last, context) ;
-      var cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
       ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       last = next ;
     }
@@ -602,7 +604,7 @@ SC.Enumerable = {
   */
   reduce: function(callback, initialValue, reducerProperty) {
     if (typeof callback !== "function") throw new TypeError() ;
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
 
     // no value to return if no initial value & empty
     if (len===0 && initialValue === undefined) throw new TypeError();
@@ -616,7 +618,7 @@ SC.Enumerable = {
       // while ret is still undefined, just set the first value we get as ret.
       // this is not the ideal behavior actually but it matches the FireFox
       // implementation... :(
-      if (next != null) {
+      if (next !== null) {
         if (ret === undefined) {
           ret = next ;
         } else {
@@ -643,23 +645,25 @@ SC.Enumerable = {
     @returns {Array} return values from calling invoke.
   */
   invoke: function(methodName) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (len <= 0) return [] ; // nothing to invoke....
-
+    
+    var idx;
+    
     // collect the arguments
     var args = [] ;
     var alen = arguments.length ;
     if (alen > 1) {
-      for(var idx=1;idx<alen;idx++) args.push(arguments[idx]) ;
+      for(idx=1;idx<alen;idx++) args.push(arguments[idx]) ;
     }
     
     // call invoke
     var ret = [] ;
     var last = null ;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
+    for(idx=0;idx<len;idx++) {
       var next = this.nextObject(idx, last, context) ;
-      var method = (next) ? next[methodName] : null ;
+      var method = next ? next[methodName] : null ;
       if (method) ret[idx] = method.apply(next, args) ;
       last = next ;
     }
@@ -680,23 +684,25 @@ SC.Enumerable = {
     @returns {Array} return values from calling invoke.
   */
   invokeWhile: function(targetValue, methodName) {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (len <= 0) return null; // nothing to invoke....
+
+    var idx;
 
     // collect the arguments
     var args = [] ;
     var alen = arguments.length ;
     if (alen > 2) {
-      for(var idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
+      for(idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
     }
     
     // call invoke
     var ret = targetValue ;
     var last = null ;
     var context = SC.Enumerator._popContext();
-    for(var idx=0;(ret === targetValue) && (idx<len);idx++) {
+    for(idx=0;(ret === targetValue) && (idx<len);idx++) {
       var next = this.nextObject(idx, last, context) ;
-      var method = (next) ? next[methodName] : null ;
+      var method = next ? next[methodName] : null ;
       if (method) ret = method.apply(next, args) ;
       last = next ;
     }
@@ -713,7 +719,7 @@ SC.Enumerable = {
     @returns {Array} the enumerable as an array.
   */
   toArray: function() {
-    var len = (this.get) ? this.get('length') : this.length ;
+    var len = this.get ? this.get('length') : this.length ;
     if (len <= 0) return [] ; // nothing to invoke....
     
     // call invoke
@@ -736,7 +742,7 @@ SC._buildReducerFor = function(reducerKey, reducerProperty) {
   return function(key, value) {
     var reducer = this[reducerKey] ;
     if (SC.typeOf(reducer) !== SC.T_FUNCTION) {
-      return (this.unknownProperty) ? this.unknownProperty(key, value) : null;
+      return this.unknownProperty ? this.unknownProperty(key, value) : null;
     } else {
       // Invoke the reduce method defined in enumerable instead of using the
       // one implemented in the receiver.  The receiver might be a native 
@@ -812,7 +818,7 @@ SC.Reducers = {
     
     var reducerKey = matches[1]; // = 'max' if key = '@max(balance)'
     var reducerProperty = matches[3] ; // = 'balance' if key = '@max(balance)'
-    var reducerKey = "reduce" + reducerKey.slice(0,1).toUpperCase() + reducerKey.slice(1);
+    reducerKey = "reduce" + reducerKey.slice(0,1).toUpperCase() + reducerKey.slice(1);
     var reducer = this[reducerKey] ;
 
     // if there is no reduce function defined for this key, then we can't 
@@ -848,9 +854,9 @@ SC.Reducers = {
   */
   reduceMax: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
-      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+      item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    if (previousValue == null) return item ;
+    if (previousValue === null) return item ;
     return (item > previousValue) ? item : previousValue ;
   },
 
@@ -864,14 +870,14 @@ SC.Reducers = {
     var previousValue = previousItem, itemValue = item ;
     if (reducerProperty) {
       if (item) {
-        itemValue = (item.get) ? item.get(reducerProperty) : item[reducerProperty] ;
+        itemValue = item.get ? item.get(reducerProperty) : item[reducerProperty] ;
       }
       
       if (previousItem) {
-        previousItemValue = (previousItem.get) ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+        previousItemValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
       }
     }
-    if (previousValue == null) return item ;
+    if (previousValue === null) return item ;
     return (itemValue > previousValue) ? item : previousItem ;
   },
 
@@ -880,9 +886,9 @@ SC.Reducers = {
   */
   reduceMin: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
-      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+      item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    if (previousValue == null) return item ;
+    if (previousValue === null) return item ;
     return (item < previousValue) ? item : previousValue ;
   },
 
@@ -896,14 +902,14 @@ SC.Reducers = {
     var previousValue = previousItem, itemValue = item ;
     if (reducerProperty) {
       if (item) {
-        itemValue = (item.get) ? item.get(reducerProperty) : item[reducerProperty] ;
+        itemValue = item.get ? item.get(reducerProperty) : item[reducerProperty] ;
       }
       
       if (previousItem) {
-        previousItemValue = (previousItem.get) ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+        previousItemValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
       }
     }
-    if (previousValue == null) return item ;
+    if (previousValue === null) return item ;
     return (itemValue < previousValue) ? item : previousItem ;
   },
 
@@ -912,10 +918,10 @@ SC.Reducers = {
   */
   reduceAverage: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
-      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+      item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
     var ret = (previousValue || 0) + item ;
-    var len = (e.get) ? e.get('length') : e.length;
+    var len = e.get ? e.get('length') : e.length;
     if (index >= len-1) ret = ret / len; //avg after last item.
     return ret ; 
   },
@@ -925,9 +931,9 @@ SC.Reducers = {
   */
   reduceSum: function(previousValue, item, index, e, reducerProperty) {
     if (reducerProperty && item) {
-      item = (item.get) ? item.get(reducerProperty) : item[reducerProperty];
+      item = item.get ? item.get(reducerProperty) : item[reducerProperty];
     }
-    return (previousValue == null) ? item : previousValue + item ;
+    return (previousValue === null) ? item : previousValue + item ;
   }
 } ;
 
@@ -961,7 +967,7 @@ Array.prototype.isEnumerable = YES ;
       var ret  = [];
       for(var idx=0;idx<len;idx++) {
         var next = this[idx] ;
-        ret[idx] = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+        ret[idx] = next ? (next.get ? next.get(key) : next[key]) : null;
       }
       return ret ;
     },
@@ -971,7 +977,7 @@ Array.prototype.isEnumerable = YES ;
       var ret  = [];
       for(var idx=0;idx<len;idx++) {
         var next = this[idx] ;
-        var cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
         var matched = (value === undefined) ? !!cur : SC.isEqual(cur, value);
         if (matched) ret.push(next) ;
       }
@@ -996,7 +1002,7 @@ Array.prototype.isEnumerable = YES ;
       var len = this.length ;
       var next, cur, found=NO, ret=null;
       for(var idx=0;idx<len && !found;idx++) {
-        cur = (next=this[idx]) ? ((next.get) ? next.get(key): next[key]):null;
+        cur = (next=this[idx]) ? (next.get ? next.get(key): next[key]):null;
         found = (value === undefined) ? !!cur : SC.isEqual(cur, value);
         if (found) ret = next ;
       }
@@ -1009,7 +1015,7 @@ Array.prototype.isEnumerable = YES ;
       var ret  = YES;
       for(var idx=0;ret && (idx<len);idx++) {
         var next = this[idx] ;
-        var cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
         ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       }
       return ret ;
@@ -1020,7 +1026,7 @@ Array.prototype.isEnumerable = YES ;
       var ret  = NO;
       for(var idx=0; !ret && (idx<len); idx++) {
         var next = this[idx] ;
-        var cur = (next) ? ((next.get) ? next.get(key) : next[key]) : null;
+        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
         ret = (value === undefined) ? !!cur : SC.isEqual(cur, value);
       }
       return ret ;  // return the invert
@@ -1030,18 +1036,20 @@ Array.prototype.isEnumerable = YES ;
       var len = this.length ;
       if (len <= 0) return [] ; // nothing to invoke....
 
+      var idx;
+
       // collect the arguments
       var args = [] ;
       var alen = arguments.length ;
       if (alen > 1) {
-        for(var idx=1;idx<alen;idx++) args.push(arguments[idx]) ;
+        for(idx=1;idx<alen;idx++) args.push(arguments[idx]) ;
       }
 
       // call invoke
       var ret = [] ;
-      for(var idx=0;idx<len;idx++) {
+      for(idx=0;idx<len;idx++) {
         var next = this[idx] ;
-        var method = (next) ? next[methodName] : null ;
+        var method = next ? next[methodName] : null ;
         if (method) ret[idx] = method.apply(next, args) ;
       }
       return ret ;
@@ -1051,18 +1059,20 @@ Array.prototype.isEnumerable = YES ;
       var len = this.length ;
       if (len <= 0) return null ; // nothing to invoke....
 
+      var idx;
+
       // collect the arguments
       var args = [] ;
       var alen = arguments.length ;
       if (alen > 2) {
-        for(var idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
+        for(idx=2;idx<alen;idx++) args.push(arguments[idx]) ;
       }
 
       // call invoke
       var ret = targetValue ;
-      for(var idx=0;(ret === targetValue) && (idx<len);idx++) {
+      for(idx=0;(ret === targetValue) && (idx<len);idx++) {
         var next = this[idx] ;
-        var method = (next) ? next[methodName] : null ;
+        var method = next ? next[methodName] : null ;
         if (method) ret = method.apply(next, args) ;
       }
       return ret ;
@@ -1086,7 +1096,7 @@ Array.prototype.isEnumerable = YES ;
       var len = this.length ;
       for(var idx=0;idx<len;idx++) {
         var obj = this[idx];
-        ret[idx] = (obj) ? ((obj.get) ? obj.get(key) : obj[key]) : null;
+        ret[idx] = obj ? (obj.get ? obj.get(key) : obj[key]) : null;
       }
       return ret ;
     },
@@ -1188,7 +1198,7 @@ Array.prototype.isEnumerable = YES ;
         // while ret is still undefined, just set the first value we get as 
         // ret. this is not the ideal behavior actually but it matches the 
         // FireFox implementation... :(
-        if (next != null) {
+        if (next !== null) {
           if (ret === undefined) {
             ret = next ;
           } else {
