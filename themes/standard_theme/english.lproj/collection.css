@@ -31,8 +31,7 @@
 
 .sc-theme .sc-list-view .sc-collection-item {
 	display: block ;
-/*  padding: 0 6px;
-*/	line-height: 22px;
+	line-height: 22px;
 }
 
 .sc-theme .sc-list-insertion-point {
@@ -49,5 +48,46 @@
   height: 8px;
 	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
 }
+
+/* @end */
+
+/* @group SC.SourceListView */
+
+.sc-theme .sc-list-view.sc-source-list {
+	background-color: #f0f0f0 ;
+	border:  none ;
+	color: #363636;
+}
+
+.sc-theme.focus .sc-list-view.sc-source-list {
+	background-color: #e6e3ef;
+	color: black ;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-collection-item {
+	border-top: 1px solid #f0f0f0;
+	font-size: 12px;
+}
+
+.sc-theme.focus .sc-list-view.sc-source-list .sc-collection-item {
+	border-top: 1px solid #e6e3ef;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-collection-item.sel {
+	background-color: #ddd;
+	border-top: 1px solid #eee;
+	font-weight: bold ;
+}
+
+.sc-theme.focus .sc-list-view.sc-source-list .sc-collection-item.sel {
+	background: static_url('images/sc-theme-sprite.png') 0 0px;
+	color: white ;
+	border-top: 1px solid #5a3f62;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view label {
+  left: 12px;
+}
+
 
 /* @end */
