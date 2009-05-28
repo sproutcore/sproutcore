@@ -874,7 +874,7 @@ SC.Reducers = {
       }
       
       if (previousItem) {
-        previousItemValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+        previousValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
       }
     }
     if (previousValue === null) return item ;
@@ -906,7 +906,7 @@ SC.Reducers = {
       }
       
       if (previousItem) {
-        previousItemValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
+        previousValue = previousItem.get ? previousItem.get(reducerProperty) : previousItem[reducerProperty] ;
       }
     }
     if (previousValue === null) return item ;

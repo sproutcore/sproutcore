@@ -444,7 +444,7 @@ test("get @maxObject(balance) should return the record with the max balance", fu
   var src, ary2 = enumerables ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
     src = ary2[idx2] ;
-    equals(src.objectAt(0), src.get('@maxObject(balance)')) ;
+    equals(src.objectAt(3), src.get('@maxObject(balance)')) ;
   }
 });
 
