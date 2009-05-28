@@ -6,6 +6,12 @@
 // ==========================================================================
 /*global ActiveXObject */
 
+/**
+  Description to come.
+  
+  @since SproutCore 1.0
+*/
+
 SC.Request = SC.Object.extend({
   
   isAsynchronous: true,
@@ -14,12 +20,21 @@ SC.Request = SC.Object.extend({
   transportClass: null,
   isJSON: false,
   
+  /**
+    Sets up the request object
+  */
   init: function(){
-    sc_super() ;
-    
+    sc_super() ;  
     this._headers = {};
   },
   
+  /**
+    To set headers on the request object
+    
+    @param {String} key
+    @param {String} value
+    @returns {SC.Request} receiver
+  */
   header: function(key, value) {
     if (typeof key == 'object' && !value) {
       for (var headerKey in key) {
@@ -41,6 +56,12 @@ SC.Request = SC.Object.extend({
     return this ;
   },
   
+  /**
+    Will fire the actual request.
+    
+    @param {String} body (optional)
+    @returns {SC.Request} receiver
+  */  
   send: function(body) {
     var request = this ; 
     if(body) {
@@ -53,7 +74,15 @@ SC.Request = SC.Object.extend({
     SC.Request.manager.sendRequest(request) ;
     return request ;
   },
-  
+
+  /**
+    Set up notifications.
+    
+    @param {Object} target
+    @param {String|function} action
+    @param {Hash} params
+    @returns {SC.Request} receiver
+  */
   notify: function(target, action, params) {
     if (SC.typeOf(action) === SC.T_STRING) action = target[action];
     this.set('notifyTarget', target)
@@ -62,9 +91,14 @@ SC.Request = SC.Object.extend({
     return this;
   },
   
+  /**
+    Response method
+    
+    @returns {Object} response
+  */
   response: function() {
     var response = this.get("rawResponse") ;
-    if (!response || !SC.$ok(response)) {
+    if (!response || !SC.$ok(response) || response.responseText.trim()==='') {
         return response ;
     }
     
@@ -81,6 +115,12 @@ SC.Request = SC.Object.extend({
   
 });
 
+/**
+  Helper method for quickly setting up a GET request.
+  
+  @param {String} address url of request
+  @returns {SC.Request} receiver
+*/
 SC.Request.getUrl = function(address) {
   var req = SC.Request.create() ;
   req.set('address', address) ;
@@ -89,6 +129,13 @@ SC.Request.getUrl = function(address) {
   return req ;
 };
 
+/**
+  Helper method for quickly setting up a POST request.
+  
+  @param {String} address url of request
+  @param {String} body
+  @returns {SC.Request} receiver
+*/
 SC.Request.postUrl = function(address, body) {
   var req = SC.Request.create() ;
   req.set('address',address) ;
@@ -98,6 +145,12 @@ SC.Request.postUrl = function(address, body) {
   return req ;
 };
 
+/**
+  Helper method for quickly setting up a DELETE request.
+  
+  @param {String} address url of request
+  @returns {SC.Request} receiver
+*/
 SC.Request.deleteUrl = function(address) {
   var req = SC.Request.create() ;
   req.set('address',address) ;
@@ -106,6 +159,13 @@ SC.Request.deleteUrl = function(address) {
   return req ;
 };
 
+/**
+  Helper method for quickly setting up a PUT request.
+  
+  @param {String} address url of request
+  @param {String} body
+  @returns {SC.Request} receiver
+*/
 SC.Request.putUrl = function(address, body) {
   var req = SC.Request.create() ;
   req.set('address',address) ;
@@ -115,6 +175,10 @@ SC.Request.putUrl = function(address, body) {
   return req ;
 };
 
+/**
+  The request manager.
+  More description to come.
+*/
 SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   maxRequests: 2,
   
