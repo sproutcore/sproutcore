@@ -3,11 +3,11 @@
 /* SC.TextFieldView - sc-theme */
 
 .sc-theme .sc-text-field-view input {
-	font-size: 13px;
+	font-size: 12px;
 }
 
 .sc-theme .sc-text-field-view .sc-hint {
   padding: 3px;
 	color: #aaa ;
-	font-size: 13px;
+	font-size: 12px;
 }

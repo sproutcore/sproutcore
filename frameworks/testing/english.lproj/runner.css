@@ -1,5 +1,5 @@
 .core-test {
-  font: 12px/16px Helvetica, sans-serif;
+  font: 12px/16px "Helvetica", Verdana, Arial, sans-serif;
   margin: 0;
   padding: 0;
   position: absolute;
@@ -11,7 +11,7 @@
   
 .core-test .useragent {
   border-bottom: 1px solid #000;
-  font: 10pt "Helvetica Neue", sans-serif;
+  font: 10pt "Helvetica", Verdana, Arial, sans-serif;
   height: 15px;
 }
 
