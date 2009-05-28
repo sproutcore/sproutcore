@@ -31,6 +31,13 @@ TestRunner.Target = SC.Record.extend(
   children: function() {
     var store = this.get('store');
     return store.findAll(TestRunner.Target).filterProperty('parent', this);
-  }.property().cacheable()
+  }.property().cacheable(),
+  
+  /**
+    Display name for this target
+  */
+  displayName: function() {
+    return this.get('name').slice(1).titleize();
+  }.property('name').cacheable()
 
 }) ;

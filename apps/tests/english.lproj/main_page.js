@@ -35,7 +35,7 @@ TestRunner.mainPage = SC.Page.design({
         contentView: SC.SourceListView.design({
           contentBinding: "TestRunner.targetsController.arrangedObjects",
           selectionBinding: "TestRunner.targetsController.selection",
-          contentValueKey: "name"
+          contentValueKey: "displayName"
         })
       }),
       
