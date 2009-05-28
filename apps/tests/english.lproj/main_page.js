@@ -32,7 +32,7 @@ TestRunner.mainPage = SC.Page.design({
       topLeftView: SC.ScrollView.design({
         
         hasHorizontalScroller: NO, // disable horizontal scrolling
-        contentView: SC.ListView.design({
+        contentView: SC.SourceListView.design({
           contentBinding: "TestRunner.targetsController.arrangedObjects",
           selectionBinding: "TestRunner.targetsController.selection",
           contentValueKey: "name"

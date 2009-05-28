@@ -1,12 +1,12 @@
 // ==========================================================================
-// Project:   TestRunner.targetController Unit Test
+// Project:   TestRunner.targetsController Unit Test
 // Copyright: ©2009 My Company, Inc.
 // ==========================================================================
 /*globals TestRunner module test ok equals same stop start */
 
-module("TestRunner.targetController");
+module("TestRunner.targetsController");
 
-// TODO: Replace with real unit test for TestRunner.targetController
+// TODO: Replace with real unit test for TestRunner.targetsController
 test("test description", function() {
   var expected = "test";
   var result   = "test";
