@@ -327,6 +327,41 @@ SC.Enumerable = {
     return ret ;
   },
 
+  /** 
+    Returns an array sorted by the value of the passed key parameters.
+    null objects will be sorted first.  You can pass either an array of keys
+    or multiple parameters which will act as key names
+    
+    @param {String} key one or more key names
+    @returns {Array}
+  */
+  sortProperty: function(key) {
+    var keys = (typeof key === SC.T_STRING) ? arguments : key,
+        len  = keys.length,
+        src;
+     
+    // get the src array to sort   
+    if (this instanceof Array) src = this;
+    else {
+      src = [];
+      this.forEach(function(i) { src.push(i); });
+    }
+    
+    if (!src) return [];
+    return src.sort(function(a,b) {
+      var idx, key, aValue, bValue, ret = 0;
+      
+      for(idx=0;ret===0 && idx<len;idx++) {
+        key = keys[idx];
+        aValue = a ? (a.get ? a.get(key) : a[key]) : null;
+        bValue = b ? (b.get ? b.get(key) : b[key]) : null;
+        ret = SC.compare(aValue, bValue);
+      }
+      return ret ;
+    });
+  },
+  
+
   /**
     Returns an array with just the items with the matched property.  You
     can pass an optional second argument with the target value.  Otherwise
@@ -960,7 +995,8 @@ Array.prototype.isEnumerable = YES ;
     nextObject: SC.Enumerable.nextObject,
     enumerator: SC.Enumerable.enumerator,
     firstObject: SC.Enumerable.firstObject,
-
+    sortProperty: SC.Enumerable.sortProperty,
+    
     // see above...
     mapProperty: function(key) {
       var len = this.length ;

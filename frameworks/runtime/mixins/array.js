@@ -263,7 +263,7 @@ SC.Array = {
     }) ;
     return ret ;
   },
-  
+
   /**
     Generates a new array with only unique values from the contents of the
     old array.
