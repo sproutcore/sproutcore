@@ -415,7 +415,7 @@ SC.Observable = {
       // clear any cached value
       if (!_keepCache) {
         func = this[key] ;
-        if (func && (func instanceof Function) && func.isCacheable) {
+        if (func && (func instanceof Function)) {
           cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined ;
         }
       }
@@ -897,7 +897,7 @@ SC.Observable = {
     var log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO) ;
     var observers, changes, dependents, starObservers, idx, keys, rev ;
     var members, membersLength, member, memberLoc, target, method, loc, func ;
-    var context, spaces ;
+    var context, spaces, cache ;
 
     if (log) {
       spaces = SC.KVO_SPACES = (SC.KVO_SPACES || '') + '  ';
@@ -945,10 +945,13 @@ SC.Observable = {
             if (log) {
               console.log("%@...including dependent keys for %@: %@".fmt(spaces, key, keys));
             }
+            cache = this._kvo_cache;
+            if (!cache) cache = this._kvo_cache = {};
             while(--loc >= 0) {
               changes.add(key = keys[loc]);
-              if ((func = this[key]) && func.isCacheable) {
+              if (func = this[key]) {
                 this[func.cacheKey] = undefined;
+                cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined;
               } // if (func=)
             } // while (--loc)
           } // if (keys && 

@@ -186,7 +186,18 @@ module("Computed properties", {
       nestedIncCallCount: 0,
       nestedInc: function(key, value) {
         return this.nestedIncCallCount++;
-      }.property('inc').cacheable()
+      }.property('inc').cacheable(),
+      
+      // two computed properties that depend on a third property
+      state: 'on',
+      isOn: function(key, value) {
+        if (value !== undefined) this.set('state', 'on');
+        return this.get('state') === 'on';
+      }.property('state'),
+      isOff: function(key, value) {
+        if (value !== undefined) this.set('state', 'off');
+        return this.get('state') === 'off';
+      }.property('state')
       
       
     })    ;
@@ -330,6 +341,16 @@ test("allPropertiesDidChange should clear cache", function() {
   equals(object.get('inc'), ret1+1, 'should increment after change');
 });
 
+test('setting one of two computed properties that depend on a third property should clear the kvo cache', function() {
+  // we have to call set twice to fill up the cache
+  object.set('isOff', YES);
+  object.set('isOn', YES);
+  
+  // setting isOff to YES should clear the kvo cache
+  object.set('isOff', YES);
+  equals(object.get('isOff'), YES, 'object.isOff should be YES');
+  equals(object.get('isOn'), NO, 'object.isOn should be NO');
+});
 
 // ..........................................................
 // OBSERVABLE OBJECTS
