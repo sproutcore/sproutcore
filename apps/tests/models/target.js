@@ -24,20 +24,25 @@ TestRunner.Target = SC.Record.extend(
     Parent of target.  Only non-null for nested targets.
   */
   parent: SC.Record.toOne("TestRunner.Target"),
+
+  isExpanded: SC.Record.attr(Boolean, { defaultValue: NO }),
   
   /**
     Children of this target.  Computed by getting the loaded targets
   */
   children: function() {
     var store = this.get('store');
-    return store.findAll(TestRunner.Target).filterProperty('parent', this);
+    var ret = TestRunner.get('targets').filterProperty('parent', this);
+    if (ret) ret = ret.sortProperty('kind', 'displayName');
+    return (ret && ret.get('length')>0) ? ret : null ;
   }.property().cacheable(),
   
   /**
     Display name for this target
   */
   displayName: function() {
-    return this.get('name').slice(1).titleize();
+    var name = (this.get('name') || '(unknown)').split('/');
+    return name[name.length-1];
   }.property('name').cacheable(),
   
   /**
@@ -55,6 +60,17 @@ TestRunner.Target = SC.Record.extend(
         break;
     }
     return ret ;
-  }.property('kind').cacheable()
+  }.property('kind').cacheable(),
+  
+  /**
+    This is the group key used to display.  Will be the kind unless the item
+    belongs to the sproutcore target.
+  */
+  sortKind: function() {
+    //if (this.get('name') === '/sproutcore') return null;
+    var parent = this.get('parent');
+    if (parent && (parent.get('name') === '/sproutcore')) return 'sproutcore';
+    else return (this.get('kind') || 'unknown').toLowerCase();
+  }.property('kind', 'parent').cacheable()
 
 }) ;

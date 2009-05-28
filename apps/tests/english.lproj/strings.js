@@ -11,5 +11,7 @@
 // localized string added to this file!
 //
 SC.stringsFor('English', {
-  // "_String Key": "Localized String"
+  "Kind.app": "Apps",
+  "Kind.framework" : "Frameworks",
+  "Kind.sproutcore" : "SproutCore"
 }) ;
