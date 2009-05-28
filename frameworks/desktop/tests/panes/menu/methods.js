@@ -7,11 +7,10 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-module("TODO: Test SC.MenuPane Methods");
-
 var menu;
 var menuItemTarget;
 var menuItemTargetName = "The Target";
+var menuItemCheckboxKey = "isCheckbox";
 
 module('SC.MenuPane#MenuItemTargetIsSet', {
   setup: function() {
@@ -23,6 +22,7 @@ module('SC.MenuPane#MenuItemTargetIsSet', {
       layout: { width: 80, height: 0 },
       itemTargetKey: 'myTarget',
       itemTitleKey: 'myTitle',
+      itemCheckboxKey: menuItemCheckboxKey,
       items: [
         { myTitle: "Item1", myTarget: menuItemTarget }
       ],
@@ -44,4 +44,12 @@ test("Menu sets item target.", function() {
   menu.remove(); // remove the menu
   var success = (target && (target.myName === menuItemTargetName)); // check to see if it's the right target
   ok(success, "Menu item should have the target we specified.");
+});
+
+test("Menu sets MenuItem.contentCheckboxKey.", function() {
+  menu.append();
+  var key = menu.menuItemViews[0].get('contentCheckboxKey');
+  menu.remove();
+  var success = (key && (key === menuItemCheckboxKey));
+  ok(success, "MenuItem.contentCheckboxKey should equal MenuPane.itemCheckboxKey after being rendered.");
 });
