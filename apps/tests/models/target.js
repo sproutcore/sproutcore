@@ -38,6 +38,23 @@ TestRunner.Target = SC.Record.extend(
   */
   displayName: function() {
     return this.get('name').slice(1).titleize();
-  }.property('name').cacheable()
+  }.property('name').cacheable(),
+  
+  /**
+    The icon to display.  Based on the type.
+  */
+  targetIcon: function() {
+    var ret = 'sc-icon-document-16';
+    switch(this.get('kind')) {
+      case "framework":
+        ret = 'sc-icon-folder-16';
+        break;
+        
+      case "app":
+        ret = 'sc-icon-options-16';
+        break;
+    }
+    return ret ;
+  }.property('kind').cacheable()
 
 }) ;
