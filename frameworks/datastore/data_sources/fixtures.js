@@ -41,6 +41,11 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   fetch: function(store, fetchKey, params) {
     
     var ret = [], dataHashes, i, storeKey, hashes= [];
+    
+    if(SC.typeOf(fetchKey)===SC.T_STRING) {
+      fetchKey = SC.objectForPropertyPath(fetchKey);
+    }
+    
     if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
       return ret ;
     }
