@@ -194,13 +194,13 @@ module("Computed properties", {
         if (value !== undefined) this.set('state', 'on');
         return this.get('state') === 'on';
       }.property('state'),
+      
       isOff: function(key, value) {
         if (value !== undefined) this.set('state', 'off');
         return this.get('state') === 'off';
       }.property('state')
       
-      
-    })    ;
+    }) ;
   }
 });
 
@@ -362,152 +362,163 @@ module("Observable objects & object properties ", {
     object = SC.Object.create({
       
       normal: 'value',
-	  abnormal: 'zeroValue',
+      abnormal: 'zeroValue',
       numberVal: 24,
       toggleVal: true,
-      observedProperty:'beingWatched',
-	  testRemove:'observerToBeRemoved',	
-		
-	  automaticallyNotifiesObserversFor : function(key) { 
-	          	    return NO;		
-  	  },	
-	  
-	  getEach: function() {
-	    	var keys = ['normal','abnormal'];
-	    	var ret = [];
-	    	for(var idx=0; idx<keys.length;idx++) {
-	      		ret[ret.length] = this.getPath(keys[idx]);
-	    	}
-	    	return ret ;
-	  },
-	  
-	  newObserver:function(){
-			this.abnormal = 'changedValueObserved';
-	  },
-	
-	  testObserver:function(){
-			this.abnormal = 'removedObserver';
-	  }.observes('normal')
-	
-    });	
-	}	 
+      observedProperty: 'beingWatched',
+      testRemove: 'observerToBeRemoved',  
+      normalArray: [1,2,3,4,5],
+    
+      automaticallyNotifiesObserversFor : function(key) { 
+        return NO;    
+      },  
+    
+      getEach: function() {
+        var keys = ['normal','abnormal'];
+        var ret = [];
+        for(var idx=0; idx<keys.length;idx++) {
+          ret[ret.length] = this.getPath(keys[idx]);
+        }
+        return ret ;
+      },
+    
+      newObserver:function(){
+        this.abnormal = 'changedValueObserved';
+      },
+    
+      testObserver:function(){
+        this.abnormal = 'removedObserver';
+      }.observes('normal'),
+    
+      testArrayObserver:function(){
+        this.abnormal = 'notifiedObserver';
+      }.observes('*normalArray.[]')
+    
+    });
+  }   
   
 });
 
 test('incrementProperty and decrementProperty',function(){
-  	var newValue = object.incrementProperty('numberVal');
-    equals(25,newValue,'numerical value incremented');
-	object.numberVal = 24;
-	newValue = object.decrementProperty('numberVal');
-    equals(23,newValue,'numerical value decremented');
+  var newValue = object.incrementProperty('numberVal');
+  equals(25,newValue,'numerical value incremented');
+  object.numberVal = 24;
+  newValue = object.decrementProperty('numberVal');
+  equals(23,newValue,'numerical value decremented');
 });
 
 test('toggle function, should be boolean',function(){
-  	equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal')); 
-    equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
-    equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));
+  equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal')); 
+  equals(object.toggleProperty('toggleVal',true,false),object.get('toggleVal'));
+  equals(object.toggleProperty('toggleVal',undefined,undefined),object.get('toggleVal'));
 });
 
 test('should not notify the observers of a property automatically',function(){
-	object.set('normal', 'doNotNotifyObserver'); 
-	equals(object.abnormal,'zeroValue')	;
+  object.set('normal', 'doNotNotifyObserver'); 
+  equals(object.abnormal,'zeroValue')  ;
+});
+
+test('should notify array observer when array changes',function(){
+  object.normalArray.replace(0,0,6);
+  equals(object.abnormal, 'notifiedObserver', 'observer should be notified');
 });
 
 
-module("object.addObserver()", {	
-	setup: function() {
-				
-		ObjectC = SC.Object.create({
-			
-			ObjectE:SC.Object.create({
-				propertyVal:"chainedProperty"
-			}),
-			
-			normal: 'value',
-			normal1: 'zeroValue',
-			normal2: 'dependentValue',
-			incrementor: 10,
-			
-			action: function() {
-				this.normal1= 'newZeroValue';
-			},
-						
-			observeOnceAction: function() {
-				this.incrementor= this.incrementor+1;
-			},
-							
-			chainedObserver:function(){
-				this.normal2 = 'chainedPropertyObserved' ;
-			}
-		});
-   	}
+module("object.addObserver()", {  
+  setup: function() {
+        
+    ObjectC = SC.Object.create({
+      
+      ObjectE:SC.Object.create({
+        propertyVal:"chainedProperty"
+      }),
+      
+      normal: 'value',
+      normal1: 'zeroValue',
+      normal2: 'dependentValue',
+      incrementor: 10,
+      
+      action: function() {
+        this.normal1= 'newZeroValue';
+      },
+            
+      observeOnceAction: function() {
+        this.incrementor= this.incrementor+1;
+      },
+              
+      chainedObserver:function(){
+        this.normal2 = 'chainedPropertyObserved' ;
+      }
+      
+    });
+  }
 });
 
 test("should register an observer for a property", function() {
-	ObjectC.addObserver('normal', ObjectC, 'action');
-	ObjectC.set('normal','newValue');
-	equals(ObjectC.normal1, 'newZeroValue');
+  ObjectC.addObserver('normal', ObjectC, 'action');
+  ObjectC.set('normal','newValue');
+  equals(ObjectC.normal1, 'newZeroValue');
 });
 
 test("should register an observer for a property - Special case of chained property", function() {
-	 ObjectC.addObserver('ObjectE.propertyVal',ObjectC,'chainedObserver');
-	 ObjectC.ObjectE.set('propertyVal',"chainedPropertyValue");
-	 equals('chainedPropertyObserved',ObjectC.normal2);
-	 ObjectC.normal2 = 'dependentValue';
-	 ObjectC.set('ObjectE','');
-	 equals('chainedPropertyObserved',ObjectC.normal2);	
+  ObjectC.addObserver('ObjectE.propertyVal',ObjectC,'chainedObserver');
+  ObjectC.ObjectE.set('propertyVal',"chainedPropertyValue");
+  equals('chainedPropertyObserved',ObjectC.normal2);
+  ObjectC.normal2 = 'dependentValue';
+  ObjectC.set('ObjectE','');
+  equals('chainedPropertyObserved',ObjectC.normal2);  
 });
 
 
-module("object.removeObserver()", {	
-	setup: function() {
-		ObjectD = SC.Object.create({
-			
-			ObjectF:SC.Object.create({
-					propertyVal:"chainedProperty"
-			}),
-			
-			normal: 'value',
-			normal1: 'zeroValue',
-			normal2: 'dependentValue',
-			ArrayKeys: ['normal','normal1'],
-							
-			addAction: function() {
-				this.normal1= 'newZeroValue';
-			},
-			
-			removeAction: function() {
-				this.normal2= 'newDependentValue';
-			},
-			removeChainedObserver:function(){
-				this.normal2 = 'chainedPropertyObserved' ;
-			}
-		});
-   	}
+module("object.removeObserver()", {  
+  setup: function() {
+    ObjectD = SC.Object.create({
+      
+      ObjectF:SC.Object.create({
+        propertyVal:"chainedProperty"
+      }),
+      
+      normal: 'value',
+      normal1: 'zeroValue',
+      normal2: 'dependentValue',
+      ArrayKeys: ['normal','normal1'],
+      
+      addAction: function() {
+        this.normal1 = 'newZeroValue';
+      },
+      removeAction: function() {
+        this.normal2 = 'newDependentValue';
+      },
+      removeChainedObserver:function(){
+        this.normal2 = 'chainedPropertyObserved' ;
+      }
+    });
+    
+  }
 });
 
 test("should unregister an observer for a property", function() {
-	ObjectD.addObserver('normal', ObjectD, 'addAction');
-	ObjectD.set('normal','newValue');
-	equals(ObjectD.normal1, 'newZeroValue');
-	
-	ObjectD.set('normal1','zeroValue');
-	
-	ObjectD.removeObserver('normal', ObjectD, 'addAction');
-	ObjectD.set('normal','newValue');
-	equals(ObjectD.normal1, 'zeroValue');	
+  ObjectD.addObserver('normal', ObjectD, 'addAction');
+  ObjectD.set('normal','newValue');
+  equals(ObjectD.normal1, 'newZeroValue');
+  
+  ObjectD.set('normal1','zeroValue');
+  
+  ObjectD.removeObserver('normal', ObjectD, 'addAction');
+  ObjectD.set('normal','newValue');
+  equals(ObjectD.normal1, 'zeroValue');  
 });
 
 
 test("should unregister an observer for a property - special case when key has a '.' in it.", function() {
-   	ObjectD.addObserver('ObjectF.propertyVal',ObjectD,'removeChainedObserver');
-	ObjectD.ObjectF.set('propertyVal',"chainedPropertyValue");
-	ObjectD.removeObserver('ObjectF.propertyVal',ObjectD,'removeChainedObserver');
-	ObjectD.normal2 = 'dependentValue';
-	ObjectD.ObjectF.set('propertyVal',"removedPropertyValue");
-	equals('dependentValue',ObjectD.normal2);
-	ObjectD.set('ObjectF','');
-	equals('dependentValue',ObjectD.normal2);	
+  ObjectD.addObserver('ObjectF.propertyVal',ObjectD,'removeChainedObserver');
+  ObjectD.ObjectF.set('propertyVal',"chainedPropertyValue");
+  ObjectD.removeObserver('ObjectF.propertyVal',ObjectD,'removeChainedObserver');
+  ObjectD.normal2 = 'dependentValue';
+  ObjectD.ObjectF.set('propertyVal',"removedPropertyValue");
+  equals('dependentValue',ObjectD.normal2);
+  ObjectD.set('ObjectF','');
+  equals('dependentValue',ObjectD.normal2);  
 });
 
 
@@ -520,16 +531,16 @@ module("Bind function ", {
       location: "Timbaktu"
     });
 
-   	objectB = SC.Object.create({
+    objectB = SC.Object.create({
       normal: "value",
- 	  computed:function(){
-		this.normal = 'newValue';
-	  }
+      computed:function() {
+        this.normal = 'newValue';
+      }
     }) ;
          
     Namespace = {
       objectA: objectA,
-	  objectB: objectB	
+      objectB: objectB  
     } ;
   }
 });
