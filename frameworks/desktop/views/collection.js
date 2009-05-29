@@ -1604,8 +1604,8 @@ SC.CollectionView = SC.View.extend(
   
   /** @private */
   keyDown: function(evt) {
-    console.log('keyDown called on %@'.fmt(this));
-    return this.interpretKeyEvents(evt) ;
+    var ret = this.interpretKeyEvents(evt) ;
+    return !ret ? NO : ret ;
   },
   
   /** @private */
