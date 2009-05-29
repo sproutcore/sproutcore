@@ -418,7 +418,7 @@ SC.Observable = {
       // clear any cached value
       if (!_keepCache) {
         func = this[key] ;
-        if (func && (func instanceof Function) && func.isCacheable) {
+        if (func && (func instanceof Function)) {
           cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined ;
         }
       }
@@ -949,10 +949,12 @@ SC.Observable = {
               console.log("%@...including dependent keys for %@: %@".fmt(spaces, key, keys));
             }
             cache = this._kvo_cache;
+            if (!cache) cache = this._kvo_cache = {};
             while(--loc >= 0) {
               changes.add(key = keys[loc]);
-              if (cache && (func = this[key])) {
-                cache[func.cacheKey]=cache[func.lastSetValueKey]=undefined;
+              if (func = this[key]) {
+                this[func.cacheKey] = undefined;
+                cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined;
               } // if (func=)
             } // while (--loc)
           } // if (keys && 
