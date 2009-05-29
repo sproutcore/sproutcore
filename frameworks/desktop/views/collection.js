@@ -1653,9 +1653,17 @@ SC.CollectionView = SC.View.extend(
 
   /** @private
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
+    If item is expandable, will collapse.
   */
   moveLeft: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1);
+    else {
+      var sel     = this.get('selection'),
+          content = this.get('content'),
+          indexes = sel ? sel.indexSetForSource(content) : null;
+      if (indexes) this.collapse(indexes);
+    }
+    
     return true ;
   },
   
@@ -1664,6 +1672,13 @@ SC.CollectionView = SC.View.extend(
   */
   moveRight: function(sender, evt) {
     if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(false, 1) ;
+    else {
+      var sel     = this.get('selection'),
+          content = this.get('content'),
+          indexes = sel ? sel.indexSetForSource(content) : null;
+      if (indexes) this.expand(indexes);
+    }
+    
     return true ;
   },
   
