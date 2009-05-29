@@ -17,6 +17,8 @@ TestRunner.sourceController = SC.TreeController.create(
   
   treeItemChildrenKey: "children",
   
-  treeItemIsExpandedKey: "isExpanded"
+  treeItemIsExpandedKey: "isExpanded",
+  
+  treeItemIsGrouped: YES
  
 }) ;
