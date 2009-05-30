@@ -21,7 +21,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // STANDARD DATA SOURCE METHODS
   // 
   
-
   /**
     
     Invoked by the store whenever it needs to load a fresh new batch or records
@@ -40,67 +39,88 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */  
   fetch: function(store, fetchKey, params) {
     
-    var ret, dataHashes, i, storeKey, cache, hashes= [];
+    var ret = [], fixtures;
+    
+    if(SC.instanceOf(fetchKey, SC.Query)) {
+      fetchKey = fetchKey.recordType;
+    }
     
     if(SC.typeOf(fetchKey)===SC.T_STRING) {
       fetchKey = SC.objectForPropertyPath(fetchKey);
     }
     
-    if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
-      return [] ;
-    }
-    
-    // IMPORTANT: Use a cache to find fetched fixtures only once.  This way
-    // multiple fetch requests return the same array.
-    cache = this._fetchedFixtures;
-    if (!cache) cache = this._fetchedFixtures = {};
-    ret = cache[SC.guidFor(fetchKey)];
-    
-    if (!ret) {
-      ret = [];
-      dataHashes = this.fixturesFor(fetchKey);
-      for(i in dataHashes){
-        storeKey = fetchKey.storeKeyFor(i);
-        hashes.push(dataHashes[i]);
-        ret.push(storeKey);
-      }
-      store.loadRecords(fetchKey, hashes);
+    if(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey)) {
+      // return store keys if they are already in store
+      // instead of running loadFixtures which could cause inifinite
+      // loop with SC.Query
+      fixtures = this.storeKeysForFixtures(fetchKey);
+      if(fixtures) return fixtures;
       
-      cache[SC.guidFor(fetchKey)] = ret ;
+      this.loadFixturesFor(store, fetchKey, ret);
     }
     
     return ret;
   },
   
-  retrieveRecord: function(store, storeKey) {
-    var ret = [], dataHashes, i, hashes= [];
+  /**
+    Load fixtures for a given fetchKey into the store
+    and push it to the ret array.
     
-    var recordType = SC.Store.recordTypeFor(storeKey),
+    @param {SC.Store} store
+    @param {SC.Record} fetchKey
+    @param {SC.Array} ret
+  */
+  loadFixturesFor: function(store, fetchKey, ret) {
+    var dataHashes, i, storeKey, hashes = [];
+    dataHashes = this.fixturesFor(fetchKey);
+    for(i in dataHashes){
+      storeKey = fetchKey.storeKeyFor(i);
+      hashes.push(dataHashes[i]);
+      ret.push(storeKey);
+    }
+    store.loadRecords(fetchKey, hashes);
+  },
+  
+  /**
+    Retrieve a record from fixtures.
+    
+    @param {SC.Store} store
+    @param {Number} storeKey
+    @param {SC.Array} ret
+  */
+  retrieveRecord: function(store, storeKey) {
+    var ret = [], recordType = SC.Store.recordTypeFor(storeKey),
         id = store.idFor(storeKey),
-        hash=this.fixtureForStoreKey(store, storeKey);
+        hash = this.fixtureForStoreKey(store, storeKey);
     ret.push(storeKey);
     store.dataSourceDidComplete(storeKey, hash, id);
     
     return ret;
   },
   
-  
   /**
     Fixture operations complete immediately so you cannot cancel them.
+    
+    @param {SC.Store} store
+    @param {SC.Array} storeKeys
+    @returns {Boolean} YES if handled
   */
   cancel: function(store, storeKeys) {
     return NO;
   },
   
- /**
+  /**
     Update the dataHash in this._fixtures
+    
+    @param {SC.Store} store
+    @param {Number} storeKey
+    @returns {Boolean} YES if handled
   */
   updateRecord: function(store, storeKey) {
     this.setFixtureForStoreKey(store, storeKey, store.readDataHash(storeKey));
     store.dataSourceDidComplete(storeKey);  
     return YES ;
   },
-
 
   /**
     Adds records to this._fixtures.  If the record does not have an id yet,
@@ -209,6 +229,26 @@ SC.FixturesDataSource = SC.DataSource.extend( {
       fixtures[id] = dataHash;
     }  
     return fixtures;
+  },
+  
+  /**
+    Returns array of storeKeys for a given recordType
+    that have already been loaded by this DataSource
+    
+    @param {SC.Record} recordType
+    @returns {SC.Array} storeKeys
+  */
+  storeKeysForFixtures: function(recordType) {
+    if (!this._fixtures) return;
+    
+    var ret = [], fixtures = this._fixtures[SC.guidFor(recordType)];
+    
+    for(storeKey in fixtures) {
+      ret.push(storeKey);
+    }
+    
+    return ret.length>0 ? ret : undefined;
+    
   }
   
 });
