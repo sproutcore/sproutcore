@@ -87,6 +87,25 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   },
   
   /**
+    Load fixtures for a given fetchKey into the store
+    and push it to the ret array.
+    
+    @param {SC.Store} store
+    @param {SC.Record} fetchKey
+    @param {SC.Array} ret
+  */
+  loadFixturesFor: function(store, fetchKey, ret) {
+    var dataHashes, i, storeKey, hashes = [];
+    dataHashes = this.fixturesFor(fetchKey);
+    for(i in dataHashes){
+      storeKey = fetchKey.storeKeyFor(i);
+      hashes.push(dataHashes[i]);
+      ret.push(storeKey);
+    }
+    store.loadRecords(fetchKey, hashes);
+  },
+  
+  /**
     Retrieve a record from fixtures.
     
     @param {SC.Store} store
