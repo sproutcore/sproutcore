@@ -40,28 +40,40 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */  
   fetch: function(store, fetchKey, params) {
     
-    var ret = [], dataHashes, i, storeKey, hashes= [];
+    var ret, dataHashes, i, storeKey, cache, hashes= [];
     
     if(SC.typeOf(fetchKey)===SC.T_STRING) {
       fetchKey = SC.objectForPropertyPath(fetchKey);
     }
     
     if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
-      return ret ;
+      return [] ;
     }
-    dataHashes = this.fixturesFor(fetchKey);
-    for(i in dataHashes){
-      storeKey = fetchKey.storeKeyFor(i);
-      hashes.push(dataHashes[i]);
-      ret.push(storeKey);
+    
+    // IMPORTANT: Use a cache to find fetched fixtures only once.  This way
+    // multiple fetch requests return the same array.
+    cache = this._fetchedFixtures;
+    if (!cache) cache = this._fetchedFixtures = {};
+    ret = cache[SC.guidFor(fetchKey)];
+    
+    if (!ret) {
+      ret = [];
+      dataHashes = this.fixturesFor(fetchKey);
+      for(i in dataHashes){
+        storeKey = fetchKey.storeKeyFor(i);
+        hashes.push(dataHashes[i]);
+        ret.push(storeKey);
+      }
+      store.loadRecords(fetchKey, hashes);
+      
+      cache[SC.guidFor(fetchKey)] = ret ;
     }
-    store.loadRecords(fetchKey, hashes);
     
     return ret;
   },
   
   retrieveRecord: function(store, storeKey) {
-    var ret = [], dataHashes, i, storeKey, hashes= [];
+    var ret = [], dataHashes, i, hashes= [];
     
     var recordType = SC.Store.recordTypeFor(storeKey),
         id = store.idFor(storeKey),
