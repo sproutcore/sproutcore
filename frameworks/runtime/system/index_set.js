@@ -251,6 +251,8 @@ SC.IndexSet = SC.mixin({},
     
     // normalize input
     if (length === undefined) { 
+      if (start === null || start === undefined) return NO ;
+      
       if (typeof start === SC.T_NUMBER) {
         length = 1 ;
         
