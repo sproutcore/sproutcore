@@ -108,3 +108,14 @@ test("Update and commit a record", function() {
   equals(fixture.name, rec.get('name'), 'fixture state should update to match new name');
     
 });
+
+test("Using SC.Query on fetch()", function() {
+  
+  var fixtures = store.get('dataSource');
+  
+  var q = SC.Query.create({recordType: Sample.File});
+  
+  var storeKeys = fixtures.fetch(store, q);
+  equals(storeKeys.length, 9, 'storeKeys length should be 9');
+
+});

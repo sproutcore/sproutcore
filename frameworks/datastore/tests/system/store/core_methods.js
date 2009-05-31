@@ -5,10 +5,11 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp Sample */
 
-var store, Data, File, FileDisk, Application;
+var store, Application;
 
 module("SC.Store Core Methods", {
   setup: function() {
+    var dataSource = SC.DataSource.create({});
     
     Application = {};
     
@@ -33,15 +34,18 @@ module("SC.Store Core Methods", {
         { guid: '136', name: 'Software', fileType: 'software', url: '/emily_parker/Software', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'June 15, 2007', filetype: 'directory', isShared: true, sharedAt: 'October 15, 2007', sharedUntil: 'March 31, 2008', sharedUrl: '2fhty', isPasswordRequired: true}
       ]
     };
+    
+    store = SC.Store.create().from(dataSource);
+    for(var i in Application.Data) {
+      store.loadRecords(Application[i], Application.Data[i]);
+    }
+    
+    // make sure RecordType by String can map
+    window.Application = Application;
   }    
 });
 
 test("Verify loadRecords() loads data", function() {
-  var dataSource = SC.DataSource.create({});
-  var store = SC.Store.create().from(dataSource);
-  for(var i in Application.Data) {
-    store.loadRecords(Application[i], Application.Data[i]);
-  }
   
   equals(store.find(Application.File, '14').get('name'), 'Birthday Invitation.pdf', 'should return File 14');
   equals(store.find(Application.FileDisk, '14').get('name'), 'Main Drive', 'should return FileDisk 14');
@@ -49,18 +53,21 @@ test("Verify loadRecords() loads data", function() {
 });
 
 test("Verify storeKeys() gets all store keys", function() {
-  var dataSource = SC.DataSource.create({});
-  var store = SC.Store.create().from(dataSource);
+  
   var storeKey;
-  for(var i in Application.Data) {
-    store.loadRecords(Application[i], Application.Data[i]);
-  }
   
   equals(store.storeKeys().length, 10, 'Length should be 10');
   
   storeKey = store.storeKeyFor(Application.File, '10');
   store.writeStatus(storeKey, SC.Record.EMPTY);
   equals(store.storeKeys().length, 9, 'Length should be one less now');
+  
+});
+
+test("find() should take both SC.Record object and SC.Record string as recordtype argument", function() {
+  
+  equals(store.find('Application.File', '14').get('name'), 'Birthday Invitation.pdf', 'should return File 14');
+  equals(store.find(Application.File, '14').get('name'), 'Birthday Invitation.pdf', 'should return FileDisk 14');
   
 });
 

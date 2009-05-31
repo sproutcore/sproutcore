@@ -637,11 +637,16 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return a record instance with a status of SC.Record.BUSY_LOADING to indicate
     that it is still fetching the data from the server.
     
-    @param {SC.Record} recordType the expected record type
+    @param {SC.Record|String} recordType the expected record type
     @param {String} id the id to load
     @returns {SC.Record} record instance or null
   */
   find: function(recordType, id) {
+    // if recordType is passed as string, find object
+    if(SC.typeOf(recordType)===SC.T_STRING) {
+      recordType = SC.objectForPropertyPath(recordType);
+    }
+    
     // first attempt to find the record in the local store
     var storeKey = recordType.storeKeyFor(id);
     if (this.readStatus(storeKey) === SC.Record.EMPTY) {
