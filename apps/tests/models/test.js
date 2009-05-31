@@ -14,10 +14,16 @@
 TestRunner.Test = SC.Record.extend(
 /** @scope TestRunner.Test.prototype */ {
 
-  primaryKey: "link_test",
+  primaryKey: "url",
   
+  /**
+    The filename for this test.
+  */
   filename: SC.Record.attr(String),
   
-  testUrl: SC.Record.attr(String, { key: "link_test" })
+  /**
+    The test URL.
+  */
+  url: SC.Record.attr(String)
 
 }) ;
