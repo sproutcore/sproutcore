@@ -46,8 +46,12 @@ TestRunner.mainPage = SC.Page.design({
         hasHorizontalScroller: NO,
         contentView: SC.ListView.design({
           contentBinding: "TestRunner.testsController.arrangedObjects",
-          selectionBinding: "TestRUnner.testsController.selection",
-          contentValueKey: "filename"
+          selectionBinding: "TestRunner.testsController.selection",
+          contentValueKey: "filename",
+          actOnSelect: YES,
+          
+          target: "TestRunner.testsController",
+          action: "showDetails"
         })
         
       })

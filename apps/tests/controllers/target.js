@@ -13,6 +13,6 @@
 TestRunner.targetController = SC.ObjectController.create(
 /** @scope TestRunner.targetController.prototype */ {
 
-  contentBinding: "TestRunner.targetsController.selection"
+  contentBinding: "TestRunner.sourceController.selection"
 
 }) ;

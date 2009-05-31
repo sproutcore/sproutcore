@@ -25,6 +25,14 @@ TestRunner.Target = SC.Record.extend(
   */
   parent: SC.Record.toOne("TestRunner.Target"),
 
+  /**
+    URL to use to load tests.
+  */
+  testsUrl: SC.Record.attr(String, { key: "link_tests" }),
+  
+  /**
+    The isExpanded state.  Defaults to NO on load.
+  */
   isExpanded: SC.Record.attr(Boolean, { defaultValue: NO }),
   
   /**
@@ -71,6 +79,14 @@ TestRunner.Target = SC.Record.extend(
     var parent = this.get('parent');
     if (parent && (parent.get('name') === '/sproutcore')) return 'sproutcore';
     else return (this.get('kind') || 'unknown').toLowerCase();
-  }.property('kind', 'parent').cacheable()
+  }.property('kind', 'parent').cacheable(),
+  
+  /**
+    Returns all of the tests associated with this target by fetching the
+    testsUrl.
+  */
+  tests: function() {
+    return this.get('store').findAll(TestRunner.Test);
+  }.property('testsUrl').cacheable()
 
 }) ;
