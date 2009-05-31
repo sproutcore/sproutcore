@@ -54,7 +54,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
       // instead of running loadFixtures which could cause inifinite
       // loop with SC.Query
       fixtures = this.storeKeysForFixtures(fetchKey);
-      if(fixtures) return fixtures;
+      if (fixtures) return fixtures;
       
       this.loadFixturesFor(store, fetchKey, ret);
     }
@@ -137,6 +137,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
         fixtures   = this.fixturesFor(recordType);
         
     if (!id) id = this.generateIdFor(recordType, dataHash, store, storeKey);
+    this._invalidateCachesFor(recordType, storeKey, id);
     fixtures[id] = dataHash;
 
     store.dataSourceDidComplete(storeKey, null, id);
@@ -154,7 +155,8 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         fixtures   = this.fixturesFor(recordType);
-        
+
+    this._invalidateCachesFor(recordType, storeKey, id);
     if (id) delete fixtures[id];
     store.dataSourceDidDestroy(storeKey);  
     return YES ;
@@ -198,6 +200,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         fixtures   = this.fixturesFor(recordType);
+    this._invalidateCachesFor(recordType, storeKey, id);
     fixtures[id] = dataHash;
     return this ;
   },
@@ -239,17 +242,42 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @returns {SC.Array} storeKeys
   */
   storeKeysForFixtures: function(recordType) {
-    if (!this._fixtures) return;
+    var fixtures = this._fixtures,
+        cache    = this._storeKeyCache,
+        guid     = SC.guidFor(recordType), 
+        ret, i;
+
+    // nothing to do?
+    if (!fixtures || !(fixtures = fixtures[guid])) return null; 
+
+    // start with storeKey cache
+    if (!cache) cache = this._storeKeyCache = {};
+    if (ret = cache[guid]) return ret;
     
-    var ret = [], fixtures = this._fixtures[SC.guidFor(recordType)];
+    // not in cache; compute
+    ret = [];
+    for(i in fixtures) ret.push(recordType.storeKeyFor(i));
+    cache[guid] = ret.copy();
     
-    for(storeKey in fixtures) {
-      ret.push(storeKey);
-    }
+    return ret.length>0 ? ret : null;
+  },
+  
+  /**
+    Invalidates any internal caches based on the recordType and optional 
+    other parameters.  Currently this only invalidates the storeKeyCache used
+    for fetch, but it could invalidate others later as well.
     
-    return ret.length>0 ? ret : undefined;
-    
+    @param {SC.Record} recordType the type of record modified
+    @param {Number} storeKey optional store key
+    @param {String} id optional record id
+    @returns {SC.FixturesDataSource} receiver
+  */
+  _invalidateCachesFor: function(recordType, storeKey, id) {
+    var cache = this._storeKeyCache;
+    if (cache) delete cache[SC.guidFor(recordType)]
+    return this ;
   }
+  
   
 });
 
