@@ -715,7 +715,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     ret = this.recordArrayFromStoreKeys(storeKeys, fetchKey, _store);
-    
     return ret ;
   },
   
@@ -730,20 +729,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   recordArrayFromStoreKeys: function(storeKeys, fetchKey, _store) {
-    var ret, isQuery, cacheKey;
+    var ret, isQuery = SC.instanceOf(fetchKey, SC.Query), cacheKey, queryKey;
     
     // if an array was provided, see if a wrapper already exists for 
     // this store.  Otherwise create it
     cacheKey = SC.keyFor('__records__', [SC.guidFor(storeKeys), SC.guidFor(fetchKey)].join('_'));
     ret = this[cacheKey];
     if (!ret) {
-      ret = SC.RecordArray.create({store: _store, queryKey: fetchKey, storeKeys: storeKeys});
+      if(isQuery) queryKey = fetchKey;
+      ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys, queryKey: queryKey});
+      
       // store reference to record array if SC.Query so we can notify it
       // when store changes
-      if(SC.instanceOf(fetchKey, SC.Query)) {
+      if(isQuery) {
         if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
         this.recordArraysWithQuery.push(ret);
       }
+      
       this[cacheKey] = ret ; // save for future reuse.
     }
     return ret;

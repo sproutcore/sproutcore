@@ -133,7 +133,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Boolean} notify to send length notifyPropertyChange()
   */
   applyQuery: function(changedStoreKeys, recordTypes, notify) {
-    
     // first check if these changes include any of the record types
     if(recordTypes && recordTypes.contains(this.recordType)) return;
     
@@ -221,7 +220,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     this._records = null ; // clear cache
     // if this record array is based on a queryKey reapply the
     // the query before setting the storeKeys to ensure it always conforms
-    
     if(SC.instanceOf(this.queryKey, SC.Query)) {
       this.storeKeys = SC.Query.containsStoreKeys(this.queryKey, value, this.store);
       this.notifyPropertyChange('length');

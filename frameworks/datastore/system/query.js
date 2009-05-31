@@ -865,7 +865,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   */
   
   containsStoreKeys: function(query, storeKeys, store) {
-    var ret = [];
+    var ret = [], idx, len, rec;
     var recType = query.get('recordType');
     // if storeKeys is not set, just get all storeKeys for this record type,
     // or all storeKeys in store if no record type is given
@@ -878,9 +878,9 @@ SC.Query.mixin( /** @scope SC.Query */ {
       }
     }
     
-    for(var idx=0,len=storeKeys.length;idx<len;idx++) {
-      var record = store.materializeRecord(storeKeys[idx]);
-      if(record && query.contains(record)) ret.push(storeKeys[idx]);
+    for(idx=0,len=storeKeys.length;idx<len;idx++) {
+      var rec = store.materializeRecord(storeKeys[idx]);
+      if(rec && query.contains(rec)) ret.push(storeKeys[idx]);
     }
     
     SC.Query.orderStoreKeys(ret, query, store);

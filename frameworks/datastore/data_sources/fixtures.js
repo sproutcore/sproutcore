@@ -23,14 +23,15 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   
   /**
     
-    Invoked by the store whenever it needs to load a fresh new batch or records
-    or simply refresh based on their storeKeys. This method is invoked from 
-    the store methods 'findAll' and 'retrieveRecords'. 
+    Invoked by the store whenever it needs to load a fresh new batch or 
+    records or simply refresh based on their storeKeys. This method is 
+    invoked from the store methods 'findAll' and 'retrieveRecords'. 
     
-    findAll() will request all records and load them using store.loadRecords(). 
-    retrieveRecords() checks if the record is already loaded and in a clean 
-    state to then just materialize it or if is in an empty state, it will call 
-    this method to load the required record to then materialize it. 
+    findAll() will request all records and load them using 
+    store.loadRecords(). retrieveRecords() checks if the record is already 
+    loaded and in a clean state to then just materialize it or if is in an 
+    empty state, it will call this method to load the required record to 
+    then materialize it. 
     
     @param {SC.Store} store the requesting store
     @param {Object} fetchKey key describing the request, may be SC.Record
@@ -41,6 +42,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     
     var ret = [], fixtures;
     
+    // TODO: this currently only supports one recordType per SC.Query
     if(SC.instanceOf(fetchKey, SC.Query)) {
       fetchKey = fetchKey.recordType;
     }
@@ -50,12 +52,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     }
     
     if(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey)) {
-      // return store keys if they are already in store
-      // instead of running loadFixtures which could cause inifinite
-      // loop with SC.Query
-      fixtures = this.storeKeysForFixtures(fetchKey);
-      if (fixtures) return fixtures;
-      
       this.loadFixturesFor(store, fetchKey, ret);
     }
     
@@ -72,13 +68,22 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */
   loadFixturesFor: function(store, fetchKey, ret) {
     var dataHashes, i, storeKey, hashes = [];
+    
     dataHashes = this.fixturesFor(fetchKey);
+    
     for(i in dataHashes){
       storeKey = fetchKey.storeKeyFor(i);
       hashes.push(dataHashes[i]);
       ret.push(storeKey);
     }
-    store.loadRecords(fetchKey, hashes);
+    
+    // before loading fixtures again, make sure they have not been
+    // loaded already, so that SC.Query does not end up in 
+    // infinite loop
+    if(!this.fixturesLoadedFor(fetchKey)) {
+      store.loadRecords(fetchKey, hashes);
+    }
+    
   },
   
   /**
@@ -235,33 +240,17 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   },
   
   /**
-    Returns array of storeKeys for a given recordType
-    that have already been loaded by this DataSource
+    Returns YES is fixtures for a given recordType have already been loaded
     
     @param {SC.Record} recordType
-    @returns {SC.Array} storeKeys
+    @returns {Boolean} storeKeys
   */
-  storeKeysForFixtures: function(recordType) {
-    var fixtures = this._fixtures,
-        cache    = this._storeKeyCache,
-        guid     = SC.guidFor(recordType), 
-        ret, i;
-
-    // nothing to do?
-    if (!fixtures || !(fixtures = fixtures[guid])) return null; 
-
-    // start with storeKey cache
-    if (!cache) cache = this._storeKeyCache = {};
-    if (ret = cache[guid]) return ret;
-    
-    // not in cache; compute
-    ret = [];
-    for(i in fixtures) ret.push(recordType.storeKeyFor(i));
-    cache[guid] = ret.copy();
-    
-    return ret.length>0 ? ret : null;
+  fixturesLoadedFor: function(recordType) {
+    if (!this._fixtures) return NO;
+    var ret = [], fixtures = this._fixtures[SC.guidFor(recordType)];
+    return fixtures ? YES: NO;
   },
-  
+
   /**
     Invalidates any internal caches based on the recordType and optional 
     other parameters.  Currently this only invalidates the storeKeyCache used
@@ -277,7 +266,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     if (cache) delete cache[SC.guidFor(recordType)]
     return this ;
   }
-  
   
 });
 
