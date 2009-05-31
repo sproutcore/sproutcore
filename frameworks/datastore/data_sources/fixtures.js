@@ -269,7 +269,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var ret = [], fixtures = this._fixtures[SC.guidFor(recordType)];
     return fixtures ? YES: NO;
   },
-
+  
   /**
     Invalidates any internal caches based on the recordType and optional 
     other parameters.  Currently this only invalidates the storeKeyCache used
