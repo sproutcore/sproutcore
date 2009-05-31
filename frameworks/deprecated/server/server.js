@@ -5,7 +5,6 @@
 // ========================================================================
 
 require('core') ;
-require('model/store');
 
 SC.URL_ENCODED_FORMAT = 'url-encoded' ;
 SC.JSON_FORMAT = 'json';
