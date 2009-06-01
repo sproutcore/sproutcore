@@ -234,31 +234,29 @@ SC.ListView = SC.CollectionView.extend(
 
       ret += delta ;
     }
+    return ret ;
+  },
+  
+  /**
+    Returns the row height for the specified content index.  This will take
+    into account custom row heights and group rows.
     
-    idx = SC.maxRange(range) ;
+    @param {Number} idx content index
+    @returns {Number} the row height
+  */
+  rowHeightForContentIndex: function(idx) {
+    var del = this.get('rowDelegate'),
+        ret, cache, content, indexes;
     
-    var baseKey = SC.guidFor(this) + '_' ;
-    var guids = this._itemViewGuids, guid;
-    if (!guids) this._itemViewGuids = guids = {};
-    
-    // TODO: Use SC.IndexSet, not separate ranges, once it's ready.
-    // This will also make it possible to do partial updates during content
-    // and selection changes. Now we always do a full update.
-    
-    if (SC.DEBUG_PARTIAL_RENDER) {
-      if (childSet.length === 0) console.log('doing a full render');
-      else console.log('doing a partial render');
-    }
-    
-    while (--idx >= range.start) {
-      c = content.objectAt(idx) ;
-      if (SC.DEBUG_PARTIAL_RENDER) {
-        console.log('rendering content(%@) at index %@, content =>'.fmt(c.unread, idx));
-        console.log(c);
+    if (del.customRowHeightIndexes && (indexes=del.get('customRowHeightIndexes'))) {
+      cache = this._sclv_heightCache ;
+      if (!cache) {
+        cache = this._sclv_heightCache = [];
+        content = this.get('content');
+        indexes.forEach(function(idx) {
+          cache[idx] = del.contentIndexRowHeight(this, content, idx);
+        }, this);
       }
-      // use cache of item view guids to avoid creating temporary objects
-      guid = SC.guidFor(c);
-      if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
       
       itemView.set('content', c) ;
       itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;

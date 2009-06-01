@@ -394,8 +394,6 @@ SC.MenuPane = SC.PickerPane.extend(
       var itemKeyEquivalent = item.get('keyEquivalent') ;
       var itemTarget = item.get('target') ;
       var itemWidth = this.get('itemWidth') ;
-      //var itemTarget = this.get('itemTarget') ;
-      var itemTarget = item.get('target');
       var itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
@@ -405,7 +403,6 @@ SC.MenuPane = SC.PickerPane.extend(
           isVisible : YES,
           contentValueKey : 'title',
           contentIconKey : 'icon',
-          //contentCheckboxKey : 'checkbox',
           contentCheckboxKey: this.itemCheckboxKey,
           contentIsBranchKey :'branchItem',  
           isSeparatorKey : 'separator',

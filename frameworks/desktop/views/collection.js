@@ -849,6 +849,107 @@ SC.CollectionView = SC.View.extend(
     
     return this ;
   },
+
+  /** 
+    Invoked once per runloop to actually reload any needed item views.
+    You can call this method at any time to actually force the reload to
+    happen immediately if any item views need to be reloaded.
+    
+    Note that this method will also invoke two other callback methods if you
+    define them on your subclass:
+    
+    - *willReload()* is called just before the items are reloaded
+    - *didReload()* is called jsut after items are reloaded
+    
+    You can use these two methods to setup and teardown caching, which may
+    reduce overall cost of a reload.  Each method will be passed an index set
+    of items that are reloaded or null if all items are reloaded.
+    
+    @returns {SC.CollectionView} receiver
+  */
+  reloadIfNeeded: function() {
+    var invalid = this._invalidIndexes;
+    if (!invalid || !this.get('isVisibleInWindow')) return this ; // delay
+    this._invalidIndexes = NO ;
+    
+    var content = this.get('content'),
+        len     = content ? content.get('length'): 0,
+        layout  = this.computeLayout(),
+        bench   = SC.BENCHMARK_RELOAD,
+        nowShowing = this.get('nowShowing'),
+        itemViews  = this._sc_itemViews,
+        containerView = this.get('containerView') || this,
+        views, idx, cvlen, view, childViews ;
+
+    // if the set is defined but it contains the entire nowShowing range, just
+    // replace
+    if (invalid.isIndexSet && invalid.contains(nowShowing)) invalid = YES ;
+    if (this.willReload) this.willReload(invalid === YES ? null : invalid);
+
+    // if an index set, just update indexes
+    if (invalid.isIndexSet) {
+      childViews = containerView.get('childViews');
+      cvlen = childViews.get('length');
+      
+      if (bench) {
+        SC.Benchmark.start(bench="%@#reloadIfNeeded (Partial)".fmt(this),YES);
+      }
+      
+      invalid.forEach(function(idx) {
+        
+        // get the existing item view, if there is one
+        var existing = itemViews ? itemViews[idx] : null;
+        
+        // if nowShowing, then reload the item view.
+        if (nowShowing.contains(idx)) {
+          view = this.itemViewForContentIndex(idx, YES);
+          if (existing && existing.parentView === containerView) {
+            containerView.replaceChild(view, existing);
+          } else {
+            containerView.appendChild(view);
+          }
+          
+        // if not nowShowing, then remove the item view if needed
+        } else if (existing && existing.parentView === containerView) {
+          containerView.removeChild(existing);
+        }
+      },this);
+
+      if (bench) SC.Benchmark.end(bench);
+      
+    // if set is NOT defined, replace entire content with nowShowing
+    } else {
+
+      if (bench) {
+        SC.Benchmark.start(bench="%@#reloadIfNeeded (Full)".fmt(this),YES);
+      }
+
+      views = [];
+      nowShowing.forEach(function(idx) {
+        views.push(this.itemViewForContentIndex(idx, YES));
+      }, this);
+
+      // below is an optimized version of:
+      //this.replaceAllChildren(views);
+      containerView.beginPropertyChanges();
+      containerView.destroyLayer().removeAllChildren();
+      containerView.set('childViews', views); // quick swap
+      containerView.replaceLayer();
+      containerView.endPropertyChanges();
+      
+      if (bench) SC.Benchmark.end(bench);
+      
+    }
+    
+    // adjust my own layout if computed
+    if (layout) this.adjust(layout);
+    if (this.didReload) this.didReload(invalid === YES ? null : invalid);
+    
+    
+    return this ;
+  },
+  
+  displayProperties: 'isFirstResponder isEnabled isActive'.w(),
   
   displayProperties: 'isFirstResponder isEnabled isActive'.w(),
   
@@ -1050,18 +1151,9 @@ SC.CollectionView = SC.View.extend(
     }
     
     // okay, found the DOM node for the view, go ahead and create it
-    // first, find the content...
-    var contentGuid = element.id.slice(baseGuidLen+1) ;
-    var nowShowingRange = this.get('nowShowingRange') ;
-    var content = SC.makeArray(this.get('content')) ;
-    var idx = SC.minRange(nowShowingRange) ;
-    var max = SC.maxRange(nowShowingRange) ;
-    
-    var c = content.objectAt(idx) ;
-    while (SC.guidFor(c) !== contentGuid) {
-      idx++ ;
-      if (idx > max) return null ; // couldn't find the content...
-      c = content.objectAt(idx) ;
+    // first, find the contentIndex
+    if (contentIndex >= this.get('length')) {
+      throw "layout for item view %@ was found when item view does not exist (%@)".fmt(id, this);
     }
     
     return this.itemViewForContentIndex(contentIndex, NO);
