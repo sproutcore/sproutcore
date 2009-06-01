@@ -27,19 +27,18 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     be anything you want.
     
     If your data source subclass can handle the fetch you should override this 
-    method to return one out of three possible values:
-    1. SC.Array with storeKeys:
-       You can return it immediately or return an empty array and populate it 
-       dynamically later once the result set has arrived with .replace() .
-    2. SC.SparseArray:
-       The data source will be consulted to dynamically populate the contents 
-       of the array as it is requested.
-    3. SC.Query:
-       With this option, the record array returned from the store will 
-       automatically update when records are added, changed, or removed from 
-       the store. This is ideal if want to delegate to your store the job of 
-       keeping the record arrays up to date instead of consulting the 
-       data source every time.
+    method to return a SC.Array with storeKeys. You can return it immediately 
+    or return an empty array and populate it dynamically later once the result 
+    set has arrived with .replace() . You can also return a SC.SparseArray, 
+    where data source will be consulted to dynamically populate the contents 
+    of the array as it is requested.
+    
+    Note that if you gave an SC.Query as the fetchKey to findAll() on the store
+    you do not have to return anything from this method as you are from then on 
+    delegating the responsibility to keep the record array updated to the store.
+    The fetch() method in that case merely functions as a notification 
+    mechanism where you get the opportunity to fetch more data from a backend
+    based on the SC.Query.
     
     On return, the Store will write your result set in an SC.RecordArray 
     instance, which will monitor your array for changes and then maps those
@@ -53,19 +52,29 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     will call this method to load the required record to then materialize it.
     
     @param {SC.Store} store the requesting store
-    @param {Object} fetchKey key describing the request, may be SC.Record or
-        SC.Record.STORE_KEYS if invoked from store.retrieveRecords
+    @param {Object|SC.Query} fetchKey key describing the request, may be 
+      SC.Record or SC.Record.STORE_KEYS if invoked from store.retrieveRecords.
+      Could also be an SC.Query if that was passed in to findAll()
     @param {Hash} params optional additonal fetch params. storeKeys if invoked
-        from store.retrieveRecords
-    @returns {SC.Array|SC.Query} result set with storeKeys. In case of SC.Array
+      from store.retrieveRecords
+    @returns {SC.Array} result set with storeKeys. In case of SC.Array
       it may be sparse.
   */
   fetch: function(store, fetchKey, params) {
     return null;  
   },
   
-  retrieveRecords: function(store, storeKeys) {
-    return this._handleEach(store, storeKeys, this.retrieveRecord);  
+  /**
+    Called when store needs a set of storeKeys
+    
+    @param {SC.Store} store the requesting store
+    @param {Array} storeKeys
+    @param {Array} ids - optional
+    @returns 
+  */
+  
+  retrieveRecords: function(store, storeKeys, ids) {
+    return this._handleEach(store, storeKeys, this.retrieveRecord, ids);  
   },
   
   /**
@@ -102,9 +111,6 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     if(destroyStoreKeys.length>0) dret = this.destroyRecords.call(this, store, destroyStoreKeys); 
     return (cret === uret === dret) ? (cret || uret || dret) : SC.MIXED_STATE ;
   },
-  
-  
-  
   
   /**
     Invoked by the store whenever it needs to cancel one or more records that
@@ -185,10 +191,12 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   /** @private
     invokes the named action for each store key.  returns proper value
   */
-  _handleEach: function(store, storeKeys, action) {
+  _handleEach: function(store, storeKeys, action, ids) {
     var len = storeKeys.length, idx, ret, cur;
+    if(!ids) ids = [];
+    
     for(idx=0;idx<len;idx++) {
-      cur = action.call(this, store, storeKeys[idx]);
+      cur = action.call(this, store, storeKeys[idx], ids[idx]);
       if (ret === undefined) {
         ret = cur ;
       } else if (ret === YES) {
@@ -220,7 +228,15 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     return NO ;
   },
 
-  retrieveRecord: function(store, storeKey) {
+  /**
+    Called from retrieveRecords() to retrieve a single record.
+    
+    @param {SC.Store} store the requesting store
+    @param {Array} storeKey key to retrieve
+    @param {String} id the id to retrieve
+    @returns {Boolean} YES if handled
+  */
+  retrieveRecord: function(store, storeKey, id) {
     return NO ;
   },
 

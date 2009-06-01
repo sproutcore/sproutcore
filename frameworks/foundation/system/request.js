@@ -43,7 +43,13 @@ SC.Request = SC.Object.extend({
   
   send: function(body) {
     var request = this ; 
-    if(body) request.set('body', body) ;
+    if(body) {
+      if(this.get('isJSON')) {
+        body=SC.json.encode(body);
+        if(body===undefined) console.error('There was an error encoding to JSON');
+      }
+      request.set('body', body) ;
+    }
     SC.Request.manager.sendRequest(request) ;
     return request ;
   },
@@ -63,10 +69,10 @@ SC.Request = SC.Object.extend({
     }
     
     if (this.get("isJSON")) {
-        var source = response.responseText ;
-        var json = SC.json.decode(source) ;
-        //TODO cache this value?
-        return json ;
+      var source = response.responseText ;
+      var json = SC.json.decode(source) ;
+      //TODO cache this value?
+      return json ;
     }
     
     if(response.responseXML) return response.responseXML ;

@@ -9,7 +9,7 @@
 var SC = SC || {} ; 
 
 SC.mapDisplayNames = function(obj, level, path, seen) {
-  if (!SC.browser.safari) return ; 
+  if (!SC.browser.safari) return ;
   if (obj === undefined) obj = window;
   if (level === undefined) level = 0;
   if (path === undefined) path = [];
@@ -22,7 +22,7 @@ SC.mapDisplayNames = function(obj, level, path, seen) {
   path[loc] = '';
   
   for(var key in obj) {
-    if (!obj.hasOwnProperty(key)) continue ;
+    if (obj.hasOwnProperty && !obj.hasOwnProperty(key)) continue ;
     if (!isNaN(Number(key))) continue ; // skip array indexes
     if (key === "constructor") continue ;
     if (key === "superclass") continue ;

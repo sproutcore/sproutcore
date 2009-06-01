@@ -217,7 +217,7 @@ SC.RootResponder = SC.RootResponder.extend(
   */ 
   attemptKeyEquivalent: function(evt) {
     var ret = null ;
-    
+
     // keystring is a method name representing the keys pressed (i.e 
     // 'alt_shift_escape')
     var keystring = evt.commandCodes()[0];
@@ -420,7 +420,7 @@ SC.RootResponder = SC.RootResponder.extend(
         return evt.hasCustomEventHandling ;
       }
     }
-    return YES; // allow normal processing...
+    return this.sendEvent('keyDown', evt) ; // allow normal processing...
   },
   
   /** @private

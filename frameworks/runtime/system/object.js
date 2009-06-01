@@ -359,12 +359,14 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 // DEFAULT OBJECT INSTANCE
 // 
 SC.Object.prototype = {
-
+  
+  _kvo_enabled: YES,
+  
   /** @private
     This is the first method invoked on a new instance.  It will first apply
     any added properties to the new instance and then calls the real init()
     method.
-
+    
     @param {Array} extensions an array-like object with hashes to apply.
     @returns {Object} receiver
   */
@@ -374,23 +376,23 @@ SC.Object.prototype = {
     for(idx=0;idx<len;idx++) SC._object_extend(this, extensions[idx]) ;
     SC.generateGuid(this) ; // add guid
     this.init() ; // call real init
-
+    
     // Call 'initMixin' methods to automatically setup modules.
     var inits = this.initMixin; len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
-
+    
     return this ; // done!
   },
-
-  /** 
+  
+  /**
     You can call this method on an object to mixin one or more hashes of 
     properties on the receiver object.  In addition to simply copying 
     properties, this method will also prepare the properties for use in 
     bindings, computed properties, etc.
-
+    
     If you plan to use this method, you should call it before you call
     the inherited init method from SC.Object or else your instance may not 
-    function properly.  
+    function properly.
     
     h2. Example
     
@@ -398,7 +400,7 @@ SC.Object.prototype = {
       // dynamically apply a mixin specified in an object property
       var MyClass = SC.Object.extend({
          extraMixin: null,
-
+         
          init: function() {
            this.mixin(this.extraMixin);
            sc_super();
@@ -488,7 +490,7 @@ SC.Object.prototype = {
   respondsTo: function( methodName ) {
     return !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
   },
-
+  
   /**
     Attemps to invoked the named method, passing the included two arguments.  
     Returns NO if the method is either not implemented or if the handler 
@@ -597,7 +599,11 @@ SC.Object.prototype = {
   /** @private */
   toString: function() {
     if (!this._object_toString) {
-      this._object_toString = "%@:%@".fmt(SC._object_className(this.constructor), SC.guidFor(this));
+      // only cache the string if the klass name is available
+      var klassName = SC._object_className(this.constructor) ;
+      var string = "%@:%@".fmt(klassName, SC.guidFor(this));
+      if (klassName) this._object_toString = string ;
+      else return string ;
     } 
     return this._object_toString ;
   },

@@ -16,14 +16,14 @@ SC.ArraySuite.define(function(T) {
   // ..........................................................
   // MODULE: isDeep = YES 
   // 
-  module(T.desc("RangeObserver Methods - isDeep YES"), {
+  module(T.desc("RangeObserver Methods"), {
     setup: function() {
       expected = T.objects(10);
       array = T.newObject(expected);
 
       observer = T.observer();
       rangeObserver = array.addRangeObserver(SC.IndexSet.create(2,3), 
-                observer, observer.rangeDidChange, null, YES);
+                observer, observer.rangeDidChange, null, NO);
       
     },
     
@@ -36,48 +36,50 @@ SC.ArraySuite.define(function(T) {
     ok(rangeObserver && rangeObserver.isRangeObserver, 'returns a range observer object');
   });
 
-  // ..........................................................
-  // EDIT PROPERTIES
+  // NOTE: Deep Property Observing is disabled for SproutCore 1.0
+  //
+  // // ..........................................................
+  // // EDIT PROPERTIES
+  // // 
+  //
+  // test("editing property on object in range should fire observer", function() {
+  //   var obj = array.objectAt(3);
+  //   obj.set('foo', 'BAR');
+  //   observer.expectRangeChange(array, obj, 'foo', SC.IndexSet.create(3));
+  // });
   // 
+  // test("editing property on object outside of range should NOT fire observer", function() {
+  //   var obj = array.objectAt(0);
+  //   obj.set('foo', 'BAR');
+  //   equals(observer.callCount, 0, 'observer should not fire');
+  // });
+  // 
+  // 
+  // test("updating property after changing observer range", function() {
+  //   array.updateRangeObserver(rangeObserver, SC.IndexSet.create(8,2));
+  //   observer.callCount = 0 ;// reset b/c callback should happen here
+  // 
+  //   var obj = array.objectAt(3);
+  //   obj.set('foo', 'BAR');
+  //   equals(observer.callCount, 0, 'modifying object in old range should not fire observer');
+  //   
+  //   obj = array.objectAt(9);
+  //   obj.set('foo', 'BAR');
+  //   observer.expectRangeChange(array, obj, 'foo', SC.IndexSet.create(9));
+  //   
+  // });
+  // 
+  // test("updating a property after removing an range should not longer update", function() {
+  //   array.removeRangeObserver(rangeObserver);
+  // 
+  //   observer.callCount = 0 ;// reset b/c callback should happen here
+  // 
+  //   var obj = array.objectAt(3);
+  //   obj.set('foo', 'BAR');
+  //   equals(observer.callCount, 0, 'modifying object in old range should not fire observer');
+  //   
+  // });
 
-  test("editing property on object in range should fire observer", function() {
-    var obj = array.objectAt(3);
-    obj.set('foo', 'BAR');
-    observer.expectRangeChange(array, obj, 'foo', SC.IndexSet.create(3));
-  });
-  
-  test("editing property on object outside of range should NOT fire observer", function() {
-    var obj = array.objectAt(0);
-    obj.set('foo', 'BAR');
-    equals(observer.callCount, 0, 'observer should not fire');
-  });
-  
-  
-  test("updating property after changing observer range", function() {
-    array.updateRangeObserver(rangeObserver, SC.IndexSet.create(8,2));
-    observer.callCount = 0 ;// reset b/c callback should happen here
-
-    var obj = array.objectAt(3);
-    obj.set('foo', 'BAR');
-    equals(observer.callCount, 0, 'modifying object in old range should not fire observer');
-    
-    obj = array.objectAt(9);
-    obj.set('foo', 'BAR');
-    observer.expectRangeChange(array, obj, 'foo', SC.IndexSet.create(9));
-    
-  });
-  
-  test("updating a property after removing an range should not longer update", function() {
-    array.removeRangeObserver(rangeObserver);
-
-    observer.callCount = 0 ;// reset b/c callback should happen here
-
-    var obj = array.objectAt(3);
-    obj.set('foo', 'BAR');
-    equals(observer.callCount, 0, 'modifying object in old range should not fire observer');
-    
-  });
-  
   // ..........................................................
   // REPLACE
   // 
@@ -196,14 +198,14 @@ SC.ArraySuite.define(function(T) {
   // REMOVING
   // 
   
-  test("removeAt IN range fires observer with index set covering edit to end of array", function() {
-    var set     = SC.IndexSet.create(3,array.get('length')-4);
+  test("removeAt IN range fires observer with index set covering edit to end of array plus delta", function() {
+    var set     = SC.IndexSet.create(3,array.get('length')-3);
     array.removeAt(3);
     observer.expectRangeChange(array, null, '[]', set);
   });
 
-  test("removeAt BEFORE range fires observer with index set covering edit to end of array", function() {
-    var set     = SC.IndexSet.create(0,array.get('length')-1);
+  test("removeAt BEFORE range fires observer with index set covering edit to end of array plus delta", function() {
+    var set     = SC.IndexSet.create(0,array.get('length'));
     array.removeAt(0);
     observer.expectRangeChange(array, null, '[]', set);
   });
@@ -216,8 +218,114 @@ SC.ArraySuite.define(function(T) {
   
   
   
+  // ..........................................................
+  // MODULE: No explicit range
+  // 
+  module(T.desc("RangeObserver Methods - No explicit range"), {
+    setup: function() {
+      expected = T.objects(10);
+      array = T.newObject(expected);
+
+      observer = T.observer();
+      rangeObserver = array.addRangeObserver(null, observer, 
+                          observer.rangeDidChange, null, NO);
+      
+    },
+    
+    teardown: function() {
+      T.destroyObject(array);
+    }
+  });
   
+  test("returns RangeObserver object", function() {
+    ok(rangeObserver && rangeObserver.isRangeObserver, 'returns a range observer object');
+  });
+
+  // ..........................................................
+  // REPLACE
+  // 
+
+  test("replacing object in range fires observer with index set covering only the effected item", function() {
+    array.replace(2, 1, T.objects(1));
+    observer.expectRangeChange(array, null, '[]', SC.IndexSet.create(2,1));
+  });
+
+  test("replacing at start of array", function() {
+    array.replace(0, 1, T.objects(1));
+    observer.expectRangeChange(array, null, '[]', SC.IndexSet.create(0,1));
+  });
+
+  test("replacing object at end of array", function() {
+    array.replace(9, 1, T.objects(1));
+    observer.expectRangeChange(array, null, '[]', SC.IndexSet.create(9,1));
+  });
+
+  test("removing range should no longer fire observers", function() {
+    array.removeRangeObserver(rangeObserver);
+    
+    observer.callCount = 0 ;
+    array.replace(2, 1, T.objects(1));
+    equals(observer.callCount, 0, 'observer should not fire');
+
+    observer.callCount = 0 ;
+    array.replace(0, 1, T.objects(1));
+    equals(observer.callCount, 0, 'observer should not fire');
+
+    observer.callCount = 0 ;
+    array.replace(9, 1, T.objects(1));
+    equals(observer.callCount, 0, 'observer should not fire');
+  });
+
+  // ..........................................................
+  // GROUPED CHANGES
+  // 
   
+  test("grouping property changes should notify observer only once at end with single IndexSet", function() {
+    
+    array.beginPropertyChanges();
+    array.replace(2, 1, T.objects(1));
+    array.replace(4, 1, T.objects(1));
+    array.endPropertyChanges();
+    
+    var set = SC.IndexSet.create().add(2).add(4); // both edits
+    observer.expectRangeChange(array, null, '[]', set);
+  });
+
+  // ..........................................................
+  // INSERTING
+  // 
+  
+  test("insertAt in range fires observer with index set covering edit to end of array", function() {
+    var newItem = T.objects(1)[0],
+        set     = SC.IndexSet.create(3,array.get('length')-2);
+        
+    array.insertAt(3, newItem);
+    observer.expectRangeChange(array, null, '[]', set);
+  });
+
+  test("adding object fires observer", function() {
+    var newItem = T.objects(1)[0];
+    var set = SC.IndexSet.create(array.get('length'));
+
+    array.pushObject(newItem);
+    observer.expectRangeChange(array, null, '[]', set);
+  });
+  
+  // ..........................................................
+  // REMOVING
+  // 
+  
+  test("removeAt fires observer with index set covering edit to end of array", function() {
+    var set     = SC.IndexSet.create(3,array.get('length')-3);
+    array.removeAt(3);
+    observer.expectRangeChange(array, null, '[]', set);
+  });
+
+  test("popObject fires observer with index set covering removed range", function() {
+    var set = SC.IndexSet.create(array.get('length')-1);
+    array.popObject();
+    observer.expectRangeChange(array, null, '[]', set);
+  });
   
   
   // ..........................................................

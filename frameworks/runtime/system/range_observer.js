@@ -48,7 +48,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
   create: function(source, indexSet, target, method, context, isDeep) {
     var ret = SC.beget(this);
     ret.source = source;
-    ret.indexes = indexSet;
+    ret.indexes = indexSet ? indexSet.frozenCopy() : null;
     ret.target = target;
     ret.method = method;
     ret.context = context ;
@@ -91,7 +91,9 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     @returns {SC.RangeObserver} receiver
   */
   update: function(source, indexSet) {
-    this.indexes = indexSet ;
+    if (this.indexes && this.indexes.isEqual(indexSet)) return this ;
+    
+    this.indexes = indexSet ? indexSet.frozenCopy() : null ;
     this.endObserving().beginObserving();
     return this;
   },
@@ -107,7 +109,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     if (!this.isDeep) return this; // nothing to do
     
     var observing = this.observing;
-    if (!observing) observing = this.observing = SC.Set.create();
+    if (!observing) observing = this.observing = SC.CoreSet.create();
     
     // cache iterator function to keep things fast
     var func = this._beginObservingForEach;
@@ -226,7 +228,8 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
     @returns {SC.RangeObserver} receiver
   */
   rangeDidChange: function(changes) {
-    if (!changes || this.indexes.intersects(changes)) {
+    var indexes = this.indexes;
+    if (!changes || !indexes || indexes.intersects(changes)) {
       this.endObserving(); // remove old observers
       this.method.call(this.target, this.source, null, '[]', changes, this.context);
       this.beginObserving(); // setup new ones
@@ -249,7 +252,7 @@ SC.RangeObserver = /** SC.RangeObserver.prototype */ {
       
     // lazily convert index to IndexSet.  
     if (index && !index.isIndexSet) {
-      index = this[guid] = SC.IndexSet.create(index);
+      index = this[guid] = SC.IndexSet.create(index).freeze();
     }
     
     if (context) {

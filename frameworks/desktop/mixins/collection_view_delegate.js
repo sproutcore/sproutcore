@@ -6,39 +6,32 @@
 // ==========================================================================
 
 /**
-  Indicates that the collection view expects to accept a drop ON the specified
-  item.
-*/
-SC.DROP_ON = 0x01 ;
-
-/**
-  Indicates that the collection view expects to accept a drop BEFORE the 
-  specified item.
-*/
-SC.DROP_BEFORE = 0x02 ;
-
-/**
-  Indicates that the collection view want's to know which operations would 
-  be allowed for either drop operation.
-*/
-SC.DROP_ANY = 0x03 ;
-
-/**
   @namespace
 
-  A Collection View Delegate is consulted by a SC.CollectionView's to control
-  certain behaviors such as selection control and drag and drop behaviors.
+  A Collection View Delegate is consulted by a SC.CollectionView's to make
+  policy decisions about certain behaviors such as selection control and
+  drag and drop.  If you need to control other aspects of your data, you may
+  also want to add the SC.CollectionContent mixin.
   
-  To act as a Collection Delegate, the object should be set as the delegate
-  property of the collection view and should implement one or more of the
-  methods below.
+  To act as a Collection Delegate, just apply this mixin to your class.  You
+  must then set the "delegate" property on the CollectionView to your object.
   
-  You can also choose to mixin this delegate to get suitable default 
-  implementations of these methods.
+  Alternatively, if no delegate is set on a CollectionView, but the content 
+  implements this mixin, the content object will be used as the delegate 
+  instead.
+  
+  If you set an ArrayController or its arrangedObjects property as the content
+  of a CollectionView, the ArrayController will automatically act as the 
+  delegate for the view.
   
   @since SproutCore 1.0
 */
 SC.CollectionViewDelegate = {
+
+  /**
+    Used to detect the mixin by SC.CollectionView
+  */
+  isCollectionViewDelegate: YES,
   
   /**
     This method will be called anytime the collection view is about to
@@ -48,9 +41,9 @@ SC.CollectionViewDelegate = {
     selected objects that cannot be selected.  The default implementation of
     this method simply returns the proposed selection.
     
-    @param view {SC.CollectionView} the collection view
-    @param sel {Array} Proposed array of selected objects.
-    @returns The actual array allowed or null if no change is allowed.
+    @param {SC.CollectionView} view the collection view
+    @param {SC.IndexSet} sel Proposed array of selected objects.
+    @returns {SC.IndexSet} Actual allow selection index set
   */
   collectionViewSelectionForProposedSelection: function(view, sel) {
     return sel ;
@@ -188,39 +181,71 @@ SC.CollectionViewDelegate = {
     This method is only called if canDeleteContent is YES on the collection
     view.
     
-    @param view {SC.CollectionView} the collection view
-    @param item {Array} proposed array  of items to delete.
-    @returns {Array} items allowed to delete or null.
+    @param {SC.CollectionView} view the collection view
+    @param {SC.IndexSet} indexes proposed index set of items to delete.
+    @returns {SC.IndexSet} index set allowed to delete or null.
   */
-  collectionViewShouldDeleteContent: function(view, items) { return items; },
+  collectionViewShouldDeleteIndexes: function(view, indexes) { 
+    return indexes; 
+  },
   
   /**
     Called by the collection view to actually delete the selected items.
     
-    The default behavior will use standard array operators to remove the 
-    items from the content array.  You can implement this method to provide
-    your own deletion method.
+    The default behavior will use standard array operators to delete the 
+    indexes from the array.  You can implement this method to provide your own 
+    deletion method.
     
-    If you simply want to controls the items to be deleted, you should instead
+    If you simply want to control the items to be deleted, you should instead
     implement collectionViewShouldDeleteItems().  This method will only be 
-    called if canDeleteContent is YES and collectionViewShouldDeleteContent()
-    returns a non-empty array.
+    called if canDeleteContent is YES and collectionViewShouldDeleteIndexes()
+    returns a non-empty index set
     
-    @param view {SC.CollectionView} the view collection view
-    @param items {Array} the items to delete
-    @returns {Boolean} YES if the operation succeeded, NO otherwise.
+    @param {SC.CollectionView} view collection view
+    @param {SC.IndexSet} indexes the items to delete
+    @returns {Boolean} YES if the deletion was a success.
   */
-  collectionViewDeleteContent: function(view, items) { return NO; },
+  collectionViewDeleteContent: function(view, content, indexes) {
+    if (!content) return NO ;
+    
+    if (SC.typeOf(content.destroyAt) === SC.T_FUNCTION) {
+      content.destroyAt(indexes);
+      return YES ;
+      
+    } else if (SC.typeOf(content.removeAt) === SC.T_FUNCTION) {
+      content.removeAt(indexes);
+      return YES;
+      
+    } else return NO ;
+  },
   
   /**
-    Called by the collection when attempting to select an item.
+    Called by the collection when attempting to select an item.  Return the 
+    actual indexes you want to allow to be selected.  Return null to disallow
+    the change.  The default allows all selection.
     
-    The default implementation always returns YES.
-    
-    @param view {SC.CollectionView} the view collection view
-    @param item {Object} the item to be selected
-    @returns {Boolean} YES to alow, NO to prevent it
+    @param {SC.CollectionView} view the view collection view
+    @param {SC.IndexSet} indexes the indexes to be selected
+    @param {Boolean} extend YES if the indexes will extend existing sel
+    @returns {SC.IndexSet} allowed index set
   */
-  collectionViewShouldSelectItem: function (view, item) { return YES; }
+  collectionViewShouldSelectIndexes: function (view, indexes, extend) { 
+    return indexes; 
+  },
+  
+  /**
+    Called by the collection when attempting to deselect an item.  Return the 
+    actual indexes you want to allow to be deselected.  Return null to 
+    disallow the change.  The default allows all selection.
+    
+    Note that you should not modify the passed in IndexSet.  clone it instead.
+    
+    @param {SC.CollectionView} view the view collection view
+    @param {SC.IndexSet} indexes the indexes to be selected
+    @returns {SC.IndexSet} allowed index set
+  */
+  collectionViewShouldDeselectIndexes: function (view, indexes) { 
+    return indexes; 
+  }
   
 };

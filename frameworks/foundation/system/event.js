@@ -77,8 +77,8 @@ SC.Event = function(originalEvent) {
   
   // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
   if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
-    this.wheelDelta = this.wheelDeltaY = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDelta)/120;
-    this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0)/120 ;
+    this.wheelDelta = this.wheelDeltaY = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDelta);
+    this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0) ;
     
   // normalize wheelDelta for Firefox
   // note that we multiple the delta on FF to make it's acceleration more 
@@ -339,18 +339,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     @returns {Hash} simulated event object
   */
   simulateEvent: function(elem, eventType, attrs) {
-    var ret = {
+    var ret = SC.Event.create({
       type: eventType,
       target: elem,
       preventDefault: function(){ this.cancelled = YES; },
-      stopPropagation: function(){ this.bubble = NO; },
+      stopPropagation: function(){ this.bubbles = NO; },
       allowDefault: function() { this.hasCustomEventHandling = YES; },
       timeStamp: Date.now(),
-      bubble: (this.NO_BUBBLE.indexOf(eventType)<0) ,
+      bubbles: (this.NO_BUBBLE.indexOf(eventType)<0),
       cancelled: NO,
       normalized: YES
-    } ;
-    if (attrs) SC.mixin(ret, attrs);
+    });
+    if (attrs) SC.mixin(ret, attrs) ;
     return ret ;
   },
   
@@ -407,15 +407,15 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       event = this.simulateEvent(elem, eventType) ;
       args.unshift(event) ;
     }
-
+    
     event.type = eventType ;
-
+    
     // Trigger the event - bubble if enabled
     var current = elem;
     do {
       ret = SC.Event.handle.apply(current, args);
       current = (current===document) ? null : (current.parentNode || document);
-    } while(!ret && event.bubble && current);    
+    } while(!ret && event.bubbles && current);    
     current = null ;
 
     // Handle triggering native .onfoo handlers

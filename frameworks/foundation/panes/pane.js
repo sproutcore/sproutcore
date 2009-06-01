@@ -378,37 +378,38 @@ SC.Pane = SC.View.extend({
     
     @param {SC.RootResponder} rootResponder
     @returns {SC.Pane} receiver
-
+    
   */
-  append: function() { 
+  append: function() {
     return this.appendTo(document.body) ;
   },
-
+  
   /**
     Removes the pane from the document.  This will remove the
     DOM node and deregister you from the document window.
   */
   remove: function() {
-    if (!this.get('isVisibleInWindow')) return this; // nothing to do
-
+    if (!this.get('isVisibleInWindow')) return this ; // nothing to do
+    if (!this.get('isPaneAttached')) return this ; // nothing to do
+    
     // remove layer...
     var dom = this.get('layer') ;
-    if (dom.parentNode) dom.parentNode.removeChild(dom);
-    dom = null;
+    if (dom.parentNode) dom.parentNode.removeChild(dom) ;
+    dom = null ;
     
     // remove from the RootResponder also
     var responder = this.rootResponder ;
     if (this.get('isKeyPane')) responder.makeKeyPane(null) ; // orders matter, remove keyPane first
-    if (this.get('isMainPane')) responder.makeMainPane(null);
-    responder.panes.remove(this);
+    if (this.get('isMainPane')) responder.makeMainPane(null) ;
+    responder.panes.remove(this) ;
     this.rootResponder = responder = null ;
-
-    // clean up some of my own properties    
+    
+    // clean up some of my own properties 
     this.set('isPaneAttached', NO) ;
     this.parentViewDidChange() ;
   },
-
-  /** 
+  
+  /**
     Inserts the pane into the DOM as the last child of the passed DOM element. 
     You can pass in either a CoreQuery object or a selector, which will be 
     converted to a CQ object.  You can optionally pass in the rootResponder 

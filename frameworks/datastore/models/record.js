@@ -214,7 +214,7 @@ SC.Record = SC.Object.extend(
   /**
     This will return the raw attributes that you can edit directly.  If you 
     make changes to this hash, be sure to call beginEditing() before you get
-    the attributes and endEditing() aftwards.
+    the attributes and endEditing() afterwards.
   
     @returns {Object} the current attributes of the receiver
   **/
@@ -260,14 +260,14 @@ SC.Record = SC.Object.extend(
   
   normalize: function(includeNull) {
     
-    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id');
-    var store = this.get('store'), storeKey = this.get('storeKey'), attrValue, isRecord;
+    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id'), 
+      recHash, store = this.get('store'), storeKey = this.get('storeKey'), 
+      attrValue, isRecord, defaultVal;
     
     dataHash[primaryKey] = recordId;
     
     for(var key in this) {
-      // make sure property is a record attribute. if record attribute is a class (SC.Record)
-      // do not add to hash unless includeNull argument is true.
+      // make sure property is a record attribute.
       if(this[key] && this[key]['typeClass']) {
         isRecord = SC.typeOf(this[key].typeClass())==='class';
 
@@ -276,19 +276,27 @@ SC.Record = SC.Object.extend(
           if(attrValue || includeNull) dataHash[key] = attrValue;
         }
         else if(isRecord) {
+          recHash = store.readDataHash(storeKey);
 
-          if(SC.typeOf(this.get(key))===SC.T_OBJECT) {
-            // if relationships are present
-            var ids = this.get(key).getEach('id');
-            dataHash[key] = ids.get('length')>1 ? ids : ids[0];
+          if(recHash[key]) {
+            // write value already there
+            dataHash[key] = recHash[key];
           }
           else {
-            // otherwise write default
-            dataHash[key] = (this.get(key).get) ? this.get(key).get('id') : this.get(key);
+            // or write default
+            defaultVal = this[key].get('defaultValue');
+            if(SC.typeOf(defaultVal)===SC.T_FUNCTION) {
+              // computed default value
+              dataHash[key] = defaultVal();
+            }
+            else {
+              // plain value
+              dataHash[key] = defaultVal;
+            }
           }
-          
         }
-        else if(includeNull) {
+        
+        if(includeNull && dataHash[key]===undefined) {
           dataHash[key] = null;
         }
         
@@ -330,9 +338,33 @@ SC.Record = SC.Object.extend(
   // PRIVATE
   //
   
+  /** @private
+    Creates string representation of record, with status.
+    
+    @returns {String}
+  */
+  
   toString: function() {
     var attrs = this.get('attributes');
-    return "%@(%@)".fmt(this.constructor.toString(), SC.inspect(attrs));
+    return "%@(%@) %@".fmt(this.constructor.toString(), SC.inspect(attrs), this.statusString());
+  },
+  
+  /** @private
+    Creates string representation of record, with status.
+    
+    @returns {String}
+  */
+  
+  statusString: function() {
+    var ret = [], status = this.status();
+    
+    for(prop in SC.Record) {
+      if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
+        ret.push(prop);
+      }
+    }
+    
+    return ret.join(" ");
   }
       
 }) ;
@@ -470,6 +502,21 @@ SC.Record.mixin( /** @scope SC.Record */ {
       SC.Store.recordTypesByStoreKey[ret] = this ;
       storeKeys[id] = ret ;
     }
+    
+    return ret ;
+  },
+  
+  /**
+    Given a primaryKey value for the record, returns the associated
+    storeKey.  As opposed to storeKeyFor() however, this method
+    will NOT generate a new storeKey but returned undefined.
+    
+    @param {String} id a record id
+    @returns {Number} a storeKey.
+  */
+  storeKeyExists: function(id) {
+    var storeKeys = this.storeKeysById(),
+        ret       = storeKeys[id];
     
     return ret ;
   },

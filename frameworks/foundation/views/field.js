@@ -30,7 +30,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
 
   /**
     The raw value of the field itself.  This is computed from the 'value'
-    propery by passing it through any validator you might have set.  This is 
+    property by passing it through any validator you might have set.  This is 
     the value that will be set on the field itself when the view is updated.
     
     @property {String}
@@ -57,7 +57,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   /**
     Override to set the actual value of the field.
-
+    
     The default implementation will simple copy the newValue to the value
     attribute of any input tags in the receiver view.  You can override this
     method to provide specific functionality needed by your view.
@@ -70,7 +70,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     this.$input().val(newValue);
     return this ;
   },
-
+  
   /**
     Override to retrieve the actual value of the field.
     
@@ -104,7 +104,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {Boolean|SC.Error} result of validation.
   */
   fieldValueDidChange: function(partialChange) {
-
     // collect the field value and convert it back to a value
     var fieldValue = this.getFieldValue();
     var value = this.objectForFieldValue(fieldValue, partialChange);
@@ -180,7 +179,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   // ACTIONS
   // You generally do not need to override these but they may be used.
-
+  
   /**
     Called to perform validation on the field just before the form 
     is submitted.  If you have a validator attached, this will get the
@@ -196,7 +195,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   // OVERRIDE IN YOUR SUBCLASS
   // Override these primitives in your subclass as required.
-
+  
   /**
     Allow the browser to do its normal event handling for the mouse down
     event.  But first, set isActive to YES.
@@ -209,7 +208,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     evt.allowDefault(); 
     return YES; 
   },
-
+  
   /** @private
     Remove the active class on mouseOut if mouse is down.
   */  
@@ -218,7 +217,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     evt.allowDefault();
     return YES;
   },
-
+  
   /** @private
     If mouse was down and we renter the button area, set the active state again.
   */  
@@ -227,7 +226,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     evt.allowDefault();
     return YES;
   },
-
+  
   _field_isMouseDown: NO,
   
   /** @private

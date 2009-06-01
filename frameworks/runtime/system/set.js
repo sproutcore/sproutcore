@@ -10,6 +10,16 @@ sc_require('mixins/observable') ;
 sc_require('mixins/freezable');
 sc_require('mixins/copyable');
 
+// IMPORTANT NOTE:  This file actually defines two classes: 
+// SC.Set is a fully observable set class documented below. 
+// SC._CoreSet is just like SC.Set but is not observable.  This is required
+// because SC.Observable is built on using sets and requires sets without 
+// observability.
+//
+// We use pointer swizzling below to swap around the actual definitions so 
+// that the documentation will turn out right.  (The docs should only 
+// define SC.Set - not SC._CoreSet)
+
 /**
   @class 
 
@@ -26,10 +36,10 @@ sc_require('mixins/copyable');
 
   h1. Creating a Set
 
-  You can create a set like you would most objects using SC.Set.create() or
-  new SC.Set().  Most new sets you create will be empty, but you can also
-  initialize the set with some content by passing an array or other enumerable
-  of objects to the constructor.
+  You can create a set like you would most objects using SC.Set.create().  
+  Most new sets you create will be empty, but you can also initialize the set 
+  with some content by passing an array or other enumerable of objects to the 
+  constructor.
 
   Finally, you can pass in an existing set and the set will be copied.  You
   can also create a copy of a set by calling SC.Set#clone().
@@ -75,26 +85,58 @@ sc_require('mixins/copyable');
   object's _guid but if you implement the hash() method on the object, it will
   use the return value from that method instead.
 
-  @extends Object
   @extends SC.Enumerable 
   @extends SC.Observable
-  @since SproutCore 0.9.15
+  @extends SC.Copyable
+  @extends SC.Freezable
+
+  @since SproutCore 1.0
 */
-SC.Set = function(items) {
-  this.initObservable();
-  if (items && items.length > 0) {
-    var idx = items.get ? items.get('length') : items.length ;
-    if (items.objectAt) {
-      while(--idx >= 0) this.add(items.objectAt(idx)) ;
-    } else {
-      while(--idx >= 0) this.add(items[idx]) ;
+SC.Set = SC.mixin({}, 
+  SC.Enumerable, 
+  SC.Observable, 
+  SC.Freezable, 
+  SC.Observable,
+/** @scope SC.Set.prototype */ {
+
+  /** 
+    Creates a new set, with the optional array of items included in the 
+    return set.
+
+    @param {SC.Enumerable} items items to add
+    @return {SC.Set}
+  */
+  create: function(items) {
+    var ret, idx, pool = SC.Set._pool, isObservable = this.isObservable;
+    if (!isObservable && items===undefined && pool.length>0) ret = pool.pop();
+    else {
+      ret = SC.beget(this);
+      if (isObservable) ret.initObservable();
+      
+      if (items && items.isEnumerable && items.get('length')>0) {
+
+        ret.isObservable = NO; // suspend change notifications
+        
+        // arrays and sets get special treatment to make them a bit faster
+        if (items.isSCArray) {
+          idx = items.get ? items.get('length') : items.length;
+          while(--idx>=0) ret.add(items.objectAt(idx));
+        
+        } else if (items.isSet) {
+          idx = items.length;
+          while(--idx>=0) ret.add(items[idx]);
+          
+        // otherwise use standard SC.Enumerable API
+        } else items.forEach(function(i) { ret.add(i); }, this);
+        
+        ret.isObservable = isObservable;
+      }
     }
-  }
-  return this ;
-} ;
-
-SC.Set.prototype = {
-
+    return ret ;
+  },
+  
+  isSet: YES,
+  
   /**
     This property will change as the number of objects in the set changes.
 
@@ -128,6 +170,27 @@ SC.Set.prototype = {
     var idx = this[SC.hashFor(obj)] ;
     return (!SC.none(idx) && (idx < this.length) && (this[idx]===obj)) ;
   },
+  
+  /**
+    Returns YES if the passed object is also a set that contains the same 
+    objects as the receiver.
+  
+    @param {SC.Set} obj the other object
+    @returns {Boolean}
+  */
+  isEqual: function(obj) {
+    // fail fast
+    if (!obj || !obj.isSet || (obj.get('length') !== this.get('length'))) {
+      return NO ;
+    }
+    
+    var loc = this.get('length');
+    while(--loc>=0) {
+      if (!obj.contains(this[loc])) return NO ;
+    }
+    
+    return YES;
+  },
 
   /**
     Call this method to add an object. performs a basic add.
@@ -146,27 +209,39 @@ SC.Set.prototype = {
     var guid = SC.hashFor(obj) ;
     var idx = this[guid] ;
     var len = this.length ;
-    if (SC.none(idx) || (idx >= len) || (this[idx] !== obj)) {
+    if ((idx===null || idx===undefined) || (idx >= len) || (this[idx]!==obj)){
       this[len] = obj ;
       this[guid] = len ;
       this.length = len+1;
     }
     
+    if (this.isObservable) this.enumerableContentDidChange();
+    
     return this ;
   },
 
   /**
-    Add all the items in the passed array.
+    Add all the items in the passed array or enumerable
   */
   addEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
-
-    var idx = objects.get('length') ;
-    if (objects.objectAt) {
-      while(--idx >= 0) this.add(objects.objectAt(idx)) ;
-    } else {
-      while(--idx >= 0) this.add(objects[idx]) ;
+    if (!objects || !objects.isEnumerable) {
+      throw "%@.addEach must pass enumerable".fmt(this);
     }
+
+    var idx, isObservable = this.isObservable ;
+    
+    if (isObservable) this.beginPropertyChanges();
+    if (objects.isSCArray) {
+      idx = objects.get('length');
+      while(--idx >= 0) this.add(objects.objectAt(idx)) ;
+    } else if (objects.isSet) {
+      idx = objects.length;
+      while(--idx>=0) this.add(objects[idx]);
+      
+    } else objects.forEach(function(i) { this.add(i); }, this);
+    if (isObservable) this.endPropertyChanges();
+    
     return this ;
   },  
 
@@ -201,6 +276,7 @@ SC.Set.prototype = {
 
     // reduce the length
     this.length = len-1;
+    if (this.isObservable) this.enumerableContentDidChange();
     return this ;
   },
 
@@ -221,12 +297,22 @@ SC.Set.prototype = {
   */
   removeEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
-    var idx = objects.get('length') ;
-    if (objects.objectAt) {
-      while(--idx >= 0) this.remove(objects.objectAt(idx)) ;
-    } else {
-      while(--idx >= 0) this.remove(objects[idx]) ;
+    if (!objects || !objects.isEnumerable) {
+      throw "%@.addEach must pass enumerable".fmt(this);
     }
+
+    var idx, isObservable = this.isObservable ;
+    
+    if (isObservable) this.beginPropertyChanges();
+    if (objects.isSCArray) {
+      idx = objects.get('length');
+      while(--idx >= 0) this.remove(objects.objectAt(idx)) ;
+    } else if (objects.isSet) {
+      idx = objects.length;
+      while(--idx>=0) this.remove(objects[idx]);
+    } else objects.forEach(function(i) { this.remove(i); }, this);
+    if (isObservable) this.endPropertyChanges();
+    
     return this ;
   },  
 
@@ -234,7 +320,7 @@ SC.Set.prototype = {
    Clones the set into a new set.  
   */
   clone: function() {
-    return SC.Set.create(this);    
+    return this.constructor.create(this);    
   },
 
   /**
@@ -242,42 +328,49 @@ SC.Set.prototype = {
   */
   destroy: function() {
     this.isFrozen = NO ; // unfreeze to return to pool
-    SC.Set._pool.push(this.clear());
+    if (!this.isObservable) SC.Set._pool.push(this.clear());
     return this;
   },
   
   // .......................................
   // PRIVATE 
   //
-  _each: function(iterator) {
-    var len = this.length ;
-    for(var idx=0;idx<len;idx++) iterator(this[idx]) ;
+
+  // optimized
+  forEach: function(iterator, target) {
+    var len = this.length;
+    if (!target) target = this ;
+    for(var idx=0;idx<len;idx++) iterator.call(target, this[idx], idx, this);
+    return this ;
   },
 
   toString: function() {
-    return "SC.Set<%@>".fmt(SC.$A(this)) ;
-  }  
+    var len = this.length, idx, ary = [];
+    for(idx=0;idx<len;idx++) ary[idx] = this[idx];
+    return "SC.Set<%@>".fmt(ary.join(',')) ;
+  },
+  
+  // the pool used for non-observable sets
+  _pool: [],
+  
+  isObservable: YES
 
-} ;
+}) ;
 
-// Make this enumerable and observable
-SC.mixin(SC.Set.prototype, SC.Enumerable, SC.Observable, SC.Freezable, SC.Observable) ;
+SC.Set.constructor = SC.Set;
 
-SC.Set.prototype.slice = SC.Set.prototype.copy = SC.Set.prototype.clone ;
+// Make SC.Set look a bit more like other enumerables
+SC.Set.copy = SC.Set.clone ;
+SC.Set.push = SC.Set.unshift = SC.Set.add ;
+SC.Set.shift = SC.Set.pop ;
 
-SC.Set.prototype.push = SC.Set.prototype.unshift = SC.Set.prototype.add ;
-SC.Set.prototype.shift = SC.Set.prototype.pop ;
+// add generic add/remove enumerable support
+SC.Set.addObject = SC.Set.add ;
+SC.Set.removeObject = SC.Set.remove;
 
 SC.Set._pool = [];
 
-/**
-  To create a set, pass an array of items instead of a hash.
-*/
-SC.Set.create = function(items) { 
-  var pool;
-  if (items === undefined && (pool = SC.Set._pool).length>0) {
-    return pool.pop();
-  } else {
-    return new SC.Set(items);  
-  }
-};
+// CoreSet is like Set but not observable
+SC.CoreSet = SC.beget(SC.Set);
+SC.CoreSet.isObservable = NO ;
+SC.CoreSet.constructor = SC.CoreSet;

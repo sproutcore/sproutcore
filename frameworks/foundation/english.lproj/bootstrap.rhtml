@@ -37,10 +37,25 @@ SC.browser = (function() {
 
 SC.setupBodyClassNames = function() {
   var el = document.body ;
+  var browser, platform, shadows, borderRad, classNames;
   if (!el) return ;
-  var browser = SC.browser.current ;
-  var platform = (SC.browser.windows) ? 'windows' : (SC.browser.mac) ? 'mac' : 'other-platform' ;
-  var classNames = (el.className) ? el.className.split(' ') : [] ;
+  browser = SC.browser.current ;
+  platform = (SC.browser.windows) ? 'windows' : (SC.browser.mac) ? 'mac' : 'other-platform' ;
+  
+  shadows = (document.documentElement.style.MozBoxShadow !== undefined) || 
+                (document.documentElement.style.webkitBoxShadow !== undefined) ||
+                (document.documentElement.style.oBoxShadow !== undefined) ||
+                (document.documentElement.style.boxShadow !== undefined);
+  
+  borderRad = (document.documentElement.style.MozBorderRadius !== undefined) || 
+              (document.documentElement.style.webkitBorderRadius !== undefined) ||
+              (document.documentElement.style.oBorderRadius !== undefined) ||
+              (document.documentElement.style.borderRadius !== undefined);
+  
+  
+  classNames = (el.className) ? el.className.split(' ') : [] ;
+  if(shadows) classNames.push('box-shadow');
+  if(borderRad) classNames.push('border-rad');
   classNames.push(browser) ;
   classNames.push(platform) ;
   if (SC.browser.mobileSafari) classNames.push('mobile-safari') ;
@@ -50,4 +65,4 @@ SC.setupBodyClassNames = function() {
 <% end %>
 <% content_for('setup_body_class_names') do %>
 if (SC.setupBodyClassNames) SC.setupBodyClassNames() ;
-<% end -%>  
+<% end -%>

@@ -19,11 +19,11 @@ module("SC.Query evaluation of records", {
     
     // load some data
     MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, firstName: "John", lastName: "Doe" },
-      { guid: 2, firstName: "Jane", lastName: "Doe" },
-      { guid: 3, firstName: "Emily", lastName: "Parker", bornIn: 1975 },
-      { guid: 4, firstName: "Johnny", lastName: "Cash" },
-      { guid: 5, firstName: "Bert", lastName: "Berthold" }
+      { guid: 1, firstName: "John", lastName: "Doe", married: true },
+      { guid: 2, firstName: "Jane", lastName: "Doe", married: false },
+      { guid: 3, firstName: "Emily", lastName: "Parker", bornIn: 1975, married: true },
+      { guid: 4, firstName: "Johnny", lastName: "Cash", married: true },
+      { guid: 5, firstName: "Bert", lastName: "Berthold", married: true }
     ]);
     
     rec1 = MyApp.store.find(MyApp.Foo,1);
@@ -70,4 +70,13 @@ test("should handle undefined record properties correctly", function() {
   ok(q.contains(rec2) == true, 'record without bornIn set should match');
   
 }); 
+
+test("should handle boolean correctly", function() {
+  
+  q.conditions = "married = true";
+  q.parseQuery();
+  ok(q.contains(rec1) == true, 'record with married set should match');
+  ok(q.contains(rec2) == false, 'record without married set should not match');
+  
+});
   

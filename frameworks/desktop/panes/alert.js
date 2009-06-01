@@ -193,8 +193,15 @@ SC.AlertPane = SC.PanelPane.extend({
     @property {SC.ButtonView}
   */
   buttonThree: SC.outlet('contentView.childViews.2.childViews.0'),
+
+  /**
+    The view for the button 3 (Extra) wrapper.
+    
+    @property {SC.View}
+  */
+  buttonThreeWrapper: SC.outlet('contentView.childViews.2'),
   
-  layout: { centerX: 0, width: 452, top: 100 },
+  layout: { centerX: 0, width: 502, top: 55 },
 
   /** @private - internal view that is actually displayed */
   contentView: SC.View.extend({
@@ -220,7 +227,7 @@ SC.AlertPane = SC.PanelPane.extend({
       }),
 
       SC.View.extend({
-        layout: { bottom: 13, height: 24, right: 18, width: 416 },
+        layout: { bottom: 13, height: 24, right: 18, width: 466 },
         childViews: ['cancelButton', 'okButton'],
         classNames: ['textAlignRight'],
         cancelButton : SC.ButtonView.extend({
@@ -250,6 +257,7 @@ SC.AlertPane = SC.PanelPane.extend({
       
       SC.View.extend({
         layout: { bottom: 13, height: 24, left: 18, width: 150 },
+        isVisible: NO,
         childViews: [
           SC.ButtonView.extend({
             useStaticLayout: YES,
@@ -340,7 +348,13 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
   for(var idx=0;idx<3;idx++) {
     button = ret.get(buttonKeys[idx]);
     title = args[idx + 3];
-    if (title) button.set('title', title).set('isVisible', YES);
+    if (title) {
+      button.set('title', title).set('isVisible', YES);
+      if (idx==2) {
+        button_wrapper = ret.get('buttonThreeWrapper');
+        button_wrapper.set('isVisible', YES);
+      }
+    }
   }
   var show = ret.append() ; // make visible.
   ret.adjust('height', ret.childViews[0].$().height()) ;

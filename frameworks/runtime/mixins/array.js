@@ -7,8 +7,8 @@
 
 // note: SC.Observable also enhances array.  make sure we are called after
 // SC.Observable so our version of unknownProperty wins.
-sc_require('mixins/observable') ;
-sc_require('mixins/enumerable') ;
+sc_require('mixins/observable');
+sc_require('mixins/enumerable');
 sc_require('system/range_observer');
 
 SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
@@ -35,59 +35,63 @@ SC.OUT_OF_RANGE_EXCEPTION = "Index out of range" ;
   contents in a KVO-friendly way.  You can also be notified whenever the 
   membership if an array changes by changing the syntax of the property to
   .observes('*myProperty.[]') .
-
+  
   To support SC.Array in your own class, you must override two
   primitives to use it: replace() and objectAt().  
-
+  
   Note that the SC.Array mixin also incorporates the SC.Enumerable mixin.  All
   SC.Array-like objects are also enumerable.
-
+  
   @extends SC.Enumerable
   @since SproutCore 0.9.0
 */
 SC.Array = {
-
-/**
-  @field {Number} length
   
-  Your array must support the length property.  your replace methods should
-  set this property whenever it changes.
-*/
+  /**
+    Walk like a duck - use isSCArray to avoid conflicts
+  */
+  isSCArray: YES,
+  
+  /**
+    @field {Number} length
+    
+    Your array must support the length property.  Your replace methods should
+    set this property whenever it changes.
+  */
   // length: 0,
   
-/**
-  This is one of the primitves you must implement to support SC.Array.  You 
-  should replace amt objects started at idx with the objects in the passed 
-  array.  You should also call this.enumerableContentDidChange() ;
-  
-  @param {Number} idx 
-    Starting index in the array to replace.  If idx >= length, then append to 
-    the end of the array.
-
-  @param {Number} amt 
-    Number of elements that should be removed from the array, starting at 
-    *idx*.
-
-  @param {Array} objects 
-    An array of zero or more objects that should be inserted into the array at 
-    *idx* 
-*/
+  /**
+    This is one of the primitves you must implement to support SC.Array.  You 
+    should replace amt objects started at idx with the objects in the passed 
+    array.  You should also call this.enumerableContentDidChange() ;
+    
+    @param {Number} idx 
+      Starting index in the array to replace.  If idx >= length, then append to 
+      the end of the array.
+      
+    @param {Number} amt 
+      Number of elements that should be removed from the array, starting at 
+      *idx*.
+      
+    @param {Array} objects 
+      An array of zero or more objects that should be inserted into the array at 
+      *idx* 
+  */
   replace: function(idx, amt, objects) {
     throw "replace() must be implemented to support SC.Array" ;
   },
-
-/**
-  This is one of the primitives you must implement to support SC.Array.  
-  Returns the object at the named index.  If your object supports retrieving 
-  the value of an array item using get() (i.e. myArray.get(0)), then you do
-  not need to implement this method yourself.
   
-  @param {Number} idx
-    The index of the item to return.  If idx exceeds the current length, 
-    return null.
-*/
-  objectAt: function(idx)
-  {
+  /**
+    This is one of the primitives you must implement to support SC.Array.  
+    Returns the object at the named index.  If your object supports retrieving 
+    the value of an array item using get() (i.e. myArray.get(0)), then you do
+    not need to implement this method yourself.
+    
+    @param {Number} idx
+      The index of the item to return.  If idx exceeds the current length, 
+      return null.
+  */
+  objectAt: function(idx) {
     if (idx < 0) return undefined ;
     if (idx >= this.get('length')) return undefined;
     return this.get(idx);
@@ -95,7 +99,7 @@ SC.Array = {
   
   /**
     @field []
-
+    
     This is the handler for the special array content property.  If you get
     this property, it will return this.  If you set this property it a new 
     array, it will replace the current content.
@@ -109,13 +113,13 @@ SC.Array = {
     return this ;
   }.property(),
   
-/**  
-  This will use the primitive replace() method to insert an object at the 
-  specified index.
-  
-  @param {Number} idx index of insert the object at.
-  @param {Object} object object to insert
-*/
+  /**
+    This will use the primitive replace() method to insert an object at the 
+    specified index.
+    
+    @param {Number} idx index of insert the object at.
+    @param {Object} object object to insert
+  */
   insertAt: function(idx, object) {
     if (idx > this.get('length')) throw SC.OUT_OF_RANGE_EXCEPTION ;
     this.replace(idx,0,[object]) ;
@@ -129,22 +133,22 @@ SC.Array = {
     
     If you pass a single index or a start and length that is beyond the 
     length this method will throw an SC.OUT_OF_RANGE_EXCEPTION
-  
+    
     @param {Number|SC.IndexSet} start index, start of range, or index set
     @param {Number} length length of passing range
     @returns {Object} receiver
   */
   removeAt: function(start, length) {
-
+    
     var delta = 0, // used to shift range
         empty = [];
     
     if (typeof start === SC.T_NUMBER) {
-
+      
       if ((start < 0) || (start >= this.get('length'))) {
         throw SC.OUT_OF_RANGE_EXCEPTION;
       }
-
+      
       // fast case
       if (length === undefined) {
         this.replace(start,1,empty);
@@ -298,14 +302,14 @@ SC.Array = {
     @param {Object} target object to invoke on change
     @param {String|Function} method the method to invoke
     @param {Object} context optional context
-    @param {Boolean} isDeep set to YES to observe object properties
     @returns {SC.RangeObserver} range observer
   */
-  addRangeObserver: function(indexes, target, method, context, isDeep) {
+  addRangeObserver: function(indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
-    if (!rangeob) rangeob = this._array_rangeObservers = SC.Set.create() ;
-
+    if (!rangeob) rangeob = this._array_rangeObservers = SC.CoreSet.create() ;
+    
     var C = this.rangeObserverClass ;
+    var isDeep = NO; //disable this feature for now
     var ret = C.create(this, indexes, target, method, context, isDeep) ;
     rangeob.add(ret);
     
@@ -350,7 +354,7 @@ SC.Array = {
     if (rangeob) rangeob.remove(rangeObserver) ; // clear
     return ret ;
   },
-
+  
   /**
     Updates observers with content change.  To support range observers, 
     you must pass three change parameters to this method.  Otherwise this
@@ -373,6 +377,7 @@ SC.Array = {
       if (delta === undefined) delta = 0 ;
       if (delta !== 0 || amt === undefined) {
         length = this.get('length') - start ;
+        if (delta<0) length -= delta; // cover removed range as well
       } else {
         length = amt ;
       }
@@ -483,7 +488,7 @@ if (!Array.prototype.lastIndexOf) {
 // because working with arrays are so common.
 (function() {
   SC.mixin(Array.prototype, {
-
+    
     // primitive for array support.
     replace: function(idx, amt, objects) {
       if (this.isFrozen) throw SC.FROZEN_ERROR ;
@@ -493,7 +498,7 @@ if (!Array.prototype.lastIndexOf) {
         var args = [idx, amt].concat(objects) ;
         this.splice.apply(this,args) ;
       }
-
+      
       // if we replaced exactly the same number of items, then pass only the
       // replaced range.  Otherwise, pass the full remaining array length 
       // since everything has shifted
@@ -501,7 +506,7 @@ if (!Array.prototype.lastIndexOf) {
       this.enumerableContentDidChange(idx, amt, len - amt) ;
       return this ;
     },
-  
+    
     // If you ask for an unknown property, then try to collect the value
     // from member items.
     unknownProperty: function(key, value) {
@@ -519,11 +524,11 @@ if (!Array.prototype.lastIndexOf) {
   if (!indexOf || (indexOf === SC.Array.indexOf)) {
     Array.prototype.indexOf = function(object, startAt) {
       var idx, len = this.length;
-
+      
       if (startAt === undefined) startAt = 0;
       else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
       if (startAt < 0) startAt += len;
-
+      
       for(idx=startAt;idx<len;idx++) {
         if (this[idx] === object) return idx ;
       }
@@ -535,11 +540,11 @@ if (!Array.prototype.lastIndexOf) {
   if (!lastIndexOf || (lastIndexOf === SC.Array.lastIndexOf)) {
     Array.prototype.lastIndexOf = function(object, startAt) {
       var idx, len = this.length;
-
+      
       if (startAt === undefined) startAt = len-1;
       else startAt = (startAt < 0) ? Math.ceil(startAt) : Math.floor(startAt);
       if (startAt < 0) startAt += len;
-
+      
       for(idx=startAt;idx>=0;idx--) {
         if (this[idx] === object) return idx ;
       }
@@ -547,5 +552,4 @@ if (!Array.prototype.lastIndexOf) {
     };
   }
   
-})() ;
-
+})();

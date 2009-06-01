@@ -27,7 +27,7 @@ var NO = false ;
 // prevent a console.log from blowing things up if we are on a browser that
 // does not support it
 if (typeof console === 'undefined') {
-  var console = console || window.console || {} ;
+  window.console = {} ;
   console.log = console.info = console.warn = console.error = function(){};
 }
 
@@ -270,7 +270,7 @@ SC.mixin(/** @scope SC */ {
     var guidKey = this.guidKey ;
     if (obj[guidKey]) return obj[guidKey] ;
 
-    switch(this.typeOf(obj)) {
+    switch(typeof obj) {
       case SC.T_NUMBER:
         return (this._numberGuids[obj] = this._numberGuids[obj] || ("nu" + obj));
       case SC.T_STRING:
@@ -328,7 +328,7 @@ SC.mixin(/** @scope SC */ {
     @returns {String} the hash code for this instance.
   */
   hashFor: function(obj) {
-    return (obj && obj.hash && SC.typeOf(obj.hash) === SC.T_FUNCTION) ? obj.hash() : this.guidFor(obj) ;
+    return (obj && obj.hash && (typeof obj.hash === SC.T_FUNCTION)) ? obj.hash() : this.guidFor(obj) ;
   },
     
   /**
@@ -383,31 +383,32 @@ SC.mixin(/** @scope SC */ {
         if (v<w) return -1;
         if (v>w) return 1;
         return 0;
-        break;
+
       case SC.T_STRING:
         if (v.localeCompare(w)<0) return -1;
         if (v.localeCompare(w)>0) return 1;
         return 0;
-        break;
+
       case SC.T_ARRAY:
         var l = Math.min(v.length,w.length);
         var r = 0;
         var i = 0;
-        while (r==0 && i < l) {
+        while (r===0 && i < l) {
           r = arguments.callee(v[i],w[i]);
-          if ( r != 0 ) return r;
+          if ( r !== 0 ) return r;
           i++;
-        };
+        }
+        
         // all elements are equal now
         // shorter array should be ordered first
         if (v.length < w.length) return -1;
         if (v.length > w.length) return 1;
         // arrays are equal now
         return 0;
-        break;
+
       default:
         return 0;
-    };
+    }
   },
   
   // ..........................................................

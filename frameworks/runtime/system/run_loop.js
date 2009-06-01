@@ -50,7 +50,10 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   beginRunLoop: function() {
-    this._start = new Date().getTime() ; // can't use Date.now() in runtime 
+    this._start = new Date().getTime() ; // can't use Date.now() in runtime
+    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+      console.log("-- SC.RunLoop.beginRunLoop at %@".fmt(this._start));
+    } 
     return this ; 
   },
   
@@ -64,18 +67,26 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   endRunLoop: function() {
-    
     // at the end of a runloop, flush all the delayed actions we may have 
     // stored up.  Note that if any of these queues actually run, we will 
     // step through all of them again.  This way any changes get flushed
     // out completely.
     var didChange ;
+
+    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+      console.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
+    } 
     
     do {
       didChange = this.flushApplicationQueues() ;
       if (!didChange) didChange = this._flushinvokeLastQueue() ; 
     } while(didChange) ;
     this._start = null ;
+
+    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+      console.log("-- SC.RunLoop.endRunLoop ~ End");
+    } 
+    
     return this ; 
   },
   

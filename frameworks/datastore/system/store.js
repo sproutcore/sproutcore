@@ -95,12 +95,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       store.commitChanges().destroy();
     }}}
     
+    @param {Hash} attrs optional attributes to set on new store
     @returns {SC.NestedStore} new nested store chained to receiver
   */
-  chain: function() {
-    var ret = SC.NestedStore.create({ parentStore: this }) ; 
-    var nested = this.nestedStores;
-    if (!nested) nested =this.nestedStores = [];
+  chain: function(attrs) {
+    if (!attrs) attrs = {};
+    attrs.parentStore = this;
+    
+    var ret    = SC.NestedStore.create(attrs),
+        nested = this.nestedStores;
+        
+    if (!nested) nested = this.nestedStores = [];
     nested.push(ret);
     return ret ;
   },
@@ -117,6 +122,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       this.nestedStores.removeObject(nestedStore);
     }
     return this ;
+  },
+
+  /**
+    Used to determine if a nested store belongs directly or indirectly to the
+    receiver.
+    
+    @param {SC.Store} store store instance
+    @returns {Boolean} YES if belongs
+  */
+  hasNestedStore: function(store) {
+    while(store && (store !== this)) store = store.get('parentStore');
+    return store === this ;
   },
 
   // ..........................................................
@@ -537,44 +554,43 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // OK, no locking issues.  So let's just copy them changes. 
     // get local reference to values.
-    var len = changes.length, i, storeKey;
-    var my_dataHashes, my_statuses, my_editables, my_revisions;
-    var ch_dataHashes, ch_statuses, ch_revisions;
+    var len = changes.length, i, storeKey, myDataHashes, myStatuses, 
+      myEditables, myRevisions, chDataHashes, chStatuses, chRevisions;
     
-    my_revisions  = this.revisions ;
-    my_dataHashes = this.dataHashes;
-    my_statuses   = this.statuses;
-    my_editables  = this.editables ;
-
+    myRevisions  = this.revisions ;
+    myDataHashes = this.dataHashes;
+    myStatuses   = this.statuses;
+    myEditables  = this.editables ;
+    
     // setup some arrays if needed
-    if (!my_editables) my_editables = this.editables = [] ;
+    if (!myEditables) myEditables = this.editables = [] ;
     
-    ch_dataHashes = nestedStore.dataHashes;
-    ch_revisions  = nestedStore.revisions ;
-    ch_statuses   = nestedStore.statuses;
+    chDataHashes = nestedStore.dataHashes;
+    chRevisions  = nestedStore.revisions ;
+    chStatuses   = nestedStore.statuses;
 
     SC.RunLoop.begin();
     for(i=0;i<len;i++) {
       storeKey = changes[i];
 
       // now copy changes
-      my_dataHashes[storeKey] = ch_dataHashes[storeKey];
-      my_statuses[storeKey]   = ch_statuses[storeKey];
-      my_revisions[storeKey]  = ch_revisions[storeKey];
+      myDataHashes[storeKey] = chDataHashes[storeKey];
+      myStatuses[storeKey]   = chStatuses[storeKey];
+      myRevisions[storeKey]  = chRevisions[storeKey];
       
-      my_editables[storeKey] = 0 ; // always make dataHash no longer editable
+      myEditables[storeKey] = 0 ; // always make dataHash no longer editable
       
       this._notifyRecordPropertyChange(storeKey, NO);
     }
     SC.RunLoop.end();
     
     // add any records to the changelog for commit handling
-    var my_changelog = this.changelog, ch_changelog = nestedStore.changelog;
-    if (ch_changelog) {
-      if (!my_changelog) my_changelog = this.changelog = SC.Set.create();
-      my_changelog.addEach(ch_changelog);
+    var myChangelog = this.changelog, chChangelog = nestedStore.changelog;
+    if (chChangelog) {
+      if (!myChangelog) myChangelog = this.changelog = SC.Set.create();
+      myChangelog.addEach(chChangelog);
     }  
-    this.changelog=my_changelog;
+    this.changelog = myChangelog;
     
     return this ;
   },
@@ -647,28 +663,28 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     h2. Query Keys
     
-    The kind of query key you pass is generally determined by the type of 
-    persistent stores you hook up for your application.  Most stores, however,
-    will accept an SC.Record subclass as the query key.  This will return 
+    The kind of fetchKey you pass is generally determined by the type of 
+    persistent stores you hook up for your application. Most stores, however,
+    will accept an SC.Record subclass as the fetchKey. It is up to your data source
+    to figure out which storeKeys to return based on the fetchKey. This will return 
     a RecordArray matching all instances of that class as is relevant to your
     application, for instance: findAll(MyApp.MyModel)
     
-    You can also pass an SC.Query object as your queryKey, for instance:
+    You can also pass an SC.Query object as your fetchKey, for instance:
     var q = SC.Query.create({ recordType: MyApp.MyModel, 
       conditions: "firstName = 'John'", orderBy: "lastName ASC"});
     var records = MyApp.store.findAll(q);
     
-    In your dataSource fetch() method you can return either a store key 
-    array, a sparse array, or an SC.Query object.
-    
-    If an SC.Query is returned from the data source, the record array created in
+    If an SC.Query is given as fetchKey, the record array created in
     findAll() will automatically update when records are added, changed, 
-    or removed from the store.
+    or removed from the store. When a fetchKey is given, you do not have to 
+    return anything from the data source as you are from then on delegating
+    the responsibility to keep the record array updated to the store.
     
     Once you retrieve a RecordArray, you can filter the results even further
     by using the filter() method, which may issue even more specific requests.
     
-    @param {Object|SC.Query} queryKey key describing the type of records to 
+    @param {Object|SC.Query} fetchKey key describing the type of records to 
       fetch or a predefined SC.Query object
     @param {Hash} params optional additional parameters to pass along to the
       data source
@@ -676,38 +692,29 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       within a given record array
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  findAll: function(queryKey, params, recordArray) { 
-    var _store = this, source = this.get('dataSource'), ret, storeKeys, 
+  findAll: function(fetchKey, params, recordArray) { 
+    var _store = this, source = this.get('dataSource'), ret = [], storeKeys, 
       sourceRet, cacheKey;
     
     if(recordArray) {
       // giving a recordArray will circumvent the data source
       // typically happens when chaining findAll statements
-      storeKeys = SC.Query.containsRecords(queryKey, recordArray, _store);
+      storeKeys = SC.Query.containsRecords(fetchKey, recordArray, _store);
     }
     else if (source) {
-      // call fetch() on the data source. It can respond with either
-      // a storeKey array, a sparse array or a SC.Query object.
-      sourceRet = source.fetch.call(source, this, queryKey, params);
-      
-      if(SC.typeOf(sourceRet) === SC.T_ARRAY) {
+      // call fetch() on the data source.
+      sourceRet = source.fetch.call(source, this, fetchKey, params);
+      if(SC.typeOf(sourceRet)===SC.T_ARRAY) {
         storeKeys = sourceRet;
       }
-      else if(SC.instanceOf(sourceRet, SC.Query)) {
-        queryKey = sourceRet;
-      }
-      else {
-        throw("Data source fetch() has to return array or SC.Query object");
-      }
-      
     }
     
     // if SC.Query returned from data source or no data source was given 
-    if(!storeKeys && SC.instanceOf(queryKey, SC.Query)) {
-      storeKeys = SC.Query.containsStoreKeys(queryKey, null, _store);
+    if(!storeKeys && SC.instanceOf(fetchKey, SC.Query)) {
+      storeKeys = SC.Query.containsStoreKeys(fetchKey, null, _store);
     }
     
-    if(storeKeys) ret = this.recordArrayFromStoreKeys(storeKeys, queryKey, _store);
+    ret = this.recordArrayFromStoreKeys(storeKeys, fetchKey, _store);
     
     return ret ;
   },
@@ -717,22 +724,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     cache if records are already cached, if not store them for reuse.
     
     @param {Array} storeKeys added to returned record array
+    @param {Object|SC.Query} fetchKey
     @param {SC.Store} _store
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   
-  recordArrayFromStoreKeys: function(storeKeys, queryKey, _store) {
+  recordArrayFromStoreKeys: function(storeKeys, fetchKey, _store) {
     var ret, isQuery, cacheKey;
     
     // if an array was provided, see if a wrapper already exists for 
     // this store.  Otherwise create it
-    cacheKey = SC.keyFor('__records__', SC.guidFor(storeKeys));
+    cacheKey = SC.keyFor('__records__', [SC.guidFor(storeKeys), SC.guidFor(fetchKey)].join('_'));
     ret = this[cacheKey];
     if (!ret) {
-      ret = SC.RecordArray.create({store: _store, queryKey: queryKey, storeKeys: storeKeys});
+      ret = SC.RecordArray.create({store: _store, queryKey: fetchKey, storeKeys: storeKeys});
       // store reference to record array if SC.Query so we can notify it
       // when store changes
-      if(SC.instanceOf(queryKey, SC.Query)) {
+      if(SC.instanceOf(fetchKey, SC.Query)) {
         if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
         this.recordArraysWithQuery.push(ret);
       }
@@ -928,7 +936,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else status = K.DESTROYED_DIRTY ;
     
     // remove the data hash, set new status
-    this.removeDataHash(storeKey, status);
+    this.writeStatus(storeKey, status);
     this.dataHashDidChange(storeKey);
 
     // add/remove change log
@@ -1013,7 +1021,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // record data hash change
     this.dataHashDidChange(storeKey, null);
-    
     // record in changelog
     changelog = this.changelog ;
     if (!changelog) changelog = this.changelog = SC.Set.create() ;
@@ -1077,8 +1084,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     instance itself using materializeRecord()
     
     @param {SC.Record|Array} recordTypes class or array of classes
-    @param {Array} ids ids to destroy
-    @param {Array} storeKeys (optional) store keys to destroy
+    @param {Array} ids ids to retrieve
+    @param {Array} storeKeys (optional) store keys to retrieve
     @returns {Array} storeKeys to be retrieved
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
@@ -1138,12 +1145,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // now retrieve storekeys from dataSource
     if (source) {
-      var ok = source.retrieveRecords.call(source, this, ret);
+      var ok = source.retrieveRecords.call(source, this, ret, ids);
       if (ok === NO) ret.length = 0; // could not find.
     }
     return ret ;
   },
-
+  
   _TMP_RETRIEVE_ARRAY: [],
   
   /**
@@ -1232,6 +1239,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
       storeKeys=this.changelog;
     }
+    
+    // if no storeKeys or ids at this point, return
+    if(!storeKeys && !ids) return;
+    
     len = (storeKeys === undefined) ? ids.length : storeKeys.length;
     
     for(idx=0;idx<len;idx++) {
@@ -1662,7 +1673,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Given a recordType and primaryKey, find the storeKey.
+    Given a recordType and primaryKey, find the storeKey. If the primaryKey 
+    has not been assigned a storeKey yet, it will be added.
     
     @param {SC.Record} recordType the record type
     @param {String} primaryKey the primary key
@@ -1670,6 +1682,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   storeKeyFor: function(recordType, primaryKey) {
     return recordType.storeKeyFor(primaryKey);
+  },
+  
+  /**
+    Given a primaryKey value for the record, returns the associated
+    storeKey.  As opposed to storeKeyFor() however, this method
+    will NOT generate a new storeKey but returned undefined.
+    
+    @param {String} id a record id
+    @returns {Number} a storeKey.
+  */
+  storeKeyExists: function(recordType, primaryKey) {
+    return recordType.storeKeyExists(primaryKey);
   },
   
   /**
@@ -1681,7 +1705,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   storeKeysFor: function(recordType) {
-    var recType, ret = [];
+    var recType, ret = [], storeKey;
     if(!this.statuses) return;
     
     for(storeKey in SC.Store.recordTypesByStoreKey) {

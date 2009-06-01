@@ -67,7 +67,7 @@ SC.Observers = {
   // need to start observing.
   addPendingRangeObserver: function(observer) {
     var ro = this.rangeObservers;
-    if (!ro) ro = this.rangeObservers = SC.Set.create();
+    if (!ro) ro = this.rangeObservers = SC.CoreSet.create();
     ro.add(observer);
     return this ;
   },
@@ -117,7 +117,7 @@ SC.Observers = {
   },
   
   isObservingSuspended: 0,
-  _pending: SC.Set.create(),
+  _pending: SC.CoreSet.create(),
   
   objectHasPendingChanges: function(obj) {
     this._pending.add(obj) ; // save for later
@@ -134,7 +134,7 @@ SC.Observers = {
     var pending ;
     if(--this.isObservingSuspended <= 0) {
       pending = this._pending ;
-      this._pending = SC.Set.create() ;
+      this._pending = SC.CoreSet.create() ;
       
       var idx, len = pending.length;
       for(idx=0;idx<len;idx++) {

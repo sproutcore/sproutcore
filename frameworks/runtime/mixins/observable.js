@@ -9,7 +9,7 @@ require('private/observer_set') ;
 
 /*globals logChange */
 
-SC.LOG_OBSERVING = NO ;
+SC.LOG_OBSERVERS = NO ;
 
 /**
   @namespace 
@@ -137,6 +137,9 @@ SC.LOG_OBSERVING = NO ;
 */
 SC.Observable = {
 
+  /** walk like that ol' duck */
+  isObservable: YES,
+  
   /**
     Determines whether observers should be automatically notified of changes
     to a key.
@@ -408,7 +411,7 @@ SC.Observable = {
     this._kvo_revision = (this._kvo_revision || 0) + 1; 
     var level = this._kvo_changeLevel || 0,
         cachedep, idx, dfunc, cache, func,
-        log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO);
+        log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO);
 
     if (this._kvo_cacheable && (cache = this._kvo_cache)) {
 
@@ -443,7 +446,7 @@ SC.Observable = {
     var suspended ;
     if ((level > 0) || (suspended=SC.Observers.isObservingSuspended)) {
       var changes = this._kvo_changes ;
-      if (!changes) changes = this._kvo_changes = SC.Set.create() ;
+      if (!changes) changes = this._kvo_changes = SC.CoreSet.create() ;
       changes.add(key) ;
       
       if (suspended) {
@@ -566,7 +569,7 @@ SC.Observable = {
     // there are dependent keys, so we need to do the work to find out if 
     // any of them or their dependent keys are cached.
     queue = cached[key] = [];
-    seen  = SC._TMP_SEEN_SET = (SC._TMP_SEEN_SET || SC.Set.create());
+    seen  = SC._TMP_SEEN_SET = (SC._TMP_SEEN_SET || SC.CoreSet.create());
     seen.add(key);
     this._kvo_addCachedDependents(queue, keys, dependents, seen);
     seen.clear(); // reset
@@ -591,9 +594,9 @@ SC.Observable = {
       this._kvo_cloned[kvoKey] = YES ;
       
     // if item does exist but has not been cloned, then clone it.  Note
-    // that all types must implement slice().0
+    // that all types must implement copy().0
     } else if (!this._kvo_cloned[kvoKey]) {
-      ret = this[kvoKey] = ret.slice();
+      ret = this[kvoKey] = ret.copy();
       this._kvo_cloned[kvoKey] = YES; 
     }
     
@@ -686,7 +689,7 @@ SC.Observable = {
       if (target === this) target = null ; // use null for observers only.
       kvoKey = SC.keyFor('_kvo_observers', key);
       this._kvo_for(kvoKey, SC._ObserverSet).add(target, method, context);
-      this._kvo_for('_kvo_observed_keys', SC.Set).add(key) ;
+      this._kvo_for('_kvo_observed_keys', SC.CoreSet).add(key) ;
     }
 
     if (this.didAddObserver) this.didAddObserver(key, target, method);
@@ -742,7 +745,7 @@ SC.Observable = {
         observers = this._kvo_for(kvoKey) ;
         observers.remove(target, method) ;
         if (observers.targets <= 0) {
-          this._kvo_for('_kvo_observed_keys', SC.Set).remove(key);
+          this._kvo_for('_kvo_observed_keys', SC.CoreSet).remove(key);
         }
       }
     }
@@ -894,7 +897,7 @@ SC.Observable = {
     
     SC.Observers.flush(this) ; // hookup as many observers as possible.
 
-    var log = SC.LOG_OBSERVING && !(this.LOG_OBSERVING===NO) ;
+    var log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO) ;
     var observers, changes, dependents, starObservers, idx, keys, rev ;
     var members, membersLength, member, memberLoc, target, method, loc, func ;
     var context, spaces, cache ;
@@ -918,7 +921,7 @@ SC.Observable = {
       
       // save the current set of changes and swap out the kvo_changes so that
       // any set() calls by observers will be saved in a new set.
-      if (!changes) changes = SC.Set.create() ;
+      if (!changes) changes = SC.CoreSet.create() ;
       this._kvo_changes = null ;
 
       // Add the passed key to the changes set.  If a '*' was passed, then
@@ -926,7 +929,7 @@ SC.Observable = {
       // once finished, clear the key so the loop will end.
       if (key === '*') {
         changes.add('*') ;
-        changes.addEach(this._kvo_for('_kvo_observed_keys', SC.Set));
+        changes.addEach(this._kvo_for('_kvo_observed_keys', SC.CoreSet));
 
       } else if (key) changes.add(key) ;
 

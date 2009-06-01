@@ -112,7 +112,7 @@ SC.mixin( /** @scope SC */ {
   
   /** Return the point that will center the frame Y within the passed frame. */
   centerY: function(innerFrame, outerFrame) {
-    return (outerFrame.width - innerFrame.width) /2  ;
+    return (outerFrame.height - innerFrame.height) /2  ;
   },
   
   /** Check if the given point is inside the rect. */

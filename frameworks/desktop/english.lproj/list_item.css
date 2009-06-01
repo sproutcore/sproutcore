@@ -9,7 +9,7 @@
 }
 
 .sc-list-item-view.sel {
-	background-color: #666; 
+	background-color: #888; 
 	color: white ;
 }
 
@@ -31,6 +31,14 @@
 	right: 4px;
 }
 
+.sc-list-item-view .sc-outline {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
 .sc-list-item-view.has-icon label,
 .sc-list-item-view.has-checkbox label {
 	left: 24px;
@@ -39,6 +47,44 @@
 .sc-list-item-view.has-checkbox.has-icon label {
 	left: 44px;
 }
+
+/* @end */
+
+/* @group Disclosure */
+
+.sc-list-item-view img.disclosure {
+	position: absolute ;
+	left: -11px;
+	top: 50%;
+	margin-top: -6px;
+	width: 14px;
+	height: 14px;
+	background-image: static_url('images/sc-theme-sprite.png') ;
+	background-position: -16px -1025px ;
+}
+
+.sc-list-item-view img.disclosure.open {
+	background-position: 0px -1008px ;
+}
+
+.sc-list-item-view img.disclosure.active {
+	background-position: -0px -1041px ;
+}
+
+.sc-list-item-view img.disclosure.open.active {
+	background-position: -16px -1008px ;
+}
+
+.sc-list-item-view.disabled img.disclosure,
+.sc-list-item-view.disabled img.disclosure.active {
+	background-position: -16px -1041px ;
+}
+
+.sc-list-item-view.disabled img.disclosure.open,
+.sc-list-item-view.disabled img.disclosure.open.active {
+	background-position: 0px -1024px ;
+}
+
 
 /* @end */
 

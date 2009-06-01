@@ -224,10 +224,22 @@ SC.String = {
     return this.replace(/^\s+|\s+$/g,"");
   },
   
-  /** Splits the string into words, separated by spaces.  */
-  w: function() { return this.split(' '); }
+  /**
+    Splits the string into words, separated by spaces. Empty strings are
+    removed from the results.
     
-} ;
+    @returns {Array} an array of non-empty strings
+  */
+  w: function() { 
+    var ary = [], ary2 = this.split(' '), len = ary2.length ;
+    for (var idx=0; idx<len; ++idx) {
+      var str = ary2[idx] ;
+      if (str.length !== 0) ary.push(str) ; // skip empty strings
+    }
+    return ary ;
+  }
+  
+};
 
 SC.String.strip = SC.String.trim; // convenience alias.
 

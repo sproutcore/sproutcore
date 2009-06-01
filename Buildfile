@@ -61,3 +61,4 @@ config :standard_theme,
 %w(tests docs).each do |app_target|
   config app_target, :required => [:desktop], :theme => :standard_theme
 end
+ 

@@ -137,7 +137,7 @@ SC.ScrollerView = SC.View.extend({
   
   didCreateLayer: function() {
     // console.log('%@.didCreateLayer called'.fmt(this));
-    var callback = this._sc_scroller_armScrollTimer ;
+    var callback = this._sc_scroller_scrollDidChange ;
     SC.Event.add(this.$(), 'scroll', this, callback) ;
     
     // set scrollOffset first time
@@ -157,22 +157,28 @@ SC.ScrollerView = SC.View.extend({
   
   willDestroyLayer: function() {
     // console.log('%@.willDestroyLayer()'.fmt(this));
-    var callback = this._sc_scroller_armScrollTimer ;
+    var callback = this._sc_scroller_scrollDidChange ;
     SC.Event.remove(this.$(), 'scroll', this, callback) ;
   },
-  
+
+  // after 50msec, fire event again
   _sc_scroller_armScrollTimer: function() {
     if (!this._sc_scrollTimer) {
       SC.RunLoop.begin();
       var method = this._sc_scroller_scrollDidChange ;
-      this._sc_scrollTimer = this.invokeLater(method, 1) ;
+      this._sc_scrollTimer = this.invokeLater(method, 50) ;
       SC.RunLoop.end();
     }
   },
   
   _sc_scroller_scrollDidChange: function() {
-    // console.log('%@._sc_scroller_scrollDidChange called'.fmt(this));
-    this._sc_scrollTimer = null ; // clear so we can fire again
+    
+    var now = Date.now(), last = this._sc_lastScroll;
+    if (last && (now-last)<50) return this._sc_scroller_armScrollTimer();
+    this._sc_scrollTimer = null; 
+    this._sc_lastScroll = now;
+
+    SC.RunLoop.begin();
     
     if (!this.get('isEnabled')) return ; // nothing to do.
     
@@ -188,6 +194,8 @@ SC.ScrollerView = SC.View.extend({
     }
     
     this.set('value', loc + this.get('minimum')) ;
+    
+    SC.RunLoop.end();
   },
   
   /** @private */

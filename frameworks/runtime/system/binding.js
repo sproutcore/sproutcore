@@ -12,7 +12,7 @@ require('system/object') ;
   the console.  This should be disabled in production code.  Note that you
   can also enable this from the console or temporarily.
 */
-SC.LOG_BINDING_NOTIFICATIONS = NO ;
+SC.LOG_BINDINGS = NO ;
 
 /**
   Performance paramter.  This will benchmark the time spent firing each 
@@ -483,10 +483,10 @@ SC.Binding = {
     this._transformedBindingValue = v;
   },
   
-  _connectQueue: SC.Set.create(),
-  _alternateConnectQueue: SC.Set.create(),
-  _changeQueue: SC.Set.create(),
-  _alternateChangeQueue: SC.Set.create(),
+  _connectQueue: SC.CoreSet.create(),
+  _alternateConnectQueue: SC.CoreSet.create(),
+  _changeQueue: SC.CoreSet.create(),
+  _alternateChangeQueue: SC.CoreSet.create(),
   _changePending: NO,
 
   /**
@@ -502,7 +502,7 @@ SC.Binding = {
     SC.Observers.suspendPropertyObserving();
 
     var didFlush = NO ;
-    var log = SC.LOG_BINDING_NOTIFICATIONS ;
+    var log = SC.LOG_BINDINGS ;
     
     // connect any bindings
     var queue, binding ;
@@ -554,7 +554,7 @@ SC.Binding = {
     var v = this._bindingValue ;
     var tv = this._transformedBindingValue ;
     var bench = SC.BENCHMARK_BINDING_NOTIFICATIONS ;
-    var log = SC.LOG_BINDING_NOTIFICATIONS ; 
+    var log = SC.LOG_BINDINGS ; 
     
     // the from property value will always be the binding value, update if 
     // needed.

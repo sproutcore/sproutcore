@@ -39,7 +39,7 @@ function validate(set, expected, defaultSource) {
   }
 }
 // ..........................................................
-// BASIC ADDS
+// BASIC REMOVES
 // 
 
 test("Removed indexes for single source", function() {

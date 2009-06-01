@@ -14,36 +14,61 @@
 */
 TestRunner.Target = SC.Record.extend(
 /** @scope TestRunner.Target.prototype */ {
-  
-  /** Load the tests for the target. */
-  tests: function() {
-    this.refreshTests();
-    return this._tests;
-  }.property().cacheable(),
+
+  primaryKey: "name",
   
   /**
-    Loads the targets from the server.  When the targets have loaded, adds 
-    them to the store and then sets the local content.
+    The target name.  This is the primary key
+    
+    @property
   */
-  refreshTests: function() {
-    if (!this._tests) this._tests = [] ;
-    SC.Request.getUrl(this.get('link_tests'))
-      .notify(this, 'testsDidRefresh').set('isJSON', YES).send();
-  },
+  name: SC.Record.attr(String),
   
-  testsDidRefresh: function(request) {
-    var json = request.get('response'), len = json.length, idx;
-    for(idx=0;idx<len;idx++) json[idx].guid = json[idx].url ; // patch
-    var tests = SC.Store.updateRecords(json, SC.Store, TestRunner.Test);
-    tests = tests.sort(function(a,b) { 
-      a = a.get('filename'); 
-      b = b.get('filename');
-      return (a<b) ? -1 : (a>b) ? 1 : 0;
-    });
+  /**
+    The kind of target.  Usually is one of "app" or "framework".
+    
+    @property
+  */
+  kind: SC.Record.attr(String),
 
-    this.propertyWillChange('tests');
-    this._tests = tests ;
-    this.propertyDidChange('tests');
-  }
+  /**
+    Link to the document index json
 
+    @property
+  */
+  docsUrl: SC.Record.attr(String, { key: "link_docs" }),
+  
+  /**
+    Link to the test index json
+    
+    @property
+  */
+  testsUrl: SC.Record.attr(String, { key: "link_tests" }),
+  
+  /**
+    Link to the target itself.  This is only useful for applications.
+    
+    @property
+  */
+  rootUrl: SC.Record.attr(String, { key: "link_root" }),
+  
+  
+  /**
+    The parent target, if there is one.  This is a reference to the primary
+    key.
+    
+    @property
+  */
+  parent: SC.Record.hasOne("TestRuner.Target"),
+  
+  /**
+    The display name for the target.  Computed by taking the last part of the
+    target name.
+  */
+  displayName: function() {
+    var name = this.get('name').split('/');
+    name = name[name.length-1] || '(none)';
+    return name.titleize();
+  }.property('name').cacheable()
+  
 }) ;

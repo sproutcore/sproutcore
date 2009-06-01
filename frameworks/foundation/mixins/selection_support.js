@@ -33,92 +33,11 @@
 */
 SC.SelectionSupport = {
   
-  /** 
-    Call this method whenever your source content changes to ensure the 
-    selection always remains up-to-date and valid.
-  */
-  updateSelectionAfterContentChange: function() {
-    var objects = SC.makeArray(this.get('arrangedObjects')) ;
-    var currentSelection = SC.makeArray(this.get('selection')) ;
-    var sel = [] ;
-    
-    // the new selection is the current selection that exists in 
-    // arrangedObjects or an empty selection if selection is not allowed.
-    var max = currentSelection.get('length') ;
-    if (this.get('allowsSelection')) {
-      for(var idx=0;idx<max;idx++) {
-        var obj = currentSelection.objectAt(idx) ;
-        if (objects.indexOf(obj) >= 0) sel.push(obj) ;
-      }
-    }
-    
-    // if the new selection is a multiple selection, get the first object
-    var selectionLength = sel.get('length') ;
-    if ((selectionLength > 1) && !this.get('allowsMultipleSelection')) {
-      sel = [sel.objectAt(0)] ;
-    }
-    
-    // if the selection is empty, select the first item.
-    if ((selectionLength == 0) && !this.get('allowsEmptySelection')) {
-      if (objects.get('length') > 0) sel = [objects.objectAt(0)] ;
-    }
-    
-    // update the selection.
-    this.set('selection', sel) ;
-  },
+  // ..........................................................
+  // PROPERTIES
+  // 
   
-  /**
-    @property
-    @type SC.Array
-    
-    Returns the set of content objects the selection should be a part of.
-    Selections in general may contain objects outside of this content, but
-    this set will be used when enforcing items such as no empty selection.
-    
-    The default version of this property returns the receiver.
-  */
-  arrangedObjects: function() { return this; }.property(),
-  
-  /**
-    @property
-    @type SC.Set
-    
-    This is the current selection.  You can make this selection and another
-    controller's selection work in concert by binding them together. You
-    generally have a master selection that relays changes TO all the others.
-  */
-  selection: function(key, value) {
-    if (value !== undefined) {
-      // are we even allowing selection at all? If not, return early...
-      if (!this.get('allowsSelection')) return this._selection ;
-      
-      value = SC.makeArray(value) ; // always force to an array
-      
-      // ok, new decide if the *type* of seleciton is allowed...
-      switch (value.get('length')) {
-        case 0:
-          // check to see if we're attemting to set an empty array
-          // if that's not allowed, set to the first available item in 
-          // arrangedObjects
-          if (!this.get('allowsEmptySelection')) {
-            var objects = this.get('arrangedObjects') ;
-            if (objects.get('length') > 0) value = [objects.objectAt(0)];
-          }
-          this._selection = value ;
-          break;
-        case 1:
-          this._selection = value;
-          break;
-        default:
-          // fall through for >= 2, only allow if configured for multi-select
-          this._selection = this.get('allowsMultipleSelection') ?
-            value :
-            this._selection ;
-          break;
-      }
-    }
-    else return this._selection ;
-  }.property(),
+  hasSelectionSupport: YES,
   
   /**
     If YES, selection is allowed. Default is YES.
@@ -142,6 +61,57 @@ SC.SelectionSupport = {
   allowsEmptySelection: YES,
   
   /**
+    This is the current selection.  You can make this selection and another
+    controller's selection work in concert by binding them together. You
+    generally have a master selection that relays changes TO all the others.
+    
+    @property
+    @type SC.SelectionSet
+  */
+  selection: function(key, value) {
+    var content, empty;
+    
+    if (value !== undefined) {
+      
+      // are we even allowing selection at all?  Also, must be enumerable
+      if (this.get('allowsSelection') && value && value.isEnumerable) {
+        
+        // ok, new decide if the *type* of selection is allowed...
+        switch (value.get('length')) {
+          
+          // check to see if we're attempting to set an empty array
+          // if that's not allowed, set to the first available item in 
+          // arrangedObjects
+          case 0:
+            empty   = this.get('allowsEmptySelection');
+            content = this.get('arrangedObjects');
+            if (empty && content && content.get('length')>0) {
+                value = SC.SelectionSet.create().add(content, 0).freeze();
+            } else value = null ;
+            break;
+            
+          // single items are always allows
+          case 1:
+            break;
+
+          // fall through for >= 2, only allow if configured for multi-select
+          default:
+            if (!this.get('allowsMultipleSelection')) value = null;
+            break;
+        }
+      } else value = null;
+      
+      // always make selection into something then save
+      if (!value) value = SC.SelectionSet.EMPTY;
+      this._scsel_selection = value;
+      
+    // read only mode
+    } else return this._scsel_selection ;
+    
+  }.property('arrangedObjects', 'allowsEmptySelection', 
+      'allowsMultipleSelection', 'allowsSelection').cacheable(),
+  
+  /**
     YES if the receiver currently has a non-zero selection.
     
     @property Boolean
@@ -149,6 +119,43 @@ SC.SelectionSupport = {
   hasSelection: function() {
     var sel = this.get('selection') ;
     return !!sel && (sel.get('length') > 0) ;
-  }.property('selection')
+  }.property('selection').cacheable(),
   
+  // ..........................................................
+  // METHODS
+  // 
+
+  /** 
+    Call this method whenever your source content changes to ensure the 
+    selection always remains up-to-date and valid.
+  */
+  updateSelectionAfterContentChange: function() {
+    var content = this.get('arrangedObjects'),
+        sel     = this.get('selection'),
+        indexes, len, max, ret;
+    if (!sel) return  this; // nothing to do
+    
+    // remove from the sel any items selected beyond the length of the new
+    // arrangedObjects
+    indexes = content? sel.indexSetForSource(content, NO) : null;
+    len     = content ? content.get('length') : 0;
+    max     = indexes ? indexes.get('max') : 0;
+    if (max > len) ret = sel.copy().remove(content, len, max-len);
+
+    if (!this.get('allowsSelection')) ret = SC.SelectionSet.EMPTY;
+
+    if (!this.get('allowsMultipleSelection') && (ret||sel).get('length')>1){
+      indexes = content ? (ret||sel).indexSetForSource(content, NO) : null;
+      ret = SC.SelectionSet.create();
+      if (indexes) ret.add(content, indexes.get('min'));
+    }
+  
+    if (!this.get('allowsEmptySelection') && (ret || sel).get('length')===0) {
+      if (content) ret = SC.SelectionSet.create().add(content, 0);
+    }
+  
+    if (ret) this.set('selection', ret);
+    return this ;
+  }
+    
 };

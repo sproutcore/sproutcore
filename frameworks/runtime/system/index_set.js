@@ -198,7 +198,7 @@ SC.IndexSet = SC.mixin({},
     index--; // start with previous index
     
     var content = this._content, 
-        max     = this.get('max');
+        max     = this.get('max'),
         start   = this.rangeStartForIndex(index);
     if (!content) return null;
 
@@ -399,8 +399,6 @@ SC.IndexSet = SC.mixin({},
       
       if (!content) return this; // nothing to do
 
-      //console.log(start.inspect());
-      
       cur = 0 ;
       next = content[0];
       while(next !== 0) {
@@ -1134,3 +1132,4 @@ SC.IndexSet = SC.mixin({},
 }) ;
 
 SC.IndexSet.slice = SC.IndexSet.copy = SC.IndexSet.clone ;
+SC.IndexSet.EMPTY = SC.IndexSet.create().freeze();

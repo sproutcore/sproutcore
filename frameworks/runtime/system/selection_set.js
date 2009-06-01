@@ -287,7 +287,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
    Clones the set into a new set.  
   */
   clone: function() {
-    var ret  = this.constructor.create(),
+    var ret  = this.constructor.create({ length: this.length }),
         sets = this._sets,
         len  = sets ? sets.length : 0 ,
         idx, set;
@@ -296,12 +296,29 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
       sets = ret._sets = sets.slice();
       for(idx=0;idx<len;idx++) {
         if (!(set = sets[idx])) continue ;
-        set = sets[idx] = set.clone();
+        set = sets[idx] = set.copy();
         ret[SC.guidFor(set.source)] = idx;
       }
     }
     
     return ret ;
+  },
+  
+  /**
+    @private 
+    
+    Freezing a SelectionSet also freezes its internal sets.
+  */
+  freeze: function() {
+    if (this.isFrozen) return this ;
+    var sets = this._sets,
+        loc  = sets ? sets.length : 0,
+        set ;
+        
+    while(--loc >= 0) {
+      if (set = sets[loc]) set.freeze();
+    }
+    return sc_super();
   },
   
   // ..........................................................
@@ -318,8 +335,11 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   
   firstObject: function() {
     if (this.get('length')===0) return undefined;
-    var sets = this._sets;
-    return sets ? sets[0].firstObject() : undefined;
+    var sets = this._sets, 
+        set  = sets ? sets[0] : null,
+        src  = set ? set.source : null,
+        idx  = set ? set.firstObject() : -1;
+    return (src && idx>=0) ? src.objectAt(idx) : undefined;
   }.property(),
   
   /**
@@ -464,3 +484,5 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
 });
 
 SC.SelectionSet.prototype.copy = SC.SelectionSet.prototype.clone;
+SC.SelectionSet.EMPTY = SC.SelectionSet.create().freeze();
+

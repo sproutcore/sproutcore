@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('views/collection');
+sc_require('mixins/collection_row_delegate');
 
 /** @class
   
@@ -18,13 +19,10 @@ sc_require('views/collection');
   the ListView to optimize its rendering.
   
   h2. Variable Row Heights
-  
-  ListView now supports variable row heights 
-  The ListView adds support for a single delegate method:
-  
-  {{{
-    collectionViewRowHeightForContent()
-  }}}
+
+  Normally you set the row height through the rowHeight property.  You can 
+  also support custom row heights by implementing the 
+  contentCustomRowHeightIndexes property to return an index set.
   
   h2. Using ListView with Very Large Data Sets
   
@@ -53,655 +51,334 @@ sc_require('views/collection');
   cheat for very long data sets to make rendering more efficient?)
   
   @extends SC.CollectionView
+  @extends SC.CollectionRowDelegate
   @since SproutCore 1.0
 */
 SC.ListView = SC.CollectionView.extend(
+  SC.CollectionRowDelegate,
 /** @scope SC.ListView.prototype */ {
   
   classNames: ['sc-list-view'],
-  
-  /**
-    The default layout for the list view simply fills the entire parentView.
-  */
-  layout: { left: 0, right: 0, top: 0, bottom: 0 },
-  
+
   acceptsFirstResponder: YES,
-  
+
   // ..........................................................
-  // ROW HEIGHT SUPPORT
+  // COLLECTION ROW DELEGATE SUPPORT
   // 
   
-  /** 
-    The common row height for list view items.
-    
-    If you set this property, then the ListView will be able to use this
-    property to perform absolute layout of its children and to minimize t
-    number of actual views it has to create.
-    
-    The value should be an integer expressed in pixels.
-    
-    You can alternatively set either the rowHeightKey or implement
-    the collectionViewHeightForRowAtContentIndex() delegate method.
-  */
-  rowHeight: 20,
   
   /**
-    If set, this key will be used to calculate the row height for a given
-    content object.
+    Returns the current collectionRowDelegate.  This property will recompute
+    everytime the content changes.
   */
-  rowHeightKey: null,
+  rowDelegate: function() {
+    var del     = this.delegate,
+        content = this.get('content');
+    return this.delegateFor('isCollectionRowDelegate', del, content);
+  }.property('delegate', 'content').cacheable(),
   
-  /**
-    This optional delegate method will be called for each item in your 
-    content, giving you a chance to decide what row height to use for the
-    content at the named index.
-    
-    The default version will return either the fixed rowHeight you 
-    specified or will lookup the row height on the content object using the
-    rowHeightKey.
-    
-    @params {SC.CollectionView} the requesting collection view
-    @params {Number} the index into the content
-    @returns {Number} rowHeight
+  /** @private 
+    Whenever the rowDelegate changes, begin observing important properties
   */
-  collectionViewHeightForRowAtContentIndex: function(collectionView, contentIndex) {
-    // console.log('collectionViewHeightForRowAtContentIndex invoked in %@ with index %@'.fmt(this, contentIndex));
-    // console.log('rowHeightKey is %@'.fmt(this.get('rowHeightKey')));
-    // just test for presence of a rowHeightKey..to implement fast path...
-    if (!this.rowHeightKey) return this.get('rowHeight');
-    var key = this.get('rowHeightKey'), content = this.get('content'), rowHeight;
-    if (content) content = content.objectAt(contentIndex);
-    rowHeight = content ? content.get(key) : this.get('rowHeight');
-    // console.log('content.get(key) is %@'.fmt(content ? content.get(key) : undefined));
-    return rowHeight ;
-  },
-  
-  /**
-    If some state changes that causes the row height for a range of rows 
-    then you should call this method to notify the view that it needs to
-    recalculate the row heights for the collection.
-    
-    Anytime your content array changes, the rows are invalidated 
-    automatically so you only need to use this for cases where your rows
-    heights may change without changing the content array itself.
-    
-    If all rows heights have changed, you can pass null to invalidate the
-    whole range.
-    
-    @param {Range} range or null.
-    @returns {SC.CollectionView} reciever
-  */
-  rowHeightsDidChangeInRange: function(range) {
-    if (this.get('hasUniformRowHeights')) return ; // nothing to do...
-    
-    // console.log('rowHeightsDidChangeInRange called on %@ with range %@'.fmt(this, $I(range)));
-    // if no range is passed, just wipe the cached...
-    if (!range) {
-      this._list_rowOffsets = this._list_rowHeights = null ;
-      
-    // otherwise, truncate the array of rowOffsets so that everything after
-    // the start of this range will be recalc'd.  For cached rowHeights,
-    // set to undefined unless max range exceeds length, in which case you
-    // just truncate.
-    } else {
-      var min = Math.max(0,range.start) ;
-      var offsets = this._list_rowOffsets, heights = this._list_rowHeights;
-      if (offsets) offsets.length = min ;
-      if (heights) {
-        var max = SC.maxRange(range); 
-        if (max >= heights.length) {
-          heights.length = min ;
-        } else {
-          while(min<max) heights[min++] = undefined ;
-        }
-      }
+  _sclv_rowDelegateDidChange: function() {
+    var last = this._sclv_rowDelegate,
+        del  = this.get('rowDelegate'),
+        func = this._sclv_rowHeightDidChange,
+        func2 = this._sclv_customRowHeightIndexesDidChange;
+        
+    if (last === del) return this; // nothing to do
+    this._sclv_rowDelegate = del; 
+
+    // last may be null on a new object
+    if (last) {
+      last.removeObserver('rowHeight', this, func);
+      last.removeObserver('customRowHeightIndexes', this, func2);
     }
     
-    // now update the layout...
-    this.adjust(this.computeLayout());
-    
-    // force recomputation of contentRangeInFrame
-    this.notifyPropertyChange('content');
-    
-    // and notify that nowShowingRange may have changed...
-    this.invalidateNowShowingRange() ;
-  },
-  
-  /**
-    Set to YES if your list view should have uniform row heights.  This will
-    enable an optimization that avoids inspecting actual content objects 
-    when calculating the size of the view.
-    
-    The default version of this property is set to YES unless you set a 
-    delegate or a rowHeightKey.
-  */
-  hasUniformRowHeights: YES,
-  // function(key, value) {
-  //     if (value !== undefined) this._list_hasUniformRowHeights = value ;
-  //     value = this._list_hasUniformRowHeights;
-  //     return SC.none(value) ? !((this.delegate && this.delegate.collectionViewHeightForRowAtContentIndex) || this.rowHeightKey) : value ;
-  //   }.property('delegate', 'rowHeightKey').cacheable(),
-  
-  /**
-    Calculates the offset for the row at the specified index.  Based on the 
-    current setting this may compute the row heights for previous items or 
-    it will simply do some math...
-  */
-  offsetForRowAtContentIndex: function(contentIndex) {
-    if (contentIndex === 0) return 0 ;
-    
-    // do some simple math if we have uniform row heights...
-    if (this.get('hasUniformRowHeights')) {
-      return this.get('rowHeight') * contentIndex ;
-      
-    // otherwise, use the rowOffsets cache...
-    } else {
-      // get caches
-      var offsets = this._list_rowOffsets;
-      if (!offsets) offsets = this._list_rowOffsets = [] ;
-      
-      // OK, now try the fast path...if undefined, loop backwards until we
-      // find an offset that IS cached...
-      var len = offsets.length, cur = contentIndex, height, ret;
-      
-      // get the cached offset.  Note that if the requested index is longer 
-      // than the length of the offsets cache, then just assume the value is
-      // undefined.  We don't want to accidentally read an old value...
-      if (contentIndex < len) {
-        ret = offsets[cur];
-      } else {
-        ret = undefined ;
-        cur = len; // start search at current end of offsets...
-      }
-      
-      // if the cached value was undefined, loop backwards through the offsets
-      // hash looking for a cached value to start from
-      while((cur>0) && (ret===undefined)) ret = offsets[--cur];
-      
-      // now, work our way forward, building the cache of offsets.  Use
-      // cached heights...
-      if (ret===undefined) ret = offsets[cur] = 0 ;
-      while (cur < contentIndex) {
-        // get height...recache if needed....
-        height = this._list_heightForRowAtContentIndex(cur) ;
-        
-        // console.log('index %@ has height %@'.fmt(cur, height));
-        
-        // add to ret and save in cache
-        ret = ret + height ;
-        
-        cur++; // go to next offset
-        offsets[cur] = ret ;
-      }
-      
-      return ret ;
+    if (!del) {
+      throw "Internal Inconsistancy: ListView must always have CollectionRowDelegate";
     }
-  },
-  
-  /**
-    Calculates the height for the row at content index.  This method will
-    perform some simple math if hasUniformRowHeights is enabled.  Otherwise
-    it will consult the collection view delegate to compute the row heights.
+    
+    del.addObserver('rowHeight', this, func);
+    del.addObserver('customRowHeightIndexes', this, func2);
+    this._sclv_rowHeightDidChange()._sclv_customRowHeightIndexesDidChange();
+    return this ;
+  }.observes('rowDelegate'),
+
+  /** @private 
+    called whenever the rowHeight changes.  If the property actually changed
+    then invalidate all row heights.
   */
-  heightForRowAtContentIndex: function(contentIndex) {
-    if (this.get('hasUniformRowHeights')) {
-      return this.get('rowHeight') ;
-    } else return this._list_heightForRowAtContentIndex(contentIndex);
+  _sclv_rowHeightDidChange: function() {
+    var del = this.get('rowDelegate'),
+        height = del.get('rowHeight'), 
+        indexes;
+        
+    if (height === this._sclv_rowHeight) return this; // nothing to do
+    this._sclv_rowHeight = height;
+
+    indexes = SC.IndexSet.create(0, this.get('length'));
+    this.rowHeightDidChangeForIndexes(indexes);
+    return this ;
   },
-  
+
+  /** @private 
+    called whenever the customRowHeightIndexes changes.  If the property 
+    actually changed then invalidate affected row heights.
+  */
+  _sclv_customRowHeightIndexesDidChange: function() {
+    var del     = this.get('rowDelegate'),
+        indexes = del.get('customRowHeightIndexes'), 
+        last    = this._sclv_customRowHeightIndexes,
+        func    = this._sclv_customRowHeightIndexesContentDidChange;
+        
+    // nothing to do
+    if ((indexes===last) || (last && last.isEqual(indexes))) return this;
+
+    // if we were observing the last index set, then remove observer
+    if (last && this._sclv_isObservingCustomRowHeightIndexes) {
+      last.removeObserver('[]', this, func);
+    }
+    
+    // only observe new index set if it exists and it is not frozen.
+    if (this._sclv_isObservingCustomRowHeightIndexes = indexes && !indexes.get('isFrozen')) {
+      indexes.addObserver('[]', this, func);
+    }
+    
+    this._sclv_customRowHeightIndexesContentDidChange();
+    return this ;
+  },
+
   /** @private
-    By-passes the uniform row heights check.  Makes offsetForRow... a little
-    faster.
+    Called whenever the customRowHeightIndexes set is modified.
   */
-  _list_heightForRowAtContentIndex: function(contentIndex) {
-    // console.log('_list_heightForRowAtContentIndex invoked on %@ with index %@'.fmt(this, index));
-    var heights = this._list_rowHeights;
-    if (!heights) heights = this._list_rowHeights = [] ;
-    
-    var height = (contentIndex < heights.length) ?
-      heights[contentIndex] :
-      undefined ;
-    if (height===undefined) {
-      height = heights[contentIndex] = this.invokeDelegateMethod(this.delegate, 'collectionViewHeightForRowAtContentIndex', this, contentIndex) || 0 ;
-    }
-    
-    return height ;
+  _sclv_customRowHeightIndexesContentDidChange: function() {
+    var del     = this.get('rowDelegate'),
+        indexes = del.get('customRowHeightIndexes'), 
+        last    = this._sclv_customRowHeightIndexes, 
+        changed;
+
+    // compute the set to invalidate.  the union of cur and last set
+    if (indexes && last) {
+      changed = indexes.copy().add(last);
+    } else changed = indexes || last ;
+    this._sclv_customRowHeightIndexes = indexes ? indexes.frozenCopy() : null; 
+
+    // invalidate
+    this.rowHeightDidChangeForIndexes(changed);
+    return this ;
   },
   
   // ..........................................................
-  // RENDERING
+  // ROW PROPERTIES
   // 
   
-  render: function(context, firstTime) {
-    if (SC.BENCHMARK_RENDER) {
-      var bkey = '%@.render'.fmt(this) ;
-      SC.Benchmark.start(bkey);
-    }
-    this.beginPropertyChanges() ; // avoid sending notifications
+  /**
+    Returns the top offset for the specified content index.  This will take
+    into account any custom row heights and group views.
     
-    var content = SC.makeArray(this.get('content')) ;
-    var selection = SC.makeArray(this.get('selection'));
-    var oldRange = this._oldNowShowingRange ;
-    var range = SC.cloneRange(this.get('nowShowingRange')) ;
-    this._oldNowShowingRange = SC.cloneRange(range) ;
-    var key, itemView = this.createExampleView(content), c ;
-    var range2 ; // only used if the old range fits inside the new range
-    var idx, end, childId, maxLen ;
-    
-    // keep track of children we've got rendered
-    var childSet = this._childSet ;
-    if (!childSet) childSet = this._childSet = [] ;
-    
-    if (SC.ENABLE_COLLECTION_PARTIAL_RENDER) {
-      // used for santity checks during debugging
-      if (SC.SANITY_CHECK_PARTIAL_RENDER) var maxLen = range.length ;
-      
-      if (SC.DEBUG_PARTIAL_RENDER) {
-        console.log('oldRange = ') ;
-        console.log(oldRange) ;
-        console.log('range = ') ;
-        console.log(range) ;
-      }
-      
-      // if we're dirty, redraw everything visible
-      // (selection changed, content changed, etc.)
-      if (this.get('isDirty') || firstTime) {
-        childSet.length = 0 ; // full render
-        
-      // else, only redaw objects we haven't previously drawn
-      } else if (oldRange) {
-        // ignore ranges that don't overlap above..
-        if (range.start >= oldRange.start + oldRange.length) {
-          childSet.length = 0 ; // full render
-        
-        // and below...
-        } else if (range.start + range.length <= oldRange.start) {
-          childSet.length = 0 ; // full render
-        
-        // okay, the ranges do overlap. are they equal?
-        } else if (SC.rangesEqual(oldRange, range)) {
-          range = SC.EMPTY_RANGE ; // nothing to render
-        
-        // nope, is the old range inside the new range?
-        } else if (range.start <= oldRange.start && range.start + range.length >= oldRange.start + oldRange.length) {
-          // need to render two ranges...all pre-existing views are valid
-          context.updateMode = SC.MODE_APPEND ;
-          range2 = { start: oldRange.start + oldRange.length, length: (range.start + range.length) - (oldRange.start + oldRange.length) } ;
-          range.length = oldRange.start - range.start ;
-        
-        // nope, is the new range inside the old range?
-        } else if (range.start >= oldRange.start && range.start + range.length <= oldRange.start + oldRange.length) {        
-          // need to remove unused childNodes at both ends, start with bottom...
-          idx = oldRange.start ;
-          end = range.start ;
-          while (idx < end) {
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom range');
-            childId = childSet[idx] ;
-            if (childId) context.remove(childId) ;
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-            delete childSet[idx] ;
-            ++idx ;
-          }
-        
-          // now remove unused childNodes at the top of the range...
-          idx = range.start + range.length ;
-          end = oldRange.start + oldRange.length ;
-          while (idx < end) {
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top range');
-            childId = childSet[idx] ;
-            if (childId) context.remove(childId) ;
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-            delete childSet[idx] ;
-            ++idx ;
-          }
-        
-          range = SC.EMPTY_RANGE ; // nothing to render
-        
-        // nope, is the new range lower than the old range?
-        } else if (range.start < oldRange.start) {
-          context.updateMode = SC.MODE_APPEND ;
-        
-          // need to remove unused childNodes at the top of the old range
-          idx = range.start + range.length ;
-          end = oldRange.start + oldRange.length ;
-          while (idx < end) {
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on top only');
-            childId = childSet[idx] ;
-            if (childId) context.remove(childId) ;
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-            delete childSet[idx] ;
-            ++idx ;
-          }
-        
-          range.length = Math.min(range.length, oldRange.start - range.start) ;
-        
-        // nope, so the new range is higher than the old range
-        } else {
-          context.updateMode = SC.MODE_APPEND ;
-        
-          // need to remove unused childNodes at the bottom of the old range
-          idx = oldRange.start ;
-          end = range.start ;
-          while (idx < end) {
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('looping on bottom only');
-            childId = childSet[idx] ;
-            if (childId) context.remove(childId) ;
-            if (SC.DEBUG_PARTIAL_RENDER) console.log('deleting content at index %@'.fmt(idx));
-            delete childSet[idx] ;
-            ++idx ;
-          }
-        
-          end = range.start + range.length ;
-          range.start = oldRange.start + oldRange.length ;
-          range.length = end - range.start ;
-        }
-      }
-    
-      if (SC.SANITY_CHECK_PARTIAL_RENDER) {
-        if (range.length < 0) throw "range.length is " + range.length ;
-        if (range.length > maxLen) throw "range.length is " + range.length + ', max length is ' + maxLen ;
-        if (range.start < 0) throw "range.start is " + range.start ;
-        if (range2) {
-          if (range2.length < 0) throw "range2.length is " + range2.length ;
-          if (range2.length > maxLen) throw "range2.length is " + range2.length + ', max length is ' + maxLen ;
-          if (range2.start < 0) throw "range2.start is " + range2.start ;
-        }
-      }
-    
-      if (SC.DEBUG_PARTIAL_RENDER) {
-        console.log('rendering = ') ;
-        console.log(range) ;
-        if (range2) {
-          console.log('also rendering = ') ;
-          console.log(range2) ;
-        }
-      }
-    }
-    
-    idx = SC.maxRange(range) ;
-    
-    var baseKey = SC.guidFor(this) + '_' ;
-    var guids = this._itemViewGuids, guid;
-    if (!guids) this._itemViewGuids = guids = {};
-    
-    // TODO: Use SC.IndexSet, not separate ranges, once it's ready.
-    // This will also make it possible to do partial updates during content
-    // and selection changes. Now we always do a full update.
-    
-    while (--idx >= range.start) {
-      c = content.objectAt(idx) ;
-      if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering content(%@) at index %@'.fmt(c.unread, idx));
-      
-      // use cache of item view guids to avoid creating temporary objects
-      guid = SC.guidFor(c);
-      if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
-      
-      itemView.set('content', c) ;
-      itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
-      itemView.layerId = key ; // cannot use .set, layerId is RO
-      if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
-      childSet[idx] = key ;
-      itemView.adjust(this.itemViewLayoutAtContentIndex(idx)) ;
-      context = context.begin(itemView.get('tagName')) ;
-      itemView.prepareContext(context, YES) ;
-      context = context.end() ;
-    }
-    
-    if (range2) {
-      idx = SC.maxRange(range2) ;
-      while (--idx >= range2.start) {
-        c = content.objectAt(idx) ;
-        if (SC.DEBUG_PARTIAL_RENDER) console.log('rendering content(%@) at index %@'.fmt(c.unread, idx));
-        
-        // use cache of item view guids to avoid creating temporary objects
-        guid = SC.guidFor(c);
-        if (!(key = guids[guid])) key = guids[guid] = baseKey+guid;
-        
-        itemView.set('content', c) ;
-        itemView.set('isSelected', (selection.indexOf(c) == -1) ? NO : YES) ;
-        itemView.layerId = key ; // cannot use .set, layerId is RO
-        if (SC.SANITY_CHECK_PARTIAL_RENDER && childSet[idx]) throw key + '(' + c.unread + ')'+ ' at index ' + idx ; // should not re-render a child in the index!
-        childSet[idx] = key ;
-        itemView.adjust(this.itemViewLayoutAtContentIndex(idx)) ;
-        context = context.begin(itemView.get('tagName')) ;
-        itemView.prepareContext(context, YES) ;
-        context = context.end() ;
-      }
-    }
-    
-    if (SC.DEBUG_PARTIAL_RENDER) console.log('******************************') ;
-    
-    this.set('isDirty', NO);
-    this.endPropertyChanges() ;
-    if (SC.BENCHMARK_RENDER) SC.Benchmark.end(bkey);    
-  },
-  
-  // ..........................................................
-  // SUBCLASS SUPPORT
-  // 
-  
-  insertionOrientation: SC.VERTICAL_ORIENTATION,
-  
-  /** @private
-    Overrides default CollectionView method to compute the minimim height
-    of the list view.
+    @param {Number} idx the content index
+    @returns {Number} the row offset
   */
-  computeLayout: function() {
-    var content = this.get('content') ;
-    var rows = (content) ? content.get('length') : 0 ;
-    
-    // use this cached layout hash to avoid allocing memory...
-    var ret = this._cachedLayoutHash ;
-    if (!ret) ret = this._cachedLayoutHash = {};
-    
-    // set minHeight
-    ret.minHeight = this.offsetForRowAtContentIndex(rows);
-    return ret; 
-  },
-  
-  /** @private
-    Calculates the visible content range in the specified frame.  If 
-    uniform rows are set, this will use some simple math.  Otherwise it will
-    compute all row offsets leading up to the frame.
-  */
-  contentRangeInFrame: function(frame) {
-    // console.log('contentRangeInFrame invoked on %@ with frame {%@, %@, %@, %@}'.fmt(this, frame.x, frame.y, frame.width, frame.height));
-    var min, max, ret, rowHeight ;
-    var minY = SC.minY(frame), maxY = SC.maxY(frame);
-    // use some simple math...
-    if (this.get('hasUniformRowHeights')) {
-      rowHeight = this.get('rowHeight') || 20 ;
-      min = Math.max(0,Math.floor(minY / rowHeight)-1) ;
-      max = Math.ceil(maxY / rowHeight) ;
+  rowOffsetForContentIndex: function(idx) {
+    if (idx === 0) return 0 ; // fastpath
+
+    var del       = this.get('rowDelegate'),
+        rowHeight = del.get('rowHeight'),
+        ret, custom, cache, delta, max, content ;
+        
+    ret = idx * rowHeight;
+    if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
       
-      var content = this.get('content') ;
-      min = Math.min(min, content.get('length')) ;
-      max = Math.min(max, content.get('length')) ;
+      // prefill the cache with custom rows.
+      cache = this._sclv_offsetCache;
+      if (!cache) {
+        cache = this._sclv_offsetCache = [];
+        delta = max = 0 ;
+        custom.forEach(function(idx) {
+          delta += this.rowHeightForContentIndex(idx)-rowHeight;
+          cache[idx+1] = delta;
+          max = idx ;
+        }, this);
+        this._sclv_max = max+1;
+      }
       
-      // convert to range...
-      ret = { start: min, length: max - min } ;
-      
-    // otherwise, get the cached row offsets...
-    } else {
-      content = this.get('content');
-      var len = (content ? content.get('length') : 0), offset = 0;
-      
-      // console.log('contentRangeInFrame content length is %@'.fmt(len));
-      
-      // console.log('minY = ' + minY) ;
-      // console.log('maxY = ' + maxY) ;
-      
-      min = null; 
-      max = 0;
-      do {
-        offset = this.offsetForRowAtContentIndex(max); // add offset.
-        // console.log('offset is now %@'.fmt(offset));
-        if ((min===null) && (offset >= minY)) min = max; // set min
-        max++ ;
-      } while (max<len && offset < maxY);
-      
-      // console.log('min = ' + min) ;
-      // console.log('max = ' + max) ;
-      
-      // convert to range...
-      ret = { start: Math.max(min-1, 0), length: Math.min(max - min + 2, len) } ;
+      // now just get the delta for the last custom row before the current 
+      // idx.
+      delta = cache[idx];
+      if (delta === undefined) {
+        delta = cache[idx] = cache[idx-1];
+        if (delta === undefined) {
+          max = this._sclv_max;
+          if (idx < max) max = custom.indexBefore(idx)+1;
+          delta = cache[idx] = cache[max] || 0;
+        }
+      }
+
+      ret += delta ;
     }
     
-    // console.log('contentRangeInFrame is {%@, %@}'.fmt(ret.start, ret.length));
     return ret ;
   },
   
-  /** @private */
-  itemViewLayoutAtContentIndex: function(contentIndex) {
-    // console.log('%@.itemViewLayoutAtContentIndex(%@)'.fmt(this, contentIndex));
-    var layout = { left: 0, right: 0 } ;
+  /**
+    Returns the row height for the specified content index.  This will take
+    into account custom row heights and group rows.
     
-    // set top & height...
-    layout.top = this.offsetForRowAtContentIndex(contentIndex) ;
-    layout.height = this.heightForRowAtContentIndex(contentIndex) ;
+    @param {Number} idx content index
+    @returns {Number} the row height
+  */
+  rowHeightForContentIndex: function(idx) {
+    var del = this.get('rowDelegate'),
+        ret, cache, content, indexes;
     
-    return layout ;
+    if (del.customRowHeightIndexes && (indexes=del.get('customRowHeightIndexes'))) {
+      cache = this._sclv_heightCache ;
+      if (!cache) {
+        cache = this._sclv_heightCache = [];
+        content = this.get('content');
+        indexes.forEach(function(idx) {
+          cache[idx] = del.contentIndexRowHeight(this, content, idx);
+        }, this);
+      }
+      
+      ret = cache[idx];
+      if (ret === undefined) ret = del.get('rowHeight');
+    } else ret = del.get('rowHeight');
+    
+    return ret ;
   },
   
-  insertionPointClass: SC.View.extend({
-    emptyElement: '<div><span class="anchor"></span></div>',
-    classNames: ['sc-list-insertion-point'],
-    layout: { top: -6, height: 2, left: 4, right: 2 }
-  }),
-  
-  // TODO refactor code, remove duplication
-  showInsertionPoint: function(itemView, dropOperation) {
-    if (!itemView) {
-      // show insertion point below final itemView
-      var content = this.get('content') ;
-      content = content.objectAt(content.get('length')-1) ;
-      itemView = this.itemViewForContent(content) ;
-      
-      if (!itemView) return ;
-      
-      var f = itemView.get('frame') ;
-      var top = f.y, height = f.height ;
-      
-      if (!this._insertionPointView) {
-        this._insertionPointView = this.insertionPointClass.create() ;
-      }
+  /**
+    Call this method whenever a row height has changed in one or more indexes.
+    This will invalidate the row height cache and reload the content indexes.
+    Pass either an index set or a single index number.
+
+    This method is called automatically whenever you change the rowHeight
+    or customRowHeightIndexes properties on the collectionRowDelegate.
     
-      var insertionPoint = this._insertionPointView ;
-      if (insertionPoint.get('parentView') !== itemView.get('parentView')) {
-        itemView.get('parentView').appendChild(insertionPoint) ;
-      }
-      
-      insertionPoint.adjust({ top: top + height }) ;
-      return ;
-    }
+    @param {SC.IndexSet|Number} indexes 
+    @returns {SC.ListView} receiver
+  */  
+  rowHeightDidChangeForIndexes: function(indexes) {
+    var len     = this.get('length');
+
+    // clear any cached offsets
+    this._sclv_heightCache = this._sclv_offsetCache = null;
     
-    // if drop on, then just add a class...
-    if (dropOperation === SC.DROP_ON) {
-      if (itemView !== this._dropOnInsertionPoint) {
-        this.hideInsertionPoint() ;
-        itemView.$().addClass('drop-target') ;
-        this._dropOnInsertionPoint = itemView ;
-      }
-      
-    } else {
-      if (this._dropOnInsertionPoint) {
-        this._dropOnInsertionPoint.$().removeClass('drop-target') ;
-        this._dropOnInsertionPoint = null ;
-      }
-      
-      if (!this._insertionPointView) {
-        this._insertionPointView = this.insertionPointClass.create() ;
-      }
-      
-      insertionPoint = this._insertionPointView ;
-      if (insertionPoint.get('parentView') !== itemView.get('parentView')) {
-        itemView.get('parentView').appendChild(insertionPoint) ;
-      }
-      
-      var frame = itemView.get('frame') ;
-      insertionPoint.adjust({ top: itemView.get('frame').y }) ;
-    }
-    
+    // find the smallest index changed; invalidate everything past it
+    if (indexes && indexes.isIndexSet) indexes = indexes.get('min');
+    this.reload(SC.IndexSet.create(indexes, len-indexes));
+    return this ;
   },
   
-  hideInsertionPoint: function() {
-    var insertionPoint = this._insertionPointView ;
-    if (insertionPoint) insertionPoint.removeFromParent() ;
-    
-    if (this._dropOnInsertionPoint) {
-      this._dropOnInsertionPoint.removeClassName('drop-target') ;
-      this._dropOnInsertionPoint = null ;
-    }
+  // ..........................................................
+  // SUBCLASS IMPLEMENTATIONS
+  // 
+  
+  /**
+    The layout for a ListView is computed from the total number of rows 
+    along with any custom row heights.
+  */
+  computeLayout: function() {
+    // default layout
+    var ret = this._sclv_layout;
+    if (!ret) ret = this._sclv_layout = {};
+    ret.minHeight = this.rowOffsetForContentIndex(this.get('length'))+4;
+    return ret ;
   },
   
-  // We can do this much faster programatically using the rowHeight
-  insertionIndexForLocation: function(loc, dropOperation) {
-    // console.log('insertionIndexForLocation called on %@'.fmt(this));
-    var f = this.get('clippingFrame') ;
-    var sf = f ; // FIXME this.get('scrollFrame') ;
-    var retOp = SC.DROP_BEFORE ;
+  /**
+  
+    Computes the layout for a specific content index by combining the current
+    row heights.
+  
+  */
+  layoutForContentIndex: function(contentIndex) {
+    return {
+      top:    this.rowOffsetForContentIndex(contentIndex),
+      height: this.rowHeightForContentIndex(contentIndex),
+      left:   0, 
+      right:  0
+    };
+  },
+  
+  /**
+    Override to return an IndexSet with the indexes that are at least 
+    partially visible in the passed rectangle.  This method is used by the 
+    default implementation of computeNowShowing() to determine the new 
+    nowShowing range after a scroll.
     
-    // find the rowHeight and offset to work with
-    var offset = loc.y - f.y - sf.y ;
-    var rowOffset, rowHeight, idx ;
+    Override this method to implement incremental rendering.
     
-    // do some simple math if we have uniform row heights...
-    if (this.get('hasUniformRowHeights')) {
-      rowHeight = this.get('rowHeight') || 0 ;
-      idx = Math.floor(offset / rowHeight) ;
-      rowOffset = idx * rowHeight ;
-    // otherwise, use the rowOffsets cache...
-    } else {
-      // get caches
-      var offsets = this._list_rowOffsets;
-      if (!offsets) offsets = this._list_rowOffsets = [] ;
-      
-      // console.log('offset of pointer is %@'.fmt(offset));
-      // console.log('offsets are %@'.fmt(offsets.join(', ')));
-      
-      // OK, now try the fast path...if undefined, loop backwards until we
-      // find an offset that IS cached...
-      var len = offsets.length, cur = len, ret;
-      
-      // if the cached value was undefined, loop backwards through the offsets
-      // hash looking for a cached value to start from
-      while (cur>0) {
-        ret = offsets[--cur];
-        if (ret < offset) break ;
-      }
-      
-      rowOffset = offset[cur] ;
-      rowHeight = this._list_heightForRowAtContentIndex(cur) ;
-      
-      // console.log('rowHeight is %@'.fmt(rowHeight));
-      
-      idx = cur ;
+    The default simply returns the current content length.
+    
+    @param {Rect} rect the visible rect
+    @returns {SC.IndexSet} now showing indexes
+  */
+  contentIndexesInRect: function(rect) {
+    var rowHeight = this.get('rowDelegate').get('rowHeight'),
+        top       = SC.minY(rect),
+        bottom    = SC.maxY(rect),
+        height    = rect.height,
+        len       = this.get('length'),
+        offset, start, end;
+    
+    // estimate the starting row and then get actual offsets until we are 
+    // right.
+    start = (top - (top % rowHeight)) / rowHeight;
+    offset = this.rowOffsetForContentIndex(start);
+    
+    // go backwards until top of row is before top edge
+    while(start>0 && offset>=top) {
+      start--;
+      offset -= this.rowHeightForContentIndex(start);
     }
     
-    // find the percent through the row...
-    var percentage = ((offset - rowOffset) / rowHeight) ;
+    // go forwards until bottom of row is after top edge
+    offset += this.rowHeightForContentIndex(start);
+    while(start<len && offset<top) {
+      offset += this.rowHeightForContentIndex(start);
+      start++ ;
+    }
+    if (start<0) start = 0;
+    if (start>=len) start=len;
     
-    // console.log('percentage is %@'.fmt(percentage));
     
-    // if the dropOperation is SC.DROP_ON and we are in the center 60%
-    // then return the current item.
-    if (dropOperation === SC.DROP_ON) {
-      if (percentage > 0.80) idx++ ;
-      if ((percentage >= 0.20) && (percentage <= 0.80)) {
-        retOp = SC.DROP_ON;
-      }
-    } else {
-      if (percentage > 0.45) idx++ ;
+    // estimate the final row and then get the actual offsets until we are 
+    // right. - look at the offset of the _following_ row
+    end = start + ((height - (height % rowHeight)) / rowHeight) ;
+    if (end > len) end = len;
+    offset = this.rowOffsetForContentIndex(end);
+    
+    // walk backwards until top of row is before or at bottom edge
+    while(end>=start && offset>=bottom) {
+      end-- ;
+      offset -= this.rowHeightForContentIndex(end);
     }
     
-    if (idx !== this._idx || retOp !== this._retOp) {
-      // console.log('insertionIndex is %@, op is %@'.fmt(idx, retOp));
-      this._idx = idx ;
-      this._retOp = retOp ;
+    // go forwards until bottom of row is after bottom edge
+    offset += this.rowHeightForContentIndex(end);
+    while(end<len && offset<=bottom) {
+      offset += this.rowHeightForContentIndex(end);
+      end++ ;
     }
     
-    // console.log('[ret, retOp] is [%@, %@]'.fmt(ret, retOp));
-    return [idx, retOp] ;
-  }
+    end++; // end should be after start
+    if (end<start) end = start;
+    if (end>len) end = len ;
+    
+    // convert to IndexSet and return
+    return SC.IndexSet.create(start, end-start);
+  },
+  
+  // ..........................................................
+  // INTENRAL SUPPORT
+  // 
+
+  init: function() {
+    sc_super();
+    this._sclv_rowDelegateDidChange();
+  }  
   
 });

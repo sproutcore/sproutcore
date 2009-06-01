@@ -47,375 +47,277 @@ require('controllers/controller') ;
   instead of an array.
   
   @extends SC.Controller
+  @since SproutCore 1.0
 */
 SC.ObjectController = SC.Controller.extend(
 /** @scope SC.ObjectController.prototype */ {
-  
-  // ...............................
+
+  // ..........................................................
   // PROPERTIES
-  //
+  // 
   
   /**
-    set this to some value and the object controller will project 
-    its properties.
+    Set to the object you want this controller to manage.  The object should
+    usually be a single value; not an array or enumerable.  If you do supply
+    an array or enumerable with a single item in it, the ObjectController
+    will manage that single item.
+
+    Usually your content object should implement the SC.Observable mixin, but
+    this is not required.  All SC.Object-based objects support SC.Observable
+    
+    @property
+    @type Object
   */
   content: null,
-  contentBindingDefault: SC.Binding.multiple(),
 
   /**
-    This will be set to true if the object currently does not have any
-    content.  You might use this to disable any controls attached to the
-    controller.
+    If YES, then setting the content to an enumerable or an array with more 
+    than one item will cause the Controller to attempt to treat the array as
+    a single object.  Use of get(), for example, will get every property on
+    the enumerable and return it.  set() will set the property on every item
+    in the enumerable. 
+    
+    If NO, then setting content to an enumerable with multiple items will be
+    treated like setting a null value.  hasContent will be NO.
     
     @type Boolean
   */
-  hasNoContent: true,
-  
-  /**
-    This will be set to true if the content is a single object or an array 
-    with a single item.  You can use this to disabled your UI.
-    
-    @type Boolean
-  */
-  hasSingleContent: false, 
-  
-  /**
-    This will be set to true if the content is an array with multiple objects 
-    in it.
-    
-    @type Boolean
-  */
-  hasMultipleContent: false,
+  allowsMultipleContent: NO,
 
   /**
-    Set to true if the controller has any content, even an empty array.
+    Becomes YES whenever this object is managing content.  Usually this means
+    the content property contains a single object or an array or enumerable
+    with a single item.  Array's or enumerables with multiple items will 
+    normally make this property NO unless allowsMultipleContent is YES.
+    
+    @property
+    @type Boolean
   */
   hasContent: function() {
-    return this.get('content') ;
-  }.property('content'),
-
-  /**
-    Set this property to true and multiple content will be treated like a null 
-    value. This will only impact use of get() and set().
-    
-    @type Boolean
-  */
-  allowsMultipleContent: true,
+    return !SC.none(this.get('observableContent'));
+  }.property('observableContent'),
   
   /**
-    Override this method to destroy the selected object. 
+    Makes a controller editable or not editable.  The SC.Controller class 
+    itself does not do anything with this property but subclasses will 
+    respect it when modifying content.
+    
+    @property
+    @type Boolean
+  */
+  isEditable: YES,
+  
+  /**
+    Primarily for internal use.  Normally you should not access this property 
+    directly.  
+    
+    Returns the actual observable object proxied by this controller.  Usually 
+    this property will mirror the content property.  In some cases - notably 
+    when setting content to an enumerable, this may return a different object.
+    
+    Note that if you set the content to an enumerable which itself contains
+    enumerables and allowsMultipleContent is NO, this will become null.
+    
+    @property
+    @type Object
+  */
+  observableContent: function() {
+    var content = this.get('content'),
+        len, allowsMultiple;
+        
+    // if enumerable, extract the first item or possibly become null
+    if (content && content.isEnumerable) {
+      len = content.get('length');
+      allowsMultiple = this.get('allowsMultipleContent');
+      
+      if (len === 1) content = content.firstObject();
+      else if (len===0 || !allowsMultiple) content = null;
+      
+      // if we got some new content, it better not be enum also...
+      if (content && !allowsMultiple && content.isEnumerable) content=null;
+    }
+    
+    return content;
+  }.property('content', 'allowsMultipleContent').cacheable(),
+
+  // ..........................................................
+  // METHODS
+  // 
+
+  /**
+    Override this method to destroy the selected object.
     
     The default just passes this call onto the content object if it supports
-    it, and then sets the content to null.
+    it, and then sets the content to null.  
+    
+    Unlike most calls to destroy() this will not actually destroy the 
+    controller itself; only the the content.  You continue to use the 
+    controller by setting the content to a new value.
+    
+    @returns {SC.ObjectController} receiver
   */
   destroy: function() {
-    var content = this.get('content') ;
-    if (content && SC.typeOf(content.destroy) === SC.T_FUNCTION) content.destroy();
+    var content = this.get('observableContent') ;
+    if (content && SC.typeOf(content.destroy) === SC.T_FUNCTION) {
+      content.destroy();
+    } 
     this.set('content', null) ;  
+    return this;
+  },
+  
+  /**
+    Invoked whenever any property on the content object changes.  
+
+    The default implementation will simply notify any observers that the 
+    property has changed.  You can override this method if you need to do 
+    some custom work when the content property changes.
+    
+    If you have set the content property to an enumerable with multiple 
+    objects and you set allowsMultipleContent to YES, this method will be 
+    called anytime any property in the set changes.
+
+    If all properties have changed on the content or if the content itself 
+    has changed, this method will be called with a key of "*".
+    
+    @param {Object} target the content object
+    @param {String} key the property that changes
+    @returns {void}
+  */
+  contentPropertyDidChange: function(target, key) {
+    if (key === '*') this.allPropertiesDidChange();
+    else this.notifyPropertyChange(key);
+  },
+  
+  /** 
+    Called whenver you try to get/set an unknown property.  The default 
+    implementation will pass through to the underlying content object but 
+    you can override this method to do some other kind of processing if 
+    needed.
+  */
+  unknownProperty: function(key,value) {
+    
+    // avoid circular references
+    if (key==='content') {
+      if (value !== undefined) this.content = value;
+      return this.content;
+    }
+    
+    // for all other keys, just pass through to the observable object if 
+    // there is one.  Use getEach() and setEach() on enumerable objects.
+    var content = this.get('observableContent'), loc, cur, isSame;
+    if (content===null || content===undefined) return undefined; // empty
+
+    // getter...
+    if (value === undefined) {
+      if (content.isEnumerable) {
+        value = content.getEach(key);
+
+        // iterate over array to see if all values are the same. if so, then
+        // just return that value
+        loc = value.get('length');
+        if (loc>0) {
+          isSame = YES;
+          cur = value.objectAt(0);
+          while((--loc > 0) && isSame) {
+            if (cur !== value.objectAt(loc)) isSame = NO ;
+          }
+          if (isSame) value = cur;
+        } else value = undefined; // empty array.
+
+      } else value = (content.isObservable) ? content.get(key) : content[key];
+      
+    // setter
+    } else {
+      if (!this.get('isEditable')) {
+        throw "%@.%@ is not editable".fmt(this,key);
+      }
+      
+      if (content.isEnumerable) content.setEach(key, value);
+      else if (content.isObservable) content.set(key, value);
+      else content[key] = value;
+    }
+    
+    return value;
   },
   
   // ...............................
   // INTERNAL SUPPORT
   //
-  
-  /**
-    When this controller commits changes, it will copy its changed values
-    to the content object and then call "commitChanges" on the content
-    object if that object implements the method.
+
+  /** @private - setup observer on init if needed. */
+  init: function() {
+    sc_super();
+    if (this.get('observableContent')) this._scoc_contentDidChange();
+  },
+
+  /** 
+    @private
+    
+    Called whenever the observable content property changes.  This will setup
+    observers on the content if needed.
   */
-  performCommitChanges: function() {
-    
-    var content = this.get('content') ;
-    var ret = true ;
-    var key, loc;
+  _scoc_contentDidChange: function() {
+    var last = this._scoc_observableContent,
+        cur  = this.get('observableContent'),
+        func = this.contentPropertyDidChange,
+        efunc= this._scoc_enumerableContentDidChange;
 
-    // empty arrays are treated like null values, arrays.len=1 treated like 
-    // single objects.
-    var isArray = false ;
-    if (SC.isArray(content)) {
-      var len = this._lengthFor(content) ;
-      if (len === 0) {
-        content = null ; 
-      } else if (len === 1) {
-        content = this._objectAt(0, content) ;
-      } else if (this.get('allowsMultipleContent')) {
-        isArray = true ;
-      } else content = null ;
+    if (last === cur) return this; // nothing to do
+    
+    this._scoc_observableContent = cur; // save old content
+    
+    // stop observing last item -- if enumerable stop observing set
+    if (last) {
+      if (last.isEnumerable) last.removeObserver('[]', this, efunc);
+      else if (last.isObservable) last.removeObserver('*', this, func);
     }
     
-    if (!this._changes) this._changes = {} ;
+    if (cur) {
+      if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
+      else if (cur.isObservable) cur.addObserver('*', this, func);
+    }
+
+    // notify!
+    if ((last && last.isEnumerable) || (cur && cur.isEnumerable)) {
+      this._scoc_enumerableContentDidChange();
+    } else this.contentPropertyDidChange(cur, '*');
+
+  }.observes("observableContent"),
+  
+  /** @private
+    Called when observed enumerable content has changed.  This will teardown
+    and setup observers on the enumerable content items and then calls 
+    contentPropertyDidChange().  This method may be called even if the new
+    'cur' is not enumerable but the last content was enumerable.
+  */
+  _scoc_enumerableContentDidChange: function() {
+    var cur  = this.get('observableContent'),
+        set  = this._scoc_observableContentItems,
+        func = this.contentPropertyDidChange;
     
-    // cannot commit changes to empty content.  Return an error.
-    if (!content) {
-      return SC.$error("No Content") ;
-
-    // if content is an array, then loop through each item in the array and
-    // get the changed values.
-    } else if (isArray) {
-      
-      loc = this._lengthFor(content) ;
-      while(--loc >= 0) {
-        var object = this._objectAt(loc, content) ;
-        if (!object) continue ;
-        
-        if (object.beginPropertyChanges) object.beginPropertyChanges(); 
-        
-        // loop through all the keys in changes and get the values...
-        for(key in this._changes) {
-          if (!this._changes.hasOwnProperty(key)) continue ;
-          var value = this._changes[key];
-          
-          // if the value is an array, get the idx matching the content
-          // object.  Otherwise, just use the value of the item.
-          if(SC.isArray(value)) {
-            value = this._objectAt(loc, value) ;
-          }
-          
-          if (object.set) {
-            object.set(key,value) ;
-          } else object[key] = value ;
-        }
-
-        if (object.endPropertyChanges) object.endPropertyChanges() ;
-        if (object.commitChanges) ret = object.commitChanges() ;
-      }
-      
-    // if the content is not an array, then just loop through each changed
-    // value and copy it to the object.
-    } else {
-      
-      if (content.beginPropertyChanges) content.beginPropertyChanges() ;
-      
-      // save the set of changes to apply them.  Nothing should clear it but
-      // just in case.
-      var changes = this._changes ;
-      for(key in changes) {
-        if (!changes.hasOwnProperty(key)) continue;
-        
-        var oldValue = content.get ? content.get(key) : content[key];
-        var newValue = changes[key];
-        
-        if (SC.none(oldValue) && newValue === '') newValue = null;
-        if (newValue != oldValue) {
-          if (content.set) {
-            content.set('isDirty', YES);
-          } else {
-            content.isDirty=YES;
-          } 
-        }
-        
-        if (content.set) {
-          content.set(key, newValue);
-        } else {
-          content[key] = newValue;
-        }
-      }
-      
-      if (content.endPropertyChanges) content.endPropertyChanges() ;
-      if (content.commitChanges) ret = content.commitChanges() ;
+    // stop observing each old item
+    if (set) {
+      set.forEach(function(item) {
+        if (item.isObservable) item.removeObserver('*', this, func);
+      }, this);
+      set.clear();
     }
     
-    // if commit was successful, dump changes hash and clear editor.
-    if (SC.$ok(ret)) {
-      this._changes = {} ;
-      //this._valueControllers = {};
-      this.editorDidClearChanges() ;
-    }
+    // start observing new items if needed
+    if (cur && cur.isEnumerable) {
+      if (!set) set = SC.Set.create();
+      cur.forEach(function(item) {
+        if (set.contains(item)) return ; // nothing to do
+        set.add(item);
+        if (item.isObservable) item.addObserver('*', this, func);
+      }, this); 
+    } else set = null;
     
-    return ret ;
-  },
+    this._scoc_observableContentItems = set; // save for later cleanup
   
-  /** @private */
-  performDiscardChanges: function() { 
-    this._changes = {};
-    this._valueControllers = {};
-    this.editorDidClearChanges();
-    this.allPropertiesDidChange();
-    return true ;
-  },
-  
-  /** @private */
-  unknownProperty: function(key,value)
-  {
-    if (key == "content")
-    {
-      // FOR CONTENT KEY:
-      // avoid circular references.  If you try to set content, just save the
-      // value. The propertyObserver will be triggered below to do the rest of
-      // the setup as needed.
-      if (!(value === undefined)) this[key] = value;
-      return this[key];
-    } 
-    else 
-    {
-      // FOR ALL OTHER KEYS:
-      // Save the value in our temporary hash and note the changes in the 
-      // editor.
-
-      if (!this._changes) this._changes = {} ; 
-      if (!this._valueControllers) this._valueControllers = {}; 
-      
-      if (value !== undefined)
-      {
-        // for changes, save in _changes hash and note that a change is required.
-        this._changes[key] = value;
-        if (this._valueControllers[key])
-        {
-          this._valueControllers[key] = null;
-        }
-        // notifying observers regarless if a controller had been created since they're lazy loaded
-        this.propertyWillChange(key + "Controller");
-        this.propertyDidChange(key + "Controller");
-        this.editorDidChange();
-      }
-      else
-      {
-        // are we requesting the controller for a value?
-        if (key.slice(key.length-10,key.length) == "Controller")
-        {
-          // the actual value...
-          key = key.slice(0,-10);
-          if ( !this._valueControllers[key] )
-          {
-            this._valueControllers[key] = this.controllerForValue(this._getValueForPropertyKey(key));
-          }
-          value = this._valueControllers[key];
-        }
-        else
-        {
-          // otherwise, get the value.
-          // first check the _changes hash, then check the content object.
-          value = this._getValueForPropertyKey(key);
-        }
-      }
-      return value;
-    }
-  },
-  
-  _getValueForPropertyKey: function( key )
-  {
-    // first check the changes hash for a uncommited value...
-    var value = this._changes[key];
-    // sweet, no need to proceed.
-    if ( value !== undefined ) return value;
-
-    // ok, we'll need to get the value from the content object
-    var obj = this.get('content');
-    // no content object... return null.
-    if (!obj) return null;
-
-    if (SC.isArray(obj))
-    {
-      value = [];
-      var len = this._lengthFor(obj);
-      if (len > 1)
-      {
-        // if content is an array with more than one item, collect
-        // content from array.
-        if (this.get('allowsMultipleContent')) {
-          for(var idx=0; idx < len; idx++) {
-            var item = this._objectAt(idx, obj) ;
-            value.push(item ? (item.get ? item.get(key) : item[key]) : null) ;
-          }
-        } else {
-          value = null;
-        }
-      }
-      else if (len == 1)
-      {
-        // if content is array with one item, collect from first obj.
-        obj = this._objectAt(0,obj) ;
-        value = obj.get ? obj.get(key) : obj[key] ;
-      }
-      else
-      {
-        // if content is empty array, act as if null.
-        value = null;
-      }
-    }
-    else
-    {
-      // content is a single item. Just get the property.
-      value = obj.get ? obj.get(key) : obj[key] ;
-    }
-    return value;
-  },
-
-  _lastContentPropertyRevision: 0,
-  
-  /** @private */
-  _contentDidChange: function(target,key,value,propertyRevision) {
-    
-    // handle changes to the content...
-    if ((value = this.get('content')) != this._content) {
-
-      if (this.get('hasChanges')) {
-        // if we have uncommitted changes, then discard the changes or raise
-        // an exception.
-        var er = this.discardChanges() ;
-        if (!SC.$ok(er)) throw(er) ;
-      } else {
-        // no changes, but we want to ensure that we flush the cache 
-        // of any SC.Controllers we have for the content
-        this._valueControllers = {} ;
-      }
-      
-      // get the handler method
-      var f = this._contentPropertyDidChange ;
-      
-      // stop listening to old content.
-      if (this._content) {
-        if (SC.isArray(this._content)) {
-          this._content.invoke('removeObserver', '*', this, f) ;
-        } else if (this._content.removeObserver) {
-          this._content.removeObserver('*', this, f) ;
-        }
-      }
-      
-      // start listening for changes on the new content object.
-      this._content = value ;
-      if (value) {
-        if (SC.isArray(value)) {
-          value.invoke('addObserver', '*', this, f) ;
-        } else if (value.addObserver) {
-          value.addObserver('*', this, f) ;
-        }
-      }
-
-      // determine the content type.
-      var count = !value ? 0 : (SC.isArray(value) ? this._lengthFor(value) : 1) ;
-      
-      // New content is configured, update controller stats
-      this.beginPropertyChanges() ;
-      this.set('hasNoContent',count === 0) ;
-      this.set('hasSingleContent',count === 1) ;
-      this.set('hasMultipleContent',count > 1) ;
-
-      // notify everyone that everything is different now.
-      this.allPropertiesDidChange() ;
-      this.endPropertyChanges() ;
-    }
-  }.observes('content'),
-  
-  // invoked when properties on the content object change.  Just forward
-  // to controller.
-  _contentPropertyDidChange: function(target,key,value, propertyRevision) {
-    this._changeFromContent = true ;
-    if (key === '*') {
-      this.allPropertiesDidChange() ;
-    } else {
-      this.propertyWillChange(key) ;
-      this.propertyDidChange(key,value) ;
-    }
-    this._changeFromContent = false ;
-  },
-  
-  _lengthFor: function(obj) {
-    return (obj.get ? obj.get('length') : obj.length) || 0;
-  },
-  
-  _objectAt: function(idx, obj) {
-    return obj.objectAt ? obj.objectAt(idx) : (obj.get ? obj.get(idx) : obj[idx]) ;
+    // notify
+    this.contentPropertyDidChange(cur, '*');
+    return this ;
   }
-      
+        
 }) ;

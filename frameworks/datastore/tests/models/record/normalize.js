@@ -40,10 +40,13 @@ module("SC.Record normalize method", {
       
       // test toMany relationships
       relatedToMany: SC.Record.toMany('MyApp.Foo')
-      
+ 
     });
     
-    MyApp.Bar = SC.Record.extend({});
+    MyApp.Bar = SC.Record.extend({
+      // test toOne relationships
+      relatedTo: SC.Record.toOne('MyApp.Bar', { defaultValue: '1' })
+    });
     
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
       { 
@@ -92,7 +95,7 @@ test("normalizing a pre-populated record" ,function() {
   
   ok(sameValue, 'hash value of firstName after normalizing is 123 string');
   ok(sameValue, 'hash value of relatedTo should be 1');
-  ok(computedValues.indexOf(relatedToComputed)!==-1, 'hash value of relatedTo should be foo1, foo2 or foo3');
+  ok(computedValues.indexOf(relatedToComputed)!==-1, 'hash value of relatedToComputed should be either foo1, foo2 or foo3');
   
   equals(rec.get('firstName'), '123', 'get value of firstName after normalizing is 123 string');
   
@@ -161,5 +164,43 @@ test("normalizing a new record with toMany should reflect id in data hash" ,func
   
   ok(SC.typeOf(newRecord.attributes()['relatedToMany'])===SC.T_ARRAY, 'should still be a hash after normalizing');
   equals(newRecord.get('relatedToMany').get('length'), 2, 'number of relatedToMany is still 2');
+  
+});
+
+test("normalizing a new record with toOne that has broken relationship" ,function() {
+
+  var recHash = { 
+    guid: 'foo5', 
+    firstName: "Andrew",
+    relatedTo: 'foo10' // does not exist
+  };
+
+  var newRecord = MyApp.store.createRecord(MyApp.Foo, recHash);
+  MyApp.store.commitRecords();
+  
+  equals(newRecord.attributes()['relatedTo'], 'foo10', 'should be foo10');
+  
+  newRecord.normalize();
+  
+  equals(newRecord.attributes()['relatedTo'], 'foo10', 'should remain foo10');
+  
+});
+
+test("normalizing a new record with toOne with relationship to wrong recordType" ,function() {
+
+  var recHash = { 
+    guid: 'bar1', 
+    firstName: "Andrew",
+    relatedTo: 'foo1' // does exist but wrong recordType
+  };
+
+  var newRecord = MyApp.store.createRecord(MyApp.Bar, recHash);
+  MyApp.store.commitRecords();
+  
+  equals(newRecord.attributes()['relatedTo'], 'foo1', 'should be foo1');
+  
+  newRecord.normalize();
+  
+  equals(newRecord.attributes()['relatedTo'], 'foo1', 'should remain foo1');
   
 });

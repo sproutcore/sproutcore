@@ -9,150 +9,95 @@ require('mixins/selection_support');
 
 /**
   @class
+
+  An ArrayController provides a way for you to publish an array of objects
+  for CollectionView or other controllers to work with.  To work with an 
+  ArrayController, set the content property to the array you want the 
+  controller to manage.  Then work directly with the controller object as if
+  it were the array itself.
   
-  An Array Controller provides a way to project the contents of an array
-  out to a view.  You can use this object any place you might use an
-  array.  Changes to the array will not propogate to the content array
-  until you call commitChanges().
-  
+  When you want to display an array of objects in a CollectionView, bind the
+  "arrangedObjects" of the array controller to the CollectionView's "content"
+  property.  This will automatically display the array in the collection view.
+
   @extends SC.Controller
   @extends SC.Array
   @extends SC.SelectionSupport
   @author Charles Jolley
-  @author Erich Ocean
-  @version 1.0
   @since SproutCore 1.0
 */
 SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 /** @scope SC.ArrayController.prototype */ {
-  
-  /**
-    If YES the will return controllers for content objects.
-    
-    If you want to use an array controller to edit an array contents directly
-    but you do not want to wrap the values of the array in controller objects
-    then you should set this property to NO.
-    
-    @type Boolean
-  */
-  useControllersForContent: NO,
-  
-  /**
-    Provides compatibility with collection controllers.
-    
-    @property
-    @type SC.ArrayController
-  */
-  arrangedObjects: function() { return this; }.property('content'),
+
+  // ..........................................................
+  // PROPERTIES
+  // 
   
   /**
     The content array managed by this controller.  
     
-    In general you can treat an instance of ArrayController as if it were 
-    the array held in this property.  Any changes you make to the controller
-    that are not specifically implemented in the controller will pass through
-    to the Array.
+    You can set the content of the ArrayController to any object that 
+    implements SC.Array or SC.Enumerable.  If you set the content to an object
+    that implements SC.Enumerable only, you must also set the orderBy property
+    so that the ArrayController can order the enumerable for you.
     
-    Also if you set commitsChangesImmediately to NO, the controller will
-    buffer changes against this.
+    If you set the content to a non-enumerable and non-array object, then the
+    ArrayController will wrap the item in an array in an attempt to normalize
+    the result.
     
     @type SC.Array
   */
   content: null,
-  
-  /** @private */
-  contentBindingDefault: SC.Binding.multiple(),
-  
+
   /**
-    Set to YES if the controller has any content, even an empty array.
+    Makes the array editable or not.  If this is set to NO, then any attempts
+    at changing the array content itself will throw an exception.
     
     @property
     @type Boolean
   */
-  hasContent: function() {
-    return !SC.none(this.get('content')) ;
-  }.property('content'),
+  isEditable: YES,
   
   /**
-    Property key to use to group objects.
+    Used to sort the array.
     
-    If groupBy is set to a non-null value, then the array controller will
-    automatically partion the content array into groups based on the value of 
-    the passed property key.  The exampleGroup will be used to create the
-    objects in the groups array.
+    If you set this property to a key name, array of key names, or a function,
+    then then ArrayController will automatically reorder your content array
+    to match the sort order.  (If you set a function, the function will be
+    used to sort).
+
+    Normally, you should only use this property if you set the content of the
+    controller to an unordered enumerable such as SC.Set or SC.SelectionSet.
+    In this case the orderBy property is required in order for the controller
+    to property order the content for display.
     
-    If this property is set, you MUST ensure the items in the content array 
-    are already sorted by the group key.  Otherwise groups might appear more 
-    than once.
+    If you set the content to an array, it is usually best to maintain the 
+    array in the proper order that you want to display things rather than 
+    using this method to order the array since it requires an extra processing
+    step.  You can use this orderBy property, however, for displaying smaller 
+    arrays of content.
     
-    @type String
-  */
-  groupByKey: null,
-  
-  /**
-    When grouping, create objects using this class. SC.ArrayController will 
-    set 'value' to the value of the groupByKey, and 'itemRange' to an 
-    SC.Range of the item indexes in the group, and 'owner' to this array
-    controller.
+    Note that you can only to use addObject() to insert new objects into an
+    array that is ordered.  You cannot manually reorder or insert new objects
+    into specific locations because the order is managed by this property 
+    instead.
     
-    @type Class
-  */
-  exampleGroup: SC.Object,
-  
-  /**
-    The groups, if any, for the current content array.
+    If you pass a function, it should be suitable for use in compare().
     
-    @readOnly
     @property
-    @type SC.Array
+    @type String|Array|Function
   */
-  groups: function(key, val) {
-    if (val) throw "The SC.ArrayController groups property is read-only." ;
+  orderBy: null,
     
-    var groupByKey = this.get('groupByKey') ;
-    if (!groupByKey) return SC.EMPTY_ARRAY ; // no groups
+  /**
+    Set to YES if you want the controller to wrap non-enumerable content    
+    in an array and publish it.  Otherwise, it will treat single content like 
+    null content.
     
-    var content = this.get('content') ;
-    if (!content || content.get('length') === 0) {
-      return SC.EMPTY_ARRAY ; // no groups...
-    }
-    
-    // okay, calculate the groups...
-    var previousGroup, currentGroup, groupStart = 0 ;
-    var obj, groups = [], GroupClass = this.get('exampleGroup') ;
-    
-    // initialize the discover groups loop
-    previousGroup = content.objectAt(0).get(groupByKey) ;
-    
-    // discover groups...
-    for (var idx=0, len=content.get('length'); idx<len; ++idx) {
-      obj = content.objectAt(idx) ;
-      currentGroup = obj.get(groupByKey) ;
-      
-      // did our group change?
-      if (previousGroup !== currentGroup) {
-        // save the current group
-        groups.push(GroupClass.create({
-          value: previousGroup,
-          itemRange: { start: groupStart, length: idx - groupStart },
-          owner: this
-        }));
-        
-        // and move on to the next group
-        previousGroup = currentGroup ;
-        groupStart = idx ;
-      }
-    }
-    
-    // close the last and final group
-    groups.push(GroupClass.create({
-      value: previousGroup,
-      itemRange: { start: groupStart, length: idx - groupStart },
-      owner: this
-    }));
-    
-    return groups ;
-  }.property('content', 'groupByKey').cacheable(),
+    @property
+    @type Boolean
+  */
+  allowsSingleContent: YES,
   
   /**
     Set to YES if you want objects removed from the array to also be
@@ -166,353 +111,364 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     @type {Boolean}
   */
   destroyOnRemoval: NO,
-  
+
   /**
-    Defines the default class to use when creating new content. 
-    
-    This property should either contains a class or a string that resolves
-    to a class that responds to the newRecord() method.
-    
-    @type {Class}
-  */
-  exampleContentObject: null,
-  
-  /**
-    Creates a new record instance and adds it to the end of the current array.
-    
-    This method works just like insertNewObjectAt() but always appends.
-    
-    @param attributes {Hash} optional hash of attributes to pass to the new obejct.
-    @param objectType {Class} optional class of object to create.
-    @returns {Object} the newly created object (also added to the array)
-  */
-  newObject: function(attributes, objectType) {
-    return this.insertNewObjectAt(null, attributes, objectType) ;
-  },
-  
-  /**
-    Creates a new content object and inserts it at the passed index or appends
-    it at the end of the array if you pass null.
-    
-    This method takes an optional hash of attributes which will be set on
-    the new record.  You can also pass an optional objectType.  If you do 
-    not pass the objectType, you must instead set the exampleContentObject to 
-    the class of the object you want to use.  The object can be of any type 
-    but it must respond to the newRecord() method.
-    
-    Objects created using this method will be destroyed automatically if you
-    have set commitsChangesImmediately to false and call discardChanges().
-    
-    @param index {Number} the index to insert at or null to append.
-    @param attributes {Hash} optional hash of attributes to pass to the new obejct.
-    @param objectType {Class} optional class of object to create.
-    @returns {Object} the newly created object (also added to the array)
-  */
-  insertNewObjectAt: function(index, attributes, objectType) {
-    
-    // compute the objectType
-    if (!objectType) objectType = this.get('exampleContentObject') ;
-    if (SC.typeOf(objectType) === SC.T_STRING) {
-      objectType = SC.objectForPropertyPath(objectType) ;
-    }
-    if (SC.none(objectType)) {
-      throw "Invalid object type was provided" ;
-    }
-    
-    if (SC.typeOf(objectType.newObject) !== SC.T_FUNCTION) {
-      throw "content object type does not support newRecord()" ;
-    }
-    
-    // Create a new object...
-    var obj = objectType.newObject(attributes) ;
-    if (!this._createdObjects) this._createdObjects = [] ;
-    this._createdObjects.push(obj) ; // save for discard...
-    
-    // Add to array.
-    if (index) {
-      this.insertAt(index, obj) ;
-    } else this.pushObject(obj) ;
-    
-    return obj ;
-  },
-  
-  /** @private
-    Watches changes to the content property updates the contentClone.
-    
-    @observes content
-  */
-  _contentDidChange: function() {
-    // console.log('%@._contentDidChange()'.fmt(this));
-    var content = this.get('content') ;
-    if (content === this._content) return ; // nothing to do
-    
-    var func = this._contentPropertyDidChange ;
-    
-    // remove old observer, add new observer, and trigger content property change
-    if (this._content && this._content.removeObserver) {
-      this._content.removeObserver('[]', this, func) ;
-    } 
-    
-    if (content && content.addObserver) {
-      content.addObserver('[]', this, func) ;
-    }
-    
-    this._content = content; //cache
-    this._contentPropertyRevision = null ;
-    
-    var rev = (content) ? content.propertyRevision : -1 ;
-    this._contentPropertyDidChange(content, '[]', content, rev) ; 
-  }.observes('content'),
-  
-  _contentPropertyDidChange: function(target, key, value, rev) {  
-    // console.log('%@._contentPropertyDidChange(target=%@, key=%@, value=%@, rev=%@)'.fmt(this, target, key, value, rev));
-    if (!this._updatingContent && (!rev || (rev != this._contentPropertyRevision))) {
-      this._contentPropertyRevision = rev ;
-      
-      this._updatingContent = true ;
-      
-      this.beginPropertyChanges();
-      this.contentCloneReset();
-      this.enumerableContentDidChange() ;
-      this.notifyPropertyChange('length') ;
-      this.updateSelectionAfterContentChange();
-      this.endPropertyChanges() ;
-      
-      this._updatingContent = false ;
-    }
-  },
-  
-  /**
-    The array content that (when committed) will be merged back into the 
-    content property. All array methods will take place on this object.
+    Returns an SC.Array object suitable for use in a CollectionView.  
+    Depending on how you have your ArrayController configured, this property
+    may be one of several different values.  
     
     @property
     @type SC.Array
   */
-  contentClone: null,
+  arrangedObjects: function() {
+    return this;
+  }.property().cacheable(),
   
-  /** @private
-    Clones the content property into the contentClone property.
-  */
-  contentCloneReset: function() {
-    this._changelog = [];
-    this.set('contentClone', null);
-  },
-
   /**
-   SC.Array interface implementation.
-   
-   @param idx {Number} Starting index in the array to replace.  If idx >= 
-     length, then append to the end of the array.
-   
-   @param amt {Number} Number of elements that should be removed from the 
-     array, starting at *idx*.
-   
-   @param objects {Array} An array of zero or more objects that should be 
-     inserted into the array at *idx* 
+    Computed property indicates whether or not the array controller can 
+    remove content.  You can delete content only if the content is not single
+    content and isEditable is YES.
+    
+    @property
+    @type Boolean
   */
-  replace: function(idx, amt, objects) {
-    var content = this.get('content') ;
+  canRemoveContent: function() {
+    var content = this.get('content'), ret;
+    ret = !!content && this.get('isEditable') && this.get('hasContent');
+    if (ret) {
+      return !content.isEnumerable || 
+             (SC.typeOf(content.removeObject) === SC.T_FUNCTION);
+    } else return NO ;
+  }.property('content', 'isEditable', 'hasContent'),
+  
+  /**
+    Computed property indicates whether you can reorder content.  You can
+    reorder content as long a the controller isEditable and the content is a
+    real SC.Array-like object.  You cannot reorder content when orderBy is
+    non-null.
     
-    // in case the passed objects are controllers, convert to source objects.
-    var copyIdx = objects.length ;
-    var sourceObjects = objects ;
-    if (copyIdx > 0) {
-      sourceObjects = [] ;
-      while(--copyIdx >= 0) {
-        sourceObjects[copyIdx] = this._sourceObjectFor(objects[copyIdx]) ;
-      }
-    }
+    @property
+    @type Boolean
+  */
+  canReorderContent: function() {
+    var content = this.get('content'), ret;
+    ret = !!content && this.get('isEditable') && !this.get('orderBy');
+    return ret && !!content.isSCArray;
+  }.property('content', 'isEditable', 'orderBy'),
+  
+  /**
+    Computed property insides whether you can add content.  You can add 
+    content as long as the controller isEditable and the content is not a 
+    single object.
     
-    // create clone of content array if needed
-    var contentClone = this.get('contentClone') ;
-    if (!contentClone) {
-      this.set('contentClone', contentClone = SC.$A(content)) ;
-    }
+    Note that the only way to simply add object to an ArrayController is to
+    use the addObject() or pushObject() methods.  All other methods imply 
+    reordering and will fail.
     
-    // now, record the removed objects.  This may be used later.
-    if (this.get('destroyOnRemoval')) {
-      if (!this._deletions) this._deletions = [] ;
-      for (var i=0; i < amt; i++) {
-        this._deletions.push(content.objectAt(idx + i));
-      }
-    }
+    @property
+    @type Boolean
+  */
+  canAddContent: function() {
+    var content = this.get('content'), ret ;
+    ret = content && this.get('isEditable') && content.isEnumerable;
+    if (ret) {
+      return (SC.typeOf(content.addObject) === SC.T_FUNCTION) || 
+             (SC.typeOf(content.pushObject) === SC.T_FUNCTION); 
+    } else return NO ;
+  }.property('content', 'isEditable'),
+  
+  /**
+    Set to YES if the controller has valid content that can be displayed,
+    even an empty array.  Returns NO if the content is null or not enumerable
+    and allowsSingleContent is NO.
     
-    // and record additions
-    if (!this._changelog) this._changelog = []; 
-    this._changelog.push({ idx: idx, amt: amt, objects: sourceObjects });
+    @property
+    @type Boolean
+  */
+  hasContent: function() {
+    var content = this.get('content');
+    return !!content && 
+           (!!content.isEnumerable || !!this.get('allowsSingleContent'));
+  }.property('content', 'allowSingleContent'),
+
+  // ..........................................................
+  // METHODS
+  // 
+  
+  /**
+    Adds an object to the array.  If the content is ordered, this will add the 
+    object to the end of the content array.  The content is not ordered, the
+    location depends on the implementation of the content.
     
-    // then actually perform the edit on the contentClone
-    contentClone.replace(idx, amt, sourceObjects);
+    If the source content does not support adding an object, then this method 
+    will throw an exception.
     
-    this.editorDidChange() ;
-    this.enumerableContentDidChange();
-    this.updateSelectionAfterContentChange();
+    @param {Object} object the object to add
+    @returns {SC.ArrayController} receiver
+  */
+  addObject: function(object) {
+    if (!this.get('canAddContent')) throw "%@ cannot add content".fmt(this);
+    
+    var content = this.get('content');
+    if (content.isSCArray) content.pushObject(object);
+    else if (content.addObject) content.addObject(object);
+    else throw "%@.content does not support addObject".fmt(this);
     
     return this;
   },
   
   /**
-    SC.Array interface implimentation.
-    @param idx {Number} The index of the item to return.  If idx exceeds the 
-      current length, return null.
+    Removes the passed object from the array.  If the underyling content 
+    is a single object, then this simply sets the content to null.  Otherwise
+    it will call removeObject() on the content.
+    
+    Also, if destroyOnRemoval is YES, this will actually destroy the object.
+    
+    @param {Object} object the object to remove
+    @returns {SC.ArrayController} receiver
+  */
+  removeObject: function(object) {
+    if (!this.get('canRemoveContent')) {
+      throw "%@ cannot remove content".fmt(this);
+    }
+    
+    var content = this.get('content');
+    if (content.isEnumerable) content.removeObject(object);
+    else {
+      this.set('content', null);
+      this.enumerableContentDidChange();
+    }
+    
+    if (this.get('destroyOnRemoval') && object.destroy) object.destroy();
+    return this; 
+  },
+  
+  // ..........................................................
+  // SC.ARRAY SUPPORT
+  // 
+
+  /**
+    Compute the length of the array based on the observable content
+  */
+  length: function() {
+    var content = this._scac_observableContent();
+    return content ? content.get('length') : 0;
+  }.property().cacheable(),
+
+  /**
+    Returns the object at the specified index based on the observable content
   */
   objectAt: function(idx) {
-    var obj = this._getSourceContent() ;
-    obj = (obj && obj.objectAt) ? obj.objectAt(idx) : null;
-    return this._objectControllerFor(obj) ;
+    var content = this._scac_observableContent();
+    return content ? content.objectAt(idx) : undefined ;    
   },
-  /**
-    SC.Array interface implimentation.
-    @property
-    @type {integer}
-  */
-  length: function( key, value ) {
-    var ret = this._getSourceContent() ;
-    return (ret && ret.get) ? (ret.get('length') || 0) : 0 ;
-  }.property(),
   
   /**
-    Returns the index in the array of the specified object.
-    
-    This can handle both controller wrapper objects and source content objects.
+    Forwards a replace on to the content, but only if reordering is allowed.
   */
-  indexOf: function(obj) {
-    return this._getSourceContent().indexOf(this._sourceObjectFor(obj)) ;
-  },
-  
-  _getSourceContent: function() {
-    return this.get('contentClone') || this.get('content') || [];
-  },
-  
-  /** @private */
-  performCommitChanges: function() {
-    var content = this.get('content');
-    var ret     = true;
-    var idx ;
-    
-    // cannot commit changes to null content.  Return an error.
-    if (!content) {
-      return SC.$error("No Content");
-    }
-    
-    if (content.beginPropertyChanges) content.beginPropertyChanges();
-    
-    // apply all the changes made to the clone
-    if (this._changelog) {
-      var changelog = this._changelog ;
-      var max = changelog.length;
-      for(idx=0;idx<max;idx++) {
-        var change = changelog[idx];
-        content.replace(change.idx, change.amt, change.objects) ;
+  replace: function(start, amt, objects) {
+
+    // check for various conditions before a replace is allowed
+    if (!objects || objects.get('length')===0) {
+      if (!this.get('canRemoveContent')) {
+        throw "%@ cannot remove objects from the current content".fmt(this);
       }
-      this._changelog.length = 0 ; // reset changelog
-    }
+    } else if (!this.get('canReorderContent')) {
+      throw "%@ cannot add or reorder the current content".fmt(this);
+    }    
     
-    // finally, destroy any removed objects if necessary.  Make 
-    // sure the objects have not been re-added before doing this.
-    if (this.get('destroyOnRemoval') && this._deletions && this._deletions.length>0) {
-      idx = this._deletions.length;
-      while(--idx >= 0) {
-        var obj = this._deletions[idx] ;
-        if (obj && obj.destroy && (content.indexOf(obj) < 0)) {
-          obj.destroy() ; 
-        }
-      }
-      this._deletions.length = 0; // clear array
-    }
-    
-    // changes commited, clear any created objects from the internal array
-    if (this._createdObjects) this._createdObjects.length = 0 ;
-    
-     // finish commiting changes.
-    if (content.endPropertyChanges) content.endPropertyChanges();
-    if (content.commitChanges) ret = content.commitChanges();
-    
-    if (SC.$ok(ret)) {
-      this.contentCloneReset();
-      this.editorDidClearChanges();
-    }
-    
-    return ret;
+    // if we can do this, then just forward the change.  This should fire
+    // updates back up the stack, updating rangeObservers, etc.
+    var content = this.get('content'); // note: use content, not observable
+    if (content) content.replace(start, amt, objects);
+    return this; 
   },
   
-  /** @private */
-  performDiscardChanges: function() {
-    this.contentCloneReset();
-    this.editorDidClearChanges();
-    
-    // if any objects were created before the commit, destroy the objects 
-    // and reset the array.
-    if (this._createdObjects && this._createdObjects.length > 0) {
-      var idx = this._createdObjects.length ;
-      while(--idx >= 0) {
-        var obj = this._createdObjects[idx] ;
-        if (SC.typeOf(obj.destroy) === SC.T_FUNCTION) obj.destroy() ;
-      }
-      this._createdObjects.length = 0 ;
-    }
-    
-    return true;
-  },
+  // ..........................................................
+  // INTERNAL SUPPORT
+  // 
   
-  /** @private
-    Returns the object controller for a source value.
-  */
-  _objectControllerFor: function(obj) {
-    if (!this.useControllersForContent) return obj;
-    
-    var controllers = (this._objControllers = this._objControllers || {}) ;
-    var guid = SC.guidFor(obj) ;
-    var ret = controllers[guid] ;
-    if (!ret) {
-      ret = controllers[guid] = this.controllerForValue(obj) ;
-      if (ret) ret.__isArrayController = true ;
-    }
-    return ret ;
-  },
-  
-  /** @private
-    Returns the source object for the passed value.  If the passed value is a 
-    controller, this will map back to the sourceo object.  Otherwise the 
-    object itself will be returned.
-  */
-  _sourceObjectFor: function(obj) {
-    return (obj && obj.kindOf && obj.kindOf(SC.Controller)) ?
-      obj.get('content') :
-      obj ;
-  },
-  
-  /** @private */
   init: function() {
-    sc_super() ;
-    if (this.get('content')) this._contentDidChange() ;
+    sc_super();
+    this._scac_contentDidChange();
   },
   
-  sort: function(callback) {
-    var content = this.get('content') ;
-    if (content && content.sort) content.sort(callback) ;
-    return this ; // we're still the content...
-  },
+  /** @private
+    Cached observable content property.  Set to NO to indicate cache is 
+    invalid.
+  */
+  _scac_cached: NO,
   
-  forEach: function(callback, target) {
-    if (typeof callback !== "function") throw new TypeError() ;
-    var content = this.get('content') ;
-    if (!content) return this ;
+  /**
+    @private
     
-    var len = (content.get) ? content.get('length') : content.length ;
-    if (target === undefined) target = null;
+    Returns the current array this controller is actually managing.  Usually
+    this should be the same as the content property, but sometimes we need to
+    generate something different because the content is not a regular array.
     
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = content.nextObject(idx, last, context) ;
-      callback.call(target, next, idx, this);
-      last = next ;
+    Passing YES to the force parameter will force this value to be recomputed.
+  
+    @returns {SC.Array} observable or null
+  */
+  _scac_observableContent: function() {
+    var ret = this._scac_cached;
+    if (ret !== NO) return ret;
+    
+    var content = this.get('content'),
+        orderBy, func, t, len;
+    
+    // empty content
+    if (SC.none(content)) return this._scac_cached = [];
+
+    // wrap non-enumerables
+    if (!content.isEnumerable) {
+      ret = this.get('allowsSingleContent') ? [content] : [];
+      return (this._scac_cached = ret);
+    } 
+    
+    // no-wrap
+    orderBy = this.get('orderBy');
+    if (!orderBy) {
+      if (content.isSCArray) return (this._scac_cached = content) ;
+      else throw "%@.orderBy is required for unordered content".fmt(this);     
     }
-    last = null ;
-    context = SC.Enumerator._pushContext(context);
-    return this ;
+    
+    // all remaining enumerables must be sorted.
+    
+    // build array - then sort it
+    switch(SC.typeOf(orderBy)) {
+    case SC.T_STRING:
+      orderBy = [orderBy];
+      break;
+    case SC.T_FUNCTION:
+      func = orderBy ;
+      break;
+    case SC.T_ARRAY:
+      break;
+    default:
+      throw "%@.orderBy must be Array, String, or Function".fmt(this);
+    }
+    
+    len = orderBy.get('length');
+    
+    // generate comparison function if needed - use orderBy
+    if (!func) {
+      func = function(a,b) {
+        var idx=0, status=0, key, aValue, bValue;
+        for(idx=0;(idx<len)&&(status===0);idx++) {
+          key = orderBy.objectAt(idx);
+        
+          if (!a) aValue = a ;
+          else if (a.isObservable) aValue = a.get(key);
+          else aValue = a[key];
+
+          if (!b) bValue = b ;
+          else if (b.isObservable) bValue = b.get(key);
+          else bValue = b[key];
+        
+          status = SC.compare(aValue, bValue);
+        }
+        return status ; 
+      };
+    }
+
+    ret = [];
+    content.forEach(function(o) { ret.push(o); });
+    ret.sort(func);
+    
+    func = null ; // avoid memory leaks
+    return (this._scac_cached = ret) ;
+  },
+  
+  /**
+    Whenever content changes, setup and teardown observers on the content
+    as needed.
+  */
+  _scac_contentDidChange: function() {
+
+    this._scac_cached = NO; // invalidate observable content
+    
+    var cur    = this.get('content'),
+        orders = !!this.get('orderBy'),
+        last   = this._scac_content,
+        oldlen = this._scac_length || 0,
+        ro     = this._scac_rangeObserver,
+        func   = this._scac_rangeDidChange,
+        efunc  = this._scac_enumerableDidChange,
+        newlen;
+        
+    if (last === cur) return this; // nothing to do
+
+    // teardown old observer
+    if (last) {
+      if (ro && last.isSCArray) last.removeRangeObserver(ro);
+      else if (last.isEnumerable) last.removeObserver('[]', this, efunc);
+    }
+    
+    ro = null;
+    
+    // save new cached values 
+    this._scac_cached = NO;
+    this._scac_content = cur ;
+    
+    // setup new observers
+    // also, calculate new length.  do it manually instead of using 
+    // get(length) because we want to avoid computed an ordered array.
+    if (cur) {
+      if (!orders && cur.isSCArray) ro = cur.addRangeObserver(null,this,func);
+      else if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
+      newlen = cur.isEnumerable ? cur.get('length') : 1; 
+    } else newlen = SC.none(cur) ? 0 : 1;
+
+    this._scac_rangeObserver = ro;
+    
+
+    // finally, notify enumerable content has changed.
+    this._scac_length = newlen;
+    this.enumerableContentDidChange(0, newlen, newlen - oldlen);
+    this.updateSelectionAfterContentChange();
+  }.observes('content'),
+  
+  /**
+    Whenever enumerable content changes, need to regenerate the 
+    observableContent and notify that the range has changed.  
+    
+    IMPORTANT: Assumes content is not null and is enumerable
+  */
+  _scac_enumerableDidChange: function() {
+    var content = this.get('content'), // use content directly
+        newlen  = content.get('length'),
+        oldlen  = this._scac_length;
+        
+    this._scac_length = newlen;
+    this.beginPropertyChanges();
+    this._scac_cached = NO; // invalidate
+    this.enumerableContentDidChange(0, newlen, newlen-oldlen);
+    this.endPropertyChanges();
+    this.updateSelectionAfterContentChange();
+  },
+  
+  /**
+    Whenever array content changes, need to simply forward notification.
+    
+    Assumes that content is not null and is SC.Array.
+  */
+  _scac_rangeDidChange: function(array, objects, key, indexes) {
+    if (key !== '[]') return ; // nothing to do
+    
+    var content = this.get('content');
+    this._scac_length = content.get('length');
+    this._scac_cached = NO; // invalidate
+    
+    // if array length has changed, just notify every index from min up
+    if (indexes) {
+      this.beginPropertyChanges();
+      indexes.forEachRange(function(start, length) {
+        this.enumerableContentDidChange(start, length, 0);
+      }, this);
+      this.endPropertyChanges();
+      this.updateSelectionAfterContentChange();
+    }
   }
   
 });
