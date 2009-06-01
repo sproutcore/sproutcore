@@ -18,7 +18,7 @@ module("SC.NestedStore#commitChanges", {
       number: 23,
       bool:   YES
     };
-    args = null;
+    args = [];
     
     storeKey = SC.Store.generateStoreKey();
 
@@ -30,7 +30,6 @@ module("SC.NestedStore#commitChanges", {
     parent.commitChangesFromNestedStore =
     child.commitChangesFromNestedStore =
     store.commitChangesFromNestedStore = function(store, changes, force) {
-      if (!args) args = [];
       args.push({ 
         target: this, 
         store: store, 
@@ -54,10 +53,12 @@ function testStateTransition(shouldIncludeStoreKey) {
   // verify result
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'data edit state');
   equals(args.length, 1, 'should have called commitChangesFromNestedStore');
-  equals(args[0].target, parent, 'should have called on parent store');
+
+  var opts = args[0] || {}; // avoid exceptions
+  equals(opts.target, parent, 'should have called on parent store');
   
   // verify if changes passed to callback included storeKey
-  var changes = args[0].changes;
+  var changes = opts.changes;
   var didInclude = changes && changes.contains(storeKey);
   if (shouldIncludeStoreKey) {
     ok(didInclude, 'passed set of changes should include storeKey');
@@ -70,7 +71,7 @@ function testStateTransition(shouldIncludeStoreKey) {
 }
 
 test("state = INHERITED", function() {
-  
+
   // write in some data to parent
   parent.writeDataHash(storeKey, json);
   
