@@ -493,7 +493,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
     
     return this ;
-  }.observes('isVisible'),
+  },
   
   // ..........................................................
   // LAYER SUPPORT
