@@ -136,11 +136,11 @@ SC.GridView = SC.ListView.extend(
     
       if (!this._insertionPointView) {
         this._insertionPointView = this.insertionPointClass.create() ;
-      } ;
+      }
     
       var insertionPoint = this._insertionPointView ;
       var itemViewFrame = itemView.get('frame') ;
-      f = { height: itemViewFrame.height - 6, 
+      var f = { height: itemViewFrame.height - 6, 
             x: itemViewFrame.x, 
             y: itemViewFrame.y + 6, 
             width: 0 
