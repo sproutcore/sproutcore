@@ -142,22 +142,31 @@ CoreTest.Runner = {
     
     if (module) name = module + " module: " + test ;
     name = CoreTest.fmt('%@ - %@msec', name, timings.total_end - timings.total_begin);
-    
     // place results into a single string to append all at once.
     var logstr = this.logstr ;
     var errors =this.errors;
     if (!logstr) logstr = this.logstr = [];
-    if (!this.errors) this.errors = ['<table style="border:1px solid"><thead>'+
-          '<tr><th class="desc">'+navigator.userAgent+'</th><th>Result</th></tr>'+
-          '</thead><tbody><tr>'];
+    if (!this.errors) {
+      this.errors = ['<style type="text/css">* {font: 12px arial;}'+
+                    '.passed { background-color: #80D175; color: white;}'+
+                    '.failed { background-color: #ea4d4; color: black; }'+
+                    '.errors { background-color: red; color: black; }'+
+                    '.warnings { background-color: #E49723; color: black;}'+
+                    '.desc { text-align: left;}'+
+                    '</style><table style="border:1px solid"><thead>'+
+                    '<tr><th class="desc">'+navigator.userAgent+
+                    '</th><th>Result</th></tr>'+
+                    '</thead><tbody><tr>'];
+    }
+    debugger;
     logstr.push(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">'+
-          '%@ (<span class="passed">%@</span>, <span class="failed">%@</span>,'+
+          '<a href="">%@</a> (<span class="passed">%@</span>, <span class="failed">%@</span>,'+
           ' <span class="errors">%@</span>, <span class="warnings">%@</span>)'+
           '</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));
     if(s.failed>0 || s.errors>0){
       this.errors.push(CoreTest.fmt('<tr class="test %@">'+
           '<th style="background:grey; color:white" class="desc" colspan="2">'+
-          '%@ (<span class="passed">%@</span>, <span class="failed">%@</span>'+
+          '<a href="">%@</a> (<span class="passed">%@</span>, <span class="failed">%@</span>'+
           ', <span class="errors">%@</span>, <span class="warnings">%@</span>'+
           ')</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));  
     }
