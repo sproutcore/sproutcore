@@ -625,7 +625,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // HIGH-LEVEL RECORD API
   // 
   
-  
   /**
     Finds a record instance with the specified recordType and id, returning 
     the record instance.  If no matching record could be found, asks the 
@@ -633,15 +632,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     the record, returns null.
     
     Note that if you try to find a record id that does not exist in memory,
-    a dataSource may load it from ths server.  In this case, this method will
+    a dataSource may load it from the server.  In this case, this method will
     return a record instance with a status of SC.Record.BUSY_LOADING to indicate
     that it is still fetching the data from the server.
     
+    You can also pass YES to the isRefresh parameter which will make sure to
+    always go back to the data source so that you can go back to refresh the 
+    record that is currently in the store. In that case, the record will
+    get the SC.Record.BUSY_REFRESH status until server has responded and
+    store is refreshed.
+    
     @param {SC.Record|String} recordType the expected record type
     @param {String} id the id to load
+    @param {Boolean} isRefresh
     @returns {SC.Record} record instance or null
   */
-  find: function(recordType, id) {
+  find: function(recordType, id, isRefresh) {
     // if recordType is passed as string, find object
     if(SC.typeOf(recordType)===SC.T_STRING) {
       recordType = SC.objectForPropertyPath(recordType);
@@ -649,8 +655,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // first attempt to find the record in the local store
     var storeKey = recordType.storeKeyFor(id);
+    
     if (this.readStatus(storeKey) === SC.Record.EMPTY) {
       storeKey = this.retrieveRecord(recordType, id);
+    }
+    
+    // also make sure to reach to the data source to actually
+    // retrieveRecord if isRefresh is YES, even if it already exists in store
+    if(isRefresh) {
+      this.retrieveRecord(recordType, id, null, isRefresh);
     }
     
     // now we have the storeKey, materialize the record and return it.
@@ -1099,20 +1112,21 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to retrieve
     @param {Array} storeKeys (optional) store keys to retrieve
+    @param {Boolean} isRefresh
     @returns {Array} storeKeys to be retrieved
   */
-  retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
-
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
+    
     var source  = this.get('dataSource'),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
-        len     = (storeKeys === undefined) ? ids.length : storeKeys.length,
+        len     = (!storeKeys) ? ids.length : storeKeys.length,
         ret     = [],
         rev     = SC.Store.generateStoreKey(),
         K       = SC.Record,
         recordType, idx, storeKey, status;
         
     if (!isArray) recordType = recordTypes;
-
+    
     // if no storeKeys were passed, map recordTypes + ids
     for(idx=0;idx<len;idx++) {
       
@@ -1129,14 +1143,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       // K.EMPTY, K.ERROR, K.DESTROYED_CLEAN - initial retrieval
       if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
-
         this.writeStatus(storeKey, K.BUSY_LOADING);
         this.dataHashDidChange(storeKey, rev, YES);
         ret.push(storeKey);
 
       // otherwise, ignore record unless isRefresh is YES.
-      } else if (_isRefresh) {
-        
+      } else if (isRefresh) {
         // K.READY_CLEAN, K.READY_DIRTY, ignore K.READY_NEW
         if (status & K.READY) {
           this.writeStatus(storeKey, K.BUSY_REFRESH | (status & 0x03)) ;
@@ -1180,13 +1192,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType class
     @param {String} id id to retrieve
     @param {Number} storeKey (optional) store key
+    @param {Boolean} isRefresh
     @returns {Number} storeKey that was retrieved 
   */
-  retrieveRecord: function(recordType, id, storeKey, _isRefresh) {
+  retrieveRecord: function(recordType, id, storeKey, isRefresh) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret;
-        
-    if (storeKey !== undefined) {
+    
+    if (storeKey) {
       array[0] = storeKey;
       storeKey = array;
       id = null ;
@@ -1195,7 +1208,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    ret = this.retrieveRecords(recordType, id, storeKey, _isRefresh);
+    ret = this.retrieveRecords(recordType, id, storeKey, isRefresh);
     array.length = 0 ;
     return ret[0];
   },
