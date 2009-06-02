@@ -56,22 +56,22 @@ SC.GridView = SC.ListView.extend(
   }.observes('itemsPerRow'),
   
   /** @private
-    Find the contentRange to display in the passed frame.  Note that we 
-    ignore the width of the frame passed since we need to have a single
+    Find the contentIndexes to display in the passed rect. Note that we 
+    ignore the width of the rect passed since we need to have a single
     contiguous range.
   */
-  contentRangeInFrame: function(frame) {
+  contentIndexesInRect: function(rect) {
     var rowHeight = this.get('rowHeight') || 48 ;
     var itemsPerRow = this.get('itemsPerRow') ;
     
-    var min = Math.floor(SC.minY(frame) / rowHeight) * itemsPerRow  ;
-    var max = Math.ceil(SC.maxY(frame) / rowHeight) * itemsPerRow ;
+    var min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow  ;
+    var max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow ;
     
-    return { start: min, length: max - min } ; 
+    return SC.IndexSet.create(min, max-min);
   },
   
   /** @private */
-  itemViewLayoutAtContentIndex: function(contentIndex) {
+  layoutForContentIndex: function(contentIndex) {    
     var rowHeight = this.get('rowHeight') || 48 ;
     var frameWidth = this.get('frame').width ;
     var itemsPerRow = this.get('itemsPerRow') ;
@@ -80,8 +80,10 @@ SC.GridView = SC.ListView.extend(
     var row = Math.floor(contentIndex / itemsPerRow) ;
     var col = contentIndex - (itemsPerRow*row) ;
     return { 
-      left: col * columnWidth, top: row * rowHeight,
-      height: rowHeight, width: columnWidth
+      left: col * columnWidth,
+      top: row * rowHeight,
+      height: rowHeight,
+      width: columnWidth
     };
   },
   
