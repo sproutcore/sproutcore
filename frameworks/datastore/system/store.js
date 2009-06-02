@@ -840,13 +840,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} Returns the created record
   */
   createRecord: function(recordType, dataHash, id) {
-
-    var primaryKey, storeKey, status, K = SC.Record, changelog;
+    
+    var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal;
     
     // First, try to get an id.  If no id is passed, look it up in the 
     // dataHash.
     if (!id && (primaryKey = recordType.prototype.primaryKey)) {
       id = dataHash[primaryKey];
+      // if still no id, check if there is a defaultValue function for
+      // the primaryKey attribute and assign that
+      defaultVal = recordType.prototype[primaryKey] ? recordType.prototype[primaryKey].defaultValue : null;
+      if(!id && SC.typeOf(defaultVal)===SC.T_FUNCTION) {
+        id = dataHash[primaryKey] = defaultVal();
+      }
     }
     
     // Next get the storeKey - base on id if available
@@ -877,7 +883,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog = this.changelog;
     if (!changelog) changelog = SC.Set.create();
     changelog.add(storeKey);
-    this.changelog=changelog;
+    this.changelog = changelog;
     
     // finally return materialized record
     return this.materializeRecord(storeKey) ;
