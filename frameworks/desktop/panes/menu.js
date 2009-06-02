@@ -7,8 +7,6 @@
 require('panes/picker');
 require('views/menu_item');
 
-SC.MENU_ITEM_KEYS = 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemBranchKey itemHeightKey subMenuKey itemKeyEquivalentKey itemTargetKey'.w();
-SC.BENCHMARK_MENU_PANE_RENDER = YES ;
 /**
   @class SC.MenuPane
   @extends SC.PickerPane
@@ -17,6 +15,9 @@ SC.BENCHMARK_MENU_PANE_RENDER = YES ;
 
 SC.MenuPane = SC.PickerPane.extend( 
 /** @scope SC.MenuPane.prototype */ {
+
+  MENU_ITEM_KEYS: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemBranchKey itemHeightKey subMenuKey itemKeyEquivalentKey itemTargetKey'.w(),
+  BENCHMARK_MENU_PANE_RENDER: YES ,
   classNames: ['sc-menu'],
 
   tagName: 'div',
@@ -255,7 +256,7 @@ SC.MenuPane = SC.PickerPane.extend(
 	                        target:null });
         menuHeight = menuHeight+20 ;
       } else if (itemType !== SC.T_ARRAY) {
-          if (keys === null) keys = SC.MENU_ITEM_KEYS.map(fetchKeys, this) ;
+          if (keys === null) keys = this.MENU_ITEM_KEYS.map(fetchKeys, this) ;
           cur = keys.map(fetchItem, item) ;
           cur[cur.length] = idx ;
           if (!keys[0] && item.toString) cur[0] = item.toString() ;
@@ -310,7 +311,7 @@ SC.MenuPane = SC.PickerPane.extend(
     The render function which depends on the displayItems and value
   */
   render: function(context, firstTime) {
-    if (SC.BENCHMARK_MENU_PANE_RENDER) {
+    if (this.BENCHMARK_MENU_PANE_RENDER) {
       var bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey);
     }
@@ -346,7 +347,7 @@ SC.MenuPane = SC.PickerPane.extend(
         menuItemView.updateLayer();
       }, this) ;
     }
-    if (SC.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey) ;
+    if (this.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey) ;
     //return ret ;
   },
 

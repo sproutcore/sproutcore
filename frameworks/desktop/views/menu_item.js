@@ -7,8 +7,6 @@
 sc_require('views/button') ;
 sc_require('views/separator') ;
 
-SC.MENU_ITEM_KEYS = 'contentValueKey contentIsBranchKey shortCutKey contentIconKey contentCheckboxKey contentActionKey'.w() ;
-SC.BENCHMARK_MENU_ITEM_RENDER = YES ;
 /**
   @class SC.MenuItemView
   @extends SC.ButtonView
@@ -16,6 +14,9 @@ SC.BENCHMARK_MENU_ITEM_RENDER = YES ;
 */
 SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
+  
+  BENCHMARK_MENU_ITEM_RENDER: YES,
+  
   classNames: ['sc-menu-item'],
   tagName: 'div',
 
@@ -179,7 +180,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns {void}
   */
   render: function(context, firstTime) {
-    if (SC.BENCHMARK_MENU_ITEM_RENDER) {
+    if (this.BENCHMARK_MENU_ITEM_RENDER) {
       var bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey) ;
     }
@@ -202,7 +203,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     if (val) {
       ic = ic.begin('span').addClass('separator') ;
       ic = ic.end() ;
-      if (SC.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
+      if (this.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
       return ;
     } else {
       // handle checkbox
@@ -254,7 +255,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       }
     }
     ic.end() ;
-    if (SC.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
+    if (this.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
   },
       
   /** 
