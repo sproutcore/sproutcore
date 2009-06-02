@@ -439,12 +439,9 @@ SC.Observable = {
       }
     }
 
-    
-    //if (log) console.log("%@%@.propertyDidChange(%@)".fmt(SC.KVO_SPACES,this,key));
-    
     // save in the change set if queuing changes
-    var suspended ;
-    if ((level > 0) || (suspended=SC.Observers.isObservingSuspended)) {
+    var suspended = SC.Observers.isObservingSuspended;
+    if ((level > 0) || suspended) {
       var changes = this._kvo_changes ;
       if (!changes) changes = this._kvo_changes = SC.CoreSet.create() ;
       changes.add(key) ;
