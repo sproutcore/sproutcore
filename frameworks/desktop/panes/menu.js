@@ -16,7 +16,7 @@ require('views/menu_item');
 SC.MenuPane = SC.PickerPane.extend( 
 /** @scope SC.MenuPane.prototype */ {
 
-  MENU_ITEM_KEYS: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemBranchKey itemHeightKey subMenuKey itemKeyEquivalentKey itemTargetKey'.w(),
+  menuItemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemBranchKey itemHeightKey subMenuKey itemKeyEquivalentKey itemTargetKey'.w(),
   BENCHMARK_MENU_PANE_RENDER: YES ,
   classNames: ['sc-menu'],
 
@@ -256,7 +256,7 @@ SC.MenuPane = SC.PickerPane.extend(
 	                        target:null });
         menuHeight = menuHeight+20 ;
       } else if (itemType !== SC.T_ARRAY) {
-          if (keys === null) keys = this.MENU_ITEM_KEYS.map(fetchKeys, this) ;
+          if (keys === null) keys = this.menuItemKeys.map(fetchKeys, this) ;
           cur = keys.map(fetchItem, item) ;
           cur[cur.length] = idx ;
           if (!keys[0] && item.toString) cur[0] = item.toString() ;
