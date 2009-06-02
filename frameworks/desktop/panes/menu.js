@@ -7,17 +7,18 @@
 require('panes/picker');
 require('views/menu_item');
 
+// Constants
+SC.BENCHMARK_MENU_PANE_RENDER = YES ;
+
 /**
   @class SC.MenuPane
   @extends SC.PickerPane
   @since SproutCore 1.0
 */
-
 SC.MenuPane = SC.PickerPane.extend( 
 /** @scope SC.MenuPane.prototype */ {
 
   menuItemKeys: 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemSeparatorKey itemActionKey itemCheckboxKey itemShortCutKey itemBranchKey itemHeightKey subMenuKey itemKeyEquivalentKey itemTargetKey'.w(),
-  BENCHMARK_MENU_PANE_RENDER: YES ,
   classNames: ['sc-menu'],
 
   tagName: 'div',
@@ -311,7 +312,7 @@ SC.MenuPane = SC.PickerPane.extend(
     The render function which depends on the displayItems and value
   */
   render: function(context, firstTime) {
-    if (this.BENCHMARK_MENU_PANE_RENDER) {
+    if (SC.BENCHMARK_MENU_PANE_RENDER) {
       var bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey);
     }
@@ -347,7 +348,7 @@ SC.MenuPane = SC.PickerPane.extend(
         menuItemView.updateLayer();
       }, this) ;
     }
-    if (this.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey) ;
+    if (SC.BENCHMARK_MENU_PANE_RENDER) SC.Benchmark.end(bkey) ;
     //return ret ;
   },
 
