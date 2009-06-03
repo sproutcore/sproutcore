@@ -1661,9 +1661,55 @@ SC.CollectionView = SC.View.extend(
       var sel     = this.get('selection'),
           content = this.get('content'),
           indexes = sel ? sel.indexSetForSource(content) : null;
-      if (indexes) this.collapse(indexes);
-    }
     
+      // Collapse the element if it is expanded.  However, if there is exactly
+      // one item selected and the item is already collapsed or is a leaf
+      // node, then select the (expanded) parent element instead as a
+      // convenience to the user.
+      if ( indexes ) {
+        var del          = undefined,     // We'll load it lazily
+            selectParent = false,
+            index        = undefined;
+
+        if ( indexes.get('length') === 1 ) {
+          index = indexes.get('firstObject');
+          del = this.get('contentDelegate');
+          var state = del.contentIndexDisclosureState(this, content, index);
+          if (state !== SC.BRANCH_OPEN) selectParent = true;
+        }
+    
+        if ( selectParent ) {
+          // TODO:  PERFORMANCE:  It would be great to have a function like
+          //        SC.CollectionView.selectParentItem() or something similar
+          //        for performance reasons.  But since we don't currently
+          //        have such a function, let's just iterate through the
+          //        previous items until we find the first one with a outline
+          //        level of one less than the selected item.
+          var desiredOutlineLevel = del.contentIndexOutlineLevel(this, content, index) - 1;
+          if ( desiredOutlineLevel >= 0 ) {
+            var parentIndex = -1;
+            while ( parentIndex < 0 ) {
+              var previousItemIndex = this._findPreviousSelectableItemFromIndex(index - 1);
+              if ( previousItemIndex < 0 ) return false;    // Sanity-check.
+              index = previousItemIndex;
+              var outlineLevel = del.contentIndexOutlineLevel(this, content, index);
+              if ( outlineLevel === desiredOutlineLevel ) {
+                parentIndex = previousItemIndex;
+              }
+            }
+          
+            // If we found the parent, select it now.
+            if ( parentIndex !== -1 ) {
+              this.select(index);
+            }
+          }
+        }
+        else {
+          this.collapse(indexes);
+        }
+      }
+    }
+  
     return true ;
   },
   
