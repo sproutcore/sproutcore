@@ -29,7 +29,7 @@
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.SceneView = SC.View.extend(
+SC.SceneView = SC.ContainerView.extend(
   /** @scope SC.SceneView.prototype */ {
 
   /**
