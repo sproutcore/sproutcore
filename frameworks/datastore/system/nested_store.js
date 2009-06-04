@@ -406,10 +406,14 @@ SC.NestedStore = SC.Store.extend(
     var pstore = this.get('parentStore'), idx, storeKey,
       len = (!storeKeys) ? ids.length : storeKeys.length;
     
-    for(idx=0;idx<len;idx++) {
-      storeKey = !storeKeys ? pstore.storeKeyFor(recordTypes, ids[idx]) : storeKeys[idx];
-      this.writeStatus(storeKey, SC.Record.BUSY_REFRESH_CLEAN);
+    // turn status to BUSY_REFRESH_CLEAN if isRefresh is true
+    if(isRefresh) {
+      for(idx=0;idx<len;idx++) {
+        storeKey = !storeKeys ? pstore.storeKeyFor(recordTypes, ids[idx]) : storeKeys[idx];
+        this.writeStatus(storeKey, SC.Record.BUSY_REFRESH_CLEAN);
+      }
     }
+    
     return pstore.retrieveRecords(recordTypes, ids, storeKeys, isRefresh);
   },
 
