@@ -41,21 +41,10 @@ TestRunner.mainPage = SC.Page.design({
         })
       }),
       
-      bottomRightView: SC.ScrollView.design({
-        
-        hasHorizontalScroller: NO,
-        contentView: SC.ListView.design({
-          contentBinding: "TestRunner.testsController.arrangedObjects",
-          selectionBinding: "TestRunner.testsController.selection",
-          contentValueKey: "filename",
-          actOnSelect: YES,
-          
-          target: "TestRunner.testsController",
-          action: "showDetails"
-        })
-        
+      bottomRightView: SC.SceneView.design({
+        scenes: "testsNone testsMaster testsDetail".w(),
+        nowShowingBinding: "TestRunner.testsController.nowShowingScene"
       })
-      
     }),
     
     // This is the toolbar view that appears at the bottom.  We include two
@@ -85,7 +74,54 @@ TestRunner.mainPage = SC.Page.design({
       })
       
     })
-  })
+  }),
+
+  testsNone: SC.View.design({
+    childViews: "labelView".w(),
+    
+    labelView: SC.LabelView.design({
+      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      textAlign: SC.ALIGN_CENTER,
+      value: "No Target Selected".loc()
+    })
+  }),
+  
+  testsMaster: SC.ScrollView.design({
+    hasHorizontalScroller: NO,
+    contentView: SC.ListView.design({
+      contentBinding: "TestRunner.testsController.arrangedObjects",
+      selectionBinding: "TestRunner.testsController.selection",
+      contentValueKey: "filename",
+      actOnSelect: YES,
+      
+      target: "TestRunner.testsController",
+      action: "showDetails"
+    })
+  }),
+  
+  testsDetail: SC.View.design({
+    childViews: "navigationView webView".w(),
+
+    navigationView: SC.View.design({
+      layout: { top: 0, left: 0, right: 0, height: 24 },
+      childViews: "backButton locationLabel".w(),
+      backButton: SC.ButtonView.design({
+        layout: { top: 1, left: 8, width: 80, height: 20 },
+        title: "Target Tests"
+      }),
+      
+      locationLabel: SC.LabelView.design({
+        layout: { right: 8, top: 4, height: 18, left: 100 },
+        textAlign: SC.ALIGN_RIGHT,
+        value: "test/name"
+      })
+      
+    }),
+    
+    webView: SC.WebView.design({
+      layout: { top: 28, left: 0, right: 0, bottom: 0 }
+    })
+  })  
 
 });
 

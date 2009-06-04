@@ -15,11 +15,27 @@ TestRunner.testsController = SC.ArrayController.create(
 
   contentBinding: "TestRunner.targetController.tests",
   
+  nowShowingScene: "testsNone",
+  
+  // ACTIONS
+  
+  /**
+    Action runs when the content of a tests controller changes.  
+  */
+  targetDidChange: function() {
+    console.log('targetDidChange');
+    if (this.get('hasContent')) this.set('nowShowingScene', 'testsMaster');
+    else this.set('nowShowingScene', 'testsNone');
+  }.observes('content'),
+  
   /**
     Action runs when a test is selected to show the server.
   */
   showDetails: function() {
+    this.set('nowShowingScene', 'testsDetail');
     console.log('showDetails(%@)'.fmt(this.get('selection')));
   }
 
 }) ;
+
+TestRunner.testsController.addProbe('nowShowingScene');
