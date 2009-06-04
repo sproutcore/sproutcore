@@ -415,12 +415,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var records = this.records, rec ;
     
     // pass along to nested stores
-    var nestedStores = this.get('nestedStores'), len, idx, store;
+    var nestedStores = this.get('nestedStores'), len, idx, store, status;
     var K = SC.Store;
     len = nestedStores ? nestedStores.length : 0 ;
     for(idx=0;idx<len;idx++) {
       store = nestedStores[idx];
-      if (store.storeKeyEditState(storeKey) === K.INHERITED) {
+      status = store.readStatus(storeKey);
+      
+      // when store needs to propagate out changes in the parent store
+      // to nested stores
+      if(store.storeKeyEditState(storeKey) === K.EDITABLE && (status & SC.Record.BUSY)) {
+        // make sure nested store does not have any changes before resetting
+        if(store.get('hasChanges')) throw K.CHAIN_CONFLICT_ERROR;
+        store.reset();
+      }
+      
+      if(store.storeKeyEditState(storeKey) === K.INHERITED) {
         store._notifyRecordPropertyChange(storeKey, statusOnly);
       }
     }
@@ -435,9 +445,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    // TODO: need make sure this is just fired once and also
-    // works with nested stores
-    //this.invokeOnce(this._flushRecordChanges);
     this._flushRecordChanges();
     
     return this;

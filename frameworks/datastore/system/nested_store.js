@@ -402,9 +402,15 @@ SC.NestedStore = SC.Store.extend(
   // actually creating record instances.
   
   /** @private - adapt for nested store */
-  retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
-    var pstore = this.get('parentStore');
-    return pstore.retrieveRecords(recordTypes, ids, storeKeys, _isRefresh);
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
+    var pstore = this.get('parentStore'), idx, storeKey,
+      len = (!storeKeys) ? ids.length : storeKeys.length;
+    
+    for(idx=0;idx<len;idx++) {
+      storeKey = !storeKeys ? pstore.storeKeyFor(recordTypes, ids[idx]) : storeKeys[idx];
+      this.writeStatus(storeKey, SC.Record.BUSY_REFRESH_CLEAN);
+    }
+    return pstore.retrieveRecords(recordTypes, ids, storeKeys, isRefresh);
   },
 
   /** @private - adapt for nested store */
