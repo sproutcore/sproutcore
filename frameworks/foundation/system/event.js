@@ -801,10 +801,6 @@ SC.Event.prototype = {
         modifiers = 'meta_' ;
         ret = lowercase;
         
-      } else if (ret !== lowercase) {
-        modifiers = 'shift_' ;
-        ret = lowercase ;
-
       } else ret = null ;
     }
 
