@@ -57,7 +57,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
 
     @type Boolean
   */
-  isSeperator: NO,
+  isSeparator: NO,
 
   /**
     (displayDelegate) The name of the property used for label itself   
