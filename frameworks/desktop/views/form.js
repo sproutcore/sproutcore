@@ -3,7 +3,6 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-require('views/text_field') ;
 
 /**
   FormView provides a simple way for you to focus a group of views onto a 

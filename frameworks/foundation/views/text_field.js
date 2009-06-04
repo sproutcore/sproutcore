@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+
+sc_require('views/field') ;
 /**
   @class
   
