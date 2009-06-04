@@ -235,6 +235,8 @@ SC.LabelView = SC.View.extend(SC.Control,
 
   displayProperties: ['displayValue', 'textAlign', 'fontWeight', 'icon'],
   
+  _TEMPORARY_CLASS_HASH: {},
+  
   render: function(context, firstTime) {
     var value = this.get('displayValue');
     var icon = this.get('icon') ;
@@ -253,6 +255,10 @@ SC.LabelView = SC.View.extend(SC.Control,
     // and setup alignment and font-weight on styles
     context.addStyle('text-align',  this.get('textAlign'))
            .addStyle('font-weight', this.get('fontWeight'));
+           
+    var classes = this._TEMPORARY_CLASS_HASH;
+    classes.icon = !!this.get('icon');
+    context.setClass(classes);
            
     // if we are editing, set the opacity to 0
     if (this.get('isEditing')) context.addStyle('opacity', 0.0);

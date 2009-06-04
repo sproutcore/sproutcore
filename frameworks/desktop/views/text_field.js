@@ -39,6 +39,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     If YES then the text field is currently editing. 
   */
   isEditing: NO,
+
+  /**
+    If YES then we use textarea instead of input. 
+  */
+  isTextArea: NO,
+
   
   /** isEditable maps to isEnabled with a TextField. */
   isEditable: function() {
@@ -66,8 +72,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     if (firstTime) {
       context.push('<span class="sc-hint">', hint, '</span>');
-      context.push('<input type="%@" name="%@" %@ value="%@" />'.fmt(type, name, disabled, v));
-      
+      if(this.get('isTextArea')){
+          context.push('<textarea type="%@" name="%@" %@ value="%@" />'.fmt(type, name, disabled, v));
+      }else{
+        context.push('<input name="%@" %@ value="%@" />'.fmt(name, disabled, v));
+      }
     // if this is not first time rendering, update the hint itself since we
     // can't just blow away the text field like we might most other controls
     } else {
