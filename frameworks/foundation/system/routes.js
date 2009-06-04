@@ -129,7 +129,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
 		}
 		
     var parts = route.split('/') ;
-    if (!this._routes) this._routes = SC.Routes._Route.create() ;
+    if (!this._routes) this._routes = SC.routes._Route.create() ;
     this._routes.addRoute(parts, target, method) ;
 		return this;
   },
@@ -156,7 +156,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     parts = route.split('/') ;
     
     // step 3: evaluate route.
-    if (!this._routes) this._routes = SC.Routes._Route.create() ;
+    if (!this._routes) this._routes = SC.routes._Route.create() ;
 
     routeHandler = this._routes.functionForRoute(parts,params) ;
     
@@ -368,7 +368,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           case ':':
             part = part.slice(1,part.length) ;
             var routes = this._dynamic[part] || [] ;
-            nextRoute = SC.Routes._Route.create() ;
+            nextRoute = SC.routes._Route.create() ;
             routes.push(nextRoute) ;
             this._dynamic[part] = routes ;
             break ;
@@ -384,7 +384,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           // setup a normal static route.
           default:
             var routes = this._static[part] || [] ;
-            nextRoute = SC.Routes._Route.create() ;
+            nextRoute = SC.routes._Route.create() ;
             routes.push(nextRoute) ;
             this._static[part] = routes ;
         }
