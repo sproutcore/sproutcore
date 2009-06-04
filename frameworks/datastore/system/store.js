@@ -1614,7 +1614,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){ 
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN) {
+      
       status = K.READY_CLEAN;
       if(dataHash===undefined) {
         this.writeStatus(storeKey, status) ;
@@ -1729,7 +1730,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType
     @returns {Array} set of storeKeys
   */
-  
   storeKeysFor: function(recordType) {
     var recType, ret = [], storeKey;
     if(!this.statuses) return;
@@ -1751,7 +1751,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @returns {Array} set of storeKeys
   */
-  
   storeKeys: function() {
     ret = [];
     if(!this.statuses) return;
@@ -1764,8 +1763,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     return ret;
-  }
+  },
   
+  /**
+    Returns string representation of a storeKey, with status.
+    
+    @param {Number} storeKey
+    @returns {String}
+  */
+  statusString: function(storeKey) {
+    var rec = this.materializeRecord(storeKey);
+    var ret = [], status = rec.status();
+    
+    for(prop in SC.Record) {
+      if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
+        ret.push(prop);
+      }
+    }
+    
+    return ret.join(" ");
+  }
   
 }) ;
 
@@ -1866,7 +1883,7 @@ SC.Store.mixin({
     this.recordTypesByStoreKey[storeKey] = recordType;
     return this ;
   }
-    
+  
 });
 
 
