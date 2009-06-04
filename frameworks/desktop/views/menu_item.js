@@ -53,7 +53,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   isSubMenuViewVisible: null,
   
   /**
-    This will return true if the menu item is a seperator.
+    This will return true if the menu item is a separator.
 
     @type Boolean
   */
@@ -198,7 +198,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     
     if(!this.get('isEnabled'))
       context.addClass('disabled') ;
-    //handle seperator    
+    //handle separator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty('isSeparatorKey', del) ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
