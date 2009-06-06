@@ -9,7 +9,7 @@
   @class
   
   Routes makes it possible to load a location in the browser.
-
+  
   This is useful when application need to change state depending upon the URL 
   change. Applications can support deep-linking using routes, which means user 
   can type specific URL to see certain state of the app e.g.
@@ -36,11 +36,11 @@
   the location.
   
   h2. Example
-
+  
   {{{
     SC.routes.add(':', RoutesDemo, 'routeHandler');
   }}}
-
+  
   This route would match any URL change. Whatever comes after # would get 
   passed as parameter. RouteDemo is the object that contains method 
   'routeHandler'.
@@ -56,8 +56,9 @@
   @extends SC.Object
   @since SproutCore 1.0
 */
-SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
-
+SC.routes = SC.Object.create(
+/** @scope SC.routes.prototype */ {
+  
   // set this property to your current app lication
   location: function(key,value) {
     if (value !== undefined) {
@@ -65,7 +66,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
       
       // convert an object hash to a string, if it was passed.
       if (typeof(value) == "object") {
-
+        
         // get the original route and any params
         var parts = (value.route) ? value.route.split('&') : [''] ;
         var route = parts.shift() ;
@@ -74,7 +75,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           var bits = p.split('=') ;
           params[bits[0]] = bits[1] ;
         }) ;
-
+        
         // overlay any params passed in the object.
         for(var key in value) {
           if (!value.hasOwnProperty(key)) continue ;
@@ -103,7 +104,9 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     return this._location ;
   }.property(),
   
-  // ensures we are at the current route location.
+  /**
+    Ensures we are at the current route location.
+  */
   ping: function() { 
     if (!this._didSetupHistory) {
       this._didSetupHistory = true ;
@@ -112,33 +115,43 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     this._checkWindowLocation(); 
   },
   
-  // register a route here.  Routes have the following format:
-  // static/route/path -- matches this path only.
-  // static/route/:path -- matches any static/route, :path passed as param.
-  // static/*route -- matches any static, route gets rest of URL.
-  //
-  // parameters can also be passed using &.
-  // static/route&param1=value&param2=value2
-
+  /**
+    Register a route here.  Routes have the following format:
+    
+    static/route/path -- matches this path only.
+    static/route/:path -- matches any static/route, :path passed as param.
+    static/*route -- matches any static, route gets rest of URL.
+    
+    parameters can also be passed using &.
+    static/route&param1=value&param2=value2
+    
+    @param {string} route
+    @param {Object} target
+    @param {Function or String} method or method name on target
+    @returns {SC.routes} receiver
+  */
   add: function(route, target, method) {
-		// normalize the target/method
-		if (SC.typeOf(target) === SC.T_FUNCTION) {
-		  method = target; target = null ;
-		} else if (SC.typeOf(method) === SC.T_STRING) {
-		  method = target[method] ;
-		}
-		
+    // normalize the target/method
+    if (SC.typeOf(target) === SC.T_FUNCTION) {
+      method = target; target = null ;
+    } else if (SC.typeOf(method) === SC.T_STRING) {
+      method = target[method] ;
+    }
+    
     var parts = route.split('/') ;
-    if (!this._routes) this._routes = SC.Routes._Route.create() ;
+    if (!this._routes) this._routes = SC.routes._Route.create() ;
     this._routes.addRoute(parts, target, method) ;
-		return this;
+    return this;
   },
-
   
-  // eval routes.
+  /**
+    Eval routes.
+    
+    @param {String} route
+  */
   gotoRoute: function(route) {
     var params = {} ; var parts, route, routeHandler, target, method ;
-
+    
     // save this route for window location sensing
     this._lastRoute = route ;
     
@@ -156,20 +169,19 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     parts = route.split('/') ;
     
     // step 3: evaluate route.
-    if (!this._routes) this._routes = SC.Routes._Route.create() ;
-
+    if (!this._routes) this._routes = SC.routes._Route.create() ;
+    
     routeHandler = this._routes.functionForRoute(parts,params) ;
     
     if (routeHandler) {
-  		target = routeHandler._target;
-  		method = routeHandler._method;
-  		method.call(target, params);
-  	}
-
-    //else console.log('could not find route for: "'+route+'"') ;
+      target = routeHandler._target;
+      method = routeHandler._method;
+      method.call(target, params);
+    }
+      //else console.log('could not find route for: "'+route+'"') ;
   },
   
-  
+  /** @private */
   init: function() {
     arguments.callee.base.call(this) ;
     if (SC.browser.isSafari && !(SC.browser.safari >= 3)) {
@@ -180,27 +192,29 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     this._didSetupHistory = false ;
   },
   
-  // _checkWindowLocation and _setWindowLocation are implemented separately for
-  // each browser.  Below are the implementations, which get copied during init.
+  /** @private
+    _checkWindowLocation and _setWindowLocation are implemented separately for
+    each browser.  Below are the implementations, which get copied during init.
+  */
   browserFuncs: {
     
     // for Safari2 and earlier.
     safari: {
-
+      
       _setupHistory: function() {
         // get initial cloc.
         var cloc = location.hash ;
         cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
         this._cloc = cloc ;
-
+        
         // create back stack.
         this._backStack = [] ;
         this._backStack.length = history.length ;
         this._backStack.push(cloc) ;
-
+        
         // create forward stack.
         this._forwardStack = [] ;
-
+        
         this.invokeLater(this._checkWindowLocation, 1000) ;
       },
       
@@ -214,7 +228,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
         var historyDidChange = (history.length - this._lastLength) != 0;
         var delta = (historyDidChange) ? (history.length - this._backStack.length) : 0 ;
         this._lastLength = history.length ;
-
+        
         if (historyDidChange) console.log('historyDidChange') ;
         
         // if the history length has changed, then we need to move forward or 
@@ -245,7 +259,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
             
             this._cloc = this._forwardStack.pop() ;
           }
-
+          
         // if the history has changed but the delta hasn't, then that means
         // a new location was set via _setWindowLocation().  Normally we would
         // call gotoRoute in that method, but doing so will crash Safari.
@@ -255,7 +269,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           this.gotoRoute(this._cloc) ;
           this._locationDidChange = false ;
         }
-
+        
         var cloc = this._cloc ;
         var loc = this.get('location') ;
         if (cloc != loc) {
@@ -265,8 +279,8 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
         
         this.invokeLater(this._checkWindowLocation, 50) ;
       },
-
-      _setWindowLocation: function(loc) {        
+      
+      _setWindowLocation: function(loc) {
         var cloc = this._cloc ;
         if (cloc != loc) {
           this._backStack.push(this._cloc) ;
@@ -275,7 +289,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           location.hash = (loc && loc.length > 0) ? loc : '' ;
           this._locationDidChange = true ;
         }
-      }            
+      }
       
     },
     
@@ -284,7 +298,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
       _setupHistory: function() {
         this.invokeLater(this._checkWindowLocation, 1000) ;
       },
-
+      
       _checkWindowLocation: function() {
         var loc = this.get('location') ;
         var cloc = location.hash ;
@@ -292,7 +306,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
         if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
         this.invokeLater(this._checkWindowLocation, 100) ;
       },
-
+      
       _setWindowLocation: function(loc) {
         //console.log('_setWindowLocation('+loc+')') ;
         var cloc = location.hash ;
@@ -305,23 +319,26 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     }
   },
   
+  /** @private */
   _setupHistory: function() {
     var that = this ;
     this._checkWindowLocation.invokeLater(this, 1000) ;
   },
   
+  /** @private */
   _checkWindowLocation: function() {
     var loc = this.get('location') ;
     var cloc = location.hash ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
     if (cloc != loc) {
-			SC.RunLoop.begin();
-			this.set('location',(cloc) ? cloc : '') ;
-			SC.RunLoop.end();
-		}
+      SC.RunLoop.begin();
+      this.set('location',(cloc) ? cloc : '') ;
+      SC.RunLoop.end();
+    }
     // this.invokeLater(this._checkWindowLocation, 100) ;
   },
   
+  /** @private */
   _setWindowLocation: function(loc) {
     //console.log('_setWindowLocation('+loc+')') ;
     var cloc = location.hash ;
@@ -332,16 +349,17 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     this.gotoRoute(loc) ;
   },
   
+  /** @private */
   _routes: null,
   
-  // This object handles a single route level.  
+  /** @private This object handles a single route level. */
   _Route: SC.Object.extend({
     
     // route handler class.
-		_target: null,
-		
-		// route handler
-		_method: null,
+    _target: null,
+    
+    // route handler
+    _method: null,
     
     // staticly named routes.
     _static: null,
@@ -353,11 +371,11 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     _wildcard: null,
     
     addRoute: function(parts, target, method) {
-
+      
       if (!parts || parts.length == 0) {
-				this._target = target;
-				this._method = method;
-				
+        this._target = target;
+        this._method = method;
+        
       // add to route table.
       } else {
         var part = parts.shift() ; // get next route.
@@ -368,7 +386,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           case ':':
             part = part.slice(1,part.length) ;
             var routes = this._dynamic[part] || [] ;
-            nextRoute = SC.Routes._Route.create() ;
+            nextRoute = SC.routes._Route.create() ;
             routes.push(nextRoute) ;
             this._dynamic[part] = routes ;
             break ;
@@ -377,14 +395,14 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
           case '*':
             part = part.slice(1,part.length) ;
             this._wildcard = part ;
-						this._target = target;				
-						this._method = method;
+            this._target = target;        
+            this._method = method;
             break ;
             
           // setup a normal static route.
           default:
             var routes = this._static[part] || [] ;
-            nextRoute = SC.Routes._Route.create() ;
+            nextRoute = SC.routes._Route.create() ;
             routes.push(nextRoute) ;
             this._static[part] = routes ;
         }
@@ -396,10 +414,10 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     
     // process the next level of the route and pass on.
     functionForRoute: function(parts, params) {
-
+      
       // if parts it empty, then we are here, so return func
       if (!parts || parts.length == 0) {
-        return this ;				
+        return this ;        
         
       // process the next part
       } else {
@@ -430,7 +448,7 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
         if ((ret == null) && this._wildcard) {
           parts.unshift(part) ;
           if (params) params[this._wildcard] = parts.join('/') ;
-					ret = this;
+          ret = this;
         }
         
         return ret ;
@@ -443,4 +461,4 @@ SC.routes = SC.Object.create(/** @scope SC.routes.prototype */ {
     }
   })
   
-}) ;
+});
