@@ -83,8 +83,6 @@ require('views/text_field') ;
 */
 SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEditorDelegate,
 /** @scope SC.InlineTextFieldView.prototype */ {
-  
-  
 
   /**
     Invoked by the class method to begin editing on an inline editor.
@@ -97,7 +95,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     @returns {Boolean} YES if editor began editing, NO if it failed.
   */
   beginEditing: function(options) {
-    
+    var layout={}, pane;
     // end existing editing if necessary
     this.beginPropertyChanges();
     if (this.get('isEditing') && !this.blurEditor()) {
@@ -128,8 +126,12 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     
     pane = this._delegate.pane();
     
-    
-    this.set('layout',this._delegate.get('layout'));
+    layout.height = this._optframe.height;
+    layout.width=this._optframe.width;
+    layout.left=this._optframe.x;
+    layout.top=this._optframe.y-this._delegate.get('layout').top;
+
+    this.set('layout', layout);
   
     this.set('parentNode', pane);
     // get style for view.
@@ -354,7 +356,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     this.commitEditing() ;
     if(prev) prev.beginEditing();
     return YES ;
-  },
+  }
 
 
 });

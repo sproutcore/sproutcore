@@ -404,6 +404,7 @@ SC.ListItemView = SC.View.extend(
     return this._isInsideElementWithClassName('disclosure', evt);
   },
   
+  
   /** @private 
   mouseDown is handled only for clicks on the checkbox view or or action
   button.
@@ -421,12 +422,17 @@ SC.ListItemView = SC.View.extend(
       this._isMouseDownOnDisclosure = YES;
       this._isMouseInsideDisclosure = YES ;
       return YES;
+    } else if (evt.clickCount === 2)  {
+      console.log('double click');
+      this.beginEditing();
+      return YES;   
     }
     
     return NO ; // let the collection view handle this event
   },
   
   mouseUp: function(evt) {
+    console.log('mouse up');
     var ret= NO, del, checkboxKey, content, state, idx, set;
     
     // if mouse was down in checkbox -- then handle mouse up, otherwise 
@@ -472,7 +478,7 @@ SC.ListItemView = SC.View.extend(
      
       this._removeDisclosureActiveState();
       ret = YES ;
-    }
+    } 
    
     // clear cached info
     this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
@@ -558,14 +564,20 @@ SC.ListItemView = SC.View.extend(
    var labelKey = this.getDelegateProperty('contentValueKey', del) ;
    var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
    
-   var f = this.get('frame') ;
+   var f= this.computeFrameWithParentFrame(null);
+   var parent = this.get('parentView');
+   var pf = parent.get('frame');
+   
    var el = this.$label() ;
+   var offset = SC.viewportOffset(el[0]);
    if (!el) return NO ;
    
    // if the label has a large line height, try to adjust it to something
    // more reasonable so that it looks right when we show the popup editor.
    var oldLineHeight = el.css('lineHeight');
    var fontSize = el.css('fontSize');
+   var top = this.$().css('top');
+   top = parseInt(top.substring(0,top.length-2));
    var lineHeight = oldLineHeight;
    var lineHeightShift = 0;
    
@@ -577,11 +589,10 @@ SC.ListItemView = SC.View.extend(
      } else oldLineHeight = null ;
    }
    
-   f.x += el.offsetLeft ;
-   f.y += el.offsetTop + lineHeightShift - 2;
-   f.height = el.offsetHeight ;
-   f.width = (f.width - 30 - el.offsetLeft) ;
-   f = this.convertFrameToView(f, null) ;
+   f.x = offset.x;
+   f.y = offset.y+top + lineHeightShift ;
+   f.height = el[0].offsetHeight ;
+   f.width = (f.width - 30 - el[0].offsetLeft) ;
    
    var ret = SC.InlineTextFieldView.beginEditing({
      frame: f, 

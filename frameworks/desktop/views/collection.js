@@ -1762,12 +1762,13 @@ SC.CollectionView = SC.View.extend(
     if content value is editable and we have one item selected, then edit.
     otherwise, invoke action.
   */
-  insertNewline: function() {
-    var sel, itemView;
-    if (this.get('contentValueIsEditable')) {
+  insertNewline: function(sender, evt) {
+    var sel, itemView, itemViews=this._sc_itemViews, n=0;
+    if (this.get('isEditable')) {
       sel = this.get('selection') ;
       if (sel && sel.get('length') === 1) {
-        itemView = this.itemViewForContent(sel.objectAt(0)) ;
+        while(!itemViews[n].isSelected){ n++; }
+        itemView = this.itemViewForContentIndex(n) ;
         if (itemView && itemView.beginEditing) {
           this.scrollToItemView(itemView) ;
           itemView.beginEditing() ;
@@ -1777,8 +1778,13 @@ SC.CollectionView = SC.View.extend(
     // invoke action!
     } else {
       sel = this.get('selection') ;
-      itemView = (sel && sel.get('length') === 1) ? this.itemViewForContent(sel.objectAt(0)) : null ;
-      this._cv_action(itemView, null) ;
+      if (sel && sel.get('length') === 1) {
+        while(!itemViews[n].isSelected){ n++; }
+        itemView = this.itemViewForContentIndex(n) ;
+      } else{
+        itemView = null;
+      }
+        this._cv_action(itemView, null) ;
     }
     
     return YES ; // always handle
