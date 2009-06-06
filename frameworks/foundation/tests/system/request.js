@@ -46,10 +46,9 @@ test("Test Asynchronous GET Request", function() {
 });
 
 test("Test Synchronous GET Request", function() {
-  request.set("isAsynchronous", NO);
-  
+
+  request.set("isAsynchronous", NO);  
   request.send();
-  
   contents = request.get("response");
   
   ok(contents !== null) ;
