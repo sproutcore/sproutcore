@@ -30,7 +30,7 @@ SC.SourceListView = SC.ListView.extend(
   /**
     Default row height for source list items is larger.
   */
-  rowHeight: 24,
+  rowHeight: 32,
 
   /**
     By default source lists should not select on mouse down since you will

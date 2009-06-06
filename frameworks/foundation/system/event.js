@@ -775,10 +775,13 @@ SC.Event.prototype = {
     // handle function keys.
     if (code) {
       ret = SC.FUNCTION_KEYS[code] ;
-      if (!ret && (this.altKey || this.ctrlKey)) ret =SC.PRINTABLE_KEYS[code];
+      if (!ret && (this.altKey || this.ctrlKey || this.metaKey)) {
+        ret = SC.PRINTABLE_KEYS[code];
+      }
+      
       if (ret) {
         if (this.altKey) modifiers += 'alt_' ;
-        if (this.ctrlKey) modifiers += 'ctrl_' ;
+        if (this.ctrlKey || this.metaKey) modifiers += 'ctrl_' ;
         if (this.shiftKey) modifiers += 'shift_' ;
       }
     }
@@ -788,9 +791,14 @@ SC.Event.prototype = {
       code = this.which ;
       key = ret = String.fromCharCode(code) ;
       lowercase = ret.toLowerCase() ;
-      if (ret != lowercase) {
+      if (this.metaKey) {
+        modifiers = 'meta_' ;
+        ret = lowercase;
+        
+      } else if (ret !== lowercase) {
         modifiers = 'shift_' ;
         ret = lowercase ;
+
       } else ret = null ;
     }
 

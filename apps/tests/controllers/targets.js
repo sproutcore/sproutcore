@@ -1,47 +1,53 @@
 // ==========================================================================
-// Project:   TestRunner.targetController
+// Project:   TestRunner.targetsController
 // Copyright: ©2009 My Company, Inc.
 // ==========================================================================
 /*globals TestRunner */
 
 /** @class
 
-  Manages the targets.  The targets will be displayed and selected in the 
-  source list.
+  Displays the full list of targets in the source list view.
 
   @extends SC.ArrayController
 */
 TestRunner.targetsController = SC.ArrayController.create(
-/** @scope TestRunner.targetController.prototype */ {
+/** @scope TestRunner.targetsController.prototype */ {
 
-  allowsEmptySelection: NO,
   allowsMultipleSelection: NO,
+  allowsEmptySelection: NO,
   
-  /**
-    Loads the targets from the server.  When the targets have loaded, adds 
-    them to the store and then sets the local content.
+  /** 
+    Generates the root array of children objects whenever the target content
+    changes.  Used in a tree node.
   */
-  refresh: function() {
-    SC.Request.getUrl('/sc/targets.json')
-      .notify(this, 'targetsDidRefresh').set('isJSON', YES).send();
-  },
-  
-  targetsDidRefresh: function(request) {
-    var json = request.get('response'), len = json.length, idx;
-    for(idx=0;idx<len;idx++) json[idx].guid = json[idx].name ; // patch
-    var targets = SC.Store.updateRecords(json, SC.Store, TestRunner.Target);
-    targets = targets.sort(function(a,b) { 
-      var kindA = a.get('kind'), kindB = b.get('kind');
-      if (kindA < kindB) return -1 ;
-      if (kindA > kindB) return 1 ;
-      if (kindA === kindB) {
-        a = a.get('name'); 
-        b = b.get('name');
-        return (a<b) ? -1 : (a>b) ? 1 : 0;
-      }
-    });
+  sourceRoot: function() {
     
-    this.set('content', targets);
-  }
+    // break targets into their respective types.  Items that should not be 
+    // visible at the top level will not have a sort kind
+    var kinds = {}, kind, targets, ret;
+    
+    this.forEach(function(target) { 
+      if (kind = target.get('sortKind')) {
+        targets = kinds[kind];
+        if (!targets) kinds[kind] = targets = [];
+        targets.push(target);
+      }
+    }, this);
+
+    // once divided into kinds, create group nodes for each kind
+    ret = [];
+    for (kind in kinds) {
+      if (!kinds.hasOwnProperty(kind)) continue;
+      targets = kinds[kind];
+      ret.push(SC.Object.create({
+        displayName: "Kind.%@".fmt(kind).loc(),
+        isExpanded: kind !== 'sproutcore',
+        children: targets.sortProperty('kind', 'displayName')
+      }));
+    }
+    
+    return SC.Object.create({ children: ret, isExpanded: YES });
+    
+  }.property('[]').cacheable()
 
 }) ;

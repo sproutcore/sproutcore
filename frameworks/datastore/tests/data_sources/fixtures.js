@@ -30,9 +30,33 @@ module("SC.FixturesDataSource", {
 });
 
 test("Verify findAll() loads all fixture data", function() {
-  var result = store.findAll(Sample.File);
+  var result = store.findAll(Sample.File),
+      rec, storeKey, dataHash;
+      
   ok(result, 'should return a result');
   equals(result.get('length'), Sample.File.FIXTURES.get('length'), 'should return records for each item in FIXTURES');
+  
+  // verify storeKeys actually return Records
+  var idx, len = result.get('length'), expected = [];
+  for(idx=0;idx<len;idx++) {
+    rec = result.objectAt(idx);
+    storeKey = rec ? rec.get('storeKey') : null;
+    dataHash = storeKey ? store.readDataHash(storeKey) : null;
+
+    ok(!!dataHash, 'storeKey at result[%@] (%@) should return dataHash'.fmt(idx, storeKey));
+    
+    expected.push(rec); // save record for later test
+  }
+  
+  // verify multiple calls to findAll() returns SAME data
+  result = store.findAll(Sample.File);
+  
+  equals(result.get('length'), expected.length, 'second result should have same length as first');
+  len = result.get('length');
+  for(idx=0;idx<len;idx++) {
+    rec = result.objectAt(idx);
+    equals(rec, expected[idx], 'record returned at index %@ should be same as previous'.fmt(idx));
+  }
 });
 
 test("Verify find() loads data from store", function() {
@@ -83,4 +107,15 @@ test("Update and commit a record", function() {
   fixture = fixtures.fixtureForStoreKey(store, storeKey);
   equals(fixture.name, rec.get('name'), 'fixture state should update to match new name');
     
+});
+
+test("Using SC.Query on fetch()", function() {
+  
+  var fixtures = store.get('dataSource');
+  
+  var q = SC.Query.create({recordType: Sample.File});
+  
+  var storeKeys = fixtures.fetch(store, q);
+  equals(storeKeys.length, 9, 'storeKeys length should be 9');
+
 });

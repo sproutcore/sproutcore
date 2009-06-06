@@ -287,9 +287,12 @@ SC.CollectionView = SC.View.extend(
     your own subclass for this property to display the type of content you 
     want.
     
+    If you leave this set to null then the regular example view will be used
+    with the isGroupView property set to YES on the item view.
+    
     @property {SC.View}
   */
-  groupExampleView: SC.ListItemView,
+  groupExampleView: null,
   
   /**
     If set, this key will be used to get the example view for a given
@@ -767,7 +770,7 @@ SC.CollectionView = SC.View.extend(
         nowShowing = this.get('nowShowing'),
         itemViews  = this._sc_itemViews,
         containerView = this.get('containerView') || this,
-        views, idx, cvlen, view, childViews ;
+        views, idx, cvlen, view, childViews, layer ;
 
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
@@ -792,6 +795,16 @@ SC.CollectionView = SC.View.extend(
         if (nowShowing.contains(idx)) {
           view = this.itemViewForContentIndex(idx, YES);
           if (existing && existing.parentView === containerView) {
+    
+            // if the existing view has a layer, remove it immediately from
+            // the parent.  This is necessary because the old and new views 
+            // will use the same layerId
+            layer = existing.get('layer');
+            if (layer && layer.parentNode) {
+              layer.parentNode.removeChild(layer);  
+            } 
+            layer = null ; // avoid leaks
+            
             containerView.replaceChild(view, existing);
           } else {
             containerView.appendChild(view);
@@ -856,7 +869,8 @@ SC.CollectionView = SC.View.extend(
     
 
   _TMP_ATTRS: {},
-  _COLLECTION_CLASS_NAMES: ['sc-collection-item'],
+  _COLLECTION_CLASS_NAMES: 'sc-collection-item'.w(),
+  _GROUP_COLLECTION_CLASS_NAMES: 'sc-collection-item sc-group-item'.w(),
   
   /**
     Returns the item view for the content object at the specified index. Call
@@ -903,7 +917,7 @@ SC.CollectionView = SC.View.extend(
     if (isGroupView) {
       key  = this.get('contentGroupExampleViewKey');
       if (key && item) E = item.get(key);
-      if (!E) E = this.get('groupExampleView');
+      if (!E) E = this.get('groupExampleView') || this.get('exampleView');
 
     } else {
       key  = this.get('contentExampleViewKey');
@@ -925,7 +939,8 @@ SC.CollectionView = SC.View.extend(
     attrs.disclosureState = del.contentIndexDisclosureState(this, content, idx);
     attrs.isGroupView  = isGroupView;
     attrs.isVisibleInWindow = this.isVisibleInWindow;
-    attrs.classNames = this._COLLECTION_CLASS_NAMES;
+    if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
+    else attrs.classNames = this._COLLECTION_CLASS_NAMES;
     
     layout = this.layoutForContentIndex(idx);
     if (layout) {
@@ -1221,6 +1236,8 @@ SC.CollectionView = SC.View.extend(
 
     var content = this.get('content'),
         del     = this.get('selectionDelegate'),
+        cdel    = this.get('contentDelegate'),
+        groupIndexes = cdel.contentGroupIndexes(this, content),
         sel;
 
     // normalize
@@ -1230,6 +1247,12 @@ SC.CollectionView = SC.View.extend(
 
     // if we are passed an empty index set or null, clear the selection.
     if (indexes && indexes.get('length')>0) {
+
+      // first remove any group indexes - these can never be selected
+      if (groupIndexes && groupIndexes.get('length')>0) {
+        indexes = indexes.copy().remove(groupIndexes);
+      }
+      
       // give the delegate a chance to alter the items
       indexes = del.collectionViewShouldSelectIndexes(this, indexes, extend);
       if (!indexes || indexes.get('length')===0) return this; // nothing to do
@@ -1301,10 +1324,12 @@ SC.CollectionView = SC.View.extend(
         range   = SC.IndexSet.create(), 
         content = this.get('content'),
         del     = this.get('selectionDelegate'),
+        cdel    = this.get('contentDelegate'),
+        groupIndexes = cdel.contentGroupIndexes(this, content),
         ret, sel ;
 
     // fast path
-    if (del.collectionViewShouldSelectIndexes === this.collectionViewShouldSelectIndexes) {
+    if (!groupIndexes && (del.collectionViewShouldSelectIndexes === this.collectionViewShouldSelectIndexes)) {
       return proposedIndex;
     }
 
@@ -1312,11 +1337,12 @@ SC.CollectionView = SC.View.extend(
     // we could alternatively just pass the whole range but this might be 
     // slow for the delegate
     while (proposedIndex < lim) {
-      range.add(proposedIndex);
-      ret = del.collectionViewShouldSelectIndexes(this, range);
-      if (ret && ret.get('length') >= 1) return proposedIndex ;
-
-      range.remove(proposedIndex);
+      if (!groupIndexes || !groupIndexes.contains(proposedIndex)) {
+        range.add(proposedIndex);
+        ret = del.collectionViewShouldSelectIndexes(this, range);
+        if (ret && ret.get('length') >= 1) return proposedIndex ;
+        range.remove(proposedIndex);
+      }
       proposedIndex++;      
     }
 
@@ -1341,10 +1367,12 @@ SC.CollectionView = SC.View.extend(
     var range   = SC.IndexSet.create(), 
         content = this.get('content'),
         del     = this.get('selectionDelegate'),
+        cdel    = this.get('contentDelegate'),
+        groupIndexes = cdel.contentGroupIndexes(this, content),
         ret ;
     
     // fast path
-    if (del.collectionViewShouldSelectIndexes === this.collectionViewShouldSelectIndexes) {
+    if (!groupIndexes && (del.collectionViewShouldSelectIndexes === this.collectionViewShouldSelectIndexes)) {
       return proposedIndex;
     }
 
@@ -1352,10 +1380,12 @@ SC.CollectionView = SC.View.extend(
     // we could alternatively just pass the whole range but this might be 
     // slow for the delegate
     while (proposedIndex >= 0) {
-      range.add(proposedIndex);
-      ret = del.collectionViewShouldSelectIndexes(this, range);
-      if (ret && ret.get('length') >= 1) return proposedIndex ;
-      range.remove(proposedIndex);
+      if (!groupIndexes || !groupIndexes.contains(proposedIndex)) {
+        range.add(proposedIndex);
+        ret = del.collectionViewShouldSelectIndexes(this, range);
+        if (ret && ret.get('length') >= 1) return proposedIndex ;
+        range.remove(proposedIndex);
+      }
       proposedIndex--;      
     }
 
@@ -1574,8 +1604,8 @@ SC.CollectionView = SC.View.extend(
   
   /** @private */
   keyDown: function(evt) {
-    console.log('keyDown called on %@'.fmt(this));
-    return this.interpretKeyEvents(evt) ;
+    var ret = this.interpretKeyEvents(evt) ;
+    return !ret ? NO : ret ;
   },
   
   /** @private */
@@ -1623,9 +1653,17 @@ SC.CollectionView = SC.View.extend(
 
   /** @private
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
+    If item is expandable, will collapse.
   */
   moveLeft: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1);
+    else {
+      var sel     = this.get('selection'),
+          content = this.get('content'),
+          indexes = sel ? sel.indexSetForSource(content) : null;
+      if (indexes) this.collapse(indexes);
+    }
+    
     return true ;
   },
   
@@ -1634,6 +1672,13 @@ SC.CollectionView = SC.View.extend(
   */
   moveRight: function(sender, evt) {
     if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(false, 1) ;
+    else {
+      var sel     = this.get('selection'),
+          content = this.get('content'),
+          indexes = sel ? sel.indexSetForSource(content) : null;
+      if (indexes) this.expand(indexes);
+    }
+    
     return true ;
   },
   

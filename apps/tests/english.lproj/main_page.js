@@ -32,10 +32,12 @@ TestRunner.mainPage = SC.Page.design({
       topLeftView: SC.ScrollView.design({
         
         hasHorizontalScroller: NO, // disable horizontal scrolling
-        contentView: SC.ListView.design({
-          contentBinding: "TestRunner.targetsController.arrangedObjects",
-          selectionBinding: "TestRunner.targetsController.selection",
-          contentValueKey: "name"
+        contentView: SC.SourceListView.design({
+          contentBinding: "TestRunner.sourceController.arrangedObjects",
+          selectionBinding: "TestRunner.sourceController.selection",
+          contentValueKey: "displayName",
+          hasContentIcon: YES,
+          contentIconKey:  "targetIcon"
         })
       }),
       
@@ -44,8 +46,12 @@ TestRunner.mainPage = SC.Page.design({
         hasHorizontalScroller: NO,
         contentView: SC.ListView.design({
           contentBinding: "TestRunner.testsController.arrangedObjects",
-          selectionBinding: "TestRUnner.testsController.selection",
-          contentValueKey: "filename"
+          selectionBinding: "TestRunner.testsController.selection",
+          contentValueKey: "filename",
+          actOnSelect: YES,
+          
+          target: "TestRunner.testsController",
+          action: "showDetails"
         })
         
       })

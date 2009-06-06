@@ -9,12 +9,21 @@
   (Document your Model here)
 
   @extends SC.Record
-  @author AuthorName
   @version 0.1
 */
 TestRunner.Test = SC.Record.extend(
 /** @scope TestRunner.Test.prototype */ {
 
-  // TODO: Add your own code here.
+  primaryKey: "url",
+  
+  /**
+    The filename for this test.
+  */
+  filename: SC.Record.attr(String),
+  
+  /**
+    The test URL.
+  */
+  url: SC.Record.attr(String)
 
 }) ;

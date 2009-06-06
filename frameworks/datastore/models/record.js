@@ -199,15 +199,21 @@ SC.Record = SC.Object.extend(
   
     @param {String} key the attribute you want to read
     @param {Object} value the attribute you want to read
+    @param {Boolean} ignoreDidChange only set if you do NOT want to flag 
+      record as dirty
     @returns {SC.Record} receiver
   **/
-  writeAttribute: function(key, value) {
-    this.beginEditing();
+  writeAttribute: function(key, value, ignoreDidChange) {
+    if(!ignoreDidChange) this.beginEditing();
     var store = this.get('store'), storeKey = this.storeKey;
     var attrs = store.readEditableDataHash(storeKey);
     if (!attrs) throw SC.Record.BAD_STATE_ERROR;
     attrs[key] = value;
-    this.endEditing();
+    // if value is primaryKey of record, write it to idsByStoreKey
+    if(key===this.get('primaryKey')) {
+      SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
+    }
+    if(!ignoreDidChange) this.endEditing();
     return this ;  
   },
   
@@ -269,6 +275,7 @@ SC.Record = SC.Object.extend(
     for(var key in this) {
       // make sure property is a record attribute.
       if(this[key] && this[key]['typeClass']) {
+        
         isRecord = SC.typeOf(this[key].typeClass())==='class';
 
         if (!isRecord) {

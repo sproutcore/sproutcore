@@ -21,17 +21,17 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // STANDARD DATA SOURCE METHODS
   // 
   
-
   /**
     
-    Invoked by the store whenever it needs to load a fresh new batch or records
-    or simply refresh based on their storeKeys. This method is invoked from 
-    the store methods 'findAll' and 'retrieveRecords'. 
+    Invoked by the store whenever it needs to load a fresh new batch or 
+    records or simply refresh based on their storeKeys. This method is 
+    invoked from the store methods 'findAll' and 'retrieveRecords'. 
     
-    findAll() will request all records and load them using store.loadRecords(). 
-    retrieveRecords() checks if the record is already loaded and in a clean 
-    state to then just materialize it or if is in an empty state, it will call 
-    this method to load the required record to then materialize it. 
+    findAll() will request all records and load them using 
+    store.loadRecords(). retrieveRecords() checks if the record is already 
+    loaded and in a clean state to then just materialize it or if is in an 
+    empty state, it will call this method to load the required record to 
+    then materialize it. 
     
     @param {SC.Store} store the requesting store
     @param {Object} fetchKey key describing the request, may be SC.Record
@@ -40,10 +40,62 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */  
   fetch: function(store, fetchKey, params) {
     
-    var ret = [], dataHashes, i, storeKey, hashes= [];
-    if (!(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey))) {
-      return ret ;
+    var ret = [], fixtures;
+    
+    // TODO: this currently only supports one recordType per SC.Query
+    if(SC.instanceOf(fetchKey, SC.Query)) {
+      fetchKey = fetchKey.recordType;
     }
+    
+    if(SC.typeOf(fetchKey)===SC.T_STRING) {
+      fetchKey = SC.objectForPropertyPath(fetchKey);
+    }
+    
+    if(fetchKey === SC.Record || SC.Record.hasSubclass(fetchKey)) {
+      this.loadFixturesFor(store, fetchKey, ret);
+    }
+    
+    return ret;
+  },
+  
+  /**
+    Load fixtures for a given fetchKey into the store
+    and push it to the ret array.
+    
+    @param {SC.Store} store
+    @param {SC.Record} fetchKey
+    @param {SC.Array} ret
+  */
+  loadFixturesFor: function(store, fetchKey, ret) {
+    var dataHashes, i, storeKey, hashes = [];
+    
+    dataHashes = this.fixturesFor(fetchKey);
+    
+    for(i in dataHashes){
+      storeKey = fetchKey.storeKeyFor(i);
+      hashes.push(dataHashes[i]);
+      ret.push(storeKey);
+    }
+    
+    // before loading fixtures again, make sure they have not been
+    // loaded already, so that SC.Query does not end up in 
+    // infinite loop
+    if(!this.fixturesLoadedFor(fetchKey)) {
+      store.loadRecords(fetchKey, hashes);
+    }
+    
+  },
+  
+  /**
+    Load fixtures for a given fetchKey into the store
+    and push it to the ret array.
+    
+    @param {SC.Store} store
+    @param {SC.Record} fetchKey
+    @param {SC.Array} ret
+  */
+  loadFixturesFor: function(store, fetchKey, ret) {
+    var dataHashes, i, storeKey, hashes = [];
     dataHashes = this.fixturesFor(fetchKey);
     for(i in dataHashes){
       storeKey = fetchKey.storeKeyFor(i);
@@ -51,39 +103,48 @@ SC.FixturesDataSource = SC.DataSource.extend( {
       ret.push(storeKey);
     }
     store.loadRecords(fetchKey, hashes);
-    
-    return ret;
   },
   
-  retrieveRecord: function(store, storeKey) {
-    var ret = [], dataHashes, i, storeKey, hashes= [];
+  /**
+    Retrieve a record from fixtures.
     
-    var recordType = SC.Store.recordTypeFor(storeKey),
+    @param {SC.Store} store
+    @param {Number} storeKey
+    @param {SC.Array} ret
+  */
+  retrieveRecord: function(store, storeKey) {
+    var ret = [], recordType = SC.Store.recordTypeFor(storeKey),
         id = store.idFor(storeKey),
-        hash=this.fixtureForStoreKey(store, storeKey);
+        hash = this.fixtureForStoreKey(store, storeKey);
     ret.push(storeKey);
     store.dataSourceDidComplete(storeKey, hash, id);
     
     return ret;
   },
   
-  
   /**
     Fixture operations complete immediately so you cannot cancel them.
+    
+    @param {SC.Store} store
+    @param {SC.Array} storeKeys
+    @returns {Boolean} YES if handled
   */
   cancel: function(store, storeKeys) {
     return NO;
   },
   
- /**
+  /**
     Update the dataHash in this._fixtures
+    
+    @param {SC.Store} store
+    @param {Number} storeKey
+    @returns {Boolean} YES if handled
   */
   updateRecord: function(store, storeKey) {
     this.setFixtureForStoreKey(store, storeKey, store.readDataHash(storeKey));
     store.dataSourceDidComplete(storeKey);  
     return YES ;
   },
-
 
   /**
     Adds records to this._fixtures.  If the record does not have an id yet,
@@ -100,6 +161,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
         fixtures   = this.fixturesFor(recordType);
         
     if (!id) id = this.generateIdFor(recordType, dataHash, store, storeKey);
+    this._invalidateCachesFor(recordType, storeKey, id);
     fixtures[id] = dataHash;
 
     store.dataSourceDidComplete(storeKey, null, id);
@@ -117,7 +179,8 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         fixtures   = this.fixturesFor(recordType);
-        
+
+    this._invalidateCachesFor(recordType, storeKey, id);
     if (id) delete fixtures[id];
     store.dataSourceDidDestroy(storeKey);  
     return YES ;
@@ -161,6 +224,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         fixtures   = this.fixturesFor(recordType);
+    this._invalidateCachesFor(recordType, storeKey, id);
     fixtures[id] = dataHash;
     return this ;
   },
@@ -192,6 +256,34 @@ SC.FixturesDataSource = SC.DataSource.extend( {
       fixtures[id] = dataHash;
     }  
     return fixtures;
+  },
+  
+  /**
+    Returns YES is fixtures for a given recordType have already been loaded
+    
+    @param {SC.Record} recordType
+    @returns {Boolean} storeKeys
+  */
+  fixturesLoadedFor: function(recordType) {
+    if (!this._fixtures) return NO;
+    var ret = [], fixtures = this._fixtures[SC.guidFor(recordType)];
+    return fixtures ? YES: NO;
+  },
+  
+  /**
+    Invalidates any internal caches based on the recordType and optional 
+    other parameters.  Currently this only invalidates the storeKeyCache used
+    for fetch, but it could invalidate others later as well.
+    
+    @param {SC.Record} recordType the type of record modified
+    @param {Number} storeKey optional store key
+    @param {String} id optional record id
+    @returns {SC.FixturesDataSource} receiver
+  */
+  _invalidateCachesFor: function(recordType, storeKey, id) {
+    var cache = this._storeKeyCache;
+    if (cache) delete cache[SC.guidFor(recordType)]
+    return this ;
   }
   
 });

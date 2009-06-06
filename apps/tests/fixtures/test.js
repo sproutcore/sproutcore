@@ -4,40 +4,41 @@
 // ==========================================================================
 /*globals TestRunner */
 
-TestRunner.FIXTURES = TestRunner.FIXTURES.concat([
+sc_require('models/test');
 
-  // TODO: Add your data fixtures here.
-  // All fixture records must have a unique guid and a type matching the
-  // name of your contact.  See the example below.
+TestRunner.Test.FIXTURES = [
 
-  // { guid: 1,
-  //   type: 'Contact',
-  //   firstName: "Michael",
-  //   lastName: "Scott"
-  // },
-  //
-  // { guid: 2,
-  //   type: 'Contact',
-  //   firstName: "Dwight",
-  //   lastName: "Schrute"
-  // },
-  //
-  // { guid: 3,
-  //   type: 'Contact',
-  //   firstName: "Jim",
-  //   lastName: "Halpert"
-  // },
-  //
-  // { guid: 4,
-  //   type: 'Contact',
-  //   firstName: "Pam",
-  //   lastName: "Beesly"
-  // },
-  //
-  // { guid: 5,
-  //   type: 'Contact',
-  //   firstName: "Ryan",
-  //   lastName: "Howard"
-  // }
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/beget.html",
+    "filename": "tests/core/beget" },
 
-]);
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/clone.html",
+    "filename": "tests/core/clone" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/compare.html",
+    "filename": "tests/core/compare" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/console.html",
+    "filename": "tests/core/console" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/guidFor.html",
+    "filename": "tests/core/guidFor" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/inspect.html",
+    "filename": "tests/core/inspect" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/isArray.html",
+    "filename": "tests/core/isArray" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/IsEqual.html",
+    "filename": "tests/core/IsEqual" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/itemType.html",
+    "filename": "tests/core/itemType" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/keys.html",
+    "filename": "tests/core/keys" },
+
+  { "url": "/static/sproutcore/runtime/en/current/tests/core/makeArray.html",
+    "filename": "tests/core/makeArray" }
+
+];

@@ -1,3 +1,8 @@
+/* @override 
+	http://localhost:4020/static/sproutcore/standard_theme/en/current/source/collection.css?1243536580
+	http://localhost:4020/static/sproutcore/standard_theme/en/current/source/collection.css?1243569705
+*/
+
 /* @group SC.CollectionView */
 
 .sc-theme .sc-collection-view {
@@ -16,9 +21,9 @@
 }
 
 .sc-theme.focus .sc-collection-view.focus .sc-collection-item.sel {
-	background-color: #40007e;
+	background-color: #2370d8;
 	color: white ;
-	border-top: 1px solid #84788f;
+	border-top: 1px solid #216bcf;
 }
 
 /* @end */
@@ -31,8 +36,7 @@
 
 .sc-theme .sc-list-view .sc-collection-item {
 	display: block ;
-/*  padding: 0 6px;
-*/	line-height: 22px;
+	line-height: 22px;
 }
 
 .sc-theme .sc-list-insertion-point {
@@ -49,5 +53,81 @@
   height: 8px;
 	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
 }
+
+/* @end */
+
+/* @group SC.SourceListView */
+
+.sc-theme .sc-list-view.sc-source-list {
+	background-color: #f0f0f0 ;
+	border:  none ;
+	color: #363636;
+}
+
+.sc-theme.focus .sc-list-view.sc-source-list {
+	background-color: #d4d7e0;
+	color: black ;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-collection-item {
+	border-top: 1px solid #f0f0f0;
+}
+
+.sc-theme.focus .sc-list-view.sc-source-list .sc-collection-item {
+	border-top: 1px solid #e6e3ef;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-collection-item.sel {
+	background-color: #ddd;
+	border-top: 1px solid #eee;
+	font-weight: bold ;
+}
+
+.sc-theme.focus .sc-list-view.sc-source-list .sc-collection-item.sel {
+	background: #607ba5 0 0px;
+	color: white ;
+	border-top: 1px solid #3262a2;
+	border-bottom: 1px solid #3262a2;
+	z-index: 1;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view label {
+  left: 12px;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.has-icon label,
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.has-checkbox label {
+	left: 32px;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.has-checkbox.has-icon label {
+	left: 56px;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view img.icon {
+	position: absolute ;
+	left: 10px;
+	top: 50%;
+	margin-top: -9px;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.has-checkbox img.icon {
+	left: 30px;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.sc-group-item {
+	text-transform: uppercase;
+	color: #2e2f30;
+	font-weight: bold;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.sc-group-item img.icon {
+	display: none;
+}
+
+.sc-theme .sc-list-view.sc-source-list .sc-list-item-view.sc-group-item.has-icon label {
+  left: 8px;
+}
+
 
 /* @end */

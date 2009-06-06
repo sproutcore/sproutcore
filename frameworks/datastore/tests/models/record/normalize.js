@@ -16,6 +16,16 @@ module("SC.Record normalize method", {
     
     MyApp.Foo = SC.Record.extend({
       
+      guid: SC.Record.attr(String, { defaultValue: function() {
+        var i, rnum, chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz",
+          strLen = 8, ret = '';
+    		for (i=0; i<strLen; i++) {
+    			rnum = Math.floor(Math.random() * chars.length);
+    			ret += chars.substring(rnum,rnum+1);
+    		}
+    		return ret;
+      } }),
+      
       // test simple reading of a pass-through prop
       firstName: SC.Record.attr(String),
 
@@ -202,5 +212,27 @@ test("normalizing a new record with toOne with relationship to wrong recordType"
   newRecord.normalize();
   
   equals(newRecord.attributes()['relatedTo'], 'foo1', 'should remain foo1');
+  
+});
+
+test("normalizing a new record with no guid should work with defaultValue" ,function() {
+  
+  var recHash = { 
+    firstName: "Andrew",
+    relatedTo: 'foo1' // does exist but wrong recordType
+  };
+  
+  var newRecord = MyApp.store.createRecord(MyApp.Foo, recHash);
+  MyApp.store.commitRecords();
+  
+  var firstGuid = newRecord.get('guid');
+  
+  equals(newRecord.get('firstName'), 'Andrew', 'firstName should be Andrew');
+  
+  newRecord.normalize();
+  
+  var findRecord = MyApp.store.find(MyApp.Foo, firstGuid);
+  
+  equals(findRecord.get('guid'), firstGuid, 'guid should be the same as first');
   
 });

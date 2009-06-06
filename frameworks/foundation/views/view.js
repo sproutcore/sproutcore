@@ -493,7 +493,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
     
     return this ;
-  }.observes('isVisible'),
+  },
   
   // ..........................................................
   // LAYER SUPPORT
@@ -2038,7 +2038,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   layoutDidChangeFor: function(childView) {
     var set = this._needLayoutViews ;
-    if (!set) set = this._needLayoutViews = SC.Set.create();
+    if (!set) set = this._needLayoutViews = SC.CoreSet.create();
     set.add(childView);
   },
   

@@ -7,8 +7,9 @@
 sc_require('views/button') ;
 sc_require('views/separator') ;
 
-SC.MENU_ITEM_KEYS = 'contentValueKey contentIsBranchKey shortCutKey contentIconKey contentCheckboxKey contentActionKey'.w() ;
+// Constants
 SC.BENCHMARK_MENU_ITEM_RENDER = YES ;
+
 /**
   @class SC.MenuItemView
   @extends SC.ButtonView
@@ -16,6 +17,8 @@ SC.BENCHMARK_MENU_ITEM_RENDER = YES ;
 */
 SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
+  
+  
   classNames: ['sc-menu-item'],
   tagName: 'div',
 

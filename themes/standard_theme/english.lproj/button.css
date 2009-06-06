@@ -20,6 +20,9 @@
   width: 16px;
 }
 
+.sc-theme .sc-button-view label.sc-button-label {
+  font-weight: normal;
+}
 
 /* @end */
 
@@ -28,7 +31,7 @@
 /* @group basic */
 
 .sc-theme .sc-button-view.regular {
-  font-size: 13px;
+  font-size: 12px;
   height: 22px;
   min-width: 32px;
   text-align: center;
@@ -242,7 +245,7 @@
 .sc-theme .sc-square-theme .sc-button-view.regular,
 .sc-theme .sc-square-theme .sc-button-view.regular.def,
 .sc-theme .sc-button-view.square {
-  font-size: 13px;
+  font-size: 12px;
   height: 21px;
   text-shadow: #c0c0c0 0px 1px 0px;
   text-align: center;
@@ -332,7 +335,7 @@
 /* @group basic : capsule */
 
 .sc-theme .sc-button-view.capsule {
-  font-size: 13px;
+  font-size: 12px;
   height: 21px;
   text-shadow: #c0c0c0 0px 1px 0px;
   text-align: center;

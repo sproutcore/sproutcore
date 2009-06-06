@@ -1,7 +1,7 @@
 .sc-view {
-	font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
-	font-size: 13px;
-	line-height: 1.2
+	font-family: "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
+	font-size: 12px;
+	line-height: 1.4
 }
 
 
@@ -21,7 +21,7 @@
 
 .sc-benchmark-title
 {
-  font-size: 13px; 
+  font-size: 12px; 
   font-weight: bold; 
   position: absolute; 
   left: 0px; 

@@ -5,7 +5,8 @@
 
 /* SC.ListItemView */
 
-.sc-list-item-view {
+.sc-list-item-view.sc-regular-size {
+  font-size: 11px;
 }
 
 .sc-list-item-view.sel {
@@ -29,6 +30,19 @@
 	line-height: 18px;
 	left:  4px;
 	right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+  -moz-binding: sc_static('ellipsis-xbl.xml');
+}
+
+.sc-list-item-view .sc-outline {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .sc-list-item-view .sc-outline {
@@ -145,18 +159,19 @@
 	display: block;
 	right: 4px;
 	top:  50%;
-	margin-top: -9px;
-	height: 16px;
+	margin-top: -7px;
+	height: 12px;
 	background-color: #888;
 	text-align: center;
-	padding-left: 6px;
-	padding-right: 6px;
-	line-height: 17px;
+	padding-left: 7px;
+	padding-right: 8px;
+	line-height: 11px;
 	color: white ;
-	font-size: 85%;
+	font-weight: bold;
 	border: 1px #888 solid;
-	-webkit-border-radius: 9px;
-	-moz-border-radius: 9px;
+	letter-spacing: -1px;
+	-webkit-border-radius: 7px;
+	-moz-border-radius: 7px;
 }
 
 .sc-list-item-view.sel .count {
