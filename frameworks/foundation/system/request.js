@@ -299,8 +299,20 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     
     rawRequest.source = request;
     
+    
+    //Part of the fix for IE
+    var transport=this;
+    var handleReadyStateChange = function() {
+      return transport.finishRequest(rawRequest) ;
+    };
+    //End of the fix for IE
+    
     var async = (request.get('isAsynchronous') ? YES : NO) ;
-    if (async) SC.Event.add(rawRequest, 'readystatechange', this, this.handleReadyStateChange, rawRequest) ;
+    if (async && !SC.browser.msie) SC.Event.add(rawRequest, 'readystatechange', this, handleReadyStateChange, rawRequest) ;
+    //This is a temporary fix while I figure with charles what is the problem with sc.event
+    if (async && SC.browser.msie) rawRequest.onreadystatechange =  handleReadyStateChange;
+    
+    
     
     rawRequest.open( request.get('type'), request.get('address'), async ) ;
     
@@ -353,11 +365,12 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
        // avoid memory leak in MSIE: clean up
        request.onreadystatechange = function() {} ;
      }
-  },
-  
-  handleReadyStateChange: function(readyStateEvent) {
-    return this.finishRequest(readyStateEvent.context) ;
   }
+  
+  // handleReadyStateChange: function(readyStateEvent) {
+  //     console.log('hello')
+  //     return this.finishRequest(readyStateEvent.context) ;
+  //   }
   
 });
 

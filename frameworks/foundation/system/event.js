@@ -641,8 +641,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       if (elem.addEventListener) {
         elem.addEventListener(eventType, listener, NO);
       } else if (elem.attachEvent) {
+        // attachEvent is not working for IE8 and xhr objects
+        // there is currently a hack in request , but it needs to fixed here.
         elem.attachEvent("on" + eventType, listener);
       }
+      //  
+      // else {
+      //         elem.onreadystatechange = listener;
+      //       }
     }
     
     elem = special = listener = null ; // avoid memory leak
