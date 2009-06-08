@@ -152,13 +152,13 @@ SC.NestedStore = SC.Store.extend(
     // be notified.
     var records, locks;
     if ((records = this.records) && (locks = this.locks)) {
-      var pstore = this.get('parentStore'), ps_revisions = pstore.revisions;
+      var pstore = this.get('parentStore'), psRevisions = pstore.revisions;
       var revisions = this.revisions, storeKey, lock, rev;
       for(storeKey in records) {
         if (!records.hasOwnProperty(storeKey)) continue ;
         if (!(lock = locks[storeKey])) continue; // not locked.
 
-        rev = ps_revisions[storeKey];
+        rev = psRevisions[storeKey];
         if ((rev !== lock) || (revisions[storeKey] > rev)) {
           this._notifyRecordPropertyChange(storeKey);
         }
@@ -366,20 +366,20 @@ SC.NestedStore = SC.Store.extend(
     
     // save a lock for each store key if it does not have one already
     // also add each storeKey to my own changes set.
-    var pstore = this.get('parentStore'), ps_revisions = pstore.revisions, i;
-    var my_locks = this.locks, my_changes = this.chainedChanges,len,storeKey;
-    if (!my_locks) my_locks = this.locks = [];
-    if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
+    var pstore = this.get('parentStore'), psRevisions = pstore.revisions, i;
+    var myLocks = this.locks, myChanges = this.chainedChanges,len,storeKey;
+    if (!myLocks) myLocks = this.locks = [];
+    if (!myChanges) myChanges = this.chainedChanges = SC.Set.create();
 
     len = changes.length ;
     for(i=0;i<len;i++) {
       storeKey = changes[i];
-      if (!my_locks[storeKey]) my_locks[storeKey] = ps_revisions[storeKey]||1;
-      my_changes.add(storeKey);
+      if (!myLocks[storeKey]) myLocks[storeKey] = psRevisions[storeKey]||1;
+      myChanges.add(storeKey);
     }
 
     // Finally, mark store as dirty if we have changes
-    this.setIfChanged('hasChanges', my_changes.get('length')>0);
+    this.setIfChanged('hasChanges', myChanges.get('length')>0);
     
     return this ;
   },
@@ -403,14 +403,17 @@ SC.NestedStore = SC.Store.extend(
   
   /** @private - adapt for nested store */
   retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
-    var pstore = this.get('parentStore'), idx, storeKey,
-      len = (!storeKeys) ? ids.length : storeKeys.length;
+    var pstore = this.get('parentStore'), idx, storeKey, newStatus,
+      len = (!storeKeys) ? ids.length : storeKeys.length,
+      K = SC.Record, status;
     
-    // turn status to BUSY_REFRESH_CLEAN if isRefresh is true
+    // turn status to BUSY_REFRESH_CLEAN/DIRTY if isRefresh is true
+    // for correct transition before handing to parent store
     if(isRefresh) {
       for(idx=0;idx<len;idx++) {
         storeKey = !storeKeys ? pstore.storeKeyFor(recordTypes, ids[idx]) : storeKeys[idx];
-        this.writeStatus(storeKey, SC.Record.BUSY_REFRESH_CLEAN);
+        newStatus = status===K.READY_DIRTY ? K.BUSY_REFRESH_DIRTY : K.BUSY_REFRESH_CLEAN;
+        this.writeStatus(storeKey, newStatus);
       }
     }
     
