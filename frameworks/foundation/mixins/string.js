@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('system/locale');
+
 // These are basic enhancements to the string class used throughout 
 // SproutCore.
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
