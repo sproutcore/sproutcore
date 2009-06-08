@@ -1780,15 +1780,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   statusString: function(storeKey) {
     var rec = this.materializeRecord(storeKey);
-    var ret = [], status = rec.status();
-    
-    for(prop in SC.Record) {
-      if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
-        ret.push(prop);
-      }
-    }
-    
-    return ret.join(" ");
+    return rec.statusString();
   }
   
 }) ;
