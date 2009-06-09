@@ -42,11 +42,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   isEditing: NO,
 
-  /**
-    If YES then we use textarea instead of input. 
-  */
-  isTextArea: NO,
-
   
   /** isEditable maps to isEnabled with a TextField. */
   isEditable: function() {
@@ -75,9 +70,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (firstTime) {
       context.push('<span class="sc-hint">', hint, '</span>');
       if(this.get('isTextArea')){
-          context.push('<textarea type="%@" name="%@" %@ value="%@" />'.fmt(type, name, disabled, v));
+          context.push('<textarea type="%@" name="%@" %@ value="%@"></textarea>'.fmt(type, name, disabled, v));
       }else{
-        context.push('<input name="%@" %@ value="%@" />'.fmt(name, disabled, v));
+        context.push('<input name="%@" %@ value="%@"></input>'.fmt(name, disabled, v));
       }
     // if this is not first time rendering, update the hint itself since we
     // can't just blow away the text field like we might most other controls
@@ -90,7 +85,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   // more efficient input
-  $input: function() { return this.$('input'); },
+  $field: function() { 
+    if(this.get('isTextArea')){
+      return this.$('textarea'); 
+    }else{
+      return this.$('input');
+    }
+  },
   
   // ..........................................................
   // HANDLE NATIVE CONTROL EVENTS
@@ -99,7 +100,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   didCreateLayer: function() {
     sc_super();
 
-    var input = this.$input();
+    var input = this.$field();
     SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
   },
@@ -107,7 +108,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   willDestroyLayer: function() {
     sc_super();
     
-    var input = this.$input();
+    var input = this.$field();
     SC.Event.remove(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.remove(input, 'blur',  this, this._textField_fieldDidBlur);
   },
@@ -153,12 +154,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       top += 3; left += 3; width -= 6; height -= 6; 
       
       var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
-      this.$input().attr('style', style) ;
+      this.$field().attr('style', style) ;
     }
   },
 
   _removeFirefoxCursorFix: function() {
-    if (SC.browser.mozilla) this.$input().attr('style', '') ;
+    if (SC.browser.mozilla) this.$field().attr('style', '') ;
   },
   
   /** tied to the isEnabled state */
@@ -180,7 +181,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!this._isFocused) {
       this._isFocused = YES ;
       if (this.get('isVisibleInWindow')) {
-        this.$input().get(0).focus();
+        this.$field().get(0).focus();
         this.invokeOnce(this._selectRootElement) ;
       }
     }
@@ -189,7 +190,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // In IE, you can't modify functions on DOM elements so we need to wrap the 
   // call to select() like this.
   _selectRootElement: function() {
-    this.$input().get(0).select() ;
+    this.$field().get(0).select() ;
   },
   
   // when we lose first responder, blur the text field if needed and show
@@ -198,7 +199,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   didLoseKeyResponderTo: function(keyView) {
     if (this._isFocused) {
       this._isFocused = NO ;
-      this.$input().get(0).blur() ;
+      this.$field().get(0).blur() ;
     } else {
       this.fieldValueDidChange() ;
     }
