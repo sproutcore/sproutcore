@@ -126,7 +126,7 @@ SC.NestedStore = SC.Store.extend(
   },
   
   /**
-    Propagate this store's changes to it's parent.  If the store does not 
+    Propagate this store's changes to its parent.  If the store does not 
     have a parent, this has no effect other than to clear the change set.
 
     @param {Boolean} force if YES, does not check for conflicts first
@@ -377,7 +377,7 @@ SC.NestedStore = SC.Store.extend(
       if (!myLocks[storeKey]) myLocks[storeKey] = psRevisions[storeKey]||1;
       myChanges.add(storeKey);
     }
-
+    
     // Finally, mark store as dirty if we have changes
     this.setIfChanged('hasChanges', myChanges.get('length')>0);
     
