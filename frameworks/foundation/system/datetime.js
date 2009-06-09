@@ -601,8 +601,8 @@ SC.DateTime.mixin(
       case 'U': return this._pad(this._get('week0'));
       case 'W': return this._pad(this._get('week1'));
       case 'w': return this._get('dayOfWeek');
-      case 'x': return this._get('date').toDateString();
-      case 'X': return this._get('date').toTimeString();
+      case 'x': return this._date.toDateString();
+      case 'X': return this._date.toTimeString();
       case 'y': return this._pad(this._get('year') % 100);
       case 'Y': return this._get('year');
       case 'Z':
