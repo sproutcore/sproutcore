@@ -1784,7 +1784,8 @@ SC.CollectionView = SC.View.extend(
       } else{
         itemView = null;
       }
-        this._cv_action(itemView, null) ;
+      
+      this.invokeLast(this._cv_action, 0, itemView, null) ;
     }
     
     return YES ; // always handle
@@ -1947,7 +1948,7 @@ SC.CollectionView = SC.View.extend(
     }
     
     this._mouseDownEvent = null ;
-    if (canAct) this._cv_action(ev, view) ;
+    if (canAct) this.invokeLater(this._cv_action, 0, ev, view) ;
     
     return NO;  // bubble event to allow didDoubleClick to be called...
   },
@@ -1986,7 +1987,7 @@ SC.CollectionView = SC.View.extend(
   doubleClick: function(ev) {
     var view = this.itemViewForEvent(ev) ;
     if (view) {
-      this._cv_action(view, ev) ;
+      this.invokeLater(this._cv_action, 0, view, ev) ;
       return true ;
     } else return false ;
   },
