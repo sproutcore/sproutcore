@@ -1,20 +1,16 @@
 // ==========================================================================
-// Project:   TestRunner.testController
+// Project:   TestRunner.detailController
 // Copyright: ©2009 My Company, Inc.
 // ==========================================================================
 /*globals TestRunner */
 
 /** @class
 
-  (Document Your Controller Here)
+  The currently selected test in detail view.
 
   @extends SC.ObjectController
 */
-TestRunner.testController = SC.ObjectController.create(
-/** @scope TestRunner.testController.prototype */ {
-
-  back: function() {
-    TestRunner.sendAction('back');
-  }
-
+TestRunner.detailController = SC.ObjectController.create(
+/** @scope TestRunner.detailController.prototype */ {
+  
 }) ;

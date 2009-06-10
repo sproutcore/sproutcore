@@ -58,9 +58,9 @@ TestRunner.mainPage = SC.Page.design({
 
       anchorLocation: SC.ANCHOR_BOTTOM,
 
-      childViews: 'leftView rightView'.w(),
+      childViews: 'logo continuousIntegrationCheckbox runTestsButton'.w(),
 
-      leftView: SC.View.design({
+      logo: SC.View.design({
         layout: { left: 0, top: 4, bottom: 0, width: 200 },
         classNames: 'app-title',
         tagName: 'h1',
@@ -71,11 +71,19 @@ TestRunner.mainPage = SC.Page.design({
         }
       }),
 
-      rightView: SC.CheckboxView.design({
+      continuousIntegrationCheckbox: SC.CheckboxView.design({
         title: "Continuous Integration",
         valueBinding: "TestRunner.testsController.useContinuousIntegration",
-        layout: { height: 18, centerY: 2, width: 170, right: 12 }
+        isEnabledBinding: "TestRunner.testsController.isShowingTests",
+        layout: { height: 18, centerY: 3, width: 170, left: 206 }
+      }),
+      
+      runTestsButton: SC.ButtonView.design({
+        title: "Run Tests",
+        isEnabledBinding: "TestRunner.testsController.isShowingTests",
+        layout: { height: 20, centerY: 2, width: 90, right: 12 }
       })
+      
       
     })
   }),
@@ -120,42 +128,72 @@ TestRunner.mainPage = SC.Page.design({
     })
   }),
   
+  /* list view:  displayed when you are in the READY_LIST state, this view 
+     shows all of the unit tests for the selected target.
+  */
   testsMaster: SC.ScrollView.design({
+    
+    // configure scroll view do hide horizontal scroller
     hasHorizontalScroller: NO,
+    
+    // this is the list view that actually shows the content
     contentView: SC.ListView.design({
+      
+      // bind to the testsController, which is an ArrayController managing the
+      // tests for the currently selected target.
       contentBinding: "TestRunner.testsController.arrangedObjects",
       selectionBinding: "TestRunner.testsController.selection",
-      contentValueKey: "filename",
+      
+      // configure the display options for the item itself.  The row height is
+      // larger to make this look more like a menu.  Also by default show
+      // the title.
+      classNames: ['test-list'], // used by CSS
+      rowHeight: 32,
+
+      hasContentIcon: YES,
+      contentIconKey: "icon",
+
+      hasContentBranch: YES,
+      contentIsBranchKey: 'isRunnable',
+
+      contentValueKey: "displayName",
+
+      // the following two options will make the collection view act like a 
+      // menu.  It will send the action down the responder chain whenever you
+      // click on an item.  When in the READY state, this action will show the
+      // detail view.
       actOnSelect: YES,
       action: "selectTest"
+      
     })
   }),
   
   testsDetail: SC.View.design({
     childViews: "navigationView webView".w(),
 
-    navigationView: SC.View.design({
-      layout: { top: 0, left: 0, right: 0, height: 24 },
+    navigationView: SC.ToolbarView.design({
+      classNames: 'navigation-bar',
+      
+      layout: { top: -4, left: 0, right: 0, height: 28 },
       childViews: "backButton locationLabel".w(),
       
       backButton: SC.ButtonView.design({
-        layout: { top: 1, left: 8, width: 80, height: 20 },
-        title: "Target Tests",
-        target: "TestRunner.testController",
+        layout: { top: 5, left: 8, width: 80, height: 20 },
+        title: "« Tests",
         action: "back"
       }),
       
       locationLabel: SC.LabelView.design({
-        layout: { right: 8, top: 4, height: 18, left: 100 },
+        layout: { right: 8, top: 8, height: 18, left: 100 },
         textAlign: SC.ALIGN_RIGHT,
-        valueBinding: "TestRunner.testController.filename"
+        valueBinding: "TestRunner.detailController.displayName"
       })
       
     }),
     
     webView: SC.WebView.design({
-      layout: { top: 28, left: 0, right: 0, bottom: 0 },
-      valueBinding: "TestRunner.testController.url"
+      layout: { top: 28, left: 2, right: 0, bottom: 0 },
+      valueBinding: "TestRunner.detailController.url"
     })
   })  
 

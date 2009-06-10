@@ -21,10 +21,12 @@ TestRunner.READY_LIST = SC.Responder.create({
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'testsMaster');
     TestRunner.testsController.set('selection', null); // always empty sel
+    TestRunner.testsController.set('isShowingTests', YES);
   },
   
   willLoseFirstResponder: function() {
     TestRunner.set('currentScene', null);
+    TestRunner.testsController.set('isShowingTests', NO);
   }
   
 });

@@ -17,8 +17,8 @@ TestRunner.READY = SC.Responder.create({
   */
   selectTarget: function(sender, target) {
     if (target && target.isEnumerable) target = target.firstObject();
-    TestRunner.targetController.set('content', target);
-    TestRunner.testController.set('content', null);
+
+    TestRunner.sourceController.selectObject(target);
     
     if (target) TestRunner.makeFirstResponder(TestRunner.READY_LIST);
     else TestRunner.makeFirstResponder(TestRunner.READY_EMPTY);
@@ -31,7 +31,7 @@ TestRunner.READY = SC.Responder.create({
     if (!TestRunner.targetController.get('hasContent')) return NO ;
 
     if (test && test.isEnumerable) test = test.firstObject();
-    TestRunner.testController.set('content', test);
+    TestRunner.detailController.set('content', test);
 
     if (test) TestRunner.makeFirstResponder(TestRunner.READY_DETAIL);
     else TestRunner.makeFirstResponder(TestRunner.READY_LIST);

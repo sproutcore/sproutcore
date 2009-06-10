@@ -27,6 +27,6 @@ TestRunner = SC.Application.create(
   /** Returns all known targets */
   targets: function() {
     return this.get('store').findAll(TestRunner.Target);
-  }.property().cacheable()  
+  }.property().cacheable(),
   
 }) ;

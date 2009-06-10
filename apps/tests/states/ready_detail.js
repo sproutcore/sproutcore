@@ -30,7 +30,7 @@ TestRunner.READY_DETAIL = SC.Responder.create({
     Invoked when you click "back"
   */
   back: function() {
-    TestRunner.testController.set('content', null);
+    TestRunner.detailController.set('content', null);
     TestRunner.makeFirstResponder(TestRunner.READY_LIST);
   }
   
