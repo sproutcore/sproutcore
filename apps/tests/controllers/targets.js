@@ -14,9 +14,6 @@
 TestRunner.targetsController = SC.ArrayController.create(
 /** @scope TestRunner.targetsController.prototype */ {
 
-  allowsMultipleSelection: NO,
-  allowsEmptySelection: NO,
-
   /**
     Call this method whenever you want to relaod the targets from the server.
   */

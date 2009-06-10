@@ -8,9 +8,9 @@
 
   (Document Your Controller Here)
 
-  @extends SC.Object
+  @extends SC.ObjectController
 */
-TestRunner.testController = SC.Object.create(
+TestRunner.testController = SC.ObjectController.create(
 /** @scope TestRunner.testController.prototype */ {
 
   back: function() {

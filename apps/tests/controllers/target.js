@@ -6,7 +6,9 @@
 
 /** @class
 
-  The currently selected target
+  The currently selected target.  Used by the testsController to get the 
+  tests of the target.  May be used by other parts of the app to control the
+  selected target.
 
   @extends SC.ObjectController
 */

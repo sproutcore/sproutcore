@@ -16,6 +16,8 @@ TestRunner.mainPage = SC.Page.design({
   */
   mainPane: SC.MainPane.design({
 
+    defaultResponder: "TestRunner",
+    
     // when defining a generic view, just name the properties holding your
     // child views here.  the w() helper is like calling split(' ')
     childViews: 'splitView toolbarView'.w(),
@@ -39,10 +41,7 @@ TestRunner.mainPage = SC.Page.design({
           hasContentIcon: YES,
           contentIconKey:  "targetIcon",
           
-          actOnSelect: YES,
-          selectOnMouseDown: YES,
-          target: 'TestRunner.sourceController',
-          action: 'didSelectTarget'
+          action: 'selectTarget'
         })
       }),
       
@@ -128,9 +127,7 @@ TestRunner.mainPage = SC.Page.design({
       selectionBinding: "TestRunner.testsController.selection",
       contentValueKey: "filename",
       actOnSelect: YES,
-      
-      target: "TestRunner.testsController",
-      action: "didSelectTest"
+      action: "selectTest"
     })
   }),
   
@@ -151,13 +148,14 @@ TestRunner.mainPage = SC.Page.design({
       locationLabel: SC.LabelView.design({
         layout: { right: 8, top: 4, height: 18, left: 100 },
         textAlign: SC.ALIGN_RIGHT,
-        value: "test/name"
+        valueBinding: "TestRunner.testController.filename"
       })
       
     }),
     
     webView: SC.WebView.design({
-      layout: { top: 28, left: 0, right: 0, bottom: 0 }
+      layout: { top: 28, left: 0, right: 0, bottom: 0 },
+      valueBinding: "TestRunner.testController.url"
     })
   })  
 

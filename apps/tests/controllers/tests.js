@@ -6,20 +6,13 @@
 
 /** @class
 
-  Tests from current selected target
+  Tests from currently selected target
 
   @extends SC.ArrayController
 */
 TestRunner.testsController = SC.ArrayController.create(
 /** @scope TestRunner.testsController.prototype */ {
 
-  contentBinding: "TestRunner.targetController.tests",
-  
-  didSelectTest: function() {
-    var sel = this.get('selection'),
-        test = sel ? sel.firstObject() : null;
-    TestRunner.sendAction('selectTest', this, test);
-    this.set('selection', null); // always empty the selection
-  }
+  contentBinding: "TestRunner.targetController.tests"
     
 }) ;

@@ -6,9 +6,11 @@
 
 /** @class
 
-  (Document Your Controller Here)
+  Exposed the flattened list of targets for the source list.  Computed from 
+  the root node generated on the targetsController.  Configure for display of
+  the source list.
 
-  @extends SC.Object
+  @extends SC.TreeController
 */
 TestRunner.sourceController = SC.TreeController.create(
 /** @scope TestRunner.sourceController.prototype */ {
@@ -18,12 +20,7 @@ TestRunner.sourceController = SC.TreeController.create(
   treeItemIsExpandedKey: "isExpanded",
   treeItemIsGrouped: YES,
   
-  didSelectTarget: function() {
-    var sel    = this.get('selection'),
-    var target = sel ? sel.firstObject() : null;
-    console.log('didSelectTarget(%@)'.fmt(target));
-    TestRunner.sendAction('selectTarget', this, target);
-  }
-  
+  allowsMultipleSelection: NO,
+  allowsEmptySelection: NO
  
 }) ;
