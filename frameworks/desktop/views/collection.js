@@ -1948,7 +1948,15 @@ SC.CollectionView = SC.View.extend(
     }
     
     this._mouseDownEvent = null ;
-    if (canAct) this.invokeLater(this._cv_action, 0, ev, view) ;
+    
+    // if actOnSelect is YES, then try to invoke the action, passing the 
+    // current selection (saved as a separate array so that a change in sel
+    // in the meantime will not be lost)
+    if (canAct) {
+      sel = this.get('selection');
+      sel = sel ? sel.toArray() : [];
+      this.invokeLater(this._cv_action, 0, ev, view, sel) ;
+    }
     
     return NO;  // bubble event to allow didDoubleClick to be called...
   },
@@ -2653,7 +2661,7 @@ SC.CollectionView = SC.View.extend(
     Perform the action.  Supports legacy behavior as well as newer style
     action dispatch.
   */
-  _cv_action: function(view, evt) {
+  _cv_action: function(view, evt, context) {
     // console.log('_cv_action invoked on %@ with view %@, evt %@'.fmt(this, view, evt));
     var action = this.get('action');
     var target = this.get('target') || null;
@@ -2664,7 +2672,9 @@ SC.CollectionView = SC.View.extend(
       
       // otherwise, use the new sendAction style
       var pane = this.get('pane') ;
-      if (pane) pane.rootResponder.sendAction(action, target, this, pane);
+      if (pane) {
+        pane.rootResponder.sendAction(action, target, this, pane, context);
+      }
       // SC.app.sendAction(action, target, this) ;
       
     // if no action is specified, then trigger the support action,
