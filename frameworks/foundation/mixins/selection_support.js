@@ -125,6 +125,97 @@ SC.SelectionSupport = {
   // METHODS
   // 
 
+  /**
+    Selects the passed objects in your content.  If you set "extend" to YES,
+    then this will attempt to extend your selection as well.
+  
+    @param {SC.Enumerable} objects objects to select
+    @param {Boolean} extend optionally set to YES to extend selection
+    @returns {Object} receiver
+  */
+  selectObjects: function(objects, extend) {
+
+    // handle passing an empty array
+    if (!objects || objects.get('length')===0) {
+      if (!extend) this.set('selection', null);
+      return this;
+    }
+    
+    var set     = SC.IndexSet.create(),
+        content = this.get('arrangedObjects'),
+        sel     = this.get('selection');
+
+    // convert to an index set
+    objects.forEach(function(o) {
+      var idx = content.indexOf(o);
+      if (idx>=0) set.add(idx);
+    }, this);
+
+    // create base selection set or clone existing one depending
+    if (extend && sel) sel = sel.copy();
+    else sel = SC.SelectionSet.create();
+    
+    // finish up
+    sel.add(content, set).freeze();
+    this.set('selection', sel);
+    return this ;
+  },
+  
+  /**
+    Selects a single passed object in your content.  If you set "extend" to 
+    YES then this will attempt to extend your selection as well.
+    
+    @param {Object} object object to select
+    @param {Boolean} extend optionally set to YES to extend selection
+    @returns {Object} receiver
+  */
+  selectObject: function(object, extend) {
+    if (object === null) {
+      if (!extend) this.set('selection', null);
+      return this ;
+      
+    } else return this.selectObjects([object], extend);
+  },    
+
+  /**
+    Deselects the passed objects in your content.
+    
+    @param {SC.Enumerable} objects objects to select
+    @returns {Object} receiver
+  */
+  deselectObjects: function(objects) {
+
+    if (!objects || objects.get('length')===0) return this; // nothing to do
+    
+    var content = this.get('arrangedObjects'),
+        sel     = this.get('selection'),
+        set;
+
+    if (!sel || sel.get('length')===0) return this; // nothing to do
+
+    // find index for each and remove it
+    sel = sel.copy();
+    objects.forEach(function(o) {
+      var idx = content.indexOf(o);
+      if (idx>=0) sel.remove(content, idx);
+    }, this);
+
+    // finish up
+    this.set('selection', sel.freeze());
+    return this ;
+  },
+  
+  /**
+    Deselects the passed object in your content.
+    
+    @param {SC.Object} object single object to select
+    @returns {Object} receiver
+  */
+  deselectObject: function(object) {
+    if (!object) return this; // nothing to do
+    else return this.deselectObjects([object]);
+  },
+  
   /** 
     Call this method whenever your source content changes to ensure the 
     selection always remains up-to-date and valid.
