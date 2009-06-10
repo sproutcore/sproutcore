@@ -387,7 +387,7 @@ SC.RecordAttribute.registerTransform(Date, {
       
       ret = new Date();
       ret.setTime(Number(time));
-    } else ret = Date.parse(str);
+    } else ret = new Date(Date.parse(str));
     return ret ;
   },
   
