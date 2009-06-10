@@ -24,6 +24,7 @@ module("SC.RecordAttribute core methods", {
       
       // test mapping Date
       date: SC.Record.attr(Date),
+      nonIsoDate: SC.Record.attr(Date, { useIsoDate: false }),
       
       // test Array
       anArray: SC.Record.attr(Array),
@@ -73,7 +74,8 @@ module("SC.RecordAttribute core methods", {
         lastName: "Doe", 
         relatedTo: 'foo1',
         anArray: 'notAnArray',
-        anObject: 'notAnObject'
+        anObject: 'notAnObject',
+        nonIsoDate: "2009/06/10 8:55:50 +0000"
       },
       
       { 
@@ -141,6 +143,11 @@ test("getting toOne relationship from computed attribute should map guid to a re
 test("reading date should parse ISO date", function() {
   var d = new Date(1235968200000); // should be proper date
   equals(rec.get('date').toString(), d.toString(), 'should have matched date');
+});
+
+test("reading date should parse non-ISO date", function() {
+  var d = new Date(2009,6,10,8,55,50);
+  equals(rec2.get('nonIsoDate').toString(), d.toString(), 'should have matched date');
 });
 
 test("reading computed default value", function() {
