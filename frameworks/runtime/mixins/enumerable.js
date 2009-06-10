@@ -754,22 +754,11 @@ SC.Enumerable = {
     @returns {Array} the enumerable as an array.
   */
   toArray: function() {
-    var len = this.get ? this.get('length') : this.length ;
-    if (len <= 0) return [] ; // nothing to invoke....
-    
-    // call invoke
-    var ret = [] ;
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      ret.push(next) ;
-      last = next ;
-    }
-    last = null ;
-    context = SC.Enumerator._pushContext(context);
+    var ret = [];
+    this.forEach(function(o) { ret.push(o); }, this);
     return ret ;
   }        
+  
 } ;
 
 // Build in a separate function to avoid unintential leaks through closures...
