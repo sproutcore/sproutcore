@@ -60,6 +60,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   displayProperties: 'hint fieldValue isEditing'.w(),
   
   render: function(context, firstTime) {
+    
     var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
     var name = SC.guidFor(this);
     var hint = this.get('hint');
@@ -75,9 +76,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (firstTime) {
       context.push('<span class="sc-hint">', hint, '</span>');
       if(this.get('isTextArea')){
-          context.push('<textarea type="%@" name="%@" %@ value="%@"></textarea>'.fmt(type, name, disabled, v));
+          context.push('<textarea name="%@" %@ value="%@"></textarea>'.fmt(name, disabled, v));
       }else{
-        context.push('<input name="%@" %@ value="%@"></input>'.fmt(name, disabled, v));
+        context.push('<input type="%@" name="%@" %@ value="%@"></input>'.fmt(type, name, disabled, v));
       }
     // if this is not first time rendering, update the hint itself since we
     // can't just blow away the text field like we might most other controls
@@ -85,7 +86,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (hint !== this._textField_currentHint) {
         this._textField_currentHint = hint ;
         this.$('.sc-hint').text(hint);
-      }          
+      }  
+      if(!this.get('isEnabled')){
+        this.$field()[0].disabled='true';
+      }else{
+        this.$field()[0].disabled=null;
+      }
+              
     }
   },
 

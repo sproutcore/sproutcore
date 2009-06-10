@@ -28,7 +28,35 @@
     hint: "Full Name", 
     value: 'John Doe',
     isEnabled: NO
+  })
+  
+  .add("textarea - empty", SC.TextFieldView, { 
+    hint: "Full Name", 
+    value: '',
+    isTextArea: YES
+  })
+  
+  .add("textarea - with value", SC.TextFieldView, { 
+    hint: "Full Name", 
+    value: 'John Doe',
+    isTextArea: YES
+  })
+  
+  .add("textarea - disabled - empty", SC.TextFieldView, { 
+    hint: "Full Name", 
+    value: '',
+    isTextArea: YES,
+    isEnabled: NO
+  })
+  
+  .add("textarea - disabled - with value", SC.TextFieldView, { 
+    hint: "Full Name", 
+    value: 'John Doe',
+    isTextArea: YES,
+    isEnabled: NO
   });
+  
+  
     
 pane.show(); // add a test to show the test pane
 
@@ -107,6 +135,30 @@ test("disabled - with value", function() {
   pane.verifyDisabled(view, YES);
 });
 
+test("textarea - empty", function() {
+   var view = pane.view('empty');
+   pane.verifyEmpty(view, 'Full Name');
+   pane.verifyDisabled(view, NO);
+});
+
+test("textarea - with value", function() {
+  var view = pane.view('with value');
+  pane.verifyNotEmpty(view, 'John Doe', 'Full Name');
+  pane.verifyDisabled(view, NO);
+});
+
+test("textarea - disabled - empty", function() {
+  var view = pane.view('disabled - empty');
+  pane.verifyEmpty(view, 'Full Name');
+  pane.verifyDisabled(view, YES);
+});
+
+test("textarea - disabled - with value", function() {
+  var view = pane.view('disabled - with value');
+  pane.verifyNotEmpty(view, 'John Doe', 'Full Name');
+  pane.verifyDisabled(view, YES);
+});
+
 // ..........................................................
 // TEST CHANGING VIEWS
 // 
@@ -123,7 +175,7 @@ test("changing value from empty -> value", function() {
 
 test("disabling view", function() {  
   var view = pane.view('empty');
-
+  
   // test changing enabled state updates like it should
   SC.RunLoop.begin();
   view.set('isEnabled', NO);
