@@ -173,7 +173,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
   */
   commitEditing: function() {
     // try to validate field.  If it fails, return false.  
-    if (!$ok(this.validateSubmit())) return NO ;
+    if (!SC.$ok(this.validateSubmit())) return NO ;
     return this._endEditing(this.get('value')) ;
   },
   
@@ -284,7 +284,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
 
     // convert the textarea's newlines into something comparable for the sizer 
     // div appending a space to give a line with no text a visible height.
-    text = text.replace(/  /g, "&nbsp; ").replace(/\n/g, "<br />&nbsp;");
+    text = text.replace((/ {2}/g), "&nbsp; ").replace(/\n/g, "<br />&nbsp;");
     
     // get the text size
     sizer.set('innerHTML', text || "&nbsp;");
@@ -305,8 +305,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
   },
   
   // ask owner to end editing.
-  willLoseFirstResponder: function()
-  {
+  willLoseFirstResponder: function(responder) {
+    if (responder !== this) return;
+    
     // should have been covered by willRemoveFromParent, but this was needed 
     // too.
     this.$('input')[0].blur();

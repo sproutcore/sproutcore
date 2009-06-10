@@ -196,8 +196,8 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this.set('itemWidth',itemWidth) ;
     this.set('itemHeight',itemHeight) ;
     
-    if(!this.get('isEnabled'))
-      context.addClass('disabled') ;
+    if(!this.get('isEnabled')) context.addClass('disabled') ;
+    
     //handle separator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty('isSeparatorKey', del) ;
@@ -546,12 +546,14 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   },
   
   /** @private*/
-  didBecomeFirstResponder: function() {
+  didBecomeFirstResponder: function(responder) {
+    if (responder !== this) return;
     if(!this.isSeparator()) this.$().addClass('focus') ;
   },
   
   /** @private*/
-  willLoseFirstResponder: function() {
+  willLoseFirstResponder: function(responder) {
+    if (responder !== this) return;
     this.$().removeClass('focus') ;
   },
   

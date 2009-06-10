@@ -75,6 +75,7 @@ require('views/view');
   that should not steal keyboard control from another view.
 
   @extends SC.View
+  @extends SC.ResponderContext
   @since SproutCore 1.0
 */
 SC.Pane = SC.View.extend({
@@ -236,7 +237,7 @@ SC.Pane = SC.View.extend({
     if (current === view) return this ; // nothing to do
     
     // notify current of firstResponder change
-    if (current) current.willLoseFirstResponder();
+    if (current) current.willLoseFirstResponder(current);
     
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {
@@ -265,7 +266,7 @@ SC.Pane = SC.View.extend({
       if (current) current.didLoseKeyResponderTo(view) ;
     }
     
-    if (view) view.didBecomeFirstResponder();
+    if (view) view.didBecomeFirstResponder(view);
     return this ;
   },
   

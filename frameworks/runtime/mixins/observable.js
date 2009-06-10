@@ -1158,7 +1158,7 @@ SC.Observable = {
   setPath: function(path, value) {
     if (path.indexOf('.') >= 0) {
       var tuple = SC.tupleForPropertyPath(path, this) ;
-      if (!tuple[0]) return null ;
+      if (!tuple || !tuple[0]) return null ;
       tuple[0].set(tuple[1], value) ;
     } else this.set(path, value) ; // shortcut
     return this;
