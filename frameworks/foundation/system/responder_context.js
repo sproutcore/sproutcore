@@ -30,6 +30,8 @@ SC.ResponderContext = SC.Responder.extend({
   // PROPERTIES
   // 
   
+  isResponderContext: YES,
+  
   /** @property
   
     When set to YES, logs tracing information about all actions sent and 

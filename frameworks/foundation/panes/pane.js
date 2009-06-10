@@ -158,7 +158,14 @@ SC.Pane = SC.View.extend({
     
     // if no handler was found in the responder chain, try the default
     if (!target && (target = this.get('defaultResponder'))) {
-      target = target.tryToPerform(action, evt) ? target : null ;
+      if (typeof target === SC.T_STRING) {
+        target = SC.objectForPropertyPath(target);
+      }
+
+      if (!target) target = null;
+      else if (target.isResponderContext) {
+        target = target.sendAction(action, this, evt);
+      } else target = target.tryToPerform(action, evt) ? target : null ;
     }
         
     return evt.mouseHandler || target ;
@@ -175,11 +182,11 @@ SC.Pane = SC.View.extend({
   defaultResponder: null,
   
   /** @property
-    The next responder for the pane is always its defaultResponder.
+    Pane's never have a next responder
   */
   nextResponder: function() {
-    return this.get('defaultResponder');
-  }.property('defaultResponder').cacheable(),
+    return null;
+  }.property().cacheable(),
   
   /** @property
     The first responder.  This is the first view that should receive action 
