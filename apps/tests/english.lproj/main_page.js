@@ -37,13 +37,18 @@ TestRunner.mainPage = SC.Page.design({
           selectionBinding: "TestRunner.sourceController.selection",
           contentValueKey: "displayName",
           hasContentIcon: YES,
-          contentIconKey:  "targetIcon"
+          contentIconKey:  "targetIcon",
+          
+          actOnSelect: YES,
+          selectOnMouseDown: YES,
+          target: 'TestRunner.sourceController',
+          action: 'didSelectTarget'
         })
       }),
       
       bottomRightView: SC.SceneView.design({
         scenes: "testsNone testsMaster testsDetail".w(),
-        nowShowingBinding: "TestRunner.testsController.nowShowingScene"
+        nowShowingBinding: "TestRunner.currentScene"
       })
     }),
     
@@ -76,6 +81,36 @@ TestRunner.mainPage = SC.Page.design({
     })
   }),
 
+  targetsLoading: SC.View.design({
+    childViews: "labelView".w(),
+    
+    labelView: SC.LabelView.design({
+      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      textAlign: SC.ALIGN_CENTER,
+      value: "Loading Targets...".loc()
+    })
+  }),
+
+  noTargets: SC.View.design({
+    childViews: "labelView".w(),
+    
+    labelView: SC.LabelView.design({
+      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      textAlign: SC.ALIGN_CENTER,
+      value: "No Targets".loc()
+    })
+  }),
+  
+  testsLoading: SC.View.design({
+    childViews: "labelView".w(),
+    
+    labelView: SC.LabelView.design({
+      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      textAlign: SC.ALIGN_CENTER,
+      value: "Loading Tests".loc()
+    })
+  }),
+
   testsNone: SC.View.design({
     childViews: "labelView".w(),
     
@@ -95,7 +130,7 @@ TestRunner.mainPage = SC.Page.design({
       actOnSelect: YES,
       
       target: "TestRunner.testsController",
-      action: "showDetails"
+      action: "didSelectTest"
     })
   }),
   
@@ -105,9 +140,12 @@ TestRunner.mainPage = SC.Page.design({
     navigationView: SC.View.design({
       layout: { top: 0, left: 0, right: 0, height: 24 },
       childViews: "backButton locationLabel".w(),
+      
       backButton: SC.ButtonView.design({
         layout: { top: 1, left: 8, width: 80, height: 20 },
-        title: "Target Tests"
+        title: "Target Tests",
+        target: "TestRunner.testController",
+        action: "back"
       }),
       
       locationLabel: SC.LabelView.design({

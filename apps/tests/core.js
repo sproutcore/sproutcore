@@ -1,6 +1,8 @@
 // ==========================================================================
-// Project:   TestRunner
-// Copyright: ©2009 My Company, Inc.
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple, Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
 // ==========================================================================
 /*globals TestRunner */
 
@@ -8,9 +10,9 @@
 
   My cool new app.  Describe your application.
   
-  @extends SC.Object
+  @extends SC.Application
 */
-TestRunner = SC.Object.create(
+TestRunner = SC.Application.create(
   /** @scope TestRunner.prototype */ {
 
   NAMESPACE: 'TestRunner',
@@ -25,8 +27,6 @@ TestRunner = SC.Object.create(
   /** Returns all known targets */
   targets: function() {
     return this.get('store').findAll(TestRunner.Target);
-  }.property().cacheable()
+  }.property().cacheable()  
   
-  // TODO: Add global constants or singleton objects needed by your app here.
-
 }) ;

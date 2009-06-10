@@ -6,7 +6,8 @@
 
 /** @class
 
-  Displays the full list of targets in the source list view.
+  The full set of targets available in the application.  This is populated 
+  automatically when you call loadTargets().
 
   @extends SC.ArrayController
 */
@@ -15,6 +16,15 @@ TestRunner.targetsController = SC.ArrayController.create(
 
   allowsMultipleSelection: NO,
   allowsEmptySelection: NO,
+
+  /**
+    Call this method whenever you want to relaod the targets from the server.
+  */
+  reload: function() {
+    var targets = TestRunner.store.findAll(TestRunner.Target);
+    this.set('content', targets);
+    TestRunner.sendAction('targetsDidChange');
+  },
   
   /** 
     Generates the root array of children objects whenever the target content
