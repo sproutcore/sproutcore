@@ -165,7 +165,7 @@ CoreTest.Runner = {
     if(s.failed>0 || s.errors>0){
       this.errors.push(CoreTest.fmt('<tr class="test %@">'+
           '<th style="background:grey; color:white" class="desc" colspan="2">'+
-          ' (<span class="passed">%@</span>, <span class="failed">%@</span>'+
+          '%@ (<span class="passed">%@</span>, <span class="failed">%@</span>'+
           ', <span class="errors">%@</span>, <span class="warnings">%@</span>'+
           ')</th></tr>', clean, name, s.passed, s.failed, s.errors, s.warnings));  
     }
