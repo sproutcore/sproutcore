@@ -136,6 +136,22 @@ SC.SplitView = SC.View.extend(
   bottomRightView: SC.View,
   
   /**
+    The current thickness for the topLeftView
+  */
+  topLeftThickness: function() {
+    var view = this.get('topLeftView');
+    return view ? this.thicknessForView(view) : 0;
+  }.property('topLeftView').cacheable(),
+
+  /**
+    The current thickness for the bottomRightView
+  */
+  bottomRightThickness: function() {
+    var view = this.get('bottomRightView');
+    return view ? this.thicknessForView(view) : 0;
+  }.property('bottomRightView').cacheable(),
+  
+  /**
     @property {SC.Cursor} the cursor thumb view should use for themselves
   */
   thumbViewCursor: null,
@@ -357,6 +373,8 @@ SC.SplitView = SC.View.extend(
     // topLeftView.updateDisplayLayout();
     // dividerView.updateDisplayLayout();
     // bottomRightView.updateDisplayLayout();
+    this.notifyPropertyChange('topLeftThickness')
+        .notifyPropertyChange('bottomRightThickness');
   },
   
   /** @private */
