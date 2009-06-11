@@ -1,5 +1,9 @@
 /* Common SC.TextFieldView styles - needed to work properly */
 
+.sc-text-field-view{
+	z-index: 10000;
+}
+
 .sc-text-field-view input {
 	position:  absolute;
 	width: 100%;
