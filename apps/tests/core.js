@@ -22,11 +22,13 @@ TestRunner = SC.Application.create(
   // of your model data.  You can also set a data source on this store to
   // connect to a backend server.  The default setup below connects the store
   // to any fixtures you define.
-  store: SC.Store.create().from(SC.Record.fixtures),
+  store: SC.Store.create().from('TestRunner.DevDataSource'),
   
   /** Returns all known targets */
   targets: function() {
     return this.get('store').findAll(TestRunner.Target);
   }.property().cacheable(),
+  
+  trace: YES
   
 }) ;

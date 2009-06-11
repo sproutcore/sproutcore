@@ -20,7 +20,9 @@ TestRunner.targetsController = SC.ArrayController.create(
   reload: function() {
     var targets = TestRunner.store.findAll(TestRunner.Target);
     this.set('content', targets);
-    TestRunner.sendAction('targetsDidChange');
+    if (targets && targets.get('length') >0) {
+      TestRunner.sendAction('targetsDidChange');
+    }
   },
   
   /** 
@@ -31,27 +33,36 @@ TestRunner.targetsController = SC.ArrayController.create(
     
     // break targets into their respective types.  Items that should not be 
     // visible at the top level will not have a sort kind
-    var kinds = {}, kind, targets, ret;
+    var kinds = {}, keys = [], kind, targets, ret;
     
     this.forEach(function(target) { 
       if (kind = target.get('sortKind')) {
         targets = kinds[kind];
         if (!targets) kinds[kind] = targets = [];
         targets.push(target);
+        if (keys.indexOf(kind) < 0) keys.push(kind);
       }
     }, this);
 
+    // sort kinds alphabetically - with sproutcore at end and apps at top
+    keys.sort();
+    if (keys.indexOf('sproutcore') >= 0) {
+      keys.removeObject('sproutcore').pushObject('sproutcore');      
+    }
+    if (keys.indexOf('apps') >= 0) {
+      keys.removeObject('apps').unshiftObject('apps');
+    }
+    
     // once divided into kinds, create group nodes for each kind
     ret = [];
-    for (kind in kinds) {
-      if (!kinds.hasOwnProperty(kind)) continue;
+    keys.forEach(function(kind) {
       targets = kinds[kind];
       ret.push(SC.Object.create({
         displayName: "Kind.%@".fmt(kind).loc(),
         isExpanded: kind !== 'sproutcore',
         children: targets.sortProperty('kind', 'displayName')
       }));
-    }
+    });
     
     return SC.Object.create({ children: ret, isExpanded: YES });
     

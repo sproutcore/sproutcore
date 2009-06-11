@@ -75,7 +75,7 @@ TestRunner.Target = SC.Record.extend(
     belongs to the sproutcore target.
   */
   sortKind: function() {
-    //if (this.get('name') === '/sproutcore') return null;
+    if (this.get('name') === '/sproutcore') return null;
     var parent = this.get('parent');
     if (parent && (parent.get('name') === '/sproutcore')) return 'sproutcore';
     else return (this.get('kind') || 'unknown').toLowerCase();
@@ -86,7 +86,7 @@ TestRunner.Target = SC.Record.extend(
     testsUrl.
   */
   tests: function() {
-    return this.get('store').findAll(TestRunner.Test);
+    return this.get('store').findAll(TestRunner.Test, { url: this.get('testsUrl') });
   }.property('testsUrl').cacheable()
 
 }) ;

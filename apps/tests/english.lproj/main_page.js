@@ -6,6 +6,8 @@
 // ==========================================================================
 /*globals TestRunner */
 
+sc_require('views/offset_checkbox');
+
 // This page describes the main user interface for your application.  
 TestRunner.mainPage = SC.Page.design({
 
@@ -29,7 +31,8 @@ TestRunner.mainPage = SC.Page.design({
       
       layout: { left: 0, top: 0, right: 0, bottom: 32 },
       
-      defaultThickness: 200,  // set default thickness in pixels
+      defaultThickness: 200,
+      topLeftThicknessBinding: "TestRunner.sourceController.sidebarThickness",
       
       topLeftView: SC.ScrollView.design({
         
@@ -71,8 +74,9 @@ TestRunner.mainPage = SC.Page.design({
         }
       }),
 
-      continuousIntegrationCheckbox: SC.CheckboxView.design({
+      continuousIntegrationCheckbox: TestRunner.OffsetCheckboxView.design({
         title: "Continuous Integration",
+        offsetBinding: "TestRunner.sourceController.sidebarThickness",
         valueBinding: "TestRunner.testsController.useContinuousIntegration",
         isEnabledBinding: "TestRunner.testsController.isShowingTests",
         layout: { height: 18, centerY: 3, width: 170, left: 206 }
