@@ -96,7 +96,6 @@ SC.Set = SC.mixin({},
   SC.Enumerable, 
   SC.Observable, 
   SC.Freezable, 
-  SC.Observable,
 /** @scope SC.Set.prototype */ {
 
   /** 
