@@ -56,11 +56,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Convenience method.  Sets the current data source to the passed property.
     This will also set the store property on the dataSource to the receiver.
     
+    If you are using this from the core.js method of your app, you may need to
+    just pass a string naming your data source class.  If this is the case,
+    then your data source will be instantiated the first time it is requested.
+    
+    @param {SC.DataSource|String} dataSource the data source
     @returns {SC.Store} receiver
   */
   from: function(dataSource) {
     this.set('dataSource', dataSource);
     return this ;
+  },
+  
+  // lazily convert data source to real object
+  _getDataSource: function() {
+    var ret = this.get('dataSource');
+    if (typeof ret === SC.T_STRING) {
+      ret = SC.objectForPropertyPath(ret);
+      if (ret) ret = ret.create();
+      if (ret) this.set('dataSource', ret);
+    }
+    return ret;
   },
   
   /**
@@ -720,7 +736,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   findAll: function(fetchKey, params, recordArray) { 
-    var _store = this, source = this.get('dataSource'), ret = [], storeKeys, 
+    var _store = this, source = this._getDataSource(), ret = [], storeKeys, 
       sourceRet, cacheKey;
     
     if(recordArray) {
@@ -977,9 +993,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // add/remove change log
     changelog = this.changelog;
     if (!changelog) changelog = this.changelog = SC.Set.create();
+    
     // only remove if state is READY_CLEAN so we don't need to propagate to
     // parent stores or do any changes on commit
-    ((status===K.READY_CLEAN)) ? changelog.remove(storeKey): changelog.add(storeKey);
+    if (status===K.READY_CLEAN) changelog.remove(storeKey) ; 
+    else changelog.add(storeKey);
     
     this.changelog = changelog;
     return this ;
@@ -1128,7 +1146,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
     
-    var source  = this.get('dataSource'),
+    var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = (!storeKeys) ? ids.length : storeKeys.length,
         ret     = [],
@@ -1263,7 +1281,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Bool} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys) {
-    var source    = this.get('dataSource'),
+    var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
         rev       = SC.Store.generateStoreKey(),
@@ -1375,7 +1393,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} the store.
   */
   cancelRecords: function(recordTypes, ids, storeKeys) {
-    var source  = this.get('dataSource'),
+    var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         K       = SC.Record,
         ret     = [],
@@ -1771,7 +1789,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Array} set of storeKeys
   */
   storeKeys: function() {
-    ret = [];
+    var ret = [], storeKey;
     if(!this.statuses) return;
     
     for(storeKey in this.statuses) {
