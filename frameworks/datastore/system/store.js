@@ -48,6 +48,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   isNested: NO,
   
+  /**
+    This type of store is not nested.
+  */
+  commitRecordsAutomatically: NO,
+  
   // ..........................................................
   // DATA SOURCE SUPPORT
   // 
@@ -496,7 +501,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(!recordTypes.contains(recordType)) {
         recordTypes.push(recordType);
       }
-      
+    
     }
     
     this._notifyRecordArraysWithQuery(storeKeys, recordTypes);
@@ -594,9 +599,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     chStatuses   = nestedStore.statuses;
 
     SC.RunLoop.begin();
-    
     for(i=0;i<len;i++) {
       storeKey = changes[i];
+
       // now copy changes
       myDataHashes[storeKey] = chDataHashes[storeKey];
       myStatuses[storeKey]   = chStatuses[storeKey];
@@ -613,8 +618,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (chChangelog) {
       if (!myChangelog) myChangelog = this.changelog = SC.Set.create();
       myChangelog.addEach(chChangelog);
-    }
-    
+    }  
     this.changelog = myChangelog;
     
     return this ;
@@ -923,6 +927,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog.add(storeKey);
     this.changelog = changelog;
     
+    // if commit records is enabled
+    if(this.get('commitRecordsAutomatically')){
+      this.invokeLast(this.commitRecords);
+    }
+    
     // finally return materialized record
     return this.materializeRecord(storeKey) ;
   },
@@ -966,7 +975,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   destroyRecord: function(recordType, id, storeKey) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     var status = this.readStatus(storeKey), changelog, K = SC.Record;
-    
+
     // handle status - ignore if destroying or destroyed
     if ((status === K.BUSY_DESTROYING) || (status & K.DESTROYED)) {
       return this; // nothing to do
@@ -980,7 +989,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       throw K.BUSY_ERROR ;
       
     // if new status, destroy but leave in clean state
-    } else if (status === K.READY_NEW) {
+    } else if (status == K.READY_NEW) {
       status = K.DESTROYED_CLEAN ;
       
     // otherwise, destroy in dirty state
@@ -989,17 +998,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // remove the data hash, set new status
     this.writeStatus(storeKey, status);
     this.dataHashDidChange(storeKey);
-    
+
     // add/remove change log
     changelog = this.changelog;
     if (!changelog) changelog = this.changelog = SC.Set.create();
-    
-    // only remove if state is READY_CLEAN so we don't need to propagate to
-    // parent stores or do any changes on commit
-    if (status===K.READY_CLEAN) changelog.remove(storeKey) ; 
-    else changelog.add(storeKey);
-    
-    this.changelog = changelog;
+
+    ((status & K.DIRTY) ? changelog.add(storeKey) : changelog.remove(storeKey));
+    this.changelog=changelog;
+
+    // if commit records is enabled
+    if(this.get('commitRecordsAutomatically')){
+      this.invokeLast(this.commitRecords);
+    }
+        
     return this ;
   },
   
@@ -1081,6 +1092,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!changelog) changelog = this.changelog = SC.Set.create() ;
     changelog.add(storeKey);
     this.changelog=changelog;
+    
+    // if commit records is enabled
+    if(this.get('commitRecordsAutomatically')){
+      this.invokeLast(this.commitRecords);
+    }
     
     return this ;
   },
@@ -1314,26 +1330,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // collect status and process
       status = this.readStatus(storeKey);
       
-      if ((status == K.EMPTY) || (status == K.ERROR)) {
+      if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
         throw K.NOT_FOUND_ERROR ;
-      } 
-      else {
-        if(status===K.READY_NEW){
+      }else{
+        if(status==K.READY_NEW){
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
           retCreate.push(storeKey);
-        } 
-        else if (status===K.READY_DIRTY) {
+        } else if (status==K.READY_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_COMMITTING);
           this.dataHashDidChange(storeKey, rev, YES);
           retUpdate.push(storeKey);
-        } 
-        else if (status===K.DESTROYED_DIRTY) {
+        } else if (status==K.DESTROYED_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_DESTROYING);
-          this.dataHashDidChange(storeKey, rev, YES);
-          retDestroy.push(storeKey);
-        }
-        else if(status===K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
           retDestroy.push(storeKey);
         }
@@ -1348,7 +1357,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (ret && recordTypes===undefined && ids===undefined && storeKeys===this.changelog){ 
       this.changelog=null; 
     }
-    
     return ret ;
   },
 
