@@ -267,7 +267,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Forwards a replace on to the content, but only if reordering is allowed.
   */
   replace: function(start, amt, objects) {
-
     // check for various conditions before a replace is allowed
     if (!objects || objects.get('length')===0) {
       if (!this.get('canRemoveContent')) {
@@ -280,7 +279,20 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // if we can do this, then just forward the change.  This should fire
     // updates back up the stack, updating rangeObservers, etc.
     var content = this.get('content'); // note: use content, not observable
+    var objsToDestroy = [], i;
+    if (this.get('destroyOnRemoval')){
+      for(i=0; i<amt; i++){
+        objsToDestroy.push(content.objectAt(i+start));
+      }
+    }
+    
     if (content) content.replace(start, amt, objects);
+    for(i=0; i<objsToDestroy.length; i++){
+      
+      objsToDestroy[i].destroy();
+    }
+    objsToDestroy = null;
+    
     return this; 
   },
   
