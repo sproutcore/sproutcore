@@ -85,6 +85,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
       ret       = opts.ret;
       ret.replace(0, ret.get('length'), storeKeys);
     }
+    TestRunner.sendAction('testsDidChange');
   }
   
 });

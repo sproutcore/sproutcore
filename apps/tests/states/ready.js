@@ -20,8 +20,18 @@ TestRunner.READY = SC.Responder.create({
 
     TestRunner.sourceController.selectObject(target);
     
-    if (target) TestRunner.makeFirstResponder(TestRunner.READY_LIST);
+    var cnt = target.get('tests').get('length');
+    if (target && cnt===0) {
+      TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
+    } else if (target) TestRunner.makeFirstResponder(TestRunner.READY_LIST);
     else TestRunner.makeFirstResponder(TestRunner.READY_EMPTY);
+  },
+
+  testsDidChange: function(sender, target) {
+    var cnt = TestRunner.targetController.getPath('tests.length');
+    if (!cnt) {
+      TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
+    } else TestRunner.makeFirstResponder(TestRunner.READY_LIST);
   },
   
   /**

@@ -13,5 +13,10 @@
 SC.stringsFor('English', {
   "Kind.app": "Apps",
   "Kind.framework" : "Frameworks",
-  "Kind.sproutcore" : "SproutCore"
+  "Kind.sproutcore" : "SproutCore",
+  
+  "_No Targets" : "No Targets",
+  "_No Tests" : "No Tests",
+  "_Loading Targets" : "Loading Targets",
+  "_No Target Selected" : "No Target Selected"
 }) ;

@@ -70,7 +70,7 @@ TestRunner.mainPage = SC.Page.design({
         render: function(context, firstTime) {
           var img_url = sc_static('images/sproutcore-logo');
           context.push('<img src="%@" />'.fmt(img_url));
-          context.push('<span>', "Test Runner".loc(), "</span>");
+          context.push('<span>', "_Test Runner".loc(), "</span>");
         }
       }),
 
@@ -98,7 +98,7 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
-      value: "Loading Targets...".loc()
+      value: "_Loading Targets".loc()
     })
   }),
 
@@ -108,7 +108,17 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
-      value: "No Targets".loc()
+      value: "_No Targets".loc()
+    })
+  }),
+
+  noTests: SC.View.design({
+    childViews: "labelView".w(),
+    
+    labelView: SC.LabelView.design({
+      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      textAlign: SC.ALIGN_CENTER,
+      value: "_No Tests".loc()
     })
   }),
   
@@ -118,7 +128,7 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
-      value: "Loading Tests".loc()
+      value: "_Loading Tests".loc()
     })
   }),
 
@@ -128,7 +138,7 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
-      value: "No Target Selected".loc()
+      value: "_No Target Selected".loc()
     })
   }),
   
