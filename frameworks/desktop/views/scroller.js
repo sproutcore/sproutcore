@@ -121,14 +121,12 @@ SC.ScrollerView = SC.View.extend({
       case SC.LAYOUT_VERTICAL:
         // if (firstTime) context.addClass('sc-vertical') ;
         context.addClass('sc-vertical') ;
-        context.push('<div class="sc-inner" style="height: %@px;">\
-          </div>'.fmt(size)) ;
+        context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(size)) ;
         break ;
       case SC.LAYOUT_HORIZONTAL:
         // if (firstTime) context.addClass('sc-horizontal') ;
         context.addClass('sc-horizontal') ;
-        context.push('<div class="sc-inner" style="width: %@px;">\
-          </div>'.fmt(size)) ;
+        context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(size)) ;
         break ;
       default:
         throw "You must set a layoutDirection for your scroller class." ;
@@ -200,9 +198,22 @@ SC.ScrollerView = SC.View.extend({
   
   /** @private */
   _sc_scroller_valueDidChange: function() {
-    // console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
-    if (this.get('value') !== this._sc_scrollValue) {
-      this.displayDidChange() ; // re-render
+    console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
+
+    var v = (this.get('value')||0) - (this.get('minimum')||0),
+        layer;
+        
+    if (v !== this._sc_scrollValue) {
+      layer = this.get('layer');
+      switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+          layer.scrollTop = v;
+          break ;
+
+        case SC.LAYOUT_HORIZONTAL:
+          layer.scrollLeft = v;
+          break ;
+      }
     }
     
     // notify owner if it has a different scroll value
