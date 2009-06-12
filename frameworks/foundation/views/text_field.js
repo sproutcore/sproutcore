@@ -42,11 +42,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   isEditing: NO,
 
-  /**
-    If YES then we use textarea instead of input. 
-  */
-  isTextArea: NO,
-
   
   /** isEditable maps to isEnabled with a TextField. */
   isEditable: function() {

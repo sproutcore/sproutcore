@@ -23,7 +23,6 @@ module("isVisibleInWindow", {
   
   setup: function() {
     pane = SC.MainPane.create() ;
-    pane.append() ;
     view = SC.View.create() ; 
   },
   
@@ -40,18 +39,13 @@ test("a new view should not be visible initially", function() {
 });
 
 test("adding a new view to a visible pane should make it visible", function() {
-  ok(view.get('isVisible'), "view.get('isVisible') === NO") ;
+  ok(view.get('isVisible'), "view.get('isVisible') === YES") ;
   ok(pane.get('isVisible'), "pane.get('isVisible') === YES") ;
   SC.RunLoop.begin();
   pane.appendChild(view) ;
-  SC.RunLoop.end();
-  ok(view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES") ;
-  ok(!view.$().hasClass('hidden'), "after pane.appendChild(view), view.$().hasClass('hidden') should be false") ;
-  SC.RunLoop.begin();
+  pane.append() ;
   view.set('isVisible', NO);
   SC.RunLoop.end();
-  
+  ok(!view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES") ;
   ok(view.$().hasClass('hidden'), "after view.set('isVisible', NO), view.$().hasClass('hidden') should be true") ;
-  
-  
 });

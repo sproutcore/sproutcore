@@ -104,7 +104,11 @@ SC.Request = SC.Object.extend({
     
     if (this.get("isJSON")) {
       var source = response.responseText ;
-      var json = SC.json.decode(source) ;
+      try{
+        var json = SC.json.decode(source) ;
+      }catch(e){
+        json = response.responseText ;
+      }
       //TODO cache this value?
       return json ;
     }
