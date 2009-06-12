@@ -133,9 +133,9 @@ SC.PickerPane = SC.PalettePane.extend({
   preferMatrix: null,
 
   /**
-    Displays a new picker pane according to the passed parameters.  
-    Every parameter except for the anchorViewOrElement is optional.  
-
+    Displays a new picker pane according to the passed parameters.
+    Every parameter except for the anchorViewOrElement is optional.
+  
     @param {Object} anchorViewOrElement view or element to anchor to
     @param {String} preferType optional apply picker position rule
     @param {Array} preferMatrix optional apply custom offset or position pref matrix for specific preferType
@@ -143,15 +143,13 @@ SC.PickerPane = SC.PalettePane.extend({
   */
   popup: function(anchorViewOrElement, preferType, preferMatrix) {
     var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
-     
     this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
-    this.positionPane();
     this.endPropertyChanges();
-    
     this.append();
+    this.positionPane();
   },
 
   /** @private
