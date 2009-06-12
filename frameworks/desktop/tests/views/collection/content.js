@@ -227,9 +227,7 @@ test("inserting into middle should reload all following items", function() {
 // EDITING PROPERTIES
 // 
 
-test("editing properties when observeContentProperties is NO", function() {
-  equals(view.get('observeContentProperties'), NO, 'precond - observeContentProperties should be NO');
-
+test("editing properties", function() {
   view.set('content', content1);
   view.reset();
   view.contentPropertyDidChange.reset();
@@ -243,24 +241,6 @@ test("editing properties when observeContentProperties is NO", function() {
   view.computeLayout.expect(NO);
 });
 
-test("editing properties when observeContentProperties is YES", function() {
-  // assume this only matters when content is set.  normally you shouldn't 
-  // change this value on a view once it is created.
-  view.set('observeContentProperties', YES);
-  equals(view.get('observeContentProperties'), YES, 'precond - observeContentProperties should be YES');
-
-  view.set('content', content1);
-  view.reset();
-  view.contentPropertyDidChange.reset();
-  
-  var obj = content1.objectAt(3);
-  ok(obj !== null, 'precond -has object to edit');
-  
-  obj.set('title', 'FOO');
-  view.reload.expect(NO, 0);
-  view.contentPropertyDidChange.expect(1);
-  view.computeLayout.expect(NO);
-});
 
 
 

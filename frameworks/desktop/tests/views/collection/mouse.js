@@ -94,7 +94,9 @@ test("clicking on an item should select it", function() {
 test("clicking on a selected item should clear selection and reselect it it", function() {
 
   view.select(SC.IndexSet.create(1,5));
+  SC.stopIt = YES ;
   clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
+  SC.stopIt = NO ;
 });
 
 test("clicking on unselected item should clear selection and select it", function() {

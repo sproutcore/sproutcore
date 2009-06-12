@@ -195,6 +195,18 @@ SC.CollectionView = SC.View.extend(
   canDeleteContentBindingDefault: SC.Binding.bool(),
   
   /**
+    Allow user to edit the content by double clicking on it or hitting return.
+    This will only work if isEditable is YES and the item view implements 
+    the beginEditing() method.
+    
+    @type {Boolean}
+  */
+  canEditContent: NO,
+  
+  /** @private */
+  canEditContentBindingDefault: SC.Binding.bool(),
+  
+  /**
     Accept drops for data other than reordering.
     
     Setting this property to return true when the view is instantiated will 
@@ -364,16 +376,6 @@ SC.CollectionView = SC.View.extend(
     Enables keyboard-based navigate, deletion, etc. if set to true.
   */
   acceptsFirstResponder: NO,
-  
-  /**
-    Enables observing content property changes.  Set this property if you 
-    want to deal with property changes on content objects directly in the 
-    collection view instead of delegating change observing to individual item
-    views.
-    
-    @type {Boolean}
-  */
-  observeContentProperties: NO,
   
   /** 
     The insertion orientation.  This is used to determine which
@@ -620,10 +622,8 @@ SC.CollectionView = SC.View.extend(
     if (observer) {
       content.updateRangeObserver(observer, nowShowing);
     } else {
-      var func = this.contentRangeDidChange,
-          deep = this.get('observeContentProperties');
-      
-      observer = content.addRangeObserver(nowShowing, this, func, null, deep);      
+      var func = this.contentRangeDidChange;
+      observer = content.addRangeObserver(nowShowing, this, func, null);      
       this._cv_contentRangeObserver = observer ;
     }
     
@@ -1790,29 +1790,35 @@ SC.CollectionView = SC.View.extend(
     otherwise, invoke action.
   */
   insertNewline: function(sender, evt) {
-    var sel, itemView, itemViews=this._sc_itemViews, n=0;
-    if (this.get('isEditable')) {
-      sel = this.get('selection') ;
+    var canEdit = this.get('isEditable') && this.get('canEditContent'),
+        sel, content, set, idx, itemView;
+    
+    // first make sure we have a single item selected; get idx 
+    if (canEdit) {
+      sel     = this.get('selection') ;
+      content = this.get('content');
       if (sel && sel.get('length') === 1) {
-        while(!itemViews[n].isSelected){ n++; }
-        itemView = this.itemViewForContentIndex(n) ;
-        if (itemView && itemView.beginEditing) {
-          this.scrollToItemView(itemView) ;
-          itemView.beginEditing() ;
-        }
+        set = sel.indexSetForSource(content);
+        idx = set ? set.get('min') : -1;
+        canEdit = idx>=0;
       }
+    }
+    
+    // next find itemView and ensure it supports editing
+    if (canEdit) {
+      itemView = this.itemViewForContentIndex(idx);
+      canEdit = itemView && SC.typeOf(itemView.beginEditing)===SC.T_FUNCTION;
+    }
       
-    // invoke action!
+    // ok, we can edit..
+    if (canEdit) {
+      this.scrollToContentIndex(idx);
+      itemView = this.itemViewForContentIndex(idx); // just in case
+      itemView.beginEditing();
+      
+    // invoke action 
     } else {
-      sel = this.get('selection') ;
-      if (sel && sel.get('length') === 1) {
-        while(!itemViews[n].isSelected){ n++; }
-        itemView = this.itemViewForContentIndex(n) ;
-      } else{
-        itemView = null;
-      }
-      
-      this.invokeLast(this._cv_action, 0, itemView, null) ;
+      this.invokeLater(this._cv_action, 0, itemView, null) ;
     }
     
     return YES ; // always handle
@@ -1918,7 +1924,7 @@ SC.CollectionView = SC.View.extend(
     var view   = this.itemViewForEvent(ev),
         info   = this.mouseDownInfo,
         idx    = info.contentIndex,
-        contentIndex, sel, isSelected, canEdit, itemView;
+        contentIndex, sel, isSelected, canEdit, itemView, content;
     
     if (this.get('useToggleSelection')) {
       if (!view) return ; // do nothing when clicked outside of elements
@@ -1948,20 +1954,23 @@ SC.CollectionView = SC.View.extend(
       // selection and reselect the clicked on item.
       if (info.shouldReselect) {
         
+        //debugger ;
         // - contentValueIsEditable is true
-        canEdit = this.get('contentValueIsEditable') ;
+        canEdit = this.get('isEditable') && this.get('canEditContent') ;
         
         // - the user clicked on an item that was already selected
+        //   ^ this is the only way shouldReset is set to YES
+        
         // - is the only item selected
         if (canEdit) {
           sel = this.get('selection') ;
-          canEdit = sel && (sel.get('length') === 1) && sel.contains(idx);
+          canEdit = sel && (sel.get('length') === 1);
         }
         
         // - the item view responds to contentHitTest() and returns YES.
         // - the item view responds to beginEditing and returns YES.
         if (canEdit) {
-          itemView = this.itemViewForContent(idx) ;
+          itemView = this.itemViewForContentIndex(idx) ;
           canEdit = itemView && (!itemView.contentHitTest || itemView.contentHitTest(ev)) ;
           canEdit = (canEdit && itemView.beginEditing) ? itemView.beginEditing() : NO ;
         }
@@ -1975,8 +1984,8 @@ SC.CollectionView = SC.View.extend(
     
     this._mouseDownEvent = null ;
 
-    // handle actOnSelect
-    this._cv_performSelectAction(view, ev);
+    // handle actions on editing
+    this._cv_performSelectAction(view, ev, 0, ev.clickCount);
     
     return NO;  // bubble event to allow didDoubleClick to be called...
   },
@@ -2009,15 +2018,6 @@ SC.CollectionView = SC.View.extend(
     this._lastHoveredItem = null ;
     if (view && view.mouseOut) view.mouseOut(ev) ;
     return YES ;
-  },
-  
-  /** @private */
-  doubleClick: function(ev) {
-    var view = this.itemViewForEvent(ev) ;
-    if (view) {
-      this.invokeLater(this._cv_action, 0, view, ev) ;
-      return true ;
-    } else return false ;
   },
   
   /** @private */
@@ -2684,10 +2684,11 @@ SC.CollectionView = SC.View.extend(
     current selection (saved as a separate array so that a change in sel
     in the meantime will not be lost)
   */
-  _cv_performSelectAction: function(view, ev, delay) {
+  _cv_performSelectAction: function(view, ev, delay, clickCount) {
     var sel;
     if (delay === undefined) delay = 0 ;
-    if (this.get('actOnSelect')) {
+    if (clickCount === undefined) clickCount = 1;
+    if ((clickCount>1) || this.get('actOnSelect')) {
       sel = this.get('selection');
       sel = sel ? sel.toArray() : [];
       if (this._cv_actionTimer) this._cv_actionTimer.invalidate();
@@ -2706,7 +2707,7 @@ SC.CollectionView = SC.View.extend(
     this._cv_actionTimer = null;
     if (action) {
       // if the action is a function, just call it
-      if (SC.typeOf(action) == SC.T_FUNCTION) return this.action(view, evt) ;
+      if (SC.typeOf(action) === SC.T_FUNCTION) return this.action(view, evt) ;
       
       // otherwise, use the new sendAction style
       var pane = this.get('pane') ;

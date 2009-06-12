@@ -422,9 +422,7 @@ SC.ListItemView = SC.View.extend(
       this._isMouseDownOnDisclosure = YES;
       this._isMouseInsideDisclosure = YES ;
       return YES;
-    } else if (evt.clickCount === 2)  {
-      this.beginEditing();
-      return YES;   
+
     }
     
     return NO ; // let the collection view handle this event
@@ -432,7 +430,7 @@ SC.ListItemView = SC.View.extend(
   
   mouseUp: function(evt) {
     var ret= NO, del, checkboxKey, content, state, idx, set;
-    
+
     // if mouse was down in checkbox -- then handle mouse up, otherwise 
     // allow parent view to handle event.
     if (this._isMouseDownOnCheckbox) {
