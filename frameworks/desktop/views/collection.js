@@ -55,6 +55,8 @@ SC.CollectionView = SC.View.extend(
   
   classNames: ['sc-collection-view'],
   
+  ACTION_DELAY: 200,
+  
   // ......................................
   // PROPERTIES
   //
@@ -901,6 +903,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
+
     // return from cache if possible
     var content   = this.get('content'),
         itemViews = this._sc_itemViews,
@@ -1441,13 +1444,13 @@ SC.CollectionView = SC.View.extend(
       }
       
       // Ensure we are not out of bounds
-      if (selTop < 0) selTop = 0 ;
+      if (SC.none(selTop) || (selTop < 0)) selTop = 0 ;
       if (selBottom < selTop) selBottom = selTop ;
       
     // if not extending, just select the item previous to the selTop
     } else {
       selTop = this._findPreviousSelectableItemFromIndex(selTop - numberOfItems);
-      if (selTop < 0) selTop = 0 ;
+      if (SC.none(selTop) || (selTop < 0)) selTop = 0 ;
       selBottom = selTop ;
       anchor = null ;
     }
@@ -1646,6 +1649,7 @@ SC.CollectionView = SC.View.extend(
   */
   moveDown: function(sender, evt) {
     this.selectNextItem(false, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
   
@@ -1654,6 +1658,7 @@ SC.CollectionView = SC.View.extend(
   */
   moveUp: function(sender, evt) {
     this.selectPreviousItem(false, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
 
@@ -1662,8 +1667,11 @@ SC.CollectionView = SC.View.extend(
     If item is expandable, will collapse.
   */
   moveLeft: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1);
-    else {
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectPreviousItem(false, 1);
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    
+    } else {
       var sel     = this.get('selection'),
           content = this.get('content'),
           indexes = sel ? sel.indexSetForSource(content) : null;
@@ -1723,8 +1731,10 @@ SC.CollectionView = SC.View.extend(
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveRight: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(false, 1) ;
-    else {
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectNextItem(false, 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    } else {
       var sel     = this.get('selection'),
           content = this.get('content'),
           indexes = sel ? sel.indexSetForSource(content) : null;
@@ -1737,12 +1747,14 @@ SC.CollectionView = SC.View.extend(
   /** @private */
   moveDownAndModifySelection: function(sender, evt) {
     this.selectNextItem(true, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
   
   /** @private */
   moveUpAndModifySelection: function(sender, evt) {
     this.selectPreviousItem(true, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
   
@@ -1750,7 +1762,10 @@ SC.CollectionView = SC.View.extend(
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveLeftAndModifySelection: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(true, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectPreviousItem(true, 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true ;
   },
 
@@ -1758,7 +1773,10 @@ SC.CollectionView = SC.View.extend(
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveRightAndModifySelection: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(true, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectNextItem(true, 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true ;
   },
 
@@ -1894,8 +1912,7 @@ SC.CollectionView = SC.View.extend(
   /** @private */
   mouseUp: function(ev) {
     
-    var canAct = this.get('actOnSelect'),
-        view   = this.itemViewForEvent(ev),
+    var view   = this.itemViewForEvent(ev),
         info   = this.mouseDownInfo,
         idx    = info.contentIndex,
         contentIndex, sel, isSelected, canEdit, itemView;
@@ -1954,15 +1971,9 @@ SC.CollectionView = SC.View.extend(
     }
     
     this._mouseDownEvent = null ;
-    
-    // if actOnSelect is YES, then try to invoke the action, passing the 
-    // current selection (saved as a separate array so that a change in sel
-    // in the meantime will not be lost)
-    if (canAct) {
-      sel = this.get('selection');
-      sel = sel ? sel.toArray() : [];
-      this.invokeLater(this._cv_action, 0, ev, view, sel) ;
-    }
+
+    // handle actOnSelect
+    this._cv_performSelectAction(view, ev);
     
     return NO;  // bubble event to allow didDoubleClick to be called...
   },
@@ -2664,14 +2675,32 @@ SC.CollectionView = SC.View.extend(
   },
   
   /** @private
+    Fires an action after a selection if enabled.
+    
+    if actOnSelect is YES, then try to invoke the action, passing the 
+    current selection (saved as a separate array so that a change in sel
+    in the meantime will not be lost)
+  */
+  _cv_performSelectAction: function(view, ev, delay) {
+    var sel;
+    if (delay === undefined) delay = 0 ;
+    if (this.get('actOnSelect')) {
+      sel = this.get('selection');
+      sel = sel ? sel.toArray() : [];
+      if (this._cv_actionTimer) this._cv_actionTimer.invalidate();
+      this._cv_actionTimer = this.invokeLater(this._cv_action, delay, view, ev, sel) ;
+    }
+  },
+  
+  /** @private
     Perform the action.  Supports legacy behavior as well as newer style
     action dispatch.
   */
   _cv_action: function(view, evt, context) {
-    // console.log('_cv_action invoked on %@ with view %@, evt %@'.fmt(this, view, evt));
     var action = this.get('action');
     var target = this.get('target') || null;
-    // console.log('action %@, target %@'.fmt(action, target));
+
+    this._cv_actionTimer = null;
     if (action) {
       // if the action is a function, just call it
       if (SC.typeOf(action) == SC.T_FUNCTION) return this.action(view, evt) ;
