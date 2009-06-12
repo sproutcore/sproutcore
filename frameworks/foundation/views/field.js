@@ -27,11 +27,6 @@ sc_require('mixins/validatable') ;
 */
 SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
 /** @scope SC.FieldView.prototype */ {
-  
-  /**
-    If YES then we use textarea instead of input. 
-  */
-  isTextArea: NO,
 
   /**
     The raw value of the field itself.  This is computed from the 'value'
@@ -263,7 +258,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.
   _field_setFieldValue: function(newValue) {
-    
     this.propertyWillChange('fieldValue');
     if (this.fieldValueForObject) {
       newValue = this.fieldValueForObject(newValue) ;

@@ -576,7 +576,8 @@ SC.ListItemView = SC.View.extend(
    var oldLineHeight = el.css('lineHeight');
    var fontSize = el.css('fontSize');
    var top = this.$().css('top');
-   top = parseInt(top.substring(0,top.length-2),0);
+   if(top) top = parseInt(top.substring(0,top.length-2));
+   else top =0;
    var lineHeight = oldLineHeight;
    var lineHeightShift = 0;
    
