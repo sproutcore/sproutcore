@@ -58,6 +58,8 @@ test('advance', function() {
 
 test('compare', function() {  
   equals(SC.DateTime.compare(dt, dt), 0);
+  equals(dt.isEqual(dt), YES);
+  equals(dt.advance({hour: 1}).isEqual(dt), NO);
   equals(SC.DateTime.compare(dt, dt.advance({hour: 1})), -1);
   equals(SC.DateTime.compare(dt.advance({hour: 1}), dt), 1);
   equals(SC.DateTime.compareDate(dt, dt.advance({hour: 1})), 0);
@@ -126,4 +128,24 @@ test('binding', function() {
   var binding = SC.Binding.dateTime('%Y-%m-%d %H:%M:%S').from('value', fromObject).to('value', toObject).connect();
   SC.Binding.flushPendingChanges();
   equals(toObject.get('value'), '1985-05-08 01:00:22');
+});
+
+test('cache', function() {
+  
+  SC.DateTime.create(options);
+  var cache_length_1 = SC.keys(SC.DateTime._dt_cache).length;
+  SC.DateTime.create(options);
+  var cache_length_2 = SC.keys(SC.DateTime._dt_cache).length;
+  equals(
+    cache_length_1, cache_length_2,
+    "Creating twice the same datetime should not modify the cache's length");
+  
+  var dates = [];
+  for (var i = 0; i < 3*SC.DateTime._DT_CACHE_MAX_LENGTH; i++) {
+    dates[i] = SC.DateTime.create(i);
+  }
+  ok(
+    SC.keys(SC.DateTime._dt_cache).length <= 2*SC.DateTime._DT_CACHE_MAX_LENGTH,
+    "Creating a lot of datetimes should not make a cache larger than the maximum allowed size");
+  
 });
