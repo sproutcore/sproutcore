@@ -1845,9 +1845,6 @@ SC.CollectionView = SC.View.extend(
     // Instead, we just need to save a bunch of state about the mouse down
     // so we can choose the right thing to do later.
     
-    // save the original mouse down event for use in dragging.
-    this._mouseDownEvent = ev ;
-    
     // Toggle selection only triggers on mouse up.  Do nothing.
     if (this.get('useToggleSelection')) return true;
     
@@ -1860,9 +1857,10 @@ SC.CollectionView = SC.View.extend(
         info, anchor ;
         
     info = this.mouseDownInfo = {
-      itemView: itemView,
+      event:        ev,  
+      itemView:     itemView,
       contentIndex: contentIndex,
-      at: Date.now()
+      at:           Date.now()
     };
       
     // become first responder if possible.
@@ -1981,8 +1979,6 @@ SC.CollectionView = SC.View.extend(
       
       this._cleanupMouseDown() ;
     }
-    
-    this._mouseDownEvent = null ;
 
     // handle actions on editing
     this._cv_performSelectAction(view, ev, 0, ev.clickCount);
@@ -1992,7 +1988,15 @@ SC.CollectionView = SC.View.extend(
   
   /** @private */
   _cleanupMouseDown: function() {
-    this._mouseDownEvent = null;
+    
+    // delete items explicitly to avoid leaks on IE
+    var info = this.mouseDownInfo, key;
+    if (info) {
+      for(key in info) {
+        if (!info.hasOwnProperty(key)) continue;
+        delete info[key];
+      }
+    }
     this.mouseDownInfo = null;
   },
   
@@ -2083,22 +2087,21 @@ SC.CollectionView = SC.View.extend(
   }.property().cacheable(),
   
   /**
-    This property is set to the array of content objects that are the subject
-    of a drag whenever a drag is initiated on the collection view.  You can
-    consult this property when implementing your collection view delegate 
-    methods, but otherwise you should not use this property in your code.
-    
-    Note that drag content will always appear in the same order the content
-    appears in the source content array.
-    
-    @type Array
+    This property is set to the IndexSet of content objects that are the 
+    subject of a drag whenever a drag is initiated on the collection view.  
+    You can consult this property when implementing your collection view 
+    delegate  methods, but otherwise you should not use this property in your 
+    code.
+
+    @type SC.IndexSet
   */
   dragContent: null,
   
   /**
     This property is set to the proposed insertion index during a call to
-    collectionViewValidateDragOperation().  Your delegate implementations can change
-    the value of this property to enforce a drop some in some other location.
+    collectionViewValidateDragOperation().  Your delegate implementations can 
+    change the value of this property to enforce a drop some in some other 
+    location.
     
     @type Number
   */
@@ -2106,11 +2109,12 @@ SC.CollectionView = SC.View.extend(
   
   /**
     This property is set to the proposed drop operation during a call to
-    collectionViewValidateDragOperation().  Your delegate implementations can change
-    the value of this property to enforce a different type of drop operation.
+    collectionViewValidateDragOperation().  Your delegate implementations can 
+    change the value of this property to enforce a different type of drop 
+    operation.
     
     @type Number
-    @field
+    @property
   */
   proposedDropOperation: null,
   
@@ -2125,13 +2129,17 @@ SC.CollectionView = SC.View.extend(
   */
   mouseDragged: function(ev) {
     
-    var del = this.delegateFor('isCollectionViewDelegate', this.delegate, this.get('content'));
+    var del     = this.get('selectionDelegate'),
+        content = this.get('content'),
+        sel     = this.get('selection'),
+        info    = this.mouseDownInfo,
+        dragContent, dragDataTypes, dragView;
     
     // if the mouse down event was cleared, there is nothing to do; return.
-    if (this._mouseDownEvent === null) return YES ;
+    if (!info || info.contentIndex<0) return YES ;
     
     // Don't do anything unless the user has been dragging for 123msec
-    if ((Date.now() - this._mouseDownAt) < 123) return YES ;
+    if ((Date.now() - info.at) < 123) return YES ;
     
     // OK, they must be serious, decide if a drag will be allowed.
     if (del.collectionViewShouldBeginDrag(this)) {
@@ -2140,39 +2148,34 @@ SC.CollectionView = SC.View.extend(
       // items appearing in this collection, in the order of the 
       // collection.
       //
-      // Set this to the dragContent property.
-      var content = this.get('content') || [] ;
-      var dragContent;
-      
+      // Compute the dragContent - the indexes we will be dragging.      
       // if we don't select on mouse down, then the selection has not been 
       // updated to whatever the user clicked.  Instead use
       // mouse down content.
       if (!this.get("selectOnMouseDown")) {
-        dragContent = [this._mouseDownContent];
-      } else {
-        dragContent = this.get('selection').sort(function(a,b) {
-          a = content.indexOf(a) ;
-          b = content.indexOf(b) ;
-          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-        });
-      }
+        dragContent = SC.IndexSet.create(info.contentIndex);
+      } else dragContent = sel ? sel.indexSetForSource(content) : null;
+      if (!dragContent) return YES; // nothing to drag
       
+      dragContent = { content: content, indexes: dragContent };
       this.set('dragContent', dragContent) ;
       
       // Get the set of data types supported by the delegate.  If this returns
       // a null or empty array and reordering content is not also supported
       // then do not start the drag.
-      if (this.get('dragDataTypes').get('length') > 0) {
+      dragDataTypes = this.get('dragDataTypes');
+      if (dragDataTypes && dragDataTypes.get('length') > 0) {
+        
         // Build the drag view to use for the ghost drag.  This 
         // should essentially contain any visible drag items.
-        //var view = this.ghostViewFor(dragContent) ;
-        var view = this.invokeDelegateMethod(this.delegate, 'dragViewFor', dragContent, this);
+        dragView = del.collectionViewDragViewFor(this, dragContent.indexes);
+        if (!dragView) dragView = this._cv_dragViewFor(dragContent.indexes);
         
         // Initiate the drag
         SC.Drag.start({
-          event: this._mouseDownEvent,
+          event: info.event,
           source: this,
-          dragView: view,
+          dragView: dragView,
           ghost: NO,
           slideBack: YES,
           dataSource: this
@@ -2184,13 +2187,41 @@ SC.CollectionView = SC.View.extend(
         this._lastInsertionIndex = null ;
         
       // Drag was not allowed by the delegate, so bail.
-      } else {
-        this.set('dragContent', null) ;
-      }
+      } else this.set('dragContent', null) ;
       
       return YES ;
     }
   },
+
+  /** @private
+    Compute a default drag view by grabbing the raw layers and inserting them
+    into a drag view.
+  */
+  _cv_dragViewFor: function(dragContent) {
+    // find only the indexes that are in both dragContent and nowShowing.
+    var indexes = this.get('nowShowing').without(dragContent);
+    indexes = this.get('nowShowing').without(indexes);
+    
+    var dragLayer = this.get('layer').cloneNode(false); 
+    var view = SC.View.create({ layer: dragLayer, parentView: this });
+
+    // cleanup weird stuff that might make the drag look out of place
+    SC.$(dragLayer).css('backgroundColor', 'transparent')
+      .css('border', 'none')
+      .css('top', 0).css('left', 0);
+    
+    indexes.forEach(function(i) {
+      var itemView = this.itemViewForContentIndex(i),
+          layer    = itemView ? itemView.get('layer') : null;
+
+      if (layer) dragLayer.appendChild(layer.cloneNode(true));
+      layer = null;
+    }, this);
+
+    dragLayer = null;
+    return view ;
+  },
+
   
   /**
     Implements the drag data source protocol for the collection view.  This
@@ -2201,26 +2232,18 @@ SC.CollectionView = SC.View.extend(
     @type Array
   */
   dragDataTypes: function() {
-    // console.log('dragDataTypes called on %@'.fmt(this));
-    
     // consult delegate.
-    var ret = this.invokeDelegateMethod(this.delegate, 'collectionViewDragDataTypes', this) ;
-    var canReorderContent = this.get('canReorderContent') ;
-    
-    // bail if ret returned null or empty array and cannot reorder.
-    if ((!ret || ret.get('length')===0) && !canReorderContent) return [];
-    
-    // add reorder type if needed.
-    if (canReorderContent) {
-      ret = (ret) ? ret.slice() : [] ;
-      
-      var key = this.get('reorderDataType') ;
-      if (ret.indexOf(key) < 0) ret.push(key) ;
+    var del = this.get('selectionDelegate'),
+        ret = del.collectionViewDragDataTypes(this),
+        key ;
+
+    if (this.get('canReorderContent')) {
+      ret = ret ? ret.copy() : [];
+      key = this.get('reorderDataType');
+      if (ret.indexOf(key) < 0) ret.push(key);          
     }
-    return ret ;
-    
-    //data: { "_mouseDownContent": dragContent }
-      
+
+    return ret ? ret : [];
   }.property(),
   
   /**
@@ -2238,8 +2261,9 @@ SC.CollectionView = SC.View.extend(
       }
     }
     
-    // otherwise, just pass along to the delegate.
-    return this.invokeDelegateMethod(this.delegate, 'collectionViewDragDataForType', this, drag, dataType) ;
+    // otherwise, just pass along to the delegate
+    var del = this.get('selectionDelegate');
+    return del.collectionViewDragDataForType(this, drag, dataType);
   },
   
   /**
@@ -2247,22 +2271,23 @@ SC.CollectionView = SC.View.extend(
     consult the collection view delegate, if you implement those methods.
   */
   computeDragOperations: function(drag, evt) {
+    return SC.DRAG_NONE; // disable for the moment
+    
     // console.log('computeDragOperations called on %@'.fmt(this));
     
     // the proposed drag operation is DRAG_REORDER only if we can reorder
     // content and the drag contains reorder content.
-    var op = SC.DRAG_NONE ;
+    var op = SC.DRAG_NONE,
+        del = this.get('selectionDelegate');
+
     if (this.get('canReorderContent')) {
-      var types = drag.get('dataTypes') ;
-      if (types.indexOf(this.get('reorderDataType')) >= 0) {
+      if (drag.get('dataTypes').indexOf(this.get('reorderDataType')) >= 0) {
         op = SC.DRAG_REORDER ;
       }
     }
     
     // Now pass this onto the delegate.
-    // op = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, SC.DROP_ANY, -1, op) ;
-    op = this.invokeDelegateMethod(this.delegate, 'collectionViewComputeDragOperations', this, drag, op) ;
-    
+    op = del.collectionViewComputeDragOperations(this, drag, op);
     if (op & SC.DRAG_REORDER) op = SC.DRAG_MOVE ;
     
     // return
@@ -2505,23 +2530,6 @@ SC.CollectionView = SC.View.extend(
   },
 
   
-  dragViewFor: function(dragContent) {
-    // console.log('%@.dragViewFor(dragContent=%@)'.fmt(this, dragContent)) ;
-    var view = SC.View.create() ;
-    var layer = this.get('layer').cloneNode(false) ;
-    
-    view.set('parentView', this) ;
-    view.set('layer', layer) ;
-    
-    var ary = dragContent, content = SC.makeArray(this.get('content')) ;
-    for (var idx=0, len=ary.length; idx<len; idx++) {
-      var itemView = this.itemViewAtContentIndex(content.indexOf(ary[idx])) ;
-      if (itemView) layer.appendChild(itemView.get('layer').cloneNode(true)) ;
-    }
-    
-    return view ;
-  },
-
   // ..........................................................
   // INSERTION POINT
   // 
