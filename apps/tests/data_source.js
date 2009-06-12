@@ -83,6 +83,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
     } else {
       storeKeys = opts.store.loadRecords(TestRunner.Test, response);
       ret       = opts.ret;
+      ret.set('isLoaded', YES);
       ret.replace(0, ret.get('length'), storeKeys);
     }
     TestRunner.sendAction('testsDidChange');
