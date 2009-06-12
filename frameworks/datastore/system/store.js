@@ -1330,7 +1330,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // collect status and process
       status = this.readStatus(storeKey);
       
-      if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
+      if ((status == K.EMPTY) || (status == K.ERROR)) {
         throw K.NOT_FOUND_ERROR ;
       }else{
         if(status==K.READY_NEW){
@@ -1343,6 +1343,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           retUpdate.push(storeKey);
         } else if (status==K.DESTROYED_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_DESTROYING);
+          this.dataHashDidChange(storeKey, rev, YES);
+          retDestroy.push(storeKey);
+        } else if (status==K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
           retDestroy.push(storeKey);
         }
