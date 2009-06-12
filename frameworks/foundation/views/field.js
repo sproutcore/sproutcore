@@ -27,6 +27,12 @@ sc_require('mixins/validatable') ;
 */
 SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
 /** @scope SC.FieldView.prototype */ {
+  
+  /**
+     If YES then we use textarea instead of input. 
+     WARNING: Use only with textField** Juan
+  */
+  isTextArea: NO,
 
   /**
     The raw value of the field itself.  This is computed from the 'value'
