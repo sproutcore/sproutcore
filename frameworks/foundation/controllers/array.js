@@ -191,6 +191,17 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
            (!!content.isEnumerable || !!this.get('allowsSingleContent'));
   }.property('content', 'allowSingleContent'),
 
+  /**
+    The current load state of the RecordArray.  If the storeKeys has a state
+    property, then this property will return that value.  Otherwise it returns
+    SC.Record.READY.
+  */
+  state: function() {
+    var content = this.get('content'),
+        ret = content ? content.get('state') : null;
+    return ret ? ret : SC.Record.READY;
+  }.property().cacheable(),
+  
   // ..........................................................
   // METHODS
   // 
@@ -407,6 +418,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
         ro     = this._scac_rangeObserver,
         func   = this._scac_rangeDidChange,
         efunc  = this._scac_enumerableDidChange,
+        sfunc  = this._scac_contentStateDidChange,
         newlen;
         
     if (last === cur) return this; // nothing to do
@@ -415,6 +427,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (last) {
       if (ro && last.isSCArray) last.removeRangeObserver(ro);
       else if (last.isEnumerable) last.removeObserver('[]', this, efunc);
+      last.removeObserver('state', this, sfunc);
     }
     
     ro = null;
@@ -430,6 +443,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       if (!orders && cur.isSCArray) ro = cur.addRangeObserver(null,this,func);
       else if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
       newlen = cur.isEnumerable ? cur.get('length') : 1; 
+      cur.addObserver('state', this, sfunc);
+      
     } else newlen = SC.none(cur) ? 0 : 1;
 
     this._scac_rangeObserver = ro;
@@ -437,6 +452,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
     // finally, notify enumerable content has changed.
     this._scac_length = newlen;
+    this._scac_contentStateDidChange();
     this.enumerableContentDidChange(0, newlen, newlen - oldlen);
     this.updateSelectionAfterContentChange();
   }.observes('content'),
@@ -481,6 +497,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
       this.endPropertyChanges();
       this.updateSelectionAfterContentChange();
     }
+  },
+  
+  /**
+    Whenver the content "state" property changes, relay out.
+  */
+  _scac_contentStateDidChange: function() {
+    this.notifyPropertyChange('state');
   }
   
 });

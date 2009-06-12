@@ -511,11 +511,12 @@ if (!Array.prototype.lastIndexOf) {
     // from member items.
     unknownProperty: function(key, value) {
       var ret = this.reducedProperty(key, value) ;
-      if (ret === undefined) {
-        ret = (value === undefined) ? this.invoke('get', key) : null ;
+      if ((value !== undefined) && ret === undefined) {
+        ret = this[key] = value;
       }
       return ret ;
     }
+    
   });
     
   // If browser did not implement indexOf natively, then override with

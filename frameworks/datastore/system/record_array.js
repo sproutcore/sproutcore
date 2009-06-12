@@ -47,6 +47,17 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   queryKey: null,
   
+  /**
+    The current load state of the RecordArray.  If the storeKeys has a state
+    property, then this property will return that value.  Otherwise it returns
+    SC.Record.READY.
+  */
+  state: function() {
+    var storeKeys = this.get('storeKeys'),
+        ret = (storeKeys && !SC.none(storeKeys.state)) ? storeKeys.get('state') : null;
+    return ret ? ret : SC.Record.READY;
+  }.property().cacheable(),
+  
   /** @private
     Cache of records returned from objectAt() so they don't need to
     be unneccesarily materialized.
@@ -192,24 +203,35 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     var storeKeys = this.get('storeKeys');
     
-    var prev = this._prevStoreKeys, f = this._storeKeysContentDidChange;
+    var prev = this._prevStoreKeys, 
+        f    = this._storeKeysContentDidChange,
+        fs   = this._storeKeysStateDidChange;
     
     if (storeKeys === prev) return this; // nothing to do
     
     if (prev) {
       prev.removeObserver('[]', this, f);
+      prev.removeObserver('state', this, fs);
     }
 
     this._prevStoreKeys = storeKeys;
     
     if (storeKeys) {
       storeKeys.addObserver('[]', this, f);
+      storeKeys.addObserver('state', this, fs);
     }
     
     var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
     this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
     
   }.observes('storeKeys'),
+  
+  /** @private
+    Invoked whenever the state property of the storeKeys change.
+  */
+  _storeKeysStateDidChange: function() {
+    this.notifyPropertyChange('state');
+  },
   
   /** @private
     Invoked whenever the content of the storeKeys array changes.  This will
