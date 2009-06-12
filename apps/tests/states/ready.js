@@ -20,20 +20,17 @@ TestRunner.READY = SC.Responder.create({
 
     TestRunner.sourceController.selectObject(target);
     
-    var cnt = target.get('tests').get('length');
-    if (target && cnt===0) {
-      TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
-    } else if (target) TestRunner.makeFirstResponder(TestRunner.READY_LIST);
-    else TestRunner.makeFirstResponder(TestRunner.READY_EMPTY);
+    if (target) {
+      var tests = target.get('tests');
+      if (tests && !tests.isLoaded) {
+        TestRunner.makeFirstResponder(TestRunner.READY_LOADING);
+      } else if (!tests || (tests.get('length')===0)) {
+        TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
+      } else TestRunner.makeFirstResponder(TestRunner.READY_LIST);
+      
+    } else TestRunner.makeFirstResponder(TestRunner.READY_EMPTY);
   },
 
-  testsDidChange: function(sender, target) {
-    var cnt = TestRunner.targetController.getPath('tests.length');
-    if (!cnt) {
-      TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
-    } else TestRunner.makeFirstResponder(TestRunner.READY_LIST);
-  },
-  
   /**
     Invoked when you select the test.
   */
