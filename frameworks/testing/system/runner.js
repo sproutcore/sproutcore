@@ -117,17 +117,18 @@ CoreTest.Runner = {
 
     // if all tests passed, disable hiding them.  if some tests failed, hide
     // them by default.
-    this.errors.push('</tr></tbody></table>');
+    if (this.errors) this.errors.push('</tr></tbody></table>');
     if ((r.failed + r.errors + r.warnings) > 0) {
       this.hidePassedTestsDidChange(); // should be checked by default
     } else {
       this.report.find('.hide-passed').addClass('disabled')
         .find('input').attr('disabled', true);
-      this.errors.length = 0;
+      if (this.errors) this.errors.length = 0;
     }     
     if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
-    CoreTest.errors=this.errors.join('');
+    
+    if (this.errors) CoreTest.errors=this.errors.join('');
   },
   
   planDidRecord: function(plan, module, test, assertions, timings) {
