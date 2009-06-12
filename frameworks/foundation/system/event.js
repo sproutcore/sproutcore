@@ -828,7 +828,7 @@ SC.Event.fire = SC.Event.trigger;
 // Register unload handler to eliminate any registered handlers
 // This avoids leaks in IE and issues with mouseout or other handlers on 
 // other browsers.
-SC.Event.add(window, 'unload', SC.Event, SC.Event.unload) ;
+SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'
