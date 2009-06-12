@@ -56,11 +56,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     automatically edit the attrbutes of the input element to reflect the 
     current isEnabled state among other things.
   */
-  $field: function() { 
+  $input: function() { 
     if(this.get('isTextArea')){
       return this.$('textarea').andSelf().filter('textarea'); 
     }else{
-      return this.$('input');
+      return this.$('input').andSelf().filter('input');
     }
   },
   
@@ -76,7 +76,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   setFieldValue: function(newValue) {
     if (SC.none(newValue)) newValue = '' ;
-    this.$field().val(newValue);
+    this.$input().val(newValue);
     return this ;
   },
   
@@ -89,7 +89,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     @returns {String} value
   */
   getFieldValue: function() {
-    return this.$field().val();
+    return this.$input().val();
   },
   
   _field_fieldValueDidChange: function(evt) {
@@ -162,11 +162,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   didCreateLayer: function() {
     this.setFieldValue(this.get('fieldValue'));
-    SC.Event.add(this.$field(), 'change', this, this._field_fieldValueDidChange) ;
+    SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange) ;
   },
   
   willDestroyLayer: function() {
-    SC.Event.remove(this.$field(), 'change', this, this._field_fieldValueDidChange); 
+    SC.Event.remove(this.$input(), 'change', this, this._field_fieldValueDidChange); 
   },
 
   /** @private
