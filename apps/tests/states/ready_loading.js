@@ -33,8 +33,10 @@ TestRunner.READY_LOADING = SC.Responder.create({
   },
   
   testsDidChange: function(sender) {
-    var tests = TestRunner.targetController.get('tests');
-    if (!tests || (tests.get('length')===0)) {
+    var tests = TestRunner.testsController;
+    if (tests.get('state') !== SC.Record.READY) return ;
+    
+    if (tests.get('length')===0) {
       TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
     } else TestRunner.makeFirstResponder(TestRunner.READY_LIST);
   }

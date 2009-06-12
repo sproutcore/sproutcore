@@ -36,6 +36,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
     if (ret) return ret ;
 
     ret = this._targets = [];
+    ret.set('state', SC.Record.BUSY_LOADING);
     SC.Request.getUrl('/sc/targets.json')
       .set('isJSON', YES)
       .notify(this, 'fetchTargetsDidComplete', { ret: ret, store: store })
@@ -45,16 +46,17 @@ TestRunner.DevDataSource = SC.DataSource.extend({
   
   fetchTargetsDidComplete: function(request, opts) {
     var response = request.get('response'),
-        storeKeys, ret;
+        ret      = opts.ret,
+        storeKeys;
         
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching targets fails");
     } else {
       storeKeys = opts.store.loadRecords(TestRunner.Target, response);
-      ret       = opts.ret;
       ret.replace(0, ret.get('length'), storeKeys);
     }
-    TestRunner.sendAction('targetsDidChange');
+
+    ret.set('state', SC.Record.READY);
   },
   
   // ..........................................................
@@ -67,6 +69,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
     if (ret = tests[url]) return ret;
     
     ret = tests[url] = [];
+    ret.set('state', SC.Record.BUSY_LOADING);
     SC.Request.getUrl(url)
       .set('isJSON', YES)
       .notify(this, 'fetchTestsDidComplete', { ret: ret, store: store })
@@ -76,17 +79,18 @@ TestRunner.DevDataSource = SC.DataSource.extend({
   
   fetchTestsDidComplete: function(request, opts) {
     var response = request.get('response'),
-        storeKeys, ret;
+        ret      = opts.ret,
+        storeKeys;
         
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching tests fails");
     } else {
       storeKeys = opts.store.loadRecords(TestRunner.Test, response);
       ret       = opts.ret;
-      ret.set('isLoaded', YES);
       ret.replace(0, ret.get('length'), storeKeys);
     }
-    TestRunner.sendAction('testsDidChange');
+
+    ret.set('state', SC.Record.READY);
   }
   
 });

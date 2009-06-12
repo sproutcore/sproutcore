@@ -15,6 +15,7 @@ SC.stringsFor('English', {
   "Kind.framework" : "Frameworks",
   "Kind.sproutcore" : "SproutCore",
   
+  "_Test Runner" : "Test Runner",
   "_No Targets" : "No Targets",
   "_No Tests" : "No Tests",
   "_Loading Targets" : "Loading Targets",

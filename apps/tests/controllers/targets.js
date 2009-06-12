@@ -20,9 +20,6 @@ TestRunner.targetsController = SC.ArrayController.create(
   reload: function() {
     var targets = TestRunner.store.findAll(TestRunner.Target);
     this.set('content', targets);
-    if (targets && targets.get('length') >0) {
-      TestRunner.sendAction('targetsDidChange');
-    }
   },
   
   /** 
@@ -66,6 +63,16 @@ TestRunner.targetsController = SC.ArrayController.create(
     
     return SC.Object.create({ children: ret, isExpanded: YES });
     
-  }.property('[]').cacheable()
+  }.property('[]').cacheable(),
+  
+  /**
+    Send event when targets load.
+  */
+  stateDidChange: function() {
+    console.log('stateDidChange');
+    TestRunner.sendAction('targetsDidChange');
+  }.observes('state')
 
 }) ;
+
+TestRunner.targetsController.addProbe('state');

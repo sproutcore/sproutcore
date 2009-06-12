@@ -22,7 +22,7 @@ TestRunner.READY = SC.Responder.create({
     
     if (target) {
       var tests = target.get('tests');
-      if (tests && !tests.isLoaded) {
+      if (tests && (tests.get('state') === SC.Record.BUSY_LOADING)) {
         TestRunner.makeFirstResponder(TestRunner.READY_LOADING);
       } else if (!tests || (tests.get('length')===0)) {
         TestRunner.makeFirstResponder(TestRunner.READY_NO_TESTS);
