@@ -198,7 +198,7 @@ SC.ScrollerView = SC.View.extend({
   
   /** @private */
   _sc_scroller_valueDidChange: function() {
-    console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
+    //console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
 
     var v = (this.get('value')||0) - (this.get('minimum')||0),
         layer;
