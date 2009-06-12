@@ -29,6 +29,6 @@ TestRunner = SC.Application.create(
     return this.get('store').findAll(TestRunner.Target);
   }.property().cacheable(),
   
-  trace: YES
+  trace: NO
   
 }) ;
