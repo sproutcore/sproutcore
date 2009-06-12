@@ -788,7 +788,7 @@ SC.Drag.mixin(
     @param {SC.View} target a view implementing the SC.DropTarget protocol
   */
   addDropTarget: function(target) {
-    // console.log('addDropTarget called on %@ with %@'.fmt(this, target));
+    console.log('addDropTarget called on %@ with %@'.fmt(this, target));
     this._dropTargets[SC.guidFor(target)] = target ;
   },
   
@@ -801,7 +801,7 @@ SC.Drag.mixin(
     @param {SC.View} target A previously registered drop target
   */
   removeDropTarget: function(target) {
-    // console.log('removeDropTarget called on %@ with %@'.fmt(this, target));
+    console.log('removeDropTarget called on %@ with %@'.fmt(this, target));
     delete this._dropTargets[SC.guidFor(target)] ;
   },
   
