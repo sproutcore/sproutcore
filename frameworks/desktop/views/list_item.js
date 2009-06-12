@@ -432,7 +432,6 @@ SC.ListItemView = SC.View.extend(
   },
   
   mouseUp: function(evt) {
-    console.log('mouse up');
     var ret= NO, del, checkboxKey, content, state, idx, set;
     
     // if mouse was down in checkbox -- then handle mouse up, otherwise 
@@ -461,7 +460,7 @@ SC.ListItemView = SC.View.extend(
       if (this._isInsideDisclosure(evt)) {
         state = this.get('disclosureState');
         idx   = this.get('contentIndex');
-        set   = idx ? SC.IndexSet.create(idx) : null;
+        set   = (!SC.none(idx)) ? SC.IndexSet.create(idx) : null;
         del = this.get('displayDelegate');
         
         if (state === SC.BRANCH_OPEN) {
@@ -577,7 +576,7 @@ SC.ListItemView = SC.View.extend(
    var oldLineHeight = el.css('lineHeight');
    var fontSize = el.css('fontSize');
    var top = this.$().css('top');
-   top = parseInt(top.substring(0,top.length-2));
+   top = parseInt(top.substring(0,top.length-2),0);
    var lineHeight = oldLineHeight;
    var lineHeightShift = 0;
    
