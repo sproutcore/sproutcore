@@ -812,6 +812,7 @@ SC.CollectionView = SC.View.extend(
           
         // if not nowShowing, then remove the item view if needed
         } else if (existing && existing.parentView === containerView) {
+          delete itemViews[idx];
           containerView.removeChild(existing);
         }
       },this);
@@ -825,6 +826,10 @@ SC.CollectionView = SC.View.extend(
         SC.Benchmark.start(bench="%@#reloadIfNeeded (Full)".fmt(this),YES);
       }
 
+      // truncate cached item views since they will all be removed from the
+      // container anyway.
+      if (itemViews) itemViews.length = 0 ; 
+      
       views = [];
       nowShowing.forEach(function(idx) {
         views.push(this.itemViewForContentIndex(idx, YES));
@@ -892,7 +897,7 @@ SC.CollectionView = SC.View.extend(
     replace the old item view in your cache with the new item view.
 
     @param {Number} idx the content index
-    @param {Boolean} rebuild internal use, do not use
+    @param {Boolean} rebuild internal use only
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
@@ -1055,7 +1060,7 @@ SC.CollectionView = SC.View.extend(
       throw "layout for item view %@ was found when item view does not exist (%@)".fmt(id, this);
     }
     
-    return this.itemViewForContentIndex(contentIndex, NO);
+    return this.itemViewForContentIndex(contentIndex);
   },
   
   // ..........................................................
@@ -1215,7 +1220,7 @@ SC.CollectionView = SC.View.extend(
     // iterate through each item and set the isSelected state.
     invalid.forEach(function(idx) {
       if (!nowShowing.contains(idx)) return; // not showing
-      var view = this.itemViewForContentIndex(idx);
+      var view = this.itemViewForContentIndex(idx, NO);
       if (view) view.set('isSelected', sel ? sel.contains(content, idx) : NO);
     },this);
     
@@ -1578,24 +1583,25 @@ SC.CollectionView = SC.View.extend(
   },
   
   /**
-    Scroll the rootElement (if needed) to ensure that the item is visible.
+    Scroll to the passed item view.  If the item view is not visible on screen
+    this method will not work.
 
     @param {SC.View} view The item view to scroll to
     @returns {SC.CollectionView} receiver
   */
   scrollToItemView: function(view) {
+    if (!view.get('parentView')) return this; // nothing to do
+    if (!view.get('layer')) {
+      if (this.get('layer')) view.updateLayerLocation();
+      else return this; // nothing to do
+    }
     
-    // TODO: Implement scrollToItemView
-    console.warn("SC.CollectionView#scrollToItemView() is not yet implemented in 1.0");
-    return this ; 
-    
-    // find first scrollable view.
-    // var scrollable = this ;
-    // while(scrollable && (scrollable != SC.window) && (!scrollable.get('isScrollable'))) {
-    //   scrollable = scrollable.get('parentNode') ;
-    // }
-    // if (!scrollable || (scrollable == SC.window)) return ; // no scrollable!
-    // scrollable.scrollToVisible(view) ;
+    var scrollable = this;
+    while (scrollable && !scrollable.isPane) {
+      if (scrollable.get('isScrollable')) scrollable.scrollToVisible(view);
+      scrollable = scrollable.get('parentView');
+    }
+    return this ;
   },
 
   // ..........................................................
@@ -2625,7 +2631,7 @@ SC.CollectionView = SC.View.extend(
   */
   _cv_nowShowingDidChange: function() {
     var nowShowing  = this.get('nowShowing'),
-        last        = this._lastNowShowing,
+        last        = this._sccv_lastNowShowing,
         diff, diff1, diff2;
 
     // find the differences between the two
@@ -2639,7 +2645,7 @@ SC.CollectionView = SC.View.extend(
 
     // if nowShowing has actually changed, then update
     if (diff && diff.get('length') > 0) {
-      this._lastNowShowing = nowShowing ? nowShowing.frozenCopy() : null ;
+      this._sccv_lastNowShowing = nowShowing ? nowShowing.frozenCopy() : null;
       this.updateContentRangeObserver();
       this.reload(diff);
     }
@@ -2652,7 +2658,7 @@ SC.CollectionView = SC.View.extend(
   
   init: function() {
      sc_super();
-     this._lastNowShowing = this.get('nowShowing').clone();
+     this._sccv_lastNowShowing = this.get('nowShowing').clone();
      if (this.content) this._cv_contentDidChange();
      if (this.selection) this._cv_selectionDidChange();
   },

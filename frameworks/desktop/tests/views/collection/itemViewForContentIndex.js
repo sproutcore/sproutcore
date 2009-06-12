@@ -60,6 +60,11 @@ module("SC.CollectionView.itemViewForContentIndex", {
         if (this.testAsGroup) {
           return SC.IndexSet.create(0, this.get('length'));
         } else return null ;
+      },
+      
+      fixtureNowShowing: SC.IndexSet.create(0,3),
+      computeNowShowing: function() {
+        return this.fixtureNowShowing;
       }
       
     });
@@ -104,10 +109,11 @@ test("returning item from cache", function() {
   var itemView2 = view.itemViewForContentIndex(1);
   equals(itemView2, itemView1, 'retrieving multiple times should same instance');
 
+  // Test internal case
   var itemView3 = view.itemViewForContentIndex(1, YES);
   ok(itemView1 !== itemView3, 'itemViewForContentIndex(1, YES) should return new item even if it is already cached actual :%@'.fmt(itemView3));
 
-  var itemView4 = view.itemViewForContentIndex(1);
+  var itemView4 = view.itemViewForContentIndex(1, NO);
   equals(itemView4, itemView3, 'itemViewForContentIndex(1) [no reload] should return newly cached item after recache');
   
 });
@@ -237,4 +243,46 @@ test("prefers delegate over content if both implement mixin", function() {
   ok(itemView, 'returns item view');
   shouldMatchFixture(itemView, del.fixture);
 });
+
+// ..........................................................
+// SPECIAL CASES
+// 
+
+test("after making an item visible then invisible again", function() {
+
+  view.isVisibleInWindow = YES ;
+  
+  // STEP 1- setup with some nowShowing
+  SC.run(function() {
+    view.set('fixtureNowShowing', SC.IndexSet.create(1));
+    view.notifyPropertyChange('nowShowing');
+  });
+  equals(view.get('childViews').length, 1, 'precond - should have a child view');
+
+  var itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('parentView'), view, 'itemView has parent view');
+  
+  // STEP 2- setup with NONE visible
+  SC.run(function() {
+    view.set('fixtureNowShowing', SC.IndexSet.create());
+    view.notifyPropertyChange('nowShowing');
+  });
+  equals(view.get('childViews').length, 0, 'precond - should have no childview');
+
+  var itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('parentView'), view, 'itemView has parent view');
+
+
+  // STEP 3- go back to nowShowing
+  SC.run(function() {
+    view.set('fixtureNowShowing', SC.IndexSet.create(1));
+    view.notifyPropertyChange('nowShowing');
+  });
+  equals(view.get('childViews').length, 1, 'precond - should have a child view');
+
+  itemView = view.itemViewForContentIndex(1);
+  equals(itemView.get('parentView'), view, 'itemView has parent view');
+  
+});
+
 

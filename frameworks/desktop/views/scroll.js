@@ -282,10 +282,21 @@ SC.ScrollView = SC.View.extend({
   scrollToVisible: function(view) {
     var contentView = this.get('contentView') ;
     if (!contentView) return this; // nothing to do if no contentView.
+
+    // get the viewportOffset for the view layer the convert that.  this will
+    // work even  with views using static layout.
+    var layer = view.get('layer'), vf;
+    if(!layer) return this ; // nothing to do
+    vf =  SC.viewportOffset(layer);
+    vf.width = layer.offsetWidth;
+    vf.height = layer.offsetHeight;
     
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
-    var vf = contentView.convertFrameFromView(view.get('frame'), view);
+    vf = contentView.convertFrameFromView(vf, null);
+    var cf = contentView.get('frame');
+    vf.x -= cf.x;
+    vf.y -= cf.y;
     
     // find current visible frame.
     var vo = this.get('containerView').get('frame');
