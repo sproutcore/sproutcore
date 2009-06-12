@@ -48,6 +48,4 @@ test("adding a new view to a visible pane should make it visible", function() {
   SC.RunLoop.end();
   ok(!view.get('isVisible'), "after pane.appendChild(view), view.get('isVisible') === YES") ;
   ok(view.$().hasClass('hidden'), "after view.set('isVisible', NO), view.$().hasClass('hidden') should be true") ;
-  
-  
 });
