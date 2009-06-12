@@ -474,9 +474,8 @@ SC.ListItemView = SC.View.extend(
      
       this._removeDisclosureActiveState();
       ret = YES ;
-    } else if (this.get('isEditing')) {
-      return YES ;
-    }
+    } 
+   
     // clear cached info
     this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
     this._isMouseDownOnDisclosure = this._isMouseInsideDisclosure = NO ;
