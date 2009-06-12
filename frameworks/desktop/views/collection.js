@@ -1378,6 +1378,8 @@ SC.CollectionView = SC.View.extend(
         cdel    = this.get('contentDelegate'),
         groupIndexes = cdel.contentGroupIndexes(this, content),
         ret ;
+
+    if (SC.none(proposedIndex)) proposedIndex = -1;
     
     // fast path
     if (!groupIndexes && (del.collectionViewShouldSelectIndexes === this.collectionViewShouldSelectIndexes)) {
@@ -1402,6 +1404,7 @@ SC.CollectionView = SC.View.extend(
       var sel = this.get('selection');
       top = sel ? sel.get('min') : -1 ;
     }
+    if (SC.none(top)) top = -1;
     return top ;
   },
   
@@ -1704,7 +1707,7 @@ SC.CollectionView = SC.View.extend(
             var parentIndex = -1;
             while ( parentIndex < 0 ) {
               var previousItemIndex = this._findPreviousSelectableItemFromIndex(index - 1);
-              if ( previousItemIndex < 0 ) return false;    // Sanity-check.
+              if (previousItemIndex < 0 ) return false;    // Sanity-check.
               index = previousItemIndex;
               var outlineLevel = del.contentIndexOutlineLevel(this, content, index);
               if ( outlineLevel === desiredOutlineLevel ) {
