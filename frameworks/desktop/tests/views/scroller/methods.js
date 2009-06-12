@@ -72,6 +72,7 @@ test("ownerScrollValueKey() function of the scroller view",function(){
 
 test("Setting the scroller to a specific value", function() {
 
+  // should be testing against the layer.scrollTop property
   view2.set('value', 10);
   equals(view2._sc_scrollValue, 10, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
   view2.set('value', 0);
@@ -83,17 +84,18 @@ test("Setting the scroller to a specific value", function() {
 	view2.set('value', 101);
   equals(view2._sc_scrollValue, 100, "After setting the value > maximum (101) on a vertical scroller, the scrollTop property of the layer must be");
 
+  // should be testing against the layer.scrollLeft property
   view2.set('layoutDirection', SC.LAYOUT_HORIZONTAL);   
   view2.set('value', 10);
-  equals(view2._sc_scrollValue, 10, "After setting the value to 10 on a vertical scroller, the scrollTop property of the layer must be");
+  equals(view2._sc_scrollValue, 10, "After setting the value to 10 on a horizontal scroller, the scrollTop property of the layer must be");
 	view2.set('value', 0);
-  equals(view2._sc_scrollValue, 0, "After setting the value to the mimumum (0) on a vertical scroller, the scrollTop property of the layer must be");
+  equals(view2._sc_scrollValue, 0, "After setting the value to the mimumum (0) on a horizontal scroller, the scrollTop property of the layer must be");
 	view2.set('value', 100);
-  equals(view2._sc_scrollValue, 100, "After setting the value to the maximum (100) on a vertical scroller, the scrollTop property of the layer must be");
+  equals(view2._sc_scrollValue, 100, "After setting the value to the maximum (100) on a horizontal scroller, the scrollTop property of the layer must be");
 	view2.set('value', -1);
-  equals(view2._sc_scrollValue, 0, "After setting the value < minimum (-1) on a vertical scroller, the scrollTop property of the layer must be");
+  equals(view2._sc_scrollValue, 0, "After setting the value < minimum (-1) on a horizontal scroller, the scrollTop property of the layer must be");
 	view2.set('value', 101);
-  equals(view2._sc_scrollValue, 100, "After setting the value > maximum (101) on a vertical scroller, the scrollTop property of the layer must be");
+  equals(view2._sc_scrollValue, 100, "After setting the value > maximum (101) on a horizontal scroller, the scrollTop property of the layer must be");
 
 });
 
