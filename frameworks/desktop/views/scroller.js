@@ -133,6 +133,23 @@ SC.ScrollerView = SC.View.extend({
       default:
         throw "You must set a layoutDirection for your scroller class." ;
     }
+    
+    // Update the scrollbar position as well. We may have gotten here via a
+    // mouse event, or some other event, rather than by manipulating the
+    // scrollbar directly
+    var layer = this.get('layer') ;
+    if(layer) {
+      switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+          layer.scrollTop = this._sc_scrollValue;
+          break;
+        
+        case SC.LAYOUT_HORIZONTAL:
+          layer.scrollLeft = this._sc_scrollValue;
+          break;
+      }
+      // console.log('%@.render(layer.scrollTop=%@,this._sc_scrollValue=%@)'.fmt(this,layer.scrollTop,this._sc_scrollValue));
+    }
   },
   
   didCreateLayer: function() {
@@ -202,6 +219,11 @@ SC.ScrollerView = SC.View.extend({
   _sc_scroller_valueDidChange: function() {
     // console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
     if (this.get('value') !== this._sc_scrollValue) {
+
+      var new_scrollValue = Math.max(this.get('value'), this.get('minimum'));
+      new_scrollValue = Math.min(new_scrollValue, this.get('maximum'));
+      this._sc_scrollValue = new_scrollValue;
+
       this.displayDidChange() ; // re-render
     }
     
