@@ -115,7 +115,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     this._commitOnBlur =  (options.commitOnBlur !== undefined) ? options.commitOnBlur : YES ;
 
     // set field values
-    //var field = this.outlet('field') ;
     this.set('validator', options.validator) ;
     this.set('value', this._originalValue) ;
     //this.set('selectedRange', options.selectedRange || { start: this._originalValue.length, length: 0 }) ;
@@ -136,10 +135,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     this.set('parentNode', pane);
     // get style for view.
     this.updateViewStyle() ;
-    
-    
-    
-    
     
     pane.appendChild(this);
     
@@ -238,6 +233,9 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     make the inline editor appear similar.
   */
   updateViewStyle: function() {
+    
+    // TODO: make this function work for 1.0
+    
     // collect font and frame from target.
     // var f= this._optframe ;
     //     var el = this._exampleElement ;
@@ -276,27 +274,42 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
   */
   resizeToFit: function(newValue)
   {
-    var sizer  = this.outlet('sizer');
-    var field  = this.outlet('field');
     
-    // XSS attack waiting to happen... escape the form input;
-    var text = (newValue || '').escapeHTML();
-
-    // convert the textarea's newlines into something comparable for the sizer 
-    // div appending a space to give a line with no text a visible height.
-    text = text.replace((/ {2}/g), "&nbsp; ").replace(/\n/g, "<br />&nbsp;");
-    
-    // get the text size
-    sizer.set('innerHTML', text || "&nbsp;");
-    sizer.recacheFrames() ;
-    var h = sizer.get('frame').height;
-    this.set('frame', { height: h }) ;
+    // TODO: make this function work for 1.0
+  
+  
+    // var sizer  = this.outlet('sizer');
+    //     var field  = this.outlet('field');
+    //     
+    //     // XSS attack waiting to happen... escape the form input;
+    //     var text = (newValue || '').escapeHTML();
+    // 
+    //     // convert the textarea's newlines into something comparable for the sizer 
+    //     // div appending a space to give a line with no text a visible height.
+    //     text = text.replace((/ {2}/g), "&nbsp; ").replace(/\n/g, "<br />&nbsp;");
+    //     
+    //     // get the text size
+    //     sizer.set('innerHTML', text || "&nbsp;");
+    //     sizer.recacheFrames() ;
+    //     var h = sizer.get('frame').height;
+    //     this.set('frame', { height: h }) ;
   },
   
   mouseDown: function(e) {
     arguments.callee.base.call(this, e) ;
     return this.get('isEditing');
   },
+  
+  
+  keyDown: function(evt) {
+    var ret = this.interpretKeyEvents(evt) ;
+    if(!ret) this.fieldValueDidChange(true);
+    return !ret ? NO : ret ;
+  },
+  
+  insertText: null,
+  
+  //keyUp: function() { return true; },
 
   // [Safari] if you don't take key focus away from an element before you 
   // remove it from the DOM key events are no longer sent to the browser.
@@ -380,10 +393,11 @@ SC.InlineTextFieldView.mixin(
       @returns {Boolean} YES if editor began editing, NO if it failed.
   */
   beginEditing: function(options) {
-    if (!this.sharedEditor){ 
-      this.sharedEditor = this.create() ;
+    if (!this.editor){ 
+      this.editor = this.create() ;
     }
-    return this.sharedEditor.beginEditing(options) ;
+    return this.editor.beginEditing(options) ;
+    
   },
   
   /** Save the current value of the inline editor and exit edit mode.
@@ -397,7 +411,7 @@ SC.InlineTextFieldView.mixin(
       progress.
   */
   commitEditing: function() {
-    return this.sharedEditor ? this.sharedEditor.commitEditing() : YES ;
+    return this.editor ? this.editor.commitEditing() : YES ;
   },
 
   /** Discard the current value of the inline editor and exit edit mode.
@@ -410,7 +424,7 @@ SC.InlineTextFieldView.mixin(
     @returns {Boolean} YES if the inline editor ended or no edit was in progress.
   */
   discardEditing: function() {
-    return this.sharedEditor ? this.sharedEditor.discardEditing() : YES ;  
+    return this.editor ? this.editor.discardEditing() : YES ;  
   },
   
 
@@ -421,6 +435,6 @@ SC.InlineTextFieldView.mixin(
     
     @type {SC.InlineTextFieldView}
   */
-  sharedEditor: null
+  editor: null
   
 }) ;
