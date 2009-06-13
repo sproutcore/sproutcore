@@ -423,7 +423,6 @@ SC.ListItemView = SC.View.extend(
       this._isMouseInsideDisclosure = YES ;
       return YES;
     } else if (evt.clickCount === 2)  {
-      console.log('double click');
       this.beginEditing();
       return YES;   
     }
@@ -600,7 +599,8 @@ SC.ListItemView = SC.View.extend(
      frame: f, 
      exampleElement: el, 
      delegate: this, 
-     value: v
+     value: v,
+     multiline: NO
    }) ;
    
    // restore old line height for original item if the old line height 
