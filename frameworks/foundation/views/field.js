@@ -211,10 +211,13 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     event.  But first, set isActive to YES.
   */
   mouseDown: function(evt) { 
-    if (this.get('isEnabled')) {
-      this.set('isActive', YES); 
-      this._field_isMouseDown = YES;
-    }
+    // This has to be fixed for safari... for now we don't set is active 
+    // because any re rendering causes text selection to behave erratically
+    
+    // if (this.get('isEnabled')) {
+    //       this.set('isActive', YES); 
+    //       this._field_isMouseDown = YES;
+    //     }
     evt.allowDefault(); 
     return YES; 
   },
