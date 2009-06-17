@@ -58,6 +58,11 @@ SC.SelectFieldView = SC.FieldView.extend(
     if true, the empty name will be localized.
   */
   localize: false,
+  
+  /**
+    if true, it means that the nameKey, valueKey or objects changed
+  */
+  cpDidChange: YES,
 
   /**
     override this to change the enabled/disabled state of menu items as they
@@ -141,7 +146,7 @@ SC.SelectFieldView = SC.FieldView.extend(
    
           // render HTML
           var disable = (this.validateMenuItem && this.validateMenuItem(value, name)) ? '' : 'disabled="disabled" ' ;
-          context.push('<option %@ value="%@">%@</option>'.fmt(disable,value,name)) ;
+          context.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
    
         // null value means separator.
         } else {
@@ -149,8 +154,6 @@ SC.SelectFieldView = SC.FieldView.extend(
         }
       }, this );
    
-      // replace the contents of this HTML element.
-      // this.$input().html(context.join(""));//this.update(html.join("")); //TODO: this won't work
       this.setFieldValue(fieldValue);
    
     } else {
@@ -166,6 +169,7 @@ SC.SelectFieldView = SC.FieldView.extend(
    
   /* @private */
   mouseDown: function(evt) {
+    
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
@@ -207,6 +211,7 @@ SC.SelectFieldView = SC.FieldView.extend(
   
   // object changes to the objects array of objects if possible.
   render: function(context, firstTime) {
+    if(this.get('cpDidChange')){
     // if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
       var loc ;
       var objects = this.get('objects') ;
@@ -248,11 +253,25 @@ SC.SelectFieldView = SC.FieldView.extend(
         } // while(--loc)
       } // if (this._objects)
      this.rebuildMenu(context) ;
-    // } // if (this.didChangeFor...)
+     this.set('cpDidChange', NO);
+    } // if (this.didChangeFor...)
   },
 
-displayProperties: ['objects','nameKey','valueKey'],
+  displayProperties: ['objects','nameKey','valueKey'],
 
+  nameKeyDidChange: function(){
+    this.set('cpDidChange', YES);
+  }.observes('nameKey'),
+
+  valueKeyDidChange: function(){
+    this.set('cpDidChange', YES);
+  }.observes('valueKey'),
+  
+  objectsDidChange: function(){
+    this.set('cpDidChange', YES);
+  }.observes('objects'),
+  
+  
   // this is invoked anytime an item we are interested in in the menu changes
   // rebuild the menu when this happens, but only one time.
   _objectsItemObserver: function(item, key, value) {
