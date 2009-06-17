@@ -203,10 +203,10 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     key = this.getDelegateProperty('isSeparatorKey', del) ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (val) {
-      ic = ic.begin('span').addClass('separator') ;
-      ic = ic.end() ;
+      //ic.begin('span').addClass('separator').end() ;
+      ic.push("<span class='separator'></span>") ;
+      ic.end() ;
       if (SC.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
-      return ;
     } else {
       // handle checkbox
       key = this.getDelegateProperty('contentCheckboxKey', del) ;
