@@ -300,7 +300,16 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     rawRequest.source = request;
     
     var async = (request.get('isAsynchronous') ? YES : NO) ;
-    if (async) SC.Event.add(rawRequest, 'readystatechange', this, this.handleReadyStateChange, rawRequest) ;
+    if (async) {
+      if (!SC.browser.msie) {
+        SC.Event.add(rawRequest, 'readystatechange', this, this.handleReadyStateChange, rawRequest) ;
+      } else { // temporary IE fix from Erich Ocean
+        var that = this ;
+        rawRequest.onreadystatechange = function() {
+          return that.finishRequest(rawRequest) ;
+        };
+      }
+    }
     
     rawRequest.open( request.get('type'), request.get('address'), async ) ;
     
