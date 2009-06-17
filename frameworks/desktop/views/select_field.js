@@ -100,13 +100,14 @@ SC.SelectFieldView = SC.FieldView.extend(
     call this method to rebuild the menu manually.  Normally you should not
     need to do this since the menu will be rebuilt as its data changes.
   */
-  rebuildMenu: function(context) {
+  rebuildMenu: function(context, firstTime) {
 
     // get list of objects.
     var nameKey = this.get('nameKey') ;
     var valueKey = this.get('valueKey') ;
     var objects = this.get('objects') ;
     var fieldValue = this.get('value') ;
+    var el, selectElement;
    
     // get the localization flag.
     var shouldLocalize = this.get('localize'); 
@@ -118,12 +119,26 @@ SC.SelectFieldView = SC.FieldView.extend(
     if (objects) {
       objects = this.sortObjects(objects) ; // sort'em.
       // var html = [] ;       
-   
+      if(!firstTime){
+        selectElement=this.$input()[0];
+        selectElement.innerHTML='';
+      }
+      
       var emptyName = this.get('emptyName') ;
       if (emptyName) {
         if (shouldLocalize) emptyName = emptyName.loc() ;
-        context.push('<option value="***">%@</option>'.fmt(emptyName)) ;
-        context.push('<option disabled="disabled"></option>') ;
+          if(firstTime){
+            context.push('<option value="***">%@</option>'.fmt(emptyName)) ;
+            context.push('<option disabled="disabled"></option>') ;
+          }else{
+            el=document.createElement('option');
+            el.value="***";
+            el.innerHTML=emptyName;
+            selectElement.appendChild(el);
+            el=document.createElement('option');
+            el.disabled="disabled";
+            selectElement.appendChild(el);
+          }
       }
    
       // generate option elements.
@@ -146,11 +161,24 @@ SC.SelectFieldView = SC.FieldView.extend(
    
           // render HTML
           var disable = (this.validateMenuItem && this.validateMenuItem(value, name)) ? '' : 'disabled="disabled" ' ;
-          context.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
-   
+          if(firstTime){
+            context.push('<option %@value="%@">%@</option>'.fmt(disable,value,name)) ;
+          } else{
+            el=document.createElement('option');
+            el.value=value;
+            el.innerHTML=name;
+            if(disable.length>0) el.disable="disabled";
+            selectElement.appendChild(el);
+          }
         // null value means separator.
         } else {
-          context.push('<option disabled="disabled"></option>') ;
+          if(firstTime){
+            context.push('<option disabled="disabled"></option>') ;
+          }else{
+            el=document.createElement('option');
+            el.disabled="disabled";
+            selectElement.appendChild(el);
+          }
         }
       }, this );
    
@@ -211,7 +239,8 @@ SC.SelectFieldView = SC.FieldView.extend(
   
   // object changes to the objects array of objects if possible.
   render: function(context, firstTime) {
-    if(this.get('cpDidChange')){
+   
+   if(this.get('cpDidChange')){
     // if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
       var loc ;
       var objects = this.get('objects') ;
@@ -252,9 +281,9 @@ SC.SelectFieldView = SC.FieldView.extend(
           } // if (object &&...)
         } // while(--loc)
       } // if (this._objects)
-     this.rebuildMenu(context) ;
+     this.rebuildMenu(context, firstTime) ;
      this.set('cpDidChange', NO);
-    } // if (this.didChangeFor...)
+     } // if (this.didChangeFor...)
   },
 
   displayProperties: ['objects','nameKey','valueKey'],
