@@ -306,7 +306,9 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
       } else { // temporary IE fix from Erich Ocean
         var that = this ;
         rawRequest.onreadystatechange = function() {
-          return that.finishRequest(rawRequest) ;
+          SC.RunLoop.begin() ;
+          that.finishRequest(rawRequest) ;
+          SC.RunoLoop.end() ;
         };
       }
     }
