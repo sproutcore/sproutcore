@@ -490,8 +490,8 @@ SC.MenuPane = SC.PickerPane.extend(
       target        = item.get('target') || this ;
       if(keyEquivalent == keyString && isEnabled) {
         if(menuItems && menuItems[idx]) {
-					var retVal = menuItems[idx].triggerAction(evt);
-					this.remove();
+          var retVal = menuItems[idx].triggerAction(evt);
+          this.remove();
           return retVal;
         }
       }
