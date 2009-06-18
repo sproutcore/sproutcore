@@ -704,7 +704,6 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   styles: function(styles, cloneOnModify) {
     var attr, regex, match;
-    
     if (styles === undefined) {
       
       // no styles are defined yet but we do have a source element.  Lazily
@@ -717,7 +716,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           
           regex = this._STYLE_REGEX ;
           regex.lastIndex = 0;
-          while(match = regex.exec(attr)) styles[match[1].camelize()] = match[2];
+          
+          ////// TODO :LOOK OUT I ADDED TOLOWERCASE BECAUSE IE IS ALWAYS RETURNING STYLE KEYS IN CAPS
+          ////// THAT MESSES UP CAMELIZING AND WE END UP WITH stuff like c-olor in the styles
+          ////// I have to add more unit test 
+          ////// JUAN
+          while(match = regex.exec(attr)) styles[match[1].toLowerCase().camelize()] = match[2];
           
           this._styles = styles;
           this._cloneStyles = NO;
