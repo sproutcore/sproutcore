@@ -197,7 +197,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // In IE, you can't modify functions on DOM elements so we need to wrap the 
   // call to select() like this.
   _selectRootElement: function() {
-    this.$field().get(0).select() ;
+    this.$field()[0].select() ;
   },
   
   // when we lose first responder, blur the text field if needed and show
@@ -232,9 +232,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   keyUp: function(evt) { 
-    if (this._isKeyDown) {
-      this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
-    }
+    // if (this._isKeyDown) {
+    //       this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
+    //     }
     this._isKeyDown = NO;
     evt.allowDefault(); 
     return YES; 
