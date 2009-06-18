@@ -716,7 +716,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         ////// THAT MESSES UP CAMELIZING AND WE END UP WITH stuff like c-olor in the styles
         ////// I have to add more unit test 
         ////// JUAN
-        attr = attr.toLowerCase();
+        
+        if(SC.browser.msie) attr = attr.toLowerCase();
+        
         if (attr && (attr = attr.toString()).length>0) {
           styles = {};
           

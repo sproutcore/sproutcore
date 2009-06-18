@@ -348,6 +348,15 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     if (this._multiline) {
       return arguments.callee.base.call(this, evt) ;
     } else {
+      // TODO : this is a work around. There is a bug where the 
+      // last character would get dropped 
+      // if the editing was completed by pressing return
+      // needs to be fixed
+      if (this.get('value') != this.$input().val()) {
+        this.set('value', this.$input().val());
+      }
+      
+      
       this.commitEditing() ;
       return YES ;
     }
