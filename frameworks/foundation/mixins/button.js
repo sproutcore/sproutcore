@@ -129,7 +129,7 @@ SC.Button = {
   */
   renderTitle: function(context, firstTime) {
     var icon = this.get('icon') ;
-    var image = null ;
+    var image = '' ;
     var title = this.get('displayTitle') ;
     var needsTitle = (!SC.none(title) && title.length>0);
 
@@ -148,7 +148,10 @@ SC.Button = {
       needsTitle = YES ;
     }
     
-    if (needsTitle) context.begin('label').addClass('sc-button-label').push(image, title).end();
+    if (needsTitle && firstTime) context.begin('label').addClass('sc-button-label').push(image, title).end();
+    if (needsTitle && !firstTime) this.$('label')[0].innerHTML = image + title;
+    if (!needsTitle && !firstTime) this.$('label')[0].innerHTML = '';
+    console.log(image+title);
     return context ;
   },
 
