@@ -83,7 +83,7 @@
     SC.Event.add(view.$('iframe')[0], 'load', this,
     function() {
       ok(view.$().height() > 150, "height of view should change based on content");
-      ok(view.$().width() > 250, "width of view should change based on content");
+      ok(view.$().width() > 200, "width of view should change based on content");
       start();
     });
   });
