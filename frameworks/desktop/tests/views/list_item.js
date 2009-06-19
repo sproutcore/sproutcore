@@ -236,7 +236,7 @@ test("outline - 1", function() {
       indent = v.get('outlineIndent');
   ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
   
-  equals(v.$('.sc-outline').css('left'), indent*1 + "px", 'sc-outline div should be offset by outline ammount');
+  equals(v.$('.sc-outline').css('left'), indent*1+16 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
 test("outline - 2", function() {
@@ -244,7 +244,7 @@ test("outline - 2", function() {
       indent = v.get('outlineIndent');
   ok(indent>0, 'precond - outlineIndent property should be > 0 (actual: %@)'.fmt(indent));
   
-  equals(v.$('.sc-outline').css('left'), indent*2 + "px", 'sc-outline div should be offset by outline ammount');
+  equals(v.$('.sc-outline').css('left'), indent*2+16 + "px", 'sc-outline div should be offset by outline ammount');
 });
 
 // ..........................................................
