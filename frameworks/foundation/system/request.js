@@ -370,11 +370,7 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
        request.onreadystatechange = function() {} ;
      }
   }
-  
-  // handleReadyStateChange: function(readyStateEvent) {
-  //     console.log('hello')
-  //     return this.finishRequest(readyStateEvent.context) ;
-  //   }
+
   
 });
 
