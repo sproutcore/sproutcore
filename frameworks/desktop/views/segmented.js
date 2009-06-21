@@ -304,7 +304,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     any "transient" states such as the global isEnabled property or selection.
   */
   renderDisplayItems: function(context, items) {
-    var title = null, icon = null, url=null, className=null, ic=null, item=null, toolTip=null;
+    var title = null, icon = null, url=null, className=null, ic=null, item=null, toolTip=null, width=null;
     var value = this.get('value');
     var isArray = SC.isArray(value);
     var activeIndex = this.get('activeIndex');
