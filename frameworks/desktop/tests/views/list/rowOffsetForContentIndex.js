@@ -42,7 +42,7 @@ function verifyRowOffsets(view, rowHeight, expected) {
   var loc = view.get('length'), actual, idx, cur=0;
   
   for(idx=0;idx<loc;idx++) {
-    if (SC.stopIt) debugger ;
+    //if (SC.stopIt) debugger ;
     actual = view.rowOffsetForContentIndex(idx);
     equals(actual, cur, "content.rowHeightForContentIndex(%@) should be expected offset".fmt(idx));
     cur += expected ? expected[idx] : rowHeight;
