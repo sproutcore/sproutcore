@@ -135,7 +135,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidFocus: function(evt) {
     if (!this._isFocused) {
       this._isFocused = YES ;
-      this._applyFirefoxCursorFix();
+     // this._applyFirefoxCursorFix();
       this.beginEditing();
     }
   },
@@ -143,7 +143,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidBlur: function() {
     if (this._isFocused) {
       this._isFocused = NO ;
-      this._removeFirefoxCursorFix();
+      //this._removeFirefoxCursorFix();
       this.commitEditing();
     }
   },
@@ -232,9 +232,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   keyUp: function(evt) { 
-    // if (this._isKeyDown) {
-    //       this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
-    //     }
+    if (this._isKeyDown) {
+      this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
+    }
     this._isKeyDown = NO;
     evt.allowDefault(); 
     return YES; 
