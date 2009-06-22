@@ -17,7 +17,7 @@
   {{{
     $ sc-gen model MyApp.MyModel
   }}}
-
+  
   This will create MyApp.MyModel in clients/my_app/models/my_model.js.
   
   The core attributes hash is used to store the values of a record in a 

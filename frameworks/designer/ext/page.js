@@ -4,8 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('views/page');
-
 /** 
   Extend SC.Page to emit a design document for the entire page.
 */

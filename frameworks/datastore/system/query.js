@@ -146,26 +146,6 @@ SC.Query = SC.Object.extend({
     // if parsing failed no record will be contained
     return this.isReady && this.tokenTree.evaluate(record, wildCardValues);
   },
- 
-  /** 
-    Default sort method that is used when calling containsStoreKeys()
-    or containsRecords() on this query. Simply materializes two records based 
-    on storekeys before passing on to compare() .
- 
-    @param {Number} storeKey1 a store key
-    @param {Number} storeKey2 a store key
-    @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
-  */
- 
-  compareStoreKeys: function(storeKey1, storeKey2) {
-    var store = SC.Query._TMP_STORE;
-    var queryKey = SC.Query._TMP_QUERY_KEY;
-    
-    var record1 = store.materializeRecord(storeKey1);
-    var record2 = store.materializeRecord(storeKey2);
-    
-    return queryKey.compare.call(queryKey, record1, record2);
-  },
   
   /**
     This will tell you which of the two passed records is greater
@@ -924,13 +904,15 @@ SC.Query.mixin( /** @scope SC.Query */ {
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
     if(query.get('orderBy') && storeKeys) {
-      // TODO: hack for now to get around the fact that we cannot pass
-      // additional parameters to .sort()
-      SC.Query._TMP_STORE = store;
-      SC.Query._TMP_QUERY_KEY = query;
-      storeKeys.sort(query.compareStoreKeys);
-      delete SC.Query._TMP_STORE;
-      delete SC.Query._TMP_QUERY_KEY;
+      
+      storeKeys.sort( function(storeKey1, storeKey2) {
+          if (store === undefined) debugger;
+
+          var record1 = store.materializeRecord(storeKey1);
+          var record2 = store.materializeRecord(storeKey2);
+
+          return query.compare.call(query, record1, record2);
+      });
     }
   }
   

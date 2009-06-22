@@ -180,6 +180,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {Array}
   */
   displayItems: function() {
+    // console.log('%@.displayItems(), this.get(\'items\') =>'.fmt(this));
+    // console.log(this.get('items'));
     var items = this.get('items'), loc = this.get('localize') ;
     var keys=null, itemType, cur ;
     var ret = [], max = items.get('length'), idx, item ;
@@ -190,7 +192,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     for(idx=0;idx<max;idx++) {
       item = items.objectAt(idx) ;
       if (SC.none(item)) continue; //skip is null or undefined
-
+      
       // if the item is a string, build the array using defaults...
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {
@@ -434,10 +436,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     will update the value if possible and fire the action.
   */
   triggerItemAtIndex: function(idx) {
+    // console.log('%@.triggerItemAtIndex(idx=%@)'.fmt(this, idx));
     var items = this.get('displayItems') ;
     var item = items.objectAt(idx);
-    if (!item[2]) return this; // nothing to do!
-
+    // if (!item[2]) return this; // nothing to do!
+    
     var empty = this.get('allowsEmptySelection');
     var mult = this.get('allowsMultipleSelection');
     

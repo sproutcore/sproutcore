@@ -233,7 +233,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     this.set('isEditing', NO) ;
   },
 
-  displayProperties: ['displayValue', 'textAlign', 'fontWeight', 'icon'],
+  displayProperties: ['displayValue', 'textAlign', 'fontWeight', 'icon', 'value'],
   
   render: function(context, firstTime) {
     var value = this.get('displayValue');

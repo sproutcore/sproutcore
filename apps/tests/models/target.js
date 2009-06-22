@@ -89,4 +89,41 @@ TestRunner.Target = SC.Record.extend(
     return this.get('store').findAll(TestRunner.Test);
   }.property('testsUrl').cacheable()
 
+    @property
+  */
+  docsUrl: SC.Record.attr(String, { key: "link_docs" }),
+  
+  /**
+    Link to the test index json
+    
+    @property
+  */
+  testsUrl: SC.Record.attr(String, { key: "link_tests" }),
+  
+  /**
+    Link to the target itself.  This is only useful for applications.
+    
+    @property
+  */
+  rootUrl: SC.Record.attr(String, { key: "link_root" }),
+  
+  
+  /**
+    The parent target, if there is one.  This is a reference to the primary
+    key.
+    
+    @property
+  */
+  parent: SC.Record.hasOne("TestRuner.Target"),
+  
+  /**
+    The display name for the target.  Computed by taking the last part of the
+    target name.
+  */
+  displayName: function() {
+    var name = this.get('name').split('/');
+    name = name[name.length-1] || '(none)';
+    return name.titleize();
+  }.property('name').cacheable()
+  
 }) ;

@@ -249,8 +249,11 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
+    // console.log('%@.recomputeIsVisibleInWindow(parentViewIsVisible=%@)'.fmt(this, parentViewIsVisible ? 'YES' : 'NO'));
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isVisible'), parentView ;
+    
+    // console.log('last=%@, cur=%@'.fmt(last?'YES':'NO', cur?'YES':'NO'));
     
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
@@ -268,7 +271,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(cur);
       }
-
+        
       // if we just became visible, update layer + layout if needed...
       if (cur) {
         if (this.parentViewDidResize) this.parentViewDidResize();
@@ -287,12 +290,15 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         this.invokeOnce(function() { that.updateLayerIfNeeded(YES); });
       }
       
+      // always update our layer regardless, because that handles DOM 
+      // visibility...
+      this.set('layerNeedsUpdate', YES) ;
+      
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
       
     }
-    
     return this ;
   },
   
@@ -326,7 +332,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} the receiver
   */
   insertBefore: function(view, beforeView) { 
-    
     view.beginPropertyChanges(); // limit notifications
     
     // remove view from old parent if needed.  Also notify views.
@@ -429,7 +434,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} the receiver
   */
   replaceChild: function(view, oldView) {
-    
     // suspend notifications
     view.beginPropertyChanges();
     oldView.beginPropertyChanges();
@@ -487,6 +491,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   parentViewDidChange: function() {
+    //console.log('%@.parentViewDidChange()'.fmt(this));
     this.recomputeIsVisibleInWindow() ;
     
     this.set('layerLocationNeedsUpdate', YES) ;
@@ -528,7 +533,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
     }
     return value ;
-  }.property('isVisibleInWindow').cacheable(),
+  }.property().idempotent(), // FIXME: [EO] Cacheing is goofing up the view redrawing
+  //}.property('isVisibleInWindow'), // .cacheable(),
   
   /**
     Get a CoreQuery object for this view's layer, or pass in a selector string
@@ -540,10 +546,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   $: function(sel) {
     var ret, layer = this.get('layer') ;
     // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
-    // return an object selecting hte document.
-    ret = !layer ?
-      SC.$([]) :
-      (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
+    // return an object selecting the document.
+    ret = !layer ? SC.$([]) : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
     layer = null ; // avoid memory leak
     return ret ;
   },
@@ -558,7 +562,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   containerLayer: function() {
     return this.get('layer') ;
-  }.property('layer').cacheable(),
+  //}.property('layer').cacheable(), 
+  }.property().idempotent(), // FIXME: [EO] Fix the cacheing bug
   
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
@@ -654,6 +659,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if layerNeedsUpdate is set to YES.
   */  
   _view_layerNeedsUpdateDidChange: function() {
+    // console.log('%@._view_layerNeedsUpdateDidChange(), this.get(\'layerNeedsUpdate\') =>'.fmt(this));
+    // console.log(this.get('layerNeedsUpdate'));
     if (this.get('layerNeedsUpdate')) {
       this.invokeOnce(this.updateLayerIfNeeded) ;
     }
@@ -678,17 +685,21 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in updateLayer
   */
   updateLayerIfNeeded: function(isVisible) {
+    // console.log('%@.updateLayerIfNeeded(isVisible=%@)'.fmt(this, isVisible ? 'YES' : 'NO'));
     if (!isVisible) isVisible = this.get('isVisibleInWindow') ;
-    if (isVisible && this.get('layerNeedsUpdate')) {
-      // only update a layer if it already exists
-      if (this.get('layer')) {
+    if (this.get('layerNeedsUpdate')) {
+      if (isVisible) {
         this.beginPropertyChanges() ;
         this.set('layerNeedsUpdate', NO) ;
         this.updateLayer() ;
         this.endPropertyChanges() ;
-        
-      // clear our layerNeedsUpdate flag so we can respond to changes later
-      } else this.set('layerNeedsUpdate', NO) ;
+      }
+      else {
+        this.beginPropertyChanges() ;
+        this.set('layerNeedsUpdate', NO) ;
+        this.updateLayer() ;
+        this.endPropertyChanges() ;
+      }
     }
     return this ;
   },
@@ -851,8 +862,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {void}
   */
   prepareContext: function(context, firstTime) {
-    var mixins, len, idx, layerId, bgcolor, cursor ;
-    
+    // console.log('%@.prepareContext(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? 'YES' : 'NO'));
+    var mixins, len, idx, layerId ;
     // do some initial setup only needed at create time.
     if (firstTime) {
       // TODO: seems like things will break later if SC.guidFor(this) is used
@@ -866,16 +877,9 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     
     // do some standard setup...
-    if (this.get('isTextSelectable')) context.addClass('allow-select') ;
-    if (!this.get('isEnabled')) context.addClass('disabled') ;
-    if (!this.get('isVisible')) context.addClass('hidden') ;
-    if (this.get('isFirstResponder')) context.addClass('focus');
-    
-    bgcolor = this.get('backgroundColor');
-    if (bgcolor) context.addStyle('backgroundColor', bgcolor);
-    
-    cursor = this.get('cursor') ;
-    if (cursor) context.addClass(cursor.get('className')) ;
+    context.setClass('allow-select', this.get('isTextSelectable')) ;
+    context.setClass('disabled', !this.get('isEnabled')) ;
+    context.setClass('hidden', !this.get('isVisible')) ;
     
     this.render(context, firstTime) ;
     if (mixins = this.renderMixin) {
@@ -896,6 +900,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in render
   */
   renderChildViews: function(context, firstTime) {
+    // console.log('%@.renderChildViews(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? 'YES' : 'NO'));
     var cv = this.get('childViews'), len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
@@ -928,6 +933,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {void}
   */
   render: function(context, firstTime) {
+    // console.log('%@.render(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? 'YES' : 'NO'));
     if (firstTime) this.renderChildViews(context, firstTime) ;
   },
   
@@ -1016,6 +1022,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in updateLayerLocation
   */
   updateLayerLocationIfNeeded: function(force) {
+    // console.log('%@.updateLayerLocationIfNeeded(force=%@)'.fmt(this, force ? 'YES' : 'NO'));
     if (this.get('layerLocationNeedsUpdate')) {
       this.set('layerLocationNeedsUpdate', NO) ;
       this.updateLayerLocation() ;
@@ -1031,12 +1038,14 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateLayerLocation: function() {
+    // console.log('%@.updateLayerLocation()'.fmt(this));
     // collect some useful value
     // if there is no node for some reason, just exit
     var node = this.get('layer') ;
     var parentView = this.get('parentView') ;
     var parentNode = parentView ? parentView.get('containerLayer') : null ;
     
+    // console.log(node);
     // remove node from current parentNode if the node does not match the new 
     // parent node.
     if (node && node.parentNode && node.parentNode !== parentNode) {

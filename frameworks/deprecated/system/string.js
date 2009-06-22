@@ -4,8 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('system/mixins/string');
-
 // deprecated, mostly useless API, that was blindly copied from Prototype
 SC.mixin(String.prototype, {
     

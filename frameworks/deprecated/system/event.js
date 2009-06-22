@@ -4,8 +4,6 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('system/event') ;
-
 // This file defines some basic extensions to the built-in Event object to
 // provide some common utility functions.
 

@@ -107,6 +107,11 @@ SC.Pane = SC.View.extend({
   /** Last known window size. */
   currentWindowSize: null,
   
+  /** @private disable caching due to an known bug in SC */
+  frame: function() {
+    return this.computeFrameWithParentFrame(null) ;
+  }.property(),
+  
   /** The parent dimensions are always the last known window size. */
   computeParentDimensions: function(frame) {
     var pframe = this.get('currentWindowSize');
@@ -350,6 +355,20 @@ SC.Pane = SC.View.extend({
   isMainPane: NO,
   
   /**
+    Invoked when the pane is about to become the focused pane.
+    
+    @param {SC.Pane} pane the pane that currently have focus
+  */
+  focusFrom: function(pane) {},
+  
+  /**
+    Invoked when the the pane is about to lose its focused pane status.
+    
+    @param {SC.Pane} pane the pane that will receive focus next
+  */
+  blurTo: function(pane) {},
+  
+  /**
     Invoked when the view is about to lose its mainPane status.  The default 
     implementation will also remove the pane from the document since you can't 
     have more than one mainPane in the document at a time.
@@ -407,6 +426,7 @@ SC.Pane = SC.View.extend({
     // clean up some of my own properties 
     this.set('isPaneAttached', NO) ;
     this.parentViewDidChange() ;
+    return this ;
   },
   
   /**

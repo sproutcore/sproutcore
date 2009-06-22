@@ -6,8 +6,6 @@
 
 /*global ViewBuilder */
 
-require('views/view');
-
 /** @class
 
   A Designer class provides the core editing functionality you need to edit
@@ -523,31 +521,49 @@ SC.ViewDesigner.mixin({
   
 });
 
+
 // ..........................................................
 // FIXUP SC.View
 // 
 
 SC.View.prototype._orig_respondsTo = SC.View.prototype.respondsTo;
+SC.View.prototype._orig_tryToPerform = SC.View.prototype.tryToPerform;
 
 /**
   If the view has a designer, then patch respondsTo...
 */
-SC.View.prototype.respondsTo = function( methodName ) {
+/*SC.View.prototype.respondsTo = function( methodName ) {
   var ret = !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
   if (this.designer) ret = ret || this.designer.respondsTo(methodName);
   return ret ;
-} ;
+} ;*/
+SC.View.prototype.respondsTo = function( methodName ) {
+  if (this.designer) {
+    var ret = !!(SC.typeOf(this[methodName]) === SC.T_FUNCTION);
+    ret = ret || this.designer.respondsTo(methodName);
+    return ret;
+  }
+  else {
+    return this._orig_respondsTo(methodName);
+  }
+};
 
 /** 
   If the view has a designer, give it an opportunity to handle an event 
   before passing it on to the main view.
 */
-SC.View.prototype.tryToPerform = function(methodName, arg1, arg2) {
+/*SC.View.prototype.tryToPerform = function(methodName, arg1, arg2) {
   if (this.designer) {
     return this.designer.tryToPerform(methodName, arg1, arg2);
   } else {
     return this._orig_respondsTo(methodName) && this[methodName](arg1, arg2);
   }
-} ;
-
-
+} ;*/
+SC.View.prototype.tryToPerform = function(methodName, arg1, arg2) {
+  if (this.designer) {
+    return this.designer.tryToPerform(methodName, arg1, arg2);
+  }
+  else {
+    return this._orig_tryToPerform(methodName, arg1, arg2);
+  }
+};

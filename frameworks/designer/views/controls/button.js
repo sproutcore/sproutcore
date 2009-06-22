@@ -4,9 +4,8 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('design.mode/views/designer');
-require('design.mode/views/mixins/button');
-require('views/controls/button');
+require('views/designer');
+require('views/mixins/button');
 
 SC.ButtonView.Designer = SC.ViewDesigner.extend( SC.Button.Designer,
 /** @scope SC.ButtonView.Designer.prototype */ {
