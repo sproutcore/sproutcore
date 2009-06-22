@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('coders/object');
+sc_require('coders/object');
 
 /** @class
 

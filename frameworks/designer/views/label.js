@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('views/designer');
+sc_require('views/designer');
 
 SC.LabelView.Designer = SC.ViewDesigner.extend(
 /** @scope SC.LabelView.Designer.prototype */ {

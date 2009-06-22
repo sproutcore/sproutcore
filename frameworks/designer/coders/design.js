@@ -6,7 +6,7 @@
 
 /* evil:true */
 
-require('coders/object');
+sc_require('coders/object');
 
 /** @class
 
