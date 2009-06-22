@@ -150,7 +150,7 @@ SC.Button = {
     
     elem = this.$('label');
     
-    if (!firstTime && elem){ 
+    if (!firstTime && elem[0]){ 
       if(needsTitle) { elem[0].innerHTML = image + title; }
       else { this.$()[0].innerHTML = ''; } 
     } else {
