@@ -59,7 +59,6 @@ SC.TabView = SC.View.extend(
   
   // forward important changes on to child views
   _tab_nowShowingDidChange: function() {
-    // console.log('%@._tab_nowShowingDidChange(), this.get(\'nowShowing\') == %@'.fmt(this, this.get('nowShowing')));
     var v = this.get('nowShowing');
     this.get('containerView').set('nowShowing',v);
     this.get('segmentedView').set('value',v);
@@ -105,11 +104,11 @@ SC.TabView = SC.View.extend(
     if (this.get('tabLocation') === SC.TOP_LOCATION) {
       ContainerView = this.containerView.extend({
         layout: { top:11, left:0, right:0, bottom: 0 }
-      })
+      });
     } else {
       ContainerView = this.containerView.extend({
         layout: { top:0, left:0, right:0, bottom: 11 }
-      })
+      });
     }
     
     view = this.containerView = this.createChildView(ContainerView, { 
@@ -149,7 +148,6 @@ SC.TabView = SC.View.extend(
       When the value changes, update the parentView's value as well.
     */
     _sc_tab_segmented_valueDidChange: function() {
-      // console.log('%@._sc_tab_segmented_valueDidChange(), this.get(\'value\') == %@'.fmt(this, this.get('value')));
       var pv = this.get('parentView');
       if (pv) pv.set('nowShowing', this.get('value'));
       
@@ -166,7 +164,6 @@ SC.TabView = SC.View.extend(
       the item key settings from the tab view.
     */
     render: function(context, firstTime) {
-      // console.log('%@.render(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? YES : NO));
       sc_super();
       // copy some useful properties from the parent view first
       var pv = this.get('parentView');

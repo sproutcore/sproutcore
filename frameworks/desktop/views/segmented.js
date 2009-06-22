@@ -180,8 +180,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {Array}
   */
   displayItems: function() {
-    // console.log('%@.displayItems(), this.get(\'items\') =>'.fmt(this));
-    // console.log(this.get('items'));
     var items = this.get('items'), loc = this.get('localize') ;
     var keys=null, itemType, cur ;
     var ret = [], max = items.get('length'), idx, item ;
@@ -306,7 +304,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     any "transient" states such as the global isEnabled property or selection.
   */
   renderDisplayItems: function(context, items) {
-    var title = null, icon = null, url=null, className=null, ic=null, item=null, toolTip=null;
+    var title, icon, url, className, ic, item, toolTip, width;
     var value = this.get('value');
     var isArray = SC.isArray(value);
     var activeIndex = this.get('activeIndex');
@@ -436,7 +434,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     will update the value if possible and fire the action.
   */
   triggerItemAtIndex: function(idx) {
-    // console.log('%@.triggerItemAtIndex(idx=%@)'.fmt(this, idx));
     var items = this.get('displayItems') ;
     var item = items.objectAt(idx);
     // if (!item[2]) return this; // nothing to do!
