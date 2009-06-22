@@ -249,11 +249,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    // console.log('%@.recomputeIsVisibleInWindow(parentViewIsVisible=%@)'.fmt(this, parentViewIsVisible ? 'YES' : 'NO'));
     var last = this.get('isVisibleInWindow') ;
     var cur = this.get('isVisible'), parentView ;
-    
-    // console.log('last=%@, cur=%@'.fmt(last?'YES':'NO', cur?'YES':'NO'));
     
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
@@ -275,9 +272,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       // if we just became visible, update layer + layout if needed...
       if (cur) {
         if (this.parentViewDidResize) this.parentViewDidResize();
-        if (this.get('layerNeedsUpdate')) {
-          this.invokeOnce(this.updateLayerIfNeeded);
-        }
+        this.set('layerNeedsUpdate', YES);
+        this.invokeOnce(this.updateLayerIfNeeded);
         
         if (this.get('childViewsNeedLayout')) {
           this.invokeOnce(this.layoutChildViewsIfNeeded);
@@ -289,10 +285,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         this.set('layerNeedsUpdate', YES);
         this.invokeOnce(function() { that.updateLayerIfNeeded(YES); });
       }
-      
-      // always update our layer regardless, because that handles DOM 
-      // visibility...
-      this.set('layerNeedsUpdate', YES) ;
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
@@ -491,7 +483,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   parentViewDidChange: function() {
-    //console.log('%@.parentViewDidChange()'.fmt(this));
     this.recomputeIsVisibleInWindow() ;
     
     this.set('layerLocationNeedsUpdate', YES) ;
@@ -533,8 +524,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
       }
     }
     return value ;
-  }.property().idempotent(), // FIXME: [EO] Cacheing is goofing up the view redrawing
-  //}.property('isVisibleInWindow'), // .cacheable(),
+  }.property('isVisibleInWindow').cacheable(),
   
   /**
     Get a CoreQuery object for this view's layer, or pass in a selector string
@@ -562,8 +552,7 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
   */
   containerLayer: function() {
     return this.get('layer') ;
-  //}.property('layer').cacheable(), 
-  }.property().idempotent(), // FIXME: [EO] Fix the cacheing bug
+  }.property('layer').cacheable(), 
   
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
@@ -659,8 +648,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     if layerNeedsUpdate is set to YES.
   */  
   _view_layerNeedsUpdateDidChange: function() {
-    // console.log('%@._view_layerNeedsUpdateDidChange(), this.get(\'layerNeedsUpdate\') =>'.fmt(this));
-    // console.log(this.get('layerNeedsUpdate'));
     if (this.get('layerNeedsUpdate')) {
       this.invokeOnce(this.updateLayerIfNeeded) ;
     }
@@ -685,21 +672,17 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in updateLayer
   */
   updateLayerIfNeeded: function(isVisible) {
-    // console.log('%@.updateLayerIfNeeded(isVisible=%@)'.fmt(this, isVisible ? 'YES' : 'NO'));
     if (!isVisible) isVisible = this.get('isVisibleInWindow') ;
-    if (this.get('layerNeedsUpdate')) {
-      if (isVisible) {
+    if (isVisible && this.get('layerNeedsUpdate')) {
+      // only update a layer if it already exists
+      if (this.get('layer')) {
         this.beginPropertyChanges() ;
         this.set('layerNeedsUpdate', NO) ;
         this.updateLayer() ;
         this.endPropertyChanges() ;
-      }
-      else {
-        this.beginPropertyChanges() ;
-        this.set('layerNeedsUpdate', NO) ;
-        this.updateLayer() ;
-        this.endPropertyChanges() ;
-      }
+        
+      // clear our layerNeedsUpdate flag so we can respond to changes later
+      } else this.set('layerNeedsUpdate', NO) ;
     }
     return this ;
   },
@@ -862,8 +845,8 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {void}
   */
   prepareContext: function(context, firstTime) {
-    // console.log('%@.prepareContext(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? 'YES' : 'NO'));
-    var mixins, len, idx, layerId ;
+    var mixins, len, idx, layerId, bgcolor, cursor ;
+    
     // do some initial setup only needed at create time.
     if (firstTime) {
       // TODO: seems like things will break later if SC.guidFor(this) is used
@@ -877,9 +860,16 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     }
     
     // do some standard setup...
-    context.setClass('allow-select', this.get('isTextSelectable')) ;
-    context.setClass('disabled', !this.get('isEnabled')) ;
-    context.setClass('hidden', !this.get('isVisible')) ;
+    if (this.get('isTextSelectable')) context.addClass('allow-select') ;
+    if (!this.get('isEnabled')) context.addClass('disabled') ;
+    if (!this.get('isVisible')) context.addClass('hidden') ;
+    if (this.get('isFirstResponder')) context.addClass('focus');
+    
+    bgcolor = this.get('backgroundColor');
+    if (bgcolor) context.addStyle('backgroundColor', bgcolor);
+    
+    cursor = this.get('cursor') ;
+    if (cursor) context.addClass(cursor.get('className')) ;
     
     this.render(context, firstTime) ;
     if (mixins = this.renderMixin) {
@@ -900,7 +890,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in render
   */
   renderChildViews: function(context, firstTime) {
-    // console.log('%@.renderChildViews(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? 'YES' : 'NO'));
     var cv = this.get('childViews'), len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
@@ -933,7 +922,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {void}
   */
   render: function(context, firstTime) {
-    // console.log('%@.render(context=%@, firstTime=%@)'.fmt(this, context, firstTime ? 'YES' : 'NO'));
     if (firstTime) this.renderChildViews(context, firstTime) ;
   },
   
@@ -1022,7 +1010,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in updateLayerLocation
   */
   updateLayerLocationIfNeeded: function(force) {
-    // console.log('%@.updateLayerLocationIfNeeded(force=%@)'.fmt(this, force ? 'YES' : 'NO'));
     if (this.get('layerLocationNeedsUpdate')) {
       this.set('layerLocationNeedsUpdate', NO) ;
       this.updateLayerLocation() ;
@@ -1038,14 +1025,12 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   updateLayerLocation: function() {
-    // console.log('%@.updateLayerLocation()'.fmt(this));
     // collect some useful value
     // if there is no node for some reason, just exit
     var node = this.get('layer') ;
     var parentView = this.get('parentView') ;
     var parentNode = parentView ? parentView.get('containerLayer') : null ;
     
-    // console.log(node);
     // remove node from current parentNode if the node does not match the new 
     // parent node.
     if (node && node.parentNode && node.parentNode !== parentNode) {
@@ -1369,11 +1354,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
         }
       }
     }
-    
-    // if (didChange) {
-    //   console.log('did change layout') ;
-    //   console.log(layout) ;
-    // }
     
     // now set adjusted layout
     if (didChange) this.set('layout', layout) ;
@@ -1998,7 +1978,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
-    // console.log('%@.layoutDidChange()'.fmt(this));
     this.beginPropertyChanges() ;
     if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;
@@ -2124,7 +2103,6 @@ SC.View = SC.Object.extend(SC.Responder, SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    // console.log(this.get('layoutStyle'));
     context.addStyle(this.get('layoutStyle'));
   },
   
