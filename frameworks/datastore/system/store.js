@@ -1112,6 +1112,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record|Array} recordTypes class or array of classes
     @param {Array} ids ids to retrieve
     @param {Array} storeKeys (optional) store keys to retrieve
+    @param {Boolean} isRefresh
     @returns {Array} storeKeys to be retrieved
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
@@ -1752,7 +1753,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   storeKeys: function() {
-    ret = [];
+    var ret = [], storeKey;
     if(!this.statuses) return;
     
     for(storeKey in this.statuses) {
