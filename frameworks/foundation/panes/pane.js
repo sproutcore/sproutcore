@@ -107,11 +107,6 @@ SC.Pane = SC.View.extend({
   /** Last known window size. */
   currentWindowSize: null,
   
-  /** @private disable caching due to an known bug in SC */
-  frame: function() {
-    return this.computeFrameWithParentFrame(null) ;
-  }.property(),
-  
   /** The parent dimensions are always the last known window size. */
   computeParentDimensions: function(frame) {
     var pframe = this.get('currentWindowSize');
