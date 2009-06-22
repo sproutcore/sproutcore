@@ -304,12 +304,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     any "transient" states such as the global isEnabled property or selection.
   */
   renderDisplayItems: function(context, items) {
-    var title = null, icon = null, url=null, className=null, ic=null, item=null, toolTip=null, width=null;
-    var value = this.get('value');
-    var isArray = SC.isArray(value);
-    var activeIndex = this.get('activeIndex');
-    var len= items.length;
-    for(var i=0; i< len; i++){
+    var value       = this.get('value'),
+        isArray     = SC.isArray(value),
+        activeIndex = this.get('activeIndex'),
+        len         = items.length,
+        title, icon, url, className, ic, item, toolTip, width, i;
+
+    for(i=0; i< len; i++){
       ic = context.begin('a').attr('href', 'javascript:;');
       item=items[i];
       title = item[0]; 
@@ -357,6 +358,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       ic.end();
     }   
   },  
+  
   // ..........................................................
   // EVENT HANDLING
   // 
@@ -434,17 +436,19 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     will update the value if possible and fire the action.
   */
   triggerItemAtIndex: function(idx) {
-    var items = this.get('displayItems') ;
-    var item = items.objectAt(idx);
+    var items = this.get('displayItems'),
+        item  = items.objectAt(idx),
+        sel, value, val, empty, mult;
+        
     if (!item[2]) return this; // nothing to do!
 
-    var empty = this.get('allowsEmptySelection');
-    var mult = this.get('allowsMultipleSelection');
+    empty = this.get('allowsEmptySelection');
+    mult = this.get('allowsMultipleSelection');
     
     
     // get new value... bail if not enabled. Also save original for later.
-    var sel = item[1];
-    var value = val = this.get('value') ;
+    sel = item[1];
+    value = val = this.get('value') ;
     if (!SC.isArray(value)) value = [value]; // force to array
     
     // if we do not allow multiple selection, either replace the current
