@@ -135,7 +135,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidFocus: function(evt) {
     if (!this._isFocused) {
       this._isFocused = YES ;
-     // this._applyFirefoxCursorFix();
+      this._applyFirefoxCursorFix();
       this.beginEditing();
     }
   },
@@ -143,7 +143,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidBlur: function() {
     if (this._isFocused) {
       this._isFocused = NO ;
-      //this._removeFirefoxCursorFix();
+      this._removeFirefoxCursorFix();
       this.commitEditing();
     }
   },
@@ -156,9 +156,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           left   = p.x, 
           width  = layer.offsetWidth, 
           height = layer.offsetHeight ;
-
-      // brittle, but the layout is correct :(
-      top += 3; left += 3; width -= 6; height -= 6; 
+          
+      top -= 2; 
+      left -= 2;  
       
       var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
       this.$field().attr('style', style) ;
