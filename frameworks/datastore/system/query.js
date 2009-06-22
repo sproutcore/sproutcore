@@ -179,12 +179,13 @@ SC.Query = SC.Object.extend({
         result = SC.compare(
                   record1.get(propertyName),record2.get(propertyName));
       }
-      if (result != 0) {
+      if (result !== 0) {
         // if order is descending we invert the sign of the result
         if (this.order[i].descending) result = (-1) * result;
         return result;
       }
-    };
+    }
+    
     // all properties are equal now
     // get order by guid
     return SC.compare(record1.get('guid'),record2.get('guid'));
@@ -415,10 +416,10 @@ SC.Query = SC.Object.extend({
                           var values = this.rightSide.evaluate(r,w);
                           var found  = false;
                           var i      = 0;
-                          while ( found==false && i<values.length ) {
+                          while ( found===false && i<values.length ) {
                             if ( prop == values[i] ) found = true;
                             i++;
-                          };
+                          }
                           return found;
                         }
     },
@@ -507,11 +508,10 @@ SC.Query = SC.Object.extend({
       
       // handling of special cases
       // check format
-      if ( t.format && !t.format.test(tokenValue) ) 
-        tokenType = "UNKNOWN";
+      if (t.format && !t.format.test(tokenValue)) tokenType = "UNKNOWN";
       // delimeted token (e.g. by ")
-      if ( t.delimeted ) 
-        skipThisCharacter = true;
+      if (t.delimeted) skipThisCharacter = true;
+      
       // reserved words
       if ( !t.delimeted ) {
         for ( var anotherToken in grammar ) {
@@ -520,7 +520,8 @@ SC.Query = SC.Object.extend({
             tokenType = anotherToken;
           }
         }
-      };
+      }
+      
       // reset t
       t = grammar[tokenType];
       // remembering count type
@@ -528,7 +529,7 @@ SC.Query = SC.Object.extend({
         if (!rememberCount[tokenType]) rememberCount[tokenType] = 0;
         tokenValue = rememberCount[tokenType];
         rememberCount[tokenType] += 1;
-      };
+      }
 
       // push token to list
       tokenList.push( {tokenType: tokenType, tokenValue: tokenValue} );
@@ -537,7 +538,7 @@ SC.Query = SC.Object.extend({
       currentToken      = null;
       currentTokenType  = null;
       currentTokenValue = null;
-    };
+    }
   
   
     // stepping through the string:
@@ -563,22 +564,19 @@ SC.Query = SC.Object.extend({
       
         // some helpers
         t = grammar[currentToken];
-        endOfToken = (t.delimeted) ? c==currentDelimeter : t.notAllowed.test(c);
+        endOfToken = t.delimeted ? c==currentDelimeter : t.notAllowed.test(c);
       
         // if still in token
-        if ( !endOfToken )
-          currentTokenValue += c;
+        if ( !endOfToken ) currentTokenValue += c;
       
         // if end of token reached
-        if ( endOfToken || endOfString )
+        if (endOfToken || endOfString) {
           addToken(currentToken, currentTokenValue);
+        }
       
         // if end of string don't check again
-        if ( endOfString && !endOfToken )
-          skipThisCharacter = true;
-      };
-    
- 
+        if ( endOfString && !endOfToken ) skipThisCharacter = true;
+      }
     
       // if not inside a token, look for next one
     
@@ -586,9 +584,10 @@ SC.Query = SC.Object.extend({
         // look for matching tokenType
         for ( token in grammar ) {
           t = grammar[token];
-          if ( t.firstCharacter && t.firstCharacter.test(c) )
+          if (t.firstCharacter && t.firstCharacter.test(c)) {
             currentToken = token;
-        };
+          }
+        }
 
         // if tokenType found
         if ( currentToken ) {
@@ -597,16 +596,17 @@ SC.Query = SC.Object.extend({
           // handling of special cases
           if ( t.delimeted ) {
             currentTokenValue = "";
-            if ( t.lastCharacter ) 
-              currentDelimeter = t.lastCharacter;
-            else
-              currentDelimeter = c;
-          };
-          if ( t.singleCharacter || endOfString )
+            if ( t.lastCharacter ) currentDelimeter = t.lastCharacter;
+            else currentDelimeter = c;
+          }
+
+          if ( t.singleCharacter || endOfString ) {
             addToken(currentToken, currentTokenValue);
-        };
-      };
-    };
+          }
+        }
+      }
+    }
+    
     return tokenList;
   },
   
@@ -642,8 +642,8 @@ SC.Query = SC.Object.extend({
     
   
     // empty tokenList is a special case
-    if (!tokenList || tokenList.length == 0){
-      return {evaluate: function(){return true;}};
+    if (!tokenList || tokenList.length === 0) {
+      return { evaluate: function(){ return true; } };
     }
   
   
@@ -653,18 +653,18 @@ SC.Query = SC.Object.extend({
       var p = position;
       if ( p < 0 ) return false;
       
-      tl = treeLogic[l[p].tokenType];
+      var tl = treeLogic[l[p].tokenType];
       
       if ( ! tl ) {
         error.push("logic for token '"+l[p].tokenType+"' is not defined");
         return false;
-      };
+      }
 
       // save evaluate in token, so that we don't have
       // to look it up again when evaluating the tree
       l[p].evaluate = tl.evaluate;
       return tl;
-    };
+    }
   
     function expectedType (side, position) {
       var p = position;
@@ -672,34 +672,32 @@ SC.Query = SC.Object.extend({
       if ( !tl )            return false;
       if (side == 'left')   return tl.leftType;
       if (side == 'right')  return tl.rightType;
-    };
+    }
   
     function evalType (position) {
       var p = position;
       var tl = tokenLogic(p);
       if ( !tl )  return false;
       else        return tl.evalType;
-    };
+    }
   
     function removeToken (position) {
       l.splice(position, 1);
       if ( position <= i ) i--;
-    };
+    }
   
     function preceedingTokenExists (position) {
       var p = position || i;
       if ( p > 0 )  return true;
       else          return false;
-    };
+    }
   
     function tokenIsMissingChilds (position) {
       var p = position;
       if ( p < 0 )  return true;
-      if (( expectedType('left',p) && !l[p].leftSide )
-              || ( expectedType('right',p) && !l[p].rightSide ))
-                    return true;
-      else          return false;
-    };
+      return (expectedType('left',p) && !l[p].leftSide)
+          || (expectedType('right',p) && !l[p].rightSide);
+    }
   
     function typesAreMatching (parent, child) {
       var side = (child < parent) ? 'left' : 'right';
@@ -708,7 +706,7 @@ SC.Query = SC.Object.extend({
       if ( !evalType(child) )                             return false;
       if ( expectedType(side,parent) == evalType(child) ) return true;
       else                                                return false;
-    };
+    }
   
     function preceedingTokenCanBeMadeChild (position) {
       var p = position;
@@ -716,7 +714,7 @@ SC.Query = SC.Object.extend({
       if ( !preceedingTokenExists(p) )  return false;
       if ( typesAreMatching(p,p-1) )    return true;
       else                              return false;
-    };
+    }
   
     function preceedingTokenCanBeMadeParent (position) {
       var p = position;
@@ -725,43 +723,40 @@ SC.Query = SC.Object.extend({
       if ( !tokenIsMissingChilds(p-1) ) return false;
       if ( typesAreMatching(p-1,p) )    return true;
       else                              return false;
-    };
+    }
   
     function makeChild (position) {
       var p = position;
       if (p<1) return false;
       l[p].leftSide = l[p-1];
       removeToken(p-1);
-    };
+    }
   
     function makeParent (position) {
       var p = position;
       if (p<1) return false;
       l[p-1].rightSide = l[p];
       removeToken(p);
-    };
+    }
   
     function removeParenthesesPair (position) {
       removeToken(position);
       removeToken(openParenthesisStack.pop());
-    };
+    }
   
     // step through the tokenList
   
     for (i=0; i < l.length; i++) {
       shouldCheckAgain = false;
     
-      if ( l[i].tokenType == 'UNKNOWN' )
+      if ( l[i].tokenType == 'UNKNOWN' ) {
         error.push('found unknown token: '+l[i].tokenValue);
+      }
       
-      if ( l[i].tokenType == 'OPEN_PAREN' )
-        openParenthesisStack.push(i);
+      if ( l[i].tokenType == 'OPEN_PAREN' ) openParenthesisStack.push(i);
+      if ( l[i].tokenType == 'CLOSE_PAREN' ) removeParenthesesPair(i);
       
-      if ( l[i].tokenType == 'CLOSE_PAREN' )      
-        removeParenthesesPair(i);
-      
-      if ( preceedingTokenCanBeMadeChild(i) ) 
-        makeChild(i);
+      if ( preceedingTokenCanBeMadeChild(i) ) makeChild(i);
       
       if ( preceedingTokenCanBeMadeParent(i) ){
         makeParent(i);
@@ -770,7 +765,7 @@ SC.Query = SC.Object.extend({
       
       if ( shouldCheckAgain ) i--;
     
-    };
+    }
   
     // error if tokenList l is not a single token now
     if (l.length == 1) l = l[0];
@@ -809,7 +804,8 @@ SC.Query = SC.Object.extend({
         p = p.split(',');
         o[i] = {propertyName: p[0]};
         if (p[1] && p[1] == 'DESC') o[i].descending = true;
-      };
+      }
+      
       return o;
     }
     
@@ -858,8 +854,8 @@ SC.Query.mixin( /** @scope SC.Query */ {
       }
     }
     
-    for(idx=0,len=storeKeys.length;idx<len;idx++) {
-      var rec = store.materializeRecord(storeKeys[idx]);
+    for(idx=0, len=storeKeys.length; idx<len;idx++) {
+      rec = store.materializeRecord(storeKeys[idx]);
       if(rec && query.contains(rec)) ret.push(storeKeys[idx]);
     }
     
@@ -887,7 +883,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
       }
     }
     
-    SC.Query.orderStoreKeys(ret, query, store);
+    ret = SC.Query.orderStoreKeys(ret, query, store);
     
     return ret;
   },
@@ -899,21 +895,40 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {Array} storeKeys to sort
     @param {SC.Query} query to use for sorting
     @param {SC.Store} store to materialize records from
+    @returns {Array} sorted store keys.  may be same instance as passed value
   */
   
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
     if(query.get('orderBy') && storeKeys) {
       
-      storeKeys.sort( function(storeKey1, storeKey2) {
-          if (store === undefined) debugger;
-
-          var record1 = store.materializeRecord(storeKey1);
-          var record2 = store.materializeRecord(storeKey2);
-
-          return query.compare.call(query, record1, record2);
-      });
+      // Set tmp variable because we can't pass variables to sort function.
+      // Do this instead of generating a temporary closure function for perf
+      SC.Query._TMP_STORE = store;
+      SC.Query._TMP_QUERY_KEY = query;
+      storeKeys.sort(query.compareStoreKeys);
+      SC.Query._TMP_STORE = SC.Query._TMP_QUERY_KEY = null;
     }
+    
+    return storeKeys;
+  },
+  
+  /** 
+    Default sort method that is used when calling containsStoreKeys()
+    or containsRecords() on this query. Simply materializes two records based 
+    on storekeys before passing on to compare() .
+ 
+    @param {Number} storeKey1 a store key
+    @param {Number} storeKey2 a store key
+    @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
+  */
+ 
+  compareStoreKeys: function(storeKey1, storeKey2) {
+    var store    = SC.Query._TMP_STORE,
+        queryKey = SC.Query._TMP_QUERY_KEY,
+        record1  = store.materializeRecord(storeKey1),
+        record2  = store.materializeRecord(storeKey2);
+    return queryKey.compare(record1, record2);
   }
   
 });
