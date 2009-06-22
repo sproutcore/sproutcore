@@ -6,8 +6,6 @@
 
 /*jslint evil:true */
 
-require('views/view');
-
 /** 
   Extend SC.View with emitDesign() which will encode the view and all of its
   subviews then computes an empty element to attach to the design.

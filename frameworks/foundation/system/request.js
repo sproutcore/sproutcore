@@ -312,9 +312,18 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     //End of the fix for IE
     
     var async = (request.get('isAsynchronous') ? YES : NO) ;
-    if (async && !SC.browser.msie) SC.Event.add(rawRequest, 'readystatechange', this, handleReadyStateChange, rawRequest) ;
-    //This is a temporary fix while I figure with charles what is the problem with sc.event
-    if (async && SC.browser.msie) rawRequest.onreadystatechange =  handleReadyStateChange;
+    if (async) {
+      if (!SC.browser.msie) {
+        SC.Event.add(rawRequest, 'readystatechange', this, this.handleReadyStateChange, rawRequest) ;
+      } else { // temporary IE fix from Erich Ocean
+        var that = this ;
+        rawRequest.onreadystatechange = function() {
+          SC.RunLoop.begin() ;
+          that.finishRequest(rawRequest) ;
+          SC.RunoLoop.end() ;
+        };
+      }
+    }
     
     
     

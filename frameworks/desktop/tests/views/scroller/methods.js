@@ -6,7 +6,7 @@
 // ==========================================================================
 
 /*global module test htmlbody ok equals same stop start */
-var pane, view, view1 ;
+var pane, view, view1, view2 ;
 module("SC.ScrollerView",{
   setup: function() {
     SC.RunLoop.begin();
@@ -20,13 +20,20 @@ module("SC.ScrollerView",{
 		  isEnabled:NO,
 		  value:15,
 		  layoutDirection: SC.LAYOUT_HORIZONTAL
+		}),
+		SC.ScrollerView.extend({	
+      layout:{ top: 0, bottom: 0, right: 0, width: 20 },	     
+		  minimum:0,
+		  maximum:100,
 		})
+
 	  ]	
 	});
 	pane.append(); // make sure there is a layer...
 	SC.RunLoop.end();	
 	view = pane.childViews[0];
 	view1= pane.childViews[1];
+  view2= pane.childViews[2];
   },
 
   teardown: function() {
@@ -61,6 +68,35 @@ test("testing properties of a scrollerview", function(){
 test("ownerScrollValueKey() function of the scroller view",function(){
   equals('verticalScrollOffset',view.ownerScrollValueKey(),'should have a vertical scroll offset');
   equals('horizontalScrollOffset',view1.ownerScrollValueKey(),'should have a vertical scroll offset');
+});
+
+test("Setting the scroller to a specific value", function() {
+
+  // should be testing against the layer.scrollTop property
+  view2.set('value', 10);
+  equals(view2._sc_scrollValue, 10, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+  view2.set('value', 0);
+  equals(view2._sc_scrollValue, 0, "After setting the value to the mimumum (0) on a vertical scroller, the scrollTop property of the layer must be");
+	view2.set('value', 100);
+  equals(view2._sc_scrollValue, 100, "After setting the value to the maximum (100) on a vertical scroller, the scrollTop property of the layer must be");
+	view2.set('value', -1);
+  equals(view2._sc_scrollValue, 0, "After setting the value < minimum (-1) on a vertical scroller, the scrollTop property of the layer must be");
+	view2.set('value', 101);
+  equals(view2._sc_scrollValue, 100, "After setting the value > maximum (101) on a vertical scroller, the scrollTop property of the layer must be");
+
+  // should be testing against the layer.scrollLeft property
+  view2.set('layoutDirection', SC.LAYOUT_HORIZONTAL);   
+  view2.set('value', 10);
+  equals(view2._sc_scrollValue, 10, "After setting the value to 10 on a horizontal scroller, the scrollTop property of the layer must be");
+	view2.set('value', 0);
+  equals(view2._sc_scrollValue, 0, "After setting the value to the mimumum (0) on a horizontal scroller, the scrollTop property of the layer must be");
+	view2.set('value', 100);
+  equals(view2._sc_scrollValue, 100, "After setting the value to the maximum (100) on a horizontal scroller, the scrollTop property of the layer must be");
+	view2.set('value', -1);
+  equals(view2._sc_scrollValue, 0, "After setting the value < minimum (-1) on a horizontal scroller, the scrollTop property of the layer must be");
+	view2.set('value', 101);
+  equals(view2._sc_scrollValue, 100, "After setting the value > maximum (101) on a horizontal scroller, the scrollTop property of the layer must be");
+
 });
 
 // JP: TODO : This unit test have to be completed. This test are not really testing much.

@@ -29,7 +29,7 @@ module("isVisibleInWindow", {
   
   teardown: function() {
     view = null ;
-    pane.remove() ;
+    pane.remove().destroy() ;
     pane = null ;
   }
   

@@ -267,13 +267,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       for(idx=0;idx<len;idx++) {
         childViews[idx].recomputeIsVisibleInWindow(cur);
       }
-
+        
       // if we just became visible, update layer + layout if needed...
       if (cur) {
         if (this.parentViewDidResize) this.parentViewDidResize();
-        if (this.get('layerNeedsUpdate')) {
-          this.invokeOnce(this.updateLayerIfNeeded);
-        }
+        this.set('layerNeedsUpdate', YES);
+        this.invokeOnce(this.updateLayerIfNeeded);
         
         if (this.get('childViewsNeedLayout')) {
           this.invokeOnce(this.layoutChildViewsIfNeeded);
@@ -291,7 +290,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
       
     }
-    
     return this ;
   },
   
@@ -325,7 +323,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} the receiver
   */
   insertBefore: function(view, beforeView) { 
-    
     view.beginPropertyChanges(); // limit notifications
     
     // remove view from old parent if needed.  Also notify views.
@@ -428,7 +425,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} the receiver
   */
   replaceChild: function(view, oldView) {
-    
     // suspend notifications
     view.beginPropertyChanges();
     oldView.beginPropertyChanges();
@@ -539,10 +535,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   $: function(sel) {
     var ret, layer = this.get('layer') ;
     // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
-    // return an object selecting hte document.
-    ret = !layer ?
-      SC.$([]) :
-      (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
+    // return an object selecting the document.
+    ret = !layer ? SC.$([]) : (sel === undefined) ? SC.$(layer) : SC.$(sel, layer) ;
     layer = null ; // avoid memory leak
     return ret ;
   },
@@ -557,7 +551,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   containerLayer: function() {
     return this.get('layer') ;
-  }.property('layer').cacheable(),
+  }.property('layer').cacheable(), 
   
   /**
     The ID to use when trying to locate the layer in the DOM.  If you do not
@@ -1449,11 +1443,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
     
-    // if (didChange) {
-    //   console.log('did change layout') ;
-    //   console.log(layout) ;
-    // }
-    
     // now set adjusted layout
     if (didChange) this.set('layout', layout) ;
     
@@ -2077,7 +2066,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
-    // console.log('%@.layoutDidChange()'.fmt(this));
     this.beginPropertyChanges() ;
     if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;
@@ -2203,7 +2191,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutChildViews
   */
   renderLayout: function(context, firstTime) {
-    // console.log(this.get('layoutStyle'));
     context.addStyle(this.get('layoutStyle'));
   },
   

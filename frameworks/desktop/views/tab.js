@@ -104,11 +104,11 @@ SC.TabView = SC.View.extend(
     if (this.get('tabLocation') === SC.TOP_LOCATION) {
       ContainerView = this.containerView.extend({
         layout: { top:11, left:0, right:0, bottom: 0 }
-      })
+      });
     } else {
       ContainerView = this.containerView.extend({
         layout: { top:0, left:0, right:0, bottom: 11 }
-      })
+      });
     }
     
     view = this.containerView = this.createChildView(ContainerView, { 
@@ -147,9 +147,15 @@ SC.TabView = SC.View.extend(
     /** @private
       When the value changes, update the parentView's value as well.
     */
-    valueDidChange: function() {
+    _sc_tab_segmented_valueDidChange: function() {
       var pv = this.get('parentView');
       if (pv) pv.set('nowShowing', this.get('value'));
+      
+      // FIXME: why is this necessary? 'value' is a displayProperty and should
+      // automatically cause displayDidChange() to fire, which should cause 
+      // the two lines below to execute in the normal course of things...
+      this.set('layerNeedsUpdate', YES) ;
+      this.invokeOnce(this.updateLayerIfNeeded) ;
     }.observes('value'),
     
     /** @private

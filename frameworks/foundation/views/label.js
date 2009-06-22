@@ -233,7 +233,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     this.set('isEditing', NO) ;
   },
 
-  displayProperties: ['displayValue', 'textAlign', 'fontWeight', 'icon'],
+  displayProperties: 'displayValue textAlign fontWeight icon'.w(),
   
   _TEMPORARY_CLASS_HASH: {},
   

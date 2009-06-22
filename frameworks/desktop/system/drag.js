@@ -446,7 +446,10 @@ SC.Drag = SC.Object.extend(
       layout: { top: frame.y, left: frame.x, width: frame.width, height: frame.height },
       owner: this,
       didCreateLayer: function() {
-        this.get('layer').appendChild(that.dragView.get('layer').cloneNode(true));
+        if (that.dragView) {
+          var layer = that.dragView.get('layer') ;
+          if (layer) this.get('layer').appendChild(layer.cloneNode(true)) ;
+        }
       }
     });
     

@@ -190,7 +190,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     for(idx=0;idx<max;idx++) {
       item = items.objectAt(idx) ;
       if (SC.none(item)) continue; //skip is null or undefined
-
+      
       // if the item is a string, build the array using defaults...
       itemType = SC.typeOf(item);
       if (itemType === SC.T_STRING) {

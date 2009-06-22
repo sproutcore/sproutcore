@@ -26,7 +26,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   tagName: 'label',
 
   render: function(context, firstTime) {
-    var dt ;
+    var dt, elem ;
     
     // add checkbox -- set name to view guid to separate it from others
     if (firstTime) {
@@ -42,12 +42,13 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     // since we don't want to regenerate the contents each time 
     // actually search for and update the displayTitle.
     } else {
-      if(this.get('isEnabled')){
-        this.$input()[0].disabled=NO;
+      
+      if (elem = this.$input()[0]) {
+        if (this.get('isEnabled')) elem.disabled=NO;
+        else elem.disabled=YES;
+        elem = null ; // avoid memory leaks
       }
-      else{
-        this.$input()[0].disabled=YES;
-      }
+      
       dt = this.get('displayTitle');
       if (dt !== this._field_currentDisplayTitle) {
         this._field_currentDisplayTitle = dt;

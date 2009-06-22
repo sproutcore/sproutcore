@@ -45,14 +45,6 @@
   bottom: 0;
 }
 
-.sc-list-item-view .sc-outline {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-}
-
 .sc-list-item-view.has-icon label,
 .sc-list-item-view.has-checkbox label {
 	left: 24px;

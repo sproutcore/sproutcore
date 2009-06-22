@@ -6,8 +6,7 @@
 
 /* evil:true */
 
-require('design.mode/coders/object');
-require('views/view');
+sc_require('coders/object');
 
 /** @class
 

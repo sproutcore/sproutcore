@@ -4,8 +4,7 @@
 // Portions copyright ©2008 Apple, Inc.  All rights reserved.
 // ========================================================================
 
-require('design.mode/coders/object');
-require('views/view');
+sc_require('coders/object');
 
 /** @class
 

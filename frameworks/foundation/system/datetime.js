@@ -254,6 +254,29 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   toString: function() {
     var d = new Date(this._ms);
     return d.toString();
+  },
+  
+  /**
+    Returns YES if the passed DateTime is equal to the receiver, ie: if their
+    number of milliseconds since January, 1st 1970 00:00:00.0 UTC are equal.
+    This is the preferred method for testing equality.
+  
+    @see SC.DateTime#compare
+    @param {SC.DateTime} aDateTime the DateTime to compare to
+    @returns {Boolean}
+  */
+  isEqual: function(aDateTime) {
+    return SC.DateTime.compare(this, aDateTime) === 0;
+  },
+  
+  /**
+    Returns a copy of the receiver. Because of the way DateTime is designed,
+    it just returns the receiver.
+    
+    @returns {DateTime}
+  */
+  copy: function() {
+    return this;
   }
   
 });
@@ -323,13 +346,30 @@ SC.DateTime.mixin(
   /** @private
     A cache of SC.DateTime instances. If you attempt to create a SC.DateTime
     instance that has already been created, then it will return the cached
-    value. That way, you can safely use === for SC.DateTime objects since there
-    is only a single SC.DateTime instance for a given time. 
+    value.
 
     @property
     @type {Array}
   */
   _dt_cache: {},
+  
+  /** @private
+    The index of the lastest cached value. Used with _DT_CACHE_MAX_LENGTH to
+    limit the size of the cache.
+
+    @property
+    @type {Integer}
+  */
+  _dt_cache_index: -1,
+  
+  /** @private
+    The maximum length of _dt_cache. If this limit is reached, then the cache
+    is overwritten, starting with the oldest element.
+
+    @property
+    @type {Integer}
+  */
+  _DT_CACHE_MAX_LENGTH: 1000,
   
   /** @private
     @see SC.DateTime#unknownProperty
@@ -387,7 +427,8 @@ SC.DateTime.mixin(
     
     // week, week0 or week1
     if (key.slice(0, 4) === 'week') {
-    	var firstDayOfWeek = key.length === 4 ? 1 : parseInt(key.slice('4'), 10); // should be 0 (Sunday) or 1 (Monday)
+      // firstDayOfWeek should be 0 (Sunday) or 1 (Monday)
+    	var firstDayOfWeek = key.length === 4 ? 1 : parseInt(key.slice('4'), 10);
     	var dayOfWeek = this._get('dayOfWeek');
       var dayOfYear = this._get('dayOfYear') - 1;
     	if (firstDayOfWeek === 0) {
@@ -424,7 +465,8 @@ SC.DateTime.mixin(
     var d = this._date;
     if (start !== undefined) d.setTime(start);
     
-    // the time options (hour, minute, sec, millisecond) reset cascadingly (see documentation)
+    // the time options (hour, minute, sec, millisecond)
+    // reset cascadingly (see documentation)
     if ( !SC.none(opts.hour) && SC.none(opts.minute)) {
       opts.minute = 0;
     }
@@ -472,11 +514,10 @@ SC.DateTime.mixin(
       month, day, hour, minute, second, millisecond
       
     Note that if you attempt to create a SC.DateTime instance that has already
-    been created, then, for performance reasons, a cached value will be
-    returned. That way, you can safely use === for SC.DateTime objects since
-    there is only a single SC.DateTime instance for a given time.
+    been created, then, for performance reasons, a cached value may be
+    returned.
     
-    @param options one of the three kind of parameters descibed oboove
+    @param options one of the three kind of parameters descibed above
     @returns {DateTime} the DateTime instance that corresponds to the
       passed parameters, possibly fetched from cache
   */
@@ -484,9 +525,18 @@ SC.DateTime.mixin(
     var arg = arguments.length === 0 ? {} : arguments[0];
     
     if (SC.typeOf(arg) === SC.T_NUMBER) {
-      var C = this, cache = this._dt_cache[arg];
-      if (!cache) cache = this._dt_cache[arg] = new C([{_ms: arguments[0]}]);
-      return cache;
+      // quick implementation of a FIFO set for the cache
+      var key = 'nu'+arg, cache = this._dt_cache;
+      var ret = cache[key];
+      if (!ret) {
+        var previousKey, idx = this._dt_cache_index, C = this;
+        ret = cache[key] = new C([{_ms: arg}]);
+        idx = this._dt_cache_index = (idx + 1) % this._DT_CACHE_MAX_LENGTH;
+        previousKey = cache[idx];
+        if (previousKey !== undefined && cache[previousKey]) delete cache[previousKey];
+        cache[idx] = key;
+      }
+      return ret;
     } else if (SC.typeOf(arg) === SC.T_HASH) {
       var now = new Date();
       return this.create(this._adjust(arg, now.getTime())._date.getTime());
@@ -601,8 +651,8 @@ SC.DateTime.mixin(
       case 'U': return this._pad(this._get('week0'));
       case 'W': return this._pad(this._get('week1'));
       case 'w': return this._get('dayOfWeek');
-      case 'x': return this._get('date').toDateString();
-      case 'X': return this._get('date').toTimeString();
+      case 'x': return this._date.toDateString();
+      case 'X': return this._date.toTimeString();
       case 'y': return this._pad(this._get('year') % 100);
       case 'Y': return this._get('year');
       case 'Z':
@@ -623,7 +673,9 @@ SC.DateTime.mixin(
     if (start !== undefined) d.setTime(start);
     
     var that = this;
-    return format.replace(/\%([aAbBcdHIjmMpSUWwxXyYZ\%])/g, function() { return that.__toFormattedString.call(that, arguments); } );
+    return format.replace(/\%([aAbBcdHIjmMpSUWwxXyYZ\%])/g, function() {
+      return that.__toFormattedString.call(that, arguments);
+    });
   },
   
   /**
