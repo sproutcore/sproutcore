@@ -394,6 +394,7 @@ SC.MenuPane = SC.PickerPane.extend(
       var itemKeyEquivalent = item.get('keyEquivalent') ;
       var itemTarget = item.get('target') ;
       var itemWidth = this.get('itemWidth') ;
+      
       var itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
