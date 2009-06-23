@@ -2573,7 +2573,7 @@ SC.CollectionView = SC.View.extend(
         
     for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
       // itemView = this.itemViewForContent(content.objectAt(idx));
-      itemView = this.itemViewAtContentIndex(idx);
+      itemView = this.itemViewForContentIndex(idx);
       f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
       
       // if we are a horizontal orientation, look for the first item that 
