@@ -214,7 +214,7 @@ SC.MenuPane = SC.PickerPane.extend(
     
     Overwrite the popup function of the pickerPane
   */
-  popup: function(anchorViewOrElement, preferMatrix) {
+  popup: function(anchorViewOrElement, preferMatrix) {  
     var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
     this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
@@ -517,7 +517,6 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   mouseUp: function(evt) {
     this.remove() ;
-    this.set('isVisible', NO) ;
     var anchor = this.get('anchor') ;
     if(this.isAnchorMenuItemType()) this.sendEvent('mouseUp', evt, anchor) ;
     return YES ;
@@ -618,7 +617,6 @@ SC.MenuPane = SC.PickerPane.extend(
     }
     if(!this.clickInside(f, evt)) {
       this.remove() ;
-      this.set('isVisible', NO) ;
     }
     return YES;
   },
@@ -639,7 +637,9 @@ SC.MenuPane = SC.PickerPane.extend(
       else return null;
     }
     else return null;
-  }
+  },
+  
+  
   
 });
 

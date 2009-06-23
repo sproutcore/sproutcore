@@ -33,40 +33,22 @@ SC.PopupButtonView = SC.ButtonView.extend({
   },
   
   /**
-    PopupMenu reference. Will be lazy-loaded from the 'menuName' string.
-    @type {SC.PopupMenu}
-  */
-  menu: function()
-  {
-    if ( !this._menu )
-    {
-      if(!this.get('menuName')) return null ;
-      var menu = this.get('menuName').create();
-      if (menu) menu.set('isVisible', NO);
-      // calling set so that the isSelectedBinding is triggered
-      this.set('_menu', menu);
-    }
-    return this._menu;
-  }.property(),
-  
-  /**
-    menuView is used to create the Menu
-    
+    Menu attached to the popupButton
     @default SC.MenuView
   */
-  menuName : null,
+  menu : null,
   
   /**
     Binds the button's selection state to the menu's visibility.
     @private
   */
-  isSelectedBinding: '*menu.isVisible',
+  isSelectedBinding: '*menu.isVisibleInWindow',
   
   /**private*/
   render: function(context,firstTime) {
     sc_super() ;
     var menu = this.get('menu') ;
-    if(menu) {
+    if(firstTime) {
       menu.createLayer() ;
     }
   },
@@ -79,7 +61,6 @@ SC.PopupButtonView = SC.ButtonView.extend({
     var menu = this.get('menu') ;
     // no menu to toggle... bail...
     if (!menu) return NO ;
-    menu.set('isVisible', YES) ;
     menu.popup(this) ;
     return YES;
   }
