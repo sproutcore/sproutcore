@@ -167,7 +167,7 @@ SC.LabelView = SC.View.extend(SC.Control,
   beginEditing: function() {
     if (this.get('isEditing')) return YES ;
     if (!this.get('isEditable')) return NO ;
-    // debugger;
+
     var el = this.$();
     var value = this.get('value') || '' ;
     var f = SC.viewportOffset(el[0]) ;
@@ -180,6 +180,7 @@ SC.LabelView = SC.View.extend(SC.Control,
       exampleElement: el,
       value: value, 
       multiline: NO, 
+      isCollection: NO,
       validator: this.get('validator')
     });
   },

@@ -94,7 +94,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     @params options {Hash} hash of options for editing
     @returns {Boolean} YES if editor began editing, NO if it failed.
   */
-  beginEditing: function(options, wrapper) {
+  beginEditing: function(options) {
     var layout={}, pane;
     // end existing editing if necessary
     this.beginPropertyChanges();
@@ -103,6 +103,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     }
 
     this._optframe = options.frame ;
+    this._optIsCollection = options.isCollection;
     this._exampleElement = options.exampleElement ;
     this._delegate = options.delegate ;
 
@@ -127,8 +128,13 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
+    if(this._optIsCollection && this._delegate.get('layout').left){
+      layout.left=this._optframe.x-this._delegate.get('layout').left;
+    }else{
+      layout.left=this._optframe.x;
+    }
     layout.left=this._optframe.x;
-    if(this._delegate.get('layout').top){
+    if(this._optIsCollection && this._delegate.get('layout').top){
       layout.top=this._optframe.y-this._delegate.get('layout').top;
     }else{
       layout.top=this._optframe.y;  
@@ -379,7 +385,8 @@ SC.InlineTextFieldView.mixin(
     var layout = options.delegate.get('layout');
     var s = this.updateViewStyle();
     
-    var str= ".inline-editor input{"+s+"}";
+    var str= ".inline-editor input{"+s+"} ";
+    str= str+".inline-editor textarea{"+s+"}";
     var pa= document.getElementsByTagName('head')[0] ;
     var el= document.createElement('style');
     el.type= 'text/css';
