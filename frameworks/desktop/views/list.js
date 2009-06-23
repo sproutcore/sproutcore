@@ -168,11 +168,7 @@ SC.ListView = SC.CollectionView.extend(
     this.rowHeightDidChangeForIndexes(changed);
     return this ;
   },
-  
-  // ..........................................................
-  // ROW PROPERTIES
-  // 
-  
+	  
   /**
     Returns the top offset for the specified content index.  This will take
     into account any custom row heights and group views.
@@ -186,9 +182,13 @@ SC.ListView = SC.CollectionView.extend(
     var del       = this.get('rowDelegate'),
         rowHeight = del.get('rowHeight'),
         ret, custom, cache, delta, max, content ;
-        
     ret = idx * rowHeight;
-    if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
+		
+		if(this.get('externalHeight')){
+    	ret += idx * this.get('externalHeight');
+		}
+    
+		if (del.customowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
       
       // prefill the cache with custom rows.
       cache = this._sclv_offsetCache;
