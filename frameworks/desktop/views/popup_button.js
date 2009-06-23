@@ -40,6 +40,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   {
     if ( !this._menu )
     {
+      if(!this.get('menuName')) return null ;
       var menu = this.get('menuName').create();
       if (menu) menu.set('isVisible', NO);
       // calling set so that the isSelectedBinding is triggered
@@ -64,7 +65,10 @@ SC.PopupButtonView = SC.ButtonView.extend({
   /**private*/
   render: function(context,firstTime) {
     sc_super() ;
-    this.get('menu').createLayer() ;
+    var menu = this.get('menu') ;
+    if(menu) {
+      menu.createLayer() ;
+    }
   },
   /**
     Button action handler
