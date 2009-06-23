@@ -1061,7 +1061,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       var nextNode = (nextView) ? nextView.get('layer') : null ;
       
       // before we add to parent node, make sure that the nextNode exists...
-      if (nextView && !nextNode) {
+      if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
         nextView.updateLayerLocationIfNeeded() ;
         nextNode = nextView.get('layer') ;
       }

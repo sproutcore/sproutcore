@@ -49,7 +49,7 @@ TestRunner.mainPage = SC.Page.design({
       }),
       
       bottomRightView: SC.SceneView.design({
-        scenes: "testsNone testsMaster testsDetail".w(),
+        scenes: "testsMaster testsDetail".w(),
         nowShowingBinding: "TestRunner.currentScene"
       })
     }),
