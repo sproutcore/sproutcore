@@ -224,6 +224,7 @@ SC.MenuPane = SC.PickerPane.extend(
     this.endPropertyChanges();
     this.append() ;
     this.positionPane() ;
+    this.becomeKeyPane() ;
   },
   
   /**
@@ -447,8 +448,11 @@ SC.MenuPane = SC.PickerPane.extend(
     if(previousSelectedMenuItem){
       var subMenu = previousSelectedMenuItem.isSubMenuAMenuPane() ;
       if(subMenu) subMenu.remove() ;
+      previousSelectedMenuItem.resignFirstResponder() ;
     }
-    if(currentSelectedMenuItem) currentSelectedMenuItem.becomeFirstResponder() ;
+    if(currentSelectedMenuItem) {
+      currentSelectedMenuItem.becomeFirstResponder() ;
+    }
   }.observes('currentSelectedMenuItem'),
   
   /**
@@ -475,7 +479,6 @@ SC.MenuPane = SC.PickerPane.extend(
   performKeyEquivalent: function(keyString,evt) {
     var items, len, menuItems, item, keyEquivalent, 
         action, isEnabled, target;
-    
     if(!this.get('isEnabled')) return NO ;
 
     items = this.get('displayItemsArray') ;
@@ -492,12 +495,11 @@ SC.MenuPane = SC.PickerPane.extend(
       if(keyEquivalent == keyString && isEnabled) {
         if(menuItems && menuItems[idx]) {
           var retVal = menuItems[idx].triggerAction(evt);
-          this.remove();
           return retVal;
         }
       }
     }
-    return NO ;
+    return YES ;
   },
   
   //Mouse and Key Events
@@ -515,6 +517,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   mouseUp: function(evt) {
     this.remove() ;
+    this.set('isVisible', NO) ;
     var anchor = this.get('anchor') ;
     if(this.isAnchorMenuItemType()) this.sendEvent('mouseUp', evt, anchor) ;
     return YES ;
@@ -613,7 +616,10 @@ SC.MenuPane = SC.PickerPane.extend(
         if(parentMenu.kindOf(SC.MenuPane)) parentMenu.modalPaneDidClick(evt);
       }
     }
-    if(!this.clickInside(f, evt)) this.remove();
+    if(!this.clickInside(f, evt)) {
+      this.remove() ;
+      this.set('isVisible', NO) ;
+    }
     return YES;
   },
   

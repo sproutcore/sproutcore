@@ -27,21 +27,45 @@ SC.PopupButtonView = SC.ButtonView.extend({
   isSelected: NO,
   performKeyEquivalent: function( charCode, evt )
   {
-    if (!this.get('isEnabled')) return false ;
+    if (!this.get('isEnabled')) return NO ;
     var menu = this.get('menu') ;
     return (!!menu && menu.performKeyEquivalent(charCode, evt)) ;
   },
+  
   /**
-    this is the Menu View associated with Popup Button
+    PopupMenu reference. Will be lazy-loaded from the 'menuName' string.
+    @type {SC.PopupMenu}
   */
-  menu: null,
-
+  menu: function()
+  {
+    if ( !this._menu )
+    {
+      var menu = this.get('menuName').create();
+      if (menu) menu.set('isVisible', NO);
+      // calling set so that the isSelectedBinding is triggered
+      this.set('_menu', menu);
+    }
+    return this._menu;
+  }.property(),
+  
+  /**
+    menuView is used to create the Menu
+    
+    @default SC.MenuView
+  */
+  menuName : null,
+  
   /**
     Binds the button's selection state to the menu's visibility.
     @private
   */
-  //isSelectedBinding: '*menu.isVisible',
+  isSelectedBinding: '*menu.isVisible',
   
+  /**private*/
+  render: function(context,firstTime) {
+    sc_super() ;
+    this.get('menu').createLayer() ;
+  },
   /**
     Button action handler
     @param {DOMMouseEvent} evt mouseup event that triggered the action
@@ -50,18 +74,10 @@ SC.PopupButtonView = SC.ButtonView.extend({
   {
     var menu = this.get('menu') ;
     // no menu to toggle... bail...
-    if (!menu) return false ;
-    if (!this._didFirstRun) {
-    // for some reason the menu#isVisible is true the first time we get 
-    // it... and since this#isSelected is bound to it... we get an incorrect 
-    // conditional check. hacking it here to keep moving.
+    if (!menu) return NO ;
+    menu.set('isVisible', YES) ;
     menu.popup(this) ;
-    this._didFirstRun = true ;
-    } else {
-      // toggle the menu...
-      this.get('isSelected') ? menu.set('isVisible', false) : menu.popup(this,SC.PICKER_MENU) ;
-    }
-    return true;
+    return YES;
   }
   
 });

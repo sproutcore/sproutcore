@@ -334,7 +334,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
   getAnchor: function() {
     var anchor = this.get('anchor') ;
-    if(anchor.kindOf(SC.MenuItemView)) return anchor ;
+    if(anchor && anchor.kindOf(SC.MenuItemView)) return anchor ;
     return null ;
   },
   
@@ -446,6 +446,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this._action(evt) ;
     var anchor = this.getAnchor() ;
     if(anchor) anchor.mouseUp(evt) ;
+    else {
+      this.resignFirstResponder() ;
+    }
     this.closeParent() ;
     return YES ;
   },
@@ -488,6 +491,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     var parentMenu = this.parentMenu() ;
     if(parentMenu) {
       parentMenu.set('previousSelectedMenuItem', this) ;
+      this.resignFirstResponder() ;
     }
     return YES ;
   },
@@ -571,7 +575,10 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   closeParent: function() {
     this.$().removeClass('focus') ;
     var menu = this.parentMenu() ;
-    if(menu) menu.remove() ;
+    if(menu) {
+      menu.remove() ;
+      menu.set('isVisible',NO) ;
+    }
   },
   
   /** @private*/
