@@ -314,15 +314,8 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     var async = (request.get('isAsynchronous') ? YES : NO) ;
     if (async) {
       if (!SC.browser.msie) {
-        SC.Event.add(rawRequest, 'readystatechange', this, this.handleReadyStateChange, rawRequest) ;
-      } else { // temporary IE fix from Erich Ocean
-        var that = this ;
-        rawRequest.onreadystatechange = function() {
-          SC.RunLoop.begin() ;
-          that.finishRequest(rawRequest) ;
-          SC.RunoLoop.end() ;
-        };
-      }
+        SC.Event.add(rawRequest, 'readystatechange', this, handleReadyStateChange, rawRequest) ;
+      } else rawRequest.onreadystatechange = handleReadyStateChange;
     }
     
     
@@ -351,6 +344,7 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
   },
   
   finishRequest: function(request) {
+    
     var readyState = request.readyState ;
     var didSucceed = !request ? NO : this.didSucceed(request) ;
     
