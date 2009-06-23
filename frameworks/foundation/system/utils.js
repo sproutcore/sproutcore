@@ -404,6 +404,22 @@ SC.mixin( /** @scope SC */ {
     var digits = number.toString(16);
     if (number < 16) return '0' + digits;
     return digits;
+  },
+  
+  
+  // Get the computed style from specific element. Useful for cloning styles
+  getStyle: function(oElm, strCssRule){
+  	var strValue = "";
+  	if(document.defaultView && document.defaultView.getComputedStyle){
+  		strValue = document.defaultView.getComputedStyle(oElm, "").getPropertyValue(strCssRule);
+  	}
+  	else if(oElm.currentStyle){
+  		strCssRule = strCssRule.replace(/\-(\w)/g, function (strMatch, p1){
+  			return p1.toUpperCase();
+  		});
+  		strValue = oElm.currentStyle[strCssRule];
+  	}
+  	return strValue;
   }
 
 }) ;

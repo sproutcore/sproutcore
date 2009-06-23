@@ -94,7 +94,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     @params options {Hash} hash of options for editing
     @returns {Boolean} YES if editor began editing, NO if it failed.
   */
-  beginEditing: function(options) {
+  beginEditing: function(options, wrapper) {
     var layout={}, pane;
     // end existing editing if necessary
     this.beginPropertyChanges();
@@ -128,14 +128,17 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
     layout.left=this._optframe.x;
-    layout.top=this._optframe.y-this._delegate.get('layout').top;
+    if(this._delegate.get('layout').top){
+      layout.top=this._optframe.y-this._delegate.get('layout').top;
+    }else{
+      layout.top=this._optframe.y;  
+    }
 
     this.set('layout', layout);
   
     this.set('parentNode', pane);
     // get style for view.
-    this.updateViewStyle() ;
-    
+   
     pane.appendChild(this);
     
     SC.RunLoop.begin().end();
@@ -216,7 +219,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     // resign first responder if not done already.  This may call us in a 
     // loop but since isEditing is already NO, nothing will happen.
     if (this.get('isFirstResponder')) this.resignFirstResponder();
-    if (this.get('parentNode')) this.removeFromParent() ;
+    if (this.get('parentNode')) this.removeFromParent() ;  
     
     return YES ;
   },
@@ -232,37 +235,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     Collects the appropriate style information from the targetView to 
     make the inline editor appear similar.
   */
-  updateViewStyle: function() {
-    
-    // TODO: make this function work for 1.0
-    
-    // collect font and frame from target.
-    // var f= this._optframe ;
-    //     var el = this._exampleElement ;
-    //     
-    //     var styles = {
-    //       fontSize:       Element.getStyle(el,'font-size'),
-    //       fontFamily:     Element.getStyle(el,'font-family'),
-    //       fontWeight:     Element.getStyle(el,'font-weight'),
-    //       paddingLeft:    Element.getStyle(el,'padding-left'),
-    //       paddingRight:   Element.getStyle(el,'padding-right'),
-    //       paddingTop:     Element.getStyle(el,'padding-top'),
-    //       paddingBottom:  Element.getStyle(el,'padding-bottom'),
-    //       lineHeight:     Element.getStyle(el,'line-height'),
-    //       textAlign:      Element.getStyle(el,'text-align')
-    //     } ;
-    //       
-    //     var field = this.outlet('field') ;
-    //     var sizer = this.outlet('sizer') ;
-    //     
-    //     field.setStyle(styles) ;
-    //     
-    //     styles.opacity = 0 ;
-    //     sizer.setStyle(styles) ;
-    //     sizer.recacheFrames() ;
-    //     
-    //     this.set('frame', f) ;
-  },
+  
   
   /**
     Resizes the visible textarea to fix the actual text in the text area.
@@ -402,9 +375,20 @@ SC.InlineTextFieldView.mixin(
       @returns {Boolean} YES if editor began editing, NO if it failed.
   */
   beginEditing: function(options) {
-    if (!this.editor){ 
-      this.editor = this.create() ;
-    }
+    this._exampleElement = options.exampleElement ;
+    var layout = options.delegate.get('layout');
+    var s = this.updateViewStyle();
+    
+    var str= ".inline-editor input{"+s+"}";
+    var pa= document.getElementsByTagName('head')[0] ;
+    var el= document.createElement('style');
+    el.type= 'text/css';
+    el.media= 'screen';
+    if(el.styleSheet) el.styleSheet.cssText= str;// IE method
+    else el.appendChild(document.createTextNode(str));// others
+    pa.appendChild(el);
+    
+    this.editor = this.create({ classNames: 'inline-editor', layout: layout}) ;
     return this.editor.beginEditing(options) ;
     
   },
@@ -436,6 +420,20 @@ SC.InlineTextFieldView.mixin(
     return this.editor ? this.editor.discardEditing() : YES ;  
   },
   
+  updateViewStyle: function() {
+    var el = this._exampleElement[0] ;   
+    var styles = '';
+    var s=SC.getStyle(el,'font-size');
+    if(s.length>0) styles = styles + "font-size: "+ s + "; ";
+    if(s.length>0) styles = styles + "font-family: " + s + "; ";
+    if(s.length>0) styles = styles + "font-weight: " + s + "; ";
+    //if(s.length>0) styles = styles + "padding-left: " + s + "; ";
+    //if(s.length>0) styles = styles + "padding-bottom: " + s + "; ";
+    if(s.length>0) styles = styles + "line-height: " + s + "; ";
+    if(s.length>0) styles = styles + "text-align: " + s + "; ";
+    
+    return styles;
+  },
 
   
   /**

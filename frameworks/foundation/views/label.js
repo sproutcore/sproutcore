@@ -167,10 +167,13 @@ SC.LabelView = SC.View.extend(SC.Control,
   beginEditing: function() {
     if (this.get('isEditing')) return YES ;
     if (!this.get('isEditable')) return NO ;
-    
+    // debugger;
+    var el = this.$();
     var value = this.get('value') || '' ;
-    var f = this.convertFrameToView(this.get('frame'), null) ;
-    var el = this.rootElement;
+    var f = SC.viewportOffset(el[0]) ;
+    var frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
+    f.width=frameTemp.width;
+    f.height=frameTemp.height;
     SC.InlineTextFieldView.beginEditing({
       frame: f,
       delegate: this,
