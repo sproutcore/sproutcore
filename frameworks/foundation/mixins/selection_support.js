@@ -137,26 +137,15 @@ SC.SelectionSupport = {
 
     // handle passing an empty array
     if (!objects || objects.get('length')===0) {
-      if (!extend) this.set('selection', null);
+      if (!extend) this.set('selection', SC.SelectionSet.EMPTY);
       return this;
     }
     
-    var set     = SC.IndexSet.create(),
-        content = this.get('arrangedObjects'),
-        sel     = this.get('selection');
-
-    // convert to an index set
-    objects.forEach(function(o) {
-      var idx = content.indexOf(o);
-      if (idx>=0) set.add(idx);
-    }, this);
-
-    // create base selection set or clone existing one depending
+    var sel = this.get('selection');
     if (extend && sel) sel = sel.copy();
     else sel = SC.SelectionSet.create();
     
-    // finish up
-    sel.add(content, set).freeze();
+    sel.addObjects(objects).freeze();
     this.set('selection', sel);
     return this ;
   },
@@ -187,20 +176,11 @@ SC.SelectionSupport = {
 
     if (!objects || objects.get('length')===0) return this; // nothing to do
     
-    var content = this.get('arrangedObjects'),
-        sel     = this.get('selection'),
-        set;
-
+    var sel = this.get('selection');
     if (!sel || sel.get('length')===0) return this; // nothing to do
 
     // find index for each and remove it
-    sel = sel.copy();
-    objects.forEach(function(o) {
-      var idx = content.indexOf(o);
-      if (idx>=0) sel.remove(content, idx);
-    }, this);
-
-    // finish up
+    sel = sel.copy().removeObjects(objects).freeze();
     this.set('selection', sel.freeze());
     return this ;
   },
@@ -221,28 +201,28 @@ SC.SelectionSupport = {
     selection always remains up-to-date and valid.
   */
   updateSelectionAfterContentChange: function() {
+    
     var content = this.get('arrangedObjects'),
         sel     = this.get('selection'),
         indexes, len, max, ret;
-    if (!sel) return  this; // nothing to do
+
+    if (!sel) sel = SC.SelectionSet.EMPTY;
     
-    // remove from the sel any items selected beyond the length of the new
-    // arrangedObjects
-    indexes = content? sel.indexSetForSource(content, NO) : null;
-    len     = content ? content.get('length') : 0;
-    max     = indexes ? indexes.get('max') : 0;
-    if (max > len) ret = sel.copy().remove(content, len, max-len);
-
-    if (!this.get('allowsSelection')) ret = SC.SelectionSet.EMPTY;
-
-    if (!this.get('allowsMultipleSelection') && (ret||sel).get('length')>1){
-      indexes = content ? (ret||sel).indexSetForSource(content, NO) : null;
-      ret = SC.SelectionSet.create();
-      if (indexes) ret.add(content, indexes.get('min'));
-    }
-  
-    if (!this.get('allowsEmptySelection') && (ret || sel).get('length')===0) {
-      if (content) ret = SC.SelectionSet.create().add(content, 0);
+    // if selection is not allowed, just force to be empty.
+    if (!this.get('allowsSelection') && sel.get('length')>0) {
+      ret = SC.SelectionSet.EMPTY;
+      
+      
+    // selection is allowed, make sure it is valid
+    } else {
+      
+      // remove from the sel any items selected beyond the length of the new
+      // arrangedObjects
+      indexes = content ? sel.indexSetForSource(content) : null;
+      len     = content ? content.get('length') : 0;
+      max     = indexes ? indexes.get('max') : 0;
+      if (max > len) ret = sel.copy().constrain(content).freeze();
+      
     }
   
     if (ret) this.set('selection', ret);

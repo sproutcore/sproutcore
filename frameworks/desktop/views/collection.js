@@ -1151,8 +1151,8 @@ SC.CollectionView = SC.View.extend(
     this._cv_selindexes = sel ? sel.frozenCopy() : null;
 
     // determine which indexes are now invalid
-    if (last) last = last.indexSetForSource(content, NO);
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (last) last = last.indexSetForSource(content);
+    if (sel) sel = sel.indexSetForSource(content);
     
     if (sel && last) diff = sel.without(last).add(last.without(sel));
     else diff = sel || last;
@@ -1431,7 +1431,7 @@ SC.CollectionView = SC.View.extend(
     
     var sel     = this.get('selection'),
         content = this.get('content');
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (sel) sel = sel.indexSetForSource(content);
     
     var selTop    = sel ? sel.get('min') : -1,
         selBottom     = sel ? sel.get('max')-1 : -1,
@@ -1492,7 +1492,7 @@ SC.CollectionView = SC.View.extend(
 
     var sel     = this.get('selection'),
         content = this.get('content');
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (sel) sel = sel.indexSetForSource(content);
     
     var selTop    = sel ? sel.get('min') : -1,
         selBottom = sel ? sel.get('max')-1 : -1,
@@ -1553,7 +1553,7 @@ SC.CollectionView = SC.View.extend(
     var sel     = this.get('selection'),
         content = this.get('content'),
         del     = this.get('selectionDelegate'),
-        indexes = sel&&content ? sel.indexSetForSource(content, NO) : null;
+        indexes = sel&&content ? sel.indexSetForSource(content) : null;
         
     if (!content || !indexes || indexes.get('length') === 0) return NO ;
     
@@ -1881,7 +1881,7 @@ SC.CollectionView = SC.View.extend(
     
     // collection some basic setup info
     var sel = this.get('selection'), isSelected, modifierKeyPressed;
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (sel) sel = sel.indexSetForSource(content);
     
     isSelected = sel ? sel.contains(contentIndex) : NO;
     info.modifierKeyPressed = modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
