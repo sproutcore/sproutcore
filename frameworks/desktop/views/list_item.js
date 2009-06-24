@@ -525,13 +525,14 @@ SC.ListItemView = SC.View.extend(
   },
   
   /**
-  Returns true if a click is on the label text itself to enable editing.
+    Returns true if a click is on the label text itself to enable editing.
   
-  Note that if you override renderLabel(), you probably need to override 
-  this as well.
+    Note that if you override renderLabel(), you probably need to override 
+    this as well, or just $label() if you only want to control the element
+    returned.
   
-  @param evt {Event} the mouseUp event.
-  @returns {Boolean} YES if the mouse was on the content element itself.
+    @param evt {Event} the mouseUp event.
+    @returns {Boolean} YES if the mouse was on the content element itself.
   */
   contentHitTest: function(evt) {
    // if not content value is returned, not much to do.
@@ -566,14 +567,14 @@ SC.ListItemView = SC.View.extend(
    
    var el = this.$label() ;
    var offset = SC.viewportOffset(el[0]);
-   if (!el) return NO ;
+   if (!el || el.get('length')===0) return NO ;
    
    // if the label has a large line height, try to adjust it to something
    // more reasonable so that it looks right when we show the popup editor.
    var oldLineHeight = el.css('lineHeight');
    var fontSize = el.css('fontSize');
    var top = this.$().css('top');
-   if(top) top = parseInt(top.substring(0,top.length-2));
+   if(top) top = parseInt(top.substring(0,top.length-2),00);
    else top =0;
    var lineHeight = oldLineHeight;
    var lineHeightShift = 0;
