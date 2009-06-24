@@ -20,5 +20,7 @@ SC.stringsFor('English', {
   "_No Tests" : "No Tests",
   "_Loading Targets" : "Loading Targets",
   "_No Target Selected" : "No Target Selected",
-  "_Loading Tests" : "Loading Tests"
+  "_Loading Tests" : "Loading Tests",
+  "_Window Title" : "Test Runner - %@",
+  "_No Target" : "No Target"
 }) ;

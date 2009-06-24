@@ -20,6 +20,10 @@ TestRunner.READY_DETAIL = SC.Responder.create({
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'testsDetail');
+    
+    var target = TestRunner.sourceController.get('selection').firstObject();
+    var test   = TestRunner.detailController.get('content');
+    TestRunner.updateRoute(target, test, YES);
   },
   
   willLoseFirstResponder: function() {

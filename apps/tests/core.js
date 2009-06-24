@@ -31,41 +31,100 @@ TestRunner = SC.Application.create(
   
   trace: NO,
   
-  /**
-    Current target name.  Set whenever a target is selected.
-  */
-  currentTargetName: null,
+  userDefaults: SC.UserDefaults.create({
+    userDomain: 'anonymous',
+    appDomain:  'SC.TestRunner'
+  }),
+  
+  // ..........................................................
+  // ROUTE SUPPORT
+  // 
   
   /**
-    Current test name.  Set whenever a test is selected.  A target must also
-    be selected.
+    The current route.  This is set whenever the route changes.
   */
-  currentTestName: null,
-    
+  route: {},
   
   /**
-    Called whenever the route changes.  Sends an appropriate even down the
+    Whenever the route changes and it does not match the current state,
+    this will be set to YES.  Whenever states transition, if the route is
+    pending, they will try to move it on to the next step if possible.
+  */
+  routePending: NO,
+  
+  /**
+    Computes the current target as named by the route.  If the target is not
+    found it will return null.  
+  */
+  computeRouteTarget: function() {
+    var name = this.get('route').target;
+    if (!name) return null;
+    else return TestRunner.targetsController.findProperty('name', name);    
+  },
+  
+  /**
+    Computes the current test as named by the route.  If the test is not found
+    it will return null.
+  */
+  computeRouteTest: function() {
+    var name = this.get('route').test;
+    if (!name) return null;
+    else return TestRunner.testsController.findProperty('filename', name);
+  },
+  
+  /**
+    Called whenever the route changes.  Sends an appropriate event down the
     responder chain.  Also sets the current target.
   */
   routeDidChange: function(params) {
     if (!params.target) return NO; // nothing to do
-    this.trace = YES;
     
     // normalize target + test
-    'target test'.w().forEach(function(key) {
-      var v = params[key];
-      if (v && !v.match(/^\//)) params[key] = '/' + v;
-    }, this);
+    params = SC.clone(params);
+    if (params.target) params.target = '/' + params.target;
+    if (params.test) params.test   = 'tests/' + params.test ;
     
-    if (params.target !== this.get('currentTargetName')) {
-      this.sendAction('routeTarget', params.target);
-    }
+    // save the desired state properties
+    this.set('route', params);
+    this.set('routePending', YES);
     
-    if (params.test && (params.test !== this.get('currentTestName'))) {
-      this.sendAction('routeTest', params.test);
-    }
+    this.trace = YES;
+    this.sendAction('route', this, params);
     this.trace=NO;
+
     return YES;
+  },
+  
+  /**
+    Called by the state machine whenever it lands in a stable target state.
+    Pass in the target and test.  We'll update the location and set a new 
+    target route state if needed.
+    
+    Whenever you update the route to the current route state, then 
+    routePending will be cleared.
+    
+    Passing isFinal will force the routePending to go to NO.  pass this when
+    the state is at a dead-end and can't move forward any further.
+  */
+  updateRoute: function(target, test, isFinal) {
+    var route = this.get('route'),
+        loc;
+    
+    if (isFinal || ((target === route.target) && (test === route.test))) {
+      this.set('routePending', NO);
+    }
+
+    // if a route is not pending, then update the current location with the
+    // new route
+    if (!this.get('routePending')) {
+      if (target) target = target.get('name');
+      if (test)   test = test.get('filename');
+
+      loc = target ? target.slice(1) : '';
+      if (test) loc = '%@&test=%@'.fmt(loc, test.slice(6));
+
+      SC.routes.setIfChanged('location', loc);
+    }    
   }
   
 }) ;

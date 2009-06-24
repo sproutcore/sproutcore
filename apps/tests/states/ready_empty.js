@@ -9,7 +9,7 @@
 sc_require('states/ready');
 
 /**
-  Show empty selector when no target chosen.
+  State when targets are loaded, but no target is selected.
 */
 TestRunner.READY_EMPTY = SC.Responder.create({
 
@@ -20,17 +20,29 @@ TestRunner.READY_EMPTY = SC.Responder.create({
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'testsNone');
-    
-    // if there is a selected target already, look it up and select it.
-    var name = TestRunner.get('targetName'), target;
-    if (name) {
-      target = TestRunner.targetsController.findProperty('name', name);
+
+    // if a route is pending, then try to select the target.  If no target
+    // could be found, then set the final route to here.
+    TestRunner.updateRoute(null, null, NO);
+     
+    if (TestRunner.get('routePending')) {
+      var target = TestRunner.computeRouteTarget();
       if (target) TestRunner.sendAction('selectTarget', this, target);
-    }
+      else TestRunner.updateRoute(null, null, YES) ;
+    } 
+    
   },
   
   willLoseFirstResponder: function() {
     TestRunner.set('currentScene', null);
+  },
+  
+  /**
+    While in the empty state, save the target/test and then. 
+  */
+  route: function(sender, params) {
+    TestRunner.set('routeTarget', params.target);
+    TestRunner.set('routeTest', params.test);
   }
   
 });

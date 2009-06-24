@@ -20,9 +20,6 @@ TestRunner.READY = SC.Responder.create({
 
     TestRunner.sourceController.selectObject(target);
     
-    TestRunner.set('targetName', target ? target.get('name') : null);
-    TestRunner.set('testName', null);
-    
     if (target) {
       var tests = target.get('tests');
       if (tests && (tests.get('state') === SC.Record.BUSY_LOADING)) {
@@ -42,24 +39,18 @@ TestRunner.READY = SC.Responder.create({
 
     if (test && test.isEnumerable) test = test.firstObject();
     TestRunner.detailController.set('content', test);
-    TestRunner.set('testName', test ? test.get('filename') : null);
+    TestRunner.set('routeName', test ? test.get('filename') : null);
 
     if (test) TestRunner.makeFirstResponder(TestRunner.READY_DETAIL);
     else TestRunner.makeFirstResponder(TestRunner.READY_LIST);
   },
   
-  routeTarget: function(name) {
-    if (name !== TestRunner.get('targetName')) {
-      var target = TestRunner.targetsController.findProperty('name', name);
-      TestRunner.sendAction('selectTarget', this, target);
-    }
-  },
+  route: function(sender, params) {
+    var target = TestRunner.computeRouteTarget(),
+        test   = TestRunner.computeRouteTest();
 
-  routeTest: function(name) {
-    if (name !== TestRunner.get('testName')) {
-      var target = TestRunner.targetsController.findProperty('name', name);
-      TestRunner.sendAction('testName', this, target);
-    }
+    if (test) TestRunner.sendAction('selectTest', this, test);
+    else TestRunner.sendAction('selectTarget', this, target);
   }
-    
+      
 });

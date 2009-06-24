@@ -18,6 +18,10 @@ TestRunner.READY_NO_TESTS = SC.Responder.create({
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'noTests');
+
+    // this is always the final route since we can't load any tests
+    var target = TestRunner.sourceController.get('selection').firstObject();
+    TestRunner.updateRoute(target, null, YES);
   },
   
   willLoseFirstResponder: function() {

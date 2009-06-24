@@ -16,6 +16,7 @@ TestRunner.NO_TARGETS = SC.Responder.create({
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'noTargets');
+    TestRunner.updateRoute(null, null, YES);
   },
   
   willLoseFirstResponder: function() {

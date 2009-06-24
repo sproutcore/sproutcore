@@ -54,10 +54,19 @@ TestRunner.targetsController = SC.ArrayController.create(
     ret = [];
     keys.forEach(function(kind) {
       targets = kinds[kind];
+      
+      var defKey = "SourceList.%@.isExpanded".fmt(kind),
+          expanded = TestRunner.userDefaults.get(defKey);
+      
       ret.push(SC.Object.create({
         displayName: "Kind.%@".fmt(kind).loc(),
-        isExpanded: kind !== 'sproutcore',
-        children: targets.sortProperty('kind', 'displayName')
+        isExpanded: SC.none(expanded) ? (kind !== 'sproutcore') : expanded,
+        children: targets.sortProperty('kind', 'displayName'),
+        
+        isExpandedDefaultKey: defKey,
+        isExpandedDidChange: function() {
+          TestRunner.userDefaults.set(this.get('isExpandedDefaultKey'), this.get('isExpanded'));
+        }.observes('isExpanded')
       }));
     });
     
