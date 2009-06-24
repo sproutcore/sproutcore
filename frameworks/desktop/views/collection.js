@@ -1852,7 +1852,8 @@ SC.CollectionView = SC.View.extend(
     };
       
     // become first responder if possible.
-    this.becomeFirstResponder() ;
+    this.becomeFirstResponder() ; // MAJD: The prototype is added because otherwise
+																						// my list view wasn't being selected properly.
     
     // console.log(mouseDownView);
     
