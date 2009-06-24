@@ -910,7 +910,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
       // Do this instead of generating a temporary closure function for perf
       SC.Query._TMP_STORE = store;
       SC.Query._TMP_QUERY_KEY = query;
-      storeKeys.sort(query.compareStoreKeys);
+      storeKeys.sort(SC.Query.compareStoreKeys);
       SC.Query._TMP_STORE = SC.Query._TMP_QUERY_KEY = null;
     }
     
