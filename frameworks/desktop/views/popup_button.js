@@ -48,7 +48,7 @@ SC.PopupButtonView = SC.ButtonView.extend({
   render: function(context,firstTime) {
     sc_super() ;
     var menu = this.get('menu') ;
-    if(firstTime) {
+    if(firstTime && menu) {
       menu.createLayer() ;
     }
   },
