@@ -69,7 +69,6 @@ TestRunner.targetsController = SC.ArrayController.create(
     Send event when targets load.
   */
   stateDidChange: function() {
-    console.log('stateDidChange');
     TestRunner.sendAction('targetsDidChange');
   }.observes('state')
 

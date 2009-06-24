@@ -34,6 +34,20 @@ TestRunner.START = SC.Responder.create({
     if (hasTargets) TestRunner.makeFirstResponder(TestRunner.READY_EMPTY);
     else TestRunner.makeFirstResponder(TestRunner.NO_TARGETS);
     return YES;
+  },
+  
+  /**
+    While in the start state, just save the target name. 
+  */
+  routeTarget: function(targetName) {
+    TestRunner.set('targetName', targetName);
+  },
+  
+  /**
+    While in the start state, just save the test name.
+  */
+  routeTest: function(testName) {
+    TestRunner.set('testName', testName);
   }
   
 });

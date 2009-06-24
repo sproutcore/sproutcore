@@ -29,6 +29,46 @@ TestRunner = SC.Application.create(
     return this.get('store').findAll(TestRunner.Target);
   }.property().cacheable(),
   
-  trace: NO
+  trace: NO,
+  
+  /**
+    Current target name.  Set whenever a target is selected.
+  */
+  currentTargetName: null,
+  
+  /**
+    Current test name.  Set whenever a test is selected.  A target must also
+    be selected.
+  */
+  currentTestName: null,
+    
+  
+  /**
+    Called whenever the route changes.  Sends an appropriate even down the
+    responder chain.  Also sets the current target.
+  */
+  routeDidChange: function(params) {
+    if (!params.target) return NO; // nothing to do
+    this.trace = YES;
+    
+    // normalize target + test
+    'target test'.w().forEach(function(key) {
+      var v = params[key];
+      if (v && !v.match(/^\//)) params[key] = '/' + v;
+    }, this);
+    
+    if (params.target !== this.get('currentTargetName')) {
+      this.sendAction('routeTarget', params.target);
+    }
+    
+    if (params.test && (params.test !== this.get('currentTestName'))) {
+      this.sendAction('routeTest', params.test);
+    }
+    this.trace=NO;
+    return YES;
+  }
   
 }) ;
+
+// Add a route handler to select a target and, optionally, a test.
+SC.routes.add('*target', TestRunner, TestRunner.routeDidChange);

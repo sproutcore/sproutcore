@@ -23,7 +23,6 @@ TestRunner.DevDataSource = SC.DataSource.extend({
       ret = this.fetchTests(store, params.url);
     }
     
-    console.log("fetch: %@ - %@".fmt(fetchKey, SC.inspect(params)));
     return ret;
   },
   
@@ -90,6 +89,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
       ret.replace(0, ret.get('length'), storeKeys);
     }
 
+    console.log('fetchTestsDidComplete');
     ret.set('state', SC.Record.READY);
   }
   

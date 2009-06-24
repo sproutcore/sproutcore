@@ -20,6 +20,13 @@ TestRunner.READY_EMPTY = SC.Responder.create({
   */
   didBecomeFirstResponder: function() {
     TestRunner.set('currentScene', 'testsNone');
+    
+    // if there is a selected target already, look it up and select it.
+    var name = TestRunner.get('targetName'), target;
+    if (name) {
+      target = TestRunner.targetsController.findProperty('name', name);
+      if (target) TestRunner.sendAction('selectTarget', this, target);
+    }
   },
   
   willLoseFirstResponder: function() {
