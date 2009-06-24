@@ -291,7 +291,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       
     }
     return this ;
-  },
+  }.observes('isVisible'),
   
   // ..........................................................
   // CHILD VIEW SUPPORT
