@@ -296,7 +296,7 @@ SC.PickerPane = SC.PalettePane.extend({
   */
   fitPositionToScreenMenu: function(w, f) {
     // min left/right padding to the window
-    if( (f.x + f.width) > (w.width-8) ) f.x = w.width - f.width - 8;
+    if( (f.x + f.width) > (w.width-20) ) f.x = w.width - f.width - 20;
     if( f.x < 7 ) f.x = 7;
     return f ;    
   },
