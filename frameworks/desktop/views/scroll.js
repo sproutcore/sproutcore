@@ -133,7 +133,11 @@ SC.ScrollView = SC.View.extend({
   horizontalScrollerView: SC.ScrollerView,
   
   /**
-    YES if the horizontal scroller should be visible.  You can change this property value anytime to show or hide the horizontal scroller.  If you do not want to use a horizontal scroller at all, you should instead set hasHorizontalScroller to NO to avoid creating a scroller view in the first place.
+    YES if the horizontal scroller should be visible.  You can change this 
+    property value anytime to show or hide the horizontal scroller.  If you do 
+    not want to use a horizontal scroller at all, you should instead set 
+    hasHorizontalScroller to NO to avoid creating a scroller view in the first 
+    place.
     
     @property {Boolean}
   */
@@ -203,7 +207,10 @@ SC.ScrollView = SC.View.extend({
   // 
   
   /**
-    The container view that will contain your main content view.  You can replace this property with your own custom subclass if you prefer.
+    The container view that will contain your main content view.  You can 
+    replace this property with your own custom subclass if you prefer.
+    
+    @type {SC.ContainerView}
   */
   containerView: SC.ContainerView,
   
@@ -428,7 +435,6 @@ SC.ScrollView = SC.View.extend({
     additional controls you have added to the view.
   */
   tile: function() {
-    // console.log('%@.tile()'.fmt(this));
     // get horizontal scroller/determine if we should have a scroller
     var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null;
     var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
@@ -591,14 +597,17 @@ SC.ScrollView = SC.View.extend({
     that is tracked separately from the offset values.
   */
   contentViewFrameDidChange: function() {
-    var view = this.get('contentView'), f = (view) ? view.get('frame'):null;
-    var width = (f) ? f.width : 0,  height = (f) ? f.height : 0 ;
+    var view   = this.get('contentView'), 
+        f      = (view) ? view.get('frame') : null,
+        width  = (f) ? f.width : 0,  
+        height = (f) ? f.height : 0,
+        dim    = this.get('frame') ;
     
     // cache out scroll settings...
     if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height ;
-    
+
     // horizontal scroller is visible if contentView.width > visibleWidth
     // visibleWidth = this.frame.width - verticalScroller if scroller visible
     
@@ -606,10 +615,22 @@ SC.ScrollView = SC.View.extend({
     // visibleHeight = this.frame.height - horizontalScroller if visible
     
     if (this.get('hasHorizontalScroller') && (view = this.get('horizontalScrollerView'))) {
+      
+      // decide if it should be visible or not
+      if (this.get('autohidesHorizontalScroller')) {
+        this.set('isHorizontalScrollerVisible', width > dim.width);
+      }
       view.set('maximum', width) ;
     }
     
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
+      
+      
+      // decide if it should be visible or not
+      if (this.get('autohidesVerticalScroller')) {
+        this.set('isVerticalScrollerVisible', height > dim.height);
+      }
+      
       view.set('maximum', height) ;
     }
     
