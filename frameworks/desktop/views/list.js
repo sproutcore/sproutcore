@@ -188,6 +188,11 @@ SC.ListView = SC.CollectionView.extend(
         ret, custom, cache, delta, max, content ;
         
     ret = idx * rowHeight;
+
+		if(this.get('rowSpacing')){ 
+      ret += idx * this.get('rowSpacing'); 
+    } 
+
     if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
       
       // prefill the cache with custom rows.

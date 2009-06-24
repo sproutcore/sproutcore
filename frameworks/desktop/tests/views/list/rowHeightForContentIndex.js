@@ -63,6 +63,11 @@ test("constant row heights", function() {
   verifyRowHeights(view, 40);
 });
 
+test("constant row heights with rowSpacing", function() {
+  var view = SC.ListView.create({ content: content, rowHeight: 40, rowSpacing: 2, customRowHeightIndexes: null });
+  verifyRowHeights(view, 42);
+});
+
 test("custom row heights", function() {
   var view = SC.ListView.create({
     content: content,
