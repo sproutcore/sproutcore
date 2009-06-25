@@ -2,6 +2,7 @@
 
 .sc-view .sc-text-field-view{
 	overflow: visible;
+	z-index:100;
 }
 
 .sc-text-field-view input {

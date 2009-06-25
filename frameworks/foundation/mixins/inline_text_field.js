@@ -431,13 +431,21 @@ SC.InlineTextFieldView.mixin(
     var el = this._exampleElement[0] ;   
     var styles = '';
     var s=SC.getStyle(el,'font-size');
-    if(s.length>0) styles = styles + "font-size: "+ s + "; ";
-    if(s.length>0) styles = styles + "font-family: " + s + "; ";
-    if(s.length>0) styles = styles + "font-weight: " + s + "; ";
-    //if(s.length>0) styles = styles + "padding-left: " + s + "; ";
-    //if(s.length>0) styles = styles + "padding-bottom: " + s + "; ";
-    if(s.length>0) styles = styles + "line-height: " + s + "; ";
-    if(s.length>0) styles = styles + "text-align: " + s + "; ";
+    if(s && s.length>0) styles = styles + "font-size: "+ s + "; ";
+    s=SC.getStyle(el,'font-family');
+    if(s && s.length>0) styles = styles + "font-family: " + s + "; ";
+    s=SC.getStyle(el,'font-weight');
+    if(s && s.length>0) styles = styles + "font-weight: " + s + "; ";
+    s=SC.getStyle(el,'z-index');
+    if(s && s.length>0) styles = styles + "z-index: " + s + "; ";
+    s=SC.getStyle(el,'padding-left');
+    if(s && s.length>0) styles = styles + "padding-left: " + s + "; ";
+    s=SC.getStyle(el,'padding-bottom');
+    if(s && s.length>0) styles = styles + "padding-bottom: " + s + "; ";
+    s=SC.getStyle(el,'line-height');
+    if(s && s.length>0) styles = styles + "line-height: " + s + "; ";
+    s=SC.getStyle(el,'text-align');
+    if(s && s.length>0) styles = styles + "text-align: " + s + "; ";
     
     return styles;
   },
