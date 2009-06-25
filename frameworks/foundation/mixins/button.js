@@ -149,12 +149,13 @@ SC.Button = {
     }
     
     elem = this.$('label');
-    
-    if (!firstTime && elem[0]){ 
+    if (!firstTime && elem[0]){
       if(needsTitle) { elem[0].innerHTML = image + title; }
       else { this.$()[0].innerHTML = ''; } 
     } else {
-      context.begin('label').addClass('sc-button-label').push(image, title).end();   
+      if(needsTitle) { 
+        context.begin('label').addClass('sc-button-label').push(image, title).end();   
+      }
     }
     return context ;
   },
