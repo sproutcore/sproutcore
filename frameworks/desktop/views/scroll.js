@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('views/scroller');
+sc_require('mixins/border');
 
 /** @class
 
@@ -22,7 +23,7 @@ sc_require('views/scroller');
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.ScrollView = SC.View.extend({
+SC.ScrollView = SC.View.extend(SC.Border, {
 
   classNames: 'sc-scroll-view',
   
@@ -565,7 +566,19 @@ SC.ScrollView = SC.View.extend({
     if (contentView) {
       contentView.addObserver('frame', this, this.contentViewFrameDidChange) ;
     }
+    
+    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
   },
+  
+  /**
+    @private
+    
+    Registers/deregisters view with SC.Drag for autoscrolling
+  */
+  _scsv_registerAutoscroll: function() {
+    if (this.get('isVisibleInWindow')) SC.Drag.addScrollableView(this);
+    else SC.Drag.removeScrollableView(this);
+  }.observes('isVisibleInWindow'),
   
   /** @private
     Whenever the contentView is changed, we need to observe the content view's
