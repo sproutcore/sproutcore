@@ -229,8 +229,8 @@ SC.Drag = SC.Object.extend(
     directly with the data property.
     
     If you are implementing a drop target, use the dataTypes property and 
-    dataForTypes() method to access data instead of working directly with these
-    properties.
+    dataForTypes() method to access data instead of working directly with 
+    these properties.
     
     @readOnly
     @type SC.DragDataSource

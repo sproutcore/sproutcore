@@ -77,32 +77,32 @@ SC.mixin( /** @scope SC */ {
   
   /** Return the left edge of the frame */
   minX: function(frame) { 
-    return frame.x; 
+    return frame.x || 0; 
   },
   
   /** Return the right edge of the frame. */
   maxX: function(frame) { 
-    return frame.x + frame.width; 
+    return (frame.x || 0) + (frame.width || 0); 
   },
   
   /** Return the midpoint of the frame. */
   midX: function(frame) {
-    return frame.x + (frame.width / 2) ;
+    return (frame.x || 0) + ((frame.width || 0) / 2) ;
   },
   
   /** Return the top edge of the frame */
   minY: function(frame) {
-    return frame.y ;
+    return frame.y || 0 ;
   },
   
   /** Return the bottom edge of the frame */
   maxY: function(frame) {
-    return frame.y + frame.height ;
+    return (frame.y || 0) + (frame.height || 0) ;
   },
   
   /** Return the midpoint of the frame */
   midY: function(frame) {
-    return frame.y + (frame.height / 2) ;
+    return (frame.y || 0) + ((frame.height || 0) / 2) ;
   },
   
   /** Returns the point that will center the frame X within the passed frame. */

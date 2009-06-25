@@ -377,18 +377,6 @@ SC.CollectionView = SC.View.extend(
   */
   acceptsFirstResponder: NO,
   
-  /** 
-    The insertion orientation.  This is used to determine which
-    dimension we should pay attention to when determining insertion point for
-    a mouse click.
-    
-    {{{
-      SC.HORIZONTAL_ORIENTATION: look at the X dimension only
-      SC.VERTICAL_ORIENTATION: look at the Y dimension only
-    }}}
-  */
-  insertionOrientation: SC.HORIZONTAL_ORIENTATION,
-  
   // ..........................................................
   // SUBCLASS METHODS
   // 
@@ -474,14 +462,11 @@ SC.CollectionView = SC.View.extend(
     The default implementation of this method does nothing.
     
     @param itemView {SC.ClassicView} view the insertion point should appear directly before. If null, show insertion point at end.
-    @param dropOperation {Number} the drop operation.  will be SC.DROP_BEFORE or SC.DROP_ON
+    @param dropOperation {Number} the drop operation.  will be SC.DROP_BEFORE, SC.DROP_AFTER, or SC.DROP_ON
     
     @returns {void}
   */
   showInsertionPoint: function(itemView, dropOperation) {
-    console.log('showInsertionPoint(%@, %@)'.fmt(itemView, dropOperation));
-    
-    //return (dropOperation === SC.DROP_BEFORE) ? this.showInsertionPointBefore(itemView) : this.hideInsertionPoint() ;
   },
   
   /**
@@ -499,7 +484,6 @@ SC.CollectionView = SC.View.extend(
     @returns {void}
   */
   hideInsertionPoint: function() {
-    console.log("hideInsertionPoint()");
   },
   
   // ..........................................................
@@ -2276,11 +2260,9 @@ SC.CollectionView = SC.View.extend(
   */
   computeDragOperations: function(drag, evt) {
 
-    console.log('computeDragOperations called on %@'.fmt(this));
-    
     // the proposed drag operation is DRAG_REORDER only if we can reorder
     // content and the drag contains reorder content.
-    var op = SC.DRAG_NONE,
+    var op  = SC.DRAG_NONE,
         del = this.get('selectionDelegate');
 
     if (this.get('canReorderContent')) {
@@ -2294,6 +2276,7 @@ SC.CollectionView = SC.View.extend(
     if (op & SC.DRAG_REORDER) op = SC.DRAG_MOVE ;
     
     // return
+    //console.log('computeDragOperations called on %@ op=%@'.fmt(this, op));
     return op ;
   },
   
@@ -2418,16 +2401,15 @@ SC.CollectionView = SC.View.extend(
   */
   dragUpdated: function(drag, evt) {
     
-    // console.log('%@.dragUpdated(drag=%@, evt=%@)'.fmt(this, drag, evt));
+    //console.log('%@.dragUpdated(drag=%@, evt=%@)'.fmt(this, drag, evt));
     var state = this._computeDropOperationState(drag, evt) ;
-    // console.log('state is %@'.fmt(state));
     var idx = state[0], dropOp = state[1], dragOp = state[2] ;
+    //console.log('>>>>>>state is idx=%@ dropOp=%@ dragOp=%@'.fmt(idx, dropOp, dragOp));
     
     // if the insertion index or dropOp have changed, update the insertion 
     // point
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
-        // var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
         var itemView = this.itemViewForContentIndex(idx) ;
         this.showInsertionPoint(itemView, dropOp) ;
       }
@@ -2563,58 +2545,60 @@ SC.CollectionView = SC.View.extend(
     @param dropOperation {DropOp} the preferred drop operation.
     @returns {Array} [proposed drop index, drop operation] 
   */
-  insertionIndexForLocation: function(loc, dropOperation) {  
-    var content    = this.get('content'),
-        nowShowing = this.get('nowShowing'),
-        orient     = this.get('insertionOrientation'),
-        lastSide   = null,
-        ret        = null,
-        itemView, curSide, f;
-        
-    for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
-      // itemView = this.itemViewForContent(content.objectAt(idx));
-      itemView = this.itemViewForContentIndex(idx);
-      f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
-      
-      // if we are a horizontal orientation, look for the first item that 
-      // will "switch sides" on the x path an the maxY is greater than Y.
-      // This assumes you will flow top to bottom, but it should work if you
-      // flow LTR or RTL.
-      if (orient == SC.HORIZONTAL_ORIENTATION) {
-        if (SC.maxY(f) > loc.y) {
-          curSide = (SC.maxX(f) < loc.x) ? -1 : 1 ;
-        } else curSide = null ;
-        
-      // if we are a vertical orientation, look for the first item that
-      // will "switch sides" on the y path and the maxX is greater than X.
-      // This assumes you will flow LTR, but it should work if you flow
-      // bottom to top or top to bottom.
-      } else {
-        if (SC.minX(f) < loc.x) {
-          curSide = (SC.maxY(f) < loc.y) ? -1 : 1 ;
-        } else curSide = null ;
-      }
-      
-      // if we "switched" sides then return this item view.
-      if (curSide !== null) {
-        
-        // OK, we found an item view, while we have this data, decide if
-        // we should insert before or after the view
-        if ((lastSide !== null) && (curSide != lastSide)) {
-          ret = idx ;
-          if (orient == SC.HORIZONTAL_ORIENTATION) {
-            if (SC.midX(f) < loc.x) ret++ ;
-          } else {
-            if (SC.midY(f) < loc.y) ret++ ;
-          }
-        }
-        lastSide =curSide ;
-      }
-    }
+  insertionIndexForLocation: function(loc, dropOperation) { 
+    var ret = 0 ;
     
-    // Handle some edge cases
-    if ((ret === null) || (ret < 0)) ret = 0 ;
-    if (ret > content.length) ret = content.length ;
+    // var content    = this.get('content'),
+    //     nowShowing = this.get('nowShowing'),
+    //     orient     = this.get('insertionOrientation'),
+    //     lastSide   = null,
+    //     ret        = null,
+    //     itemView, curSide, f;
+    //     
+    // for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
+    //   // itemView = this.itemViewForContent(content.objectAt(idx));
+    //   itemView = this.itemViewForContentIndex(idx);
+    //   f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
+    //   
+    //   // if we are a horizontal orientation, look for the first item that 
+    //   // will "switch sides" on the x path an the maxY is greater than Y.
+    //   // This assumes you will flow top to bottom, but it should work if you
+    //   // flow LTR or RTL.
+    //   if (orient == SC.HORIZONTAL_ORIENTATION) {
+    //     if (SC.maxY(f) > loc.y) {
+    //       curSide = (SC.maxX(f) < loc.x) ? -1 : 1 ;
+    //     } else curSide = null ;
+    //     
+    //   // if we are a vertical orientation, look for the first item that
+    //   // will "switch sides" on the y path and the maxX is greater than X.
+    //   // This assumes you will flow LTR, but it should work if you flow
+    //   // bottom to top or top to bottom.
+    //   } else {
+    //     if (SC.minX(f) < loc.x) {
+    //       curSide = (SC.maxY(f) < loc.y) ? -1 : 1 ;
+    //     } else curSide = null ;
+    //   }
+    //   
+    //   // if we "switched" sides then return this item view.
+    //   if (curSide !== null) {
+    //     
+    //     // OK, we found an item view, while we have this data, decide if
+    //     // we should insert before or after the view
+    //     if ((lastSide !== null) && (curSide != lastSide)) {
+    //       ret = idx ;
+    //       if (orient == SC.HORIZONTAL_ORIENTATION) {
+    //         if (SC.midX(f) < loc.x) ret++ ;
+    //       } else {
+    //         if (SC.midY(f) < loc.y) ret++ ;
+    //       }
+    //     }
+    //     lastSide =curSide ;
+    //   }
+    // }
+    // 
+    // // Handle some edge cases
+    // if ((ret === null) || (ret < 0)) ret = 0 ;
+    // if (ret > content.length) ret = content.length ;
     
     // Done. Phew.  Return.
     return ret;
