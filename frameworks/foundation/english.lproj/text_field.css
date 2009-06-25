@@ -1,7 +1,6 @@
 /* Common SC.TextFieldView styles - needed to work properly */
 
 .sc-view .sc-text-field-view{
-	z-index: 10000;
 	overflow: visible;
 }
 
