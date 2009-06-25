@@ -135,6 +135,28 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
   
   /**
+    Called to refresh the query that is attached to this record array.
+    This will force the query to evaluated again against the store. 
+  */
+  refreshQuery: function() {
+    var query = this.get('queryKey');
+    
+    if(query) {
+      var recordType = query.get('recordType');
+      var storeKeys = this.get('store').storeKeysFor(recordType);
+      
+      var recordTypes = SC.Set.create();
+      recordTypes.push(recordType);
+      
+      // clear existing storeKeys, start over by applying all storekeys for 
+      // this recordType
+      this.storeKeys = [];
+      this.applyQuery(storeKeys, recordTypes);
+    }
+    
+  },
+  
+  /**
     Apply the SC.Query again. This is invoked when new records are loaded
     or changed in the store (or directly on the array with .replace() ) and 
     and when we need to refresh all SC.Query 'based' record arrays accordingly.

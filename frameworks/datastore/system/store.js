@@ -517,6 +517,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     with an SC.Query to reapply their query with the new storeKeys
     
     @param {SC.IndexSet} storeKeys set of storeKeys that changed
+    @param {SC.Set} recordTypes
   */
   
   _notifyRecordArraysWithQuery: function(storeKeys, recordTypes) {
