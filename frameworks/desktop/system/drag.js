@@ -388,6 +388,8 @@ SC.Drag = SC.Object.extend(
     var loc = { x: evt.pageX, y: evt.pageY } ;
     var target = this._lastTarget, op = this.dropOperations;
     
+    this.set('location', loc);
+    
     // try to have the drop target perform the drop...
     try {
       if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {

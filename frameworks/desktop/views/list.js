@@ -404,9 +404,6 @@ SC.ListView = SC.CollectionView.extend(
     Default implementation will show an insertion point
   */
   showInsertionPoint: function(itemView, dropOperation) {
-    
-    console.log('%@:showInsertionPoint itemView=%@ dropOperation=%@'.fmt(this, itemView, dropOperation));
-    
     var view = this._insertionPointView;
     if (!view) {
       view = this._insertionPointView 
@@ -442,10 +439,6 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   hideInsertionPoint: function() {
-    
-    console.log('%@:hideInsertionPoint');
-    
-    
     if (this._lastDropOnView) {
       this._lastDropOnView.set('isSelected', NO);
       this._lastDropOnView = null;
@@ -459,7 +452,7 @@ SC.ListView = SC.CollectionView.extend(
   insertionIndexForLocation: function(loc, dropOperation) { 
     var indexes = this.contentIndexesInRect(loc),
         index   = indexes.get('min');
-    console.log('insertionIndexForLocation(%@) = %@'.fmt(SC.inspect(loc), index));
+
     if (SC.none(index) || index<0) {
       //debugger; 
       return [-1, SC.DRAG_NONE]; // nothing to do

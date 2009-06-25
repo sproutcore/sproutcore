@@ -1852,10 +1852,7 @@ SC.CollectionView = SC.View.extend(
     };
       
     // become first responder if possible.
-    this.becomeFirstResponder() ; // MAJD: The prototype is added because otherwise
-																						// my list view wasn't being selected properly.
-    
-    // console.log(mouseDownView);
+    this.becomeFirstResponder() ;
     
     // recieved a mouseDown on the collection element, but not on one of the 
     // childItems... unless we do not allow empty selections, set it to empty.
@@ -2245,7 +2242,6 @@ SC.CollectionView = SC.View.extend(
     // if this is a reorder, then return drag content.
     if (this.get('canReorderContent')) {
       if (dataType === this.get('reorderDataType')) {
-        // console.log('dragContent is %@'.fmt(this.get('dragContent')));
         return this.get('dragContent') ;
       }
     }
@@ -2276,8 +2272,6 @@ SC.CollectionView = SC.View.extend(
     op = del.collectionViewComputeDragOperations(this, drag, op);
     if (op & SC.DRAG_REORDER) op = SC.DRAG_MOVE ;
     
-    // return
-    //console.log('computeDragOperations called on %@ op=%@'.fmt(this, op));
     return op ;
   },
   
@@ -2315,7 +2309,6 @@ SC.CollectionView = SC.View.extend(
     // then it will return DRAG_NONE, in which case we will try again with
     // drop before.
     if (dropOp == SC.DROP_ON) {
-      // console.log('dropOp === SC.DROP_ON');
       
       // Now save the insertion index and the dropOp.  This may be changed by
       // the collection delegate.
@@ -2402,10 +2395,8 @@ SC.CollectionView = SC.View.extend(
   */
   dragUpdated: function(drag, evt) {
     
-    //console.log('%@.dragUpdated(drag=%@, evt=%@)'.fmt(this, drag, evt));
     var state = this._computeDropOperationState(drag, evt) ;
     var idx = state[0], dropOp = state[1], dragOp = state[2] ;
-    //console.log('>>>>>>state is idx=%@ dropOp=%@ dragOp=%@'.fmt(idx, dropOp, dragOp));
     
     // if the insertion index or dropOp have changed, update the insertion 
     // point
@@ -2447,16 +2438,12 @@ SC.CollectionView = SC.View.extend(
     reordering content.
   */
   performDragOperation: function(drag, op) { 
-    // console.log('performDragOperation called on %@ with drag.dataTypes %@'.fmt(this, drag.get('dataTypes')));
-    // console.log('op is %@'.fmt(SC.Drag.inspectOperation(op)));
     // Get the correct insertion point, drop operation, etc.
     var state = this._computeDropOperationState(drag, null, op),
         idx   = state[0], dropOp = state[1], dragOp = state[2],
         del   = this.get('selectionDelegate'),
         performed, objects, data, content, shift;
         
-    // console.log('dragOp is %@'.fmt(SC.Drag.inspectOperation(dragOp)));
-    
     // The dragOp is the kinds of ops allowed.  The drag operation must 
     // be included in that set.
     if (dragOp & SC.DRAG_REORDER) {
