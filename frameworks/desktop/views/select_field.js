@@ -27,6 +27,11 @@ SC.SelectFieldView = SC.FieldView.extend(
     An array of items that will form the menu you want to show.
   */ 
   objects: [],
+  
+  /**
+    Binding default for an array of objects
+  */ 
+  objectsBindingDefault: SC.Binding.multiple(),
 
   /**
     If you set this to a non-null value, then the name shown for each 
@@ -239,8 +244,6 @@ SC.SelectFieldView = SC.FieldView.extend(
   
   // object changes to the objects array of objects if possible.
   render: function(context, firstTime) {
-   
-   if(this.get('cpDidChange')){
     // if (this.didChangeFor('_objO','objects','nameKey','valueKey')) {
       var loc ;
       var objects = this.get('objects') ;
@@ -282,23 +285,11 @@ SC.SelectFieldView = SC.FieldView.extend(
         } // while(--loc)
       } // if (this._objects)
      this.rebuildMenu(context, firstTime) ;
-     this.set('cpDidChange', NO);
-     } // if (this.didChangeFor...)
+     //} // if (this.didChangeFor...)
   },
 
   displayProperties: ['objects','nameKey','valueKey'],
 
-  nameKeyDidChange: function(){
-    this.set('cpDidChange', YES);
-  }.observes('nameKey'),
-
-  valueKeyDidChange: function(){
-    this.set('cpDidChange', YES);
-  }.observes('valueKey'),
-  
-  objectsDidChange: function(){
-    this.set('cpDidChange', YES);
-  }.observes('objects'),
   
   
   // this is invoked anytime an item we are interested in in the menu changes
