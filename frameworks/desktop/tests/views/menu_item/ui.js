@@ -31,7 +31,7 @@ var pane = SC.ControlTestPane.design({ width:200,height: 32 })
   
   .add("disabled menu item with no content", SC.MenuItemView.design({ 
     content: SC.Object.create(),
-    isSeperator: YES,
+    isSeparator: YES,
     isEnabled: NO
   }));
  

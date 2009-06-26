@@ -229,8 +229,8 @@ SC.Drag = SC.Object.extend(
     directly with the data property.
     
     If you are implementing a drop target, use the dataTypes property and 
-    dataForTypes() method to access data instead of working directly with these
-    properties.
+    dataForTypes() method to access data instead of working directly with 
+    these properties.
     
     @readOnly
     @type SC.DragDataSource
@@ -267,7 +267,6 @@ SC.Drag = SC.Object.extend(
     
     var loc = { x: evt.pageX, y: evt.pageY } ;
     this.set('location', loc) ;
-    // console.log({ top: loc.y, left: loc.x });
     
     var dv = this.dragView ;
     var pane = dv.get('pane') ;
@@ -289,17 +288,10 @@ SC.Drag = SC.Object.extend(
     
     var origin = f;//pv.convertFrameToView(dv.get('frame'), null) ;
     
-    // console.log("clipping Frame x: %@ y: %@ ".fmt(clippingFrame.x, clippingFrame.y));
-    // console.log("dvf x: %@ y: %@ ".fmt(dvf.x, dvf.y));
-    // 
-    // console.log("f x: %@ y: %@ ".fmt(f.x, f.y));
-    // console.log("loc x: %@ loc: %@ ".fmt(loc.x, loc.y));
-    // console.log("pf x: %@ pf: %@ ".fmt(pf.x, pf.y));
-    
     this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
-    // console.log("ghost Offset x: %@ pf: %@ ".fmt(this.ghostOffset.x, this.ghostOffset.y));
     
-    this.mouseGhostOffset = {x: loc.x - (dvf.x), y: loc.y - (dvf.y)}
+    this.mouseGhostOffset = {x: (loc.x - dvf.x), y: (loc.y - dvf.y)};
+    
     // position the ghost view
     this._positionGhostView(evt) ;
     
@@ -396,22 +388,24 @@ SC.Drag = SC.Object.extend(
     var loc = { x: evt.pageX, y: evt.pageY } ;
     var target = this._lastTarget, op = this.dropOperations;
     
+    this.set('location', loc);
+    
     // try to have the drop target perform the drop...
     try {
       if (target && target.acceptDragOperation && target.acceptDragOperation(this, op)) {
-        op = (target.performDragOperation) ? target.performDragOperation(this, op) : SC.DRAG_NONE ;  
+        op = target.performDragOperation ? target.performDragOperation(this, op) : SC.DRAG_NONE ;  
       } else {
         op = SC.DRAG_NONE;
       }
     } catch (e) {
-      console.log('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e)) ;
+      console.error('Exception in SC.Drag.mouseUp(acceptDragOperation|performDragOperation): %@'.fmt(e)) ;
     }
     
     try {
       // notify last drop target that the drag exited, to allow it to cleanup
       if (target && target.dragExited) target.dragExited(this, evt) ;
-    } catch (e) {
-      //onsole.log('Exception in SC.Drag.mouseUp(target.dragExited): %@'.fmt(e)) ;
+    } catch (ex) {
+      console.error('Exception in SC.Drag.mouseUp(target.dragExited): %@'.fmt(ex)) ;
     }
     
     // notify all drop targets that the drag ended
@@ -419,8 +413,8 @@ SC.Drag = SC.Object.extend(
     for (var idx=0, len=ary.length; idx<len; idx++) {
       try {
         ary[idx].tryToPerform('dragEnded', this, evt) ;
-      } catch (e) {
-        console.log('Exception in SC.Drag.mouseUp(dragEnded on %@): %@'.fmt(ary[idx], e)) ;
+      } catch (ex2) {
+        console.error('Exception in SC.Drag.mouseUp(dragEnded on %@): %@'.fmt(ary[idx], ex2)) ;
       }
     }
     
@@ -439,9 +433,11 @@ SC.Drag = SC.Object.extend(
     This will create the ghostView and add it to the document.
   */
   _createGhostView: function() {
-    var that = this ;
-    var frame = this.dragView.get('frame') ;
-    var view = this.ghostView = SC.Pane.create({
+    var that  = this,
+        frame = this.dragView.get('frame'),
+        view;
+        
+    view = this.ghostView = SC.Pane.create({
       classNames:['sc-ghost-view'],
       layout: { top: frame.y, left: frame.x, width: frame.width, height: frame.height },
       owner: this,
@@ -453,8 +449,6 @@ SC.Drag = SC.Object.extend(
       }
     });
     
-    // console.log('dragView %@ frame is { top: %@, left: %@, width: %@, height: %@ }'.fmt(this.dragView, frame.y, frame.x, frame.width, frame.height)) ;
-    // console.log(this.ghostView);
     view.append() ;  // add to window
   },
   
@@ -463,13 +457,9 @@ SC.Drag = SC.Object.extend(
     recorded by when the drag started.
   */
   _positionGhostView: function(evt) {
-    // console.log('%@._positionGhostView(evt=%@)'.fmt(this, evt));
     var loc = this.get('location') ;
-    // console.log(loc) ;
     loc.x -= this.ghostOffset.x ;
     loc.y -= this.ghostOffset.y ;
-    // console.log({ top: loc.y, left: loc.x });
-    // console.log(this.ghostView);
     this.ghostView.adjust({ top: loc.y, left: loc.x }) ;   
     this.ghostView.invokeOnce('updateLayout') ;
   },
@@ -580,7 +570,7 @@ SC.Drag = SC.Object.extend(
     Returns YES if a scroll was performed.
   */
   _autoscroll: function(evt) {
-    return NO ; // TODO FIXME
+    if (!evt) evt = this._lastAutoscrollEvent ;
     
     // If drag has ended, exit
     if (!this._dragInProgress) return NO;
@@ -592,80 +582,73 @@ SC.Drag = SC.Object.extend(
     // - there must be room left to scroll in that direction. 
     
     // NOTE: an event is passed only when called from mouseDragged
-    var loc = (evt) ? { x: evt.pageX, y: evt.pageY } : this.get('location') ;
-    var view = this._findScrollableView(loc) ;
+    var loc  = evt ? { x: evt.pageX, y: evt.pageY } : this.get('location'),
+        view = this._findScrollableView(loc),
+        scrollableView = null, // become final view when found
+        vscroll, hscroll, min, max, edge, container, f;
     
-    // these will become either 1 or -1 to indicate scroll direction or 0 for no scroll.
-    var verticalScroll, horizontalScroll ;
-    var min, max, edge ;
-    var scrollableView = null;
+    // hscroll and vscroll will become either 1 or -1 to indicate scroll 
+    // direction or 0 for no scroll.
     
     while (view && !scrollableView) {
       
       // quick check...can we scroll this view right now?
-      verticalScroll = view.get('hasVerticalScroller') ? 1 : 0;
-      horizontalScroll = view.get('hasHorizontalScroller') ? 1 : 0;
-      
-      // at least one direction might be scrollable.  Collect some extra
-      // info to investigate further.
-      if ((verticalScroll != 0) || (horizontalScroll != 0)) {
-        var f = view.convertFrameToView(view.get('frame'), null) ;
-        var innerSize = view.get('innerFrame') ;
-        var scrollFrame = view.get('scrollFrame') ;
-      }
-      
-      if (verticalScroll != 0) {
-        
-        // bottom hotzone?
-        max = SC.maxY(f); min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
-        edge = SC.maxY(scrollFrame) ;
-        
-        if ((edge >= innerSize.height) && (loc.y >= min) && (loc.y <= max)) {
-          verticalScroll = 1 ;
-          
-        // no...how about top hotzone?
+      vscroll = view.get('canScrollVertical') ? 1 : 0;
+      hscroll = view.get('canScrollHorizontal') ? 1 : 0;
+
+      // at least one direction might be scrollable.  Collect frame info
+      if (vscroll || hscroll) {
+        container = view.get('containerView');
+        if (container) {
+          f = view.convertFrameToView(container.get('frame'),null);
         } else {
-          min = SC.minY(f); max = min + SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ;
-          edge = SC.minY(scrollFrame) ;
-          if ((edge <= innerSize.height) && (loc.y >= min) && (loc.y <= max)) {
-            verticalScroll = -1 ;
-          
-          // no, ok don't scroll vertical
-          } else verticalScroll = 0 ;
+          vscroll = hscroll = 0 ; // can't autoscroll this mother
         }
       }
-      
-      if (horizontalScroll != 0) {
-        // right hotzone?
-        max = SC.maxX(f); min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
-        edge = SC.maxX(scrollFrame) ;
-        if ((edge >= innerSize.width) && (loc.x >= min) && (loc.x <= max)) {
-          horizontalScroll = 1 ;
-          
-        // no...how about left hotzone?
-        } else {
-          min = SC.minY(f); max = min + SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ;
-          edge = SC.minY(scrollFrame) ;
-          if ((edge <= innerSize.width) && (loc.x >= min) && (loc.x <= max)) {
-            horizontalScroll = -1 ;
-          
-          // no, ok don't scroll vertical
-          } else horizontalScroll = 0 ;
+
+      // handle vertical direction
+      if (vscroll) {
+        
+        // bottom hotzone?
+        max = SC.maxY(f); 
+        min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
+        if (loc.y >= min && loc.y <= max) vscroll = 1 ;
+        else {
+          // how about top
+          min = SC.minY(f); 
+          max = min + SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ;
+          if (loc.y >= min && loc.y <= max) vscroll = -1 ;
+          else vscroll = 0 ; // can't scroll vertical
+        }
+      }
+
+      // handle horizontal direction
+      if (hscroll) {
+        
+        // bottom hotzone?
+        max = SC.maxX(f); 
+        min = max - SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ; 
+        if (loc.x >= min && loc.x <= max) hscroll = 1 ;
+        else {
+          // how about top
+          min = SC.minX(f); 
+          max = min + SC.DRAG_AUTOSCROLL_ZONE_THICKNESS ;
+          if (loc.x >= min && loc.x <= max) hscroll = -1 ;
+          else hscroll = 0 ; // can't scroll vertical
         }
       }
       
       // if we can scroll, then set this.
-      if ((verticalScroll != 0) || (horizontalScroll != 0)) {
-        scrollableView = view ;
-      } else view = this._findNextScrollableView(view) ;
+      if (vscroll || hscroll) scrollableView = view ;
+      else view = this._findNextScrollableView(view) ;
     }
     
-    // STEP 2: Only scroll if the user remains within the hot-zone for a period of
-    // time
-    if (scrollableView && (this._lastScrollableView == scrollableView)) {
+    // STEP 2: Only scroll if the user remains within the hot-zone for a 
+    // period of time
+    if (scrollableView && (this._lastScrollableView === scrollableView)) {
       if ((Date.now() - this._hotzoneStartTime) > 100) {
         this._horizontalScrollAmount *= 1.05 ;
-        this._verticalScrollAmount *= 1.05 ;
+        this._verticalScrollAmount *= 1.05 ; // accelerate scroll
       }
       
     // otherwise, reset everything and disallow scroll
@@ -674,25 +657,29 @@ SC.Drag = SC.Object.extend(
       this._horizontalScrollAmount = 15 ;
       this._verticalScrollAmount = 15 ;
       this._hotzoneStartTime = (scrollableView) ? Date.now() : null ;
-      
-      horizontalScroll = verticalScroll = 0 ;
+      hscroll = vscroll = 0 ;
     }
     
     // STEP 3: Scroll!
-    if (scrollableView && ((horizontalScroll != 0) || (verticalScroll != 0))) {
+    if (scrollableView && (hscroll || vscroll)) {
       var scroll = { 
-        x: horizontalScroll * this._horizontalScrollAmount,
-        y: verticalScroll * this._verticalScrollAmount 
+        x: hscroll * this._horizontalScrollAmount,
+        y: vscroll * this._verticalScrollAmount 
       } ;
-      
       scrollableView.scrollBy(scroll) ;
     }
     
-    // If a scrollable view was found, then reschedule
+    // If a scrollable view was found, then check later
     if (scrollableView) {
-      this.invokeLater('_autoscroll', 100, null);
+      if (evt) {
+        this._lastAutoscrollEvent = { pageX: evt.pageX, pageY: evt.pageY };
+      }
+      this.invokeLater(this._autoscroll, 100, null);
       return YES ;
-    } else return NO ;
+    } else {
+      this._lastAutoscrollEvent = null;
+      return NO ;
+    }
   },
   
   /** @private
@@ -730,12 +717,14 @@ SC.Drag = SC.Object.extend(
     target area.
   */
   _findScrollableView: function(loc) {
-    var target, frame ;
-    var ary = this._scrollableViews() ;
-    for (var idx=0, len=ary.length; idx<len; idx++) {
+    var ary = this._scrollableViews(),
+        len = ary ? ary.length : 0,
+        target, frame, idx;
+        
+    for (idx=0; idx<len; idx++) {
       target = ary[idx] ;
       
-      // FIXME if (!target.get('isVisibleInWindow')) continue ;
+      if (!target.get('isVisibleInWindow')) continue ;
       
       // get clippingFrame, converted to the pane
       frame = target.convertFrameToView(target.get('clippingFrame'), null) ;
@@ -791,7 +780,6 @@ SC.Drag.mixin(
     @param {SC.View} target a view implementing the SC.DropTarget protocol
   */
   addDropTarget: function(target) {
-    // console.log('addDropTarget called on %@ with %@'.fmt(this, target));
     this._dropTargets[SC.guidFor(target)] = target ;
   },
   
@@ -804,7 +792,6 @@ SC.Drag.mixin(
     @param {SC.View} target A previously registered drop target
   */
   removeDropTarget: function(target) {
-    // console.log('removeDropTarget called on %@ with %@'.fmt(this, target));
     delete this._dropTargets[SC.guidFor(target)] ;
   },
   

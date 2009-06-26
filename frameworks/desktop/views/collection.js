@@ -55,6 +55,8 @@ SC.CollectionView = SC.View.extend(
   
   classNames: ['sc-collection-view'],
   
+  ACTION_DELAY: 200,
+  
   // ......................................
   // PROPERTIES
   //
@@ -191,6 +193,18 @@ SC.CollectionView = SC.View.extend(
   
   /** @private */
   canDeleteContentBindingDefault: SC.Binding.bool(),
+  
+  /**
+    Allow user to edit the content by double clicking on it or hitting return.
+    This will only work if isEditable is YES and the item view implements 
+    the beginEditing() method.
+    
+    @type {Boolean}
+  */
+  canEditContent: NO,
+  
+  /** @private */
+  canEditContentBindingDefault: SC.Binding.bool(),
   
   /**
     Accept drops for data other than reordering.
@@ -363,28 +377,6 @@ SC.CollectionView = SC.View.extend(
   */
   acceptsFirstResponder: NO,
   
-  /**
-    Enables observing content property changes.  Set this property if you 
-    want to deal with property changes on content objects directly in the 
-    collection view instead of delegating change observing to individual item
-    views.
-    
-    @type {Boolean}
-  */
-  observeContentProperties: NO,
-  
-  /** 
-    The insertion orientation.  This is used to determine which
-    dimension we should pay attention to when determining insertion point for
-    a mouse click.
-    
-    {{{
-      SC.HORIZONTAL_ORIENTATION: look at the X dimension only
-      SC.VERTICAL_ORIENTATION: look at the Y dimension only
-    }}}
-  */
-  insertionOrientation: SC.HORIZONTAL_ORIENTATION,
-  
   // ..........................................................
   // SUBCLASS METHODS
   // 
@@ -470,12 +462,11 @@ SC.CollectionView = SC.View.extend(
     The default implementation of this method does nothing.
     
     @param itemView {SC.ClassicView} view the insertion point should appear directly before. If null, show insertion point at end.
-    @param dropOperation {Number} the drop operation.  will be SC.DROP_BEFORE or SC.DROP_ON
+    @param dropOperation {Number} the drop operation.  will be SC.DROP_BEFORE, SC.DROP_AFTER, or SC.DROP_ON
     
     @returns {void}
   */
   showInsertionPoint: function(itemView, dropOperation) {
-    return (dropOperation === SC.DROP_BEFORE) ? this.showInsertionPointBefore(itemView) : this.hideInsertionPoint() ;
   },
   
   /**
@@ -492,7 +483,8 @@ SC.CollectionView = SC.View.extend(
     
     @returns {void}
   */
-  hideInsertionPoint: function() {},
+  hideInsertionPoint: function() {
+  },
   
   // ..........................................................
   // DELEGATE SUPPORT
@@ -618,10 +610,8 @@ SC.CollectionView = SC.View.extend(
     if (observer) {
       content.updateRangeObserver(observer, nowShowing);
     } else {
-      var func = this.contentRangeDidChange,
-          deep = this.get('observeContentProperties');
-      
-      observer = content.addRangeObserver(nowShowing, this, func, null, deep);      
+      var func = this.contentRangeDidChange;
+      observer = content.addRangeObserver(nowShowing, this, func, null);      
       this._cv_contentRangeObserver = observer ;
     }
     
@@ -812,6 +802,7 @@ SC.CollectionView = SC.View.extend(
           
         // if not nowShowing, then remove the item view if needed
         } else if (existing && existing.parentView === containerView) {
+          delete itemViews[idx];
           containerView.removeChild(existing);
         }
       },this);
@@ -825,6 +816,10 @@ SC.CollectionView = SC.View.extend(
         SC.Benchmark.start(bench="%@#reloadIfNeeded (Full)".fmt(this),YES);
       }
 
+      // truncate cached item views since they will all be removed from the
+      // container anyway.
+      if (itemViews) itemViews.length = 0 ; 
+      
       views = [];
       nowShowing.forEach(function(idx) {
         views.push(this.itemViewForContentIndex(idx, YES));
@@ -892,10 +887,11 @@ SC.CollectionView = SC.View.extend(
     replace the old item view in your cache with the new item view.
 
     @param {Number} idx the content index
-    @param {Boolean} rebuild internal use, do not use
+    @param {Boolean} rebuild internal use only
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
+
     // return from cache if possible
     var content   = this.get('content'),
         itemViews = this._sc_itemViews,
@@ -1055,7 +1051,7 @@ SC.CollectionView = SC.View.extend(
       throw "layout for item view %@ was found when item view does not exist (%@)".fmt(id, this);
     }
     
-    return this.itemViewForContentIndex(contentIndex, NO);
+    return this.itemViewForContentIndex(contentIndex);
   },
   
   // ..........................................................
@@ -1139,8 +1135,8 @@ SC.CollectionView = SC.View.extend(
     this._cv_selindexes = sel ? sel.frozenCopy() : null;
 
     // determine which indexes are now invalid
-    if (last) last = last.indexSetForSource(content, NO);
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (last) last = last.indexSetForSource(content);
+    if (sel) sel = sel.indexSetForSource(content);
     
     if (sel && last) diff = sel.without(last).add(last.without(sel));
     else diff = sel || last;
@@ -1215,7 +1211,7 @@ SC.CollectionView = SC.View.extend(
     // iterate through each item and set the isSelected state.
     invalid.forEach(function(idx) {
       if (!nowShowing.contains(idx)) return; // not showing
-      var view = this.itemViewForContentIndex(idx);
+      var view = this.itemViewForContentIndex(idx, NO);
       if (view) view.set('isSelected', sel ? sel.contains(content, idx) : NO);
     },this);
     
@@ -1370,6 +1366,8 @@ SC.CollectionView = SC.View.extend(
         cdel    = this.get('contentDelegate'),
         groupIndexes = cdel.contentGroupIndexes(this, content),
         ret ;
+
+    if (SC.none(proposedIndex)) proposedIndex = -1;
     
     // fast path
     if (!groupIndexes && (del.collectionViewShouldSelectIndexes === this.collectionViewShouldSelectIndexes)) {
@@ -1394,6 +1392,7 @@ SC.CollectionView = SC.View.extend(
       var sel = this.get('selection');
       top = sel ? sel.get('min') : -1 ;
     }
+    if (SC.none(top)) top = -1;
     return top ;
   },
   
@@ -1416,7 +1415,7 @@ SC.CollectionView = SC.View.extend(
     
     var sel     = this.get('selection'),
         content = this.get('content');
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (sel) sel = sel.indexSetForSource(content);
     
     var selTop    = sel ? sel.get('min') : -1,
         selBottom     = sel ? sel.get('max')-1 : -1,
@@ -1436,13 +1435,13 @@ SC.CollectionView = SC.View.extend(
       }
       
       // Ensure we are not out of bounds
-      if (selTop < 0) selTop = 0 ;
+      if (SC.none(selTop) || (selTop < 0)) selTop = 0 ;
       if (selBottom < selTop) selBottom = selTop ;
       
     // if not extending, just select the item previous to the selTop
     } else {
       selTop = this._findPreviousSelectableItemFromIndex(selTop - numberOfItems);
-      if (selTop < 0) selTop = 0 ;
+      if (SC.none(selTop) || (selTop < 0)) selTop = 0 ;
       selBottom = selTop ;
       anchor = null ;
     }
@@ -1477,7 +1476,7 @@ SC.CollectionView = SC.View.extend(
 
     var sel     = this.get('selection'),
         content = this.get('content');
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (sel) sel = sel.indexSetForSource(content);
     
     var selTop    = sel ? sel.get('min') : -1,
         selBottom = sel ? sel.get('max')-1 : -1,
@@ -1538,7 +1537,7 @@ SC.CollectionView = SC.View.extend(
     var sel     = this.get('selection'),
         content = this.get('content'),
         del     = this.get('selectionDelegate'),
-        indexes = sel&&content ? sel.indexSetForSource(content, NO) : null;
+        indexes = sel&&content ? sel.indexSetForSource(content) : null;
         
     if (!content || !indexes || indexes.get('length') === 0) return NO ;
     
@@ -1578,24 +1577,25 @@ SC.CollectionView = SC.View.extend(
   },
   
   /**
-    Scroll the rootElement (if needed) to ensure that the item is visible.
+    Scroll to the passed item view.  If the item view is not visible on screen
+    this method will not work.
 
     @param {SC.View} view The item view to scroll to
     @returns {SC.CollectionView} receiver
   */
   scrollToItemView: function(view) {
+    if (!view.get('parentView')) return this; // nothing to do
+    if (!view.get('layer')) {
+      if (this.get('layer')) view.updateLayerLocation();
+      else return this; // nothing to do
+    }
     
-    // TODO: Implement scrollToItemView
-    console.warn("SC.CollectionView#scrollToItemView() is not yet implemented in 1.0");
-    return this ; 
-    
-    // find first scrollable view.
-    // var scrollable = this ;
-    // while(scrollable && (scrollable != SC.window) && (!scrollable.get('isScrollable'))) {
-    //   scrollable = scrollable.get('parentNode') ;
-    // }
-    // if (!scrollable || (scrollable == SC.window)) return ; // no scrollable!
-    // scrollable.scrollToVisible(view) ;
+    var scrollable = this;
+    while (scrollable && !scrollable.isPane) {
+      if (scrollable.get('isScrollable')) scrollable.scrollToVisible(view);
+      scrollable = scrollable.get('parentView');
+    }
+    return this ;
   },
 
   // ..........................................................
@@ -1640,6 +1640,7 @@ SC.CollectionView = SC.View.extend(
   */
   moveDown: function(sender, evt) {
     this.selectNextItem(false, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
   
@@ -1648,6 +1649,7 @@ SC.CollectionView = SC.View.extend(
   */
   moveUp: function(sender, evt) {
     this.selectPreviousItem(false, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
 
@@ -1656,14 +1658,63 @@ SC.CollectionView = SC.View.extend(
     If item is expandable, will collapse.
   */
   moveLeft: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(false, 1);
-    else {
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectPreviousItem(false, 1);
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    
+    } else {
       var sel     = this.get('selection'),
           content = this.get('content'),
           indexes = sel ? sel.indexSetForSource(content) : null;
-      if (indexes) this.collapse(indexes);
-    }
     
+      // Collapse the element if it is expanded.  However, if there is exactly
+      // one item selected and the item is already collapsed or is a leaf
+      // node, then select the (expanded) parent element instead as a
+      // convenience to the user.
+      if ( indexes ) {
+        var del          = undefined,     // We'll load it lazily
+            selectParent = false,
+            index        = undefined;
+
+        if ( indexes.get('length') === 1 ) {
+          index = indexes.get('firstObject');
+          del = this.get('contentDelegate');
+          var state = del.contentIndexDisclosureState(this, content, index);
+          if (state !== SC.BRANCH_OPEN) selectParent = true;
+        }
+    
+        if ( selectParent ) {
+          // TODO:  PERFORMANCE:  It would be great to have a function like
+          //        SC.CollectionView.selectParentItem() or something similar
+          //        for performance reasons.  But since we don't currently
+          //        have such a function, let's just iterate through the
+          //        previous items until we find the first one with a outline
+          //        level of one less than the selected item.
+          var desiredOutlineLevel = del.contentIndexOutlineLevel(this, content, index) - 1;
+          if ( desiredOutlineLevel >= 0 ) {
+            var parentIndex = -1;
+            while ( parentIndex < 0 ) {
+              var previousItemIndex = this._findPreviousSelectableItemFromIndex(index - 1);
+              if (previousItemIndex < 0 ) return false;    // Sanity-check.
+              index = previousItemIndex;
+              var outlineLevel = del.contentIndexOutlineLevel(this, content, index);
+              if ( outlineLevel === desiredOutlineLevel ) {
+                parentIndex = previousItemIndex;
+              }
+            }
+          
+            // If we found the parent, select it now.
+            if ( parentIndex !== -1 ) {
+              this.select(index);
+            }
+          }
+        }
+        else {
+          this.collapse(indexes);
+        }
+      }
+    }
+  
     return true ;
   },
   
@@ -1671,8 +1722,10 @@ SC.CollectionView = SC.View.extend(
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveRight: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(false, 1) ;
-    else {
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectNextItem(false, 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    } else {
       var sel     = this.get('selection'),
           content = this.get('content'),
           indexes = sel ? sel.indexSetForSource(content) : null;
@@ -1685,12 +1738,14 @@ SC.CollectionView = SC.View.extend(
   /** @private */
   moveDownAndModifySelection: function(sender, evt) {
     this.selectNextItem(true, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
   
   /** @private */
   moveUpAndModifySelection: function(sender, evt) {
     this.selectPreviousItem(true, this.get('itemsPerRow') || 1) ;
+    this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
     return true ;
   },
   
@@ -1698,7 +1753,10 @@ SC.CollectionView = SC.View.extend(
     Selects the previous item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveLeftAndModifySelection: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectPreviousItem(true, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectPreviousItem(true, 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true ;
   },
 
@@ -1706,7 +1764,10 @@ SC.CollectionView = SC.View.extend(
     Selects the next item if itemsPerRow > 1.  Otherwise does nothing.
   */
   moveRightAndModifySelection: function(sender, evt) {
-    if ((this.get('itemsPerRow') || 1) > 1) this.selectNextItem(true, 1) ;
+    if ((this.get('itemsPerRow') || 1) > 1) {
+      this.selectNextItem(true, 1) ;
+      this._cv_performSelectAction(null, evt, this.ACTION_DELAY);
+    }
     return true ;
   },
 
@@ -1716,23 +1777,36 @@ SC.CollectionView = SC.View.extend(
     if content value is editable and we have one item selected, then edit.
     otherwise, invoke action.
   */
-  insertNewline: function() {
-    var sel, itemView;
-    if (this.get('contentValueIsEditable')) {
-      sel = this.get('selection') ;
+  insertNewline: function(sender, evt) {
+    var canEdit = this.get('isEditable') && this.get('canEditContent'),
+        sel, content, set, idx, itemView;
+    
+    // first make sure we have a single item selected; get idx 
+    if (canEdit) {
+      sel     = this.get('selection') ;
+      content = this.get('content');
       if (sel && sel.get('length') === 1) {
-        itemView = this.itemViewForContent(sel.objectAt(0)) ;
-        if (itemView && itemView.beginEditing) {
-          this.scrollToItemView(itemView) ;
-          itemView.beginEditing() ;
-        }
+        set = sel.indexSetForSource(content);
+        idx = set ? set.get('min') : -1;
+        canEdit = idx>=0;
       }
+    }
+    
+    // next find itemView and ensure it supports editing
+    if (canEdit) {
+      itemView = this.itemViewForContentIndex(idx);
+      canEdit = itemView && SC.typeOf(itemView.beginEditing)===SC.T_FUNCTION;
+    }
       
-    // invoke action!
+    // ok, we can edit..
+    if (canEdit) {
+      this.scrollToContentIndex(idx);
+      itemView = this.itemViewForContentIndex(idx); // just in case
+      itemView.beginEditing();
+      
+    // invoke action 
     } else {
-      sel = this.get('selection') ;
-      itemView = (sel && sel.get('length') === 1) ? this.itemViewForContent(sel.objectAt(0)) : null ;
-      this._cv_action(itemView, null) ;
+      this.invokeLater(this._cv_action, 0, itemView, null) ;
     }
     
     return YES ; // always handle
@@ -1759,9 +1833,6 @@ SC.CollectionView = SC.View.extend(
     // Instead, we just need to save a bunch of state about the mouse down
     // so we can choose the right thing to do later.
     
-    // save the original mouse down event for use in dragging.
-    this._mouseDownEvent = ev ;
-    
     // Toggle selection only triggers on mouse up.  Do nothing.
     if (this.get('useToggleSelection')) return true;
     
@@ -1774,15 +1845,14 @@ SC.CollectionView = SC.View.extend(
         info, anchor ;
         
     info = this.mouseDownInfo = {
-      itemView: itemView,
+      event:        ev,  
+      itemView:     itemView,
       contentIndex: contentIndex,
-      at: Date.now()
+      at:           Date.now()
     };
       
     // become first responder if possible.
     this.becomeFirstResponder() ;
-    
-    // console.log(mouseDownView);
     
     // recieved a mouseDown on the collection element, but not on one of the 
     // childItems... unless we do not allow empty selections, set it to empty.
@@ -1793,7 +1863,7 @@ SC.CollectionView = SC.View.extend(
     
     // collection some basic setup info
     var sel = this.get('selection'), isSelected, modifierKeyPressed;
-    if (sel) sel = sel.indexSetForSource(content, NO);
+    if (sel) sel = sel.indexSetForSource(content);
     
     isSelected = sel ? sel.contains(contentIndex) : NO;
     info.modifierKeyPressed = modifierKeyPressed = ev.ctrlKey || ev.metaKey ;
@@ -1835,11 +1905,10 @@ SC.CollectionView = SC.View.extend(
   /** @private */
   mouseUp: function(ev) {
     
-    var canAct = this.get('actOnSelect'),
-        view   = this.itemViewForEvent(ev),
+    var view   = this.itemViewForEvent(ev),
         info   = this.mouseDownInfo,
         idx    = info.contentIndex,
-        contentIndex, sel, isSelected, canEdit, itemView;
+        contentIndex, sel, isSelected, canEdit, itemView, content;
     
     if (this.get('useToggleSelection')) {
       if (!view) return ; // do nothing when clicked outside of elements
@@ -1869,20 +1938,23 @@ SC.CollectionView = SC.View.extend(
       // selection and reselect the clicked on item.
       if (info.shouldReselect) {
         
+        //debugger ;
         // - contentValueIsEditable is true
-        canEdit = this.get('contentValueIsEditable') ;
+        canEdit = this.get('isEditable') && this.get('canEditContent') ;
         
         // - the user clicked on an item that was already selected
+        //   ^ this is the only way shouldReset is set to YES
+        
         // - is the only item selected
         if (canEdit) {
           sel = this.get('selection') ;
-          canEdit = sel && (sel.get('length') === 1) && sel.contains(idx);
+          canEdit = sel && (sel.get('length') === 1);
         }
         
         // - the item view responds to contentHitTest() and returns YES.
         // - the item view responds to beginEditing and returns YES.
         if (canEdit) {
-          itemView = this.itemViewForContent(idx) ;
+          itemView = this.itemViewForContentIndex(idx) ;
           canEdit = itemView && (!itemView.contentHitTest || itemView.contentHitTest(ev)) ;
           canEdit = (canEdit && itemView.beginEditing) ? itemView.beginEditing() : NO ;
         }
@@ -1893,16 +1965,24 @@ SC.CollectionView = SC.View.extend(
       
       this._cleanupMouseDown() ;
     }
-    
-    this._mouseDownEvent = null ;
-    if (canAct) this._cv_action(ev, view) ;
+
+    // handle actions on editing
+    this._cv_performSelectAction(view, ev, 0, ev.clickCount);
     
     return NO;  // bubble event to allow didDoubleClick to be called...
   },
   
   /** @private */
   _cleanupMouseDown: function() {
-    this._mouseDownEvent = null;
+    
+    // delete items explicitly to avoid leaks on IE
+    var info = this.mouseDownInfo, key;
+    if (info) {
+      for(key in info) {
+        if (!info.hasOwnProperty(key)) continue;
+        delete info[key];
+      }
+    }
     this.mouseDownInfo = null;
   },
   
@@ -1928,15 +2008,6 @@ SC.CollectionView = SC.View.extend(
     this._lastHoveredItem = null ;
     if (view && view.mouseOut) view.mouseOut(ev) ;
     return YES ;
-  },
-  
-  /** @private */
-  doubleClick: function(ev) {
-    var view = this.itemViewForEvent(ev) ;
-    if (view) {
-      this._cv_action(view, ev) ;
-      return true ;
-    } else return false ;
   },
   
   /** @private */
@@ -2002,22 +2073,21 @@ SC.CollectionView = SC.View.extend(
   }.property().cacheable(),
   
   /**
-    This property is set to the array of content objects that are the subject
-    of a drag whenever a drag is initiated on the collection view.  You can
-    consult this property when implementing your collection view delegate 
-    methods, but otherwise you should not use this property in your code.
-    
-    Note that drag content will always appear in the same order the content
-    appears in the source content array.
-    
-    @type Array
+    This property is set to the IndexSet of content objects that are the 
+    subject of a drag whenever a drag is initiated on the collection view.  
+    You can consult this property when implementing your collection view 
+    delegate  methods, but otherwise you should not use this property in your 
+    code.
+
+    @type SC.IndexSet
   */
   dragContent: null,
   
   /**
     This property is set to the proposed insertion index during a call to
-    collectionViewValidateDragOperation().  Your delegate implementations can change
-    the value of this property to enforce a drop some in some other location.
+    collectionViewValidateDragOperation().  Your delegate implementations can 
+    change the value of this property to enforce a drop some in some other 
+    location.
     
     @type Number
   */
@@ -2025,11 +2095,12 @@ SC.CollectionView = SC.View.extend(
   
   /**
     This property is set to the proposed drop operation during a call to
-    collectionViewValidateDragOperation().  Your delegate implementations can change
-    the value of this property to enforce a different type of drop operation.
+    collectionViewValidateDragOperation().  Your delegate implementations can 
+    change the value of this property to enforce a different type of drop 
+    operation.
     
     @type Number
-    @field
+    @property
   */
   proposedDropOperation: null,
   
@@ -2044,13 +2115,17 @@ SC.CollectionView = SC.View.extend(
   */
   mouseDragged: function(ev) {
     
-    var del = this.delegateFor('isCollectionViewDelegate', this.delegate, this.get('content'));
+    var del     = this.get('selectionDelegate'),
+        content = this.get('content'),
+        sel     = this.get('selection'),
+        info    = this.mouseDownInfo,
+        dragContent, dragDataTypes, dragView;
     
     // if the mouse down event was cleared, there is nothing to do; return.
-    if (this._mouseDownEvent === null) return YES ;
+    if (!info || info.contentIndex<0) return YES ;
     
     // Don't do anything unless the user has been dragging for 123msec
-    if ((Date.now() - this._mouseDownAt) < 123) return YES ;
+    if ((Date.now() - info.at) < 123) return YES ;
     
     // OK, they must be serious, decide if a drag will be allowed.
     if (del.collectionViewShouldBeginDrag(this)) {
@@ -2059,39 +2134,34 @@ SC.CollectionView = SC.View.extend(
       // items appearing in this collection, in the order of the 
       // collection.
       //
-      // Set this to the dragContent property.
-      var content = this.get('content') || [] ;
-      var dragContent;
-      
+      // Compute the dragContent - the indexes we will be dragging.      
       // if we don't select on mouse down, then the selection has not been 
       // updated to whatever the user clicked.  Instead use
       // mouse down content.
       if (!this.get("selectOnMouseDown")) {
-        dragContent = [this._mouseDownContent];
-      } else {
-        dragContent = this.get('selection').sort(function(a,b) {
-          a = content.indexOf(a) ;
-          b = content.indexOf(b) ;
-          return (a<b) ? -1 : ((a>b) ? 1 : 0) ;
-        });
-      }
+        dragContent = SC.IndexSet.create(info.contentIndex);
+      } else dragContent = sel ? sel.indexSetForSource(content) : null;
+      if (!dragContent) return YES; // nothing to drag
       
+      dragContent = { content: content, indexes: dragContent };
       this.set('dragContent', dragContent) ;
       
       // Get the set of data types supported by the delegate.  If this returns
       // a null or empty array and reordering content is not also supported
       // then do not start the drag.
-      if (this.get('dragDataTypes').get('length') > 0) {
+      dragDataTypes = this.get('dragDataTypes');
+      if (dragDataTypes && dragDataTypes.get('length') > 0) {
+        
         // Build the drag view to use for the ghost drag.  This 
         // should essentially contain any visible drag items.
-        //var view = this.ghostViewFor(dragContent) ;
-        var view = this.invokeDelegateMethod(this.delegate, 'dragViewFor', dragContent, this);
+        dragView = del.collectionViewDragViewFor(this, dragContent.indexes);
+        if (!dragView) dragView = this._cv_dragViewFor(dragContent.indexes);
         
         // Initiate the drag
         SC.Drag.start({
-          event: this._mouseDownEvent,
+          event: info.event,
           source: this,
-          dragView: view,
+          dragView: dragView,
           ghost: NO,
           slideBack: YES,
           dataSource: this
@@ -2103,13 +2173,41 @@ SC.CollectionView = SC.View.extend(
         this._lastInsertionIndex = null ;
         
       // Drag was not allowed by the delegate, so bail.
-      } else {
-        this.set('dragContent', null) ;
-      }
+      } else this.set('dragContent', null) ;
       
       return YES ;
     }
   },
+
+  /** @private
+    Compute a default drag view by grabbing the raw layers and inserting them
+    into a drag view.
+  */
+  _cv_dragViewFor: function(dragContent) {
+    // find only the indexes that are in both dragContent and nowShowing.
+    var indexes = this.get('nowShowing').without(dragContent);
+    indexes = this.get('nowShowing').without(indexes);
+    
+    var dragLayer = this.get('layer').cloneNode(false); 
+    var view = SC.View.create({ layer: dragLayer, parentView: this });
+
+    // cleanup weird stuff that might make the drag look out of place
+    SC.$(dragLayer).css('backgroundColor', 'transparent')
+      .css('border', 'none')
+      .css('top', 0).css('left', 0);
+    
+    indexes.forEach(function(i) {
+      var itemView = this.itemViewForContentIndex(i),
+          layer    = itemView ? itemView.get('layer') : null;
+
+      if (layer) dragLayer.appendChild(layer.cloneNode(true));
+      layer = null;
+    }, this);
+
+    dragLayer = null;
+    return view ;
+  },
+
   
   /**
     Implements the drag data source protocol for the collection view.  This
@@ -2120,26 +2218,18 @@ SC.CollectionView = SC.View.extend(
     @type Array
   */
   dragDataTypes: function() {
-    // console.log('dragDataTypes called on %@'.fmt(this));
-    
     // consult delegate.
-    var ret = this.invokeDelegateMethod(this.delegate, 'collectionViewDragDataTypes', this) ;
-    var canReorderContent = this.get('canReorderContent') ;
-    
-    // bail if ret returned null or empty array and cannot reorder.
-    if ((!ret || ret.get('length')===0) && !canReorderContent) return [];
-    
-    // add reorder type if needed.
-    if (canReorderContent) {
-      ret = (ret) ? ret.slice() : [] ;
-      
-      var key = this.get('reorderDataType') ;
-      if (ret.indexOf(key) < 0) ret.push(key) ;
+    var del = this.get('selectionDelegate'),
+        ret = del.collectionViewDragDataTypes(this),
+        key ;
+
+    if (this.get('canReorderContent')) {
+      ret = ret ? ret.copy() : [];
+      key = this.get('reorderDataType');
+      if (ret.indexOf(key) < 0) ret.push(key);          
     }
-    return ret ;
-    
-    //data: { "_mouseDownContent": dragContent }
-      
+
+    return ret ? ret : [];
   }.property(),
   
   /**
@@ -2152,13 +2242,13 @@ SC.CollectionView = SC.View.extend(
     // if this is a reorder, then return drag content.
     if (this.get('canReorderContent')) {
       if (dataType === this.get('reorderDataType')) {
-        // console.log('dragContent is %@'.fmt(this.get('dragContent')));
         return this.get('dragContent') ;
       }
     }
     
-    // otherwise, just pass along to the delegate.
-    return this.invokeDelegateMethod(this.delegate, 'collectionViewDragDataForType', this, drag, dataType) ;
+    // otherwise, just pass along to the delegate
+    var del = this.get('selectionDelegate');
+    return del.collectionViewDragDataForType(this, drag, dataType);
   },
   
   /**
@@ -2166,25 +2256,22 @@ SC.CollectionView = SC.View.extend(
     consult the collection view delegate, if you implement those methods.
   */
   computeDragOperations: function(drag, evt) {
-    // console.log('computeDragOperations called on %@'.fmt(this));
-    
+
     // the proposed drag operation is DRAG_REORDER only if we can reorder
     // content and the drag contains reorder content.
-    var op = SC.DRAG_NONE ;
+    var op  = SC.DRAG_NONE,
+        del = this.get('selectionDelegate');
+
     if (this.get('canReorderContent')) {
-      var types = drag.get('dataTypes') ;
-      if (types.indexOf(this.get('reorderDataType')) >= 0) {
+      if (drag.get('dataTypes').indexOf(this.get('reorderDataType')) >= 0) {
         op = SC.DRAG_REORDER ;
       }
     }
     
     // Now pass this onto the delegate.
-    // op = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, SC.DROP_ANY, -1, op) ;
-    op = this.invokeDelegateMethod(this.delegate, 'collectionViewComputeDragOperations', this, drag, op) ;
-    
+    op = del.collectionViewComputeDragOperations(this, drag, op);
     if (op & SC.DRAG_REORDER) op = SC.DRAG_MOVE ;
     
-    // return
     return op ;
   },
   
@@ -2199,10 +2286,12 @@ SC.CollectionView = SC.View.extend(
     // by a subclass using whatever method.  This method is not expected to
     // do any data valdidation, just to map the location to an insertion 
     // index.
-    var loc = drag.get('location') ;    
-    loc = this.convertFrameFromView(loc, null) ;
-    var dropOp = SC.DROP_BEFORE ;
-    var dragOp = SC.DRAG_NONE ;
+    var loc    = this.convertFrameFromView(drag.get('location'), null),
+        dropOp = SC.DROP_BEFORE,
+        dragOp = SC.DRAG_NONE,
+        del    = this.get('selectionDelegate'),
+        canReorder = this.get('canReorderContent'),
+        objects, content, isPreviousInDrag, isNextInDrag, len;
     
     // STEP 1: Try with a DROP_ON option -- send straight to delegate if 
     // supported by view.
@@ -2220,26 +2309,23 @@ SC.CollectionView = SC.View.extend(
     // then it will return DRAG_NONE, in which case we will try again with
     // drop before.
     if (dropOp == SC.DROP_ON) {
-      // console.log('dropOp === SC.DROP_ON');
       
       // Now save the insertion index and the dropOp.  This may be changed by
       // the collection delegate.
       this.set('proposedInsertionIndex', idx) ;
       this.set('proposedDropOperation', dropOp) ;
-      dragOp = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDragOperation', this, drag, dragOp, idx, dropOp) ;
+      dragOp = del.collectionViewValidateDragOperation(this, drag, dragOp, idx, dropOp) ;
       idx = this.get('proposedInsertionIndex') ;
       dropOp = this.get('proposedDropOperation') ;
       this._dropInsertionIndex = this._dropOperation = null ;
 
       // The delegate is OK with a drop on also, so just return.
-      if (dragOp !== SC.DRAG_NONE) {
-        // console.log('[idx, dropOp, dragOp] is [%@, %@, %@]'.fmt(idx, dropOp, dragOp));
-        return [idx, dropOp, dragOp] ;
+      if (dragOp !== SC.DRAG_NONE) return [idx, dropOp, dragOp] ;
         
       // The delegate is NOT OK with a drop on, try to get the insertion
       // index again, but this time prefer SC.DROP_BEFORE, then let the 
       // rest of the method run...
-      } else {
+      else {
         dropOp = SC.DROP_BEFORE ;
         idx = this.insertionIndexForLocation(loc, SC.DROP_BEFORE) ;
         if (SC.typeOf(idx) === SC.T_ARRAY) {
@@ -2249,34 +2335,36 @@ SC.CollectionView = SC.View.extend(
       }
     }
     
-    // console.log('this is a redorder drag, dropOp is %@'.fmt(dropOp)) ;
-    
     // if this is a reorder drag, set the proposed op to SC.DRAG_REORDER and
     // validate the insertion point.  This only works if the insertion point
-    // is DROP_BEFORE.  DROP_ON is not handled by reordering content.
-    if ((idx >= 0) && this.get('canReorderContent') && (dropOp === SC.DROP_BEFORE)) {
+    // is DROP_BEFORE or DROP_AFTER.  DROP_ON is not handled by reordering 
+    // content.
+    if ((idx >= 0) && canReorder && (dropOp !== SC.DROP_ON)) {
       
-      var objects = drag.dataForType(this.get('reorderDataType')) ;
+      objects = drag.dataForType(this.get('reorderDataType')) ;
       if (objects) {
-        // console.log('found objects');
-        var content = this.get('content') || [] ;
-        // console.log('objects is %@, content is %@'.fmt(objects, content));
+        content = this.get('content') ;
         
         // if the insertion index is in between two items in the drag itself, 
         // then this is not allowed.  Either use the last insertion index or 
         // find the first index that is not in between selections.  Stop when
         // we get to the beginning.
-        var previousContent = (idx > 0) ? content.objectAt(idx-1) : null ;
-        var nextContent = (idx < content.get('length')) ? content.objectAt(idx) : null;
-        
-        var isPreviousInDrag = (previousContent) ? objects.indexOf(previousContent)>=0 : NO;
-        var isNextInDrag = (nextContent) ? objects.indexOf(nextContent)>=0 : NO;
+        if (dropOp === SC.DROP_BEFORE) {
+          isPreviousInDrag = objects.indexes.contains(idx-1);
+          isNextInDrag     = objects.indexes.contains(idx);
+        } else {
+          isPreviousInDrag = objects.indexes.contains(idx);
+          isNextInDrag     = objects.indexes.contains(idx-1);
+        }
         
         if (isPreviousInDrag && isNextInDrag) {
           if (SC.none(this._lastInsertionIndex)) {
-            while((idx >= 0) && (objects.indexOf(content.objectAt(idx)) >= 0)) {
-              idx-- ;
-            } 
+            if (dropOp === SC.DROP_BEFORE) {
+              while ((idx >= 0) && objects.indexes.contains(idx)) idx--;
+            } else {
+              len = content ? content.get('length') : 0;
+              while ((idx < len) && objects.indexes.contains(idx)) idx++;
+            }
           } else idx = this._lastInsertionIndex ;
         }
         
@@ -2286,14 +2374,11 @@ SC.CollectionView = SC.View.extend(
       }
     }
     
-    // console.log('the dragOp is %@'.fmt(dragOp)) ;
-    
     // Now save the insertion index and the dropOp.  This may be changed by
     // the collection delegate.
     this.set('proposedInsertionIndex', idx) ;
     this.set('proposedDropOperation', dropOp) ;
-    // dragOp = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDrop', this, drag, dropOp, idx, dragOp) ;
-    dragOp = this.invokeDelegateMethod(this.delegate, 'collectionViewValidateDragOperation', this, drag, dragOp, idx, dropOp) ;
+    dragOp = del.collectionViewValidateDragOperation(this, drag, dragOp, idx, dropOp) ;
     idx = this.get('proposedInsertionIndex') ;
     dropOp = this.get('proposedDropOperation') ;
     this._dropInsertionIndex = this._dropOperation = null ;
@@ -2309,16 +2394,15 @@ SC.CollectionView = SC.View.extend(
     content on its own.
   */
   dragUpdated: function(drag, evt) {
-    // console.log('%@.dragUpdated(drag=%@, evt=%@)'.fmt(this, drag, evt));
+    
     var state = this._computeDropOperationState(drag, evt) ;
-    // console.log('state is %@'.fmt(state));
     var idx = state[0], dropOp = state[1], dragOp = state[2] ;
     
-    // if the insertion index or dropOp have changed, update the insertion point
+    // if the insertion index or dropOp have changed, update the insertion 
+    // point
     if (dragOp !== SC.DRAG_NONE) {
       if ((this._lastInsertionIndex !== idx) || (this._lastDropOperation !== dropOp)) {
-        // var itemView = this.itemViewForContent(this.get('content').objectAt(idx));
-        var itemView = this.itemViewAtContentIndex(idx) ;
+        var itemView = this.itemViewForContentIndex(idx) ;
         this.showInsertionPoint(itemView, dropOp) ;
       }
       
@@ -2329,7 +2413,8 @@ SC.CollectionView = SC.View.extend(
       this._lastInsertionIndex = this._lastDropOperation = null ;
     }
     
-    // Normalize drag operation to the standard kinds accepted by the drag system.
+    // Normalize drag operation to the standard kinds accepted by the drag 
+    // system.
     return (dragOp & SC.DRAG_REORDER) ? SC.DRAG_MOVE : dragOp;  
   },
   
@@ -2353,61 +2438,51 @@ SC.CollectionView = SC.View.extend(
     reordering content.
   */
   performDragOperation: function(drag, op) { 
-    // console.log('performDragOperation called on %@ with drag.dataTypes %@'.fmt(this, drag.get('dataTypes')));
-    // console.log('op is %@'.fmt(SC.Drag.inspectOperation(op)));
     // Get the correct insertion point, drop operation, etc.
-    var state = this._computeDropOperationState(drag, null, op) ;
-    var idx = state[0], dropOp = state[1], dragOp = state[2] ;
-    // console.log('dragOp is %@'.fmt(SC.Drag.inspectOperation(dragOp)));
-    
+    var state = this._computeDropOperationState(drag, null, op),
+        idx   = state[0], dropOp = state[1], dragOp = state[2],
+        del   = this.get('selectionDelegate'),
+        performed, objects, data, content, shift;
+        
     // The dragOp is the kinds of ops allowed.  The drag operation must 
     // be included in that set.
     if (dragOp & SC.DRAG_REORDER) {
       op = (op & SC.DRAG_MOVE) ? SC.DRAG_REORDER : SC.DRAG_NONE ;
-    } else {
-      op = op & dragOp ;
-    }
-    // console.log('after processing, op is %@'.fmt(SC.Drag.inspectOperation(op)));
+    } else op = op & dragOp ;
     
     // If no allowed drag operation could be found, just return.
     if (op === SC.DRAG_NONE) return op;
     
     // Some operation is allowed through, give the delegate a chance to
     // handle it.
-    // var performed = this.invokeDelegateMethod(this.delegate, 'collectionViewAcceptDrop', this, drag, dropOp, idx, op) ;
-    var performed = this.invokeDelegateMethod(this.delegate, 'collectionViewPerformDragOperation', this, drag, op, idx, dropOp) ;
+    performed = del.collectionViewPerformDragOperation(this, drag, op, idx, dropOp) ;
     
-    // console.log('performed is %@'.fmt(SC.Drag.inspectOperation(performed)));
     // If the delegate did not handle the drag (i.e. returned SC.DRAG_NONE),
     // and the op type is REORDER, then do the reorder here.
-    // console.log('performed & SC.DRAG_NONE is %@, op & SC.DRAG_REORDER is %@'.fmt((performed & SC.DRAG_NONE),(op & SC.DRAG_REORDER)));
     if ((performed === SC.DRAG_NONE) && (op & SC.DRAG_REORDER)) {
-      var objects = drag.dataForType(this.get('reorderDataType')) ;
-      // console.log('objects is %@'.fmt(objects));
-      if (!objects) return SC.DRAG_NONE ;
       
-      var content = this.get('content') ;
+      data = drag.dataForType(this.get('reorderDataType')) ;
+      if (!data) return SC.DRAG_NONE ;
+      
+      content = this.get('content') ;
       content.beginPropertyChanges(); // suspend notifications
+
+      // get each object, then remove it from the content. they will be 
+      // added again later.
+      objects = [];
+      shift = 0;
+      data.indexes.forEach(function(i) {  
+        objects.push(content.objectAt(i-shift));
+        content.removeAt(i-shift);
+        shift++;
+        if (i < idx) idx--;
+        if ((dropOp === SC.DROP_AFTER) && (i === idx)) idx--;
+      }, this);
       
-      // find the old index and remove it.
-      var old ;
-      var objectsIdx = objects.get('length') ;
-      while(--objectsIdx >= 0) {
-        var obj = objects.objectAt(objectsIdx) ;
-        old = content.indexOf(obj) ;
-        if (old >= 0) content.removeAt(old) ;
-        if ((old >= 0) && (old < idx)) idx--; //adjust idx
-      }
-      
-      // now insert objects at new location
-      content.replace(idx, 0, objects) ;
+      // now insert objects into new insertion locaiton
+      content.replace(idx, 0, objects);
       content.endPropertyChanges(); // restart notifications
-      
-      var outOfDateIndices = Math.min(old, idx) ;
-      if (outOfDateIndices < 0 ) outOfDateIndices = 0 ;
-      
-      this.rowHeightsDidChangeInRange({ start: outOfDateIndices, length: content.get('length')-outOfDateIndices }) ;
-      
+
       // make the op into its actual value
       op = SC.DRAG_MOVE ;
     }
@@ -2424,23 +2499,6 @@ SC.CollectionView = SC.View.extend(
   },
 
   
-  dragViewFor: function(dragContent) {
-    // console.log('%@.dragViewFor(dragContent=%@)'.fmt(this, dragContent)) ;
-    var view = SC.View.create() ;
-    var layer = this.get('layer').cloneNode(false) ;
-    
-    view.set('parentView', this) ;
-    view.set('layer', layer) ;
-    
-    var ary = dragContent, content = SC.makeArray(this.get('content')) ;
-    for (var idx=0, len=ary.length; idx<len; idx++) {
-      var itemView = this.itemViewAtContentIndex(content.indexOf(ary[idx])) ;
-      if (itemView) layer.appendChild(itemView.get('layer').cloneNode(true)) ;
-    }
-    
-    return view ;
-  },
-
   // ..........................................................
   // INSERTION POINT
   // 
@@ -2448,7 +2506,7 @@ SC.CollectionView = SC.View.extend(
   
   /**
     Get the preferred insertion point for the given location, including 
-    an insertion preference of before or after the named index.
+    an insertion preference of before, after or on the named index.
     
     You can implement this method in a subclass if you like to perform a 
     more efficient check.  The default implementation will loop through the 
@@ -2457,12 +2515,12 @@ SC.CollectionView = SC.View.extend(
     
     This method should return an array with two values.  The first value is
     the insertion point index and the second value is the drop operation,
-    which should be one of SC.DROP_BEFORE or SC.DROP_ON. 
+    which should be one of SC.DROP_BEFORE, SC.DROP_AFTER, or SC.DROP_ON. 
     
     The preferred drop operation passed in should be used as a hint as to 
-    the type of operation the drag and drop could would prefer to receive.
-    If the dropOperaiton is SC.DROP_ON, then you should return a DROP_ON
-    mode if possible.  Otherwise, you should never return DROP_ON.
+    the type of operation the view would prefer to receive. If the 
+    dropOperation is SC.DROP_ON, then you should return a DROP_ON mode if 
+    possible.  Otherwise, you should never return DROP_ON.
     
     For compatibility, you can also return just the insertion index.  If you
     do this, then the collction view will assume the drop operation is 
@@ -2475,55 +2533,60 @@ SC.CollectionView = SC.View.extend(
     @param dropOperation {DropOp} the preferred drop operation.
     @returns {Array} [proposed drop index, drop operation] 
   */
-  insertionIndexForLocation: function(loc, dropOperation) {  
-    var content = this.get('content') ;
-    var f, itemView, curSide, lastSide = null ;
-    var orient = this.get('insertionOrientation') ;
-    var ret=  null ;
-    for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
-      // itemView = this.itemViewForContent(content.objectAt(idx));
-      itemView = this.itemViewAtContentIndex(idx);
-      f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
-      
-      // if we are a horizontal orientation, look for the first item that 
-      // will "switch sides" on the x path an the maxY is greater than Y.
-      // This assumes you will flow top to bottom, but it should work if you
-      // flow LTR or RTL.
-      if (orient == SC.HORIZONTAL_ORIENTATION) {
-        if (SC.maxY(f) > loc.y) {
-          curSide = (SC.maxX(f) < loc.x) ? -1 : 1 ;
-        } else curSide = null ;
-        
-      // if we are a vertical orientation, look for the first item that
-      // will "swithc sides" on the y path and the maxX is greater than X.
-      // This assumes you will flow LTR, but it should work if you flow
-      // bottom to top or top to bottom.
-      } else {
-        if (SC.minX(f) < loc.x) {
-          curSide = (SC.maxY(f) < loc.y) ? -1 : 1 ;
-        } else curSide = null ;
-      }
-      
-      // if we "switched" sides then return this item view.
-      if (curSide !== null) {
-        
-        // OK, we found an item view, while we have this data, decide if
-        // we should insert before or after the view
-        if ((lastSide !== null) && (curSide != lastSide)) {
-          ret = idx ;
-          if (orient == SC.HORIZONTAL_ORIENTATION) {
-            if (SC.midX(f) < loc.x) ret++ ;
-          } else {
-            if (SC.midY(f) < loc.y) ret++ ;
-          }
-        }
-        lastSide =curSide ;
-      }
-    }
+  insertionIndexForLocation: function(loc, dropOperation) { 
+    var ret = 0 ;
     
-    // Handle some edge cases
-    if ((ret === null) || (ret < 0)) ret = 0 ;
-    if (ret > content.length) ret = content.length ;
+    // var content    = this.get('content'),
+    //     nowShowing = this.get('nowShowing'),
+    //     orient     = this.get('insertionOrientation'),
+    //     lastSide   = null,
+    //     ret        = null,
+    //     itemView, curSide, f;
+    //     
+    // for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
+    //   // itemView = this.itemViewForContent(content.objectAt(idx));
+    //   itemView = this.itemViewForContentIndex(idx);
+    //   f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
+    //   
+    //   // if we are a horizontal orientation, look for the first item that 
+    //   // will "switch sides" on the x path an the maxY is greater than Y.
+    //   // This assumes you will flow top to bottom, but it should work if you
+    //   // flow LTR or RTL.
+    //   if (orient == SC.HORIZONTAL_ORIENTATION) {
+    //     if (SC.maxY(f) > loc.y) {
+    //       curSide = (SC.maxX(f) < loc.x) ? -1 : 1 ;
+    //     } else curSide = null ;
+    //     
+    //   // if we are a vertical orientation, look for the first item that
+    //   // will "switch sides" on the y path and the maxX is greater than X.
+    //   // This assumes you will flow LTR, but it should work if you flow
+    //   // bottom to top or top to bottom.
+    //   } else {
+    //     if (SC.minX(f) < loc.x) {
+    //       curSide = (SC.maxY(f) < loc.y) ? -1 : 1 ;
+    //     } else curSide = null ;
+    //   }
+    //   
+    //   // if we "switched" sides then return this item view.
+    //   if (curSide !== null) {
+    //     
+    //     // OK, we found an item view, while we have this data, decide if
+    //     // we should insert before or after the view
+    //     if ((lastSide !== null) && (curSide != lastSide)) {
+    //       ret = idx ;
+    //       if (orient == SC.HORIZONTAL_ORIENTATION) {
+    //         if (SC.midX(f) < loc.x) ret++ ;
+    //       } else {
+    //         if (SC.midY(f) < loc.y) ret++ ;
+    //       }
+    //     }
+    //     lastSide =curSide ;
+    //   }
+    // }
+    // 
+    // // Handle some edge cases
+    // if ((ret === null) || (ret < 0)) ret = 0 ;
+    // if (ret > content.length) ret = content.length ;
     
     // Done. Phew.  Return.
     return ret;
@@ -2564,7 +2627,7 @@ SC.CollectionView = SC.View.extend(
   */
   _cv_nowShowingDidChange: function() {
     var nowShowing  = this.get('nowShowing'),
-        last        = this._lastNowShowing,
+        last        = this._sccv_lastNowShowing,
         diff, diff1, diff2;
 
     // find the differences between the two
@@ -2578,7 +2641,7 @@ SC.CollectionView = SC.View.extend(
 
     // if nowShowing has actually changed, then update
     if (diff && diff.get('length') > 0) {
-      this._lastNowShowing = nowShowing ? nowShowing.frozenCopy() : null ;
+      this._sccv_lastNowShowing = nowShowing ? nowShowing.frozenCopy() : null;
       this.updateContentRangeObserver();
       this.reload(diff);
     }
@@ -2591,27 +2654,59 @@ SC.CollectionView = SC.View.extend(
   
   init: function() {
      sc_super();
-     this._lastNowShowing = this.get('nowShowing').clone();
+     if (this.get('canReorderContent')) this._cv_canReorderContentDidChange();
+     this._sccv_lastNowShowing = this.get('nowShowing').clone();
      if (this.content) this._cv_contentDidChange();
      if (this.selection) this._cv_selectionDidChange();
+  },
+  
+  /** @private
+    Become a drop target whenever reordering content is enabled.
+  */
+  _cv_canReorderContentDidChange: function() {
+    if (this.get('canReorderContent')) {
+      if (!this.get('isDropTarget')) this.set('isDropTarget', YES);
+      SC.Drag.addDropTarget(this);
+    }
+  }.observes('canReorderContent'),
+  
+  /** @private
+    Fires an action after a selection if enabled.
+    
+    if actOnSelect is YES, then try to invoke the action, passing the 
+    current selection (saved as a separate array so that a change in sel
+    in the meantime will not be lost)
+  */
+  _cv_performSelectAction: function(view, ev, delay, clickCount) {
+    var sel;
+    if (delay === undefined) delay = 0 ;
+    if (clickCount === undefined) clickCount = 1;
+    if ((clickCount>1) || this.get('actOnSelect')) {
+      sel = this.get('selection');
+      sel = sel ? sel.toArray() : [];
+      if (this._cv_actionTimer) this._cv_actionTimer.invalidate();
+      this._cv_actionTimer = this.invokeLater(this._cv_action, delay, view, ev, sel) ;
+    }
   },
   
   /** @private
     Perform the action.  Supports legacy behavior as well as newer style
     action dispatch.
   */
-  _cv_action: function(view, evt) {
-    // console.log('_cv_action invoked on %@ with view %@, evt %@'.fmt(this, view, evt));
+  _cv_action: function(view, evt, context) {
     var action = this.get('action');
     var target = this.get('target') || null;
-    // console.log('action %@, target %@'.fmt(action, target));
+
+    this._cv_actionTimer = null;
     if (action) {
       // if the action is a function, just call it
-      if (SC.typeOf(action) == SC.T_FUNCTION) return this.action(view, evt) ;
+      if (SC.typeOf(action) === SC.T_FUNCTION) return this.action(view, evt) ;
       
       // otherwise, use the new sendAction style
       var pane = this.get('pane') ;
-      if (pane) pane.rootResponder.sendAction(action, target, this, pane);
+      if (pane) {
+        pane.rootResponder.sendAction(action, target, this, pane, context);
+      }
       // SC.app.sendAction(action, target, this) ;
       
     // if no action is specified, then trigger the support action,

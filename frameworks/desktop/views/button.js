@@ -174,6 +174,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     var toolTip = this.get('toolTip') ;
     if(SC.typeOf(toolTip) === SC.T_STRING) {
         context.attr('title', this.get('localize') ? toolTip.loc() : toolTip) ;
+        context.attr('alt', this.get('localize') ? toolTip.loc() : toolTip) ;
     }
     
     // add some standard attributes & classes.
@@ -184,10 +185,14 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     context.attr('role', 'button')
       .setClass(classes).addClass(this.get('theme'));
     // render inner html 
-    context = context.begin('span')
-      .addClass('sc-button-inner').addStyle('minWidth', this.get('titleMinWidth'));
+    if(firstTime){
+      context = context.push("<span class='sc-button-inner' style = 'min-width:%@px'>"
+          .fmt(this.get('titleMinWidth')));
       this.renderTitle(context, firstTime) ; // from button mixin
-    context = context.end();
+      context.push("</span>") ;
+    }else{
+      this.renderTitle(context, firstTime) ;
+    }
    },
   
   /** @private {String} used to store a previously defined key equiv */

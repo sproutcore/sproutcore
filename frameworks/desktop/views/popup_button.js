@@ -27,21 +27,31 @@ SC.PopupButtonView = SC.ButtonView.extend({
   isSelected: NO,
   performKeyEquivalent: function( charCode, evt )
   {
-    if (!this.get('isEnabled')) return false ;
+    if (!this.get('isEnabled')) return NO ;
     var menu = this.get('menu') ;
     return (!!menu && menu.performKeyEquivalent(charCode, evt)) ;
   },
+  
   /**
-    this is the Menu View associated with Popup Button
+    Menu attached to the popupButton
+    @default SC.MenuView
   */
-  menu: null,
-
+  menu : null,
+  
   /**
     Binds the button's selection state to the menu's visibility.
     @private
   */
-  //isSelectedBinding: '*menu.isVisible',
+  isSelectedBinding: '*menu.isVisibleInWindow',
   
+  /**private*/
+  render: function(context,firstTime) {
+    sc_super() ;
+    var menu = this.get('menu') ;
+    if(firstTime && menu) {
+      menu.createLayer() ;
+    }
+  },
   /**
     Button action handler
     @param {DOMMouseEvent} evt mouseup event that triggered the action
@@ -50,18 +60,9 @@ SC.PopupButtonView = SC.ButtonView.extend({
   {
     var menu = this.get('menu') ;
     // no menu to toggle... bail...
-    if (!menu) return false ;
-    if (!this._didFirstRun) {
-    // for some reason the menu#isVisible is true the first time we get 
-    // it... and since this#isSelected is bound to it... we get an incorrect 
-    // conditional check. hacking it here to keep moving.
+    if (!menu) return NO ;
     menu.popup(this) ;
-    this._didFirstRun = true ;
-    } else {
-      // toggle the menu...
-      this.get('isSelected') ? menu.set('isVisible', false) : menu.popup(this,SC.PICKER_MENU) ;
-    }
-    return true;
+    return YES;
   }
   
 });

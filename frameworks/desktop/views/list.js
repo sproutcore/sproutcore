@@ -188,6 +188,11 @@ SC.ListView = SC.CollectionView.extend(
         ret, custom, cache, delta, max, content ;
         
     ret = idx * rowHeight;
+
+		if(this.get('rowSpacing')){ 
+      ret += idx * this.get('rowSpacing'); 
+    } 
+
     if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
       
       // prefill the cache with custom rows.
@@ -313,14 +318,14 @@ SC.ListView = SC.CollectionView.extend(
     
     The default simply returns the current content length.
     
-    @param {Rect} rect the visible rect
+    @param {Rect} rect the visible rect or a point
     @returns {SC.IndexSet} now showing indexes
   */
   contentIndexesInRect: function(rect) {
     var rowHeight = this.get('rowDelegate').get('rowHeight'),
         top       = SC.minY(rect),
         bottom    = SC.maxY(rect),
-        height    = rect.height,
+        height    = rect.height || 0,
         len       = this.get('length'),
         offset, start, end;
     
@@ -373,7 +378,91 @@ SC.ListView = SC.CollectionView.extend(
   },
   
   // ..........................................................
-  // INTENRAL SUPPORT
+  // DRAG AND ROP SUPPORT
+  // 
+  
+  
+  /**
+    Default view class used to draw an insertion point.  The default 
+    view will show a vertical line.  Any view you create
+    should expect an outlineLevel property set, which should impact your left
+    offset.
+    
+    @property 
+    @type {SC.View}
+  */
+  insertionPointView: SC.View.extend({
+    classNames: 'sc-list-insertion-point',
+    
+    render: function(context, firstTime) {
+      if (firstTime) context.push('<div class="anchor"></div>');
+    }
+    
+  }),
+
+  /**
+    Default implementation will show an insertion point
+  */
+  showInsertionPoint: function(itemView, dropOperation) {
+    var view = this._insertionPointView;
+    if (!view) {
+      view = this._insertionPointView 
+           = this.get('insertionPointView').create();
+    }
+    
+    var layout = SC.clone(itemView.get('layout')),
+        level  = itemView.get('outlineLevel'),
+        indent = itemView.get('outlineIndent') || 0;
+    if (SC.none(level)) level = -1;
+    
+    if (dropOperation & SC.DROP_ON) {
+      this.hideInsertionPoint();
+      itemView.set('isSelected', YES);
+      this._lastDropOnView = itemView;
+    } else {
+
+      if (this._lastDropOnView) {
+        this._lastDropOnView.set('isSelected', NO);
+        this._lastDropOnView = null;
+      }
+      
+      if (dropOperation & SC.DROP_AFTER) layout.top += layout.height;
+      
+      layout.height = 2;
+      layout.right  = 0;
+      layout.left   = ((level+1) * indent) + 12;
+      delete layout.width;
+
+      view.set('layout', layout);
+      this.appendChild(view);
+    }
+  },
+  
+  hideInsertionPoint: function() {
+    if (this._lastDropOnView) {
+      this._lastDropOnView.set('isSelected', NO);
+      this._lastDropOnView = null;
+    }
+    
+    var view = this._insertionPointView;
+    if (view) view.removeFromParent().destroy();
+    this._insertionPointView = null;
+  },
+
+  insertionIndexForLocation: function(loc, dropOperation) { 
+    var indexes = this.contentIndexesInRect(loc),
+        index   = indexes.get('min');
+
+    if (SC.none(index) || index<0) {
+      //debugger; 
+      return [-1, SC.DRAG_NONE]; // nothing to do
+    }
+
+    return [index, dropOperation];
+  },
+  
+  // ..........................................................
+  // INTERNAL SUPPORT
   // 
 
   init: function() {

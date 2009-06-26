@@ -82,7 +82,14 @@ test("Width 150 Right 0", function() {
   ok(!view.$().hasClass('sel'), 'should not have sel class');
 });
 
-test("redraw", function(){
+test("Check that by setting the value the selection actually changes", function() {  
+  var view = pane.view('Width 150 Right 0');
+  SC.RunLoop.begin();
+  view.set('value',2);
+  SC.RunLoop.end();
+  equals(view.getFieldValue(), 2, 'the field value should change to 2');
+});
+})();test("redraw", function(){
   var view = pane.view('redraw');
   ok(view.get('objects').length === 0, "objects should be empty");
   SC.RunLoop.begin();

@@ -53,11 +53,11 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   isSubMenuViewVisible: null,
   
   /**
-    This will return true if the menu item is a seperator.
+    This will return true if the menu item is a separator.
 
     @type Boolean
   */
-  isSeperator: NO,
+  isSeparator: NO,
 
   /**
     (displayDelegate) The name of the property used for label itself   
@@ -182,8 +182,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns {void}
   */
   render: function(context, firstTime) {
+    var bkey ;
     if (SC.BENCHMARK_MENU_ITEM_RENDER) {
-      var bkey = '%@.render'.fmt(this) ;
+      bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey) ;
     }
     var content = this.get('content') ;
@@ -196,17 +197,15 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this.set('itemWidth',itemWidth) ;
     this.set('itemHeight',itemHeight) ;
     
-    if(!this.get('isEnabled'))
-      context.addClass('disabled') ;
-    //handle seperator    
+    if(!this.get('isEnabled')) context.addClass('disabled') ;
+    
+    //handle separator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty('isSeparatorKey', del) ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (val) {
-      ic = ic.begin('span').addClass('separator') ;
-      ic = ic.end() ;
-      if (SC.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
-      return ;
+      //ic.begin('span').addClass('separator').end() ;
+      ic.push("<span class='separator'></span>") ;
     } else {
       // handle checkbox
       key = this.getDelegateProperty('contentCheckboxKey', del) ;
@@ -334,7 +333,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
   getAnchor: function() {
     var anchor = this.get('anchor') ;
-    if(anchor.kindOf(SC.MenuItemView)) return anchor ;
+    if(anchor && anchor.kindOf(SC.MenuItemView)) return anchor ;
     return null ;
   },
   
@@ -446,6 +445,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this._action(evt) ;
     var anchor = this.getAnchor() ;
     if(anchor) anchor.mouseUp(evt) ;
+    else {
+      this.resignFirstResponder() ;
+    }
     this.closeParent() ;
     return YES ;
   },
@@ -488,6 +490,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     var parentMenu = this.parentMenu() ;
     if(parentMenu) {
       parentMenu.set('previousSelectedMenuItem', this) ;
+      this.resignFirstResponder() ;
     }
     return YES ;
   },
@@ -546,12 +549,14 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   },
   
   /** @private*/
-  didBecomeFirstResponder: function() {
+  didBecomeFirstResponder: function(responder) {
+    if (responder !== this) return;
     if(!this.isSeparator()) this.$().addClass('focus') ;
   },
   
   /** @private*/
-  willLoseFirstResponder: function() {
+  willLoseFirstResponder: function(responder) {
+    if (responder !== this) return;
     this.$().removeClass('focus') ;
   },
   
@@ -569,7 +574,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   closeParent: function() {
     this.$().removeClass('focus') ;
     var menu = this.parentMenu() ;
-    if(menu) menu.remove() ;
+    if(menu) {
+      menu.remove() ;
+    }
   },
   
   /** @private*/

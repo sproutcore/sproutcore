@@ -339,7 +339,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   dragDidStart: function(drag) {
     // console.log('dragDidStart called in %@ with %@'.fmt(this, drag));
-    // this._mouseDownView = drag ;
+    this._mouseDownView = drag ;
     this._drag = drag ;
   },
   

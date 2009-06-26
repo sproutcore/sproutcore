@@ -641,8 +641,14 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
       if (elem.addEventListener) {
         elem.addEventListener(eventType, listener, NO);
       } else if (elem.attachEvent) {
+        // attachEvent is not working for IE8 and xhr objects
+        // there is currently a hack in request , but it needs to fixed here.
         elem.attachEvent("on" + eventType, listener);
       }
+      //  
+      // else {
+      //         elem.onreadystatechange = listener;
+      //       }
     }
     
     elem = special = listener = null ; // avoid memory leak
@@ -822,7 +828,7 @@ SC.Event.fire = SC.Event.trigger;
 // Register unload handler to eliminate any registered handlers
 // This avoids leaks in IE and issues with mouseout or other handlers on 
 // other browsers.
-SC.Event.add(window, 'unload', SC.Event, SC.Event.unload) ;
+SC.Event.add(window, 'unload', SC.Event.prototype, SC.Event.unload) ;
 
 SC.MODIFIER_KEYS = {
   16:'shift', 17:'ctrl', 18: 'alt'

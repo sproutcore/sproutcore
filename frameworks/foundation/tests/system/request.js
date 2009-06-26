@@ -30,7 +30,7 @@ test("Basic Requirements", function() {
 
 test("Test Asynchronous GET Request", function() {
   request.addObserver("response", function(response) {
-      contents = request.get("response") ;
+      contents = request.get("rawResponse") ;
   });
   
   request.send() ;
@@ -38,23 +38,21 @@ test("Test Asynchronous GET Request", function() {
   stop() ; // stops the test runner
   setTimeout( function(){
     ok(contents !== null, 'request.send() should return a response') ;
-    ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
-    
-    if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}', "should match retrieved message") ;
+    ok(SC.$ok(contents), 'contents should not be an error ');
+    if (SC.$ok(contents)) equals(contents.responseText, '{"message": "Yay!"}', "should match retrieved message") ;
     window.start() ; // starts the test runner
   }, 3000); // a shorter timeout fails when a lot of unit tests are running...
 });
 
 test("Test Synchronous GET Request", function() {
-  request.set("isAsynchronous", NO);
-  
+
+  request.set("isAsynchronous", NO);  
   request.send();
-  
-  contents = request.get("response");
+  contents = request.get("rawResponse");
   
   ok(contents !== null) ;
-  ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
-  if (SC.$ok(contents)) equals(contents, '{"message": "Yay!"}', 'should match retrieved message') ;
+  ok(SC.$ok(contents), 'contents should not be an error ');
+  if (SC.$ok(contents)) equals(contents.responseText, '{"message": "Yay!"}', 'should match retrieved message') ;
 });
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
@@ -69,7 +67,7 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
   stop() ; // stops the test runner
   setTimeout( function(){
     ok(contents !== null) ;
-    ok(SC.$ok(contents), 'contents should not be an error (Error: %@)'.fmt(contents));
+    ok(SC.$ok(contents), 'contents should not be an error ');
     if (SC.$ok(contents)) same({"message": "Yay!"}, contents) ;
     window.start() ; // starts the test runner
   }, 1000);
@@ -84,7 +82,7 @@ test("Test Synchronous GET Request, auto-deserializing JSON", function() {
   var contents = request.get("response");
   
   ok(contents !== null, 'contents should not be null') ;
-  ok(SC.$ok(contents), 'contents should not be an error (contents = %@)'.fmt(contents));
+  ok(SC.$ok(contents), 'contents should not be an error');
   if (SC.$ok(contents)) same(contents, {"message": "Yay!"}, 'contents should have message') ;
 });
 

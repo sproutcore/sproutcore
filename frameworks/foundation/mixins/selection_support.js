@@ -125,33 +125,104 @@ SC.SelectionSupport = {
   // METHODS
   // 
 
+  /**
+    Selects the passed objects in your content.  If you set "extend" to YES,
+    then this will attempt to extend your selection as well.
+  
+    @param {SC.Enumerable} objects objects to select
+    @param {Boolean} extend optionally set to YES to extend selection
+    @returns {Object} receiver
+  */
+  selectObjects: function(objects, extend) {
+
+    // handle passing an empty array
+    if (!objects || objects.get('length')===0) {
+      if (!extend) this.set('selection', SC.SelectionSet.EMPTY);
+      return this;
+    }
+    
+    var sel = this.get('selection');
+    if (extend && sel) sel = sel.copy();
+    else sel = SC.SelectionSet.create();
+    
+    sel.addObjects(objects).freeze();
+    this.set('selection', sel);
+    return this ;
+  },
+  
+  /**
+    Selects a single passed object in your content.  If you set "extend" to 
+    YES then this will attempt to extend your selection as well.
+    
+    @param {Object} object object to select
+    @param {Boolean} extend optionally set to YES to extend selection
+    @returns {Object} receiver
+  */
+  selectObject: function(object, extend) {
+    if (object === null) {
+      if (!extend) this.set('selection', null);
+      return this ;
+      
+    } else return this.selectObjects([object], extend);
+  },    
+
+  /**
+    Deselects the passed objects in your content.
+    
+    @param {SC.Enumerable} objects objects to select
+    @returns {Object} receiver
+  */
+  deselectObjects: function(objects) {
+
+    if (!objects || objects.get('length')===0) return this; // nothing to do
+    
+    var sel = this.get('selection');
+    if (!sel || sel.get('length')===0) return this; // nothing to do
+
+    // find index for each and remove it
+    sel = sel.copy().removeObjects(objects).freeze();
+    this.set('selection', sel.freeze());
+    return this ;
+  },
+  
+  /**
+    Deselects the passed object in your content.
+    
+    @param {SC.Object} object single object to select
+    @returns {Object} receiver
+  */
+  deselectObject: function(object) {
+    if (!object) return this; // nothing to do
+    else return this.deselectObjects([object]);
+  },
+  
   /** 
     Call this method whenever your source content changes to ensure the 
     selection always remains up-to-date and valid.
   */
   updateSelectionAfterContentChange: function() {
+    
     var content = this.get('arrangedObjects'),
         sel     = this.get('selection'),
         indexes, len, max, ret;
-    if (!sel) return  this; // nothing to do
+
+    if (!sel) sel = SC.SelectionSet.EMPTY;
     
-    // remove from the sel any items selected beyond the length of the new
-    // arrangedObjects
-    indexes = content? sel.indexSetForSource(content, NO) : null;
-    len     = content ? content.get('length') : 0;
-    max     = indexes ? indexes.get('max') : 0;
-    if (max > len) ret = sel.copy().remove(content, len, max-len);
-
-    if (!this.get('allowsSelection')) ret = SC.SelectionSet.EMPTY;
-
-    if (!this.get('allowsMultipleSelection') && (ret||sel).get('length')>1){
-      indexes = content ? (ret||sel).indexSetForSource(content, NO) : null;
-      ret = SC.SelectionSet.create();
-      if (indexes) ret.add(content, indexes.get('min'));
-    }
-  
-    if (!this.get('allowsEmptySelection') && (ret || sel).get('length')===0) {
-      if (content) ret = SC.SelectionSet.create().add(content, 0);
+    // if selection is not allowed, just force to be empty.
+    if (!this.get('allowsSelection') && sel.get('length')>0) {
+      ret = SC.SelectionSet.EMPTY;
+      
+      
+    // selection is allowed, make sure it is valid
+    } else {
+      
+      // remove from the sel any items selected beyond the length of the new
+      // arrangedObjects
+      indexes = content ? sel.indexSetForSource(content) : null;
+      len     = content ? content.get('length') : 0;
+      max     = indexes ? indexes.get('max') : 0;
+      if (max > len) ret = sel.copy().constrain(content).freeze();
+      
     }
   
     if (ret) this.set('selection', ret);

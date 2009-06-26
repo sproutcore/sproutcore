@@ -214,7 +214,7 @@ SC.MenuPane = SC.PickerPane.extend(
     
     Overwrite the popup function of the pickerPane
   */
-  popup: function(anchorViewOrElement, preferMatrix) {
+  popup: function(anchorViewOrElement, preferMatrix) {  
     var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
     this.beginPropertyChanges();
     this.set('anchorElement',anchor) ;
@@ -224,6 +224,7 @@ SC.MenuPane = SC.PickerPane.extend(
     this.endPropertyChanges();
     this.append() ;
     this.positionPane() ;
+    this.becomeKeyPane() ;
   },
   
   /**
@@ -447,8 +448,11 @@ SC.MenuPane = SC.PickerPane.extend(
     if(previousSelectedMenuItem){
       var subMenu = previousSelectedMenuItem.isSubMenuAMenuPane() ;
       if(subMenu) subMenu.remove() ;
+      previousSelectedMenuItem.resignFirstResponder() ;
     }
-    if(currentSelectedMenuItem) currentSelectedMenuItem.becomeFirstResponder() ;
+    if(currentSelectedMenuItem) {
+      currentSelectedMenuItem.becomeFirstResponder() ;
+    }
   }.observes('currentSelectedMenuItem'),
   
   /**
@@ -475,7 +479,6 @@ SC.MenuPane = SC.PickerPane.extend(
   performKeyEquivalent: function(keyString,evt) {
     var items, len, menuItems, item, keyEquivalent, 
         action, isEnabled, target;
-    
     if(!this.get('isEnabled')) return NO ;
 
     items = this.get('displayItemsArray') ;
@@ -491,11 +494,12 @@ SC.MenuPane = SC.PickerPane.extend(
       target        = item.get('target') || this ;
       if(keyEquivalent == keyString && isEnabled) {
         if(menuItems && menuItems[idx]) {
-          return menuItems[idx].triggerAction(evt);
+          var retVal = menuItems[idx].triggerAction(evt);
+          return retVal;
         }
       }
     }
-    return NO ;
+    return YES ;
   },
   
   //Mouse and Key Events
@@ -611,7 +615,9 @@ SC.MenuPane = SC.PickerPane.extend(
         if(parentMenu.kindOf(SC.MenuPane)) parentMenu.modalPaneDidClick(evt);
       }
     }
-    if(!this.clickInside(f, evt)) this.remove();
+    if(!this.clickInside(f, evt)) {
+      this.remove() ;
+    }
     return YES;
   },
   
@@ -631,7 +637,9 @@ SC.MenuPane = SC.PickerPane.extend(
       else return null;
     }
     else return null;
-  }
+  },
+  
+  
   
 });
 

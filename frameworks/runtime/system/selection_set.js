@@ -12,12 +12,14 @@ sc_require('mixins/freezable');
 
 /** @class
 
-  A SelectionSet is a set of objects refrenced by index against source 
-  objects.  You can use a SelectionSet to keep track of items selected in 
-  multiple source arrays.
+  A SelectionSet contains a set of objects that represent the current 
+  selection.  You can select objects by either adding them to the set directly
+  or indirectly by selecting a range of indexes on a source object.
   
   @extends SC.Object
   @extends SC.Enumerable
+  @extends SC.Freezable
+  @extends SC.Copyable
   @since SproutCore 1.0
 */
 SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
@@ -30,7 +32,18 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     @property
     @type Number
   */
-  length: 0,
+  length: function() {
+    var ret     = 0,
+        sets    = this._sets,
+        objects = this._objects;
+    if (objects) ret += objects.get('length');
+    if (sets) sets.forEach(function(s) { ret += s.get('length'); });
+    return ret ;
+  }.property().cacheable(),
+
+  // ..........................................................
+  // INDEX-BASED SELECTION
+  // 
 
   /**
     A set of all the source objects used in the selection set.  This 
@@ -53,14 +66,51 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   }.property().cacheable(),
   
   /**
-    Returns the index set for the passed source object.  If no index set 
-    exists, one will be created unless canCreate is set to NO.
+    Returns the index set for the passed source object or null if no items are
+    seleted in the source.
     
     @param {SC.Array} source the source object
-    @param {Boolean} canCreate optional
     @returns {SC.IndexSet} index set or null
   */
-  indexSetForSource: function(source, canCreate) {
+  indexSetForSource: function(source) {
+    if (!source || !source.isSCArray) return null; // nothing to do
+    
+    var cache   = this._indexSetCache,
+        objects = this._objects,
+        ret, idx;
+
+    // try to find in cache
+    if (!cache) cache = this._indexSetCache = {};
+    ret = cache[SC.guidFor(source)];
+
+    // not in cache.  generate from index sets and any saved objects
+    if (!ret) {
+      ret = this._indexSetForSource(source, NO);
+      if (ret && ret.get('length')===0) ret = null;
+    
+      if (objects) {
+        if (ret) ret = ret.copy();
+        objects.forEach(function(o) {
+          if ((idx = source.indexOf(o)) >= 0) {
+            if (!ret) ret = SC.IndexSet.create();
+            ret.add(idx);
+          }
+        }, this);
+      }
+      
+      if (ret) ret = cache[SC.guidFor(source)] = ret.frozenCopy();
+    }
+    
+    return ret;
+  },
+    
+  /** 
+    @private
+  
+    Internal method gets the index set for the source, ignoring objects
+    that have been added directly.
+  */
+  _indexSetForSource: function(source, canCreate) {
     if (canCreate === undefined) canCreate = YES;
 
     var guid  = SC.guidFor(source),
@@ -96,7 +146,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     You can also pass an SC.SelectionSet to this method and all the selected
     sets will be added from their instead.
     
-    @param {SC.Array} source source object. must not be null
+    @param {SC.Array} source source object or object to add.
     @param {Number} start index, start of range, range or IndexSet
     @param {Number} length length if passing start/length pair.
     @returns {SC.SelectionSet} receiver
@@ -104,8 +154,8 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   add: function(source, start, length) {
     
     if (this.isFrozen) throw SC.FROZEN_ERROR ;
-    
-    var sets, len, idx, set, oldlen, newlen, setlen;
+
+    var sets, len, idx, set, oldlen, newlen, setlen, objects;
     
     // normalize
     if (start === undefined && length === undefined) {
@@ -113,6 +163,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
       if (source.isIndexSet) return this.add(source.source, source);
       if (source.isSelectionSet) {
         sets = source._sets;
+        objects = source._objects;
         len  = sets ? sets.length : 0;
 
         this.beginPropertyChanges();
@@ -120,25 +171,29 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
           set = sets[idx];
           if (set && set.get('length')>0) this.add(set.source, set);
         }
+        if (objects) this.addObjects(objects);
         this.endPropertyChanges();
         return this ;
         
       }
     }
 
-    set    = this.indexSetForSource(source);
+    set    = this._indexSetForSource(source, YES);
     oldlen = this.get('length');
     setlen = set.get('length');
     newlen = oldlen - setlen;
         
     set.add(start, length);
 
+    this._indexSetCache = null;
+
     newlen += set.get('length');
     if (newlen !== oldlen) {
-      this.set('length', newlen);
+      this.propertyDidChange('length');
       this.enumerableContentDidChange();
-      if (setlen === 0) this.notifyPropertyChange('sources')
+      if (setlen === 0) this.notifyPropertyChange('sources');
     }
+
     return this ;
   },
 
@@ -160,7 +215,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     
     if (this.isFrozen) throw SC.FROZEN_ERROR ;
     
-    var sets, len, idx, set, oldlen, newlen, setlen;
+    var sets, len, idx, set, oldlen, newlen, setlen, objects;
     
     // normalize
     if (start === undefined && length === undefined) {
@@ -168,6 +223,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
       if (source.isIndexSet) return this.remove(source.source, source);
       if (source.isSelectionSet) {
         sets = source._sets;
+        objects = source._objects;
         len  = sets ? sets.length : 0;
             
         this.beginPropertyChanges();
@@ -175,12 +231,13 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
           set = sets[idx];
           if (set && set.get('length')>0) this.remove(set.source, set);
         }
+        if (objects) this.removeObjects(objects);
         this.endPropertyChanges();
         return this ;
       }
     }
     
-    set    = this.indexSetForSource(source);
+    set    = this._indexSetForSource(source, YES);
     oldlen = this.get('length');
     newlen = oldlen - set.get('length');
         
@@ -188,43 +245,16 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     setlen = set.get('length');
     newlen += setlen;
 
+    this._indexSetCache = null;
     if (newlen !== oldlen) {
-      this.set('length', newlen);
+      this.propertyDidChange('length');
       this.enumerableContentDidChange();
-      if (setlen === 0) this.notifyPropertyChange('sources')
+      if (setlen === 0) this.notifyPropertyChange('sources');
     }
+
     return this ;
   },
-  
-  /**
-    Returns YES if the passed index set or selection set contains the exact 
-    same source objects and indexes as  the receiver.  If you pass any object 
-    other than an IndexSet or SelectionSet, returns NO.
-    
-    @param {Object} obj another object.
-    @returns {Boolean}
-  */
-  isEqual: function(obj) {
-    if (!obj || !obj.isSelectionSet) return NO ;
-    
-    // fast paths
-    if (this._sets === obj._sets) return YES;
-    if (!obj._sets || (obj.get('length') !== this.get('length'))) return NO ;
-    if (this.get('length') === 0) return YES ;
 
-    var sources = this.get('sources'),
-        len     = sources.get('length'),
-        idx, source, my_set, obj_set;
-
-    for(idx=0;idx<len;idx++) {
-      source  = sources[idx];
-      my_set  = this.indexSetForSource(source, NO);
-      obj_set = obj.indexSetForSource(source, NO);
-      if (my_set === obj_set) continue ; // same
-      if (!obj_set || !my_set || !my_set.isEqual(obj_set)) return NO ;
-    }
-    return YES ;
-  },
   
   /**
     Returns YES if the selection contains the named index, range of indexes.
@@ -235,29 +265,15 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     @returns {Boolean}
   */
   contains: function(source, start, length) {
-    var set = this.indexSetForSource(source, NO);
+    if (start === undefined && length === undefined) {
+      return this.containsObject(source);
+    }
+    
+    var set = this.indexSetForSource(source);
     if (!set) return NO ;
     return set.contains(start, length);
   },
 
-  /**
-    Returns YES if the selection contains the passed object.  This will search
-    selected ranges in all source objects.
-    
-    @param {Object} object the object to search for
-    @returns {Boolean}
-  */
-  containsObject: function(object) {
-    var sets = this._sets,
-        len  = sets ? sets.length : 0,
-        idx, set;
-    for(idx=0;idx<len;idx++) {
-      set = sets[idx];
-      if (set && set.indexOf(object)>=0) return YES;
-    }
-    return NO ;
-  },
-  
   /**
     Returns YES if the index set contains any of the passed indexes.  You
     can pass a single index, a range or an index set.
@@ -273,13 +289,227 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     return set.intersects(start, length);
   },
   
+  
+  // ..........................................................
+  // OBJECT-BASED API
+  // 
+
+  _TMP_ARY: [],
+  
+  /**
+    Adds the object to the selection set.  Unlike adding an index set, the 
+    selection will actually track the object independent of its location in 
+    the array.
+    
+    @param {Object} object 
+    @returns {SC.SelectionSet} receiver
+  */
+  addObject: function(object) {  
+    var ary = this._TMP_ARY, ret;
+    ary[0] = object;
+    
+    ret = this.addObjects(ary);
+    ary.length = 0;
+    
+    return ret;
+  },
+  
+  /**
+    Adds objects in the passed enumerable to the selection set.  Unlike adding
+    an index set, the seleciton will actually track the object independent of
+    its location the array.
+    
+    @param {SC.Enumerable} objects
+    @returns {SC.SelectionSet} receiver
+  */
+  addObjects: function(objects) {
+    var cur = this._objects,
+        oldlen, newlen;
+    if (!cur) cur = this._objects = SC.CoreSet.create();
+    oldlen = cur.get('length');
+
+    cur.addEach(objects);
+    newlen = cur.get('length');
+    
+    this._indexSetCache = null;
+    if (newlen !== oldlen) {
+      this.propertyDidChange('length');
+      this.enumerableContentDidChange();
+    }
+    return this;
+  },
+
+  /**
+    Removes the object from the selection set.  Note that if the selection
+    set also selects a range of indexes that includes this object, it may 
+    still be in the selection set.
+    
+    @param {Object} object 
+    @returns {SC.SelectionSet} receiver
+  */
+  removeObject: function(object) {  
+    var ary = this._TMP_ARY, ret;
+    ary[0] = object;
+    
+    ret = this.removeObjects(ary);
+    ary.length = 0;
+    
+    return ret;
+  },
+  
+  /**
+    Removes the objects from the selection set.  Note that if the selection
+    set also selects a range of indexes that includes this object, it may 
+    still be in the selection set.
+    
+    @param {Object} object 
+    @returns {SC.SelectionSet} receiver
+  */
+  removeObjects: function(objects) {
+    var cur = this._objects,
+        oldlen, newlen, sets;
+        
+    if (!cur) return this;
+
+    oldlen = cur.get('length');
+
+    cur.removeEach(objects);
+    newlen = cur.get('length');
+    
+    // also remove from index sets, if present
+    if (sets = this._sets) {
+      sets.forEach(function(set) {
+        oldlen += set.get('length');
+        set.removeObjects(objects);
+        newlen += set.get('length');
+      }, this);
+    }
+    
+    this._indexSetCache = null;
+    if (newlen !== oldlen) {
+      this.propertyDidChange('length');
+      this.enumerableContentDidChange();
+    }
+    return this;
+  },
+
+  /**
+    Returns YES if the selection contains the passed object.  This will search
+    selected ranges in all source objects.
+    
+    @param {Object} object the object to search for
+    @returns {Boolean}
+  */
+  containsObject: function(object) {
+    // fast path
+    var objects = this._objects ;
+    if (objects && objects.contains(object)) return YES ;
+    
+    var sets = this._sets,
+        len  = sets ? sets.length : 0,
+        idx, set;
+    for(idx=0;idx<len;idx++) {
+      set = sets[idx];
+      if (set && set.indexOf(object)>=0) return YES;
+    }
+    
+    return NO ;
+  },
+  
+  
+  // ..........................................................
+  // GENERIC HELPER METHODS
+  // 
+  
+  /**
+    Constrains the selection set to only objects found in the passed source
+    object.  This will remove any indexes selected in other sources, any 
+    indexes beyond the length of the content, and any objects not found in the
+    set.
+  */
+  constrain: function(source) {
+    var set, len, max, objects;
+    
+    this.beginPropertyChanges();
+    
+    // remove sources other than this one
+    this.get('sources').forEach(function(cur) {
+      if (cur === source) return; //skip
+      var set = this._indexSetForSource(source, NO);
+      if (set) this.remove(source, set);
+    },this); 
+    
+    // remove indexes beyond end of source length
+    set = this._indexSetForSource(source, NO);
+    if (set && ((max=set.get('max'))>(len=source.get('length')))) {
+      this.remove(source, len, max-len);
+    }
+    
+    // remove objects not in source
+    if (objects = this._objects) {
+      objects.forEach(function(cur) {
+        if (source.indexOf(cur)<0) this.removeObject(cur);
+      },this);
+    }
+    
+    this.endPropertyChanges();
+    return this ;
+  },
+  
+  /**
+    Returns YES if the passed index set or selection set contains the exact 
+    same source objects and indexes as  the receiver.  If you pass any object 
+    other than an IndexSet or SelectionSet, returns NO.
+    
+    @param {Object} obj another object.
+    @returns {Boolean}
+  */
+  isEqual: function(obj) {
+    var left, right, idx, len, sources, source;
+    
+    // fast paths
+    if (!obj || !obj.isSelectionSet) return NO ;
+    if (obj === this) return YES;
+    if ((this._sets === obj._sets) && (this._objects === obj._objects)) return YES;
+    if (this.get('length') !== obj.get('length')) return NO;
+    
+    // check objects
+    left = this._objects;
+    right = obj._objects;
+    if (left || right) {
+      if ((left ? left.get('length'):0) !== (right ? right.get('length'):0)) {
+        return NO;
+      }
+      if (left && !left.isEqual(right)) return NO ;
+    }
+
+    // now go through the sets
+    sources = this.get('sources');
+    len     = sources.get('length');
+    for(idx=0;idx<len;idx++) {
+      source = sources.objectAt(idx);
+      left = this._indexSetForSource(source, NO);
+      right = this._indexSetForSource(source, NO);
+      if (!!right !== !!left) return NO ;
+      if (left && !left.isEqual(right)) return NO ;
+    }
+    
+    return YES ;
+  },
+
   /**
     Clears the set.  Removes all IndexSets from the object
   */
   clear: function() {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
     if (this._sets) this._sets.length = 0 ; // truncate
-    this.set('length', 0);
+    if (this._objects) this._objects = null;
+    
+    this._indexSetCache = null;
+    this.propertyDidChange('length');
+    this.enumerableContentDidChange();
+    this.notifyPropertyChange('sources');
+    
     return this ;
   },
   
@@ -287,7 +517,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
    Clones the set into a new set.  
   */
   clone: function() {
-    var ret  = this.constructor.create({ length: this.length }),
+    var ret  = this.constructor.create(),
         sets = this._sets,
         len  = sets ? sets.length : 0 ,
         idx, set;
@@ -301,6 +531,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
       }
     }
     
+    if (this._objects) ret._objects = this._objects.copy();
     return ret ;
   },
   
@@ -318,6 +549,8 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     while(--loc >= 0) {
       if (set = sets[loc]) set.freeze();
     }
+    
+    if (this._objects) this._objects.freeze();
     return sc_super();
   },
   
@@ -330,16 +563,25 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     sets = sets.map(function(set) { 
       return set.toString().replace("SC.IndexSet", SC.guidFor(set.source)); 
     }, this);
+    if (this._objects) sets.push(this._objects.toString());
     return "SC.SelectionSet:%@<%@>".fmt(SC.guidFor(this), sets.join(','));  
   },
   
   firstObject: function() {
-    if (this.get('length')===0) return undefined;
-    var sets = this._sets, 
-        set  = sets ? sets[0] : null,
-        src  = set ? set.source : null,
-        idx  = set ? set.firstObject() : -1;
-    return (src && idx>=0) ? src.objectAt(idx) : undefined;
+    var sets    = this._sets,
+        objects = this._objects;
+        
+    // if we have sets, get the first one
+    if (sets && sets.get('length')>0) {
+      var set  = sets ? sets[0] : null,
+          src  = set ? set.source : null,
+          idx  = set ? set.firstObject() : -1;
+      if (src && idx>=0) return src.objectAt(idx);
+    }
+    
+    // otherwise if we have objects, get the first one
+    return objects ? objects.firstObject() : undefined;
+    
   }.property(),
   
   /**
@@ -347,50 +589,24 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     selection.
   */
   nextObject: function(count, lastObject, context) { 
-
-    var sets = this._sets,
-        len  = sets ? sets.length : 0,
-        loc  = context.sel_loc,
-        set  = context.sel_set,
-        cnt  = context.sel_cnt,
-        last = context.sel_last,
-        next = undefined, 
-        ret ;
-        
-    if (len === 0) return undefined; // nothing to do
+    var objects, ret;
     
-    // reset iteration
+    // TODO: Make this more efficient.  Right now it collects all objects
+    // first.  
+    
     if (count === 0) {
-      loc = 0 ;
-      set = sets[0] ;
-      cnt = 0 ;
-      last = null;
+      objects = context.objects = [];
+      this.forEach(function(o) { objects.push(o); }, this);
+      context.max = objects.length;
+    }
+
+    objects = context.objects ;
+    ret = objects[count];
+    
+    if (count+1 >= context.max) {
+      context.objects = context.max = null;
     }
     
-    // loop forward until we find a set that can return something
-    while ((!set || cnt < set.get('length')) && (loc<len)) {
-      set = sets[++loc];
-      cnt = 0 ;
-      last = null ;
-    }
-    
-    // get the next index.  If we have an index, then get the object
-    if (set) next = set.nextObject(cnt++, last, context);
-    ret = (SC.none(next) || !set.source) ? undefined : set.source.objectAt(next);
-    last = next ; // save for later calls
-    
-    // clear out info if this is the end
-    if (count+1 === this.get('length')) {
-      loc = set = cnt = last = null ;
-    }
-    
-    // save context info
-    context.sel_loc = loc ;
-    context.sel_set = set ;
-    context.sel_cnt = cnt ;
-    context.sel_last = last ;
-    
-    // done!
     return ret ;
   },
   
@@ -413,6 +629,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   */
   forEach: function(callback, target) {
     var sets = this._sets,
+        objects = this._objects,
         len = sets ? sets.length : 0,
         set, idx;
         
@@ -420,66 +637,10 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
       set = sets[idx];
       if (set) set.forEachObject(callback, target);
     }
+    
+    if (objects) objects.forEach(callback, target);
     return this ;
-  },
-
-  /**
-    Iterates over the selection, invoking your callback with each selected
-    __index__.  This will not actually get the object referenced by the 
-    selection, just the index.
-    
-    The callback must have the following signature:
-    
-    {{{
-      function callback(index, callbackCount, indexSet, source) { ... }
-    }}}
-
-    The callbackCount will indicate the number of times the callback has 
-    been invoked for this call.
-    
-    If you pass a target, it will be used when the callback is called.
-    
-    @param {Function} callback function to invoke.  
-    @param {Object} target optional content. otherwise uses window
-    @returns {SC.SelectionSet} receiver
-  */
-  forEachIndex: function(callback, target) {
-    var sets = this._sets,
-        len = sets ? sets.length : 0,
-        set, idx;
-        
-    for(idx=0;idx<len;idx++) {
-      set = sets[idx];
-      if (set) set.forEach(callback, target);
-    }
-    return this ;
-  },
-  
-  /** 
-    Invoke the callback, passing each occuppied source object and range 
-    instead of each index.  This can be a more efficient way to iterate in 
-    some cases.  The callback should have the signature:
-    
-    {{{
-      callback(start, length, indexSet, source) { ... }
-    }}}
-
-    @param {Function} callback the iterator callback
-    @param {Object} target the target
-    @returns {SC.IndexSet} receiver
-  */
-  forEachRange: function(callback, target) {
-    var sets = this._sets,
-        len = sets ? sets.length : 0,
-        set, idx;
-        
-    for(idx=0;idx<len;idx++) {
-      set = sets[idx];
-      if (set) set.forEachRange(callback, target);
-    }
-    return this ;
-  }
-  
+  }  
   
 });
 

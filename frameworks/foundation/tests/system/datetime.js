@@ -10,7 +10,7 @@ var ms, options, dt;
 
 module("SC.DateTime", {
   setup: function() {
-    ms = 484354822925;
+    ms = 484387222925;
     options = {year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925};
     dt = SC.DateTime.create(options);
   },
@@ -24,13 +24,13 @@ module("SC.DateTime", {
 function timeShouldBeEqualToHash(t, h) {
   if (h === undefined) h = testHash;
   
-  equals(t.get('year'), h.year);
-  equals(t.get('month'), h.month);
-  equals(t.get('day'), h.day);
-  equals(t.get('hour'), h.hour);
-  equals(t.get('minute'), h.minute);
-  equals(t.get('second'), h.second);
-  equals(t.get('millisecond'), h.millisecond);
+  equals(t.get('year'), h.year , 'year');
+  equals(t.get('month'), h.month, 'month');
+  equals(t.get('day'), h.day, 'day');
+  equals(t.get('hour'), h.hour, 'hour');
+  equals(t.get('minute'), h.minute, 'minute');
+  equals(t.get('second'), h.second, 'second');
+  equals(t.get('millisecond'), h.millisecond, 'millisecond');
 }
 
 test('create', function() {

@@ -117,17 +117,18 @@ CoreTest.Runner = {
 
     // if all tests passed, disable hiding them.  if some tests failed, hide
     // them by default.
-    this.errors.push('</tr></tbody></table>');
+    if (this.errors) this.errors.push('</tr></tbody></table>');
     if ((r.failed + r.errors + r.warnings) > 0) {
       this.hidePassedTestsDidChange(); // should be checked by default
     } else {
       this.report.find('.hide-passed').addClass('disabled')
         .find('input').attr('disabled', true);
-      this.errors.length = 0;
+      if (this.errors) this.errors.length = 0;
     }     
     if(CoreTest.showUI) Q$('.core-test').css("right", "360px");
     result.html(str);
-    CoreTest.errors=this.errors.join('');
+    
+    if (this.errors) CoreTest.errors=this.errors.join('');
   },
   
   planDidRecord: function(plan, module, test, assertions, timings) {
@@ -142,14 +143,22 @@ CoreTest.Runner = {
     
     if (module) name = module + " module: " + test ;
     name = CoreTest.fmt('%@ - %@msec', name, timings.total_end - timings.total_begin);
-    
     // place results into a single string to append all at once.
     var logstr = this.logstr ;
     var errors =this.errors;
     if (!logstr) logstr = this.logstr = [];
-    if (!this.errors) this.errors = ['<table style="border:1px solid"><thead>'+
-          '<tr><th class="desc">'+navigator.userAgent+'</th><th>Result</th></tr>'+
-          '</thead><tbody><tr>'];
+    if (!this.errors) {
+      this.errors = ['<style type="text/css">* {font: 12px arial;}'+
+                    '.passed { background-color: #80D175; color: white;}'+
+                    '.failed { background-color: #ea4d4; color: black; }'+
+                    '.errors { background-color: red; color: black; }'+
+                    '.warnings { background-color: #E49723; color: black;}'+
+                    '.desc { text-align: left;}'+
+                    '</style><table style="border:1px solid"><thead>'+
+                    '<tr><th class="desc">'+navigator.userAgent+
+                    '</th><th>Result</th></tr>'+
+                    '</thead><tbody><tr>'];
+    }
     logstr.push(CoreTest.fmt('<tr class="test %@"><th class="desc" colspan="2">'+
           '%@ (<span class="passed">%@</span>, <span class="failed">%@</span>,'+
           ' <span class="errors">%@</span>, <span class="warnings">%@</span>)'+

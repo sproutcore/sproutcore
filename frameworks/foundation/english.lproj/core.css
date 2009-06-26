@@ -4,6 +4,131 @@
 	line-height: 1.4
 }
 
+// YUI reset
+
+.sc-view body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+code,
+form,
+fieldset,
+legend,
+input,
+button,
+textarea,
+p,
+blockquote,
+th,
+td {
+	margin: 0;
+	padding: 0;
+}
+
+.sc-view table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+.sc-view fieldset,
+.sc-view img {
+	border: 0;
+}
+
+.sc-view address,
+caption,
+cite,
+code,
+dfn,
+em,
+strong,
+th,
+var,
+optgroup {
+	font-style: inherit;
+	font-weight: inherit;
+}
+
+.sc-view del,
+.sc-view ins {
+	text-decoration: none;
+}
+
+.sc-view li {
+	list-style: none;
+}
+
+.sc-view caption,
+th {
+	text-align: left;
+}
+
+.sc-view h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-size: 100%;
+	font-weight: normal;
+}
+
+.sc-view q:before,
+q:after {
+	content: '';
+}
+
+.sc-view abbr,
+acronym {
+	border: 0;
+	font-variant: normal;
+}
+
+.sc-view sup {
+	vertical-align: baseline;
+}
+
+.sc-view sub {
+	vertical-align: baseline;
+}
+
+/*because legend doesn't inherit in IE */
+.sc-view legend {
+	color: #000;
+}
+
+.sc-view input,
+button,
+textarea,
+select,
+optgroup,
+option {
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit;
+}
+
+/*@purpose To enable resizing for IE */
+/*@branch For IE6-Win, IE7-Win */
+.sc-view input,
+button,
+textarea,
+select {
+	*font-size: 100%;
+}
+
 
 /* @group SC.Benchmark */
 

@@ -1,0 +1,6 @@
+.sc-view.sc-ghost-view {
+  opacity: 0.5;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)"; 
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  z-index: 10000;
+}

@@ -55,8 +55,9 @@ SC.mixin({
       }, NO);
     }
 
-    if ( SC.browser.safari ) {
-      console.log("ready() is not yet supported on Safari <= 3.1") ;
+    if (SC.browser.safari && SC.browser.safari < 530.0 ) {
+      console.error("ready() is not yet supported on Safari 3.1 and earlier");
+      // TODO: implement ready() in < Safari 4 
       // var numStyles;
       // (function(){
       //   if (SC.isReady) return;
@@ -137,7 +138,7 @@ SC.mixin({
     if (SC.removeLoading) SC.$('#loading').remove();
     
     // Now execute main, if defined
-    if ((typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
+    if ((SC.mode === SC.APP_MODE) && (typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
     
     // handle routes, if modules is installed.
     if (SC.routes && SC.routes.ping) SC.routes.ping() ; 
@@ -188,3 +189,7 @@ SC.mixin({
 SC._bindReady() ;
 SC.removeLoading = YES;
 
+// default to app mode.  When loading unit tests, this will run in test mode
+SC.APP_MODE = "APP_MODE";
+SC.TEST_MODE = "TEST_MODE";
+SC.mode = SC.APP_MODE;

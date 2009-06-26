@@ -104,7 +104,11 @@ SC.Request = SC.Object.extend({
     
     if (this.get("isJSON")) {
       var source = response.responseText ;
-      var json = SC.json.decode(source) ;
+      try{
+        var json = SC.json.decode(source) ;
+      }catch(e){
+        json = response.responseText ;
+      }
       //TODO cache this value?
       return json ;
     }
@@ -299,12 +303,22 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
     
     rawRequest.source = request;
     
+    
+    //Part of the fix for IE
+    var transport=this;
+    var handleReadyStateChange = function() {
+      return transport.finishRequest(rawRequest) ;
+    };
+    //End of the fix for IE
+    
     var async = (request.get('isAsynchronous') ? YES : NO) ;
     if (async) {
       if (!SC.browser.msie) {
         SC.Event.add(rawRequest, 'readystatechange', this, handleReadyStateChange, rawRequest) ;
       } else rawRequest.onreadystatechange = handleReadyStateChange;
     }
+    
+    
     
     rawRequest.open( request.get('type'), request.get('address'), async ) ;
     
@@ -358,11 +372,8 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
        // avoid memory leak in MSIE: clean up
        request.onreadystatechange = function() {} ;
      }
-  },
-  
-  handleReadyStateChange: function(readyStateEvent) {
-    return this.finishRequest(readyStateEvent.context) ;
   }
+
   
 });
 

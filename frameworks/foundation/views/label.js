@@ -167,16 +167,20 @@ SC.LabelView = SC.View.extend(SC.Control,
   beginEditing: function() {
     if (this.get('isEditing')) return YES ;
     if (!this.get('isEditable')) return NO ;
-    
+
+    var el = this.$();
     var value = this.get('value') || '' ;
-    var f = this.convertFrameToView(this.get('frame'), null) ;
-    var el = this.rootElement;
+    var f = SC.viewportOffset(el[0]) ;
+    var frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
+    f.width=frameTemp.width;
+    f.height=frameTemp.height;
     SC.InlineTextFieldView.beginEditing({
       frame: f,
       delegate: this,
       exampleElement: el,
       value: value, 
       multiline: NO, 
+      isCollection: NO,
       validator: this.get('validator')
     });
   },
@@ -235,6 +239,8 @@ SC.LabelView = SC.View.extend(SC.Control,
 
   displayProperties: 'displayValue textAlign fontWeight icon'.w(),
   
+  _TEMPORARY_CLASS_HASH: {},
+  
   render: function(context, firstTime) {
     var value = this.get('displayValue');
     var icon = this.get('icon') ;
@@ -253,6 +259,10 @@ SC.LabelView = SC.View.extend(SC.Control,
     // and setup alignment and font-weight on styles
     context.addStyle('text-align',  this.get('textAlign'))
            .addStyle('font-weight', this.get('fontWeight'));
+           
+    var classes = this._TEMPORARY_CLASS_HASH;
+    classes.icon = !!this.get('icon');
+    context.setClass(classes);
            
     // if we are editing, set the opacity to 0
     if (this.get('isEditing')) context.addStyle('opacity', 0.0);

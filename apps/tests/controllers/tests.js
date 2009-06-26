@@ -6,7 +6,7 @@
 
 /** @class
 
-  Tests from current selected target
+  Manages the list of tests for the currently focused target.
 
   @extends SC.ArrayController
 */
@@ -16,10 +16,18 @@ TestRunner.testsController = SC.ArrayController.create(
   contentBinding: "TestRunner.targetController.tests",
   
   /**
-    Action runs when a test is selected to show the server.
+    Enables/disables continuous integration mode.
   */
-  showDetails: function() {
-    console.log('showDetails(%@)'.fmt(this.get('selection')));
-  }
-
+  useContinuousIntegration: NO,
+  
+  /**
+    Whenever we are actually showing the tests, then controls are enabled.
+    Set to YES when in READY_LIST mode.
+  */
+  isShowingTests: NO,
+  
+  stateDidChange: function() {
+    TestRunner.sendAction('testsDidChange');
+  }.observes('state')
+  
 }) ;

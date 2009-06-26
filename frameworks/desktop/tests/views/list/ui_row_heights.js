@@ -109,7 +109,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(2,21);
+  exp = SC.IndexSet.create(2,22);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
@@ -132,7 +132,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(2,21);
+  exp = SC.IndexSet.create(2,22);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);

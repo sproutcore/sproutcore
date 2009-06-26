@@ -47,6 +47,17 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   queryKey: null,
   
+  /**
+    The current load state of the RecordArray.  If the storeKeys has a state
+    property, then this property will return that value.  Otherwise it returns
+    SC.Record.READY.
+  */
+  state: function() {
+    var storeKeys = this.get('storeKeys'),
+        ret = (storeKeys && !SC.none(storeKeys.state)) ? storeKeys.get('state') : null;
+    return ret ? ret : SC.Record.READY;
+  }.property().cacheable(),
+  
   /** @private
     Cache of records returned from objectAt() so they don't need to
     be unneccesarily materialized.
@@ -124,6 +135,28 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
   
   /**
+    Called to refresh the query that is attached to this record array.
+    This will force the query to evaluated again against the store. 
+  */
+  refreshQuery: function() {
+    var query = this.get('queryKey');
+    
+    if(query) {
+      var recordType = query.get('recordType');
+      var storeKeys = this.get('store').storeKeysFor(recordType);
+      
+      var recordTypes = SC.Set.create();
+      recordTypes.push(recordType);
+      
+      // clear existing storeKeys, start over by applying all storekeys for 
+      // this recordType
+      this.storeKeys = [];
+      this.applyQuery(storeKeys, recordTypes);
+    }
+    
+  },
+  
+  /**
     Apply the SC.Query again. This is invoked when new records are loaded
     or changed in the store (or directly on the array with .replace() ) and 
     and when we need to refresh all SC.Query 'based' record arrays accordingly.
@@ -133,14 +166,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @param {Boolean} notify to send length notifyPropertyChange()
   */
   applyQuery: function(changedStoreKeys, recordTypes, notify) {
-
-    var queryKey = this.get('queryKey');
-    // first check if these changes include any of the record types
-    if(recordTypes && queryKey && recordTypes.contains(queryKey.recordType)) return;
-    
     var newStoreKeys = this.get('storeKeys'), inChangedStoreKeys, 
-      inMatchingStoreKeys, idx, len, storeKey,
+      inMatchingStoreKeys, idx, len, storeKey, queryKey = this.get('queryKey'),
       store = this.get('store');
+      
+    // first check if these changes include any of the record types
+    if(recordTypes && queryKey.recordType && !recordTypes.contains(queryKey.recordType)) return;
+    
     var matchingStoreKeys = SC.Query.containsStoreKeys(queryKey, 
       changedStoreKeys, store);
     
@@ -194,24 +226,35 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     var storeKeys = this.get('storeKeys');
     
-    var prev = this._prevStoreKeys, f = this._storeKeysContentDidChange;
+    var prev = this._prevStoreKeys, 
+        f    = this._storeKeysContentDidChange,
+        fs   = this._storeKeysStateDidChange;
     
     if (storeKeys === prev) return this; // nothing to do
     
     if (prev) {
       prev.removeObserver('[]', this, f);
+      prev.removeObserver('state', this, fs);
     }
 
     this._prevStoreKeys = storeKeys;
     
     if (storeKeys) {
       storeKeys.addObserver('[]', this, f);
+      storeKeys.addObserver('state', this, fs);
     }
     
     var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
     this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
     
   }.observes('storeKeys'),
+  
+  /** @private
+    Invoked whenever the state property of the storeKeys change.
+  */
+  _storeKeysStateDidChange: function() {
+    this.notifyPropertyChange('state');
+  },
   
   /** @private
     Invoked whenever the content of the storeKeys array changes.  This will

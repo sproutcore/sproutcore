@@ -6,15 +6,21 @@
 
 /** @class
 
-  Displays the full list of targets in the source list view.
+  The full set of targets available in the application.  This is populated 
+  automatically when you call loadTargets().
 
   @extends SC.ArrayController
 */
 TestRunner.targetsController = SC.ArrayController.create(
 /** @scope TestRunner.targetsController.prototype */ {
 
-  allowsMultipleSelection: NO,
-  allowsEmptySelection: NO,
+  /**
+    Call this method whenever you want to relaod the targets from the server.
+  */
+  reload: function() {
+    var targets = TestRunner.store.findAll(TestRunner.Target);
+    this.set('content', targets);
+  },
   
   /** 
     Generates the root array of children objects whenever the target content
@@ -24,30 +30,57 @@ TestRunner.targetsController = SC.ArrayController.create(
     
     // break targets into their respective types.  Items that should not be 
     // visible at the top level will not have a sort kind
-    var kinds = {}, kind, targets, ret;
+    var kinds = {}, keys = [], kind, targets, ret;
     
     this.forEach(function(target) { 
       if (kind = target.get('sortKind')) {
         targets = kinds[kind];
         if (!targets) kinds[kind] = targets = [];
         targets.push(target);
+        if (keys.indexOf(kind) < 0) keys.push(kind);
       }
     }, this);
 
+    // sort kinds alphabetically - with sproutcore at end and apps at top
+    keys.sort();
+    if (keys.indexOf('sproutcore') >= 0) {
+      keys.removeObject('sproutcore').pushObject('sproutcore');      
+    }
+    if (keys.indexOf('apps') >= 0) {
+      keys.removeObject('apps').unshiftObject('apps');
+    }
+    
     // once divided into kinds, create group nodes for each kind
     ret = [];
-    for (kind in kinds) {
-      if (!kinds.hasOwnProperty(kind)) continue;
+    keys.forEach(function(kind) {
       targets = kinds[kind];
+      
+      var defKey = "SourceList.%@.isExpanded".fmt(kind),
+          expanded = TestRunner.userDefaults.get(defKey);
+      
       ret.push(SC.Object.create({
         displayName: "Kind.%@".fmt(kind).loc(),
-        isExpanded: kind !== 'sproutcore',
-        children: targets.sortProperty('kind', 'displayName')
+        isExpanded: SC.none(expanded) ? (kind !== 'sproutcore') : expanded,
+        children: targets.sortProperty('kind', 'displayName'),
+        
+        isExpandedDefaultKey: defKey,
+        isExpandedDidChange: function() {
+          TestRunner.userDefaults.set(this.get('isExpandedDefaultKey'), this.get('isExpanded'));
+        }.observes('isExpanded')
       }));
-    }
+    });
     
     return SC.Object.create({ children: ret, isExpanded: YES });
     
-  }.property('[]').cacheable()
+  }.property('[]').cacheable(),
+  
+  /**
+    Send event when targets load.
+  */
+  stateDidChange: function() {
+    TestRunner.sendAction('targetsDidChange');
+  }.observes('state')
 
 }) ;
+
+TestRunner.targetsController.addProbe('state');

@@ -113,7 +113,7 @@ test("repeating timer should terminate after expiration", function() {
     }
     
     if ((checks > 0) && t.get('isValid')) {
-      wait(100, f);
+      //wait(100, f);
       setTimeout(f, 100) ;
     } else {
       var diffs = fired.map(function(x) { return x - start; });

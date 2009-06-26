@@ -48,6 +48,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   isNested: NO,
   
+  /**
+    This type of store is not nested.
+  */
+  commitRecordsAutomatically: NO,
+  
   // ..........................................................
   // DATA SOURCE SUPPORT
   // 
@@ -56,11 +61,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Convenience method.  Sets the current data source to the passed property.
     This will also set the store property on the dataSource to the receiver.
     
+    If you are using this from the core.js method of your app, you may need to
+    just pass a string naming your data source class.  If this is the case,
+    then your data source will be instantiated the first time it is requested.
+    
+    @param {SC.DataSource|String} dataSource the data source
     @returns {SC.Store} receiver
   */
   from: function(dataSource) {
     this.set('dataSource', dataSource);
     return this ;
+  },
+  
+  // lazily convert data source to real object
+  _getDataSource: function() {
+    var ret = this.get('dataSource');
+    if (typeof ret === SC.T_STRING) {
+      ret = SC.objectForPropertyPath(ret);
+      if (ret) ret = ret.create();
+      if (ret) this.set('dataSource', ret);
+    }
+    return ret;
   },
   
   /**
@@ -412,15 +433,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   _notifyRecordPropertyChange: function(storeKey, statusOnly) {
     
-    var records = this.records, rec ;
+    var records = this.records, rec, editState;
     
     // pass along to nested stores
-    var nestedStores = this.get('nestedStores'), len, idx, store;
+    var nestedStores = this.get('nestedStores'), len, idx, store, status;
     var K = SC.Store;
     len = nestedStores ? nestedStores.length : 0 ;
     for(idx=0;idx<len;idx++) {
       store = nestedStores[idx];
-      if (store.storeKeyEditState(storeKey) === K.INHERITED) {
+      status = store.readStatus(storeKey);
+      editState = store.storeKeyEditState(storeKey);
+      
+      // when store needs to propagate out changes in the parent store
+      // to nested stores
+      if(editState!==K.INHERITED && (status & SC.Record.BUSY)) {
+        // make sure nested store does not have any changes before resetting
+        if(store.get('hasChanges')) throw K.CHAIN_CONFLICT_ERROR;
+        store.reset();
+      }
+      
+      if(store.storeKeyEditState(storeKey) === K.INHERITED) {
         store._notifyRecordPropertyChange(storeKey, statusOnly);
       }
     }
@@ -435,9 +467,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    // TODO: need make sure this is just fired once and also
-    // works with nested stores
-    //this.invokeOnce(this._flushRecordChanges);
     this._flushRecordChanges();
     
     return this;
@@ -488,6 +517,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     with an SC.Query to reapply their query with the new storeKeys
     
     @param {SC.IndexSet} storeKeys set of storeKeys that changed
+    @param {SC.Set} recordTypes
   */
   
   _notifyRecordArraysWithQuery: function(storeKeys, recordTypes) {
@@ -711,7 +741,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
   findAll: function(fetchKey, params, recordArray) { 
-    var _store = this, source = this.get('dataSource'), ret = [], storeKeys, 
+    var _store = this, source = this._getDataSource(), ret = [], storeKeys, 
       sourceRet, cacheKey;
     
     if(recordArray) {
@@ -898,6 +928,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog.add(storeKey);
     this.changelog = changelog;
     
+    // if commit records is enabled
+    if(this.get('commitRecordsAutomatically')){
+      this.invokeLast(this.commitRecords);
+    }
+    
     // finally return materialized record
     return this.materializeRecord(storeKey) ;
   },
@@ -968,9 +1003,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // add/remove change log
     changelog = this.changelog;
     if (!changelog) changelog = this.changelog = SC.Set.create();
+
     ((status & K.DIRTY) ? changelog.add(storeKey) : changelog.remove(storeKey));
     this.changelog=changelog;
-    
+
+    // if commit records is enabled
+    if(this.get('commitRecordsAutomatically')){
+      this.invokeLast(this.commitRecords);
+    }
+        
     return this ;
   },
   
@@ -1053,6 +1094,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     changelog.add(storeKey);
     this.changelog=changelog;
     
+    // if commit records is enabled
+    if(this.get('commitRecordsAutomatically')){
+      this.invokeLast(this.commitRecords);
+    }
+    
     return this ;
   },
 
@@ -1117,7 +1163,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
     
-    var source  = this.get('dataSource'),
+    var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = (!storeKeys) ? ids.length : storeKeys.length,
         ret     = [],
@@ -1252,7 +1298,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Bool} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys) {
-    var source    = this.get('dataSource'),
+    var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
         rev       = SC.Store.generateStoreKey(),
@@ -1285,7 +1331,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // collect status and process
       status = this.readStatus(storeKey);
       
-      if ((status == K.EMPTY) || (status == K.ERROR) || (status == K.DESTROYED_CLEAN)) {
+      if ((status == K.EMPTY) || (status == K.ERROR)) {
         throw K.NOT_FOUND_ERROR ;
       }else{
         if(status==K.READY_NEW){
@@ -1298,6 +1344,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           retUpdate.push(storeKey);
         } else if (status==K.DESTROYED_DIRTY) {
           this.writeStatus(storeKey, K.BUSY_DESTROYING);
+          this.dataHashDidChange(storeKey, rev, YES);
+          retDestroy.push(storeKey);
+        } else if (status==K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
           retDestroy.push(storeKey);
         }
@@ -1356,7 +1405,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} the store.
   */
   cancelRecords: function(recordTypes, ids, storeKeys) {
-    var source  = this.get('dataSource'),
+    var source  = this._getDataSource(),
         isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         K       = SC.Record,
         ret     = [],
@@ -1532,24 +1581,25 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
-    var status = this.readStatus(storeKey), K = SC.Record;
+    var status = this.readStatus(storeKey), K = SC.Record, statusOnly;
     
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
     if (!(status & K.BUSY)) {
       throw K.BAD_STATE_ERROR; // should never be called in this state
-      
     }
     
     // otherwise, determine proper state transition
-    if(status==K.BUSY_DESTROYING) {
+    if(status===K.BUSY_DESTROYING) {
       throw K.BAD_STATE_ERROR ;
     } else status = K.READY_CLEAN ;
 
     this.writeStatus(storeKey, status) ;
     if (dataHash) this.writeDataHash(storeKey, dataHash, status) ;
     if (newId) SC.Store.replaceIdFor(storeKey, newId);
-    this.dataHashDidChange(storeKey);
+    
+    statusOnly = dataHash || newId ? NO : YES;
+    this.dataHashDidChange(storeKey, null, statusOnly);
     
     return this ;
   },
@@ -1614,7 +1664,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){ 
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN) {
+      
       status = K.READY_CLEAN;
       if(dataHash===undefined) {
         this.writeStatus(storeKey, status) ;
@@ -1729,7 +1780,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType
     @returns {Array} set of storeKeys
   */
-  
   storeKeysFor: function(recordType) {
     var recType, ret = [], storeKey;
     if(!this.statuses) return;
@@ -1751,7 +1801,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @returns {Array} set of storeKeys
   */
-  
   storeKeys: function() {
     var ret = [], storeKey;
     if(!this.statuses) return;
@@ -1764,8 +1813,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     return ret;
-  }
+  },
   
+  /**
+    Returns string representation of a storeKey, with status.
+    
+    @param {Number} storeKey
+    @returns {String}
+  */
+  statusString: function(storeKey) {
+    var rec = this.materializeRecord(storeKey);
+    return rec.statusString();
+  }
   
 }) ;
 
@@ -1866,7 +1925,7 @@ SC.Store.mixin({
     this.recordTypesByStoreKey[storeKey] = recordType;
     return this ;
   }
-    
+  
 });
 
 

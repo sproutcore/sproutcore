@@ -27,6 +27,12 @@ sc_require('mixins/validatable') ;
 */
 SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
 /** @scope SC.FieldView.prototype */ {
+  
+  /**
+     If YES then we use textarea instead of input. 
+     WARNING: Use only with textField** Juan
+  */
+  isTextArea: NO,
 
   /**
     The raw value of the field itself.  This is computed from the 'value'
@@ -52,7 +58,11 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     current isEnabled state among other things.
   */
   $input: function() { 
-    return this.$('input').andSelf().filter('input'); 
+    if(this.get('isTextArea')){
+      return this.$('textarea').andSelf().filter('textarea'); 
+    }else{
+      return this.$('input').andSelf().filter('input');
+    }
   },
   
   /**
@@ -173,8 +183,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     // only change field value if it has changed from the last time we 
     // set it.  This allows the browser-native field value to change without
     // this method interfering with it.
-    var fieldValue = this.get('fieldValue');
-    this.setFieldValue(fieldValue);
+    //var fieldValue = this.get('fieldValue');
+    //this.setFieldValue(fieldValue);
   },
   
   // ACTIONS
@@ -201,10 +211,13 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     event.  But first, set isActive to YES.
   */
   mouseDown: function(evt) { 
+    // This has to be fixed for safari... for now we don't set is active 
+    // because any re rendering causes text selection to behave erratically
+    
     if (this.get('isEnabled')) {
-      this.set('isActive', YES); 
-      this._field_isMouseDown = YES;
-    }
+              this.set('isActive', YES); 
+              this._field_isMouseDown = YES;
+            }
     evt.allowDefault(); 
     return YES; 
   },
@@ -254,7 +267,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   // these methods use the validator to convert the raw field value returned
   // by your subclass into an object and visa versa.
   _field_setFieldValue: function(newValue) {
-    
     this.propertyWillChange('fieldValue');
     if (this.fieldValueForObject) {
       newValue = this.fieldValueForObject(newValue) ;

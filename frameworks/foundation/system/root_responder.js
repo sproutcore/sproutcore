@@ -177,28 +177,51 @@ SC.RootResponder = SC.Object.extend({
     the action name you pass to this method.  Set 'tagret' to null to search 
     the responder chain.
     
+    IMPORTANT: This method's API and implementation will likely change 
+    significantly after SproutCore 1.0 to match the version found in 
+    SC.ResponderContext.
+    
+    You generally should not call or override this method in your own 
+    applications.
+    
     @param {String} action The action to perform - this is a method name.
     @param {SC.Responder} target object to set method to (can be null)
     @param {Object} sender The sender of the action
     @param {SC.Pane} pane optional pane to start search with
+    @param {Object} context optional. only passed to ResponderContexts
     @returns {Boolean} YES if action was performed, NO otherwise
     @test in targetForAction
   */
-  sendAction: function( action, target, sender, pane) {
+  sendAction: function( action, target, sender, pane, context) {
     target = this.targetForAction(action, target, sender, pane) ;
-    return target && target.tryToPerform(action, sender) ;
+    
+    // HACK: If the target is a ResponderContext, forward the action.
+    if (target && target.isResponderContext) {
+      return !!target.sendAction(action, sender, context);
+    } else return target && target.tryToPerform(action, sender);
   },
   
   _responderFor: function(target, methodName) {
+    var defaultResponder = target ? target.get('defaultResponder') : null;
+
     if (target) {
-      target = target.get('firstResponder') ||
-        target.get('defaultResponder') ||
-        target ;
+      target = target.get('firstResponder') || target;
       do {
         if (target.respondsTo(methodName)) return target ;
       } while (target = target.get('nextResponder')) ;
     }
-    return null ;
+
+    // HACK: Eventually we need to normalize the sendAction() method between
+    // this and the ResponderContext, but for the moment just look for a 
+    // ResponderContext as the defaultResponder and return it if present.
+    if (typeof defaultResponder === SC.T_STRING) {
+      defaultResponder = SC.objectForPropertyPath(defaultResponder);
+    }
+
+    if (!defaultResponder) return null;
+    else if (defaultResponder.isResponderContext) return defaultResponder;
+    else if (defaultResponder.respondsTo(methodName)) return defaultResponder;
+    else return null;
   },
   
   /**

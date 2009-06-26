@@ -404,6 +404,7 @@ SC.ListItemView = SC.View.extend(
     return this._isInsideElementWithClassName('disclosure', evt);
   },
   
+  
   /** @private 
   mouseDown is handled only for clicks on the checkbox view or or action
   button.
@@ -421,6 +422,7 @@ SC.ListItemView = SC.View.extend(
       this._isMouseDownOnDisclosure = YES;
       this._isMouseInsideDisclosure = YES ;
       return YES;
+
     }
     
     return NO ; // let the collection view handle this event
@@ -428,7 +430,7 @@ SC.ListItemView = SC.View.extend(
   
   mouseUp: function(evt) {
     var ret= NO, del, checkboxKey, content, state, idx, set;
-    
+
     // if mouse was down in checkbox -- then handle mouse up, otherwise 
     // allow parent view to handle event.
     if (this._isMouseDownOnCheckbox) {
@@ -455,7 +457,7 @@ SC.ListItemView = SC.View.extend(
       if (this._isInsideDisclosure(evt)) {
         state = this.get('disclosureState');
         idx   = this.get('contentIndex');
-        set   = idx ? SC.IndexSet.create(idx) : null;
+        set   = (!SC.none(idx)) ? SC.IndexSet.create(idx) : null;
         del = this.get('displayDelegate');
         
         if (state === SC.BRANCH_OPEN) {
@@ -472,7 +474,7 @@ SC.ListItemView = SC.View.extend(
      
       this._removeDisclosureActiveState();
       ret = YES ;
-    }
+    } 
    
     // clear cached info
     this._isMouseInsideCheckbox = this._isMouseDownOnCheckbox = NO ;
@@ -523,13 +525,14 @@ SC.ListItemView = SC.View.extend(
   },
   
   /**
-  Returns true if a click is on the label text itself to enable editing.
+    Returns true if a click is on the label text itself to enable editing.
   
-  Note that if you override renderLabel(), you probably need to override 
-  this as well.
+    Note that if you override renderLabel(), you probably need to override 
+    this as well, or just $label() if you only want to control the element
+    returned.
   
-  @param evt {Event} the mouseUp event.
-  @returns {Boolean} YES if the mouse was on the content element itself.
+    @param evt {Event} the mouseUp event.
+    @returns {Boolean} YES if the mouse was on the content element itself.
   */
   contentHitTest: function(evt) {
    // if not content value is returned, not much to do.
@@ -558,14 +561,21 @@ SC.ListItemView = SC.View.extend(
    var labelKey = this.getDelegateProperty('contentValueKey', del) ;
    var v = (labelKey && content && content.get) ? content.get(labelKey) : null ;
    
-   var f = this.get('frame') ;
+   var f= this.computeFrameWithParentFrame(null);
+   var parent = this.get('parentView');
+   var pf = parent.get('frame');
+   
    var el = this.$label() ;
-   if (!el) return NO ;
+   var offset = SC.viewportOffset(el[0]);
+   if (!el || el.get('length')===0) return NO ;
    
    // if the label has a large line height, try to adjust it to something
    // more reasonable so that it looks right when we show the popup editor.
    var oldLineHeight = el.css('lineHeight');
    var fontSize = el.css('fontSize');
+   var top = this.$().css('top');
+   if(top) top = parseInt(top.substring(0,top.length-2),00);
+   else top =0;
    var lineHeight = oldLineHeight;
    var lineHeightShift = 0;
    
@@ -577,17 +587,18 @@ SC.ListItemView = SC.View.extend(
      } else oldLineHeight = null ;
    }
    
-   f.x += el.offsetLeft ;
-   f.y += el.offsetTop + lineHeightShift - 2;
-   f.height = el.offsetHeight ;
-   f.width = (f.width - 30 - el.offsetLeft) ;
-   f = this.convertFrameToView(f, null) ;
+   f.x = offset.x;
+   f.y = offset.y+top + lineHeightShift ;
+   f.height = el[0].offsetHeight ;
+   f.width = (f.width - 30 - el[0].offsetLeft) ;
    
    var ret = SC.InlineTextFieldView.beginEditing({
      frame: f, 
      exampleElement: el, 
      delegate: this, 
-     value: v
+     value: v,
+     multiline: NO,
+     isCollection: YES
    }) ;
    
    // restore old line height for original item if the old line height 

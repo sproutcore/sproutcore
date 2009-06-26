@@ -42,7 +42,7 @@ function verifyRowOffsets(view, rowHeight, expected) {
   var loc = view.get('length'), actual, idx, cur=0;
   
   for(idx=0;idx<loc;idx++) {
-    if (SC.stopIt) debugger ;
+    //if (SC.stopIt) debugger ;
     actual = view.rowOffsetForContentIndex(idx);
     equals(actual, cur, "content.rowHeightForContentIndex(%@) should be expected offset".fmt(idx));
     cur += expected ? expected[idx] : rowHeight;
@@ -60,6 +60,11 @@ function verifyRowOffsets(view, rowHeight, expected) {
 test("constant row heights", function() {
   var view = SC.ListView.create({ content: content, rowHeight: 40, customRowHeightIndexes: null });
   verifyRowOffsets(view, 40);
+});
+
+test("constant row heights with rowSpacing", function() {
+  var view = SC.ListView.create({ content: content, rowHeight: 40, rowSpacing: 2, customRowHeightIndexes: null });
+  verifyRowOffsets(view, 42);
 });
 
 test("custom row heights", function() {

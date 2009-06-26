@@ -363,7 +363,7 @@ SC.Record = SC.Object.extend(
   */
   
   statusString: function() {
-    var ret = [], status = this.status();
+    var ret = [], status = this.get('status');
     
     for(prop in SC.Record) {
       if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
@@ -380,29 +380,29 @@ SC.Record = SC.Object.extend(
 SC.Record.mixin( /** @scope SC.Record */ {
 
   // Record States
-  CLEAN:            0x0001,
-  DIRTY:            0x0002,
-
-  EMPTY:            0x0100,
-  ERROR:            0x1000,
-
-  READY:            0x0200,
-  READY_CLEAN:      0x0201,
-  READY_DIRTY:      0x0202,
-  READY_NEW:        0x0203,
-
-  DESTROYED:        0x0400,
-  DESTROYED_CLEAN:  0x0401,
-  DESTROYED_DIRTY:  0x0402,
-
-  BUSY:             0x0800,
-  BUSY_LOADING:     0x0804,
-  BUSY_CREATING:    0x0808,
-  BUSY_COMMITTING:  0x0810,
-  BUSY_REFRESH:     0x0820,
-  BUSY_REFRESH_CLEAN:  0x0821,
-  BUSY_REFRESH_DIRTY:  0x0822,
-  BUSY_DESTROYING:  0x0840,
+  CLEAN:            0x0001, // 1
+  DIRTY:            0x0002, // 2
+  
+  EMPTY:            0x0100, // 256
+  ERROR:            0x1000, // 4096
+  
+  READY:            0x0200, // 512
+  READY_CLEAN:      0x0201, // 513
+  READY_DIRTY:      0x0202, // 514
+  READY_NEW:        0x0203, // 515
+  
+  DESTROYED:        0x0400, // 1024
+  DESTROYED_CLEAN:  0x0401, // 1025
+  DESTROYED_DIRTY:  0x0402, // 1026
+  
+  BUSY:             0x0800, // 2048
+  BUSY_LOADING:     0x0804, // 2052
+  BUSY_CREATING:    0x0808, // 2056
+  BUSY_COMMITTING:  0x0810, // 2064
+  BUSY_REFRESH:     0x0820, // 2080
+  BUSY_REFRESH_CLEAN:  0x0821, // 2081
+  BUSY_REFRESH_DIRTY:  0x0822, // 2082
+  BUSY_DESTROYING:  0x0840, // 2112
 
   // exceptions that can be raised when processing records
   BAD_STATE_ERROR:     new Error("Internal Inconsistency"),

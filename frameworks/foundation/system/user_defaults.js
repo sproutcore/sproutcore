@@ -84,8 +84,15 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       localStorage = window.globalStorage[window.location.hostname];
     }
     if (localStorage) {
-      //console.log('userKeyName = %@ local=%@'.fmt(userKeyName, localStorage));
       ret = localStorage[["SC.UserDefaults",userKeyName].join('@')];
+      if (!SC.none(ret)) {
+        try {
+          ret = SC.json.decode(ret);
+        } 
+        catch(e) {
+          ret = null;
+        }
+      }
     }
     
     // if not found in localStorage, try to notify delegate
@@ -131,7 +138,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       localStorage = window.globalStorage[window.location.hostname];
     }
     if (localStorage) {
-      localStorage[["SC.UserDefaults",userKeyName].join('@')] = value;
+      localStorage[["SC.UserDefaults",userKeyName].join('@')] = SC.json.encode(value);
     }
     
     // also notify delegate

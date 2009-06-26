@@ -17,3 +17,12 @@ h1.app-title img {
   position: relative;
   top: -3px;
 }
+
+.sc-collection-view.test-list .sc-collection-item {
+  border-bottom: 1px #eee solid;
+  font-size: 12px;
+}
+
+.sc-view.sc-toolbar-view.navigation-bar {
+  border-bottom: 1px #999 solid;
+}

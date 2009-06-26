@@ -1,0 +1,30 @@
+/* @group Checkbox */
+
+.sc-list-item-view .sc-checkbox-view {
+	position: absolute;
+	display: block;
+	border: none;
+	width: 16px;
+	height: 16px;
+	left: 5px;
+	top:  50%;
+	margin-top: -8px;
+  background: none;
+}
+
+.sc-list-item-view.sel .sc-checkbox-view {
+  background: none;
+	border: none;
+}
+
+.sc-list-item-view .sc-checkbox-view.sel {
+  background: none;
+	border: none;
+}
+
+.sc-list-item-view .sc-checkbox-view.active {
+  background: none;
+	border: none;
+}
+
+/* @end */

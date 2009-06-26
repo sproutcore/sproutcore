@@ -16,9 +16,12 @@ TestRunner.main = function main() {
   // setup views
   TestRunner.getPath('mainPage.mainPane').append() ;
 
+  //debugger;
+  TestRunner.makeFirstResponder(TestRunner.START);
+
   // load initial data
-  var targets = TestRunner.store.findAll(TestRunner.Target);
-  TestRunner.targetsController.set('content', targets);
+  //var targets = TestRunner.store.findAll(TestRunner.Target);
+  //TestRunner.targetsController.set('content', targets);
 
 } ;
 
