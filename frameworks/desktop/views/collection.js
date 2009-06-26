@@ -2198,10 +2198,24 @@ SC.CollectionView = SC.View.extend(
     
     indexes.forEach(function(i) {
       var itemView = this.itemViewForContentIndex(i),
-          layer    = itemView ? itemView.get('layer') : null;
+          isSelected, layer;
+        
+      // render item view without isSelected state.  
+      if (itemView) {
+        isSelected = itemView.get('isSelected');
+        itemView.set('isSelected', NO);
+        
+        itemView.updateLayerIfNeeded();
+        layer = itemView.get('layer');
+        if (layer) layer = layer.cloneNode(true);
+        
+        itemView.set('isSelected', isSelected);
+        itemView.updateLayerIfNeeded();
+      }
 
-      if (layer) dragLayer.appendChild(layer.cloneNode(true));
+      if (layer) dragLayer.appendChild(layer);
       layer = null;
+      
     }, this);
 
     dragLayer = null;
@@ -2481,6 +2495,7 @@ SC.CollectionView = SC.View.extend(
       
       // now insert objects into new insertion locaiton
       content.replace(idx, 0, objects);
+      this.select(SC.IndexSet.create(idx, objects.length));
       content.endPropertyChanges(); // restart notifications
 
       // make the op into its actual value
