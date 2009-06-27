@@ -225,3 +225,41 @@ test("Binding with transforms, function to check the type of value", function() 
 	SC.Binding.flushPendingChanges();
 	equals(jon.get("value1"), bon2.get("val1"));
 });
+
+test("two bindings to the same value should sync in the order they are initialized", function() {
+
+  SC.LOG_BINDINGS = YES;
+
+  SC.RunLoop.begin();
+
+  var a = window.a = SC.Object.create({ 
+    foo: "bar" 
+  });
+  
+  var b = window.b = SC.Object.create({ 
+    foo: "baz",
+    fooBinding: "a.foo",
+    
+    C: SC.Object.extend({
+      foo: "bee",
+      fooBinding: "*owner.foo"
+    }),
+    
+    init: function() {
+      sc_super();
+      this.set('c', this.C.create({ owner: this }));
+    }
+    
+  });
+
+  SC.LOG_BINDINGS = YES;
+    
+  SC.RunLoop.end();
+  
+  equals(a.get('foo'), "bar", 'a.foo should not change');
+  equals(b.get('foo'), "bar", 'a.foo should propogate up to b.foo');
+  equals(b.c.get('foo'), "bar", 'a.foo should propogate up to b.c.foo');
+  
+  window.a = window.b = null ;
+  
+});

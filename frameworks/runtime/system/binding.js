@@ -433,7 +433,7 @@ SC.Binding = {
     // schedule to register an update.
     if (v !== this._bindingValue) {
 
-      this._setBindingValue(v) ;
+      this._setBindingValue(target, key) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.  
     }
@@ -457,14 +457,32 @@ SC.Binding = {
     // if the new value is different from the current binding value, then 
     // schedule to register an update.
     if (v !== this._transformedBindingValue) {
-      this._setBindingValue(v) ;
+      this._setBindingValue(target, key) ;
       this._changePending = YES ;
       SC.Binding._changeQueue.add(this) ; // save for later.  
     }
   },
   
-  _setBindingValue: function(v) {
-    this._bindingValue = v ;
+  /**
+    Saves the source location for the binding value.  This will be used later
+    to actually update the binding value.
+  */
+  _setBindingValue: function(source, key) {
+    this._bindingSource = source;
+    this._bindingKey    = key;
+  },
+  
+  /**
+    Updates the binding value from the current binding source if needed.  This
+    should be called just before using this._bindingValue.
+  */
+  _computeBindingValue: function() {
+    var source = this._bindingSource,
+        key    = this._bindingKey,
+        v;
+        
+    if (!source) return ; // nothing to do
+    this._bindingValue = v = source.getPath(key);
     
     // apply any transforms to get the to property value also
     var transforms = this._transforms;
@@ -550,6 +568,7 @@ SC.Binding = {
 
     // compute the binding targets if needed.
     this._computeBindingTargets() ;
+    this._computeBindingValue();
     
     var v = this._bindingValue ;
     var tv = this._transformedBindingValue ;
@@ -605,7 +624,7 @@ SC.Binding = {
       // if the new value is different from the current binding value, then 
       // schedule to register an update.
       if (v !== this._bindingValue) {
-        this._setBindingValue(v) ;
+        this._setBindingValue(target, key) ;
         this._changePending = YES ;
         SC.Binding._changeQueue.add(this) ; // save for later.  
       }
