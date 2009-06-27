@@ -91,7 +91,7 @@ SC.DropTarget = {
   dragUpdated: function(drag, evt) {},
   
   /**
-    Called when the user exists your droppable area or the drag ends
+    Called when the user exits your droppable area or the drag ends
     and you were the last targeted droppable area.
     
     Override this method to perform any clean up on your UI such as hiding 
@@ -107,9 +107,9 @@ SC.DropTarget = {
   /**
     Called on all drop targets when the drag ends.  
     
-    For example, the user might have dragged the view off the screen and let go
-    or they might have hit escape.  Override this method to perform any final
-    cleanup.  This will be called instead of dragExited.
+    For example, the user might have dragged the view off the screen and let 
+    go or they might have hit escape.  Override this method to perform any 
+    final cleanup.  This will be called instead of dragExited.
     
     The default implementation does nothing.
     

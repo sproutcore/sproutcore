@@ -449,13 +449,43 @@ SC.ListView = SC.CollectionView.extend(
     this._insertionPointView = null;
   },
 
+  /**
+    Compute the insertion index for the passed location.  The location is 
+    a point, relative to the top/left corner of the receiver view.  The return
+    value is an index plus a dropOperation, which is computed as such:
+    
+    - if outlining is not used and you are within 5px of an edge, DROP_BEFORE
+      the item after the edge.
+      
+    - if outlining is used and you are within 5px of an edge and the previous
+      item has a different outline level then the next item, then DROP_AFTER
+      the previous item if you are closer to that outline level.
+      
+    - if dropOperation = SC.DROP_ON and you are over the middle of a row, then
+      use DROP_ON.
+  */
   insertionIndexForLocation: function(loc, dropOperation) { 
     var indexes = this.contentIndexesInRect(loc),
-        index   = indexes.get('min');
+        index   = indexes.get('min'),
+        len, min, max;
 
+    // if there are no indexes in the rect, then we need to either insert
+    // before the top item or after the last item.  Figure that out by 
+    // computing both.
     if (SC.none(index) || index<0) {
-      //debugger; 
-      return [-1, SC.DRAG_NONE]; // nothing to do
+      len = this.get('length');
+      if ((len===0) || (loc.y <= this.rowOffsetForContentIndex(0))) index = 0;
+      else if (loc.y >= this.rowOffsetForContentIndex(len)) index = len;
+    }
+
+    // figure the range of the row the location must be within.
+    min = this.rowOffsetForContentIndex(index);
+    max = min + this.rowHeightForContentIndex(index);
+    
+    // now we know which index we are in.  if dropOperation is DROP_ON, figure
+    // if we can drop on or not.
+    if (dropOperation == SC.DROP_ON) {
+      
     }
 
     return [index, dropOperation];

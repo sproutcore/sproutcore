@@ -251,6 +251,16 @@ SC.Drag = SC.Object.extend(
   */
   data: null,
   
+  /**
+    Returns the currently allowed dragOperations for the drag.  This will be 
+    set just before any callbacks are invoked on a drop target.  The drag 
+    source is given an opportunity to set these operations.
+    
+    @readOnly
+    @type Number
+  */
+  allowedDragOperations: SC.DRAG_ANY,
+  
   /** @private required by autoscroll */
   _dragInProgress: YES,
   
@@ -344,14 +354,12 @@ SC.Drag = SC.Object.extend(
         op = source.dragSourceOperationMaskFor(this, target) ;
       } else op = SC.DRAG_ANY ; // assume drops are allowed
       
-      this.sourceDropOperations = op ;
-      
       // now, let's see if the target will accept the drag
       if ((op != SC.DRAG_NONE) && target && target.computeDragOperations) {
-        op = op & target.computeDragOperations(this, evt) ;
+        op = op & target.computeDragOperations(this, evt, op) ;
       } else op = SC.DRAG_NONE ; // assume drops AREN'T allowed
       
-      this.dropOperations = op ;
+      this.allowedDragOperations = op ;
       
       // if DRAG_NONE, then look for the next parent that is a drop zone
       if (op == SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
@@ -385,8 +393,9 @@ SC.Drag = SC.Object.extend(
     executes the drop target protocol to try to complete the drag operation.
   */
   mouseUp: function(evt) {
-    var loc = { x: evt.pageX, y: evt.pageY } ;
-    var target = this._lastTarget, op = this.dropOperations;
+    var loc    = { x: evt.pageX, y: evt.pageY },
+        target = this._lastTarget, 
+        op     = this.allowedDragOperations;
     
     this.set('location', loc);
     
