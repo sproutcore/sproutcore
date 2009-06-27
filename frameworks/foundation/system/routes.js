@@ -193,6 +193,18 @@ SC.routes = SC.Object.create(
     this._didSetupHistory = false ;
   },
   
+  // use this method instead of invokeLater() to check windowLocation since
+  // we don't want to trigger runLoops.
+  invokeCheckWindowLocation: function(after) {
+    var f = this.__checkWindowLocation, that = this;
+    if (!f) {
+      f = this.__checkWindowLocation = function() {
+        that._checkWindowLocation();
+      };
+    }
+    setTimeout(f, after);
+  },
+  
   /** @private
     _checkWindowLocation and _setWindowLocation are implemented separately for
     each browser.  Below are the implementations, which get copied during init.
@@ -216,7 +228,7 @@ SC.routes = SC.Object.create(
         // create forward stack.
         this._forwardStack = [] ;
         
-        this.invokeLater(this._checkWindowLocation, 1000) ;
+        this.invokeCheckWindowLocation(1000) ;
       },
       
       _checkWindowLocation: function() { 
@@ -278,7 +290,7 @@ SC.routes = SC.Object.create(
           this.gotoRoute(cloc) ;
         }
         
-        this.invokeLater(this._checkWindowLocation, 50) ;
+        this.invokeCheckWindowLocation(50) ;
       },
       
       _setWindowLocation: function(loc) {
@@ -297,7 +309,7 @@ SC.routes = SC.Object.create(
     // for IE.
     ie: {
       _setupHistory: function() {
-        this.invokeLater(this._checkWindowLocation, 1000) ;
+        this.invokeCheckWindowLocation(1000) ;
       },
       
       _checkWindowLocation: function() {
@@ -305,7 +317,7 @@ SC.routes = SC.Object.create(
         var cloc = location.hash ;
         cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
         if (cloc != loc) this.set('location',(cloc) ? cloc : '') ;
-        this.invokeLater(this._checkWindowLocation, 100) ;
+        this.invokeCheckWindowLocation(100) ;
       },
       
       _setWindowLocation: function(loc) {
@@ -323,7 +335,7 @@ SC.routes = SC.Object.create(
   /** @private */
   _setupHistory: function() {
     var that = this ;
-    this._checkWindowLocation.invokeLater(this, 1000) ;
+    this.invokeCheckWindowLocation(1000) ;
   },
   
   /** @private */
@@ -336,7 +348,8 @@ SC.routes = SC.Object.create(
       this.set('location',(cloc) ? cloc : '') ;
       SC.RunLoop.end();
     }
-    this.invokeLater(this._checkWindowLocation, 150) ;
+    
+    this.invokeCheckWindowLocation(150) ;
   },
   
   /** @private */
