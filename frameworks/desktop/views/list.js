@@ -467,13 +467,13 @@ SC.ListView = SC.CollectionView.extend(
   insertionIndexForLocation: function(loc, dropOperation) { 
     var indexes = this.contentIndexesInRect(loc),
         index   = indexes.get('min'),
-        len, min, max;
+        len     = this.get('length'),
+        min, max, diff, clevel, cindent, plevel, pindent, itemView;
 
     // if there are no indexes in the rect, then we need to either insert
     // before the top item or after the last item.  Figure that out by 
     // computing both.
     if (SC.none(index) || index<0) {
-      len = this.get('length');
       if ((len===0) || (loc.y <= this.rowOffsetForContentIndex(0))) index = 0;
       else if (loc.y >= this.rowOffsetForContentIndex(len)) index = len;
     }
@@ -482,10 +482,47 @@ SC.ListView = SC.CollectionView.extend(
     min = this.rowOffsetForContentIndex(index);
     max = min + this.rowHeightForContentIndex(index);
     
+    dropOperation = SC.DROP_BEFORE;
+    
     // now we know which index we are in.  if dropOperation is DROP_ON, figure
     // if we can drop on or not.
     if (dropOperation == SC.DROP_ON) {
+      // editable size - reduce height by a bit to handle dropping
+      if (this.get('isEditable')) diff=Math.min(Math.floor((max-min)*0.2),5);
+      else diff = 0;
       
+      // if we're inside the range, then DROP_ON
+      if (loc.y >= (min+diff) || loc.y <= (max+diff)) {
+        return [index, SC.DROP_ON];
+      }
+    }
+    
+    // ok, now if we are in last 10px, go to next item.
+    if ((index<len) && (loc.y >= max-10)) index++;
+    
+    // finally, let's decide if we want to actually insert before/after.  Only
+    // matters if we are using outlining.
+    if (index>0) {
+      itemView = this.itemViewForContentIndex(index);
+      clevel   = itemView ? itemView.get('outlineLevel') : 0;
+      cindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
+      cindent  *= clevel;
+      
+      itemView = this.itemViewForContentIndex(index);
+      pindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
+      plevel   = itemView ? itemView.get('outlineLevel') : 0;
+      pindent  *= plevel;
+
+      // if indent levels are different, then try to figure out which level 
+      // it should be on.
+      if ((clevel !== plevel) && (cindent !== pindent)) {
+        // use most inner indent as boundary
+        if (((pindent > cindent) && (loc.x >= pindent)) ||
+            ((pindent < cindent) && (loc.x <= cindent))) {
+          index-- ;
+          dropOperation = SC.DROP_AFTER;
+        }
+      }
     }
 
     return [index, dropOperation];
