@@ -183,6 +183,20 @@ SC.Array = {
   },
   
   /**
+    Search the array for the passed set of objects and remove any occurrences
+    of the. 
+    
+    @param {SC.Enumerable} objects the objects to remove
+    @returns {SC.Array} receiver
+  */
+  removeObjects: function(objects) {
+    this.beginPropertyChanges();
+    objects.forEach(function(obj) { this.removeObject(obj); }, this);
+    this.endPropertyChanges();
+    return this;
+  },
+  
+  /**
     Push the object onto the end of the array.  Works just like push() but it 
     is KVO-compliant.
   */
@@ -191,6 +205,21 @@ SC.Array = {
     return obj ;
   },
   
+  
+  /**
+    Add the objects in the passed numerable to the end of the array.  Defers
+    notifying observers of the change until all objects are added.
+    
+    @param {SC.Enumerable} objects the objects to add
+    @returns {SC.Array} receiver
+  */
+  pushObjects: function(objects) {
+    this.beginPropertyChanges();
+    objects.forEach(function(obj) { this.pushObject(obj); }, this);
+    this.endPropertyChanges();
+    return this;
+  },
+
   /**
     Pop object from array or nil if none are left.  Works just like pop() but 
     it is KVO-compliant.
@@ -222,6 +251,21 @@ SC.Array = {
   unshiftObject: function(obj) {
     this.insertAt(0, obj) ;
     return obj ;
+  },
+
+  
+  /**
+    Adds the named objects to the beginning of the array.  Defers notifying
+    observers until all objects have been added.
+    
+    @param {SC.Enumerable} objects the objects to add
+    @returns {SC.Array} receiver
+  */
+  unshiftObjects: function(objects) {
+    this.beginPropertyChanges();
+    objects.forEach(function(obj) { this.unshiftObject(obj); }, this);
+    this.endPropertyChanges();
+    return this;
   },
   
   /**  
