@@ -412,15 +412,26 @@ SC.Array = {
   */
   enumerableContentDidChange: function(start, amt, delta) {
     var rangeob = this._array_rangeObservers, 
-        length, changes ;
-        
+        oldlen  = this._array_oldLength,
+        newlen, length, changes ;
+
+    this.beginPropertyChanges();    
+    this.notifyPropertyChange('length'); // flush caches
+
+    // schedule info for range observers
     if (rangeob && rangeob.length>0) {
+
+      // if no oldLength has been cached, just assume 0
+      if (oldlen === undefined) oldlen = 0;    
+      this._array_oldLength = newlen = this.get('length');
       
       // normalize input parameters
+      // if delta was not passed, assume it is the different between the 
+      // new and old length.
       if (start === undefined) start = 0;
-      if (delta === undefined) delta = 0 ;
+      if (delta === undefined) delta = newlen - oldlen ;
       if (delta !== 0 || amt === undefined) {
-        length = this.get('length') - start ;
+        length = newlen - start ;
         if (delta<0) length -= delta; // cover removed range as well
       } else {
         length = amt ;
@@ -431,7 +442,9 @@ SC.Array = {
       changes.add(start, length);
     }
     
-    this.notifyPropertyChange('[]').notifyPropertyChange('length') ;
+    this.notifyPropertyChange('[]') ;
+    this.endPropertyChanges();
+    
     return this ;
   },
   
