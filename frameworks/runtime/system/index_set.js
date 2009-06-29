@@ -1072,7 +1072,7 @@ SC.IndexSet = SC.mixin({},
       if (idx >= 0) { 
         this.remove(idx);
         if (firstOnly) return this ;
-        cur = idx++;
+        cur = idx+1;
       } else return this ;
     }
     return this ;    
