@@ -151,7 +151,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       // clear existing storeKeys, start over by applying all storekeys for 
       // this recordType
       this.storeKeys = [];
-      this.applyQuery(storeKeys, recordTypes);
+      this.applyQuery(storeKeys, recordTypes, YES);
     }
     
   },
