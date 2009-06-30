@@ -41,6 +41,8 @@ var pane = SC.ControlTestPane.design()
     useStaticLayout: YES, 
     layout: { width: '150', right: '0' }
   });
+  
+    pane.show();
 
 // ..........................................................
 // TEST VIEWS
