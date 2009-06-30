@@ -752,7 +752,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     else if (source) {
       // call fetch() on the data source.
       sourceRet = source.fetch.call(source, this, fetchKey, params);
-      if(SC.typeOf(sourceRet)===SC.T_ARRAY) {
+      var typeRet = SC.typeOf(sourceRet);
+      if(typeRet===SC.T_ARRAY || (typeRet===SC.T_OBJECT && sourceRet.isSCArray)) {
         storeKeys = sourceRet;
       }
     }
