@@ -1,5 +1,4 @@
-/* @override 
-*/
+/* @override http://localhost:4020/static/sproutcore/standard_theme/en/current/source/button.css?1245946971 */
 
 /* @group Button Core */
 
@@ -65,17 +64,17 @@
 
 .sc-theme.blur .sc-button-view.regular,
 .sc-theme.focus .sc-button-view.regular.disabled {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -496px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -496px;
 }
 
 .sc-theme.blur .sc-button-view.regular .sc-button-inner,
 .sc-theme.focus .sc-button-view.regular.disabled .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat 0 -450px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -450px;
 }
 
 .sc-theme.blur .sc-button-view.regular .sc-button-label, 
 .sc-theme.focus .sc-button-view.regular.disabled .sc-button-label {
-  background: static_url('images/sc-theme-sprite.png') repeat-x 0 -473px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -473px;
   color: #999;
   text-shadow: none ;
 }
@@ -86,7 +85,7 @@
 
 .sc-theme.focus .sc-button-view.regular.sel.disabled, 
 .sc-theme.focus .sc-button-view.regular.def.disabled {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -289px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -289px;
 }
 
 .sc-theme.blur .sc-button-view.regular.sel .sc-button-inner,
@@ -94,7 +93,7 @@
 
 .sc-theme.focus .sc-button-view.regular.sel.disabled .sc-button-inner,
 .sc-theme.focus .sc-button-view.regular.def.disabled .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat 0 -243px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -243px;
 }
 
 .sc-theme.blur .sc-button-view.regular.def .sc-button-label, 
@@ -102,7 +101,7 @@
 
 .sc-theme.focus .sc-button-view.regular.def.disabled .sc-button-label, 
 .sc-theme.focus .sc-button-view.regular.sel.disabled .sc-button-label {
-  background: static_url('images/sc-theme-sprite.png') repeat-x 0 -266px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -266px;
   color: #999;
   text-shadow: none ;
 }
@@ -112,15 +111,15 @@
 /* @group enabled */
 
 .sc-theme .sc-button-view.regular {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -358px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -358px;
 }
 
 .sc-theme .sc-button-view.regular .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat 0 -312px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -312px;
 }
 
 .sc-theme .sc-button-view.regular .sc-button-label {
-   background: transparent static_url('images/sc-theme-sprite.png') repeat-x left -335px;
+   background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x left -335px;
 }
 
 /* @end */
@@ -129,17 +128,17 @@
 
 .sc-theme .sc-button-view.regular.sel, 
 .sc-theme .sc-button-view.regular.def {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -151px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -151px;
 }
 
 .sc-theme .sc-button-view.regular.sel .sc-button-inner, 
 .sc-theme .sc-button-view.regular.def .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat 0 -105px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -105px;
 }
 
 .sc-theme .sc-button-view.regular.sel .sc-button-label, 
 .sc-theme .sc-button-view.regular.def .sc-button-label {
-  background: static_url('images/sc-theme-sprite.png') repeat-x 0 -128px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -128px;
   text-shadow: #dabec6 0px 1px 0px;
 }
 
@@ -149,17 +148,17 @@
 
 .sc-theme .sc-button-view.regular.sel.active, 
 .sc-theme .sc-button-view.regular.def.active {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -220px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -220px;
 }
 
 .sc-theme .sc-button-view.regular.sel.active .sc-button-inner, 
 .sc-theme .sc-button-view.regular.def.active .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat 0 -174px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -174px;
 }
 
 .sc-theme .sc-button-view.regular.sel.active .sc-button-label, 
 .sc-theme .sc-button-view.regular.def.active .sc-button-label {
-  background: static_url('images/sc-theme-sprite.png') repeat-x 0 -197px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -197px;
   text-shadow: #b884a4 0px 1px 0px;
 }
 
@@ -168,15 +167,15 @@
 /* @group active */
 
 .sc-theme .sc-button-view.regular.active {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -427px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -427px;
 }
 
 .sc-theme .sc-button-view.regular.active .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat 0 -381px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -381px;
 }
 
 .sc-theme .sc-button-view.regular.active .sc-button-label {
-  background: static_url('images/sc-theme-sprite.png') repeat-x 0 -404px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -404px;
   text-shadow: #b8b8b8 0px 1px 0px;
 }
 
@@ -186,50 +185,50 @@
 
 .sc-theme .sc-square-theme .sc-button-view.regular,
 .sc-theme .sc-square-theme .sc-button-view.regular.def {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -1150px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -1150px;
   text-shadow: #f0f0f0 0px 1px 0px;
 } 
 
 .sc-theme .sc-square-theme .sc-button-view.regular .sc-button-inner,
 .sc-theme .sc-square-theme .sc-button-view.regular.def .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat left -1104px; 
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1104px; 
 } 
 
 .sc-theme .sc-square-theme .sc-button-view.regular .sc-button-label,
 .sc-theme .sc-square-theme .sc-button-view.regular.def .sc-button-label {
-  background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1127px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1127px;
   text-shadow: #dabec6 0px 1px 0px;
 }
 
 .sc-theme .sc-square-theme .sc-button-view.regular.sel,
 .sc-theme .sc-square-theme .sc-button-view.regular.active {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -1219px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -1219px;
 } 
 
 .sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-inner,
 .sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat left -1173px; 
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1173px; 
 } 
 
 .sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-label,
 .sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-label {
-  background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1196px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1196px;
   text-shadow: #b884a4 0px 1px 0px;
 }
 
 .sc-theme.blur .sc-square-theme .sc-button-view.regular,
 .sc-theme .sc-square-theme .sc-button-view.regular.disabled {
-  background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -1288px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -1288px;
 } 
 
 .sc-theme.blur .sc-square-theme .sc-button-view.regular .sc-button-inner,
 .sc-theme .sc-square-theme .sc-button-view.regular.disabled .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat left -1242px; 
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1242px; 
 } 
 
 .sc-theme.blur .sc-square-theme .sc-button-view.regular .sc-button-label,
 .sc-theme .sc-square-theme .sc-button-view.regular.disabled .sc-button-label {
-  background: transparent static_url('images/sc-theme-sprite.png') repeat-x 0px -1265px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1265px;
   text-shadow: none ;
 }
 
@@ -249,7 +248,7 @@
   height: 21px;
   text-shadow: #c0c0c0 0px 1px 0px;
   text-align: center;
-  background: static_url('images/sc-theme-sprite.png') repeat-x left -1397px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1397px;
   border: 1px solid #625560;
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
@@ -284,7 +283,7 @@
 .sc-theme .sc-square-theme .sc-button-view.regular.active,
 .sc-theme .sc-button-view.square.sel, 
 .sc-theme .sc-button-view.square.active {
-  background: static_url('images/sc-theme-sprite.png') no-repeat left -1489px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1489px;
   text-shadow: #a0a0a0 0px 1px 0px;
 }
 
@@ -292,14 +291,14 @@
 .sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-inner,
 .sc-theme .sc-button-view.square.sel .sc-button-inner, 
 .sc-theme .sc-button-view.square.active .sc-button-inner {
-  background: static_url('images/sc-theme-sprite.png') no-repeat right -1535px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1535px;
 }
 
 .sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-label,
 .sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-label,
 .sc-theme .sc-button-view.square.sel .sc-button-label, 
 .sc-theme .sc-button-view.square.active .sc-button-label {
-  background: static_url('images/sc-theme-sprite.png') repeat-x right -1512px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x right -1512px;
 }
 
 /* @end */
@@ -309,7 +308,7 @@
 .sc-theme.blur .sc-square-theme .sc-button-view.regular,
 .sc-theme .sc-square-theme .sc-button-view.regular.disabled,
 .sc-theme .sc-button-view.square.disabled {
-  background: static_url('images/sc-theme-sprite.png') repeat-x left -1420px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1420px;
   color: #999;
   text-shadow: none ;
   border: 1px #999 solid;
@@ -332,51 +331,54 @@
 
 /* @end */
 
+/* @group Capsule */
+
 /* @group basic : capsule */
 
 .sc-theme .sc-button-view.capsule {
   font-size: 12px;
-  height: 21px;
-  text-shadow: #c0c0c0 0px 1px 0px;
+  height: 24px;
+  max-height: 24px;
+  text-shadow: #fff 0px 1px 0px;
   text-align: center;
-	background: transparent static_url('images/sc-theme-sprite.png') no-repeat right -358px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -224px;
 }
 
 .sc-theme .sc-button-view.capsule .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -312px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -196px;
   display: block ;
-  height: 21px;
-  max-height: 21px;
+  height: 24px;
+  max-height: 23px;
 }
 
 .sc-theme .sc-button-view.capsule .sc-button-label {
- 	background: transparent static_url('images/sc-theme-sprite.png') repeat-x left -335px;
+ 	background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x left -170px;
   display: block ;
   text-align: center;
   padding: 0px 0px 7px 0px;
-  height: 14px;
-  margin-left: 8px;
-  margin-right: 8px;  
-  line-height: 22px;  
+  height: 24px;
+  margin-left: 12px;
+  margin-right: 12px;  
+  line-height: 24px;  
 }
 
 /* @end */
 
-/* @group sel - def */
+/* @group sel - def : capsule */
 
 .sc-theme .sc-button-view.capsule.sel,
 .sc-theme .sc-button-view.capsule.def {
-	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -151px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -151px;
 }
 
 .sc-theme .sc-button-view.capsule.sel .sc-button-inner,
 .sc-theme .sc-button-view.capsule.def .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -105px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -105px;
 }
 
 .sc-theme .sc-button-view.capsule.sel .sc-button-label,
 .sc-theme .sc-button-view.capsule.def .sc-button-label {
-	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -128px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -128px;
 	text-shadow: #dabec6 0px 1px 0px;
 }
 
@@ -385,15 +387,15 @@
 /* @group disabled */
 
 .sc-theme .sc-button-view.capsule.disabled {
-	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -496px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -496px;
 }
 
 .sc-theme .sc-button-view.capsule.disabled .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -450px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -450px;
 }
 
 .sc-theme .sc-button-view.capsule.disabled .sc-button-label {
-	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -473px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -473px;
 	color: #999;
 	text-shadow: none ;
 }
@@ -404,17 +406,17 @@
 
 .sc-theme .sc-button-view.capsule.sel.disabled,
 .sc-theme .sc-button-view.capsule.def.disabled {
-	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -289px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -289px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.disabled .sc-button-inner,
 .sc-theme .sc-button-view.capsule.def.disabled .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -243px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -243px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.disabled .sc-button-label,
 .sc-theme .sc-button-view.capsule.def.disabled .sc-button-label {
-	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -266px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -266px;
 	color: #999;
 	text-shadow: none ;
 }
@@ -425,17 +427,17 @@
 
 .sc-theme .sc-button-view.capsule.sel.active,
 .sc-theme .sc-button-view.capsule.def.active {
-	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -220px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -220px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.active .sc-button-inner,
 .sc-theme .sc-button-view.capsule.def.active .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -174px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -174px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.active .sc-button-label,
 .sc-theme .sc-button-view.capsule.def.active .sc-button-label {
-	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -197px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -197px;
 	text-shadow: #b884a4 0px 1px 0px;
 }
 
@@ -444,17 +446,21 @@
 /* @group active */
 
 .sc-theme .sc-button-view.capsule.active {
-	background: transparent static_url('images/sc-theme-sprite.png') no-repeat scroll right -427px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -427px;
 }
 
 .sc-theme .sc-button-view.capsule.active .sc-button-inner {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -381px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -381px;
 }
 
 .sc-theme .sc-button-view.capsule.active .sc-button-label {
-	background: static_url('images/sc-theme-sprite.png') repeat-x 0 -404px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -404px;
 	text-shadow: #b8b8b8 0px 1px 0px;
 }
+
+/* @end */
+
+
 
 /* @end */
 
