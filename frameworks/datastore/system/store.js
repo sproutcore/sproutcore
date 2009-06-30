@@ -503,8 +503,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     
     }
-    
-    this._notifyRecordArraysWithQuery(storeKeys, recordTypes);
+        
+    // this._notifyRecordArraysWithQuery(storeKeys, recordTypes);
     
     // reset for next run loop
     this.recordPropertyChanges.storeKeys = [];
@@ -1491,7 +1491,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = dataHashes.get('length'),
         ret     = [],
-        recordType, id, primaryKey, idx, dataHash, storeKey;
+        recordType, id, primaryKey, idx, dataHash, storeKey, newRecordTypes = SC.Set.create();
         
     // save lookup info
     if (!isArray) {
@@ -1508,8 +1508,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
       id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
       ret[idx] = storeKey = recordType.storeKeyFor(id); // needed to cache
+      newRecordTypes.push(recordType);
       this.pushRetrieve(recordType, id, dataHash, storeKey);
     }
+    
+    this._notifyRecordArraysWithQuery(ret, newRecordTypes);
+    
     // return storeKeys
     return ret ;
   },
