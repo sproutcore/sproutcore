@@ -102,6 +102,10 @@ SC.ImageView = SC.View.extend(SC.Control,
     
     if (status === SC.IMAGE_STATE_NONE && value) this._image_valueDidChange() ; // setup initial state
     
+    // query the status again, as calling this._image_valueDidChange() may
+    // update status to SC.IMAGE_STATE_LOADED or SC.IMAGE_STATE_SPRITE
+    status = this.get('status');
+
     var src = (status === SC.IMAGE_STATE_LOADED) ? value : SC.BLANK_IMAGE_URL ;
     if (status === SC.IMAGE_STATE_SPRITE) context.addClass(value) ;
     context.attr('src', src) ;
