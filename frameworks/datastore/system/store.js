@@ -527,7 +527,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for(var idx=0, len=recordArrays.length;idx<len;idx++) {
       var recArray = recordArrays[idx];
       // if this record array still exists, reapply the query
-      if(recArray) recArray.applyQuery(storeKeys, recordTypes, YES);
+      if(recArray) recArray.applyQuery(storeKeys, recordTypes);
     }
   },
   
