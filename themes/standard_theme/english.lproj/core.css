@@ -6,7 +6,7 @@
 /* Always use Helvetica and this background color. */
 body.sc-theme {
 	font: 12px/18px "Lucida Grande", "Lucida Sans", Verdana, Arial, sans-serif;
-	background-color: #f0f0f0 ;
+	background-color: #57647f ;
 	padding: 0px;
 }
 
@@ -44,4 +44,17 @@ body.sc-theme .sc-view.sc-top-border {
 
 .sc-theme div.sc-web-view {
   background-color: white;
+}
+
+.sc-theme .sc-pane.sc-main {
+	background: -webkit-gradient(linear, left top, left bottom, from(#57647f), to(#848ea2));
+}
+
+.sc-theme #loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+	background: -webkit-gradient(linear, left top, left bottom, from(#57647f), to(#848ea2));
 }

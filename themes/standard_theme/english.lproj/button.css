@@ -25,306 +25,166 @@
 
 /* @end */
 
-/* @group regular */
+/* @group Square Style */
+
+/* @group Core */
+
+.sc-theme .sc-button-view.sc-regular-size.square {
+  text-shadow: #fff 0px 1px 0px;
+  text-align: center;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square .sc-button-inner {
+  display: block ;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square .sc-button-label {
+  display: block ;
+  text-align: center;
+  padding: 0px 0px 7px 0px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.active .sc-button-label {
+  text-shadow:  black 0px -1px 0px;
+  color: white;
+}
+
+.sc-theme .sc-button-view.square.disabled .sc-button-label {
+  color: #999;
+  text-shadow: none;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel .sc-button-label {
+	color: white;
+	text-shadow: #2a569e 0px -1px 0px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.disabled .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.disabled .sc-button-label {
+	color: #ddd;
+	text-shadow: none;
+}
+
+/* @end */
+
+/* @group Regular Size */
 
 /* @group basic */
 
-.sc-theme .sc-button-view.regular {
+.sc-theme .sc-button-view.sc-regular-size.square {
   font-size: 12px;
-  height: 22px;
-  min-width: 32px;
-  text-align: center;
+  max-height: 24px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -814px;
 }
 
-.sc-theme .sc-button-view.regular .sc-button-inner {
-  display: block ;
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
+.sc-theme .sc-button-view.sc-regular-size.square .sc-button-inner {
+  height: 24px;
+  max-height: 24px;
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -789px;
 }
 
-.sc-theme .sc-button-view.regular .sc-button-label {
-  display: block ;
-  text-align: center;
-  line-height: 22px;
-  vertical-align: middle;
-  text-shadow: #f0f0f0 0px 1px 0px;
-  position: absolute;
-  left: 12px;
-  top: 0;
-  bottom: 0;
-  right: 12px;
-}
-
-/* @end */
-
-/* @group disabled */
-
-.sc-theme.blur .sc-button-view.regular,
-.sc-theme.focus .sc-button-view.regular.disabled {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -496px;
-}
-
-.sc-theme.blur .sc-button-view.regular .sc-button-inner,
-.sc-theme.focus .sc-button-view.regular.disabled .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -450px;
-}
-
-.sc-theme.blur .sc-button-view.regular .sc-button-label, 
-.sc-theme.focus .sc-button-view.regular.disabled .sc-button-label {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -473px;
-  color: #999;
-  text-shadow: none ;
-}
-
-
-.sc-theme.blur .sc-button-view.regular.sel, 
-.sc-theme.blur .sc-button-view.regular.def, 
-
-.sc-theme.focus .sc-button-view.regular.sel.disabled, 
-.sc-theme.focus .sc-button-view.regular.def.disabled {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -289px;
-}
-
-.sc-theme.blur .sc-button-view.regular.sel .sc-button-inner,
-.sc-theme.blur .sc-button-view.regular.def .sc-button-inner,
-
-.sc-theme.focus .sc-button-view.regular.sel.disabled .sc-button-inner,
-.sc-theme.focus .sc-button-view.regular.def.disabled .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -243px;
-}
-
-.sc-theme.blur .sc-button-view.regular.def .sc-button-label, 
-.sc-theme.blur .sc-button-view.regular.sel .sc-button-label, 
-
-.sc-theme.focus .sc-button-view.regular.def.disabled .sc-button-label, 
-.sc-theme.focus .sc-button-view.regular.sel.disabled .sc-button-label {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -266px;
-  color: #999;
-  text-shadow: none ;
-}
-
-/* @end */
-
-/* @group enabled */
-
-.sc-theme .sc-button-view.regular {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -358px;
-}
-
-.sc-theme .sc-button-view.regular .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -312px;
-}
-
-.sc-theme .sc-button-view.regular .sc-button-label {
-   background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x left -335px;
-}
-
-/* @end */
-
-/* @group sel - def */
-
-.sc-theme .sc-button-view.regular.sel, 
-.sc-theme .sc-button-view.regular.def {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -151px;
-}
-
-.sc-theme .sc-button-view.regular.sel .sc-button-inner, 
-.sc-theme .sc-button-view.regular.def .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -105px;
-}
-
-.sc-theme .sc-button-view.regular.sel .sc-button-label, 
-.sc-theme .sc-button-view.regular.def .sc-button-label {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -128px;
-  text-shadow: #dabec6 0px 1px 0px;
-}
-
-/* @end */
-
-/* @group sel.active - def.active */
-
-.sc-theme .sc-button-view.regular.sel.active, 
-.sc-theme .sc-button-view.regular.def.active {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -220px;
-}
-
-.sc-theme .sc-button-view.regular.sel.active .sc-button-inner, 
-.sc-theme .sc-button-view.regular.def.active .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -174px;
-}
-
-.sc-theme .sc-button-view.regular.sel.active .sc-button-label, 
-.sc-theme .sc-button-view.regular.def.active .sc-button-label {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -197px;
-  text-shadow: #b884a4 0px 1px 0px;
+.sc-theme .sc-button-view.sc-regular-size.square .sc-button-label {
+  height: 24px;
+  line-height: 24px;  
+  margin-left: 11px;
+  margin-right: 11px;  
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
 }
 
 /* @end */
 
 /* @group active */
 
-.sc-theme .sc-button-view.regular.active {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -427px;
+.sc-theme .sc-button-view.sc-regular-size.square.active {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -913px;
 }
 
-.sc-theme .sc-button-view.regular.active .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -381px;
+.sc-theme .sc-button-view.sc-regular-size.square.active .sc-button-inner {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -939px;
 }
 
-.sc-theme .sc-button-view.regular.active .sc-button-label {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -404px;
-  text-shadow: #b8b8b8 0px 1px 0px;
-}
-
-/* @end */
-
-/* @group square theme */
-
-.sc-theme .sc-square-theme .sc-button-view.regular,
-.sc-theme .sc-square-theme .sc-button-view.regular.def {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -1150px;
-  text-shadow: #f0f0f0 0px 1px 0px;
-} 
-
-.sc-theme .sc-square-theme .sc-button-view.regular .sc-button-inner,
-.sc-theme .sc-square-theme .sc-button-view.regular.def .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1104px; 
-} 
-
-.sc-theme .sc-square-theme .sc-button-view.regular .sc-button-label,
-.sc-theme .sc-square-theme .sc-button-view.regular.def .sc-button-label {
-  background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1127px;
-  text-shadow: #dabec6 0px 1px 0px;
-}
-
-.sc-theme .sc-square-theme .sc-button-view.regular.sel,
-.sc-theme .sc-square-theme .sc-button-view.regular.active {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -1219px;
-} 
-
-.sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-inner,
-.sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1173px; 
-} 
-
-.sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-label,
-.sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-label {
-  background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1196px;
-  text-shadow: #b884a4 0px 1px 0px;
-}
-
-.sc-theme.blur .sc-square-theme .sc-button-view.regular,
-.sc-theme .sc-square-theme .sc-button-view.regular.disabled {
-  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -1288px;
-} 
-
-.sc-theme.blur .sc-square-theme .sc-button-view.regular .sc-button-inner,
-.sc-theme .sc-square-theme .sc-button-view.regular.disabled .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1242px; 
-} 
-
-.sc-theme.blur .sc-square-theme .sc-button-view.regular .sc-button-label,
-.sc-theme .sc-square-theme .sc-button-view.regular.disabled .sc-button-label {
-  background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1265px;
-  text-shadow: none ;
-}
-
-/* @end */
-
-
-/* @end */
-
-/* @group square */
-
-/* @group basic */
-
-.sc-theme .sc-square-theme .sc-button-view.regular,
-.sc-theme .sc-square-theme .sc-button-view.regular.def,
-.sc-theme .sc-button-view.square {
-  font-size: 12px;
-  height: 21px;
-  text-shadow: #c0c0c0 0px 1px 0px;
-  text-align: center;
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1397px;
-  border: 1px solid #625560;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-}
-
-.sc-theme .sc-square-theme .sc-button-view.regular .sc-button-inner,
-.sc-theme .sc-square-theme .sc-button-view.regular.def .sc-button-inner,
-.sc-theme .sc-button-view.square .sc-button-inner {
-  display: block ;
-  height: 21px;
-  max-height: 21px;
-}
-
-.sc-theme .sc-square-theme .sc-button-view.regular .sc-button-label,
-.sc-theme .sc-square-theme .sc-button-view.regular.def .sc-button-label,
-.sc-theme .sc-button-view.square .sc-button-label {
-  display: block ;
-  text-align: center;
-  padding: 0px 0px 7px 0px;
-  height: 14px;
-  margin-left: 8px;
-  margin-right: 8px;  
-  line-height: 22px;  
-}
-
-/* @end */
-
-/* @group sel - def */
-
-.sc-theme .sc-square-theme .sc-button-view.regular.sel,
-.sc-theme .sc-square-theme .sc-button-view.regular.active,
-.sc-theme .sc-button-view.square.sel, 
-.sc-theme .sc-button-view.square.active {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1489px;
-  text-shadow: #a0a0a0 0px 1px 0px;
-}
-
-.sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-inner,
-.sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-inner,
-.sc-theme .sc-button-view.square.sel .sc-button-inner, 
-.sc-theme .sc-button-view.square.active .sc-button-inner {
-  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1535px;
-}
-
-.sc-theme .sc-square-theme .sc-button-view.regular.sel .sc-button-label,
-.sc-theme .sc-square-theme .sc-button-view.regular.active .sc-button-label,
-.sc-theme .sc-button-view.square.sel .sc-button-label, 
-.sc-theme .sc-button-view.square.active .sc-button-label {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x right -1512px;
+.sc-theme .sc-button-view.sc-regular-size.square.active .sc-button-label {
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x right -889px;
 }
 
 /* @end */
 
 /* @group disabled */
 
-.sc-theme.blur .sc-square-theme .sc-button-view.regular,
-.sc-theme .sc-square-theme .sc-button-view.regular.disabled,
-.sc-theme .sc-button-view.square.disabled {
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1420px;
-  color: #999;
-  text-shadow: none ;
-  border: 1px #999 solid;
+.sc-theme .sc-button-view.sc-regular-size.square.disabled {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1064px;
 }
 
-.sc-theme.blur .sc-square-theme .sc-button-view.regular .sc-button-inner,
-.sc-theme .sc-square-theme .sc-button-view.regular.disabled .sc-button-inner ,
-.sc-theme .sc-button-view.square.disabled .sc-button-inner {
-  background: none ;
+.sc-theme .sc-button-view.sc-regular-size.square.disabled .sc-button-inner {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1038px;
 }
 
-.sc-theme.blur .sc-square-theme .sc-button-view.regular .sc-button-label,
-.sc-theme .sc-square-theme .sc-button-view.regular.disabled .sc-button-label,
-.sc-theme .sc-button-view.square.disabled .sc-button-label {
-  background: none ;
+.sc-theme .sc-button-view.sc-regular-size.square.disabled .sc-button-label {
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1014px;
 }
+
+/* @end */
+
+/* @group sel - def */
+
+.sc-theme .sc-button-view.sc-regular-size.square.def,
+.sc-theme .sc-button-view.sc-regular-size.square.sel {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1190px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def .sc-button-inner,
+.sc-theme .sc-button-view.sc-regular-size.square.sel .sc-button-inner {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1164px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel .sc-button-label {
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1140px;
+}
+
+/* @end */
+
+
+
+/* @group sel - def -active */
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.active,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.active {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1316px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.active .sc-button-inner,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.active .sc-button-inner {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1290px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.active .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.active .sc-button-label {
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1266px;
+}
+
+/* @end */
+
+
+/* @group sel - def -disabled */
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.disabled,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.disabled {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat right -1442px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.disabled .sc-button-inner,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.disabled .sc-button-inner {
+  background: static_url('images/sc-theme-repeat-x.png') no-repeat left -1416px;
+}
+
+.sc-theme .sc-button-view.sc-regular-size.square.def.disabled .sc-button-label,
+.sc-theme .sc-button-view.sc-regular-size.square.sel.disabled .sc-button-label {
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -1392px;
+}
+
+/* @end */
 
 /* @end */
 
@@ -333,26 +193,27 @@
 
 /* @group Capsule */
 
-/* @group basic : capsule */
+/* @group basic */
 
 .sc-theme .sc-button-view.capsule {
-  font-size: 12px;
-  height: 24px;
-  max-height: 24px;
-  text-shadow: #fff 0px 1px 0px;
-  text-align: center;
-	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -224px;
+	font-size:   12px;
+	height:      24px;
+	max-height:  24px;
+	text-shadow: #fff 0px 1px 0px;
+  	text-align:  center;
+ 	background:  transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -224px;
 }
 
 .sc-theme .sc-button-view.capsule .sc-button-inner {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -196px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -197px;
   display: block ;
   height: 24px;
-  max-height: 23px;
+  max-height: 24px;
 }
 
+/* 170 - 250 - 490 */
 .sc-theme .sc-button-view.capsule .sc-button-label {
- 	background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x left -170px;
+ 	background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
   display: block ;
   text-align: center;
   padding: 0px 0px 7px 0px;
@@ -360,6 +221,7 @@
   margin-left: 12px;
   margin-right: 12px;  
   line-height: 24px;  
+  text-shadow: none;
 }
 
 /* @end */
@@ -368,18 +230,19 @@
 
 .sc-theme .sc-button-view.capsule.sel,
 .sc-theme .sc-button-view.capsule.def {
-	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -151px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -304px;
 }
 
 .sc-theme .sc-button-view.capsule.sel .sc-button-inner,
 .sc-theme .sc-button-view.capsule.def .sc-button-inner {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -105px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -277px;
 }
 
 .sc-theme .sc-button-view.capsule.sel .sc-button-label,
 .sc-theme .sc-button-view.capsule.def .sc-button-label {
-	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -128px;
-	text-shadow: #dabec6 0px 1px 0px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1140px;
+	color: white;
+	text-shadow: #2a569e 0px -1px 0px;
 }
 
 /* @end */
@@ -387,15 +250,15 @@
 /* @group disabled */
 
 .sc-theme .sc-button-view.capsule.disabled {
-	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -496px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -544px;
 }
 
 .sc-theme .sc-button-view.capsule.disabled .sc-button-inner {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -450px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -517px;
 }
 
 .sc-theme .sc-button-view.capsule.disabled .sc-button-label {
-	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -473px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1014px;
 	color: #999;
 	text-shadow: none ;
 }
@@ -406,17 +269,17 @@
 
 .sc-theme .sc-button-view.capsule.sel.disabled,
 .sc-theme .sc-button-view.capsule.def.disabled {
-	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -289px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -544px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.disabled .sc-button-inner,
 .sc-theme .sc-button-view.capsule.def.disabled .sc-button-inner {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -243px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -517px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.disabled .sc-button-label,
 .sc-theme .sc-button-view.capsule.def.disabled .sc-button-label {
-	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -266px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1014px;
 	color: #999;
 	text-shadow: none ;
 }
@@ -427,18 +290,19 @@
 
 .sc-theme .sc-button-view.capsule.sel.active,
 .sc-theme .sc-button-view.capsule.def.active {
-	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -220px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -464px;
 }
 
 .sc-theme .sc-button-view.capsule.sel.active .sc-button-inner,
 .sc-theme .sc-button-view.capsule.def.active .sc-button-inner {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -174px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -437px;
 }
 
+/* 410 */
 .sc-theme .sc-button-view.capsule.sel.active .sc-button-label,
 .sc-theme .sc-button-view.capsule.def.active .sc-button-label {
-	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -197px;
-	text-shadow: #b884a4 0px 1px 0px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -1266px;
+	color:  white;
 }
 
 /* @end */
@@ -446,16 +310,17 @@
 /* @group active */
 
 .sc-theme .sc-button-view.capsule.active {
-	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -427px;
+	background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -384px;
 }
 
 .sc-theme .sc-button-view.capsule.active .sc-button-inner {
-	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -381px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0 -357px;
 }
 
+/* 330 */
 .sc-theme .sc-button-view.capsule.active .sc-button-label {
-	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -404px;
-	text-shadow: #b8b8b8 0px 1px 0px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -889px;
+	color: white;
 }
 
 /* @end */
