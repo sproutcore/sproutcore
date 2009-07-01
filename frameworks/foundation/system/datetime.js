@@ -198,7 +198,8 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - 'week0', the week number of the current year, starting with
         the first Monday as the first day of the first week (00..53)
       - 'lastMonday', 'lastTuesday', etc., 'nextMonday', 'nextTuesday', etc.,
-        the date of the last or next weekday in comparison to the receiver
+        the date of the last or next weekday in comparison to the receiver,
+      - 'utc', the UTC formatted time
     
     @param {String} key the property name to get
     @return the value asked for
@@ -236,13 +237,18 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       %X - Preferred representation for the time alone, no date
       %y - Year without a century (00..99)
       %Y - Year with century
-      %Z - Time zone name
+      %Z - Time zone (ISO 8601 formatted)
       %% - Literal ``%'' character
     
     @param {String} format the format string
     @return {String} the formatted string
   */
   toFormattedString: function(fmt) {
+    return this.constructor._toFormattedString(fmt, this._ms);
+  },
+  
+  toISO8601: function(){
+    var fmt = '%Y-%m-%dT%H:%M:%S%Z';
     return this.constructor._toFormattedString(fmt, this._ms);
   },
   
@@ -390,6 +396,7 @@ SC.DateTime.mixin(
       case 'millisecond':    return d.getMilliseconds();
       case 'milliseconds':   return d.getTime();
       case 'timezoneOffset': return d.getTimezoneOffset();
+      case 'utc':            return d.utcFormat();
     }
     
     // isLeapYear
@@ -589,7 +596,24 @@ SC.DateTime.mixin(
           case 'X': throw "%X is not implemented";
           case 'y': opts.year = scanner.scanInt(2); opts.year += (opts.year > 70 ? 1900 : 2000); break;
           case 'Y': opts.year = scanner.scanInt(4); break;
-          case 'Z': throw "%Z is not implemented";
+          case 'Z':
+            var modifier = scanner.scan(1);
+            if(modifier == 'Z'){
+              opts.timeZoneOffset = 0; 
+            } else {
+              var timeZoneHours = scanner.scanInt(2);
+              if(scanner.scan(1) !== ':'){
+                scanner.scan(-1);
+              } 
+              var timeZoneMinutes = scanner.scanInt(2);
+              var timeZoneSecondsOffset = (timeZoneHours*3600)+(timeZoneMinutes*60);
+
+              var offset = eval(0 + modifier + timeZoneSecondsOffset);
+              opts.timeZoneOffset = offset;
+            } 
+              
+            break;
+      //    case 'Z': throw "%Z is not implemented";
           case '%': scanner.skipString('%'); break;
           default:  scanner.skipString(parts[0]); break;
         }
@@ -608,6 +632,9 @@ SC.DateTime.mixin(
     
     if (!SC.none(check.dayOfWeek) && d.get('dayOfWeek') !== check.dayOfWeek) {
       return null;
+    }
+    if(!SC.none(opts.timeZoneOffset)){
+      d = d.advance({second: opts.timeZoneOffset});
     }
     
     return d;
@@ -648,6 +675,7 @@ SC.DateTime.mixin(
       case 'M': return this._pad(this._get('minute'));
       case 'p': return this._get('hour') > 11 ? 'PM' : 'AM';
       case 'S': return this._pad(this._get('second'));
+      case 'u': return this._pad(this._get('utc')); //utc
       case 'U': return this._pad(this._get('week0'));
       case 'W': return this._pad(this._get('week1'));
       case 'w': return this._get('dayOfWeek');
