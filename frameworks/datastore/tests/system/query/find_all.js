@@ -142,7 +142,7 @@ test("loading more data into the store should propagate to record array", functi
 });
 
 test("loading more data into the store should propagate to record array with query", function() {
-  
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
   
   var records = MyApp.store.findAll(q);
@@ -157,16 +157,17 @@ test("loading more data into the store should propagate to record array with que
   // and should fire original SC.Query again
   
   MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
-  
+  SC.RunLoop.end();
   equals(records.get('length'), 2, 'record length after should be 2');
   
   // subsequent updates to store keys should also work
-  
+  SC.RunLoop.begin();
   var newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 11, firstName: "John", lastName: "Norman" }
   ]);
   
   MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 3, 'record length after should be 3');
   
@@ -302,6 +303,7 @@ test("Using orderBy in SC.Query returned from findAll()", function() {
 
 test("Using orderBy in SC.Query returned from findAll() and loading more records to original store key array", function() {
   
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
   
   var records = MyApp.store.findAll(q);
@@ -315,6 +317,7 @@ test("Using orderBy in SC.Query returned from findAll() and loading more records
   ]);
   
   MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
+  SC.RunLoop.end();
   
   equals(records.objectAt(0).get('firstName'), 'Anna', 'name should be Anna');
   equals(records.objectAt(1).get('firstName'), 'Bert', 'name should be Bert');

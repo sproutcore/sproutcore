@@ -258,12 +258,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   _storeKeysContentDidChange: function(target, key, value, rev) {
     this._records = null ; // clear cache
-    // if this record array is based on a queryKey reapply the
-    // the query before setting the storeKeys to ensure it always conforms
-    
-    if(SC.instanceOf(this.queryKey, SC.Query)) {
-      this.storeKeys = SC.Query.containsStoreKeys(this.queryKey, value, this.store);
-    }
     
     this.beginPropertyChanges()
       .notifyPropertyChange('length')
@@ -273,9 +267,20 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   init: function() {
     sc_super();
-    this._storeKeysDidChange();
+    
+    // if this record array is based on a queryKey apply the
+    // the query before setting the storeKeys to ensure it always conforms
+    if(SC.instanceOf(this.queryKey, SC.Query)) {
+      var queryKey = this.get('queryKey'), recordTypes = SC.Set.create();
+      recordTypes.push(queryKey.get('recordType'));
+      
+      this.applyQuery(this.get('storeKeys'), recordTypes);
+    }
+    else {
+      this._storeKeysDidChange();
+    }
+    
   }
-  
   
 });
 
