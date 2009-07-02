@@ -45,10 +45,11 @@ module("SC.Query querying findAll on a store", {
     
     // load some data
     MyApp.DataSource.storeKeys = MyApp.store.loadRecords(MyApp.Foo, records);
+    SC.RunLoop.end();
     
+    SC.RunLoop.begin();
     // for sanity check, load two record types
     MyApp.store.loadRecords(MyApp.Faa, records);
-    
     SC.RunLoop.end();
     
   }
