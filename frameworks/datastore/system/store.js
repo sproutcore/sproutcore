@@ -415,14 +415,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = storeKeys;
     }
     
-    SC.RunLoop.begin();
     for(idx=0;idx<len;idx++) {
       if (isArray) storeKey = storeKeys[idx];
       this.revisions[storeKey] = rev;
       this._notifyRecordPropertyChange(storeKey, statusOnly);
     }
-    
-    SC.RunLoop.end();
     
     return this ;
   },
@@ -467,7 +464,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    this._flushRecordChanges();
+    this.invokeOnce(this._flushRecordChanges);
     
     return this;
   },
@@ -481,6 +478,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   
   _flushRecordChanges: function() {
+    
     var storeKeys = this.recordPropertyChanges.storeKeys, 
       statusOnly = this.recordPropertyChanges.statusOnly,
       records = this.recordPropertyChanges.records, rec, 
@@ -503,7 +501,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     
     }
-    
     this._notifyRecordArraysWithQuery(storeKeys, recordTypes);
     
     // reset for next run loop
@@ -514,7 +511,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   /** @private 
     Will ask all record arrays that have been returned from findAll
-    with an SC.Query to reapply their query with the new storeKeys
+    with an SC.Query to check their arrays with the new storeKeys
     
     @param {SC.IndexSet} storeKeys set of storeKeys that changed
     @param {SC.Set} recordTypes
@@ -526,7 +523,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     for(var idx=0, len=recordArrays.length;idx<len;idx++) {
       var recArray = recordArrays[idx];
-      // if this record array still exists, reapply the query
+      // if this record array still exists, check storeKeys
       if(recArray) recArray.applyQuery(storeKeys, recordTypes);
     }
   },
@@ -551,12 +548,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     var records = this.records, storeKey;
     if (records) {
-      SC.RunLoop.begin();
       for(storeKey in records) {
         if (!records.hasOwnProperty(storeKey)) continue ;
         this._notifyRecordPropertyChange(storeKey, NO);
       }
-      SC.RunLoop.end();
     }
     
     this.set('hasChanges', NO);
@@ -598,8 +593,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     chDataHashes = nestedStore.dataHashes;
     chRevisions  = nestedStore.revisions ;
     chStatuses   = nestedStore.statuses;
-
-    SC.RunLoop.begin();
+    
     for(i=0;i<len;i++) {
       storeKey = changes[i];
 
@@ -612,7 +606,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       this._notifyRecordPropertyChange(storeKey, NO);
     }
-    SC.RunLoop.end();
     
     // add any records to the changelog for commit handling
     var myChangelog = this.changelog, chChangelog = nestedStore.changelog;
@@ -1511,6 +1504,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       ret[idx] = storeKey = recordType.storeKeyFor(id); // needed to cache
       this.pushRetrieve(recordType, id, dataHash, storeKey);
     }
+    
     // return storeKeys
     return ret ;
   },

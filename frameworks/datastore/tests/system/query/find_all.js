@@ -9,6 +9,7 @@
 var MyApp;
 module("SC.Query querying findAll on a store", {
   setup: function() {
+    SC.RunLoop.begin();
     // setup dummy app and store
     MyApp = SC.Object.create({});
     
@@ -44,10 +45,15 @@ module("SC.Query querying findAll on a store", {
     
     // load some data
     MyApp.DataSource.storeKeys = MyApp.store.loadRecords(MyApp.Foo, records);
+    SC.RunLoop.end();
+    
+    SC.RunLoop.begin();
     // for sanity check, load two record types
     MyApp.store.loadRecords(MyApp.Faa, records);
+    SC.RunLoop.end();
     
   }
+  
 });
 
 
@@ -182,6 +188,7 @@ test("SC.Query returned from fetchRecords() should return result set", function(
 
 test("Loading records after SC.Query is returned in fetchRecords() should show up", function() {
   
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
   
   var records = MyApp.store.findAll(q);
@@ -195,6 +202,7 @@ test("Loading records after SC.Query is returned in fetchRecords() should show u
   ];
   
   MyApp.store.loadRecords(MyApp.Foo, recordsToLoad);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 3, 'record length should be 3');
   
@@ -206,6 +214,7 @@ test("Loading records after SC.Query is returned in fetchRecords() should show u
 
 test("Loading records after getting empty record array based on SC.Query should update", function() {
   
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Maria'"});
   
   var records = MyApp.store.findAll(q);
@@ -216,6 +225,7 @@ test("Loading records after getting empty record array based on SC.Query should 
   ];
   
   MyApp.store.loadRecords(MyApp.Foo, recordsToLoad);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 1, 'record length should be 1');
   
@@ -225,6 +235,8 @@ test("Loading records after getting empty record array based on SC.Query should 
 
 test("Changing a record should make it show up in RecordArrays based on SC.Query", function() {
   
+  SC.RunLoop.begin();
+  
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Maria'"});
   
   var records = MyApp.store.findAll(q);
@@ -232,6 +244,8 @@ test("Changing a record should make it show up in RecordArrays based on SC.Query
   
   var record = MyApp.store.find(MyApp.Foo, 1);
   record.set('firstName', 'Maria');
+  
+  SC.RunLoop.end();
   
   equals(records.get('length'), 1, 'record length should be 1');
   
@@ -241,13 +255,14 @@ test("Changing a record should make it show up in RecordArrays based on SC.Query
 
 test("Deleting a record should make the RecordArray based on SC.Query update accordingly", function() {
   
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
   
   var records = MyApp.store.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   
   MyApp.store.destroyRecord(MyApp.Foo, 1);
-  MyApp.store.commitRecords();
+  SC.RunLoop.end();
   
   equals(records.get('length'), 0, 'record length should be 0');
   
@@ -255,6 +270,7 @@ test("Deleting a record should make the RecordArray based on SC.Query update acc
 
 test("Using findAll with SC.Query on store with no data source should work", function() {
   
+  SC.RunLoop.begin();
   // create a store with no data source
   MyApp.store3 = SC.Store.create();
   
@@ -270,6 +286,8 @@ test("Using findAll with SC.Query on store with no data source should work", fun
   ];
   
   MyApp.store3.loadRecords(MyApp.Foo, recordsToLoad);
+  
+  SC.RunLoop.end();
   
   equals(records.get('length'), 2, 'record length should be 2');
   
@@ -311,6 +329,7 @@ test("Using orderBy in SC.Query returned from findAll() and loading more records
 
 test("Using orderBy in SC.Query and loading more records to the store", function() {
   
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
   
   var records = MyApp.store.findAll(q);
@@ -320,6 +339,7 @@ test("Using orderBy in SC.Query and loading more records to the store", function
   MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 11, firstName: "Anna", lastName: "Petterson" }
   ]);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 6, 'record length should be 6');
   
@@ -347,6 +367,7 @@ test("Chaining findAll() queries", function() {
 
 test("Chaining findAll() queries and loading more records", function() {
   
+  SC.RunLoop.begin();
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"lastName='Doe'"});
   var q2 = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName='John'"});
   
@@ -356,6 +377,7 @@ test("Chaining findAll() queries and loading more records", function() {
   MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 11, firstName: "John", lastName: "Doe" }
   ]);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 2, 'record length should be 2');
   
