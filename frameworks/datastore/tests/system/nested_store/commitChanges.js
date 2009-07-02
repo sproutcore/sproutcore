@@ -11,6 +11,7 @@
 var parent, store, child, storeKey, json, args;
 module("SC.NestedStore#commitChanges", {
   setup: function() {
+    
     parent = SC.Store.create();
     
     json = {

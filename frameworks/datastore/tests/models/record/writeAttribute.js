@@ -8,6 +8,7 @@
 var store, Foo, json, foo ;
 module("SC.Record#writeAttribute", {
   setup: function() {
+    SC.RunLoop.begin();
     store = SC.Store.create();
     Foo = SC.Record.extend();
     json = { 
@@ -18,7 +19,8 @@ module("SC.Record#writeAttribute", {
     };
     
     foo = store.createRecord(Foo, json);
-    store.writeStatus(foo.storeKey, SC.Record.READY_CLEAN); 
+    store.writeStatus(foo.storeKey, SC.Record.READY_CLEAN);
+    SC.RunLoop.end();
   }
 });
 
@@ -30,9 +32,11 @@ test("first time writing should mark record as dirty", function() {
   // precondition
   equals(foo.get('status'), SC.Record.READY_CLEAN, 'precond - start clean');
 
+  SC.RunLoop.begin();
   // action
   foo.writeAttribute("bar", "baz");
-
+  SC.RunLoop.end();
+  
   // evaluate
   equals(foo.get('status'), SC.Record.READY_DIRTY, 'should make READY_DIRTY after write');
 });
@@ -42,14 +46,18 @@ test("state change should be deferred if writing inside of a beginEditing()/endE
   // precondition
   equals(foo.get('status'), SC.Record.READY_CLEAN, 'precond - start clean');
 
+  SC.RunLoop.begin();
   // action
   foo.beginEditing();
+  
   foo.writeAttribute("bar", "baz");
-
+  
   equals(foo.get('status'), SC.Record.READY_CLEAN, 'should not change state yet');
 
   foo.endEditing();
-
+  
+  SC.RunLoop.end();
+  
   // evaluate
   equals(foo.get('status'), SC.Record.READY_DIRTY, 'should make READY_DIRTY after write');
   

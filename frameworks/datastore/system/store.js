@@ -490,7 +490,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(records.indexOf(storeKey)!==-1) {
         status = statusOnly.indexOf(storeKey)!==-1 ? YES: NO;
         rec = this.records[storeKey];
-        rec.storeDidChangeProperties(status);
+        if(rec) rec.storeDidChangeProperties(status);
         // remove it so we don't trigger this twice
         records.removeObject(storeKey);
       }

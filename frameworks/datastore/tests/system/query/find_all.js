@@ -48,7 +48,9 @@ module("SC.Query querying findAll on a store", {
     
     // for sanity check, load two record types
     MyApp.store.loadRecords(MyApp.Faa, records);
+    
     SC.RunLoop.end();
+    
   }
   
 });
