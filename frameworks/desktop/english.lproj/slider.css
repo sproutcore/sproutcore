@@ -26,6 +26,11 @@
 	border-radius: 3px;
 }
 
+.sc-slider-view .sc-inner .sc-leftcap,
+.sc-slider-view .sc-inner .sc-righcap {
+  display: none;
+}
+
 .blur .sc-slider-view .sc-inner,
 .focus .sc-slider-view.disabled .sc-inner {
 	border: 1px #ccc solid;
