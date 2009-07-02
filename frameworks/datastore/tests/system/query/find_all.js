@@ -45,13 +45,10 @@ module("SC.Query querying findAll on a store", {
     
     // load some data
     MyApp.DataSource.storeKeys = MyApp.store.loadRecords(MyApp.Foo, records);
-    SC.RunLoop.end();
     
-    SC.RunLoop.begin();
     // for sanity check, load two record types
     MyApp.store.loadRecords(MyApp.Faa, records);
     SC.RunLoop.end();
-    
   }
   
 });
@@ -62,7 +59,6 @@ module("SC.Query querying findAll on a store", {
 // 
 
 test("should find records based on boolean", function() {
-  
   var q = SC.Query.create({recordType: MyApp.Foo, conditions:"married=true"});
   
   var records = MyApp.store.findAll(q);
