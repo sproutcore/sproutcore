@@ -24,7 +24,7 @@ TestRunner.testsController = SC.ArrayController.create(
     Whenever we are actually showing the tests, then controls are enabled.
     Set to YES when in READY_LIST mode.
   */
-  isShowingTests: NO,
+  isShowingTests: YES,
   
   stateDidChange: function() {
     TestRunner.sendAction('testsDidChange');

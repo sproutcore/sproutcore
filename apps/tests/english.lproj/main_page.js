@@ -85,7 +85,7 @@ TestRunner.mainPage = SC.Page.design({
       runTestsButton: SC.ButtonView.design({
         title: "Run Tests",
         isEnabledBinding: "TestRunner.testsController.isShowingTests",
-        layout: { height: 20, centerY: 2, width: 90, right: 12 }
+        layout: { height: 24, centerY: 2, width: 90, right: 12 }
       })
       
       
@@ -98,6 +98,10 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
+      controlSize: SC.HUGE_CONTROL_SIZE,
+      classNames: "center-label",
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      fontWeight: SC.BOLD_WEIGHT,
       value: "_Loading Targets".loc()
     })
   }),
@@ -108,6 +112,9 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
+      classNames: "center-label",
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      fontWeight: SC.BOLD_WEIGHT,
       value: "_No Targets".loc()
     })
   }),
@@ -118,6 +125,9 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
+      classNames: "center-label",
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      fontWeight: SC.BOLD_WEIGHT,
       value: "_No Tests".loc()
     })
   }),
@@ -128,6 +138,9 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
+      classNames: "center-label",
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      fontWeight: SC.BOLD_WEIGHT,
       value: "_Loading Tests".loc()
     })
   }),
@@ -138,6 +151,9 @@ TestRunner.mainPage = SC.Page.design({
     labelView: SC.LabelView.design({
       layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
       textAlign: SC.ALIGN_CENTER,
+      classNames: "center-label",
+      controlSize: SC.LARGE_CONTROL_SIZE,
+      fontWeight: SC.BOLD_WEIGHT,
       value: "_No Target Selected".loc()
     })
   }),
