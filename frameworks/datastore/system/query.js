@@ -842,7 +842,6 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {SC.Store} store to materialize record from during sort
     @returns {Array} array instance of store keys matching the SC.Query (sorted)
   */
-  
   containsStoreKeys: function(query, storeKeys, store) {
     var ret = [], idx, len, rec, status, K = SC.Record;
     var recType = query.get('recordType');

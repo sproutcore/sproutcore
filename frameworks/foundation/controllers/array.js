@@ -408,7 +408,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     as needed.
   */
   _scac_contentDidChange: function() {
-
+    console.log('%@._scac_contentDidChange()'.fmt(this));
     this._scac_cached = NO; // invalidate observable content
     
     var cur    = this.get('content'),
@@ -440,8 +440,13 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // also, calculate new length.  do it manually instead of using 
     // get(length) because we want to avoid computed an ordered array.
     if (cur) {
-      if (!orders && cur.isSCArray) ro = cur.addRangeObserver(null,this,func);
-      else if (cur.isEnumerable) cur.addObserver('[]', this, efunc);
+      if (!orders && cur.isSCArray) {
+        console.log('adding addRangeObserver() observer to %@'.fmt(cur));
+        ro = cur.addRangeObserver(null,this,func);
+      } else if (cur.isEnumerable) {
+        console.log('adding _scac_enumerableDidChange() observer to %@'.fmt(cur));
+        cur.addObserver('[]', this, efunc);
+      }
       newlen = cur.isEnumerable ? cur.get('length') : 1; 
       cur.addObserver('state', this, sfunc);
       
@@ -464,6 +469,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     IMPORTANT: Assumes content is not null and is enumerable
   */
   _scac_enumerableDidChange: function() {
+    console.log('%@._scac_enumerableDidChange()'.fmt(this));
     var content = this.get('content'), // use content directly
         newlen  = content.get('length'),
         oldlen  = this._scac_length;
@@ -482,6 +488,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Assumes that content is not null and is SC.Array.
   */
   _scac_rangeDidChange: function(array, objects, key, indexes) {
+    console.log('%@._scac_rangeDidChange()'.fmt(this));
     if (key !== '[]') return ; // nothing to do
     
     var content = this.get('content');
@@ -489,12 +496,16 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this._scac_cached = NO; // invalidate
     
     // if array length has changed, just notify every index from min up
-    if (indexes) {
+    if (!this._scac_rangeDidChangeUpdating && indexes) {
+      this._scac_rangeDidChangeUpdating = YES ;
       this.beginPropertyChanges();
       indexes.forEachRange(function(start, length) {
+        // console.log(start + '' + length);
+        // debugger ;
         this.enumerableContentDidChange(start, length, 0);
       }, this);
       this.endPropertyChanges();
+      this._scac_rangeDidChangeUpdating = NO ;
       this.updateSelectionAfterContentChange();
     }
   },
