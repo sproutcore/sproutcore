@@ -195,11 +195,11 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   
   numberOfCurrentRequests: function() {
     return this.get('currentRequests').length ;
-  }.property('currentRequests'),
+  }.property('.currentRequests.[]'),
   
   numberOfRequests: function() {
     return this.get('queue').length ;
-  }.property('queue'),
+  }.property('.queue.[]'),
   
   sendRequest: function(request) {
     if(!request) return;
