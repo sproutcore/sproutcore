@@ -191,7 +191,7 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
   
   canLoadAnotherRequest: function() {
     return (this.get('numberOfCurrentRequests') < this.get('maxRequests')) ;
-  }.property('numberOfCurrentRequests'),
+  }.property('numberOfCurrentRequests', 'maxRequests'),
   
   numberOfCurrentRequests: function() {
     return this.get('currentRequests').length ;
