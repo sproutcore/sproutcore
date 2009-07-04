@@ -39,13 +39,13 @@ test("state properties", function() {
 });
 
 test("addObject", function() {
-  throws(function() {
+  should_throw(function() {
     controller.addObject(extra);
   }, Error, "controller.addObject should throw exception");
 });
 
 test("removeObject", function() {
-  throws(function() {
+  should_throw(function() {
     controller.removeObject(extra);
   }, Error, "controller.addObject should throw exception");
 });
@@ -54,7 +54,7 @@ test("basic array operations", function() {
   equals(controller.get("length"), 0, 'length should be empty');
   equals(controller.objectAt(0), undefined, "objectAt() should return undefined");
   
-  throws(function() {
+  should_throw(function() {
     controller.replace(0,1,[extra]);
   }, Error, 'replace() should throw an error since it is not editable');
 });

@@ -72,7 +72,7 @@ test("basic array WRITE operations", function() {
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
 
-  throws(function() {
+  should_throw(function() {
     controller.replace(0,1,[extra]);
   }, Error, "calling replace on an enumerable should throw");
 });
@@ -178,7 +178,7 @@ test("basic array WRITE operations", function() {
   var callCount = 0;
   controller.addObserver('[]', function() { callCount++; });
 
-  throws(function() {
+  should_throw(function() {
     controller.replace(0,1,[extra]);
   }, Error, "calling replace on an enumerable should throw");
 });

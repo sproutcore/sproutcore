@@ -560,7 +560,7 @@ CoreTest.Plan = {
       @param {String} a description
       @returns {CoreTest.Plan} receiver
     */
-    throws: function throws(callback, expected, msg) {
+    should_throw: function should_throw(callback, expected, msg) {
       var actual = false ;
       
       try {
