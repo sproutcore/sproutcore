@@ -41,7 +41,7 @@ test("state properties", function() {
 
 // addObject should append to end of array + notify observers on Array itself
 test("addObject", function() {
-  throws(function() {
+  should_throw(function() {
     controller.addObject(extra);
   }, Error, "controller.addObject should throw exception");
 });
@@ -72,7 +72,7 @@ test("basic array READ operations", function() {
 });
 
 test("basic array WRITE operations", function() {
-  throws(function() {
+  should_throw(function() {
     controller.replace(0,1,[extra]);
   }, Error, "calling replace on an enumerable should throw");
 });
@@ -108,13 +108,13 @@ test("state properties", function() {
 
 // addObject should append to end of array + notify observers on Array itself
 test("addObject", function() {
-  throws(function() {
+  should_throw(function() {
     controller.addObject(extra);
   }, Error, "controller.addObject should throw exception");
 });
 
 test("removeObject", function() {
-  throws(function() {
+  should_throw(function() {
     controller.removeObject(extra);
   }, Error, "controller.removeObject should throw exception");
 });
@@ -125,7 +125,7 @@ test("basic array READ operations", function() {
 });
 
 test("basic array WRITE operations", function() {
-  throws(function() {
+  should_throw(function() {
     controller.replace(0,1,[extra]);
   }, Error, "calling replace on an enumerable should throw");
 });

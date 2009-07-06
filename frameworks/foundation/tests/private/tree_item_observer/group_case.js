@@ -503,7 +503,7 @@ test("removing partial group", function() {
   var expected = content.slice();
 
   // note: select entire group here...
-  throws(function() {
+  should_throw(function() {
     obs.removeAt(3,6);
   }, Error, "should throw error when trying to remove uneven boundaries");
 
@@ -520,7 +520,7 @@ test("removing group header and some of the children", function() {
   var expected = content.slice();
 
   // note: select entire group here...
-  throws(function() {
+  should_throw(function() {
     obs.removeAt(6, 3);
   }, Error, "should throw error when trying to remove uneven boundaries");
 

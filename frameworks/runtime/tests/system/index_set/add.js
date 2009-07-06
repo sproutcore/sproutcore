@@ -188,7 +188,7 @@ test("appending range to start of empty set should create a single range", funct
 });
 
 test("add raises exception when frozen", function() {
-  throws(function() {
+  should_throw(function() {
     set.freeze().add(0,2);    
   }, SC.FROZEN_ERROR);  
 });
