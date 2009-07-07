@@ -89,7 +89,8 @@ test("Check that by setting the value the selection actually changes", function(
   SC.RunLoop.end();
   equals(view.getFieldValue(), 2, 'the field value should change to 2');
 });
-})();test("redraw", function(){
+
+test("redraw", function(){
   var view = pane.view('redraw');
   ok(view.get('objects').length === 0, "objects should be empty");
   SC.RunLoop.begin();
