@@ -126,7 +126,7 @@ SC.NestedStore = SC.Store.extend(
   },
   
   /**
-    Propagate this store's changes to its parent.  If the store does not
+    Propagate this store's changes to its parent.  If the store does not 
     have a parent, this has no effect other than to clear the change set.
 
     @param {Boolean} force if YES, does not check for conflicts first
@@ -152,13 +152,13 @@ SC.NestedStore = SC.Store.extend(
     // be notified.
     var records, locks;
     if ((records = this.records) && (locks = this.locks)) {
-      var pstore = this.get('parentStore'), ps_revisions = pstore.revisions;
+      var pstore = this.get('parentStore'), psRevisions = pstore.revisions;
       var revisions = this.revisions, storeKey, lock, rev;
       for(storeKey in records) {
         if (!records.hasOwnProperty(storeKey)) continue ;
         if (!(lock = locks[storeKey])) continue; // not locked.
 
-        rev = ps_revisions[storeKey];
+        rev = psRevisions[storeKey];
         if ((rev !== lock) || (revisions[storeKey] > rev)) {
           this._notifyRecordPropertyChange(storeKey);
         }
@@ -366,20 +366,20 @@ SC.NestedStore = SC.Store.extend(
     
     // save a lock for each store key if it does not have one already
     // also add each storeKey to my own changes set.
-    var pstore = this.get('parentStore'), ps_revisions = pstore.revisions, i;
-    var my_locks = this.locks, my_changes = this.chainedChanges,len,storeKey;
-    if (!my_locks) my_locks = this.locks = [];
-    if (!my_changes) my_changes = this.chainedChanges = SC.Set.create();
+    var pstore = this.get('parentStore'), psRevisions = pstore.revisions, i;
+    var myLocks = this.locks, myChanges = this.chainedChanges,len,storeKey;
+    if (!myLocks) myLocks = this.locks = [];
+    if (!myChanges) myChanges = this.chainedChanges = SC.Set.create();
 
     len = changes.length ;
     for(i=0;i<len;i++) {
       storeKey = changes[i];
-      if (!my_locks[storeKey]) my_locks[storeKey] = ps_revisions[storeKey]||1;
-      my_changes.add(storeKey);
+      if (!myLocks[storeKey]) myLocks[storeKey] = psRevisions[storeKey]||1;
+      myChanges.add(storeKey);
     }
-
+    
     // Finally, mark store as dirty if we have changes
-    this.setIfChanged('hasChanges', my_changes.get('length')>0);
+    this.setIfChanged('hasChanges', myChanges.get('length')>0);
     
     return this ;
   },
@@ -402,9 +402,22 @@ SC.NestedStore = SC.Store.extend(
   // actually creating record instances.
   
   /** @private - adapt for nested store */
-  retrieveRecords: function(recordTypes, ids, storeKeys, _isRefresh) {
-    var pstore = this.get('parentStore');
-    return pstore.retrieveRecords(recordTypes, ids, storeKeys, _isRefresh);
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
+    var pstore = this.get('parentStore'), idx, storeKey, newStatus,
+      len = (!storeKeys) ? ids.length : storeKeys.length,
+      K = SC.Record, status;
+    
+    // turn status to BUSY_REFRESH_CLEAN/DIRTY if isRefresh is true
+    // for correct transition before handing to parent store
+    if(isRefresh) {
+      for(idx=0;idx<len;idx++) {
+        storeKey = !storeKeys ? pstore.storeKeyFor(recordTypes, ids[idx]) : storeKeys[idx];
+        newStatus = status===K.READY_DIRTY ? K.BUSY_REFRESH_DIRTY : K.BUSY_REFRESH_CLEAN;
+        this.writeStatus(storeKey, newStatus);
+      }
+    }
+    
+    return pstore.retrieveRecords(recordTypes, ids, storeKeys, isRefresh);
   },
 
   /** @private - adapt for nested store */
