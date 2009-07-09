@@ -97,6 +97,13 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   */
   rangeWindowSize: 1,
   
+  /*
+    This array contains all the start_indexes of ranges requested. This is to 
+    avoid calling sparseArrayDidRequestRange to often. Indexes are removed and 
+    added as range requests are completed.
+  */
+  requestedRangeIndex: [],
+  
   /** 
     Returns the object at the specified index.  If the value for the index
     is currently undefined, invokes the didRequestIndex() method to notify
@@ -122,6 +129,8 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     loaded.  This will possibly expand the index into a range and then invoke
     an appropriate method on the delegate to request the data.
     
+    It will check if the range has been already requested.
+    
     @param {SC.SparseArray} receiver
   */
   requestIndex: function(idx) {
@@ -130,23 +139,60 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     
     // adjust window
     var len = this.get('rangeWindowSize'), start = idx;
-    if (len > 1) start = Math.floor(start / windowSize);
+    if (len > 1) start = start - Math.floor(start % len);
     if (len < 1) len = 1 ;
     
     // invoke appropriate callback
     this._requestingIndex++;
     if (del.sparseArrayDidRequestRange) {
       var range = this._TMP_RANGE;
-      range.start = start;
-      range.length = len;
-      del.sparseArrayDidRequestRange(this, range);
-      
+      if(this.wasRangeRequested(start)===-1){
+        range.start = start;
+        range.length = len;
+        del.sparseArrayDidRequestRange(this, range);
+        this.requestedRangeIndex.push(start);
+      }
     } else if (del.sparseArrayDidRequestIndex) {
       while(--len >= 0) del.sparseArrayDidRequestIndex(this, start + len);
     }
     this._requestingIndex--;
 
     return this ;
+  },
+  
+  /*
+    This method is called by requestIndex to check if the range has already 
+    been requested. We assume that rangeWindowSize is not changed often.
+    
+     @param {Number} startIndex
+     @return {Number} index in requestRangeIndex
+  */
+  wasRangeRequested: function(rangeStart) {
+    var i, ilen;
+    for(i=0, ilen=this.requestedRangeIndex.length; i<ilen; i++){
+      if(this.requestedRangeIndex[i]===rangeStart) return i;
+    }
+    return -1;
+  },
+  
+  /*
+    This method has to be called after a request for a range has completed.
+    To remove the index from the sparseArray to allow future updates on the 
+    range.
+    
+     @param {Number} startIndex
+     @return {Number} index in requestRangeIndex
+  */
+  rangeRequestCompleted: function(start) { 
+    var i;
+    i = this.wasRangeRequested(start);
+    console.log('rangeRequestedCompleted '+start+","+i+", | "+this.requestedRangeIndex);
+    if(i>=0) { 
+      this.requestedRangeIndex.removeAt(i,1);
+    console.log('rangeRequestedCompleted '+this.requestedRangeIndex);
+      return YES;
+    }
+    return NO;
   },
   
   /**
