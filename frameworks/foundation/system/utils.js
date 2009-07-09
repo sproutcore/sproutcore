@@ -194,6 +194,15 @@ SC.mixin( /** @scope SC */ {
     return { x: r.x, y: r.y, width: r.width, height: r.height } ;
   },
   
+  /** Returns a string representation of the rect as {x, y, width, height}.  
+    
+    @param r {Rect} The rect to stringify.
+    @returns {String} A string representation of the rect.
+  */
+  stringFromRect: function(r) {
+    return '{%@, %@, %@, %@}'.fmt(r.x, r.y, r.width, r.height);
+  },
+  
   
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
