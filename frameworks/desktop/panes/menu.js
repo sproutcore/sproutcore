@@ -462,7 +462,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   isAnchorMenuItemType: function() {
     var anchor = this.get('anchor') ;
-    return (anchor && anchor.kindOf(SC.MenuItemView)) ;
+    return (anchor && anchor.kindOf && anchor.kindOf(SC.MenuItemView)) ;
   },
   
   //..........................................................
@@ -637,7 +637,7 @@ SC.MenuPane = SC.PickerPane.extend(
       else return null;
     }
     else return null;
-  },
+  }
   
   
   
