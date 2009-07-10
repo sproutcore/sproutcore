@@ -35,10 +35,12 @@ module("SC.Store Core Methods", {
       ]
     };
     
+    SC.RunLoop.begin();
     store = SC.Store.create().from(dataSource);
     for(var i in Application.Data) {
       store.loadRecords(Application[i], Application.Data[i]);
     }
+    SC.RunLoop.end();
     
     // make sure RecordType by String can map
     window.Application = Application;
@@ -71,3 +73,22 @@ test("find() should take both SC.Record object and SC.Record string as recordtyp
   
 });
 
+test("loading more records should not sending _flushRecordChanges() until the end of the runloop", function() {
+
+  var moreData = [
+      { guid: '55', name: 'Home', url: '/emily_parker', isDirectory: true, parent: null, children: 'Collection'},
+      { guid: '56', name: 'Documents', fileType: 'documents', url: '/emily_parker/Documents', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'October 21, 2007', filetype: 'directory', isShared: false},
+      { guid: '57',name: 'Library', fileType: 'library', url: '/emily_parker/Library', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'October 21, 2007', filetype: 'directory', isShared: false}
+  ];
+  
+  SC.RunLoop.begin();
+  
+  var storeKeys = store.loadRecords(Application.File, moreData);
+  equals(storeKeys.length, 3, 'precon - should have loaded three records');
+  equals(store.recordPropertyChanges.storeKeys.length, 3, 'should be three storeKeys in changelog');
+  
+  SC.RunLoop.end();
+  
+  equals(store.recordPropertyChanges.storeKeys.length, 0, 'should be zero storeKeys in changelog');
+  
+});
