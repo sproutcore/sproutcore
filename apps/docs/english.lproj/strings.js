@@ -1,15 +1,15 @@
 // ==========================================================================
-// JsDoc English Strings
+// Project:   Docs Strings
+// Copyright: ©2009 My Company, Inc.
 // ==========================================================================
+/*globals Docs */
 
-// Place strings you want to localize here.  In your app, use the key and 
+// Place strings you want to localize here.  In your app, use the key and
 // localize it using "key string".loc().  HINT: For your key names, use the
 // english string with an underscore in front.  This way you can still see
 // how your UI will look and you'll notice right away when something needs a
 // localized string added to this file!
-
-Object.extend( String.English, {
-  
+//
+SC.stringsFor('English', {
   // "_String Key": "Localized String"
-  
-});
+}) ;
