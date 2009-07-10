@@ -64,7 +64,7 @@ TestRunner.mainPage = SC.Page.design({
       childViews: 'logo continuousIntegrationCheckbox runTestsButton'.w(),
 
       logo: SC.View.design({
-        layout: { left: 0, top: 4, bottom: 0, width: 200 },
+        layout: { left: 0, top: 0, bottom: 0, width: 200 },
         classNames: 'app-title',
         tagName: 'h1',
         render: function(context, firstTime) {
@@ -79,13 +79,13 @@ TestRunner.mainPage = SC.Page.design({
         offsetBinding: "TestRunner.sourceController.sidebarThickness",
         valueBinding: "TestRunner.testsController.useContinuousIntegration",
         isEnabledBinding: "TestRunner.testsController.isShowingTests",
-        layout: { height: 18, centerY: 3, width: 170, left: 206 }
+        layout: { height: 18, centerY: 1, width: 170, left: 206 }
       }),
       
       runTestsButton: SC.ButtonView.design({
         title: "Run Tests",
         isEnabledBinding: "TestRunner.testsController.isShowingTests",
-        layout: { height: 24, centerY: 2, width: 90, right: 12 }
+        layout: { height: 24, centerY: 0, width: 90, right: 12 }
       })
       
       
@@ -96,7 +96,7 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
     
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
       textAlign: SC.ALIGN_CENTER,
       controlSize: SC.HUGE_CONTROL_SIZE,
       classNames: "center-label",
@@ -110,7 +110,7 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
     
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
       textAlign: SC.ALIGN_CENTER,
       classNames: "center-label",
       controlSize: SC.LARGE_CONTROL_SIZE,
@@ -123,7 +123,7 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
     
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
       textAlign: SC.ALIGN_CENTER,
       classNames: "center-label",
       controlSize: SC.LARGE_CONTROL_SIZE,
@@ -136,7 +136,7 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
     
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
       textAlign: SC.ALIGN_CENTER,
       classNames: "center-label",
       controlSize: SC.LARGE_CONTROL_SIZE,
@@ -149,7 +149,7 @@ TestRunner.mainPage = SC.Page.design({
     childViews: "labelView".w(),
     
     labelView: SC.LabelView.design({
-      layout: { centerX: 0, centerY: 0, height: 18, width: 200 },
+      layout: { centerX: 0, centerY: 0, height: 24, width: 200 },
       textAlign: SC.ALIGN_CENTER,
       classNames: "center-label",
       controlSize: SC.LARGE_CONTROL_SIZE,
