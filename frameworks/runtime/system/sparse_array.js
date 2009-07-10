@@ -184,12 +184,9 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
      @return {Number} index in requestRangeIndex
   */
   rangeRequestCompleted: function(start) { 
-    var i;
-    i = this.wasRangeRequested(start);
-    console.log('rangeRequestedCompleted '+start+","+i+", | "+this.requestedRangeIndex);
+    var i = this.wasRangeRequested(start);
     if(i>=0) { 
       this.requestedRangeIndex.removeAt(i,1);
-    console.log('rangeRequestedCompleted '+this.requestedRangeIndex);
       return YES;
     }
     return NO;

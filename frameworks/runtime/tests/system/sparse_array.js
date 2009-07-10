@@ -84,6 +84,43 @@ test("element to be added is at idx > length of array ", function() {
 });
 
 
+test("Check that requestIndex works with a rangeWindowSize larger than 1", function() {
+	var ary = SC.SparseArray.array(10) ;
+	var didRequestRange=NO;
+	
+	var DummyDelegate = SC.Object.extend({
+    content: [], // source array
+
+    sparseArrayDidRequestLength: function(sparseArray) {
+      sparseArray.provideLength(this.content.length);
+    },
+
+    sparseArrayDidRequestIndex: function(sparseArray, index) {
+      sparseArray.provideObjectAtIndex(index, this.content[index]);
+    },
+
+    sparseArrayDidRequestIndexOf: function(sparseArray, object) {
+      return this.content.indexOf(object);    
+    },
+
+    sparseArrayShouldReplace: function(sparseArray, idx, amt, objects) {
+      this.content.replace(idx, amt, objects) ; // keep internal up-to-date
+      return YES ; // allow anything
+    },
+    sparseArrayDidRequestRange: function(sparseArray, range) {
+       didRequestRange=YES;
+     }
+
+  });
+  ary.set('delegate', DummyDelegate.create());
+	ary.set('rangeWindowSize', 4);
+	equals(10, ary.get('length'), "length") ;
+	ary.objectAt(7);
+	equals(didRequestRange, YES, "The range was requested") ;
+});
+
+
+
 // ..........................................................
 // TEST SC.ARRAY COMPLIANCE
 // 
