@@ -46,25 +46,30 @@ module("SC.NestedStore#commitChanges", {
 // BASIC STATE TRANSITIONS
 //
 
-function testStateTransition(shouldIncludeStoreKey) {
+function testStateTransition(shouldIncludeStoreKey, shouldCallParent) {
 
   // attempt to commit
   equals(store.commitChanges(), store, 'should return receiver');
   
   // verify result
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'data edit state');
-  equals(args.length, 1, 'should have called commitChangesFromNestedStore');
 
-  var opts = args[0] || {}; // avoid exceptions
-  equals(opts.target, parent, 'should have called on parent store');
-  
-  // verify if changes passed to callback included storeKey
-  var changes = opts.changes;
-  var didInclude = changes && changes.contains(storeKey);
-  if (shouldIncludeStoreKey) {
-    ok(didInclude, 'passed set of changes should include storeKey');
+  if (shouldCallParent === NO) {
+    ok(!args || args.length===0, 'should not call commitChangesFromNestedStore');    
   } else {
-    ok(!didInclude, 'passed set of changes should NOT include storeKey');
+    equals(args.length, 1, 'should have called commitChangesFromNestedStore');
+
+    var opts = args[0] || {}; // avoid exceptions
+    equals(opts.target, parent, 'should have called on parent store');
+
+    // verify if changes passed to callback included storeKey
+    var changes = opts.changes;
+    var didInclude = changes && changes.contains(storeKey);
+    if (shouldIncludeStoreKey) {
+      ok(didInclude, 'passed set of changes should include storeKey');
+    } else {
+      ok(!didInclude, 'passed set of changes should NOT include storeKey');
+    }
   }
   
   equals(store.get('hasChanges'), NO, 'hasChanges should be cleared');
@@ -79,7 +84,7 @@ test("state = INHERITED", function() {
   // check preconditions
   equals(store.storeKeyEditState(storeKey), SC.Store.INHERITED, 'precond - data edit state');
 
-  testStateTransition(NO);
+  testStateTransition(NO, NO);
 });
 
 
@@ -94,7 +99,7 @@ test("state = LOCKED", function() {
   equals(store.storeKeyEditState(storeKey), SC.Store.LOCKED, 'precond - data edit state');
   ok(!store.chainedChanges || !store.chainedChanges.contains(storeKey), 'locked record should not be in chainedChanges set');
 
-  testStateTransition(NO);
+  testStateTransition(NO, NO);
 });
 
 test("state = EDITABLE", function() {
@@ -107,7 +112,7 @@ test("state = EDITABLE", function() {
   equals(store.storeKeyEditState(storeKey), SC.Store.EDITABLE, 'precond - data edit state');
   ok(store.chainedChanges  && store.chainedChanges.contains(storeKey), 'editable record should be in chainedChanges set');
 
-  testStateTransition(YES);
+  testStateTransition(YES, YES);
 });
 
 
