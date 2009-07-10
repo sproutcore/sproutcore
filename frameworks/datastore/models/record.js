@@ -341,6 +341,17 @@ SC.Record = SC.Object.extend(
     return this.readAttribute(key);
   },
   
+  /**
+    Lets you commit this specific record to the store which will trigger
+    the appropriate methods in the data source for you.
+    
+    @param {Hash} params optional additonal params that will passed down
+      to the data source
+  */
+  commitRecord: function(params) {
+    this.get('store').commitRecord(undefined, undefined, this.get('storeKey'), params);
+  },
+  
   // ...............................
   // PRIVATE
   //

@@ -1282,16 +1282,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
     
   /**
-    Commits the passed store keys.  Based on the current state of the 
-    record, this will ask the data source to perform the appropriate actions
+    Commits the passed store keys or ids. If no storeKeys are given 
+    it will commit any records in the changelog. 
+    
+    Based on the current state of the record, this will ask the data 
+    source to perform the appropriate actions
     on the store keys.
     
-    @param {String} id to id of the record to load
-    @param {SC.Record} recordType the expected record type
+    @param {Hash} params optional additional parameters to pass along to the
+      data source
+    @param {Array} recordTypes the expected record types (SC.Record)
+    @param {Array} ids to commit
+    @param {Array} storeKeys to commit
 
     @returns {SC.Bool} if the action was succesful.
   */
-  commitRecords: function(recordTypes, ids, storeKeys) {
+  commitRecords: function(params, recordTypes, ids, storeKeys) {
     var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
@@ -1303,7 +1309,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // Remove any committed records from changelog property.
 
     if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
-      storeKeys=this.changelog;
+      storeKeys = this.changelog;
     }
     
     // if no storeKeys or ids at this point, return
@@ -1327,8 +1333,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       if ((status == K.EMPTY) || (status == K.ERROR)) {
         throw K.NOT_FOUND_ERROR ;
-      }else{
-        if(status==K.READY_NEW){
+      } 
+      else {
+        if(status==K.READY_NEW) {
           this.writeStatus(storeKey, K.BUSY_CREATING);
           this.dataHashDidChange(storeKey, rev, YES);
           retCreate.push(storeKey);
@@ -1347,10 +1354,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING, 
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
       }
-    }   
-      
+    }
+    
     // now commit storekeys to dataSource
-    if (source) ret=source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy);
+    if (source) ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
     //remove all commited changes from changelog
     if (ret && recordTypes===undefined && ids===undefined && storeKeys===this.changelog){ 
       this.changelog=null; 
@@ -1359,18 +1366,20 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
-    Commits the passed store key.  Based on the current state of the 
+    Commits the passed store key or id.  Based on the current state of the 
     record, this will ask the data source to perform the appropriate action
     on the store key.
     
     You have to pass either the id or the storeKey otherwise it will return NO.
     
-    @param {String} id to id of the record to load
     @param {SC.Record} recordType the expected record type
-
-    @returns {SC.Bool} if the action was succesful.
+    @param {String} id the id of the record to commit
+    @param {Number} storeKey the storeKey of the record to commit
+    @param {Hash} params optional additonal params that will passed down
+      to the data source
+    @returns {SC.Bool} if the action was successful.
   */
-  commitRecord: function(recordType, id, storeKey) {
+  commitRecord: function(recordType, id, storeKey, params) {
     var array = this._TMP_RETRIEVE_ARRAY,
         ret ;
     if (id === undefined && storeKey === undefined ) return NO;
@@ -1383,7 +1392,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    ret = this.commitRecords(recordType, id, storeKey);
+    ret = this.commitRecords(params, recordType, id, storeKey);
     array.length = 0 ;
     return ret;
   },

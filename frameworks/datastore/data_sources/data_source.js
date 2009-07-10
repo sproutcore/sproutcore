@@ -56,7 +56,8 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
       SC.Record or SC.Record.STORE_KEYS if invoked from store.retrieveRecords.
       Could also be an SC.Query if that was passed in to findAll()
     @param {Hash} params optional additonal fetch params. storeKeys if invoked
-      from store.retrieveRecords
+      from store.retrieveRecords. this originated from the commitRecords() 
+      call on the store
     @returns {SC.Array} result set with storeKeys. In case of SC.Array
       it may be sparse.
   */
@@ -70,11 +71,13 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys
     @param {Array} ids - optional
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns 
   */
   
-  retrieveRecords: function(store, storeKeys, ids) {
-    return this._handleEach(store, storeKeys, this.retrieveRecord, ids);  
+  retrieveRecords: function(store, storeKeys, ids, params) {
+    return this._handleEach(store, storeKeys, this.retrieveRecord, ids, params);  
   },
   
   /**
@@ -102,13 +105,15 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {Array} createStoreKeys keys to create
     @param {Array} updateStoreKeys keys to update
     @param {Array} destroyStoreKeys keys to destroy
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if data source can handle keys
   */
-  commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys) {
+  commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys, params) {
     var cret, uret, dret;
-    if(createStoreKeys.length>0) cret = this.createRecords.call(this, store, createStoreKeys);    
-    if(updateStoreKeys.length>0) uret = this.updateRecords.call(this, store, updateStoreKeys);    
-    if(destroyStoreKeys.length>0) dret = this.destroyRecords.call(this, store, destroyStoreKeys); 
+    if(createStoreKeys.length>0) cret = this.createRecords.call(this, store, createStoreKeys, params);    
+    if(updateStoreKeys.length>0) uret = this.updateRecords.call(this, store, updateStoreKeys, params);    
+    if(destroyStoreKeys.length>0) dret = this.destroyRecords.call(this, store, destroyStoreKeys, params); 
     return (cret === uret === dret) ? (cret || uret || dret) : SC.MIXED_STATE ;
   },
   
@@ -149,9 +154,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
   */
-  updateRecords: function(store, storeKeys) {
-    return this._handleEach(store, storeKeys, this.updateRecord);
+  updateRecords: function(store, storeKeys, params) {
+    return this._handleEach(store, storeKeys, this.updateRecord, null, params);
   },
   
   /**
@@ -166,9 +173,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
   */
-  createRecords: function(store, storeKeys) {
-    return this._handleEach(store, storeKeys, this.createRecord);
+  createRecords: function(store, storeKeys, params) {
+    return this._handleEach(store, storeKeys, this.createRecord, null, params);
   },
 
   /**
@@ -183,20 +192,24 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
   */
-  destroyRecords: function(store, storeKeys) {
-    return this._handleEach(store, storeKeys, this.destroyRecord);
+  destroyRecords: function(store, storeKeys, params) {
+    return this._handleEach(store, storeKeys, this.destroyRecord, null, params);
   },
 
   /** @private
     invokes the named action for each store key.  returns proper value
   */
-  _handleEach: function(store, storeKeys, action, ids) {
-    var len = storeKeys.length, idx, ret, cur;
+  _handleEach: function(store, storeKeys, action, ids, params) {
+    var len = storeKeys.length, idx, ret, cur, lastArg;
     if(!ids) ids = [];
     
     for(idx=0;idx<len;idx++) {
-      cur = action.call(this, store, storeKeys[idx], ids[idx]);
+      lastArg = ids[idx] ? ids[idx] : params;
+      
+      cur = action.call(this, store, storeKeys[idx], lastArg, params);
       if (ret === undefined) {
         ret = cur ;
       } else if (ret === YES) {
@@ -222,9 +235,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to update
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if handled
   */
-  updateRecord: function(store, storeKey) {
+  updateRecord: function(store, storeKey, params) {
     return NO ;
   },
 
@@ -234,9 +249,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to retrieve
     @param {String} id the id to retrieve
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if handled
   */
-  retrieveRecord: function(store, storeKey, id) {
+  retrieveRecord: function(store, storeKey, id, params) {
     return NO ;
   },
 
@@ -249,9 +266,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to update
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if handled
   */
-  createRecord: function(store, storeKey) {
+  createRecord: function(store, storeKey, params) {
     return NO ;
   },
 
@@ -264,9 +283,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to update
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if handled
   */
-  destroyRecord: function(store, storeKey) {
+  destroyRecord: function(store, storeKey, params) {
     return NO ;
   }  
     

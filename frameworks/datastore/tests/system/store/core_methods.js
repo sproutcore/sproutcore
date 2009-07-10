@@ -5,11 +5,17 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp Sample */
 
-var store, Application;
+var store, Application, dataSource;
 
 module("SC.Store Core Methods", {
   setup: function() {
-    var dataSource = SC.DataSource.create({});
+    dataSource = SC.DataSource.create({ 
+      
+      gotParams: NO,
+      
+      updateRecord: function(store, storeKey, params) {
+        this.gotParams = params && params['param1'] ? YES: NO;
+      }});
     
     Application = {};
     
@@ -91,4 +97,16 @@ test("loading more records should not sending _flushRecordChanges() until the en
   
   equals(store.recordPropertyChanges.storeKeys.length, 0, 'should be zero storeKeys in changelog');
   
+});
+
+test("Passing params through commitRecords()", function() {
+  
+  var file = store.find(Application.File, '14');
+  file.set('name', 'My Great New Name');
+  
+  store.commitRecords({ param1: 'value1' });
+  
+  equals(dataSource.gotParams, YES, 'params should have travelled through to dataSource updateRecord() call');
+  
+
 });
