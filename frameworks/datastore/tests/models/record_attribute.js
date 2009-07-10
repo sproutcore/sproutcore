@@ -58,6 +58,7 @@ module("SC.RecordAttribute core methods", {
     
     MyApp.Bar = SC.Record.extend({});
     
+    SC.RunLoop.begin();
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
       { 
         guid: 'foo1', 
@@ -92,6 +93,8 @@ module("SC.RecordAttribute core methods", {
     MyApp.store.loadRecords(MyApp.Bar, [
       { guid: 'bar1', city: "Chicago" }
     ]);
+    
+    SC.RunLoop.end();
     
     rec = MyApp.store.find(MyApp.Foo, 'foo1');
     rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
@@ -182,10 +185,15 @@ test("writing a value should override default value", function() {
 test("writing to a to-one relationship should update set guid", function() {
   var rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
   equals(rec2.get('id'), 'foo2', 'precond - should find record 2');
+
   equals(rec2.get('relatedTo'), rec, 'precond - should get rec1 instance for rec2.relatedTo');
-  
+
   rec2.set('relatedTo', rec2);
+
   equals(rec2.readAttribute('relatedTo'), 'foo2', 'should write ID for set record to relatedTo attribute');
+  
+  equals(rec2.get('relatedTo'), rec2, 'should get foo record that was just set');
+
 });
 
 test("writing to a to-one computed relationship should update set guid", function() {
