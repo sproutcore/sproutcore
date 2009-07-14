@@ -384,3 +384,29 @@ test("Chaining findAll() queries and loading more records", function() {
   equals(records.get('length'), 2, 'record length should be 2');
   
 });
+
+
+module("create record");
+
+test("creating record appears in future findAll", function() {
+  var Rec = SC.Record.extend({ title: SC.Record.attr(String) });
+  var store = SC.Store.create();
+  SC.run(function() {
+    store.loadRecords(Rec, 
+      [{ title: "A", guid: 1 }, { title: "B", guid: 2 }]);
+  });
+  
+  equals(store.findAll(Rec).get('length'), 2, 'should have two initial record');
+
+  var r;
+  
+  SC.run(function() {
+    store.createRecord(Rec, { title: "C" });
+    r = store.findAll(Rec);
+    equals(r.get('length'), 3, 'should return additional record');
+  });
+
+  r = store.findAll(Rec);
+  equals(r.get('length'), 3, 'should return additional record');
+  
+});
