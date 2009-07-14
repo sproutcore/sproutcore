@@ -673,10 +673,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @param {SC.Record|String} recordType the expected record type
     @param {String} id the id to load
+    @param {Hash} params optional additional parameters to pass along to the
+      data source
     @param {Boolean} isRefresh
     @returns {SC.Record} record instance or null
   */
-  find: function(recordType, id, isRefresh) {
+  find: function(recordType, id, params, isRefresh) {
     // if recordType is passed as string, find object
     if(SC.typeOf(recordType)===SC.T_STRING) {
       recordType = SC.objectForPropertyPath(recordType);
