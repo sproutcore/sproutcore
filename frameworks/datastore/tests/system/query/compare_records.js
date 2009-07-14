@@ -43,34 +43,34 @@ module("SC.Query comparison of records", {
 // 
 
 test("parseQuery should work with conditions = null", function(){
-  q.parseQuery();
+  q.parse();
 });
  
 test("building the order", function() {
   // undefined orderBy
   q.orderBy = null;
-  q.parseQuery();
+  q.parse();
   equals(q.order.length, 0, 'order should be empty');
   
   // empty orderBy
   q.orderBy = "";
-  q.parseQuery();
+  q.parse();
   equals(q.order.length, 0, 'order should be empty');
   
   // single property
   q.orderBy = "firstName";
-  q.parseQuery();
+  q.parse();
   equals(q.order[0].propertyName,'firstName', 'propertyName should be firstName');
   
   // more properties
   q.orderBy = "lastName, firstName";
-  q.parseQuery();
+  q.parse();
   equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
   equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
   
   // more properties with direction
   q.orderBy = "lastName, firstName, year DESC";
-  q.parseQuery();
+  q.parse();
   equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
   ok(!q.order[0].descending, 'descending should be false');
   equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
@@ -81,46 +81,46 @@ test("building the order", function() {
 
 test("no order should result in comparison by guid", function() {
   q.orderBy = null;
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
 });
 
 test("comparing non existant properties", function() {
   q.orderBy = "year";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec5,rec1), -1, 'null should be before 1974');
 });
  
 test("comparing null and boolean properties", function() {
   q.orderBy = "active";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec3,rec4), -1, 'null should be before false');
   equals(q.compare(rec4,rec5), -1, 'false should be before true');
 });
  
 test("comparing number properties", function() {
   q.orderBy = "year";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec1,rec2), -1, '1974 should be before 1975');
   
   q.orderBy = "year DESC";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec1,rec2), 1, '1974 should be after 1975 with DESC');
 }); 
  
  
 test("comparing string properties", function() {
   q.orderBy = "firstName";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec1,rec2), 1, 'John should be after Jane');
   
   q.orderBy = "firstName DESC";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec1,rec2), -1, 'John should be before Jane with DESC');
 }); 
 
 test("comparing by equal properties should use guid for order", function() {
   q.orderBy = "lastName";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
 });

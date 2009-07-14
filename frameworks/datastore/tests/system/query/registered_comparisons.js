@@ -51,10 +51,10 @@ test("SC.Query.comparisons", function(){
   });
   ok(SC.Query.comparisons['firstName'], 'comparison for firstName should be set');
   q.orderBy = "firstName";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec2,rec3), -1, "firstName should be compared by registered comparison");
   
   q.orderBy = "lastName";
-  q.parseQuery();
+  q.parse();
   equals(q.compare(rec2,rec3), -1, "lastName should be compared by SC.compare()");
 });

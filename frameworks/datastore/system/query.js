@@ -125,35 +125,70 @@ require('core') ;
   @since SproutCore 1.0
 */
 
-SC.Query = SC.Object.extend({
+SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
 
- 
+  // ..........................................................
+  // PROPERTIES
+  // 
+  
+  /**
+    Unparsed query conditions.  If you are handling a query yourself, then 
+    you will find the base query string here.
+    
+    @type {String}
+  */
   conditions:  null,
+  
+  /**
+    Optional orderBy parameters.  This will be a string of keys, optionally
+    beginning with the strings "DESC " or "ASC " to select descending or 
+    ascending order.
+    
+    @type {String}
+  */
   orderBy:     null,
+  
+  /**
+    The base record type or types for the query.  This must be specified to
+    filter the kinds of records this query will work on.  You may either 
+    set this to a single record type or to an array or set of record types.
+    
+    @type {SC.Record|SC.Enumerable}
+  */
   recordType:  null,
+  
+  /**
+    Optional hash of parameters.  These parameters may be interpolated into 
+    the query conditions.  If you are handling the query manually, these 
+    parameters will not be used.
+    
+    @type {Hash}
+  */
   parameters:  null,
  
+  // ..........................................................
+  // METHODS
+  // 
+  
   /** 
     Returns YES if record is matched by the query, NO otherwise.
  
     @param {SC.Record} record the record to check
+    @param {Hash} parameters optional override parameters
     @returns {Boolean} YES if record belongs, NO otherwise
   */ 
-  contains: function(record, wildCardValues) {
-    // if called for the first time we have to parse the query
-    if (!this.isReady) this.parseQuery();
-
-    // if wildCardValues were not provided, use parameters instead
-    if (wildCardValues === undefined) wildCardValues = this.parameters;
+  contains: function(record, parameters) {
+    if (!this._isReady) this.parse(); // prepare the query if needed
+    if (parameters === undefined) parameters = this.parameters;
     
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
-    return this.isReady && this.tokenTree.evaluate(record, wildCardValues);
+    return this.isReady && this._tokenTree.evaluate(record, parameters);
   },
   
   /**
-    This will tell you which of the two passed records is greater
-    than the other, in respect to the orderBy property of your SC.Query object.
+    Returns the sort order of the two passed records, taking into account the
+    orderBy property set on this query.
  
     @param {SC.Record} record1 the first record
     @param {SC.Record} record2 the second record
@@ -162,52 +197,48 @@ SC.Query = SC.Object.extend({
                       0 if equal
   */
   compare: function(record1, record2) {
-    var result;
-    var propertyName;
 
-    // if called for the first time we have to build the order array
-    if (!this.isReady) this.parseQuery();
-    // if parsing failed we say everything is equal
-    if (!this.isReady) return 0;
+    var result = 0, 
+        propertyName, order, len, i;
+
+    // fast cases go here
+    if (record1 === record2) return 0;
     
-    // for every property specified in orderBy
-    for (var i=0, orderLength=this.order.length ; i < orderLength; i++) {
-      propertyName = this.order[i].propertyName;
+    // if called for the first time we have to build the order array
+    if (!this._isReady) this.parse();
+    if (!this._isReady) { // can't parse. guid is wrong but consistent
+      return SC.compare(record1.get('guid'),record2.get('guid'));
+    }
+    
+    // for every property specified in orderBy until non-eql result is found
+    order = this._order;
+    len   = order ? order.length : 0;
+    for (i=0; result===0 && (i < len); i++) {
+      propertyName = order[i].propertyName;
       // if this property has a registered comparison use that
-      // if not use default SC.compare()
       if (SC.Query.comparisons[propertyName]) {
         result = SC.Query.comparisons[propertyName](
                   record1.get(propertyName),record2.get(propertyName));
-      }
-      else {
+                  
+      // if not use default SC.compare()
+      } else {
         result = SC.compare(
-                  record1.get(propertyName),record2.get(propertyName));
+                  record1.get(propertyName), record2.get(propertyName) );
       }
-      if (result !== 0) {
-        // if order is descending we invert the sign of the result
-        if (this.order[i].descending) result = (-1) * result;
-        return result;
-      }
+      
+      if ((result!==0) && order[i].descending) result = (-1) * result;
     }
-    
-    // all properties are equal now
-    // get order by guid
-    return SC.compare(record1.get('guid'),record2.get('guid'));
+
+    // return result or compare by guid
+    if (result !== 0) return result ;
+    else return SC.compare(record1.get('guid'),record2.get('guid'));
   },
-  
-  
-  
-  /** @private
-    Some internal properties
+
+  /** @private 
+      Becomes YES once the query has been successfully parsed 
   */
-  isReady:        false,
-  tokenList:      null,
-  usedProperties: null,
-  needsRecord:    false,
-  tokenTree:      null,
-  order:          [],
-  
-  
+  _isReady:     NO,
+  _needsRecord: NO,
   
   /**
     This method has to be called before the query object can be used.
@@ -217,24 +248,19 @@ SC.Query = SC.Object.extend({
  
     @returns {Boolean} true if parsing succeeded, false otherwise
   */
-  parseQuery: function() {
-    this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
-    this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLanguage);
-    this.order     = this.buildOrder(this.orderBy);
+  parse: function() {
+    var conditions = this.get('conditions'),
+        lang       = this.get('queryLanguage'),
+        tokens, tree;
+        
+    tokens = this._tokenList = this.tokenizeString(conditions, lang);
+    tree = this._tokenTree = this.buildTokenTree(tokens, lang);
+    this._order = this.buildOrder(this.get('orderBy'));
     
-    // maybe we need this later
-    // this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
-    
-    if ( !this.tokenTree || this.tokenTree.error ) {
-      return false;
-    }  
-    else {
-      this.isReady = true;
-      return true;
-    }
+    this._isReady = !tree || tree.error;
+    if (tree && tree.error) throw tree.error;
+    return this._isReady;
   },
-  
-  
   
   // ..........................................................
   // QUERY LANGUAGE DEFINITION
@@ -489,7 +515,7 @@ SC.Query = SC.Object.extend({
   
   /**
     Takes a string and tokenizes it based on the grammar definition
-    provided. Called by parseQuery().
+    provided. Called by parse().
     
     @param {String} inputString the string to tokenize
     @param {Object} grammar the grammar definition (normally queryLanguage)
@@ -498,20 +524,20 @@ SC.Query = SC.Object.extend({
   tokenizeString: function (inputString, grammar) {
 	
 	
-    var tokenList           = [];
-    var c                   = null;
-  	var t                   = null;
-  	var token               = null;
-    var tokenType           = null;
-    var currentToken        = null;
-    var currentTokenType    = null;
-    var currentTokenValue   = null;
-    var currentDelimeter    = null;
-    var endOfString         = false;
-    var endOfToken          = false;
-    var belongsToToken      = false;
-    var skipThisCharacter   = false;
-    var rememberCount       = {};
+    var tokenList           = [],
+        c                   = null,
+        t                   = null,
+        token               = null,
+        tokenType           = null,
+        currentToken        = null,
+        currentTokenType    = null,
+        currentTokenValue   = null,
+        currentDelimeter    = null,
+        endOfString         = false,
+        endOfToken          = false,
+        belongsToToken      = false,
+        skipThisCharacter   = false,
+        rememberCount       = {};
   
   
     // helper function that adds tokens to the tokenList
@@ -802,7 +828,7 @@ SC.Query = SC.Object.extend({
   /**
     Takes a string containing an order statement and returns an array
     describing this order for easier processing.
-    Called by parseQuery().
+    Called by parse().
     
     @param {String} orderString the string containing the order statement
     @returns {Array} array of order statement
@@ -826,20 +852,6 @@ SC.Query = SC.Object.extend({
     }
     
   }
-  
-  
-  // ..........................................................
-  // OTHER HELPERS
-  // not used right now
-  
-  // propertiesUsedInQuery: function (tokenList) {
-  //   var propertyList = [];
-  //   for (var i=0; i < tokenList.length; i++) {
-  //     if (tokenList[i].tokenType == 'PROPERTY') propertyList.push(tokenList[i].tokenValue);
-  //   };
-  //   return propertyList;
-  // }
-  
 
 });
 
