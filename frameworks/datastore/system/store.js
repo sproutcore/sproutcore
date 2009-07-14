@@ -1289,15 +1289,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     source to perform the appropriate actions
     on the store keys.
     
-    @param {Hash} params optional additional parameters to pass along to the
-      data source
     @param {Array} recordTypes the expected record types (SC.Record)
     @param {Array} ids to commit
     @param {Array} storeKeys to commit
+    @param {Hash} params optional additional parameters to pass along to the
+      data source
 
     @returns {SC.Bool} if the action was succesful.
   */
-  commitRecords: function(params, recordTypes, ids, storeKeys) {
+  commitRecords: function(recordTypes, ids, storeKeys, params) {
     var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
@@ -1308,7 +1308,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // If no params are passed, look up storeKeys in the changelog property.
     // Remove any committed records from changelog property.
 
-    if(recordTypes===undefined && ids===undefined && storeKeys===undefined){
+    if(!recordTypes && !ids && !storeKeys){
       storeKeys = this.changelog;
     }
     
@@ -1392,7 +1392,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       id = array;
     }
     
-    ret = this.commitRecords(params, recordType, id, storeKey);
+    ret = this.commitRecords(recordType, id, storeKey, params);
     array.length = 0 ;
     return ret;
   },

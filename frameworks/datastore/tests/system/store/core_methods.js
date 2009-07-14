@@ -104,7 +104,7 @@ test("Passing params through commitRecords()", function() {
   var file = store.find(Application.File, '14');
   file.set('name', 'My Great New Name');
   
-  store.commitRecords({ param1: 'value1' });
+  store.commitRecords(null, null, null, { param1: 'value1' });
   
   equals(dataSource.gotParams, YES, 'params should have travelled through to dataSource updateRecord() call');
   
