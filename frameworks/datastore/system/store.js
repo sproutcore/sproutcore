@@ -197,20 +197,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   revisions: null,
 
-  /** @private
-    Stores three sets of record property changes (storeKeys, statuses
-    and recordTypes) which is used when _notifyRecordPropertyChange is 
-    called. Makes it possible to only execute once at the end of 
-    the runloop.
-  
-    @property {Hash}
-  */
-  recordPropertyChanges: { 
-    storeKeys: [],
-    records: [],
-    statusOnly: []
-  },
-
   /**
     Array indicates whether a data hash is possibly in use by an external 
     record for editing.  If a data hash is editable then it may be modified
@@ -366,13 +352,25 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     hash.  If no status is found, returns SC.RECORD_EMPTY.
     
     @param {Number} storeKey the store key
-    @returns {String} status
+    @returns {Number} status
   */
   readStatus: function(storeKey) {
     // use readDataHash to handle optimistic locking.  this could be inlined
     // but for now this minimized copy-and-paste code.
     this.readDataHash(storeKey);
     return this.statuses[storeKey] || SC.Record.EMPTY;
+  },
+  
+  /**
+    Reads the current status for the storeKey without actually locking the 
+    record.  Usually you won't need to use this method.  It is mostly used
+    internally.
+    
+    @param {Number} storeKey the store key
+    @returns {Number} status
+  */
+  peekStatus: function(storeKey) {
+    return this.statuses[storeKey] || SC.Record.EMPTY;  
   },
   
   /**
@@ -430,27 +428,27 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   _notifyRecordPropertyChange: function(storeKey, statusOnly) {
     
-    var records = this.records, rec, editState;
+    var records      = this.records, 
+        nestedStores = this.get('nestedStores'),
+        K            = SC.Store,
+        rec, editState, len, idx, store, status;
     
     // pass along to nested stores
-    var nestedStores = this.get('nestedStores'), len, idx, store, status;
-    var K = SC.Store;
     len = nestedStores ? nestedStores.length : 0 ;
     for(idx=0;idx<len;idx++) {
       store = nestedStores[idx];
-      status = store.readStatus(storeKey);
+      status = store.peekStatus(storeKey); // important: peek avoids read-lock
       editState = store.storeKeyEditState(storeKey);
       
       // when store needs to propagate out changes in the parent store
       // to nested stores
-      if(editState!==K.INHERITED && (status & SC.Record.BUSY)) {
+      if (editState === K.INHERITED) {
+        store._notifyRecordPropertyChange(storeKey, statusOnly);
+
+      } else if (status & SC.Record.BUSY) {
         // make sure nested store does not have any changes before resetting
         if(store.get('hasChanges')) throw K.CHAIN_CONFLICT_ERROR;
         store.reset();
-      }
-      
-      if(store.storeKeyEditState(storeKey) === K.INHERITED) {
-        store._notifyRecordPropertyChange(storeKey, statusOnly);
       }
     }
     
@@ -484,10 +482,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     if (!this.recordPropertyChanges) return this;
     
-    var storeKeys = this.recordPropertyChanges.storeKeys, 
-      statusOnly = this.recordPropertyChanges.statusOnly,
-      records = this.recordPropertyChanges.records, rec, 
-      recordType, recordTypes = SC.Set.create(), status, idx, len, storeKey;
+    var changes     = this.recordPropertyChanges,
+        storeKeys   = changes.storeKeys, 
+        statusOnly  = changes.statusOnly,
+        records     = changes.records, 
+        recordTypes = SC.Set.create(),
+        rec, recordType, status, idx, len, storeKey;
     
     for(idx=0,len=storeKeys.length;idx<len;idx++) {
       storeKey = storeKeys[idx];
@@ -616,6 +616,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       myChangelog.addEach(chChangelog);
     }  
     this.changelog = myChangelog;
+    
+    // immediately flush changes to notify records - nested stores will flush
+    // later on.
+    if (!this.get('parentStore')) this.flush();
     
     return this ;
   },
@@ -1165,7 +1169,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         ret     = [],
         rev     = SC.Store.generateStoreKey(),
         K       = SC.Record,
-        recordType, idx, storeKey, status;
+        recordType, idx, storeKey, status, ok;
         
     if (!isArray) recordType = recordTypes;
     
@@ -1210,10 +1214,30 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    // now retrieve storekeys from dataSource
-    if (source) {
-      var ok = source.retrieveRecords.call(source, this, ret, ids);
-      if (ok === NO) ret.length = 0; // could not find.
+    // now retrieve storekeys from dataSource.  if there is no dataSource,
+    // then act as if we couldn't retrieve.
+    ok = NO;
+    if (source) ok = source.retrieveRecords.call(source, this, ret, ids);
+
+    // if the data source could not retrieve or if there is no source, then
+    // simulate the data source calling dataSourceDidError on those we are 
+    // loading for the first time or dataSourceDidComplete on refreshes.
+    if (!ok) {
+      len = ret.length;
+      rev = SC.Store.generateStoreKey();
+      for(idx=0;idx<len;idx++) {
+        storeKey = ret[idx];
+        status   = this.readStatus(storeKey);
+        if (status === K.BUSY_LOADING) {
+          this.writeStatus(storeKey, K.ERROR);
+          this.dataHashDidChange(storeKey, rev, YES);
+          
+        } else if (status & K.BUSY_REFRESH) {
+          this.writeStatus(storeKey, K.READY | (status & 0x03));
+          this.dataHashDidChange(storeKey, rev, YES);
+        }
+      }
+      ret.length = 0 ; // truncate to indicate that none could refresh
     }
     return ret ;
   },
@@ -1266,7 +1290,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Boolean} YES if the retrieval was a success.
   */
   refreshRecord: function(recordType, id, storeKey) {
-    return this.retrieveRecord(recordType, id, storeKey, YES);
+    return !!this.retrieveRecord(recordType, id, storeKey, YES);
   },
 
   /**
@@ -1280,7 +1304,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Boolean} YES if the retrieval was a success.
   */
   refreshRecords: function(recordTypes, ids, storeKeys) {
-    return this.retrieveRecords(recordTypes, ids, storeKeys, YES);
+    var ret = this.retrieveRecords(recordTypes, ids, storeKeys, YES);
+    return ret && ret.length>0;
   },
     
   /**
@@ -1360,7 +1385,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // now commit storekeys to dataSource
     if (source) ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
-    //remove all commited changes from changelog
+    
+    // remove all commited changes from changelog
     if (ret && recordTypes===undefined && ids===undefined && storeKeys===this.changelog){ 
       this.changelog=null; 
     }

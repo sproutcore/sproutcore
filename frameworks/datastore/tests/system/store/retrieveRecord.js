@@ -82,20 +82,36 @@ module("SC.Store#retrieveRecord", {
     store.writeDataHash(storeKey8, json8, SC.Record.READY_CLEAN);
     }
 });
-    
-test("Retrieve a record and check for different errors and states", function() {
+  
+function testStates(canLoad) {
   var msg, status;
+  
+  SC.RunLoop.begin();
+  
   store.retrieveRecord(undefined, undefined, storeKey1, YES);
   status = store.readStatus( storeKey1);
-  equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
+  if (canLoad) {
+    equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
+  } else {
+    equals(status, SC.Record.ERROR, "the status should remain empty");
+  }
+  
   
   store.retrieveRecord(undefined, undefined, storeKey2, YES);
   status = store.readStatus( storeKey2);
-  equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
+  if (canLoad) {
+    equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
+  } else {
+    equals(status, SC.Record.ERROR, "the status should become empty");
+  }
   
   store.retrieveRecord(undefined, undefined, storeKey3, YES);
   status = store.readStatus( storeKey3);
-  equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
+  if (canLoad) {
+    equals(status, SC.Record.BUSY_LOADING, "the status should have changed to BUSY_LOADING");
+  } else {
+    equals(status, SC.Record.ERROR, "the status should become empty");
+  }
   
   try{
     store.retrieveRecord(undefined, undefined, storeKey4, YES);
@@ -132,6 +148,37 @@ test("Retrieve a record and check for different errors and states", function() {
 
   store.retrieveRecord(undefined, undefined, storeKey8, YES);
   status = store.readStatus( storeKey8);
-  ok(SC.Record.BUSY_REFRESH | (status & 0x03), "the status changed to BUSY_REFRESH.");
+  if (canLoad) {
+    ok(SC.Record.BUSY_REFRESH | (status & 0x03), "the status changed to BUSY_REFRESH.");
+  } else {
+    equals(status, SC.Record.READY_CLEAN, "the status should remain ready clean");
+  }
   
+  SC.RunLoop.end();
+}  
+
+test("Retrieve a record without a data source", function() {
+  testStates(NO);
+});
+
+test("Retrieve a record without a working data source and check for different errors and states", function() {
+  // build a fake data source that claims to NOT handle retrieval
+  var source = SC.DataSource.create({
+    retrieveRecords: function() { return NO ; }
+  });
+  store.set('dataSource', source);
+
+  testStates(NO);
+
+});
+
+test("Retrieve a record with working data source and check for different errors and states", function() {
+  // build a fake data source that claims to handle retrieval
+  var source = SC.DataSource.create({
+    retrieveRecords: function() { return YES ; }
+  });
+  store.set('dataSource', source);
+
+  testStates(YES);
+
 });

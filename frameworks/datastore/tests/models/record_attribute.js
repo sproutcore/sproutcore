@@ -6,7 +6,8 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for RecordArray with RecordAttribute
-var storeKeys, rec;
+var storeKeys, rec, rec2, bar ;
+
 module("SC.RecordAttribute core methods", {
   setup: function() {
 
@@ -51,7 +52,7 @@ module("SC.RecordAttribute core methods", {
       relatedToComputed: SC.Record.toOne(function() {
         // not using .get() to avoid another transform which will 
         // trigger an infinite loop
-        return (this.readAttribute('relatedToComputed').indexOf("foo")==0) ? MyApp.Foo : MyApp.Bar;
+        return (this.readAttribute('relatedToComputed').indexOf("foo")===0) ? MyApp.Foo : MyApp.Bar;
       })
       
     });
@@ -149,7 +150,7 @@ test("reading date should parse ISO date", function() {
 });
 
 test("reading date should parse non-ISO date", function() {
-  var d = new Date(2009,6,10,8,55,50);
+  var d = new Date(1244624150000); // should be proper date
   equals(rec2.get('nonIsoDate').toString(), d.toString(), 'should have matched date');
 });
 

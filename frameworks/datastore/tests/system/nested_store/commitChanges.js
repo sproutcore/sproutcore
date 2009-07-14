@@ -120,4 +120,52 @@ test("state = EDITABLE", function() {
 // SPECIAL CASES
 // 
 
-// TODO: Add more special cases for SC.NestedStore#commitChanges
+test("commiting a changed record should immediately notify outstanding records in parent store", function() {
+
+  var Rec = SC.Record.extend({
+    
+    fooCnt: 0,
+    fooDidChange: function() { this.fooCnt++; }.observes('foo'),
+    
+    statusCnt: 0,
+    statusDidChange: function() { this.statusCnt++; }.observes('status'),
+    
+    reset: function() { this.fooCnt = this.statusCnt = 0; },
+    
+    equals: function(fooCnt, statusCnt, str) {
+      if (!str) str = '' ;
+      equals(this.get('fooCnt'), fooCnt, str + ':fooCnt');
+      equals(this.get('statusCnt'), statusCnt, str + ':statusCnt');
+    }
+    
+  });
+
+  SC.RunLoop.begin();
+    
+  var store = SC.Store.create();
+  var prec  = store.createRecord(Rec, { foo: "bar", guid: 1 });
+  
+  var child = store.chain();
+  var crec  = child.find(Rec, prec.get('id'));
+  
+  // check assumptions
+  ok(!!crec, 'prerec - should find child record');
+  equals(crec.get('foo'), 'bar', 'prerec - child record should have foo');
+  
+  // modify child record - should not modify parent
+  prec.reset();
+  crec.set('foo', 'baz');
+  equals(prec.get('foo'), 'bar', 'should not modify parent before commit');
+  prec.equals(0,0, 'before commitChanges');
+  
+  // commit changes - note: still inside runloop
+  child.commitChanges();
+  equals(prec.get('foo'), 'baz', 'should push data to parent');
+  prec.equals(1,1, 'after commitChanges'); // should notify immediately
+  
+  SC.RunLoop.end();
+  
+  // should not notify again after runloop - nothing to do
+  prec.equals(1,1,'after runloop ends - should not notify again');
+  
+});

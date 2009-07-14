@@ -284,7 +284,7 @@ test("Using findAll with SC.Query on store with no data source should work", fun
     { guid: 21, firstName: "John", lastName: "Anderson" },
     { guid: 22, firstName: "Barbara", lastName: "Jones" }
   ];
-  
+
   MyApp.store3.loadRecords(MyApp.Foo, recordsToLoad);
   
   SC.RunLoop.end();

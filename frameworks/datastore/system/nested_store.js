@@ -168,6 +168,7 @@ SC.NestedStore = SC.Store.extend(
     }
     
     this.reset();
+    this.flush();
     return this ;
   },
   

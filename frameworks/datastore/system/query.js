@@ -859,10 +859,11 @@ SC.Query.mixin( /** @scope SC.Query */ {
     
     for(idx=0,len=storeKeys.length;idx<len;idx++) {
       rec = store.materializeRecord(storeKeys[idx]);
-      status = rec.get('status');
+      if (rec) status = rec.get('status');
+      
       // do not include EMPTY or DESTROYED records
-      if(rec && !(status & K.EMPTY) && !(status & K.DESTROYED) && query.contains(rec)) {
-        ret.push(storeKeys[idx]);
+      if (rec && !(status & K.EMPTY) && !(status & K.DESTROYED)) {
+        if (query.contains(rec)) ret.push(storeKeys[idx]);
       }
     }
     

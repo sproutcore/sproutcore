@@ -147,7 +147,8 @@ test("changing attributes on a parent store should NOT notify child store if loc
   expect(0,0); // should not reflect on child
   
   // discarding changes should update
-  child.discardChanges(); // make it match parent again
+  // NOTE: notifications should happen immediately on commit/discard changes.
+  child.discardChanges(); // make it match parent again 
   expect(1,1);
 });
 

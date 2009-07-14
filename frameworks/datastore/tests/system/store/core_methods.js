@@ -95,7 +95,11 @@ test("loading more records should not sending _flushRecordChanges() until the en
   
   SC.RunLoop.end();
   
-  equals(store.recordPropertyChanges.storeKeys.length, 0, 'should be zero storeKeys in changelog');
+  // recordPropertyChanges may not exist after notifications have gone out.
+  // treat that like having len=0
+  var changes = store.recordPropertyChanges;
+  var len = (changes && changes.storeKeys) ? changes.storeKeys.length : 0;
+  equals(len, 0, 'should be zero storeKeys in changelog');
   
 });
 
