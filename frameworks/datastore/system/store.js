@@ -455,29 +455,34 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // schedule
-    this.recordPropertyChanges.storeKeys.push(storeKey);
-    
-    if (records && (rec=records[storeKey])) {
-      this.recordPropertyChanges.records.push(storeKey);
-      if(statusOnly) {
-        this.recordPropertyChanges.statusOnly.push(storeKey);
-      }
+    var changes = this.recordPropertyChanges;
+    if (!changes) {
+      changes = this.recordPropertyChanges = 
+        { storeKeys: [], records: [], statusOnly: [] };
     }
     
-    this.invokeOnce(this._flushRecordChanges);
-    
+    changes.storeKeys.push(storeKey);
+
+    if (records && (rec=records[storeKey])) {
+      changes.records.push(storeKey);
+      if(statusOnly) changes.statusOnly.push(storeKey);
+    }
+
+    this.invokeOnce(this.flush);
     return this;
   },
-  
-  /** @private 
-    Will notify any record instances of the property change at the end of 
-    the run loop.  Also notifies any inherited record instances as well.
-    
-    Will also notify any record arrays with queries to refresh based on
-    the new/changed store keys.
+
+  /**
+    Delivers any pending changes to materialized records.  Normally this 
+    happens once, automatically, at the end of the RunLoop.  If you have
+    updated some records and need to update records immediately, however, 
+    you may call this manually.
+
+    @returns {SC.Store} receiver
   */
-  
-  _flushRecordChanges: function() {
+  flush: function() {
+    
+    if (!this.recordPropertyChanges) return this;
     
     var storeKeys = this.recordPropertyChanges.storeKeys, 
       statusOnly = this.recordPropertyChanges.statusOnly,
@@ -502,11 +507,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     }
     this._notifyRecordArraysWithQuery(storeKeys, recordTypes);
-    
-    // reset for next run loop
-    this.recordPropertyChanges.storeKeys = [];
-    this.recordPropertyChanges.records = [];
-    this.recordPropertyChanges.statusOnly = [];
+    this.recordPropertyChanges = null;
+    return this;
   },
   
   /** @private 
