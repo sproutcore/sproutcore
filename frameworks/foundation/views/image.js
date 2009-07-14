@@ -89,17 +89,30 @@ SC.ImageView = SC.View.extend(SC.Control,
   */
   canLoadInBackground: NO,
   
-  displayProperties: 'status'.w(),
+  /**
+    If YES, any specified toolTip will be localized before display.
+  */
+  localize: YES,
+  
+  displayProperties: 'status toolTip'.w(),
   
   render: function(context, firstTime) {
     // the image source is the value if the status is LOADED or blank
-    var status = this.get('status'), value = this.get('value');
+    var status = this.get('status'), value = this.get('value') ;
     
     if (status === SC.IMAGE_STATE_NONE && value) this._image_valueDidChange() ; // setup initial state
     
-    var src = (status === SC.IMAGE_STATE_LOADED) ? value : SC.BLANK_IMAGE_URL;
-    if (status === SC.IMAGE_STATE_SPRITE) context.addClass(value);
-    context.attr('src', src);
+    var src = (status === SC.IMAGE_STATE_LOADED) ? value : SC.BLANK_IMAGE_URL ;
+    if (status === SC.IMAGE_STATE_SPRITE) context.addClass(value) ;
+    context.attr('src', src) ;
+    
+    // If there is a toolTip set, grab it and localize if necessary.
+    var toolTip = this.get('toolTip') ;
+    if (SC.typeOf(toolTip) === SC.T_STRING) {
+      if (this.get('localize')) toolTip = toolTip.loc() ;
+      context.attr('title', toolTip) ;
+      context.attr('alt', toolTip) ;
+    }
   },
   
   /** @private - 
