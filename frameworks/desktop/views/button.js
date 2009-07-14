@@ -38,7 +38,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     should set a class name on the HTML with the same value to allow CSS 
     styling.
     
-    The default SproutCore theme supports "regular", "checkbox", and "radio"
+    The default SproutCore theme supports "regular", "capsule", "checkbox", 
+    and "radio"
   */
   theme: 'square',
   
