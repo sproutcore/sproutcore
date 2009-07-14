@@ -22,7 +22,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     pane.show();
 
 
-    module('SC.ImageView ui', pane.standardSetup());
+    module('SC.ImageView ui');
   
   
     test("Verify that all the rendering properties of an image that is being loaded are correct", function() {
