@@ -225,15 +225,21 @@ test("Adding left accessory view", function() {
   ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
   
   
-  // The input element should automatically have its left-padding set to the
-  // accessory view's offset + width (18 = 2 left offset + 16 width)
-  ok(view.$field()[0].style.paddingLeft === '18px', 'input element should get 18px padding-left');
+  // The hint and field elements should automatically have their padding-left
+  // set to the accessory view's offset + width
+  // (18 = 2 left offset + 16 width)
+  var hintElement  = view.$('.sc-hint')[0];
+  var fieldElement = view.$field()[0];
+  ok(hintElement.style.paddingLeft  === '18px', 'hint element should get 18px padding-left');
+  ok(fieldElement.style.paddingLeft === '18px', 'field element should get 18px padding-left');
   
   // Test removing the accessory view.
   SC.RunLoop.begin();
   view.set('leftAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing the left accessory view there should be no child views left');
+  ok(!hintElement.style.paddingLeft, 'after removing the left accessory view the hint element should have no padding-left style');
+  ok(!fieldElement.style.paddingLeft, 'after removing the left accessory view the field element should have no padding-left style');
 });
 
 test("Adding right accessory view", function() {  
@@ -252,9 +258,13 @@ test("Adding right accessory view", function() {
   ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
   
   
-  // The input element should automatically have its right-padding set to the
-  // accessory view's offset + width (20 = 3 right offset + 17 width)
-  ok(view.$field()[0].style.paddingRight === '20px', 'input element should get 20px padding-right');
+  // The hint and field elements should automatically have their padding-right
+  // set to the accessory view's offset + width
+  // (20 = 3 right offset + 17 width)
+  var hintElement  = view.$('.sc-hint')[0];
+  var fieldElement = view.$field()[0];
+  ok(hintElement.style.paddingRight  === '20px', 'hint element should get 20px padding-right');
+  ok(fieldElement.style.paddingRight === '20px', 'field element should get 20px padding-right');
   
   
   // If a right accessory view is set with only 'left' (and not 'right')
@@ -276,6 +286,8 @@ test("Adding right accessory view", function() {
   view.set('rightAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing the right accessory view there should be no child views left');
+  ok(!hintElement.style.paddingRight, 'after removing the right accessory view the hint element should have no padding-right style');
+  ok(!fieldElement.style.paddingRight, 'after removing the right accessory view the field element should have no padding-right style');
 });
 
 test("Adding both left and right accessory views", function() {  
@@ -296,13 +308,16 @@ test("Adding both left and right accessory views", function() {
   ok(view.get('childViews').length === 2, 'we should have two child views since we added both a left and a right accessory view');
   
   
-  // The input element should automatically have its left-padding and its
-  // right-padding set to the  accessory views' offset + width
+  // The hint and field elements should automatically have their padding-left
+  // and padding-right values set to the accessory views' offset + width
   //   *  left:   18 = 2 left offset + 16 width)
   //   *  right:  20 = 3 left offset + 17 width)
-  var element = view.$field()[0];
-  ok(element.style.paddingLeft  === '18px', 'input element should get 18px padding-left');
-  ok(element.style.paddingRight === '20px', 'input element should get 20px padding-right');
+  var hintElement  = view.$('.sc-hint')[0];
+  var fieldElement = view.$field()[0];
+  ok(hintElement.style.paddingLeft  === '18px', 'hint element should get 18px padding-left');
+  ok(fieldElement.style.paddingLeft === '18px', 'field element should get 18px padding-left');
+  ok(hintElement.style.paddingRight  === '20px', 'hint element should get 20px padding-right');
+  ok(fieldElement.style.paddingRight === '20px', 'field element should get 20px padding-right');
   
   
   // Test removing the accessory views.
@@ -310,10 +325,14 @@ test("Adding both left and right accessory views", function() {
   view.set('rightAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 1, 'after removing the right accessory view there should be one child view left (the left accessory view)');
+  ok(!hintElement.style.paddingRight, 'after removing the right accessory view the hint element should have no padding-right style');
+  ok(!fieldElement.style.paddingRight, 'after removing the right accessory view the field element should have no padding-right style');
   SC.RunLoop.begin();
   view.set('leftAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing both accessory views there should be no child views left');
+  ok(!hintElement.style.paddingLeft, 'after removing the left accessory view the hint element should have no padding-left style');
+  ok(!fieldElement.style.paddingLeft, 'after removing the left accessory view the field element should have no padding-left style');
 });
 
 
