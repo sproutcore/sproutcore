@@ -158,6 +158,12 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
   recordType:  null,
   
   /**
+    Optional array of multiple record types.  If the query accepts multiple 
+    record types, this is how you can check for it.
+  */
+  recordTypes: null,
+  
+  /**
     Optional hash of parameters.  These parameters may be interpolated into 
     the query conditions.  If you are handling the query manually, these 
     parameters will not be used.
@@ -165,7 +171,20 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     @type {Hash}
   */
   parameters:  null,
- 
+  
+  /**
+    If true, then the query will attempt to autoupdate any RecordArrays 
+    whenever their backing store changes.  If you have set a query delegate,
+    then you should expect a call to the queryDidChangeForStore() call to 
+    refresh.
+    
+    If you set a delegate the query, this will normally change automatically
+    to NO.
+    
+    @type {Boolean}
+  */
+  updatesAutomatically: YES,
+  
   // ..........................................................
   // METHODS
   // 
@@ -178,12 +197,24 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     @returns {Boolean} YES if record belongs, NO otherwise
   */ 
   contains: function(record, parameters) {
+
+    // check the recordType if specified
+    var rtype, ret = YES ;    
+    if (rtype = this.get('recordTypes')) { // plural form
+      ret = rtype.find(function(t) { return SC.instanceOf(record, t);});
+    } else if (rtype = this.get('recordType')) { // singual
+      ret = SC.instanceOf(record, rtype);
+    }
+    if (!ret) return NO ; // if either did not pass, does not contain
+
+    // now try parsing
     if (!this._isReady) this.parse(); // prepare the query if needed
-    if (parameters === undefined) parameters = this.parameters;
+    if (!this._isReady) return NO ;
+    if (parameters === undefined) parameters = this.parameters || this;
     
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
-    return this._isReady && this._tokenTree.evaluate(record, parameters);
+    return this._tokenTree.evaluate(record, parameters);
   },
   
   /**

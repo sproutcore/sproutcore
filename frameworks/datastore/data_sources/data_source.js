@@ -21,10 +21,33 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   
 
   /**
-    Invoked by the store whenever it needs to retrieve data matching a specific 
-    query, triggered by findAll() or retrieveRecords(). The fetchKey will most 
-    times be either an SC.Record subclass or an SC.Query object, but it could 
-    be anything you want.
+    Invoked by the store the first time a Query is created.  This gives you a 
+    chance to configure the query object before it is actually used to 
+    retrieve data.  
+    
+    Normally if you just want a query to be filled from whatever objects are
+    in memory, you don't need to override this method at all.  If you want to
+    control the actual way the Query is filled, you can configure the Query
+    now.
+    
+    After this method returns, the query will be frozen.
+    
+    @param {SC.Store} store the requesting store
+    @param {SC.Query} query the query
+    @returns {void}
+  */
+  prepareQuery: function(store, query) {
+  },
+  
+  /**
+  
+    Invoked by the store whenever it needs to retrieve data matching a 
+    specific query, triggered by findAll().
+    
+    TODO: Update this documentation to reflect the new implementation
+    
+    The fetchKey will most times be either an SC.Record subclass or an 
+    SC.Query object, but it could be anything you want.
     
     If your data source subclass can handle the fetch you should override this 
     method to return a SC.Array with storeKeys. You can return it immediately 
@@ -33,12 +56,12 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     where data source will be consulted to dynamically populate the contents 
     of the array as it is requested.
     
-    Note that if you gave an SC.Query as the fetchKey to findAll() on the store
-    you do not have to return anything from this method as you are from then on 
-    delegating the responsibility to keep the record array updated to the store.
-    The fetch() method in that case merely functions as a notification 
-    mechanism where you get the opportunity to fetch more data from a backend
-    based on the SC.Query.
+    Note that if you gave an SC.Query as the fetchKey to findAll() on the 
+    store you do not have to return anything from this method as you are from 
+    then on  delegating the responsibility to keep the record array updated to 
+    the store. The fetch() method in that case merely functions as a 
+    notification mechanism where you get the opportunity to fetch more data 
+    from a backend based on the SC.Query.
     
     On return, the Store will write your result set in an SC.RecordArray 
     instance, which will monitor your array for changes and then maps those
@@ -46,27 +69,26 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     your underlying storeKeys to create subqueries for client-side searching
     and filtering.
     
-    findAll() will request all records and load them using store.loadRecords(). 
-    retrieveRecords() checks if the record is already loaded and in a clean 
-    state to then just materialize it. If the record is in an empty state, it 
-    will call this method to load the required record to then materialize it.
+    findAll() will request all records and load them using 
+    store.loadRecords(). retrieveRecords() checks if the record is already 
+    loaded and in a clean state to then just materialize it. If the record is 
+    in an empty state, it will call this method to load the required record to 
+    then materialize it.
     
     @param {SC.Store} store the requesting store
-    @param {Object|SC.Query} fetchKey key describing the request, may be 
-      SC.Record or SC.Record.STORE_KEYS if invoked from store.retrieveRecords.
-      Could also be an SC.Query if that was passed in to findAll()
-    @param {Hash} params optional additonal fetch params. storeKeys if invoked
-      from store.retrieveRecords. this originated from the commitRecords() 
-      call on the store
-    @returns {SC.Array} result set with storeKeys. In case of SC.Array
-      it may be sparse.
+    @param {SC.Query} query query describing the request
+    @returns {Boolean} YES if you can handle fetching the query, NO otherwise
   */
-  fetch: function(store, fetchKey, params) {
-    return null;  
+  fetchQuery: function(store, query) {
   },
   
   /**
-    Called when store needs a set of storeKeys
+    Called by the store whenever it needs to load a specific set of store 
+    keys.  The default implementation will call retrieveRecord() for each
+    storeKey.  
+    
+    You should implement either retrieveRecord() or retrieveRecords() to 
+    actually fetch the records referenced by the storeKeys .
     
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys

@@ -728,6 +728,66 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
 
   /**
+    Takes the passed options and builds a query object, possibly allowing the
+    data source to configure the query, deciding how it should be handled.
+    
+    You can take this query and call findAll() to actually execute the 
+    query later.
+    
+    @param {SC.Record} recordType the type of records or array of types
+    @param {String} conditions query conditions
+    @param {Hash|Array} params additonal properties to set on the query
+    @returns {SC.Query} the query
+  */
+  queryFor: function(recordType, conditions, params) {
+    var ret, key, queries, source;
+    
+    // make API compatible with findAll.
+    if (SC.instanceOf(recordType, SC.Query)) return recordType;
+    
+    // if no params were passed, attempt to use a cached version
+    if (!params) {
+      key = [] ;
+      if (recordType && recordType.isEnumerable) {
+        recordType.forEach(function(t) { key.push(SC.guidFor(t)); });
+      } else key.push(SC.guidFor(recordType))
+      key.sort(); // make sure recordTypes go in the same order every time
+      key.push('@');
+      key.push(SC.guidFor(conditions));
+      key = key.join('-');
+      
+      queries = this._scstore_queries ;
+      if (!queries) queries = this._scstore_queries = {};
+      ret = queries[key];
+    }
+    
+    // if not cached, create query
+    if (!ret) {
+      if (params) {
+        if (!params.isEnumerable) params = SC.clone(params);
+        else if (params.isSCArray) params = { parameters: params };
+        else params = { parameters: params.toArray() };
+      } else params = {};
+      
+      if (recordType && recordType.isEnumerable) {
+        params.recordTypes = recordType ; // save multiple
+      } else params.recordType = recordType; // save single
+
+      params.conditions = conditions ;
+      
+      ret = SC.Query.create(params);
+      
+      source = this._getDataSource();
+      if (source) source.prepareQuery(this, ret);
+      ret.freeze(); // no more changes!
+    }
+    
+    // use caching if possible
+    if (queries && key) queries[key] = ret ;
+    return ret ;
+  },
+  
+  /**
     Retrieves records from the persistent store.  You should pass in a named
     query that will be understood by one of the persistent stores you have
     configured along with any optional parameters needed by the search.
