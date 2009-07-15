@@ -206,6 +206,119 @@ test("enabling disabled view", function() {
 
 
 // ..........................................................
+// TEST ACCESSORY VIEWS
+// 
+
+test("Adding left accessory view", function() {  
+  var view = pane.view('with value');
+  
+  // test adding accessory view adds the view like it should
+  SC.RunLoop.begin();
+  var accessoryView = SC.View.create({
+    layout:  { top:1, left:2, width:16, height:16 }
+  });
+  view.set('leftAccessoryView', accessoryView);
+  SC.RunLoop.end();
+
+  ok(view.get('leftAccessoryView') === accessoryView, 'left accessory view should be set to ' + accessoryView.toString());
+  ok(view.get('childViews').length === 1, 'there should only be one child view');
+  ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
+  
+  
+  // The input element should automatically have its left-padding set to the
+  // accessory view's offset + width (18 = 2 left offset + 16 width)
+  ok(view.$field()[0].style.paddingLeft === '18px', 'input element should get 18px padding-left');
+  
+  // Test removing the accessory view.
+  SC.RunLoop.begin();
+  view.set('leftAccessoryView', null);
+  SC.RunLoop.end();
+  ok(view.get('childViews').length === 0, 'after removing the left accessory view there should be no child views left');
+});
+
+test("Adding right accessory view", function() {  
+  var view = pane.view('with value');
+  
+  // test adding accessory view adds the view like it should
+  SC.RunLoop.begin();
+  var accessoryView = SC.View.create({
+    layout:  { top:1, right:3, width:17, height:16 }
+  });
+  view.set('rightAccessoryView', accessoryView);
+  SC.RunLoop.end();
+
+  ok(view.get('rightAccessoryView') === accessoryView, 'right accessory view should be set to ' + accessoryView.toString());
+  ok(view.get('childViews').length === 1, 'there should only be one child view');
+  ok(view.get('childViews')[0] === accessoryView, 'first child view should be set to ' + accessoryView.toString());
+  
+  
+  // The input element should automatically have its right-padding set to the
+  // accessory view's offset + width (20 = 3 right offset + 17 width)
+  ok(view.$field()[0].style.paddingRight === '20px', 'input element should get 20px padding-right');
+  
+  
+  // If a right accessory view is set with only 'left' (and not 'right')
+  // defined in its layout, 'left' should be cleared out and 'right' should
+  // be set to 0.
+  SC.RunLoop.begin();
+  var accessoryView = SC.View.create({
+    layout:  { top:1, left:2, width:16, height:16 }
+  });
+  view.set('rightAccessoryView', accessoryView);
+  SC.RunLoop.end();
+  
+  ok(view.get('rightAccessoryView').get('layout').left === null, "right accessory view created with 'left' rather than 'right' in layout should have layout.left set to null");
+  ok(view.get('rightAccessoryView').get('layout').right === 0, "right accessory view created with 'left' rather than 'right' in layout should have layout.right set to 0");
+  
+  
+  // Test removing the accessory view.
+  SC.RunLoop.begin();
+  view.set('rightAccessoryView', null);
+  SC.RunLoop.end();
+  ok(view.get('childViews').length === 0, 'after removing the right accessory view there should be no child views left');
+});
+
+test("Adding both left and right accessory views", function() {  
+  var view = pane.view('with value');
+  
+  // test adding accessory view adds the view like it should
+  SC.RunLoop.begin();
+  var leftAccessoryView = SC.View.create({
+    layout:  { top:1, left:2, width:16, height:16 }
+  });
+  view.set('leftAccessoryView', leftAccessoryView);
+  var rightAccessoryView = SC.View.create({
+    layout:  { top:1, right:3, width:17, height:16 }
+  });
+  view.set('rightAccessoryView', rightAccessoryView);
+  SC.RunLoop.end();
+
+  ok(view.get('childViews').length === 2, 'we should have two child views since we added both a left and a right accessory view');
+  
+  
+  // The input element should automatically have its left-padding and its
+  // right-padding set to the  accessory views' offset + width
+  //   *  left:   18 = 2 left offset + 16 width)
+  //   *  right:  20 = 3 left offset + 17 width)
+  var element = view.$field()[0];
+  ok(element.style.paddingLeft  === '18px', 'input element should get 18px padding-left');
+  ok(element.style.paddingRight === '20px', 'input element should get 20px padding-right');
+  
+  
+  // Test removing the accessory views.
+  SC.RunLoop.begin();
+  view.set('rightAccessoryView', null);
+  SC.RunLoop.end();
+  ok(view.get('childViews').length === 1, 'after removing the right accessory view there should be one child view left (the left accessory view)');
+  SC.RunLoop.begin();
+  view.set('leftAccessoryView', null);
+  SC.RunLoop.end();
+  ok(view.get('childViews').length === 0, 'after removing both accessory views there should be no child views left');
+});
+
+
+
+// ..........................................................
 // TEST EVENTS
 // 
 
