@@ -837,31 +837,78 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       within a given record array
     @returns {SC.RecordArray} matching set or null if no server handled it
   */
-  findAll: function(fetchKey, params, recordArray) { 
-    var _store = this, source = this._getDataSource(), ret = [], storeKeys, 
-      sourceRet, cacheKey;
+  findAll: function(recordType, conditions, params, recordArray, _store) { 
+    var query, source, storeKeys, ret ;
+    if (!_store) _store = this;
     
-    if(recordArray) {
-      // giving a recordArray will circumvent the data source
-      // typically happens when chaining findAll statements
-      storeKeys = SC.Query.containsRecords(fetchKey, recordArray, _store);
+    // get a query for the passed parameters
+    if (SC.instanceOf(recordType, SC.Query)) {
+      query = recordType;
+      recordArray = conditions;
+    } else query = this.queryFor(recordType, conditions, params);
+
+    // if a record array is passed, just search in the recordArray.  Return 
+    if (recordArray) {
+      storeKeys = SC.Query.containsRecords(query, recordArray, _store);
+
+    // otherwise, actually ask the data source, if we have one, to fetch the
+    // records.
+    } else {
+      source = this._getDataSource();
+      // the source only knows about the root store, no chained stores, so 
+      // pass "this" as store, not "_store".
+      if (source) source.fetchQuery(this, query); 
     }
-    else if (source) {
-      // call fetch() on the data source.
-      sourceRet = source.fetch.call(source, this, fetchKey, params);
-      var typeRet = SC.typeOf(sourceRet);
-      if(typeRet===SC.T_ARRAY || (typeRet===SC.T_OBJECT && sourceRet.isSCArray)) {
-        storeKeys = sourceRet;
-      }
-    }
-    
-    // if SC.Query returned from data source or no data source was given 
-    if(!storeKeys && SC.instanceOf(fetchKey, SC.Query)) {
-      storeKeys = SC.Query.containsStoreKeys(fetchKey, null, _store);
-    }
-    
-    ret = this.recordArrayFromStoreKeys(storeKeys, fetchKey, _store);
+
+    ret = _store.recordArrayFromQuery(query, storeKeys);
     return ret ;
+  },
+  
+  recordArrayFromQuery: function(query, storeKeys) {
+    var cache = this._scstore_recordArrays,
+        ret, key;
+    
+    // if storeKeys are passed, this is a one time record array.  not live.
+    // just build and return.
+    if (storeKeys) {
+      ret = SC.RecordArray.create({
+        store: this,
+        storeKeys: storeKeys,
+        query: query,
+        autoupdate: NO
+      });
+    
+    // otherwise, try to get from cache
+    } else {
+      if (!cache) cache = this._scstore_recordArrays = {}; 
+      key = SC.guidFor(query);
+      ret = cache[key];
+      if (!ret) {
+        cache[key] = ret = SC.RecordArray.create({
+          store: this,
+          query: query,
+          autoupdate: YES
+        });
+      } 
+    }
+    
+    // if the record array auto-updates, then register
+    if (ret && ret.get('autoupdate')) {
+      if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
+      this.recordArraysWithQuery.push(ret);
+    }
+    
+    return ret ;
+  },
+  
+  /**
+    Called by the record array just before it is destroyed.  This will 
+    de-register it from receiving future notifications.
+  */
+  recordArrayWillDestroy: function(recordArray) {
+    var recordArrays = this.recordArraysWithQuery;
+    if (recordArrays) recordArrays.removeObject(recordArray);
+    return this ;
   },
   
   /**

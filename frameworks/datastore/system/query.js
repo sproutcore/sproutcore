@@ -219,7 +219,9 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
   
   /**
     Returns the sort order of the two passed records, taking into account the
-    orderBy property set on this query.
+    orderBy property set on this query.  This method does not verify that the
+    two records actually belong in the query set or not; this is checked using
+    contains().
  
     @param {SC.Record} record1 the first record
     @param {SC.Record} record2 the second record

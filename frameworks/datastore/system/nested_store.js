@@ -399,9 +399,9 @@ SC.NestedStore = SC.Store.extend(
   },
   
   /** @private - adapt for nested store */
-  findAll: function(queryKey, params, _store) { 
-    if (!_store) store = this;
-    return this.get('parentStore').findAll(queryKey, params, _store);
+  findAll: function(recordType, conditions, params, recordArray, _store) { 
+    if (!_store) _store = this;
+    return this.get('parentStore').findAll(recordType, conditions, params, recordArray, _store);
   },
 
   // ..........................................................
