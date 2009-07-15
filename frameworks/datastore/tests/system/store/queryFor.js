@@ -78,7 +78,16 @@ function queryEquals(q, recordType, conditions, extra, desc) {
 // queryFor Test
 // 
 
-module("SC.Store#queryFor");
+module("SC.Store#queryFor", {
+  setup: function() {
+    window.TestRecord = TestRecord;
+    window.TestRecord2 = TestRecord2;
+  },
+  
+  teardown: function() {
+    window.TestRecord = window.TestRecord2 = null; // cleanup
+  }
+});
 
 test("basic query with just record type", function() {
   var store = SC.Store.create();
@@ -88,6 +97,19 @@ test("basic query with just record type", function() {
   
   var q1 = store.queryFor(TestRecord);
   equals(q1, q, 'second queryFor call should return cached value');
+  
+  // using string for record type name should work
+  var q2 = store.queryFor("TestRecord");
+  equals(q2, q, 'queryFor with string should return cached value');
+  
+  // using an array of a single item should be treated as a single item
+  var q3 = store.queryFor([TestRecord]);
+  equals(q3, q, 'queryFor([TestRecord]) with string should return cached value');
+
+  // ditto w/ strings
+  var q4 = store.queryFor(['TestRecord']);
+  equals(q4, q, 'queryFor(["TestRecord"]) with string should return cached value');
+  
 });
 
 test("query with multiple recordtypes", function() {
@@ -111,6 +133,10 @@ test("query with multiple recordtypes", function() {
   var set = SC.Set.create().add(TestRecord).add(TestRecord2);
   var q4  = store.queryFor(set);
   equals(q4, q1, 'should return cached query even if using an enumerable for types');
+  
+  // try again using strings
+  var q5 = store.queryFor('TestRecord TestRecord2'.w());
+  equals(q5, q1, 'should return cached query even if string record names are used');
 });
 
 test("query with record type and conditions", function() {

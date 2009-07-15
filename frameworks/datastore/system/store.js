@@ -745,12 +745,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // make API compatible with findAll.
     if (SC.instanceOf(recordType, SC.Query)) return recordType;
     
+    // if recordType is passed as a string, find object
+    if (SC.typeOf(recordType) === SC.T_STRING) {
+      recordType = SC.objectForPropertyPath(recordType);
+    }
+    
     // if no params were passed, attempt to use a cached version
     if (!params) {
       key = [] ;
       if (recordType && recordType.isEnumerable) {
-        recordType.forEach(function(t) { key.push(SC.guidFor(t)); });
-      } else key.push(SC.guidFor(recordType))
+        recordType.forEach(function(t) { 
+          if (SC.typeOf(t)===SC.T_STRING) t = SC.objectForPropertyPath(t);
+          key.push(SC.guidFor(t)); 
+        });
+        
+      } else key.push(SC.guidFor(recordType));
+      
       key.sort(); // make sure recordTypes go in the same order every time
       key.push('@');
       key.push(SC.guidFor(conditions));
@@ -800,10 +810,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     The kind of fetchKey you pass is generally determined by the type of 
     persistent stores you hook up for your application. Most stores, however,
-    will accept an SC.Record subclass as the fetchKey. It is up to your data source
-    to figure out which storeKeys to return based on the fetchKey. This will return 
-    a RecordArray matching all instances of that class as is relevant to your
-    application, for instance: findAll(MyApp.MyModel)
+    will accept an SC.Record subclass as the fetchKey. It is up to your data 
+    source to figure out which storeKeys to return based on the fetchKey. This 
+    will return  a RecordArray matching all instances of that class as is 
+    relevant to your application, for instance: findAll(MyApp.MyModel)
     
     You can also pass an SC.Query object as your fetchKey, for instance:
     var q = SC.Query.create({ recordType: MyApp.MyModel, 
