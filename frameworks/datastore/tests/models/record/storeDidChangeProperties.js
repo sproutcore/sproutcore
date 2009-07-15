@@ -150,9 +150,12 @@ test("changing attributes on a parent store should NOT notify child store if loc
   expect(parentfoo,1,1);
   // discarding changes should update
 
+  // NOTE: recourds should change immediately on commit/discard changes.
+  // test results here BEFORE run loop ends
   SC.RunLoop.begin();
   child.discardChanges(); // make it match parent again
-  SC.RunLoop.end();
   expect(childfoo,1,1); //the childfoo record is reset to whatever the parentValue is.
-  });
+  SC.RunLoop.end();
+
+});
 
