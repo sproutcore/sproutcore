@@ -98,7 +98,7 @@ module("Real Array & DummyEnumerable", {
   },
   
   teardown: function() {
-    delete enumerables ;
+    delete enumerables;
     delete Array.prototype["@max(balance)"] ; // remove cached value
     delete Array.prototype["@min(balance)"] ;
   }
@@ -153,7 +153,7 @@ test("should run forEach() to go through objects", function() {
     }, this);
     
     var len = src.get('length') ;
-    for(var idx=0;idx<len;idx++) {
+    for(idx=0;idx<len;idx++) {
       equals(items[idx], src.objectAt(idx)) ;
       equals(indexes[idx], idx) ;
       equals(arrays[idx], src) ;
@@ -187,7 +187,7 @@ test("should map to values while passing proper params", function() {
     }, this);
     
     var len = src.get('length') ;
-    for(var idx=0;idx<len;idx++) {
+    for(idx=0;idx<len;idx++) {
       equals(src.objectAt(idx), items[idx], "items") ;
       equals(idx, indexes[idx], "indexes") ;
       equals(src, arrays[idx], 'arrays') ;
@@ -220,7 +220,7 @@ test("should filter to items that return for callback", function() {
     }, this);
     
     var len = src.get('length') ;
-    for(var idx=0;idx<len;idx++) {
+    for(idx=0;idx<len;idx++) {
       equals(src.objectAt(idx), items[idx], "items") ;
       equals(idx, indexes[idx], "indexes") ;
       equals(src, arrays[idx], 'arrays') ;
@@ -254,7 +254,7 @@ test("should return true if function for every() returns true", function() {
     }, this);
     
     var len = src.get('length') ;
-    for(var idx=0;idx<len;idx++) {
+    for(idx=0;idx<len;idx++) {
       equals(src.objectAt(idx), items[idx], "items") ;
       equals(idx, indexes[idx], "indexes") ;
       equals(src, arrays[idx], 'arrays') ;
@@ -298,7 +298,7 @@ test("should return false if all functions for some() returns false", function()
     }, this);
     
     var len = src.get('length') ;
-    for(var idx=0;idx<len;idx++) {
+    for(idx=0;idx<len;idx++) {
       equals(src.objectAt(idx), items[idx], "items") ;
       equals(idx, indexes[idx], "indexes") ;
       equals(src, arrays[idx], 'arrays') ;
