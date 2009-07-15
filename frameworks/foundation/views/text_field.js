@@ -255,26 +255,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
       
       // Adjust the padding to accommodate any accessory views.
-      if (leftPadding  ||  rightPadding) {
-        var element = elements[0] ;
-        if (element) {
-          if (leftPadding) {
-            if (element.style.paddingLeft !== leftPadding) {
-              element.style.paddingLeft = leftPadding ;
-            }
+      var element = elements[0] ;
+      if (element) {
+        if (leftPadding) {
+          if (element.style.paddingLeft !== leftPadding) {
+            element.style.paddingLeft = leftPadding ;
           }
-          else {
-            element.style.paddingLeft = null ;
-          }
+        }
+        else {
+          element.style.paddingLeft = null ;
+        }
           
-          if (rightPadding) {
-            if (element.style.paddingRight !== rightPadding) {
-              element.style.paddingRight = rightPadding ;
-            }
+        if (rightPadding) {
+          if (element.style.paddingRight !== rightPadding) {
+            element.style.paddingRight = rightPadding ;
           }
-          else {
-            element.style.paddingRight = null ;
-          }
+        }
+        else {
+          element.style.paddingRight = null ;
         }
       }
     }
