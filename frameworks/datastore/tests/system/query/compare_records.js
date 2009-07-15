@@ -9,6 +9,9 @@
 var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
 module("SC.Query comparison of records", {
   setup: function() {
+    
+    SC.RunLoop.begin();
+    
     // setup dummy app and store
     MyApp = SC.Object.create({
       store: SC.Store.create()
@@ -26,6 +29,8 @@ module("SC.Query comparison of records", {
       { guid: 5, firstName: "Bert", lastName: "Berthold", active: true }
     ]);
     
+    SC.RunLoop.end();
+    
     rec1 = MyApp.store.find(MyApp.Foo,1);
     rec2 = MyApp.store.find(MyApp.Foo,2);
     rec3 = MyApp.store.find(MyApp.Foo,3);
@@ -42,7 +47,7 @@ module("SC.Query comparison of records", {
 // TESTS
 // 
 
-test("parseQuery should work with conditions = null", function(){
+test("parse() should work with conditions = null", function(){
   q.parse();
 });
  
@@ -50,33 +55,33 @@ test("building the order", function() {
   // undefined orderBy
   q.orderBy = null;
   q.parse();
-  equals(q.order.length, 0, 'order should be empty');
+  equals(q._order.length, 0, 'order should be empty');
   
   // empty orderBy
   q.orderBy = "";
   q.parse();
-  equals(q.order.length, 0, 'order should be empty');
+  equals(q._order.length, 0, 'order should be empty');
   
   // single property
   q.orderBy = "firstName";
   q.parse();
-  equals(q.order[0].propertyName,'firstName', 'propertyName should be firstName');
+  equals(q._order[0].propertyName,'firstName', 'propertyName should be firstName');
   
   // more properties
   q.orderBy = "lastName, firstName";
   q.parse();
-  equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
-  equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
+  equals(q._order[0].propertyName,'lastName', 'propertyName should be lastName');
+  equals(q._order[1].propertyName,'firstName', 'propertyName should be firstName');
   
   // more properties with direction
   q.orderBy = "lastName, firstName, year DESC";
   q.parse();
-  equals(q.order[0].propertyName,'lastName', 'propertyName should be lastName');
-  ok(!q.order[0].descending, 'descending should be false');
-  equals(q.order[1].propertyName,'firstName', 'propertyName should be firstName');
-  ok(!q.order[1].descending, 'descending should be false');
-  equals(q.order[2].propertyName,'year', 'propertyName should be year');
-  ok(q.order[2].descending, 'descending should be true');
+  equals(q._order[0].propertyName,'lastName', 'propertyName should be lastName');
+  ok(!q._order[0].descending, 'descending should be false');
+  equals(q._order[1].propertyName,'firstName', 'propertyName should be firstName');
+  ok(!q._order[1].descending, 'descending should be false');
+  equals(q._order[2].propertyName,'year', 'propertyName should be year');
+  ok(q._order[2].descending, 'descending should be true');
 });
 
 test("no order should result in comparison by guid", function() {

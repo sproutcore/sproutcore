@@ -183,7 +183,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
-    return this.isReady && this._tokenTree.evaluate(record, parameters);
+    return this._isReady && this._tokenTree.evaluate(record, parameters);
   },
   
   /**
@@ -257,7 +257,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     tree = this._tokenTree = this.buildTokenTree(tokens, lang);
     this._order = this.buildOrder(this.get('orderBy'));
     
-    this._isReady = !tree || tree.error;
+    this._isReady = !!tree && !tree.error;
     if (tree && tree.error) throw tree.error;
     return this._isReady;
   },
