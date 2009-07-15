@@ -499,7 +499,7 @@ SC.MenuPane = SC.PickerPane.extend(
         }
       }
     }
-    return YES ;
+    return NO ;
   },
   
   //Mouse and Key Events
