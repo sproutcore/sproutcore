@@ -5,7 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
+sc_require('core') ;
+sc_require('models/record');
+
 /**
   @class
 
@@ -125,7 +127,7 @@ require('core') ;
   @since SproutCore 1.0
 */
 
-SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
+SC.Query = SC.Object.extend(SC.Copyable, {
 
   // ..........................................................
   // PROPERTIES
@@ -183,10 +185,37 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     
     @type {Boolean}
   */
-  updatesAutomatically: YES,
+  updateAutomatically: YES,
+  
+  /**
+    The current load status for the query.  This status is changed by the 
+    data source to indicate when it is busy loading the query contents.  The
+    value will be one of SC.Record.READY or SC.Record.BUSY.
+    
+    Normally you do not need to change this property yourself.  Instead you
+    just called one of the fetchDidBegin() and fetchDidEnd() methods.
+    
+    @type {String}
+  */
+  status: SC.Record.READY,
+  
+  /**
+    If set to YES, then the RecordArray will permit modifying the underlying
+    storeKeys array.  You should only set this property to YES if you also
+    set a delegate on the query.  Otherwise when the query refreshes the 
+    storeKeys it will destroy any modification.
+  */
+  isEditable: NO,
+  
+
+  /**
+    If set, these storeKeys will be used as the basis for a RecordArray 
+    instead of generating content from the in memory store.
+  */
+  storeKeys: null,
   
   // ..........................................................
-  // METHODS
+  // PRIMITIVE METHODS
   // 
   
   /** 
@@ -215,6 +244,21 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     // if parsing worked we check if record is contained
     // if parsing failed no record will be contained
     return this._tokenTree.evaluate(record, parameters);
+  },
+  
+  /**
+    Returns YES if the query matches one or more of the record types in the
+    passed set.
+    
+    @param {SC.Set} types set of record types
+    @returns {Boolean} YES if record types match
+  */
+  containsRecordTypes: function(types) {
+    var rtype = this.get('recordType');
+    if (rtype) return types.contains(rtype);
+    else if (rtype = this.get('recordTypes')) {
+      return rtype.find(function(t) { return types.contains(t); });
+    } else return YES; // allow anything through
   },
   
   /**
@@ -294,6 +338,58 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
     if (tree && tree.error) throw tree.error;
     return this._isReady;
   },
+  
+  // ..........................................................
+  // DATA SOURCE CALLBACKS
+  // 
+
+  _scq_fetchCount: 0,
+  
+  /**
+    Called by the data source when it begins loading data for the query.
+    This will update the status, reflecting the same in any record arrays.
+    
+    @returns {SC.Query} receiver
+  */
+  fetchDidBegin: function() {
+    this._scq_fetchCount++;
+    this.setIfChanged('status', SC.Record.BUSY_LOADING);
+    return this ;
+  },
+  
+  /**
+    Called by the data source when it is finished loading data for the query.
+    This will update the status, reflecting the same in any record arrays.
+    It will not have any impact on the actual data shown as adding records to
+    the store will automatically invalidate the actual query data.
+    
+    @returns {SC.Query} receiver
+  */
+  fetchDidEnd: function() {
+    if (--this._scq_fetchCount <= 0) {
+      this._scq_fetchCount = 0 ;
+      this.setIfChanged('status', SC.Record.READY);
+    }
+    return this;   
+  },
+  
+  
+  // ..........................................................
+  // PRIVATE SUPPORT
+  // 
+
+  /** @private 
+    disable modifying properties that need to be locked
+  */
+  set: function(key, value) {
+    if (!this.isEditable && this._scq_editProperties.contains(key)) {
+      throw "Cannot modify key %@ because %@ is not editable".fmt(this, key);
+    }
+    return this._scq_set(key, value);
+  },
+  
+  _scq_set: SC.Observable.set,
+  _scq_editProperties: SC.CoreSet.create().addEach('conditions recordType recordTypes parameters isEditable'.w()),
   
   // ..........................................................
   // QUERY LANGUAGE DEFINITION
@@ -528,16 +624,31 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return undefined; }
     },
+
     'false': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return false; }
     },
+
     'true': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return true; }
+    },
+    
+    'YES': {
+      reservedWord:     true,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return false; }
+    },
+    
+    'NO': {
+      reservedWord:     true,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return true; }
     }
+    
   },
   
 
@@ -891,45 +1002,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, {
 
 // Class Methods
 SC.Query.mixin( /** @scope SC.Query */ {
-  /**
-    Will find which records match a given SC.Query and return the storeKeys.
-    This will also apply the sorting for the query
-    
-    @param {SC.Query} query to apply
-    @param {Array} storeKeys to search within
-    @param {SC.Store} store to materialize record from during sort
-    @returns {Array} array instance of store keys matching the SC.Query (sorted)
-  */
-  
-  containsStoreKeys: function(query, storeKeys, store) {
-    var ret = [], idx, len, rec, status, K = SC.Record;
-    var recType = query.get('recordType');
-    // if storeKeys is not set, just get all storeKeys for this record type,
-    // or all storeKeys in store if no record type is given
-    if(!storeKeys) {
-      if(recType) {
-        storeKeys = store.storeKeysFor(recType);
-      }
-      else {
-        storeKeys = store.storeKeys();
-      }
-    }
-    
-    for(idx=0,len=storeKeys.length;idx<len;idx++) {
-      rec = store.materializeRecord(storeKeys[idx]);
-      if (rec) status = rec.get('status');
-      
-      // do not include EMPTY or DESTROYED records
-      if (rec && !(status & K.EMPTY) && !(status & K.DESTROYED)) {
-        if (query.contains(rec)) ret.push(storeKeys[idx]);
-      }
-    }
-    
-    SC.Query.orderStoreKeys(ret, query, store);
-    
-    return ret;
-  },
-  
+
   /**
     Will find which records match a give SC.Query and return an array of 
     store keys. This will also apply the sorting for the query.
@@ -939,7 +1012,6 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {SC.Store} store to materialize record from
     @returns {Array} array instance of store keys matching the SC.Query (sorted)
   */
-  
   containsRecords: function(query, records, store) {
     var ret = [];
     for(var idx=0,len=records.get('length');idx<len;idx++) {

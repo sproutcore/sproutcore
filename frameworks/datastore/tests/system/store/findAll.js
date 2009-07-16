@@ -121,12 +121,11 @@ test("data source must get the right calls", function() {
 // RECORD PROPERTIES
 // 
 
-notest("should find records based on boolean", function() {
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"married=true"});
-  
-  var records = MyApp.store.findAll(q);
+test("should find records based on boolean", function() {
+  SC.RunLoop.begin();
+  var records = MyApp.store.findAll(MyApp.Foo, "married=YES");
   equals(records.get('length'), 4, 'record length should be 4');
-  
+  SC.RunLoop.end();
 });
 
 notest("should find records based on query string", function() {

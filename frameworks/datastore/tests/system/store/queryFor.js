@@ -28,7 +28,6 @@ var TestDataSource = SC.DataSource.extend({
     this.query = query;
     this.callCount++;
     query.set('isMarked', YES);
-    equals(query.get('isFrozen'), NO, 'query should not be frozen yet');
   },
   
   equals: function(store, query, callCount, desc) {
@@ -62,9 +61,7 @@ function queryEquals(q, recordType, conditions, extra, desc) {
     }
     
     equals(q.get('conditions'), conditions, desc + ': should have conditions');
-    
-    equals(q.get('isFrozen'), YES, desc + ': should be frozen');
-    
+        
     if (extra) {
       for (var key in extra) {
         if (!extra.hasOwnProperty(key)) continue;

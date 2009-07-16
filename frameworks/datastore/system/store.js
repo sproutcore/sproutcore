@@ -548,8 +548,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     for(var idx=0, len=recordArrays.length;idx<len;idx++) {
       var recArray = recordArrays[idx];
-      // if this record array still exists, check storeKeys
-      if(recArray) recArray.applyQuery(storeKeys, recordTypes);
+      if (recArray) recArray.storeDidChangeStoreKeys(storeKeys, recordTypes);
     }
   },
   
@@ -789,7 +788,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       source = this._getDataSource();
       if (source) source.prepareQuery(this, ret);
-      ret.freeze(); // no more changes!
     }
     
     // use caching if possible
@@ -1959,15 +1957,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {Array} set of storeKeys
   */
   storeKeysFor: function(recordType) {
-    var recType, ret = [], storeKey;
-    if(!this.statuses) return;
+    var ret = [], 
+        isEnum = recordType && recordType.isEnumerable,
+        recType, storeKey, isMatch ;
     
+    if (!this.statuses) return ret;
     for(storeKey in SC.Store.recordTypesByStoreKey) {
       recType = SC.Store.recordTypesByStoreKey[storeKey];
+      
       // if same record type and this store has it
-      if(recType===recordType && this.statuses[storeKey]) {
-        ret.push(parseInt(storeKey,0));
-      }
+      if (isEnum) isMatch = recordType.contains(recType);
+      else isMatch = recType === recordType;
+      
+      if(isMatch && this.statuses[storeKey]) ret.push(parseInt(storeKey, 0));
     }
     
     return ret;
