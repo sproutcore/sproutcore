@@ -119,8 +119,8 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   
   stop() ; // stops the test runner
   setTimeout( function(){
-    equals(requestCount, 8, "requestCount should be 4");
-    equals(responseCount, 6, "responseCount should be 4");
+    equals(requestCount, 8, "requestCount should be 8");
+    equals(responseCount, 8, "responseCount should be 8");
     window.start() ; // starts the test runne
   }, 3000);
 });

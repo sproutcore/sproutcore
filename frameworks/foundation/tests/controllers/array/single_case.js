@@ -51,10 +51,10 @@ test("removeObject - no destroyOnRemoval", function() {
   controller.set('destroyOnRemoval', NO);
   controller.addObserver('[]', function() { callCount++; });
   
-  SC.run(function() { controller.removeObject(content); });
+  controller.removeObject(content);
   
   equals(controller.get('content'), null, 'removeObject(content) should set content to null');
-  equals(callCount, 1, 'should notify observer since content did not change');
+  ok((callCount>=1), 'should notify observer since content did not change');
   equals(controller.get('length'), 0, 'should now have length of 0');
   equals(content.isDestroyed, NO, 'content.isDestroyed should be destroyed');
 });
