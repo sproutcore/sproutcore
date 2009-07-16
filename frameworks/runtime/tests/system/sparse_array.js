@@ -120,6 +120,22 @@ test("Check that requestIndex works with a rangeWindowSize larger than 1", funct
 });
 
 
+// ..........................................................
+// definedIndexes
+// 
+
+test("definedIndexes", function() {
+  var ary = SC.SparseArray.array(10);
+  ary.provideObjectAtIndex(5, "foo");
+  
+  var expected = SC.IndexSet.create().add(5);
+  same(ary.definedIndexes(), expected, 'definedIndexes() should return all defined indexes');
+  
+  same(ary.definedIndexes(SC.IndexSet.create().add(2, 10)), expected, 'definedIndexes([2..11]) should return indexes within');
+  
+  same(ary.definedIndexes(SC.IndexSet.create().add(2)), SC.IndexSet.EMPTY, 'definedIndexes([2]) should return empty set (since does not overlap with defined index)');
+  
+});
 
 // ..........................................................
 // TEST SC.ARRAY COMPLIANCE

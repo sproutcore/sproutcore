@@ -122,6 +122,37 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     return ret ;
   },
 
+  /**
+    Returns the set of indexes that are currently defined on the sparse array.
+    If you pass an optional index set, the search will be limited to only 
+    those indexes.  Otherwise this method will return an index set containing
+    all of the defined indexes.  Currently this can be quite expensive if 
+    you have a lot of indexes defined.
+    
+    @param {SC.IndexSet} indexes optional from indexes
+    @returns {SC.IndexSet} defined indexes
+  */
+  definedIndexes: function(indexes) {
+    var ret = SC.IndexSet.create(),
+        content = this._sa_content,
+        idx, len;
+        
+    if (!content) return ret.freeze(); // nothing to do
+    
+    if (indexes) {
+      indexes.forEach(function(idx) { 
+        if (content[idx] !== undefined) ret.add(idx);
+      });
+    } else {      
+      len = content.length;
+      for(idx=0;idx<len;idx++) {
+        if (content[idx] !== undefined) ret.add(idx);
+      }
+    }
+    
+    return ret.freeze();
+  },
+  
   _TMP_RANGE: {},
   
   /**
