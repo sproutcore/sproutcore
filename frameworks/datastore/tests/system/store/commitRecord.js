@@ -56,6 +56,7 @@ module("SC.Store#commitRecord", {
       bool:   YES
     };
     
+    SC.RunLoop.begin();
     storeKey1 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey1, json1, SC.Record.READY_CLEAN);
     storeKey2 = SC.Store.generateStoreKey();
@@ -70,7 +71,7 @@ module("SC.Store#commitRecord", {
     store.writeDataHash(storeKey6, json6, SC.Record.READY_ERROR);
     storeKey7 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey7, json7, SC.Record.READY_DESTROYED_CLEAN);
-
+    SC.RunLoop.end();
   }
 });
 
@@ -89,11 +90,14 @@ test("Confirm that all the states are switched as expected after running commitR
   status = store.readStatus( storeKey3);
   equals(status, SC.Record.BUSY_COMMITTING, "the status should be SC.Record.BUSY_COMMITTING");
   
+  store.dataSourceDidComplete(storeKey3);
+  equals(status, SC.Record.READY_CLEAN, "the status should be SC.Record.READY_CLEAN");
+  
   store.commitRecord(undefined, undefined, storeKey4);
   status = store.readStatus( storeKey4);
   equals(status, SC.Record.BUSY_DESTROYING, "the status should be SC.Record.BUSY_DESTROYING");
   
-  try{
+  try {
     store.commitRecord(undefined, undefined, storeKey5);
     throwError=false;
     msg='';
@@ -122,5 +126,7 @@ test("Confirm that all the states are switched as expected after running commitR
     msg=error3.message;
   }
   equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
+  
+  
   
 });
