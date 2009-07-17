@@ -20,8 +20,11 @@ module("SC.NestedStore#dataHashDidChange", {
     };
     
     storeKey = SC.Store.generateStoreKey();
-
+    
+    SC.RunLoop.begin();
     parent.writeDataHash(storeKey, json, SC.Record.READY_CLEAN);
+    SC.RunLoop.end();
+    
     parent.editables = null; // manually patch to setup test state
     
     store = parent.chain(); // create nested store

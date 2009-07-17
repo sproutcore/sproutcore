@@ -27,7 +27,8 @@ module("SC.Record core methods", {
       foo: "bar", 
       number: 123,
       bool: YES,
-      array: [1,2,3] 
+      array: [1,2,3],
+      guid: 1
     };
     
     SC.RunLoop.begin();
@@ -51,5 +52,4 @@ test("Can commitRecord() specific SC.Record instance", function() {
   equals(dataSource.wasCommitted, YES, 'Record was committed');
   equals(dataSource.gotParams, YES, 'Params were properly passed through commitRecord');
   
-
 });

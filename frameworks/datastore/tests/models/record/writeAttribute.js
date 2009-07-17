@@ -15,7 +15,8 @@ module("SC.Record#writeAttribute", {
       foo: "bar", 
       number: 123,
       bool: YES,
-      array: [1,2,3] 
+      array: [1,2,3],
+      guid: 1
     };
     
     foo = store.createRecord(Foo, json);
@@ -75,5 +76,20 @@ test("raises exception if you try to write an attribute before an attribute hash
     cnt++;
   }
   equals(cnt, 1, 'should raise exception');
+});
+
+
+test("Writing to an attribute in chained store sets correct status", function() {
+  
+  var chainedStore = store.chain() ;
+  
+  var chainedRecord = chainedStore.find(Foo, foo.readAttribute('guid'));
+  equals(chainedRecord.get('status'), SC.Record.READY_CLEAN, 'precon - status should be READY_CLEAN');
+  
+  chainedRecord.writeAttribute('foo', 'newValue');
+  //chainedRecord.set('foo', 'newValue');
+  
+  equals(chainedRecord.get('status'), SC.Record.READY_DIRTY, 'status should be READY_DIRTY');
+  
 });
 
