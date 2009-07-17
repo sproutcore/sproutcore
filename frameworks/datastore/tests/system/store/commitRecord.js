@@ -91,6 +91,7 @@ test("Confirm that all the states are switched as expected after running commitR
   equals(status, SC.Record.BUSY_COMMITTING, "the status should be SC.Record.BUSY_COMMITTING");
   
   store.dataSourceDidComplete(storeKey3);
+  status = store.readStatus( storeKey3);
   equals(status, SC.Record.READY_CLEAN, "the status should be SC.Record.READY_CLEAN");
   
   store.commitRecord(undefined, undefined, storeKey4);
