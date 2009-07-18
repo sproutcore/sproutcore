@@ -566,17 +566,18 @@ SC.MenuPane = SC.PickerPane.extend(
     var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
       var len = menuItemViews.length ;
-      var idx = (menuItemViews.indexOf(menuItem) === -1) ? len : menuItemViews.indexOf(menuItem) ;
+      var menuIdx = idx = (menuItemViews.indexOf(menuItem) === -1) ? 
+        len : menuItemViews.indexOf(menuItem) ;
       var isEnabled = NO ;
       var isSeparator = NO ;
-      while((!isEnabled || isSeparator) && --idx >= 0) {
+      while((!isEnabled || isSeparator) && --idx !== menuIdx) {
+        if(idx === -1) idx = len - 1;
         isEnabled = menuItemViews[idx].get('isEnabled') ;
         var content = menuItemViews[idx].get('content') ;
         if(content) {
           isSeparator = content.get(menuItemViews[idx].get('isSeparatorKey'));
         }
       }
-      if(idx === -1) idx = len - 1;
       return menuItemViews[idx];
     }
   },
@@ -590,17 +591,18 @@ SC.MenuPane = SC.PickerPane.extend(
     var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
       var len = menuItemViews.length ;
-      var idx = (menuItemViews.indexOf(menuItem) === -1) ? 0 : menuItemViews.indexOf(menuItem) ;
+      var menuIdx = idx = (menuItemViews.indexOf(menuItem) === -1) ? 
+        0 : menuItemViews.indexOf(menuItem) ;
       var isEnabled = NO ;
       var isSeparator = NO ;
-      while((!isEnabled || isSeparator) && ++idx < len) {
+      while((!isEnabled || isSeparator) && ++idx !== menuIdx) {
+        if(idx === len) idx = 0;
         isEnabled = menuItemViews[idx].get('isEnabled') ;
         var content = menuItemViews[idx].get('content') ;
         if(content) {
           isSeparator = content.get(menuItemViews[idx].get('isSeparatorKey'));
         }
       }
-      if(idx === len) idx = 0 ;
       return menuItemViews[idx] ;
     }
   },
