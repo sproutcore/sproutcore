@@ -31,6 +31,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type Boolean
+    @default isEnabled
   */
   itemIsEnabledKey: "isEnabled",
   
@@ -100,6 +101,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default height
   */
   itemHeightKey: 'height',
   
@@ -108,6 +110,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default subMenu
   */
   subMenuKey: 'subMenu',
 
@@ -121,6 +124,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type Boolean
+    @default separator
   */  
   itemSeparatorKey: 'separator',
 
@@ -129,6 +133,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default action
   */
   itemActionKey: 'action',
 
@@ -137,6 +142,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default checkbox
   */
   itemCheckboxKey: 'checkbox',
 
@@ -145,6 +151,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default branchItem
   */
   itemBranchKey: 'branchItem',
   
@@ -153,6 +160,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default shortcut
   */
   itemShortCutKey: 'shortcut',
   
@@ -161,6 +169,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default keyEquivalent
   */
   itemKeyEquivalentKey: 'keyEquivalent',
   
@@ -169,6 +178,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @readOnly
     @type String
+    @default target
   */
   itemTargetKey: 'target',
   
