@@ -234,7 +234,7 @@ SC.AlertPane = SC.PanelPane.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON2_STATUS,
             localize: YES,
-            titleMinWidth: 64,
+            titleMinWidth: 80,
             layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
             title: "Cancel", 
@@ -246,7 +246,7 @@ SC.AlertPane = SC.PanelPane.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON1_STATUS,
             localize: YES,
-            titleMinWidth: 64,
+            titleMinWidth: 80,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
             title: "OK", 
@@ -263,7 +263,7 @@ SC.AlertPane = SC.PanelPane.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON3_STATUS,
             localize: YES,
-            titleMinWidth: 64,
+            titleMinWidth: 80,
             layout: { left: 0, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
             title: "Extra", 
@@ -351,7 +351,7 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
     if (title) {
       button.set('title', title).set('isVisible', YES);
       if (idx==2) {
-        button_wrapper = ret.get('buttonThreeWrapper');
+        var button_wrapper = ret.get('buttonThreeWrapper');
         button_wrapper.set('isVisible', YES);
       }
     }

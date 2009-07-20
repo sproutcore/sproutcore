@@ -105,6 +105,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     if(firstTime) {
       var blankImage = static_url('blank');
       context.push('<span class="sc-inner">');
+      context.push('<span class="sc-leftcap"></span>');
+      context.push('<span class="sc-rightcap"></span>');
       context.push('<img src="', blankImage, '" class="sc-handle" style="left: ', value, '%" />');
       context.push('</span>');
     }

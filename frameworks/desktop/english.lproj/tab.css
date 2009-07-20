@@ -7,6 +7,6 @@
   overflow: visible;
 }
 
-.sc-tab-view .sc-container-view .sc-segmented-view{
+.sc-tab-view > .sc-segmented-view{
   z-index:100;
 }

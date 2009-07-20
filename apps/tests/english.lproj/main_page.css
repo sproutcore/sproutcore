@@ -7,6 +7,8 @@ h1.app-title {
   vertical-align: middle;
   padding-left: 12px;
   letter-spacing: -1px;
+  color: white;
+  text-shadow: #3d4557 0px -1px 0px;
 }
  
 h1.app-title img {
@@ -25,4 +27,13 @@ h1.app-title img {
 
 .sc-view.sc-toolbar-view.navigation-bar {
   border-bottom: 1px #999 solid;
+}
+
+.sc-label-view.center-label {
+  color: white;
+  opacity: 0.8;
+}
+
+.sc-view.sc-toolbar-view .sc-checkbox-view {
+  color: white;
 }

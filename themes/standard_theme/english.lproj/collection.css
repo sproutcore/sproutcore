@@ -74,7 +74,7 @@
 }
 
 .sc-theme.focus .sc-list-view.sc-source-list .sc-collection-item {
-	border-top: 1px solid #e6e3ef;
+	border-top: 1px solid #d4d7e0;
 }
 
 .sc-theme .sc-list-view.sc-source-list .sc-collection-item.sel {
@@ -84,10 +84,11 @@
 }
 
 .sc-theme.focus .sc-list-view.sc-source-list .sc-collection-item.sel {
-	background: #607ba5 0 0px;
+ 	background: transparent static_url('images/sc-theme-repeat-x.png') repeat-x 0px -16px;
 	color: white ;
-	border-top: 1px solid #3262a2;
-	border-bottom: 1px solid #3262a2;
+	border-top: 1px solid #1f4f9b;
+	border-bottom: 1px solid #1f4f9b;
+	border-right: 0;
 	z-index: 1;
 }
 

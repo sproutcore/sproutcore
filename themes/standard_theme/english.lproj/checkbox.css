@@ -25,7 +25,8 @@
 }
 
 .sc-theme .sc-checkbox-view.disabled {
-	color: #999;
+	color: #666;
+	color: rgba(0,0,0,0.5);
 }
 
 /* @group Checkbox Image */
@@ -46,7 +47,7 @@
 }
 
 .sc-theme .sc-checkbox-view img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -728px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -468px;
 	width: 16px;
 	height: 16px;
 	position: absolute ;
@@ -55,35 +56,35 @@
 }
 
 .sc-theme .sc-checkbox-view.sel img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0px -728px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -32px -495px;
 }
 
 .sc-theme .sc-checkbox-view.mixed img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -744px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -468px;
 }
 
 .sc-theme .sc-checkbox-view.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -760px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -27px -411px;
 } 
 
 .sc-theme .sc-checkbox-view.sel.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -792px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -495px;
 }
 
 .sc-theme .sc-checkbox-view.mixed.disabled img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0 -760px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -32px -441px;
 }
 
 .sc-theme .sc-checkbox-view.active img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat 0px -744px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -441px;
 } 
 
 .sc-theme .sc-checkbox-view.sel.active img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -16px -728px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -495px;
 }
 
 .sc-theme .sc-checkbox-view.mixed.active img.button {
-	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -744px;
+	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -388px;
 }
 
 /* @end */
