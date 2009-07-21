@@ -637,8 +637,7 @@ SC.MenuPane = SC.PickerPane.extend(
       else return null;
     }
     else return null;
-  },
-  
+  }
   
   
 });
