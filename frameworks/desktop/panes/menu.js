@@ -454,8 +454,8 @@ SC.MenuPane = SC.PickerPane.extend(
       itemView.prepareContext(context, YES) ;
       context = context.end() ;
       menuItemViews.push(itemView) ;
-      this.set('menuItemViews',menuItemViews) ;
     }
+    this.set('menuItemViews',menuItemViews) ;
   },
   
   /**
