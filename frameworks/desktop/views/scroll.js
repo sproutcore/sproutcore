@@ -307,7 +307,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     vf.y -= cf.y;
     
     // find current visible frame.
-    var vo = this.get('containerView').get('frame');
+    var vo = SC.cloneRect(this.get('containerView').get('frame'));
     vo.x = this.get('horizontalScrollOffset');
     vo.y = this.get('verticalScrollOffset');
     
