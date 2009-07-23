@@ -212,6 +212,13 @@ SC.mixin( /** @scope SC */ {
     @returns {Point} A hash with x,y offsets.
   */
   viewportOffset: function(el) {
+    // Some browsers natively implement getBoundingClientRect, so if it's
+    // available we'll use it for speed.
+    if (el.getBoundingClientRect) {
+      var boundingRect = el.getBoundingClientRect();
+      return { x:boundingRect.left, y:boundingRect.top };
+    }
+    
     var valueL = 0 ; var valueT = 0;
 
     // add up all the offsets for the element.
