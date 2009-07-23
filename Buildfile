@@ -29,7 +29,6 @@ config :mobile,
   :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
 
 # WRAPPER FRAMEWORKS
-config :deprecated, :required => :desktop
 config :sproutcore, :required => :desktop
 
 # SPECIAL FRAMEWORKS AND THEMES
