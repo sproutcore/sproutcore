@@ -99,11 +99,11 @@ SC.PanelPane = SC.Pane.extend({
   /** @private */
   createChildViews: function() {
     // if contentView is defined, then create the content
-     var view = this.contentView ;
-        if (view) {
-          view = this.contentView = this.createChildView(view) ;
-          this.childViews = [view] ;
-        }
+    var view = this.contentView ;
+    if (view) {
+      view = this.contentView = this.createChildView(view) ;
+      this.childViews = [view] ;
+    }
   },
 
   
