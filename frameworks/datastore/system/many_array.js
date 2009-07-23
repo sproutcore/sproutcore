@@ -11,7 +11,8 @@
   A ManyArray is used to map an array of store ids back to their 
   record objects which will be materialized from the owner store on demand.
   
-  @extends SC.ManyArray
+  @extends SC.Enumerable
+  @extends SC.Array
   @since SproutCore 1.0
 */
 

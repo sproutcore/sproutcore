@@ -500,9 +500,9 @@ SC.Timer = SC.Object.extend(
   
 }) ;
 
-/**
-  @scope SC.Timer
-  
+/** @scope SC.Timer */
+
+/*  
   Created a new timer with the passed properties and schedules it to 
   execute.  This is the same as calling SC.Time.create({ props }).schedule().
   

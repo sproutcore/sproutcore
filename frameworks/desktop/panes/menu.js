@@ -660,7 +660,6 @@ SC.MenuPane = SC.PickerPane.extend(
   }
   
   
-  
 });
 
 SC._menu_fetchKeys = function(k) {
