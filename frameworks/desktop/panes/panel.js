@@ -48,7 +48,7 @@ SC.PanelPane = SC.Pane.extend({
 
   /**
     The modal pane to place behind this pane if this pane is modal.  This 
-    must be a subclass or a insance of SC.ModalPane.
+    must be a subclass or an instance of SC.ModalPane.
   */
   modalPane: SC.ModalPane.extend({
     classNames: 'for-sc-panel'
