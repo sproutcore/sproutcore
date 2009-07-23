@@ -203,6 +203,46 @@ SC.mixin( /** @scope SC */ {
     return '{%@, %@, %@, %@}'.fmt(r.x, r.y, r.width, r.height);
   },
   
+  /**
+    Returns a string representation of the layout hash.
+
+    Layouts can contain the following keys:
+      - left: the left edge
+      - top: the top edge
+      - right: the right edge
+      - bottom: the bottom edge
+      - height: the height
+      - width: the width
+      - centerX: an offset from center X 
+      - centerY: an offset from center Y
+      - minWidth: a minimum width
+      - minHeight: a minimum height
+      - maxWidth: a maximum width
+      - maxHeight: a maximum height
+    
+    @param layout {Hash} The layout hash to stringify.
+    @returns {String} A string representation of the layout hash.
+  */
+  stringFromLayout: function(layout) {
+    // Put them in the reverse order that we want to display them, because
+    // iterating in reverse is faster for CPUs that can compare against zero
+    // quickly.
+    var keys = ['maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'centerY',
+                'centerX', 'width', 'height', 'bottom', 'right', 'top',
+                'left'];
+
+    var keyValues = [];
+    var i = keys.length;
+    while (--i >= 0) {
+      var key = keys[i];
+      if (layout.hasOwnProperty(key)) {
+        keyValues.push(key + ':' + layout[key]);
+      }
+    }
+    
+    return '{' + keyValues.join(', ') + '}';
+  },
+  
   
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
