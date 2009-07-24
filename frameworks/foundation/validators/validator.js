@@ -296,16 +296,19 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
     method you define in your subclass.
   */
   fieldValueForObject: function(object, form, field) {
-    return this.prototype.fieldValueForObject(object,form,field) ;
+    if (this.prototype && this.prototype.fieldValueForObject)
+      return this.prototype.fieldValueForObject(object,form,field) ;
+    else return null ;
   },
-
+  
   /**
     Convenience class method to call the objectForFieldValue() instance
     method you define in your subclass.
   */
   objectForFieldValue: function(value, form, field) {
-    return this.prototype.objectForFieldValue(value,form,field) ;
+    if (this.prototype && this.prototype.objectForFieldValue)
+      return this.prototype.objectForFieldValue(value,form,field) ;
+    else return null ;
   }
   
-}) ;
-
+});
