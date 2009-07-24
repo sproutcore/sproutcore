@@ -302,9 +302,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
     vf = contentView.convertFrameFromView(vf, null);
-    var cf = contentView.get('frame');
-    vf.x -= cf.x;
-    vf.y -= cf.y;
     
     // find current visible frame.
     var vo = SC.cloneRect(this.get('containerView').get('frame'));
