@@ -65,8 +65,8 @@ module("SC.ListView.render", {
   teardown: function() {
     SC.RunLoop.begin();
     pane.remove();
-    view.reset();
     SC.RunLoop.end();
+    view.reset();
   }
   
 });

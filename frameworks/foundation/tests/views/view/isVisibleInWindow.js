@@ -63,19 +63,22 @@ test("removing a view from a visible pane should make it invisible again", funct
 test("updateLayer should not be invoked even if layer becomes dirty until isVisibleInWindow changes, then it should invoke", function() {
 
 	var callCount = 0 ;
-	view.updateLayer = function() { callCount++; };
+	view.createLayer = function() {
+	  SC.View.prototype.createLayer.apply(this, arguments);
+	  callCount++;
+	};
 	ok(!view.get('isVisibleInWindow'), 'precond - view should not be visible to start');
 	
 	SC.RunLoop.begin();
 	view.displayDidChange();
 	SC.RunLoop.end();
-	equals(callCount, 0, 'updateLayer should not run b/c its not visible');
+	equals(callCount, 0, 'createLayer should not run b/c its not visible');
 	
 	SC.RunLoop.begin();
 	pane.appendChild(view); // make visible in window...
 	ok(view.get('isVisibleInWindow'), 'view should now be visible in window');
 	SC.RunLoop.end();
-	equals(callCount, 1, 'updateLayer should exec now b/c isVisibleInWindow is YES');
+	equals(callCount, 1, 'createLayer should exec now b/c isVisibleInWindow is YES');
 });
 
 test("layoutChildViewsIfNeeded should not be invoked even if layer needs layout until isVisibleInWindow changes, then it should invoke", function() {
