@@ -279,11 +279,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
         
       // if we just became invisible, force an update to hide the layer
-      } else {
-        var that = this;
-        this.set('layerNeedsUpdate', YES);
-        this.invokeOnce(function() { that.updateLayerIfNeeded(YES); });
-      }
+      } else this.set('layerNeedsUpdate', YES) ;
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
@@ -870,11 +866,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     cursor = this.get('cursor') ;
     if (cursor) context.addClass(cursor.get('className')) ;
     
+    this.beginPropertyChanges() ;
+    this.set('layerNeedsUpdate', NO) ;
     this.render(context, firstTime) ;
     if (mixins = this.renderMixin) {
       len = mixins.length;
       for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
     }
+    this.endPropertyChanges() ;
   },
   
   /**
