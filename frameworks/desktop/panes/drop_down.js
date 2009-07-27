@@ -61,17 +61,22 @@ SC.DropDownView = SC.ButtonView.extend(
     Method to set the Menu Items from the user defined objects
   */
   fetchMenuItems: function() {
-    var items = this.get('objects');
+    var items = this.get('objects') ;
+    var valueKey = this.get('valueKey') ;
     var itemList = [];
-    
-    for (var idx = 0, iLen = items.length; idx < iLen; ++idx) {
-      itemList.push({
-       title: items[idx],
-       isEnabled: YES,
-       action: this.displaySelectedItem
-      });
-    }
-    this.set('itemList', itemList) ;
+    items.forEach(function(object) {
+      if (object) {
+        // Get the value key. If value key is not specified convert obj 
+        //to string
+        var value = valueKey ? object[valueKey] : object.toString() ;
+        itemList.push({
+          title: value,
+          isEnabled: YES,
+          action: this.displaySelectedItem
+        });
+       }
+      this.set('itemList', itemList) ;
+   }, this ) ;
   },
 
   /**
