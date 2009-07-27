@@ -39,6 +39,7 @@ config :mobile,
 
 # WRAPPER FRAMEWORKS
 config :sproutcore, :required => :desktop
+config :mini, :required => [:runtime, :datastore]
 
 # SPECIAL FRAMEWORKS AND THEMES
 # These do not require any of the built-in SproutCore frameworks
