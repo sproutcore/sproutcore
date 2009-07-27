@@ -702,6 +702,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var context = this.renderContext(this.get('layer')) ;
     this.prepareContext(context, NO) ;
     context.update() ;
+    if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
     return this ;
   },
   
