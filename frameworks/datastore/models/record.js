@@ -204,16 +204,25 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   **/
   writeAttribute: function(key, value, ignoreDidChange) {
-    if(!ignoreDidChange) this.beginEditing();
     var store = this.get('store'), storeKey = this.storeKey;
     var attrs = store.readEditableDataHash(storeKey);
     if (!attrs) throw SC.Record.BAD_STATE_ERROR;
-    attrs[key] = value;
+    
+    // if value is the same, do not flag record as dirty
+    if(value===attrs[key]) {
+      ignoreDidChange = YES;
+    }
+    else {
+      if(!ignoreDidChange) this.beginEditing();
+      attrs[key] = value;
+      if(!ignoreDidChange) this.endEditing();
+    }
+    
     // if value is primaryKey of record, write it to idsByStoreKey
     if(key===this.get('primaryKey')) {
       SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
     }
-    if(!ignoreDidChange) this.endEditing();
+    
     return this ;  
   },
   
