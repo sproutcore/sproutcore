@@ -85,9 +85,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
           ret = SC.json.decode(ret);
         } 
         catch(e) {
-          ret = null;
+          ret = undefined;
         }
-      }
+      } else ret = undefined;
     }
     
     // if not found in localStorage, try to notify delegate
