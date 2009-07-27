@@ -597,6 +597,27 @@ SC.mixin(/** @scope SC */ {
     }
 
     return root ;
+  },
+  
+  
+  // ..........................................................
+  // LOCALIZATION SUPPORT
+  // 
+  
+  /**
+    Known loc strings
+  */
+  STRINGS: {},
+  
+  /**
+    This is a simplified handler for installing a bunch of strings.  This
+    ignores the language name and simply applies the passed strings hash.
+    
+    @param {String} lang the language the strings are for
+    @param {Hash} strings hash of strings
+  */
+  stringsFor: function(lang, strings) {
+    SC.mixin(SC.STRINGS, strings);
   }
   
   
@@ -852,5 +873,19 @@ String.prototype.fmt = function() {
     s =args[argIndex];
     return ((s===null) ? '(null)' : (s===undefined) ? '' : s).toString(); 
   }) ;
+};
+
+/**
+  Localizes the string.  This will look up the reciever string as a key 
+  in the current Strings hash.  If the key matches, the loc'd value will be
+  used.  The resulting string will also be passed through fmt() to insert
+  any variables.
+  
+  @param args {Object...} optional arguments to interpolate also
+  @returns {String} the localized and formatted string.
+*/
+String.prototype.loc = function() {
+  var str = SC.STRINGS[this] || this;
+  return str.fmt.apply(str,arguments) ;
 };
 
