@@ -363,6 +363,7 @@ SC.mixin( /** @scope SC */ {
     var min = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
 
     var h = (max == min) ? 0 : ((max == rgb[0]) ? ((rgb[1]-rgb[2])/(max-min)/6) : ((max == rgb[1]) ? ((rgb[2]-rgb[0])/(max-min)/6+1/3) : ((rgb[0]-rgb[1])/(max-min)/6+2/3)));
+    h = (h < 0) ? (h + 1) : ((h > 1)  ? (h - 1) : h);
     var s = (max == 0) ? 0 : (1 - min/max);
     var v = max/255;
     return [h, s, v];
