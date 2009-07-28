@@ -62,15 +62,19 @@ SC.DropDownView = SC.ButtonView.extend(
   */
   fetchMenuItems: function() {
     var items = this.get('objects') ;
-    var valueKey = this.get('valueKey') ;
+    var titleValueKey = this.get('titleValueKey') ;
+    var iconValueKey = this.get('iconValueKey') ;
     var itemList = [];
     items.forEach(function(object) {
       if (object) {
         // Get the value key. If value key is not specified convert obj 
         //to string
-        var value = valueKey ? object[valueKey] : object.toString() ;
+        var titleValue = titleValueKey ? object[titleValueKey] : object.toString() ;
+        var iconURL = object[iconValueKey] ;
+        var iconValue = iconValueKey ? object[iconValueKey] : object ;
         itemList.push({
-          title: value,
+          title: titleValue,
+          icon: iconURL,
           isEnabled: YES,
           action: this.displaySelectedItem
         });
@@ -107,6 +111,7 @@ SC.DropDownView = SC.ButtonView.extend(
       isEnabled: YES,
       itemIsEnabledKey: "isEnabled",
       itemTitleKey: "title",
+      itemIconKey:"icon",
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
       layout: { width: 150 },
@@ -144,7 +149,7 @@ SC.DropDownView = SC.ButtonView.extend(
      var button = this.getPath('parentView.anchor') ;
      
      button.set('title', this.get('value')) ;
-     //button.set('icon', '')
+     button.set('icon', this.get('icon')) ;
    }
 }) ;
 
