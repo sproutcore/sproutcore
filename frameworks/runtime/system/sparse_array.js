@@ -97,6 +97,13 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   */
   rangeWindowSize: 1,
   
+  /*
+    This array contains all the start_indexes of ranges requested. This is to 
+    avoid calling sparseArrayDidRequestRange to often. Indexes are removed and 
+    added as range requests are completed.
+  */
+  requestedRangeIndex: [],
+  
   /** 
     Returns the object at the specified index.  If the value for the index
     is currently undefined, invokes the didRequestIndex() method to notify
@@ -115,12 +122,45 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     return ret ;
   },
 
+  /**
+    Returns the set of indexes that are currently defined on the sparse array.
+    If you pass an optional index set, the search will be limited to only 
+    those indexes.  Otherwise this method will return an index set containing
+    all of the defined indexes.  Currently this can be quite expensive if 
+    you have a lot of indexes defined.
+    
+    @param {SC.IndexSet} indexes optional from indexes
+    @returns {SC.IndexSet} defined indexes
+  */
+  definedIndexes: function(indexes) {
+    var ret = SC.IndexSet.create(),
+        content = this._sa_content,
+        idx, len;
+        
+    if (!content) return ret.freeze(); // nothing to do
+    
+    if (indexes) {
+      indexes.forEach(function(idx) { 
+        if (content[idx] !== undefined) ret.add(idx);
+      });
+    } else {      
+      len = content.length;
+      for(idx=0;idx<len;idx++) {
+        if (content[idx] !== undefined) ret.add(idx);
+      }
+    }
+    
+    return ret.freeze();
+  },
+  
   _TMP_RANGE: {},
   
   /**
     Called by objectAt() whenever you request an index that has not yet been
     loaded.  This will possibly expand the index into a range and then invoke
     an appropriate method on the delegate to request the data.
+    
+    It will check if the range has been already requested.
     
     @param {SC.SparseArray} receiver
   */
@@ -130,23 +170,57 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     
     // adjust window
     var len = this.get('rangeWindowSize'), start = idx;
-    if (len > 1) start = Math.floor(start / windowSize);
+    if (len > 1) start = start - Math.floor(start % len);
     if (len < 1) len = 1 ;
     
     // invoke appropriate callback
     this._requestingIndex++;
     if (del.sparseArrayDidRequestRange) {
       var range = this._TMP_RANGE;
-      range.start = start;
-      range.length = len;
-      del.sparseArrayDidRequestRange(this, range);
-      
+      if(this.wasRangeRequested(start)===-1){
+        range.start = start;
+        range.length = len;
+        del.sparseArrayDidRequestRange(this, range);
+        this.requestedRangeIndex.push(start);
+      }
     } else if (del.sparseArrayDidRequestIndex) {
       while(--len >= 0) del.sparseArrayDidRequestIndex(this, start + len);
     }
     this._requestingIndex--;
 
     return this ;
+  },
+  
+  /*
+    This method is called by requestIndex to check if the range has already 
+    been requested. We assume that rangeWindowSize is not changed often.
+    
+     @param {Number} startIndex
+     @return {Number} index in requestRangeIndex
+  */
+  wasRangeRequested: function(rangeStart) {
+    var i, ilen;
+    for(i=0, ilen=this.requestedRangeIndex.length; i<ilen; i++){
+      if(this.requestedRangeIndex[i]===rangeStart) return i;
+    }
+    return -1;
+  },
+  
+  /*
+    This method has to be called after a request for a range has completed.
+    To remove the index from the sparseArray to allow future updates on the 
+    range.
+    
+     @param {Number} startIndex
+     @return {Number} index in requestRangeIndex
+  */
+  rangeRequestCompleted: function(start) { 
+    var i = this.wasRangeRequested(start);
+    if(i>=0) { 
+      this.requestedRangeIndex.removeAt(i,1);
+      return YES;
+    }
+    return NO;
   },
   
   /**

@@ -5,11 +5,17 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp Sample */
 
-var store, Application;
+var store, Application, dataSource;
 
 module("SC.Store Core Methods", {
   setup: function() {
-    var dataSource = SC.DataSource.create({});
+    dataSource = SC.DataSource.create({ 
+      
+      gotParams: NO,
+      
+      updateRecord: function(store, storeKey, params) {
+        this.gotParams = params && params['param1'] ? YES: NO;
+      }});
     
     Application = {};
     
@@ -35,10 +41,12 @@ module("SC.Store Core Methods", {
       ]
     };
     
+    SC.RunLoop.begin();
     store = SC.Store.create().from(dataSource);
     for(var i in Application.Data) {
       store.loadRecords(Application[i], Application.Data[i]);
     }
+    SC.RunLoop.end();
     
     // make sure RecordType by String can map
     window.Application = Application;
@@ -71,3 +79,38 @@ test("find() should take both SC.Record object and SC.Record string as recordtyp
   
 });
 
+test("loading more records should not sending _flushRecordChanges() until the end of the runloop", function() {
+
+  var moreData = [
+      { guid: '55', name: 'Home', url: '/emily_parker', isDirectory: true, parent: null, children: 'Collection'},
+      { guid: '56', name: 'Documents', fileType: 'documents', url: '/emily_parker/Documents', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'October 21, 2007', filetype: 'directory', isShared: false},
+      { guid: '57',name: 'Library', fileType: 'library', url: '/emily_parker/Library', isDirectory: true, parent: '10', children: 'Collection', createdAt: 'June 15, 2007', modifiedAt: 'October 21, 2007', filetype: 'directory', isShared: false}
+  ];
+  
+  SC.RunLoop.begin();
+  
+  var storeKeys = store.loadRecords(Application.File, moreData);
+  equals(storeKeys.length, 3, 'precon - should have loaded three records');
+  equals(store.recordPropertyChanges.storeKeys.length, 3, 'should be three storeKeys in changelog');
+  
+  SC.RunLoop.end();
+  
+  // recordPropertyChanges may not exist after notifications have gone out.
+  // treat that like having len=0
+  var changes = store.recordPropertyChanges;
+  var len = (changes && changes.storeKeys) ? changes.storeKeys.length : 0;
+  equals(len, 0, 'should be zero storeKeys in changelog');
+  
+});
+
+test("Passing params through commitRecords()", function() {
+  
+  var file = store.find(Application.File, '14');
+  file.set('name', 'My Great New Name');
+  
+  store.commitRecords(null, null, null, { param1: 'value1' });
+  
+  equals(dataSource.gotParams, YES, 'params should have travelled through to dataSource updateRecord() call');
+  
+
+});

@@ -122,6 +122,11 @@ test('parse', function() {
     {year: 1971, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0});
 });
 
+test('parse with time zones',function(){
+  equals(SC.DateTime.parse('08/05/1985 01:00:22 %a -0700', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),"1985-05-07T18:00:22-07:00");
+  equals(SC.DateTime.parse('07/01/2020 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),"2020-01-07T18:33:22-08:00");
+});
+
 test('binding', function() {
   var fromObject = SC.Object.create({value: dt});
   var toObject = SC.Object.create({value: ''});

@@ -67,13 +67,8 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     var ret= undefined ;
     
     // namespace keyname
-    if (keyName.indexOf('/')) {
-      var domain = this.get('appDomain') || 'app';
-      keyName = [domain, keyName].join(':');
-    } 
-    
-    var user = this.get('userDomain') || '' ;
-    var userKeyName = [user,keyName].join('@');
+    keyName = this._normalizeKeyName(keyName);
+    var userKeyName = this._userKeyName(keyName);
 
     // look into recently written values
     if (this._written) ret = this._written[userKeyName];
@@ -90,9 +85,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
           ret = SC.json.decode(ret);
         } 
         catch(e) {
-          ret = null;
+          ret = undefined;
         }
-      }
+      } else ret = undefined;
     }
     
     // if not found in localStorage, try to notify delegate
@@ -118,15 +113,10 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefault} receiver
   */
   writeDefault: function(keyName, value) {
-    // namespace keyname
-    if (keyName.indexOf('/')) {
-      var domain = this.get('appDomain') || 'app';
-      keyName = [domain, keyName].join(':');
-    } 
     
-    var user = this.get('userDomain') || '' ;
-    var userKeyName = [user,keyName].join('@');
-
+    keyName = this._normalizeKeyName(keyName);
+    var userKeyName = this._userKeyName(keyName);
+    
     // save to local hash
     var written = this._written ;
     if (!written) written = this._written = {};
@@ -150,6 +140,36 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     return this ;
   },
   
+  /**
+    Removed the passed keyName from the written hash and local storage.
+    
+    @param {String} keyName
+    @returns {SC.UserDefaults} receiver
+  */
+  resetDefault: function(keyName) {  
+    var fullKeyName = this._normalizeKeyName(keyName);
+    var userKeyName = this._userKeyName(fullKeyName);
+    
+    this.propertyWillChange(keyName);
+    this.propertyWillChange(fullKeyName);
+    
+    var written = this._written;
+    if (written) delete written[userKeyName];
+    
+    var localStorage = window.localStorage ;
+    if (!localStorage && window.globalStorage) {
+      localStorage = window.globalStorage[window.location.hostname];
+    }
+
+    if (localStorage) {
+      delete localStorage[["SC.UserDefaults",userKeyName].join('@')];
+    }
+
+    this.propertyDidChange(keyName);
+    this.propertyDidChange(fullKeyName);
+    return this ;
+  },
+  
   unknownProperty: function(key, value) {
     if (value === undefined) {
       return this.readDefault(key) ;
@@ -157,6 +177,47 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       this.writeDefault(key, value);
       return value ;
     }
+  },
+  
+  /**
+    Normalize the passed key name.  Used by all accessors to automatically 
+    insert an appName if needed.
+  */
+  _normalizeKeyName: function(keyName) {
+    if (keyName.indexOf(':')<0) {
+      var domain = this.get('appDomain') || 'app';
+      keyName = [domain, keyName].join(':');
+    } 
+    return keyName;
+  },
+  
+  /** 
+    Builds a user key name from the passed key name
+  */
+  _userKeyName: function(keyName) {
+    var user = this.get('userDomain') || '(anonymous)' ;
+    return [user,keyName].join('@');
+  },
+  
+  _domainDidChange: function() {
+    var didChange = NO;
+    if (this.get("userDomain") !== this._scud_userDomain) {
+      this._scud_userDomain = this.get('userDomain');
+      didChange = YES;
+    }
+    
+    if (this.get('appDomain') !== this._scud_appDomain) {
+      this._scud_appDomain = this.get('appDomain');
+      didChange = YES;
+    }
+    
+    if (didChange) this.allPropertiesDidChange();
+  }.observes('userDomain', 'appDomain'),
+  
+  init: function() {
+    sc_super();
+    this._scud_userDomain = this.get('userDomain');
+    this._scud_appDomain  = this.get('appDomain');
   }
   
 });

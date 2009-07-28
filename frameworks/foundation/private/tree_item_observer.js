@@ -367,7 +367,6 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     treeItemIsGrouped
   */
   contentGroupIndexes: function(view, content) {
-    
     if (content !== this) return null; // only care about receiver
 
     var ret = this._contentGroupIndexes;

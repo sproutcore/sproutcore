@@ -136,8 +136,10 @@ SC.NestedStore = SC.Store.extend(
     if (this.get('hasChanges')) {
       var pstore = this.get('parentStore');
       pstore.commitChangesFromNestedStore(this, this.chainedChanges, force);
-      this.reset(); // clear out custom changes
     }
+
+    // clear out custom changes - even if there is nothing to commit.
+    this.reset();
     return this ;
   },
 
@@ -166,6 +168,7 @@ SC.NestedStore = SC.Store.extend(
     }
     
     this.reset();
+    this.flush();
     return this ;
   },
   
@@ -380,6 +383,7 @@ SC.NestedStore = SC.Store.extend(
     
     // Finally, mark store as dirty if we have changes
     this.setIfChanged('hasChanges', myChanges.get('length')>0);
+    this.flush();
     
     return this ;
   },

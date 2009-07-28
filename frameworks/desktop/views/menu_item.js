@@ -204,8 +204,8 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     key = this.getDelegateProperty('isSeparatorKey', del) ;
     val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (val) {
-      //ic.begin('span').addClass('separator').end() ;
       ic.push("<span class='separator'></span>") ;
+      context.addClass('disabled') ;
     } else {
       // handle checkbox
       key = this.getDelegateProperty('contentCheckboxKey', del) ;
@@ -333,7 +333,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
   getAnchor: function() {
     var anchor = this.get('anchor') ;
-    if(anchor && anchor.kindOf(SC.MenuItemView)) return anchor ;
+    if(anchor && anchor.kindOf && anchor.kindOf(SC.MenuItemView)) return anchor ;
     return null ;
   },
   
@@ -437,7 +437,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       if (content && content.get(key)) {
         this.$('.checkbox').setClass('inactive', YES) ;
         content.set(key, NO) ;
-      } else {
+      } else if( content.get(key)!== undefined ) {
         this.$('.checkbox').removeClass('inactive') ;
         content.set(key, YES) ;
       }

@@ -108,6 +108,8 @@ SC.Pane = SC.View.extend({
   /** Last known window size. */
   currentWindowSize: null,
   
+  previousKeyPane: null,
+  
   /** The parent dimensions are always the last known window size. */
   computeParentDimensions: function(frame) {
     var pframe = this.get('currentWindowSize');
@@ -347,6 +349,7 @@ SC.Pane = SC.View.extend({
   didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
+    this.set('previousKeyPane', pane);
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
@@ -421,7 +424,11 @@ SC.Pane = SC.View.extend({
     
     // remove from the RootResponder also
     var responder = this.rootResponder ;
-    if (this.get('isKeyPane')) responder.makeKeyPane(null) ; // orders matter, remove keyPane first
+    if (this.get('isKeyPane')) { // orders matter, remove keyPane first
+      var oldKeyPane = this.get('previousKeyPane');
+      if(!oldKeyPane) responder.makeKeyPane(null) ; 
+      else responder.makeKeyPane(oldKeyPane) ;
+    }
     if (this.get('isMainPane')) responder.makeMainPane(null) ;
     responder.panes.remove(this) ;
     this.rootResponder = responder = null ;

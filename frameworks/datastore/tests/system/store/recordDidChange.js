@@ -70,5 +70,4 @@ test("recordDidChange", function() {
    status = store.readStatus( storeKey4);
    equals(status, SC.Record.READY_DIRTY, "the status shouldn't have changed.");
   
- 
 });

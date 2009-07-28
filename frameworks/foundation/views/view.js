@@ -262,6 +262,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // if the state has changed, update it and notify children
     if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
+      this._needsVisibiltyChange = YES ; // update even if we aren't visible
       
       var childViews = this.get('childViews'), len = childViews.length, idx;
       for(idx=0;idx<len;idx++) {
@@ -271,19 +272,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // if we just became visible, update layer + layout if needed...
       if (cur) {
         if (this.parentViewDidResize) this.parentViewDidResize();
-        this.set('layerNeedsUpdate', YES);
-        this.invokeOnce(this.updateLayerIfNeeded);
         
         if (this.get('childViewsNeedLayout')) {
           this.invokeOnce(this.layoutChildViewsIfNeeded);
         }
-        
-      // if we just became invisible, force an update to hide the layer
-      } else {
-        var that = this;
-        this.set('layerNeedsUpdate', YES);
-        this.invokeOnce(function() { that.updateLayerIfNeeded(YES); });
       }
+      
+      this.set('layerNeedsUpdate', YES) ;
       
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
@@ -670,19 +665,19 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
     @test in updateLayer
   */
-  updateLayerIfNeeded: function(isVisible) {
-    if (!isVisible) isVisible = this.get('isVisibleInWindow') ;
-    if (isVisible && this.get('layerNeedsUpdate')) {
+  updateLayerIfNeeded: function() {
+    var viz = this.get('isVisibleInWindow') ;
+    if ((viz || this._needsVisibiltyChange) && this.get('layerNeedsUpdate')) {
+      this._needsVisibiltyChange = NO ;
       // only update a layer if it already exists
       if (this.get('layer')) {
         this.beginPropertyChanges() ;
         this.set('layerNeedsUpdate', NO) ;
         this.updateLayer() ;
         this.endPropertyChanges() ;
-        
-      // clear our layerNeedsUpdate flag so we can respond to changes later
-      } else this.set('layerNeedsUpdate', NO) ;
+      }
     }
+    else this.set('layerNeedsUpdate', NO) ;
     return this ;
   },
   
@@ -707,6 +702,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var context = this.renderContext(this.get('layer')) ;
     this.prepareContext(context, NO) ;
     context.update() ;
+    if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
     return this ;
   },
   
@@ -870,11 +866,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     cursor = this.get('cursor') ;
     if (cursor) context.addClass(cursor.get('className')) ;
     
+    this.beginPropertyChanges() ;
+    this.set('layerNeedsUpdate', NO) ;
     this.render(context, firstTime) ;
     if (mixins = this.renderMixin) {
       len = mixins.length;
       for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
     }
+    this.endPropertyChanges() ;
   },
   
   /**

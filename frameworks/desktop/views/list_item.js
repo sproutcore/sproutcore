@@ -400,7 +400,7 @@ SC.ListItemView = SC.View.extend(
     occurred inside of it.
   */
   _isInsideDisclosure: function(evt) {
-    if (this.get('disclosureSate')===SC.LEAF_NODE) return NO;
+    if (this.get('disclosureState')===SC.LEAF_NODE) return NO;
     return this._isInsideElementWithClassName('disclosure', evt);
   },
   
@@ -574,7 +574,7 @@ SC.ListItemView = SC.View.extend(
    var oldLineHeight = el.css('lineHeight');
    var fontSize = el.css('fontSize');
    var top = this.$().css('top');
-   if(top) top = parseInt(top.substring(0,top.length-2),00);
+   if(top) top = parseInt(top.substring(0,top.length-2),0);
    else top =0;
    var lineHeight = oldLineHeight;
    var lineHeightShift = 0;

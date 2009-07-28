@@ -172,9 +172,10 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
     // If there is a toolTip set, grab it and localize if necessary.
     var toolTip = this.get('toolTip') ;
-    if(SC.typeOf(toolTip) === SC.T_STRING) {
-        context.attr('title', this.get('localize') ? toolTip.loc() : toolTip) ;
-        context.attr('alt', this.get('localize') ? toolTip.loc() : toolTip) ;
+    if (SC.typeOf(toolTip) === SC.T_STRING) {
+      if (this.get('localize')) toolTip = toolTip.loc() ;
+      context.attr('title', toolTip) ;
+      context.attr('alt', toolTip) ;
     }
     
     // add some standard attributes & classes.

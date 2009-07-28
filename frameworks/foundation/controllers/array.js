@@ -247,7 +247,6 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (content.isEnumerable) content.removeObject(object);
     else {
       this.set('content', null);
-      this.enumerableContentDidChange();
     }
     
     if (this.get('destroyOnRemoval') && object.destroy) object.destroy();

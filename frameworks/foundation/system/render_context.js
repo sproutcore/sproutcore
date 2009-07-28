@@ -712,14 +712,10 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         // parse style...
         attr = this._elem.getAttribute('style');
         
-        ////// TODO :LOOK OUT I ADDED TOLOWERCASE BECAUSE IE IS ALWAYS RETURNING STYLE KEYS IN CAPS
-        ////// THAT MESSES UP CAMELIZING AND WE END UP WITH stuff like c-olor in the styles
-        ////// I have to add more unit test 
-        ////// JUAN
-        
-        if(SC.browser.msie) attr = attr.toLowerCase();
-        
         if (attr && (attr = attr.toString()).length>0) {
+          if(SC.browser.msie){ 
+            attr = attr.toLowerCase();
+          }
           styles = {};
           
           regex = this._STYLE_REGEX ;

@@ -358,8 +358,8 @@ test("id", function() {
 	
 	//t( "All Children of ID", "#foo > *", ["sndp", "en", "sap"] );
 	//t( "All Children of ID with no children", "#firstUL > *", [] );
-	
-	SC.$('<a name="tName1">tName1 A</a><a name="tName2">tName2 A</a><div id="tName1">tName1 Div</div>').appendTo('#main');
+	var q=SC.$('<a name="tName1">tName1 A</a><a name="tName2">tName2 A</a><div id="tName1">tName1 Div</div>');
+	q.appendTo('#main');
 	equals( SC.$("#tName1")[0].id, 'tName1', "ID selector with same value for a name attribute" );
 	equals( SC.$("#tName2").length, 0, "ID selector non-existing but name attribute on an A tag" );
 	t( "ID Selector on Form with an input that has a name of 'id'", "#lengthtest", ["lengthtest"] );

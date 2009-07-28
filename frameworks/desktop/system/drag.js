@@ -334,9 +334,9 @@ SC.Drag = SC.Object.extend(
       return ; // quickly ignore duplicate calls
     } 
     
-    // cache the current location to avoid processing duplicate mouseDragged 
-    // calls
-    this.set('location', { x: evt.pageX, y: evt.pageY }) ;
+    // save the new location to avoid duplicate mouseDragged event processing
+    loc = { x: evt.pageX, y: evt.pageY };
+    this.set('location', loc) ;
     
     // STEP 1: Determine the deepest drop target that allows an operation.
     // if the drop target selected the last time this method was called 
@@ -543,7 +543,8 @@ SC.Drag = SC.Object.extend(
     for (var idx=0, len=ary.length; idx<len; idx++) {
       target = ary[idx] ;
       
-      // FIXME if (!target.get('isVisibleInWindow')) continue ;
+      // If the target is not visible, it is not valid.
+      if (!target.get('isVisibleInWindow')) continue ;
       
       // get clippingFrame, converted to the pane.
       frame = target.convertFrameToView(target.get('clippingFrame'), null) ;

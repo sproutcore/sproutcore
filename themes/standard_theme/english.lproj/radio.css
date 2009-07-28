@@ -34,6 +34,10 @@
 	margin-bottom: 3px;
 }
 
+.sc-radio-view.sc-layout-horizontal  .sc-radio-button {
+  padding-right: 8px;
+}
+
 .sc-theme .sc-radio-view.sc-layout-vertical .sc-radio-button img.button {
 	position: absolute ;
 	margin: 0;

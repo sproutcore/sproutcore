@@ -9,7 +9,7 @@
 var storeKeys, rec;
 module("SC.ManyAttribute core methods", {
   setup: function() {
-
+    SC.RunLoop.begin();
     MyApp = SC.Object.create({
       store: SC.Store.create()
     });
@@ -47,6 +47,8 @@ module("SC.ManyAttribute core methods", {
     rec3 = MyApp.store.find(MyApp.Foo, 3);
     rec4 = MyApp.store.find(MyApp.Foo, 4);
     equals(rec.storeKey, storeKeys[0], 'should find record');
+    
+    SC.RunLoop.end();
   }
 });
 
@@ -74,7 +76,10 @@ test("writing to a to-many relationship should update set guids", function() {
   equals(rec3.get('id'), 3, 'precond - should find record 3');
   equals(rec3.get('fooMany').objectAt(0), rec, 'should get rec1 instance for rec3.fooMany');
   
+  SC.RunLoop.begin();
   rec3.set('fooMany', [rec2, rec4]);
+  SC.RunLoop.end();
+  
   equals(rec3.get('fooMany').objectAt(0), rec2, 'should get rec2 instance for rec3.fooMany');
   equals(rec3.get('fooMany').objectAt(1), rec4, 'should get rec2 instance for rec3.fooMany');
 });

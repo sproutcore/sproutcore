@@ -226,6 +226,10 @@ CoreTest.Plan = {
     @returns {CoreTest.Plan} receiver
   */
   module: function(desc, lifecycle) {
+    if (typeof SC !== 'undefined' && SC.filename) {
+      desc = SC.filename.replace(/^.+?\/current\/tests\//,'') + '\n' + desc;
+    }
+    
     this.currentModule = desc;
 
     if (!lifecycle) lifecycle = {};

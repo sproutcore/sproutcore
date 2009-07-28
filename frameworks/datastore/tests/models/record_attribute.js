@@ -6,7 +6,8 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for RecordArray with RecordAttribute
-var storeKeys, rec;
+var storeKeys, rec, rec2, bar ;
+
 module("SC.RecordAttribute core methods", {
   setup: function() {
 
@@ -51,13 +52,14 @@ module("SC.RecordAttribute core methods", {
       relatedToComputed: SC.Record.toOne(function() {
         // not using .get() to avoid another transform which will 
         // trigger an infinite loop
-        return (this.readAttribute('relatedToComputed').indexOf("foo")==0) ? MyApp.Foo : MyApp.Bar;
+        return (this.readAttribute('relatedToComputed').indexOf("foo")===0) ? MyApp.Foo : MyApp.Bar;
       })
       
     });
     
     MyApp.Bar = SC.Record.extend({});
     
+    SC.RunLoop.begin();
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
       { 
         guid: 'foo1', 
@@ -92,6 +94,8 @@ module("SC.RecordAttribute core methods", {
     MyApp.store.loadRecords(MyApp.Bar, [
       { guid: 'bar1', city: "Chicago" }
     ]);
+    
+    SC.RunLoop.end();
     
     rec = MyApp.store.find(MyApp.Foo, 'foo1');
     rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
@@ -146,7 +150,7 @@ test("reading date should parse ISO date", function() {
 });
 
 test("reading date should parse non-ISO date", function() {
-  var d = new Date(2009,6,10,8,55,50);
+  var d = new Date(1244624150000);
   equals(rec2.get('nonIsoDate').toString(), d.toString(), 'should have matched date');
 });
 
@@ -182,10 +186,15 @@ test("writing a value should override default value", function() {
 test("writing to a to-one relationship should update set guid", function() {
   var rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
   equals(rec2.get('id'), 'foo2', 'precond - should find record 2');
+
   equals(rec2.get('relatedTo'), rec, 'precond - should get rec1 instance for rec2.relatedTo');
-  
+
   rec2.set('relatedTo', rec2);
+
   equals(rec2.readAttribute('relatedTo'), 'foo2', 'should write ID for set record to relatedTo attribute');
+  
+  equals(rec2.get('relatedTo'), rec2, 'should get foo record that was just set');
+
 });
 
 test("writing to a to-one computed relationship should update set guid", function() {

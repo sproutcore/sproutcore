@@ -54,7 +54,7 @@ module("SC.CollectionView Mouse Events", {
   @param {IndexSet} expected expected selection
   @returns {void}
 */
-function clickOn(view, index, shiftKey, ctrlKey, expected) {
+function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
   var itemView = view.getPath('childViews.%@'.fmt(index)),
       layer    = itemView.get('layer'), 
       opts     = { shiftKey: shiftKey, ctrlKey: ctrlKey }, 
@@ -69,15 +69,26 @@ function clickOn(view, index, shiftKey, ctrlKey, expected) {
   SC.Event.trigger(layer, 'mouseup', [ev]);
   
   if (expected !== undefined) {
-    sel = view.get('selection');
+    var f = function() {
+      SC.RunLoop.begin();
+      sel = view.get('selection');
+      
+      modifiers = [];
+      if (shiftKey) modifiers.push('shift');
+      if (ctrlKey) modifiers.push('ctrl');
+      modifiers = modifiers.length > 0 ? modifiers.join('+') : 'no modifiers';
+      
+      expected = SC.SelectionSet.create().add(view.get('content'), expected);
+      
+      ok(expected.isEqual(sel), 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
+      SC.RunLoop.end();
+      if (delay) window.start() ; // starts the test runner
+    };
     
-    modifiers = [];
-    if (shiftKey) modifiers.push('shift');
-    if (ctrlKey) modifiers.push('ctrl');
-    modifiers = modifiers.length > 0 ? modifiers.join('+') : 'no modifiers';
-    
-    expected = SC.SelectionSet.create().add(view.get('content'), expected);
-    ok(expected.isEqual(sel), 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
+    if (delay) {
+      stop() ; // stops the test runner
+      setTimeout(f, delay) ;
+    } else f() ;
   }
   
   layer = itemView = null ;
@@ -91,11 +102,11 @@ test("clicking on an item should select it", function() {
   clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
 });
 
-test("clicking on a selected item should clear selection and reselect it it", function() {
-
+test("clicking on a selected item should clear selection after 301ms and reselect it", function() {
   view.select(SC.IndexSet.create(1,5));
   SC.stopIt = YES ;
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
+  SC.RootResponder.responder._lastMouseUpAt = null ; // HACK: don't want a doubleClick from previous tests
+  clickOn(view, 3, NO, NO, SC.IndexSet.create(3), 301);
   SC.stopIt = NO ;
 });
 

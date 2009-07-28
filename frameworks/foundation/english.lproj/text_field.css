@@ -1,8 +1,12 @@
 /* Common SC.TextFieldView styles - needed to work properly */
 
-.sc-view .sc-text-field-view{
+.sc-view .sc-text-field-view {
 	overflow: visible;
 	z-index:100;
+}
+
+.sc-view .sc-text-field-view .sc-text-field-accessory-view {
+	z-index:2;
 }
 
 .sc-text-field-view input {

@@ -834,7 +834,7 @@ SC.Reducers = {
   */
   reducedProperty: function(key, value, generateProperty) {
      
-    if (key[0] !== '@') return undefined ; // not a reduced property
+    if (!key || key.charAt(0) !== '@') return undefined ; // not a reduced property
     
     // get the reducer key and the reducer
     var matches = key.match(/^@([^(]*)(\(([^)]*)\))?$/) ;

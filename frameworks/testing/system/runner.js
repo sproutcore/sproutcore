@@ -141,7 +141,7 @@ CoreTest.Runner = {
     for(idx=0;idx<len;idx++) s[assertions[idx].result]++;
     if ((s.failed + s.errors + s.warnings) === 0) clean = "clean" ;
     
-    if (module) name = module + " module: " + test ;
+    if (module) name = module.replace(/\n/g, '<br />') + " module: " + test ;
     name = CoreTest.fmt('%@ - %@msec', name, timings.total_end - timings.total_begin);
     // place results into a single string to append all at once.
     var logstr = this.logstr ;

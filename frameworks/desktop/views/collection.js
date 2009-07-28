@@ -1959,8 +1959,11 @@ SC.CollectionView = SC.View.extend(
           canEdit = (canEdit && itemView.beginEditing) ? itemView.beginEditing() : NO ;
         }
         
-        // if cannot edit, just reselect
-        if (!canEdit) this.select(idx, false) ;
+        // if cannot edit, schedule a reselect (but give doubleClick a chance)
+        if (!canEdit) {
+          if (this._cv_reselectTimer) this._cv_reselectTimer.invalidate() ;
+          this._cv_reselectTimer = this.invokeLater(this.select, 300, idx, false) ;
+        }
       }
       
       this._cleanupMouseDown() ;
@@ -2710,6 +2713,7 @@ SC.CollectionView = SC.View.extend(
     if (delay === undefined) delay = 0 ;
     if (clickCount === undefined) clickCount = 1;
     if ((clickCount>1) || this.get('actOnSelect')) {
+      if (this._cv_reselectTimer) this._cv_reselectTimer.invalidate() ;
       sel = this.get('selection');
       sel = sel ? sel.toArray() : [];
       if (this._cv_actionTimer) this._cv_actionTimer.invalidate();

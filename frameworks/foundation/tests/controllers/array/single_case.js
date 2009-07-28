@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*globals throws */
+/*globals should_throw */
 
 var content, controller, extra;
 
@@ -51,7 +51,7 @@ test("removeObject - no destroyOnRemoval", function() {
   controller.set('destroyOnRemoval', NO);
   controller.addObserver('[]', function() { callCount++; });
   
-  SC.run(function() { controller.removeObject(content); });
+  controller.removeObject(content);
   
   equals(controller.get('content'), null, 'removeObject(content) should set content to null');
   equals(callCount, 1, 'should notify observer since content did not change');

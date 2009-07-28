@@ -87,51 +87,16 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   },
   
   /**
-    Load fixtures for a given fetchKey into the store
-    and push it to the ret array.
-    
-    @param {SC.Store} store
-    @param {SC.Record} fetchKey
-    @param {SC.Array} ret
-  */
-  loadFixturesFor: function(store, fetchKey, ret) {
-    var dataHashes, i, storeKey, hashes = [];
-    dataHashes = this.fixturesFor(fetchKey);
-    for(i in dataHashes){
-      storeKey = fetchKey.storeKeyFor(i);
-      hashes.push(dataHashes[i]);
-      ret.push(storeKey);
-    }
-    store.loadRecords(fetchKey, hashes);
-  },
-  
-  /**
-    Load fixtures for a given fetchKey into the store
-    and push it to the ret array.
-    
-    @param {SC.Store} store
-    @param {SC.Record} fetchKey
-    @param {SC.Array} ret
-  */
-  loadFixturesFor: function(store, fetchKey, ret) {
-    var dataHashes, i, storeKey, hashes = [];
-    dataHashes = this.fixturesFor(fetchKey);
-    for(i in dataHashes){
-      storeKey = fetchKey.storeKeyFor(i);
-      hashes.push(dataHashes[i]);
-      ret.push(storeKey);
-    }
-    store.loadRecords(fetchKey, hashes);
-  },
-  
-  /**
     Retrieve a record from fixtures.
     
     @param {SC.Store} store
     @param {Number} storeKey
     @param {SC.Array} ret
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
+    @returns {Array} storeKeys
   */
-  retrieveRecord: function(store, storeKey) {
+  retrieveRecord: function(store, storeKey, params) {
     var ret = [], recordType = SC.Store.recordTypeFor(storeKey),
         id = store.idFor(storeKey),
         hash = this.fixtureForStoreKey(store, storeKey);
@@ -157,9 +122,11 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     
     @param {SC.Store} store
     @param {Number} storeKey
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if handled
   */
-  updateRecord: function(store, storeKey) {
+  updateRecord: function(store, storeKey, params) {
     this.setFixtureForStoreKey(store, storeKey, store.readDataHash(storeKey));
     store.dataSourceDidComplete(storeKey);  
     return YES ;
@@ -171,9 +138,11 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     
     @param {SC.Store} store the store
     @param {Number} storeKey the store key
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if successful
   */
-  createRecord: function(store, storeKey) {
+  createRecord: function(store, storeKey, params) {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         dataHash   = store.readDataHash(storeKey), 
@@ -192,9 +161,11 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     
     @param {SC.Store} store the store
     @param {Number} storeKey the store key
+    @param {Hash} params to be passed down to data source. originated
+      from the commitRecords() call on the store
     @returns {Boolean} YES if successful
   */
-  destroyRecord: function(store, storeKey) {
+  destroyRecord: function(store, storeKey, params) {
     var id         = store.idFor(storeKey),
         recordType = store.recordTypeFor(storeKey),
         fixtures   = this.fixturesFor(recordType);
@@ -301,7 +272,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */
   _invalidateCachesFor: function(recordType, storeKey, id) {
     var cache = this._storeKeyCache;
-    if (cache) delete cache[SC.guidFor(recordType)]
+    if (cache) delete cache[SC.guidFor(recordType)];
     return this ;
   }
   
