@@ -303,7 +303,7 @@ SC.Drag = SC.Object.extend(
     this.mouseGhostOffset = {x: (loc.x - dvf.x), y: (loc.y - dvf.y)};
     
     // position the ghost view
-    this._positionGhostView(evt) ;
+    if(!this._ghostViewHidden) this._positionGhostView(evt) ;
     
     // notify root responder that a drag is in process
     this.ghostView.rootResponder.dragDidStart(this) ;
@@ -383,7 +383,7 @@ SC.Drag = SC.Object.extend(
     if (source && source.dragDidMove) source.dragDidMove(this, loc) ;
     
     // reposition the ghostView
-    this._positionGhostView(evt) ;
+    if(!this._ghostViewHidden) this._positionGhostView(evt) ;
   },
   
   /**
@@ -426,7 +426,7 @@ SC.Drag = SC.Object.extend(
         console.error('Exception in SC.Drag.mouseUp(dragEnded on %@): %@'.fmt(ary[idx], ex2)) ;
       }
     }
-    
+
     // destroy the ghost view
     this._destroyGhostView() ;
     
@@ -469,8 +469,40 @@ SC.Drag = SC.Object.extend(
     var loc = this.get('location') ;
     loc.x -= this.ghostOffset.x ;
     loc.y -= this.ghostOffset.y ;
-    this.ghostView.adjust({ top: loc.y, left: loc.x }) ;   
-    this.ghostView.invokeOnce('updateLayout') ;
+    var gV = this.ghostView;
+    if(gV) {
+      gV.adjust({ top: loc.y, left: loc.x }) ;   
+      gV.invokeOnce('updateLayout') ;
+    }
+  },
+  
+  /**
+    YES if the ghostView has been manually hidden.
+    
+    @private 
+    @type {Boolean}
+    @default NO
+  */
+  _ghostViewHidden: NO,
+  
+  /**
+    Hide the ghostView.
+  */
+  hideGhostView: function() {
+    if(this.ghostView && !this._ghostViewHidden) {
+      this.ghostView.remove();
+      this._ghostViewHidden = YES;
+    }
+  },
+
+  /**
+    Unhide the ghostView.
+  */
+  unhideGhostView: function() {
+    if(this._ghostViewHidden) {
+      this._ghostViewHidden = NO;
+      this._createGhostView();
+    }
   },
   
   /** @private */
@@ -478,6 +510,7 @@ SC.Drag = SC.Object.extend(
     if (this.ghostView) {
       this.ghostView.remove() ;
       this.ghostView = null ; // this will allow the GC to collect it.
+      this._ghostViewHidden = NO;
     }
   },
   
