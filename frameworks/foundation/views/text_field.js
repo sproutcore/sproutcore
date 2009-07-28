@@ -5,8 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-
 sc_require('views/field') ;
+sc_require('system/text_selection') ;
+
 /**
   @class
   
@@ -106,6 +107,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isEditable: function() {
     return this.get('isEnabled') ;
   }.property('isEnabled').cacheable(),
+  
+  
+  /**
+    The current selection of the text field, returned as an SC.TextSelection
+    object.
+    
+    Note that if the selection changes a new object will be returned -- it is
+    not the case that a previously-returned SC.TextSelection object will
+    simply have its properties mutated.
+    
+    @property {SC.TextSelection}
+  */
+  selection: SC.TextSelection.create({start:0, end:0}),
+
     
   // ..........................................................
   // INTERNAL SUPPORT
@@ -303,7 +318,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       }
     }
     else {
-      var element = this.$field()[0];
+      var element = this.$field().get(0);
       if (element) {
         if (!this.get('isEnabled')) {
           element.disabled = 'true' ;
@@ -311,6 +326,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         else {
           element.disabled = null ;
         }
+        
       
         // Adjust the padding to accommodate any accessory views.
         if (leftPadding) {
@@ -371,9 +387,29 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
   
+  
   // ..........................................................
   // HANDLE NATIVE CONTROL EVENTS
-  // 
+  //
+
+  /** @private            
+    There are certain ways users can add/remove text that we can't identify
+    via our key/mouse down/up handlers (such as the user choosing Paste from a
+    menu).  So we need to update our 'selection' property whenever the field's
+    value changes.
+    
+    Implementation Note:
+    Right now, it seems that defining properties as depending on a field's
+    'fieldValue' or 'value' properties doesn't work, but defining an observer
+    does.
+    
+    TODO:  This should be changed when possible, because it's bad for
+           performance.
+  */
+  fieldValueObserver: function() {
+    this._updateTextSelectionValue() ;
+  }.observes('fieldValue'),
+  
   
   didCreateLayer: function() {
     sc_super();
@@ -381,6 +417,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var input = this.$field();
     SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
+        
+    // There are certain ways users can select text that we can't identify via
+    // our key/mouse down/up handlers (such as the user choosing Select All
+    // from a menu).
+    SC.Event.add(input, 'select', this, this._updateTextSelectionValue);
   },
   
   willDestroyLayer: function() {
@@ -389,6 +430,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var input = this.$field();
     SC.Event.remove(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.remove(input, 'blur',  this, this._textField_fieldDidBlur);
+    SC.Event.remove(input, 'select',  this, this._updateTextSelectionValue);
   },
   
   _textField_fieldDidFocus: function(evt) {
@@ -468,7 +510,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // In IE, you can't modify functions on DOM elements so we need to wrap the 
   // call to select() like this.
   _selectRootElement: function() {
-    this.$field()[0].select() ;
+    this.$field().get(0).select() ;
   },
   
   // when we lose first responder, blur the text field if needed and show
@@ -489,8 +531,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     Simply allow keyDown & keyUp to pass through to the default web browser
     implementation.
   */
-  keyDown: function(evt) { 
-    
+  keyDown: function(evt) {
     // validate keyDown...
     if (this.performValidateKeyDown(evt)) {
       this._isKeyDown = YES ;
@@ -503,11 +544,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   keyUp: function(evt) { 
+    // The caret/selection could have moved.  In some browsers, though, the
+    // element's values won't be updated until after this event is finished
+    // processing.
+    this._updateTextSelectionValue();
+    
     if (this._isKeyDown) {
       this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
     }
     this._isKeyDown = NO;
-    evt.allowDefault(); 
+    evt.allowDefault();
+
     return YES; 
   },
   
@@ -519,10 +566,154 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   mouseUp: function(evt) {
+    // The caret/selection could have moved.  In some browsers, though, the
+    // element's values won't be updated until after this event is finished
+    // processing.
+    this._updateTextSelectionValue();
+    
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
     } else return sc_super();
-  }
+  },
+  
+  /** @private
+    Should be called to update our 'text selection' property when an event
+    occurs that can modify it.
+    
+    Note that we'll coalesce requests to every 10 milliseconds to try to avoid
+    doing duplicate work.
+  */
+  _updateTextSelectionValue: function() {
+    if (!this._updateTextSelectionValue_scheduled) {
+      this._updateTextSelectionValue_scheduled = YES ;
+      this.invokeLater(this._reallyUpdateTextSelectionValue, 10) ;
+    }
+  },
+  
+  
+  /** @private
+    Because there are multiple paths that will cause us to need to update the
+    selection value that can sometimes occur near-simultaneously, it's a
+    performance win to coalesce the requests into a small but useful
+    timeframe.
+  */
+  _updateTextSelectionValue_scheduled: NO,
+    
+  _reallyUpdateTextSelectionValue: function() {
+    this._updateTextSelectionValue_scheduled = NO ;
+    
+    var element = this.$field().get(0) ;
+    if (element) {
+      var start = end = null ;
+      
+      // In Firefox 3.5, trying to get the selection value for a size 0
+      // element will throw an exception.  This happens in our unit tests.
+      if (!element.value  ||  element.size === 0) {
+        start = end = 0 ;
+      }
+      else {
+        // In IE8, input elements don't have hasOwnProperty() defined.
+        if ('selectionStart' in element) {
+          start = element.selectionStart ;
+        }
+        if ('selectionEnd' in element) {
+          end = element.selectionEnd ;
+        }
+      
+        // Support Internet Explorer.
+        if (start === null  ||  end === null ) {
+          var selection = document.selection ;
+          if (selection) {
+            var type = selection.type ;
+            if (type  &&  (type === 'None'  ||  type === 'Text')) {
+              if (this._isFocused) {
+                var range = selection.createRange() ;
+              
+                if (!this.get('isTextArea')) {
+                  // Input tag support.  Figure out the starting position by
+                  // moving the range's start position as far left as possible
+                  // and seeing how many characters it actually moved over.
+                  var length = range.text.length ;
+                  start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1))) ;
+                  end = start + length ;
+                }
+                else {
+                  // Textarea support.  Unfortunately, this case is a bit more
+                  // complicated than the input tag case.  We need to create a
+                  // "dummy" range to help in the calculations.
+                  var dummyRange = range.duplicate() ;
+                  dummyRange.moveToElementText(element) ;
+                  dummyRange.setEndPoint('EndToStart', range) ;
+                  start = dummyRange.text.length ;
+                  end = start + range.text.length ;
+                }
+              }
+              else {
+                start = end = 0 ;
+              }
+            }
+          }
+        }
+      }
+      
+      // Don't needlessly create a new selection object if the values haven't
+      // changed.
+      var previousSelection = this.get('selection') ;
+      if (!previousSelection  ||
+          start !== previousSelection.get('start')  ||
+          end   !== previousSelection.get('end')) {
+        var selection = SC.TextSelection.create({ start:start, end:end }) ;
+        this._ignoreNextSelectionChange = YES ;
+        this.set('selection', selection) ;
+      }
+    }
+    else {
+      this._ignoreNextSelectionChange = YES ;
+      this.set('selection', null) ;
+    }
+  },
+  
+  /** @private
+    Applies any changes to our 'selection' property to the underlying DOM
+    element, unless we made the changes ourselves in
+    _updateTextSelectionValue().
+  */
+  _selectionWasUpdated: function() {
+    if (this._ignoreNextSelectionChange) {
+      // It was us programmatically updating the property value to match the
+      // state of the underlying DOM element, ignore this change.
+      this._ignoreNextSelectionChange = NO ;
+      return ;
+    }
+    
+    var selection = this.get('selection') ;
+    
+    // Update the element.
+    var element = this.$field().get(0) ;
+    var setStart, setEnd ;
+    if (element) {
+      // In IE8, input elements don't have hasOwnProperty() defined.  Also, in
+      // Firefox 3.5, trying to get the selectionStart / selectionEnd
+      // properties at certain times can cause exceptions.
+      if ('selectionStart' in element) {
+        element.selectionStart = selection.get('start') ;
+        setStart = YES ;
+      }
+      if ('selectionEnd' in element) {
+        element.selectionEnd = selection.get('end') ;
+        setEnd = YES ;
+      }
+      
+      // Support Internet Explorer.
+      if (!setStart  ||  !setEnd) {
+        var range = element.createTextRange() ;
+        var start = selection.get('start') ;
+        range.move('character', start) ;
+        range.moveEnd('character', selection.get('end') - start) ;
+        range.select() ;
+      }
+    }
+  }.observes('selection')
   
 }) ;
