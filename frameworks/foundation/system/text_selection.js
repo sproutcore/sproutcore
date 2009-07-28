@@ -5,10 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/copyable') ;
-sc_require('mixins/freezable') ;
-require('system/object') ;
-
 /**
   @class
   
