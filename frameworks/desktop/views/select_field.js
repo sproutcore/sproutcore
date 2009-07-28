@@ -293,7 +293,7 @@ SC.SelectFieldView = SC.FieldView.extend(
   }.observes('isFocused'),
 
   didCreateLayer: function() {
-    var input = this.$();
+    var input = this.$input();
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
     SC.Event.add(input, 'focus',this, this.fieldDidFocus);
     return sc_super();

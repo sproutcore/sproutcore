@@ -13,9 +13,8 @@
   HTML and to set to use a TOGGLE_BEHAVIOR for its buttons.
   
   This view renders a simulated checkbox that can display a mixed state and 
-  has other features not found in platform-native controls.  If you want to 
-  use the platform native version instead, see SC.CheckboxFieldView.
-
+  has other features not found in platform-native controls.  
+  
   @extends SC.FieldView
   @since SproutCore 1.0
 */
@@ -85,6 +84,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     state can be retained.
   */
   setFieldValue: function(v) { 
+    console.log('setfieldvalue');
     this._lastFieldValue = v; 
     this.$input().attr('checked', (v === SC.MIXED_STATE) ? NO : !!v); 
   },
