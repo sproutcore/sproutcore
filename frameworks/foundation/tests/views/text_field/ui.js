@@ -204,6 +204,21 @@ test("enabling disabled view", function() {
   pane.verifyDisabled(view, NO);
 });
 
+// ..........................................................
+// TEST SELECTION SUPPORT
+// 
+
+test("Setting and then getting back the selection", function() {  
+  var view = pane.view('with value');
+  
+  var selection = SC.TextSelection.create({start:2, end:5});
+  view.set('selection', selection);
+  
+  var fetchedSelection = view.get('selection');
+  ok(fetchedSelection.get('start') === 2, 'the selection should start at index 2');
+  ok(fetchedSelection.get('end') === 5, 'the selection should end at index 4');
+  ok(fetchedSelection.get('length') === 3, 'the selection should have length 3');
+});
 
 // ..........................................................
 // TEST ACCESSORY VIEWS
