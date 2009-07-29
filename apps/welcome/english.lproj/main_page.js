@@ -28,7 +28,7 @@ Welcome.mainPage = SC.Page.design({
         layout: { left: 56, top: 20, right: 20, height: 32 },
         tagName: "h1",
         classNames: "heading",
-        value: "SproutCore Developer Tools"
+        valueBinding: 'Welcome.displayTitle' 
       }),
       
       prompt: SC.LabelView.design({
