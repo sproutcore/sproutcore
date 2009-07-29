@@ -70,6 +70,7 @@ SC.DropDownView = SC.ButtonView.extend(
     Method to set the Menu Items from the user defined objects
   */
   fetchMenuItems: function() {
+    console.log(this.get('preferMatrix')) ;
     var items = this.get('objects') ;
     var titleValueKey = this.get('titleValueKey') ;
     var iconValueKey = this.get('iconValueKey') ;
@@ -100,7 +101,7 @@ SC.DropDownView = SC.ButtonView.extend(
     sc_super() ;
     
     this.fetchMenuItems() ;
-    // this.changeDropDownPreferMatrix();
+    this.changeDropDownPreferMatrix();
     
     var menu = this.get('menu') ;
     if(firstTime && menu) {
@@ -213,16 +214,15 @@ SC.DropDownView = SC.ButtonView.extend(
      to the swatch on the button when menu is opened.
    */
    changeDropDownPreferMatrix: function() {
-      var pxOffset = 0;
-      var preferMatrixAttributeTop = 20;
-     // if(selectedColor) {
-     //        var index = defaultColors.indexOf(selectedColor);
-     //        if(index === -1 || index > 3) {
-     //          index = 3;
-     //          pxOffset = -3;
-     //        }
-     //        preferMatrixAttributeTop = index * 20;
-     //      }
+     var pxOffset = 0;
+     var preferMatrixAttributeTop = 20;
+     
+     /** 
+       Have to fetch the selected menuItem index. Once this is done.
+        the menu pane aligment is complete.
+     */
+     // if(selectedItem) {}
+     //   preferMatrixAttributeTop = index * 20;
      
      if(this.get('preferMatrix'))
        this.get('preferMatrix')[1] = -preferMatrixAttributeTop + pxOffset;
