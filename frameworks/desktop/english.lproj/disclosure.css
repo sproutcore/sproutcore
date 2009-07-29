@@ -5,6 +5,7 @@
 /* @group basic */
 
 .sc-button-view.sc-disclosure-view {
+  background: transparent;
 }
 
 .sc-button-view.sc-disclosure-view img.button {
@@ -22,6 +23,12 @@
 	top: 0;
 	bottom: 0;
 	right: 0;
+	text-align: left;
+}
+
+.sc-button-view.sc-disclosure-view label {
+	text-align: left;
+	margin-left: 16px;
 }
 
 /* SC.DisclosureView - sc-theme */
