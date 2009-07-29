@@ -48,6 +48,7 @@ body.sc-theme .sc-view.sc-top-border {
 
 .sc-theme .sc-pane.sc-main {
 	background: -webkit-gradient(linear, left top, left bottom, from(#57647f), to(#848ea2));
+	color: white;
 }
 
 .sc-theme #loading {
@@ -57,4 +58,19 @@ body.sc-theme .sc-view.sc-top-border {
   bottom: 0;
   right: 0;
 	background: -webkit-gradient(linear, left top, left bottom, from(#57647f), to(#848ea2));
+	color: white;
 }
+
+.sc-theme #loading p.loading {
+  position: absolute;
+  padding: 4px 12px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  background-color: #b1baca;
+  color: black;
+  border-top: 1px #b1baca solid;
+  text-align: right;
+}
+
