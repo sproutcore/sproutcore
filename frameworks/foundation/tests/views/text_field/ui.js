@@ -210,9 +210,11 @@ test("enabling disabled view", function() {
 
 test("Setting and then getting back the selection", function() {  
   var view = pane.view('with value');
+  var fieldElement = view.$field()[0];
+  fieldElement.size = 10;     // Avoid Firefox 3.5 issue
   
-  var selection = SC.TextSelection.create({start:2, end:5});
-  view.set('selection', selection);
+  var newSelection = SC.TextSelection.create({start:2, end:5});
+  view.setSelection(newSelection);
   
   var fetchedSelection = view.get('selection');
   ok(fetchedSelection.get('start') === 2, 'the selection should start at index 2');
