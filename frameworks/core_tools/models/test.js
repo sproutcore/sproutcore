@@ -1,8 +1,8 @@
 // ==========================================================================
-// Project:   TestRunner.Test
+// Project:   CoreTools.Test
 // Copyright: ©2009 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools */
 
 /** @class
 
@@ -11,8 +11,8 @@
   @extends SC.Record
   @version 0.1
 */
-TestRunner.Test = SC.Record.extend(
-/** @scope TestRunner.Test.prototype */ {
+CoreTools.Test = SC.Record.extend(
+/** @scope CoreTools.Test.prototype */ {
 
   primaryKey: "url",
   

@@ -1,8 +1,8 @@
 // ==========================================================================
-// Project:   TestRunner.Target
+// Project:   CoreTools.Target
 // Copyright: ©2009 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools */
 
 /** @class
 
@@ -10,8 +10,8 @@
 
   @extends SC.Record
 */
-TestRunner.Target = SC.Record.extend(
-/** @scope TestRunner.Target.prototype */ {
+CoreTools.Target = SC.Record.extend(
+/** @scope CoreTools.Target.prototype */ {
 
   primaryKey: "name",
   
@@ -23,12 +23,19 @@ TestRunner.Target = SC.Record.extend(
   /**
     Parent of target.  Only non-null for nested targets.
   */
-  parent: SC.Record.toOne("TestRunner.Target"),
+  parent: SC.Record.toOne("CoreTools.Target"),
 
   /**
     URL to use to load tests.
   */
   testsUrl: SC.Record.attr(String, { key: "link_tests" }),
+  
+  /**  
+    URL to use to load the app.  If no an app, returns null
+  */
+  appUrl: function() {
+    return (this.get('kind') === 'app') ? this.get('name') : null;
+  }.property('kind', 'name').cacheable(),
   
   /**
     The isExpanded state.  Defaults to NO on load.
@@ -86,7 +93,7 @@ TestRunner.Target = SC.Record.extend(
     testsUrl.
   */
   tests: function() {
-    return this.get('store').findAll(TestRunner.Test, { url: this.get('testsUrl') });
+    return this.get('store').findAll(CoreTools.Test, { url: this.get('testsUrl') });
   }.property('testsUrl').cacheable()
   
 }) ;

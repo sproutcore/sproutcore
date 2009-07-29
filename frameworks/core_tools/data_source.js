@@ -4,13 +4,13 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools */
 
 /**
   This DataSource connects to the SproutCore sc-server to retrieve targets
   and tests.  Currently this DataSource is read only.
 */
-TestRunner.DevDataSource = SC.DataSource.extend({
+CoreTools.DevDataSource = SC.DataSource.extend({
 
   /**
     Fetch a group of records from the data source.  Knows how to fetch 
@@ -18,8 +18,8 @@ TestRunner.DevDataSource = SC.DataSource.extend({
   */
   fetch: function(store, fetchKey, params) {
     var ret = null;
-    if (fetchKey === TestRunner.Target) ret = this.fetchTargets(store);
-    else if (fetchKey === TestRunner.Test) {
+    if (fetchKey === CoreTools.Target) ret = this.fetchTargets(store);
+    else if (fetchKey === CoreTools.Test) {
       ret = this.fetchTests(store, params.url);
     }
     
@@ -51,7 +51,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching targets fails");
     } else {
-      storeKeys = opts.store.loadRecords(TestRunner.Target, response);
+      storeKeys = opts.store.loadRecords(CoreTools.Target, response);
       ret.replace(0, ret.get('length'), storeKeys);
     }
 
@@ -84,7 +84,7 @@ TestRunner.DevDataSource = SC.DataSource.extend({
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching tests fails");
     } else {
-      storeKeys = opts.store.loadRecords(TestRunner.Test, response);
+      storeKeys = opts.store.loadRecords(CoreTools.Test, response);
       ret       = opts.ret;
       ret.replace(0, ret.get('length'), storeKeys);
     }
