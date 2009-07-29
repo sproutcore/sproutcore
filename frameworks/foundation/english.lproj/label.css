@@ -22,6 +22,7 @@
 
 .sc-label-view.disabled {
 	color: #999;
+	color: rgba(50,50,50,0.5);
 }
 
 .sc-label-view img.icon {
