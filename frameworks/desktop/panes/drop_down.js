@@ -52,6 +52,15 @@ SC.DropDownView = SC.ButtonView.extend(
   menu : null,
   
   /**
+      Prefer matrix to position the color menu on the button such that the 
+      selected color swatch from color menu will appear alligned to the 
+      swtach image on the button.
+
+      @property
+  */  
+    preferMatrix: [-13, 0, 2],
+  
+  /**
     Binds the button's selection state to the menu's visibility.
     @private
   */
@@ -76,6 +85,7 @@ SC.DropDownView = SC.ButtonView.extend(
           title: titleValue,
           icon: iconURL,
           isEnabled: YES,
+          // checkbox: YES,
           action: this.displaySelectedItem
         });
        }
@@ -90,6 +100,7 @@ SC.DropDownView = SC.ButtonView.extend(
     sc_super() ;
     
     this.fetchMenuItems() ;
+    // this.changeDropDownPreferMatrix();
     
     var menu = this.get('menu') ;
     if(firstTime && menu) {
@@ -105,13 +116,51 @@ SC.DropDownView = SC.ButtonView.extend(
     var menu = this.get('menu') ;
     var itemList = this.get('itemList') ;
     var pane = SC.MenuPane.create({
-      
+      classNames: ['drop-down-menu-item'],
+            
       items: itemList,
       
+      /**
+        This property enables all the items and makes them selectable.
+
+        @property
+      */
       isEnabled: YES,
+      /**
+        This property points to the key setting the enable/disable configuration.
+
+        @property
+      */
       itemIsEnabledKey: "isEnabled",
+      
+      /**
+        This property points to the key setting the title.
+
+        @property
+      */
       itemTitleKey: "title",
+      
+      /**
+        This property points to the key setting the icon.
+
+        @property
+      */
       itemIconKey:"icon",
+      
+      /**
+        This property points to the key setting the checkbox.
+
+        @property
+      */
+      itemCheckboxKey: "checkbox",
+      
+      /**
+        This property points to the key setting the action.
+
+        @property
+      */
+      itemActionKey: "action",
+      
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
       layout: { width: 150 },
@@ -119,11 +168,12 @@ SC.DropDownView = SC.ButtonView.extend(
       })
     }) ;
     
-    pane.popup(this) ;
+    
+    pane.popup(this, this.preferMatrix) ;
     
     // no menu to toggle... bail...
     if (!menu) return NO ;
-    menu.popup(this) ;
+    menu.popup(this, this.preferMatrix) ;
     return YES;
   },
   
@@ -144,12 +194,38 @@ SC.DropDownView = SC.ButtonView.extend(
      
   */  
    displaySelectedItem: function() {
+     console.log(this) ;
+     var menuView = this.get('parentView') ;
+     console.log('menuView =>'+menuView) ;
+     
+     // var menuIdx = idx = (menuItemViews.indexOf(menuItem)
      //set the title and icon of the here. This in turn
      //triggers the render method
      var button = this.getPath('parentView.anchor') ;
      
      button.set('title', this.get('value')) ;
      button.set('icon', this.get('icon')) ;
+   },
+   
+   /**
+     Set the "top" attribute in the prefer matrix property which will position 
+     menu such that the selected color swatch in the menu will be place alligned 
+     to the swatch on the button when menu is opened.
+   */
+   changeDropDownPreferMatrix: function() {
+      var pxOffset = 0;
+      var preferMatrixAttributeTop = 20;
+     // if(selectedColor) {
+     //        var index = defaultColors.indexOf(selectedColor);
+     //        if(index === -1 || index > 3) {
+     //          index = 3;
+     //          pxOffset = -3;
+     //        }
+     //        preferMatrixAttributeTop = index * 20;
+     //      }
+     
+     if(this.get('preferMatrix'))
+       this.get('preferMatrix')[1] = -preferMatrixAttributeTop + pxOffset;
    }
 }) ;
 
