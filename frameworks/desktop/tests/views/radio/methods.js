@@ -92,7 +92,7 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   SC.Event.trigger(elem,'mouseup');
   input.attr('checked', NO);
   // loose focus of the element since it was changed
-  SC.Event.trigger(input.get(1),'change');
+  SC.Event.trigger(input.get(1),'click');
   
   ok(!view.get('isActive'), 'view should no longer be active');
   equals(view.get('value'), undefined, 'value should be undefined (none checked)');
