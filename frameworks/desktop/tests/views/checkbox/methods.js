@@ -111,7 +111,7 @@ test("pressing mouseDown and then mouseUp anywhere in the checkbox should toggle
   // simulate mouseUp and browser-native change to control
   SC.Event.trigger(elem,'mouseup');
   input.attr('checked', NO);
-  SC.Event.trigger(input.get(0),'change');
+  SC.Event.trigger(input.get(0),'click');
   
   ok(!view.get('isActive'), 'view should no longer be active');
   ok(!view.get('value'), 'value should change to NO');

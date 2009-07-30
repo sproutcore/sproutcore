@@ -33,7 +33,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
 
       var blank = sc_static('blank');
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
-      context.push('<img src="', blank, '" class="button" />');
+      context.push('<span class="button" ></span>');
       context.push('<input type="checkbox" name="%@" %@ />'.fmt(SC.guidFor(this),disabled));
       context.push('<span class="label">', dt, '</span>');
       context.attr('name', SC.guidFor(this));
@@ -84,7 +84,6 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     state can be retained.
   */
   setFieldValue: function(v) { 
-    console.log('setfieldvalue');
     this._lastFieldValue = v; 
     this.$input().attr('checked', (v === SC.MIXED_STATE) ? NO : !!v); 
   },
@@ -100,6 +99,15 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     var ret = (v === SC.MIXED_STATE) ? this.get('value') : 
       (!!v) ? this.get('toggleOnValue') : this.get('toggleOffValue'); 
       return ret ;
+  },
+  
+  didCreateLayer: function() {
+    this.setFieldValue(this.get('fieldValue'));
+    SC.Event.add(this.$input()[0], 'click', this, this._field_fieldValueDidChange) ;
+  },
+  
+  willDestroyLayer: function() {
+    SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
   }
     
 }) ;
