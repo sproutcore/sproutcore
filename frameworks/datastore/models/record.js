@@ -134,10 +134,14 @@ SC.Record = SC.Object.extend(
     If you use the writeAttribute() primitive, this method will be called for 
     you.
     
-    @returns {SC.Record} reciever
+    If you pass the key that changed it will ensure that observers are fired
+    only once for the changed property instead of allPropertiesDidChange()
+    
+    @param {String} key that changed (optional)
+    @returns {SC.Record} receiver
   */
-  recordDidChange: function() {
-    this.get('store').recordDidChange(null, null, this.get('storeKey'));
+  recordDidChange: function(key) {
+    this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
     return this ;
   },
   
@@ -171,12 +175,13 @@ SC.Record = SC.Object.extend(
     
     Calls to beginEditing() and endEditing() can be nested.
     
+    @param {String} key that changed (optional)
     @returns {SC.Record} receiver
   */
-  endEditing: function() {
+  endEditing: function(key) {
     if(--this._editLevel <= 0) {
       this._editLevel = 0; 
-      this.recordDidChange();
+      this.recordDidChange(key);
     }
     return this ;
   },
@@ -218,7 +223,7 @@ SC.Record = SC.Object.extend(
     else {
       if(!ignoreDidChange) this.beginEditing();
       attrs[key] = value;
-      if(!ignoreDidChange) this.endEditing();
+      if(!ignoreDidChange) this.endEditing(key);
     }
     
     // if value is primaryKey of record, write it to idsByStoreKey
@@ -246,13 +251,19 @@ SC.Record = SC.Object.extend(
     will notify any observers interested in data hash properties that they
     have changed.
     
+    @param {Boolean} statusOnly changed
+    @param {String} key that changed (optional)
     @returns {SC.Record} receiver
   */
-  storeDidChangeProperties: function(statusOnly) {
+  storeDidChangeProperties: function(statusOnly, key) {
     if (statusOnly) {
       this.notifyPropertyChange('status');
-    } else {
-      this.allPropertiesDidChange(); 
+    } 
+    else if(key) {
+      this.notifyPropertyChange(key);
+    } 
+    else {
+      this.allPropertiesDidChange();
     }
   },
   

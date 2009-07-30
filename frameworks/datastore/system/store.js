@@ -395,9 +395,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Number|Array} storeKeys one or more store keys that changed
     @param {Number} rev optional new revision number. normally leave null
     @param {Boolean} statusOnly (optional) YES if only status changed
+    @param {String} key that changed (optional)
     @returns {SC.Store} receiver
   */
-  dataHashDidChange: function(storeKeys, rev, statusOnly) {
+  dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
     
     // update the revision for storeKey.  Use generateStoreKey() because that
     // gaurantees a universally (to this store hierarchy anyway) unique 
@@ -416,7 +417,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     for(idx=0;idx<len;idx++) {
       if (isArray) storeKey = storeKeys[idx];
       this.revisions[storeKey] = rev;
-      this._notifyRecordPropertyChange(storeKey, statusOnly);
+      this._notifyRecordPropertyChange(storeKey, statusOnly, key);
     }
     
     return this ;
@@ -426,7 +427,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     Will push all changes to a the recordPropertyChanges property
     and execute flushRecordChanges() once at the end of the runloop.
   */
-  _notifyRecordPropertyChange: function(storeKey, statusOnly) {
+  _notifyRecordPropertyChange: function(storeKey, statusOnly, key) {
     
     var records      = this.records, 
         nestedStores = this.get('nestedStores'),
@@ -456,7 +457,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var changes = this.recordPropertyChanges;
     if (!changes) {
       changes = this.recordPropertyChanges = 
-        { storeKeys: [], records: [], statusOnly: [] };
+        { storeKeys: [], records: [], statusOnly: [], propertyForStoreKeys: {} };
     }
     
     changes.storeKeys.push(storeKey);
@@ -464,8 +465,16 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (records && (rec=records[storeKey])) {
       changes.records.push(storeKey);
       if(statusOnly) changes.statusOnly.push(storeKey);
+      // if this is a key specific change, make sure that only those
+      // properties/keys are notified
+      if(key) {
+        if(!changes.propertyForStoreKeys[storeKey]) {
+          changes.propertyForStoreKeys[storeKey] = [];
+        }
+        changes.propertyForStoreKeys[storeKey].push(key);
+      }
     }
-
+    
     this.invokeOnce(this.flush);
     return this;
   },
@@ -486,8 +495,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         storeKeys   = changes.storeKeys, 
         statusOnly  = changes.statusOnly,
         records     = changes.records, 
+        propertyForStoreKeys  = changes.propertyForStoreKeys,
         recordTypes = SC.Set.create(),
-        rec, recordType, status, idx, len, storeKey;
+        rec, recordType, status, idx, len, storeKey, props, idxx, lenn;
     
     for(idx=0,len=storeKeys.length;idx<len;idx++) {
       storeKey = storeKeys[idx];
@@ -495,7 +505,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if(records.indexOf(storeKey)!==-1) {
         status = statusOnly.indexOf(storeKey)!==-1 ? YES: NO;
         rec = this.records[storeKey];
-        if(rec) rec.storeDidChangeProperties(status);
+        props = changes.propertyForStoreKeys[storeKey];
+        
+        if(rec && !props) {
+          // this will notify that all properties changed (unless status flag is on)
+          rec.storeDidChangeProperties(status);
+        }
+        else if(rec) {
+          // iterate through the properties for this storeKey and
+          // notify only changes to this specifically
+          for(idxx=0,lenn=props.length;idxx<len;idxx++) {
+            rec.storeDidChangeProperties(status, props[idxx]);
+          }
+        }
         // remove it so we don't trigger this twice
         records.removeObject(storeKey);
       }
@@ -1069,12 +1091,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {SC.Record} recordType the recordType
     @param {String} id the record id
     @param {Number} storeKey (optional) if passed, ignores recordType and id
+    @param {String} key that changed (optional)
     @returns {SC.Store} receiver
   */
-  recordDidChange: function(recordType, id, storeKey) {
+  recordDidChange: function(recordType, id, storeKey, key) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     var status = this.readStatus(storeKey), changelog, K = SC.Record;
-
+    
     // BUSY_LOADING, BUSY_CREATING, BUSY_COMMITTING, BUSY_REFRESH_CLEAN
     // BUSY_REFRESH_DIRTY, BUSY_DESTROYING
     if (status & K.BUSY) {
@@ -1092,12 +1115,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // record data hash change
-    this.dataHashDidChange(storeKey, null);
+    this.dataHashDidChange(storeKey, null, null, key);
     // record in changelog
     changelog = this.changelog ;
     if (!changelog) changelog = this.changelog = SC.Set.create() ;
     changelog.add(storeKey);
-    this.changelog=changelog;
+    this.changelog = changelog;
     
     // if commit records is enabled
     if(this.get('commitRecordsAutomatically')){
@@ -1330,6 +1353,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Bool} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys, params) {
+    
     var source    = this._getDataSource(),
         isArray   = SC.typeOf(recordTypes) === SC.T_ARRAY,    
         retCreate= [], retUpdate= [], retDestroy = [], 
