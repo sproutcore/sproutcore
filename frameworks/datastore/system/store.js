@@ -469,7 +469,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // properties/keys are notified
       if(key) {
         if(!changes.propertyForStoreKeys[storeKey]) {
-          changes.propertyForStoreKeys[storeKey] = [];
+          // always notify status change
+          changes.propertyForStoreKeys[storeKey] = ['status'];
         }
         changes.propertyForStoreKeys[storeKey].push(key);
       }

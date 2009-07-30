@@ -127,7 +127,7 @@ test("Make sure that setting an attribute on a record will only notify respectiv
   var file = store.find(Application.File, '14');
   
   SC.RunLoop.begin();
-  file.writeAttribute('name', 'My Great New Name');
+  file.set('name', 'My Great New Name');
   SC.RunLoop.end();
   
   equals(Application._nameDidChange, 1, 'observer was only fired once');
