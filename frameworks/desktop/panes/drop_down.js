@@ -31,8 +31,15 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   itemList: [],
   
+  /** 
+    Current selected menu item
+    @Array
+  */
+  currentSelItem: null,
+  
   /**private */
   acceptsFirstResponder: YES,
+  
   /**
     Overriding the default SC.ButtonView#performKeyEquivalent method to pass 
     it onto the menu
@@ -43,19 +50,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   isSelected: NO,
   
-  performKeyEquivalent: function( charCode, evt )
-  {
-    if (!this.get('isEnabled')) return NO ;
-    var menu = this.get('menu') ;
-    return (!!menu && menu.performKeyEquivalent(charCode, evt)) ;
-  },
-  
-  /**
-    Menu attached to the popupButton
-    @default SC.MenuView
-  */
-  menu : null,
-  
   /**
     To set the menu item index
     
@@ -63,16 +57,38 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   itemIdx: null,
   
-  // flag: 0,
+  /**
+     Current Value of the dropDown
+     
+     @property
+  */
+  dropDownValue: null,
   
   /**
-      Prefer matrix to position the drop down menu the button such that the 
-      selected item for the menu item will appear aligned to the 
-      icon on the button.
-      
-      @property
-  */  
-  preferMatrix: [-13, 0, 2],
+    Binds the button's title to the 'dropDownValue'
+    
+    @private
+  */
+  titleBinding: '*.dropDownValue',
+  
+  /**
+    Default selected value of the drop down.
+     This will be the first item from the menu item list.
+    
+    @private
+  */
+  defaultSelVal: null,
+  
+  /**
+    Prefer matrix to position the drop down menu the button such that the 
+    selected item for the menu item will appear aligned to the 
+    icon on the button.
+    
+    @property
+    @default [ -4, 0. 2]
+    
+  */
+  preferMatrix: [-4, 0, 2],
   
   /**
     Binds the button's selection state to the menu's visibility.
@@ -85,16 +101,21 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   fetchMenuItems: function() {
     var items = this.get('objects') ;
+    
+    //Get the titleValuekey set by the user
     var titleValueKey = this.get('titleValueKey') ;
+    
+    //Get the iconValueKey from the user
     var iconValueKey = this.get('iconValueKey') ;
-    var selectionValueKey = this.get('selectionValueKey') ;
+    
+    //itemList array to set the menu items
     var itemList = [];
-    
-    
-    // var flag = this.get('flag') ;
     
     //to set the 'checkbox' property of menu items
     var isChecked = YES ;
+    
+    //index for finding the first item in the list
+    var idx = 0 ;
     
     items.forEach(function(object) {
       if (object) {
@@ -104,29 +125,26 @@ SC.DropDownMenu = SC.ButtonView.extend(
         var titleValue = 
           titleValueKey ? object[titleValueKey] : object.toString() ;
         
-        //get selection value
-        var selectionValue = 
-          selectionValueKey ? object[selectionValueKey] : null ;
-          
         //Check if the item is currentSelectedItem or not
-        if(titleValue === this.title) {
+        if(titleValue === this.dropDownValue) {
+          
+          //set the itemIdx - To change the prefMatrix accordingly.
+          this.set('itemIdx', idx) ;
           isChecked = YES ;
         }
-        // else if (selectionValue === YES) {
-        //          if (flag === 0 ) {
-        //            isChecked = YES
-        //            this.set('flag', 1) ;
-        //          }
-        //          else {
-        //            isChecked = NO ;
-        //          }
-        //        }
+        
         else {
           isChecked = NO ;
         }
         
         //Get the iconVlaue key
         var iconValue = iconValueKey ? object[iconValueKey] : object ;
+        
+        //Set the first item from the list as default selected item 
+        if (idx === 0) {
+          this.set('defaultSelVal',titleValue) ;
+          this.set('icon', iconValue) ;
+        }
         
         //Set the items in the itemList array
         itemList.push({
@@ -137,6 +155,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
           action: this.displaySelectedItem
         });
        }
+       idx += 1 ;
+      
       this.set('itemList', itemList) ;
    }, this ) ;
   },
@@ -151,12 +171,24 @@ SC.DropDownMenu = SC.ButtonView.extend(
     //Fetch the menu items
     this.fetchMenuItems() ;
     
+    
+    if(firstTime) {
+      var selectionValue = this.get('selectionValue') ;
+      if(selectionValue) {
+        this.set('dropDownValue', selectionValue) ;
+      }
+      else {
+        this.set('dropDownValue', this.get('defaultSelVal')) ;
+      }
+    }
+    
     //Set the preference matrix for the menu pane
     this.changeDropDownPreferMatrix(this.itemIdx);
     
     var menu = this.get('menu') ;
     if(firstTime && menu) {
       menu.createLayer() ;
+     
     }
   },
   
@@ -166,9 +198,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   action: function( evt )
   {
-    var menu = this.get('menu') ;
+    var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
-    var pane = SC.MenuPane.create({
+    var menu = SC.MenuPane.create({
       
       /**
         Class name - drop-down-menu-item
@@ -190,53 +222,19 @@ SC.DropDownMenu = SC.ButtonView.extend(
       */
       isEnabled: YES,
       
-      /**
-        This property points to the key setting the enable/disable configuration.
-
-        @property
-      */
-      itemIsEnabledKey: "isEnabled",
-      
-      /**
-        This property points to the key setting the title.
-
-        @property
-      */
-      itemTitleKey: "title",
-      
-      /**
-        This property points to the key setting the icon.
-
-        @property
-      */
-      itemIconKey:"icon",
-      
-      /**
-        This property points to the key setting the checkbox.
-
-        @property
-      */
-      itemCheckboxKey: "checkbox",
-      
-      /**
-        This property points to the key setting the action.
-
-        @property
-      */
-      itemActionKey: "action",
-      
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
-      layout: { width: 150 },
+      layout: { width: 150},
       contentView: SC.View.extend({
       })
     }) ;
     
-    pane.popup(this, this.preferMatrix) ;
+    // menu.popup(this, this.preferMatrix) ;
     
     // no menu to toggle... bail...
     if (!menu) return NO ;
     menu.popup(this, this.preferMatrix) ;
+    menu.set('currentSelectedMenuItem', currSel) ;
     return YES;
   },
   
@@ -264,6 +262,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
      //Current selected menu item
      var currSel = menuView.get('currentSelectedMenuItem') ;
      
+
+     
      // MenuItemViews
      var itemViews = menuView.menuItemViews ;
      
@@ -278,6 +278,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
      //Set the button title and icon
      button.set('title', this.get('value')) ;
      button.set('icon', this.get('icon')) ;
+     
+     //Set the button title and icon
+     button.set('dropDownValue', this.get('value')) ;
+     
+     //Set the current selected item
+     button.set('currentSelItem', currSel) ;
      
      //Set the value of 'itemIdx' property of the DropDownMenu 
      button.set('itemIdx', itemIdx) ;
