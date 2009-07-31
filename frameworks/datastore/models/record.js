@@ -292,7 +292,7 @@ SC.Record = SC.Object.extend(
 
         if (!isRecord) {
           attrValue = this.get(key);
-          if(attrValue || includeNull) dataHash[key] = attrValue;
+          if(attrValue!==undefined || attrValue!==null) dataHash[key] = attrValue;
         }
         else if(isRecord) {
           recHash = store.readDataHash(storeKey);
