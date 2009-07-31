@@ -297,7 +297,7 @@ SC.Record = SC.Object.extend(
         else if(isRecord) {
           recHash = store.readDataHash(storeKey);
 
-          if(recHash[key]) {
+          if(recHash[key]!==undefined) {
             // write value already there
             dataHash[key] = recHash[key];
           }
