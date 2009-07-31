@@ -237,7 +237,6 @@ SC.Button = {
     @returns {Boolean} return state
   */
   computeIsSelectedForValue: function(value) {
-    console.log('computeIsSelectedForValue '+value);
     var targetValue = this.get('toggleOnValue') ;
     var state, next ;
     

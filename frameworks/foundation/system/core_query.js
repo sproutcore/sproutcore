@@ -182,7 +182,7 @@ SC.CoreQuery = (function() {
         return this ;
 
       // Handle HTML strings
-      } else if ( typeof selector == "string" ) {
+      } else if ( typeof selector === "string" ) {
         // Are we dealing with HTML string or an ID?
         var match = quickExpr.exec( selector );
 
@@ -232,7 +232,7 @@ SC.CoreQuery = (function() {
       @returns {Object|Array}
     */
     get: function( num ) {
-      return num == undefined ? CQ.makeArray(this) : this[num];
+      return num === undefined ? CQ.makeArray(this) : this[num];
     },
 
     /** 
@@ -280,7 +280,7 @@ SC.CoreQuery = (function() {
       @returns {CoreQuery}
     */
     not: function( selector ) {
-      if ( selector.constructor == String ) {
+      if ( typeof selector === "string" ) {
         // test special case where just one selector is passed in
         if ( isSimple.test( selector ) )
           return this.pushStack( CQ.multiFilter( selector, this, true ) );
@@ -384,7 +384,7 @@ SC.CoreQuery = (function() {
     add: function( selector ) {
       return this.pushStack( CQ.merge(
         this.get(),
-        typeof selector == 'string' ?
+        typeof selector === 'string' ?
           CQ( selector ) :
           CQ.makeArray( selector )
       ).uniq()) ;
@@ -405,7 +405,7 @@ SC.CoreQuery = (function() {
       var options = name;
 
       // Look for the case where we're accessing a style value
-      if ( name.constructor == String )
+      if ( typeof name === "string" )
         if ( value === undefined )
           return this[0] && CQ[ type || "attr" ]( this[0], name );
 
@@ -510,7 +510,7 @@ SC.CoreQuery = (function() {
         
       // otherwise set the value
       } else {
-        if( value.constructor == Number ) value += ''; // force to string
+        if( typeof value === "number" ) value += ''; // force to string
         this.each(function(){
           if ( this.nodeType != 1 ) return;
           
@@ -597,7 +597,7 @@ SC.CoreQuery = (function() {
       @returns {String|CoreQuery}
     */
     text: function( text ) {
-      if ( typeof text != "object" && text != null )
+      if ( typeof text !== "object" && text != null )
         return this.empty().append( (this[0] && this[0].ownerDocument || document).createTextNode( text ) );
 
       var ret = "";
@@ -803,11 +803,11 @@ SC.CoreQuery = (function() {
       }
 
       CQ.each(elems, function(i, elem){
-        if ( typeof elem == 'number' ) elem += '';
+        if ( typeof elem === 'number' ) elem += '';
         if ( !elem ) return;
 
         // Convert html string into DOM nodes
-        if ( typeof elem == "string" ) {
+        if ( typeof elem === "string" ) {
           // Fix "XHTML"-style tags in all browsers
           elem = elem.replace(/(<(\w+)[^>]*?)\/>/g, function(all, front, tag){
             return tag.match(/^(abbr|br|col|img|input|link|meta|param|hr|area|embed)$/i) ?
@@ -1127,7 +1127,7 @@ SC.CoreQuery = (function() {
       if( array != null ){
         var i = array.length;
         // The window, strings (and functions) also have 'length'
-        if( i == null || typeof array == 'string' || array.setInterval )
+        if( i == null || typeof array === 'string' || array.setInterval )
           ret[0] = array;
         else
           while( i )
@@ -1162,7 +1162,7 @@ SC.CoreQuery = (function() {
       if (SC.typeOf(value) === SC.T_FUNCTION) value = value.call(elem, i);
 
       // Handle passing in a number to a CSS property
-      return value && (value.constructor === Number) && type == "curCSS" && !exclude.test( name ) ? value + "px" : value;
+      return value && (typeof value === "number") && type == "curCSS" && !exclude.test( name ) ? value + "px" : value;
     },
     
     
@@ -1602,7 +1602,7 @@ SC.CoreQuery = (function() {
 
           // Set the width or height on the element (default to pixels if value is unitless)
         } else {
-          return this.css(type, (size.constructor==String) ? size : size+"px");
+          return this.css(type, (typeof size === "string") ? size : size+"px");
         }
       }
       return ret ;
