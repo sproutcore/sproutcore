@@ -28,7 +28,7 @@ SC.Validator.Date = SC.Validator.extend(
   */
   fieldValueForObject: function(object, form, field) {
     var date ;
-    if (typeof(object) == "number") {
+    if (typeof(object) === "number") {
       date = new Date(object) ;
     } else if (object instanceof Date) { date = object; }
       
