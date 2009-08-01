@@ -4,7 +4,7 @@
 	line-height: 1.4
 }
 
-// YUI reset
+/* YUI reset*/
 
 .sc-view body,
 div,
@@ -126,7 +126,7 @@ option {
 button,
 textarea,
 select {
-	*font-size: 100%;
+	font-size: 100%;
 }
 
 
