@@ -473,7 +473,7 @@ SC.CoreQuery = (function() {
     val: function( value ) {
       
       // get the value
-      if ( value == undefined ) {     
+      if ( value === undefined ) {     
         var elem = this[0];
         if (elem) {
           if(CQ.nodeName(elem, 'option'))
@@ -565,7 +565,7 @@ SC.CoreQuery = (function() {
       // this is primarily for IE but the data expando shouldn't be copied 
       // over in any browser
       var clone = ret.find("*").andSelf().each(function(){
-        if ( this[ SC.guidKey ] != undefined )
+        if ( this[ SC.guidKey ] !== undefined )
           this[ SC.guidKey ] = null;
       });
 
@@ -766,7 +766,7 @@ SC.CoreQuery = (function() {
       var name, i = 0, length = object.length;
 
       if ( args ) {
-        if ( length == undefined ) {
+        if ( length === undefined ) {
           for ( name in object )
             if ( callback.apply( object[ name ], args ) === false )
               break;
@@ -777,7 +777,7 @@ SC.CoreQuery = (function() {
 
       // A special, fast, case for the most common use of each
       } else {
-        if ( length == undefined ) {
+        if ( length === undefined ) {
           for ( name in object )
             if ( callback.call( object[ name ], name, object[ name ] ) === false )
               break;
@@ -816,7 +816,7 @@ SC.CoreQuery = (function() {
           });
 
           // Trim whitespace, otherwise indexOf won't work as expected
-          var tags = elem.trim().toLowerCase(), 
+          var tags = elem.replace(/^\s+/, "").substring(0, 10).toLowerCase(), 
               div = context.createElement("div");
 
           var wrap =
@@ -879,7 +879,7 @@ SC.CoreQuery = (function() {
 
         if (elem.length === 0 && (!CQ.nodeName( elem, "form" ) && !CQ.nodeName( elem, "select" ))) return;
 
-        if (elem[0] == undefined || CQ.nodeName( elem, "form" ) || elem.options) ret.push( elem );
+        if (elem[0] === undefined || CQ.nodeName( elem, "form" ) || elem.options) ret.push( elem );
 
         else ret = CQ.merge( ret, elem );
 
@@ -1192,7 +1192,7 @@ SC.CoreQuery = (function() {
       // internal only, use removeClass("class")
       remove: function( elem, classNames ) {
         if (elem.nodeType == 1) {
-          elem.className = classNames != undefined ?
+          elem.className = classNames !== undefined ?
             CQ.grep(elem.className.split(/\s+/), function(className){
               return !CQ.className.has( classNames, className );
             }).join(" ") : "";
@@ -1201,7 +1201,7 @@ SC.CoreQuery = (function() {
 
       // internal only, use hasClass("class")
       has: function( elem, className ) {
-        return CQ.inArray( className, (elem.className || elem).toString().split(/\s+/) ) > -1;
+        return elem && CQ.inArray( className, (elem.className || elem).toString().split(/\s+/) ) > -1;
       }
     },
     
@@ -1392,7 +1392,7 @@ SC.CoreQuery = (function() {
 
         // Safari mis-reports the default selected property of a hidden option
         // Accessing the parent's selectedIndex property fixes it
-        if ( name == "selected" && SC.browser.safari ) {
+        if ( name == "selected" && elem.parentNode ) {
           elem.parentNode.selectedIndex;
         }
 
@@ -1412,6 +1412,19 @@ SC.CoreQuery = (function() {
           // attributes.
           if( CQ.nodeName( elem, "form" ) && elem.getAttributeNode(name) ) {
             return elem.getAttributeNode( name ).nodeValue;
+          }
+          
+          // elem.tabIndex doesn't always return the correct value when it hasn't been explicitly set
+          // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
+          if ( name == "tabIndex" ) {
+          	var attributeNode = elem.getAttributeNode( "tabIndex" );
+          	return attributeNode && attributeNode.specified
+          				? attributeNode.value
+          				: elem.nodeName.match(/(button|input|object|select|textarea)/i)
+          					? 0
+          					: elem.nodeName.match(/^(a|area)$/i) && elem.href
+          						? 0
+          						: undefined;
           }
 
           return elem[ name ];
