@@ -230,6 +230,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   
   
   accessoryViewObserver: function() {
+    var classNames;
     var viewProperties = ['leftAccessoryView', 'rightAccessoryView'] ;
     var len = viewProperties.length ;
     for (var i=0; i<len; i++) {
@@ -249,7 +250,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (previousView) {
           // Remove the "sc-text-field-accessory-view" class name that we had
           // added earlier.
-          var classNames = previousView.get('classNames') ;
+          classNames = previousView.get('classNames') ;
           classNames = classNames.without('sc-text-field-accessory-view') ;
           previousView.set('classNames', classNames) ;
           this.removeChild(previousView) ;
@@ -269,7 +270,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
           // Add in the "sc-text-field-accessory-view" class name so that the
           // z-index gets set correctly.
-          var classNames = accessoryView.get('classNames') ;
+          classNames = accessoryView.get('classNames') ;
           var className = 'sc-text-field-accessory-view' ;
           if (classNames.indexOf(className) < 0) {
             classNames.push(className) ;
@@ -530,11 +531,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   fieldDidBlur: function() {
-    if (this._isFocused) {
+    //if (this._isFocused) {
       this._isFocused = NO ;
       this._removeFirefoxCursorFix();
       this.commitEditing();
-    }
+    //}
   },
 
   _applyFirefoxCursorFix: function() {
@@ -604,6 +605,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this.fieldValueDidChange() ;
     }
   },
+  
   
   _isFocused: false,
   
