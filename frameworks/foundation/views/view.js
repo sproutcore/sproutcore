@@ -1574,7 +1574,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null) ;
-  }.property().cacheable(),
+  }.property('layout').cacheable(),
   
   /**
     Computes what the frame of this view would be if the parent were resized
