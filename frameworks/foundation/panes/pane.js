@@ -530,6 +530,7 @@ SC.Pane = SC.View.extend({
     // update my own location
     this.set('isPaneAttached', YES) ;
     this.parentViewDidChange() ;
+    
     return this ;
   },
   
@@ -566,6 +567,15 @@ SC.Pane = SC.View.extend({
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
+    }
+    
+    // if we just became visible, update layer + layout if needed...
+    if (cur) {
+      if (this.parentViewDidResize) this.parentViewDidResize();
+      
+      if (this.get('childViewsNeedLayout')) {
+        this.invokeOnce(this.layoutChildViewsIfNeeded);
+      }
     }
     
     return this ;
