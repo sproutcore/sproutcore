@@ -129,15 +129,14 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
     if(this._optIsCollection && this._delegate.get('layout').left){
-      layout.left=this._optframe.x-this._delegate.get('layout').left;
+      layout.left=this._optframe.x-this._delegate.get('layout').left-pane.$()[0].offsetLeft;
     }else{
-      layout.left=this._optframe.x;
+      layout.left=this._optframe.x-pane.$()[0].offsetLeft;
     }
-    layout.left=this._optframe.x;
     if(this._optIsCollection && this._delegate.get('layout').top){
-      layout.top=this._optframe.y-this._delegate.get('layout').top;
+      layout.top=this._optframe.y-this._delegate.get('layout').top-pane.$()[0].offsetTop;
     }else{
-      layout.top=this._optframe.y;  
+      layout.top=this._optframe.y-pane.$()[0].offsetTop;  
     }
 
     this.set('layout', layout);
