@@ -113,7 +113,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     icon on the button.
 
     @property
-    @default [ -4, 0. 2]
+    @default [ 2, 0. 2]
 
   */
   preferMatrix: [2, 0, 2],
