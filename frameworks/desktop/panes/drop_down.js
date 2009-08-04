@@ -116,7 +116,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @default [ -4, 0. 2]
 
   */
-  preferMatrix: [-4, 0, 2],
+  preferMatrix: [2, 0, 2],
 
   /**
     Binds the button's selection state to the menu's visibility.
