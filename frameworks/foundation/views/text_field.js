@@ -532,7 +532,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidFocus: function(evt) {
     if (!this._isFocused) {
       this._isFocused = YES ;
-      this._applyFirefoxCursorFix();
       this.beginEditing();
     }
   },
@@ -540,13 +539,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   fieldDidBlur: function() {
     //if (this._isFocused) {
       this._isFocused = NO ;
-      this._removeFirefoxCursorFix();
       this.commitEditing();
     //}
   },
 
   _applyFirefoxCursorFix: function() {
+    this._applyTimer = null; // clear 
+    if (this._hasFirefoxCursorFix) return this;
     if (SC.browser.mozilla) {
+      this._hasFirefoxCursorFix = YES ;
+      
       var layer = this.get('layer');
       var p = SC.viewportOffset(this.get('layer')) ;
       var top    = p.y, 
@@ -560,10 +562,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
       this.$field().attr('style', style) ;
     }
+    return this ;
   },
 
   _removeFirefoxCursorFix: function() {
+    if (!this._hasFirefoxCursorFix) return this;
+    this._hasFirefoxCursorFix = NO ;
     if (SC.browser.mozilla) this.$field().attr('style', '') ;
+    return this ;
   },
   
   _textField_selectionDidChange: function() {
@@ -590,6 +596,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       this._isFocused = YES ;
       if (this.get('isVisibleInWindow')) {
         this.$field().get(0).focus();
+        this._applyFirefoxCursorFix();
         this.invokeOnce(this._selectRootElement) ;
       }
     }
@@ -608,11 +615,21 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (this._isFocused) {
       this._isFocused = NO ;
       this.$field().get(0).blur() ;
+      this._removeFirefoxCursorFix();
     } else {
       this.fieldValueDidChange() ;
     }
   },
   
+  parentViewDidResize: function() {
+    if (SC.browser.mozilla && this.get('isFirstResponder')) {
+      this._removeFirefoxCursorFix();
+      if (this._applyTimer) this._applyTimer.invalidate();
+      this._applyTimer = this.invokeLater(this._applyFirefoxCursorFix, 250);
+    }
+    
+    sc_super();
+  },
   
   _isFocused: false,
   
@@ -630,7 +647,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // handle tab key
     if (evt.which === 9 && !this.get('isMultiline')) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      console.log("TAB: %@".fmt(view));
       view.becomeFirstResponder();
       return YES ; // handled
     }
