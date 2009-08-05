@@ -395,7 +395,7 @@ SC.Query = SC.Object.extend({
       evaluate:         function (r,w) {
                           var all   = this.leftSide.evaluate(r,w);
                           var start = this.rightSide.evaluate(r,w);
-                          return ( all.substr(0,start.length) == start );
+                          return ( all.indexOf(start) === 0 );
                         }
     },
     'ENDS_WITH': {
