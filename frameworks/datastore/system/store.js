@@ -685,7 +685,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // first attempt to find the record in the local store
-    var storeKey = recordType.storeKeyFor(id);
+    var storeKey ;
+    if (recordType && recordType.get && recordType.get('isRecord')) {
+      storeKey = recordType.get('storeKey');
+    } else storeKey = recordType.storeKeyFor(id);
     
     if (this.readStatus(storeKey) === SC.Record.EMPTY) {
       storeKey = this.retrieveRecord(recordType, id);

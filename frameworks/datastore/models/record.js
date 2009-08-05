@@ -39,6 +39,9 @@
 SC.Record = SC.Object.extend(
 /** @scope SC.Record.prototype */ {
   
+  /**  Walk like a duck */
+  isRecord: YES,
+  
   // ...............................
   // PROPERTIES
   //
