@@ -428,7 +428,10 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   //..........................................
   
   mouseUp: function(evt) {
-    if (!this.get('isEnabled')) return YES ;
+    if (!this.get('isEnabled') || this.get('hasMouseExited')) {
+      this.set('hasMouseExited',NO) ;
+      return YES ;
+    }
     this.set('hasMouseExited',NO) ;
     this.isSelected = YES ;
     var key = this.get('contentCheckboxKey') ;
