@@ -1459,7 +1459,7 @@ SC.CollectionView = SC.View.extend(
   },
   
   /**
-    Select one or more items folling the current selection, optionally
+    Select one or more items following the current selection, optionally
     extending the current selection.  Also scrolls to selected item.
     
     Selection does not wrap around.
