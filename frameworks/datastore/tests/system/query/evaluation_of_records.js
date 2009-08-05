@@ -53,6 +53,11 @@ test("should get record properties correctly", function() {
   q.parseQuery();
   ok(q.contains(rec5) == true, 'Bert Berthold should match: lastName BEGINS_WITH firstName');
   ok(q.contains(rec2) == false, 'Jane Doe should not match: lastName BEGINS_WITH firstName');
+  
+  q.conditions = "lastName CONTAINS firstName";
+  q.parseQuery();
+  ok(q.contains(rec5) == true, 'Bert Berthold should match: lastName CONTAINS firstName');
+  ok(q.contains(rec2) == false, 'Jane Doe should not match: lastName CONTAINS firstName');
 
 }); 
 

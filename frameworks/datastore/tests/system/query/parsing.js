@@ -111,9 +111,9 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[1].tokenType, 'CLOSE_PAREN', 'type should be CLOSE_PAREN');
   
   // COMPARATORS
-  q.conditions = "= != < <= > >= BEGINS_WITH ENDS_WITH ANY MATCHES TYPE_IS";
+  q.conditions = "= != < <= > >= BEGINS_WITH ENDS_WITH CONTAINS ANY MATCHES TYPE_IS";
   q.parseQuery();
-  ok(q.tokenList.length == 11, 'list should have 10 tokens');
+  ok(q.tokenList.length == 12, 'list should have 11 tokens');
   equals(q.tokenList[0].tokenType, '=', 'type should be =');
   equals(q.tokenList[0].tokenValue, '=', 'value should be =');
   equals(q.tokenList[1].tokenType, '!=', 'type should be !=');
@@ -130,12 +130,14 @@ test("should recognize all primitives", function() {
   equals(q.tokenList[6].tokenValue, 'BEGINS_WITH', 'value should be BEGINS_WITH');
   equals(q.tokenList[7].tokenType, 'ENDS_WITH', 'type should be ENDS_WITH');
   equals(q.tokenList[7].tokenValue, 'ENDS_WITH', 'value should be ENDS_WITH');
-  equals(q.tokenList[8].tokenType, 'ANY', 'type should be ANY');
-  equals(q.tokenList[8].tokenValue, 'ANY', 'value should be ANY');
-  equals(q.tokenList[9].tokenType, 'MATCHES', 'type should be MATCHES');
-  equals(q.tokenList[9].tokenValue, 'MATCHES', 'value should be MATCHES');
-  equals(q.tokenList[10].tokenType, 'TYPE_IS', 'type should be TYPE_IS');
-  equals(q.tokenList[10].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
+  equals(q.tokenList[8].tokenType, 'CONTAINS', 'type should be CONTAINS');
+  equals(q.tokenList[8].tokenValue, 'CONTAINS', 'value should be CONTAINS');
+  equals(q.tokenList[9].tokenType, 'ANY', 'type should be ANY');
+  equals(q.tokenList[9].tokenValue, 'ANY', 'value should be ANY');
+  equals(q.tokenList[10].tokenType, 'MATCHES', 'type should be MATCHES');
+  equals(q.tokenList[10].tokenValue, 'MATCHES', 'value should be MATCHES');
+  equals(q.tokenList[11].tokenType, 'TYPE_IS', 'type should be TYPE_IS');
+  equals(q.tokenList[11].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
   
   // BOOLEAN OPERATORS
   q.conditions = "AND OR NOT";

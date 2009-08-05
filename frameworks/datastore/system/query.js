@@ -85,6 +85,7 @@ require('core') ;
   - >=
   - BEGINS_WITH (checks if a string starts with another one)
   - ENDS_WITH   (checks if a string ends with another one)
+  - CONTAINS    (checks if a string contains another one)
   - MATCHES     (checks if a string is matched by a regexp,
                 you will have to use a parameter to insert the regexp)
   - ANY         (checks if the thing on its left is contained in the array
@@ -407,6 +408,17 @@ SC.Query = SC.Object.extend({
                           var end = this.rightSide.evaluate(r,w);
                           var suf = all.substring(all.length-end.length,all.length);
                           return suf == end;
+                        }
+    },
+    'CONTAINS': {
+      reservedWord:     true,
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          var all    = this.leftSide.evaluate(r,w);
+                          var substr = this.rightSide.evaluate(r,w);
+                          return (all.indexOf(substr) !== -1);
                         }
     },
     'ANY': {
