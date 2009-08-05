@@ -155,12 +155,12 @@ test("DropDownWithIcon", function() {
   ok(!view.hasClass('def'), 'hasClass(def) should be NO') ;
 }) ;
 
-test("Check if setting a value actually changes the selection value(dropDownValue)", function() {  
+test("Check if setting a value actually changes the selection value", function() {  
   var view = pane.view('SortedObjects') ;
   SC.RunLoop.begin() ;
-  view.set('dropDownValue','Medium') ;
+  view.set('value','Medium') ;
   SC.RunLoop.end() ;
-  equals(view.get('dropDownValue'), 'Medium', 'Drop Down value should change to Medium') ;
+  equals(view.get('value'), 'Medium', 'Drop Down value should change to Medium') ;
 }) ;
 
 test("StaticLayout", function() {  
