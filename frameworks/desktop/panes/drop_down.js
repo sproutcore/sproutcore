@@ -90,14 +90,14 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
      @property
   */
-  dropDownValue: null,
+  value: null,
 
   /**
-    Binds the button's title to the 'dropDownValue'
+    Binds the button's title to the 'value'
 
     @private
   */
-  titleBinding: '*.dropDownValue',
+  titleBinding: '*.value',
 
   /**
     Default selected value of the drop down.
@@ -192,7 +192,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         object.get(valueKey) : object[valueKey]) : object ;
 
       //Check if the item is currentSelectedItem or not
-      if(name === this.dropDownValue) {
+      if(name === this.value) {
 
         //set the itemIdx - To change the prefMatrix accordingly.
         this.set('itemIdx', idx) ;
@@ -228,10 +228,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
     if(firstTime) {
       var selectionValue = this.get('selectionValue') ;
       if(!SC.none(selectionValue)) {
-        this.set('dropDownValue', selectionValue) ;
+        this.set('value', selectionValue) ;
       }
       else {
-        this.set('dropDownValue', this.get('defaultSelVal')) ;
+        this.set('value', this.get('defaultSelVal')) ;
       }
     }
 
@@ -328,8 +328,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
     button.set('title', this.get('value')) ;
     button.set('icon', this.get('icon')) ;
 
-    //Set dropDownValue, currentSelectedItem & itemIdx
-    button.set('dropDownValue', this.get('value')) ;
+    //Set value, currentSelectedItem & itemIdx
+    button.set('value', this.get('value')) ;
     button.set('currentSelItem', currSel) ;
     button.set('itemIdx', itemIdx) ;
   },
