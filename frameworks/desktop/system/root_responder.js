@@ -407,6 +407,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // equivalent.  Otherwise, send as a keyDown event so that the focused
     // responder can do something useful with the event.
     if (this._isFunctionOrNonPrintableKey(evt)) {
+      
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
@@ -420,7 +421,8 @@ SC.RootResponder = SC.RootResponder.extend(
         return evt.hasCustomEventHandling ;
       }
     }
-    return this.sendEvent('keyDown', evt) ; // allow normal processing...
+    
+    return YES ; // otherwise do not handle keydown - wait for keypress
   },
   
   /** @private

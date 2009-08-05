@@ -203,15 +203,24 @@ SC.Button = {
     @returns {Boolean}  YES if handled, NO otherwise
   */
   performKeyEquivalent: function(keystring, evt) {
+
     if (!this.get('isEnabled')) return NO;
-    var keyEquivalent = this.get('keyEquivalent');
-    if (keyEquivalent && (keyEquivalent === keystring)) {
-      // button has defined a keyEquivalent and it matches!
-      // if triggering succeeded, true will be returned and the operation will 
-      // be handeled (i.e performKeyEquivalent will cease crawling the view 
-      // tree)
-      return this.triggerAction(evt);
+    var equiv = this.get('keyEquivalent');
+
+    // button has defined a keyEquivalent and it matches!
+    // if triggering succeeded, true will be returned and the operation will 
+    // be handeled (i.e performKeyEquivalent will cease crawling the view 
+    // tree)
+    if (equiv) {
+      if (equiv === keystring) return this.triggerAction(evt);
+    
+    // should fire if isDefault OR isCancel.  This way if isDefault AND 
+    // isCancel, responds to both return and escape
+    } else if ((this.get('isDefault') && (keystring === 'return')) ||
+        (this.get('isCancel') && (keystring === 'escape'))) {
+          return this.triggerAction(evt);
     }
+
     return NO; // did not handle it; keep searching
   },
 

@@ -34,6 +34,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   isPassword: NO,
   
   /**
+    If YES then allow multi-line input.  This will also change the default
+    tag type from "input" to "textarea".  Otherwise, pressing return will 
+    trigger the default insertion handler.
+  */
+  isMultline: NO,
+  
+  /**
     The hint to display while the field is not active.  Can be a loc key.
   */  
   hint: null,
@@ -614,6 +621,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
+
+    // handle return and escape.  this way they can be passed on to the 
+    // responder chain.
+    if ((evt.which === 13) && !this.get('isMultiline')) return NO ;
+    if (evt.which === 27) return NO ;
+    
     // validate keyDown...
     if (this.performValidateKeyDown(evt)) {
       this._isKeyDown = YES ;

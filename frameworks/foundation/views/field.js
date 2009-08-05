@@ -94,7 +94,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   },
   
   _field_fieldValueDidChange: function(evt) {
-    console.log('the change is triggered');
     SC.RunLoop.begin();
     this.fieldValueDidChange(NO);
     SC.RunLoop.end();  

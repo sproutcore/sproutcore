@@ -119,7 +119,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     @returns {bool} success/failure of the request
   */  
   triggerAction: function(evt) {  
-    if (!this.get('isEnabled')) return false;
+    if (!this.get('isEnabled')) return NO;
     this.set('isActive', YES);
     this._action(evt);
     this.didTriggerAction();
