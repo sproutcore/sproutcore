@@ -1,29 +1,37 @@
 // ==========================================================================
-// Project:   DropDownMenu
-// Copyright:
-// License:
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            Portions ©2008-2009 Apple Inc. All rights reserved.
+// License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
 /** @class
 
-  @extends SC.Button
+  Drop Down Menu has a functionality similar to that of SelectField
+
+  Clicking the DropDownMenu button displays a menu pane with a
+  list of items. The selected item will be displayed on the button.
+
+  @extends SC.ButtonView
   @version 1.0
   @author Mohammed Ashik
 */
 sc_require('views/button');
 
 SC.DropDownMenu = SC.ButtonView.extend(
-/** @scope SC.DropDownView.prototype */ {
-
-  /** Begin new code */
+/** @scope SC.DropDownMenu.prototype */ {
 
   /**
     An array of items that will form the menu you want to show.
+
+    @property
   */
   objects: [],
 
   /**
     Binding default for an array of objects
+
+    @property
   */
   objectsBindingDefault: SC.Binding.multiple(),
 
@@ -31,13 +39,17 @@ SC.DropDownMenu = SC.ButtonView.extend(
     If you set this to a non-null value, then the name shown for each
     menu item will be pulled from the object using the named property.
     if this is null, the collection objects themselves will be used.
+
+    @property
   */
   nameKey: null,
 
   /**
-   If you set this to a non-null value, then the value of this key will
-   be used to sort the objects.  If this is not set, then nameKey will
-   be used.
+    If you set this to a non-null value, then the value of this key will
+    be used to sort the objects.  If this is not set, then nameKey will
+    be used.
+
+    @property
   */
   sortKey: null,
 
@@ -45,36 +57,45 @@ SC.DropDownMenu = SC.ButtonView.extend(
      Set this to a non-null value to use a key from the passed set of objects
      as the value for the options popup.  If you don't set this, then the
      objects themselves will be used as the value.
+
+     @property
   */
   valueKey: null,
 
   /**
     if true, the empty name will be localized.
+
+    @property
   */
   localize: false,
 
   /**
     if true, it means that no sorting will occur, objects will appear
     in the same order as in the array
+
+    @property
   */
   disableSort: NO,
 
-  /** End new code */
-
   /**
     className - sc-popup-button
+
+    @property
   */
   classNames: ['drop-down-menu'],
 
   /**
     Menu item list
-    @Array
+
+    @property
+    @type:{SC.Array}
   */
   itemList: [],
 
   /**
     Current selected menu item
-    @Array
+
+    @property
   */
   currentSelItem: null,
 
@@ -90,12 +111,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
      @property
   */
-  value: null,
+  value: null ,
 
   /**
     Binds the button's title to the 'value'
 
-    @private
+    @property
   */
   titleBinding: '*.value',
 
@@ -105,7 +126,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     @private
   */
-  defaultSelVal: null,
+  _defaultSelVal: null,
 
   /**
     Prefer matrix to position the drop down menu the button such that the
@@ -128,7 +149,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     override this method to implement your own sorting of the menu. By
     default, menu items are sorted using the value shown or the sortKey
 
-    @param objects the unsorted array of objects to display.
+    @param{SC.Array} objects the unsorted array of objects to display.
     @returns sorted array of objects
   */
   sortObjects: function(objects) {
@@ -147,11 +168,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
   /**
     render method
+
     @private
   */
   render: function(context,firstTime) {
-
-    /** New code */
     var objects = this.get('objects') ;
     objects = this.sortObjects(objects) ;
 
@@ -203,11 +223,15 @@ SC.DropDownMenu = SC.ButtonView.extend(
       }
 
       //Get the icon value
-      var icon = iconKey ? object[iconKey] : null ;
+      var icon = iconKey ? (object.get ?
+        object.get(iconKey) : object[iconKey]) : null ;
+      if (SC.none(object[iconKey])) {
+         icon = null ;
+      }
 
       //Set the first item from the list as default selected item
       if (idx === 0) {
-        this.set('defaultSelVal',name) ;
+        this._defaultSelVal = name ;
         this.set('icon', icon) ;
       }
 
@@ -231,7 +255,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         this.set('value', selectionValue) ;
       }
       else {
-        this.set('value', this.get('defaultSelVal')) ;
+        this.set('value', this._defaultSelVal) ;
       }
     }
 
@@ -247,9 +271,11 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
   /**
     Button action handler
+
+    @private
     @param {DOMMouseEvent} evt mouseup event that triggered the action
   */
-  action: function( evt )
+  _action: function( evt )
   {
     var width = this.get('layer').offsetWidth ;
     var currSel = this.get('currentSelItem') ;
@@ -299,6 +325,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
   /**
     Render method gets triggered when these properties change
+
+    @property
+    @type{SC.Array}
   */
   displayProperties: ['icon', 'title'],
 
@@ -335,21 +364,20 @@ SC.DropDownMenu = SC.ButtonView.extend(
   },
 
   /**
-     Set the "top" attribute in the prefer matrix property which will 
-     position menu such that the selected item in the menu will be 
+     Set the "top" attribute in the prefer matrix property which will
+     position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
   */
   changeDropDownPreferMatrix: function() {
-    var pxOffset = 0;
     var preferMatrixAttributeTop = 0;
     var itemIdx = this.get('itemIdx') ;
-    
+
     //Set the preferMatrixAttribute Top
     if(itemIdx)
       preferMatrixAttributeTop = itemIdx * 20;
-    
+
     if(this.get('preferMatrix'))
-      this.get('preferMatrix')[1] = -preferMatrixAttributeTop + pxOffset;
+      this.get('preferMatrix')[1] = -preferMatrixAttributeTop ;
   }
 }) ;
 
