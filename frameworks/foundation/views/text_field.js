@@ -626,6 +626,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // responder chain.
     if ((evt.which === 13) && !this.get('isMultiline')) return NO ;
     if (evt.which === 27) return NO ;
+
+    // handle tab key
+    if (evt.which === 9 && !this.get('isMultiline')) {
+      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      console.log("TAB: %@".fmt(view));
+      view.becomeFirstResponder();
+      return YES ; // handled
+    }
     
     // validate keyDown...
     if (this.performValidateKeyDown(evt)) {
