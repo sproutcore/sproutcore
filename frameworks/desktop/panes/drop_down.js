@@ -22,9 +22,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
 /** @scope SC.DropDownMenu.prototype */ {
 
   /**
-    An array of items that will form the menu you want to show.
+    An array of items that will be form the menu you want to show.
 
     @property
+    @type {Array}
   */
   objects: [],
 
@@ -32,6 +33,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     Binding default for an array of objects
 
     @property
+    @default SC.Binding.multiple()
   */
   objectsBindingDefault: SC.Binding.multiple(),
 
@@ -41,6 +43,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     if this is null, the collection objects themselves will be used.
 
     @property
+    @type {String}
   */
   nameKey: null,
 
@@ -50,6 +53,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
     be used.
 
     @property
+    @type: {String}
+    default: null
   */
   sortKey: null,
 
@@ -59,6 +64,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
      objects themselves will be used as the value.
 
      @property
+     @type {String}
+     @default null
   */
   valueKey: null,
 
@@ -66,6 +73,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
     if true, the empty name will be localized.
 
     @property
+    @type {Boolean}
+    @default false
   */
   localize: false,
 
@@ -74,13 +83,15 @@ SC.DropDownMenu = SC.ButtonView.extend(
     in the same order as in the array
 
     @property
+    @type {Boolean}
+    @default NO
   */
   disableSort: NO,
 
   /**
-    className - sc-popup-button
 
     @property
+    @default ['drop-down-menu']
   */
   classNames: ['drop-down-menu'],
 
@@ -88,7 +99,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     Menu item list
 
     @property
-    @type:{SC.Array}
+    @type:{Array}
   */
   itemList: [],
 
@@ -96,6 +107,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     Current selected menu item
 
     @property
+    @default null
   */
   currentSelItem: null,
 
@@ -103,6 +115,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
     To set the menu item index
 
     @property
+    @type {Number}
+    @default null
   */
   itemIdx: null,
 
@@ -110,13 +124,14 @@ SC.DropDownMenu = SC.ButtonView.extend(
      Current Value of the dropDown
 
      @property
+     @default null
   */
   value: null ,
 
   /**
     Binds the button's title to the 'value'
 
-    @property
+    @private
   */
   titleBinding: '*.value',
 
@@ -134,13 +149,26 @@ SC.DropDownMenu = SC.ButtonView.extend(
     icon on the button.
 
     @property
-    @default [ 2, 0. 2]
+    @type {Array}
+    @default [ 0, 0. 2]
 
   */
-  preferMatrix: [2, 0, 2],
+  preferMatrix: [0, 0, 2],
+
+  /**
+    Width of the sprite image that gets applied due to the theme.
+     This has to be accounted for while calculating the actual
+     width of the button
+
+    @property
+    @type {Number}
+    @default 32
+  */
+  DROP_DOWN_SPRITE_WIDTH: 32,
 
   /**
     Binds the button's selection state to the menu's visibility.
+
     @private
   */
   isSelectedBinding: '*menu.isVisibleInWindow',
@@ -172,6 +200,13 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   render: function(context,firstTime) {
+
+    var width = this.layout.width ;
+    var title = this.get('title') ;
+    if(firstTime && width) {
+      this.adjust({ width: width - this.DROP_DOWN_SPRITE_WIDTH }) ;
+    }
+
     var objects = this.get('objects') ;
     objects = this.sortObjects(objects) ;
 
@@ -181,10 +216,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var valueKey = this.get('valueKey') ;
 
     // get the localization flag.
-    var shouldLocalize = this.get('localize');
+    var shouldLocalize = this.get('localize') ;
 
     //itemList array to set the menu items
-    var itemList = [];
+    var itemList = [] ;
 
     //to set the 'checkbox' property of menu items
     var isChecked = YES ;
@@ -203,7 +238,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       // localize name if specified.
       if(shouldLocalize)
       {
-        name = name.loc();
+        name = name.loc() ;
       }
 
       // get the value using the valueKey or the object if no valueKey.
@@ -260,7 +295,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     }
 
     //Set the preference matrix for the menu pane
-    this.changeDropDownPreferMatrix(this.itemIdx);
+    this.changeDropDownPreferMatrix(this.itemIdx) ;
 
     var menu = this.get('menu') ;
     if(firstTime && menu) {
@@ -280,6 +315,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var width = this.get('layer').offsetWidth ;
     var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
+
     var menu = SC.MenuPane.create({
 
       /**
@@ -313,7 +349,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     if (!menu) return NO ;
     menu.popup(this, this.preferMatrix) ;
     menu.set('currentSelectedMenuItem', currSel) ;
-    return YES;
+    return YES ;
   },
 
   /**
@@ -369,12 +405,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
      place aligned to the item on the button when menu is opened.
   */
   changeDropDownPreferMatrix: function() {
-    var preferMatrixAttributeTop = 0;
+    var preferMatrixAttributeTop = 0 ;
     var itemIdx = this.get('itemIdx') ;
 
     //Set the preferMatrixAttribute Top
     if(itemIdx)
-      preferMatrixAttributeTop = itemIdx * 20;
+      preferMatrixAttributeTop = itemIdx * 20 ;
 
     if(this.get('preferMatrix'))
       this.get('preferMatrix')[1] = -preferMatrixAttributeTop ;
