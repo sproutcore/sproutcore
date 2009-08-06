@@ -8,11 +8,11 @@
 /*global module test htmlbody ok equals same stop start */
 
 var pane, view , view1, view2, view3 ;
+
 module("SC.DropDownMenu",{
 
   //setup
   setup: function() {
-
     SC.RunLoop.begin();
     var isDue = NO ;
 
@@ -27,6 +27,7 @@ module("SC.DropDownMenu",{
         SC.DropDownMenu.extend({
           objects: ["To","Back", "You"]
         }),
+
         //view2
         SC.DropDownMenu.extend({
           objects: ["Drop","Down", "Menu"]
