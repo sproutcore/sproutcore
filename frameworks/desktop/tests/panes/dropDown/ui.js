@@ -44,22 +44,22 @@ var pane = SC.ControlTestPane.design()
 
     //sample7
     .add("DropDownWithIcon", SC.DropDownMenu, {
-     objects: [{ title: "None", icon: 'drop-down-icon' },
-       { title: "Low", icon: 'drop-down-icon' },
-       { title: "Medium", icon: 'drop-down-icon' },
-       { title: "High", icon: 'drop-down-icon' }],
-       nameKey: 'title',
-       iconKey: 'icon'
+      objects: [{ title: "None", icon: 'drop-down-icon' },
+        { title: "Low", icon: 'drop-down-icon' },
+        { title: "Medium", icon: 'drop-down-icon' },
+        { title: "High", icon: 'drop-down-icon' }],
+      nameKey: 'title',
+      iconKey: 'icon'
     })
 
     //sample8
     .add("SortKey", SC.DropDownMenu, {
-     objects: [{ title: "None", pos: 3},
-       { title: "Low", pos: 1},
-       { title: "Medium", pos: 2 },
-       { title: "High", pos: 4}],
-       nameKey: 'title',
-       sortKey: 'pos'
+      objects: [{ title: "None", pos: 3},
+        { title: "Low", pos: 1},
+        { title: "Medium", pos: 2 },
+        { title: "High", pos: 4}],
+      nameKey: 'title',
+      sortKey: 'pos'
     })
 
     //sample9
