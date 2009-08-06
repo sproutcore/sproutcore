@@ -44,6 +44,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     @property
     @type {String}
+    @default: null
   */
   nameKey: null,
 
@@ -54,7 +55,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     @property
     @type: {String}
-    default: null
+    @default: null
   */
   sortKey: null,
 
@@ -76,7 +77,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @type {Boolean}
     @default false
   */
-  localize: false,
+  localize: NO,
 
   /**
     if true, it means that no sorting will occur, objects will appear
@@ -142,6 +143,21 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   _defaultSelVal: null,
+
+  /**
+    @private
+
+    The button theme will be popup
+  */
+  theme: 'popup',
+
+  /**
+    Render method gets triggered when these properties change
+
+    @property
+    @type{SC.Array}
+  */
+  displayProperties: ['icon', 'title'],
 
   /**
     Prefer matrix to position the drop down menu the button such that the
@@ -351,21 +367,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
     menu.set('currentSelectedMenuItem', currSel) ;
     return YES ;
   },
-
-  /**
-    @private
-
-    The button theme will be popup
-  */
-  theme: 'popup',
-
-  /**
-    Render method gets triggered when these properties change
-
-    @property
-    @type{SC.Array}
-  */
-  displayProperties: ['icon', 'title'],
 
   /**
      Action method for the drop down menu items
