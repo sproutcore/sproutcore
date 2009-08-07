@@ -25,7 +25,8 @@ module("SC.DropDownMenu",{
 
         //view1
         SC.DropDownMenu.extend({
-          objects: ["To","Back", "You"]
+          objects: ["To","Back", "You"],
+          disableSort: NO
         }),
 
         //view2
@@ -50,13 +51,14 @@ module("SC.DropDownMenu",{
         })
       ]
     });
-    pane.append(); // make sure there is a layer...
-    SC.RunLoop.end();
 
     view1 = pane.childViews[0] ;
     view2 = pane.childViews[1] ;
     view3 = pane.childViews[2] ;
     view4 = pane.childViews[3] ;
+
+    pane.append(); // make sure there is a layer...
+    SC.RunLoop.end();
   },
 
   //teardown
