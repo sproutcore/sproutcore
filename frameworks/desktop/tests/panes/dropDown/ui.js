@@ -49,7 +49,8 @@ var pane = SC.ControlTestPane.design()
         { title: "Medium", icon: 'drop-down-icon' },
         { title: "High", icon: 'drop-down-icon' }],
       nameKey: 'title',
-      iconKey: 'icon'
+      iconKey: 'icon',
+      checkboxEnabled: YES
     })
 
     //sample8
@@ -59,7 +60,9 @@ var pane = SC.ControlTestPane.design()
         { title: "Medium", pos: 2 },
         { title: "High", pos: 4}],
       nameKey: 'title',
-      sortKey: 'pos'
+      disableSort: NO,
+      sortKey: 'pos',
+      checkboxEnabled: YES
     })
 
     //sample9
