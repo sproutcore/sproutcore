@@ -41,7 +41,7 @@ test("Test Asynchronous GET Request", function() {
     ok(SC.$ok(contents), 'contents should not be an error ');
     if (SC.$ok(contents)) equals(contents.responseText, '{"message": "Yay!"}', "should match retrieved message") ;
     window.start() ; // starts the test runner
-  }, 3000); // a shorter timeout fails when a lot of unit tests are running...
+  }, 2000); // a shorter timeout fails when a lot of unit tests are running...
 });
 
 test("Test Synchronous GET Request", function() {
@@ -106,7 +106,7 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
 
   var observer = function(response) {
     responseCount++;
-    if(requestCount<=7) {
+    if(requestCount<=5) {
       SC.Request.getUrl(url).addObserver("response", observer).send();
       requestCount++;
     }
@@ -119,9 +119,9 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   
   stop() ; // stops the test runner
   setTimeout( function(){
-    equals(requestCount, 8, "requestCount should be 8");
-    equals(responseCount, 8, "responseCount should be 8");
+    equals(requestCount, 6, "requestCount should be 8");
+    equals(responseCount, 6, "responseCount should be 8");
     window.start() ; // starts the test runne
-  }, 3000);
+  }, 2000);
 });
 

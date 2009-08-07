@@ -53,7 +53,7 @@ test("clears internal _elem to avoid memory leaks on update", function() {
 module("SC.RenderContext#update - attrs", {
   setup: function() {
     elem = document.createElement('div');
-    elem.setAttribute("foo", "initial");
+    SC.$(elem).attr("foo", "initial");
     context = SC.RenderContext(elem);
   },
   
@@ -91,7 +91,7 @@ test("removes attribute if value is null", function() {
 module("SC.RenderContext#update - id", {
   setup: function() {
     elem = document.createElement('div');
-    elem.setAttribute("id", "foo");
+    SC.$(elem).attr("id", "foo");
     context = SC.RenderContext(elem);
   },
   
@@ -125,7 +125,7 @@ test("set id overrides attr", function() {
 module("SC.RenderContext#update - className", {
   setup: function() {
     elem = document.createElement('div');
-    elem.setAttribute("class", "foo bar");
+    SC.$(elem).attr("class", "foo bar");
     context = SC.RenderContext(elem);
   },
   
@@ -159,7 +159,7 @@ test("set class names override class attr", function() {
 module("SC.RenderContext#update - style", {
   setup: function() {
     elem = document.createElement('div');
-    elem.setAttribute("style", "color: red;");
+    SC.$(elem).attr("style", "color: red;");
     context = SC.RenderContext(elem);
   },
   
@@ -171,7 +171,7 @@ module("SC.RenderContext#update - style", {
 test("does not change styles if retrieved but not edited", function() {
   context.styles();
   context.update();
-  var style = elem.getAttribute("style");
+  var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
   
   equals(style.toLowerCase(), "color: red;", "style");
@@ -183,7 +183,7 @@ test("replaces style name if styles edited", function() {
   
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
-  var style = elem.getAttribute("style");
+  var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
   
   equals(style.toLowerCase(), "color: black;", "attribute");
@@ -197,7 +197,7 @@ test("set styles override style attr", function() {
   
   // Browsers return single attribute styles differently, sometimes with a trailing ';'
   // sometimes, without one. Normalize it here.
-  var style = elem.getAttribute("style");
+  var style = SC.$(elem).attr("style");
   if (!style.match(/;$/)) style += ';' ;
   
   equals(style.toLowerCase(), "color: black;", "attribute");

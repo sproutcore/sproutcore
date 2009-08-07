@@ -46,7 +46,7 @@ test("clone on next retrieval if classNames(foo) set with cloneOnModify=YES", fu
 
 test("extracts class names from element on first retrieval", function() {
   var elem = document.createElement('div');
-  elem.setAttribute('class', 'foo bar');
+  SC.$(elem).attr('class', 'foo bar');
   context = SC.RenderContext(elem);
   
   var result = context.classNames();

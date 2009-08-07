@@ -464,7 +464,7 @@ test("attr(String)", function() {
  var nextSibling = $body.attr('nextSibling') ;
  ok( (($body.attr('nextSibling') === null) || (nextSibling.id == '_firebugConsole')), 'Make sure a null expando returns null' );
  
- body.setAttribute('foo', 'baz');
+ $body.attr('foo', 'baz');
  equals( $body.attr('foo'), 'baz', 'Make sure the dom attribute is retrieved when no expando is found' );
  
  body.foo = 'bar';

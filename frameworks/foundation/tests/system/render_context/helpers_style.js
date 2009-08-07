@@ -47,7 +47,7 @@ test("clone on next retrieval if styles(foo) set with cloneOnModify=YES", functi
 
 test("extracts styles from element on first retrieval", function() {
   var elem = document.createElement('div');
-  elem.setAttribute('style', 'color: black; height: 20px; ');
+  SC.$(elem).attr('style', 'color: black; height: 20px; ');
   context = SC.RenderContext(elem);
   
   var result = context.styles();

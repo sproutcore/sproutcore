@@ -23,7 +23,7 @@ SC.mixin( /** @scope SC */ {
   download: function(path) {
     var tempDLIFrame=document.createElement('iframe');
     var frameId = 'DownloadFrame_' + this._downloadFrames;
-    tempDLIFrame.setAttribute('id',frameId);
+    SC.$(tempDLIFrame).attr('id',frameId);
     tempDLIFrame.style.border='10px';
     tempDLIFrame.style.width='0px';
     tempDLIFrame.style.height='0px';
@@ -31,15 +31,15 @@ SC.mixin( /** @scope SC */ {
     tempDLIFrame.style.top='-10000px';
     tempDLIFrame.style.left='-10000px';    
     // Don't set the iFrame content yet if this is Safari
-    if (!(SC.browser.isSafari)) {
-      tempDLIFrame.setAttribute('src',path);
+    if (!SC.browser.isSafari) {
+      SC.$(tempDLIFrame).attr('src',path);
     }
     document.getElementsByTagName('body')[0].appendChild(tempDLIFrame);
     if (SC.browser.isSafari) {
-      tempDLIFrame.setAttribute('src',path);    
+      SC.$(tempDLIFrame).attr('src',path);    
     }
     this._downloadFrames = this._downloadFrames + 1;
-    if (!(SC.browser.isSafari)) {
+    if (!SC.browser.isSafari) {
       var r = function() { 
         document.body.removeChild(document.getElementById(frameId)); 
         frameId = null;
@@ -434,10 +434,10 @@ SC.mixin( /** @scope SC */ {
 
   // parse rgb color or 3-digit hex color to return a properly formatted 6-digit hex colour spec, or false
   parseColor: function(string) {
-    var color = '#', match;
+    var i=0, color = '#', match;
     if(match = this.PARSE_COLOR_RGBRE.exec(string)) {
       var part;
-      for (var i=1; i<=3; i++) {
+      for (i=1; i<=3; i++) {
         part = Math.max(0, Math.min(255, parseInt(match[i],0)));
         color += this.toColorPart(part);
       }
@@ -445,7 +445,7 @@ SC.mixin( /** @scope SC */ {
     }
     if (match = this.PARSE_COLOR_HEXRE.exec(string)) {
       if(match[1].length == 3) {
-        for (var i=0; i<3; i++) {
+        for (i=0; i<3; i++) {
           color += match[1].charAt(i) + match[1].charAt(i);
         }
         return color;

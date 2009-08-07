@@ -327,19 +327,19 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         if (value[key] === null) { // remove empty attrs
           elem.removeAttribute(key);
         } else {
-          elem.setAttribute(key, value[key]);
+          SC.$(elem).attr(key, value[key]);
         }
       }
     }
     
     // class="foo bar"
     if (this._classNamesDidChange && (value = this._classNames)) {
-      elem.setAttribute('class', value.join(' '));
+      SC.$(elem).attr('class', value.join(' '));
     }
     
     // id="foo"
     if (this._idDidChange && (value = this._id)) {
-      elem.setAttribute('id', value);
+      SC.$(elem).attr('id', value);
     }
     
     // style="a:b; c:d;"
@@ -354,7 +354,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         joined.push(pair.join(': '));
       }
       
-      elem.setAttribute('style', joined.join('; '));
+      SC.$(elem).attr('style', joined.join('; '));
       joined.length = 0; // reset temporary object
     }
     
@@ -710,7 +710,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       // extract styles from element.
       if (!this._styles && this._elem) {
         // parse style...
-        attr = this._elem.getAttribute('style');
+        attr = SC.$(this._elem).attr('style');
         
         if (attr && (attr = attr.toString()).length>0) {
           if(SC.browser.msie){ 
