@@ -33,6 +33,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   childViews: "tableHeadView scrollView".w(),
   
   scrollView: SC.ScrollView.design({
+    isVisible: NO,
     layout: {
       left:   0,
       right:  0,
@@ -57,7 +58,9 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   // FIXME: Charles originally had this as an outlet, but that doesn't work.
   // Figure out why.
   containerView: function() {
-    return this.get('scrollView').get('contentView');
+    var scrollView = this.get('scrollView');
+    return (scrollView && scrollView.get) ? scrollView.get('contentView') : null;
+    //return this.get('scrollView').get('contentView');
   }.property('scrollView'),
   
   layout: { left: 0, right: 0, top: 0, bottom: 0 },
@@ -70,6 +73,77 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   
   
   canReorderContent: NO,
+  
+  isInDragMode: NO,
+  
+  // ..........................................................
+  // EVENT RESPONDERS
+  // 
+  
+  mouseDownInTableHeaderView: function(evt, header) {
+    var column = header.get('column');
+    
+    if (!column.get('isReorderable') && !column.get('isSortable')) {
+      return NO;
+    }
+    
+    // Save the mouseDown event so we can use it for mouseUp/mouseDragged.
+    this._mouseDownEvent = evt;
+    // Set the timer for switching from a sort action to a reorder action.
+    this._mouseDownTimer = SC.Timer.schedule({
+      target: this,
+      action: '_scthv_enterDragMode',
+      interval: 300
+    });
+    
+    return YES;
+  },
+  
+  mouseUpInTableHeaderView: function(evt, header) {
+    var isInDragMode = this.get('isInDragMode');
+    // Only sort if we're not in drag mode (i.e., short clicks).
+    if (!isInDragMode) {
+      var column = header.get('column');
+      // Change the sort state of the associated column.
+      this.set('sortedColumn', column);
+
+      var sortState = column.get('sortState');
+      var newSortState = sortState === SC.SORT_ASCENDING ?
+       SC.SORT_DESCENDING : SC.SORT_ASCENDING;
+
+      column.set('sortState', newSortState);
+    }
+    
+    // Exit drag mode (and cancel any scheduled drag modes).
+    this._scthv_exitDragMode();
+    this._dragging = false;
+    if (this._mouseDownTimer) {
+      this._mouseDownTimer.invalidate();
+    }
+    
+  },
+  
+  mouseDraggedInTableHeaderView: function(evt, header) {
+    SC.RunLoop.begin();
+    //console.log(arguments.callee.displayName, arguments);
+    var isInDragMode = this.get('isInDragMode');
+    if (!isInDragMode) return NO;
+    
+    if (!this._dragging) {
+      SC.Drag.start({
+        event:  this._mouseDownEvent,
+        source: header,
+        dragView: this._scthv_dragViewForHeader(),
+        ghost: YES
+        //anchorView: this.get('parentView')
+      });
+      this._dragging = true;
+    }
+    
+    return sc_super();
+    SC.RunLoop.end();
+  },
+  
   
   // ..........................................................
   // COLUMN PROPERTIES
@@ -164,6 +238,13 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   */
   exampleView: SC.TableRowView,
   
+  // ..........................................................
+  // DRAG-REORDER MODE
+  // 
+  
+  isInColumnDragMode: NO,
+  
+    
   
   // ..........................................................
   // OTHER PROPERTIES
@@ -207,7 +288,8 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     } else {
       // TODO
     }
-  },  
+  },
+  
   
   /**  
     Computes the layout for a specific content index by combining the current
@@ -235,6 +317,10 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     var cv = this.get('containerView'),
         sv = this.get('scrollView'),
         f  = this.get('frame');
+        
+    if (!sv.get) {
+      return f;
+    }
 
     return {
       height: f.height,
@@ -291,6 +377,14 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   
   
   _sctv_columnsDidChange: function() {
+    var columns = this.get('columns'), 
+        content = this.get('content'),
+        idx;
+    
+    for (idx = 0; idx < columns.get('length'); i++) {
+      columns.objectAt(idx).set('tableContent', content);
+    }
+    
     // remove observer []
     // add observer [].
     //this._sctv_columnPropertyDidChange(...);
@@ -298,8 +392,8 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   
   _sctv_columnPropertyDidChange: function() {
     var content = this.get('content'),
-        del = this.delegateFor('isTableDelegate', this.delegate,
-          content);
+        del = this.delegateFor('isTableDelegate', 
+          this.delegate, content);
           
     width = del.tableShouldResizeColumnTo(this, column, width);
   },

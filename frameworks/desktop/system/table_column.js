@@ -73,6 +73,22 @@ SC.TableColumn = SC.Object.extend({
     @type Boolean
   */
   isFlexible: NO,
+  
+  /**
+    Whether the column can be drag-reordered.
+    
+    @property
+    @type Boolean
+  */
+  isReorderable: YES,
+  
+  /**
+    Whether the column can be sorted.
+    
+    @property
+    @type Boolean
+  */
+  isSortable: YES,
 
   /**
     Reference to the URL for this column's icon. If `null`, there is no
@@ -92,6 +108,13 @@ SC.TableColumn = SC.Object.extend({
     
     @property
   */
-  sortState: null
+  sortState: null,
+  
+  /**
+    The content property of the controlling SC.TableView. This is needed
+    because the SC.TableHeader views use this class to find out how to
+    render table content (when necessary).
+  */
+  tableContent: null
   
 });

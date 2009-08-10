@@ -9,6 +9,11 @@ sc_require('views/table');
 
 /** @class
   The views that make up the column header cells in a typical `SC.TableView`.
+  
+  In addition, this view is in charge of rendering the _entire_ table column
+  (both header and body) when the table is in the "drag-reorder" state. This
+  is the state that occurs when the user clicks and holds on a table header,
+  then drags that header horizontally.
 
   @extends SC.View
   @since SproutCore 1.1
@@ -17,9 +22,41 @@ SC.TableHeaderView = SC.View.extend({
   
   classNames: ['sc-table-header'],
   
-  displayProperties: ['sortState'],
+  displayProperties: ['sortState', 'isInDragMode'],
   
   acceptsFirstResponder: YES,
+  
+  isInDragMode: NO,
+  
+  hasHorizontalScroller: NO,
+  hasVerticalScroller: NO,
+  
+  childViews: ['dragModeView'],
+  
+  
+  /**
+    The view that is visible when the column is in drag mode.
+  */
+  dragModeView: SC.ListView.design({
+    isVisible: NO,
+    
+    layout: { left: 0, right: 0, bottom: 0 },
+    
+    init: function() {
+      var tableHeaderView = this.get('parentView');
+      
+      if (tableHeaderView) {
+        tableHeaderView.addObserver('isInDragMode', this,
+            '_scthv_dragModeDidChange');
+      }
+      
+    },
+    
+    _scthv_dragModeDidChange: function() {
+      // var isInDragMode = this.get('tableHeaderView').get('isInDragMode');
+      // this.set('isVisible', isInDragMode);
+    }
+  }),
 
   /**
     The SC.TableColumn object this header cell is bound to.
@@ -32,7 +69,7 @@ SC.TableHeaderView = SC.View.extend({
       html = '<img src="%@" class="icon" />'.fmt(icon);
       context.push(html);
     } else {
-      context.push(this.get('content'));    
+      context.push(this.get('label'));
     }
   },
     
@@ -43,6 +80,13 @@ SC.TableHeaderView = SC.View.extend({
     column.addObserver('minWidth',  this, '_scthv_layoutDidChange');
     
     column.addObserver('sortState', this, '_scthv_sortStateDidChange');
+    
+    column.addObserver('tableContent', this, '_scthv_tableContentDidChange');
+    
+    // var tableContent = column.get('tableContent');
+    // var columnContent = this._scthv_columnContentFromTableContent(tableContent);
+    // this.set('content', columnContent);
+    
     return sc_super();
   },
   
@@ -54,25 +98,85 @@ SC.TableHeaderView = SC.View.extend({
   }.property(),
   
   mouseDown: function(evt) {
-    sc_super();
-    return YES;
+    var tableView = this.get('tableView');    
+    return tableView ? this.mouseDownInTableHeaderView(evt, this) :
+     sc_super();
   },
   
   mouseUp: function(evt) {
-    // Change the sort state of the associated column.
     var tableView = this.get('tableView');
-    tableView.set('sortedColumn', this.get('column'));
-
-    var column = this.get('column'), sortState = column.get('sortState');
-    var newSortState = sortState === SC.SORT_ASCENDING ?
-     SC.SORT_DESCENDING : SC.SORT_ASCENDING;
-     
-    column.set('sortState', newSortState);
+    return tableView ? this.mouseUpInTableHeaderView(evt, this) :
+     sc_super();
   },
+  
+  mouseDragged: function(evt) {
+    var tableView = this.get('tableView');
+    return tableView ? tableView.mouseDraggedInTableHeaderView(evt, this) :
+     sc_super();
+  },
+  
+  _scthv_dragViewForHeader: function() {
+    var dragLayer = this.get('layer').cloneNode(true);
+    var view = SC.View.create({ layer: dragLayer, parentView: this });
+    
+    // cleanup weird stuff that might make the drag look out of place
+    SC.$(dragLayer).css('backgroundColor', 'transparent')
+      .css('border', 'none')
+      .css('top', 0).css('left', 0);      
+    
+    return view;
+  },
+  
+  _scthv_enterDragMode: function() {
+    this.set('isInDragMode', YES);
+  },
+  
+  _scthv_exitDragMode: function() {
+    this.set('isInDragMode', NO);
+  },
+  
+  // _scthv_hideViewInDragMode: function() {    
+  //   var shouldBeVisible = !this.get('isInDragMode'), layer = this.get('layer');
+  //   console.log('should be visible: %@'.fmt(!this.get('isInDragMode')));
+  //   SC.RunLoop.begin();
+  //   SC.$(layer).css('display', shouldBeVisible ? 'block' : 'none');
+  //   SC.RunLoop.end();
+  // }.observes('isInDragMode'),
+  
+  // _scthv_setupDragMode: function() {
+  //   var isInDragMode = this.get('isInDragMode');
+  //   if (isInDragMode) {
+  //     });      
+  //   } else {
+  //     //
+  //   }
+  //   
+  //   
+  // }.observes('isInDragMode'),
+  
+  _scthv_dragModeViewDidChange: function() {
+    var dragModeView = this.get('dragModeView');
+    if (dragModeView && dragModeView.set) {
+      dragModeView.set('tableHeadView', this);
+      dragModeView.set('tableView', this.get('tableView'));
+    }
+  }.observes('dragModeView'),
   
   _scthv_layoutDidChange: function(sender, key, value, rev) {
     var pv = this.get('parentView');
     pv.invokeOnce(pv.layoutChildViews);
+    
+    // Tell the container view how tall the header is so that it can adjust
+    // itself accordingly.
+    var layout = this.get('layout');    
+    //this.get('dragModeView').adjust('top', layout.height);
+  },
+  
+  _scthv_tableContentDidChange: function() {
+    var tableContent = this.get('column').get('tableContent');    
+    var columnContent = this._scthv_columnContentFromTableContent(tableContent);
+    
+    this.set('content', columnContent);
   },
   
   _scthv_sortStateDidChange: function() {

@@ -27,6 +27,8 @@ SC.TableHeadView = SC.View.extend({
   
   acceptsFirstResponder: YES,
   
+  dragOrder: null,
+  
   init: function() {
     // TODO: Figure out why the `columns` observer doesn't work
     this._scthv_handleChildren();
@@ -61,6 +63,49 @@ SC.TableHeadView = SC.View.extend({
   // INTERNAL SUPPORT
   //
   
+  _scthv_enterDragMode: function() {
+    var order = [], columns = this.get('columns'), idx;
+    
+    for (idx = 0; idx < columns.get('length'); idx++) {
+      order.push(columns.objectAt(idx).get('key'));
+    }
+    
+    this.set('dragOrder', order);
+  },
+  
+  _scthv_changeDragOrder: function(draggedColumnIndex, leftOfIndex) {
+    var dragOrder = this.get('dragOrder'),
+     draggedColumn = dragOrder.objectAt(draggedColumnIndex);
+    
+    dragOrder.removeAt(idx);
+    dragOrder.insertAt(leftOfIndex, draggedColumn);
+  },
+  
+  _scthv_reorderDragColumnViews: function() {
+    
+  }.observes('dragOrder'),
+  
+  _scthv_columnContentFromTableContent: function(tableContent, columnIndex) {
+    var column = this.get('columns').objectAt(columnIndex),
+        key = column.get('key'),
+        ret = [],
+        idx;
+        
+    if (!tableContent) return ret;
+        
+    var tableView = this.get('parentView'),
+        length = tableContent.get('length');
+        // visibleIndexes = tableView.contentIndexesInRect(
+        //     tableView.get('frame')).toArray();
+            
+    for (idx = 0; idx < length; idx++) {
+      //visibleIndex = visibleIndexes.objectAt(idx);
+      ret.push(tableContent.objectAt(idx).get(key));
+    }
+    
+    return ret;
+  },
+  
   _scthv_layoutForHeaderAtColumnIndex: function(index) {
     var columns = this.get('columns'),
         rowHeight = this.get('parentView').get('rowHeight'),
@@ -81,13 +126,16 @@ SC.TableHeadView = SC.View.extend({
   _scthv_handleChildren: function() {
     this.removeAllChildren();
     var columns = this.get('columns');
+    var tableView = this.get('parentView');
+    var tableContent = tableView.get('content');
     
-    var column, key, value, cells = [], cell, idx;
+    var column, key, label, content, cells = [], cell, idx;
     for (idx = 0; idx < columns.get('length'); idx++) {
       column = columns.objectAt(idx);
       key    = column.get('key');
-      value  = column.get('label');
-      cell   = this._scthv_createTableHeader(column, value);
+      label  = column.get('label');
+      content = this._scthv_columnContentFromTableContent(tableContent, idx);
+      cell   = this._scthv_createTableHeader(column, label, content);
       cells.push(cell);
       this.appendChild(cell);
     }
@@ -95,11 +143,12 @@ SC.TableHeadView = SC.View.extend({
     this.set('cells', cells);
   },
   
-  _scthv_createTableHeader: function(column, value) {
+  _scthv_createTableHeader: function(column, label, content) {
     var tableView = this.get('parentView');
     var cell = SC.TableHeaderView.create({
       column:  column,
-      content: value,
+      label: label,
+      content: content,
       tableView: tableView
     });
     return cell;
