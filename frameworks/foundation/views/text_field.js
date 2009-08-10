@@ -131,9 +131,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (element) {
       var start = end = null ;
       
-      // In Firefox 3.5, trying to get the selection value for a size 0
-      // element will throw an exception.  This happens in our unit tests.
-      if (!element.value  ||  element.size === 0) {
+      if (!element.value) {  
         start = end = 0 ;
       }
       else {
