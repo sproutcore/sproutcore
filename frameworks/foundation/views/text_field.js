@@ -129,7 +129,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   selection: function() {
     var element = this.$field().get(0) ;
     if (element) {
-      var start = end = null ;
+      var start = null, end = null ;
       
       if (!element.value) {  
         start = end = 0 ;
@@ -692,6 +692,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       evt.stop();
       return YES;
     } else return sc_super();
+  },
+  
+  selectStart: function(evt) {
+    return YES;
   }
   
 }) ;
