@@ -15,7 +15,7 @@
 	left: -2px;
 	width: 100%;
 	height: 100%;
-  padding: 0px;
+  padding: 1px;
 }
 
 .sc-text-field-view textarea {
@@ -24,7 +24,7 @@
 	left: -2px;
   width: 100%;
 	height: 100%;
-  padding: 0px;
+  padding: 1px;
   overflow: auto;
   font-family: "Lucida Grande","Lucida Sans",Verdana,Arial,sans-serif;
 }
