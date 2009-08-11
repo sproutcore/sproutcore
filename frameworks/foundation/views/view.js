@@ -2293,10 +2293,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   isView: YES,
   
   /**
-    Default method called when a selectstart event is called. This event is 
+    Default method called when a selectstart event is triggered. This event is 
     only supported by IE. Used in sproutcore to disable text selection and 
     IE8 accelerators. The accelerators will be enabled only in 
     text selectable views. In FF and Safari we use the css style 'allow-select'.
+    
+    If you want to enable text selection in certain controls is recommended
+    to override this function to always return YES , instead of setting 
+    isTextSelectable to true. 
+    
+    For example in textfield you dont want to enable textSelection on the text
+    hint only on the actual text you are entering. You can achieve that by
+    only overriding this method.
     
     @param evt {SC.Event} the selectstart event
     @returns YES if selectable
