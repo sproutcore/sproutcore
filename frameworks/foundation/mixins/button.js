@@ -132,7 +132,7 @@ SC.Button = {
     var image = '' ;
     var title = this.get('displayTitle') ;
     var needsTitle = (!SC.none(title) && title.length>0);
-    var elem;
+    var elem, htmlNode;
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
@@ -147,16 +147,13 @@ SC.Button = {
       }
       needsTitle = YES ;
     }
-    
     elem = this.$('label');
-    if (!firstTime && elem[0]){
-      if(needsTitle) { elem[0].innerHTML = image + title; }
-      else { this.$()[0].innerHTML = ''; } 
-    } else {
-      if(needsTitle) { 
-        context.begin('label').addClass('sc-button-label').push(image, title).end();   
-      }
-    }
+    if(firstTime){
+        context.push('<label class="sc-button-label">'+image+title+'</label>');   
+    }else if ( (htmlNode = elem[0])){
+      if(needsTitle) { htmlNode.innerHTML = image + title; }
+      else { htmlNode.innerHTML = ''; } 
+    }  
     return context ;
   },
 
