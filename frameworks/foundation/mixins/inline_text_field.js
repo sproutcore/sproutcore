@@ -125,7 +125,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEd
     // add to window.
     
     pane = this._delegate.pane();
-    
+
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
     if(this._optIsCollection && this._delegate.get('layout').left){
@@ -381,6 +381,12 @@ SC.InlineTextFieldView.mixin(
   */
   beginEditing: function(options) {
     this._exampleElement = options.exampleElement ;
+    
+    // If exampleInlineTextFieldView is set, load this class otherwise use
+    // the default, this.
+    var klass = (options.exampleInlineTextFieldView) 
+              ? options.exampleInlineTextFieldView : this;
+    
     var layout = options.delegate.get('layout');
     var s = this.updateViewStyle();
     
@@ -394,7 +400,7 @@ SC.InlineTextFieldView.mixin(
     else el.appendChild(document.createTextNode(str));// others
     pa.appendChild(el);
     
-    this.editor = this.create({ classNames: 'inline-editor', layout: layout}) ;
+    this.editor = klass.create({ classNames: 'inline-editor', layout: layout}) ;
     return this.editor.beginEditing(options) ;
     
   },
