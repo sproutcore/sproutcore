@@ -76,6 +76,16 @@ SC.ResponderProtocol = {
   */
   mouseMoved: function(evt) {},
   
+  
+  /**
+    Called when a selectstart event in IE is triggered. ONLY IE
+    We use it to disable IE accelerators and text selection
+    
+    @param evt {SC.Event} the selectstart event
+    @returns {void}
+  */
+  selectStart: function(evt) {},
+  
   // .......................................................................
   // Event Handlers
   //

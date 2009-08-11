@@ -2290,7 +2290,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /** walk like a duck */
-  isView: YES
+  isView: YES,
+  
+  /**
+    Default method called when a selectstart event is called. This event is 
+    only supported by IE. Used in sproutcore to disable text selection and 
+    IE8 accelerators. The accelerators will be enabled only in 
+    text selectable views. In FF and Safari we use the css style 'allow-select'.
+    
+    @param evt {SC.Event} the selectstart event
+    @returns YES if selectable
+  */
+  selectStart: function(evt) {
+    return this.get('isTextSelectable');
+  }
   
 });
 
