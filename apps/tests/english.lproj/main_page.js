@@ -223,7 +223,7 @@ TestRunner.mainPage = SC.Page.design({
     
     webView: SC.WebView.design({
       layout: { top: 28, left: 2, right: 0, bottom: 0 },
-      valueBinding: "TestRunner.detailController.url"
+      valueBinding: "TestRunner.detailController.uncachedUrl"
     })
   })  
 
