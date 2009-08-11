@@ -177,7 +177,7 @@ SC.routes = SC.Object.create(
     if (routeHandler) {
       target = routeHandler._target;
       method = routeHandler._method;
-      method.call(target, params);
+      if (method) method.call(target, params);
     }
       //else console.log('could not find route for: "'+route+'"') ;
   },
