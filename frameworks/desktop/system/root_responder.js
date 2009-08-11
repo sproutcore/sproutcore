@@ -462,7 +462,7 @@ SC.RootResponder = SC.RootResponder.extend(
       
       // first, save the click count.  Click count resets if your down is
       // more than 125msec after you last click up.
-      this._clickCount = this._clickCount + 1 ;
+      this._clickCount += 1 ;
       if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
         this._clickCount = 1 ; 
       }
@@ -577,6 +577,7 @@ SC.RootResponder = SC.RootResponder.extend(
   mousemove: function(evt) {
     SC.RunLoop.begin();
     try {
+      
       // make sure the view gets focus no matter what.  FF is inconsistant 
       // about this.
       this.focus();
@@ -586,9 +587,11 @@ SC.RootResponder = SC.RootResponder.extend(
       if (this._drag) {
         this._drag.tryToPerform('mouseDragged', evt);
       } else {
+        
         var lh = this._lastHovered || [] ;
         var nh = [] ;
         var view = this.targetViewForEvent(evt) ;
+        var exited;
         
         // work up the view chain.  Notify of mouse entered and
         // mouseMoved if implemented.
@@ -603,17 +606,15 @@ SC.RootResponder = SC.RootResponder.extend(
           
           view = view.get('nextResponder');
         }
-        
         // now find those views last hovered over that were no longer found 
         // in this chain and notify of mouseExited.
-        for(var loc=0; loc < lh.length; loc++) {
+        for(var loc=0, len=lh.length; loc < len; loc++) {
           view = lh[loc] ;
-          var exited = view.respondsTo('mouseExited') ;
+          exited = view.respondsTo('mouseExited') ;
           if (exited && !(nh.indexOf(view) !== -1)) {
             view.tryToPerform('mouseExited',evt);
           }
         }
-        
         this._lastHovered = nh; 
         
         // also, if a mouseDownView exists, call the mouseDragged action, if 
@@ -621,6 +622,7 @@ SC.RootResponder = SC.RootResponder.extend(
         if (this._mouseDownView) {
           this._mouseDownView.tryToPerform('mouseDragged', evt);
         }
+        
       }
     } catch (e) {
       console.log('Exception during mousemove: %@'.fmt(e)) ;
