@@ -82,6 +82,10 @@
   -moz-border-radius: 2px;
 }
 
+.sc-menu-item.focus div.checkbox {
+  background-image: sc_static('icons/mini_ffffff'); 
+}
+
 .sc-menu-item.disabled div.checkbox,
 .sc-menu-item div.checkbox.inactive {
   background-image: sc_static('blank.gif'); 
