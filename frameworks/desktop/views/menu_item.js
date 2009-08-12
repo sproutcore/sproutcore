@@ -136,12 +136,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
   itemHeight: 20,
   
-  /**
-    Property specifies which menu item the mouseover stops at
-
-    @type Boolean
-  */
-  isSelected : NO,
 
   /**
     Sub Menu Items 
@@ -390,7 +384,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   loseFocus: function() {
     if(!this.isSubMenuAMenuPane()) {
       this.set('hasMouseExited',YES) ;
-      //this.set('isSelected',NO) ;
       this.$().removeClass('focus') ;
     }
   },
@@ -431,7 +424,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       return YES ;
     }
     this.set('hasMouseExited',NO) ;
-    //this.set('isSelected',NO) ;
     var key = this.get('contentCheckboxKey') ;
     var content = this.get('content') ;
     if (key) {
@@ -474,7 +466,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       parentMenu.becomeKeyPane() ;
     }
     if (!this.get('isEnabled') && !this.isSeparator()) return YES ;
-    //this.set('isSelected',YES) ;
     var key = this.get('contentIsBranchKey') ;
     if(key) {
       var content = this.get('content') ;
