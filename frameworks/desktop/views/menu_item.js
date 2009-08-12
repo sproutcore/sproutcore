@@ -198,7 +198,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this.set('itemHeight',itemHeight) ;
     
     if(!this.get('isEnabled')) context.addClass('disabled') ;
-    
     //handle separator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty('isSeparatorKey', del) ;
@@ -391,7 +390,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   loseFocus: function() {
     if(!this.isSubMenuAMenuPane()) {
       this.set('hasMouseExited',YES) ;
-      this.set('isSelected',NO) ;
+      //this.set('isSelected',NO) ;
       this.$().removeClass('focus') ;
     }
   },
@@ -413,8 +412,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       context = context.end() ;
       var menuItemViews = subMenu.get('menuItemViews') ;
       if(menuItemViews && menuItemViews.length>0) {
-        subMenu.set('currentSelectedMenuItem',menuItemViews[0]) ;
-        subMenu.set('keyPane',YES) ;
+        subMenu.becomeKeyPane();
       }
     }
   },
@@ -433,7 +431,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       return YES ;
     }
     this.set('hasMouseExited',NO) ;
-    this.isSelected = YES ;
+    //this.set('isSelected',NO) ;
     var key = this.get('contentCheckboxKey') ;
     var content = this.get('content') ;
     if (key) {
@@ -447,7 +445,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     }
     this._action(evt) ;
     var anchor = this.getAnchor() ;
-    if(anchor) anchor.mouseUp(evt) ;
+    if(anchor) {
+      anchor.mouseUp(evt) ;
+    }
     else {
       this.resignFirstResponder() ;
     }
@@ -468,18 +468,20 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns Boolean
   */
   mouseEntered: function(evt) {
+    var parentMenu = this.parentMenu() ;
+    this.set('hasMouseExited', NO) ;
+    if(parentMenu) {
+      parentMenu.becomeKeyPane() ;
+    }
     if (!this.get('isEnabled') && !this.isSeparator()) return YES ;
-    this.isSelected = YES ;
-
-    var parentPane = this.parentMenu() ;
-    if(parentPane) parentPane.set('currentSelectedMenuItem', this) ;
-
+    //this.set('isSelected',YES) ;
     var key = this.get('contentIsBranchKey') ;
     if(key) {
       var content = this.get('content') ;
       var val = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
       if(val) this.invokeLater(this.branching(),100) ;
     }
+    this.becomeFirstResponder() ;
 	  return YES ;
   },
 
@@ -554,13 +556,24 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   /** @private*/
   didBecomeFirstResponder: function(responder) {
     if (responder !== this) return;
-    if(!this.isSeparator()) this.$().addClass('focus') ;
+    if(!this.isSeparator()) {
+      this.$().addClass('focus') ;
+    }
+    var parentMenu = this.parentMenu() ;
+    if(parentMenu) {
+      parentMenu.set('currentSelectedMenuItem', this) ;
+    }
   },
   
   /** @private*/
   willLoseFirstResponder: function(responder) {
     if (responder !== this) return;
     this.$().removeClass('focus') ;
+    var parentMenu = this.parentMenu() ;
+    if(parentMenu) {
+      parentMenu.set('currentSelectedMenuItem', null) ;
+      parentMenu.set('previousSelectedMenuItem', this) ;
+    }
   },
   
   /** @private*/

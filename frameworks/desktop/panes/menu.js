@@ -459,22 +459,18 @@ SC.MenuPane = SC.PickerPane.extend(
   },
   
   /**
-    Get the current selected Menu item
+    Observes the PreviousSelectedMenuItem and clears the submenu 
+    for that item.
     
     @returns void
   */
-  currentSelectedMenuItemObserver: function(){
-    var currentSelectedMenuItem = this.get('currentSelectedMenuItem') ;
+  previousSelectedMenuItemObserver: function(){
     var previousSelectedMenuItem = this.get('previousSelectedMenuItem') ;
-    if(previousSelectedMenuItem){
+    if(previousSelectedMenuItem) {
       var subMenu = previousSelectedMenuItem.isSubMenuAMenuPane() ;
       if(subMenu) subMenu.remove() ;
-      previousSelectedMenuItem.resignFirstResponder() ;
     }
-    if(currentSelectedMenuItem) {
-      currentSelectedMenuItem.becomeFirstResponder() ;
-    }
-  }.observes('currentSelectedMenuItem'),
+  }.observes('previousSelectedMenuItem'),
   
   /**
     This function returns whether the anchor is of type of MenuItemView
@@ -549,7 +545,6 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   moveDown: function(menuItem) {
     var currentSelectedMenuItem = this.getNextEnabledMenuItem(menuItem) ;
-    this.set('currentItemSelected',currentSelectedMenuItem) ;
     if(menuItem) menuItem.resignFirstResponder() ;
     currentSelectedMenuItem.becomeFirstResponder() ;
   },
@@ -562,7 +557,6 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   moveUp: function(menuItem) {
     var currentSelectedMenuItem = this.getPreviousEnabledMenuItem(menuItem) ;
-    this.set('currentItemSelected',currentSelectedMenuItem) ;
     if(menuItem) menuItem.resignFirstResponder() ;
     currentSelectedMenuItem.becomeFirstResponder() ;
     return YES ;
