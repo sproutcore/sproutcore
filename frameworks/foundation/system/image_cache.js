@@ -5,8 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('system/error');
-require('system/locale');
+sc_require('system/locale');
 
 SC.IMAGE_ABORTED_ERROR = SC.$error("SC.Image.AbortedError", "Image", -100) ;
 
