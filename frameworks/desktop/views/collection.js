@@ -1530,7 +1530,6 @@ SC.CollectionView = SC.View.extend(
     @returns {Boolean} YES if deletion is possible.
   */
   deleteSelection: function() {
-    
     // perform some basic checks...
     if (!this.get('canDeleteContent')) return NO;  
 
@@ -1554,9 +1553,9 @@ SC.CollectionView = SC.View.extend(
     // also, fix up the selection by removing the actual items we removed
     // set selection directly instead of calling select() since we are just
     // fixing up the selection.
-    sel = this.get('selection').copy().remove(content, indexes);
-    this.set('selection', sel.freeze());
     
+    this.selectPreviousItem(false, 1) ;
+
     return YES ;
   },
   
