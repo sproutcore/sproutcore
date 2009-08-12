@@ -440,7 +440,6 @@ SC.RootResponder = SC.RootResponder.extend(
 
     // normal processing.  send keyDown for printable keys...
     } else {
-      if (this._isFunctionOrNonPrintableKey(evt)) return YES; 
       if (evt.charCode !== undefined && evt.charCode === 0) return YES;
       return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
