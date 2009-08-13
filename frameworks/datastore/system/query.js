@@ -187,33 +187,6 @@ SC.Query = SC.Object.extend(SC.Copyable, {
   */
   updateAutomatically: YES,
   
-  /**
-    The current load status for the query.  This status is changed by the 
-    data source to indicate when it is busy loading the query contents.  The
-    value will be one of SC.Query.READY, SC.Query.BUSY, SC.Query.EMPTY, etc.
-    
-    Normally you do not need to change this property yourself.  Instead you
-    just called one of the fetchDidBegin() and fetchDidEnd() methods.
-    
-    @type {String}
-  */
-  status: SC.Query.READY,
-  
-  /**
-    If set to YES, then the RecordArray will permit modifying the underlying
-    storeKeys array.  You should only set this property to YES if you also
-    set a delegate on the query.  Otherwise when the query refreshes the 
-    storeKeys it will destroy any modification.
-  */
-  isEditable: NO,
-  
-
-  /**
-    If set, these storeKeys will be used as the basis for a RecordArray 
-    instead of generating content from the in memory store.
-  */
-  storeKeys: null,
-  
   // ..........................................................
   // PRIMITIVE METHODS
   // 
