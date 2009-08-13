@@ -1816,13 +1816,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
-    if (!(status & K.BUSY)) {
-      throw K.BAD_STATE_ERROR; // should never be called in this state
-    }
+    if (!(status & K.BUSY)) throw K.BAD_STATE_ERROR; 
+
     // otherwise, determine proper state transition
-    else{
-      status = error ;
-    } 
+    else status = K.ERROR ;
+
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
 
@@ -1836,19 +1834,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
     var K = SC.Record, status;
     
-    if(storeKey===undefined){
-      storeKey = recordType.storeKeyFor(id);
-    }
+    if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
     if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN) {
       
       status = K.READY_CLEAN;
-      if(dataHash===undefined) {
-        this.writeStatus(storeKey, status) ;
-      }
-      else {
-        this.writeDataHash(storeKey, dataHash, status) ;
-      }
+      if(dataHash===undefined) this.writeStatus(storeKey, status) ;
+      else this.writeDataHash(storeKey, dataHash, status) ;
+
       this.dataHashDidChange(storeKey);
       
       return YES;
@@ -1877,12 +1870,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   pushError: function(recordType, id, error, storeKey) {
     var K = SC.Record, status;
 
-    if(storeKey===undefined){
-      storeKey = recordType.storeKeyFor(id);
-    }
+    if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
+
     if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
-      status = error;
+      status = K.ERROR;
       this.writeStatus(storeKey, status) ;
       this.dataHashDidChange(storeKey, null, YES);
       return YES;
