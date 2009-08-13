@@ -190,14 +190,14 @@ SC.Query = SC.Object.extend(SC.Copyable, {
   /**
     The current load status for the query.  This status is changed by the 
     data source to indicate when it is busy loading the query contents.  The
-    value will be one of SC.Record.READY or SC.Record.BUSY.
+    value will be one of SC.Query.READY, SC.Query.BUSY, SC.Query.EMPTY, etc.
     
     Normally you do not need to change this property yourself.  Instead you
     just called one of the fetchDidBegin() and fetchDidEnd() methods.
     
     @type {String}
   */
-  status: SC.Record.READY,
+  status: SC.Query.READY,
   
   /**
     If set to YES, then the RecordArray will permit modifying the underlying
@@ -353,7 +353,7 @@ SC.Query = SC.Object.extend(SC.Copyable, {
   */
   fetchDidBegin: function() {
     this._scq_fetchCount++;
-    this.setIfChanged('status', SC.Record.BUSY_LOADING);
+    this.setIfChanged('status', SC.Query.BUSY_LOADING);
     return this ;
   },
   
