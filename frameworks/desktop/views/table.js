@@ -33,7 +33,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   childViews: "tableHeadView scrollView".w(),
   
   scrollView: SC.ScrollView.design({
-    isVisible: NO,
+    isVisible: YES,
     layout: {
       left:   0,
       right:  0,
