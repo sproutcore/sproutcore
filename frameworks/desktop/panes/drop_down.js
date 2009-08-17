@@ -169,7 +169,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @property
     @type{SC.Array}
   */
-  displayProperties: ['icon', 'title'],
+  displayProperties: ['icon', 'value'],
 
   /**
     Prefer matrix to position the drop down menu such that the
@@ -240,7 +240,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   render: function(context,firstTime) {
 
-    var title = this.get('title') ;
+     var val = this.get('value') ;
+     this.set('title', val) ;
 
     var layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
@@ -404,8 +405,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var button = this.getPath('parentView.anchor') ;
 
     //Set the button title,icon, value, currentSelectedItem & itemIdx
-    button.set('title', this.get('value')).
-      set('icon', this.get('icon')).set('value', this.get('value')).
+    button.set('icon', this.get('icon')).set('value', this.get('value')).
       set('currentSelItem', currSel).set('itemIdx', itemIdx) ;
   },
 
