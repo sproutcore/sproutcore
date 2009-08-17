@@ -240,7 +240,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   render: function(context,firstTime) {
 
-    var title = this.get('title') ;
+    var val = this.get('value') ;
+    this.set('title', val) ;
 
     var layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
@@ -427,5 +428,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
       tempPreferMatrix = [0, -preferMatrixAttributeTop, 2] ;
       this.set('preferMatrix', tempPreferMatrix) ;
   }
+
 }) ;
 
