@@ -240,8 +240,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   render: function(context,firstTime) {
 
-     var val = this.get('value') ;
-     this.set('title', val) ;
+    var title = this.get('title') ;
 
     var layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
@@ -405,7 +404,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var button = this.getPath('parentView.anchor') ;
 
     //Set the button title,icon, value, currentSelectedItem & itemIdx
-    button.set('icon', this.get('icon')).set('value', this.get('value')).
+    button.set('title', this.get('value')).
+      set('icon', this.get('icon')).set('value', this.get('value')).
       set('currentSelItem', currSel).set('itemIdx', itemIdx) ;
   },
 
