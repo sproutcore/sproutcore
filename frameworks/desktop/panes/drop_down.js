@@ -133,11 +133,18 @@ SC.DropDownMenu = SC.ButtonView.extend(
   value: null ,
 
   /**
-    Binds the button's title to the 'value'
+    Binds the button's title to the 'fieldValue'
 
     @private
   */
-  titleBinding: '*.value',
+  titleBinding: '*.fieldValue',
+
+  /**
+    Property used for caching the title of the button
+
+    @private
+  */
+  fieldValue: null,
 
   /**
     if this property is set to 'YES', a checbox is shown next to the
@@ -240,9 +247,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   render: function(context,firstTime) {
 
-    var val = this.get('value') ;
-    this.set('title', val) ;
-
     var layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.DROP_DOWN_SPRITE_WIDTH }) ;
@@ -256,6 +260,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var iconKey = this.get('iconKey') ;
     var valueKey = this.get('valueKey') ;
     var checkboxEnabled = this.get('checkboxEnabled') ;
+
+    //get the current selected value
+    var currentSelectedVal = this.get('value') ;
 
     // get the localization flag.
     var shouldLocalize = this.get('localize') ;
@@ -285,8 +292,14 @@ SC.DropDownMenu = SC.ButtonView.extend(
       var value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
 
+      if (currentSelectedVal && value){
+        if( currentSelectedVal === value ) {
+          this.set('fieldValue', name) ;
+        }
+      }
+
       //Check if the item is currentSelectedItem or not
-      if(name === this.value) {
+      if(name === this.fieldValue) {
 
         //set the itemIdx - To change the prefMatrix accordingly.
         this.set('itemIdx', idx) ;
@@ -311,6 +324,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       itemList.push({
         title: name,
         icon: icon,
+        newVal:value,
         isEnabled: YES,
         checkbox: isChecked,
         action: this.displaySelectedItem
@@ -324,7 +338,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     if(firstTime) {
       var selectionValue = this.get('selectionValue') ;
-      this.value =
+      this.fieldValue =
         selectionValue? selectionValue : this.get('_defaultSelVal') ;
     }
 
@@ -393,21 +407,34 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
 
-    /**
-      Fetch the index of the current selected item
-    */
+    //  Fetch the index of the current selected item
     var itemIdx = 0 ;
     if (currSel && itemViews) {
       itemIdx = itemViews.indexOf(currSel) ;
     }
 
-    //Get the drop down View
+    // Get the drop down View
     var button = this.getPath('parentView.anchor') ;
 
-    //Set the button title,icon, value, currentSelectedItem & itemIdx
-    button.set('title', this.get('value')).
-      set('icon', this.get('icon')).set('value', this.get('value')).
-      set('currentSelItem', currSel).set('itemIdx', itemIdx) ;
+    // set the value and title
+    var object = menuView.get('items') ;
+    var len = object.length ;
+    var found = null ;
+
+    while (!found && (--len >= 0)) {
+      title = object[len].title ? object[len].title: object.toString() ;
+      newVal =  object[len].newVal ? object[len].newVal: title ;
+
+      if (title === this.get('value')) {
+        found = object ;
+        button.set('value', newVal) ;
+        button.set('title', title) ;
+      }
+    }
+
+    // set the icon, currentSelectedItem and itemIdx
+    button.set('icon', this.get('icon')).set('currentSelItem', currSel).
+      set('itemIdx', itemIdx) ;
   },
 
   /**
