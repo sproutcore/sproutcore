@@ -133,20 +133,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
   value: null ,
 
   /**
-    Binds the button's title to the 'fieldValue'
-
-    @private
-  */
-  titleBinding: '*.fieldValue',
-
-  /**
-    Property used for caching the title of the button
-
-    @private
-  */
-  fieldValue: null,
-
-  /**
     if this property is set to 'YES', a checbox is shown next to the
     selected menu item.
 
@@ -294,12 +280,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
       if (currentSelectedVal && value){
         if( currentSelectedVal === value ) {
-          this.set('fieldValue', name) ;
+          this.set('title', name) ;
         }
       }
 
       //Check if the item is currentSelectedItem or not
-      if(name === this.fieldValue) {
+      if(name === this.title) {
 
         //set the itemIdx - To change the prefMatrix accordingly.
         this.set('itemIdx', idx) ;
@@ -338,7 +324,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     if(firstTime) {
       var selectionValue = this.get('selectionValue') ;
-      this.fieldValue =
+      this.title =
         selectionValue? selectionValue : this.get('_defaultSelVal') ;
     }
 
