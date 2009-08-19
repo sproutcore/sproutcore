@@ -523,6 +523,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       evt.stop();
       return YES;
     } else return sc_super();
+  },
+  
+  fieldValueDidChange: function(partialChange) {
+    // save the cursor's position
+    var element = this.$field()[0];
+    var start = element.selectionStart;
+    var end = element.selectionEnd;
+    
+    sc_super();
+    
+    // restore the cursor's position
+    element.setSelectionRange(start, end);
   }
   
 }) ;
