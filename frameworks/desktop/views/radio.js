@@ -331,6 +331,8 @@ SC.RadioView = SC.FieldView.extend(
     return this;
   },
   
+
+  
   didCreateLayer: function() {
      this.setFieldValue(this.get('fieldValue'));
      var inputElems=this.$input();

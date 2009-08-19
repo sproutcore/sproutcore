@@ -42,6 +42,7 @@
 	vertical-align: top ;
 	margin: 0;
 	margin-right: 3px;
+	outline:0px;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
 	}

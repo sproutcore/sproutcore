@@ -166,6 +166,81 @@ SC.SliderView = SC.View.extend(SC.Control,
     if (Math.abs(v-loc)>=0.01) this.set('value', loc); // adjust 
     return YES ;
   },
+  
+  /** tied to the isEnabled state */
+  acceptsFirstResponder: function() {
+    return this.get('isEnabled');
+  }.property('isEnabled'),
+  
+  willBecomeKeyResponderFrom: function(keyView) {
+    // focus the text field.
+    if (!this._isFocused) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$()[0].focus();
+      }
+    }
+  },
+  
+  willLoseKeyResponderTo: function(responder) {
+    if (this._isFocused) this._isFocused = NO ;
+  },
+  
+  keyDown: function(evt) {
+
+     // handle tab key
+     if (evt.which === 9) {
+       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+       view.becomeFirstResponder();
+       return YES ; // handled
+     }
+     
+     if (evt.which === 37 || evt.which === 38 || evt.which === 39 || evt.which === 40){
+       var min = this.get('minimum'),max=this.get('maximum');  
+       var step = this.get('step');
+       var size = max-min, val=0, calculateStep;
+     
+       if (evt.which === 37 || evt.which === 38 ){
+         if(step === 0){
+           if(size<100){
+             val = this.get('value')-1;
+           }else{
+             calculateStep = Math.abs(size/100);
+             if(calculateStep<2) calculateStep =2;
+             val = this.get('value')-Math.abs(size/100);
+           }
+         }else{
+           val = this.get('value')-step;
+         }
+       }
+       if (evt.which === 39 || evt.which === 40 ){
+           if(step === 0){
+              if(size<100){
+                val = this.get('value') + 2;
+              }else{
+                calculateStep = Math.abs(size/100);
+                if(calculateStep<2) calculateStep =2;
+                val = this.get('value')+calculateStep;
+              }
+            }else{
+              val = this.get('value')+step;
+            }       
+       }
+       if(val>=min && val<=max) this.set('value', val);
+     }
+     //handle arrows
+
+     // validate keyDown...
+     // if (this.performValidateKeyDown(evt)) {
+     //    this._isKeyDown = YES ;
+     //    evt.allowDefault(); 
+     //  } else {
+     //    evt.stop();
+     //  }
+     SC.RunLoop.begin().end();
+     return YES; 
+   },
 
   contentPropertyDidChange: function(target, key) {
     var content = this.get('content');

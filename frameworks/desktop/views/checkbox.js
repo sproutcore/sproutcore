@@ -101,6 +101,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
       return ret ;
   },
   
+  
   didCreateLayer: function() {
     this.setFieldValue(this.get('fieldValue'));
     SC.Event.add(this.$input()[0], 'click', this, this._field_fieldValueDidChange) ;

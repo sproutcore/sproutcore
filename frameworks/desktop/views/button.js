@@ -258,6 +258,21 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     if (inside && this.get('isEnabled')) this._action(evt) ;
     return true ;
   },
+  
+  
+  keyDown: function(evt) {
+    // handle tab key
+    if (evt.which === 9) {
+      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      view.becomeFirstResponder();
+      return YES ; // handled
+    }    
+    if (evt.which === 13) {
+      this.triggerAction(evt);
+      return YES ; // handled
+    }
+    return YES; 
+  },
 
   /** @private  Perform an action based on the behavior of the button.
   
@@ -326,6 +341,26 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       eval("this.action = function(e) { return "+ action +"(this, e); };");
       this.action(evt);
     }
+  },
+  
+  /** tied to the isEnabled state */
+  acceptsFirstResponder: function() {
+    return this.get('isEnabled');
+  }.property('isEnabled'),
+  
+  willBecomeKeyResponderFrom: function(keyView) {
+    // focus the text field.
+    if (!this._isFocused) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$()[0].focus();
+      }
+    }
+  },
+  
+  willLoseKeyResponderTo: function(responder) {
+    if (this._isFocused) this._isFocused = NO ;
   }
   
 }) ;
