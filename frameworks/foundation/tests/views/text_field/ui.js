@@ -271,7 +271,7 @@ test("Adding right accessory view", function() {
   // defined in its layout, 'left' should be cleared out and 'right' should
   // be set to 0.
   SC.RunLoop.begin();
-  var accessoryView = SC.View.create({
+  accessoryView = SC.View.create({
     layout:  { top:1, left:2, width:16, height:16 }
   });
   view.set('rightAccessoryView', accessoryView);
