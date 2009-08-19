@@ -377,6 +377,14 @@ SC.CollectionView = SC.View.extend(
   */
   acceptsFirstResponder: NO,
   
+  /**
+    Changing this property value by default will cause the CollectionView to
+    add/remove an 'active' class name to the root element.
+    
+    @type Boolean
+  */
+  isActive: NO,
+  
   // ..........................................................
   // SUBCLASS METHODS
   // 
