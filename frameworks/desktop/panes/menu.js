@@ -231,6 +231,11 @@ SC.MenuPane = SC.PickerPane.extend(
   exampleView: SC.MenuItemView,
   
   /**
+    Control Size for the Menu Item
+  */
+  controlSize: SC.REGULAR_CONTROL_SIZE,
+  
+  /**
     @private
     
     Overwrite the popup function of the pickerPane
@@ -328,7 +333,7 @@ SC.MenuPane = SC.PickerPane.extend(
   // ..........................................................
   // RENDERING/DISPLAY SUPPORT
   // 
-  displayProperties: ['displayItems', 'value'],
+  displayProperties: ['displayItems', 'value', 'controlSize'],
 
   /**
     The render function which depends on the displayItems and value
@@ -416,7 +421,7 @@ SC.MenuPane = SC.PickerPane.extend(
       var itemKeyEquivalent = item.get('keyEquivalent') ;
       var itemTarget = item.get('target') ;
       var itemWidth = this.get('itemWidth') ;
-      
+      var controlSize = this.get('controlSize') ;
       var itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
@@ -437,6 +442,7 @@ SC.MenuPane = SC.PickerPane.extend(
           itemHeight : itemHeight,
           itemWidth : itemWidth,
           keyEquivalent : itemKeyEquivalent,
+          controlSize: controlSize,
           content : SC.Object.create({
             title : itemTitle,
             value : itemValue,

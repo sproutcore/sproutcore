@@ -7,6 +7,15 @@
   cursor:default;
 }
 
+.sc-button-view.sc-menu-item.sc-small-size a span {
+  line-height: 11px;
+  font-size: 11px;
+}
+
+.sc-menu-item.sc-small-size a{
+  line-height: 11px;
+}
+
 .sc-menu-item a{
   display: block;
   top: 0;

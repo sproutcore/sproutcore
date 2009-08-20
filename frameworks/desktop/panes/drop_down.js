@@ -162,7 +162,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @property
     @type{SC.Array}
   */
-  displayProperties: ['icon', 'value'],
+  displayProperties: ['icon', 'value','controlSize'],
 
   /**
     Prefer matrix to position the drop down menu such that the
@@ -204,7 +204,20 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   isSelectedBinding: '*menu.isVisibleInWindow',
+  
+  /**
+    Left Alignment based on the size of the button
 
+    @private
+  */
+  leftAlign: function() {
+    var val = 0 ;
+    var controlSize = this.get('controlSize') ;
+    if(controlSize === SC.SMALL_CONTROL_SIZE) val = -14 ;
+    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -11 ;
+    return val;    
+  }.property('controlSize'),
+  
   /**
     override this method to implement your own sorting of the menu. By
     default, menu items are sorted using the value shown or the sortKey
@@ -345,7 +358,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var width = this.get('layer').offsetWidth ;
     var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
-
+    var menuControlSize = this.get('controlSize') ;
     var menu = SC.MenuPane.create({
 
       /**
@@ -371,6 +384,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
       layout: { width: width },
+      controlSize: menuControlSize,
       contentView: SC.View.extend({
       })
     }) ;
@@ -392,6 +406,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var menuView = this.get('parentView') ;
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
+    var title,newVal ;
 
     //  Fetch the index of the current selected item
     var itemIdx = 0 ;
@@ -432,14 +447,13 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var preferMatrixAttributeTop = 0 ;
     var itemIdx = this.get('itemIdx') ;
     var tempPreferMatrix = this.get('preferMatrix');
-
+    var leftAlign = this.get('leftAlign') ;
     //Set the preferMatrixAttribute Top
-    if(itemIdx)
-      preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT ;
-
-    if(this.get('preferMatrix'))
-      tempPreferMatrix = [0, -preferMatrixAttributeTop, 2] ;
-      this.set('preferMatrix', tempPreferMatrix) ;
+    if(itemIdx) preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT ;
+    if(this.get('preferMatrix')) {
+      tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
+    }
+    this.set('preferMatrix', tempPreferMatrix) ;
   }
 
 }) ;
