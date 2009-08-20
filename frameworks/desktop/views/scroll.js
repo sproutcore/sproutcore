@@ -559,6 +559,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // already been setup in prepareDisplay so we don't need to call 
     // viewFrameDidChange...
     var contentView = this.get('contentView') ;
+    var containerView = this.get('containerView') ;
+
     this._scroll_contentView = contentView ;
     if (contentView) {
       contentView.addObserver('frame', this, this.contentViewFrameDidChange) ;
