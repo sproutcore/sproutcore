@@ -240,18 +240,23 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   */
   element: function() {  
     if (this._elem) return this._elem;
-    
     // create factory div if needed
     var ret ;
     if (!SC.RenderContext.factory) {
       SC.RenderContext.factory = document.createElement('div');
     }
-    
-    // console.log('%@#element() called'.fmt(this));
-    // console.log(this.join());
-    
     SC.RenderContext.factory.innerHTML = this.join();
-    return SC.RenderContext.factory.firstChild ;
+    
+    // In IE something weird happens when reusing the same element.
+    // After setting innerHTML, the innerHTML of the element in the previous view
+    // turns blank. Seems that there is something weird with their garbage 
+    // collection algorithm. I tried just removing the nodes after keeping a 
+    // reference to the first child, but it didnt work. 
+    // Ended up cloning the first child.
+    
+    var child = SC.RenderContext.factory.firstChild.cloneNode(true);
+    SC.RenderContext.factory.innerHTML = '';
+    return child ;
   },
   
   /**
