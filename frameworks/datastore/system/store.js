@@ -1700,7 +1700,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN) {
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN) {
       
       status = K.READY_CLEAN;
       if(dataHash===undefined) {
