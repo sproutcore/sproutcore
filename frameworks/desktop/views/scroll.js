@@ -241,7 +241,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (y===undefined && SC.typeOf(x) === SC.T_HASH) {
       y = x.y; x = x.x;
     }
-    
+    console.log('max v s offset%@, x %@, y %@'.fmt(this.get('maximumVerticalScrollOffset'), x, y)) ;
     if (!SC.none(x)) {
       x = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), x));
       this.set('horizontalScrollOffset', x) ;
@@ -446,7 +446,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var clipLayout = { left: 0, top: 0 };
     var t ;
     
-    var ht = (hasHorizontal) ? hscroll.get('scrollerThickness') : 0 ;
+    var ht = (hasHorizontal) ? hscroll.get('scrollerThickness') : 100 ;
     var vt = (hasVertical) ?   vscroll.get('scrollerThickness') : 0 ;
     
     if (hasHorizontal) {
@@ -720,13 +720,33 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   _scroll_verticalScrollOffsetDidChange: function() {
     var offset = this.get('verticalScrollOffset');
+    console.log('offset %@'.fmt(offset)) ;
+
+    // update the value of the horizontal scroller...
+    var scroller ;
+    var scale = 1 ;
+    if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView'))) {
+      var min = scroller.get('minimum') ;
+      var max = scroller.get('maximum') ;
+
+       // calculate required size...
+      var size =  max-min-2 ;
+
+      var containerSize = scroller.get('containerSize') ;
+      var frameSize = scroller.get('frame').height;
+      if (!containerSize) containerSize = frameSize;
+      scale =  containerSize / frameSize ;
+
+    }
+
+    
+    console.log('scale %@ , offset: %@'.fmt(scale, Math.floor(offset*scale))) ;
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
-    if (contentView) contentView.adjust('top', 0-offset);
+    if (contentView) contentView.adjust('top', 0-Math.floor(offset * scale));
     
     // update the value of the horizontal scroller...
-    var scroller ;
     if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView'))) {
       scroller.set('value', offset);
     }
