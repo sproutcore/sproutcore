@@ -127,6 +127,7 @@ SC.ScrollerView = SC.View.extend({
      // calculate required size...
     var size = (enabled) ? max-min-2 : 0 ;
     var containerSize = this.get('containerSize');
+    console.log('%@.render() containerSize = %@'.fmt(this, containerSize));
     var frameSize ;
     
     
@@ -134,25 +135,23 @@ SC.ScrollerView = SC.View.extend({
       case SC.LAYOUT_VERTICAL:
         frameSize = this.get('frame').height;
         if (!containerSize) containerSize = frameSize;
-        size = Math.floor((size * frameSize) / containerSize) ;
         
         context.addClass('sc-vertical') ;
         if (firstTime) {
-          context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(size)) ;
+          context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(containerSize)) ;
         } else {
-          this.$('div')[0].style.height = size + "px";
+          this.$('div')[0].style.height = containerSize + "px";
         }
         break ;
       case SC.LAYOUT_HORIZONTAL:
         frameSize = this.get('frame').width;
         if (!containerSize) containerSize = frameSize;
-        size = Math.floor((size * frameSize) / containerSize) ;
-
+        
         context.addClass('sc-horizontal') ;
         if (firstTime) {  
-          context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(size)) ;
+          context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(containerSize)) ;
         } else {
-            this.$('div')[0].style.width = size + "px";
+          this.$('div')[0].style.width = containerSize + "px";
         }
         break ;
       default:

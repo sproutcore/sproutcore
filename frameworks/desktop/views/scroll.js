@@ -253,7 +253,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (y===undefined && SC.typeOf(x) === SC.T_HASH) {
       y = x.y; x = x.x;
     }
-    console.log('max v s offset%@, x %@, y %@'.fmt(this.get('maximumVerticalScrollOffset'), x, y)) ;
+    
     if (!SC.none(x)) {
       x = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), x));
       this.set('horizontalScrollOffset', x) ;
@@ -474,7 +474,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       vscroll.set('layout', { top: 0, bottom: ht, right: 0, width: vt });
       clipLayout.right = vt-1;
     } else {
-      clipLayout.bottom = 0 ;
+      clipLayout.right = 0 ;
     }
     if (vscroll) vscroll.set('isVisible', hasVertical);
     
@@ -561,29 +561,18 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.tile() ; // set up initial tiling
   },
   
-  // didCreateLayer: function() {
-  //   window.scrollView = this ;
-  // },
-  
   init: function() {
     sc_super();
     
     // start observing initial content view.  The content view's frame has
     // already been setup in prepareDisplay so we don't need to call 
     // viewFrameDidChange...
-    var contentView = this.get('contentView') ;
-    var containerView = this.get('containerView') ;
-
-    this._scroll_contentView = contentView ;
+    var contentView = this._scroll_contentView = this.get('contentView') ;
     if (contentView) {
       contentView.addObserver('frame', this, this.contentViewFrameDidChange) ;
     }
     
-    if (containerView) {
-      containerView.addObserver('frame', this, this.containerViewFrameDidChange);
-    }
-    
-    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
+    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll() ;
   },
   
   /**
@@ -632,80 +621,30 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         height = (f) ? f.height : 0,
         dim    = this.get('frame') ;
     
+    console.log('%@.contentViewFrameDidChange() contentView.frame = %@'.fmt(this, SC.inspect(f)));
+    
     // cache out scroll settings...
     if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height ;
-
-    // horizontal scroller is visible if contentView.width > visibleWidth
-    // visibleWidth = this.frame.width - verticalScroller if scroller visible
-    
-    // vertical scroll is visible if contentView.height > visibleHeight
-    // visibleHeight = this.frame.height - horizontalScroller if visible
     
     if (this.get('hasHorizontalScroller') && (view = this.get('horizontalScrollerView'))) {
-      
       // decide if it should be visible or not
       if (this.get('autohidesHorizontalScroller')) {
         this.set('isHorizontalScrollerVisible', width > dim.width);
       }
+      view.setIfChanged('containerSize', width) ;
       view.set('maximum', width) ;
     }
     
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView'))) {
-      
-      
       // decide if it should be visible or not
       if (this.get('autohidesVerticalScroller')) {
         this.set('isVerticalScrollerVisible', height > dim.height);
       }
-      
-      view.set('maximum', height) ;
+      view.setIfChanged('containerSize', height) ;
+      view.set('maximum', height + this.get('verticalScrollOffset')) ;
     }
-    
-  },
-  
-  /** @private
-    Whenever the containerView is changed, we need to observe the view's
-    frame to update the content size of the scrollers.
-  */
-  containerViewDidChange: function() {
-    var newView = this.get('containerView'), 
-        oldView = this._scroll_containerView;
-    var f = this.containerViewFrameDidChange ;
-    if (newView !== oldView) {
-      
-      // stop observing old content view
-      if (oldView) oldView.removeObserver('frame', this, f);
-      
-      // update cache
-      this._scroll_containerView = newView;
-      if (newView) newView.addObserver('frame', this, f);
-      
-      this.containerViewFrameDidChange();
-    }
-  }.observes('containerView'),
-  
-  /** @private
-    Invoked whenever the containerViews's frame changes.  This will update the 
-    scroller contentSize
-  */
-  containerViewFrameDidChange: function() {
-    var view   = this.get('containerView'), 
-        f      = (view) ? view.get('frame') : null,
-        width  = (f) ? f.width : 0,  
-        height = (f) ? f.height : 0 ;
-    
-    if (this.get('hasHorizontalScroller') && 
-        (view = this.get('horizontalScrollerView'))) {
-      view.setIfChanged('containerSize', width);
-    }
-    
-    if (this.get('hasVerticalScroller') && 
-        (view = this.get('verticalScrollerView'))) {
-      view.setIfChanged('containerSize', height);
-    }
-    
   },
   
   /**
@@ -732,40 +671,16 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     edit the location of the contentView.
   */
   _scroll_verticalScrollOffsetDidChange: function() {
-    var offset = this.get('verticalScrollOffset');
-    
-    console.log('offset %@'.fmt(offset)) ;
-
-    // update the value of the horizontal scroller...
-    var scroller ;
-    var scale = 1 ;
-    if (this.get('hasVerticalScroller') && (scroller = this.get('verticalScrollerView'))) {
-      var min = scroller.get('minimum') ;
-      var max = scroller.get('maximum') ;
-
-       // calculate required size...
-      var size =  max-min-2 ;
-
-      var containerSize = scroller.get('containerSize') ;
-      var frameSize = scroller.get('frame').height;
-      if (!containerSize) containerSize = frameSize;
-      scale =  containerSize / frameSize ;
-
-    }
-
-    var scaledOffset = Math.floor(offset*scale) ;
-    
-    console.log('scale %@ , offset: %@'.fmt(scale, scaledOffset)) ;
+    var offset = this.get('verticalScrollOffset') ;
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
-    if (contentView) contentView.adjust('top', 0-scaledOffset);
+    if (contentView) contentView.adjust('top', 0-offset) ;
     
     // update the value of the vertical scroller...
     if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView'))) {
-      scroller.set('value', offset);
+      scroller.set('value', offset) ;
     }
-    
   }.observes('verticalScrollOffset')
   
 });
