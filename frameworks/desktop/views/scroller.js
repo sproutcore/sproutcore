@@ -32,37 +32,31 @@ SC.ScrollerView = SC.View.extend({
   
   /** 
     The scroller offset value.  This value will adjust between the minimum
-    and maximum values that you set.
+    and maximum values that you set. Default is 0.
     
     @property
   */
-  value: 0,
-  
-  /**
-    The minimum offset value for the scroller.  When the scroller is at the 
-    top/left, it will have this value.
-    
-    @property
-  */
-  minimum: 0,
+  value: function(key, val) {
+    if (val !== undefined) {
+      // Don't enforce the maximum now, because the scroll view could change
+      // height and we want our content to stay put when it does.
+      this._value = val ;
+    } else {
+      var val = this._value || 0 ; // default value is at top/left
+      return Math.min(val, this.get('maximum')) ;
+    }
+  }.property('maximum').cacheable(),
   
   /**
     The maximum offset value for the scroller.  This will be used to calculate
-    the internal height/width of the scroller itself.
+    the internal height/width of the scroller itself. It is not necessarily
+    the same as the height of a scroll view's content view.
     
-    @property
+    When set less than the height of the scroller, the scroller is disabled.
+    
+    @property {Number}
   */
   maximum: 0,
-  
-  /**
-    Describes the visible size of the clipping view this scroll will manage.
-    If left as null, then this will by default look at the container view of 
-    the owner scroll view.
-    
-    @property
-    @type {Number}
-  */
-  containerSize: null,
   
   /**
     YES if enable scrollbar, NO to disable it.  Scrollbars will automatically 
@@ -95,14 +89,14 @@ SC.ScrollerView = SC.View.extend({
     @property {String}
   */
   ownerScrollValueKey: function() {
-    var key = null;
+    var key = null ;
     switch(this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         key = 'verticalScrollOffset' ;
-        break;
+        break ;
       case SC.LAYOUT_HORIZONTAL:
         key = 'horizontalScrollOffset' ;
-        break;
+        break ;
       default:
         key = null ;
     }
@@ -113,59 +107,44 @@ SC.ScrollerView = SC.View.extend({
   // INTERNAL SUPPORT
   // 
   
-  displayProperties: 'minimum maximum isEnabled containerSize'.w(),
+  displayProperties: 'maximum isEnabled layoutDirection'.w(),
   
   /** @private
     Update the scroll location or inner height/width if needed.
   */
   render: function(context, firstTime) {
-    // console.log('%@.render(context=%@, firstTime=%@)'.fmt(this, context, firstTime?'YES':'NO'));
-    var dir = this.get('layoutDirection') ;
-    var min = this.get('minimum'), max = this.get('maximum') ;
-    var enabled = this.get('isEnabled'), value = this.get('value') ;
+    var max = this.get('maximum') ;
     
-     // calculate required size...
-    var size = (enabled) ? max-min-2 : 0 ;
-    var containerSize = this.get('containerSize');
-    console.log('%@.render() containerSize = %@'.fmt(this, containerSize));
-    var frameSize ;
-    
-    
-    switch (dir) {
+    switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        frameSize = this.get('frame').height;
-        if (!containerSize) containerSize = frameSize;
-        
         context.addClass('sc-vertical') ;
         if (firstTime) {
-          context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(containerSize)) ;
+          context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(max)) ;
         } else {
-          this.$('div')[0].style.height = containerSize + "px";
+          this.$('div')[0].style.height = max + "px";
         }
         break ;
       case SC.LAYOUT_HORIZONTAL:
-        frameSize = this.get('frame').width;
-        if (!containerSize) containerSize = frameSize;
-        
         context.addClass('sc-horizontal') ;
         if (firstTime) {  
-          context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(containerSize)) ;
+          context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(max)) ;
         } else {
-          this.$('div')[0].style.width = containerSize + "px";
+          this.$('div')[0].style.width = max + "px";
         }
         break ;
       default:
         throw "You must set a layoutDirection for your scroller class." ;
     }
+    
+    context.setClass('disabled', !this.get('isEnabled')) ;
   },
   
   didCreateLayer: function() {
-    // console.log('%@.didCreateLayer called'.fmt(this));
     var callback = this._sc_scroller_scrollDidChange ;
     SC.Event.add(this.$(), 'scroll', this, callback) ;
     
     // set scrollOffset first time
-    var amt = this.get('value') - this.get('minimum') ;
+    var amt = this.get('value') ;
     var layer = this.get('layer') ;
     
     switch (this.get('layoutDirection')) {
@@ -180,72 +159,68 @@ SC.ScrollerView = SC.View.extend({
   },
   
   willDestroyLayer: function() {
-    // console.log('%@.willDestroyLayer()'.fmt(this));
     var callback = this._sc_scroller_scrollDidChange ;
     SC.Event.remove(this.$(), 'scroll', this, callback) ;
   },
-
+  
   // after 50msec, fire event again
   _sc_scroller_armScrollTimer: function() {
     if (!this._sc_scrollTimer) {
-      SC.RunLoop.begin();
+      SC.RunLoop.begin() ;
       var method = this._sc_scroller_scrollDidChange ;
       this._sc_scrollTimer = this.invokeLater(method, 50) ;
-      SC.RunLoop.end();
+      SC.RunLoop.end() ;
     }
   },
   
   _sc_scroller_scrollDidChange: function() {
+    var now = Date.now(), last = this._sc_lastScroll ;
+    if (last && (now-last)<50) return this._sc_scroller_armScrollTimer() ;
+    this._sc_scrollTimer = null ;
+    this._sc_lastScroll = now ;
     
-    var now = Date.now(), last = this._sc_lastScroll;
-    if (last && (now-last)<50) return this._sc_scroller_armScrollTimer();
-    this._sc_scrollTimer = null; 
-    this._sc_lastScroll = now;
-
     SC.RunLoop.begin();
     
     if (!this.get('isEnabled')) return ; // nothing to do.
     
-    var layer = this.get('layer'), loc = 0 ;
+    var layer = this.get('layer'), scroll = 0 ;
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        this._sc_scrollValue = loc = layer.scrollTop ;
+        this._sc_scrollValue = scroll = layer.scrollTop ;
         break ;
         
       case SC.LAYOUT_HORIZONTAL:
-        this._sc_scrollValue = loc = layer.scrollLeft ;
+        this._sc_scrollValue = scroll = layer.scrollLeft ;
         break ;
     }
-    
-    this.set('value', loc + this.get('minimum')) ;
+    this.set('value', scroll) ; // will now enforce minimum and maximum
     
     SC.RunLoop.end();
   },
   
   /** @private */
   _sc_scroller_valueDidChange: function() {
-    //console.log('%@._sc_scroller_valueDidChange called'.fmt(this));
-
-    var v = (this.get('value')||0) - (this.get('minimum')||0),
-        layer;
+    var v = this.get('value') ;
         
     if (v !== this._sc_scrollValue) {
-      layer = this.get('layer');
-      switch (this.get('layoutDirection')) {
-        case SC.LAYOUT_VERTICAL:
-          layer.scrollTop = v;
-          break ;
-
-        case SC.LAYOUT_HORIZONTAL:
-          layer.scrollLeft = v;
-          break ;
+      var layer = this.get('layer') ;
+      if (layer) {
+        switch (this.get('layoutDirection')) {
+          case SC.LAYOUT_VERTICAL:
+            layer.scrollTop = v;
+            break ;
+          
+          case SC.LAYOUT_HORIZONTAL:
+            layer.scrollLeft = v ;
+            break ;
+        }
       }
     }
     
     // notify owner if it has a different scroll value
-    var key = this.get('ownerScrollValueKey');
+    var key = this.get('ownerScrollValueKey') ;
     if (key && this.owner && (this.owner[key] !== undefined)) {
-      this.owner.setIfChanged(key, this.get('value')) ;
+      this.owner.setIfChanged(key, v) ;
     }
   }.observes('value')
   
