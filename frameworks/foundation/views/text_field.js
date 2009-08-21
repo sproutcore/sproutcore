@@ -7,6 +7,8 @@
 
 
 sc_require('views/field') ;
+sc_require('mixins/static_layout') ;
+
 /**
   @class
   
