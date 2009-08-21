@@ -240,6 +240,7 @@ SC.SplitView = SC.View.extend(
           break ;
         case SC.RESIZE_BOTTOM_RIGHT:
           delete layout.right ;
+          delete layout.height ;
           layout.width = topLeftThickness ;
           break ;
       }
@@ -256,6 +257,7 @@ SC.SplitView = SC.View.extend(
           break ;
         case SC.RESIZE_BOTTOM_RIGHT:
           delete layout.bottom ;
+          delete layout.width ;
           layout.height = topLeftThickness ;
           break ;
       }
