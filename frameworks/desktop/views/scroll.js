@@ -203,6 +203,18 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   autohidesVerticalScroller: YES,
   
+  
+  
+  /**
+  Use this property to provide a 'bottom' property to your vertical scroller,
+  By doing this you will effectively scale down the size of the scroller when 
+  compared to the container view.
+  This will be useful if you want to provide a 'Mac Finder' style thumb view
+  below your scroller.
+  */
+  verticalScrollerBottom: 0,
+  
+  
   // ..........................................................
   // CUSTOM VIEWS
   // 
@@ -446,7 +458,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var clipLayout = { left: 0, top: 0 };
     var t ;
     
-    var ht = (hasHorizontal) ? hscroll.get('scrollerThickness') : 100 ;
+    var ht = ((hasHorizontal) ? hscroll.get('scrollerThickness') : 0) ;
     var vt = (hasVertical) ?   vscroll.get('scrollerThickness') : 0 ;
     
     if (hasHorizontal) {
@@ -458,6 +470,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (hscroll) hscroll.set('isVisible', hasHorizontal);
     
     if (hasVertical) {
+      ht = ht + this.get('verticalScrollerBottom') ;
       vscroll.set('layout', { top: 0, bottom: ht, right: 0, width: vt });
       clipLayout.right = vt-1;
     } else {
@@ -720,12 +733,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   */
   _scroll_verticalScrollOffsetDidChange: function() {
     var offset = this.get('verticalScrollOffset');
+    
     console.log('offset %@'.fmt(offset)) ;
 
     // update the value of the horizontal scroller...
     var scroller ;
     var scale = 1 ;
-    if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView'))) {
+    if (this.get('hasVerticalScroller') && (scroller = this.get('verticalScrollerView'))) {
       var min = scroller.get('minimum') ;
       var max = scroller.get('maximum') ;
 
@@ -739,14 +753,15 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
     }
 
+    var scaledOffset = Math.floor(offset*scale) ;
     
-    console.log('scale %@ , offset: %@'.fmt(scale, Math.floor(offset*scale))) ;
+    console.log('scale %@ , offset: %@'.fmt(scale, scaledOffset)) ;
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
-    if (contentView) contentView.adjust('top', 0-Math.floor(offset * scale));
+    if (contentView) contentView.adjust('top', 0-scaledOffset);
     
-    // update the value of the horizontal scroller...
+    // update the value of the vertical scroller...
     if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView'))) {
       scroller.set('value', offset);
     }
