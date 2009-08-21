@@ -213,7 +213,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   
   /**
     Use this property to set the 'bottom' offset of your vertical scroller, 
-    to make room for a thuwb view or other accessory view. Default is 0.
+    to make room for a thumb view or other accessory view. Default is 0.
     
     @property {Number}
   */
@@ -573,11 +573,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // start observing initial content view.  The content view's frame has
     // already been setup in prepareDisplay so we don't need to call 
     // viewFrameDidChange...
-    var contentView = this._scroll_contentView = this.get('contentView') ;
+    this._scroll_contentView = this.get('contentView') ;
+    var contentView = this._scroll_contentView ;
+
     if (contentView) {
       contentView.addObserver('frame', this, this.contentViewFrameDidChange) ;
     }
-    
+
     if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll() ;
   },
   
@@ -678,6 +680,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (contentView) contentView.adjust('top', 0-offset) ;
     
     // update the value of the vertical scroller...
+    var scroller;
     if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView'))) {
       scroller.set('value', offset) ;
     }
