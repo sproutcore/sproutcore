@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module test ok equals same stop start */
 
 (function() {
     var appleURL="http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg";
@@ -18,7 +18,7 @@
     .add("basic2", SC.ScrollView, {
         contentView: iv
     })
-
+    
     .add("basic3", SC.ScrollView, {
       contentView: iv,
       isHorizontalScrollerVisible: NO
@@ -26,6 +26,15 @@
     
     .add("disabled", SC.ScrollView, {
       isEnabled: NO
+    })
+    
+    .add("verticalScrollerBottom",SC.ScrollView, {
+      contentView: iv,
+      hasHorizontalScroller : NO,
+      verticalScrollerBottom: 16,
+      isVerticalScrollerVisible: YES,
+      autohidesVerticalScroller: NO
+      
     });
 
     pane.show(); // add a test to show the test pane
@@ -145,6 +154,15 @@
     equals(viewsc.get('horizontalScrollOffset'), 73, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
     equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 73, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
    });
+   
+   
+   test("non-zero bottom in vertical scrollbar", function() {
+      var view = pane.view('verticalScrollerBottom'); 
+      equals(view.get('verticalScrollerBottom'),16, "should have verticalScrollerBottom as ");
+      var scroller = view.get('verticalScrollerView') ;
+      ok(scroller, 'should have vertical scroller view ');
+      equals(scroller.get('layout').bottom,16, 'should have style.bottom of scroller as ');
+    });
    
    
 })();
