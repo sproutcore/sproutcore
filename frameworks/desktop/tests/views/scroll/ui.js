@@ -161,7 +161,8 @@
       equals(view.get('verticalScrollerBottom'),16, "should have verticalScrollerBottom as ");
       var scroller = view.get('verticalScrollerView') ;
       ok(scroller, 'should have vertical scroller view ');
-      equals(scroller.get('layout').bottom,16, 'should have style.bottom of scroller as ');
+      equals(scroller.get('layout').bottom,16, 'should have layout.bottom of scroller as ');
+      equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
     });
    
    
