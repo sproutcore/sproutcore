@@ -175,7 +175,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @default [ 0, 0, 2]
 
   */
-  preferMatrix: [0, 0, 2],
+  preferMatrix: null,
 
   /**
     Width of the sprite image that gets applied due to the theme.
@@ -204,7 +204,16 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   isSelectedBinding: '*menu.isVisibleInWindow',
-  
+
+  /**
+    If this property is set to 'YES', the menu pane will be positioned
+    below the anchor.
+
+    @private
+    @default NO
+  */
+  isDefaultPosition: NO,
+
   /**
     Left Alignment based on the size of the button
 
@@ -215,9 +224,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var controlSize = this.get('controlSize') ;
     if(controlSize === SC.SMALL_CONTROL_SIZE) val = -14 ;
     if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -11 ;
-    return val;    
+    return val;
   }.property('controlSize'),
-  
+
   /**
     override this method to implement your own sorting of the menu. By
     default, menu items are sorted using the value shown or the sortKey
@@ -446,14 +455,20 @@ SC.DropDownMenu = SC.ButtonView.extend(
   changeDropDownPreferMatrix: function() {
     var preferMatrixAttributeTop = 0 ;
     var itemIdx = this.get('itemIdx') ;
-    var tempPreferMatrix = this.get('preferMatrix');
     var leftAlign = this.get('leftAlign') ;
-    //Set the preferMatrixAttribute Top
-    if(itemIdx) preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT ;
-    if(this.get('preferMatrix')) {
-      tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
+    var defPreferMatrix ;
+    var tempPreferMatrix ;
+
+    if(this.get('isDefaultPosition')) {
+      defPreferMatrix = [leftAlign, 4, 3] ;
+      this.set('preferMatrix', defPreferMatrix) ;
     }
-    this.set('preferMatrix', tempPreferMatrix) ;
+    else {
+      if(itemIdx)
+        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT ;
+      tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
+      this.set('preferMatrix', tempPreferMatrix) ;
+    }
   }
 
 }) ;
