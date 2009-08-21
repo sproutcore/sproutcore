@@ -42,8 +42,8 @@ SC.ScrollerView = SC.View.extend({
       // height and we want our content to stay put when it does.
       this._value = val ;
     } else {
-      var val = this._value || 0 ; // default value is at top/left
-      return Math.min(val, this.get('maximum')) ;
+      var value = this._value || 0 ; // default value is at top/left
+      return Math.min(value, this.get('maximum')) ;
     }
   }.property('maximum').cacheable(),
   
