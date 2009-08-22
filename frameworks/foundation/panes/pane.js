@@ -349,7 +349,8 @@ SC.Pane = SC.View.extend({
   didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
-    this.set('previousKeyPane', pane);
+    if(pane && !pane.kindOf(SC.MenuPane)) this.set('previousKeyPane', pane);
+    else this.set('previousKeyPane', null);
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
@@ -425,6 +426,7 @@ SC.Pane = SC.View.extend({
     // remove from the RootResponder also
     var responder = this.rootResponder ;
     if (this.get('isKeyPane')) { // orders matter, remove keyPane first
+      debugger;
       var oldKeyPane = this.get('previousKeyPane');
       if (!oldKeyPane) responder.makeKeyPane(null) ; 
       else responder.makeKeyPane(oldKeyPane) ;
