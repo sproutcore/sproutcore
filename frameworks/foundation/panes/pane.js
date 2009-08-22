@@ -429,7 +429,6 @@ SC.Pane = SC.View.extend({
     // remove from the RootResponder also
     var responder = this.rootResponder ;
     if (this.get('isKeyPane')) { // orders matter, remove keyPane first
-      debugger;
       var oldKeyPane = this.get('previousKeyPane');
       if (!oldKeyPane) responder.makeKeyPane(null) ; 
       else responder.makeKeyPane(oldKeyPane) ;
