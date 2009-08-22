@@ -142,12 +142,28 @@ SC.DropDownMenu = SC.ButtonView.extend(
   checkboxEnabled: NO,
 
   /**
-    Default selected value of the drop down.
+    Default value of the drop down.
      This will be the first item from the menu item list.
 
     @private
   */
-  _defaultSelVal: null,
+  _defaultVal: null,
+
+  /**
+    Default value of the drop down.
+     This will be the title corresponding to the _defaultVal.
+
+    @private
+  */
+  _defaultTitle: null,
+
+  /**
+    Default value of the drop down.
+     This will be the icon corresponding to the _defaultVal.
+
+    @private
+  */
+  _defaultIcon: null,
 
   /**
     @private
