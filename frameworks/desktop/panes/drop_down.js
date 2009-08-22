@@ -311,6 +311,11 @@ SC.DropDownMenu = SC.ButtonView.extend(
       // localize name if specified.
       name = shouldLocalize? name.loc() : name ;
 
+      //Get the icon value
+      var icon = iconKey ? (object.get ?
+        object.get(iconKey) : object[iconKey]) : null ;
+      if (SC.none(object[iconKey])) icon = null ;
+
       // get the value using the valueKey or the object if no valueKey.
       // then convert to a string or use _guid if one of available.
       var value = (valueKey) ? (object.get ?
@@ -319,6 +324,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       if (currentSelectedVal && value){
         if( currentSelectedVal === value ) {
           this.set('title', name) ;
+          this.set('icon', icon) ;
         }
       }
 
@@ -333,15 +339,11 @@ SC.DropDownMenu = SC.ButtonView.extend(
         isChecked = NO ;
       }
 
-      //Get the icon value
-      var icon = iconKey ? (object.get ?
-        object.get(iconKey) : object[iconKey]) : null ;
-      if (SC.none(object[iconKey])) icon = null ;
-
       //Set the first item from the list as default selected item
       if (idx === 0) {
-        this._defaultSelVal = name ;
-        this.set('icon', icon) ;
+        this._defaultVal = value ;
+        this._defaultTitle = name ;
+        this._defaultIcon = icon ;
       }
 
       //Set the items in the itemList array
