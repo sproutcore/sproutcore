@@ -349,7 +349,10 @@ SC.Pane = SC.View.extend({
   didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
-    if(pane && !pane.kindOf(SC.MenuPane)) this.set('previousKeyPane', pane);
+    // check if the previousKeyPane is a menu. If it is a menu, don't set as 
+    // a previous keypane, set the previousKeyPane to the keypane before
+    // the menu as it is an the menu is an intermediate pane that you dont want to go back to.
+    if(pane && !pane.kindOf(SC.MenuPane)) this.set('previousKeyPane', pane.get('previousKeyPane'));
     else this.set('previousKeyPane', null);
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
