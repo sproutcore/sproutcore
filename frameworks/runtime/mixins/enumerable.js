@@ -173,20 +173,9 @@ SC.Enumerable = {
     @returns {Array} extracted values
   */
   getEach: function(key) {
-    var len = this.get ? this.get('length') : this.length ;
-    var ret = [] ;
-
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      var obj = next ? (next.get ? next.get(key) : next[key]) : null;
-      ret[ret.length] = obj;
-      last = next ;
-    }
-    last = null;
-    context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return this.map(function(next) {
+      return next ? (next.get ? next.get(key) : next[key]) : null;
+    }, this);
   },
 
   /**
@@ -200,21 +189,12 @@ SC.Enumerable = {
     @returns {Object} receiver
   */
   setEach: function(key, value) {
-    var len = this.get ? this.get('length') : this.length ;
-
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
+    this.forEach(function(next) {
       if (next) {
-        if (next.set) {
-          next.set(key, value) ;
-        } else next[key] = value ;
+        if (next.set) next.set(key, value) ;
+        else next[key] = value ;
       }
-      last = next ;
-    }
-    last = null;
-    context = SC.Enumerator._pushContext(context);
+    }, this);
     return this ;
   },
   
@@ -269,18 +249,9 @@ SC.Enumerable = {
     @returns {Array} The mapped array.
   */
   mapProperty: function(key) {
-    var len = this.get ? this.get('length') : this.length ;
-    var ret  = [];
-    var last = null ;
-    var context = SC.Enumerator._popContext();
-    for(var idx=0;idx<len;idx++) {
-      var next = this.nextObject(idx, last, context) ;
-      ret[idx] = next ? (next.get ? next.get(key) : next[key]) : null;
-      last = next ;
-    }
-    last = null ;
-    context = SC.Enumerator._pushContext(context);
-    return ret ;
+    return this.map(function(next) { 
+      return next ? (next.get ? next.get(key) : next[key]) : null;
+    });
   },
 
   /**
