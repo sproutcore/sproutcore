@@ -672,24 +672,24 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 						hIQITlNPYmplY3QAhZKEhIQITlNT
 						dHJpbmcBlIQBKww8JURvY3VtZW50
 						JT6GhAJpSQEMkoSEhAxOU0RpY3Rp
-						b25hcnkAlIQBaQOShJaWEE5TUGFy
-						YWdyYXBoU3R5bGWGkoSEhBBOU1Bh
-						cmFncmFwaFN0eWxlAJSEBENDQFMB
-						AISEhAdOU0FycmF5AJSZDJKEhIQJ
-						TlNUZXh0VGFiAJSEAkNmAByGkoSf
-						ngA4hpKEn54AVIaShJ+eAHCGkoSf
-						ngCBjACGkoSfngCBqACGkoSfngCB
-						xACGkoSfngCB4ACGkoSfngCB/ACG
-						koSfngCBGAGGkoSfngCBNAGGkoSf
-						ngCBUAGGhgCGkoSWlgdOU0NvbG9y
-						hpKEhIQHTlNDb2xvcgCUhAFjBoQD
-						QEBAhJaWBlN5c3RlbYaElpYJdGV4
-						dENvbG9yhoStoAOEAmZmAAGGhpKE
-						lpYGTlNGb250hpKEhIQGTlNGb250
-						HpSZPIQFWzYwY10GAAAAMgAAAP/+
-						SABlAGwAdgBlAHQAaQBjAGEATgBl
-						AHUAZQAtAFUAbAB0AHIAYQBMAGkA
-						ZwBoAHQAAACEAWZAoACgAaAAoACG
+						b25hcnkAlIQBaQOShJaWBk5TRm9u
+						dIaShISEBk5TRm9udB6UmTyEBVs2
+						MGNdBgAAADIAAAD//kgAZQBsAHYA
+						ZQB0AGkAYwBhAE4AZQB1AGUALQBV
+						AGwAdAByAGEATABpAGcAaAB0AAAA
+						hAFmQIQBYwCdAZ0AnQCGkoSWlgdO
+						U0NvbG9yhpKEhIQHTlNDb2xvcgCU
+						nQaEA0BAQISWlgZTeXN0ZW2GhJaW
+						CXRleHRDb2xvcoaEnp0DhAJmZgAB
+						hoaShJaWEE5TUGFyYWdyYXBoU3R5
+						bGWGkoSEhBBOU1BhcmFncmFwaFN0
+						eWxlAJSEBENDQFMBAISEhAdOU0Fy
+						cmF5AJSZDJKEhIQJTlNUZXh0VGFi
+						AJSEAkNmAByGkoSopQA4hpKEqKUA
+						VIaShKilAHCGkoSopQCBjACGkoSo
+						pQCBqACGkoSopQCBxACGkoSopQCB
+						4ACGkoSopQCB/ACGkoSopQCBGAGG
+						koSopQCBNAGGkoSopQCBUAGGhgCG
 						hoY=
 						</data>
 						<key>Text</key>
@@ -757,7 +757,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 		</dict>
 	</array>
 	<key>ModificationDate</key>
-	<string>2009-08-13 12:37:29 -0700</string>
+	<string>2009-08-23 19:36:42 -0700</string>
 	<key>Modifier</key>
 	<string>Charles Jolley</string>
 	<key>NotesVisible</key>
@@ -16273,7 +16273,7 @@ Add a copy of this page to separate sections in your design document.  The title
 			<array>
 				<dict>
 					<key>Bounds</key>
-					<string>{{249.528, 291.722}, {48, 21}}</string>
+					<string>{{253.028, 291.722}, {41, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16326,7 +16326,7 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 pushError}</string>
+\f0\i\fs18 \cf0 didError}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -16402,7 +16402,7 @@ Add a copy of this page to separate sections in your design document.  The title
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{539.111, 439.278}, {36, 21}}</string>
+					<string>{{532.611, 439.31}, {49, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16455,7 +16455,7 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 cancel}</string>
+\f0\i\fs18 \cf0 didCancel}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -16529,7 +16529,7 @@ Add a copy of this page to separate sections in your design document.  The title
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{464.361, 397.679}, {36, 21}}</string>
+					<string>{{457.861, 397.679}, {49, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16582,14 +16582,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 cancel}</string>
+\f0\i\fs18 \cf0 didCancel}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{331.173, 334.667}, {39, 21}}</string>
+					<string>{{328.674, 334.667}, {44, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16642,14 +16642,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 retrieve}</string>
+\f0\i\fs18 \cf0 willFetch}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{243.028, 484.396}, {61, 21}}</string>
+					<string>{{251.528, 484.396}, {44, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16702,14 +16702,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 pushRetrieve}</string>
+\f0\i\fs18 \cf0 didFetch}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{664.383, 265.944}, {39, 21}}</string>
+					<string>{{661.883, 265.944}, {44, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16762,14 +16762,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 retrieve}</string>
+\f0\i\fs18 \cf0 willFetch}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{705.608, 488.126}, {39, 21}}</string>
+					<string>{{703.108, 488.126}, {44, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16822,14 +16822,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 retrieve}</string>
+\f0\i\fs18 \cf0 willFetch}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{873.195, 347.924}, {61, 21}}</string>
+					<string>{{881.695, 347.924}, {44, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16882,14 +16882,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 pushRetrieve}</string>
+\f0\i\fs18 \cf0 didFetch}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{807.778, 382.453}, {48, 21}}</string>
+					<string>{{811.278, 382.453}, {41, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -16942,14 +16942,14 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
-\f0\i\fs18 \cf0 pushError}</string>
+\f0\i\fs18 \cf0 didError}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{645.256, 425.193}, {60, 21}}</string>
+					<string>{{653.256, 425.192}, {44, 21}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -17004,7 +17004,7 @@ Add a copy of this page to separate sections in your design document.  The title
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
 
-\f0\i\fs18 \cf0 didComplete}</string>
+\f0\i\fs18 \cf0 didFetch}</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -19316,7 +19316,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf540
 {\fonttbl\f0\fnil\fcharset0 HelveticaNeue-Light;}
 {\colortbl;\red255\green255\blue255;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
 
 \f0\fs24 \cf0 Root Store}</string>
 					</dict>
@@ -19492,11 +19492,11 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>10</integer>
+		<integer>9</integer>
 		<key>ExpandedCanvases</key>
 		<array/>
 		<key>Frame</key>
-		<string>{{17, 54}, {920, 724}}</string>
+		<string>{{31, 133}, {1304, 1018}}</string>
 		<key>ListView</key>
 		<false/>
 		<key>OutlineWidth</key>
@@ -19510,9 +19510,9 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 		<key>SidebarWidth</key>
 		<integer>138</integer>
 		<key>VisibleRegion</key>
-		<string>{{0, 0}, {1022.67, 784}}</string>
+		<string>{{0, 0}, {1023.11, 784}}</string>
 		<key>Zoom</key>
-		<real>1</real>
+		<real>1.5</real>
 		<key>ZoomValues</key>
 		<array>
 			<array>
