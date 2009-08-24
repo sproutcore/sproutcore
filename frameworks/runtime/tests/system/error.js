@@ -45,3 +45,8 @@ test("SC.$val should return the error value if it has one", function() {
   equals(SC.val(new Error()), null, 'val(Error) should be null');
   equals(SC.val(SC.Object.create({ isError: YES, errorValue: "BAR" })), "BAR", 'val({ isError: YES, errorValue: BAR }) should be BAR');
 });
+
+test("errorObject property should return the error itself", function() {
+  var er = SC.$error("foo");
+  equals(er.get('errorObject'), er, 'errorObject should return receiver');
+});

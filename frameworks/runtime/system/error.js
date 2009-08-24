@@ -53,6 +53,15 @@ SC.Error = SC.Object.extend(
   errorValue: null,
   
   /**
+    The original error object.  Normally this will return the receiver.  
+    However, sometimes another object will masquarade as an error; this gives
+    you a way to get at the underyling error.
+  */
+  errorObject: function() {
+    return this;
+  }.property().cacheable(),
+  
+  /**
     Human readable name of the item with the error.
   */
   label: null,
