@@ -473,6 +473,10 @@ SC.mixin(/** @scope SC */ {
   */
   clone: function(object) {
     var ret = object ;
+    
+    // fast path
+    if (object && object.isCopyable) return object.copy();
+    
     switch (SC.typeOf(object)) {
     case SC.T_ARRAY:
       if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
@@ -627,12 +631,12 @@ SC.mixin(/** @scope SC */ {
   
 }); // end mixin
 
+/** @private Aliasn for SC.clone() */
+SC.copy = SC.clone ;
+
 /** @private Alias for SC.A() */
 SC.$A = SC.A;
 
-/** @private Alias for SC.typeOf() */
-SC.typeOf = SC.typeOf ;
-  
 /** @private Provided for compatibility with old HTML templates. */
 SC.didLoad = SC.K ;
 
