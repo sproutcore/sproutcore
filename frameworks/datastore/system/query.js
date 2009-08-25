@@ -291,7 +291,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     // if called for the first time we have to build the order array
     if (!this._isReady) this.parse();
     if (!this._isReady) { // can't parse. guid is wrong but consistent
-      return SC.compare(record1.get('guid'),record2.get('guid'));
+      return SC.compare(record1.get('id'),record2.get('id'));
     }
     
     // for every property specified in orderBy until non-eql result is found
@@ -315,7 +315,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     // return result or compare by guid
     if (result !== 0) return result ;
-    else return SC.compare(record1.get('guid'),record2.get('guid'));
+    else return SC.compare(record1.get('id'),record2.get('id'));
   },
 
   /** @private 
@@ -1063,7 +1063,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
-    if(query.get('orderBy') && storeKeys) {
+    if (storeKeys) {
       
       // Set tmp variable because we can't pass variables to sort function.
       // Do this instead of generating a temporary closure function for perf
