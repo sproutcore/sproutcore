@@ -121,37 +121,49 @@ test("should recognize all primitives", function() {
   equals(q._tokenList[1].tokenType, 'CLOSE_PAREN', 'type should be CLOSE_PAREN');
   
   // COMPARATORS
-  q.conditions = "= != < <= > >= BEGINS_WITH ENDS_WITH ANY MATCHES TYPE_IS";
+  q.conditions = "= != < <= > >= BEGINS_WITH ENDS_WITH CONTAINS ANY MATCHES TYPE_IS";
   try {
     q.parse();
   } catch(e1) {
     // ignore - we don't care that it doesn't parse - just testing tokens
   }
-  ok(q._tokenList.length == 12, 'list should have 12 tokens');
+  equals(q._tokenList.length, 12, 'q._tokenList.length');
+  
   equals(q._tokenList[0].tokenType, '=', 'type should be =');
   equals(q._tokenList[0].tokenValue, '=', 'value should be =');
+  
   equals(q._tokenList[1].tokenType, '!=', 'type should be !=');
   equals(q._tokenList[1].tokenValue, '!=', 'value should be !=');
+  
   equals(q._tokenList[2].tokenType, '<', 'type should be <');
   equals(q._tokenList[2].tokenValue, '<', 'value should be <');
+  
   equals(q._tokenList[3].tokenType, '<=', 'type should be <=');
   equals(q._tokenList[3].tokenValue, '<=', 'value should be <=');
+  
   equals(q._tokenList[4].tokenType, '>', 'type should be >');
   equals(q._tokenList[4].tokenValue, '>', 'value should be >');
+  
   equals(q._tokenList[5].tokenType, '>=', 'type should be >=');
   equals(q._tokenList[5].tokenValue, '>=', 'value should be >=');
+  
   equals(q._tokenList[6].tokenType, 'BEGINS_WITH', 'type should be BEGINS_WITH');
   equals(q._tokenList[6].tokenValue, 'BEGINS_WITH', 'value should be BEGINS_WITH');
+  
   equals(q._tokenList[7].tokenType, 'ENDS_WITH', 'type should be ENDS_WITH');
   equals(q._tokenList[7].tokenValue, 'ENDS_WITH', 'value should be ENDS_WITH');
+  
   equals(q._tokenList[8].tokenType, 'CONTAINS', 'type should be CONTAINS');
   equals(q._tokenList[8].tokenValue, 'CONTAINS', 'value should be CONTAINS');
-  equals(q._tokenList[8].tokenType, 'ANY', 'type should be ANY');
-  equals(q._tokenList[8].tokenValue, 'ANY', 'value should be ANY');
-  equals(q._tokenList[9].tokenType, 'MATCHES', 'type should be MATCHES');
-  equals(q._tokenList[9].tokenValue, 'MATCHES', 'value should be MATCHES');
-  equals(q._tokenList[10].tokenType, 'TYPE_IS', 'type should be TYPE_IS');
-  equals(q._tokenList[10].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
+  
+  equals(q._tokenList[9].tokenType, 'ANY', 'type should be ANY');
+  equals(q._tokenList[9].tokenValue, 'ANY', 'value should be ANY');
+  
+  equals(q._tokenList[10].tokenType, 'MATCHES', 'type should be MATCHES');
+  equals(q._tokenList[10].tokenValue, 'MATCHES', 'value should be MATCHES');
+  
+  equals(q._tokenList[11].tokenType, 'TYPE_IS', 'type should be TYPE_IS');
+  equals(q._tokenList[11].tokenValue, 'TYPE_IS', 'value should be TYPE_IS');
   
   // BOOLEAN OPERATORS
   q.conditions = "AND OR NOT";

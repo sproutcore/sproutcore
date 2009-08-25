@@ -100,6 +100,10 @@ test("Checking the instance of method for an object", function() {
 test("Checking the kind of method for an object", function() {
 	equals(obj1.kindOf(obj), YES);
 	equals(obj1.kindOf(don), NO);
+	
+	equals(SC.kindOf(obj1, obj), YES);
+	equals(SC.kindOf(obj1, don), NO);
+	equals(SC.kindOf(null, obj1), NO);
 });
 
 

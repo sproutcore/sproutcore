@@ -773,13 +773,26 @@ function findClassNames() {
   Same as the instance method, but lets you check instanceOf without
   having to first check if instanceOf exists as a method.
   
-  @param {Object} object the object to check instance of
+  @param {Object} scObject the object to check instance of
   @param {Class} scClass the class
   @returns {Boolean} if object1 is instance of class
 */
 SC.instanceOf = function(scObject, scClass) {
-  return (scObject && scObject.constructor === scClass) ;  
-} ;
+  return !!(scObject && scObject.constructor === scClass) ;  
+} ; 
+
+/**
+  Same as the instance method, but lets you check kindOf without having to 
+  first check if kindOf exists as a method.
+  
+  @param {Object} scObject object to check kind of
+  @param {Class} scClass the class to check
+  @returns {Boolean} if object is an instance of class or subclass
+*/
+SC.kindOf = function(scObject, scClass) {
+  if (scObject && !scObject.isClass) scObject = scObject.constructor;
+  return !!(scObject && scObject.kindOf(scClass));
+};
 
 /** @private
   Returns the name of this class.  If the name is not known, triggers

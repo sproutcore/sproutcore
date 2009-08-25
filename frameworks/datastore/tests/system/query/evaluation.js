@@ -112,24 +112,24 @@ test("should evaluate all comparators", function() {
   ok(q._tokenTree.evaluate() === false, "'Tea pot' ENDS_WITH 'a cup' should be false");
   
   q.conditions = "'Tea pot' CONTAINS 'Tea pot'";
-  q.parseQuery();
-  ok(q.tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'Tea pot' should be true");
+  q.parse();
+  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'Tea pot' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'Tea'";
-  q.parseQuery();
-  ok(q.tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'Tea' should be true");
+  q.parse();
+  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'Tea' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'pot'";
-  q.parseQuery();
-  ok(q.tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'pot' should be true");
+  q.parse();
+  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'pot' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'a po'";
-  q.parseQuery();
-  ok(q.tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'a po' should be true");
+  q.parse();
+  ok(q._tokenTree.evaluate() == true, "'Tea pot' CONTAINS 'a po' should be true");
   
   q.conditions = "'Tea pot' CONTAINS 'a cup'";
-  q.parseQuery();
-  ok(q.tokenTree.evaluate() == false, "'Tea pot' CONTAINS 'a cup' should be false");
+  q.parse();
+  ok(q._tokenTree.evaluate() == false, "'Tea pot' CONTAINS 'a cup' should be false");
   
   q.conditions = "'Tea pot' MATCHES {myCup}";
   q.parse();

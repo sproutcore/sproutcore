@@ -123,11 +123,13 @@ sc_require('models/record');
   Again see below for details.
 
   @extends SC.Object
-  @static
+  @extends SC.Copyable
+  @extends SC.Freezable
   @since SproutCore 1.0
 */
 
-SC.Query = SC.Object.extend(SC.Copyable, {
+SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, 
+  /** @scope SC.Query.prototype */ {
 
   // ..........................................................
   // PROPERTIES
@@ -175,24 +177,46 @@ SC.Query = SC.Object.extend(SC.Copyable, {
   parameters:  null,
   
   /**
-    If true, then the query will attempt to autoupdate any RecordArrays 
-    whenever their backing store changes.  If you have set a query delegate,
-    then you should expect a call to the queryDidChangeForStore() call to 
-    refresh.
+    Indicates the location where the result set for this query is stored.  
+    Currently the available options are:
     
-    If you set a delegate the query, this will normally change automatically
-    to NO.
+    - SC.Query.LOCAL: indicates that the query results will be automatically computed from the in-memory store.
+    - SC.Query.REMOTE: indicates that the query results are kept on a remote server and hence must be loaded from the DataSource.
     
-    @type {Boolean}
+    The default setting for this property is SC.Query.LOCAL.  
+    
+    Note that even if a query location is LOCAL, your DataSource will still
+    have its fetch() method called for the query.  For LOCAL queries, you 
+    won't need to explicitly provide the query result set; you can just load
+    records into the in-memory store as needed and let the query recompute 
+    automatically.
+    
+    If your query location is REMOTE, then your DataSource will need to 
+    provide the actual set of query results manually.  Usually you will only 
+    need to use a REMOTE query if you are retrieving a large data set and you
+    don't want to pay the cost of computing the result set client side.
+    
+    @property
+    @type {String}
   */
-  updateAutomatically: YES,
+  location: 'local', // SC.Query.LOCAL
+  
+  /**
+    Another query that will optionally limit the search of records.  This is 
+    usually configured for you when you do find() from another record array.
+    
+    @property
+    @type {SC.Query}
+  */
+  scope: null,
   
   // ..........................................................
   // PRIMITIVE METHODS
   // 
   
   /** 
-    Returns YES if record is matched by the query, NO otherwise.
+    Returns YES if record is matched by the query, NO otherwise.  This is 
+    used when computing a query locally.  
  
     @param {SC.Record} record the record to check
     @param {Hash} parameters optional override parameters
@@ -203,12 +227,17 @@ SC.Query = SC.Object.extend(SC.Copyable, {
     // check the recordType if specified
     var rtype, ret = YES ;    
     if (rtype = this.get('recordTypes')) { // plural form
-      ret = rtype.find(function(t) { return SC.instanceOf(record, t);});
-    } else if (rtype = this.get('recordType')) { // singual
-      ret = SC.instanceOf(record, rtype);
+      ret = rtype.find(function(t) { return SC.kindOf(record, t); });
+    } else if (rtype = this.get('recordType')) { // singular
+      ret = SC.kindOf(record, rtype);
     }
+    
     if (!ret) return NO ; // if either did not pass, does not contain
 
+    // if we have a scope - check for that as well
+    var scope = this.get('scope');
+    if (scope && !scope.contains(record)) return NO ;
+    
     // now try parsing
     if (!this._isReady) this.parse(); // prepare the query if needed
     if (!this._isReady) return NO ;
@@ -228,9 +257,14 @@ SC.Query = SC.Object.extend(SC.Copyable, {
   */
   containsRecordTypes: function(types) {
     var rtype = this.get('recordType');
-    if (rtype) return types.contains(rtype);
-    else if (rtype = this.get('recordTypes')) {
-      return rtype.find(function(t) { return types.contains(t); });
+    if (rtype) {
+      return !!types.find(function(t) { return SC.kindOf(t, rtype); });
+    
+    } else if (rtype = this.get('recordTypes')) {
+      return !!rtype.find(function(t) { 
+        return !!types.find(function(t2) { return SC.kindOf(t2,t); });
+      });
+      
     } else return YES; // allow anything through
   },
   
@@ -288,7 +322,6 @@ SC.Query = SC.Object.extend(SC.Copyable, {
       Becomes YES once the query has been successfully parsed 
   */
   _isReady:     NO,
-  _needsRecord: NO,
   
   /**
     This method has to be called before the query object can be used.
@@ -312,58 +345,60 @@ SC.Query = SC.Object.extend(SC.Copyable, {
     return this._isReady;
   },
   
-  // ..........................................................
-  // DATA SOURCE CALLBACKS
-  // 
-
-  _scq_fetchCount: 0,
-  
   /**
-    Called by the data source when it begins loading data for the query.
-    This will update the status, reflecting the same in any record arrays.
+    Returns the same query but with the scope set to the passed record array.
+    This will copy the receiver.  It also stores these queries in a cache to
+    reuse them if possible.
     
-    @returns {SC.Query} receiver
+    @param {SC.RecordArray} recordArray the scope
+    @returns {SC.Query} new query
   */
-  fetchDidBegin: function() {
-    this._scq_fetchCount++;
-    this.setIfChanged('status', SC.Query.BUSY_LOADING);
-    return this ;
-  },
-  
-  /**
-    Called by the data source when it is finished loading data for the query.
-    This will update the status, reflecting the same in any record arrays.
-    It will not have any impact on the actual data shown as adding records to
-    the store will automatically invalidate the actual query data.
-    
-    @returns {SC.Query} receiver
-  */
-  fetchDidEnd: function() {
-    if (--this._scq_fetchCount <= 0) {
-      this._scq_fetchCount = 0 ;
-      this.setIfChanged('status', SC.Record.READY);
+  queryWithScope: function(recordArray) {
+    // look for a cached query on record array.
+    var key = SC.keyFor('__query__', SC.guidFor(this)),
+        ret = recordArray[key];
+        
+    if (!ret) {
+      recordArray[key] = ret = this.copy();
+      ret.set('scope', recordArray);
+      ret.freeze();
     }
-    return this;   
+    
+    return ret ;
   },
-  
   
   // ..........................................................
   // PRIVATE SUPPORT
   // 
 
-  /** @private 
-    disable modifying properties that need to be locked
+  /**
+    Properties that need to be copied when cloning the query.
   */
-  set: function(key, value) {
-    if (!this.isEditable && this._scq_editProperties.contains(key)) {
-      throw "Cannot modify key %@ because %@ is not editable".fmt(this, key);
+  copyKeys: 'conditions orderBy recordType recordTypes parameters location scope'.w(),
+  
+  concatenatedProperties: 'copyKeys'.w(),
+
+  /**
+    Implement the Copyable API to clone a query object once it has been 
+    created.
+  */
+  copy: function() {
+    var opts = {}, 
+        keys = this.get('copyKeys'),
+        loc  = keys ? keys.length : 0,
+        key, value;
+        
+    while(--loc >= 0) {
+      key = keys[loc];
+      value = this.get(key);
+      if (value !== undefined) opts[key] = value ;
     }
-    return this._scq_set(key, value);
+    
+    ret = this.constructor.create(opts);
+    opts = null;
+    return ret ;
   },
-  
-  _scq_set: SC.Observable.set,
-  _scq_editProperties: SC.CoreSet.create().addEach('conditions recordType recordTypes parameters isEditable'.w()),
-  
+
   // ..........................................................
   // QUERY LANGUAGE DEFINITION
   //
@@ -976,6 +1011,23 @@ SC.Query = SC.Object.extend(SC.Copyable, {
 // Class Methods
 SC.Query.mixin( /** @scope SC.Query */ {
 
+  /** Constant used for SC.Query#location */
+  LOCAL: 'local',
+  
+  /** Constant used for SC.Query#location */
+  REMOTE: 'remote',
+  
+  /**
+    Given a query, returns the associated storeKey.  For the inverse of this 
+    method see SC.Store.queryFor().
+    
+    @param {SC.Query} query the query
+    @returns {Number} a storeKey.
+  */
+  storeKeyFor: function(query) {
+    return query ? query.get('storeKey') : null;
+  },
+  
   /**
     Will find which records match a give SC.Query and return an array of 
     store keys. This will also apply the sorting for the query.
@@ -1040,6 +1092,76 @@ SC.Query.mixin( /** @scope SC.Query */ {
         record1  = store.materializeRecord(storeKey1),
         record2  = store.materializeRecord(storeKey2);
     return queryKey.compare(record1, record2);
+  },
+  
+  _scq_build: function(location, recordType, conditions, params) {
+    
+    var ret, cache, key, opts;
+    
+    if (typeof recordType === SC.T_STRING) {
+      ret = SC.objectForPropertyPath(recordType);
+      if (!ret) throw "%@ did not resolve to a class".fmt(recordType);
+      recordType = ret ;
+    }
+    
+    // special case - easy to cache.
+    if (arguments.length <= 2) {
+
+      // handle findAll selector
+      if (!recordType) throw "Query must have a recordType";
+
+      cache = SC.Query._scq_recordTypeQueriesCache;
+      if (!cache) cache = SC.Query._scq_recordTypeQueriesCache = {};
+      if (recordType.isEnumerable) {
+        key = recordType.map(function(k) { return SC.guidFor(k); });
+        key = key.sort().join(':');
+      } else key = SC.guidFor(recordType);
+      
+      ret = cache[key];
+      if (!ret) {
+        if (recordType.isEnumerable) {
+          opts = { recordTypes: recordType.copy() };
+        } else opts = { recordType: recordType };
+        ret = cache[key] = SC.Query.create(opts);
+      }
+      
+      return ret ;
+
+    // otherwise parse extra conditions and handle them
+    } else {
+      // if conditions is a hash, treat as extra opts to assign.
+      var opts;
+      if (SC.typeOf(conditions) === SC.T_HASH) {
+        opts = SC.clone(conditions);
+        conditions = undefined;
+      } else opts = {};
+
+      // pass one or more recordTypes.
+      if (recordType && recordType.isEnumerable) opts.recordsTypes = recordType;
+      else opts.recordType = recordType;
+
+      // if conditions are passed, also look for possible params
+      if (conditions !== undefined) {
+        opts.conditions = conditions ;
+        if (conditions.match(/%@/)) {
+          if (!params || !params.isSCArray) params = SC.A(arguments).slice(3); 
+        } else if (params && params.orderBy) {
+          opts.orderBy = params.orderBy;
+          delete params.orderBy;
+        }
+        opts.params = params ;
+      }
+
+      return SC.Query.create(opts);
+    }
+  },
+  
+  local: function(recordType, conditions, params) {
+    return this._scq_build(SC.Query.LOCAL, recordType, conditions, params);
+  },
+  
+  remote: function(recordType, conditions, params) {
+    return this._scq_build(SC.Query.REMOTE, recordType, conditions, params);
   }
   
 });
@@ -1081,3 +1203,7 @@ SC.Query.registerComparison = function(propertyName, comparison) {
 SC.Query.registerQueryExtension = function(tokenName, token) {
   SC.Query.prototype.queryLanguage[tokenName] = token;
 };
+
+// shorthand
+SC.Q = SC.Query.from ;
+
