@@ -511,6 +511,19 @@ SC.DropDownMenu = SC.ButtonView.extend(
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
       this.set('preferMatrix', tempPreferMatrix) ;
     }
+  },
+
+  /**
+    @private
+
+    Holding down the button should display the menu pane.
+  */
+  mouseDown: function(evt) {
+    if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
+    this.set('isActive', YES);
+    this._isMouseDown = YES;
+    this._action() ;
+    return YES ;
   }
 
 }) ;
