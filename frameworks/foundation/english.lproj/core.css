@@ -4,6 +4,14 @@
 	line-height: 1.4
 }
 
+.ellipsis {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+  -ms-text-overflow: ellipsis;
+}
+
 /* YUI reset*/
 
 .sc-view body,
