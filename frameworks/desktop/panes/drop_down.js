@@ -229,14 +229,22 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @default NO
   */
   isDefaultPosition: NO,
-  
+
   /**
-    lastMenuWidth is the width of the last menu which was created from 
+    lastMenuWidth is the width of the last menu which was created from
     the objects of this drop down.
-    
-    @private 
+
+    @private
   */
   lastMenuWidth: null,
+
+  /**
+    Background color of the icon.This is an optional property.
+
+    @private
+  */
+  iconBgColor: null,
+
   /**
     Left Alignment based on the size of the button
 
@@ -353,15 +361,22 @@ SC.DropDownMenu = SC.ButtonView.extend(
         this._defaultIcon = icon ;
       }
 
-      //Set the items in the itemList array
-      itemList.push({
+      item = {
         title: name,
         icon: icon,
         newVal:value,
         isEnabled: YES,
         checkbox: isChecked,
-        action: this.displaySelectedItem
-      });
+        action: this.displaySelectedItem,
+        iconBgColor: 'blue'
+      } ;
+
+      if (!SC.none(object.color)){
+        item.iconBgColor = object.color ;
+      }
+
+      //Set the items in the itemList array
+      itemList.push(item);
     }
 
     idx += 1 ;
@@ -385,6 +400,61 @@ SC.DropDownMenu = SC.ButtonView.extend(
   },
 
   /**
+    renderTitle method
+
+    @private
+  */
+  renderTitle: function(context, firstTime) {
+    var icon = this.get('icon') ;
+    var iconBgColor = this.get('iconBgColor') || '#BB54FD' ;
+    // console.log(iconBgColor) ;
+    var image = '' ;
+    var title = this.get('displayTitle') ;
+    var needsTitle = (!SC.none(title) && title.length>0);
+    var elem, htmlNode;
+    // get the icon.  If there is an icon, then get the image and update it.
+    // if there is no image element yet, create it and insert it just before
+    // title.
+    if (icon) {
+      var blank = static_url('blank');
+
+      if (iconBgColor) {
+        image = '<img src="%@1" alt="" class="%@2" style="background-color: %@3;" />' ;
+        if (icon.indexOf('/') >= 0) {
+          image = image.fmt(icon, 'icon', iconBgColor);
+        }
+        else {
+          image = image.fmt(blank, icon, iconBgColor);
+        }
+      }
+      else {
+        image = '<img src="%@1" alt="" class="%@2" />' ;
+        if (icon.indexOf('/') >= 0) {
+          image = image.fmt(icon, 'icon');
+        }
+        else {
+          image = image.fmt(blank, icon);
+        }
+      }
+      needsTitle = YES ;
+    }
+    elem = this.$('label');
+
+    if (firstTime) {
+      context.push('<label class="sc-button-label">'+image+title+'</label>');
+    }
+    else if ((htmlNode = elem[0])) {
+      if(needsTitle) {
+        htmlNode.innerHTML = image + title ;
+      }
+      else {
+        htmlNode.innerHTML = '' ;
+      }
+    }
+    return context ;
+  },
+
+  /**
     Button action handler
 
     @private
@@ -394,22 +464,27 @@ SC.DropDownMenu = SC.ButtonView.extend(
   {
     var buttonLabel = this.$('.sc-button-label')[0] ;
     var menuWidth = this.get('layer').offsetWidth ; // Get the length of the text on the button in pixels
-    var scrollWidth = buttonLabel.scrollWidth ; 
-    var lastMenuWidth = this.get('lastMenuWidth'), menuWidth;
+    var scrollWidth = buttonLabel.scrollWidth ;
+    var lastMenuWidth = this.get('lastMenuWidth'), menuWidth ;
     if(scrollWidth) {
        var offsetWidth = buttonLabel.offsetWidth ; // Get the original width of the label in the button
        if(scrollWidth && offsetWidth) {
           menuWidth = menuWidth + scrollWidth - offsetWidth ; //Add the difference of the offset Height and the scrollHeight to the menu width
        }
     }
-    if(!lastMenuWidth || (menuWidth > lastMenuWidth)) {
+    if (!lastMenuWidth || (menuWidth > lastMenuWidth)) {
       lastMenuWidth = menuWidth ;
     }
     this.set('lastMenuWidth',lastMenuWidth) ;
     var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
     var menuControlSize = this.get('controlSize') ;
-    var menu = SC.MenuPane.create({
+
+    // get the user defined custom view
+    var customView = this.get('customView') ;
+    customMenuView = customView ? customView : SC.MenuItemView ;
+
+    var menu  = SC.MenuPane.create({
 
       /**
         Class name - drop-down-menu-item
@@ -423,6 +498,14 @@ SC.DropDownMenu = SC.ButtonView.extend(
         @property
       */
       items: itemList,
+
+      /**
+        Example view which will be used to create the Menu Items
+
+        @default SC.MenuItemView
+        @type SC.View
+      */
+      exampleView: customMenuView,
 
       /**
         This property enables all the items and makes them selectable.
