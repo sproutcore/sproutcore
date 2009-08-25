@@ -246,7 +246,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var val = 0 ;
     var controlSize = this.get('controlSize') ;
     if(controlSize === SC.SMALL_CONTROL_SIZE) val = -14 ;
-    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -11 ;
+    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -16 ;
     return val;
   }.property('controlSize'),
 
