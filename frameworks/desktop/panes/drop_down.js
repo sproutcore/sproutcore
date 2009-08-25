@@ -229,7 +229,14 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @default NO
   */
   isDefaultPosition: NO,
-
+  
+  /**
+    lastMenuWidth is the width of the last menu which was created from 
+    the objects of this drop down.
+    
+    @private 
+  */
+  lastMenuWidth: null,
   /**
     Left Alignment based on the size of the button
 
@@ -385,7 +392,20 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   _action: function( evt )
   {
-    var width = this.get('layer').offsetWidth ;
+    var buttonLabel = this.$('.sc-button-label')[0] ;
+    var menuWidth = this.get('layer').offsetWidth ; // Get the length of the text on the button in pixels
+    var scrollWidth = buttonLabel.scrollWidth ; 
+    var lastMenuWidth = this.get('lastMenuWidth'), menuWidth;
+    if(scrollWidth) {
+       var offsetWidth = buttonLabel.offsetWidth ; // Get the original width of the label in the button
+       if(scrollWidth && offsetWidth) {
+          menuWidth = menuWidth + scrollWidth - offsetWidth ; //Add the difference of the offset Height and the scrollHeight to the menu width
+       }
+    }
+    if(!lastMenuWidth || (menuWidth > lastMenuWidth)) {
+      lastMenuWidth = menuWidth ;
+    }
+    this.set('lastMenuWidth',lastMenuWidth) ;
     var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
     var menuControlSize = this.get('controlSize') ;
@@ -413,8 +433,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',
-      layout: { width: width },
+      layout: { width: lastMenuWidth },
       controlSize: menuControlSize,
+      itemWidth: lastMenuWidth,
       contentView: SC.View.extend({
       })
     }) ;
