@@ -38,7 +38,11 @@ SC.DisclosureView = SC.ButtonView.extend(
   /** @private */
   render: function(context, firstTime) {
     context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" alt="" />');
-    context.push('<label>',this.get('displayTitle'),'</label>');
+    if(this.get('needsEllipsis')){
+      context.push('<label class="ellipsis">',this.get('displayTitle'),'</label>');
+    }else{
+        context.push('<label>',this.get('displayTitle'),'</label>');  
+    }
   }
   
 });

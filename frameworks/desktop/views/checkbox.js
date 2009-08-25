@@ -24,6 +24,8 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   classNames: ['sc-checkbox-view'],
   tagName: 'label',
 
+  needsEllipsis: NO,
+
   render: function(context, firstTime) {
     var dt, elem ;
     
@@ -35,7 +37,11 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
       context.push('<span class="button" ></span>');
       context.push('<input type="checkbox" name="%@" %@ />'.fmt(SC.guidFor(this),disabled));
-      context.push('<span class="label">', dt, '</span>');
+      if(this.get('needsEllipsis')){
+        context.push('<span class="label ellipsis">', dt, '</span>');
+      }else{
+        context.push('<span class="label">', dt, '</span>');  
+      }
       context.attr('name', SC.guidFor(this));
 
     // since we don't want to regenerate the contents each time 
