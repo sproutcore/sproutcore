@@ -14,7 +14,7 @@
 #
 -%>
 <% content_for('bootstrap') do %>
-var SC = SC || {};
+var SC = SC || { BUNDLE_INFO: {} };
 SC.browser = (function() {
   var userAgent = navigator.userAgent.toLowerCase();
   var version = (userAgent.match( /.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [])[1] ;
@@ -34,6 +34,19 @@ SC.browser = (function() {
     browser.current = (browser.msie) ? 'msie' : (browser.mozilla) ? 'mozilla' : (browser.safari) ? 'safari' : (browser.opera) ? 'opera' : 'unknown' ;
   return browser ;
 })();
+
+SC.bundleDidLoad = function(bundle) {
+  var info = this.BUNDLE_INFO[bundle] ;
+  if (!info) info = this.BUNDLE_INFO[bundle] = {} ;
+  info.loaded = true ;
+};
+
+SC.bundleIsLoaded = function(bundle) {
+  var info = this.BUNDLE_INFO[bundle] ;
+  return info ? !!info.loaded : false ;
+};
+
+SC.loadBundle = function() { throw "SC.loadBundle(): SproutCore is not loaded."; };
 
 SC.setupBodyClassNames = function() {
   var el = document.body ;
