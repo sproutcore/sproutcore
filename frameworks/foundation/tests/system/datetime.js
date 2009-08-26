@@ -10,8 +10,8 @@ var ms, options, dt;
 
 module("SC.DateTime", {
   setup: function() {
-    ms = 484387222925;
-    options = {year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925};
+    ms = 484354822925; // 1985-05-08 01:00:22 +02:00
+    options = {year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: SC.DateTime.timezone};
     dt = SC.DateTime.create(options);
   },
   teardown: function() {
@@ -23,6 +23,7 @@ module("SC.DateTime", {
 
 function timeShouldBeEqualToHash(t, h) {
   if (h === undefined) h = testHash;
+  if (h.timezone === undefined) h.timezone = SC.DateTime.timezone;
   
   equals(t.get('year'), h.year , 'year');
   equals(t.get('month'), h.month, 'month');
@@ -31,24 +32,34 @@ function timeShouldBeEqualToHash(t, h) {
   equals(t.get('minute'), h.minute, 'minute');
   equals(t.get('second'), h.second, 'second');
   equals(t.get('millisecond'), h.millisecond, 'millisecond');
+  equals(t.get('timezone'), h.timezone, 'timezone');
 }
 
-test('create', function() {
+function formatTimezone(offset) {
+  var modifier = offset < 0 ? '+' : '-';
+  offset = Math.abs(offset);
+  var minutes = offset % 60;
+  var hours = (offset - minutes) / 60;
+  return modifier + SC.DateTime._pad(hours) + ':' + SC.DateTime._pad(minutes);
+}
+
+test('create with a hash', function() {
   timeShouldBeEqualToHash(dt, options);
 });
 
-test('create', function() {
+test('create with milliseconds', function() {
   var x = SC.DateTime.create(ms);
   timeShouldBeEqualToHash(x, options);
 });
 
 test('adjust', function() {
-  timeShouldBeEqualToHash(dt.adjust({year: 2005}), {year: 2005, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
-  timeShouldBeEqualToHash(dt.adjust({month:   9}), {year: 1985, month: 9, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
-  timeShouldBeEqualToHash(dt.adjust({day:    31}), {year: 1985, month: 5, day: 31, hour: 1, minute: 0, second: 22, millisecond: 925});
-  timeShouldBeEqualToHash(dt.adjust({hour:    3}), {year: 1985, month: 5, day:  8, hour: 3, minute: 0, second:  0, millisecond:   0});
-  timeShouldBeEqualToHash(dt.adjust({minute:  1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 1, second:  0, millisecond:   0});
-  timeShouldBeEqualToHash(dt.adjust({second: 30}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 30, millisecond:   0});
+  timeShouldBeEqualToHash(dt.adjust({year:      2005}), {year: 2005, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.adjust({month:        9}), {year: 1985, month: 9, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.adjust({day:         31}), {year: 1985, month: 5, day: 31, hour: 1, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.adjust({hour:         3}), {year: 1985, month: 5, day:  8, hour: 3, minute: 0, second:  0, millisecond:   0});
+  timeShouldBeEqualToHash(dt.adjust({minute:       1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 1, second:  0, millisecond:   0});
+  timeShouldBeEqualToHash(dt.adjust({millisecond: 18}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond:  18});
+  timeShouldBeEqualToHash(dt.adjust({timezone:     0}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: 0});
 });
 
 test('advance', function() {
@@ -66,12 +77,20 @@ test('compare', function() {
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1, second: -1})), 0);
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1})), -1);
   equals(SC.DateTime.compareDate(dt, dt.advance({day: 1})), -1);
+  
+  equals(SC.DateTime.compare(dt, dt.advance({timezone: -120, hours: 120})), 0);
 });
 
 test('Format', function() {
   equals(
     dt.toFormattedString('%a %A %b %B %d %H %I %j %m %M %p %S %w %y %Y %%a'),
     'Wed Wednesday May May 08 01 01 128 05 00 AM 22 3 85 1985 %a');
+  
+  equals(dt.toFormattedString('%Z'), formatTimezone(SC.DateTime.timezone));
+  equals(dt.adjust({timezone:    0}).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-05-08 01:00:22 +00:00');
+  equals(dt.adjust({timezone: -120}).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-05-08 01:00:22 +02:00');
+  equals(dt.adjust({timezone:  420}).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-05-08 01:00:22 -07:00');
+  
 });
 
 test('fancy getters', function() {
@@ -122,9 +141,16 @@ test('parse', function() {
     {year: 1971, month: 1, day: 1, hour: 0, minute: 0, second: 0, millisecond: 0});
 });
 
-test('parse with time zones',function(){
-  equals(SC.DateTime.parse('08/05/1985 01:00:22 %a -0700', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),"1985-05-07T18:00:22-07:00");
-  equals(SC.DateTime.parse('07/01/2020 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),"2020-01-07T18:33:22-08:00");
+test('parse with time zones',function() {
+  equals(
+    SC.DateTime.parse('08/05/1985 01:00:22 %a -0700', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),
+    "1985-05-08T01:00:22-07:00");
+  equals(
+    SC.DateTime.parse('08/05/1985 01:00:22 %a +02:00', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),
+    "1985-05-08T01:00:22+02:00");
+  equals(
+    SC.DateTime.parse('07/01/2020 18:33:22 %a Z', '%d/%m/%Y %H:%M:%S %%a %Z').toISO8601(),
+    "2020-01-07T18:33:22+00:00");
 });
 
 test('binding', function() {
