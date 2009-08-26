@@ -239,11 +239,11 @@ SC.DropDownMenu = SC.ButtonView.extend(
   lastMenuWidth: null,
 
   /**
-    Property to implement ellipsis.
+    Background color of the icon.This is an optional property.
 
     @private
   */
-  needsEllipsis: YES,
+  iconBgColor: null,
 
   /**
     Left Alignment based on the size of the button
@@ -298,6 +298,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var nameKey = this.get('nameKey') ;
     var iconKey = this.get('iconKey') ;
     var valueKey = this.get('valueKey') ;
+    var iconBgColorKey = this.get('iconBgColorKey') ;
     var checkboxEnabled = this.get('checkboxEnabled') ;
 
     //get the current selected value
@@ -335,6 +336,11 @@ SC.DropDownMenu = SC.ButtonView.extend(
       // then convert to a string or use _guid if one of available.
       var value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
+      
+        var iconColor = iconBgColorKey ? (object.get ?
+          object.get(iconBgColorKey) : object[iconBgColorKey]) : null ;
+        if (SC.none(object[iconBgColorKey])) iconBgColor = null ;
+       console.log('icon '+iconBgColor)
 
       if (currentSelectedVal && value){
         if( currentSelectedVal === value ) {
@@ -368,12 +374,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
         isEnabled: YES,
         checkbox: isChecked,
         action: this.displaySelectedItem,
-        iconBgColor: 'blue'
+        iconBgColor: iconColor
       } ;
-
-      if (!SC.none(object.color)){
-        item.iconBgColor = object.color ;
-      }
 
       //Set the items in the itemList array
       itemList.push(item);
@@ -397,6 +399,61 @@ SC.DropDownMenu = SC.ButtonView.extend(
     this.changeDropDownPreferMatrix(this.itemIdx) ;
 
     sc_super() ;
+  },
+
+  /**
+    renderTitle method
+
+    @private
+  */
+  renderTitle: function(context, firstTime) {
+    var icon = this.get('icon') ;
+    var iconBgColor = this.get('iconBgColor') || '#BB54FD' ;
+    // console.log(iconBgColor) ;
+    var image = '' ;
+    var title = this.get('displayTitle') ;
+    var needsTitle = (!SC.none(title) && title.length>0);
+    var elem, htmlNode;
+    // get the icon.  If there is an icon, then get the image and update it.
+    // if there is no image element yet, create it and insert it just before
+    // title.
+    if (icon) {
+      var blank = static_url('blank');
+
+      if (iconBgColor) {
+        image = '<img src="%@1" alt="" class="%@2" style="background-color: %@3;" />' ;
+        if (icon.indexOf('/') >= 0) {
+          image = image.fmt(icon, 'icon', iconBgColor);
+        }
+        else {
+          image = image.fmt(blank, icon, iconBgColor);
+        }
+      }
+      else {
+        image = '<img src="%@1" alt="" class="%@2" />' ;
+        if (icon.indexOf('/') >= 0) {
+          image = image.fmt(icon, 'icon');
+        }
+        else {
+          image = image.fmt(blank, icon);
+        }
+      }
+      needsTitle = YES ;
+    }
+    elem = this.$('label');
+
+    if (firstTime) {
+      context.push('<label class="sc-button-label">'+image+title+'</label>');
+    }
+    else if ((htmlNode = elem[0])) {
+      if(needsTitle) {
+        htmlNode.innerHTML = image + title ;
+      }
+      else {
+        htmlNode.innerHTML = '' ;
+      }
+    }
+    return context ;
   },
 
   /**
@@ -425,6 +482,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var itemList = this.get('itemList') ;
     var menuControlSize = this.get('controlSize') ;
 
+    // get the user defined custom view
+    var customView = this.get('customView') ;
+    customMenuView = customView ? customView : SC.MenuItemView ;
+
     var menu  = SC.MenuPane.create({
 
       /**
@@ -439,6 +500,14 @@ SC.DropDownMenu = SC.ButtonView.extend(
         @property
       */
       items: itemList,
+
+      /**
+        Example view which will be used to create the Menu Items
+
+        @default SC.MenuItemView
+        @type SC.View
+      */
+      exampleView: customMenuView,
 
       /**
         This property enables all the items and makes them selectable.
