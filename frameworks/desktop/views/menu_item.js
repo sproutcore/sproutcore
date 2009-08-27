@@ -417,7 +417,10 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   //..........................................
   //Mouse Events Handling
   //..........................................
-  
+
+  // to check the 'isMouseDown' property of the anchor 
+  isAnchorMouseDown: NO,
+
   mouseUp: function(evt) {
     if (!this.get('isEnabled') || this.get('hasMouseExited')) {
       this.set('hasMouseExited',NO) ;
@@ -464,6 +467,11 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this.set('hasMouseExited', NO) ;
     if(parentMenu) {
       parentMenu.becomeKeyPane() ;
+      var isAnchorMouseDown = parentMenu.getPath('anchor._isMouseDown') ;
+      this.set('isAnchorMouseDown', isAnchorMouseDown) ;
+      if(this.get('isAnchorMouseDown')) {
+        SC.Event.trigger(this.get('layer'), 'mousedown');
+      }
     }
     if (!this.get('isEnabled') && !this.isSeparator()) return YES ;
     var key = this.get('contentIsBranchKey') ;
