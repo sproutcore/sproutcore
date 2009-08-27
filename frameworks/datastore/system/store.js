@@ -374,10 +374,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   /**
-    Writes the current status for a storeKey.
+    Writes the current status for a storeKey.  If the new status is 
+    SC.Record.ERROR, you may also pass an optional error object.  Otherwise 
+    this param is ignored.
     
     @param {Number} storeKey the store key
     @param {String} newStatus the new status
+    @param {SC.Error} error optional error object
     @returns {SC.Store} receiver
   */
   writeStatus: function(storeKey, newStatus) {
@@ -453,7 +456,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     }
     
-    // schedule
+    // store info in changes hash and schedule notification if needed.
     var changes = this.recordPropertyChanges;
     if (!changes) {
       changes = this.recordPropertyChanges = 
@@ -497,7 +500,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         statusOnly  = changes.statusOnly,
         records     = changes.records, 
         propertyForStoreKeys  = changes.propertyForStoreKeys,
-        recordTypes = SC.Set.create(),
+        recordTypes = SC.CoreSet.create(),
         rec, recordType, status, idx, len, storeKey, props, idxx, lenn;
     
     for(idx=0,len=storeKeys.length;idx<len;idx++) {
@@ -529,27 +532,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
     
     }
-    this._notifyRecordArraysWithQuery(storeKeys, recordTypes);
+
+    this._notifyRecordArrays(storeKeys, recordTypes);
     this.recordPropertyChanges = null;
     return this;
-  },
-  
-  /** @private 
-    Will ask all record arrays that have been returned from findAll
-    with an SC.Query to check their arrays with the new storeKeys
-    
-    @param {SC.IndexSet} storeKeys set of storeKeys that changed
-    @param {SC.Set} recordTypes
-  */
-  
-  _notifyRecordArraysWithQuery: function(storeKeys, recordTypes) {
-    var recordArrays = this.recordArraysWithQuery;
-    if(!recordArrays) return;
-    
-    for(var idx=0, len=recordArrays.length;idx<len;idx++) {
-      var recArray = recordArrays[idx];
-      if (recArray) recArray.storeDidChangeStoreKeys(storeKeys, recordTypes);
-    }
   },
   
   /**
@@ -677,36 +663,116 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // 
   
   /**
-    Finds a record instance with the specified recordType and id, returning 
-    the record instance.  If no matching record could be found, asks the 
-    data source to retrieve the record.  If the data source cannot retrieve
-    the record, returns null.
+    Finds a single record instance with the specified recordType and id or an 
+    array of records matching some query conditions.
     
-    Note that if you try to find a record id that does not exist in memory,
-    a dataSource may load it from the server.  In this case, this method will
-    return a record instance with a status of SC.Record.BUSY_LOADING to indicate
-    that it is still fetching the data from the server.
+    h2. Finding a Single Record
     
-    You can also pass YES to the isRefresh parameter which will make sure to
-    always go back to the data source so that you can go back to refresh the 
-    record that is currently in the store. In that case, the record will
-    get the SC.Record.BUSY_REFRESH status until server has responded and
-    store is refreshed.
+    If you pass a single recordType and id, this method will return an actual
+    record instance.  If the record has not been loaded into the store yet,
+    this method will ask the data source to retrieve it.  If no data source
+    indicates that it can retrieve the record, then this method will return
+    null.
+    
+    Note that if the record needs to be retrieved from the server, then the
+    record instance returned from this method will not have any data yet. 
+    Instead it will have a status of SC.Record.READY_LOADING.  You can monitor
+    the status property to be notified when the record data is available for 
+    you to use it.
+    
+    h2. Find a Collection of Records
+    
+    If you pass only a record type or a query object, you can instead find 
+    all records matching a specified set of conditions.  When you call find()
+    in this way, it will create a query if needed and pass it to the data
+    source to fetch the results.
+    
+    If this is the first time you have fetched the query, then the store will
+    automatically ask the data source to fetch any records related to it as 
+    well.  Otherwise you can refresh the query results at anytime by calling
+    refresh() on the returned RecordArray.
+
+    You can detect whether a RecordArray is fetching from the server by 
+    checking its status.
+    
+    h2. Examples
+    
+    Finding a single record:
+    
+    {{{
+      MyApp.store.find(MyApp.Contact, "23"); // returns MyApp.Contact
+    }}}
+    
+    Finding all records of a particular type:
+    
+    {{{
+      MyApp.store.find(MyApp.Contact); // returns SC.RecordArray of contacts
+    }}}
+    
+    Finding all contacts with first name John:
+    
+    {{{
+      var query = SC.Query.local(MyApp.Contact, "firstName = %@", "John");
+      MyApp.store.find(query); // returns SC.RecordArray of contacts
+    }}}
+    
+    Finding all contacts using a remote query:
+    
+    {{{
+      var query = SC.Query.remote(MyApp.Contact);
+      MyApp.store.find(query); // returns SC.RecordArray filled by server
+    }}}
     
     @param {SC.Record|String} recordType the expected record type
     @param {String} id the id to load
-    @param {Hash} params optional additional parameters to pass along to the
-      data source
-    @param {Boolean} isRefresh
     @returns {SC.Record} record instance or null
   */
-  find: function(recordType, id, params, isRefresh) {
+  find: function(recordType, id) {
+
     // if recordType is passed as string, find object
-    if(SC.typeOf(recordType)===SC.T_STRING) {
+    if (SC.typeOf(recordType)===SC.T_STRING) {
       recordType = SC.objectForPropertyPath(recordType);
     }
     
+    // handle passing a query...
+    if (arguments.length === 1) {
+      if (!recordType) throw "SC.Store#find() must pass recordType or query";
+      if (!recordType.isQuery) recordType = SC.Query.local(recordType);
+      return this._findQuery(recordType, YES, YES);
+      
+    // handle finding a single record
+    } else return this._findRecord(recordType, id);
+  },
+
+  _findQuery: function(query, createIfNeeded, refreshIfNew) {
+
+    // lookup the local RecordArray for this query.
+    var cache = this._scst_recordArraysByQuery, 
+        key   = SC.guidFor(query),
+        ret, ra ;
+    if (!cache) cahce = this._scst_recordArraysByQuery = {};
+    ret = cache[key];
+    
+    // if a RecordArray was not found, then create one and also add it to the
+    // list of record arrays to update.
+    if (!ret && createIfNeeded) {
+      cache[key] = ret = SC.RecordArray.create({ store: this, query: query });
+
+      ra = this.get('recordArrays');
+      if (!ra) this.set('recordArrays', ra = SC.Set.create());
+      ra.add(ret);
+
+      if (refreshIfNew) this.refreshQuery(query);
+    }
+    
+    return ret ;
+  },
+  
+  _findRecord: function(recordType, id) {
+
     // first attempt to find the record in the local store
+    // if a record instance is passed, get the storeKey.  This allows you to
+    // pass a record from a chained store.
     var storeKey ;
     if (recordType && recordType.get && recordType.get('isRecord')) {
       storeKey = recordType.get('storeKey');
@@ -716,231 +782,82 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = this.retrieveRecord(recordType, id);
     }
     
-    // also make sure to reach to the data source to actually
-    // retrieveRecord if isRefresh is YES, even if it already exists in store
-    if(isRefresh) {
-      this.retrieveRecord(recordType, id, null, isRefresh);
-    }
-    
     // now we have the storeKey, materialize the record and return it.
     return storeKey ? this.materializeRecord(storeKey) : null ;
   },
 
-  /**
-    Takes the passed options and builds a query object, possibly allowing the
-    data source to configure the query, deciding how it should be handled.
-    
-    You can take this query and call findAll() to actually execute the 
-    query later.
-    
-    @param {SC.Record} recordType the type of records or array of types
-    @param {String} conditions query conditions
-    @param {Hash|Array} params additonal properties to set on the query
-    @returns {SC.Query} the query
-  */
-  queryFor: function(recordType, conditions, params) {
-    var ret, key, queries, source;
-    
-    // make API compatible with findAll.
-    if (SC.instanceOf(recordType, SC.Query)) return recordType;
-    
-    // if recordType is passed as a string, find object
-    if (SC.typeOf(recordType) === SC.T_STRING) {
-      recordType = SC.objectForPropertyPath(recordType);
-    }
-    
-    // if no params were passed, attempt to use a cached version
-    if (!params) {
-      key = [] ;
-      if (recordType && recordType.isEnumerable) {
-        recordType.forEach(function(t) { 
-          if (SC.typeOf(t)===SC.T_STRING) t = SC.objectForPropertyPath(t);
-          key.push(SC.guidFor(t)); 
-        });
-        
-      } else key.push(SC.guidFor(recordType));
-      
-      key.sort(); // make sure recordTypes go in the same order every time
-      key.push('@');
-      key.push(SC.guidFor(conditions));
-      key = key.join('-');
-      
-      queries = this._scstore_queries ;
-      if (!queries) queries = this._scstore_queries = {};
-      ret = queries[key];
-    }
-    
-    // if not cached, create query
-    if (!ret) {
-      if (params) {
-        if (!params.isEnumerable) params = SC.clone(params);
-        else if (params.isSCArray) params = { parameters: params };
-        else params = { parameters: params.toArray() };
-      } else params = {};
-      
-      if (recordType && recordType.isEnumerable) {
-        params.recordTypes = recordType ; // save multiple
-      } else params.recordType = recordType; // save single
+  // ..........................................................
+  // RECORD ARRAY OPERATIONS
+  // 
 
-      params.conditions = conditions ;
-      
-      ret = SC.Query.create(params);
-      
-      source = this._getDataSource();
-      if (source) source.prepareQuery(this, ret);
-    }
-    
-    // use caching if possible
-    if (queries && key) queries[key] = ret ;
-    return ret ;
-  },
-  
-  /**
-    Retrieves records from the persistent store.  You should pass in a named
-    query that will be understood by one of the persistent stores you have
-    configured along with any optional parameters needed by the search.
-    
-    The return value is an SC.RecordArray that may be populated dynamically
-    by the server as data becomes available.  You can treat this object just
-    like any other object that implements SC.Array.
-    
-    h2. Query Keys
-    
-    The kind of fetchKey you pass is generally determined by the type of 
-    persistent stores you hook up for your application. Most stores, however,
-    will accept an SC.Record subclass as the fetchKey. It is up to your data 
-    source to figure out which storeKeys to return based on the fetchKey. This 
-    will return  a RecordArray matching all instances of that class as is 
-    relevant to your application, for instance: findAll(MyApp.MyModel)
-    
-    You can also pass an SC.Query object as your fetchKey, for instance:
-    var q = SC.Query.create({ recordType: MyApp.MyModel, 
-      conditions: "firstName = 'John'", orderBy: "lastName ASC"});
-    var records = MyApp.store.findAll(q);
-    
-    If an SC.Query is given as fetchKey, the record array created in
-    findAll() will automatically update when records are added, changed, 
-    or removed from the store. When a fetchKey is given, you do not have to 
-    return anything from the data source as you are from then on delegating
-    the responsibility to keep the record array updated to the store.
-    
-    Once you retrieve a RecordArray, you can filter the results even further
-    by using the filter() method, which may issue even more specific requests.
-    
-    @param {Object|SC.Query} fetchKey key describing the type of records to 
-      fetch or a predefined SC.Query object
-    @param {Hash} params optional additional parameters to pass along to the
-      data source
-    @param {SC.RecordArray} recordArray optional if you want to find just 
-      within a given record array
-    @returns {SC.RecordArray} matching set or null if no server handled it
-  */
-  findAll: function(recordType, conditions, params, recordArray, _store) { 
-    var query, source, storeKeys, ret ;
-    if (!_store) _store = this;
-    
-    // get a query for the passed parameters
-    if (SC.instanceOf(recordType, SC.Query)) {
-      query = recordType;
-      recordArray = conditions;
-    } else query = this.queryFor(recordType, conditions, params);
-
-    // if a record array is passed, just search in the recordArray.  Return 
-    if (recordArray) {
-      storeKeys = SC.Query.containsRecords(query, recordArray, _store);
-
-    // otherwise, actually ask the data source, if we have one, to fetch the
-    // records.
-    } else {
-      source = this._getDataSource();
-      // the source only knows about the root store, no chained stores, so 
-      // pass "this" as store, not "_store".
-      if (source) source.fetchQuery(this, query); 
-    }
-
-    ret = _store.recordArrayFromQuery(query, storeKeys);
-    return ret ;
-  },
-  
-  recordArrayFromQuery: function(query, storeKeys) {
-    var cache = this._scstore_recordArrays,
-        ret, key;
-    
-    // if storeKeys are passed, this is a one time record array.  not live.
-    // just build and return.
-    if (storeKeys) {
-      ret = SC.RecordArray.create({
-        store: this,
-        storeKeys: storeKeys,
-        query: query,
-        autoupdate: NO
-      });
-    
-    // otherwise, try to get from cache
-    } else {
-      if (!cache) cache = this._scstore_recordArrays = {}; 
-      key = SC.guidFor(query);
-      ret = cache[key];
-      if (!ret) {
-        cache[key] = ret = SC.RecordArray.create({
-          store: this,
-          query: query,
-          autoupdate: YES
-        });
-      } 
-    }
-    
-    // if the record array auto-updates, then register
-    if (ret && ret.get('autoupdate')) {
-      if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
-      this.recordArraysWithQuery.push(ret);
-    }
-    
-    return ret ;
-  },
-  
   /**
     Called by the record array just before it is destroyed.  This will 
     de-register it from receiving future notifications.
+
+    You should never call this method yourself.  Instead call destroy() on the
+    RecordArray directly.
+    
+    @param {SC.RecordArray} recordArray the record array
+    @returns {SC.Store} receiver
   */
   recordArrayWillDestroy: function(recordArray) {
-    var recordArrays = this.recordArraysWithQuery;
-    if (recordArrays) recordArrays.removeObject(recordArray);
+    var cache = this._scst_recordArraysByQuery,
+        set   = this.get('recordArrays');
+        
+    if (cache) delete cache[SC.guidFor(recordArray.get('query'))];
+    if (set) set.remove(recordArray);
+    return this ;
+  },
+
+  /**
+    Called by the record array whenever it needs the data source to refresh
+    its contents.  Nested stores will actually just pass this along to the
+    parent store.  The parent store will call fetch() on the data source.
+
+    You should never call this method yourself.  Instead call refresh() on the
+    RecordArray directly.
+    
+    @param {SC.Query} query the record array query to refresh
+    @returns {SC.Store} receiver
+  */
+  refreshQuery: function(query) {
+    if (!query) throw "refreshQuery() requires a query";
+
+    var cache    = this._scst_recordArraysByQuery,
+        recArray = cache ? cache[SC.guidFor(query)] : null, 
+        source   = this._getDataSource();
+        
+    if (source && source.fetch) {
+      if (recArray) recArray.storeWillFetchQuery(query);
+      source.fetch.call(source, this, query);
+    }
+    
+    return this ;      
+  },
+  
+  /** @private 
+    Will ask all record arrays that have been returned from findAll
+    with an SC.Query to check their arrays with the new storeKeys
+    
+    @param {SC.IndexSet} storeKeys set of storeKeys that changed
+    @param {SC.Set} recordTypes
+    @returns {SC.Store} receiver
+  */
+  _notifyRecordArrays: function(storeKeys, recordTypes) {
+    var recordArrays = this.get('recordArray');
+    if (!recordArrays) return this;
+
+    recordArrays.forEach(function(recArray) {
+      if (recArray) recArray.storeDidChangeStoreKeys(storeKeys, recordTypes);
+    }, this);
+    
     return this ;
   },
   
-  /**
-    Creates a record array based on passed storeKeys. Will return
-    cache if records are already cached, if not store them for reuse.
-    
-    @param {Array} storeKeys added to returned record array
-    @param {Object|SC.Query} fetchKey
-    @param {SC.Store} _store
-    @returns {SC.RecordArray} matching set or null if no server handled it
-  */
   
-  recordArrayFromStoreKeys: function(storeKeys, fetchKey, _store) {
-    var ret, isQuery = SC.instanceOf(fetchKey, SC.Query), cacheKey, queryKey;
-    
-    // if an array was provided, see if a wrapper already exists for 
-    // this store.  Otherwise create it
-    cacheKey = SC.keyFor('__records__', [SC.guidFor(storeKeys), SC.guidFor(fetchKey)].join('_'));
-    ret = this[cacheKey];
-    if (!ret) {
-      if(isQuery) queryKey = fetchKey;
-      ret = SC.RecordArray.create({store: _store, storeKeys: storeKeys, queryKey: queryKey});
-      
-      // store reference to record array if SC.Query so we can notify it
-      // when store changes
-      if(isQuery) {
-        if (!this.recordArraysWithQuery) this.recordArraysWithQuery = [];
-        this.recordArraysWithQuery.push(ret);
-      }
-      
-      this[cacheKey] = ret ; // save for future reuse.
-    }
-    return ret;
-  },
+  // ..........................................................
+  // LOW-LEVEL HELPERS
+  // 
   
   /**
     Array of all records currently in the store with the specified
@@ -1651,8 +1568,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     they were loaded from the data source and do not need to be committed 
     back before changing.
     
-    This method is implemented by calling pushRetrieve().  The standard
-    state constraints for that method apply here.
+    This method will check the state of each storeKey and call either 
+    pushRetrieve() or dataSourceDidComplete().  The standard state constraints 
+    for these methods apply here.
+    
+    The return value will be the storeKeys used for each push.  This is often
+    convenient to pass into loadQuery(), if you are fetching a remote query.
     
     If you are upgrading from a pre SproutCore 1.0 application, this method 
     is the closest to the old updateRecords().
@@ -1666,6 +1587,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var isArray = SC.typeOf(recordTypes) === SC.T_ARRAY,
         len     = dataHashes.get('length'),
         ret     = [],
+        K       = SC.Record,
         recordType, id, primaryKey, idx, dataHash, storeKey;
         
     // save lookup info
@@ -1683,7 +1605,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       }
       id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
       ret[idx] = storeKey = recordType.storeKeyFor(id); // needed to cache
-      this.pushRetrieve(recordType, id, dataHash, storeKey);
+      
+      if (this.readStatus(storeKey) & K.BUSY) {
+        this.dataSourceDidComplete(storeKey, dataHash, id);
+      } else this.pushRetrieve(recordType, id, dataHash, storeKey);
     }
     
     // return storeKeys
@@ -1884,6 +1809,133 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   },
   
   // ..........................................................
+  // FETCH CALLBACKS
+  // 
+  
+  // NOTE: although these method works on RecordArray instances right now.
+  // They could be optimized to actually share query results between nested
+  // stores.  This is why these methods are implemented here instead of 
+  // directly on Query or RecordArray objects.
+  
+  /**
+    Sets the passed array of storeKeys as the new data for the query.  You
+    can call this at any time for a remote query to update its content.  If
+    you want to use incremental loading, then pass a SparseArray object.
+    
+    If the query you pass is not a REMOTE query, then this method will raise
+    an exception.  This will also implicitly transition the query state to 
+    SC.Record.READY.
+    
+    If you called loadRecords() before to load the actual content, you can
+    call this method with the return value of that method to actually set the
+    storeKeys on the result.
+    
+    @param {SC.Query} query the query you are loading.  must be remote.
+    @param {SC.Array} storeKeys array of store keys
+    @returns {SC.Store} receiver
+  */
+  loadQueryResults: function(query, storeKeys) {
+    if (query.get('location') === SC.Query.LOCAL) {
+      throw "Cannot load query results for a local query";
+    }
+
+    var recArray = this._findQuery(query, YES, NO);
+    if (recArray) recArray.set('storeKeys', storeKeys);
+    this.dataSourceDidFetchQuery(query);
+    
+    return this ;
+  },
+  
+  /**
+    Called by your data source whenever you finish fetching the results of a 
+    query.  This will put the query into a READY state if it was loading.
+    
+    Note that if the query is a REMOTE query, then you must separately load 
+    the results into the query using loadQuery().  If the query is LOCAL, then
+    the query will update automatically with any new records you added to the
+    store.
+    
+    @param {SC.Query} query the query you fetched
+    @returns {SC.Store} receiver
+  */
+  dataSourceDidFetchQuery: function(query) {
+    return this._dataSourceDidFetchQuery(query, YES);
+  },
+  
+  _dataSourceDidFetchQuery: function(query, createIfNeeded) {
+    var recArray     = this._findQuery(query, createIfNeeded, NO),
+        nestedStores = this.get('nestedStores'),
+        loc          = nestedStores ? nestedStores.get('length') : 0;
+    
+    // fix query if needed
+    if (recArray) recArray.storeDidFetchQuery(query);
+    
+    // notify nested stores
+    while(--loc >= 0) {
+      nestedStores[loc]._scstore_dataSourceDidFetchQuery(query, NO);
+    }
+    
+    return this ;
+  },
+  
+  /**
+    Called by your data source if it cancels fetching the results of a query.
+    This will put any RecordArray's back into its original state (READY or
+    EMPTY).
+    
+    @param {SC.Query} query the query you cancelled
+    @returns {SC.Store} receiver
+  */
+  dataSourceDidCancelQuery: function(query) {
+    return this._scstore_dataSourceDidCancelQuery(query, YES);
+  },
+  
+  _scstore_dataSourceDidCancelQuery: function(query, createIfNeeded) {
+    var recArray     = this._findQuery(query, createIfNeeded, NO),
+        nestedStores = this.get('nestedStores'),
+        loc          = nestedStores ? nestedStores.get('length') : 0;
+    
+    // fix query if needed
+    if (recArray) recArray.storeDidCancelQuery(query);
+    
+    // notify nested stores
+    while(--loc >= 0) {
+      nestedStores[loc]._scstore_dataSourceDidCancelQuery(query, NO);
+    }
+    
+    return this ;
+  },
+  
+  /**
+    Called by your data source if it encountered an error loading the query.
+    This will put the query into an error state until you try to refresh it
+    again.
+    
+    @param {SC.Query} query the query with the error
+    @param {SC.Error} error optional error object to set
+    @returns {SC.Store} receiver
+  */
+  dataSourceDidErrorQuery: function(query, error) {
+    return this._scstore_dataSourceDidErrorQuery(query, YES);
+  },
+
+  _scstore_dataSourceDidCancelQuery: function(query, createIfNeeded) {
+    var recArray     = this._findQuery(query, createIfNeeded, NO),
+        nestedStores = this.get('nestedStores'),
+        loc          = nestedStores ? nestedStores.get('length') : 0;
+
+    // fix query if needed
+    if (recArray) recArray.storeDidErrorQuery(query);
+
+    // notify nested stores
+    while(--loc >= 0) {
+      nestedStores[loc]._scstore_dataSourceDidErrorQuery(query, NO);
+    }
+
+    return this ;
+  },
+    
+  // ..........................................................
   // INTERNAL SUPPORT
   // 
   
@@ -2025,6 +2077,16 @@ SC.Store.mixin({
   recordTypesByStoreKey: {},
   
   /** @private
+    Maps some storeKeys to query instance.  Once a storeKey is associated with
+    a query instance, that remains constant through the lifetime of the 
+    application.  If a Query is destroyed, it will remove itself from this 
+    list.
+    
+    Don't access this directly.  Use queryFor().
+  */
+  queriesByStoreKey: [],
+  
+  /** @private
     The next store key to allocate.  A storeKey must always be greater than 0
   */
   nextStoreKey: 1,
@@ -2040,6 +2102,17 @@ SC.Store.mixin({
   */
   idFor: function(storeKey) {
     return this.idsByStoreKey[storeKey] ;
+  },
+  
+  /**
+    Given a storeKey, returns the query object associated with the key.  If
+    no query is associated with the storeKey, returns null.
+    
+    @param {Number} storeKey the store key
+    @returns {SC.Query} query query object
+  */
+  queryFor: function(storeKey) {
+    return this.queriesByStoreKey[storeKey];  
   },
   
   /**
@@ -2065,20 +2138,25 @@ SC.Store.mixin({
     @param {String} newPrimaryKey the new primary key
     @returns {SC.Store} receiver
   */
-  replaceIdFor: function(storeKey, primaryKey) {
-    var recordType = this.recordTypeFor(storeKey);
-    if (!recordType) {
-      throw "replaceIdFor: storeKey %@ does not exist".fmt(storeKey);
+  replaceIdFor: function(storeKey, newId) {
+    var oldId = this.idsByStoreKey[storeKey],
+        recordType, storeKeys;
+        
+    if (oldId !== newId) { // skip if id isn't changing
+
+      recordType = this.recordTypeFor(storeKey);
+       if (!recordType) {
+        throw "replaceIdFor: storeKey %@ does not exist".fmt(storeKey);
+      }
+
+      // map one direction...
+      this.idsByStoreKey[storeKey] = newId; 
+
+      // then the other...
+      storeKeys = recordType.storeKeysById() ;
+      delete storeKeys[oldId];
+      storeKeys[newId] = storeKey;     
     }
-    
-    // map one direction...
-    var oldPrimaryKey = this.idsByStoreKey[storeKey];
-    this.idsByStoreKey[storeKey] = primaryKey ;
-    
-    // then the other...
-    var storeKeys = recordType.storeKeysById() ;
-    delete storeKeys[oldPrimaryKey];
-    storeKeys[primaryKey] = storeKey;     
     
     return this ;
   },

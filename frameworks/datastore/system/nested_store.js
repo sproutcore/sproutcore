@@ -103,6 +103,20 @@ SC.NestedStore = SC.Store.extend(
   // 
   
   /**
+    find() cannot accept REMOTE queries in a nested store.  This override will
+    verify that condition for you.  See SC.Store#find() for info on using this
+    method.
+    
+    @returns {SC.Record|SC.RecordArray}
+  */
+  find: function(query) {
+    if (query && query.isQuery && query.get('location') !== SC.Query.LOCAL) {
+      throw "SC.Store#find() can only accept LOCAL queries in nested stores";
+    }
+    return sc_super();
+  },
+  
+  /**
     Resets a store's data hash contents to match its parent.
     
     @returns {SC.Store} receiver
@@ -211,6 +225,16 @@ SC.NestedStore = SC.Store.extend(
     // TODO: Notify record instances
     
     this.set('hasChanges', NO);
+  },
+  
+  /** @private
+  
+    Chain to parentstore
+  */
+  refreshQuery: function(query) {
+    var parentStore = this.get('parentStore');
+    if (parentStore) parentStore.refreshQuery(query);
+    return this ;      
   },
   
   // ..........................................................

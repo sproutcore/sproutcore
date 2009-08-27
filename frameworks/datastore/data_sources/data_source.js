@@ -21,65 +21,73 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   
 
   /**
-    Invoked by the store the first time a Query is created.  This gives you a 
-    chance to configure the query object before it is actually used to 
-    retrieve data.  
-    
-    Normally if you just want a query to be filled from whatever objects are
-    in memory, you don't need to override this method at all.  If you want to
-    control the actual way the Query is filled, you can configure the Query
-    now.
-    
-    After this method returns, the query will be frozen.
-    
-    @param {SC.Store} store the requesting store
-    @param {SC.Query} query the query
-    @returns {void}
-  */
-  prepareQuery: function(store, query) {
-  },
-  
-  /**
   
     Invoked by the store whenever it needs to retrieve data matching a 
-    specific query, triggered by findAll().
+    specific query, triggered by findAll().  This method is called anytime
+    you invoke SC.Store#find() with a query or SC.RecordArray#refresh().  You 
+    should override this method to actually retrieve data from the server 
+    needed to fulfill the query.  If the query is a remote query, then you 
+    will also need to provide the contents of the query as well.
     
-    TODO: Update this documentation to reflect the new implementation
+    h2. Handling Local Queries
     
-    The fetchKey will most times be either an SC.Record subclass or an 
-    SC.Query object, but it could be anything you want.
+    Most queries you create in your application will be local queries.  Local
+    queries are populated automatically from whatever data you have in memory.
+    When your fetch() method is called on a local queries, all you need to do
+    is load any records that might be matched by the query into memory. 
     
-    If your data source subclass can handle the fetch you should override this 
-    method to return a SC.Array with storeKeys. You can return it immediately 
-    or return an empty array and populate it dynamically later once the result 
-    set has arrived with .replace() . You can also return a SC.SparseArray, 
-    where data source will be consulted to dynamically populate the contents 
-    of the array as it is requested.
+    The way you choose which queries to fetch is up to you, though usually it
+    can be something fairly straightforward such as loading all records of a
+    specified type.
     
-    Note that if you gave an SC.Query as the fetchKey to findAll() on the 
-    store you do not have to return anything from this method as you are from 
-    then on  delegating the responsibility to keep the record array updated to 
-    the store. The fetch() method in that case merely functions as a 
-    notification mechanism where you get the opportunity to fetch more data 
-    from a backend based on the SC.Query.
+    When you finish loading any data that might be required for your query, 
+    you should always call SC.Store#dataSourceDidFetchQuery() to put the query 
+    back into the READY state.  You should call this method even if you choose
+    not to load any new data into the store in order to notify that the store
+    that you think it is ready to return results for the query.
     
-    On return, the Store will write your result set in an SC.RecordArray 
-    instance, which will monitor your array for changes and then maps those
-    store keys to actual SC.Record instances.  SC.RecordArray can also use 
-    your underlying storeKeys to create subqueries for client-side searching
-    and filtering.
+    h2. Handling Remote Queries
     
-    findAll() will request all records and load them using 
-    store.loadRecords(). retrieveRecords() checks if the record is already 
-    loaded and in a clean state to then just materialize it. If the record is 
-    in an empty state, it will call this method to load the required record to 
-    then materialize it.
+    Remote queries are special queries whose results will be populated by the
+    server instead of from memory.  Usually you will only need to use this 
+    type of query when loading large amounts of data from the server.
+    
+    Like Local queries, to fetch a remote query you will need to load any data
+    you need to fetch from the server and add the records to the store.  Once
+    you are finished loading this data, however, you must also call
+    SC.Store#loadQueryResults() to actually set an array of storeKeys that
+    represent the latest results from the server.  This will implicitly also
+    call datasSourceDidFetchQuery() so you don't need to call this method 
+    yourself.
+    
+    If you want to support incremental loading from the server for remote 
+    queries, you can do so by passing a SC.SparseArray instance instead of 
+    a regular array of storeKeys and then populate the sparse array on demand.
+    
+    h2. Handling Errors and Cancelations
+    
+    If you encounter an error while trying to fetch the results for a query 
+    you can call SC.Store#dataSourceDidErrorQuery() instead.  This will put
+    the query results into an error state.  
+    
+    If you had to cancel fetching a query before the results were returned, 
+    you can instead call SC.Store#dataSourceDidCancelQuery().  This will set 
+    the query back into the state it was in previously before it started 
+    loading the query.
+    
+    h2. Return Values
+    
+    When you return from this method, be sure to return a Boolean.  YES means
+    you handled the query, NO means you can't handle the query.  When using
+    a cascading data source, returning NO will mean the next data source will
+    be asked to fetch the same results as well.
     
     @param {SC.Store} store the requesting store
     @param {SC.Query} query query describing the request
     @returns {Boolean} YES if you can handle fetching the query, NO otherwise
   */
-  fetchQuery: function(store, query) {
+  fetch: function(store, query) {
+    return NO ; // do not handle anything!
   },
   
   /**
@@ -93,13 +101,11 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys
     @param {Array} ids - optional
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
-    @returns 
+    @returns {Boolean} YES if handled, NO otherwise
   */
   
-  retrieveRecords: function(store, storeKeys, ids, params) {
-    return this._handleEach(store, storeKeys, this.retrieveRecord, ids, params);  
+  retrieveRecords: function(store, storeKeys, ids) {
+    return this._handleEach(store, storeKeys, this.retrieveRecord, ids);  
   },
   
   /**
@@ -133,10 +139,19 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   */
   commitRecords: function(store, createStoreKeys, updateStoreKeys, destroyStoreKeys, params) {
     var cret, uret, dret;
-    if(createStoreKeys.length>0) cret = this.createRecords.call(this, store, createStoreKeys, params);    
-    if(updateStoreKeys.length>0) uret = this.updateRecords.call(this, store, updateStoreKeys, params);    
-    if(destroyStoreKeys.length>0) dret = this.destroyRecords.call(this, store, destroyStoreKeys, params); 
-    return (cret === uret === dret) ? (cret || uret || dret) : SC.MIXED_STATE ;
+    if (createStoreKeys.length>0) {
+      cret = this.createRecords.call(this, store, createStoreKeys, params);
+    }
+        
+    if (updateStoreKeys.length>0) {
+      uret = this.updateRecords.call(this, store, updateStoreKeys, params); 
+    }
+       
+    if (destroyStoreKeys.length>0) {
+      dret = this.destroyRecords.call(this, store, destroyStoreKeys, params);
+    }
+     
+    return ((cret === uret) && (cret === dret)) ? cret : SC.MIXED_STATE;
   },
   
   /**
@@ -271,11 +286,9 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {SC.Store} store the requesting store
     @param {Array} storeKey key to retrieve
     @param {String} id the id to retrieve
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
     @returns {Boolean} YES if handled
   */
-  retrieveRecord: function(store, storeKey, id, params) {
+  retrieveRecord: function(store, storeKey, id) {
     return NO ;
   },
 
