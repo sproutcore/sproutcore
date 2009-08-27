@@ -541,6 +541,8 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   /** @private*/
   cancel: function(evt) {
     this.loseFocus() ;
+    var menu = this.parentMenu() ;
+    if (menu) menu.remove() ;
     return YES ;
   },
   
