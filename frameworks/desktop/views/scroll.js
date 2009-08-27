@@ -579,8 +579,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (contentView) {
       contentView.addObserver('frame', this, this.contentViewFrameDidChange) ;
     }
-
-    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll() ;
+    
+    if (containerView) {
+      containerView.addObserver('frame', this, this.containerViewFrameDidChange);
+    }
+    
+    if (this.get('isVisibleInWindow')) this._scsv_registerAutoscroll();
   },
   
   /** @private Registers/deregisters view with SC.Drag for autoscrolling */
@@ -651,6 +655,49 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   },
   
   /** @private
+    Whenever the containerView is changed, we need to observe the view's
+    frame to update the content size of the scrollers.
+  */
+  containerViewDidChange: function() {
+    var newView = this.get('containerView'), 
+        oldView = this._scroll_containerView;
+    var f = this.containerViewFrameDidChange ;
+    if (newView !== oldView) {
+      
+      // stop observing old content view
+      if (oldView) oldView.removeObserver('frame', this, f);
+      
+      // update cache
+      this._scroll_containerView = newView;
+      if (newView) newView.addObserver('frame', this, f);
+      
+      this.containerViewFrameDidChange();
+    }
+  }.observes('containerView'),
+  
+  /** @private
+    Invoked whenever the containerViews's frame changes.  This will update the 
+    scroller contentSize
+  */
+  containerViewFrameDidChange: function() {
+    var view   = this.get('containerView'), 
+        f      = (view) ? view.get('frame') : null,
+        width  = (f) ? f.width : 0,  
+        height = (f) ? f.height : 0 ;
+    
+    if (this.get('hasHorizontalScroller') && 
+        (view = this.get('horizontalScrollerView'))) {
+      view.setIfChanged('containerSize', width);
+    }
+    
+    if (this.get('hasVerticalScroller') && 
+        (view = this.get('verticalScrollerView'))) {
+      view.setIfChanged('containerSize', height);
+    }
+    
+  },
+  
+  /**
     Whenever the horizontal scroll offset changes, update the scrollers and 
     edit the location of the contentView.
   */
