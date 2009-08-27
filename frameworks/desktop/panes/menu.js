@@ -507,6 +507,11 @@ SC.MenuPane = SC.PickerPane.extend(
     items = this.get('displayItemsArray') ;
     if (!items) return NO;
 
+    // handling esc key
+    if (keyString === 'escape') {
+      this.remove() ;
+    }
+
     len = items.length ;
     for(var idx=0; idx<len; ++idx) {
       item          = items[idx] ;
