@@ -288,7 +288,7 @@ test("Adding right accessory view", function() {
   // defined in its layout, 'left' should be cleared out and 'right' should
   // be set to 0.
   SC.RunLoop.begin();
-  var accessoryView = SC.View.create({
+  accessoryView = SC.View.create({
     layout:  { top:1, left:2, width:16, height:16 }
   });
   view.set('rightAccessoryView', accessoryView);
@@ -393,7 +393,15 @@ test("focus and blurring text field", function() {
   }, 100);  
   
 });
+
+test("editing a field should not change the cursor position", function() {
+  var input = pane.view('empty').$('input');
+  input.val('John Doe');
+  input[0].setSelectionRange(4, 4);
+  SC.Event.trigger(input, 'change');
+
+  ok(input.val() === 'John Doe', 'input value should be \'John Doe\'');
+  ok(input[0].selectionStart == 4 && input[0].selectionEnd == 4, 'cursor position should be unchanged');
+});
+
 })();
-
-
-

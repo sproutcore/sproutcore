@@ -125,12 +125,20 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   
   /** @private
     Internal representation of a date: the number of milliseconds
-    since January, 1st 1970 00:00:00.0 UTC
+    since January, 1st 1970 00:00:00.0 UTC.
     
-    @prototype
+    @property
     @type {Integer}
   */
   _ms: 0,
+  
+  /**
+    The offset, in minutes, between UTC and the object's timezone.
+    
+    @property
+    @type {Integer}
+  */
+  timezone: 0,
   
   /**
     A DateTime instance is frozen by default for better performance.
@@ -162,7 +170,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     
     @see SC.DateTime#create for the list of options you can pass
     @param {Hash} options the amount of date/time to advance the receiver
-    @returns {DateTime} the amount of days in the current month
+    @returns {DateTime} copy of the receiver
   */
   advance: function(options) {
    return this.constructor._advance(options, this._ms)._createFromCurrentState();
@@ -182,13 +190,6 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - 'millisecond'
       - 'milliseconds', the number of milliseconds since
         January, 1st 1970 00:00:00.0 UTC
-      - 'timezoneOffset', the time-zone offset is the difference, in minutes,
-        between UTC and local time. Note that this means that the offset is
-        positive if the local timezone is behind UTC and negative if it is
-        ahead.  For example, if your time zone is UTC+10 (Australian Eastern
-        Standard Time), -600 will be returned. Daylight savings time prevents
-        this value from being a constant even for a given locale. (Copied from
-        the Mozilla JavaScript reference)
       - 'isLeapYear', a boolean value indicating whether the receiver's year
         is a leap year
       - 'daysInMonth', the number of days of the receiver's current month
@@ -198,14 +199,13 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
       - 'week0', the week number of the current year, starting with
         the first Monday as the first day of the first week (00..53)
       - 'lastMonday', 'lastTuesday', etc., 'nextMonday', 'nextTuesday', etc.,
-        the date of the last or next weekday in comparison to the receiver,
-      - 'utc', the UTC formatted time
+        the date of the last or next weekday in comparison to the receiver.
     
     @param {String} key the property name to get
     @return the value asked for
   */
   unknownProperty: function(key) {
-    return this.constructor._get(key, this._ms);
+    return this.constructor._get(key, this._ms, this.timezone);
   },
   
   /**
@@ -244,22 +244,34 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     @return {String} the formatted string
   */
   toFormattedString: function(fmt) {
-    return this.constructor._toFormattedString(fmt, this._ms);
+    return this.constructor._toFormattedString(fmt, this._ms, this.timezone);
   },
   
+  /**
+    Formats the receiver according ISO 8601 standard. It is equivalent to
+    calling toFormattedString with the '%Y-%m-%dT%H:%M:%S%Z' format string.
+    
+    @return {String} the formatted string
+  */
   toISO8601: function(){
     var fmt = '%Y-%m-%dT%H:%M:%S%Z';
-    return this.constructor._toFormattedString(fmt, this._ms);
+    return this.constructor._toFormattedString(fmt, this._ms, this.timezone);
   },
   
   /** @private
-    Creates string representation of the receiver.
+    Creates a string representation of the receiver.
+    (Debuggers call all the time the toString method. Because of the way
+    DateTime is designed, calling SC.DateTime._toFormattedString would
+    have a nasty side effect. We shouldn't therefore call any of SC.DateTime's
+    methods from toString)
     
     @returns {String}
   */
   toString: function() {
-    var d = new Date(this._ms);
-    return d.toString();
+    return "UTC: " +
+           new Date(this._ms).toUTCString() +
+           ", timezone: " +
+           this.timezone;
   },
   
   /**
@@ -350,6 +362,24 @@ SC.DateTime.mixin(
   _date: new Date(),
   
   /** @private
+    The offset, in minutes, between UTC and the currently manipulated
+    DateTime instance.
+    
+    @property
+    @type {Integer}
+  */
+  _tz: 0,
+  
+  /**
+    The offset, in minutes, between UTC and the local system time. This
+    property is computed at loading time and should never be changed.
+    
+    @property
+    @type {Integer}
+  */
+  timezone: new Date().getTimezoneOffset(),
+  
+  /** @private
     A cache of SC.DateTime instances. If you attempt to create a SC.DateTime
     instance that has already been created, then it will return the cached
     value.
@@ -380,9 +410,17 @@ SC.DateTime.mixin(
   /** @private
     @see SC.DateTime#unknownProperty
   */
-  _get: function(key, start) {
+  _setState: function(start, timezone) {
+    if (start !== undefined) this._date.setTime(start);
+    if (timezone !== undefined) this._tz = timezone;
+  },
+  
+  /** @private
+    @see SC.DateTime#unknownProperty
+  */
+  _get: function(key, start, timezone) {
     var d = this._date;
-    if (start !== undefined) d.setTime(start);
+    this._setState(start, timezone);
     
     // simple keys
     switch (key) {
@@ -395,8 +433,7 @@ SC.DateTime.mixin(
       case 'second':         return d.getSeconds();
       case 'millisecond':    return d.getMilliseconds();
       case 'milliseconds':   return d.getTime();
-      case 'timezoneOffset': return d.getTimezoneOffset();
-      case 'utc':            return d.utcFormat();
+      case 'timezone':       return this._tz;
     }
     
     // isLeapYear
@@ -466,11 +503,11 @@ SC.DateTime.mixin(
   /** @private
     @see SC.DateTime#adjust
   */
-  _adjust: function(options, start) {
+  _adjust: function(options, start, timezone) {
     var opts = options ? SC.clone(options) : {};
     
     var d = this._date;
-    if (start !== undefined) d.setTime(start);
+    this._setState(start, timezone);
     
     // the time options (hour, minute, sec, millisecond)
     // reset cascadingly (see documentation)
@@ -493,6 +530,7 @@ SC.DateTime.mixin(
     if (!SC.none(opts.minute))      d.setMinutes(opts.minute);
     if (!SC.none(opts.second))      d.setSeconds(opts.second);
     if (!SC.none(opts.millisecond)) d.setMilliseconds(opts.millisecond);
+    if (!SC.none(opts.timezone))    this._tz = opts.timezone;
     
     return this;
   },
@@ -500,11 +538,11 @@ SC.DateTime.mixin(
   /** @private
     @see SC.DateTime#advance
   */
-  _advance: function(options, start) {
+  _advance: function(options, start, timezone) {
     var opts = options ? SC.clone(options) : {};
     
     var d = this._date;
-    if (start !== undefined) d.setTime(start);
+    this._setState(start, timezone);
     
     for (var key in opts) opts[key] += this._get(key);
     return this._adjust(opts);
@@ -514,15 +552,20 @@ SC.DateTime.mixin(
     Returns a new DateTime object advanced according the the given parameters.
     The parameters can be:
     - none, to create a DateTime instance initialized to the current
-      date and time,
+      date and time in the local timezone,
     - a integer, the number of milliseconds since
       January, 1st 1970 00:00:00.0 UTC
     - a options hash that can contain any of the following properties: year,
-      month, day, hour, minute, second, millisecond
+      month, day, hour, minute, second, millisecond, timezone
       
     Note that if you attempt to create a SC.DateTime instance that has already
     been created, then, for performance reasons, a cached value may be
     returned.
+    
+    The timezone option is the offset, in minutes, between UTC and local time.
+    If you don't pass a timezone option, the date object is created in the
+    local timezone. If you want to create a UTC+2 (CEST) date, for example,
+    then you should pass a timezone of -120.
     
     @param options one of the three kind of parameters descibed above
     @returns {DateTime} the DateTime instance that corresponds to the
@@ -531,22 +574,28 @@ SC.DateTime.mixin(
   create: function() {
     var arg = arguments.length === 0 ? {} : arguments[0];
     
-    if (SC.typeOf(arg) === SC.T_NUMBER) {
+    if (SC.typeOf(arg) === SC.T_NUMBER) arg = { milliseconds: arg };
+    if (SC.none(arg.timezone)) arg.timezone = this.timezone;
+    
+    if (!SC.none(arg.milliseconds)) {
       // quick implementation of a FIFO set for the cache
-      var key = 'nu'+arg, cache = this._dt_cache;
+      var key = 'nu'+arg.milliseconds+arg.timezone, cache = this._dt_cache;
       var ret = cache[key];
       if (!ret) {
         var previousKey, idx = this._dt_cache_index, C = this;
-        ret = cache[key] = new C([{_ms: arg}]);
+        ret = cache[key] = new C([{_ms: arg.milliseconds, timezone: arg.timezone}]);
         idx = this._dt_cache_index = (idx + 1) % this._DT_CACHE_MAX_LENGTH;
         previousKey = cache[idx];
         if (previousKey !== undefined && cache[previousKey]) delete cache[previousKey];
         cache[idx] = key;
       }
       return ret;
-    } else if (SC.typeOf(arg) === SC.T_HASH) {
+    } else {
       var now = new Date();
-      return this.create(this._adjust(arg, now.getTime())._date.getTime());
+      return this.create({
+        milliseconds: this._adjust(arg, now.getTime())._date.getTime(),
+        timezone: arg.timezone
+      });
     }
     
     return null;
@@ -558,7 +607,10 @@ SC.DateTime.mixin(
     @return {DateTime} the DateTime instance returned by create()
   */
   _createFromCurrentState: function() {
-    return this.create(this._date.getTime());
+    return this.create({
+      milliseconds: this._date.getTime(),
+      timezone: this._tz
+    });
   },
   
   /**
@@ -598,22 +650,15 @@ SC.DateTime.mixin(
           case 'Y': opts.year = scanner.scanInt(4); break;
           case 'Z':
             var modifier = scanner.scan(1);
-            if(modifier == 'Z'){
-              opts.timeZoneOffset = 0; 
-            } else {
-              var timeZoneHours = scanner.scanInt(2);
-              if(scanner.scan(1) !== ':'){
-                scanner.scan(-1);
-              } 
-              var timeZoneMinutes = scanner.scanInt(2);
-              var timeZoneSecondsOffset = (timeZoneHours*3600)+(timeZoneMinutes*60);
-
-              var offset = eval(0 + modifier + timeZoneSecondsOffset);
-              opts.timeZoneOffset = offset;
-            } 
-              
+            if (modifier === 'Z') {
+              opts.timezone = 0;
+            } else if (modifier === '+' || modifier === '-' ) {
+              var h = scanner.scanInt(2);
+              if (scanner.scan(1) !== ':') scanner.scan(-1);
+              var m = scanner.scanInt(2);
+              opts.timezone = (modifier === '+' ? -1 : 1) * (h*60 + m);
+            }
             break;
-      //    case 'Z': throw "%Z is not implemented";
           case '%': scanner.skipString('%'); break;
           default:  scanner.skipString(parts[0]); break;
         }
@@ -632,9 +677,6 @@ SC.DateTime.mixin(
     
     if (!SC.none(check.dayOfWeek) && d.get('dayOfWeek') !== check.dayOfWeek) {
       return null;
-    }
-    if(!SC.none(opts.timeZoneOffset)){
-      d = d.advance({second: opts.timeZoneOffset});
     }
     
     return d;
@@ -684,7 +726,7 @@ SC.DateTime.mixin(
       case 'y': return this._pad(this._get('year') % 100);
       case 'Y': return this._get('year');
       case 'Z':
-        var offset = -1 * this._get('timezoneOffset');
+        var offset = -1 * this._tz;
         return (offset >= 0 ? '+' : '-')
                + this._pad(parseInt(Math.abs(offset)/60, 10))
                + ':'
@@ -696,9 +738,9 @@ SC.DateTime.mixin(
   /** @private
     @see SC.DateTime#toFormattedString
   */
-  _toFormattedString: function(format, start) {
+  _toFormattedString: function(format, start, timezone) {
     var d = this._date;
-    if (start !== undefined) d.setTime(start);
+    this._setState(start, timezone);
     
     var that = this;
     return format.replace(/\%([aAbBcdHIjmMpSUWwxXyYZ\%])/g, function() {
@@ -708,7 +750,10 @@ SC.DateTime.mixin(
   
   /**
     This will tell you which of the two passed DateTime is greater than the
-    other, by comparing the date and time parts of the passed objects.
+    other, by comparing if their number of milliseconds since
+    January, 1st 1970 00:00:00.0 UTC.
+    
+    
  
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance

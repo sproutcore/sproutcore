@@ -5,6 +5,7 @@
 
 
 require('views/text_field') ;
+require('protocols/inline_editor_delegate');
 
 /**
   @class
