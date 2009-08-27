@@ -92,9 +92,43 @@ SC.Record = SC.Object.extend(
     You should not edit this store key but you may sometimes need to refer to
     this store key when implementing a Server object.
     
-    @property {Integer}
+    @property 
+    @type {Integer}
   */
   storeKey: null,
+
+  /**
+    YES when the record is in an editable state.  You can use this property to
+    quickly determine whether attempting to modify the record would raise an 
+    exception or not.
+    
+    This property is both readable and writable.  Note however that if you 
+    set this property to YES but the status of the record is anything but
+    SC.Record.READY, the return value of this property may remain NO.
+    
+    @property
+    @type {Boolean}
+  */
+  isEditable: function(key, value) {
+    if (value !== undefined) this._screc_isEditable = value;
+    if (this.get('status') & SC.Record.READY) return this._screc_isEditable;
+    else return NO ;
+  }.property('status').cacheable(),
+  
+  _screc_isEditable: YES, // default
+  
+  /**
+    YES when the record's contents have been loaded for the first time.  You 
+    can use this to quickly determine if the record is ready to display.
+    
+    @property
+    @type {Boolean}
+  */
+  isLoaded: function() {
+    var K = SC.Record, 
+        status = this.get('status');
+    return !((status===K.EMPTY) || (status===K.BUSY_LOADING) || (status===K.ERROR));
+  }.property('status').cacheable(),
   
   // ...............................
   // CRUD OPERATIONS
@@ -217,17 +251,14 @@ SC.Record = SC.Object.extend(
     if (!attrs) throw SC.Record.BAD_STATE_ERROR;
     
     // if value is the same, do not flag record as dirty
-    if(value===attrs[key]) {
-      ignoreDidChange = YES;
-    }
-    else {
+    if (value !== attrs[key]) {
       if(!ignoreDidChange) this.beginEditing();
       attrs[key] = value;
       if(!ignoreDidChange) this.endEditing(key);
     }
     
     // if value is primaryKey of record, write it to idsByStoreKey
-    if(key===this.get('primaryKey')) {
+    if (key===this.get('primaryKey')) {
       SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
     }
     
@@ -242,7 +273,8 @@ SC.Record = SC.Object.extend(
     @returns {Object} the current attributes of the receiver
   **/
   attributes: function() {
-    var store = this.get('store'), storeKey = this.storeKey;
+    var store    = this.get('store'), 
+        storeKey = this.storeKey;
     return store.readEditableDataHash(storeKey);
   }.property(),
   
@@ -289,9 +321,12 @@ SC.Record = SC.Object.extend(
   
   normalize: function(includeNull) {
     
-    var primaryKey = this.primaryKey, dataHash = {}, recordId = this.get('id'), 
-      recHash, store = this.get('store'), storeKey = this.get('storeKey'), 
-      attrValue, isRecord, defaultVal;
+    var primaryKey = this.primaryKey, 
+        dataHash   = {}, 
+        recordId   = this.get('id'), 
+        store      = this.get('store'), 
+        storeKey   = this.get('storeKey'), 
+        recHash, attrValue, isRecord, defaultVal;
     
     dataHash[primaryKey] = recordId;
     
@@ -311,25 +346,23 @@ SC.Record = SC.Object.extend(
           if(recHash[key]!==undefined) {
             // write value already there
             dataHash[key] = recHash[key];
-          }
-          else {
-            // or write default
+
+          // or write default
+          } else {
             defaultVal = this[key].get('defaultValue');
-            if(SC.typeOf(defaultVal)===SC.T_FUNCTION) {
-              // computed default value
+
+            // computed default value
+            if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
               dataHash[key] = defaultVal();
-            }
-            else {
-              // plain value
+            
+            // plain value
+            } else {
               dataHash[key] = defaultVal;
             }
           }
         }
         
-        if(includeNull && dataHash[key]===undefined) {
-          dataHash[key] = null;
-        }
-        
+        if (includeNull && dataHash[key]===undefined) dataHash[key] = null;
       }
     }
     
@@ -372,8 +405,49 @@ SC.Record = SC.Object.extend(
       to the data source
   */
   commitRecord: function(params) {
-    this.get('store').commitRecord(undefined, undefined, this.get('storeKey'), params);
+    var store = this.get('store');
+    store.commitRecord(undefined, undefined, this.get('storeKey'), params);
   },
+  
+  // ..........................................................
+  // EMULATE SC.ERROR API
+  // 
+  
+  /**
+    Returns YES whenever the status is SC.Record.ERROR.  This will allow you 
+    to put the UI into an error state.
+    
+    @property
+    @type {Boolean}
+  */
+  isError: function() {
+    return this.get('status') & SC.Record.ERROR;
+  }.property('status').cacheable(),
+
+  /**
+    Returns the receiver if the record is in an error state.  Returns null
+    otherwise.
+    
+    @property
+    @type {SC.Record}
+  */
+  errorValue: function() {
+    return this.get('isError') ? this : null;
+  }.property('isError').cacheable(),
+  
+  /**
+    Returns the current error object only if the record is in an error state.
+    If no explicit error object has been set, returns SC.Record.GENERIC_ERROR.
+    
+    @property
+    @type {SC.Error}
+  */
+  errorObject: function() {
+    if (this.get('isError')) {
+      var store = this.get('store');
+      return store.readError(this.get('storeKey')) || SC.Record.GENERIC_ERROR;
+    } else return null ;
+  }.property('isError').cacheable(),
   
   // ...............................
   // PRIVATE
@@ -439,10 +513,11 @@ SC.Record.mixin( /** @scope SC.Record */ {
   BUSY_DESTROYING:  0x0840, // 2112
 
   // exceptions that can be raised when processing records
-  BAD_STATE_ERROR:     new Error("Internal Inconsistency"),
-  RECORD_EXISTS_ERROR: new Error("Record Exists"),
-  NOT_FOUND_ERROR:     new Error("Not found "),
-  BUSY_ERROR:          new Error("Busy"),
+  BAD_STATE_ERROR:     SC.$error("Internal Inconsistency"),
+  RECORD_EXISTS_ERROR: SC.$error("Record Exists"),
+  NOT_FOUND_ERROR:     SC.$error("Not found "),
+  BUSY_ERROR:          SC.$error("Busy"),
+  GENERIC_ERROR:       SC.$error("Generic Error"),
   
   /**
     Helper method returns a new SC.RecordAttribute instance to map a simple
