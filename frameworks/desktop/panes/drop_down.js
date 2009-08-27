@@ -244,6 +244,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   iconBgColor: null,
+  
+  maxLen: 0,
+  maxName: null,
 
   /**
     Left Alignment based on the size of the button
@@ -326,6 +329,13 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
       // localize name if specified.
       name = shouldLocalize? name.loc() : name ;
+      
+      len = name.length ;
+      if (len > this.get('maxLen')) {
+        console.log('max len '+len) ;
+        this.set('maxLen', len)
+        this.set('maxName', name) ;
+      }
 
       //Get the icon value
       var icon = iconKey ? (object.get ?
@@ -340,7 +350,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         var iconColor = iconBgColorKey ? (object.get ?
           object.get(iconBgColorKey) : object[iconBgColorKey]) : null ;
         if (SC.none(object[iconBgColorKey])) iconBgColor = null ;
-       console.log('icon '+iconBgColor)
+       // console.log('icon '+iconBgColor)
 
       if (currentSelectedVal && value){
         if( currentSelectedVal === value ) {
@@ -385,6 +395,17 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     this.set('itemList', itemList) ;
     }, this ) ;
+    
+    console.log('maxName '+this.get('maxName'))
+    var temp = document.createElement('div') ;
+    temp.innerHTML = this.get('maxName') ;
+    temp.style.width = this.layout.width ;
+    temp.style.height = 'auto',
+    temp.style.display = 'block'
+    document.body.appendChild(temp) ;
+    var tempWidth = temp.scrollWidth ;
+    console.log('temp width '+tempWidth) ;
+    console.log('offsetWidth '+temp.offsetWidth) ;
 
     if(firstTime) {
       var value = this.get('value') ;
@@ -464,6 +485,16 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   _action: function( evt )
   {
+    // var temp = document.createElement('div') ;
+    // temp.innerHTML = this.get('maxName') ;
+    // temp.style.width = this.layout.width ;
+    // var tempWidth = temp.style.width ;
+    // temp.style.height = 'auto',
+    // temp.style.display = 'block'
+    // document.body.appendChild(temp) ;
+    // console.log('temp width '+tempWidth) ;
+    // console.log('offsetWidth '+temp.offsetWidth) ;
+    
     var buttonLabel = this.$('.sc-button-label')[0] ;
     var menuWidth = this.get('layer').offsetWidth ; // Get the length of the text on the button in pixels
     var scrollWidth = buttonLabel.scrollWidth ;
