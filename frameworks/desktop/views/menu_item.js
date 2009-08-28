@@ -550,6 +550,8 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this.loseFocus() ;
     var menu = this.parentMenu() ;
     if (menu) menu.remove() ;
+    var pane = menu.getPath('anchor.pane') ;
+    if (pane) pane.becomeKeyPane() ;
     return YES ;
   },
   
