@@ -135,6 +135,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PROPERTIES
   // 
   
+  isQuery: YES,
+  
   /**
     Unparsed query conditions.  If you are handling a query yourself, then 
     you will find the base query string here.
@@ -1094,74 +1096,162 @@ SC.Query.mixin( /** @scope SC.Query */ {
     return queryKey.compare(record1, record2);
   },
   
-  _scq_build: function(location, recordType, conditions, params) {
+  /**
+    Returns a SC.Query instance reflecting the passed properties.  Where 
+    possible this method will return cached query instances so that multiple 
+    calls to this method will return the same instance.  This is not possible 
+    however, when you pass custom parameters or set ordering. All returned 
+    queries are frozen.
     
-    var ret, cache, key, opts;
+    Usually you will not call this method directly.  Instead use the more
+    convenient SC.Query.local() and SC.Query.remote().
     
+    h2. Examples
+    
+    There are a number of different ways you can call this method.  
+    
+    The following return local queries selecting all records of a particular 
+    type or types, including any subclasses:
+    
+    {{{
+      var people = SC.Query.local(Ab.Person);
+      var peopleAndCompanies = SC.Query.local([Ab.Person, Ab.Company]);
+      
+      var people = SC.Query.local('Ab.Person');
+      var peopleAndCompanies = SC.Query.local('Ab.Person Ab.Company'.w());
+      
+      var allRecords = SC.Query.local(SC.Record);
+    }}} 
+    
+    The following will match a particular type of condition:
+    
+    {{{
+      var married = SC.Query.local(Ab.Person, "isMarried=YES");
+      var married = SC.Query.local(Ab.Person, "isMarried=%@", [YES]);
+      var married = SC.Query.local(Ab.Person, "isMarried={married}", {
+        married: YES
+      });
+    }}}
+    
+    You can also pass a hash of options as the second parameter.  This is 
+    how you specify an order, for example:
+    
+    {{{
+      var orderedPeople = SC.Query.local(Ab.Person, { orderBy: "firstName" });
+    }}}
+    
+    @param {String} location the query location.
+    @param {SC.Record|Array} recordType the record type or types.
+    @param {String} conditions optional conditions
+    @param {Hash} params optional params. or pass multiple args.
+    @returns {SC.Query}
+  */
+  build: function(location, recordType, conditions, params) {
+    
+    var opts = null,
+        ret, cache, key, tmp;
+    
+    // fast case for query objects.
+    if (recordType && recordType.isQuery) { 
+      if (recordType.get('location') === location) return recordType;
+      else return recordType.copy().set('location', location).freeze();
+    }
+    
+    // normalize recordType
     if (typeof recordType === SC.T_STRING) {
       ret = SC.objectForPropertyPath(recordType);
       if (!ret) throw "%@ did not resolve to a class".fmt(recordType);
       recordType = ret ;
+    } else if (recordType && recordType.isEnumerable) {
+      ret = [];
+      recordType.forEach(function(t) {
+        if (typeof t === SC.T_STRING) t = SC.objectForPropertyPath(t);
+        if (!t) throw "cannot resolve record types: %@".fmt(recordType);
+        ret.push(t);
+      }, this);
+      recordType = ret ;
+    } else if (!recordType) recordType = SC.Record; // find all records
+    
+    if (params === undefined) params = null;
+    if (conditions === undefined) conditions = null;
+
+    // normalize other params. if conditions is just a hash, treat as opts
+    if (!params && (typeof conditions !== SC.T_STRING)) {
+      opts = conditions;
+      conditions = null ;
     }
     
     // special case - easy to cache.
-    if (arguments.length <= 2) {
+    if (!params && !opts) {
 
-      // handle findAll selector
-      if (!recordType) throw "Query must have a recordType";
-
-      cache = SC.Query._scq_recordTypeQueriesCache;
-      if (!cache) cache = SC.Query._scq_recordTypeQueriesCache = {};
+      tmp = SC.Query._scq_recordTypeCache;
+      if (!tmp) tmp = SC.Query._scq_recordTypeCache = {};
+      cache = tmp[location];
+      if (!cache) cache = tmp[location] = {}; 
+      
       if (recordType.isEnumerable) {
         key = recordType.map(function(k) { return SC.guidFor(k); });
         key = key.sort().join(':');
       } else key = SC.guidFor(recordType);
+      
+      if (conditions) key = [key, conditions].join('::');
       
       ret = cache[key];
       if (!ret) {
         if (recordType.isEnumerable) {
           opts = { recordTypes: recordType.copy() };
         } else opts = { recordType: recordType };
-        ret = cache[key] = SC.Query.create(opts);
+        
+        opts.location = location ;
+        opts.conditions = conditions ;
+        ret = cache[key] = SC.Query.create(opts).freeze();
       }
       
-      return ret ;
-
     // otherwise parse extra conditions and handle them
     } else {
-      // if conditions is a hash, treat as extra opts to assign.
-      var opts;
-      if (SC.typeOf(conditions) === SC.T_HASH) {
-        opts = SC.clone(conditions);
-        conditions = undefined;
-      } else opts = {};
+
+      if (!opts) opts = {};
+      if (!opts.location) opts.location = location ; // allow override
 
       // pass one or more recordTypes.
-      if (recordType && recordType.isEnumerable) opts.recordsTypes = recordType;
-      else opts.recordType = recordType;
+      if (recordType && recordType.isEnumerable) {
+        opts.recordsTypes = recordType;
+      } else opts.recordType = recordType;
 
-      // if conditions are passed, also look for possible params
-      if (conditions !== undefined) {
-        opts.conditions = conditions ;
-        if (conditions.match(/%@/)) {
-          if (!params || !params.isSCArray) params = SC.A(arguments).slice(3); 
-        } else if (params && params.orderBy) {
-          opts.orderBy = params.orderBy;
-          delete params.orderBy;
-        }
-        opts.params = params ;
-      }
+      // set conditions and params if needed
+      if (conditions) opts.conditions = conditions;
+      if (params) opts.parameters = params;
 
-      return SC.Query.create(opts);
+      ret = SC.Query.create(opts).freeze();
     }
+    
+    return ret ;
   },
   
+  /**
+    Returns a LOCAL query with the passed options.  For a full description of
+    the parameters you can pass to this method, see SC.Query.build().
+  
+    @param {SC.Record|Array} recordType the record type or types.
+    @param {String} conditions optional conditions
+    @param {Hash} params optional params. or pass multiple args.
+    @returns {SC.Query}
+  */
   local: function(recordType, conditions, params) {
-    return this._scq_build(SC.Query.LOCAL, recordType, conditions, params);
+    return this.build(SC.Query.LOCAL, recordType, conditions, params);
   },
   
+  /**
+    Returns a REMOTE query with the passed options.  For a full description of
+    the parameters you can pass to this method, see SC.Query.build().
+    
+    @param {SC.Record|Array} recordType the record type or types.
+    @param {String} conditions optional conditions
+    @param {Hash} params optional params. or pass multiple args.
+    @returns {SC.Query}
+  */
   remote: function(recordType, conditions, params) {
-    return this._scq_build(SC.Query.REMOTE, recordType, conditions, params);
+    return this.build(SC.Query.REMOTE, recordType, conditions, params);
   }
   
 });
