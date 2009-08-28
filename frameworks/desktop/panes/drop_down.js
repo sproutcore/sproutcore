@@ -540,7 +540,33 @@ SC.DropDownMenu = SC.ButtonView.extend(
     this._isMouseDown = YES;
     this._action() ;
     return YES ;
-  }
+  },
+
+  /**
+    @private
+
+    Handle Key event - Down arrow key
+  */
+  keyDown: function(event) {
+    if ( this.interpretKeyEvents(event) ) {
+      return YES;
+    }
+    else {
+      sc_super();
+    }
+  },
+
+  /**
+    @private
+
+    Pressing the Up or Down arrow key should display the menu pane
+  */
+  interpretKeyEvents: function(event) {
+    if (event  && (event.keyCode === 38 || event.keyCode === 40)) {
+      this._action() ;
+    }
+    return sc_super();
+  },
 
 }) ;
 
