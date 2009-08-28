@@ -510,6 +510,8 @@ SC.MenuPane = SC.PickerPane.extend(
     // handling esc key
     if (keyString === 'escape') {
       this.remove() ;
+      var pane = this.getPath('anchor.pane') ;
+      if (pane) pane.becomeKeyPane() ;
     }
 
     len = items.length ;
