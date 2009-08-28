@@ -562,11 +562,16 @@ SC.DropDownMenu = SC.ButtonView.extend(
     Pressing the Up or Down arrow key should display the menu pane
   */
   interpretKeyEvents: function(event) {
-    if (event  && (event.keyCode === 38 || event.keyCode === 40)) {
-      this._action() ;
+    if (event) {
+      if ((event.keyCode === 38 || event.keyCode === 40)) {
+        this._action() ;
+      }
+      else if (event.keyCode === 27) {
+        this.resignFirstResponder() ;
+      }
     }
     return sc_super();
-  },
+  }
 
 }) ;
 
