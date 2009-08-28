@@ -23,7 +23,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
   /**
   
     Invoked by the store whenever it needs to retrieve data matching a 
-    specific query, triggered by findAll().  This method is called anytime
+    specific query, triggered by find().  This method is called anytime
     you invoke SC.Store#find() with a query or SC.RecordArray#refresh().  You 
     should override this method to actually retrieve data from the server 
     needed to fulfill the query.  If the query is a remote query, then you 

@@ -744,13 +744,36 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     } else return this._findRecord(recordType, id);
   },
 
+  /**
+    DEPRECATED used find() instead.
+    
+    This method will accept a record type or query and return a record array
+    matching the results.  This method was commonly used prior to SproutCore 
+    1.0.  It has been deprecated in favor of a single find() method instead.
+    
+    For compatibility, this method will continue to work in SproutCore 1.0 but
+    it will raise a warning.  It will be removed in a future version of 
+    SproutCore.
+  */
+  findAll: function(recordType, conditions, params) {
+    console.warn("SC.Store#findAll() will be removed in a future version of SproutCore.  Use SC.Store#find() instead");
+    
+
+    if (!recordType || !recordType.isQuery) {
+      recordType = SC.Query.local(recordType, conditions, params);
+    }
+    
+    return this._findQuery(recordType, YES, YES);
+  },
+  
+  
   _findQuery: function(query, createIfNeeded, refreshIfNew) {
 
     // lookup the local RecordArray for this query.
     var cache = this._scst_recordArraysByQuery, 
         key   = SC.guidFor(query),
         ret, ra ;
-    if (!cache) cahce = this._scst_recordArraysByQuery = {};
+    if (!cache) cache = this._scst_recordArraysByQuery = {};
     ret = cache[key];
     
     // if a RecordArray was not found, then create one and also add it to the

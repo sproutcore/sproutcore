@@ -16,13 +16,11 @@ module("SC.Query querying findAll on a store", {
     // setup data source that just returns cached storeKeys
     MyApp.DataSource = SC.DataSource.create({
 
-      prepareQuery: function(store, query) {  
-      },
-      
-      fetchQuery: function(store, query) {
+      fetch: function(store, query) {
         this.query = query;
         this.store = store;
         this.fetchCount++ ;
+        return YES ;
       },
       
       reset: function() {
@@ -51,8 +49,8 @@ module("SC.Query querying findAll on a store", {
     MyApp.store = SC.Store.create().from(MyApp.DataSource);
     
     // setup a dummy model
-    MyApp.Foo = SC.Record.extend({});
-    MyApp.Faa = SC.Record.extend({});
+    MyApp.Foo = SC.Record.extend();
+    MyApp.Bar = SC.Record.extend();
     
     var records = [
       { guid: 1, firstName: "John", lastName: "Doe", married: true },
@@ -68,7 +66,7 @@ module("SC.Query querying findAll on a store", {
     
     SC.RunLoop.begin();
     // for sanity check, load two record types
-    MyApp.store.loadRecords(MyApp.Faa, records);
+    MyApp.store.loadRecords(MyApp.Bar, records);
     SC.RunLoop.end();
     
   }
@@ -78,21 +76,22 @@ module("SC.Query querying findAll on a store", {
 // ..........................................................
 // RECORD ARRAY CACHING
 // 
-
-test("findAll caching for a single store", function() {
-  var r1 = MyApp.store.findAll(MyApp.Foo);  
-  var r2 = MyApp.store.findAll(MyApp.Foo);
+ 
+test("caching for a single store", function() {
+  var r1 = MyApp.store.find(MyApp.Foo);  
+  var r2 = MyApp.store.find(MyApp.Foo);
   ok(!!r1, 'should return a record array');
+  ok(r1.isEnumerable, 'returned item should be enumerable');
   equals(r1.get('store'), MyApp.store, 'return object should be owned by store');
   equals(r2, r1, 'should return same record array for multiple calls');
 });
 
 test("findAll caching for a chained store", function() {
-  var r1 = MyApp.store.findAll(MyApp.Foo);  
+  var r1 = MyApp.store.find(MyApp.Foo);  
   
   var child = MyApp.store.chain();
-  var r2 = child.findAll(MyApp.Foo);
-  var r3 = child.findAll(MyApp.Foo);
+  var r2 = child.find(MyApp.Foo);
+  var r3 = child.find(MyApp.Foo);
 
   ok(!!r1, 'should return a record array from base store');
   equals(r1.get('store'), MyApp.store, 'return object should be owned by store');
@@ -111,9 +110,9 @@ test("findAll caching for a chained store", function() {
 test("data source must get the right calls", function() {
   var ds = MyApp.store.get('dataSource');
   
-  ds.reset();
-  var records = MyApp.store.findAll(MyApp.Foo);
-  var q = MyApp.store.queryFor(MyApp.Foo);
+  ds.reset();  
+  var records = MyApp.store.find(MyApp.Foo);
+  var q = SC.Query.local(MyApp.Foo);
   ds.fetchEquals(MyApp.store, q, 'after fetch');
 });
 
@@ -123,18 +122,21 @@ test("data source must get the right calls", function() {
 
 test("should find records based on boolean", function() {
   SC.RunLoop.begin();
-  var records = MyApp.store.findAll(MyApp.Foo, "married=YES");
+  var q = SC.Query.local(MyApp.Foo, "married=YES");
+  var records = MyApp.store.find(q);
+  debugger;
   equals(records.get('length'), 4, 'record length should be 4');
   SC.RunLoop.end();
 });
 
-notest("should find records based on query string", function() {
+test("should find records based on query string", function() {
   
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
-  var records = MyApp.store.findAll(q);
+  SC.RunLoop.begin();
+  var q = SC.Query.local(MyApp.Foo, { conditions:"firstName = 'John'" });
+  var records = MyApp.store.find(q);
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
-
+  SC.RunLoop.end();
 });
 
 notest("should find records based on SC.Query", function() {
