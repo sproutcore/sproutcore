@@ -18,7 +18,7 @@ TestRunner.targetsController = SC.ArrayController.create(
     Call this method whenever you want to relaod the targets from the server.
   */
   reload: function() {
-    var targets = TestRunner.store.findAll(CoreTools.Target);
+    var targets = TestRunner.store.find(CoreTools.TARGETS_QUERY);
     this.set('content', targets);
   },
   
@@ -77,9 +77,9 @@ TestRunner.targetsController = SC.ArrayController.create(
   /**
     Send event when targets load.
   */
-  stateDidChange: function() {
+  statusDidChange: function() {
     TestRunner.sendAction('targetsDidChange');
-  }.observes('state')
+  }.observes('status')
 
 }) ;
 

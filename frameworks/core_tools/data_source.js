@@ -57,7 +57,7 @@ CoreTools.DataSource = SC.DataSource.extend({
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching targets fails");
     } else {
-      storeKeys = store.loadRecords(SC.Record.Target, response);
+      storeKeys = store.loadRecords(CoreTools.Target, response);
       store.loadQueryResults(query, storeKeys);
     }
   },
@@ -71,10 +71,9 @@ CoreTools.DataSource = SC.DataSource.extend({
     URL.
   */
   fetchTests: function(store, query) {
-    var params = query.get('parameters'),
-        url    = params ? params.url : null ;
+    var url = query.get('url') ;
         
-    if (!url || !query.get('isLocal')) return NO ; // not handled
+    if (!query.get('isRemote') || !url) return NO ; // not handled
     
     SC.Request.getUrl(url)
       .set('isJSON', YES)
@@ -93,6 +92,7 @@ CoreTools.DataSource = SC.DataSource.extend({
       console.error("TODO: Add handler when fetching tests fails");
     } else {
       storeKeys = store.loadRecords(CoreTools.Test, response);
+      store.loadQueryResults(query, storeKeys); // notify query loaded
     }
   }
   

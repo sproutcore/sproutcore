@@ -28,7 +28,7 @@ TestRunner.START = SC.Responder.create({
     or not.
   */
   targetsDidChange: function() {
-    if (TestRunner.getPath('targets.state') !== SC.Record.READY) return NO;
+    if (TestRunner.getPath('targets.status') !== SC.Record.READY_CLEAN) return NO;
     
     var hasTargets = TestRunner.getPath('targets.length') >0;
     if (hasTargets) TestRunner.makeFirstResponder(TestRunner.READY_EMPTY);

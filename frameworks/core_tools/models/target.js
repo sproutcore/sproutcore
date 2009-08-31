@@ -90,8 +90,9 @@ CoreTools.Target = SC.Record.extend(
     else return (this.get('kind') || 'unknown').toLowerCase();
   }.property('kind', 'parent').cacheable(),
   
-  testQuery: function() {
-    return SC.Query.local(CoreTools.Test, 'url = {url}', { url: this.get('testsUrl') });
+  
+  testsQuery: function() {
+    return SC.Query.remote(CoreTools.Test, { url: this.get('testsUrl') });
   }.property('testsUrl').cacheable(),
   
   /**
