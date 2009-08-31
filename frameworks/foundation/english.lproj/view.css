@@ -43,3 +43,9 @@
 .sc-view.textAlignRight {
   text-align:right;
 }
+
+/*User the following to know what view has the focus in webkit*/
+/*.sc-view .focus {
+  outline: auto 5px -webkit-focus-ring-color; 
+  outline-offset: -2px;
+}*/

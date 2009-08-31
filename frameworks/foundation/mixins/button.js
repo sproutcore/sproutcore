@@ -152,12 +152,18 @@ SC.Button = {
     elem = this.$('label');
     if(firstTime){
       if(this.get('needsEllipsis')){
-        context.push('<label class="sc-button-label ellipsis">'+image+title+'</label>'); 
+        context.push('<label class="sc-button-label">'+image+'<span="ellipsis">'+title+'</span></label>'); 
       }else{
           context.push('<label class="sc-button-label">'+image+title+'</label>'); 
       }  
     }else if ( (htmlNode = elem[0])){
-      if(needsTitle) { htmlNode.innerHTML = image + title; }
+      if(needsTitle) { 
+        if(this.get('needsEllipsis')){
+          htmlNode.innerHTML = image + '<span class="ellipsis">'+title+'</span>';
+        }else{
+          htmlNode.innerHTML = image + title;
+        } 
+      }
       else { htmlNode.innerHTML = ''; } 
     }  
     return context ;
