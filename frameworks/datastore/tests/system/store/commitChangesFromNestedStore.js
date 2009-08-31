@@ -30,6 +30,8 @@ module("SC.Store#commitChangesFromNestedStore", {
 
 test("copies changed data hashes, statuses, and revisions", function() {
   
+  SC.RunLoop.begin();
+  
   // verify preconditions
   equals(store.readDataHash(storeKey), null, 'precond - should not have data yet');
   ok(child.chainedChanges.contains(storeKey), 'precond - child changes should include storeKey');
@@ -42,12 +44,15 @@ test("copies changed data hashes, statuses, and revisions", function() {
   equals(store.readStatus(storeKey), SC.Record.READY_DIRTY, 'now should have status');
   equals(store.revisions[storeKey], child.revisions[storeKey], 'now shoulave have revision from child');  
     
+  SC.RunLoop.end();
 });
 
 test("adds items in changelog to reciever changelog", function() {
 
   var key1 = SC.Store.generateStoreKey();
 
+  SC.RunLoop.begin();
+  
   store.changelog = SC.Set.create();
   store.changelog.add(key1);
   
@@ -58,6 +63,8 @@ test("adds items in changelog to reciever changelog", function() {
   // changelog should merge nested store & existing
   ok(store.changelog.contains(key1), 'changelog should still contain key1');
   ok(store.changelog.contains(storeKey), 'changelog should also contain storeKey');
+  
+  SC.RunLoop.end();
 });
 
 test("ignores changed data hashes not passed in changes set", function() {

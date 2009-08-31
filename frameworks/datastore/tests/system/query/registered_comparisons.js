@@ -35,6 +35,12 @@ module("SC.Query comparison of records", {
     
     
     q = SC.Query.create();
+  },
+  
+  teardown: function() {
+    // IMPORTANT: must delete so we don't screw up other unit tests.
+    // cleanup after ourselves
+    delete SC.Query.comparisons.firstName;
   }
 });
  

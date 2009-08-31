@@ -212,6 +212,29 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   scope: null,
   
+  
+  /**
+    Returns YES if query location is Remote.  This is sometimes more 
+    convenient than checking the location.
+    
+    @property
+    @type {Boolean}
+  */
+  isRemote: function() {
+    return this.get('location') === SC.Query.REMOTE;
+  }.property('location').cacheable(),
+
+  /**
+    Returns YES if query location is Local.  This is sometimes more 
+    convenient than checking the location.
+    
+    @property
+    @type {Boolean}
+  */
+  isLocal: function() {
+    return this.get('location') === SC.Query.LOCAL;
+  }.property('location').cacheable(),
+  
   // ..........................................................
   // PRIMITIVE METHODS
   // 

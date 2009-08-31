@@ -103,13 +103,14 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     Actually performs the fetch.  
   */
   _fetch: function(store, query) {
+    
     // NOTE: Assumes recordType or recordTypes is defined.  checked in fetch()
     var recordType = query.get('recordType'),
         recordTypes = query.get('recordTypes') || [recordType];
         
     // load fixtures for each recordType
     recordTypes.forEach(function(recordType) {
-      if (SC.typeOf(recordType === SC.T_STRING)) {
+      if (SC.typeOf(recordType) === SC.T_STRING) {
         recordType = SC.objectForPropertyPath(recordType);
       }
       
@@ -158,8 +159,6 @@ SC.FixturesDataSource = SC.DataSource.extend( {
       ret.push(storeKey);
       store.dataSourceDidComplete(storeKey, hash, id);
     }, this);
-    
-    return ret;
   },
   
   // ..........................................................
@@ -293,7 +292,9 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     @returns {SC.Fixture} receiver
   */
   loadFixturesFor: function(store, recordType, ret) {
-    var dataHashes, i, storeKey, hashes = [];
+    var hashes   = [],
+        isLoaded = this.fixturesLoadedFor(recordType),
+        dataHashes, i, storeKey ;
     
     dataHashes = this.fixturesFor(recordType);
     
@@ -306,9 +307,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     // before loading fixtures again, make sure they have not been
     // loaded already, so that SC.Query does not end up in 
     // infinite loop
-    if (!this.fixturesLoadedFor(recordType)) {
-      store.loadRecords(recordType, hashes);
-    }
+    if (!isLoaded) store.loadRecords(recordType, hashes);
     
     return this ;
   },

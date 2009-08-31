@@ -5,9 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
-// test querying through findAll on the store
+// test querying through find() on the store
 var MyApp;
-module("SC.Query querying findAll on a store", {
+module("SC.Query querying find() on a store", {
   setup: function() {
     SC.RunLoop.begin();
     // setup dummy app and store
@@ -94,7 +94,7 @@ test("caching for a single store", function() {
   equals(r2, r1, 'should return same record array for multiple calls');
 });
 
-test("findAll caching for a chained store", function() {
+test("find() caching for a chained store", function() {
   var r1 = MyApp.store.find(MyApp.Foo);  
   
   var child = MyApp.store.chain();
@@ -347,7 +347,7 @@ test("Deleting a record should make the RecordArray based on SC.Query update acc
   var q, records;
 
   q = SC.Query.local(MyApp.Foo, "firstName = 'John'");
-  records = MyApp.store.findAll(q);
+  records = MyApp.store.find(q);
   equals(records.get('length'), 1, 'record length should be 1');
   
   SC.RunLoop.begin();
@@ -383,7 +383,7 @@ test("Using find() with SC.Query on store with no data source should work", func
   equals(records.get('length'), 2, 'record length should be 2');  
 });
 
-test("Using orderBy in SC.Query returned from findAll()", function() {
+test("Using orderBy in SC.Query returned from find()", function() {
   
   var q, records;
   
@@ -477,7 +477,7 @@ test("Chaining find() queries and loading more records", function() {
 
 
 module("create record");
-
+ 
 test("creating record appears in future find()", function() {
   var Rec, store, r;
   

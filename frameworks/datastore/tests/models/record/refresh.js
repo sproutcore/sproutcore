@@ -8,6 +8,7 @@
 var MyFoo = null, callInfo ;
 module("SC.Record#refresh", {
   setup: function() {
+    SC.RunLoop.begin();
     MyApp = SC.Object.create({
       store: SC.Store.create()
     })  ;
@@ -28,7 +29,12 @@ module("SC.Record#refresh", {
     MyApp.store.refreshRecord = function(records) {
       callInfo = SC.A(arguments) ; // save method call
     };
+  },
+  
+  teardown: function() {
+    SC.RunLoop.end();
   }
+  
 });
 
 test("calling refresh should call refreshRecord() on store", function() {

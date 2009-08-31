@@ -428,7 +428,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
   /** @private 
     Will push all changes to a the recordPropertyChanges property
-    and execute flushRecordChanges() once at the end of the runloop.
+    and execute flush() once at the end of the runloop.
   */
   _notifyRecordPropertyChange: function(storeKey, statusOnly, key) {
     
@@ -460,14 +460,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var changes = this.recordPropertyChanges;
     if (!changes) {
       changes = this.recordPropertyChanges = 
-        { storeKeys: [], records: [], statusOnly: [], propertyForStoreKeys: {} };
+        { storeKeys:  SC.CoreSet.create(), 
+          records:    SC.CoreSet.create(), 
+          statusOnly: SC.CoreSet.create(),
+          propertyForStoreKeys: [] };
     }
     
-    changes.storeKeys.push(storeKey);
+    changes.storeKeys.add(storeKey);
 
     if (records && (rec=records[storeKey])) {
       changes.records.push(storeKey);
       if(statusOnly) changes.statusOnly.push(storeKey);
+      
       // if this is a key specific change, make sure that only those
       // properties/keys are notified
       if(key) {
@@ -492,7 +496,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   flush: function() {
-    
     if (!this.recordPropertyChanges) return this;
     
     var changes     = this.recordPropertyChanges,
@@ -503,11 +506,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         recordTypes = SC.CoreSet.create(),
         rec, recordType, status, idx, len, storeKey, props, idxx, lenn;
     
-    for(idx=0,len=storeKeys.length;idx<len;idx++) {
-      storeKey = storeKeys[idx];
-      
-      if(records.indexOf(storeKey)!==-1) {
-        status = statusOnly.indexOf(storeKey)!==-1 ? YES: NO;
+    storeKeys.forEach(function(storeKey) {
+
+      if(records.contains(storeKey)) {
+        status = statusOnly.contains(storeKey) ? YES: NO;
         rec = this.records[storeKey];
         props = changes.propertyForStoreKeys[storeKey];
         
@@ -523,18 +525,20 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           }
         }
         // remove it so we don't trigger this twice
-        records.removeObject(storeKey);
+        records.remove(storeKey);
       }
       
       recordType = SC.Store.recordTypeFor(storeKey);
-      if(!recordTypes.contains(recordType)) {
-        recordTypes.push(recordType);
-      }
-    
-    }
+      recordTypes.add(recordType);
+      
+    }, this);
 
     this._notifyRecordArrays(storeKeys, recordTypes);
-    this.recordPropertyChanges = null;
+
+    storeKeys.clear();
+    statusOnly.clear();
+    records.clear();
+    
     return this;
   },
   
@@ -620,7 +624,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // add any records to the changelog for commit handling
     var myChangelog = this.changelog, chChangelog = nestedStore.changelog;
     if (chChangelog) {
-      if (!myChangelog) myChangelog = this.changelog = SC.Set.create();
+      if (!myChangelog) myChangelog = this.changelog = SC.CoreSet.create();
       myChangelog.addEach(chChangelog);
     }  
     this.changelog = myChangelog;

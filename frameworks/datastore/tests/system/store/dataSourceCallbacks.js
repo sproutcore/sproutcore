@@ -135,7 +135,12 @@ module("SC.Store#dataSourceCallbacks", {
     storeKey15 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey15, json15, SC.Record.BUSY_CREATING);
   
+    SC.RunLoop.begin();
   
+  },
+  
+  teardown: function() {
+    SC.RunLoop.end();
   }
 });
 
@@ -241,9 +246,9 @@ test("Confirm that dataSourceDidError switched the records to the right states",
   }
   equals(SC.Record.BAD_STATE_ERROR.message, msg, 
     "should throw the following error ");
-  
+
   store.dataSourceDidError(storeKey15, SC.Record.BAD_STATE_ERROR);
   status = store.readStatus( storeKey15);
-  equals(status, SC.Record.BAD_STATE_ERROR, 
+  equals(status, SC.Record.ERROR, 
     "the status shouldn't have changed.");
 });

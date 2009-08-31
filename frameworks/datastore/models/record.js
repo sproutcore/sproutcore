@@ -176,6 +176,7 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function(key) {
     this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
+    this.storeDidChangeProperties(NO);
     return this ;
   },
   

@@ -10,9 +10,6 @@ var store, storeKey, storeId, rec, storeIds, recs;
 module("SC.ManyArray core methods", {
   setup: function() {
     
-    // loadRecords() needs a SC.RunLoop.currentRunLoop
-    SC.RunLoop.begin();
-    
     // setup dummy app and store
     MyApp = SC.Object.create({
       store: SC.Store.create()
@@ -21,6 +18,8 @@ module("SC.ManyArray core methods", {
     // setup a dummy model
     MyApp.Foo = SC.Record.extend({});
     
+    SC.RunLoop.begin();
+    
     // load some data
     MyApp.store.loadRecords(MyApp.Foo, [
       { guid: 1, firstName: "John", lastName: "Doe", age: 32 },
@@ -28,7 +27,7 @@ module("SC.ManyArray core methods", {
       { guid: 3, firstName: "Emily", lastName: "Parker", age: 7 },
       { guid: 4, firstName: "Johnny", lastName: "Cash", age: 17 }
     ]);
-    
+     
     storeKey = MyApp.store.storeKeyFor(MyApp.Foo, 1);
     
     // get record
@@ -39,8 +38,10 @@ module("SC.ManyArray core methods", {
     storeIds = [1,2,3,4];
     recs = SC.ManyArray.create({ store: MyApp.store, storeIds: storeIds, recordType: MyApp.Foo });
     
+  },
+  
+  teardown: function() {
     SC.RunLoop.end();
-    
   }
 });
 
