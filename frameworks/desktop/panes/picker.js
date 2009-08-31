@@ -309,15 +309,18 @@ SC.PickerPane = SC.PalettePane.extend({
     // 4 perfect positions: right > left > top > bottom
     // 2 coordinates: x, y
     // top-left corner of 4 perfect positioned f  (4x2)
-    var prefP1    =[[a.x+a.width-15, a.y+parseInt(a.height/3,0)-35], 
-                    [a.x-f.width+15, a.y+parseInt(a.height/3,0)-35], 
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y-f.height-5],
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y+a.height+5]];
+    var overlapTunningX = (a.height > 12) ? 0 : 1;
+    var overlapTunningY = (a.height > 12) ? 0 : 3;
+
+    var prefP1    =[[a.x+a.width+(19+overlapTunningX), a.y+parseInt(a.height/2,0)-40], 
+                    [a.x-f.width-(7+overlapTunningX),  a.y+parseInt(a.height/2,0)-40], 
+                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y-f.height-(17+overlapTunningY)],
+                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y+a.height+(17+overlapTunningY)]];
     // bottom-right corner of 4 perfect positioned f  (4x2)
-    var prefP2    =[[a.x+a.width+f.width-15, a.y+parseInt(a.height/3,0)+f.height-35], 
-                    [a.x+15,                 a.y+parseInt(a.height/3,0)+f.height-35], 
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y-5],
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y+a.height+f.height+5]];
+    var prefP2    =[[a.x+a.width+f.width+(19+overlapTunningX), a.y+parseInt(a.height/2,0)+f.height-40], 
+                    [a.x-(7+overlapTunningX),                  a.y+parseInt(a.height/2,0)+f.height-40], 
+                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y-(17+overlapTunningY)],
+                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y+a.height+f.height+(17+overlapTunningY)]];
     // cutoff of 4 perfect positioned f: top, right, bottom, left  (4x4)
     var cutoffPrefP =[[prefP1[0][1]>0 ? 0 : 0-prefP1[0][1], prefP2[0][0]<w.width ? 0 : prefP2[0][0]-w.width, prefP2[0][1]<w.height ? 0 : prefP2[0][1]-w.height, prefP1[0][0]>0 ? 0 : 0-prefP1[0][0]], 
                       [prefP1[1][1]>0 ? 0 : 0-prefP1[1][1], prefP2[1][0]<w.width ? 0 : prefP2[1][0]-w.width, prefP2[1][1]<w.height ? 0 : prefP2[1][1]-w.height, prefP1[1][0]>0 ? 0 : 0-prefP1[1][0]],
