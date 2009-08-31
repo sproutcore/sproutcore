@@ -130,100 +130,100 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @property {SC.TextSelection}
   */
   selection: function() {
-    var element = this.$field().get(0) ;
-    if (element) {
-      var start = null, end = null ;
-      
-      if (!element.value) {  
-        start = end = 0 ;
-      }
-      else {
-        // In IE8, input elements don't have hasOwnProperty() defined.
-        if ('selectionStart' in element) {
-          start = element.selectionStart ;
-        }
-        if ('selectionEnd' in element) {
-          end = element.selectionEnd ;
-        }
-      
-        // Support Internet Explorer.
-        if (start === null  ||  end === null ) {
-          var selection = document.selection ;
-          if (selection) {
-            var type = selection.type ;
-            if (type  &&  (type === 'None'  ||  type === 'Text')) {
-              var range = selection.createRange() ;
-
-              if (!this.get('isTextArea')) {
-                // Input tag support.  Figure out the starting position by
-                // moving the range's start position as far left as possible
-                // and seeing how many characters it actually moved over.
-                var length = range.text.length ;
-                start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1))) ;
-                end = start + length ;
-              }
-              else {
-                // Textarea support.  Unfortunately, this case is a bit more
-                // complicated than the input tag case.  We need to create a
-                // "dummy" range to help in the calculations.
-                var dummyRange = range.duplicate() ;
-                dummyRange.moveToElementText(element) ;
-                dummyRange.setEndPoint('EndToStart', range) ;
-                start = dummyRange.text.length ;
-                end = start + range.text.length ;
-              }
-            }
-          }
-        }
-      }
-      return SC.TextSelection.create({ start:start, end:end }) ;
-    }
-    else {
-      return null;
-    }
-    
-    // Implementation note:
-    // There are certain ways users can add/remove text that we can't identify
-    // via our key/mouse down/up handlers (such as the user choosing Paste from a
-    // menu).  So that's why we need to update our 'selection' property whenever
-    // the field's value changes.
-  }.property('fieldValue').cacheable(),
-  
-  
-  /**
-    Updates the selection to match the specified SC.TextSelection object.
-  */ 
-  setSelection: function(newSelection) {
-    // Update the element.
-    var element = this.$field().get(0) ;
-    var setStart, setEnd ;
-    if (element) {
-      // In IE8, input elements don't have hasOwnProperty() defined.  Also, in
-      // Firefox 3.5, trying to get the selectionStart / selectionEnd
-      // properties at certain times can cause exceptions.
-      if ('selectionStart' in element) {
-        element.selectionStart = newSelection.get('start') ;
-        setStart = YES ;
-      }
-      if ('selectionEnd' in element) {
-        element.selectionEnd = newSelection.get('end') ;
-        setEnd = YES ;
-      }
-      
-      // Support Internet Explorer.
-      if (!setStart  ||  !setEnd) {
-        var range = element.createTextRange() ;
-        var start = newSelection.get('start') ;
-        range.move('character', start) ;
-        range.moveEnd('character', newSelection.get('end') - start) ;
-        range.select() ;
-      }
-    }
-    
-    // Notify any observers about the property change.
-    this.notifyPropertyChange('selection');
-  },
-
+       var element = this.$input()[0] ;
+       if (element) {
+         var start = null, end = null ;
+         
+         if (!element.value) {  
+           start = end = 0 ;
+         }
+         else {
+           // In IE8, input elements don't have hasOwnProperty() defined.
+           if ('selectionStart' in element) {
+             start = element.selectionStart ;
+           }
+           if ('selectionEnd' in element) {
+             end = element.selectionEnd ;
+           }
+         
+           // Support Internet Explorer.
+           if (start === null  ||  end === null ) {
+             var selection = document.selection ;
+             if (selection) {
+               var type = selection.type ;
+               if (type  &&  (type === 'None'  ||  type === 'Text')) {
+                 var range = selection.createRange() ;
+   
+                 if (!this.get('isTextArea')) {
+                   // Input tag support.  Figure out the starting position by
+                   // moving the range's start position as far left as possible
+                   // and seeing how many characters it actually moved over.
+                   var length = range.text.length ;
+                   start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1))) ;
+                   end = start + length ;
+                 }
+                 else {
+                   // Textarea support.  Unfortunately, this case is a bit more
+                   // complicated than the input tag case.  We need to create a
+                   // "dummy" range to help in the calculations.
+                   var dummyRange = range.duplicate() ;
+                   dummyRange.moveToElementText(element) ;
+                   dummyRange.setEndPoint('EndToStart', range) ;
+                   start = dummyRange.text.length ;
+                   end = start + range.text.length ;
+                 }
+               }
+             }
+           }
+         }
+         return SC.TextSelection.create({ start:start, end:end }) ;
+       }
+       else {
+         return null;
+       }
+       
+       // Implementation note:
+       // There are certain ways users can add/remove text that we can't identify
+       // via our key/mouse down/up handlers (such as the user choosing Paste from a
+       // menu).  So that's why we need to update our 'selection' property whenever
+       // the field's value changes.
+     }.property('fieldValue').cacheable(),
+     
+     
+     /**
+       Updates the selection to match the specified SC.TextSelection object.
+     */ 
+     setSelection: function(newSelection) {
+       // Update the element.
+       var element = this.$input().get(0) ;
+       var setStart, setEnd ;
+       if (element) {
+         // In IE8, input elements don't have hasOwnProperty() defined.  Also, in
+         // Firefox 3.5, trying to get the selectionStart / selectionEnd
+         // properties at certain times can cause exceptions.
+         if ('selectionStart' in element) {
+           element.selectionStart = newSelection.get('start') ;
+           setStart = YES ;
+         }
+         if ('selectionEnd' in element) {
+           element.selectionEnd = newSelection.get('end') ;
+           setEnd = YES ;
+         }
+         
+         // Support Internet Explorer.
+         if (!setStart  ||  !setEnd) {
+           var range = element.createTextRange() ;
+           var start = newSelection.get('start') ;
+           range.move('character', start) ;
+           range.moveEnd('character', newSelection.get('end') - start) ;
+           range.select() ;
+         }
+       }
+       
+       // Notify any observers about the property change.
+       this.notifyPropertyChange('selection');
+     },
+   
     
   // ..........................................................
   // INTERNAL SUPPORT
@@ -342,10 +342,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var rightPadding = accessoryViewWidths['right'] ;
     if (leftPadding)  leftPadding  += 'px' ;
     if (rightPadding) rightPadding += 'px' ;
-
-
-    this._renderHint(context, firstTime, leftPadding, rightPadding);
+    
     this._renderField(context, firstTime, v, leftPadding, rightPadding);
+    this._renderHint(context, firstTime, leftPadding, rightPadding);
+    
   },
   
   _renderHint: function(context, firstTime, leftPadding, rightPadding) {
@@ -412,17 +412,18 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (rightPadding) paddingStyle += 'padding-right: ' + rightPadding + ';' ;
         paddingStyle += '"' ;
       }
-      
+      context.push('<span class="border"></span>');
       if (this.get('isTextArea')) {
-        context.push('<textarea name="%@" %@ value="%@" %@></textarea>'.fmt(name, disabled, value, paddingStyle)) ;
+        context.push('<span class="padding"><textarea name="%@" %@ value="%@" %@></textarea></span>'.fmt(name, disabled, value, paddingStyle)) ;
       }
       else {
         var type = this.get('isPassword') ? 'password' : 'text' ;
-        context.push('<input type="%@" name="%@" %@ value="%@" %@></input>'.fmt(type, name, disabled, value, paddingStyle)) ;
+        context.push('<span class="padding"><input type="%@" name="%@" %@ value="%@" %@/></span>'.fmt(type, name, disabled, value, paddingStyle)) ;
       }
+      
     }
     else {
-      var element = this.$field().get(0);
+      var element = this.$input()[0];
       if (element) {
         if (!this.get('isEnabled')) {
           element.disabled = 'true' ;
@@ -454,6 +455,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
   },
   
+  
   _getAccessoryViewWidths: function() {
     var widths = {};
     var accessoryViewPositions = ['left', 'right'] ;
@@ -479,18 +481,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     return widths;
   },
-  
-  
-
-  // more efficient input
-  $field: function() { 
-    if(this.get('isTextArea')){
-      return this.$('textarea'); 
-    }else{
-      return this.$('input');
-    }
-  },
-  
+    
   
   // ..........................................................
   // HANDLE NATIVE CONTROL EVENTS
@@ -499,7 +490,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   didCreateLayer: function() {
     sc_super();
 
-    var input = this.$field();
+    var input = this.$input();
     SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
         
@@ -512,7 +503,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   willDestroyLayer: function() {
     sc_super();
     
-    var input = this.$field();
+    var input = this.$input();
     SC.Event.remove(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.remove(input, 'blur',  this, this._textField_fieldDidBlur);
     SC.Event.remove(input, 'select',  this, this._textField_selectionDidChange);
@@ -550,18 +541,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (SC.browser.mozilla) {
       this._hasFirefoxCursorFix = YES ;
       
-      var layer = this.get('layer');
-      var p = SC.viewportOffset(this.get('layer')) ;
+      var element = this.$input();
+      var layer = element[0];
+      var p = SC.viewportOffset(layer) ;
       var top    = p.y, 
           left   = p.x, 
           width  = layer.offsetWidth, 
           height = layer.offsetHeight ;
           
-      top -= 2; 
-      left -= 2;  
-      
       var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
-      this.$field().attr('style', style) ;
+      element.attr('style', style) ;
     }
     return this ;
   },
@@ -569,18 +558,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _removeFirefoxCursorFix: function() {
     if (!this._hasFirefoxCursorFix) return this;
     this._hasFirefoxCursorFix = NO ;
-    if (SC.browser.mozilla) this.$field().attr('style', '') ;
+    if (SC.browser.mozilla) this.$input().attr('style', '') ;
     return this ;
   },
   
   _textField_selectionDidChange: function() {
     this.notifyPropertyChange('selection');
   },
-  
-  /** tied to the isEnabled state */
-  acceptsFirstResponder: function() {
-    return this.get('isEnabled');
-  }.property('isEnabled'),
+      
     
   // ..........................................................
   // FIRST RESPONDER SUPPORT
@@ -595,10 +580,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // focus the text field.
     if (!this._isFocused) {
       this._isFocused = YES ;
+      this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        this.$field().get(0).focus();
+        this.$input()[0].focus();
         this._applyFirefoxCursorFix();
-        this.invokeOnce(this._selectRootElement) ;
+        if(this.getFieldValue().length===0 || SC.browser.msie){
+        if(!SC.browser.safari) this.invokeOnce(this._selectRootElement) ;
+        else this.invokeLater(this._selectRootElement, 1) ;
+      }
       }
     }
   },
@@ -606,7 +595,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // In IE, you can't modify functions on DOM elements so we need to wrap the 
   // call to select() like this.
   _selectRootElement: function() {
-    this.$field().get(0).select() ;
+    this.$input()[0].select() ;
   },
   
   // when we lose first responder, blur the text field if needed and show
@@ -615,11 +604,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   didLoseKeyResponderTo: function(keyView) {
     if (this._isFocused) {
       this._isFocused = NO ;
-      this.$field().get(0).blur() ;
-      this._removeFirefoxCursorFix();
+      this.$input()[0].blur() ;
     } else {
       this.fieldValueDidChange() ;
     }
+    if(this._hasFirefoxCursorFix) this._removeFirefoxCursorFix();
   },
   
   parentViewDidResize: function() {

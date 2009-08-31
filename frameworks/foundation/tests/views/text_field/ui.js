@@ -210,7 +210,7 @@ test("enabling disabled view", function() {
 
 test("Setting and then getting back the selection", function() {  
   var view = pane.view('with value');
-  var fieldElement = view.$field()[0];
+  var fieldElement = view.$input()[0];
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
   
   var newSelection = SC.TextSelection.create({start:2, end:5});
@@ -246,7 +246,7 @@ test("Adding left accessory view", function() {
   // set to the accessory view's offset + width
   // (18 = 2 left offset + 16 width)
   var hintElement  = view.$('.sc-hint')[0];
-  var fieldElement = view.$field()[0];
+  var fieldElement = view.$input()[0];
   ok(hintElement.style.paddingLeft  === '18px', 'hint element should get 18px padding-left');
   ok(fieldElement.style.paddingLeft === '18px', 'field element should get 18px padding-left');
   
@@ -279,7 +279,7 @@ test("Adding right accessory view", function() {
   // set to the accessory view's offset + width
   // (20 = 3 right offset + 17 width)
   var hintElement  = view.$('.sc-hint')[0];
-  var fieldElement = view.$field()[0];
+  var fieldElement = view.$input()[0];
   ok(hintElement.style.paddingRight  === '20px', 'hint element should get 20px padding-right');
   ok(fieldElement.style.paddingRight === '20px', 'field element should get 20px padding-right');
   
@@ -330,7 +330,7 @@ test("Adding both left and right accessory views", function() {
   //   *  left:   18 = 2 left offset + 16 width)
   //   *  right:  20 = 3 left offset + 17 width)
   var hintElement  = view.$('.sc-hint')[0];
-  var fieldElement = view.$field()[0];
+  var fieldElement = view.$input()[0];
   ok(hintElement.style.paddingLeft  === '18px', 'hint element should get 18px padding-left');
   ok(fieldElement.style.paddingLeft === '18px', 'field element should get 18px padding-left');
   ok(hintElement.style.paddingRight  === '20px', 'hint element should get 20px padding-right');
