@@ -16,5 +16,5 @@ CoreTools = SC.Object.create( /** @scope CoreTools.prototype */ {
 
   NAMESPACE: 'CoreTools',
   VERSION: '1.0.0'
-
+  
 }) ;

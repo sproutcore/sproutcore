@@ -10,17 +10,21 @@
   This DataSource connects to the SproutCore sc-server to retrieve targets
   and tests.  Currently this DataSource is read only.
 */
-CoreTools.DevDataSource = SC.DataSource.extend({
+CoreTools.DataSource = SC.DataSource.extend({
 
   /**
     Fetch a group of records from the data source.  Knows how to fetch 
     a list of targets and tests.
   */
-  fetch: function(store, fetchKey, params) {
-    var ret = null;
-    if (fetchKey === CoreTools.Target) ret = this.fetchTargets(store);
-    else if (fetchKey === CoreTools.Test) {
-      ret = this.fetchTests(store, params.url);
+  fetch: function(store, query) {
+    var ret = NO;
+    switch(query.get('recordType')) {
+      case CoreTools.Target:
+        ret = this.fetchTargets(store, query);
+        break;
+      case CoreTools.Test:
+        ret = this.fetchTests(store, query);
+        break;
     }
     
     return ret;
@@ -30,67 +34,66 @@ CoreTools.DevDataSource = SC.DataSource.extend({
   // FETCHING TARGETS
   // 
   
-  fetchTargets: function(store) {
-    var ret = this._targets; // get loaded items
-    if (ret) return ret ;
-
-    ret = this._targets = [];
-    ret.set('state', SC.Record.BUSY_LOADING);
+  /**
+    Fetch the actual targets.  Only understands how to handle a remote query.
+  */
+  fetchTargets: function(store, query) {
+    
+    if (!query.get('isRemote')) return NO ; 
+    
     SC.Request.getUrl('/sc/targets.json')
       .set('isJSON', YES)
-      .notify(this, 'fetchTargetsDidComplete', { ret: ret, store: store })
+      .notify(this, 'fetchTargetsDidComplete', { query: query, store: store })
       .send();
-    return ret ;
+    return YES ;
   },
   
   fetchTargetsDidComplete: function(request, opts) {
     var response = request.get('response'),
-        ret      = opts.ret,
+        query    = opts.query,
+        store    = opts.store,
         storeKeys;
         
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching targets fails");
     } else {
-      storeKeys = opts.store.loadRecords(CoreTools.Target, response);
-      ret.replace(0, ret.get('length'), storeKeys);
+      storeKeys = store.loadRecords(SC.Record.Target, response);
+      store.loadQueryResults(query, storeKeys);
     }
-
-    ret.set('state', SC.Record.READY);
   },
   
   // ..........................................................
   // FETCHING TESTS
   // 
-  
-  fetchTests: function(store, url) {
-    var tests = this._tests, ret ;
-    if (!tests) tests = this._tests = {};
-    if (ret = tests[url]) return ret;
+
+  /**
+    Load tests for a particular URL.  Only understands local querys with a
+    URL.
+  */
+  fetchTests: function(store, query) {
+    var params = query.get('parameters'),
+        url    = params ? params.url : null ;
+        
+    if (!url || !query.get('isLocal')) return NO ; // not handled
     
-    ret = tests[url] = [];
-    ret.set('state', SC.Record.BUSY_LOADING);
     SC.Request.getUrl(url)
       .set('isJSON', YES)
-      .notify(this, 'fetchTestsDidComplete', { ret: ret, store: store })
+      .notify(this, 'fetchTestsDidComplete', { query: query, store: store })
       .send();
-    return ret ;
+    return YES ;
   },
   
   fetchTestsDidComplete: function(request, opts) {
     var response = request.get('response'),
-        ret      = opts.ret,
+        store    = opts.store,
+        query    = opts.query,
         storeKeys;
         
     if (!SC.$ok(response)) {
       console.error("TODO: Add handler when fetching tests fails");
     } else {
-      storeKeys = opts.store.loadRecords(CoreTools.Test, response);
-      ret       = opts.ret;
-      ret.replace(0, ret.get('length'), storeKeys);
+      storeKeys = store.loadRecords(CoreTools.Test, response);
     }
-
-    console.log('fetchTestsDidComplete');
-    ret.set('state', SC.Record.READY);
   }
   
 });

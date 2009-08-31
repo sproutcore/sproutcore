@@ -46,8 +46,10 @@ CoreTools.Target = SC.Record.extend(
     Children of this target.  Computed by getting the loaded targets
   */
   children: function() {
-    var store = this.get('store');
-    var ret = TestRunner.get('targets').filterProperty('parent', this);
+    var store = this.get('store'),
+        query = CoreTools.TARGETS_QUERY,
+        ret   = store.find(query).filterProperty('parent', this);
+        
     if (ret) ret = ret.sortProperty('kind', 'displayName');
     return (ret && ret.get('length')>0) ? ret : null ;
   }.property().cacheable(),
@@ -88,12 +90,18 @@ CoreTools.Target = SC.Record.extend(
     else return (this.get('kind') || 'unknown').toLowerCase();
   }.property('kind', 'parent').cacheable(),
   
+  testQuery: function() {
+    return SC.Query.local(CoreTools.Test, 'url = {url}', { url: this.get('testsUrl') });
+  }.property('testsUrl').cacheable(),
+  
   /**
     Returns all of the tests associated with this target by fetching the
     testsUrl.
   */
   tests: function() {
-    return this.get('store').findAll(CoreTools.Test, { url: this.get('testsUrl') });
-  }.property('testsUrl').cacheable()
+    return this.get('store').find(this.get('testsQuery'));
+  }.property('testsQuery').cacheable()
   
 }) ;
+
+CoreTools.TARGETS_QUERY = SC.Query.remote(CoreTools.Target);
