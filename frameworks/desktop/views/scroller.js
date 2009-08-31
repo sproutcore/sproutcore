@@ -59,16 +59,6 @@ SC.ScrollerView = SC.View.extend({
   maximum: 0,
   
   /**
-    Describes the visible size of the clipping view this scroll will manage.
-    If left as null, then this will by default look at the container view of 
-    the owner scroll view.
-    
-    @property
-    @type {Number}
-  */
-  containerSize: null,
-  
-  /**
     YES if enable scrollbar, NO to disable it.  Scrollbars will automatically 
     disable if the maximum scroll width does not exceed their capacity.
     
@@ -117,11 +107,7 @@ SC.ScrollerView = SC.View.extend({
   // INTERNAL SUPPORT
   // 
   
-<<<<<<< Updated upstream:frameworks/desktop/views/scroller.js
   displayProperties: 'maximum isEnabled layoutDirection'.w(),
-=======
-  displayProperties: 'minimum maximum isEnabled containerSize'.w(),
->>>>>>> Stashed changes:frameworks/desktop/views/scroller.js
   
   /** @private
     Update the scroll location or inner height/width if needed.
@@ -129,22 +115,8 @@ SC.ScrollerView = SC.View.extend({
   render: function(context, firstTime) {
     var max = this.get('maximum') ;
     
-<<<<<<< Updated upstream:frameworks/desktop/views/scroller.js
     switch (this.get('layoutDirection')) {
-=======
-     // calculate required size...
-    var size = (enabled) ? max-min-2 : 0 ;
-    var containerSize = this.get('containerSize');
-    var frameSize ;
-    
-    
-    switch (dir) {
->>>>>>> Stashed changes:frameworks/desktop/views/scroller.js
       case SC.LAYOUT_VERTICAL:
-        frameSize = this.get('frame').height;
-        if (!containerSize) containerSize = frameSize;
-        size = Math.floor((size * frameSize) / containerSize) ;
-        
         context.addClass('sc-vertical') ;
         if (firstTime) {
           context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(max)) ;
@@ -153,10 +125,6 @@ SC.ScrollerView = SC.View.extend({
         }
         break ;
       case SC.LAYOUT_HORIZONTAL:
-        frameSize = this.get('frame').width;
-        if (!containerSize) containerSize = frameSize;
-        size = Math.floor((size * frameSize) / containerSize) ;
-
         context.addClass('sc-horizontal') ;
         if (firstTime) {  
           context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(max)) ;
