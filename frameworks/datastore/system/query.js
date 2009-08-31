@@ -650,13 +650,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     'YES': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
-      evaluate:         function (r,w) { return false; }
+      evaluate:         function (r,w) { return true; }
     },
     
     'NO': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
-      evaluate:         function (r,w) { return true; }
+      evaluate:         function (r,w) { return false; }
     }
     
   },

@@ -13,6 +13,10 @@ module("SC.Query querying findAll on a store", {
     // setup dummy app and store
     MyApp = SC.Object.create({});
     
+    // setup a dummy model
+    MyApp.Foo = SC.Record.extend();
+    MyApp.Bar = SC.Record.extend();
+    
     // setup data source that just returns cached storeKeys
     MyApp.DataSource = SC.DataSource.create({
 
@@ -20,6 +24,14 @@ module("SC.Query querying findAll on a store", {
         this.query = query;
         this.store = store;
         this.fetchCount++ ;
+        
+        // used by tests to verify remote queries
+        if (query.get('location') === SC.Query.REMOTE) {
+          if (query.get('recordType') === MyApp.Foo) {
+            store.loadQueryResults(query, this.get('storeKeys'));    
+          }
+        }
+        
         return YES ;
       },
       
@@ -47,10 +59,6 @@ module("SC.Query querying findAll on a store", {
     });
     
     MyApp.store = SC.Store.create().from(MyApp.DataSource);
-    
-    // setup a dummy model
-    MyApp.Foo = SC.Record.extend();
-    MyApp.Bar = SC.Record.extend();
     
     var records = [
       { guid: 1, firstName: "John", lastName: "Doe", married: true },
@@ -124,7 +132,6 @@ test("should find records based on boolean", function() {
   SC.RunLoop.begin();
   var q = SC.Query.local(MyApp.Foo, "married=YES");
   var records = MyApp.store.find(q);
-  debugger;
   equals(records.get('length'), 4, 'record length should be 4');
   SC.RunLoop.end();
 });
@@ -139,89 +146,129 @@ test("should find records based on query string", function() {
   SC.RunLoop.end();
 });
 
-notest("should find records based on SC.Query", function() {
+test("should find records based on SC.Query", function() {
+  var q = SC.Query.create({
+    recordType: MyApp.Foo, 
+    conditions:"firstName = 'Jane'"
+  });
   
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Jane'"});
+  var records = MyApp.store.find(q);
   
-  var records = MyApp.store.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'Jane', 'name should be Jane');
+});
+
+test("modifying a record should update RecordArray automatically", function() {
+  var q    = SC.Query.local(MyApp.Foo, "firstName = 'Jane'"),
+      recs = MyApp.store.find(q);
+      
+  equals(recs.get('length'), 1, 'record length should be 1');
+  equals(recs.objectAt(0).get('firstName'), 'Jane', 'name should be Jane');
+  
+  SC.RunLoop.begin();
+
+  var r2 = MyApp.store.find(MyApp.Foo, 3);
+  ok(r2.get('firstName') !== 'Jane', 'precond - firstName is not Jane');
+  r2.set('firstName', 'Jane');
+
+  SC.RunLoop.end();
+  
+  equals(recs.get('length'), 2, 'record length should increase');
+  same(recs.getEach('firstName'), ['Jane', 'Jane'], 'check all firstNames are Jane');
+  
+  // try the other direction...
+  SC.RunLoop.begin();
+  r2.set('firstName', 'Ester');
+  SC.RunLoop.end();
+  
+  equals(recs.get('length'), 1, 'record length should decrease');
 
 });
 
 notest("should find records based on SC.Query without recordType", function() {
   
-  var q = SC.Query.create({conditions:"lastName = 'Doe'"});
+  var q = SC.Query.create({ conditions:"lastName = 'Doe'" });
   
-  var records = MyApp.store.findAll(q);
+  var records = MyApp.store.find(q);
   equals(records.get('length'), 2, 'record length should be 2');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
   equals(records.objectAt(1).get('firstName'), 'Jane', 'name should be Jane');
 
 });
 
-notest("should find records within a passed record array", function() {
+test("should find records within a passed record array", function() {
 
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Emily'"});
+  SC.RunLoop.begin();
+  
+  var q = SC.Query.create({ 
+    recordType: MyApp.Foo, 
+    conditions: "firstName = 'Emily'" 
+  });
 
-  var recArray = MyApp.store.findAll(MyApp.Foo);
-  var records = MyApp.store.findAll(q, null, recArray);
+  var recArray = MyApp.store.find(MyApp.Foo);
+  var records  = recArray.find(q);
   
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'Emily', 'name should be Emily');
 
+  SC.RunLoop.end();
+  
 });
 
-notest("changing the original store key array from data source should propagate to record array", function() {
+test("sending a new store key array from the data source should update record array", function() {
   
-  var records = MyApp.store.findAll(MyApp.Foo);
+  var q       = SC.Query.remote(MyApp.Foo),
+      records = MyApp.store.find(q);
   
+  SC.RunLoop.begin();
   equals(records.get('length'), 5, 'record length should be 5');
+  SC.RunLoop.end();
   
-  var newStoreKeys = MyApp.DataSource.storeKeys;
+  var newStoreKeys = MyApp.DataSource.storeKeys.copy();
   newStoreKeys.pop();
   
   // .replace() will call .enumerableContentDidChange()
-  MyApp.DataSource.storeKeys.replace(0,100,newStoreKeys);
+  SC.RunLoop.begin();
+  MyApp.store.loadQueryResults(q, newStoreKeys);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 4, 'record length should be 4');
 
 });
 
 
-notest("loading more data into the store should propagate to record array", function() {
+test("loading more data into the store should propagate to record array", function() {
   
-  var records = MyApp.store.findAll(MyApp.Foo);
+  var records = MyApp.store.find(MyApp.Foo);
   
   equals(records.get('length'), 5, 'record length before should be 5');
+
+  SC.RunLoop.begin();
   
   var newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 10, firstName: "John", lastName: "Johnson" }
   ]);
   
-  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
+  SC.RunLoop.end();
   
   equals(records.get('length'), 6, 'record length after should be 6');
-
 });
 
-notest("loading more data into the store should propagate to record array with query", function() {
-  SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
-  
-  var records = MyApp.store.findAll(q);
+test("loading more data into the store should propagate to record array with query", function() {
+
+  var q = SC.Query.local(MyApp.Foo, "firstName = 'John'"),
+      records = MyApp.store.find(q);
   
   equals(records.get('length'), 1, 'record length before should be 1');
-  
+
+  SC.RunLoop.begin();
   var newStoreKeys = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 10, firstName: "John", lastName: "Johnson" }
   ]);
+  SC.RunLoop.end();
   
   // .replace() will call .enumerableContentDidChange()
   // and should fire original SC.Query again
-  
-  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys);
-  SC.RunLoop.end();
   equals(records.get('length'), 2, 'record length after should be 2');
   
   // subsequent updates to store keys should also work
@@ -229,30 +276,16 @@ notest("loading more data into the store should propagate to record array with q
   var newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 11, firstName: "John", lastName: "Norman" }
   ]);
-  
-  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
   SC.RunLoop.end();
   
   equals(records.get('length'), 3, 'record length after should be 3');
-  
 });
 
-notest("SC.Query returned from fetchRecords() should return result set", function() {
+test("Loading records after SC.Query should show up", function() {
   
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
-  
-  var records = MyApp.store.findAll(q);
-  equals(records.get('length'), 1, 'record length should be 1');
-  equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
-
-});
-
-notest("Loading records after SC.Query is returned in fetchRecords() should show up", function() {
-  
-  SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
-  
-  var records = MyApp.store.findAll(q);
+  var q = SC.Query.local(MyApp.Foo, "firstName = 'John'"),
+      records = MyApp.store.find(q);
+      
   equals(records.get('length'), 1, 'record length should be 1');
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
   
@@ -262,6 +295,7 @@ notest("Loading records after SC.Query is returned in fetchRecords() should show
     { guid: 22, firstName: "Barbara", lastName: "Jones" }
   ];
   
+  SC.RunLoop.begin();
   MyApp.store.loadRecords(MyApp.Foo, recordsToLoad);
   SC.RunLoop.end();
   
@@ -270,77 +304,73 @@ notest("Loading records after SC.Query is returned in fetchRecords() should show
   equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
   equals(records.objectAt(1).get('firstName'), 'John', 'name should be John');
   equals(records.objectAt(2).get('firstName'), 'John', 'name should be John');
-  
 });
 
-notest("Loading records after getting empty record array based on SC.Query should update", function() {
+test("Loading records after getting empty record array based on SC.Query should update", function() {
   
-  SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Maria'"});
-  
-  var records = MyApp.store.findAll(q);
+  var q = SC.Query.local(MyApp.Foo, "firstName = 'Maria'");
+  var records = MyApp.store.find(q);
   equals(records.get('length'), 0, 'record length should be 0');
   
   var recordsToLoad = [
     { guid: 20, firstName: "Maria", lastName: "Johnson" }
   ];
   
+  SC.RunLoop.begin();
   MyApp.store.loadRecords(MyApp.Foo, recordsToLoad);
   SC.RunLoop.end();
   
   equals(records.get('length'), 1, 'record length should be 1');
   
-  equals(records.objectAt(0).get('firstName'), 'Maria', 'name should be Maria');
-  
+  equals(records.objectAt(0).get('firstName'), 'Maria', 'name should be Maria');  
 });
 
-notest("Changing a record should make it show up in RecordArrays based on SC.Query", function() {
+test("Changing a record should make it show up in RecordArrays based on SC.Query", function() {
   
-  SC.RunLoop.begin();
+  var q, records, record;
   
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'Maria'"});
-  
-  var records = MyApp.store.findAll(q);
+  q = SC.Query.local(MyApp.Foo, "firstName = 'Maria'");
+  records = MyApp.store.find(q);
   equals(records.get('length'), 0, 'record length should be 0');
   
-  var record = MyApp.store.find(MyApp.Foo, 1);
+  SC.RunLoop.begin();
+  record = MyApp.store.find(MyApp.Foo, 1);
   record.set('firstName', 'Maria');
-  
   SC.RunLoop.end();
   
   equals(records.get('length'), 1, 'record length should be 1');
-  
   equals(records.objectAt(0).get('firstName'), 'Maria', 'name should be Maria');
-  
 });
 
-notest("Deleting a record should make the RecordArray based on SC.Query update accordingly", function() {
+test("Deleting a record should make the RecordArray based on SC.Query update accordingly", function() {
   
-  SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
-  
-  var records = MyApp.store.findAll(q);
+  var q, records;
+
+  q = SC.Query.local(MyApp.Foo, "firstName = 'John'");
+  records = MyApp.store.findAll(q);
   equals(records.get('length'), 1, 'record length should be 1');
   
-  MyApp.store.destroyRecord(MyApp.Foo, 1);
+  SC.RunLoop.begin();
+  records.objectAt(0).destroy();
   SC.RunLoop.end();
   
   equals(records.get('length'), 0, 'record length should be 0');
-  
 });
 
-notest("Using findAll with SC.Query on store with no data source should work", function() {
+test("Using find() with SC.Query on store with no data source should work", function() {
+
+  var q, records, recordsToLoad;
   
   SC.RunLoop.begin();
+  
   // create a store with no data source
   MyApp.store3 = SC.Store.create();
   
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName = 'John'"});
-  
-  var records = MyApp.store3.findAll(q);
+  q = SC.Query.local(MyApp.Foo, "firstName = 'John'");
+  records = MyApp.store3.find(q);
   equals(records.get('length'), 0, 'record length should be 0');
   
-  var recordsToLoad = [
+  recordsToLoad = [
     { guid: 20, firstName: "John", lastName: "Johnson" },
     { guid: 21, firstName: "John", lastName: "Anderson" },
     { guid: 22, firstName: "Barbara", lastName: "Jones" }
@@ -350,37 +380,35 @@ notest("Using findAll with SC.Query on store with no data source should work", f
   
   SC.RunLoop.end();
   
-  equals(records.get('length'), 2, 'record length should be 2');
-  
+  equals(records.get('length'), 2, 'record length should be 2');  
 });
 
-notest("Using orderBy in SC.Query returned from findAll()", function() {
+test("Using orderBy in SC.Query returned from findAll()", function() {
   
-  var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
+  var q, records;
   
-  var records = MyApp.store.findAll(q);
+  q = SC.Query.local(MyApp.Foo, { orderBy: "firstName ASC" });
+  records = MyApp.store.find(q);
   equals(records.get('length'), 5, 'record length should be 5');
   
-  same(records.getEach('firstName'), ["Bert", "Emily", "Jane", "John", "Johnny"], 'first name should be properly sorted');
-  
+  same(records.getEach('firstName'), ["Bert", "Emily", "Jane", "John", "Johnny"], 'first name should be properly sorted');  
 });
 
-notest("Using orderBy in SC.Query returned from findAll() and loading more records to original store key array", function() {
+test("Using orderBy in SC.Query returned from find() and loading more records to original store key array", function() {
+
+  var q, records, newStoreKeys2;
   
-  SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
-  
-  var records = MyApp.store.findAll(q);
+  q = SC.Query.local(MyApp.Foo, { orderBy:"firstName ASC" });
+  records = MyApp.store.find(q);
   equals(records.get('length'), 5, 'record length should be 5');
   
   equals(records.objectAt(0).get('firstName'), 'Bert', 'name should be Bert');
   equals(records.objectAt(4).get('firstName'), 'Johnny', 'name should be Johnny');
   
-  var newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
+  SC.RunLoop.begin();
+  newStoreKeys2 = MyApp.store.loadRecords(MyApp.Foo, [
     { guid: 11, firstName: "Anna", lastName: "Petterson" }
   ]);
-  
-  MyApp.DataSource.storeKeys.replace(0,0,newStoreKeys2);
   SC.RunLoop.end();
   
   equals(records.objectAt(0).get('firstName'), 'Anna', 'name should be Anna');
@@ -390,12 +418,13 @@ notest("Using orderBy in SC.Query returned from findAll() and loading more recor
 });
 
 
-notest("Using orderBy in SC.Query and loading more records to the store", function() {
+test("Using orderBy in SC.Query and loading more records to the store", function() {
+
+  var q, records;
   
   SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, orderBy:"firstName ASC"});
-  
-  var records = MyApp.store.findAll(q);
+  q = SC.Query.local(MyApp.Foo, { orderBy:"firstName ASC" });
+  records = MyApp.store.find(q);
   equals(records.get('length'), 5, 'record length should be 5');
   equals(records.objectAt(0).get('firstName'), 'Bert', 'name should be Bert');
   
@@ -411,30 +440,31 @@ notest("Using orderBy in SC.Query and loading more records to the store", functi
   
 });
 
-notest("Chaining findAll() queries", function() {
+test("Chaining find() queries", function() {
   
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"lastName='Doe'"});
+  var q, records, q2, records2;
   
-  var records = MyApp.store.findAll(q);
+  q = SC.Query.local(MyApp.Foo, "lastName='Doe'");
+  records = MyApp.store.find(q);
   equals(records.get('length'), 2, 'record length should be 2');
   
-  var q2 = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName='John'"});
-  
-  var records2 = records.findAll(q2);
-  
-  equals(records2.get('length'), 1, 'record length should be 1');
-  
+  q2 = SC.Query.local(MyApp.Foo, "firstName='John'");
+  records2 = records.find(q2);
+
+  equals(records2.get('length'), 1, 'record length should be 1');  
   equals(records2.objectAt(0).get('firstName'), 'John', 'name should be John');
   
 });
 
-notest("Chaining findAll() queries and loading more records", function() {
+test("Chaining find() queries and loading more records", function() {
+
+  var q, q2, records;
   
   SC.RunLoop.begin();
-  var q = SC.Query.create({recordType: MyApp.Foo, conditions:"lastName='Doe'"});
-  var q2 = SC.Query.create({recordType: MyApp.Foo, conditions:"firstName='John'"});
+  q = SC.Query.local(MyApp.Foo, "lastName='Doe'");
+  q2 = SC.Query.local(MyApp.Foo, "firstName='John'");
   
-  var records = MyApp.store.findAll(q).findAll(q2);
+  records = MyApp.store.find(q).find(q2);
   equals(records.get('length'), 1, 'record length should be 1');
   
   MyApp.store.loadRecords(MyApp.Foo, [
@@ -442,32 +472,36 @@ notest("Chaining findAll() queries and loading more records", function() {
   ]);
   SC.RunLoop.end();
   
-  equals(records.get('length'), 2, 'record length should be 2');
-  
+  equals(records.get('length'), 2, 'record length should be 2');  
 });
 
 
 module("create record");
 
-notest("creating record appears in future findAll", function() {
-  var Rec = SC.Record.extend({ title: SC.Record.attr(String) });
-  var store = SC.Store.create();
+test("creating record appears in future find()", function() {
+  var Rec, store, r;
+  
+  Rec = SC.Record.extend({ title: SC.Record.attr(String) });
+  store = SC.Store.create();
+  
   SC.run(function() {
     store.loadRecords(Rec, 
-      [{ title: "A", guid: 1 }, { title: "B", guid: 2 }]);
+      [ { title: "A", guid: 1 }, 
+        { title: "B", guid: 2 } ]);
   });
   
-  equals(store.findAll(Rec).get('length'), 2, 'should have two initial record');
+  equals(store.find(Rec).get('length'), 2, 'should have two initial record');
 
-  var r;
-  
   SC.run(function() {
     store.createRecord(Rec, { title: "C" });
-    r = store.findAll(Rec);
+    
+    // NOTE: calling find() here should flush changes to the record arrays
+    // so that find() always returns an accurate result
+    r = store.find(Rec);
     equals(r.get('length'), 3, 'should return additional record');
   });
 
-  r = store.findAll(Rec);
-  equals(r.get('length'), 3, 'should return additional record');
-  
+  r = store.find(Rec);
+  equals(r.get('length'), 3, 'should return additional record');  
 });
+

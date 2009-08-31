@@ -788,6 +788,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       if (refreshIfNew) this.refreshQuery(query);
     }
     
+    this.flush();
     return ret ;
   },
   
@@ -867,7 +868,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   _notifyRecordArrays: function(storeKeys, recordTypes) {
-    var recordArrays = this.get('recordArray');
+    var recordArrays = this.get('recordArrays');
     if (!recordArrays) return this;
 
     recordArrays.forEach(function(recArray) {
