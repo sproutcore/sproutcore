@@ -339,12 +339,11 @@ SC.DropDownMenu = SC.ButtonView.extend(
       // localize name if specified.
       name = shouldLocalize? name.loc() : name ;
       
-      len = name.length ;
-      if (len > this.get('maxLen')) {
-        console.log('max len '+len) ;
-        this.set('maxLen', len)
-        this.set('maxName', name) ;
-      }
+      var len = name.length ;
+      // if (len > this.get('maxLen')) {
+      //   this.set('maxLen', len)
+      //   this.set('maxName', name) ;
+      // }
 
       //Get the icon value
       var icon = iconKey ? (object.get ?
@@ -386,7 +385,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         this._defaultIcon = icon ;
       }
 
-      item = {
+      var item = SC.Object.create({
         title: name,
         icon: icon,
         newVal:value,
@@ -394,7 +393,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         checkbox: isChecked,
         action: this.displaySelectedItem,
         iconBgColor: iconColor
-      } ;
+      }) ;
 
       //Set the items in the itemList array
       itemList.push(item);
@@ -405,16 +404,16 @@ SC.DropDownMenu = SC.ButtonView.extend(
     this.set('itemList', itemList) ;
     }, this ) ;
     
-    console.log('maxName '+this.get('maxName'))
-    var temp = document.createElement('div') ;
-    temp.innerHTML = this.get('maxName') ;
-    temp.style.width = this.layout.width ;
-    temp.style.height = 'auto',
-    temp.style.display = 'block'
-    document.body.appendChild(temp) ;
-    var tempWidth = temp.scrollWidth ;
-    console.log('temp width '+tempWidth) ;
-    console.log('offsetWidth '+temp.offsetWidth) ;
+    // console.log('maxName '+this.get('maxName'))
+    // var temp = document.createElement('div') ;
+    // temp.innerHTML = this.get('maxName') ;
+    // temp.style.width = this.layout.width ;
+    // temp.style.height = 'auto',
+    // temp.style.display = 'block'
+    // document.body.appendChild(temp) ;
+    // var tempWidth = temp.scrollWidth ;
+    // console.log('temp width '+tempWidth) ;
+    // console.log('offsetWidth '+temp.offsetWidth) ;
 
     if(firstTime) {
       var value = this.get('value') ;
@@ -428,7 +427,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     //Set the preference matrix for the menu pane
     this.changeDropDownPreferMatrix(this.itemIdx) ;
 
-    sc_super() ;
+    arguments.callee.base.apply(this,arguments) ;
   },
 
   /**
@@ -448,7 +447,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     // if there is no image element yet, create it and insert it just before
     // title.
     if (icon) {
-      var blank = static_url('blank');
+      var blank = '/my/sproutcore/foundation/en/current/blank.gif?1242434616';
 
       if (iconBgColor) {
         image = '<img src="%@1" alt="" class="%@2" style="background-color: %@3;" />' ;
@@ -507,7 +506,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var buttonLabel = this.$('.sc-button-label')[0] ;
     var menuWidth = this.get('layer').offsetWidth ; // Get the length of the text on the button in pixels
     var scrollWidth = buttonLabel.scrollWidth ;
-    var lastMenuWidth = this.get('lastMenuWidth'), menuWidth ;
+    var lastMenuWidth = this.get('lastMenuWidth') ;
     if(scrollWidth) {
        var offsetWidth = buttonLabel.offsetWidth ; // Get the original width of the label in the button
        if(scrollWidth && offsetWidth) {
@@ -524,7 +523,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     // get the user defined custom view
     var customView = this.get('customView') ;
-    customMenuView = customView ? customView : SC.MenuItemView ;
+    var customMenuView = customView ? customView : SC.MenuItemView ;
 
     var menu  = SC.MenuPane.create({
 
@@ -532,7 +531,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         Class name - drop-down-menu-item
 
       */
-      classNames: ['drop-down-menu-item'],
+      classNames: ['drop-down-menu'],
 
       /**
         The menu items are set from the itemList property of DropDownMenu
@@ -631,8 +630,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
       this.set('preferMatrix', defPreferMatrix) ;
     }
     else {
-      if(itemIdx)
+      if(itemIdx) {
         preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT ;
+      }
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
       this.set('preferMatrix', tempPreferMatrix) ;
     }
@@ -662,7 +662,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       return YES;
     }
     else {
-      sc_super();
+      arguments.callee.base.apply(this,arguments);
     }
   },
 
@@ -680,7 +680,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         this.resignFirstResponder() ;
       }
     }
-    return sc_super();
+    return arguments.callee.base.apply(this,arguments);
   }
 
 }) ;
