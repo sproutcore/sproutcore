@@ -71,7 +71,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
      @default null
   */
   valueKey: null,
-
+  
+  /**
+     Key used to extract icons from the objects array
+  */
+  iconKey: null,
+  
   /**
     If true, the empty name will be localized.
 
@@ -247,6 +252,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
   
   maxLen: 0,
   maxName: null,
+  /**
+    customView used to draw the menu
+  */
+  customView: null,
 
   /**
     Left Alignment based on the size of the button
