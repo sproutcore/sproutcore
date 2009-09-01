@@ -355,7 +355,6 @@ SC.Pane = SC.View.extend({
     if(pane && pane.kindOf(SC.MenuPane)) this.set('previousKeyPane', pane.get('previousKeyPane'));
     else if(pane) this.set('previousKeyPane', pane);
     else this.set('previousKeyPane', null);
-    
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
