@@ -1428,11 +1428,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(!recordTypes && !ids && !storeKeys){
       storeKeys = this.changelog;
     }
-    
-    // if no storeKeys or ids at this point, return
-    if(!storeKeys && !ids) return;
-    
-    len = (!storeKeys) ? ids.length : storeKeys.length;
+
+    len = storeKeys ? storeKeys.get('length') : (ids ? ids.get('length') : 0);
     
     for(idx=0;idx<len;idx++) {
       
@@ -1474,7 +1471,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // now commit storekeys to dataSource
-    if (source) ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
+    if (source && (len>0 || params)) {
+      ret = source.commitRecords.call(source, this, retCreate, retUpdate, retDestroy, params);
+    }
+    
     //remove all commited changes from changelog
     if (ret && !recordTypes && !ids && storeKeys===this.changelog){ 
       this.changelog = null; 
