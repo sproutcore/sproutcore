@@ -22,7 +22,6 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   
   @extends SC.View
   @extends SC.Control
-  @extends SC.InlineEditorDelegate
   @extends SC.Editable
   @extends SC.StaticLayout
   @since SproutCore 1.0
@@ -30,7 +29,6 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
 SC.ListItemView = SC.View.extend(
     SC.StaticLayout,
     SC.Control,
-    SC.InlineEditorDelegate,
 /** @scope SC.ListItemView.prototype */ {
   
   classNames: ['sc-list-item-view'],
