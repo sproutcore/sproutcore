@@ -77,7 +77,6 @@ sc_require('views/text_field') ;
   
   @extends SC.View
   @extends SC.DelegateSupport
-  @extends SC.InlineEditorDelegate
   @since SproutCore 1.0
 */
 SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
