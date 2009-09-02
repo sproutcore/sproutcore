@@ -494,7 +494,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     var parentMenu = this.parentMenu() ;
     if(parentMenu) {
       parentMenu.set('previousSelectedMenuItem', this) ;
-      this.resignFirstResponder() ;
     }
     return YES ;
   },
