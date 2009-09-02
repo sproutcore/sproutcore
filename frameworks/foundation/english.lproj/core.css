@@ -163,7 +163,7 @@ version: 2.7.0
  * x-small is for IE6/7 quirks mode.
  */
 .sc-view body {
-	font:13px/1.231 arial,helvetica,clean,sans-serif;
+	font:13px/1.231 "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;;
 	/* for IE6/7 */ 
 	*font-size:small; 
 	/* for IE Quirks Mode */
@@ -178,7 +178,7 @@ input,
 button,
 textarea,
 button {
-	font:99% arial,helvetica,clean,sans-serif;
+	font:99% "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;;
 }
 
 /**

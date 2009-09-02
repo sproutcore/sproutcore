@@ -39,7 +39,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     tag type from "input" to "textarea".  Otherwise, pressing return will 
     trigger the default insertion handler.
   */
-  isMultline: NO,
+  isTextArea: NO,
   
   /**
     The hint to display while the field is not active.  Can be a loc key.
