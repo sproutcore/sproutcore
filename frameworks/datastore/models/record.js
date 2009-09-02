@@ -659,6 +659,13 @@ SC.Record.mixin( /** @scope SC.Record */ {
   */
   findAll: function(store, params) {
     return store.findAll(this, params);
+  },
+  
+  /** @private - enhance extend to notify SC.Query as well. */
+  extend: function() {
+    var ret = SC.Object.extend.apply(this, arguments);
+    SC.Query._scq_didDefineRecordType(ret);
+    return ret ;
   }
   
 }) ;

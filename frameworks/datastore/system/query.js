@@ -170,6 +170,42 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   recordTypes: null,
   
   /**
+    Returns the complete set of recordTypes matched by this query.  Includes
+    any named recordTypes plus their subclasses.
+    
+    @property
+    @type {SC.Enumerable}
+  */
+  expandedRecordTypes: function() {
+    var ret = SC.CoreSet.create(), rt, q  ;
+    
+    if (rt = this.get('recordType')) this._scq_expandRecordType(rt, ret);      
+    else if (rt = this.get('recordTypes')) {
+      rt.forEach(function(t) { this._scq_expandRecordType(t, ret); }, this);
+    } else this._scq_expandRecordType(SC.Record, ret);
+
+    // save in queue.  if a new recordtype is defined, we will be notified.
+    q = SC.Query._scq_queriesWithExpandedRecordTypes;
+    if (!q) {
+      q = SC.Query._scq_queriesWithExpandedRecordTypes = SC.CoreSet.create();
+    }
+    q.add(this);
+    
+    return ret.freeze() ;
+  }.property('recordType', 'recordTypes').cacheable(),
+
+  /** @private 
+    expands a single record type into the set. called recursively
+  */
+  _scq_expandRecordType: function(recordType, set) {
+    if (set.contains(recordType)) return; // nothing to do
+    set.add(recordType);
+    recordType.subclasses.forEach(function(t) { 
+      this._scq_expandRecordType(t, set);
+    }, this);  
+  },
+  
+  /**
     Optional hash of parameters.  These parameters may be interpolated into 
     the query conditions.  If you are handling the query manually, these 
     parameters will not be used.
@@ -1275,6 +1311,19 @@ SC.Query.mixin( /** @scope SC.Query */ {
   */
   remote: function(recordType, conditions, params) {
     return this.build(SC.Query.REMOTE, recordType, conditions, params);
+  },
+  
+  /** @private 
+    called by SC.Record.extend(). invalided expandedRecordTypes
+  */
+  _scq_didDefineRecordType: function() {
+    var q = SC.Query._scq_queriesWithExpandedRecordTypes;
+    if (q) {
+      q.forEach(function(query) { 
+        query.notifyPropertyChange('expandedRecordTypes');
+      }, this);
+      q.clear();
+    }
   }
   
 });

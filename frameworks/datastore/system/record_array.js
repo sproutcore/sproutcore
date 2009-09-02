@@ -473,11 +473,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         sourceKeys = scope.flush().get('storeKeys');
 
       // otherwise, lookup all storeKeys for the named recordType...
-      } else if (recordType = query.get('recordType')) {
-        sourceKeys = store.storeKeysFor(recordType)
-        
-      // or for each recordType, if multiple types are specified
-      } else if (recordType = query.get('recordTypes')) {
+      } else if (recordType = query.get('expandedRecordTypes')) {
         sourceKeys = SC.IndexSet.create();
         recordType.forEach(function(cur) { 
           sourceKeys.addEach(store.storeKeysFor(recordType));

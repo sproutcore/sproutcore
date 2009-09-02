@@ -77,6 +77,11 @@ module("SC.Query querying find() on a store", {
     MyApp.store.loadRecords(MyApp.Bar, records);
     SC.RunLoop.end();
     
+  },
+  
+  teardown: function() {
+    MyApp = null ;
+    SC.Record.subclasses.clear(); //reset
   }
   
 });
@@ -179,21 +184,20 @@ test("modifying a record should update RecordArray automatically", function() {
   // try the other direction...
   SC.RunLoop.begin();
   r2.set('firstName', 'Ester');
-  SC.RunLoop.end();
+  SC.RunLoop.end(); 
   
   equals(recs.get('length'), 1, 'record length should decrease');
 
 });
 
-notest("should find records based on SC.Query without recordType", function() {
+test("should find records based on SC.Query without recordType", function() {
   
-  var q = SC.Query.create({ conditions:"lastName = 'Doe'" });
+  var q = SC.Query.local(SC.Record, "lastName = 'Doe'");
   
   var records = MyApp.store.find(q);
-  equals(records.get('length'), 2, 'record length should be 2');
-  equals(records.objectAt(0).get('firstName'), 'John', 'name should be John');
-  equals(records.objectAt(1).get('firstName'), 'Jane', 'name should be Jane');
+  equals(records.get('length'), 4, 'record length should be 2');
 
+  same(records.getEach('firstName'), 'John John Jane Jane'.w(), 'firstNames should match');
 });
 
 test("should find records within a passed record array", function() {
