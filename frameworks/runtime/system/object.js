@@ -5,9 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
-require('mixins/observable') ;
-require('mixins/array') ;
+sc_require('core') ;
+sc_require('mixins/observable') ;
+sc_require('mixins/array') ;
+sc_require('system/set');
 
 /*globals $$sel */
 
@@ -250,6 +251,9 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     ret.superclass = this ;
     SC.generateGuid(ret); // setup guid
 
+    ret.subclasses = SC.Set.create();
+    this.subclasses.add(ret); // now we can walk a class hierarchy
+
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
@@ -287,6 +291,12 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   */
   isClass: YES,
 
+  /**
+    Set of subclasses that extend from this class.  You can observe this 
+    array if you want to be notified when the object is extended.
+  */
+  subclasses: SC.Set.create(),
+  
   /** @private */
   toString: function() { return SC._object_className(this); },
 
