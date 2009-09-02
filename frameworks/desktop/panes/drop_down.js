@@ -256,6 +256,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
     customView used to draw the menu
   */
   customView: null,
+  
+  /**private*/
+  needsEllipsis: YES,
 
   /**
     Left Alignment based on the size of the button
