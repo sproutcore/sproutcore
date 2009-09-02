@@ -22,44 +22,76 @@ SC.mixin(/** @scope SC */ {
     return bundleInfo ? !!bundleInfo.loaded : NO ;
   },
   
+  _scb_bundleDidLoad: function(bundleName, target, method, args) {
+    if(SC.typeOf(target) === SC.T_STRING) {
+      target = SC.objectForPropertyPath(target);
+    }
+
+    if(SC.typeOf(method) === SC.T_STRING) {
+      method = SC.objectForPropertyPath(method, target);
+    }
+    
+    if(!method) {
+      throw "SC.loadBundle(): could not find callback for '%@'".fmt(bundleName);
+    }
+
+    if(!args) {
+      args = [];
+    }
+
+    args.push(bundleName);
+    
+    var needsRunLoop = !!SC.RunLoop.currentRunLoop;
+    if (needsRunLoop) SC.RunLoop.begin() ;
+    method.apply(target, args) ;
+    if (needsRunLoop) SC.RunLoop.end() 
+  },
+  
   /**
     Dynamically load bundleName if not already loaded. Once loaded (or if
     already loaded), invoke callback on target, passing bundleName as the 
     first (and only) parameter.
     
     @param bundleName {String}
-    @param callback {Function}
-    @param target {Object} will be set as this in callback
+    @param target {Function} 
+    @param method {Function}
   */
-  loadBundle: function(bundleName, callback, target) {
+  loadBundle: function(bundleName, target, method) {
+    
+    if(method === undefined && SC.typeOf(target) === SC.T_FUNCTION) {
+      method = target;
+      target = null;
+    }
+
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
+    var args = SC.A(arguments).slice(3);
+
     if (!bundleInfo) {
       throw "SC.loadBundle(): could not find bundle '%@'".fmt(bundleName) ;
     } else if (bundleInfo.loaded) {
-      // call callback immediately if we're already loaded and SC.isReady
-      if (SC.isReady) {
-        // don't assume run loop is running...
-        SC.RunLoop.begin() ;
-        callback.call(target, bundleName) ;
-        SC.RunLoop.end() ;
-      } else {
-        // queue callback for when SC is ready
-        SC.ready(SC, function() {
-          SC.RunLoop.begin() ;
-          callback.call(target, bundleName) ;
-          SC.RunLoop.end() ;
-        });
+      if(method) {
+        // call callback immediately if we're already loaded and SC.isReady
+        if (SC.isReady) {
+          SC._scb_bundleDidLoad(bundleName, target, method, args);
+        } else {
+          // queue callback for when SC is ready
+          SC.ready(SC, function() {
+            SC._scb_bundleDidLoad(bundleName, target, method, args);        
+          });
+        }
       }
     } else {
+
       // queue callback for later
       callbacks = bundleInfo.callbacks || [] ;
-      targets = bundleInfo.targets || [] ;
-      if (callback) {
-        callbacks.push(callback) ;
-        targets.push(target) ;
+
+      if (method) {
+        callbacks.push(function() {
+          SC._scb_bundleDidLoad(bundleName, target, method, args);        
+        });
         bundleInfo.callbacks = callbacks ;
-        bundleInfo.targets = targets ;
       }
+
       if (!bundleInfo.loading) {
         // load bundle's dependencies first
         var requires = bundleInfo.requires || [] ;
@@ -73,7 +105,7 @@ SC.mixin(/** @scope SC */ {
             if (targetInfo.loading) {
               dependenciesMet = NO ;
               break ;
-            } else if (targetInfo.isLoaded) {
+            } else if (targetInfo.loaded) {
               continue ;
             } else {
               dependenciesMet = NO ;
@@ -136,7 +168,7 @@ SC.mixin(/** @scope SC */ {
   */
   bundleDidLoad: function(bundleName) {
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
-    if (!bundleInfo) return ; // shouldn't happen, but recover anyway
+    if (!bundleInfo) bundleInfo = SC.BUNDLE_INFO[bundleName] = {} ;
     if (bundleInfo.loaded) {
       console.log("SC.bundleDidLoad() called more than once for bundle '%@'. Skipping.".fmt(bundleName));
       return ;
@@ -164,15 +196,14 @@ SC.mixin(/** @scope SC */ {
   
   /** @private Invoke queued callbacks for bundleName. */
   _invokeCallbacksForBundle: function(bundleName) {
-    var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
+    var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks ;
     if (!bundleInfo) return ; // shouldn't happen, but recover anyway
     
     callbacks = bundleInfo.callbacks || [] ;
-    targets = bundleInfo.targets ;
     
     SC.RunLoop.begin() ;
     for (var idx=0, len=callbacks.length; idx<len; ++idx) {
-      callbacks[idx].call(targets[idx], bundleName) ;
+      callbacks[idx]() ;
     }
     SC.RunLoop.end() ;
   }
