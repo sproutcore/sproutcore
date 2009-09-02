@@ -1235,6 +1235,8 @@ SC.CollectionView = SC.View.extend(
         cdel    = this.get('contentDelegate'),
         groupIndexes = cdel.contentGroupIndexes(this, content),
         sel;
+        
+    if(!this.get('isSelectable')) return this;
 
     // normalize
     if (SC.typeOf(indexes) === SC.T_NUMBER) {
@@ -1282,6 +1284,7 @@ SC.CollectionView = SC.View.extend(
         content = this.get('content'),
         del     = this.get('selectionDelegate');
         
+    if(!this.get('isSelectable')) return this;
     if (!sel || sel.get('length')===0) return this; // nothing to do
         
     // normalize
