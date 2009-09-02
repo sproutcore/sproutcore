@@ -31,7 +31,7 @@ config :datastore,  :required => [:runtime]
 
 # APP-LEVEL FRAMEWORKS
 %w(desktop mobile).each do |app_framework|
-  config app_framework, :required => [:runtime, :datastore, :foundation, :datejs]
+  config app_framework, :required => [:runtime, :datastore, :foundation]
 end
 
 config :mobile, 
