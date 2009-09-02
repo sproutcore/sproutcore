@@ -118,8 +118,7 @@ SC.RadioView = SC.FieldView.extend(
       titleKey = this.get('itemTitleKey'), valueKey = this.get('itemValueKey'),
       isEnabledKey = this.get('itemIsEnabledKey'), 
       iconKey = this.get('itemIconKey');
-      
-    var ret = [], max = (items)? items.length : 0 ;
+    var ret = [], max = (items)? items.get('length') : 0 ;
     var item, title, value, idx, isArray, isEnabled, icon;
     
     for(idx=0;idx<max;idx++) {
@@ -241,7 +240,7 @@ SC.RadioView = SC.FieldView.extend(
         input = this.$(input);
         idx = parseInt(input.val(),0);
         item = (idx>=0) ? items[idx] : null;
-        
+
         input.attr('disabled', (!item[2]) ? 'disabled' : null);
         selectionState = this._getSelectionState(item, value, isArray, true);
 
