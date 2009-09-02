@@ -96,7 +96,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
         len       = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         i, keys, ids;
 
-    if (!storeIds) throw "storeIds required";
+    // If there is no storeIds array, then create one.
+    if (!storeIds) {
+      storeIds = [];
+      this.set('storeIds', storeIds);
+    }
 
     // map to store keys
     ids = [] ;
