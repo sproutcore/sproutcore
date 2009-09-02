@@ -538,6 +538,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
+    this.becomeFirstResponder() ;
     this._action() ;
     return YES ;
   },
