@@ -71,9 +71,13 @@
 	display: block;
 	background: transparent;
 	vertical-align: middle;
-	}
+}
+	
+.msie .sc-text-field-view input {
+  	line-height:1.8em;
+}
 
-.mozilla  .sc-text-field-view input {
+.mozilla .sc-text-field-view input {
   	top:3px;
 }
 
@@ -87,6 +91,12 @@
   bottom: 0px;
 	right: 0px;
 	display: block;
+	background: transparent;
+	vertical-align: middle;
+}
+
+.mozilla .sc-text-field-view textarea {
+  	top:3px;
 }
 
 .sc-text-field-view .sc-hint {
