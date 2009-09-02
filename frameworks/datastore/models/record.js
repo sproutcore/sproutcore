@@ -642,23 +642,11 @@ SC.Record.mixin( /** @scope SC.Record */ {
     Returns a record with the named ID in store.
     
     @param {SC.Store} store the store
-    @param {String} id the record id
+    @param {String} id the record id or a query
     @returns {SC.Record} record instance
   */
   find: function(store, id) {
     return store.find(this, id);
-  },
-
-  /**
-    Finds all records in the store with this record type matching the named
-    parameters.  This is the same as calling store.findAll(recordType, params)
-    
-    @param {SC.Store} store the store
-    @param {Hash} params optional params
-    @returns {SC.RecordArray} result set or null
-  */
-  findAll: function(store, params) {
-    return store.findAll(this, params);
   },
   
   /** @private - enhance extend to notify SC.Query as well. */

@@ -798,12 +798,16 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   _findRecord: function(recordType, id) {
 
-    // first attempt to find the record in the local store
-    // if a record instance is passed, get the storeKey.  This allows you to
-    // pass a record from a chained store.
     var storeKey ;
+    
+    // if a record instance is passed, simply use the storeKey.  This allows 
+    // you to pass a record from a chained store to get the same record in the
+    // current store.
     if (recordType && recordType.get && recordType.get('isRecord')) {
       storeKey = recordType.get('storeKey');
+      
+    // otherwise, lookup the storeKey for the passed id.  look in subclasses 
+    // as well.
     } else storeKey = recordType.storeKeyFor(id);
     
     if (this.readStatus(storeKey) === SC.Record.EMPTY) {
