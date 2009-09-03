@@ -385,6 +385,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     if(!this.isSubMenuAMenuPane()) {
       this.set('hasMouseExited',YES) ;
       this.$().removeClass('focus') ;
+      this.resignFirstResponder() ;
     }
   },
   
