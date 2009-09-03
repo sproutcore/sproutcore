@@ -51,9 +51,14 @@
   top:0px;
   left:3px;
   bottom:0px;
-  right:0px;
+  right:3px;
   position:  absolute;
 }
+
+.sc-view .sc-text-field-view.text-area .padding{
+  right:0px;
+}
+
 
 .sc-view .sc-text-field-view .sc-text-field-accessory-view {
 	z-index:2;
@@ -95,8 +100,6 @@
 	resize: none;
 	line-height: 1.8em;
 	overflow: auto;
-	font-family: 'Lucida Sans', 'Lucida Grande', Verdana, Arial, sans-serif;
-	box-sizing: border-box;
 }
 
 .mozilla .sc-text-field-view textarea {

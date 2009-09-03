@@ -227,7 +227,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // INTERNAL SUPPORT
   // 
   
-  displayProperties: 'hint fieldValue isEditing leftAccessoryView rightAccessoryView'.w(),
+  displayProperties: 'hint fieldValue isEditing leftAccessoryView rightAccessoryView isTextArea'.w(),
   
   
   createChildViews: function() {
@@ -322,6 +322,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
     var name = SC.guidFor(this);
     var type = this.get('isPassword') ? 'password' : 'text';
+    
+    if (this.get('isTextArea')) context.addClass('text-area');
 
     // always have at least an empty string
     var v = this.get('fieldValue');
@@ -629,7 +631,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
     // handle return and escape.  this way they can be passed on to the 
     // responder chain.
-    if ((evt.which === 13) && !this.get('isMultiline')) return NO ;
+    if ((evt.which === 13) && !this.get('isTextArea')) return NO ;
     if (evt.which === 27) return NO ;
 
     // handle tab key
