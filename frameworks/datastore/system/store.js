@@ -215,7 +215,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     you call commitRecords() without passing any other parameters, the keys
     in this set will be committed instead.
   
-    @property {Hash}
+    @property {Array}
   */
   changelog: null,
   
@@ -283,6 +283,35 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       ret = this.dataHashes[storeKey] = SC.clone(ret);
     }
     return ret;
+  },
+  
+  /**
+    Reads a property from the hash - cloning it if needed so you can modify 
+    it independently of any parent store.  This method is really only well
+    tested for use with toMany relationships.  Although it is public you 
+    generally should not call it directly.
+    
+    @param {Number} storeKey storeKey of data hash 
+    @param {String} propertyName property to read
+    @returns {Object} editable property value
+  */
+  readEditableProperty: function(storeKey, propertyName) {
+    var hash      = this.readEditableDataHash(storeKey), 
+        editables = this.editables[storeKey], // get editable info...
+        ret       = hash[propertyName];
+        
+    // editables must be made into a hash so that we can keep track of which
+    // properties have already been made editable
+    if (editables === 1) editables = this.editables[storeKey] = {};
+    
+    // clone if needed
+    if (!editables[propertyName]) {
+      ret = hash[propertyName];
+      if (ret && ret.isCopyable) ret = hash[propertyName] = ret.copy();
+      editables[propertyName] = YES ;
+    }
+    
+    return ret ;
   },
   
   /**
@@ -739,7 +768,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // handle passing a query...
-    if (arguments.length === 1) {
+    if ((arguments.length === 1) && !(recordType && recordType.isRecord)) {
       if (!recordType) throw "SC.Store#find() must pass recordType or query";
       if (!recordType.isQuery) recordType = SC.Query.local(recordType);
       return this._findQuery(recordType, YES, YES);

@@ -8,8 +8,12 @@
 /**
   @class
 
-  A ManyArray is used to map an array of store ids back to their 
+  A ManyArray is used to map an array of record ids back to their 
   record objects which will be materialized from the owner store on demand.
+  
+  Whenever you create a toMany() relationship, the value returned from the 
+  property will be an instance of ManyArray.  You can generally customize the
+  behavior of ManyArray by passing settings to the toMany() helper.
   
   @extends SC.Enumerable
   @extends SC.Array
@@ -20,29 +24,82 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ManyArray.prototype */ {
 
   /**
-    The store that owns this record array.  All record arrays must have a 
-    store to function properly.
-
-    @property {SC.Store}
-  */
-  store: null,
-
-  /**
-    SC.Array object that will provide the store ids for the array.  The 
-    many array will register itself as an observer for this array.
-
-    @property {SC.Array}
-  */
-  storeIds: null,
-  
-  /**
     recordType will tell what type to transform the record to when
     materializing the record.
 
     @type {String}
   */
   recordType: null,
+  
+  /**
+    If set, this will represent the inverse key used to represent this 
+    relationship in the opposite direction.  Whenever you add or remove 
+    records to this array, it will modify the inverse relationship as well.
+    
+    @type {String}
+  */
+  inverse: null,
+  
+  /**
+    If set, the record will be notified whenever the array changes so that 
+    it can change its own state
+    
+    @type {SC.Record}
+  */
+  record: null,
+  
+  /**
+    If set will be used by the many array to get an editable version of the
+    storeIds from the owner.
+    
+    @type {String}
+  */
+  propertyName: null,
+  
+  /**
+    The store that owns this record array.  All record arrays must have a 
+    store to function properly.
 
+    @property
+    @type {SC.Store}
+  */
+  store: function() {
+    return this.get('record').get('store');
+  }.property('record').cacheable(),
+  
+  /**
+    The storeKey for the parent record of this many array.  Editing this 
+    array will place the parent record into a READY_DIRTY state.
+
+    @property
+    @type {Number}
+  */
+  storeKey: function() {
+    return this.get('record').get('storeKey');
+  }.property('record').cacheable(),
+
+
+  readOnlyStoreIds: function() {
+    return this.get('record').readAttribute(this.get('propertyName'));
+  }.property(),
+  
+  
+  editableStoreIds: function() {
+    var store    = this.get('store'),
+        storeKey = this.get('storeKey'),
+        pname    = this.get('propertyName'),
+        ret, hash;
+        
+    ret = store.readEditableProperty(storeKey, pname);    
+    if (!ret) {
+      hash = store.readEditableDataHash(storeKey);
+      ret = hash[pname] = [];      
+    }
+    
+    if (ret !== this._prevStoreIds) this.recordPropertyDidChange();
+    return ret ;
+  }.property(),
+  
   // ..........................................................
   // ARRAY PRIMITIVES
   // 
@@ -51,9 +108,9 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returned length is a pass-through to the storeIds array.
   */
   length: function() {
-    var storeIds = this.get('storeIds');
+    var storeIds = this.get('readOnlyStoreIds');
     return storeIds ? storeIds.get('length') : 0;
-  }.property('storeIds').cacheable(),
+  }.property('readOnlyStoreIds').cacheable(),
 
   /**
     Looks up the store id in the store ids array and materializes a
@@ -61,7 +118,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   objectAt: function(idx) {
     var recs      = this._records, 
-        storeIds  = this.get('storeIds'),
+        storeIds  = this.get('readOnlyStoreIds'),
         store     = this.get('store'),
         recordType = this.get('recordType'),
         storeKey, ret, storeId ;
@@ -92,15 +149,15 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
     records, which can be converted to storeIds.
   */
   replace: function(idx, amt, recs) {
-    var storeIds = this.get('storeIds'), 
-        len       = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
-        i, keys, ids;
-
-    // If there is no storeIds array, then create one.
-    if (!storeIds) {
-      storeIds = [];
-      this.set('storeIds', storeIds);
+    
+    if (!this.get('isEditable')) {
+      throw "%@.%@[] is not editable".fmt(this.get('record'), this.get('propertyName'));
     }
+    
+    var storeIds = this.get('editableStoreIds'), 
+        len      = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
+        owner    = this.get('record'),
+        i, keys, ids;
 
     // map to store keys
     ids = [] ;
@@ -108,6 +165,8 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // pass along - if allowed, this should trigger the content observer 
     storeIds.replace(idx, amt, ids);
+    
+    if (owner) owner.recordDidChange();
     
     return this;
   },
@@ -119,26 +178,22 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private 
     Invoked whenever the storeIds array changes.  Observes changes.
   */
-  _storeIdsDidChange: function() {
-    var storeIds = this.get('storeIds');
+  recordPropertyDidChange: function(key) {
+    if (key && this.get('propertyName') !== key) return; // nothing to do
+    
+    var storeIds = this.get('readOnlyStoreIds');
     var prev = this._prevStoreIds, f = this._storeIdsContentDidChange;
 
     if (storeIds === prev) return this; // nothing to do
 
-    if (prev) {
-      prev.removeObserver('[]', this, f);
-    }
-
+    if (prev) prev.removeObserver('[]', this, f);
     this._prevStoreIds = storeIds;
-
-    if (storeIds) {
-      storeIds.addObserver('[]', this, f);
-    }
+    if (storeIds) storeIds.addObserver('[]', this, f);
 
     var rev = (storeIds) ? storeIds.propertyRevision : -1 ;
     this._storeIdsContentDidChange(storeIds, '[]', storeIds, rev);
     
-  }.observes('storeIds'),
+  },
 
   /** @private
     Invoked whenever the content of the storeIds array changes.  This will
@@ -147,11 +202,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   _storeIdsContentDidChange: function(target, key, value, rev) {
     this._records = null ; // clear cache
-
-    this.beginPropertyChanges()
-      .notifyPropertyChange('length')
-      .enumerableContentDidChange()
-    .endPropertyChanges();
+    this.enumerableContentDidChange();
   },
   
   unknownProperty: function(key, value) {
@@ -161,7 +212,7 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   init: function() {
     sc_super();
-    this._storeIdsDidChange();
+    this.recordPropertyDidChange();
   }
   
 }) ;

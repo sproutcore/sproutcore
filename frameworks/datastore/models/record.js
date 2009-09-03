@@ -130,6 +130,19 @@ SC.Record = SC.Object.extend(
     return !((status===K.EMPTY) || (status===K.BUSY_LOADING) || (status===K.ERROR));
   }.property('status').cacheable(),
   
+  /**
+    If set, this should be an array of active relationship objects that need
+    to be notified whenever the underlying record properties change.  
+    Currently this is only used by toMany relationships, but you could 
+    possibly patch into this yourself also if you are building your own 
+    relationships.
+    
+    Note this must be a regular Array - NOT any object implmenting SC.Array.
+    
+    @type {Array}
+  */
+  relationships: null,
+  
   // ...............................
   // CRUD OPERATIONS
   //
@@ -289,14 +302,16 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   */
   storeDidChangeProperties: function(statusOnly, key) {
-    if (statusOnly) {
-      this.notifyPropertyChange('status');
-    } 
-    else if(key) {
-      this.notifyPropertyChange(key);
-    } 
+    if (statusOnly) this.notifyPropertyChange('status');
     else {
-      this.allPropertiesDidChange();
+
+      if (key) this.notifyPropertyChange(key);
+      else this.allPropertiesDidChange(); 
+    
+      // also notify manyArrays
+      var manyArrays = this.relationships,
+          loc        = manyArrays ? manyArrays.length : 0 ;
+      while(--loc>=0) manyArrays[loc].recordPropertyDidChange(key);
     }
   },
   

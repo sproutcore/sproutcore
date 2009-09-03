@@ -6,7 +6,6 @@
 /*globals module ok equals same test MyApp */
 
 // test querying through find() on the store
-var MyApp;
 module("SC.Query querying find() on a store", {
   setup: function() {
     SC.RunLoop.begin();
@@ -84,6 +83,26 @@ module("SC.Query querying find() on a store", {
     SC.Record.subclasses.clear(); //reset
   }
   
+});
+
+// ..........................................................
+// FINDING SINGLE RECORDS
+// 
+
+test("find(recordType, id)", function() {
+  
+  equals(MyApp.store.find('MyApp.Foo', 1).get('firstName'), 'John', 'should return foo(1)');
+  equals(MyApp.store.find(MyApp.Foo, 1).get('firstName'), 'John', 'should return foo(1)');  
+});
+
+test("find(record)", function() {
+  
+  var rec1 = MyApp.store.find(MyApp.Foo, 1);
+  equals(MyApp.store.find(rec1), rec1, 'find(rec1) should return rec1');
+  
+  var rec2 = MyApp.store.chain().find(rec1);
+  ok(rec2 !== rec1, 'nested.find(rec1) should not return same instance');
+  equals(rec2.get('storeKey'), rec1.get('storeKey'), 'nested.find(rec1) should return same record in nested store');
 });
 
 // ..........................................................
