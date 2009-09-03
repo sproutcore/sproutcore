@@ -398,12 +398,16 @@ SC.mixin(/** @scope SC */ {
           if ( r !== 0 ) return r;
           i++;
         }
-        
+      
         // all elements are equal now
         // shorter array should be ordered first
         if (v.length < w.length) return -1;
         if (v.length > w.length) return 1;
         // arrays are equal now
+        return 0;
+        
+      case SC.T_OBJECT:
+        if (v.constructor.isComparable === YES) return v.constructor.compare(v, w);
         return 0;
 
       default:

@@ -300,7 +300,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 });
 
 // Class Methods
-SC.DateTime.mixin(
+SC.DateTime.mixin(SC.Comparable,
   /** @scope SC.DateTime */ {
   
   /**

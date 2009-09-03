@@ -67,18 +67,19 @@ test('advance', function() {
   timeShouldBeEqualToHash(t, {year: 1986, month: 6, day: 9, hour: 2, minute: 1, second: 23, millisecond: 926});
 });
 
-test('compare', function() {  
-  equals(SC.DateTime.compare(dt, dt), 0);
+test('compare', function() {
+  equals(SC.DateTime.isComparable, YES);
+  equals(SC.compare(dt, dt), 0);
   equals(dt.isEqual(dt), YES);
   equals(dt.advance({hour: 1}).isEqual(dt), NO);
-  equals(SC.DateTime.compare(dt, dt.advance({hour: 1})), -1);
-  equals(SC.DateTime.compare(dt.advance({hour: 1}), dt), 1);
+  equals(SC.compare(dt, dt.advance({hour: 1})), -1);
+  equals(SC.compare(dt.advance({hour: 1}), dt), 1);
   equals(SC.DateTime.compareDate(dt, dt.advance({hour: 1})), 0);
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1, second: -1})), 0);
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1})), -1);
   equals(SC.DateTime.compareDate(dt, dt.advance({day: 1})), -1);
   
-  equals(SC.DateTime.compare(dt, dt.advance({timezone: -120, hours: 120})), 0);
+  equals(SC.compare(dt, dt.advance({timezone: -120, hours: 120})), 0);
 });
 
 test('Format', function() {
