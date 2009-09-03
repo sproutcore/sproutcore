@@ -71,12 +71,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
      @default null
   */
   valueKey: null,
-  
+
   /**
      Key used to extract icons from the objects array
   */
   iconKey: null,
-  
+
   /**
     If true, the empty name will be localized.
 
@@ -249,15 +249,18 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   iconBgColor: null,
-  
-  maxLen: 0,
-  maxName: null,
+
   /**
     customView used to draw the menu
   */
   customView: null,
-  
-  /**private*/
+
+  /**
+    This is a property for enabling/disabling ellipsis
+
+    @private
+    @default YES
+  */
   needsEllipsis: YES,
 
   /**
@@ -341,27 +344,19 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
       // localize name if specified.
       name = shouldLocalize? name.loc() : name ;
-      
-      var len = name.length ;
-      // if (len > this.get('maxLen')) {
-      //   this.set('maxLen', len)
-      //   this.set('maxName', name) ;
-      // }
 
       //Get the icon value
       var icon = iconKey ? (object.get ?
         object.get(iconKey) : object[iconKey]) : null ;
       if (SC.none(object[iconKey])) icon = null ;
 
-      // get the value using the valueKey or the object if no valueKey.
-      // then convert to a string or use _guid if one of available.
+      // get the value using the valueKey or the object 
       var value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
-      
+
         var iconColor = iconBgColorKey ? (object.get ?
           object.get(iconBgColorKey) : object[iconBgColorKey]) : null ;
         if (SC.none(object[iconBgColorKey])) iconBgColor = null ;
-       // console.log('icon '+iconBgColor)
 
       if (currentSelectedVal && value){
         if( currentSelectedVal === value ) {
@@ -406,17 +401,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
     this.set('itemList', itemList) ;
     }, this ) ;
-    
-    // console.log('maxName '+this.get('maxName'))
-    // var temp = document.createElement('div') ;
-    // temp.innerHTML = this.get('maxName') ;
-    // temp.style.width = this.layout.width ;
-    // temp.style.height = 'auto',
-    // temp.style.display = 'block'
-    // document.body.appendChild(temp) ;
-    // var tempWidth = temp.scrollWidth ;
-    // console.log('temp width '+tempWidth) ;
-    // console.log('offsetWidth '+temp.offsetWidth) ;
 
     if(firstTime) {
       var value = this.get('value') ;
@@ -440,12 +424,12 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   renderTitle: function(context, firstTime) {
     var icon = this.get('icon') ;
-    var iconBgColor = this.get('iconBgColor') || '#BB54FD' ;
-    // console.log(iconBgColor) ;
+    var iconBgColor = this.get('iconBgColor') ;
     var image = '' ;
     var title = this.get('displayTitle') ;
-    var needsTitle = (!SC.none(title) && title.length>0);
-    var elem, htmlNode;
+    var needsTitle = (!SC.none(title) && title.length>0) ;
+    var elem, htmlNode ;
+
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
@@ -455,19 +439,19 @@ SC.DropDownMenu = SC.ButtonView.extend(
       if (iconBgColor) {
         image = '<img src="%@1" alt="" class="%@2" style="background-color: %@3;" />' ;
         if (icon.indexOf('/') >= 0) {
-          image = image.fmt(icon, 'icon', iconBgColor);
+          image = image.fmt(icon, 'icon', iconBgColor) ;
         }
         else {
-          image = image.fmt(blank, icon, iconBgColor);
+          image = image.fmt(blank, icon, iconBgColor) ;
         }
       }
       else {
         image = '<img src="%@1" alt="" class="%@2" />' ;
         if (icon.indexOf('/') >= 0) {
-          image = image.fmt(icon, 'icon');
+          image = image.fmt(icon, 'icon') ;
         }
         else {
-          image = image.fmt(blank, icon);
+          image = image.fmt(blank, icon) ;
         }
       }
       needsTitle = YES ;
@@ -496,16 +480,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
   */
   _action: function( evt )
   {
-    // var temp = document.createElement('div') ;
-    // temp.innerHTML = this.get('maxName') ;
-    // temp.style.width = this.layout.width ;
-    // var tempWidth = temp.style.width ;
-    // temp.style.height = 'auto',
-    // temp.style.display = 'block'
-    // document.body.appendChild(temp) ;
-    // console.log('temp width '+tempWidth) ;
-    // console.log('offsetWidth '+temp.offsetWidth) ;
-    
+
     var buttonLabel = this.$('.sc-button-label')[0] ;
     var menuWidth = this.get('layer').offsetWidth ; // Get the length of the text on the button in pixels
     var scrollWidth = buttonLabel.scrollWidth ;
