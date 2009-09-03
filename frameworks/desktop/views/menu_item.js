@@ -385,7 +385,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     if(!this.isSubMenuAMenuPane()) {
       this.set('hasMouseExited',YES) ;
       this.$().removeClass('focus') ;
-      this.resignFirstResponder() ;
+      //this.resignFirstResponder() ;
     }
   },
   
@@ -423,7 +423,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   isAnchorMouseDown: NO,
 
   mouseUp: function(evt) {
-    if (!this.get('isEnabled') || this.get('hasMouseExited')) {
+    if (!this.get('isEnabled')) {
       this.set('hasMouseExited',NO) ;
       return YES ;
     }
@@ -443,8 +443,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     var anchor = this.getAnchor() ;
     if(anchor) {
       anchor.mouseUp(evt) ;
-    }
-    else {
+    } else {
       this.resignFirstResponder() ;
     }
     this.closeParent() ;
