@@ -1917,9 +1917,8 @@ SC.CollectionView = SC.View.extend(
     
     var view   = this.itemViewForEvent(ev),
         info   = this.mouseDownInfo,
-        idx    = info.contentIndex,
-        contentIndex, sel, isSelected, canEdit, itemView, content;
-    
+        contentIndex, sel, isSelected, canEdit, itemView, content, idx;
+        
     if (this.get('useToggleSelection')) {
       if (!view) return ; // do nothing when clicked outside of elements
       
@@ -1931,7 +1930,8 @@ SC.CollectionView = SC.View.extend(
       if (isSelected) this.deselect(contentIndex) ;
       else this.select(contentIndex, YES) ;
       
-    } else {
+    } else if(info) {
+      idx = info.contentIndex;
       contentIndex = (view) ? view.get('contentIndex') : -1 ;
       
       // this will be set if the user simply clicked on an unselected item and 

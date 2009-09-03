@@ -386,14 +386,15 @@ SC.InlineTextFieldView.mixin(
     
     // If exampleInlineTextFieldView is set, load this class otherwise use
     // the default, this.
-    var klass = (options.exampleInlineTextFieldView) 
+    var klass = options.exampleInlineTextFieldView 
               ? options.exampleInlineTextFieldView : this;
     
     var layout = options.delegate.get('layout');
     var s = this.updateViewStyle();
+    var p = this.updateViewPaddingStyle();
     
     var str= ".inline-editor input{"+s+"} ";
-    str= str+".inline-editor textarea{"+s+"}";
+    str= str+".inline-editor textarea{"+s+"} .inline-editor .padding{"+p+"}";
     var pa= document.getElementsByTagName('head')[0] ;
     var el= document.createElement('style');
     el.type= 'text/css';
@@ -438,21 +439,33 @@ SC.InlineTextFieldView.mixin(
     var el = this._exampleElement[0] ;   
     var styles = '';
     var s=SC.getStyle(el,'font-size');
-    if(s && s.length>0) styles = styles + "font-size: "+ s + "; ";
+    if(s && s.length>0) styles = styles + "font-size: "+ s + " !important; ";
     s=SC.getStyle(el,'font-family');
-    if(s && s.length>0) styles = styles + "font-family: " + s + "; ";
+    if(s && s.length>0) styles = styles + "font-family: " + s + " !important; ";
     s=SC.getStyle(el,'font-weight');
-    if(s && s.length>0) styles = styles + "font-weight: " + s + "; ";
+    if(s && s.length>0) styles = styles + "font-weight: " + s + " !important; ";
     s=SC.getStyle(el,'z-index');
-    if(s && s.length>0) styles = styles + "z-index: " + s + "; ";
-    s=SC.getStyle(el,'padding-left');
-    if(s && s.length>0) styles = styles + "padding-left: " + s + "; ";
-    s=SC.getStyle(el,'padding-bottom');
-    if(s && s.length>0) styles = styles + "padding-bottom: " + s + "; ";
+    if(s && s.length>0) styles = styles + "z-index: " + s + " !important; ";
     s=SC.getStyle(el,'line-height');
-    if(s && s.length>0) styles = styles + "line-height: " + s + "; ";
+    if(s && s.length>0) styles = styles + "line-height: " + s + " !important; ";
     s=SC.getStyle(el,'text-align');
-    if(s && s.length>0) styles = styles + "text-align: " + s + "; ";
+    if(s && s.length>0) styles = styles + "text-align: " + s + " !important; ";
+    
+    return styles;
+  },
+
+
+  updateViewPaddingStyle: function() {
+    var el = this._exampleElement[0] ;   
+    var styles = '';
+    var s=SC.getStyle(el,'padding-top');
+    if(s && s.length>0) styles = styles + "top: "+ s + " !important; ";
+    s=SC.getStyle(el,'padding-bottom');
+    if(s && s.length>0) styles = styles + "bottom: " + s + " !important; ";
+    s=SC.getStyle(el,'padding-left');
+    if(s && s.length>0) styles = styles + "left: " + s + " !important; ";
+    s=SC.getStyle(el,'padding-right');
+    if(s && s.length>0) styles = styles + "right: " + s + " !important; ";
     
     return styles;
   },
