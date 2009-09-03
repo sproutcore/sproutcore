@@ -163,6 +163,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     // and become first responder
     this.becomeFirstResponder() ;
+    
+    this._selectRootElement();
 
     this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this) ;
   },
