@@ -9,6 +9,10 @@
 var store, storeKey, storeId, rec, storeIds, recs;
 module("SC.ManyArray core methods", {
   setup: function() {
+    
+    // loadRecords() needs a SC.RunLoop.currentRunLoop
+    SC.RunLoop.begin();
+    
     // setup dummy app and store
     MyApp = SC.Object.create({
       store: SC.Store.create()
@@ -19,10 +23,10 @@ module("SC.ManyArray core methods", {
     
     // load some data
     MyApp.store.loadRecords(MyApp.Foo, [
-      { guid: 1, firstName: "John", lastName: "Doe" },
-      { guid: 2, firstName: "Jane", lastName: "Doe" },
-      { guid: 3, firstName: "Emily", lastName: "Parker" },
-      { guid: 4, firstName: "Johnny", lastName: "Cash" }
+      { guid: 1, firstName: "John", lastName: "Doe", age: 32 },
+      { guid: 2, firstName: "Jane", lastName: "Doe", age: 30 },
+      { guid: 3, firstName: "Emily", lastName: "Parker", age: 7 },
+      { guid: 4, firstName: "Johnny", lastName: "Cash", age: 17 }
     ]);
     
     storeKey = MyApp.store.storeKeyFor(MyApp.Foo, 1);
@@ -34,6 +38,8 @@ module("SC.ManyArray core methods", {
     // get many array.
     storeIds = [1,2,3,4];
     recs = SC.ManyArray.create({ store: MyApp.store, storeIds: storeIds, recordType: MyApp.Foo });
+    
+    SC.RunLoop.end();
     
   }
 });
@@ -175,4 +181,11 @@ test("swapping storeIds array should change ManyArray and observers", function()
   equals(recs.get('length'), 2, 'should reflect new length');
   equals(recs.objectAt(0), rec, 'recs.objectAt(0) should return pushed rec');  
 
+});
+
+test("reduced properties", function() {
+  equals(recs.get('@sum(age)'), 32+30+7+17, 'sum reducer should return the correct value');
+  equals(recs.get('@max(age)'), 32, 'max reducer should return the correct value');
+  equals(recs.get('@min(age)'), 7, 'min reducer should return the correct value');
+  equals(recs.get('@average(age)'), (32+30+7+17)/4.0, 'average reducer should return the correct value');
 });
