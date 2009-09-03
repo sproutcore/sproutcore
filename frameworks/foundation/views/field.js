@@ -226,7 +226,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   mouseDown: function(evt) {  
     if (this.get('isEnabled')) {
-              //this.set('isActive', YES); 
+              this.set('isActive', YES); 
               this.becomeFirstResponder();
               this._field_isMouseDown = YES;
             }

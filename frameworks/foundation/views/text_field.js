@@ -584,10 +584,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if (this.get('isVisibleInWindow')) {
         this.$input()[0].focus();
         this._applyFirefoxCursorFix();
-        if(this.getFieldValue().length===0 || SC.browser.msie){
-        if(!SC.browser.safari) this.invokeOnce(this._selectRootElement) ;
-        else this.invokeLater(this._selectRootElement, 1) ;
-      }
+
+        if(!this._txtFieldMouseDown){          
+          if(!SC.browser.safari) this.invokeOnce(this._selectRootElement) ;
+          else this.invokeLater(this._selectRootElement, 1) ;
+        }
       }
     }
   },
@@ -668,6 +669,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
   
   mouseDown: function(evt) {
+    this._txtFieldMouseDown=YES;
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
@@ -675,6 +677,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   mouseUp: function(evt) {
+    this._txtFieldMouseDown=NO;
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
