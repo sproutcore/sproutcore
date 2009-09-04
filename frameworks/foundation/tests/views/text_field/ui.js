@@ -208,13 +208,49 @@ test("enabling disabled view", function() {
 // TEST SELECTION SUPPORT
 // 
 
+test("Setting the selection to a null value should fail", function() {  
+  var view = pane.view('with value');
+  var fieldElement = view.$input()[0];
+  fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+  
+  var thrownException = null;
+  try {
+    view.set('selection', null);
+  }
+  catch(e) {
+    thrownException = e;
+  }
+  ok(thrownException.indexOf !== undefined, 'an exception should have been thrown');
+  if (thrownException.indexOf !== undefined) {
+    ok(thrownException.indexOf('must specify an SC.TextSelection instance') !== -1, 'the exception should be about not specifying an SC.TextSelection instance');
+  }
+});
+
+test("Setting the selection to a non-SC.TextSelection value should fail", function() {  
+  var view = pane.view('with value');
+  var fieldElement = view.$input()[0];
+  fieldElement.size = 10;     // Avoid Firefox 3.5 issue
+  
+  var thrownException = null;
+  try {
+    view.set('selection', {start: 0, end: 0});
+  }
+  catch(e) {
+    thrownException = e;
+  }
+  ok(thrownException.indexOf !== undefined, 'an exception should have been thrown');
+  if (thrownException.indexOf !== undefined) {
+    ok(thrownException.indexOf('must specify an SC.TextSelection instance') !== -1, 'the exception should be about not specifying an SC.TextSelection instance');
+  }
+});
+
 test("Setting and then getting back the selection", function() {  
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
   
   var newSelection = SC.TextSelection.create({start:2, end:5});
-  view.setSelection(newSelection);
+  view.set('selection', newSelection);
   
   var fetchedSelection = view.get('selection');
   ok(fetchedSelection.get('start') === 2, 'the selection should start at index 2');

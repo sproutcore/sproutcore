@@ -113,100 +113,103 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     
     @property {SC.TextSelection}
   */
-  selection: function() {
-       var element = this.$input()[0] ;
-       if (element) {
-         var start = null, end = null ;
-         
-         if (!element.value) {  
-           start = end = 0 ;
-         }
-         else {
-           // In IE8, input elements don't have hasOwnProperty() defined.
-           if ('selectionStart' in element) {
-             start = element.selectionStart ;
-           }
-           if ('selectionEnd' in element) {
-             end = element.selectionEnd ;
-           }
-         
-           // Support Internet Explorer.
-           if (start === null  ||  end === null ) {
-             var selection = document.selection ;
-             if (selection) {
-               var type = selection.type ;
-               if (type  &&  (type === 'None'  ||  type === 'Text')) {
-                 var range = selection.createRange() ;
-   
-                 if (!this.get('isTextArea')) {
-                   // Input tag support.  Figure out the starting position by
-                   // moving the range's start position as far left as possible
-                   // and seeing how many characters it actually moved over.
-                   var length = range.text.length ;
-                   start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1))) ;
-                   end = start + length ;
-                 }
-                 else {
-                   // Textarea support.  Unfortunately, this case is a bit more
-                   // complicated than the input tag case.  We need to create a
-                   // "dummy" range to help in the calculations.
-                   var dummyRange = range.duplicate() ;
-                   dummyRange.moveToElementText(element) ;
-                   dummyRange.setEndPoint('EndToStart', range) ;
-                   start = dummyRange.text.length ;
-                   end = start + range.text.length ;
-                 }
-               }
-             }
-           }
-         }
-         return SC.TextSelection.create({ start:start, end:end }) ;
-       }
-       else {
-         return null;
-       }
-       
-       // Implementation note:
-       // There are certain ways users can add/remove text that we can't identify
-       // via our key/mouse down/up handlers (such as the user choosing Paste from a
-       // menu).  So that's why we need to update our 'selection' property whenever
-       // the field's value changes.
-     }.property('fieldValue').cacheable(),
-     
-     
-     /**
-       Updates the selection to match the specified SC.TextSelection object.
-     */ 
-     setSelection: function(newSelection) {
-       // Update the element.
-       var element = this.$input().get(0) ;
-       var setStart, setEnd ;
-       if (element) {
-         // In IE8, input elements don't have hasOwnProperty() defined.  Also, in
-         // Firefox 3.5, trying to get the selectionStart / selectionEnd
-         // properties at certain times can cause exceptions.
-         if ('selectionStart' in element) {
-           element.selectionStart = newSelection.get('start') ;
-           setStart = YES ;
-         }
-         if ('selectionEnd' in element) {
-           element.selectionEnd = newSelection.get('end') ;
-           setEnd = YES ;
-         }
-         
-         // Support Internet Explorer.
-         if (!setStart  ||  !setEnd) {
-           var range = element.createTextRange() ;
-           var start = newSelection.get('start') ;
-           range.move('character', start) ;
-           range.moveEnd('character', newSelection.get('end') - start) ;
-           range.select() ;
-         }
-       }
-       
-       // Notify any observers about the property change.
-       this.notifyPropertyChange('selection');
-     },
+  selection: function(key, value) {
+    var element = this.$input().get(0) ;
+    
+    // Are we being asked to set the value, or return the current value?
+    if (value === undefined) {
+      // The client is retrieving the value.
+      if (element) {
+        var start = null, end = null ;
+
+        if (!element.value) {  
+          start = end = 0 ;
+        }
+        else {
+          // In IE8, input elements don't have hasOwnProperty() defined.
+          if ('selectionStart' in element) {
+            start = element.selectionStart ;
+          }
+          if ('selectionEnd' in element) {
+            end = element.selectionEnd ;
+          }
+
+          // Support Internet Explorer.
+          if (start === null  ||  end === null ) {
+            var selection = document.selection ;
+            if (selection) {
+              var type = selection.type ;
+              if (type  &&  (type === 'None'  ||  type === 'Text')) {
+                var range = selection.createRange() ;
+
+                if (!this.get('isTextArea')) {
+                  // Input tag support.  Figure out the starting position by
+                  // moving the range's start position as far left as possible
+                  // and seeing how many characters it actually moved over.
+                  var length = range.text.length ;
+                  start = Math.abs(range.moveStart('character', 0 - (element.value.length + 1))) ;
+                  end = start + length ;
+                }
+                else {
+                  // Textarea support.  Unfortunately, this case is a bit more
+                  // complicated than the input tag case.  We need to create a
+                  // "dummy" range to help in the calculations.
+                  var dummyRange = range.duplicate() ;
+                  dummyRange.moveToElementText(element) ;
+                  dummyRange.setEndPoint('EndToStart', range) ;
+                  start = dummyRange.text.length ;
+                  end = start + range.text.length ;
+                }
+              }
+            }
+          }
+        }
+        return SC.TextSelection.create({ start:start, end:end }) ;
+      }
+      else {
+        return null;
+      }
+    }
+    else {
+      // The client is setting the value.  Make sure the new value is a text
+      // selection object.
+      if (!value  ||  !value.kindOf  ||  !value.kindOf(SC.TextSelection)) {
+        throw "When setting the selection, you must specify an SC.TextSelection instance.";
+      }
+      
+      if (element) {
+        var setStart, setEnd ;
+
+        // In IE8, input elements don't have hasOwnProperty() defined.  Also,
+        // in Firefox 3.5, trying to get the selectionStart / selectionEnd
+        // properties at certain times can cause exceptions.
+        if ('selectionStart' in element) {
+         element.selectionStart = value.get('start') ;
+         setStart = YES ;
+        }
+        if ('selectionEnd' in element) {
+         element.selectionEnd = value.get('end') ;
+         setEnd = YES ;
+        }
+
+        // Support Internet Explorer.
+        if (!setStart  ||  !setEnd) {
+         var range = element.createTextRange() ;
+         var start = value.get('start') ;
+         range.move('character', start) ;
+         range.moveEnd('character', value.get('end') - start) ;
+         range.select() ;
+        }
+      }
+    }
+    
+    // Implementation note:
+    // There are certain ways users can add/remove text that we can't identify
+    // via our key/mouse down/up handlers (such as the user choosing Paste
+    // from a menu).  So that's why we need to update our 'selection' property
+    // whenever the field's value changes.
+  }.property('fieldValue').cacheable(),
+
    
     
   // ..........................................................
