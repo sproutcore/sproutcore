@@ -431,13 +431,16 @@ test("focus and blurring text field", function() {
 });
 
 test("editing a field should not change the cursor position", function() {
-  var input = pane.view('empty').$('input');
+  var textField = pane.view('empty');
+  var input = textField.$('input');
   input.val('John Doe');
-  input[0].setSelectionRange(4, 4);
+  textField.set('selection', SC.TextSelection.create({start:2, end:3}));
   SC.Event.trigger(input, 'change');
 
   ok(input.val() === 'John Doe', 'input value should be \'John Doe\'');
-  ok(input[0].selectionStart == 4 && input[0].selectionEnd == 4, 'cursor position should be unchanged');
+  var selection = textField.get('selection');
+  console.log("Selection:  %@".fmt(selection));
+  ok(selection.get('start') == 2 && selection.get('end') == 3, 'cursor position should be unchanged');
 });
 
 })();
