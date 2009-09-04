@@ -64,16 +64,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     One example use would be for a web site's icon, found to the left of the
     URL field, in many popular web browsers.
     
-    Because the padding is set for you, it is recommended that you use the
-    'border-box' box-sizing CSS declaration for your hint and field elements
-    if you do not want them to resize as accessory views are added and
-    removed.
-    
     Note:  If you set a left accessory view, the left padding of the text
-    field will automatically be set to the width of the accessory view,
-    overriding any CSS padding-left you may have defined.  If you would like
-    to customize the amount of left padding used when the accessory view is
-    visible, make the accessory view wider, with empty space on the right.
+    field (really, the left offset of the padding element) will automatically
+    be set to the width of the accessory view, overriding any CSS you may have
+    defined on the "padding" element.  If you would like to customize the
+    amount of left padding used when the accessory view is visible, make the
+    accessory view wider, with empty space on the right.
   */
   leftAccessoryView: null,
   
@@ -91,22 +87,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     One example use would be for a button to clear the contents of the text
     field.
     
-    Note:  If you set a right accessory view, the left padding of the text
-    field will automatically be set to the width of the accessory view,
-    overriding any CSS padding-right you may have defined.  If you would like
-    to customize the amount of right padding used when the accessory view is
-    visible, make the accessory view wider, with empty space on the left.
-    
-    Because the padding is set for you, it is recommended that you use the
-    'border-box' box-sizing CSS declaration for your hint and field elements
-    if you do not want them to resize as accessory views are added and
-    removed.
-    
-    IMPORTANT NOTE:  In Internet Explorer 7 and 8, fixed-width text views do
-    not respect the right padding property, so if you are using a right
-    accessory view in such a situation be aware that it may float over the
-    text if the text is long enough.  You may wish to use a translucent
-    background to somewhat mitigate this issue.
+    Note:  If you set a right accessory view, the right padding of the text
+    field (really, the right offset of the padding element) will automatically
+    be set to the width of the accessory view, overriding any CSS you may have
+    defined on the "padding" element.  If you would like to customize the
+    amount of right padding used when the accessory view is visible, make the
+    accessory view wider, with empty space on the left.
   */
   rightAccessoryView: null,
 
@@ -337,32 +323,33 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // if we could add in the original padding, too, but there's no efficient
     // way to do that without first rendering the element somewhere on/off-
     // screen, and we don't want to take the performance hit.)
-    var accessoryViewWidths = this._getAccessoryViewWidths();
-    var leftPadding  = accessoryViewWidths['left'] ;
-    var rightPadding = accessoryViewWidths['right'] ;
-    if (leftPadding)  leftPadding  += 'px' ;
-    if (rightPadding) rightPadding += 'px' ;
+    var accessoryViewWidths = this._getAccessoryViewWidths() ;
+    var leftAdjustment  = accessoryViewWidths['left'] ;
+    var rightAdjustment = accessoryViewWidths['right'] ;
+        
+    if (leftAdjustment)  leftAdjustment  += 'px' ;
+    if (rightAdjustment) rightAdjustment += 'px' ;
     
-    this._renderField(context, firstTime, v, leftPadding, rightPadding);
-    this._renderHint(context, firstTime, leftPadding, rightPadding);
+    this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
+    this._renderHint(context, firstTime, leftAdjustment, rightAdjustment) ;
     
   },
   
-  _renderHint: function(context, firstTime, leftPadding, rightPadding) {
+  _renderHint: function(context, firstTime, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
     var hint = this.get('hint') ;
         
     if (firstTime) {
-      var paddingStyle = '' ;
-      if (leftPadding  ||  rightPadding) {
-        paddingStyle = 'style="' ;
-        if (leftPadding)  paddingStyle += 'padding-left: '  + leftPadding  + '; ' ;
-        if (rightPadding) paddingStyle += 'padding-right: ' + rightPadding + ';' ;
-        paddingStyle += '"' ;
+      var adjustmentStyle = '' ;
+      if (leftAdjustment  ||  rightAdjustment) {
+        adjustmentStyle = 'style="' ;
+        if (leftAdjustment)  adjustmentStyle += 'left: '  + leftAdjustment  + '; ' ;
+        if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
+        adjustmentStyle += '"' ;
       }
-      context.push('<span class="sc-hint" %@>'.fmt(paddingStyle), hint, '</span>') ;
+      context.push('<span class="sc-hint" %@>'.fmt(adjustmentStyle), hint, '</span>') ;
     }
     else {
       // If this is not first time rendering, update the hint itself since we
@@ -373,31 +360,31 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         elements.text(hint) ;
       }
       
-      // Adjust the padding to accommodate any accessory views.
+      // Adjust the hint positioning to accommodate any accessory views.
       var element = elements[0] ;
       if (element) {
-        if (leftPadding) {
-          if (element.style.paddingLeft !== leftPadding) {
-            element.style.paddingLeft = leftPadding ;
+        if (leftAdjustment) {
+          if (element.style.left !== leftAdjustment) {
+            element.style.left = leftAdjustment ;
           }
         }
         else {
-          element.style.paddingLeft = null ;
+          element.style.left = null ;
         }
           
-        if (rightPadding) {
-          if (element.style.paddingRight !== rightPadding) {
-            element.style.paddingRight = rightPadding ;
+        if (rightAdjustment) {
+          if (element.style.right !== rightAdjustment) {
+            element.style.right = rightAdjustment ;
           }
         }
         else {
-          element.style.paddingRight = null ;
+          element.style.right = null ;
         }
       }
     }
   },
   
-  _renderField: function(context, firstTime, value, leftPadding, rightPadding) {
+  _renderField: function(context, firstTime, value, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
@@ -405,20 +392,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
       var name = SC.guidFor(this) ;
       
-      var paddingStyle = '' ;
-      if (leftPadding  ||  rightPadding) {
-        paddingStyle = 'style="' ;
-        if (leftPadding)  paddingStyle += 'padding-left: '  + leftPadding  + '; ' ;
-        if (rightPadding) paddingStyle += 'padding-right: ' + rightPadding + ';' ;
-        paddingStyle += '"' ;
+      var adjustmentStyle = '' ;
+      if (leftAdjustment  ||  rightAdjustment) {
+        adjustmentStyle = 'style="' ;
+        if (leftAdjustment)  adjustmentStyle += 'left: '  + leftAdjustment  + '; ' ;
+        if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
+        adjustmentStyle += '"' ;
       }
       context.push('<span class="border"></span>');
       if (this.get('isTextArea')) {
-        context.push('<span class="padding"><textarea name="%@" %@ value="%@" %@></textarea></span>'.fmt(name, disabled, value, paddingStyle)) ;
+        context.push('<span class="padding" %@><textarea name="%@" %@ value="%@"></textarea></span>'.fmt(adjustmentStyle, name, disabled, value)) ;
       }
       else {
         var type = this.get('isPassword') ? 'password' : 'text' ;
-        context.push('<span class="padding"><input type="%@" name="%@" %@ value="%@" %@/></span>'.fmt(type, name, disabled, value, paddingStyle)) ;
+        context.push('<span class="padding" %@><input type="%@" name="%@" %@ value="%@"/></span>'.fmt(adjustmentStyle, type, name, disabled, value)) ;
       }
       
     }
@@ -432,24 +419,32 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           element.disabled = null ;
         }
         
-      
-        // Adjust the padding to accommodate any accessory views.
-        if (leftPadding) {
-          if (element.style.paddingLeft !== leftPadding) {
-            element.style.paddingLeft = leftPadding ;
+        // Adjust the padding element to accommodate any accessory views.
+        var paddingElement = element.parentNode;
+        if (leftAdjustment) {
+          if (paddingElement.style.left !== leftAdjustment) {
+            paddingElement.style.left = leftAdjustment ;
           }
         }
         else {
-          element.style.paddingLeft = null ;
+          paddingElement.style.left = null ;
         }
-    
-        if (rightPadding) {
-          if (element.style.paddingRight !== rightPadding) {
-            element.style.paddingRight = rightPadding ;
+        
+        if (rightAdjustment) {
+          if (paddingElement.style.right !== rightAdjustment) {
+            paddingElement.style.right = rightAdjustment ;
           }
         }
         else {
-          element.style.paddingRight = null ;
+          paddingElement.style.right = null ;
+        }
+        
+        
+        // Firefox needs a bit of help to recalculate the width of the text
+        // field, if it has focus.  (Even though it's set to 100% of its
+        // parent, if we adjust the parent it doesn't always adjust in kind.)
+        if (SC.browser.mozilla) {
+          element.style.width = paddingElement.clientWidth + "px";
         }
       }
     }

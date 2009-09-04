@@ -111,13 +111,15 @@
 	z-index: 1;
 	position: absolute;
 	top: 0;
-	left: 0;
-	right: 0;
+	left: 3px;
+	right: 3px;
 	bottom: 0;
-	padding: 3px;
 	color: #aaa ;
 	font-size: 12px;
+}
 
+.sc-text-field-view.text-area {
+	right: 0px;
 }
 
 .sc-text-field-view.focus .sc-hint,
