@@ -278,6 +278,15 @@ SC.CollectionViewDelegate = {
   */
   collectionViewDragViewFor: function(view, dragContent) {
     return null;
-  }
+  },
 
+  /**
+    Allows the ghost view created in collectionViewDragViewFor to be displayed
+    like a cursor instead of the default implementation. This sets the view 
+    origin to be the location of the mouse cursor.
+    
+    @property {Boolean} ghost view acts like a cursor
+  */
+  ghostActsLikeCursor: NO
+  
 };

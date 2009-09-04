@@ -77,6 +77,15 @@ SC.Drag = SC.Object.extend(
   */
   ghostView: null,
   
+  /**
+    If YES, then the ghostView will acts like a cursor and attach directly
+    to the mouse location.
+    
+    @readOnly
+    @type Boolean
+  */
+  ghostActsLikeCursor: NO,
+  
   /**  
     The view that was used as the source of the ghostView.  
     
@@ -298,9 +307,8 @@ SC.Drag = SC.Object.extend(
     
     var origin = f;//pv.convertFrameToView(dv.get('frame'), null) ;
     
-    this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
-    
-    this.mouseGhostOffset = {x: (loc.x - dvf.x), y: (loc.y - dvf.y)};
+    if (this.ghostActsLikeCursor) this.ghostOffset = { x: 0, y: 0 };
+    else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
     
     // position the ghost view
     if(!this._ghostViewHidden) this._positionGhostView(evt) ;

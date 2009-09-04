@@ -2179,6 +2179,7 @@ SC.CollectionView = SC.View.extend(
           source: this,
           dragView: dragView,
           ghost: NO,
+          ghostActsLikeCursor: del.ghostActsLikeCursor,
           slideBack: YES,
           dataSource: this
         }); 
