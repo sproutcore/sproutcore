@@ -2170,6 +2170,9 @@ SC.CollectionView = SC.View.extend(
         dragView = del.collectionViewDragViewFor(this, dragContent.indexes);
         if (!dragView) dragView = this._cv_dragViewFor(dragContent.indexes);
         
+        // Make sure the dragView has created its layer.
+        dragView.createLayer();
+        
         // Initiate the drag
         SC.Drag.start({
           event: info.event,
