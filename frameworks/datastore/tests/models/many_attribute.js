@@ -66,7 +66,7 @@ test("getting toMany relationship should map guid to real records", function() {
   equals(rec3.get('fooMany').objectAt(0), rec, 'should get rec1 instance for rec3.fooMany');
   equals(rec3.get('fooMany').objectAt(1), rec2, 'should get rec2 instance for rec3.fooMany');
 });
-
+ 
 test("getting toMany relation should not change record state", function() {
   equals(rec3.get('status'), SC.Record.READY_CLEAN, 'precond - status should be READY_CLEAN');
   
@@ -129,13 +129,16 @@ test("pushing an object to a to-many relationship attribute should update set gu
   equals(rec3.get('fooMany').objectAt(1), rec2, 'should get rec2 instance for rec3.fooMany');
   equals(rec3.get('fooMany').objectAt(2), rec4, 'should get rec4 instance for rec3.fooMany');
 });
-
+ 
 test("modifying a toMany array should mark the record as changed", function() {
   var recs = rec3.get('fooMany');
   equals(rec3.get('status'), SC.Record.READY_CLEAN, 'precond - rec3.status should be READY_CLEAN');
   ok(!!rec4, 'precond - rec4 should be defined');
   
+  SC.RunLoop.begin();
   recs.pushObject(rec4);
+  SC.RunLoop.end();
+  
   equals(rec3.get('status'), SC.Record.READY_DIRTY, 'record status should have changed to dirty');
 
 });

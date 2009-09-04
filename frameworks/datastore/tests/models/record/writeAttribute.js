@@ -86,7 +86,9 @@ test("Writing to an attribute in chained store sets correct status", function() 
   var chainedRecord = chainedStore.find(Foo, foo.get('id'));
   equals(chainedRecord.get('status'), SC.Record.READY_CLEAN, 'precon - status should be READY_CLEAN');
   
+  SC.RunLoop.begin();
   chainedRecord.writeAttribute('foo', 'newValue');
+  SC.RunLoop.end();
   //chainedRecord.set('foo', 'newValue');
   
   equals(chainedRecord.get('status'), SC.Record.READY_DIRTY, 'status should be READY_DIRTY');

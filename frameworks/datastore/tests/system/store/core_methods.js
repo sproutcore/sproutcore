@@ -125,9 +125,10 @@ test("Passing params through commitRecords()", function() {
 test("Make sure that setting an attribute on a record will only notify respective observers once", function() {
   
   var file = store.find(Application.File, '14');
+  Application._nameDidChange = 0 ;
   
   SC.RunLoop.begin();
-  file.set('name', 'My Great New Name');
+  file.writeAttribute('name', 'My Great New Name');
   SC.RunLoop.end();
   
   equals(Application._nameDidChange, 1, 'observer was only fired once');

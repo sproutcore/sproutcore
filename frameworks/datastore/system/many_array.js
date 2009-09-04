@@ -173,13 +173,14 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   // ..........................................................
   // INTERNAL SUPPORT
-  // 
+  //  
 
   /** @private 
     Invoked whenever the storeIds array changes.  Observes changes.
   */
-  recordPropertyDidChange: function(key) {
-    if (key && this.get('propertyName') !== key) return; // nothing to do
+  recordPropertyDidChange: function(keys) {
+    
+    if (keys && !keys.contains(this.get('propertyName'))) return this;
     
     var storeIds = this.get('readOnlyStoreIds');
     var prev = this._prevStoreIds, f = this._storeIdsContentDidChange;

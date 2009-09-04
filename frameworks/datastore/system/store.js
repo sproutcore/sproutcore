@@ -464,7 +464,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var records      = this.records, 
         nestedStores = this.get('nestedStores'),
         K            = SC.Store,
-        rec, editState, len, idx, store, status;
+        rec, editState, len, idx, store, status, keys;
     
     // pass along to nested stores
     len = nestedStores ? nestedStores.length : 0 ;
@@ -492,7 +492,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         { storeKeys:  SC.CoreSet.create(), 
           records:    SC.CoreSet.create(), 
           statusOnly: SC.CoreSet.create(),
-          propertyForStoreKeys: [] };
+          propertyForStoreKeys: {} };
     }
     
     changes.storeKeys.add(storeKey);
@@ -503,12 +503,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       // if this is a key specific change, make sure that only those
       // properties/keys are notified
-      if(key) {
-        if(!changes.propertyForStoreKeys[storeKey]) {
-          // always notify status change
-          changes.propertyForStoreKeys[storeKey] = ['status'];
+      if (key) {
+        if (!(keys = changes.propertyForStoreKeys[storeKey])) {
+          keys = changes.propertyForStoreKeys[storeKey] = SC.CoreSet.create();
         }
-        changes.propertyForStoreKeys[storeKey].push(key);
+        keys.add(key);
       }
     }
     
@@ -533,26 +532,17 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         records     = changes.records, 
         propertyForStoreKeys  = changes.propertyForStoreKeys,
         recordTypes = SC.CoreSet.create(),
-        rec, recordType, status, idx, len, storeKey, props, idxx, lenn;
+        rec, recordType, status, idx, len, storeKey, keys;
     
     storeKeys.forEach(function(storeKey) {
 
-      if(records.contains(storeKey)) {
+      if (records.contains(storeKey)) {
         status = statusOnly.contains(storeKey) ? YES: NO;
         rec = this.records[storeKey];
-        props = changes.propertyForStoreKeys[storeKey];
+        keys = propertyForStoreKeys ? propertyForStoreKeys[storeKey] : null;
         
-        if(rec && !props) {
-          // this will notify that all properties changed (unless status flag is on)
-          rec.storeDidChangeProperties(status);
-        }
-        else if(rec) {
-          // iterate through the properties for this storeKey and
-          // notify only changes to this specifically
-          for(idxx=0,lenn=props.length;idxx<len;idxx++) {
-            rec.storeDidChangeProperties(status, props[idxx]);
-          }
-        }
+        if (rec) rec.storeDidChangeProperties(status, keys);
+        
         // remove it so we don't trigger this twice
         records.remove(storeKey);
       }
@@ -567,6 +557,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     storeKeys.clear();
     statusOnly.clear();
     records.clear();
+    propertyForStoreKeys.length = 0; // reset
     
     return this;
   },
@@ -1210,6 +1201,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // record data hash change
     this.dataHashDidChange(storeKey, null, null, key);
+    
     // record in changelog
     changelog = this.changelog ;
     if (!changelog) changelog = this.changelog = SC.Set.create() ;

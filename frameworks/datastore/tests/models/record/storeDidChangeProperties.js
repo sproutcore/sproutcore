@@ -79,7 +79,7 @@ test("editing a clean record should change all", function() {
   foo.writeAttribute("foo", "baz"); // NB: Must be different from "foo"
   SC.RunLoop.end();
   
-  expect(foo,2,2);
+  expect(foo,2,1);
 });
 
 test("editing an attribute to same value should do nothing", function() {
@@ -156,7 +156,7 @@ test("changing attributes on a parent store should NOT notify child store if loc
   parentfoo.writeAttribute('foo', 'baz'); // must not be bar
   SC.RunLoop.end();
   expect(childfoo,0,0); // should not reflect on child
-  expect(parentfoo,2,2);
+  expect(parentfoo,2,1);
   // discarding changes should update
 
   // NOTE: recourds should change immediately on commit/discard changes.

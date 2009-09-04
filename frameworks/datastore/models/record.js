@@ -189,7 +189,6 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function(key) {
     this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
-    this.storeDidChangeProperties(NO);
     return this ;
   },
   
@@ -260,8 +259,12 @@ SC.Record = SC.Object.extend(
     @returns {SC.Record} receiver
   **/
   writeAttribute: function(key, value, ignoreDidChange) {
-    var store = this.get('store'), storeKey = this.storeKey;
-    var attrs = store.readEditableDataHash(storeKey);
+    var store    = this.get('store'), 
+        storeKey = this.storeKey,
+        status   = store.peekStatus(storeKey),
+        attrs;
+        
+    attrs = store.readEditableDataHash(storeKey);
     if (!attrs) throw SC.Record.BAD_STATE_ERROR;
     
     // if value is the same, do not flag record as dirty
@@ -274,6 +277,12 @@ SC.Record = SC.Object.extend(
     // if value is primaryKey of record, write it to idsByStoreKey
     if (key===this.get('primaryKey')) {
       SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
+    }
+
+    // read the new status.  If it has changed, be sure to also notify 
+    // status change to clear cache.
+    if (store.peekStatus(storeKey) !== status) {
+      this.notifyPropertyChange('status');
     }
     
     return this ;  
@@ -301,17 +310,23 @@ SC.Record = SC.Object.extend(
     @param {String} key that changed (optional)
     @returns {SC.Record} receiver
   */
-  storeDidChangeProperties: function(statusOnly, key) {
+  storeDidChangeProperties: function(statusOnly, keys) {
     if (statusOnly) this.notifyPropertyChange('status');
-    else {
-
-      if (key) this.notifyPropertyChange(key);
-      else this.allPropertiesDidChange(); 
+    else {      
+      if (SC.stopIt) debugger ;
+      
+      if (keys) {
+        this.beginPropertyChanges();
+        keys.forEach(function(k) { this.notifyPropertyChange(k); }, this);
+        this.notifyPropertyChange('status'); 
+        this.endPropertyChanges();
+        
+      } else this.allPropertiesDidChange(); 
     
       // also notify manyArrays
       var manyArrays = this.relationships,
           loc        = manyArrays ? manyArrays.length : 0 ;
-      while(--loc>=0) manyArrays[loc].recordPropertyDidChange(key);
+      while(--loc>=0) manyArrays[loc].recordPropertyDidChange(keys);
     }
   },
   
