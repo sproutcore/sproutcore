@@ -334,67 +334,22 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (rightAdjustment) rightAdjustment += 'px' ;
 
     this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
-    this._renderHint(context, firstTime, leftAdjustment, rightAdjustment) ;
-
-  },
-
-  _renderHint: function(context, firstTime, leftAdjustment, rightAdjustment) {
-    // TODO:  The cleanest thing might be to create a sub- rendering context
-    //        here, but currently SC.RenderContext will render sibling
-    //        contexts as parent/child.
-    var hint = this.get('hint') ;
-
-    if (firstTime) {
-      var adjustmentStyle = '' ;
-      if (leftAdjustment  ||  rightAdjustment) {
-        adjustmentStyle = 'style="' ;
-        if (leftAdjustment)  adjustmentStyle += 'left: '  + leftAdjustment  + '; ' ;
-        if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
-        adjustmentStyle += '"' ;
-      }
-      context.push('<span class="sc-hint" %@>'.fmt(adjustmentStyle), hint, '</span>') ;
-    }
-    else {
-      // If this is not first time rendering, update the hint itself since we
-      // can't just blow away the text field like we might most other controls
-      var elements = this.$('.sc-hint') ;
-      if (hint !== this._textField_currentHint) {
-        this._textField_currentHint = hint ;
-        elements.text(hint) ;
-      }
-
-      // Adjust the hint positioning to accommodate any accessory views.
-      var element = elements[0] ;
-      if (element) {
-        if (leftAdjustment) {
-          if (element.style.left !== leftAdjustment) {
-            element.style.left = leftAdjustment ;
-          }
-        }
-        else {
-          element.style.left = null ;
-        }
-
-        if (rightAdjustment) {
-          if (element.style.right !== rightAdjustment) {
-            element.style.right = rightAdjustment ;
-          }
-        }
-        else {
-          element.style.right = null ;
-        }
-      }
-    }
   },
 
   _renderField: function(context, firstTime, value, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
+    var hint = this.get('hint') ;
+    
     if (firstTime) {
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
       var name = SC.guidFor(this) ;
+      
+      context.push('<span class="border"></span>');
 
+      // Render the padding element, with any necessary positioning
+      // adjustments to accommodate accessory views.
       var adjustmentStyle = '' ;
       if (leftAdjustment  ||  rightAdjustment) {
         adjustmentStyle = 'style="' ;
@@ -402,17 +357,31 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
         adjustmentStyle += '"' ;
       }
-      context.push('<span class="border"></span>');
+      context.push('<span class="padding" %@>'.fmt(adjustmentStyle));
+      
+      // Render the hint.
+      context.push('<span class="sc-hint">', hint, '</span>') ;
+      
+      // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
-        context.push('<span class="padding" %@><textarea name="%@" %@ value="%@"></textarea></span>'.fmt(adjustmentStyle, name, disabled, value)) ;
+        context.push('<textarea name="%@" %@ value="%@"></textarea></span>'.fmt(name, disabled, value)) ;
       }
       else {
         var type = this.get('isPassword') ? 'password' : 'text' ;
-        context.push('<span class="padding" %@><input type="%@" name="%@" %@ value="%@"/></span>'.fmt(adjustmentStyle, type, name, disabled, value)) ;
+        context.push('<input type="%@" name="%@" %@ value="%@"/></span>'.fmt(type, name, disabled, value)) ;
       }
 
     }
     else {
+      // If this is not first time rendering, update the hint itself since we
+      // can't just blow away the text field like we might most other controls
+      var hintElements = this.$('.sc-hint') ;
+      if (hint !== this._textField_currentHint) {
+        this._textField_currentHint = hint ;
+        hintElements.text(hint) ;
+      }
+      
+      // Enable/disable the actual input/textarea as appropriate.
       var element = this.$input()[0];
       if (element) {
         if (!this.get('isEnabled')) {
