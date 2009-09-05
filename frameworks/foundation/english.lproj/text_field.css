@@ -121,6 +121,6 @@
 
 .sc-text-field-view.focus .sc-hint,
 .sc-text-field-view.not-empty .sc-hint {
-/*  display: none ;*/
+  display: none ;
 }
 
