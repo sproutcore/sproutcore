@@ -307,7 +307,7 @@ SC.Drag = SC.Object.extend(
     
     var origin = f;//pv.convertFrameToView(dv.get('frame'), null) ;
     
-    if (this.ghostActsLikeCursor) this.ghostOffset = { x: 0, y: 0 };
+    if (this.ghostActsLikeCursor) this.ghostOffset = { x: 14, y: 14 };
     else this.ghostOffset = { x: (loc.x-origin.x), y: (loc.y-origin.y) } ;
     
     // position the ghost view
