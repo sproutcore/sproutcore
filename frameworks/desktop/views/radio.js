@@ -341,12 +341,17 @@ SC.RadioView = SC.FieldView.extend(
      }
    },
 
-   willDestroyLayer: function() {
+  willDestroyLayer: function() {
        var inputElems=this.$input();
         for( var i=0; i<inputElems.length; i++){
             SC.Event.remove(this.$input()[i], 'click', this, this._field_fieldValueDidChange); 
         }
    
-   }
+  },
+  
+  mouseDown: function(evt) {  
+    this.$input()[0].focus();
+    sc_super();
+  }
 
 });

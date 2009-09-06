@@ -24,6 +24,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   classNames: ['sc-checkbox-view'],
   tagName: 'label',
 
+  /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,
 
   render: function(context, firstTime) {
@@ -115,6 +116,11 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   
   willDestroyLayer: function() {
     SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
-  }
+  },
+  
+  mouseDown: function(evt) {  
+    this.$input()[0].focus();
+    sc_super();
+  },
     
 }) ;

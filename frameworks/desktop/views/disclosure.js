@@ -43,6 +43,18 @@ SC.DisclosureView = SC.ButtonView.extend(
     }else{
         context.push('<label>',this.get('displayTitle'),'</label>');  
     }
+  },
+  
+  keyDown: function(evt) {
+    if (evt.which === 37 || evt.which === 38) {  
+      this.set('value', this.get('toggleOffValue')) ;
+      return YES;
+    }
+    if (evt.which === 39 || evt.which === 40) {  
+      this.set('value', this.get('toggleOnValue')) ;
+      return YES;
+    }     
+    sc_super(); 
   }
   
 });
