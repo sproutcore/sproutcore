@@ -424,9 +424,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _applyFirefoxCursorFix: function() {
     if (SC.browser.mozilla) {
       var layer = this.get('layer');
-      var p = SC.viewportOffset(this.get('layer')) ;
-      var top    = p.y, 
-          left   = p.x, 
+      var p = this.$().offset();
+      var top    = p.top,
+          left   = p.left,
           width  = layer.offsetWidth, 
           height = layer.offsetHeight ;
           
