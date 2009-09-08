@@ -200,6 +200,11 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   _scq_expandRecordType: function(recordType, set) {
     if (set.contains(recordType)) return; // nothing to do
     set.add(recordType);
+    
+    if (SC.typeOf(recordType)===SC.T_STRING) {
+      recordType = SC.objectForPropertyPath(recordType);
+    }
+    
     recordType.subclasses.forEach(function(t) { 
       this._scq_expandRecordType(t, set);
     }, this);  
@@ -1265,7 +1270,6 @@ SC.Query.mixin( /** @scope SC.Query */ {
         opts.conditions = conditions ;
         ret = cache[key] = SC.Query.create(opts).freeze();
       }
-      
     // otherwise parse extra conditions and handle them
     } else {
 

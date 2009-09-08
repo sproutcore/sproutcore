@@ -88,6 +88,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   status: SC.Record.EMPTY,
   
+  isEditable: YES,
+  
   // ..........................................................
   // ARRAY PRIMITIVES
   // 
@@ -180,7 +182,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         i, keys;
         
     if (!storeKeys) throw "storeKeys required";
-    
+
     var query = this.get('query');
     if (query && !query.get('isEditable')) throw SC.RecordArray.NOT_EDITABLE;
     
@@ -215,12 +217,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {Number} index
   */
   indexOf: function(record, startAt) {
-    if (!SC.instanceOf(SC.Record, record)) return NO ; // only takes records
+    if (!SC.kindOf(record, SC.Record)) return NO ; // only takes records
     
     this.flush();
     
     var storeKey  = record.get('storeKey'), 
         storeKeys = this.get('storeKeys');
+        
     return storeKeys ? storeKeys.indexOf(storeKey, startAt) : -1; 
   },
 
@@ -232,7 +235,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {Number} index
   */
   lastIndexOf: function(record, startAt) {
-    if (!SC.instanceOf(SC.Record, record)) return NO ; // only takes records
+    if (!SC.kindOf(record, SC.Record)) return NO ; // only takes records
 
     this.flush();
     
@@ -249,7 +252,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   add: function(record) {
-    if (!SC.instanceOf(SC.Record, record)) return this ;
+    if (!SC.kindOf(record, SC.Record)) return this ;
     if (this.indexOf(record)<0) this.pushObject(record);
     return this ;
   },
@@ -262,7 +265,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   remove: function(record) {
-    if (!SC.instanceOf(SC.Record, record)) return this ;
+    if (!SC.kindOf(record, SC.Record)) return this ;
     this.removeObject(record);
     return this ;
   },
@@ -385,7 +388,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   storeDidChangeStoreKeys: function(storeKeys, recordTypes) {
     var query =  this.get('query');
-    
     // fast path exits
     if (query.get('location') !== SC.Query.LOCAL) return this;
     if (!query.containsRecordTypes(recordTypes)) return this;   
@@ -412,18 +414,24 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     SC.Query.LOCAL.  You can call this method on any RecordArray however,
     without an error.
     
+    @param {Boolean} force force re-eval of query even if needsFlush is NO
+    @param {Boolean} forceOrder force re-eval of order
     @returns {SC.RecordArray} receiver
   */
-  flush: function() {
-    if (!this.get('needsFlush')) return this; // nothing to do
+  flush: function(force, forceOrder) {
+    if (!this.get('needsFlush') && !force) return this; // nothing to do
     this.set('needsFlush', NO); // avoid running again.
-  
+    
     // fast exit
     var query = this.get('query'),
         store = this.get('store'); 
     if (!store || !query || query.get('location') !== SC.Query.LOCAL) {
       return this;
     }
+    
+    // if we are manually forcing a flush, then also re-parse the query in
+    // case any of the query properties changed
+    if(force) query.parse();
     
     // OK, actually generate some results
     var storeKeys = this.get('storeKeys'),
@@ -434,7 +442,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
     // if we have storeKeys already, just look at the changed keys
     if (storeKeys) {
-      
       if (changed) {
         changed.forEach(function(storeKey) {
 
@@ -498,7 +505,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (changed) changed.clear();
     
     // only resort and update if we did change
-    if (didChange) {
+    if (didChange || forceOrder) {
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
       this.set('storeKeys', storeKeys); // replace content
     }

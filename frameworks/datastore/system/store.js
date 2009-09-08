@@ -752,7 +752,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} record instance or null
   */
   find: function(recordType, id) {
-
     // if recordType is passed as string, find object
     if (SC.typeOf(recordType)===SC.T_STRING) {
       recordType = SC.objectForPropertyPath(recordType);
@@ -761,11 +760,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // handle passing a query...
     if ((arguments.length === 1) && !(recordType && recordType.isRecord)) {
       if (!recordType) throw "SC.Store#find() must pass recordType or query";
-      if (!recordType.isQuery) recordType = SC.Query.local(recordType);
+      if (!recordType.isQuery) {
+        recordType = SC.Query.local(recordType);
+      }
       return this._findQuery(recordType, YES, YES);
       
     // handle finding a single record
-    } else return this._findRecord(recordType, id);
+    } else if(id) {
+      return this._findRecord(recordType, id);
+    }
   },
 
   /**
@@ -995,7 +998,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} Returns the created record
   */
   createRecord: function(recordType, dataHash, id) {
-    
     var primaryKey, storeKey, status, K = SC.Record, changelog, defaultVal;
     
     // First, try to get an id.  If no id is passed, look it up in the 
@@ -1925,7 +1927,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // notify nested stores
     while(--loc >= 0) {
-      nestedStores[loc]._scstore_dataSourceDidFetchQuery(query, NO);
+      //nestedStores[loc]._scstore_dataSourceDidFetchQuery(query, NO);
     }
     
     return this ;
