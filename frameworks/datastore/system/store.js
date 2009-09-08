@@ -1912,10 +1912,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   dataSourceDidFetchQuery: function(query) {
-    return this._dataSourceDidFetchQuery(query, YES);
+    return this._scstore_dataSourceDidFetchQuery(query, YES);
   },
   
-  _dataSourceDidFetchQuery: function(query, createIfNeeded) {
+  _scstore_dataSourceDidFetchQuery: function(query, createIfNeeded) {
     var recArray     = this._findQuery(query, createIfNeeded, NO),
         nestedStores = this.get('nestedStores'),
         loc          = nestedStores ? nestedStores.get('length') : 0;
