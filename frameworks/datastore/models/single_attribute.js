@@ -48,36 +48,43 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     @private - implements support for handling inverse relationships.
   */
   call: function(record, key, newRec) {
-    var isWrite = (newRec !== undefined),
-        inverseKey, isMaster, oldRec, attr, ret;
+    var inverseKey, isMaster, oldRec, attr, ret, nvalue;
     
-    // can only take other records
-    if (newRec && !SC.kindOf(newRec, SC.Record)) {
-      throw "%@ is not an instance of SC.Record".fmt(newRec);
-    }
-    
-    // if we have an inverse relationship, save info for updates
-    if (isWrite && (inverseKey = this.get('inverse'))) {
-      oldRec = this._scsa_call(record, key); // read old value
-    }
-    
-    ret = this._scsa_call(record, key, newRec); // do normal read/write
+    // WRITE
+    if (newRec !== undefined) {
 
-    // ok, now if we have an inverse relationship, get the inverse 
-    // relationship and notify it of what is happening.  This will allow it
-    // to update itself as needed.  The callbacks implemented here are 
-    // supported by both SingleAttribute and ManyAttribute.
-    //
-    if (isWrite && inverseKey && (oldRec !== newRec)) {
-      if (oldRec && (attr = oldRec[inverseKey])) {
-        attr.inverseDidRemoveRecord(oldRec, inverseKey, record, key);
+      // can only take other records or null
+      if (newRec && !SC.kindOf(newRec, SC.Record)) {
+        throw "%@ is not an instance of SC.Record".fmt(newRec);
+      }
+
+      inverseKey = this.get('inverse');
+      if (inverseKey) oldRec = this._scsa_call(record, key);
+
+      // careful: don't overwrite value here.  we want the return value to 
+      // cache.
+      nvalue = this.fromType(record, key, newRec) ; // convert to attribute.
+      record.writeAttribute(key, nvalue, !this.get('isMaster')); 
+      ret = newRec ;
+
+      // ok, now if we have an inverse relationship, get the inverse 
+      // relationship and notify it of what is happening.  This will allow it
+      // to update itself as needed.  The callbacks implemented here are 
+      // supported by both SingleAttribute and ManyAttribute.
+      //
+      if (inverseKey && (oldRec !== newRec)) {
+        if (oldRec && (attr = oldRec[inverseKey])) {
+          attr.inverseDidRemoveRecord(oldRec, inverseKey, record, key);
+        }
+
+        if (newRec && (attr = newRec[inverseKey])) {
+          attr.inverseDidAddRecord(newRec, inverseKey, record, key);
+        }
       }
       
-      if (newRec && (attr = newRec[inverseKey])) {
-        attr.inverseDidAddRecord(newRec, inverseKey, record, key);
-      }
-    }
-    
+    // READ 
+    } else ret = this._scsa_call(record, key, newRec);
+
     return ret ;
   },
   

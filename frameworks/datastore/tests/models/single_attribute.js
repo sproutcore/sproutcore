@@ -32,7 +32,7 @@ module("SC.RecordAttribute core methods", {
     });
     
     MyApp.Bar = SC.Record.extend({
-      foo: SC.Record.toOne('MyApp.Foo', { inverse: 'bar' })
+      foo: SC.Record.toOne('MyApp.Foo', { inverse: 'bar', isMaster: NO })
     });
     
     SC.RunLoop.begin();
@@ -143,14 +143,21 @@ test("clearing a toOne relationship", function() {
   equals(rec2.readAttribute('relatedTo'), null, 'rec.relatedTo attribute should be null');
 });
 
-test("clearing a toOne relationship with an inverse", function() {
+test("clearing a toOne relationship with an inverse - foo isMaster", function() {
   equals(rec.get('bar'), bar, 'precond - foo1.bar should eq bar');
   equals(bar.get('foo'), rec, 'precond - bar.foo should eq foo1');
+
+  equals(rec.get('status'), SC.Record.READY_CLEAN, 'precond - foo1.status should be READY_CLEAN');
+  equals(bar.get('status'), SC.Record.READY_CLEAN, 'precond - bar1.status should be READY_CLEAN');
   
   rec.set('bar', null);
   
   equals(rec.get('bar'), null, 'foo1.bar should be null after change');
   equals(bar.get('foo'), null, 'bar.foo should also be null after change');
+  
+  equals(rec.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+  
 });
 
 test("modifying a toOne relationship with an inverse from null", function() {
@@ -158,11 +165,20 @@ test("modifying a toOne relationship with an inverse from null", function() {
   equals(bar.get('foo'), rec, 'precond - bar.foo should eq foo1');
   equals(rec2.get('bar'), null, 'precond - foo2.bar should eq null');
   
+  [rec, rec2, bar].forEach(function(r) {
+    equals(r.get('status'), SC.Record.READY_CLEAN, 'precond - %@.status should be READY_CLEAN'.fmt(r.get('id')));
+  }, this);
+  
   bar.set('foo', rec2);
   
   equals(rec.get('bar'), null, 'foo1.bar should be null after change');
   equals(bar.get('foo'), rec2, 'bar.foo should eq foo2 after change');
   equals(rec2.get('bar'), bar, 'foo2.bar should eq bar after change');
+  
+  equals(rec.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(rec2.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+  
 });
 
 test("modifying a toOne relationship with an inverse from other", function() {
@@ -177,6 +193,11 @@ test("modifying a toOne relationship with an inverse from other", function() {
   equals(foo3.get('bar'), bar2, 'precond - foo3.bar should eq null');
   equals(bar2.get('foo'), foo3, 'precond - bar2.foo should eq foo3');
   
+  
+  [foo1, foo3, bar1, bar2].forEach(function(r) {
+    equals(r.get('status'), SC.Record.READY_CLEAN, 'precond - %@.status should be READY_CLEAN'.fmt(r.get('id')));
+  }, this);
+  
   bar1.set('foo', foo3);
   
   equals(foo1.get('bar'), null, 'foo1.bar should be null after change');
@@ -184,5 +205,12 @@ test("modifying a toOne relationship with an inverse from other", function() {
 
   equals(foo3.get('bar'), bar1, 'foo3.bar should be bar after change');
   equals(bar2.get('foo'), null, 'bar2.foo should eq null after change');
+  
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+  equals(bar2.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+  
 });
 
