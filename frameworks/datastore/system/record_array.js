@@ -88,8 +88,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   status: SC.Record.EMPTY,
   
-  isEditable: YES,
-  
   // ..........................................................
   // ARRAY PRIMITIVES
   // 
