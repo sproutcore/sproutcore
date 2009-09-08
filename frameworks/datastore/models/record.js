@@ -313,8 +313,6 @@ SC.Record = SC.Object.extend(
   storeDidChangeProperties: function(statusOnly, keys) {
     if (statusOnly) this.notifyPropertyChange('status');
     else {      
-      if (SC.stopIt) debugger ;
-      
       if (keys) {
         this.beginPropertyChanges();
         keys.forEach(function(k) { this.notifyPropertyChange(k); }, this);
@@ -606,7 +604,7 @@ SC.Record.mixin( /** @scope SC.Record */ {
     modify the underlying data, but the inverse key on the matching record
     will also be edited and that record will be marked as needing a change.
     
-    @param {SC.Reocrd|String} recordType The type of record to create
+    @param {SC.Record|String} recordType The type of record to create
     @param {Hash} opts the options for the attribute
     @returns {SC.ManyAttribute} created instance
   */
@@ -614,6 +612,19 @@ SC.Record.mixin( /** @scope SC.Record */ {
     return SC.ManyAttribute.attr(recordType, opts);
   },
   
+  /**
+    Returns a SC.SingleAttribute that converts the underlying ID to a single
+    record.  If you modify this property, it will rewrite the underyling ID. 
+    It will also modify the inverse of the relationship, if you set it.
+    
+    @param {SC.Record|String} recordType the type of the record to create
+    @param {Hash} opts additional options
+    @returns {SC.SingleAttribute} created instance
+  */
+  toOne: function(recordType, opts) {
+    return SC.SingleAttribute.attr(recordType, opts);
+  },
+    
   /**
     Returns all storeKeys mapped by Id for this record type.  This method is
     used mostly by the SC.Store and the Record to coordinate.  You will rarely
@@ -687,10 +698,3 @@ SC.Record.mixin( /** @scope SC.Record */ {
   }
   
 }) ;
-
-/** 
-  Alias for SC.Record.attr.  Using this version to describe to-one 
-  relationships can sometimes make your code more understandable.
-*/
-SC.Record.toOne = SC.Record.attr ;
-

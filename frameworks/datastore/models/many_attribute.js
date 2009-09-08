@@ -54,12 +54,6 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   */
   isMaster: YES,
   
-  /**
-    If YES the attribute will be editable.  Otherwise changes will raise an
-    exception.
-  */
-  isEditable: YES,
-  
   // ..........................................................
   // LOW-LEVEL METHODS
   //
@@ -78,9 +72,8 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
         recordType:   type, 
         record:       record, 
         propertyName: key,
-        inverse:      this.get('inverse'),
-        isMaster:     this.get('isMaster'),
-        isEditable:   this.get('isEditable')
+        isEditable:   this.get('isEditable'),
+        owner:        this
       });
       
       record[arrayKey] = ret ; // save on record

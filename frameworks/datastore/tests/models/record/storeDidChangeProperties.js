@@ -123,7 +123,6 @@ test("committing attribute changes from nested store should change attrs", funct
   SC.RunLoop.begin();
   // commit
   child.commitChanges();
-  SC.stopIt = NO ;
 
   // now changes
   expect(foo,1,1);

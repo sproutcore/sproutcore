@@ -37,10 +37,8 @@ module("SC.FixturesDataSource", {
 
 test("Verify find() loads all fixture data", function() {
 
-  SC.stopIt = YES ;
   var result = store.find(Sample.File),
       rec, storeKey, dataHash;
-  SC.stopIt = NO;
   
   ok(result, 'should return a result');
   equals(result.get('length'), Sample.File.FIXTURES.get('length'), 'should return records for each item in FIXTURES');

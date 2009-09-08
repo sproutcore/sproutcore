@@ -178,13 +178,10 @@ test("swapping storeIds array should change ManyArray and observers", function()
   
   // now swap storeKeys
   obj.cnt = 0 ;
-  SC.stopIt = YES ;
   arrayRec.writeAttribute('fooMany', storeIds2);
 
   SC.RunLoop.end();
   SC.RunLoop.begin();
-
-  SC.stopIt = NO ;
   
   // verify observer fired and record changed
   equals(obj.cnt, 1, 'observer should have fired after swap');
