@@ -174,9 +174,8 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     
     if(firstTime) {
       var classString = this._createClassNameString(classNames);
-      context.push('<div class="sc-outer-head"></div>');
       context.push('<div class="sc-inner ', classString, '" style="width: ', value, ';left: ', offset, '">');
-      context.push('<div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div><div class="sc-outer-tail"></div>');
+      context.push('<div class="sc-inner-head"></div><div class="sc-inner-tail"></div></div><div class="sc-outer-head"></div><div class="sc-outer-tail"></div>');
     }
     else {
       context.setClass(classNames);
