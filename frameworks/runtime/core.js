@@ -748,13 +748,14 @@ SC.mixin(Function.prototype,
       
     }}}
     
-    bq. *Why Use The Same Method for Getters and Setters?*  Most property-
-    based frameworks expect you to write two methods for each property but
-    SproutCore only uses one.  We do this because most of the time when
-    you write a setter is is basically a getter plus some extra work.  There 
-    is little added benefit in writing both methods when you can conditionally
-    exclude part of it.  This helps to keep your code more compact and easier
-    to maintain.
+    h2. Why Use The Same Method for Getters and Setters?
+    
+    Most property-based frameworks expect you to write two methods for each
+    property but SproutCore only uses one. We do this because most of the time
+    when you write a setter is is basically a getter plus some extra work.
+    There is little added benefit in writing both methods when you can
+    conditionally exclude part of it. This helps to keep your code more
+    compact and easier to maintain.
     
     @param dependentKeys {String...} optional set of dependent keys
     @returns {Function} the declared function instance
