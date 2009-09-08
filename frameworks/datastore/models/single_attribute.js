@@ -47,40 +47,39 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
   /**
     @private - implements support for handling inverse relationships.
   */
-  // call: function(record, key, newRec) {
-  //     var isWrite = (newRec === undefined),
-  //         inverseKey, isMaster, oldRec, attr, ret;
-  // 
-  //     // can only take other records
-  //     if (!SC.instanceOf(newRec, SC.Record)) {
-  //       throw "%@ is not an instance of SC.Record".fmt(newRec);
-  //     }
-  // 
-  //     // if we have an inverse relationship, save info for updates
-  //     if (isWrite && (inverseKey = this.get('inverse'))) {
-  //       oldRec = this._scsa_call(record, key); // read old value
-  //     }
-  //     
-  //     ret = sc_super(); // do normal read/write
-  // 
-  //     // ok, now if we have an inverse relationship, get the inverse 
-  //     // relationship and notify it of what is happening.  This will allow it
-  //     // to update itself as needed.  The callbacks implemented here are 
-  //     // supported by both SingleAttribute and ManyAttribute.
-  //     //
-  //     if (isWrite && inverseKey && (oldRec !== newRec)) {
-  // 
-  //       if (oldRec && (attr = oldRec[inverseKey])) {
-  //         attr.inverseDidRemoveRecord(oldRec, inverseKey, record, key);
-  //       }
-  //       
-  //       if (newRec && (attr = newRec[inverseKey])) {
-  //         attr.inverseDidAddRecord(newRec, inverseKey, record, key);
-  //       }
-  //     }
-  //     
-  //     return ret ;
-  //   },
+  call: function(record, key, newRec) {
+    var isWrite = (newRec !== undefined),
+        inverseKey, isMaster, oldRec, attr, ret;
+    
+    // can only take other records
+    if (newRec && !SC.kindOf(newRec, SC.Record)) {
+      throw "%@ is not an instance of SC.Record".fmt(newRec);
+    }
+    
+    // if we have an inverse relationship, save info for updates
+    if (isWrite && (inverseKey = this.get('inverse'))) {
+      oldRec = this._scsa_call(record, key); // read old value
+    }
+    
+    ret = this._scsa_call(record, key, newRec); // do normal read/write
+
+    // ok, now if we have an inverse relationship, get the inverse 
+    // relationship and notify it of what is happening.  This will allow it
+    // to update itself as needed.  The callbacks implemented here are 
+    // supported by both SingleAttribute and ManyAttribute.
+    //
+    if (isWrite && inverseKey && (oldRec !== newRec)) {
+      if (oldRec && (attr = oldRec[inverseKey])) {
+        attr.inverseDidRemoveRecord(oldRec, inverseKey, record, key);
+      }
+      
+      if (newRec && (attr = newRec[inverseKey])) {
+        attr.inverseDidAddRecord(newRec, inverseKey, record, key);
+      }
+    }
+    
+    return ret ;
+  },
   
   /** @private - save original call() impl */
   _scsa_call: SC.RecordAttribute.prototype.call,
@@ -91,13 +90,14 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     then it will update itself accordingly.
   */
   inverseDidRemoveRecord: function(record, key, inverseRecord, inverseKey) {
-    
+
     var myInverseKey  = this.get('inverse'),
         curRec   = this._scsa_call(record, key),
         isMaster = this.get('isMaster'), attr;
 
     // ok, you removed me, I'll remove you...  if isMaster, notify change.
     record.writeAttribute(key, null, !isMaster);
+    record.notifyPropertyChange(key);
 
     // if we have another value, notify them as well...
     if ((curRec !== inverseRecord) || (inverseKey !== myInverseKey)) {
@@ -121,7 +121,8 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
 
     // ok, replace myself with the new value...
     nvalue = this.fromType(record, key, inverseRecord); // convert to attr.
-    record.writeAttribute(key, null, !isMaster);
+    record.writeAttribute(key, nvalue, !isMaster);
+    record.notifyPropertyChange(key);
 
     // if we have another value, notify them as well...
     if ((curRec !== inverseRecord) || (inverseKey !== myInverseKey)) {
