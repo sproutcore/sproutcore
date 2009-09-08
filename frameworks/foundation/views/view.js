@@ -731,6 +731,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.prepareContext(context, NO) ;
     context.update() ;
     if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
+    if(this.designer && this.designer.viewDidUpdateLayer) this.designer.viewDidUpdateLayer(); //let the designer know
     return this ;
   },
   
