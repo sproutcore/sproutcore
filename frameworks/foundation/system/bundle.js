@@ -112,7 +112,9 @@ SC.mixin(/** @scope SC */ {
               
               // register ourself as a dependent bundle (used by 
               // SC.bundleDidLoad()...)
-              var dependents = targetInfo.dependents || [] ;
+              var dependents = targetInfo.dependents;
+              if(!dependents) targetInfo.dependents = dependents = [];
+
               dependents.push(bundleName) ;
               
               // recursively load targetName so it's own dependencies are
@@ -190,6 +192,7 @@ SC.mixin(/** @scope SC */ {
     // for each dependent bundle, try and load them again...
     var dependents = bundleInfo.dependents || [] ;
     for (var idx=0, len=dependents.length; idx<len; ++idx) {
+      console.log('dependents: ' + dependents[idx]);
       SC.loadBundle(dependents[idx]) ;
     }
   },
