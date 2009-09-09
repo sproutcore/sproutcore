@@ -68,6 +68,14 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   maximumBindingDefault: SC.Binding.single().notEmpty(),
 
   /**
+    The value of the progress inner offset range. Should be the same as width 
+    of image. Default it to 24
+
+    @type Integer
+  */
+  offsetRange: 24,
+
+  /**
     Optionally specify the key used to extract the maximum progress value 
     from the content object.  If this is set to null then the maximum value
     will not be derived from the content object.
@@ -90,6 +98,13 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   */
   isRunning: NO,
   isRunningBindingDefault: SC.Binding.bool(),
+
+  /** 
+    Set to the matrix used for background image position for animation.
+    [1st image y-location, offset, total number of images]
+    @property {Array}
+  */
+  animatedBackgroundMatrix: [],
   
   /**
     Optionally specify the key used to extract the isIndeterminate value 
@@ -111,6 +126,8 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   //
 
   _backgroundOffset: 0,
+  _currentBackground: 1,
+  _nextBackground: 1,
   
   // start animating at the end of the init() method.  note that we call this
   // here because we want this to make sure this function is called anytime 
@@ -142,8 +159,9 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     var isIndeterminate = this.get('isIndeterminate');
     var isRunning = this.get('isRunning');
     var isEnabled = this.get('isEnabled');
+    var offsetRange = this.get('offsetRange');
   
-    var offset = (isIndeterminate && isRunning) ? (-24+Math.floor(Date.now()/75)%24) : 0;
+    var offset = (isIndeterminate && isRunning) ? (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
   
     // compute value for setting the width of the inner progress
     var value;
@@ -180,6 +198,15 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     else {
       context.setClass(classNames);
       this.$('.sc-inner').css('width', value).css('left',offset);
+      if (this.get('animatedBackgroundMatrix').length === 3 ) {
+        this.$('.sc-inner').css('backgroundPosition', '0px -'+ 
+        (this.get('animatedBackgroundMatrix')[0] + 
+        this.get('animatedBackgroundMatrix')[1]*this._currentBackground)+'px');
+        if(this._currentBackground===this.get('animatedBackgroundMatrix')[2]-1
+           || this._currentBackground===0)
+          this._nextBackground *= -1;
+        this._currentBackground += this._nextBackground;
+      }
     }
     
   },
