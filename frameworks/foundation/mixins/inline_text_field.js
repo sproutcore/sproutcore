@@ -5,7 +5,6 @@
 
 
 require('views/text_field') ;
-require('protocols/inline_editor_delegate');
 
 /**
   @class
@@ -82,7 +81,7 @@ require('protocols/inline_editor_delegate');
   @extends SC.InlineEditorDelegate
   @since SproutCore 1.0
 */
-SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport, SC.InlineEditorDelegate,
+SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 /** @scope SC.InlineTextFieldView.prototype */ {
 
   /**
