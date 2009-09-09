@@ -25,6 +25,7 @@ SC.BOLD_WEIGHT = 'bold';
   
   @extends SC.View
   @extends SC.Control
+  @extends SC.InlineEditorDelegate
   @since SproutCore 1.0
 */
 SC.LabelView = SC.View.extend(SC.Control,
