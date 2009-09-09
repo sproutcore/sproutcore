@@ -412,12 +412,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     SC.Query.LOCAL.  You can call this method on any RecordArray however,
     without an error.
     
-    @param {Boolean} force force re-eval of query even if needsFlush is NO
-    @param {Boolean} forceOrder force re-eval of order
     @returns {SC.RecordArray} receiver
   */
-  flush: function(force, forceOrder) {
-    if (!this.get('needsFlush') && !force) return this; // nothing to do
+  flush: function() {
+    if (!this.get('needsFlush')) return this; // nothing to do
     this.set('needsFlush', NO); // avoid running again.
     
     // fast exit
@@ -426,10 +424,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!store || !query || query.get('location') !== SC.Query.LOCAL) {
       return this;
     }
-    
-    // if we are manually forcing a flush, then also re-parse the query in
-    // case any of the query properties changed
-    if(force) query.parse();
     
     // OK, actually generate some results
     var storeKeys = this.get('storeKeys'),
@@ -442,7 +436,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (storeKeys) {
       if (changed) {
         changed.forEach(function(storeKey) {
-
           // get record - do not include EMPTY or DESTROYED records
           status = store.peekStatus(storeKey);
           if (!(status & K.EMPTY) && !(status & K.DESTROYED)) {
@@ -454,19 +447,18 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
           if (included) {
             if (storeKeys.indexOf(storeKey)<0) {
               if (!didChange) storeKeys = storeKeys.copy(); 
-              storeKeys.pushObject(storeKey);
-              didChange = YES ;
+              storeKeys.pushObject(storeKey); 
             }
-          
           // if storeKey should NOT be in set but IS -- remove it
           } else {
             if (storeKeys.indexOf(storeKey)>=0) {
               if (!didChange) storeKeys = storeKeys.copy();
               storeKeys.removeObject(storeKey);
-              didChange = YES ;
             } // if (storeKeys.indexOf)
           } // if (included)
         }, this);
+        // make sure resort happens
+        didChange = YES ;
       } // if (changed)
     
     // if no storeKeys, then we have to go through all of the storeKeys 
@@ -503,9 +495,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (changed) changed.clear();
     
     // only resort and update if we did change
-    if (didChange || forceOrder) {
+    if (didChange) {
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
-      this.set('storeKeys', storeKeys); // replace content
+      this.set('storeKeys', SC.clone(storeKeys)); // replace content
     }
 
     return this;

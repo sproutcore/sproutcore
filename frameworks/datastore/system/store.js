@@ -1927,7 +1927,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // notify nested stores
     while(--loc >= 0) {
-      //nestedStores[loc]._scstore_dataSourceDidFetchQuery(query, NO);
+      nestedStores[loc]._scstore_dataSourceDidFetchQuery(query, NO);
     }
     
     return this ;
