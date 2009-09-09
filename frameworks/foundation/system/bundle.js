@@ -10,6 +10,16 @@
 */
 SC.mixin(/** @scope SC */ {
   
+  
+  /**
+    @property
+    @default NO
+    @type {Boolean}
+    
+    If YES, log bundle loading.
+  */
+  logBundleLoading: NO,
+  
   /**
     Returns YES is bundleName is loaded; NO if bundleName is not loaded or
     no information is available.
@@ -22,6 +32,11 @@ SC.mixin(/** @scope SC */ {
     return bundleInfo ? !!bundleInfo.loaded : NO ;
   },
   
+  /**
+    @private
+    
+    Execute callback function.
+  */
   _scb_bundleDidLoad: function(bundleName, target, method, args) {
     if(SC.typeOf(target) === SC.T_STRING) {
       target = SC.objectForPropertyPath(target);
@@ -48,9 +63,8 @@ SC.mixin(/** @scope SC */ {
   },
   
   /**
-    Dynamically load bundleName if not already loaded. Once loaded (or if
-    already loaded), invoke callback on target, passing bundleName as the 
-    first (and only) parameter.
+    Dynamically load bundleName if not already loaded. Call the target and 
+    method with any given arguments.
     
     @param bundleName {String}
     @param target {Function} 
@@ -66,9 +80,14 @@ SC.mixin(/** @scope SC */ {
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
     var args = SC.A(arguments).slice(3);
 
+    if(SC.logBundleLoading) console.log("SC.loadBundle(): Attempting to load '%@'".fmt(bundleName));
+
     if (!bundleInfo) {
       throw "SC.loadBundle(): could not find bundle '%@'".fmt(bundleName) ;
     } else if (bundleInfo.loaded) {
+
+      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' already loaded, skipping.".fmt(bundleName));
+
       if(method) {
         // call callback immediately if we're already loaded and SC.isReady
         if (SC.isReady) {
@@ -81,6 +100,8 @@ SC.mixin(/** @scope SC */ {
         }
       }
     } else {
+
+      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' is not loaded, loading now.".fmt(bundleName));
 
       // queue callback for later
       callbacks = bundleInfo.callbacks || [] ;
@@ -116,6 +137,8 @@ SC.mixin(/** @scope SC */ {
               if(!dependents) targetInfo.dependents = dependents = [];
 
               dependents.push(bundleName) ;
+
+              if(SC.logBundleLoading) console.log("SC.loadBundle(): '%@' depends on '%@', loading dependency…".fmt(bundleName, targetName));
               
               // recursively load targetName so it's own dependencies are
               // loaded first.
@@ -141,21 +164,49 @@ SC.mixin(/** @scope SC */ {
               head.appendChild(el) ;
             }
           }
+
+          // Push the URLs on the the queue and then start the loading.
+          var jsBundleLoadQueue = this._jsBundleLoadQueue;
+          if(!jsBundleLoadQueue) this._jsBundleLoadQueue = jsBundleLoadQueue = {};
+          var q = jsBundleLoadQueue[bundleName] = [], 
+              scripts = bundleInfo.scripts || [] ;
           
-          body = document.body, scripts = bundleInfo.scripts || [] ;
           for (idx=0, len=scripts.length; idx<len; ++idx) {
             url = scripts[idx] ;
             if (url.length > 0) {
-              el = document.createElement('script') ;
-              el.setAttribute('type', "text/javascript") ;
-              el.setAttribute('src', url) ;
-              body.appendChild(el) ;
+              q.push(url);
             }
           }
           
           // and remember that we're loading
           bundleInfo.loading = YES ;
+          
+          // Start the load process.
+          this.scriptDidLoad(bundleName);
         }
+      }
+    }
+  },
+
+  /**
+    Load the next script in the queue now that the caller of this function
+    is complete.
+    
+    @param {String} bundleName The name of the bundle.
+  */
+  scriptDidLoad: function(bundleName) {
+    var jsBundleLoadQueue = this._jsBundleLoadQueue;
+    if(jsBundleLoadQueue) {
+      var q = jsBundleLoadQueue[bundleName];
+      if(q) {
+        var url = q.shift();
+        
+        if(SC.logBundleLoading) console.log("SC.scriptDidLoad(): Loading next file in '%@' -> '%@'".fmt(bundleName, url));
+
+        var el = document.createElement('script') ;
+        el.setAttribute('type', "text/javascript") ;
+        el.setAttribute('src', url) ;
+        document.body.appendChild(el) ;
       }
     }
   },
@@ -192,7 +243,7 @@ SC.mixin(/** @scope SC */ {
     // for each dependent bundle, try and load them again...
     var dependents = bundleInfo.dependents || [] ;
     for (var idx=0, len=dependents.length; idx<len; ++idx) {
-      console.log('dependents: ' + dependents[idx]);
+      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' has completed loading, loading '%@' that depended on it.".fmt(bundleName, dependents[idx]));
       SC.loadBundle(dependents[idx]) ;
     }
   },
@@ -202,6 +253,8 @@ SC.mixin(/** @scope SC */ {
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks ;
     if (!bundleInfo) return ; // shouldn't happen, but recover anyway
     
+    if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' has completed loading, invoking callbacks.".fmt(bundleName));
+
     callbacks = bundleInfo.callbacks || [] ;
     
     SC.RunLoop.begin() ;
