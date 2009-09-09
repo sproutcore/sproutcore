@@ -194,6 +194,8 @@ SC.routes = SC.Object.create(
       SC.mixin(this,this.browserFuncs.safari) ;  
     } else if (SC.browser.isIE) {
       SC.mixin(this,this.browserFuncs.ie) ;  
+    } else if (SC.browser.isMozilla) {
+      SC.mixin(this,this.browserFuncs.firefox);
     }
     this._didSetupHistory = false ;
   },
@@ -334,6 +336,37 @@ SC.routes = SC.Object.create(
         }
         this.gotoRoute(loc) ;
       }
+    },
+    
+    // Firefox
+    // Because of bugs:
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=378962
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=483304
+    firefox: {
+      
+      _checkWindowLocation: function() {
+        var loc = this.get('location') ;
+        var cloc = location.hash ;
+        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
+        if (cloc != loc) {
+          SC.RunLoop.begin();
+          this.set('location',(cloc) ? cloc : '') ;
+          SC.RunLoop.end();
+        }
+
+        this.invokeCheckWindowLocation(150) ;
+      },
+      
+      _setWindowLocation: function(loc) {
+        //console.log('_setWindowLocation('+loc+')') ;
+        var cloc = location.hash ;
+        cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
+        if (cloc != loc) {
+          location.hash = (loc && loc.length > 0) ? loc : '#' ;
+        }
+        this.gotoRoute(loc) ;
+      }
+      
     }
   },
   
@@ -346,7 +379,7 @@ SC.routes = SC.Object.create(
   /** @private */
   _checkWindowLocation: function() {
     var loc = this.get('location') ;
-    var cloc = location.hash ;
+    var cloc = decodeURI(location.hash) ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
     if (cloc != loc) {
       SC.RunLoop.begin();
@@ -363,7 +396,7 @@ SC.routes = SC.Object.create(
     var cloc = location.hash ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
     if (cloc != loc) {
-      location.hash = (loc && loc.length > 0) ? loc : '#' ;
+      location.hash = (loc && loc.length > 0) ? encodeURI(loc) : '#' ;
     }
     this.gotoRoute(loc) ;
   },

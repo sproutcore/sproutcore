@@ -510,9 +510,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
       var element = this.$input();
       var layer = element[0];
-      var p = SC.viewportOffset(layer) ;
-      var top    = p.y,
-          left   = p.x,
+      var p = SC.$(layer).offset() ;
+      var top    = p.top,
+          left   = p.left,
           width  = layer.offsetWidth,
           height = layer.offsetHeight ;
 

@@ -153,6 +153,11 @@ SC.ManyArray = SC.Object.extend(SC.Enumerable, SC.Array,
       .enumerableContentDidChange()
     .endPropertyChanges();
   },
+  
+  unknownProperty: function(key, value) {
+    var ret = this.reducedProperty(key, value);
+    return ret === undefined ? sc_super() : ret;
+  },
 
   init: function() {
     sc_super();

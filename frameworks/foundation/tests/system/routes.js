@@ -3,31 +3,31 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
-var imgUrl,obj;
+var currentRoute;
+
+var handleRoute = function(url) {
+  currentRoute = url.url;
+};
+
 module("SC.routes", {
   
   setup: function() {
-    
-	url = sc_static("file_exists.json"); 
-    request = SC.Request.getUrl(url) ;
-		
-	obj = SC.Object.create({			
-		name:'Test SproutCore',
-		imageDidLoad:function(){
-		 this.name = 'SproutCore';
-		}
-	});
+    currentRoute = null;
+    SC.routes.add(':url', handleRoute);
   },
   
   teardown: function() {
-
+    SC.routes.set('location', '');
   }
   
 });
 
-// test("adding routes ", function() {
-//  SC.routes.add(':', obj, 'imageDidLoad');
-//  request.send() ;
-// });
-
-
+test("Routes with UTF-8 characters", function() {
+  SC.routes.set('location', 'éàçùß€');
+  equals(currentRoute, 'éàçùß€');
+  stop();
+  setTimeout(function() {
+    start();
+    equals(currentRoute, 'éàçùß€');
+  }, 1200);
+});
