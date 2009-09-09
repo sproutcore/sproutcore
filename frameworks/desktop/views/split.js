@@ -622,13 +622,18 @@ SC.SplitView = SC.View.extend(
     }
   },
   
-  /** @private */
+  /** 
+    This observes 'layoutDirection' to update the cursor style immediately
+    after the value of the layoutDirection of Split view is changed
+
+    @private 
+  */
   _setCursorStyle: function() {
     // console.log('%@._setCursorStyle()'.fmt(this));
     var topLeftView = this._topLeftView ;
     var bottomRightView = this._bottomRightView ;
     var thumbViewCursor = this.get('thumbViewCursor') ;
-    
+    this._layoutDirection = this.get('layoutDirection') ;
     // updates the cursor of the thumb view that called mouseDownInThumbView() to reflect the status of the drag
     var tlThickness = this.thicknessForView(topLeftView) ;
     var brThickness = this.thicknessForView(bottomRightView) ;
@@ -639,7 +644,7 @@ SC.SplitView = SC.View.extend(
     } else {
       thumbViewCursor.set('cursorStyle', this._layoutDirection == SC.LAYOUT_HORIZONTAL ? "ew-resize" : "ns-resize") ;
     }
-  },
+  }.observes('layoutDirection'),
   
   /**
     (DELEGATE) Control whether a view can be collapsed.
