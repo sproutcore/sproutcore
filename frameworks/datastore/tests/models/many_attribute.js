@@ -7,7 +7,7 @@
 
 // test core array-mapping methods for ManyArray with ManyAttribute
 var storeKeys, rec;
-var foo1, foo2, foo3, bar1, bar2;
+var foo1, foo2, foo3, bar1, bar2, bar3;
 
 module("SC.ManyAttribute core methods", {
   setup: function() {
@@ -37,7 +37,7 @@ module("SC.ManyAttribute core methods", {
       
       // test many-to-many relationships with inverse
       barToMany: SC.Record.toMany('MyApp.Bar', {
-        inverse: 'fooToMany', isMaster: YES
+        inverse: 'fooToMany', isMaster: YES, orderBy: 'name'
       }),
       
       // test many-to-one relationships with inverse
@@ -56,7 +56,7 @@ module("SC.ManyAttribute core methods", {
       
       // test many-to-one
       fooToOne: SC.Record.toOne('MyApp.Foo', {
-        inverse: 'fooToOne', isMaster: YES
+        inverse: 'barToOne', isMaster: YES
       })
     });
     
@@ -87,8 +87,9 @@ module("SC.ManyAttribute core methods", {
     ]);
     
     MyApp.store.loadRecords(MyApp.Bar, [
-      { guid: "bar1", fooToMany: [1,2], fooToOne: 1 },
-      { guid: "bar2", footoMany: [2,3], fooToOne: 1 }
+      { guid: "bar1", name: "A", fooToMany: [1,2], fooToOne: 1 },
+      { guid: "bar2", name: "Z", fooToMany: [2,3], fooToOne: 1 },
+      { guid: "bar3", name: "C" }
     ]);
     
     foo1 = rec = MyApp.store.find(MyApp.Foo, 1);
@@ -99,6 +100,7 @@ module("SC.ManyAttribute core methods", {
     
     bar1 = MyApp.store.find(MyApp.Bar, "bar1");
     bar2 = MyApp.store.find(MyApp.Bar, 'bar2');
+    bar3 = MyApp.store.find(MyApp.Bar, 'bar3');
     
     SC.RunLoop.end();
   },
@@ -245,7 +247,7 @@ test("should be able to modify an initially empty record", function() {
 
 
 // ..........................................................
-// WRITING INVERSE RELATIONSHIPS
+// MANY-TO-MANY RELATIONSHIPS
 // 
 
 function checkAllClean() {
@@ -269,6 +271,55 @@ test("removing a record from a many-to-many", function() {
   
 });
 
+test("removing a record from a many-to-many; other side", function() {
+  ok(foo1.get('barToMany').indexOf(bar1) >= 0, 'PRECOND - foo1.barToMany should contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo1) >= 0, 'PRECOND - bar1.fooToMany should contain foo1');
+  checkAllClean(foo1, bar1);
+  
+  bar1.get('fooToMany').removeObject(foo1);
+
+  ok(foo1.get('barToMany').indexOf(bar1) < 0, 'foo1.barToMany should NOT contain bar1');
+  ok(bar1.get('fooToMany').indexOf(foo1) < 0, 'bar1.fooToMany should NOT contain foo1');
+
+  equals(foo1.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+  
+});
+
+test("adding a record to a many-to-many; bar side", function() {
+  ok(foo2.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo1.barToMany should NOT contain bar1');
+  ok(bar3.get('fooToMany').indexOf(foo2) < 0, 'PRECOND - bar3.fooToMany should NOT contain foo1');
+  checkAllClean(foo2, bar3);
+  
+  bar3.get('fooToMany').pushObject(foo2);
+
+  // v-- since bar3 is added throught inverse, it should follow orderBy
+  equals(foo2.get('barToMany').indexOf(bar3), 1, 'foo1.barToMany should contain bar1');
+  ok(bar3.get('fooToMany').indexOf(foo2) >= 0, 'bar1.fooToMany should contain foo1');
+
+  equals(foo2.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar1.status should be READY_CLEAN');
+});
+
+
+test("adding a record to a many-to-many; foo side", function() {
+  ok(foo2.get('barToMany').indexOf(bar3) < 0, 'PRECOND - foo1.barToMany should NOT contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo2) < 0, 'PRECOND - bar3.fooToMany should NOT contain foo1');
+  checkAllClean(foo2, bar3);
+  
+  foo2.get('barToMany').pushObject(bar3);
+
+  ok(foo2.get('barToMany').indexOf(bar3) >= 0, 'foo1.barToMany should contain bar3');
+  ok(bar3.get('fooToMany').indexOf(foo2) >= 0, 'bar1.fooToMany should contain foo3');
+
+  equals(foo2.get('status'), SC.Record.READY_DIRTY, 'foo1.status should be READY_DIRTY');
+  equals(bar1.get('status'), SC.Record.READY_CLEAN, 'bar3.status should be READY_CLEAN');
+});
+
+// ..........................................................
+// ONE-TO-MANY RELATIONSHIPS
+// 
+
 test("removing a record from a one-to-many", function() {
   ok(foo1.get('barToOne').indexOf(bar1) >= 0, 'PRECOND - foo1.barToOne should contain bar1');
   equals(bar1.get('fooToOne'), foo1, 'PRECOND - bar1.fooToOne should eq foo1');
@@ -281,5 +332,53 @@ test("removing a record from a one-to-many", function() {
 
   equals(foo1.get('status'), SC.Record.READY_CLEAN, 'foo1.status should be READY_CLEAN');
   equals(bar1.get('status'), SC.Record.READY_DIRTY, 'bar1.status should be READY_DIRTY');
+  
+});
+
+
+test("removing a record from a one-to-many; other-side", function() {
+  ok(foo1.get('barToOne').indexOf(bar1) >= 0, 'PRECOND - foo1.barToOne should contain bar1');
+  equals(bar1.get('fooToOne'), foo1, 'PRECOND - bar1.fooToOne should eq foo1');
+  checkAllClean(foo1, bar1);
+  
+  bar1.set('fooToOne', null);
+
+  ok(foo1.get('barToOne').indexOf(bar1) < 0, 'foo1.barToOne should NOT contain bar1');
+  equals(bar1.get('fooToOne'), null, 'bar1.fooToOne should eq null');
+
+  equals(foo1.get('status'), SC.Record.READY_CLEAN, 'foo1.status should be READY_CLEAN');
+  equals(bar1.get('status'), SC.Record.READY_DIRTY, 'bar1.status should be READY_DIRTY');
+  
+});
+
+
+test("add a record to a one-to-many; many-side", function() {
+  ok(foo1.get('barToOne').indexOf(bar3) < 0, 'PRECOND - foo1.barToOne should NOT contain bar3');
+  equals(bar3.get('fooToOne'), null, 'PRECOND - bar3.fooToOne should eq null');
+  checkAllClean(foo1, bar1);
+  
+  foo1.get('barToOne').pushObject(bar3);
+
+  ok(foo1.get('barToOne').indexOf(bar3) >= 0, 'foo1.barToOne should contain bar3');
+  equals(bar3.get('fooToOne'), foo1, 'bar3.fooToOne should eq foo1');
+
+  equals(foo1.get('status'), SC.Record.READY_CLEAN, 'foo1.status should be READY_CLEAN');
+  equals(bar3.get('status'), SC.Record.READY_DIRTY, 'bar3.status should be READY_DIRTY');
+  
+});
+
+
+test("add a record to a one-to-many; one-side", function() {
+  ok(foo1.get('barToOne').indexOf(bar3) < 0, 'PRECOND - foo1.barToOne should NOT contain bar3');
+  equals(bar3.get('fooToOne'), null, 'PRECOND - bar3.fooToOne should eq null');
+  checkAllClean(foo1, bar1);
+  
+  bar3.set('fooToOne', foo1);
+
+  ok(foo1.get('barToOne').indexOf(bar3) >= 0, 'foo1.barToOne should contain bar3');
+  equals(bar3.get('fooToOne'), foo1, 'bar3.fooToOne should eq foo1');
+
+  equals(foo1.get('status'), SC.Record.READY_CLEAN, 'foo1.status should be READY_CLEAN');
+  equals(bar3.get('status'), SC.Record.READY_DIRTY, 'bar3.status should be READY_DIRTY');
   
 });

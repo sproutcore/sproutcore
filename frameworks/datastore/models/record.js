@@ -189,6 +189,7 @@ SC.Record = SC.Object.extend(
   */
   recordDidChange: function(key) {
     this.get('store').recordDidChange(null, null, this.get('storeKey'), key);
+    this.notifyPropertyChange('status');
     return this ;
   },
   
@@ -279,12 +280,6 @@ SC.Record = SC.Object.extend(
       SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
     }
 
-    // read the new status.  If it has changed, be sure to also notify 
-    // status change to clear cache.
-    if (store.peekStatus(storeKey) !== status) {
-      this.notifyPropertyChange('status');
-    }
-    
     return this ;  
   },
   

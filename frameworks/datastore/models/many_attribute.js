@@ -51,8 +51,21 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     this record.  You should use this property only if you have an inverse 
     property also set.  Only one of the inverse relationships should be marked
     as master so you can control which record should be committed.
+    
+    @property
+    @type {Boolean}
   */
   isMaster: YES,
+  
+  /**
+    If set and you have an inverse relationship, will be used to determine the
+    order of an object when it is added to an array.  You can pass a function
+    or an array of property keys.
+    
+    @property
+    @type {Function|Array}
+  */
+  orderBy: null,
   
   // ..........................................................
   // LOW-LEVEL METHODS
@@ -69,11 +82,10 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     // same object.  
     if (!ret) {
       ret = SC.ManyArray.create({ 
-        recordType:   type, 
-        record:       record, 
-        propertyName: key,
-        isEditable:   this.get('isEditable'),
-        owner:        this
+        recordType:    type, 
+        record:        record, 
+        propertyName:  key,
+        manyAttribute: this
       });
       
       record[arrayKey] = ret ; // save on record
@@ -98,6 +110,30 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     }
     
     return ret;
+  },
+  
+  /**
+    Called by an inverse relationship whenever the receiver is no longer part
+    of the relationship.  If this matches the inverse setting of the attribute
+    then it will update itself accordingly.
+  */
+  inverseDidRemoveRecord: function(record, key, inverseRecord, inverseKey) {
+    var manyArray = record.get(key);
+    if (manyArray) {
+      manyArray.removeInverseRecord(inverseRecord);
+    }
+  },
+  
+  /**
+    Called by an inverse relationship whenever the receiver is added to the 
+    inverse relationship.  This will set the value of this inverse record to 
+    the new record.
+  */
+  inverseDidAddRecord: function(record, key, inverseRecord, inverseKey) {
+    var manyArray = record.get(key);
+    if (manyArray) {
+      manyArray.addInverseRecord(inverseRecord);
+    }
   }
   
 });
