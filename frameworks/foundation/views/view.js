@@ -2409,6 +2409,122 @@ SC.View.mixin(/** @scope SC.View */ {
   },
   
   /**
+    Convert any layout to a Top, Left, Width, Height layout
+  */
+  convertLayoutToAnchoredLayout: function(layout, parentFrame){
+    var ret = {top: 0, left: 0, width: parentFrame.width, height: parentFrame.height};
+    
+    // X Conversion
+    // handle left aligned and left/right
+    if (!SC.none(layout.left)) {
+      ret.left = Math.floor(layout.left);
+      if (layout.width !== undefined) {
+        if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+        else ret.width = Math.floor(layout.width) ;
+      } else {
+        ret.width = parentFrame.width - ret.left - Math.floor(layout.right || 0);
+      }
+
+    // handle right aligned
+    } else if (!SC.none(layout.right)) {
+      
+      // if no width, calculate it from the parent frame
+      if (SC.none(layout.width)) {
+        ret.left = 0;
+        ret.width = parentFrame.width - Math.floor(layout.right || 0);
+      
+      // If has width, calculate the left anchor from the width and right and parent frame
+      } else {
+        if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+        else { 
+          ret.width = layout.width;
+          ret.left = parentFrame.width - (layout.width + layout.right); 
+        }
+      }
+
+    // handle centered
+    } else if (!SC.none(layout.centerX)) {
+      ret.width = Math.floor(layout.width || 0) ;
+      ret.left = Math.floor((parentFrame.width - ret.width)/2) + layout.centerX;
+    
+    // if width defined, assume left of zero
+    } else if (!SC.none(layout.width)) {
+      ret.left =  0;
+      if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+      else {
+        ret.width = Math.floor(layout.width);
+      }
+
+    // fallback, full width.
+    } else {
+      ret.left = 0;
+      ret.width = 0;
+    }
+
+    // handle min/max
+    if (layout.minWidth !== undefined) ret.minWidth = layout.minWidth ;
+    if (layout.maxWidth !== undefined) ret.maxWidth = layout.maxWidth ; 
+    
+    // Y Conversion
+    // handle left aligned and top/bottom
+    if (!SC.none(layout.top)) {
+      ret.top = Math.floor(layout.top);
+      if (layout.height !== undefined) {
+        if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+        else ret.height = Math.floor(layout.height) ;
+      } else {
+        ret.height = parentFrame.height - ret.top - Math.floor(layout.bottom || 0);
+      }
+
+    // handle bottom aligned
+    } else if (!SC.none(layout.bottom)) {
+      
+      // if no height, calculate it from the parent frame
+      if (SC.none(layout.height)) {
+        ret.top = 0;
+        ret.height = parentFrame.height - Math.floor(layout.bottom || 0);
+      
+      // If has height, calculate the top anchor from the height and bottom and parent frame
+      } else {
+        if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+        else { 
+          ret.height = layout.height;
+          ret.top = parentFrame.height - (layout.height + layout.bottom); 
+        }
+      }
+
+    // handle centered
+    } else if (!SC.none(layout.centerY)) {
+      ret.height = Math.floor(layout.height || 0) ;
+      ret.top = Math.floor((parentFrame.height - ret.height)/2) + layout.centerY;
+    
+    // if height defined, assume top of zero
+    } else if (!SC.none(layout.height)) {
+      ret.top =  0;
+      if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+      else ret.height = Math.floor(layout.height);
+
+    // fallback, full height.
+    } else {
+      ret.top = 0;
+      ret.height = 0;
+    }
+
+    // handle min/max
+    if (layout.minHeight !== undefined) ret.minHeight = layout.minHeight ;
+    if (layout.maxHeight !== undefined) ret.maxHeight = layout.maxHeight ;
+    
+    return ret;
+  },
+  
+  /**
+    For now can only convert Top/Left/Width/Height to a Custom Layout
+  */
+  convertLayoutToCustomLayout: function(layout, layoutParams, parentFrame){
+    // TODO: [EG] Create Top/Left/Width/Height to a Custom Layout conversion
+  },
+  
+  /**
     Helper applies the classNames to the prototype
   */
   classNames: function(sc) {
