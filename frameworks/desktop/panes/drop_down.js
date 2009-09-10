@@ -434,7 +434,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     // if there is no image element yet, create it and insert it just before
     // title.
     if (icon) {
-      var blank = '/my/sproutcore/foundation/en/current/blank.gif?1242434616';
+      var blank = sc_static('blank');
 
       if (iconBgColor) {
         image = '<img src="%@1" alt="" class="%@2" style="background-color: %@3;" />' ;
