@@ -6,16 +6,16 @@
 // ==========================================================================
 
 // test
-var SC = SC || {} ; 
+var SC = SC || {} ;
 
 // Note:  We won't use SC.T_* here because those constants might not yet be
 //        defined.
 SC._mapDisplayNamesUseHashForSeenTypes = ['object', 'number', 'boolean', 'array', 'string', 'function', 'class', 'undefined', 'error'];  // 'hash' causes problems
 
 
-SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {  
+SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
   if (!SC.browser.safari) return ;
-  
+
   // Lazily instantiate the hash of types we'll use a hash for the "have we
   // seen this before?" structure.  (Some types are not safe to put in a hash
   // in this manner, so we'll use the hash for its algorithmic advantage when
@@ -30,18 +30,18 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
     }
     SC._mapDisplayNamesUseHashForSeenTypesHash = typesHash ;
   }
-  
-  
+
+
   if (obj === undefined) obj = window ;
   if (level === undefined) level = 0 ;
   if (path === undefined) path = [] ;
   if (seenHash === undefined) seenHash = {} ;
   if (seenArray === undefined) seenArray = [] ;
-  
+
   if (level > 5) return ;
-  
+
   var useHash = !!SC._mapDisplayNamesUseHashForSeenTypesHash[SC.typeOf(obj)] ;
-  
+
   var hash;
   if (useHash) {
     hash = SC.hashFor(obj) ;
@@ -56,17 +56,17 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
   else {
     seenArray.push(obj) ;
   }
-  
+
   var loc = path.length, str, val, t;
   path[loc] = '';
-  
+
   for(var key in obj) {
     if (obj.hasOwnProperty && !obj.hasOwnProperty(key)) continue ;
     if (!isNaN(Number(key))) continue ; // skip array indexes
     if (key === "constructor") continue ;
     if (key === "superclass") continue ;
     if (key === "document") continue ;
-    
+
     val = obj[key];
     if (key === "SproutCore") key = "SC";
     t   = SC.typeOf(val);
@@ -76,24 +76,24 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
         str = path.join('.').replace('.prototype.', '#');
         val.displayName = str;
       }
-      
+
       // handle constructor-style
       if (val.prototype) {
         path.push("prototype");
         SC.mapDisplayNames(val.prototype, level+1, path, seenHash, seenArray);
         path.pop();
       }
-      
+
     } else if (t === SC.T_CLASS) {
       path[loc] = key ;
       SC.mapDisplayNames(val, level+1, path, seenHash, seenArray);
-      
+
     } else if ((key.indexOf('_')!==0) && (t===SC.T_OBJECT || t===SC.T_HASH)) {
       path[loc] = key ;
       SC.mapDisplayNames(val, level+1, path, seenHash, seenArray);
     }
   }
-  
-  path.pop(); 
+
+  path.pop();
 };
 
