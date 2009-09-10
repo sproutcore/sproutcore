@@ -8,15 +8,54 @@
 // test
 var SC = SC || {} ; 
 
-SC.mapDisplayNames = function(obj, level, path, seen) {
+// Note:  We won't use SC.T_* here because those constants might not yet be
+//        defined.
+SC._mapDisplayNamesUseHashForSeenTypes = ['object', 'number', 'boolean', 'array', 'string', 'function', 'class', 'undefined', 'error'];  // 'hash' causes problems
+
+
+SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {  
   if (!SC.browser.safari) return ;
-  if (obj === undefined) obj = window;
-  if (level === undefined) level = 0;
-  if (path === undefined) path = [];
-  if (seen === undefined) seen = [];
   
-  if (level > 5 || seen.indexOf(obj)>=0) return ; // nothing to do
-  seen.push(obj);
+  // Lazily instantiate the hash of types we'll use a hash for the "have we
+  // seen this before?" structure.  (Some types are not safe to put in a hash
+  // in this manner, so we'll use the hash for its algorithmic advantage when
+  // possible, but fall back to an array using indexOf() when necessary.)
+  if (!SC._mapDisplayNamesUseHashForSeenTypesHash) {
+    var types = SC._mapDisplayNamesUseHashForSeenTypes ;
+    var typesHash = {} ;
+    var len = types.length ;
+    for (var i = 0;  i < len;  ++i) {
+      var type = types[i] ;
+      typesHash[type] = true ;
+    }
+    SC._mapDisplayNamesUseHashForSeenTypesHash = typesHash ;
+  }
+  
+  
+  if (obj === undefined) obj = window ;
+  if (level === undefined) level = 0 ;
+  if (path === undefined) path = [] ;
+  if (seenHash === undefined) seenHash = {} ;
+  if (seenArray === undefined) seenArray = [] ;
+  
+  if (level > 5) return ;
+  
+  var useHash = !!SC._mapDisplayNamesUseHashForSeenTypesHash[SC.typeOf(obj)] ;
+  
+  var hash;
+  if (useHash) {
+    hash = SC.hashFor(obj) ;
+    if (seenHash[hash]) return ;
+  }
+  else {
+    if (seenArray.indexOf(obj) !== -1) return ;
+  }
+  if (useHash) {
+    seenHash[hash] = true ;
+  }
+  else {
+    seenArray.push(obj) ;
+  }
   
   var loc = path.length, str, val, t;
   path[loc] = '';
@@ -41,21 +80,20 @@ SC.mapDisplayNames = function(obj, level, path, seen) {
       // handle constructor-style
       if (val.prototype) {
         path.push("prototype");
-        SC.mapDisplayNames(val.prototype, level+1, path, seen);
+        SC.mapDisplayNames(val.prototype, level+1, path, seenHash, seenArray);
         path.pop();
       }
       
     } else if (t === SC.T_CLASS) {
       path[loc] = key ;
-      SC.mapDisplayNames(val, level+1, path, seen);
+      SC.mapDisplayNames(val, level+1, path, seenHash, seenArray);
       
     } else if ((key.indexOf('_')!==0) && (t===SC.T_OBJECT || t===SC.T_HASH)) {
       path[loc] = key ;
-      SC.mapDisplayNames(val, level+1, path, seen);
+      SC.mapDisplayNames(val, level+1, path, seenHash, seenArray);
     }
   }
   
   path.pop(); 
-  
 };
 
