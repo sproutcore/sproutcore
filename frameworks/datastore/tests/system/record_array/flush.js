@@ -78,9 +78,15 @@ test("calling storeDidChangeStoreKeys() with a matching recordType", function() 
   same(recs.get('storeKeys'), orig, 'storeKeys should not have changed yet');
   
   recs.flush();
+  
   orig.unshift(storeKey); // update - must be first b/c id.bar < id.foo
   equals(recs.get('needsFlush'), NO, 'should not need flush anymore');
-  same(recs.get('storeKeys'), orig, 'storeKeys should now be updated - rec1[%@] = %@, rec2[%@] = %@'.fmt(rec.get('id'), rec, store.materializeRecord(storeKey).get('id'), store.materializeRecord(storeKey)));
+  same(recs.get('storeKeys'), orig, 'storeKeys should now be updated - rec1[%@]{%@} = %@, rec2[%@]{%@} = %@'.fmt(
+    rec.get('id'), rec.get('storeKey'), rec, 
+    
+    store.materializeRecord(storeKey).get('id'), 
+    storeKey, 
+    store.materializeRecord(storeKey)));
     
 });
 

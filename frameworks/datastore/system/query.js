@@ -1129,7 +1129,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
-    if (storeKeys && query.get('orderBy')) {
+    if (storeKeys) {
       
       // Set tmp variable because we can't pass variables to sort function.
       // Do this instead of generating a temporary closure function for perf

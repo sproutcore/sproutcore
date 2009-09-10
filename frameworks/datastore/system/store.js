@@ -766,7 +766,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       return this._findQuery(recordType, YES, YES);
       
     // handle finding a single record
-    } else if(id) {
+    } else {
       return this._findRecord(recordType, id);
     }
   },
@@ -821,7 +821,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   
   _findRecord: function(recordType, id) {
 
-    var storeKey ;
+    var storeKey ; 
     
     // if a record instance is passed, simply use the storeKey.  This allows 
     // you to pass a record from a chained store to get the same record in the
@@ -831,9 +831,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
     // otherwise, lookup the storeKey for the passed id.  look in subclasses 
     // as well.
-    } else storeKey = recordType.storeKeyFor(id);
+    } else storeKey = id ? recordType.storeKeyFor(id) : null;
     
-    if (this.readStatus(storeKey) === SC.Record.EMPTY) {
+    if (storeKey && (this.readStatus(storeKey) === SC.Record.EMPTY)) {
       storeKey = this.retrieveRecord(recordType, id);
     }
     
