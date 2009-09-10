@@ -452,7 +452,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     var opts = {}, 
         keys = this.get('copyKeys'),
         loc  = keys ? keys.length : 0,
-        key, value;
+        key, value, ret;
         
     while(--loc >= 0) {
       key = keys[loc];
