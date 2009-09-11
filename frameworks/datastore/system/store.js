@@ -541,10 +541,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         rec = this.records[storeKey];
         keys = propertyForStoreKeys ? propertyForStoreKeys[storeKey] : null;
         
-        if (rec) rec.storeDidChangeProperties(status, keys);
-        
         // remove it so we don't trigger this twice
         records.remove(storeKey);
+        
+        if (rec) rec.storeDidChangeProperties(status, keys);
       }
       
       recordType = SC.Store.recordTypeFor(storeKey);
