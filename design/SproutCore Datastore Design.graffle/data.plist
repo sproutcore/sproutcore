@@ -62,7 +62,7 @@
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {2054.4, 1564.8}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -269,7 +269,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 				<integer>32</integer>
 			</dict>
 			<key>HPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 			<key>KeepToScale</key>
 			<true/>
 			<key>Layers</key>
@@ -315,7 +315,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 			<key>UniqueID</key>
 			<integer>1</integer>
 			<key>VPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>ActiveLayerIndex</key>
@@ -325,7 +325,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -485,7 +485,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -757,7 +757,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 		</dict>
 	</array>
 	<key>ModificationDate</key>
-	<string>2009-09-02 17:06:04 -0700</string>
+	<string>2009-09-11 12:16:30 -0700</string>
 	<key>Modifier</key>
 	<string>Charles Jolley</string>
 	<key>NotesVisible</key>
@@ -771,22 +771,17 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 		<key>NSBottomMargin</key>
 		<array>
 			<string>float</string>
-			<string>10.8</string>
+			<string>12.24</string>
 		</array>
 		<key>NSLeftMargin</key>
 		<array>
 			<string>float</string>
-			<string>10.8</string>
+			<string>11.94</string>
 		</array>
 		<key>NSOrientation</key>
 		<array>
 			<string>int</string>
 			<string>1</string>
-		</array>
-		<key>NSPaperName</key>
-		<array>
-			<string>string</string>
-			<string>Generic US Letter</string>
 		</array>
 		<key>NSPaperSize</key>
 		<array>
@@ -796,7 +791,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 		<key>NSRightMargin</key>
 		<array>
 			<string>float</string>
-			<string>10.8</string>
+			<string>12.06</string>
 		</array>
 		<key>NSScalingFactor</key>
 		<array>
@@ -806,7 +801,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 		<key>NSTopMargin</key>
 		<array>
 			<string>float</string>
-			<string>14.4</string>
+			<string>12.24</string>
 		</array>
 	</dict>
 	<key>ReadOnly</key>
@@ -826,7 +821,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -1066,7 +1061,7 @@ Modified &lt;%ModificationDate%&gt; \'96 Prepared by &lt;%Modifier%&gt;}</string
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -1310,7 +1305,7 @@ Add a copy of this page to separate sections in your design document.  The title
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -3936,7 +3931,7 @@ EMPTY}</string>
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -7047,7 +7042,7 @@ push_destroy/conflict()}</string>
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -9811,7 +9806,7 @@ push_destroy\
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -13468,7 +13463,7 @@ commit/ignore()\
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -13712,7 +13707,7 @@ Add a copy of this page to separate sections in your design document.  The title
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -16003,7 +15998,7 @@ did_change}</string>
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {1027.2, 782.4}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -16247,7 +16242,7 @@ Add a copy of this page to separate sections in your design document.  The title
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {2054.4, 1564.8}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -18362,7 +18357,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 				<integer>32</integer>
 			</dict>
 			<key>HPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 			<key>KeepToScale</key>
 			<true/>
 			<key>Layers</key>
@@ -18410,7 +18405,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 			<key>UniqueID</key>
 			<integer>14</integer>
 			<key>VPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>ActiveLayerIndex</key>
@@ -18425,7 +18420,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {2054.4, 1564.8}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -19337,7 +19332,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 				<integer>32</integer>
 			</dict>
 			<key>HPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 			<key>KeepToScale</key>
 			<true/>
 			<key>Layers</key>
@@ -19385,7 +19380,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 			<key>UniqueID</key>
 			<integer>16</integer>
 			<key>VPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 		<dict>
 			<key>ActiveLayerIndex</key>
@@ -19400,7 +19395,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 			<key>BackgroundGraphic</key>
 			<dict>
 				<key>Bounds</key>
-				<string>{{0, 0}, {2054.4, 1564.8}}</string>
+				<string>{{0, 0}, {1024, 783.36}}</string>
 				<key>Class</key>
 				<string>SolidGraphic</string>
 				<key>ID</key>
@@ -19437,7 +19432,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 				<integer>32</integer>
 			</dict>
 			<key>HPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 			<key>KeepToScale</key>
 			<true/>
 			<key>Layers</key>
@@ -19485,7 +19480,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 			<key>UniqueID</key>
 			<integer>4</integer>
 			<key>VPages</key>
-			<integer>2</integer>
+			<integer>1</integer>
 		</dict>
 	</array>
 	<key>SmartAlignmentGuidesActive</key>
@@ -19497,7 +19492,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 	<key>WindowInfo</key>
 	<dict>
 		<key>CurrentSheet</key>
-		<integer>7</integer>
+		<integer>5</integer>
 		<key>ExpandedCanvases</key>
 		<array>
 			<dict>
@@ -19506,7 +19501,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 			</dict>
 		</array>
 		<key>Frame</key>
-		<string>{{454, 232}, {1331, 1039}}</string>
+		<string>{{20, 0}, {1224, 778}}</string>
 		<key>ListView</key>
 		<false/>
 		<key>OutlineWidth</key>
@@ -19520,7 +19515,7 @@ The SC.RecordArray#status property reflects the underlying SC.Fetch status, as d
 		<key>SidebarWidth</key>
 		<integer>138</integer>
 		<key>VisibleRegion</key>
-		<string>{{-10, -8}, {1047.11, 800.889}}</string>
+		<string>{{58.6667, 228.444}, {939.556, 555.556}}</string>
 		<key>Zoom</key>
 		<real>1.5</real>
 		<key>ZoomValues</key>
