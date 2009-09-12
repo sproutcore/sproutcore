@@ -43,18 +43,22 @@ SC.mapDisplayNames = function(obj, level, path, seenHash, seenArray) {
   var useHash = !!SC._mapDisplayNamesUseHashForSeenTypesHash[SC.typeOf(obj)] ;
 
   var hash;
+  var arrayToCheck;
   if (useHash) {
     hash = SC.hashFor(obj) ;
-    if (seenHash[hash]) return ;
+    arrayToCheck = seenHash[hash];
   }
   else {
-    if (seenArray.indexOf(obj) !== -1) return ;
+    arrayToCheck = seenArray;
   }
-  if (useHash) {
-    seenHash[hash] = true ;
+  
+  if (arrayToCheck  &&  arrayToCheck.indexOf(obj) !== -1) return ;
+  
+  if (arrayToCheck) {
+    arrayToCheck.push(obj) ;
   }
-  else {
-    seenArray.push(obj) ;
+  else if (useHash) {
+    seenHash[hash] = [obj] ;
   }
 
   var loc = path.length, str, val, t;
