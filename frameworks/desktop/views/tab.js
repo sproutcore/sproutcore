@@ -111,14 +111,10 @@ SC.TabView = SC.View.extend(
       });
     }
     
-    view = this.containerView = this.createChildView(ContainerView, { 
-      rootElementPath: [0] 
-    }) ;
+    view = this.containerView = this.createChildView(ContainerView) ;
     childViews.push(view);
     
-    view = this.segmentedView = this.createChildView(this.segmentedView, { 
-      rootElementPath: [1] 
-    }) ;
+    view = this.segmentedView = this.createChildView(this.segmentedView) ;
     childViews.push(view);
     
     this.set('childViews', childViews);
