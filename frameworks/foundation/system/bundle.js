@@ -222,7 +222,7 @@ SC.mixin(/** @scope SC */ {
   bundleDidLoad: function(bundleName) {
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
     if (!bundleInfo) bundleInfo = SC.BUNDLE_INFO[bundleName] = {} ;
-    if (bundleInfo.loaded) {
+    if (bundleInfo.loaded && SC.logBundleLoading) {
       console.log("SC.bundleDidLoad() called more than once for bundle '%@'. Skipping.".fmt(bundleName));
       return ;
     }
