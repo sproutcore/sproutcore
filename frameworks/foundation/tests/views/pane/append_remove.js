@@ -31,6 +31,20 @@ test("adding to document for first time", function() {
   
 });
 
+test("adding a pane twice should have no effect", function() {
+  var cnt = 0;
+  var pane = SC.Pane.create();
+  pane._tmp_paneDidAttach = pane.paneDidAttach;
+  pane.paneDidAttach = function() {
+    cnt++;
+    return this._tmp_paneDidAttach.apply(this, arguments);
+  }
+  
+  pane.append();
+  pane.append();
+  equals(cnt, 1, 'should only append once');
+});
+
 test("readding pane", function() {
   var pane = SC.Pane.create();
   var elem1 = Q$('body').get(0), elem2 = Q$('#appendtest').get(0);

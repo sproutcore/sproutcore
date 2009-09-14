@@ -457,6 +457,11 @@ SC.Pane = SC.View.extend({
   appendTo: function(elem) {
     var layer = this.get('layer');
     if (!layer) layer =this.createLayer().get('layer'); 
+    
+    if (this.get('isPaneAttached') && (layer.parentNode === elem)) {
+      return this; // nothing to do
+    }
+    
     elem.insertBefore(layer, null); // add to DOM
     elem = layer = null ;
 
@@ -470,8 +475,15 @@ SC.Pane = SC.View.extend({
     @returns {SC.Pane} receiver
   */
   prependTo: function(elem) {
+    if (this.get('isPaneAttached')) return this;
+    
     var layer = this.get('layer');
     if (!layer) layer =this.createLayer().get('layer'); 
+    
+    if (this.get('isPaneAttached') && (layer.parentNode === elem)) {
+      return this; // nothing to do
+    }
+    
     elem.insertBefore(layer, elem.firstChild); // add to DOM
     elem = layer = null ;
 
@@ -485,10 +497,17 @@ SC.Pane = SC.View.extend({
     @returns {SC.Pane} receiver
   */
   before: function(elem) {
+    if (this.get('isPaneAttached')) return this;
+    
     var layer = this.get('layer');
     if (!layer) layer =this.createLayer().get('layer');
     
     var parent = elem.parentNode ; 
+
+    if (this.get('isPaneAttached') && (layer.parentNode === parent)) {
+      return this; // nothing to do
+    }
+    
     parent.insertBefore(layer, elem); // add to DOM
     parent = elem = layer = null ;
 
@@ -503,11 +522,17 @@ SC.Pane = SC.View.extend({
     @returns {SC.Pane} receiver
   */
   after: function(elem) {
+    
     var layer = this.get('layer');
     if (!layer) layer =this.createLayer().get('layer'); 
     
     var parent = elem.parentNode ;
-    elem.insertBefore(layer, elem.nextSibling); // add to DOM
+  
+    if (this.get('isPaneAttached') && (layer.parentNode === parent)) {
+      return this; // nothing to do
+    }
+    
+    parent.insertBefore(layer, elem.nextSibling); // add to DOM
     parent = elem = layer = null ;
 
     return this.paneDidAttach(); // do the rest of the setup
