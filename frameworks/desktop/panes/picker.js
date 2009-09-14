@@ -147,9 +147,9 @@ SC.PickerPane = SC.PalettePane.extend({
     this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
+    this.positionPane();
     this.endPropertyChanges();
     this.append();
-    this.positionPane();
   },
 
   /** @private
@@ -195,7 +195,7 @@ SC.PickerPane = SC.PalettePane.extend({
         origin.y += origin.height ;
       }
       origin = this.fitPositionToScreen(origin, this.get('frame'), anchor) ;
-      layout = { width: layout.width, height: layout.height, left: origin.x, top: origin.y };
+      layout = { width: origin.width, height: origin.height, left: origin.x, top: origin.y };
 
     // if no anchor view has been set for some reason, just center.
     } else {
@@ -298,7 +298,14 @@ SC.PickerPane = SC.PalettePane.extend({
     // min left/right padding to the window
     if( (f.x + f.width) > (w.width-20) ) f.x = w.width - f.width - 20;
     if( f.x < 7 ) f.x = 7;
-    return f ;    
+	
+	// if the height of the menu is bigger than the window height resize it.
+	  if( f.height > w.height){
+		  f.y = 15;
+		  f.height = w.height - 35;
+	  }
+	
+	  return f ;    
   },
 
   /** @private

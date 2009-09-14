@@ -624,9 +624,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         width  = (f) ? f.width : 0,  
         height = (f) ? f.height : 0,
         dim    = this.get('frame') ;
+        
+    // console.log(width+" "+ this._scroll_contentWidth+" "+ height+" "+ this._scroll_contentHeight);
+    // console.log("dims "+dim.width+" "+ dim.height);
     
     // cache out scroll settings...
-    if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
+    //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height ;
     
