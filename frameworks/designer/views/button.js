@@ -5,13 +5,17 @@
 // ========================================================================
 
 sc_require('views/designer');
-sc_require('views/mixins/button');
+sc_require('mixins/button');
 
 SC.ButtonView.Designer = SC.ViewDesigner.extend( SC.Button.Designer,
 /** @scope SC.ButtonView.Designer.prototype */ {
   
   encodeChildViews: NO,
   
-  designProperties: 'theme buttonBehavior href'.w()
+  designProperties: 'theme buttonBehavior href'.w(),
+  
+  canResizeVertical: NO,
+  
+  canResizeHorizontal: YES
   
 });

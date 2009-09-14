@@ -18,6 +18,10 @@
 */
 SC.PageDesignController = SC.Object.extend({
   
+  // ..........................................................
+  // SELECTION
+  // 
+  
   /** The current view builder selection. */
   selection: null,
   
@@ -29,9 +33,13 @@ SC.PageDesignController = SC.Object.extend({
     The passed selection must be a Designer object.
   */
   select: function(sel, extend) {
-    var base = (extend ? this.get('selection') : []) || [];
-    sel = base.concat(sel||[]).compact().uniq();
-    this.set('selection', sel) ;
+    var base = this.get('selection');
+    if (!base || !extend || !base.contains(sel)) {
+      base = (!extend || !base) ? SC.CoreSet.create() : base.copy();
+      base.add(sel);
+      this.set('selection', base.freeze()) ;
+    }
+    return this ;
   },
   
   /**
@@ -41,14 +49,13 @@ SC.PageDesignController = SC.Object.extend({
   */
   deselect: function(sel) {
     
-    // build new selection without passed elements
-    var newSel = [], cur = this.get('selection')||[];
-    if (!sel) sel = []; 
-    cur.forEach(function(s) {
-      if (sel.indexOf(s)<0) newSel.push(s)
-    },this);
-    
-    this.set('selection', newSel) ;
+    var base = this.get('selection');
+    if (base && base.contains(sel)) {
+      base = base.copy();
+      base.remove(sel);
+      this.set('selection', base.freeze());
+    }
+    return this;
   },
   
   /**
@@ -56,23 +63,41 @@ SC.PageDesignController = SC.Object.extend({
     on the old and new views.
   */
   selectionDidChange: function() {
-    // get new and old selection. step through both and update states
-    var sel = this.get('selection')||[], oldSel = this._selection||[];
-    var set = SC.Set.create(sel);
+    var sel = this.get('selection'),
+        oldSel = this._selection ;
 
     // save old selection for next time
     this._selection = sel ;
     
     // set the isSelected state on new selection.
-    sel.invoke('set', 'designIsSelected', YES);
+    if (sel) sel.setEach('designIsSelected', YES);
     
     // remove the isSelected state for old selection not in new selection.
-    oldSel.forEach(function(s){ 
-      if (!set.contains(s)) s.set('designIsSelected', NO);
-    }, this);
+    if (oldSel) {
+      oldSel.forEach(function(s){ 
+        if (!sel || !sel.contains(s)) s.set('designIsSelected', NO);
+      }, this);
+    }
     
   }.observes('selection'),
   
+  
+  /**
+    Called by a view to reposition the current selection during a mouse 
+    drag.
+  */
+  repositionSelection: function(evt, info) {
+    var sel = this.get('selection');
+    if (sel) sel.invoke('mouseReposition', evt, info);  
+  },
+  
+  /**
+    Called by a view to prepare all views in selection for repositioning
+  */
+  prepareReposition: function(info) {
+    var sel = this.get('selection');
+    if (sel) sel.invoke('prepareReposition', info);
+  },
   
   // ..........................................................
   // DESIGNERS
