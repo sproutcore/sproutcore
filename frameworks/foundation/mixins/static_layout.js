@@ -85,31 +85,6 @@ SC.StaticLayout = {
   },
   
   /**
-    Not available on views with static layout.  Calling this method will raise 
-    an exception.
-    
-    @function
-  */
-  convertFrameToView: null,
-
-  /**
-    Not available on views with static layout.  Calling this method will raise 
-    an exception.
-    
-    @function
-  */
-  convertFrameFromView: null,
-  
-  /**
-    Frame is not available on views with static layout.  This property will
-    always return null.
-    
-    @function
-  */
-  frame: null,
-  
-
-  /**
     clippingFrame is not available on views with static layout.  This 
     property will always return null.
     

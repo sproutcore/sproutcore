@@ -1598,6 +1598,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   convertFrameToView: function(frame, targetView) {
     var myX=0, myY=0, targetX=0, targetY=0, view = this, f ;
     
+    if (this.get('useStaticLayout')) {
+      throw "convertFrameToView is not available with static layout";
+    }
+    
     // walk up this side
     while (view) {
       f = view.get('frame'); myX += f.x; myY += f.y ;
@@ -1640,6 +1644,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   convertFrameFromView: function(frame, targetView) {
     var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f ;
     
+    if (this.get('useStaticLayout')) {
+      throw "convertFrameToView is not available with static layout";
+    }
+    
     // walk up this side
     while (view) {
       f = view.get('frame'); myX += f.x; myY += f.y ;
@@ -1670,7 +1678,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null) ;
-  }.property('layout').cacheable(),
+  }.property('layout', 'useStaticLayout').cacheable(),
   
   /**
     Computes what the frame of this view would be if the parent were resized
@@ -1707,6 +1715,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       console.error(error.toString())  ;
       throw error ;
     }
+    
+    if (stLayout) return null; // can't compute
     
     // handle left aligned and left/right 
     if (!SC.none(layout.left)) {
