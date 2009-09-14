@@ -44,6 +44,8 @@ SC.MODE_PREPEND = 'prepend';
 */
 SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   
+  SELF_CLOSING: SC.CoreSet.create().addEach('area base basefront br hr input img link meta'.w()),
+  
   /** 
     When you create a context you should pass either a tag name or an element
     that should be used as the basis for building the context.  If you pass
@@ -82,9 +84,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       while(c) { c.length++; c = c.prevObject; }
       
       this.strings.push(null);
-      if (this._tagName === 'script') this._selfClosing = NO; // special case
-      if (this._tagName === 'div') this._selfClosing = NO; //  illegal in html 4.01
-      if (this._tagName === 'select') this._selfClosing = NO; //  illegal in html 4.01
+      this._selfClosing = this.SELF_CLOSING.contains(this._tagName);
     } else {
       this._elem = tagNameOrElement ;
       this._needsTag = NO ;
