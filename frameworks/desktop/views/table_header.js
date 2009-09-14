@@ -99,13 +99,13 @@ SC.TableHeaderView = SC.View.extend({
   
   mouseDown: function(evt) {
     var tableView = this.get('tableView');    
-    return tableView ? this.mouseDownInTableHeaderView(evt, this) :
+    return tableView ? tableView.mouseDownInTableHeaderView(evt, this) :
      sc_super();
   },
   
   mouseUp: function(evt) {
     var tableView = this.get('tableView');
-    return tableView ? this.mouseUpInTableHeaderView(evt, this) :
+    return tableView ? tableView.mouseUpInTableHeaderView(evt, this) :
      sc_super();
   },
   

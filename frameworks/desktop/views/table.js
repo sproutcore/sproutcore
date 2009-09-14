@@ -115,7 +115,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     }
     
     // Exit drag mode (and cancel any scheduled drag modes).
-    this._scthv_exitDragMode();
+    // this._scthv_exitDragMode();
     this._dragging = false;
     if (this._mouseDownTimer) {
       this._mouseDownTimer.invalidate();
