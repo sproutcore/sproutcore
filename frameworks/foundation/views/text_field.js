@@ -115,12 +115,14 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   */
   selection: function(key, value) {
     var element = this.$input().get(0) ;
+    var range, start, end;
 
     // Are we being asked to set the value, or return the current value?
     if (value === undefined) {
       // The client is retrieving the value.
       if (element) {
-        var start = null, end = null ;
+        start = null;
+        end = null;
 
         if (!element.value) {
           start = end = 0 ;
@@ -140,7 +142,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
             if (selection) {
               var type = selection.type ;
               if (type  &&  (type === 'None'  ||  type === 'Text')) {
-                var range = selection.createRange() ;
+                range = selection.createRange() ;
 
                 if (!this.get('isTextArea')) {
                   // Input tag support.  Figure out the starting position by
@@ -194,8 +196,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
         // Support Internet Explorer.
         if (!setStart  ||  !setEnd) {
-         var range = element.createTextRange() ;
-         var start = value.get('start') ;
+         range = element.createTextRange() ;
+         start = value.get('start') ;
          range.move('character', start) ;
          range.moveEnd('character', value.get('end') - start) ;
          range.select() ;
@@ -336,13 +338,26 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
   },
 
+
+  /**
+    If isTextArea is changed (this might happen in inlineeditor constantly)
+    force the field render to render like the firsttime to avoid writing extra
+    code. This can be useful also 
+  */
+  _forceRenderFirstTime: NO,
+    
+  _renderFieldLikeFirstTime: function(){
+    this.set('forceRenderFirstTime', YES);
+  }.observes('isTextArea'),
+  
   _renderField: function(context, firstTime, value, leftAdjustment, rightAdjustment) {
     // TODO:  The cleanest thing might be to create a sub- rendering context
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
     var hint = this.get('hint') ;
     
-    if (firstTime) {
+    if (firstTime || this._forceRenderFirstTime) {
+      this._forceRenderFirstTime = NO;
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
       var name = SC.guidFor(this) ;
       
@@ -603,7 +618,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (evt.which === 27) return NO ;
 
     // handle tab key
-    if (evt.which === 9 && !this.get('isMultiline')) {
+    if (evt.which === 9 && !this.get('isTextArea')) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       view.becomeFirstResponder();
       return YES ; // handled

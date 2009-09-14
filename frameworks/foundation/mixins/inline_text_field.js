@@ -112,6 +112,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     this._originalValue = options.value || '' ;
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
+    if(this._multiline){
+      this.set('isTextArea', YES);
+    }else{
+    this.set('isTextArea', NO);
+    }
     this._commitOnBlur =  (options.commitOnBlur !== undefined) ? options.commitOnBlur : YES ;
 
     // set field values
@@ -294,7 +299,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   // [Safari] if you don't take key focus away from an element before you 
   // remove it from the DOM key events are no longer sent to the browser.
   willRemoveFromParent: function() {
-    this.$('input')[0].blur();
+    this.$input()[0].blur();
   },
   
   // ask owner to end editing.
@@ -303,7 +308,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     // should have been covered by willRemoveFromParent, but this was needed 
     // too.
-    this.$('input')[0].blur();
+    this.$input()[0].blur();
     return this.blurEditor() ;
   },
 
@@ -326,6 +331,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   // edit.
   insertNewline: function(evt) { 
     if (this._multiline) {
+      evt.allowDefault();
       return arguments.callee.base.call(this, evt) ;
     } else {
       // TODO : this is a work around. There is a bug where the 

@@ -98,6 +98,11 @@ SC.LabelView = SC.View.extend(SC.Control,
   textAlign: SC.ALIGN_LEFT,
   
   /**
+    If you want the inline editor to be multiline set this property to YES.
+  */
+  isInlineEditorMultiline: NO,
+  
+  /**
     [RO] The value that will actually be displayed.
     
     This property is dynamically computed by applying localization, 
@@ -192,7 +197,7 @@ SC.LabelView = SC.View.extend(SC.Control,
       delegate: this,
       exampleElement: el,
       value: value, 
-      multiline: NO, 
+      multiline: this.get('isInlineEditorMultiline'), 
       isCollection: NO,
       validator: this.get('validator'),
       exampleInlineTextFieldView: this.get('exampleInlineTextFieldView')
