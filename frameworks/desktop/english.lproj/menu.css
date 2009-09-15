@@ -1,0 +1,21 @@
+.sc-menu-scroller-view .down{
+
+  background: black;
+}
+
+.sc-menu-scroller-view.sc-horizontal {
+  overflow: hidden;
+}
+
+.sc-menu-scroller-view.sc-horizontal .sc-inner {
+  bottom: 0;
+}
+
+
+.sc-menu-scroller-view.sc-vertical {
+  overflow: hidden;
+}
+
+.sc-menu-scroller-view.sc-vertical .sc-inner {
+
+}

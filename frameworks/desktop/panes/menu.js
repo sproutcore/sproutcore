@@ -238,7 +238,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
   createChildViews: function() {
     var childViews = [] , scroll, items, cv, t;
-	  scroll = SC.ScrollView;
+	  scroll = SC.MenuScrollView;
     items = this.get('displayItems') ;
  	  this.generateMenuItems(items) ;
 	  cv = this.get('menuItemViews');
