@@ -293,21 +293,20 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   */
   loadFixturesFor: function(store, recordType, ret) {
     var hashes   = [],
-        isLoaded = this.fixturesLoadedFor(recordType),
         dataHashes, i, storeKey ;
     
     dataHashes = this.fixturesFor(recordType);
     
     for(i in dataHashes){
       storeKey = recordType.storeKeyFor(i);
-      hashes.push(dataHashes[i]);
+      if (store.peekStatus(storeKey) === SC.Record.EMPTY) {
+        hashes.push(dataHashes[i]);
+      }
       if (ret) ret.push(storeKey);
     }
-    
-    // before loading fixtures again, make sure they have not been
-    // loaded already, so that SC.Query does not end up in 
-    // infinite loop
-    if (!isLoaded) store.loadRecords(recordType, hashes);
+
+    // only load records that were not already loaded to avoid infinite loops
+    if (hashes && hashes.length>0) store.loadRecords(recordType, hashes);
     
     return this ;
   },
