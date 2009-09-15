@@ -27,6 +27,14 @@ sc_require('models/record');
   @since SproutCore 1.0
 */
 SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
+  
+  /**
+    An (optional) name of the store, which can be useful during debugging,
+    especially if you have multiple nested stores.
+    
+    @property {String}
+  */
+  name: null,
 
   /**
     An array of all the chained stores that current rely on the receiver 
@@ -1997,6 +2005,19 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   init: function() {
     sc_super();
     this.reset();
+  },
+  
+  
+  toString: function() {
+    // Include the name if the client has specified one.
+    var name = this.get('name');
+    if (!name) {
+      return sc_super();
+    }
+    else {
+      var ret = sc_super();
+      return "%@ (%@)".fmt(name, ret);
+    }
   },
 
 

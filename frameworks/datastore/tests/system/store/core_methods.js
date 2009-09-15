@@ -50,7 +50,7 @@ module("SC.Store Core Methods", {
     };
     
     SC.RunLoop.begin();
-    store = SC.Store.create().from(dataSource);
+    store = SC.Store.create({ name: 'Test store'} ).from(dataSource);
     for(var i in Application.Data) {
       store.loadRecords(Application[i], Application.Data[i]);
     }
@@ -59,6 +59,13 @@ module("SC.Store Core Methods", {
     // make sure RecordType by String can map
     window.Application = Application;
   }    
+});
+
+test("Verify that SC.Store's toString() includes the store's name, if it was specified", function() {
+  
+  var description = store.toString();
+  ok(description.indexOf('Test store') !== -1, 'should contain "Test store"');
+  
 });
 
 test("Verify loadRecords() loads data", function() {
