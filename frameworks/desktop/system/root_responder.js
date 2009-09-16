@@ -565,10 +565,10 @@ SC.RootResponder = SC.RootResponder.extend(
   _lastHovered: null,
   
   /**
-   This will send mouseOver, mouseOut, and mouseMoved to the views you
-   hover over.  To receive these events, you must implement the method.
-   If any subviews implement them and return true, then you won't receive
-   any notices.
+   This will send mouseEntered, mouseExited, mousedDragged and mouseMoved 
+   to the views you hover over.  To receive these events, you must implement 
+   the method. If any subviews implement them and return true, then you won't 
+   receive any notices.
    
    If there is a target mouseDown view, then mouse moved events will also
    trigger calls to mouseDragged.

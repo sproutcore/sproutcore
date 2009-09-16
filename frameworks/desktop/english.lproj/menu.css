@@ -1,4 +1,4 @@
-.sc-menu-scroller-view .down{
+.sc-menu-scroller-view {
 
   background: black;
 }
@@ -13,7 +13,8 @@
 
 
 .sc-menu-scroller-view.sc-vertical {
-  overflow: hidden;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
 }
 
 .sc-menu-scroller-view.sc-vertical .sc-inner {
