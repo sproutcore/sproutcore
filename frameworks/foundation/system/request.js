@@ -343,20 +343,18 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
   
   didSucceed: function(request) {
     var status = null ;
-    try {
-        status = request.status || 0;
-    } catch (e) {}
+    status = request.status || 0;
     return !status || (status >= 200 && status < 300) ;      
   },
   
   finishRequest: function(request) {
     
     var readyState = request.readyState ;
-    var didSucceed = !request ? NO : this.didSucceed(request) ;
     
     if (readyState == 4) {
       request._complete = YES ;
-      
+
+      var didSucceed = !request ? NO : this.didSucceed(request) ;      
       if (didSucceed) {
         var response = request ;
         request.source.set('rawResponse', response) ; 
