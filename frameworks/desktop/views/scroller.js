@@ -40,7 +40,9 @@ SC.ScrollerView = SC.View.extend({
     if (val !== undefined) {
       // Don't enforce the maximum now, because the scroll view could change
       // height and we want our content to stay put when it does.
-      this._value = val ;
+      if (val > 0) {
+        this._value = val ;
+      }
     } else {
       var value = this._value || 0 ; // default value is at top/left
       return Math.min(value, this.get('maximum')) ;
