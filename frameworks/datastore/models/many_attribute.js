@@ -76,6 +76,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     var type      = this.get('typeClass'),
         arrayKey  = SC.keyFor('__manyArray__', SC.guidFor(this)),
         ret       = record[arrayKey],
+        attrKey   = this.get('key') || key,
         rel;
       
     // lazily create a ManyArray one time.  after that always return the 
@@ -84,7 +85,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
       ret = SC.ManyArray.create({ 
         recordType:    type, 
         record:        record, 
-        propertyName:  key,
+        propertyName:  attrKey,
         manyAttribute: this
       });
       
