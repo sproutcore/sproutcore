@@ -6,7 +6,19 @@
 // ==========================================================================
 
 sc_require('views/scroll');
-sc_require('mixins/border');
+
+/** @class
+
+  Implements a complete scroller view for menus.  This class implements the
+  arrows displayed in a menu to scroll.
+  
+  The main difference with SC.ScrollerView is that there is only vertical 
+  scrollers. Value Syncing between SC.MenuScrollView and SC.MenuScrollerView
+  is done using valueBinding.
+  
+  @extends SC.ScrollerView
+  @since SproutCore 1.0
+*/
 
 SC.MenuScrollerView = SC.ScrollerView.extend({
   classNames: ['sc-menu-scroller-view'],
@@ -14,11 +26,6 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   // ..........................................................
   // PROPERTIES
   // 
-  
-  /**
-   Used by the SC.ScrollView to properly layout the scrollers.
-  */
-  scrollerThickness: SC.NATURAL_SCROLLER_THICKNESS,
   
   /**
    Used to set the scrolling direction of the scroller.
@@ -70,91 +77,49 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
   
+  /** 
+     Amount to scroll one vertical line.
+     Defaults to 20px.
+  */
+  verticalLineScroll: 20,
+  
   /**
-    Returns the owner view property the scroller should modify.  If this 
-    property is non-null and the owner view defines this property, then the 
-    scroller will automatically update this property whenever its own value 
-    changes.
-    
-    The default value of this property is computed based on the 
-    layoutDirection.  You can override this property to provide your own 
-    calculation if necessary or to return null if you want to disable this 
-    behavior.
+    This function overrides the default function in SC.Scroller as 
+    menus only have vertical scrolling.
     
     @property {String}
   */
   ownerScrollValueKey: function() {
-    var key = null ;
-    switch(this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        key = 'verticalScrollOffset' ;
-        break ;
-      case SC.LAYOUT_HORIZONTAL:
-        key = 'horizontalScrollOffset' ;
-        break ;
-      default:
-        key = null ;
-    }
-    return key ;  
+    return 'verticalScrollOffset' ;  
   }.property('layoutDirection').cacheable(),
   
   // ..........................................................
   // INTERNAL SUPPORT
   // 
   
-  displayProperties: 'maximum isEnabled layoutDirection'.w(),
-  
-  /** @private
-    Update the scroll location or inner height/width if needed.
-  */
   render: function(context, firstTime) {
-    var max = this.get('maximum') ;
-    
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        context.addClass('sc-vertical') ;
-        if (firstTime) {
-          if(this.get('scrollDown')){
-            context.push('<span class="arrowDown">&nbsp;</span>') ;
-          }else{
-            context.push('<span class="arrowUp">&nbsp;</span>') ;
-          }
-        } 
-        //           // this.$('div')[0].style.height = max + "px";
-        //         }
-        break ;
-      case SC.LAYOUT_HORIZONTAL:
-        context.addClass('sc-horizontal') ;
-        // if (firstTime) {  
-        //           context.push('<div class="left">&nbsp;</div>') ;
-        //         } else {
-        //           // this.$('div')[0].style.width = max + "px";
-        //         }
-        break ;
-      default:
-        throw "You must set a layoutDirection for your scroller class." ;
-    }
-    
+    context.addClass('sc-vertical') ;
+    if (firstTime) {
+      if(this.get('scrollDown')){
+        context.push('<span class="arrowDown">&nbsp;</span>') ;
+      }else{
+        context.push('<span class="arrowUp">&nbsp;</span>') ;
+      }
+    } 
     context.setClass('disabled', !this.get('isEnabled')) ;
   },
   
   didCreateLayer: function() {
-    var callback = this._sc_scroller_scrollDidChange ;
+    var callback, amt, layer;
+    
+    callback = this._sc_scroller_scrollDidChange ;
     SC.Event.add(this.$(), 'scroll', this, callback) ;
     
     // set scrollOffset first time
-    var amt = this.get('value') ;
-    var layer = this.get('layer') ;
+    amt = this.get('value') ;
+    layer = this.get('layer') ;
     
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        layer.scrollTop = amt ;
-        break;
-        
-      case SC.LAYOUT_HORIZONTAL:
-        layer.scrollLeft = amt ;
-        break;
-    }
+    layer.scrollTop = amt ;
   },
   
   willDestroyLayer: function() {
@@ -162,6 +127,27 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     SC.Event.remove(this.$(), 'scroll', this, callback) ;
   },
   
+  mouseEntered: function(evt) {
+    this.set('isMouseOver', YES);
+    this._invokeScrollOnMouseOver();
+  },
+  
+  mouseExited: function(evt) {
+    this.set('isMouseOver', NO);
+  },
+  
+  /** @private */
+  
+  /**
+    This function overrides the default function in SC.Scroller. 
+    SC.MenuScroller and SC.MenuScroll use valueBinding so this function is
+    not neccesary.
+  */
+  _sc_scroller_valueDidChange: function() {
+    
+  }.observes('value'),
+  
+
   // after 50msec, fire event again
   _sc_scroller_armScrollTimer: function() {
     if (!this._sc_scrollTimer) {
@@ -173,7 +159,11 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   },
   
   _sc_scroller_scrollDidChange: function() {
-    var now = Date.now(), last = this._sc_lastScroll ;
+    var now = Date.now(), 
+        last = this._sc_lastScroll, 
+        layer = this.get('layer'), 
+        scroll = 0 ;
+    
     if (last && (now-last)<50) return this._sc_scroller_armScrollTimer() ;
     this._sc_scrollTimer = null ;
     this._sc_lastScroll = now ;
@@ -182,53 +172,43 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     
     if (!this.get('isEnabled')) return ; // nothing to do.
     
-    var layer = this.get('layer'), scroll = 0 ;
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        this._sc_scrollValue = scroll = layer.scrollTop ;
-        break ;
-        
-      case SC.LAYOUT_HORIZONTAL:
-        this._sc_scrollValue = scroll = layer.scrollLeft ;
-        break ;
-    }
+    this._sc_scrollValue = scroll = layer.scrollTop ;
     this.set('value', scroll) ; // will now enforce minimum and maximum
     
     SC.RunLoop.end();
   },
   
-  /** @private */
-  _sc_scroller_valueDidChange: function() {
-    
-  }.observes('value'),
   
-
-  mouseEntered: function(evt) {
-    this.set('isMouseOver', YES);
-    this._invokeScrollOnMouseOver();
-  },
-  mouseExited: function(evt) {
-    this.set('isMouseOver', NO);
-  },
-  scrollMenu: function(){
-    var val = this.get('value');
+  /**
+    Scroll the menu if it is is an up or down arrow. This is called by
+    the function that simulates mouseOver.
+  */
+  _scrollMenu: function(){
+    var val = this.get('value'), newval;
     if(this.get('scrollDown')) {
-      if(val+20<=this.get('maximum')){
-        this.set('value', val+20);
+      newval = val+this.verticalLineScroll;
+      if(newval<=this.get('maximum')){
+        this.set('value', newval);
       }
     }
     else {
-      if(val-20>=0){
-        this.set('value', val-20);
-      }else if(val<=20 && val>0){
+      newval = val-this.verticalLineScroll;
+      if(newval>=0){
+        this.set('value', newval);
+      }else if(val<=this.verticalLineScroll && val>0){
         this.set('value', 0);
       }
     }
     return YES;
   },
   
+  /**
+    We use this function to simulate mouseOver. It checks for the flag 
+    isMouseOver which is turned on when mouseEntered is called and turned off
+    when mouseExited is called. 
+  */
   _invokeScrollOnMouseOver: function(){
-    this.scrollMenu();
+    this._scrollMenu();
     if(this.get('isMouseOver')){
       this.invokeLater(this._invokeScrollOnMouseOver, 50);
     }
@@ -238,8 +218,14 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
 
 /** @class
 
+  Implements a scroll view for menus.  This class extends SC.ScrollView for 
+  menus. 
   
-  @extends SC.View
+  The main difference with SC.ScrollView is that there is only vertical 
+  scrolling. Value Syncing between SC.MenuScrollView and SC.MenuScrollerView
+  is done using valueBinding.
+  
+  @extends SC.ScrollView
   @since SproutCore 1.0
 */
 SC.MenuScrollView = SC.ScrollView.extend({
@@ -250,22 +236,6 @@ SC.MenuScrollView = SC.ScrollView.extend({
   // PROPERTIES
   // 
   
-  // isScrollable: YES,
-  
-  /** 
-    The content view you want the scroll view to manage. This will be assigned to the contentView of the clipView also.
-  */
-  // contentView: null,
-
-  /**
-    The current horizontal scroll offset. Changing this value will update both the contentView and the horizontal scroller, if there is one.
-  */
-  // horizontalScrollOffset: 0,
-  
-  /**
-    The current vertical scroll offset.  Changing this value will update both the contentView and the vertical scroller, if there is one.
-  */
-  // verticalScrollOffset: 0,
   
   /**
     The maximum horizontal scroll offset allowed given the current contentView 
@@ -274,65 +244,10 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     @property {Number}
   */
-  // maximumHorizontalScrollOffset: function() {
-  //    if (!this.get('canScrollHorizontal')) return 0 ;
-  //    var view = this.get('contentView') ;
-  //    var contentWidth = view ? view.get('frame').width : 0 ;
-  //    var containerWidth = this.get('containerView').get('frame').width ;
-  //    return Math.max(0, contentWidth-containerWidth) ;
-  //  }.property(),
-  
-  /**
-    The maximum vertical scroll offset allowed given the current contentView 
-    size and the size of the scroll view.  If vertical scrolling is disabled,
-    this will always return 0.
+  maximumHorizontalScrollOffset: function() {
+  }.property(),
     
-    @property {Number}
-  */  // 
-    // maximumVerticalScrollOffset: function() {
-    //   if (!this.get('canScrollVertical')) return 0 ;
-    //   var view = this.get('contentView') ;
-    //   var contentHeight = view ? view.get('frame').height : 0 ;
-    //   var containerHeight = this.get('containerView').get('frame').height ;
-    //   return Math.max(0, contentHeight-containerHeight) ;
-    // }.property(),
-  
-  /** 
-    Amount to scroll one vertical line.
-  
-    Used by the default implementation of scrollDownLine() and scrollUpLine().  
-    Defaults to 20px.
-  */
-  // verticalLineScroll: 20,
-  
-  /**
-    Amount to scroll one horizontal line.
-  
-    Used by the default implementation of scrollLeftLine() and 
-    scrollRightLine(). Defaults to 20px.
-  */
-  // horizontalLineScroll: 20,
-  
-  /**
-    Amount to scroll one vertical page.
-    
-    Used by the default implementation of scrollUpPage() and scrollDownPage(). 
-    Defaults to current frame height.
-  */
-  // verticalPageScroll: function() {
-  //     return this.get('frame').height ;
-  //   }.property('frame'),
-  
-  /**
-    Amount to scroll one horizontal page.
-    
-    Used by the default implementation of scrollLeftPage() and 
-    scrollRightPage().  Defaults to current innerFrame width.
-  */
-  // horizontalPageScroll: function() {
-  //     return this.get('frame').width ;  
-  //   }.property('frame'),
-  //     
+       
   // ..........................................................
   // SCROLLERS
   // 
@@ -343,7 +258,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     @property {Boolean}
   */
-  // hasHorizontalScroller: YES,
+  hasHorizontalScroller: NO,
   
   /**
     The horizontal scroller view class. This will be replaced with a view 
@@ -371,12 +286,10 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     @property {Boolean}
   */
-  // canScrollHorizontal: function() {
-  //     return !!(this.get('hasHorizontalScroller') && 
-  //       this.get('horizontalScrollerView') && 
-  //       this.get('isHorizontalScrollerVisible')) ;
-  //   }.property('isHorizontalScrollerVisible').cacheable(),
-  //   
+  canScrollHorizontal: function() {
+    return false; 
+  }.property('isHorizontalScrollerVisible').cacheable(),
+   
   /**
     If YES, the horizontal scroller will autohide if the contentView is
     smaller than the visible area.  You must set hasHorizontalScroller to YES 
@@ -402,24 +315,16 @@ SC.MenuScrollView = SC.ScrollView.extend({
   verticalScrollerView2: SC.MenuScrollerView,
   
   /**
-    YES if the vertical scroller should be visible.  You can change this 
-    property value anytime to show or hide the vertical scroller.  If you do 
-    not want to use a vertical scroller at all, you should instead set 
-    hasVerticalScroller to NO to avoid creating a scroller view in the first 
-    place.
+    YES if the vertical scroller should be visible.  For SC.MenuScroll the
+    vertical scroller is always there we just hide the arrows to scroll.
     
     @property {Boolean}
   */
   isVerticalScrollerVisible: YES,
 
-  /**
-    Returns YES if the view both has a horizontal scroller, the scroller is
-    visible.
-    
-    @property {Boolean}
-  */
+  
   canScrollVertical: function() {
-    return false;
+    return YES;
   }.property('isVerticalScrollerVisible').cacheable(),
 
   /**
@@ -453,211 +358,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
   // ..........................................................
   // METHODS
   // 
-  
-  /**
-    Scrolls the receiver to the specified x,y coordinate.  This should be the
-    offset into the contentView you want to appear at the top-left corner of
-    the scroll view.
-    
-    This method will contrain the actual scroll based on whether the view
-    can scroll in the named direction and the maximum distance it can
-    scroll.
-    
-    If you only want to scroll in one direction, pass null for the other 
-    direction.  You can also optionally pass a Hash for the first parameter 
-    with x and y coordinates.
-    
-    @param x {Number} the x scroll location
-    @param y {Number} the y scroll location
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollTo: function(x,y) {
-  //   // normalize params
-  //   if (y===undefined && SC.typeOf(x) === SC.T_HASH) {
-  //     y = x.y; x = x.x;
-  //   }
-  //   
-  //   if (!SC.none(x)) {
-  //     x = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), x)) ;
-  //     this.set('horizontalScrollOffset', x) ;
-  //   }
-  //   
-  //   if (!SC.none(y)) {
-  //     y = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), y)) ;
-  //     this.set('verticalScrollOffset', y) ;
-  //   }
-  //   
-  //   return this ;
-  // },
-  
-  /**
-    Scrolls the receiver in the horizontal and vertical directions by the 
-    amount specified, if allowed.  The actual scroll amount will be 
-    constrained by the current scroll view settings.
-    
-    If you only want to scroll in one direction, pass null or 0 for the other 
-    direction.  You can also optionally pass a Hash for the first parameter 
-    with x and y coordinates.
-    
-    @param x {Number} change in the x direction (or hash)
-    @param y {Number} change in the y direction
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollBy: function(x , y) {
-  //   // normalize params
-  //   if (y===undefined && SC.typeOf(x) === SC.T_HASH) {
-  //     y = x.y; x = x.x;
-  //   }
-  //   
-  //   // if null, undefined, or 0, pass null; otherwise just add current offset
-  //   x = (x) ? this.get('horizontalScrollOffset')+x : null ;
-  //   y = (y) ? this.get('verticalScrollOffset')+y : null ;
-  //   return this.scrollTo(x,y) ;
-  // },
-  
-  /**
-    Scroll the view to make the view's frame visible.  For this to make sense,
-    the view should be a subview of the contentView.  Otherwise the results
-    will be undefined.
-    
-    @param {SC.ScrollView} receiver
-  */
-  // scrollToVisible: function(view) {
-  //   var contentView = this.get('contentView') ;
-  //   if (!contentView) return this; // nothing to do if no contentView.
-  //   
-  //   // get the viewportOffset for the view layer the convert that.  this will
-  //   // work even  with views using static layout.
-  //   var layer = view.get('layer'), vf ;
-  //   if(!layer) return this ; // nothing to do
-  //   vf =  SC.viewportOffset(layer) ;
-  //   vf.width = layer.offsetWidth ;
-  //   vf.height = layer.offsetHeight ;
-  //   
-  //   // convert view's frame to an offset from the contentView origin.  This
-  //   // will become the new scroll offset after some adjustment.
-  //   vf = contentView.convertFrameFromView(vf, null) ;
-  //   
-  //   // find current visible frame.
-  //   var vo = SC.cloneRect(this.get('containerView').get('frame')) ;
-  //   vo.x = this.get('horizontalScrollOffset') ;
-  //   vo.y = this.get('verticalScrollOffset') ;
-  //   
-  //   // if top edge is not visible, shift origin
-  //   vo.y -= Math.max(0, SC.minY(vo) - SC.minY(vf)) ;
-  //   vo.x -= Math.max(0, SC.minX(vo) - SC.minX(vf)) ;
-  //   
-  //   // if bottom edge is not visible, shift origin
-  //   vo.y += Math.max(0, SC.maxY(vf) - SC.maxY(vo)) ;
-  //   vo.x += Math.max(0, SC.maxX(vf) - SC.maxX(vo)) ;
-  //   
-  //   // scroll to that origin.
-  //   return this.scrollTo(vo.x, vo.y) ;
-  // },
-  
-  /**
-    Scrolls the receiver down one or more lines if allowed.  If number of
-    lines is not specified, scrolls one line.
-    
-    @param lines {Number} options number of lines
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollDownLine: function(lines) {
-  //   if (lines === undefined) lines = 1 ;
-  //   return this.scrollBy(null, this.get('verticalLineScroll')*lines) ;
-  // },
-  
-  /**
-    Scrolls the receiver up one or more lines if allowed.  If number of
-    lines is not specified, scrolls one line.
-    
-    @param lines {Number} options number of lines
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollUpLine: function(lines) {
-  //   if (lines === undefined) lines = 1 ;
-  //   return this.scrollBy(null, 0-this.get('verticalLineScroll')*lines) ;
-  // },
-  
-  /**
-    Scrolls the receiver right one or more lines if allowed.  If number of
-    lines is not specified, scrolls one line.
-    
-    @param lines {Number} options number of lines
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollRightLine: function(lines) {
-  //   if (lines === undefined) lines = 1 ;
-  //   return this.scrollTo(this.get('horizontalLineScroll')*lines, null) ;
-  // },
-  
-  /**
-    Scrolls the receiver left one or more lines if allowed.  If number of
-    lines is not specified, scrolls one line.
-    
-    @param lines {Number} options number of lines
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollLeftLine: function(lines) {
-  //   if (lines === undefined) lines = 1 ;
-  //   return this.scrollTo(0-this.get('horizontalLineScroll')*lines, null) ;
-  // },
-  
-  /**
-    Scrolls the receiver down one or more page if allowed.  If number of
-    pages is not specified, scrolls one page.  The page size is determined by
-    the verticalPageScroll value.  By default this is the size of the current
-    scrollable area.
-    
-    @param pages {Number} options number of pages
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollDownPage: function(pages) {
-  //   if (pages === undefined) pages = 1 ;
-  //   return this.scrollBy(null, this.get('verticalPageScroll')*pages) ;
-  // },
-  
-  /**
-    Scrolls the receiver up one or more page if allowed.  If number of
-    pages is not specified, scrolls one page.  The page size is determined by
-    the verticalPageScroll value.  By default this is the size of the current
-    scrollable area.
-    
-    @param pages {Number} options number of pages
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollUpPage: function(pages) {
-  //   if (pages === undefined) pages = 1 ;
-  //   return this.scrollBy(null, 0-(this.get('verticalPageScroll')*pages)) ;
-  // },
-  
-  /**
-    Scrolls the receiver right one or more page if allowed.  If number of
-    pages is not specified, scrolls one page.  The page size is determined by
-    the verticalPageScroll value.  By default this is the size of the current
-    scrollable area.
-    
-    @param pages {Number} options number of pages
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollRightPage: function(pages) {
-  //   if (pages === undefined) pages = 1 ;
-  //   return this.scrollBy(this.get('horizontalPageScroll')*pages, null) ;
-  // },
-  
-  /**
-    Scrolls the receiver left one or more page if allowed.  If number of
-    pages is not specified, scrolls one page.  The page size is determined by
-    the verticalPageScroll value.  By default this is the size of the current
-    scrollable area.
-    
-    @param pages {Number} options number of pages
-    @returns {SC.ScrollView} receiver
-  */
-  // scrollLeftPage: function(pages) {
-  //   if (pages === undefined) pages = 1 ;
-  //   return this.scrollBy(0-(this.get('horizontalPageScroll')*pages), null) ;
-  // },
+
   
   /**
     Adjusts the layout for the various internal views.  This method is called
@@ -668,59 +369,48 @@ SC.MenuScrollView = SC.ScrollView.extend({
     additional controls you have added to the view.
   */
   tile: function() {
-    // get horizontal scroller/determine if we should have a scroller
-    var hscroll = this.get('hasHorizontalScroller') ? this.get('horizontalScrollerView') : null ;
-    var hasHorizontal = hscroll && this.get('isHorizontalScrollerVisible');
-    //     
     // get vertical scroller/determine if we should have a scroller
-    var vscroll = this.get('hasVerticalScroller') ? this.get('verticalScrollerView') : null ;
-    var vscroll2 = this.get('hasVerticalScroller') ? this.get('verticalScrollerView2') : null ;
-    var hasVertical = vscroll && this.get('isVerticalScrollerVisible') ;
+    var hasScroller, vscroll, vscroll2, hasVertical, clip, clipLayout, viewportHeight;
+    hasScroller = this.get('hasVerticalScroller');
+    vscroll = hasScroller ? this.get('verticalScrollerView') : null ;
+    vscroll2 = hasScroller ? this.get('verticalScrollerView2') : null ;
+    hasVertical = vscroll && this.get('isVerticalScrollerVisible') ;
     
     // get the containerView
-    var clip = this.get('containerView') ;
-    var clipLayout = { left: 0, top: 0 } ;
-    var t ;
-    
-    var ht = ((hasHorizontal) ? hscroll.get('scrollerThickness') : 0) ;
-    var vt = (hasVertical) ?   vscroll.get('scrollerThickness') : 0 ;
-    
-    // if (hasHorizontal) {
-    //       hscroll.set('layout', { left: 0, bottom: 0, right: vt-1, height: ht }) ;
-    //       clipLayout.bottom = ht-1 ;
-    //     } else {
-    //       clipLayout.bottom = 0 ;
-    //     }
-    // if (hscroll) hscroll.set('isVisible', hasHorizontal) ;
+    clip = this.get('containerView') ;
+    clipLayout = { left: 0, top: 0 } ;
     
     if (hasVertical) {
-      ht = ht + this.get('verticalScrollerBottom') ;
-      var viewportHeight =0;
-       var view   = this.get('contentView'), view2, 
+      viewportHeight =0;
+      var view   = this.get('contentView'), view2, 
             f      = (view) ? view.get('frame') : null, 
-            height = (f) ? f.height : 0;
-            
-      if(this.containerView.$()[0]) viewportHeight = this.containerView.$()[0].offsetHeight;
-      if(this.get('verticalScrollOffset')===0){
+            height = (f) ? f.height : 0,
+            elem = this.containerView.$()[0],
+            verticalOffset = this.get('verticalScrollOffset'),
+            topArrowInvisible = { height: 0, top: 0, right: 0, left: 0 },
+            topArrowVisible = { height: this.verticalLineScroll, top: 0, right: 0, left: 0 },
+            bottomArrowVisible = { height: this.verticalLineScroll, bottom: 0, right: 0, left: 0 },
+            bottomArrowInvisible = { height: 0, bottom: 0, right: 0, left: 0 };
+      
+      if(elem) viewportHeight = elem.offsetHeight;
+      
+      if(verticalOffset===0){
         clipLayout.top = 0 ;
-        clipLayout.bottom = 20 ;
-        vscroll.set('layout', { height: 0, top: 0, right: 0, left: 0 }) ;
-        vscroll2.set('layout', { height: 20, bottom: 0, right: 0, left: 0 }) ;
-      }else if(this.get('verticalScrollOffset')>=(height-viewportHeight-20)){
-        clipLayout.top = 20 ;
+        clipLayout.bottom = this.verticalLineScroll;
+        vscroll.set('layout', topArrowInvisible) ;
+        vscroll2.set('layout', bottomArrowVisible) ;
+      }else if(verticalOffset>=(height-viewportHeight-this.verticalLineScroll)){
+        clipLayout.top = this.verticalLineScroll ;
         clipLayout.bottom = 0 ;
-         vscroll.set('layout', { height: 20, top: 0, right: 0, left: 0 }) ;
-          vscroll2.set('layout', { height: 0, bottom: 0, right: 0, left: 0 }) ;
+        vscroll.set('layout', topArrowVisible) ;
+        vscroll2.set('layout', bottomArrowInvisible) ;
       }else{
-        clipLayout.top = 20 ;
-        clipLayout.bottom = 20 ;
-         vscroll.set('layout', { height: 20, top: 0, right: 0, left: 0 }) ;
-        vscroll2.set('layout', { height: 20, bottom: 0, right: 0, left: 0 }) ;
+        clipLayout.top = this.verticalLineScroll ;
+        clipLayout.bottom = this.verticalLineScroll ;
+        vscroll.set('layout', topArrowVisible) ;
+        vscroll2.set('layout', bottomArrowVisible) ;
       }
-      //clipLayout.right = vt-1 ;
-    } else {
-      //clipLayout.right = 0 ;
-    }
+    } 
     if (vscroll){
      vscroll.set('isVisible', hasVertical) ;
      vscroll2.set('isVisible', hasVertical) ;
@@ -732,31 +422,9 @@ SC.MenuScrollView = SC.ScrollView.extend({
     Called whenever a scroller visibility changes.  Calls the tile() method.
   */
   scrollerVisibilityDidChange: function() {
-      this.tile();
-    }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible', 'verticalScrollOffset'),
+    this.tile();
+  }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible', 'verticalScrollOffset'),
     
-  // ..........................................................
-  // SCROLL WHEEL SUPPORT
-  // 
-  
-  /** @private */ // _scroll_wheelDeltaX: 0,
-  //   /** @private */ _scroll_wheelDeltaY: 0,
-  //   
-  // save adjustment and then invoke the actual scroll code later.  This will
-  // keep the view feeling smooth.
-  // mouseWheel: function(evt) {
-  //   this._scroll_wheelDeltaX += evt.wheelDeltaX;
-  //   this._scroll_wheelDeltaY += evt.wheelDeltaY;
-  //   this.invokeLater(this._scroll_mouseWheel, 10) ;
-  //   return YES ;  
-  // },
-  
-  /** @private */
-  // _scroll_mouseWheel: function() {
-  //   this.scrollBy(this._scroll_wheelDeltaX, this._scroll_wheelDeltaY);
-  //   this._scroll_wheelDeltaX = this._scroll_wheelDeltaY = 0;
-  // },
-  
   
   // ..........................................................
   // INTERNAL SUPPORT
@@ -767,9 +435,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     in the regular properties.
   */
   createChildViews: function() {
-    // debugger ;
-    var childViews = [] ;
-    var view, view2 ;
+    var childViews = [], view, view2 ;
     
     // create the containerView.  We must always have a container view. 
     // also, setup the contentView as the child of the containerView...
@@ -782,19 +448,17 @@ SC.MenuScrollView = SC.ScrollView.extend({
     // and replace our own contentView...
     this.contentView = this.containerView.get('contentView');
     
-    // create a vertical scroller view if needed...
+    // create a vertical scroller 
     if ((view=this.verticalScrollerView) && (view2=this.verticalScrollerView2)) {
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
-          layoutDirection: SC.LAYOUT_VERTICAL,
-          layout: {top: 0, left: 0, right: 0, height: 20},
+          layout: {top: 0, left: 0, right: 0, height: this.verticalLineScroll},
           valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view);
         view2 = this.verticalScrollerView2 = this.createChildView(view2, {
-          layoutDirection: SC.LAYOUT_VERTICAL,
           scrollDown: YES,
-          layout: {bottom: 0, left: 0, right: 0, height: 20},
+          layout: {bottom: 0, left: 0, right: 0, height: this.verticalLineScroll},
           valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view2);
@@ -838,8 +502,10 @@ SC.MenuScrollView = SC.ScrollView.extend({
     frame to be notified whenever it's size changes.
   */
   contentViewDidChange: function() {
-    var newView = this.get('contentView'), oldView = this._scroll_contentView;
-    var f = this.contentViewFrameDidChange ;
+    var newView = this.get('contentView'), 
+        oldView = this._scroll_contentView,
+        f = this.contentViewFrameDidChange ;
+      
     if (newView !== oldView) {
       
       // stop observing old content view
@@ -867,24 +533,13 @@ SC.MenuScrollView = SC.ScrollView.extend({
         f      = (view) ? view.get('frame') : null,
         width  = (f) ? f.width : 0,  
         height = (f) ? f.height : 0,
-        dim    = this.get('frame') ;
+        dim    = this.get('frame'),
+        viewportHeight, elem ;
         
-    // console.log(width+" "+ this._scroll_contentWidth+" "+ height+" "+ this._scroll_contentHeight);
-    // console.log("dims "+dim.width+" "+ dim.height);
-    
     // cache out scroll settings...
     //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height ;
-    
-    // if (this.get('hasHorizontalScroller') && (view = this.get('horizontalScrollerView'))) {
-    //      width -= 1 ; // accurately account for our layout
-    //      // decide if it should be visible or not
-    //      if (this.get('autohidesHorizontalScroller')) {
-    //        this.set('isHorizontalScrollerVisible', width > dim.width);
-    //      }
-    //      view.setIfChanged('maximum', width) ;
-    //    }
     
     if (this.get('hasVerticalScroller') && (view = this.get('verticalScrollerView')) && (view2 = this.get('verticalScrollerView2'))) {
       height -= 1 ; // accurately account for our layout
@@ -893,10 +548,12 @@ SC.MenuScrollView = SC.ScrollView.extend({
         this.set('isVerticalScrollerVisible', height > dim.height);
       }
       height -= this.get('verticalScrollerBottom') ;
-      var viewportHeight =0;
-      if(this.containerView.$()[0]) viewportHeight = this.containerView.$()[0].offsetHeight;
-      view.setIfChanged('maximum', height - viewportHeight) ;
-      view2.setIfChanged('maximum', height - viewportHeight) ;
+      viewportHeight = 0;
+      elem = this.containerView.$()[0];
+      if(elem) viewportHeight = elem.offsetHeight;
+      height = height - viewportHeight;
+      view.setIfChanged('maximum', height) ;
+      view2.setIfChanged('maximum', height) ;
     }
   },
   
@@ -904,35 +561,20 @@ SC.MenuScrollView = SC.ScrollView.extend({
     Whenever the horizontal scroll offset changes, update the scrollers and 
     edit the location of the contentView.
   */
-  // _scroll_horizontalScrollOffsetDidChange: function() {
-  //    var offset = this.get('horizontalScrollOffset');
-  //    
-  //    // update the offset for the contentView...
-  //    var contentView = this.get('contentView');
-  //    if (contentView) contentView.adjust('left', 0-offset);
-  //    
-  //    // update the value of the horizontal scroller...
-  //    var scroller ;
-  //    if (this.get('hasHorizontalScroller') && (scroller=this.get('horizontalScrollerView'))) {
-  //      scroller.set('value', offset);
-  //    }
-  //  }.observes('horizontalScrollOffset'),
-  //  
+  _scroll_horizontalScrollOffsetDidChange: function() {
+  }.observes('horizontalScrollOffset'),
+   
   /** @private
     Whenever the vertical scroll offset changes, update the scrollers and 
     edit the location of the contentView.
   */
   _scroll_verticalScrollOffsetDidChange: function() {
-  // TODO : make sure this is still necessary JP
-  
     var offset = this.get('verticalScrollOffset') ;
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
     if (contentView) contentView.adjust('top', 0-offset) ;
     
-    // update the value of the vertical scroller...
-  
   }.observes('verticalScrollOffset')
 
 });
