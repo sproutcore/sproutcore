@@ -8,10 +8,6 @@
 sc_require('views/scroll');
 sc_require('mixins/border');
 
-
-
-
-
 SC.MenuScrollerView = SC.ScrollerView.extend({
   classNames: ['sc-menu-scroller-view'],
   
@@ -36,7 +32,6 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     @property
   */
   value: function(key, val) {
-    console.log('maximum '+ this.get('maximum'));
     if (val !== undefined) {
       // Don't enforce the maximum now, because the scroll view could change
       // height and we want our content to stay put when it does.
@@ -118,9 +113,13 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         context.addClass('sc-vertical') ;
-        // if (firstTime) {
-        //           context.push('<div class="down">&nbsp;</div>') ;
-        //         } else {
+        if (firstTime) {
+          if(this.get('scrollDown')){
+            context.push('<span class="arrowDown">&nbsp;</span>') ;
+          }else{
+            context.push('<span class="arrowUp">&nbsp;</span>') ;
+          }
+        } 
         //           // this.$('div')[0].style.height = max + "px";
         //         }
         break ;
@@ -200,47 +199,41 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   
   /** @private */
   _sc_scroller_valueDidChange: function() {
-    var v = this.get('value') ;
-        
-    if (v !== this._sc_scrollValue) {
-      var layer = this.get('layer') ;
-      if (layer) {
-        switch (this.get('layoutDirection')) {
-          case SC.LAYOUT_VERTICAL:
-            layer.scrollTop = v;
-            break ;
-          
-          case SC.LAYOUT_HORIZONTAL:
-            layer.scrollLeft = v ;
-            break ;
-        }
-      }
-    }
     
-    // notify owner if it has a different scroll value
-    var key = this.get('ownerScrollValueKey') ;
-    if (key && this.owner && (this.owner[key] !== undefined)) {
-      this.owner.setIfChanged(key, v) ;
-    }
   }.observes('value'),
   
- 
-  mouseMoved: function(evt) {
+
+  mouseEntered: function(evt) {
+    this.set('isMouseOver', YES);
+    this._invokeScrollOnMouseOver();
+  },
+  mouseExited: function(evt) {
+    this.set('isMouseOver', NO);
+  },
+  scrollMenu: function(){
     var val = this.get('value');
-    console.log('mousemoved '+val);
     if(this.get('scrollDown')) {
       if(val+20<=this.get('maximum')){
-        this.set('value', this.get('value')+20);
+        this.set('value', val+20);
       }
     }
     else {
       if(val-20>=0){
-        this.set('value', this.get('value')-20 <0);
+        this.set('value', val-20);
+      }else if(val<=20 && val>0){
+        this.set('value', 0);
       }
     }
     return YES;
+  },
+  
+  _invokeScrollOnMouseOver: function(){
+    this.scrollMenu();
+    if(this.get('isMouseOver')){
+      this.invokeLater(this._invokeScrollOnMouseOver, 50);
+    }
   }
-
+  
 });
 
 /** @class
@@ -702,13 +695,18 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     if (hasVertical) {
       ht = ht + this.get('verticalScrollerBottom') ;
-     
+      var viewportHeight =0;
+       var view   = this.get('contentView'), view2, 
+            f      = (view) ? view.get('frame') : null, 
+            height = (f) ? f.height : 0;
+            
+      if(this.containerView.$()[0]) viewportHeight = this.containerView.$()[0].offsetHeight;
       if(this.get('verticalScrollOffset')===0){
         clipLayout.top = 0 ;
         clipLayout.bottom = 20 ;
         vscroll.set('layout', { height: 0, top: 0, right: 0, left: 0 }) ;
         vscroll2.set('layout', { height: 20, bottom: 0, right: 0, left: 0 }) ;
-      }else if(this.get('verticalScrollOffset')>=this.get('maximum')){
+      }else if(this.get('verticalScrollOffset')>=(height-viewportHeight-20)){
         clipLayout.top = 20 ;
         clipLayout.bottom = 0 ;
          vscroll.set('layout', { height: 20, top: 0, right: 0, left: 0 }) ;
@@ -734,7 +732,6 @@ SC.MenuScrollView = SC.ScrollView.extend({
     Called whenever a scroller visibility changes.  Calls the tile() method.
   */
   scrollerVisibilityDidChange: function() {
-      console.log('scrollervisibilitydidchange');
       this.tile();
     }.observes('isVerticalScrollerVisible', 'isHorizontalScrollerVisible', 'verticalScrollOffset'),
     
@@ -790,13 +787,15 @@ SC.MenuScrollView = SC.ScrollView.extend({
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_VERTICAL,
-          layout: {top: 0, left: 0, right: 0, height: 20}
+          layout: {top: 0, left: 0, right: 0, height: 20},
+          valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view);
         view2 = this.verticalScrollerView2 = this.createChildView(view2, {
           layoutDirection: SC.LAYOUT_VERTICAL,
           scrollDown: YES,
-          layout: {bottom: 0, left: 0, right: 0, height: 20}
+          layout: {bottom: 0, left: 0, right: 0, height: 20},
+          valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view2);
       } else {
@@ -894,8 +893,10 @@ SC.MenuScrollView = SC.ScrollView.extend({
         this.set('isVerticalScrollerVisible', height > dim.height);
       }
       height -= this.get('verticalScrollerBottom') ;
-      view.setIfChanged('maximum', height) ;
-      view2.setIfChanged('maximum', height) ;
+      var viewportHeight =0;
+      if(this.containerView.$()[0]) viewportHeight = this.containerView.$()[0].offsetHeight;
+      view.setIfChanged('maximum', height - viewportHeight) ;
+      view2.setIfChanged('maximum', height - viewportHeight) ;
     }
   },
   
@@ -922,6 +923,8 @@ SC.MenuScrollView = SC.ScrollView.extend({
     edit the location of the contentView.
   */
   _scroll_verticalScrollOffsetDidChange: function() {
+  // TODO : make sure this is still necessary JP
+  
     var offset = this.get('verticalScrollOffset') ;
     
     // update the offset for the contentView...
@@ -929,11 +932,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     if (contentView) contentView.adjust('top', 0-offset) ;
     
     // update the value of the vertical scroller...
-    var scroller, scroller2;
-    if (this.get('hasVerticalScroller') && (scroller=this.get('verticalScrollerView')) && (scroller2=this.get('verticalScrollerView2'))) {
-      scroller.set('value', offset) ;
-      scroller2.set('value', offset) ;
-    }
+  
   }.observes('verticalScrollOffset')
 
 });

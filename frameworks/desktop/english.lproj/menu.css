@@ -1,16 +1,8 @@
 .sc-menu-scroller-view {
 
-  background: black;
-}
+  background: #EAEAEA;
 
-.sc-menu-scroller-view.sc-horizontal {
-  overflow: hidden;
 }
-
-.sc-menu-scroller-view.sc-horizontal .sc-inner {
-  bottom: 0;
-}
-
 
 .sc-menu-scroller-view.sc-vertical {
   overflow-x: hidden !important;
