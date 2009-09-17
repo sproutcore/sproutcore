@@ -9,6 +9,9 @@
 var store, storeKey, rec1, rec2, rec3, rec4, rec5, MyApp, q;
 module("SC.Query evaluation of records", {
   setup: function() {
+    
+    SC.RunLoop.begin();
+    
     // setup dummy app and store
     MyApp = SC.Object.create({
       store: SC.Store.create()
@@ -32,6 +35,8 @@ module("SC.Query evaluation of records", {
     rec4 = MyApp.store.find(MyApp.Foo,4);
     rec5 = MyApp.store.find(MyApp.Foo,5);
     
+
+    SC.RunLoop.end();
     
     q = SC.Query.create();
   }
@@ -45,14 +50,19 @@ module("SC.Query evaluation of records", {
 test("should get record properties correctly", function() {
   
   q.conditions = "firstName = 'John'";
-  q.parseQuery();
-  ok(q.contains(rec1) == true, 'John should match: firstName = "John"');
-  ok(q.contains(rec2) == false, 'Jane should not match: firstName = "John"');
+  q.parse();
+  equals(q.contains(rec1), true, 'John should match: firstName = "John"');
+  equals(q.contains(rec2), false, 'Jane should not match: firstName = "John"');
   
   q.conditions = "lastName BEGINS_WITH firstName";
-  q.parseQuery();
-  ok(q.contains(rec5) == true, 'Bert Berthold should match: lastName BEGINS_WITH firstName');
-  ok(q.contains(rec2) == false, 'Jane Doe should not match: lastName BEGINS_WITH firstName');
+  q.parse();
+  equals(q.contains(rec5), true, 'Bert Berthold should match: lastName BEGINS_WITH firstName');
+  equals(q.contains(rec2), false, 'Jane Doe should not match: lastName BEGINS_WITH firstName');
+  
+  q.conditions = "lastName CONTAINS firstName";
+  q.parse();
+  equals(q.contains(rec5), true, 'Bert Berthold should match: lastName CONTAINS firstName');
+  equals(q.contains(rec2), false, 'Jane Doe should not match: lastName CONTAINS firstName');
 
 }); 
 
@@ -60,23 +70,23 @@ test("should get record properties correctly", function() {
 test("should handle undefined record properties correctly", function() {
   
   q.conditions = "bornIn = 1975";
-  q.parseQuery();
-  ok(q.contains(rec3) == true, 'record with bornIn set should match');
-  ok(q.contains(rec2) == false, 'record without bornIn set should not match');
+  q.parse();
+  equals(q.contains(rec3), true, 'record with bornIn set should match');
+  equals(q.contains(rec2), false, 'record without bornIn set should not match');
   
   q.conditions = "bornIn = null";
-  q.parseQuery();
-  ok(q.contains(rec3) == false, 'record with bornIn set different to null should not match');
-  ok(q.contains(rec2) == true, 'record without bornIn set should match');
+  q.parse();
+  equals(q.contains(rec3), false, 'record with bornIn set different to null should not match');
+  equals(q.contains(rec2), true, 'record without bornIn set should match');
   
 }); 
 
 test("should handle boolean correctly", function() {
   
   q.conditions = "married = true";
-  q.parseQuery();
-  ok(q.contains(rec1) == true, 'record with married set should match');
-  ok(q.contains(rec2) == false, 'record without married set should not match');
+  q.parse();
+  equals(q.contains(rec1), true, 'record with married set should match');
+  equals(q.contains(rec2), false, 'record without married set should not match');
   
 });
   

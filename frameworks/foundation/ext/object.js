@@ -28,15 +28,17 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
   */
   invokeLater: function(methodName, interval) {
     if (interval === undefined) interval = 1 ;
-    var f = methodName ;
+    var f = methodName, args, func;
+    
+    // if extra arguments were passed - build a function binding.
     if (arguments.length > 2) {
-      var args =SC.$A(arguments).slice(2);
-      args.unshift(this);
+      args = SC.$A(arguments).slice(2);
       if (SC.typeOf(f) === SC.T_STRING) f = this[methodName] ;
-      // f = f.bind.apply(f, args) ;
-      var that = this, func = f ;
-      f = function() { return func.apply(that, args.slice(1)); } ;
+      func = f ;
+      f = function() { return func.apply(this, args); } ;
     }
+
+    // schedule the timer
     return SC.Timer.schedule({ target: this, action: f, interval: interval });
   },
   

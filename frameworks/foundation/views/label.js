@@ -74,6 +74,18 @@ SC.LabelView = SC.View.extend(SC.Control,
   */
   value: '',
   
+
+  /**
+    The exampleInlineTextFieldView property is by default a 
+    SC.InlineTextFieldView but it can be set to a customized inline text field
+    view.
+  
+    @property
+    @type {SC.View}
+    @default {SC.InlineTextFieldView}
+  */
+  exampleInlineTextFieldView: SC.InlineTextFieldView,
+  
   /**
     An optional icon to display to the left of the label.  Set this value
     to either a CSS class name (for spriting) or an image URL.
@@ -174,6 +186,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     var frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
     f.width=frameTemp.width;
     f.height=frameTemp.height;
+    
     SC.InlineTextFieldView.beginEditing({
       frame: f,
       delegate: this,
@@ -181,7 +194,8 @@ SC.LabelView = SC.View.extend(SC.Control,
       value: value, 
       multiline: NO, 
       isCollection: NO,
-      validator: this.get('validator')
+      validator: this.get('validator'),
+      exampleInlineTextFieldView: this.get('exampleInlineTextFieldView')
     });
   },
   

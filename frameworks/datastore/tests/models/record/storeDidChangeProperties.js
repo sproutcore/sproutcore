@@ -57,18 +57,14 @@ function expect(fooObject, expectedStatusCnt, expectedFooCnt) {
 
 test("should change status only if statusOnly=YES", function() {
   checkPreconditions();
-  
   foo.storeDidChangeProperties(YES);
-
   expect(foo,1,0);
 });
 
 
 test("should change attrs  & status if statusOnly=NO", function() {
   checkPreconditions();
-  
   foo.storeDidChangeProperties(NO);
-  
   expect(foo,1,1);
 });
 
@@ -78,10 +74,22 @@ test("should change attrs  & status if statusOnly=NO", function() {
 
 test("editing a clean record should change all", function() {
   checkPreconditions();
+  
   SC.RunLoop.begin();
-  foo.writeAttribute("foo", "bar");
+  foo.writeAttribute("foo", "baz"); // NB: Must be different from "foo"
   SC.RunLoop.end();
-  expect(foo,1,1);
+  
+  expect(foo,2,1);
+});
+
+test("editing an attribute to same value should do nothing", function() {
+  checkPreconditions();
+  
+  SC.RunLoop.begin();
+  foo.writeAttribute("foo", "bar"); // NB: Must be "bar"
+  SC.RunLoop.end();
+  
+  expect(foo,0,0);
 });
 
 test("destroying a record should change all", function() {
@@ -106,7 +114,8 @@ test("committing attribute changes from nested store should change attrs", funct
   SC.RunLoop.begin();
   var child = store.chain();
   var foo2 = child.materializeRecord(foo.storeKey);
-  foo2.writeAttribute('foo', 'bar');
+
+  foo2.writeAttribute('foo', 'baz'); // must not be 'bar'
   SC.RunLoop.end();
   // no changes should happen yet on foo.
   expect(foo,0,0);
@@ -114,7 +123,6 @@ test("committing attribute changes from nested store should change attrs", funct
   SC.RunLoop.begin();
   // commit
   child.commitChanges();
-  SC.RunLoop.end();
 
   // now changes
   expect(foo,1,1);
@@ -128,7 +136,7 @@ test("changing attributes on a parent store should notify child store if inherit
   equals(child.storeKeyEditState(foo.storeKey), SC.Store.INHERITED, 'precond - foo should be inherited from parent store');
   
   SC.RunLoop.begin();
-  parentfoo.writeAttribute('foo', 'bar');
+  parentfoo.writeAttribute('foo', 'baz'); // must not be bar
   SC.RunLoop.end();
   
   expect(childfoo,1,1); // should reflect on child
@@ -142,12 +150,12 @@ test("changing attributes on a parent store should NOT notify child store if loc
   var childfoo = child.materializeRecord(foo.storeKey);
   childfoo.readAttribute('foo');
   equals(child.storeKeyEditState(foo.storeKey), SC.Store.EDITABLE, 'precond - foo should be locked from parent store');
-  
+   
   SC.RunLoop.begin();
-  parentfoo.writeAttribute('foo', 'bar');
+  parentfoo.writeAttribute('foo', 'baz'); // must not be bar
   SC.RunLoop.end();
   expect(childfoo,0,0); // should not reflect on child
-  expect(parentfoo,1,1);
+  expect(parentfoo,2,1);
   // discarding changes should update
 
   // NOTE: recourds should change immediately on commit/discard changes.

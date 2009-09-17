@@ -9,7 +9,7 @@
 
 htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 (function() {
-  var appleURL='http://weblogs.baltimoresun.com/business/consuminginterests/blog/apple-logo1.jpg';
+  var appleURL='http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg';
 
   var pane = SC.ControlTestPane.design()
     .add("image_not_loaded", SC.ImageView, { 

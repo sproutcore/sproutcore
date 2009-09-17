@@ -170,6 +170,13 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     return this ;
   },
   
+  /**
+    Is called whenever you .get() or .set() values on this object
+    
+    @param {Object} key
+    @param {Object} value
+    @returns {Object}
+  */
   unknownProperty: function(key, value) {
     if (value === undefined) {
       return this.readDefault(key) ;

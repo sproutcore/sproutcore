@@ -9,8 +9,25 @@
 var AB;
 module("Sample Model from an address book app", { 
   setup: function() {
-    AB = SC.Object.create({
-      store: SC.Store.create()
+
+    // define the application space
+    AB = SC.Application.create({
+      store: SC.Store.create(SC.Record.fixtures)
+    });
+
+    // Describes a single contact detail such as a phone number, address,
+    // email, etc.
+    AB.ContactDetail = SC.Record.extend({
+      
+    });
+    
+    // Describes a generic contact.  A contact has contact details, which 
+    // describe contact info.  A contact also has a fullName, which changes
+    // depending on the type.
+    AB.Contact = SC.Record.extend({
+
+      details: SC.Record.toMany(AB.ContactDetail)
+      
     });
     
     AB.ContactGroup = SC.Record.extend({

@@ -19,5 +19,12 @@ Welcome = SC.Object.create(
 
   NAMESPACE: 'Welcome',
   VERSION: '1.0.0',
+  
+  store: SC.Store.create().from('CoreTools.DataSource'),
+  
+  displayTitle: function() {
+    var hostname = (window.location.hostname || 'localhost').toString();
+    return hostname.match(/sproutcore\.com/) ? "SproutCore Demos".loc() : "SproutCore Developer Tools";
+  }.property().cacheable()
 
 }) ;

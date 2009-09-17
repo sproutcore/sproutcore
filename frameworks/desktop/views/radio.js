@@ -190,7 +190,9 @@ SC.RadioView = SC.FieldView.extend(
   
   render: function(context, firstTime) {
     // if necessary, regenerate the radio buttons
-    var item, idx, icon, name, itemsLength, url, className, disabled, labelText, selectionState, items = this.get('displayItems'), 
+    var item, idx, icon, name, itemsLength, url, className, disabled, 
+      labelText, selectionState, selectionStateClassNames, 
+      items = this.get('displayItems'), 
       value = this.get('value'), isArray = SC.isArray(value);
     
     context.addClass(this.get('layoutDirection'));
@@ -223,8 +225,8 @@ SC.RadioView = SC.FieldView.extend(
         var blankImage = static_url('blank');
         
         context.push('<label class="sc-radio-button ', selectionStateClassNames, '">');
-        context.push('<img src="', blankImage, '" class="button" />');
         context.push('<input type="radio" value="', idx, '" name="', name, '" ', disabled, '/>');
+        context.push('<span class="button"></span>');
         context.push('<span class="sc-button-label">', icon, labelText, '</span></label>');
       }
       
@@ -247,7 +249,7 @@ SC.RadioView = SC.FieldView.extend(
         input.parent().setClass(selectionState);
         
         // avoid memory leaks
-        input = val = idx = selectionState = null;
+        input =  idx = selectionState = null;
       }, this);
     
     }
@@ -262,7 +264,7 @@ SC.RadioView = SC.FieldView.extend(
        assigned to the the input field parent
   */
   _getSelectionState: function(item, value, isArray, shouldReturnObject) {
-      var sel, classNames;
+      var sel, classNames, key;
       
       // determine if the current item is selected
       if (item) {
@@ -274,7 +276,7 @@ SC.RadioView = SC.FieldView.extend(
       // now set class names
       classNames = {
         sel: (sel && !isArray), mixed: (sel && isArray), disabled: (!item[2]) 
-      }
+      };
       
       if(shouldReturnObject) {
         return classNames;
@@ -327,6 +329,29 @@ SC.RadioView = SC.FieldView.extend(
     });
     
     return this;
+  },
+  
+
+  
+  didCreateLayer: function() {
+     this.setFieldValue(this.get('fieldValue'));
+     var inputElems=this.$input();
+     for( var i=0; i<inputElems.length; i++){
+       SC.Event.add(inputElems[i], 'click', this, this._field_fieldValueDidChange) ;
+     }
+   },
+
+  willDestroyLayer: function() {
+       var inputElems=this.$input();
+        for( var i=0; i<inputElems.length; i++){
+            SC.Event.remove(this.$input()[i], 'click', this, this._field_fieldValueDidChange); 
+        }
+   
+  },
+  
+  mouseDown: function(evt) {  
+    this.$input()[0].focus();
+    sc_super();
   }
 
 });

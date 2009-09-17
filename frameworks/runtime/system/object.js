@@ -5,9 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
-require('mixins/observable') ;
-require('mixins/array') ;
+sc_require('core') ;
+sc_require('mixins/observable') ;
+sc_require('mixins/array') ;
+sc_require('system/set');
 
 /*globals $$sel */
 
@@ -35,7 +36,7 @@ SC.BENCHMARK_OBJECTS = NO;
   @returns {Hash} base hash
 */
 SC._object_extend = function _object_extend(base, ext) {
-  if (!ext) throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?";
+  if (!ext) throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?";
 
   // set _kvo_cloned for later use
   base._kvo_cloned = null;
@@ -250,6 +251,9 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
     ret.superclass = this ;
     SC.generateGuid(ret); // setup guid
 
+    ret.subclasses = SC.Set.create();
+    this.subclasses.add(ret); // now we can walk a class hierarchy
+
     // setup new prototype and add properties to it
     var base = (ret.prototype = SC.beget(this.prototype));
     var idx, len = arguments.length;
@@ -287,6 +291,12 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   */
   isClass: YES,
 
+  /**
+    Set of subclasses that extend from this class.  You can observe this 
+    array if you want to be notified when the object is extended.
+  */
+  subclasses: SC.Set.create(),
+  
   /** @private */
   toString: function() { return SC._object_className(this); },
 
@@ -773,13 +783,26 @@ function findClassNames() {
   Same as the instance method, but lets you check instanceOf without
   having to first check if instanceOf exists as a method.
   
-  @param {Object} object the object to check instance of
+  @param {Object} scObject the object to check instance of
   @param {Class} scClass the class
   @returns {Boolean} if object1 is instance of class
 */
 SC.instanceOf = function(scObject, scClass) {
-  return (scObject && scObject.constructor === scClass) ;  
-} ;
+  return !!(scObject && scObject.constructor === scClass) ;  
+} ; 
+
+/**
+  Same as the instance method, but lets you check kindOf without having to 
+  first check if kindOf exists as a method.
+  
+  @param {Object} scObject object to check kind of
+  @param {Class} scClass the class to check
+  @returns {Boolean} if object is an instance of class or subclass
+*/
+SC.kindOf = function(scObject, scClass) {
+  if (scObject && !scObject.isClass) scObject = scObject.constructor;
+  return !!(scObject && scObject.kindOf(scClass));
+};
 
 /** @private
   Returns the name of this class.  If the name is not known, triggers

@@ -114,7 +114,7 @@ test("checked", function() {
       buttonValue = theInput.attr('value');
     
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
-    if(idx==0) {
+    if(idx===0) {
       ok(theInput.attr('checked'), 'radio button #%@ should be checked'.fmt(idx));
     } else {
       ok(!theInput.attr('checked'), 'radio button #%@ should not be checked'.fmt(idx));
@@ -173,7 +173,9 @@ test("enabled first", function() {
   
   var radioButtons = view.$('input');
   equals(radioButtons.length, 3, 'number of radio buttons should be 3');
-  
+  SC.RunLoop.begin();
+  view.set('isEnabled', NO);
+  SC.RunLoop.end();
   var i = 0;
   radioButtons.forEach(function(radioInput) {
     var theInput = SC.$(radioInput),
@@ -182,11 +184,7 @@ test("enabled first", function() {
       
     equals(idx, i, 'radio button #%@ should have field value %@'.fmt(idx, i));
     ok(!theInput.attr('checked'), 'radio button #%@ should not be checked'.fmt(idx));
-    if(idx==0) {
-      ok(!theInput.attr('disabled'), 'radio button #%@ should not be disabled'.fmt(idx));
-    } else {
       ok(theInput.attr('disabled'), 'radio button #%@ should be disabled'.fmt(idx));
-    }
     i++;
   });
   

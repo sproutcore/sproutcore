@@ -31,6 +31,12 @@ var pane = SC.ControlTestPane.design()
   useStaticLayout: YES, 
       layout: { width: 'auto', right: 'auto' }
     })
+      .add("unSortedStringOptions", SC.SelectFieldView, { 
+        objects:["Apple","Sproutcore 1.0","Development","Charles"],
+    useStaticLayout: YES, 
+    disableSort: YES,
+        layout: { width: 'auto', right: 'auto' }
+      })
   
     .add("Width 150 Right 0", SC.SelectFieldView, { 
       objects: [1,6,11,2,8],
@@ -41,6 +47,8 @@ var pane = SC.ControlTestPane.design()
     useStaticLayout: YES, 
     layout: { width: '150', right: '0' }
   });
+  
+  
   
     pane.show();
 

@@ -4,7 +4,6 @@
 
 .sc-theme .sc-button-view {
   text-decoration: none ;
-  color: black ;
   border: none ;
   padding: 0;
   display: inline-block ;
@@ -19,10 +18,6 @@
   width: 16px;
 }
 
-.sc-theme .sc-button-view label.sc-button-label {
-  font-weight: normal;
-}
-
 /* @end */
 
 /* @group Square Style */
@@ -31,7 +26,7 @@
 
 .sc-theme .sc-button-view.sc-regular-size.square {
   text-shadow: #fff 0px 1px 0px;
-  text-align: center;
+  color: black ;
 }
 
 .sc-theme .sc-button-view.sc-regular-size.square .sc-button-inner {
@@ -202,6 +197,7 @@
 	text-shadow: #fff 0px 1px 0px;
   	text-align:  center;
  	background:  transparent static_url('images/sc-theme-repeat-x.png') no-repeat right -224px;
+  color: black ;
 }
 
 .sc-theme .sc-button-view.capsule .sc-button-inner {

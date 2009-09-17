@@ -1,12 +1,12 @@
 // ==========================================================================
-// Project:   TestRunner.Test Fixtures
+// Project:   CoreTools.Test Fixtures
 // Copyright: ©2009 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools */
 
 sc_require('models/test');
 
-TestRunner.Test.FIXTURES = [
+CoreTools.Test.FIXTURES = [
 
   { "url": "/static/sproutcore/runtime/en/current/tests/core/beget.html",
     "filename": "tests/core/beget" },

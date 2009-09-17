@@ -1,10 +1,10 @@
 // ==========================================================================
-// Project:   TestRunner.Test Unit Test
+// Project:   CoreTools.Test Unit Test
 // Copyright: ©2009 Apple Inc.
 // ==========================================================================
 /*globals TestRunner module test ok equals same stop start */
 
-module("TestRunner.Test");
+module("CoreTools.Test");
 
 // TODO: Replace with real unit test for Test
 test("test description", function() {

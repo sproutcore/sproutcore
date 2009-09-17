@@ -104,10 +104,8 @@ test("clicking on an item should select it", function() {
 
 test("clicking on a selected item should clear selection after 301ms and reselect it", function() {
   view.select(SC.IndexSet.create(1,5));
-  SC.stopIt = YES ;
   SC.RootResponder.responder._lastMouseUpAt = null ; // HACK: don't want a doubleClick from previous tests
   clickOn(view, 3, NO, NO, SC.IndexSet.create(3), 301);
-  SC.stopIt = NO ;
 });
 
 test("clicking on unselected item should clear selection and select it", function() {

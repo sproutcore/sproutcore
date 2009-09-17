@@ -231,6 +231,11 @@ SC.MenuPane = SC.PickerPane.extend(
   exampleView: SC.MenuItemView,
   
   /**
+    Control Size for the Menu Item
+  */
+  controlSize: SC.REGULAR_CONTROL_SIZE,
+  
+  /**
     @private
     
     Overwrite the popup function of the pickerPane
@@ -328,7 +333,7 @@ SC.MenuPane = SC.PickerPane.extend(
   // ..........................................................
   // RENDERING/DISPLAY SUPPORT
   // 
-  displayProperties: ['displayItems', 'value'],
+  displayProperties: ['displayItems', 'value', 'controlSize'],
 
   /**
     The render function which depends on the displayItems and value
@@ -416,7 +421,7 @@ SC.MenuPane = SC.PickerPane.extend(
       var itemKeyEquivalent = item.get('keyEquivalent') ;
       var itemTarget = item.get('target') ;
       var itemWidth = this.get('itemWidth') ;
-      
+      var controlSize = this.get('controlSize') ;
       var itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
@@ -437,6 +442,7 @@ SC.MenuPane = SC.PickerPane.extend(
           itemHeight : itemHeight,
           itemWidth : itemWidth,
           keyEquivalent : itemKeyEquivalent,
+          controlSize: controlSize,
           content : SC.Object.create({
             title : itemTitle,
             value : itemValue,
@@ -454,27 +460,23 @@ SC.MenuPane = SC.PickerPane.extend(
       itemView.prepareContext(context, YES) ;
       context = context.end() ;
       menuItemViews.push(itemView) ;
-      this.set('menuItemViews',menuItemViews) ;
     }
+    this.set('menuItemViews',menuItemViews) ;
   },
   
   /**
-    Get the current selected Menu item
+    Observes the PreviousSelectedMenuItem and clears the submenu 
+    for that item.
     
     @returns void
   */
-  currentSelectedMenuItemObserver: function(){
-    var currentSelectedMenuItem = this.get('currentSelectedMenuItem') ;
+  previousSelectedMenuItemObserver: function(){
     var previousSelectedMenuItem = this.get('previousSelectedMenuItem') ;
-    if(previousSelectedMenuItem){
+    if(previousSelectedMenuItem) {
       var subMenu = previousSelectedMenuItem.isSubMenuAMenuPane() ;
       if(subMenu) subMenu.remove() ;
-      previousSelectedMenuItem.resignFirstResponder() ;
     }
-    if(currentSelectedMenuItem) {
-      currentSelectedMenuItem.becomeFirstResponder() ;
-    }
-  }.observes('currentSelectedMenuItem'),
+  }.observes('previousSelectedMenuItem'),
   
   /**
     This function returns whether the anchor is of type of MenuItemView
@@ -505,6 +507,13 @@ SC.MenuPane = SC.PickerPane.extend(
     items = this.get('displayItemsArray') ;
     if (!items) return NO;
 
+    // handling esc key
+    if (keyString === 'escape') {
+      this.remove() ;
+      var pane = this.getPath('anchor.pane') ;
+      if (pane) pane.becomeKeyPane() ;
+    }
+
     len = items.length ;
     for(var idx=0; idx<len; ++idx) {
       item          = items[idx] ;
@@ -514,6 +523,7 @@ SC.MenuPane = SC.PickerPane.extend(
       target        = item.get('target') || this ;
       if(keyEquivalent == keyString && isEnabled) {
         var retVal = SC.RootResponder.responder.sendAction(action,target);
+        this.remove();
         return retVal;
       }
     }
@@ -548,7 +558,6 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   moveDown: function(menuItem) {
     var currentSelectedMenuItem = this.getNextEnabledMenuItem(menuItem) ;
-    this.set('currentItemSelected',currentSelectedMenuItem) ;
     if(menuItem) menuItem.resignFirstResponder() ;
     currentSelectedMenuItem.becomeFirstResponder() ;
   },
@@ -561,7 +570,6 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   moveUp: function(menuItem) {
     var currentSelectedMenuItem = this.getPreviousEnabledMenuItem(menuItem) ;
-    this.set('currentItemSelected',currentSelectedMenuItem) ;
     if(menuItem) menuItem.resignFirstResponder() ;
     currentSelectedMenuItem.becomeFirstResponder() ;
     return YES ;
@@ -576,8 +584,8 @@ SC.MenuPane = SC.PickerPane.extend(
     var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
       var len = menuItemViews.length ;
-      var menuIdx = idx = (menuItemViews.indexOf(menuItem) === -1) ? 
-        len : menuItemViews.indexOf(menuItem) ;
+      var idx = (menuItemViews.indexOf(menuItem) === -1) ? len : menuItemViews.indexOf(menuItem) ;
+      var menuIdx = idx;
       var isEnabled = NO ;
       var isSeparator = NO ;
       while((!isEnabled || isSeparator) && --idx !== menuIdx) {
@@ -601,8 +609,9 @@ SC.MenuPane = SC.PickerPane.extend(
     var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
       var len = menuItemViews.length ;
-      var menuIdx = idx = (menuItemViews.indexOf(menuItem) === -1) ? 
+      var idx = (menuItemViews.indexOf(menuItem) === -1) ? 
         0 : menuItemViews.indexOf(menuItem) ;
+      var menuIdx = idx;
       var isEnabled = NO ;
       var isSeparator = NO ;
       while((!isEnabled || isSeparator) && ++idx !== menuIdx) {

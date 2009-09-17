@@ -386,6 +386,41 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     return (match) ? this.$('a.sc-segment').index(match) : -1;
   },
   
+  keyDown: function(evt) {
+    // handle tab key
+    var i, item, items, len, value, isArray;
+    if (evt.which === 9) {
+      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      view.becomeFirstResponder();
+      return YES ; // handled
+    }    
+    if (!this.get('allowsMultipleSelection') && !this.get('allowsEmptySelection')){
+      items = this.get('displayItems');
+      len = items.length;
+      value = this.get('value');
+      isArray = SC.isArray(value);
+      if (evt.which === 39 || evt.which === 40) {  
+        for(i=0; i< len-1; i++){
+          item=items[i];
+          if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value)){
+            this.triggerItemAtIndex(i+1);
+          }
+        }
+        return YES ; // handled
+      }
+      else if (evt.which === 37 || evt.which === 38) {
+        for(i=1; i< len; i++){
+          item=items[i];
+          if( isArray ? (value.indexOf(item[1])>=0) : (item[1]===value)){
+            this.triggerItemAtIndex(i-1);
+          }
+        }
+        return YES ; // handled
+      }
+    }
+    return YES; 
+  },
+  
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return YES; // nothing to do
     var idx = this.displayItemIndexForEvent(evt);
@@ -394,6 +429,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (idx>=0) {
       this._isMouseDown = YES ;
       this.set('activeIndex', idx);
+    }
+    if (!this._isFocused) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$()[0].focus();
+      }
     }
     
     return YES ;
@@ -509,7 +551,27 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (action && resp) {
       resp.sendAction(action, this.get('target'), this, this.get('pane'));
     }
-  }
+  },
+  
+  /** tied to the isEnabled state */
+   acceptsFirstResponder: function() {
+     return this.get('isEnabled');
+   }.property('isEnabled'),
+
+   willBecomeKeyResponderFrom: function(keyView) {
+     // focus the text field.
+     if (!this._isFocused) {
+       this._isFocused = YES ;
+       this.becomeFirstResponder();
+       if (this.get('isVisibleInWindow')) {
+         this.$()[0].focus();
+       }
+     }
+   },
+   
+   willLoseKeyResponderTo: function(responder) {
+     if (this._isFocused) this._isFocused = NO ;
+   }
     
 }) ;
 

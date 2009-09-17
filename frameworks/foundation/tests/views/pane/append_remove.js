@@ -87,3 +87,27 @@ test("removes pane from DOM", function() {
 });
 
 
+// ..........................................................
+// SPECIAL CASES
+// 
+
+test("updates frame and clippingFrame when loading MainPane", function() {
+  
+  var pane = SC.MainPane.create(); 
+  var f  = SC.clone(pane.get('frame')), // save preconditions
+      cf = SC.clone(pane.get('clippingFrame'));
+      
+  equals(f.width, 1000, 'frame width should be 1000 before adding');
+  equals(cf.width, 1000, 'clippingFrame width should be 1000 before adding');
+  ok(SC.RootResponder.responder.computeWindowSize().width !== 1000, 'window size should not be 1000');
+  
+  // add the pane to the main window.  should resize the frames
+  SC.run(function() {
+    pane.append();
+  });
+  
+  ok(pane.get('frame').width !== 1000, 'frame width should have changed');
+  ok(pane.get('clippingFrame').width !== 1000, 'clippingFrame width should have changed');
+  
+});
+

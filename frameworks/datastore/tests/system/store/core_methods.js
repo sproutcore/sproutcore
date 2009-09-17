@@ -15,11 +15,19 @@ module("SC.Store Core Methods", {
       
       updateRecord: function(store, storeKey, params) {
         this.gotParams = params && params['param1'] ? YES: NO;
-      }});
+      }
+    });
     
     Application = {};
+    Application._nameDidChange = 0;
     
-    Application.File = SC.Record.extend({ });
+    Application.File = SC.Record.extend({ 
+      
+      nameDidChange: function(object, key) {
+        Application._nameDidChange++;
+      }.observes('name', 'url', 'isDirectory')
+      
+    });
     Application.FileDisk = SC.Record.extend({ });
     
     Application.Data = {
@@ -112,5 +120,17 @@ test("Passing params through commitRecords()", function() {
   
   equals(dataSource.gotParams, YES, 'params should have travelled through to dataSource updateRecord() call');
   
+});
+
+test("Make sure that setting an attribute on a record will only notify respective observers once", function() {
+  
+  var file = store.find(Application.File, '14');
+  Application._nameDidChange = 0 ;
+  
+  SC.RunLoop.begin();
+  file.writeAttribute('name', 'My Great New Name');
+  SC.RunLoop.end();
+  
+  equals(Application._nameDidChange, 1, 'observer was only fired once');
 
 });

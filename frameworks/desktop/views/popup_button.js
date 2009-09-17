@@ -52,14 +52,6 @@ SC.PopupButtonView = SC.ButtonView.extend({
   */
   isSelectedBinding: '*menu.isVisibleInWindow',
   
-  /**private*/
-  render: function(context,firstTime) {
-    sc_super() ;
-    var menu = this.get('menu') ;
-    if(firstTime && menu) {
-      menu.createLayer() ;
-    }
-  },
   /**
     Button action handler
     @param {DOMMouseEvent} evt mouseup event that triggered the action

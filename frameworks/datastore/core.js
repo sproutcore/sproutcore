@@ -4,7 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-
+ 
 SC.mixin(Function.prototype, {
   
   typeConverter: function() {

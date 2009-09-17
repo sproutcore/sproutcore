@@ -55,12 +55,12 @@ test("SC.Query.queryExtensions", function(){
   ok(q.queryLanguage['STARTS_WITH_J'], 'extension STARTS_WITH_J should be set');
   
   q.conditions = "firstName STARTS_WITH_J";
-  q.parseQuery();
+  q.parse();
   ok(q.contains(rec2), "Jane should match");
   ok(!q.contains(rec3), "Emily should not match");
   
   q.conditions = "firstName STARTS_WITH_J OR lastName STARTS_WITH_J";
-  q.parseQuery();
+  q.parse();
   ok(q.contains(rec2), "Jane Doe should match");
   ok(q.contains(rec5), "Bert Jules should match");
 

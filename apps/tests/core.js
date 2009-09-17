@@ -4,7 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools TestRunner */
 
 /** @namespace
 
@@ -22,11 +22,11 @@ TestRunner = SC.Application.create(
   // of your model data.  You can also set a data source on this store to
   // connect to a backend server.  The default setup below connects the store
   // to any fixtures you define.
-  store: SC.Store.create().from('TestRunner.DevDataSource'),
+  store: SC.Store.create().from('CoreTools.DataSource'),
   
   /** Returns all known targets */
   targets: function() {
-    return this.get('store').findAll(TestRunner.Target);
+    return this.get('store').find(CoreTools.TARGETS_QUERY);
   }.property().cacheable(),
   
   trace: NO,

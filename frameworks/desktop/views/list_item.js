@@ -22,7 +22,6 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   
   @extends SC.View
   @extends SC.Control
-  @extends SC.InlineEditorDelegate
   @extends SC.Editable
   @extends SC.StaticLayout
   @since SproutCore 1.0
@@ -563,7 +562,6 @@ SC.ListItemView = SC.View.extend(
    var f= this.computeFrameWithParentFrame(null);
    var parent = this.get('parentView');
    var pf = parent.get('frame');
-   
    var el = this.$label() ;
    var offset = SC.viewportOffset(el[0]);
    if (!el || el.get('length')===0) return NO ;
@@ -589,7 +587,7 @@ SC.ListItemView = SC.View.extend(
    f.x = offset.x;
    f.y = offset.y+top + lineHeightShift ;
    f.height = el[0].offsetHeight ;
-   f.width = (f.width - 30 - el[0].offsetLeft) ;
+   f.width = (f.width - 40 - el[0].offsetLeft) ;
    
    var ret = SC.InlineTextFieldView.beginEditing({
      frame: f, 

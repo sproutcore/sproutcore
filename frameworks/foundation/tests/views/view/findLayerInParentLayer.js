@@ -17,7 +17,7 @@ module("SC.View#findLayerInParentLayer", {
     
     // manually construct a test layer.  next childDom a few layers deep
     childDom = document.createElement('div');
-    childDom.setAttribute('id', layerId);
+    SC.$(childDom).attr('id', layerId);
     
     var intermediate = document.createElement('div');
     intermediate.appendChild(childDom);

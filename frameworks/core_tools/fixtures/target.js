@@ -1,12 +1,12 @@
 // ==========================================================================
-// Project:   TestRunner.Target Fixtures
+// Project:   CoreTools.Target Fixtures
 // Copyright: ©2009 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools */
 
 sc_require('models/target');
 
-TestRunner.Target.FIXTURES = [
+CoreTools.Target.FIXTURES = [
 
   // SAMPLE APPS
   { "name": "/sample_controls",

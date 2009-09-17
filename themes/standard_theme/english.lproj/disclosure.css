@@ -21,7 +21,9 @@
 	background-position: -16px -1025px ;
 }
 
-
+.sc-theme .sc-button-view.sc-disclosure-view {
+  background: transparent;
+}
 
 /* @end */
 

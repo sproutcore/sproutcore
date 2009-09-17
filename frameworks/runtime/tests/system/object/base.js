@@ -100,10 +100,14 @@ test("Checking the instance of method for an object", function() {
 test("Checking the kind of method for an object", function() {
 	equals(obj1.kindOf(obj), YES);
 	equals(obj1.kindOf(don), NO);
+	
+	equals(SC.kindOf(obj1, obj), YES);
+	equals(SC.kindOf(obj1, don), NO);
+	equals(SC.kindOf(null, obj1), NO);
 });
 
 
-module("SC.Object superclass", {  
+module("SC.Object superclass and subclasses", {  
   setup: function() {
     obj = SC.Object.extend ({
 	  method1: function() {
@@ -132,4 +136,13 @@ test("Checking the superclass method for an existing function", function() {
 test("Checking the subclassOf function on an object and its subclass", function(){
 	equals(obj1.subclassOf(obj), YES);
 	equals(obj.subclassOf(obj1), NO);
+});
+
+test("subclasses should contain defined subclasses", function() {
+  ok(obj.subclasses.contains(obj1), 'obj.subclasses should contain obj1');
+  
+  equals(obj1.subclasses.get('length'),0,'obj1.subclasses should be empty');
+  
+  var kls2 = obj1.extend();
+  ok(obj1.subclasses.contains(kls2), 'obj1.subclasses should contain kls2');
 });

@@ -418,7 +418,7 @@ SC.Observable = {
       // clear any cached value
       if (!_keepCache) {
         func = this[key] ;
-        if (func && (func instanceof Function)) {
+        if (func && func.isProperty) {
           cache[func.cacheKey] = cache[func.lastSetValueKey] = undefined ;
         }
       }

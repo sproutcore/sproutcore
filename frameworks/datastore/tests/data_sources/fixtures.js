@@ -35,10 +35,11 @@ module("SC.FixturesDataSource", {
   }
 });
 
-test("Verify findAll() loads all fixture data", function() {
-  var result = store.findAll(Sample.File),
+test("Verify find() loads all fixture data", function() {
+
+  var result = store.find(Sample.File),
       rec, storeKey, dataHash;
-      
+  
   ok(result, 'should return a result');
   equals(result.get('length'), Sample.File.FIXTURES.get('length'), 'should return records for each item in FIXTURES');
   
@@ -55,7 +56,7 @@ test("Verify findAll() loads all fixture data", function() {
   }
   
   // verify multiple calls to findAll() returns SAME data
-  result = store.findAll(Sample.File);
+  result = store.find(Sample.File);
   
   equals(result.get('length'), expected.length, 'second result should have same length as first');
   len = result.get('length');
@@ -113,15 +114,4 @@ test("Update and commit a record", function() {
   fixture = fixtures.fixtureForStoreKey(store, storeKey);
   equals(fixture.name, rec.get('name'), 'fixture state should update to match new name');
     
-});
-
-test("Using SC.Query on fetch()", function() {
-  
-  var fixtures = store.get('dataSource');
-  
-  var q = SC.Query.create({recordType: Sample.File});
-  
-  var storeKeys = fixtures.fetch(store, q);
-  equals(storeKeys.length, 9, 'storeKeys length should be 9');
-
 });

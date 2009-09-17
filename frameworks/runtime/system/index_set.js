@@ -731,12 +731,15 @@ SC.IndexSet = SC.mixin({},
   addEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
+    this.beginPropertyChanges();
     var idx = objects.get('length') ;
-    if (objects.objectAt) {
+    if (objects.isSCArray) {
       while(--idx >= 0) this.add(objects.objectAt(idx)) ;
-    } else {
-      while(--idx >= 0) this.add(objects[idx]) ;
+    } else if (objects.isEnumerable) {
+      objects.forEach(function(idx) { this.add(idx); }, this);
     }
+    this.endPropertyChanges();
+    
     return this ;
   },  
 
@@ -746,12 +749,17 @@ SC.IndexSet = SC.mixin({},
   removeEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
 
+    this.beginPropertyChanges();
+    
     var idx = objects.get('length') ;
-    if (objects.objectAt) {
+    if (objects.isSCArray) {
       while(--idx >= 0) this.remove(objects.objectAt(idx)) ;
-    } else {
-      while(--idx >= 0) this.remove(objects[idx]) ;
+    } else if (objects.isEnumerable) {
+      objects.forEach(function(idx) { this.remove(idx); }, this); 
     }
+    
+    this.endPropertyChanges();
+    
     return this ;
   },  
 

@@ -7,6 +7,15 @@
   cursor:default;
 }
 
+.sc-button-view.sc-menu-item.sc-small-size a span {
+  line-height: 11px;
+  font-size: 11px;
+}
+
+.sc-menu-item.sc-small-size a{
+  line-height: 11px;
+}
+
 .sc-menu-item a{
   display: block;
   top: 0;
@@ -80,6 +89,10 @@
   top: 5px;
   -webkit-border-radius: 2px;
   -moz-border-radius: 2px;
+}
+
+.sc-menu-item.focus div.checkbox {
+  background-image: sc_static('icons/mini_ffffff'); 
 }
 
 .sc-menu-item.disabled div.checkbox,

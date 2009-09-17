@@ -7,11 +7,53 @@
 
 var store, storeKey1, storeKey2, storeKey3, storeKey4, storeKey5, storeKey6;
 var storeKey7, json, json1, json2, json3, json4, json5, json6, json7;
+var ds ;
 
 module("SC.Store#commitRecord", {
   setup: function() {
+
+    ds = SC.DataSource.create({
+      
+      callCount: 0,
+      
+      commitRecords: function(store, toCreate, toUpdate, toDestroy, params) {
+        this.toCreate = toCreate;
+        this.toUpdate = toUpdate;
+        this.toDestroy = toDestroy;
+        this.params = params;
+        this.callCount++;
+      },
+      
+      reset: function() {
+        this.toCreate = this.toUpdate = this.toDestroy = this.params = null;
+        this.callCount = 0 ;
+      },
+      
+      expect: function(callCount, toCreate, toUpdate, toDestroy, params) {
+        if (callCount !== undefined) {
+          equals(this.callCount, callCount, 'expect datasource.commitRecords to be called X times');
+        }
+        
+        if (toCreate !== undefined) {
+          same(this.toCreate, toCreate, 'expect toCreate to have items');
+        }
+
+        if (toUpdate !== undefined) {
+          same(this.toUpdate, toUpdate, 'expect toUpdate to have items');
+        }
+        
+        if (toDestroy !== undefined) {
+          same(this.toDestroy, toDestroy, 'expect toDestroy to have items');
+        }
+
+        if (params !== undefined) {
+          same(this.params, params, 'expect params to have items');
+        }
+      }
+      
+    });
     
-    store = SC.Store.create();
+    store = SC.Store.create().from(ds);
     
     json1 = {
       guid: "commitGUID1",
@@ -128,6 +170,42 @@ test("Confirm that all the states are switched as expected after running commitR
   }
   equals(msg, SC.Record.NOT_FOUND_ERROR.message, "commitRecord should throw the following error");
   
-  
-  
 });
+
+test("calling commitRecords() without explicit storeKeys", function() {
+  
+  store.changelog = [storeKey1, storeKey2, storeKey3, storeKey4];
+  store.commitRecords();
+
+  status = store.readStatus( storeKey1);
+  equals(status, SC.Record.READY_CLEAN, "storeKey1 - the status shouldn't have changed. It should be READY_CLEAN ");
+  
+  status = store.readStatus( storeKey2);
+  equals(status, SC.Record.BUSY_CREATING, "storeKey2 - the status should be SC.Record.BUSY_CREATING");
+
+  status = store.readStatus( storeKey3);
+  equals(status, SC.Record.BUSY_COMMITTING, "storeKey3 - the status should be SC.Record.BUSY_COMMITTING");
+  
+  status = store.readStatus( storeKey4);
+  equals(status, SC.Record.BUSY_DESTROYING, "storeKey4 - the status should be SC.Record.BUSY_DESTROYING");
+  
+  ds.expect(1, [storeKey2], [storeKey3], [storeKey4]);
+});
+
+test("calling commitRecords() with params", function() {
+  var p = { foo: "bar" };
+  store.commitRecord(null, null, storeKey2, p);
+  ds.expect(1, [storeKey2], [], [], p);
+  ds.reset();
+
+  // calling commit records with no storeKeys should still invoke if params
+  store.commitRecords(null,null,null,p);
+  ds.expect(1, [], [], [], p);
+  ds.reset();
+  
+  // call commit records with no storeKeys and no params should not invoke ds
+  store.commitRecords(null,null,null,null);
+  ds.expect(0);
+});
+
+

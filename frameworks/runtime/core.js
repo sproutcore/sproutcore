@@ -473,6 +473,10 @@ SC.mixin(/** @scope SC */ {
   */
   clone: function(object) {
     var ret = object ;
+    
+    // fast path
+    if (object && object.isCopyable) return object.copy();
+    
     switch (SC.typeOf(object)) {
     case SC.T_ARRAY:
       if (object.clone && SC.typeOf(object.clone) === SC.T_FUNCTION) {
@@ -627,12 +631,12 @@ SC.mixin(/** @scope SC */ {
   
 }); // end mixin
 
+/** @private Aliasn for SC.clone() */
+SC.copy = SC.clone ;
+
 /** @private Alias for SC.A() */
 SC.$A = SC.A;
 
-/** @private Alias for SC.typeOf() */
-SC.typeOf = SC.typeOf ;
-  
 /** @private Provided for compatibility with old HTML templates. */
 SC.didLoad = SC.K ;
 
@@ -752,13 +756,14 @@ SC.mixin(Function.prototype,
       
     }}}
     
-    bq. *Why Use The Same Method for Getters and Setters?*  Most property-
-    based frameworks expect you to write two methods for each property but
-    SproutCore only uses one.  We do this because most of the time when
-    you write a setter is is basically a getter plus some extra work.  There 
-    is little added benefit in writing both methods when you can conditionally
-    exclude part of it.  This helps to keep your code more compact and easier
-    to maintain.
+    h2. Why Use The Same Method for Getters and Setters?
+    
+    Most property-based frameworks expect you to write two methods for each
+    property but SproutCore only uses one. We do this because most of the time
+    when you write a setter is is basically a getter plus some extra work.
+    There is little added benefit in writing both methods when you can
+    conditionally exclude part of it. This helps to keep your code more
+    compact and easier to maintain.
     
     @param dependentKeys {String...} optional set of dependent keys
     @returns {Function} the declared function instance
@@ -892,4 +897,22 @@ String.prototype.loc = function() {
   var str = SC.STRINGS[this] || this;
   return str.fmt.apply(str,arguments) ;
 };
+
+
+  
+/**
+  Splits the string into words, separated by spaces. Empty strings are
+  removed from the results.
+  
+  @returns {Array} an array of non-empty strings
+*/
+String.prototype.w = function() { 
+  var ary = [], ary2 = this.split(' '), len = ary2.length ;
+  for (var idx=0; idx<len; ++idx) {
+    var str = ary2[idx] ;
+    if (str.length !== 0) ary.push(str) ; // skip empty strings
+  }
+  return ary ;
+};
+
 

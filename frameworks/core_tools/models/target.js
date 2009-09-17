@@ -1,8 +1,8 @@
 // ==========================================================================
-// Project:   TestRunner.Target
+// Project:   CoreTools.Target
 // Copyright: ©2009 Apple Inc.
 // ==========================================================================
-/*globals TestRunner */
+/*globals CoreTools */
 
 /** @class
 
@@ -10,8 +10,8 @@
 
   @extends SC.Record
 */
-TestRunner.Target = SC.Record.extend(
-/** @scope TestRunner.Target.prototype */ {
+CoreTools.Target = SC.Record.extend(
+/** @scope CoreTools.Target.prototype */ {
 
   primaryKey: "name",
   
@@ -23,12 +23,19 @@ TestRunner.Target = SC.Record.extend(
   /**
     Parent of target.  Only non-null for nested targets.
   */
-  parent: SC.Record.toOne("TestRunner.Target"),
+  parent: SC.Record.toOne("CoreTools.Target"),
 
   /**
     URL to use to load tests.
   */
   testsUrl: SC.Record.attr(String, { key: "link_tests" }),
+  
+  /**  
+    URL to use to load the app.  If no an app, returns null
+  */
+  appUrl: function() {
+    return (this.get('kind') === 'app') ? this.get('name') : null;
+  }.property('kind', 'name').cacheable(),
   
   /**
     The isExpanded state.  Defaults to NO on load.
@@ -39,8 +46,10 @@ TestRunner.Target = SC.Record.extend(
     Children of this target.  Computed by getting the loaded targets
   */
   children: function() {
-    var store = this.get('store');
-    var ret = TestRunner.get('targets').filterProperty('parent', this);
+    var store = this.get('store'),
+        query = CoreTools.TARGETS_QUERY,
+        ret   = store.find(query).filterProperty('parent', this);
+        
     if (ret) ret = ret.sortProperty('kind', 'displayName');
     return (ret && ret.get('length')>0) ? ret : null ;
   }.property().cacheable(),
@@ -81,12 +90,19 @@ TestRunner.Target = SC.Record.extend(
     else return (this.get('kind') || 'unknown').toLowerCase();
   }.property('kind', 'parent').cacheable(),
   
+  
+  testsQuery: function() {
+    return SC.Query.remote(CoreTools.Test, { url: this.get('testsUrl') });
+  }.property('testsUrl').cacheable(),
+  
   /**
     Returns all of the tests associated with this target by fetching the
     testsUrl.
   */
   tests: function() {
-    return this.get('store').findAll(TestRunner.Test, { url: this.get('testsUrl') });
-  }.property('testsUrl').cacheable()
+    return this.get('store').find(this.get('testsQuery'));
+  }.property('testsQuery').cacheable()
   
 }) ;
+
+CoreTools.TARGETS_QUERY = SC.Query.remote(CoreTools.Target);

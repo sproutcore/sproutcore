@@ -26,8 +26,8 @@ TestRunner.testsController = SC.ArrayController.create(
   */
   isShowingTests: YES,
   
-  stateDidChange: function() {
+  statusDidChange: function() {
     TestRunner.sendAction('testsDidChange');
-  }.observes('state')
+  }.observes('status')
   
 }) ;

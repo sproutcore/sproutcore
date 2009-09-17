@@ -132,18 +132,6 @@ test("getting an array and object attributes where underlying value is not", fun
   equals((typeof rec2.get('anObject')), 'object', 'reading prop anObject should return empty object');
 });
 
-test("getting toOne relationship should map guid to a real record", function() {
-  var rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
-  equals(rec2.get('id'), 'foo2', 'precond - should find record 2');
-  equals(rec2.get('relatedTo'), rec, 'should get rec1 instance for rec2.relatedTo');
-});
-
-test("getting toOne relationship from computed attribute should map guid to a real record", function() {
-  var rec3 = MyApp.store.find(MyApp.Foo, 'foo3');
-  equals(rec3.get('id'), 'foo3', 'precond - should find record 3');
-  equals(rec3.get('relatedToComputed'), bar, 'should get bar1 instance for rec3.relatedToComputed');
-});
-
 test("reading date should parse ISO date", function() {
   var d = new Date(1235968200000); // should be proper date
   equals(rec.get('date').toString(), d.toString(), 'should have matched date');
@@ -181,29 +169,6 @@ test("writing a value should override default value", function() {
   equals(rec.get('defaultValue'), 'default', 'precond - returns default');
   rec.set('defaultValue', 'not-default');
   equals(rec.get('defaultValue'), 'not-default', 'newly written value should replace default value');
-});
-
-test("writing to a to-one relationship should update set guid", function() {
-  var rec2 = MyApp.store.find(MyApp.Foo, 'foo2');
-  equals(rec2.get('id'), 'foo2', 'precond - should find record 2');
-
-  equals(rec2.get('relatedTo'), rec, 'precond - should get rec1 instance for rec2.relatedTo');
-
-  rec2.set('relatedTo', rec2);
-
-  equals(rec2.readAttribute('relatedTo'), 'foo2', 'should write ID for set record to relatedTo attribute');
-  
-  equals(rec2.get('relatedTo'), rec2, 'should get foo record that was just set');
-
-});
-
-test("writing to a to-one computed relationship should update set guid", function() {
-  var rec3 = MyApp.store.find(MyApp.Foo, 'foo3');
-  equals(rec3.get('id'), 'foo3', 'precond - should find record 2');
-  equals(rec3.get('relatedToComputed'), bar, 'precond - should get bar1 instance for rec3.relatedToComputed');
-  
-  rec3.set('relatedToComputed', rec);
-  equals(rec3.readAttribute('relatedToComputed'), 'foo1', 'should write ID for set record to relatedTo attribute');
 });
 
 test("writing a date should generate an ISO date" ,function() {

@@ -12,7 +12,7 @@ sc_require('models/record_attribute');
 
   Describes a single attribute that is fetched dynamically from the server
   when you request it.  Normally getting a property value with this attribute
-  applied will cause call the findAll() method on the record store passing
+  applied will cause call the find() method on the record store passing
   the attribute record type as the query key along with the property value,
   owner record, and property key name as parameters. 
   

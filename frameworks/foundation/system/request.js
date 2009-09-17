@@ -64,8 +64,15 @@ SC.Request = SC.Object.extend({
   */  
   send: function(body) {
     var request = this ; 
-    if(body) {
-      if(this.get('isJSON')) {
+    
+    var isJSON = request.get('isJSON');
+    
+    // Set the content-type to JSON (many browsers will otherwise default it
+    // to XML).
+    if (isJSON) request.header('Content-Type', 'application/json');
+    
+    if (body) {
+      if (isJSON) {
         body=SC.json.encode(body);
         if(body===undefined) console.error('There was an error encoding to JSON');
       }

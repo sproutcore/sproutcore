@@ -158,7 +158,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   setup: function() {
     // handle basic events        
-    this.listenFor('keydown keyup mousedown mouseup click dblclick mouseout mouseover mousemove'.w(), document)
+    this.listenFor('keydown keyup mousedown mouseup click dblclick mouseout mouseover mousemove selectstart'.w(), document)
         .listenFor('resize focus blur'.w(), window);
 
     // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
@@ -407,6 +407,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // equivalent.  Otherwise, send as a keyDown event so that the focused
     // responder can do something useful with the event.
     if (this._isFunctionOrNonPrintableKey(evt)) {
+      
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
@@ -420,7 +421,8 @@ SC.RootResponder = SC.RootResponder.extend(
         return evt.hasCustomEventHandling ;
       }
     }
-    return this.sendEvent('keyDown', evt) ; // allow normal processing...
+    
+    return YES ; // otherwise do not handle keydown - wait for keypress
   },
   
   /** @private
@@ -438,7 +440,6 @@ SC.RootResponder = SC.RootResponder.extend(
 
     // normal processing.  send keyDown for printable keys...
     } else {
-      if (this._isFunctionOrNonPrintableKey(evt)) return YES; 
       if (evt.charCode !== undefined && evt.charCode === 0) return YES;
       return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
@@ -460,7 +461,7 @@ SC.RootResponder = SC.RootResponder.extend(
       
       // first, save the click count.  Click count resets if your down is
       // more than 125msec after you last click up.
-      this._clickCount = this._clickCount + 1 ;
+      this._clickCount += 1 ;
       if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
         this._clickCount = 1 ; 
       }
@@ -575,6 +576,7 @@ SC.RootResponder = SC.RootResponder.extend(
   mousemove: function(evt) {
     SC.RunLoop.begin();
     try {
+      
       // make sure the view gets focus no matter what.  FF is inconsistant 
       // about this.
       this.focus();
@@ -584,9 +586,11 @@ SC.RootResponder = SC.RootResponder.extend(
       if (this._drag) {
         this._drag.tryToPerform('mouseDragged', evt);
       } else {
+        
         var lh = this._lastHovered || [] ;
         var nh = [] ;
         var view = this.targetViewForEvent(evt) ;
+        var exited;
         
         // work up the view chain.  Notify of mouse entered and
         // mouseMoved if implemented.
@@ -601,17 +605,15 @@ SC.RootResponder = SC.RootResponder.extend(
           
           view = view.get('nextResponder');
         }
-        
         // now find those views last hovered over that were no longer found 
         // in this chain and notify of mouseExited.
-        for(var loc=0; loc < lh.length; loc++) {
+        for(var loc=0, len=lh.length; loc < len; loc++) {
           view = lh[loc] ;
-          var exited = view.respondsTo('mouseExited') ;
+          exited = view.respondsTo('mouseExited') ;
           if (exited && !(nh.indexOf(view) !== -1)) {
             view.tryToPerform('mouseExited',evt);
           }
         }
-        
         this._lastHovered = nh; 
         
         // also, if a mouseDownView exists, call the mouseDragged action, if 
@@ -619,6 +621,7 @@ SC.RootResponder = SC.RootResponder.extend(
         if (this._mouseDownView) {
           this._mouseDownView.tryToPerform('mouseDragged', evt);
         }
+        
       }
     } catch (e) {
       console.log('Exception during mousemove: %@'.fmt(e)) ;
@@ -634,7 +637,10 @@ SC.RootResponder = SC.RootResponder.extend(
   
   _mouseCanDrag: YES,
   
-  selectstart: function() { return this._mouseCanDrag ? false : true ; },
+  selectstart: function(evt) { 
+    var result = this.sendEvent('selectStart', evt, this.targetViewForEvent(evt));
+    return (result !=null ? YES: NO) && (this._mouseCanDrag ? NO : YES);
+  },
   
   drag: function() { return false; }
   

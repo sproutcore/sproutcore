@@ -20,7 +20,7 @@ config :all,
 # off in your project buildfile by referencing sproutcore specifically
 mode :debug do
   config :all, 
-    :combine_javascript => true,
+    :combine_javascript => false,
     :combine_stylesheet => true
 end
 
@@ -68,7 +68,21 @@ config :standard_theme,
   :debug_required => ['sproutcore/debug']
 
 # CONFIGURE APPS
-%w(tests docs).each do |app_target|
-  config app_target, :required => [:desktop], :theme => :standard_theme
+
+config :core_tools, :required => [:desktop]
+
+# mode :debug do
+#   config :core_tools, :combine_javascript => false
+# end
+
+%w(tests docs welcome).each do |app_target|
+  config app_target, 
+    :required => [:desktop, :core_tools], 
+    :theme => :standard_theme
+    
+  # mode :debug do
+  #   config app_target, :combine_javascript => false
+  # end
+  
 end
  

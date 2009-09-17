@@ -491,8 +491,6 @@ SC.ListView = SC.CollectionView.extend(
     min = this.rowOffsetForContentIndex(index);
     max = min + this.rowHeightForContentIndex(index);
     
-    dropOperation = SC.DROP_BEFORE;
-    
     // now we know which index we are in.  if dropOperation is DROP_ON, figure
     // if we can drop on or not.
     if (dropOperation == SC.DROP_ON) {
@@ -505,6 +503,8 @@ SC.ListView = SC.CollectionView.extend(
         return [index, SC.DROP_ON];
       }
     }
+    
+    dropOperation = SC.DROP_BEFORE;
     
     // ok, now if we are in last 10px, go to next item.
     if ((index<len) && (loc.y >= max-10)) index++;

@@ -23,7 +23,7 @@ SC.mixin( /** @scope SC */ {
   download: function(path) {
     var tempDLIFrame=document.createElement('iframe');
     var frameId = 'DownloadFrame_' + this._downloadFrames;
-    tempDLIFrame.setAttribute('id',frameId);
+    SC.$(tempDLIFrame).attr('id',frameId);
     tempDLIFrame.style.border='10px';
     tempDLIFrame.style.width='0px';
     tempDLIFrame.style.height='0px';
@@ -31,15 +31,15 @@ SC.mixin( /** @scope SC */ {
     tempDLIFrame.style.top='-10000px';
     tempDLIFrame.style.left='-10000px';    
     // Don't set the iFrame content yet if this is Safari
-    if (!(SC.browser.isSafari)) {
-      tempDLIFrame.setAttribute('src',path);
+    if (!SC.browser.isSafari) {
+      SC.$(tempDLIFrame).attr('src',path);
     }
     document.getElementsByTagName('body')[0].appendChild(tempDLIFrame);
     if (SC.browser.isSafari) {
-      tempDLIFrame.setAttribute('src',path);    
+      SC.$(tempDLIFrame).attr('src',path);    
     }
     this._downloadFrames = this._downloadFrames + 1;
-    if (!(SC.browser.isSafari)) {
+    if (!SC.browser.isSafari) {
       var r = function() { 
         document.body.removeChild(document.getElementById(frameId)); 
         frameId = null;
@@ -203,6 +203,46 @@ SC.mixin( /** @scope SC */ {
     return '{%@, %@, %@, %@}'.fmt(r.x, r.y, r.width, r.height);
   },
   
+  /**
+    Returns a string representation of the layout hash.
+
+    Layouts can contain the following keys:
+      - left: the left edge
+      - top: the top edge
+      - right: the right edge
+      - bottom: the bottom edge
+      - height: the height
+      - width: the width
+      - centerX: an offset from center X 
+      - centerY: an offset from center Y
+      - minWidth: a minimum width
+      - minHeight: a minimum height
+      - maxWidth: a maximum width
+      - maxHeight: a maximum height
+    
+    @param layout {Hash} The layout hash to stringify.
+    @returns {String} A string representation of the layout hash.
+  */
+  stringFromLayout: function(layout) {
+    // Put them in the reverse order that we want to display them, because
+    // iterating in reverse is faster for CPUs that can compare against zero
+    // quickly.
+    var keys = ['maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'centerY',
+                'centerX', 'width', 'height', 'bottom', 'right', 'top',
+                'left'];
+
+    var keyValues = [];
+    var i = keys.length;
+    while (--i >= 0) {
+      var key = keys[i];
+      if (layout.hasOwnProperty(key)) {
+        keyValues.push(key + ':' + layout[key]);
+      }
+    }
+    
+    return '{' + keyValues.join(', ') + '}';
+  },
+  
   
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
@@ -212,6 +252,13 @@ SC.mixin( /** @scope SC */ {
     @returns {Point} A hash with x,y offsets.
   */
   viewportOffset: function(el) {
+    // Some browsers natively implement getBoundingClientRect, so if it's
+    // available we'll use it for speed.
+    if (el.getBoundingClientRect) {
+      var boundingRect = el.getBoundingClientRect();
+      return { x:boundingRect.left, y:boundingRect.top };
+    }
+    
     var valueL = 0 ; var valueT = 0;
 
     // add up all the offsets for the element.
@@ -363,6 +410,7 @@ SC.mixin( /** @scope SC */ {
     var min = Math.min(Math.min(rgb[0], rgb[1]), rgb[2]);
 
     var h = (max == min) ? 0 : ((max == rgb[0]) ? ((rgb[1]-rgb[2])/(max-min)/6) : ((max == rgb[1]) ? ((rgb[2]-rgb[0])/(max-min)/6+1/3) : ((rgb[0]-rgb[1])/(max-min)/6+2/3)));
+    h = (h < 0) ? (h + 1) : ((h > 1)  ? (h - 1) : h);
     var s = (max == 0) ? 0 : (1 - min/max);
     var v = max/255;
     return [h, s, v];
@@ -386,10 +434,10 @@ SC.mixin( /** @scope SC */ {
 
   // parse rgb color or 3-digit hex color to return a properly formatted 6-digit hex colour spec, or false
   parseColor: function(string) {
-    var color = '#', match;
+    var i=0, color = '#', match;
     if(match = this.PARSE_COLOR_RGBRE.exec(string)) {
       var part;
-      for (var i=1; i<=3; i++) {
+      for (i=1; i<=3; i++) {
         part = Math.max(0, Math.min(255, parseInt(match[i],0)));
         color += this.toColorPart(part);
       }
@@ -397,7 +445,7 @@ SC.mixin( /** @scope SC */ {
     }
     if (match = this.PARSE_COLOR_HEXRE.exec(string)) {
       if(match[1].length == 3) {
-        for (var i=0; i<3; i++) {
+        for (i=0; i<3; i++) {
           color += match[1].charAt(i) + match[1].charAt(i);
         }
         return color;

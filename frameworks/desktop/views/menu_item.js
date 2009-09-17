@@ -136,12 +136,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
   itemHeight: 20,
   
-  /**
-    Property specifies which menu item the mouseover stops at
-
-    @type Boolean
-  */
-  isSelected : NO,
 
   /**
     Sub Menu Items 
@@ -198,7 +192,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     this.set('itemHeight',itemHeight) ;
     
     if(!this.get('isEnabled')) context.addClass('disabled') ;
-    
     //handle separator    
     ic = context.begin('a').attr('href', 'javascript: ;') ;   
     key = this.getDelegateProperty('isSeparatorKey', del) ;
@@ -391,8 +384,8 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   loseFocus: function() {
     if(!this.isSubMenuAMenuPane()) {
       this.set('hasMouseExited',YES) ;
-      this.set('isSelected',NO) ;
       this.$().removeClass('focus') ;
+      //this.resignFirstResponder() ;
     }
   },
   
@@ -413,8 +406,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       context = context.end() ;
       var menuItemViews = subMenu.get('menuItemViews') ;
       if(menuItemViews && menuItemViews.length>0) {
-        subMenu.set('currentSelectedMenuItem',menuItemViews[0]) ;
-        subMenu.set('keyPane',YES) ;
+        subMenu.becomeKeyPane();
       }
     }
   },
@@ -426,11 +418,16 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   //..........................................
   //Mouse Events Handling
   //..........................................
-  
+
+  // to check the 'isMouseDown' property of the anchor 
+  isAnchorMouseDown: NO,
+
   mouseUp: function(evt) {
-    if (!this.get('isEnabled')) return YES ;
+    if (!this.get('isEnabled')) {
+      this.set('hasMouseExited',NO) ;
+      return YES ;
+    }
     this.set('hasMouseExited',NO) ;
-    this.isSelected = YES ;
     var key = this.get('contentCheckboxKey') ;
     var content = this.get('content') ;
     if (key) {
@@ -444,8 +441,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     }
     this._action(evt) ;
     var anchor = this.getAnchor() ;
-    if(anchor) anchor.mouseUp(evt) ;
-    else {
+    if(anchor) {
+      anchor.mouseUp(evt) ;
+    } else {
       this.resignFirstResponder() ;
     }
     this.closeParent() ;
@@ -465,18 +463,27 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns Boolean
   */
   mouseEntered: function(evt) {
+    var parentMenu = this.parentMenu() ;
+    this.set('hasMouseExited', NO) ;
+    if(parentMenu) {
+      parentMenu.becomeKeyPane() ;
+      // condition check whether the anchor tag has _isMouseDown or not
+      if(parentMenu.get('anchor')._isMouseDown){
+        var isAnchorMouseDown = parentMenu.getPath('anchor._isMouseDown') ;
+        this.set('isAnchorMouseDown', isAnchorMouseDown) ;
+        if(this.get('isAnchorMouseDown')) {
+          SC.Event.trigger(this.get('layer'), 'mousedown');
+        }
+      }
+    }
     if (!this.get('isEnabled') && !this.isSeparator()) return YES ;
-    this.isSelected = YES ;
-
-    var parentPane = this.parentMenu() ;
-    if(parentPane) parentPane.set('currentSelectedMenuItem', this) ;
-
     var key = this.get('contentIsBranchKey') ;
     if(key) {
       var content = this.get('content') ;
       var val = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
       if(val) this.invokeLater(this.branching(),100) ;
     }
+    this.becomeFirstResponder() ;
 	  return YES ;
   },
 
@@ -490,7 +497,6 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     var parentMenu = this.parentMenu() ;
     if(parentMenu) {
       parentMenu.set('previousSelectedMenuItem', this) ;
-      this.resignFirstResponder() ;
     }
     return YES ;
   },
@@ -545,19 +551,34 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   /** @private*/
   cancel: function(evt) {
     this.loseFocus() ;
+    var menu = this.parentMenu() ;
+    if (menu) menu.remove() ;
+    var pane = menu.getPath('anchor.pane') ;
+    if (pane) pane.becomeKeyPane() ;
     return YES ;
   },
   
   /** @private*/
   didBecomeFirstResponder: function(responder) {
     if (responder !== this) return;
-    if(!this.isSeparator()) this.$().addClass('focus') ;
+    if(!this.isSeparator()) {
+      this.$().addClass('focus') ;
+    }
+    var parentMenu = this.parentMenu() ;
+    if(parentMenu) {
+      parentMenu.set('currentSelectedMenuItem', this) ;
+    }
   },
   
   /** @private*/
   willLoseFirstResponder: function(responder) {
     if (responder !== this) return;
     this.$().removeClass('focus') ;
+    var parentMenu = this.parentMenu() ;
+    if(parentMenu) {
+      parentMenu.set('currentSelectedMenuItem', null) ;
+      parentMenu.set('previousSelectedMenuItem', this) ;
+    }
   },
   
   /** @private*/

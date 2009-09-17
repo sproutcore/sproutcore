@@ -4,8 +4,9 @@
   border: 1px #333 solid;
   border-radius: 5px;
   -webkit-border-radius: 5px;
-  background-color: #99a1b2;
-  background-color: rgba(255,255,255,0.25);
+  background-color: #8991a2;
+  background-color: rgba(205,205,205,0.25);
+  overflow: hidden;
 }
 
 /* only first tab view should color background */

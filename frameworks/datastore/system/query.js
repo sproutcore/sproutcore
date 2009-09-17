@@ -5,7 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
+sc_require('core') ;
+sc_require('models/record');
+
 /**
   @class
 
@@ -85,6 +87,7 @@ require('core') ;
   - >=
   - BEGINS_WITH (checks if a string starts with another one)
   - ENDS_WITH   (checks if a string ends with another one)
+  - CONTAINS    (checks if a string contains another one)
   - MATCHES     (checks if a string is matched by a regexp,
                 you will have to use a parameter to insert the regexp)
   - ANY         (checks if the thing on its left is contained in the array
@@ -120,39 +123,222 @@ require('core') ;
   Again see below for details.
 
   @extends SC.Object
-  @static
+  @extends SC.Copyable
+  @extends SC.Freezable
   @since SproutCore 1.0
 */
 
-SC.Query = SC.Object.extend({
+SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable, 
+  /** @scope SC.Query.prototype */ {
 
- 
-  conditions:  null,
-  orderBy:     null,
-  recordType:  null,
-  parameters:  null,
- 
-  /** 
-    Returns YES if record is matched by the query, NO otherwise.
- 
-    @param {SC.Record} record the record to check
-    @returns {Boolean} YES if record belongs, NO otherwise
-  */ 
-  contains: function(record, wildCardValues) {
-    // if called for the first time we have to parse the query
-    if (!this.isReady) this.parseQuery();
-
-    // if wildCardValues were not provided, use parameters instead
-    if (wildCardValues === undefined) wildCardValues = this.parameters;
+  // ..........................................................
+  // PROPERTIES
+  // 
+  
+  isQuery: YES,
+  
+  /**
+    Unparsed query conditions.  If you are handling a query yourself, then 
+    you will find the base query string here.
     
-    // if parsing worked we check if record is contained
-    // if parsing failed no record will be contained
-    return this.isReady && this.tokenTree.evaluate(record, wildCardValues);
+    @type {String}
+  */
+  conditions:  null,
+  
+  /**
+    Optional orderBy parameters.  This will be a string of keys, optionally
+    beginning with the strings "DESC " or "ASC " to select descending or 
+    ascending order.
+    
+    @type {String}
+  */
+  orderBy:     null,
+  
+  /**
+    The base record type or types for the query.  This must be specified to
+    filter the kinds of records this query will work on.  You may either 
+    set this to a single record type or to an array or set of record types.
+    
+    @type {SC.Record|SC.Enumerable}
+  */
+  recordType:  null,
+  
+  /**
+    Optional array of multiple record types.  If the query accepts multiple 
+    record types, this is how you can check for it.
+  */
+  recordTypes: null,
+  
+  /**
+    Returns the complete set of recordTypes matched by this query.  Includes
+    any named recordTypes plus their subclasses.
+    
+    @property
+    @type {SC.Enumerable}
+  */
+  expandedRecordTypes: function() {
+    var ret = SC.CoreSet.create(), rt, q  ;
+    
+    if (rt = this.get('recordType')) this._scq_expandRecordType(rt, ret);      
+    else if (rt = this.get('recordTypes')) {
+      rt.forEach(function(t) { this._scq_expandRecordType(t, ret); }, this);
+    } else this._scq_expandRecordType(SC.Record, ret);
+
+    // save in queue.  if a new recordtype is defined, we will be notified.
+    q = SC.Query._scq_queriesWithExpandedRecordTypes;
+    if (!q) {
+      q = SC.Query._scq_queriesWithExpandedRecordTypes = SC.CoreSet.create();
+    }
+    q.add(this);
+    
+    return ret.freeze() ;
+  }.property('recordType', 'recordTypes').cacheable(),
+
+  /** @private 
+    expands a single record type into the set. called recursively
+  */
+  _scq_expandRecordType: function(recordType, set) {
+    if (set.contains(recordType)) return; // nothing to do
+    set.add(recordType);
+    
+    if (SC.typeOf(recordType)===SC.T_STRING) {
+      recordType = SC.objectForPropertyPath(recordType);
+    }
+    
+    recordType.subclasses.forEach(function(t) { 
+      this._scq_expandRecordType(t, set);
+    }, this);  
   },
   
   /**
-    This will tell you which of the two passed records is greater
-    than the other, in respect to the orderBy property of your SC.Query object.
+    Optional hash of parameters.  These parameters may be interpolated into 
+    the query conditions.  If you are handling the query manually, these 
+    parameters will not be used.
+    
+    @type {Hash}
+  */
+  parameters:  null,
+  
+  /**
+    Indicates the location where the result set for this query is stored.  
+    Currently the available options are:
+    
+    - SC.Query.LOCAL: indicates that the query results will be automatically computed from the in-memory store.
+    - SC.Query.REMOTE: indicates that the query results are kept on a remote server and hence must be loaded from the DataSource.
+    
+    The default setting for this property is SC.Query.LOCAL.  
+    
+    Note that even if a query location is LOCAL, your DataSource will still
+    have its fetch() method called for the query.  For LOCAL queries, you 
+    won't need to explicitly provide the query result set; you can just load
+    records into the in-memory store as needed and let the query recompute 
+    automatically.
+    
+    If your query location is REMOTE, then your DataSource will need to 
+    provide the actual set of query results manually.  Usually you will only 
+    need to use a REMOTE query if you are retrieving a large data set and you
+    don't want to pay the cost of computing the result set client side.
+    
+    @property
+    @type {String}
+  */
+  location: 'local', // SC.Query.LOCAL
+  
+  /**
+    Another query that will optionally limit the search of records.  This is 
+    usually configured for you when you do find() from another record array.
+    
+    @property
+    @type {SC.Query}
+  */
+  scope: null,
+  
+  
+  /**
+    Returns YES if query location is Remote.  This is sometimes more 
+    convenient than checking the location.
+    
+    @property
+    @type {Boolean}
+  */
+  isRemote: function() {
+    return this.get('location') === SC.Query.REMOTE;
+  }.property('location').cacheable(),
+
+  /**
+    Returns YES if query location is Local.  This is sometimes more 
+    convenient than checking the location.
+    
+    @property
+    @type {Boolean}
+  */
+  isLocal: function() {
+    return this.get('location') === SC.Query.LOCAL;
+  }.property('location').cacheable(),
+  
+  // ..........................................................
+  // PRIMITIVE METHODS
+  // 
+  
+  /** 
+    Returns YES if record is matched by the query, NO otherwise.  This is 
+    used when computing a query locally.  
+ 
+    @param {SC.Record} record the record to check
+    @param {Hash} parameters optional override parameters
+    @returns {Boolean} YES if record belongs, NO otherwise
+  */ 
+  contains: function(record, parameters) {
+
+    // check the recordType if specified
+    var rtype, ret = YES ;    
+    if (rtype = this.get('recordTypes')) { // plural form
+      ret = rtype.find(function(t) { return SC.kindOf(record, t); });
+    } else if (rtype = this.get('recordType')) { // singular
+      ret = SC.kindOf(record, rtype);
+    }
+    
+    if (!ret) return NO ; // if either did not pass, does not contain
+
+    // if we have a scope - check for that as well
+    var scope = this.get('scope');
+    if (scope && !scope.contains(record)) return NO ;
+    
+    // now try parsing
+    if (!this._isReady) this.parse(); // prepare the query if needed
+    if (!this._isReady) return NO ;
+    if (parameters === undefined) parameters = this.parameters || this;
+    
+    // if parsing worked we check if record is contained
+    // if parsing failed no record will be contained
+    return this._tokenTree.evaluate(record, parameters);
+  },
+  
+  /**
+    Returns YES if the query matches one or more of the record types in the
+    passed set.
+    
+    @param {SC.Set} types set of record types
+    @returns {Boolean} YES if record types match
+  */
+  containsRecordTypes: function(types) {
+    var rtype = this.get('recordType');
+    if (rtype) {
+      return !!types.find(function(t) { return SC.kindOf(t, rtype); });
+    
+    } else if (rtype = this.get('recordTypes')) {
+      return !!rtype.find(function(t) { 
+        return !!types.find(function(t2) { return SC.kindOf(t2,t); });
+      });
+      
+    } else return YES; // allow anything through
+  },
+  
+  /**
+    Returns the sort order of the two passed records, taking into account the
+    orderBy property set on this query.  This method does not verify that the
+    two records actually belong in the query set or not; this is checked using
+    contains().
  
     @param {SC.Record} record1 the first record
     @param {SC.Record} record2 the second record
@@ -161,52 +347,47 @@ SC.Query = SC.Object.extend({
                       0 if equal
   */
   compare: function(record1, record2) {
-    var result;
-    var propertyName;
 
-    // if called for the first time we have to build the order array
-    if (!this.isReady) this.parseQuery();
-    // if parsing failed we say everything is equal
-    if (!this.isReady) return 0;
+    var result = 0, 
+        propertyName, order, len, i;
+
+    // fast cases go here
+    if (record1 === record2) return 0;
     
-    // for every property specified in orderBy
-    for (var i=0, orderLength=this.order.length ; i < orderLength; i++) {
-      propertyName = this.order[i].propertyName;
+    // if called for the first time we have to build the order array
+    if (!this._isReady) this.parse();
+    if (!this._isReady) { // can't parse. guid is wrong but consistent
+      return SC.compare(record1.get('id'),record2.get('id'));
+    }
+    
+    // for every property specified in orderBy until non-eql result is found
+    order = this._order;
+    len   = order ? order.length : 0;
+    for (i=0; result===0 && (i < len); i++) {
+      propertyName = order[i].propertyName;
       // if this property has a registered comparison use that
-      // if not use default SC.compare()
       if (SC.Query.comparisons[propertyName]) {
         result = SC.Query.comparisons[propertyName](
                   record1.get(propertyName),record2.get(propertyName));
-      }
-      else {
+                  
+      // if not use default SC.compare()
+      } else {
         result = SC.compare(
-                  record1.get(propertyName),record2.get(propertyName));
+                  record1.get(propertyName), record2.get(propertyName) );
       }
-      if (result !== 0) {
-        // if order is descending we invert the sign of the result
-        if (this.order[i].descending) result = (-1) * result;
-        return result;
-      }
+      
+      if ((result!==0) && order[i].descending) result = (-1) * result;
     }
-    
-    // all properties are equal now
-    // get order by guid
-    return SC.compare(record1.get('guid'),record2.get('guid'));
+
+    // return result or compare by guid
+    if (result !== 0) return result ;
+    else return SC.compare(record1.get('id'),record2.get('id'));
   },
-  
-  
-  
-  /** @private
-    Some internal properties
+
+  /** @private 
+      Becomes YES once the query has been successfully parsed 
   */
-  isReady:        false,
-  tokenList:      null,
-  usedProperties: null,
-  needsRecord:    false,
-  tokenTree:      null,
-  order:          [],
-  
-  
+  _isReady:     NO,
   
   /**
     This method has to be called before the query object can be used.
@@ -216,25 +397,74 @@ SC.Query = SC.Object.extend({
  
     @returns {Boolean} true if parsing succeeded, false otherwise
   */
-  parseQuery: function() {
-    this.tokenList = this.tokenizeString(this.conditions, this.queryLanguage);
-    this.tokenTree = this.buildTokenTree(this.tokenList, this.queryLanguage);
-    this.order     = this.buildOrder(this.orderBy);
+  parse: function() {
+    var conditions = this.get('conditions'),
+        lang       = this.get('queryLanguage'),
+        tokens, tree;
+        
+    tokens = this._tokenList = this.tokenizeString(conditions, lang);
+    tree = this._tokenTree = this.buildTokenTree(tokens, lang);
+    this._order = this.buildOrder(this.get('orderBy'));
     
-    // maybe we need this later
-    // this.usedProperties = this.propertiesUsedInQuery(this.tokenList);
-    
-    if ( !this.tokenTree || this.tokenTree.error ) {
-      return false;
-    }  
-    else {
-      this.isReady = true;
-      return true;
-    }
+    this._isReady = !!tree && !tree.error;
+    if (tree && tree.error) throw tree.error;
+    return this._isReady;
   },
   
+  /**
+    Returns the same query but with the scope set to the passed record array.
+    This will copy the receiver.  It also stores these queries in a cache to
+    reuse them if possible.
+    
+    @param {SC.RecordArray} recordArray the scope
+    @returns {SC.Query} new query
+  */
+  queryWithScope: function(recordArray) {
+    // look for a cached query on record array.
+    var key = SC.keyFor('__query__', SC.guidFor(this)),
+        ret = recordArray[key];
+        
+    if (!ret) {
+      recordArray[key] = ret = this.copy();
+      ret.set('scope', recordArray);
+      ret.freeze();
+    }
+    
+    return ret ;
+  },
   
+  // ..........................................................
+  // PRIVATE SUPPORT
+  // 
+
+  /**
+    Properties that need to be copied when cloning the query.
+  */
+  copyKeys: 'conditions orderBy recordType recordTypes parameters location scope'.w(),
   
+  concatenatedProperties: 'copyKeys'.w(),
+
+  /**
+    Implement the Copyable API to clone a query object once it has been 
+    created.
+  */
+  copy: function() {
+    var opts = {}, 
+        keys = this.get('copyKeys'),
+        loc  = keys ? keys.length : 0,
+        key, value, ret;
+        
+    while(--loc >= 0) {
+      key = keys[loc];
+      value = this.get(key);
+      if (value !== undefined) opts[key] = value ;
+    }
+    
+    ret = this.constructor.create(opts);
+    opts = null;
+    return ret ;
+  },
+
   // ..........................................................
   // QUERY LANGUAGE DEFINITION
   //
@@ -394,7 +624,7 @@ SC.Query = SC.Object.extend({
       evaluate:         function (r,w) {
                           var all   = this.leftSide.evaluate(r,w);
                           var start = this.rightSide.evaluate(r,w);
-                          return ( all.substr(0,start.length) == start );
+                          return ( all.indexOf(start) === 0 );
                         }
     },
     'ENDS_WITH': {
@@ -405,8 +635,18 @@ SC.Query = SC.Object.extend({
       evaluate:         function (r,w) {
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
-                          var suf = all.substring(all.length-end.length,all.length);
-                          return suf == end;
+                          return ( all.indexOf(end) === (all.length - end.length) );
+                        }
+    },
+    'CONTAINS': {
+      reservedWord:     true,
+      leftType:         'PRIMITIVE',
+      rightType:        'PRIMITIVE',
+      evalType:         'BOOLEAN',
+      evaluate:         function (r,w) {
+                          var all    = this.leftSide.evaluate(r,w);
+                          var substr = this.rightSide.evaluate(r,w);
+                          return (all.indexOf(substr) !== -1);
                         }
     },
     'ANY': {
@@ -458,16 +698,31 @@ SC.Query = SC.Object.extend({
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return undefined; }
     },
+
     'false': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return false; }
     },
+
     'true': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return true; }
+    },
+    
+    'YES': {
+      reservedWord:     true,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return true; }
+    },
+    
+    'NO': {
+      reservedWord:     true,
+      evalType:         'PRIMITIVE',
+      evaluate:         function (r,w) { return false; }
     }
+    
   },
   
 
@@ -478,7 +733,7 @@ SC.Query = SC.Object.extend({
   
   /**
     Takes a string and tokenizes it based on the grammar definition
-    provided. Called by parseQuery().
+    provided. Called by parse().
     
     @param {String} inputString the string to tokenize
     @param {Object} grammar the grammar definition (normally queryLanguage)
@@ -487,20 +742,20 @@ SC.Query = SC.Object.extend({
   tokenizeString: function (inputString, grammar) {
 	
 	
-    var tokenList           = [];
-    var c                   = null;
-  	var t                   = null;
-  	var token               = null;
-    var tokenType           = null;
-    var currentToken        = null;
-    var currentTokenType    = null;
-    var currentTokenValue   = null;
-    var currentDelimeter    = null;
-    var endOfString         = false;
-    var endOfToken          = false;
-    var belongsToToken      = false;
-    var skipThisCharacter   = false;
-    var rememberCount       = {};
+    var tokenList           = [],
+        c                   = null,
+        t                   = null,
+        token               = null,
+        tokenType           = null,
+        currentToken        = null,
+        currentTokenType    = null,
+        currentTokenValue   = null,
+        currentDelimeter    = null,
+        endOfString         = false,
+        endOfToken          = false,
+        belongsToToken      = false,
+        skipThisCharacter   = false,
+        rememberCount       = {};
   
   
     // helper function that adds tokens to the tokenList
@@ -791,7 +1046,7 @@ SC.Query = SC.Object.extend({
   /**
     Takes a string containing an order statement and returns an array
     describing this order for easier processing.
-    Called by parseQuery().
+    Called by parse().
     
     @param {String} orderString the string containing the order statement
     @returns {Array} array of order statement
@@ -815,63 +1070,28 @@ SC.Query = SC.Object.extend({
     }
     
   }
-  
-  
-  // ..........................................................
-  // OTHER HELPERS
-  // not used right now
-  
-  // propertiesUsedInQuery: function (tokenList) {
-  //   var propertyList = [];
-  //   for (var i=0; i < tokenList.length; i++) {
-  //     if (tokenList[i].tokenType == 'PROPERTY') propertyList.push(tokenList[i].tokenValue);
-  //   };
-  //   return propertyList;
-  // }
-  
 
 });
 
 
 // Class Methods
 SC.Query.mixin( /** @scope SC.Query */ {
-  /**
-    Will find which records match a given SC.Query and return the storeKeys.
-    This will also apply the sorting for the query
-    
-    @param {SC.Query} query to apply
-    @param {Array} storeKeys to search within
-    @param {SC.Store} store to materialize record from during sort
-    @returns {Array} array instance of store keys matching the SC.Query (sorted)
-  */
+
+  /** Constant used for SC.Query#location */
+  LOCAL: 'local',
   
-  containsStoreKeys: function(query, storeKeys, store) {
-    var ret = [], idx, len, rec, status, K = SC.Record;
-    var recType = query.get('recordType');
-    // if storeKeys is not set, just get all storeKeys for this record type,
-    // or all storeKeys in store if no record type is given
-    if(!storeKeys) {
-      if(recType) {
-        storeKeys = store.storeKeysFor(recType);
-      }
-      else {
-        storeKeys = store.storeKeys();
-      }
-    }
+  /** Constant used for SC.Query#location */
+  REMOTE: 'remote',
+  
+  /**
+    Given a query, returns the associated storeKey.  For the inverse of this 
+    method see SC.Store.queryFor().
     
-    for(idx=0,len=storeKeys.length;idx<len;idx++) {
-      rec = store.materializeRecord(storeKeys[idx]);
-      if (rec) status = rec.get('status');
-      
-      // do not include EMPTY or DESTROYED records
-      if (rec && !(status & K.EMPTY) && !(status & K.DESTROYED)) {
-        if (query.contains(rec)) ret.push(storeKeys[idx]);
-      }
-    }
-    
-    SC.Query.orderStoreKeys(ret, query, store);
-    
-    return ret;
+    @param {SC.Query} query the query
+    @returns {Number} a storeKey.
+  */
+  storeKeyFor: function(query) {
+    return query ? query.get('storeKey') : null;
   },
   
   /**
@@ -883,7 +1103,6 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {SC.Store} store to materialize record from
     @returns {Array} array instance of store keys matching the SC.Query (sorted)
   */
-  
   containsRecords: function(query, records, store) {
     var ret = [];
     for(var idx=0,len=records.get('length');idx<len;idx++) {
@@ -910,7 +1129,7 @@ SC.Query.mixin( /** @scope SC.Query */ {
   
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
-    if(query.get('orderBy') && storeKeys) {
+    if (storeKeys) {
       
       // Set tmp variable because we can't pass variables to sort function.
       // Do this instead of generating a temporary closure function for perf
@@ -939,6 +1158,176 @@ SC.Query.mixin( /** @scope SC.Query */ {
         record1  = store.materializeRecord(storeKey1),
         record2  = store.materializeRecord(storeKey2);
     return queryKey.compare(record1, record2);
+  },
+  
+  /**
+    Returns a SC.Query instance reflecting the passed properties.  Where 
+    possible this method will return cached query instances so that multiple 
+    calls to this method will return the same instance.  This is not possible 
+    however, when you pass custom parameters or set ordering. All returned 
+    queries are frozen.
+    
+    Usually you will not call this method directly.  Instead use the more
+    convenient SC.Query.local() and SC.Query.remote().
+    
+    h2. Examples
+    
+    There are a number of different ways you can call this method.  
+    
+    The following return local queries selecting all records of a particular 
+    type or types, including any subclasses:
+    
+    {{{
+      var people = SC.Query.local(Ab.Person);
+      var peopleAndCompanies = SC.Query.local([Ab.Person, Ab.Company]);
+      
+      var people = SC.Query.local('Ab.Person');
+      var peopleAndCompanies = SC.Query.local('Ab.Person Ab.Company'.w());
+      
+      var allRecords = SC.Query.local(SC.Record);
+    }}} 
+    
+    The following will match a particular type of condition:
+    
+    {{{
+      var married = SC.Query.local(Ab.Person, "isMarried=YES");
+      var married = SC.Query.local(Ab.Person, "isMarried=%@", [YES]);
+      var married = SC.Query.local(Ab.Person, "isMarried={married}", {
+        married: YES
+      });
+    }}}
+    
+    You can also pass a hash of options as the second parameter.  This is 
+    how you specify an order, for example:
+    
+    {{{
+      var orderedPeople = SC.Query.local(Ab.Person, { orderBy: "firstName" });
+    }}}
+    
+    @param {String} location the query location.
+    @param {SC.Record|Array} recordType the record type or types.
+    @param {String} conditions optional conditions
+    @param {Hash} params optional params. or pass multiple args.
+    @returns {SC.Query}
+  */
+  build: function(location, recordType, conditions, params) {
+    
+    var opts = null,
+        ret, cache, key, tmp;
+    
+    // fast case for query objects.
+    if (recordType && recordType.isQuery) { 
+      if (recordType.get('location') === location) return recordType;
+      else return recordType.copy().set('location', location).freeze();
+    }
+    
+    // normalize recordType
+    if (typeof recordType === SC.T_STRING) {
+      ret = SC.objectForPropertyPath(recordType);
+      if (!ret) throw "%@ did not resolve to a class".fmt(recordType);
+      recordType = ret ;
+    } else if (recordType && recordType.isEnumerable) {
+      ret = [];
+      recordType.forEach(function(t) {
+        if (typeof t === SC.T_STRING) t = SC.objectForPropertyPath(t);
+        if (!t) throw "cannot resolve record types: %@".fmt(recordType);
+        ret.push(t);
+      }, this);
+      recordType = ret ;
+    } else if (!recordType) recordType = SC.Record; // find all records
+    
+    if (params === undefined) params = null;
+    if (conditions === undefined) conditions = null;
+
+    // normalize other params. if conditions is just a hash, treat as opts
+    if (!params && (typeof conditions !== SC.T_STRING)) {
+      opts = conditions;
+      conditions = null ;
+    }
+    
+    // special case - easy to cache.
+    if (!params && !opts) {
+
+      tmp = SC.Query._scq_recordTypeCache;
+      if (!tmp) tmp = SC.Query._scq_recordTypeCache = {};
+      cache = tmp[location];
+      if (!cache) cache = tmp[location] = {}; 
+      
+      if (recordType.isEnumerable) {
+        key = recordType.map(function(k) { return SC.guidFor(k); });
+        key = key.sort().join(':');
+      } else key = SC.guidFor(recordType);
+      
+      if (conditions) key = [key, conditions].join('::');
+      
+      ret = cache[key];
+      if (!ret) {
+        if (recordType.isEnumerable) {
+          opts = { recordTypes: recordType.copy() };
+        } else opts = { recordType: recordType };
+        
+        opts.location = location ;
+        opts.conditions = conditions ;
+        ret = cache[key] = SC.Query.create(opts).freeze();
+      }
+    // otherwise parse extra conditions and handle them
+    } else {
+
+      if (!opts) opts = {};
+      if (!opts.location) opts.location = location ; // allow override
+
+      // pass one or more recordTypes.
+      if (recordType && recordType.isEnumerable) {
+        opts.recordsTypes = recordType;
+      } else opts.recordType = recordType;
+
+      // set conditions and params if needed
+      if (conditions) opts.conditions = conditions;
+      if (params) opts.parameters = params;
+
+      ret = SC.Query.create(opts).freeze();
+    }
+    
+    return ret ;
+  },
+  
+  /**
+    Returns a LOCAL query with the passed options.  For a full description of
+    the parameters you can pass to this method, see SC.Query.build().
+  
+    @param {SC.Record|Array} recordType the record type or types.
+    @param {String} conditions optional conditions
+    @param {Hash} params optional params. or pass multiple args.
+    @returns {SC.Query}
+  */
+  local: function(recordType, conditions, params) {
+    return this.build(SC.Query.LOCAL, recordType, conditions, params);
+  },
+  
+  /**
+    Returns a REMOTE query with the passed options.  For a full description of
+    the parameters you can pass to this method, see SC.Query.build().
+    
+    @param {SC.Record|Array} recordType the record type or types.
+    @param {String} conditions optional conditions
+    @param {Hash} params optional params. or pass multiple args.
+    @returns {SC.Query}
+  */
+  remote: function(recordType, conditions, params) {
+    return this.build(SC.Query.REMOTE, recordType, conditions, params);
+  },
+  
+  /** @private 
+    called by SC.Record.extend(). invalided expandedRecordTypes
+  */
+  _scq_didDefineRecordType: function() {
+    var q = SC.Query._scq_queriesWithExpandedRecordTypes;
+    if (q) {
+      q.forEach(function(query) { 
+        query.notifyPropertyChange('expandedRecordTypes');
+      }, this);
+      q.clear();
+    }
   }
   
 });
@@ -980,3 +1369,7 @@ SC.Query.registerComparison = function(propertyName, comparison) {
 SC.Query.registerQueryExtension = function(tokenName, token) {
   SC.Query.prototype.queryLanguage[tokenName] = token;
 };
+
+// shorthand
+SC.Q = SC.Query.from ;
+

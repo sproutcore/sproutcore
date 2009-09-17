@@ -39,6 +39,16 @@ test("the thickness of the views",function(){
 	ok(view.thicknessForView(view.get('bottomRightView')),'thickness of the bottomRightView');
 });
 
+test("Layout direction is Horizontal",function() {
+  view.set('layoutDirection', SC.LAYOUT_HORIZONTAL) ;
+  equals(view.getPath('thumbViewCursor.cursorStyle'),"ew-resize",'The Cursor is');
+});
+
+test("Layout direction is Vertical",function() {
+  view.set('layoutDirection', SC.LAYOUT_VERTICAL) ;
+  equals(view.getPath('thumbViewCursor.cursorStyle'),"ns-resize",'The Cursor is');
+});
+
 // 
 // test("performing the mouse up event", function() {
 // 	var elem = thumb.get('layer');

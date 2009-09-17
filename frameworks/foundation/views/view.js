@@ -1203,6 +1203,102 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     return ret ;
   },
   
+  /**
+    Optionally points to the next key view that should gain focus when tabbing
+    through an interface.  If this is not set, then the next key view will
+    be set automatically to the next child.
+  */
+  nextKeyView: null,
+  
+  /**
+    Computes the next valid key view, possibly returning the receiver or null.
+    This is the next key view that acceptsFirstResponder.
+    
+    @property
+    @type SC.View
+  */
+  nextValidKeyView: function() {
+    var seen = SC.CoreSet.create(),
+        ret  = this._computeNextValidKeyView(seen);
+    seen.destroy();
+    return ret ;
+  }.property('nextKeyView'),
+  
+  _computeNextValidKeyView: function(seen) {  
+    var ret = this.get('nextKeyView'),
+        pv, cv, idx;
+
+    seen.add(this); // avoid cycles
+    
+    // find next sibling
+    if (!ret) {
+      pv = this.get('parentView');
+      cv = pv ? pv.get('childViews') : null;
+      idx = cv ? cv.indexOf(this) : -1 ;
+      
+      // get next child if possible
+      if (idx<0) ret = null;
+      else if (idx+1 >= cv.get('length')) ret = cv.objectAt(0);
+      else ret = cv.objectAt(idx+1);
+    }
+    
+    // if next view does not accept responder then get nextValidKeyView...
+    if (ret && !ret.get('acceptsFirstResponder')) {
+      if (seen.contains(ret)) ret = null;
+      else ret = ret._computeNextValidKeyView(seen);
+    }
+    
+    return ret ;
+  },
+  
+  /**
+    Optionally points to the previous key view that should gain focus when
+    tabbing through the interface. If this is not set then the previous 
+    key view will be set automatically to the previous child.
+  */
+  previousKeyView: null,
+
+  /**
+    Computes the previous valid key view, possibly returning the receiver or 
+    null.  This is the previous key view that acceptsFirstResponder.
+    
+    @property
+    @type SC.View
+  */
+  previousValidKeyView: function() {
+    var seen = SC.CoreSet.create(),
+        ret  = this._computePreviousValidKeyView(seen);
+    seen.destroy();
+    return ret ;
+  }.property('previousKeyView'),
+  
+  _computePreviousValidKeyView: function(seen) {  
+    var ret = this.get('previousKeyView'),
+        pv, cv, idx;
+
+    seen.add(this); // avoid cycles
+    
+    // find previous sibling
+    if (!ret) {
+      pv = this.get('parentView');
+      cv = pv ? pv.get('childViews') : null;
+      idx = cv ? cv.indexOf(this) : -1 ;
+      
+      // get next child if possible
+      if (idx<0) ret = null;
+      else if (idx > 0) ret = cv.objectAt(idx-1);
+      else ret = cv.objectAt(cv.get('length')-1);
+    }
+    
+    // if next view does not accept responder then get nextValidKeyView...
+    if (ret && !ret.get('acceptsFirstResponder')) {
+      if (seen.contains(ret)) ret = null;
+      else ret = ret._computePreviousValidKeyView(seen);
+    }
+    
+    return ret ;
+  },
+  
   // .......................................................
   // CORE DISPLAY METHODS
   //
@@ -1574,7 +1670,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   frame: function() {
     return this.computeFrameWithParentFrame(null) ;
-  }.property().cacheable(),
+  }.property('layout').cacheable(),
   
   /**
     Computes what the frame of this view would be if the parent were resized
@@ -2194,7 +2290,28 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /** walk like a duck */
-  isView: YES
+  isView: YES,
+  
+  /**
+    Default method called when a selectstart event is triggered. This event is 
+    only supported by IE. Used in sproutcore to disable text selection and 
+    IE8 accelerators. The accelerators will be enabled only in 
+    text selectable views. In FF and Safari we use the css style 'allow-select'.
+    
+    If you want to enable text selection in certain controls is recommended
+    to override this function to always return YES , instead of setting 
+    isTextSelectable to true. 
+    
+    For example in textfield you dont want to enable textSelection on the text
+    hint only on the actual text you are entering. You can achieve that by
+    only overriding this method.
+    
+    @param evt {SC.Event} the selectstart event
+    @returns YES if selectable
+  */
+  selectStart: function(evt) {
+    return this.get('isTextSelectable');
+  }
   
 });
 

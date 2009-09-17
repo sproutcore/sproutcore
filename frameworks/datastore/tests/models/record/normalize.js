@@ -10,6 +10,8 @@ var storeKeys, rec;
 module("SC.Record normalize method", {
   setup: function() {
 
+    SC.RunLoop.begin();
+ 
     MyApp = SC.Object.create({
       store: SC.Store.create()
     });
@@ -83,7 +85,12 @@ module("SC.Record normalize method", {
     
     equals(rec.storeKey, storeKeys[0], 'should find record');
     
+  },
+  
+  teardown: function() {
+    SC.RunLoop.end();
   }
+  
 });
 
 // ..........................................................

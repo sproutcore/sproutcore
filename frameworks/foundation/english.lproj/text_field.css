@@ -1,45 +1,129 @@
 /* Common SC.TextFieldView styles - needed to work properly */
 
 .sc-view .sc-text-field-view {
-	overflow: visible;
-	z-index:100;
+  border:none;
+  z-index:100;
+  overflow: visible;
+  background :white;
 }
 
+/* outline style for each browser tricky stuff... */
+.safari .sc-view .sc-text-field-view.focus {
+  outline: auto 7px -webkit-focus-ring-color; 
+  outline-offset: -2px;
+}
+.mozilla .sc-view .sc-text-field-view.focus {
+  outline-color:-moz-mac-focusring;
+  outline-offset:-5px;
+  outline-style:solid;
+  outline-width:3px;
+}
+
+.msie .sc-view .sc-text-field-view.focus {
+  outline: 1px dotted;
+}
+
+.sc-text-field-view .border {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+}
+
+/*css style to make divs look like native controls*/
+
+.mozilla .sc-view .sc-text-field-view .border {
+  -moz-appearance: textfield;
+}
+
+.msie .sc-view .sc-text-field-view .border {
+  border:1px inset;
+}
+
+.safari .sc-text-field-view .border {
+  -webkit-appearance: textfield;
+}
+
+
+
+.sc-view .sc-text-field-view .padding {
+  top: 0px;
+  left: 3px;
+  bottom: 0px;
+  right: 3px;
+  position: absolute;
+}
+
+.sc-view .sc-text-field-view.text-area .padding {
+  right: 0px;
+}
+
+
 .sc-view .sc-text-field-view .sc-text-field-accessory-view {
-	z-index:2;
+	z-index: 2;
 }
 
 .sc-text-field-view input {
-	position:  absolute;
-	top: -2px;
-	left: -2px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 	width: 100%;
 	height: 100%;
-  padding: 0px;
+	line-height: 100%;
+  bottom: 0px;
+	right: 0px;
+	display: block;
+	background: transparent;
+	vertical-align: middle;
+}
+	
+.msie .sc-text-field-view input {
+  	line-height:1.8em;
+}
+
+.mozilla .sc-text-field-view input {
+  	top: 3px;
 }
 
 .sc-text-field-view textarea {
-	position:  absolute;
-	top: -2px;
-	left: -2px;
-  width: 100%;
+  position: absolute;
+	top: 0px;
+	left: 0px;
+	width:100%;
+  bottom: 0px;
+	right: 0px;
 	height: 100%;
-  padding: 0px;
-  overflow: auto;
-  font-family: "Lucida Grande","Lucida Sans",Verdana,Arial,sans-serif;
+	display: block;
+	background: transparent;
+	vertical-align: middle;
+	resize: none;
+	line-height: 1.8em;
+	overflow: auto;
 }
+
+.mozilla .sc-text-field-view textarea {
+  
+}
+
 
 .sc-text-field-view .sc-hint {
 	z-index: 1;
 	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	padding: 3px;
+	top: 3px;
+	left: 1px;
+	right: 1px;
+	bottom: 3px;
+	padding: 0px;
 	color: #aaa ;
 	font-size: 12px;
+}
 
+.sc-text-field-view.text-area .sc-hint {
+	top: 2px;
+	left: 3px;
+	right: 3px;
+	bottom: 2px;
 }
 
 .sc-text-field-view.focus .sc-hint,

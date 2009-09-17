@@ -33,6 +33,14 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
      WARNING: Use only with textField** Juan
   */
   isTextArea: NO,
+  
+  /*
+    This variable is here to make the tab focus behavior work like safari's.
+    We believe that is a better experience for accesibility and the user in 
+    general to be able to access all controls through you keyboard. If you
+    disagree set this variable to YES.
+  */
+  followSafariTabFocusBehavior: NO,
 
   /**
     The raw value of the field itself.  This is computed from the 'value'
@@ -77,7 +85,13 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   setFieldValue: function(newValue) {
     if (SC.none(newValue)) newValue = '' ;
-    this.$input().val(newValue);
+    var input = this.$input();
+    
+    // Don't needlessly set the element if it already has the value, because
+    // doing so moves the cursor to the end in some browsers.
+    if (input.val() !== newValue) {
+      input.val(newValue);
+    }
     return this ;
   },
   
@@ -210,12 +224,10 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     Allow the browser to do its normal event handling for the mouse down
     event.  But first, set isActive to YES.
   */
-  mouseDown: function(evt) { 
-    // This has to be fixed for safari... for now we don't set is active 
-    // because any re rendering causes text selection to behave erratically
-    
+  mouseDown: function(evt) {  
     if (this.get('isEnabled')) {
               this.set('isActive', YES); 
+              this.becomeFirstResponder();
               this._field_isMouseDown = YES;
             }
     evt.allowDefault(); 
@@ -253,6 +265,54 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     evt.allowDefault();
     return YES ;
   },
+  
+  /** @private
+    Simply allow keyDown & keyUp to pass through to the default web browser
+    implementation.
+  */
+  keyDown: function(evt) {
+
+    // handle tab key
+    if (evt.which === 9) {
+      var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
+      view.becomeFirstResponder();
+      return YES ; // handled
+    }
+    
+    // validate keyDown...
+    if (this.performValidateKeyDown(evt)) {
+      this._isKeyDown = YES ;
+      evt.allowDefault(); 
+    } else {
+      evt.stop();
+    }
+    
+    return YES; 
+  },
+  
+  /** tied to the isEnabled state */
+  acceptsFirstResponder: function() {
+    if(!this.get('followSafariTabFocusBehavior')){
+      return this.get('isEnabled');
+    }
+    return NO;
+  }.property('isEnabled'),
+  
+  willBecomeKeyResponderFrom: function(keyView) {
+    // focus the text field.
+    if (!this._isFocused) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$input().get(0).focus();
+      }
+    }
+  },
+  
+  willLoseKeyResponderTo: function(responder) {
+    if (this._isFocused) this._isFocused = NO ;
+  },
+  
   
   // called whenever the value is set on the object.  Will set the value
   // on the field if the value is changed.

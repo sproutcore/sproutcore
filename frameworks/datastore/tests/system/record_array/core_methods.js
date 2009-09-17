@@ -26,6 +26,10 @@ module("SC.RecordArray core methods", {
   }
 });
 
+test("initial status", function() {
+  equals(recs.get('status'), SC.Record.EMPTY, 'status should be SC.Record.EMPTY');
+});
+
 // ..........................................................
 // LENGTH
 // 
@@ -62,7 +66,10 @@ test("modifying the underlying storeKey should change the returned materialized 
   equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');  
   
   // create a new record.
+  SC.RunLoop.begin();
   var rec2 = store.createRecord(SC.Record, { foo: "rec2" });
+  SC.RunLoop.end();
+
   var storeKey2 = rec2.get('storeKey');
   
   // add to beginning of storeKey array
@@ -80,7 +87,7 @@ test("reading a record not loaded in store should trigger retrieveRecord", funct
   store.removeDataHash(storeKey, SC.Record.EMPTY);
   store.retrieveRecord = function() { callCount++; };
   
-  equals(store.readStatus(storeKeys.objectAt(0)), SC.Record.EMPTY, 'precond - storeKey must not be loaded');
+  equals(store.peekStatus(storeKeys.objectAt(0)), SC.Record.EMPTY, 'precond - storeKey must not be loaded');
   
   var rec = recs.objectAt(0);
   equals(callCount, 1, 'store.retrieveRecord() should have been called');
@@ -95,7 +102,10 @@ test("adding a record to the record array should pass through storeKeys", functi
   equals(recs.objectAt(0), rec, 'recs.objectAt(0) should materialize record');  
   
   // create a new record.
+  SC.RunLoop.begin();
   var rec2 = store.createRecord(SC.Record, { foo: "rec2" });
+  SC.RunLoop.end();
+  
   var storeKey2 = rec2.get('storeKey');
   
   // add record to beginning of record array
@@ -132,7 +142,10 @@ test("changing the underlying storeKeys should notify observers of records", fun
 test("swapping storeKey array should change recordArray and observers", function() {
 
   // setup alternate storeKeys
+  SC.RunLoop.begin();
   var rec2 = store.createRecord(SC.Record, { foo: "rec2" });
+  SC.RunLoop.end();
+  
   var storeKey2 = rec2.get('storeKey');
   var storeKeys2 = [storeKey2];
 

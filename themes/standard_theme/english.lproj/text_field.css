@@ -2,9 +2,19 @@
 
 /* SC.TextFieldView - sc-theme */
 
+.sc-text-field-view input {
+	border: none;
+	outline: none;
+	}
+
+.sc-text-field-view textarea {
+	border: none;
+	outline: none;
+}
 
 .sc-theme .sc-text-field-view .sc-hint {
-  padding: 3px;
 	color: #aaa ;
 	font-size: 12px;
 }
+
+

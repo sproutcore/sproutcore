@@ -15,7 +15,7 @@
   can type specific URL to see certain state of the app e.g.
   http://localhost:4020/routes_demo#Documents/Photographs
   
-  To use Routes, first add routes by using SC.route.add(route, target, 
+  To use Routes, first add routes by using SC.routes.add(route, target, 
   method).
   
   - *route* - Route is the part of the URL that come after hash (#).
@@ -53,6 +53,11 @@
   Documents/Photographs in this case, gets passed as parameter to route 
   handler.
   
+  If your url has a route, the corresponding routeHandler is fired only after 
+  the app's main function is executed. If you need the routeHandlers to be fired
+  much before running main(), then you probably read the location hash manually, 
+  possibly in the bootstrap of your app and not use routes.
+
   @extends SC.Object
   @since SproutCore 1.0
 */
@@ -177,7 +182,7 @@ SC.routes = SC.Object.create(
     if (routeHandler) {
       target = routeHandler._target;
       method = routeHandler._method;
-      method.call(target, params);
+      if (method) method.call(target, params);
     }
       //else console.log('could not find route for: "'+route+'"') ;
   },

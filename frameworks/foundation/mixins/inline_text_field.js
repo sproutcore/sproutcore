@@ -3,8 +3,7 @@
 // copyright 2006-2008 Sprout Systems, Inc.
 // ========================================================================
 
-
-require('views/text_field') ;
+sc_require('views/text_field') ;
 
 /**
   @class
@@ -125,19 +124,18 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     // add to window.
     
     pane = this._delegate.pane();
-    
+
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
     if(this._optIsCollection && this._delegate.get('layout').left){
-      layout.left=this._optframe.x-this._delegate.get('layout').left;
+      layout.left=this._optframe.x-this._delegate.get('layout').left-pane.$()[0].offsetLeft-1;
     }else{
-      layout.left=this._optframe.x;
+      layout.left=this._optframe.x-pane.$()[0].offsetLeft-1;
     }
-    layout.left=this._optframe.x;
     if(this._optIsCollection && this._delegate.get('layout').top){
-      layout.top=this._optframe.y-this._delegate.get('layout').top;
+      layout.top=this._optframe.y-this._delegate.get('layout').top-pane.$()[0].offsetTop;
     }else{
-      layout.top=this._optframe.y;  
+      layout.top=this._optframe.y-pane.$()[0].offsetTop;  
     }
 
     this.set('layout', layout);
@@ -165,7 +163,10 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     // and become first responder
     this.becomeFirstResponder() ;
-
+  
+    if(SC.browser.msie) this.invokeLater(this._selectRootElement, 200) ;
+    else this._selectRootElement();
+  
     this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this) ;
   },
   
@@ -346,7 +347,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   
   insertTab: function(evt)
   {
-    var next = this.get("owner")._delegate.nextValidKeyView();
+    var next = this._delegate.nextValidKeyView();
     this.commitEditing() ;
     if(next) next.beginEditing();
     return YES ;
@@ -354,7 +355,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
   insertBacktab: function(evt)
   {
-    var prev = this.get("owner")._delegate.previousValidKeyView();
+    var prev = this._delegate.previousValidKeyView();
     this.commitEditing() ;
     if(prev) prev.beginEditing();
     return YES ;
@@ -382,11 +383,18 @@ SC.InlineTextFieldView.mixin(
   */
   beginEditing: function(options) {
     this._exampleElement = options.exampleElement ;
+    
+    // If exampleInlineTextFieldView is set, load this class otherwise use
+    // the default, this.
+    var klass = options.exampleInlineTextFieldView 
+              ? options.exampleInlineTextFieldView : this;
+    
     var layout = options.delegate.get('layout');
     var s = this.updateViewStyle();
+    var p = this.updateViewPaddingStyle();
     
     var str= ".inline-editor input{"+s+"} ";
-    str= str+".inline-editor textarea{"+s+"}";
+    str= str+".inline-editor textarea{"+s+"} .inline-editor .padding{"+p+"}";
     var pa= document.getElementsByTagName('head')[0] ;
     var el= document.createElement('style');
     el.type= 'text/css';
@@ -395,7 +403,7 @@ SC.InlineTextFieldView.mixin(
     else el.appendChild(document.createTextNode(str));// others
     pa.appendChild(el);
     
-    this.editor = this.create({ classNames: 'inline-editor', layout: layout}) ;
+    this.editor = klass.create({ classNames: 'inline-editor', layout: layout}) ;
     return this.editor.beginEditing(options) ;
     
   },
@@ -431,21 +439,33 @@ SC.InlineTextFieldView.mixin(
     var el = this._exampleElement[0] ;   
     var styles = '';
     var s=SC.getStyle(el,'font-size');
-    if(s && s.length>0) styles = styles + "font-size: "+ s + "; ";
+    if(s && s.length>0) styles = styles + "font-size: "+ s + " !important; ";
     s=SC.getStyle(el,'font-family');
-    if(s && s.length>0) styles = styles + "font-family: " + s + "; ";
+    if(s && s.length>0) styles = styles + "font-family: " + s + " !important; ";
     s=SC.getStyle(el,'font-weight');
-    if(s && s.length>0) styles = styles + "font-weight: " + s + "; ";
+    if(s && s.length>0) styles = styles + "font-weight: " + s + " !important; ";
     s=SC.getStyle(el,'z-index');
-    if(s && s.length>0) styles = styles + "z-index: " + s + "; ";
-    s=SC.getStyle(el,'padding-left');
-    if(s && s.length>0) styles = styles + "padding-left: " + s + "; ";
-    s=SC.getStyle(el,'padding-bottom');
-    if(s && s.length>0) styles = styles + "padding-bottom: " + s + "; ";
+    if(s && s.length>0) styles = styles + "z-index: " + s + " !important; ";
     s=SC.getStyle(el,'line-height');
-    if(s && s.length>0) styles = styles + "line-height: " + s + "; ";
+    if(s && s.length>0) styles = styles + "line-height: " + s + " !important; ";
     s=SC.getStyle(el,'text-align');
-    if(s && s.length>0) styles = styles + "text-align: " + s + "; ";
+    if(s && s.length>0) styles = styles + "text-align: " + s + " !important; ";
+    
+    return styles;
+  },
+
+
+  updateViewPaddingStyle: function() {
+    var el = this._exampleElement[0] ;   
+    var styles = '';
+    var s=SC.getStyle(el,'padding-top');
+    if(s && s.length>0) styles = styles + "top: "+ s + " !important; ";
+    s=SC.getStyle(el,'padding-bottom');
+    if(s && s.length>0) styles = styles + "bottom: " + s + " !important; ";
+    s=SC.getStyle(el,'padding-left');
+    if(s && s.length>0) styles = styles + "left: " + s + " !important; ";
+    s=SC.getStyle(el,'padding-right');
+    if(s && s.length>0) styles = styles + "right: " + s + " !important; ";
     
     return styles;
   },

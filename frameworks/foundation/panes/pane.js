@@ -349,7 +349,12 @@ SC.Pane = SC.View.extend({
   didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
-    this.set('previousKeyPane', pane);
+    // check if the previousKeyPane is a menu. If it is a menu, don't set as 
+    // a previous keypane, set the previousKeyPane to the keypane before
+    // the menu as it is an the menu is an intermediate pane that you dont want to go back to.
+    if(pane && pane.kindOf(SC.MenuPane)) this.set('previousKeyPane', pane.get('previousKeyPane'));
+    else if(pane) this.set('previousKeyPane', pane);
+    else this.set('previousKeyPane', null);
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
@@ -426,7 +431,7 @@ SC.Pane = SC.View.extend({
     var responder = this.rootResponder ;
     if (this.get('isKeyPane')) { // orders matter, remove keyPane first
       var oldKeyPane = this.get('previousKeyPane');
-      if(!oldKeyPane) responder.makeKeyPane(null) ; 
+      if (!oldKeyPane) responder.makeKeyPane(null) ; 
       else responder.makeKeyPane(oldKeyPane) ;
     }
     if (this.get('isMainPane')) responder.makeMainPane(null) ;
@@ -530,6 +535,7 @@ SC.Pane = SC.View.extend({
     // update my own location
     this.set('isPaneAttached', YES) ;
     this.parentViewDidChange() ;
+    
     return this ;
   },
   
@@ -566,6 +572,15 @@ SC.Pane = SC.View.extend({
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
+    }
+    
+    // if we just became visible, update layer + layout if needed...
+    if (cur) {
+      if (this.parentViewDidResize) this.parentViewDidResize();
+      
+      if (this.get('childViewsNeedLayout')) {
+        this.invokeOnce(this.layoutChildViewsIfNeeded);
+      }
     }
     
     return this ;

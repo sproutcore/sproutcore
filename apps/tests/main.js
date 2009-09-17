@@ -20,7 +20,7 @@ TestRunner.main = function main() {
   TestRunner.makeFirstResponder(TestRunner.START);
 
   // load initial data
-  //var targets = TestRunner.store.findAll(TestRunner.Target);
+  //var targets = TestRunner.store.findAll(CoreTools.Target);
   //TestRunner.targetsController.set('content', targets);
 
 } ;

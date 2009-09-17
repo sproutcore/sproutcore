@@ -5,12 +5,39 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+sc_require('models/record');
+
 /**
   @class
 
-  A RecordArray wraps an array of storeKeys, converting them into materialized
-  record objects from the owner store on demand.  A Record Array instance is
-  usually returned when you call SC.Store#findAll() or SC.Store#recordsFor().
+  A RecordArray wraps an array of storeKeys and, optionally, a Query object.
+  When you access the items of a RecordArray it will automatically convert the
+  storeKeys into actual SC.Record objects that the rest of your application
+  can work with.
+  
+  Normally you do not create RecordArray's yourself.  Instead, a RecordArray
+  is returned when you call SC.Store.findAll(), already properly configured.
+  You can usually just work with the RecordArray instance just like another
+  array.
+  
+  The information below about RecordArray internals is only intended for those
+  who need to override this class for some reason to do some special.
+  
+  h2. Internal Notes
+  
+  Normally the RecordArray behavior is very simple.  Any array-like operations
+  will be translated into similar calls onto the underlying array of 
+  storeKeys.  The underlying array can be a real array or it may be a 
+  SparseArray, which is how you implement incremental loading.
+  
+  If the RecordArray is created with an SC.Query objects as well (and it 
+  almost always will have a Query object), then the RecordArray will also 
+  consult the query for various delegate operations such as determining if 
+  the record array should update automatically whenever records in the store
+  changes.
+  
+  It will also ask the Query to refresh the storeKeys whenever records change
+  in the store.
   
   @extends SC.Object
   @extends SC.Enumerable
@@ -23,49 +50,44 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
   /**
     The store that owns this record array.  All record arrays must have a 
-    store to function properly.
+    store to function properly. 
+    
+    NOTE: You MUST set this property on the RecordArray when creating it or 
+    else it will fail.
   
     @property {SC.Store}
   */
   store: null,
 
   /**
-    SC.Array object that will provide the store keys for the array.  The 
-    record array will register itself as an observer for this array.
+    The Query object this record array is based upon.  All record arrays MUST 
+    have an associated query in order to function correctly.  You cannot 
+    change this property once it has been set.
+
+    NOTE: You MUST set this property on the RecordArray when creating it or 
+    else it will fail.
     
-    @property {SC.Array}
+    @property {SC.Query}
+  */
+  query: null,
+
+  /**
+    The array of storeKeys as retrieved from the owner store.
+    
+    @property
+    @type {SC.Array}
   */
   storeKeys: null,
-  
-  /**
-    SC.Query object that is set if record array is based on a query.
-    Whenever the store keys content change, the SC.Query will be
-    reapplied so that only matching storeKeys are set on the record
-    array.
-    
-    @property {SC.Query}
-  */
-  queryKey: null,
-  
-  /**
-    The current load state of the RecordArray.  If the storeKeys has a state
-    property, then this property will return that value.  Otherwise it returns
-    SC.Record.READY.
-  */
-  state: function() {
-    var storeKeys = this.get('storeKeys'),
-        ret = (storeKeys && !SC.none(storeKeys.state)) ? storeKeys.get('state') : null;
-    return ret ? ret : SC.Record.READY;
-  }.property().cacheable(),
-  
-  /** @private
-    Cache of records returned from objectAt() so they don't need to
-    be unneccesarily materialized.
-    
-    @property {SC.Query}
-  */
-  _records: null,
 
+  /**
+    The current status for the record array.  Read from the underlying 
+    store.
+    
+    @property
+    @type {Number}
+  */
+  status: SC.Record.EMPTY,
+  
   // ..........................................................
   // ARRAY PRIMITIVES
   // 
@@ -74,10 +96,13 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     Returned length is a pass-through to the storeKeys array.
   */
   length: function() {
+    this.flush(); // cleanup pending changes
     var storeKeys = this.get('storeKeys');
     return storeKeys ? storeKeys.get('length') : 0;
   }.property('storeKeys').cacheable(),
 
+  _scra_records: null,
+  
   /**
     Looks up the store key in the store keys array and materializes a
     records.
@@ -86,7 +111,10 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @return {SC.Record} materialized record
   */
   objectAt: function(idx) {
-    var recs      = this._records, 
+
+    this.flush(); // cleanup pending if needed
+
+    var recs      = this._scra_records, 
         storeKeys = this.get('storeKeys'),
         store     = this.get('store'),
         storeKey, ret ;
@@ -95,18 +123,43 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (recs && (ret=recs[idx])) return ret ; // cached
     
     // not in cache, materialize
-    if (!recs) this._records = recs = [] ; // create cache
+    if (!recs) this._scra_records = recs = [] ; // create cache
     storeKey = storeKeys.objectAt(idx);
     
     if (storeKey) {
       // if record is not loaded already, then ask the data source to 
       // retrieve it
-      if (store.readStatus(storeKey) === SC.Record.EMPTY) {
+      if (store.peekStatus(storeKey) === SC.Record.EMPTY) {
         store.retrieveRecord(null, null, storeKey);
       }
       recs[idx] = ret = store.materializeRecord(storeKey);
     }
     return ret ;
+  },
+
+  /** @private - optimized forEach loop. */
+  forEach: function(callback, target) {
+    this.flush();
+    
+    var recs      = this._scra_records, 
+        storeKeys = this.get('storeKeys'),
+        store     = this.get('store'), 
+        len       = storeKeys ? storeKeys.get('length') : 0,
+        idx, storeKey, rec;
+        
+    if (!storeKeys || !store) return this; // nothing to do    
+    if (!recs) recs = this._scra_records = [] ;
+    if (!target) target = this;
+    
+    for(idx=0;idx<len;idx++) {
+      rec = recs[idx];
+      if (!rec) {
+        rec = recs[idx] = store.materializeRecord(storeKeys.objectAt(idx));
+      }
+      callback.call(target, rec, idx, this);
+    }
+    
+    return this;
   },
   
   /**
@@ -119,11 +172,20 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @return {SC.RecordArray} 'this' after replace
   */
   replace: function(idx, amt, recs) {
+
+    this.flush(); // cleanup pending if needed
+    
     var storeKeys = this.get('storeKeys'), 
         len       = recs ? (recs.get ? recs.get('length') : recs.length) : 0,
         i, keys;
         
     if (!storeKeys) throw "storeKeys required";
+
+    var query = this.get('query');
+    if (query && !query.get('isEditable')) throw SC.RecordArray.NOT_EDITABLE;
+    
+    // you can't modify an array whose store keys are autogenerated from a 
+    // query.
     
     // map to store keys
     keys = [] ;
@@ -135,81 +197,321 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   },
   
   /**
-    Called to refresh the query that is attached to this record array.
-    This will force the query to evaluated again against the store. 
+    Returns YES if the passed can be found in the record array.  This is 
+    provided for compatibility with SC.Set.
+    
+    @param {SC.Record} record the record
+    @returns {Boolean}
   */
-  refreshQuery: function() {
-    var query = this.get('queryKey');
-    
-    if(query) {
-      var recordType = query.get('recordType');
-      var storeKeys = this.get('store').storeKeysFor(recordType);
-      
-      var recordTypes = SC.Set.create();
-      recordTypes.push(recordType);
-      
-      // clear existing storeKeys, start over by applying all storekeys for 
-      // this recordType
-      this.storeKeys = [];
-      query.parseQuery();
-      this.applyQuery(storeKeys, recordTypes);
-    }
-    
+  contains: function(record) {
+    return this.indexOf(record)>=0;
   },
   
   /**
-    Apply the SC.Query again. This is invoked when new records are loaded
-    or changed in the store (or directly on the array with .replace() ) and 
-    and when we need to refresh all SC.Query 'based' record arrays accordingly.
+    Returns the first index where the specified record is found.
     
-    @param {Array} storeKeys to evaluate against the query
-    @param {SC.Set} recordTypes set of record types that changed
+    @param {SC.Record} record the record
+    @param {Number} startAt optional starting index
+    @returns {Number} index
   */
-  applyQuery: function(changedStoreKeys, recordTypes) {
-    var newStoreKeys = SC.clone(this.get('storeKeys')), inChangedStoreKeys, 
-      inMatchingStoreKeys, idx, len, storeKey, queryKey = this.get('queryKey'),
-      store = this.get('store');
+  indexOf: function(record, startAt) {
+    if (!SC.kindOf(record, SC.Record)) return NO ; // only takes records
     
-    // first check if these changes include any of the record types
-    if(recordTypes && queryKey.recordType && !recordTypes.contains(queryKey.recordType)) return;
+    this.flush();
     
-    var matchingStoreKeys = SC.Query.containsStoreKeys(queryKey, 
-      changedStoreKeys, store);
+    var storeKey  = record.get('storeKey'), 
+        storeKeys = this.get('storeKeys');
+        
+    return storeKeys ? storeKeys.indexOf(storeKey, startAt) : -1; 
+  },
+
+  /**
+    Returns the last index where the specified record is found.
     
-    // Will iterate through all changed store keys and make sure they:
-    //  1. Are added if they are new AND match the query
-    //  2. Are removed if they exist and do NOT match the query
-    for(idx=0,len=changedStoreKeys.length;idx<len;idx++) {
-      storeKey = changedStoreKeys[idx];
-      inMatchingStoreKeys = (matchingStoreKeys && 
-        matchingStoreKeys.indexOf(storeKey)!==-1) ? YES: NO;
-      var inRecArray = this.storeKeys.indexOf(storeKey)!==-1 ? YES : NO;
-      
-      if(inMatchingStoreKeys && !inRecArray) {
-        newStoreKeys.push(storeKey);
-      }
-      else if(!inMatchingStoreKeys && inRecArray) {
-        newStoreKeys.removeObject(storeKey);
-      }
-      
-    }
+    @param {SC.Record} record the record
+    @param {Number} startAt optional starting index
+    @returns {Number} index
+  */
+  lastIndexOf: function(record, startAt) {
+    if (!SC.kindOf(record, SC.Record)) return NO ; // only takes records
+
+    this.flush();
     
-    SC.Query.orderStoreKeys(newStoreKeys, queryKey, store);
-    this.set('storeKeys', newStoreKeys);
+    var storeKey  = record.get('storeKey'), 
+        storeKeys = this.get('storeKeys');
+    return storeKeys ? storeKeys.lastIndexOf(storeKey, startAt) : -1; 
+  },
+
+  /**
+    Adds the specified record to the record array if it is not already part 
+    of the array.  Provided for compatibilty with SC.Set.
+    
+    @param {SC.Record} record
+    @returns {SC.RecordArray} receiver
+  */
+  add: function(record) {
+    if (!SC.kindOf(record, SC.Record)) return this ;
+    if (this.indexOf(record)<0) this.pushObject(record);
+    return this ;
   },
   
   /**
-    Will call findAll() on the store, which allows for chaining findAll
-    statements. Note that chaining findAll() will not notify the data
-    source (only the initial findAll will).
+    Removes the specified record from the array if it is not already a part
+    of the array.  Provided for compatibility with SC.Set.
     
-    @param {SC.Query} queryKey a SC.Query object
+    @param {SC.Record} record
+    @returns {SC.RecordArray} receiver
+  */
+  remove: function(record) {
+    if (!SC.kindOf(record, SC.Record)) return this ;
+    this.removeObject(record);
+    return this ;
+  },
+  
+  // ..........................................................
+  // HELPER METHODS
+  // 
+
+  /**
+    Extends the standard SC.Enumerable implementation to return results based
+    on a Query if you pass it in.
+    
+    @param {SC.Query} query a SC.Query object
     @returns {SC.RecordArray} 
   */
-  
-  findAll: function(queryKey) {
-    return this.get('store').findAll(queryKey, null, this);
+  find: function(query, target) {
+    if (query && query.isQuery) {
+      return this.get('store').find(query.queryWithScope(this));
+    } else return sc_super();
   },
+  
+  /**
+    Call whenever you want to refresh the results of this query.  This will
+    notify the data source, asking it to refresh the contents.
+    
+    @returns {SC.RecordArray} receiver
+  */
+  refresh: function() {
+    this.get('store').refreshQuery(this.get('query'));  
+  },
+  
+  /**
+    Destroys the record array.  Releases any storeKeys, and deregisters with
+    the owner store.
+    
+    @returns {SC.RecordArray} receiver
+  */
+  destroy: function() {
+    if (!this.get('isDestroyed')) {
+      this.get('store').recordArrayWillDestroy(this);
+    } 
+    
+    sc_super();
+  },
+  
+  // ..........................................................
+  // STORE CALLBACKS
+  // 
+  
+  // NOTE: storeWillFetchQuery(), storeDidFetchQuery(), storeDidCancelQuery(),
+  // and storeDidErrorQuery() are tested implicitly through the related
+  // methods in SC.Store.  We're doing it this way because eventually this 
+  // particular implementation is likely to change; moving some or all of this
+  // code directly into the store. -CAJ
+  
+  /**
+    Called whenever the store initiates a refresh of the query.  Sets the 
+    status of the record array to the appropriate status.
+    
+    @param {SC.Query} query
+    @returns {SC.RecordArray} receiver
+  */
+  storeWillFetchQuery: function(query) {
+    var status = this.get('status'),
+        K      = SC.Record;
+    if ((status === K.EMPTY) || (status === K.ERROR)) status = K.BUSY_LOADING;
+    if (status & K.READY) status = K.BUSY_REFRESH;
+    this.setIfChanged('status', status);
+    return this ;
+  },
+  
+  /**
+    Called whenever the store has finished fetching a query.
+    
+    @param {SC.Query} query
+    @returns {SC.RecordArray} receiver
+  */
+  storeDidFetchQuery: function(query) {
+    this.setIfChanged('status', SC.Record.READY_CLEAN);
+    return this ;
+  },
+  
+  /**
+    Called whenever the store has cancelled a refresh.  Sets the 
+    status of the record array to the appropriate status.
+    
+    @param {SC.Query} query
+    @returns {SC.RecordArray} receiver
+  */
+  storeDidCancelQuery: function(query) {
+    var status = this.get('status'),
+        K      = SC.Record;
+    if (status === K.BUSY_LOADING) status = K.EMPTY;
+    else if (status === K.BUSY_REFRESH) status = K.READY_CLEAN;
+    this.setIfChanged('status', status);
+    return this ;
+  },
+
+  /**
+    Called whenever the store encounters an error while fetching.  Sets the 
+    status of the record array to the appropriate status.
+    
+    @param {SC.Query} query
+    @returns {SC.RecordArray} receiver
+  */
+  storeDidErrorQuery: function(query) {
+    this.setIfChanged('status', SC.Record.ERROR);
+    return this ;
+  },
+  
+  /**
+    Called by the store whenever it changes the state of certain store keys.
+    If the receiver cares about these changes, it will mark itself as dirty.
+    The next time you try to access the record array it will update any 
+    pending changes.
+    
+    @param {SC.Array} storeKeys the effected store keys
+    @param {SC.Set} recordTypes the record types for the storeKeys.
+    @returns {SC.RecordArray} receiver
+  */
+  storeDidChangeStoreKeys: function(storeKeys, recordTypes) {
+    var query =  this.get('query');
+    // fast path exits
+    if (query.get('location') !== SC.Query.LOCAL) return this;
+    if (!query.containsRecordTypes(recordTypes)) return this;   
+    
+    // ok - we're interested.  mark as dirty and save storeKeys.
+    var changed = this._scq_changedStoreKeys;
+    if (!changed) changed = this._scq_changedStoreKeys = SC.IndexSet.create();
+    changed.addEach(storeKeys);
+    
+    this.set('needsFlush', YES);
+    this.enumerableContentDidChange();
+
+    return this;
+  },
+  
+  /**
+    Applies the query to any pending changed store keys, updating the record
+    array contents as necessary.  This method is called automatically anytime
+    you access the RecordArray to make sure it is up to date, but you can 
+    call it yourself as well if you need to force the record array to fully
+    update immediately.
+    
+    Currently this method only has an effect if the query location is 
+    SC.Query.LOCAL.  You can call this method on any RecordArray however,
+    without an error.
+    
+    @returns {SC.RecordArray} receiver
+  */
+  flush: function() {
+    if (!this.get('needsFlush')) return this; // nothing to do
+    this.set('needsFlush', NO); // avoid running again.
+    
+    // fast exit
+    var query = this.get('query'),
+        store = this.get('store'); 
+    if (!store || !query || query.get('location') !== SC.Query.LOCAL) {
+      return this;
+    }
+    
+    // OK, actually generate some results
+    var storeKeys = this.get('storeKeys'),
+        changed   = this._scq_changedStoreKeys,
+        didChange = NO,
+        K         = SC.Record,
+        rec, status, recordType, sourceKeys, scope, included;
+
+    // if we have storeKeys already, just look at the changed keys
+    if (storeKeys) {
+      if (changed) {
+        changed.forEach(function(storeKey) {
+          // get record - do not include EMPTY or DESTROYED records
+          status = store.peekStatus(storeKey);
+          if (!(status & K.EMPTY) && !(status & K.DESTROYED)) {
+            rec = store.materializeRecord(storeKey);
+            included = !!(rec && query.contains(rec));
+          } else included = NO ;
+          
+          // if storeKey should be in set but isn't -- add it.
+          if (included) {
+            if (storeKeys.indexOf(storeKey)<0) {
+              if (!didChange) storeKeys = storeKeys.copy(); 
+              storeKeys.pushObject(storeKey); 
+            }
+          // if storeKey should NOT be in set but IS -- remove it
+          } else {
+            if (storeKeys.indexOf(storeKey)>=0) {
+              if (!didChange) storeKeys = storeKeys.copy();
+              storeKeys.removeObject(storeKey);
+            } // if (storeKeys.indexOf)
+          } // if (included)
+        }, this);
+        // make sure resort happens
+        didChange = YES ;
+      } // if (changed)
+    
+    // if no storeKeys, then we have to go through all of the storeKeys 
+    // and decide if they belong or not.  ick.
+    } else {
+      
+      // collect the base set of keys.  if query has a parent scope, use that
+      if (scope = query.get('scope')) {
+        sourceKeys = scope.flush().get('storeKeys');
+
+      // otherwise, lookup all storeKeys for the named recordType...
+      } else if (recordType = query.get('expandedRecordTypes')) {
+        sourceKeys = SC.IndexSet.create();
+        recordType.forEach(function(cur) { 
+          sourceKeys.addEach(store.storeKeysFor(recordType));
+        });
+      }
+
+      // loop through storeKeys to determine if it belongs in this query or 
+      // not.
+      storeKeys = [];
+      sourceKeys.forEach(function(storeKey) {
+        status = store.peekStatus(storeKey);
+        if (!(status & K.EMPTY) && !(status & K.DESTROYED)) {
+          rec = store.materializeRecord(storeKey);
+          if (rec && query.contains(rec)) storeKeys.push(storeKey);
+        }
+      });
+      
+      didChange = YES ;
+    }
+
+    // clear set of changed store keys
+    if (changed) changed.clear();
+    
+    // only resort and update if we did change
+    if (didChange) {
+      storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
+      this.set('storeKeys', SC.clone(storeKeys)); // replace content
+    }
+
+    return this;
+  },
+
+  /**
+    Set to YES when the query is dirty and needs to update its storeKeys 
+    before returning any results.  RecordArrays always start dirty and become
+    clean the first time you try to access their contents.
+    
+    @property
+    @type {Boolean}
+  */
+  needsFlush: YES,
   
   // ..........................................................
   // INTERNAL SUPPORT
@@ -227,17 +529,9 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     if (storeKeys === prev) return this; // nothing to do
     
-    if (prev) {
-      prev.removeObserver('[]', this, f);
-      prev.removeObserver('state', this, fs);
-    }
-
+    if (prev) prev.removeObserver('[]', this, f);
     this._prevStoreKeys = storeKeys;
-    
-    if (storeKeys) {
-      storeKeys.addObserver('[]', this, f);
-      storeKeys.addObserver('state', this, fs);
-    }
+    if (storeKeys) storeKeys.addObserver('[]', this, f);
     
     var rev = (storeKeys) ? storeKeys.propertyRevision : -1 ;
     this._storeKeysContentDidChange(storeKeys, '[]', storeKeys, rev);
@@ -245,19 +539,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   }.observes('storeKeys'),
   
   /** @private
-    Invoked whenever the state property of the storeKeys change.
-  */
-  _storeKeysStateDidChange: function() {
-    this.notifyPropertyChange('state');
-  },
-  
-  /** @private
     Invoked whenever the content of the storeKeys array changes.  This will
     dump any cached record lookup and then notify that the enumerable content
     has changed.
   */
   _storeKeysContentDidChange: function(target, key, value, rev) {
-    this._records = null ; // clear cache
+    if (this._scra_records) this._scra_records.length=0 ; // clear cache
     
     this.beginPropertyChanges()
       .notifyPropertyChange('length')
@@ -267,20 +554,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   
   init: function() {
     sc_super();
-    
-    // if this record array is based on a queryKey apply the
-    // the query before setting the storeKeys to ensure it always conforms
-    if(SC.instanceOf(this.queryKey, SC.Query)) {
-      var queryKey = this.get('queryKey'), recordTypes = SC.Set.create();
-      recordTypes.push(queryKey.get('recordType'));
-      
-      this.applyQuery(this.get('storeKeys'), recordTypes);
-    }
-    else {
-      this._storeKeysDidChange();
-    }
-    
+    this._storeKeysDidChange();
   }
   
 });
 
+SC.RecordArray.mixin({  
+  NOT_EDITABLE: SC.Error.desc("SC.RecordArray is not editable")
+});

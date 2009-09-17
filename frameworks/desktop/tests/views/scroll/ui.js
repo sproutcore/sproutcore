@@ -5,10 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module test ok equals same stop start */
 
 (function() {
-    var appleURL=static_url('debug/apple-logo1');
+    var appleURL="http://photos4.meetupstatic.com/photos/event/4/6/9/9/600_4518073.jpeg";
     var iv=SC.ImageView.design({value: appleURL, layout: {height:400, width:400}});
     var pane = SC.ControlTestPane.design({ height: 100 })
     .add("basic", SC.ScrollView, {
@@ -18,7 +18,7 @@
     .add("basic2", SC.ScrollView, {
         contentView: iv
     })
-
+    
     .add("basic3", SC.ScrollView, {
       contentView: iv,
       isHorizontalScrollerVisible: NO
@@ -26,6 +26,15 @@
     
     .add("disabled", SC.ScrollView, {
       isEnabled: NO
+    })
+    
+    .add("verticalScrollerBottom",SC.ScrollView, {
+      contentView: iv,
+      hasHorizontalScroller : NO,
+      verticalScrollerBottom: 16,
+      isVerticalScrollerVisible: YES,
+      autohidesVerticalScroller: NO
+      
     });
 
     pane.show(); // add a test to show the test pane
@@ -107,5 +116,54 @@
      ok(view.$().hasClass('disabled'), 'should have disabled class');
      ok(!view.$().hasClass('sel'), 'should not have sel class');
    });
+   
+   test("Setting the scroller to a specific value", function() {
+     var viewsc = pane.view('basic2');
+     // should be testing against the layer.scrollTop property
+     viewsc.scrollTo(0, 10);
+     equals(viewsc.get('verticalScrollOffset'), 10, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 10, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     viewsc.scrollTo(0, 0);
+     equals(viewsc.get('verticalScrollOffset'), 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     viewsc.scrollTo(0, 100);
+     equals(viewsc.get('verticalScrollOffset'), 100, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 100, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     viewsc.scrollTo(0, -1);
+     equals(viewsc.get('verticalScrollOffset'), 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     viewsc.scrollTo(0, 101);
+     equals(viewsc.get('verticalScrollOffset'), 101, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 101, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+
+     // should be testing against the layer.scrollLeft property
+    viewsc.set('layoutDirection', SC.LAYOUT_HORIZONTAL);
+    viewsc.scrollTo(10, 0);
+    equals(viewsc.get('horizontalScrollOffset'), 10, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 10, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    viewsc.scrollTo(0, 0);
+    equals(viewsc.get('horizontalScrollOffset'), 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    viewsc.scrollTo(50, 0);
+    equals(viewsc.get('horizontalScrollOffset'), 50, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 50, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    viewsc.scrollTo( - 1, 0);
+    equals(viewsc.get('horizontalScrollOffset'), 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 0, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    viewsc.scrollTo(101, 0);
+    equals(viewsc.get('horizontalScrollOffset'), 73, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 73, "After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+   });
+   
+   
+   test("non-zero bottom in vertical scrollbar", function() {
+      var view = pane.view('verticalScrollerBottom'); 
+      equals(view.get('verticalScrollerBottom'),16, "should have verticalScrollerBottom as ");
+      var scroller = view.get('verticalScrollerView') ;
+      ok(scroller, 'should have vertical scroller view ');
+      equals(scroller.get('layout').bottom,16, 'should have layout.bottom of scroller as ');
+      equals(scroller.$()[0].style.bottom,'16px', 'should have style.bottom of scroller as ');
+    });
+   
    
 })();

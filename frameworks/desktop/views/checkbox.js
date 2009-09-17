@@ -13,9 +13,8 @@
   HTML and to set to use a TOGGLE_BEHAVIOR for its buttons.
   
   This view renders a simulated checkbox that can display a mixed state and 
-  has other features not found in platform-native controls.  If you want to 
-  use the platform native version instead, see SC.CheckboxFieldView.
-
+  has other features not found in platform-native controls.  
+  
   @extends SC.FieldView
   @since SproutCore 1.0
 */
@@ -24,6 +23,9 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
 
   classNames: ['sc-checkbox-view'],
   tagName: 'label',
+
+  /* Ellipsis is disabled by default to allow multiline text */
+  needsEllipsis: NO,
 
   render: function(context, firstTime) {
     var dt, elem ;
@@ -34,9 +36,13 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
 
       var blank = sc_static('blank');
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
-      context.push('<img src="', blank, '" class="button" />');
+      context.push('<span class="button" ></span>');
       context.push('<input type="checkbox" name="%@" %@ />'.fmt(SC.guidFor(this),disabled));
-      context.push('<span class="label">', dt, '</span>');
+      if(this.get('needsEllipsis')){
+        context.push('<span class="label ellipsis">', dt, '</span>');
+      }else{
+        context.push('<span class="label">', dt, '</span>');  
+      }
       context.attr('name', SC.guidFor(this));
 
     // since we don't want to regenerate the contents each time 
@@ -100,6 +106,21 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     var ret = (v === SC.MIXED_STATE) ? this.get('value') : 
       (!!v) ? this.get('toggleOnValue') : this.get('toggleOffValue'); 
       return ret ;
-  }
+  },
+  
+  
+  didCreateLayer: function() {
+    this.setFieldValue(this.get('fieldValue'));
+    SC.Event.add(this.$input()[0], 'click', this, this._field_fieldValueDidChange) ;
+  },
+  
+  willDestroyLayer: function() {
+    SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
+  },
+  
+  mouseDown: function(evt) {  
+    this.$input()[0].focus();
+    sc_super();
+  },
     
 }) ;
