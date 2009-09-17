@@ -251,7 +251,7 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
         if (!transportClass) transportClass = this.get('transportClass') ;
         
         if (transportClass) {
-          var transport = this.transportClass.create(item) ;
+          var transport = transportClass.create(item) ;
           if (transport) {
             item.request.set('transport', transport) ;
             this._transportDidOpen(transport) ;
