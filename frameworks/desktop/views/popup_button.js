@@ -63,6 +63,19 @@ SC.PopupButtonView = SC.ButtonView.extend({
     if (!menu) return NO ;
     menu.popup(this, this.preferMatrix) ;
     return YES;
+  },
+  
+  /**
+    @private
+
+    Holding down the button should display the menu pane.
+  */
+  mouseDown: function(evt) {
+    if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
+    this.set('isActive', YES);
+    this._isMouseDown = YES;
+    this._action() ;
+    return YES ;
   }
   
 });
