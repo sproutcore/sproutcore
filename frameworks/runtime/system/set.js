@@ -134,21 +134,33 @@ SC.Set = SC.mixin({},
     return ret ;
   },
   
+  /**
+    Walk like a duck
+    
+    @property {Boolean}
+  */
   isSet: YES,
   
   /**
     This property will change as the number of objects in the set changes.
 
-    @type number
+    @property {Number}
   */
   length: 0,
 
+  /**
+    Returns the first object in the set or null if the set is empty
+    
+    @property {Object}
+  */
   firstObject: function() {
     return (this.length>0) ? this[0] : undefined ;
   }.property(),
   
   /**
     Clears the set 
+    
+    @returns {SC.Set}
   */
   clear: function() { 
     if (this.isFrozen) throw SC.FROZEN_ERROR;
@@ -158,6 +170,8 @@ SC.Set = SC.mixin({},
 
   /**
     Call this method to test for membership.
+    
+    @returns {Boolean}
   */
   contains: function(obj) {
 
@@ -197,7 +211,7 @@ SC.Set = SC.mixin({},
     If the object is already in the set it will not be added again.
 
     @param obj {Object} the object to add
-    @returns {Object} this
+    @returns {SC.Set} receiver
   */
   add: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
@@ -221,6 +235,8 @@ SC.Set = SC.mixin({},
 
   /**
     Add all the items in the passed array or enumerable
+
+    @returns {SC.Set} receiver
   */
   addEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
@@ -250,7 +266,7 @@ SC.Set = SC.mixin({},
     If the object is not in the set, nothing will be changed.
 
     @param obj {Object} the object to remove
-    @returns {this} this
+    @returns {SC.Set} receiver
   */  
   remove: function(obj) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
@@ -293,6 +309,8 @@ SC.Set = SC.mixin({},
 
   /**
     Removes all the items in the passed array.
+
+    @returns {SC.Set} receiver
   */
   removeEach: function(objects) {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
@@ -317,13 +335,17 @@ SC.Set = SC.mixin({},
 
   /**
    Clones the set into a new set.  
+
+    @returns {SC.Set} new copy
   */
-  clone: function() {
+  copy: function() {
     return this.constructor.create(this);    
   },
 
   /**
     Return a set to the pool for reallocation.
+
+    @returns {SC.Set} receiver
   */
   destroy: function() {
     this.isFrozen = NO ; // unfreeze to return to pool
@@ -335,7 +357,7 @@ SC.Set = SC.mixin({},
   // PRIVATE 
   //
 
-  // optimized
+  /** @private - optimized */
   forEach: function(iterator, target) {
     var len = this.length;
     if (!target) target = this ;
@@ -343,6 +365,7 @@ SC.Set = SC.mixin({},
     return this ;
   },
 
+  /** @private */
   toString: function() {
     var len = this.length, idx, ary = [];
     for(idx=0;idx<len;idx++) ary[idx] = this[idx];
@@ -351,7 +374,8 @@ SC.Set = SC.mixin({},
   
   // the pool used for non-observable sets
   _pool: [],
-  
+
+  /** @private */
   isObservable: YES
 
 }) ;
@@ -359,17 +383,43 @@ SC.Set = SC.mixin({},
 SC.Set.constructor = SC.Set;
 
 // Make SC.Set look a bit more like other enumerables
-SC.Set.copy = SC.Set.clone ;
+
+/** @private */
+SC.Set.clone = SC.Set.copy ;
+
+/** @private */
 SC.Set.push = SC.Set.unshift = SC.Set.add ;
+
+/** @private */
 SC.Set.shift = SC.Set.pop ;
 
 // add generic add/remove enumerable support
+
+/** @private */
 SC.Set.addObject = SC.Set.add ;
+
+/** @private */
 SC.Set.removeObject = SC.Set.remove;
 
 SC.Set._pool = [];
 
-// CoreSet is like Set but not observable
+// ..........................................................
+// CORE SET
+// 
+
+/** @class
+
+  CoreSet is just like set but not observable.  If you want to use the set 
+  as a simple data structure with no observing, CoreSet is slightly faster
+  and more memory efficient.
+  
+  @extends SC.Set
+  @since SproutCore 1.0
+*/
 SC.CoreSet = SC.beget(SC.Set);
+
+/** @private */
 SC.CoreSet.isObservable = NO ;
+
+/** @private */
 SC.CoreSet.constructor = SC.CoreSet;

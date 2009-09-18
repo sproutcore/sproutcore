@@ -187,12 +187,16 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 /** 
   The current run loop.  This is created automatically the first time you
   call begin(). 
+  
+  @property {SC.RunLoop}
 */
 SC.RunLoop.currentRunLoop = null;
 
 /**
   The default RunLoop class.  If you choose to extend the RunLoop, you can
   set this property to make sure your class is used instead.
+  
+  @property {Class}
 */
 SC.RunLoop.runLoopClass = SC.RunLoop;
 

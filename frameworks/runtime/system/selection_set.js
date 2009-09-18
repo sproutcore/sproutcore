@@ -22,15 +22,20 @@ sc_require('mixins/freezable');
   @extends SC.Copyable
   @since SproutCore 1.0
 */
-SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
+SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, 
+  /** @scope SC.SelectionSet.prototype */ {
   
+  /**
+    Walk like a duck.
+    
+    @property {Boolean}
+  */
   isSelectionSet: YES,
   
   /**
     Total number of indexes in the selection set
     
-    @property
-    @type Number
+    @property {Number}
   */
   length: function() {
     var ret     = 0,
@@ -49,8 +54,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     A set of all the source objects used in the selection set.  This 
     property changes automatically as you add or remove index sets.
     
-    @property
-    @type SC.Array
+    @property {SC.Array}
   */
   sources: function() {
     var ret  = [],
@@ -426,6 +430,9 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     object.  This will remove any indexes selected in other sources, any 
     indexes beyond the length of the content, and any objects not found in the
     set.
+    
+    @param {Object} source the source to limit
+    @returns {SC.SelectionSet} receiver
   */
   constrain: function(source) {
     var set, len, max, objects;
@@ -499,6 +506,8 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
 
   /**
     Clears the set.  Removes all IndexSets from the object
+    
+    @returns {SC.SelectionSet}
   */
   clear: function() {
     if (this.isFrozen) throw SC.FROZEN_ERROR;
@@ -515,8 +524,10 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   
   /**
    Clones the set into a new set.  
+   
+   @returns {SC.SelectionSet}
   */
-  clone: function() {
+  copy: function() {
     var ret  = this.constructor.create(),
         sets = this._sets,
         len  = sets ? sets.length : 0 ,
@@ -558,6 +569,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   // ITERATORS
   // 
   
+  /** @private */
   toString: function() {
     var sets = this._sets || [];
     sets = sets.map(function(set) { 
@@ -567,6 +579,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     return "SC.SelectionSet:%@<%@>".fmt(SC.guidFor(this), sets.join(','));  
   },
   
+  /** @private */
   firstObject: function() {
     var sets    = this._sets,
         objects = this._objects;
@@ -584,7 +597,7 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
     
   }.property(),
   
-  /**
+  /** @private
     Implement primitive enumerable support.  Returns each object in the 
     selection.
   */
@@ -644,6 +657,13 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable, {
   
 });
 
-SC.SelectionSet.prototype.copy = SC.SelectionSet.prototype.clone;
+/** @private */
+SC.SelectionSet.prototype.clone = SC.SelectionSet.prototype.copy;
+
+/** 
+  Default frozen empty selection set
+  
+  @property {SC.SelectionSet}
+*/
 SC.SelectionSet.EMPTY = SC.SelectionSet.create().freeze();
 

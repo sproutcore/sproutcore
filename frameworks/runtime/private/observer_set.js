@@ -8,19 +8,30 @@
 // ........................................................................
 // ObserverSet
 //
-// This private class is used to store information about obversers on a 
-// particular key.  Note that this object is not observable.  You create new
-// instances by calling SC.beget(SC._ObserverSet) ;
-//
+
+/**
+  @private
+  @namespace
+
+  This private class is used to store information about obversers on a 
+  particular key.  Note that this object is not observable.  You create new
+  instances by calling SC.beget(SC._ObserverSet) ;
+
+  @since SproutCore 1.0
+*/
 SC._ObserverSet = {
 
-  // the number of targets in the set.
+  /**
+    the number of targets in the set.
+  */
   targets: 0,
   
   _membersCacheIsValid: NO,
   
-  // adds the named target/method observer to the set.  The method must be
-  // a function, not a string..
+  /**
+    adds the named target/method observer to the set.  The method must be
+    a function, not a string..
+  */
   add: function(target, method, context) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
     
@@ -45,11 +56,13 @@ SC._ObserverSet = {
     this._membersCacheIsValid = NO ;
   },
   
-  // removes the named target/method observer from the set.  If this is the
-  // last method for the named target, then the number of targets will also
-  // be reduced.
-  //
-  // returns YES if the items was removed, NO if it was not found.
+  /**
+    removes the named target/method observer from the set.  If this is the
+    last method for the named target, then the number of targets will also
+    be reduced.
+  
+    returns YES if the items was removed, NO if it was not found.
+  */
   remove: function(target, method) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
     
@@ -74,8 +87,10 @@ SC._ObserverSet = {
     return YES ;
   },
   
-  // Invokes the target/method pairs in the receiver.  Used by SC.RunLoop
-  // Note: does not support context
+  /**
+    Invokes the target/method pairs in the receiver.  Used by SC.RunLoop
+    Note: does not support context
+  */
   invokeMethods: function() {
     // iterate through the set, look for sets.
     for(var key in this) {
@@ -89,7 +104,9 @@ SC._ObserverSet = {
     }
   },
   
-  // Returns an array of target/method pairs.  This is cached.
+  /**
+    Returns an array of target/method pairs.  This is cached.
+  */
   getMembers: function() {
     if (this._membersCacheIsValid) return this._members ;
     
@@ -124,7 +141,9 @@ SC._ObserverSet = {
     return ret ;
   },
   
-  // Returns a new instance of the set with the contents cloned.
+  /**
+    Returns a new instance of the set with the contents cloned.
+  */
   clone: function() {
     var oldSet, newSet, key, ret = SC._ObserverSet.create() ;
     for(key in this) {
@@ -142,7 +161,9 @@ SC._ObserverSet = {
     return ret ;
   },
   
-  // Creates a new instance of the observer set.
+  /**
+    Creates a new instance of the observer set.
+  */
   create: function() { return SC.beget(this); }
   
 } ;

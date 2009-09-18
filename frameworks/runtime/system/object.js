@@ -182,13 +182,11 @@ SC._object_extend = function _object_extend(base, ext) {
   obj = new SC.Object() ;
   
   @extends SC.Observable 
-  @author Charles Jolley
-  @constructor
   @since SproutCore 1.0
 */
 SC.Object = function(props) { return this._object_init(props); };
 
-SC.mixin(SC.Object, /** @scope SC.Object @static */ {
+SC.mixin(SC.Object, /** @scope SC.Object */ {
 
   /**
     Adds the passed properties to the object's class definition.  You can 
@@ -213,6 +211,8 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
   /**
     Points to the superclass for this class.  You can use this to trace a
     class hierarchy.
+    
+    @property {SC.Object}
   */
   superclass: null,
   
@@ -281,19 +281,25 @@ SC.mixin(SC.Object, /** @scope SC.Object @static */ {
 
     You can pass any hash of properties to this method, including mixins.
     
-    @param {Hash} props optional hash of method or properties to add to the instance.
+    @param {Hash} props 
+      optional hash of method or properties to add to the instance.
+      
     @returns {SC.Object} new instance of the receiver class.
   */
   create: function(props) { var C=this; return new C(arguments); },
 
   /**
     Walk like a duck.  You can use this to quickly test classes.
+    
+    @property {Boolean}
   */
   isClass: YES,
 
   /**
     Set of subclasses that extend from this class.  You can observe this 
     array if you want to be notified when the object is extended.
+    
+    @property {SC.Set}
   */
   subclasses: SC.Set.create(),
   
@@ -451,7 +457,7 @@ SC.Object.prototype = {
     Although the default init() method returns the receiver, the return 
     value is ignored.
 
-    @returns {Object} reciever
+    @returns {void}
   */
   init: function() {
     this.initObservable();
@@ -460,6 +466,8 @@ SC.Object.prototype = {
 
   /**
     Set to NO once this object has been destroyed. 
+    
+    @property {Boolean}
   */
   isDestroyed: NO,
 
@@ -488,6 +496,8 @@ SC.Object.prototype = {
 
   /**
     Walk like a duck. Always YES since this is an object and not a class.
+    
+    @property {Boolean}
   */
   isObject: true,
 
@@ -691,7 +701,7 @@ SC.Object.prototype = {
     should limit the number of properties you include in this list as it 
     adds a slight overhead to new class and instance creation.
 
-    @property
+    @property {Array}
   */
   concatenatedProperties: ['concatenatedProperties', 'initMixin', 'destroyMixin']  
 

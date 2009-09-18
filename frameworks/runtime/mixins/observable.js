@@ -9,6 +9,12 @@ require('private/observer_set') ;
 
 /*globals logChange */
 
+/**
+  Set to YES to have all observing activity logged to the console.  This 
+  should be used for debugging only.
+  
+  @property {Boolean}
+*/
 SC.LOG_OBSERVERS = NO ;
 
 /**
@@ -137,7 +143,11 @@ SC.LOG_OBSERVERS = NO ;
 */
 SC.Observable = {
 
-  /** walk like that ol' duck */
+  /** 
+    Walk like that ol' duck 
+    
+    @property {Boolean}
+  */
   isObservable: YES,
   
   /**
@@ -256,7 +266,7 @@ SC.Observable = {
     
     @param key {String} the property to set
     @param value {Object} the value to set or null.
-    @returns {this}
+    @returns {SC.Observable}
   */
   set: function(key, value) {
     var func   = this[key], 
@@ -341,7 +351,7 @@ SC.Observable = {
     When you are done making changes, all endPropertyChanges() to allow 
     notification to resume.
     
-    @returns {this}
+    @returns {SC.Observable}
   */
   beginPropertyChanges: function() {
     this._kvo_changeLevel = (this._kvo_changeLevel || 0) + 1; 
@@ -358,7 +368,7 @@ SC.Observable = {
     notifications. When you are done making changes, call this method to allow 
     notification to resume.
     
-    @returns {this}
+    @returns {SC.Observable}
   */
   endPropertyChanges: function() {
     this._kvo_changeLevel = (this._kvo_changeLevel || 1) - 1 ;
@@ -383,7 +393,7 @@ SC.Observable = {
     and cause notifications to be delivered more often than you would like.
     
     @param key {String} The property key that is about to change.
-    @returns {this}
+    @returns {SC.Observable}
   */
   propertyWillChange: function(key) {
     return this ;
@@ -404,7 +414,7 @@ SC.Observable = {
     
     @param key {String} The property key that has just changed.
     @param value {Object} The new value of the key.  May be null.
-    @returns {this}
+    @returns {SC.Observable}
   */
   propertyDidChange: function(key,value, _keepCache) {
 
@@ -1131,7 +1141,7 @@ SC.Observable = {
     
     @param key {String} the key to change
     @param value {Object} the value to change
-    @returns {this}
+    @returns {SC.Observable}
   */
   setIfChanged: function(key, value) {
     return (this.get(key) !== value) ? this.set(key, value) : this ;
@@ -1153,7 +1163,7 @@ SC.Observable = {
     
     @param path {String} the property path to set
     @param value {Object} the value to set
-    @returns {this}
+    @returns {SC.Observable}
   */
   setPath: function(path, value) {
     if (path.indexOf('.') >= 0) {
@@ -1250,7 +1260,7 @@ SC.Observable = {
     
     @param key {String} The property key that has just changed.
     @param value {Object} The new value of the key.  May be null.
-    @returns {this}
+    @returns {SC.Observable}
   */
   notifyPropertyChange: function(key, value) {
     this.propertyWillChange(key) ;
@@ -1268,7 +1278,7 @@ SC.Observable = {
     In those cases, you can simply call this method to notify all property
     observers immediately.  Note that this ignores property groups.
     
-    @returns {this}
+    @returns {SC.Observable}
   */
   allPropertiesDidChange: function() {
     this._kvo_cache = null; //clear cached props
@@ -1282,7 +1292,7 @@ SC.Observable = {
   /**
     Logs the named properties to the console.
     
-    @param propertyNames one or more property names
+    @param {String...} propertyNames one or more property names
   */
   logProperty: function() {
     var props = SC.$A(arguments) ;

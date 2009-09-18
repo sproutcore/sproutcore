@@ -471,7 +471,7 @@ SC.mixin(/** @scope SC */ {
     @param object {Object} the object to clone
     @returns {Object} the cloned object
   */
-  clone: function(object) {
+  copy: function(object) {
     var ret = object ;
     
     // fast path
@@ -614,6 +614,8 @@ SC.mixin(/** @scope SC */ {
   
   /**
     Known loc strings
+    
+    @property {Hash}
   */
   STRINGS: {},
   
@@ -632,7 +634,7 @@ SC.mixin(/** @scope SC */ {
 }); // end mixin
 
 /** @private Aliasn for SC.clone() */
-SC.copy = SC.clone ;
+SC.clone = SC.copy ;
 
 /** @private Alias for SC.A() */
 SC.$A = SC.A;
@@ -657,8 +659,9 @@ SC.ORDER_DEFINITION = [ SC.T_ERROR,
 // ........................................
 // FUNCTION ENHANCEMENTS
 //
+
 SC.mixin(Function.prototype, 
-/** @scope Function.prototype */ {
+/** @lends Function.prototype */ {
   
   /**
     Indicates that the function should be treated as a computed property.
@@ -825,6 +828,8 @@ SC.mixin(Function.prototype,
   /**
     Declare that a function should observe an object at the named path.  Note
     that the path is used only to construct the observation one time.
+    
+    @returns {Function} receiver
   */
   observes: function(propertyPaths) { 
     // sort property paths into local paths (i.e just a property name) and

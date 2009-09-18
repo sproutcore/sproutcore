@@ -37,18 +37,24 @@ SC.Error = SC.Object.extend(
   
   /**
     error code.  Used to designate the error type.
+    
+    @property {Number}
   */
   code: -1,
   
   /**
     Human readable description of the error.  This can also be a non-localized
     key.
+    
+    @property {String}
   */
   message: '',
   
   /**
     The value the error represents.  This is used when wrapping a value inside
     of an error to represent the validation failure.
+    
+    @property {Object}
   */
   errorValue: null,
   
@@ -56,6 +62,8 @@ SC.Error = SC.Object.extend(
     The original error object.  Normally this will return the receiver.  
     However, sometimes another object will masquarade as an error; this gives
     you a way to get at the underyling error.
+    
+    @property {SC.Error}
   */
   errorObject: function() {
     return this;
@@ -63,20 +71,23 @@ SC.Error = SC.Object.extend(
   
   /**
     Human readable name of the item with the error.
+    
+    @property {String}
   */
   label: null,
-  
+
+  /** @private */
   toString: function() {
     return "SC.Error:%@:%@ (%@)".fmt(SC.guidFor(this), this.get('message'), this.get('code'));
   },
   
   /**
     Walk like a duck.
+    
+    @property {Boolean}
   */
   isError: YES
 }) ;
-
-Error.prototype.isError = YES ; // also walk like a duck
 
 /**
   Creates a new SC.Error instance with the passed description, label, and
@@ -110,9 +121,12 @@ SC.$error = function(description, label, value, c) {
 /**
   Returns YES if the passed value is an error object or false.
 */
-SC.ok = SC.$ok = function(ret) {
+SC.ok = function(ret) {
   return (ret !== false) && !(ret && ret.isError);
 };
+
+/** @private */
+SC.$ok = SC.ok;
 
 /**
   Returns the value of an object.  If the passed object is an error, returns
@@ -121,15 +135,20 @@ SC.ok = SC.$ok = function(ret) {
   @param {Object} obj the object
   @returns {Object} value 
 */
-SC.val = SC.$val = function(obj) {
+SC.val = function(obj) {
   if (obj && obj.isError) {
     return obj.get ? obj.get('errorValue') : null ; // Error has no value
   } else return obj ;
 };
 
+/** @private */
+SC.$val = SC.val;
+
 // STANDARD ERROR OBJECTS
 
 /**
   Standard error code for errors that do not support multiple values.
+  
+  @property {Number}
 */
 SC.Error.HAS_MULTIPLE_VALUES = -100 ;

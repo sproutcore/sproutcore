@@ -31,6 +31,8 @@
   Note that typically delegates are not observable, hence it is not necessary
   to use get() to retrieve the value of the delegate.
   
+  @since SproutCore 1.0
+  
 */
 SC.DelegateSupport = {  
   
@@ -69,9 +71,9 @@ SC.DelegateSupport = {
     
     @param {Object} delegate a delegate object.  May be null.
     @param {String} methodName a method name
-    @param {*} args (OPTIONAL) any additional arguments
+    @param {Object...} args (OPTIONAL) any additional arguments
     
-    @returns value returned by delegate
+    @returns {Object} value returned by delegate
   */
   invokeDelegateMethod: function(delegate, methodName, args) {
     args = SC.A(arguments); args = args.slice(2, args.length) ;
