@@ -120,6 +120,9 @@ SC.$error = function(description, label, value, c) {
 
 /**
   Returns YES if the passed value is an error object or false.
+  
+  @param {Object} ret object value
+  @returns {Boolean}
 */
 SC.ok = function(ret) {
   return (ret !== false) && !(ret && ret.isError);

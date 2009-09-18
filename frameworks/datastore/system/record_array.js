@@ -74,8 +74,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /**
     The array of storeKeys as retrieved from the owner store.
     
-    @property
-    @type {SC.Array}
+    @property {SC.Array}
   */
   storeKeys: null,
 
@@ -83,8 +82,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     The current status for the record array.  Read from the underlying 
     store.
     
-    @property
-    @type {Number}
+    @property {Number}
   */
   status: SC.Record.EMPTY,
   
@@ -92,7 +90,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // ARRAY PRIMITIVES
   // 
 
-  /**
+  /** @private
     Returned length is a pass-through to the storeKeys array.
   */
   length: function() {
@@ -103,7 +101,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 
   _scra_records: null,
   
-  /**
+  /** @private
     Looks up the store key in the store keys array and materializes a
     records.
     
@@ -162,7 +160,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this;
   },
   
-  /**
+  /** @private
     Pass through to the underlying array.  The passed in objects must be
     records, which can be converted to storeKeys.
     
@@ -207,7 +205,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this.indexOf(record)>=0;
   },
   
-  /**
+  /** @private
     Returns the first index where the specified record is found.
     
     @param {SC.Record} record the record
@@ -225,7 +223,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.indexOf(storeKey, startAt) : -1; 
   },
 
-  /**
+  /** @private 
     Returns the last index where the specified record is found.
     
     @param {SC.Record} record the record
@@ -242,7 +240,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return storeKeys ? storeKeys.lastIndexOf(storeKey, startAt) : -1; 
   },
 
-  /**
+  /** 
     Adds the specified record to the record array if it is not already part 
     of the array.  Provided for compatibilty with SC.Set.
     
@@ -319,7 +317,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   // particular implementation is likely to change; moving some or all of this
   // code directly into the store. -CAJ
   
-  /**
+  /** @private
     Called whenever the store initiates a refresh of the query.  Sets the 
     status of the record array to the appropriate status.
     
@@ -335,7 +333,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
   
-  /**
+  /** @private
     Called whenever the store has finished fetching a query.
     
     @param {SC.Query} query
@@ -346,7 +344,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
   
-  /**
+  /** @private
     Called whenever the store has cancelled a refresh.  Sets the 
     status of the record array to the appropriate status.
     
@@ -362,7 +360,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
 
-  /**
+  /** @private
     Called whenever the store encounters an error while fetching.  Sets the 
     status of the record array to the appropriate status.
     
@@ -374,7 +372,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     return this ;
   },
   
-  /**
+  /** @private
     Called by the store whenever it changes the state of certain store keys.
     If the receiver cares about these changes, it will mark itself as dirty.
     The next time you try to access the record array it will update any 
@@ -508,8 +506,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     before returning any results.  RecordArrays always start dirty and become
     clean the first time you try to access their contents.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   needsFlush: YES,
   
@@ -552,6 +549,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     .endPropertyChanges();
   },
   
+  /** @private */
   init: function() {
     sc_super();
     this._storeKeysDidChange();
@@ -560,5 +558,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
 });
 
 SC.RecordArray.mixin({  
+  
+  /** 
+    Standard error throw when you try to modify a record that is not editable
+    
+    @property {SC.Error}
+  */
   NOT_EDITABLE: SC.Error.desc("SC.RecordArray is not editable")
 });

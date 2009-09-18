@@ -14,71 +14,91 @@ sc_require('models/record');
   This permits you to perform queries on your data store,
   written in a SQL-like language. Here is a simple example:
     
+  {{{
     q = SC.Query.create({
       conditions: "firstName = 'Jonny' AND lastName = 'Cash'"
     })
+  }}}
     
   You can check if a certain record matches the query by calling:
-  
+
+  {{{
     q.contains(record)
+  }}}
   
   To find all records of your store, that match query q, use findAll with
   query q as argument:
   
+  {{{
     r = MyApp.store.findAll(q)
+  }}}
   
   r will be a record array containing all matching records.
   To limit the query to a record type of MyApp.MyModel,
   you can specify the type as a property of the query like this:
   
+  {{{
     q = SC.Query.create({ 
       conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
       recordType: MyApp.MyModel 
     })
+  }}}
   
-  Calling findAll() like above will now return only records of type t.
+  Calling find() like above will now return only records of type t.
   It is recommended to limit your query to a record type, since the query will
   have to look for matching records in the whole store, if no record type
   is given.
   
   You can give an order, which the resulting records should follow, like this:
   
+  {{{
     q = SC.Query.create({ 
       conditions: "firstName = 'Jonny' AND lastName = 'Cash'",
       recordType: MyApp.MyModel,
       orderBy: "lastName, year DESC" 
-    })
+    });
+  }}}
   
   The default order direction is ascending. You can change it to descending
   by writing DESC behind the property name like in the example above.
   If no order is given, or records are equal in respect to a given order,
   records will be ordered by guid.
-  
+
+  h2. SproutCore Query Language
   
   Features of the query language:
   
-  Primitives:
+  h4. Primitives:
+
   - record properties
   - null, undefined
   - true, false
   - numbers (integers and floats)
   - strings (double or single quoted)
   
-  Parameters:
+  h4. Parameters:
+
   - %@ (wild card)
   - {parameterName} (named parameter)
-  Wild cards are used to identify parameters by the order in
-  which they appear in the query string. Named parameters can be
-  used when tracking the order becomes difficult.
-  Both types of parameters can be used by giving the parameters
-  as a property to your query object:
+
+  Wild cards are used to identify parameters by the order in which they appear 
+  in the query string. Named parameters can be used when tracking the order 
+  becomes difficult. Both types of parameters can be used by giving the 
+  parameters as a property to your query object:
+  
+  {{{
     yourQuery.parameters = yourParameters
+  }}}
+  
   where yourParameters should have one of the following formats:
+
     for wild cards: [firstParam, secondParam, thirdParam]
     for named params: {name1: param1, mane2: parma2}
+
   You cannot use both types of parameters in a single query!
   
-  Operators:
+  h4. Operators:
+  
   - =
   - !=
   - <
@@ -97,30 +117,37 @@ sc_require('models/record');
                 of a Model class on its right side, only records of this type
                 will match)
     
-  Boolean Operators:
+  h4. Boolean Operators:
+  
   - AND
   - OR
   - NOT
   
-  Parenthesis for grouping:
-  - ( and )
+  h4. Parenthesis for grouping:
   
+  - ( and )
+
+
+  h2. Adding Your Own Query Handlers
+
+  You can extend the query language with your own operators by calling:
+
+  {{{
+    SC.Query.registerQueryExtension('your_operator', your_operator_definition);
+  }}}
+
+  See details below. As well you can provide your own comparison functions
+  to control ordering of specific record properties like this:
+
+  {{{
+    SC.Query.registerComparison(property_name, comparison_for_this_property);
+  }}}
+  
+  h2. Examples
   
   Some example queries:
   
   TODO add examples
-  
-  
-  You can extend the query language with your own operators by calling:
-  
-  SC.Query.registerQueryExtension('your_operator', your_operator_definition)
-  
-  See details below. As well you can provide your own comparison functions
-  to control ordering of specific record properties like this:
-  
-  SC.Query.registerComparison(property_name, comparison_for_this_property) 
-  
-  Again see below for details.
 
   @extends SC.Object
   @extends SC.Copyable
@@ -135,13 +162,18 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PROPERTIES
   // 
   
+  /** 
+    Walk like a duck.
+    
+    @property {Boolean}
+  */
   isQuery: YES,
   
   /**
     Unparsed query conditions.  If you are handling a query yourself, then 
     you will find the base query string here.
     
-    @type {String}
+    @property {String}
   */
   conditions:  null,
   
@@ -150,7 +182,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     beginning with the strings "DESC " or "ASC " to select descending or 
     ascending order.
     
-    @type {String}
+    @property {String}
   */
   orderBy:     null,
   
@@ -159,13 +191,15 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     filter the kinds of records this query will work on.  You may either 
     set this to a single record type or to an array or set of record types.
     
-    @type {SC.Record|SC.Enumerable}
+    @property {SC.Record}
   */
   recordType:  null,
   
   /**
     Optional array of multiple record types.  If the query accepts multiple 
     record types, this is how you can check for it.
+    
+    @property {SC.Enumerable}
   */
   recordTypes: null,
   
@@ -173,8 +207,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns the complete set of recordTypes matched by this query.  Includes
     any named recordTypes plus their subclasses.
     
-    @property
-    @type {SC.Enumerable}
+    @property {SC.Enumerable}
   */
   expandedRecordTypes: function() {
     var ret = SC.CoreSet.create(), rt, q  ;
@@ -215,7 +248,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     the query conditions.  If you are handling the query manually, these 
     parameters will not be used.
     
-    @type {Hash}
+    @property {Hash}
   */
   parameters:  null,
   
@@ -239,8 +272,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     need to use a REMOTE query if you are retrieving a large data set and you
     don't want to pay the cost of computing the result set client side.
     
-    @property
-    @type {String}
+    @property {String}
   */
   location: 'local', // SC.Query.LOCAL
   
@@ -248,8 +280,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Another query that will optionally limit the search of records.  This is 
     usually configured for you when you do find() from another record array.
     
-    @property
-    @type {SC.Query}
+    @property {SC.Query}
   */
   scope: null,
   
@@ -258,8 +289,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns YES if query location is Remote.  This is sometimes more 
     convenient than checking the location.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   isRemote: function() {
     return this.get('location') === SC.Query.REMOTE;
@@ -269,8 +299,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     Returns YES if query location is Local.  This is sometimes more 
     convenient than checking the location.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   isLocal: function() {
     return this.get('location') === SC.Query.LOCAL;
@@ -437,14 +466,15 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   // PRIVATE SUPPORT
   // 
 
-  /**
+  /** @private
     Properties that need to be copied when cloning the query.
   */
   copyKeys: 'conditions orderBy recordType recordTypes parameters location scope'.w(),
   
+  /** @private */
   concatenatedProperties: 'copyKeys'.w(),
 
-  /**
+  /** @private 
     Implement the Copyable API to clone a query object once it has been 
     created.
   */
@@ -470,21 +500,27 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   //
   
   
-  /**
+  /** @private
     This is the definition of the query language. You can extend it
     by using SC.Query.registerQueryExtension().
   */
   queryLanguage: {
+    
+    /** @private */
     'UNKNOWN': {
       firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
       notAllowed:       /[\s'"\w\d\(\)\{\}]/
     },
+
+    /** @private */
     'PROPERTY': {
       firstCharacter:   /[a-zA-Z_]/,
       notAllowed:       /[^a-zA-Z_0-9]/,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return r.get(this.tokenValue); }
     },
+
+    /** @private */
     'NUMBER': {
       firstCharacter:   /\d/,
       notAllowed:       /[^\d\.]/,
@@ -492,12 +528,16 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return parseFloat(this.tokenValue); }
     },
+
+    /** @private */
     'STRING': {
       firstCharacter:   /['"]/,
       delimeted:        true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return this.tokenValue; }
     },
+
+    /** @private */
     'PARAMETER': {
       firstCharacter:   /\{/,
       lastCharacter:    '}',
@@ -505,20 +545,28 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
+
+    /** @private */
     '%@': {
       rememberCount:    true,
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
+
+    /** @private */
     'OPEN_PAREN': {
       firstCharacter:   /\(/,
       singleCharacter:  true
     },
+
+    /** @private */
     'CLOSE_PAREN': {
       firstCharacter:   /\)/,
       singleCharacter:  true
     },
+
+    /** @private */
     'AND': {
       reservedWord:     true,
       leftType:         'BOOLEAN',
@@ -530,6 +578,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left && right;
                         }
     },
+
+    /** @private */
     'OR': {
       reservedWord:     true,
       leftType:         'BOOLEAN',
@@ -541,6 +591,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left || right;
                         }
     },
+
+    /** @private */
     'NOT': {
       reservedWord:     true,
       rightType:        'BOOLEAN',
@@ -550,6 +602,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return !right;
                         }
     },
+
+    /** @private */
     '=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -561,6 +615,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left == right;
                         }
     },
+
+    /** @private */
     '!=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -572,6 +628,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left != right;
                         }
     },
+
+    /** @private */
     '<': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -583,6 +641,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left < right;
                         }
     },
+
+    /** @private */
     '<=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -594,6 +654,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left <= right;
                         }
     },
+
+    /** @private */
     '>': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -605,6 +667,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left > right;
                         }
     },
+
+    /** @private */
     '>=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -616,6 +680,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return left >= right;
                         }
     },
+
+    /** @private */
     'BEGINS_WITH': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -627,6 +693,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return ( all.indexOf(start) === 0 );
                         }
     },
+
+    /** @private */
     'ENDS_WITH': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -638,6 +706,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return ( all.indexOf(end) === (all.length - end.length) );
                         }
     },
+
+    /** @private */
     'CONTAINS': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -649,6 +719,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return (all.indexOf(substr) !== -1);
                         }
     },
+
+    /** @private */
     'ANY': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -666,6 +738,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return found;
                         }
     },
+
+    /** @private */
     'MATCHES': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
@@ -677,6 +751,8 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return matchWith.test(toMatch);
                         }
     },
+
+    /** @private */
     'TYPE_IS': {
       reservedWord:     true,
       rightType:        'PRIMITIVE',
@@ -688,35 +764,43 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           return actualType == expectType;
                         }
     },
+
+    /** @private */
     'null': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return null; }
     },
+
+    /** @private */
     'undefined': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return undefined; }
     },
 
+    /** @private */
     'false': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return false; }
     },
 
+    /** @private */
     'true': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return true; }
     },
     
+    /** @private */
     'YES': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
       evaluate:         function (r,w) { return true; }
     },
     
+    /** @private */
     'NO': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
@@ -1077,10 +1161,18 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
 // Class Methods
 SC.Query.mixin( /** @scope SC.Query */ {
 
-  /** Constant used for SC.Query#location */
+  /** 
+    Constant used for SC.Query#location
+  
+    @property {String}
+  */
   LOCAL: 'local',
   
-  /** Constant used for SC.Query#location */
+  /** 
+    Constant used for SC.Query#location 
+    
+    @property {String}
+  */
   REMOTE: 'remote',
   
   /**
@@ -1126,7 +1218,6 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {SC.Store} store to materialize records from
     @returns {Array} sorted store keys.  may be same instance as passed value
   */
-  
   orderStoreKeys: function(storeKeys, query, store) {
     // apply the sort if there is one
     if (storeKeys) {
@@ -1151,7 +1242,6 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {Number} storeKey2 a store key
     @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
   */
- 
   compareStoreKeys: function(storeKey1, storeKey2) {
     var store    = SC.Query._TMP_STORE,
         queryKey = SC.Query._TMP_QUERY_KEY,
