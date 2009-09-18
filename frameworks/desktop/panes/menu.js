@@ -302,9 +302,9 @@ SC.MenuPane = SC.PickerPane.extend(
 	                        value: item, isEnabled: YES, icon: null, 
 	                        isSeparator: null, action: null, isCheckbox: NO, 
 	                        menuItemNumber: idx, isShortCut: NO, isBranch: NO,
-	                        itemHeight: 20, subMenu: null,keyEquivalent: null,
+	                        itemHeight: this.get('itemHeight'), subMenu: null,keyEquivalent: null,
 	                        target:null });
-        menuHeight = menuHeight+20 ;
+        menuHeight = menuHeight+this.get('itemHeight') ;
       } else if (itemType !== SC.T_ARRAY) {
           if (keys === null) keys = this.menuItemKeys.map(fetchKeys, this) ;
           cur = keys.map(fetchItem, item) ;
