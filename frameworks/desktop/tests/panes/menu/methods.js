@@ -39,6 +39,7 @@ module('SC.MenuPane#MenuItemTargetIsSet', {
 });
 
 test("Menu sets item target.", function() {
+  menu.get('displayItems');
   menu.append(); // force a rendering of the menu item child views
   var target = menu.menuItemViews[0].get('target'); // see if the target propagated through
   menu.remove(); // remove the menu
@@ -47,6 +48,7 @@ test("Menu sets item target.", function() {
 });
 
 test("Menu sets MenuItem.contentCheckboxKey.", function() {
+  menu.get('displayItems');
   menu.append();
   var key = menu.menuItemViews[0].get('contentCheckboxKey');
   menu.remove();

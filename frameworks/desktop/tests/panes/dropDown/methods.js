@@ -7,7 +7,7 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-var pane, view , view1, view2, view3 ;
+var pane, view , view1, view2, view3, view4 ;
 
 module("SC.DropDownMenu",{
 
@@ -19,6 +19,10 @@ module("SC.DropDownMenu",{
     //pane
     pane = SC.MainPane.create({
       objs : ["Around","The","World"],
+      objs2 : [{ title: "Around", pos: 3},
+        { title: "The", pos: 1},
+        { title: "World", pos: 2 },
+        { title: "Again", pos: 4}],
       selectedValue: "World",
       isDue: YES,
       childViews: [
@@ -43,7 +47,7 @@ module("SC.DropDownMenu",{
 
         //view4
         SC.DropDownMenu.extend({
-          objectsBinding: '*owner.objs',
+          objectsBinding: '*owner.objs2',
           valueBinding: '*owner.selectedValue',
           valueKey: 'title',
           nameKey: 'title',
