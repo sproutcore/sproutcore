@@ -17,19 +17,6 @@ test("fetching the object at index", function() {
 	equals(2 ,ary.indexOf('there'), "Index of 'there' is");
 });
 
-test("creating a clone of a sparse array", function() {
-	var ary = SC.SparseArray.create(6);
-	// var arr = ["captain","crash","and the","beauty","queen","from Mars"];
-	// 	ary = arr;
-	// ary.provideObjectAtIndex(0, "captain");
-	// ary.provideObjectAtIndex(1, "crash");
-	// ary.provideObjectAtIndex(2, "and the");
-	// ary.provideObjectAtIndex(3, "beauty");
-	// ary.provideObjectAtIndex(4, "queen");
-	// ary.provideObjectAtIndex(5, "from Mars");
-	// var cpy = ary.clone(); alert(cpy);
-});
-
 test("Update the sparse array using provideObjectAtIndex", function() {
 	var ary = SC.SparseArray.create(2);
 	var obj = "not";
@@ -83,6 +70,38 @@ test("element to be added is at idx > length of array ", function() {
 	equals(5, ary.get('length'), "length") ;
 });
 
+
+test("modifying a range should not require the rest of the array to refetch", function() {
+  var del = {
+    cnt: 0,
+    
+    sparseArrayDidRequestIndex: function(sparseArray, idx) {
+      this.cnt++;
+      sparseArray.provideObjectAtIndex(idx, "foo");
+    },
+    
+    sparseArrayDidRequestLength: function(sparseArray) {
+      sparseArray.provideLength(100);
+    },
+    
+    // make editable
+    sparseArrayShouldReplace: function() { return YES; }
+    
+  };
+  
+  var ary = SC.SparseArray.create({
+    delegate: del
+  });
+  
+  equals(ary.objectAt(10), 'foo', 'precond - should provide foo');
+  equals(del.cnt, 1, 'precond - should invoke sparseArrayDidRequestIndex() one time');
+  
+  del.cnt = 0;
+  
+  ary.removeAt(5); // delete an item before 10
+  equals(ary.objectAt(9), 'foo', 'should provide foo at index after delete');
+  equals(del.cnt, 0, 'should NOT invoke sparseArrayRequestIndex() since it was provided already');
+});
 
 test("Check that requestIndex works with a rangeWindowSize larger than 1", function() {
 	var ary = SC.SparseArray.array(10) ;
