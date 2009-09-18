@@ -80,7 +80,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
     @type String
   */
-  itemWidth: 150,
+  itemWidth: null,
   
   /** 
     The default height for each menu item.
@@ -234,27 +234,6 @@ SC.MenuPane = SC.PickerPane.extend(
     Control Size for the Menu Item
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
-
-
-  createChildViews: function() {
-    var childViews = [] , scroll, items, cv, t;
-	  scroll = SC.MenuScrollView;
-    items = this.get('displayItems') ;
- 	  this.generateMenuItems(items) ;
-	  cv = this.get('menuItemViews');
-	  t = SC.View.design(
-	    { layout:{ 
-	        top: 0,
-	        left: 0,
-
-	        minHeight : this.get('menuHeight')  
-	      }, 
-	      classNames: 'menuContainer', 
-	      childViews: cv
-	    });
-	  scroll = this.createChildView(scroll, { borderStyle: SC.BORDER_NONE, contentView: t});
-	  this.childViews = [scroll] ;
-  },
   
   /**
     @private
@@ -268,14 +247,12 @@ SC.MenuPane = SC.PickerPane.extend(
     this.set('anchor',anchorViewOrElement);
     this.set('preferType',SC.PICKER_MENU) ;
     if(preferMatrix) this.set('preferMatrix',preferMatrix) ;
-    this.positionPane() ;
     this.endPropertyChanges();
     this.append() ;
-
-    
+    this.positionPane() ;
     this.becomeKeyPane() ;
   },
-
+  
   /**
     This computed property is generated from the items array
 
@@ -283,15 +260,15 @@ SC.MenuPane = SC.PickerPane.extend(
     @type {String}
   */
   displayItems: function() {
-    var items = this.get('items') ,
-      loc = this.get('localize') ,
-      keys = null, itemType, cur ,
-      ret = [], rel,
-      max = items.get('length') ,
-      idx, item ,
-      fetchKeys = SC._menu_fetchKeys ,
-      fetchItem = SC._menu_fetchItem ,
-      menuHeight = 0 ;
+    var items = this.get('items') ;
+    var loc = this.get('localize') ;
+    var keys = null,itemType, cur ;
+    var ret = [], rel;
+    var max = items.get('length') ;
+    var idx, item ;
+    var fetchKeys = SC._menu_fetchKeys ;
+    var fetchItem = SC._menu_fetchItem ;
+    var menuHeight = 0 ;
     // loop through items and collect data
     for (idx = 0; idx < max; ++idx) {
       item = items.objectAt(idx) ;
@@ -362,29 +339,28 @@ SC.MenuPane = SC.PickerPane.extend(
     The render function which depends on the displayItems and value
   */
   render: function(context, firstTime) {
-    var items, last, itemWidth;
     if (SC.BENCHMARK_MENU_PANE_RENDER) {
       var bkey = '%@.render'.fmt(this) ;
       SC.Benchmark.start(bkey);
     }
-    sc_super();
     // collect some data 
-    items = this.get('displayItems') ;
-
-    
+    var items = this.get('displayItems') ;
+    //var ret = sc_super();
     // regenerate the buttons only if the new display items differs from the
     // last cached version of it.
 
-    last = this.get('_menu_displayItems') ;
+    var last = this.get('_menu_displayItems') ;
     if (firstTime || (items !== last)) {
-      if(!this.get('isEnabled')) return ;
+      if(!this.get('isEnabled') || !this.get('contentView')) return ;
+      var menuHeight = this.get('menuHeight');
       this.set('_menu_displayItems',items) ; // save for future
       context.addStyle('text-align', 'center') ;
-      itemWidth = this.get('itemWidth') ;
+      var itemWidth = this.get('itemWidth') ;
       if (SC.none(itemWidth)) {
         itemWidth = this.get('layout').width || 100;
         this.set('itemWidth',itemWidth) ; 
       }
+      this.renderChildren(context,items) ;
       context.push("<div class='top-left-edge'></div>",
        "<div class='top-edge'></div>",
        "<div class='top-right-edge'></div>",
@@ -411,10 +387,10 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   menuHeightObserver: function() {
     var height = this.layout.height ;
-          var menuHeight = this.get('menuHeight') ; 
-          if( height !== menuHeight) {
-            this.adjust('height',menuHeight).updateLayout() ;
-          }
+    var menuHeight = this.get('menuHeight') ; 
+    if( height !== menuHeight) {
+      this.adjust('height',menuHeight).updateLayout() ;
+    }
   }.observes('menuHeight'),
   
   /**
@@ -423,33 +399,30 @@ SC.MenuPane = SC.PickerPane.extend(
     items change thereafter.  This will construct the HTML but will not set
     any "transient" states such as the global isEnabled property or selection.
   */
-  generateMenuItems: function(items) {
+  renderChildren: function(context,items) {
     if(!this.get('isEnabled')) return ;
-    var item, itemTitle, itemValue, itemIsEnabled, itemIcon, isSeparator, itemAction, isCheckbox, 
-        menuItemNumber, isShortCut, isBranch, itemSubMenu, itemHeight, itemKeyEquivalent, itemTarget, itemWidth,
-        controlSize, itemView, menuItemViews, len, content, idx;
-    menuItemViews = [];
-    len = items.length ;
-    content = SC.makeArray(items) ;
-    for (idx = 0; idx < len; ++idx) {
-      item = items[idx];
-      itemTitle = item.get('title') ;
-      itemValue = item.get('value') ;
-      itemIsEnabled = item.get('isEnabled') ;
-      itemIcon = item.get('icon') ;
-      isSeparator = item.get('isSeparator') ;
-      itemAction = item.get('action') ;
-      isCheckbox = item.get('isCheckbox') ;
-      menuItemNumber = item.get('menuItemNumber') ;
-      isShortCut = item.get('isShortCut') ;
-      isBranch   = item.get('isBranch') ;
-      itemSubMenu = item.get('subMenu') ;
-      itemHeight = item.get('itemHeight') ;
-      itemKeyEquivalent = item.get('keyEquivalent') ;
-      itemTarget = item.get('target') ;
-      itemWidth = this.get('itemWidth') ;
-      controlSize = this.get('controlSize') ;
-      itemView = this.createChildView(
+    var menuItemViews = [];
+    var len = items.length ;
+    var content = SC.makeArray(items) ;
+    for (var idx = 0; idx < len; ++idx) {
+      var item = items[idx];
+      var itemTitle = item.get('title') ;
+      var itemValue = item.get('value') ;
+      var itemIsEnabled = item.get('isEnabled') ;
+      var itemIcon = item.get('icon') ;
+      var isSeparator = item.get('isSeparator') ;
+      var itemAction = item.get('action') ;
+      var isCheckbox = item.get('isCheckbox') ;
+      var menuItemNumber = item.get('menuItemNumber') ;
+      var isShortCut = item.get('isShortCut') ;
+      var isBranch   = item.get('isBranch') ;
+      var itemSubMenu = item.get('subMenu') ;
+      var itemHeight = item.get('itemHeight') ;
+      var itemKeyEquivalent = item.get('keyEquivalent') ;
+      var itemTarget = item.get('target') ;
+      var itemWidth = this.get('itemWidth') ;
+      var controlSize = this.get('controlSize') ;
+      var itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
           displayDelegate : itemView,
@@ -483,6 +456,9 @@ SC.MenuPane = SC.PickerPane.extend(
           }),
         rootElementPath : [menuItemNumber]
       });
+      context = context.begin(itemView.get('tagName')) ;
+      itemView.prepareContext(context, YES) ;
+      context = context.end() ;
       menuItemViews.push(itemView) ;
     }
     this.set('menuItemViews',menuItemViews) ;
@@ -525,7 +501,7 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   performKeyEquivalent: function(keyString,evt) {
     var items, len, menuItems, item, keyEquivalent, 
-        action, isEnabled, target, idx;
+        action, isEnabled, target;
     if(!this.get('isEnabled')) return NO ;
     this.displayItems() ;
     items = this.get('displayItemsArray') ;
@@ -539,7 +515,7 @@ SC.MenuPane = SC.PickerPane.extend(
     }
 
     len = items.length ;
-    for(idx=0; idx<len; ++idx) {
+    for(var idx=0; idx<len; ++idx) {
       item          = items[idx] ;
       keyEquivalent = item.get('keyEquivalent') ;
       action        = item.get('action') ;
@@ -605,7 +581,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns MenuItemView
   */
   getPreviousEnabledMenuItem : function(menuItem) {
-    var content, menuItemViews = this.get('menuItemViews') ;
+    var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
       var len = menuItemViews.length ;
       var idx = (menuItemViews.indexOf(menuItem) === -1) ? len : menuItemViews.indexOf(menuItem) ;
@@ -615,7 +591,7 @@ SC.MenuPane = SC.PickerPane.extend(
       while((!isEnabled || isSeparator) && --idx !== menuIdx) {
         if(idx === -1) idx = len - 1;
         isEnabled = menuItemViews[idx].get('isEnabled') ;
-        content = menuItemViews[idx].get('content') ;
+        var content = menuItemViews[idx].get('content') ;
         if(content) {
           isSeparator = content.get(menuItemViews[idx].get('isSeparatorKey'));
         }
@@ -630,7 +606,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns MenuItemView
   */
   getNextEnabledMenuItem : function(menuItem) {
-    var content, menuItemViews = this.get('menuItemViews') ;
+    var menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
       var len = menuItemViews.length ;
       var idx = (menuItemViews.indexOf(menuItem) === -1) ? 
@@ -641,7 +617,7 @@ SC.MenuPane = SC.PickerPane.extend(
       while((!isEnabled || isSeparator) && ++idx !== menuIdx) {
         if(idx === len) idx = 0;
         isEnabled = menuItemViews[idx].get('isEnabled') ;
-        content = menuItemViews[idx].get('content') ;
+        var content = menuItemViews[idx].get('content') ;
         if(content) {
           isSeparator = content.get(menuItemViews[idx].get('isSeparatorKey'));
         }
@@ -659,12 +635,12 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns Boolean
   */
   modalPaneDidClick: function(evt) {
-    var parentMenu, anchor, currentSelectedMenuItem, f = this.get("frame");
-    currentSelectedMenuItem = this.get('currentSelectedMenuItem');
+    var f = this.get("frame");
+    var currentSelectedMenuItem = this.get('currentSelectedMenuItem');
     if(currentSelectedMenuItem) {
-      anchor = currentSelectedMenuItem.getAnchor();
+      var anchor = currentSelectedMenuItem.getAnchor();
       if(anchor) {
-        parentMenu = anchor.parentMenu();
+        var parentMenu =  anchor.parentMenu();
         if(parentMenu.kindOf(SC.MenuPane)) parentMenu.modalPaneDidClick(evt);
       }
     }
@@ -682,11 +658,10 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns SC.MenuItemView
   */
   getMenuItem: function(key,value) {
-    var displayItems, menuItemViews, idx;
-    displayItems = this.get('displayItemsArray') ;
-    menuItemViews = this.get('menuItemViews') ;
+    var displayItems = this.get('displayItemsArray') ;
+    var menuItemViews = this.get('menuItemViews') ;
     if(displayItems && menuItemViews) {
-      idx = displayItems.get(key).indexOf(value);
+      var idx = displayItems.get(key).indexOf(value);
       if(idx !== -1) return menuItemViews[idx];
       else return null;
     }
