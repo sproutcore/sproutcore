@@ -282,7 +282,6 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     @returns {Number} the row height in pixels
   */
   rowHeightForContentIndex: function(contentIndex) {
-    if (contentIndex > 1000) { debugger; }
     if (this.get('hasUniformRowHeights')) {
       return this.get('rowHeight');
     } else {
