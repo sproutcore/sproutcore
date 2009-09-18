@@ -554,10 +554,9 @@ SC.DropDownMenu = SC.ButtonView.extend(
 
   */
   displaySelectedItem: function() {
-
     //Get MenuPane, currentSelectedMenuItem & menuItemView
     // Get the main parent view to show the menus
-    var menuView = this.getPath('parentView.parentView.parentView.parentView') ;
+    var menuView = this.parentMenu() ;
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
     var title,newVal ;
