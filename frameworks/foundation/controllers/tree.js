@@ -19,7 +19,7 @@ sc_require('private/tree_item_observer');
   
   TODO: Document More
 
-  @extends SC.ObejctController
+  @extends SC.ObjectController
   @extends SC.SelectionSupport
   @since SproutCore 1.0
 */
