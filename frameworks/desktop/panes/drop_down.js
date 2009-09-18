@@ -262,7 +262,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @default YES
   */
   needsEllipsis: YES,
-
+  
   /**
     Left Alignment based on the size of the button
 
@@ -556,7 +556,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
   displaySelectedItem: function() {
 
     //Get MenuPane, currentSelectedMenuItem & menuItemView
-    var menuView = this.get('parentView') ;
+    // Get the main parent view to show the menus
+    var menuView = this.getPath('parentView.parentView.parentView.parentView') ;
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
     var title,newVal ;
@@ -568,7 +569,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     }
 
     // Get the drop down View
-    var button = this.getPath('parentView.anchor') ;
+    var button = menuView.get('anchor') ;
 
     // set the value and title
     var object = menuView.get('items') ;
