@@ -695,7 +695,7 @@ SC.Observable = {
 
       if (target === this) target = null ; // use null for observers only.
       kvoKey = SC.keyFor('_kvo_observers', key);
-      this._kvo_for(kvoKey, SC._ObserverSet).add(target, method, context);
+      this._kvo_for(kvoKey, SC.ObserverSet).add(target, method, context);
       this._kvo_for('_kvo_observed_keys', SC.CoreSet).add(key) ;
     }
 

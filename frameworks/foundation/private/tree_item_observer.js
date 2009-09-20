@@ -8,7 +8,8 @@
 sc_require('mixins/tree_item_content');
 sc_require('mixins/collection_content');
 
-/**
+/** 
+  @ignore
   @class
   
   A TreeNode is an internal class that will manage a single item in a tree

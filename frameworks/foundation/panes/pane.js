@@ -78,7 +78,7 @@ require('views/view');
   @extends SC.ResponderContext
   @since SproutCore 1.0
 */
-SC.Pane = SC.View.extend({
+SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
 
   /** 
     Returns YES for easy detection of when you reached the pane. 
@@ -105,13 +105,25 @@ SC.Pane = SC.View.extend({
   */
   rootResponder: null,  
   
-  /** Last known window size. */
+  /** 
+    Last known window size. 
+    
+    @property {Rect}
+  */
   currentWindowSize: null,
   
+  /** @private 
+  
+    @property {SC.Pane}
+  */
   previousKeyPane: null,
   
-  /** The parent dimensions are always the last known window size. */
-  computeParentDimensions: function(frame) {
+  /** 
+    The parent dimensions are always the last known window size. 
+    
+    @returns {Rect} current window size 
+  */
+  computeParentDimensions: function() {
     var pframe = this.get('currentWindowSize');
     return {
       width: (pframe) ? pframe.width : 1000,
@@ -128,10 +140,15 @@ SC.Pane = SC.View.extend({
     Invoked by the root responder whenever the window resizes.  This should
     simply begin the process of notifying children that the view size has
     changed, if needed.
+    
+    @param {Rect} oldSize the old window size
+    @param {Rect} newSize the new window size
+    @returns {SC.Pane} receiver
   */
   windowSizeDidChange: function(oldSize, newSize) {
     this.set('currentWindowSize', newSize) ;
     this.parentViewDidResize(); // start notifications.
+    return this ;
   },
   
   /**
@@ -177,34 +194,46 @@ SC.Pane = SC.View.extend({
   // HANDLE FIRST RESPONDER AND KEY RESPONDER STATUS
   //
 
-  /** @property
+  /**
     The default responder.  Set this to point to a responder object that can 
     respond to events when no other view in the hierarchy handles them.
+    
+    @property {SC.Responder}
   */
   defaultResponder: null,
   
-  /** @property
+  /**
     Pane's never have a next responder
+    
+    @property {SC.Responder}
+    @readOnly
   */
   nextResponder: function() {
     return null;
   }.property().cacheable(),
   
-  /** @property
+  /**
     The first responder.  This is the first view that should receive action 
-    events.  Whenever you click on a view, it will usually become firstResponder. 
+    events.  Whenever you click on a view, it will usually become 
+    firstResponder. 
+    
+    @property {SC.Responder}
   */
   firstResponder: null,
   
-  /** @property
+  /** 
     If YES, this pane can become the key pane.  You may want to set this to NO 
     for certain types of panes.  For example, a palette may never want to 
     become key.  The default value is YES.
+    
+    @property {Boolean}
   */
   acceptsKeyPane: YES,
   
-  /** @property
+  /**
     This is set to YES when your pane is currently the target of key events. 
+    
+    @property {Boolean}
   */
   isKeyPane: NO,
 
@@ -309,8 +338,8 @@ SC.Pane = SC.View.extend({
   /**
     Called just before the pane becomes keyPane.  Notifies the current keyView 
     that it is about to gain focus.  The keyView can use this opportunity to 
-    prepare itself, possibly stealing any value it might need to steal from the 
-    current key view.
+    prepare itself, possibly stealing any value it might need to steal from 
+    the current key view.
     
     @param {SC.Pane} pane
     @returns {SC.Pane} receiver
@@ -363,19 +392,29 @@ SC.Pane = SC.View.extend({
   // MAIN PANE SUPPORT
   //
   
+  /**
+    Returns YES whenever the pane has been set as the main pane for the 
+    application.
+    
+    @property {Boolean}
+  */
   isMainPane: NO,
   
   /**
-    Invoked when the pane is about to become the focused pane.
+    Invoked when the pane is about to become the focused pane.  Override to
+    implement your own custom handling.
     
     @param {SC.Pane} pane the pane that currently have focus
+    @returns {void}
   */
   focusFrom: function(pane) {},
   
   /**
-    Invoked when the the pane is about to lose its focused pane status.
+    Invoked when the the pane is about to lose its focused pane status.  
+    Override to implement your own custom handling
     
     @param {SC.Pane} pane the pane that will receive focus next
+    @returns {void}
   */
   blurTo: function(pane) {},
   
@@ -383,6 +422,9 @@ SC.Pane = SC.View.extend({
     Invoked when the view is about to lose its mainPane status.  The default 
     implementation will also remove the pane from the document since you can't 
     have more than one mainPane in the document at a time.
+    
+    @param {SC.Pane} pane
+    @returns {void}
   */
   blurMainTo: function(pane) {
     this.set('isMainPane', NO) ;
@@ -393,6 +435,9 @@ SC.Pane = SC.View.extend({
     implementation simply updates the isMainPane property.  In your subclass, 
     you should make sure your pane has been added to the document before 
     trying to make it the mainPane.  See SC.MainPane for more information.
+    
+    @param {SC.Pane} pane
+    @returns {void}
   */
   focusMainFrom: function(pane) {
     this.set('isMainPane', YES);
@@ -408,7 +453,6 @@ SC.Pane = SC.View.extend({
     
     @param {SC.RootResponder} rootResponder
     @returns {SC.Pane} receiver
-    
   */
   append: function() {
     return this.appendTo(document.body) ;
@@ -417,6 +461,8 @@ SC.Pane = SC.View.extend({
   /**
     Removes the pane from the document.  This will remove the
     DOM node and deregister you from the document window.
+    
+    @returns {SC.Pane} receiver
   */
   remove: function() {
     if (!this.get('isVisibleInWindow')) return this ; // nothing to do
@@ -479,7 +525,8 @@ SC.Pane = SC.View.extend({
   },
 
   /** 
-    inserts the pane's rootElement into the hierarchy before the passed element.
+    inserts the pane's rootElement into the hierarchy before the passed 
+    element.
     
     @param {DOMElement} elem the element to append to
     @returns {SC.Pane} receiver
@@ -515,6 +562,8 @@ SC.Pane = SC.View.extend({
   
   /**
     This method has no effect in the pane.  Instead use remove().
+    
+    @returns {void}
   */
   removeFromParent: function() { },
   
@@ -539,8 +588,11 @@ SC.Pane = SC.View.extend({
     return this ;
   },
   
-  /** @property
+  /**
     YES when the pane is currently attached to a document DOM.  Read only.
+    
+    @property {Boolean}
+    @readOnly
   */
   isPaneAttached: NO,
 
@@ -586,12 +638,14 @@ SC.Pane = SC.View.extend({
     return this ;
   },
   
+  /** @private */
   updateLayerLocation: function() {
     // note: the normal code here to update node location is removed 
     // because we don't need it for panes.
     return this ; 
   },
 
+  /** @private */
   init: function() {
     // if a layer was set manually then we will just attach to existing 
     // HTML.
@@ -600,6 +654,7 @@ SC.Pane = SC.View.extend({
     if (hasLayer) this.paneDidAttach();
   },
 
+  /** @private */
   classNames: 'sc-pane'.w()
   
 }) ;

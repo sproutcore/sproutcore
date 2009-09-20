@@ -16,7 +16,6 @@ sc_require('system/set');
 // notification is sent.
 
 /**
-  @private 
   @namespace 
   
   The private ObserverQueue is used to maintain a set of pending observers. 

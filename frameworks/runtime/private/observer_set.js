@@ -10,16 +10,15 @@
 //
 
 /**
-  @private
   @namespace
 
   This private class is used to store information about obversers on a 
   particular key.  Note that this object is not observable.  You create new
-  instances by calling SC.beget(SC._ObserverSet) ;
+  instances by calling SC.beget(SC.ObserverSet) ;
 
   @since SproutCore 1.0
 */
-SC._ObserverSet = {
+SC.ObserverSet = {
 
   /**
     the number of targets in the set.
@@ -145,7 +144,7 @@ SC._ObserverSet = {
     Returns a new instance of the set with the contents cloned.
   */
   clone: function() {
-    var oldSet, newSet, key, ret = SC._ObserverSet.create() ;
+    var oldSet, newSet, key, ret = SC.ObserverSet.create() ;
     for(key in this) {
       if (!this.hasOwnProperty(key)) continue ;
       oldSet = this[key];
@@ -168,6 +167,6 @@ SC._ObserverSet = {
   
 } ;
 
-SC._ObserverSet.slice = SC._ObserverSet.clone ;
+SC.ObserverSet.slice = SC.ObserverSet.clone ;
 
 

@@ -7,22 +7,46 @@
 
 sc_require('mixins/string');
 
-/** Indicates a value has a mixed state of both on and off. */
+/** 
+  Indicates a value has a mixed state of both on and off. 
+  
+  @property {String}
+*/
 SC.MIXED_STATE = '__MIXED__' ;
 
-/** Option for HUGE control size. */
+/** 
+  Option for HUGE control size.
+  
+  @property {String}
+*/
 SC.HUGE_CONTROL_SIZE = 'sc-huge-size' ;
 
-/** Option for large control size. */
+/** 
+  Option for large control size.
+  
+  @property {String}
+*/
 SC.LARGE_CONTROL_SIZE = 'sc-large-size' ;
 
-/** Option for standard control size. */
+/** 
+  Option for standard control size.
+  
+  @property {String}
+*/
 SC.REGULAR_CONTROL_SIZE = 'sc-regular-size' ;
 
-/** Option for small control size. */
+/** 
+  Option for small control size.
+  
+  @property {String}
+*/
 SC.SMALL_CONTROL_SIZE = 'sc-small-size' ;
 
-/** Option for tiny control size */
+/** 
+  Option for tiny control size
+  
+  @property {String}
+*/
 SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 
 /**
@@ -79,6 +103,7 @@ SC.TINY_CONTROL_SIZE = 'sc-tiny-size' ;
 */
 SC.Control = {
   
+  /** @private */
   initMixin: function() {
     this._control_contentDidChange() ; // setup content observing if needed.
   },
@@ -87,7 +112,7 @@ SC.Control = {
     The selected state of this control.  Possible options are YES, NO or 
     SC.MIXED_STATE.
     
-    @type Boolean or SC.MIXED_STATE
+    @property {Boolean}
   */
   isSelected: NO,
   
@@ -102,7 +127,7 @@ SC.Control = {
     Changing this property value by default will cause the Control mixin to
     add/remove an 'active' class name to the root element.
     
-    @type Boolean
+    @property {Boolean}
   */
   isActive: NO,
   
@@ -121,6 +146,8 @@ SC.Control = {
     If instead of setting a single value on a control, you would like to 
     set a content object and have the control display a single property
     of that control, then you should use the content property instead.
+
+    @property {Object}
   */
   value: null,
   
@@ -140,7 +167,7 @@ SC.Control = {
     collection view, then it would be better to instead bind the value of
     the control directly to a controller property.
     
-    @type SC.Object
+    @property {SC.Object}
   */
   content: null,
   
@@ -150,7 +177,7 @@ SC.Control = {
     content object is first set.  If you have a displayDelegate, then
     you can also use the contentValueKey of the displayDelegate.
     
-    @type String
+    @property {String}
   */
   contentValueKey: null,
   
@@ -167,6 +194,7 @@ SC.Control = {
     
     @param {Object} target the content object
     @param {String} key the property that changes
+    @returns {void}
     @test in content
   */
   contentPropertyDidChange: function(target, key) {
@@ -220,6 +248,8 @@ SC.Control = {
     If you are using contentValueKey in some other way than typically
     implemented by this mixin, then you may want to override this method as
     well.
+    
+    @returns {void}
   */
   updateContentWithValueObserver: function() {
     var key = this.contentValueKey ?
@@ -247,7 +277,7 @@ SC.Control = {
     automatically bind the value to the property key you name here on the 
     content object.
     
-    @type String
+    @property {String}
   */
   fieldKey: null,
   
@@ -258,7 +288,7 @@ SC.Control = {
     in the error explanation.  If you do not set this property, then the 
     fieldKey or the class name will be used to generate a human readable name.
     
-    @type String
+    @property {String}
   */
   fieldLabel: null,
   
@@ -266,14 +296,15 @@ SC.Control = {
     The human readable label for this control for use in error strings.  This
     property is computed dynamically using the following rules:
     
-    # If the fieldLabel is defined, that property is localized and returned.
-    # Otherwise, if the keyField is defined, try to localize using the string 
-    # "ErrorLabel.{fieldKeyName}".  If a localized name cannot be found, use a
-    # humanized form of the fieldKey.
-    # Try to localize using the string "ErrorLabel.{ClassName}"
-    # Return a humanized form of the class name.
+    If the fieldLabel is defined, that property is localized and returned.
+    Otherwise, if the keyField is defined, try to localize using the string 
+    "ErrorLabel.{fieldKeyName}".  If a localized name cannot be found, use a
+    humanized form of the fieldKey.
     
-    @type String
+    Try to localize using the string "ErrorLabel.{ClassName}". Return a 
+    humanized form of the class name.
+    
+    @property {String}
   */
   errorLabel: function() {
     var ret, fk, def ;
@@ -290,15 +321,18 @@ SC.Control = {
   /**
     The control size.  This will set a CSS style on the element that can be 
     used by the current theme to vary the appearance of the control.
+    
+    @property {String}
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
   
+  /** @private */
   displayProperties: 'isEnabled isSelected isActive controlSize'.w(),
   
   /** @private */
   _CONTROL_TMP_CLASSNAMES: {},
   
-  /**
+  /** @private
     Invoke this method in your updateDisplay() method to update any basic 
     control CSS classes.
   */

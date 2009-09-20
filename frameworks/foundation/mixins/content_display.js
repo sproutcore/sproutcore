@@ -24,6 +24,7 @@
     });
   }}}
   
+  @since SproutCore 1.0
 */
 SC.ContentDisplay = {
   
@@ -37,6 +38,8 @@ SC.ContentDisplay = {
     Add an array with the names of any property on the content object that
     should trigger an update of the display for your view.  Changes to the
     content object will only invoke your display method once per runloop.
+    
+    @property {Array}
   */
   contentDisplayProperties: [],
   

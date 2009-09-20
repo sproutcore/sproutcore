@@ -22,8 +22,8 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
     If you would prefer to pass your own parameters instead, you can instead
     call invokeLater() directly on the function object itself.
     
-    @param interval {Number} period from current time to schedule.
     @param methodName {String} method name to perform.
+    @param interval {Number} period from current time to schedule.
     @returns {SC.Timer} scheduled timer.
   */
   invokeLater: function(methodName, interval) {
@@ -60,8 +60,8 @@ SC.mixin(SC.Object.prototype, /** @scope SC.Object.prototype */ {
     You may pass either a function itself or a target/method pair.
     
     @param {String} pathName
-    @param {Object} target or method
-    @param {Function} method
+    @param {Object} target target or method
+    @param {Function|String} method
     @returns {SC.Object} receiver
   */
   invokeWith: function(pathName, target, method) {

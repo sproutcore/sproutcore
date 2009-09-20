@@ -500,78 +500,81 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
   //
   
   
-  /** @private
+  /**
     This is the definition of the query language. You can extend it
     by using SC.Query.registerQueryExtension().
   */
   queryLanguage: {
     
-    /** @private */
     'UNKNOWN': {
       firstCharacter:   /[^\s'"\w\d\(\)\{\}]/,
       notAllowed:       /[\s'"\w\d\(\)\{\}]/
     },
 
-    /** @private */
     'PROPERTY': {
       firstCharacter:   /[a-zA-Z_]/,
       notAllowed:       /[^a-zA-Z_0-9]/,
       evalType:         'PRIMITIVE',
+      
+      /** @ignore */
       evaluate:         function (r,w) { return r.get(this.tokenValue); }
     },
 
-    /** @private */
     'NUMBER': {
       firstCharacter:   /\d/,
       notAllowed:       /[^\d\.]/,
       format:           /^\d+$|^\d+\.\d+$/,
       evalType:         'PRIMITIVE',
+      
+      /** @ignore */
       evaluate:         function (r,w) { return parseFloat(this.tokenValue); }
     },
 
-    /** @private */
     'STRING': {
       firstCharacter:   /['"]/,
       delimeted:        true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return this.tokenValue; }
     },
 
-    /** @private */
     'PARAMETER': {
       firstCharacter:   /\{/,
       lastCharacter:    '}',
       delimeted:        true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
 
-    /** @private */
     '%@': {
       rememberCount:    true,
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return w[this.tokenValue]; }
     },
 
-    /** @private */
     'OPEN_PAREN': {
       firstCharacter:   /\(/,
       singleCharacter:  true
     },
 
-    /** @private */
     'CLOSE_PAREN': {
       firstCharacter:   /\)/,
       singleCharacter:  true
     },
 
-    /** @private */
     'AND': {
       reservedWord:     true,
       leftType:         'BOOLEAN',
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -579,12 +582,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'OR': {
       reservedWord:     true,
       leftType:         'BOOLEAN',
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -592,23 +596,25 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'NOT': {
       reservedWord:     true,
       rightType:        'BOOLEAN',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var right = this.rightSide.evaluate(r,w);
                           return !right;
                         }
     },
 
-    /** @private */
     '=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -616,12 +622,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     '!=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -629,12 +636,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     '<': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -642,12 +650,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     '<=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -655,12 +664,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     '>': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -668,12 +678,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     '>=': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
@@ -681,12 +692,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'BEGINS_WITH': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var all   = this.leftSide.evaluate(r,w);
                           var start = this.rightSide.evaluate(r,w);
@@ -694,12 +706,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'ENDS_WITH': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
@@ -707,12 +720,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'CONTAINS': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var all    = this.leftSide.evaluate(r,w);
                           var substr = this.rightSide.evaluate(r,w);
@@ -720,12 +734,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'ANY': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var prop   = this.leftSide.evaluate(r,w);
                           var values = this.rightSide.evaluate(r,w);
@@ -739,12 +754,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'MATCHES': {
       reservedWord:     true,
       leftType:         'PRIMITIVE',
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var toMatch = this.leftSide.evaluate(r,w);
                           var matchWith = this.rightSide.evaluate(r,w);
@@ -752,11 +768,12 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'TYPE_IS': {
       reservedWord:     true,
       rightType:        'PRIMITIVE',
       evalType:         'BOOLEAN',
+
+      /** @ignore */
       evaluate:         function (r,w) {
                           var actualType = SC.Store.recordTypeFor(r.storeKey);
                           var right      = this.rightSide.evaluate(r,w);
@@ -765,45 +782,51 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                         }
     },
 
-    /** @private */
     'null': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return null; }
     },
 
-    /** @private */
     'undefined': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return undefined; }
     },
 
-    /** @private */
     'false': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return false; }
     },
 
-    /** @private */
     'true': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return true; }
     },
     
-    /** @private */
     'YES': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return true; }
     },
     
-    /** @private */
     'NO': {
       reservedWord:     true,
       evalType:         'PRIMITIVE',
+
+      /** @ignore */
       evaluate:         function (r,w) { return false; }
     }
     

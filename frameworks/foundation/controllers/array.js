@@ -4,8 +4,8 @@
 // Portions copyright ©2008 Apple Inc.  All rights reserved.
 // ========================================================================
 
-require('controllers/controller');
-require('mixins/selection_support');
+sc_require('controllers/controller');
+sc_require('mixins/selection_support');
 
 /**
   @class
@@ -45,7 +45,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     ArrayController will wrap the item in an array in an attempt to normalize
     the result.
     
-    @type SC.Array
+    @property {SC.Array}
   */
   content: null,
 
@@ -53,8 +53,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Makes the array editable or not.  If this is set to NO, then any attempts
     at changing the array content itself will throw an exception.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   isEditable: YES,
   
@@ -84,8 +83,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     If you pass a function, it should be suitable for use in compare().
     
-    @property
-    @type String|Array|Function
+    @property {String|Array|Function}
   */
   orderBy: null,
     
@@ -94,8 +92,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     in an array and publish it.  Otherwise, it will treat single content like 
     null content.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   allowsSingleContent: YES,
   
@@ -108,7 +105,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     removeObject() will still destroy the object in question as well as 
     removing it from the parent array.
     
-    @type {Boolean}
+    @property {Boolean}
   */
   destroyOnRemoval: NO,
 
@@ -117,8 +114,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Depending on how you have your ArrayController configured, this property
     may be one of several different values.  
     
-    @property
-    @type SC.Array
+    @property {SC.Array}
   */
   arrangedObjects: function() {
     return this;
@@ -129,8 +125,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     remove content.  You can delete content only if the content is not single
     content and isEditable is YES.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   canRemoveContent: function() {
     var content = this.get('content'), ret;
@@ -147,8 +142,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     real SC.Array-like object.  You cannot reorder content when orderBy is
     non-null.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   canReorderContent: function() {
     var content = this.get('content'), ret;
@@ -165,8 +159,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     use the addObject() or pushObject() methods.  All other methods imply 
     reordering and will fail.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   canAddContent: function() {
     var content = this.get('content'), ret ;
@@ -182,8 +175,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     even an empty array.  Returns NO if the content is null or not enumerable
     and allowsSingleContent is NO.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   hasContent: function() {
     var content = this.get('content');
@@ -194,6 +186,8 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   /**
     Returns the current status property for the content.  If the content does
     not have a status property, returns SC.Record.READY.
+    
+    @property {Number}
   */
   status: function() {
     var content = this.get('content'),
@@ -258,13 +252,15 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
 
   /**
     Compute the length of the array based on the observable content
+    
+    @property {Number}
   */
   length: function() {
     var content = this._scac_observableContent();
     return content ? content.get('length') : 0;
   }.property().cacheable(),
 
-  /**
+  /** @private
     Returns the object at the specified index based on the observable content
   */
   objectAt: function(idx) {
@@ -272,7 +268,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return content ? content.objectAt(idx) : undefined ;    
   },
   
-  /**
+  /** @private
     Forwards a replace on to the content, but only if reordering is allowed.
   */
   replace: function(start, amt, objects) {
@@ -309,6 +305,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
   // INTERNAL SUPPORT
   // 
   
+  /** @private */
   init: function() {
     sc_super();
     this._scac_contentDidChange();
@@ -401,7 +398,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     return (this._scac_cached = ret) ;
   },
   
-  /**
+  /** @private
     Whenever content changes, setup and teardown observers on the content
     as needed.
   */
@@ -455,7 +452,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   }.observes('content'),
   
-  /**
+  /** @private
     Whenever enumerable content changes, need to regenerate the 
     observableContent and notify that the range has changed.  
     
@@ -474,7 +471,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.updateSelectionAfterContentChange();
   },
   
-  /**
+  /** @private
     Whenever array content changes, need to simply forward notification.
     
     Assumes that content is not null and is SC.Array.
@@ -497,7 +494,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
   },
   
-  /**
+  /** @private
     Whenver the content "status" property changes, relay out.
   */
   _scac_contentStatusDidChange: function() {

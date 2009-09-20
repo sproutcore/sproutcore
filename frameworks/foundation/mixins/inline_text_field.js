@@ -75,9 +75,8 @@ sc_require('views/text_field') ;
   discardEditing().  This method will generally suceed unless your delegate
   refuses it as well.
   
-  @extends SC.View
+  @extends SC.TextFieldView
   @extends SC.DelegateSupport
-  @extends SC.InlineEditorDelegate
   @since SproutCore 1.0
 */
 SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
@@ -175,6 +174,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     Tries to commit the current value of the field and end editing.  
     
     Do not use this method, use the class method instead.
+    
+    @returns {Boolean}
   */
   commitEditing: function() {
     // try to validate field.  If it fails, return false.  
@@ -186,6 +187,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     Tries to discard the current value of the field and end editing.
     
     Do not use this method, use the class method instead.
+
+    @returns {Boolean}
   */
   discardEditing: function() {
     return this._endEditing(this._originalValue) ;
@@ -194,6 +197,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   /**
     Invoked whenever the editor loses (or should lose) first responder 
     status to commit or discard editing.
+    
+    @returns {Boolean}
   */
   blurEditor: function() {
     if (!this.get('isEditing')) return YES ;
@@ -234,70 +239,68 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   /**
     YES if the editor is currently visible and editing.
   
-    @type {Boolean}
+    @property {Boolean}
   */
   isEditing: NO,
   
-  /**
-    Collects the appropriate style information from the targetView to 
-    make the inline editor appear similar.
-  */
+  // TODO: make this function work for 1.0
+  // /**
+  //   Resizes the visible textarea to fix the actual text in the text area.
+  //   
+  //   This method works by keeping a div positioned immediately beneath the 
+  //   text area with an opacity of 0 that contains the same text as the 
+  //   input text field itself.  This is then used to calculate the required 
+  //   size for the text area.
+  // */
+  // resizeToFit: function(newValue)
+  // {
+  //   
+  // 
+  // 
+  // var sizer  = this.outlet('sizer');
+  //     var field  = this.outlet('field');
+  //     
+  //     // XSS attack waiting to happen... escape the form input;
+  //     var text = (newValue || '').escapeHTML();
+  // 
+  //     // convert the textarea's newlines into something comparable for the sizer 
+  //     // div appending a space to give a line with no text a visible height.
+  //     text = text.replace((/ {2}/g), "&nbsp; ").replace(/\n/g, "<br />&nbsp;");
+  //     
+  //     // get the text size
+  //     sizer.set('innerHTML', text || "&nbsp;");
+  //     sizer.recacheFrames() ;
+  //     var h = sizer.get('frame').height;
+  //     this.set('frame', { height: h }) ;
+  // },
   
-  
-  /**
-    Resizes the visible textarea to fix the actual text in the text area.
-    
-    This method works by keeping a div positioned immediately beneath the 
-    text area with an opacity of 0 that contains the same text as the 
-    input text field itself.  This is then used to calculate the required 
-    size for the text area.
-  */
-  resizeToFit: function(newValue)
-  {
-    
-    // TODO: make this function work for 1.0
-  
-  
-    // var sizer  = this.outlet('sizer');
-    //     var field  = this.outlet('field');
-    //     
-    //     // XSS attack waiting to happen... escape the form input;
-    //     var text = (newValue || '').escapeHTML();
-    // 
-    //     // convert the textarea's newlines into something comparable for the sizer 
-    //     // div appending a space to give a line with no text a visible height.
-    //     text = text.replace((/ {2}/g), "&nbsp; ").replace(/\n/g, "<br />&nbsp;");
-    //     
-    //     // get the text size
-    //     sizer.set('innerHTML', text || "&nbsp;");
-    //     sizer.recacheFrames() ;
-    //     var h = sizer.get('frame').height;
-    //     this.set('frame', { height: h }) ;
-  },
-  
+  /** @private */
   mouseDown: function(e) {
     arguments.callee.base.call(this, e) ;
     return this.get('isEditing');
   },
   
-  
+  /** @private */
   keyDown: function(evt) {
     var ret = this.interpretKeyEvents(evt) ;
     if(!ret) this.fieldValueDidChange(true);
     return !ret ? NO : ret ;
   },
   
+  /** @private */
   insertText: null,
   
   //keyUp: function() { return true; },
 
   // [Safari] if you don't take key focus away from an element before you 
   // remove it from the DOM key events are no longer sent to the browser.
+  /** @private */
   willRemoveFromParent: function() {
     this.$('input')[0].blur();
   },
   
   // ask owner to end editing.
+  /** @private */
   willLoseFirstResponder: function(responder) {
     if (responder !== this) return;
     
@@ -307,8 +310,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     return this.blurEditor() ;
   },
 
-  // invoked when the user presses escape.  Returns true to ignore
-  // keystroke
+  /**
+    invoked when the user presses escape.  Returns true to ignore keystroke
+    
+    @returns {Boolean}
+  */
   cancel: function() { 
     this.discardEditing(); 
     return YES;
@@ -316,6 +322,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   
   // do it here instead of waiting on the binding to make sure the UI
   // updates immediately.
+  /** @private */
   fieldValueDidChange: function(partialChange) {
     arguments.callee.base.call(this, partialChange) ;
     //this.resizeToFit(this.getFieldValue()) ;
@@ -324,6 +331,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   // invoked when the user presses return.  If this is a multi-line field,
   // then allow the newine to proceed.  Otherwise, try to commit the 
   // edit.
+  /** @private */
   insertNewline: function(evt) { 
     if (this._multiline) {
       return arguments.callee.base.call(this, evt) ;
@@ -344,17 +352,16 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   
   // Tries to find the next key view when tabbing.  If the next view is 
   // editable, begins editing.
-  
-  insertTab: function(evt)
-  {
+  /** @private */
+  insertTab: function(evt) {
     var next = this._delegate.nextValidKeyView();
     this.commitEditing() ;
     if(next) next.beginEditing();
     return YES ;
   },
 
-  insertBacktab: function(evt)
-  {
+  /** @private */
+  insertBacktab: function(evt) {
     var prev = this._delegate.previousValidKeyView();
     this.commitEditing() ;
     if(prev) prev.beginEditing();
@@ -366,7 +373,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
 
 SC.InlineTextFieldView.mixin(
-/** @static SC.InlineTextFieldView */ {
+/** @scope SC.InlineTextFieldView */ {
+  
   /** Call this method to make the inline editor begin editing for your view.
       
       If the inline editor is already being used for another value it will
@@ -435,6 +443,7 @@ SC.InlineTextFieldView.mixin(
     return this.editor ? this.editor.discardEditing() : YES ;  
   },
   
+  /** @private */
   updateViewStyle: function() {
     var el = this._exampleElement[0] ;   
     var styles = '';
@@ -454,7 +463,7 @@ SC.InlineTextFieldView.mixin(
     return styles;
   },
 
-
+  /** @private */
   updateViewPaddingStyle: function() {
     var el = this._exampleElement[0] ;   
     var styles = '';
@@ -475,7 +484,7 @@ SC.InlineTextFieldView.mixin(
     The current shared inline editor.  This property will often remain NULL
     until you actually begin editing for the first time.
     
-    @type {SC.InlineTextFieldView}
+    @property {SC.InlineTextFieldView}
   */
   editor: null
   

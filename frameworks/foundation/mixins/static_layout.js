@@ -66,7 +66,7 @@ SC.StaticLayout = {
     Note that a view that hasStaticLayout still may not actually use static
     layout unless useStaticLayout is also set to YES.
     
-    @type {Boolean}
+    @property {Boolean}
   */
   hasStaticLayout: YES,
   
@@ -75,7 +75,7 @@ SC.StaticLayout = {
     still use absolute positioning.  To activate static positioning, set this
     property to YES.
 
-    @type {Boolean}
+    @property {Boolean}
   */
   useStaticLayout: NO,
   
@@ -87,18 +87,24 @@ SC.StaticLayout = {
   /**
     Not available on views with static layout.  Calling this method will raise 
     an exception.
+    
+    @function
   */
   convertFrameToView: null,
 
   /**
     Not available on views with static layout.  Calling this method will raise 
     an exception.
+    
+    @function
   */
   convertFrameFromView: null,
   
   /**
     Frame is not available on views with static layout.  This property will
     always return null.
+    
+    @function
   */
   frame: null,
   
@@ -106,26 +112,36 @@ SC.StaticLayout = {
   /**
     clippingFrame is not available on views with static layout.  This 
     property will always return null.
+    
+    @function
   */
   clippingFrame: null,
   
   /**
     This method is not supported on static layout views.
+    
+    @function
   */
   parentViewDidResize: null,
   
   /**
     This method is not supported on static layout views.
+    
+    @function
   */
   beginLiveResize: null,
 
   /**
     This method is not supported on static layout views.
+    
+    @function
   */
   endLiveResize: null,
 
   /**
     This method is not supported on static layout views.
+    
+    @function
   */
   viewDidResize: null
   

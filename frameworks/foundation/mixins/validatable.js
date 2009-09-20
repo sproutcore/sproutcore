@@ -14,6 +14,7 @@
 */
 SC.Validatable = {
   
+  /** @private */
   initMixin: function() {
     this._validatable_validatorDidChange() ;
   },
@@ -23,6 +24,8 @@ SC.Validatable = {
   
     Set to a validator class or instance.  If this points to a class, it will 
     be instantiated when the validator is first used.
+    
+    @property {SC.Validator}
   */
   validator: null,
 
@@ -34,6 +37,8 @@ SC.Validatable = {
     
     You can return a loc string here if you like.  It will be localized when
     it is placed into the error string.
+    
+    @property {String}
   */
   errorLabel: null,
 
@@ -44,7 +49,7 @@ SC.Validatable = {
     this property if you want to use some other method to calculate the
     current valid state.
     
-    @field
+    @property {Boolean}
   */
   isValid: function() { 
     return SC.typeOf(this.get('value')) !== SC.T_ERROR; 
@@ -54,6 +59,8 @@ SC.Validatable = {
     The form that the view belongs to.  May be null if the view does not 
     belong to a form.  This property is usually set automatically by an 
     owner form view.
+    
+    @property {SC.View}
   */
   ownerForm: null,
   
@@ -65,7 +72,7 @@ SC.Validatable = {
     always return SC.VALIDATE_OK.
 
     @param {Boolean} partialChange YES if this is a partial edit.
-    @returns SC.VALIDATE_OK, error, or SC.VALIDATE_NO_CHANGE
+    @returns {String} SC.VALIDATE_OK, error, or SC.VALIDATE_NO_CHANGE
   */
   performValidate: function(partialChange) {
     var ret = SC.VALIDATE_OK ;
@@ -91,6 +98,8 @@ SC.Validatable = {
     Runs validateSubmit.  You should use this in your implementation of 
     validateSubmit.  If no validator is installed, this always returns
     SC.VALIDATE_OK
+    
+    @returns {String}
   */
   performValidateSubmit: function() {
     return this._validator ? this._validator.validateSubmit(this.get('ownerForm'), this) : SC.VALIDATE_OK;
@@ -113,7 +122,7 @@ SC.Validatable = {
   /**
     Returns the validator object, if one has been created.
     
-    @property {SC.Validator} the object
+    @property {SC.Validator}
   */
   validatorObject: function() {
     return this._validator;
@@ -125,6 +134,8 @@ SC.Validatable = {
     
     The default implementation simply calls performValidateSubmit() and 
     returns that value.
+    
+    @property {Boolean}
   */
   validateSubmit: function() { return this.performValidateSubmit(); },
   
@@ -133,8 +144,9 @@ SC.Validatable = {
     
     This method will call the validators objectForFieldValue if it exists.
     
-    @param fieldValue the raw value from the field.
-    @returns converted object
+    @param {Object} fieldValue the raw value from the field.
+    @param {Boolean} partialChange
+    @returns {Object}
   */
   objectForFieldValue: function(fieldValue, partialChange) {
     return this._validator ? this._validator.objectForFieldValue(fieldValue, this.get('ownerForm'), this) : fieldValue ;
@@ -145,8 +157,8 @@ SC.Validatable = {
     
     This method will call the validator's fieldValueForObject if it exists.
     
-    @param object the objec to convert
-    @returns converted field value
+    @param object {Object} the objec to convert
+    @returns {Object}
   */
   fieldValueForObject: function(object) {
     return this._validator ? this._validator.fieldValueForObject(object, this.get('ownerForm'), this) : object ;
@@ -156,6 +168,7 @@ SC.Validatable = {
     this.displayDidChange();
   }.observes('isValid'),
   
+  /** @private */
   updateLayerMixin: function(context) {
     context.setClass('invalid', !this.get('isValid'));
   },

@@ -8,12 +8,16 @@
 /**
   Indicates that the collection view expects to accept a drop ON the specified
   item.
+  
+  @property {Number}
 */
 SC.DROP_ON = 0x01 ;
 
 /**
   Indicates that the collection view expects to accept a drop BEFORE the 
   specified item.
+  
+  @property {Number}
 */
 SC.DROP_BEFORE = 0x02 ;
 
@@ -21,16 +25,20 @@ SC.DROP_BEFORE = 0x02 ;
   Indicates that the collection view expects to accept a drop AFTER the
   specified item.  This is treated just like SC.DROP_BEFORE is most views
   except for tree lists.
+  
+  @property {Number}
 */
 SC.DROP_AFTER = 0x04 ;
 
 /**
   Indicates that the collection view want's to know which operations would 
   be allowed for either drop operation.
+  
+  @property {Number}
 */
 SC.DROP_ANY = 0x07 ;
 
-SC.mixin(/** @scope SC */ {
+SC.mixin(/** @lends SC */ {
   
   /**
     Reads or writes data from a global cache.  You can use this facility to
@@ -103,7 +111,7 @@ SC.mixin(/** @scope SC */ {
   }
 }) ;
 
-SC.mixin(Function.prototype, {
+SC.mixin(Function.prototype, /** @scope Function.prototype */ {
   /**
     Creates a timer that will execute the function after a specified 
     period of time.

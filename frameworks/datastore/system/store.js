@@ -1444,7 +1444,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Hash} params optional additional parameters to pass along to the
       data source
 
-    @returns {SC.Bool} if the action was succesful.
+    @returns {Boolean} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys, params) {
     
@@ -1520,14 +1520,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     record, this will ask the data source to perform the appropriate action
     on the store key.
     
-    You have to pass either the id or the storeKey otherwise it will return NO.
+    You have to pass either the id or the storeKey otherwise it will return 
+    NO.
     
     @param {SC.Record} recordType the expected record type
     @param {String} id the id of the record to commit
     @param {Number} storeKey the storeKey of the record to commit
     @param {Hash} params optional additonal params that will passed down
       to the data source
-    @returns {SC.Bool} if the action was successful.
+    @returns {Boolean} if the action was successful.
   */
   commitRecord: function(recordType, id, storeKey, params) {
     var array = this._TMP_RETRIEVE_ARRAY,
