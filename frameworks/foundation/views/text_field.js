@@ -520,7 +520,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _applyFirefoxCursorFix: function() {
     this._applyTimer = null; // clear
     if (this._hasFirefoxCursorFix) return this;
-    if (SC.browser.mozilla) {
+    if (parseFloat(SC.browser.mozilla) < 1.9) {
       this._hasFirefoxCursorFix = YES ;
 
       var element = this.$input();
@@ -540,7 +540,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _removeFirefoxCursorFix: function() {
     if (!this._hasFirefoxCursorFix) return this;
     this._hasFirefoxCursorFix = NO ;
-    if (SC.browser.mozilla) this.$input().attr('style', '') ;
+    if (parseFloat(SC.browser.mozilla) < 1.9) {
+      this.$input().attr('style', '') ;
+    }
     return this ;
   },
 
