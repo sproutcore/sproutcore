@@ -766,13 +766,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Record} record instance or null
   */
   find: function(recordType, id) {
+    
     // if recordType is passed as string, find object
     if (SC.typeOf(recordType)===SC.T_STRING) {
       recordType = SC.objectForPropertyPath(recordType);
     }
     
     // handle passing a query...
-    if ((arguments.length === 1) && !(recordType && recordType.get('isRecord'))) {
+    if ((arguments.length === 1) && !(recordType && recordType.get && recordType.get('isRecord'))) {
       if (!recordType) throw "SC.Store#find() must pass recordType or query";
       if (!recordType.isQuery) {
         recordType = SC.Query.local(recordType);
