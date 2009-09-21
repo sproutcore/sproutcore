@@ -47,7 +47,7 @@
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
 	}
 
-.sc-theme .sc-checkbox-view span.button {
+.sc-theme .sc-checkbox-view img.button, .sc-theme .sc-checkbox-view span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -468px;
 	width: 16px;
 	height: 16px;
@@ -57,35 +57,35 @@
 	top: 0px;
 }
 
-.sc-theme .sc-checkbox-view.sel span.button {
+.sc-theme .sc-checkbox-view.sel img.button, .sc-theme .sc-checkbox-view.sel span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -32px -495px;
 }
 
-.sc-theme .sc-checkbox-view.mixed span.button {
+.sc-theme .sc-checkbox-view.mixed img.button, .sc-theme .sc-checkbox-view.mixed span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -468px;
 }
 
-.sc-theme .sc-checkbox-view.disabled span.button {
+.sc-theme .sc-checkbox-view.disabled img.button, .sc-theme .sc-checkbox-view.disabled span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -27px -411px;
 } 
 
-.sc-theme .sc-checkbox-view.sel.disabled span.button {
+.sc-theme .sc-checkbox-view.sel.disabled img.button, .sc-theme .sc-checkbox-view.sel.disabled span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -495px;
 }
 
-.sc-theme .sc-checkbox-view.mixed.disabled span.button {
+.sc-theme .sc-checkbox-view.mixed.disabled img.button, .sc-theme .sc-checkbox-view.mixed.disabled span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -32px -441px;
 }
 
-.sc-theme .sc-checkbox-view.active span.button {
+.sc-theme .sc-checkbox-view.active img.button, .sc-theme .sc-checkbox-view.active span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -441px;
 } 
 
-.sc-theme .sc-checkbox-view.sel.active span.button {
+.sc-theme .sc-checkbox-view.sel.active img.button, .sc-theme .sc-checkbox-view.sel.active span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -495px;
 }
 
-.sc-theme .sc-checkbox-view.mixed.active span.button {
+.sc-theme .sc-checkbox-view.mixed.active img.button, .sc-theme .sc-checkbox-view.mixed.active span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -388px;
 }
 
