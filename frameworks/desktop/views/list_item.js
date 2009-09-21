@@ -267,7 +267,7 @@ SC.ListItemView = SC.View.extend(
 
       // now add inner content.  note we do not add a real checkbox because
       // we don't want to have to setup a change observer on it.
-      tmp.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" />');
+      tmp.push('<span class="button"></span>');
 
       // apply edit
       html = cache[key] = tmp.join();
