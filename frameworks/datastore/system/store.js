@@ -772,7 +772,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // handle passing a query...
-    if ((arguments.length === 1) && !(recordType && recordType.isRecord)) {
+    if ((arguments.length === 1) && !(recordType && recordType.get('isRecord'))) {
       if (!recordType) throw "SC.Store#find() must pass recordType or query";
       if (!recordType.isQuery) {
         recordType = SC.Query.local(recordType);
