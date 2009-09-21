@@ -244,13 +244,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
   lastMenuWidth: null,
 
   /**
-    Background color of the icon.This is an optional property.
-
-    @private
-  */
-  iconBgColor: null,
-
-  /**
     customView used to draw the menu
   */
   customView: null,
@@ -303,7 +296,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @private
   */
   render: function(context,firstTime) {
-
+    sc_super();
     var layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.DROP_DOWN_SPRITE_WIDTH }) ;
@@ -316,7 +309,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var nameKey = this.get('nameKey') ;
     var iconKey = this.get('iconKey') ;
     var valueKey = this.get('valueKey') ;
-    var iconBgColorKey = this.get('iconBgColorKey') ;
     var checkboxEnabled = this.get('checkboxEnabled') ;
 
     //get the current selected value
@@ -354,10 +346,6 @@ SC.DropDownMenu = SC.ButtonView.extend(
       var value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
 
-        var iconColor = iconBgColorKey ? (object.get ?
-          object.get(iconBgColorKey) : object[iconBgColorKey]) : null ;
-        if (SC.none(object[iconBgColorKey])) iconBgColor = null ;
-
       if (currentSelectedVal && value){
         if( currentSelectedVal === value ) {
           this.set('title', name) ;
@@ -386,11 +374,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
       var item = SC.Object.create({
         title: name,
         icon: icon,
-        newVal:value,
+        value:value,
         isEnabled: YES,
         checkbox: isChecked,
-        action: this.displaySelectedItem,
-        iconBgColor: iconColor
+        action: this.displaySelectedItem
       }) ;
 
       //Set the items in the itemList array
@@ -414,63 +401,8 @@ SC.DropDownMenu = SC.ButtonView.extend(
     //Set the preference matrix for the menu pane
     this.changeDropDownPreferMatrix(this.itemIdx) ;
 
-    arguments.callee.base.apply(this,arguments) ;
   },
 
-  /**
-    renderTitle method
-
-    @private
-  */
-  renderTitle: function(context, firstTime) {
-    var icon = this.get('icon') ;
-    var iconBgColor = this.get('iconBgColor') ;
-    var image = '' ;
-    var title = this.get('displayTitle') ;
-    var needsTitle = (!SC.none(title) && title.length>0) ;
-    var elem, htmlNode ;
-
-    // get the icon.  If there is an icon, then get the image and update it.
-    // if there is no image element yet, create it and insert it just before
-    // title.
-    if (icon) {
-      var blank = sc_static('blank');
-
-      if (iconBgColor) {
-        image = '<img src="%@1" alt="" class="%@2" style="background-color: %@3;" />' ;
-        if (icon.indexOf('/') >= 0) {
-          image = image.fmt(icon, 'icon', iconBgColor) ;
-        }
-        else {
-          image = image.fmt(blank, icon, iconBgColor) ;
-        }
-      }
-      else {
-        image = '<img src="%@1" alt="" class="%@2" />' ;
-        if (icon.indexOf('/') >= 0) {
-          image = image.fmt(icon, 'icon') ;
-        }
-        else {
-          image = image.fmt(blank, icon) ;
-        }
-      }
-      needsTitle = YES ;
-    }
-    elem = this.$('label');
-
-    if (firstTime) {
-      context.push('<label class="sc-button-label">'+image+title+'</label>');
-    }
-    else if ((htmlNode = elem[0])) {
-      if(needsTitle) {
-        htmlNode.innerHTML = image + title ;
-      }
-      else {
-        htmlNode.innerHTML = '' ;
-      }
-    }
-    return context ;
-  },
 
   /**
     Button action handler
@@ -559,7 +491,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var menuView = this.parentMenu() ;
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
-    var title,newVal ;
+    var title,value ;
 
     //  Fetch the index of the current selected item
     var itemIdx = 0 ;
@@ -575,20 +507,10 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var len = object.length ;
     var found = null ;
 
-    while (!found && (--len >= 0)) {
-      title = object[len].title ? object[len].title: object.toString() ;
-      newVal =  object[len].newVal ? object[len].newVal: title ;
-
-      if (title === this.get('value')) {
-        found = object ;
-        button.set('value', newVal) ;
-        button.set('title', title) ;
-      }
-    }
-
-    // set the icon, currentSelectedItem and itemIdx
-    button.set('icon', this.get('icon')).set('currentSelItem', currSel).
-      set('itemIdx', itemIdx) ;
+    title = this.get('title') ? this.get('title'): this.toString() ;
+    value =  this.get('value') ? this.get('value'): title ;
+    button.set('value', value).set('title',title).set('icon', this.get('icon'))
+          .set('currentSelItem', currSel).set('itemIdx', itemIdx) ;
   },
 
   /**
