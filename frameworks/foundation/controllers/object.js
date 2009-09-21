@@ -65,8 +65,7 @@ SC.ObjectController = SC.Controller.extend(
     Usually your content object should implement the SC.Observable mixin, but
     this is not required.  All SC.Object-based objects support SC.Observable
     
-    @property
-    @type Object
+    @property {Object}
   */
   content: null,
 
@@ -80,7 +79,7 @@ SC.ObjectController = SC.Controller.extend(
     If NO, then setting content to an enumerable with multiple items will be
     treated like setting a null value.  hasContent will be NO.
     
-    @type Boolean
+    @property {Boolean}
   */
   allowsMultipleContent: NO,
 
@@ -90,8 +89,7 @@ SC.ObjectController = SC.Controller.extend(
     with a single item.  Array's or enumerables with multiple items will 
     normally make this property NO unless allowsMultipleContent is YES.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   hasContent: function() {
     return !SC.none(this.get('observableContent'));
@@ -102,8 +100,7 @@ SC.ObjectController = SC.Controller.extend(
     itself does not do anything with this property but subclasses will 
     respect it when modifying content.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   isEditable: YES,
   
@@ -118,8 +115,7 @@ SC.ObjectController = SC.Controller.extend(
     Note that if you set the content to an enumerable which itself contains
     enumerables and allowsMultipleContent is NO, this will become null.
     
-    @property
-    @type Object
+    @property {Object}
   */
   observableContent: function() {
     var content = this.get('content'),
@@ -188,11 +184,15 @@ SC.ObjectController = SC.Controller.extend(
     else this.notifyPropertyChange(key);
   },
   
-  /** 
+  /**
     Called whenver you try to get/set an unknown property.  The default 
     implementation will pass through to the underlying content object but 
     you can override this method to do some other kind of processing if 
     needed.
+    
+    @property {String} key key being retrieved
+    @property {Object} value value to set or undefined if reading only
+    @returns {Object} property value
   */
   unknownProperty: function(key,value) {
     
@@ -250,8 +250,7 @@ SC.ObjectController = SC.Controller.extend(
     if (this.get('observableContent')) this._scoc_contentDidChange();
   },
 
-  /** 
-    @private
+  /**  @private
     
     Called whenever the observable content property changes.  This will setup
     observers on the content if needed.

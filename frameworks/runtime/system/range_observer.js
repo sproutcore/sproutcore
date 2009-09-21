@@ -20,10 +20,16 @@
   
   @since SproutCore 1.0
 */
-SC.RangeObserver = /** SC.RangeObserver.prototype */ {
+SC.RangeObserver = {
 
+  /** 
+    Walk like a duck.
+    
+    @property {Boolean}
+  */
   isRangeObserver: YES,
   
+  /** @private */
   toString: function() { 
     var base = this.indexes ? this.indexes.toString() : "SC.IndexSet<..>";
     return base.replace('IndexSet', 'RangeObserver(%@)'.fmt(SC.guidFor(this)));

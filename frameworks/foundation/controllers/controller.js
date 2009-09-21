@@ -37,8 +37,7 @@ SC.Controller = SC.Object.extend(
     itself does not do anything with this property but subclasses will 
     respect it when modifying content.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   isEditable: YES
   

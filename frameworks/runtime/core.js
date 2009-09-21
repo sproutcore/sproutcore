@@ -177,6 +177,9 @@ SC.mixin(/** @scope SC */ {
     Returns YES if the passed value is null or undefined.  This avoids errors
     from JSLint complaining about use of ==, which can be technically 
     confusing.
+    
+    @object {Object} obj value to test
+    @returns {Boolean}
   */
   none: function(obj) {
     return obj===null || obj===undefined;  
@@ -204,9 +207,12 @@ SC.mixin(/** @scope SC */ {
     Makes an object into an Array if it is not array or array-like already.
     Unlike SC.A(), this method will not clone the object if it is already
     an array.
+    
+    @param {Object} obj object to convert
+    @returns {Array} Actual array
   */
   makeArray: function(obj) {
-    return SC.isArray(obj) ? obj : SC.$A(obj);
+    return SC.isArray(obj) ? obj : SC.A(obj);
   },
   
   /**
@@ -287,7 +293,9 @@ SC.mixin(/** @scope SC */ {
     efficient than simply combining strings because it uses a cache  
     internally for performance.
     
-    @param 
+    @param {String} prefix the prefix to attach to the key
+    @param {String} key key
+    @returns {String} result 
   */
   keyFor: function(prefix, key) {
     var ret, pcache = this._keyCache[prefix];
@@ -421,15 +429,32 @@ SC.mixin(/** @scope SC */ {
   
   /** 
     Empty function.  Useful for some operations. 
+    
+    @returns {Object}
   */
   K: function() { return this; },
 
-  /** Empty array.  Useful for some optimizations. */
+  /** 
+    Empty array.  Useful for some optimizations.
+  
+    @property {Array}
+  */
   EMPTY_ARRAY: [],
 
-  EMPTY_HASH: {},
+  /**
+    Empty hash.  Useful for some optimizations.
   
+    @property {Hash}
+  */
+  EMPTY_HASH: {},
+
+  /**
+    Empty range. Useful for some optimizations.
+    
+    @property {Range}
+  */
   EMPTY_RANGE: {start: 0, length: 0},
+  
   /**
     Creates a new object with the passed object as its prototype.
 
@@ -471,7 +496,7 @@ SC.mixin(/** @scope SC */ {
     @param object {Object} the object to clone
     @returns {Object} the cloned object
   */
-  clone: function(object) {
+  copy: function(object) {
     var ret = object ;
     
     // fast path
@@ -614,6 +639,8 @@ SC.mixin(/** @scope SC */ {
   
   /**
     Known loc strings
+    
+    @property {Hash}
   */
   STRINGS: {},
   
@@ -623,16 +650,18 @@ SC.mixin(/** @scope SC */ {
     
     @param {String} lang the language the strings are for
     @param {Hash} strings hash of strings
+    @returns {SC} receiver
   */
   stringsFor: function(lang, strings) {
     SC.mixin(SC.STRINGS, strings);
+    return this ;
   }
   
   
 }); // end mixin
 
 /** @private Aliasn for SC.clone() */
-SC.copy = SC.clone ;
+SC.clone = SC.copy ;
 
 /** @private Alias for SC.A() */
 SC.$A = SC.A;
@@ -657,8 +686,9 @@ SC.ORDER_DEFINITION = [ SC.T_ERROR,
 // ........................................
 // FUNCTION ENHANCEMENTS
 //
+
 SC.mixin(Function.prototype, 
-/** @scope Function.prototype */ {
+/** @lends Function.prototype */ {
   
   /**
     Indicates that the function should be treated as a computed property.
@@ -825,6 +855,8 @@ SC.mixin(Function.prototype,
   /**
     Declare that a function should observe an object at the named path.  Note
     that the path is used only to construct the observation one time.
+    
+    @returns {Function} receiver
   */
   observes: function(propertyPaths) { 
     // sort property paths into local paths (i.e just a property name) and

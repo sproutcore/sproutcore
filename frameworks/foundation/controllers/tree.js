@@ -19,7 +19,7 @@ sc_require('private/tree_item_observer');
   
   TODO: Document More
 
-  @extends SC.ObejctController
+  @extends SC.ObjectController
   @extends SC.SelectionSupport
   @since SproutCore 1.0
 */
@@ -34,8 +34,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     Set to YES if you want the top-level items in the tree to be displayed as
     group items in the collection view.
     
-    @property
-    @type Boolean
+    @property {Boolean}
   */
   treeItemIsGrouped: NO,
   
@@ -45,8 +44,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     determine the expansion state of the item.  The default is 
     "treeItemIsExpanded"
     
-    @property
-    @type String
+    @property {String}
   */
   treeItemIsExpandedKey: "treeItemIsExpanded",
   
@@ -54,8 +52,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     Set to the name of the property on your content object that holds the 
     children array for each tree node.  The default is "treeItemChildren".
     
-    @property 
-    @type String
+    @property {String}
   */
   treeItemChildrenKey: "treeItemChildren",
   
@@ -66,8 +63,7 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
     use this property directly.  Instead, work on the tree content using the
     TreeController like you would any other ObjectController.
   
-    @property
-    @type SC.Array
+    @property {SC.Array}
   */
   arrangedObjects: function() {
     var ret, content = this.get('content');

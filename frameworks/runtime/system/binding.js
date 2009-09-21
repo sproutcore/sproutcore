@@ -5,50 +5,66 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('system/object') ;
+sc_require('system/object') ;
 
 /**
   Debug parameter you can turn on.  This will log all bindings that fire to
   the console.  This should be disabled in production code.  Note that you
   can also enable this from the console or temporarily.
+  
+  @property {Boolean}
 */
 SC.LOG_BINDINGS = NO ;
 
 /**
   Performance paramter.  This will benchmark the time spent firing each 
   binding.
+  
+  @property {Boolean}
 */
 SC.BENCHMARK_BINDING_NOTIFICATIONS = NO ;
 
 /**
   Performance parameter.  This will benchmark the time spend configuring each
   binding.  
+  
+  @property {Boolean}
 */
 SC.BENCHMARK_BINDING_SETUP = NO;
   
 /** 
   Default placeholder for multiple values in bindings.
+  
+  @property {String}
 */
 SC.MULTIPLE_PLACEHOLDER = '@@MULT@@' ;
 
 /**
   Default placeholder for null values in bindings.
+  
+  @property {String}
 */
 SC.NULL_PLACEHOLDER = '@@NULL@@' ;
 
 /**
   Default placeholder for empty values in bindings.
+  
+  @property {String}
 */
 SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
 
 
 /**
+  @namespace 
+  
   A binding simply connects the properties of two objects so that whenever the
   value of one property changes, the other property will be changed also.  You
   do not usually work with Binding objects directly but instead describe
   bindings in your class definition using something like:
   
+  {{{
     valueBinding: "MyApp.someController.title"
+  }}}
     
   This will create a binding from "MyApp.someController.title" to the "value"
   property of your object instance automatically.  Now the two values will be
@@ -64,7 +80,9 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   To customize a binding, you can use one of the many helper methods defined 
   on SC.Binding like so:
   
+  {{{
     valueBinding: SC.Binding.single("MyApp.someController.title") 
+  }}}
     
   This will create a binding just like the example above, except that now the
   binding will convert the value of MyApp.someController.title to a single 
@@ -73,7 +91,9 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   
   You can also chain helper methods to build custom bindings like so:
   
+  {{{
     valueBinding: SC.Binding.single("MyApp.someController.title").notEmpty("(EMPTY)")
+  }}}
     
   This will force the value of MyApp.someController.title to be a single value
   and then check to see if the value is "empty" (null, undefined, empty array,
@@ -89,11 +109,13 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   has changed, but your object will not be changing the preference itself, you
   could do:
   
+  {{{
     bigTitlesBinding: SC.Binding.oneWay("MyApp.preferencesController.bigTitles")
+  }}}
     
   This way if the value of MyApp.preferencesController.bigTitles changes the
-  "bigTitles" property of your object will change also.  However, if you change
-  the value of your "bigTitles" property, it will not update the 
+  "bigTitles" property of your object will change also.  However, if you 
+  change the value of your "bigTitles" property, it will not update the 
   preferencesController.
   
   One way bindings are almost twice as fast to setup and twice as fast to 
@@ -147,10 +169,10 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
     valueBinding: SC.Binding.oneWay("MyApp.someController.value").notEmpty().notLessThan(10)
   }}}
   
-  Note that the built in helper methods all allow you to pass a "from" property
-  path so you don't have to use the from() helper to set the path.  You can do
-  the same thing with your own helper methods if you like, but it is not 
-  required.
+  Note that the built in helper methods all allow you to pass a "from" 
+  property path so you don't have to use the from() helper to set the path.  
+  You can do the same thing with your own helper methods if you like, but it 
+  is not required.
   
   h2. Creating Custom Binding Templates
   
@@ -164,25 +186,29 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   bindings that allow values greater than 10 throughout your app.  You could
   create a binding template in your core.js like this:
   
+  {{{
     MyApp.LimitBinding = SC.Binding.oneWay().notEmpty().notLessThan(10);
+  }}}
   
   Then anywhere you want to use this binding, just refer to the template like 
   so:
-  
+
+  {{{
     valueBinding: MyApp.LimitBinding.beget("MyApp.someController.value")
+  }}}
     
-  Note that when you use binding templates, it is very important that you always
-  start by using beget() to extend the template.  If you do not do this, you 
-  will end up using the same binding instance throughout your app which will 
-  lead to erratic behavior.
+  Note that when you use binding templates, it is very important that you 
+  always start by using beget() to extend the template.  If you do not do 
+  this, you will end up using the same binding instance throughout your app 
+  which will lead to erratic behavior.
   
   h2. How to Manually Activate a Binding
 
-  All of the examples above show you how to configure a custom binding, but the
-  result of these customizations will be a binding template, not a fully active
-  binding.  The binding will actually become active only when you instantiate
-  the object the binding belongs to.  It is useful however, to understand what
-  actually happens when the binding is activated.
+  All of the examples above show you how to configure a custom binding, but 
+  the result of these customizations will be a binding template, not a fully 
+  active binding.  The binding will actually become active only when you 
+  instantiate the object the binding belongs to.  It is useful however, to 
+  understand what actually happens when the binding is activated.
   
   For a binding to function it must have at least a "from" property and a "to"
   property.  The from property path points to the object/key that you want to
@@ -191,18 +217,22 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   When you define a custom binding, you are usually describing the property 
   you want to bind from (such as "MyApp.someController.value" in the examples
   above).  When your object is created, it will automatically assign the value
-  you want to bind "to" based on the name of your binding key.  In the examples
-  above, during init, SproutCore objects will effectively call something like
-  this on your binding:
+  you want to bind "to" based on the name of your binding key.  In the 
+  examples above, during init, SproutCore objects will effectively call 
+  something like this on your binding:
   
+  {{{
     binding = this.valueBinding.beget().to("value", this) ;
+  }}}
     
   This creates a new binding instance based on the template you provide, and 
   sets the to path to the "value" property of the new object.  Now that the 
   binding is fully configured with a "from" and a "to", it simply needs to be
   connected to become active.  This is done through the connect() method:
   
+  {{{
     binding.connect() ;
+  }}}
     
   Now that the binding is connected, it will observe both the from and to side 
   and relay changes.
@@ -240,9 +270,7 @@ SC.EMPTY_PLACEHOLDER = '@@EMPTY@@' ;
   create bindings for you.  You should always use the highest-level APIs 
   available, even if you understand how to it works underneath.
   
-  
-  @extends Object
-  
+  @since SproutCore 1.0
 */
 SC.Binding = {
   
@@ -463,7 +491,7 @@ SC.Binding = {
     }
   },
   
-  /**
+  /** @private
     Saves the source location for the binding value.  This will be used later
     to actually update the binding value.
   */
@@ -472,7 +500,7 @@ SC.Binding = {
     this._bindingKey    = key;
   },
   
-  /**
+  /** @private 
     Updates the binding value from the current binding source if needed.  This
     should be called just before using this._bindingValue.
   */

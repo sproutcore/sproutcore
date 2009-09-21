@@ -34,7 +34,11 @@
 */
 SC.TreeItemContent = {
 
-  /** Walk like a duck. */
+  /** 
+    Walk like a duck. 
+    
+    @property {Boolean}
+  */
   isTreeItemContent: YES,
   
   /**
@@ -42,8 +46,7 @@ SC.TreeItemContent = {
     returns null.  If you implement this mixin, you MUST implement this 
     property to return the actual tree item children for the item.
    
-    @property
-    @type {SC.Array}
+    @property {SC.Array}
   */
   treeItemChildren: null,
 
@@ -53,8 +56,7 @@ SC.TreeItemContent = {
     treeItemDisclosureState() to compute the disclosure state however you 
     want.
     
-    @property 
-    @type {Boolean}
+    @property {Boolean}
   */
   treeItemIsExpanded: YES,
   
@@ -63,8 +65,7 @@ SC.TreeItemContent = {
     This property is only useful on the root item in your tree.  Setting it to
     YES on any other item will be ignored.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   treeItemIsGrouped: NO,
   
@@ -137,7 +138,7 @@ SC.TreeItemContent = {
     
     @param {Object} parent the parent item containing this item
     @param {Number} index the index of the item in the parent
-    @param {SC.IndexSet} branch indexes
+    @returns {SC.IndexSet} branch indexes
   */
   treeItemBranchIndexes: function(parent, index) {
     var children = this.get('treeItemChildren'),

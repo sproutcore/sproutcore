@@ -108,7 +108,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
     if (SC.typeOf(method) === SC.T_STRING) method = target[method];
-    if (!this._invokeQueue) this._invokeQueue = SC._ObserverSet.create();
+    if (!this._invokeQueue) this._invokeQueue = SC.ObserverSet.create();
     this._invokeQueue.add(target, method);
     return this ;
   },
@@ -135,7 +135,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
       method = target; target = this ;
     }
     if (SC.typeOf(method) === SC.T_STRING) method = target[method];
-    if (!this._invokeLastQueue) this._invokeLastQueue = SC._ObserverSet.create();
+    if (!this._invokeLastQueue) this._invokeLastQueue = SC.ObserverSet.create();
     this._invokeLastQueue.add(target, method);
     return this ;
   },
@@ -187,12 +187,16 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
 /** 
   The current run loop.  This is created automatically the first time you
   call begin(). 
+  
+  @property {SC.RunLoop}
 */
 SC.RunLoop.currentRunLoop = null;
 
 /**
   The default RunLoop class.  If you choose to extend the RunLoop, you can
   set this property to make sure your class is used instead.
+  
+  @property {Class}
 */
 SC.RunLoop.runLoopClass = SC.RunLoop;
 

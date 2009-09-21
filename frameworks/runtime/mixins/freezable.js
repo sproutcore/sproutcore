@@ -8,6 +8,8 @@
 
 /**
   Standard Error that should be raised when you try to modify a frozen object.
+  
+  @property {Error}
 */
 SC.FROZEN_ERROR = new Error("Cannot modify a frozen object");
 
@@ -73,12 +75,16 @@ SC.Freezable = {
   
   /**
     Walk like a duck.
+    
+    @property {Boolean}
   */
   isFreezable: YES,
   
   /**
     Set to YES when the object is frozen.  Use this property to detect whether
     your object is frozen or not.
+    
+    @property {Boolean}
   */
   isFrozen: NO,
   

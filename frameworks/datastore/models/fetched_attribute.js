@@ -26,13 +26,13 @@ sc_require('models/record_attribute');
   @since SproutCore 1.0
 */
 SC.FetchedAttribute = SC.RecordAttribute.extend(
-  /** @scipe SC.FetchedAttribute.prototype */ {
+  /** @scope SC.FetchedAttribute.prototype */ {
 
   /**
     Define the param key that will be passed to the findAll method on the
     store.  If null, the param will not be send.  Defaults to 'link'
     
-    @param {String}
+    @property {String}
   */
   paramValueKey: 'link',
 
@@ -40,23 +40,31 @@ SC.FetchedAttribute = SC.RecordAttribute.extend(
     Define the param key used to send the parent record.  If null the param
     will not be sent.  Defaults to 'owner'.
     
-    @param {String}
+    @property {String}
   */
   paramOwnerKey: 'owner',
   
   /**
     Define the param key used to send the key name used to reference this 
     attribute.  If null, the param will not be sent.  Defaults to "rel"
+    
+    @property {String}
   */
   paramRelKey: 'rel',
   
   /**
     Optional query key to pass to findAll.  Otherwise type class will be 
     passed.
+    
+    @property {String}
   */
   queryKey: null,
 
-  /** Fetched attributes are not editable */
+  /** 
+    Fetched attributes are not editable 
+    
+    @property {Boolean}
+  */
   isEditable: NO,  
   
   // ..........................................................

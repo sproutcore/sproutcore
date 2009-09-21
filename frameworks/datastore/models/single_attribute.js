@@ -34,12 +34,16 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     Specifies the property on the member record that represents the inverse
     of the current relationship.  If set, then modifying this relationship
     will also alter the opposite side of the relationship.
+    
+    @property {String}
   */
   inverse: null,
   
   /**
     If set, determines that when an inverse relationship changes whether this
     record should become dirty also or not.
+    
+    @property {Boolean}
   */
   isMaster: YES,
   
@@ -95,6 +99,12 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     Called by an inverse relationship whenever the receiver is no longer part
     of the relationship.  If this matches the inverse setting of the attribute
     then it will update itself accordingly.
+    
+    @param {SC.Record} the record owning this attribute
+    @param {String} key the key for this attribute
+    @param {SC.Record} inverseRecord record that was removed from inverse
+    @param {String} key key on inverse that was modified
+    @returns {void}
   */
   inverseDidRemoveRecord: function(record, key, inverseRecord, inverseKey) {
 
@@ -118,6 +128,12 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     Called by an inverse relationship whenever the receiver is added to the 
     inverse relationship.  This will set the value of this inverse record to 
     the new record.
+    
+    @param {SC.Record} the record owning this attribute
+    @param {String} key the key for this attribute
+    @param {SC.Record} inverseRecord record that was added to inverse
+    @param {String} key key on inverse that was modified
+    @returns {void}
   */
   inverseDidAddRecord: function(record, key, inverseRecord, inverseKey) {
     

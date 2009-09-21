@@ -39,7 +39,11 @@
 SC.Record = SC.Object.extend(
 /** @scope SC.Record.prototype */ {
   
-  /**  Walk like a duck */
+  /**  
+    Walk like a duck
+  
+    @property {Boolean}
+  */
   isRecord: YES,
   
   // ...............................
@@ -50,8 +54,7 @@ SC.Record = SC.Object.extend(
     This is the primary key used to distinguish records.  If the keys
     match, the records are assumed to be identical.
     
-    @property
-    @type {String}
+    @property {String}
   */
   primaryKey: 'guid',
   
@@ -60,6 +63,8 @@ SC.Record = SC.Object.extend(
     identify this record instance from all others of the same type.  If you 
     have a primaryKey set on this class, then the id will be the value of the
     primaryKey property on the underlying JSON hash.
+    
+    @property {String}
   */
   id: function() {
     return SC.Store.idFor(this.storeKey);
@@ -92,8 +97,7 @@ SC.Record = SC.Object.extend(
     You should not edit this store key but you may sometimes need to refer to
     this store key when implementing a Server object.
     
-    @property 
-    @type {Integer}
+    @property {Number}
   */
   storeKey: null,
 
@@ -106,8 +110,7 @@ SC.Record = SC.Object.extend(
     set this property to YES but the status of the record is anything but
     SC.Record.READY, the return value of this property may remain NO.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   isEditable: function(key, value) {
     if (value !== undefined) this._screc_isEditable = value;
@@ -121,8 +124,7 @@ SC.Record = SC.Object.extend(
     YES when the record's contents have been loaded for the first time.  You 
     can use this to quickly determine if the record is ready to display.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   isLoaded: function() {
     var K = SC.Record, 
@@ -139,10 +141,23 @@ SC.Record = SC.Object.extend(
     
     Note this must be a regular Array - NOT any object implmenting SC.Array.
     
-    @type {Array}
+    @property {Array}
   */
   relationships: null,
+
+  /**
+    This will return the raw attributes that you can edit directly.  If you 
+    make changes to this hash, be sure to call beginEditing() before you get
+    the attributes and endEditing() afterwards.
   
+    @property {Hash}
+  **/
+  attributes: function() {
+    var store    = this.get('store'), 
+        storeKey = this.storeKey;
+    return store.readEditableDataHash(storeKey);
+  }.property(),
+    
   // ...............................
   // CRUD OPERATIONS
   //
@@ -284,19 +299,6 @@ SC.Record = SC.Object.extend(
   },
   
   /**
-    This will return the raw attributes that you can edit directly.  If you 
-    make changes to this hash, be sure to call beginEditing() before you get
-    the attributes and endEditing() afterwards.
-  
-    @returns {Object} the current attributes of the receiver
-  **/
-  attributes: function() {
-    var store    = this.get('store'), 
-        storeKey = this.storeKey;
-    return store.readEditableDataHash(storeKey);
-  }.property(),
-  
-  /**
     Called by the store whenever the underlying data hash has changed.  This
     will notify any observers interested in data hash properties that they
     have changed.
@@ -427,10 +429,12 @@ SC.Record = SC.Object.extend(
     
     @param {Hash} params optional additonal params that will passed down
       to the data source
+    @returns {SC.Record} receiver
   */
   commitRecord: function(params) {
     var store = this.get('store');
     store.commitRecord(undefined, undefined, this.get('storeKey'), params);
+    return this ;
   },
   
   // ..........................................................
@@ -441,8 +445,7 @@ SC.Record = SC.Object.extend(
     Returns YES whenever the status is SC.Record.ERROR.  This will allow you 
     to put the UI into an error state.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   isError: function() {
     return this.get('status') & SC.Record.ERROR;
@@ -452,8 +455,7 @@ SC.Record = SC.Object.extend(
     Returns the receiver if the record is in an error state.  Returns null
     otherwise.
     
-    @property
-    @type {SC.Record}
+    @property {SC.Record}
   */
   errorValue: function() {
     return this.get('isError') ? this : null;
@@ -463,8 +465,7 @@ SC.Record = SC.Object.extend(
     Returns the current error object only if the record is in an error state.
     If no explicit error object has been set, returns SC.Record.GENERIC_ERROR.
     
-    @property
-    @type {SC.Error}
+    @property {SC.Error}
   */
   errorObject: function() {
     if (this.get('isError')) {
@@ -511,37 +512,239 @@ SC.Record = SC.Object.extend(
 // Class Methods
 SC.Record.mixin( /** @scope SC.Record */ {
 
-  // Record States
+  // ..........................................................
+  // CONSTANTS
+  // 
+
+  /** 
+    Generic state for records with no local changes.
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   CLEAN:            0x0001, // 1
+
+  /** 
+    Generic state for records with local changes.
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   DIRTY:            0x0002, // 2
   
+  /** 
+    State for records that are still loaded.  
+    
+    A record instance should never be in this state.  You will only run into 
+    it when working with the low-level data hash API on SC.Store. Use a 
+    logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   EMPTY:            0x0100, // 256
+
+  /** 
+    State for records in an error state.
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   ERROR:            0x1000, // 4096
   
+  /** 
+    Generic state for records that are loaded and ready for use
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   READY:            0x0200, // 512
+
+  /** 
+    State for records that are loaded and ready for use with no local changes
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   READY_CLEAN:      0x0201, // 513
+
+
+  /** 
+    State for records that are loaded and ready for use with local changes
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   READY_DIRTY:      0x0202, // 514
+
+
+  /** 
+    State for records that are new - not yet committed to server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   READY_NEW:        0x0203, // 515
   
+
+  /** 
+    Generic state for records that have been destroyed
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   DESTROYED:        0x0400, // 1024
+
+
+  /** 
+    State for records that have been destroyed and committed to server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   DESTROYED_CLEAN:  0x0401, // 1025
+
+
+  /** 
+    State for records that have been destroyed but not yet committed to server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   DESTROYED_DIRTY:  0x0402, // 1026
   
+
+  /** 
+    Generic state for records that have been submitted to data source
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY:             0x0800, // 2048
+
+
+  /** 
+    State for records that are still loading data from the server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY_LOADING:     0x0804, // 2052
+
+
+  /** 
+    State for new records that were created and submitted to the server; 
+    waiting on response from server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY_CREATING:    0x0808, // 2056
+
+
+  /** 
+    State for records that have been modified and submitted to server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY_COMMITTING:  0x0810, // 2064
+
+
+  /** 
+    State for records that have requested a refresh from the server.
+    
+    Use a logical AND (single &) to test record status.
+  
+    @property {Number}
+  */
   BUSY_REFRESH:     0x0820, // 2080
+
+
+  /** 
+    State for records that have requested a refresh from the server.
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY_REFRESH_CLEAN:  0x0821, // 2081
+
+  /** 
+    State for records that have requested a refresh from the server.
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY_REFRESH_DIRTY:  0x0822, // 2082
+
+  /** 
+    State for records that have been destroyed and submitted to server
+    
+    Use a logical AND (single &) to test record status
+  
+    @property {Number}
+  */
   BUSY_DESTROYING:  0x0840, // 2112
 
-  // exceptions that can be raised when processing records
+
+  // ..........................................................
+  // ERRORS
+  // 
+  
+  /**
+    Error for when you try to modify a record while it is in a bad 
+    state.
+    
+    @property {SC.Error}
+  */
   BAD_STATE_ERROR:     SC.$error("Internal Inconsistency"),
+
+  /**
+    Error for when you try to create a new record that already exists.
+    
+    @property {SC.Error}
+  */
   RECORD_EXISTS_ERROR: SC.$error("Record Exists"),
+
+  /**
+    Error for when you attempt to locate a record that is not found
+    
+    @property {SC.Error}
+  */
   NOT_FOUND_ERROR:     SC.$error("Not found "),
+
+  /**
+    Error for when you try to modify a record that is currently busy
+    
+    @property {SC.Error}
+  */
   BUSY_ERROR:          SC.$error("Busy"),
+
+  /**
+    Generic unknown record error
+    
+    @property {SC.Error}
+  */
   GENERIC_ERROR:       SC.$error("Generic Error"),
+  
+  // ..........................................................
+  // CLASS METHODS
+  // 
   
   /**
     Helper method returns a new SC.RecordAttribute instance to map a simple

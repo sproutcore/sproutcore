@@ -42,7 +42,6 @@ sc_require('mixins/copyable');
   the end of an empty range.  A value less than the index is a search 
   accelerator.  It tells you the start of the nearest range.
 
-  @extends Object
   @extends SC.Enumerable 
   @extends SC.Observable
   @extends SC.Copyable
@@ -72,6 +71,8 @@ SC.IndexSet = SC.mixin({},
   
   /**
     To create a set, pass either a start and index or another IndexSet.
+    
+    @returns {SC.IndexSet}
   */
   create: function(start, length) { 
     var ret = SC.beget(this);
@@ -92,14 +93,24 @@ SC.IndexSet = SC.mixin({},
     return ret ;
   },
 
+  /**
+    Walk like a duck.
+    
+    @property {Boolean}
+  */
   isIndexSet: YES,
-  
+
+  /**  @private 
+    Internal setting determines the preferred skip size for hinting sets.
+    
+    @property {Number}
+  */
   HINT_SIZE: 256,
   
   /**
     Total number of indexes contained in the set
 
-    @type number
+    @property {Number}
   */
   length: 0,
   
@@ -107,14 +118,15 @@ SC.IndexSet = SC.mixin({},
     One greater than the largest index currently stored in the set.  This 
     is sometimes useful when determining the total range of items covering
     the index set.
+    
+    @property {Number}
   */
   max: 0,
   
   /**
     The first index included in the set or -1.
     
-    @property
-    @type {Number}
+    @property {Number}
   */
   min: function() {  
     var content = this._content, 
@@ -123,6 +135,11 @@ SC.IndexSet = SC.mixin({},
     
   }.property('[]').cacheable(),
   
+  /**
+    Returns the first index in the set .
+    
+    @property {Number}
+  */
   firstObject: function() {
     return (this.get('length')>0) ? this.get('min') : undefined;  
   }.property(),
@@ -1108,6 +1125,8 @@ SC.IndexSet = SC.mixin({},
   /** 
     Usually observing notifications from IndexSet are not useful, so 
     supress them by default.
+    
+    @property {Boolean}
   */
   LOG_OBSERVING: NO,
   

@@ -15,7 +15,8 @@ sc_require('models/record');
   @extends SC.DataSource
   @since SproutCore 1.0
 */
-SC.FixturesDataSource = SC.DataSource.extend( {
+SC.FixturesDataSource = SC.DataSource.extend(
+  /** @scope SC.FixturesDataSource.prototype */ {
 
   /**
     If YES then the data source will asyncronously respond to data requests
@@ -28,8 +29,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     local storage, for example, then you should set this property to NO to 
     accurately simulate the behavior of your actual data source.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   simulateRemoteResponse: NO,
   
@@ -44,8 +44,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     - 100: simulates the latency to a "nearby" server (i.e. same part of the world).  Suitable for simulating locally hosted servers or servers with multiple data centers around the world.
     - 50: simulates the latency to an edge cache node when using a CDN.  Life is really good if you can afford this kind of setup.
     
-    @property
-    @type {Number}
+    @property {Number}
   */
   latency: 50,
   
@@ -53,13 +52,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // CANCELLING
   // 
   
-  /**
-    Fixture operations complete immediately so you cannot cancel them.
-     
-    @param {SC.Store} store
-    @param {SC.Array} storeKeys
-    @returns {Boolean} YES if handled
-  */
+  /** @private */
   cancel: function(store, storeKeys) {
     return NO;
   },
@@ -69,19 +62,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // FETCHING
   // 
   
-  /**
-    Invoked by the store whenever it needs to fetch the contents of a query.
-    The default implementation ONLY works with local queries.  To simulate
-    support for remote queries, you can extend the Fixtures class and 
-    override this method to provide whatever response you want.
-
-    The default implementation of fetch() loads all the fixtures for any 
-    recordTypes specified in your query.
-    
-    @param {SC.Store} store the requesting store
-    @param {SC.Query} query the query
-    @returns {Boolean} YES if the query was handled; no otherwise.
-  */  
+  /** @private */
   fetch: function(store, query) {
     
     // can only handle local queries out of the box
@@ -125,16 +106,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // RETRIEVING
   // 
   
-  /**
-    Retrieve a record from fixtures.
-    
-    @param {SC.Store} store
-    @param {Number} storeKey
-    @param {SC.Array} ret
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
-    @returns {Array} storeKeys
-  */
+  /** @private */
   retrieveRecords: function(store, storeKeys) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -165,15 +137,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // UPDATE
   // 
   
-  /**
-    Update the dataHash in this._fixtures
-    
-    @param {SC.Store} store
-    @param {Number} storeKey
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
-    @returns {Boolean} YES if handled
-  */
+  /** @private */
   updateRecords: function(store, storeKeys, params) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -201,16 +165,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // CREATE RECORDS
   // 
   
-  /**
-    Adds records to this._fixtures.  If the record does not have an id yet,
-    then then calls generateIdFor() and sets that.
-    
-    @param {SC.Store} store the store
-    @param {Number} storeKey the store key
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
-    @returns {Boolean} YES if successful
-  */
+  /** @private */
   createRecords: function(store, storeKeys, params) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -242,15 +197,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   // DESTROY RECORDS
   // 
   
-  /**
-    Removes the data from the fixtures.  
-    
-    @param {SC.Store} store the store
-    @param {Number} storeKey the store key
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
-    @returns {Boolean} YES if successful
-  */
+  /** @private */
   destroyRecords: function(store, storeKeys, params) {
     // first let's see if the fixture data source can handle any of the
     // storeKeys
@@ -315,6 +262,12 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   /**
     Generates an id for the passed record type.  You can override this if 
     needed.  The default generates a storekey and formats it as a string.
+    
+    @param {Class} recordType Subclass of SC.Record
+    @param {Hash} dataHash the data hash for the record
+    @param {SC.Store} store the store 
+    @param {Number} storeKey store key for the item
+    @returns {String}
   */
   generateIdFor: function(recordType, dataHash, store, storeKey) {
     return "@id%@".fmt(SC.Store.generateStoreKey());
@@ -414,7 +367,7 @@ SC.FixturesDataSource = SC.DataSource.extend( {
     return ret ;
   },
   
-  /**
+  /** @private
     Invalidates any internal caches based on the recordType and optional 
     other parameters.  Currently this only invalidates the storeKeyCache used
     for fetch, but it could invalidate others later as well.
@@ -432,5 +385,9 @@ SC.FixturesDataSource = SC.DataSource.extend( {
   
 });
 
-// create default instance for use when configuring
+/**
+  Default fixtures instance for use in applications.
+  
+  @property {SC.FixturesDataSource}
+*/
 SC.Record.fixtures = SC.FixturesDataSource.create();

@@ -56,7 +56,7 @@ sc_require('data_sources/data_source');
   @since SproutCore 1.0
 */
 SC.CascadeDataSource = SC.DataSource.extend( 
-  /** SC.CascadeDataSource.prototype */ {
+  /** @scope SC.CascadeDataSource.prototype */ {
 
   /**
     The data sources used by the cascade, in the order that they are to be 
@@ -154,6 +154,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
   // INTERNAL SUPPORT
   // 
   
+  /** @private */
   init: function() {
     sc_super();
     

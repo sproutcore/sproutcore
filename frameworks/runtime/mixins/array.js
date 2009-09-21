@@ -448,7 +448,7 @@ SC.Array = {
     return this ;
   },
   
-  /** 
+  /**  @private
     Observer fires whenever the '[]' property changes.  If there are 
     range observers, will notify observers of change.
   */

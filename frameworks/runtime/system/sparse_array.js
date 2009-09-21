@@ -162,7 +162,8 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
     
     It will check if the range has been already requested.
     
-    @param {SC.SparseArray} receiver
+    @param {Number} idx the index to retrieve
+    @returns {SC.SparseArray} receiver
   */
   requestIndex: function(idx) {
     var del = this.delegate;
@@ -353,6 +354,8 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
   /** 
     Resets the SparseArray, causing it to reload its content from the 
     delegate again.
+    
+    @returns {SC.SparseArray} receiver
   */
   reset: function() {
     this._sa_content = null ;
@@ -364,6 +367,13 @@ SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array,
       
 }) ;
 
+/** 
+  Convenience metohd returns a new sparse array with a default length already 
+  provided.
+  
+  @param {Number} len the length of the array
+  @returns {SC.SparseArray}
+*/
 SC.SparseArray.array = function(len) {
   return this.create({ _length: len||0 });
 };

@@ -13,7 +13,7 @@
   @extend SC.Object
   @since SproutCore 1.0
 */
-SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
+SC.DataSource = SC.Object.extend( /** @scope SC.DataSource.prototype */ {
 
   // ..........................................................
   // SC.STORE ENTRY POINTS
@@ -29,7 +29,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     needed to fulfill the query.  If the query is a remote query, then you 
     will also need to provide the contents of the query as well.
     
-    h2. Handling Local Queries
+    h3. Handling Local Queries
     
     Most queries you create in your application will be local queries.  Local
     queries are populated automatically from whatever data you have in memory.
@@ -46,7 +46,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     not to load any new data into the store in order to notify that the store
     that you think it is ready to return results for the query.
     
-    h2. Handling Remote Queries
+    h3. Handling Remote Queries
     
     Remote queries are special queries whose results will be populated by the
     server instead of from memory.  Usually you will only need to use this 
@@ -64,7 +64,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     queries, you can do so by passing a SC.SparseArray instance instead of 
     a regular array of storeKeys and then populate the sparse array on demand.
     
-    h2. Handling Errors and Cancelations
+    h3. Handling Errors and Cancelations
     
     If you encounter an error while trying to fetch the results for a query 
     you can call SC.Store#dataSourceDidErrorQuery() instead.  This will put
@@ -75,7 +75,7 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     the query back into the state it was in previously before it started 
     loading the query.
     
-    h2. Return Values
+    h3. Return Values
     
     When you return from this method, be sure to return a Boolean.  YES means
     you handled the query, NO means you can't handle the query.  When using
@@ -103,7 +103,6 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {Array} ids - optional
     @returns {Boolean} YES if handled, NO otherwise
   */
-  
   retrieveRecords: function(store, storeKeys, ids) {
     return this._handleEach(store, storeKeys, this.retrieveRecord, ids);  
   },
@@ -191,8 +190,12 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
+    @param {Hash} params 
+      to be passed down to data source. originated from the commitRecords() 
+      call on the store
+
+    @returns {Boolean} YES, NO, or SC.MIXED_STATE  
+
   */
   updateRecords: function(store, storeKeys, params) {
     return this._handleEach(store, storeKeys, this.updateRecord, null, params);
@@ -210,8 +213,13 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
 
     @param {SC.Store} store the requesting store
     @param {Array} storeKeys keys to update
-    @param {Hash} params to be passed down to data source. originated
-      from the commitRecords() call on the store
+    
+    @param {Hash} params 
+      to be passed down to data source. originated from the commitRecords() 
+      call on the store
+    
+    @returns {Boolean} YES, NO, or SC.MIXED_STATE  
+  
   */
   createRecords: function(store, storeKeys, params) {
     return this._handleEach(store, storeKeys, this.createRecord, null, params);
@@ -231,6 +239,9 @@ SC.DataSource = SC.Object.extend( /** SC.DataSource.prototype */ {
     @param {Array} storeKeys keys to update
     @param {Hash} params to be passed down to data source. originated
       from the commitRecords() call on the store
+
+    @returns {Boolean} YES, NO, or SC.MIXED_STATE  
+
   */
   destroyRecords: function(store, storeKeys, params) {
     return this._handleEach(store, storeKeys, this.destroyRecord, null, params);

@@ -26,10 +26,7 @@
   Add this mixin to any controller you want to manage selection.  It is 
   already applied to the CollectionController and ArrayController.
   
-  @author Charles Jolley
-  @author Erich Ocean
-  @version 1.0
-  @since 0.9
+  @since SproutCore 1.0
 */
 SC.SelectionSupport = {
   
@@ -37,26 +34,31 @@ SC.SelectionSupport = {
   // PROPERTIES
   // 
   
+  /**
+    Walk like a duck.
+    
+    @property {Boolean}
+  */
   hasSelectionSupport: YES,
   
   /**
     If YES, selection is allowed. Default is YES.
     
-    @type Boolean
+    @property {Boolean}
   */
   allowsSelection: YES,
   
   /**
     If YES, multiple selection is allowed. Default is YES.
     
-    @type Boolean
+    @property {Boolean}
   */
   allowsMultipleSelection: YES,
   
   /**
     If YES, allow empty selection Default is YES.
     
-    @type Boolean
+    @property {Boolean}
   */
   allowsEmptySelection: YES,
   
@@ -65,8 +67,7 @@ SC.SelectionSupport = {
     controller's selection work in concert by binding them together. You
     generally have a master selection that relays changes TO all the others.
     
-    @property
-    @type SC.SelectionSet
+    @property {SC.SelectionSet}
   */
   selection: function(key, value) {
     var content, empty;
@@ -114,7 +115,7 @@ SC.SelectionSupport = {
   /**
     YES if the receiver currently has a non-zero selection.
     
-    @property Boolean
+    @property {Boolean}
   */
   hasSelection: function() {
     var sel = this.get('selection') ;
@@ -196,7 +197,7 @@ SC.SelectionSupport = {
     else return this.deselectObjects([object]);
   },
   
-  /** 
+  /**  @private
     Call this method whenever your source content changes to ensure the 
     selection always remains up-to-date and valid.
   */

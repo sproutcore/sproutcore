@@ -7,7 +7,7 @@
 
 sc_require('core') ;
  
-/** @namespace SC.Benchmark
+/** @namespace
 
   This bit of meta-programming magic can install a benchmark handler on any
   object method.  When a benchmark is installed, the time required to execute
@@ -44,7 +44,7 @@ SC.Benchmark = {
     If true, then benchmarks will be logged to the console as they are 
     recorded.
   
-    @type bool
+    @property {Boolean}
   */
   verbose: NO,
   
@@ -52,11 +52,11 @@ SC.Benchmark = {
     If false, benchmarking will be disabled.  You might want to disable this
     during production to maximize performance.
   
-    @type bool
+    @property {Boolean}
   */
   enabled: YES,
   
-  /**
+  /** 
      This hash stores collected stats.  It contains key value pairs.  The value
      will be a hash with the following properties:
    
@@ -65,51 +65,55 @@ SC.Benchmark = {
     * * *name*: an optional longer name you assigned to the stat key.  Set this  using name().
     * * *_starts*: this array is used internally.
     * * *_times*: this array is used internally.
+    
+    @property {Object}
   */
   stats: {},
 
   /**
     If set, one can tell when the benchmark is started relatively to the global start time.
   
-    @type Integer
+    @property {Number}
   */
   globalStartTime: null,
 
    /**
     Call this method at the start of whatever you want to collect.
-    If a parentKey is passed, then you will attach the stat to the parent, otherwise 
-    it will be on the top level. If topLevelOnly is passed, then recursive calls 
-    to the start will be ignored and only the top level call will be benchmarked.
+    If a parentKey is passed, then you will attach the stat to the parent, 
+    otherwise it will be on the top level. If topLevelOnly is passed, then 
+    recursive calls to the start will be ignored and only the top level call 
+    will be benchmarked.
     
-    @param key {String} A unique key that identifies this benchmark.  All calls to start/end with the same key will be groups together.
-    @param parentKey {String} A unique key that identifies the parent benchmark.  All calls to start/end with the same key will be groups together.
-    @param topLevelOnly {Boolean} If true then recursive calls to this method with the same key will be ignored.  
-    @param time {Integer} Only pass if you want to explicitly set the start time.  Otherwise the start time is now.
+    @param {String} key 
+      A unique key that identifies this benchmark.  All calls to start/end 
+      with the same key will be groups together.
+    
+    @param {String} parentKey
+      A unique key that identifies the parent benchmark.  All calls to 
+      start/end with the same key will be groups together.
+    
+    @param {Boolean} topLevelOnly
+      If true then recursive calls to this method with the same key will be 
+      ignored.  
+    
+    @param {Number} time
+      Only pass if you want to explicitly set the start time.  Otherwise the 
+      start time is now.
+      
+    @returns {String} the passed key
   */
   start: function(key, parentKey, time, topLevelOnly) {
     if (!this.enabled) return ;
 
-    var start = (time || Date.now());
+    var start = (time || Date.now()), stat;
 
-    if(parentKey)
-    {
-      var stat = this._subStatFor(key, parentKey) ;
-    }
-    else
-    {
-      var stat = this._statFor(key) ;
-    }
+    if (parentKey) stat = this._subStatFor(key, parentKey) ;
+    else stat = this._statFor(key) ;
     
-    if (topLevelOnly && stat._starts.length > 0) 
-    {
-      stat._starts.push('ignore') ;
-    }
-    else
-    {
-      stat._starts.push(start) ;
-    }
+    if (topLevelOnly && stat._starts.length > 0) stat._starts.push('ignore');
+    else stat._starts.push(start) ;
+
     stat._times.push({start: start, _subStats: {}});
-    
     return key;
   },
 
@@ -117,9 +121,15 @@ SC.Benchmark = {
     Call this method at the end of whatever you want to collect.  This will
     save the collected benchmark.
     
-    @param key {String} The benchmark key you used when you called start()
-    @param parentKey {String} The benchmark parent key you used when you called start()
-    @param time {Integer} Only pass if you want to explicitly set the end time.  Otherwise start time is now.
+    @param {String} key
+      The benchmark key you used when you called start()
+    
+    @param {String} parentKey
+      The benchmark parent key you used when you called start()
+    
+    @param {Number} time
+      Only pass if you want to explicitly set the end time.  Otherwise start 
+      time is now.
   */
   end: function(key, parentKey, time) {
     if (!this.enabled) return ;

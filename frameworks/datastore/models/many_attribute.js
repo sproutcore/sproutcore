@@ -40,8 +40,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     relationship as well.  Modifying this many array will modify the inverse
     property as well.
     
-    @property
-    @type {String}
+    @property {String}
   */
   inverse: null,
   
@@ -52,8 +51,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     property also set.  Only one of the inverse relationships should be marked
     as master so you can control which record should be committed.
     
-    @property
-    @type {Boolean}
+    @property {Boolean}
   */
   isMaster: YES,
   
@@ -62,8 +60,7 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     order of an object when it is added to an array.  You can pass a function
     or an array of property keys.
     
-    @property
-    @type {Function|Array}
+    @property {Function|Array}
   */
   orderBy: null,
   
@@ -117,6 +114,14 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     Called by an inverse relationship whenever the receiver is no longer part
     of the relationship.  If this matches the inverse setting of the attribute
     then it will update itself accordingly.
+
+    You should never call this directly.
+    
+    @param {SC.Record} the record owning this attribute
+    @param {String} key the key for this attribute
+    @param {SC.Record} inverseRecord record that was removed from inverse
+    @param {String} key key on inverse that was modified
+    @returns {void}
   */
   inverseDidRemoveRecord: function(record, key, inverseRecord, inverseKey) {
     var manyArray = record.get(key);
@@ -129,6 +134,14 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
     Called by an inverse relationship whenever the receiver is added to the 
     inverse relationship.  This will set the value of this inverse record to 
     the new record.
+    
+    You should never call this directly.
+    
+    @param {SC.Record} the record owning this attribute
+    @param {String} key the key for this attribute
+    @param {SC.Record} inverseRecord record that was added to inverse
+    @param {String} key key on inverse that was modified
+    @returns {void}
   */
   inverseDidAddRecord: function(record, key, inverseRecord, inverseKey) {
     var manyArray = record.get(key);

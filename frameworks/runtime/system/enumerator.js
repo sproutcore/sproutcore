@@ -17,7 +17,6 @@
   until you can iterated through the entire collection.  Once you have
   exhausted the enumerator, you can reuse it if you want by calling reset().
   
-  @extends Object
   @since SproutCore 1.0
 */
 SC.Enumerator = function(enumerableObject) {
@@ -84,7 +83,7 @@ SC.Enumerator.prototype = {
   will not access this method directly but instead call enumerator() on the
   item you want to enumerate.
 
-  @param {SC.Enumerable}  The enumerable object.
+  @param {SC.Enumerable}  enumerableObject enumerable object.
   @returns {SC.Enumerator} the enumerator
 */
 SC.Enumerator.create = function(enumerableObject) {

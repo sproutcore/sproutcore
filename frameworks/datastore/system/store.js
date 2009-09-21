@@ -48,16 +48,22 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     The data source is the persistent storage that will provide data to the
     store and save changes.  You normally will set your data source when you
     first create your store in your application.
+    
+    @property {SC.DataSource}
   */
   dataSource: null,
   
   /**
     This type of store is not nested.
+    
+    @property {Boolean}
   */
   isNested: NO,
   
   /**
     This type of store is not nested.
+    
+    @property {Boolean}
   */
   commitRecordsAutomatically: NO,
   
@@ -779,7 +785,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
   },
 
-  /**
+  /** @private
     DEPRECATED used find() instead.
     
     This method will accept a record type or query and return a record array
@@ -962,7 +968,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     Each Store instance returns unique record instances for each storeKey.
 
-    @param {Integer} storeKey The storeKey for the dataHash.
+    @param {Number} storeKey The storeKey for the dataHash.
     @returns {SC.Record} Returns a record instance.
   */
   materializeRecord: function(storeKey) {
@@ -1446,7 +1452,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Hash} params optional additional parameters to pass along to the
       data source
 
-    @returns {SC.Bool} if the action was succesful.
+    @returns {Boolean} if the action was succesful.
   */
   commitRecords: function(recordTypes, ids, storeKeys, params) {
     
@@ -1522,14 +1528,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     record, this will ask the data source to perform the appropriate action
     on the store key.
     
-    You have to pass either the id or the storeKey otherwise it will return NO.
+    You have to pass either the id or the storeKey otherwise it will return 
+    NO.
     
     @param {SC.Record} recordType the expected record type
     @param {String} id the id of the record to commit
     @param {Number} storeKey the storeKey of the record to commit
     @param {Hash} params optional additonal params that will passed down
       to the data source
-    @returns {SC.Bool} if the action was successful.
+    @returns {Boolean} if the action was successful.
   */
   commitRecord: function(recordType, id, storeKey, params) {
     var array = this._TMP_RETRIEVE_ARRAY,
@@ -1742,6 +1749,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     required when you commit a record that does not have an id yet.
     
     @param {Number} storeKey record store key to change to READY_CLEAN state
+    @param {Hash} dataHash optional data hash to replace current hash
+    @param {Object} newId optional new id to replace the old one
     @returns {SC.Store} reciever
   */
   dataSourceDidComplete: function(storeKey, dataHash, newId) {
@@ -1819,6 +1828,16 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // PUSH CHANGES FROM DATA SOURCE
   // 
   
+  /**
+    Call by the data source whenever you want to push new data out of band 
+    into the store.
+    
+    @param {Class} recordType the SC.Record subclass
+    @param {Object} id the record id or null
+    @param {Hash} dataHash data hash to load
+    @param {Number} storeKey optional store key.  
+    @returns {Boolean} YES if push was allowed
+  */
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
     var K = SC.Record, status;
     
@@ -1838,6 +1857,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return NO;
   },
   
+  /**
+    Call by the data source whenever you want to push a deletion into the 
+    store.
+    
+    @param {Class} recordType the SC.Record subclass
+    @param {Object} id the record id or null
+    @param {Number} storeKey optional store key.  
+    @returns {Boolean} YES if push was allowed
+  */
   pushDestroy: function(recordType, id, storeKey) {
     var K = SC.Record, status;
 
@@ -1855,6 +1883,15 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return NO;
   },
 
+  /**
+    Call by the data source whenever you want to push an error into the 
+    store.
+    
+    @param {Class} recordType the SC.Record subclass
+    @param {Object} id the record id or null
+    @param {Number} storeKey optional store key.  
+    @returns {Boolean} YES if push was allowed
+  */
   pushError: function(recordType, id, error, storeKey) {
     var K = SC.Record, status;
 
@@ -1982,7 +2019,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     return this._scstore_dataSourceDidErrorQuery(query, YES);
   },
 
-  _scstore_dataSourceDidCancelQuery: function(query, createIfNeeded) {
+  _scstore_dataSourceDidErrorQuery: function(query, createIfNeeded) {
     var recArray     = this._findQuery(query, createIfNeeded, NO),
         nestedStores = this.get('nestedStores'),
         loc          = nestedStores ? nestedStores.get('length') : 0;
@@ -2002,6 +2039,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   // INTERNAL SUPPORT
   // 
   
+  /** @private */
   init: function() {
     sc_super();
     this.reset();
@@ -2130,12 +2168,51 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
 SC.Store.mixin({
   
+  /**
+    Standard error raised if you try to commit changes from a nested store
+    and there is a conflict.
+    
+    @property {Error}
+  */
   CHAIN_CONFLICT_ERROR: new Error("Nested Store Conflict"),
+  
+  /**
+    Standard error if you try to perform an operation on a nested store 
+    without a parent.
+  
+    @property {Error}
+  */
   NO_PARENT_STORE_ERROR: new Error("Parent Store Required"),
+  
+  /**
+    Standard error if you try to perform an operation on a nested store that
+    is only supported in root stores.
+    
+    @property {Error}
+  */
   NESTED_STORE_UNSUPPORTED_ERROR: new Error("Unsupported In Nested Store"),
 
+  /**
+    Data hash state indicates the data hash is currently editable
+    
+    @property {String}
+  */
   EDITABLE:  'editable',
+  
+  /**
+    Data hash state indicates the hash no longer tracks changes from a 
+    parent store, but it is not editable.
+    
+    @property {String}
+  */
   LOCKED:    'locked',
+
+  /**
+    Data hash state indicates the hash is tracking changes from the parent
+    store and is not editable.
+    
+    @property {String}
+  */
   INHERITED: 'inherited',
   
   /** @private
@@ -2167,6 +2244,11 @@ SC.Store.mixin({
   */
   nextStoreKey: 1,
   
+  /**
+    Generates a new store key for use.
+    
+    @property {Number}
+  */
   generateStoreKey: function() { return this.nextStoreKey++; },
   
   /** 
@@ -2255,6 +2337,7 @@ SC.Store.mixin({
 });
 
 
+/** @private */
 SC.Store.prototype.nextStoreIndex = 1;
 
 // ..........................................................
@@ -2271,7 +2354,10 @@ SC.Store._getDefaultStore = function() {
   return store;
 };
 
-/** @deprecated 
+/** @private
+
+  DEPRECATED
+  
   Included for compatibility, loads data hashes with the named recordType. 
   If no recordType is passed, expects to find a recordType property in the 
   data hashes.  dataSource and isLoaded params are ignored.
@@ -2286,6 +2372,9 @@ SC.Store._getDefaultStore = function() {
   @returns {Array} SC.Record instances for loaded data hashes
 */
 SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded) {
+  
+  console.warn("SC.Store.updateRecords() is deprecated.  Use loadRecords() instead");
+  
   var store = this._getDefaultStore(),
       len   = dataHashes.length,
       idx, ret;
@@ -2306,7 +2395,10 @@ SC.Store.updateRecords = function(dataHashes, dataSource, recordType, isLoaded) 
   return ret ;
 };
 
-/** @deprecated
+/** @private
+
+  DEPRECATED 
+
   Finds a record with the passed guid on the default store.  This is included
   only for compatibility.  You should use the newer find() method defined on
   SC.Store instead.
@@ -2319,7 +2411,10 @@ SC.Store.find = function(guid, recordType) {
   return this._getDefaultStore().find(recordType, guid);
 };
 
-/** @deprecated 
+/** @private
+
+  DEPRECATED 
+
   Passes through to findAll on default store.  This is included only for 
   compatibility.  You should use the newer findAll() defined on SC.Store
   instead.

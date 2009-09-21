@@ -45,13 +45,14 @@ require('system/enumerator');
   libraries by implementing only methods that mostly correspond to the
   JavaScript 1.8 API.  
   
-  @static
   @since SproutCore 1.0
 */
 SC.Enumerable = {
 
   /** 
     Walk like a duck.
+    
+    @property {Boolean}
   */
   isEnumerable: YES,
   
@@ -748,7 +749,7 @@ SC._buildReducerFor = function(reducerKey, reducerProperty) {
   }.property('[]') ;
 };
 
-SC.Reducers = {
+SC.Reducers = /** @lends SC.Enumerable */ {
   /**
     This property will trigger anytime the enumerable's content changes.
     You can observe this property to be notified of changes to the enumerables
@@ -756,6 +757,8 @@ SC.Reducers = {
     
     For plain enumerables, this property is read only.  SC.Array overrides
     this method.
+    
+    @property {SC.Array}
   */
   '[]': function(key, value) { return this ; }.property(),
 
@@ -797,10 +800,16 @@ SC.Reducers = {
       }
     }}}
      
-    @param key {String} the reduce property key
-    @param value {Object} a value or undefined.
-    @param generateProperty {Boolean} only set to false if you do not want an
-      optimized computed property handler generated for this.  Not common.
+    @param {String} key
+      the reduce property key
+    
+    @param {Object} value
+      a value or undefined.
+    
+    @param {Boolean} generateProperty
+      only set to false if you do not want an optimized computed property 
+      handler generated for this.  Not common.
+  
     @returns {Object} the reduced property or undefined
   */
   reducedProperty: function(key, value, generateProperty) {

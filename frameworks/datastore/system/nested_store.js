@@ -29,8 +29,7 @@ SC.NestedStore = SC.Store.extend(
     This is set to YES when there are changes that have not been committed 
     yet.
 
-    @property
-    @type {Boolean}
+    @property {Boolean}
     @default NO
   */
   hasChanges: NO,
@@ -47,6 +46,8 @@ SC.NestedStore = SC.Store.extend(
 
   /**
     YES if the view is nested. Walk like a duck
+    
+    @property {Boolean}
   */
   isNested: YES,
 
@@ -114,29 +115,6 @@ SC.NestedStore = SC.Store.extend(
       throw "SC.Store#find() can only accept LOCAL queries in nested stores";
     }
     return sc_super();
-  },
-  
-  /**
-    Resets a store's data hash contents to match its parent.
-    
-    @returns {SC.Store} receiver
-  */
-  reset: function() {
-    
-    // if we have a transient parent store, then we can just respawn from 
-    // its properties
-    var parentStore = this.get('parentStore');
-    if(parentStore) {
-      this.dataHashes = SC.beget(parentStore.dataHashes);
-      this.revisions  = SC.beget(parentStore.revisions);
-      this.statuses   = SC.beget(parentStore.statuses);
-    }
-    
-    // also, reset private temporary objects
-    this.chainedChanges = this.locks = this.editables = null;
-    this.changelog = null ;
-
-    this.set('hasChanges', NO);
   },
   
   /**

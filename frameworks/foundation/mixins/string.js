@@ -9,6 +9,7 @@ sc_require('system/locale');
 
 // These are basic enhancements to the string class used throughout 
 // SproutCore.
+/** @private */
 SC.STRING_TITLEIZE_REGEXP = (/([\s|\-|\_|\n])([^\s|\-|\_|\n]?)/g);
 
 /**
@@ -322,9 +323,12 @@ SC.String = {
     
 };
 
+/** @private */
 SC.String.strip = SC.String.trim; // convenience alias.
 
 // Apply SC.String mixin to built-in String object
 SC.mixin(String.prototype, SC.String) ;
+
+/** @private */
 SC.String.fmt = String.prototype.fmt; // copy from runtime
 

@@ -2315,7 +2315,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
 });
 
-SC.View.mixin(/** @scope SC.View @static */ {
+SC.View.mixin(/** @scope SC.View */ {
   
   /** @private walk like a duck -- used by SC.Page */
   isViewClass: YES,

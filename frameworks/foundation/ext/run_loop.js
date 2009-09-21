@@ -23,7 +23,10 @@ SC.RunLoop = SC.RunLoop.extend(
     return this._start ;  
   }.property(),
   
-  /** @private - override to fire and reschedule timers once per run loop
+  /* 
+  
+    Override to fire and reschedule timers once per run loop.
+    
     Note that timers should fire only once per run loop to avoid the 
     situation where a timer might cause an infinite loop by constantly 
     rescheduling itself everytime it is fired.

@@ -113,6 +113,8 @@ SC.RecordAttribute = SC.Object.extend(
   
   /**
     Finds the transform handler. 
+    
+    @property {Function}
   */
   transform: function() {
     var klass      = this.get('typeClass') || String,
