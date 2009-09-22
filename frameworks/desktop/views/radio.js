@@ -349,8 +349,7 @@ SC.RadioView = SC.FieldView.extend(
   },
   
   mouseDown: function(evt) {  
-    this.$input()[0].focus();
-    sc_super();
-  }
+     return YES;
+   }
 
 });

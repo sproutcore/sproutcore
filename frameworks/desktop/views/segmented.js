@@ -430,13 +430,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       this._isMouseDown = YES ;
       this.set('activeIndex', idx);
     }
-    if (!this._isFocused) {
-      this._isFocused = YES ;
-      this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.$()[0].focus();
-      }
-    }
     
     return YES ;
   },

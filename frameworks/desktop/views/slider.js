@@ -120,16 +120,8 @@ SC.SliderView = SC.View.extend(SC.Control,
   
   mouseDown: function(evt) {
     if (!this.get('isEnabled')) return YES; // nothing to do...
-    
     this.set('isActive', YES);
     this._isMouseDown = YES ;
-    if (!this._isFocused) {
-      this._isFocused = YES ;
-      this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.$()[0].focus();
-      }
-    }
     return this._triggerHandle(evt);
   },
   

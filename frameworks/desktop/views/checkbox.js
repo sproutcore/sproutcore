@@ -119,8 +119,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   },
   
   mouseDown: function(evt) {  
-    this.$input()[0].focus();
-    sc_super();
-  },
+    return YES;
+  }
     
 }) ;
