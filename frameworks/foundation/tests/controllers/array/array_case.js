@@ -163,9 +163,26 @@ test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
 });
 
+test("array orderBy using function", function(){
+  var testFunc = function(a,b){ 
+    if(a.get('title') > b.get('title')) return -1;
+    else if (a.get('title') == b.get('title')) return 0; 
+    else return 1; 
+  };
+  var expected = content.slice();
+  expected.sort(testFunc);
+  
+  var testController = SC.ArrayController.create({
+    content: content,
+    orderBy: testFunc
+  });
+  same(testController.get('arrangedObjects').toArray(), expected, 'arrangedObjects should be sortable by a custom function');
+});
+
 // ..........................................................
 // ADD SPECIAL CASES HERE
 // 
+
 
 
 // ..........................................................

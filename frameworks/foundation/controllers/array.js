@@ -366,11 +366,10 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     default:
       throw "%@.orderBy must be Array, String, or Function".fmt(this);
     }
-    
-    len = orderBy.get('length');
-    
+        
     // generate comparison function if needed - use orderBy
-    if (!func) {
+    if (!func) {  
+      len = orderBy.get('length');
       func = function(a,b) {
         var idx=0, status=0, key, aValue, bValue;
         for(idx=0;(idx<len)&&(status===0);idx++) {
