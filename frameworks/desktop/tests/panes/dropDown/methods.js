@@ -9,7 +9,7 @@
 
 var pane, view , view1, view2, view3, view4 ;
 
-module("SC.DropDownMenu",{
+module("SC.Selector",{
 
   //setup
   setup: function() {
@@ -28,25 +28,25 @@ module("SC.DropDownMenu",{
       childViews: [
 
         //view1
-        SC.DropDownMenu.extend({
+        SC.Selector.extend({
           objects: ["To","Back", "You"],
           disableSort: NO
         }),
 
         //view2
-        SC.DropDownMenu.extend({
+        SC.Selector.extend({
           objects: ["Drop","Down", "Menu"]
         }),
 
         //view3
-        SC.DropDownMenu.extend({
+        SC.Selector.extend({
           objectsBinding: '*owner.objs',
           valueBinding: '*owner.selectedValue',
           isVisibleBinding: '*owner.isDue'
         }),
 
         //view4
-        SC.DropDownMenu.extend({
+        SC.Selector.extend({
           objectsBinding: '*owner.objs2',
           valueBinding: '*owner.selectedValue',
           valueKey: 'title',
@@ -95,10 +95,10 @@ test("Check if isVisibleBinding works", function() {
 });
 
 //test4
-test("DropDownMenu with objects", function() {
-  equals(3,view1.objects.length,'The number of options in dropDown Menu should be') ;
-  equals(null,view1.nameKey,'the dropDownMenu should not have any name key') ;
-  equals(null,view1.valueKey,'the dropDownMenu should not have any value key') ;
+test("Selector with objects", function() {
+  equals(3,view1.objects.length,'The number of options in selector Menu should be') ;
+  equals(null,view1.nameKey,'the selector should not have any name key') ;
+  equals(null,view1.valueKey,'the selector should not have any value key') ;
 });
 
 //test5

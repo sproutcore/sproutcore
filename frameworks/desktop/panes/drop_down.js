@@ -10,7 +10,7 @@
 
   Drop Down Menu has a functionality similar to that of SelectField
 
-  Clicking the DropDownMenu button displays a menu pane with a
+  Clicking the Selector button displays a menu pane with a
   list of items. The selected item will be displayed on the button.
   User has the option of enabling checkbox for the selected menu item.
 
@@ -20,8 +20,8 @@
 */
 sc_require('views/button');
 
-SC.DropDownMenu = SC.ButtonView.extend(
-/** @scope SC.DropDownMenu.prototype */ {
+SC.Selector = SC.ButtonView.extend(
+/** @scope SC.Selector.prototype */ {
 
   /**
     An array of items that will be form the menu you want to show.
@@ -130,7 +130,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
   itemIdx: null,
 
   /**
-     Current Value of the dropDown
+     Current Value of the selector
 
      @property
      @default null
@@ -399,7 +399,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     }
 
     //Set the preference matrix for the menu pane
-    this.changeDropDownPreferMatrix(this.itemIdx) ;
+    this.changeSelectorPreferMatrix(this.itemIdx) ;
 
   },
 
@@ -444,7 +444,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       classNames: ['drop-down-menu'],
 
       /**
-        The menu items are set from the itemList property of DropDownMenu
+        The menu items are set from the itemList property of Selector
 
         @property
       */
@@ -528,7 +528,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
   */
-  changeDropDownPreferMatrix: function() {
+  changeSelectorPreferMatrix: function() {
     var preferMatrixAttributeTop = 0 ;
     var itemIdx = this.get('itemIdx') ;
     var leftAlign = this.get('leftAlign') ;

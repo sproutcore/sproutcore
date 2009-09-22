@@ -12,38 +12,38 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 //control test pane
 var pane = SC.ControlTestPane.design()
      //sample1
-    .add("Basic", SC.DropDownMenu, {
+    .add("Basic", SC.Selector, {
        objects: ['None', 'Low', 'Medium', 'High']
     })
 
     //sample2
-    .add("Disabled", SC.DropDownMenu, {
+    .add("Disabled", SC.Selector, {
        isEnabled: NO, objects: ['None', 'Low', 'Medium', 'High']
     })
 
     //sample3
-    .add("NotVisible", SC.DropDownMenu, {
+    .add("NotVisible", SC.Selector, {
       isVisible: NO, objects: ['None', 'Low', 'Medium', 'High']
     })
 
     //sample4
-    .add("SortedObjects", SC.DropDownMenu, {
+    .add("SortedObjects", SC.Selector, {
       objects:['None', 'Low', 'Medium', 'High']
     })
 
     //sample5
-    .add("UnsortedObjects", SC.DropDownMenu, {
+    .add("UnsortedObjects", SC.Selector, {
       objects:['None', 'Low', 'Medium', 'High'],
       disableSort: YES
     })
 
     //sample6
-    .add("redraw", SC.DropDownMenu, {
+    .add("redraw", SC.Selector, {
       layout: { width: '150', right: '0' }
     })
 
     //sample7
-    .add("DropDownWithIcon", SC.DropDownMenu, {
+    .add("SelectorWithIcon", SC.Selector, {
       objects: [{ title: "None", icon: 'drop-down-icon' },
         { title: "Low", icon: 'drop-down-icon' },
         { title: "Medium", icon: 'drop-down-icon' },
@@ -54,7 +54,7 @@ var pane = SC.ControlTestPane.design()
     })
 
     //sample8
-    .add("SortKey", SC.DropDownMenu, {
+    .add("SortKey", SC.Selector, {
       objects: [{ title: "None", pos: 3},
         { title: "Low", pos: 1},
         { title: "Medium", pos: 2 },
@@ -66,7 +66,7 @@ var pane = SC.ControlTestPane.design()
     })
 
     //sample9
-    .add("StaticLayout", SC.DropDownMenu, {
+    .add("StaticLayout", SC.Selector, {
       useStaticLayout: YES,
       objects:['None', 'Low', 'Medium', 'High'],
       layout: { width: '150', right: '0' }
@@ -78,17 +78,17 @@ var pane = SC.ControlTestPane.design()
 // TEST VIEWS
 //
 
-module('SC.DropDownMenu ui', pane.standardSetup()) ;
+module('SC.Selector ui', pane.standardSetup()) ;
 
 //test1
-test("Check the visiblity of the dropDowns", function() {
+test("Check the visiblity of the selectors", function() {
   ok(pane.view('Basic').get('isVisibleInWindow'), 'Basic.isVisibleInWindow should be YES') ;
   ok(pane.view('Disabled').get('isVisibleInWindow'), 'Disabled.isVisibleInWindow should be YES') ;
   ok(!pane.view('NotVisible').get('isVisibleInWindow'), 'NotVisible.isVisibleInWindow should be NO') ;
   ok(pane.view('SortedObjects').get('isVisibleInWindow'), 'SortedObjects.isVisibleInWindow should be YES') ;
   ok(pane.view('UnsortedObjects').get('isVisibleInWindow'), 'UnsortedObjects.isVisibleInWindow should be YES') ;
   ok(pane.view('redraw').get('isVisibleInWindow'), 'redraw.isVisibleInWindow should be YES') ;
-  ok(pane.view('DropDownWithIcon').get('isVisibleInWindow'), 'DropDownWithIcon.isVisibleInWindow should be YES') ;
+  ok(pane.view('SelectorWithIcon').get('isVisibleInWindow'), 'SelectorWithIcon.isVisibleInWindow should be YES') ;
   ok(pane.view('StaticLayout').get('isVisibleInWindow'), 'StaticLayout.isVisibleInWindow should be YES') ;
 }) ;
 
@@ -174,8 +174,8 @@ test("redraw", function() {
 }) ;
 
 //test8
-test("DropDownWithIcon", function() {
-  view=pane.view('DropDownWithIcon').$();
+test("SelectorWithIcon", function() {
+  view=pane.view('SelectorWithIcon').$();
   ok(view.hasClass('icon'), 'hasClass(Icon) should be YES') ;
   ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;

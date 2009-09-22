@@ -37,7 +37,7 @@ SC.ResponderContext = SC.Responder.extend({
     When set to YES, logs tracing information about all actions sent and 
     responder changes.
   */
-  trace: NO,
+  trace: YES,
   
   /** @property
     The default responder.  Set this to point to a responder object that can 
