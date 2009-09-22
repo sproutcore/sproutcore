@@ -120,6 +120,9 @@ SC.Scanner = SC.Object.extend(
   @extends SC.Copyable
   @author Martin Ottenwaelter
 */
+
+SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
+
 SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   /** @scope SC.DateTime.prototype */ {
   
@@ -161,7 +164,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     @returns {DateTime} copy of receiver
   */
   adjust: function(options) {
-    return this.constructor._adjust(options, this._ms)._createFromCurrentState();
+    return this.constructor._adjust(options, this._ms, this.timezone)._createFromCurrentState();
   },
   
   /**
@@ -173,7 +176,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     @returns {DateTime} copy of the receiver
   */
   advance: function(options) {
-   return this.constructor._advance(options, this._ms)._createFromCurrentState();
+   return this.constructor._advance(options, this._ms, this.timezone)._createFromCurrentState();
   },
   
   /**
@@ -295,6 +298,21 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   */
   copy: function() {
     return this;
+  },
+  
+  /**
+    Returns a copy of the receiver with the timezone set to the passed
+    timezone. The returned value is equal to the receiver (ie SC.Compare
+    returns 0), it is just the timezone representation that changes.
+    
+    If you don't pass any argument, the target timezone is assumed to be 0,
+    ie UTC.
+    
+    @return {DateTime}
+  */
+  toTimezone: function(timezone) {
+    if (timezone === undefined) timezone = 0;
+    return this.advance({ timezone: timezone-this.timezone });
   }
   
 });
@@ -432,7 +450,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'minute':         return d.getMinutes();
       case 'second':         return d.getSeconds();
       case 'millisecond':    return d.getMilliseconds();
-      case 'milliseconds':   return d.getTime();
+      case 'milliseconds':   return d.getTime() + this._tz*60000;
       case 'timezone':       return this._tz;
     }
     
@@ -503,7 +521,7 @@ SC.DateTime.mixin(SC.Comparable,
   /** @private
     @see SC.DateTime#adjust
   */
-  _adjust: function(options, start, timezone) {
+  _adjust: function(options, start, timezone, resetCascadingly) {
     var opts = options ? SC.clone(options) : {};
     
     var d = this._date;
@@ -511,16 +529,18 @@ SC.DateTime.mixin(SC.Comparable,
     
     // the time options (hour, minute, sec, millisecond)
     // reset cascadingly (see documentation)
-    if ( !SC.none(opts.hour) && SC.none(opts.minute)) {
-      opts.minute = 0;
-    }
-    if (!(SC.none(opts.hour) && SC.none(opts.minute))
-        && SC.none(opts.second)) {
-      opts.second = 0;
-    }
-    if (!(SC.none(opts.hour) && SC.none(opts.minute) && SC.none(opts.second))
-        && SC.none(opts.millisecond)) {
-      opts.millisecond = 0;
+    if (resetCascadingly === undefined || resetCascadingly === YES) {
+      if ( !SC.none(opts.hour) && SC.none(opts.minute)) {
+        opts.minute = 0;
+      }
+      if (!(SC.none(opts.hour) && SC.none(opts.minute))
+          && SC.none(opts.second)) {
+        opts.second = 0;
+      }
+      if (!(SC.none(opts.hour) && SC.none(opts.minute) && SC.none(opts.second))
+          && SC.none(opts.millisecond)) {
+        opts.millisecond = 0;
+      }
     }
 
     if (!SC.none(opts.year))        d.setFullYear(opts.year);
@@ -540,12 +560,15 @@ SC.DateTime.mixin(SC.Comparable,
   */
   _advance: function(options, start, timezone) {
     var opts = options ? SC.clone(options) : {};
-    
-    var d = this._date;
     this._setState(start, timezone);
     
+    if (!SC.none(opts.timezone)) {
+      if (SC.none(opts.minute)) opts.minute = 0;
+      opts.minute -= opts.timezone;
+    }
     for (var key in opts) opts[key] += this._get(key);
-    return this._adjust(opts);
+    
+    return this._adjust(opts, start, timezone, NO);
   },
   
   /**
@@ -574,8 +597,11 @@ SC.DateTime.mixin(SC.Comparable,
   create: function() {
     var arg = arguments.length === 0 ? {} : arguments[0];
     
-    if (SC.typeOf(arg) === SC.T_NUMBER) arg = { milliseconds: arg };
-    if (SC.none(arg.timezone)) arg.timezone = this.timezone;
+    if (SC.typeOf(arg) === SC.T_NUMBER) {
+      arg = { milliseconds: arg, timezone: 0 };
+    } else if (SC.none(arg.timezone)) {
+      arg.timezone = this.timezone;
+    }
     
     if (!SC.none(arg.milliseconds)) {
       // quick implementation of a FIFO set for the cache
@@ -739,7 +765,6 @@ SC.DateTime.mixin(SC.Comparable,
     @see SC.DateTime#toFormattedString
   */
   _toFormattedString: function(format, start, timezone) {
-    var d = this._date;
     this._setState(start, timezone);
     
     var that = this;
@@ -752,8 +777,6 @@ SC.DateTime.mixin(SC.Comparable,
     This will tell you which of the two passed DateTime is greater than the
     other, by comparing if their number of milliseconds since
     January, 1st 1970 00:00:00.0 UTC.
-    
-    
  
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance
@@ -762,23 +785,29 @@ SC.DateTime.mixin(SC.Comparable,
                        0 if a == b
   */
   compare: function(a, b) {
-    return a._ms < b._ms ? -1 : a._ms === b._ms ? 0 : 1;
+    var ma = a.get('milliseconds');
+    var mb = b.get('milliseconds');
+    return ma < mb ? -1 : ma === mb ? 0 : 1;
   },
   
   /**
     This will tell you which of the two passed DateTime is greater than the
-    other, by only comparing the date parts of the passed objects.
+    other, by only comparing the date parts of the passed objects. Only dates
+    with the same timezone can be compared.
  
     @param {SC.DateTime} a the first DateTime instance
     @param {SC.DateTime} b the second DateTime instance
     @returns {Integer} -1 if a < b,
                        +1 if a > b,
                        0 if a == b
+    @throws {SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR} if the passed arguments
+      don't have the same timezone
   */
   compareDate: function(a, b) {
-    var d1 = this._adjust({hour: 0}, a._ms)._date.getTime();
-    var d2 = this._adjust({hour: 0}, b._ms)._date.getTime();
-    return d1 < d2 ? -1 : d1 === d2 ? 0 : 1;
+    if (a.get('timezone') !== b.get('timezone')) throw SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR;
+    var ma = a.adjust({hour: 0}).get('milliseconds');
+    var mb = b.adjust({hour: 0}).get('milliseconds');
+    return ma < mb ? -1 : ma === mb ? 0 : 1;
   }
   
 });
