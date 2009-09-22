@@ -131,6 +131,18 @@ test("should evaluate all comparators", function() {
   q.parse();
   ok(q._tokenTree.evaluate() == false, "'Tea pot' CONTAINS 'a cup' should be false");
   
+  q.conditions = "{myTeapot} CONTAINS 'Tea'";
+  q.parse();
+  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) == true, "['Tea', 'pot'] CONTAINS 'Tea' should be true");
+
+  q.conditions = "{myTeapot} CONTAINS 'pot'";
+  q.parse();
+  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) == true, "['Tea', 'pot'] CONTAINS 'pot' should be true");
+
+  q.conditions = "{myTeapot} CONTAINS 'coffee'";
+  q.parse();
+  ok(q._tokenTree.evaluate(null,{myTeapot: ['Tea','pot']}) == false, "['Tea', 'pot'] CONTAINS 'coffee' should be false");
+  
   q.conditions = "'Tea pot' MATCHES {myCup}";
   q.parse();
   ok(q._tokenTree.evaluate(null,{myCup: /a\sp/}) === true, "'Tea pot' MATCHES /a\sp/ should be true");
