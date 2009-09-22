@@ -465,6 +465,14 @@ SC.InlineTextFieldView.mixin(
     if(s && s.length>0) styles = styles + "line-height: " + s + " !important; ";
     s=SC.getStyle(el,'text-align');
     if(s && s.length>0) styles = styles + "text-align: " + s + " !important; ";
+    s=SC.getStyle(el,'top-margin');
+    if(s && s.length>0) styles = styles + "top-margin: " + s + " !important; ";
+    s=SC.getStyle(el,'bottom-margin');
+    if(s && s.length>0) styles = styles + "bottom-margin: " + s + " !important; ";
+    s=SC.getStyle(el,'left-margin');
+    if(s && s.length>0) styles = styles + "left-margin: " + s + " !important; ";
+    s=SC.getStyle(el,'right-margin');
+    if(s && s.length>0) styles = styles + "right-margin: " + s + " !important; ";
     
     return styles;
   },
