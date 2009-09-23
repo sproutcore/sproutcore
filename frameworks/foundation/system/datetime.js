@@ -5,6 +5,49 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+/**
+  Standard error thrown by SC.Scanner when it runs out of bounds
+  
+  @property {Error}
+*/
+SC.SCANNER_OUT_OF_BOUNDS_ERROR = new Error("Out of bounds.");
+
+/**
+  Standard error thrown by SC.Scanner when  you pass a value not an integer.
+  
+  @property {Error}
+*/
+SC.SCANNER_INT_ERROR = new Error("Not an int.");
+
+/**
+  Standard error thrown by SC.SCanner when it cannot find a string to skip.
+  
+  @property {Error}
+*/
+SC.SCANNER_SKIP_ERROR = new Error("Did not find the string to skip.");
+
+/** 
+  Standard error thrown by SC.Scanner when it can any kind a string in the 
+  matching array.
+*/
+SC.SCANNER_SCAN_ARRAY_ERROR = new Error("Did not find any string of the given array to scan.");
+
+/**
+  Standard error thrown when trying to compare two dates in different 
+  timezones.
+  
+  @property {Error}
+*/
+SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
+
+/**
+  Standard ISO8601 date format
+  
+  @property {String}
+*/
+SC.DATETIME_ISO8601 = '%Y-%m-%dT%H:%M:%S%Z';
+
+
 /** @class
 
   A Scanner reads a string and interprets the characters into numbers. You
@@ -15,14 +58,9 @@
   Scanners are used by DateTime to convert strings into DateTime objects.
   
   @extends SC.Object
+  @since SproutCore 1.0
   @author Martin Ottenwaelter
 */
-
-SC.SCANNER_OUT_OF_BOUNDS_ERROR = new Error("Out of bounds.");
-SC.SCANNER_INT_ERROR = new Error("Not an int.");
-SC.SCANNER_SKIP_ERROR = new Error("Did not find the string to skip.");
-SC.SCANNER_SCAN_ARRAY_ERROR = new Error("Did not find any string of the given array to scan.");
-
 SC.Scanner = SC.Object.extend(
 /** @scope SC.Scanner.prototype */ {
   
@@ -119,11 +157,8 @@ SC.Scanner = SC.Object.extend(
   @extends SC.Freezable
   @extends SC.Copyable
   @author Martin Ottenwaelter
+  @since SproutCore 1.0
 */
-
-SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
-SC.DATETIME_ISO8601 = '%Y-%m-%dT%H:%M:%S%Z';
-
 SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   /** @scope SC.DateTime.prototype */ {
   
