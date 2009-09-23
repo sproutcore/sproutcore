@@ -63,6 +63,11 @@ SC.TableColumn = SC.Object.extend({
   */
   maxWidth: 700,
   
+  escapeHTML: NO,
+
+  formatter: null,
+
+  
   isVisible: YES,
   
   /**
