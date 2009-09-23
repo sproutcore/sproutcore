@@ -6,13 +6,14 @@
 
 module('Time');
 
-var ms, options, dt;
+var ms, options, dt, timezones;
 
 module("SC.DateTime", {
   setup: function() {
     ms = 484354822925; // 1985-05-08 01:00:22 +02:00
     options = {year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: SC.DateTime.timezone};
     dt = SC.DateTime.create(options);
+    timezones = [480, 420, 0, -60, -120, -330]; // PST, PDT, UTC, CET, CEST, Mumbai
   },
   teardown: function() {
     delete ms;
@@ -48,23 +49,52 @@ test('create with a hash', function() {
 });
 
 test('create with milliseconds', function() {
-  var x = SC.DateTime.create(ms);
-  timeShouldBeEqualToHash(x, options);
+  var t = SC.DateTime.create(ms);
+  options.timezone = 0;
+  
+  equals(t.get('milliseconds'), ms);
+  timeShouldBeEqualToHash(t, options);
+  equals(SC.DateTime.create(0).get('milliseconds'), 0);
 });
 
 test('adjust', function() {
-  timeShouldBeEqualToHash(dt.adjust({year:      2005}), {year: 2005, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
-  timeShouldBeEqualToHash(dt.adjust({month:        9}), {year: 1985, month: 9, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
-  timeShouldBeEqualToHash(dt.adjust({day:         31}), {year: 1985, month: 5, day: 31, hour: 1, minute: 0, second: 22, millisecond: 925});
-  timeShouldBeEqualToHash(dt.adjust({hour:         3}), {year: 1985, month: 5, day:  8, hour: 3, minute: 0, second:  0, millisecond:   0});
-  timeShouldBeEqualToHash(dt.adjust({minute:       1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 1, second:  0, millisecond:   0});
-  timeShouldBeEqualToHash(dt.adjust({millisecond: 18}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond:  18});
-  timeShouldBeEqualToHash(dt.adjust({timezone:     0}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: 0});
+  timezones.forEach(function(timezone) {
+    options.timezone = timezone;
+    dt = SC.DateTime.create(options);
+    
+    timeShouldBeEqualToHash(dt.adjust({year:      2005}), {year: 2005, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({month:        9}), {year: 1985, month: 9, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({day:         31}), {year: 1985, month: 5, day: 31, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({hour:         3}), {year: 1985, month: 5, day:  8, hour: 3, minute: 0, second:  0, millisecond:   0, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({minute:       1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 1, second:  0, millisecond:   0, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({second:      12}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 12, millisecond:   0, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({millisecond: 18}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond:  18, timezone: timezone});
+    timeShouldBeEqualToHash(dt.adjust({timezone:     0}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: 0});
+  });
 });
 
 test('advance', function() {
-  var t = dt.advance({year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, millisecond: 1});
-  timeShouldBeEqualToHash(t, {year: 1986, month: 6, day: 9, hour: 2, minute: 1, second: 23, millisecond: 926});
+  timeShouldBeEqualToHash(
+    dt.advance({year: 1, month: 1, day: 1, hour: 1, minute: 1, second: 1, millisecond: 1}),
+    {year: 1986, month: 6, day: 9, hour: 2, minute: 1, second: 23, millisecond: 926});
+  timeShouldBeEqualToHash(dt.advance({year:         1}), {year: 1986, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.advance({month:        1}), {year: 1985, month: 6, day:  8, hour: 1, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.advance({day:          1}), {year: 1985, month: 5, day:  9, hour: 1, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.advance({hour:         1}), {year: 1985, month: 5, day:  8, hour: 2, minute: 0, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.advance({minute:       1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 1, second: 22, millisecond: 925});
+  timeShouldBeEqualToHash(dt.advance({second:       1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 23, millisecond: 925});
+  timeShouldBeEqualToHash(dt.advance({millisecond:  1}), {year: 1985, month: 5, day:  8, hour: 1, minute: 0, second: 22, millisecond: 926});
+  
+  // Convert time from CEST to UTC, then UTC to UTC+05:30 (Mumbai)
+  var h = {year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: -120};
+  var t = SC.DateTime.create(h);
+  timeShouldBeEqualToHash(t, h);
+  timeShouldBeEqualToHash(t.advance({timezone: 120}), {year: 1985, month: 5, day:  7, hour: 23, minute: 0, second: 22, millisecond: 925, timezone: 0});
+  timeShouldBeEqualToHash(t.advance({timezone: 120}).advance({timezone: -330}), {year: 1985, month: 5, day:  8, hour: 4, minute: 30, second: 22, millisecond: 925, timezone: -330});
+  equals(SC.DateTime.compare(
+    t.advance({timezone: 120}).advance({timezone: -330}),
+    t.advance({timezone: -210})),
+    0);
 });
 
 test('compare', function() {
@@ -78,8 +108,24 @@ test('compare', function() {
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1, second: -1})), 0);
   equals(SC.DateTime.compareDate(dt, dt.adjust({hour: 0}).advance({day: 1})), -1);
   equals(SC.DateTime.compareDate(dt, dt.advance({day: 1})), -1);
+  equals(SC.compare(
+    SC.DateTime.create({year: 1985, month: 5, day: 7, hour: 23, minute: 0, second: 22, millisecond: 925, timezone:    0}),
+    SC.DateTime.create({year: 1985, month: 5, day: 8, hour:  1, minute: 0, second: 22, millisecond: 925, timezone: -120})),
+    0);
   
-  equals(SC.compare(dt, dt.advance({timezone: -120, hours: 120})), 0);
+  var exception = null;
+  try {
+    equals(SC.DateTime.compareDate(
+      SC.DateTime.create({year: 1985, month: 5, day: 7, hour: 23, minute: 0, second: 22, millisecond: 925, timezone:    0}),
+      SC.DateTime.create({year: 1985, month: 5, day: 8, hour:  1, minute: 0, second: 22, millisecond: 925, timezone: -120})),
+      0);
+  } catch(e) {
+    exception = e;
+  } finally {
+    ok(!SC.none(exception), "Comparing two dates with a different timezone should throw an exception.");
+  }
+
+  equals(SC.compare(dt, dt.advance({timezone: 120, minutes: 120})), 0);
 });
 
 test('Format', function() {
@@ -180,4 +226,27 @@ test('cache', function() {
     SC.keys(SC.DateTime._dt_cache).length <= 2*SC.DateTime._DT_CACHE_MAX_LENGTH,
     "Creating a lot of datetimes should not make a cache larger than the maximum allowed size");
   
+});
+
+test('timezones', function() {
+  options.timezone = 0;
+  timeShouldBeEqualToHash(SC.DateTime.create(options), options);
+  timeShouldBeEqualToHash(SC.DateTime.create(ms), options);
+  
+  options.timezone = -120;
+  timeShouldBeEqualToHash(SC.DateTime.create(options), options);
+    
+  options.timezone = 330;
+  timeShouldBeEqualToHash(SC.DateTime.create(options), options);
+  
+  options.timezone = 0;
+  dt = SC.DateTime.create(options);
+    
+  timeShouldBeEqualToHash(dt,                  {year: 1985, month: 5, day: 8, hour:  1, minute:  0, second: 22, millisecond: 925, timezone:    0});
+  timeShouldBeEqualToHash(dt.toTimezone(480),  {year: 1985, month: 5, day: 7, hour: 17, minute:  0, second: 22, millisecond: 925, timezone:  480});
+  timeShouldBeEqualToHash(dt.toTimezone(420),  {year: 1985, month: 5, day: 7, hour: 18, minute:  0, second: 22, millisecond: 925, timezone:  420});
+  timeShouldBeEqualToHash(dt.toTimezone(),     {year: 1985, month: 5, day: 8, hour:  1, minute:  0, second: 22, millisecond: 925, timezone:    0});
+  timeShouldBeEqualToHash(dt.toTimezone( -60), {year: 1985, month: 5, day: 8, hour:  2, minute:  0, second: 22, millisecond: 925, timezone:  -60});
+  timeShouldBeEqualToHash(dt.toTimezone(-120), {year: 1985, month: 5, day: 8, hour:  3, minute:  0, second: 22, millisecond: 925, timezone: -120});
+  timeShouldBeEqualToHash(dt.toTimezone(-330), {year: 1985, month: 5, day: 8, hour:  6, minute: 30, second: 22, millisecond: 925, timezone: -330});
 });
