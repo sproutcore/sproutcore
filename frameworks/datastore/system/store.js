@@ -490,7 +490,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // when store needs to propagate out changes in the parent store
       // to nested stores
       if (editState === K.INHERITED) {
-        store._notifyRecordPropertyChange(storeKey, statusOnly);
+        store._notifyRecordPropertyChange(storeKey, statusOnly, key);
 
       } else if (status & SC.Record.BUSY) {
         // make sure nested store does not have any changes before resetting
