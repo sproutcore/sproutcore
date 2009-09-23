@@ -255,7 +255,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     @default YES
   */
   needsEllipsis: YES,
-  
+
   /**
     Left Alignment based on the size of the button
 
@@ -342,7 +342,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
         object.get(iconKey) : object[iconKey]) : null ;
       if (SC.none(object[iconKey])) icon = null ;
 
-      // get the value using the valueKey or the object 
+      // get the value using the valueKey or the object
       var value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
 
@@ -374,7 +374,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
       var item = SC.Object.create({
         title: name,
         icon: icon,
-        value:value,
+        value: value,
         isEnabled: YES,
         checkbox: isChecked,
         action: this.displaySelectedItem
@@ -491,7 +491,7 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var menuView = this.parentMenu() ;
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
-    var title,value ;
+    var title,newVal ;
 
     //  Fetch the index of the current selected item
     var itemIdx = 0 ;
@@ -507,10 +507,20 @@ SC.DropDownMenu = SC.ButtonView.extend(
     var len = object.length ;
     var found = null ;
 
-    title = this.get('title') ? this.get('title'): this.toString() ;
-    value =  this.get('value') ? this.get('value'): title ;
-    button.set('value', value).set('title',title).set('icon', this.get('icon'))
-          .set('currentSelItem', currSel).set('itemIdx', itemIdx) ;
+    while (!found && (--len >= 0)) {
+      title = object[len].title ? object[len].title: object.toString() ;
+      val =  object[len].value ? object[len].value: title ;
+
+      if (title === this.get('value')) {
+        found = object ;
+        button.set('value', val) ;
+        button.set('title', title) ;
+      }
+    }
+
+    // set the icon, currentSelectedItem and itemIdx
+    button.set('icon', this.get('icon')).set('currentSelItem', currSel).
+      set('itemIdx', itemIdx) ;
   },
 
   /**
