@@ -2579,62 +2579,7 @@ SC.CollectionView = SC.View.extend(
     @returns {Array} [proposed drop index, drop operation] 
   */
   insertionIndexForLocation: function(loc, dropOperation) { 
-    var ret = 0 ;
-    
-    // var content    = this.get('content'),
-    //     nowShowing = this.get('nowShowing'),
-    //     orient     = this.get('insertionOrientation'),
-    //     lastSide   = null,
-    //     ret        = null,
-    //     itemView, curSide, f;
-    //     
-    // for(var idx=0; ((ret === null) && (idx<content.length)); idx++) {
-    //   // itemView = this.itemViewForContent(content.objectAt(idx));
-    //   itemView = this.itemViewForContentIndex(idx);
-    //   f = this.convertFrameFromView(itemView.get('frame'), itemView) ;
-    //   
-    //   // if we are a horizontal orientation, look for the first item that 
-    //   // will "switch sides" on the x path an the maxY is greater than Y.
-    //   // This assumes you will flow top to bottom, but it should work if you
-    //   // flow LTR or RTL.
-    //   if (orient == SC.HORIZONTAL_ORIENTATION) {
-    //     if (SC.maxY(f) > loc.y) {
-    //       curSide = (SC.maxX(f) < loc.x) ? -1 : 1 ;
-    //     } else curSide = null ;
-    //     
-    //   // if we are a vertical orientation, look for the first item that
-    //   // will "switch sides" on the y path and the maxX is greater than X.
-    //   // This assumes you will flow LTR, but it should work if you flow
-    //   // bottom to top or top to bottom.
-    //   } else {
-    //     if (SC.minX(f) < loc.x) {
-    //       curSide = (SC.maxY(f) < loc.y) ? -1 : 1 ;
-    //     } else curSide = null ;
-    //   }
-    //   
-    //   // if we "switched" sides then return this item view.
-    //   if (curSide !== null) {
-    //     
-    //     // OK, we found an item view, while we have this data, decide if
-    //     // we should insert before or after the view
-    //     if ((lastSide !== null) && (curSide != lastSide)) {
-    //       ret = idx ;
-    //       if (orient == SC.HORIZONTAL_ORIENTATION) {
-    //         if (SC.midX(f) < loc.x) ret++ ;
-    //       } else {
-    //         if (SC.midY(f) < loc.y) ret++ ;
-    //       }
-    //     }
-    //     lastSide =curSide ;
-    //   }
-    // }
-    // 
-    // // Handle some edge cases
-    // if ((ret === null) || (ret < 0)) ret = 0 ;
-    // if (ret > content.length) ret = content.length ;
-    
-    // Done. Phew.  Return.
-    return ret;
+    return -1; 
   },
   
   // ..........................................................
