@@ -338,7 +338,6 @@ SC.RootResponder = SC.RootResponder.extend(
   },
   
   dragDidStart: function(drag) {
-    // console.log('dragDidStart called in %@ with %@'.fmt(this, drag));
     this._mouseDownView = drag ;
     this._drag = drag ;
   },
@@ -394,6 +393,7 @@ SC.RootResponder = SC.RootResponder.extend(
     the keypress event.
   */
   keydown: function(evt) {
+    
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla > 0 && (evt.which === 8)) return true ;
     
@@ -401,11 +401,14 @@ SC.RootResponder = SC.RootResponder.extend(
     // send event for modifier key changes, but only stop processing if this 
     // is only a modifier change
     var ret = this._handleModifierChanges(evt);
-    if (this._isModifierKey(evt)) return ret;
+    var forceBlock = (evt.which === 8) && !SC.allowsBackspaceToPreviousPage;
+    
+    if (this._isModifierKey(evt)) return (forceBlock ? NO : ret);
     
     // if this is a function or non-printable key, try to use this as a key
     // equivalent.  Otherwise, send as a keyDown event so that the focused
     // responder can do something useful with the event.
+    ret = YES ;
     if (this._isFunctionOrNonPrintableKey(evt)) {
       
       // otherwise, send as keyDown event.  If no one was interested in this
@@ -415,14 +418,11 @@ SC.RootResponder = SC.RootResponder.extend(
       
       // attempt key equivalent if key not handled
       if (!ret) {
-        ret = this.attemptKeyEquivalent(evt) ;
-        return !ret ;
-      } else {
-        return evt.hasCustomEventHandling ;
-      }
+        ret = !this.attemptKeyEquivalent(evt) ;
+      } else ret = evt.hasCustomEventHandling ;
     }
     
-    return YES ; // otherwise do not handle keydown - wait for keypress
+    return forceBlock ? NO : ret ; 
   },
   
   /** @private
@@ -434,9 +434,12 @@ SC.RootResponder = SC.RootResponder.extend(
     trigger a keyDown.
   */
   keypress: function(evt) {
+    var ret ;
+    
     // delete is handled in keydown() for most browsers
     if (SC.browser.mozilla > 0 && (evt.which === 8)) {
-      return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      ret = this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
+      return SC.allowsBackspaceToPreviousPage ? ret : NO ;
 
     // normal processing.  send keyDown for printable keys...
     } else {
@@ -472,7 +475,7 @@ SC.RootResponder = SC.RootResponder.extend(
       if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
     } catch (e) {
     
-      console.log('Exception during mousedown: %@'.fmt(e)) ;
+      console.warn('Exception during mousedown: %@'.fmt(e)) ;
       this._mouseDownView = null ;
       this._mouseCanDrag = NO ;
       throw e;
@@ -489,7 +492,7 @@ SC.RootResponder = SC.RootResponder.extend(
     sent.
   */
   mouseup: function(evt) {
-    // console.log('mouseup called in %@ with this._mouseDownView = %@'.fmt(this, this._mouseDownView));
+
     try {
       if (this._drag) {
         this._drag.tryToPerform('mouseUp', evt) ;
@@ -536,7 +539,6 @@ SC.RootResponder = SC.RootResponder.extend(
       // cleanup
       this._mouseCanDrag = NO; this._mouseDownView = null ;
     } catch (e) {
-      console.log('Exception during mouseup: %@'.fmt(e)) ;
       this._drag = null; this._mouseCanDrag = NO; this._mouseDownView = null ;
       throw e;
     }
@@ -556,7 +558,6 @@ SC.RootResponder = SC.RootResponder.extend(
       var view = this.targetViewForEvent(evt) ;
       var handler = this.sendEvent('mouseWheel', evt, view) ;
     } catch (e) {
-      console.log('Exception during mousewheel: %@'.fmt(e)) ;
       throw e;
     }
     return (handler) ? evt.hasCustomEventHandling : YES ;
@@ -624,7 +625,6 @@ SC.RootResponder = SC.RootResponder.extend(
         
       }
     } catch (e) {
-      console.log('Exception during mousemove: %@'.fmt(e)) ;
       throw e;
     }
     SC.RunLoop.end();

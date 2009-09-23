@@ -1175,7 +1175,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {Object} receiver or object that handled event
   */
   insertText: function(chr) {
-    return this ;
+    return NO ;
   },
     
   /**
