@@ -503,8 +503,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var changes = this.recordPropertyChanges;
     if (!changes) {
       changes = this.recordPropertyChanges = 
-        { storeKeys:      SC.CoreSet.create(), 
-          records:        SC.CoreSet.create(), 
+        { storeKeys:      SC.CoreSet.create(),
+          records:        SC.CoreSet.create(),
           hasDataChanges: SC.CoreSet.create(),
           propertyForStoreKeys: {} };
     }
@@ -547,9 +547,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (!this.recordPropertyChanges) return this;
     
     var changes              = this.recordPropertyChanges,
-        storeKeys            = changes.storeKeys, 
+        storeKeys            = changes.storeKeys,
         hasDataChanges       = changes.hasDataChanges,
-        records              = changes.records, 
+        records              = changes.records,
         propertyForStoreKeys = changes.propertyForStoreKeys,
         recordTypes = SC.CoreSet.create(),
         rec, recordType, statusOnly, idx, len, storeKey, keys;
