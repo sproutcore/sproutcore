@@ -503,9 +503,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     var changes = this.recordPropertyChanges;
     if (!changes) {
       changes = this.recordPropertyChanges = 
-        { storeKeys:  SC.CoreSet.create(), 
-          records:    SC.CoreSet.create(), 
-          statusOnly: SC.CoreSet.create(),
+        { storeKeys:      SC.CoreSet.create(), 
+          records:        SC.CoreSet.create(), 
+          hasDataChanges: SC.CoreSet.create(),
           propertyForStoreKeys: {} };
     }
     
@@ -513,7 +513,13 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     if (records && (rec=records[storeKey])) {
       changes.records.push(storeKey);
-      if(statusOnly) changes.statusOnly.push(storeKey);
+      
+      // If there are changes other than just the status we need to record
+      // that information so we do the right thing during the next flush.
+      // Note that if we're called multiple times before flush and one call
+      // has statusOnly=true and another has statusOnly=false, the flush will
+      // (correctly) operate in statusOnly=false mode.
+      if (!statusOnly) changes.hasDataChanges.push(storeKey);
       
       // if this is a key specific change, make sure that only those
       // properties/keys are notified
@@ -540,25 +546,24 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   flush: function() {
     if (!this.recordPropertyChanges) return this;
     
-    var changes     = this.recordPropertyChanges,
-        storeKeys   = changes.storeKeys, 
-        statusOnly  = changes.statusOnly,
-        records     = changes.records, 
-        propertyForStoreKeys  = changes.propertyForStoreKeys,
+    var changes              = this.recordPropertyChanges,
+        storeKeys            = changes.storeKeys, 
+        hasDataChanges       = changes.hasDataChanges,
+        records              = changes.records, 
+        propertyForStoreKeys = changes.propertyForStoreKeys,
         recordTypes = SC.CoreSet.create(),
-        rec, recordType, status, idx, len, storeKey, keys;
+        rec, recordType, statusOnly, idx, len, storeKey, keys;
     
     storeKeys.forEach(function(storeKey) {
-
       if (records.contains(storeKey)) {
-        status = statusOnly.contains(storeKey) ? YES: NO;
+        statusOnly = hasDataChanges.contains(storeKey) ? NO : YES;
         rec = this.records[storeKey];
         keys = propertyForStoreKeys ? propertyForStoreKeys[storeKey] : null;
         
         // remove it so we don't trigger this twice
         records.remove(storeKey);
         
-        if (rec) rec.storeDidChangeProperties(status, keys);
+        if (rec) rec.storeDidChangeProperties(statusOnly, keys);
       }
       
       recordType = SC.Store.recordTypeFor(storeKey);
@@ -569,7 +574,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this._notifyRecordArrays(storeKeys, recordTypes);
 
     storeKeys.clear();
-    statusOnly.clear();
+    hasDataChanges.clear();
     records.clear();
     propertyForStoreKeys.length = 0; // reset
     

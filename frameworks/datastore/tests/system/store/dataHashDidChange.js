@@ -76,3 +76,18 @@ test("calling with array of storeKeys will edit all store keys", function() {
   }
 });
 
+test("calling dataHashDidChange twice before the runloop ends with different statusOnly values should trigger a non-statusOnly flush if any of the statusOnly values were NO", function() {
+  SC.RunLoop.begin();
+
+  // Create a phony record because that's the only way the 'hasDataChanges'
+  // data structure will be used.
+  var record = SC.Record.create({ id: 514 }) ;
+  var storeKey = SC.Record.storeKeyFor(514) ;
+  var record = store.materializeRecord(storeKey) ;
+  store.dataHashDidChange(storeKey, null, NO) ;
+  store.dataHashDidChange(storeKey, null, YES) ;
+  
+  ok(!store.recordPropertyChanges.hasDataChanges.contains(storeKey), 'recordPropertyChanges.hasDataChanges should contain the storeKey %@'.fmt(storeKey)) ;
+
+  SC.RunLoop.end();
+});
