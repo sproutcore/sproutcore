@@ -413,19 +413,41 @@ SC.NestedStore = SC.Store.extend(
   // The methods in this section can be used to manipulate records without 
   // actually creating record instances.
   
-  /** @private - adapt for nested store */
-  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {
+  /** @private - adapt for nested store
+  
+    Unlike for the main store, for nested stores if isRefresh=YES, we'll throw
+    an error if the record is dirty.  We'll otherwise avoid setting our status
+    because that can disconnect us from upper and/or lower stores.
+  */
+  retrieveRecords: function(recordTypes, ids, storeKeys, isRefresh) {    
     var pstore = this.get('parentStore'), idx, storeKey, newStatus,
       len = (!storeKeys) ? ids.length : storeKeys.length,
       K = SC.Record, status;
     
-    // turn status to BUSY_REFRESH_CLEAN/DIRTY if isRefresh is true
-    // for correct transition before handing to parent store
-    if(isRefresh) {
+    // Is this a refresh?
+    if (isRefresh) {
       for(idx=0;idx<len;idx++) {
         storeKey = !storeKeys ? pstore.storeKeyFor(recordTypes, ids[idx]) : storeKeys[idx];
-        newStatus = status===K.READY_DIRTY ? K.BUSY_REFRESH_DIRTY : K.BUSY_REFRESH_CLEAN;
-        this.writeStatus(storeKey, newStatus);
+        status   = this.peekStatus(storeKey);
+        
+        // We won't allow calling retrieve on a dirty record in a nested store
+        // (although we do allow it in the main store).  This is because doing
+        // so would involve writing a unique status, and that would break the
+        // status hierarchy, so even though lower stores would complete the
+        // retrieval, the upper layers would never inherit the new statuses.
+        if (status & K.DIRTY) {
+          throw SC.Store.NESTED_STORE_RETRIEVE_DIRTY_ERROR;
+        }
+        else {
+          // Not dirty?  Then abandon any status we had set (to re-establish
+          // any prototype linkage breakage) before asking our parent store to
+          // perform the retrieve.
+          if (this.dataHashes) delete this.dataHashes[storeKey];
+          if (this.revisions)  delete this.revisions[storeKey];
+          if (this.statuses)   delete this.statuses[storeKey];
+          if (this.editables)  delete this.editables[storeKey];
+          if (this.locks)      delete this.locks[storeKey];
+        }
       }
     }
     

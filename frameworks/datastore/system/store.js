@@ -2197,6 +2197,14 @@ SC.Store.mixin({
     @property {Error}
   */
   NESTED_STORE_UNSUPPORTED_ERROR: new Error("Unsupported In Nested Store"),
+  
+  /**
+    Standard error if you try to retrieve a record in a nested store that is
+    dirty.  (This is allowed on the main store, but not in nested stores.)
+    
+    @property {Error}
+  */
+  NESTED_STORE_RETRIEVE_DIRTY_ERROR: new Error("Cannot Retrieve Dirty Record in Nested Store"),
 
   /**
     Data hash state indicates the data hash is currently editable
