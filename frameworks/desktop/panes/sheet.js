@@ -59,17 +59,15 @@ SC.SheetPane = SC.PanelPane.extend({
   
   init: function(){
     sc_super();
-    console.log('SheetPane: init() called...');
+    
     this._openLayout = this.get('layout');
     var pframe = this.computeParentDimensions();
-    console.log('Parent Frame: X: %@, Y: %@, Width: %@, Height: %@'.fmt(pframe.x, pframe.y, pframe.width, pframe.height));
     this._anchoredLayout = SC.View.convertLayoutToAnchoredLayout(this._openLayout, pframe);
     this.set('layout', SC.merge(this._anchoredLayout, this.OFFSCREEN_LAYOUT));
   },
   
   replaceContent: function(newContent) {
     sc_super();
-    console.log('SheetPane: replaceContent() called...');
     this._anchoredLayout = SC.View.convertLayoutToAnchoredLayout(this._openLayout, this.computeParentDimensions());
     this.set('layout', SC.merge(this._anchoredLayout, this.OFFSCREEN_LAYOUT));
     
@@ -138,6 +136,7 @@ SC.SheetPane = SC.PanelPane.extend({
     if (pct>=1) {
       if (dir === this.SLIDE_DOWN || dir == this.BLIND_DOWN){
         target.adjust(this._openLayout);
+        this.awake();
       }
       else {
         newLayout = SC.View.convertLayoutToAnchoredLayout(this._openLayout, this.computeParentDimensions());

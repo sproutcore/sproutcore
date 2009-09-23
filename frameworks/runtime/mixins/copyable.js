@@ -54,7 +54,7 @@ SC.Copyable = {
   frozenCopy: function() {
     var isFrozen = this.get ? this.get('isFrozen') : this.isFrozen;
     if (isFrozen === YES) return this;
-    else if (isFrozen === undefined) throw "%@ does not support freezing";
+    else if (isFrozen === undefined) throw "%@ does not support freezing".fmt(this);
     else return this.copy().freeze();
   }
 };
