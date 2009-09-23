@@ -122,6 +122,7 @@ SC.Scanner = SC.Object.extend(
 */
 
 SC.DATETIME_COMPAREDATE_TIMEZONE_ERROR = new Error("Can't compare the dates of two DateTimes that don't have the same timezone.");
+SC.DATETIME_ISO8601 = '%Y-%m-%dT%H:%M:%S%Z';
 
 SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   /** @scope SC.DateTime.prototype */ {
@@ -257,8 +258,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     @return {String} the formatted string
   */
   toISO8601: function(){
-    var fmt = '%Y-%m-%dT%H:%M:%S%Z';
-    return this.constructor._toFormattedString(fmt, this._ms, this.timezone);
+    return this.constructor._toFormattedString(SC.DATETIME_ISO8601, this._ms, this.timezone);
   },
   
   /** @private
@@ -320,6 +320,20 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
 // Class Methods
 SC.DateTime.mixin(SC.Comparable,
   /** @scope SC.DateTime */ {
+  
+  /**
+    The default format (ISO 8601) in which DateTimes are stored in a record.
+    Change this value if your backend sends and receives dates in another
+    format.
+    
+    This value can also be customized on a per-attribute basis with the format
+    property. For example:
+      SC.Record.attr(SC.DateTime, { format: '%d/%m/%Y %H:%M:%S' })
+    
+    @property
+    @type {String}
+  */
+  recordFormat: SC.DATETIME_ISO8601,
   
   /**
     The localized day names. Add the key '_SC.DateTime.dayNames' and its value
@@ -829,3 +843,38 @@ SC.Binding.dateTime = function(format) {
     return value ? value.toFormattedString(format) : null;
   });
 };
+
+if (SC.RecordAttribute && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
+
+  /**
+    Registers a transform to allow SC.DateTime to be used as a record attribute,
+    ie SC.Record.attr(SC.DateTime);
+
+    Because SC.RecordAttribute is in the datastore framework and SC.DateTime in
+    the foundation framework, and we don't know which framework is being loaded
+    first, this chunck of code is duplicated in both frameworks.
+
+    IF YOU EDIT THIS CODE MAKE SURE YOU COPY YOUR CHANGES to record_attribute.js. 
+  */
+  SC.RecordAttribute.registerTransform(SC.DateTime, {
+  
+    /** @private
+      Convert a String to a DateTime
+    */
+    to: function(str, attr) {
+      if (SC.none(str)) return str;
+      var format = attr.get('format');
+      return SC.DateTime.parse(str, format ? format : SC.DateTime.recordFormat);
+    },
+  
+    /** @private
+      Convert a DateTime to a String
+    */
+    from: function(dt, attr) {
+      if (SC.none(dt)) return dt;
+      var format = attr.get('format');
+      return dt.toFormattedString(format ? format : SC.DateTime.recordFormat);
+    }
+  });
+  
+}
