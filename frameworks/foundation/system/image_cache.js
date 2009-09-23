@@ -223,12 +223,12 @@ SC.imageCache = SC.Object.create(/** @scope SC.imageCache.prototype */ {
 
       // add to loading queue.
       this._loading.push(entry) ;
-    } 
     
-    // increment active requests and start next request until queue is empty
-    // or until load limit is reached.
-    this.incrementProperty('activeRequests');
-    this.loadNextImage();
+      // increment active requests and start next request until queue is empty
+      // or until load limit is reached.
+      this.incrementProperty('activeRequests');
+      this.loadNextImage();
+    } 
   },
   
   // ..........................................................
