@@ -9,7 +9,7 @@
 
 var pane, view , view1, view2, view3, view4 ;
 
-module("SC.Selector",{
+module("SC.SelectButtonView",{
 
   //setup
   setup: function() {
@@ -28,25 +28,25 @@ module("SC.Selector",{
       childViews: [
 
         //view1
-        SC.Selector.extend({
+        SC.SelectButtonView.extend({
           objects: ["To","Back", "You"],
           disableSort: NO
         }),
 
         //view2
-        SC.Selector.extend({
+        SC.SelectButtonView.extend({
           objects: ["Drop","Down", "Menu"]
         }),
 
         //view3
-        SC.Selector.extend({
+        SC.SelectButtonView.extend({
           objectsBinding: '*owner.objs',
           valueBinding: '*owner.selectedValue',
           isVisibleBinding: '*owner.isDue'
         }),
 
         //view4
-        SC.Selector.extend({
+        SC.SelectButtonView.extend({
           objectsBinding: '*owner.objs2',
           valueBinding: '*owner.selectedValue',
           valueKey: 'title',
@@ -95,10 +95,10 @@ test("Check if isVisibleBinding works", function() {
 });
 
 //test4
-test("Selector with objects", function() {
-  equals(3,view1.objects.length,'The number of options in selector Menu should be') ;
-  equals(null,view1.nameKey,'the selector should not have any name key') ;
-  equals(null,view1.valueKey,'the selector should not have any value key') ;
+test("SelectButton with objects", function() {
+  equals(3,view1.objects.length,'The number of options in selectButton Menu should be') ;
+  equals(null,view1.nameKey,'the selectButton should not have any name key') ;
+  equals(null,view1.valueKey,'the selectButton should not have any value key') ;
 });
 
 //test5

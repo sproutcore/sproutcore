@@ -8,9 +8,9 @@
 /**
   @class
 
-  Drop Down Menu has a functionality similar to that of SelectField
+  SelectButtonView has a functionality similar to that of SelectField
 
-  Clicking the Selector button displays a menu pane with a
+  Clicking the SelectButtonView button displays a menu pane with a
   list of items. The selected item will be displayed on the button.
   User has the option of enabling checkbox for the selected menu item.
 
@@ -20,8 +20,8 @@
 */
 sc_require('views/button');
 
-SC.Selector = SC.ButtonView.extend(
-/** @scope SC.Selector.prototype */ {
+SC.SelectButtonView = SC.ButtonView.extend(
+/** @scope SC.SelectButtonView.prototype */ {
 
   /**
     An array of items that will be form the menu you want to show.
@@ -99,9 +99,9 @@ SC.Selector = SC.ButtonView.extend(
   /**
 
     @property
-    @default ['drop-down-menu']
+    @default ['select-button']
   */
-  classNames: ['drop-down-menu'],
+  classNames: ['select-button'],
 
   /**
     Menu item list
@@ -130,7 +130,7 @@ SC.Selector = SC.ButtonView.extend(
   itemIdx: null,
 
   /**
-     Current Value of the selector
+     Current Value of the selectButton
 
      @property
      @default null
@@ -399,7 +399,7 @@ SC.Selector = SC.ButtonView.extend(
     }
 
     //Set the preference matrix for the menu pane
-    this.changeSelectorPreferMatrix(this.itemIdx) ;
+    this.changeSelectButtonPreferMatrix(this.itemIdx) ;
 
   },
 
@@ -438,13 +438,13 @@ SC.Selector = SC.ButtonView.extend(
     var menu  = SC.MenuPane.create({
 
       /**
-        Class name - drop-down-menu-item
+        Class name - select-button-item
 
       */
-      classNames: ['drop-down-menu'],
+      classNames: ['select-button'],
 
       /**
-        The menu items are set from the itemList property of Selector
+        The menu items are set from the itemList property of SelectButton
 
         @property
       */
@@ -528,7 +528,7 @@ SC.Selector = SC.ButtonView.extend(
      position menu such that the selected item in the menu will be
      place aligned to the item on the button when menu is opened.
   */
-  changeSelectorPreferMatrix: function() {
+  changeSelectButtonPreferMatrix: function() {
     var preferMatrixAttributeTop = 0 ;
     var itemIdx = this.get('itemIdx') ;
     var leftAlign = this.get('leftAlign') ;

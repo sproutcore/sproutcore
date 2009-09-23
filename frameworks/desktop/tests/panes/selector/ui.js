@@ -12,49 +12,49 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 //control test pane
 var pane = SC.ControlTestPane.design()
      //sample1
-    .add("Basic", SC.Selector, {
+    .add("Basic", SC.SelectButtonView, {
        objects: ['None', 'Low', 'Medium', 'High']
     })
 
     //sample2
-    .add("Disabled", SC.Selector, {
+    .add("Disabled", SC.SelectButtonView, {
        isEnabled: NO, objects: ['None', 'Low', 'Medium', 'High']
     })
 
     //sample3
-    .add("NotVisible", SC.Selector, {
+    .add("NotVisible", SC.SelectButtonView, {
       isVisible: NO, objects: ['None', 'Low', 'Medium', 'High']
     })
 
     //sample4
-    .add("SortedObjects", SC.Selector, {
+    .add("SortedObjects", SC.SelectButtonView, {
       objects:['None', 'Low', 'Medium', 'High']
     })
 
     //sample5
-    .add("UnsortedObjects", SC.Selector, {
+    .add("UnsortedObjects", SC.SelectButtonView, {
       objects:['None', 'Low', 'Medium', 'High'],
       disableSort: YES
     })
 
     //sample6
-    .add("redraw", SC.Selector, {
+    .add("redraw", SC.SelectButtonView, {
       layout: { width: '150', right: '0' }
     })
 
     //sample7
-    .add("SelectorWithIcon", SC.Selector, {
-      objects: [{ title: "None", icon: 'drop-down-icon' },
-        { title: "Low", icon: 'drop-down-icon' },
-        { title: "Medium", icon: 'drop-down-icon' },
-        { title: "High", icon: 'drop-down-icon' }],
+    .add("SelectButtonWithIcon", SC.SelectButtonView, {
+      objects: [{ title: "None", icon: 'select-button-icon' },
+        { title: "Low", icon: 'select-button-icon' },
+        { title: "Medium", icon: 'select-button-icon' },
+        { title: "High", icon: 'select-button-icon' }],
       nameKey: 'title',
       iconKey: 'icon',
       checkboxEnabled: YES
     })
 
     //sample8
-    .add("SortKey", SC.Selector, {
+    .add("SortKey", SC.SelectButtonView, {
       objects: [{ title: "None", pos: 3},
         { title: "Low", pos: 1},
         { title: "Medium", pos: 2 },
@@ -66,7 +66,7 @@ var pane = SC.ControlTestPane.design()
     })
 
     //sample9
-    .add("StaticLayout", SC.Selector, {
+    .add("StaticLayout", SC.SelectButtonView, {
       useStaticLayout: YES,
       objects:['None', 'Low', 'Medium', 'High'],
       layout: { width: '150', right: '0' }
@@ -78,17 +78,17 @@ var pane = SC.ControlTestPane.design()
 // TEST VIEWS
 //
 
-module('SC.Selector ui', pane.standardSetup()) ;
+module('SC.SelectButtonView ui', pane.standardSetup()) ;
 
 //test1
-test("Check the visiblity of the selectors", function() {
+test("Check the visiblity of the selectButtons", function() {
   ok(pane.view('Basic').get('isVisibleInWindow'), 'Basic.isVisibleInWindow should be YES') ;
   ok(pane.view('Disabled').get('isVisibleInWindow'), 'Disabled.isVisibleInWindow should be YES') ;
   ok(!pane.view('NotVisible').get('isVisibleInWindow'), 'NotVisible.isVisibleInWindow should be NO') ;
   ok(pane.view('SortedObjects').get('isVisibleInWindow'), 'SortedObjects.isVisibleInWindow should be YES') ;
   ok(pane.view('UnsortedObjects').get('isVisibleInWindow'), 'UnsortedObjects.isVisibleInWindow should be YES') ;
   ok(pane.view('redraw').get('isVisibleInWindow'), 'redraw.isVisibleInWindow should be YES') ;
-  ok(pane.view('SelectorWithIcon').get('isVisibleInWindow'), 'SelectorWithIcon.isVisibleInWindow should be YES') ;
+  ok(pane.view('SelectButtonWithIcon').get('isVisibleInWindow'), 'SelectButtonWithIcon.isVisibleInWindow should be YES') ;
   ok(pane.view('StaticLayout').get('isVisibleInWindow'), 'StaticLayout.isVisibleInWindow should be YES') ;
 }) ;
 
@@ -174,8 +174,8 @@ test("redraw", function() {
 }) ;
 
 //test8
-test("SelectorWithIcon", function() {
-  view=pane.view('SelectorWithIcon').$();
+test("SelectButtonWithIcon", function() {
+  view=pane.view('SelectButtonWithIcon').$();
   ok(view.hasClass('icon'), 'hasClass(Icon) should be YES') ;
   ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
