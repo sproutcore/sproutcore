@@ -40,7 +40,7 @@ SC.ScrollerView = SC.View.extend({
     if (val !== undefined) {
       // Don't enforce the maximum now, because the scroll view could change
       // height and we want our content to stay put when it does.
-      if (val > 0) {
+      if (val >= 0) {
         this._value = val ;
       }
     } else {
@@ -217,12 +217,6 @@ SC.ScrollerView = SC.View.extend({
             break ;
         }
       }
-    }
-    
-    // notify owner if it has a different scroll value
-    var key = this.get('ownerScrollValueKey') ;
-    if (key && this.owner && (this.owner[key] !== undefined)) {
-      this.owner.setIfChanged(key, v) ;
     }
   }.observes('value')
   
