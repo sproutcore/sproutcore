@@ -354,6 +354,7 @@ SC.NestedStore = SC.Store.extend(
       this._lock(storeKey);
       this.revisions[storeKey] = rev;
       changes.add(storeKey);
+      this._notifyRecordPropertyChange(storeKey, NO);
     }
 
     this.setIfChanged('hasChanges', YES);
