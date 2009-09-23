@@ -183,9 +183,6 @@ SC.MenuPane = SC.PickerPane.extend(
   itemTargetKey: 'target',
   
   /** @private */
-  isKeyPane: YES,
-
-  /** @private */
   preferType: SC.PICKER_MENU,
 
   /**
