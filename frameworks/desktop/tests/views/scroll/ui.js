@@ -122,40 +122,60 @@
    test("Setting the scroller to a specific value", function() {
      var viewsc = pane.view('basic2');
      // should be testing against the layer.scrollTop property
+     SC.RunLoop.begin();
      viewsc.scrollTo(0, 10);
+     SC.RunLoop.end();
      equals(viewsc.get('verticalScrollOffset'), 10, "1After setting the value to the 10 on a vertical scroller, the verticalscrollOffset property of the layer must be");
      equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 10, "2After setting the value to the 10 on a vertical scroller, the scrollTop property of the layer must be");
+     SC.RunLoop.begin();
      viewsc.scrollTo(0, 0);
+     SC.RunLoop.end();
      equals(viewsc.get('verticalScrollOffset'), 0, "1After setting the value to the 0 on a vertical scroller, the verticalscrollOffset property of the layer must be");
      equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 0, "2After setting the value to the 0 on a vertical scroller, the scrollTop property of the layer must be");
+     SC.RunLoop.begin();
      viewsc.scrollTo(0, 100);
+     SC.RunLoop.end();
      equals(viewsc.get('verticalScrollOffset'), 100, "1After setting the value to the 100 on a vertical scroller, the verticalscrollOffset property of the layer must be");
      equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 100, "2After setting the value to the 100 on a vertical scroller, the scrollTop property of the layer must be");
+     SC.RunLoop.begin();
      viewsc.scrollTo(0, -1);
+     SC.RunLoop.end();
      equals(viewsc.get('verticalScrollOffset'), 0, "1After setting the value to the -1 on a vertical scroller, the verticalscrollOffset property of the layer must be");
      equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 0, "2After setting the value to the -1 on a vertical scroller, the scrollTop property of the layer must be");
+     SC.RunLoop.begin();
      viewsc.scrollTo(0, 101);
+     SC.RunLoop.end();
      equals(viewsc.get('verticalScrollOffset'), 101, "1After setting the value to the 101 on a vertical scroller, the verticalscrollOffset property of the layer must be");
      equals(viewsc.get('verticalScrollerView').get('layer').scrollTop, 101, "2After setting the value to the 101 on a vertical scroller, the scrollTop property of the layer must be");
 
      // should be testing against the layer.scrollLeft property
-    viewsc.set('layoutDirection', SC.LAYOUT_HORIZONTAL);
-    viewsc.scrollTo(10, 0);
-    equals(viewsc.get('horizontalScrollOffset'), 10, "After setting the value to the 10 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
-    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 10, "After setting the value to the 10 on a horizontal scroller, the scrollLeft property of the layer must be");
-    viewsc.scrollTo(0, 0);
-    equals(viewsc.get('horizontalScrollOffset'), 0, "After setting the value to the 0 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
-    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 0, "After setting the value to the 0 on a horizontal scroller, the scrollLeft property of the layer must be");
-    viewsc.scrollTo(50, 0);
-    equals(viewsc.get('horizontalScrollOffset'), 50, "After setting the value to the 50 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
-    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 50, "After setting the value to the 50 on a horizontal scroller, the scrollLeft property of the layer must be");
-    viewsc.scrollTo( - 1, 0);
-    equals(viewsc.get('horizontalScrollOffset'), 0, "After setting the value to the -1 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
-    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 0, "After setting the value to the -1 on a horizontal scroller, the scrollLeft property of the layer must be");
-    viewsc.scrollTo(101, 0);
-    equals(viewsc.get('horizontalScrollOffset'), 73, "After setting the value to the 101 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
-    equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 73, "After setting the value to the 101 on a horizontal scroller, the scrollLeft property of the layer must be");
-   });
+     viewsc.set('layoutDirection', SC.LAYOUT_HORIZONTAL);
+     SC.RunLoop.begin();
+     viewsc.scrollTo(10, 0);
+     SC.RunLoop.end();
+     equals(viewsc.get('horizontalScrollOffset'), 10, "After setting the value to the 10 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
+     equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 10, "After setting the value to the 10 on a horizontal scroller, the scrollLeft property of the layer must be");
+     SC.RunLoop.begin();
+     viewsc.scrollTo(0, 0);
+     SC.RunLoop.end();
+     equals(viewsc.get('horizontalScrollOffset'), 0, "After setting the value to the 0 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
+     equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 0, "After setting the value to the 0 on a horizontal scroller, the scrollLeft property of the layer must be");
+     SC.RunLoop.begin();
+     viewsc.scrollTo(50, 0);
+     SC.RunLoop.end();
+     equals(viewsc.get('horizontalScrollOffset'), 50, "After setting the value to the 50 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
+     equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 50, "After setting the value to the 50 on a horizontal scroller, the scrollLeft property of the layer must be");
+     SC.RunLoop.begin();
+     viewsc.scrollTo( - 1, 0);
+     SC.RunLoop.end();
+     equals(viewsc.get('horizontalScrollOffset'), 0, "After setting the value to the -1 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
+     equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 0, "After setting the value to the -1 on a horizontal scroller, the scrollLeft property of the layer must be");
+     SC.RunLoop.begin();
+     viewsc.scrollTo(101, 0);
+     SC.RunLoop.end();
+     equals(viewsc.get('horizontalScrollOffset'), 73, "After setting the value to the 101 on a horizontal scroller, the horizontalScrollOffset property of the layer must be");
+     equals(viewsc.get('horizontalScrollerView').get('layer').scrollLeft, 73, "After setting the value to the 101 on a horizontal scroller, the scrollLeft property of the layer must be");
+  });
    
    
    test("non-zero bottom in vertical scrollbar", function() {

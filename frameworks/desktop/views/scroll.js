@@ -605,10 +605,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_contentView = newView;
       if (newView) newView.addObserver('frame', this, f);
       
-      
-      this.oldScrollHOffset = this.get('horizontalScrollOffset');
-      this.oldScrollVOffset = this.get('verticalScrollOffset');
-      
       // replace container
       this.containerView.set('content', newView);
       
@@ -622,17 +618,19 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
   */
+  
+  oldMaxHOffset: 0,
+  oldMaxVOffset: 0,
+  
   contentViewFrameDidChange: function() {
     var view   = this.get('contentView'), 
         f      = (view) ? view.get('frame') : null,
         width  = (f) ? f.width : 0,  
         height = (f) ? f.height : 0,
         dim    = this.get('frame') ;
-        
     
     // cache out scroll settings...
-    if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
-    console.log('contentviewframechangeda');
+    //if ((width === this._scroll_contentWidth) && (height === this._scroll_contentHeight)) return ;
     this._scroll_contentWidth = width;
     this._scroll_contentHeight = height ;
     
@@ -654,6 +652,22 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       height -= this.get('verticalScrollerBottom') ;
       view.setIfChanged('maximum', height) ;
     }
+    
+    
+    // This forces to recalculate the height of the frame when is at the bottom
+    // of the scroll and the content dimension are smaller that the previous one
+    
+    var forceHeight = this.get('maximumVerticalScrollOffset') && 
+                        this.get('hasVerticalScroller') && 
+                        this.get('maximumVerticalScrollOffset')<=this.get('verticalScrollOffset');
+    var forceWidth = this.get('maximumHorizontalScrollOffset') && 
+                            this.get('hasHorizontalScroller') && 
+                            this.get('maximumHorizontalScrollOffset')<=this.get('horizontalScrollOffset');
+    var maxHOffset = this.get('maximumHorizontalScrollOffset');
+    var maxVOffset = this.get('maximumVerticalScrollOffset');
+    if(forceHeight || forceWidth){
+      this.forceDimensionsRecalculation(forceWidth, forceHeight);
+    }
   },
   
   /** @private
@@ -669,6 +683,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var contentView = this.get('contentView');
     if (contentView) contentView.adjust('left', 0-offset);
     
+    
   }.observes('horizontalScrollOffset'),
   
   /** @private
@@ -682,8 +697,33 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');
-    if (contentView) contentView.adjust('top', 0-offset) ;
+    var containerView = this.get('containerView');
     
-  }.observes('verticalScrollOffset')
+    // Optimization when not using collections. We need to reimplement clippingFrame
+    // and scrolling to be able to scroll using scrolltop. For now I just
+    // detect if the content to scroll is a class of collectionView.
+    if (contentView && containerView){
+      if(contentView.kindOf(SC.CollectionView)){
+        contentView.adjust('top', 0-offset) ;
+      }else{
+        containerView.$()[0].scrollTop = offset;
+      }
+    }
+  }.observes('verticalScrollOffset'),
+  
+  forceDimensionsRecalculation: function (forceWidth, forceHeight) {
+    var oldScrollHOffset = this.get('horizontalScrollOffset');
+    var oldScrollVOffset = this.get('verticalScrollOffset');
+    this.scrollTo(0,0);
+    if(forceWidth && forceHeight){
+      this.scrollTo(this.get('maximumHorizontalScrollOffset')-0.001, this.get('maximumVerticalScrollOffset')-0.001);
+    }
+    if(forceWidth && !forceHeight){
+      this.scrollTo(this.get('maximumHorizontalScrollOffset')-0.001, oldScrollVOffset);
+    }
+    if(!forceWidth && forceHeight){
+      this.scrollTo(oldScrollHOffset ,this.get('maximumVerticalScrollOffset')-0.001);
+    }
+  }
   
 });
