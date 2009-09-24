@@ -127,7 +127,7 @@ SC.CascadeDataSource = SC.DataSource.extend(
     
     for(idx=0; (ret !== YES) && idx<len; idx++) {
       source = sources.objectAt(idx);
-      cur = source.retrieveRecords.call(source, store, createStoreKeys, updateStoreKeys, destroyStoreKeys);
+      cur = source.commitRecords.call(source, store, createStoreKeys, updateStoreKeys, destroyStoreKeys);
       ret = this._handleResponse(ret, cur);
     }
     
