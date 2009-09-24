@@ -147,7 +147,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
-    Default value of the drop down.
+    Default value of the select button.
      This will be the first item from the menu item list.
 
     @private
@@ -155,7 +155,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   _defaultVal: null,
 
   /**
-    Default value of the drop down.
+    Default title of the select button.
      This will be the title corresponding to the _defaultVal.
 
     @private
@@ -163,7 +163,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   _defaultTitle: null,
 
   /**
-    Default value of the drop down.
+    Default icon of the select button.
      This will be the icon corresponding to the _defaultVal.
 
     @private
@@ -186,14 +186,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
   displayProperties: ['icon', 'value','controlSize'],
 
   /**
-    Prefer matrix to position the drop down menu such that the
+    Prefer matrix to position the select button menu such that the
     selected item for the menu item will appear aligned to the
     the button. The value at the second index(0) changes based on the
     postion(index) of the menu item in the menu pane.
 
     @property
     @type {Array}
-    @default [ 0, 0, 2]
+    @default null
 
   */
   preferMatrix: null,
@@ -207,7 +207,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @type {Number}
     @default 32
   */
-  DROP_DOWN_SPRITE_WIDTH: 32,
+  SELECT_BUTTON_SPRITE_WIDTH: 32,
 
   /**
     Property to set the menu item height. This in turn is used for
@@ -237,7 +237,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /**
     lastMenuWidth is the width of the last menu which was created from
-    the objects of this drop down.
+    the objects of this select button.
 
     @private
   */
@@ -299,7 +299,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     sc_super();
     var layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
-      this.adjust({ width: layoutWidth - this.DROP_DOWN_SPRITE_WIDTH }) ;
+      this.adjust({ width: layoutWidth - this.SELECT_BUTTON_SPRITE_WIDTH }) ;
     }
 
     var objects = this.get('objects') ;
@@ -482,7 +482,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   },
 
   /**
-     Action method for the drop down menu items
+     Action method for the select button menu items
 
   */
   displaySelectedItem: function() {
@@ -499,7 +499,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       itemIdx = itemViews.indexOf(currSel) ;
     }
 
-    // Get the drop down View
+    // Get the select button View
     var button = menuView.get('anchor') ;
 
     // set the value and title
