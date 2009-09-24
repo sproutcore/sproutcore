@@ -346,7 +346,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       var value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
 
-      if (currentSelectedVal && value){
+      if (!SC.none(currentSelectedVal) && !SC.none(value)){
         if( currentSelectedVal === value ) {
           this.set('title', name) ;
           this.set('icon', icon) ;
@@ -491,7 +491,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var menuView = this.parentMenu() ;
     var currSel = menuView.get('currentSelectedMenuItem') ;
     var itemViews = menuView.menuItemViews ;
-    var title,newVal ;
+    var title,val ;
 
     //  Fetch the index of the current selected item
     var itemIdx = 0 ;
