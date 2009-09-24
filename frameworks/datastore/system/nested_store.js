@@ -330,7 +330,7 @@ SC.NestedStore = SC.Store.extend(
   },
   
   /** @private - book-keeping for a single data hash. */
-  dataHashDidChange: function(storeKeys, rev) {
+  dataHashDidChange: function(storeKeys, rev, statusOnly, key) {
     
     // update the revision for storeKey.  Use generateStoreKey() because that
     // gaurantees a universally (to this store hierarchy anyway) unique 
@@ -354,7 +354,7 @@ SC.NestedStore = SC.Store.extend(
       this._lock(storeKey);
       this.revisions[storeKey] = rev;
       changes.add(storeKey);
-      this._notifyRecordPropertyChange(storeKey, NO);
+      this._notifyRecordPropertyChange(storeKey, statusOnly, key);
     }
 
     this.setIfChanged('hasChanges', YES);
