@@ -141,7 +141,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if (newStoreClass) {
       // Ensure the passed-in class is a type of nested store.
       if (SC.typeOf(newStoreClass) !== 'class') throw "%@ is not a valid class".fmt(newStoreClass);
-      if (!SC.kindOf(newStoreClass, SC.NestedStore)) throw "%@ must be a type of SC.NestedStore".fmt(newStoreClass);
+      if (!SC.kindOf(newStoreClass, SC.NestedStore)) throw "%@ is not a type of SC.NestedStore".fmt(newStoreClass);
     }
     else {
       newStoreClass = SC.NestedStore;

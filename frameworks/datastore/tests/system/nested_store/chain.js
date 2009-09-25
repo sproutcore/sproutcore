@@ -52,6 +52,37 @@ test("initial setup for chained store", function() {
   ok(!store.locks, 'should not have locks');
   ok(!store.chainedChanges, 'should not have chainedChanges');
   ok(!store.editables, 'should not have editables');
+});
+
+test("allow for custom subclasses of SC.NestedStore", function() {
+  var parent = SC.Store.create();
+  
+  // We should get an exception if we specify a "subclass" that's not a class
+  var ex = null;
+  try {
+    var bogus = parent.chain({}, "I am not a class");
+  }
+  catch(e) {
+    ex = e;
+  }
+  ok(ex  &&  ex.indexOf('not a valid class') !== -1, 'chain should report that our bogus "class" it is not a valid class');
+  
+  // We should get an exception if we specify a class that's not a subclass of
+  // SC.NestedStore
+  ex = null;
+  try {
+    var bogus = parent.chain({}, SC.Store);
+  }
+  catch(e) {
+    ex = e;
+  }
+  ok(ex  &&  ex.indexOf('is not a type of SC.NestedStore') !== -1, 'chain should report that our class needs to be a subclass of SC.NestedStore');
+  
+  
+  // Our specified (proper!) subclass should be respected.
+  var MyNestedStoreSubclass = SC.NestedStore.extend();
+  var nested = parent.chain({}, MyNestedStoreSubclass);
+  ok(nested.kindOf(MyNestedStoreSubclass), 'our nested store should be the SC.NestedStore subclass we specified');
 }); 
 
 
@@ -59,7 +90,7 @@ test("initial setup for chained store", function() {
 // SPECIAL CASES
 // 
 
-test("chained store changes should propogate reliably", function() {
+test("chained store changes should propagate reliably", function() {
   var parent = SC.Store.create(), rec, store, rec2;
 
   SC.run(function() {
