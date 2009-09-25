@@ -73,7 +73,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   maximumVerticalScrollOffset: function() {
     if (!this.get('canScrollVertical')) return 0 ;
     var view = this.get('contentView') ;
-    var contentHeight = view ? view.get('frame').height : 0 ;
+    var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0 ;
     var containerHeight = this.get('containerView').get('frame').height ;
     return Math.max(0, contentHeight-containerHeight) ;
   }.property(),
