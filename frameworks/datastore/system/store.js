@@ -131,13 +131,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }}}
     
     @param {Hash} attrs optional attributes to set on new store
+    @param {Class} newStoreClass optional the class of the newly-created nested store (defaults to SC.NestedStore)
     @returns {SC.NestedStore} new nested store chained to receiver
   */
-  chain: function(attrs) {
+  chain: function(attrs, newStoreClass) {
     if (!attrs) attrs = {};
     attrs.parentStore = this;
     
-    var ret    = SC.NestedStore.create(attrs),
+    if (newStoreClass) {
+      // Ensure the passed-in class is a type of nested store.
+      if (SC.typeOf(newStoreClass) !== 'class') throw "%@ is not a valid class".fmt(newStoreClass);
+      if (!SC.kindOf(newStoreClass, SC.NestedStore)) throw "%@ must be a type of SC.NestedStore".fmt(newStoreClass);
+    }
+    else {
+      newStoreClass = SC.NestedStore;
+    }
+    
+    var ret    = newStoreClass.create(attrs),
         nested = this.nestedStores;
         
     if (!nested) nested = this.nestedStores = [];
