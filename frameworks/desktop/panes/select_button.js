@@ -403,7 +403,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   },
 
-
   /**
     Button action handler
 
@@ -412,7 +411,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   _action: function( evt )
   {
-
     var buttonLabel = this.$('.sc-button-label')[0] ;
     var menuWidth = this.get('layer').offsetWidth ; // Get the length of the text on the button in pixels
     var scrollWidth = buttonLabel.scrollWidth ;
@@ -439,7 +437,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
       /**
         Class name - select-button-item
-
       */
       classNames: ['select-button'],
 
@@ -508,8 +505,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var found = null ;
 
     while (!found && (--len >= 0)) {
-      title = object[len].title ? object[len].title: object.toString() ;
-      val =  object[len].value ? object[len].value: title ;
+      title = !SC.none(object[len].title) ? object[len].title: object.toString() ;
+      val =  !SC.none(object[len].value) ? object[len].value: title ;
 
       if (title === this.get('value')) {
         found = object ;
