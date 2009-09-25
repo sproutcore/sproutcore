@@ -147,8 +147,9 @@ SC.PickerPane = SC.PalettePane.extend({
     this.set('anchorElement',anchor) ;
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
-    this.positionPane();
     this.endPropertyChanges();
+
+    this.positionPane();
     this.append();
   },
 
