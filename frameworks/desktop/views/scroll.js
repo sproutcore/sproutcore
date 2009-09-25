@@ -682,8 +682,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // update the offset for the contentView...
     var contentView = this.get('contentView');
     if (contentView) contentView.adjust('left', 0-offset);
-    
-    
+     
   }.observes('horizontalScrollOffset'),
   
   /** @private
@@ -702,13 +701,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // Optimization when not using collections. We need to reimplement clippingFrame
     // and scrolling to be able to scroll using scrolltop. For now I just
     // detect if the content to scroll is a class of collectionView.
-    if (contentView && containerView){
-      if(contentView.kindOf(SC.CollectionView)){
-        contentView.adjust('top', 0-offset) ;
-      }else{
-        containerView.$()[0].scrollTop = offset;
-      }
-    }
+    if (contentView) contentView.adjust('top', 0-offset) ;
+    
   }.observes('verticalScrollOffset'),
   
   forceDimensionsRecalculation: function (forceWidth, forceHeight) {
