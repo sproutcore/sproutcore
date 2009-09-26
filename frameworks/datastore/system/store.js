@@ -140,8 +140,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     if (newStoreClass) {
       // Ensure the passed-in class is a type of nested store.
-      if (SC.typeOf(newStoreClass) !== 'class') throw "%@ is not a valid class".fmt(newStoreClass);
-      if (!SC.kindOf(newStoreClass, SC.NestedStore)) throw "%@ is not a type of SC.NestedStore".fmt(newStoreClass);
+      if (SC.typeOf(newStoreClass) !== 'class') throw new Error("%@ is not a valid class".fmt(newStoreClass));
+      if (!SC.kindOf(newStoreClass, SC.NestedStore)) throw new Error("%@ is not a type of SC.NestedStore".fmt(newStoreClass));
     }
     else {
       newStoreClass = SC.NestedStore;
@@ -789,7 +789,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     // handle passing a query...
     if ((arguments.length === 1) && !(recordType && recordType.get && recordType.get('isRecord'))) {
-      if (!recordType) throw "SC.Store#find() must pass recordType or query";
+      if (!recordType) throw new Error("SC.Store#find() must pass recordType or query");
       if (!recordType.isQuery) {
         recordType = SC.Query.local(recordType);
       }
@@ -906,7 +906,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   refreshQuery: function(query) {
-    if (!query) throw "refreshQuery() requires a query";
+    if (!query) throw new Error("refreshQuery() requires a query");
 
     var cache    = this._scst_recordArraysByQuery,
         recArray = cache ? cache[SC.guidFor(query)] : null, 
@@ -1952,7 +1952,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   loadQueryResults: function(query, storeKeys) {
     if (query.get('location') === SC.Query.LOCAL) {
-      throw "Cannot load query results for a local query";
+      throw new Error("Cannot load query results for a local query");
     }
 
     var recArray = this._findQuery(query, YES, NO);
@@ -2328,7 +2328,7 @@ SC.Store.mixin({
 
       recordType = this.recordTypeFor(storeKey);
        if (!recordType) {
-        throw "replaceIdFor: storeKey %@ does not exist".fmt(storeKey);
+        throw new Error("replaceIdFor: storeKey %@ does not exist".fmt(storeKey));
       }
 
       // map one direction...

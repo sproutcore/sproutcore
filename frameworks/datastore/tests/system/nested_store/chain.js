@@ -65,7 +65,7 @@ test("allow for custom subclasses of SC.NestedStore", function() {
   catch(e) {
     ex = e;
   }
-  ok(ex  &&  ex.indexOf('not a valid class') !== -1, 'chain should report that our bogus "class" it is not a valid class');
+  ok(ex  &&  ex.message  &&  ex.message.indexOf('not a valid class') !== -1, 'chain should report that our bogus "class" it is not a valid class');
   
   // We should get an exception if we specify a class that's not a subclass of
   // SC.NestedStore
@@ -76,7 +76,7 @@ test("allow for custom subclasses of SC.NestedStore", function() {
   catch(e) {
     ex = e;
   }
-  ok(ex  &&  ex.indexOf('is not a type of SC.NestedStore') !== -1, 'chain should report that our class needs to be a subclass of SC.NestedStore');
+  ok(ex  &&  ex.message  &&  ex.message.indexOf('is not a type of SC.NestedStore') !== -1, 'chain should report that our class needs to be a subclass of SC.NestedStore');
   
   
   // Our specified (proper!) subclass should be respected.
