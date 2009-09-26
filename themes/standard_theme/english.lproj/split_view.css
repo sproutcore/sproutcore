@@ -12,7 +12,7 @@
 }
 
 .sc-theme .sc-split-view.vertical > .sc-split-divider-view {
-	background: static_url('images/sc-theme-sprite.png') repeat-x 0px -1397px;
+	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1397px;
 /*  border-top: 1px #888 solid;
   border-bottom: 1px #888 solid;
 */	z-index: 5;
