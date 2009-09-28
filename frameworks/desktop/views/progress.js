@@ -155,7 +155,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
   displayProperties: 'value minimum maximum isIndeterminate'.w(),
   
   render: function(context, firstTime) {
-    
+    var inner, animatedBackground;
     var isIndeterminate = this.get('isIndeterminate');
     var isRunning = this.get('isRunning');
     var isEnabled = this.get('isEnabled');
@@ -197,14 +197,17 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     }
     else {
       context.setClass(classNames);
-      this.$('.sc-inner').css('width', value).css('left',offset);
-      if (this.get('animatedBackgroundMatrix').length === 3 ) {
-        this.$('.sc-inner').css('backgroundPosition', '0px -'+ 
-        (this.get('animatedBackgroundMatrix')[0] + 
-        this.get('animatedBackgroundMatrix')[1]*this._currentBackground)+'px');
-        if(this._currentBackground===this.get('animatedBackgroundMatrix')[2]-1
-           || this._currentBackground===0)
+      inner = this.$('.sc-inner');
+      animatedBackground = this.get('animatedBackgroundMatrix');
+      inner.css('width', value).css('left',offset);
+      if (animatedBackground.length === 3 ) {
+        inner.css('backgroundPosition', '0px -'+ 
+        (animatedBackground[0] + 
+        animatedBackground[1]*this._currentBackground)+'px');
+        if(this._currentBackground===animatedBackground[2]-1
+           || this._currentBackground===0){
           this._nextBackground *= -1;
+        }
         this._currentBackground += this._nextBackground;
       }
     }
