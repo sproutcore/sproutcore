@@ -3,3 +3,7 @@
 .sc-pane.sc-modal {
   z-index: 100;
 }
+
+.msie .sc-pane.sc-modal {
+  background-image: url('.');
+}
