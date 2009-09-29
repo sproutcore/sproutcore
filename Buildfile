@@ -25,6 +25,8 @@ mode :debug do
 end
 
 # CORE FRAMEWORKS
+config :bootstrap,  :required => [], :use_modules => false
+
 config :runtime,    :required => []
 config :foundation, :required => [:runtime]
 config :datastore,  :required => [:runtime]
