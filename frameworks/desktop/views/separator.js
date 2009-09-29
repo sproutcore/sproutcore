@@ -27,9 +27,8 @@ SC.SeparatorView = SC.View.extend(
   layoutDirection: SC.LAYOUT_HORIZONTAL,
 
   render: function(context, firstTime) {
-
-    context.push('<span></span>');
-	context.addClass(this.get('layoutDirection'));
+    if(firstTime) context.push('<span></span>');
+	  context.addClass(this.get('layoutDirection'));
   }
 
 
