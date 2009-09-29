@@ -1320,8 +1320,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       SC.View.views[this.get('layerId')] = this ;
     }
     
+    var childViews = this.get('childViews');
+    
     // setup child views.  be sure to clone the child views array first
-    this.childViews = this.childViews ? this.childViews.slice() : [] ;
+    this.childViews = childViews ? childViews.slice() : [] ;
     this.createChildViews() ; // setup child Views
     
     // register display property observers ..
