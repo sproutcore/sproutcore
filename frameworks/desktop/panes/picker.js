@@ -108,6 +108,8 @@ SC.PickerPane = SC.PalettePane.extend({
   isModal: YES,
   
   pointerPos: 'perfectRight',
+  pointerPosX: 0,
+  pointerPosY: 0,
   
   /**
     This property will be set to the element (or view.get('layer')) that 
@@ -348,6 +350,8 @@ SC.PickerPane = SC.PalettePane.extend({
     f.x = prefP1[m[4]][0] ;
     f.y = prefP1[m[4]][1] ;
     this.set('pointerPos', SC.POINTER_LAYOUT[m[4]]);
+    this.set('pointerPosX', 0);
+    this.set('pointerPosY', 0);
 
     for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
       if (cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2]===0 && cutoffPrefP[m[i]][3]===0) {
@@ -357,6 +361,14 @@ SC.PickerPane = SC.PalettePane.extend({
           f.y = prefP1[m[i]][1] ;
           this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
         }
+        i = SC.POINTER_LAYOUT.length;
+      } else if ((m[i] === 0 || m[i] === 1) && cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2] < f.height-91 && cutoffPrefP[m[i]][3]===0) {
+        if (m[4] != m[i]) {
+          f.x = prefP1[m[i]][0] ;
+          this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
+        }
+        f.y = prefP1[m[i]][1] - cutoffPrefP[m[i]][2] ;
+        this.set('pointerPosY', cutoffPrefP[m[i]][2]);
         i = SC.POINTER_LAYOUT.length;
       }
     }
@@ -369,11 +381,12 @@ SC.PickerPane = SC.PalettePane.extend({
     var ret = sc_super();
     if (context.needsContent) {
       if (this.get('preferType') == SC.PICKER_POINTER) {
-        context.push('<div class="sc-pointer %@"></div>'.fmt(this.get('pointerPos')));
+        context.push('<div class="sc-pointer %@" style="margin-top: %@px"></div>'.fmt(this.get('pointerPos'), this.get('pointerPosY')));
       }
     } else {
       var el = this.$('.sc-pointer');
       el.attr('class', "sc-pointer %@".fmt(this.get('pointerPos')));
+      el.attr('style', "margin-top: %@px".fmt(this.get('pointerPosY')));
     }
     return ret ;
   },
