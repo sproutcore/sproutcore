@@ -928,7 +928,8 @@ SC.Binding = {
 
     var to = this._toRoot ? "<%@>:%@".fmt(this._toRoot,this._toPropertyPath) : this._toPropertyPath;
     
-    return "SC.Binding%@(%@ -> %@)".fmt(SC.guidFor(this), from, to) ;
+    var oneWay = this._oneWay ? '[oneWay]' : '';
+    return "SC.Binding%@(%@ -> %@)%@".fmt(SC.guidFor(this), from, to, oneWay);
   }  
 } ;
 
