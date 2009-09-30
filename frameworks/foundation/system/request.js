@@ -365,13 +365,14 @@ SC.XHRRequestTransport = SC.RequestTransport.extend({
         error.set("request",request) ;
         request.source.set('rawResponse', error) ;
       }
+
+      SC.Request.manager.transportDidClose(this) ;
+
       if (this.target && this.action) {
         SC.RunLoop.begin();
         this.action.call(this.target, request.source, this.params);
         SC.RunLoop.end();
       }
-      
-      SC.Request.manager.transportDidClose(this) ;
      }
      
      if (readyState == 4) {
