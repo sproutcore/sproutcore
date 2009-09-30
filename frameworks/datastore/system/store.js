@@ -531,13 +531,23 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       // (correctly) operate in statusOnly=false mode.
       if (!statusOnly) changes.hasDataChanges.push(storeKey);
       
-      // if this is a key specific change, make sure that only those
-      // properties/keys are notified
+      // If this is a key specific change, make sure that only those
+      // properties/keys are notified.  However, if a previous invocation of
+      // _notifyRecordPropertyChange specified that all keys have changed, we
+      // need to respect that.
       if (key) {
         if (!(keys = changes.propertyForStoreKeys[storeKey])) {
           keys = changes.propertyForStoreKeys[storeKey] = SC.CoreSet.create();
         }
-        keys.add(key);
+        // If it's '*' instead of a set, then that means there was a previous
+        // invocation that said all keys have changed.
+        else if (keys !== '*') {
+          keys.add(key);
+        }
+      }
+      else {
+        // Mark that all properties have changed.
+        changes.propertyForStoreKeys[storeKey] = '*';
       }
     }
     
@@ -569,6 +579,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         statusOnly = hasDataChanges.contains(storeKey) ? NO : YES;
         rec = this.records[storeKey];
         keys = propertyForStoreKeys ? propertyForStoreKeys[storeKey] : null;
+        
+        // Are we invalidating all keys?  If so, don't pass any to
+        // storeDidChangeProperties.
+        if (keys === '*') keys = null;
         
         // remove it so we don't trigger this twice
         records.remove(storeKey);
