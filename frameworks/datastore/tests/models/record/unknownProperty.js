@@ -22,6 +22,15 @@ module("SC.Record#unknownProperty", {
     };
     
     MyApp.foo = MyApp.store.createRecord(MyApp.Foo, MyApp.json);
+    
+    MyApp.FooStrict = SC.Record.extend();
+    
+    SC.mixin(MyApp.FooStrict, {
+      ignoreUnknownProperties: YES
+    });
+    
+    MyApp.fooStrict = MyApp.store.createRecord(MyApp.FooStrict, MyApp.json);
+    
   },
   
   teardown: function() {
@@ -48,4 +57,10 @@ test("set() should replace existing property", function() {
   MyApp.foo.set('foo', 'baz');
   equals(MyApp.store.dataHashes[MyApp.foo.storeKey].foo, 'baz', 'should update foo attribute');
 });
+
+test("set() on unknown property if model ignoreUnknownProperties=YES should not write it to data hash", function() {
+  MyApp.fooStrict.set('foo', 'baz');
+  equals(MyApp.store.dataHashes[MyApp.fooStrict.storeKey].foo, 'bar', 'should not have written new value to dataHash');
+});
+
 

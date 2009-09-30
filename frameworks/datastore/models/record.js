@@ -400,13 +400,27 @@ SC.Record = SC.Object.extend(
     If you try to get/set a property not defined by the record, then this 
     method will be called. It will try to get the value from the set of 
     attributes.
+    
+    This will also check is ignoreUnknownProperties is set on the recordType
+    so that they will not be written to dataHash unless explicitly defined
+    in the model schema.
   
     @param {String} key the attribute being get/set
     @param {Object} value the value to set the key to, if present
     @returns {Object} the value
   */
   unknownProperty: function(key, value) {
+    
     if (value !== undefined) {
+      
+      // first check if we should ignore unknown properties for this 
+      // recordType
+      var storeKey = this.get('storeKey'),
+        recordType = SC.Store.recordTypeFor(storeKey);
+      
+      if(recordType.ignoreUnknownProperties===YES) {
+        return value;
+      }
       
       // if we're modifying the PKEY, then SC.Store needs to relocate where 
       // this record is cached. store the old key, update the value, then let 
@@ -416,7 +430,7 @@ SC.Record = SC.Object.extend(
 
       // update ID if needed
       if (key === primaryKey) {
-        SC.Store.replaceIdFor(this.get('storeKey'), value);
+        SC.Store.replaceIdFor(storeKey, value);
       }
       
     }
@@ -511,6 +525,15 @@ SC.Record = SC.Object.extend(
 
 // Class Methods
 SC.Record.mixin( /** @scope SC.Record */ {
+
+  /**
+    Whether to ignore unknown properties when they are being set on the record
+    object. This is useful if you want to strictly enforce the model schema
+    and not allow dynamically expanding it by setting new unknown properties
+    
+    @property {Boolean}
+  */
+  ignoreUnknownProperties: NO,
 
   // ..........................................................
   // CONSTANTS
