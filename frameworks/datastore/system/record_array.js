@@ -519,6 +519,43 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {Boolean}
   */
   needsFlush: YES,
+
+  // ..........................................................
+  // EMULATE SC.ERROR API
+  // 
+  
+  /**
+    Returns YES whenever the status is SC.Record.ERROR.  This will allow you 
+    to put the UI into an error state.
+    
+    @property {Boolean}
+  */
+  isError: function() {
+    return this.get('status') & SC.Record.ERROR;
+  }.property('status').cacheable(),
+
+  /**
+    Returns the receiver if the record array is in an error state.  Returns null
+    otherwise.
+    
+    @property {SC.Record}
+  */
+  errorValue: function() {
+    return this.get('isError') ? this : null;
+  }.property('isError').cacheable(),
+  
+  /**
+    Returns the current error object only if the record array is in an error state.
+    If no explicit error object has been set, returns SC.Record.GENERIC_ERROR.
+    
+    @property {SC.Error}
+  */
+  errorObject: function() {
+    if (this.get('isError')) {
+      var store = this.get('store');
+      return store.readQueryError(this.get('query')) || SC.Record.GENERIC_ERROR;
+    } else return null ;
+  }.property('isError').cacheable(),
   
   // ..........................................................
   // INTERNAL SUPPORT

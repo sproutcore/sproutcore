@@ -214,6 +214,34 @@ SC.NestedStore = SC.Store.extend(
     if (parentStore) parentStore.refreshQuery(query);
     return this ;      
   },
+
+  /**
+    Returns the SC.Error object associated with a specific record.
+
+    Delegates the call to the parent store.
+
+    @param {Number} storeKey The store key of the record.
+ 
+    @returns {SC.Error} SC.Error or null if no error associated with the record.
+  */
+  readError: function(storeKey) {
+    var parentStore = this.get('parentStore');
+    return parentStore ? parentStore.readError(storeKey) : null;
+  },
+
+  /**
+    Returns the SC.Error object associated with a specific query.
+
+    Delegates the call to the parent store.
+
+    @param {SC.Query} query The SC.Query with which the error is associated.
+ 
+    @returns {SC.Error} SC.Error or null if no error associated with the query.
+  */
+  readQueryError: function(query) {
+    var parentStore = this.get('parentStore');
+    return parentStore ? parentStore.readQueryError(query) : null;
+  },
   
   // ..........................................................
   // CORE ATTRIBUTE API

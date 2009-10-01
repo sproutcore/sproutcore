@@ -17,5 +17,7 @@ test("initial setup for root store", function() {
   equals(SC.typeOf(store.revisions), SC.T_HASH, 'should have revisions');
   equals(SC.typeOf(store.statuses), SC.T_HASH, 'should have statuses');
   ok(!store.editables, 'should not have editables');
+  ok(!store.recordErrors, 'should not have recordErrors');
+  ok(!store.queryErrors, 'should not have queryErrors');
 }); 
 

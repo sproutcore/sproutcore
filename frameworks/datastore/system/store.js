@@ -233,6 +233,28 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @property {Array}
   */
   recordArraysWithQuery: null,
+
+  /**
+    An array of SC.Error objects associated with individual records in the
+    store (indexed by store keys).
+
+    Errors passed form the data source in the call to dataSourceDidError() are
+    stored here.
+
+    @property {Array}
+  */
+  recordErrors: null,
+
+  /**
+    An array of SC.Error objects associated with queries (indexed by the GUID
+    of the query).
+
+    Errors passed from the data source in the call to dataSourceDidErrorQuery()
+    are stored here.
+
+    @property {Array}
+  */
+  queryErrors: null,
   
   // ..........................................................
   // CORE ATTRIBUTE API
@@ -582,9 +604,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.revisions  = {} ;
     this.statuses   = {} ;
 
-    // also reset temporary objects
+    // also reset temporary objects and errors
     this.chainedChanges = this.locks = this.editables = null;
     this.changelog = null ;
+    this.recordErrors = null;
+    this.queryErrors = null;
 
     var records = this.records, storeKey;
     if (records) {
@@ -1676,6 +1700,32 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // return storeKeys
     return ret ;
   },
+
+  /**
+    Returns the SC.Error object associated with a specific record.
+
+    @param {Number} storeKey The store key of the record.
+ 
+    @returns {SC.Error} SC.Error or null if no error associated with the record.
+  */
+  readError: function(storeKey) {
+    var errors = this.recordErrors;
+    return errors && errors[storeKey] ? errors[storeKey] : null;
+  },
+
+  /**
+    Returns the SC.Error object associated with a specific query.
+
+    @param {SC.Query} query The SC.Query with which the error is associated.
+ 
+    @returns {SC.Error} SC.Error or null if no error associated with the query.
+  */
+  readQueryError: function(query) {
+    var guid = SC.guidFor(query);
+    if (!guid) return null;
+    var errors = this.queryErrors;
+    return errors && errors[guid] ? errors[guid] : null;
+  },
   
   // ..........................................................
   // DATA SOURCE CALLBACKS
@@ -1801,7 +1851,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} reciever
   */
   dataSourceDidError: function(storeKey, error) {
-    var status = this.readStatus(storeKey), K = SC.Record;
+    var status = this.readStatus(storeKey), errors = this.recordErrors, K = SC.Record;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
@@ -1809,6 +1859,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // otherwise, determine proper state transition
     else status = K.ERROR ;
+
+    // Add the error to the array of record errors (for lookup later on if necessary).
+    if (error && error.isError) {
+      if (!errors) errors = this.recordErrors = [];
+      errors[storeKey] = error;
+    }
 
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
@@ -2008,6 +2064,14 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @returns {SC.Store} receiver
   */
   dataSourceDidErrorQuery: function(query, error) {
+    var errors = this.queryErrors;
+
+    // Add the error to the array of query errors (for lookup later on if necessary).
+    if (error && error.isError) {
+      if (!errors) errors = this.queryErrors = [];
+      errors[SC.guidFor(query)] = error;
+    }
+
     return this._scstore_dataSourceDidErrorQuery(query, YES);
   },
 
