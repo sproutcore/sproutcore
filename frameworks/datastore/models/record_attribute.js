@@ -94,6 +94,19 @@ SC.RecordAttribute = SC.Object.extend(
   */
   useIsoDate: YES,
   
+  /**
+    If YES, setting a new value on this property will not mark the record as
+    dirty. This will also ensure the datahash does not become locked or in 
+    editable state. 
+    
+    This is useful if your server API returns certain properties
+    as read only, but you'd still like to set those values client side without
+    affecting the record state.
+    
+    @property {Boolean}
+  */
+  readOnly: NO,
+  
   // ..........................................................
   // HELPER PROPERTIES
   // 

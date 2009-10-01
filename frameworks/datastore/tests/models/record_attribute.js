@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for RecordArray with RecordAttribute
-var storeKeys, rec, rec2, bar ;
+var storeKeys, rec, rec2, bar, MyApp;
 
 module("SC.RecordAttribute core methods", {
   setup: function() {
@@ -18,12 +18,12 @@ module("SC.RecordAttribute core methods", {
     MyApp.Foo = SC.Record.extend({
       
       // test simple reading of a pass-through prop
-      firstName: SC.Record.attr(String),
+      firstName: SC.Record.attr(String, { readOnly: YES }),
 
       // test mapping to another internal key
       otherName: SC.Record.attr(String, { key: "firstName" }),
       
-      // test mapping Date
+      // test mapping Date and readOnly
       date: SC.Record.attr(Date),
       nonIsoDate: SC.Record.attr(Date, { useIsoDate: false }),
       
@@ -175,4 +175,22 @@ test("writing a date should generate an ISO date" ,function() {
   var date = new Date(1238650083966);
   equals(rec.set('date', date), rec, 'returns reciever');
   equals(rec.readAttribute('date'), '2009-04-01T22:28:03-07:00', 'should have new time (%@)'.fmt(date.toString()));
+});
+
+test("writing a value to a readOnly attribute should not alter state or make it editable nor locked", function() {
+
+  equals(rec.get('firstName'), 'John', 'precond - should return John');
+  
+  rec.set('firstName', 'Adam');
+  equals(rec.get('firstName'), 'Adam', 'newly written value should exist');
+  
+  // now check if it is still ready
+  equals(rec.get('status'), SC.Record.READY_CLEAN, 'still ready clean state');
+  
+  // and not editable
+  equals(MyApp.store.editables.indexOf(rec.get('storeKey')), -1, 'is not editable');
+  
+  // and not locked
+  equals(MyApp.store.locks, null, 'is not locked');
+  
 });
