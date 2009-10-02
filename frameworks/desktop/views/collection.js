@@ -978,6 +978,15 @@ SC.CollectionView = SC.View.extend(
     return ret ;
   },
   
+  /**
+    Helper method for getting the item view of a specific content object
+    
+    @param {Object} object
+  */
+  itemViewForContentObject: function(object) {
+    return this.itemViewForContentIndex(this.get('content').indexOf(object));
+  },
+  
   _TMP_LAYERID: [],
   
   /**
