@@ -86,6 +86,16 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   */
   status: SC.Record.EMPTY,
   
+  /**
+    The current editabile state based on the query.
+    
+    @property {Boolean}
+  */
+  isEditable: function() {
+    var query = this.get('query');
+    return query ? query.get('isEditable') : NO;
+  }.property('query').cacheable(),
+  
   // ..........................................................
   // ARRAY PRIMITIVES
   // 

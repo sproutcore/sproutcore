@@ -166,6 +166,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.endPropertyChanges() ;
     
     // and become first responder
+    this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
     this.becomeFirstResponder() ;
   
     if(SC.browser.msie) this.invokeLater(this._selectRootElement, 200) ;
@@ -235,7 +236,14 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
     // resign first responder if not done already.  This may call us in a 
     // loop but since isEditing is already NO, nothing will happen.
-    if (this.get('isFirstResponder')) this.resignFirstResponder();
+    if (this.get('isFirstResponder')) {
+      var pane = this.get('pane');
+      if (pane && this._previousFirstResponder) {
+        pane.makeFirstResponder(this._previousFirstResponder);
+      } else this.resignFirstResponder();
+    }
+    this._previousFirstResponder = null ; // clearout no matter what
+    
     if (this.get('parentNode')) this.removeFromParent() ;  
     
     return YES ;
@@ -308,6 +316,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   /** @private */
   willLoseFirstResponder: function(responder) {
     if (responder !== this) return;
+
+    // if we're about to lose first responder for any reason other than
+    // ending editing, make sure we clear the previous first responder so 
+    // isn't cached
+    this._previousFirstResponder = null;
     
     // should have been covered by willRemoveFromParent, but this was needed 
     // too.

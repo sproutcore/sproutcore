@@ -305,6 +305,13 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
     return this.get('location') === SC.Query.LOCAL;
   }.property('location').cacheable(),
   
+  /**
+    Indicates whether a record is editable or not.  Defaults to NO.  Local
+    queries should never be made editable.  Remote queries may be editable or
+    not depending on the data source.
+  */
+  isEditable: NO,
+  
   // ..........................................................
   // PRIMITIVE METHODS
   // 
