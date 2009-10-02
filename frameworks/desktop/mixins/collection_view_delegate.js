@@ -244,7 +244,8 @@ SC.CollectionViewDelegate = {
     @returns the allowed drag operation.  Defaults to op
   */
   collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperaration) {
-    return (op & SC.DROP_ON) ? SC.DRAG_NONE : op ;
+    // don't allow dropping on by default
+    return (proposedDropOperaration & SC.DROP_ON) ? SC.DRAG_NONE : op ;
   },
   
   /**
