@@ -437,6 +437,7 @@ SC.Record = SC.Object.extend(
         recordType = SC.Store.recordTypeFor(storeKey);
       
       if(recordType.ignoreUnknownProperties===YES) {
+        this[key] = value;
         return value;
       }
       
