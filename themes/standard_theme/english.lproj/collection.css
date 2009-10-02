@@ -12,6 +12,7 @@
 
 .sc-theme .sc-collection-view .sc-collection-item.sel {
 	background-color: #ddd;
+	color: #333;
 }
 
 .sc-theme.focus .sc-collection-view.focus .sc-collection-item.sel {
@@ -41,8 +42,8 @@
 .sc-theme .sc-list-insertion-point .anchor {
   position: absolute ;
   width: 8px;
-  top: -3px;
-  left: -3px;
+  top: -2px;
+  left: -4px;
   height: 8px;
 	background: static_url('images/sc-theme-sprite.png') no-repeat -32px -1040px;
 }

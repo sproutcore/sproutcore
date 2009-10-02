@@ -12,6 +12,7 @@
   outline: auto 7px -webkit-focus-ring-color; 
   outline-offset: -2px;
 }
+
 .mozilla .sc-view .sc-text-field-view.focus {
   outline-color:-moz-mac-focusring;
   outline-offset:-5px;
