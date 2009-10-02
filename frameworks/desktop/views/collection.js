@@ -811,6 +811,15 @@ SC.CollectionView = SC.View.extend(
         // if not nowShowing, then remove the item view if needed
         } else if (existing && existing.parentView === containerView) {
           delete itemViews[idx];
+          
+          // if the existing view has a layer, remove it immediately from
+          // the parent...
+          layer = existing.get('layer');
+          if (layer && layer.parentNode) {
+            layer.parentNode.removeChild(layer);
+          }
+          layer = null ; // avoid leaks
+          
           containerView.removeChild(existing);
         }
       },this);
