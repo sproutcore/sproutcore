@@ -230,6 +230,15 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
+
+    if (!this._isFocused && (this.get('buttonBehavior')!==SC.PUSH_BEHAVIOR)) {
+      this._isFocused = YES ;
+      this.becomeFirstResponder();
+      if (this.get('isVisibleInWindow')) {
+        this.$()[0].focus();
+      }
+    }
+
     return YES ;
   },
 
