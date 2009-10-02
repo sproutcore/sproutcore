@@ -101,6 +101,15 @@ SC.Record = SC.Object.extend(
   */
   storeKey: null,
 
+  /** 
+    YES when the record has been destroyed
+    
+    @property {Boolean}
+  */
+  isDestroyed: function() {
+    return !!(this.get('status') & SC.Record.DESTROYED);  
+  }.property('status').cacheable(),
+  
   /**
     YES when the record is in an editable state.  You can use this property to
     quickly determine whether attempting to modify the record would raise an 
