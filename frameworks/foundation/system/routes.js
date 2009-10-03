@@ -381,7 +381,7 @@ SC.routes = SC.Object.create(
     var loc = this.get('location') ;
     var cloc = decodeURI(location.hash) ;
     cloc = (cloc && cloc.length > 0) ? cloc.slice(1,cloc.length) : '' ;
-    if (cloc != loc) {
+    if (cloc !== loc) {
       SC.RunLoop.begin();
       this.set('location',(cloc) ? cloc : '') ;
       SC.RunLoop.end();
