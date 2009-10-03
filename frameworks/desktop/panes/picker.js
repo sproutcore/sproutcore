@@ -383,7 +383,7 @@ SC.PickerPane = SC.PalettePane.extend({
     return f ;    
   },
   
-  
+  displayProperties: ["pointerPosY"],
 
   render: function(context, firstTime) {
     var ret = sc_super();
