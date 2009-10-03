@@ -302,28 +302,33 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     the view should be a subview of the contentView.  Otherwise the results
     will be undefined.
     
-    @param {SC.ScrollView} receiver
+    @param {SC.View} view view to scroll or null to scroll receiver visible
+    @returns {Boolean} YES if scroll position was changed
   */
   scrollToVisible: function(view) {
-    var contentView = this.get('contentView') ;
-    if (!contentView) return this; // nothing to do if no contentView.
     
-    // get the viewportOffset for the view layer the convert that.  this will
-    // work even  with views using static layout.
-    var layer = view.get('layer'), vf ;
-    if(!layer) return this ; // nothing to do
-    vf =  SC.viewportOffset(layer) ;
-    vf.width = layer.offsetWidth ;
-    vf.height = layer.offsetHeight ;
+    // if no view is passed, do default
+    if (arguments.length === 0) return sc_super(); 
+    
+    var contentView = this.get('contentView') ;
+    if (!contentView) return NO; // nothing to do if no contentView.
+
+    // get the frame for the view - should work even for views with static 
+    // layout, assuming it has been added to the screen.
+    var vf = view.get('frame');
+    if (!vf) return NO; // nothing to do
     
     // convert view's frame to an offset from the contentView origin.  This
     // will become the new scroll offset after some adjustment.
-    vf = contentView.convertFrameFromView(vf, null) ;
+    vf = contentView.convertFrameFromView(vf, view.get('parentView')) ;
     
     // find current visible frame.
     var vo = SC.cloneRect(this.get('containerView').get('frame')) ;
+    
     vo.x = this.get('horizontalScrollOffset') ;
     vo.y = this.get('verticalScrollOffset') ;
+
+    var origX = vo.x, origY = vo.y;
     
     // if top edge is not visible, shift origin
     vo.y -= Math.max(0, SC.minY(vo) - SC.minY(vf)) ;
@@ -334,7 +339,10 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     vo.x += Math.max(0, SC.maxX(vf) - SC.maxX(vo)) ;
     
     // scroll to that origin.
-    return this.scrollTo(vo.x, vo.y) ;
+    if ((origX !== vo.x) || (origY !== vo.y)) {
+      this.scrollTo(vo.x, vo.y);
+      return YES ;
+    } else return NO;
   },
   
   /**

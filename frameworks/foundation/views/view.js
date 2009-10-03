@@ -1662,6 +1662,26 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
+    Attempt to scroll the view to visible.  This will walk up the parent
+    view hierarchy looking looking for a scrollable view.  It will then 
+    call scrollToVisible() on it.
+    
+    Returns YES if an actual scroll took place, no otherwise.
+    
+    @returns {Boolean} 
+  */
+  scrollToVisible: function() {
+    var pv = this.get('parentView');
+    while(pv && !pv.get('isScrollable')) pv = pv.get('parentView');
+    
+    // found view, first make it scroll itself visible then scroll this.
+    if (pv) {
+      pv.scrollToVisible();
+      return pv.scrollToVisible(this);
+    } else return NO ;
+  },
+  
+  /**
     Frame describes the current bounding rect for your view.  This is always
     measured from the top-left corner of the parent view.
     
