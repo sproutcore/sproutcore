@@ -1603,17 +1603,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.CollectionView} receiver
   */
   scrollToItemView: function(view) {
-    if (!view.get('parentView')) return this; // nothing to do
-    if (!view.get('layer')) {
-      if (this.get('layer')) view.updateLayerLocation();
-      else return this; // nothing to do
-    }
-    
-    var scrollable = this;
-    while (scrollable && !scrollable.isPane) {
-      if (scrollable.get('isScrollable')) scrollable.scrollToVisible(view);
-      scrollable = scrollable.get('parentView');
-    }
+    if (view) view.scrollVisible();
     return this ;
   },
 
