@@ -1632,6 +1632,19 @@ SC.CollectionView = SC.View.extend(
   keyUp: function() { return true; },
   
   /** @private
+    Handle space key event.  Do action
+  */
+  insertText: function(chr, evt) {
+    if (chr === ' ') {
+      var sel = this.get('selection');
+      if (sel && sel.get('length')>0) {
+        this.invokeLater(this._cv_action, 0, null, evt);
+      } 
+      return YES ;
+    } else return NO ;
+  },
+  
+  /** @private
     Handle select all keyboard event.
   */
   selectAll: function(evt) {
