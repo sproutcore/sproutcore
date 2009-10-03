@@ -1614,7 +1614,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.CollectionView} receiver
   */
   scrollToItemView: function(view) {
-    if (view) view.scrollVisible();
+    if (view) view.scrollToVisible();
     return this ;
   },
 
