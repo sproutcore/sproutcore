@@ -1142,7 +1142,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {Object} object that handled event, if any
   */
   interpretKeyEvents: function(event) {
-    var codes = event.commandCodes(), cmd = codes[0], chr = codes[1];
+    var codes = event.commandCodes(), cmd = codes[0], chr = codes[1], ret;
 
     if (!cmd && !chr) return null ;  //nothing to do.
 
@@ -1162,7 +1162,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // if we haven't returned yet and there is plain text, then do an insert 
       // of the text.  Since this is not an action, do not send it up the 
       // responder chain.
-     return this.insertText(chr);
+      ret = this.insertText(chr, event);
+      return ret ? (ret===YES ? this : ret) : null ; // map YES|NO => this|nil
     }
 
     return null ; //nothing to do.
