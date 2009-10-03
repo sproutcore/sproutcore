@@ -296,7 +296,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   /** @private */
   keyDown: function(evt) {
     var ret = this.interpretKeyEvents(evt) ;
-    if(!ret) this.fieldValueDidChange(true);
+    if (!ret) this.fieldValueDidChange(true);
     return !ret ? NO : ret ;
   },
   
@@ -385,9 +385,20 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.commitEditing() ;
     if(prev) prev.beginEditing();
     return YES ;
+  },
+  
+  /** @private */
+  deleteForward: function(evt) {
+    evt.allowDefault();
+    return YES;
+  },
+  
+  /** @private */
+  deleteBackward: function(evt) {
+    evt.allowDefault();
+    return YES ;
   }
-
-
+  
 });
 
 

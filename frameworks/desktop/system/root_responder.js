@@ -419,9 +419,12 @@ SC.RootResponder = SC.RootResponder.extend(
       // attempt key equivalent if key not handled
       if (!ret) {
         ret = !this.attemptKeyEquivalent(evt) ;
-      } else ret = evt.hasCustomEventHandling ;
+      } else {
+        ret = evt.hasCustomEventHandling ;
+        if (ret) forceBlock = NO ; // code asked explicitly to let delete go
+      }
     }
-    
+
     return forceBlock ? NO : ret ; 
   },
   
@@ -438,8 +441,8 @@ SC.RootResponder = SC.RootResponder.extend(
     
     // delete is handled in keydown() for most browsers
     if (SC.browser.mozilla > 0 && (evt.which === 8)) {
-      ret = this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
-      return SC.allowsBackspaceToPreviousPage ? ret : NO ;
+      ret = this.sendEvent('keyDown', evt);
+      return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
 
     // normal processing.  send keyDown for printable keys...
     } else {
