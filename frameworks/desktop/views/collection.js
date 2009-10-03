@@ -107,8 +107,7 @@ SC.CollectionView = SC.View.extend(
     @type {SC.IndexSet}
   */
   nowShowing: function() {
-    var ret = this.computeNowShowing();
-    return ret ? ret.frozenCopy() : null;
+    return this.computeNowShowing();
   }.property('length', 'clippingFrame').cacheable(),
   
   /**
@@ -416,6 +415,18 @@ SC.CollectionView = SC.View.extend(
   },
   
   /**
+    This computed property returns an index set selecting all content indexes.
+    It will recompute anytime the length of the collection view changes.
+    
+    This is used by the default contentIndexesInRect() implementation.
+    
+    @property {SC.Range}
+  */
+  allContentIndexes: function() {
+    return SC.IndexSet.create(0, this.get('length')).freeze();
+  }.property('length').cacheable(),
+  
+  /**
     Override to return an IndexSet with the indexes that are at least 
     partially visible in the passed rectangle.  This method is used by the 
     default implementation of computeNowShowing() to determine the new 
@@ -429,7 +440,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.IndexSet} now showing indexes
   */
   contentIndexesInRect: function(rect) {
-    return SC.IndexSet.create(0, this.get('length'));    
+    return null; // select all
   },
   
   /**
@@ -442,16 +453,16 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.IndexSet} new now showing range
   */
   computeNowShowing: function() {
-    var r = this.contentIndexesInRect(this.get('clippingFrame')),
-        content = SC.makeArray(this.get('content')),
-        len     = content.get('length');
-         
-    // default show all.
-    if (!r) r = SC.IndexSet.create(0, len);
+    var r = this.contentIndexesInRect(this.get('clippingFrame'));
+    if (!r) r = this.get('allContentIndexes'); // default show all
 
     // make sure the index set doesn't contain any indexes greater than the
     // actual content.
-    if (r.get('max') > len) r.remove(len, r.get('max')-len);
+    else {
+      var len = this.get('length'), 
+          max = r.get('max');
+      if (max > len) r = r.copy().remove(len, max-len).freeze();
+    }
     
     return r ;
   },
@@ -2622,11 +2633,13 @@ SC.CollectionView = SC.View.extend(
     // find the differences between the two
     // NOTE: reuse a TMP IndexSet object to avoid creating lots of objects
     // during scrolling
-    if (last && nowShowing && (last !== nowShowing)) {
-      diff1 = this._TMP_DIFF1.add(last).remove(nowShowing);
-      diff2 = this._TMP_DIFF2.add(nowShowing).remove(last);
-      diff = diff1.add(diff2);
-    } else diff = last || nowShowing ;
+    if (last !== nowShowing) {
+      if (last && nowShowing) {
+        diff1 = this._TMP_DIFF1.add(last).remove(nowShowing);
+        diff2 = this._TMP_DIFF2.add(nowShowing).remove(last);
+        diff = diff1.add(diff2);
+      } else diff = last || nowShowing ;
+    }
 
     // if nowShowing has actually changed, then update
     if (diff && diff.get('length') > 0) {
