@@ -367,8 +367,8 @@ SC.PickerPane = SC.PalettePane.extend({
           f.x = prefP1[m[i]][0] ;
           this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
         }
-        f.y = prefP1[m[i]][1] - cutoffPrefP[m[i]][2] ;
-        this.set('pointerPosY', cutoffPrefP[m[i]][2]);
+        f.y = prefP1[m[i]][1] - cutoffPrefP[m[i]][2] - 14 ; //Componsate for the corners while calculating the y cordinate
+        this.set('pointerPosY', cutoffPrefP[m[i]][2] + 12); //Componsate for the corners excluding border while calculating the arrow position
         i = SC.POINTER_LAYOUT.length;
       } else if ((m[i] === 0 || m[i] === 1) && cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2] <= f.height-57 && cutoffPrefP[m[i]][3]===0) {
         if (m[4] != m[i]) {
