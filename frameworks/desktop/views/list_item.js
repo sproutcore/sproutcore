@@ -135,7 +135,7 @@ SC.ListItemView = SC.View.extend(
   disclosureState: SC.LEAF_NODE,
   
   contentPropertyDidChange: function() {
-    if (this.get('isEditing')) this.discardEditing() ;
+    //if (this.get('isEditing')) this.discardEditing() ;
     this.displayDidChange();
   },
   
