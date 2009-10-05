@@ -740,7 +740,6 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                           switch(SC.typeOf(all)) {
                             case SC.T_STRING:
                               return (all.indexOf(value) !== -1); 
-                              break;
                             case SC.T_ARRAY:
                               var found  = false;
                               var i      = 0;
@@ -749,7 +748,6 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
                                 i++;
                               }
                               return found;
-                              break;
                             default:
                               //do nothing
                               break;
