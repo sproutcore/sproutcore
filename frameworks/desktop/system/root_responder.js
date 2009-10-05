@@ -393,7 +393,6 @@ SC.RootResponder = SC.RootResponder.extend(
     the keypress event.
   */
   keydown: function(evt) {
-    
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla > 0 && (evt.which === 8)) return true ;
     
@@ -401,7 +400,8 @@ SC.RootResponder = SC.RootResponder.extend(
     // send event for modifier key changes, but only stop processing if this 
     // is only a modifier change
     var ret = this._handleModifierChanges(evt);
-    var forceBlock = (evt.which === 8) && !SC.allowsBackspaceToPreviousPage;
+    var target = evt.target || evt.srcElement;
+    var forceBlock = (evt.which === 8) && !SC.allowsBackspaceToPreviousPage && (target === document.body);
     
     if (this._isModifierKey(evt)) return (forceBlock ? NO : ret);
     
