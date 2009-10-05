@@ -38,16 +38,45 @@ SC.mixin(/** @scope SC */ {
     Execute callback function.
   */
   _scb_bundleDidLoad: function(bundleName, target, method, args) {
+    var m, t;
     if(SC.typeOf(target) === SC.T_STRING) {
-      target = SC.objectForPropertyPath(target);
+      t = SC.objectForPropertyPath(target);
     }
 
     if(SC.typeOf(method) === SC.T_STRING) {
-      method = SC.objectForPropertyPath(method, target);
+      m = SC.objectForPropertyPath(method, t);
     }
     
-    if(!method) {
-      throw "SC.loadBundle(): could not find callback for '%@'".fmt(bundleName);
+    if(!m) {
+
+      if(SC.LAZY_INSTANTIATION[bundleName]) {
+        var lazyInfo = SC.LAZY_INSTANTIATION[bundleName];
+
+      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' is marked for lazy instantiation, instantiating it now…".fmt(bundleName));            
+        
+        for(var i=0, iLen = lazyInfo.length; i<iLen; i++) {
+          try { 
+            lazyInfo[i]();
+          }catch(e) {
+            console.log("SC.loadBundle(): Failted to lazily instatiate entry for  '%@'".fmt(bundleName));  
+          }
+        }
+        delete SC.LAZY_INSTANTIATION[bundleName];
+
+        if(SC.typeOf(target) === SC.T_STRING) {
+          t = SC.objectForPropertyPath(target);
+        }
+        if(SC.typeOf(method) === SC.T_STRING) {
+          m = SC.objectForPropertyPath(method, t);
+        }
+
+        if(!method) {
+          throw "SC.loadBundle(): could not find callback for lazily instantiated bundle '%@'".fmt(bundleName);
+
+        }
+      } else {
+        throw "SC.loadBundle(): could not find callback for '%@'".fmt(bundleName);
+      }
     }
 
     if(!args) {
@@ -58,10 +87,30 @@ SC.mixin(/** @scope SC */ {
     
     var needsRunLoop = !!SC.RunLoop.currentRunLoop;
     if (needsRunLoop) SC.RunLoop.begin() ;
-    method.apply(target, args) ;
+    m.apply(t, args) ;
     if (needsRunLoop) SC.RunLoop.end() 
   },
   
+  tryToLoadBundle: function(bundleName, target, method, args) {
+    var m, t;
+    
+    // First see if it is already defined.
+    if(SC.typeOf(target) === SC.T_STRING) {
+      t = SC.objectForPropertyPath(target);
+    }
+    if(SC.typeOf(method) === SC.T_STRING) {
+      m = SC.objectForPropertyPath(method, t);
+    }
+
+    // If the method exists, try to call it. It could have been loaded 
+    // through other means but the SC.BUNDLE_INFO entry doesn't exist.
+    if(m || SC.LAZY_INSTANTIATION[bundleName]) {
+      if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' found through other means, will attempt to load…".fmt(bundleName));
+      return SC.BUNDLE_INFO[bundleName] = {loaded: YES};
+    }
+    return NO;
+  },
+    
   /**
     Dynamically load bundleName if not already loaded. Call the target and 
     method with any given arguments.
@@ -80,9 +129,17 @@ SC.mixin(/** @scope SC */ {
     var bundleInfo = SC.BUNDLE_INFO[bundleName], callbacks, targets ;
     var args = SC.A(arguments).slice(3);
 
-    if(SC.logBundleLoading) console.log("SC.loadBundle(): Attempting to load '%@'".fmt(bundleName));
+    if(SC.logBundleLoading) {
+      console.log("SC.loadBundle(): Attempting to load '%@'".fmt(bundleName));
+    }
+    
+    if(!bundleInfo) {
+      if(SC.logBundleLoading) console.log("SC.loadBundle(): Attemping to load %@ without SC.BUNDLE_INFO entry… could be loaded through other means.".fmt(bundleName));
+      bundleInfo = this.tryToLoadBundle(bundleName, target, method, args);
+    }
+    
 
-    if (!bundleInfo) {
+    if (!bundleInfo) {        
       throw "SC.loadBundle(): could not find bundle '%@'".fmt(bundleName) ;
     } else if (bundleInfo.loaded) {
 

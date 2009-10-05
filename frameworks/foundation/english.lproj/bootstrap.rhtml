@@ -11,7 +11,7 @@
 #
 -%>
 <% content_for('bootstrap') do %>
-var SC = SC || { BUNDLE_INFO: {} };
+var SC = SC || { BUNDLE_INFO: {}, LAZY_INSTANTIATION: {} };
 SC.browser = (function() {
   var userAgent = navigator.userAgent.toLowerCase();
   var version = (userAgent.match( /.+(?:rv|it|ra|ie)[\/: ]([\d.]+)/ ) || [])[1] ;
