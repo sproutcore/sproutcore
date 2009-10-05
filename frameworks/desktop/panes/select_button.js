@@ -147,6 +147,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
+    Set this property to YES to display separtor before the last item
+
+    @private
+    @default NO
+  */
+  hasSeparator: NO,
+
+  /**
     Default value of the select button.
      This will be the first item from the menu item list.
 
@@ -304,6 +312,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     var objects = this.get('objects') ;
     objects = this.sortObjects(objects) ;
+    var len = objects.length ;
 
     //Get the namekey, iconKey and valueKey set by the user
     var nameKey = this.get('nameKey') ;
@@ -316,6 +325,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     // get the localization flag.
     var shouldLocalize = this.get('localize') ;
+
+    // get the hasSeparator flag
+    var hasSeparator = this.get('hasSeparator') ;
 
     //itemList array to set the menu items
     var itemList = [] ;
@@ -385,6 +397,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     idx += 1 ;
+
+    // display the separator if specified by the user
+    if (hasSeparator && idx === (len-1)) {
+      var separator = SC.Object.create({
+        separator: YES
+      }) ;
+      itemList.push(separator);
+    }
 
     this.set('itemList', itemList) ;
     }, this ) ;
