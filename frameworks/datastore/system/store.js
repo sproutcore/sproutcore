@@ -233,26 +233,26 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @property {Array}
   */
   recordArraysWithQuery: null,
-
+  
   /**
     An array of SC.Error objects associated with individual records in the
     store (indexed by store keys).
-
+    
     Errors passed form the data source in the call to dataSourceDidError() are
     stored here.
-
+    
     @property {Array}
   */
   recordErrors: null,
-
+  
   /**
-    An array of SC.Error objects associated with queries (indexed by the GUID
+    A hash of SC.Error objects associated with queries (indexed by the GUID
     of the query).
-
+    
     Errors passed from the data source in the call to dataSourceDidErrorQuery()
     are stored here.
-
-    @property {Array}
+    
+    @property {Hash}
   */
   queryErrors: null,
   
@@ -1706,11 +1706,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @param {Number} storeKey The store key of the record.
  
-    @returns {SC.Error} SC.Error or null if no error associated with the record.
+    @returns {SC.Error} SC.Error or undefined if no error associated with the record.
   */
   readError: function(storeKey) {
-    var errors = this.recordErrors;
-    return errors && errors[storeKey] ? errors[storeKey] : null;
+    var errors = this.recordErrors ;
+    return errors ? errors[storeKey] : undefined ;
   },
 
   /**
@@ -1718,13 +1718,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     @param {SC.Query} query The SC.Query with which the error is associated.
  
-    @returns {SC.Error} SC.Error or null if no error associated with the query.
+    @returns {SC.Error} SC.Error or undefined if no error associated with the query.
   */
   readQueryError: function(query) {
-    var guid = SC.guidFor(query);
-    if (!guid) return null;
-    var errors = this.queryErrors;
-    return errors && errors[guid] ? errors[guid] : null;
+    var errors = this.queryErrors ;
+    return errors ? errors[SC.guidFor(query)] : undefined ;
   },
   
   // ..........................................................
@@ -1847,7 +1845,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Converts the passed record into an error object.
     
-    @param {Number} storeKey record store key to cancel
+    @param {Number} storeKey record store key to error
+    @param {SC.Error} error [optional] an SC.Error instance to associate with storeKey
     @returns {SC.Store} reciever
   */
   dataSourceDidError: function(storeKey, error) {
@@ -1937,17 +1936,25 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @param {Class} recordType the SC.Record subclass
     @param {Object} id the record id or null
-    @param {Number} storeKey optional store key.  
+    @param {SC.Error} error [optional] an SC.Error instance to associate with id or storeKey
+    @param {Number} storeKey optional store key.
     @returns {Boolean} YES if push was allowed
   */
   pushError: function(recordType, id, error, storeKey) {
-    var K = SC.Record, status;
+    var K = SC.Record, status, errors = this.recordErrors;
 
     if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
 
     if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
       status = K.ERROR;
+      
+      // Add the error to the array of record errors (for lookup later on if necessary).
+      if (error && error.isError) {
+        if (!errors) errors = this.recordErrors = [];
+        errors[storeKey] = error;
+      }
+      
       this.writeStatus(storeKey, status) ;
       this.dataHashDidChange(storeKey, null, YES);
       return YES;
@@ -2060,7 +2067,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     again.
     
     @param {SC.Query} query the query with the error
-    @param {SC.Error} error optional error object to set
+    @param {SC.Error} error [optional] an SC.Error instance to associate with query
     @returns {SC.Store} receiver
   */
   dataSourceDidErrorQuery: function(query, error) {
@@ -2068,7 +2075,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // Add the error to the array of query errors (for lookup later on if necessary).
     if (error && error.isError) {
-      if (!errors) errors = this.queryErrors = [];
+      if (!errors) errors = this.queryErrors = {};
       errors[SC.guidFor(query)] = error;
     }
 

@@ -541,7 +541,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @property {SC.Record}
   */
   errorValue: function() {
-    return this.get('isError') ? this : null;
+    return this.get('isError') ? SC.val(this.get('errorObject')) : null ;
   }.property('isError').cacheable(),
   
   /**
