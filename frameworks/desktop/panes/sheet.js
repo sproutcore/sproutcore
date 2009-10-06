@@ -31,6 +31,14 @@ SC.SheetPane = SC.PanelPane.extend({
   
   classNames: 'sc-sheet',
 
+  /**
+    The modal pane to place behind this pane if this pane is modal.  This 
+    must be a subclass or an instance of SC.ModalPane.
+  */
+  modalPane: SC.ModalPane.extend({
+    classNames: 'for-sc-panel for-sc-sheet'
+  }),
+
   init: function() {
     sc_super() ;
 
