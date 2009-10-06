@@ -4,97 +4,231 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-/*global ActiveXObject */
+
+sc_require('system/response');
 
 /**
-  Description to come.
+  @class
   
+  Implements support for Ajax requests using XHR, JSON-P and other prototcols.
+  
+  SC.Request is much like an inverted version of the request/response objects
+  you receive when implement HTTP servers.  
+  
+  To send a request, you just need to create your request object, configure
+  your options, and call send() to initiate the request.
+  
+  @extends SC.Object
   @since SproutCore 1.0
 */
 
-SC.Request = SC.Object.extend({
+SC.Request = SC.Object.extend(
+  /** @scope SC.Request.prototype */ {
   
-  isAsynchronous: true,
+  // ..........................................................
+  // PROPERTIES
+  // 
+  
+  /**
+    Sends the request asynchronously instead of blocking the browser.  You
+    should almost always make requests asynchronous.  You can change this 
+    options with the async() helper option (or simply set it directly).
+    
+    Defaults to YES. 
+    
+    @property {Boolean}
+  */
+  isAsynchronous: YES,
+
+  /**
+    Processes the request and response as JSON if possible.  You can change
+    this option with the json() helper method.
+
+    Defaults to NO 
+    
+    @property {Boolean}
+  */
+  isJSON: NO,
+
+  /**
+    Process the request and response as XML if possible.  You can change this
+    option with the xml() helper method.
+    
+    Defaults to NO
+  
+    @property {Boolean}
+  */
+  isXML: NO,
+  
   rawResponse: null,
   error: null,
-  transportClass: null,
-  isJSON: false,
-  
+
   /**
-    Sets up the request object
+    Current set of headers for the request
   */
-  init: function(){
-    sc_super() ;  
-    this._headers = {};
-  },
-  
+  headers: function() {
+    var ret = this._headers ;
+    if (!ret) ret = this._headers = {} ;
+    return ret ;  
+  }.property().cacheable(),
+
   /**
-    To set headers on the request object
+    Underlying response class to actually handle this request.  Currently the
+    only supported option is SC.XHRResponse which uses a traditional
+    XHR transport.
     
-    @param {String} key
+    @property {SC.Response}
+  */
+  responseClass: SC.XHRResponse,
+  
+  // ..........................................................
+  // HELPER METHODS
+  // 
+
+  /**
+    To set headers on the request object.  Pass either a single key/value 
+    pair or a hash of key/value pairs.  If you pass only a header name, this
+    will return the current value of the header.
+    
+    @param {String|Hash} key
     @param {String} value
-    @returns {SC.Request} receiver
+    @returns {SC.Request|Object} receiver
   */
   header: function(key, value) {
-    if (typeof key == 'object' && !value) {
-      for (var headerKey in key) {
-        this.header(headerKey,key[headerKey]) ;
+    var headers;
+    
+    if (SC.typeOf(key) === SC.T_STRING) {
+      headers = this._headers ;
+      if (arguments.length===1) {
+        return headers ? headers[key] : null;
+      } else {
+        this.propertyWillChange('headers');
+        if (!headers) headers = this._headers = {};
+        headers[key] = value;
+        this.propertyDidChange('headers');
+        return this;
       }
+    
+    // handle parsing hash of parameters
+    } else if (value === undefined) {
+      headers = key;
+      this.beginPropertyChanges();
+      for(key in headers) {
+        if (!headers.hasOwnProperty(key)) continue ;
+        this.header(key, headers[key]);
+      }
+      this.endPropertyChanges();
       return this;
     }
-    
-    if (typeof key == 'string' && !value) {
-      return this._headers[key] ;
-    }
-    
-    this.propertyWillChange('headers') ;
-    
-    //set value for key
-    this._headers[key] = value ;
-    
-    this.propertyDidChange('headers') ;
+
     return this ;
   },
   
   /**
-    Will fire the actual request.
+    Converts the current request to use JSON.
     
-    @param {String} body (optional)
+    @property {Boolean} flag YES to make JSON, NO or undefined
     @returns {SC.Request} receiver
+  */
+  json: function(flag) {
+    if (flag === undefined) flag = YES;
+    if (flag) this.set('isXML', NO);
+    return this.set('isJSON', flag);
+  },
+  
+  /**
+    Converts the current request to use XML.
+    
+    @property {Boolean} flag YES to make XML, NO or undefined
+    @returns {SC.Request} recevier
+  */
+  xml: function(flag) {
+    if (flag === undefined) flag = YES ;
+    if (flag) this.set('isJSON', NO);
+    return this.set('isXML', flag);
+  },
+  
+  /**
+    Will fire the actual request.  If you have set the request to use JSON 
+    mode then you can pass any object that can be converted to JSON as the 
+    body.  Otherwise you should pass a string body.
+    
+    @param {String|Object} body (optional)
+    @returns {SC.Response} new response object
   */  
   send: function(body) {
-    var request = this ; 
-    
-    var isJSON = request.get('isJSON');
+    var isJSON = this.get('isJSON');
+
+    if (!body) this.set('body', body);
+    else body = this.get('body');
     
     // Set the content-type to JSON (many browsers will otherwise default it
     // to XML).
-    if (isJSON) request.header('Content-Type', 'application/json');
-    
-    if (body) {
-      if (isJSON) {
-        body=SC.json.encode(body);
-        if(body===undefined) console.error('There was an error encoding to JSON');
-      }
-      request.set('body', body) ;
+    if (isJSON && !this.header('Content-Type')) {
+      this.header('Content-Type', 'application/json');
     }
-    SC.Request.manager.sendRequest(request) ;
-    return request ;
+
+    if (body && isJSON) {
+      body = SC.json.encode(body);
+
+      if (body===undefined) {
+        console.error('There was an error encoding to JSON');
+      }
+
+      this.set('body', body) ;
+    }
+    
+    return SC.Request.manager.sendRequest(this) ;
   },
 
   /**
-    Set up notifications.
+    Configures a callback to execute when a request completes.  You must pass
+    at least a target and action/method to this and optionally a status code.
+    You may also pass additional parameters which will be passed along to your
+    callback.
+    
+    h2. Scoping With Status Codes
+    
+    If you pass a status code as the first option to this method, then your 
+    notification callback will only be called if the response status matches
+    the code.  For example, if you pass 201 (or SC.Request.CREATED) then 
+    your method will only be called if the response status from the server
+    is 201.
+    
+    You can also pass "generic" status codes such as 200, 300, or 400, which
+    will be invoked anytime the status code is the range if a more specific 
+    notifier was not registered first and returned YES.  
+    
+    Finally, passing a status code of 0 or no status at all will cause your
+    method to be executed no matter what the resulting status is unless a 
+    more specific notifier was registered and returned YES.
+    
+    h2. Callback Format
+    
+    Your notification callback should expect to receive the Response object
+    as the first parameter plus any additional parameters that you pass.  
     
     @param {Object} target
     @param {String|function} action
     @param {Hash} params
     @returns {SC.Request} receiver
   */
-  notify: function(target, action, params) {
-    if (SC.typeOf(action) === SC.T_STRING) action = target[action];
-    this.set('notifyTarget', target)
-    .set('notifyAction', action)
-    .set('notifyParams', params);
+  notify: function(status, target, action) {
+    
+    // normalize status
+    var hasStatus = YES, params ;
+    if (SC.typeOf(status) !== SC.T_NUMBER) {
+      params = SC.A(arguments).slice(2);
+      action = target;
+      target = status;
+      status = 0 ;
+      hasStatus = NO ;
+    } else params = SC.A(arguments).slice(3);
+    
+    var listeners = this.get('listeners');
+    if (!listeners) this.set('listeners', listeners = {});
+    listeners[status] = { target: target, action: action, params: params };
+
     return this;
   },
   
@@ -133,11 +267,7 @@ SC.Request = SC.Object.extend({
   @returns {SC.Request} receiver
 */
 SC.Request.getUrl = function(address) {
-  var req = SC.Request.create() ;
-  req.set('address', address) ;
-  req.set('type', 'GET') ;
-  
-  return req ;
+  return SC.Request.create().set('address', address).set('type', 'GET');
 };
 
 /**
@@ -148,11 +278,8 @@ SC.Request.getUrl = function(address) {
   @returns {SC.Request} receiver
 */
 SC.Request.postUrl = function(address, body) {
-  var req = SC.Request.create() ;
-  req.set('address',address) ;
+  var req = SC.Request.create().set('address', address).set('type', 'POST');
   if(body) req.set('body', body) ;
-  req.set('type', 'POST') ;
-  
   return req ;
 };
 
@@ -163,11 +290,7 @@ SC.Request.postUrl = function(address, body) {
   @returns {SC.Request} receiver
 */
 SC.Request.deleteUrl = function(address) {
-  var req = SC.Request.create() ;
-  req.set('address',address) ;
-  req.set('type', 'DELETE') ;
-  
-  return req ;
+  return SC.Request.create().set('address', address).set('type', 'DELETE');
 };
 
 /**
@@ -178,208 +301,149 @@ SC.Request.deleteUrl = function(address) {
   @returns {SC.Request} receiver
 */
 SC.Request.putUrl = function(address, body) {
-  var req = SC.Request.create() ;
-  req.set('address',address) ;
+  var req = SC.Request.create().set('address', address).set('type', 'PUT');
   if(body) req.set('body', body) ;
-  req.set('type', 'PUT') ;
-  
   return req ;
 };
 
 /**
-  The request manager.
-  More description to come.
+  The request manager coordinates all of the active XHR requests.  It will
+  only allow a certain number of requests to be active at a time; queuing 
+  any others.  This allows you more precise control over which requests load
+  in which order.
 */
 SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
-  maxRequests: 2,
+
+  /**
+    Maximum number of concurrent requests allowed.  6 for all browsers.
+    
+    @property {Number}
+  */
+  maxRequests: 6,
+
+  /**
+    Current requests that are inflight.
+    
+    @property {Array}
+  */
+  inflight: [],
   
-  currentRequests: [],
-  queue: [],
+  /**
+    Requests that are pending and have not been started yet.
   
-  canLoadAnotherRequest: function() {
-    return (this.get('numberOfCurrentRequests') < this.get('maxRequests')) ;
-  }.property('numberOfCurrentRequests', 'maxRequests'),
+    @property {Array}
+  */
+  pending: [],
+
+  // ..........................................................
+  // METHODS
+  // 
   
-  numberOfCurrentRequests: function() {
-    return this.get('currentRequests').length ;
-  }.property('currentRequests'),
-  
-  numberOfRequests: function() {
-    return this.get('queue').length ;
-  }.property('queue'),
-  
+  /**
+    Invoked by the send() method on a request.  This will create a new low-
+    level transport object and queue it if needed.
+    
+    @param {SC.Request} request the request to send
+    @returns {SC.Object} response object
+  */
   sendRequest: function(request) {
-    if(!request) return;
+    if (!request) return null ;
     
-    request = { 
-      request: request, 
-      action:  request.get('notifyAction'),
-      target:  request.get('notifyTarget'),
-      params:  request.get('notifyParams') };
-    
-    this.propertyWillChange("queue");
-    this.get('queue').pushObject(request);
-    this.propertyDidChange("queue");
-    
-    this.fireRequestIfNeeded();
-  },
-  
-  removeRequest: function(request) {
-    this.get('queue').removeObject(request);
-    return YES;
-  },  
-  
-  cancelAllRequests: function() {
-    var r, xhrRequest;
-    this.set('queue', []);
-    var activeRequests=this.get('currentRequests');
-    while(r=activeRequests.shiftObject()){
-      xhrRequest = r.get('request');
-      xhrRequest.abort();
-    }
-    return YES;
-  },
-  
-  fireRequestIfNeeded: function() {
-    if (this.canLoadAnotherRequest()) {
-      this.propertyWillChange('queue') ;
-      var item = this.get('queue').shiftObject() ;
-      this.propertyDidChange('queue') ;
+    // create low-level transport.  copy all critical data for request over
+    // so that if the request has been reconfigured the transport will still
+    // work.
+    var response = request.get('responseClass').create({
+      request: request,
+
+      type:    request.get('type'),
+      address: request.get('address'),
+      requestHeaders: SC.copy(request.headers()),
+      requestBosy:    request.get('body'),
+      isAsynchronous: request.get('isAsynchronous'),
       
-      if (item) {
-        var transportClass = item.request.get('transportClass') ;
-        if (!transportClass) transportClass = this.get('transportClass') ;
+      listeners:  SC.copy(request.get('listeners') || {}),
+      isJSON:  request.get('isJSON'),
+      isXML:   request.get('isXML')
+    });
+
+    // add to pending queue
+    this.get('pending').pushObject(response);
+    this.fireRequestIfNeeded();
+    
+    return response ;
+  },
+
+  /** 
+    Cancels a specific request.  If the request is pending it will simply
+    be removed.  Otherwise it will actually be cancelled.
+    
+    @param {Object} response a response object
+    @returns {Boolean} YES if cancelled
+  */
+  cancel: function(response) {
+
+    var pending = this.get('pending'),
+        inflight = this.get('inflight'),
+        idx ;
+
+    if (pending.indexOf(response) >= 0) {
+      this.propertyWillChange('pending');
+      pending.removeObject(response);
+      this.propertyDidChange('pending');
+      return YES;
+      
+    } else if (inflight.indexOf(response) >= 0) {
+      
+      response.cancel();
+      
+      inflight.removeObject(response);
+      this.fireRequestIfNeeded();
+      return YES;
+
+    } else return NO ;
+  },  
+
+  /**
+    Cancels all inflight and pending requests.  
+    
+    @returns {Boolean} YES if any items were cancelled.
+  */
+  cancelAll: function() {
+    if (this.get('pending').length || this.get('inflight').length) {
+      this.set('pending', []);
+      this.get('inflight').forEach(function(r) { r.cancel(); });
+      this.set('inflight', []);
+      return YES;
+      
+    } else return NO ;
+  },
+  
+  /**
+    Checks the inflight queue.  If there is an open slot, this will move a 
+    request from pending to inflight.
+    
+    @returns {Object} receiver
+  */
+  fireRequestIfNeeded: function() {
+    var pending = this.get('pending'), 
+        inflight = this.get('inflight'),
+        max = this.get('maxRequests'),
+        next ;
         
-        if (transportClass) {
-          var transport = transportClass.create(item) ;
-          if (transport) {
-            item.request.set('transport', transport) ;
-            this._transportDidOpen(transport) ;
-          }
-        }
-      }
+    if ((pending.length>0) && (inflight.length<max)) {
+      next = pending.shiftObject();
+      inflight.pushObject(next);
+      next.fire();
     }
-  }.observes('currentRequests'),
-  
-  _transportDidOpen: function(transport) {
-    this.propertyWillChange('currentRequests') ;
-    this.get('currentRequests').pushObject(transport) ;
-    this.propertyDidChange('currentRequests') ;
-    transport.fire() ;
   },
-  
-  transportDidClose: function(request) {
-    this.propertyWillChange('currentRequests') ;
-    this.get('currentRequests').removeObject(request) ;
-    this.propertyDidChange('currentRequests') ;
+
+  /**
+    Called by a response/transport object when finishes running.  Removes 
+    the transport from the queue and kicks off the next one.
+  */
+  transportDidClose: function(response) {
+    this.get('inflight').removeObject(response);
+    this.fireRequestIfNeeded();
   }
   
 });
-
-// abstract superclass, creates no-op objects
-SC.RequestTransport = SC.Object.extend({
-  
-  fire: function() {
-    SC.Request.manager.transportDidClose(this) ;
-  }
-  
-});
-
-SC.XHRRequestTransport = SC.RequestTransport.extend({
-  
-  fire: function() {
-    
-    var tryThese = function() {
-      for (var i=0; i < arguments.length; i++) {
-        try {
-          var item = arguments[i]() ;
-          return item ;
-        } catch (e) {}
-      }
-      return NO;
-    };
-    
-    var rawRequest = tryThese(
-      function() { return new XMLHttpRequest(); },
-      function() { return new ActiveXObject('Msxml2.XMLHTTP'); },
-      function() { return new ActiveXObject('Microsoft.XMLHTTP'); }
-    );
-    
-    var request = this.get('request') ;
-    
-    rawRequest.source = request;
-    
-    
-    //Part of the fix for IE
-    var transport=this;
-    var handleReadyStateChange = function() {
-      return transport.finishRequest(rawRequest) ;
-    };
-    //End of the fix for IE
-    
-    var async = (request.get('isAsynchronous') ? YES : NO) ;
-    if (async) {
-      if (!SC.browser.msie) {
-        SC.Event.add(rawRequest, 'readystatechange', this, handleReadyStateChange, rawRequest) ;
-      } else rawRequest.onreadystatechange = handleReadyStateChange;
-    }
-    
-    
-    
-    rawRequest.open( request.get('type'), request.get('address'), async ) ;
-    
-    // headers need to be set *After* the open call.
-    var headers = request._headers ;
-    for (var headerKey in headers) {
-      rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
-    }
-    
-    rawRequest.send(request.get('body')) ;
-    
-    if (!async) this.finishRequest(rawRequest) ;
-    
-    return rawRequest ;
-  },
-  
-  didSucceed: function(request) {
-    var status = null ;
-    status = request.status || 0;
-    return !status || (status >= 200 && status < 300) ;      
-  },
-  
-  finishRequest: function(request) {
-    
-    var readyState = request.readyState ;
-    
-    if (readyState == 4) {
-      request._complete = YES ;
-
-      var didSucceed = !request ? NO : this.didSucceed(request) ;      
-      if (didSucceed) {
-        var response = request ;
-        request.source.set('rawResponse', response) ; 
-      } else {
-        var error = SC.$error("HTTP Request failed", "Fail", -1) ;
-        error.set("request",request) ;
-        request.source.set('rawResponse', error) ;
-      }
-
-      SC.Request.manager.transportDidClose(this) ;
-
-      if (this.target && this.action) {
-        SC.RunLoop.begin();
-        this.action.call(this.target, request.source, this.params);
-        SC.RunLoop.end();
-      }
-     }
-     
-     if (readyState == 4) {
-       // avoid memory leak in MSIE: clean up
-       request.onreadystatechange = function() {} ;
-     }
-  }
-
-  
-});
-
-SC.Request.manager.set('transportClass', SC.XHRRequestTransport) ;
