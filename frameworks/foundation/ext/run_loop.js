@@ -55,6 +55,8 @@ SC.RunLoop = SC.RunLoop.extend(
     @returns {SC.RunLoop} receiver
   */
   scheduleTimer: function(timer, runTime) {
+    if (!this._start) this._scrl_auto();
+    
     // if the timer is already in the schedule, remove it.
     this._timerQueue = timer.removeFromTimerQueue(this._timerQueue);
     

@@ -40,6 +40,8 @@ sc_require('private/observer_set');
 */
 SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   
+  _runLevel: 0,
+  
   /**
     Call this method whenver you begin executing code.  
     
@@ -51,6 +53,7 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
   */
   beginRunLoop: function() {
     this._start = new Date().getTime() ; // can't use Date.now() in runtime
+    this._runLevel++;
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       console.log("-- SC.RunLoop.beginRunLoop at %@".fmt(this._start));
     } 
@@ -71,23 +74,41 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     // stored up.  Note that if any of these queues actually run, we will 
     // step through all of them again.  This way any changes get flushed
     // out completely.
-    var didChange ;
+    var didChange, level = --this._runLevel;
 
-    if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
-      console.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
-    } 
-    
-    do {
-      didChange = this.flushApplicationQueues() ;
-      if (!didChange) didChange = this._flushinvokeLastQueue() ; 
-    } while(didChange) ;
-    this._start = null ;
+    if (level <= 0) {
+      this._runLevel = 0 ;
+
+      if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
+        console.log("-- SC.RunLoop.endRunLoop ~ flushing application queues");
+      } 
+
+      do {
+        didChange = this.flushApplicationQueues() ;
+        if (!didChange) didChange = this._flushinvokeLastQueue() ; 
+      } while(didChange) ;
+      this._start = null ;
+    }
 
     if (SC.LOG_BINDINGS || SC.LOG_OBSERVERS) {
       console.log("-- SC.RunLoop.endRunLoop ~ End");
     } 
     
     return this ; 
+  },
+  
+  // if needed, begins a runloop now and sets a timeout to fire at the end
+  // of the loop automatically.
+  _scrl_auto: function() {
+    if (!this._start) {
+      this.beginRunLoop();
+      
+      var runLoop = this;
+      this._scrl_autostart = setTimeout(function() { 
+        this._scrl_autostart = null ;
+        runLoop.endRunLoop();
+      }, 1);
+    }
   },
   
   /**
@@ -103,6 +124,8 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   invokeOnce: function(target, method) {
+    if (!this._start) this._scrl_auto();
+    
     // normalize
     if (method === undefined) { 
       method = target; target = this ;
@@ -130,6 +153,8 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     @returns {SC.RunLoop} receiver
   */
   invokeLast: function(target, method) {
+    if (!this._start) this._scrl_auto();
+
     // normalize
     if (method === undefined) { 
       method = target; target = this ;
