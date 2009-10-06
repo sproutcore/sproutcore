@@ -347,9 +347,9 @@ SC.PickerPane = SC.PalettePane.extend({
 
     // initiated with fallback position
     // Will be used only if the following preferred alternative can not be found
-    f.x = prefP1[m[4]][0] ;
-    f.y = prefP1[m[4]][1] ;
-    this.set('pointerPos', SC.POINTER_LAYOUT[m[4]]);
+    f.x = (m[4] === -1) ? (a.x>0 ? a.x+23 : 0) : prefP1[m[4]][0];
+    f.y = (m[4] === -1) ? prefP1[0][1] : prefP1[m[4]][1];
+    this.set('pointerPos', (m[4] === -1) ? SC.POINTER_LAYOUT[0] : SC.POINTER_LAYOUT[m[4]]);
     this.set('pointerPosX', 0);
     this.set('pointerPosY', 0);
 
