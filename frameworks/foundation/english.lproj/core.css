@@ -382,6 +382,10 @@ input[type="submit"] {
   top: 25px;
   background-color: #ccc;
   opacity: 0.4;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)"; 
+  -moz-opacity:0.4;
+  
   position: relative;
   border-top: 1px solid #aaa;
   border-bottom: 1px solid #aaa;
@@ -431,6 +435,10 @@ input[type="submit"] {
 .sc-benchmark-row.even
 {
   opacity: 0.4;
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=40)"; 
+  -moz-opacity:0.4;
+  
   background-color: #ddd; 
 }
 

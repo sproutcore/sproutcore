@@ -13,6 +13,7 @@
 	opacity: 0.5;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  -moz-opacity:0.5;
 }
 
 .sc-theme .sc-progress-view .sc-inner {

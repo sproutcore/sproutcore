@@ -83,7 +83,9 @@
 #qunit div.medheight { height: 50px; }
 #qunit div.medopacity {
 	opacity: 0.5;
-	filter: progid:DXImageTransform.Microsoft.Alpha(opacity=50);
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
+  -moz-opacity:0.5;
 }
 
 #qunit div.nowidth {
@@ -96,7 +98,10 @@
 
 #qunit div.noopacity {
 	opacity: 0;
-	filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0);
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
+  -moz-opacity:0;
+  
 }
 
 #qunit div.hidden {

@@ -25,10 +25,11 @@
 	height: 10px;
   position: absolute;
 	margin-left: -20px;
-	opacity: 0.0;
+	opacity: 0;
 	outline:0px;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  -moz-opacity:0;
 }
 
 .sc-theme .sc-radio-view.sc-layout-vertical .sc-radio-button {
@@ -96,6 +97,7 @@
 	opacity: 0.5;
 	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)"; 
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
+  -moz-opacity:0.5;
 }
 
 /* @end */
