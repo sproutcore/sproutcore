@@ -1122,7 +1122,10 @@ SC.Observable = {
       if (seenRevisions[key] != currentRevision) {
         // yes, check the value with the last seen value
         var value = this.get(key) ;
-        if (seenValues[key] !== value) ret = true ; // did change!
+        if (seenValues[key] !== value) {
+          ret = true ; // did change!
+          seenValues[key] = value;
+        }
       }
       seenRevisions[key] = currentRevision;
     }
