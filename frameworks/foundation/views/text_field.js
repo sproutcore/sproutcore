@@ -95,6 +95,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     accessory view wider, with empty space on the left.
   */
   rightAccessoryView: null,
+  
+  _isFocused: NO,
 
 
   /** isEditable maps to isEnabled with a TextField. */
@@ -431,7 +433,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         // field, if it has focus.  (Even though it's set to 100% of its
         // parent, if we adjust the parent it doesn't always adjust in kind.)
         if (SC.browser.mozilla) {
-          element.style.width = paddingElement.clientWidth + "px";
+          if(paddingElement.clientWidth>0){
+            element.style.width = paddingElement.clientWidth + "px";
+          }
         }
       }
     }
@@ -480,6 +484,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // our key/mouse down/up handlers (such as the user choosing Select All
     // from a menu).
     SC.Event.add(input, 'select', this, this._textField_selectionDidChange);
+    this._applyFirefoxCursorFix();
   },
 
   willDestroyLayer: function() {
@@ -492,37 +497,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   _textField_fieldDidFocus: function(evt) {
-    SC.RunLoop.begin();
-    this.fieldDidFocus();
-    SC.RunLoop.end();
+      SC.RunLoop.begin();
+      this.beginEditing();
+      SC.RunLoop.end();
   },
 
   _textField_fieldDidBlur: function(evt) {
-    SC.RunLoop.begin();
-    this.fieldDidBlur();
-    SC.RunLoop.end();
-  },
-
-  fieldDidFocus: function(evt) {
-    if (!this._isFocused) {
-      this._isFocused = YES ;
-      this.beginEditing();
-    }
-  },
-
-  fieldDidBlur: function() {
-    //if (this._isFocused) {
-      this._isFocused = NO ;
+      SC.RunLoop.begin();
       this.commitEditing();
-    //}
+      SC.RunLoop.end();
   },
+
 
   _applyFirefoxCursorFix: function() {
     this._applyTimer = null; // clear
     if (this._hasFirefoxCursorFix) return this;
     if (SC.browser.mozilla) {
       this._hasFirefoxCursorFix = YES ;
-
+    
       var element = this.$input();
       var layer = element[0];
       var p = SC.$(layer).offset() ;
@@ -530,14 +522,15 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
           left   = p.left,
           width  = layer.offsetWidth,
           height = layer.offsetHeight ;
-
+    
       var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
       element.attr('style', style) ;
     }
     return this ;
   },
-
+  
   _removeFirefoxCursorFix: function() {
+    
     if (!this._hasFirefoxCursorFix) return this;
     this._hasFirefoxCursorFix = NO ;
     if (SC.browser.mozilla) {
@@ -545,7 +538,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     }
     return this ;
   },
-
+ 
   _textField_selectionDidChange: function() {
     this.notifyPropertyChange('selection');
   },
@@ -561,20 +554,20 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // hide the hint text.
   /** @private */
   willBecomeKeyResponderFrom: function(keyView) {
-    // focus the text field.
-    if (!this._isFocused) {
-      this._isFocused = YES ;
-      this.becomeFirstResponder();
-      if (this.get('isVisibleInWindow')) {
-        this.$input()[0].focus();
-        this._applyFirefoxCursorFix();
-
-        if(!this._txtFieldMouseDown){
-          if(!SC.browser.safari) this.invokeOnce(this._selectRootElement) ;
-          else this.invokeLater(this._selectRootElement, 1) ;
-        }
+    if(this.get('isVisibleInWindow')) {
+      this.$input()[0].focus();
+      
+      if(!this._txtFieldMouseDown){
+        if(SC.browser.mozilla) this.invokeOnce(this._selectRootElement) ;
+        else this.$input()[0].select() ;
+        // if(!SC.browser.safari) 
+        //else this.invokeLater(this._selectRootElement, 1) ;
       }
     }
+  },
+  
+  willLoseKeyResponderTo: function(responder) {
+    //if (this._isFocused) this._isFocused = NO ;
   },
 
   // In IE, you can't modify functions on DOM elements so we need to wrap the
@@ -587,33 +580,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // the hint text if needed.
   /** @private */
   didLoseKeyResponderTo: function(keyView) {
-    if (this._isFocused) {
-      this._isFocused = NO ;
-      this.$input()[0].blur() ;
-    } else {
-      this.fieldValueDidChange() ;
-    }
-    if(this._hasFirefoxCursorFix) this._removeFirefoxCursorFix();
+    this.$input()[0].blur() ;
   },
 
   parentViewDidResize: function() {
-    if (SC.browser.mozilla && this.get('isFirstResponder')) {
+    if (SC.browser.mozilla) {
       this._removeFirefoxCursorFix();
       if (this._applyTimer) this._applyTimer.invalidate();
       this._applyTimer = this.invokeLater(this._applyFirefoxCursorFix, 250);
     }
-
     sc_super();
   },
 
-  _isFocused: false,
 
   /** @private
     Simply allow keyDown & keyUp to pass through to the default web browser
     implementation.
   */
   keyDown: function(evt) {
-
     // handle return and escape.  this way they can be passed on to the
     // responder chain.
     if ((evt.which === 13) && !this.get('isTextArea')) return NO ;
@@ -624,6 +608,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
       view.becomeFirstResponder();
       return YES ; // handled
+    }
+    
+    // handle delete key, set dontForceDeleteKey to allow the default behavior
+    // of the delete key.
+    if (evt.which === 8){
+      evt.dontForceDeleteKey=YES;
     }
 
     // validate keyDown...
@@ -638,6 +628,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   keyUp: function(evt) {
+    
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
@@ -654,8 +645,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   mouseDown: function(evt) {
     this._txtFieldMouseDown=YES;
+    //this.becomeFirstResponder();
     if (!this.get('isEnabled')) {
       evt.stop();
+      return YES;
+    } else if((this.value && this.value.length===0) || !this.value) {
       return YES;
     } else return sc_super();
   },
@@ -670,7 +664,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
-    } else return sc_super();
+    }   else if((this.value && this.value.length===0) || !this.value) {
+        this.$input()[0].focus();
+        return YES;
+      } else return sc_super();
   },
 
   selectStart: function(evt) {

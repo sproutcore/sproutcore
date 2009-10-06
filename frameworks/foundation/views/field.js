@@ -42,6 +42,9 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   */
   followSafariTabFocusBehavior: NO,
 
+
+  _field_isMouseDown: NO,
+  
   /**
     The raw value of the field itself.  This is computed from the 'value'
     property by passing it through any validator you might have set.  This is 
@@ -225,6 +228,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     event.  But first, set isActive to YES.
   */
   mouseDown: function(evt) {  
+    this._field_isMouseDown = YES;
     evt.allowDefault(); 
     return YES; 
   },
@@ -247,8 +251,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     return YES;
   },
   
-  _field_isMouseDown: NO,
-  
   /** @private
     on mouse up, remove the isActive class and then allow the browser to do
     its normal thing.
@@ -256,7 +258,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   mouseUp: function(evt) {
     // track independently in case isEnabled has changed
     if (this._field_isMouseDown) this.set('isActive', NO); 
-    this._field_isMouseDown = false;
+    this._field_isMouseDown = NO;
     evt.allowDefault();
     return YES ;
   },

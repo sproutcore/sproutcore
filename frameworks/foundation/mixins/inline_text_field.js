@@ -93,7 +93,10 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     @returns {Boolean} YES if editor began editing, NO if it failed.
   */
   beginEditing: function(options) {
+    if (!options) return;
+    
     var layout={}, pane;
+    
     // end existing editing if necessary
     this.beginPropertyChanges();
     if (this.get('isEditing') && !this.blurEditor()) {
