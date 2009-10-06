@@ -214,8 +214,8 @@ SC.PickerPane = SC.PalettePane.extend({
   computeAnchorRect: function(anchor) {
     var ret = SC.viewportOffset(anchor); // get x & y
     var cq = SC.$(anchor);
-    ret.width = cq.width();
-    ret.height = cq.height();
+    ret.width = cq.outerWidth();
+    ret.height = cq.outerHeight();
     return ret ;
   },
 
@@ -322,13 +322,13 @@ SC.PickerPane = SC.PalettePane.extend({
     var overlapTunningX = (a.height > 12) ? 0 : 1;
     var overlapTunningY = (a.height > 12) ? 0 : 3;
 
-    var prefP1    =[[a.x+a.width+(19+overlapTunningX), a.y+parseInt(a.height/2,0)-40], 
+    var prefP1    =[[a.x+a.width+(7+overlapTunningX), a.y+parseInt(a.height/2,0)-40], 
                     [a.x-f.width-(7+overlapTunningX),  a.y+parseInt(a.height/2,0)-40], 
                     [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y-f.height-(17+overlapTunningY)],
                     [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y+a.height+(17+overlapTunningY)]];
     // bottom-right corner of 4 perfect positioned f  (4x2)
-    var prefP2    =[[a.x+a.width+f.width+(19+overlapTunningX), a.y+parseInt(a.height/2,0)+f.height-40], 
-                    [a.x-(7+overlapTunningX),                  a.y+parseInt(a.height/2,0)+f.height-40], 
+    var prefP2    =[[a.x+a.width+f.width+(7+overlapTunningX), a.y+parseInt(a.height/2,0)+f.height-24], 
+                    [a.x-(7+overlapTunningX),                  a.y+parseInt(a.height/2,0)+f.height-24], 
                     [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y-(17+overlapTunningY)],
                     [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y+a.height+f.height+(17+overlapTunningY)]];
     // cutoff of 4 perfect positioned f: top, right, bottom, left  (4x4)
@@ -360,19 +360,15 @@ SC.PickerPane = SC.PalettePane.extend({
           f.x = prefP1[m[i]][0] ;
           f.y = prefP1[m[i]][1] ;
           this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
-          if(m[i] === 0) f.x -=13 ; //Added so that the pointer would overlap on the anchor slightly,
-                                    // when the picker is positioned left of the anchor
         }
         i = SC.POINTER_LAYOUT.length;
       } else if ((m[i] === 0 || m[i] === 1) && cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2] < f.height-91 && cutoffPrefP[m[i]][3]===0) {
         if (m[4] != m[i]) {
           f.x = prefP1[m[i]][0] ;
           this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
-          if(m[i] === 0) f.x -=13 ; //Added so that the pointer would overlap on the anchor slightly,
-                                    // when the picker is positioned left of the anchor
         }
-        f.y = prefP1[m[i]][1] - cutoffPrefP[m[i]][2] - 14 ; //Componsate for the corners while calculating the y cordinate
-        this.set('pointerPosY', cutoffPrefP[m[i]][2] + 12); //Componsate for the corners excluding border while calculating the arrow position
+        f.y = prefP1[m[i]][1] - cutoffPrefP[m[i]][2];
+        this.set('pointerPosY', cutoffPrefP[m[i]][2]);
         i = SC.POINTER_LAYOUT.length;
       } else if ((m[i] === 0 || m[i] === 1) && cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2] <= f.height-57 && cutoffPrefP[m[i]][3]===0) {
         if (m[4] != m[i]) {
