@@ -10,7 +10,7 @@ var ms, options, dt, timezones;
 
 module("SC.DateTime", {
   setup: function() {
-    ms = 484354822925; // 1985-05-08 01:00:22 +02:00
+    ms = 484387222925; // 1985-05-08T01:00:22-07:00
     options = {year: 1985, month: 5, day: 8, hour: 1, minute: 0, second: 22, millisecond: 925, timezone: SC.DateTime.timezone};
     dt = SC.DateTime.create(options);
     timezones = [480, 420, 0, -60, -120, -330]; // PST, PDT, UTC, CET, CEST, Mumbai

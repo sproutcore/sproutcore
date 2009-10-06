@@ -241,7 +241,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   element: function() {  
     if (this._elem) return this._elem;
     // create factory div if needed
-    var ret ;
+    var ret, child;
     if (!SC.RenderContext.factory) {
       SC.RenderContext.factory = document.createElement('div');
     }
@@ -254,8 +254,12 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // reference to the first child, but it didnt work. 
     // Ended up cloning the first child.
     
-    var child = SC.RenderContext.factory.firstChild.cloneNode(true);
-    SC.RenderContext.factory.innerHTML = '';
+    if(SC.RenderContext.factory.innerHTML.length>0){
+      child = SC.RenderContext.factory.firstChild.cloneNode(true);
+      SC.RenderContext.factory.innerHTML = '';
+    } else {
+      child = null;
+    }
     return child ;
   },
   

@@ -30,7 +30,8 @@ test("SC.$ok should return YES if the passed value is an error object or false",
   ok(SC.$ok(undefined), '$ok(undefined) should be YES');
   ok(SC.$ok("foo"), '$ok(foo) should be YES');
   ok(!SC.$ok(SC.$error("foo")), '$ok(SC.Error) should be NO');
-  ok(!SC.$ok(new Error()), '$ok(Error) should be NO');
+
+  ok(!SC.$ok(new SC.Error()), '$ok(Error) should be NO');
   ok(!SC.$ok(SC.Object.create({ isError: YES })), '$ok({ isError: YES }) should be NO');
 });
 
@@ -42,7 +43,7 @@ test("SC.$val should return the error value if it has one", function() {
   equals(SC.val("foo"), "foo", 'val(foo) should be YES');
   equals(SC.val(SC.$error("foo", "FOO", "BAZ")), "BAZ", 'val(SC.Error) should be BAZ');
   equals(SC.val(SC.$error("foo", "FOO")), undefined, 'val(SC.Error) should be undefined');
-  equals(SC.val(new Error()), null, 'val(Error) should be null');
+  equals(SC.val(new SC.Error()), null, 'val(Error) should be null');
   equals(SC.val(SC.Object.create({ isError: YES, errorValue: "BAR" })), "BAR", 'val({ isError: YES, errorValue: BAR }) should be BAR');
 });
 

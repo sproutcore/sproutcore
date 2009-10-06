@@ -281,9 +281,7 @@ test("Adding left accessory view", function() {
   // The hint and padding elements should automatically have their 'left'
   // values set to the accessory view's offset + width
   // (18 = 2 left offset + 16 width)
-  var hintElement  = view.$('.sc-hint')[0];
   var paddingElement = view.$('.padding')[0];
-  ok(hintElement.style.left  === '18px', 'hint element should get 18px left');
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
   
   // Test removing the accessory view.
@@ -291,7 +289,6 @@ test("Adding left accessory view", function() {
   view.set('leftAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing the left accessory view there should be no child views left');
-  ok(!hintElement.style.left, 'after removing the left accessory view the hint element should have no left style');
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
@@ -314,9 +311,7 @@ test("Adding right accessory view", function() {
   // The hint and padding elements should automatically have their 'right'
   // values set to the accessory view's offset + width
   // (20 = 3 right offset + 17 width)
-  var hintElement  = view.$('.sc-hint')[0];
   var paddingElement = view.$('.padding')[0];
-  ok(hintElement.style.right  === '20px', 'hint element should get 20px right');
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
   
   
@@ -339,7 +334,6 @@ test("Adding right accessory view", function() {
   view.set('rightAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing the right accessory view there should be no child views left');
-  ok(!hintElement.style.right, 'after removing the right accessory view the hint element should have no right style');
   ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
 });
 
@@ -365,11 +359,8 @@ test("Adding both left and right accessory views", function() {
   // 'right' values set to the accessory views' offset + width
   //   *  left:   18 = 2 left offset + 16 width)
   //   *  right:  20 = 3 left offset + 17 width)
-  var hintElement  = view.$('.sc-hint')[0];
   var paddingElement = view.$('.padding')[0];
-  ok(hintElement.style.left  === '18px', 'hint element should get 18px left');
   ok(paddingElement.style.left === '18px', 'padding element should get 18px left');
-  ok(hintElement.style.right  === '20px', 'hint element should get 20px right');
   ok(paddingElement.style.right === '20px', 'padding element should get 20px right');
   
   
@@ -378,13 +369,11 @@ test("Adding both left and right accessory views", function() {
   view.set('rightAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 1, 'after removing the right accessory view there should be one child view left (the left accessory view)');
-  ok(!hintElement.style.right, 'after removing the right accessory view the hint element should have no right style');
   ok(!paddingElement.style.right, 'after removing the right accessory view the padding element should have no right style');
   SC.RunLoop.begin();
   view.set('leftAccessoryView', null);
   SC.RunLoop.end();
   ok(view.get('childViews').length === 0, 'after removing both accessory views there should be no child views left');
-  ok(!hintElement.style.left, 'after removing the left accessory view the hint element should have no left style');
   ok(!paddingElement.style.left, 'after removing the left accessory view the padding element should have no left style');
 });
 
