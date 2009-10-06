@@ -29,7 +29,6 @@ test("converts context to a DOM element and returns root element if there is one
 });
 
 test("returns null if context does not generate valid element", function() {
-  debugger;
   context = SC.RenderContext(null);
   var elem = context.element();
   equals(elem, null, 'should be null');
