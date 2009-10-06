@@ -491,7 +491,7 @@ SC.Record = SC.Object.extend(
     @property {SC.Record}
   */
   errorValue: function() {
-    return this.get('isError') ? this : null;
+    return this.get('isError') ? SC.val(this.get('errorObject')) : null ;
   }.property('isError').cacheable(),
   
   /**

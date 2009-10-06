@@ -101,6 +101,12 @@ module("SC.Store#dataSourceCallbacks", {
       number: 23,
       bool:   YES
     };
+    json16 = {
+      guid: "commitGUID16",
+      string: "string",
+      number: 23,
+      bool:   YES
+    };
     storeKey1 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey1, json1, SC.Record.READY_CLEAN);
     storeKey2 = SC.Store.generateStoreKey();
@@ -134,6 +140,9 @@ module("SC.Store#dataSourceCallbacks", {
     store.writeDataHash(storeKey14, json14, SC.Record.READY_CLEAN);
     storeKey15 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey15, json15, SC.Record.BUSY_CREATING);
+
+    storeKey16 = SC.Store.generateStoreKey();
+    store.writeDataHash(storeKey16, json16, SC.Record.BUSY_LOADING);
   
     SC.RunLoop.begin();
   
@@ -251,4 +260,19 @@ test("Confirm that dataSourceDidError switched the records to the right states",
   status = store.readStatus( storeKey15);
   equals(status, SC.Record.ERROR, 
     "the status shouldn't have changed.");
+});
+
+test("Confirm that errors passed to dataSourceDidError make it into the recordErrors array", function() {
+  var msg = '';
+
+  ok(!store.recordErrors, "recordErrors should be null at this point");
+
+  try {
+    store.dataSourceDidError(storeKey16, SC.Record.GENERIC_ERROR);
+  } catch (error) {
+    msg = error.message;
+  }
+ 
+  equals(store.recordErrors[storeKey16], SC.Record.GENERIC_ERROR,
+    "recordErrors[storeKey] should be the right error object");
 });

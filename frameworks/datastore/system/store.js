@@ -252,6 +252,28 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   recordArraysWithQuery: null,
   
+  /**
+    An array of SC.Error objects associated with individual records in the
+    store (indexed by store keys).
+    
+    Errors passed form the data source in the call to dataSourceDidError() are
+    stored here.
+    
+    @property {Array}
+  */
+  recordErrors: null,
+  
+  /**
+    A hash of SC.Error objects associated with queries (indexed by the GUID
+    of the query).
+    
+    Errors passed from the data source in the call to dataSourceDidErrorQuery()
+    are stored here.
+    
+    @property {Hash}
+  */
+  queryErrors: null,
+  
   // ..........................................................
   // CORE ATTRIBUTE API
   // 
@@ -619,9 +641,11 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     this.revisions  = {} ;
     this.statuses   = {} ;
 
-    // also reset temporary objects
+    // also reset temporary objects and errors
     this.chainedChanges = this.locks = this.editables = null;
     this.changelog = null ;
+    this.recordErrors = null;
+    this.queryErrors = null;
 
     var records = this.records, storeKey;
     if (records) {
@@ -1714,6 +1738,30 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     // return storeKeys
     return ret ;
   },
+
+  /**
+    Returns the SC.Error object associated with a specific record.
+
+    @param {Number} storeKey The store key of the record.
+ 
+    @returns {SC.Error} SC.Error or undefined if no error associated with the record.
+  */
+  readError: function(storeKey) {
+    var errors = this.recordErrors ;
+    return errors ? errors[storeKey] : undefined ;
+  },
+
+  /**
+    Returns the SC.Error object associated with a specific query.
+
+    @param {SC.Query} query The SC.Query with which the error is associated.
+ 
+    @returns {SC.Error} SC.Error or undefined if no error associated with the query.
+  */
+  readQueryError: function(query) {
+    var errors = this.queryErrors ;
+    return errors ? errors[SC.guidFor(query)] : undefined ;
+  },
   
   // ..........................................................
   // DATA SOURCE CALLBACKS
@@ -1835,11 +1883,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   /**
     Converts the passed record into an error object.
     
-    @param {Number} storeKey record store key to cancel
+    @param {Number} storeKey record store key to error
+    @param {SC.Error} error [optional] an SC.Error instance to associate with storeKey
     @returns {SC.Store} reciever
   */
   dataSourceDidError: function(storeKey, error) {
-    var status = this.readStatus(storeKey), K = SC.Record;
+    var status = this.readStatus(storeKey), errors = this.recordErrors, K = SC.Record;
 
     // EMPTY, ERROR, READY_CLEAN, READY_NEW, READY_DIRTY, DESTROYED_CLEAN,
     // DESTROYED_DIRTY
@@ -1847,6 +1896,12 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
     // otherwise, determine proper state transition
     else status = K.ERROR ;
+
+    // Add the error to the array of record errors (for lookup later on if necessary).
+    if (error && error.isError) {
+      if (!errors) errors = this.recordErrors = [];
+      errors[storeKey] = error;
+    }
 
     this.writeStatus(storeKey, status) ;
     this.dataHashDidChange(storeKey, null, YES);
@@ -1919,17 +1974,25 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     
     @param {Class} recordType the SC.Record subclass
     @param {Object} id the record id or null
-    @param {Number} storeKey optional store key.  
+    @param {SC.Error} error [optional] an SC.Error instance to associate with id or storeKey
+    @param {Number} storeKey optional store key.
     @returns {Boolean} YES if push was allowed
   */
   pushError: function(recordType, id, error, storeKey) {
-    var K = SC.Record, status;
+    var K = SC.Record, status, errors = this.recordErrors;
 
     if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
 
     if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
       status = K.ERROR;
+      
+      // Add the error to the array of record errors (for lookup later on if necessary).
+      if (error && error.isError) {
+        if (!errors) errors = this.recordErrors = [];
+        errors[storeKey] = error;
+      }
+      
       this.writeStatus(storeKey, status) ;
       this.dataHashDidChange(storeKey, null, YES);
       return YES;
@@ -2042,10 +2105,18 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     again.
     
     @param {SC.Query} query the query with the error
-    @param {SC.Error} error optional error object to set
+    @param {SC.Error} error [optional] an SC.Error instance to associate with query
     @returns {SC.Store} receiver
   */
   dataSourceDidErrorQuery: function(query, error) {
+    var errors = this.queryErrors;
+
+    // Add the error to the array of query errors (for lookup later on if necessary).
+    if (error && error.isError) {
+      if (!errors) errors = this.queryErrors = {};
+      errors[SC.guidFor(query)] = error;
+    }
+
     return this._scstore_dataSourceDidErrorQuery(query, YES);
   },
 
