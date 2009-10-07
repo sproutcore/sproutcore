@@ -19,10 +19,12 @@ sc_require('system/response');
   your options, and call send() to initiate the request.
   
   @extends SC.Object
+  @extends SC.Copyable
+  @extends SC.Freezable
   @since SproutCore 1.0
 */
 
-SC.Request = SC.Object.extend(
+SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   /** @scope SC.Request.prototype */ {
   
   // ..........................................................
@@ -60,9 +62,6 @@ SC.Request = SC.Object.extend(
   */
   isXML: NO,
   
-  rawResponse: null,
-  error: null,
-
   /**
     Current set of headers for the request
   */
@@ -80,11 +79,132 @@ SC.Request = SC.Object.extend(
     @property {SC.Response}
   */
   responseClass: SC.XHRResponse,
+
+  /**
+    The original request for copied requests.
+    
+    @property {SC.Request}
+  */
+  source: null,
+  
+  /**
+    The URL this request to go to.
+    
+    @param {String}
+  */
+  address: null,
+  
+  /**
+    The HTTP method to use.
+    
+    @param {String}
+  */
+  type: 'GET',
+  
+  /**
+    The body of the request.  May be an object is isJSON or isXML is set,
+    otherwise should be a string.
+  */
+  body: null,
+  
+  /**
+    The body, encoded as JSON or XML if needed.
+  */
+  encodedBody: function() {
+    // TODO: support XML
+    var ret = this.get('body');
+    if (ret && this.get('isJSON')) ret = SC.json.encode(ret);
+    return ret ;
+  }.property('isJSON', 'isXML', 'body').cacheable(),
+
+  // ..........................................................
+  // CALLBACKS
+  // 
+  
+  /**
+    Invoked on the original request object just before a copied request is 
+    frozen and then sent to the server.  This gives you one last change to 
+    fixup the request; possibly adding headers and other options.
+    
+    If you do not want the request to actually send, call cancel().
+    
+    @param {SC.Request} request a copy of the request, not frozen
+    @returns {void}
+  */
+  willSend: function(request, response) {},
+  
+  /**
+    Invoked on the original request object just after the request is sent to
+    the server.  You might use this callback to update some state in your 
+    application.
+    
+    The passed request is a frozen copy of the request, indicating the 
+    options set at the time of the request.
+    
+    @param {SC.Request} request a copy of the request, frozen
+    @param {SC.Response} response the object that will carry the response
+    @returns {void}
+  */
+  didSend: function(request, response) {},
+  
+  /**
+    Invoked when a response has been received but not yet processed.  This is
+    your chance to fixup the response based on the results.  If you don't want
+    to continue processing the response call response.cancel().
+    
+    @param {SC.Response} response the response
+    @returns {void}
+  */
+  willReceive: function(request, response) {},
+  
+  /**
+    Invoked after a response has been processed but before any listeners are
+    notified.  You can do any standard processing on the request at this 
+    point.  If you don't want to allow notifications to continue, call
+    response.cancel()
+    
+    @param {SC.Response} response reponse
+    @returns {void}
+  */
+  didReceive: function(request, response) {},
   
   // ..........................................................
   // HELPER METHODS
   // 
 
+  COPY_KEYS: 'isAsynchronous isJSON isXML address type body responseClass willSend didSend willReceive didReceive'.w(),
+  
+  /**
+    Returns a copy of the current request.  This will only copy certain
+    properties so if you want to add additional properties to the copy you
+    will need to override copy() in a subclass.
+    
+    @returns {SC.Request} new request
+  */
+  copy: function() {
+    var ret = {},
+        keys = this.COPY_KEYS,
+        loc  = keys.length, 
+        key, listeners, headers;
+        
+    while(--loc>=0) {
+      key = keys[loc];
+      if (this.hasOwnProperty(key)) ret[key] = this.get(key);
+    }
+    
+    if (this.hasOwnProperty('listeners')) {
+      ret.listeners = SC.copy(this.get('listeners'));
+    }
+    
+    if (this.hasOwnProperty('_headers')) {
+      ret._headers = SC.copy(this._headers);
+    }
+    
+    ret.source = this.get('source') || this ;
+    
+    return this.constructor.create(ret);
+  },
+  
   /**
     To set headers on the request object.  Pass either a single key/value 
     pair or a hash of key/value pairs.  If you pass only a header name, this
@@ -148,6 +268,20 @@ SC.Request = SC.Object.extend(
     return this.set('isXML', flag);
   },
   
+  /** 
+    Called just before a request is enqueued.  This will encode the body 
+    into JSON if it is not already encoded.
+  */
+  _prep: function() {
+    var hasContentType = !!this.header('Content-Type');
+    if (this.get('isJSON') && !hasContentType) {
+      this.header('Content-Type', 'application/json');
+    } else if (this.get('isXML') && !hasContentType) {
+      this.header('Content-Type', 'text/xml');
+    }
+    return this ;
+  },
+  
   /**
     Will fire the actual request.  If you have set the request to use JSON 
     mode then you can pass any object that can be converted to JSON as the 
@@ -157,30 +291,22 @@ SC.Request = SC.Object.extend(
     @returns {SC.Response} new response object
   */  
   send: function(body) {
-    var isJSON = this.get('isJSON');
-
-    if (!body) this.set('body', body);
-    else body = this.get('body');
-    
-    // Set the content-type to JSON (many browsers will otherwise default it
-    // to XML).
-    if (isJSON && !this.header('Content-Type')) {
-      this.header('Content-Type', 'application/json');
-    }
-
-    if (body && isJSON) {
-      body = SC.json.encode(body);
-
-      if (body===undefined) {
-        console.error('There was an error encoding to JSON');
-      }
-
-      this.set('body', body) ;
-    }
-    
-    return SC.Request.manager.sendRequest(this) ;
+    if (body) this.set('body', body);
+    return SC.Request.manager.sendRequest(this.copy()._prep());
   },
 
+  /**
+    Resends the current request.  This is more efficient than calling send()
+    for requests that have already been used in a send.  Otherwise acts just
+    like send().  Does not take a body argument.
+    
+    @returns {SC.Response} new response object
+  */
+  resend: function() {
+    var req = this.get('source') ? this : this.copy()._prep();
+    return SC.Request.manager.sendRequest(req);
+  },
+  
   /**
     Configures a callback to execute when a request completes.  You must pass
     at least a target and action/method to this and optionally a status code.
@@ -230,81 +356,61 @@ SC.Request = SC.Object.extend(
     listeners[status] = { target: target, action: action, params: params };
 
     return this;
-  },
+  }
+    
+});
+
+SC.Request.mixin(/** @scope SC.Request */ {
   
   /**
-    Response method
-    
-    @returns {Object} response
+    Helper method for quickly setting up a GET request.
+
+    @param {String} address url of request
+    @returns {SC.Request} receiver
   */
-  response: function() {
-    var response = this.get("rawResponse") ;
-    if (!response || !SC.$ok(response) || response.responseText.trim()==='') {
-        return response ;
-    }
-    
-    if (this.get("isJSON")) {
-      var source = response.responseText ;
-      try{
-        var json = SC.json.decode(source) ;
-      }catch(e){
-        json = response.responseText ;
-      }
-      //TODO cache this value?
-      return json ;
-    }
-    
-    if(response.responseXML) return response.responseXML ;
-    return response.responseText ;
-  }.property('rawResponse').cacheable()
+  getUrl: function(address) {
+    return SC.Request.create().set('address', address).set('type', 'GET');
+  },
+
+  /**
+    Helper method for quickly setting up a POST request.
+
+    @param {String} address url of request
+    @param {String} body
+    @returns {SC.Request} receiver
+  */
+  postUrl: function(address, body) {
+    var req = SC.Request.create().set('address', address).set('type', 'POST');
+    if(body) req.set('body', body) ;
+    return req ;
+  },
+
+  /**
+    Helper method for quickly setting up a DELETE request.
+
+    @param {String} address url of request
+    @returns {SC.Request} receiver
+  */
+  deleteUrl: function(address) {
+    return SC.Request.create().set('address', address).set('type', 'DELETE');
+  },
+
+  /**
+    Helper method for quickly setting up a PUT request.
+
+    @param {String} address url of request
+    @param {String} body
+    @returns {SC.Request} receiver
+  */
+  putUrl: function(address, body) {
+    var req = SC.Request.create().set('address', address).set('type', 'PUT');
+    if(body) req.set('body', body) ;
+    return req ;
+  }
   
 });
 
-/**
-  Helper method for quickly setting up a GET request.
-  
-  @param {String} address url of request
-  @returns {SC.Request} receiver
-*/
-SC.Request.getUrl = function(address) {
-  return SC.Request.create().set('address', address).set('type', 'GET');
-};
 
-/**
-  Helper method for quickly setting up a POST request.
-  
-  @param {String} address url of request
-  @param {String} body
-  @returns {SC.Request} receiver
-*/
-SC.Request.postUrl = function(address, body) {
-  var req = SC.Request.create().set('address', address).set('type', 'POST');
-  if(body) req.set('body', body) ;
-  return req ;
-};
-
-/**
-  Helper method for quickly setting up a DELETE request.
-  
-  @param {String} address url of request
-  @returns {SC.Request} receiver
-*/
-SC.Request.deleteUrl = function(address) {
-  return SC.Request.create().set('address', address).set('type', 'DELETE');
-};
-
-/**
-  Helper method for quickly setting up a PUT request.
-  
-  @param {String} address url of request
-  @param {String} body
-  @returns {SC.Request} receiver
-*/
-SC.Request.putUrl = function(address, body) {
-  var req = SC.Request.create().set('address', address).set('type', 'PUT');
-  if(body) req.set('body', body) ;
-  return req ;
-};
 
 /**
   The request manager coordinates all of the active XHR requests.  It will
@@ -352,19 +458,7 @@ SC.Request.manager = SC.Object.create( SC.DelegateSupport, {
     // create low-level transport.  copy all critical data for request over
     // so that if the request has been reconfigured the transport will still
     // work.
-    var response = request.get('responseClass').create({
-      request: request,
-
-      type:    request.get('type'),
-      address: request.get('address'),
-      requestHeaders: SC.copy(request.headers()),
-      requestBosy:    request.get('body'),
-      isAsynchronous: request.get('isAsynchronous'),
-      
-      listeners:  SC.copy(request.get('listeners') || {}),
-      isJSON:  request.get('isJSON'),
-      isXML:   request.get('isXML')
-    });
+    var response = request.get('responseClass').create({ request: request });
 
     // add to pending queue
     this.get('pending').pushObject(response);

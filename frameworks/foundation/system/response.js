@@ -42,47 +42,56 @@ SC.Response = SC.Object.extend(
   errorObject: null,
   
   /** 
-    Original request
+    Request used to generate this response.  This is a copy of the original
+    request object as you may have modified the original request object since
+    then.
+   
+    To retrieve the original request object use originalRequest.
     
     @property {SC.Request}
   */
   request: null,
+  
+  /**
+    The request object that originated this request series.  Mostly this is
+    useful if you are looking for a reference to the original request.  To
+    inspect actual properties you should use request instead.
+    
+    @property {SC.Request}
+  */
+  originalRequest: function() {
+    var ret = this.get('request');
+    while (ret.get('source')) ret = ret.get('source');
+    return ret ;
+  }.property('request').cacheable(),
 
   /** 
-    Type of request.  Must be an HTTP method.
+    Type of request.  Must be an HTTP method.  Based on the request
   
     @property {String}
   */
-  type:    '',
+  type: function() {
+    return this.getPath('request.type');
+  }.property('request').cacheable(),
   
   /**
     URL of request. 
     
     @property {String}
   */
-  address: '',
+  address: function() {
+    return this.getPath('request.address');
+  }.property('request').cacheable(),
   
-  /** @private
-    Request headers.  Deleted as soon as request is sent
-    
-    @property {Hash}
-  */
-  requestHeaders: null,
-  
-  /** @private
-    Request body.  Deleted as soon as request is sent.
-    
-    @property {String}
-  */
-  requestBody: null,
-
   /**
     If set then will attempt to automatically parse response as JSON 
     regardless of headers.
     
     @property {Boolean}
   */
-  isJSON: NO,
+  isJSON: function() {
+    return this.getPath('request.isJSON') || NO;
+  }.property('request').cacheable(),
 
   /**
     If set, then will attempt to automatically parse response as XML
@@ -90,19 +99,23 @@ SC.Response = SC.Object.extend(
     
     @property {Boolean}
   */
-  isXML: NO,
+  isXML: function() {
+    return this.getPath('request.isXML') || NO ;
+  }.property('request').cacheable(),
   
-  /**
-    Hash of listeners configured for this request/response
-  
+  /** 
+    Returns the hash of listeners set on the request.
+    
     @property {Hash}
   */
-  listeners: {},
+  listeners: function() {
+    return this.getPath('request.listeners');
+  }.property('request').cacheable(),
   
   /**
     The response status code.  
   */
-  status: 0,
+  status: -100, // READY
 
   /**
     Headers from the response.  Computed on-demand
@@ -112,11 +125,24 @@ SC.Response = SC.Object.extend(
   headers: null,
   
   /**
+    The raw body retrieved from the transport.  This may be further parsed
+    by the body property, which is probably what you want.
+    
+    @property {String}
+  */
+  encodedBody: null,
+  
+  /**
     Response body.  If isJSON was set, will be parsed automatically.
     
     @property {Hash|String}
   */
-  body: null,
+  body: function() {
+    // TODO: support XML
+    var ret = this.get('encodedBody');
+    if (ret && this.get('isJSON')) ret = SC.json.decode(ret);
+    return ret;
+  }.property('encodedBody').cacheable(),
   
   /** 
     @private
@@ -130,54 +156,101 @@ SC.Response = SC.Object.extend(
     return this.get('body');
   }.property('body').cacheable(),
   
+  /**
+    Set to YES if response is cancelled
+  */
+  isCancelled: NO,
+  
   // ..........................................................
   // METHODS
   // 
 
   /**
-    Default method just closes the connection.
+    Called by the request manager when its time to actually run.  This will
+    invoke any callbacks on the source request then invoke transport() to 
+    begin the actual request.
   */
   fire: function() {
-    this.notify();
-    SC.Request.manager.transportDidClose(this) ;
+    
+    var req = this.get('request'),
+        source = req ? req.get('source') : null;
+    
+    
+    // first give the source a chance to fixup the request and response
+    // then freeze req so no more changes can happen.
+    if (source && source.willSend) source.willSend(req, this);
+    req.freeze();
+
+    // if the source did not cancel the request, then invoke the transport
+    // to actually trigger the request.  This might receive a response 
+    // immediately if it is synchronous.
+    if (!this.get('isCancelled')) this.invokeTransport();
+
+    // if the transport did not cancel the request for some reason, let the
+    // source know that the request was sent
+    if (!this.get('isCancelled') && source && source.didSend) {
+      source.didSend(req, this);
+    }
   },
 
-  /**
-    Default method just closes the connection.
-  */
-  cancel: function() {
-    this.notify();
-    SC.Request.manager.transportDidClose(this) ;
+  invokeTransport: function() {
+    this.receive(function(proceed) { this.set('status', 200); }, this);
   },
   
   /**
-    Even once you send a request you can continue to configure listeners to
-    fire when the request responds.  This won't have an effect if the 
-    request was synchronous.
+    Invoked by the transport when it receives a response.  The passed 
+    callback will be invoked to actually process the response.  If cancelled
+    we will pass NO.  You sould cleanup instead.
     
-    @borrows SC.Request.prototype.notify
+    Invokes callbacks on the source request also.
+    
+    @param {Function} callback the function to receive
+    @param {Object} context context to execute the callback in
+    @returns {SC.Response} receiver
   */
-  notify: function(status, target, action) {
+  receive: function(callback, context) {
+    var req = this.get('request');
+    var source = req ? req.get('source') : null;
     
-    // normalize status
-    var hasStatus = YES ;
-    if (SC.typeOf(status) !== SC.T_NUMBER) {
-      action = target;
-      target = status;
-      status = 0 ;
-      hasStatus = NO ;
+    // invoke the source, giving a chance to fixup the reponse or (more 
+    // likely) cancel the request.
+    if (source && source.willReceive) source.willReceive(req, this);
+    
+    // invoke the callback.  note if the response was cancelled or not
+    callback.call(context, !this.get('isCancelled'));
+    
+    // if we weren't cancelled, then give the source first crack at handling
+    // the response.  if the source doesn't want listeners to be notified,
+    // it will cancel the response.
+    if (!this.get('isCancelled') && source && source.didReceive) {
+      source.didReceive(req, this);
     }
+
+    // notify listeners if we weren't cancelled.
+    if (!this.get('isCancelled')) this.notify();
     
-    // normalize target/action
-    var params = SC.A(arguments).slice(hasStatus ? 3 : 2);
-
-    var listeners = this.get('listeners');
-    if (!listeners) this.set('listeners', listeners = {});
-    listeners[status] = { target: target, action: action, params: params };
-
+    // no matter what, remove from inflight queue
+    SC.Request.manager.transportDidClose(this) ;
     return this;
   },
-    
+  
+  /**
+    Default method just closes the connection.  It will also mark the request
+    as cancelled, which will not call any listeners.
+  */
+  cancel: function() {
+    if (!this.get('isCancelled')) {
+      this.set('isCancelled', YES);
+      this.cancelTransport();
+      SC.Request.manager.transportDidClose(this) ;
+    }
+  },
+  
+  /**
+    Override with concrete implementation to actually cancel the transport.
+  */
+  cancelTransport: function() {},
+  
   _notifyListener: function(listeners, status) {
     var info = listeners[status], params, target, action;
     if (!info) return NO ;
@@ -197,7 +270,7 @@ SC.Response = SC.Object.extend(
     
     @returns {SC.Response} receiver
   */
-  notifyListeners: function() {
+  notify: function() {
     var listeners = this.get('listeners'), 
         status    = this.get('status'),
         baseStat  = Math.floor(status / 100) * 100,
@@ -262,18 +335,22 @@ SC.XHRResponse = SC.Response.extend({
   /**
     Implement transport-specific support for fetching tasks
   */
-  body: function() {
+  encodedBody: function() {
     var xhr = this.get('rawRequest'), ret ;
     if (!xhr) ret = null;
-    else if (this.get('isJSON')) ret = SC.json.decode(xhr.responseText);
     else if (this.get('isXML')) ret = xhr.responseXML;
-    else ret = xhr.responseText ;
-
+    else ret = xhr.responseText;
     return ret ;
   }.property('status').cacheable(),
   
+
+  cancelTransport: function() {
+    var rawRequest = this.get('rawRequest');
+    if (rawRequest) rawRequest.abort();
+    this.set('rawRequest', null);
+  },
   
-  fire: function() {
+  invokeTransport: function() {
     
     var rawRequest, transport, handleReadyStateChange, async, headers;
     
@@ -319,18 +396,15 @@ SC.XHRResponse = SC.Response.extend({
     rawRequest.open(this.get('type'), this.get('address'), async ) ;
     
     // headers need to be set *after* the open call.
-    headers = this.get('requestHeaders') ;
+    headers = this.getPath('request.headers') ;
     for (var headerKey in headers) {
       rawRequest.setRequestHeader(headerKey, headers[headerKey]) ;
     }
 
     // now send the actual request body - for sync requests browser will
     // block here
-    rawRequest.send(this.get('requestBody')) ;
+    rawRequest.send(this.getPath('request.encodedBody')) ;
     if (!async) this.finishRequest() ; // not async
-
-    // allow cleanup.
-    this.set('requestBody', null).set('requestHeaders', null);
     
     return rawRequest ;
   },
@@ -348,35 +422,35 @@ SC.XHRResponse = SC.Response.extend({
         error, status, msg;
 
     if (readyState === 4) {
+      this.receive(function(proceed) {
 
-      // collect the status and decide if we're in an error state or not
-      status = -1 ;
-      try {
-        status = rawRequest.status || 0;
-      } catch (e) {}
-
-      // if there was an error - setup error and save it
-      if ((status < 200) || (status >= 300)) {
-        msg = rawRequest.statusText;
-        error = SC.$error(msg || "HTTP Request failed", "Request", status) ;
-        error.set("errorValue", this) ;
-        this.set('isError', YES);
-        this.set('errorObject', error);
-      }
-
-      // set the status - this will trigger changes on relatedp properties
-      this.set('status', status);
+        if (!proceed) return ; // skip receiving...
       
-      // notify target/action if set.
-      this.notifyListeners();
+        // collect the status and decide if we're in an error state or not
+        status = -1 ;
+        try {
+          status = rawRequest.status || 0;
+        } catch (e) {}
+
+        // if there was an error - setup error and save it
+        if ((status < 200) || (status >= 300)) {
+          msg = rawRequest.statusText;
+          error = SC.$error(msg || "HTTP Request failed", "Request", status) ;
+          error.set("errorValue", this) ;
+          this.set('isError', YES);
+          this.set('errorObject', error);
+        }
+
+        // set the status - this will trigger changes on relatedp properties
+        this.set('status', status);
       
-      SC.Request.manager.transportDidClose(this) ;
-     }
+      }, this);
+    }
      
-     if (readyState === 4) {
-       // avoid memory leak in MSIE: clean up
-       rawRequest.onreadystatechange = function() {} ;
-     }
+    if (readyState === 4) {
+      // avoid memory leak in MSIE: clean up
+      rawRequest.onreadystatechange = function() {} ;
+    }
   }
 
   
