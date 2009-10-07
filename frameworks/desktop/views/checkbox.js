@@ -119,6 +119,8 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   },
   
   mouseDown: function(evt) {  
+    this.set('isActive', YES);
+    this._field_isMouseDown = YES;
     return YES;
   }
     

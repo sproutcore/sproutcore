@@ -103,7 +103,6 @@ test("clicking on the checkbox will change toggle the value", function() {
 test("pressing mouseDown and then mouseUp anywhere in the checkbox should toggle the selection", function() {
 
   var elem = view.get('layer'), input = SC.$('input', elem);
-  
   SC.Event.trigger(elem, 'mousedown');
   ok(view.get('isActive'), 'view should be active');
   ok(view.get('value'), 'value should not change yet');

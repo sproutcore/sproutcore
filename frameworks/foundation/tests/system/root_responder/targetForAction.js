@@ -173,8 +173,8 @@ test("no target, explicit pane, no first responder", function() {
   equals(r.targetForAction('bar', null, null, pane), null, 
     'should NOT return child view');
 
-  equals(r.targetForAction('paneAction', null, null, pane), null, 
-    'should NOT return pane');
+  equals(r.targetForAction('paneAction', null, null, pane), pane, 
+    'should return pane');
   
   equals(r.targetForAction('defaultAction', null, null, pane), 
     defaultResponder, 'should return defaultResponder');

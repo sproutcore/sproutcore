@@ -22,8 +22,9 @@ test("should emit a self closing tag.  like calling begin().end()", function() {
 
 test("should respect passed opts when emitting", function() {
   context.tag("foo") ;
-  equals(context.length, 2);
-  equals(context.get(1), "<foo />");
+  equals(context.length, 3);
+  equals(context.get(1), "<foo>");
+  equals(context.get(2), '<'+'/foo>');
 });
 
 test("should NOT emit self closing tag if tag is script", function() {

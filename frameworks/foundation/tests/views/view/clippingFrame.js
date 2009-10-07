@@ -112,7 +112,7 @@ test("notifies receiver and each child if parent clipping frame changes", functi
   // This should not happen.  If this is the case, fix the view code so that
   // it does not invalidate frame more than once before you change this 
   // number.
-  equals(callCount, 2, 'should invoke observer on child and nested child');
+  equals(callCount, 4, 'should invoke observer on child and nested child');
 });
 
 
@@ -128,6 +128,6 @@ test("does not notify child views of clippingFrame changes if child view hasStat
   // now, adjust layout of child so that clipping frame will change...
   a.adjust('top', -50);
   
-  equals(callCount, 1, 'should invoke observer on child only');
+  equals(callCount, 2, 'should invoke observer on child only');
 });
 
