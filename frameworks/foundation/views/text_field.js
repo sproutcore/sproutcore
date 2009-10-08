@@ -338,6 +338,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (rightAdjustment) rightAdjustment += 'px' ;
 
     this._renderField(context, firstTime, v, leftAdjustment, rightAdjustment) ;
+    if(SC.browser.mozilla) this.invokeLast(this._applyFirefoxCursorFix);
   },
 
 
@@ -349,7 +350,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   _forceRenderFirstTime: NO,
     
   _renderFieldLikeFirstTime: function(){
-    this.set('forceRenderFirstTime', YES);
+    this.set('_forceRenderFirstTime', YES);
   }.observes('isTextArea'),
   
   _renderField: function(context, firstTime, value, leftAdjustment, rightAdjustment) {
@@ -432,11 +433,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         // Firefox needs a bit of help to recalculate the width of the text
         // field, if it has focus.  (Even though it's set to 100% of its
         // parent, if we adjust the parent it doesn't always adjust in kind.)
-        if (SC.browser.mozilla) {
-          if(paddingElement.clientWidth>0){
-            element.style.width = paddingElement.clientWidth + "px";
-          }
-        }
+        // if (SC.browser.mozilla) {
+        //           if(paddingElement.clientWidth>0){
+        //             element.style.width = paddingElement.clientWidth + "px";
+        //           }
+        //         }
       }
     }
   },
@@ -484,7 +485,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // our key/mouse down/up handlers (such as the user choosing Select All
     // from a menu).
     SC.Event.add(input, 'select', this, this._textField_selectionDidChange);
-    this._applyFirefoxCursorFix();
+    
+    if(SC.browser.mozilla){
+      // cache references to layer items to improve firefox hack perf
+       this._cacheInputElement = this.$input();
+       this._cachePaddingElement = this.$('.padding');
+    }
   },
 
   willDestroyLayer: function() {
@@ -518,35 +524,46 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
 
   _applyFirefoxCursorFix: function() {
-    this._applyTimer = null; // clear
-    if (this._hasFirefoxCursorFix) return this;
+    // Be extremely careful changing this code.  !!!!!!!! 
+    // Contact me if you need to change or improve the code. After several 
+    // iterations the new way to apply the fix seems to be the most 
+    // consistent.
+    // This fixes: selection visibility, cursor visibility, and the ability 
+    // to fix the cursor at any position. As of FF 3.5.3 mozilla hasn't fixed this 
+    // bug, even though related bugs that I've found on their database appear
+    // as fixed.  
+    // 
+    // Juan Pinzon
+    
     if (SC.browser.mozilla) {
-      this._hasFirefoxCursorFix = YES ;
-    
-      var element = this.$input();
-      var layer = element[0];
-      var p = SC.$(layer).offset() ;
-      var top    = p.top,
-          left   = p.left,
-          width  = layer.offsetWidth,
-          height = layer.offsetHeight ;
-    
-      var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
-      element.attr('style', style) ;
+      var top, left, width, height, p, layer, element, textfield;
+      
+      // I'm caching in didCreateLayer this elements to improve perf
+      element = this._cacheInputElement;
+      textfield = this._cachePaddingElement;
+      if(textfield && textfield[0]){
+        layer = textfield[0];
+        p = SC.$(layer).offset() ;
+      
+        // this is to take into account an styling issue.
+        if(element[0].tagName.toLowerCase()==="input") {
+          top = p.top+3; 
+        }
+        else top = p.top;
+        left = p.left;
+        width = layer.offsetWidth;
+        height = layer.offsetHeight ;
+      
+        var style = 'position: fixed; top: %@px; left: %@px; width: %@px; height: %@px;'.fmt(top, left, width, height) ;
+        // if the style is the same don't re-apply
+        if(!this._prevStyle || this._prevStyle!=style) element.attr('style', style) ;
+        this._prevStyle = style;
+      }
     }
     return this ;
   },
   
-  _removeFirefoxCursorFix: function() {
-    
-    if (!this._hasFirefoxCursorFix) return this;
-    this._hasFirefoxCursorFix = NO ;
-    if (SC.browser.mozilla) {
-      this.$input().attr('style', '') ;
-    }
-    return this ;
-  },
- 
+  
   _textField_selectionDidChange: function() {
     this.notifyPropertyChange('selection');
   },
@@ -593,9 +610,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   parentViewDidResize: function() {
     if (SC.browser.mozilla) {
-      this._removeFirefoxCursorFix();
-      if (this._applyTimer) this._applyTimer.invalidate();
-      this._applyTimer = this.invokeLater(this._applyFirefoxCursorFix, 250);
+      this.invokeLast(this._applyFirefoxCursorFix);
     }
     sc_super();
   },

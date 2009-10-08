@@ -83,9 +83,9 @@
   	line-height:1.8em;
 }
 
-.mozilla .sc-text-field-view input {
-  	top: 3px;
-}
+/*.mozilla .sc-text-field-view input {
+    top: 3px;
+}*/
 
 .sc-text-field-view textarea {
   position: absolute;
