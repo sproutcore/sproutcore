@@ -225,7 +225,7 @@ SC.CollectionViewDelegate = {
     general which operations you might support and specifically the operations
     you would support if the user dropped an item over a specific location.
     
-    If the proposedDropOperaration parameter is SC.DROP_ON or SC.DROP_BEFORE, 
+    If the proposedDropOperation parameter is SC.DROP_ON or SC.DROP_BEFORE, 
     then the proposedInsertionPoint will be a non-negative value and you 
     should determine the specific operations you will support if the user 
     dropped the drag item at that point.
@@ -243,9 +243,9 @@ SC.CollectionViewDelegate = {
     @param proposedDropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
     @returns the allowed drag operation.  Defaults to op
   */
-  collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperaration) {
+  collectionViewValidateDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
     // don't allow dropping on by default
-    return (proposedDropOperaration & SC.DROP_ON) ? SC.DRAG_NONE : op ;
+    return (proposedDropOperation & SC.DROP_ON) ? SC.DRAG_NONE : op ;
   },
   
   /**
@@ -265,7 +265,7 @@ SC.CollectionViewDelegate = {
     @param proposedDropOperation {String} the proposed drop operation.  Will be one of SC.DROP_ON, SC.DROP_BEFORE, or SC.DROP_ANY.
     @returns the allowed drag operation.  Defaults to proposedDragOperation
   */
-  collectionViewPerformDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperaration) {
+  collectionViewPerformDragOperation: function(view, drag, op, proposedInsertionIndex, proposedDropOperation) {
     return SC.DRAG_NONE ;
   },
   
