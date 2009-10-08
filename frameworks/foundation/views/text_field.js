@@ -497,15 +497,23 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   _textField_fieldDidFocus: function(evt) {
-      SC.RunLoop.begin();
-      this.beginEditing();
-      SC.RunLoop.end();
+    SC.RunLoop.begin();
+    this.fieldDidFocus();
+    SC.RunLoop.end();
   },
 
   _textField_fieldDidBlur: function(evt) {
-      SC.RunLoop.begin();
-      this.commitEditing();
-      SC.RunLoop.end();
+    SC.RunLoop.begin();
+    this.fieldDidBlur();
+    SC.RunLoop.end();
+  },
+  
+  fieldDidFocus: function(evt) {
+      this.beginEditing();
+  },
+  
+  fieldDidBlur: function() {
+    this.commitEditing();
   },
 
 
