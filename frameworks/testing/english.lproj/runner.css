@@ -6,9 +6,9 @@
   top: 0;
   left: 0;
   right: 0;
-  auto: 0;
+  bottom: 0;
   background-color: #f0f0f0;
-  min-height: 100%;
+  overflow: auto;
 }
   
 .core-test .useragent {
