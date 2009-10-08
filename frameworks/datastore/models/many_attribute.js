@@ -71,27 +71,28 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
   /**  @private - adapted for to many relationship */
   toType: function(record, key, value) {
     var type      = this.get('typeClass'),
+        attrKey   = this.get('key') || key,
         arrayKey  = SC.keyFor('__manyArray__', SC.guidFor(this)),
         ret       = record[arrayKey],
         rel;
-      
+
     // lazily create a ManyArray one time.  after that always return the 
-    // same object.  
+    // same object.
     if (!ret) {
       ret = SC.ManyArray.create({ 
-        recordType:    type, 
-        record:        record, 
-        propertyName:  key,
+        recordType:    type,
+        record:        record,
+        propertyName:  attrKey,
         manyAttribute: this
       });
-      
+
       record[arrayKey] = ret ; // save on record
       rel = record.get('relationships');
       if (!rel) record.set('relationships', rel = []);
       rel.push(ret); // make sure we get notified of changes...
-      
+
     }
-    
+
     return ret;
   },
   

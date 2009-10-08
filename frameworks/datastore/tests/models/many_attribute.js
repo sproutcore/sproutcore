@@ -34,7 +34,12 @@ module("SC.ManyAttribute core methods", {
       
       // test toMany relationships
       fooMany: SC.Record.toMany('MyApp.Foo'),
-      
+
+      // test toMany relationships with different key
+      fooManyKeyed: SC.Record.toMany('MyApp.Foo', {
+        key: 'fooIds'
+      }),
+
       // test many-to-many relationships with inverse
       barToMany: SC.Record.toMany('MyApp.Bar', {
         inverse: 'fooToMany', isMaster: YES, orderBy: 'name'
@@ -83,7 +88,11 @@ module("SC.ManyAttribute core methods", {
         barToOne: [] 
       },
       
-      { guid: 4, firstName: "Johnny", lastName: "Cash" }
+      { guid: 4,
+        firstName: "Johnny",
+        lastName: "Cash",
+        fooIds: [1,2]
+      }
     ]);
     
     MyApp.store.loadRecords(MyApp.Bar, [
@@ -124,6 +133,13 @@ test("getting toMany relationship should map guid to real records", function() {
   equals(rec3.get('id'), 3, 'precond - should find record 3');
   equals(rec3.get('fooMany').objectAt(0), rec, 'should get rec1 instance for rec3.fooMany');
   equals(rec3.get('fooMany').objectAt(1), rec2, 'should get rec2 instance for rec3.fooMany');
+});
+
+test("getting toMany relationship should map guid to real records when using different key", function() {
+  var rec4 = MyApp.store.find(MyApp.Foo, 4);
+  equals(rec4.get('id'), 4, 'precond - should find record 4');
+  equals(rec4.get('fooManyKeyed').objectAt(0), rec, 'should get rec1 instance for rec4.fooManyKeyed');
+  equals(rec4.get('fooManyKeyed').objectAt(1), rec2, 'should get rec2 instance for rec4.fooManyKeyed');
 });
  
 test("getting toMany relation should not change record state", function() {
@@ -172,7 +188,19 @@ test("writing to a to-many relationship should update set guids", function() {
   SC.RunLoop.end();
   
   equals(rec3.get('fooMany').objectAt(0), rec2, 'should get rec2 instance for rec3.fooMany');
-  equals(rec3.get('fooMany').objectAt(1), rec4, 'should get rec2 instance for rec3.fooMany');
+  equals(rec3.get('fooMany').objectAt(1), rec4, 'should get rec4 instance for rec3.fooMany');
+});
+
+test("writing to a to-many relationship should update set guids when using a different key", function() {
+  var rec4 = MyApp.store.find(MyApp.Foo, 4);
+  equals(rec4.get('id'), 4, 'precond - should find record 4');
+  equals(rec4.get('fooManyKeyed').objectAt(0), rec, 'should get rec1 instance for rec4.fooManyKeyed');
+
+  SC.RunLoop.begin();
+  rec4.set('fooManyKeyed', [rec2, rec3]);
+  SC.RunLoop.end();
+
+  ok(rec4.get('fooIds').isEqual([2,3]), 'should get array of guids (2, 3) for rec4.fooIds');
 });
 
 test("pushing an object to a to-many relationship attribute should update set guids", function() {
