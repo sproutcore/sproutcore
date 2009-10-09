@@ -335,7 +335,9 @@ SC.ListItemView = SC.View.extend(
    @returns {void}
   */
   renderCount: function(context, count) {
-    context.push('<span class="count %@-digit"><span class="inner">'.fmt(count.toString().length))
+    var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
+    var digit = (count.toString().length < digits.length) ? digits[count.toString().length] : digits[digits.length-1];
+    context.push('<span class="count %@-digit"><span class="inner">'.fmt(digit))
       .push(count.toString()).push('</span></span>') ;
   },
   
