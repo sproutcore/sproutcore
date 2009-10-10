@@ -70,7 +70,8 @@ SC.Responder = SC.Object.extend( /** SC.Responder.prototype */ {
     @returns {SC.Responder} receiver
   */
   becomeFirstResponder: function() {  
-    var pane = this.get('pane') || this.get('responderContext');
+    var pane = this.get('pane') || this.get('responderContext') ||
+              this.pane();
     if (pane && this.get('acceptsFirstResponder')) {
       if (pane.get('firstResponder') !== this) pane.makeFirstResponder(this);
     } 
