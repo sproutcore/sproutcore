@@ -213,9 +213,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     @property
     @type {Number}
-    @default 32
+    @default 28
   */
-  SELECT_BUTTON_SPRITE_WIDTH: 32,
+  SELECT_BUTTON_SPRITE_WIDTH: 28,
 
   /**
     Property to set the menu item height. This in turn is used for
