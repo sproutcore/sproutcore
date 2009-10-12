@@ -93,6 +93,6 @@ test("looking up indexSet for source when objects are added should recache when 
 
   array.removeObject(obj).pushObject(obj); // move obj to end.
   ret = set.indexSetForSource(array) ;
-  same(ret, SC.IndexSet.create(array.indexOf(ret)), 'should return index set with item at end');
+  same(ret, SC.IndexSet.create(array.indexOf(obj)), 'should return index set with item at end');
   
 });
