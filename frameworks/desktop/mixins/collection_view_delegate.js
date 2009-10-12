@@ -120,13 +120,15 @@ SC.CollectionViewDelegate = {
   */
   collectionViewDeleteContent: function(view, content, indexes) {
     if (!content) return NO ;
-    
+
     if (SC.typeOf(content.destroyAt) === SC.T_FUNCTION) {
       content.destroyAt(indexes);
+      view.selectPreviousItem(NO, 1) ;
       return YES ;
       
     } else if (SC.typeOf(content.removeAt) === SC.T_FUNCTION) {
       content.removeAt(indexes);
+      view.selectPreviousItem(NO, 1) ;
       return YES;
       
     } else return NO ;
