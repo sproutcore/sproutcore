@@ -86,6 +86,9 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
     // try to find in cache
     if (!cache) cache = this._indexSetCache = {};
     ret = cache[SC.guidFor(source)];
+    if (ret && ret._sourceRevision && (ret._sourceRevision !== source.propertyRevision)) {
+      ret = null;
+    }
 
     // not in cache.  generate from index sets and any saved objects
     if (!ret) {
@@ -102,7 +105,10 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
         }, this);
       }
       
-      if (ret) ret = cache[SC.guidFor(source)] = ret.frozenCopy();
+      if (ret) {
+        ret = cache[SC.guidFor(source)] = ret.frozenCopy();
+        ret._sourceRevision = source.propertyRevision;
+      }
     }
     
     return ret;

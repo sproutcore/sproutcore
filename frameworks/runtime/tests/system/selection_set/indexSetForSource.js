@@ -83,3 +83,16 @@ test("add and remove source", function() {
   set.add(array, 3,4).remove(array, 3,4);
   equals(set.indexSetForSource(array), null, 'should return null for source not in set');
 });
+
+test("looking up indexSet for source when objects are added should recache when source content changes", function() {
+  var obj = array.objectAt(0), ret;
+  
+  set = SC.SelectionSet.create().addObject(obj);
+  ret = set.indexSetForSource(array);
+  same(ret, SC.IndexSet.create(0), 'should return index set with item at 0');
+
+  array.removeObject(obj).pushObject(obj); // move obj to end.
+  ret = set.indexSetForSource(array) ;
+  same(ret, SC.IndexSet.create(array.indexOf(ret)), 'should return index set with item at end');
+  
+});
