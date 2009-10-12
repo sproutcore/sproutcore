@@ -1589,12 +1589,6 @@ SC.CollectionView = SC.View.extend(
     // delegate implementation just uses standard SC.Array methods to do the
     // right thing.
     del.collectionViewDeleteContent(this, this.get('content'), indexes);
-    
-    // also, fix up the selection by removing the actual items we removed
-    // set selection directly instead of calling select() since we are just
-    // fixing up the selection.
-    
-    this.selectPreviousItem(false, 1) ;
 
     return YES ;
   },
