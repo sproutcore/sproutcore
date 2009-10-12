@@ -147,12 +147,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
   checkboxEnabled: YES,
 
   /**
-    Set this property to YES to display separtor before the last item
+    Set this property to required display positon of separtor from bottom
 
     @private
-    @default NO
+    @default null
   */
-  hasSeparator: NO,
+  separatorPostion: null,
 
   /**
     Default value of the select button.
@@ -326,8 +326,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
     // get the localization flag.
     var shouldLocalize = this.get('localize') ;
 
-    // get the hasSeparator flag
-    var hasSeparator = this.get('hasSeparator') ;
+    //get the separatorPostion
+    var separatorPostion = this.get('separatorPostion') ;
 
     //itemList array to set the menu items
     var itemList = [] ;
@@ -399,7 +399,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     idx += 1 ;
 
     // display the separator if specified by the user
-    if (hasSeparator && idx === (len-1)) {
+    if (separatorPostion && idx === (len-separatorPostion)) {
       var separator = SC.Object.create({
         separator: YES
       }) ;
