@@ -347,11 +347,19 @@ SC.PickerPane = SC.PalettePane.extend({
 
     // initiated with fallback position
     // Will be used only if the following preferred alternative can not be found
-    f.x = (m[4] === -1) ? (a.x>0 ? a.x+23 : 0) : prefP1[m[4]][0];
-    f.y = (m[4] === -1) ? prefP1[0][1] : prefP1[m[4]][1];
-    this.set('pointerPos', (m[4] === -1) ? SC.POINTER_LAYOUT[0] : SC.POINTER_LAYOUT[m[4]]);
+    if(m[4] === -1) {
+      //f.x = a.x>0 ? a.x+23 : 0; // another alternative align to left
+      f.x = a.x+parseInt(a.width/2,0);
+      f.y = a.y+parseInt(a.height/2,0)-parseInt(f.height/2,0);
+      this.set('pointerPos', SC.POINTER_LAYOUT[0]+' fallback');
+      this.set('pointerPosY', parseInt(f.height/2,0)-40);      
+    } else {
+      f.x = prefP1[m[4]][0];
+      f.y = prefP1[m[4]][1];
+      this.set('pointerPos', SC.POINTER_LAYOUT[m[4]]);
+      this.set('pointerPosY', 0);      
+    }
     this.set('pointerPosX', 0);
-    this.set('pointerPosY', 0);
 
     for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
       if (cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2]===0 && cutoffPrefP[m[i]][3]===0) {
@@ -359,6 +367,7 @@ SC.PickerPane = SC.PalettePane.extend({
         if (m[4] != m[i]) {
           f.x = prefP1[m[i]][0] ;
           f.y = prefP1[m[i]][1] ;
+          this.set('pointerPosY', 0);
           this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
         }
         i = SC.POINTER_LAYOUT.length;
