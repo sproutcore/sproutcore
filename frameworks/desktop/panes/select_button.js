@@ -366,7 +366,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       }
 
       //Check if the item is currentSelectedItem or not
-      if(value === this.value) {
+      if(value === this.get('value')) {
 
         //set the itemIdx - To change the prefMatrix accordingly.
         this.set('itemIdx', idx) ;
