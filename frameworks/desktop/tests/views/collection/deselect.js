@@ -27,7 +27,7 @@ module("SC.CollectionView.deselect", {
 // BASIC OPERATIONS
 // 
 
-test("delect(indexes=Number)", function() {
+test("deselect(indexes=Number)", function() {
   var expected = SC.SelectionSet.create().add(content,4,4).remove(content,6),
       actual ;
       
@@ -38,7 +38,7 @@ test("delect(indexes=Number)", function() {
 });
 
 
-test("delect(indexes=IndexSet)", function() {
+test("deselect(indexes=IndexSet)", function() {
   var actual, expected = SC.SelectionSet.create()
                                 .add(content,4,4).remove(content,6,2);
       
@@ -49,7 +49,7 @@ test("delect(indexes=IndexSet)", function() {
 });
 
 
-test("delect() with empty selection", function() {
+test("deselect() with empty selection", function() {
   var expected = SC.SelectionSet.create(),
       actual ;
 
@@ -195,5 +195,21 @@ test("del.collectionViewSelectionForProposedSelection - returns null", function(
   
 });
 
+// ..........................................................
+// SPECIAL CASES
+// 
+
+test("deselecting a range should remove individual objects in range also", function() {
+
+  var obj = content.objectAt(1);
+  var expected = SC.SelectionSet.create().add(content, 5,3),
+      actual;
+
+  sel.addObject(obj);
+  view.deselect(SC.IndexSet.create(0,5));
+
+  actual = view.get('selection');
+  ok(expected.isEqual(actual), 'should remove content[1] from selection (expected: %@ actual: %@)'.fmt(expected, actual));
+});
 
 

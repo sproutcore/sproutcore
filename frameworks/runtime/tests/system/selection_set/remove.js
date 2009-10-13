@@ -83,5 +83,29 @@ test("Adding another SelectionSet", function() {
 });
 
 
+// ..........................................................
+// SPECIAL CASES
+// 
 
+test("removing index set should also remove individually added objects", function() {
+  var objToRemove = array[3]; // item from one array...
+  var objToNotRemove = array2[3]; // item from array we won't remove..
+  
+  // add both objects.
+  set.addObject(objToRemove).addObject(objToNotRemove);
+  set.add(array, 4, 3);
+  
+  ok(set.contains(objToRemove), 'set should contain objToRemove');
+  ok(set.contains(objToNotRemove), 'set should contain objToNotRemove');
+  equals(set.get('length'), 5, 'set.length sould == two objects + index.length');
+    
+  // now remove from array set
+  set.remove(array, 2, 4);  
+  
+  SC.stopIt = NO ;
+  
+  ok(!set.contains(objToRemove), 'set should NOT contain objToRemove');
+  ok(set.contains(objToNotRemove), 'set should contain objToNotRemove');
+  equals(set.get('length'), 2, 'set.length should == 1 object + index.length');
+});
 

@@ -30,16 +30,16 @@ test("calling select(indexes=Number)", function() {
   
   view.select(3);
   
-  var expected = SC.SelectionSet.create().add(content, 3),
+  var expected = SC.SelectionSet.create().addObject(content.objectAt(3)),
       actual   = view.get('selection');
-  ok(expected.isEqual(actual), 'selection should have index only (expected: %@ actual: %@)'.fmt(expected, actual));
+  ok(expected.isEqual(actual), 'selection should have object (expected: %@ actual: %@)'.fmt(expected, actual));
 });
 
 test("calling select(indexes=Number, extend=YES)", function() {
 
   var base = SC.SelectionSet.create().add(content, 3,3),
       next = 1,
-      expected = base.copy().add(content, next),
+      expected = base.copy().addObject(content.objectAt(next)),
       actual;
   
   view.select(SC.IndexSet.create(3,3));
@@ -175,7 +175,7 @@ test("del.collectionViewShouldSelectIndexes - returns empty index set", function
 
   view.select(2);
   view.select(3); // should be ignored
-  var expected = SC.SelectionSet.create().add(content,2),
+  var expected = SC.SelectionSet.create().addObject(content.objectAt(2)),
       actual   = view.get('selection');
   ok(expected.isEqual(actual), 'selection should not change if delegate does not allow any proposed selected indexes (expected: %@ actual: %@)'.fmt(expected, actual));
 
@@ -191,7 +191,7 @@ test("del.collectionViewShouldSelectIndexes - delegate returns null", function()
   };
 
   view.select(10); // should be ignored
-  var expected = SC.SelectionSet.create().add(content,2),
+  var expected = SC.SelectionSet.create().addObject(content.objectAt(2)),
       actual   = view.get('selection');
   ok(expected.isEqual(actual), 'selection should not change if delegate returns null (expected: %@ actual: %@)'.fmt(expected, actual));
   
@@ -202,7 +202,7 @@ test("del.collectionViewSelectionForProposedSelection - returns indexes", functi
 
   del.collectionViewSelectionForProposedSelection = function(v, indexes) { 
 
-    var expected = SC.SelectionSet.create().add(content,10),
+    var expected = SC.SelectionSet.create().addObject(content.objectAt(10)),
         actual   = indexes;
     ok(expected.isEqual(actual), 'should pass proposed selection to delegate (expected: %@ actual: %@)'.fmt(expected, actual));
 

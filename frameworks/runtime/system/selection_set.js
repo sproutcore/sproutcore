@@ -247,14 +247,36 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
       }
     }
     
+    // save starter info
     set    = this._indexSetForSource(source, YES);
     oldlen = this.get('length');
     newlen = oldlen - set.get('length');
-        
+
+    // if we have objects selected, determine if they are in the index 
+    // set and remove them as well.
+    if (set && (objects = this._objects)) {
+      
+      // convert start/length to index set so the iterator below will work...
+      if (length !== undefined) {
+        start = SC.IndexSet.create(start, length);
+        length = undefined;
+      }
+      
+      objects.forEach(function(object) {
+        idx = source.indexOf(object);
+        if (start.contains(idx)) {
+          objects.remove(object);
+          newlen--;
+        }
+      }, this);
+    }
+    
+    // remove indexes from source index set
     set.remove(start, length);
     setlen = set.get('length');
     newlen += setlen;
 
+    // update caches; change enumerable...
     this._indexSetCache = null;
     if (newlen !== oldlen) {
       this.propertyDidChange('length');

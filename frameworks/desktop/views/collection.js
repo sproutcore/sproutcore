@@ -1297,7 +1297,17 @@ SC.CollectionView = SC.View.extend(
     // build the selection object, merging if needed
     if (extend && (sel = this.get('selection'))) sel = sel.copy();
     else sel = SC.SelectionSet.create();
-    if (indexes) sel.add(content, indexes);
+    
+    if (indexes && indexes.get('length')>0) {
+
+      // when selecting only one item, always select by content
+      if (indexes.get('length')===1) {
+        sel.addObject(content.objectAt(indexes.get('firstObject')));
+        
+      // otherwise select an index range
+      } else sel.add(content, indexes);
+      
+    }
 
     // give delegate one last chance
     sel = del.collectionViewSelectionForProposedSelection(this, sel);
