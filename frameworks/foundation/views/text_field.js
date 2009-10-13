@@ -667,13 +667,16 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   mouseDown: function(evt) {
     this._txtFieldMouseDown=YES;
-    //this.becomeFirstResponder();
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
     } else if((this.value && this.value.length===0) || !this.value) {
       return YES;
-    } else return sc_super();
+    } else {
+      // This fixes the double click issue in firefox
+      if(SC.browser.mozilla) this.$input()[0].focus();
+      return sc_super();
+    }
   },
 
   mouseUp: function(evt) {
@@ -686,10 +689,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (!this.get('isEnabled')) {
       evt.stop();
       return YES;
-    }   else if((this.value && this.value.length===0) || !this.value) {
-        this.$input()[0].focus();
-        return YES;
-      } else return sc_super();
+    } else if((this.value && this.value.length===0) || !this.value) {
+      this.$input()[0].focus();
+      return YES;
+    } else return sc_super();
   },
 
   selectStart: function(evt) {
