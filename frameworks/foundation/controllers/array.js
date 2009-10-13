@@ -284,7 +284,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     // if we can do this, then just forward the change.  This should fire
     // updates back up the stack, updating rangeObservers, etc.
     var content = this.get('content'); // note: use content, not observable
-    var objsToDestroy = [], i;
+    var objsToDestroy = [], i, objsLen;
     if (this.get('destroyOnRemoval')){
       for(i=0; i<amt; i++){
         objsToDestroy.push(content.objectAt(i+start));
@@ -292,7 +292,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     }
     
     if (content) content.replace(start, amt, objects);
-    for(i=0; i<objsToDestroy.length; i++){
+    for(i=0, objsLen = objsToDestroy.length; i<objsLen; i++){
       
       objsToDestroy[i].destroy();
     }

@@ -475,12 +475,12 @@ SC.routes = SC.Object.create(
       } else {
         var part = parts.shift(),
             ret  = null,
-           routes, nextRoute, loc ;
+           routes, nextRoute, loc , routesLen;
         
         // try to match to static
         routes = this._static[part] ;
         if (routes) {
-          for(loc=0;(loc < routes.length) && (ret===null);loc++) {
+          for(loc=0, routesLen = routes.length;(loc < routesLen) && (ret===null);loc++) {
             var clone = parts.slice() ;
             ret = routes[loc].functionForRoute(clone, params) ;
           }
@@ -491,7 +491,7 @@ SC.routes = SC.Object.create(
           for(var key in this._dynamic) {
             routes = this._dynamic[key] ;
             if (routes) {
-              for(loc=0;(loc<routes.length) && (ret === null);loc++) {
+              for(loc=0, routesLen = routes.length; (loc<routesLen) && (ret === null);loc++) {
                 clone = parts.slice() ;
                 ret = routes[loc].functionForRoute(clone,params) ;
             

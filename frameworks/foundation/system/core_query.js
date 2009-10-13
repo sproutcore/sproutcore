@@ -4,6 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
+/*globals CQ*/
 
 require('system/builder') ;
 
@@ -1723,7 +1724,7 @@ SC.CoreQuery = (function() {
 
         // Mozilla does not add the border for a parent that has overflow != 
         // visible
-        if ( mozilla && css(parent, "overflow") != "visible" ) border(parent);
+        if ( br.mozilla && css(parent, "overflow") != "visible" ) border(parent);
 
         // Get next parent
         parent = parent.parentNode;
