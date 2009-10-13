@@ -585,7 +585,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     storeKeys.clear();
     statusOnly.clear();
     records.clear();
-    propertyForStoreKeys.length = 0; // reset
+    // Provide full reference to overwrite
+    this.recordPropertyChanges.propertyForStoreKeys = {};
     
     return this;
   },
