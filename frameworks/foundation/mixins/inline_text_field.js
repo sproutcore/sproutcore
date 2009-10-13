@@ -95,7 +95,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
   beginEditing: function(options) {
     if (!options) return;
     
-    var layout={}, pane;
+    var layout={}, pane, delLayout, paneElem;
     
     // end existing editing if necessary
     this.beginPropertyChanges();
@@ -134,15 +134,17 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 
     layout.height = this._optframe.height;
     layout.width=this._optframe.width;
-    if(this._optIsCollection && this._delegate.get('layout').left){
-      layout.left=this._optframe.x-this._delegate.get('layout').left-pane.$()[0].offsetLeft-1;
+    delLayout = this._delegate.get('layout');
+    paneElem = pane.$()[0];
+    if(this._optIsCollection && delLayout.left){
+      layout.left=this._optframe.x-delLayout.left-paneElem.offsetLeft-1;
     }else{
-      layout.left=this._optframe.x-pane.$()[0].offsetLeft-1;
+      layout.left=this._optframe.x-paneElem.offsetLeft-1;
     }
-    if(this._optIsCollection && this._delegate.get('layout').top){
-      layout.top=this._optframe.y-this._delegate.get('layout').top-pane.$()[0].offsetTop;
+    if(this._optIsCollection && delLayout.top){
+      layout.top=this._optframe.y-delLayout.top-paneElem.offsetTop;
     }else{
-      layout.top=this._optframe.y-pane.$()[0].offsetTop;  
+      layout.top=this._optframe.y-paneElem.offsetTop;  
     }
 
     this.set('layout', layout);
@@ -153,7 +155,6 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     pane.appendChild(this);
     
     SC.RunLoop.begin().end();
-    
     
     var del = this._delegate ;
 
@@ -166,16 +167,17 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     // this.resizeToFit(this.getFieldValue()) ;
 
     // allow notifications to go
-    this.endPropertyChanges() ;
+    
     
     // and become first responder
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
-    this.becomeFirstResponder() ;
-  
-    if(SC.browser.msie) this.invokeLater(this._selectRootElement, 200) ;
-    else this._selectRootElement();
-  
+   
+    this.endPropertyChanges() ;
+
     this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this) ;
+    //if(SC.browser.mozilla)this.invokeOnce(this.becomeFirstResponder) ;
+    this.invokeLast(this.becomeFirstResponder) ;
+
   },
   
   
