@@ -474,6 +474,17 @@ SC.RootResponder = SC.RootResponder.extend(
       evt.clickCount = this._clickCount ;
       
       var view = this.targetViewForEvent(evt) ;
+      // InlineTextField needs to loose firstResponder whenever you click outside
+      // the view. This is a special case as textfields are not supposed to loose 
+      // focus unless you click on a list, another textfield or an special
+      // view/control.
+      var fr=null;
+      if(view) fr=view.get('pane').get('firstResponder');
+      
+      if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
+        fr.resignFirstResponder();
+      }
+      
       view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
       if (view && view.respondsTo('mouseDragged')) this._mouseCanDrag = YES ;
     } catch (e) {
@@ -642,7 +653,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   selectstart: function(evt) { 
     var result = this.sendEvent('selectStart', evt, this.targetViewForEvent(evt));
-    return (result !=null ? YES: NO) && (this._mouseCanDrag ? NO : YES);
+    return (result !==null ? YES: NO) && (this._mouseCanDrag ? NO : YES);
   },
   
   drag: function() { return false; }
