@@ -417,6 +417,17 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   isAnchorMouseDown: NO,
 
   mouseUp: function(evt) {
+    // SproutCore's event system will deliver the mouseUp event to the view
+    // that got the mouseDown event, but for menus we want to track the mouse,
+    // so we'll do our own dispatching.
+    var parentMenu = this.parentMenu() ;
+    if (parentMenu) {
+      var selectedMenuItem = parentMenu.get('currentSelectedMenuItem') ;
+      if (selectedMenuItem  &&  (this !== selectedMenuItem)) {
+        return selectedMenuItem.tryToPerform('mouseUp', evt) ;
+      }
+    }
+
     if (!this.get('isEnabled')) {
       this.set('hasMouseExited',NO) ;
       return YES ;
