@@ -20,23 +20,22 @@ SC.loadBundle = function() { throw "SC.loadBundle(): SproutCore is not loaded.";
 
 SC.setupBodyClassNames = function() {
   var el = document.body ;
-  var browser, platform, shadows, borderRad, classNames;
   if (!el) return ;
+  var browser, platform, shadows, borderRad, classNames, style;
   browser = SC.browser.current ;
-  platform = (SC.browser.windows) ? 'windows' : (SC.browser.mac) ? 'mac' : 'other-platform' ;
+  platform = SC.browser.windows ? 'windows' : SC.browser.mac ? 'mac' : 'other-platform' ;
+  style = document.documentElement.style;
+  shadows = (style.MozBoxShadow !== undefined) || 
+                (style.webkitBoxShadow !== undefined) ||
+                (style.oBoxShadow !== undefined) ||
+                (style.boxShadow !== undefined);
   
-  shadows = (document.documentElement.style.MozBoxShadow !== undefined) || 
-                (document.documentElement.style.webkitBoxShadow !== undefined) ||
-                (document.documentElement.style.oBoxShadow !== undefined) ||
-                (document.documentElement.style.boxShadow !== undefined);
+  borderRad = (style.MozBorderRadius !== undefined) || 
+              (style.webkitBorderRadius !== undefined) ||
+              (style.oBorderRadius !== undefined) ||
+              (style.borderRadius !== undefined);
   
-  borderRad = (document.documentElement.style.MozBorderRadius !== undefined) || 
-              (document.documentElement.style.webkitBorderRadius !== undefined) ||
-              (document.documentElement.style.oBorderRadius !== undefined) ||
-              (document.documentElement.style.borderRadius !== undefined);
-  
-  
-  classNames = (el.className) ? el.className.split(' ') : [] ;
+  classNames = el.className ? el.className.split(' ') : [] ;
   if(shadows) classNames.push('box-shadow');
   if(borderRad) classNames.push('border-rad');
   classNames.push(browser) ;
