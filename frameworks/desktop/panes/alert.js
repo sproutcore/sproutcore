@@ -27,7 +27,7 @@ SC.BUTTON2_STATUS = 'button2';
 */
 SC.BUTTON3_STATUS = 'button3';
 
-/**
+/** @class
   Displays a preformatted modal alert pane.
   
   Alert panes are a simple way to provide modal messaging that otherwise 
