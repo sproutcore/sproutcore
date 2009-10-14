@@ -532,7 +532,7 @@ SC.Record = SC.Object.extend(
   statusString: function() {
     var ret = [], status = this.get('status');
     
-    for(prop in SC.Record) {
+    for(var prop in SC.Record) {
       if(prop.match(/[A-Z_]$/) && SC.Record[prop]===status) {
         ret.push(prop);
       }
