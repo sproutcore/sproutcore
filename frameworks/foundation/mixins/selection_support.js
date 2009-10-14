@@ -63,6 +63,19 @@ SC.SelectionSupport = {
   allowsEmptySelection: YES,
   
   /**
+    Override to return the first selectable object.  For example, if you 
+    have groups or want to otherwise limit the kinds of objects that can be
+    selected.
+    
+    the default imeplementation returns firstObject property.
+    
+    @returns {Object} first selectable object
+  */
+  firstSelectableObject: function() {
+    return this.get('firstObject');
+  }.property(),
+  
+  /**
     This is the current selection.  You can make this selection and another
     controller's selection work in concert by binding them together. You
     generally have a master selection that relays changes TO all the others.
@@ -70,44 +83,57 @@ SC.SelectionSupport = {
     @property {SC.SelectionSet}
   */
   selection: function(key, value) {
-    var content, empty;
-    
-    if (value !== undefined) {
-      
-      // are we even allowing selection at all?  Also, must be enumerable
-      if (this.get('allowsSelection') && value && value.isEnumerable) {
         
-        // ok, new decide if the *type* of selection is allowed...
-        switch (value.get('length')) {
-          
-          // check to see if we're attempting to set an empty array
-          // if that's not allowed, set to the first available item in 
-          // arrangedObjects
-          case 0:
-            empty   = this.get('allowsEmptySelection');
-            content = this.get('arrangedObjects');
-            if (empty && content && content.get('length')>0) {
-                value = SC.SelectionSet.create().add(content, 0).freeze();
-            } else value = null ;
-            break;
-            
-          // single items are always allows
-          case 1:
-            break;
+    var old = this._scsel_selection,
+        oldlen = old ? old.get('length') : 0,
+        content, empty, len;
 
-          // fall through for >= 2, only allow if configured for multi-select
-          default:
-            if (!this.get('allowsMultipleSelection')) value = null;
-            break;
-        }
-      } else value = null;
-      
-      // always make selection into something then save
-      if (!value) value = SC.SelectionSet.EMPTY;
-      this._scsel_selection = value;
-      
-    // read only mode
-    } else return this._scsel_selection ;
+    // whenever we have to recompute selection, reapply all the conditions to
+    // the selection.  This ensures that changing the conditions immediately
+    // updates the selection.
+    // 
+    // Note also if we don't allowSelection, we don't clear the old selection;
+    // we just don't allow it to be changed.
+    if ((value === undefined) || !this.get('allowsSelection')) value = old ;
+
+    len = (value && value.isEnumerable) ? value.get('length') : 0;
+    
+    // if we don't allow multiple selection
+    if ((len>1) && !this.get('allowsMultipleSelection')) {
+
+      if (oldlen>1) {
+        value = SC.SelectionSet.create()
+                  .addObject(old.get('firstObject')).freeze();
+        len   = 1;
+      } else {
+        value = old;
+        len = oldlen;
+      }
+    }
+    
+    // if we don't allow empty selection, block that also.  select first 
+    // selectable item if necessary.
+    if ((len===0) && !this.get('allowsEmptySelection')) {
+      if (oldlen===0) {
+        value = this.get('firstSelectableObject');
+        if (value) value = SC.SelectionSet.create().addObject(value).freeze();
+        else value = SC.SelectionSet.EMPTY;
+        len = value.get('length');
+        
+      } else {
+        value = old;
+        len = oldlen;
+      }
+    }
+    
+    // if value is empty or is not enumerable, then use empty set
+    if (len===0) value = SC.SelectionSet.EMPTY;
+    
+    // always use a frozen copy...
+    value = value.frozenCopy();
+    this._scsel_selection = value;
+    
+    return value;
     
   }.property('arrangedObjects', 'allowsEmptySelection', 
       'allowsMultipleSelection', 'allowsSelection').cacheable(),
@@ -205,28 +231,36 @@ SC.SelectionSupport = {
     
     var content = this.get('arrangedObjects'),
         sel     = this.get('selection'),
-        indexes, len, max, ret;
+        ret     = sel,
+        indexes, len, max;
 
-    if (!sel) sel = SC.SelectionSet.EMPTY;
-    
-    // if selection is not allowed, just force to be empty.
-    if (!this.get('allowsSelection') && sel.get('length')>0) {
-      ret = SC.SelectionSet.EMPTY;
-      
-      
-    // selection is allowed, make sure it is valid
-    } else {
-      
-      // remove from the sel any items selected beyond the length of the new
-      // arrangedObjects
-      indexes = content ? sel.indexSetForSource(content) : null;
-      len     = content ? content.get('length') : 0;
+    // first, make sure selection goes beyond current items...
+    if (ret && content && ret.get('sources').indexOf(content)>=0) {
+      indexes = ret.indexSetForSource(content);
+      len     = content.get('length') ;
       max     = indexes ? indexes.get('max') : 0;
-      if (max > len) ret = sel.copy().constrain(content).freeze();
       
+      // to clean this up, just copy the selection and remove the extra 
+      // indexes
+      if (max > len) {
+        ret = ret.copy().remove(content, len, max-len).freeze();
+        this.set('selection', ret);
+      }
     }
-  
-    if (ret) this.set('selection', ret);
+
+    // if we didn't have to recompute the selection anyway, do a quick check
+    // to make sure there are no constraints that need to be recomputed.
+    if (ret === sel) {
+      len = sel ? sel.get('length') : 0;
+      max = content ? content.get('length') : 0;
+      
+      // need to recompute if the selection is empty and it shouldn't be but
+      // only if we have some content; otherwise what's the point?
+      if ((len===0) && !this.get('allowsEmptySelection') && max>0) {
+        this.notifyPropertyChange('selection');
+      }
+    }
+
     return this ;
   }
     

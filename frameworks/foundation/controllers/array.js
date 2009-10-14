@@ -455,11 +455,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     Whenever enumerable content changes, need to regenerate the 
     observableContent and notify that the range has changed.  
     
-    IMPORTANT: Assumes content is not null and is enumerable
+    This is called whenever the content enumerable changes or whenever orderBy
+    changes.
   */
   _scac_enumerableDidChange: function() {
     var content = this.get('content'), // use content directly
-        newlen  = content.get('length'),
+        newlen  = content ? content.get('length') : 0,
         oldlen  = this._scac_length;
         
     this._scac_length = newlen;
@@ -468,7 +469,7 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     this.enumerableContentDidChange(0, newlen, newlen-oldlen);
     this.endPropertyChanges();
     this.updateSelectionAfterContentChange();
-  },
+  }.observes('orderBy'),
   
   /** @private
     Whenever array content changes, need to simply forward notification.

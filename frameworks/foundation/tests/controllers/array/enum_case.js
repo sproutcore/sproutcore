@@ -11,6 +11,7 @@ var content, controller, extra;
 
 var TestObject = SC.Object.extend({
   title: "test",  
+  xFactor: "THETA",
   toString: function() { return "TestObject(%@)".fmt(this.get("title")); }
 });
 
@@ -25,7 +26,7 @@ module("SC.ArrayController - enum_case - EMPTY SET", {
     controller = SC.ArrayController.create({ 
       content: content, orderBy: "title" 
     });
-    extra = TestObject.create({ title: "FOO" });
+    extra = TestObject.create({ title: "FOO", xFactor: "ZED" });
   },
   
   teardown: function() {
@@ -81,7 +82,6 @@ test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
 });
 
-
 // ..........................................................
 // NON-EMPTY SET
 // 
@@ -90,13 +90,13 @@ module("SC.ArrayController - enum_case - NON-EMPTY SET", {
   setup: function() {
     content = SC.Set.create();
     "1 2 3 4 5".w().forEach(function(x) {
-      content.add(TestObject.create({ title: x }));
+      content.add(TestObject.create({ title: x, xFactor: (5-x) }));
     });
     
     controller = SC.ArrayController.create({ 
       content: content, orderBy: "title" 
     });
-    extra = TestObject.create({ title: "FOO" });
+    extra = TestObject.create({ title: "FOO", xFactor: 0 });
   },
   
   teardown: function() {
@@ -185,6 +185,19 @@ test("basic array WRITE operations", function() {
 
 test("arrangedObjects", function() {
   equals(controller.get("arrangedObjects"), controller, 'c.arrangedObjects should return receiver');
+});
+
+
+test("modifying orderBy should build order", function() {
+  
+  var cnt = 0 ;
+  controller.addObserver('[]', this, function() { cnt++; });
+  same(controller.getEach('title'), '1 2 3 4 5'.w(), 'initially should be ordered by title');
+  
+  cnt = 0;
+  controller.set('orderBy', 'xFactor');
+  equals(cnt, 1, 'should have fired observer on enumerable');
+  same(controller.getEach('title'), '5 4 3 2 1'.w(), 'should be ordered reverse');
 });
 
 // ..........................................................

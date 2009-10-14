@@ -126,19 +126,19 @@ module("SC.TreeItemObserver - Group Use Case", {
     });
     
     flattened = [
-      content[0],
-      content[0].children[0],
-      content[0].children[1],
-      content[0].children[2],
-      content[0].children[3],
-      content[0].children[4],
-      content[1],
-      content[1].children[0],
-      content[1].children[1],
-      content[1].children[2],
-      content[1].children[3],
-      content[1].children[4],
-      content[2]];
+      content[0],             // 0
+      content[0].children[0], // 1
+      content[0].children[1], // 2
+      content[0].children[2], // 3
+      content[0].children[3], // 4
+      content[0].children[4], // 5
+      content[1],             // 6
+      content[1].children[0], // 7
+      content[1].children[1], // 8
+      content[1].children[2], // 9
+      content[1].children[3], // 10
+      content[1].children[4], // 11
+      content[2]];            // 12
       
     delegate = Delegate.create();
 

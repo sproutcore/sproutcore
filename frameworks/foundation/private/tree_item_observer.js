@@ -209,11 +209,31 @@ SC.TreeItemObserver = SC.Object.extend(SC.Array, SC.CollectionContent, {
     range you replace must lie entirely within the same parent item, otherwise
     this will raise an exception.
     
+    h3. The Operation Parameter
+    
     Note that this replace method accepts an additional parameter "operation"
     which is used when you try to insert an item on a boundary between 
     branches whether it should be inserted at the end of the previous group
     after the group.  If you don't pass operation, the default is 
     SC.DROP_BEFORE, which is the expected behavior.
+    
+    Even if the operation is SC.DROP_AFTER, you should still pass the actual
+    index where you expect the item to be inserted.  For example, if you want
+    to insert AFTER the last index of an 3-item array, you would still call:
+    
+    {{{
+      observer.replace(3, 0, [object1 .. objectN], SC.DROP_AFTER)
+    }}}
+    
+    The operation is simply used to disambiguate whether the insertion is
+    intended to be AFTER the previous item or BEFORE the items you are
+    replacing.
+    
+    @param {Number} start the starting index
+    @param {Number} amt the number of items to replace
+    @param {SC.Array} objects array of objects to insert
+    @param {Number} operation either SC.DROP_BEFORE or SC.DROP_AFTER
+    @returns {SC.TreeItemObserver} receiver
   */
   replace: function(start, amt, objects, operation) {
 

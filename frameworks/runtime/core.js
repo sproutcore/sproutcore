@@ -178,13 +178,24 @@ SC.mixin(/** @scope SC */ {
     from JSLint complaining about use of ==, which can be technically 
     confusing.
     
-    @object {Object} obj value to test
+    @param {Object} obj value to test
     @returns {Boolean}
   */
   none: function(obj) {
     return obj===null || obj===undefined;  
   },
 
+  /**
+    Verifies that a value is either null or an empty string.  Return false if
+    the object is not a string.
+    
+    @param {Object} obj value to test
+    @returns {Boolean}
+  */
+  empty: function(obj) {
+    return obj===null || obj===undefined || obj==='';
+  },
+  
   /**
     Returns YES if the passed object is an array or array-like. Instances
     of the NodeList class return NO.

@@ -418,10 +418,25 @@ SC.ListView = SC.CollectionView.extend(
       view = this._insertionPointView 
            = this.get('insertionPointView').create();
     }
-    
-    var layout = SC.clone(itemView.get('layout')),
+
+    var index  = itemView.get('contentIndex'),
+        len    = this.get('length'),
+        layout = SC.clone(itemView.get('layout')),
         level  = itemView.get('outlineLevel'),
-        indent = itemView.get('outlineIndent') || 0;
+        indent = itemView.get('outlineIndent') || 0,
+        group;
+
+    // show item indented if we are inserting at the end and the last item
+    // is a group item.  This is a special case that should really be 
+    // converted into a more general protocol.
+    if ((index >= len) && index>0) {
+      group = this.itemViewForContentIndex(len-1);
+      if (group.get('isGroupView')) {
+        level = 1;
+        indent = group.get('outlineIndent');
+      }
+    }
+    
     if (SC.none(level)) level = -1;
     
     if (dropOperation & SC.DROP_ON) {
@@ -477,7 +492,7 @@ SC.ListView = SC.CollectionView.extend(
     var indexes = this.contentIndexesInRect(loc),
         index   = indexes.get('min'),
         len     = this.get('length'),
-        min, max, diff, clevel, cindent, plevel, pindent, itemView;
+        min, max, diff, clevel, cindent, plevel, pindent, itemView, pgroup;
 
     // if there are no indexes in the rect, then we need to either insert
     // before the top item or after the last item.  Figure that out by 
@@ -512,28 +527,62 @@ SC.ListView = SC.CollectionView.extend(
     // finally, let's decide if we want to actually insert before/after.  Only
     // matters if we are using outlining.
     if (index>0) {
-      itemView = this.itemViewForContentIndex(index);
-      clevel   = itemView ? itemView.get('outlineLevel') : 0;
-      cindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
-      cindent  *= clevel;
-      
-      itemView = this.itemViewForContentIndex(index);
+
+      itemView = this.itemViewForContentIndex(index-1);
       pindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
       plevel   = itemView ? itemView.get('outlineLevel') : 0;
+      
+      if (index<len) {
+        itemView = this.itemViewForContentIndex(index);
+        clevel   = itemView ? itemView.get('outlineLevel') : 0;
+        cindent  = (itemView ? itemView.get('outlineIndent') : 0) || 0;
+        cindent  *= clevel;
+      } else {
+        clevel = itemView.get('isGroupView') ? 1 : 0; // special case...
+        cindent = pindent * clevel;  
+      }
+
       pindent  *= plevel;
 
       // if indent levels are different, then try to figure out which level 
       // it should be on.
       if ((clevel !== plevel) && (cindent !== pindent)) {
+        
         // use most inner indent as boundary
-        if (((pindent > cindent) && (loc.x >= pindent)) ||
-            ((pindent < cindent) && (loc.x <= cindent))) {
-          index-- ;
+        if (pindent > cindent) {
+          index--;
           dropOperation = SC.DROP_AFTER;
         }
       }
     }
 
+    // we do not support dropping before a group item.  If dropping before 
+    // a group item, always try to instead drop after the previous item.  If
+    // the previous item is also a group then, well, dropping is just not 
+    // allowed.  Note also that dropping at 0, first item must not be group
+    // and dropping at length, last item must not be a group
+    //
+    if (dropOperation === SC.DROP_BEFORE) {
+      itemView = (index<len) ? this.itemViewForContentIndex(index) : null;
+      if (!itemView || itemView.get('isGroupView')) {
+        if (index>0) {
+          itemView = this.itemViewForContentIndex(index-1);
+          
+          // don't allow a drop if the previous item is a group view and we're
+          // insert before the end.  For the end, allow the drop if the 
+          // previous item is a group view but OPEN.
+          if (!itemView.get('isGroupView') || (itemView.get('disclosureState') === SC.BRANCH_OPEN)) {
+            index = index-1;
+            dropOperation = SC.DROP_AFTER;
+          } else index = -1;
+
+        } else index = -1;
+      }
+      
+      if (index<0) dropOperation = SC.DRAG_NONE ;
+    } 
+    
+    // return whatever we came up with
     return [index, dropOperation];
   },
   

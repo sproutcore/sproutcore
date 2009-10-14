@@ -2168,6 +2168,8 @@ SC.CollectionView = SC.View.extend(
         content = this.get('content'),
         sel     = this.get('selection'),
         info    = this.mouseDownInfo,
+        cdel    = this.get('contentDelegate'),
+        groupIndexes = cdel.contentGroupIndexes(this, content),
         dragContent, dragDataTypes, dragView;
     
     // if the mouse down event was cleared, there is nothing to do; return.
@@ -2190,7 +2192,16 @@ SC.CollectionView = SC.View.extend(
       if (!this.get("selectOnMouseDown")) {
         dragContent = SC.IndexSet.create(info.contentIndex);
       } else dragContent = sel ? sel.indexSetForSource(content) : null;
+      
+      // remove any group indexes.  groups cannot be dragged.
+      if (dragContent && groupIndexes && groupIndexes.get('length')>0) {
+        dragContent = dragContent.copy().remove(groupIndexes);
+        if (dragContent.get('length')===0) dragContent = null;
+        else dragContent.freeze();
+      }
+      
       if (!dragContent) return YES; // nothing to drag
+      else dragContent = dragContent.frozenCopy(); // so it doesn't change
       
       dragContent = { content: content, indexes: dragContent };
       this.set('dragContent', dragContent) ;
@@ -2452,7 +2463,7 @@ SC.CollectionView = SC.View.extend(
         if (idx >= 0) dragOp = SC.DRAG_REORDER ;
       }
     }
-    
+
     // Now save the insertion index and the dropOp.  This may be changed by
     // the collection delegate.
     this.set('proposedInsertionIndex', idx) ;
@@ -2518,11 +2529,12 @@ SC.CollectionView = SC.View.extend(
     reordering content.
   */
   performDragOperation: function(drag, op) { 
+        
     // Get the correct insertion point, drop operation, etc.
     var state = this._computeDropOperationState(drag, null, op),
         idx   = state[0], dropOp = state[1], dragOp = state[2],
         del   = this.get('selectionDelegate'),
-        performed, objects, data, content, shift;
+        performed, objects, data, content, shift, indexes;
         
     // The dragOp is the kinds of ops allowed.  The drag operation must 
     // be included in that set.
@@ -2545,6 +2557,16 @@ SC.CollectionView = SC.View.extend(
       if (!data) return SC.DRAG_NONE ;
       
       content = this.get('content') ;
+      
+      // check for special case - inserting BEFORE ourself...
+      // in this case just pretend the move happened since it's a no-op 
+      // anyway
+      indexes = data.indexes;
+      if (indexes.get('length')===1) {
+        if (((dropOp === SC.DROP_BEFORE) || (dropOp === SC.DROP_AFTER)) &&
+            (indexes.get('min')===idx)) return SC.DRAG_MOVE;
+      }
+      
       content.beginPropertyChanges(); // suspend notifications
 
       // get each object, then remove it from the content. they will be 
@@ -2556,11 +2578,11 @@ SC.CollectionView = SC.View.extend(
         content.removeAt(i-shift);
         shift++;
         if (i < idx) idx--;
-        if ((dropOp === SC.DROP_AFTER) && (i === idx)) idx--;
       }, this);
       
       // now insert objects into new insertion locaiton
-      content.replace(idx, 0, objects);
+      if (dropOp === SC.DROP_AFTER) idx++;
+      content.replace(idx, 0, objects, dropOp);
       this.select(SC.IndexSet.create(idx, objects.length));
       content.endPropertyChanges(); // restart notifications
 
