@@ -298,6 +298,8 @@ SC.SelectFieldView = SC.FieldView.extend(
 
   didCreateLayer: function() {
     var input = this.$input();
+    if (this.get('isEnabled') == false)
+      this.$()[0].disabled = true;
     SC.Event.add(input, 'blur', this, this.fieldDidBlur);
     SC.Event.add(input, 'focus',this, this.fieldDidFocus);
     return sc_super();
