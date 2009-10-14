@@ -207,7 +207,10 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
       key = this.getDelegateProperty('contentIconKey', del) ;
       val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
       if(val && SC.typeOf(val) !== SC.T_STRING) val = val.toString() ;
-      if(val) this.renderImage(ic, val) ;
+      if(val) {
+        this.renderImage(ic, val) ;
+        ic.addClass('hasIcon') ;
+      }
 
       // handle label -- always invoke
       key = this.getDelegateProperty('contentValueKey', del) ;

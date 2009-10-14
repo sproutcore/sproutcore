@@ -119,6 +119,10 @@
   right: 55px;
 }
 
+.sc-menu-item a.hasIcon span.value {
+  margin-left: 45px;
+}
+
 .sc-menu-item span.hasBranch {
   position:absolute;
   text-align:center;
