@@ -110,9 +110,12 @@ SC.TreeController = SC.ObjectController.extend(SC.SelectionSupport,
   */
   firstSelectableObject: function() {
     var objects = this.get('arrangedObjects'),
-        indexes = objects.contentGroupIndexes(null, objects),
-        len     = objects.get('length'),
-        idx     = 0;
+        indexes, len, idx     = 0;
+        
+    if (!objects) return null; // fast track
+    
+    indexes = objects.contentGroupIndexes(null, objects);
+    len = objects.get('length');
     while(indexes.contains(idx) && (idx<len)) idx++;
     return idx>=len ? null : objects.objectAt(idx);
   }.property()
