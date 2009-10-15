@@ -191,7 +191,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @property
     @type{SC.Array}
   */
-  displayProperties: ['icon', 'value','controlSize'],
+  displayProperties: ['icon', 'value','controlSize','objects'],
 
   /**
     Prefer matrix to position the select button menu such that the
