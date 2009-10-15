@@ -305,7 +305,6 @@ SC.Record = SC.Object.extend(
         if(!ignoreDidChange) this.beginEditing();
         attrs[key] = value;
         if(!ignoreDidChange) this.endEditing(key);
-        store.dataHashDidChange(storeKey, null, NO, key);
       }
     }
     
