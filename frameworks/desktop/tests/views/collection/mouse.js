@@ -51,11 +51,12 @@ module("SC.CollectionView Mouse Events", {
   @param {Number} index the index to click on
   @param {Boolean} shiftKey simulate shift key pressed 
   @param {Boolean} ctrlKey simulate ctrlKey pressed
-  @param {IndexSet} expected expected selection
+  @param {SC.SelectionSet} expected expected selection
+  @param {Number} delay delay before running the test (optional)
   @returns {void}
 */
 function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
-  var itemView = view.getPath('childViews.%@'.fmt(index)),
+  var itemView = view.itemViewForContentIndex(index),
       layer    = itemView.get('layer'), 
       opts     = { shiftKey: shiftKey, ctrlKey: ctrlKey }, 
       sel, ev, modifiers;
@@ -78,8 +79,6 @@ function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
       if (ctrlKey) modifiers.push('ctrl');
       modifiers = modifiers.length > 0 ? modifiers.join('+') : 'no modifiers';
       
-      expected = SC.SelectionSet.create().add(view.get('content'), expected);
-      
       ok(expected.isEqual(sel), 'should have selection: %@ after click with %@ on item[%@], actual: %@'.fmt(expected, modifiers, index, sel));
       SC.RunLoop.end();
       if (delay) window.start() ; // starts the test runner
@@ -94,24 +93,50 @@ function clickOn(view, index, shiftKey, ctrlKey, expected, delay) {
   layer = itemView = null ;
 }
 
+/*
+  Creates an SC.SelectionSet from a given index.
+
+  @param {Number} index the index of the content to select
+  @returns {SC.SelectionSet}
+*/
+
+function selectionFromIndex(index) {
+  var ret = SC.SelectionSet.create();
+  ret.addObject(content.objectAt(index));
+
+  return ret;
+}
+
+/*
+  Creates an SC.SelectionSet from a given SC.IndexSet.
+
+  @param {Number} index the index of the content to select
+  @returns {SC.SelectionSet}
+*/
+function selectionFromIndexSet(indexSet) {
+  var ret = SC.SelectionSet.create();
+  ret.add(content, indexSet);
+
+  return ret;
+}
+
 // ..........................................................
 // basic click
 // 
 
 test("clicking on an item should select it", function() {
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
 });
 
 test("clicking on a selected item should clear selection after 301ms and reselect it", function() {
   view.select(SC.IndexSet.create(1,5));
   SC.RootResponder.responder._lastMouseUpAt = null ; // HACK: don't want a doubleClick from previous tests
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3), 301);
+  clickOn(view, 3, NO, NO, selectionFromIndex(3), 301);
 });
 
 test("clicking on unselected item should clear selection and select it", function() {
-
   view.select(SC.IndexSet.create(1,5));
-  clickOn(view, 7, NO, NO, SC.IndexSet.create(7));
+  clickOn(view, 7, NO, NO, selectionFromIndex(7));
 });
 
 test("first responder", function() {
@@ -124,15 +149,15 @@ test("first responder", function() {
 // 
 
 test("ctrl-clicking on unselected item should add to selection", function() {
-  clickOn(view,3, NO, YES, SC.IndexSet.create(3));
-  clickOn(view,5, NO, YES, SC.IndexSet.create(3).add(5));
+  clickOn(view,3, NO, YES, selectionFromIndex(3));
+  clickOn(view,5, NO, YES, selectionFromIndex(3).addObject(content.objectAt(5)));
 });
 
 test("ctrl-clicking on selected item should remove from selection", function() {
-  clickOn(view,3, NO, YES, SC.IndexSet.create(3));
-  clickOn(view,5, NO, YES, SC.IndexSet.create(3).add(5));
-  clickOn(view,3, NO, YES, SC.IndexSet.create(5));
-  clickOn(view,5, NO, YES, SC.IndexSet.create());
+  clickOn(view,3, NO, YES, selectionFromIndex(3));
+  clickOn(view,5, NO, YES, selectionFromIndex(3).addObject(content.objectAt(5)));
+  clickOn(view,3, NO, YES, selectionFromIndex(5));
+  clickOn(view,5, NO, YES, SC.SelectionSet.create());
 });
 
 // ..........................................................
@@ -140,35 +165,35 @@ test("ctrl-clicking on selected item should remove from selection", function() {
 // 
 
 test("shift-clicking on an item below should extend the selection", function() {
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
-  clickOn(view, 5, YES, NO, SC.IndexSet.create(3,3));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+  clickOn(view, 5, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,3)));
 });
 
 
 test("shift-clicking on an item above should extend the selection", function() {
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
-  clickOn(view, 1, YES, NO, SC.IndexSet.create(1,3));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+  clickOn(view, 1, YES, NO, selectionFromIndexSet(SC.IndexSet.create(1,3)));
 });
 
 test("shift-clicking inside selection first time should reduce selection from top", function() {
   view.select(SC.IndexSet.create(3,4));
-  clickOn(view,4, YES, NO, SC.IndexSet.create(3,2));
+  clickOn(view,4, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,2)));
 });
 
 test("shift-click below to extend selection down then shift-click inside selection should reduce selection", function() {
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
-  clickOn(view, 5, YES, NO, SC.IndexSet.create(3,3));
-  clickOn(view,4, YES, NO, SC.IndexSet.create(3,2));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+  clickOn(view, 5, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,3)));
+  clickOn(view,4, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,2)));
 });
 
 test("shift-click above to extend selection down then shift-click inside selection should reduce top of selection", function() {
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
-  clickOn(view, 1, YES, NO, SC.IndexSet.create(1,3));
-  clickOn(view,2, YES, NO, SC.IndexSet.create(2,2));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+  clickOn(view, 1, YES, NO, selectionFromIndexSet(SC.IndexSet.create(1,3)));
+  clickOn(view,2, YES, NO, selectionFromIndexSet(SC.IndexSet.create(2,2)));
 });
 
 test("shift-click below bottom of selection then shift click on top of selection should select only top item", function() {
-  clickOn(view, 3, NO, NO, SC.IndexSet.create(3));
-  clickOn(view, 5, YES, NO, SC.IndexSet.create(3,3));
-  clickOn(view,3, YES, NO, SC.IndexSet.create(3));
+  clickOn(view, 3, NO, NO, selectionFromIndex(3));
+  clickOn(view, 5, YES, NO, selectionFromIndexSet(SC.IndexSet.create(3,3)));
+  clickOn(view,3, YES, NO, selectionFromIndex(3));
 });
