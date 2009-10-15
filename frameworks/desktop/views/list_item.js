@@ -13,8 +13,8 @@ SC.LIST_ITEM_ACTION_EJECT = 'sc-list-item-cancel-eject';
   @class
   
   Many times list items need to display a lot more than just a label of text.
-  You often need to include checkboxes, icons, extra counts and an action or 
-  warning icon to the far right. 
+  You often need to include checkboxes, icons, right icons, extra counts and 
+  an action or warning icon to the far right. 
   
   A ListItemView can implement all of this for you in a more efficient way 
   than you might get if you simply put together a list item on your own using
@@ -51,6 +51,14 @@ SC.ListItemView = SC.View.extend(
     space will be left for the icon next to the list item view.
   */
   hasContentIcon: NO,
+
+  /**
+    (displayDelegate) True if you want the item view to display a right icon.
+    
+    If false, the icon on the list item view will be hidden.  Otherwise,
+    space will be left for the icon next to the list item view.
+  */
+  hasContentRightIcon: NO,
   
   /**
     (displayDelegate) True if you want space to be allocated for a branch 
@@ -76,6 +84,14 @@ SC.ListItemView = SC.View.extend(
     icon to display.  It must return either a URL or a CSS class name.
   */
   contentIconKey: null,
+ 
+  /**
+    (displayDelegate) Property key to use for the right icon url
+
+    This property will be checked on the content object to determine the 
+    icon to display.  It must return either a URL or a CSS class name.
+  */
+  contentRightIconKey: null,
   
   /**
     (displayDelegate) The name of the property used for label itself
@@ -190,11 +206,25 @@ SC.ListItemView = SC.View.extend(
     if (value && SC.typeOf(value) !== SC.T_STRING) value = value.toString();
     if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
     this.renderLabel(working, value);
+
+    // handle right icon
+    if (this.getDelegateProperty('hasContentRightIcon', del)) {
+      key = this.getDelegateProperty('contentRightIconKey', del) ;
+      value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
+      
+      this.renderRightIcon(working, value);
+      context.addClass('has-right-icon');
+    }
     
     // handle unread count
     key = this.getDelegateProperty('contentUnreadCountKey', del) ;
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-    if (!SC.none(value) && (value !== 0)) this.renderCount(working, value) ;
+    if (!SC.none(value) && (value !== 0)) {
+      this.renderCount(working, value) ;
+      var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
+      var digit = (value.toString().length < digits.length) ? digits[value.toString().length] : digits[digits.length-1];
+      context.addClass('has-count %@-digit'.fmt(digit));
+    }
     
     // handle action 
     key = this.getDelegateProperty('listItemActionProperty', del) ;
@@ -324,6 +354,31 @@ SC.ListItemView = SC.View.extend(
   $label: function() {
     return this.$('label') ;
   },
+
+  /** 
+    Generates a right icon for the label based on the content.  This method will
+    only be called if the list item view has icons enabled.  You can override
+    this method to display your own type of icon if desired.
+    
+    @param {SC.RenderContext} context the render context
+    @param {String} icon a URL or class name.
+    @returns {void}
+  */
+  renderRightIcon: function(context, icon){
+    // get a class name and url to include if relevant
+    var url = null, className = null ;
+    if (icon && SC.ImageView.valueIsUrl(icon)) {
+      url = icon; className = '' ;
+    } else {
+      className = icon; url = SC.BLANK_IMAGE_URL ;
+    }
+    
+    // generate the img element...
+    context.begin('img')
+      .addClass('right-icon').addClass(className)
+      .attr('src', url)
+    .end();
+  },
   
   /** 
    Generates an unread or other count for the list item.  This method will
@@ -335,9 +390,7 @@ SC.ListItemView = SC.View.extend(
    @returns {void}
   */
   renderCount: function(context, count) {
-    var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
-    var digit = (count.toString().length < digits.length) ? digits[count.toString().length] : digits[digits.length-1];
-    context.push('<span class="count %@-digit"><span class="inner">'.fmt(digit))
+    context.push('<span class="count"><span class="inner">')
       .push(count.toString()).push('</span></span>') ;
   },
   
