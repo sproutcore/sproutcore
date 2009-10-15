@@ -41,7 +41,7 @@ test("canDeleteContent", function() {
   view.set('canDeleteContent', YES);
   equals(view.deleteSelection(), YES, 'should return YES if allowed');
   equals(content.get('length'), afterLen, 'content.length should change');
-  equals(view.get('selection').get('length'), 0, 'should have empty selection');
+  equals(view.get('selection').indexSetForSource(content).get('min'), 3, 'should select an adjacent item');
 });
 
 test("empty selection case", function() {
