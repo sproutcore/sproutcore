@@ -236,8 +236,7 @@ SC.SliderView = SC.View.extend(SC.Control,
      //  } else {
      //    evt.stop();
      //  }
-     this.updateLayerIfNeeded();
-     //SC.RunLoop.begin().end();
+     SC.RunLoop.begin().end();
      return YES; 
    },
 

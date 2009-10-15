@@ -153,9 +153,8 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     // get style for view.
    
     pane.appendChild(this);
-    if (this.get('layer')) this.updateLayerIfNeeded() ;
-    else this.createLayer();
-    //this.updateLayerIfNeeded(); //force layer
+    
+    SC.RunLoop.begin().end();
     
     var del = this._delegate ;
 
