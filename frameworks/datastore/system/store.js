@@ -561,9 +561,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         if (!(keys = changes.propertyForStoreKeys[storeKey])) {
           keys = changes.propertyForStoreKeys[storeKey] = SC.CoreSet.create();
         }
+        
         // If it's '*' instead of a set, then that means there was a previous
         // invocation that said all keys have changed.
-        else if (keys !== '*') {
+        if (keys !== '*') {
           keys.add(key);
         }
       }
