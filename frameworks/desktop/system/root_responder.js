@@ -464,7 +464,10 @@ SC.RootResponder = SC.RootResponder.extend(
       // make sure the window gets focus no matter what.  FF is inconsistant 
       // about this.
       this.focus();
-      
+      if(SC.browser.msie) {
+        this._lastMouseDownX = evt.clientX;
+        this._lastMouseDownY = evt.clientY;
+      }
       // first, save the click count.  Click count resets if your down is
       // more than 125msec after you last click up.
       this._clickCount += 1 ;
@@ -599,7 +602,15 @@ SC.RootResponder = SC.RootResponder.extend(
       // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
       // drags send their own events, e.g. drag[Moved|Entered|Exited]
       if (this._drag) {
-        this._drag.tryToPerform('mouseDragged', evt);
+        //IE triggers mousemove at the same time as mousedown
+        if(SC.browser.msie){
+          if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
+            this._drag.tryToPerform('mouseDragged', evt);
+          }
+        }
+        else {
+          this._drag.tryToPerform('mouseDragged', evt);
+        }
       } else {
         
         var lh = this._lastHovered || [] ;
@@ -634,9 +645,15 @@ SC.RootResponder = SC.RootResponder.extend(
         // also, if a mouseDownView exists, call the mouseDragged action, if 
         // it exists.
         if (this._mouseDownView) {
-          this._mouseDownView.tryToPerform('mouseDragged', evt);
+          if(SC.browser.msie){
+            if (this._lastMouseDownX !== evt.clientX && this._lastMouseDownY !== evt.clientY) {
+              this._mouseDownView.tryToPerform('mouseDragged', evt);
+            }
+          }
+          else {
+            this._mouseDownView.tryToPerform('mouseDragged', evt);
+          }
         }
-        
       }
     } catch (e) {
       throw e;
