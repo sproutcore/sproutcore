@@ -104,8 +104,7 @@ SC.Button = {
   
   /**
     The button icon.  Set this to either a URL or a CSS class name (for 
-    spriting).  To display an icon, you must set hasIcon to YES when the 
-    button is created.  Note that if you pass a URL, it must contain at 
+    spriting).  Note that if you pass a URL, it must contain at 
     least one slash to be detected as such.
     
     @property {String}
