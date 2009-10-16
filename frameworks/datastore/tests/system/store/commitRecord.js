@@ -173,21 +173,21 @@ test("Confirm that all the states are switched as expected after running commitR
 });
 
 test("calling commitRecords() without explicit storeKeys", function() {
-  
+  var st;
   store.changelog = [storeKey1, storeKey2, storeKey3, storeKey4];
   store.commitRecords();
 
-  status = store.readStatus( storeKey1);
-  equals(status, SC.Record.READY_CLEAN, "storeKey1 - the status shouldn't have changed. It should be READY_CLEAN ");
+  st = store.readStatus( storeKey1);
+  equals(st, SC.Record.READY_CLEAN, "storeKey1 - the status shouldn't have changed. It should be READY_CLEAN ");
   
-  status = store.readStatus( storeKey2);
-  equals(status, SC.Record.BUSY_CREATING, "storeKey2 - the status should be SC.Record.BUSY_CREATING");
+  st = store.readStatus( storeKey2);
+  equals(st, SC.Record.BUSY_CREATING, "storeKey2 - the status should be SC.Record.BUSY_CREATING");
 
-  status = store.readStatus( storeKey3);
-  equals(status, SC.Record.BUSY_COMMITTING, "storeKey3 - the status should be SC.Record.BUSY_COMMITTING");
+  st = store.readStatus( storeKey3);
+  equals(st, SC.Record.BUSY_COMMITTING, "storeKey3 - the status should be SC.Record.BUSY_COMMITTING");
   
-  status = store.readStatus( storeKey4);
-  equals(status, SC.Record.BUSY_DESTROYING, "storeKey4 - the status should be SC.Record.BUSY_DESTROYING");
+  st = store.readStatus( storeKey4);
+  equals(st, SC.Record.BUSY_DESTROYING, "storeKey4 - the status should be SC.Record.BUSY_DESTROYING");
   
   ds.expect(1, [storeKey2], [storeKey3], [storeKey4]);
 });
