@@ -481,7 +481,7 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
       if (!oldKeyPane) responder.makeKeyPane(null) ; 
       else responder.makeKeyPane(oldKeyPane) ;
     }
-    else if (this.rootResponder) responder.makeKeyPane(null);
+    else responder.makeKeyPane(null);
     responder.panes.remove(this) ;
     this.rootResponder = responder = null ;
     
