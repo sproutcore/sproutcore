@@ -59,6 +59,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (!this.get('canScrollHorizontal')) return 0 ;
     var view = this.get('contentView') ;
     var contentWidth = view ? view.get('frame').width : 0 ;
+    
+    // The following code checks if there is a calculatedWidth (collections)
+    // to avoid looking at the incorrect value calculated by frame.
+    if(view.calculatedWidth && view.calculatedWidth!==0){
+      contentWidth = view.calculatedWidth; 
+    }
     var containerWidth = this.get('containerView').get('frame').width ;
     return Math.max(0, contentWidth-containerWidth) ;
   }.property(),
@@ -74,6 +80,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (!this.get('canScrollVertical')) return 0 ;
     var view = this.get('contentView') ;
     var contentHeight = (view && view.get('frame')) ? view.get('frame').height : 0 ;
+    
+    // The following code checks if there is a calculatedWidth (collections)
+    // to avoid looking at the incorrect value calculated by frame.
+    if(view.calculatedHeight && view.calculatedHeight!==0){
+      contentHeight = view.calculatedHeight; 
+    }
     var containerHeight = this.get('containerView').get('frame').height ;
     return Math.max(0, contentHeight-containerHeight) ;
   }.property(),
@@ -665,16 +677,15 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // This forces to recalculate the height of the frame when is at the bottom
     // of the scroll and the content dimension are smaller that the previous one
     
-    var forceHeight = this.get('maximumVerticalScrollOffset') && 
-                        this.get('hasVerticalScroller') && 
-                        this.get('maximumVerticalScrollOffset')<=this.get('verticalScrollOffset');
-    var forceWidth = this.get('maximumHorizontalScrollOffset') && 
-                            this.get('hasHorizontalScroller') && 
-                            this.get('maximumHorizontalScrollOffset')<=this.get('horizontalScrollOffset');
-    var maxHOffset = this.get('maximumHorizontalScrollOffset');
-    var maxVOffset = this.get('maximumVerticalScrollOffset');
+    
+    var mxVOffSet = this.get('maximumVerticalScrollOffset'),
+        vOffSet = this.get('verticalScrollOffset'),
+        mxHOffSet = this.get('maximumHorizontalScrollOffset'),
+        hOffSet = this.get('horizontalScrollOffset');
+    var forceHeight = mxVOffSet && this.get('hasVerticalScroller') && mxVOffSet<vOffSet;
+    var forceWidth = mxHOffSet && this.get('hasHorizontalScroller') && mxHOffSet<hOffSet;
     if(forceHeight || forceWidth){
-      this.forceDimensionsRecalculation(forceWidth, forceHeight);
+      this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     }
   },
   
@@ -713,18 +724,18 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
   }.observes('verticalScrollOffset'),
   
-  forceDimensionsRecalculation: function (forceWidth, forceHeight) {
-    var oldScrollHOffset = this.get('horizontalScrollOffset');
-    var oldScrollVOffset = this.get('verticalScrollOffset');
+  forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
+    var oldScrollHOffset = hOffSet;
+    var oldScrollVOffset = vOffSet;
     this.scrollTo(0,0);
     if(forceWidth && forceHeight){
-      this.scrollTo(this.get('maximumHorizontalScrollOffset')-0.001, this.get('maximumVerticalScrollOffset')-0.001);
+      this.scrollTo(this.get('maximumHorizontalScrollOffset'), this.get('maximumVerticalScrollOffset'));
     }
     if(forceWidth && !forceHeight){
-      this.scrollTo(this.get('maximumHorizontalScrollOffset')-0.001, oldScrollVOffset);
+      this.scrollTo(this.get('maximumHorizontalScrollOffset'), oldScrollVOffset);
     }
     if(!forceWidth && forceHeight){
-      this.scrollTo(oldScrollHOffset ,this.get('maximumVerticalScrollOffset')-0.001);
+      this.scrollTo(oldScrollHOffset ,this.get('maximumVerticalScrollOffset'));
     }
   }
   
