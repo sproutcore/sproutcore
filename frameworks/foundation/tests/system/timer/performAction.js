@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+var objectA, objectB, object;
+
 module("SC.Timer.fireTime + SC.Timer.performAction ",{
   	setup: function() {
     	objectA = {} ;

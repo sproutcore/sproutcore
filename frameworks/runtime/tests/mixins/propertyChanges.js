@@ -1,3 +1,4 @@
+var ObjectA;
 module("object.propertyChanges()", {	
 	setup: function() {
 		ObjectA = SC.Object.create({

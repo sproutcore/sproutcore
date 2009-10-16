@@ -89,7 +89,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
     var labelView = this.outlet('labelView') ;
     
     // hide labelView if content is null.
-    if (content == null) {
+    if (content === null) {
       labelView.setIfChanged('isVisible', NO) ;
       this.setIfChanged('hasGroupTitle', NO) ;
       return ;

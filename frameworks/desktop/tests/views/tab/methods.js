@@ -8,7 +8,7 @@
 /*global module test htmlbody ok equals same stop start */
 
 var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-
+var pane, view;
 module("SC.TabView", {
   setup: function() {
     SC.RunLoop.begin();

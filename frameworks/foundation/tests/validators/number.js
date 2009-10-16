@@ -14,7 +14,7 @@ test("validate() a number", function() {
 });
 
 test("Checking fieldValueForObject" ,function(){
- obj = {};
+ var obj = {};
  var value;
  value = SC.Validator.Number.fieldValueForObject(obj,'','');
  equals(SC.T_HASH,SC.typeOf(value),'Returns an object');
@@ -27,7 +27,7 @@ test("Checking fieldValueForObject" ,function(){
 });
 
 test("Checking objectForFieldValue" ,function(){
- obj = {};
+ var obj = {};
  var value = '';
  value = SC.Validator.Number.objectForFieldValue('','','');
  equals(null,value,'Returns null for an empty string parameter');

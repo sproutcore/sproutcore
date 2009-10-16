@@ -58,8 +58,8 @@ SC.Enumerator.prototype = {
   reset: function() {
     var e = this.enumerable ;
     if (!e) throw SC.$error("Enumerator has been destroyed");
-    
-    var len = this._length = (e.get) ? e.get('length') : e.length ;
+    this._length = e.get ? e.get('length') : e.length ;
+    var len = this._length;
     this._index = 0;
     this._previousObject = null ;
     this._context = (len > 0) ? SC.Enumerator._popContext() : null;
@@ -94,12 +94,13 @@ SC.Enumerator.create = function(enumerableObject) {
 // objects.
 
 SC.Enumerator._popContext = function() {
-  var ret = (this._contextCache) ? this._contextCache.pop() : null ;
+  var ret = this._contextCache ? this._contextCache.pop() : null ;
   return ret || {} ;
 } ;
 
 SC.Enumerator._pushContext = function(context) {
-  var cache = this._contextCache = this._contextCache || [] ;
+  this._contextCache = this._contextCache || [] ;
+  var cache = this._contextCache;
   cache.push(context);
   return null ;
 }; 

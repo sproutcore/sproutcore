@@ -3,7 +3,7 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
-var fromObject, toObject, binding ; // global variables
+var fromObject, toObject, binding, Bon1, bon2 ; // global variables
 
 module("basic object binding", {
   
@@ -190,12 +190,12 @@ module("Custom Binding", {
 });
 
 test("Binding value1 such that it will recieve only single values", function() {
-	bon1 = Bon1.create({
+	var bon1 = Bon1.create({
 		value1Binding: SC.Binding.single("TestNamespace.bon2.val1"),
 		array1Binding: SC.Binding.single("TestNamespace.bon2.arr")
 	});
 	SC.Binding.flushPendingChanges();
-	var a = new Array (23,31,12,21);
+	var a = [23,31,12,21];
 	bon2.set("arr", a);
 	bon2.set("val1","changed");
 	SC.Binding.flushPendingChanges();
@@ -205,7 +205,7 @@ test("Binding value1 such that it will recieve only single values", function() {
 });
 
 test("Single binding using notEmpty function.", function() {
-	bond = Bon1.create ({
+	var bond = Bon1.create ({
 	  array1Binding: SC.Binding.single("TestNamespace.bon2.arr").notEmpty(null,'(EMPTY)')
 	});
 	SC.Binding.flushPendingChanges();
@@ -215,7 +215,7 @@ test("Single binding using notEmpty function.", function() {
 });
 
 test("Binding with transforms, function to check the type of value", function() {
-	jon = Bon1.create({
+	var jon = Bon1.create({
 		value1Binding: SC.Binding.transform(function(val1) {
 			return (SC.typeOf(val1) == SC.T_STRING)? val1 : "";
 		}).from("TestNamespace.bon2.val1")
@@ -232,11 +232,13 @@ test("two bindings to the same value should sync in the order they are initializ
 
   SC.RunLoop.begin();
 
-  var a = window.a = SC.Object.create({ 
+  window.a = SC.Object.create({ 
     foo: "bar" 
   });
   
-  var b = window.b = SC.Object.create({ 
+  var a = window.a;
+  
+  window.b = SC.Object.create({ 
     foo: "baz",
     fooBinding: "a.foo",
     
@@ -251,6 +253,8 @@ test("two bindings to the same value should sync in the order they are initializ
     }
     
   });
+  
+  var b = window.b;
 
   SC.LOG_BINDINGS = YES;
     

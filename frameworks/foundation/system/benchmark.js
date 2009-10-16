@@ -4,6 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
+/*globals $A*/
 
 sc_require('core') ;
  
@@ -132,14 +133,15 @@ SC.Benchmark = {
       time is now.
   */
   end: function(key, parentKey, time) {
+    var stat;
     if (!this.enabled) return ;
     if(parentKey)
     {
-      var stat = this._subStatFor(key, parentKey) ;
+      stat = this._subStatFor(key, parentKey) ;
     }
     else
     {
-      var stat = this._statFor(key) ;
+      stat = this._statFor(key) ;
     }
     var start = stat._starts.pop() ;
     if (!start) {
@@ -196,7 +198,8 @@ SC.Benchmark = {
   install: function(object,method, topLevelOnly) {
     
     // vae the original method.
-    var __func = object['b__' + method] = object[method] ;
+    object['b__' + method] = object[method] ;
+    var __func = object['b__' + method];
     
     // replace with this helper.
     object[method] = function() {
@@ -227,9 +230,9 @@ SC.Benchmark = {
   report: function(key) {
     if (key) return this._genReport(key) ;
     var ret = [] ;
-    for(var key in this.stats) {
-      if (!this.stats.hasOwnProperty(key)) continue ;
-      ret.push(this._genReport(key)) ;
+    for(var k in this.stats) {
+      if (!this.stats.hasOwnProperty(k)) continue ;
+      ret.push(this._genReport(k)) ;
     }
     return ret.join("\n") ;
   },
@@ -264,7 +267,7 @@ SC.Benchmark = {
 
   */
   timelineChart: function(appName) {
-    
+    var i=0;
     // Hide the chart if there is an existing one.
     this.hideChart();
     
@@ -273,10 +276,10 @@ SC.Benchmark = {
     var chartLen = chart.length;
     
     // Return if there is nothing to draw.
-    if(chartLen == 0) return;
+    if(chartLen === 0) return;
     
     // Get the global start of the graph.
-    var gStart = (this.globalStartTime) ? this.globalStartTime : chart[0][1];
+    var gStart = this.globalStartTime ? this.globalStartTime : chart[0][1];
     var maxDur = chart[chartLen-1][2]-gStart;
     var maxHeight = 50+chartLen*30;
     var incr = Math.ceil(maxDur/200)+1;
@@ -300,7 +303,7 @@ SC.Benchmark = {
     graph.appendChild(topBox);
 
     // Draw the tick marks.
-    for(var i=0;i<incr; i++)
+    for(i=0;i<incr; i++)
     {
       var tick = document.createElement('div');
       tick.className = 'sc-benchmark-tick';
@@ -315,12 +318,12 @@ SC.Benchmark = {
     }
     
     // For each item in the chart, print it out on the screen.
-    for(var i=0;i<chartLen; i++)
+    for(i=0;i<chartLen; i++)
     {
     	var row = document.createElement('div');
     	row.style.top = (75+(i*30))+'px';
     	row.style.width = maxWidth+'px';
-    	row.className = (i%2==0) ? 'sc-benchmark-row even' : 'sc-benchmark-row';
+    	row.className = (i%2===0) ? 'sc-benchmark-row even' : 'sc-benchmark-row';
     	graph.appendChild(row);
 
       var div = document.createElement('div');
@@ -350,7 +353,7 @@ SC.Benchmark = {
     if(this._graph) {
       try{ 
         document.body.removeChild(this._graph);
-      }catch(e){};
+      }catch(e){}
     }
   },
   
@@ -384,14 +387,14 @@ SC.Benchmark = {
   // Generates, sorts, and returns the array of all the data that has been captured.
   _compileChartData: function(showSub)
   {
-    var chart = [];
+    var chart = [], dispKey;
     for(var key in this.stats) 
     {
       var stat = this.stats[key];
       for(var i=0; i<stat._times.length; i++)
       {
         var st = stat._times[i];
-        var dispKey = (stat._times.length > 1) ? (i+1)+' - '+key : key;
+        dispKey = (stat._times.length > 1) ? (i+1)+' - '+key : key;
         chart.push([dispKey, st.start, st.end, st.dur, false]);
         if(showSub)
         {
@@ -403,7 +406,7 @@ SC.Benchmark = {
             for(var j=0; j<subStat._times.length; j++)
             {
               var s = subStat._times[j];
-              var dispKey = (subStat._times.length > 1) ? (j+1)+' - '+k : k;
+              dispKey = (subStat._times.length > 1) ? (j+1)+' - '+k : k;
               chart.push([dispKey, s.start, s.end, s.dur, true]);
          
             }
@@ -468,12 +471,15 @@ SC.Benchmark = {
   // creates it.
   _subStatFor: function(key, parentKey) {
     var parentTimeLen = this.stats[parentKey]._times.length;
-    if(parentTimeLen == 0) return;
+    if(parentTimeLen === 0) return;
     var parentSubStats = this.stats[parentKey]._times[this.stats[parentKey]._times.length-1]._subStats;
     var ret = parentSubStats[key] ;
-    if (!ret) ret = parentSubStats[key] = {
-      runs: 0, amt: 0, name: key, _starts: [], _times: []      
-    };
+    if (!ret) {
+      parentSubStats[key] = {
+        runs: 0, amt: 0, name: key, _starts: [], _times: []      
+      };
+      ret = parentSubStats[key];
+    }
     return ret ;
   },
 
@@ -481,9 +487,12 @@ SC.Benchmark = {
   // creates it.
   _statFor: function(key) {
     var ret = this.stats[key] ;
-    if (!ret) ret = this.stats[key] = {
-      runs: 0, amt: 0, name: key, _starts: [], _times: []      
-    };
+    if (!ret) {
+      ret = this.stats[key] = {
+        runs: 0, amt: 0, name: key, _starts: [], _times: []      
+      };
+      ret = this.stats[key];
+    }
     return ret ;
   },
   

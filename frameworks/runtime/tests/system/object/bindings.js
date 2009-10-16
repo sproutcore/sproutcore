@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+var testObject, fromObject, extraObject, TestObject;
+
 module("bind() method", {
   
   setup: function() {
@@ -97,6 +99,7 @@ test("bind(*extraObject.foo) should create locally chained binding", function() 
   SC.Binding.flushPendingChanges();
   equals("extraObjectValue", testObject.get("foo"), "testObject.foo") ;
 });
+
 
 module("fooBinding method", {
   

@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test normalize method for SC.Record
-var storeKeys, rec;
+var storeKeys, rec, rec2, rec3, rec4;
 module("SC.Record normalize method", {
   setup: function() {
 

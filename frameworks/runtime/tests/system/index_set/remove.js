@@ -4,7 +4,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same notest */
+/*global module test equals context ok same notest should_throw*/
 var set ;
 module("SC.IndexSet#remove", {
   setup: function() {

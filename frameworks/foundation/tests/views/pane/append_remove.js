@@ -38,7 +38,7 @@ test("adding a pane twice should have no effect", function() {
   pane.paneDidAttach = function() {
     cnt++;
     return this._tmp_paneDidAttach.apply(this, arguments);
-  }
+  };
   
   pane.append();
   pane.append();

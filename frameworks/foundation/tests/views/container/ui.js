@@ -10,15 +10,15 @@
 // htmlbody('<style> .sc-control-test-pane .wrapper { overflow: none; } </style>');
 
 (function() {
-  var pane = SC.ControlTestPane.design({ height: 100 })
+  var pane = SC.ControlTestPane.design({ height: 100 });
   
   pane.add("basic", SC.ContainerView, {
       isEnabled: YES
-    })
+    });
     
   pane.add("disabled", SC.ContainerView, {
       isEnabled: NO
-    })
+    });
     
     // .add("disabled - single selection", SC.ListView, {
     //   isEnabled: NO,

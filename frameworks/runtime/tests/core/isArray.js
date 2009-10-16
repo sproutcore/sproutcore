@@ -3,7 +3,7 @@
 // ========================================================================
 /*globals module test */
 
-var objectA,objectB,objectC; //global variables
+var objectA,objectB,objectC, objectD, objectE; //global variables
 
 module("Array Check" , {
 	

@@ -37,7 +37,7 @@ SC.browser = (function() {
     /** non-zero if we are on a mac */
     mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
     
-    language: ((navigator.language || navigator.browserLanguage).split('-', 1)[0])
+    language: (navigator.language || navigator.browserLanguage).split('-', 1)[0]
   };
   
   // Add more SC-like descriptions...
@@ -54,7 +54,7 @@ SC.browser = (function() {
 
     /**
       The current browser name.  This is useful for switch statements. */
-    current: (browser.msie) ? 'msie' : (browser.mozilla) ? 'mozilla' : (browser.safari) ? 'safari' : (browser.opera) ? 'opera' : 'unknown'
+    current: browser.msie ? 'msie' : browser.mozilla ? 'mozilla' : browser.safari ? 'safari' : browser.opera ? 'opera' : 'unknown'
     
   }) ;
   

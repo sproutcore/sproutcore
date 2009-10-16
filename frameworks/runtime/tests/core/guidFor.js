@@ -114,6 +114,8 @@ test("guid should not parse to a number", function() {
   equals(YES, isNaN(parseInt(SC.guidFor(undefined), 0))) ;
 });
 
+var array1, array1copy, array2, array2copy;
+
 module("Arrays", {
 	
 	setup: function() {

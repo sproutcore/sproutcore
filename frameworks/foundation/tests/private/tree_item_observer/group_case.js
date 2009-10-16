@@ -6,7 +6,7 @@
 // ==========================================================================
 
 // The TreeItemObserver is tested based on the common use cases.
-/*globals throws */
+/*globals throws should_throw*/
 
 var content, delegate, flattened, obs, extra, extrachild, root;
 

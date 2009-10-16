@@ -1,3 +1,5 @@
+
+var LocaleObject;
 module("object.SC.Locale()", {	
 		setup: function() {
 			
@@ -5,7 +7,7 @@ module("object.SC.Locale()", {
 				init: function(){
 					sc_super();
 					//hash of new languages
-					newLocales = { deflang: 'dl'};
+					var newLocales = { deflang: 'dl'};
 					
 					//Added the new languages to the existing list of locales
 					SC.Locale.addStrings(newLocales);
@@ -37,7 +39,7 @@ test("Locale.addStrings() : Should be able to add the passed hash of strings to 
 	equals(false, SC.Locale.options().strings.chinese === 'zh' && SC.Locale.options().strings.dutch === 'nl') ;
 	
 	//hash of new languages
-	newLocales = { chinese: 'zh', czech: 'cs', dutch: 'nl'};
+	var newLocales = { chinese: 'zh', czech: 'cs', dutch: 'nl'};
 	
 	//Added the new languages to the existing list of locales
 	SC.Locale.addStrings(newLocales);
@@ -49,7 +51,7 @@ test("Locale.addStrings() : Should be able to add the passed hash of strings to 
 test("Locale.options() : Should provide the registered locales that have not been instantiated", function() {
 		
 		//hash of new languages
-		newLocales = { jamican: 'ji', korean: 'ko'};
+		var newLocales = { jamican: 'ji', korean: 'ko'};
 
 		//Added the new languages to the existing list of locales
 		SC.Locale.addStrings(newLocales);
@@ -69,7 +71,7 @@ test("Locale.normalizeLanguage() : Should provide the two character language cod
 	equals(SC.Locale.normalizeLanguage('English'), 'en') ;
 	
 	//For any other code passed which is not in the default code it should return as it was passed
-	equals(SC.Locale.normalizeLanguage('ab'), 'ab') ; ;
+	equals(SC.Locale.normalizeLanguage('ab'), 'ab') ; 
 });
 
 test("Locale.toString() : Should retrun the current language set with the guid value", function() {
@@ -118,7 +120,7 @@ test("Locale.extend() : Should make sure important properties of Locale object a
 	SC.Locale.locales['mn'] = SC.Locale.extend({ _deprecatedLanguageCodes: ['newlang'] }) ;
 	
 	//hash of new languages
-	testLocales = { test: 'te', newtest: 'nt'};
+	var testLocales = { test: 'te', newtest: 'nt'};
 	//Added the new languages to the existing list of locales through the new locale object
 	SC.Locale.locales.mn.addStrings(testLocales);
 	

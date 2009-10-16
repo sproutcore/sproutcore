@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module test htmlbody ok equals same stop start Q$*/
 
 var pane, view , view1, view2, view3;
 module("SC.SelectFieldView",{

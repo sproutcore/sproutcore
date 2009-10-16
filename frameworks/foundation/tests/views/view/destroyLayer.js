@@ -75,10 +75,8 @@ test("removes layer from parentNode if in DOM", function() {
   
   view.destroyLayer();
 
-  if(layer.parentNode)
-    equals(layer.parentNode.nodeType, 11, 'layer no longer in parent node');
-  else
-    equals(layer.parentNode, null, 'layer no longer in parent node');
+  if(layer.parentNode) equals(layer.parentNode.nodeType, 11, 'layer no longer in parent node');
+  else equals(layer.parentNode, null, 'layer no longer in parent node');
   layer = null; // cleanup
 });
 

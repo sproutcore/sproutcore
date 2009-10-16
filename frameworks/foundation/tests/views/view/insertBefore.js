@@ -42,7 +42,7 @@ test("insertBefore(child, null) appends child to end of parent.childView's array
 test("insertBefore(child, otherChild) inserts child before other child view", function() {
   
   var otherChild = parent.childViews[0]; // get current first child
-  ok(otherChild, 'precond - otherChild is not null')
+  ok(otherChild, 'precond - otherChild is not null');
   parent.insertBefore(child, otherChild);
   equals(parent.childViews[0], child, 'child inserted before other child');
 });

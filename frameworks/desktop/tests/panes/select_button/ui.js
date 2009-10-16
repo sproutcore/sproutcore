@@ -106,7 +106,7 @@ test("Basic", function() {
 
 //test3
 test("Disabled", function() {
-  view=pane.view('Disabled').$() ;
+  var view=pane.view('Disabled').$() ;
   ok(view.hasClass('disabled'), 'hasClass(disabled) should be YES') ;
   ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
@@ -118,7 +118,7 @@ test("Disabled", function() {
 
 //test4
 test("NotVisible", function() {
-  view=pane.view('NotVisible').$();
+  var view=pane.view('NotVisible').$();
   ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
   ok(view.hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
@@ -157,7 +157,7 @@ test("UnsortedObjects", function() {
 
 //test7
 test("redraw", function() {
-  view=pane.view('redraw');
+  var view=pane.view('redraw');
   ok(view.$().hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.$().hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
   ok(view.$().hasClass('sc-regular-size'), 'hasClass(sc-regular-size) should be YES') ;
@@ -175,7 +175,7 @@ test("redraw", function() {
 
 //test8
 test("SelectButtonWithIcon", function() {
-  view=pane.view('SelectButtonWithIcon').$();
+  var view=pane.view('SelectButtonWithIcon').$();
   ok(view.hasClass('icon'), 'hasClass(Icon) should be YES') ;
   ok(view.hasClass('sc-view'), 'hasClass(sc-view) should be YES') ;
   ok(view.hasClass('sc-button-view'), 'hasClass(sc-button-view) should be YES') ;
@@ -187,7 +187,7 @@ test("SelectButtonWithIcon", function() {
 
 //test9
 test("Check if the objects are sorted based on sortKey", function() {
-  view=pane.view('SortKey');
+  var view=pane.view('SortKey');
   equals('None',view.get('objects')[2].title, 'Third object should be "None" ') ;
 }) ;
 

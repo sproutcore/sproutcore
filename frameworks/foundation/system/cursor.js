@@ -126,4 +126,4 @@ SC.Cursor.sharedStyleSheet = function() {
     this._styleSheet = ss ;
   }
   return ss ;
-}
+};

@@ -5,13 +5,13 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/*global module test htmlbody ok equals same stop start Q$ */
 
 
 // note: need to test interaction with Validators here
 // possibly move Validator support to TextFieldView specifically.
 
-var pane, view ;
+var pane, view, view1;
 module("SC.TextFieldView",{
 	setup: function() {
 	    SC.RunLoop.begin();
@@ -68,9 +68,9 @@ test("isEnabled=NO should add disabled class", function() {
 //   });
 
 test("isEnabled and isEditable mapping", function() {
-  	obj= SC.TextFieldView.create();
-	obj.set('isEnabled',false)
+  var obj= SC.TextFieldView.create();
+	obj.set('isEnabled',false);
 	equals(obj.get('isEditable'),false);
-	obj.set('isEnabled',true)
+	obj.set('isEnabled',true);
 	equals(obj.get('isEditable'),true);
 });

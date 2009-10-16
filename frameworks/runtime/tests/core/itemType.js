@@ -1,3 +1,4 @@
+var object;
 module("item type", {
   setup: function() {
      object = SC.Object.create({
@@ -12,7 +13,7 @@ module("item type", {
 });
 
 test("should return the type for the passed item", function() {
-	  a = null;
+	  var a = null;
 	  var arr = [1,2,3];
 	  var obj = {};
 	  

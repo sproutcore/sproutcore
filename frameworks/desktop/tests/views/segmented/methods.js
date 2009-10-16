@@ -8,7 +8,7 @@
 /*global module test htmlbody ok equals same stop start */
 
 var iconURL= "http://www.freeiconsweb.com/Icons/16x16_people_icons/People_046.gif";
-
+var pane, view;
 module("SC.SegmentedView", {
   setup: function() {
     SC.RunLoop.begin();
@@ -74,12 +74,12 @@ test("Check that properties are mapped correctly", function() {
    equals(view._isMouseDown, YES, 'Mouse down flag on mousedown should be ');
    equals(view.get('activeIndex'), 0, 'The active item is the first segment.');
    
-   var elem = view.get('layer').childNodes[1];
+   elem = view.get('layer').childNodes[1];
    SC.Event.trigger(elem, 'mouseup');
    equals(view._isMouseDown, NO, 'Mouse down flag on mouseup should be ');
    equals(view.get('activeIndex'), -1, 'Ther shouldnt be any active item');
    
-   var elem = view.get('layer').childNodes[2];
+   elem = view.get('layer').childNodes[2];
    SC.Event.trigger(elem, 'mousedown');
     
    SC.Event.trigger(elem, 'mousemoved');

@@ -106,7 +106,8 @@ SC.mixin(/** @scope SC */ {
     // through other means but the SC.BUNDLE_INFO entry doesn't exist.
     if(m || SC.LAZY_INSTANTIATION[bundleName]) {
       if(SC.logBundleLoading) console.log("SC.loadBundle(): Bundle '%@' found through other means, will attempt to load…".fmt(bundleName));
-      return SC.BUNDLE_INFO[bundleName] = {loaded: YES};
+      SC.BUNDLE_INFO[bundleName] = {loaded: YES};
+      return SC.BUNDLE_INFO[bundleName]; 
     }
     return NO;
   },
@@ -120,7 +121,7 @@ SC.mixin(/** @scope SC */ {
     @param method {Function}
   */
   loadBundle: function(bundleName, target, method) {
-    
+    var idx, len;
     if(method === undefined && SC.typeOf(target) === SC.T_FUNCTION) {
       method = target;
       target = null;
@@ -174,7 +175,7 @@ SC.mixin(/** @scope SC */ {
         // load bundle's dependencies first
         var requires = bundleInfo.requires || [] ;
         var dependenciesMet = YES ;
-        for (var idx=0, len=requires.length; idx<len; ++idx) {
+        for (idx=0, len=requires.length; idx<len; ++idx) {
           var targetName = requires[idx] ;
           var targetInfo = SC.BUNDLE_INFO[targetName] ;
           if (!targetInfo) {
@@ -207,7 +208,7 @@ SC.mixin(/** @scope SC */ {
         
         if (dependenciesMet) {
           // add <script> and <link> tags to DOM for bundle's resources
-          var styles, scripts, url, el, head, body, idx, len ;
+          var styles, scripts, url, el, head, body;
           head = document.getElementsByTagName('head')[0] ;
           if (!head) head = document.documentElement ; // fix for Opera
           styles = bundleInfo.styles || [] ;
@@ -225,8 +226,9 @@ SC.mixin(/** @scope SC */ {
           // Push the URLs on the the queue and then start the loading.
           var jsBundleLoadQueue = this._jsBundleLoadQueue;
           if(!jsBundleLoadQueue) this._jsBundleLoadQueue = jsBundleLoadQueue = {};
-          var q = jsBundleLoadQueue[bundleName] = [], 
-              scripts = bundleInfo.scripts || [] ;
+          jsBundleLoadQueue[bundleName] = [];
+          var q = jsBundleLoadQueue[bundleName] ;
+          scripts = bundleInfo.scripts || [] ;
           
           for (idx=0, len=scripts.length; idx<len; ++idx) {
             url = scripts[idx] ;
@@ -297,7 +299,7 @@ SC.mixin(/** @scope SC */ {
     } else {
       SC.ready(SC, function() {
         SC._invokeCallbacksForBundle(bundleName) ;
-      })
+      });
     }
     
     // for each dependent bundle, try and load them again...

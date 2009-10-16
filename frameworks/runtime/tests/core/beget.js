@@ -3,7 +3,7 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
-var objectA, objectB ; // global variables
+var objectA, objectB , arrayA, stringA; // global variables
 
 module("Beget function Module", {
 setup: function() {

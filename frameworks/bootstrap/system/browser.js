@@ -20,9 +20,9 @@ SC.browser = (function() {
     mobileSafari: (/apple.*mobile.*safari/).test(userAgent) ? version : 0,
     windows: !!(/(windows)/).test(userAgent),
     mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
-    language: ((navigator.language || navigator.browserLanguage).split('-', 1)[0])
+    language: (navigator.language || navigator.browserLanguage).split('-', 1)[0]
   };
   
-    browser.current = (browser.msie) ? 'msie' : (browser.mozilla) ? 'mozilla' : (browser.safari) ? 'safari' : (browser.opera) ? 'opera' : 'unknown' ;
+    browser.current = browser.msie ? 'msie' : browser.mozilla ? 'mozilla' : browser.safari ? 'safari' : browser.opera ? 'opera' : 'unknown' ;
   return browser ;
 })();

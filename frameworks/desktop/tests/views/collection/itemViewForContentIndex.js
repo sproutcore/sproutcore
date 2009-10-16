@@ -269,7 +269,7 @@ test("after making an item visible then invisible again", function() {
   });
   equals(view.get('childViews').length, 0, 'precond - should have no childview');
 
-  var itemView = view.itemViewForContentIndex(1);
+  itemView = view.itemViewForContentIndex(1);
   equals(itemView.get('parentView'), view, 'itemView has parent view');
 
 

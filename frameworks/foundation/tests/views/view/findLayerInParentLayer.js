@@ -43,10 +43,8 @@ test("discovers layer by finding element with matching layerId - when DOM is in 
 });
 
 test("discovers layer by finding element with matching layerId - when parent DOM is NOT in document", function() {
-  if(parentDom.parentNode)
-      equals(parentDom.parentNode.nodeType, 11, 'precond - NOT in parent doc');
-  else    
-    equals(parentDom.parentNode, null, 'precond - NOT in parent doc');
+  if(parentDom.parentNode) equals(parentDom.parentNode.nodeType, 11, 'precond - NOT in parent doc');
+  else equals(parentDom.parentNode, null, 'precond - NOT in parent doc');
   equals(view.findLayerInParentLayer(parentDom), childDom, 'found childDom');
 });
 

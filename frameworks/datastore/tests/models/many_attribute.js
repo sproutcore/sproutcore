@@ -6,7 +6,7 @@
 /*globals module ok equals same test MyApp */
 
 // test core array-mapping methods for ManyArray with ManyAttribute
-var storeKeys, rec;
+var storeKeys, rec, rec2, rec3, rec4;
 var foo1, foo2, foo3, bar1, bar2, bar3;
 
 module("SC.ManyAttribute core methods", {

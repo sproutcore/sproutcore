@@ -149,9 +149,9 @@ SC._object_extend = function _object_extend(base, ext) {
   // Manually set base on toString() because some JS engines (such as IE8) do
   // not enumerate it
   if (ext.hasOwnProperty('toString')) {
-    var key = 'toString';
+    key = 'toString';
     // get the value.  use concats if defined
-    var value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
+    value = (concats.hasOwnProperty(key) ? concats[key] : null) || ext[key] ;
     if (!value.superclass && (value !== (cur=base[key]))) {
       value.superclass = value.base = cur || K ;
     }

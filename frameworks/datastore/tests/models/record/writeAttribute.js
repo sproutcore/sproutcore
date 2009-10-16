@@ -68,7 +68,7 @@ test("raises exception if you try to write an attribute before an attribute hash
   store.removeDataHash(foo.storeKey);
   equals(store.readDataHash(foo.storeKey), null, 'precond - should not have store key');
   
-  var e, cnt=0 ;
+  var cnt=0 ;
   try {
     foo.writeAttribute("foo", "bar");
   } catch(e) {

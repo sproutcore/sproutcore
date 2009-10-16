@@ -296,8 +296,9 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
     method you define in your subclass.
   */
   fieldValueForObject: function(object, form, field) {
-    if (this.prototype && this.prototype.fieldValueForObject)
+    if (this.prototype && this.prototype.fieldValueForObject) {
       return this.prototype.fieldValueForObject(object,form,field) ;
+    }
     else return null ;
   },
   
@@ -306,8 +307,9 @@ SC.Validator.mixin(/** @scope SC.Validator */ {
     method you define in your subclass.
   */
   objectForFieldValue: function(value, form, field) {
-    if (this.prototype && this.prototype.objectForFieldValue)
+    if (this.prototype && this.prototype.objectForFieldValue) {
       return this.prototype.objectForFieldValue(value,form,field) ;
+    }
     else return null ;
   }
   

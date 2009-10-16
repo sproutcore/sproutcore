@@ -142,8 +142,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
     for (var i=0, ilen=segments.length; i<ilen; i++){
-      seg=segments[i];
-      if(i==0){
+      var seg=segments[i];
+      if(i===0){
         ok((seg.className.indexOf('sc-first-segment')>=0), 'first segment has the right classname assigned.');
       }    
       if(i==segments.length-1){
@@ -152,7 +152,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       ok((seg.childNodes[0].className.indexOf('sc-button-inner')>=0), 'segment '+i+' should have an inner-button.');
       ok((seg.childNodes[0].childNodes[0].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
         
-      if(i!=0 && i!=segments.length-1){
+      if(i!==0 && i!=segments.length-1){
         ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segment has the right classname assigned.');
       }
       viewElem=pane.view('3_items,2_sel,disabled').$();
@@ -168,8 +168,8 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     ok(viewElem.hasClass('sc-view'), '3_empty.hasClass(sc-view) should be YES');
     ok(viewElem.hasClass('sc-segmented-view'), '3_empty.hasClass(sc-segmented-view) should be YES');
     for (var i=0, ilen=segments.length; i<ilen; i++){
-      seg=segments[i];
-      if(i==0){
+      var seg=segments[i];
+      if(i===0){
         ok((seg.className.indexOf('sc-first-segment')>=0), 'first segment has the right classname assigned.');
       }    
       if(i==segments.length-1){
@@ -179,7 +179,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       ok((seg.childNodes[0].childNodes[0].className.indexOf('sc-button-label')>=0), 'segment '+i+' should have a label.');
       ok((seg.childNodes[0].childNodes[0].childNodes[0].src.length>0), 'segment '+i+' should have an icon.');
         
-      if(i!=0 && i!=segments.length-1){
+      if(i!==0 && i!=segments.length-1){
         ok((seg.className.indexOf('sc-middle-segment')>=0), 'middle segment has the right classname assigned.');
       }
       viewElem=pane.view('3_items,2_sel,disabled').$();
@@ -192,7 +192,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   test("Check that the selected segments have the right classes assigned.", function() {
     var segments=pane.view('3_empty').$('a');
     for (var i=0, ilen=segments.length; i<ilen; i++){
-      seg=segments[i];
+      var seg=segments[i];
       ok((seg.className.indexOf('sel')==-1), 'this element should not be selected.');
     }
 
@@ -203,7 +203,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
     var segments=pane.view('3_items,icon,2_sel').$('a');
     var count=0;
     for (var i=0, ilen=segments.length; i<ilen; i++){
-      seg=segments[i];
+      var seg=segments[i];
       if(seg.className.indexOf('sel')!=-1){
         count++;
       }

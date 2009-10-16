@@ -29,13 +29,13 @@ test("To check if the set of array elements are pushed into stack",function(){
 
 test("create a new builder subclass with any passed properties copied to the builder's 'fn' property",function(){
 	obj =SC.Builder.create({ name : 'Charles'});
-	fn_name =obj.fn.name;
+	var fn_name =obj.fn.name;
 	equals(fn_name,"Charles","name should match");
 });
 
 test("instantiate the builder, any passed args will be forwarded onto an internal init() method",function(){
 	obj = new SC.Builder({name : 'Charles',age :23, sex :'M'});
-	objA =obj.fn.init();
+	var objA =obj.fn.init();
 	equals(objA.name,obj.fn.name);
 	equals(objA.age,obj.fn.age);
 	equals(objA.sex,obj.fn.sex);

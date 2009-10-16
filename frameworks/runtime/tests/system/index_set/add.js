@@ -4,7 +4,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same */
+/*global module test equals context ok same should_throw*/
 var set ;
 module("SC.IndexSet#add", {
   setup: function() {

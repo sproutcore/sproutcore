@@ -26,7 +26,7 @@ SC.Validator.Password = SC.Validator.extend(
   },
 
   validate: function(force) {
-    if (!this.fields || this.fields.length == 0) return true ;
+    if (!this.fields || this.fields.length === 0) return true ;
     
     var empty = false ;
     var notEmpty = false ;
@@ -35,22 +35,22 @@ SC.Validator.Password = SC.Validator.extend(
     this.fields.forEach(function(field) {
       var curValue = field.get('fieldValue') ;
       if (curValue != value) ret= false ;
-      if (!curValue || curValue.length == 0) empty = true ;
+      if (!curValue || curValue.length === 0) empty = true ;
       if (curValue && curValue.length > 0) notEmpty = true ;
     }) ;
 
     // if forces, valid OK if there was an empty.  If not forced, valid OK 
     // only if all fields match AND they are not all empty.
     if (force) {
-      return (notEmpty == false) ? false : ret ;
+      return (notEmpty === false) ? false : ret ;
     } else {
-      return (empty == true) ? true : ret ;
+      return (empty === true) ? true : ret ;
     }
   },
   
   // update field states
   updateFields: function(form,valid) {
-    if (!this.fields || this.fields.length == 0) return true ;
+    if (!this.fields || this.fields.length === 0) return true ;
     var err = "Invalid.Password".loc();
     var topField = this._field ;
     this.fields.forEach(function(f) {

@@ -3,7 +3,7 @@
 // ========================================================================
 /*globals module test */
 
-var object1,object3; //global variables
+var object, object1,object3; //global variables
 
 module("Checking the tuple for property path",{
 	
@@ -33,5 +33,5 @@ test("should check for the tuple property", function() {
 test("should check for the tuple property when path is undefined",function(){     //test case where no property defined
      var object2;
      object2 = SC.tupleForPropertyPath(object.value,'');
-     equals(YES,object2 == null,'returns null for undefined path');	
+     equals(YES,object2 === null,'returns null for undefined path');	
 });

@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*globals throws */
+/*globals throws should_throw*/
 
 var content, controller, extra;
 

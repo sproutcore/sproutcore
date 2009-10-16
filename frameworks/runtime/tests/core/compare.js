@@ -23,7 +23,7 @@ module("SC.compare()", {
     v[10] = [1,3];
     v[11] = {a: 'hash'};
     v[12] = SC.Object.create();
-    v[13] = function (a) {return a};
+    v[13] = function (a) {return a;};
   }
 });
 
@@ -37,8 +37,8 @@ test("ordering should work", function() {
     equals(SC.compare(v[j],v[j]), 0, j +' should equal itself');
     for (var i=j+1; i < v.length; i++) {
       equals(SC.compare(v[j],v[i]), -1, 'v[' + j + '] (' + SC.typeOf(v[j]) + ') should be smaller than v[' + i + '] (' + SC.typeOf(v[i]) + ')' );
-    };
+    }
     
-  };
+  }
 }); 
   

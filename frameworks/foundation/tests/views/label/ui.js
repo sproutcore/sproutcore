@@ -140,8 +140,8 @@ test("Check that the title is set or not and if it is in the appropriate element
   var viewElem=pane.view('basic').$();
   equals(viewElem.text(), 'hello', 'has a value set');
 
-  var viewElem=pane.view('centered,icon').$('img');
-  ok((viewElem!=null), 'should have an image corresponding to an icon');
+  viewElem=pane.view('centered,icon').$('img');
+  ok((viewElem!==null), 'should have an image corresponding to an icon');
 
 });
 

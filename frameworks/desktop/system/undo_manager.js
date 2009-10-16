@@ -38,7 +38,7 @@ SC.UndoManager = SC.Object.extend(
     
   */
   undoActionName: function() { 
-    return (this.undoStack) ? this.undoStack.name : null ;
+    return this.undoStack ? this.undoStack.name : null ;
   }.property('undoStack'),
   
   /** 
@@ -48,7 +48,7 @@ SC.UndoManager = SC.Object.extend(
     
   */
   redoActionName: function() { 
-    return (this.redoStack) ? this.redoStack.name : null ;
+    return this.redoStack ? this.redoStack.name : null ;
   }.property('redoStack'),
 
   /** 
@@ -132,7 +132,7 @@ SC.UndoManager = SC.Object.extend(
       
     // otherwise, create a new active group.  
     } else {
-      var stack = (this.isUndoing) ? 'redoStack' : 'undoStack' ;
+      var stack = this.isUndoing ? 'redoStack' : 'undoStack' ;
       this._activeGroup = { name: name, actions: [], prev: this.get(stack) } ;
       this.set(stack, this._activeGroup) ;
       this.groupingLevel = 1 ;
@@ -150,7 +150,7 @@ SC.UndoManager = SC.Object.extend(
     } else {
       this._activeGroup = null ; this.groupingLevel = 0 ;
     }
-    this.propertyDidChange((this.isUndoing) ? 'redoStack' : 'undoStack') ;
+    this.propertyDidChange(this.isUndoing ? 'redoStack' : 'undoStack') ;
   },
 
   /**

@@ -74,7 +74,6 @@ SC.ManyAttribute = SC.RecordAttribute.extend(
         attrKey   = this.get('key') || key,
         arrayKey  = SC.keyFor('__manyArray__', SC.guidFor(this)),
         ret       = record[arrayKey],
-        attrKey   = this.get('key') || key,
         rel;
 
     // lazily create a ManyArray one time.  after that always return the 

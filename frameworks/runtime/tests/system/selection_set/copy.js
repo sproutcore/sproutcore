@@ -11,7 +11,7 @@ test("basic copy", function() {
       set     = SC.SelectionSet.create().add(content,4,4).remove(content,6),
       copy    = set.copy();
   
-  equals(set.get('length'), 3, 'precond - original set should have length')
+  equals(set.get('length'), 3, 'precond - original set should have length');
   equals(copy.get('length'), 3, 'copy should have same length');
   same(copy, set, 'copy should be the same as original set');
 });
