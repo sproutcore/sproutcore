@@ -17,12 +17,8 @@
 }
 
 .sc-menu-item a{
-  position: absolute;
   display: block;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
+  top: 0;
   line-height: 22px;
   text-shadow: #b0b0b0 0px 1px 0px;
   text-decoration: none ;
@@ -105,22 +101,8 @@
 }
 
 .sc-menu-item span.value {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 15px;
-  right: 15px;
-  display: inline-block;
-  text-align:left;
+  text-align:center;
   margin-left:30px;
-}
-
-.sc-menu-item a.shortcutkey span.value {
-  right: 55px;
-}
-
-.sc-menu-item a.hasIcon span.value {
-  margin-left: 45px;
 }
 
 .sc-menu-item span.hasBranch {

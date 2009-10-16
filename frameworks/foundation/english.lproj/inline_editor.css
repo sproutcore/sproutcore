@@ -10,7 +10,3 @@
 .mozilla .sc-view .sc-text-field-view.inline-editor.focus {
   outline-offset: 0px;
 }
-
-.sc-view .sc-text-field-view.inline-editor {
-  z-index:10;
-}

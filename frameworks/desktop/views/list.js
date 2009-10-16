@@ -419,7 +419,7 @@ SC.ListView = SC.CollectionView.extend(
       view = this._insertionPointView 
            = this.get('insertionPointView').create();
     }
-
+    
     var index  = itemView.get('contentIndex'),
         len    = this.get('length'),
         layout = SC.clone(itemView.get('layout')),
