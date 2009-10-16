@@ -2381,7 +2381,7 @@ SC.CollectionView = SC.View.extend(
         dropOp = SC.DROP_BEFORE,
         del    = this.get('selectionDelegate'),
         canReorder = this.get('canReorderContent'),
-        objects, content, isPreviousInDrag, isNextInDrag, len;
+        objects, content, isPreviousInDrag, isNextInDrag, len, tmp;
     
     // STEP 1: Try with a DROP_ON option -- send straight to delegate if 
     // supported by view.
@@ -2404,13 +2404,13 @@ SC.CollectionView = SC.View.extend(
       // the collection delegate.
       this.set('proposedInsertionIndex', idx) ;
       this.set('proposedDropOperation', dropOp) ;
-      dragOp = del.collectionViewValidateDragOperation(this, drag, dragOp, idx, dropOp) ;
+      tmp = del.collectionViewValidateDragOperation(this, drag, dragOp, idx, dropOp) ;
       idx = this.get('proposedInsertionIndex') ;
       dropOp = this.get('proposedDropOperation') ;
       this._dropInsertionIndex = this._dropOperation = null ;
 
       // The delegate is OK with a drop on also, so just return.
-      if (dragOp !== SC.DRAG_NONE) return [idx, dropOp, dragOp] ;
+      if (tmp !== SC.DRAG_NONE) return [idx, dropOp, tmp] ;
         
       // The delegate is NOT OK with a drop on, try to get the insertion
       // index again, but this time prefer SC.DROP_BEFORE, then let the 
