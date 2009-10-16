@@ -439,6 +439,9 @@ SC.IndexSet = SC.mixin({},
       }
     } else if (length === null) length = 1 ;
 
+    // if no length - do nothing.
+    if (length <= 0) return this;
+    
     // special case - appending to end of set
     var max     = this.get('max'),
         oldmax  = max,
@@ -513,7 +516,7 @@ SC.IndexSet = SC.mixin({},
       } else {
         start = cur ;
         if (next > max) {
-          delta -= next - max ;
+          // delta -= next - max ;
           max = next ;
         }
       }
@@ -599,6 +602,8 @@ SC.IndexSet = SC.mixin({},
       }
     }
 
+    if (length <= 0) return this; // nothing to do
+    
     // special case - appending to end of set
     var max     = this.get('max'),
         oldmax  = max,
