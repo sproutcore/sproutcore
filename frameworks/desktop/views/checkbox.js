@@ -118,7 +118,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
   },
   
-  mouseDown: function(evt) {  
+  mouseDown: function(evt) {
     this.set('isActive', YES);
     this._field_isMouseDown = YES;
     return YES;
