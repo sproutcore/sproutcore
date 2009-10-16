@@ -80,7 +80,10 @@ test("basic", function() {
   ok(view.$('.sc-inner-head'), 'should have sc-inner-head class');
   ok(view.$('.sc-inner-tail'), 'should have sc-inner-tail class');
   equals(view.$('.sc-inner').css("width"), "25%", 'width should be 25%');
-  equals(view.$('.sc-inner').width(), 84, 'pixel width ');
+  
+  // browsers compute the width after % adjustment differently.  just be close
+  var v = (SC.browser.msie || SC.browser.mozilla) ? 85 : 84;
+  equals(view.$('.sc-inner').width(), v, 'pixel width ');
   
 });
 
@@ -173,7 +176,9 @@ test("changing value from full -> negative number", function() {
 test("changing value to over maximum", function() {
   var view = pane.view('progress basic');
   
-  equals(view.$('.sc-inner').width(), 84, 'precon - pixel width should be 84');
+  // browsers compute the width after % adjustment differently.  just be close
+  var v = (SC.browser.msie || SC.browser.mozilla) ? 85 : 84;
+  equals(view.$('.sc-inner').width(), v, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 110);
   SC.RunLoop.end();
@@ -187,7 +192,9 @@ test("changing value to a string", function() {
   SC.RunLoop.begin();
   view.set('value', 25);
   SC.RunLoop.end();
-  equals(view.$('.sc-inner').width(), 84, 'precon - pixel width should be 84');
+
+  var v = (SC.browser.msie || SC.browser.mozilla) ? 85 : 84;
+  equals(view.$('.sc-inner').width(), v, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 'aString');
   SC.RunLoop.end();

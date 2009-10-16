@@ -13,7 +13,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 
   var pane = SC.ControlTestPane.design()
     .add("image_not_loaded", SC.ImageView, { 
-      value: appleURL, layout : {width: 200, height: 300}
+      value: null, layout : {width: 200, height: 300}
     })
     .add("image_loaded", SC.ImageView, { 
       value: appleURL, status:'loaded', layout : {width: 200, height: 300}
@@ -26,8 +26,15 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
   
   
     test("Verify that all the rendering properties of an image that is being loaded are correct", function() {
-      ok(pane.view('image_not_loaded').get('isVisibleInWindow'), 'image_not_loaded is visible in window');
-      ok((pane.view('image_not_loaded').$().attr('src').indexOf('blank.gif')!=-1), "The src should be set to the blank URL.");    
+      var view = pane.view('image_not_loaded');
+
+      ok(view.get('isVisibleInWindow'), 'image_not_loaded is visible in window');
+
+      view.set('value', appleURL);
+      ok(view.get('status') !== 'loaded', 'PRECOND - status should not be loaded (status=%@)'.fmt(view.get('status')));
+     
+      var url = view.$().attr('src')
+  ok((url.indexOf('blank.gif')!=-1), "The src should be blank URL. url = %@".fmt(url));    
     });
     
     test("Verify that all the rendering properties of an image that is loaded are correct", function() {

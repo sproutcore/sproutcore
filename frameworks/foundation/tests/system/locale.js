@@ -78,8 +78,7 @@ test("Locale.toString() : Should retrun the current language set with the guid v
 	
 	//Result should retrun the chinese object
 	equals(SC.Locale.locales.mx.currentLocale.isObject, true) ;
-	//Result should convert the chinese object into a string
-	equals(SC.Locale.locales.mx.toString(), 'SC.Locale[mx]') ;
+
 });
 
 test("Locale.createCurrentLocale() : Should create the Lacale Object for the language selected", function() {
