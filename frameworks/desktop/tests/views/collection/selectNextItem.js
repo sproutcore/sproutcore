@@ -18,13 +18,27 @@ module("SC.CollectionView.selectNextItem", {
   }
 });
 
+/*
+  Creates an SC.SelectionSet from a given index.
+
+  @param {Number} index the index of the content to select
+  @returns {SC.SelectionSet}
+*/
+
+function selectionFromIndex(index) {
+  var ret = SC.SelectionSet.create();
+  ret.addObject(content.objectAt(index));
+
+  return ret;
+}
+
 // ..........................................................
 // BASIC OPERATIONS
 //
 
 test("selectNextItem(extend=undefined, numberOfItems=undefined)", function() {
-  var sel = SC.SelectionSet.create().add(content,4),
-      expected = SC.SelectionSet.create().add(content,5),
+  var sel = selectionFromIndex(4),
+      expected = selectionFromIndex(5),
       actual;
       
   view.set('selection', sel);
@@ -35,8 +49,8 @@ test("selectNextItem(extend=undefined, numberOfItems=undefined)", function() {
 });
 
 test("selectNextItem(extend=NO, numberOfItems=undefined)", function() {
-  var sel = SC.SelectionSet.create().add(content,4),
-      expected = SC.SelectionSet.create().add(content,5),
+  var sel = selectionFromIndex(4),
+      expected = selectionFromIndex(5),
       actual;
       
   view.set('selection', sel);
@@ -47,7 +61,7 @@ test("selectNextItem(extend=NO, numberOfItems=undefined)", function() {
 });
 
 test("selectNextItem(extend=YES, numberOfItems=undefined)", function() {
-  var sel = SC.SelectionSet.create().add(content,4),
+  var sel = selectionFromIndex(4),
       expected = SC.SelectionSet.create().add(content,4,2),
       actual;
       
@@ -59,7 +73,7 @@ test("selectNextItem(extend=YES, numberOfItems=undefined)", function() {
 });
 
 test("selectNextItem(extend=YES, numberOfItems=2)", function() {
-  var sel = SC.SelectionSet.create().add(content,4),
+  var sel = selectionFromIndex(4),
       expected = SC.SelectionSet.create().add(content,4,3),
       actual;
       
@@ -132,7 +146,7 @@ test("anchor test 2 - anchor at end", function() {
 
   // TRY 3: should make selection one item long
   view.selectNextItem(YES); 
-  expected = SC.SelectionSet.create().add(content,7,1); 
+  expected = selectionFromIndex(7); 
   actual = view.get('selection');
   ok(expected.isEqual(actual), 'TRY 3: make selection one item long (sel: %@ expected: %@ actual: %@)'.fmt(sel, expected, actual));  
   sel = actual;
@@ -166,8 +180,8 @@ test("anchor test 2 - anchor at end", function() {
 // 
 
 test("selectNextItem() when selection is 9..9", function() {
-  var sel = SC.SelectionSet.create().add(content,9),
-      expected = SC.SelectionSet.create().add(content,9),
+  var sel = selectionFromIndex(9),
+      expected = selectionFromIndex(9),
       actual;
       
   view.set('selection', sel);
