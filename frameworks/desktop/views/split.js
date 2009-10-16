@@ -65,8 +65,7 @@ SC.RESIZE_BOTTOM_RIGHT = 'resize-bottom-right' ;
   viewhelper.
   
   @property {Boolean} canCollapseViews Set to NO when you don't want any of
-  the child views to collapse. Defaults to YES. Use the :can_collapse_views
-  option with the split_view viewhelper.
+  the child views to collapse. Defaults to YES. 
   
   In addition, the top/left and bottom/right child views can have these
   properties:
