@@ -393,6 +393,11 @@ SC.RootResponder = SC.RootResponder.extend(
     the keypress event.
   */
   keydown: function(evt) {
+    // This code is to check for the simulated keypressed event
+    if(!evt.kindOf) this._ffevt=null;
+    else evt=this._ffevt;
+    if (evt === null) return YES;
+    
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla > 0 && (evt.which === 8)) return true ;
     
@@ -410,7 +415,15 @@ SC.RootResponder = SC.RootResponder.extend(
     // responder can do something useful with the event.
     ret = YES ;
     if (this._isFunctionOrNonPrintableKey(evt)) {
-      
+      // Simulate keydown events for firefox since keypress only triggers once
+      // We don't do it in keypress as it doesn't work in certain cases, ie.
+      // Caret is at last position and you press down arrow key.
+      if (SC.browser.mozilla && evt.keyCode>=37 && evt.keyCode<=40){
+        this._ffevt=evt;
+        SC.RunLoop.begin();
+        this.invokeLater(this.keydown, 50);
+        SC.RunLoop.end();
+      }
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
@@ -452,6 +465,8 @@ SC.RootResponder = SC.RootResponder.extend(
   },
   
   keyup: function(evt) {
+    // to end the simulation of keypress in firefox set the _ffevt to null
+    if(this._ffevt) this._ffevt=null;
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this is only a modifier change
     var ret = this._handleModifierChanges(evt);
