@@ -14,100 +14,106 @@ module("SC.Request", {
   },
   
   teardown: function() {
-    delete url ;
-    delete request ;
-    delete contents ;
+    url = request = contents;
   }
   
 });
 
 test("Basic Requirements", function() {
   ok(SC.Request, "SC.Request is defined") ;
-  ok("" != url, "url variable is not empty") ;
+  ok("" !== url, "url variable is not empty") ;
   ok(request !== null, "request object is not null") ;
   ok(contents === null, "contents is null" ) ;
 });
 
 test("Test Asynchronous GET Request", function() {
-  request.addObserver("response", function(response) {
-      contents = request.get("rawResponse") ;
+
+  var response, timer;
+
+  timer = setTimeout(function() {
+    ok(false, 'response did not invoke notify() withint 2sec');
+    window.start();
+  }, 2000);
+  
+  request.notify(this, function(response) {
+    ok(SC.ok(response), 'response should not be an error');
+    equals(response.get('body'), '{"message": "Yay!"}', 'should match retrieved message');
+    clearTimeout(timer);
+    window.start();
   });
   
-  request.send() ;
+  response = request.send();
+  ok(response !== null, 'request.send() should return a response object');
   
-  stop() ; // stops the test runner
-  setTimeout( function(){
-    ok(contents !== null, 'request.send() should return a response') ;
-    ok(SC.$ok(contents), 'contents should not be an error ');
-    if (SC.$ok(contents)) equals(contents.responseText, '{"message": "Yay!"}', "should match retrieved message") ;
-    window.start() ; // starts the test runner
-  }, 2000); // a shorter timeout fails when a lot of unit tests are running...
+  stop() ; // stops the test runner - wait for response
 });
 
 test("Test Synchronous GET Request", function() {
 
   request.set("isAsynchronous", NO);  
-  request.send();
-  contents = request.get("rawResponse");
+  var response = request.send();
   
-  ok(contents !== null) ;
-  ok(SC.$ok(contents), 'contents should not be an error ');
-  if (SC.$ok(contents)) equals(contents.responseText, '{"message": "Yay!"}', 'should match retrieved message') ;
+  ok(response !== null, 'send() should return response') ;
+  ok(SC.$ok(response), 'contents should not be an error ');
+  equals(response.get('body'), '{"message": "Yay!"}', 'should match retrieved message') ;
 });
 
 test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
   request.set("isJSON", YES);
+
+
+  var timer;
+
+  timer = setTimeout( function(){
+    ok(false, 'response did not invoke notify()');
+    window.start();
+  }, 1000);
   
-  request.addObserver("response", function(response){
-      contents = request.get("response");
+  request.notify(this, function(response) {
+    ok(SC.ok(response), 'response should not be error');
+    same(response.get('body'), {"message": "Yay!"}, 'repsonse.body');
+    clearTimeout(timer);
+    window.start();
   });
   
   request.send();
   
   stop() ; // stops the test runner
-  setTimeout( function(){
-    ok(contents !== null) ;
-    ok(SC.$ok(contents), 'contents should not be an error ');
-    if (SC.$ok(contents)) same({"message": "Yay!"}, contents) ;
-    window.start() ; // starts the test runner
-  }, 1000);
+
 });
 
 test("Test Synchronous GET Request, auto-deserializing JSON", function() {
   request.set("isAsynchronous", false);
   request.set("isJSON", true);
   
-  request.send();
+  var response = request.send();
   
-  var contents = request.get("response");
-  
-  ok(contents !== null, 'contents should not be null') ;
-  ok(SC.$ok(contents), 'contents should not be an error');
-  if (SC.$ok(contents)) same(contents, {"message": "Yay!"}, 'contents should have message') ;
+  ok(response !== null, 'response should not be null') ;
+  ok(SC.ok(response), 'contents should not be an error');
+  same(response.get('body'), {"message": "Yay!"}, 'contents should have message') ;
 });
 
 
 test("Test if Request body is being auto-serializing to JSON", function() {
-  request.set("isAsynchronous", false);
-  request.set("isJSON", true);
   var objectToPost={"content": "garbage"};
-  
-  request.send(objectToPost);
-  var jsonEncoded = request.get('body');
-  var contents = request.get("response");
+  request.set("isJSON", true).set('body', objectToPost);
+
+  var jsonEncoded = request.get('encodedBody');
   
   equals(jsonEncoded, '{"content":"garbage"}', "The json object passed in send should be encoded and set as the body");
 });
 
-
+ 
 test("Test Multiple Asynchronous GET Request - two immediate, and two in serial", function() {
   var requestCount = 3;
   var responseCount = 0;
+  var serialCount = 0;
 
   var observer = function(response) {
     responseCount++;
-    if(requestCount<=5) {
-      SC.Request.getUrl(url).addObserver("response", observer).send();
+    if (serialCount<=2) {
+      serialCount++;
+      SC.Request.getUrl(url).notify(this, observer).send();
       requestCount++;
     }
   };
@@ -119,8 +125,8 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   
   stop() ; // stops the test runner
   setTimeout( function(){
-    equals(requestCount, 6, "requestCount should be 8");
-    equals(responseCount, 6, "responseCount should be 8");
+    equals(requestCount, 6, "requestCount should be 6");
+    equals(responseCount, 6, "responseCount should be 6");
     window.start() ; // starts the test runne
   }, 2000);
 });
