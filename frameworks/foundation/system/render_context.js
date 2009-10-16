@@ -892,6 +892,8 @@ SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
 SC.RenderContext.escapeHTML = function(text) {
   var elem, node, ret ;
   
+  if (SC.none(text)) return text; // ignore empty
+  
   elem = this.escapeHTMLElement;
   if (!elem) elem = this.escapeHTMLElement = document.createElement('div');
   
