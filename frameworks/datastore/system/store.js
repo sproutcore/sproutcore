@@ -1560,7 +1560,6 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
           retDestroy.push(storeKey);
         } else if (status==K.DESTROYED_CLEAN) {
           this.dataHashDidChange(storeKey, rev, YES);
-          retDestroy.push(storeKey);
         }
         // ignore K.READY_CLEAN, K.BUSY_LOADING, K.BUSY_CREATING, K.BUSY_COMMITTING, 
         // K.BUSY_REFRESH_CLEAN, K_BUSY_REFRESH_DIRTY, KBUSY_DESTROYING
