@@ -263,6 +263,15 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @default YES
   */
   needsEllipsis: YES,
+  
+  /**
+    This property allows you at add extra padding to the height 
+    of the menu pane.
+    
+    @default 0
+    @property {Number} heightPadding for menu pane.
+  */
+  menuPaneHeightPadding: 0,
 
   /**
     Left Alignment based on the size of the button
@@ -448,6 +457,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
     var menuControlSize = this.get('controlSize') ;
+    var menuHeightPadding = this.get('menuPaneHeightPadding') ;
 
     // get the user defined custom view
     var customView = this.get('customView') ;
@@ -481,6 +491,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
         @property
       */
       isEnabled: YES,
+      
+      menuHeightPadding: menuHeightPadding,
 
       preferType: SC.PICKER_MENU,
       itemHeightKey: 'height',

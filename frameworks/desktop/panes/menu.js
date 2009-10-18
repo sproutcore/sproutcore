@@ -231,25 +231,28 @@ SC.MenuPane = SC.PickerPane.extend(
     Control Size for the Menu Item
   */
   controlSize: SC.REGULAR_CONTROL_SIZE,
-
+  
+  /**
+    Padding to add to the minHeight of the pane.
+  */
+  menuHeightPadding: 0,
 
   createChildViews: function() {
     var childViews = [] , scroll, items, cv, t;
-	  scroll = SC.MenuScrollView;
-	  
+    scroll = SC.MenuScrollView;
+    
     cv = this.get('menuItemViews');
-	  t = SC.View.design(
-	    { layout:{ 
-	        top: 0,
-	        left: 0,
-	        minHeight : this.get('menuHeight')  
-	      }, 
-	      classNames: 'menuContainer', 
-	      childViews: cv
-	    });
-	  this.set('itemWidth',this.get('layout').width || 100) ; 
-	  scroll = this.createChildView(scroll, { borderStyle: SC.BORDER_NONE, contentView: t});
-	  this.childViews = [scroll] ;
+    t = SC.View.design({ 
+      layout:{ top: 0, left: 0, minHeight : this.get('menuHeight') },
+      classNames: 'menuContainer', 
+      childViews: cv
+    });
+    this.set('itemWidth',this.get('layout').width || 100) ; 
+    scroll = this.createChildView(scroll, { 
+      borderStyle: SC.BORDER_NONE, 
+      contentView: t
+    });
+    this.childViews = [scroll] ;
   },
   
   /**
@@ -286,7 +289,7 @@ SC.MenuPane = SC.PickerPane.extend(
       idx, item ,
       fetchKeys = SC._menu_fetchKeys ,
       fetchItem = SC._menu_fetchItem ,
-      menuHeight = 0 ;
+      menuHeight = this.get('menuHeightPadding') ;
     // loop through items and collect data
     for (idx = 0; idx < max; ++idx) {
       item = items.objectAt(idx) ;
@@ -321,7 +324,7 @@ SC.MenuPane = SC.PickerPane.extend(
                                               keyEquivalent: cur[11], target: cur[12] }) ;                         
       }
     }
-    this.set('menuHeight',menuHeight);
+    this.set('menuHeight', menuHeight);
     this.set('displayItemsArray',ret);
     this.generateMenuItems(ret);
     return ret;
