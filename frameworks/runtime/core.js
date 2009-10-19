@@ -86,7 +86,6 @@ SC.mixin = function() {
     if (!(options = arguments[idx])) continue ;
     for(var key in options) {
       if (!options.hasOwnProperty(key)) continue ;
-      var src = target[key];
       var copy = options[key] ;
       if (target===copy) continue ; // prevent never-ending loop
       if (copy !== undefined) target[key] = copy ;
