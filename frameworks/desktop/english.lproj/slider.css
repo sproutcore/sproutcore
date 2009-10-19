@@ -47,6 +47,8 @@
 	top: -6px;
 	position: absolute ;
 	background: black;
+	border-radius:9px;
+	-moz-border-radius:9px;
 }
 
 .focus .sc-slider-view .sc-handle {

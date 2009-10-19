@@ -6,7 +6,3 @@
   border-radius: 2px;
   overflow: visible;
 }
-
-.sc-tab-view > .sc-segmented-view{
-  z-index:100;
-}

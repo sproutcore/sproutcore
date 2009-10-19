@@ -86,6 +86,18 @@
   	top: 3px;
 }
 
+
+.sc-text-field-view input {
+	border: none;
+	outline: none;
+	}
+
+.sc-text-field-view textarea {
+	border: none;
+	outline: none;
+}
+
+
 .sc-text-field-view textarea {
   position: absolute;
 	top: 0px;
