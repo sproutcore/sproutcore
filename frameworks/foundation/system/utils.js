@@ -243,6 +243,44 @@ SC.mixin( /** @scope SC */ {
     return '{' + keyValues.join(', ') + '}';
   },
   
+  /**
+    Given a string and a fixed width, calculates the height of that
+    block of text using a style string, a set of class names,
+    or both.
+
+    @param str {String} The text to calculate
+    @param width {Number} The fixed width to assume the text will fill
+    @param style {String} A CSS style declaration.  E.g., 'font-weight: bold'
+    @param classNames {Array} An array of class names that may affect the style
+    @returns {Number} The height of the text given the passed parameters
+  */
+  heightForString: function(str, width, style, classNames) {
+    var elem = this._heightCalcElement, classes, height;
+
+    // Coalesce the array of class names to one string, if the array exists
+    classes = (classNames && SC.typeOf(classNames) === SC.T_ARRAY) ? classNames.join(' ') : '';
+
+    if (!width) width = 100; // default to 100 pixels
+
+    // Only create the offscreen element once, then cache it
+    if (!elem) {
+      elem = this._heightCalcElement = document.createElement('div');
+      document.body.insertBefore(elem, null);
+    }
+
+    style = '%@; width: %@px; left: %@px; position: absolute'.fmt(style, width, (-1*width));
+    elem.setAttribute('style', style);
+
+    if (classes !== '') {
+      elem.setAttribute('class', classes);
+    }
+
+    elem.textContent = str;
+    height = elem.clientHeight;
+
+    elem = null; // don't leak memory
+    return height;
+  },
   
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
