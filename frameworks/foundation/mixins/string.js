@@ -312,13 +312,31 @@ SC.String = {
   },
   
   /**
-    Removes any extra whitespace from the edges of the strings. This method is 
+    Removes any extra whitespace from the edges of the string. This method is 
     also aliased as strip().
     
     @returns {String} the trimmed string
   */
   trim: function () {
     return this.replace(/^\s+|\s+$/g,"");
+  },
+  
+  /**
+    Removes any extra whitespace from the left edge of the string.
+    
+    @returns {String} the trimmed string
+  */
+  trimLeft: function () {
+    return this.replace(/^\s+/g,"");
+  },
+  
+  /**
+    Removes any extra whitespace from the right edge of the string.
+    
+    @returns {String} the trimmed string
+  */
+  trimRight: function () {
+    return this.replace(/\s+$/g,"");
   }
     
 };

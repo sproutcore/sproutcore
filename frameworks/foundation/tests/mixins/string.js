@@ -15,3 +15,14 @@ test("'one    two    three'.w() with extra spaces between words => ['one','two',
   same('one    two    three'.w(), ['one','two','three'], "should be equal");
 });
 
+test("Trim ' spaces on both sides '", function() {
+  same(' spaces on both sides '.trim(), 'spaces on both sides', "should be equal");
+});
+
+test("Trim ' spaces on both sides ' on left only", function() {
+  same(' spaces on both sides '.trimLeft(), 'spaces on both sides ', "should be equal");
+});
+
+test("Trim ' spaces on both sides ' on right only", function() {
+  same(' spaces on both sides '.trimRight(), ' spaces on both sides', "should be equal");
+});
