@@ -327,7 +327,7 @@ SC.String = {
 SC.String.strip = SC.String.trim; // convenience alias.
 
 // Apply SC.String mixin to built-in String object
-SC.mixin(String.prototype, SC.String) ;
+SC.supplement(String.prototype, SC.String) ;
 
 /** @private */
 SC.String.fmt = String.prototype.fmt; // copy from runtime

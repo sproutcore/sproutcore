@@ -95,6 +95,45 @@ SC.mixin = function() {
   return target;
 } ;
 
+/**
+  Adds properties to a target object.  Unlike SC.mixin, however, if the target
+  already has a value for a property, it will not be overwritten.
+  
+  Takes the root object and adds the attributes for any additional 
+  arguments passed.
+
+  @param target {Object} the target object to extend
+  @param properties {Object} one or more objects with properties to copy.
+  @returns {Object} the target object.
+  @static
+*/
+SC.supplement = function() {
+  // copy reference to target object
+  var target = arguments[0] || {};
+  var idx = 1;
+  var length = arguments.length ;
+  var options ;
+
+  // Handle case where we have only one item...extend SC
+  if (length === 1) {
+    target = this || {};
+    idx=0;
+  }
+
+  for ( ; idx < length; idx++ ) {
+    if (!(options = arguments[idx])) continue ;
+    for(var key in options) {
+      if (!options.hasOwnProperty(key)) continue ;
+      var src = target[key] ;
+      var copy = options[key] ;
+      if (target===copy) continue ; // prevent never-ending loop
+      if (copy !== undefined  &&  src === undefined) target[key] = copy ;
+    }
+  }
+  
+  return target;
+} ;
+
 /** 
   Alternative to mixin.  Provided for compatibility with jQuery.
   @function 
