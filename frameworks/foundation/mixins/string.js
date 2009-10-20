@@ -348,5 +348,8 @@ SC.String.strip = SC.String.trim; // convenience alias.
 SC.supplement(String.prototype, SC.String) ;
 
 /** @private */
+String.prototype.loc = SC.String.loc; // Two places define it, and we want the version at SC.String.loc
+
+/** @private */
 SC.String.fmt = String.prototype.fmt; // copy from runtime
 
