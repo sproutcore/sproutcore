@@ -1075,7 +1075,7 @@ test("filter()", function() {
 });
 
 test("not()", function() {
- expect(7);
+ expect(8);
  
  // NOTE: These two tests were altered to use simpler selectors.
  equals( SC.$("#main p#ap a").length, 4, 'base before not should return A');

@@ -247,6 +247,7 @@ test("Setting the selection to a non-SC.TextSelection value should fail", functi
 test("Setting and then getting back the selection", function() {  
   var view = pane.view('with value');
   var fieldElement = view.$input()[0];
+  fieldElement.focus();
   fieldElement.size = 10;     // Avoid Firefox 3.5 issue
   
   var newSelection = SC.TextSelection.create({start:2, end:5});

@@ -43,7 +43,7 @@ SC.ControlTestPane = SC.Pane.extend(
 /** @scope SC.ControlTestPane.prototype */ {
   
   classNames: ['sc-control-test-pane'],
-  layout: { right: 5, width: 350, top: 75, bottom: 5 },
+  layout: { right: 20, width: 350, top: 65, bottom: 5 },
 
   /**
     The starting top location for the first row.  This will increment as 
