@@ -674,11 +674,17 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       view.setIfChanged('maximum', height) ;
     }
     
-    // if there is no vertical scroller and auto hiding is on, make
+    // If there is no vertical scroller and auto hiding is on, make
     // sure we are at the top if not already there
-    if(!this.get('isVerticalScrollerVisible') && this.get('verticalScrollOffset')!==0 && 
+    if (!this.get('isVerticalScrollerVisible') && (this.get('verticalScrollOffset') !== 0) && 
        this.get('autohidesVerticalScroller')) {
       this.set('verticalScrollOffset', 0);
+    }
+    
+    // Same thing for horizontal scrolling.
+    if (!this.get('isHorizontalScrollerVisible') && (this.get('horizontalScrollOffset') !== 0) && 
+       this.get('autohidesHorizontalScroller')) {
+      this.set('horizontalScrollOffset', 0);
     }
     
     // This forces to recalculate the height of the frame when is at the bottom
