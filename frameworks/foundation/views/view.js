@@ -599,7 +599,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       while(q.length!==0){
         node=q[0];
         q.shift();
-        if(node.id==layerId){
+        if(node.id===layerId){
           found=true;
           elem=node;
           break;
