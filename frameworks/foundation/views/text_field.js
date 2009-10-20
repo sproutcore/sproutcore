@@ -522,6 +522,10 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     this.commitEditing();
   },
 
+  /**
+    Move magic number out so it can be over-written later in inline editor
+  */
+  _topOffsetForFirefoxCursorFix: 3,
 
   _applyFirefoxCursorFix: function() {
     // Be extremely careful changing this code.  !!!!!!!! 
@@ -547,7 +551,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
         // this is to take into account an styling issue.
         if(element[0].tagName.toLowerCase()==="input") {
-          top = p.top+3; 
+          top = p.top+this._topOffsetForFirefoxCursorFix; 
         }
         else top = p.top;
         left = p.left;

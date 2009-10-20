@@ -83,6 +83,11 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
 /** @scope SC.InlineTextFieldView.prototype */ {
 
   /**
+    Over-write magic number from SC.TextFieldView
+  */
+  _topOffsetForFirefoxCursorFix: 0,
+
+  /**
     Invoked by the class method to begin editing on an inline editor.
     
     You generally should call the class method beginEditing() instead of

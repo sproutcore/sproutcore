@@ -665,7 +665,7 @@ SC.ListItemView = SC.View.extend(
     f.x = offset.x;
     f.y = offset.y+top + lineHeightShift ;
     f.height = el[0].offsetHeight ;
-    f.width = (f.width - 40 - el[0].offsetLeft) ;
+    f.width = el[0].offsetWidth ;
 
     ret = SC.InlineTextFieldView.beginEditing({
       frame: f, 
