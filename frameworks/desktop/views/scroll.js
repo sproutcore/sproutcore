@@ -643,6 +643,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   oldMaxVOffset: 0,
   
   contentViewFrameDidChange: function() {
+        
     var view   = this.get('contentView'), 
         f      = (view) ? view.get('frame') : null,
         width  = (f) ? f.width : 0,  
@@ -673,6 +674,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       view.setIfChanged('maximum', height) ;
     }
     
+    // if there is no vertical scroller and auto hiding is on, make
+    // sure we are at the top if not already there
+    if(!this.get('isVerticalScrollerVisible') && this.get('verticalScrollOffset')!==0 && 
+       this.get('autohidesVerticalScroller')) {
+      this.set('verticalScrollOffset', 0);
+    }
     
     // This forces to recalculate the height of the frame when is at the bottom
     // of the scroll and the content dimension are smaller that the previous one
