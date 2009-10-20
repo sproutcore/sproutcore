@@ -448,13 +448,14 @@ SC.Timer = SC.Object.extend(
   */
   removeFromTimerQueue: function(timerQueueRoot) {
     var prev = this._timerQueuePrevious, next = this._timerQueueNext ;
-    if (!prev && !next) return timerQueueRoot ; // not in a queue...
-    
+
+    if (!prev && !next && timerQueueRoot !== this) return timerQueueRoot ; // not in a queue...
+
     // else, patch up to remove...
     if (prev) prev._timerQueueNext = next ;
     if (next) next._timerQueuePrevious = prev ;
     this._timerQueuePrevious = this._timerQueueNext = null ;
-    return (timerQueueRoot == this) ? next : timerQueueRoot ;
+    return (timerQueueRoot === this) ? next : timerQueueRoot ;
   },
   
   /** @private - schedules the timer in the queue based on the runtime. */
