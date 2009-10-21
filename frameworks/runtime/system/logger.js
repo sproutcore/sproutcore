@@ -4,7 +4,7 @@
 
 
 /**
-  If SC.Logger.format is true, this delimiter will be put between arguments
+  If SC.Logger.format is true, this delimiter will be put between arguments.
   
   @property {String}
 */
@@ -12,7 +12,7 @@ SC.LOGGER_LOG_DELIMITER = ", ";
 
 /**
   If SC.Logger.error falls back onto SC.Logger.log, this will be
-  prepended to the output
+  prepended to the output.
   
   @property {String}
 */
@@ -20,7 +20,7 @@ SC.LOGGER_LOG_ERROR = "ERROR: ";
 
 /**
   If SC.Logger.info falls back onto SC.Logger.log, this will be
-  prepended to the output
+  prepended to the output.
   
   @property {String}
 */
@@ -28,7 +28,7 @@ SC.LOGGER_LOG_INFO = "INFO: ";
 
 /**
   If SC.Logger.warn falls back onto SC.Logger.log, this will be
-  prepended to the output
+  prepended to the output.
   
   @property {String}
 */
@@ -36,22 +36,20 @@ SC.LOGGER_LOG_WARN = "WARNING: ";
 
 /** @class
   
-  Mixin to allow for safe console actions
+  Object to allow for safe logging actions, such as using the browser console.
   
   @author Colin Campbell
-  @version 0.1
-  @since 0.1
+  @extends SC.Object
+  @since Sproutcore 1.0
 */
 SC.Logger = SC.Object.create({ 
-/* Console Mixin */
   
   // ..........................................................
   // PROPERTIES
   //   
   
   /**
-    Computed property that checks for the existence of a console
-    within the web browser
+    Computed property that checks for the existence of the reporter object.
     
     @property {Boolean}
   */
@@ -60,7 +58,7 @@ SC.Logger = SC.Object.create({
   }.property('reporter').cacheable(),
   
   /**
-    If console.log does not exist, SC.Logger will use window.alert instead
+    If console.log does not exist, SC.Logger will use window.alert instead.
     
     This property is only used inside SC.Logger.log. If fallBackOnLog is
     false and you call a different function, an alert will not be opened.
@@ -71,7 +69,7 @@ SC.Logger = SC.Object.create({
   
   /**
     If some function, such as console.dir, does not exist,
-    SC.Logger will try console.log if this is true
+    SC.Logger will try console.log if this is true.
     
     @property {Boolean}
   */
@@ -79,15 +77,16 @@ SC.Logger = SC.Object.create({
   
   /**
     Whether or not to format multiple arguments together
-    or let the browser deal with that
+    or let the browser deal with that.
     
     @property {Boolean}
   */
   format: YES,
   
   /**
-    The reporter is the object which implements the actual logging functions
+    The reporter is the object which implements the actual logging functions.
     
+    @default The browser's console
     @property {Object}
   */
   reporter: console,
@@ -97,7 +96,7 @@ SC.Logger = SC.Object.create({
   // 
 
   /**
-    Log output to the console, but only if it exists
+    Log output to the console, but only if it exists.
     
     @param {String|Array|Function|Object}
     @returns {Boolean} true if console.log exists, false otherwise
@@ -136,7 +135,7 @@ SC.Logger = SC.Object.create({
     Prints the properties of an object.
     
     Logs the object using SC.Logger.log if the console.dir function does not exist and
-    SC.Logger.fallBackOnLog is true
+    SC.Logger.fallBackOnLog is true.
     
     @param {Object}
     @returns {Boolean} true if logged to console, false if not
@@ -157,12 +156,10 @@ SC.Logger = SC.Object.create({
     Prints an XML outline for any HTML or XML object.
     
     Logs the object using SC.Logger.log if console.dirxml function does not exist and
-    SC.Logger.fallBackOnLog is true
+    SC.Logger.fallBackOnLog is true.
     
     @param {Object}
     @returns {Boolean} true if logged to console, false if not
-    
-    @see SC.Logger.dir
   */
   dirxml: function() {
     var reporter = this.get('reporter');
@@ -180,7 +177,7 @@ SC.Logger = SC.Object.create({
     Log an error to the console
     
     Logs the error using SC.Logger.log if console.error does not exist and
-    SC.Logger.fallBackOnLog is true
+    SC.Logger.fallBackOnLog is true.
     
     @param {String|Array|Function|Object}
     @returns {Boolean} true if logged to console, false if not
@@ -203,7 +200,7 @@ SC.Logger = SC.Object.create({
   /**
     Every log after this call until SC.Logger.groupEnd() is called
     will be indented for readability. You can create as many levels
-    as you want
+    as you want.
     
     @param {String} [title] An optional title to display above the group
     @returns {Boolean} true if a group was created, false if not
@@ -219,10 +216,9 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Ends a group declared with SC.Logger.group
+    Ends a group declared with SC.Logger.group.
     
     @returns {Boolean} true if the console.groupEnd exists, false otherwise
-    
     @see SC.Logger.group
   */
   groupEnd: function() {
@@ -236,10 +232,10 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Log an information response to the console
+    Log an information response to the console.
     
     Logs the response using SC.Logger.log if console.info does not exist and
-    SC.Logger.fallBackOnLog is true
+    SC.Logger.fallBackOnLog is true.
     
     @param {String|Array|Function|Object}
     @returns {Boolean} true if logged to console, false if not
@@ -261,11 +257,9 @@ SC.Logger = SC.Object.create({
   
   /**
     Begins the JavaScript profiler, if it exists. Call SC.Logger.profileEnd
-    to end the profiling process and receive a report
+    to end the profiling process and receive a report.
     
     @returns {Boolean} true if console.profile exists, false otherwise
-    
-    @see SC.Logger.profileEnd
   */
   profile: function() {
     var reporter = this.get('reporter');
@@ -295,11 +289,10 @@ SC.Logger = SC.Object.create({
   
   /**
     Measure the time between when this function is called and
-    SC.Logger.timeEnd is called
+    SC.Logger.timeEnd is called.
     
     @param {String} name The name of the profile to begin
     @returns {Boolean} true if console.time exists, false otherwise
-    
     @see SC.Logger.timeEnd
   */
   time: function(name) {
@@ -345,10 +338,10 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Log a warning to the console
+    Log a warning to the console.
     
     Logs the warning using SC.Logger.log if console.warning does not exist and
-    SC.Logger.fallBackOnLog is true
+    SC.Logger.fallBackOnLog is true.
     
     @param {String|Array|Function|Object}
     @returns {Boolean} true if logged to console, false if not
@@ -394,7 +387,7 @@ SC.Logger = SC.Object.create({
     @private
     
     Formats the arguments array of a function by creating a string
-    with SC.LOGGER_LOG_DELIMITER between the elements
+    with SC.LOGGER_LOG_DELIMITER between the elements.
     
     @returns {String} A string of formatted arguments
   */
