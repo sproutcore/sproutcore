@@ -4,14 +4,14 @@
 
 
 /**
-  If SC.Logger.format is true, this delimiter will be put between arguments.
+  If {@link SC.Logger.format} is true, this delimiter will be put between arguments.
   
   @property {String}
 */
 SC.LOGGER_LOG_DELIMITER = ", ";
 
 /**
-  If SC.Logger.error falls back onto SC.Logger.log, this will be
+  If SC.Logger.error falls back onto {@link SC.Logger.log}, this will be
   prepended to the output.
   
   @property {String}
@@ -19,7 +19,7 @@ SC.LOGGER_LOG_DELIMITER = ", ";
 SC.LOGGER_LOG_ERROR = "ERROR: ";
 
 /**
-  If SC.Logger.info falls back onto SC.Logger.log, this will be
+  If SC.Logger.info falls back onto {@link SC.Logger.log}, this will be
   prepended to the output.
   
   @property {String}
@@ -27,7 +27,7 @@ SC.LOGGER_LOG_ERROR = "ERROR: ";
 SC.LOGGER_LOG_INFO = "INFO: ";
 
 /**
-  If SC.Logger.warn falls back onto SC.Logger.log, this will be
+  If SC.Logger.warn falls back onto {@link SC.Logger.log}, this will be
   prepended to the output.
   
   @property {String}
@@ -38,9 +38,14 @@ SC.LOGGER_LOG_WARN = "WARNING: ";
   
   Object to allow for safe logging actions, such as using the browser console.
   
+  The FireFox plugin Firebug was used as a function reference. Please see
+  {@link <a href="http://getfirebug.com/logging.html">Firebug Logging Reference</a>}
+  for further information.
+  
   @author Colin Campbell
   @extends SC.Object
   @since Sproutcore 1.0
+  @see <a href="http://getfirebug.com/logging.html">Firebug Logging Reference</a>
 */
 SC.Logger = SC.Object.create({ 
   
@@ -60,7 +65,7 @@ SC.Logger = SC.Object.create({
   /**
     If console.log does not exist, SC.Logger will use window.alert instead.
     
-    This property is only used inside SC.Logger.log. If fallBackOnLog is
+    This property is only used inside {@link SC.Logger.log}. If fallBackOnLog is
     false and you call a different function, an alert will not be opened.
     
     @property {Boolean}
@@ -99,7 +104,7 @@ SC.Logger = SC.Object.create({
     Log output to the console, but only if it exists.
     
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if console.log exists, false otherwise
+    @returns {Boolean} true if reporter.log exists, false otherwise
   */
   log: function() {
     var reporter = this.get('reporter');
@@ -134,8 +139,8 @@ SC.Logger = SC.Object.create({
   /**
     Prints the properties of an object.
     
-    Logs the object using SC.Logger.log if the console.dir function does not exist and
-    SC.Logger.fallBackOnLog is true.
+    Logs the object using {@link SC.Logger.log} if the reporter.dir function does not exist and
+    {@link SC.Logger.fallBackOnLog} is true.
     
     @param {Object}
     @returns {Boolean} true if logged to console, false if not
@@ -155,11 +160,11 @@ SC.Logger = SC.Object.create({
   /**
     Prints an XML outline for any HTML or XML object.
     
-    Logs the object using SC.Logger.log if console.dirxml function does not exist and
-    SC.Logger.fallBackOnLog is true.
+    Logs the object using {@link SC.Logger.log} if reporter.dirxml function does not exist and
+    {@lnk SC.Logger.fallBackOnLog} is true.
     
     @param {Object}
-    @returns {Boolean} true if logged to console, false if not
+    @returns {Boolean} true if logged to reporter, false if not
   */
   dirxml: function() {
     var reporter = this.get('reporter');
@@ -176,11 +181,11 @@ SC.Logger = SC.Object.create({
   /**
     Log an error to the console
     
-    Logs the error using SC.Logger.log if console.error does not exist and
-    SC.Logger.fallBackOnLog is true.
+    Logs the error using {@link SC.Logger.log} if reporter.error does not exist and
+    {@link SC.Logger.fallBackOnLog} is true.
     
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to console, false if not
+    @returns {Boolean} true if logged to reporter, false if not
   */
   error: function() {
     var reporter = this.get('reporter');
@@ -198,12 +203,12 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Every log after this call until SC.Logger.groupEnd() is called
+    Every log after this call until {@link SC.Logger.groupEnd} is called
     will be indented for readability. You can create as many levels
     as you want.
     
     @param {String} [title] An optional title to display above the group
-    @returns {Boolean} true if a group was created, false if not
+    @returns {Boolean} true if reporter.group exists, false otherwise
   */
   group: function(s) {
     var reporter = this.get('reporter');
@@ -216,9 +221,9 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Ends a group declared with SC.Logger.group.
+    Ends a group declared with {@link SC.Logger.group}.
     
-    @returns {Boolean} true if the console.groupEnd exists, false otherwise
+    @returns {Boolean} true if the reporter.groupEnd exists, false otherwise
     @see SC.Logger.group
   */
   groupEnd: function() {
@@ -232,13 +237,13 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Log an information response to the console.
+    Log an information response to the reporter.
     
-    Logs the response using SC.Logger.log if console.info does not exist and
-    SC.Logger.fallBackOnLog is true.
+    Logs the response using {@link SC.Logger.log} if reporter.info does not exist and
+    {@link SC.Logger.fallBackOnLog} is true.
     
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to console, false if not
+    @returns {Boolean} true if logged to reporter, false if not
   */
   info: function() {
     var reporter = this.get('reporter');
@@ -256,10 +261,10 @@ SC.Logger = SC.Object.create({
   },
   
   /**
-    Begins the JavaScript profiler, if it exists. Call SC.Logger.profileEnd
+    Begins the JavaScript profiler, if it exists. Call {@link SC.Logger.profileEnd}
     to end the profiling process and receive a report.
     
-    @returns {Boolean} true if console.profile exists, false otherwise
+    @returns {Boolean} true if reporter.profile exists, false otherwise
   */
   profile: function() {
     var reporter = this.get('reporter');
@@ -274,7 +279,7 @@ SC.Logger = SC.Object.create({
   /**
     Ends the JavaScript profiler, if it exists.
     
-    @returns {Boolean} true if console.profileEnd exists, false otherwise
+    @returns {Boolean} true if reporter.profileEnd exists, false otherwise
     @see SC.Logger.profile
   */
   profileEnd: function() {
@@ -289,10 +294,10 @@ SC.Logger = SC.Object.create({
   
   /**
     Measure the time between when this function is called and
-    SC.Logger.timeEnd is called.
+    {@link SC.Logger.timeEnd} is called.
     
     @param {String} name The name of the profile to begin
-    @returns {Boolean} true if console.time exists, false otherwise
+    @returns {Boolean} true if reporter.time exists, false otherwise
     @see SC.Logger.timeEnd
   */
   time: function(name) {
@@ -309,7 +314,7 @@ SC.Logger = SC.Object.create({
     Ends the profile specified.
     
     @param {String} name The name of the profile to end
-    @returns {Boolean} true if console.timeEnd exists, false otherwise
+    @returns {Boolean} true if reporter.timeEnd exists, false otherwise
     @see SC.Logger.time
   */
   timeEnd: function(name) {
@@ -325,7 +330,7 @@ SC.Logger = SC.Object.create({
   /**
     Prints a stack-trace.
     
-    @returns {Boolean} true if console.trace exists, false otherwise
+    @returns {Boolean} true if reporter.trace exists, false otherwise
   */
   trace: function() {
     var reporter = this.get('reporter');
@@ -340,11 +345,11 @@ SC.Logger = SC.Object.create({
   /**
     Log a warning to the console.
     
-    Logs the warning using SC.Logger.log if console.warning does not exist and
-    SC.Logger.fallBackOnLog is true.
+    Logs the warning using {@link SC.Logger.log} if reporter.warning does not exist and
+    {@link SC.Logger.fallBackOnLog} is true.
     
     @param {String|Array|Function|Object}
-    @returns {Boolean} true if logged to console, false if not
+    @returns {Boolean} true if logged to reporter, false if not
   */
   warn: function() {
     var reporter = this.get('reporter');
