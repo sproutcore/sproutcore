@@ -107,7 +107,7 @@ SC.Logger = SC.Object.create({
     
     // log through the reporter
     if (this.get('exists') && typeof(reporter.log) === "function") {
-      if (this.format) {
+      if (this.get('format')) {
         reporter.log(this._argumentsToString.apply(this, arguments));
       }
       else {
@@ -118,7 +118,7 @@ SC.Logger = SC.Object.create({
     
     // log through alert
     else if (this.fallBackOnAlert) {
-      var s = this.format ? this._argumentsToString.apply(this, arguments) : arguments;
+      var s = this.get('format') ? this._argumentsToString.apply(this, arguments) : arguments;
       // include support for overriding the alert through the reporter
       // if it has come this far, it's likely this will fail
       if (this.get('exists') && typeof(reporter.alert) === "function") {
