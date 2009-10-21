@@ -11,7 +11,7 @@
 SC.LOGGER_LOG_DELIMITER = ", ";
 
 /**
-  If SC.Logger.error falls back onto {@link SC.Logger.log}, this will be
+  If {@link SC.Logger.error} falls back onto {@link SC.Logger.log}, this will be
   prepended to the output.
   
   @property {String}
@@ -19,7 +19,7 @@ SC.LOGGER_LOG_DELIMITER = ", ";
 SC.LOGGER_LOG_ERROR = "ERROR: ";
 
 /**
-  If SC.Logger.info falls back onto {@link SC.Logger.log}, this will be
+  If {@link SC.Logger.info} falls back onto {@link SC.Logger.log}, this will be
   prepended to the output.
   
   @property {String}
@@ -27,7 +27,7 @@ SC.LOGGER_LOG_ERROR = "ERROR: ";
 SC.LOGGER_LOG_INFO = "INFO: ";
 
 /**
-  If SC.Logger.warn falls back onto {@link SC.Logger.log}, this will be
+  If {@link SC.Logger.warn} falls back onto {@link SC.Logger.log}, this will be
   prepended to the output.
   
   @property {String}
