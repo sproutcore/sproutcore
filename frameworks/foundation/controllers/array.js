@@ -300,7 +300,12 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     
     return this; 
   },
-  
+
+  indexOf: function(object, startAt) {
+    var content = this._scac_observableContent();
+    return content ? content.indexOf(object, startAt) : -1;
+  },
+
   // ..........................................................
   // INTERNAL SUPPORT
   // 
