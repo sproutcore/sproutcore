@@ -67,7 +67,7 @@ SC.Logger = SC.Object.create({
     
     @property {Boolean}
   */
-  fallBackOnAlert: false,
+  fallBackOnAlert: NO,
   
   /**
     If some function, such as console.dir, does not exist,
@@ -75,7 +75,7 @@ SC.Logger = SC.Object.create({
     
     @property {Boolean}
   */
-  fallBackOnLog: true,
+  fallBackOnLog: YES,
   
   /**
     Whether or not to format multiple arguments together
@@ -83,7 +83,7 @@ SC.Logger = SC.Object.create({
     
     @property {Boolean}
   */
-  format: true,
+  format: YES,
   
   /**
     The reporter is the object which implements the actual logging functions
