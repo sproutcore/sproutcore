@@ -141,7 +141,7 @@ SC.Logger = SC.Object.create({
     @param {Object}
     @returns {Boolean} true if logged to console, false if not
   */
-  dir: function(object) {
+  dir: function() {
     var reporter = this.get('reporter');
     
   	if (this.get('exists') && typeof(reporter.dir) === "function") {
