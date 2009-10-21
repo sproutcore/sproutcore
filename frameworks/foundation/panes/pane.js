@@ -465,7 +465,9 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     this.resignKeyPane();
     
     // remove the pane
-    this.rootResponder.panes.remove(this) ;
+    var rootResponder = this.rootResponder ;
+    if (this.get('isMainPane')) rootResponder.makeMainPane(null) ;
+    rootResponder.panes.remove(this) ;
     this.rootResponder = null ;
     
     // clean up some of my own properties 
