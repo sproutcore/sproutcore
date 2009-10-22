@@ -470,7 +470,7 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     rootResponder.panes.remove(this) ;
     this.rootResponder = null ;
     
-    // clean up some of my own properties 
+    // clean up some of my own properties
     this.set('isPaneAttached', NO) ;
     this.parentViewDidChange() ;
     return this ;
