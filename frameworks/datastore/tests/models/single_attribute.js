@@ -27,7 +27,9 @@ module("SC.RecordAttribute core methods", {
         return (this.readAttribute('relatedToComputed').indexOf("foo")===0) ? MyApp.Foo : MyApp.Bar;
       }),
       
-      bar: SC.Record.toOne('MyApp.Bar', { inverse: 'foo' })
+      bar: SC.Record.toOne('MyApp.Bar', { inverse: 'foo' }),
+      
+      barKeyed: SC.Record.toOne('MyApp.Bar', { key: 'barId' })
       
     });
     
@@ -65,6 +67,13 @@ module("SC.RecordAttribute core methods", {
         anArray: ['one', 'two', 'three'],
         anObject: { 'key1': 'value1', 'key2': 'value2' },
         bar: "bar2"
+      },
+      
+      {
+        guid: 'foo4',
+        firstName: 'Joe',
+        lastName:  'Schmo',
+        barId: 'bar1'
       }
       
     ]);
@@ -106,6 +115,11 @@ test("getting toOne relationship from computed attribute should map guid to a re
 test("reading an inverse relationship", function() {
   equals(rec.get('bar'), bar, 'foo1.bar should == bar');
   equals(bar.get('foo'), rec, 'bar.foo should == foo1');  
+});
+
+test("reading a keyed relationship", function(){
+  var rec4 = MyApp.store.find(MyApp.Foo, 'foo4');
+  equals(rec4.get('barKeyed'), bar, 'foo4.barKeyed should == bar');
 });
 
 // ..........................................................
@@ -214,3 +228,10 @@ test("modifying a toOne relationship with an inverse from other", function() {
   
 });
 
+test("modifying a keyed toOne relationship", function(){
+  var rec4 = MyApp.store.find(MyApp.Foo, 'foo4');
+
+  rec4.set('barKeyed', bar2);
+
+  equals(rec4.get('barId'), 'bar2', 'foo4.barId should == bar2');
+});
