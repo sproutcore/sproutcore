@@ -290,22 +290,14 @@ SC.Record = SC.Object.extend(
         recordAttr = this[key],
         attrs;
     
-    // if read only attribute do not mark as dirty and do not
-    // make editable
-    if(recordAttr && recordAttr.get('readOnly')===YES) {
-      attrs = store.readDataHash(storeKey);
-      attrs[key] = value;
-    }
-    else {
-      attrs = store.readEditableDataHash(storeKey);
-      if (!attrs) throw SC.Record.BAD_STATE_ERROR;
+    attrs = store.readEditableDataHash(storeKey);
+    if (!attrs) throw SC.Record.BAD_STATE_ERROR;
 
-      // if value is the same, do not flag record as dirty
-      if (value !== attrs[key]) {
-        if(!ignoreDidChange) this.beginEditing();
-        attrs[key] = value;
-        if(!ignoreDidChange) this.endEditing(key);
-      }
+    // if value is the same, do not flag record as dirty
+    if (value !== attrs[key]) {
+      if(!ignoreDidChange) this.beginEditing();
+      attrs[key] = value;
+      if(!ignoreDidChange) this.endEditing(key);
     }
     
     // if value is primaryKey of record, write it to idsByStoreKey

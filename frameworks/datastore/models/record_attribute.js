@@ -13,6 +13,15 @@ sc_require('models/record');
   generate computed properties on records that can automatically convert data
   types and verify data.
   
+  When defining an attribute on an SC.Record, you can configure it this way: 
+  
+  {{{
+    title: SC.Record.attr(String, { 
+      defaultValue: 'Untitled',
+      isRequired: YES|NO
+    })
+  }}}
+  
   In addition to having predefined transform types, there is also a way to 
   set a computed relationship on an attribute. A typical example of this would
   be if you have record with a parentGuid attribute, but are not able to 
@@ -93,19 +102,6 @@ SC.RecordAttribute = SC.Object.extend(
     @property {Boolean}
   */
   useIsoDate: YES,
-  
-  /**
-    If YES, setting a new value on this property will not mark the record as
-    dirty. This will also ensure the datahash does not become locked or in 
-    editable state. 
-    
-    This is useful if your server API returns certain properties
-    as read only, but you'd still like to set those values client side without
-    affecting the record state.
-    
-    @property {Boolean}
-  */
-  readOnly: NO,
   
   // ..........................................................
   // HELPER PROPERTIES
