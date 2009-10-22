@@ -174,7 +174,7 @@ SC.PanelPane = SC.Pane.extend({
   /** @private - extends SC.Pane's method - make panel keyPane when shown */
   paneDidAttach: function() {
     var ret = sc_super();
-    this.get('rootResponder').makeKeyPane(this);
+    this.becomeKeyPane();
     return ret ;
   },
 

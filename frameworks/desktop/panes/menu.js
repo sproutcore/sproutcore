@@ -267,9 +267,8 @@ SC.MenuPane = SC.PickerPane.extend(
     if(preferMatrix) this.set('preferMatrix',preferMatrix) ;
     
     this.endPropertyChanges();
-    this.append() ;
     this.positionPane() ;
-    this.becomeKeyPane() ;
+    this.append() ;
   },
 
   /**

@@ -117,36 +117,87 @@ SC.RootResponder = SC.Object.extend({
     mainPane.
   */
   keyPane: null,
+    
+  /** @property
+    A stack of the previous key panes.
+    
+    *IMPORTANT: Property is not observable*
+  */
+  previousKeyPanes: [],
   
   /**
     Makes the passed pane the new key pane.  If you pass nil or if the pane 
-    does not accept key focus, then key focus will transfer to the mainPane.  
-    This will notify both the old pane and the new root View that key focus 
-    has changed.
+    does not accept key focus, then key focus will transfer to the previous
+    key pane (if it is still attached), and so on down the stack.  This will
+    notify both the old pane and the new root View that key focus has changed.
     
     @param {SC.Pane} pane
     @returns {SC.RootResponder} receiver
   */
   makeKeyPane: function(pane) {
-    if (pane && !pane.get('acceptsKeyPane')) return this ;
+    // Was a pane specified?
+    var newKeyPane, previousKeyPane, previousKeyPanes ;
     
-    // if null was passed, try to make mainPane key instead.
-    if (!pane) {
-      pane = this.get('mainPane') ;
-      if (pane && !pane.get('acceptsKeyPane')) pane = null ;
+    if (pane) {
+      // Does the specified pane accept being the key pane?  If not, there's
+      // nothing to do.
+      if (!pane.get('acceptsKeyPane')) {
+        return this ;
+      }
+      else {
+        // It does accept key pane status?  Then push the current keyPane to
+        // the top of the stack and make the specified pane the new keyPane.
+        // First, though, do a sanity-check to make sure it's not already the
+        // key pane, in which case we have nothing to do.
+        var previousKeyPane = this.get('keyPane') ;
+        if (previousKeyPane === pane) {
+          return this ;
+        }
+        else {
+          if (previousKeyPane) {
+            previousKeyPanes = this.get('previousKeyPanes') ;
+            previousKeyPanes.push(previousKeyPane) ;
+          }
+          
+          newKeyPane = pane ;
+        }
+      }
+    }
+    else {
+      // No pane was specified?  Then pop the previous key pane off the top of
+      // the stack and make it the new key pane, assuming that it's still
+      // attached and accepts key pane (its value for acceptsKeyPane might
+      // have changed in the meantime).  Otherwise, we'll keep going up the
+      // stack.
+      previousKeyPane = this.get('keyPane') ;
+      previousKeyPanes = this.get('previousKeyPanes') ;
+  
+      var newKeyPane = null ;
+      while (previousKeyPanes.length > 0) {
+        var candidate = previousKeyPanes.pop();
+        if (candidate.get('isPaneAttached')  &&  candidate.get('acceptsKeyPane')) {
+          newKeyPane = candidate ;
+          break ;
+        }
+      }
     }
     
-    var current = this.get('keyPane') ;
-    if (current === pane) return this ; // nothing to do
+    
+    // If we found an appropriate candidate, make it the new key pane.
+    // Otherwise, make the main pane the key pane (if it accepts it).
+    if (!newKeyPane) {
+      var mainPane = this.get('mainPane') ;
+      if (mainPane.get('acceptsKeyPane')) newKeyPane = mainPane ;
+    }
     
     // now notify old and new key views of change after edit    
-    if (current) current.willLoseKeyPaneTo(pane) ;
-    if (pane) pane.willBecomeKeyPaneFrom(current) ;
+    if (previousKeyPane) previousKeyPane.willLoseKeyPaneTo(newKeyPane) ;
+    if (newKeyPane) newKeyPane.willBecomeKeyPaneFrom(previousKeyPane) ;
     
-    this.set('keyPane', pane) ;
+    this.set('keyPane', newKeyPane) ;
     
-    if (pane) pane.didBecomeKeyPaneFrom(current) ;
-    if (current) current.didLoseKeyPaneTo(pane) ;
+    if (newKeyPane) newKeyPane.didBecomeKeyPaneFrom(previousKeyPane) ;
+    if (previousKeyPane) previousKeyPane.didLoseKeyPaneTo(newKeyPane) ;
     
     return this ;
   },

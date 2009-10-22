@@ -112,12 +112,6 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
   */
   currentWindowSize: null,
   
-  /** @private 
-  
-    @property {SC.Pane}
-  */
-  previousKeyPane: null,
-  
   /** 
     The parent dimensions are always the last known window size. 
     
@@ -378,12 +372,6 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
   didBecomeKeyPaneFrom: function(pane) {
     var isKeyPane = this.get('isKeyPane');
     this.set('isKeyPane', YES);
-    // check if the previousKeyPane is a menu. If it is a menu, don't set as 
-    // a previous keypane, set the previousKeyPane to the keypane before
-    // the menu as it is an the menu is an intermediate pane that you dont want to go back to.
-    if(pane && pane.kindOf(SC.MenuPane)) this.set('previousKeyPane', pane.get('previousKeyPane'));
-    else if(pane) this.set('previousKeyPane', pane);
-    else this.set('previousKeyPane', null);
     this._forwardKeyChange(!isKeyPane, 'didBecomeKeyResponderFrom', pane, YES);
     return this ;
   },
@@ -473,17 +461,12 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     if (dom.parentNode) dom.parentNode.removeChild(dom) ;
     dom = null ;
     
-    // remove from the RootResponder also
-    var responder = this.rootResponder ;
+    // resign keyPane status, if we had it
+    this.resignKeyPane();
     
-    if (this.get('isKeyPane')) { // orders matter, remove keyPane first
-      var oldKeyPane = this.get('previousKeyPane');
-      if (!oldKeyPane) responder.makeKeyPane(null) ; 
-      else responder.makeKeyPane(oldKeyPane) ;
-    }
-    else responder.makeKeyPane(null);
-    responder.panes.remove(this) ;
-    this.rootResponder = responder = null ;
+    // remove the pane
+    this.rootResponder.panes.remove(this) ;
+    this.rootResponder = null ;
     
     // clean up some of my own properties 
     this.set('isPaneAttached', NO) ;
