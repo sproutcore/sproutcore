@@ -44,6 +44,7 @@ test("Test Asynchronous GET Request", function() {
   
   response = request.send();
   ok(response !== null, 'request.send() should return a response object');
+  ok(response.get('status')<0, 'response should still not have a return code since this should be async');
   
   stop() ; // stops the test runner - wait for response
 });
