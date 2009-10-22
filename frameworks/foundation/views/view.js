@@ -482,8 +482,36 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.set('layerLocationNeedsUpdate', YES) ;
     this.invokeOnce(this.updateLayerLocationIfNeeded) ;
     
+    // We also need to iterate down through the view hierarchy and invalidate
+    // all our child view's caches for 'pane', since it could have changed.
+    //
+    // Note:  In theory we could try to avoid this invalidation if we
+    //        do this only in cases where we "know" the 'pane' value might
+    //        have changed, but those cases are few and far between.
+    
+    this._invalidatePaneCacheForSelfAndAllChildViews();
+    
     return this ;
   }.observes('isVisible'),
+  
+  /** @private
+    We want to cache the 'pane' property, but it's impossible for us to
+    declare a dependence on all properties that can affect the value.  (For
+    example, if our grandparent gets attached to a new pane, our pane will
+    have changed.)  So when there's the potential for the pane changing, we
+    need to invalidate the caches for all our child views, and their child
+    views, and so on.
+  */
+  _invalidatePaneCacheForSelfAndAllChildViews: function () {
+    this.notifyPropertyChange('pane');
+    
+    var childViews = this.get('childViews');
+    var len = childViews.length ;
+    for (var idx=0; idx<len; ++idx) {
+      var childView = childViews[idx];
+      if (childView._invalidatePaneCacheForSelfAndAllChildViews) childView._invalidatePaneCacheForSelfAndAllChildViews();
+    }
+  },
   
   // ..........................................................
   // LAYER SUPPORT
