@@ -66,8 +66,13 @@ SC.Record = SC.Object.extend(
     
     @property {String}
   */
-  id: function() {
-    return SC.Store.idFor(this.storeKey);
+  id: function(key, value) {
+    if (value !== undefined) {
+      this.writeAttribute(this.get('primaryKey'), value);
+      return value;
+    } else {
+      return SC.Store.idFor(this.storeKey);
+    }
   }.property('storeKey').cacheable(),
   
   /**
@@ -303,6 +308,7 @@ SC.Record = SC.Object.extend(
     // if value is primaryKey of record, write it to idsByStoreKey
     if (key===this.get('primaryKey')) {
       SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
+      this.propertyDidChange('id'); // Reset computed value
     }
 
     return this ;  

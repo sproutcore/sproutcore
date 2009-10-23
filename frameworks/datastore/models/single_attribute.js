@@ -52,7 +52,8 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
     @private - implements support for handling inverse relationships.
   */
   call: function(record, key, newRec) {
-    var inverseKey, isMaster, oldRec, attr, ret, nvalue;
+    var attrKey = this.get('key') || key,
+        inverseKey, isMaster, oldRec, attr, ret, nvalue;
     
     // WRITE
     if (newRec !== undefined) {
@@ -68,7 +69,7 @@ SC.SingleAttribute = SC.RecordAttribute.extend(
       // careful: don't overwrite value here.  we want the return value to 
       // cache.
       nvalue = this.fromType(record, key, newRec) ; // convert to attribute.
-      record.writeAttribute(key, nvalue, !this.get('isMaster')); 
+      record.writeAttribute(attrKey, nvalue, !this.get('isMaster')); 
       ret = newRec ;
 
       // ok, now if we have an inverse relationship, get the inverse 
