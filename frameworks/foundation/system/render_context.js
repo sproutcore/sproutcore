@@ -889,6 +889,12 @@ SC.RenderContext.fn.css = SC.RenderContext.fn.addStyle;
   this method to avoid errors.  You can also do this with the text() helper
   method on a render context.
 */
+
+
+if (!SC.browser.isSafari || parseInt(SC.browser.version, 10) < 526) {
+  SC.RenderContext._safari3 = YES;
+}
+
 SC.RenderContext.escapeHTML = function(text) {
   var elem, node, ret ;
   
@@ -905,7 +911,10 @@ SC.RenderContext.escapeHTML = function(text) {
   
   node.data = text ;
   ret = elem.innerHTML ;
-  node = elem = null;
   
+  // Safari 3 does not escape the '>' character
+  if (SC.RenderContext._safari3) { ret = ret.replace(/>/g, '&gt;'); }
+
+  node = elem = null;
   return ret ;
 };
