@@ -103,6 +103,15 @@ SC.RecordAttribute = SC.Object.extend(
   */
   useIsoDate: YES,
   
+  /**
+    Only works if record attribute is a toOne or toMany relationship.
+    This flag, if set, will ensure that any changes to the properties of a 
+    related object will also mark this record object DIRTY.
+    
+    @property {Boolean}
+  */
+  aggregate: NO,
+  
   // ..........................................................
   // HELPER PROPERTIES
   // 

@@ -822,7 +822,7 @@ SC.instanceOf = function(scObject, scClass) {
 */
 SC.kindOf = function(scObject, scClass) {
   if (scObject && !scObject.isClass) scObject = scObject.constructor;
-  return !!(scObject && scObject.kindOf(scClass));
+  return !!(scObject && scObject.kindOf && scObject.kindOf(scClass));
 };
 
 /** @private
