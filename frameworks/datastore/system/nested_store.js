@@ -470,22 +470,27 @@ SC.NestedStore = SC.Store.extend(
           // Not dirty?  Then abandon any status we had set (to re-establish
           // any prototype linkage breakage) before asking our parent store to
           // perform the retrieve.
-          var dataHashes, revisions, statuses, editables, locks;
+          var dataHashes = this.dataHashes,
+              revisions  = this.revisions,
+              statuses   = this.statuses,
+              editables  = this.editables,
+              locks      = this.locks;
+
           var changed    = NO;
           var statusOnly = NO;
   
-          if (dataHashes = this.dataHashes) {
+          if (dataHashes  &&  dataHashes.hasOwnProperty(storeKey)) {
             delete dataHashes[storeKey];
             changed = YES;
           }
-          if (revisions = this.revisions) {
+          if (revisions   &&  revisions.hasOwnProperty(storeKey)) {
             delete revisions[storeKey];
             changed = YES;
           }
-          if (editables = this.editables) delete editables[storeKey];
-          if (locks = this.locks) delete locks[storeKey];
+          if (editables) delete editables[storeKey];
+          if (locks) delete locks[storeKey];
 
-          if (statuses = this.statuses) {
+          if (statuses  &&  statuses.hasOwnProperty(storeKey)) {
             delete statuses[storeKey];
             if (!changed) statusOnly = YES;
             changed = YES;
