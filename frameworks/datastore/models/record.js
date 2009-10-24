@@ -76,7 +76,18 @@ SC.Record = SC.Object.extend(
   }.property('storeKey').cacheable(),
   
   /**
-    The record's status changes as it is loaded from the server.
+    All records generally have a life cycle as they are created or loaded into 
+    memory, modified, committed and finally destroyed.  This life cycle is 
+    managed by the status property on your record. 
+
+    The status of a record is modelled as a finite state machine.  Based on the 
+    current state of the record, you can determine which operations are 
+    currently allowed on the record and which are not.
+    
+    In general, a record can be in one of five primary states; SC.Record.EMPTY,
+    SC.Record.BUSY, SC.Record.READY, SC.Record.DESTROYED, SC.Record.ERROR. 
+    These are all described in more detail in the class mixin (below) where 
+    they are defined.
     
     @property {Number}
   */
@@ -310,8 +321,46 @@ SC.Record = SC.Object.extend(
       SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
       this.propertyDidChange('id'); // Reset computed value
     }
+    
+    this.applyAggregates();
 
     return this ;  
+  },
+  
+  /**
+    This will also ensure that any aggregate records are also marked dirty
+    if this record changes.
+  */
+  applyAggregates: function() {
+    var storeKey = this.get('storeKey'),
+      recordType = SC.Store.recordTypeFor(storeKey), idx, len, key, rec;
+    
+    var aggregates = recordType.aggregates;
+    
+    // if recordType aggregates are not set up yet, make sure to 
+    // create the cache first
+    if(!aggregates) {
+      var dataHash = this.get('store').readDataHash(storeKey),
+        aggregates = [];
+      for(k in dataHash) {
+        if(this[k] && this[k].get('aggregate')===YES) aggregates.push(k);
+      }
+      recordType.aggregates = aggregates;
+    }
+    
+    // now loop through all aggregate properties and mark their related
+    // record objects as dirty
+    for(idx=0,len=aggregates.length;idx<len;idx++) {
+      key = aggregates[idx];
+      rec = this.get(key);
+      
+      // write the dirty status
+      if(rec) { 
+        rec.get('store').writeStatus(rec.get('storeKey'), this.get('status'));
+        rec.storeDidChangeProperties(YES);
+      }
+    }
+    
   },
   
   /**

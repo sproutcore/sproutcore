@@ -59,11 +59,13 @@ module("SC.RecordAttribute core methods", {
       }),
       
       // test relationships with aggregate flag
-      relatedToAggregate: SC.Record.toOne('MyApp.Bar', { aggregate: YES })
+      relatedToAggregate: SC.Record.toOne('MyApp.Bar')
       
     });
     
-    MyApp.Bar = SC.Record.extend({});
+    MyApp.Bar = SC.Record.extend({
+      parent: SC.Record.toOne('MyApp.Foo', { aggregate: YES, inverse: "relatedToAggregate" })
+    });
     
     SC.RunLoop.begin();
     storeKeys = MyApp.store.loadRecords(MyApp.Foo, [
@@ -99,7 +101,7 @@ module("SC.RecordAttribute core methods", {
     ]);
     
     MyApp.store.loadRecords(MyApp.Bar, [
-      { guid: 'bar1', city: "Chicago" }
+      { guid: 'bar1', city: "Chicago", parent: 'foo2' }
     ]);
     
     SC.RunLoop.end();

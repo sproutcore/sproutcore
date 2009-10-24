@@ -104,9 +104,9 @@ SC.RecordAttribute = SC.Object.extend(
   useIsoDate: YES,
   
   /**
-    Only works if record attribute is a toOne or toMany relationship.
+    Only works on inverse relationship, going from child to parent.
     This flag, if set, will ensure that any changes to the properties of a 
-    related object will also mark this record object DIRTY.
+    record will also mark the inversely related object DIRTY.
     
     @property {Boolean}
   */
