@@ -1,68 +1,85 @@
+== 1.0.1008 (1.0 RC1)
+
+This is the first release candidate for SproutCore 1.0.  Since this software 
+has been under development for more than year, it contains many major changes 
+to the entire framework including:
+
+- A new framework structure for building only portions of the frameworks
+- Major performance improvements in data bindings and property observing
+- Better caching of computed properties
+- A completely rewritten datastore layer that support 50,000+ records without
+  much degredation.
+- A completely rewritten view layer that offers massive performance gains over
+  the older design.
+- A new UI theme (Ace)
+- Over 5,000 unit tests at all levels of the framework
+- Major refactoring and cleanup of the entire User Interface
+
 == sproutcore 0.9.19
-
+ 
 - SC.Server refresh fix [Evin Grano]
-
+ 
 == sproutcore 0.9.18
-
+ 
 - picker.js bug (Ticket #82) [Alexei Svitkine]
-
+ 
 - selection_support.js problem with SelectFieldView (Tickets #103, #104) [Bill Klaila]
-
+ 
 - Fixed radio enabled display state (Ticket #127) [Gert Hulstein]
-
+ 
 - CollectionView doesn't resize groups after a frame change (Ticket #12) [Christopher Swasey]
-
+ 
 - SC.Record.Date should handle GMT formatted strings (Ticket #101) [Joshua Dickens, Erich Ocean]
-
+ 
 - Missing SC.Collection.removeRecords method (Ticket #102) [mm]
-
+ 
 - SC.Record.create() inconsistency (Ticket #99) [Michael Allman]
-
+ 
 - toMany relationship is null (Ticket #166) [Reto Wolf]
-
+ 
 - SC.CollectionView itemViewForEvent somtimes throws exception on IE8 (Ticket #169)
   [Darryl Fuller]
-
+ 
 - SC.Collection doesn't update itself properly (Ticket #152) [Christopher Swasey]
-
+ 
 - SC.Record notifies SC.Store improperly of changes (Ticket #155) [Christopher Swasey]
-
+ 
 - Basic tests for collections (initial) (Ticket #156) [Christopher Swasey]
-
+ 
 - problem with record.js; parent-child relationship; and tomcat (Ticket #154) [Bill Klaila]
-
+ 
 - SC.CollectionController.hasSelection() does not return anything when there is no content
   (Ticket #178) [Maurits Lamers, Erich Ocean]
-
+ 
 - CollectionView doesn't properly redraw contents if it isn't visible at the time of a
   content change (Ticket #123) [Christopher Swasey]
-
+ 
 - Split view can collapse when thickness becomes less than a given value
   (Ticket #137) [Lawrence Pit]
-
+ 
 - IE6 Fix (Ticket #162) [sujoykroy]
-
+ 
 - String.fmt ordered arguments are broken (Ticket #165) [Boris Smus, Erich Ocean]
-
+ 
 - Reimplementation of Array.invoke breaks Scriptaculous (Ticket #163) [Boris Smus]
-
+ 
 - record.js/readAttributes() Bug (Ticket #139) [Evin Grano]
-
+ 
 - Records with multiple toMany relationships mixup data (Ticket #161)
   [Reto Wolf, Erich Ocean]
-
+ 
 - Segmented buttons are 1 pixel too tall towards the bottom (Ticket #138) [Lawrence Pit]
-
+ 
 - Split view doesn't honor canCollapse property (Ticket #128) [Lawrence Pit]
-
+ 
 - Split view doesn't honor min_thickness property (Ticket #129) [Lawrence Pit]
-
+ 
 == sproutcore 0.9.17
-
+ 
 - Fix require()'s for server/rest_server.js and server/rails_server.js
-
+ 
 == sproutcore 0.9.15
-
+ 
 - Added titleize() helper for Strings.  Also imported various other helpers
   from Prototype.
   
@@ -72,10 +89,10 @@
   
 - SC.Record does a better job of matching null values.  Fixed #96 [Fredrik 
   Blomqvist]
-
+ 
 - SC.Server now handles created records with no attributes yet.  Fixed #98 
   [CAJ]
-
+ 
 - Added support for reduced properties.  These properties begin with "@" and
   will automatically calculate some kind of summary information about the 
   receiving array.  They are also bindable so you can bind to myArray.@average
@@ -108,7 +125,7 @@
   primitive objects.  Before it would differentiate between different 
   instances of these objects.  Now it treats them the same if they are the 
   same value. [CAJ]
-
+ 
 - Added SC.hashFor() method which can be used to determine if two objects are
   equal.  Normally this returns the same value as guidFor() but if you
   implement the hash() method on your object, it will return that value
@@ -116,7 +133,7 @@
   equal even if they are different instances. [CAJ]
   
 - Updated SC.isEqual() to respect SC.hashFor().
-
+ 
 - Added support for hasSelection, hasContent, and other useful properties on
   controllers for activating UI.
   
@@ -127,31 +144,31 @@
   change.
   
 - Optimized SC.Object.objectForPropertyPath() to use less memory.
-
+ 
 - You can now pass a string path as a :target and it will be converted to an
   object. (thanks Peter Blazejewicz!)
   
 - SC.CollectionView will now call destroyObject on the content array instead 
   of removeObject if that method is defined.  This allows you to implement 
   arrays with a more specific handling of the destroyObject method.
-
+ 
 - Added support for checkbox views in ListItemViews.  Since this is a fairly
   common requirement, checkbox views are now built in.
-
+ 
 == sproutcore 0.9.14
-
+ 
 - Fixed bug in SC.SourceListView that could incorrectly hide groups. Closes 
   #57. (Thanks mguymon)
-
+ 
 - Fixed bug in SC.ObjectController that would sometimes not commit all pending
   changes because the model object would clear the changes hash.  Also a test
   for this was added.  Closes #66.  (Thanks YoNoSoyTu!)
   
 - default index.html now has text/javascript added to script tags. Closes #71
 - server.js now handles namespaced prefixes. Closes #74
-
+ 
 - label_view now defaults to the span tag.  Closes #75.  (Thanks Erich!)
-
+ 
 - Added support for posting data in both URL-encoded and JSON formats via
   SC.server.  This makes for a much cleaner round-trip.  To use this, set the
   postFormat: property to SC.JSON_FORMAT in SC.server.  Closes #49. 
@@ -165,39 +182,39 @@
 - All internal calls for arguments.callee.base.apply() have now been switched 
   to sc_super().  This means you MUST use version 0.9.13 or later of the build 
   tools to work with the javascript.
-
+ 
 - Fixed a memory leak in IE that was caused by a self-reference to document. 
   (Thanks Juan)
-
+ 
 - Improved documentation for a variety of classes. (Thanks gskluzacek)
-
+ 
 - SC.Server can now handled nested Server prefixes in case you have 
   multi-level namespaces.
-
+ 
 == sproutcore 0.9.12
-
-- SC.ClassicButtonView & SC.MenuItemView now removes and adds the 'active' class name
+ 
+- SC.ButtonView & SC.MenuItemView now removes and adds the 'active' class name
   on mouseExited and mouseEntered when the mouse is pressed to provide better 
   indication of whether an action will occur on mouse up. (Thanks schwa23)
-
+ 
 - SC.Record#toString now shows record type in description.
-
+ 
 - [FIX] SC.Timer now computes the next fire time before it executes your 
   callback action.  This should avoid the situation where a timer would call 
   your action, which would then take it past the last time it should fire and 
   hence the last fire would never happen. (Thanks August)
-
+ 
 - [FIX] SC.Record#matchCondition() did not behave correctly when comparing 
   record instances.  Fix by onitunes includes both a faster comparison method 
   along with correct behavior + kickin' unit tests
-
+ 
 - [FIX] some settings on the inline editor for multi-line edits were wrong.  
   Now fixed thanks to maloninc (#38)
-
+ 
 == sproutcore 0.9.11
-
+ 
 - [FIX] innerFrame tests were failing.  Now working.
-
+ 
 - Progress bar now shows 100% fill when set to indeterminate.  This should 
   make it easier to style an indeterminate appearance.
   
@@ -205,12 +222,12 @@
   Improves IE compatibility.
   
 - Cleaned JSLink warnings from animator.js
-
+ 
 - Removed stray debugger statements (thanks august!)
-
+ 
 - Fixed CSS issues with SC-theme that made buttons appear offset.  Now appears   
   correct in FF3 & Safari (thanks mde!)
-
+ 
 - Added detect-browser script which can be included at the top of your page to 
   detect the current browser and platform.  Also includes an 
   SC.setupBodyClassNames method that you can call after the body tag has been
@@ -219,26 +236,26 @@
 - Added documentation for Function.property()
 - Added documentation for SC.Error.
 - Added documentation for SC.SegmentedView
-
+ 
 == sproutcore-0.9.10
-
-- SC.Browser.FireFox now returns 2 for any gecko browser that is not Firefox.
-
+ 
+- SC.Platform.Firefox now returns 2 for any gecko browser that is not Firefox.
+ 
 - set() and a variety of other methods now returns this instead of the set
 value.  This makes it possible to do method chaining.
-
+ 
 - Fixed typo in ().  Fixes #12
-
+ 
 - Fixed #11
-
+ 
 - Switch from transitional to strict DTD
-
+ 
 - Replacement of window.location to window.location.href.
-
+ 
 - Added default src to image_view (static_url('blank'))
-
+ 
 - Fix  for view_helper view that was closing the element.
-
+ 
 - sproutcore now treats space as a printable key instead of a function key.
     
 - Added chainability to observer methods; improved docs
@@ -251,432 +268,430 @@ value.  This makes it possible to do method chaining.
       .set('firstName', 'Charles')
       .set('lastName', 'Jolley')
     .endPropertyChanges();
-
+ 
 - auto select content of textarea when it's focused: this._isFocused is true 
   for textarea while false for text input in didBecomeFirstRespo
     
 - scrollable#scrollViewToVisible now scrolls up and left.  This corrects a bug
   with keyboard control that would bust when you move up or left.
-
+ 
 - Updated documentation on form
-
+ 
 - Use Element instead of element for IE compatability in 
   Element.setClassName()
     
-- Added SC.ClassicView#destroy() to remove views from internal caches. insertBefore, 
+- Added SC.View#destroy() to remove views from internal caches. insertBefore, 
   removeChild, etc. also now return the view instance so you can chain them.
-
+ 
 - Popup menu was setting the width on each of the child menu items in addition
   to itself. This had a huge performance impact with little ac
     
 - Disabled the current behavior for the menu item view helper which parses the 
   shortcut before inserting it; now it simply passes the passe
-
+ 
 - [FIX] Replaced url() calls with static_url() in CSS so that they will work 
   properly in build mode
-
+ 
 - Cleanup in drag.js
-
+ 
 - Adding href property to ButtonView for bindable functionality on href 
   attributes.
-
+ 
 - Properly order drop targets so that nested targets appear first.
-
+ 
 == 0.9.8
-
+ 
 * [FIX] collection views now update group views appropriately.
-
+ 
 * [IE] offsetParent and viewportOffset() are now IE compliant.
-
+ 
 * [IE] innerFrame now returns the correct value for elements without 
   hasLayout.
-
+ 
 * [IE] get styleWidth & styleHeight on a view will now return the same value
 on all platforms.  The IE version would previously include padding and borders
 even though it should include only the core width.
-
+ 
 * [FIX] Unit tests could fail to execute in IE if they ended in a comment, 
   fixed unittest.js to avoid this problem.
-
+ 
 * [FIX] TextFieldView could blank out content when you tabbed out of in.
-
+ 
 == SproutCore 0.9.5
-
+ 
 * Collection View now supports selectOnMouseDown which can be turned off to 
   provide better drag and drop behavior on SourceList.  SC.SourceListView now 
   turns this off by default.
-
+ 
 * Requesting a resource that should be available in production mode while 
   running your server in dev mode will now work.  Bundles now build one 
   manifest per language/build_mode combination. 
-
+ 
 * Initial changes to SampleControls to add a form-view demo.  None of the 
   controls are wired up yet.
-
+ 
 * Added mongrel as a required dependency of SproutCore.  If you have something
 like thin installed this is technically not required, but several people were
 experiencing trouble installing the gem.
-
+ 
 * Lots of Safari-specific features for Photos just to demo some of its 
   capabilities.  Client-side storage support is also provided but currently 
   does not save changes you make.
-
+ 
 * SC.CollectionView now supports selectAll (Ctrl+A)
-
+ 
 * SC.CollectionView now supports the delete key to remove items.  Also added 
   delegate methods to the collection view delegate to give you control over 
   how deletions happen.
-
+ 
 * SC.window can now properly capture the backspace key in Firefox.  To 
   activate this feature you must declare SC.CAPTURE_BACKSPACE_KEY = YES in 
   your core.js file.  Capturing the backspace key will prevent the browser 
   from going to previous page when the user hits backspace, which can lead to 
   data loss. To capture this key, SC.window will directly set the 
   document.onkeypress handler.  
-
+ 
 * SC.GridView now supports dropping ON items.
  
 * SC.ListView now supports dropping ON items.
-
+ 
 * Removed the try/catch() that was placed around property notifiers.  This is 
   not only faster but it will make it easier to debug these exceptions in 
   Firebug and IE.
-
+ 
 * [FIX] SC.InlineTextFieldView was using the _frame property even though that
 is used by a parent class.  Changed to _optframe
-
+ 
 * Improved some documentation here and there.
-
-* [FIX] SC.ClassicView will recache its frames when isVisibleInWindow changes.  This 
+ 
+* [FIX] SC.View will recache its frames when isVisibleInWindow changes.  This 
   will help to ensure we always have the correct dimensions when bringing 
   views on and offscreen. -- All unit tests now pass again.
-
+ 
 * Improves Photos sample to include support for adding/deleting albums and 
   drag and drop into albums.
-
+ 
 * Collection View now supports dropping items ON item views as well as 
   between them. 
-
+ 
 * Collection Views now support a delegate object that can be used to control 
   drag and drop and selection behavior.  See 
   mixins/collection_view_delegate.js for a complete description of the new 
   methods.
-
+ 
 * SC.ArrayController now supports the useControllersForContent property.  If
   set to YES, then getting an objectAt() will return a controller for the 
   value instead of the value itself.  This is useful for those times you are 
   using an array controller to manage a set of objects you want to control.  
   Previously this feature was always used by array controllers and could not 
   be disabled. This is now off by default.
-
+ 
 * [FIX] SC.ArrayController and SC.ObjectController now will properly observe
 their own content, even when the content is set on init.
-
+ 
 == SproutCore 0.9.4
-
+ 
 * [FIX] Build system now generates index.html files for client bundles, even 
 if they do not include .rhtml resources.
-
+ 
 * [FIX] Typos in the readme docs for the client generator.
-
+ 
 * Added automaticOutletFor() that will cause a view to be configured 
 automatically instead of forcing you to use an outlets array.  Useful for when
 you are manually constructing your views.
-
+ 
 * Initial changes required to eventually implement improved observer 
 notification system.
-
+ 
 * Improved documentation for a variety of classes
-
+ 
 * [FIX] Only fixtures ending in ".js" will now be loaded.  This allows you to 
   include fixtures named .json or whatever and actually load them via XHR.
-
+ 
 == SproutCore 0.9.3
-
+ 
 * Basic changes to get IE working.  All non-view tests now pass and the doc 
   app and test runner both load and run in IE7.  Lots of visual fixes are 
   still required for the sc-theme as well as IE-specific perf optimization 
   and bug fixes.
-
+ 
 * [BUG] Default template for both client and template included a stray comma 
   in their core.js file that breaks IE and Safari 2.  This is fixed in the 
   templates and in the clients included with the framework, though you will 
   need to make this change manually in your own apps.
-
+ 
 * beginInlineEdit() and endInlineEdit() on SC.LabelView were renamed to comply
   with the SC.Editable protocol.  Use beginEditing() and commitEditing() or
   discardEditing() instead.
-
+ 
 * Added SC.Editable mixin.  This provides a standard protocol for begining 
   and ending keyboard editing sessions on views.  SC.Editable is now used 
   by SC.LabelView, SC.ListItemView, SC.TextFieldView, and 
   SC.TextareaFieldView.
-
+ 
 * Collection view now supports the default behavior to begin editing when you
   click on a selected item for a second time.  If you hit return it will also
   begin editing.  To support this, you must set contentValueIsEditable to YES 
   and implement beginEditing() on your item view. 
-
+ 
 * Inline editor is now supported in both SC.ListItemView and SC.LabelView.
-
+ 
 * Improved inline editor (now renamed SC.InlineTextFieldView for consistancy).
   The new editor can be used with basically any view now in addition to just 
   the label view.  It also automatically inherits the font size and style of 
   any underlying DOM element that you hand it.  To work with an inline editor 
   you will need to implement the InlineEditorDelegate (see documentation).
-
+ 
 * Inline editor now displays with a fixed width and grows downward as you type
   instead of stretching out to the end.
-
+ 
 * Added hello world sample app.
-
+ 
 * Updated contacts sample app.  It is much nicer now.
-
+ 
 * Add sproutcore freeze:gems command to freeze latest SproutCore in your local
   project.
-
+ 
 * Updated copyright to 2008.
-
+ 
 * Converted all uses of setTimeout() in the framework to use run loop instead.
-
+ 
 * Added invokeLater() methods to both SC.Object and Function.  These 
   convenience methods will create a timer to execute a method or function at a 
   later time.  If you need to execute code later, instead of setTimeout, 
   consider using myObject.invokeLater(0, 'methodName') ;
-
+ 
 * New SC.Timer class provides more efficient triggers for timeouts, etc.  The
   timer class now also has unit tests and really awesome docs.
-
+ 
 * [FIX] offsetParent, frame, clippingFrame, and innerFrame would all sometimes
   return the wrong values in Firefox because of a bug that returns the wrong
   offsetLeft and offsetTop when a parent element has a border.
-
+ 
 * Fixed all SC unit tests that were failing (now that I can run them again).
-
+ 
 * Test Runner now has a "Rerun Current Test" button that will rerun the 
   current test.
-
+ 
 * Added convenience method $I() (or SC.inspect()) - converts an object to a 
   hash and then displays its key/value pairs.  Useful for debugging.
-
+ 
 * Fixed up test templates in generators so that they check for the presence
   of main() before trying to fix it up.  This was causing errors on new tests 
   when added to frameworks.
-
+ 
 * [FIX] invokeWhile() was implemented on real Array objects but not on 
   SC.Array mixin.  This caused the controllers/controller test to fail.  Now 
   fixed.
-
+ 
 * Updated test runner to use new SproutCore.
-
+ 
 * [FIX] The JSDoc template will now try to group items based on their full 
   path, rather than just the top-most directory.  This means views stored 
   under views/buttons, for example, now appear in the group VIEWS/BUTTONS in 
   the UI.
-
+ 
 * Moved the base class for collections, buttons, and fields into their 
   respective folders.  This will appear them to appear under the correct 
   location in the Doc viewer.
-
+ 
 * [FIX] Grouped views in the source list without a visible header will 
   overlapping the following group, absorbing their clicks.  Now they render
   the proper size.
-
+ 
 * SC.SliderView provides a horizontal slider.  No vertical slider is currently
 planned since those controls are so rare.  If someone really needs one, please
 enhance SC.SliderView to support it!
-
+ 
 * slider_view helper creates a slider view + html
-
+ 
 * Add example to sample_controls
-
+ 
 * Converted docs for drag modules to JSDoc format.
-
+ 
 * SourceListGroupViews now automatically collapse their group title if the
 group value is null.  Items will still be shown; they will just appear to be 
 "top level"
-
+ 
 * JSDocs template was cutting the first sentance from a class description. 
   This is now fixed.
  
 * Updated sc_docs to work with updated SproutCore.  Also adopts new look and 
   feel and includes support for live search on all symbols defined in the 
   library (try it; it's cool - visit: http://localhost:4020/sproutcore/-docs)
-
+ 
 * JSDoc template no longer generated highlighted JS source along with ref
   docs.  This was slowing things down and the output wasn't really that great
   anyway.
-
+ 
 * Tweaked JSdoc's Textile support to accept '-' as a bullet characters.  Since
   jsdoc strips all * at the beginning of lines you could not do bulletted 
   lists before.  Now you can using -.
-
+ 
 * Updated design of jsdoc documentation to make it easier to read.
-
+ 
 * Renamed buttons-sprite.png to sc-theme-sprite.png. Added 
   sc-theme-ysprite.png.  One is now used to hold all repeat-x and non-
   repeating sprites while the other is used for repeat-y sprites only.
-
+ 
 * SC.SplitView & SC.SplitDividerView provide support for draggable and 
   collapsable split views.
-
+ 
 * SC.ListView now uses SC.ListItemView as its default example view instead of
   SC.LabelView (or the old SC.TextCellView)
-
-
+ 
+ 
 * The Source List now provides support for the disclosure triangle.  A 
   disclosure is automatically shown if you have grouping enabled and you set 
   the groupVisibleKey property to anything other an null.  The disclosure 
   does not yet auto-reveal during a drag.
-
+ 
 * SC.DisclosureView - Shows a disclosure triangle button.
-
+ 
 * [FIX] Left over calls to SC.TextCellView.  Replaced with SC.LabelView.
-
+ 
 * SC.WorkspaceView is now removed from the framework.  It was always intended
   for use in Sproutit applications and it is really too specific for such a 
   generic framework.
-
+ 
 * SC.LabelView gets a new API!  Now in line with other SC.Control based
   classes.  Set value for the value, content/contentValueKey to display part
   of some content.
-
+ 
 * You can add view helpers to your own projects just by dropping them into 
   a lib directory inside your framework or client.  If you need to load your
   view helpers in a certain order, use the view_helper() method.  See the 
   view helpers in SproutCore for an example usage.
-
+ 
 * SproutCore view helpers are now stored in the framework itself along with
   the JavaScript.  This will make it easier to include the latest version of 
   the SproutCore framework in you app without having to install a new set of
   build tools.  This should basically eliminate the only frequently changing 
   part of the build tools.
-
+ 
 * SC.SourceList and SC.ListItemView properties now use "content..Key" 
   convention for naming properties.  If you have built code with the old
   "content..Property" conventions, you will need to update your code.
-
+ 
 * Added hint property to text_area_view helper that is required to display 
   ghost text.
-
+ 
 * added new SC.CheckboxView and SC.RadioView for creating simulated checkbox
   and radio buttons.  These buttons have more functions than their platform
   native counterparts including mixed style and full styling support.
-
+ 
 * Moved field view subclasses to views/field directory.
-
+ 
 * Added SC.Validatable mixin that can be applied to any view to make it work
   with validators.  SC.FieldView now incorporates this mixin.
-
+ 
 * Now if you add initMixin() to a mixin, it will be called automatically 
   whenever an object that includes the mixin is instantiated.  You can use 
   this to perform any setup necessary for the mixin.
-
+ 
 * Renamed SC.Control.contentValueProperty to SC.Control.contentValueKey to
   be consistent with the rest of the API.
-
+ 
 * Added updateContentWithValueObserver to SC.Control that will relay changes
   to the value property back to the content object if you use the default 
   implementation.
-
+ 
 * Changed SC.Control observers for various states that were once private to 
   public methods.  This way you can override them in your subclasses if you 
   need to perform some extra processing and you want to make sure you do them 
   in the right order.  You can also just add more observers as well.
-
+ 
 * Added JSDoc info for Validators, SC.FieldView, SC.CheckboxFieldView
-
+ 
 * Switched some Sc Theme CSS to use sc-button-view classname instead of more
   generic a.button or a.regular.
-
+ 
 * Added new addClassName, removeClassName, setClassName and hasClassName
-  methods on SC.ClassicView that are 7x faster than prototype's version.
-
-* Integrated SC.Control into SC.ClassicButtonView
-
-* Changed SC.ClassicButtonView.labelText and SC.ClassicButtonView.labelSelector to 
-  SC.ClassicButtonView.title and SC.ClassicButtonView.titleSelector to be more consistant 
+  methods on SC.View that are 7x faster than prototype's version.
+ 
+* Integrated SC.Control into SC.ButtonView
+ 
+* Changed SC.ButtonView.labelText and SC.ButtonView.labelSelector to 
+  SC.ButtonView.title and SC.ButtonView.titleSelector to be more consistant 
   with current naming conventions.
-
+ 
 * [FIX] Some doc tags were wrong in SC.ScrollView and others.
-
+ 
 * Improved documentations on SC.ImageView.
-
+ 
 * SC.ImageView now includes the SC.Control mixin and can accept either a 
 CSS class name or a URL as its value.  This makes it easy to switch an image
 from using a sprite to use a custom-generated image and back again.
-
+ 
 * SproutCore now includes some shared standard icons that you can use in your
 own application, courtesy of IconDrawer (http://www.icondrawer.com).
-
+ 
 * Generalized SC.Control's observer so that you can now use it to observe
   changes to multiple properties on content.  This should capture a very 
   common pattern requires by collection item views.  Most control-list 
-  SC.ClassicViews will eventually adopt this mixin.
-
+  SC.Views will eventually adopt this mixin.
+ 
 * Added ListItemView which will be used for rendering content in list views 
   and source list views.  ListViewItem can render a name, icon, and optional
   unread count.
-
+ 
 * Changed displayProperty in SC.CollectionView to contentValueKey to match 
   the new SC.Control pattern.
-
+ 
 * SC.Control now has built in support for a value and content property.  The 
   value property is typically the value the control displays, while content 
   is an object that you might pull a content value from.  You can determine 
   the proeprty of the content object to use as a value by setting the 
   'contentValueKey'.  The contentValueKey can also be provided by the 
   displayDelegate.
-
+ 
 * Added SC.DelegateSupport mixin that can be used to support the delegate 
   pattern.
-
+ 
 * [FIX] Selection management would throw exception after a drag and drop.
-
+ 
 * [FIX] Optimization in fmt() would through an exception if you passed it a
   value that did not support toString().
-
+ 
 * Moved selection management methods from CollectionController in independent 
   SC.SelectionSupport mixin.  This mixin is now used by both 
   SC.CollectionController and SC.ArrayController so you can use either one to 
   manage a selection state.  You can also apply this mixin to your own 
   controllers to manage selection state if you like (though this is not 
   required to manage selections.)
-
+ 
 * Began to separate CSS rules into a core.css and a theme.css.  The core.css 
   styles are generally required by SproutCore and should apply even if you 
   build your own theme.  The theme.css rules apply to the SproutCore theme 
   only and can be overriden by your own CSS.
-
+ 
 * Added SC.SourceListView and sc-theme styles for source lists.  Source lists 
   support grouping if you enable this feature.  See the new Collections2 tab 
   in the SampleControls app for an example source list.
-
+ 
 * Added SC.TableView.  This feature is in progress.    See the new 
   Collections2 tab in the SampleControls app for an example table view.
-
+ 
 * Changed asHTML and asText properties to innerHTML and innerText to match 
   their DOM equivalents.
-
+ 
 * Renamed SC.CollectionItem mixin to SC.Control mixin.  SC.Control mixin now 
   provides some standard functionality for all interactive controls such as 
   handling selection states, enabled and focus states.
-
+ 
 * Removed support for :resize_options property in view helper, since 
-  auto-resizing is no longer supported in SC.ClassicView (it never worked right 
+  auto-resizing is no longer supported in SC.View (it never worked right 
   anyway and was not functionally very usable.)
-
+ 
 * innerText property now uses TextNodes, making it about 50% faster than 
   innerHTML on FireFox.
-
+ 
 * Added view helpers for list_view, scroll_view, grid_view, source_list_view, 
   and table_view.  Also refactored collection view helpers into their own 
   file.
-
+ 
 * [FIX] CollectionView is now able to render items in groups.  
-
+ 
 * [FIX] SC.ObjectController: Avoid unwanted commit when oldValue == null && 
-  newValue == ''.  
-
-
-
+  newValue == ''.
+  
