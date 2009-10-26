@@ -1,5 +1,5 @@
 .sc-alert {
-  background: sc_static('standard-white-fade') repeat ;
+  background: white;
 }
 
 .sc-pane.sc-panel.sc-alert > div > .sc-view {

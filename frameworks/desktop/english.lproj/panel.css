@@ -6,7 +6,11 @@
 }
 
 .sc-pane.sc-modal.for-sc-panel {
-  background: static_url('images/standard_fade/000000') repeat ;
+  background: black;
+  opacity: 0.3;
+  -moz-opacity: 0.3;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)"; 
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=30);
 }
 
 .sc-pane.sc-panel > .sc-view {
