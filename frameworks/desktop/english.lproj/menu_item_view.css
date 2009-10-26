@@ -103,11 +103,11 @@ Content-Type: multipart/related; boundary="BLANK_IMAGE"
 Content-Location:SC
 Content-Transfer-Encoding:base64
 
-R0lGODlhAQABAJH/AP///wAAAMDAwAAAACH5BAEAAAIALAAAAAABAAEAAAICVAEAOw==
+R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==
 */
 .sc-menu-item.disabled div.checkbox,
 .sc-menu-item div.checkbox.inactive {
-  background-image: url(data:image/gif;base64,R0lGODlhAQABAJH/AP///wAAAMDAwAAAACH5BAEAAAIALAAAAAABAAEAAAICVAEAOw==) top left no-repeat; 
+  background-image: url(data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==) top left no-repeat; 
   *background-image: url(mhtml:stylesheet.css!SC) top left no-repeat; /* IE < 8 */
 }
 
