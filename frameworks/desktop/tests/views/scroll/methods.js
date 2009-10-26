@@ -114,16 +114,17 @@ test("maximumHorizontalScrollOffset() returns the maximum horizontal scroll dime
 
   view2.set('horizontalScrollOffset',old_horizontalScrollOffset);
   view2.set('verticalScrollOffset',old_verticalScrollOffset);
-  view2.scrollRightPage(3);
+  view2.scrollBy(5000, 0);
+  view2.get('horizontalScrollOffset');
+
   equals(view2.get('horizontalScrollOffset'),1900, 'maximum y coordinate should be 1900');	
  
   view2.set('horizontalScrollOffset',old_horizontalScrollOffset);
   view2.set('verticalScrollOffset',old_verticalScrollOffset);
-  view2.scrollLeftPage(3);
+  view2.scrollBy(-5000,0);
   equals(view2.get('horizontalScrollOffset'),0, 'minimum y coordinate should be 0');	
   	
 });
-
 
 test("maximumVerticalScrollOffset() returns the maximum vertical scroll dimention", function() {
   var old_horizontalScrollOffset=2;
@@ -131,12 +132,12 @@ test("maximumVerticalScrollOffset() returns the maximum vertical scroll dimentio
 
   view2.set('horizontalScrollOffset',old_horizontalScrollOffset);
   view2.set('verticalScrollOffset',old_verticalScrollOffset);
-  view2.scrollDownPage(3);
+  view2.scrollBy(0, 5000);
+  view2.get('maximumVerticalScrollOffset');
   equals(view2.get('verticalScrollOffset'),1900, 'maximum coordinate should be 1900'); 
-
   view2.set('horizontalScrollOffset',old_horizontalScrollOffset);
   view2.set('verticalScrollOffset',old_verticalScrollOffset);
-  view2.scrollUpPage(3);
+  view2.scrollBy(0,-5000);
   equals(view2.get('verticalScrollOffset'),0, 'The minimum y coordinate should be 0');
  
 });
