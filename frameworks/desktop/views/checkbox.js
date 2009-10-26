@@ -34,7 +34,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     if (firstTime) {
       dt = this._field_currentDisplayTitle = this.get('displayTitle');
 
-      var blank = sc_static('blank');
+      var blank = SC.BLANK_IMAGE_URL;
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
       context.push('<span class="button" ></span>');
       context.push('<input type="checkbox" name="%@" %@ />'.fmt(SC.guidFor(this),disabled));

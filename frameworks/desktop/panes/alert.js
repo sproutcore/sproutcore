@@ -216,7 +216,7 @@ SC.AlertPane = SC.PanelPane.extend({
 
         render: function(context, firstTime) {
           var pane = this.get('pane');
-          var blank = sc_static('blank') ;
+          var blank = SC.BLANK_IMAGE_URL ;
           if(pane.get('icon') == 'blank') context.addClass('plain');
           context.push('<img src="%@" class="icon %@" />'.fmt(blank, pane.get('icon')));
           context.begin('h1').text(pane.get('message') || '').end();

@@ -272,7 +272,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     
     // add icon if needed
     if (icon) {
-      var url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+      var url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL;
       var className = (url === icon) ? '' : icon ;
       icon = '<img src="%@" alt="" class="icon %@" />'.fmt(url, className) ;
       context.push(icon);

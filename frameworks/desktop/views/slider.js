@@ -103,7 +103,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     value = Math.floor((value - min) / (max - min) * 100);
     
     if(firstTime) {
-      var blankImage = static_url('blank');
+      var blankImage = SC.BLANK_IMAGE_URL;
       context.push('<span class="sc-inner">');
       context.push('<span class="sc-leftcap"></span>');
       context.push('<span class="sc-rightcap"></span>');

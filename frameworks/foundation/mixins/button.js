@@ -169,7 +169,7 @@ SC.Button = {
     // if there is no image element yet, create it and insert it just before
     // title.
     if (icon) {
-      var blank = static_url('blank');
+      var blank = SC.BLANK_IMAGE_URL;
 
       image = '<img src="%@1" alt="" class="%@2" />' ;
       if (icon.indexOf('/') >= 0) {

@@ -346,7 +346,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       }
 
       if (icon) {
-        url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+        url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL;
         className = (url === icon) ? '' : icon ;
         icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
       } else {

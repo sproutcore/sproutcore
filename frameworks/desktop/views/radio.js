@@ -212,7 +212,7 @@ SC.RadioView = SC.FieldView.extend(
         // get the icon from the item, if one exists...
         icon = item[3];
         if (icon) {
-          url = (icon.indexOf('/')>=0) ? icon : static_url('blank');
+          url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL;
           className = (url === icon) ? '' : icon ;
           icon = '<img src="%@" class="icon %@" alt="" />'.fmt(url, className);
         } else icon = '';
@@ -221,7 +221,6 @@ SC.RadioView = SC.FieldView.extend(
         disabled = (!item[2]) || (!this.get('isEnabled')) ? 'disabled="disabled" ' : '';
         
         labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
-        var blankImage = static_url('blank');
         
         context.push('<label class="sc-radio-button ', selectionStateClassNames, '">');
         context.push('<input type="radio" value="', idx, '" name="', name, '" ', disabled, '/>');

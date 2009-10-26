@@ -74,7 +74,7 @@ SC.SourceListGroupView = SC.View.extend(SC.Control, SC.CollectionGroup,
   
   render: function(context, firstTime) {
     context.push('<a href="javascript:;" class="sc-source-list-label sc-disclosure-view sc-button-view button disclosure no-disclosure">') ;
-    context.push('<img src="%@" class="button" />'.fmt(sc_static('blank'))) ;
+    context.push('<img src="%@" class="button" />'.fmt(SC.BLANK_IMAGE_URL)) ;
     context.push('<span class="label"></span></a>') ;
   },
   

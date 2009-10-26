@@ -3,6 +3,16 @@
   background: static_url('panels/overlay') repeat;
 }
 
+/*
+Content-Type: multipart/related; boundary="BLANK_IMAGE"
+
+--BLANK_IMAGE
+Content-Location:SCTheme
+Content-Transfer-Encoding:base64
+
+R0lGODlhAQABAJH/AP///wAAAMDAwAAAACH5BAEAAAIALAAAAAABAAEAAAICVAEAOw==
+*/
 .sc-theme div.sc-ghost-view {
-  background: static_url('blank');
+  background-image: url(data:image/gif;base64,R0lGODlhAQABAJH/AP///wAAAMDAwAAAACH5BAEAAAIALAAAAAABAAEAAAICVAEAOw==) top left no-repeat; 
+  *background-image: url(mhtml:stylesheet.css!SCTheme) top left no-repeat; /* IE < 8 */
 }
