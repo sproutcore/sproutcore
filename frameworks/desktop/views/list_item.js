@@ -175,6 +175,13 @@ SC.ListItemView = SC.View.extend(
     working = context.begin("div").addClass("sc-outline");
     if (level>=0 && indent>0) working.addStyle("left", indent*(level+1));
     
+    // add alternating row classes
+    if (this.get('contentIndex') % 2 === 0) {
+      context.addClass('even');
+    } else {
+      context.addClass('odd');
+    }
+    
     // handle disclosure triangle
     value = this.get('disclosureState');
     if (value !== SC.LEAF_NODE) {
