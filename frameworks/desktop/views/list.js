@@ -61,6 +61,24 @@ SC.ListView = SC.CollectionView.extend(
   classNames: ['sc-list-view'],
 
   acceptsFirstResponder: YES,
+  
+  /**
+  * If set to YES, the default theme will show alternating rows
+  * for the views this ListView created through exampleView property.
+  *
+  * @property {Boolean} 
+  */
+  showAlternatingRows: NO,
+  
+  // ..........................................................
+  // METHODS
+  //
+  
+  render: function(context, firstTime) {
+    context.setClass('alternating', this.get('showAlternatingRows'));
+    
+    return sc_super();
+  },
 
   // ..........................................................
   // COLLECTION ROW DELEGATE SUPPORT
