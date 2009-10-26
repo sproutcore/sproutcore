@@ -10,9 +10,17 @@
 	color: #000;
 }
 
+.sc-theme .sc-collection-view.alternating .sc-collection-item.even {
+  background-color: #e4e4e4;
+}
+
 .sc-theme .sc-collection-view .sc-collection-item.sel {
 	background-color: #ddd;
 	color: #333;
+}
+
+.sc-theme.focus .sc-collection-view.alternating .sc-collection-item.even {
+  background-color: #f4f7fb;
 }
 
 .sc-theme.focus .sc-collection-view.focus .sc-collection-item.sel {

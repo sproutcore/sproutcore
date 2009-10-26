@@ -512,10 +512,14 @@ SC.SplitView = SC.View.extend(
   mouseUp: function(evt) {
     // console.log('%@.mouseUp(%@, %@)'.fmt(this, evt));
     // console.log(evt.originalEvent);
-    this._thumbView = null ; // avoid memory leaks
-    this._inLiveResize = NO ;
-    this.endLiveResize() ;
-    return YES ;
+		if (this._inLiveResize === YES) {
+    	this._thumbView = null ; // avoid memory leaks
+    	this._inLiveResize = NO ;
+    	this.endLiveResize() ;
+    	return YES ;
+		}
+		
+		return NO ;
   },
   
   doubleClickInThumbView: function(evt, thumbView) {
