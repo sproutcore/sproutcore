@@ -113,7 +113,9 @@ SC.Response = SC.Object.extend(
   }.property('request').cacheable(),
   
   /**
-    The response status code.  
+    The response status code.
+    
+    @property {Number}
   */
   status: -100, // READY
 
@@ -251,6 +253,10 @@ SC.Response = SC.Object.extend(
   */
   cancelTransport: function() {},
   
+  
+  /** @private
+    Will notify each listener.
+  */
   _notifyListener: function(listeners, status) {
     var info = listeners[status], params, target, action;
     if (!info) return NO ;
@@ -287,6 +293,9 @@ SC.Response = SC.Object.extend(
     return this ;
   },
   
+  /**
+    String representation of the response object
+  */
   toString: function() {
     var ret = sc_super();
     return "%@<%@ %@, status=%@".fmt(ret, this.get('type'), this.get('address'), this.get('status'));

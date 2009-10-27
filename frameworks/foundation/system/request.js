@@ -334,12 +334,13 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     Your notification callback should expect to receive the Response object
     as the first parameter plus any additional parameters that you pass.  
     
+    @param {Number} status
     @param {Object} target
     @param {String|function} action
     @param {Hash} params
     @returns {SC.Request} receiver
   */
-  notify: function(status, target, action) {
+  notify: function(status, target, action, params) {
     
     // normalize status
     var hasStatus = YES, params ;
