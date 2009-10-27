@@ -127,6 +127,7 @@ SC.ListItemView = SC.View.extend(
   */
   contentIsBranchKey: null,
   
+
   /**
     YES if the item view is currently editing.
   */
@@ -152,8 +153,21 @@ SC.ListItemView = SC.View.extend(
   
   contentPropertyDidChange: function() {
     //if (this.get('isEditing')) this.discardEditing() ;
+    if (this.get('contentIsEditable') !== this.contentIsEditable()) {
+      this.notifyPropertyChange('contentIsEditable');
+    }
+    
     this.displayDidChange();
   },
+  
+  /**
+    Determines if content is editable or not.  Checkboxes and other related
+    components will render disabled if an item is not editable.
+  */
+  contentIsEditable: function() {
+    var content = this.get('content');
+    return content && (content.get('isEditable')!==NO);
+  }.property('content').cacheable(),
   
   /**
     Fills the passed html-array with strings that can be joined to form the
@@ -171,16 +185,13 @@ SC.ListItemView = SC.View.extend(
         indent  = this.get('outlineIndent'),
         key, value, working ;
     
+    // add alternating row classes
+    context.addClass((this.get('contentIndex')%2 === 0) ? 'even' : 'odd');
+    context.setClass('disabled', !this.get('isEnabled'));
+
     // outline level wrapper
     working = context.begin("div").addClass("sc-outline");
     if (level>=0 && indent>0) working.addStyle("left", indent*(level+1));
-    
-    // add alternating row classes
-    if (this.get('contentIndex') % 2 === 0) {
-      context.addClass('even');
-    } else {
-      context.addClass('odd');
-    }
     
     // handle disclosure triangle
     value = this.get('disclosureState');
@@ -289,8 +300,10 @@ SC.ListItemView = SC.View.extend(
     
     var key = (state === SC.MIXED_STATE) ? "mixed" : state ? "sel" : "nosel",
         cache = this._scli_checkboxHtml,
+        isEnabled = this.get('contentIsEditable') && this.get('isEnabled'),
         html, tmp;
         
+    if (!isEnabled) key = SC.keyFor('disabled', key);
     if (!cache) cache = this.constructor.prototype._scli_checkboxHtml = {};
     html = cache[key];
     
@@ -301,6 +314,9 @@ SC.ListItemView = SC.View.extend(
       // set state on html
       if (state === SC.MIXED_STATE) tmp.addClass('mixed');
       else tmp.setClass('sel', state);
+      
+      // disabled
+      tmp.setClass('disabled', !isEnabled);
 
       // now add inner content.  note we do not add a real checkbox because
       // we don't want to have to setup a change observer on it.
@@ -470,6 +486,11 @@ SC.ListItemView = SC.View.extend(
   button.
   */
   mouseDown: function(evt) {
+    
+    // if content is not editable, then always let collection view handle the
+    // event.
+    if (!this.get('contentIsEditable')) return NO ; 
+    
     // if occurred inside checkbox, item view should handle the event.
     if (this._isInsideCheckbox(evt)) {
       this._addCheckboxActiveState() ;
@@ -615,6 +636,7 @@ SC.ListItemView = SC.View.extend(
   
   beginEditing: function() {
     if (this.get('isEditing')) return YES ;
+    if (!this.get('contentIsEditable')) return NO ;
     return this._beginEditing(YES);
   },
   
