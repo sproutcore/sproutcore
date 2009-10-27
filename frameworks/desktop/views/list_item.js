@@ -636,7 +636,7 @@ SC.ListItemView = SC.View.extend(
   
   beginEditing: function() {
     if (this.get('isEditing')) return YES ;
-    if (!this.get('contentIsEditable')) return NO ;
+    //if (!this.get('contentIsEditable')) return NO ;
     return this._beginEditing(YES);
   },
   
