@@ -133,7 +133,7 @@ SC.mixin( /** @scope SC */ {
   rectsEqual: function(r1, r2, delta) {
     if (!r1 || !r2) return (r1 == r2) ;
     
-    if (delta===undefined || delta == null) delta = 0.1;
+    if (delta == null) delta = 0.1;
     if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return NO ; 
     if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return NO ; 
     if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return NO ; 
@@ -449,7 +449,7 @@ SC.mixin( /** @scope SC */ {
 
     var h = (max == min) ? 0 : ((max == rgb[0]) ? ((rgb[1]-rgb[2])/(max-min)/6) : ((max == rgb[1]) ? ((rgb[2]-rgb[0])/(max-min)/6+1/3) : ((rgb[0]-rgb[1])/(max-min)/6+2/3)));
     h = (h < 0) ? (h + 1) : ((h > 1)  ? (h - 1) : h);
-    var s = (max === 0) ? 0 : (1 - min/max);
+    var s = (max == 0) ? 0 : (1 - min/max);
     var v = max/255;
     return [h, s, v];
   },
