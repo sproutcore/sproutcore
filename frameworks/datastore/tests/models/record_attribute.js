@@ -56,15 +56,13 @@ module("SC.RecordAttribute core methods", {
         // not using .get() to avoid another transform which will 
         // trigger an infinite loop
         return (this.readAttribute('relatedToComputed').indexOf("foo")===0) ? MyApp.Foo : MyApp.Bar;
-      }),
-      
-      // test relationships with aggregate flag
-      relatedToAggregate: SC.Record.toOne('MyApp.Bar')
+      })
       
     });
     
     MyApp.Bar = SC.Record.extend({
-      parent: SC.Record.toOne('MyApp.Foo', { aggregate: YES, inverse: "relatedToAggregate" })
+      parent: SC.Record.toOne('MyApp.Foo', { aggregate: YES }),
+      relatedMany: SC.Record.toMany('MyApp.Foo', { aggregate: YES })
     });
     
     SC.RunLoop.begin();
@@ -101,7 +99,7 @@ module("SC.RecordAttribute core methods", {
     ]);
     
     MyApp.store.loadRecords(MyApp.Bar, [
-      { guid: 'bar1', city: "Chicago", parent: 'foo2' }
+      { guid: 'bar1', city: "Chicago", parent: 'foo2', relatedMany: ['foo1', 'foo2'] }
     ]);
     
     SC.RunLoop.end();
@@ -191,5 +189,15 @@ test("writing an attribute should make relationship aggregate dirty" ,function()
   
   bar.set('city', 'Oslo');
   
+  equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");
+});
+
+test("writing an attribute should make many relationship aggregate dirty" ,function() {
+  equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
+  equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
+  
+  bar.set('city', 'Oslo');
+  
+  equals(rec.get('status'), SC.Record.READY_DIRTY, "foo1 should be READY_DIRTY");
   equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");
 });

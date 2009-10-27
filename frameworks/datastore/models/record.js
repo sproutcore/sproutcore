@@ -304,6 +304,7 @@ SC.Record = SC.Object.extend(
         storeKey = this.storeKey,
         status   = store.peekStatus(storeKey),
         recordAttr = this[key],
+        recordType = SC.Store.recordTypeFor(storeKey),
         attrs;
     
     attrs = store.readEditableDataHash(storeKey);
@@ -322,18 +323,24 @@ SC.Record = SC.Object.extend(
       this.propertyDidChange('id'); // Reset computed value
     }
     
-    this.applyAggregates();
-
+    // if any aggregates, propagate the state
+    if(!recordType.aggregates || recordType.aggregates.length>0) {
+      this.propagateToAggregates();
+    }
+    
     return this ;  
   },
   
   /**
     This will also ensure that any aggregate records are also marked dirty
     if this record changes.
+    
+    Should not have to be called manually.
   */
-  applyAggregates: function() {
+  propagateToAggregates: function() {
     var storeKey = this.get('storeKey'),
-      recordType = SC.Store.recordTypeFor(storeKey), idx, len, key, rec;
+        recordType = SC.Store.recordTypeFor(storeKey), 
+        idx, len, key, val, recs;
     
     var aggregates = recordType.aggregates;
     
@@ -341,7 +348,7 @@ SC.Record = SC.Object.extend(
     // create the cache first
     if(!aggregates) {
       var dataHash = this.get('store').readDataHash(storeKey),
-        aggregates = [];
+          aggregates = [];
       for(k in dataHash) {
         if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
           aggregates.push(k);
@@ -354,13 +361,16 @@ SC.Record = SC.Object.extend(
     // record objects as dirty
     for(idx=0,len=aggregates.length;idx<len;idx++) {
       key = aggregates[idx];
-      rec = this.get(key);
+      val = this.get(key);
       
-      // write the dirty status
-      if(rec) { 
-        rec.get('store').writeStatus(rec.get('storeKey'), this.get('status'));
-        rec.storeDidChangeProperties(YES);
-      }
+      recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
+      recs.forEach(function(rec) {
+        // write the dirty status
+        if(rec) { 
+          rec.get('store').writeStatus(rec.get('storeKey'), this.get('status'));
+          rec.storeDidChangeProperties(YES);
+        }
+      }, this);
     }
     
   },
