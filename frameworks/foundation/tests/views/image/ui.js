@@ -34,7 +34,7 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
       ok(view.get('status') !== 'loaded', 'PRECOND - status should not be loaded (status=%@)'.fmt(view.get('status')));
      
       var url = view.$().attr('src')
-  ok((url.indexOf('blank.gif')!=-1), "The src should be blank URL. url = %@".fmt(url));    
+  ok((url.indexOf('base64')!=-1), "The src should be blank URL. url = %@".fmt(url));    
     });
     
     test("Verify that all the rendering properties of an image that is loaded are correct", function() {
