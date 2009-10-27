@@ -274,14 +274,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
   menuPaneHeightPadding: 0,
 
   /**
-    This is a property for holding largest menu title
-
-    @private
-    @default null
-  */
-  largestMenuTitle: null,
-
-  /**
     Left Alignment based on the size of the button
 
     @private
@@ -354,9 +346,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     //index for finding the first item in the list
     var idx = 0 ;
-    
-    //to get the largest menu item
-    var largestMenuTitle = this.get('largestMenuTitle');
 
     objects.forEach(function(object) {
     if (object) {
@@ -414,12 +403,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
       //Set the items in the itemList array
       itemList.push(item);
-      
-      //to get the largest menu title
-      if(!largestMenuTitle || (name.length > largestMenuTitle.length) ) {
-        largestMenuTitle = name ;
-        this.set('largestMenuTitle',name) ;
-      }
+
     }
 
     idx += 1 ;
@@ -471,15 +455,23 @@ SC.SelectButtonView = SC.ButtonView.extend(
       lastMenuWidth = menuWidth ;
     }
 
-    //getting the width of largest menu item
-    var largestMenuTitle = this.get('largestMenuTitle') ;
-    var element = document.createElement('div') ;
-    element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
-    element.className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
-    element.innerHTML = largestMenuTitle ;
-    document.body.appendChild(element) ;
-    var largestMenuWidth = element.offsetWidth ;
-    document.body.removeChild(element) ;
+    var items = this.get('itemList') ;
+    var menuWidth, largestMenuWidth ;
+
+    for (var idx = 0; idx < items.length; ++idx) {
+      //getting the width of largest menu item
+      var element = document.createElement('div') ;
+      element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
+      element.className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+      element.innerHTML = items[idx].title ; 
+      document.body.appendChild(element) ;
+      menuWidth = element.offsetWidth ;
+
+      if (!largestMenuWidth || (menuWidth > largestMenuWidth)) {
+        largestMenuWidth = menuWidth ;
+      }
+      document.body.removeChild(element) ; 
+    }
     
     lastMenuWidth = (largestMenuWidth > lastMenuWidth) ? 
                       largestMenuWidth: lastMenuWidth ;
