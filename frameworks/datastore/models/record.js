@@ -343,7 +343,9 @@ SC.Record = SC.Object.extend(
       var dataHash = this.get('store').readDataHash(storeKey),
         aggregates = [];
       for(k in dataHash) {
-        if(this[k] && this[k].get('aggregate')===YES) aggregates.push(k);
+        if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
+          aggregates.push(k);
+        }
       }
       recordType.aggregates = aggregates;
     }
