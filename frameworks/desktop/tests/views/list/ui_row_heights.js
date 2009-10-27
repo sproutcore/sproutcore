@@ -37,7 +37,7 @@ var ContentArray = SC.Object.extend(SC.Array, {
 
 var pane = SC.ControlTestPane.design()
   .add("Custom Row Heights", SC.ScrollView.design({
-    layout: { left: 0, right: 0, top: 0, height: 500 },
+    layout: { left: 0, right: 0, top: 0, height: 200 },
     hasHorizontalScroller: NO,
     contentView: SC.ListView.design({
       content: ContentArray.create({ length: 100001 }),
@@ -45,7 +45,7 @@ var pane = SC.ControlTestPane.design()
       
       // used for testing
       adjustableRows: SC.IndexSet.create(0,5),
-      altRowHeight: 40,
+      altRowHeight: 10,
       
       contentIndexRowHeight: function(view, content, index) {
         var ret =this.get('rowHeight');
@@ -91,8 +91,7 @@ module("SC.ListView - ui_row_heights", pane.standardSetup());
 
 test("rendering only incremental portion", function() {
   var listView = pane.view("Custom Row Heights").contentView; 
-
-  same(listView.get("nowShowing"), SC.IndexSet.create(0, 21), 'nowShowing should be smaller IndexSet');
+  same(listView.get("nowShowing"), SC.IndexSet.create(0, 10), 'nowShowing should be smaller IndexSet');
   equals(listView.get('childViews').length, listView.get('nowShowing').get('length'), 'should have same number of childViews as nowShowing length');  
 });
 
@@ -101,7 +100,7 @@ test("scrolling by small amount should update incremental rendering", function()
       listView   = scrollView.contentView,
       exp;
   
-  same(listView.get('nowShowing'), SC.IndexSet.create(0,21), 'precond - nowShowing has incremental range');
+  same(listView.get('nowShowing'), SC.IndexSet.create(0,10), 'precond - nowShowing has incremental range');
 
   // SCROLL DOWN ONE LINE
   SC.run(function() {
@@ -109,7 +108,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(2,22);
+  exp = SC.IndexSet.create(4,9);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
@@ -120,7 +119,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(3,22);
+  exp = SC.IndexSet.create(6,8);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
@@ -132,7 +131,7 @@ test("scrolling by small amount should update incremental rendering", function()
   });
   
   // top line should have scrolled out of view
-  exp = SC.IndexSet.create(2,22);
+  exp = SC.IndexSet.create(4,9);
   same(listView.get('nowShowing'), exp, 'nowShowing should change to reflect new clippingFrame');
 
   verifyChildViewsMatch(listView.childViews, exp);
@@ -148,7 +147,7 @@ test("manually calling rowHeightDidChangeForIndexes()", function() {
       listView   = scrollView.contentView,
       exp;
   
-  same(listView.get('nowShowing'), SC.IndexSet.create(0,21), 'precond - nowShowing has incremental range');
+  same(listView.get('nowShowing'), SC.IndexSet.create(0,10), 'precond - nowShowing has incremental range');
   
   // adjust row height and then invalidate a portion range
   SC.run(function() {
@@ -157,7 +156,7 @@ test("manually calling rowHeightDidChangeForIndexes()", function() {
   });
 
   // nowShowing should adjust
-  same(listView.get('nowShowing'), SC.IndexSet.create(0,15), 'visible range should decrease since row heights for some rows doubled');
+  same(listView.get('nowShowing'), SC.IndexSet.create(0,5), 'visible range should decrease since row heights for some rows doubled');
   
   // as well as offset and heights for rows - spot check
   var view = listView.itemViewForContentIndex(3);

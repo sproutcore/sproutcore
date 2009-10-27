@@ -166,7 +166,7 @@ SC.ListItemView = SC.View.extend(
   */
   contentIsEditable: function() {
     var content = this.get('content');
-    return content && (content.get('isEditable')!==NO);
+    return content && (content.get ? content.get('isEditable')!==NO : NO);
   }.property('content').cacheable(),
   
   /**
