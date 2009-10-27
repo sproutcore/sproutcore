@@ -12,27 +12,32 @@ htmlbody('<style> .sc-static-layout { border: 1px red dotted; } </style>');
 var pane = SC.ControlTestPane.design()
 
   .add("progress basic", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 25,
     minimum: 0,
     maximum: 100
   })
   .add("progress disabled", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 25,
     minimum: 0,
     maximum: 100,
     isEnabled: NO
   })
   .add("progress basic value 0", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 0,
     minimum: 0,
     maximum: 100
   })
   .add("progress basic value 100", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 100,
     minimum: 0,
     maximum: 100
   })
   .add("progress basic max 50", SC.ProgressView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 25,
     minimum: 0,
     maximum: 50
@@ -40,22 +45,26 @@ var pane = SC.ControlTestPane.design()
   
   // Slider View UI
   .add("slider basic", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 50, 
     minimum: 0, 
     maximum: 100
   })
   .add("slider disabled", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 50, 
     minimum: 0, 
     maximum: 100,
     isEnabled: NO
   })
   .add("slider value 100", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 100, 
     minimum: 0, 
     maximum: 100
   })
   .add("slider basic step 20", SC.SliderView, {
+    layout: {top:0, bottom:0, left:0, width: 250},
     value: 50, 
     minimum: 0, 
     maximum: 100,
@@ -82,7 +91,7 @@ test("basic", function() {
   equals(view.$('.sc-inner').css("width"), "25%", 'width should be 25%');
   
   // browsers compute the width after % adjustment differently.  just be close
-  var v = (SC.browser.msie || SC.browser.mozilla) ? 85 : 84;
+  var v = (SC.browser.msie || SC.browser.mozilla) ? 63 : 62;
   equals(view.$('.sc-inner').width(), v, 'pixel width ');
   
 });
@@ -116,7 +125,7 @@ test("basic value 100", function() {
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
-  equals(view.$('.sc-inner').width(), 338, 'pixel width ');
+  equals(view.$('.sc-inner').width(), 250, 'pixel width ');
   
 });
 
@@ -127,7 +136,7 @@ test("basic max 50", function() {
   ok(!view.$().hasClass('disabled'), 'should NOT have disabled class');
   ok(view.$('.sc-inner'), 'should have sc-inner class');
   equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
-  equals(view.$('.sc-inner').width(), 169, 'pixel width ');
+  equals(view.$('.sc-inner').width(), 125, 'pixel width ');
   
 });
 
@@ -143,13 +152,13 @@ test("changing value from empty -> value", function() {
   view.set('value', 50);
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "50%", 'width should be 50%');
-  equals(view.$('.sc-inner').width(), 169, 'pixel width ');
+  equals(view.$('.sc-inner').width(), 125, 'pixel width ');
 });
 
 test("changing value from full -> empty", function() {
   var view = pane.view('progress basic value 100');
   
-  equals(view.$('.sc-inner').width(), 338, 'precon - pixel width should be 316');
+  equals(view.$('.sc-inner').width(), 250, 'precon - pixel width should be 316');
   SC.RunLoop.begin();
   view.set('value', 0);
   SC.RunLoop.end();
@@ -165,7 +174,7 @@ test("changing value from full -> negative number", function() {
   view.set('value', 100);
   SC.RunLoop.end();
   
-  equals(view.$('.sc-inner').width(), 338, 'precon - pixel width should be 338');
+  equals(view.$('.sc-inner').width(), 250, 'precon - pixel width should be 338');
   SC.RunLoop.begin();
   view.set('value', -10);
   SC.RunLoop.end();
@@ -177,13 +186,13 @@ test("changing value to over maximum", function() {
   var view = pane.view('progress basic');
   
   // browsers compute the width after % adjustment differently.  just be close
-  var v = (SC.browser.msie || SC.browser.mozilla) ? 85 : 84;
+  var v = (SC.browser.msie || SC.browser.mozilla) ? 63 : 62;
   equals(view.$('.sc-inner').width(), v, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 110);
   SC.RunLoop.end();
   equals(view.$('.sc-inner').css("width"), "100%", 'width should be 100%');
-  equals(view.$('.sc-inner').width(), 338, 'pixel width ');
+  equals(view.$('.sc-inner').width(), 250, 'pixel width ');
 });
 
 test("changing value to a string", function() {
@@ -193,7 +202,7 @@ test("changing value to a string", function() {
   view.set('value', 25);
   SC.RunLoop.end();
 
-  var v = (SC.browser.msie || SC.browser.mozilla) ? 85 : 84;
+  var v = (SC.browser.msie || SC.browser.mozilla) ? 63 : 62;
   equals(view.$('.sc-inner').width(), v, 'precon - pixel width should be fixed');
   SC.RunLoop.begin();
   view.set('value', 'aString');
