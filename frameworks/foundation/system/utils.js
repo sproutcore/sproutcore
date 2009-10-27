@@ -133,7 +133,7 @@ SC.mixin( /** @scope SC */ {
   rectsEqual: function(r1, r2, delta) {
     if (!r1 || !r2) return (r1 == r2) ;
     
-    if (delta === null) delta = 0.1;
+    if (delta===undefined || delta == null) delta = 0.1;
     if ((r1.y != r2.y) && (Math.abs(r1.y - r2.y) > delta)) return NO ; 
     if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return NO ; 
     if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return NO ; 
@@ -378,8 +378,8 @@ SC.mixin( /** @scope SC */ {
   /** Returns the union of two ranges.  If one range is null, the other
    range will be returned.  */
   unionRanges: function(r1, r2) { 
-    if ((r1 === null) || (r1.length < 0)) return r2 ;
-    if ((r2 === null) || (r2.length < 0)) return r1 ;
+    if ((r1 == null) || (r1.length < 0)) return r2 ;
+    if ((r2 == null) || (r2.length < 0)) return r1 ;
     
     var min = Math.min(r1.start, r2.start) ;
     var max = Math.max(SC.maxRange(r1), SC.maxRange(r2)) ;
@@ -388,7 +388,7 @@ SC.mixin( /** @scope SC */ {
   
   /** Returns the intersection of the two ranges or SC.RANGE_NOT_FOUND */
   intersectRanges: function(r1, r2) {
-    if ((r1 === null) || (r2 === null)) return SC.RANGE_NOT_FOUND ;
+    if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
     if ((r1.length < 0) || (r2.length < 0)) return SC.RANGE_NOT_FOUND;
     var min = Math.max(SC.minRange(r1), SC.minRange(r2)) ;
     var max = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
@@ -398,7 +398,7 @@ SC.mixin( /** @scope SC */ {
   
   /** Returns the difference of the two ranges or SC.RANGE_NOT_FOUND */
   subtractRanges: function(r1, r2) {
-    if ((r1 === null) || (r2 === null)) return SC.RANGE_NOT_FOUND ;
+    if ((r1 == null) || (r2 == null)) return SC.RANGE_NOT_FOUND ;
     if ((r1.length < 0) || (r2.length < 0)) return SC.RANGE_NOT_FOUND;
     var max = Math.max(SC.minRange(r1), SC.minRange(r2)) ;
     var min = Math.min(SC.maxRange(r1), SC.maxRange(r2)) ;
@@ -416,8 +416,8 @@ SC.mixin( /** @scope SC */ {
   */
   rangesEqual: function(r1, r2) {
     if (r1===r2) return true ;
-    if (r1 === null) return r2.length < 0 ;
-    if (r2 === null) return r1.length < 0 ;
+    if (r1 == null) return r2.length < 0 ;
+    if (r2 == null) return r1.length < 0 ;
     return (r1.start == r2.start) && (r1.length == r2.length) ;
   },
 
