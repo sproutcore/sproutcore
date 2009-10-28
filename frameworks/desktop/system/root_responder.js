@@ -399,7 +399,7 @@ SC.RootResponder = SC.RootResponder.extend(
     if (evt === null) return YES;
     
     // Firefox does NOT handle delete here...
-    if (SC.browser.mozilla > 0 && (evt.which === 8)) return true ;
+    if (SC.browser.mozilla && (evt.which === 8)) return true ;
     
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this 
@@ -453,7 +453,7 @@ SC.RootResponder = SC.RootResponder.extend(
     var ret ;
     
     // delete is handled in keydown() for most browsers
-    if (SC.browser.mozilla > 0 && (evt.which === 8)) {
+    if (SC.browser.mozilla && (evt.which === 8)) {
       ret = this.sendEvent('keyDown', evt);
       return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
 
