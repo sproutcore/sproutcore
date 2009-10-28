@@ -394,7 +394,7 @@ SC.XHRResponse = SC.Response.extend({
         handleReadyStateChange = function() {
           if (!transport) return null ;
           var ret = transport.finishRequest();
-          transport = null ; // cleanup memory
+          if (ret) transport = null ; // cleanup memory
           return ret ;
         };
         rawRequest.onreadystatechange = handleReadyStateChange;
@@ -454,12 +454,11 @@ SC.XHRResponse = SC.Response.extend({
         this.set('status', status);
       
       }, this);
-    }
-     
-    if (readyState === 4) {
       // avoid memory leak in MSIE: clean up
       rawRequest.onreadystatechange = function() {} ;
+      return YES;
     }
+    return NO; 
   }
 
   
