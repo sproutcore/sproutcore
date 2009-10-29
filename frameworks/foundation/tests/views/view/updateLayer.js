@@ -24,7 +24,7 @@ test("invokes prepareContext() and then updates layer element", function() {
   });
   
   view.updateLayer();
-  ok(layer.getAttribute('class').toString().indexOf('did-update')>=0, 'has class name added by prepareContext()');
+  ok(SC.$(layer).attr('class').indexOf('did-update')>=0, 'has class name added by prepareContext()');
 });
 
 // ..........................................................

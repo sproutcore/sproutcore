@@ -1093,7 +1093,7 @@ SC.CollectionView = SC.View.extend(
     // walk up the element hierarchy until we find this or an element with an
     // id matching the base guid (i.e. a collection item)
     while (element && element !== document && element !== layer) {
-      id = element ? element.getAttribute('id') : null ;
+      id = element ? SC.$(element).attr('id') : null ;
       if (id && (contentIndex = this.contentIndexForLayerId(id)) !== null) {
           break;
       }

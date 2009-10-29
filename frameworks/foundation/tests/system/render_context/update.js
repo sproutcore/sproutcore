@@ -137,20 +137,20 @@ module("SC.RenderContext#update - className", {
 test("does not change class names if retrieved but not edited", function() {
   context.classNames();
   context.update();
-  equals(elem.getAttribute("class"), "foo bar", "class");
+  equals(SC.$(elem).attr("class"), "foo bar", "class");
 });
 
 test("replaces class name if classNames edited", function() {
   context.classNames('bar baz'.w());
   context.update();
-  equals(elem.getAttribute("class"), "bar baz", "attribute");
+  equals(SC.$(elem).attr("class"), "bar baz", "attribute");
 });
 
 test("set class names override class attr", function() {
   context.attr("class", "bar");
   context.classNames('baz'.w());
   context.update();
-  equals(elem.getAttribute("class"), "baz", "should use classNames");
+  equals(SC.$(elem).attr("class"), "baz", "should use classNames");
 });
 
 // ..........................................................

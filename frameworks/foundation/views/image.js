@@ -17,7 +17,9 @@ SC.IMAGE_STATE_SPRITE = 'sprite';
 /**
   URL to a transparent GIF.  Used for spriting.
 */
-SC.BLANK_IMAGE_URL = "data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw=="
+SC.BLANK_IMAGE_DATAURL = "data:image/gif;base64,R0lGODlhAQABAJAAAP///wAAACH5BAUQAAAALAAAAAABAAEAAAICBAEAOw==";
+
+SC.BLANK_IMAGE_URL = SC.browser.msie && SC.browser.msie<8 ? sc_static('blank.gif') : SC.BLANK_IMAGE_DATAURL;
 
 /**
   @class

@@ -553,7 +553,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   classNames: function(classNames, cloneOnModify) {
     if (classNames === undefined) {
       if (!this._classNames && this._elem) {
-        this._classNames = (this._elem.getAttribute('class')||'').split(' ');
+        this._classNames = (SC.$(this._elem).attr('class')||'').split(' ');
       }
       
       if (this._cloneClassNames) {
@@ -611,7 +611,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     var classNames = this._classNames, idx;
     if (!classNames && this._elem) {
       classNames = this._classNames = 
-        (this._elem.getAttribute('class')||'').split(' ');
+        (SC.$(this._elem).attr('class')||'').split(' ');
     }
 
     if (classNames && (idx=classNames.indexOf(className))>=0) {
@@ -666,7 +666,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       classNames = this._classNames ;
       if (!classNames && this._elem) {
         classNames = this._classNames = 
-          (this._elem.getAttribute('class')||'').split(' ');
+          (SC.$(this._elem).attr('class')||'').split(' ');
       }
       if (!classNames) classNames = this._classNames = [];
     

@@ -269,10 +269,10 @@ SC.mixin( /** @scope SC */ {
     }
 
     style = '%@; width: %@px; left: %@px; position: absolute'.fmt(style, width, (-1*width));
-    elem.setAttribute('style', style);
+    SC.$(elem).attr('style', style);
 
     if (classes !== '') {
-      elem.setAttribute('class', classes);
+      SC.$(elem).attr('class', classes);
     }
 
     elem.textContent = str;
