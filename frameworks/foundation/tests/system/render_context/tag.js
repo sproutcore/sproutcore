@@ -17,30 +17,30 @@ module("SC.RenderContext#tag", {
 
 test("should emit a self closing tag.  like calling begin().end()", function() {
   context.tag("input");
-  equals(context.get(1), "<input />");
+  equals(SC.RenderContext.escapeHTML(context.get(1)), SC.RenderContext.escapeHTML("<input />"));
 });
 
 test("should respect passed opts when emitting", function() {
   context.tag("foo") ;
   equals(context.length, 3);
-  equals(context.get(1), "<foo>");
-  equals(context.get(2), '<'+'/foo>');
+  equals(SC.RenderContext.escapeHTML(context.get(1)), SC.RenderContext.escapeHTML("<foo>"));
+  equals(SC.RenderContext.escapeHTML(context.get(2)), SC.RenderContext.escapeHTML('<'+'/foo>'));
 });
 
 test("should NOT emit self closing tag if tag is script", function() {
   context.tag("script");
-  equals(context.get(1), '<script>');
-  equals(context.get(2), '<'+'/script>');
+  equals(SC.RenderContext.escapeHTML(context.get(1)), SC.RenderContext.escapeHTML('<script>'));
+  equals(SC.RenderContext.escapeHTML(context.get(2)), SC.RenderContext.escapeHTML('<'+'/script>'));
 });
 
 test("should NOT emit self closing tag if tag is div", function() {
   context.tag("div");
-  equals(context.get(1), '<div>');
-  equals(context.get(2), '<'+'/div>');
+  equals(SC.RenderContext.escapeHTML(context.get(1)), SC.RenderContext.escapeHTML('<div>'));
+  equals(SC.RenderContext.escapeHTML(context.get(2)), SC.RenderContext.escapeHTML('<'+'/div>'));
 });
 
 test("should NOT emit self closing tag if no tag is passed", function() {
   context.tag();
-  equals(context.get(1), '<div>');
-  equals(context.get(2), '<'+'/div>');
+  equals(SC.RenderContext.escapeHTML(context.get(1)), SC.RenderContext.escapeHTML('<div>'));
+  equals(SC.RenderContext.escapeHTML(context.get(2)), SC.RenderContext.escapeHTML('<'+'/div>'));
 });
