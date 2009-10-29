@@ -265,14 +265,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
   needsEllipsis: YES,
 
   /**
-    This is a property to check if the menuWidth has been set
-
-    @private
-    @default NO
-  */
-  isMenuWidthSet: NO,
-
-  /**
     This property allows you at add extra padding to the height
     of the menu pane.
 
@@ -454,18 +446,13 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var menuWidth = this.get('layer').offsetWidth ;
     var scrollWidth = buttonLabel.scrollWidth ;
     var lastMenuWidth = this.get('lastMenuWidth') ;
-    var isMenuWidthSet = this.get('isMenuWidthSet') ;
-    var offsetWidth ;
-
-    if(!isMenuWidthSet && scrollWidth) {
-       // Get the original width of the button label
-       offsetWidth = buttonLabel.offsetWidth ;
+    if(scrollWidth) {
+       // Get the original width of the label in the button
+       var offsetWidth = buttonLabel.offsetWidth ;
        if(scrollWidth && offsetWidth) {
           menuWidth = menuWidth + scrollWidth - offsetWidth ;
-          this.set('isMenuWidthSet', YES) ;
        }
     }
-
     if (!lastMenuWidth || (menuWidth > lastMenuWidth)) {
       lastMenuWidth = menuWidth ;
     }
@@ -474,6 +461,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     var elementOffsetWidth, largestMenuWidth ;
 
     for (var idx = 0; idx < items.length; ++idx) {
+      //getting the width of largest menu item
       var item = items.objectAt(idx) ;
       var element = document.createElement('div') ;
       element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
@@ -483,17 +471,15 @@ SC.SelectButtonView = SC.ButtonView.extend(
       elementOffsetWidth = element.offsetWidth ;
 
       if (!largestMenuWidth || (elementOffsetWidth > largestMenuWidth)) {
-        largestMenuWidth = elementOffsetWidth;
+        largestMenuWidth = elementOffsetWidth ;
       }
       document.body.removeChild(element) ;
     }
 
-    largestMenuWidth  = menuWidth + largestMenuWidth - offsetWidth ;
-
     lastMenuWidth = (largestMenuWidth > lastMenuWidth) ?
-      largestMenuWidth: lastMenuWidth ;
-    this.set('lastMenuWidth',lastMenuWidth) ;
+                      largestMenuWidth: lastMenuWidth ;
 
+    this.set('lastMenuWidth',lastMenuWidth) ;
     var currSel = this.get('currentSelItem') ;
     var itemList = this.get('itemList') ;
     var menuControlSize = this.get('controlSize') ;
