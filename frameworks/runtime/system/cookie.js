@@ -83,21 +83,10 @@ SC.Cookie = SC.Object.extend({
   */
   destroy: function() {
     this.set('expires', -1);
+    this.write();
     
     sc_super();
   },
-  
-  /**
-    Checks to see if the value of SC.Cookie#expires is -1, if it is, this cookie will destroy itself
-    
-    @observes expires
-  */
-  expiresDidChange: function() {
-    var expires = this.get('expires');
-    if (SC.typeOf(expires) === SC.T_NUMBER && expires === -1) {
-      this.write(); // kill self
-    }
-  }.observes('expires'),
   
   /**
     Writes this SC.Cookie to document.cookie and adds it to SC.Cookie collection. To find this

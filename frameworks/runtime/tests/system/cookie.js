@@ -125,7 +125,7 @@ test("Destroying a cookie - expires", function() {
   var result = readCookie('cookie-expires');
   equals(result, "testing value", "value from document.cookie should match what we set");
   
-  cookie.set('expires', -1);
+  cookie.set('expires', -1).write();
   
   var result2 = readCookie('cookie-expires');
   equals(result2, null, "value from document.cookie should be null");
