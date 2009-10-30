@@ -441,7 +441,6 @@ SC.Record = SC.Object.extend(
 
         if (!isRecord) {
           attrValue = this.get(key);
-          console.log('key: ' + key + ' val: ' + attrValue);
           if(attrValue!==undefined || (attrValue===null && includeNull)) {
             dataHash[key] = attrValue;
           }
