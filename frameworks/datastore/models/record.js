@@ -441,7 +441,10 @@ SC.Record = SC.Object.extend(
 
         if (!isRecord) {
           attrValue = this.get(key);
-          if(attrValue!==undefined || attrValue!==null) dataHash[key] = attrValue;
+          console.log('key: ' + key + ' val: ' + attrValue);
+          if(attrValue!==undefined || (attrValue===null && includeNull)) {
+            dataHash[key] = attrValue;
+          }
         }
         else if(isRecord) {
           recHash = store.readDataHash(storeKey);
@@ -464,8 +467,6 @@ SC.Record = SC.Object.extend(
             }
           }
         }
-        
-        if (includeNull && dataHash[key]===undefined) dataHash[key] = null;
       }
     }
     
