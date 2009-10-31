@@ -25,8 +25,6 @@ SC.TableCellView = SC.View.extend({
       if (!SC.none(formattedValue)) value = formattedValue ;
     }
     
-    // 2. If the returned value is an array, convert items to strings and 
-    // join with commas.
     if (SC.typeOf(value) === SC.T_ARRAY) {
       var ary = [];
       for(var idx=0;idx<value.get('length');idx++) {
@@ -37,10 +35,8 @@ SC.TableCellView = SC.View.extend({
       value = ary.join(',') ;
     }
     
-    // 3. If value is not a string, convert to string. (handles 0)
     if (!SC.none(value) && value.toString) value = value.toString() ;
     
-    // 5. escapeHTML if needed
     if (this.get('escapeHTML')) value = SC.RenderContext.escapeHTML(value);
     
     return value ;
@@ -57,21 +53,8 @@ SC.TableCellView = SC.View.extend({
     column.addObserver('maxWidth', this, '_sctcv_layoutDidChange');
     column.addObserver('minWidth', this, '_sctcv_layoutDidChange');
     
-    // debugger;
-    // this.bind('escapeHTML', SC.Binding.from('.column.escapeHTML').oneWay());
-    // this.bind('formatter', SC.Binding.from('.column.formatter').oneWay());
-    
-    // column.addObserver('escapeHTML', this, '_sctcv_columnPropChanged');
-    // column.addObserver('formatter', this, '_sctcv_columnPropChanged');
   },
-  
-  // _sctcv_columnPropChanged: function(sender, key, value, rev) {
-  //   
-  //   var column = this.get('column');
-  //   this.set('escapeHTML', column.get('escapeHTML'));
-  //   
-  // },
-  
+    
   _sctcv_layoutDidChange: function(sender, key, value, rev) {
     var pv = this.get('parentView');
     SC.run( function() { pv.layoutChildViews(); });
