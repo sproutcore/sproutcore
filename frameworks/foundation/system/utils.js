@@ -138,7 +138,7 @@ SC.mixin( /** @scope SC */ {
     if ((r1.x != r2.x) && (Math.abs(r1.x - r2.x) > delta)) return NO ; 
     if ((r1.width != r2.width) && (Math.abs(r1.width - r2.width) > delta)) return NO ; 
     if ((r1.height != r2.height) && (Math.abs(r1.height - r2.height) > delta)) return NO ; 
-    return true ;
+    return YES ;
   },
   
   /** Returns the insersection between two rectangles. 

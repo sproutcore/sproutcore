@@ -142,7 +142,7 @@ SC.Response = SC.Object.extend(
   body: function() {
     // TODO: support XML
     var ret = this.get('encodedBody');
-    if (ret && this.get('isJSON')) ret = SC.json.decode(ret);
+    if (ret && this.get('isJSON') && !ret.match(/^\s*$/)) ret = SC.json.decode(ret);
     return ret;
   }.property('encodedBody').cacheable(),
   
