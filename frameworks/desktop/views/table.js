@@ -125,7 +125,6 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   
   mouseDraggedInTableHeaderView: function(evt, header) {
     SC.RunLoop.begin();
-    //console.log(arguments.callee.displayName, arguments);
     var isInDragMode = this.get('isInDragMode');
     if (!isInDragMode) return NO;
     
@@ -374,39 +373,35 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
   // INTERNAL SUPPORT
   // 
   
-  
+  // When the columns change, go through all the columns and set their tableContent to be this table's content
+  // TODO: should these guys not just have a binding of this instead?
   _sctv_columnsDidChange: function() {
+
     var columns = this.get('columns'), 
         content = this.get('content'),
         idx;
     
-    for (idx = 0; idx < columns.get('length'); i++) {
+    for (idx = 0; idx < columns.get('length'); idx++) {
       columns.objectAt(idx).set('tableContent', content);
     }
-    
-    // remove observer []
-    // add observer [].
-    //this._sctv_columnPropertyDidChange(...);
+    this.get('tableHeadView')._scthv_handleChildren();
+    this.reload();
+
   }.observes('columns'),
   
-  _sctv_columnPropertyDidChange: function() {
-    var content = this.get('content'),
-        del = this.delegateFor('isTableDelegate', 
-          this.delegate, content);
-          
-    width = del.tableShouldResizeColumnTo(this, column, width);
-  },
-    
+  // Do stuff when our frame size changes.
   _sctv_adjustColumnWidthsOnResize: function() {
+
     var width   = this.get('frame').width;
     var content = this.get('content'),
         del = this.delegateFor('isTableDelegate', this.delegate, content);
-          
+    
+    if (this.get('columns').length == 0) return;
     width = del.tableShouldResizeWidthTo(this, width);
     
     var columns = this.get('columns'), totalColumnWidth = 0, idx;
     
-    for (idx = 0; idx < columns.length; idx++) {
+    for (var idx = 0; idx < columns.length; idx++) {
       totalColumnWidth += columns.objectAt(idx).get('width');
     }
     
@@ -419,17 +414,13 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     flexibleColumn.set('width', flexibleWidth);    
   }.observes('frame'),
     
-  _sctv_setupHeaderRow: function() {
-    if (!this.get('hasTableHead')) return;
-    var columns = this.get('columns'),
-        tableHeadView = this.get('tableHeadView');    
-    if (!tableHeadView) {
-      tableHeadView = this.get('exampleHeadView').create({
-        tableView: this,
-        columns:   columns
-      });
-      this.set('tableHeadView', tableHeadView);
-    }
+  // =============================================================
+  // = This is all terrible, but will have to do in the interim. =
+  // =============================================================
+  _sctv_sortContent: function() {
+    var sortedColumn = this.get('sortedColumn');
+    var sortKey = sortedColumn.get('key');
+    this.set('orderBy', sortKey);
   },
   
   _sctv_sortedColumnDidChange: function() {
@@ -445,46 +436,5 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
     }
     
     this.invokeOnce('_sctv_sortContent');
-  }.observes('sortedColumn'),
-    
-  _sctv_sortContent: function() {
-    var content = this.get('content'), store = content.get('store'), newContent;
-    
-    var q = this._sctv_queryForCurrentState();
-    
-    newContent = store.findAll(this.get('recordType')).findAll(q);
-    
-    this.set('content', newContent);
-    this.updateLayerIfNeeded();
-  },
-  
-  _sctv_queryForCurrentState: function() {
-    var obj = {}, sortedColumn = this.get('sortedColumn');
-    
-    obj.recordType = this.get('recordType');
-    
-    if (sortedColumn && sortedColumn.get('sortState')) {
-      obj.orderBy = "%@ %@".fmt(
-        sortedColumn.get('key'),
-        sortedColumn.get('sortState') === SC.SORT_ASCENDING ? "ASC" : "DESC"
-      );
-    }
-    
-    var columns = this.get('columns'), columnKeys = [], idx;
-    var filterKey = this.get('filterKey');    
-    if (filterKey !== null && filterKey !== "") {
-      var re = new RegExp(filterKey, 'ig');
-      for (idx = 0; idx < columns.get('length'); idx++) {
-        columnKeys.push("(%@ MATCHES {regexp})".fmt(columns.objectAt(idx).get('key')));
-      }
-      obj.conditions = columnKeys.join(' OR ');
-      obj.parameters = { regexp: re };
-    }
-    
-    return SC.Query.create(obj);
-  },
-  
-  _sctv_filterKeyDidChange: function() {
-    this.invokeOnce('_sctv_sortContent');
-  }.observes('filterKey')
+  }.observes('sortedColumn')    
 });

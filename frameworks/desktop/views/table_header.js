@@ -73,14 +73,15 @@ SC.TableHeaderView = SC.View.extend({
     }
   },
     
+  // ========================================================
+  // = For the column we look after, set up some observers. =
+  // ========================================================
   init: function() {
     var column = this.get('column');
     column.addObserver('width',     this, '_scthv_layoutDidChange');
     column.addObserver('maxWidth',  this, '_scthv_layoutDidChange');
     column.addObserver('minWidth',  this, '_scthv_layoutDidChange');
-    
     column.addObserver('sortState', this, '_scthv_sortStateDidChange');
-    
     column.addObserver('tableContent', this, '_scthv_tableContentDidChange');
     
     // var tableContent = column.get('tableContent');
@@ -172,10 +173,10 @@ SC.TableHeaderView = SC.View.extend({
     //this.get('dragModeView').adjust('top', layout.height);
   },
   
+  // When our column's tableContent property changes, we need to go back and get our column content
   _scthv_tableContentDidChange: function() {
     var tableContent = this.get('column').get('tableContent');    
-    var columnContent = this._scthv_columnContentFromTableContent(tableContent);
-    
+    var columnContent = this.get('parentView')._scthv_columnContentFromTableContent(tableContent, this.get('columnIndex'));
     this.set('content', columnContent);
   },
   

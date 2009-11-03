@@ -26,14 +26,14 @@ SC.TableHeadView = SC.View.extend({
   cells: [],
   
   acceptsFirstResponder: YES,
-  
+
   dragOrder: null,
   
   init: function() {
     // TODO: Figure out why the `columns` observer doesn't work
     this._scthv_handleChildren();
   },
-  
+    
   columns: function() {
     return this.get('parentView').get('columns');
   }.property(),  
@@ -85,6 +85,7 @@ SC.TableHeadView = SC.View.extend({
     
   }.observes('dragOrder'),
   
+  
   _scthv_columnContentFromTableContent: function(tableContent, columnIndex) {
     var column = this.get('columns').objectAt(columnIndex),
         key = column.get('key'),
@@ -124,7 +125,8 @@ SC.TableHeadView = SC.View.extend({
   },
   
   _scthv_handleChildren: function() {
-    this.removeAllChildren();
+    // this.removeAllChildren();
+    // debugger;
     var columns = this.get('columns');
     var tableView = this.get('parentView');
     var tableContent = tableView.get('content');
@@ -135,21 +137,24 @@ SC.TableHeadView = SC.View.extend({
       key    = column.get('key');
       label  = column.get('label');
       content = this._scthv_columnContentFromTableContent(tableContent, idx);
-      cell   = this._scthv_createTableHeader(column, label, content);
+      cell   = this._scthv_createTableHeader(column, label, content, idx);
       cells.push(cell);
-      this.appendChild(cell);
+      // this.appendChild(cell);
+      console.log("Adding %@ column", key);
     }
-    
     this.set('cells', cells);
+    if (cells.length > 0)
+      this.replaceAllChildren(cells);
   },
   
-  _scthv_createTableHeader: function(column, label, content) {
+  _scthv_createTableHeader: function(column, label, content, idx) {
     var tableView = this.get('parentView');
     var cell = SC.TableHeaderView.create({
       column:  column,
       label: label,
       content: content,
-      tableView: tableView
+      tableView: tableView,
+      columnIndex: idx
     });
     return cell;
   }
