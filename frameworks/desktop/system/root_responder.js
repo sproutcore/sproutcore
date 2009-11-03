@@ -396,7 +396,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // This code is to check for the simulated keypressed event
     if(!evt.kindOf) this._ffevt=null;
     else evt=this._ffevt;
-    if (evt === null) return YES;
+    if (evt == null) return YES;
     
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla && (evt.which === 8)) return true ;
@@ -421,7 +421,7 @@ SC.RootResponder = SC.RootResponder.extend(
       if (SC.browser.mozilla && evt.keyCode>=37 && evt.keyCode<=40){
         this._ffevt=evt;
         SC.RunLoop.begin();
-        this.invokeLater(this.keydown, 50);
+        this.invokeLater(this.keydown, 100);
         SC.RunLoop.end();
       }
       // otherwise, send as keyDown event.  If no one was interested in this
