@@ -282,7 +282,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
 
   renderLabel: function(context, label) {
-    context.push("<span class='value'>"+label+"</span>") ;
+    context.push("<span class='value ellipsis'>"+label+"</span>") ;
   },
   
   /** 
