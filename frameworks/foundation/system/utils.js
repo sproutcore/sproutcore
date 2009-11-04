@@ -275,7 +275,7 @@ SC.mixin( /** @scope SC */ {
       SC.$(elem).attr('class', classes);
     }
 
-    elem.textContent = str;
+    elem.innerHTML = str;
     height = elem.clientHeight;
 
     elem = null; // don't leak memory
