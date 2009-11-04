@@ -12,6 +12,8 @@ SC.mixin( /** @scope SC */ {
 
   _downloadFrames: 0, // count of download frames inserted into document
   
+  _copy_computed_props: ["maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom", "fontFamily", "fontSize", "fontStyle", "fontWeight"],
+  
   /**
     Starts a download of the file at the named path.
     
@@ -282,6 +284,90 @@ SC.mixin( /** @scope SC */ {
     return height;
   },
   
+  /**
+  Given a string and an example element or style string, and an optional
+  set of class names, calculates the width and height of that block of text.
+  
+  To constrain the width, set max-width.
+  */
+  metricsForString: function(string, exampleElement, classNames)
+  {
+    var element = this._metricsCalculationElement, width, height, classes, styles, style;
+    
+    // collect the class names
+    classes = SC.A(classNames).join(' ');
+    
+    // get the calculation element
+    if (!element) {
+      element = this._metricsCalculationElement = document.createElement("div");
+      document.body.insertBefore(element, null);
+    }
+    
+    // two possibilities: example element or type string
+    if (SC.typeOf(exampleElement) != SC.T_STRING) {
+      var computed = null;
+      if (document.defaultView && document.defaultView.getComputedStyle) {
+        computed = document.defaultView.getComputedStyle(exampleElement, null);
+      } else {
+        computed = exampleElement.currentStyle;
+      }
+      
+      // set (lovely cssText property here helps a lot—if it works. Unfortunately, only Safari supplies it.)
+      style = computed.cssText;
+      
+      // if that didn't work (Safari-only?) go alternate route. This is SLOW code...
+      if (!style || style.trim() === "") {
+        // there is only one way to do it...
+        var props = this._copy_computed_props;
+        
+        // firefox ONLY allows this method
+        for (var i = 0; i < props.length; i++) {
+          var prop = props[i], val = computed[prop];
+          element.style[prop] = val;
+        }
+        
+        SC.mixin(element.style, {
+          left: "0px", top: "0px", position: "absolute", bottom: "auto", right: "auto", width: "auto", height: "auto"
+        });
+      }
+      else
+      {
+        // set style
+        element.setAttribute("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
+      }
+      
+      // clean up
+      computed = null;
+    } else {
+      // it is a style string already
+      style = exampleElement;
+      
+      // set style
+      element.setAttribute("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
+    }
+    
+    // the conclusion of which to use (innerText or textContent) should be cached
+    if (typeof element.innerText != "undefined") element.innerText = string;
+    else element.textContent = string;
+    
+    element.className = classes;
+    
+    // measure
+    var result = {
+      width: element.clientWidth,
+      height: element.clientHeight
+    };
+    
+    // clear element
+    element.innerHTML = "";
+    element.className = "";
+    element.setAttribute("style", ""); // get rid of any junk from computed style.
+    
+    // clean up
+    element = null;
+    return result;
+  },
+
   /** Finds the absolute viewportOffset for a given element.
     This method is more accurate than the version provided by prototype.
     
