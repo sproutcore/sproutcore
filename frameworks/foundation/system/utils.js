@@ -288,7 +288,11 @@ SC.mixin( /** @scope SC */ {
   Given a string and an example element or style string, and an optional
   set of class names, calculates the width and height of that block of text.
   
-  To constrain the width, set max-width.
+  To constrain the width, set max-width on the exampleElement or in the style string.
+  
+  @param string {String} The string to measure.
+  @param exampleElement The example element to grab styles from, or the style string to use.
+  @param classNames {String} (Optional) Class names to add to the test element.
   */
   metricsForString: function(string, exampleElement, classNames)
   {
