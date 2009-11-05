@@ -150,7 +150,7 @@ SC.Timer = SC.Object.extend(
     
     @property {Boolean}
   */
-  isPooled: YES,
+  isPooled: NO,
   
   /**
     The time interval in milliseconds.
@@ -408,7 +408,7 @@ SC.Timer = SC.Object.extend(
   /** @private - Default values to reset reused timers to. */
   RESET_DEFAULTS: {
     target: null, action: null, 
-    isPooled: YES, isPaused: NO, isScheduled: NO, isValid: YES,
+    isPooled: NO, isPaused: NO, isScheduled: NO, isValid: YES,
     interval: 0, repeats: NO, until: null,
     startTime: null, lastFireTime: 0
   },
