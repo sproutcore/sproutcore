@@ -26,3 +26,5 @@ For more information about SproutCore, visit http://www.sproutcore.com
 
 ==========================================================================
 @license */
+
+"use modules false";

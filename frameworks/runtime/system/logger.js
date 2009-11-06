@@ -2,6 +2,9 @@
 // SC.Logger
 // ==========================================================================
 
+"import core";
+"import system/object";
+"export package";
 
 /**
   If {@link SC.Logger.format} is true, this delimiter will be put between arguments.

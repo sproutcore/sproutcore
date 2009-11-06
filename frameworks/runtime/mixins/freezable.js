@@ -5,6 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"import core";
+"export package";
 
 /**
   Standard Error that should be raised when you try to modify a frozen object.

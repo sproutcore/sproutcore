@@ -25,9 +25,18 @@ mode :debug do
 end
 
 # CORE FRAMEWORKS
-config :bootstrap,  :required => [], :use_modules => false
+config :bootstrap,  
+  :required => [],
+  :use_loader => false,
+  :use_modules => false       
 
-config :runtime,    :required => []
+config :runtime,    
+  :required => ['tiki/system'],
+  :debug_required => [],
+  :test_required => ['core_test'],
+  :use_modules => true,
+  :factory_format => :function
+  
 config :foundation, :required => [:runtime]
 config :datastore,  :required => [:runtime]
 

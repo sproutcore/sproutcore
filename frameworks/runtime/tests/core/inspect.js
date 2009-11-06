@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+"import core_test:package core";
+
 var obj1,obj2,obj3; //global variables
 
 module("Inspect module",{
@@ -25,3 +27,5 @@ test("SC.inspect module should give a string type",function(){
 	var object3 = SC.inspect(obj3);
 	equals(YES,SC.T_STRING === SC.typeOf(object3),'description of the object');
 });
+
+plan.run();

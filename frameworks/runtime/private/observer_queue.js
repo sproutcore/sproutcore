@@ -5,8 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/observable');
-sc_require('system/set');
+"import core";
+"import system/set";
 
 // ........................................................................
 // OBSERVER QUEUE

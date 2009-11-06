@@ -5,6 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"import core";
+"import private/observer_queue";
+"import system/index_set";
+"export package";
 
 /** @class
 

@@ -5,10 +5,13 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/enumerable') ;
-sc_require('mixins/array') ;
-sc_require('mixins/observable') ;
-sc_require('mixins/delegate_support') ;
+"import core";
+"import system/index_set";
+"import system/object";
+"import mixins/enumerable";
+"import mixins/array";
+"import mixins/delegate_support";
+"export package";
 
 /**
   @class
@@ -40,7 +43,7 @@ sc_require('mixins/delegate_support') ;
   @since SproutCore 1.0
 */
 
-SC.SparseArray = SC.Object.extend(SC.Observable, SC.Enumerable, SC.Array, 
+SC.SparseArray = SC.Object.extend(SC.Enumerable, SC.Array, 
   SC.DelegateSupport, /** @scope SC.SparseArray.prototype */ {  
 
   // ..........................................................

@@ -5,10 +5,14 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/object');
-sc_require('mixins/enumerable');
-sc_require('mixins/copyable');
-sc_require('mixins/freezable');
+"import core";
+"import system/object";
+"import mixins/enumerable";
+"import mixins/copyable";
+"import mixins/freezable";
+"import system/set";
+"import system/index_set";
+"export package";
 
 /** @class
 

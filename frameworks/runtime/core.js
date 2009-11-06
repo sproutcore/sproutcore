@@ -5,15 +5,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"require license";
+"import system:package as system";
+"export package SC SproutCore YES NO";
+
 /*global NodeList */
-
-// These commands are used by the build tools to control load order.  On the
-// client side these are a no-op.
-var require = require || function require() { } ;
-var sc_require = sc_require || require;
-var sc_resource = sc_resource || function sc_resource() {};
-
-sc_require('license') ;
 
 // ........................................
 // GLOBAL CONSTANTS
@@ -21,15 +17,15 @@ sc_require('license') ;
 // Most global constants should be defined inside of the SC namespace.  
 // However the following two are useful enough and generally benign enough
 // to put into the global object.
-var YES = true ; 
-var NO = false ;
+YES = true ; 
+NO = false ;
 
 // prevent a console.log from blowing things up if we are on a browser that
 // does not support it
-if (typeof console === 'undefined') {
-  window.console = {} ;
-  console.log = console.info = console.warn = console.error = function(){};
-}
+var UNDEFINED = 'undefined';
+if (UNDEFINED === typeof console) console = system.console;
+if (UNDEFINED === typeof sc_require) sc_require = function() {};
+if (UNDEFINED === typeof sc_resource) sc_resource = function() {} ;
 
 // ........................................
 // BOOTSTRAP
@@ -55,8 +51,7 @@ if (typeof console === 'undefined') {
   The core Base framework is based on the jQuery API with a number of 
   performance optimizations.
 */
-var SC = SC || {} ; 
-var SproutCore = SproutCore || SC ;
+SC = SproutCore = {} ; 
 
 /**
   Adds properties to a target object.

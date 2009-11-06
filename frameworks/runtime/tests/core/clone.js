@@ -5,6 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"import core_test:package core";
+"import system/object";
+
 /*globals module test ok equals expects object same */
 
 var object ;
@@ -82,3 +85,5 @@ test("should use copy() if isCopyable", function() {
 test("SC.copy should be an alias for SC.clone", function() {
   equals(SC.copy, SC.clone, 'SC.copy should equal SC.clone');
 });
+
+plan.run();

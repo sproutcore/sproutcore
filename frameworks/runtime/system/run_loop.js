@@ -5,7 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('private/observer_set');
+"import core";
+"import private/observer_set";
+"import system/object";
+"export package";
 
 /**
   @class

@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test */
 
+"import core_test:package core";
+
 var objectA,objectB,objectC; //global variables
 
 module("Make Array ", {
@@ -28,3 +30,5 @@ test("should return an array for the object passed ",function(){
 	ret = SC.makeArray(arrayA);
 	equals(SC.isArray(ret),true) ;
 });
+
+plan.run();

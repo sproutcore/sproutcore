@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('system/object');
+"import core";
 
 // ........................................................................
 // CHAIN OBSERVER

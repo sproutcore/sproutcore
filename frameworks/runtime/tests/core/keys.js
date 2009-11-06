@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test */
 
+"import core_test:package core";
+
 module("Fetch Keys ");
 
 test("should get a key array for a specified object ",function(){
@@ -14,7 +16,7 @@ test("should get a key array for a specified object ",function(){
 
 	var object2 = [];
 	object2 = SC.keys(object1);
-	same(object2,['names','age','place']);
+	same(object2,['names','age','place'], 'compare keys');
 });
 
-
+plan.run();

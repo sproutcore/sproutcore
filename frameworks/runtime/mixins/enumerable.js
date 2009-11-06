@@ -5,8 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('core') ;
-require('system/enumerator');
+"import core";
+"import system/enumerator";
+"export package";
 
 /*globals Prototype */
 
