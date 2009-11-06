@@ -96,3 +96,5 @@ test("looking up indexSet for source when objects are added should recache when 
   same(ret, SC.IndexSet.create(array.indexOf(obj)), 'should return index set with item at end');
   
 });
+
+plan.run();

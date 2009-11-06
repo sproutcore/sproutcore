@@ -115,3 +115,5 @@ test("notifications with context", function() {
 });
 
 
+
+plan.run();

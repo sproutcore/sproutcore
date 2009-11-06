@@ -58,3 +58,5 @@ test("set1.isEqual(set2) after set2 is filled and emptied", function() {
   set2.add(content,4,4).remove(content,4,4);
   ok(set1.isEqual(set2), 'same content should return YES');
 });
+
+plan.run();

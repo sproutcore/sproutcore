@@ -72,4 +72,6 @@ test("stops observes changes if changes happend before destroy", function() {
   equals(observer.callCount, 2, 'range observer should fire only first time through');
 });
 
+plan.run();
+
 

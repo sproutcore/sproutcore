@@ -63,3 +63,5 @@ test("switches to observing new range - previously updated", function() {
   equals(observer.callCount, 1, 'range observer should fire on new range');
 });
 
+
+plan.run();

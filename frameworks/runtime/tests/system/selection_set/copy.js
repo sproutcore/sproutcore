@@ -15,3 +15,5 @@ test("basic copy", function() {
   equals(copy.get('length'), 3, 'copy should have same length');
   same(copy, set, 'copy should be the same as original set');
 });
+
+plan.run();

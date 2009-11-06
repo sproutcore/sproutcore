@@ -5,6 +5,12 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"import core_test:package";
+"import core";
+"import system/object";
+"import mixins/enumerable";
+"import mixins/array"; // required for array-like operations
+
 /*globals module test ok isObj equals expects */
 
 var enumerables ; // global variables
@@ -609,3 +615,5 @@ test("should notify observers even if reduced property is cached on prototype", 
   // was triggered when we changed the array contents.
   equals(5, observedValue, "observedValue") ;
 });
+
+plan.run();

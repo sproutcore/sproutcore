@@ -47,3 +47,5 @@ test("adding should iterate over a indexset", function() {
   equals(set.get('max'), 1002, 'max should return 1 past last index');
   same(iter(set), [1001]);
 });
+
+plan.run();

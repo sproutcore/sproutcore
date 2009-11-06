@@ -7,7 +7,9 @@
 
 /*globals module test ok equals same CoreTest */
 
-sc_require('debug/test_suites/array/base');
+"import core";
+"import debug/test_suites/array/base";
+"import core_test:package";
 
 SC.ArraySuite.define(function(T) {
   
@@ -25,8 +27,8 @@ SC.ArraySuite.define(function(T) {
     var after = T.expected(1);
     
     observer.observe('[]') ;
-    obj.insertAt(0, after) ;
-    T.validateAfter(obj, after, observer);
+    obj.insertAt(0, after[0]) ;
+    T.validateAfter(obj, [after[0]], observer);
   });
   
   test("[].insertAt(200,X) => OUT_OF_RANGE_EXCEPTION exception", function() {

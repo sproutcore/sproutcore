@@ -90,3 +90,4 @@ test("Adding indexes with range object !!", function() {
 
 
 
+plan.run();

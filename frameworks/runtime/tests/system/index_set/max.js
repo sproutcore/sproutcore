@@ -38,3 +38,5 @@ test("after removing all ranges", function() {
   equals(set.get('max'), 0, 'max should be back to 0 with no content');
 });
 
+
+plan.run();

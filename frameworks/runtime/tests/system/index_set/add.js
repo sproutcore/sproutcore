@@ -210,3 +210,5 @@ test("adding in the same range should keep length consistent", function() {
   equals(set.length, 4, 'set length should remain 4 after set.add(1,2)');
   
 });
+
+plan.run();

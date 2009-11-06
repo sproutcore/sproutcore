@@ -72,3 +72,5 @@ test("handle self", function() {
   equals(set.contains(set), YES, 'should return YES when passed itself');  
 });
 
+plan.run();
+

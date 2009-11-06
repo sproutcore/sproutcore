@@ -1,7 +1,12 @@
 // ========================================================================
 // SC.Observable Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok isObj equals expects plan */
+
+"import core_test:package";
+"import core";
+"import system/object";
+"import mixins/observable";
 
 var revMatches = NO , ObjectA;
 
@@ -130,3 +135,5 @@ test("revision passed to observers should match .propertyRevision", function() {
   equals(revMatches, true) ;
   
 });
+
+plan.run();

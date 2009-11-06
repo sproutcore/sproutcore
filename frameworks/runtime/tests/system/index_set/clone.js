@@ -41,3 +41,5 @@ test("copy works like clone", function() {
   equals(set.frozenCopy(), set, 'should return same instance when frozen');
 });
 
+
+plan.run();

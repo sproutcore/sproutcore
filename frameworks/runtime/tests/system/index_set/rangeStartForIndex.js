@@ -34,3 +34,5 @@ test("index past last index", function() {
 });
 
 
+
+plan.run();

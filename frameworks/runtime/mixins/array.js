@@ -228,7 +228,7 @@ SC.Array = {
   */
   popObject: function() {
     var len = this.get('length') ;
-    if (len === 0) return null ;
+    if (len === 0) return undefined ;
     
     var ret = this.objectAt(len-1) ;
     this.removeAt(len-1) ;
@@ -240,7 +240,7 @@ SC.Array = {
     like shift() but it is KVO-compliant.
   */
   shiftObject: function() {
-    if (this.get('length') === 0) return null ;
+    if (this.get('length') === 0) return undefined ;
     var ret = this.objectAt(0) ;
     this.removeAt(0) ;
     return ret ;

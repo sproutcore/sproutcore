@@ -107,4 +107,6 @@ test("if object in observed range changes, should stop observing old objects and
     
 });
 
+plan.run();
+
 

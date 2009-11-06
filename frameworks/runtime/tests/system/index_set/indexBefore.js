@@ -36,3 +36,5 @@ test("single index range", function() {
 
 
 
+
+plan.run();

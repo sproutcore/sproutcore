@@ -51,3 +51,5 @@ test("errorObject property should return the error itself", function() {
   var er = SC.$error("foo");
   equals(er.get('errorObject'), er, 'errorObject should return receiver');
 });
+
+plan.run();
