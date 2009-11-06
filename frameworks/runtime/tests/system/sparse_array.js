@@ -1,7 +1,12 @@
 // ========================================================================
 // SC.SparseArray Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok isObj equals expects plan */
+
+"import core_test:package";
+"import package";
+"import debug/test_suites/array";
+
 var objectA = 23, objectB = 12, objectC = 31, numbers, new_numbers;
 module("SC.SparseArray") ;
 

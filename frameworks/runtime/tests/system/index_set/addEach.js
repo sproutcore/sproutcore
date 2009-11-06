@@ -3,8 +3,11 @@
 // Copyright: ©2006-2009 Apple Inc. and contributors.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
+/*global module test equals context ok same plan */
 
-/*global module test equals context ok same */
+"import core_test:package";
+"import package";
+
 var set ;
 module("SC.IndexSet#addEach", {
   setup: function() {

@@ -4,12 +4,11 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
+/*global NodeList system */
 
 "require license";
-"import system:package as system";
+"import tiki/system:package as system";
 "export package SC SproutCore YES NO";
-
-/*global NodeList */
 
 // ........................................
 // GLOBAL CONSTANTS
@@ -52,6 +51,33 @@ if (UNDEFINED === typeof sc_resource) sc_resource = function() {} ;
   performance optimizations.
 */
 SC = SproutCore = {} ; 
+
+/**
+  Register a new key/value pair in the global object.  You must register all
+  top-level namespaces in this way for them to be found via bindings etc.
+  
+  @param {String} key the name to expose.
+  @param {Object} value the value to expose
+  @returns {Object} SC namespace
+*/
+SC.global = function(key, value) {
+  system.global[key] = value;
+  return SC ;
+};
+
+/**
+  Removes a global object from the top-level namespace.  You should almost 
+  never call this.  It is only used for unit testing.
+  
+  @param {String} key the name to expose.
+  @returns {Object} SC namespace
+*/
+SC.global.remove = function(key) {
+  delete system.global[key];
+  return SC;
+};
+
+SC.global('SC', SC);
 
 /**
   Adds properties to a target object.
@@ -639,7 +665,7 @@ SC.mixin(/** @scope SC */ {
     the standard method used in SproutCore to traverse object paths.
 
     @param path {String} the path
-    @param root {Object} optional root object.  window is used otherwise
+    @param root {Object} optional root object.  global is used otherwise
     @param stopAt {Integer} optional point to stop searching the path.
     @returns {Object} the found object or undefined.
   */
@@ -647,7 +673,7 @@ SC.mixin(/** @scope SC */ {
 
     var loc, nextDotAt, key, max ;
 
-    if (!root) root = window ;
+    if (!root) root = system.global ;
 
     // faster method for strings
     if (SC.typeOf(path) === SC.T_STRING) {

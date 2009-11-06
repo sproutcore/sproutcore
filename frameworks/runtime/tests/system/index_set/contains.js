@@ -6,6 +6,10 @@
 
 /*global module test equals context ok same notest */
 
+"import core_test:package";
+"import package";
+
+
 var set ;
 module("SC.IndexSet#contains", {
   setup: function() {

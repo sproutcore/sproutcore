@@ -1,7 +1,10 @@
 // ========================================================================
 // SC.Set Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok isObj equals expects plan */
+
+"import core_test:package";
+"import package";
 
 var a, b, c ; // global variables
 

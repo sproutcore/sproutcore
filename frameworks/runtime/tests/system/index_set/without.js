@@ -4,7 +4,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same notest */
+/*global module test equals context ok same notest plan */
+
+"import core_test:package";
+"import package";
+
 var set, ret ;
 module("SC.IndexSet#without", {
   setup: function() {

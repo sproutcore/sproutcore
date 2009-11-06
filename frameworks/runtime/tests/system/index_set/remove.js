@@ -4,7 +4,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same notest should_throw*/
+/*global module test equals context ok same notest shouldThrow plan*/
+
+"import core_test:package";
+"import package";
+
 var set ;
 module("SC.IndexSet#remove", {
   setup: function() {
@@ -183,7 +187,7 @@ test("removing an index range outside of target range (specific bug)", function(
 });
 
 test("remove() raises exception when frozen", function() {
-  should_throw(function() {
+  shouldThrow(function() {
     set.freeze().remove(0,2);    
   }, SC.FROZEN_ERROR);  
 });

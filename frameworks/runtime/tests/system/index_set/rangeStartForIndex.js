@@ -4,7 +4,12 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same */
+/*global module test equals context ok same plan */
+
+"import core_test:package";
+"import package";
+
+
 var set, start, len ;
 module("SC.IndexSet#rangeStartForIndex", {
   setup: function() {

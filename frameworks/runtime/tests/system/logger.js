@@ -4,6 +4,8 @@
 
 /*globals module test equals */
 
+"import core_test:package";
+"import package";
 
 // Test console needed because testing for null functions,
 // ie. setting the actual console.log = null means setting up

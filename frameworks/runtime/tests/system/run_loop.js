@@ -1,22 +1,43 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Apple Inc. and contributors.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+/*globals plan */
+
+"import core_test:package";
+"import package";
+
+var first, second, third, binding1, binding2;
+
 module("System:run_loop() - chained binding", {
   setup: function() {
     first = SC.Object.create({ 
-		output: 'first' 
-	}) ;
+      output: 'first' 
+    }) ;
     
-	second = SC.Object.create({ 
+    second = SC.Object.create({ 
       input: 'second',
       output: 'second',
       
       inputDidChange: function() {
         this.set("output", this.get("input")) ;
       }.observes("input") 
-
     }) ;
     
     third = SC.Object.create({ 
-		input: "third" 
-	}) ;
+      input: "third" 
+    }) ;
+    
+    SC.global('first', first);
+    SC.global('second', second);
+    SC.global('third', third);
+  },
+  
+  teardown: function() {
+    SC.global.remove('first');
+    SC.global.remove('second');
+    SC.global.remove('third');
   }
 });
 
@@ -49,14 +70,16 @@ test("Should propograte bindings after the RunLoop completes (using SC.RunLoop)"
 });
 
 test("Should propograte bindings after the RunLoop completes (using SC.beginRunLoop)", function() {
-	SC.beginRunLoop;
+
 		//Binding of output of first object to input of second object
   		binding1 = SC.Binding.from("output", first).to("input", second).connect() ;
     	
 		//Binding of output of second object to input of third object
-		binding2 = SC.Binding.from("output", second).to("input", third).connect() ;
+		binding2 = SC.Binding.from("output", second).to("input", third).connect();
 		
 		SC.Binding.flushPendingChanges() ; // actually sets up the connection
+
+  	SC.RunLoop.begin();
 		
 		//Based on the above binding if you change the output of first object it should
 		//change the all the variable of first,second and third object
@@ -67,8 +90,7 @@ test("Should propograte bindings after the RunLoop completes (using SC.beginRunL
 		
 		//since binding has not taken into effect the value still remains as change.
 		equals(second.get("output"), "first") ;
-	SC.endRunLoop; // allows bindings to trigger...
-	SC.Binding.flushPendingChanges() ; // actually sets up the connection
+	SC.RunLoop.end(); // allows bindings to trigger...
 	
 	//Value of the output variable changed to 'change'
 	equals(first.get("output"), "change") ;
