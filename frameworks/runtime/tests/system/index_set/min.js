@@ -1,12 +1,14 @@
-
-plan.run();
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Apple Inc. and contributors.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test equals context ok same notest */
+/*global module test equals context ok same notest plan */
+
+"import core_test:package";
+"import package";
+
 
 module("SC.IndexSet#min");
 

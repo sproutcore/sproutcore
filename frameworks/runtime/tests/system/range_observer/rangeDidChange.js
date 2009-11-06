@@ -6,6 +6,9 @@
 
 /*global module test equals context ok same notest */
 
+"import core_test:package";
+"import package";
+
 var source, indexes, observer, obj ; // base array to work with
 module("SC.RangeObserver#rangeDidChange", {
   setup: function() {
@@ -35,7 +38,7 @@ module("SC.RangeObserver#rangeDidChange", {
           if (this.indexes) {
             ok(this.indexes.isEqual(inIndexes), 'passed indexes should be %@.  actual: %@'.fmt(this.indexes, inIndexes));
           } else if (this.indexes === null) {
-            equals(inIndexes, null, 'passed indexes should be null');
+            equals(inIndexes, undefined, 'passed indexes should be undefined'); 
           }
           
           equals(inContext, 'context', 'should pass context');

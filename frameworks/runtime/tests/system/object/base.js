@@ -3,6 +3,9 @@
 // ========================================================================
 /*globals module test ok isObj equals expects same plan */
 
+"import core_test:package";
+"import package";
+
 var obj, obj1, don, don1 ; // global variables
 
 module("A new SC.Object instance", {
@@ -148,3 +151,4 @@ test("subclasses should contain defined subclasses", function() {
 });
 
 plan.run();
+

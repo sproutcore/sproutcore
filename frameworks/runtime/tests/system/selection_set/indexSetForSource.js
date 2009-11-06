@@ -3,6 +3,10 @@
 // Copyright: ©2006-2009 Apple Inc. and contributors.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
+/*globals plan */
+
+"import core_test:package";
+"import package";
 
 var set, array, array2;
 module("SC.SelectionSet#indexSetForSource", {

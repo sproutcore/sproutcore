@@ -3,6 +3,9 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+"import core_test:package";
+"import package";
+
 module("SC.ERROR");
 
 test("SC.Error.desc creates an error instance with description,label and code", function() {
@@ -42,7 +45,7 @@ test("SC.$val should return the error value if it has one", function() {
   equals(SC.val(undefined), undefined, '$ok(undefined) should be YES');
   equals(SC.val("foo"), "foo", 'val(foo) should be YES');
   equals(SC.val(SC.$error("foo", "FOO", "BAZ")), "BAZ", 'val(SC.Error) should be BAZ');
-  equals(SC.val(SC.$error("foo", "FOO")), undefined, 'val(SC.Error) should be undefined');
+  equals(SC.val(SC.$error("foo", "FOO")), null, 'val(SC.Error) should be undefined');
   equals(SC.val(new SC.Error()), null, 'val(Error) should be null');
   equals(SC.val(SC.Object.create({ isError: YES, errorValue: "BAR" })), "BAR", 'val({ isError: YES, errorValue: BAR }) should be BAR');
 });

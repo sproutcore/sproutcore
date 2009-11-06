@@ -8,6 +8,7 @@
 "import system/binding";
 "import system/object";
 "import system/run_loop";
+"import tiki/system:package as system";
 
 var fromObject, toObject, binding, Bon1, bon2 ; // global variables
 
@@ -20,7 +21,7 @@ module("basic object binding", {
     SC.Binding.flushPendingChanges() ; // actually sets up up the connection
   }
 });
-  
+   
 test("binding is connected", function() {
   equals(binding.isConnected, YES, "binding.isConnected") ;
 });
@@ -238,13 +239,13 @@ test("two bindings to the same value should sync in the order they are initializ
 
   SC.RunLoop.begin();
 
-  window.a = SC.Object.create({ 
+  system.global.a = SC.Object.create({ 
     foo: "bar" 
   });
   
-  var a = window.a;
+  var a = system.global.a;
   
-  window.b = SC.Object.create({ 
+  system.global.b = SC.Object.create({ 
     foo: "baz",
     fooBinding: "a.foo",
     
@@ -260,7 +261,7 @@ test("two bindings to the same value should sync in the order they are initializ
     
   });
   
-  var b = window.b;
+  var b = system.global.b;
 
   SC.LOG_BINDINGS = YES;
     
@@ -270,7 +271,7 @@ test("two bindings to the same value should sync in the order they are initializ
   equals(b.get('foo'), "bar", 'a.foo should propogate up to b.foo');
   equals(b.c.get('foo'), "bar", 'a.foo should propogate up to b.c.foo');
   
-  window.a = window.b = null ;
+  system.global.a = system.global.b = null ;
   
 });
 
