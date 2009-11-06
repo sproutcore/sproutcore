@@ -1,3 +1,11 @@
+// ========================================================================
+// SC.isEqual Tests
+// ========================================================================
+/*globals module test */
+
+"import core_test:package core";
+"import system/object";
+
 var object;
 module("item type", {
   setup: function() {
@@ -37,3 +45,5 @@ test("should return true for null and undefined ",function(){
 	equals(YES,SC.none(a),"for a null parameter passed  ");
 	equals(YES,SC.none(b),"for a undefined parameter passed ");
 });
+
+plan.run();

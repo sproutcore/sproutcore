@@ -3,6 +3,7 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+"import core_test:package core";
 
 module("Console object");
 
@@ -14,3 +15,4 @@ test("The console object should be defined for all browsers and work if supporte
   console.error("Console.error is working");
 });
 
+plan.run();

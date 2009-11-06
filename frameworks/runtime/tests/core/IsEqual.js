@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test */
 
+"import core_test:package core";
+
 var StringA, StringB, StringC;
 
 module("String's - isEqual", {
@@ -55,6 +57,4 @@ test("array should be equal  ",function(){
 	equals(SC.isEqual(objectA,objectC),false, 'two array instances with different values should not be equal');
 });	
 
-
-
-	
+plan.run();

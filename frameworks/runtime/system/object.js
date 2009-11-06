@@ -5,12 +5,10 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('core') ;
-sc_require('mixins/observable') ;
-sc_require('mixins/array') ;
-sc_require('system/set');
-
-/*globals $$sel */
+"import core";
+"import mixins/observable";
+"import system/set";
+"export package";
 
 SC.BENCHMARK_OBJECTS = NO;
 
@@ -37,7 +35,7 @@ SC.BENCHMARK_OBJECTS = NO;
 */
 SC._object_extend = function _object_extend(base, ext) {
   if (!ext) throw "SC.Object.extend expects a non-null value.  Did you forget to 'sc_require' something?  Or were you passing a Protocol to extend() as if it were a mixin?";
-
+  
   // set _kvo_cloned for later use
   base._kvo_cloned = null;
 

@@ -5,10 +5,12 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('mixins/enumerable') ;
-sc_require('mixins/observable') ;
-sc_require('mixins/freezable');
-sc_require('mixins/copyable');
+"import core";
+"import mixins/enumerable";
+"import mixins/copyable";
+"import mixins/freezable";
+"import mixins/observable";
+"export package";
 
 // IMPORTANT NOTE:  This file actually defines two classes: 
 // SC.Set is a fully observable set class documented below. 

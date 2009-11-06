@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+"import core_test:package core";
+
 var objectA, objectB , arrayA, stringA; // global variables
 
 module("Beget function Module", {
@@ -21,3 +23,4 @@ test("should return a new object with same prototype as that of passed object", 
 	equals(YES, SC.beget(arrayA) !== arrayA, "Beget for an array") ;
 });
 
+plan.run();

@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test */
 
+"import core_test:package core";
+
 var objectA,objectB,objectC, objectD, objectE; //global variables
 
 module("Array Check" , {
@@ -23,3 +25,5 @@ test("should check if a given object is an array or not " ,function(){
 	equals(SC.isArray(objectD),false);
 	equals(SC.isArray(objectE),false);
 });
+
+plan.run();

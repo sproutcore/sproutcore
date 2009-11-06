@@ -5,7 +5,8 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('system/object') ;
+"import core";
+"export package";
 
 /**
   Debug parameter you can turn on.  This will log all bindings that fire to

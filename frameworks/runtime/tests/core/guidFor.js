@@ -3,6 +3,8 @@
 // ========================================================================
 /*globals module test ok isObj equals expects */
 
+"import core_test:package core";
+
 var objectA, objectB ; // global variables
 
 module("Object", {
@@ -147,3 +149,5 @@ test("two instances with different value should have different guid", function()
 test("guid should not parse to a number", function() {
   equals(YES, isNaN(parseInt(SC.guidFor(array1), 0))) ;
 });
+
+plan.run();

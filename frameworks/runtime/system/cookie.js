@@ -1,6 +1,12 @@
 // ==========================================================================
 // SC.Cookie
+// Copyright: ©2009 Sprout Systems, Inc. and contributors.
+// License:   Licened under MIT license (see license.js)
 // ==========================================================================
+
+"import core";
+"import system/object";
+"export package";
 
 /** @class
   

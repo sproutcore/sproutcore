@@ -5,6 +5,9 @@
 // ==========================================================================
 /*globals module ok equals same test MyApp */
 
+"import core_test:package core";
+"import system/object";
+
 // test parsing of query string
 var v = [];
 module("SC.compare()", {
@@ -42,3 +45,4 @@ test("ordering should work", function() {
   }
 }); 
   
+plan.run();

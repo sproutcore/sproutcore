@@ -5,7 +5,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('private/observer_set') ;
+"import core";
+"import private/observer_set";
+"export package";
+
+var _inited = false; // see initObservable().  avoid cyclical loop
 
 /*globals logChange */
 
@@ -807,6 +811,8 @@ SC.Observable = {
   initObservable: function() {
     if (this._observableInited) return ;
     this._observableInited = YES ;
+
+    if (_inited) require('sproutcore/runtime:private/observer_queue');
     
     var loc, keys, key, value, observer, propertyPaths, propertyPathsLength ;
     
