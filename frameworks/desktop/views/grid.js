@@ -31,7 +31,7 @@ SC.GridView = SC.ListView.extend(
     width of each item will be this value.
   */
   columnWidth: 64,
-  
+
   /**
     The default example item view will render text-based items.
     
@@ -41,19 +41,13 @@ SC.GridView = SC.ListView.extend(
   
   insertionOrientation: SC.HORIZONTAL_ORIENTATION,
   
-  displayProperties: 'itemsPerRow'.w(),
-  
   /** @private */
   itemsPerRow: function() {
     var f = this.get('frame') ;
     var columnWidth = this.get('columnWidth') || 0 ;
+
     return (columnWidth <= 0) ? 1 : Math.floor(f.width / columnWidth) ;
-  }.property('frame', 'columnWidth').cacheable(),
-  
-  /** @private */
-  itemsPerRowDidChange: function() {
-    this.set('isDirty', YES) ;
-  }.observes('itemsPerRow'),
+  }.property('clippingFrame', 'columnWidth').cacheable(),
   
   /** @private
     Find the contentIndexes to display in the passed rect. Note that we 
@@ -66,14 +60,13 @@ SC.GridView = SC.ListView.extend(
     
     var min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow  ;
     var max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow ;
-    
     return SC.IndexSet.create(min, max-min);
   },
   
   /** @private */
-  layoutForContentIndex: function(contentIndex) {    
+  layoutForContentIndex: function(contentIndex) {
     var rowHeight = this.get('rowHeight') || 48 ;
-    var frameWidth = this.get('frame').width ;
+    var frameWidth = this.get('clippingFrame').width ;
     var itemsPerRow = this.get('itemsPerRow') ;
     var columnWidth = Math.floor(frameWidth/itemsPerRow);
     
@@ -197,6 +190,22 @@ SC.GridView = SC.ListView.extend(
     // convert to index
     var ret= (row*itemsPerRow) + col ;
     return [ret, retOp] ;
-  }
-  
+  },
+
+  /** @private
+    If the size of the clipping frame changes, all of the item views
+    on screen are potentially in the wrong position.  Update all of their
+    layouts if different.
+  */
+  _gv_clippingFrameDidChange: function() {
+    var nowShowing = this.get('nowShowing'), itemView, idx, len;
+    this.notifyPropertyChange('itemsPerRow');
+
+    len = nowShowing.get('length');
+
+    for (idx=0; idx < len; idx++) {
+      itemView = this.itemViewForContentIndex(idx);
+      itemView.adjust(this.layoutForContentIndex(idx));
+    }
+  }.observes('clippingFrame')
 }) ;
