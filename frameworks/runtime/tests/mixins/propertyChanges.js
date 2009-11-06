@@ -1,3 +1,16 @@
+// ==========================================================================
+// Project:   SproutCore - JavaScript Application Framework
+// Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
+//            portions copyright @2009 Apple Inc.
+// License:   Licened under MIT license (see license.js)
+// ==========================================================================
+
+/*globals module test ok equals same plan */
+
+"import core_test:package";
+"import core";
+"import system/object";
+
 var ObjectA;
 module("object.propertyChanges()", {	
 	setup: function() {
@@ -79,3 +92,4 @@ test("should notify all observers that their property might have changed", funct
 	equals(ObjectA.normal2,'newZeroValue') ;
 });
 
+plan.run();

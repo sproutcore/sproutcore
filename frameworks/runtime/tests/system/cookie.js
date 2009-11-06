@@ -1,8 +1,13 @@
 // ==========================================================================
 // SC.Cookie Unit Test
 // ==========================================================================
-
 /*globals module test equals */
+
+"import core_test:package";
+"import core";
+"import system/cookie";
+"import system/object";
+"import system/logger";
 
 var setCookies = ['cookie', 'cookie2', 'cookie-hashincreate', 'cookie-usingset', 'cookie-2-1', 'cookie-2-2', 'cookie-2-3', 'cookie-expires', 'cookie-destroy', 'cookie-find'];
 eraseCookies();
@@ -161,3 +166,5 @@ test("find", function() {
   
   setCookies = ["cookie-find"];
 });
+
+plan.run();

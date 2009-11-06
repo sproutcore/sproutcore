@@ -5,7 +5,13 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/*globals module test ok equals same */
+/*globals module test ok equals same plan */
+
+"import core_test:package";
+"import core";
+"import system/object";
+"import mixins/observable";
+"import mixins/enumerable mixins/array";
 
 var object ;
 
@@ -77,3 +83,5 @@ test("should indicate the registered property changes if the dependent key value
   // fullName should fire.
   equals(object.get('observedValue'), 'Jane Johnson');
 });
+
+plan.run();

@@ -187,3 +187,5 @@ test("remove() raises exception when frozen", function() {
     set.freeze().remove(0,2);    
   }, SC.FROZEN_ERROR);  
 });
+
+plan.run();

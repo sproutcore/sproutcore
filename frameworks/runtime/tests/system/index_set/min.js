@@ -1,3 +1,5 @@
+
+plan.run();
 // ==========================================================================
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Apple Inc. and contributors.
@@ -38,3 +40,5 @@ test("after removing all ranges", function() {
   equals(set.get('min'), -1, 'min should be back to -1 with no content');
 });
 
+
+plan.run();

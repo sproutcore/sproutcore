@@ -163,3 +163,5 @@ test("_argumentsToString", function() {
   SC.LOGGER_LOG_DELIMITER = "|";
   equals(SC.Logger._argumentsToString.apply(SC.Logger, ["test", "test2"]), "test|test2", "Formatting using custom delimiter");
 });
+
+plan.run();

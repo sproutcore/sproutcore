@@ -146,3 +146,5 @@ test("subclasses should contain defined subclasses", function() {
   var kls2 = obj1.extend();
   ok(obj1.subclasses.contains(kls2), 'obj1.subclasses should contain kls2');
 });
+
+plan.run();

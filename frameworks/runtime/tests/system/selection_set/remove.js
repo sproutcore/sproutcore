@@ -109,3 +109,5 @@ test("removing index set should also remove individually added objects", functio
   equals(set.get('length'), 2, 'set.length should == 1 object + index.length');
 });
 
+
+plan.run();

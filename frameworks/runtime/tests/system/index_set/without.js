@@ -87,3 +87,5 @@ test("passing range object should remove range", function() {
   same(iter(ret), [1,8,9]);
 });
 
+
+plan.run();

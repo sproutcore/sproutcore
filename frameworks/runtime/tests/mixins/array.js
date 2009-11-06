@@ -6,6 +6,11 @@
 // ==========================================================================
 
 // Unit test some standard SC.Array implementations.
+"import core_test:package";
+"import core";
+"import debug/test_suites/array";
+"import system/object";
+"import mixins/array";
 
 // ..........................................................
 // BUILT-IN ARRAY
@@ -55,3 +60,4 @@ SC.ArraySuite.generate("DummyArray", {
   }
 });
 
+plan.run();

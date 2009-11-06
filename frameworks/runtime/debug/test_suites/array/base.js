@@ -7,6 +7,9 @@
 
 /*globals module test ok equals same CoreTest */
 
+"import core";
+"import core_test:package";
+
 /**
   Adds a new module of unit tests to verify that the passed object implements
   the SC.Array interface.  To generate, call the ArrayTests array with a 

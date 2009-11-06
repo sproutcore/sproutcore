@@ -3,6 +3,14 @@
 // ========================================================================
 /*globals module test ok isObj equals expects Namespace */
 
+"import core_test:package";
+"import core";
+"import system/object";
+"import mixins/observable";
+
+// used in testing method
+"import mixins/enumerable mixins/array system/run_loop system/binding";
+
 var object, ObjectC, ObjectD, objectA, objectB ;
 
 // ..........................................................
@@ -583,5 +591,7 @@ test("changing chained observer object to null should not raise exception", func
 
   //debugger ;
   equals(callCount, 1, 'changing bar should trigger observer');
-  expect(3);
 });
+
+plan.run();
+

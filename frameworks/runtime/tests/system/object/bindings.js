@@ -340,3 +340,5 @@ test("fooBinding: SC.Binding.not(TestNamespace.fromObject.bar should override de
   SC.Binding.flushPendingChanges();
   equals(YES, testObject.get("foo"), "testObject.foo == YES");
 });
+
+plan.run();

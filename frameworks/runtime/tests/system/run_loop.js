@@ -118,3 +118,6 @@ test("Should propograte bindings after the RunLoop completes (checking invokeOnc
 	equals(second.get("output"), "change") ;
 	
 }); 
+
+
+plan.run();

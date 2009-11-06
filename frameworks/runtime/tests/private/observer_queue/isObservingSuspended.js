@@ -5,6 +5,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"import core_test:package";
+"import core"; 
+"import private/observer_queue";
+"import system/object";
+
 var callCount, obj;
 
 module("SC.Observers.isObservingSuspended", {
@@ -53,3 +58,5 @@ test("suspended notifications should work when nesting property change groups", 
   SC.Observers.resumePropertyObserving();
   equals(callCount, 1, 'should notify observer when resumed');
 });
+
+plan.run();

@@ -5,6 +5,11 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+"import core_test:package";
+"import core";
+"import system/object";
+"import mixins/comparable";
+
 /*globals module test ok isObj equals expects */
 
 var Rectangle = SC.Object.extend({
@@ -42,3 +47,5 @@ test("should be comparable and return the correct result", function() {
   equals(SC.compare(r1, r2), -1);
   equals(SC.compare(r2, r1), 1);
 });
+
+plan.run();

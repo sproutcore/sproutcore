@@ -290,3 +290,5 @@ test("the clone() should return an indentical set", function() {
 	equals(YES,obj.contains(set[3]));
 	equals(YES,obj.contains(set[4]));
 });
+
+plan.run();

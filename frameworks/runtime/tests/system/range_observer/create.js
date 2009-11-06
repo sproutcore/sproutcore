@@ -57,3 +57,5 @@ test("does not observe object properties if isDeep is NO", function() {
   }
   equals(observer.callCount, 0, 'range observer should not fire');
 });
+
+plan.run();

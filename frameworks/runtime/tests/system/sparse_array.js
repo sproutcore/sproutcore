@@ -192,3 +192,5 @@ SC.ArraySuite.generate("SC.SparseArray", {
     return SC.SparseArray.create({ delegate: del });
   }
 });
+
+plan.run();
