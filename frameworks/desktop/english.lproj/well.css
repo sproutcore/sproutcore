@@ -1,0 +1,72 @@
+.sc-well-view .top-right-edge {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  top: 0px;
+  right: 0px;
+}
+
+.sc-well-view .top-left-edge {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  top: 0px;
+  left: 0px;
+}
+
+.sc-well-view .bottom-left-edge {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  bottom: 0px;
+  left: 0px;
+}
+
+.sc-well-view .bottom-right-edge {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  bottom: 0px;
+  right: 0px;
+}
+
+.sc-well-view .top-edge {
+  position: absolute;
+  height: 5px;
+  top: 0px;
+  right: 7px;
+  left: 7px;
+}
+
+.sc-well-view .bottom-edge {
+  position: absolute;
+  height: 5px;
+  bottom: 0px;
+  right: 7px;
+  left: 7px;
+}
+
+.sc-well-view .left-edge {
+  position: absolute;
+  width: 7px;
+  top: 7px;
+  bottom: 7px;
+  left: 0px;
+}
+
+.sc-well-view .right-edge {
+  position: absolute;
+  width: 7px;
+  top: 7px;
+  bottom: 7px;
+  right: 0px;
+}
+
+.sc-well-view .content-background {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  right: 7px;
+  left: 7px;
+  z-index:-1;
+}
