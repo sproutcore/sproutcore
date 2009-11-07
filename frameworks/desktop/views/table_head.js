@@ -125,8 +125,6 @@ SC.TableHeadView = SC.View.extend({
   },
   
   _scthv_handleChildren: function() {
-    // this.removeAllChildren();
-    // debugger;
     var columns = this.get('columns');
     var tableView = this.get('parentView');
     var tableContent = tableView.get('content');
@@ -139,8 +137,6 @@ SC.TableHeadView = SC.View.extend({
       content = this._scthv_columnContentFromTableContent(tableContent, idx);
       cell   = this._scthv_createTableHeader(column, label, content, idx);
       cells.push(cell);
-      // this.appendChild(cell);
-      console.log("Adding %@ column", key);
     }
     this.set('cells', cells);
     if (cells.length > 0)
