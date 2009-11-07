@@ -20,8 +20,11 @@ config :all,
 # off in your project buildfile by referencing sproutcore specifically
 mode :debug do
   config :all, 
-    :combine_javascript => true,
+    :combine_javascript => false,
     :combine_stylesheet => true
+    
+  config :runtime, :combine_javascript => true, :minify_javascript => true
+  
 end
 
 # CORE FRAMEWORKS
@@ -36,6 +39,13 @@ config :runtime,
   :test_required => ['core_test'],
   :use_modules => true,
   :factory_format => :function
+  
+# config :datastore,
+#   :required       => ['tiki/system', :runtime],
+#   :debug_required => [],
+#   :test_required  => ['core_test'],
+#   :use_modules    => true,
+#   :factory_format => :function
   
 config :foundation, :required => [:runtime]
 config :datastore,  :required => [:runtime]
