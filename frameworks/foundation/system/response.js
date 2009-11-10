@@ -135,14 +135,24 @@ SC.Response = SC.Object.extend(
   encodedBody: null,
   
   /**
-    Response body.  If isJSON was set, will be parsed automatically.
+    Response body. If isJSON was set, will be parsed automatically.
     
-    @property {Hash|String}
+    @response {Hash|String|SC.Error} the response body or the parsed JSON.
+      Returns a SC.Error instance if there is a JSON parsing error.
   */
   body: function() {
     // TODO: support XML
     var ret = this.get('encodedBody');
-    if (ret && this.get('isJSON') && !ret.match(/^\s*$/)) ret = SC.json.decode(ret);
+    if (ret && this.get('isJSON')) {
+      try {
+        ret = SC.json.decode(ret);
+      } catch(e) {
+        return SC.Error.create({
+          message: e.name + ': ' + e.message,
+          label: 'Response',
+          errorValue: this });
+      }
+    }
     return ret;
   }.property('encodedBody').cacheable(),
   

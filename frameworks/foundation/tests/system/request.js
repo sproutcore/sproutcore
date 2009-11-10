@@ -83,6 +83,33 @@ test("Test Asynchronous GET Request, auto-deserializing JSON", function() {
 
 });
 
+test("Test auto-deserializing malformed JSON", function() {
+  request = SC.Request.getUrl(sc_static('malformed.json')).set('isJSON', YES);
+
+  var timer = setTimeout(function() {
+    ok(false, 'response did not invoke notify()');
+    window.start();
+  }, 1000);
+  
+  request.notify(this, function(response) {
+    ok(SC.ok(response), 'response should not be error');
+    
+    try {
+      var body = response.get('body');
+      ok(!SC.ok(body), 'body should be an error');
+    } catch(e) {
+      ok(false, 'getting the body should not throw an exception');
+    }
+    
+    clearTimeout(timer);
+    window.start();
+  });
+  
+  request.send();
+
+  stop();
+});
+
 test("Test Synchronous GET Request, auto-deserializing JSON", function() {
   request.set("isAsynchronous", false);
   request.set("isJSON", true);
