@@ -32,9 +32,9 @@ SC.Event = function(originalEvent) {
   // copy properties from original event, if passed in.
   if (originalEvent) {
     this.originalEvent = originalEvent ;
-    var props = SC.Event._props, len = props.length, idx = len ;
+    var props = SC.Event._props, len = props.length, idx = len , key;
     while(--idx >= 0) {
-      var key = props[idx] ;
+      key = props[idx] ;
       this[key] = originalEvent[key] ;
     }
   }
@@ -207,8 +207,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Get the handlers queue for this element/eventType.  If the queue does
     // not exist yet, create it and also setup the shared listener for this
     // eventType.
-    var events = SC.data(elem, "events") || SC.data(elem, "events", {}) ;
-    var handlers = events[eventType]; 
+    var events = SC.data(elem, "events") || SC.data(elem, "events", {}) ,
+        handlers = events[eventType]; 
     if (!handlers) {
       handlers = events[eventType] = {} ;
       this._addEventListener(elem, eventType) ;
@@ -399,10 +399,11 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     // Normalize to an array
     args = SC.A(args) ;
 
-    var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION ;
+    var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION , 
+        event, current, onfoo;
 
     // Get the event to pass, creating a fake one if necessary
-    var event = args[0];
+    event = args[0];
     if (!event || !event.preventDefault) {
       event = this.simulateEvent(elem, eventType) ;
       args.unshift(event) ;
@@ -411,7 +412,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     event.type = eventType ;
     
     // Trigger the event - bubble if enabled
-    var current = elem;
+    current = elem;
     do {
       ret = SC.Event.handle.apply(current, args);
       current = (current===document) ? null : (current.parentNode || document);
@@ -419,8 +420,8 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     current = null ;
 
     // Handle triggering native .onfoo handlers
-    var onfoo = elem["on" + eventType] ;
-    var isClick = SC.CoreQuery.nodeName(elem, 'a') && eventType === 'click';
+    onfoo = elem["on" + eventType] ;
+    isClick = SC.CoreQuery.nodeName(elem, 'a') && eventType === 'click';
     if ((!fn || isClick) && onfoo && onfoo.apply(elem, args) === NO) ret = NO;
 
     // Trigger the native events (except for clicks on links)
@@ -459,7 +460,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if ((typeof SC === "undefined") || SC.Event.triggered) return YES ;
     
     // returned undefined or NO
-    var val, ret, namespace, all, handlers, args;
+    var val, ret, namespace, all, handlers, args, key, handler, method, target;
 
     // normalize event across browsers.  The new event will actually wrap the
     // real event with a normalized API.
@@ -471,16 +472,16 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (!handlers) return NO ; // nothing to do
     
     // invoke all handlers
-    for (var key in handlers ) {
-      var handler = handlers[key];
-      var method = handler[1] ;
+    for (key in handlers ) {
+      handler = handlers[key];
+      method = handler[1] ;
 
       // Pass in a reference to the handler function itself
       // So that we can later remove it
       event.handler = method;
       event.data = event.context = handler[2];
 
-      var target = handler[0] || this ;
+      target = handler[0] || this ;
       ret = method.apply( target, args );
       
       if (val !== NO) val = ret;

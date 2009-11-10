@@ -49,8 +49,8 @@ SC.Cursor = SC.Object.extend(
     sc_super() ;
     
     // create a unique style rule and add it to the shared cursor style sheet
-    var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ;
-    var ss = this.constructor.sharedStyleSheet() ;
+    var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ,
+        ss = this.constructor.sharedStyleSheet() ;
     
     if (ss.insertRule) { // WC3
       ss.insertRule(
@@ -83,20 +83,21 @@ SC.Cursor = SC.Object.extend(
   
   /** @private */
   cursorStyleDidChange: function() {
-    var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ;
-    var rule = this._rule ;
+    var cursorStyle, rule, selector, ss, rules, idx, len;
+    cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR;
+    rule = this._rule;
     if (rule) {
       rule.style.cursor = cursorStyle ; // fast path
       return ;
     }
     
     // slow path, taken only once
-    var selector = '.'+this.get('className') ;
-    var ss = this.constructor.sharedStyleSheet() ;
-    var rules = (ss.cssRules ? ss.cssRules : ss.rules) || [] ;
+    selector = '.'+this.get('className') ;
+    ss = this.constructor.sharedStyleSheet() ;
+    rules = (ss.cssRules ? ss.cssRules : ss.rules) || [] ;
     
     // find our rule, cache it, and update the cursor style property
-    for (var idx=0, len = rules.length; idx<len; ++idx) {
+    for (idx=0, len = rules.length; idx<len; ++idx) {
       rule = rules[idx] ;
       if (rule.selectorText === selector) {
         this._rule = rule ; // cache for next time
@@ -112,12 +113,12 @@ SC.Cursor = SC.Object.extend(
 
 /** @private */
 SC.Cursor.sharedStyleSheet = function() {
-  var ss = this._styleSheet ;
+  var head, ss = this._styleSheet ;
   if (!ss) {
     // create the stylesheet object the hard way (works everywhere)
     ss = document.createElement('style') ;
     ss.type = 'text/css' ;
-    var head = document.getElementsByTagName('head')[0] ;
+    head = document.getElementsByTagName('head')[0] ;
     if (!head) head = document.documentElement ; // fix for Opera
     head.appendChild(ss) ;
     
