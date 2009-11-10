@@ -16,68 +16,7 @@ SC.mixin({
   _bindReady: function() {
     if (this._isReadyBound) return;
     this._isReadyBound = YES ;
-
-    // Mozilla, Opera (see further below for it) and webkit nightlies 
-    // currently support this event.  Use the handy event callback
-    if ( document.addEventListener && !SC.browser.opera) {
-      document.addEventListener( "DOMContentLoaded", SC._didBecomeReady, NO );
-    }
-
-    // If IE is used and is not in a frame
-    // Continually check to see if the document is ready
-    if (SC.browser.msie && (window === top)) {
-      (function() {
-        if (SC.isReady) return;
-        try {
-          // If IE is used, use the trick by Diego Perini
-          // http://javascript.nwbox.com/IEContentLoaded/
-          document.documentElement.doScroll("left");
-        } catch( error ) {
-          setTimeout( arguments.callee, 0 );
-          return;
-        }
-        // and execute any waiting functions
-        SC._didBecomeReady();
-      })();
-    }
-
-    if ( SC.browser.opera ) {
-      document.addEventListener( "DOMContentLoaded", function () {
-        if (SC.isReady) return;
-        for (var i = 0; i < document.styleSheets.length; i++) {
-          if (document.styleSheets[i].disabled) {
-            setTimeout( arguments.callee, 0 );
-            return;
-          }
-        }
-        // and execute any waiting functions
-        SC._didBecomeReady();
-      }, NO);
-    }
-
-    if (SC.browser.safari && SC.browser.safari < 530.0 ) {
-      console.error("ready() is not yet supported on Safari 3.1 and earlier");
-      // TODO: implement ready() in < Safari 4 
-      // var numStyles;
-      // (function(){
-      //   if (SC.isReady) return;
-      //   if ( document.readyState != "loaded" && document.readyState != "complete" ) {
-      //     setTimeout( arguments.callee, 0 );
-      //     return;
-      //   }
-      //   if ( numStyles === undefined ) numStyles = 0 ;
-      //     //numStyles = SC.$("style, link[rel=stylesheet]").length;
-      //   if ( document.styleSheets.length != numStyles ) {
-      //     setTimeout( arguments.callee, 0 );
-      //     return;
-      //   }
-      //   // and execute any waiting functions
-      //   SC._didBecomeReady();
-      // })();
-    }
-
-    // A fallback to window.onload, that will always work
-    SC.Event.add( window, "load", SC._didBecomeReady);
+    tiki.require('system').ready(this, this._didBecomeReady); 
   },
 
   /** @private handlers scheduled to execute on ready. */
