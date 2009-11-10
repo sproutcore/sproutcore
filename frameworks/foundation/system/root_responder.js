@@ -149,7 +149,7 @@ SC.RootResponder = SC.Object.extend({
         // the top of the stack and make the specified pane the new keyPane.
         // First, though, do a sanity-check to make sure it's not already the
         // key pane, in which case we have nothing to do.
-        var previousKeyPane = this.get('keyPane') ;
+        previousKeyPane = this.get('keyPane') ;
         if (previousKeyPane === pane) {
           return this ;
         }
@@ -172,7 +172,7 @@ SC.RootResponder = SC.Object.extend({
       previousKeyPane = this.get('keyPane') ;
       previousKeyPanes = this.get('previousKeyPanes') ;
   
-      var newKeyPane = null ;
+      newKeyPane = null ;
       while (previousKeyPanes.length > 0) {
         var candidate = previousKeyPanes.pop();
         if (candidate.get('isPaneAttached')  &&  candidate.get('acceptsKeyPane')) {

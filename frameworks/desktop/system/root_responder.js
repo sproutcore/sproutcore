@@ -67,9 +67,9 @@ SC.RootResponder = SC.RootResponder.extend(
     @returns {SC.RootResponder} receiver
   */
   orderBefore: function(pane, beforePane) {
-    var currentFocus = this.get('focusedPane');
-    var panes = this.get('orderedPanes').without(pane);
-    var len, idx, currentOrder, newFocus ;
+    var currentFocus = this.get('focusedPane'),
+        panes = this.get('orderedPanes').without(pane),
+        len, idx, currentOrder, newFocus ;
 
     // adjust the beforePane to match orderLayer
     var orderLayer = pane.get('orderLayer');
@@ -396,7 +396,7 @@ SC.RootResponder = SC.RootResponder.extend(
     // This code is to check for the simulated keypressed event
     if(!evt.kindOf) this._ffevt=null;
     else evt=this._ffevt;
-    if (evt == null) return YES;
+    if (SC.none(evt)) return YES;
     
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla && (evt.which === 8)) return true ;
@@ -404,9 +404,9 @@ SC.RootResponder = SC.RootResponder.extend(
     // modifier keys are handled separately by the 'flagsChanged' event
     // send event for modifier key changes, but only stop processing if this 
     // is only a modifier change
-    var ret = this._handleModifierChanges(evt);
-    var target = evt.target || evt.srcElement;
-    var forceBlock = (evt.which === 8) && !SC.allowsBackspaceToPreviousPage && (target === document.body);
+    var ret = this._handleModifierChanges(evt),
+        target = evt.target || evt.srcElement,
+        forceBlock = (evt.which === 8) && !SC.allowsBackspaceToPreviousPage && (target === document.body);
     
     if (this._isModifierKey(evt)) return (forceBlock ? NO : ret);
     
@@ -491,12 +491,11 @@ SC.RootResponder = SC.RootResponder.extend(
       }
       evt.clickCount = this._clickCount ;
       
-      var view = this.targetViewForEvent(evt) ;
+      var fr, view = this.targetViewForEvent(evt) ;
       // InlineTextField needs to loose firstResponder whenever you click outside
       // the view. This is a special case as textfields are not supposed to loose 
       // focus unless you click on a list, another textfield or an special
       // view/control.
-      var fr=null;
       if(view) fr=view.get('pane').get('firstResponder');
       
       if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
@@ -587,8 +586,8 @@ SC.RootResponder = SC.RootResponder.extend(
   
   mousewheel: function(evt) {
     try {
-      var view = this.targetViewForEvent(evt) ;
-      var handler = this.sendEvent('mouseWheel', evt, view) ;
+      var view = this.targetViewForEvent(evt) ,
+          handler = this.sendEvent('mouseWheel', evt, view) ;
     } catch (e) {
       throw e;
     }
@@ -607,13 +606,19 @@ SC.RootResponder = SC.RootResponder.extend(
    trigger calls to mouseDragged.
   */
   mousemove: function(evt) {
+    if(SC.browser.msie){
+      if(this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
+      else {
+        this._lastMoveX = evt.clientX;
+        this._lastMoveY = evt.clientY;
+      }
+    }
+    
     SC.RunLoop.begin();
     try {
-      
       // make sure the view gets focus no matter what.  FF is inconsistant 
       // about this.
       this.focus();
-      
       // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
       // drags send their own events, e.g. drag[Moved|Entered|Exited]
       if (this._drag) {
@@ -627,11 +632,8 @@ SC.RootResponder = SC.RootResponder.extend(
           this._drag.tryToPerform('mouseDragged', evt);
         }
       } else {
-        
-        var lh = this._lastHovered || [] ;
-        var nh = [] ;
-        var view = this.targetViewForEvent(evt) ;
-        var exited;
+        var lh = this._lastHovered || [] , nh = [] , exited, loc, len, 
+            view = this.targetViewForEvent(evt) ;
         
         // work up the view chain.  Notify of mouse entered and
         // mouseMoved if implemented.
@@ -648,7 +650,7 @@ SC.RootResponder = SC.RootResponder.extend(
         }
         // now find those views last hovered over that were no longer found 
         // in this chain and notify of mouseExited.
-        for(var loc=0, len=lh.length; loc < len; loc++) {
+        for(loc=0, len=lh.length; loc < len; loc++) {
           view = lh[loc] ;
           exited = view.respondsTo('mouseExited') ;
           if (exited && !(nh.indexOf(view) !== -1)) {
