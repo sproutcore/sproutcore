@@ -36,7 +36,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
 
       var blank = SC.BLANK_IMAGE_URL;
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
-      context.attr('for', SC.guidFor(this));
+      if(SC.browser.msie) context.attr('for', SC.guidFor(this));
       context.push('<span class="button" ></span>');
       context.push('<input type="checkbox" id="%@" name="%@" %@ />'.fmt(SC.guidFor(this),SC.guidFor(this),disabled));
       if(this.get('needsEllipsis')){
