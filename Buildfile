@@ -22,8 +22,6 @@ mode :debug do
   config :all, 
     :combine_javascript => false,
     :combine_stylesheet => true
-    
-  config :runtime, :combine_javascript => true, :minify_javascript => true
   
 end
 
