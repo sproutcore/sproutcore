@@ -396,9 +396,8 @@ SC.RootResponder = SC.RootResponder.extend(
     // This code is to check for the simulated keypressed event
     if(!evt.kindOf) this._ffevt=null;
     else evt=this._ffevt;
-
-    if (SC.none(evt)) return YES;    
-
+    if (SC.none(evt)) return YES;
+    
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla && (evt.which === 8)) return true ;
     
