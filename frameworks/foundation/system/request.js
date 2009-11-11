@@ -370,7 +370,7 @@ SC.Request.mixin(/** @scope SC.Request */ {
     @returns {SC.Request} receiver
   */
   getUrl: function(address) {
-    return SC.Request.create().set('address', address).set('type', 'GET');
+    return this.create().set('address', address).set('type', 'GET');
   },
 
   /**
@@ -381,7 +381,7 @@ SC.Request.mixin(/** @scope SC.Request */ {
     @returns {SC.Request} receiver
   */
   postUrl: function(address, body) {
-    var req = SC.Request.create().set('address', address).set('type', 'POST');
+    var req = this.create().set('address', address).set('type', 'POST');
     if(body) req.set('body', body) ;
     return req ;
   },
@@ -393,7 +393,7 @@ SC.Request.mixin(/** @scope SC.Request */ {
     @returns {SC.Request} receiver
   */
   deleteUrl: function(address) {
-    return SC.Request.create().set('address', address).set('type', 'DELETE');
+    return this.create().set('address', address).set('type', 'DELETE');
   },
 
   /**
@@ -404,7 +404,7 @@ SC.Request.mixin(/** @scope SC.Request */ {
     @returns {SC.Request} receiver
   */
   putUrl: function(address, body) {
-    var req = SC.Request.create().set('address', address).set('type', 'PUT');
+    var req = this.create().set('address', address).set('type', 'PUT');
     if(body) req.set('body', body) ;
     return req ;
   }
