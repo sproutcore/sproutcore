@@ -12,7 +12,11 @@ SC.mixin( /** @scope SC */ {
 
   _downloadFrames: 0, // count of download frames inserted into document
   
-  _copy_computed_props: ["maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom", "fontFamily", "fontSize", "fontStyle", "fontWeight"],
+  _copy_computed_props: [
+    "maxWidth", "maxHeight", "paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
+    "fontFamily", "fontSize", "fontStyle", "fontWeight", "fontVariant", "lineHeight",
+    "whiteSpace"
+  ],
   
   /**
     Starts a download of the file at the named path.
@@ -328,6 +332,21 @@ SC.mixin( /** @scope SC */ {
         for (var i = 0; i < props.length; i++) {
           var prop = props[i], val = computed[prop];
           element.style[prop] = val;
+        }
+        
+        // and why does firefox specifically need "font" set?
+        var cs = element.style; // cached style
+        if (cs.font === "") {
+          var font = "";
+          if (cs.fontStyle) font += cs.fontStyle + " ";
+          if (cs.fontVariant) font += cs.fontVariant + " ";
+          if (cs.fontWeight) font += cs.fontWeight + " ";
+          if (cs.fontSize) font += cs.fontSize; else font += "10px"; //force a default
+          if (cs.lineHeight) font += "/" + cs.lineHeight;
+          font += " ";
+          if (cs.fontFamily) font += cs.fontFamily; else cs += "sans-serif";
+          
+          element.style.font = font;
         }
         
         SC.mixin(element.style, {
