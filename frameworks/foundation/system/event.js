@@ -293,7 +293,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           method = target[method] ;
         }
         
-        delete events[SC.guidFor(method)] ;
+        delete handlers[SC.guidFor(method)] ;
         
         // check to see if there are handlers left on this event/eventType.
         // if not, then cleanup the handlers.
