@@ -165,14 +165,15 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   render: function(context, firstTime) {
     // add href attr if tagName is anchor...
+    var href, toolTip, classes;
     if (this.get('tagName') === 'a') {
-      var href = this.get('href');
+      href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript"+":;";
       context.attr('href', href);
     }
 
     // If there is a toolTip set, grab it and localize if necessary.
-    var toolTip = this.get('toolTip') ;
+    toolTip = this.get('toolTip') ;
     if (SC.typeOf(toolTip) === SC.T_STRING) {
       if (this.get('localize')) toolTip = toolTip.loc() ;
       context.attr('title', toolTip) ;
@@ -180,7 +181,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     }
     
     // add some standard attributes & classes.
-    var classes = this._TEMPORARY_CLASS_HASH;
+    classes = this._TEMPORARY_CLASS_HASH;
     classes.def = this.get('isDefault');
     classes.cancel = this.get('isCancel');
     classes.icon = !!this.get('icon');
@@ -188,8 +189,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       .setClass(classes).addClass(this.get('theme'));
     // render inner html 
     if(firstTime){
-      context = context.push("<span class='sc-button-inner' style = 'min-width:%@px'>"
-          .fmt(this.get('titleMinWidth')));
+       context = context.push("<span class='sc-button-inner' style = 'min-width:%@px'>"
+            .fmt(this.get('titleMinWidth')));
       this.renderTitle(context, firstTime) ; // from button mixin
       context.push("</span>") ;
     }else{
@@ -204,8 +205,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     Whenever the isDefault or isCancel property changes, update the display and change the keyEquivalent.
   */  
   _isDefaultOrCancelDidChange: function() {
-    var isDef = !!this.get('isDefault') ;
-    var isCancel = !isDef && this.get('isCancel') ;
+    var isDef = !!this.get('isDefault'),
+        isCancel = !isDef && this.get('isCancel') ;
     
     if(this.didChangeFor('defaultCancelChanged','isDefault','isCancel')) {
       this.displayDidChange() ; // make sure to update the UI
@@ -317,8 +318,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     // otherwise, just trigger an action if there is one.
     default:
       //if (this.action) this.action(evt);
-      var action = this.get('action');
-      var target = this.get('target') || null;
+      var action = this.get('action'),
+          target = this.get('target') || null;
       if (action) {
         if (this._hasLegacyActionHandler()) {
           // old school... 
@@ -371,6 +372,17 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   willLoseKeyResponderTo: function(responder) {
     if (this._isFocused) this._isFocused = NO ;
+  },
+  
+  didCreateLayer: function() {
+    //Fix for IE7 min-with bug
+    if(SC.browser.msie<8) {
+      var buttonInner = this.$('.sc-button-inner')[0];
+      if (buttonInner){
+        var mL = buttonInner.style.marginLeft;
+        this.$('.sc-button-label')[0].style.minWidth=this.get('titleMinWidth')-mL;
+      }
+    }
   }
   
 }) ;
