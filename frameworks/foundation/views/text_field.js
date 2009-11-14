@@ -624,6 +624,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
+    debugger;
     // handle return and escape.  this way they can be passed on to the
     // responder chain.
     if ((evt.which === 13) && !this.get('isTextArea')) return NO ;
@@ -675,6 +676,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       evt.stop();
       return YES;
     } else if((this.value && this.value.length===0) || !this.value) {
+      this.$input()[0].focus();
       return YES;
     } else {
       // This fixes the double click issue in firefox
