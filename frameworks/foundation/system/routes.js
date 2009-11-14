@@ -190,7 +190,7 @@ SC.routes = SC.Object.create(
   /** @private */
   init: function() {
     arguments.callee.base.call(this) ;
-    if (SC.browser.isSafari && !(SC.browser.safari >= 3)) {
+    if (SC.browser.isSafari && parseInt(SC.browser.version,0) < 417) {
       SC.mixin(this,this.browserFuncs.safari) ;  
     } else if (SC.browser.isIE) {
       SC.mixin(this,this.browserFuncs.ie) ;  
