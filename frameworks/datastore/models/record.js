@@ -458,7 +458,7 @@ SC.Record = SC.Object.extend(
 
             // computed default value
             if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
-              dataHash[key] = defaultVal();
+              dataHash[key] = defaultVal(this, key, defaultVal);
             
             // plain value
             } else {
