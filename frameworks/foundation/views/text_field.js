@@ -362,7 +362,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
       var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
-      var name = SC.guidFor(this) ;
+      var name = this.get('layerId');
       
       context.push('<span class="border"></span>');
 
