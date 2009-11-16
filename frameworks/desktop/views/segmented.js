@@ -285,13 +285,14 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         value = value.objectAt(0); isArray = NO ;
       }
       var names = {}; // reuse
-    
+      // debugger;
       var loc = items.length, cq = this.$('a.sc-segment'), item;
       while(--loc>=0) {
         item = items[loc];
         names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
         names.active = (activeIndex === loc);
-        SC.$(cq.get(loc)).setClass(names);
+        names.disabled = !item[1].isEnabled;
+        SC.$(cq[loc]).setClass(names);
       }
       names = items = value = items = null; // cleanup
     }
