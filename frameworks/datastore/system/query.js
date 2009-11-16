@@ -709,7 +709,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var all   = this.leftSide.evaluate(r,w);
                           var start = this.rightSide.evaluate(r,w);
-                          return ( all.indexOf(start) === 0 );
+                          return ( all && all.indexOf(start) === 0 );
                         }
     },
 
@@ -723,7 +723,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
-                          return ( all.indexOf(end) === (all.length - end.length) );
+                          return ( all && all.indexOf(end) === (all.length - end.length) );
                         }
     },
 
