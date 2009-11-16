@@ -624,7 +624,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
-    debugger;
     // handle return and escape.  this way they can be passed on to the
     // responder chain.
     if ((evt.which === 13) && !this.get('isTextArea')) return NO ;
