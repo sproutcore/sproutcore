@@ -477,7 +477,10 @@ SC.RootResponder = SC.RootResponder.extend(
   mousedown: function(evt) {
     try {
       // make sure the window gets focus no matter what.  FF is inconsistant 
-      // about this.
+      // about this. You have to regain focus on the window for the key events
+      // to get triggered. This happens when we don't let the browser trigger
+      // the default action and we have something in the app like an iframe.
+      window.focus();
       this.focus();
       if(SC.browser.msie) {
         this._lastMouseDownX = evt.clientX;
@@ -496,6 +499,7 @@ SC.RootResponder = SC.RootResponder.extend(
       // the view. This is a special case as textfields are not supposed to loose 
       // focus unless you click on a list, another textfield or an special
       // view/control.
+      
       if(view) fr=view.get('pane').get('firstResponder');
       
       if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
