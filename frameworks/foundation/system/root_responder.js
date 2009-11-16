@@ -187,7 +187,7 @@ SC.RootResponder = SC.Object.extend({
     // Otherwise, make the main pane the key pane (if it accepts it).
     if (!newKeyPane) {
       var mainPane = this.get('mainPane') ;
-      if (mainPane.get('acceptsKeyPane')) newKeyPane = mainPane ;
+      if (mainPane && mainPane.get('acceptsKeyPane')) newKeyPane = mainPane ;
     }
     
     // now notify old and new key views of change after edit    
