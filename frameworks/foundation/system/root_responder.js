@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('system/ready');
+sc_require('system/ready');
 
 /** @class
 

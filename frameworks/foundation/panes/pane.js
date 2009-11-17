@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('views/view');
+sc_require('views/view');
 
 /** @class
   A Pane is like a regular view except that it does not need to live within a 

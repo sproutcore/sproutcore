@@ -5,7 +5,7 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-require('controllers/controller') ;
+sc_require('controllers/controller') ;
 
 /** @class
 
