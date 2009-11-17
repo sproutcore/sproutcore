@@ -79,3 +79,14 @@ test("should return receiver", function() {
   equals(MyApp.foo.destroy(), MyApp.foo, 'should return receiver');
 });
 
+test("destroy should update status cache", function() {
+  var st = MyApp.foo.get('status');
+  ok(st !== SC.Record.DESTROYED_CLEAN, 'precond - foo should not be destroyed');
+
+  SC.RunLoop.begin();
+  MyApp.foo.destroy();
+  equals(MyApp.foo.get('status'), SC.Record.DESTROYED_CLEAN, 'status should be DESTROYED_CLEAN immediately when destroyed directly by record');
+  SC.RunLoop.end();
+});
+
+
