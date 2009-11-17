@@ -228,12 +228,17 @@ SC.RootResponder = SC.RootResponder.extend(
     var keyPane  = this.get('keyPane'), mainPane = this.get('mainPane'), 
         mainMenu = this.get('mainMenu');
 
-    // try the keyPane
-    if (keyPane) ret = keyPane.performKeyEquivalent(keystring, evt) ;
+    // Try the keyPane.  If it's modal, then try the equivalent there but on
+    // nobody else.
+    if (keyPane) {
+      ret = keyPane.performKeyEquivalent(keystring, evt) ;
+      if (ret || keyPane.get('isModal')) return ret ;
+    }
     
     // if not, then try the main pane
     if (!ret && mainPane && (mainPane!==keyPane)) {
       ret = mainPane.performKeyEquivalent(keystring, evt);
+      if (ret || mainPane.get('isModal')) return ret ;
     }
 
     // if not, then try the main menu
