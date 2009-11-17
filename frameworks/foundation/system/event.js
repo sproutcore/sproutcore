@@ -189,7 +189,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (!elem) return this; // nothing to do
     
     // cannot register events on text nodes, etc.
-    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.Event;
+    if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
@@ -265,7 +265,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (!elem) return this; // nothing to do
     
     // don't do events on text and comment nodes
-    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.Event;
+    if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
@@ -394,13 +394,13 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
     if (!elem) return this; // nothing to do
 
     // don't do events on text and comment nodes
-    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return undefined;
+    if ( elem.nodeType === 3 || elem.nodeType === 8 ) return undefined;
     
     // Normalize to an array
     args = SC.A(args) ;
 
     var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION , 
-        event, current, onfoo;
+        event, current, onfoo, isClick;
 
     // Get the event to pass, creating a fake one if necessary
     event = args[0];
@@ -690,7 +690,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
-    if (event == window.event) {
+    if (event === window.event) {
       // IE can't do event.normalized on an Event object
       return SC.Event.create(event) ; 
     } else {
