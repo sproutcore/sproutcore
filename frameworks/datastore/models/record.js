@@ -346,9 +346,9 @@ SC.Record = SC.Object.extend(
     
     // if recordType aggregates are not set up yet, make sure to 
     // create the cache first
-    if(!aggregates) {
-      var dataHash = this.get('store').readDataHash(storeKey),
-          aggregates = [];
+    if (!aggregates) {
+      var dataHash = this.get('store').readDataHash(storeKey);
+      aggregates = [];
       for(k in dataHash) {
         if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
           aggregates.push(k);
@@ -359,16 +359,27 @@ SC.Record = SC.Object.extend(
     
     // now loop through all aggregate properties and mark their related
     // record objects as dirty
-    for(idx=0,len=aggregates.length;idx<len;idx++) {
+    var K = SC.Record;
+    var dirtyFlag = K.DIRTY;
+    for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
       val = this.get(key);
-      
+
       recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
       recs.forEach(function(rec) {
-        // write the dirty status
-        if(rec) { 
-          rec.get('store').writeStatus(rec.get('storeKey'), this.get('status'));
-          rec.storeDidChangeProperties(YES);
+        // If the child is dirty, then make sure the parent gets a dirty
+        // status.  (If the child is created or destroyed, there's no need,
+        // because the parent will dirty itself when it modifies that
+        // relationship.)
+        if (rec) { 
+          var childStatus = this.get('status');
+          if (childStatus & dirtyFlag) {
+            var parentStatus = rec.get('status');
+            if (parentStatus === K.READY_NEW) {
+              rec.get('store').writeStatus(rec.get('storeKey'), K.READY_DIRTY);
+              rec.storeDidChangeProperties(YES);
+            }
+          }
         }
       }, this);
     }
