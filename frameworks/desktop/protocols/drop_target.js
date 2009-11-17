@@ -4,7 +4,7 @@
 // Portions copyright ©2008 Apple Inc.  All rights reserved.
 // ========================================================================
 
-require('system/drag');
+sc_require('system/drag');
 
 /**
   @mixin

@@ -2,7 +2,7 @@
 // SC.GridView
 // ==========================================================================
 
-require('views/list') ;
+sc_require('views/list') ;
 
 /** @class
 
