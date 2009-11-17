@@ -176,9 +176,5 @@ SC.PanelPane = SC.Pane.extend({
     var ret = sc_super();
     this.becomeKeyPane();
     return ret ;
-  },
-
-  /** @private - suppress all mouse events on panel itself. */
-  mouseDown: function(evt) { return YES; }
-  
+  }
 });
