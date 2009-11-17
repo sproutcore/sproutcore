@@ -360,7 +360,6 @@ SC.Record = SC.Object.extend(
     // now loop through all aggregate properties and mark their related
     // record objects as dirty
     var K = SC.Record;
-    var dirtyFlag = K.DIRTY;
     for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
       val = this.get(key);
@@ -373,7 +372,7 @@ SC.Record = SC.Object.extend(
         // relationship.)
         if (rec) { 
           var childStatus = this.get('status');
-          if (childStatus & dirtyFlag) {
+          if (childStatus & K.DIRTY) {
             var parentStatus = rec.get('status');
             if (parentStatus === K.READY_NEW) {
               rec.get('store').writeStatus(rec.get('storeKey'), K.READY_DIRTY);
