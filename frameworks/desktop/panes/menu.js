@@ -493,6 +493,10 @@ SC.MenuPane = SC.PickerPane.extend(
         action, isEnabled, target, idx;
     if(!this.get('isEnabled')) return NO ;
     this.displayItems() ;
+
+    // Make sure we redraw the menu items if they've changed
+    SC.RunLoop.begin().end();
+
     items = this.get('displayItemsArray') ;
     if (!items) return NO;
 
