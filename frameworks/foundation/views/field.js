@@ -33,14 +33,6 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
      WARNING: Use only with textField** Juan
   */
   isTextArea: NO,
-  
-  /*
-    This variable is here to make the tab focus behavior work like safari's.
-    We believe that is a better experience for accesibility and the user in 
-    general to be able to access all controls through you keyboard. If you
-    disagree set this variable to YES.
-  */
-  followSafariTabFocusBehavior: NO,
 
 
   _field_isMouseDown: NO,
@@ -272,7 +264,8 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     // handle tab key
     if (evt.which === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      view.becomeFirstResponder();
+      if(view) view.becomeFirstResponder();
+      else evt.allowDefault();
       return YES ; // handled
     }
     
@@ -289,10 +282,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
   
   /** tied to the isEnabled state */
   acceptsFirstResponder: function() {
-    if(!this.get('followSafariTabFocusBehavior')){
-      return this.get('isEnabled');
-    }
-    return NO;
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
   }.property('isEnabled'),
   
   willBecomeKeyResponderFrom: function(keyView) {

@@ -248,8 +248,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    var last = this.get('isVisibleInWindow') ;
-    var cur = this.get('isVisible'), parentView ;
+    var last = this.get('isVisibleInWindow'),
+        cur = this.get('isVisible'), parentView ;
     
     // isVisibleInWindow = isVisible && parentView.isVisibleInWindow
     // this approach only goes up to the parentView if necessary.
@@ -505,9 +505,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _invalidatePaneCacheForSelfAndAllChildViews: function () {
     this.notifyPropertyChange('pane');
     
-    var childViews = this.get('childViews');
-    var len = childViews.length ;
-    for (var idx=0; idx<len; ++idx) {
+    var childViews = this.get('childViews'),
+        len = childViews.length, idx ;
+    for (idx=0; idx<len; ++idx) {
       var childView = childViews[idx];
       if (childView._invalidatePaneCacheForSelfAndAllChildViews) childView._invalidatePaneCacheForSelfAndAllChildViews();
     }
@@ -599,8 +599,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {DOMElement} the discovered layer
   */
   findLayerInParentLayer: function(parentLayer) {
-    var layerId = this.get('layerId') ;
-    var node, i, ilen,found, elem;
+    var layerId = this.get('layerId'),
+        node, i, ilen,found, elem;
     
     // first, let's try the fast path...
     if(parentLayer.getElementById) elem = parentLayer.getElementById(layerId) ;
@@ -778,13 +778,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   _notifyDidCreateLayer: function() {
     if (this.didCreateLayer) this.didCreateLayer() ;
-    var mixins = this.didCreateLayerMixin, len, idx ;
+    var mixins = this.didCreateLayerMixin, len, idx,
+        childViews = this.get('childViews');
     if (mixins) {
       len = mixins.length ;
       for (idx=0; idx<len; ++idx) mixins[idx].call(this) ;
     }
     
-    var childViews = this.get('childViews') ;
     len = childViews.length ;
     for (idx=0; idx<len; ++idx) {
       if (!childViews[idx]) continue;
@@ -842,13 +842,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   _notifyWillDestroyLayer: function() {
     if (this.willDestroyLayer) this.willDestroyLayer() ;
-    var mixins = this.willDestroyLayerMixin, len, idx ;
+    var mixins = this.willDestroyLayerMixin, len, idx,
+        childViews = this.get('childViews') ;
     if (mixins) {
       len = mixins.length ;
       for (idx=0; idx<len; ++idx) mixins[idx].call(this) ;
     }
     
-    var childViews = this.get('childViews') ;
     len = childViews.length ;
     for (idx=0; idx<len; ++idx) childViews[idx]._notifyWillDestroyLayer() ;
     
@@ -1053,9 +1053,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   updateLayerLocation: function() {
     // collect some useful value
     // if there is no node for some reason, just exit
-    var node = this.get('layer') ;
-    var parentView = this.get('parentView') ;
-    var parentNode = parentView ? parentView.get('containerLayer') : null ;
+    var node = this.get('layer'),
+        parentView = this.get('parentView'),
+        parentNode = parentView ? parentView.get('containerLayer') : null ;
     
     // remove node from current parentNode if the node does not match the new 
     // parent node.
@@ -1247,36 +1247,36 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @type SC.View
   */
   nextValidKeyView: function() {
-    var seen = SC.CoreSet.create(),
-        ret  = this._computeNextValidKeyView(seen);
-    seen.destroy();
+    var seen = [],
+        rootView = this.pane(), ret; 
+    ret = rootView._computeNextValidKeyView(this, seen);
     return ret ;
   }.property('nextKeyView'),
   
-  _computeNextValidKeyView: function(seen) {  
+  _computeNextValidKeyView: function(currentView, seen) {  
     var ret = this.get('nextKeyView'),
-        pv, cv, idx;
-
-    seen.add(this); // avoid cycles
+        children, i, childLen;
+    // if(ret){
+    //       debugger;
+    //     }    
+    //     if(seen.indexOf(currentView)!=-1) {
+    //       debugger;
+    //     }
+    if(this !== currentView && seen.indexOf(currentView)!=-1 && this.get('acceptsFirstResponder')){
+      return this;
+    }
+    seen.push(this); // avoid cycles
     
     // find next sibling
     if (!ret) {
-      pv = this.get('parentView');
-      cv = pv ? pv.get('childViews') : null;
-      idx = cv ? cv.indexOf(this) : -1 ;
-      
-      // get next child if possible
-      if (idx<0) ret = null;
-      else if (idx+1 >= cv.get('length')) ret = cv.objectAt(0);
-      else ret = cv.objectAt(idx+1);
+      children = this.get('childViews');
+      for(i=0, childLen= children.length; i<childLen; i++){
+        ret = children[i]._computeNextValidKeyView(currentView, seen);
+        if (ret) return ret;
+      }
+      // console.log('got to the end of '+this.toString());
+      //       ret = null;
     }
-    
-    // if next view does not accept responder then get nextValidKeyView...
-    if (ret && !ret.get('acceptsFirstResponder')) {
-      if (seen.contains(ret)) ret = null;
-      else ret = ret._computeNextValidKeyView(seen);
-    }
-    
     return ret ;
   },
   
@@ -1296,35 +1296,30 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   previousValidKeyView: function() {
     var seen = SC.CoreSet.create(),
-        ret  = this._computePreviousValidKeyView(seen);
+        rootView = this.pane(), ret; 
+    ret = rootView._computePreviousValidKeyView(this, seen);
     seen.destroy();
     return ret ;
   }.property('previousKeyView'),
   
-  _computePreviousValidKeyView: function(seen) {  
+  _computePreviousValidKeyView: function(currentView, seen) {  
     var ret = this.get('previousKeyView'),
-        pv, cv, idx;
-
+        children, i;
+        
+    if(seen.contains(currentView) && this.get('acceptsFirstResponder')){
+      return this;
+    }
     seen.add(this); // avoid cycles
     
-    // find previous sibling
+    // find next sibling
     if (!ret) {
-      pv = this.get('parentView');
-      cv = pv ? pv.get('childViews') : null;
-      idx = cv ? cv.indexOf(this) : -1 ;
-      
-      // get next child if possible
-      if (idx<0) ret = null;
-      else if (idx > 0) ret = cv.objectAt(idx-1);
-      else ret = cv.objectAt(cv.get('length')-1);
+      children = this.get('childViews');
+      for(i=children.length-1; 0<=i; i--){
+        ret = children[i]._computeNextValidKeyView(currentView, seen);
+        if (ret) return ret;
+      }
+      ret = null;
     }
-    
-    // if next view does not accept responder then get nextValidKeyView...
-    if (ret && !ret.get('acceptsFirstResponder')) {
-      if (seen.contains(ret)) ret = null;
-      else ret = ret._computePreviousValidKeyView(seen);
-    }
-    
     return ret ;
   },
   
@@ -1747,9 +1742,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {Rect} the computed frame
   */
   computeFrameWithParentFrame: function(pdim) {
-    var layout = this.get('layout') ;
-    var f = {} , error, layer, AUTO = SC.LAYOUT_AUTO;
-    var stLayout = this.get('useStaticLayout') ;
+    var layout = this.get('layout'),
+        f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
+        stLayout = this.get('useStaticLayout') ;
     
     if (layout.width !== undefined &&
         layout.width === SC.LAYOUT_AUTO &&
@@ -2047,8 +2042,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @readOnly
   */
   layoutStyle: function() {
-    var layout = this.get('layout'), ret = {}, pdim = null, error, AUTO = SC.LAYOUT_AUTO;
-    var stLayout = this.get('useStaticLayout');
+    var layout = this.get('layout'), ret = {}, pdim = null, error, 
+        AUTO = SC.LAYOUT_AUTO,
+        stLayout = this.get('useStaticLayout');
     
     if (layout.width !== undefined &&
         layout.width === SC.LAYOUT_AUTO &&
@@ -2303,8 +2299,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */
   layoutChildViews: function() {
-    var set = this._needLayoutViews, len = set ? set.length : 0, idx;
-    var view, context, layer;
+    var set = this._needLayoutViews, len = set ? set.length : 0, idx,
+        view, context, layer;
     for(idx=0;idx<len;idx++) {
       view = set[idx];
       view.updateLayout();

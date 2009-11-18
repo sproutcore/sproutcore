@@ -275,7 +275,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     // handle tab key
     if (evt.which === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      view.becomeFirstResponder();
+      if(view) view.becomeFirstResponder();
+      else evt.allowDefault();
       return YES ; // handled
     }    
     if (evt.which === 13) {
@@ -336,8 +337,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   _hasLegacyActionHandler: function()
   {
     var action = this.get('action');
-    if (action && (SC.typeOf(action) == SC.T_FUNCTION)) return true;
-    if (action && (SC.typeOf(action) == SC.T_STRING) && (action.indexOf('.') != -1)) return true;
+    if (action && (SC.typeOf(action) === SC.T_FUNCTION)) return true;
+    if (action && (SC.typeOf(action) === SC.T_STRING) && (action.indexOf('.') != -1)) return true;
     return false;
   },
 
@@ -347,8 +348,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     if (!this._hasLegacyActionHandler()) return false;
     
     var action = this.get('action');
-    if (SC.typeOf(action) == SC.T_FUNCTION) this.action(evt);
-    if (SC.typeOf(action) == SC.T_STRING) {
+    if (SC.typeOf(action) === SC.T_FUNCTION) this.action(evt);
+    if (SC.typeOf(action) === SC.T_STRING) {
       eval("this.action = function(e) { return "+ action +"(this, e); };");
       this.action(evt);
     }
@@ -356,8 +357,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   /** tied to the isEnabled state */
   acceptsFirstResponder: function() {
-        return this.get('isEnabled');
-      }.property('isEnabled'),
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+  }.property('isEnabled'),
   
   willBecomeKeyResponderFrom: function(keyView) {
     // focus the text field.

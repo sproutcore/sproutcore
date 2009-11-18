@@ -388,7 +388,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var i, item, items, len, value, isArray;
     if (evt.which === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      view.becomeFirstResponder();
+      if(view) view.becomeFirstResponder();
+      else evt.allowDefault();
       return YES ; // handled
     }    
     if (!this.get('allowsMultipleSelection') && !this.get('allowsEmptySelection')){
@@ -545,7 +546,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   /** tied to the isEnabled state */
    acceptsFirstResponder: function() {
-     return this.get('isEnabled');
+     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
    }.property('isEnabled'),
 
    willBecomeKeyResponderFrom: function(keyView) {
