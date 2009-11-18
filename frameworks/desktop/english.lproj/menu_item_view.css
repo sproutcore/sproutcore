@@ -24,7 +24,6 @@
   left: 0px;
   right: 0px;
   line-height: 22px;
-  text-shadow: #b0b0b0 0px 1px 0px;
   text-decoration: none ;
   text-align: left;
   color: black;
@@ -36,7 +35,6 @@
 }
 
 .sc-menu-item.disabled{
-  background-color:#E0E0E0;
   border:none;
   color:#A0A0A0;
 }
@@ -75,10 +73,12 @@
 .sc-pane.sc-panel > .sc-view.sc-menu-item.focus, 
 .sc-menu-item a:hover {
   background-color: #5A8EC6;
+  color: #fff;
 }
 
 .sc-menu-item.disabled a:hover {
-  background-color: #E0E0E0;
+  background-color: transparent;
+  color:#A0A0A0;
 }
 /* @end */
 
