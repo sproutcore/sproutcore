@@ -275,8 +275,9 @@ SC.Observable = {
         cachedep, cache, idx, dfunc ;
 
     // if there are any dependent keys and they use caching, then clear the
-    // cache.
-    if (this._kvo_cacheable && (cache = this._kvo_cache)) {
+    // cache.  (If we're notifying, then propertyDidChange will do this for
+    // us.)
+    if (!notify && this._kvo_cacheable && (cache = this._kvo_cache)) {
       // lookup the cached dependents for this key.  if undefined, compute.
       // note that if cachdep is set to null is means we figure out it has no
       // cached dependencies already.  this is different from undefined.
