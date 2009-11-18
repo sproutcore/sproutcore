@@ -615,13 +615,14 @@ SC.RootResponder = SC.RootResponder.extend(
    trigger calls to mouseDragged.
   */
   mousemove: function(evt) {
-    if(SC.browser.msie){
-      if(this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
-      else {
-        this._lastMoveX = evt.clientX;
-        this._lastMoveY = evt.clientY;
-      }
+    if (SC.browser.msie) {
+      if (this._lastMoveX === evt.clientX && this._lastMoveY === evt.clientY) return;
     }
+    
+    // We'll record the last positions in all browsers, in case a special pane
+    // or some such UI absolutely needs this information.
+    this._lastMoveX = evt.clientX;
+    this._lastMoveY = evt.clientY;
     
     SC.RunLoop.begin();
     try {
