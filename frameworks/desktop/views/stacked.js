@@ -39,6 +39,15 @@ SC.StackedView = SC.CollectionView.extend(
     adjust the height of the view.
   */
   layout: { top: 0, left: 0, right: 0, height: 1 },
+  
+  /**
+    Return full range of its indexes for nowShowing
+    
+    @returns {SC.IndexSet} full range of indexes
+  */
+  computeNowShowing: function(rect) {
+    return this.get('allContentIndexes');
+  },  
 
   /**
     Updates the height of the stacked view to reflect the current content of 
