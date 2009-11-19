@@ -374,7 +374,7 @@ SC.Record = SC.Object.extend(
           var childStatus = this.get('status');
           if (childStatus & K.DIRTY) {
             var parentStatus = rec.get('status');
-            if (parentStatus === K.READY_NEW) {
+            if (parentStatus === K.READY_CLEAN) {
               rec.get('store').writeStatus(rec.get('storeKey'), K.READY_DIRTY);
               rec.storeDidChangeProperties(YES);
             }
