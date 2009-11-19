@@ -1256,12 +1256,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   _computeNextValidKeyView: function(currentView, seen) {  
     var ret = this.get('nextKeyView'),
         children, i, childLen;
-    // if(ret){
-    //       debugger;
-    //     }    
-    //     if(seen.indexOf(currentView)!=-1) {
-    //       debugger;
-    //     }
+   
     if(this !== currentView && seen.indexOf(currentView)!=-1 && this.get('acceptsFirstResponder')){
       return this;
     }
@@ -1274,8 +1269,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         ret = children[i]._computeNextValidKeyView(currentView, seen);
         if (ret) return ret;
       }
-      // console.log('got to the end of '+this.toString());
-      //       ret = null;
+      ret = null;
     }
     return ret ;
   },
@@ -1295,10 +1289,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @type SC.View
   */
   previousValidKeyView: function() {
-    var seen = SC.CoreSet.create(),
+    var seen = [],
         rootView = this.pane(), ret; 
     ret = rootView._computePreviousValidKeyView(this, seen);
-    seen.destroy();
     return ret ;
   }.property('previousKeyView'),
   
@@ -1306,16 +1299,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var ret = this.get('previousKeyView'),
         children, i;
         
-    if(seen.contains(currentView) && this.get('acceptsFirstResponder')){
+    if(this !== currentView && seen.indexOf(currentView)!=-1 && this.get('acceptsFirstResponder')){
       return this;
     }
-    seen.add(this); // avoid cycles
+    seen.push(this); // avoid cycles
     
     // find next sibling
     if (!ret) {
       children = this.get('childViews');
       for(i=children.length-1; 0<=i; i--){
-        ret = children[i]._computeNextValidKeyView(currentView, seen);
+        ret = children[i]._computePreviousValidKeyView(currentView, seen);
         if (ret) return ret;
       }
       ret = null;
