@@ -1315,5 +1315,20 @@ SC.logChange = function logChange(target, key, value) {
   console.log("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key))) ;
 };
 
+/**
+  Retrieves a property from an object, using get() if the
+  object implements SC.Observable.
+
+  @param  {Object}  object  the object to query
+  @param  {String}  key the property to retrieve
+*/
+SC.mixin(SC, {
+  get: function(object, key) {
+    if (!object) return undefined;
+    if (object.get) return object.get(key);
+    return object[key];
+  }
+});
+
 // Make all Array's observable
 SC.mixin(Array.prototype, SC.Observable) ;

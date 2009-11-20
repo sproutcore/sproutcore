@@ -56,6 +56,75 @@ test("should call unknownProperty when value is undefined", function() {
   equals(object.lastUnknownProperty, "unknown") ;
 });
 
+// ..........................................................
+// SC.GET()
+//
+module("SC.get()", {
+  setup: function() {
+    objectA = SC.Object.create({
+
+      normal: 'value',
+      numberVal: 24,
+      toggleVal: true,
+
+      computed: function() { return 'value'; }.property(),
+
+      method: function() { return "value"; },
+
+      nullProperty: null,
+
+      unknownProperty: function(key, value) {
+        this.lastUnknownProperty = key ;
+        return "unknown" ;
+      }
+
+    });
+
+    objectB = {
+      normal: 'value',
+
+      nullProperty: null
+    };
+  }
+});
+
+test("should get normal properties on SC.Observable", function() {
+  equals(SC.get(objectA, 'normal'), 'value') ;
+});
+
+test("should call computed properties on SC.Observable and return their result", function() {
+  equals(SC.get(objectA, "computed"), "value") ;
+});
+
+test("should return the function for a non-computed property on SC.Observable", function() {
+  var value = SC.get(objectA, "method") ;
+  equals(SC.typeOf(value), SC.T_FUNCTION) ;
+});
+
+test("should return null when property value is null on SC.Observable", function() {
+  equals(SC.get(objectA, "nullProperty"), null) ;
+});
+
+test("should call unknownProperty when value is undefined on SC.Observable", function() {
+  equals(SC.get(object, "unknown"), "unknown") ;
+  equals(object.lastUnknownProperty, "unknown") ;
+});
+
+test("should get normal properties on standard objects", function() {
+  equals(SC.get(objectB, 'normal'), 'value');
+});
+
+test("should return null when property is null on standard objects", function() {
+  equals(SC.get(objectB, 'nullProperty'), null);
+});
+
+test("should return undefined if the provided object is null", function() {
+  equals(SC.get(null, 'key'), undefined);
+});
+
+test("should return undefined if the provided object is undefined", function() {
+  equals(SC.get(undefined, 'key'), undefined);
+});
 
 // ..........................................................
 // SET()
