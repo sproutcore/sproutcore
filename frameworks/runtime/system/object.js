@@ -472,8 +472,6 @@ SC.Object.prototype = {
   */
   init: function() {
     this.initObservable();
-    this._observer_set = [];
-    this._isDestroyingObservers = NO;
     return this ;
   },
 
@@ -504,53 +502,9 @@ SC.Object.prototype = {
     var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
 
-    // we will be calling removeObserver, so we want to make sure didRemoveObserver 
-    // does nothing. Otherwise, we'd both skip observers and be slow. Both are bad.
-    this._isDestroyingObservers = YES;
-    
-    // loop through
-    var observers = this._observer_set, o;
-    len = observers.length;
-    for(idx = 0; idx < len; idx++) { 
-      o = observers[idx];
-      this.removeObserver(o[0], o[1], o[2]);
-    }
+    // destroy observable
+    this.destroyObservable();
     return this ;
-  },
-  
-  /**
-  Overridden to make sure observers are automatically removed when the object is destroyed.
-  */
-  didAddObserver: function(a, b, c) {
-    this._observer_set.push([a, b, c]);
-  },
-  
-  /**
-  Overridden to make sure observers already removed are not removed again when the object is destroyed.
-  
-  
-  TODO: Improve performance by making it NOT have to loop through almost every observer to
-        remvoe one.
-        
-        Observers aren't removed <em>that</em> often outside of object destruction, however,
-        —which gets its own processing path—so it is not a gigantic problem.
-  */
-  didRemoveObserver: function(a, b, c) {
-    // don't do anything if it is already destroying observers from the destroy function
-    if (this._isDestroyingObservers) return;
-    
-    var observers = this._observer_set, idx, len = observers.length;
-    
-    // simple loop to find the observer removed
-    for (idx = 0; idx < len; idx++) {
-      var o = observers[idx];
-      
-      // if it is the one we want
-      if (o[0] == a && o[1] == b && o[2] == c) {
-        this._observer_set.splice(idx, 1); 
-        return;
-      }
-    }
   },
 
   /**
