@@ -1399,8 +1399,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
-     
-    sc_super();
+
+    // sc_super(); -> We'll let _destroy do this manually. Superclass is Responder.
     
     // remove from parent if found
     this.removeFromParent() ;
@@ -1433,8 +1433,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     delete this._CQ ; 
     delete this.page ;
     
-    // mark as destroyed so we don't do this again
-    this.set('isDestroyed', YES) ;
+    // you know what the shiny super function called below will do?
+    // remove all responders. So our bindings should not need to be
+    // removed manually here.
+
+    // call super destroy method; it will set isDestroyed for us, too.
+    SC.Responder.prototype.destroy.call(this);
     return this ;
   },
   
