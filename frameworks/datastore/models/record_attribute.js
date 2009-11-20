@@ -467,7 +467,7 @@ if (SC.DateTime && !SC.RecordAttribute.transforms[SC.guidFor(SC.DateTime)]) {
       Convert a String to a DateTime
     */
     to: function(str, attr) {
-      if (SC.none(str)) return str;
+      if (SC.none(str) || SC.instanceOf(str, SC.DateTime)) return str;
       var format = attr.get('format');
       return SC.DateTime.parse(str, format ? format : SC.DateTime.recordFormat);
     },
