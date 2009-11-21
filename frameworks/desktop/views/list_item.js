@@ -241,7 +241,7 @@ SC.ListItemView = SC.View.extend(
       this.renderCount(working, value) ;
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
       var digit = (value.toString().length < digits.length) ? digits[value.toString().length] : digits[digits.length-1];
-      context.addClass('has-count %@-digit'.fmt(digit));
+      context.addClass('has-count '+digit+'-digit');
     }
     
     // handle action 
@@ -281,7 +281,7 @@ SC.ListItemView = SC.View.extend(
     html = cache[key];
 
     if (!html) {
-      html = cache[key] = '<img src="%@" class="disclosure button %@" />'.fmt(SC.BLANK_IMAGE_URL, key);
+      html = cache[key] = '<img src="'+SC.BLANK_IMAGE_URL+'" class="disclosure button '+key+'" />';
     }
     
     context.push(html);
