@@ -426,7 +426,8 @@ SC.RootResponder = SC.RootResponder.extend(
       if (SC.browser.mozilla && evt.keyCode>=37 && evt.keyCode<=40){
         this._ffevt=evt;
         SC.RunLoop.begin();
-        this.invokeLater(this.keydown, 100);
+        //Timeout to emulate key repetitions when leaving the key pressed in FF
+        this.invokeLater(this.keydown, 200);
         SC.RunLoop.end();
       }
       // otherwise, send as keyDown event.  If no one was interested in this
