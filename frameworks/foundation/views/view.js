@@ -260,7 +260,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     // if the state has changed, update it and notify children
-    if (last !== cur) {
+   if (last !== cur || this.isVisibleFlag) {
       this.set('isVisibleInWindow', cur) ;
       this._needsVisibiltyChange = YES ; // update even if we aren't visible
       
@@ -286,7 +286,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       
     }
     return this ;
-  }.observes('isVisible'),
+  },
   
   // ..........................................................
   // CHILD VIEW SUPPORT
@@ -464,6 +464,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   appendChild: function(view) {
     return this.insertBefore(view, null);
   },
+  
+  /** @private
+  
+    !!!!HACK/FIX
+    This is a temporary fix while we figure out bug in the isVisible
+    isVisibleWindow. Where the isVisible property will be set to NO but
+    the view will be visible. This function has to be executed before
+    parentViewDidChange()
+  
+  */
+  isVisibleChanged:function() {
+    this.isVisibleFlag=YES;
+  }.observes('isVisible'),
+  
   
   /** 
     This method is called whenever the receiver's parentView has changed.  
@@ -694,6 +708,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in updateLayer
   */
   updateLayerIfNeeded: function() {
+    
     var viz = this.get('isVisibleInWindow') ;
     if ((viz || this._needsVisibiltyChange) && this.get('layerNeedsUpdate')) {
       this._needsVisibiltyChange = NO ;
