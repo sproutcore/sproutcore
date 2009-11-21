@@ -23,7 +23,9 @@ SC.PopupButtonView = SC.ButtonView.extend({
   preferMatrix: null,
     
   /**private */
-  acceptsFirstResponder: YES,
+  acceptsFirstResponder: function() {
+    if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+  }.property('isEnabled'),
   /**
     Overriding the default SC.ButtonView#performKeyEquivalent method to pass 
     it onto the menu
