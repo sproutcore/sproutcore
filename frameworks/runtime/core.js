@@ -956,8 +956,8 @@ SC.mixin(Function.prototype,
 */
 String.prototype.fmt = function() {
   // first, replace any ORDERED replacements.
-  var args = arguments;
-  var idx  = 0; // the current index for non-numerical replacements
+  var args = arguments,
+      idx  = 0; // the current index for non-numerical replacements
   return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
     argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
     s =args[argIndex];
@@ -988,12 +988,10 @@ String.prototype.loc = function() {
   @returns {Array} an array of non-empty strings
 */
 String.prototype.w = function() { 
-  var ary = [], ary2 = this.split(' '), len = ary2.length ;
-  for (var idx=0; idx<len; ++idx) {
-    var str = ary2[idx] ;
+  var ary = [], ary2 = this.split(' '), len = ary2.length, str, idx=0;
+  for (idx=0; idx<len; ++idx) {
+    str = ary2[idx] ;
     if (str.length !== 0) ary.push(str) ; // skip empty strings
   }
   return ary ;
 };
-
-
