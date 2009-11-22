@@ -72,7 +72,6 @@ test("Navigate between textfields- going backwards", function() {
 
 
 test("Navigate forward with view that have a nextKeyView set", function() {
-  debugger;
   SC.SAFARI_FOCUS_BEHAVIOR = YES;
   var v = view2.nextValidKeyView();
   same(v, textfield_view3, "The next view should be " + textfield_view3.toString());
