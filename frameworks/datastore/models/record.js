@@ -210,6 +210,7 @@ SC.Record = SC.Object.extend(
   */
   destroy: function() { 
     this.get('store').destroyRecord(null, null, this.get('storeKey'));
+    this.propertyDidChange('status');
     return this ;
   },
 

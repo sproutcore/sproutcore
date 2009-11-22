@@ -1683,7 +1683,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     // walk up this side
-    while (view) {
+    while (view && view.get('frame')) {
       f = view.get('frame'); myX += f.x; myY += f.y ;
       view = view.get('parentView') ; 
     }
