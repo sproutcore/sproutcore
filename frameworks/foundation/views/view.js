@@ -1396,26 +1396,15 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     child views). This will remove the view from any parent node, then make 
     sure that the DOM element managed by the view can be released by the 
     memory manager.
+    
+    To avoid removing the node from parent node, disableRemoveOnDestroy may be set
+    to YES.
   */
   destroy: function() {
     if (this.get('isDestroyed')) return this; // nothing to do
 
-    // sc_super(); -> We'll let _destroy do this manually. Superclass is Responder.
-    
     // remove from parent if found
-    this.removeFromParent() ;
-    this._destroy(); // core destroy method
-    
-    // unregister for drags
-    if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
-    
-    // unregister for autoscroll during drags
-    if (this.get('isScrollable')) SC.Drag.removeScrollableView(this) ;
-    return this; // done with cleanup
-  },
-  
-  _destroy: function() {
-    if (this.get('isDestroyed')) return this ; // nothing to do
+    if (!this.disableRemoveOnDestroy) this.removeFromParent() ;
     
     // destroy the layer -- this will avoid each child view destroying 
     // the layer over and over again...
@@ -1425,7 +1414,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var childViews = this.get('childViews'), len = childViews.length, idx ;
     if (len) {
       childViews = childViews.slice() ;
-      for (idx=0; idx<len; ++idx) childViews[idx]._destroy() ;
+      for (idx=0; idx<len; ++idx) {
+        childViews[idx].disableRemoveOnDestroy = YES;
+        childViews[idx].destroy() ;
+      }
     }
     
     // next remove view from global hash
@@ -1433,13 +1425,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     delete this._CQ ; 
     delete this.page ;
     
-    // you know what the shiny super function called below will do?
-    // remove all responders. So our bindings should not need to be
-    // removed manually here.
-
-    // call super destroy method; it will set isDestroyed for us, too.
-    SC.Responder.prototype.destroy.call(this);
-    return this ;
+    // unregister for drags
+    if (this.get('isDropTarget')) SC.Drag.removeDropTarget(this) ;
+    
+    // unregister for autoscroll during drags
+    if (this.get('isScrollable')) SC.Drag.removeScrollableView(this) ;
+    
+    // call superdestroy, now that we have done all of our own destroys.
+    sc_super();
+    
+    return this; // done with cleanup
   },
   
   /** 
