@@ -695,7 +695,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   // CSS Styles Support
   // 
     
-  _STYLE_REGEX: /\s*([^:\s]+)\s*:\s*([^;\s]+)\s*;?/g,
+  _STYLE_REGEX: /\s*([^:\s]+)\s*:\s*([^;]+)\s*;?/g,
   
   /**
     Retrieves or sets the current styles for the outer tag.  If you retrieve
