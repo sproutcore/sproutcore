@@ -502,8 +502,6 @@ SC.Object.prototype = {
     var idx, inits = this.destroyMixin, len = (inits) ? inits.length : 0 ;
     for(idx=0;idx < len; idx++) inits[idx].call(this);
 
-    // destroy observable
-    this.destroyObservable();
     return this ;
   },
 

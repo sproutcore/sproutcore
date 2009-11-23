@@ -826,13 +826,7 @@ SC.CollectionView = SC.View.extend(
         
         // if nowShowing, then reload the item view.
         if (nowShowing.contains(idx)) {
-          // disable remove on destroy if needed—we remove with replaceChild in this case.
-          if (existing && existing.parentView === containerView) existing.disableRemoveOnDestroy = YES;
-          
-          // get new view
           view = this.itemViewForContentIndex(idx, YES);
-          
-          // replace old view or add new view
           if (existing && existing.parentView === containerView) {
     
             // if the existing view has a layer, remove it immediately from
@@ -862,8 +856,6 @@ SC.CollectionView = SC.View.extend(
           layer = null ; // avoid leaks
           
           containerView.removeChild(existing);
-          existing.disableRemoveOnDestroy = YES;
-          existing.destroy();
         }
       },this);
 
@@ -888,10 +880,6 @@ SC.CollectionView = SC.View.extend(
       // below is an optimized version of:
       //this.replaceAllChildren(views);
       containerView.beginPropertyChanges();
-      containerView.childViews.forEach(function(idx){
-        idx.disableRemoveOnDestroy = YES; // we will remove with removeAllChildren.
-        idx.destroy();
-      });
       containerView.destroyLayer().removeAllChildren();
       containerView.set('childViews', views); // quick swap
       containerView.replaceLayer();
@@ -949,15 +937,13 @@ SC.CollectionView = SC.View.extend(
     method so that it uses a cache to return the same item view for a given
     index unless "force" is YES.  In that case, generate a new item view and
     replace the old item view in your cache with the new item view.
-    
-    Also, although "internal only," if called with "rebuild," the <em>caller</em> 
-    is the one responsible for removing any old node from the parent node.
 
     @param {Number} idx the content index
     @param {Boolean} rebuild internal use only
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
+
     // return from cache if possible
     var content   = this.get('content'),
         itemViews = this._sc_itemViews,
@@ -970,13 +956,7 @@ SC.CollectionView = SC.View.extend(
     // use cache if available
     if (!itemViews) itemViews = this._sc_itemViews = [] ;
     if (!rebuild && (ret = itemViews[idx])) return ret ; 
-    
-    // make sure to get rid of the cached one if we aren't using it
-    if (itemViews[idx]) {
-      itemViews[idx].destroy();
-      delete itemViews[idx];
-    }
-    
+
     // otherwise generate...
     
     // first, determine the class to use
