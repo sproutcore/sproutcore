@@ -377,7 +377,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   didCreateLayer: function() {
     //Fix for IE7 min-with bug
-    if(SC.browser.msie<8) {
+    if(SC.browser.msie && SC.browser.msie<8) {
       var buttonInner = this.$('.sc-button-inner')[0];
       if (buttonInner){
         var mL = buttonInner.style.marginLeft;
