@@ -25,8 +25,8 @@ module("A new SC.Object instance", {
 });
 
 test("Should identify it's methods using the 'respondsTo' method", function() {
-  equals(obj.respondsTo('aMethodThatExists'), true) ;
-  equals(obj.respondsTo('aMethodThatDoesNotExist'), false) ;
+  equals(obj.respondsTo('aMethodThatExists'), true, "method that exists") ;
+  equals(obj.respondsTo('aMethodThatDoesNotExist'), false, "method that does not exist") ;
 });
 
 test("Should return false when asked to perform a method it does not have", function() {
@@ -58,20 +58,22 @@ test("Should allow changing of those properties by calling SC.Object#set", funct
 
 test("Should only advertise changes once per request to SC.Object#didChangeFor", function() {
   obj.set( 'foo', 'Chunky Bacon' );
-  equals(obj.didChangeFor( this, 'foo' ), true) ;
-  equals(obj.didChangeFor( this, 'foo' ), false) ;
+  equals(obj.didChangeFor( this, 'foo' ), true, "first request") ;
+  equals(obj.didChangeFor( this, 'foo' ), false, "second request") ;
 });
 
 test("Should advertise changes once per request to SC.Object#didChangeFor when setting property to NULL", function() {
   obj.set( 'foo', null );
-  equals(obj.didChangeFor( this, 'foo' ), true) ;
-  equals(obj.didChangeFor( this, 'foo' ), false) ;
+  equals(obj.didChangeFor( this, 'foo' ), true, "first request") ;
+  equals(obj.didChangeFor( this, 'foo' ), false, "second request") ;
 });
 
-test("When the object is destroyed the 'isDestroyed' status should change accordingly", function() {
-	equals(obj.get('isDestroyed'), NO);
+test("When the object is destroyed the 'isDestroyed' and 'isDestroyedObservable' status should change accordingly", function() {
+	equals(obj.get('isDestroyed'), NO, "Object is destroyed");
+	equals(obj.get('isDestroyedObservable'), NO, "Observable is destroyed");
 	obj.destroy();
-	equals(obj.get('isDestroyed'), YES);
+	equals(obj.get('isDestroyed'), YES, "Object is destroyed");
+	equals(obj.get('isDestroyedObservable'), YES, "Observable is destroyed");
 });
 
 
@@ -93,17 +95,17 @@ module("SC.Object instance extended", {
 });
 
 test("Checking the instance of method for an object", function() {
-	equals(obj1.instanceOf(obj), YES);
-	equals(obj1.instanceOf(don), NO);
+	equals(obj1.instanceOf(obj), YES, "obj1 instance of obj");
+	equals(obj1.instanceOf(don), NO, "obj1 instance of don");
 });
 
 test("Checking the kind of method for an object", function() {
-	equals(obj1.kindOf(obj), YES);
-	equals(obj1.kindOf(don), NO);
+	equals(obj1.kindOf(obj), YES, "obj1 kind of of obj");
+	equals(obj1.kindOf(don), NO, "obj1 kind of don");
 	
-	equals(SC.kindOf(obj1, obj), YES);
-	equals(SC.kindOf(obj1, don), NO);
-	equals(SC.kindOf(null, obj1), NO);
+	equals(SC.kindOf(obj1, obj), YES, "obj1 kind of obj");
+	equals(SC.kindOf(obj1, don), NO, "obj1 kind of don");
+	equals(SC.kindOf(null, obj1), NO, "null kind of obj1");
 });
 
 
@@ -123,7 +125,7 @@ module("SC.Object superclass and subclasses", {
   },
 
   teardown: function() {
-	obj = undefined ;
+    obj = undefined ;
     obj1 = undefined ;
     don = undefined ;
   }
@@ -134,8 +136,8 @@ test("Checking the superclass method for an existing function", function() {
 });
 
 test("Checking the subclassOf function on an object and its subclass", function(){
-	equals(obj1.subclassOf(obj), YES);
-	equals(obj.subclassOf(obj1), NO);
+	equals(obj1.subclassOf(obj), YES, "obj1 subclass of obj");
+	equals(obj.subclassOf(obj1), NO, "obj subclass of obj1");
 });
 
 test("subclasses should contain defined subclasses", function() {
