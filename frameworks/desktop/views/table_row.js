@@ -136,7 +136,7 @@ SC.TableRowView = SC.View.extend({
     for (idx = 0; idx < columns.get('length'); idx++) {
       column = columns.objectAt(idx);
       key    = column.get('key');
-      value  = content ? content.get(key) : "";
+      value  = content ? content.getPath(key) : "";
       cell   = this._sctrv_createTableCell(column, value);
       cells.push(cell);
       this.appendChild(cell);
