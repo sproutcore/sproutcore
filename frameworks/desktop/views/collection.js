@@ -856,7 +856,6 @@ SC.CollectionView = SC.View.extend(
           layer = null ; // avoid leaks
           
           containerView.removeChild(existing);
-          existing._destroy();
         }
       },this);
 
@@ -881,9 +880,6 @@ SC.CollectionView = SC.View.extend(
       // below is an optimized version of:
       //this.replaceAllChildren(views);
       containerView.beginPropertyChanges();
-      containerView.childViews.forEach(function(idx){
-        idx._destroy();
-      });
       containerView.destroyLayer().removeAllChildren();
       containerView.set('childViews', views); // quick swap
       containerView.replaceLayer();
@@ -947,6 +943,7 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
+
     // return from cache if possible
     var content   = this.get('content'),
         itemViews = this._sc_itemViews,
@@ -959,13 +956,7 @@ SC.CollectionView = SC.View.extend(
     // use cache if available
     if (!itemViews) itemViews = this._sc_itemViews = [] ;
     if (!rebuild && (ret = itemViews[idx])) return ret ; 
-    
-    // make sure to get rid of the cached one if we aren't using it
-    if (itemViews[idx]) {
-      itemViews[idx].destroy();
-      delete itemViews[idx];
-    }
-    
+
     // otherwise generate...
     
     // first, determine the class to use
