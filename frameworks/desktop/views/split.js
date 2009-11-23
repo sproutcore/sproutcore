@@ -209,9 +209,10 @@ SC.SplitView = SC.View.extend(
         bottomRightView = this.get('bottomRightView') ,
         dividerView = this.get('dividerView') ,
         direction = this.get('layoutDirection') ,
-        topLeftThickness = this._desiredTopLeftThickness ,
-        dividerThickness = this.get('dividerThickness') || 7 ,
-        splitViewThickness = (direction === SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ,
+        topLeftThickness = this._desiredTopLeftThickness ;
+    var dividerThickness = this.get('dividerThickness') ;
+        dividerThickness = (!SC.none(dividerThickness)) ? dividerThickness : 7 ;
+    var splitViewThickness = (direction === SC.LAYOUT_HORIZONTAL) ? this.get('frame').width : this.get('frame').height ,
         bottomRightThickness = splitViewThickness - dividerThickness - topLeftThickness ,
         autoresizeBehavior = this.get('autoresizeBehavior') ,
         layout , isCollapsed ;
@@ -389,9 +390,10 @@ SC.SplitView = SC.View.extend(
       var layoutDirection = this.get('layoutDirection') ,
           fr = this.get('frame'),
           splitViewThickness, elemRendered = this.$(),
-          dividerThickness = this.get('dividerThickness') || 7 ,
           desiredThickness = this.get('defaultThickness') ,
           autoResizeBehavior = this.get('autoresizeBehavior') ;
+      var dividerThickness = this.get('dividerThickness') ;
+      dividerThickness = (!SC.none(dividerThickness)) ? dividerThickness : 7 ;
       // Turn a flag on to recalculate the spliting if the desired thickness
       // is a percentage
       // debugger;
