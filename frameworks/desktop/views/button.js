@@ -358,6 +358,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   /** tied to the isEnabled state */
   acceptsFirstResponder: function() {
     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+    else return NO;
   }.property('isEnabled'),
   
   willBecomeKeyResponderFrom: function(keyView) {

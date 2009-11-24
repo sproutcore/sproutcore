@@ -168,6 +168,7 @@ SC.SliderView = SC.View.extend(SC.Control,
   /** tied to the isEnabled state */
   acceptsFirstResponder: function() {
     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+    else return NO;
   }.property('isEnabled'),
   
   willBecomeKeyResponderFrom: function(keyView) {
