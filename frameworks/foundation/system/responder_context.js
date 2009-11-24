@@ -139,6 +139,8 @@ SC.ResponderContext = SC.Responder.extend({
       console.log('%@: makeFirstResponder => %@'.fmt(this, this.responderNameFor(responder)));
     }
     
+    responder.set("becomingFirstResponder", YES);
+    
     this._locked = YES;
     this._pendingResponder = null;
     
@@ -167,6 +169,8 @@ SC.ResponderContext = SC.Responder.extend({
       this.makeFirstResponder(this._pendingResponder);
       this._pendingResponder = null;
     }
+    
+    responder.set("becomingFirstResponder", NO);
     
     return this ;
   },

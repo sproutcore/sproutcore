@@ -63,6 +63,8 @@ SC.Responder = SC.Object.extend( /** SC.Responder.prototype */ {
   */
   acceptsFirstResponder: YES,
   
+  becomingFirstResponder: NO,
+  
   /** 
     Call this method on your view or responder to make it become first 
     responder.
