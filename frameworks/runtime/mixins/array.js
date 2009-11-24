@@ -351,6 +351,12 @@ SC.Array = {
   addRangeObserver: function(indexes, target, method, context) {
     var rangeob = this._array_rangeObservers;
     if (!rangeob) rangeob = this._array_rangeObservers = SC.CoreSet.create() ;
+
+    // The first time a range observer is added, cache the current length so
+    // we can properly notify observers the first time through
+    if (this._array_oldLength===undefined) {
+      this._array_oldLength = this.get('length') ;
+    }
     
     var C = this.rangeObserverClass ;
     var isDeep = NO; //disable this feature for now
