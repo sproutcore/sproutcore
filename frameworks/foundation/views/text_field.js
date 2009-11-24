@@ -365,12 +365,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     //        here, but currently SC.RenderContext will render sibling
     //        contexts as parent/child.
     var hint = this.get('hint'), disabled, name, adjustmentStyle, type, 
-        hintElements, element, paddingElement;
+        hintElements, element, paddingElementStyle;
     
     if (firstTime || this._forceRenderFirstTime) {
       this._forceRenderFirstTime = NO;
-      var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
-      var name = this.get('layerId');
+      disabled = this.get('isEnabled') ? '' : 'disabled="disabled"' ;
+      name = this.get('layerId');
       
       context.push('<span class="border"></span>');
 
@@ -390,11 +390,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
-        context.push('<textarea name="%@" %@>%@</textarea></span>'.fmt(name, disabled, value)) ;
+        context.push('<textarea name="', name, '" ', disabled, '>', value, '</textarea></span>') ;
       }
       else {
         type = this.get('isPassword') ? 'password' : 'text' ;
-        context.push('<input type="%@" name="%@" %@ value="%@"/></span>'.fmt(type, name, disabled, value)) ;
+        context.push('<input type="', type,'" name="', name, '" ', disabled, ' value="', value,'"/></span>') ;
       }
 
     }
@@ -418,34 +418,24 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         }
 
         // Adjust the padding element to accommodate any accessory views.
-        paddingElement = element.parentNode;
+        paddingElementStyle = element.parentNode.style;
         if (leftAdjustment) {
-          if (paddingElement.style.left !== leftAdjustment) {
-            paddingElement.style.left = leftAdjustment ;
+          if (paddingElementStyle.left !== leftAdjustment) {
+            paddingElementStyle.left = leftAdjustment ;
           }
         }
         else {
-          paddingElement.style.left = null ;
+          paddingElementStyle.left = null ;
         }
 
         if (rightAdjustment) {
-          if (paddingElement.style.right !== rightAdjustment) {
-            paddingElement.style.right = rightAdjustment ;
+          if (paddingElementStyle.right !== rightAdjustment) {
+            paddingElementStyle.right = rightAdjustment ;
           }
         }
         else {
-          paddingElement.style.right = null ;
+          paddingElementStyle.right = null ;
         }
-
-
-        // Firefox needs a bit of help to recalculate the width of the text
-        // field, if it has focus.  (Even though it's set to 100% of its
-        // parent, if we adjust the parent it doesn't always adjust in kind.)
-        // if (SC.browser.mozilla) {
-        //           if(paddingElement.clientWidth>0){
-        //             element.style.width = paddingElement.clientWidth + "px";
-        //           }
-        //         }
       }
     }
   },
@@ -644,12 +634,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       if(view) view.becomeFirstResponder();
       else evt.allowDefault();
       return YES ; // handled
-    }
-    
-    // handle delete key, set dontForceDeleteKey to allow the default behavior
-    // of the delete key.
-    if (evt.which === 8){
-      evt.dontForceDeleteKey=YES;
     }
 
     // validate keyDown...

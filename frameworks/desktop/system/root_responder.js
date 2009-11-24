@@ -398,9 +398,6 @@ SC.RootResponder = SC.RootResponder.extend(
     the keypress event.
   */
   keydown: function(evt) {
-    // This code is to check for the simulated keypressed event
-    if(!evt.kindOf) this._ffevt=null;
-    else evt=this._ffevt;
     if (SC.none(evt)) return YES;
     
     // Firefox does NOT handle delete here...
@@ -420,16 +417,6 @@ SC.RootResponder = SC.RootResponder.extend(
     // responder can do something useful with the event.
     ret = YES ;
     if (this._isFunctionOrNonPrintableKey(evt)) {
-      // Simulate keydown events for firefox since keypress only triggers once
-      // We don't do it in keypress as it doesn't work in certain cases, ie.
-      // Caret is at last position and you press down arrow key.
-      if (SC.browser.mozilla && evt.keyCode>=37 && evt.keyCode<=40){
-        this._ffevt=evt;
-        SC.RunLoop.begin();
-        //Timeout to emulate key repetitions when leaving the key pressed in FF
-        this.invokeLater(this.keydown, 200);
-        SC.RunLoop.end();
-      }
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
@@ -460,12 +447,17 @@ SC.RootResponder = SC.RootResponder.extend(
     
     // delete is handled in keydown() for most browsers
     if (SC.browser.mozilla && (evt.which === 8)) {
+      //get the keycode and set it for which.
+      evt.which=evt.keyCode;
       ret = this.sendEvent('keyDown', evt);
       return ret ? (SC.allowsBackspaceToPreviousPage || evt.hasCustomEventHandling) : YES ;
 
-    // normal processing.  send keyDown for printable keys...
+    // normal processing.  send keyDown for printable keys... 
+    //there is a special case for arrow key repeating of events in FF.
     } else {
-      if (evt.charCode !== undefined && evt.charCode === 0) return YES;
+      var isFirefoxArrowKeys = (evt.keyCode>=37 && evt.keyCode<=40 && SC.browser.mozilla);
+      if ((evt.charCode !== undefined && evt.charCode === 0) && !isFirefoxArrowKeys) return YES;
+      if (isFirefoxArrowKeys) evt.which=evt.keyCode;
       return this.sendEvent('keyDown', evt) ? evt.hasCustomEventHandling:YES;
     }
   },
