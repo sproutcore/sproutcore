@@ -612,7 +612,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // if browser supports querySelector use that.
     if (!elem && parentLayer.querySelector) {
       // TODO: make querySelector work on all platforms...
-      // elem = parentLayer.querySelector('#' + layerId)[0];
+      elem = parentLayer.querySelector('#' + layerId);
     }
     
     // if no element was found the fast way, search down the parentLayer for
