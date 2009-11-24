@@ -118,32 +118,35 @@
 
 .sc-theme .sc-radio-view .sc-radio-button.disabled span.button,
 .sc-theme .sc-radio-view.disabled .sc-radio-button span.button,
-.sc-theme .sc-radio-view.active .sc-radio-button.disabled:hover span.button {
+.sc-theme .sc-radio-view.disabled .sc-radio-button.active:hover span.button,
+.sc-theme .sc-radio-view .sc-radio-button.disabled.active:hover span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -226px;
 }
 
 .sc-theme .sc-radio-view.disabled .sc-radio-button.sel span.button,
+.sc-theme .sc-radio-view.disabled .sc-radio-button.sel.active:hover span.button,
 .sc-theme .sc-radio-view .sc-radio-button.sel.disabled span.button,
-.sc-theme .sc-radio-view.active .sc-radio-button.sel.disabled:hover span.button {
+.sc-theme .sc-radio-view .sc-radio-button.sel.disabled.active:hover span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -280px;
 }
 
 .sc-theme .sc-radio-view.disabled .sc-radio-button.mixed span.button,
 .sc-theme .sc-radio-view .sc-radio-button.mixed.disabled span.button,
-.sc-theme .sc-radio-view.active .sc-radio-button.mixed.disabled:hover span.button {
+.sc-theme .sc-radio-view.disabled .sc-radio-button.mixed.active:hover span.button,
+.sc-theme .sc-radio-view .sc-radio-button.mixed.disabled span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -308px;
 }
 
 
-.sc-theme .sc-radio-view.active .sc-radio-button:hover span.button {
+.sc-theme .sc-radio-view .sc-radio-button.active:hover span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -32px -200px;
 }
 
-.sc-theme .sc-radio-view.active .sc-radio-button.sel:hover span.button {
+.sc-theme .sc-radio-view .sc-radio-button.active.sel:hover span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat 0px -226px;
 }
 
-.sc-theme .sc-radio-view.active .sc-radio-button.mixed:hover span.button {
+.sc-theme .sc-radio-view .sc-radio-button.mixed.active:hover span.button {
 	background: static_url('images/sc-theme-repeat-x.png') no-repeat -16px -308px;
 }
 
