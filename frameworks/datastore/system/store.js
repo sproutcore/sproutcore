@@ -1249,9 +1249,10 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {String} id the record id
     @param {Number} storeKey (optional) if passed, ignores recordType and id
     @param {String} key that changed (optional)
+    @param {Boolean} if the change is to statusOnly (optional)
     @returns {SC.Store} receiver
   */
-  recordDidChange: function(recordType, id, storeKey, key) {
+  recordDidChange: function(recordType, id, storeKey, key, statusOnly) {
     if (storeKey === undefined) storeKey = recordType.storeKeyFor(id);
     var status = this.readStatus(storeKey), changelog, K = SC.Record;
     
@@ -1272,7 +1273,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     }
     
     // record data hash change
-    this.dataHashDidChange(storeKey, null, null, key);
+    this.dataHashDidChange(storeKey, null, statusOnly, key);
     
     // record in changelog
     changelog = this.changelog ;

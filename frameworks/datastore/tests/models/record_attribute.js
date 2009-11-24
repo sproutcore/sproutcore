@@ -188,6 +188,7 @@ test("writing an attribute should make relationship aggregate dirty" ,function()
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
   
   bar.set('city', 'Oslo');
+  bar.get('store').flush();
   
   equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");
 });
@@ -197,7 +198,19 @@ test("writing an attribute should make many relationship aggregate dirty" ,funct
   equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
   
   bar.set('city', 'Oslo');
+  bar.get('store').flush();
   
   equals(rec.get('status'), SC.Record.READY_DIRTY, "foo1 should be READY_DIRTY");
   equals(rec2.get('status'), SC.Record.READY_DIRTY, "foo2 should be READY_DIRTY");
+});
+
+test("writing an attribute should make many relationship aggregate dirty and add the aggregate to the store" ,function() {
+  equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");
+  equals(rec2.get('status'), SC.Record.READY_CLEAN, "precond - rec2 should be READY_CLEAN");
+  
+  bar.set('city', 'Oslo');
+
+  var store = bar.get('store');
+  ok(store.changelog.contains(rec.get('storeKey')), "foo1 should be in the store's changelog");
+  ok(store.changelog.contains(rec2.get('storeKey')), "foo2 should be in the store's changelog");
 });

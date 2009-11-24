@@ -364,7 +364,6 @@ SC.Record = SC.Object.extend(
     for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
       val = this.get(key);
-
       recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
       recs.forEach(function(rec) {
         // If the child is dirty, then make sure the parent gets a dirty
@@ -376,8 +375,9 @@ SC.Record = SC.Object.extend(
           if (childStatus & K.DIRTY) {
             var parentStatus = rec.get('status');
             if (parentStatus === K.READY_CLEAN) {
-              rec.get('store').writeStatus(rec.get('storeKey'), K.READY_DIRTY);
-              rec.storeDidChangeProperties(YES);
+              // Note:  storeDidChangeProperties() won't put it in the
+              //        changelog!
+              rec.get('store').recordDidChange(rec.constructor, null, rec.get('storeKey'), null, YES);
             }
           }
         }
