@@ -350,6 +350,7 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
     title = args[idx + 3];
     if (title) {
       button.set('title', title).set('isVisible', YES);
+      if(title=='?') button.set('titleMinWidth', 0);
       if (idx==2) {
         var button_wrapper = ret.get('buttonThreeWrapper');
         button_wrapper.set('isVisible', YES);
