@@ -459,7 +459,7 @@ SC.CoreQuery = (function() {
     */
     hasClass: function( className ) {
       return Array.prototype.every.call(this, function(elem) {
-        return (elem.nodeType!=1) || CQ.className.has(elem, className) ;
+        return (elem.nodeType===1) && CQ.className.has(elem, className) ;
       });
     },
 
