@@ -422,12 +422,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }, this ) ;
 
     if(firstTime) {
-      value = this.get('value') ;
-      if(SC.none(value)) {
-        this.set('value', this._defaultVal) ;
-        this.set('title', this._defaultTitle) ;
-        this.set('icon', this._defaultIcon) ;
-      }
+      this.invokeLast(function() {
+        var value = this.get('value') ;
+        if(SC.none(value)) {
+          this.set('value', this._defaultVal) ;
+          this.set('title', this._defaultTitle) ;
+          this.set('icon', this._defaultIcon) ;
+        }
+      });
     }
 
     //Set the preference matrix for the menu pane
