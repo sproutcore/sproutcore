@@ -1103,7 +1103,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }
     }
     
-    parentNode = parentView = node = null ; // avoid memory leaks
+    parentNode = parentView = node = nextNode = null ; // avoid memory leaks
     return this ; 
   },
   
