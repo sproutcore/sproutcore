@@ -41,6 +41,7 @@ SC.TableView = SC.ListView.extend(SC.TableDelegate, {
       top:    18
     },
     hasHorizontalScroller: NO,
+    borderStyle: SC.BORDER_NONE,
     contentView: SC.View.design({
     }),
     
