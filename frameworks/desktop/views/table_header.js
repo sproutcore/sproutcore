@@ -65,12 +65,14 @@ SC.TableHeaderView = SC.View.extend({
   
   render: function(context, firstTime) {
     var column = this.get('column'), icon = column.get('icon'), html;
+    var span = context.begin('span');
     if (icon) {
       html = '<img src="%@" class="icon" />'.fmt(icon);
-      context.push(html);
+      span.push(html);
     } else {
-      context.push(this.get('label'));
+      span.push(this.get('label'));
     }
+    span.end();
   },
     
   // ========================================================

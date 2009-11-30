@@ -522,31 +522,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     menu  = SC.MenuPane.create({
 
-      /**
-        Class name - select-button-item
-      */
       classNames: ['select-button'],
 
-      /**
-        The menu items are set from the itemList property of SelectButton
-
-        @property
-      */
       items: itemList,
 
-      /**
-        Example view which will be used to create the Menu Items
-
-        @default SC.MenuItemView
-        @type SC.View
-      */
       exampleView: customMenuView,
 
-      /**
-        This property enables all the items and makes them selectable.
-
-        @property
-      */
       isEnabled: YES,
 
       menuHeightPadding: menuHeightPadding,
@@ -556,6 +537,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       layout: { width: lastMenuWidth },
       controlSize: menuControlSize,
       itemWidth: lastMenuWidth,
+      itemHeight: this.get('itemHeight') || 20,
       contentView: SC.View.extend({
       })
     }) ;
