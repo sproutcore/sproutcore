@@ -398,9 +398,9 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     // generate opening tag.
     
     // get attributes first.  Copy in className + styles...
-    var tag = this._TAG_ARRAY, pair, joined, key ;
-    var attrs = this._attrs, className = this._classNames ;
-    var id = this._id, styles = this._styles;
+    var tag = this._TAG_ARRAY, pair, joined, key ,
+        attrs = this._attrs, className = this._classNames,
+        id = this._id, styles = this._styles;
     
     // add tag to tag array
     tag[0] = '<';  tag[1] = this._tagName ;
@@ -422,7 +422,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
           pair[1] = styles[key];
           if (pair[1] === null) continue; // skip empty styles
           
-          if(typeof pair[1] === SC.T_NUMBER) pair[1] = "%@px".fmt(pair[1]);
+          if(typeof pair[1] === SC.T_NUMBER) pair[1] = pair[1]+"px";
           joined.push(pair.join(': '));
         }
         attrs.style = joined.join('; ') ;
