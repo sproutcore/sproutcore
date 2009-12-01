@@ -5,6 +5,7 @@
 
 .sc-segmented-view {
   display: block;
+  text-align: center;
 }
 
 .sc-segmented-view a.sc-segment {

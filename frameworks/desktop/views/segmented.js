@@ -272,7 +272,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (firstTime || (items !== last)) {
       this._seg_displayItems = items; // save for future
       this.renderDisplayItems(context, items) ;
-      context.addStyle('text-align', 'center');
     }else{
     // update selection and active state
       var activeIndex = this.get('activeIndex');
