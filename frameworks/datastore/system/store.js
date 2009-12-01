@@ -1960,8 +1960,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       storeKey = recordType.storeKeyFor(id);
     }
     status = this.readStatus(storeKey);
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
-      status = K.DESTROY_CLEAN;
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN){
+      status = K.DESTROYED_CLEAN;
       this.removeDataHash(storeKey, status) ;
       this.dataHashDidChange(storeKey);
       return YES;
@@ -1986,7 +1986,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     if(storeKey===undefined) storeKey = recordType.storeKeyFor(id);
     status = this.readStatus(storeKey);
 
-    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROY_CLEAN){
+    if(status==K.EMPTY || status==K.ERROR || status==K.READY_CLEAN || status==K.DESTROYED_CLEAN){
       status = K.ERROR;
       
       // Add the error to the array of record errors (for lookup later on if necessary).
