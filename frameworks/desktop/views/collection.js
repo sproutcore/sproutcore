@@ -904,7 +904,7 @@ SC.CollectionView = SC.View.extend(
     child views still need to be added, go ahead and add them.
   */
   render: function(context, firstTime) {
-    if (firstTime && this._needsReload) this.reloadIfNeeded ;
+    if (firstTime && this._needsReload) this.reloadIfNeeded() ;
     
     // add classes for other state.
     context.setClass('focus', this.get('isFirstResponder'));
