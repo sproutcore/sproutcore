@@ -237,7 +237,7 @@ SC.SelectFieldView = SC.FieldView.extend(
     var value = sc_super(); // get raw value... 
     var valueKey = this.get('valueKey') ;
     var objects = this.get('objects') ;
-    var found;
+    var found, object;
     
     // Handle empty selection.
     if (value == '***') {
@@ -247,10 +247,12 @@ SC.SelectFieldView = SC.FieldView.extend(
     // object.
     } else if (value && objects) {
       // objects = Array.from(objects) ;
-      var loc = objects.length ;
+      
+      var loc = (SC.typeOf(objects.length) === SC.T_FUNCTION) ? objects.length() : objects.length;
+      
       found = null ; // matching object goes here.
       while(!found && (--loc >= 0)) {
-        var object = objects[loc] ;
+        object = objects.objectAt? objects.objectAt(loc) : objects[loc] ;
       
         // get value using valueKey if there is one or use object
         // map to _guid or toString.

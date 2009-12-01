@@ -9,30 +9,66 @@
 
 module("SC.SheetPane UI");
 
-var pane ;
+var slidePane, blindPane ;
 
-test("verify sheet pane content container is visible at correct location with right size", function() { 
-  pane = SC.SheetPane.create({
-    layout: { width: 400, height: 200, centerX: 0 },
-    contentView: SC.View.extend({
+test("verify sheet pane slide down works", function() { 
+  slidePane = SC.SheetPane.create({
+    layout: { top: 0, left: 100, width: 400, height: 200 },
+    contentView: SC.LabelView.extend({
+      escapeHTML: NO,
+      value: '<h1>Slide Down!</h1>'
     })
   });
-  pane.append();
-
-  ok(pane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
-  ok(pane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
-  ok(pane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
-  ok(pane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
   
-  var pw = pane.layout.width;
-  var ph = pane.layout.height;
-  var ret = pane.layoutStyle();
+  var layout = slidePane.get('layout');
+  var pt = layout.top;
+  var pl = layout.left;
+  var pw = layout.width;
+  var ph = layout.height;
+  var ret = slidePane.layoutStyle();
 
   equals(ret.top, '0px', 'pane should be displayed at default position top');
-  equals(ret.left, '50%', 'pane should center horizontally');
+  equals(ret.left, '500px', 'pane should center horizontally');
   equals(ret.width, '400px', 'pane should have width 400px');
   equals(ret.height, '200px', 'pane should have height 200px');
-  equals(ret.marginLeft, -pw/2+'px', 'pane should shift-left %@ px'.fmt(-pw/2));
+  
+  slidePane.slideDown();
+  
+  ok(slidePane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
+  ok(slidePane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
+  ok(slidePane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
+  ok(slidePane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
+  
+  slidePane.slideUp();
+}) ;
 
-  pane.remove();
+test("verify sheet pane blind down works", function() { 
+  blindPane = SC.SheetPane.create({
+    layout: { top: 50, right: 100, width: 400, height: 200 },
+    contentView: SC.LabelView.extend({
+      escapeHTML: NO,
+      value: '<h1>Blind Down!</h1>'
+    })
+  });
+  
+  var layout = blindPane.get('layout');
+  var pt = layout.top;
+  var pl = layout.left;
+  var pw = layout.width;
+  var ph = layout.height;
+  var ret = blindPane.layoutStyle();
+
+  equals(ret.top, '0px', 'pane should be displayed at default position top');
+  equals(ret.left, '500px', 'pane should center horizontally');
+  equals(ret.width, '400px', 'pane should have width 400px');
+  equals(ret.height, '0px', 'pane should have height 0px');
+  
+  blindPane.blindDown();
+  
+  ok(blindPane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
+  ok(blindPane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
+  ok(blindPane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
+  ok(blindPane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
+  
+  blindPane.blindUp();
 }) ;

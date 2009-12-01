@@ -42,6 +42,7 @@ SC.TabView = SC.View.extend(
   itemIsEnabledKey: null,
   itemIconKey: null,
   itemWidthKey: null,
+  itemToolTipKey: null,
   
   tabLocation: SC.TOP_LOCATION,
   
@@ -184,4 +185,4 @@ SC.TabView = SC.View.extend(
   
 }) ;
 
-SC._TAB_ITEM_KEYS = 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey'.w();
+SC._TAB_ITEM_KEYS = 'itemTitleKey itemValueKey itemIsEnabledKey itemIconKey itemWidthKey itemToolTipKey'.w();

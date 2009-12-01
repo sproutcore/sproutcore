@@ -32,7 +32,7 @@ config :foundation, :required => [:runtime]
 config :datastore,  :required => [:runtime]
 
 # APP-LEVEL FRAMEWORKS
-%w(desktop mobile).each do |app_framework|
+%w(desktop mobile designer).each do |app_framework|
   config app_framework, :required => [:runtime, :datastore, :foundation]
 end
 
@@ -41,8 +41,10 @@ config :mobile,
   :test_layout    => 'sproutcore/mobile:lib/index.rhtml'
 
 # WRAPPER FRAMEWORKS
+config :designer, :required => [:runtime, :foundation]
 config :sproutcore, :required => :desktop
 config :mini, :required => [:runtime, :datastore]
+
 
 # SPECIAL FRAMEWORKS AND THEMES
 # These do not require any of the built-in SproutCore frameworks

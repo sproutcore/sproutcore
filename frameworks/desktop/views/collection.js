@@ -1224,8 +1224,8 @@ SC.CollectionView = SC.View.extend(
   reloadSelectionIndexes: function(indexes) {
     var invalid = this._invalidSelection ;
     if (indexes && (invalid !== YES)) {
-      if (invalid) invalid.add(indexes)
-      else invalid = this._invalidSelection = indexes.copy();
+      if (invalid) { invalid.add(indexes) ; }
+      else { invalid = this._invalidSelection = indexes.copy(); }
 
     } else this._invalidSelection = YES ; // force a total reload
     

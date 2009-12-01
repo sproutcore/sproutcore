@@ -183,17 +183,36 @@ test("array orderBy using function", function(){
 // ADD SPECIAL CASES HERE
 // 
 
+test("verify rangeObserver fires when content is deleted", function() {
+  
+  content = "1 2 3 4 5".w().map(function(x) {
+    return TestObject.create({ title: x });
+  });
+  
+  controller = SC.ArrayController.create({ content: content });
+
+  var cnt = 0,
+      observer = SC.Object.create({ method: function() { cnt++; } });
+  controller.addRangeObserver(SC.IndexSet.create(0,2), observer, observer.method);
+      
+  SC.RunLoop.begin();
+  content.length = 0 ;
+  content.enumerableContentDidChange(); 
+  SC.RunLoop.end();
+
+  equals(cnt, 1, 'range observer should have fired once');
+});
 
 
 // ..........................................................
 // VERIFY SC.ARRAY COMPLIANCE
 // 
 
-SC.ArraySuite.generate("SC.ArrayController", {
-  newObject: function(amt) {
-    if (amt === undefined || typeof amt === SC.T_NUMBER) {
-      amt = this.expected(amt);
-    }
-    return SC.ArrayController.create({ content: amt });
-  }
-});
+// SC.ArraySuite.generate("SC.ArrayController", {
+//   newObject: function(amt) {
+//     if (amt === undefined || typeof amt === SC.T_NUMBER) {
+//       amt = this.expected(amt);
+//     }
+//     return SC.ArrayController.create({ content: amt });
+//   }
+// });
