@@ -639,6 +639,7 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     
     // update my own location
     this.set('isPaneAttached', YES) ;
+		this.viewDidResize() ;
     this.parentViewDidChange() ;
     
     //notify that the layers have been appended to the document
