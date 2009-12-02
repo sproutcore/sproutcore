@@ -690,13 +690,12 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // This forces to recalculate the height of the frame when is at the bottom
     // of the scroll and the content dimension are smaller that the previous one
     
-    
     var mxVOffSet = this.get('maximumVerticalScrollOffset'),
         vOffSet = this.get('verticalScrollOffset'),
         mxHOffSet = this.get('maximumHorizontalScrollOffset'),
         hOffSet = this.get('horizontalScrollOffset');
-    var forceHeight = mxVOffSet && this.get('hasVerticalScroller') && mxVOffSet<vOffSet;
-    var forceWidth = mxHOffSet && this.get('hasHorizontalScroller') && mxHOffSet<hOffSet;
+    var forceHeight = mxVOffSet<vOffSet;
+    var forceWidth = mxHOffSet<hOffSet;
     if(forceHeight || forceWidth){
       this.forceDimensionsRecalculation(forceWidth, forceHeight, vOffSet, hOffSet);
     }
