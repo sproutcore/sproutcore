@@ -49,5 +49,5 @@ SC.Border = {
       } else context.addStyle('border', '1px '+style+' solid');
     }
   }
-  
+
 };
