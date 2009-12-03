@@ -180,7 +180,7 @@ SC.PickerPane = SC.PalettePane.extend({
         switch (preferType) {
           case SC.PICKER_MENU:
           case SC.PICKER_FIXED:
-            if(!preferMatrix || preferMatrix.length != 3) {
+            if(!preferMatrix || preferMatrix.length !== 3) {
               // default below the anchor with fine tunned visual alignment 
               // for Menu to appear just below the anchorElement.
               this.set('preferMatrix', [1, 4, 3]) ;
@@ -324,20 +324,20 @@ SC.PickerPane = SC.PalettePane.extend({
 
     var prefP1    =[[a.x+a.width+(7+overlapTunningX), a.y+parseInt(a.height/2,0)-40], 
                     [a.x-f.width-(7+overlapTunningX),  a.y+parseInt(a.height/2,0)-40], 
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y-f.height-(17+overlapTunningY)],
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0), a.y+a.height+(17+overlapTunningY)]];
+                    [a.x+parseInt((a.width/2)-(f.width/2),0), a.y-f.height-(17+overlapTunningY)],
+                    [a.x+parseInt((a.width/2)-(f.width/2),0), a.y+a.height+(17+overlapTunningY)]];
     // bottom-right corner of 4 perfect positioned f  (4x2)
     var prefP2    =[[a.x+a.width+f.width+(7+overlapTunningX), a.y+parseInt(a.height/2,0)+f.height-24], 
                     [a.x-(7+overlapTunningX),                  a.y+parseInt(a.height/2,0)+f.height-24], 
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y-(17+overlapTunningY)],
-                    [a.x+parseInt(a.width/2,0)-parseInt(f.width/2,0)+f.width, a.y+a.height+f.height+(17+overlapTunningY)]];
+                    [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y-(17+overlapTunningY)],
+                    [a.x+parseInt((a.width/2)-(f.width/2),0)+f.width, a.y+a.height+f.height+(17+overlapTunningY)]];
     // cutoff of 4 perfect positioned f: top, right, bottom, left  (4x4)
     var cutoffPrefP =[[prefP1[0][1]>0 ? 0 : 0-prefP1[0][1], prefP2[0][0]<w.width ? 0 : prefP2[0][0]-w.width, prefP2[0][1]<w.height ? 0 : prefP2[0][1]-w.height, prefP1[0][0]>0 ? 0 : 0-prefP1[0][0]], 
                       [prefP1[1][1]>0 ? 0 : 0-prefP1[1][1], prefP2[1][0]<w.width ? 0 : prefP2[1][0]-w.width, prefP2[1][1]<w.height ? 0 : prefP2[1][1]-w.height, prefP1[1][0]>0 ? 0 : 0-prefP1[1][0]],
                       [prefP1[2][1]>0 ? 0 : 0-prefP1[2][1], prefP2[2][0]<w.width ? 0 : prefP2[2][0]-w.width, prefP2[2][1]<w.height ? 0 : prefP2[2][1]-w.height, prefP1[2][0]>0 ? 0 : 0-prefP1[2][0]],
                       [prefP1[3][1]>0 ? 0 : 0-prefP1[3][1], prefP2[3][0]<w.width ? 0 : prefP2[3][0]-w.width, prefP2[3][1]<w.height ? 0 : prefP2[3][1]-w.height, prefP1[3][0]>0 ? 0 : 0-prefP1[3][0]]];
 
-    if(!this.preferMatrix || this.preferMatrix.length != 5) {
+    if(!this.preferMatrix || this.preferMatrix.length !== 5) {
       // default re-position rule : perfect right (0) > perfect left (1) > perfect top (2) > perfect bottom (3)
       // fallback to perfect top (2)
       this.set('preferMatrix', [0,1,2,3,2]) ;
@@ -361,31 +361,32 @@ SC.PickerPane = SC.PalettePane.extend({
     }
     this.set('pointerPosX', 0);
 
-    for(var i=0; i<SC.POINTER_LAYOUT.length; i++) {
-      if (cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2]===0 && cutoffPrefP[m[i]][3]===0) {
+    for(var i=0, cM, pointerLen=SC.POINTER_LAYOUT.length; i<pointerLen; i++) {
+      cM = m[i];
+      if (cutoffPrefP[cM][0]===0 && cutoffPrefP[cM][1]===0 && cutoffPrefP[cM][2]===0 && cutoffPrefP[cM][3]===0) {
         // alternative i in preferMatrix by priority
-        if (m[4] != m[i]) {
-          f.x = prefP1[m[i]][0] ;
-          f.y = prefP1[m[i]][1] ;
+        if (m[4] !== cM) {
+          f.x = prefP1[cM][0] ;
+          f.y = prefP1[cM][1] ;
           this.set('pointerPosY', 0);
-          this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
+          this.set('pointerPos', SC.POINTER_LAYOUT[cM]);
         }
         i = SC.POINTER_LAYOUT.length;
-      } else if ((m[i] === 0 || m[i] === 1) && cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2] < f.height-91 && cutoffPrefP[m[i]][3]===0) {
-        if (m[4] != m[i]) {
-          f.x = prefP1[m[i]][0] ;
-          this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]);
+      } else if ((cM === 0 || cM === 1) && cutoffPrefP[cM][0]===0 && cutoffPrefP[cM][1]===0 && cutoffPrefP[cM][2] < f.height-91 && cutoffPrefP[cM][3]===0) {
+        if (m[4] !== cM) {
+          f.x = prefP1[cM][0] ;
+          this.set('pointerPos', SC.POINTER_LAYOUT[cM]);
         }
-        f.y = prefP1[m[i]][1] - cutoffPrefP[m[i]][2];
-        this.set('pointerPosY', cutoffPrefP[m[i]][2]);
+        f.y = prefP1[cM][1] - cutoffPrefP[cM][2];
+        this.set('pointerPosY', cutoffPrefP[cM][2]);
         i = SC.POINTER_LAYOUT.length;
-      } else if ((m[i] === 0 || m[i] === 1) && cutoffPrefP[m[i]][0]===0 && cutoffPrefP[m[i]][1]===0 && cutoffPrefP[m[i]][2] <= f.height-57 && cutoffPrefP[m[i]][3]===0) {
-        if (m[4] != m[i]) {
-          f.x = prefP1[m[i]][0] ;
+      } else if ((cM === 0 || cM === 1) && cutoffPrefP[cM][0]===0 && cutoffPrefP[cM][1]===0 && cutoffPrefP[cM][2] <= f.height-57 && cutoffPrefP[cM][3]===0) {
+        if (m[4] !== cM) {
+          f.x = prefP1[cM][0] ;
         }
-        f.y = prefP1[m[i]][1] - (f.height-57) ;
+        f.y = prefP1[cM][1] - (f.height-57) ;
         this.set('pointerPosY', (f.height-59));
-        this.set('pointerPos', SC.POINTER_LAYOUT[m[i]]+' extra-low');
+        this.set('pointerPos', SC.POINTER_LAYOUT[cM]+' extra-low');
         i = SC.POINTER_LAYOUT.length;
       }
     }
