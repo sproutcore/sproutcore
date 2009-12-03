@@ -1256,9 +1256,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   _computeNextValidKeyView: function(currentView, seen) {  
     var ret = this.get('nextKeyView'),
-        children, i, childLen;
-   
-    if(this !== currentView && seen.indexOf(currentView)!=-1 && this.get('acceptsFirstResponder')){
+        children, i, childLen, child;
+    if(this !== currentView && seen.indexOf(currentView)!=-1 && 
+      this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')){
       return this;
     }
     seen.push(this); // avoid cycles
@@ -1267,7 +1267,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!ret) {
       children = this.get('childViews');
       for(i=0, childLen= children.length; i<childLen; i++){
-        ret = children[i]._computeNextValidKeyView(currentView, seen);
+        child = children[i];
+        if(child.get('isVisibleInWindow') && child.get('isVisible')){
+          ret = child._computeNextValidKeyView(currentView, seen);
+        }
         if (ret) return ret;
       }
       ret = null;
@@ -1298,9 +1301,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   _computePreviousValidKeyView: function(currentView, seen) {  
     var ret = this.get('previousKeyView'),
-        children, i;
+        children, i, child;
         
-    if(this !== currentView && seen.indexOf(currentView)!=-1 && this.get('acceptsFirstResponder')){
+    if(this !== currentView && seen.indexOf(currentView)!=-1 && 
+      this.get('acceptsFirstResponder') && this.get('isVisibleInWindow')){
       return this;
     }
     seen.push(this); // avoid cycles
@@ -1309,7 +1313,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (!ret) {
       children = this.get('childViews');
       for(i=children.length-1; 0<=i; i--){
-        ret = children[i]._computePreviousValidKeyView(currentView, seen);
+        child = children[i];
+        if(child.get('isVisibleInWindow') && child.get('isVisible')){
+          ret = child._computePreviousValidKeyView(currentView, seen);
+        }
         if (ret) return ret;
       }
       ret = null;
