@@ -300,7 +300,22 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   refresh: function() {
-    this.get('store').refreshQuery(this.get('query'));  
+    this.get('store').refreshQuery(this.get('query'));
+    return this;
+  },
+  
+  /**
+    Will recompute the results based on the SC.Query attached to the record
+    array. Useful if your query is based on computed properties that might 
+    have changed. Use refresh() instead of you want to trigger a fetch on your
+    data source since this will purely look at records already loaded into
+    the store.
+    
+    @returns {SC.RecordArray} receiver
+  */
+  reload: function() {
+    this.flush(YES);
+    return this;
   },
   
   /**
@@ -420,10 +435,11 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     SC.Query.LOCAL.  You can call this method on any RecordArray however,
     without an error.
     
+    @param {Boolean} _flush to force it - use reload() to trigger it
     @returns {SC.RecordArray} receiver
   */
-  flush: function() {
-    if (!this.get('needsFlush')) return this; // nothing to do
+  flush: function(_flush) {
+    if (!this.get('needsFlush') && !_flush) return this; // nothing to do
     this.set('needsFlush', NO); // avoid running again.
     
     // fast exit
@@ -441,7 +457,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         rec, status, recordType, sourceKeys, scope, included;
 
     // if we have storeKeys already, just look at the changed keys
-    if (storeKeys) {
+    if (storeKeys && !_flush) {
       if (changed) {
         changed.forEach(function(storeKey) {
           // get record - do not include EMPTY or DESTROYED records
