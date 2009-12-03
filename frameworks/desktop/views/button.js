@@ -374,17 +374,6 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   willLoseKeyResponderTo: function(responder) {
     if (this._isFocused) this._isFocused = NO ;
-  },
-  
-  didCreateLayer: function() {
-    //Fix for IE7 min-with bug
-    if(SC.browser.msie && SC.browser.msie<8) {
-      var buttonInner = this.$('.sc-button-inner')[0];
-      if (buttonInner){
-        var mL = buttonInner.style.marginLeft;
-        this.$('.sc-button-label')[0].style.minWidth=this.get('titleMinWidth')-mL;
-      }
-    }
   }
   
 }) ;
