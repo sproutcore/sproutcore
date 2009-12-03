@@ -58,6 +58,12 @@ if (typeof console === 'undefined') {
 var SC = SC || {} ; 
 var SproutCore = SproutCore || SC ;
 
+// Will speed up references to window, and allows munging its name. 
+// Taken from jQuery
+var window = this,
+    undefined;
+
+
 /**
   Adds properties to a target object.
   
@@ -71,10 +77,10 @@ var SproutCore = SproutCore || SC ;
 */
 SC.mixin = function() {
   // copy reference to target object
-  var target = arguments[0] || {};
-  var idx = 1;
-  var length = arguments.length ;
-  var options ;
+  var target = arguments[0] || {},
+      idx = 1,
+      length = arguments.length ,
+      options, copy , key;
 
   // Handle case where we have only one item...extend SC
   if (length === 1) {
@@ -84,9 +90,9 @@ SC.mixin = function() {
 
   for ( ; idx < length; idx++ ) {
     if (!(options = arguments[idx])) continue ;
-    for(var key in options) {
+    for(key in options) {
       if (!options.hasOwnProperty(key)) continue ;
-      var copy = options[key] ;
+      copy = options[key] ;
       if (target===copy) continue ; // prevent never-ending loop
       if (copy !== undefined) target[key] = copy ;
     }
