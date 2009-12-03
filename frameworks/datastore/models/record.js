@@ -315,13 +315,15 @@ SC.Record = SC.Object.extend(
     if (value !== attrs[key]) {
       if(!ignoreDidChange) this.beginEditing();
       attrs[key] = value;
+      
+      // If the key is the primaryKey of the record, we need to tell the store
+      // about the change.
+      if (key===this.get('primaryKey')) {
+        SC.Store.replaceIdFor(storeKey, value) ;
+        this.propertyDidChange('id'); // Reset computed value
+      }
+      
       if(!ignoreDidChange) this.endEditing(key);
-    }
-    
-    // if value is primaryKey of record, write it to idsByStoreKey
-    if (key===this.get('primaryKey')) {
-      SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
-      this.propertyDidChange('id'); // Reset computed value
     }
     
     // if any aggregates, propagate the state
