@@ -482,7 +482,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
   },
   
   /**
-    Generates a with the passed options.  Like calling context.begin().end().
+    Generates a tag with the passed options.  Like calling context.begin().end().
     
     @param {String} tagName optional tag name.  default 'div'
     @param {Hash} opts optional tag options.  defaults to empty options.
