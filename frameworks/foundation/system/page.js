@@ -41,7 +41,7 @@ SC.Page = SC.Object.extend(
       this[key] = value = value.create({ page: this }) ;
       if (!this.get('inDesignMode')) value.awake() ;
       return value ;
-    } else return sc_super() ;
+    } else return sc_super();
   },
   
   /**
@@ -54,9 +54,10 @@ SC.Page = SC.Object.extend(
   */
   awake: function() {
     // step through all views and build them
-    for(var key in this) {
+    var value, key;
+    for(key in this) {
       if (!this.hasOwnProperty(key)) continue ;
-      var value = this[key] ;
+      value = this[key] ;
       if (value && value.isViewClass) {
         this[key] = value = value.create({ page: this }) ;
       }
@@ -78,9 +79,10 @@ SC.Page = SC.Object.extend(
     Applies a localization to every view builder defined on the page.  You must call this before you construct a view to apply the localization.
   */
   loc: function(locs) {
-    for(var key in locs) {
+    var view, key;
+    for(key in locs) {
       if (!locs.hasOwnProperty(key)) continue ;
-      var view = this[key] ;
+      view = this[key] ;
       if (!view || !view.isViewClass) continue ;
       view.loc(locs[key]);
     }
