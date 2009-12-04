@@ -29,14 +29,16 @@ test("verify sheet pane slide down works", function() {
 
   slidePane.append();
   var f = function() {
+    // make sure all fo the timers have had an opportunity to fire
+    SC.RunLoop.begin().end();
     equals(slidePane.get('layout').top, 0, 'pane should be displayed at default position top after animating');
     ok(slidePane.get('isVisibleInWindow'), 'pane.isVisibleInWindow should be YES');
     ok(slidePane.$().hasClass('sc-sheet'), 'pane should have sc-sheet class');
     ok(slidePane.childViews[0].get('isVisibleInWindow'), 'pane.div.isVisibleInWindow should be YES');
     ok(slidePane.childViews[0].$().hasClass('sc-view'), 'pane.div should have sc-view class');
     window.start();
+    slidePane.remove();
   };
   stop();
-  setTimeout(f, 205);
-  slidePane.remove();
+  setTimeout(f, 250);
 }) ;
