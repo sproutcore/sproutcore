@@ -58,12 +58,6 @@ if (typeof console === 'undefined') {
 var SC = SC || {} ; 
 var SproutCore = SproutCore || SC ;
 
-// Will speed up references to window, and allows munging its name. 
-// Taken from jQuery
-var window = this,
-    undefined;
-
-
 /**
   Adds properties to a target object.
   
