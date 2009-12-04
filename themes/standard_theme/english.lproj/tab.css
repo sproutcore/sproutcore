@@ -13,7 +13,3 @@
 .sc-theme .sc-tab-view .sc-tab-view {
   background-color: transparent;
 }
-
-.sc-theme .sc-tab-view > .sc-segmented-view{
-  z-index: 100;
-}
