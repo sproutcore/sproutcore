@@ -70,7 +70,7 @@ test("adding/remove/adding pane", function() {
   var layer = pane.get('layer');
   ok(layer, 'has layer');
   equals(layer.parentNode, elem1, 'layer belongs to parent');
-  
+  ok(pane.get('isVisibleInWindow'), 'isVisibleInWindow is YES before remove');
   pane.remove();
   ok(!pane.get('isVisibleInWindow'), 'isVisibleInWindow is NO');
   
