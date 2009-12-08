@@ -618,7 +618,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
     }, this);
 
-    this._notifyRecordArrays(storeKeys, recordTypes);
+    if (storeKeys.get('length') > 0) this._notifyRecordArrays(storeKeys, recordTypes);
 
     storeKeys.clear();
     hasDataChanges.clear();
