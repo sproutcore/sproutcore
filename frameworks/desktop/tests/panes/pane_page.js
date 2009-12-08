@@ -10,7 +10,6 @@
 module('SC.Pane-SC.Page') ;
 
 test("isVisible changes should update views that are instantiated in a page", function() {
-  debugger;
   var page = SC.Page.design({
     inspector: SC.PickerPane.design({
       layout: { width: 300, height: 300, centerX: 0 },

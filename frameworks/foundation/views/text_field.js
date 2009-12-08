@@ -689,9 +689,17 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       evt.stop();
       return YES;
     } else if((this.value && this.value.length===0) || !this.value) {
-      this.$input()[0].focus();
+      if(SC.browser.msie<8){
+        this.invokeLater(this.focusIE7, 1);
+      }else{
+        this.$input()[0].focus();
+      }
       return YES;
     } else return sc_super();
+  },
+
+  focusIE7: function (){
+    this.$input()[0].focus();
   },
 
   selectStart: function(evt) {
