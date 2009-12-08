@@ -112,6 +112,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
   itemList: [],
 
   /**
+    Is the menu item enabled or not
+
+    @property
+    @type: {Boolean}
+  */
+  isEnabledKey: null,
+
+  /**
     Current selected menu item
 
     @property
@@ -314,8 +322,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
   render: function(context,firstTime) {
     sc_super();
     var layoutWidth, objects, len, nameKey, iconKey, valueKey, checkboxEnabled,
-      currentSelectedVal, shouldLocalize, separatorPostion, itemList, isChecked,
-      idx, name, icon, value, item;
+      isEnabledKey, currentSelectedVal, shouldLocalize, separatorPostion,
+      itemList, isChecked, idx, name, icon, value, item, isEnabled ;
     layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.SELECT_BUTTON_SPRITE_WIDTH }) ;
@@ -330,6 +338,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     iconKey = this.get('iconKey') ;
     valueKey = this.get('valueKey') ;
     checkboxEnabled = this.get('checkboxEnabled') ;
+    isEnabledKey = this.get('isEnabledKey') ;
 
     //get the current selected value
     currentSelectedVal = this.get('value') ;
@@ -376,6 +385,10 @@ SC.SelectButtonView = SC.ButtonView.extend(
         }
       }
 
+      //Check if the item is enabled or not
+      isEnabled = isEnabledKey ? (object.get ?
+        object.get(isEnabledKey) : object[isEnabledKey]) : YES ;
+
       //Check if the item is currentSelectedItem or not
       if(value === this.get('value')) {
 
@@ -398,7 +411,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
         title: name,
         icon: icon,
         value: value,
-        isEnabled: YES,
+        isEnabled: isEnabled,
         checkbox: isChecked,
         action: this.displaySelectedItem
       }) ;
