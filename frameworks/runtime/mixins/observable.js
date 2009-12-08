@@ -721,7 +721,7 @@ SC.Observable = {
     }
     if (!target) target = this ;
     if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
-    if (!method) throw "You must pass a method to addObserver()" ;
+    if (!method) throw "You must pass a method to removeObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
     key = key.toString() ;
