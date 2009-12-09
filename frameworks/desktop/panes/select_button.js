@@ -115,7 +115,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
     Is the menu item enabled or not
 
     @property
-    @type: {Boolean}
+    @type: {String}
+    @default null
   */
   isEnabledKey: null,
 
