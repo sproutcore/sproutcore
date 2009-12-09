@@ -768,8 +768,16 @@ SC.Event.prototype = {
   normalized: YES,
 
   /** Returns the pressed character (found in this.which) as a string. */
-  getCharString: function() { 
-    return (this.charCode>0) ? String.fromCharCode(this.which) : null;
+  getCharString: function() {
+      if(SC.browser.msie){
+        if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
+          return String.fromCharCode(0);
+        }else{
+          return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;  
+        }
+      }else{
+        return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
+      }
   },
   
   /** Returns character codes for the event.  The first value is the normalized code string, with any shift or ctrl characters added to the begining.  The second value is the char string by itself.

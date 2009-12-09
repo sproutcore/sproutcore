@@ -46,7 +46,7 @@ SC.Validator.Number = SC.Validator.extend(
     
     switch(SC.typeOf(value)) {
       case SC.T_STRING:
-        if (value.length == '') {
+        if (value.length === 0) {
           value = null ;
         } else if (this.get('places') > 0) {
           value = parseFloat(value) ;
@@ -64,7 +64,7 @@ SC.Validator.Number = SC.Validator.extend(
   
   validate: function(form, field) { 
     var value = field.get('fieldValue') ;
-    return (value == '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
+    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
   },
   
   validateError: function(form, field) {
@@ -76,7 +76,7 @@ SC.Validator.Number = SC.Validator.extend(
     Allow only numbers, dashes, period, and commas
   */
   validateKeyDown: function(form, field, charStr) {
-    return !!charStr.match(/[0-9\.,\-]/);
+    return (!!charStr.match(/[0-9\.,\-\0]/)) || charStr.length === 0;
   }
     
 }) ;
