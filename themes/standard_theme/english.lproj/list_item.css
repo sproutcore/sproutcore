@@ -66,3 +66,17 @@
 
 
 /* @end */
+
+/* @group Branch */
+
+.sc-list-item-view .branch {
+	background-image: sc_static('icons/mini_454545'); 
+	background-position: -32px 0;
+}
+
+.sc-list-item-view.sel .branch,
+.sc-list-item-view.active .branch {
+	background-image: sc_static('icons/mini_ffffff'); 
+}
+
+/* @end */

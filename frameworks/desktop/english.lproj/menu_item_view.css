@@ -83,8 +83,6 @@
 /* @end */
 
 .sc-menu-item div.checkbox {
-  background-image: sc_static('icons/mini_454545'); 
-  background-position: -66px -147px;
   position: absolute;
   display: block;
   width: 12px;
@@ -96,7 +94,6 @@
 }
 
 .sc-menu-item.focus div.checkbox {
-  background-image: sc_static('icons/mini_ffffff'); 
 }
 
 

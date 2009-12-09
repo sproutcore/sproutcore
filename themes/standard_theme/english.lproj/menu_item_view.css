@@ -1,3 +1,12 @@
 .sc-theme .sc-menu-item {  
   display:block !important;
 }
+
+.sc-menu-item div.checkbox {
+  background-image: sc_static('icons/mini_454545'); 
+  background-position: -66px -147px;
+}
+
+.sc-menu-item.focus div.checkbox {
+  background-image: sc_static('icons/mini_ffffff'); 
+}
