@@ -500,7 +500,13 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     lastMenuWidth = (largestMenuWidth > lastMenuWidth) ?
                       largestMenuWidth: lastMenuWidth ;
-
+    // Get the window size width and compare with the lastMenuWidth.
+    // If it is greater than windows width then reduce the maxwidth by 25px
+    // so that the ellipsis property is enabled by default
+    var maxWidth = SC.RootResponder.responder.get('currentWindowSize').width;
+    if(lastMenuWidth > maxWidth) {
+      lastMenuWidth = (maxWidth - 25) ;
+    }
     this.set('lastMenuWidth',lastMenuWidth) ;
     currSel = this.get('currentSelItem') ;
     itemList = this.get('itemList') ;
