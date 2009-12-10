@@ -112,15 +112,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
   itemList: [],
 
   /**
-    Is the menu item enabled or not
-
-    @property
-    @type: {String}
-    @default null
-  */
-  isEnabledKey: null,
-
-  /**
     Current selected menu item
 
     @property
@@ -264,6 +255,16 @@ SC.SelectButtonView = SC.ButtonView.extend(
     customView used to draw the menu
   */
   customView: null,
+  
+  /**
+    css classes applied to customView
+  */
+  customViewClassName: null,
+  
+  /**
+    customView menu offset width
+  */
+  customViewMenuOffsetWidth: 0,
 
   /**
     This is a property for enabling/disabling ellipsis
@@ -323,8 +324,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
   render: function(context,firstTime) {
     sc_super();
     var layoutWidth, objects, len, nameKey, iconKey, valueKey, checkboxEnabled,
-      isEnabledKey, currentSelectedVal, shouldLocalize, separatorPostion,
-      itemList, isChecked, idx, name, icon, value, item, isEnabled ;
+      currentSelectedVal, shouldLocalize, separatorPostion, itemList, isChecked,
+      idx, name, icon, value, item;
     layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.SELECT_BUTTON_SPRITE_WIDTH }) ;
@@ -339,7 +340,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
     iconKey = this.get('iconKey') ;
     valueKey = this.get('valueKey') ;
     checkboxEnabled = this.get('checkboxEnabled') ;
-    isEnabledKey = this.get('isEnabledKey') ;
 
     //get the current selected value
     currentSelectedVal = this.get('value') ;
@@ -386,10 +386,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
         }
       }
 
-      //Check if the item is enabled or not
-      isEnabled = isEnabledKey ? (object.get ?
-        object.get(isEnabledKey) : object[isEnabledKey]) : YES ;
-
       //Check if the item is currentSelectedItem or not
       if(value === this.get('value')) {
 
@@ -412,7 +408,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
         title: name,
         icon: icon,
         value: value,
-        isEnabled: isEnabled,
+        isEnabled: YES,
         checkbox: isChecked,
         action: this.displaySelectedItem
       }) ;
@@ -481,16 +477,21 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     items = this.get('itemList') ;
-    
+
+    var customViewClassName = this.get('customViewClassName') ;
+    var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth') ;
+    var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+    className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
+
     for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
       item = items.objectAt(idx) ;
       element = document.createElement('div') ;
       element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
-      element.className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+      element.className = className ;
       element.innerHTML = item.title ;
       document.body.appendChild(element) ;
-      elementOffsetWidth = element.offsetWidth ;
+      elementOffsetWidth = element.offsetWidth + customViewMenuOffsetWidth;
 
       if (!largestMenuWidth || (elementOffsetWidth > largestMenuWidth)) {
         largestMenuWidth = elementOffsetWidth ;
@@ -500,6 +501,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
     lastMenuWidth = (largestMenuWidth > lastMenuWidth) ?
                       largestMenuWidth: lastMenuWidth ;
+
     // Get the window size width and compare with the lastMenuWidth.
     // If it is greater than windows width then reduce the maxwidth by 25px
     // so that the ellipsis property is enabled by default
@@ -507,6 +509,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     if(lastMenuWidth > maxWidth) {
       lastMenuWidth = (maxWidth - 25) ;
     }
+
     this.set('lastMenuWidth',lastMenuWidth) ;
     currSel = this.get('currentSelItem') ;
     itemList = this.get('itemList') ;
