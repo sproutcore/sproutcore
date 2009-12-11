@@ -184,7 +184,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           this.add(e, eventType, target, method, context);
         }, this);
         return this;
-      } else elem = elem.get(0);
+      } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
     
@@ -260,7 +260,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           this.remove(e, eventType, target, method);
         }, this);
         return this;
-      } else elem = elem.get(0);
+      } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
     
@@ -389,7 +389,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           this.trigger(e, eventType, args, donative);
         }, this);
         return this;
-      } else elem = elem.get(0);
+      } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
 

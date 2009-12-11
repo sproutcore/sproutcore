@@ -348,9 +348,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       } else {
         icon = '';
       }
-      ic.push('<span class="sc-button-inner"><label class="sc-button-label">');
-      ic.push(icon+title);
-      ic.push('</label></span>');
+      ic.push('<span class="sc-button-inner"><label class="sc-button-label">',
+              icon+title, '</label></span>');
       ic.end();
     }   
   },  
@@ -370,7 +369,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // start at the target event and go upwards until we reach either the 
     // root responder or find an anchor.sc-segment.
     var root = this.$(), match = null ;
-    while(!match && (elem.length>0) && (elem.get(0)!==root.get(0))) {
+    while(!match && (elem.length>0) && (elem[0]!==root[0])) {
       if (elem.hasClass('sc-segment') && elem.attr('tagName')==='A') {
         match = elem;
       } else elem = elem.parent();

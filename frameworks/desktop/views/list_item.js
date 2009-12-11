@@ -453,7 +453,7 @@ SC.ListItemView = SC.View.extend(
     
     var el = SC.$(evt.target) ;
     var ret = NO, classNames ;
-    while(!ret && el.length>0 && (el.get(0) !== layer)) {
+    while(!ret && el.length>0 && (el[0] !== layer)) {
       if (el.hasClass(className)) ret = YES ;
       el = el.parent() ;
     }
@@ -655,7 +655,7 @@ SC.ListItemView = SC.View.extend(
    if (!labelKey) return NO ;
    
    // get the element to check for.
-   var el = this.$label().get(0) ;
+   var el = this.$label()[0] ;
    if (!el) return NO ; // no label to check for.
    
    var cur = evt.target, layer = this.get('layer') ;
