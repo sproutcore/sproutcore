@@ -455,7 +455,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         didChange = NO,
         K         = SC.Record,
         rec, status, recordType, sourceKeys, scope, included;
-    var oldStoreKeys = storeKeys;
 
     // if we have storeKeys already, just look at the changed keys
     if (storeKeys && !_flush) {
@@ -521,32 +520,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     // only resort and update if we did change
     if (didChange) {
-      didChange = NO;
-      var newStoreKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
-      
-      if (oldStoreKeys) {
-        var oldLen = oldStoreKeys.length;
-        var newLen = newStoreKeys.length;
-        if (oldLen === newLen) {
-          var i, oldValue, newValue;
-          for (i = 0;  i < newLen;  ++i) {
-            oldValue = oldStoreKeys[i];
-            newValue = newStoreKeys[i];
-            if (oldValue !== newValue) {
-              didChange = YES;
-              break;
-            }
-          }
-        }
-        else {
-          didChange = YES;
-        }
-      }
-      else {
-        didChange = YES;
-      }
-      
-      if (didChange) this.set('storeKeys', SC.clone(newStoreKeys)); // replace content
+      storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
+      this.set('storeKeys', SC.clone(storeKeys)); // replace content
     }
 
     return this;
