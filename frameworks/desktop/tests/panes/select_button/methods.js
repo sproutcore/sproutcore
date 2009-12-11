@@ -52,6 +52,18 @@ module("SC.SelectButtonView",{
           valueKey: 'title',
           nameKey: 'title',
           sortKey: 'pos'
+        }),
+        
+        //view5
+        SC.SelectButtonView.extend({
+          objects: ["My","New", "List"]
+        }),
+        
+        //view6
+        SC.SelectButtonView.extend({
+          objects: ["My","New", "List"],
+          customViewClassName: 'custom-menu-item',
+          customViewMenuOffsetWidth: 46
         })
       ]
     });
@@ -60,7 +72,9 @@ module("SC.SelectButtonView",{
     view2 = pane.childViews[1] ;
     view3 = pane.childViews[2] ;
     view4 = pane.childViews[3] ;
-
+    view5 = pane.childViews[4] ;
+    view6 = pane.childViews[5] ;
+    
     pane.append(); // make sure there is a layer...
     SC.RunLoop.end();
   },
@@ -163,3 +177,18 @@ test("objects should change on changing the binding", function() {
   ok(objects===newObjects, 'Objects should be bound') ;
 });
 
+//test11
+test("The properties for select button should take default values unless specified", function() {
+  var prop1 = view5.get('customViewClassName');
+  var prop2 = view5.get('customViewMenuOffsetWidth');
+  equals(prop1,null,'Custom view class name should be null');
+  equals(prop2,0,'Custom view menu off set width should be 0');
+});
+
+//test12
+test("The properties for select button should take the specified values", function() {
+  var prop1 = view6.get('customViewClassName');
+  var prop2 = view6.get('customViewMenuOffsetWidth');
+  equals(prop1,'custom-menu-item','Custom view class name should be custom-menu-item');
+  equals(prop2,46,'Custom view menu off set width should be 46');
+});
