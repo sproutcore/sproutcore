@@ -28,8 +28,8 @@ SC.ObserverSet = {
   _membersCacheIsValid: NO,
   
   /**
-    adds the named target/method observer to the set.  The method must be
-    a function, not a string..
+    Adds the named target/method observer to the set.  The method must be
+    a function, not a string.
   */
   add: function(target, method, context) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";
@@ -48,7 +48,10 @@ SC.ObserverSet = {
     // implementation is intentionally lazy.
     if (context !== undefined) {
       var contexts = methods.contexts ;
-      if (!context) contexts = {};
+      if (!context) {
+        contexts = {};
+        methods.contexts = contexts;
+      }
       contexts[SC.guidFor(method)] = context ;
     }
     
