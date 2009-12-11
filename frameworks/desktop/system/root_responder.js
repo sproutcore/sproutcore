@@ -420,6 +420,10 @@ SC.RootResponder = SC.RootResponder.extend(
       // otherwise, send as keyDown event.  If no one was interested in this
       // keyDown event (probably the case), just let the browser do its own
       // processing.
+      
+      // Arrow keys are handled in keypress for firefox
+      if (evt.keyCode>=37 && evt.keyCode<=40 && SC.browser.mozilla) return YES;
+      
       ret = this.sendEvent('keyDown', evt) ;
       
       // attempt key equivalent if key not handled
