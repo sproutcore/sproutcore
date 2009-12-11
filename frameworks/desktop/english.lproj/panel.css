@@ -19,7 +19,6 @@
 }
 
 .sc-pane.sc-panel > .top-right-edge {
-  background: static_url('images/panels/sprite-x.png') no-repeat -40px -120px;
   position: absolute;
   width: 40px;
   height: 40px;
@@ -29,7 +28,6 @@
 }
 
 .sc-pane.sc-panel > .top-left-edge {
-  background: static_url('images/panels/sprite-x.png') no-repeat 0px -120px;
   position: absolute;
   width: 40px;
   height: 40px;
@@ -39,7 +37,6 @@
 }
 
 .sc-pane.sc-panel > .bottom-left-edge {
-  background: static_url('images/panels/sprite-x.png') no-repeat 0px -160px;
   position: absolute;
   width: 40px;
   height: 40px;
@@ -49,7 +46,6 @@
 }
 
 .sc-pane.sc-panel > .bottom-right-edge {
-  background: static_url('images/panels/sprite-x.png') no-repeat -40px -160px;
   position: absolute;
   width: 40px;
   height: 40px;
@@ -59,7 +55,6 @@
 }
 
 .sc-pane.sc-panel > .top-edge {
-  background: static_url('images/panels/sprite-x.png') repeat-x 0px -230px;
   position: absolute;
   height: 20px;
   top: -20px;
@@ -69,7 +64,6 @@
 }
 
 .sc-pane.sc-panel > .bottom-edge {
-  background: static_url('images/panels/sprite-x.png') repeat-x 0px -210px;
   position: absolute;
   height: 20px;
   bottom: -20px;
@@ -79,7 +73,6 @@
 }
 
 .sc-pane.sc-panel > .left-edge {
-  background: static_url('images/panels/sprite-y.png') repeat-y 0px 0px;
   position: absolute;
   width: 20px;
   top: 20px;
@@ -89,7 +82,6 @@
 }
 
 .sc-pane.sc-panel > .right-edge {
-  background: static_url('images/panels/sprite-y.png') repeat-y -20px 0px;
   position: absolute;
   width: 20px;
   top: 20px;
