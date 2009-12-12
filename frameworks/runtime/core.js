@@ -424,6 +424,9 @@ SC.mixin(/** @scope SC */ {
 
   */
   compare: function (v, w) {
+    // Doing a '===' check is very cheap, so in the case of equality, checking
+    // this up-front is a big win.
+    if (v === w) return 0;
     
     var type1 = SC.typeOf(v);
     var type2 = SC.typeOf(w);
@@ -447,19 +450,22 @@ SC.mixin(/** @scope SC */ {
         return 0;
 
       case SC.T_ARRAY:
-        var l = Math.min(v.length,w.length);
+        var vLen = v.length;
+        var wLen = w.length;
+        var l = Math.min(vLen, wLen);
         var r = 0;
         var i = 0;
+        var thisFunc = arguments.callee;
         while (r===0 && i < l) {
-          r = arguments.callee(v[i],w[i]);
-          if ( r !== 0 ) return r;
+          r = thisFunc(v[i],w[i]);
           i++;
         }
+        if (r !== 0) return r;
       
         // all elements are equal now
         // shorter array should be ordered first
-        if (v.length < w.length) return -1;
-        if (v.length > w.length) return 1;
+        if (vLen < wLen) return -1;
+        if (vLen > wLen) return 1;
         // arrays are equal now
         return 0;
         
