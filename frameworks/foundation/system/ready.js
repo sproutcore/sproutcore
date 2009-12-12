@@ -92,6 +92,7 @@ SC.mixin({
     // Only call once
     if (SC.isReady) return ;
     if (typeof SC.mapDisplayNames === SC.T_FUNCTION) SC.mapDisplayNames();
+    if (typeof SC.addInvokeOnceLastDebuggingInfo === SC.T_FUNCTION) SC.addInvokeOnceLastDebuggingInfo();
      
     // setup locale
     SC.Locale.createCurrentLocale();

@@ -30,6 +30,10 @@ SC.ObserverSet = {
   /**
     Adds the named target/method observer to the set.  The method must be
     a function, not a string.
+    
+    Note that in debugging mode only, this method is overridden to also record
+    the name of the object and function that resulted in the target/method
+    being added.
   */
   add: function(target, method, context) {
     var targetGuid = (target) ? SC.guidFor(target) : "__this__";

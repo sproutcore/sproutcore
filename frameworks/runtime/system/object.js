@@ -657,7 +657,10 @@ SC.Object.prototype = {
     too expensive to execute more than once, such as methods that update the
     DOM.
     
-    @param {Funciton|String} method method or method name
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
+    
+    @param {Function|String} method method or method name
     @returns {SC.Object} receiver
   */
   invokeOnce: function(method) {
@@ -694,6 +697,9 @@ SC.Object.prototype = {
     
     You can call invokeLast as many times as you like and the method will
     only be invoked once.
+    
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
     
     @param {Funciton|String} method method or method name
     @returns {SC.Object} receiver

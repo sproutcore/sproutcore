@@ -98,6 +98,9 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     Usually you will not call this method directly but use invokeOnce() 
     defined on SC.Object.
     
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
+    
     @param {Object} target
     @param {Function} method
     @returns {SC.RunLoop} receiver
@@ -124,6 +127,9 @@ SC.RunLoop = SC.Object.extend(/** @scope SC.RunLoop.prototype */ {
     
     Usually you will not call this method directly but use invokeLast() 
     defined on SC.Object.
+    
+    Note that in development mode only, the object and method that call this
+    method will be recorded, for help in debugging scheduled code.
     
     @param {Object} target
     @param {Function} method
