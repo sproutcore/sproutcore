@@ -118,6 +118,14 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
     re-render the view using the render() method.  If you would like to 
     override this behavior with your own custom updating code, you can 
     replace updateLayer() with your own implementation instead.
+    
+  - *didAppendLayerToDocument:* in theory all DOM setup could be done
+    in didCreateLayer() as you already have a DOM element instantiated. 
+    However there is cases where the element has to be first appended to the
+    Document because there is either a bug on the browser or you are using 
+    plugins which objects are not instantiated until you actually append the
+    element to the DOM. This will allow you to do things like registering 
+    DOM events on flash or quicktime objects.
   
   @extends SC.Responder
   @extends SC.DelegateSupport
@@ -338,6 +346,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // The DOM will need some fixing up, note this on the view.
     view.parentViewDidChange() ;
     view.layoutDidChange() ;
+    var pane = view.get('pane');
+    if(pane && pane.get('isPaneAttached')) {
+      view._notifyDidAppendToDocument();
+    }
     
     // notify views
     if (this.didAddChild) this.didAddChild(view, beforeView) ;
@@ -730,6 +742,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var context = this.renderContext(this.get('layer')) ;
     this.prepareContext(context, NO) ;
     context.update() ;
+    if (context._innerHTMLReplaced) {
+      var pane = this.get('pane');
+      if(pane && pane.get('isPaneAttached')) {
+        this._notifyDidAppendToDocument();
+      }
+    }
     if (this.didUpdateLayer) this.didUpdateLayer(); // call to update DOM
     if(this.designer && this.designer.viewDidUpdateLayer) this.designer.viewDidUpdateLayer(); //let the designer know
     return this ;
@@ -950,6 +968,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   render: function(context, firstTime) {
     if (firstTime) this.renderChildViews(context, firstTime) ;
+  },
+  
+  
+  /** @private - 
+    Invokes the receivers didAppendLayerToDocument() method if it exists and then
+    invokes the same on all child views. 
+  */
+  
+  _notifyDidAppendToDocument: function() {
+    if(this.didAppendToDocument) this.didAppendToDocument();
+    var i=0, child, childLen, children = this.get('childViews');
+    for(i=0, childLen=children.length; i<childLen; i++) {
+      child = children[i];
+      if(child._notifyDidAppendToDocument){
+        child._notifyDidAppendToDocument();
+      }
+    }
   },
   
   // ..........................................................
@@ -2582,7 +2617,7 @@ SC.View.mixin(/** @scope SC.View */ {
   */
   localization: function(attrs, rootElement) { 
     // add rootElement
-    if (rootElement) attrs.rootElement = SC.$(rootElement).get(0);
+    if (rootElement) attrs.rootElement = SC.$(rootElement)[0];
     return attrs; 
   },
   
@@ -2600,7 +2635,7 @@ SC.View.mixin(/** @scope SC.View */ {
     var args = SC.$A(arguments); // prepare to edit
     if (SC.none(element)) {
       args.shift(); // remove if no element passed
-    } else args[0] = { rootElement: SC.$(element).get(0) } ;
+    } else args[0] = { rootElement: SC.$(element)[0] } ;
     var ret = this.create.apply(this, arguments) ;
     args = args[0] = null;
     return ret ;
