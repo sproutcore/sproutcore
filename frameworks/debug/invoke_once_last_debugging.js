@@ -139,7 +139,7 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
       originatingMethod = originatingStack[0];
     }
     else {
-      originatingStack  = "unknown";
+      originatingStack  = null;
       originatingMethod = arguments.callee.caller;
     }    SC.RunLoop.currentRunLoop.invokeOnce(this, method, originatingTarget, originatingMethod, originatingStack) ;
     return this ;
@@ -154,7 +154,7 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
       originatingMethod = originatingStack[0];
     }
     else {
-      originatingStack  = "unknown";
+      originatingStack  = null;
       originatingMethod = arguments.callee.caller;
     }
     SC.RunLoop.currentRunLoop.invokeLast(this, method, originatingTarget, originatingMethod, originatingStack) ;
@@ -174,7 +174,7 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
         originatingMethod = originatingStack[0];
       }
       else {
-        originatingStack  = "unknown";
+        originatingStack  = null;
         originatingMethod = arguments.callee.caller;
       }
     }
@@ -199,8 +199,14 @@ SC.addInvokeOnceLastDebuggingInfo = function() {
     // not provided for us.
     if (!originatingTarget) originatingTarget = null;   // More obvious when debugging
     if (!originatingMethod) {
-      originatingStack  = SC.getRecentStack();
-      originatingMethod = originatingStack[0];
+      if (SC.LOG_RUNLOOP_INVOCATIONS) {
+        originatingStack  = SC.getRecentStack();
+        originatingMethod = originatingStack[0];
+      }
+      else {
+        originatingStack  = null;
+        originatingMethod = arguments.callee.caller;
+      }
     }    
     // THIS IS THE PORTION THAT DIFFERS FROM THE STANDARD IMPLEMENTATION
     
