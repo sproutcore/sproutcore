@@ -116,7 +116,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     @property {SC.TextSelection}
   */
   selection: function(key, value) {
-    var element = this.$input().get(0),
+    var element = this.$input()[0],
         range, start, end;
 
     // Are we being asked to set the value, or return the current value?
@@ -474,21 +474,40 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   //
 
   didCreateLayer: function() {
-    sc_super();
-
+    if(!this.get('isTextArea')){
+      sc_super(); 
+      this._addTextAreaEvents();
+    } 
+  },
+  
+  
+  didAppendToDocument: function() {
+    // Turns out that in safari and firefox you can attach events to a textarea
+    // only if it has been appended to the DOM or if you did did it during
+    // loading time. For input tags is the other way around. I tested in all
+    // browsers and if I add the event for input tag before being visible it works
+    // fine, and if I add the event after the textarea is visible then the 
+    // textarea works. In IE works fine both ways.
+    if(this.get('isTextArea')){
+      sc_super();
+      this._addTextAreaEvents();
+    }
+  },
+  
+  _addTextAreaEvents: function() {
     var input = this.$input();
     SC.Event.add(input, 'focus', this, this._textField_fieldDidFocus);
     SC.Event.add(input, 'blur',  this, this._textField_fieldDidBlur);
-
+    
     // There are certain ways users can select text that we can't identify via
     // our key/mouse down/up handlers (such as the user choosing Select All
     // from a menu).
     SC.Event.add(input, 'select', this, this._textField_selectionDidChange);
-    
+        
     if(SC.browser.mozilla){
       // cache references to layer items to improve firefox hack perf
-       this._cacheInputElement = this.$input();
-       this._cachePaddingElement = this.$('.padding');
+      this._cacheInputElement = this.$input();
+      this._cachePaddingElement = this.$('.padding');
     }
   },
 

@@ -175,6 +175,17 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
     SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange) ;
   },
   
+  /** @private
+    after the layer is append to the doc, set the field value and observe events
+    only for textarea.
+  */
+  didAppendToDocument: function() {
+    if(this.get('isTextArea')){
+      this.setFieldValue(this.get('fieldValue'));
+      SC.Event.add(this.$input(), 'change', this, this._field_fieldValueDidChange) ;
+    }
+  },
+  
   willDestroyLayer: function() {
     SC.Event.remove(this.$input(), 'change', this, this._field_fieldValueDidChange); 
   },
@@ -292,7 +303,7 @@ SC.FieldView = SC.View.extend(SC.Control, SC.Validatable,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        this.$input().get(0).focus();
+        this.$input()[0].focus();
       }
     }
   },
