@@ -495,7 +495,8 @@ SC.CoreQuery = (function() {
             var index = elem.selectedIndex,
               values = [],
               options = elem.options,
-              one = elem.type === "select-one";
+              one = elem.type === "select-one",
+              option;
 
             // Nothing was selected
             if ( index < 0 ) return null;
@@ -503,7 +504,7 @@ SC.CoreQuery = (function() {
             // Loop through all the selected options
             var i, max = one ? index+1:options.length;
             for (i = one ? index : 0; i < max; i++ ) {
-              var option = options[ i ];
+              option = options[ i ];
               if ( option.selected ) {
                 value = CQ(option).val(); // get value
                 if (one) return value; // We don't need an array for one
@@ -609,7 +610,7 @@ SC.CoreQuery = (function() {
       @returns {String|CoreQuery}
     */
     text: function( text ) {
-      if ( typeof text !== "object" && text != null ) {
+      if ( text !== undefined && typeof text !== "object" && text != null ) {
         return this.empty().append( (this[0] && this[0].ownerDocument || document).createTextNode( text ) );
       }
       var ret = "";
@@ -749,12 +750,12 @@ SC.CoreQuery = (function() {
       @returns {Array} mapped elements
     */
     map: function( elems, callback ) {
-      var ret = [];
+      var ret = [], value, i, length;
 
       // Go through the array, translating each of the items to their
       // new value (or values).
-      for ( var i = 0, length = elems.length; i < length; i++ ) {
-        var value = callback( elems[ i ], i );
+      for ( i = 0, length = elems.length; i < length; i++ ) {
+        value = callback( elems[ i ], i );
 
         if ( value != null ) ret[ ret.length ] = value;
       }
@@ -1041,7 +1042,8 @@ SC.CoreQuery = (function() {
               // do nothing
             }
           }
-          delete ret; ret = next ; // swap array
+          delete ret; 
+          ret = next ; // swap array
           inFindMode = NO;
           
         // if we are not in findMode then simply filter the results.
@@ -1055,9 +1057,9 @@ SC.CoreQuery = (function() {
 
     classFilter: function(r,m,not){
       m = " " + m + " ";
-      var tmp = [];
+      var tmp = [], pass;
       for ( var i = 0; r[i]; i++ ) {
-        var pass = (" " + r[i].className + " ").indexOf( m ) >= 0;
+        pass = (" " + r[i].className + " ").indexOf( m ) >= 0;
         if ( !not && pass || not && !pass ) {
           tmp.push( r[i] );
         }
@@ -1139,7 +1141,7 @@ SC.CoreQuery = (function() {
     makeArray: function(array) {
       var ret = [];
 
-      if( array != null ){
+      if( array !== undefined || array != null ){
         var i = array.length;
         // The window, strings (and functions) also have 'length'
         if( i == null || typeof array === 'string' || array.setInterval ) {
@@ -1313,12 +1315,12 @@ SC.CoreQuery = (function() {
 
           // Since we flip the display style, we have to handle that
           // one special, otherwise get the value
-          ret = (name === "display" && swap[stack.length-1]!=null) ? "none" :
+          ret = (name === "display" && swap[stack.length-1]!==null) ? "none" :
             (computedStyle && computedStyle.getPropertyValue(name)) || "";
 
           // Finally, revert the display styles back
           for ( i = 0, swLen = swap.length; i < swLen; i++ ) {
-            if (swap[i]!=null) stack[i].style.display = swap[i];
+            if (swap[i]!==null) stack[i].style.display = swap[i];
           }
         }
 
@@ -1628,7 +1630,7 @@ SC.CoreQuery = (function() {
           
       // get/set element width/or height
       } else {
-        if (size == undefined) {
+        if (size === undefined) {
           return this.length ? CQ.css(this[0], type) : null ;
 
           // Set the width or height on the element (default to pixels if value is unitless)
@@ -1818,7 +1820,7 @@ SC.CoreQuery = (function() {
     CQ.fn[ method ] = function(val) {
       if (!this[0]) return;
 
-      return val != undefined ?
+      return val !== undefined ?
 
         // Set the scroll offset
         this.each(function() {
@@ -2019,11 +2021,12 @@ SC.mixin(SC.$.fn, /** @scope SC.CoreQuery.prototype */ {
   // loop through an update some enumerable methods.  If this is CoreQuery,
   // we just need to patch up the wrapped methods.  If this is jQuery, we
   // need to go through the entire set of SC.Enumerable.
-  var isCoreQuery = SC.$.jquery === 'SC.CoreQuery';
-  var fn = SC.$.fn, enumerable = isCoreQuery ? wrappers : SC.Enumerable ;
+  var isCoreQuery = SC.$.jquery === 'SC.CoreQuery',
+      fn = SC.$.fn, enumerable = isCoreQuery ? wrappers : SC.Enumerable ,
+      value;
   for(var key in enumerable) {
     if (!enumerable.hasOwnProperty(key)) continue ;
-    var value = enumerable[key];
+    value = enumerable[key];
     if (key in wrappers) {
       original[key] = fn[key]; value = wrappers[key];
     }
