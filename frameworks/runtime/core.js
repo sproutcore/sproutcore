@@ -430,8 +430,24 @@ SC.mixin(/** @scope SC */ {
     
     var type1 = SC.typeOf(v);
     var type2 = SC.typeOf(w);
-    var type1Index = SC.ORDER_DEFINITION.indexOf(type1);
-    var type2Index = SC.ORDER_DEFINITION.indexOf(type2);
+    
+    // If we haven't yet generated a reverse-mapping of SC.ORDER_DEFINITION,
+    // do so now.
+    var mapping = SC.ORDER_DEFINITION_MAPPING;
+    if (!mapping) {
+      var order = SC.ORDER_DEFINITION;
+      mapping = SC.ORDER_DEFINITION_MAPPING = {};
+      var idx, len;
+      for (idx = 0, len = order.length;  idx < len;  ++idx) {
+        mapping[order[idx]] = idx;
+      }
+      
+      // We no longer need SC.ORDER_DEFINITION.
+      delete SC.ORDER_DEFINITION;
+    }
+    
+    var type1Index = mapping[type1];
+    var type2Index = mapping[type2];
     
     if (type1Index < type2Index) return -1;
     if (type1Index > type2Index) return 1;
