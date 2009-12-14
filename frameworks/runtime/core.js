@@ -445,8 +445,9 @@ SC.mixin(/** @scope SC */ {
         return 0;
 
       case SC.T_STRING:
-        if (v.localeCompare(w)<0) return -1;
-        if (v.localeCompare(w)>0) return 1;
+        var comp = v.localeCompare(w);
+        if (comp<0) return -1;
+        if (comp>0) return 1;
         return 0;
 
       case SC.T_ARRAY:
