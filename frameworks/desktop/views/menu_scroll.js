@@ -110,16 +110,16 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   },
   
   didCreateLayer: function() {
-    var callback, amt, layer;
-    
-    callback = this._sc_scroller_scrollDidChange ;
-    SC.Event.add(this.$(), 'scroll', this, callback) ;
-    
-    // set scrollOffset first time
-    amt = this.get('value') ;
-    layer = this.get('layer') ;
-    
-    layer.scrollTop = amt ;
+    // var callback, amt, layer;
+    // 
+    // callback = this._sc_scroller_scrollDidChange ;
+    // SC.Event.add(this.$(), 'scroll', this, callback) ;
+    // 
+    // // set scrollOffset first time
+    // amt = this.get('value') ;
+    // layer = this.get('layer') ;
+    // 
+    // layer.scrollTop = amt ;
   },
   
   willDestroyLayer: function() {
@@ -505,31 +505,6 @@ SC.MenuScrollView = SC.ScrollView.extend({
     if (this.get('isVisibleInWindow')) SC.Drag.addScrollableView(this);
     else SC.Drag.removeScrollableView(this);
   }.observes('isVisibleInWindow'),
-  
-  /** @private
-    Whenever the contentView is changed, we need to observe the content view's
-    frame to be notified whenever it's size changes.
-  */
-  contentViewDidChange: function() {
-    var newView = this.get('contentView'), 
-        oldView = this._scroll_contentView,
-        f = this.contentViewFrameDidChange ;
-      
-    if (newView !== oldView) {
-      
-      // stop observing old content view
-      if (oldView) oldView.removeObserver('frame', this, f);
-      
-      // update cache
-      this._scroll_contentView = newView;
-      if (newView) newView.addObserver('frame', this, f);
-      
-      // replace container
-      this.containerView.set('content', newView);
-      
-      this.contentViewFrameDidChange();
-    }
-  }.observes('contentView'),
   
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the 

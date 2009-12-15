@@ -228,7 +228,7 @@ SC.PickerPane = SC.PalettePane.extend({
   */  
   fitPositionToScreen: function(preferredPosition, picker, anchor) {
     // get window rect.
-    var wsize = this.get('currentWindowSize') || SC.RootResponder.responder.computeWindowSize() ;
+    var wsize = SC.RootResponder.responder.computeWindowSize() ;
     var wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
@@ -236,7 +236,6 @@ SC.PickerPane = SC.PalettePane.extend({
       switch(this.preferType) {
         case SC.PICKER_MENU:
           // apply default + menu re-position rule
-          picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
           picker = this.fitPositionToScreenMenu(wret, picker) ;
           break;
         case SC.PICKER_POINTER:
@@ -305,14 +304,18 @@ SC.PickerPane = SC.PalettePane.extend({
     // min left/right padding to the window
     if( (f.x + f.width) > (w.width-20) ) f.x = w.width - f.width - 20;
     if( f.x < 7 ) f.x = 7;
-	
-	// if the height of the menu is bigger than the window height resize it.
-	  if( f.height > w.height){
-		  f.y = 15;
-		  f.height = w.height - 35;
-	  }
-	
-	  return f ;    
+    
+    // if the height of the menu is bigger than the window height resize it.
+    if( f.height+f.y+35 >= w.height){
+      if (f.height+50 >= w.height) {
+        f.y = 15;
+        f.height = w.height - 50;
+      } else {
+        f.y += (w.height - (f.height+f.y+35));
+      }
+    }
+
+    return f ;    
   },
 
   /** @private
@@ -438,7 +441,6 @@ SC.PickerPane = SC.PalettePane.extend({
     Invoked by the root responder. Re-position picker whenever the window resizes. 
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    sc_super();
     this.positionPane();
   }
 
