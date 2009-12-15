@@ -268,7 +268,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     // if the state has changed, update it and notify children
-    if (last !== cur) {
+    // if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
       this._needsVisibiltyChange = YES ; // update even if we aren't visible
       
@@ -292,7 +292,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // visible.
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
       
-    }
+    // }
     return this ;
   }.observes('isVisible'),
   

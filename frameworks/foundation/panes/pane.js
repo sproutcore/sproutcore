@@ -664,11 +664,11 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     @returns {SC.Pane} receiver
   */
   recomputeIsVisibleInWindow: function(parentViewIsVisible) {
-    var last = this.get('isVisibleInWindow') ;
-    var cur = this.get('isVisible') ;
+    var last = this.get('isVisibleInWindow'),
+        cur = this.get('isVisible') ;
 
     // if the state has changed, update it and notify children
-    if (last !== cur) {
+    // if (last !== cur) {
       this.set('isVisibleInWindow', cur) ;
       this._needsVisibiltyChange = YES ; // update even if we aren't visible      
       
@@ -684,7 +684,7 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
       // if we were firstResponder, resign firstResponder also if no longer
       // visible.
       if (!cur && this.get('isFirstResponder')) this.resignFirstResponder();
-    }
+    // }
     
     // if we just became visible, update layer + layout if needed...
     if (cur) {
