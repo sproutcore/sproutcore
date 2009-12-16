@@ -309,18 +309,17 @@ SC.MenuPane = SC.PickerPane.extend(
     len = items.get('length');
     for (idx = 0; idx < len; idx++) {
       item = items[idx];
-      height = SC.get(item, heightKey);
+      height = item.get(heightKey);
       if (!height) {
-        height = SC.get(item, separatorKey) ? separatorHeight : defaultHeight;
+        height = item.get(separatorKey) ? separatorHeight : defaultHeight;
       }
       view = this._menuView.createChildView(exampleView, {
-        layout: { height: height || 9, top: menuHeight },
+        layout: { height: height, top: menuHeight },
         contentDisplayProperties: keyArray,
         content: item,
         parentMenu: this
       });
       views[idx] = view;
-
       menuHeight += height;
     }
 
