@@ -10,5 +10,8 @@
 
 .sc-menu-item.focus div.checkbox {
   background-image: sc_static('icons/mini_ffffff'); 
+}
+
+.sc-theme .sc-menu-item .separator {
   margin: 3px 1px 3px 1px;
 }
