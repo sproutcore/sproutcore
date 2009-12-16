@@ -13,7 +13,7 @@ sc_require('system/response');
   Implements support for Ajax requests using XHR, JSON-P and other prototcols.
   
   SC.Request is much like an inverted version of the request/response objects
-  you receive when implement HTTP servers.  
+  you receive when implementing HTTP servers.  
   
   To send a request, you just need to create your request object, configure
   your options, and call send() to initiate the request.
@@ -102,6 +102,21 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   type: 'GET',
   
   /**
+    An optional timeout value of the request, in milliseconds.  The timer
+    begins when SC.Response#fire is actually invoked by the request manager
+    and not necessarily when SC.Request#send is invoked.  If this timeout is
+    reached before a response is received, the equivalent of
+    SC.Request.manager#cancel() will be invoked on the SC.Response instance
+    and the didTimeout() callback will be called.
+    
+    An exception will be thrown if you try to invoke send() on a request that
+    has both a timeout and isAsyncronous set to NO.
+    
+    @property {Number}
+  */
+  timeout: null,
+  
+  /**
     The body of the request.  May be an object is isJSON or isXML is set,
     otherwise should be a string.
   */
@@ -149,9 +164,9 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   
   /**
     Invoked when a response has been received but not yet processed.  This is
-    your chance to fixup the response based on the results.  If you don't want
-    to continue processing the response call response.cancel().
-    
+    your chance to fix up the response based on the results.  If you don't
+    want to continue processing the response call response.cancel().
+
     @param {SC.Response} response the response
     @returns {void}
   */
@@ -168,11 +183,21 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   */
   didReceive: function(request, response) {},
   
+  /**
+    Invoked when a request times out before a response has been received, as
+    determined by the 'timeout' property.  Note that if a request times out,
+    neither willReceive() nor didReceive() will be called.
+
+    @param {SC.Response} response the response
+    @returns {void}
+  */
+  didTimeout: function(request, response) {},
+  
   // ..........................................................
   // HELPER METHODS
   // 
 
-  COPY_KEYS: 'isAsynchronous isJSON isXML address type body responseClass willSend didSend willReceive didReceive'.w(),
+  COPY_KEYS: 'isAsynchronous isJSON isXML address type timeout body responseClass willSend didSend willReceive didReceive'.w(),
   
   /**
     Returns a copy of the current request.  This will only copy certain
@@ -291,6 +316,16 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
     @returns {SC.Response} new response object
   */  
   send: function(body) {
+    // Sanity-check:  Be sure a timeout value was not specified if the request
+    // is synchronous (because it wouldn't work).
+    var timeout = this.get('timeout');
+    if (timeout) {
+      if (!this.get('isAsynchronous')) throw "Timeout values cannot be used with synchronous requests";
+    }
+    else if (timeout === 0) {
+      throw "The timeout value must either not be specified or must be greater than 0";
+    }
+    
     if (body) this.set('body', body);
     return SC.Request.manager.sendRequest(this.copy()._prep());
   },
@@ -343,7 +378,7 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
   notify: function(status, target, action, params) {
     
     // normalize status
-    var hasStatus = YES, params ;
+    var hasStatus = YES ;
     if (SC.typeOf(status) !== SC.T_NUMBER) {
       params = SC.A(arguments).slice(2);
       action = target;
