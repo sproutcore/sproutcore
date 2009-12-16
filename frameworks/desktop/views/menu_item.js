@@ -63,6 +63,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     menuItems = content.get( this.get('parentMenu').itemSubMenuKey );
     if (menuItems) {
       if (SC.kindOf(menuItems, SC.MenuPane)) {
+        menuItems.set('isModal', NO);
+        menuItems.set('rootMenu', this.get('rootMenu') || this);
         return menuItems;
       } else {
         return SC.MenuPane.create({
