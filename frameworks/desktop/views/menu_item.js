@@ -305,11 +305,38 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return YES ;
   },
 
-  performAction: function() {
+  performAction: function(skipFlash) {
     var action = this.getContentProperty('itemActionKey'),
-        target = this.getContentProperty('itemTargetKey');
+        target = this.getContentProperty('itemTargetKey'), menu;
+
+    this._flashCounter = 0;
+    if (skipFlash) {
+      this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
+
+      menu = this.get('parentMenu');
+      if (menu.get('isSubMenu')) menu.get('rootPane').remove();
+      else menu.remove();
+    } else {
+      this.invokeLater(this.flashHighlight, 50);
+    }
   },
-  
+
+  flashHighlight: function() {
+    var flashCounter = this._flashCounter, layer = this.$();
+    if (flashCounter % 2 === 0) {
+      layer.addClass('focus');
+    } else {
+      layer.removeClass('focus');
+    }
+
+    if (flashCounter > 4) {
+      this.performAction(YES);
+    } else {
+      this.invokeLater(this.flashHighlight, 75);
+      this._flashCounter++;
+    }
+  },
+
   /** @private*/
   mouseDown: function(evt) {
     return YES ;
