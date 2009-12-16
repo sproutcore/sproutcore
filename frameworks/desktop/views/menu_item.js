@@ -119,6 +119,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       val = content.get(menu.itemIconKey);
       if (val) {
         this.renderImage(context, val);
+        context.addClass('has-icon');
       }
       
       val = content.get(menu.itemTitleKey) || '';

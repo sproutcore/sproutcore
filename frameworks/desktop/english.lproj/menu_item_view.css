@@ -98,6 +98,10 @@
   margin-left:28px;
 }
 
+.sc-menu-item a.has-icon span.value {
+  margin-left: 45px;
+}
+
 .sc-menu-item a.shortcutkey span.value {
   right: 55px;
 }
