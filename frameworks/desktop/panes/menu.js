@@ -496,11 +496,6 @@ SC.MenuPane = SC.PickerPane.extend(
     var currentMenuItem = this.get('currentMenuItem'),
         previousMenuItem = this.get('previousMenuItem');
 
-    console.log('currentMenuItem changed from %@ to %@'.fmt(
-      previousMenuItem ? previousMenuItem.getContentProperty('itemTitleKey') : 'null',
-      currentMenuItem ? currentMenuItem.getContentProperty('itemTitleKey') : 'null'
-      ));
-
     if (previousMenuItem) {
       if (previousMenuItem.get('hasSubMenu') && currentMenuItem === null) {
 
@@ -530,8 +525,13 @@ SC.MenuPane = SC.PickerPane.extend(
     }
   },
 
+  closeOpenMenus: function() {
+    this.closeOpenMenusFor(this.get('previousMenuItem'));
+  },
+
   remove: function() {
     this.set('currentMenuItem', null);
+    this.closeOpenMenus();
     sc_super();
   },
 
