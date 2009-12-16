@@ -439,6 +439,14 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   flush: function(_flush) {
+    // Are we already inside a flush?  If so, then don't do it again, to avoid
+    // never-ending recursive flush calls.  Instead, we'll simply mark
+    // ourselves as needing a flush again when we're done.
+    if (this._insideFlush) {
+      this.set('needsFlush', YES);
+      return this;
+    }
+    
     if (!this.get('needsFlush') && !_flush) return this; // nothing to do
     this.set('needsFlush', NO); // avoid running again.
     
@@ -449,6 +457,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       return this;
     }
     
+    this._insideFlush = YES;
+    
     // OK, actually generate some results
     var storeKeys = this.get('storeKeys'),
         changed   = this._scq_changedStoreKeys,
@@ -457,6 +467,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         rec, status, recordType, sourceKeys, scope, included;
 
     // if we have storeKeys already, just look at the changed keys
+    var oldStoreKeys = storeKeys;
     if (storeKeys && !_flush) {
       if (changed) {
         changed.forEach(function(storeKey) {
@@ -521,9 +532,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // only resort and update if we did change
     if (didChange) {
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
-      this.set('storeKeys', SC.clone(storeKeys)); // replace content
+      if (SC.compare(oldStoreKeys, storeKeys) !== 0){
+        this.set('storeKeys', SC.clone(storeKeys)); // replace content
+      }
     }
 
+    this._insideFlush = NO;
     return this;
   },
 
@@ -587,7 +601,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         f    = this._storeKeysContentDidChange,
         fs   = this._storeKeysStateDidChange;
     
-    if (storeKeys === prev) return this; // nothing to do
+    if (storeKeys === prev) return; // nothing to do
     
     if (prev) prev.removeObserver('[]', this, f);
     this._prevStoreKeys = storeKeys;
