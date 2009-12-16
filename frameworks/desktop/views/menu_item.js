@@ -383,7 +383,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
   
   checkMouseLocation: function() {
-    console.log('checkMouseLocation');
     var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu');
     if (!subMenu.get('mouseHasEntered') && (parentMenu.get('currentMenuItem') === this || parentMenu.get('currentMenuItem') === null)) {
       parentMenu.get('previousMenuItem').$().removeClass('focus');
