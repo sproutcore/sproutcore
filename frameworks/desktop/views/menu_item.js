@@ -328,7 +328,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
       rootMenu.remove();
     } else {
-      this.invokeLater(this.flashHighlight, 50);
+      this.invokeLater(this.flashHighlight, 25);
     }
   },
 
@@ -340,10 +340,10 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       layer.removeClass('focus');
     }
 
-    if (flashCounter > 4) {
+    if (flashCounter > 2) {
       this.performAction(YES);
     } else {
-      this.invokeLater(this.flashHighlight, 75);
+      this.invokeLater(this.flashHighlight, 50);
       this._flashCounter++;
     }
   },
