@@ -240,9 +240,9 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
     @param {}
     @returns Boolean
-  */	  
+  */
   isSeparator: function() {
-    return this.getContentProperty('itemSeparatorKey') === NO;
+    return this.getContentProperty('itemSeparatorKey') === YES;
   }.property().cacheable('content'),
   
   /**
