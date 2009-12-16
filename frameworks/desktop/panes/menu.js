@@ -292,6 +292,8 @@ SC.MenuPane = SC.PickerPane.extend(
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
         menuHeight, menuHeightPadding, keyArray, idx, len;
 
+    if (!items) return null;
+
     heightKey = this.get('itemHeightKey');
     separatorKey = this.get('itemSeparatorKey');
     defaultHeight = this.get('itemHeight');
@@ -379,13 +381,16 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   displayItems: function() {
     var items = this.get('items'), localize = this.get('localize'),
-        itemHeight = this.get('itemHeight'), max = items.get('length'),
+        itemHeight = this.get('itemHeight'), len,
         ret = [], idx, item, itemType;
 
+    if (!items) return null;
+
+    len = items.get('length');
 
     // Loop through the items property and transmute as needed, then
     // copy the new objects into the ret array.
-    for (idx = 0; idx < max; idx++) {
+    for (idx = 0; idx < len; idx++) {
       item = items.objectAt(idx) ;
 
       // fast track out if we can't do anything with this item
@@ -510,12 +515,12 @@ SC.MenuPane = SC.PickerPane.extend(
      currentMenuItem.$().addClass('focus');
     }
   }.observes('currentMenuItem'),
-  
+
   closeOpenMenusFor: function(menuItem) {
     if (!menuItem) return;
-    
+
     var menu = menuItem.get('parentMenu');
-    
+
     // Close any open menus if a root menu changes
     while (menu && menuItem) {
       menu = menuItem.get('subMenu');
