@@ -11,7 +11,8 @@
 SC.TOGGLE_BEHAVIOR = 'toggle';
 SC.PUSH_BEHAVIOR =   'push';
 SC.TOGGLE_ON_BEHAVIOR = "on";
-SC.TOGGLE_OFF_BEHAVIOR = "off" ;  
+SC.TOGGLE_OFF_BEHAVIOR = "off" ;
+SC.HOLD_BEHAVIOR = 'hold' ;
 
 /** @class
 
@@ -55,6 +56,13 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   
   */  
   buttonBehavior: SC.PUSH_BEHAVIOR,
+
+  /*
+    If buttonBehavior is SC.HOLD_BEHAVIOR, this specifies, in miliseconds, how often to trigger the action.
+    Ignored for other behaviors.
+  */
+
+  holdInterval: 100,
 
   /**
     If YES, then this button will be triggered when you hit return.
@@ -122,7 +130,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   triggerAction: function(evt) {  
     if (!this.get('isEnabled')) return NO;
     this.set('isActive', YES);
-    this._action(evt);
+    this._action(evt, YES);
     this.didTriggerAction();
     this.invokeLater('set', 200, 'isActive', NO);
     return true;
@@ -228,11 +236,15 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     On mouse down, set active only if enabled.
   */    
   mouseDown: function(evt) {
+    var buttonBehavior = this.get('buttonBehavior');
+
     if (!this.get('isEnabled')) return YES ; // handled event, but do nothing
     this.set('isActive', YES);
     this._isMouseDown = YES;
 
-    if (!this._isFocused && (this.get('buttonBehavior')!==SC.PUSH_BEHAVIOR)) {
+    if (buttonBehavior === SC.HOLD_BEHAVIOR) {
+      this._action(evt);
+    } else if (!this._isFocused && (buttonBehavior!==SC.PUSH_BEHAVIOR)) {
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
@@ -265,9 +277,13 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   mouseUp: function(evt) {
     if (this._isMouseDown) this.set('isActive', NO); // track independently in case isEnabled has changed
     this._isMouseDown = false;
-    var inside = this.$().within(evt.target) ;
-    if (inside && this.get('isEnabled')) this._action(evt) ;
-    return true ;
+
+    if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
+      var inside = this.$().within(evt.target) ;
+      if (inside && this.get('isEnabled')) this._action(evt) ;
+    }
+
+    return YES ;
   },
   
   
@@ -293,7 +309,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
    - off behavior: turn off.
    - otherwise: invoke target/action
   */
-  _action: function(evt) {
+  _action: function(evt, skipHoldRepeat) {
     switch(this.get('buttonBehavior')) {
       
     // When toggling, try to invert like values. i.e. 1 => 0, etc.
@@ -315,20 +331,42 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     case SC.TOGGLE_OFF_BEHAVIOR:
       this.set('value', this.get('toggleOffValue')) ;
       break ;
-      
+
+    case SC.HOLD_BEHAVIOR:
+      this._runHoldAction(evt, skipHoldRepeat);
+      break ;
+
     // otherwise, just trigger an action if there is one.
     default:
       //if (this.action) this.action(evt);
-      var action = this.get('action'),
-          target = this.get('target') || null;
-      if (action) {
-        if (this._hasLegacyActionHandler()) {
-          // old school... 
-          this._triggerLegacyActionHandler(evt);
-        } else {
-          // newer action method + optional target syntax...
-          this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
-        }
+      this._runAction(evt);
+    }
+  },
+
+  _runAction: function(evt) {
+    var action = this.get('action'),
+        target = this.get('target') || null;
+
+    if (action) {
+      if (this._hasLegacyActionHandler()) {
+        // old school... 
+        this._triggerLegacyActionHandler(evt);
+      } else {
+        // newer action method + optional target syntax...
+        this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
+      }
+    }
+  },
+
+  _runHoldAction: function(evt, skipRepeat) {
+    if (this.get('isActive')) {
+      this._runAction();
+
+      if (!skipRepeat) {
+        // This run loop appears to only be necessary for testing
+        SC.RunLoop.begin();
+        this.invokeLater('_runHoldAction', this.get('holdInterval'), evt);
+        SC.RunLoop.end();
       }
     }
   },
