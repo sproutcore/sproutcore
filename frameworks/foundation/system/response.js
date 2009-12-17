@@ -512,7 +512,13 @@ SC.XHRResponse = SC.Response.extend({
 
         // if there was an error - setup error and save it
         if ((status < 200) || (status >= 300)) {
-          msg = rawRequest.statusText;
+          
+          try {
+            msg = rawRequest.statusText || '';
+          } catch(e2) {
+            msg = '';
+          }
+          
           error = SC.$error(msg || "HTTP Request failed", "Request", status) ;
           error.set("errorValue", this) ;
           this.set('isError', YES);
