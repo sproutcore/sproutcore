@@ -122,30 +122,6 @@
   margin-left: 45px;
 }
 
-.sc-menu-item.sc-small-size a.hasIcon span.value {
-  margin-left: 37px;
-}
-
-.msie .sc-menu-item a.hasIcon span.value {
-  margin-left: 47px;
-}
-
-.msie .sc-menu-item.sc-small-size a.hasIcon span.value {
-  margin-left: 46px;
-}
-
-.sc-menu-item a span.hasBranch {
-  position:absolute;
-  text-align:center;
-  right:8px;
-}
-
-.sc-menu-item.sc-small-size a span.hasBranch {
-  position:absolute;
-  text-align:center;
-  right:6px;
-}
-
 .sc-menu-item span.hasBranch {
   position:absolute;
   text-align:center;

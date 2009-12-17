@@ -312,7 +312,7 @@ SC.MenuPane = SC.PickerPane.extend(
           if (!keys[1]) cur[1] = item ;
           if (!keys[2]) cur[2] = YES ;
           if (!cur[9]) cur[9] = this.get('itemHeight') ;
-          if (cur[4]) cur[9] = 10 ;
+          if (cur[4]) cur[9] = 9 ;
           menuHeight = menuHeight+cur[9] ;
           if (loc && cur[0]) cur[0] = cur[0].loc() ;
           ret[rel] = SC.Object.create({ title: cur[0], value: cur[1],
@@ -446,7 +446,7 @@ SC.MenuPane = SC.PickerPane.extend(
     }
     var contentV = this.childViews[0].contentView;
     contentV.replaceAllChildren(menuItemViews);
-    contentV.adjust('minHeight', this.get('menuHeight') +1);
+    contentV.adjust('minHeight', this.get('menuHeight'));
     this.set('menuItemViews',menuItemViews) ;
   },
   

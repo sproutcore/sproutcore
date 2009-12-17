@@ -296,8 +296,9 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
 
   renderBranch: function(context, hasBranch) {
 
+    var a = '>' ;
     var url = SC.BLANK_IMAGE_URL;
-    context.push('<span class= "hasBranch"></span>') ;
+    context.push('<span class= "hasBranch">'+a+'</span>') ; 
   },
 
   /** 
