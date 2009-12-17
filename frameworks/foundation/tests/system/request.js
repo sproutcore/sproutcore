@@ -189,6 +189,7 @@ test("Test timeouts", function() {
       timeoutRequest = SC.Request.getUrl("http://www.sproutcore.com");
   timeoutRequest.set('timeout', 20);
   timeoutRequest.set('didTimeout', function() { callbackValue = "after timeout"; });
+  timeoutRequest.set('didReceive', function() { callbackValue = "received data"; });
   SC.RunLoop.begin();
   timeoutRequest.send();
   SC.RunLoop.end();
@@ -203,6 +204,6 @@ test("Test timeouts", function() {
     ok(!changedBefore, 'The timeout callback should not have run before the timeout value was exceeded');
     ok(changedAfter, 'The timeout callback should have run after the timeout value was exceeded');
     window.start() ; // starts the test runner
-  }, 100);
+  }, 5000);
 });
 

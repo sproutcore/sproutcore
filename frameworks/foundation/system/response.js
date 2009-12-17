@@ -246,30 +246,33 @@ SC.Response = SC.Object.extend(
     @returns {SC.Response} receiver
   */
   receive: function(callback, context) {
-    // If we had a timeout timer scheduled, invalidate it now.
-    var timer = this.get('timeoutTimer');
-    if (timer) timer.invalidate();
-    this.set('timedOut', NO);
+    // If we timed out, we should ignore this response.
+    if (!this.get('timedOut')) {
+      // If we had a timeout timer scheduled, invalidate it now.
+      var timer = this.get('timeoutTimer');
+      if (timer) timer.invalidate();
+      this.set('timedOut', NO);
     
-    var req = this.get('request');
-    var source = req ? req.get('source') : null;
+      var req = this.get('request');
+      var source = req ? req.get('source') : null;
     
-    // invoke the source, giving a chance to fixup the reponse or (more 
-    // likely) cancel the request.
-    if (source && source.willReceive) source.willReceive(req, this);
+      // invoke the source, giving a chance to fixup the reponse or (more 
+      // likely) cancel the request.
+      if (source && source.willReceive) source.willReceive(req, this);
     
-    // invoke the callback.  note if the response was cancelled or not
-    callback.call(context, !this.get('isCancelled'));
+      // invoke the callback.  note if the response was cancelled or not
+      callback.call(context, !this.get('isCancelled'));
     
-    // if we weren't cancelled, then give the source first crack at handling
-    // the response.  if the source doesn't want listeners to be notified,
-    // it will cancel the response.
-    if (!this.get('isCancelled') && source && source.didReceive) {
-      source.didReceive(req, this);
-    }
+      // if we weren't cancelled, then give the source first crack at handling
+      // the response.  if the source doesn't want listeners to be notified,
+      // it will cancel the response.
+      if (!this.get('isCancelled') && source && source.didReceive) {
+        source.didReceive(req, this);
+      }
 
-    // notify listeners if we weren't cancelled.
-    if (!this.get('isCancelled')) this.notify();
+      // notify listeners if we weren't cancelled.
+      if (!this.get('isCancelled')) this.notify();
+    }
     
     // no matter what, remove from inflight queue
     SC.Request.manager.transportDidClose(this) ;
