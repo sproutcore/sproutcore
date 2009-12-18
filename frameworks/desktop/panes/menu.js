@@ -483,6 +483,7 @@ SC.MenuPane = SC.PickerPane.extend(
   displayProperties: ['displayItems', 'value', 'controlSize'],
 
   mouseEntered: function() {
+    this.becomeKeyPane();
     this.set('mouseHasEntered', YES);
   },
 
