@@ -253,6 +253,14 @@ SC.MenuPane = SC.PickerPane.extend(
   */
   _menuView: null,
 
+  init: function() {
+    sc_super();
+
+    // Set the MenuPane to its own default responder, so it can
+    // interpret key events.
+    this.set('defaultResponder', this);
+  },
+
   /**
     Creates the child scroll view, and sets its contentView to a new
     view.  This new view is saved and managed by the SC.MenuPane,
