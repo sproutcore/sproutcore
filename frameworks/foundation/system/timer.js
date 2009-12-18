@@ -174,7 +174,7 @@ SC.Timer = SC.Object.extend(
     the timer.  This ensures that all timers scheduled in the same run loop
     cycle will execute in the sync with one another.
     
-    The value of this property is an offset like waht you get if you call
+    The value of this property is an offset like what you get if you call
     Date.now().
     
     @type {Number}
