@@ -545,6 +545,7 @@ SC.MenuPane = SC.PickerPane.extend(
   remove: function() {
     this.set('currentMenuItem', null);
     this.closeOpenMenus();
+    this.resignKeyPane();
     sc_super();
   },
 
@@ -622,6 +623,61 @@ SC.MenuPane = SC.PickerPane.extend(
     var anchor = this.get('anchor') ;
     if(this.isAnchorMenuItemType()) this.sendEvent('mouseUp', evt, anchor) ;
     return YES ;
+  },
+
+  keyUp: function(evt) {
+    var ret = this.interpretKeyEvents(evt) ;
+    return !ret ? NO : ret ;
+  },
+
+  insertText: function(chr, evt) {
+    var timer = this._timer, keyBuffer = this._keyBuffer;
+
+    if (timer) {
+      timer.invalidate();
+    }
+    timer = this._timer = SC.Timer.schedule({
+      target: this,
+      action: 'clearKeyBuffer',
+      interval: 500,
+      isPooled: NO
+    });
+
+    keyBuffer = keyBuffer || '';
+    keyBuffer += chr.toUpperCase();
+
+    this.selectMenuItemForString(keyBuffer);
+    this._keyBuffer = keyBuffer;
+
+    return YES;
+  },
+
+  performKeyEquivalent: function() {
+    return YES;
+  },
+
+  selectMenuItemForString: function(buffer) {
+    var items = this.get('menuItemViews'), item, title, idx, len, bufferLength;
+    if (!items) return;
+
+    bufferLength = buffer.length;
+    len = items.get('length');
+    for (idx = 0; idx < len; idx++) {
+      item = items.objectAt(idx);
+      title = item.get('title');
+
+      if (!title) continue;
+
+      title = title.substr(0,bufferLength).replace(/ /g,'').toUpperCase();
+      if (title === buffer) {
+        this.set('currentMenuItem', item);
+        break;
+      }
+    }
+  },
+
+  clearKeyBuffer: function() {
+    this._keyBuffer = '';
   },
 
   /**
