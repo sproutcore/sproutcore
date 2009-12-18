@@ -244,14 +244,6 @@ SC.MenuPane = SC.PickerPane.extend(
   isSubMenu: NO,
 
   /**
-    If this is a submenu, this property corresponds to the
-    top-most parent menu.
-
-    @type SC.MenuPane
-  */
-  rootMenu: null,
-
-  /**
     The view that contains the MenuItemViews that are visible on screen.
 
     This is created and set in createChildViews.
@@ -352,6 +344,18 @@ SC.MenuPane = SC.PickerPane.extend(
     this.positionPane();
     this.append();
   },
+
+  /**
+    If this is a submenu, this property corresponds to the
+    top-most parent menu.  If this is the root menu, it returns
+    itself.
+
+    @type SC.MenuPane
+  */
+  rootMenu: function() {
+    if (this.get('isSubMenu')) return this.getPath('parentMenu.rootMenu');
+    return this;
+  }.property().cacheable(),
 
   windowSizeDidChange: function(oldSize, newSize) {
     this.adjust('height', this.get('menuHeight'));
