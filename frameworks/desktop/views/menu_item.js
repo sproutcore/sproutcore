@@ -14,8 +14,7 @@ sc_require('views/separator') ;
 */
 SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
-  
-  
+
   classNames: ['sc-menu-item'],
   
   /** 
@@ -56,15 +55,17 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @type SC.MenuView
   */
   subMenu: function() {
-    var content = this.get('content'), menuItems;
+    var content = this.get('content'), menuItems, parentMenu;
     
     if (!content) return null;
     
-    menuItems = content.get( this.get('parentMenu').itemSubMenuKey );
+    parentMenu = this.get('parentMenu');
+    menuItems = content.get(parentMenu.itemSubMenuKey );
     if (menuItems) {
       if (SC.kindOf(menuItems, SC.MenuPane)) {
         menuItems.set('isModal', NO);
-        menuItems.set('rootMenu', this.get('rootMenu') || this);
+        menuItems.set('isSubMenu', YES);
+        menuItems.set('parentMenu', parentMenu);
         return menuItems;
       } else {
         return SC.MenuPane.create({
@@ -72,7 +73,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
           items: menuItems,
           isModal: NO,
           isSubMenu: YES,
-          rootMenu: this.get('rootMenu') || this
+          parentMenu: parentMenu
         });
       }
     }
@@ -389,13 +390,20 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
   
   checkMouseLocation: function() {
-    var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu');
-    if (!subMenu.get('mouseHasEntered') && (parentMenu.get('currentMenuItem') === this || parentMenu.get('currentMenuItem') === null)) {
-      parentMenu.get('previousMenuItem').$().removeClass('focus');
-      subMenu.remove();
+    var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu'),
+        currentMenuItem, previousMenuItem;
+    if (!subMenu.get('mouseHasEntered')) {
+      currentMenuItem = parentMenu.get('currentMenuItem');
+      if (currentMenuItem === this || currentMenuItem === null) {
+        previousMenuItem = parentMenu.get('previousMenuItem');
+
+        if (previousMenuItem) {
+                  parentMenu.get('previousMenuItem').$().removeClass('focus');
+        }
+        subMenu.remove();
+      }
     }
   },
-
 
   /** @private
     Call the moveUp function on the parent Menu
@@ -409,7 +417,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     }
     return YES ;
   },
-  
+
   /** @private
     Call the moveDown function on the parent Menu
     
