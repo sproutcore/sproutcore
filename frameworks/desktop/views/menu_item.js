@@ -105,13 +105,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     var menu = this.get('parentMenu');
     var itemWidth = this.get('itemWidth') || menu.layout.width ;
     var itemHeight = this.get('itemHeight') || 20 ;
-    this.set('itemWidth',itemWidth) ;
-    this.set('itemHeight',itemHeight) ;
-    
-    // Disable the menu item only if isEnabled is NO
-    // if (content.get(menu.itemIsEnabledKey) === NO) {
-    //   context.addClass('disabled') ;
-    // }
+    this.set('itemWidth',itemWidth);
+    this.set('itemHeight',itemHeight);
     
     context = context.begin('a').attr('href', 'javascript:');
     
