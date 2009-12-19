@@ -239,7 +239,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   */
   isSeparator: function() {
     return this.getContentProperty('itemSeparatorKey') === YES;
-  }.property().cacheable('content'),
+  }.property('content').cacheable(),
   
   /**
     Checks if a menu is a sub menu, during branching.
@@ -271,7 +271,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   
   isEnabled: function() {
     return this.getContentProperty('itemIsEnabledKey') !== NO;
-  }.property().cacheable('content'),
+  }.property('content.isEnabled').cacheable(),
   
   getContentProperty: function(property) {
     var content = this.get('content'),
