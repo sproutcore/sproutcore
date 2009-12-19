@@ -498,6 +498,8 @@ SC.MenuPane = SC.PickerPane.extend(
         this.set('previousMenuItem', this._currentMenuItem);
       }
       this._currentMenuItem = value;
+      this.setPath('rootMenu.targetMenuItem', value);
+
       return value;
     }
 

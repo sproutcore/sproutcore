@@ -297,27 +297,31 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     // SproutCore's event system will deliver the mouseUp event to the view
     // that got the mouseDown event, but for menus we want to track the mouse,
     // so we'll do our own dispatching.
-    var menu = this.get('parentMenu'), currentMenuItem, action;
+    var targetMenuItem;
     
-    if (menu) {
-      currentMenuItem = menu.get('currentMenuItem') ;
-      currentMenuItem.performAction();
-    }
+    targetMenuItem = this.getPath('parentMenu.rootMenu.targetMenuItem');
+
+    if (targetMenuItem) targetMenuItem.performAction();
 
     return YES ;
   },
 
   performAction: function(skipFlash) {
     var action = this.getContentProperty('itemActionKey'),
-        target = this.getContentProperty('itemTargetKey'), menu;
+        target = this.getContentProperty('itemTargetKey'),
+        rootMenu = this.getPath('parentMenu.rootMenu');
+
+    if (this.get('hasSubMenu')) {
+      return;
+    }
+
+    action = (action === undefined) ? rootMenu.get('action') : action;
+    target = (target === undefined) ? rootMenu.get('target') : target;
 
     this._flashCounter = 0;
     if (skipFlash) {
       this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
-
-      menu = this.get('parentMenu');
-      if (menu.get('isSubMenu')) menu.get('rootPane').remove();
-      else menu.remove();
+      rootMenu.remove();
     } else {
       this.invokeLater(this.flashHighlight, 50);
     }
@@ -354,8 +358,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   mouseEntered: function(evt) {
     var menu = this.get('parentMenu'), content = this.get('content');
     menu.set('mouseHasEntered', YES);
-    menu.setIfChanged('currentMenuItem', this);
-      
+    menu.set('currentMenuItem', this);
+
     if(this.get('hasSubMenu')) {
       this.invokeLater(this.showSubMenu(),100) ;
     }
