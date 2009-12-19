@@ -440,10 +440,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       for(key in attrs) {
         if (!attrs.hasOwnProperty(key)) continue ;
         if (attrs[key] === null) continue ; // skip empty attrs
-        tag.push(key);
-        tag.push('="');
-        tag.push(attrs[key]) ;
-        tag.push('" ') ;
+        tag.push(key, '="', attrs[key], '" ');
       }
       
       // if we are using the DEFAULT_ATTRS temporary object, make sure we 

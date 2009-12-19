@@ -240,8 +240,9 @@ SC.LabelView = SC.View.extend(SC.Control,
     Hide the label view while the inline editor covers it.
   */
   inlineEditorDidBeginEditing: function(inlineEditor) {
-    this._oldOpacity = this.$().css('opacity') ;
-    this.$().css('opacity', 0.0);
+    var layer = this.$();
+    this._oldOpacity = layer.css('opacity') ;
+    layer.css('opacity', 0.0);
   },
 
   /** @private
