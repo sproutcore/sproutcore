@@ -272,6 +272,15 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   isEnabled: function() {
     return this.getContentProperty('itemIsEnabledKey') !== NO;
   }.property('content.isEnabled').cacheable(),
+
+  title: function() {
+    var ret = this.getContentProperty('itemTitleKey');
+
+    if (ret) {
+      ret = ret.loc();
+    }
+    return ret;
+  }.property('content.title').cacheable(),
   
   getContentProperty: function(property) {
     var content = this.get('content'),
