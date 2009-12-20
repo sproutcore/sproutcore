@@ -1,0 +1,3 @@
+# SproutCore is required for animation to work. This shouldn't be an issue,
+# but is required to force the tester to include SproutCore.
+config :all, :required=>[:sproutcore]
