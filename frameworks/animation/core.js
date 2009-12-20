@@ -34,6 +34,12 @@ aView: SC.LabelView.design(Animate.Animatable, {
 @extends SC.Object
 */
 SC.Animatable = {
+  /**
+  Walks like a duck.
+  */
+  isAnimatable: YES,
+  
+  
   transitions: {},
   concatenatedProperties: ["transitions"],
 
@@ -98,7 +104,22 @@ SC.Animatable = {
     this._animators = {}; // keyAnimated => object describing it.
     this._animatableSetCSS = "";
     this._last_transition_css = ""; // to keep from re-setting unnecessarily
+    this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
   },
+  
+  /**
+  Disables animation.
+  
+  It is like parenthesis. Each "disable" must be matched by an "enable".
+  If you call disable twice, you need two enables to start it. Three times, you need
+  three enables.
+  */
+  disableAnimation: function() { this._disableAnimation++; },
+  
+  /**
+  Enables animation if it was disabled (or moves towards that direction, at least).
+  */
+  enableAnimation: function() { this._disableAnimation--; if (this._disableAnimation < 0) this._disableAnimation = 0; },
 
   /**
   Adds support for some style properties to adjust.
@@ -164,7 +185,7 @@ SC.Animatable = {
   resetAnimation: function()
   {
     this._animatableCurrentStyle = this.style;
-    this.styleDidChange();
+    this.updateStyle();
   },
 
   _getStartStyleHash: function(start, target)
@@ -207,10 +228,15 @@ SC.Animatable = {
   },
 
   _TMP_CSS_TRANSITIONS: [],
+  
   /**
-  Triggered when style changes.
+  Immediately applies styles to elements, and starts any needed transitions.
+  
+  Called automatically when style changes, but if you need styles to be adjusted
+  immediately (for instance, if you have temporarily disabled animation to set a
+  start state), you may want to call manually too.
   */
-  styleDidChange: function()
+  updateStyle: function()
   {
 
     // get the layer. We need it for a great many things.
@@ -222,7 +248,7 @@ SC.Animatable = {
     // make sure there _is_ a previous style to animate from. Otherwise,
     // we don't animate—and this is sometimes used to temporarily disable animation.
     var i;
-    if (!this._animatableCurrentStyle)
+    if (!this._animatableCurrentStyle || this._disableAnimation > 0)
     {
       // clone it to be a nice starting point next time.
       this._animatableCurrentStyle = {};
@@ -515,7 +541,7 @@ SC.Animatable = {
 
     if (didChange) {
       this.style = style;
-      this.styleDidChange(); // updateLayout is already called late, so why delay longer?
+      this.updateStyle(); // updateLayout is already called late, so why delay longer?
     }
 
     return this;
