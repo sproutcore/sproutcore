@@ -34,6 +34,14 @@ SC.LOGGER_LOG_INFO = "INFO: ";
 */
 SC.LOGGER_LOG_WARN = "WARNING: ";
 
+/**
+  If {@link SC.Logger.debug} falls back onto {@link SC.Logger.log}, this will be
+  prepended to the output.
+
+  @property {String}
+*/
+SC.LOGGER_LOG_DEBUG = "DEBUG: ";
+
 /** @class
 
   Object to allow for safe logging actions, such as using the browser console.
@@ -43,6 +51,7 @@ SC.LOGGER_LOG_WARN = "WARNING: ";
   for further information.
 
   @author Colin Campbell
+  @author Benedikt Böhm
   @extends SC.Object
   @since Sproutcore 1.0
   @see <a href="http://getfirebug.com/logging.html">Firebug Logging Reference</a>
@@ -51,8 +60,15 @@ SC.Logger = SC.Object.create({
 
   // ..........................................................
   // PROPERTIES
-  //   
-  
+  //
+
+  /**
+    Whether or not to enable debug logging.
+
+    @property: {Boolean}
+  */
+  debugEnabled: NO,
+
   /**
     Computed property that checks for the existence of the reporter object.
 
@@ -135,7 +151,35 @@ SC.Logger = SC.Object.create({
     }
     return false;
   },
-  
+
+  /**
+    Log a debug message to the console.
+
+    Logs the response using {@link SC.Logger.log} if reporter.debug does not exist and
+    {@link SC.Logger.fallBackOnLog} is true.
+
+    @param {String|Array|Function|Object}
+    @returns {Boolean} true if logged to reporter, false if not
+  */
+  debug: function() {
+    var reporter = this.get('reporter');
+
+    if (this.get('debugEnabled') !== YES) {
+      return false;
+    }
+
+    if (this.get('exists') && typeof(reporter.debug) === "function") {
+      reporter.debug.apply(reporter, arguments);
+      return true;
+    }
+    else if (this.fallBackOnLog) {
+      var a = this._argumentsToArray(arguments);
+      if (typeof(a.unshift) === "function") a.unshift(SC.LOGGER_LOG_DEBUG);
+      return this.log.apply(this, a);
+    }
+    return false;
+  },
+
   /**
     Prints the properties of an object.
 
