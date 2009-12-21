@@ -315,13 +315,15 @@ SC.Record = SC.Object.extend(
     if (value !== attrs[key]) {
       if(!ignoreDidChange) this.beginEditing();
       attrs[key] = value;
+      
+      // If the key is the primaryKey of the record, we need to tell the store
+      // about the change.
+      if (key===this.get('primaryKey')) {
+        SC.Store.replaceIdFor(storeKey, value) ;
+        this.propertyDidChange('id'); // Reset computed value
+      }
+      
       if(!ignoreDidChange) this.endEditing(key);
-    }
-    
-    // if value is primaryKey of record, write it to idsByStoreKey
-    if (key===this.get('primaryKey')) {
-      SC.Store.idsByStoreKey[storeKey] = attrs[key] ;
-      this.propertyDidChange('id'); // Reset computed value
     }
     
     // if any aggregates, propagate the state
@@ -347,9 +349,9 @@ SC.Record = SC.Object.extend(
     
     // if recordType aggregates are not set up yet, make sure to 
     // create the cache first
-    if(!aggregates) {
-      var dataHash = this.get('store').readDataHash(storeKey),
-          aggregates = [];
+    if (!aggregates) {
+      var dataHash = this.get('store').readDataHash(storeKey);
+      aggregates = [];
       for(k in dataHash) {
         if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
           aggregates.push(k);
@@ -360,16 +362,26 @@ SC.Record = SC.Object.extend(
     
     // now loop through all aggregate properties and mark their related
     // record objects as dirty
-    for(idx=0,len=aggregates.length;idx<len;idx++) {
+    var K = SC.Record;
+    for(idx=0,len=aggregates.length;idx<len;++idx) {
       key = aggregates[idx];
       val = this.get(key);
-      
       recs = SC.kindOf(val, SC.ManyArray) ? val : [val];
       recs.forEach(function(rec) {
-        // write the dirty status
-        if(rec) { 
-          rec.get('store').writeStatus(rec.get('storeKey'), this.get('status'));
-          rec.storeDidChangeProperties(YES);
+        // If the child is dirty, then make sure the parent gets a dirty
+        // status.  (If the child is created or destroyed, there's no need,
+        // because the parent will dirty itself when it modifies that
+        // relationship.)
+        if (rec) { 
+          var childStatus = this.get('status');
+          if (childStatus & K.DIRTY) {
+            var parentStatus = rec.get('status');
+            if (parentStatus === K.READY_CLEAN) {
+              // Note:  storeDidChangeProperties() won't put it in the
+              //        changelog!
+              rec.get('store').recordDidChange(rec.constructor, null, rec.get('storeKey'), null, YES);
+            }
+          }
         }
       }, this);
     }
@@ -459,7 +471,7 @@ SC.Record = SC.Object.extend(
 
             // computed default value
             if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
-              dataHash[key] = defaultVal();
+              dataHash[key] = defaultVal(this, key, defaultVal);
             
             // plain value
             } else {

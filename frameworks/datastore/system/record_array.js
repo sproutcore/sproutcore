@@ -300,7 +300,22 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     @returns {SC.RecordArray} receiver
   */
   refresh: function() {
-    this.get('store').refreshQuery(this.get('query'));  
+    this.get('store').refreshQuery(this.get('query'));
+    return this;
+  },
+  
+  /**
+    Will recompute the results based on the SC.Query attached to the record
+    array. Useful if your query is based on computed properties that might 
+    have changed. Use refresh() instead of you want to trigger a fetch on your
+    data source since this will purely look at records already loaded into
+    the store.
+    
+    @returns {SC.RecordArray} receiver
+  */
+  reload: function() {
+    this.flush(YES);
+    return this;
   },
   
   /**
@@ -420,10 +435,19 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     SC.Query.LOCAL.  You can call this method on any RecordArray however,
     without an error.
     
+    @param {Boolean} _flush to force it - use reload() to trigger it
     @returns {SC.RecordArray} receiver
   */
-  flush: function() {
-    if (!this.get('needsFlush')) return this; // nothing to do
+  flush: function(_flush) {
+    // Are we already inside a flush?  If so, then don't do it again, to avoid
+    // never-ending recursive flush calls.  Instead, we'll simply mark
+    // ourselves as needing a flush again when we're done.
+    if (this._insideFlush) {
+      this.set('needsFlush', YES);
+      return this;
+    }
+    
+    if (!this.get('needsFlush') && !_flush) return this; // nothing to do
     this.set('needsFlush', NO); // avoid running again.
     
     // fast exit
@@ -433,6 +457,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
       return this;
     }
     
+    this._insideFlush = YES;
+    
     // OK, actually generate some results
     var storeKeys = this.get('storeKeys'),
         changed   = this._scq_changedStoreKeys,
@@ -441,7 +467,8 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         rec, status, recordType, sourceKeys, scope, included;
 
     // if we have storeKeys already, just look at the changed keys
-    if (storeKeys) {
+    var oldStoreKeys = storeKeys;
+    if (storeKeys && !_flush) {
       if (changed) {
         changed.forEach(function(storeKey) {
           // get record - do not include EMPTY or DESTROYED records
@@ -505,9 +532,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     // only resort and update if we did change
     if (didChange) {
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
-      this.set('storeKeys', SC.clone(storeKeys)); // replace content
+      if (SC.compare(oldStoreKeys, storeKeys) !== 0){
+        this.set('storeKeys', SC.clone(storeKeys)); // replace content
+      }
     }
 
+    this._insideFlush = NO;
     return this;
   },
 
@@ -571,7 +601,7 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
         f    = this._storeKeysContentDidChange,
         fs   = this._storeKeysStateDidChange;
     
-    if (storeKeys === prev) return this; // nothing to do
+    if (storeKeys === prev) return; // nothing to do
     
     if (prev) prev.removeObserver('[]', this, f);
     this._prevStoreKeys = storeKeys;

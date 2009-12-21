@@ -493,6 +493,10 @@ SC.MenuPane = SC.PickerPane.extend(
         action, isEnabled, target, idx;
     if(!this.get('isEnabled')) return NO ;
     this.displayItems() ;
+
+    // Make sure we redraw the menu items if they've changed
+    SC.RunLoop.begin().end();
+
     items = this.get('displayItemsArray') ;
     if (!items) return NO;
 
@@ -570,12 +574,15 @@ SC.MenuPane = SC.PickerPane.extend(
     @returns MenuItemView
   */
   getPreviousEnabledMenuItem : function(menuItem) {
-    var content, itemView, menuItemViews = this.get('menuItemViews') ;
+    var content, itemView, len, idx, menuIdx, isEnabled, isSeparator, 
+      menuItemViews = this.get('menuItemViews') ;
     if(menuItemViews) {
-      var len = menuItemViews.length ;
-      var idx = (menuItemViews.indexOf(menuItem) === -1) ? 
+      len = menuItemViews.length ;
+      idx = (menuItemViews.indexOf(menuItem) === -1) ? 
               len : menuItemViews.indexOf(menuItem) ;
-      var menuIdx = idx, isEnabled = NO, isSeparator = NO ;
+      menuIdx = idx;
+      isEnabled = NO;
+      isSeparator = NO ;
       while((!isEnabled || isSeparator) && --idx !== menuIdx) {
         if(idx === -1) idx = len - 1;
         itemView = menuItemViews[idx];

@@ -54,7 +54,10 @@ SC.RecordAttribute = SC.Object.extend(
     will be substituted instead.  Note that defaultValues are not converted
     so the value should be in the output type expected by the attribute.
     
-    @property {Object}
+    If you use a defaultValue function, the arguments given to it is the
+    record instance and the key.
+    
+    @property {Object|function}
   */
   defaultValue: null,
   

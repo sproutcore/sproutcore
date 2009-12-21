@@ -229,7 +229,7 @@ SC.AlertPane = SC.PanelPane.extend({
       SC.View.extend({
         layout: { bottom: 13, height: 24, right: 18, width: 466 },
         childViews: ['cancelButton', 'okButton'],
-        classNames: ['textAlignRight'],
+        classNames: ['text-align-right'],
         cancelButton : SC.ButtonView.extend({
             useStaticLayout: YES,
             actionKey: SC.BUTTON2_STATUS,
@@ -350,6 +350,7 @@ SC.AlertPane.show = function(message, description, caption, button1Title, button
     title = args[idx + 3];
     if (title) {
       button.set('title', title).set('isVisible', YES);
+      if(title=='?') button.set('titleMinWidth', 0);
       if (idx==2) {
         var button_wrapper = ret.get('buttonThreeWrapper');
         button_wrapper.set('isVisible', YES);

@@ -180,11 +180,9 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     @property {Array}
   */
   displayItems: function() {
-    var items = this.get('items'), loc = this.get('localize') ;
-    var keys=null, itemType, cur ;
-    var ret = [], max = items.get('length'), idx, item ;
-    var fetchKeys = SC._segmented_fetchKeys;
-    var fetchItem = SC._segmented_fetchItem;
+    var items = this.get('items'), loc = this.get('localize'),
+      keys=null, itemType, cur, ret = [], max = items.get('length'), idx, 
+      item, fetchKeys = SC._segmented_fetchKeys, fetchItem = SC._segmented_fetchItem;
     
     // loop through items and collect data
     for(idx=0;idx<max;idx++) {
@@ -198,7 +196,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         
       // if the item is not an array, try to use the itemKeys.
       } else if (itemType !== SC.T_ARRAY) {
-        
         // get the itemKeys the first time
         if (keys===null) {
           keys = this.itemKeys.map(fetchKeys,this);
@@ -209,7 +206,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         cur[cur.length] = idx; // save current index
         
         // special case 1...if title key is null, try to make into string
-        if (!keys[0] && item.toString) cur[0] = item.toString();
+        if (!keys[0] && item.toString) cur[0] = item.toString(); 
         
         // special case 2...if value key is null, use item itself
         if (!keys[1]) cur[1] = item;
@@ -230,7 +227,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     
     // all done, return!
     return ret ;
-  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey').cacheable(),
+  }.property('items', 'itemTitleKey', 'itemValueKey', 'itemIsEnabledKey', 'localize', 'itemIconKey', 'itemWidthKey', 'itemToolTipKey'),
   
   /** If the items array itself changes, add/remove observer on item... */
   itemsDidChange: function() { 
@@ -275,7 +272,6 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     if (firstTime || (items !== last)) {
       this._seg_displayItems = items; // save for future
       this.renderDisplayItems(context, items) ;
-      context.addStyle('text-align', 'center');
     }else{
     // update selection and active state
       var activeIndex = this.get('activeIndex');
@@ -285,13 +281,13 @@ SC.SegmentedView = SC.View.extend(SC.Control,
         value = value.objectAt(0); isArray = NO ;
       }
       var names = {}; // reuse
-    
       var loc = items.length, cq = this.$('a.sc-segment'), item;
       while(--loc>=0) {
         item = items[loc];
         names.sel = isArray ? (value.indexOf(item[1])>=0) : (item[1]===value);
         names.active = (activeIndex === loc);
-        SC.$(cq.get(loc)).setClass(names);
+        names.disabled = !item[2];
+        SC.$(cq[loc]).setClass(names);
       }
       names = items = value = items = null; // cleanup
     }
@@ -352,9 +348,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       } else {
         icon = '';
       }
-      ic.push('<span class="sc-button-inner"><label class="sc-button-label">');
-      ic.push(icon+title);
-      ic.push('</label></span>');
+      ic.push('<span class="sc-button-inner"><label class="sc-button-label">',
+              icon+title, '</label></span>');
       ic.end();
     }   
   },  
@@ -374,7 +369,7 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     // start at the target event and go upwards until we reach either the 
     // root responder or find an anchor.sc-segment.
     var root = this.$(), match = null ;
-    while(!match && (elem.length>0) && (elem.get(0)!==root.get(0))) {
+    while(!match && (elem.length>0) && (elem[0]!==root[0])) {
       if (elem.hasClass('sc-segment') && elem.attr('tagName')==='A') {
         match = elem;
       } else elem = elem.parent();
@@ -391,7 +386,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
     var i, item, items, len, value, isArray;
     if (evt.which === 9) {
       var view = evt.shiftKey ? this.get('previousValidKeyView') : this.get('nextValidKeyView');
-      view.becomeFirstResponder();
+      if(view) view.becomeFirstResponder();
+      else evt.allowDefault();
       return YES ; // handled
     }    
     if (!this.get('allowsMultipleSelection') && !this.get('allowsEmptySelection')){
@@ -548,7 +544,8 @@ SC.SegmentedView = SC.View.extend(SC.Control,
   
   /** tied to the isEnabled state */
    acceptsFirstResponder: function() {
-     return this.get('isEnabled');
+     if(!SC.SAFARI_FOCUS_BEHAVIOR) return this.get('isEnabled');
+     else return NO;
    }.property('isEnabled'),
 
    willBecomeKeyResponderFrom: function(keyView) {

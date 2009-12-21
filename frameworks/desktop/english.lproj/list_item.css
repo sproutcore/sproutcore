@@ -95,13 +95,8 @@
 	border: 1px #333 solid;
 }
 
-.sc-list-item-view .sc-checkbox-view.sel {
-	background-image: sc_static('icons/mini_454545'); 
-	background-position: -66px -147px;
-}
 
 .sc-list-item-view .sc-checkbox-view.active {
-	background-image: sc_static('icons/mini_ffffff'); 
 	background-color: #333;
 	border-color: black;
 }
@@ -156,13 +151,6 @@
 	right: 1px;
 	top: 50%;
 	margin-top: -8px;
-	background-image: sc_static('icons/mini_454545'); 
-	background-position: -32px 0;
-}
-
-.sc-list-item-view.sel .branch,
-.sc-list-item-view.active .branch {
-	background-image: sc_static('icons/mini_ffffff'); 
 }
 
 /* @end */

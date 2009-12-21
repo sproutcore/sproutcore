@@ -255,6 +255,16 @@ SC.SelectButtonView = SC.ButtonView.extend(
     customView used to draw the menu
   */
   customView: null,
+  
+  /**
+    css classes applied to customView
+  */
+  customViewClassName: null,
+  
+  /**
+    customView menu offset width
+  */
+  customViewMenuOffsetWidth: 0,
 
   /**
     This is a property for enabling/disabling ellipsis
@@ -279,8 +289,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @private
   */
   leftAlign: function() {
-    var val = 0 ;
-    var controlSize = this.get('controlSize') ;
+    var val = 0, controlSize = this.get('controlSize') ;
     if(controlSize === SC.SMALL_CONTROL_SIZE) val = -14 ;
     if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -16 ;
     return val;
@@ -314,57 +323,60 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   render: function(context,firstTime) {
     sc_super();
-    var layoutWidth = this.layout.width ;
+    var layoutWidth, objects, len, nameKey, iconKey, valueKey, checkboxEnabled,
+      currentSelectedVal, shouldLocalize, separatorPostion, itemList, isChecked,
+      idx, name, icon, value, item;
+    layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.SELECT_BUTTON_SPRITE_WIDTH }) ;
     }
 
-    var objects = this.get('objects') ;
+    objects = this.get('objects') ;
     objects = this.sortObjects(objects) ;
-    var len = objects.length ;
+    len = objects.length ;
 
     //Get the namekey, iconKey and valueKey set by the user
-    var nameKey = this.get('nameKey') ;
-    var iconKey = this.get('iconKey') ;
-    var valueKey = this.get('valueKey') ;
-    var checkboxEnabled = this.get('checkboxEnabled') ;
+    nameKey = this.get('nameKey') ;
+    iconKey = this.get('iconKey') ;
+    valueKey = this.get('valueKey') ;
+    checkboxEnabled = this.get('checkboxEnabled') ;
 
     //get the current selected value
-    var currentSelectedVal = this.get('value') ;
+    currentSelectedVal = this.get('value') ;
 
     // get the localization flag.
-    var shouldLocalize = this.get('localize') ;
+    shouldLocalize = this.get('localize') ;
 
     //get the separatorPostion
-    var separatorPostion = this.get('separatorPostion') ;
+    separatorPostion = this.get('separatorPostion') ;
 
     //itemList array to set the menu items
-    var itemList = [] ;
+    itemList = [] ;
 
     //to set the 'checkbox' property of menu items
-    var isChecked = YES ;
+    isChecked = YES ;
 
     //index for finding the first item in the list
-    var idx = 0 ;
+    idx = 0 ;
 
     objects.forEach(function(object) {
     if (object) {
 
       //Get the name value. If value key is not specified convert obj
       //to string
-      var name = nameKey ? (object.get ?
+      name = nameKey ? (object.get ?
         object.get(nameKey) : object[nameKey]) : object.toString() ;
 
       // localize name if specified.
       name = shouldLocalize? name.loc() : name ;
 
       //Get the icon value
-      var icon = iconKey ? (object.get ?
+      icon = iconKey ? (object.get ? 
         object.get(iconKey) : object[iconKey]) : null ;
       if (SC.none(object[iconKey])) icon = null ;
 
       // get the value using the valueKey or the object
-      var value = (valueKey) ? (object.get ?
+        value = (valueKey) ? (object.get ?
         object.get(valueKey) : object[valueKey]) : object ;
 
       if (!SC.none(currentSelectedVal) && !SC.none(value)){
@@ -420,12 +432,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }, this ) ;
 
     if(firstTime) {
-      var value = this.get('value') ;
-      if(SC.none(value)) {
-        this.set('value', this._defaultVal) ;
-        this.set('title', this._defaultTitle) ;
-        this.set('icon', this._defaultIcon) ;
-      }
+      this.invokeLast(function() {
+        var value = this.get('value') ;
+        if(SC.none(value)) {
+          this.set('value', this._defaultVal) ;
+          this.set('title', this._defaultTitle) ;
+          this.set('icon', this._defaultIcon) ;
+        }
+      });
     }
 
     //Set the preference matrix for the menu pane
@@ -441,14 +455,19 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   _action: function( evt )
   {
-    var buttonLabel = this.$('.sc-button-label')[0] ;
+    var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
+      items, elementOffsetWidth, largestMenuWidth, item, element, idx,
+      currSel, itemList, menuControlSize, menuHeightPadding, customView,
+      customMenuView, menu, itemsLength;
+      
+    buttonLabel = this.$('.sc-button-label')[0] ;
     // Get the length of the text on the button in pixels
-    var menuWidth = this.get('layer').offsetWidth ;
-    var scrollWidth = buttonLabel.scrollWidth ;
-    var lastMenuWidth = this.get('lastMenuWidth') ;
+    menuWidth = this.get('layer').offsetWidth ;
+    scrollWidth = buttonLabel.scrollWidth ;
+    lastMenuWidth = this.get('lastMenuWidth') ;
     if(scrollWidth) {
        // Get the original width of the label in the button
-       var offsetWidth = buttonLabel.offsetWidth ;
+       offsetWidth = buttonLabel.offsetWidth ;
        if(scrollWidth && offsetWidth) {
           menuWidth = menuWidth + scrollWidth - offsetWidth ;
        }
@@ -457,18 +476,22 @@ SC.SelectButtonView = SC.ButtonView.extend(
       lastMenuWidth = menuWidth ;
     }
 
-    var items = this.get('itemList') ;
-    var elementOffsetWidth, largestMenuWidth ;
+    items = this.get('itemList') ;
 
-    for (var idx = 0; idx < items.length; ++idx) {
+    var customViewClassName = this.get('customViewClassName') ;
+    var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth') ;
+    var className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+    className = customViewClassName ? (className + ' ' + customViewClassName) : className ;
+
+    for (idx = 0, itemsLength = items.length; idx < itemsLength; ++idx) {
       //getting the width of largest menu item
-      var item = items.objectAt(idx) ;
-      var element = document.createElement('div') ;
+      item = items.objectAt(idx) ;
+      element = document.createElement('div') ;
       element.style.cssText = 'top:-10000px; left: -10000px;  position: absolute;' ;
-      element.className = 'sc-view sc-pane sc-panel sc-palette sc-picker sc-menu select-button sc-scroll-view sc-menu-scroll-view sc-container-view menuContainer sc-button-view sc-menu-item sc-regular-size' ;
+      element.className = className ;
       element.innerHTML = item.title ;
       document.body.appendChild(element) ;
-      elementOffsetWidth = element.offsetWidth ;
+      elementOffsetWidth = element.offsetWidth + customViewMenuOffsetWidth;
 
       if (!largestMenuWidth || (elementOffsetWidth > largestMenuWidth)) {
         largestMenuWidth = elementOffsetWidth ;
@@ -479,17 +502,25 @@ SC.SelectButtonView = SC.ButtonView.extend(
     lastMenuWidth = (largestMenuWidth > lastMenuWidth) ?
                       largestMenuWidth: lastMenuWidth ;
 
+    // Get the window size width and compare with the lastMenuWidth.
+    // If it is greater than windows width then reduce the maxwidth by 25px
+    // so that the ellipsis property is enabled by default
+    var maxWidth = SC.RootResponder.responder.get('currentWindowSize').width;
+    if(lastMenuWidth > maxWidth) {
+      lastMenuWidth = (maxWidth - 25) ;
+    }
+
     this.set('lastMenuWidth',lastMenuWidth) ;
-    var currSel = this.get('currentSelItem') ;
-    var itemList = this.get('itemList') ;
-    var menuControlSize = this.get('controlSize') ;
-    var menuHeightPadding = this.get('menuPaneHeightPadding') ;
+    currSel = this.get('currentSelItem') ;
+    itemList = this.get('itemList') ;
+    menuControlSize = this.get('controlSize') ;
+    menuHeightPadding = this.get('menuPaneHeightPadding') ;
 
     // get the user defined custom view
-    var customView = this.get('customView') ;
-    var customMenuView = customView ? customView : SC.MenuItemView ;
+    customView = this.get('customView') ;
+    customMenuView = customView ? customView : SC.MenuItemView ;
 
-    var menu  = SC.MenuPane.create({
+    menu  = SC.MenuPane.create({
 
       /**
         Class name - select-button-item
@@ -541,30 +572,32 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   */
   displaySelectedItem: function() {
+    var menuView, currSel, itemViews, title, val, itemIdx = 0, button, object,
+      len, found = null, objTmp;
+    
     //Get MenuPane, currentSelectedMenuItem & menuItemView
     // Get the main parent view to show the menus
-    var menuView = this.parentMenu() ;
-    var currSel = menuView.get('currentSelectedMenuItem') ;
-    var itemViews = menuView.menuItemViews ;
-    var title,val ;
-
+      
+    menuView = this.parentMenu() ;
+    currSel = menuView.get('currentSelectedMenuItem') ;
+    itemViews = menuView.menuItemViews ;
+    
     //  Fetch the index of the current selected item
-    var itemIdx = 0 ;
     if (currSel && itemViews) {
       itemIdx = itemViews.indexOf(currSel) ;
     }
 
     // Get the select button View
-    var button = menuView.get('anchor') ;
+    button = menuView.get('anchor') ;
 
     // set the value and title
-    var object = menuView.get('items') ;
-    var len = object.length ;
-    var found = null ;
+    object = menuView.get('items') ;
+    len = object.length ;
 
     while (!found && (--len >= 0)) {
-      title = !SC.none(object[len].title) ? object[len].title: object.toString() ;
-      val =  !SC.none(object[len].value) ? object[len].value: title ;
+      objTmp = object[len];
+      title = !SC.none(objTmp.title) ? objTmp.title: object.toString() ;
+      val =  !SC.none(objTmp.value) ? objTmp.value: title ;
 
       if (title === this.get('value') && (itemIdx === len)) {
         found = object ;
@@ -584,11 +617,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
      place aligned to the item on the button when menu is opened.
   */
   changeSelectButtonPreferMatrix: function() {
-    var preferMatrixAttributeTop = 0 ;
-    var itemIdx = this.get('itemIdx') ;
-    var leftAlign = this.get('leftAlign') ;
-    var defPreferMatrix ;
-    var tempPreferMatrix ;
+    var preferMatrixAttributeTop = 0 ,
+      itemIdx = this.get('itemIdx') ,
+      leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
 
     if(this.get('isDefaultPosition')) {
       defPreferMatrix = [leftAlign, 4, 3] ;

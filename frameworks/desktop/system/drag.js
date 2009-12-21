@@ -338,7 +338,7 @@ SC.Drag = SC.Object.extend(
   mouseDragged: function(evt) {
     var scrolled = this._autoscroll(evt) ;
     var loc = this.get('location') ;
-    if (!scrolled && (evt.pageX == loc.x) && (evt.pageY == loc.y)) {
+    if (!scrolled && (evt.pageX === loc.x) && (evt.pageY === loc.y)) {
       return ; // quickly ignore duplicate calls
     } 
     
@@ -355,7 +355,7 @@ SC.Drag = SC.Object.extend(
     var target = this._findDropTarget(evt) ; // deepest drop target
     var op = SC.DRAG_NONE ;
     
-    while (target && (target != last) && (op == SC.DRAG_NONE)) {
+    while (target && (target !== last) && (op === SC.DRAG_NONE)) {
       // make sure the drag source will permit a drop operation on the named 
       // target
       if (target && source && source.dragSourceOperationMaskFor) {
@@ -363,18 +363,18 @@ SC.Drag = SC.Object.extend(
       } else op = SC.DRAG_ANY ; // assume drops are allowed
       
       // now, let's see if the target will accept the drag
-      if ((op != SC.DRAG_NONE) && target && target.computeDragOperations) {
+      if ((op !== SC.DRAG_NONE) && target && target.computeDragOperations) {
         op = op & target.computeDragOperations(this, evt, op) ;
       } else op = SC.DRAG_NONE ; // assume drops AREN'T allowed
       
       this.allowedDragOperations = op ;
       
       // if DRAG_NONE, then look for the next parent that is a drop zone
-      if (op == SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
+      if (op === SC.DRAG_NONE) target = this._findNextDropTarget(target) ;
     }
     
     // STEP 2: Refocus the drop target if needed
-    if (target != last) {
+    if (target !== last) {
       if (last && last.dragExited) last.dragExited(this, evt) ;
       
       if (target) {

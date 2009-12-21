@@ -347,10 +347,38 @@ SC.RadioView = SC.FieldView.extend(
    
   },
   
-  mouseDown: function(evt) {  
-    this.set('isActive', YES);
+  /**
+    If the user clicks inside one of the radio elements, mark it as active.
+
+    Save the element that was clicked on so we can remove the active state on
+    mouseUp.
+  */
+  mouseDown: function(evt) {
+    var target = evt.target;
+    while (target) {
+      if (target.className && target.className.indexOf('sc-radio-button') > -1) break;
+      target = target.parentNode;
+    }
+    if (!target) return NO;
+
+    target = this.$(target);
+    target.addClass('active');
+    this._activeRadioButton = target;
+
     this._field_isMouseDown = YES;
     return YES;
+  },
+
+  /**
+    If we have a radio element that was clicked on previously, make sure we
+    remove the active state.
+  */
+  mouseUp: function(evt) {
+    var active = this._activeRadioButton;
+    if (active) {
+      active.removeClass('active');
+      this._activeRadioButton = null;
+    }
   }
 
 });

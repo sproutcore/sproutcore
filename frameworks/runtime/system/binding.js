@@ -296,8 +296,8 @@ SC.Binding = {
     Returns a builder function for compatibility.  
   */
   builder: function() {
-    var binding = this ;
-    var ret = function(fromProperty) { return binding.beget().from(fromProperty); };
+    var binding = this,
+        ret = function(fromProperty) { return binding.beget().from(fromProperty); };
     ret.beget = function() { return binding.beget(); } ;
     return ret ;
   },
@@ -376,8 +376,8 @@ SC.Binding = {
     if (!this._connectionPending) return; //nothing to do
     this._connectionPending = NO ;
 
-    var path, root ;
-    var bench = SC.BENCHMARK_BINDING_SETUP;
+    var path, root,
+        bench = SC.BENCHMARK_BINDING_SETUP;
 
     if (bench) SC.Benchmark.start("SC.Binding.connect()");
     
@@ -507,7 +507,7 @@ SC.Binding = {
   _computeBindingValue: function() {
     var source = this._bindingSource,
         key    = this._bindingKey,
-        v;
+        v, idx;
         
     if (!source) return ; // nothing to do
     this._bindingValue = v = source.getPath(key);
@@ -515,9 +515,10 @@ SC.Binding = {
     // apply any transforms to get the to property value also
     var transforms = this._transforms;
     if (transforms) {
-      var len = transforms.length ;
-      for(var idx=0;idx<len;idx++) {
-        var transform = transforms[idx] ;
+      var len = transforms.length,
+          transform;
+      for(idx=0;idx<len;idx++) {
+        transform = transforms[idx] ;
         v = transform(v, this) ;
       }
     }
@@ -547,11 +548,10 @@ SC.Binding = {
     this._isFlushing = YES ;
     SC.Observers.suspendPropertyObserving();
 
-    var didFlush = NO ;
-    var log = SC.LOG_BINDINGS ;
-    
-    // connect any bindings
-    var queue, binding ;
+    var didFlush = NO,
+        log = SC.LOG_BINDINGS,
+        // connect any bindings
+        queue, binding ;
     while((queue = this._connectQueue).length >0) {
       this._connectQueue = this._alternateConnectQueue ;
       this._alternateConnectQueue = queue ;
@@ -598,10 +598,10 @@ SC.Binding = {
     this._computeBindingTargets() ;
     this._computeBindingValue();
     
-    var v = this._bindingValue ;
-    var tv = this._transformedBindingValue ;
-    var bench = SC.BENCHMARK_BINDING_NOTIFICATIONS ;
-    var log = SC.LOG_BINDINGS ; 
+    var v = this._bindingValue,
+        tv = this._transformedBindingValue,
+        bench = SC.BENCHMARK_BINDING_NOTIFICATIONS,
+        log = SC.LOG_BINDINGS ; 
     
     // the from property value will always be the binding value, update if 
     // needed.
@@ -642,8 +642,8 @@ SC.Binding = {
     // we are connected, go ahead and sync
     } else {
       this._computeBindingTargets() ;
-      var target = this._fromTarget ;
-      var key = this._fromPropertyKey ;
+      var target = this._fromTarget,
+          key = this._fromPropertyKey ;
       if (!target || !key) return this ; // nothing to do
 
       // get the new value

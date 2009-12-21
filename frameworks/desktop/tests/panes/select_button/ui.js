@@ -70,6 +70,19 @@ var pane = SC.ControlTestPane.design()
       useStaticLayout: YES,
       objects:['None', 'Low', 'Medium', 'High'],
       layout: { width: '150', right: '0' }
+    })
+
+    //sample10
+    .add("DisableItem", SC.SelectButtonView, {
+      objects: [{ title: "None", pos: 3, isEnabled: YES },
+        { title: "Low", pos: 1, isEnabled: NO },
+        { title: "Medium", pos: 2, isEnabled: YES },
+        { title: "High", pos: 4, isEnabled: NO }],
+      nameKey: 'title',
+      disableSort: NO,
+      isEnabledKey: 'isEnabled',
+      sortKey: 'pos',
+      checkboxEnabled: YES
     }) ;
 
     pane.show();

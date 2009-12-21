@@ -160,43 +160,46 @@ SC.Button = {
     @returns {SC.RenderContext} the context
   */
   renderTitle: function(context, firstTime) {
-    var icon = this.get('icon') ;
-    var image = '' ;
-    var title = this.get('displayTitle') ;
-    var needsTitle = (!SC.none(title) && title.length>0);
-    var elem, htmlNode;
+    var icon = this.get('icon'),
+        image = '' ,
+        title = this.get('displayTitle') ,
+        needsTitle = (!SC.none(title) && title.length>0),
+        elem, htmlNode, imgTitle;
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
     if (icon) {
       var blank = SC.BLANK_IMAGE_URL;
 
-      image = '<img src="%@1" alt="" class="%@2" />' ;
       if (icon.indexOf('/') >= 0) {
-        image = image.fmt(icon, 'icon');
+        image = '<img src="'+icon+'" alt="" class="icon" />';
       } else {
-        image = image.fmt(blank, icon);
+        image = '<img src="'+blank+'" alt="" class="'+icon+'" />';
       }
       needsTitle = YES ;
     }
-    elem = this.$('label');
+    imgTitle = image + title;
     if(firstTime){
       if(this.get('needsEllipsis')){
-        context.push('<label class="sc-button-label ellipsis">'+image+title+'</label>'); 
+        context.push('<label class="sc-button-label ellipsis">'+imgTitle+'</label>'); 
       }else{
-          context.push('<label class="sc-button-label">'+image+title+'</label>'); 
+          context.push('<label class="sc-button-label">'+imgTitle+'</label>'); 
       }  
-    }else if ( (htmlNode = elem[0])){
-      if(needsTitle) { 
-        if(this.get('needsEllipsis')){
-          elem.addClass('ellipsis');
-          htmlNode.innerHTML = image + title;
-        }else{
-          elem.removeClass('ellipsis');
-          htmlNode.innerHTML = image + title;
-        } 
+      this._ImageTitleCached = imgTitle;
+    }else{
+      elem = this.$('label');  
+      if ( (htmlNode = elem[0])){
+        if(needsTitle) { 
+          if(this.get('needsEllipsis')){
+            elem.addClass('ellipsis');
+            if(this._ImageTitleCached !== imgTitle) htmlNode.innerHTML = imgTitle;
+          }else{
+            elem.removeClass('ellipsis');
+            if(this._ImageTitleCached !== imgTitle) htmlNode.innerHTML = imgTitle;
+          } 
+        }
+        else { htmlNode.innerHTML = ''; } 
       }
-      else { htmlNode.innerHTML = ''; } 
     }  
     return context ;
   },
@@ -210,8 +213,8 @@ SC.Button = {
     @returns {SC.Button} receiver
   */
   contentPropertyDidChange: function(target, key) {
-    var del = this.get('displayDelegate');
-    var content = this.get('content'), value ;
+    var del = this.get('displayDelegate'), 
+        content = this.get('content'), value ;
 
     var valueKey = this.getDelegateProperty('contentValueKey', del) ;
     if (valueKey && (key === valueKey || key === '*')) {
@@ -291,8 +294,7 @@ SC.Button = {
     @returns {Boolean} return state
   */
   computeIsSelectedForValue: function(value) {
-    var targetValue = this.get('toggleOnValue') ;
-    var state, next ;
+    var targetValue = this.get('toggleOnValue'), state, next ;
     
     if (SC.typeOf(value) === SC.T_ARRAY) {
 
@@ -314,7 +316,8 @@ SC.Button = {
       
     // for single values, just compare to the toggleOnValue...use truthiness
     } else {
-      state = (value == targetValue) ;
+      if(value === SC.MIXED_STATE) state = SC.MIXED_STATE;
+      else state = (value == targetValue) ;
     }
     return state ;
   },
@@ -330,8 +333,8 @@ SC.Button = {
     Whenever the button value changes, update the selected state to match.
   */
   _button_valueDidChange: function() {
-    var value = this.get('value');  
-    var state = this.computeIsSelectedForValue(value);
+    var value = this.get('value'),
+        state = this.computeIsSelectedForValue(value);
     this.set('isSelected', state) ; // set new state...
   }.observes('value'),
   
@@ -339,8 +342,8 @@ SC.Button = {
     Whenever the selected state is changed, make sure the button value is also updated.  Note that this may be called because the value has just changed.  In that case this should do nothing.
   */
   _button_isSelectedDidChange: function() {
-    var newState = this.get('isSelected');
-    var curState = this.computeIsSelectedForValue(this.get('value'));
+    var newState = this.get('isSelected'),
+        curState = this.computeIsSelectedForValue(this.get('value'));
     
     // fix up the value, but only if computed state does not match.
     // never fix up value if isSelected is set to MIXED_STATE since this can

@@ -83,9 +83,8 @@ test("clicking on a radio button will change toggle the value", function() {
 
 test("pressing mouseDown and then mouseUp anywhere in a radio button should toggle the selection", function() {
   var elem = view.get('layer'), input = SC.$('input', elem);
-  
-  SC.Event.trigger(elem, 'mousedown');
-  ok(view.get('isActive'), 'view should be active');
+  SC.Event.trigger(input[0], 'mousedown');
+  ok(view.$('label').first().hasClass('active'), 'radio button should be active');
   equals(view.get('value'), 'Red', 'value should not change yet');
   
   // simulate mouseUp and browser-native change to control
@@ -94,7 +93,7 @@ test("pressing mouseDown and then mouseUp anywhere in a radio button should togg
   // loose focus of the element since it was changed
   SC.Event.trigger(input.get(1),'click');
   
-  ok(!view.get('isActive'), 'view should no longer be active');
+  ok(!view.$('label').first().hasClass('active'), 'radio button should no longer be active');
   equals(view.get('value'), undefined, 'value should be undefined (none checked)');
   
   input = elem = null ;

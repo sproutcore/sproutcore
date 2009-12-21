@@ -709,7 +709,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var all   = this.leftSide.evaluate(r,w);
                           var start = this.rightSide.evaluate(r,w);
-                          return ( all.indexOf(start) === 0 );
+                          return ( all && all.indexOf(start) === 0 );
                         }
     },
 
@@ -723,7 +723,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var all = this.leftSide.evaluate(r,w);
                           var end = this.rightSide.evaluate(r,w);
-                          return ( all.indexOf(end) === (all.length - end.length) );
+                          return ( all && all.indexOf(end) === (all.length - end.length) );
                         }
     },
 
@@ -1267,13 +1267,24 @@ SC.Query.mixin( /** @scope SC.Query */ {
     if (storeKeys) {
       
       // Set tmp variable because we can't pass variables to sort function.
-      // Do this instead of generating a temporary closure function for perf
-      SC.Query._TMP_STORE = store;
-      SC.Query._TMP_QUERY_KEY = query;
-      storeKeys.sort(SC.Query.compareStoreKeys);
-      SC.Query._TMP_STORE = SC.Query._TMP_QUERY_KEY = null;
+      // Do this instead of generating a temporary closure function for perf.
+      // We'll use a stack-based approach in case our sort routine ends up
+      // calling code that triggers a recursive invocation of orderStoreKeys.
+      var K             = SC.Query;
+          tempStores    = K._TMP_STORES;
+          tempQueryKeys = K._TMP_QUERY_KEYS;
+      if (!tempStores)    tempStores    = K._TMP_STORES = [];
+      if (!tempQueryKeys) tempQueryKeys = K._TMP_QUERY_KEYS = [];
+      
+      tempStores.push(store);
+      tempQueryKeys.push(query);
+        
+      var res = storeKeys.sort(SC.Query.compareStoreKeys);
+      
+      K._TMP_STORES.pop();
+      K._TMP_QUERY_KEYS.pop();
     }
-    
+
     return storeKeys;
   },
   
@@ -1286,11 +1297,14 @@ SC.Query.mixin( /** @scope SC.Query */ {
     @param {Number} storeKey2 a store key
     @returns {Number} -1 if record1 < record2,  +1 if record1 > record2, 0 if equal
   */
-  compareStoreKeys: function(storeKey1, storeKey2) {
-    var store    = SC.Query._TMP_STORE,
-        queryKey = SC.Query._TMP_QUERY_KEY,
-        record1  = store.materializeRecord(storeKey1),
-        record2  = store.materializeRecord(storeKey2);
+  compareStoreKeys: function(storeKey1, storeKey2) {    
+    var K             = SC.Query,
+        tempStores    = K._TMP_STORES,
+        tempQueryKeys = K._TMP_QUERY_KEYS;
+        store         = tempStores[tempStores.length - 1],
+        queryKey      = tempQueryKeys[tempQueryKeys.length - 1],
+        record1       = store.materializeRecord(storeKey1),
+        record2       = store.materializeRecord(storeKey2);
     return queryKey.compare(record1, record2);
   },
   

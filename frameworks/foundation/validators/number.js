@@ -43,15 +43,15 @@ SC.Validator.Number = SC.Validator.extend(
     
     // strip out commas
     value = value.replace(/,/g,'');
-    
     switch(SC.typeOf(value)) {
       case SC.T_STRING:
-        if (value.length == '') {
+        if (value.length === 0) {
           value = null ;
         } else if (this.get('places') > 0) {
           value = parseFloat(value) ;
         } else {
-          value = parseInt(value,0) ;
+          if(value.length==1 && value.match(/-/)) value = null;
+          else value = parseInt(value,0) ;
         }
         break ;
       case SC.T_NULL:
@@ -64,7 +64,7 @@ SC.Validator.Number = SC.Validator.extend(
   
   validate: function(form, field) { 
     var value = field.get('fieldValue') ;
-    return (value == '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
+    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
   },
   
   validateError: function(form, field) {
@@ -76,7 +76,11 @@ SC.Validator.Number = SC.Validator.extend(
     Allow only numbers, dashes, period, and commas
   */
   validateKeyDown: function(form, field, charStr) {
-    return !!charStr.match(/[0-9\.,\-]/);
+    if(this.get('places')===0){
+      return (charStr.match(/^[\-+]?[0-9,\0]*/)[0]===charStr) || charStr.length === 0;
+    }else {
+      return (charStr.match(/^[\-+]?[0-9,\0]*\.?[0-9\0]+/)===charStr) || charStr.length === 0;
+    }
   }
     
 }) ;

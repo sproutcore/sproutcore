@@ -71,10 +71,10 @@ var SproutCore = SproutCore || SC ;
 */
 SC.mixin = function() {
   // copy reference to target object
-  var target = arguments[0] || {};
-  var idx = 1;
-  var length = arguments.length ;
-  var options ;
+  var target = arguments[0] || {},
+      idx = 1,
+      length = arguments.length ,
+      options, copy , key;
 
   // Handle case where we have only one item...extend SC
   if (length === 1) {
@@ -84,9 +84,9 @@ SC.mixin = function() {
 
   for ( ; idx < length; idx++ ) {
     if (!(options = arguments[idx])) continue ;
-    for(var key in options) {
+    for(key in options) {
       if (!options.hasOwnProperty(key)) continue ;
-      var copy = options[key] ;
+      copy = options[key] ;
       if (target===copy) continue ; // prevent never-ending loop
       if (copy !== undefined) target[key] = copy ;
     }
@@ -424,11 +424,30 @@ SC.mixin(/** @scope SC */ {
 
   */
   compare: function (v, w) {
+    // Doing a '===' check is very cheap, so in the case of equality, checking
+    // this up-front is a big win.
+    if (v === w) return 0;
     
     var type1 = SC.typeOf(v);
     var type2 = SC.typeOf(w);
-    var type1Index = SC.ORDER_DEFINITION.indexOf(type1);
-    var type2Index = SC.ORDER_DEFINITION.indexOf(type2);
+    
+    // If we haven't yet generated a reverse-mapping of SC.ORDER_DEFINITION,
+    // do so now.
+    var mapping = SC.ORDER_DEFINITION_MAPPING;
+    if (!mapping) {
+      var order = SC.ORDER_DEFINITION;
+      mapping = SC.ORDER_DEFINITION_MAPPING = {};
+      var idx, len;
+      for (idx = 0, len = order.length;  idx < len;  ++idx) {
+        mapping[order[idx]] = idx;
+      }
+      
+      // We no longer need SC.ORDER_DEFINITION.
+      delete SC.ORDER_DEFINITION;
+    }
+    
+    var type1Index = mapping[type1];
+    var type2Index = mapping[type2];
     
     if (type1Index < type2Index) return -1;
     if (type1Index > type2Index) return 1;
@@ -442,24 +461,28 @@ SC.mixin(/** @scope SC */ {
         return 0;
 
       case SC.T_STRING:
-        if (v.localeCompare(w)<0) return -1;
-        if (v.localeCompare(w)>0) return 1;
+        var comp = v.localeCompare(w);
+        if (comp<0) return -1;
+        if (comp>0) return 1;
         return 0;
 
       case SC.T_ARRAY:
-        var l = Math.min(v.length,w.length);
+        var vLen = v.length;
+        var wLen = w.length;
+        var l = Math.min(vLen, wLen);
         var r = 0;
         var i = 0;
+        var thisFunc = arguments.callee;
         while (r===0 && i < l) {
-          r = arguments.callee(v[i],w[i]);
-          if ( r !== 0 ) return r;
+          r = thisFunc(v[i],w[i]);
           i++;
         }
+        if (r !== 0) return r;
       
         // all elements are equal now
         // shorter array should be ordered first
-        if (v.length < w.length) return -1;
-        if (v.length > w.length) return 1;
+        if (vLen < wLen) return -1;
+        if (vLen > wLen) return 1;
         // arrays are equal now
         return 0;
         
@@ -956,8 +979,8 @@ SC.mixin(Function.prototype,
 */
 String.prototype.fmt = function() {
   // first, replace any ORDERED replacements.
-  var args = arguments;
-  var idx  = 0; // the current index for non-numerical replacements
+  var args = arguments,
+      idx  = 0; // the current index for non-numerical replacements
   return this.replace(/%@([0-9]+)?/g, function(s, argIndex) {
     argIndex = (argIndex) ? parseInt(argIndex,0)-1 : idx++ ;
     s =args[argIndex];
@@ -988,12 +1011,10 @@ String.prototype.loc = function() {
   @returns {Array} an array of non-empty strings
 */
 String.prototype.w = function() { 
-  var ary = [], ary2 = this.split(' '), len = ary2.length ;
-  for (var idx=0; idx<len; ++idx) {
-    var str = ary2[idx] ;
+  var ary = [], ary2 = this.split(' '), len = ary2.length, str, idx=0;
+  for (idx=0; idx<len; ++idx) {
+    str = ary2[idx] ;
     if (str.length !== 0) ary.push(str) ; // skip empty strings
   }
   return ary ;
 };
-
-

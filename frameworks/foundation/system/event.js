@@ -184,12 +184,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           this.add(e, eventType, target, method, context);
         }, this);
         return this;
-      } else elem = elem.get(0);
+      } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
     
     // cannot register events on text nodes, etc.
-    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.Event;
+    if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
@@ -260,12 +260,12 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           this.remove(e, eventType, target, method);
         }, this);
         return this;
-      } else elem = elem.get(0);
+      } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
     
     // don't do events on text and comment nodes
-    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return SC.Event;
+    if ( elem.nodeType === 3 || elem.nodeType === 8 ) return SC.Event;
 
     // For whatever reason, IE has trouble passing the window object
     // around, causing it to be cloned in the process
@@ -389,18 +389,18 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
           this.trigger(e, eventType, args, donative);
         }, this);
         return this;
-      } else elem = elem.get(0);
+      } else elem = elem[0];
     }
     if (!elem) return this; // nothing to do
 
     // don't do events on text and comment nodes
-    if ( elem.nodeType == 3 || elem.nodeType == 8 ) return undefined;
+    if ( elem.nodeType === 3 || elem.nodeType === 8 ) return undefined;
     
     // Normalize to an array
     args = SC.A(args) ;
 
     var ret, fn = SC.typeOf(elem[eventType] || null) === SC.T_FUNCTION , 
-        event, current, onfoo;
+        event, current, onfoo, isClick;
 
     // Get the event to pass, creating a fake one if necessary
     event = args[0];
@@ -690,7 +690,7 @@ SC.mixin(SC.Event, /** @scope SC.Event */ {
   
   /** @private Take an incoming event and convert it to a normalized event. */
   normalizeEvent: function(event) {
-    if (event == window.event) {
+    if (event === window.event) {
       // IE can't do event.normalized on an Event object
       return SC.Event.create(event) ; 
     } else {
@@ -768,8 +768,16 @@ SC.Event.prototype = {
   normalized: YES,
 
   /** Returns the pressed character (found in this.which) as a string. */
-  getCharString: function() { 
-    return (this.charCode>0) ? String.fromCharCode(this.which) : null;
+  getCharString: function() {
+      if(SC.browser.msie){
+        if(this.keyCode == 8 || this.keyCode == 9 || (this.keyCode>=37 && this.keyCode<=40)){
+          return String.fromCharCode(0);
+        }else{
+          return (this.keyCode>0) ? String.fromCharCode(this.keyCode) : null;  
+        }
+      }else{
+        return (this.charCode>0) ? String.fromCharCode(this.charCode) : null;
+      }
   },
   
   /** Returns character codes for the event.  The first value is the normalized code string, with any shift or ctrl characters added to the begining.  The second value is the char string by itself.

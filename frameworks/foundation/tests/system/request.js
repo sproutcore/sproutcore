@@ -27,11 +27,11 @@ test("Basic Requirements", function() {
 });
 
 test("Test Asynchronous GET Request", function() {
-
+  
   var response, timer;
 
   timer = setTimeout(function() {
-    ok(false, 'response did not invoke notify() withint 2sec');
+    ok(false, 'response did not invoke notify() within 2sec');
     window.start();
   }, 2000);
   
@@ -155,7 +155,55 @@ test("Test Multiple Asynchronous GET Request - two immediate, and two in serial"
   setTimeout( function(){
     equals(requestCount, 6, "requestCount should be 6");
     equals(responseCount, 6, "responseCount should be 6");
-    window.start() ; // starts the test runne
+    window.start() ; // starts the test runner
   }, 2000);
+});
+
+
+test("Test timeouts", function() {
+  var message;
+  
+  // Sanity check 1
+  try {
+    SC.Request.getUrl(url).set('timeout', 0).send();
+    badRequest.send();
+  }
+  catch (e) {
+    message = e;
+  }
+  ok(message && message.indexOf("The timeout value must either not be specified or must be greater than 0") !== -1, 'An error should be thrown when the timeout value is 0 ms');
+  
+  // Sanity check 2
+  try {
+    SC.Request.getUrl(url).set('isAsynchronous', NO).set('timeout', 10).send();
+  }
+  catch (e) {
+    message = e;
+  }
+  ok(message && message.indexOf("Timeout values cannot be used with synchronous requests") !== -1, 'An error should be thrown when trying to use a timeout with a synchronous request');
+
+
+  // Make sure timeouts actually fire, and fire when expected.
+  var changedBefore  = changedAfter = NO,
+      callbackValue  = "initial";
+      timeoutRequest = SC.Request.getUrl("http://www.sproutcore.com");
+  timeoutRequest.set('timeout', 20);
+  timeoutRequest.set('didTimeout', function() { callbackValue = "after timeout"; });
+  timeoutRequest.set('didReceive', function() { callbackValue = "received data"; });
+  SC.RunLoop.begin();
+  timeoutRequest.send();
+  SC.RunLoop.end();
+  
+  stop() ; // stops the test runner
+  setTimeout(function() {
+    changedBefore = (callbackValue !== "initial");
+  }, 10);
+  setTimeout(function() {
+    changedAfter = (callbackValue === "after timeout");
+
+    ok(!changedBefore, 'The timeout callback should not have run before the timeout value was exceeded');
+    ok(changedAfter, 'The timeout callback should have run after the timeout value was exceeded');
+    window.start() ; // starts the test runner
+  }, 5000);
 });
 

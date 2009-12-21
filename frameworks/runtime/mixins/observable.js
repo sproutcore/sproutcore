@@ -275,8 +275,9 @@ SC.Observable = {
         cachedep, cache, idx, dfunc ;
 
     // if there are any dependent keys and they use caching, then clear the
-    // cache.
-    if (this._kvo_cacheable && (cache = this._kvo_cache)) {
+    // cache.  (If we're notifying, then propertyDidChange will do this for
+    // us.)
+    if (!notify && this._kvo_cacheable && (cache = this._kvo_cache)) {
       // lookup the cached dependents for this key.  if undefined, compute.
       // note that if cachdep is set to null is means we figure out it has no
       // cached dependencies already.  this is different from undefined.
@@ -720,7 +721,7 @@ SC.Observable = {
     }
     if (!target) target = this ;
     if (SC.typeOf(method) === SC.T_STRING) method = target[method] ;
-    if (!method) throw "You must pass a method to addObserver()" ;
+    if (!method) throw "You must pass a method to removeObserver()" ;
 
     // if the key contains a '.', this is a chained observer.
     key = key.toString() ;
@@ -808,18 +809,19 @@ SC.Observable = {
     if (this._observableInited) return ;
     this._observableInited = YES ;
     
-    var loc, keys, key, value, observer, propertyPaths, propertyPathsLength ;
+    var loc, keys, key, value, observer, propertyPaths, propertyPathsLength,
+        len, ploc, path, dotIndex, root, propertyKey, keysLen;
     
     // Loop through observer functions and register them
     if (keys = this._observers) {
-      var len = keys.length ;
+      len = keys.length ;
       for(loc=0;loc<len;loc++) {
         key = keys[loc]; observer = this[key] ;
         propertyPaths = observer.propertyPaths ;
         propertyPathsLength = (propertyPaths) ? propertyPaths.length : 0 ;
-        for(var ploc=0;ploc<propertyPathsLength;ploc++) {
-          var path = propertyPaths[ploc] ;
-          var dotIndex = path.indexOf('.') ;
+        for(ploc=0;ploc<propertyPathsLength;ploc++) {
+          path = propertyPaths[ploc] ;
+          dotIndex = path.indexOf('.') ;
           // handle most common case, observing a local property
           if (dotIndex < 0) {
             this.addObserver(path, this, observer) ;
@@ -832,7 +834,7 @@ SC.Observable = {
           // will add the observer now or later when the named path becomes
           // available.
           } else {
-            var root = null ;
+            root = null ;
             
             // handle special cases for observers that look to the local root
             if (dotIndex === 0) {
@@ -852,17 +854,17 @@ SC.Observable = {
     // Add Bindings
     this.bindings = []; // will be filled in by the bind() method.
     if (keys = this._bindings) {
-      for(loc=0;loc<keys.length;loc++) {
+      for(loc=0, keysLen = keys.length; loc < keysLen;loc++) {
         // get propertyKey
         key = keys[loc] ; value = this[key] ;
-        var propertyKey = key.slice(0,-7) ; // contentBinding => content
+        propertyKey = key.slice(0,-7) ; // contentBinding => content
         this[key] = this.bind(propertyKey, value) ;
       }
     }
 
     // Add Properties
     if (keys = this._properties) {
-      for(loc=0;loc<keys.length;loc++) {
+      for(loc=0, keysLen = keys.length; loc<keysLen;loc++) {
         key = keys[loc];
         if (value = this[key]) {
 
@@ -904,10 +906,10 @@ SC.Observable = {
     
     SC.Observers.flush(this) ; // hookup as many observers as possible.
 
-    var log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO) ;
-    var observers, changes, dependents, starObservers, idx, keys, rev ;
-    var members, membersLength, member, memberLoc, target, method, loc, func ;
-    var context, spaces, cache ;
+    var log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO),
+        observers, changes, dependents, starObservers, idx, keys, rev,
+        members, membersLength, member, memberLoc, target, method, loc, func,
+        context, spaces, cache ;
 
     if (log) {
       spaces = SC.KVO_SPACES = (SC.KVO_SPACES || '') + '  ';
@@ -1068,14 +1070,14 @@ SC.Observable = {
   */
   bind: function(toKey, target, method) {
 
-    var binding ;
+    var binding , pathType;
 
     // normalize...
     if (method !== undefined) target = [target, method];
 
     // if a string or array (i.e. tuple) is passed, convert this into a
     // binding.  If a binding default was provided, use that.
-    var pathType = SC.typeOf(target) ;
+    pathType = SC.typeOf(target) ;
     if (pathType === SC.T_STRING || pathType === SC.T_ARRAY) {
       binding = this[toKey + 'BindingDefault'] || SC.Binding;
       binding = binding.beget().from(target) ;
@@ -1098,30 +1100,31 @@ SC.Observable = {
     }
   */  
   didChangeFor: function(context) { 
-    
+    var valueCache, revisionCache, seenValues, seenRevisions, ret,
+        currentRevision, idx, key, value;
     context = SC.hashFor(context) ; // get a hash key we can use in caches.
     
     // setup caches...
-    var valueCache = this._kvo_didChange_valueCache ;
+    valueCache = this._kvo_didChange_valueCache ;
     if (!valueCache) valueCache = this._kvo_didChange_valueCache = {};
-    var revisionCache = this._kvo_didChange_revisionCache;
+    revisionCache = this._kvo_didChange_revisionCache;
     if (!revisionCache) revisionCache=this._kvo_didChange_revisionCache={};
 
     // get the cache of values and revisions already seen in this context
-    var seenValues = valueCache[context] || {} ;
-    var seenRevisions = revisionCache[context] || {} ;
+    seenValues = valueCache[context] || {} ;
+    seenRevisions = revisionCache[context] || {} ;
     
     // prepare too loop!
-    var ret = false ;
-    var currentRevision = this._kvo_revision || 0  ;
-    var idx = arguments.length ;
+    ret = false ;
+    currentRevision = this._kvo_revision || 0  ;
+    idx = arguments.length ;
     while(--idx >= 1) {  // NB: loop only to 1 to ignore context arg.
-      var key = arguments[idx];
+      key = arguments[idx];
       
       // has the kvo revision changed since the last time we did this?
       if (seenRevisions[key] != currentRevision) {
         // yes, check the value with the last seen value
-        var value = this.get(key) ;
+        value = this.get(key) ;
         if (seenValues[key] !== value) {
           ret = true ; // did change!
           seenValues[key] = value;
@@ -1206,9 +1209,9 @@ SC.Observable = {
     @returns {Array} Values of property keys.
   */
   getEach: function() {
-    var keys = SC.A(arguments) ;
-    var ret = [];
-    for(var idx=0; idx<keys.length;idx++) {
+    var keys = SC.A(arguments),
+        ret = [], idx, idxLen;
+    for(idx=0, idxLen = keys.length; idx < idxLen;idx++) {
       ret[ret.length] = this.getPath(keys[idx]);
     }
     return ret ;
@@ -1298,9 +1301,10 @@ SC.Observable = {
     @param {String...} propertyNames one or more property names
   */
   logProperty: function() {
-    var props = SC.$A(arguments) ;
-    for(var idx=0;idx<props.length; idx++) {
-      var prop = props[idx] ;
+    var props = SC.$A(arguments),
+        prop, propsLen, idx;
+    for(idx=0, propsLen = props.length; idx<propsLen; idx++) {
+      prop = props[idx] ;
       console.log('%@:%@: '.fmt(SC.guidFor(this), prop), this.get(prop)) ;
     }
   },
@@ -1313,6 +1317,21 @@ SC.Observable = {
 SC.logChange = function logChange(target, key, value) {
   console.log("CHANGE: %@[%@] => %@".fmt(target, key, target.get(key))) ;
 };
+
+/**
+  Retrieves a property from an object, using get() if the
+  object implements SC.Observable.
+
+  @param  {Object}  object  the object to query
+  @param  {String}  key the property to retrieve
+*/
+SC.mixin(SC, {
+  get: function(object, key) {
+    if (!object) return undefined;
+    if (object.get) return object.get(key);
+    return object[key];
+  }
+});
 
 // Make all Array's observable
 SC.mixin(Array.prototype, SC.Observable) ;

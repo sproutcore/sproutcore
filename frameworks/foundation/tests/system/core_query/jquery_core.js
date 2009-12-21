@@ -1159,7 +1159,7 @@ test("prev([String])", function() {
 
 
 test("addClass(String)", function() {
- expect(2);
+ expect(1);
  var div = SC.$("div");
  div.addClass("test");
  var pass = true;
@@ -1168,11 +1168,11 @@ test("addClass(String)", function() {
  }
  ok( pass, "Add Class" );
 
- // using contents will get regular, text, and comment nodes
- var j = SC.$("#nonnodes").contents();
- j.addClass("asdf");
- ok( j.hasClass("asdf"), "Check node,textnode,comment for addClass" );
-});
+ // // using contents will get regular, text, and comment nodes
+ //  var j = SC.$("#nonnodes").contents();
+ //  j.addClass("asdf");
+ //  ok( j.hasClass("asdf"), "Check node,textnode,comment for addClass" );
+ });
 
 test("removeClass(String) - simple", function() {
  expect(4);

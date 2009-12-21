@@ -173,6 +173,18 @@ SC.Response = SC.Object.extend(
   */
   isCancelled: NO,
   
+  /**
+    Set to YES if the request timed out.  Set to NO if the request has
+    completed before the timeout value.  Set to null if the timeout timer is
+    still ticking.
+  */
+  timedOut: null,
+  
+  /**
+    The timer tracking the timeout
+  */
+  timeoutTimer: null,
+  
   // ..........................................................
   // METHODS
   // 
@@ -183,7 +195,6 @@ SC.Response = SC.Object.extend(
     begin the actual request.
   */
   fire: function() {
-    
     var req = this.get('request'),
         source = req ? req.get('source') : null;
     
@@ -198,6 +209,20 @@ SC.Response = SC.Object.extend(
     // immediately if it is synchronous.
     if (!this.get('isCancelled')) this.invokeTransport();
 
+
+    // If the request specified a timeout value, then set a timer for it now.
+    var timeout = req.get('timeout');
+    if (timeout) {
+      var timer = SC.Timer.schedule({
+        target:   this, 
+        action:   'timeoutReached', 
+        interval: timeout,
+        repeats:  NO
+      });
+      this.set('timeoutTimer', timer);
+    }
+
+
     // if the transport did not cancel the request for some reason, let the
     // source know that the request was sent
     if (!this.get('isCancelled') && source && source.didSend) {
@@ -210,9 +235,9 @@ SC.Response = SC.Object.extend(
   },
   
   /**
-    Invoked by the transport when it receives a response.  The passed 
+    Invoked by the transport when it receives a response.  The passed-in
     callback will be invoked to actually process the response.  If cancelled
-    we will pass NO.  You sould cleanup instead.
+    we will pass NO.  You should clean up instead.
     
     Invokes callbacks on the source request also.
     
@@ -221,25 +246,33 @@ SC.Response = SC.Object.extend(
     @returns {SC.Response} receiver
   */
   receive: function(callback, context) {
-    var req = this.get('request');
-    var source = req ? req.get('source') : null;
+    // If we timed out, we should ignore this response.
+    if (!this.get('timedOut')) {
+      // If we had a timeout timer scheduled, invalidate it now.
+      var timer = this.get('timeoutTimer');
+      if (timer) timer.invalidate();
+      this.set('timedOut', NO);
     
-    // invoke the source, giving a chance to fixup the reponse or (more 
-    // likely) cancel the request.
-    if (source && source.willReceive) source.willReceive(req, this);
+      var req = this.get('request');
+      var source = req ? req.get('source') : null;
     
-    // invoke the callback.  note if the response was cancelled or not
-    callback.call(context, !this.get('isCancelled'));
+      // invoke the source, giving a chance to fixup the reponse or (more 
+      // likely) cancel the request.
+      if (source && source.willReceive) source.willReceive(req, this);
     
-    // if we weren't cancelled, then give the source first crack at handling
-    // the response.  if the source doesn't want listeners to be notified,
-    // it will cancel the response.
-    if (!this.get('isCancelled') && source && source.didReceive) {
-      source.didReceive(req, this);
-    }
+      // invoke the callback.  note if the response was cancelled or not
+      callback.call(context, !this.get('isCancelled'));
+    
+      // if we weren't cancelled, then give the source first crack at handling
+      // the response.  if the source doesn't want listeners to be notified,
+      // it will cancel the response.
+      if (!this.get('isCancelled') && source && source.didReceive) {
+        source.didReceive(req, this);
+      }
 
-    // notify listeners if we weren't cancelled.
-    if (!this.get('isCancelled')) this.notify();
+      // notify listeners if we weren't cancelled.
+      if (!this.get('isCancelled')) this.notify();
+    }
     
     // no matter what, remove from inflight queue
     SC.Request.manager.transportDidClose(this) ;
@@ -252,9 +285,35 @@ SC.Response = SC.Object.extend(
   */
   cancel: function() {
     if (!this.get('isCancelled')) {
-      this.set('isCancelled', YES);
-      this.cancelTransport();
+      this.set('isCancelled', YES) ;
+      this.cancelTransport() ;
       SC.Request.manager.transportDidClose(this) ;
+    }
+  },
+  
+  /**
+    Default method just closes the connection.
+  */
+  timeoutReached: function() {
+    // If we already received a response yet the timer still fired for some
+    // reason, do nothing.
+    if (this.get('timedOut') === null) {
+      this.set('timedOut', YES);
+      this.cancelTransport();
+      SC.Request.manager.transportDidClose(this);
+      
+      // Set our value to an error.
+      var error = SC.$error("HTTP Request timed out", "Request", 408) ;
+      error.set("errorValue", this) ;
+      this.set('isError', YES);
+      this.set('errorObject', error);
+      
+      // Invoke the didTimeout callback.
+      var req = this.get('request');
+      var source = req ? req.get('source') : null;
+      if (!this.get('isCancelled') && source && source.didTimeout) {
+        source.didTimeout(req, this);
+      }
     }
   },
   
@@ -453,7 +512,13 @@ SC.XHRResponse = SC.Response.extend({
 
         // if there was an error - setup error and save it
         if ((status < 200) || (status >= 300)) {
-          msg = rawRequest.statusText;
+          
+          try {
+            msg = rawRequest.statusText || '';
+          } catch(e2) {
+            msg = '';
+          }
+          
           error = SC.$error(msg || "HTTP Request failed", "Request", status) ;
           error.set("errorValue", this) ;
           this.set('isError', YES);

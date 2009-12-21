@@ -10,7 +10,7 @@
   cursor:             default;
   overflow:           hidden;
   position:           absolute; /* all views are absolutely positioned. */
-  -moz-user-select:   none;
+  -moz-user-select:   -moz-none;
   -khtml-user-select: none;
   user-select:        none;
   margin:             0px;
@@ -40,6 +40,7 @@
 }
 
 /* This className is useful when aligning buttons to the right */
+.sc-view.text-align-right,
 .sc-view.textAlignRight {
   text-align:right;
 }

@@ -148,23 +148,22 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     if (delay===0) delay = 1000/30;
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
       this.displayDidChange();
-      this.invokeLater(this._animateProgressBar, delay, 0);
+      this.invokeLater(this._animateProgressBar, delay, 10);
     }
   },
   
   displayProperties: 'value minimum maximum isIndeterminate'.w(),
   
   render: function(context, firstTime) {
-    var inner, animatedBackground;
-    var isIndeterminate = this.get('isIndeterminate');
-    var isRunning = this.get('isRunning');
-    var isEnabled = this.get('isEnabled');
-    var offsetRange = this.get('offsetRange');
-  
-    var offset = (isIndeterminate && isRunning) ? (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
+    var inner, animatedBackground, value, cssString, backPosition,
+        isIndeterminate = this.get('isIndeterminate'),
+        isRunning = this.get('isRunning'),
+        isEnabled = this.get('isEnabled'),
+        offsetRange = this.get('offsetRange'),
+        offset = (isIndeterminate && isRunning) ? 
+                (Math.floor(Date.now()/75)%offsetRange-offsetRange) : 0;
   
     // compute value for setting the width of the inner progress
-    var value;
     if (!isEnabled) {
       value = "0%" ;
     } else if (isIndeterminate) {
@@ -199,16 +198,23 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       context.setClass(classNames);
       inner = this.$('.sc-inner');
       animatedBackground = this.get('animatedBackgroundMatrix');
-      inner.css('width', value).css('left',offset);
+      cssString = "width: "+value+"; ";
+      cssString = cssString + "left: "+offset+"; ";
       if (animatedBackground.length === 3 ) {
-        inner.css('backgroundPosition', '0px -'+ 
-        (animatedBackground[0] + 
-        animatedBackground[1]*this._currentBackground)+'px');
+        backPosition = '0px -'+ 
+                      (animatedBackground[0] + 
+                      animatedBackground[1]*this._currentBackground)+'px';
         if(this._currentBackground===animatedBackground[2]-1
            || this._currentBackground===0){
           this._nextBackground *= -1;
         }
         this._currentBackground += this._nextBackground;
+        
+        cssString = cssString + "backgroundPosition: "+backPosition+"; ";
+        //Instead of using css() set attr for faster perf.
+        inner.attr('style', cssString);
+      }else{
+        inner.attr('style', cssString);
       }
     }
     
