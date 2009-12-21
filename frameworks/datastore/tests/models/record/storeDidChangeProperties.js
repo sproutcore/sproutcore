@@ -96,8 +96,9 @@ test("destroying a record should change all", function() {
   checkPreconditions();
   SC.RunLoop.begin();
   foo.destroy();
+  expect(foo,1,0); // calling destroy() should specifically change status
   SC.RunLoop.end();
-  expect(foo,1,1);
+  expect(foo,2,1);
 });
 
 test("refreshing a record should change status", function() {

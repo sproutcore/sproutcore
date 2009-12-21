@@ -27,12 +27,13 @@ function testConsole() {
     trace: function() { return true; },
     warn: function() { return true; }
   };
-};
+}
 
 module("SC.Logger", {
   setup: function() {
     SC.Logger.set('reporter', testConsole());
     
+    SC.Logger.debugEnabled = true;
     SC.Logger.format = true;
     SC.Logger.fallBackOnLog = true;
     SC.Logger.fallBackOnAlert = false;
