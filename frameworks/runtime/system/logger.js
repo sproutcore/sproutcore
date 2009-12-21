@@ -168,7 +168,7 @@ SC.Logger = SC.Object.create({
       return false;
     }
 
-    if (this.get('exists') && (typeof reporter.debug === "function")) {
+    if (this.get('exists') && typeof(reporter.debug) === "function") {
       reporter.debug.apply(reporter, arguments);
       return true;
     }
