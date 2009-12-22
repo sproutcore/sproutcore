@@ -314,7 +314,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   performAction: function(skipFlash) {
     var action = this.getContentProperty('itemActionKey'),
         target = this.getContentProperty('itemTargetKey'),
-        rootMenu = this.getPath('parentMenu.rootMenu');
+        rootMenu = this.getPath('parentMenu.rootMenu'), responder;
 
     if (this.get('hasSubMenu')) {
       return;
@@ -325,7 +325,12 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
     this._flashCounter = 0;
     if (skipFlash) {
-      this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
+      responder = this.getPath('pane.rootResponder');
+
+      if (responder) {
+        responder.sendAction(action, target, this, this.get('pane'));
+      }
+
       rootMenu.remove();
       rootMenu.set('selectedMenuItem', this);
     } else {
