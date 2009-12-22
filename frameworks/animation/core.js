@@ -519,7 +519,7 @@ SC.Animatable = {
       // apply the styles (but we have to mix it in, because we still have transitions, etc. that we set)
       var ls = this.holder.get("layoutStyle");
       for (var key in ls) {
-        if (SC.none(ls[key])) delete style[key];
+        if (SC.none(ls[key])) style[key] = ""; // because IE is stupid and can't handle delete or null
         else if (style[key] != ls[key]) style[key] = ls[key];
       }
 
@@ -554,7 +554,7 @@ SC.Animatable = {
       var key = ls[i];
       if (style[key] !== newLayout[key])
       {
-        if (SC.none(newLayout[key])) delete style[key];
+        if (SC.none(newLayout[key])) style[key] = ""; // because IE is stupid and can't handle delete or debug.
         else style[key] = newLayout[key];
         didChange = YES;
       }
