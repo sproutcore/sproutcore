@@ -55,6 +55,13 @@ SC.MenuPane = SC.PickerPane.extend(
   items: [],
 
   /**
+    The last menu item to be selected by the user.
+
+    @type SC.MenuItemView
+  */
+  selectedMenuItem: null,
+
+  /**
     Create a modal pane beneath the menu that will prevent any mouse clicks
     that fall outside the menu pane from triggering an inadvertent action.
 
@@ -416,7 +423,7 @@ SC.MenuPane = SC.PickerPane.extend(
       } else if (itemType === SC.T_HASH) {
         item = SC.Object.create(item);
       } else if (itemType === SC.T_ARRAY) {
-          item = this.convertArrayMenuItemToObject(item);
+        item = this.convertArrayMenuItemToObject(item);
       }
 
       ret.push(item);

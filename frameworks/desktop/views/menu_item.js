@@ -327,6 +327,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     if (skipFlash) {
       this.getPath('pane.rootResponder').sendAction(action, target, this, this.get('pane'));
       rootMenu.remove();
+      rootMenu.set('selectedMenuItem', this);
     } else {
       this.invokeLater(this.flashHighlight, 25);
     }
