@@ -75,6 +75,9 @@ SC.Animatable = {
     // substitute our didUpdateLayer method (but saving the old one)
     this._animatable_original_did_update_layer = this.didUpdateLayer || function(){};
     this.didUpdateLayer = this._animatable_did_update_layer;
+    
+    this._animatable_original_willRemoveFromParent = this.willRemoveFromParent || function(){};
+    this.willRemoveFromParent = this._animatable_will_remove_from_parent;
 
     // for debugging
     this._animateTickPixel.displayName = "animate-tick";
@@ -108,18 +111,30 @@ SC.Animatable = {
   },
   
   /**
+  Stops all animations on the layer when this occurs by calling resetAnimation.
+  */
+  _animatable_will_remove_from_parent: function() {
+    this.resetAnimation();
+  },
+  
+  /**
   Disables animation.
   
   It is like parenthesis. Each "disable" must be matched by an "enable".
   If you call disable twice, you need two enables to start it. Three times, you need
   three enables.
   */
-  disableAnimation: function() { this._disableAnimation++; },
+  disableAnimation: function() { 
+    this._disableAnimation++;
+  },
   
   /**
   Enables animation if it was disabled (or moves towards that direction, at least).
   */
-  enableAnimation: function() { this._disableAnimation--; if (this._disableAnimation < 0) this._disableAnimation = 0; },
+  enableAnimation: function() {
+    this._disableAnimation--; 
+    if (this._disableAnimation < 0) this._disableAnimation = 0;
+  },
 
   /**
   Adds support for some style properties to adjust.
@@ -177,15 +192,25 @@ SC.Animatable = {
   },
 
   /**
-  Resets animation so that next manipulation of style will not animate.
-
-  Currently does not stop existing animations, so won't work very well
-  if there are any (will actually stutter).
+  Resets animation, stopping all existing animations.
   */
-  resetAnimation: function()
-  {
-    this._animatableCurrentStyle = this.style;
+  resetAnimation: function() {
+    this._animatableCurrentStyle = undefined;
+    this._stopJavaScriptAnimations();
+    this.disableAnimation();
     this.updateStyle();
+    this.enableAnimation();
+  },
+  
+  /**
+    Stops all JavaScript animations on the object. In their tracks. Hah hah.
+  */
+  _stopJavaScriptAnimations: function() {
+    for (var i in this._animators) {
+      if (this._animators[i] && this._animators[i].isQueued) {
+         SC.Animatable.removeTimer(this._animators[i]);
+      }
+    }
   },
 
   _getStartStyleHash: function(start, target)
@@ -196,6 +221,7 @@ SC.Animatable = {
     this.layout = start;
 
     // get our frame and parent's frame
+    this.notifyPropertyChange("layout");
     var f = this.get("frame");
     var p = this.getPath("layoutView.frame");
 
@@ -248,7 +274,7 @@ SC.Animatable = {
     // make sure there _is_ a previous style to animate from. Otherwise,
     // we don't animate—and this is sometimes used to temporarily disable animation.
     var i;
-    if (!this._animatableCurrentStyle || this._disableAnimation > 0)
+    if (!this._animatableCurrentStyle || this._disableAnimation > 0 || !layer)
     {
       // clone it to be a nice starting point next time.
       this._animatableCurrentStyle = {};
@@ -447,23 +473,21 @@ SC.Animatable = {
 
     // get timer
     var timer = this._animators["display-styles"];
-
-    // fire if there is already a pending one
-    if (timer.isQueued) {
-      //	timer.action.call(timer, 0);
-    }
-
+    
+    // set settings
     timer.holder = this;
     timer.action = this._animatableApplyNonDisplayStyles;
     timer.layer = layer;
     timer.styles = styles;
     this._animatableCurrentStyle = styles;
+    
+    // schedule.
     SC.Animatable.addTimer(timer);
   },
 
   _animatableApplyNonDisplayStyles: function(){
     var loop = SC.RunLoop.begin();
-    var layer = this.layer, styles = this.styles;
+    var layer = this.layer, styles = this.styles; // this == timer
     var styleHelpers = {
       opacity: this.holder._style_opacity_helper
       // more to be added here...
@@ -518,10 +542,7 @@ SC.Animatable = {
   /**
   Overriden to support animation.
 
-  Works by keeping a copy of the current layout, called animatableCurrentLayout.
-  Whenever the layout needs updating, the old layout is consulted.
-
-  "layout" is kept at the new layout
+  Works by copying the styles to the object's "style" property.
   */
   updateLayout: function(context, firstTime)
   {
@@ -833,13 +854,21 @@ SC.mixin(SC.Animatable, {
     lastFPS: 0
   }),
 
-  addTimer: function(animator)
-  {
+  addTimer: function(animator) {
     if (animator.isQueued) return;
+    animator.prev = SC.Animatable.baseTimer;
     animator.next = SC.Animatable.baseTimer.next;
-    SC.Animatable.baseTimer.next = animator;
+    if (SC.Animatable.baseTimer.next) SC.Animatable.baseTimer.next.prev = animator; // adjust next prev.
+    SC.Animatable.baseTimer.next = animator; // switcheroo.
     animator.isQueued = true;
     if (!SC.Animatable.going) SC.Animatable.start();
+  },
+  
+  removeTimer: function(animator) {
+    if (!animator.isQueued) return;
+    if (animator.next) animator.next.prev = animator.prev; // splice ;)
+    animator.prev.next = animator.next; // it should always have a prev.
+    animator.isQueued = false;
   },
 
   start: function()
@@ -865,6 +894,7 @@ SC.mixin(SC.Animatable, {
       var t = next.next;
       next.isQueued = false;
       next.next = null;
+      next.prev = null;
       next.action.call(next, start);
       next = t;
       i++;
