@@ -130,8 +130,8 @@ test('compare', function() {
 
 test('Format', function() {
   equals(
-    dt.toFormattedString('%a %A %b %B %d %H %I %j %m %M %p %S %w %y %Y %%a'),
-    'Wed Wednesday May May 08 01 01 128 05 00 AM 22 3 85 1985 %a');
+    dt.toFormattedString('%a %A %b %B %d %h %H %i %I %j %m %M %p %S %w %y %Y %%a'),
+    'Wed Wednesday May May 08 1 01 1 01 128 05 00 AM 22 3 85 1985 %a');
   
   equals(dt.toFormattedString('%Z'), formatTimezone(SC.DateTime.timezone));
   equals(dt.adjust({timezone:    0}).toFormattedString('%Y-%m-%d %H:%M:%S %Z'), '1985-05-08 01:00:22 +00:00');
