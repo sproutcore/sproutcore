@@ -152,11 +152,34 @@ SC.Scanner = SC.Object.extend(
   A class representation of a date and time. It's basically a wrapper around
   the Date javascript object, KVO friendly and with common date/time
   manipulation methods.
+
+  This object differs from the standard JS Date object, however, in that it
+  supports time zones other than UTC and that local to the machine on which
+  it is running.  Any time zone can be specified when creating an SC.DateTime
+  object, e.g
+
+    // Creates a DateTime representing 5am in Washington, DC and 10am in London
+    var d = SC.DateTime.create({ hour: 5, timezone: 300 }); // -5 hours from UTC
+    var e = SC.DateTime.create({ hour: 10, timezone: 0 }); // same time, specified in UTC
+    
+    and it is true that d.isEqual(e).
+
+  The time zone specified upon creation is permanent, and any calls to get() on that
+  instance will return values expressed in that time zone.  So,
+  
+    d.get('hour') returns 5.
+    e.get('hour') returns 10.
+    
+    but
+    
+    d.get('milliseconds') === e.get('milliseconds') is true, since they are technically the same position in time.
   
   @extends SC.Object
   @extends SC.Freezable
   @extends SC.Copyable
   @author Martin Ottenwaelter
+  @author Jonathan Lewis
+  @author Josh Holt
   @since SproutCore 1.0
 */
 SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
@@ -171,8 +194,10 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
   */
   _ms: 0,
   
-  /**
+  /** @read-only
     The offset, in minutes, between UTC and the object's timezone.
+    All calls to get() will use this time zone to translate date/time
+    values into the zone specified here.
     
     @property
     @type {Integer}
@@ -196,11 +221,23 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     
     (Parts copied from the Ruby On Rails documentation)
     
+    If a time zone is passed in the options hash, all dates and times are assumed
+    to be local to it, and the returned DateTime instance has that time zone.  If
+    none is passed, it defaults to SC.DateTime.timezone.
+
+    Note that passing only a time zone does not affect the actual milliseconds since
+    Jan 1, 1970, only the time zone in which it is expressed when displayed.
+    
     @see SC.DateTime#create for the list of options you can pass
     @returns {DateTime} copy of receiver
   */
-  adjust: function(options) {
-    return this.constructor._adjust(options, this._ms, this.timezone)._createFromCurrentState();
+  adjust: function(options, resetCascadingly) {
+    var timezone;
+    
+    options = options ? SC.clone(options) : {};
+    timezone = (options.timezone !== undefined) ? options.timezone : (this.timezone !== undefined) ? this.timezone : 0;
+    
+    return this.constructor._adjust(options, this._ms, timezone, resetCascadingly)._createFromCurrentState();
   },
   
   /**
@@ -212,7 +249,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     @returns {DateTime} copy of the receiver
   */
   advance: function(options) {
-   return this.constructor._advance(options, this._ms, this.timezone)._createFromCurrentState();
+    return this.constructor._advance(options, this._ms, this.timezone)._createFromCurrentState();
   },
   
   /**
@@ -271,7 +308,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
           starting with the first Sunday as the first
           day of the first week (00..53)
       - %W - Week number of the current year,
-          starting with the first Monday as the first
+          starting with the first Monday as the first 
           day of the first week (00..53)
       - %w - Day of the week (Sunday is 0, 0..6)
       - %x - Preferred representation for the date alone, no time
@@ -344,12 +381,16 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
     
     If you don't pass any argument, the target timezone is assumed to be 0,
     ie UTC.
+
+    Note that this method does not change the underlying position in time,
+    but only the time zone in which it is displayed.  In other words, the underlying
+    number of milliseconds since Jan 1, 1970 does not change.
     
     @return {DateTime}
   */
   toTimezone: function(timezone) {
     if (timezone === undefined) timezone = 0;
-    return this.advance({ timezone: timezone-this.timezone });
+    return this.advance({ timezone: timezone - this.timezone });
   }
   
 });
@@ -424,6 +465,14 @@ SC.DateTime.mixin(SC.Comparable,
     The unique internal Date object used to make computations. Better
     performance is obtained by having only one Date object for the whole
     application and manipulating it with setTime() and getTime().
+    
+    Note that since this is used for internal calculations across many
+    DateTime instances, it is not guaranteed to store the date/time that
+    any one DateTime instance represents.  So it might be that
+      
+      this._date.getTime() !== this._ms
+
+    Be sure to set it before using for internal calculations if necessary.
 
     @property
     @type {Date}
@@ -477,106 +526,239 @@ SC.DateTime.mixin(SC.Comparable,
   _DT_CACHE_MAX_LENGTH: 1000,
   
   /** @private
-    @see SC.DateTime#unknownProperty
+    Both args are optional, but will only overwrite _date and _tz if defined.
+    This method does not affect the DateTime instance's actual time, but simply
+    initializes the one _date instance to a time relevant for a calculation.
+    (this._date is just a resource optimization)
+
+    This is mainly used as a way to store a recursion starting state during
+    internal calculations.
+
+    'milliseconds' is time since Jan 1, 1970.
+    'timezone' is the current time zone we want to be working in internally.
+
+    Returns a hash of the previous milliseconds and time zone in case they
+    are wanted for later restoration.
   */
-  _setState: function(start, timezone) {
-    if (start !== undefined) this._date.setTime(start);
+  _setCalcState: function(ms, timezone) {
+    var previous = {
+      milliseconds: this._date.getTime(),
+      timezone: this._tz
+    };
+
+    if (ms !== undefined) this._date.setTime(ms);
     if (timezone !== undefined) this._tz = timezone;
+
+    return previous;
   },
-  
+
+  /**
+    By this time, any time zone setting on 'hash' will be ignored.
+    'timezone' will be used, or the last this._tz.
+  */
+  _setCalcStateFromHash: function(hash, timezone) {
+    var tz = (timezone !== undefined) ? timezone : this._tz; // use the last-known time zone if necessary
+    var ms = this._toMilliseconds(hash, this._ms, tz); // convert the hash (local to specified time zone) to milliseconds (in UTC)
+    return this._setCalcState(ms, tz); // now call the one we really wanted
+  },
+
   /** @private
     @see SC.DateTime#unknownProperty
   */
   _get: function(key, start, timezone) {
+    var ms, tz, doy, m, y, firstDayOfWeek, dayOfWeek, dayOfYear, prefix, suffix;
+    var currentWeekday, targetWeekday;
     var d = this._date;
-    this._setState(start, timezone);
-    
-    // simple keys
-    switch (key) {
-      case 'year':           return d.getFullYear(); //TODO: investigate why some libraries do getFullYear().toString() or getFullYear()+""
-      case 'month':          return d.getMonth()+1; // January is 0 in JavaScript
-      case 'day':            return d.getDate();
-      case 'dayOfWeek':      return d.getDay();
-      case 'hour':           return d.getHours();
-      case 'minute':         return d.getMinutes();
-      case 'second':         return d.getSeconds();
-      case 'millisecond':    return d.getMilliseconds();
-      case 'milliseconds':   return d.getTime() + this._tz*60000;
-      case 'timezone':       return this._tz;
+    var originalTime, v = null;
+
+    // Set up an absolute date/time using the given milliseconds since Jan 1, 1970.
+    // Only do it if we're given a time value, though, otherwise we want to use the
+    // last one we had because this _get() method is recursive.
+    //
+    // Note that because these private time calc methods are recursive, and because all DateTime instances
+    // share an internal this._date and this._tz state for doing calculations, methods
+    // that modify this._date or this._tz should restore the last state before exiting
+    // to avoid obscure calculation bugs.  So we save the original state here, and restore
+    // it before returning at the end.
+    originalTime = this._setCalcState(start, timezone); // save so we can restore it to how it was before we got here
+
+    // Check this first because it is an absolute value -- no tweaks necessary when calling for milliseconds
+    if (key === 'milliseconds') {
+      v = d.getTime();
+    }
+    else if (key === 'timezone') {
+      v = this._tz;
     }
     
-    // isLeapYear
-    if (key === 'isLeapYear') {
-      var y = this._get('year');
-      return (y%4 === 0 && y%100 !== 0) || y%400 === 0;
-    }
-    
-    // daysInMonth
-    if (key === 'daysInMonth') {
-      switch (this._get('month')) {
-        case 4:
-        case 6:
-        case 9:
-        case 11:
-          return 30;
-        case 2:
-          return this._get('isLeapYear') ? 29 : 28;
-        default:
-          return 31;
+    // 'nextWeekday' or 'lastWeekday'.
+    // We want to do this calculation in local time, before shifting UTC below.
+    if (v === null) {
+      prefix = key.slice(0, 4);
+      suffix = key.slice(4);
+      if (prefix === 'last' || prefix === 'next') {
+        currentWeekday = d.getDay();
+        targetWeekday = this._englishDayNames.indexOf(suffix);    
+        if (targetWeekday >= 0) {
+          var delta = targetWeekday - currentWeekday;
+          if (prefix === 'last' && delta >= 0) delta -= 7;
+          if (prefix === 'next' && delta <  0) delta += 7;
+          this._advance({ day: delta });
+          v = this._createFromCurrentState();
+        }
       }
     }
     
-    // dayOfYear
-    if (key === 'dayOfYear') {
-      var ms = d.getTime(); // save time
-      var doy = this._get('day');
-      this._adjust({day: 1});
-      for (var m = this._get('month') - 1; m > 0; m--) {
-        doy += this._adjust({month: m})._get('daysInMonth');
+    if (v === null) {
+      // need to adjust for alternate display time zone.
+      // Before calculating, we need to get everything into a common time zone to
+      // negate the effects of local machine time (so we can use all the 'getUTC...() methods on Date).
+      if (timezone !== undefined) {
+        this._setCalcState(d.getTime() - (timezone * 60000), 0); // make this instance's time zone the new UTC temporarily
       }
-      d.setTime(ms); // restore time
-      return doy;
-    }
     
-    // week, week0 or week1
-    if (key.slice(0, 4) === 'week') {
-      // firstDayOfWeek should be 0 (Sunday) or 1 (Monday)
-    	var firstDayOfWeek = key.length === 4 ? 1 : parseInt(key.slice('4'), 10);
-    	var dayOfWeek = this._get('dayOfWeek');
-      var dayOfYear = this._get('dayOfYear') - 1;
-    	if (firstDayOfWeek === 0) {
-    	  return parseInt((dayOfYear - dayOfWeek + 7) / 7, 10);
-    	} else {
-    	  return parseInt((dayOfYear - (dayOfWeek - 1 + 7) % 7 + 7) / 7, 10);
-    	}
-    }
+      // simple keys
+      switch (key) {
+        case 'year':
+          v = d.getUTCFullYear(); //TODO: investigate why some libraries do getFullYear().toString() or getFullYear()+""
+          break;
+        case 'month':
+          v = d.getUTCMonth()+1; // January is 0 in JavaScript
+          break;
+        case 'day':
+          v = d.getUTCDate();
+          break;
+        case 'dayOfWeek':
+          v = d.getUTCDay();
+          break;
+        case 'hour':
+          v = d.getUTCHours();
+          break;
+        case 'minute':
+          v = d.getUTCMinutes();
+          break;
+        case 'second':
+          v = d.getUTCSeconds();
+          break;
+        case 'millisecond':
+          v = d.getUTCMilliseconds();
+          break;
+      }
+      
+      // isLeapYear
+      if ((v === null) && (key === 'isLeapYear')) {
+        y = this._get('year');
+        v = (y%4 === 0 && y%100 !== 0) || y%400 === 0;
+      }
+
+      // daysInMonth
+      if ((v === null) && (key === 'daysInMonth')) {
+        switch (this._get('month')) {
+          case 4:
+          case 6:
+          case 9:
+          case 11:
+            v = 30;
+            break;
+          case 2:
+            v = this._get('isLeapYear') ? 29 : 28;
+            break;
+          default:
+            v = 31;
+            break;
+        }
+      }
     
-    // nextWeekday or lastWeekday
-    var prefix = key.slice(0, 4);
-    var suffix = key.slice(4);
-    if (prefix === 'last' || prefix === 'next') {
-      var currentWeekday = d.getDay();
-      var targetWeekday = this._englishDayNames.indexOf(suffix);    
-      if (targetWeekday >= 0) {
-        var delta = targetWeekday - currentWeekday;
-        if (prefix === 'last' && delta >= 0) delta -= 7;
-        if (prefix === 'next' && delta <  0) delta += 7;
-        this._advance({day: delta})._adjust({hour: 0});
-        return this._createFromCurrentState();
+      // dayOfYear
+      if ((v === null) && (key === 'dayOfYear')) {
+        ms = d.getTime(); // save time
+        doy = this._get('day');
+        this._setCalcStateFromHash({ day: 1 });
+        for (m = this._get('month') - 1; m > 0; m--) {
+          this._setCalcStateFromHash({ month: m });
+          doy += this._get('daysInMonth');
+        }
+        d.setTime(ms); // restore time
+        v = doy;
+      }
+
+      // week, week0 or week1
+      if ((v === null) && (key.slice(0, 4) === 'week')) {
+        // firstDayOfWeek should be 0 (Sunday) or 1 (Monday)
+        firstDayOfWeek = key.length === 4 ? 1 : parseInt(key.slice('4'), 10);
+        dayOfWeek = this._get('dayOfWeek');
+        dayOfYear = this._get('dayOfYear') - 1;
+        if (firstDayOfWeek === 0) {
+          v = parseInt((dayOfYear - dayOfWeek + 7) / 7, 10);
+        }
+        else {
+          v = parseInt((dayOfYear - (dayOfWeek - 1 + 7) % 7 + 7) / 7, 10);
+        }
       }
     }
 
-    return null;
+    // restore the internal calculation state in case someone else was in the
+    // middle of a calculation (we might be recursing).
+    this._setCalcState(originalTime.milliseconds, originalTime.timezone);
+
+    return v;
   },
-  
-  /** @private
-    @see SC.DateTime#adjust
+
+  /**
+    Sets the internal calculation state to something specified.
   */
   _adjust: function(options, start, timezone, resetCascadingly) {
     var opts = options ? SC.clone(options) : {};
+    var ms = this._toMilliseconds(options, start, timezone, resetCascadingly);
+    this._setCalcState(ms, timezone);
+    return this; // for chaining
+  },
+  
+  /** @private
+    @see SC.DateTime#advance
+  */
+  _advance: function(options, start, timezone) {
+    var opts = options ? SC.clone(options) : {};
+    var tz;
+
+    for (var key in opts) {
+      opts[key] += this._get(key, start, timezone);
+    }
     
+    // The time zone can be advanced by a delta as well, so try to use the
+    // new value if there is one.
+    tz = (opts.timezone !== undefined) ? opts.timezone : timezone; // watch out for zero, which is acceptable as a time zone
+
+    return this._adjust(opts, start, tz, NO);
+  },
+  
+  /* @private
+    Converts a standard date/time options hash to an integer representing that position
+    in time relative to Jan 1, 1970
+  */
+  _toMilliseconds: function(options, start, timezone, resetCascadingly) {
+    var opts = options ? SC.clone(options) : {};
     var d = this._date;
-    this._setState(start, timezone);
+    var previousMilliseconds = d.getTime(); // rather than create a new Date object, we'll reuse the instance we have for calculations, then restore it
+    var ms, tz;
+
+    // Initialize our internal for-calculations Date object to our current date/time.
+    // Note that this object was created in the local machine time zone, so when we set
+    // its params later, it will be assuming these values to be in the same time zone as it is.
+    // It's ok for start to be null, in which case we'll just keep whatever we had in 'd' before.
+    if (!SC.none(start)) {
+      d.setTime(start); // using milliseconds here specifies an absolute location in time, regardless of time zone, so that's nice
+    }
+    
+    // We have to get all time expressions, both in 'options' (assume to be in time zone 'timezone')
+    // and in 'd', to the same time zone before we can any calculations correctly.  So because the Date object provides
+    // a suite of UTC getters and setters, we'll temporarily redefine 'timezone' as our new
+    // 'UTC', so we don't have to worry about local machine time.  We do this by subtracting
+    // milliseconds for the time zone offset.  Then we'll do all our calculations, then convert
+    // it back to real UTC.
+    
+    // (Zero time zone is considered a valid value.)
+    tz = (timezone !== undefined) ? timezone : (this.timezone !== undefined) ? this.timezone : 0;
+    d.setTime(d.getTime() - (tz * 60000)); // redefine 'UTC' to establish a new local absolute so we can use all the 'getUTC...()' Date methods
     
     // the time options (hour, minute, sec, millisecond)
     // reset cascadingly (see documentation)
@@ -593,33 +775,36 @@ SC.DateTime.mixin(SC.Comparable,
         opts.millisecond = 0;
       }
     }
+    
+    // Get the current values for any not provided in the options hash.
+    // Since everything is in 'UTC' now, use the UTC accessors.  We do this because,
+    // according to javascript Date spec, you have to set year, month, and day together
+    // if you're setting any one of them.  So we'll use the provided Date.UTC() method
+    // to get milliseconds, and we need to get any missing values first...
+    if (SC.none(opts.year))        opts.year = d.getUTCFullYear();
+    if (SC.none(opts.month))       opts.month = d.getUTCMonth() + 1; // January is 0 in JavaScript
+    if (SC.none(opts.day))         opts.day = d.getUTCDate();
+    if (SC.none(opts.hour))        opts.hour = d.getUTCHours();
+    if (SC.none(opts.minute))      opts.minute = d.getUTCMinutes();
+    if (SC.none(opts.second))      opts.second = d.getUTCSeconds();
+    if (SC.none(opts.millisecond)) opts.millisecond = d.getUTCMilliseconds();
 
-    if (!SC.none(opts.year))        d.setFullYear(opts.year);
-    if (!SC.none(opts.month))       d.setMonth(opts.month-1); // January is 0 in JavaScript
-    if (!SC.none(opts.day))         d.setDate(opts.day);
-    if (!SC.none(opts.hour))        d.setHours(opts.hour);
-    if (!SC.none(opts.minute))      d.setMinutes(opts.minute);
-    if (!SC.none(opts.second))      d.setSeconds(opts.second);
-    if (!SC.none(opts.millisecond)) d.setMilliseconds(opts.millisecond);
-    if (!SC.none(opts.timezone))    this._tz = opts.timezone;
+    // Ask the JS Date to calculate milliseconds for us (still in redefined UTC).  It
+    // is best to set them all together because, for example, a day value means different things
+    // to the JS Date object depending on which month or year it is.  It can now handle that stuff
+    // internally as it's made to do.
+    ms = Date.UTC(opts.year, opts.month - 1, opts.day, opts.hour, opts.minute, opts.second, opts.millisecond);
+
+    // Now that we've done all our calculations in a common time zone, add back the offset
+    // to move back to real UTC.
+    d.setTime(ms + (tz * 60000));
+    ms = d.getTime(); // now get the corrected milliseconds value
     
-    return this;
-  },
-  
-  /** @private
-    @see SC.DateTime#advance
-  */
-  _advance: function(options, start, timezone) {
-    var opts = options ? SC.clone(options) : {};
-    this._setState(start, timezone);
-    
-    if (!SC.none(opts.timezone)) {
-      if (SC.none(opts.minute)) opts.minute = 0;
-      opts.minute -= opts.timezone;
-    }
-    for (var key in opts) opts[key] += this._get(key);
-    
-    return this._adjust(opts, start, timezone, NO);
+    // Restore what was there previously before leaving in case someone called this method
+    // in the middle of another calculation.
+    d.setTime(previousMilliseconds);
+
+    return ms;
   },
   
   /**
@@ -647,31 +832,41 @@ SC.DateTime.mixin(SC.Comparable,
   */
   create: function() {
     var arg = arguments.length === 0 ? {} : arguments[0];
+    var timezone;
     
+    // if simply milliseconds since Jan 1, 1970 are given, just use those
     if (SC.typeOf(arg) === SC.T_NUMBER) {
-      arg = { milliseconds: arg, timezone: 0 };
-    } else if (SC.none(arg.timezone)) {
-      arg.timezone = this.timezone;
+      arg = { milliseconds: arg };
     }
-    
+
+    // Default to local machine time zone if none is given
+    timezone = (arg.timezone !== undefined) ? arg.timezone : this.timezone;
+    if (timezone === undefined) timezone = 0;
+
+    // Desired case: create with milliseconds if we have them.
+    // If we don't, convert what we have to milliseconds and recurse.
     if (!SC.none(arg.milliseconds)) {
+
       // quick implementation of a FIFO set for the cache
-      var key = 'nu'+arg.milliseconds+arg.timezone, cache = this._dt_cache;
+      var key = 'nu' + arg.milliseconds + timezone, cache = this._dt_cache;
       var ret = cache[key];
       if (!ret) {
         var previousKey, idx = this._dt_cache_index, C = this;
-        ret = cache[key] = new C([{_ms: arg.milliseconds, timezone: arg.timezone}]);
+        ret = cache[key] = new C([{ _ms: arg.milliseconds, timezone: timezone }]);
         idx = this._dt_cache_index = (idx + 1) % this._DT_CACHE_MAX_LENGTH;
         previousKey = cache[idx];
         if (previousKey !== undefined && cache[previousKey]) delete cache[previousKey];
         cache[idx] = key;
       }
       return ret;
-    } else {
+    }
+    // otherwise, convert what we have to milliseconds and try again
+    else {
       var now = new Date();
-      return this.create({
-        milliseconds: this._adjust(arg, now.getTime())._date.getTime(),
-        timezone: arg.timezone
+
+      return this.create({ // recursive call with new arguments
+        milliseconds: this._toMilliseconds(arg, now.getTime(), timezone, arg.resetCascadingly),
+        timezone: timezone
       });
     }
     
@@ -775,9 +970,19 @@ SC.DateTime.mixin(SC.Comparable,
   },
   
   /** @private
-    @see SC.DateTime#toFormattedString
+    @see SC.DateTime#_toFormattedString
   */
-  __toFormattedString: function(part) {
+  __toFormattedString: function(part, start, timezone) {
+    var hour, offset;
+
+    // Note: all calls to _get() here should include only one
+    // argument, since _get() is built for recursion and behaves differently
+    // if arguments 2 and 3 are included.
+    //
+    // This method is simply a helper for this._toFormattedString() (one underscore);
+    // this is only called from there, and _toFormattedString() has already
+    // set up the appropriate internal date/time/timezone state for it.
+    
     switch(part[1]) {
       case 'a': return this.abbreviatedDayNames[this._get('dayOfWeek')];
       case 'A': return this.dayNames[this._get('dayOfWeek')];
@@ -788,10 +993,10 @@ SC.DateTime.mixin(SC.Comparable,
       case 'h': return this._get('hour');
       case 'H': return this._pad(this._get('hour'));
       case 'i':
-        var hour = this._get('hour');
+        hour = this._get('hour');
         return (hour === 12 || hour === 0) ? 12 : (hour + 12) % 12;
       case 'I': 
-        var hour = this._get('hour');
+        hour = this._get('hour');
         return this._pad((hour === 12 || hour === 0) ? 12 : (hour + 12) % 12);
       case 'j': return this._pad(this._get('dayOfYear'), 3);
       case 'm': return this._pad(this._get('month'));
@@ -807,7 +1012,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'y': return this._pad(this._get('year') % 100);
       case 'Y': return this._get('year');
       case 'Z':
-        var offset = -1 * this._tz;
+        offset = -1 * timezone;
         return (offset >= 0 ? '+' : '-')
                + this._pad(parseInt(Math.abs(offset)/60, 10))
                + ':'
@@ -820,11 +1025,15 @@ SC.DateTime.mixin(SC.Comparable,
     @see SC.DateTime#toFormattedString
   */
   _toFormattedString: function(format, start, timezone) {
-    this._setState(start, timezone);
-    
     var that = this;
+    var tz = (timezone !== undefined) ? timezone : (this.timezone !== undefined) ? this.timezone : 0;
+
+    // need to move into local time zone for these calculations
+    this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
+
     return format.replace(/\%([aAbBcdHIjmMpSUWwxXyYZ\%])/g, function() {
-      return that.__toFormattedString.call(that, arguments);
+      var v = that.__toFormattedString.call(that, arguments, start, timezone);
+      return v;
     });
   },
   
