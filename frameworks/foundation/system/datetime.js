@@ -308,7 +308,7 @@ SC.DateTime = SC.Object.extend(SC.Freezable, SC.Copyable,
           starting with the first Sunday as the first
           day of the first week (00..53)
       - %W - Week number of the current year,
-          starting with the first Monday as the first
+          starting with the first Monday as the first 
           day of the first week (00..53)
       - %w - Day of the week (Sunday is 0, 0..6)
       - %x - Preferred representation for the date alone, no time
