@@ -29,6 +29,8 @@ SC.PICKER_POINTER = 'pointer';
 SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom"];
 
 /**
+  @class
+
   Displays a non-modal, self anchor positioned picker pane.
 
   The default way to use the picker pane is to simply add it to your page like this:
