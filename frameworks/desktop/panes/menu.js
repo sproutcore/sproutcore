@@ -437,13 +437,16 @@ SC.MenuPane = SC.PickerPane.extend(
     var views = [], items = this.get('displayItems'),
         exampleView = this.get('exampleView'), item, view,
         height, heightKey, separatorKey, defaultHeight, separatorHeight,
-        menuHeight, menuHeightPadding, keyArray, idx, len;
+        menuHeight, menuHeightPadding, keyEquivalentKey, keyEquivalent,
+        keyArray, idx,
+        len;
 
     if (!items) return null;
 
     heightKey = this.get('itemHeightKey');
     separatorKey = this.get('itemSeparatorKey');
     defaultHeight = this.get('itemHeight');
+    keyEquivalentKey = this.get('itemKeyEquivalentKey');
     separatorHeight = this.get('itemSeparatorHeight');
 
     menuHeightPadding = Math.floor(this.get('menuHeightPadding')/2);
@@ -468,6 +471,11 @@ SC.MenuPane = SC.PickerPane.extend(
       });
       views[idx] = view;
       menuHeight += height;
+
+      keyEquivalent = item.get(keyEquivalentKey);
+      if (keyEquivalent) {
+        this._keyEquivalents[keyEquivalent] = view;
+      }
     }
 
 
@@ -476,29 +484,12 @@ SC.MenuPane = SC.PickerPane.extend(
   }.property('displayItems').cacheable(),
 
   /**
-    Makes the menu visible and adds it to the HTML document.
+    An associate array of the shortcut keys. The key is the shortcut in the
+    form 'ctrl_z', and the value is the menu item of the action to trigger.
 
-    If you provide a view or element as the first parameter, the menu will
-    anchor itself to the view, and intelligently reposition itself if the
-    contents of the menu exceed the available space.
-
-    @param {SC.View|Element}  anchorViewOrElement the view or element to which the menu should anchor
+    @private
   */
-  popup: function(anchorViewOrElement, preferMatrix) {
-    var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
-
-    this.beginPropertyChanges();
-
-    this.set('anchorElement',anchor) ;
-    this.set('anchor',anchorViewOrElement);
-    this.set('preferType',SC.PICKER_MENU) ;
-    if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
-
-    this.endPropertyChanges();
-    this.adjust('height', this.get('menuHeight'));
-    this.positionPane();
-    this.append();
-  },
+  _keyEquivalents: { },
 
   /**
     If this is a submenu, this property corresponds to the
@@ -812,8 +803,14 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES;
   },
 
-  performKeyEquivalent: function() {
-    return YES;
+  performKeyEquivalent: function(keyEquivalent) {
+    var menuItem = this._keyEquivalents[keyEquivalent];
+
+    if (menuItem) {
+      menuItem.performAction(YES);
+      return YES;
+    }
+    return NO;
   },
 
   selectMenuItemForString: function(buffer) {
