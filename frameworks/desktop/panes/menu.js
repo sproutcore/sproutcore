@@ -575,11 +575,11 @@ SC.MenuPane = SC.PickerPane.extend(
     return ret;
   }.property('items').cacheable(),
 
-  displayItemsDidChange: function() {
+  itemsDidChange: function() {
     var views = this.get('menuItemViews');
     this._menuView.replaceAllChildren(views);
     this._menuView.adjust('height', this.get('menuHeight'));
-  }.observes('displayItems'),
+  }.observes('items'),
 
   /**
     Takes an array of values and places them in a hash that can be used
