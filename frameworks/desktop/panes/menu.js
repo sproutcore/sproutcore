@@ -452,9 +452,7 @@ SC.MenuPane = SC.PickerPane.extend(
     menuHeightPadding = Math.floor(this.get('menuHeightPadding')/2);
     menuHeight = menuHeightPadding;
 
-    keyArray = this.menuItemKeys.map(function(key) {
-      return this.get(key);
-    }, this);
+    keyArray = this.menuItemKeys.map(SC._menu_fetchKeys, this);
 
     len = items.get('length');
     for (idx = 0; idx < len; idx++) {
