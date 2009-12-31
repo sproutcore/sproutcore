@@ -663,7 +663,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
       }
     }
     return arguments.callee.base.apply(this,arguments);
-  }
+  },
+
+  /** Function overridden - tied to the isEnabled state */
+  acceptsFirstResponder: function() {
+    return YES;
+  }.property('isEnabled')
 
 }) ;
 
