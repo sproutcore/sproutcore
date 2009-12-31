@@ -662,13 +662,13 @@ SC.MenuPane = SC.PickerPane.extend(
       if (previousMenuItem.get('hasSubMenu') && currentMenuItem === null) {
 
       } else {
-        previousMenuItem.$().removeClass('focus');
+        previousMenuItem.resignFirstResponder();
         this.closeOpenMenusFor(previousMenuItem);
       }
     }
 
     if (currentMenuItem && currentMenuItem.get('isEnabled') && !currentMenuItem.get('isSeparator')) {
-     currentMenuItem.$().addClass('focus');
+     currentMenuItem.becomeFirstResponder();
     }
   }.observes('currentMenuItem'),
 
@@ -691,69 +691,6 @@ SC.MenuPane = SC.PickerPane.extend(
     this.closeOpenMenusFor(this.get('previousMenuItem'));
   },
 
-  remove: function() {
-    this.set('currentMenuItem', null);
-    this.closeOpenMenus();
-    this.resignKeyPane();
-    sc_super();
-  },
-
-  /**
-    This function returns whether the anchor is of type of MenuItemView
-
-    @returns Boolean
-  */
-  isAnchorMenuItemType: function() {
-    var anchor = this.get('anchor') ;
-    return (anchor && anchor.kindOf && anchor.kindOf(SC.MenuItemView)) ;
-  },
-
-  //..........................................................
-  // mouseEvents and keyBoard Events handling
-  //..........................................................
-
-  /**
-    Perform actions equivalent for the keyBoard Shortcuts
-
-    @param {String} keystring
-    @param {SC.Event} evt
-    @returns {Boolean}  YES if handled, NO otherwise
-  */
-  // performKeyEquivalent: function(keyString,evt) {
-  //   var items, len, menuItems, item, keyEquivalent,
-  //       action, isEnabled, target, idx;
-  //   if(!this.get('isEnabled')) return NO ;
-  //   this.displayItems() ;
-  //
-  //   // Make sure we redraw the menu items if they've changed
-  //   SC.RunLoop.begin().end();
-  //
-  //   items = this.get('displayItemsArray') ;
-  //   if (!items) return NO;
-  //
-  //   // handling esc key
-  //   if (keyString === 'escape') {
-  //     this.remove() ;
-  //     var pane = this.getPath('anchor.pane') ;
-  //     if (pane) pane.becomeKeyPane() ;
-  //   }
-  //
-  //   len = items.length ;
-  //   for(idx=0; idx<len; ++idx) {
-  //     item          = items[idx] ;
-  //     keyEquivalent = item.get('keyEquivalent') ;
-  //     action        = item.get('action') ;
-  //     isEnabled     = item.get('isEnabled') ;
-  //     target        = item.get('target') || this ;
-  //     if(keyEquivalent == keyString && isEnabled) {
-  //       var retVal = SC.RootResponder.responder.sendAction(action,target);
-  //       this.remove();
-  //       return retVal;
-  //     }
-  //   }
-  //   return NO ;
-  // },
-
   //Mouse and Key Events
 
   /** @private */
@@ -761,22 +698,13 @@ SC.MenuPane = SC.PickerPane.extend(
     return YES ;
   },
 
-  /**
-    @private
-
-    Get the anchor and send the event to the anchor in case the
-    current Menu is a subMenu
-  */
-  mouseUp: function(evt) {
-    this.remove() ;
-    var anchor = this.get('anchor') ;
-    if(this.isAnchorMenuItemType()) this.sendEvent('mouseUp', evt, anchor) ;
-    return YES ;
-  },
-
   keyUp: function(evt) {
     var ret = this.interpretKeyEvents(evt) ;
     return !ret ? NO : ret ;
+  },
+
+  moveUp: function() {
+    SC.Logger.log("moveUp");
   },
 
   insertText: function(chr, evt) {
@@ -823,7 +751,7 @@ SC.MenuPane = SC.PickerPane.extend(
 
       if (!title) continue;
 
-      title = title.substr(0,bufferLength).replace(/ /g,'').toUpperCase();
+      title = title.replace(/ /g,'').substr(0,bufferLength).toUpperCase();
       if (title === buffer) {
         this.set('currentMenuItem', item);
         break;
