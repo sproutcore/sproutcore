@@ -1683,6 +1683,52 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     array.length = 0 ;
     return this;
   },
+
+  /** 
+    Convenience method can be called by the store or other parts of your 
+    application to load a record into the store.  This method will take a
+    recordType and a data hashes and either add or update the 
+    record in the store. 
+    
+    The loaded records will be in an SC.Record.READY_CLEAN state, indicating
+    they were loaded from the data source and do not need to be committed 
+    back before changing.
+    
+    This method will check the state of the storeKey and call either 
+    pushRetrieve() or dataSourceDidComplete().  The standard state constraints 
+    for these methods apply here.
+    
+    The return value will be the storeKey used for the push.  This is often
+    convenient to pass into loadQuery(), if you are fetching a remote query.
+    
+    If you are upgrading from a pre SproutCore 1.0 application, this method 
+    is the closest to the old updateRecord().
+    
+    @param {SC.Record} recordType the record type
+    @param {Array} dataHash to update
+    @param {Array} id optional.  if not passed lookup on the hash
+    @returns {String} store keys assigned to these id
+  */
+  loadRecord: function(recordType, dataHash, id) {
+    var K       = SC.Record,
+        ret, primaryKey, dataHash, storeKey;
+        
+    // save lookup info
+    recordType = recordType || SC.Record;
+    primaryKey = recordType.prototype.primaryKey;
+    
+    
+    // push each record
+    id = id || dataHash[primaryKey];
+    ret = storeKey = recordType.storeKeyFor(id); // needed to cache
+      
+    if (this.readStatus(storeKey) & K.BUSY) {
+        this.dataSourceDidComplete(storeKey, dataHash, id);
+      } else this.pushRetrieve(recordType, id, dataHash, storeKey);
+    
+    // return storeKey
+    return ret ;
+  },
   
   /** 
     Convenience method can be called by the store or other parts of your 
@@ -1730,11 +1776,8 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
         primaryKey = recordType.prototype.primaryKey ;
       }
       id = (ids) ? ids.objectAt(idx) : dataHash[primaryKey];
-      ret[idx] = storeKey = recordType.storeKeyFor(id); // needed to cache
+      ret[idx] = this.loadRecord(recordType, dataHash, id);
       
-      if (this.readStatus(storeKey) & K.BUSY) {
-        this.dataSourceDidComplete(storeKey, dataHash, id);
-      } else this.pushRetrieve(recordType, id, dataHash, storeKey);
     }
     
     // return storeKeys
