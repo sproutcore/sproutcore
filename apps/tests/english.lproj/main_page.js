@@ -204,17 +204,17 @@ TestRunner.mainPage = SC.Page.design({
     navigationView: SC.ToolbarView.design({
       classNames: 'navigation-bar',
       
-      layout: { top: -4, left: 0, right: 0, height: 28 },
+      layout: { top: 0, left: 0, right: 0, height: 32 },
       childViews: "backButton locationLabel".w(),
       
       backButton: SC.ButtonView.design({
-        layout: { top: 5, left: 8, width: 80, height: 20 },
+        layout: { left: 8, centerY: 0, width: 80, height: 24 },
         title: "« Tests",
         action: "back"
       }),
       
       locationLabel: SC.LabelView.design({
-        layout: { right: 8, top: 8, height: 18, left: 100 },
+        layout: { right: 8, centerY: -2, height: 16, left: 100 },
         textAlign: SC.ALIGN_RIGHT,
         valueBinding: "TestRunner.detailController.displayName"
       })
@@ -222,7 +222,7 @@ TestRunner.mainPage = SC.Page.design({
     }),
     
     webView: SC.WebView.design({
-      layout: { top: 28, left: 2, right: 0, bottom: 0 },
+      layout: { top: 33, left: 2, right: 0, bottom: 0 },
       valueBinding: "TestRunner.detailController.uncachedUrl"
     })
   })  
