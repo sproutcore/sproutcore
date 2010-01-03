@@ -62,6 +62,7 @@ TestRunner.mainPage = SC.Page.design({
       anchorLocation: SC.ANCHOR_BOTTOM,
 
       childViews: 'logo continuousIntegrationCheckbox runTestsButton'.w(),
+      classNames: 'bottom-toolbar',
 
       logo: SC.View.design({
         layout: { left: 0, top: 0, bottom: 0, width: 200 },

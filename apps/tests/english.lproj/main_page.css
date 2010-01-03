@@ -35,8 +35,12 @@ h1.app-title img {
   opacity: 0.8;
 	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
   -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)"; 
-  -moz-opacity:0.8;
-  
+  -moz-opacity:0.8;  
+}
+
+.sc-view.sc-toolbar-view.bottom-toolbar {
+    z-index:2;
+    -webkit-box-shadow: none;
 }
 
 .sc-view.sc-toolbar-view .sc-checkbox-view {
