@@ -7,51 +7,37 @@
 
 /*global module test htmlbody ok equals same stop start */
 
-var menu;
-var menuItemTarget;
-var menuItemTargetName = "The Target";
-var menuItemCheckboxKey = "isCheckbox";
+var items = [
+  { title: 'Menu Item', keyEquivalent: 'ctrl_shift_n' },
+  { title: 'Checked Menu Item', isChecked: YES, keyEquivalent: 'ctrl_a' },
+  { title: 'Selected Menu Item', keyEquivalent: 'backspace' },
+  { isSeparator: YES },
+  { title: 'Menu Item with Icon', icon: 'inbox', keyEquivalent: 'ctrl_m' },
+  { title: 'Menu Item with Icon', icon: 'folder', keyEquivalent: 'ctrl_p' },
+  { isSeparator: YES },
+  { title: 'Selected Menu Item…', isChecked: YES, keyEquivalent: 'ctrl_shift_o' },
+  { title: 'Item with Submenu', subMenu: [{ title: 'Submenu item 1' }, { title: 'Submenu item 2'}] },
+  { title: 'Disabled Menu Item', isEnabled: NO },
+  { isSeparator: YES },
+  { groupTitle: 'Menu Label', items: [{ title: 'Nested Item' }, { title: 'Nested Item' }] }
+];
 
-module('SC.MenuPane#MenuItemTargetIsSet', {
+var menu;
+
+module('SC.MenuPane#popup', {
   setup: function() {
-    menuItemTarget = SC.Object.create({
-      myName: menuItemTargetName
-    });
-    
     menu = SC.MenuPane.create({
-      layout: { width: 80, height: 0 },
-      itemTargetKey: 'myTarget',
-      itemTitleKey: 'myTitle',
-      itemCheckboxKey: menuItemCheckboxKey,
-      items: [
-        { myTitle: "Item1", myTarget: menuItemTarget }
-      ],
-      contentView: SC.View.extend({})
+      layout: { width: 200 },
+      items: items
     });
   },
-  
+
   teardown: function() {
-    menuItemTarget.destroy();
-    menuItemTarget = null;
     menu.destroy();
     menu = null;
   }
 });
 
-test("Menu sets item target.", function() {
-  menu.get('displayItems');
-  menu.append(); // force a rendering of the menu item child views
-  var target = menu.menuItemViews[0].get('target'); // see if the target propagated through
-  menu.remove(); // remove the menu
-  var success = (target && (target.myName === menuItemTargetName)); // check to see if it's the right target
-  ok(success, "Menu item should have the target we specified.");
-});
-
-test("Menu sets MenuItem.contentCheckboxKey.", function() {
-  menu.get('displayItems');
+test('SC.MenuPane - append()', function(){
   menu.append();
-  var key = menu.menuItemViews[0].get('contentCheckboxKey');
-  menu.remove();
-  var success = (key && (key === menuItemCheckboxKey));
-  ok(success, "MenuItem.contentCheckboxKey should equal MenuPane.itemCheckboxKey after being rendered.");
 });
