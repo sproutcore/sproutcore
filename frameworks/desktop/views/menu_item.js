@@ -330,7 +330,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
     this._flashCounter = 0;
     if (skipFlash) {
-      responder = this.getPath('pane.rootResponder');
+      responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
 
       if (responder) {
         responder.sendAction(action, target, this, this.get('pane'));
