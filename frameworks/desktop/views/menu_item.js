@@ -8,7 +8,10 @@ sc_require('views/button') ;
 sc_require('views/separator') ;
 
 /**
-  @class SC.MenuItemView
+  @class
+
+  An SC.MenuItemView is created for every item in a menu.
+
   @extends SC.ButtonView
   @since SproutCore 1.0
 */
@@ -48,10 +51,25 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @type Boolean
   */
   hasMouseExited: NO,
-  
+
+  /**
+    Because we don't know what keys to observe for display changes
+    until we're instantiated, we explicitly set contentDisplayProperties
+    on init.
+    
+    @private
+  */
+  init: function() {
+    var menu = this.getPath('parentMenu.rootMenu'),
+    keyArray = menu.menuItemKeys.map(SC._menu_fetchKeys, menu);
+
+    this.set('contentDisplayProperties', keyArray);
+    return sc_super();
+  },
+
   /**
     This menu item's submenu, if it exists.
-    
+
     @type SC.MenuView
   */
   subMenu: function() {
