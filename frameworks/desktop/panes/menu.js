@@ -682,6 +682,7 @@ SC.MenuPane = SC.PickerPane.extend(
       menu = menuItem.get('subMenu');
       if (menu) {
         menu.remove();
+        menuItem.resignFirstResponder();
         menuItem = menu.get('previousMenuItem');
       }
     }
