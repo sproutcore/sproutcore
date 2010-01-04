@@ -273,6 +273,8 @@ SC.MenuPane = SC.PickerPane.extend(
     this.endPropertyChanges();
     this.positionPane() ;
     this.append() ;
+    var currentSelectedMenuItem = this.get('currentSelectedMenuItem') ;
+    if(currentSelectedMenuItem) currentSelectedMenuItem.becomeFirstResponder() ;
   },
 
   /**
@@ -402,7 +404,7 @@ SC.MenuPane = SC.PickerPane.extend(
   generateMenuItems: function(items) {
     if(!this.get('isEnabled')) return ;
     var item, itemAction, menuItemNumber, itemView, itemHeight, itemWidth, 
-      menuItemViews = [], len, content, idx;
+      menuItemViews = [], len, content, idx, isCheckbox;
     len = items.length ;
     content = SC.makeArray(items) ;
     for (idx = 0; idx < len; ++idx) {
@@ -411,6 +413,7 @@ SC.MenuPane = SC.PickerPane.extend(
       menuItemNumber = item.get('menuItemNumber') ;
       itemHeight = item.get('itemHeight') ;
       itemWidth = this.get('itemWidth') ;
+      isCheckbox = item.get('isCheckbox') ;
       itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
@@ -438,7 +441,7 @@ SC.MenuPane = SC.PickerPane.extend(
             icon : item.get('icon'),
             separator : item.get('isSeparator'),
             action : itemAction,
-            checkbox : item.get('isCheckbox'),
+            checkbox : isCheckbox,
             shortCut : item.get('isShortCut'),
             branchItem : item.get('isBranch'),
             subMenu : item.get('subMenu')
@@ -446,6 +449,9 @@ SC.MenuPane = SC.PickerPane.extend(
         rootElementPath : [menuItemNumber]
       });
       menuItemViews.push(itemView) ;
+      if(isCheckbox) {
+        this.set('currentSelectedMenuItem',itemView) ;
+      }
     }
     var contentV = this.childViews[0].contentView;
     contentV.replaceAllChildren(menuItemViews);
