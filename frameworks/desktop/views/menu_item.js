@@ -137,46 +137,33 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
         this.renderImage(context, val);
         context.addClass('has-icon');
       }
-      
-      val = content.get(menu.itemTitleKey) || '';
+
+      val = this.getContentProperty('itemTitleKey') || '';
       if (SC.typeOf(val) !== SC.T_STRING) val = val.toString();
       // TODO check localization setting
       this.renderLabel(context, val.loc());
-      
-      if (content.get(menu.itemCheckboxKey)) {
+
+      if (this.getContentProperty('itemCheckboxKey')) {
         context.push('<div class="checkbox"></div>');
       }
-      
+
       if (this.get('hasSubMenu')) {
         this.renderBranch(context);
       }
-      
-      val = content.get(menu.itemShortCutKey);
+
+      val = this.getContentProperty('itemShortCutKey');
       if (val) {
         this.renderShortcut(context, val);
       }
     }
-    
+
     context = context.end();
-    
-    //         // handle short cut keys
-    //         if (this.getDelegateProperty('shortCutKey', del)) {
-    //           key = this.getDelegateProperty('shortCutKey', del) ;
-    //           val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-    //           if (val) {
-    //             this.renderShortcut(ic, val) ;
-    //             ic.addClass('shortcutkey') ;
-    //           }
-    //         }
-    //       }
-    //     }
-    //     ic.end() ;
   },
-      
-  /** 
-   Generates the image used to represent the image icon. override this to 
+
+  /**
+   Generates the image used to represent the image icon. override this to
    return your own custom HTML
- 
+
    @param {SC.RenderContext} context the render context
    @param {String} the source path of the image
    @returns {void}
