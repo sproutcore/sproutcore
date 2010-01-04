@@ -125,9 +125,9 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     var itemHeight = this.get('itemHeight') || 20 ;
     this.set('itemWidth',itemWidth);
     this.set('itemHeight',itemHeight);
-    
-    context = context.begin('a').attr('href', 'javascript:');
-    
+
+    context = context.begin('a');
+
     if (content.get(menu.itemSeparatorKey)) {
       context.push('<span class="separator"></span>');
       context.addClass('disabled');
