@@ -413,7 +413,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
         previousMenuItem = parentMenu.get('previousMenuItem');
 
         if (previousMenuItem) {
-                  parentMenu.get('previousMenuItem').$().removeClass('focus');
+          previousMenuItem.resignFirstResponder();
         }
         subMenu.remove();
       }
@@ -488,7 +488,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   /** @private*/
   willLoseFirstResponder: function(responder) {
     if (responder !== this) return;
-    // this.$().removeClass('focus') ;
     var parentMenu = this.get('parentMenu') ;
     if(parentMenu) {
       parentMenu.set('currentSelectedMenuItem', null) ;
