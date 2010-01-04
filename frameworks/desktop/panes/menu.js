@@ -759,6 +759,14 @@ SC.MenuPane = SC.PickerPane.extend(
     }
   },
 
+  /**
+    Clear the key buffer if the user does not enter any text after a certain
+    amount of time.
+
+    This is called by the timer created in the insertText method.
+
+    @private
+  */
   clearKeyBuffer: function() {
     this._keyBuffer = '';
   },
