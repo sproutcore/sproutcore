@@ -764,16 +764,19 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   /**
-    @private - click away picker.
+    Close the menu and any open submenus if the user clicks outside the menu.
 
-    Override to pass the event to the parent Menu
-    in case the current Menu is a subMenu
+    Because only the root-most menu has a modal pane, this will only ever get
+    called once.
 
     @returns Boolean
+    @private
   */
   modalPaneDidClick: function(evt) {
     this.closeOpenMenusFor(this.get('previousMenuItem'));
     this.remove();
+
+    return YES;
   }
 });
 
