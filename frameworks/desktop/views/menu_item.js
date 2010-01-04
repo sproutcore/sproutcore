@@ -337,7 +337,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       }
 
       rootMenu.remove();
-      rootMenu.set('selectedMenuItem', this);
+      rootMenu.set('selectedItem', this.get('content'));
     } else {
       this.invokeLater(this.flashHighlight, 25);
     }
