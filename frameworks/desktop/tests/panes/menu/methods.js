@@ -17,18 +17,22 @@ var items = [
   { isSeparator: YES },
   { title: 'Selected Menu Item…', isChecked: YES, keyEquivalent: 'ctrl_shift_o' },
   { title: 'Item with Submenu', subMenu: [{ title: 'Submenu item 1' }, { title: 'Submenu item 2'}] },
-  { title: 'Disabled Menu Item', isEnabled: NO },
-  { isSeparator: YES },
-  { groupTitle: 'Menu Label', items: [{ title: 'Nested Item' }, { title: 'Nested Item' }] }
+  { title: 'Disabled Menu Item', isEnabled: NO }//,
+  // { isSeparator: YES },
+  // { groupTitle: 'Menu Label', items: [{ title: 'Nested Item' }, { title: 'Nested Item' }] }
 ];
 
-var menu;
+var menu, anchor;
 
 module('SC.MenuPane#popup', {
   setup: function() {
     menu = SC.MenuPane.create({
-      layout: { width: 200 },
+      layout: { width: 206 },
       items: items
+    });
+    
+    anchor = SC.Pane.create({
+      layout: { top: 15, left: 15, width: 100, height: 100 }
     });
   },
 
@@ -38,6 +42,27 @@ module('SC.MenuPane#popup', {
   }
 });
 
-test('SC.MenuPane - append()', function(){
-  menu.append();
+test('SC.MenuPane - popup() without anchor', function(){
+  var layout;
+  
+  menu.popup();
+  layout = menu.get('layout');
+  equals(layout.centerX, 0, 'menu should be horizontally centered');
+  equals(layout.centerY, 0, 'menu should be vertically centered');
+  equals(layout.width, 206, 'menu should maintain the width specified');
+  equals(layout.height, 178, 'menu height should resize based on item content');
+  menu.remove();
+});
+
+test('SC.MenuPane - popup() with anchor', function(){
+  var layout;
+  
+  anchor.append();
+  menu.popup(anchor);
+  layout = menu.get('layout');
+  equals(layout.left, 16, 'menu should be aligned to the left of the anchor');
+  equals(layout.top, 119, 'menu should be positioned below the anchor');
+  equals(layout.width, 206, 'menu should maintain the width specified');
+  equals(layout.height, 178, 'menu height should resize based on item content');
+  menu.remove();
 });
