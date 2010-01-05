@@ -221,22 +221,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
 
   /**
-    This method is used to fetch the Menu Item View to which the
-    Parent Menu Pane is anchored 
-    to
-
-    @param {}
-    @returns MenuPane
-  */
-  getAnchor: function() {
-    var anchor = this.get('anchor') ;
-    if(anchor && anchor.kindOf && anchor.kindOf(SC.MenuItemView)) return anchor ;
-    return null ;
-  },
-  
-  isCurrent: NO,
-
-  /**
     This method checks if the menu item is a separator.
 
     @param {}
@@ -269,7 +253,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   showSubMenu: function() {
     var subMenu = this.get('subMenu') ;
     if(subMenu) {
-      subMenu.set('anchor', this) ;
       subMenu.popup(this,[0,0,0]) ;
     }
   },
