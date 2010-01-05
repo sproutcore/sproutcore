@@ -164,7 +164,7 @@ SC.PickerPane = SC.PalettePane.extend({
     fallback to center.
   */  
   positionPane: function() {
-    var anchor       = this.get('anchorElement'),
+    var anchor       = this.get('anchor'),
         preferType   = this.get('preferType'),
         preferMatrix = this.get('preferMatrix'),
         layout       = this.get('layout'),
@@ -175,6 +175,8 @@ SC.PickerPane = SC.PalettePane.extend({
     // If that is not possible, fitPositionToScreen will take care of that for 
     // other alternative and fallback position.
     if (anchor) {
+      // get the layer if we are passed a view
+      anchor = anchor.isView ? anchor.get('layer') : anchor;
       anchor = this.computeAnchorRect(anchor);
       origin = SC.cloneRect(anchor);
 

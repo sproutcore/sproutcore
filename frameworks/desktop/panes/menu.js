@@ -174,17 +174,14 @@ SC.MenuPane = SC.PickerPane.extend(
     anchor itself to the view, and intelligently reposition itself if the
     contents of the menu exceed the available space.
 
-    @param  SC.View  anchorViewOrElement the view or element to which the menu
-    should anchor
+    @param  SC.View|Rect  anchorViewOrElement the view or element to which the menu
+    should anchor. May also be specified as a rect relative to the viewport.
     @param preferMatrix The prefer matrix used to position the
     pane. (optional)
   */
   popup: function(anchorViewOrElement, preferMatrix) {
-    var anchor = anchorViewOrElement.isView ? anchorViewOrElement.get('layer') : anchorViewOrElement;
-
     this.beginPropertyChanges();
 
-    this.set('anchorElement',anchor) ;
     this.set('anchor',anchorViewOrElement);
     this.set('preferType',SC.PICKER_MENU) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
