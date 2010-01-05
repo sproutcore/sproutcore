@@ -8,7 +8,11 @@
 /**
   @class
   
-  Disclosure triangle button.
+  Disclosure triangle button. As a subclass of SC.ButtonView, this view
+  takes a lot of the same properties as a button:
+  
+  - isEnabled: whether disclosure triangle is clickable or not
+  - value: YES or NO (where YES implies expanded/open)
   
   @extends SC.ButtonView
   @since SproutCore
@@ -37,18 +41,26 @@ SC.DisclosureView = SC.ButtonView.extend(
   
   /** @private */
   render: function(context, firstTime) {
-    if(firstTime){
+    if(firstTime) {
       context.push('<img src="', SC.BLANK_IMAGE_URL, '" class="button" alt="" />');
-      if(this.get('needsEllipsis')){
+      if(this.get('needsEllipsis')) {
         context.push('<label class="ellipsis">',this.get('displayTitle'),'</label>');
-      }else{
+      }
+      else {
         context.push('<label>',this.get('displayTitle'),'</label>');  
       }
-    }else{
+    }
+    else {
       this.$('label')[0].text = this.get('displayTitle');
     }
   },
   
+  /**
+    Allows toggling of the value with the right and left arrow keys. 
+    Extends the behavior inherted from SC.ButtonView.
+    
+    @param evt
+  */
   keyDown: function(evt) {
     if (evt.which === 37 || evt.which === 38) {  
       this.set('value', this.get('toggleOffValue')) ;
@@ -57,8 +69,8 @@ SC.DisclosureView = SC.ButtonView.extend(
     if (evt.which === 39 || evt.which === 40) {  
       this.set('value', this.get('toggleOnValue')) ;
       return YES;
-    }     
-    sc_super(); 
+    }
+    sc_super();
   }
   
 });
