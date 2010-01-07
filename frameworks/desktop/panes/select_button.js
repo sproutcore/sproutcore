@@ -667,7 +667,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
 
   /** Function overridden - tied to the isEnabled state */
   acceptsFirstResponder: function() {
-    return YES;
+    if(this.get('isEnabled')) return YES;
+    return NO;
   }.property('isEnabled')
 
 }) ;
