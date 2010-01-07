@@ -689,7 +689,7 @@ SC.ListItemView = SC.View.extend(
     // view too often.
     if (scrollIfNeeded && this.scrollToVisible()) {
       var collectionView = this.get('owner'), idx = this.get('contentIndex');
-      this.invokeLater(function() {
+      this.invokeLast(function() {
         var item = collectionView.itemViewForContentIndex(idx);
         if (item && item._beginEditing) item._beginEditing(NO);
       });
