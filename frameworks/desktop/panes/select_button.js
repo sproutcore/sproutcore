@@ -290,8 +290,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
   */
   leftAlign: function() {
     var val = 0, controlSize = this.get('controlSize') ;
-    if(controlSize === SC.SMALL_CONTROL_SIZE) val = -14 ;
-    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -16 ;
+    if(controlSize === SC.SMALL_CONTROL_SIZE) val = -12 ;
+    if(controlSize === SC.REGULAR_CONTROL_SIZE) val = -15 ;
     return val;
   }.property('controlSize'),
 
@@ -443,6 +443,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     //Set the preference matrix for the menu pane
+    this.set('CUSTOM_MENU_ITEM_HEIGHT', this.get('controlSize')===SC.SMALL_CONTROL_SIZE ? 18 : 20);
     this.changeSelectButtonPreferMatrix(this.itemIdx) ;
 
   },
@@ -599,7 +600,9 @@ SC.SelectButtonView = SC.ButtonView.extend(
      place aligned to the item on the button when menu is opened.
   */
   changeSelectButtonPreferMatrix: function() {
-    var preferMatrixAttributeTop = 0 ,
+    var controlSizeTuning = 
+      this.get('controlSize')===SC.SMALL_CONTROL_SIZE ? 0 : -2;
+    var preferMatrixAttributeTop = controlSizeTuning ,
       itemIdx = this.get('itemIdx') ,
       leftAlign = this.get('leftAlign'), defPreferMatrix, tempPreferMatrix ;
 
@@ -609,7 +612,8 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
     else {
       if(itemIdx) {
-        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT ;
+        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT + 
+          controlSizeTuning ;
       }
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
       this.set('preferMatrix', tempPreferMatrix) ;

@@ -250,7 +250,8 @@ SC.MenuPane = SC.PickerPane.extend(
     this.set('itemWidth',this.get('layout').width || 100) ; 
     scroll = this.createChildView(scroll, { 
       borderStyle: SC.BORDER_NONE, 
-      contentView: t
+      contentView: t,
+      controlSize: this.get('controlSize')
     });
     this.childViews = [scroll] ;
   },
@@ -289,6 +290,7 @@ SC.MenuPane = SC.PickerPane.extend(
       idx, item ,
       fetchKeys = SC._menu_fetchKeys ,
       fetchItem = SC._menu_fetchItem ,
+      itemHeight = (this.get('controlSize') === SC.SMALL_CONTROL_SIZE) ? 18 : this.get('itemHeight'),
       menuHeight = this.get('menuHeightPadding') ;
     // loop through items and collect data
     for (idx = 0; idx < max; ++idx) {
@@ -301,9 +303,9 @@ SC.MenuPane = SC.PickerPane.extend(
 	                        value: item, isEnabled: YES, icon: null, 
 	                        isSeparator: null, action: null, isCheckbox: NO, 
 	                        menuItemNumber: idx, isShortCut: NO, isBranch: NO,
-	                        itemHeight: this.get('itemHeight'), subMenu: null,keyEquivalent: null,
+	                        itemHeight: itemHeight, subMenu: null,keyEquivalent: null,
 	                        target:null });
-        menuHeight = menuHeight+this.get('itemHeight') ;
+        menuHeight = menuHeight+itemHeight ;
       } else if (itemType !== SC.T_ARRAY) {
           if (keys === null) keys = this.menuItemKeys.map(fetchKeys, this) ;
           cur = keys.map(fetchItem, item) ;
@@ -311,8 +313,8 @@ SC.MenuPane = SC.PickerPane.extend(
           if (!keys[0] && item.toString) cur[0] = item.toString() ;
           if (!keys[1]) cur[1] = item ;
           if (!keys[2]) cur[2] = YES ;
-          if (!cur[9]) cur[9] = this.get('itemHeight') ;
-          if (cur[4]) cur[9] = 9 ;
+          if (!cur[9]) cur[9] = itemHeight ;
+          if (cur[4]) cur[9] = 10 ;
           menuHeight = menuHeight+cur[9] ;
           if (loc && cur[0]) cur[0] = cur[0].loc() ;
           ret[rel] = SC.Object.create({ title: cur[0], value: cur[1],
@@ -369,6 +371,7 @@ SC.MenuPane = SC.PickerPane.extend(
     sc_super();
     
     if (firstTime) {
+      context.addClass(this.get('controlSize'));
       if(!this.get('isEnabled')) return ;
       context.addStyle('text-align', 'center') ;
     }
