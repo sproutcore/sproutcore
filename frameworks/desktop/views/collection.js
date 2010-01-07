@@ -2139,7 +2139,7 @@ SC.CollectionView = SC.View.extend(
     @type String
   */
   reorderDataType: function() {
-    return 'SC.CollectionView.Reorder.%@'.fmt(SC.guidFor(this)) ;
+    return 'SC.CollectionView.Reorder.'+SC.guidFor(this) ;
   }.property().cacheable(),
   
   /**

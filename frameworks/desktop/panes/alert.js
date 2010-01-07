@@ -218,7 +218,7 @@ SC.AlertPane = SC.PanelPane.extend({
           var pane = this.get('pane');
           var blank = SC.BLANK_IMAGE_URL ;
           if(pane.get('icon') == 'blank') context.addClass('plain');
-          context.push('<img src="%@" class="icon %@" />'.fmt(blank, pane.get('icon')));
+          context.push('<img src="'+blank+'" class="icon '+pane.get('icon')+'" />');
           context.begin('h1').text(pane.get('message') || '').end();
           context.push(pane.get('displayDescription') || '');
           context.push(pane.get('displayCaption') || '');

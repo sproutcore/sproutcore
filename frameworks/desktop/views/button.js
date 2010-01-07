@@ -197,8 +197,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       .setClass(classes).addClass(this.get('theme'));
     // render inner html 
     if(firstTime){
-       context = context.push("<span class='sc-button-inner' style = 'min-width:%@px'>"
-            .fmt(this.get('titleMinWidth')));
+       context = context.push("<span class='sc-button-inner' style = 'min-width:"+this.get('titleMinWidth')+"px'>");
       this.renderTitle(context, firstTime) ; // from button mixin
       context.push("</span>") ;
     }else{

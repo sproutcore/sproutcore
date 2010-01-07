@@ -205,7 +205,7 @@ SC.mixin( /** @scope SC */ {
     @returns {String} A string representation of the rect.
   */
   stringFromRect: function(r) {
-    return '{%@, %@, %@, %@}'.fmt(r.x, r.y, r.width, r.height);
+    return '{'+r.x+', '+r.y+', '+r.width+', '+r.height+'}';
   },
   
   /**
@@ -273,7 +273,7 @@ SC.mixin( /** @scope SC */ {
       document.body.insertBefore(elem, null);
     }
 
-    style = '%@; width: %@px; left: %@px; position: absolute'.fmt(style, width, (-1*width));
+    style = style+'; width: '+width+'px; left: '+(-1*width)+'px; position: absolute';
     SC.$(elem).attr('style', style);
 
     if (classes !== '') {

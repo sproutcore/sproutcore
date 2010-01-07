@@ -128,7 +128,7 @@ SC.ScrollerView = SC.View.extend({
       case SC.LAYOUT_VERTICAL:
         context.addClass('sc-vertical') ;
         if (firstTime) {
-          context.push('<div class="sc-inner" style="height: %@px;">&nbsp;</div>'.fmt(max)) ;
+          context.push('<div class="sc-inner" style="height: '+max+'px;">&nbsp;</div>') ;
         } else {
           this.$('div')[0].style.height = max + "px";
         }
@@ -136,7 +136,7 @@ SC.ScrollerView = SC.View.extend({
       case SC.LAYOUT_HORIZONTAL:
         context.addClass('sc-horizontal') ;
         if (firstTime) {  
-          context.push('<div class="sc-inner" style="width: %@px;">&nbsp;</div>'.fmt(max)) ;
+          context.push('<div class="sc-inner" style="width: '+max+'px;">&nbsp;</div>') ;
         } else {
           this.$('div')[0].style.width = max + "px";
         }

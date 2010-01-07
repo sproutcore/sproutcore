@@ -214,7 +214,7 @@ SC.RadioView = SC.FieldView.extend(
         if (icon) {
           url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL;
           className = (url === icon) ? '' : icon ;
-          icon = '<img src="%@" class="icon %@" alt="" />'.fmt(url, className);
+          icon = '<img src="'+url+'" class="icon '+className+'" alt="" />';
         } else icon = '';
         
         selectionStateClassNames = this._getSelectionState(item, value, isArray, false);

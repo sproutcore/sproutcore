@@ -399,12 +399,12 @@ SC.PickerPane = SC.PalettePane.extend({
     var ret = sc_super();
     if (context.needsContent) {
       if (this.get('preferType') == SC.PICKER_POINTER) {
-        context.push('<div class="sc-pointer %@" style="margin-top: %@px"></div>'.fmt(this.get('pointerPos'), this.get('pointerPosY')));
+        context.push('<div class="sc-pointer '+this.get('pointerPos')+'" style="margin-top: '+this.get('pointerPosY')+'px"></div>');
       }
     } else {
       var el = this.$('.sc-pointer');
-      el.attr('class', "sc-pointer %@".fmt(this.get('pointerPos')));
-      el.attr('style', "margin-top: %@px".fmt(this.get('pointerPosY')));
+      el.attr('class', "sc-pointer "+this.get('pointerPos'));
+      el.attr('style', "margin-top: "+this.get('pointerPosY')+"px");
     }
     return ret ;
   },

@@ -218,7 +218,7 @@ SC.Control = {
   updatePropertyFromContent: function(prop, key, contentKey, content) {
     var all = key === '*';
     if (contentKey === undefined) {
-      contentKey = "content%@Key".fmt(prop.capitalize());
+      contentKey = "content"+prop.capitalize()+"Key";
     }
     if (content === undefined) content = this.get('content');
     
@@ -313,8 +313,8 @@ SC.Control = {
     // if field label is not provided, compute something...
     fk = this.get('fieldKey') || this.constructor.toString() ;
     def = (fk || '').humanize().capitalize() ;
-    return "ErrorLabel.%@".fmt(fk)
-      .locWithDefault("FieldKey.%@".fmt(fk).locWithDefault(def)) ;
+    return "ErrorLabel."+fk
+      .locWithDefault(("FieldKey."+fk).locWithDefault(def)) ;
       
   }.property('fieldLabel','fieldKey').cacheable(),
 
