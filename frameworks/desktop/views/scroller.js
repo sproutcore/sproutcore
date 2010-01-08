@@ -100,8 +100,8 @@ SC.ScrollerView = SC.View.extend({
         break;
     }
     return size - (this.capSize-this.capOverlapSize) - this.downButtonSize - (this.upButtonSize-this.capOverlapSize);
-  },
-  
+  }.property(),
+
   /**
     Returns the owner view property the scroller should modify.  If this
     property is non-null and the owner view defines this property, then the
@@ -160,44 +160,31 @@ SC.ScrollerView = SC.View.extend({
   mouseDown: function(evt) {
     var target = evt.target;
     if (target.className.indexOf('thumb') >= 0 || target.parentElement.className.indexOf('thumb') >= 0) {
-      console.log('thumb clicked');
+      this._thumbOffset = this.convertFrameFromView({ y: evt.pageY }).y - this._top ;
+      this._startY = evt.pageY;
+      this._startTop = this._top;
+      return YES;
     }
-    this._thumbOffset = this.convertFrameFromView({ y: evt.pageY }).y - this._top ;
-    this._startY = evt.pageY;
-    this._startTop = this._top;
-    console.log('Offset: %@'.fmt(this._thumbOffset));
-    return YES;
   },
   
   mouseDragged: function(evt) {
-    console.log('dragged');
     this._top = Math.max(0, this._startTop + (evt.pageY - this._startY));
     var frame = this.get('frame');
     // this.$('.thumb').css('top', this._top);
-  this.set('value', Math.round((this._top / frame.height) * (this.get('maximum')-frame.height)));
+  this.set('value', Math.round((this._top / (this.get('trackLength')-this._thumbHeight)) * (this.get('maximum')-frame.height)));
     return YES;
-  },
-  
-  // after 50msec, fire event again
-  _sc_scroller_armScrollTimer: function() {
-    if (!this._sc_scrollTimer) {
-      SC.RunLoop.begin() ;
-      var method = this._sc_scroller_scrollDidChange ;
-      this._sc_scrollTimer = this.invokeLater(method, 50) ;
-      SC.RunLoop.end() ;
-    }
   },
 
   _sc_scroller_frameDidChange: function() {
     var max = this.get('maximum'), height = this.get('frame').height;
-    height = Math.max((height/max)*height, 20);
+    height = Math.ceil(Math.max((height/max)*height, 20));
+    this._thumbHeight = height;
     var thumb = this.$('.thumb');
     
     if (thumb) {
       thumb.css('height', height);
       this.$('.thumb .center').css('height', Math.max(height-14,0));
     }
-    this._thumbHeight = height;
   }.observes('frame', 'maximum'),
   
   _sc_scroller_scrollDidChange: function() {
@@ -236,9 +223,10 @@ SC.ScrollerView = SC.View.extend({
       if (thumb) {
         switch (this.get('layoutDirection')) {
           case SC.LAYOUT_VERTICAL:
-            console.log('v: %@ max: %@'.fmt(v, max));
-            this._top = ((v / (max-frame.height)) * (frame.height - this._thumbHeight-36))+3;
-            console.log('top: %@ pct: %@ f: %@'.fmt(this._top, (v/(max-frame.height)), frame.height));
+            var pct = (v/(max-this.get('frame').height));
+            if (pct > 1) pct = 1;
+            var totalLen = (this.get('trackLength')-this._thumbHeight);
+            this._top = Math.round(pct * totalLen + 3);
             thumb.css('top', this._top);
             break ;
           case SC.LAYOUT_HORIZONTAL:
