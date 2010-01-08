@@ -560,7 +560,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // 
     // Juan Pinzon
     
-    if (SC.browser.mozilla) {
+    if (SC.browser.mozilla && !this.get('useStaticLayout')) {
       var top, left, width, height, p, layer, element, textfield;
       
       // I'm caching in didCreateLayer this elements to improve perf
