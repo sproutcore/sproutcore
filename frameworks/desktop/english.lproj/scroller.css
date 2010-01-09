@@ -1,26 +1,62 @@
 /* SC.ScrollerView */
 
-.sc-scroller-view .sc-inner {
+.sc-scroller.vertical .track {
+  height: 100%;
+  background-image: sc_static('images/track.png');
+  background-repeat: repeat-y;
+}
+
+.sc-scroller.vertical .button-top {
   position: absolute;
-  left:0;
-  top: 0;
+  background-image: sc_static('images/upbutton');
+  height: 23px;
+  width: 16px;
+  bottom: 17px;
 }
 
-.sc-scroller-view.sc-horizontal {
-  overflow-x: scroll;
-  overflow-y: hidden;
-}
-
-.sc-scroller-view.sc-horizontal .sc-inner {
+.sc-scroller.vertical .button-bottom {
+  position: absolute;
+  background-image: sc_static('images/downbutton');
+  height: 17px;
+  width: 16px;
   bottom: 0;
 }
 
-
-.sc-scroller-view.sc-vertical {
-  overflow-y: scroll;
-  overflow-x: hidden;
+.sc-scroller.vertical .cap {
+  position: absolute;
+  background-image: sc_static('images/cap');
+  height: 10px;
+  width: 16px;
+  top: 0;
 }
 
-.sc-scroller-view.sc-vertical .sc-inner {
+.sc-scroller.vertical .thumb {
+  position: absolute;
+  left: 1px;
+  height: 60px;
+}
 
+.sc-scroller.vertical .thumb .center {
+  background-image: sc_static('images/thumb-center');
+  height: 46px;
+  margin: 7px 0;
+  width: 13px;
+}
+
+.sc-scroller.vertical .thumb .top {
+  position: absolute;
+  background-image: sc_static('images/thumb-top');
+  height: 7px;
+  left: 0px;
+  width: 13px;
+  top: 0px;
+}
+
+.sc-scroller.vertical .thumb .bottom {
+  position: absolute;
+  background-image: sc_static('images/thumb-bottom');
+  height: 7px;
+  left: 0px;
+  width: 13px;
+  bottom: 0px;
 }
