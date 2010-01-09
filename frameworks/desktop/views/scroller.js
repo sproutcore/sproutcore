@@ -136,11 +136,11 @@ SC.ScrollerView = SC.View.extend({
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'maximum isEnabled layoutDirection'.w(),
+  displayProperties: 'maximum isEnabled layoutDirection value frame'.w(),
   
   render: function(context, firstTime) {
     context.addClass('sc-scroller');
-    
+
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         context.addClass('vertical');
