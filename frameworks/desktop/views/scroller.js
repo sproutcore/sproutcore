@@ -218,10 +218,9 @@ SC.ScrollerView = SC.View.extend({
   },
   
   mouseDragged: function(evt) {
-    this._top = Math.max(0, this._startTop + (evt.pageY - this._startY));
+    this._sc_thumbPos = Math.max(0, this._startTop + (evt.pageY - this._startY));
     var frame = this.get('frame');
-    // this.$('.thumb').css('top', this._top);
-  this.set('value', Math.round((this._top / (this.get('trackLength')-this._thumbHeight)) * (this.get('maximum')-frame.height)));
+  this.set('value', Math.round((this._sc_thumbPos / (this.get('trackLength')-this._thumbHeight)) * (this.get('maximum')-frame.height)));
     return YES;
   },
 
