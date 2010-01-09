@@ -155,7 +155,30 @@ SC.ScrollerView = SC.View.extend({
       context.push('<div class="button-top"></div>');
       context.push('<div class="cap"></div>');
       context.push('<div class="thumb"><div class="center"></div><div class="top"></div><div class="bottom"></div></div>');
-      this._top = 3;
+      this._sc_thumbPos = this.capSize - this.capOverlapSize;
+    } else {
+      // Ensure that the scroll thumb is in the correct location
+      var v = this.get('value');
+
+      // If the value hasn't changed then don't bother moving the thumb
+      if (v !== this._sc_scrollValue) {
+        var thumb = this.$('.thumb'),
+            max = this.get('maximum'),
+            frame = this.get('frame'),
+            totalLen = (this.get('trackLength')-this._thumbHeight),
+            pct;
+
+        switch (this.get('layoutDirection')) {
+          case SC.LAYOUT_VERTICAL:
+            pct = (v/(max-this.get('frame').height));
+            if (pct > 1) pct = 1;
+            this._sc_thumbPos = Math.ceil(pct * totalLen + 3);
+            thumb.css('top', this._sc_thumbPos);
+            break ;
+          case SC.LAYOUT_HORIZONTAL:
+            // layer.scrollLeft = v ;
+            break ;
+        }
     }
   },
 
@@ -212,31 +235,6 @@ SC.ScrollerView = SC.View.extend({
     this.set('value', scroll) ; // will now enforce minimum and maximum
 
     SC.RunLoop.end();
-  },
-
-  /** @private */
-  _sc_scroller_valueDidChange: function() {
-    var v = this.get('value');
-    if (v !== this._sc_scrollValue) {
-      var thumb = this.$('.thumb'),
-          max = this.get('maximum'),
-          frame = this.get('frame');
-
-      if (thumb) {
-        switch (this.get('layoutDirection')) {
-          case SC.LAYOUT_VERTICAL:
-            var pct = (v/(max-this.get('frame').height));
-            if (pct > 1) pct = 1;
-            var totalLen = (this.get('trackLength')-this._thumbHeight);
-            this._top = Math.round(pct * totalLen + 3);
-            thumb.css('top', this._top);
-            break ;
-          case SC.LAYOUT_HORIZONTAL:
-            // layer.scrollLeft = v ;
-            break ;
-        }
-      }
-    }
-  }.observes('value')
+  }
 
 });
