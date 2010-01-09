@@ -1224,21 +1224,25 @@ SC.Observable = {
     Increments the value of a property.
     
     @param key {String} property name
+    @param increment {Number} the amount to increment (optional)
     @returns {Number} new value of property
   */
-  incrementProperty: function(key) { 
-    this.set(key,(this.get(key) || 0)+1); 
+  incrementProperty: function(key,increment) {
+    if (!increment) increment = 1;
+    this.set(key,(this.get(key) || 0)+increment); 
     return this.get(key) ;
   },
 
   /**  
-    decrements a property
+    Decrements the value of a property.
     
     @param key {String} property name
+    @param increment {Number} the amount to decrement (optional)
     @returns {Number} new value of property
   */
-  decrementProperty: function(key) {
-    this.set(key,(this.get(key) || 0) - 1 ) ;
+  decrementProperty: function(key,increment) {
+    if (!increment) increment = 1;
+    this.set(key,(this.get(key) || 0) - increment) ;
     return this.get(key) ;
   },
 

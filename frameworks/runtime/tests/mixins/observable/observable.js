@@ -480,6 +480,12 @@ test('incrementProperty and decrementProperty',function(){
   object.numberVal = 24;
   newValue = object.decrementProperty('numberVal');
   equals(23,newValue,'numerical value decremented');
+  object.numberVal = 25;
+  newValue = object.incrementProperty('numberVal', 5);
+  equals(30,newValue,'numerical value incremented by specified increment');
+  object.numberVal = 25;
+  newValue = object.decrementProperty('numberVal',5);
+  equals(20,newValue,'numerical value decremented by specified increment');
 });
 
 test('toggle function, should be boolean',function(){
