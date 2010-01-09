@@ -42,6 +42,8 @@ SC.ScrollerView = SC.View.extend({
       // height and we want our content to stay put when it does.
       if (val >= 0) {
         this._value = val ;
+      } else {
+        this._value = 0;
       }
     }
 
