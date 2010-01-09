@@ -158,7 +158,7 @@ SC.RootResponder = SC.RootResponder.extend(
   
   setup: function() {
     // handle basic events        
-    this.listenFor('keydown keyup mousedown mouseup click dblclick mouseout mouseover mousemove selectstart'.w(), document)
+    this.listenFor('keydown keyup mousedown mouseup click dblclick mouseout mouseover mousemove selectstart contextmenu'.w(), document)
         .listenFor('resize focus blur'.w(), window);
 
     // handle special case for keypress- you can't use normal listener to block the backspace key on Mozilla
@@ -697,6 +697,11 @@ SC.RootResponder = SC.RootResponder.extend(
     return (result !==null ? YES: NO) && (this._mouseCanDrag ? NO : YES);
   },
   
-  drag: function() { return false; }
+  drag: function() { return false; },
+  
+  contextmenu: function(evt) {
+    var view = this.targetViewForEvent(evt) ; 
+    return this.sendEvent('contextMenu', evt, view);
+  }
   
 });

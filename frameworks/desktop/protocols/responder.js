@@ -86,6 +86,15 @@ SC.ResponderProtocol = {
   */
   selectStart: function(evt) {},
   
+  /**
+     Called when a contextmenu event is triggered. Used to disable contextmenu
+     per view.
+     
+     @param evt {SC.Event} the selectstart event
+     @returns {void}
+   */
+  contextMenu: function(evt) {},
+  
   // .......................................................................
   // Event Handlers
   //

@@ -75,6 +75,12 @@ SC.ANCHOR_CENTER = { centerX: 0, centerY: 0 };
 
 SC.LAYOUT_AUTO = 'auto';
 
+/**
+  Default property to disable or enable by default the contextMenu
+*/
+SC.CONTEXT_MENU_ENABLED = YES;
+
+
 /** @private - custom array used for child views */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
 SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
@@ -239,6 +245,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if the view until the view becomes visible in the window.
   */
   isVisibleInWindow: NO,
+  
+  /**
+    By default we don't disable the context Menu, by overriding this property
+    in your view you can enable disable the context menu
+  */
+  isContextMenuEnabled: function() {
+    return SC.CONTEXT_MENU_ENABLED;
+  }.property(),
   
   /**
     Recomputes the isVisibleInWindow property based on the visibility of the 
@@ -2404,6 +2418,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   selectStart: function(evt) {
     return this.get('isTextSelectable');
+  },
+  
+  /**
+    Used to block the contextMenu per view.
+   
+    @param evt {SC.Event} the contextmenu event
+    @returns YES if the contextmenu can show up
+  */
+  contextMenu: function(evt) {
+    if(!this.get('isContextMenuEnabled')) evt.stop();
+    return true;
   }
   
 });
