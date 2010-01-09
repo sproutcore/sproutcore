@@ -1328,6 +1328,7 @@ SC.logChange = function logChange(target, key, value) {
 SC.mixin(SC, {
   get: function(object, key) {
     if (!object) return undefined;
+    if (key === undefined) return this[object];
     if (object.get) return object.get(key);
     return object[key];
   }

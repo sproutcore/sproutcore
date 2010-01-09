@@ -126,6 +126,12 @@ test("should return undefined if the provided object is undefined", function() {
   equals(SC.get(undefined, 'key'), undefined);
 });
 
+test("should work when object is SC (used in SC.objectForPropertyPath)", function() {
+  equals(SC.objectForPropertyPath('SC.RunLoop'), SC.RunLoop);
+  equals(SC.get('RunLoop'), SC.RunLoop);
+  equals(SC.get(SC, 'RunLoop'), SC.RunLoop);
+});
+
 // ..........................................................
 // SET()
 // 
