@@ -195,11 +195,25 @@ SC.ScrollerView = SC.View.extend({
 
   mouseDown: function(evt) {
     var target = evt.target;
-    if (target.className.indexOf('thumb') >= 0 || target.parentElement.className.indexOf('thumb') >= 0) {
-      this._thumbOffset = this.convertFrameFromView({ y: evt.pageY }).y - this._top ;
+    if (target.className.indexOf('thumb') >= 0 || target.parentNode.className.indexOf('thumb') >= 0) {
+      this._thumbOffset = this.convertFrameFromView({ y: evt.pageY }).y - this._sc_thumbPos ;
       this._startY = evt.pageY;
-      this._startTop = this._top;
+      this._startTop = this._sc_thumbPos;
       return YES;
+    } else if (SC.__BUTTON_UP__) {
+
+    } else if (SC.__BUTTON_DOWN__) {
+
+    } else {
+      // Page up/down
+      var top = this._sc_thumbPos,
+          f = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
+      var h = this.get('frame').height;
+      if (f.y < top) {
+        this.decrementProperty('value',h);
+      } else {
+        this.incrementProperty('value', h);
+      }
     }
   },
   
