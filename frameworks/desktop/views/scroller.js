@@ -7,7 +7,7 @@
 
 /** Vary based on current platform. */
 SC.NATURAL_SCROLLER_THICKNESS = 16;
-
+SC.LOG_SCROLLER_UPDATES = NO;
 /** @class
 
   Displays a horizontal or vertical scroller.  You will not usually need to
@@ -179,6 +179,17 @@ SC.ScrollerView = SC.View.extend({
             // layer.scrollLeft = v ;
             break ;
         }
+
+        if (SC.LOG_SCROLLER_UPDATES) {
+          var log = this.toString() + ".render() updated thumb position\n";
+          log += "---------------------------------\n";
+          log += "Value: "+v+"       Max: "+max+"\n";
+          log += "Frame: "+SC.stringFromRect(frame)+"\n";
+          log += "Percent: "+pct+"       Position: "+this._sc_thumbPos+"\n";
+          console.log(log);
+        }
+        // this._sc_scrollValue = v;
+      }
     }
   },
 
