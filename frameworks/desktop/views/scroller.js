@@ -43,10 +43,10 @@ SC.ScrollerView = SC.View.extend({
       if (val >= 0) {
         this._value = val ;
       }
-    } else {
-      var value = this._value || 0 ; // default value is at top/left
-      return Math.min(value, this.get('maximum')) ;
     }
+
+    var value = this._value || 0 ; // default value is at top/left
+    return Math.min(value, this.get('maximum')) ;
   }.property('maximum').cacheable(),
 
   /**
