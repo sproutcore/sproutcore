@@ -817,7 +817,7 @@ SC.mixin(SC.Animatable, {
   TRANSITION_CSS_EASE: "ease",
   TRANSITION_CSS_EASE_IN: "ease-in",
   TRANSITION_CSS_EASE_OUT: "ease-out",
-  TRANSITION_CSS_EASE_OUT: "ease-in-out",
+  TRANSITION_CSS_EASE_IN_OUT: "ease-in-out",
 
   // JavaScript-enabled
   TRANSITION_EASE: [0.25, 0.1, 0.25, 1.0],
