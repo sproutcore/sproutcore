@@ -237,7 +237,7 @@ SC.Animatable = {
       if (f)
       {
         if (i == "left") { l[i] = f.x; continue; }
-        else if (i == " top") { l[i] = f.y; continue; }
+        else if (i == "top") { l[i] = f.y; continue; }
         else if (i == "right") { l[i] = p.width - f.x - f.width; continue; }
         else if (i == "bottom") { l[i] = p.height - f.y - f.height; continue; }
         else if (i == "width") { l[i] = f.width; continue; }
