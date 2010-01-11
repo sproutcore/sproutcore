@@ -8,10 +8,12 @@ module("Animatable", {
   setup: function() {
     view = SC.View.create(SC.Animatable, { 
       layout: { left: 100, top: 100, height: 100, width: 100 },
+      style: { opacity: .5 },
       transitions: {
         left: 0.25,
         top: { duration: 0.35 },
-        width: { duration: 0.2, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
+        width: { duration: 0.2, timing: SC.Animatable.TRANSITION_EASE_IN_OUT },
+        style: { opacity: 1 }
       }
     });
     
@@ -63,3 +65,26 @@ test("animatable should handle concatenated transitions properly", function(){
   equals(width["timing"], SC.Animatable.TRANSITION_EASE_IN_OUT, "SC.Animatable.TRANSITION_EASE_IN_OUT for width.");
 });
 
+test("animatable handler for layer update should ensure both layout and styles are set in the 'current style'.", function() {
+  var original_transition_enabled = SC.Animatable.enableCSSTransitions;
+  SC.Animatable.enableCSSTransitions = NO;
+  
+  // check current style (should be none yet)
+  var current = view.getCurrentJavaScriptStyles();
+  equals(current, null, "There should be no current style yet.");
+  
+  // create the layer
+  view.createLayer();
+  view.updateLayer();
+  
+  // check again. Now, we should have a style
+  current = view.getCurrentJavaScriptStyles();
+  ok(!SC.none(current), "There now SHOULD be a current JS style.");
+  
+  // and now, make sure we have both style AND layout set properly.
+  equals(current["opacity"], .5, "opacity should be .5");
+  equals(current["left"], 100, "left should be 100");
+  
+  // go back to the beginning
+  SC.Animatable.enableCSSTransitions = original_transition_enabled;
+});
