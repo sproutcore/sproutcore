@@ -17,6 +17,7 @@ SC.STRING_HUMANIZE_REGEXP = (/[\-_]/g);
 SC.STRING_TRIM_REGEXP = (/^\s+|\s+$/g);
 SC.STRING_TRIM_LEFT_REGEXP = (/^\s+/g);
 SC.STRING_TRIM_RIGHT_REGEXP = (/\s+$/g);
+SC.STRING_REGEXP_ESCAPED_REGEXP = (/([\\\.\+\*\?\[\^\]\$\(\)\{\}\=\!\<\>\|\:])/g);
 
 /**
   @namespace
@@ -221,6 +222,19 @@ SC.String = {
   */
   humanize: function() {
     return this.decamelize().replace(SC.STRING_HUMANIZE_REGEXP,' ') ;
+  },
+  
+  /**
+    Will escape a string so it can be securely used in a regular expression.
+    
+    Useful when you need to use user input in a regular expression without
+    having to worry about it breaking code if any reserved regular expression 
+    characters are used.
+    
+    @returns {String} the string properly escaped for use in a regexp.
+  */
+  escapeForRegExp: function() {
+    return this.replace(SC.STRING_REGEXP_ESCAPED_REGEXP, "\\$1");
   },
   
   /**
