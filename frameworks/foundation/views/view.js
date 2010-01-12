@@ -248,7 +248,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   
   /**
    By default we don't disable the context menu. Overriding this property
-   can enable disable the context menu per view.
+   can enable/disable the context menu per view.
   */
   isContextMenuEnabled: function() {
     return SC.CONTEXT_MENU_ENABLED;
