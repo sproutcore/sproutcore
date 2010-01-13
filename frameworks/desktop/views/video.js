@@ -24,7 +24,7 @@ SC.VideoView = SC.View.extend({
   videoHeight:0,
   
   time: '00:00/00:00',
-  degradeList: ['quicktime', 'flash'],
+  degradeList: ['video','quicktime', 'flash'],
   
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen;
