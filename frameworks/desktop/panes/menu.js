@@ -76,6 +76,16 @@ SC.MenuPane = SC.PickerPane.extend(
   itemIconKey: 'icon',
 
   /** 
+    The property holds the item value which is should come default selected
+    when menu is popedup.
+
+    @property
+    @type Object
+    @default null
+  */
+  defaultSelectedItemValue: null,
+
+  /** 
     The width for each menu item and ultimately the menu itself.
 
     @type String
@@ -404,7 +414,7 @@ SC.MenuPane = SC.PickerPane.extend(
   generateMenuItems: function(items) {
     if(!this.get('isEnabled')) return ;
     var item, itemAction, menuItemNumber, itemView, itemHeight, itemWidth, 
-      menuItemViews = [], len, content, idx, isCheckbox;
+      menuItemViews = [], len, content, idx, value, defaultSelectedItemValue;
     len = items.length ;
     content = SC.makeArray(items) ;
     for (idx = 0; idx < len; ++idx) {
@@ -413,7 +423,7 @@ SC.MenuPane = SC.PickerPane.extend(
       menuItemNumber = item.get('menuItemNumber') ;
       itemHeight = item.get('itemHeight') ;
       itemWidth = this.get('itemWidth') ;
-      isCheckbox = item.get('isCheckbox') ;
+      value = item.get('value') ;
       itemView = this.createChildView(
         this.exampleView, {
           owner : itemView,
@@ -437,11 +447,11 @@ SC.MenuPane = SC.PickerPane.extend(
           controlSize: this.get('controlSize'),
           content : SC.Object.create({
             title : item.get('title'),
-            value : item.get('value'),
+            value : value,
             icon : item.get('icon'),
             separator : item.get('isSeparator'),
             action : itemAction,
-            checkbox : isCheckbox,
+            checkbox : item.get('isCheckbox'),
             shortCut : item.get('isShortCut'),
             branchItem : item.get('isBranch'),
             subMenu : item.get('subMenu')
@@ -449,7 +459,9 @@ SC.MenuPane = SC.PickerPane.extend(
         rootElementPath : [menuItemNumber]
       });
       menuItemViews.push(itemView) ;
-      if(isCheckbox) {
+      defaultSelectedItemValue = this.get('defaultSelectedItemValue') ;
+      if(!SC.none(defaultSelectedItemValue)
+          && value === defaultSelectedItemValue) {
         this.set('currentSelectedMenuItem',itemView) ;
       }
     }

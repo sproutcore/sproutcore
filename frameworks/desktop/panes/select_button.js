@@ -112,14 +112,6 @@ SC.SelectButtonView = SC.ButtonView.extend(
   itemList: [],
 
   /**
-    Current selected menu item
-
-    @property
-    @default null
-  */
-  currentSelItem: null,
-
-  /**
     Property to set the index of the selected menu item. This in turn
     is used to calculate the preferMatrix.
 
@@ -458,7 +450,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
   {
     var buttonLabel, menuWidth, scrollWidth, lastMenuWidth, offsetWidth,
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
-      currSel, itemList, menuControlSize, menuHeightPadding, customView,
+      value, itemList, menuControlSize, menuHeightPadding, customView,
       customMenuView, menu, itemsLength;
       
     buttonLabel = this.$('.sc-button-label')[0] ;
@@ -512,7 +504,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     this.set('lastMenuWidth',lastMenuWidth) ;
-    currSel = this.get('currentSelItem') ;
+    value = this.get('value') ;
     itemList = this.get('itemList') ;
     menuControlSize = this.get('controlSize') ;
     menuHeightPadding = this.get('menuPaneHeightPadding') ;
@@ -546,7 +538,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     // no menu to toggle... bail...
     if (!menu) return NO ;
     menu.popup(this, this.preferMatrix) ;
-    menu.set('currentSelectedMenuItem', currSel) ;
+    menu.set('defaultSelectedItemValue', value) ;
     return YES ;
   },
 
@@ -590,8 +582,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
 
     // set the icon, currentSelectedItem and itemIdx
-    button.set('icon', this.get('icon')).set('currentSelItem', currSel).
-      set('itemIdx', itemIdx) ;
+    button.set('icon', this.get('icon')).set('itemIdx', itemIdx) ;
   },
 
   /**
