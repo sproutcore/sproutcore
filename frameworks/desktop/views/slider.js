@@ -100,7 +100,7 @@ SC.SliderView = SC.View.extend(SC.Control,
     }
     
     // determine the percent across
-    value = Math.floor((value - min) / (max - min) * 100);
+    if(value!==0) value = Math.floor((value - min) / (max - min) * 100);
     
     if(firstTime) {
       var blankImage = SC.BLANK_IMAGE_URL;
