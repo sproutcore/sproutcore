@@ -22,9 +22,10 @@ SC.VideoView = SC.View.extend({
   canPlay: NO, //can the video be played
   videoWidth:0,
   videoHeight:0,
+  captionsEnabled: NO,
   
   time: '00:00/00:00',
-  degradeList: ['video','quicktime', 'flash'],
+  degradeList: ['video', 'quicktime', 'flash'],
   
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen;
@@ -37,19 +38,29 @@ SC.VideoView = SC.View.extend({
             context.attr('src', this.src);
             context.attr('poster', this.poster);
          //   context.push('video tag not supported by your browser');
+            this.loaded='video';
+            return;
           }
-          this.loaded='video';
-          return;
+          break;
         case "quicktime":
           var hasQT=false;
-          if (navigator.plugins) {
-            for (j=0, pluginsLen = navigator.plugins.length; j < pluginsLen; j++ ) {
-              if (navigator.plugins[j].name.indexOf("QuickTime") >= 0) hasQT = true; 
-            }
-            if(!hasQT) break;
-          }
+          // if (navigator.plugins) {
+          //             for (j=0, pluginsLen = navigator.plugins.length; j < pluginsLen; j++ ) {
+          //               if (navigator.plugins[j].name.indexOf("QuickTime") >= 0) hasQT = true; 
+          //             }
+          //             if(!hasQT) break;
+          //           }
           var id = SC.guidFor(this);
+          if(SC.browser.msie){
+            context.push('<object id="qt_event_source" ');
+            context.push('classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" ');         
+            context.push('codebase="http://www.apple.com/qtactivex/qtplugin.cab#version=7,2,1,0"> ');
+            context.push('</object> ');
+          }
           context.push('<object width="100%" height="100%"');
+          if(SC.browser.msie){
+            context.push('style="behavior:url(#qt_event_source);"');
+          }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" ');
           context.push('id="object_'+id+'" ');
           context.push('codebase="http://www.apple.com/qtactivex/qtplugin.cab">');
@@ -64,6 +75,7 @@ SC.VideoView = SC.View.extend({
           context.push('autostart="false" ');
           context.push('EnableJavaScript="true" ');
           context.push('postdomevents="true" ');
+          context.push('controller="false" ');
           context.push('pluginspage="www.apple.com/quicktime/download">');
           context.push('</embed></object>');
           context.push('</object>');
@@ -76,7 +88,7 @@ SC.VideoView = SC.View.extend({
         default:
           context.push('video is not supported by your browser');
           return;
-      }
+        }
       }
     }
     else{
@@ -91,137 +103,145 @@ SC.VideoView = SC.View.extend({
     if(this.loaded==="video"){
       videoElem = this.$()[0];
       this.set('videoObject', videoElem);
-      videoElem.addEventListener("durationchange", function () {
+      SC.Event.add(videoElem, 'durationchange', this, function () {
         SC.RunLoop.begin();
         view.set('duration', videoElem.duration);
         SC.RunLoop.end();
-      }, false);
-      videoElem.addEventListener("timeupdate", function () {
-        SC.RunLoop.begin();
-        view.set('currentTime', videoElem.currentTime);
-        view.updateTime();
-        SC.RunLoop.end();
-      }, false);
-      videoElem.addEventListener("loadstart", function () {
+      }) ;
+      SC.Event.add(videoElem, 'timeupdate', this, function () {
+          SC.RunLoop.begin();
+          view.set('currentTime', videoElem.currentTime);
+          view.updateTime();
+          SC.RunLoop.end();
+      }) ;
+      SC.Event.add(videoElem, 'loadstart', this, function () {
         SC.RunLoop.begin();
         view.set('volume', videoElem.volume);
         console.log('loadstart');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("progress", function (ev) {
+      });     
+      SC.Event.add(videoElem, 'progress', this, function () {
         SC.RunLoop.begin();
         if(this.lengthComputable) view.set('size', ev.total);
-        view.set('loadedData', ev.loaded);
-        console.log('progress '+ev.loaded+","+ev.total );
+         try{
+            var trackCount=view.GetTrackCount(),i;
+            for(i=1; i<=trackCount;i++){
+              if("Closed Caption"===this.GetTrackType(i)){
+                view._closedCaptionTrackIndex=i;
+              }
+            }
+          }catch(f){}
+        //view.set('loadedData', ev.loaded);
+        //console.log('progress '+ev.loaded+","+ev.total );
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("suspend", function () {
+      });     
+      SC.Event.add(videoElem, 'suspend', this, function () {
         SC.RunLoop.begin();
         console.log('suspend');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("load", function () {
+      });     
+      SC.Event.add(videoElem, 'load', this, function () {
         SC.RunLoop.begin();
         console.log('load');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("abort", function () {
+      });     
+      SC.Event.add(videoElem, 'abort', this, function () {
         SC.RunLoop.begin();
         console.log('abort');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("error", function () {
+      });     
+      SC.Event.add(videoElem, 'error', this, function () {
         SC.RunLoop.begin();
         console.log('error');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("loadend", function () {
+      });     
+      SC.Event.add(videoElem, 'loadend', this, function () {
         SC.RunLoop.begin();
         console.log('loadend');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("emptied", function () {
+      });     
+      SC.Event.add(videoElem, 'emptied', this, function () {
         SC.RunLoop.begin();
         console.log('emptied');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("stalled", function () {
+      });     
+      SC.Event.add(videoElem, 'stalled', this, function () {
         SC.RunLoop.begin();
         console.log('stalled');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("play", function () {
+      });     
+      SC.Event.add(videoElem, 'play', this, function () {
         SC.RunLoop.begin();
         view.set('paused', NO);
         console.log('play');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("pause", function () {
+      });     
+      SC.Event.add(videoElem, 'pause', this, function () {
         SC.RunLoop.begin();
         view.set('paused', YES);
         console.log('pause');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("loadedmetadata", function () {
+      });     
+      SC.Event.add(videoElem, 'loadedmetadata', this, function () {
         SC.RunLoop.begin();
         view.set('videoWidth', videoElem.videoWidth);
         view.set('videoHeight', videoElem.videoHeight);
         
         console.log('loadedmetadata');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("loadeddata", function () {
+      });     
+      SC.Event.add(videoElem, 'loadeddata', this, function () {
         SC.RunLoop.begin();
         console.log('loadeddata');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("waiting", function () {
+      });     
+      SC.Event.add(videoElem, 'waiting', this, function () {
         SC.RunLoop.begin();
         console.log('waiting');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("playing", function () {
+      });     
+      SC.Event.add(videoElem, 'playing', this, function () {
         SC.RunLoop.begin();
         console.log('playing');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("canplay", function () {
+      });     
+      SC.Event.add(videoElem, 'canplay', this, function () {
         SC.RunLoop.begin();
         view.set('canPlay', YES);
         console.log('canplay');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("canplaythrough", function () {
+      });     
+      SC.Event.add(videoElem, 'canplaythrough', this, function () {
         SC.RunLoop.begin();
         console.log('canplaythrough');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("seeking", function () {
+      });     
+      SC.Event.add(videoElem, 'seeking', this, function () {
         SC.RunLoop.begin();
         console.log('seeking');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("seeked", function () {
+      });     
+      SC.Event.add(videoElem, 'seeked', this, function () {
         SC.RunLoop.begin();
         console.log('seeked');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("ended", function () {
+      });     
+      SC.Event.add(videoElem, 'ended', this, function () {
         SC.RunLoop.begin();
         view.set('ended', YES);
         console.log('ended');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("ratechange", function () {
+      });     
+      SC.Event.add(videoElem, 'ratechange', this, function () {
         SC.RunLoop.begin();
         console.log('ratechange');
         SC.RunLoop.end();
-      }, false);     
-      videoElem.addEventListener("volumechange", function () {
+      });     
+      SC.Event.add(videoElem, 'volumechange', this, function () {
         SC.RunLoop.begin();
         console.log('volumechange');
         SC.RunLoop.end();
-      }, false);     
+      });     
       
     }
     
@@ -229,83 +249,103 @@ SC.VideoView = SC.View.extend({
   
   didAppendToDocument :function(){
     var vid=this._getVideoObject();
+    try{
+      vid.GetDuration();
+    }catch(e){
+      console.log('loaded fail trying later');
+      this.invokeLater(this.didAppendToDocument, 100);
+      return;
+    }
+    
+    var videoElem = this.$()[0];
     var view=this;
+    
     if(this.loaded==="quicktime"){
       this.set('videoObject', vid);
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-      console.log('duration set'+vid.GetDuration()/vid.GetTimeScale());
       view.set('volume', vid.GetVolume()/256);
       this.updateTime();
-      vid.addEventListener("qt_durationchange", function () {
+      SC.Event.add(videoElem, 'qt_durationchange', this, function () {
         SC.RunLoop.begin();
         view.set('duration', vid.GetDuration()/vid.GetTimeScale());
         console.log('qt_durationchange');
         SC.RunLoop.end();
-      }, false);
-      vid.addEventListener("qt_timechanged", function () {
-        SC.RunLoop.begin();
-        view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-        console.log('qt_timechanged');
-        view.updateTime();
-        SC.RunLoop.end();
-      }, false);
-      vid.addEventListener("qt_begin", function () {
+      });
+      // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
+        // SC.RunLoop.begin();
+        //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+        //         console.log('qt_timechanged');
+        //         view.updateTime();
+        //         SC.RunLoop.end();
+      // });
+      SC.Event.add(videoElem, 'qt_begin', this, function () {
         SC.RunLoop.begin();
         view.set('volume', vid.GetVolume()/256);
         console.log('qt_begin');
         SC.RunLoop.end();
-      }, false);
-      vid.addEventListener("qt_loadedmetadata", function () {
+      });
+      SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
         SC.RunLoop.begin();
         view.set('duration', vid.GetDuration()/vid.GetTimeScale());
         console.log('qt_loadedmetadata');
         SC.RunLoop.end();
-      }, false);
-      vid.addEventListener("qt_loadedfirstframe", function () {
+      });
+      SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
         console.log('qt_loadedfirstframe');
-      }, false);
-      vid.addEventListener("qt_canplay", function () {
+      });
+      SC.Event.add(videoElem, 'qt_canplay', this, function () {
         SC.RunLoop.begin();
         view.set('canPlay', YES);
         console.log('qt_canplay');
         SC.RunLoop.end();
-      }, false);
-      vid.addEventListener("qt_canplaythrough", function () {
+      });
+      SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
         console.log('qt_canplaythrough');
-      }, false);
-      vid.addEventListener("qt_load", function () {
+      });
+      SC.Event.add(videoElem, 'qt_load', this, function () {
         console.log('qt_load');
-      }, false);
-      vid.addEventListener("qt_ended", function () {
+      });
+      SC.Event.add(videoElem, 'qt_ended', this, function () {
         console.log('qt_ended');
-      }, false);
-      vid.addEventListener("qt_error", function () {
+      });
+      SC.Event.add(videoElem, 'qt_error', this, function () {
         console.log('qt_error');
-      }, false);
-      vid.addEventListener("qt_pause", function () {
+      });
+      SC.Event.add(videoElem, 'qt_pause', this, function () {
         SC.RunLoop.begin();
+        view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+        view.updateTime();
         view.set('paused', YES);
         console.log('qt_pause');
-      }, false);
-      vid.addEventListener("qt_play", function () {
+      });
+      SC.Event.add(videoElem, 'qt_play', this, function () {
         SC.RunLoop.begin();
+        view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+        view.updateTime();
         view.set('paused', NO);
         console.log('qt_play');
-      }, false);
-      vid.addEventListener("qt_progress", function () {
+      });
+      SC.Event.add(videoElem, 'qt_progress', this, function () {
         console.log('qt_progress');
-      }, false);
-      vid.addEventListener("qt_waiting", function () {
+      });
+      SC.Event.add(videoElem, 'qt_waiting', this, function () {
         console.log('qt_waiting');
-      }, false);
-      vid.addEventListener("qt_stalled", function () {
+      });
+      SC.Event.add(videoElem, 'qt_stalled', this, function () {
         console.log('qt_stalled');
-      }, false);
-      vid.addEventListener("qt_volumechange", function () {
+      });
+      SC.Event.add(videoElem, 'qt_volumechange', this, function () {
         console.log('qt_volumechange');
-      }, false);
+      });
     }
   },
+  
+  _qtTimer:function(){
+    if(!this.get('paused')){
+      this.incrementProperty('currentTime');
+      this.invokeLater(this._qtTimer, 1000);
+    }
+  }.observes('paused'),
   
   seek:function(){
     var timeInSecs, totaltimeInSecs, formattedTime;
@@ -369,6 +409,17 @@ SC.VideoView = SC.View.extend({
   },
   
   closedCaption:function(){
+    try{
+      if(this.get('captionsEnabled')){
+        if(this._closedCaptionTrackIndex){
+          this.SetTrackEnabled(this._closedCaptionTrackIndex,true);
+          this.set('captionsEnabled', YES);
+        }
+      }else{
+        this.SetTrackEnabled(this._closedCaptionTrackIndex,false);
+        this.set('captionsEnabled', NO);
+      }   
+    }catch(a){}
     return;
   },
   
