@@ -647,9 +647,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
-    // handle return and escape.  this way they can be passed on to the
+    // Handle return and escape.  this way they can be passed on to the
     // responder chain.
-    if ((evt.which === 13) && !this.get('isTextArea')) return NO ;
+    // If the event is triggered by a return while entering IME input,
+    // don't got through this path.
+    if ((evt.which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) return NO ;
     if (evt.which === 27) return NO ;
 
     // handle tab key
@@ -672,7 +674,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   keyUp: function(evt) {
-    
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.

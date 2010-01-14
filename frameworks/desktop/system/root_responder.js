@@ -400,6 +400,14 @@ SC.RootResponder = SC.RootResponder.extend(
   keydown: function(evt) {
     if (SC.none(evt)) return YES;
     
+    // Fix for IME input (japanese, mandarin). 
+    // If the KeyCode is 229 wait for the keyup and
+    // trigger a keyDown if it is is enter onKeyup.
+    if (evt.keyCode===229){
+      this._IMEInputON = YES;
+      return YES;
+    }
+    
     // Firefox does NOT handle delete here...
     if (SC.browser.mozilla && (evt.which === 8)) return true ;
     
@@ -423,6 +431,7 @@ SC.RootResponder = SC.RootResponder.extend(
       
       // Arrow keys are handled in keypress for firefox
       if (evt.keyCode>=37 && evt.keyCode<=40 && SC.browser.mozilla) return YES;
+     
       
       ret = this.sendEvent('keyDown', evt) ;
       
@@ -473,6 +482,14 @@ SC.RootResponder = SC.RootResponder.extend(
     // send event for modifier key changes, but only stop processing if this is only a modifier change
     var ret = this._handleModifierChanges(evt);
     if (this._isModifierKey(evt)) return ret;
+    // Fix for IME input (japanese, mandarin). 
+    // If the KeyCode is 229 wait for the keyup and
+    // trigger a keyDown if it is is enter onKeyup.
+    if (this._IMEInputON && evt.keyCode===13){
+      evt.isIMEInput = YES;
+      this.sendEvent('keyDown', evt);
+      this._IMEInputON = NO;
+    } 
     return this.sendEvent('keyUp', evt) ? evt.hasCustomEventHandling:YES;
   },
   
