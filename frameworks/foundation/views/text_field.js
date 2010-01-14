@@ -477,24 +477,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   //
 
   didCreateLayer: function() {
-    if(!this.get('isTextArea')){
-      sc_super(); 
-      this._addTextAreaEvents();
-    } 
-  },
-  
-  
-  didAppendToDocument: function() {
-    // Turns out that in safari and firefox you can attach events to a textarea
-    // only if it has been appended to the DOM or if you did did it during
-    // loading time. For input tags is the other way around. I tested in all
-    // browsers and if I add the event for input tag before being visible it works
-    // fine, and if I add the event after the textarea is visible then the 
-    // textarea works. In IE works fine both ways.
-    if(this.get('isTextArea')){
-      sc_super();
-      this._addTextAreaEvents();
-    }
+    sc_super(); 
+    this.invokeLast(this._addTextAreaEvents);
   },
   
   _addTextAreaEvents: function() {
