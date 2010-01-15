@@ -168,6 +168,7 @@ SC.Button = {
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
+    
     if (icon) {
       var blank = SC.BLANK_IMAGE_URL;
 
