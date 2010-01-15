@@ -478,7 +478,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   didCreateLayer: function() {
     sc_super(); 
-    this.invokeLast(this._addTextAreaEvents);
+    // For some strange reason if we add focus/blur events to textarea
+    // inmediately they won't work. However if I add them at the end of the
+    // runLoop it works fine.
+    if(this.get('isTextArea')) this.invokeLast(this._addTextAreaEvents);
+    else this._addTextAreaEvents();
   },
   
   _addTextAreaEvents: function() {
