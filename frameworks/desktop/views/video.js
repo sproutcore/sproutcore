@@ -25,7 +25,7 @@ SC.VideoView = SC.View.extend({
   captionsEnabled: NO,
   
   time: '00:00/00:00',
-  degradeList: ['video', 'quicktime', 'flash'],
+  degradeList: ['video','quicktime', 'flash'],
   
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen;
@@ -39,6 +39,7 @@ SC.VideoView = SC.View.extend({
             context.attr('poster', this.poster);
          //   context.push('video tag not supported by your browser');
             this.loaded='video';
+            console.log('loaded using video tag');
             return;
           }
           break;
@@ -59,6 +60,7 @@ SC.VideoView = SC.View.extend({
           }
           context.push('<object width="100%" height="100%"');
           if(SC.browser.msie){
+            console.log('adding style behavior');
             context.push('style="behavior:url(#qt_event_source);"');
           }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" ');
@@ -69,7 +71,7 @@ SC.VideoView = SC.View.extend({
           context.push('<param name="loop" value="false"/>');
           context.push('<param name="controller" value="false"/>');
           context.push('<param name="postdomevents" value="true"/>');
-          context.push('<embed width="100%" height="100%"');
+          context.push('<embed width="100%" height="100%" ');
           context.push('name="object_'+id+'" ');
           context.push('src="'+this.src+'" ');
           context.push('autostart="false" ');
@@ -81,9 +83,11 @@ SC.VideoView = SC.View.extend({
           context.push('</object>');
           i=listLen;
           this.loaded='quicktime';
+          console.log('loaded using quicktime');
           return;
         case "flash":
           this.loaded='flash';
+          console.log('loaded using flash');
           return;
         default:
           context.push('video is not supported by your browser');
@@ -249,18 +253,17 @@ SC.VideoView = SC.View.extend({
   
   didAppendToDocument :function(){
     var vid=this._getVideoObject();
-    try{
-      vid.GetDuration();
-    }catch(e){
-      console.log('loaded fail trying later');
-      this.invokeLater(this.didAppendToDocument, 100);
-      return;
-    }
-    
     var videoElem = this.$()[0];
     var view=this;
     
     if(this.loaded==="quicktime"){
+      try{
+        vid.GetDuration();
+      }catch(e){
+        console.log('loaded fail trying later');
+        this.invokeLater(this.didAppendToDocument, 100);
+        return;
+      }
       this.set('videoObject', vid);
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
       view.set('volume', vid.GetVolume()/256);
@@ -341,7 +344,7 @@ SC.VideoView = SC.View.extend({
   },
   
   _qtTimer:function(){
-    if(!this.get('paused')){
+    if(this.loaded==='quicktime' && !this.get('paused')){
       this.incrementProperty('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
