@@ -44,7 +44,6 @@ SC.Number = /** @lends Number */ {
     if (!decimalPlace) decimalPlace = 0;
     var factor = Math.pow(10, decimalPlace);
     n = this.valueOf();
-    SC.Logger.log(n, factor, n * factor, Math.round(n * factor), Math.round(n * factor) / factor);
     return Math.round(n * factor) / factor;
   }
   
