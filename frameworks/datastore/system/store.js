@@ -2164,9 +2164,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     query.  This will put the query into a READY state if it was loading.
     
     Note that if the query is a REMOTE query, then you must separately load 
-    the results into the query using loadQuery().  If the query is LOCAL, then
-    the query will update automatically with any new records you added to the
-    store.
+    the results into the query using loadQueryResults().  If the query is 
+    LOCAL, then the query will update automatically with any new records you 
+    added to the store.
     
     @param {SC.Query} query the query you fetched
     @returns {SC.Store} receiver

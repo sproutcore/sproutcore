@@ -30,7 +30,10 @@ SC.TabView = SC.View.extend(
   // ..........................................................
   // PROPERTIES
   // 
-  
+
+ /** 
+    Set nowShowing with the page you want to display.
+  */
   nowShowing: null,
   
   items: [],
