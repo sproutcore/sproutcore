@@ -390,7 +390,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
       // Render the hint.
       context.push('<span class="sc-hint">', hint, '</span>') ;
-      
+      value = this.get('escapeHTML')?SC.RenderContext.escapeHTML(value):value; 
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea name="', name, '" ', disabled, '>', value, '</textarea></span>') ;
