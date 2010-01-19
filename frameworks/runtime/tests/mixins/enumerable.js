@@ -353,6 +353,17 @@ test("should filterProperty with default bool", function() {
   }
 });
 
+test("should groupBy a given property", function() {
+  var src, ary2 = enumerables ;
+  for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
+    src = ary2[idx2] ;
+    var filtered = src.groupBy("gender") ;
+    equals(filtered.length, 2) ;
+    equals(filtered[1][0].first, "Jenna") ;
+  }
+});
+
+
 test("everyProperty should return true if all properties macth", function() {
   var src, ary2 = enumerables ;
   for (var idx2=0, len2=ary2.length; idx2<len2; idx2++) {
