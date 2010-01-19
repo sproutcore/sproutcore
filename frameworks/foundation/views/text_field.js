@@ -687,6 +687,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     } else {
       // This fixes the double click issue in firefox
       if(SC.browser.mozilla) this.$input()[0].focus();
+      if(SC.browser.msie) this.$input()[0].focus();
       return sc_super();
     }
   },
