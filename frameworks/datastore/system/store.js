@@ -1711,7 +1711,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
   */
   loadRecord: function(recordType, dataHash, id) {
     var K       = SC.Record,
-        ret, primaryKey, dataHash, storeKey;
+        ret, primaryKey, storeKey;
         
     // save lookup info
     recordType = recordType || SC.Record;
