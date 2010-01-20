@@ -129,6 +129,49 @@ test("calling storeDidChangeStoreKeys() to remove a record", function() {
 });
 
 
+// ..........................................................
+// SPECIAL CASES
+// 
+
+var json2, foo, bar ;
+
+module("SC.RecordArray core methods", {
+  setup: function() {
+    // setup dummy store
+    store = SC.Store.create();
+
+    storeKey = SC.Record.storeKeyFor('foo');
+    json = {  guid: "foo", name: "foo" };
+    store.writeDataHash(storeKey, json, SC.Record.READY_CLEAN); 
+    foo = store.materializeRecord(storeKey);
+    equals(foo.get('name'), 'foo', 'record should have json');
+
+    storeKey = SC.Record.storeKeyFor('bar');
+    json2 = { guid: "bar", name: "bar" };
+    store.writeDataHash(storeKey, json2, SC.Record.READY_CLEAN); 
+    bar = store.materializeRecord(storeKey);
+    equals(bar.get('name'), 'bar', 'record should have json');
+    
+    // get record array.
+    query = SC.Query.create({ recordType: SC.Record, orderBy: 'name' });
+    recs = store.find(query);
+  }
+});
+
+test("local query should notify changes", function() {
+  
+    // note: important to retrieve records from RecordArray first to prime
+    // any cache
+    same(recs.mapProperty('id'), ['bar', 'foo'], 'PRECOND - bar should appear before foo');
+
+    SC.stopIt = YES;
+    
+    SC.RunLoop.begin();
+    bar.set('name', 'zzbar');
+    SC.RunLoop.end(); // should resort record array
+
+    same(recs.mapProperty('id'), ['foo', 'bar'], 'order of records should change');
+});
 
 
 

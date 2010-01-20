@@ -531,6 +531,12 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
     
     // only resort and update if we did change
     if (didChange) {
+      
+      // storeKeys must be a new instance because orderStoreKeys() works on it
+      if (storeKeys && (storeKeys===oldStoreKeys)) {
+        storeKeys = storeKeys.copy();
+      }
+      
       storeKeys = SC.Query.orderStoreKeys(storeKeys, query, store);
       if (SC.compare(oldStoreKeys, storeKeys) !== 0){
         this.set('storeKeys', SC.clone(storeKeys)); // replace content
