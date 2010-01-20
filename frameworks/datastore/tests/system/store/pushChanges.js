@@ -8,7 +8,7 @@
 var store, storeKey, json;
 module("SC.Store#pushChanges", {
   setup: function() {
-    
+    SC.RunLoop.begin();
     store = SC.Store.create();
     
     json = {
@@ -34,27 +34,27 @@ module("SC.Store#pushChanges", {
 
     storeKey6 = SC.Store.generateStoreKey();
     store.writeDataHash(storeKey6, json, SC.Record.BUSY_LOADING);
+    SC.RunLoop.end();
   }
 });
 
 test("Do a pushRetrieve and check if there is conflicts", function() {
   var res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey1);
-  ok(res, "There is no conflict, pushRetrieve was succesful.");
+  equals(res, storeKey1, "There is no conflict, pushRetrieve was succesful.");
   res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey4);
   ok(!res, "There is a conflict, because of the state, this is expected.");
-
 });
 
 test("Do a pushDestroy and check if there is conflicts", function() {
   var res = store.pushDestroy(SC.Record, undefined, storeKey2);
-  ok(res, "There is no conflict, pushDestroy was succesful.");
+  equals(res, storeKey2, "There is no conflict, pushDestroy was succesful.");
   res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey5);
   ok(!res, "There is a conflict, because of the state, this is expected.");
 });
 
 test("Issue a pushError and check if there is conflicts", function() {
   var res = store.pushError(SC.Record, undefined, SC.Record.NOT_FOUND_ERROR, storeKey3);
-  ok(res, "There is no conflict, pushError was succesful.");
+  equals(res, storeKey3, "There is no conflict, pushError was succesful.");
   res = store.pushRetrieve(SC.Record, undefined, undefined, storeKey6);
   ok(!res, "There is a conflict, because of the state, this is expected.");
 });
