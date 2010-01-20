@@ -81,7 +81,6 @@ SC.VideoView = SC.View.extend({
           context.push('pluginspage="www.apple.com/quicktime/download">');
           context.push('</embed></object>');
           context.push('</object>');
-          i=listLen;
           this.loaded='quicktime';
           console.log('loaded using quicktime');
           return;
