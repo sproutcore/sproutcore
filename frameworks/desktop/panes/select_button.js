@@ -274,6 +274,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @property {Number} heightPadding for menu pane.
   */
   menuPaneHeightPadding: 0,
+  
+  /**
+    This is a property to enable/disable focus rings in buttons.
+    For select_button we are making it a default. 
+
+    @default YES
+  */
+  supportFocusRing: YES,
 
   /**
     Left Alignment based on the size of the button

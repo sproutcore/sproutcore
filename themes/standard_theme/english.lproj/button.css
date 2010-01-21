@@ -320,6 +320,47 @@
 
 /* @end */
 
+/* @group focus ring */
+
+.sc-theme .sc-button-view.focus {
+  overflow: visible;
+}
+
+.sc-theme .sc-button-view div.focus-ring {
+  visibility: hidden;
+}
+
+.sc-theme .sc-button-view.focus div.focus-ring {
+  visibility: visible;
+  right: 0px;
+  top: 0px;
+  left: 0px;
+  bottom:0px;
+  position: absolute;
+}
+.sc-theme .sc-button-view.focus div.focus-ring div {
+  top: -2px;
+  bottom: -2px;
+  position: absolute;
+}
+
+.sc-theme .sc-button-view.focus div.focus-ring .focus-left {
+  left: -2px;
+  width: 2px;
+}
+
+.sc-theme .sc-button-view.focus div.focus-ring .focus-right {
+  right: -2px;
+  width: 2px;
+}
+
+.sc-theme .sc-button-view.focus div.focus-ring .focus-middle {
+  left: 0px;
+  right: 0px;
+}
+
+/* @end */
+
 
 
 /* @end */

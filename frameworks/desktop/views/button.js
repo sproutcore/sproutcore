@@ -119,6 +119,11 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   */
   target: null,
   
+  /** 
+    If YES, use a focus ring.
+  */
+  supportFocusRing: NO,
+  
   /**
     fakes a click... evt is optional.  
     
@@ -200,6 +205,12 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
        context = context.push("<span class='sc-button-inner' style = 'min-width:"+this.get('titleMinWidth')+"px'>");
       this.renderTitle(context, firstTime) ; // from button mixin
       context.push("</span>") ;
+      if(this.get('supportFocusRing')) {
+        context.push('<div class="focus-ring">'+
+                      '<div class="focus-left"></div>'+
+                      '<div class="focus-middle"></div>'+
+                      '<div class="focus-right"></div></div>');
+      }
     }else{
       this.renderTitle(context, firstTime) ;
     }
