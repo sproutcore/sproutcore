@@ -710,8 +710,17 @@ SC.RootResponder = SC.RootResponder.extend(
   _mouseCanDrag: YES,
   
   selectstart: function(evt) { 
-    var result = this.sendEvent('selectStart', evt, this.targetViewForEvent(evt));
-    return (result !==null ? YES: NO) && (this._mouseCanDrag ? NO : YES);
+    var targetView = this.targetViewForEvent(evt);
+    var result = this.sendEvent('selectStart', evt, targetView);
+    
+    // If the target view implements mouseDragged, then we want to ignore the
+    // 'selectstart' event.
+    if (targetView && targetView.respondsTo('mouseDragged')) {
+      return (result !==null ? YES: NO) && !this._mouseCanDrag;
+    }
+    else {
+      return (result !==null ? YES: NO);
+    }
   },
   
   drag: function() { return false; },
