@@ -4,7 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-
+/*globals ie7userdata */
 /**
   @class
   
@@ -64,34 +64,47 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {Object} read value
   */
   readDefault: function(keyName) {
-    var ret= undefined ;
+    var ret= undefined, userKeyName, localStorage, key, del;
     
     // namespace keyname
     keyName = this._normalizeKeyName(keyName);
-    var userKeyName = this._userKeyName(keyName);
+    userKeyName = this._userKeyName(keyName);
 
     // look into recently written values
     if (this._written) ret = this._written[userKeyName];
     
     // attempt to read from localStorage
-    var localStorage = window.localStorage ;
-    if (!localStorage && window.globalStorage) {
-      localStorage = window.globalStorage[window.location.hostname];
+    
+    if(SC.browser.msie=="7.0"){
+       localStorage=ie7userdata;
+       try{
+         localStorage.load("SC.UserDefaults");
+       }catch(e){}
+    }else{
+       localStorage = window.localStorage ;
+       if (!localStorage && window.globalStorage) {
+         localStorage = window.globalStorage[window.location.hostname];
+       }
     }
     if (localStorage) {
-      ret = localStorage[["SC.UserDefaults",userKeyName].join('@')];
+      key=["SC.UserDefaults",userKeyName].join('-at-');
+      if(SC.browser.msie=="7.0"){
+        ret=localStorage.getAttribute(key.replace(/\W/gi, ''));        
+      }else{
+        ret = localStorage[key];
+      }
       if (!SC.none(ret)) {
         try {
           ret = SC.json.decode(ret);
         } 
-        catch(e) {
+        catch(ex) {
           ret = undefined;
         }
       } else ret = undefined;
     }
     
     // if not found in localStorage, try to notify delegate
-    var del =this.delegate ;
+    del =this.delegate ;
     if (del && del.userDefaultsNeedsDefault) {
       ret = del.userDefaultsNeedsDefault(this, keyName, userKeyName);
     }
@@ -113,26 +126,39 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefault} receiver
   */
   writeDefault: function(keyName, value) {
+    var userKeyName, written, localStorage, key, del;
     
     keyName = this._normalizeKeyName(keyName);
-    var userKeyName = this._userKeyName(keyName);
+    userKeyName = this._userKeyName(keyName);
     
     // save to local hash
-    var written = this._written ;
+    written = this._written ;
     if (!written) written = this._written = {};
     written[userKeyName] = value ;
     
     // save to local storage
-    var localStorage = window.localStorage ;
-    if (!localStorage && window.globalStorage) {
-      localStorage = window.globalStorage[window.location.hostname];
+    
+    if(SC.browser.msie=="7.0"){
+       localStorage=ie7userdata;
+    }else{
+       localStorage = window.localStorage ;
+       if (!localStorage && window.globalStorage) {
+         localStorage = window.globalStorage[window.location.hostname];
+       }
     }
+    key=["SC.UserDefaults",userKeyName].join('-at-');
     if (localStorage) {
-      localStorage[["SC.UserDefaults",userKeyName].join('@')] = SC.json.encode(value);
+      var encodedValue = SC.json.encode(value);
+      if(SC.browser.msie=="7.0"){
+        localStorage.setAttribute(key.replace(/\W/gi, ''), encodedValue);
+        localStorage.save("SC.UserDefaults");
+      }else{
+        localStorage[key] = encodedValue;
+      }
     }
     
     // also notify delegate
-    var del = this.delegate;
+    del = this.delegate;
     if (del && del.userDefaultsDidChange) {
       del.userDefaultsDidChange(this, keyName, value, userKeyName);
     }
@@ -147,23 +173,36 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefaults} receiver
   */
   resetDefault: function(keyName) {  
-    var fullKeyName = this._normalizeKeyName(keyName);
-    var userKeyName = this._userKeyName(fullKeyName);
+    var fullKeyName, userKeyName, written, localStorage, key;
+    fullKeyName = this._normalizeKeyName(keyName);
+    userKeyName = this._userKeyName(fullKeyName);
     
     this.propertyWillChange(keyName);
     this.propertyWillChange(fullKeyName);
     
-    var written = this._written;
+    written = this._written;
     if (written) delete written[userKeyName];
     
-    var localStorage = window.localStorage ;
-    if (!localStorage && window.globalStorage) {
-      localStorage = window.globalStorage[window.location.hostname];
+    if(SC.browser.msie=="7.0"){
+       localStorage=ie7userdata;
+    }else{
+       localStorage = window.localStorage ;
+       if (!localStorage && window.globalStorage) {
+         localStorage = window.globalStorage[window.location.hostname];
+       }
     }
 
+    key=["SC.UserDefaults",userKeyName].join('-at-');
+
     if (localStorage) {
-      delete localStorage[["SC.UserDefaults",userKeyName].join('@')];
+      if(SC.browser.msie=="7.0"){
+        localStorage.setAttribute(key.replace(/\W/gi, ''), null);
+        localStorage.save("SC.UserDefaults");
+      }else{
+        delete localStorage[key];
+      }
     }
+    
 
     this.propertyDidChange(keyName);
     this.propertyDidChange(fullKeyName);
@@ -203,7 +242,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   */
   _userKeyName: function(keyName) {
     var user = this.get('userDomain') || '(anonymous)' ;
-    return [user,keyName].join('@');
+    return [user,keyName].join('-at-');
   },
   
   _domainDidChange: function() {
@@ -225,6 +264,17 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     sc_super();
     this._scud_userDomain = this.get('userDomain');
     this._scud_appDomain  = this.get('appDomain');
+    if(SC.browser.msie=="7.0"){
+      var el = document.createElement('div');
+      
+      // set element properties
+      el.id = "ie7userdata";
+      el.style.display = 'none';
+      el.addBehavior('#default#userData');
+      
+      // append element to body
+      document.body.appendChild(el);
+    }
   }
   
 });
