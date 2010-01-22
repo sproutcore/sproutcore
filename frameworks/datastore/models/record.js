@@ -352,7 +352,7 @@ SC.Record = SC.Object.extend(
     if (!aggregates) {
       var dataHash = this.get('store').readDataHash(storeKey);
       aggregates = [];
-      for(k in dataHash) {
+      for(var k in dataHash) {
         if(this[k] && this[k].get && this[k].get('aggregate')===YES) {
           aggregates.push(k);
         }
@@ -438,17 +438,17 @@ SC.Record = SC.Object.extend(
   normalize: function(includeNull) {
     
     var primaryKey = this.primaryKey, 
-        dataHash   = {}, 
         recordId   = this.get('id'), 
         store      = this.get('store'), 
         storeKey   = this.get('storeKey'), 
-        recHash, attrValue, isRecord, defaultVal;
+        dataHash, recHash, attrValue, isRecord, defaultVal;
     
+    dataHash = store.readEditableDataHash(storeKey) || {};
     dataHash[primaryKey] = recordId;
     
     for(var key in this) {
       // make sure property is a record attribute.
-      if(this[key] && this[key]['typeClass']) {
+      if(this[key] && this[key].typeClass) {
         
         isRecord = SC.typeOf(this[key].typeClass())==='class';
 
@@ -482,7 +482,6 @@ SC.Record = SC.Object.extend(
       }
     }
     
-    store.writeDataHash(storeKey, dataHash);
     return store.materializeRecord(storeKey);
   },
   
@@ -936,7 +935,32 @@ SC.Record.mixin( /** @scope SC.Record */ {
   toOne: function(recordType, opts) {
     return SC.SingleAttribute.attr(recordType, opts);
   },
+  
+  /**
+    Returns an SC.ChildrenAttribute that describes a record array backed by a
+    array of hashes.  You can edit the contents
+    of this relationship.
     
+    @param {SC.Record|String} recordType The default type of record to create
+    @param {Hash} opts the options for the attribute
+    @returns {SC.ChildrenAttribute} created instance
+  */
+  toChildren: function(recordType, opts) {
+    return SC.ChildrenAttribute.attr(recordType, opts);
+  },
+  
+  /**
+    Returns an SC.ChildAttribute.  You can edit the contents
+    of this relationship.
+    
+    @param {SC.Record|String} recordType The default type of record to create
+    @param {Hash} opts the options for the attribute
+    @returns {SC.RecordAttribute} created instance
+  */
+  toChild: function(recordType, opts) {
+    return SC.ChildAttribute.attr(recordType, opts);
+  },
+  
   /**
     Returns all storeKeys mapped by Id for this record type.  This method is
     used mostly by the SC.Store and the Record to coordinate.  You will rarely

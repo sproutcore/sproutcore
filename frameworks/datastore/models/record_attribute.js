@@ -6,6 +6,7 @@
 // ==========================================================================
 
 sc_require('models/record');
+sc_require('models/child_record');
 
 /** @class
 
@@ -371,6 +372,45 @@ SC.RecordAttribute.registerTransform(SC.Record, {
   /** @private - convert a record instance to a record id */
   from: function(record) { return record ? record.get('id') : null; }
 });
+
+// /** @private - generic converter for SC.ChildRecord-type records */
+// SC.Child = SC.beget(Object);
+// SC.Child.isChildRecordTransform = YES;
+// SC.RecordAttribute.registerTransform(SC.Child, {
+// 
+//   /**
+//    * Converts the given child record hash to a child record instance.
+//    */
+//   to: function(hash, recAttr, type, parentRecord, key) {
+//     if (!parentRecord || !parentRecord.isParentRecord) {
+//       throw 'SC.Child: Error during transform: Unable to retrieve parent record.';
+//     }
+// 
+//     // If no hash, return null.
+//     if (!hash) return null;
+//     
+//     // Get the record type.
+//     // REVIEW: [EG, MB] Review to see if this is the best way to do this.
+//     var childNS = parentRecord.get('childRecordNamespace');
+//     if (!hash.type || SC.none(childNS)) {
+//       throw 'SC.Child: Error during transform: Unable to determine record type.';
+//     }
+//     var recordType = childNS[hash.type];
+// 
+//     if (!recordType || SC.typeOf(recordType) !== SC.T_CLASS) {
+//       throw 'SC.Child: Error during transform: Invalid record type.';
+//     }
+// 
+//     // Create an instance of the record by registering it with the parent and return.
+//     return parentRecord.registerChildRecord(recordType, hash);
+//   },
+//   
+//   call: function(hash, recAttr, type, parentRecord, key) {
+//     debugger;
+//     return this.to(hash, recAttr, type, parentRecord, key);
+//   }
+// });
+
 
 /** @private - generic converter for transforming computed record attributes */
 SC.RecordAttribute.registerTransform(SC.T_FUNCTION, {
