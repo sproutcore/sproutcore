@@ -43,6 +43,33 @@ SC.ChildRecord = SC.Record.extend(
   _parentRecord: null,
   
   /**
+    All child records will have a life cycle that mirrors as they are created or 
+    loaded into memory, modified, committed and finally destroyed.  This life 
+    cycle is managed by the status property on your record. 
+
+    The status of a record is modelled as a finite state machine.  Based on the 
+    current state of the record, you can determine which operations are 
+    currently allowed on the record and which are not.
+    
+    In general, a record can be in one of five primary states; SC.Record.EMPTY,
+    SC.Record.BUSY, SC.Record.READY, SC.Record.DESTROYED, SC.Record.ERROR. 
+    These are all described in more detail in the class mixin (in record.js) where 
+    they are defined.
+    
+    @property {Number}
+  */
+  status: function() {
+    var pStatus = SC.Record.EMPTY;
+    if (this._parentRecord && this._parentRecord) {
+      pStatus = this._parentRecord.get('status');
+      this.store.writeStatus(this.storeKey, pStatus);
+      this.store.dataHashDidChange(this.storeKey);
+    }
+    return pStatus;
+  }.property('storeKey').cacheable(),
+  
+  
+  /**
    * Marks the record as dirty.
    *
    * Invokes the parent's recordDidChange() function until it gets to an SC.Record instance, at

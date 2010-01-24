@@ -177,3 +177,20 @@ test("Basic Write", function() {
   same(testParent.readAttribute('info'), cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
 });
 
+test("Child Status Changed", function() {
+  var cr;
+  cr = testParent.get('info');
+  equals(cr.get('status'), testParent.get('status'), 'after initializing the parent to READY_NEW, check that the child record matches');
+  
+  SC.RunLoop.begin();
+  store.writeStatus(testParent.storeKey, SC.Record.DIRTY_NEW);
+  store.dataHashDidChange(testParent.storeKey);
+  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to DIRTY_NEW, check that the child record matches');
+  SC.RunLoop.end();
+  
+  SC.RunLoop.begin();
+  store.writeStatus(testParent.storeKey, SC.Record.BUSY_REFRESH);
+  store.dataHashDidChange(testParent.storeKey);
+  equals(cr.get('status'), testParent.get('status'), 'after setting the parent to BUSY_REFRESH, check that the child record matches');
+  SC.RunLoop.end();
+});

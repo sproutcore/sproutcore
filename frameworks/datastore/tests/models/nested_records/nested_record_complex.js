@@ -10,26 +10,26 @@
 var NestedRecord, store, testParent; 
 
 var initModels = function(){
-  NestedRecord.ParentRecordTest = SC.Record.extend( SC.ParentRecord, {
-    /** Child Record Namespace */
-    childRecordNamespace: NestedRecord,
-
-    name: SC.Record.attr(String),
-    person: SC.Record.toChild()
+  NestedRecord.Address = SC.ChildRecord.extend({
+    street: SC.Record.attr(String),
+    city: SC.Record.attr(String),
+    state: SC.Record.attr(String, {defaultValue: 'VA'})
   });
-
+  
   NestedRecord.Person = SC.ChildRecord.extend( SC.ParentRecord, {
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
     
     name: SC.Record.attr(String),
-    address: SC.Record.toChild()
+    address: SC.Record.toChild('NestedRecord.Address')
   });
   
-  NestedRecord.Address = SC.ChildRecord.extend({
-    street: SC.Record.attr(String),
-    city: SC.Record.attr(String),
-    state: SC.Record.attr(String, {defaultValue: 'VA'})
+  NestedRecord.ParentRecordTest = SC.Record.extend( SC.ParentRecord, {
+    /** Child Record Namespace */
+    childRecordNamespace: NestedRecord,
+
+    name: SC.Record.attr(String),
+    person: SC.Record.toChild('NestedRecord.Person')
   });
 };
 

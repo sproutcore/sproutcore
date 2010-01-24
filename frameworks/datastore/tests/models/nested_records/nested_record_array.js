@@ -200,31 +200,36 @@ test("Basic Write", function() {
    ok(SC.instanceOf(newArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
    equals(newArray.get('length'), 3, "after set() on parent, check that the length of the array of child records is 3");
    var cr = newArray.objectAt(0);
+   
    ok(SC.kindOf(cr, SC.ChildRecord), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.ChildRecord Object");
    ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "check that first ChildRecord from the get() creates an actual instance of a ChildRecordTest Object");
+});
+
+test("Basic Write: reference tests", function() {
+   var elems, cr, key, storeRef, newElems;
    
+   elems = testParent.get('elements');
+   cr = elems.objectAt(0);
    // TODO: [EG] Add test to make sure the number of ChildRecords in store
    
    // Check reference information
-   var key = cr.get('childRecordKey');
-   var storeRef = store.find(NestedRecord.ChildRecordTest, key);
+   key = cr.get('childRecordKey');
+   storeRef = store.find(NestedRecord.ChildRecordTest, key);
    ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper childRecordKey');
    equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-   var oldKey = oldCR.get('childRecordKey');
-   ok(!(oldKey === key), 'check to see that the old child record has a different key from the new child record');
    
    // Check for changes on the child bubble to the parent.
    cr.set('name', 'Child Name Change');
    equals(cr.get('name'), 'Child Name Change', "after a set('name', <new>) on child, checking that the value is updated");
    ok(cr.get('status') & SC.Record.DIRTY, 'check that the child record is dirty');
    ok(testParent.get('status') & SC.Record.DIRTY, 'check that the parent record is dirty');
-   newArray = testParent.get('elements');
-   var newCR = newArray.objectAt(0);
+   newElems = testParent.get('elements');
+   var newCR = newElems.objectAt(0);
    same(newCR, cr, "after a set('name', <new>) on child, checking to see that the parent has recieved the changes from the child record");
    var readAttrsArray = testParent.readAttribute('elements');
    ok(readAttrsArray, "checks to make sure the readAttibute works with a change to the name in the first child.");
-   equals(readAttrsArray.length, 3, "after set() on parent, check that the length of the attribute array of child records is 3");
-   same(readAttrsArray[0], cr.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
+   equals(readAttrsArray.length, 4, "after set() on parent, check that the length of the attribute array of child records is 4");
+   same(readAttrsArray[0], newCR.get('attributes'), "after a set('name', <new>) on child, readAttribute on the parent should be correct for info child attributes");
 });
 
 test("Basic Array Functionality: pushObject", function() {   

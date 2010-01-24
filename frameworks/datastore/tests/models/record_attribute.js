@@ -177,11 +177,11 @@ test("writing a value should override default value", function() {
   equals(rec.get('defaultValue'), 'not-default', 'newly written value should replace default value');
 });
 
-// test("writing a date should generate an ISO date" ,function() {
-//   var date = new Date(1238650083966);
-//   equals(rec.set('date', date), rec, 'returns reciever');
-//   equals(rec.readAttribute('date'), '2009-04-01T22:28:03-07:00', 'should have new time (%@)'.fmt(date.toString()));
-// });
+test("writing a date should generate an ISO date" ,function() {
+  var date = new Date(1238650083966);
+  equals(rec.set('date', date), rec, 'returns reciever');
+  equals(rec.readAttribute('date'), '2009-04-01T22:28:03-07:00', 'should have new time (%@)'.fmt(date.toString()));
+});
 
 test("writing an attribute should make relationship aggregate dirty" ,function() {
   equals(bar.get('status'), SC.Record.READY_CLEAN, "precond - bar should be READY_CLEAN");

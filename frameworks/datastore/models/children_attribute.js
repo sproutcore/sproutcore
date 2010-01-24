@@ -6,16 +6,17 @@
 
 sc_require('models/record');
 sc_require('models/record_attribute');
+sc_require('models/child_attribute');
 
 /** @class
   
-  ChildrenAttribute is a subclass of RecordAttribute and handles to-many 
+  ChildrenAttribute is a subclass of ChildAttribute and handles to-many 
   relationships for child records
   
   When setting ( .set() ) the value of a toMany attribute, make sure
   to pass in an array of SC.Record objects.
   
-  There are many ways you can configure a ManyAttribute:
+  There are many ways you can configure a ChildrenAttribute:
   
   {{{
     contacts: SC.ChildrenAttribute.attr('SC.Child');
@@ -24,10 +25,8 @@ sc_require('models/record_attribute');
   @extends SC.RecordAttribute
   @since SproutCore 1.0
 */
-SC.ChildrenAttribute = SC.RecordAttribute.extend(
+SC.ChildrenAttribute = SC.ChildAttribute.extend(
   /** @scope SC.ChildrenAttribute.prototype */ {
-    
-  isChildRecordTransform: YES,
     
   // ..........................................................
   // LOW-LEVEL METHODS
@@ -38,17 +37,18 @@ SC.ChildrenAttribute = SC.RecordAttribute.extend(
     var attrKey   = this.get('key') || key,
         arrayKey  = SC.keyFor('__kidsArray__', SC.guidFor(this)),
         ret       = record[arrayKey],
-        rel;
+        recordType  = this.get('typeClass'), rel;
 
     // lazily create a ManyArray one time.  after that always return the 
     // same object.
     if (!ret) {
       ret = SC.ChildArray.create({ 
         record:         record,
-        propertyName:   attrKey
+        propertyName:   attrKey,
+        defaultRecordType: recordType
       });
 
-      record[arrayKey] = ret ; // save on record
+      record[arrayKey] = this._cachedRef = ret ; // save on record
       rel = record.get('relationships');
       if (!rel) record.set('relationships', rel = []);
       rel.push(ret); // make sure we get notified of changes...
@@ -56,20 +56,26 @@ SC.ChildrenAttribute = SC.RecordAttribute.extend(
 
     return ret;
   },
+      
+  orphan: function(){
+    var cArray = this._cachedRef,
+        store, storeKey, attrs, key, 
+        len, param, cr;
     
-  /**
-    The core handler.  Called from the property.
-    
-    @param {SC.Record} record the record instance
-    @param {String} key the key used to access this attribute on the record
-    @param {Object} value the property value if called as a setter
-    @returns {Object} property value
-  */
-  call: function(record, key, value) {
-    sc_super();
-    return this.toType(record, key, value);
+    if (cArray) {
+      cArray.forEach( function(cr){
+        attrs = cr.get('attributes');
+        for(key in attrs) {
+          param = cr[key];
+          // Orphan all the child record and child records in a tree to clean up the store
+          if(param && param.isChildRecordTransform) param.orphan();
+        }
+        store = cr.get('store');
+        if(store) storeKey = cr.storeKey;
+        if(storeKey) store.unloadRecord(undefined, undefined, storeKey);
+      }, this);
+    }
   }
-  
 });
 
 

@@ -16,6 +16,13 @@
 
 SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.ManyArray.prototype */ {
+    
+  /**
+    If set, it is the default record recordType
+  
+    @property {SC.Record}
+  */
+  defaultRecordType: null,
   
   /**
     If set, the parent record will be notified whenever the array changes so that 
@@ -170,20 +177,17 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   _materializeChild: function(key, hash){
     var store = this.get('store'),
         parentRecord = this.get('record'), 
-        recordType, ret, storeKey;
+        recordType = this.get('defaultRecordType'),
+        ret, storeKey;
         
     // Find the record type
     if (!parentRecord || !parentRecord.isParentRecord) return undefined;
-    
     var nspace = parentRecord.get('childRecordNamespace');
     // Get the record type.
-    if (!hash.type) {
-      throw 'ChildrenArray: Error during transform: Unable to determine record type.';
+    if (hash.type && !SC.none(nspace)) {
+      recordType = nspace[hash.type];
     }
 
-    // REVIEW: [EG, MB] Review to see if this is the best way to do this.
-    if (nspace) recordType = nspace[hash.type];
-    
     if (!recordType || SC.typeOf(recordType) !== SC.T_CLASS) {
       throw 'ChildrenArray: Error during transform: Invalid record type.';
     }
