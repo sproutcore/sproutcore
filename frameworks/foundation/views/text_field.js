@@ -29,6 +29,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   // PROPERTIES
   //
 
+  applyImmediately: YES,
+
   /**
     If YES, the field will hide its text from display. The default value is NO.
   */
@@ -328,6 +330,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // always have at least an empty string
     v = this.get('fieldValue');
     if (SC.none(v)) v = '';
+    v = String(v);
 
     // update layer classes always
     context.setClass('not-empty', v.length > 0);
@@ -675,7 +678,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // processing.
     this.notifyPropertyChange('selection');
 
-    if (this._isKeyDown) {
+    if (this._isKeyDown && this.get('applyImmediately')) {
       this.invokeLater(this.fieldValueDidChange, 1, YES); // notify change
     }
     this._isKeyDown = NO;
