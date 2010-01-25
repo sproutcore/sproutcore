@@ -1,5 +1,5 @@
 /**
- * Nested Record Array(SC.ParentRecord and SC.ChildRecord) Unit Test
+ * Nested Record Array (SC.ChildRecord) Unit Test
  *
  * @author Evin Grano
  */
@@ -10,20 +10,20 @@
 var NestedRecord, store, testParent, peopleData1, peopleData2, personData1, addressData1; 
 
 var initModels = function(){
-  NestedRecord.Group = SC.Record.extend( SC.ParentRecord, {
+  NestedRecord.Group = SC.Record.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
 
     name: SC.Record.attr(String),
-    people: SC.Record.toChildren()
+    people: SC.Record.toMany('NestedRecord.Person', { nested: true })
   });
 
-  NestedRecord.Person = SC.ChildRecord.extend( SC.ParentRecord, {
+  NestedRecord.Person = SC.ChildRecord.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
     
     name: SC.Record.attr(String),
-    addresses: SC.Record.toChildren()
+    addresses: SC.Record.toMany('NestedRecord.Address', { nested: true })
   });
   
   NestedRecord.Address = SC.ChildRecord.extend({

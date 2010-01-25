@@ -41,14 +41,13 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
         recordType  = this.get('typeClass');
     if (this._cachedRef) return this._cachedRef;
     
-    if (!parentRecord || !parentRecord.isParentRecord) {
+    if (!parentRecord) {
       throw 'SC.Child: Error during transform: Unable to retrieve parent record.';
     }
 
     // If no hash, return null.
     if (hash){
       // Get the record type.
-      // REVIEW: [EG, MB] Review to see if this is the best way to do this.
       var childNS = parentRecord.get('childRecordNamespace');
       if (hash.type && !SC.none(childNS)) {
         recordType = childNS[hash.type];

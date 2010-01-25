@@ -1,5 +1,5 @@
 /**
- * Nested Record Array(SC.ParentRecord and SC.ChildRecord) Unit Test
+ * Nested Record Array of SC.ChildRecords Unit Test
  *
  * @author Evin Grano
  */
@@ -10,12 +10,12 @@
 var NestedRecord, store, testParent, testParent2; 
 
 var initModels = function(){
-  NestedRecord.ParentRecordTest = SC.Record.extend( SC.ParentRecord, {
+  NestedRecord.ParentRecordTest = SC.Record.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
 
     name: SC.Record.attr(String),
-    elements: SC.Record.toChildren()
+    elements: SC.Record.toMany('NestedRecord.ChildRecordTest', { nested: true })
   });
 
   NestedRecord.ChildRecordTest = SC.ChildRecord.extend({
@@ -25,7 +25,7 @@ var initModels = function(){
 };
 
 // ..........................................................
-// Basic SC.ParentRecord with an Array of Children
+// Basic SC.Record with an Array of Children
 // 
 module("Basic SC.Record w/ a Parent > Array of Children", {
 

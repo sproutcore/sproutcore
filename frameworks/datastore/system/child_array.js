@@ -181,7 +181,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
         ret, storeKey;
         
     // Find the record type
-    if (!parentRecord || !parentRecord.isParentRecord) return undefined;
+    if (!parentRecord) return undefined;
     var nspace = parentRecord.get('childRecordNamespace');
     // Get the record type.
     if (hash.type && !SC.none(nspace)) {

@@ -155,7 +155,7 @@ test("normalizing a new record with toOne should reflect id in data hash" ,funct
   
   equals(newRecord.attributes()['relatedTo'], 'foo1', 'hash value of relatedTo is foo1');
   equals(newRecord.get('relatedTo'), rec, 'get value of relatedTo is foo1');
-  
+
   newRecord.normalize();
   
   equals(newRecord.attributes()['relatedTo'], 'foo1', 'hash value of relatedTo after normalizing is still foo1');

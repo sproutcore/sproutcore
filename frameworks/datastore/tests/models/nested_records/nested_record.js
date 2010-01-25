@@ -1,5 +1,5 @@
 /**
- * Nested Records (SC.ParentRecord and SC.ChildRecord) Unit Test
+ * Nested Records (SC.ChildRecord) Unit Test
  *
  * @author Evin Grano
  */
@@ -10,12 +10,12 @@
 var NestedRecord, store, testParent, childData1; 
 
 var initModels = function(){
-  NestedRecord.ParentRecordTest = SC.Record.extend( SC.ParentRecord, {
+  NestedRecord.ParentRecordTest = SC.Record.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
 
     name: SC.Record.attr(String),
-    info: SC.Record.toChild()
+    info: SC.Record.toOne('NestedRecord.ChildRecordTest', { nested: true })
   });
 
   NestedRecord.ChildRecordTest = SC.ChildRecord.extend({

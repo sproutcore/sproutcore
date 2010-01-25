@@ -1,5 +1,5 @@
 /**
- * Complex Nested Records (SC.ParentRecord and SC.ChildRecord) Unit Test
+ * Complex Nested Records (SC.ChildRecord) Unit Test
  *
  * @author Evin Grano
  */
@@ -16,20 +16,20 @@ var initModels = function(){
     state: SC.Record.attr(String, {defaultValue: 'VA'})
   });
   
-  NestedRecord.Person = SC.ChildRecord.extend( SC.ParentRecord, {
+  NestedRecord.Person = SC.ChildRecord.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
     
     name: SC.Record.attr(String),
-    address: SC.Record.toChild('NestedRecord.Address')
+    address: SC.Record.toOne('NestedRecord.Address', { nested: true })
   });
   
-  NestedRecord.ParentRecordTest = SC.Record.extend( SC.ParentRecord, {
+  NestedRecord.ParentRecordTest = SC.Record.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
 
     name: SC.Record.attr(String),
-    person: SC.Record.toChild('NestedRecord.Person')
+    person: SC.Record.toOne('NestedRecord.Person', { nested: true })
   });
 };
 
