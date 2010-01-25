@@ -222,16 +222,16 @@ SC.RecordAttribute = SC.Object.extend(
       // cache.
       nvalue = this.fromType(record, key, value) ; // convert to attribute.
       record.writeAttribute(attrKey, nvalue); 
-    } else {
-      value = record.readAttribute(attrKey);
-      if (SC.none(value) && (value = this.get('defaultValue'))) {
-        if (typeof value === SC.T_FUNCTION) {
-          value = this.defaultValue(record, key, this);
-          // write default value so it doesn't have to be executed again
-          if(record.attributes()) record.writeAttribute(attrKey, value, true);
-        }
-      } else value = this.toType(record, key, value);
-    }
+    } 
+
+    value = record.readAttribute(attrKey);
+    if (SC.none(value) && (value = this.get('defaultValue'))) {
+       if (typeof value === SC.T_FUNCTION) {
+        value = this.defaultValue(record, key, this);
+        // write default value so it doesn't have to be executed again
+        if(record.attributes()) record.writeAttribute(attrKey, value, true);
+      }
+    } else value = this.toType(record, key, value);
     
     return value ;
   },
