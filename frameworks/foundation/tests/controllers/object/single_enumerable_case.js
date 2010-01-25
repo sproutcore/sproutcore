@@ -14,11 +14,12 @@ var src, content, controller;
 module("SC.ObjectController - single_enumerable_case - OBSERVABLE OBJECT", {
   setup: function() {
     src        = SC.Object.create({ foo: "foo1", bar: "bar1" });
-    content    = SC.Set.create().add(src); // use generic enumerable
+    content    = SC.Set.create(); // use generic enumerable
     controller = SC.ObjectController.create({ 
       content: content,
       allowsMultipleContent: NO 
     });
+    content.add(src);
   },
   
   teardown: function() {

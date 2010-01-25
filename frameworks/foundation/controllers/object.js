@@ -247,21 +247,41 @@ SC.ObjectController = SC.Controller.extend(
   /** @private - setup observer on init if needed. */
   init: function() {
     sc_super();
-    if (this.get('observableContent')) this._scoc_contentDidChange();
+    if (this.get('content')) this._scoc_contentDidChange();
+    if (this.get('observableContent')) this._scoc_observableContentDidChange();
   },
 
+  _scoc_contentDidChange: function () {
+    var last = this._scoc_content,
+        cur  = this.get('content');
+        
+    if (last !== cur) {
+      this._scoc_content = cur;
+      var func = this._scoc_enumerableContentDidChange;
+      if (last && last.isEnumerable) {
+        //console.log('no longer observing [] on last');
+        last.removeObserver('[]', this, func);
+      }
+      if (cur && cur.isEnumerable) {
+        //console.log('observing [] on cur');
+        cur.addObserver('[]', this, func);
+      }
+    }
+  }.observes("content"),
+  
   /**  @private
     
     Called whenever the observable content property changes.  This will setup
     observers on the content if needed.
   */
-  _scoc_contentDidChange: function() {
+  _scoc_observableContentDidChange: function() {
     var last = this._scoc_observableContent,
         cur  = this.get('observableContent'),
         func = this.contentPropertyDidChange,
         efunc= this._scoc_enumerableContentDidChange;
 
     if (last === cur) return this; // nothing to do
+    //console.log('observableContentDidChange');
     
     this._scoc_observableContent = cur; // save old content
     
