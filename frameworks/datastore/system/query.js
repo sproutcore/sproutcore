@@ -625,7 +625,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return left == right;
+                          return SC.compare(left, right) == 0;//left == right;
                         }
     },
 
@@ -639,7 +639,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return left != right;
+                          return SC.compare(left, right) != 0;//left != right;
                         }
     },
 
@@ -653,7 +653,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return left < right;
+                          return SC.compare(left, right) == -1; //left < right;
                         }
     },
 
@@ -667,7 +667,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return left <= right;
+                          return SC.compare(left, right) != 1; //left <= right;
                         }
     },
 
@@ -681,7 +681,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return left > right;
+                          return SC.compare(left, right) == 1; //left > right;
                         }
     },
 
@@ -695,7 +695,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return left >= right;
+                          return SC.compare(left, right) != -1; //left >= right;
                         }
     },
 
