@@ -488,7 +488,15 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     @returns {SC.Pane} receiver
   */
   append: function() {
-    return this.appendTo(document.body) ;
+   
+    if(SC.userDefaults.get('ready')){
+       console.log('appending now');
+      return this.appendTo(document.body) ;
+    } 
+    else {
+       console.log('appending callback');
+      SC.userDefaults.readyCallback(this, this.append);
+    }
   },
   
   /**

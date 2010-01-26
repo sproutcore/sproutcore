@@ -28,6 +28,8 @@
 */
 SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   
+  ready: NO,
+  
   /** 
     the default domain for the user.  This will be used to store keys in
     local storage.  If you do not set this property, the wrong values may be
@@ -275,7 +277,23 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       // append element to body
       document.body.appendChild(el);
     }
-  }
+   // this.set('ready', YES);
+  },
+  
+  readyCallback: function(ob, func){
+    this.func = func;
+    this.ob = ob;
+  },
+  
+  readyChanged: function(){
+    if(this.get('ready')){
+      console.log('ready changed');
+      var f = this.get('func');
+      if(f) f.apply(this.get('ob'));
+    }
+  }.observes('ready')
+  
+  
   
 });
 
