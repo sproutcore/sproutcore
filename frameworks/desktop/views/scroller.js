@@ -5,8 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-/** Vary based on current platform. */
-SC.NATURAL_SCROLLER_THICKNESS = 16;
 SC.LOG_SCROLLER_UPDATES = NO;
 /** @class
 
@@ -26,11 +24,6 @@ SC.ScrollerView = SC.View.extend({
   //
 
   /**
-   Used by the SC.ScrollView to properly layout the scrollers.
-  */
-  scrollerThickness: SC.NATURAL_SCROLLER_THICKNESS,
-
-  /**
     The scroller offset value.  This value will adjust between the minimum
     and maximum values that you set. Default is 0.
 
@@ -41,13 +34,13 @@ SC.ScrollerView = SC.View.extend({
       // Don't enforce the maximum now, because the scroll view could change
       // height and we want our content to stay put when it does.
       if (val >= 0) {
-        this._value = val ;
+        this._scs_value = val ;
       } else {
-        this._value = 0;
+        this._scs_value = 0;
       }
     }
 
-    var value = this._value || 0 ; // default value is at top/left
+    var value = this._scs_value || 0 ; // default value is at top/left
     return Math.min(value, this.get('maximum')) ;
   }.property('maximum').cacheable(),
 
@@ -78,31 +71,43 @@ SC.ScrollerView = SC.View.extend({
     @property
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
+
   // ..........................................................
   // DISPLAY METRICS
-  // 
+  //
   
-  capSize: 10,
-  
-  capOverlapSize: 7,
-  
-  downButtonSize: 17,
-  
-  upButtonSize: 23,
-  
-  trackLength: function() {
-    var frame = this.get('frame'), size;
+  /**
+    The width of the scrollbar.
     
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        size = frame.height;
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        size = frame.width;
-        break;
-    }
-    return size - (this.capSize-this.capOverlapSize) - this.downButtonSize - (this.upButtonSize-this.capOverlapSize);
-  }.property(),
+    @property
+  */
+  scrollbarThickness: 14,
+  
+  /**
+    The height or width of the cap that encloses the track.
+    
+    @property
+  */
+  capLength: 18,
+  
+  /**
+    The amount by which the scroller overlaps the cap.
+    
+    @property
+  */
+  capOverlap: 17,
+
+  /**
+    The amount by which the scroller overlaps the arrow buttons.
+    
+    @property
+  */
+  buttonOverlap: 10,
+
+  /**
+    The height or width of the up/down or left/right arrow buttons.
+  */
+  buttonLength: 40,
 
   /**
     Returns the owner view property the scroller should modify.  If this
@@ -139,8 +144,8 @@ SC.ScrollerView = SC.View.extend({
   displayProperties: 'maximum isEnabled layoutDirection value frame'.w(),
   
   render: function(context, firstTime) {
-    context.addClass('sc-scroller');
-
+    // We style based on the layout direction, so set a 
+    // class name
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         context.addClass('vertical');
@@ -154,8 +159,10 @@ SC.ScrollerView = SC.View.extend({
       context.push('<div class="button-bottom"></div>');
       context.push('<div class="button-top"></div>');
       context.push('<div class="cap"></div>');
-      context.push('<div class="thumb"><div class="center"></div><div class="top"></div><div class="bottom"></div></div>');
-      this._sc_thumbPos = this.capSize - this.capOverlapSize;
+      context.push('<div class="thumb"><div class="thumb-center"></div><div class="thumb-top"></div><div class="thumb-bottom"></div></div>');
+      
+      // default the thumb position to the top
+      this._sc_thumbPos = this.capLength - this.capOverlap;
     } else {
       // Ensure that the scroll thumb is in the correct location
       var v = this.get('value');
@@ -172,7 +179,7 @@ SC.ScrollerView = SC.View.extend({
           case SC.LAYOUT_VERTICAL:
             pct = (v/(max-this.get('frame').height));
             if (pct > 1) pct = 1;
-            this._sc_thumbPos = Math.ceil(pct * totalLen + 3);
+            this._sc_thumbPos = Math.ceil(pct * totalLen + (this.capLength - this.capOverlap));
             thumb.css('top', this._sc_thumbPos);
             break ;
           case SC.LAYOUT_HORIZONTAL:
@@ -188,22 +195,37 @@ SC.ScrollerView = SC.View.extend({
           log += "Percent: "+pct+"       Position: "+this._sc_thumbPos+"\n";
           console.log(log);
         }
-        // this._sc_scrollValue = v;
       }
     }
   },
 
+  trackLength: function() {
+    var frame = this.get('frame'), size;
+    
+    switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+        size = frame.height;
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        size = frame.width;
+        break;
+    }
+    return size - this.capLength + this.capOverlap - this.buttonLength + this.buttonOverlap;
+  }.property(),
+
   mouseDown: function(evt) {
-    var target = evt.target;
-    if (target.className.indexOf('thumb') >= 0 || target.parentNode.className.indexOf('thumb') >= 0) {
+    var target = evt.target, value;
+    if (target.className.indexOf('thumb') >= 0) {
       this._thumbOffset = this.convertFrameFromView({ y: evt.pageY }).y - this._sc_thumbPos ;
       this._startY = evt.pageY;
       this._startTop = this._sc_thumbPos;
       return YES;
-    } else if (SC.__BUTTON_UP__) {
-
-    } else if (SC.__BUTTON_DOWN__) {
-
+    } else if (target.className.indexOf('button-top') >= 0) {
+      this.decrementProperty('value', 30);
+      this.setButtonActive('.button-top');
+    } else if (target.className.indexOf('button-bottom') >= 0) {
+      this.incrementProperty('value', 30);
+      this.setButtonActive('.button-bottom');
     } else {
       // Page up/down
       var top = this._sc_thumbPos,
@@ -215,6 +237,22 @@ SC.ScrollerView = SC.View.extend({
         this.incrementProperty('value', h);
       }
     }
+  },
+  
+  setButtonActive: function(element) {
+    this.$(element).addClass('active');
+    this._scs_buttonActive = element;
+  },
+  
+  mouseUp: function(evt) {
+    var active = this._scs_buttonActive;
+    
+    if (active) {
+      this.$(active).removeClass('active');
+      return YES;
+    }
+    
+    return NO;
   },
   
   mouseDragged: function(evt) {
@@ -232,7 +270,7 @@ SC.ScrollerView = SC.View.extend({
     
     if (thumb) {
       thumb.css('height', height);
-      this.$('.thumb .center').css('height', Math.max(height-14,0));
+      this.$('.thumb .thumb-center').css('height', Math.max(height-20,0));
     }
   }.observes('frame', 'maximum'),
   

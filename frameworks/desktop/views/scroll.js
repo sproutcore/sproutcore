@@ -483,8 +483,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var clipLayout = { left: 0, top: 0 } ;
     var t ;
     
-    var ht = ((hasHorizontal) ? hscroll.get('scrollerThickness') : 0) ;
-    var vt = (hasVertical) ?   vscroll.get('scrollerThickness') : 0 ;
+    var ht = ((hasHorizontal) ? hscroll.get('scrollbarThickness') : 0) ;
+    var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0 ;
     
     if (hasHorizontal) {
       hscroll.set('layout', { left: 0, bottom: 0, right: vt-1, height: ht }) ;
@@ -534,7 +534,6 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.scrollBy(this._scroll_wheelDeltaX, this._scroll_wheelDeltaY);
     this._scroll_wheelDeltaX = this._scroll_wheelDeltaY = 0;
   },
-  
   
   // ..........................................................
   // INTERNAL SUPPORT
@@ -734,7 +733,13 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     // Optimization when not using collections. We need to reimplement clippingFrame
     // and scrolling to be able to scroll using scrolltop. For now I just
     // detect if the content to scroll is a class of collectionView.
-    if (contentView) contentView.adjust('top', 0-offset) ;
+
+    if (SC.SCROLL_TOP) {
+      containerView.$()[0].scrollTop = offset;
+    } else {
+      if (contentView) contentView.adjust('top', 0-offset) ;
+    }
+
     
   }.observes('verticalScrollOffset'),
   
