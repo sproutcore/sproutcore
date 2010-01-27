@@ -41,13 +41,25 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   /**
     The current horizontal scroll offset. Changing this value will update both the contentView and the horizontal scroller, if there is one.
   */
-  horizontalScrollOffset: 0,
+  horizontalScrollOffset: function(key, value) {
+    if (value !== undefined) {
+      this._scroll_horizontalScrollOffset = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), value)) ;
+    }
+
+    return this._scroll_horizontalScrollOffset||0;
+  }.property().cacheable(),
   
   /**
     The current vertical scroll offset.  Changing this value will update both the contentView and the vertical scroller, if there is one.
   */
-  verticalScrollOffset: 0,
-  
+  verticalScrollOffset: function(key, value) {
+    if (value !== undefined) {
+      this._scroll_verticalScrollOffset = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), value)) ;
+    }
+
+    return this._scroll_verticalScrollOffset||0;
+  }.property().cacheable(),
+
   /**
     The maximum horizontal scroll offset allowed given the current contentView 
     size and the size of the scroll view.  If horizontal scrolling is 
