@@ -637,7 +637,8 @@ SC.Record = SC.Object.extend(
    * @param {Hash} hash The hash of attributes to apply to the child record.
    */
   registerChildRecord: function(recordType, hash) {
-    var childKey = hash.childRecordKey;
+    var pm = recordType.primaryKey || 'childRecordKey';
+    var childKey = hash[pm];
     var childRecord = null;
     var crManager = this.get('childRecords');
     if (childKey && crManager) {
@@ -660,7 +661,9 @@ SC.Record = SC.Object.extend(
     // Generate the key used by the parent's child record manager.
     var key = SC.Record._generateChildKey();
     hash = hash || {}; // init if needed
-    hash.childRecordKey = key;
+    var pm = childRecordType.primaryKey || 'childRecordKey';
+    var childKey = hash[pm];
+    hash[pm] = key;
     
     var store = this.get('store');
     if (SC.none(store)) throw 'Error: during the creation of a child record: NO STORE ON PARENT!';

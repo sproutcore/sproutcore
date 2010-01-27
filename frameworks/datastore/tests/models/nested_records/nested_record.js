@@ -119,9 +119,10 @@ test("Basic Read", function() {
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "get() creates an actual instance of a ChildRecordTest Object");
   
   // Check reference information
-  var key = cr.get('childRecordKey');
+  var pm = cr.get('primaryKey');
+  var key = cr.get(pm);
   var storeRef = store.find(NestedRecord.ChildRecordTest, key);
-  ok(storeRef, 'checking that the store has the instance of the child record with proper childRecordKey');
+  ok(storeRef, 'checking that the store has the instance of the child record with proper primary key');
   equals(cr, storeRef, "checking the parent reference is the same as the direct store reference");
   
   // Check to see if the attributes of a Child Record match the refrence of the parent
@@ -130,13 +131,13 @@ test("Basic Read", function() {
   // Duplication check
   var sameCR = testParent.get('info');
   ok(sameCR, "check to see if we have an instance of a child record again");
-  var oldKey = cr.get('childRecordKey'), newKey = sameCR.get('childRecordKey');
-  equals(oldKey, newKey, "check to see if the childRecordKeys are the same");
+  var oldKey = cr.get(pm), newKey = sameCR.get(pm);
+  equals(oldKey, newKey, "check to see if the Primary Key are the same");
   same(sameCR, cr, "check to see that it is the same child record as before");
   
   // ID check
   id = sameCR.get('id');
-  ok((id !== oldKey), "if there is an id param, it should be different from the childRecordKey: %@ != %@".fmt(id, oldKey));
+  ok((id !== oldKey), "if there is an id param, it should be different from the Primary Key: %@ != %@".fmt(id, oldKey));
 });
 
 test("Basic Write", function() {
@@ -160,11 +161,12 @@ test("Basic Write", function() {
   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest), "set() with an object creates an actual instance of a ChildRecordTest Object");
   
   // Check reference information
-  var key = cr.get('childRecordKey');
+  var pm = cr.get('primaryKey');
+  var key = cr.get(pm);
   var storeRef = store.find(NestedRecord.ChildRecordTest, key);
-  ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper childRecordKey');
+  ok(storeRef, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
   equals(cr, storeRef, "after a set with an object, checking the parent reference is the same as the direct store reference");
-  var oldKey = oldCR.get('childRecordKey');
+  var oldKey = oldCR.get(pm);
   ok(!(oldKey === key), 'check to see that the old child record has a different key from the new child record');
   
   // Check for changes on the child bubble to the parent.

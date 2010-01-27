@@ -172,7 +172,7 @@ test("Function: writeAttribute()", function() {
 });
 
 test("Basic Read, Testing the First Child Array", function() {
-  var ppl, pplAttr, pplDup, p, pDup, pStore, key, oldKey;
+  var pm, ppl, pplAttr, pplDup, p, pDup, pStore, key, oldKey;
   // Test general gets
   equals(testParent.get('name'), 'Test Group', "get should be correct for name attribute: Test Group");
   equals(testParent.get('nothing'), null, "get should be correct for invalid key");
@@ -188,9 +188,10 @@ test("Basic Read, Testing the First Child Array", function() {
   ok(SC.instanceOf(p, NestedRecord.Person), "check that first ChildRecord from the get() creates an actual instance of a Person Object");
   
   // Check reference information
-  key = p.get('childRecordKey');
+  pm = p.get('primaryKey');
+  key = p.get(pm);
   pStore = store.find(NestedRecord.Person, key);
-  ok(pStore, 'check that first ChildRecord that the store has the instance of the child record with proper childRecordKey');
+  ok(pStore, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
   equals(p, pStore, "check the parent reference to the first child is the same as the direct store reference");
   
   // Check to see if the attributes of a Child Record match the refrence of the parent
@@ -204,16 +205,16 @@ test("Basic Read, Testing the First Child Array", function() {
   equals(pplDup.get('length'), 3, "check that the length of the array of child records is still 3");
   pDup = pplDup.objectAt(0);
   ok(pDup, "check to see if we have an instance of a child record again");
-  oldKey = p.get('childRecordKey');
-  key = pDup.get('childRecordKey');
-  equals(key, oldKey, "check to see if the childRecordKeys are the same");
+  oldKey = p.get(pm);
+  key = pDup.get(pm);
+  equals(key, oldKey, "check to see if the primary keys are the same");
   equals(SC.guidFor(pDup), SC.guidFor(p), "check to see if the guid are the same");
   same(pDup, p, "check to see that it is the same child record as before");
 });
 
 test("Basic Read, Testing the Second Child Array", function() {
   var pDup, pStore;
-  var ppl, pplAttr, p, addrs, addrsDup, addrsAttr, a, aDup, aStore, key, oldKey;
+  var pm, ppl, pplAttr, p, addrs, addrsDup, addrsAttr, a, aDup, aStore, key, oldKey;
   
   // Test Addresses (Child Record) creation
   ppl = testParent.get('people');
@@ -228,9 +229,10 @@ test("Basic Read, Testing the Second Child Array", function() {
   ok(SC.instanceOf(a, NestedRecord.Address), "check that first ChildRecord from the get() creates an actual instance of a Address Object");
   
   // Check reference information
-  key = a.get('childRecordKey');
+  pm = a.get('primaryKey');
+  key = a.get(pm);
   aStore = store.find(NestedRecord.Address, key);
-  ok(aStore, 'check that first ChildRecord that the store has the instance of the child record with proper childRecordKey');
+  ok(aStore, 'check that first ChildRecord that the store has the instance of the child record with proper primary key');
   equals(a, aStore, "check the parent reference to the first child is the same as the direct store reference");
   
   // Check to see if the attributes of a Child Record match the refrence of the parent
@@ -247,15 +249,15 @@ test("Basic Read, Testing the Second Child Array", function() {
   equals(addrsDup.get('length'), 2, "check that the length of the array of child records is still 2");
   aDup = addrsDup.objectAt(0);
   ok(aDup, "check to see if we have an instance of a child record again");
-  oldKey = a.get('childRecordKey');
-  key = aDup.get('childRecordKey');
-  equals(key, oldKey, "check to see if the childRecordKeys are the same");
+  oldKey = a.get(pm);
+  key = aDup.get(pm);
+  equals(key, oldKey, "check to see if the primary key are the same");
   equals(SC.guidFor(aDup), SC.guidFor(a), "check to see if the guid are the same");
   same(aDup, a, "check to see that it is the same child record as before");
 });
 
 test("Basic Write: Testing the First Child Array", function() {
-  var ppl, p, pAddrs, pAddrsAttr, pStore, key, oldKey, aFirst, aLast;
+  var pm, ppl, p, pAddrs, pAddrsAttr, pStore, key, oldKey, aFirst, aLast;
   // Test general gets
   testParent.set('name', 'New Group');
   equals(testParent.get('name'), 'New Group', "set() should change name attribute");
@@ -273,9 +275,10 @@ test("Basic Write: Testing the First Child Array", function() {
    // TODO: [EG] Add test to make sure the number of ChildRecords in store is correct when we add store recored clearing
    
    // Check reference information
-   key = p.get('childRecordKey');
+   pm = p.get('primaryKey');
+   key = p.get(pm);
    pStore = store.find(NestedRecord.Person, key);
-   ok(pStore, 'after a set() with an object, checking that the store has the instance of the child record with proper childRecordKey');
+   ok(pStore, 'after a set() with an object, checking that the store has the instance of the child record with proper primary key');
    equals(pStore, p, "after a set with an object, checking the parent reference is the same as the direct store reference");
    
    // Check for changes on the child bubble to the parent.

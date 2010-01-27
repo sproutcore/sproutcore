@@ -118,7 +118,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   objectAt: function(idx) {
     var recs      = this._records, 
         children = this.get('readOnlyChildren'),
-        childKey, hash, ret;
+        hash, ret;
     var len = children ? children.length : 0;
     
     if (!children) return undefined; // nothing to do
@@ -131,8 +131,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     if (!hash) return undefined;
     
     // not in cache, materialize
-    childKey = hash.childRecordKey;
-    recs[idx] = ret = this._materializeChild(childKey, hash);
+    recs[idx] = ret = this._materializeChild(hash);
     
     return ret;
   },
@@ -174,11 +173,11 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @private
     Call to create an object from a hash
   */
-  _materializeChild: function(key, hash){
+  _materializeChild: function(hash){
     var store = this.get('store'),
         parentRecord = this.get('record'), 
         recordType = this.get('defaultRecordType'),
-        ret, storeKey;
+        key, ret, storeKey, pm;
         
     // Find the record type
     if (!parentRecord) return undefined;
@@ -192,6 +191,8 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       throw 'ChildrenArray: Error during transform: Invalid record type.';
     }
     
+    pm = recordType.primaryKey || 'childRecordKey';
+    key = hash[pm];
     if (key){
       storeKey = store.storeKeyFor(recordType, key);
       ret = store.materializeRecord(storeKey);
