@@ -74,9 +74,15 @@ SC.Animatable = {
 
   initMixin: function()
   {
+    this._animatable_original_didCreateLayer = this.didCreateLayer || function(){};
+    this.didCreateLayer = this._animatable_didCreateLayer;
+
     // substitute our didUpdateLayer method (but saving the old one)
     this._animatable_original_did_update_layer = this.didUpdateLayer || function(){};
     this.didUpdateLayer = this._animatable_did_update_layer;
+
+    this._animatable_original_willDestroyLayer = this.willDestroyLayer || function(){};
+    this.willDestroyLayer = this._animatable_willDestroyLayer;
     
     this._animatable_original_willRemoveFromParent = this.willRemoveFromParent || function(){};
     this.willRemoveFromParent = this._animatable_will_remove_from_parent;
@@ -113,16 +119,16 @@ SC.Animatable = {
     this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
   },
 
-  didCreateLayer: function(){
+  _animatable_didCreateLayer: function(){
     SC.Event.add(this.get('layer'), "webkitTransitionEnd", this, this.transitionEnd);
     SC.Event.add(this.get('layer'), "transitionend", this, this.transitionEnd);
-    return sc_super();
+    return this._animatable_original_didCreateLayer();
   },
 
-  willDestroyLayer: function(){
+  _animatable_willDestroyLayer: function(){
     SC.Event.remove(this.get('layer'), "webkitTransitionEnd", this, this.transitionEnd);
     SC.Event.remove(this.get('layer'), "transitionend", this, this.transitionEnd);
-    return sc_super();
+    return this._animatable_original_willDestroyLayer();
   },
   
   /**
