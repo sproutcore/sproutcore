@@ -68,6 +68,8 @@ SC.Animatable = {
   // and, said animation order
   _animationOrder: ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "display"],
 
+  _transitionCallbacks: {},
+
 
   initMixin: function()
   {
@@ -108,6 +110,18 @@ SC.Animatable = {
     this._animatableSetCSS = "";
     this._last_transition_css = ""; // to keep from re-setting unnecessarily
     this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
+  },
+
+  didCreateLayer: function(){
+    SC.Event.add(this.get('layer'), "webkitTransitionEnd", this, this.transitionEnd);
+    SC.Event.add(this.get('layer'), "transitionend", this, this.transitionEnd);
+    return sc_super();
+  },
+
+  willDestroyLayer: function(){
+    SC.Event.remove(this.get('layer'), "webkitTransitionEnd", this, this.transitionEnd);
+    SC.Event.remove(this.get('layer'), "transitionend", this, this.transitionEnd);
+    return sc_super();
   },
   
   /**
@@ -190,7 +204,16 @@ SC.Animatable = {
     // call base with whatever is leftover
     return this;
   },
-  
+
+
+  transitionEnd: function(evt){
+    var propertyName = evt.originalEvent.propertyName;
+        callback = this._transitionCallbacks[propertyName];
+
+    if(callback) SC.Animatable.runCallback(callback);
+  },
+
+
   /**
   Returns the current set of styles and layout according to JavaScript transitions.
   
@@ -376,6 +399,15 @@ SC.Animatable = {
         // the transition is already set up.
         // we can just set it as part of the starting point
         startingPoint[i] = newStyle[i];
+
+        if (this.transitions[i].action){
+          this._transitionCallbacks[i] = {
+            source: this,
+            target: (this.transitions[i].target || this),
+            action: this.transitions[i].action
+          };
+        };
+
         continue;
       }
 
@@ -423,6 +455,14 @@ SC.Animatable = {
       a.action = applier;
       a.style = layer.style;
       a.holder = this;
+
+      if (this.transitions[i].action){
+        a.callback = {
+          source: this,
+          target: (this.transitions[i].target || this),
+          action: this.transitions[i].action
+        };
+      };
 
       timing = this.transitions[i].timing || SC.Animatable.defaultTimingFunction;
       if (timing && SC.typeOf(timing) != SC.T_STRING) a.timingFunction = timing;
@@ -687,6 +727,7 @@ SC.Animatable = {
     if (t < e) SC.Animatable.addTimer(this);
     else {
       this.going = false;
+      if(this.callback) SC.Animatable.runCallback(this.callback);
       this.styles = null;
       this.layer = null;
     }
@@ -714,6 +755,7 @@ SC.Animatable = {
     this.style[this.property] = this.endValue;
 
     this.going = false;
+    if(this.callback) SC.Animatable.runCallback(this.callback);
     this.styles = null;
     this.layer = null;
   },
@@ -764,6 +806,7 @@ SC.Animatable = {
     if (t < e) SC.Animatable.addTimer(this);
     else {
       this.going = false;
+      if(this.callback) SC.Animatable.runCallback(this.callback);
       this.styles = null;
       this.layer = null;
     }
@@ -818,6 +861,7 @@ SC.Animatable = {
     if (t < e) SC.Animatable.addTimer(this);
     else {
       this.going = false;
+      if(this.callback) SC.Animatable.runCallback(this.callback);
       this.styles = null;
       this.layer = null;
     }
@@ -942,7 +986,38 @@ SC.mixin(SC.Animatable, {
       SC.Animatable.stats.set("lastFPS", SC.Animatable._ticks / (time_diff / 1000));
       loop.end();
     }
+  },
+
+  runCallback: function(callback){
+    var typeOfAction = SC.typeOf(callback.action);
+
+    // if the action is a function, just try to call it.
+    if (typeOfAction == SC.T_FUNCTION) {
+      callback.action.call(callback.target);
+
+    // otherwise, action should be a string.  If it has a period, treat it
+    // like a property path.
+    } else if (typeOfAction === SC.T_STRING) {
+      if (callback.action.indexOf('.') >= 0) {
+        var path = callback.action.split('.') ;
+        var property = path.pop() ;
+
+        var target = SC.objectForPropertyPath(path, window) ;
+        var action = target.get ? target.get(property) : target[property];
+        if (action && SC.typeOf(action) == SC.T_FUNCTION) {
+          action.call(target);
+        } else {
+          throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
+        }
+
+      // otherwise, try to execute action direction on target or send down
+      // responder chain.
+      } else {
+        SC.RootResponder.responder.sendAction(callback.action, callback.target);
+      }
+    }
   }
+
 });
 
 
