@@ -719,14 +719,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     edit the location of the contentView.
   */
   _scroll_horizontalScrollOffsetDidChange: function() {
-    var offset = this.get('horizontalScrollOffset');
-    
-    offset = Math.max(0,Math.min(this.get('maximumHorizontalScrollOffset'), offset)) ;
-    
-    // update the offset for the contentView...
-    var contentView = this.get('contentView');
-    if (contentView) contentView.adjust('left', 0-offset);
-     
+    this.invokeLast(this.adjustElementScroll);
   }.observes('horizontalScrollOffset'),
   
   /** @private
@@ -734,52 +727,21 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     edit the location of the contentView.
   */
   _scroll_verticalScrollOffsetDidChange: function() {
-    var offset = this.get('verticalScrollOffset') ;
-    
-    offset = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), offset)) ;
-    
-    // update the offset for the contentView...
-    var contentView = this.get('contentView');
-    var containerView = this.get('containerView');
-    
-    // Optimization when not using collections. We need to reimplement clippingFrame
-    // and scrolling to be able to scroll using scrolltop. For now I just
-    // detect if the content to scroll is a class of collectionView.
-
-    if (SC.SCROLL_TOP) {
-      containerView.$()[0].scrollTop = offset;
-    } else {
-      if (contentView) contentView.adjust('top', 0-offset) ;
-    }
-
-    
+    this.invokeLast(this.adjustElementScroll);
   }.observes('verticalScrollOffset'),
   
-  /** @private
-    Whenever the scroll frame changes check if the verticalScrollOffset and 
-    horizontalScrollOffset are still smaller then the maximum value.
-  */
-  _scroll_frameDidChange: function() {
-    SC.RunLoop.currentRunLoop.invokeLast(this, function() {
-      var verticalScrolllOffset = this.get('verticalScrollOffset');
-      var maxVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
-      
-      var horizontalScrollOffset = this.get('horizontalScrollOffset');
-      var maxHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset');
-      
-      var clampVertical =  verticalScrolllOffset > maxVerticalScrollOffset;
-      var clampHorizontal = horizontalScrollOffset > maxHorizontalScrollOffset;
-      
-      if (clampVertical && clampHorizontal) {
-        this.scrollTo(maxHorizontalScrollOffset, maxVerticalScrollOffset);
-      } else if (clampVertical) {
-        this.scrollTo(horizontalScrollOffset, maxVerticalScrollOffset);
-      } else if (clampHorizontal) {
-        this.scrollTo(maxHorizontalScrollOffset, verticalScrolllOffset);
-      }
-    });
-  }.observes('frame'),
-   
+  adjustElementScroll: function() {
+    var container = this.get('containerView'),
+        containerElement = container.$(),
+        offset;
+
+    offset = this.get('verticalScrollOffset');
+    containerElement[0].scrollTop = offset;
+    offset = this.get('horizontalScrollOffset');
+    containerElement[0].scrollLeft = offset;
+    container.notifyPropertyChange('clippingFrame');
+  },
+
   forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
     var oldScrollHOffset = hOffSet;
     var oldScrollVOffset = vOffSet;
