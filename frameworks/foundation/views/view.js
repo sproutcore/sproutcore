@@ -2038,17 +2038,26 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     Normally this will be calculate based on the intersection of your own 
     clippingFrame and your parentView's clippingFrame.  
-    
+
     @property {Rect}
   */
   clippingFrame: function() {
-    var pv= this.get('parentView'), f = this.get('frame'), ret = f ;
+    var pv= this.get('parentView'), f = this.get('frame'), ret = f, cf ;
     if (pv) {
-     pv = pv.get('clippingFrame') ;
-     ret = SC.intersectRects(pv, f) ;
+      cf = pv.get('clippingFrame');
+      ret = SC.intersectRects(cf, f);
+
+      // Account for special cases inside ScrollView, where we adjust the
+      // element's scrollTop/scrollLeft property for performance reasons.
+      if (pv.isScrollable) {
+          ret.x += pv.get('horizontalScrollOffset');
+          ret.y += pv.get('verticalScrollOffset');
+      }
     }
+
     ret.x -= f.x ;
     ret.y -= f.y ;
+
     return ret ;
   }.property('parentView', 'frame').cacheable(),
   
