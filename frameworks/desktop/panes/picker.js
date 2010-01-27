@@ -299,14 +299,14 @@ SC.PickerPane = SC.PalettePane.extend({
   },
 
   /** @private
-    re-position rule optimized for Menu to enforce min left(7px)/right(8px) padding to the window
+    re-position rule optimized for Menu to enforce min left(7px)/right(20px) padding to the window
   */
   fitPositionToScreenMenu: function(w, f, subMenu) {
     // min left/right padding to the window
-    if( (f.x + f.width) > (w.width-9) ) {
+    if( (f.x + f.width) > (w.width-20) ) {
       // sub-menus should be re-anchored to the left of the parent menu
       if (subMenu) f.x = f.x - (f.width*2);
-      else f.x = w.width - f.width - 9;
+      else f.x = w.width - f.width - 20;
     }
     if( f.x < 7 ) f.x = 7;
     
