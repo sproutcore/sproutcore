@@ -568,7 +568,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         p = SC.$(layer).offset() ;
       
         // this is to take into account an styling issue.
-        if(element[0].tagName.toLowerCase()==="input") {
+        // this is counterproductive in FF >= 3.6
+        if(SC.browser.compareVersion(1,9,2) < 0 && 
+           element[0].tagName.toLowerCase()==="input") {
           top = p.top+this._topOffsetForFirefoxCursorFix; 
         }
         else top = p.top;
