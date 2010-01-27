@@ -540,11 +540,21 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.invokeLater(this._scroll_mouseWheel, 10) ;
     return this.get('canScrollHorizontal') || this.get('canScrollVertical') ;  
   },
-  
+
   /** @private */
   _scroll_mouseWheel: function() {
     this.scrollBy(this._scroll_wheelDeltaX, this._scroll_wheelDeltaY);
-    this._scroll_wheelDeltaX = this._scroll_wheelDeltaY = 0;
+    if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY > 0) {
+      this._scroll_wheelDeltaY = Math.floor(this._scroll_wheelDeltaY*0.950);
+      this._scroll_wheelDeltaY = Math.max(this._scroll_wheelDeltaY, 0);
+      this.invokeLater(this._scroll_mouseWheel, 10) ;
+    } else if (SC.WHEEL_MOMENTUM && this._scroll_wheelDeltaY < 0){
+      this._scroll_wheelDeltaY = Math.ceil(this._scroll_wheelDeltaY*0.950);
+      this._scroll_wheelDeltaY = Math.min(this._scroll_wheelDeltaY, 0);
+      this.invokeLater(this._scroll_mouseWheel, 10) ;
+    } else {
+      this._scroll_wheelDeltaY = 0;
+    }
   },
   
   // ..........................................................
