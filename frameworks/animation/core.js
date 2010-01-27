@@ -58,7 +58,7 @@ SC.Animatable = {
 
   // properties that adjust should relay to style
   _styleProperties: [ "opacity", "display" ],
-  _layoutStyles: ["left", "right", "top", "bottom", "width", "height", "centerX", "centerY"],
+  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight'.w(),
 
   // we cache this dictionary so we don't generate a new one each time we make
   // a new animation. It is used so we can start the animations in order—
