@@ -4,7 +4,7 @@
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
-/*globals ie7userdata */
+/*globals ie7userdata openDatabase*/
 /**
   @class
   
@@ -48,6 +48,8 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   */
   _defaults: null,
   
+  _safari3DB: null,
+  
   /**
     Invoke this method to set the builtin defaults.  This will cause all
     properties to change.
@@ -66,7 +68,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {Object} read value
   */
   readDefault: function(keyName) {
-    var ret= undefined, userKeyName, localStorage, key, del;
+    var ret= undefined, userKeyName, localStorage, key, del, storageSafari3;
     
     // namespace keyname
     keyName = this._normalizeKeyName(keyName);
@@ -82,16 +84,20 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
        try{
          localStorage.load("SC.UserDefaults");
        }catch(e){}
+    }else if(this.HTML5DB_noLocalStorage){
+         storageSafari3 = this._safari3DB;
     }else{
        localStorage = window.localStorage ;
        if (!localStorage && window.globalStorage) {
          localStorage = window.globalStorage[window.location.hostname];
        }
     }
-    if (localStorage) {
+    if (localStorage || storageSafari3) {
       key=["SC.UserDefaults",userKeyName].join('-at-');
       if(SC.browser.msie=="7.0"){
         ret=localStorage.getAttribute(key.replace(/\W/gi, ''));        
+      }else if(storageSafari3){
+        ret = this.dataHash[key];
       }else{
         ret = localStorage[key];
       }
@@ -128,7 +134,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefault} receiver
   */
   writeDefault: function(keyName, value) {
-    var userKeyName, written, localStorage, key, del;
+    var userKeyName, written, localStorage, key, del, storageSafari3;
     
     keyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(keyName);
@@ -141,7 +147,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     // save to local storage
     
     if(SC.browser.msie=="7.0"){
-       localStorage=ie7userdata;
+      localStorage=ie7userdata;
+    }else if(this.HTML5DB_noLocalStorage){
+      storageSafari3 = this._safari3DB;
     }else{
        localStorage = window.localStorage ;
        if (!localStorage && window.globalStorage) {
@@ -149,12 +157,28 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
        }
     }
     key=["SC.UserDefaults",userKeyName].join('-at-');
-    if (localStorage) {
+    if (localStorage || storageSafari3) {
       var encodedValue = SC.json.encode(value);
       if(SC.browser.msie=="7.0"){
         localStorage.setAttribute(key.replace(/\W/gi, ''), encodedValue);
         localStorage.save("SC.UserDefaults");
+      }else if(storageSafari3){
+        var obj = this;
+        storageSafari3.transaction(
+          function (t) {
+            t.executeSql("delete from SCLocalStorage where key = ?", [key], 
+              function (){
+                t.executeSql("insert into SCLocalStorage(key, value)"+
+                            " VALUES ('"+key+"', '"+encodedValue+"');", 
+                            [], obj._nullDataHandler, obj.killTransaction
+                );
+              }
+            );
+          }
+        );
+        this.dataHash[key] = encodedValue;
       }else{
+        
         localStorage[key] = encodedValue;
       }
     }
@@ -175,7 +199,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     @returns {SC.UserDefaults} receiver
   */
   resetDefault: function(keyName) {  
-    var fullKeyName, userKeyName, written, localStorage, key;
+    var fullKeyName, userKeyName, written, localStorage, key, storageSafari3;
     fullKeyName = this._normalizeKeyName(keyName);
     userKeyName = this._userKeyName(fullKeyName);
     
@@ -187,6 +211,8 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     
     if(SC.browser.msie=="7.0"){
        localStorage=ie7userdata;
+    }else if(this.HTML5DB_noLocalStorage){
+         storageSafari3 = this._safari3DB;
     }else{
        localStorage = window.localStorage ;
        if (!localStorage && window.globalStorage) {
@@ -200,6 +226,14 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       if(SC.browser.msie=="7.0"){
         localStorage.setAttribute(key.replace(/\W/gi, ''), null);
         localStorage.save("SC.UserDefaults");
+      } else if(storageSafari3){
+        var obj = this;
+        storageSafari3.transaction(
+          function (t) {
+            t.executeSql("delete from SCLocalStorage where key = ?", [key], null);
+          }
+        );
+        delete this.dataHash[key];
       }else{
         delete localStorage[key];
       }
@@ -277,24 +311,82 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
       // append element to body
       document.body.appendChild(el);
     }
-   // this.set('ready', YES);
+    this.HTML5DB_noLocalStorage = ((parseInt(SC.browser.safari, 0)>523) && (parseInt(SC.browser.safari, 0)<528));
+    if(this.HTML5DB_noLocalStorage){
+      var myDB;
+      try {
+        if (!window.openDatabase) {
+          console.error("Trying to load a database with safari version 3.1 "+
+                  "to get SC.UserDefaults to work. You are either in a"+
+                  " previous version or there is a problem with your browser.");
+          return;
+        } else {
+          var shortName = 'scdb',
+              version = '1.0',
+              displayName = 'SproutCore database',
+              maxSize = 65536; // in bytes,
+          myDB = openDatabase(shortName, version, displayName, maxSize);
+    
+          // You should have a database instance in myDB.
+    
+        }
+      } catch(e) {
+        console.error("Trying to load a database with safari version 3.1 "+
+                "to get SC.UserDefaults to work. You are either in a"+
+                " previous version or there is a problem with your browser.");
+        return;
+      }
+    
+      if(myDB){
+        var obj = this;
+        myDB.transaction(
+          function (transaction) {
+            transaction.executeSql('CREATE TABLE IF NOT EXISTS SCLocalStorage'+
+              '(key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL);', 
+              [], obj._nullDataHandler, obj.killTransaction);
+          }
+        );
+        myDB.transaction(
+          function (transaction) {
+            transaction.parent = obj;
+            transaction.executeSql('SELECT * from SCLocalStorage;', 
+                [], function(transaction, results){
+                  var hash={}, row;
+                  for(var i=0, iLen=results.rows.length; i<iLen; i++){
+                    row=results.rows.item(i);
+                    hash[row['key']]=row['value'];
+                  }
+                  transaction.parent.dataHash = hash;
+                  SC.userDefaults.set('ready', YES);
+                }, obj.killTransaction);
+          }
+        );
+        this._safari3DB=myDB;
+      }
+    }else{
+      this.set('ready', YES);
+    }
   },
-  
+
+
+  //Private methods to use if user defaults uses the database in safari 3
+  _killTransaction: function(transaction, error){
+    return true; // fatal transaction error
+  },
+
+  _nullDataHandler: function(transaction, results){},
+        
   readyCallback: function(ob, func){
     this.func = func;
     this.ob = ob;
   },
   
   readyChanged: function(){
-    if(this.get('ready')){
-      console.log('ready changed');
-      var f = this.get('func');
-      if(f) f.apply(this.get('ob'));
+    if(this.ready===YES){
+      var f = this.func;
+      if(f) f.apply(this.ob);
     }
-  }.observes('ready')
-  
-  
-  
+  }.observes('ready')  
 });
 
 /** global user defaults. */
