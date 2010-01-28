@@ -536,13 +536,13 @@ SC.SplitView = SC.View.extend(
     
     if (!isCollapsed) {
       // remember thickness in it's uncollapsed state
-      this._uncollapsedThickness = this.getThicknessForView(view)  ;
+      this._uncollapsedThickness = this.thicknessForView(view)  ;
       // and collapse
       // this.setThicknessForView(view, 0) ;
       if (view === this._topLeftView) {
-        this._topLeftViewThickness = 0 ;
+        this._updateTopLeftThickness(this.topLeftThickness()*-1) ;
       } else {
-        this._bottomRightViewThickness = 0 ;
+        this._updateBottomRightThickness(this.bottomRightThickness()*-1) ;
       }
       
       // if however the splitview decided not to collapse, clear:
@@ -552,9 +552,9 @@ SC.SplitView = SC.View.extend(
     } else {
       // uncollapse to the last thickness in it's uncollapsed state
       if (view === this._topLeftView) {
-        this._topLeftViewThickness = this._uncollapsedThickness ;
+        this._updateTopLeftThickness(this._uncollapsedThickness) ;
       } else {
-        this._bottomRightViewThickness = this._uncollapsedThickness ;
+        this._updateBottomRightThickness(this._uncollapsedThickness) ;
       }
       view._uncollapsedThickness = null ;
     }
@@ -640,6 +640,84 @@ SC.SplitView = SC.View.extend(
     }
   },
   
+  
+  _updateBottomRightThickness: function(offset) {
+    // console.log('%@._updateTopLeftThickness(%@)'.fmt(this, offset));
+    // console.log('%@.frame = %@'.fmt(this, SC.inspect(this.get('frame'))));
+    var topLeftView = this._topLeftView ,
+        bottomRightView = this._bottomRightView,
+        topLeftViewThickness = this.thicknessForView(topLeftView), // the current thickness, not the original thickness
+        bottomRightViewThickness = this.thicknessForView(bottomRightView),
+        minAvailable = this._dividerThickness ,
+        maxAvailable = 0,
+        proposedThickness = this._topLeftViewThickness + offset,
+        direction = this._layoutDirection,
+        bottomRightCanCollapse = this.canCollapseView(bottomRightView),
+        thickness = proposedThickness,
+        // constrain to thickness set on top/left
+        max = this.get('topLeftMaxThickness'),
+        min = this.get('topLeftMinThickness'),
+        bottomRightThickness, tlCollapseAtThickness, brCollapseAtThickness;
+    
+    if (!topLeftView.get("isCollapsed")) maxAvailable += topLeftViewThickness ;
+    if (!bottomRightView.get("isCollapsed")) maxAvailable += bottomRightViewThickness ;
+    
+    if (!SC.none(max)) thickness = Math.min(max, thickness) ;
+    if (!SC.none(min)) thickness = Math.max(min, thickness) ;
+    
+    // constrain to thickness set on bottom/right
+    max = this.get('bottomRightMaxThickness') ;
+    min = this.get('bottomRightMinThickness') ;
+    bottomRightThickness = maxAvailable - thickness ;
+    if (!SC.none(max)) bottomRightThickness = Math.min(max, bottomRightThickness) ;
+    if (!SC.none(min)) bottomRightThickness = Math.max(min, bottomRightThickness) ;
+    thickness = maxAvailable - bottomRightThickness ;
+    
+    // constrain to thickness determined by delegate.
+    thickness = this.invokeDelegateMethod(this.delegate, 'splitViewConstrainThickness', this, topLeftView, thickness) ;
+    
+    // cannot be more than what's available
+    thickness = Math.min(thickness, maxAvailable) ;
+    
+    // cannot be less than zero
+    thickness = Math.max(0, thickness) ;
+    
+    tlCollapseAtThickness = topLeftView.get('collapseAtThickness') ;
+    if (!tlCollapseAtThickness) tlCollapseAtThickness = 0 ;
+    brCollapseAtThickness = bottomRightView.get('collapseAtThickness') ;
+    brCollapseAtThickness = SC.none(brCollapseAtThickness) ? maxAvailable : (maxAvailable - brCollapseAtThickness);
+    
+    if ((proposedThickness <= tlCollapseAtThickness) && this.canCollapseView(topLeftView)) {
+      // want to collapse top/left, check if this doesn't violate the max thickness of bottom/right
+      max = bottomRightView.get('maxThickness');
+      if (!max || (minAvailable + maxAvailable) <= max) {
+        // collapse top/left view, even if it has a minThickness
+        thickness = 0 ;
+      }
+    } else if (proposedThickness >= brCollapseAtThickness && this.canCollapseView(bottomRightView)) {
+      // want to collapse bottom/right, check if this doesn't violate the max thickness of top/left
+      max = topLeftView.get('maxThickness');
+      if (!max || (minAvailable + maxAvailable) <= max) {
+        // collapse bottom/right view, even if it has a minThickness
+        thickness = maxAvailable;
+      }
+    }
+    
+    // now apply constrained value
+    if (thickness != this.thicknessForView(topLeftView)) {
+      this._desiredTopLeftThickness = thickness ;
+      
+      // un-collapse if needed.
+      topLeftView.set('isCollapsed', thickness === 0) ;
+      bottomRightView.set('isCollapsed', thickness >= maxAvailable) ;
+      
+      // this.set('displayNeedsUpdate', YES);
+      // this.adjustLayout();
+      this.updateChildLayout(); // updates child layouts
+      this.displayDidChange(); // updates cursor
+    }
+  },
+  
   /** 
     This observes 'layoutDirection' to update the cursor style immediately
     after the value of the layoutDirection of Split view is changed
@@ -648,7 +726,7 @@ SC.SplitView = SC.View.extend(
   */
   _setCursorStyle: function() {
     // console.log('%@._setCursorStyle()'.fmt(this));
-    var topLeftView = this._topLeftView ;
+    var topLeftView = this._topLeftView,
         bottomRightView = this._bottomRightView,
         thumbViewCursor = this.get('thumbViewCursor'),
         // updates the cursor of the thumb view that called mouseDownInThumbView() to reflect the status of the drag

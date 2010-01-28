@@ -2,8 +2,5 @@
 
 .sc-split-divider-view {
   background-color: #ddd;
-  border-left: 1px #999 solid;
-  border-right: 1px #999 solid;
-  z-index: 1;
 }
 
