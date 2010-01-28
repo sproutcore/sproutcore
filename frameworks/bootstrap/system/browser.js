@@ -18,6 +18,7 @@ SC.browser = (function() {
     msie: (/msie/).test( userAgent ) && !(/opera/).test( userAgent ) ? version : 0,
     mozilla: (/mozilla/).test( userAgent ) && !(/(compatible|webkit)/).test( userAgent ) ? version : 0,
     mobileSafari: (/apple.*mobile.*safari/).test(userAgent) ? version : 0,
+    chrome: (/chrome/).test( userAgent ) ? version : 0,
     windows: !!(/(windows)/).test(userAgent),
     mac: !!((/(macintosh)/).test(userAgent) || (/(mac os x)/).test(userAgent)),
     language: (navigator.language || navigator.browserLanguage).split('-', 1)[0]
