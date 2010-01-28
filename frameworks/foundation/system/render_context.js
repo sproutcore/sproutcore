@@ -588,15 +588,25 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     Adds the specified className to the current tag, if it does not already
     exist.  This method has no effect if there is no open tag.
     
-    @param {String} className the class to add
+    @param {String|Array} nameOrClasses the class name or an array of classes
     @returns {SC.RenderContext} receiver
   */
-  addClass: function(className) {
+  addClass: function(nameOrClasses) {
     var classNames = this.classNames() ; // handles cloning ,etc.
-    if (classNames.indexOf(className)<0) {
-      classNames.push(className);
-      this._classNamesDidChange = YES ;
+    if(SC.typeOf(nameOrClasses) === SC.T_STRING){
+      if (classNames.indexOf(nameOrClasses)<0) {
+        classNames.push(nameOrClasses);
+      }
+    }else{
+      for(var i = 0, iLen= nameOrClasses.length; i<iLen; i++){
+        var cl = nameOrClasses[i];
+        if (classNames.indexOf(cl)<0) {
+          classNames.push(cl);
+        }
+      }
     }
+    this._classNamesDidChange = YES ;
+    
     return this;
   },
   

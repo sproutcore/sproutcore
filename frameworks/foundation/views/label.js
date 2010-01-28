@@ -116,12 +116,15 @@ SC.LabelView = SC.View.extend(SC.Control,
     @field
   */
   displayValue: function() {
-    var value = this.get('value') ;
+    var value, formatter;
+    
+    value = this.get('value') ;
     
     // 1. apply the formatter
-    var formatter = this.getDelegateProperty('formatter', this.displayDelegate) ;
+    formatter = this.getDelegateProperty('formatter', this.displayDelegate) ;
     if (formatter) {
-      var formattedValue = (SC.typeOf(formatter) === SC.T_FUNCTION) ? formatter(value, this) : formatter.fieldValueForObject(value, this) ;
+      var formattedValue = (SC.typeOf(formatter) === SC.T_FUNCTION) ? 
+          formatter(value, this) : formatter.fieldValueForObject(value, this) ;
       if (!SC.none(formattedValue)) value = formattedValue ;
     }
     
@@ -129,7 +132,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     // join with commas.
     if (SC.typeOf(value) === SC.T_ARRAY) {
       var ary = [];
-      for(var idx=0;idx<value.get('length');idx++) {
+      for(var idx=0, idxLen = value.get('length'); idx< idxLen;idx++) {
         var x = value.objectAt(idx) ;
         if (!SC.none(x) && x.toString) x = x.toString() ;
         ary.push(x) ;
@@ -190,10 +193,10 @@ SC.LabelView = SC.View.extend(SC.Control,
     if (this.get('isEditing')) return YES ;
     if (!this.get('isEditable')) return NO ;
 
-    var el = this.$();
-    var value = this.get('value') || '' ;
-    var f = SC.viewportOffset(el[0]) ;
-    var frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
+    var el = this.$(),
+        value = this.get('value') || '',
+        f = SC.viewportOffset(el[0]),
+        frameTemp = this.convertFrameFromView(this.get('frame'), null) ;
     f.width=frameTemp.width;
     f.height=frameTemp.height;
     
@@ -269,34 +272,59 @@ SC.LabelView = SC.View.extend(SC.Control,
   render: function(context, firstTime) {
     var value = this.get('displayValue'),
         icon = this.get('icon'),
-        hint = this.get('hint');
+        hint = this.get('hint'),
+        classes, stylesHash;
     
     // add icon if needed
     if (icon) {
-      var url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL;
-      var className = (url === icon) ? '' : icon ;
-      icon = '<img src="%@" alt="" class="icon %@" />'.fmt(url, className) ;
-      context.push(icon);
+      var url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL,
+          className = (url === icon) ? '' : icon ;
+      // if(firstTime){
+        icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
+        context.push(icon);    
+      // }else{
+      //         this.$('img').attr('src', url);
+      //         this.$('img').attr('class', 'icon '+className);
+      //       }
     }
     
     // if there is a hint set and no value, render the hint
     // otherwise, render the value
     if (hint && (!value || value === '')) {
-      context.push('<span class="sc-hint">', hint, '</span>');
-    } else { 
-      context.push(value);
+      if(firstTime){
+        context.push('<span class="sc-hint">', hint, '</span>');
+        this._hintCache = hint;
+      }else{
+        if(this._hintCache!==hint) {
+          this.$('span').text(hint);
+          this._hintCache = hint;
+        }
+      }
+    } else {
+      if(firstTime){
+        context.push(value);
+        this._valueCache = value;
+      }else{
+        if(this._valueCache!==value){
+          this.$().text(value);
+          this._valueCache = value;
+        }
+      }
     }
     
     // and setup alignment and font-weight on styles
-    context.addStyle('text-align',  this.get('textAlign'))
-           .addStyle('font-weight', this.get('fontWeight'));
-           
-    var classes = this._TEMPORARY_CLASS_HASH;
-    classes.icon = !!this.get('icon');
-    context.setClass(classes);
+    stylesHash = { 
+      'text-align': this.get('textAlign'), 
+      'font-weight':this.get('fontWeight')
+    };
            
     // if we are editing, set the opacity to 0
-    if (this.get('isEditing')) context.addStyle('opacity', 0.0);
+    if (this.get('isEditing')) stylesHash['opacity']=0;
+    context.addStyle(stylesHash);
+    
+    classes = this._TEMPORARY_CLASS_HASH;
+    classes.icon = !!this.get('icon');
+    context.setClass(classes);
   }
   
 });

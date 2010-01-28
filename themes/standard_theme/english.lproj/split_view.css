@@ -1,10 +1,10 @@
 /* @group SC.SplitView */
 
-.sc-theme .sc-split-divider-view.horizontal {
+.sc-theme .sc-horizontal .sc-split-divider-view {
 	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
 }
 
-.sc-theme .sc-split-divider-view.vertical {
+.sc-theme .sc-vertical .sc-split-divider-view {
 	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1397px;
 }
 
