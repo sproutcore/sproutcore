@@ -80,6 +80,12 @@ SC.LAYOUT_AUTO = 'auto';
 */
 SC.CONTEXT_MENU_ENABLED = YES;
 
+/**
+  Default property to disable or enable if the focus can jump to the address
+  bar or not.
+*/
+SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
+
 
 /** @private - custom array used for child views */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
@@ -1302,6 +1308,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var seen = [],
         rootView = this.pane(), ret; 
     ret = rootView._computeNextValidKeyView(this, seen);
+    if(SC.TABBING_ONLY_INSIDE_DOCUMENT && SC.ret === null){
+      ret = rootView._computeNextValidKeyView(rootView, seen);
+    }
     return ret ;
   }.property('nextKeyView'),
   
