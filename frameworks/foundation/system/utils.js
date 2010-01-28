@@ -179,7 +179,7 @@ SC.mixin( /** @scope SC */ {
       x: Math.min(SC.minX(r1), SC.minX(r2)),
       y: Math.min(SC.minY(r1), SC.minY(r2)),
       width: Math.max(SC.maxX(r1), SC.maxX(r2)),
-      height: Math.max(SC.maxY(r1), SC.maxX(r2))
+      height: Math.max(SC.maxY(r1), SC.maxY(r2))
     } ;
     
     // convert edges to w/h
