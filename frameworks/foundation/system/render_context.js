@@ -596,6 +596,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       console.warn('You are adding an undefined or empty class'+ this.toString());
       return this;
     }
+    
     var classNames = this.classNames() ; // handles cloning ,etc.
     if(SC.typeOf(nameOrClasses) === SC.T_STRING){
       if (classNames.indexOf(nameOrClasses)<0) {
