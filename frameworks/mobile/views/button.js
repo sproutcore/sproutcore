@@ -109,8 +109,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button,
     classes.def = this.get('isDefault');
     classes.cancel = this.get('isCancel');
     classes.icon = !!icon;
-    context.attr('role', 'button')
-      .setClass(classes).addClass(this.get('theme'));
+    var theme = this.get('theme');
+    if(theme) classes[theme] = YES;
+    context.attr('role', 'button').setClass(classes);
       
     // don't reset the content if the touch is down because we don't want to
     // regenerate the event.

@@ -279,13 +279,23 @@ SC.LabelView = SC.View.extend(SC.Control,
     if (icon) {
       var url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL,
           className = (url === icon) ? '' : icon ;
-      // if(firstTime){
+      if(firstTime){
         icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
-        context.push(icon);    
-      // }else{
-      //         this.$('img').attr('src', url);
-      //         this.$('img').attr('class', 'icon '+className);
-      //       }
+        context.push(icon);
+        this._urlCache = url;
+        this._classNameCache = className;    
+      }else if(this._urlCache!==url && this._classNameCache!==className){
+        var img = this.$('img');
+        if(img){
+          img.attr('src', url);
+          img.attr('class', 'icon '+className);  
+        }else{
+          icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
+          context.push(icon);    
+        }
+        this._urlCache = url;
+        this._classNameCache = className;
+      }
     }
     
     // if there is a hint set and no value, render the hint
@@ -315,7 +325,7 @@ SC.LabelView = SC.View.extend(SC.Control,
     // and setup alignment and font-weight on styles
     stylesHash = { 
       'text-align': this.get('textAlign'), 
-      'font-weight':this.get('fontWeight')
+      'font-weight': this.get('fontWeight')
     };
            
     // if we are editing, set the opacity to 0
