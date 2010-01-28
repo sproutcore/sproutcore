@@ -611,6 +611,8 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         }
       }
     }
+    this._classNamesDidChange = YES ;
+    
     return this;
   },
   
