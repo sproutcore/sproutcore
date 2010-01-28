@@ -557,6 +557,43 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
   },
   
+  touchStart: function(evt) {
+    this._scroll_startOffset = this.get('verticalScrollOffset');
+    this._scroll_touchStartOffset = evt.touches[0].pageY;
+
+    return YES;
+  },
+
+  touchDragged: function(evt) {
+    var offset = evt.touches[0].pageY - this._scroll_touchStartOffset;
+    this._scroll_offset = offset;
+    offset = this._scroll_startOffset + offset;
+    this.set('verticalScrollOffset', offset);
+
+    this._scroll_timestamp = evt.timeStamp;
+  },
+
+  touchEnd: function(evt) {
+    if (evt.timeStamp - this._scroll_timestamp < 100) {
+      this._scroll_touchEndOffset = this.get('verticalScrollOffset');
+      this.decelerateAnimation();
+    }
+  },
+
+  decelerateAnimation: function() {
+    if (this._scroll_offset > 0) {
+      this.set('verticalScrollOffset', this.get('verticalScrollOffset')+this._scroll_offset);
+      this._scroll_offset = Math.floor(this._scroll_offset*0.950);
+      this._scroll_offset = Math.max(this._scroll_offset, 0);
+      this.invokeLater(this.decelerateAnimation, 16) ;
+    } else if (this._scroll_offset < 0) {
+      this.set('verticalScrollOffset', this.get('verticalScrollOffset')+this._scroll_offset);
+      this._scroll_offset = Math.ceil(this._scroll_offset*0.950);
+      this._scroll_offset = Math.min(this._scroll_offset, 0);
+      this.invokeLater(this.decelerateAnimation, 16) ;
+    }
+  },
+
   // ..........................................................
   // INTERNAL SUPPORT
   // 
