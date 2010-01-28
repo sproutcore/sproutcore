@@ -596,17 +596,17 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     if(SC.typeOf(nameOrClasses) === SC.T_STRING){
       if (classNames.indexOf(nameOrClasses)<0) {
         classNames.push(nameOrClasses);
+        this._classNamesDidChange = YES ;
       }
     }else{
       for(var i = 0, iLen= nameOrClasses.length; i<iLen; i++){
         var cl = nameOrClasses[i];
         if (classNames.indexOf(cl)<0) {
           classNames.push(cl);
+          this._classNamesDidChange = YES ;
         }
       }
     }
-    this._classNamesDidChange = YES ;
-    
     return this;
   },
   
