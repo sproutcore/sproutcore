@@ -575,7 +575,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
 
   touchEnd: function(evt) {
     if (evt.timeStamp - this._scroll_timestamp < 100) {
-      this._scroll_touchEndOffset = this.get('verticalScrollOffset')-20;
+      this._scroll_touchEndOffset = this.get('verticalScrollOffset')/2;
       this.decelerateAnimation();
     }
   },
