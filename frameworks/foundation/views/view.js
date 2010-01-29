@@ -1308,7 +1308,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var seen = [],
         rootView = this.pane(), ret; 
     ret = rootView._computeNextValidKeyView(this, seen);
-    if(SC.TABBING_ONLY_INSIDE_DOCUMENT && SC.ret === null){
+    if(SC.TABBING_ONLY_IN_DOCUMENT && SC.ret === null){
       ret = rootView._computeNextValidKeyView(rootView, seen);
     }
     return ret ;
