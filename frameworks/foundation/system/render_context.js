@@ -592,6 +592,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     @returns {SC.RenderContext} receiver
   */
   addClass: function(nameOrClasses) {
+    if(nameOrClasses === undefined || nameOrClasses === null) return this;
     var classNames = this.classNames() ; // handles cloning ,etc.
     if(SC.typeOf(nameOrClasses) === SC.T_STRING){
       if (classNames.indexOf(nameOrClasses)<0) {
