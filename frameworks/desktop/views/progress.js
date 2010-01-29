@@ -198,23 +198,18 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       context.setClass(classNames);
       inner = this.$('.sc-inner');
       animatedBackground = this.get('animatedBackgroundMatrix');
-      cssString = "width: "+value+"; ";
-      cssString = cssString + "left: "+offset+"; ";
+      inner.css('width', value).css('left',offset);
       if (animatedBackground.length === 3 ) {
-        backPosition = '0px -'+ 
-                      (animatedBackground[0] + 
-                      animatedBackground[1]*this._currentBackground)+'px';
+        inner.css('backgroundPosition', '0px -'+ 
+                (animatedBackground[0] + 
+                animatedBackground[1]*this._currentBackground)+'px');
         if(this._currentBackground===animatedBackground[2]-1
            || this._currentBackground===0){
           this._nextBackground *= -1;
         }
         this._currentBackground += this._nextBackground;
         
-        cssString = cssString + "backgroundPosition: "+backPosition+"; ";
-        //Instead of using css() set attr for faster perf.
-        inner.attr('style', cssString);
-      }else{
-        inner.attr('style', cssString);
+       
       }
     }
     
