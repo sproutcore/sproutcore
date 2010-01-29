@@ -210,12 +210,16 @@ SC.PickerPane = SC.PalettePane.extend({
 
   /** @private
     This method will return ret (x, y, width, height) from a rectangular element
+    Notice: temp hack for calculating visiable anchor height by counting height 
+    up to window bottom only. We do have 'clippingFrame' supported from view.
+    But since our anchor can be element, we use this solution for now.
   */  
   computeAnchorRect: function(anchor) {
     var ret = SC.viewportOffset(anchor); // get x & y
     var cq = SC.$(anchor);
+    var wsize = this.get('currentWindowSize') || SC.RootResponder.responder.computeWindowSize() ;
     ret.width = cq.outerWidth();
-    ret.height = cq.outerHeight();
+    ret.height = (wsize.height-ret.y) < cq.outerHeight() ? (wsize.height-ret.y) : cq.outerHeight();
     return ret ;
   },
 
