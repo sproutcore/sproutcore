@@ -117,9 +117,9 @@ SC.RadioView = SC.FieldView.extend(
     var items = this.get('items'), loc = this.get('localize'),
       titleKey = this.get('itemTitleKey'), valueKey = this.get('itemValueKey'),
       isEnabledKey = this.get('itemIsEnabledKey'), 
-      iconKey = this.get('itemIconKey');
-    var ret = [], max = (items)? items.get('length') : 0 ;
-    var item, title, value, idx, isArray, isEnabled, icon;
+      iconKey = this.get('itemIconKey'),
+      ret = [], max = (items)? items.get('length') : 0,
+      item, title, value, idx, isArray, isEnabled, icon;
     
     for(idx=0;idx<max;idx++) {
       item = items.objectAt(idx); 
@@ -222,10 +222,11 @@ SC.RadioView = SC.FieldView.extend(
         
         labelText = this.escapeHTML ? SC.RenderContext.escapeHTML(item[0]) : item[0];
         
-        context.push('<label class="sc-radio-button ', selectionStateClassNames, '">');
-        context.push('<input type="radio" value="', idx, '" name="', name, '" ', disabled, '/>');
-        context.push('<span class="button"></span>');
-        context.push('<span class="sc-button-label">', icon, labelText, '</span></label>');
+        context.push('<label class="sc-radio-button ', selectionStateClassNames, '">',
+                  '<input type="radio" value="', idx, '" name="', name, '" ', disabled, '/>',
+                  '<span class="button"></span>',
+                  '<span class="sc-button-label">', 
+                  icon, labelText, '</span></label>');
       }
       
       // first remove listener on existing radio buttons
@@ -251,7 +252,6 @@ SC.RadioView = SC.FieldView.extend(
       }, this);
     
     }
-    
   },
   
   /** @private - 
@@ -262,37 +262,36 @@ SC.RadioView = SC.FieldView.extend(
        assigned to the the input field parent
   */
   _getSelectionState: function(item, value, isArray, shouldReturnObject) {
-      var sel, classNames, key;
-      
-      // determine if the current item is selected
-      if (item) {
-        sel = (isArray) ? (value.indexOf(item[1])>=0) : (value===item[1]);
-      } else {
-        sel = NO;
+    var sel, classNames, key;
+    
+    // determine if the current item is selected
+    if (item) {
+      sel = (isArray) ? (value.indexOf(item[1])>=0) : (value===item[1]);
+    } else {
+      sel = NO;
+    }
+    
+    // now set class names
+    classNames = {
+      sel: (sel && !isArray), mixed: (sel && isArray), disabled: (!item[2]) 
+    };
+    
+    if(shouldReturnObject) {
+      return classNames;
+    } else {
+      // convert object values to string
+      var classNameArray = [];
+      for(key in classNames) {
+        if(!classNames.hasOwnProperty(key)) continue;
+        if(classNames[key]) classNameArray.push(key);
       }
-      
-      // now set class names
-      classNames = {
-        sel: (sel && !isArray), mixed: (sel && isArray), disabled: (!item[2]) 
-      };
-      
-      if(shouldReturnObject) {
-        return classNames;
-      } else {
-        // convert object values to string
-        var classNameArray = [];
-        for(key in classNames) {
-          if(!classNames.hasOwnProperty(key)) continue;
-          if(classNames[key]) classNameArray.push(key);
-        }
-        return classNameArray.join(" ");
-      }
-      
+      return classNameArray.join(" ");
+    }
   },
 
   getFieldValue: function() {
-    var val = this.$input().filter(function() { return this.checked; }).val();
-    var items = this.get('displayItems') ;
+    var val = this.$input().filter(function() { return this.checked; }).val(),
+        items = this.get('displayItems') ;
     val = items[parseInt(val,0)];
     
     // if no items are selected there is a saved mixed value, return that...
@@ -330,7 +329,6 @@ SC.RadioView = SC.FieldView.extend(
   },
   
 
-  
   didCreateLayer: function() {
      this.setFieldValue(this.get('fieldValue'));
      var inputElems=this.$input();
@@ -340,11 +338,10 @@ SC.RadioView = SC.FieldView.extend(
    },
 
   willDestroyLayer: function() {
-       var inputElems=this.$input();
-        for( var i=0, inputLen = inputElems.length; i<inputLen; i++){
-            SC.Event.remove(this.$input()[i], 'click', this, this._field_fieldValueDidChange); 
-        }
-   
+    var inputElems=this.$input();
+    for( var i=0, inputLen = inputElems.length; i<inputLen; i++){
+      SC.Event.remove(this.$input()[i], 'click', this, this._field_fieldValueDidChange); 
+    }
   },
   
   /**
