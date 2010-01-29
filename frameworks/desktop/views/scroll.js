@@ -556,41 +556,66 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_wheelDeltaY = 0;
     }
   },
-  
+
+  //HACK! REMOVE THIS!
+  // Proxy mouse events to touch events for desktop testing
+  mouseDown: function(evt) {
+    evt.touches = [{pageY: evt.pageY}];
+    return this.touchStart(evt);
+  },
+
+  mouseDragged: function(evt) {
+    evt.touches = [{pageY: evt.pageY}];
+    return this.touchDragged(evt);
+  },
+
+  mouseUp: function(evt) {
+    evt.touches = [{pageY: evt.pageY}];
+    return this.touchEnd(evt);
+  },
+
   touchStart: function(evt) {
-    this._scroll_startOffset = this.get('verticalScrollOffset');
-    this._scroll_touchStartOffset = evt.touches[0].pageY;
-    this._scroll_offset = 0;
+    this._scroll_startScrollOffset = this.containerView.$()[0].scrollTop;
+    this._scroll_startTouchOffset = evt.touches[0].pageY;
+    this._scroll_velocity = 0;
     return YES;
   },
 
   touchDragged: function(evt) {
-    var offset = evt.touches[0].pageY - this._scroll_touchStartOffset;
-    this._scroll_offset = offset;
-    offset = this._scroll_startOffset - offset;
-    this.set('verticalScrollOffset', offset);
+    var offset = evt.touches[0].pageY - this._scroll_startTouchOffset;
 
+    offset = this._scroll_startScrollOffset - offset;
+    this.containerView.$()[0].scrollTop = offset;
+    // if (this._scroll_timestamp - evt.timeStamp > 50) {
+    //   this._scroll_startTouchOffset = evt.touches[0].pageY;
+    // }
     this._scroll_timestamp = evt.timeStamp;
   },
 
   touchEnd: function(evt) {
-    if (evt.timeStamp - this._scroll_timestamp < 100) {
-      this._scroll_touchEndOffset = this.get('verticalScrollOffset')/2;
-      this.decelerateAnimation();
+    if (evt.timeStamp - this._scroll_timestamp < 150) {
+      this._scroll_touchEndOffset = this.get('verticalScrollOffset')/10;
+      this.scrollOffset = this.get('verticalScrollOffset');
+      this.decelerateAnimation(this, this.containerView.$()[0]);
     }
   },
 
-  decelerateAnimation: function() {
-    if (this._scroll_offset > 0) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset')-this._scroll_offset);
-      this._scroll_offset = Math.floor(this._scroll_offset*0.950);
-      this._scroll_offset = Math.max(this._scroll_offset, 0);
-      this.invokeLater(this.decelerateAnimation, 16) ;
-    } else if (this._scroll_offset < 0) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset')-this._scroll_offset);
-      this._scroll_offset = Math.ceil(this._scroll_offset*0.950);
-      this._scroll_offset = Math.min(this._scroll_offset, 0);
-      this.invokeLater(this.decelerateAnimation, 16) ;
+  decelerateAnimation: function(scroll, container) {
+    if (scroll._scroll_offset > 0) {
+      console.log(container.scrollTop);
+      console.log(scroll._scroll_offset);
+      container.scrollTop = scroll.scrollOffset;
+      scroll.scrollOffset = scroll.scrollOffset-scroll._scroll_offset;
+      scroll._scroll_offset = Math.floor(scroll._scroll_offset*0.950);
+      scroll._scroll_offset = Math.max(scroll._scroll_offset, 0);
+      setTimeout(scroll.decelerateAnimation, 16, scroll, container) ;
+    } else if (scroll._scroll_offset < 0) {
+      console.log(container.scrollTop);
+      container.scrollTop = scroll.scrollOffset;
+      scroll.scrollOffset = scroll.scrollOffset-scroll._scroll_offset;
+      scroll._scroll_offset = Math.ceil(scroll._scroll_offset*0.950);
+      scroll._scroll_offset = Math.min(scroll._scroll_offset, 0);
+      setTimeout(scroll.decelerateAnimation, 16, scroll, container) ;
     }
   },
 
