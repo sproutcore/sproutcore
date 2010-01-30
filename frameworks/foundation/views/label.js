@@ -316,7 +316,7 @@ SC.LabelView = SC.View.extend(SC.Control,
         this._valueCache = value;
       }else{
         if(this._valueCache!==value){
-          this.$().text(value);
+          this.$().text(value||'');
           this._valueCache = value;
         }
       }
