@@ -907,7 +907,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */
   prepareContext: function(context, firstTime) {
-    var mixins, len, idx, layerId, bgcolor, cursor, classArray=[];
+    var mixins, len, idx, layerId, bgcolor, cursor;
     
     // do some initial setup only needed at create time.
     if (firstTime) {
@@ -922,18 +922,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     // do some standard setup...
-    if (this.get('isTextSelectable')) classArray.push('allow-select') ;
-    if (!this.get('isEnabled')) classArray.push('disabled') ;
-    if (!this.get('isVisible')) classArray.push('hidden') ;
-    if (this.get('isFirstResponder')) classArray.push('focus');
+    if (this.get('isTextSelectable')) context.addClass('allow-select') ;
+    if (!this.get('isEnabled')) context.addClass('disabled') ;
+    if (!this.get('isVisible')) context.addClass('hidden') ;
+    if (this.get('isFirstResponder')) context.addClass('focus');
     
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
     
     cursor = this.get('cursor') ;
-    if (cursor) classArray.push(cursor.get('className')) ;
-    
-    context.addClass(classArray);
+    if (cursor) context.addClass(cursor.get('className')) ;
     
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
