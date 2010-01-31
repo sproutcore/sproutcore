@@ -519,7 +519,7 @@ SC.RootResponder = SC.RootResponder.extend(
       // focus unless you click on a list, another textfield or an special
       // view/control.
       
-      if(view) fr=view.get('pane').get('firstResponder');
+      if(view) fr=view.getPath('pane.firstResponder');
       
       if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
         fr.resignFirstResponder();
