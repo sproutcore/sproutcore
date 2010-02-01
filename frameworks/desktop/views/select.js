@@ -14,8 +14,8 @@
   list of items. The selected item will be displayed on the button.
   User has the option of enabling checkbox for the selected menu item.
 
-  I AM CHANGING THIS AND BREAKING APIs, so I have renamed it (and put it in a more
-  logical place) so that I don't break anyone else's current use of SelectButtonView...
+  I AM REWRITING THIS AND BREAKING APIs, so I have renamed it (and put it in a more
+  logical place) so that I don't break anyone else's current use of SelectView...
   even though I have a suspiscion that no one uses it.
   
   @extends SC.ButtonView
@@ -119,7 +119,7 @@ SC.SelectView = SC.ButtonView.extend(
     @private
     @type:{Array}
   */
-  _itemList: [],
+  itemList: [],
 
   /**
     Current selected menu item
@@ -331,9 +331,9 @@ SC.SelectView = SC.ButtonView.extend(
 
     //Get the namekey, iconKey and valueKey set by the user
     nameKey = this.get('itemTitleKey') ;
-    iconKey = this.get('itemIconKey') ;
+    iconKey = this.get('iconKey') ;
     valueKey = this.get('itemValueKey') ;
-    separatorKey = this.get('itemSeparatorKey');
+    separatorKey = this.get('separatorKey');
     showCheckbox = this.get('showCheckbox') ;
 
     //get the current selected value
@@ -416,7 +416,7 @@ SC.SelectView = SC.ButtonView.extend(
 
     idx += 1 ;
 
-    this.set('_itemList', itemList) ;
+    this.set('itemList', itemList) ;
     }, this ) ;
 
     if(firstTime) {
@@ -464,7 +464,7 @@ SC.SelectView = SC.ButtonView.extend(
       lastMenuWidth = menuWidth ;
     }
 
-    items = this.get('_itemList') ;
+    items = this.get('itemList') ;
 
     var customViewClassName = this.get('customViewClassName') ;
     var customViewMenuOffsetWidth = this.get('customViewMenuOffsetWidth') ;
@@ -496,12 +496,12 @@ SC.SelectView = SC.ButtonView.extend(
 
     this.set('lastMenuWidth',lastMenuWidth) ;
     currSel = this.get('_currentSelItem') ;
-    itemList = this.get('_itemList') ;
+    itemList = this.get('itemList') ;
     menuControlSize = this.get('controlSize') ;
     menuHeightPadding = this.get('menuPaneHeightPadding') ;
 
     // get the user defined custom view
-    customView = this.get('exampleView') ;
+    customView = this.get('customView') ;
     customMenuView = customView ? customView : SC.MenuItemView ;
 
     menu  = SC.MenuPane.create({
