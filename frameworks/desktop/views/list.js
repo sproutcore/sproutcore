@@ -203,12 +203,13 @@ SC.ListView = SC.CollectionView.extend(
 
     var del       = this.get('rowDelegate'),
         rowHeight = del.get('rowHeight'),
-        ret, custom, cache, delta, max, content ;
+        rowSpacing, ret, custom, cache, delta, max, content ;
         
     ret = idx * rowHeight;
 
-		if(this.get('rowSpacing')){ 
-      ret += idx * this.get('rowSpacing'); 
+    rowSpacing = this.get('rowSpacing');
+		if(rowSpacing){ 
+      ret += idx * rowSpacing; 
     } 
 
     if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
