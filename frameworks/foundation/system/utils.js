@@ -288,18 +288,18 @@ SC.mixin( /** @scope SC */ {
   },
   
   /**
-  Given a string and an example element or style string, and an optional
-  set of class names, calculates the width and height of that block of text.
+  Sets up a string measuring environment.
   
-  To constrain the width, set max-width on the exampleElement or in the style string.
+  You may want to use this, in conjunction with teardownStringMeasurement and
+  measureString, instead of metricsForString, if you will be measuring many strings
+  with the same settings. It would be a lot more efficient, as it would only prepare
+  and teardown once instead of several times.
   
-  @param string {String} The string to measure.
   @param exampleElement The example element to grab styles from, or the style string to use.
   @param classNames {String} (Optional) Class names to add to the test element.
   */
-  metricsForString: function(string, exampleElement, classNames)
-  {
-    var element = this._metricsCalculationElement, width, height, classes, styles, style;
+  prepareStringMeasurement: function(exampleElement, classNames) {
+    var element = this._metricsCalculationElement, classes, styles, style;
     
     // collect the class names
     classes = SC.A(classNames).join(' ');
@@ -368,25 +368,72 @@ SC.mixin( /** @scope SC */ {
       element.setAttribute("style", style + "; position:absolute; left: 0px; top: 0px; bottom: auto; right: auto; width: auto; height: auto;");
     }
     
-    // the conclusion of which to use (innerText or textContent) should be cached
-    if (typeof element.innerText != "undefined") element.innerText = string;
-    else element.textContent = string;
-    
     element.className = classes;
-    
-    // measure
-    var result = {
-      width: element.clientWidth,
-      height: element.clientHeight
-    };
+    element = null;
+  },
+  
+  /**
+  Tears down the string measurement environment. Usually, this doesn't _have_
+  to be called, but there are too many what ifs: for example, what if the measurement
+  environment has a bright green background and is over 10,000px wide? Guess what: it will
+  become visible on the screen.
+  
+  So, generally, we tear the measurement environment down so that it doesn't cause issue.
+  However, we keep the DOM element for efficiency.
+  */
+  teardownStringMeasurement: function() {
+    var element = this._metricsCalculationElement;
     
     // clear element
     element.innerHTML = "";
     element.className = "";
     element.setAttribute("style", ""); // get rid of any junk from computed style.
-    
-    // clean up
     element = null;
+  },
+  
+  /**
+  Measures a string in the prepared environment.
+  
+  An easier and simpler alternative (but less efficient for bulk measuring) is metricsForString.
+  
+  @param string {String} The string to measure.
+  */
+  measureString: function(string) {
+    var element = this._metricsCalculationElement;
+    if (!element) {
+      throw "measureString requires a string measurement environment to be set up. Did you mean metricsForString?";
+    }
+    
+    // the conclusion of which to use (innerText or textContent) should be cached
+    if (typeof element.innerText != "undefined") element.innerText = string;
+    else element.textContent = string;
+    
+    // generate result
+    var result = {
+      width: element.clientWidth,
+      height: element.clientHeight
+    };
+    
+    element = null;
+    return result;
+  },
+  
+  
+  /**
+  Given a string and an example element or style string, and an optional
+  set of class names, calculates the width and height of that block of text.
+  
+  To constrain the width, set max-width on the exampleElement or in the style string.
+  
+  @param string {String} The string to measure.
+  @param exampleElement The example element to grab styles from, or the style string to use.
+  @param classNames {String} (Optional) Class names to add to the test element.
+  */
+  metricsForString: function(string, exampleElement, classNames)
+  {
+    SC.prepareStringMeasurement(exampleElement, classNames);
+    var result = SC.measureString(string);
+    SC.teardownStringMeasurement();
     return result;
   },
 
