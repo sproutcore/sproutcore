@@ -165,6 +165,8 @@ SC.Button = {
         title = this.get('displayTitle') ,
         needsTitle = (!SC.none(title) && title.length>0),
         elem, htmlNode, imgTitle;
+        if(this.get('escapeHTML')) title = SC.RenderContext.escapeHTML(title) ;
+        
     // get the icon.  If there is an icon, then get the image and update it.
     // if there is no image element yet, create it and insert it just before
     // title.
