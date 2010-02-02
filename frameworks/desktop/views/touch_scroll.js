@@ -5,7 +5,6 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
-sc_require('views/scroller');
 sc_require('mixins/border');
 
 /** @class
@@ -23,9 +22,8 @@ sc_require('mixins/border');
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.ScrollView = SC.View.extend(SC.Border, {
-
-  classNames: ['sc-scroll-view'],
+SC.TouchScrollView = SC.View.extend(SC.Border, {
+  classNames: ['sc-touch-scroll-view'],
   
   // ..........................................................
   // PROPERTIES
@@ -52,13 +50,14 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   /**
     The current vertical scroll offset.  Changing this value will update both the contentView and the vertical scroller, if there is one.
   */
-  verticalScrollOffset: function(key, value) {
-    if (value !== undefined) {
-      this._scroll_verticalScrollOffset = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), value)) ;
-    }
-
-    return this._scroll_verticalScrollOffset||0;
-  }.property().cacheable(),
+  verticalScrollOffset: 0,
+  // verticalScrollOffset: function(key, value) {
+  //   if (value !== undefined) {
+  //     this._scroll_verticalScrollOffset = Math.max(0,Math.min(this.get('maximumVerticalScrollOffset'), value)) ;
+  //   }
+  // 
+  //   return this._scroll_verticalScrollOffset||0;
+  // }.property().cacheable(),
 
   /**
     The maximum horizontal scroll offset allowed given the current contentView 
@@ -556,42 +555,147 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_wheelDeltaY = 0;
     }
   },
+
+  // HACK! REMOVE THIS!
+  // Proxy mouse events to touch events for desktop testing
+  mouseDown: function(evt) {
+    evt.touches = [{pageY: evt.pageY}];
+    return this.touchStart(evt);
+  },
   
+  mouseDragged: function(evt) {
+    evt.touches = [{pageY: evt.pageY}];
+    return this.touchDragged(evt);
+  },
+  
+  mouseUp: function(evt) {
+    evt.touches = [{pageY: evt.pageY}];
+    return this.touchEnd(evt);
+  },
+
   touchStart: function(evt) {
-    this._scroll_startOffset = this.get('verticalScrollOffset');
-    this._scroll_touchStartOffset = evt.touches[0].pageY;
-    this._scroll_offset = 0;
+    this.beginTouchTracking(evt);
+    this.invokeLater(this.beginTouchesInContent, 150);
+
     return YES;
   },
 
-  touchDragged: function(evt) {
-    var offset = evt.touches[0].pageY - this._scroll_touchStartOffset;
-    this._scroll_offset = offset;
-    offset = this._scroll_startOffset - offset;
-    this.set('verticalScrollOffset', offset);
+  beginTouchesInContent: function() {
+    var touch = this.touch, itemView;
+    if (touch.tracking && !touch.dragging) {
+      var ev = touch.originalEvent;
+      console.log('beginTouches');
+      ev.manufactured = YES;
+      this.contentView.mouseDown(ev);
+      // itemView = this.contentView.itemViewForEvent(ev);
+      // itemView.$().addClass('sel');
+      // this.contentView.select(itemView.contentIndex);
+    }
+  },
+  
+  beginTouchTracking: function(evt) {
+    // initialize start state
+    this.touch = {
+      startScrollOffset: { x: this.horizontalScrollOffset, y: this.verticalScrollOffset },
+      startTime: evt.timeStamp,
+      startTimePosition: this.verticalScrollOffset,
+      startTouchOffset: { x: evt.touches[0].pageX, y: evt.touches[0].pageY },
+      decelerationVelocity: { y: 0 },
+      originalTarget: SC.RootResponder.responder.targetViewForEvent(evt),
+      originalPane: this.get('pane'),
+      originalEvent: SC.copy(evt),
+      
+      tracking: YES,
+      dragging: NO,
+      decelerating: NO
+    };
+    
+    this.tracking = YES;
+    this.dragging = NO;
+  },
 
-    this._scroll_timestamp = evt.timeStamp;
+  touchDragged: function(evt) {
+    console.log('dragged');
+    var touch = this.touch,
+        touchY = evt.touches[0].pageY,
+        offsetY = touch.startScrollOffset.y,
+        maxOffset = this.get('maximumVerticalScrollOffset');
+
+    var deltaY = touchY - touch.startTouchOffset.y;
+
+    if (!touch.dragging) {
+      // give the user 5 pixels of wiggle room before we begin a drag
+      if (Math.abs(deltaY) > 5) {
+        touch.dragging = YES;
+        touch.firstDrag = YES;
+        this.contentView.select(SC.IndexSet.create());
+      }
+    }
+    
+    if (touch.dragging) {
+      offsetY = offsetY - deltaY;
+      
+      if (touch.firstDrag) {
+        touch.firstDrag = NO;
+        // this._scroll_startTouchOffset.y = offsetY;
+        return;
+      }
+    }
+
+    this.verticalScrollOffset = Math.max(0,Math.min(offsetY, maxOffset));
+    this.get('containerView').$()[0].scrollTop = this.verticalScrollOffset;
+
+    if (evt.timeStamp - touch.lastEventTime > 50) {
+      touch.startTime = evt.timeStamp;
+      touch.startTimePosition = this.verticalScrollOffset;
+    }
+    touch.lastEventTime = evt.timeStamp;
   },
 
   touchEnd: function(evt) {
-    if (evt.timeStamp - this._scroll_timestamp < 100) {
-      this._scroll_touchEndOffset = this.get('verticalScrollOffset')-20;
-      this.decelerateAnimation();
+    var touch = this.touch;
+    
+    this.tracking = NO;
+    touch.tracking = NO;
+    this.dragging = NO;
+    if (touch.dragging) {
+      touch.dragging = NO;
+
+      if (evt.timeStamp - touch.lastEventTime <= 100) {
+        touch.offsetBeforeDeceleration = { y: this.verticalScrollOffset };
+        this.startDecelerationAnimation(evt);
+      }
     }
   },
 
+  startDecelerationAnimation: function(evt) {
+    var touch = this.touch;
+
+    var scrollDistance = this.verticalScrollOffset - touch.startTimePosition;
+    var scrollDuration = (evt.timeStamp - touch.startTime)/15;
+    touch.decelerationVelocity = { y: scrollDistance / scrollDuration };
+    this.decelerateAnimation();
+  },
+
   decelerateAnimation: function() {
-    if (this._scroll_offset > 0) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset')-this._scroll_offset);
-      this._scroll_offset = Math.floor(this._scroll_offset*0.950);
-      this._scroll_offset = Math.max(this._scroll_offset, 0);
-      this.invokeLater(this.decelerateAnimation, 16) ;
-    } else if (this._scroll_offset < 0) {
-      this.set('verticalScrollOffset', this.get('verticalScrollOffset')-this._scroll_offset);
-      this._scroll_offset = Math.ceil(this._scroll_offset*0.950);
-      this._scroll_offset = Math.min(this._scroll_offset, 0);
-      this.invokeLater(this.decelerateAnimation, 16) ;
+    var touch = this.touch,
+        maxOffset = this.get('maximumVerticalScrollOffset'),
+        newY = this.verticalScrollOffset + touch.decelerationVelocity.y;
+
+    this.verticalScrollOffset = Math.max(0,Math.min(Math.round(newY), maxOffset));
+    this.get('containerView').$()[0].scrollTop = this.verticalScrollOffset;
+
+    touch.decelerationVelocity.y *= 0.950;
+
+    var absYVelocity = Math.abs(touch.decelerationVelocity.y);
+    // console.log(absYVelocity);
+    if (absYVelocity < 0.01) {
+      touch.decelerationVelocity.y = 0;
+      touch.decelerating = NO;
+      return;
     }
+    
+    this.invokeLater(this.decelerateAnimation, 16);
   },
 
   // ..........................................................
@@ -617,8 +721,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.contentView = this.containerView.get('contentView');
     
     // create a horizontal scroller view if needed...
-    view = this.horizontalScrollerView;
-    if (view) {
+    if (view=this.horizontalScrollerView) {
       if (this.get('hasHorizontalScroller')) {
         view = this.horizontalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_HORIZONTAL,
@@ -629,8 +732,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
     
     // create a vertical scroller view if needed...
-    view = this.verticalScrollerView;
-    if (view) {
+    if (view=this.verticalScrollerView) {
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_VERTICAL,
@@ -646,7 +748,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.contentViewDidChange() ; // setup initial display...
     this.tile() ; // set up initial tiling
   },
-  
+
   init: function() {
     sc_super();
     
@@ -685,12 +787,20 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this._scroll_contentView = newView;
       if (newView) newView.addObserver('frame', this, f);
       
+      newView.adjust('top', 50);
+      this.verticalScrollOffset = 50;
       // replace container
       this.containerView.set('contentView', newView);
       
       this.contentViewFrameDidChange();
     }
   }.observes('contentView'),
+  
+  didCreateLayer: function() {
+    this.invokeLast(function() {
+      this.containerView.$()[0].scrollTop = 50;
+    });
+  },
   
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the 
@@ -783,9 +893,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
         offset;
 
     offset = this.get('verticalScrollOffset');
-    containerElement[0].scrollTop = offset;
+    // containerElement[0].scrollTop = offset;
     offset = this.get('horizontalScrollOffset');
-    containerElement[0].scrollLeft = offset;
+    // containerElement[0].scrollLeft = offset;
     container.notifyPropertyChange('clippingFrame');
   },
 
