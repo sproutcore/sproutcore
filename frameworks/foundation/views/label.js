@@ -152,6 +152,20 @@ SC.LabelView = SC.View.extend(SC.Control,
     return value ;
   }.property('value', 'localize', 'formatter', 'escapeHTML').cacheable(),
   
+  
+  /**
+    [RO] The hint value that will actually be displayed.
+    
+    This property is dynamically computed by applying localization 
+    and other normalization utilities.
+    
+  */
+  hintValue: function() {
+    var hintVal = this.get('hint');
+    if (this.get('escapeHTML')) hintVal = SC.RenderContext.escapeHTML(hintVal);
+    return hintVal ;
+  }.property('hint', 'escapeHTML').cacheable(),
+  
   /**
     Enables editing using the inline editor.
   */
@@ -272,7 +286,7 @@ SC.LabelView = SC.View.extend(SC.Control,
   render: function(context, firstTime) {
     var value = this.get('displayValue'),
         icon = this.get('icon'),
-        hint = this.get('hint'),
+        hint = this.get('hintValue'),
         classes, stylesHash;
     
     // add icon if needed
@@ -306,7 +320,7 @@ SC.LabelView = SC.View.extend(SC.Control,
         this._hintCache = hint;
       }else{
         if(this._hintCache!==hint) {
-          this.$('span').text(hint);
+          this.$('span').html(hint);
           this._hintCache = hint;
         }
       }
@@ -316,7 +330,7 @@ SC.LabelView = SC.View.extend(SC.Control,
         this._valueCache = value;
       }else{
         if(this._valueCache!==value){
-          this.$().text(value||'');
+          this.$().html(value||'');
           this._valueCache = value;
         }
       }
