@@ -287,53 +287,31 @@ SC.LabelView = SC.View.extend(SC.Control,
     var value = this.get('displayValue'),
         icon = this.get('icon'),
         hint = this.get('hintValue'),
-        classes, stylesHash;
+        classes, stylesHash, text,
+        iconChanged = false, textChanged = false;
     
-    // add icon if needed
     if (icon) {
       var url = (icon.indexOf('/')>=0) ? icon : SC.BLANK_IMAGE_URL,
           className = (url === icon) ? '' : icon ;
-      if(firstTime){
-        icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
-        context.push(icon);
-        this._urlCache = url;
-        this._classNameCache = className;    
-      }else if(this._urlCache!==url && this._classNameCache!==className){
-        var img = this.$('img');
-        if(img){
-          img.attr('src', url);
-          img.attr('class', 'icon '+className);  
-        }else{
-          icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
-          context.push(icon);    
-        }
-        this._urlCache = url;
-        this._classNameCache = className;
+      icon = '<img src="'+url+'" alt="" class="icon '+className+'" />';
+      if(icon!==this._iconCache) {
+        this._iconCache=icon;
+        iconChanged = true;
       }
     }
     
-    // if there is a hint set and no value, render the hint
-    // otherwise, render the value
     if (hint && (!value || value === '')) {
-      if(firstTime){
-        context.push('<span class="sc-hint">', hint, '</span>');
-        this._hintCache = hint;
-      }else{
-        if(this._hintCache!==hint) {
-          this.$('span').html(hint);
-          this._hintCache = hint;
-        }
-      }
-    } else {
-      if(firstTime){
-        context.push(value);
-        this._valueCache = value;
-      }else{
-        if(this._valueCache!==value){
-          this.$().html(value||'');
-          this._valueCache = value;
-        }
-      }
+      text = '<span class="sc-hint">'+hint+'</span>';
+    }else{
+      text = value;
+    }
+    if(text!==this._textCache) {
+      this._textCache=text;
+      textChanged = true;
+    }
+        
+    if(firstTime || textChanged || iconChanged){
+      context.push(icon, text);
     }
     
     // and setup alignment and font-weight on styles
