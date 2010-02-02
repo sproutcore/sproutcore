@@ -178,7 +178,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   render: function(context, firstTime) {
     // add href attr if tagName is anchor...
-    var href, toolTip, classes;
+    var href, toolTip, classes, theme;
     if (this.get('tagName') === 'a') {
       href = this.get('href');
       if (!href || (href.length === 0)) href = "javascript"+":;";
@@ -198,8 +198,9 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     classes.def = this.get('isDefault');
     classes.cancel = this.get('isCancel');
     classes.icon = !!this.get('icon');
-    context.attr('role', 'button')
-      .setClass(classes).addClass(this.get('theme'));
+    context.attr('role', 'button').setClass(classes);
+    theme = this.get('theme');
+    if (theme) context.addClass(theme);
     // render inner html 
     if(firstTime){
        context = context.push("<span class='sc-button-inner' style = 'min-width:"+this.get('titleMinWidth')+"px'>");
