@@ -133,7 +133,7 @@ SC.IndexSet = SC.mixin({},
         cur = content[0];
     return (cur === 0) ? -1 : (cur>0) ? 0 : Math.abs(cur);
     
-  }.property('[]').cacheable(),
+  }.property('[]'),
   
   /**
     Returns the first index in the set .
