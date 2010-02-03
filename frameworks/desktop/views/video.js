@@ -35,22 +35,14 @@ SC.VideoView = SC.View.extend({
         case "video":
           if(SC.browser.safari){
             context.tagName('video');
-            context.attr('src', this.src);
+            context.attr('src', this.get('value'));
             context.attr('poster', this.poster);
-         //   context.push('video tag not supported by your browser');
             this.loaded='video';
             console.log('loaded using video tag');
             return;
           }
           break;
         case "quicktime":
-          var hasQT=false;
-          // if (navigator.plugins) {
-          //             for (j=0, pluginsLen = navigator.plugins.length; j < pluginsLen; j++ ) {
-          //               if (navigator.plugins[j].name.indexOf("QuickTime") >= 0) hasQT = true; 
-          //             }
-          //             if(!hasQT) break;
-          //           }
           var id = SC.guidFor(this);
           if(SC.browser.msie){
             context.push('<object id="qt_event_source" ');
@@ -66,18 +58,20 @@ SC.VideoView = SC.View.extend({
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" ');
           context.push('id="object_'+id+'" ');
           context.push('codebase="http://www.apple.com/qtactivex/qtplugin.cab">');
-          context.push('<param name="src" value="'+this.src+'"/>');
+          context.push('<param name="src" value="'+this.get('value')+'"/>');
           context.push('<param name="autoplay" value="false"/>');
           context.push('<param name="loop" value="false"/>');
           context.push('<param name="controller" value="false"/>');
           context.push('<param name="postdomevents" value="true"/>');
+          context.push('<param name="scale" value="aspect"/>');
           context.push('<embed width="100%" height="100%" ');
           context.push('name="object_'+id+'" ');
-          context.push('src="'+this.src+'" ');
+          context.push('src="'+this.get('value')+'" ');
           context.push('autostart="false" ');
           context.push('EnableJavaScript="true" ');
           context.push('postdomevents="true" ');
           context.push('controller="false" ');
+          context.push('scale="aspect" ');
           context.push('pluginspage="www.apple.com/quicktime/download">');
           context.push('</embed></object>');
           context.push('</object>');
@@ -85,8 +79,36 @@ SC.VideoView = SC.View.extend({
           console.log('loaded using quicktime');
           return;
         case "flash":
-          this.loaded='flash';
           console.log('loaded using flash');
+          var flashURL= sc_static('videoCanvas.swf');
+          context.push('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" ');
+          context.push('codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" ');
+          context.push('width="100%" ');
+          context.push('height="100%" ');
+          context.push('id="videoCanvas" ');
+          context.push('align="middle">');
+        	context.push('<param name="allowScriptAccess" value="sameDomain" />');
+        	context.push('<param name="allowFullScreen" value="true" />');
+        	context.push('<param name="movie" value="'+flashURL+'" />');
+        	context.push('<param name="quality" value="autohigh" />');
+        	context.push('<param name="scale" value="default" />');
+        	context.push('<param name="wmode" value="transparent" />');
+        	context.push('<param name="bgcolor" value="#ffffff" />	');
+        	context.push('<embed src="'+flashURL+'" ');
+        	context.push('quality="autohigh" ');
+        	context.push('scale="default" ');
+        	context.push('wmode="transparent" ');
+        	context.push('bgcolor="#ffffff" ');
+        	context.push('width="100%" ');
+        	context.push('height="100%" ');
+        	context.push('name="videoCanvas" ');
+        	context.push('align="middle" ');
+        	context.push('allowScriptAccess="sameDomain" ');
+        	context.push('allowFullScreen="true" ');
+        	context.push('type="application/x-shockwave-flash" ');
+        	context.push('pluginspage="http://www.adobe.com/go/getflashplayer" />');
+        	context.push('</object>');
+          this.loaded='flash';
           return;
         default:
           context.push('video is not supported by your browser');
@@ -94,10 +116,8 @@ SC.VideoView = SC.View.extend({
         }
       }
     }
-    else{
-      
-    }
   },
+
   
   
   didCreateLayer :function(){
