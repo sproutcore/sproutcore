@@ -35,6 +35,9 @@ module("SC.RecordAttribute core methods", {
       
       // test Object
       anObject: SC.Record.attr(Object),
+                                 
+      // test Number
+      aNumber: SC.Record.attr(Number),
       
       // used to test default value
       defaultValue: SC.Record.attr(String, {
@@ -73,7 +76,8 @@ module("SC.RecordAttribute core methods", {
         lastName: "Doe", 
         date: "2009-03-01T20:30-08:00",
         anArray: ['one', 'two', 'three'],
-        anObject: { 'key1': 'value1', 'key2': 'value2' }
+        anObject: { 'key1': 'value1', 'key2': 'value2' },
+        aNumber: '123'
       },
       
       { 
@@ -84,6 +88,7 @@ module("SC.RecordAttribute core methods", {
         relatedToAggregate: 'bar1',
         anArray: 'notAnArray',
         anObject: 'notAnObject',
+        aNumber: '123',
         nonIsoDate: "2009/06/10 8:55:50 +0000"
       },
       
@@ -93,7 +98,8 @@ module("SC.RecordAttribute core methods", {
         lastName: "Doe", 
         relatedToComputed: 'bar1',
         anArray: ['one', 'two', 'three'],
-        anObject: { 'key1': 'value1', 'key2': 'value2' }
+        anObject: { 'key1': 'value1', 'key2': 'value2' },
+        aNumber: '123'
       }
       
     ]);
@@ -127,6 +133,10 @@ test("returns default value if underyling value is empty", function() {
 
 test("naming a key should read alternate attribute", function() {
   equals(rec.get('otherName'), 'John', 'reading prop otherName should get attr from firstName');
+});
+
+test("getting a number", function() {
+  equals((typeof rec.get('aNumber')), 'number', 'reading prop aNumber should get attr as number');
 });
 
 test("getting an array and object", function() {
@@ -175,6 +185,12 @@ test("writing a value should override default value", function() {
   equals(rec.get('defaultValue'), 'default', 'precond - returns default');
   rec.set('defaultValue', 'not-default');
   equals(rec.get('defaultValue'), 'not-default', 'newly written value should replace default value');
+});
+
+test("writing a string to a number attribute should store a number" ,function() {
+     equals(rec.set('aNumber', "456"), rec, 'returns reciever');
+     equals(rec.get('aNumber'), 456, 'should have new value');
+     equals(typeof(rec.get('aNumber')), 'number', 'new value should be a number');
 });
 
 test("writing a date should generate an ISO date" ,function() {
