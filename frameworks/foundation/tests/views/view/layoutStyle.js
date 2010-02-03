@@ -160,6 +160,85 @@ test("layout {top, left, width: auto, height: auto}", function() {
   layer.parentNode.removeChild(layer);
 });
 
+
+// ..........................................................
+// TEST FRAME/STYLEFRAME WITH BASIC LAYOUT VARIATIONS
+// 
+// NOTE:  Each test evaluates the frame before and after adding it to the 
+// parent.
+
+module('BASIC LAYOUT VARIATIONS PERCENTAGE', commonSetup);
+
+test("layout {top, left, width, height}", function() {
+
+  var layout = { top: 10, left: 10, width: 50, height: 50 };
+  var s = { top: 10, left: 10, width: 50, height: 50 } ;
+  var no_f = { x: 10, y: 10, width: 50, height: 50 } ;
+  var with_f = { x: 10, y: 10, width: 50, height: 50 } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+test("layout {top, left, bottom, right}", function() {
+
+  var layout = { top: 10, left: 10, bottom: 10, right: 10 };
+  var no_f = { x: 10, y: 10, width: 0, height: 0 } ;
+  var with_f = { x: 10, y: 10, width: 180, height: 180 } ;
+  var s = { top: 10, left: 10, bottom: 10, right: 10 } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+test("layout {bottom, right, width, height}", function() {
+
+  var layout = { bottom: 10, right: 10, width: 50, height: 50 };
+  var no_f = { x: 0, y: 0, width: 50, height: 50 } ;
+  var with_f = { x: 140, y: 140, width: 50, height: 50 } ;
+  var s = { bottom: 10, right: 10, width: 50, height: 50 } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+test("layout {centerX, centerY, width, height}", function() {
+
+  var layout = { centerX: 10, centerY: 10, width: 60, height: 60 };
+  var no_f = { x: 10, y: 10, width: 60, height: 60 } ;
+  var with_f = { x: 80, y: 80, width: 60, height: 60 } ;
+  var s = { marginLeft: -20, marginTop: -20, width: 60, height: 60, top: "50%", left: "50%" } ;
+
+  performLayoutTest(layout, no_f, s, with_f, s) ;
+}) ;
+
+test("layout {top, left, width: auto, height: auto}", function() {
+  child = SC.View.create({
+    useStaticLayout: YES,
+    render: function(context) {
+      // needed for auto
+      context.push('<div style="padding: 10px"></div>');
+    }
+  });
+
+  // parent MUST have a layer.
+  parent.createLayer();
+  var layer = parent.get('layer');
+  document.body.appendChild(layer);
+  
+  var layout = { top: 0, left: 0, width: 'auto', height: 'auto' };
+  var no_f = { x: 0, y: 0, width: 0, height: 0 };
+  var with_f = { x: 0, y: 0, width: 20, height: 20 };
+  var s = { top: 0, left: 0, width: 'auto', height: 'auto' };
+  
+  performLayoutTest(layout, no_f, s, with_f, s);
+  
+  layer.parentNode.removeChild(layer);
+});
+
+
+
+
+
+
+
 // ..........................................................
 // TEST FRAME/STYLEFRAME WITH INVALID LAYOUT VARIATIONS
 // 

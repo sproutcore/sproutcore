@@ -2100,9 +2100,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {Hash}
     @readOnly
   */
+  
+  
   layoutStyle: function() {
     var layout = this.get('layout'), ret = {}, pdim = null, error, 
         AUTO = SC.LAYOUT_AUTO,
+        dims = SC._VIEW_DEFAULT_DIMS, loc = dims.length, x, value, key,
         stLayout = this.get('useStaticLayout');
     
     if (layout.width !== undefined &&
@@ -2125,20 +2128,31 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // handle left aligned and left/right
     if (!SC.none(layout.left)) {
-      ret.left = Math.floor(layout.left);
-      if (layout.width !== undefined) {
-        if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else ret.width = Math.floor(layout.width) ;
-        ret.right = null ;
-      } else {
-        ret.width = null ;
-        ret.right = Math.floor(layout.right || 0) ;
+      if(layout.left > 0 && layout.left < 1) {
+        ret.left = Math.floor(layout.left*100)+"%";  //percentage left
+      }else{
+        ret.left = Math.floor(layout.left); //px left
       }
       ret.marginLeft = 0 ;
       
+      if (layout.width !== undefined) {
+        if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+        else if(layout.width > 0 && layout.width < 1) ret.width = Math.floor(layout.width*100)+"%"; //percentage width
+        else ret.width = Math.floor(layout.width) ; //px width
+        ret.right = null ;
+      } else {
+        ret.width = null ;
+        if(layout.right && layout.right > 0 && layout.right < 1) ret.right = Math.floor(layout.right*100)+"%"; //percentage right
+        else ret.right = Math.floor(layout.right || 0) ; //px right
+      }
+      
     // handle right aligned
     } else if (!SC.none(layout.right)) {
-      ret.right = Math.floor(layout.right) ;
+      if(layout.right > 0 && layout.right < 1) {
+        ret.right = Math.floor(layout.right*100)+"%";  //percentage left
+      }else{
+        ret.right = Math.floor(layout.right) ;
+      }
       ret.marginLeft = 0 ;
       
       if (SC.none(layout.width)) {
@@ -2147,14 +2161,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       } else {
         ret.left = null ;
         if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else ret.width = Math.floor(layout.width || 0) ;
+        else if(layout.width && layout.width > 0 && layout.width < 1) ret.width = Math.floor(layout.width*100)="%" ; //percentage width
+        else ret.width = Math.floor(layout.width || 0) ; //px width
       }
       
     // handle centered
     } else if (!SC.none(layout.centerX)) {
       ret.left = "50%";
-      ret.width = Math.floor(layout.width || 0) ;
-      ret.marginLeft = Math.floor(layout.centerX - ret.width/2) ;
+      if(layout.width && layout.width > 0 && layout.width < 1) ret.width = Math.floor(layout.width*100)="%" ; //percentage width
+      else ret.width = Math.floor(layout.width || 0) ;
+      if(layout.width && layout.width > 0 && layout.width < 1 && layout.centerX > 0 && layout.centerX < 1){
+        ret.marginLeft = Math.floor((layout.centerX - layout.width/2)*100)+"%" ;
+      }else if(layout.width && layout.width > 1 && (layout.centerX > 1 || layout.centerX <= 0)){
+        ret.marginLeft = Math.floor(layout.centerX - ret.width/2) ;
+      }else {
+        console.error("You have to set width and centerX usign both percentages or pixels");
+        ret.marginLeft = null;
+      }
       ret.right = null ;
     
     // if width defined, assume top/left of zero
@@ -2162,6 +2185,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.left =  0;
       ret.right = null;
       if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+      else if(layout.width > 0 && layout.width < 1) ret.width = Math.floor(layout.width*100)+"%";
       else ret.width = Math.floor(layout.width);
       ret.marginLeft = 0;
       
@@ -2182,41 +2206,57 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // handle left aligned and left/right
     if (!SC.none(layout.top)) {
-      ret.top = Math.floor(layout.top);
+      if(layout.top > 0 && layout.top < 1) ret.top = Math.floor(layout.top*100)+"%";
+      else ret.top = Math.floor(layout.top);
       if (layout.height !== undefined) {
         if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+        else if(layout.height > 0 && layout.height < 1) ret.height = Math.floor(layout.height*100)+"%" ;
         else ret.height = Math.floor(layout.height) ;
         ret.bottom = null ;
       } else {
         ret.height = null ;
-        ret.bottom = Math.floor(layout.bottom || 0) ;
+        if(layout.bottom && layout.bottom > 0 && layout.bottom < 1) ret.bottom = Math.floor(layout.bottom*100)+"%" ;
+        else ret.bottom = Math.floor(layout.bottom || 0) ;
       }
       ret.marginTop = 0 ;
       
     // handle right aligned
     } else if (!SC.none(layout.bottom)) {
       ret.marginTop = 0 ;
-      ret.bottom = Math.floor(layout.bottom) ;
+      if(layout.bottom > 0 && layout.bottom < 1) ret.bottom = Math.floor(layout.bottom*100)+"%";
+      else ret.bottom = Math.floor(layout.bottom) ;
       if (SC.none(layout.height)) {
         ret.top = 0;
         ret.height = null ;
       } else {
         ret.top = null ;
         if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+        else if(layout.height && layout.height > 0 && layout.height < 1 ) ret.height = Math.floor(layout.height*100)+"%" ;
         else ret.height = Math.floor(layout.height || 0) ;
       }
       
     // handle centered
     } else if (!SC.none(layout.centerY)) {
       ret.top = "50%";
-      ret.height = Math.floor(layout.height || 0) ;
-      ret.marginTop = Math.floor(layout.centerY - ret.height/2) ;
       ret.bottom = null ;
+      
+      if(layout.height && layout.height > 0 && layout.height < 1) ret.height = Math.floor(layout.height*100)+ "%" ;
+      else ret.height = Math.floor(layout.height || 0) ;
+      
+      if(layout.height && layout.height > 0 && layout.height < 1 && layout.centerY > 0 && layout.centerY < 1){
+        ret.marginTop = Math.floor((layout.centerY - layout.height/2)*100)+"%" ;
+      }else if(layout.height && layout.height > 1 && (layout.centerY > 1 || layout.centerY <= 0)){
+        ret.marginTop = Math.floor(layout.centerY - ret.height/2) ;
+      }else {
+        console.error("You have to set height and centerY to use both percentages or pixels");
+        ret.marginTop = null;
+      }
     
     } else if (!SC.none(layout.height)) {
       ret.top = 0;
       ret.bottom = null;
       if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+      else if(layout.height && layout.height > 0 && layout.height < 1) ret.height = Math.floor(layout.height*100)+"%" ;
       else ret.height = Math.floor(layout.height || 0) ;
       ret.marginTop = 0;
       
@@ -2247,15 +2287,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // set default values to null to allow built-in CSS to shine through
     // currently applies only to marginLeft & marginTop
-    var dims = SC._VIEW_DEFAULT_DIMS, loc = dims.length, x;
     while(--loc >=0) {
       x = dims[loc];
       if (ret[x]===0) ret[x]=null;
     }
     
     // convert any numbers into a number + "px".
-    for(var key in ret) {
-      var value = ret[key];
+    for(key in ret) {
+      value = ret[key];
       if (typeof value === SC.T_NUMBER) ret[key] = (value + "px");
     }
     return ret ;
