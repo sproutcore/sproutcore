@@ -484,7 +484,7 @@ SC.mixin( /** @scope SC */ {
         // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
         // clientLeft of the offset parent.
         var offsetParent = element.offsetParent ;
-        if ((SC.browser.mozilla >= 3) && offsetParent) {
+        if (SC.browser.mozilla.match(/1[.]9/) && offsetParent) {
           valueT -= offsetParent.clientTop ;
           valueL -= offsetParent.clientLeft;
         }

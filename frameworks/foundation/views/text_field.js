@@ -545,10 +545,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // to fix the cursor at any position. As of FF 3.5.3 mozilla hasn't fixed this 
     // bug, even though related bugs that I've found on their database appear
     // as fixed.  
+    
+    // UPDATE: Things seem to be working on FF3.6 therefore we are disabling the
+    // hack for the latest versions of FF.
     // 
     // Juan Pinzon
     
-    if (SC.browser.mozilla && !this.get('useStaticLayout')) {
+    if (parseFloat(SC.browser.mozilla)<1.9 && !this.get('useStaticLayout')) {
       var top, left, width, height, p, layer, element, textfield;
       
       // I'm caching in didCreateLayer this elements to improve perf
