@@ -709,8 +709,14 @@ SC.SplitView = SC.View.extend(
       thumbViewCursor.set('cursorStyle', 
         this._layoutDirection === SC.LAYOUT_HORIZONTAL ? "w-resize" : "n-resize") ;
     } else {
-      thumbViewCursor.set('cursorStyle', 
-        this._layoutDirection === SC.LAYOUT_HORIZONTAL ? "ew-resize" : "ns-resize") ;
+      if(SC.browser.msie) {
+        thumbViewCursor.set('cursorStyle', 
+          this._layoutDirection === SC.LAYOUT_HORIZONTAL ? "e-resize" : "n-resize") ;
+      }
+      else {
+        thumbViewCursor.set('cursorStyle', 
+          this._layoutDirection === SC.LAYOUT_HORIZONTAL ? "ew-resize" : "ns-resize") ;
+      }
     }
   }.observes('layoutDirection'),
   
