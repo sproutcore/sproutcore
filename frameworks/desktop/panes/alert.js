@@ -238,7 +238,6 @@ SC.AlertPane = SC.PanelPane.extend({
             layout: { right: 5, height: 'auto', width: 'auto', bottom: 0 },
             theme: 'capsule',
             title: "Cancel", 
-            isCancel: YES,
             action: "dismiss",
             isVisible: NO
           }),
