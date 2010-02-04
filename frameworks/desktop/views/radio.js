@@ -241,7 +241,7 @@ SC.RadioView = SC.FieldView.extend(
         idx = parseInt(input.val(),0);
         item = (idx>=0) ? items[idx] : null;
 
-        input.attr('disabled', (!item[2]) ? 'disabled' : null);
+        input.attr('disabled', (!item[2]) || (!this.get('isEnabled')) ? 'disabled' : null);
         selectionState = this._getSelectionState(item, value, isArray, true);
 
         // set class of label
