@@ -1,0 +1,74 @@
+/* Track */
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .track {
+	position: absolute;
+	top: 0px;
+	bottom: 0px;
+	left: 0;
+	right: 0;
+	background: sc_static("images/sc-scroller-repeat-y") -0px -0px repeat-y;
+}
+
+/* Cap */
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .cap {
+	position:absolute;
+	height: 16;
+	width: 14px;
+	height: 16px;
+	top: 0px;
+	background: sc_static("images/sc-scroller-sprite") -0px -52px no-repeat;
+}
+
+/* Buttons */
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .button-top {
+	position:absolute;
+	background: sc_static("images/sc-scroller-sprite") -0px -26px no-repeat;
+	height: 26px;
+    width: 14px;
+    bottom: 14px;
+}
+
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .button-bottom {
+	position:absolute;
+	background: sc_static("images/sc-scroller-sprite") -0px -68px no-repeat;
+	height: 15px;
+    width: 14px;
+    bottom: 0px;
+}
+
+/* Active */
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .button-top:active {
+	background: sc_static("images/sc-scroller-sprite") -0px -0px no-repeat;
+}
+
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .button-bottom:active {
+	background: sc_static("images/sc-scroller-sprite") -0px -83px no-repeat;
+}
+
+/* Thumb */
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .thumb {
+	position:absolute;
+}
+
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .thumb-center {
+	position: absolute;
+	width: 14px;
+	top: 10px;
+	bottom: 10px;
+	background: sc_static("images/sc-scroller-repeat-y") -14px -0px repeat-y;
+}
+
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .thumb-top {
+	position: absolute;
+	width: 14px;
+	top: 0px;
+	height: 10px;
+	background: sc_static("images/sc-scroller-sprite") -0px -98px no-repeat;
+}
+
+.sc-theme .sc-view.sc-scroller-view.sc-vertical .thumb-bottom {
+	position: absolute;
+	width: 14px;
+	bottom: 0px;
+	height: 10px;
+	background: sc_static("images/sc-scroller-sprite") -0px -108px no-repeat;
+}
