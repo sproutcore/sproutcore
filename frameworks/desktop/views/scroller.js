@@ -11,10 +11,29 @@
   work with scroller views directly, but you may override this class to
   implement your own custom scrollers.
 
+  Because the scroller uses the dimensions of its constituent elements to
+  calculate layout, you may need to override the default display metrics.
+
+  You can either create a subclass of ScrollerView with the new values, or
+  provide your own in your theme:
+
+{{{
+  SC.mixin(SC.ScrollerView.prototype, {
+    scrollbarThickness: 14,
+    capLength: 18,
+    capOverlap: 14,
+    buttonOverlap: 11,
+    buttonLength: 41,
+    thumbTopLength: 10,
+    thumbBottomLength: 10
+  });
+}}}
+
   @extends SC.View
   @since SproutCore 1.0
 */
-SC.ScrollerView = SC.View.extend({
+SC.ScrollerView = SC.View.extend(
+/** @scope SC.ScrollerView.prototype */ {
 
   classNames: ['sc-scroller-view'],
 
@@ -23,30 +42,24 @@ SC.ScrollerView = SC.View.extend({
   //
 
   /**
-    The scroller offset value.  This value will adjust between the minimum
-    and maximum values that you set. Default is 0.
+    The value of the scroller.
+
+    The value represents the position of the scroller's thumb.
 
     @property
   */
   value: function(key, val) {
     if (val !== undefined) {
-      // Don't enforce the maximum now, because the scroll view could change
-      // height and we want our content to stay put when it does.
-      if (val >= 0) {
-        this._scs_value = val ;
-      } else {
-        this._scs_value = 0;
-      }
+      this._scs_value = val;
     }
 
-    var value = this._scs_value || 0 ; // default value is at top/left
-    return Math.min(value, this.get('maximum')) ;
-  }.property('maximum').cacheable(),
+    val = this._scs_value || 0 ; // default value is at top/left
+    return Math.max(Math.min(val, this.get('maximum')), this.get('minimum')) ;
+  }.property('maximum', 'minimum').cacheable(),
 
   /**
     The maximum offset value for the scroller.  This will be used to calculate
-    the internal height/width of the scroller itself. It is not necessarily
-    the same as the height of a scroll view's content view.
+    the internal height/width of the scroller itself.
 
     When set less than the height of the scroller, the scroller is disabled.
 
@@ -55,7 +68,15 @@ SC.ScrollerView = SC.View.extend({
   maximum: 0,
 
   /**
-    YES if enable scrollbar, NO to disable it.  Scrollbars will automatically
+    The minimum offset value for the scroller.  This will be used to calculate
+    the internal height/width of the scroller itself.
+
+    @property {Number}
+  */
+  minimum: 0,
+
+  /**
+    YES to enable scrollbar, NO to disable it.  Scrollbars will automatically
     disable if the maximum scroll width does not exceed their capacity.
 
     @property
@@ -70,43 +91,6 @@ SC.ScrollerView = SC.View.extend({
     @property
   */
   layoutDirection: SC.LAYOUT_VERTICAL,
-
-  // ..........................................................
-  // DISPLAY METRICS
-  //
-  
-  /**
-    The width of the scrollbar.
-    
-    @property
-  */
-  scrollbarThickness: 14,
-  
-  /**
-    The height or width of the cap that encloses the track.
-    
-    @property
-  */
-  capLength: 18,
-  
-  /**
-    The amount by which the scroller overlaps the cap.
-    
-    @property
-  */
-  capOverlap: 17,
-
-  /**
-    The amount by which the scroller overlaps the arrow buttons.
-    
-    @property
-  */
-  buttonOverlap: 10,
-
-  /**
-    The height or width of the up/down or left/right arrow buttons.
-  */
-  buttonLength: 40,
 
   /**
     Returns the owner view property the scroller should modify.  If this
@@ -137,61 +121,156 @@ SC.ScrollerView = SC.View.extend({
   }.property('layoutDirection').cacheable(),
 
   // ..........................................................
+  // DISPLAY METRICS
+  //
+
+  /**
+    The width or height of the scrollbar.
+
+    @property {Number}
+  */
+  scrollbarThickness: 14,
+
+  /**
+    The width or height of the cap that encloses the track.
+
+    @property {Number}
+  */
+  capLength: 18,
+
+  /**
+    The amount by which the scroller overlaps the cap.
+
+    @property {Number}
+  */
+  capOverlap: 15,
+
+  /**
+    The amount by which the scroller overlaps the arrow buttons.
+
+    @property {Number}
+  */
+  buttonOverlap: 8,
+
+  /**
+    The width or height of the up/down or left/right arrow buttons.
+
+    @property {Number}
+  */
+  buttonLength: 40,
+
+  /**
+    The size of the top/left end of the thumb.
+
+    @property {Number}
+  */
+  thumbTopLength: 10,
+
+
+  /**
+    The size of the bottom/right end of the thumb.
+
+    @property {Number}
+  */
+  thumbBottomLength: 10,
+
+  // ..........................................................
   // INTERNAL SUPPORT
   //
 
   displayProperties: 'maximum isEnabled layoutDirection value frame'.w(),
-  
+
+  /**
+    Generates the HTML that gets displayed to the user.
+
+    The first time render is called, the HTML will be output to the DOM.
+    Successive calls will reposition the thumb based on the value property.
+
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} firstTime YES if this is creating a layer
+    @private
+  */
   render: function(context, firstTime) {
-    // We style based on the layout direction, so set a 
-    // class name
+    var classNames = [],
+        capLength = this.get('capLength'),
+        capOverlap = this.get('capOverlap'),
+        value, thumbElement, max, frame, length, pct;
+
+    // We set a class name depending on the layout direction so that we can
+    // style them differently using CSS.
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        context.addClass('vertical');
+        classNames.push('sc-vertical');
         break;
       case SC.LAYOUT_HORIZONTAL:
-        context.addClass('horizontal');
+        classNames.push('sc-horizontal');
         break;
     }
+
+    // The appearance of the scroller changes if disabled
+    if (!this.get('isEnabled')) classNames.push('disabled');
+
+    // Change the class names of the DOM element all at once to improve
+    // performance
+    context.addClass(classNames);
+
+    // If this is the first time, generate the actual HTML
     if (firstTime) {
-      context.push('<div class="track"></div>');
-      context.push('<div class="button-bottom"></div>');
-      context.push('<div class="button-top"></div>');
-      context.push('<div class="cap"></div>');
-      context.push('<div class="thumb"><div class="thumb-center"></div><div class="thumb-top"></div><div class="thumb-bottom"></div></div>');
-      
-      // default the thumb position to the top
-      this._sc_thumbPos = this.capLength - this.capOverlap;
+      context.push('<div class="track"></div>',
+                    '<div class="button-bottom"></div>',
+                    '<div class="button-top"></div>',
+                    '<div class="cap"></div>',
+                    '<div class="thumb">',
+                    '<div class="thumb-center"></div>',
+                    '<div class="thumb-top"></div>',
+                    '<div class="thumb-bottom"></div></div>');
+
+      // default the thumb position to the top/left
+      this._scs_thumbPosition = capLength - capOverlap;
     } else {
-      // Ensure that the scroll thumb is in the correct location
-      var v = this.get('value');
+      // The HTML has already been generated, so all we have to do is
+      // reposition the thumb
+      value = this.get('value');
 
       // If the value hasn't changed then don't bother moving the thumb
-      if (v !== this._sc_scrollValue) {
-        var thumb = this.$('.thumb'),
-            max = this.get('maximum'),
-            frame = this.get('frame'),
-            totalLen = (this.get('trackLength')-this._thumbHeight),
-            pct;
+      if (value === this._scs_scrollValue) return;
 
-        switch (this.get('layoutDirection')) {
-          case SC.LAYOUT_VERTICAL:
-            pct = (v/(max-this.get('frame').height));
-            if (pct > 1) pct = 1;
-            this._sc_thumbPos = Math.ceil(pct * totalLen + (this.capLength - this.capOverlap));
-            thumb.css('top', this._sc_thumbPos);
-            break ;
-          case SC.LAYOUT_HORIZONTAL:
-            // layer.scrollLeft = v ;
-            break ;
-        }
+      thumbElement = this.$('.thumb');
+      max = this.get('maximum');
+      frame = this.get('frame');
+      length = (this.get('trackLength') - this._scs_thumbSize);
+
+      switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+          pct = (value / (max - frame.height));
+          if (pct > 1) pct = 1;
+          this._scs_thumbPosition = Math.ceil(pct * length + (capLength - capOverlap));
+          thumbElement.css('top', this._scs_thumbPosition);
+          break;
+      case SC.LAYOUT_HORIZONTAL:
+          pct = (value / (max - this.get('frame').width));
+          if (pct > 1) pct = 1;
+          this._scs_thumbPosition = Math.ceil(pct * length + (capLength - capOverlap));
+          thumbElement.css('left', this._scs_thumbPosition);
+          break;
       }
+
     }
   },
 
+  /**
+    Returns the total length of the track in which the thumb sits.
+
+    The length of the track is the height or width of the scroller, less the
+    cap length and the button length. This property is used to calculate the
+    position of the thumb relative to the view.
+
+    @property
+    @private
+  */
   trackLength: function() {
     var frame = this.get('frame'), size;
-    
+
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         size = frame.height;
@@ -203,90 +282,271 @@ SC.ScrollerView = SC.View.extend({
     return size - this.capLength + this.capOverlap - this.buttonLength + this.buttonOverlap;
   }.property(),
 
+  /**
+    Handles mouse down events and adjusts the value property depending where
+    the user clicked.
+
+    If the control is disabled, we ignore all mouse input.
+
+    If the user clicks the thumb, we note the position of the mouse event but
+    do not take further action until they begin to drag.
+
+    If the user clicks the track, we adjust the value a page at a time.
+
+    If the user clicks the buttons, we adjust the value by a fixed amount.
+
+    If the user clicks and holds on either the track or buttons, those actions
+    are repeated until they release the mouse button.
+
+    @param evt {SC.Event} the mousedown event
+    @private
+  */
   mouseDown: function(evt) {
-    var target = evt.target, value;
+    if (!this.get('isEnabled')) return NO;
+
+    var target = evt.target, value, clickLocation, clickOffset;
+
+    // Determine the subcontrol that was clicked
     if (target.className.indexOf('thumb') >= 0) {
-      this._thumbOffset = this.convertFrameFromView({ y: evt.pageY }).y - this._sc_thumbPos ;
-      this._startY = evt.pageY;
-      this._startTop = this._sc_thumbPos;
-      return YES;
+      // Convert the mouseDown coordinates to the view's coordinates
+      clickLocation = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
+
+      clickLocation.x -= this._scs_thumbPosition;
+      clickLocation.y -= this._scs_thumbPosition;
+
+      // Store the starting state so we know how much to adjust the
+      // thumb when the user drags
+      this._thumbDragging = YES;
+      this._thumbOffset = clickLocation;
+      this._mouseDownLocation = { x: evt.pageX, y: evt.pageY };
+      this._thumbPositionAtDragStart = this._scs_thumbPosition;
     } else if (target.className.indexOf('button-top') >= 0) {
+      // User clicked the up/left button
+      // Decrement the value by a fixed amount
       this.decrementProperty('value', 30);
-      this.setButtonActive('.button-top');
+      this.makeButtonActive('.button-top');
+      // start a timer that will continue to fire until mouseUp is called
+      this.startMouseDownTimer('scrollUp');
     } else if (target.className.indexOf('button-bottom') >= 0) {
+      // User clicked the down/right button
+      // Increment the value by a fixed amount
       this.incrementProperty('value', 30);
-      this.setButtonActive('.button-bottom');
+      this.makeButtonActive('.button-bottom');
+      // start a timer that will continue to fire until mouseUp is called
+      this.startMouseDownTimer('scrollDown');
     } else {
-      // Page up/down
-      var top = this._sc_thumbPos,
-          f = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY });
-      var h = this.get('frame').height;
-      if (f.y < top) {
-        this.decrementProperty('value',h);
+      // User clicked in the track
+      var thumbPosition = this._scs_thumbPosition,
+          pageSize = this.get('pageSize'),
+          frame = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY }),
+          mousePosition;
+
+      switch (this.get('layoutDirection')) {
+        case SC.LAYOUT_VERTICAL:
+          this._mouseDownLocation = mousePosition = frame.y;
+          break;
+        case SC.LAYOUT_HORIZONTAL:
+          this._mouseDownLocation = mousePosition = frame.x;
+          break;
+      }
+
+      // Move the thumb up or down a page depending on whether the click
+      // was above or below the thumb
+      if (mousePosition < thumbPosition) {
+        this.decrementProperty('value',pageSize);
+        this.startMouseDownTimer('pageUp');
       } else {
-        this.incrementProperty('value', h);
+        this.incrementProperty('value', pageSize);
+        this.startMouseDownTimer('pageDown');
       }
     }
-  },
-  
-  setButtonActive: function(element) {
-    this.$(element).addClass('active');
-    this._scs_buttonActive = element;
-  },
-  
-  mouseUp: function(evt) {
-    var active = this._scs_buttonActive;
-    
-    if (active) {
-      this.$(active).removeClass('active');
-      return YES;
-    }
-    
-    return NO;
-  },
-  
-  mouseDragged: function(evt) {
-    this._sc_thumbPos = Math.max(0, this._startTop + (evt.pageY - this._startY));
-    var frame = this.get('frame');
-  this.set('value', Math.round((this._sc_thumbPos / (this.get('trackLength')-this._thumbHeight)) * (this.get('maximum')-frame.height)));
+
     return YES;
   },
 
-  _sc_scroller_frameDidChange: function() {
-    var max = this.get('maximum'), height = this.get('frame').height;
-    height = Math.ceil(Math.max((height/max)*height, 20));
-    this._thumbHeight = height;
-    var thumb = this.$('.thumb');
-    
-    if (thumb) {
-      thumb.css('height', height);
-      this.$('.thumb .thumb-center').css('height', Math.max(height-20,0));
+  /**
+    When the user releases the mouse button, remove any active
+    state from the button controls, and cancel any outstanding
+    timers.
+
+    @param evt {SC.Event} the mousedown event
+    @private
+  */
+  mouseUp: function(evt) {
+    var active = this._scs_buttonActive, ret = NO, timer;
+
+    // If we have an element that was set as active in mouseDown,
+    // remove its active state
+    if (active) {
+      active.removeClass('active');
+      ret = YES;
     }
-  }.observes('frame', 'maximum'),
-  
-  _sc_scroller_scrollDidChange: function() {
-    var now = Date.now(), last = this._sc_lastScroll ;
-    if (last && (now-last)<50) return this._sc_scroller_armScrollTimer() ;
-    this._sc_scrollTimer = null ;
-    this._sc_lastScroll = now ;
 
-    SC.RunLoop.begin();
+    // Stop firing repeating events after mouseup
+    timer = this._mouseDownTimer;
+    if (timer) {
+      timer.invalidate();
+      this._mouseDownTimer = null;
+    }
 
-    if (!this.get('isEnabled')) return ; // nothing to do.
+    this._thumbDragging = NO;
 
-    var layer = this.get('layer'), scroll = 0 ;
+    return ret;
+  },
+
+  /**
+    If the user began the drag on the thumb, we calculate the difference
+    between the mouse position at click and where it is now.  We then
+    offset the thumb by that amount, within the bounds of the track.
+
+    @param evt {SC.Event} the mousedragged event
+    @private
+  */
+  mouseDragged: function(evt) {
+    var position, frame, length;
+
+    // Only move the thumb if the user clicked on the thumb during mouseDown
+    if (!this._thumbDragging) return NO;
+
+    frame = this.get('frame');
+
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        this._sc_scrollValue = scroll = layer.scrollTop ;
-        break ;
-
+        position = this._thumbPositionAtDragStart + (evt.pageY - this._mouseDownLocation.y);
+        length = frame.height;
+        break;
       case SC.LAYOUT_HORIZONTAL:
-        this._sc_scrollValue = scroll = layer.scrollLeft ;
-        break ;
+        position = this._thumbPositionAtDragStart + (evt.pageX - this._mouseDownLocation.x);
+        length = frame.width;
+        break;
     }
-    this.set('value', scroll) ; // will now enforce minimum and maximum
+    this._scs_thumbPosition = position = Math.max(0, position);
 
-    SC.RunLoop.end();
-  }
+    this.set('value', Math.round((this._scs_thumbPosition / (this.get('trackLength')-this._scs_thumbSize)) * (this.get('maximum')-length)));
+    return YES;
+  },
 
+  /**
+    Starts a timer that fires after 300ms.  This is called when the user
+    clicks a button or inside the track to move a page at a time. If they
+    continue holding the mouse button down, we want to repeat that action
+    after a small delay.  This timer will be invalidated in mouseUp.
+
+    @private
+  */
+  startMouseDownTimer: function(action) {
+    var timer;
+
+    this._mouseDownTimerAction = action;
+    this._mouseDownTimer = SC.Timer.schedule({
+      target: this, action: this.mouseDownTimerDidFire, interval: 300
+    });
+  },
+
+  /**
+    Called by the mousedown timer.  This method determines the initial
+    user action and repeats it until the timer is invalidated in mouseUp.
+
+    @private
+  */
+  mouseDownTimerDidFire: function() {
+    var pageSize = this.get('pageSize'),
+        mouseLocation = this._mouseDownLocation,
+        thumbPosition;
+
+    switch (this._mouseDownTimerAction) {
+      case 'scrollDown':
+        this.incrementProperty('value', 30);
+        break;
+      case 'scrollUp':
+        this.decrementProperty('value', 30);
+        break;
+      case 'pageDown':
+        thumbPosition = this._scs_thumbPosition+this._scs_thumbSize;
+        if (mouseLocation < thumbPosition) return;
+        this.incrementProperty('value', pageSize);
+        break;
+      case 'pageUp':
+        thumbPosition = this._scs_thumbPosition;
+        if (mouseLocation > thumbPosition) return;
+        this.decrementProperty('value', pageSize);
+        break;
+    }
+
+    this._mouseDownTimer = SC.Timer.schedule({
+      target: this, action: this.mouseDownTimerDidFire, interval: 50
+    });
+  },
+
+  /**
+    Returns the height of a vertical scroller or the width of a horizontal
+    scroller.  This is used when scrolling up and down by page.
+
+    @property {Number}
+    @private
+  */
+  pageSize: function() {
+    switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+        return this.get('frame').height;
+      case SC.LAYOUT_HORIZONTAL:
+        return this.get('frame').width;
+    }
+
+    return 0;
+  }.property('frame').cacheable(),
+
+  /**
+    The size of the thumb ends.
+
+    @private
+  */
+  thumbEndSizes: function() {
+    return this.thumbTopLength + this.thumbBottomLength;
+  }.property().cacheable(),
+
+  /**
+    Given a selector, finds the corresponding DOM element and adds
+    the 'active' class name.  Also stores the returned element so that
+    the 'active' class name can be removed during mouseup.
+
+    @param {String} the selector to find
+    @private
+  */
+  makeButtonActive: function(selector) {
+    this._scs_buttonActive = this.$(selector).addClass('active');
+  },
+
+  /**
+    Resizes the thumb when the scroller changes size or the maximum
+    property changes.
+
+    @private
+  */
+  _sc_scroller_frameDidChange: function() {
+    var max = this.get('maximum'), length,
+        thumb = this.$('.thumb'),
+        thumbEndSizes = this.get('thumbEndSizes'),
+        thumbCenter;
+
+    if (thumb.length < 1) return;
+    thumbCenter = thumb.children().first();
+
+    switch (this.get('layoutDirection')) {
+      case SC.LAYOUT_VERTICAL:
+        length = this.get('frame').height;
+        length = Math.ceil(Math.max((length/max)*length, 20));
+        thumb.css('height', length);
+        thumbCenter.css('height', Math.max(length-thumbEndSizes,0));
+        break;
+      case SC.LAYOUT_HORIZONTAL:
+        length = this.get('frame').width;
+        length = Math.ceil(Math.max((length/max)*length, 20));
+        thumb.css('width', length);
+        thumbCenter.css('width', Math.max(length-thumbEndSizes,0));
+        break;
+    }
+
+    this._scs_thumbSize = length;
+  }.observes('frame', 'maximum')
 });
