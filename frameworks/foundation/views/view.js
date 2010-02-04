@@ -535,12 +535,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     views, and so on.
   */
   _invalidatePaneCacheForSelfAndAllChildViews: function () {
+    var childView, childViews = this.get('childViews'),
+        len = childViews.length, idx ;
+        
     this.notifyPropertyChange('pane');
     
-    var childViews = this.get('childViews'),
-        len = childViews.length, idx ;
     for (idx=0; idx<len; ++idx) {
-      var childView = childViews[idx];
+      childView = childViews[idx];
       if (childView._invalidatePaneCacheForSelfAndAllChildViews) {
         childView._invalidatePaneCacheForSelfAndAllChildViews();
       } 
@@ -1143,9 +1144,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         node = this.get('layer') ;
       }
       
-      var siblings = parentView.get('childViews') ;
-      var nextView = siblings.objectAt(siblings.indexOf(this)+1) ;
-      var nextNode = (nextView) ? nextView.get('layer') : null ;
+      var siblings = parentView.get('childViews'),
+          nextView = siblings.objectAt(siblings.indexOf(this)+1),
+          nextNode = (nextView) ? nextView.get('layer') : null ;
       
       // before we add to parent node, make sure that the nextNode exists...
       if (nextView && (!nextNode || nextNode.parentNode!==parentNode)) {
@@ -1638,7 +1639,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         }
       }
     }
-    
     // now set adjusted layout
     if (didChange) this.set('layout', layout) ;
     
@@ -1798,7 +1798,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in layoutStyle
   */
   frame: function() {
-    console.log('frame recalc');
     return this.computeFrameWithParentFrame(null) ;
   }.property('layout', 'useStaticLayout').cacheable(),
   
@@ -1840,7 +1839,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
      throw error ;
     }
     
-    if (layout.height !== undefined &&
+    if (lH !== undefined &&
         lH === SC.LAYOUT_AUTO &&
         stLayout !== undefined && !stLayout) {
       error = SC.Error.desc("%@.layout() you cannot use height:auto if "+
@@ -1858,40 +1857,40 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // handle left aligned and left/right 
     if (!SC.none(lL)) {
-      if(lL < 1 && lL > 0){
+      if(SC.isPercentage(lL)){
         f.x = dW*lL;
       }else{
         f.x = lL ;
       }
       if (lW !== undefined) {
         if(lW === AUTO) f.width = AUTO ;
-        else if(lW < 1 && lW>0) f.width = dW*lW ;
+        else if(SC.isPercentage(lW)) f.width = dW*lW ;
         else f.width = lW ;
       } else { // better have lR!
         f.width = dW - f.x ;
-        if(lR && lR < 1 && lR>0) f.width = f.width - (lR*dW) ;
+        if(lR && SC.isPercentage(lR)) f.width = f.width - (lR*dW) ;
         else f.width = f.width - (lR || 0) ;
       }
     // handle right aligned
     } else if (!SC.none(lR)) {
       if (SC.none(lW)) {
-        if (lL < 1 && lL > 0) f.width = dW - (dW*lR) ;
+        if (SC.isPercentage(lL)) f.width = dW - (dW*lR) ;
         else f.width = dW - lR ;
         f.x = 0 ;
       } else {
         if(lW === AUTO) f.width = AUTO ;
-        else if(lW < 1 && lW>0) f.width = dW*lW ;
+        else if(SC.isPercentage(lW)) f.width = dW*lW ;
         else f.width = (lW || 0) ;
-        if (lW < 1 && lW>0) f.x = dW - (lR*dW) - f.width ;
+        if (SC.isPercentage(lW)) f.x = dW - (lR*dW) - f.width ;
         else f.x = dW - lR - f.width ;
       }
       
     // handle centered
     } else if (!SC.none(lcX)) {
       if(lW === AUTO) f.width = AUTO ;
-      else if (lW<1 && lW>0) f.width = lW*dW ;
+      else if (SC.isPercentage(lW)) f.width = lW*dW ;
       else f.width = (lW || 0) ;
-      if(lcX<1 && lcX>0) f.x = (dW - f.width)/2 + (lcX*dW) ;
+      if(SC.isPercentage(lcX)) f.x = (dW - f.width)/2 + (lcX*dW) ;
       else f.x = (dW - f.width)/2 + lcX ;
     } else {
       f.x = 0 ; // fallback
@@ -1899,44 +1898,44 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         f.width = dW ;
       } else {
         if(lW === AUTO) f.width = AUTO ;
-        if (lW<1 && lW>0) f.width = lW*dW ;
+        if (SC.isPercentage(lW)) f.width = lW*dW ;
         else f.width = (lW || 0) ;
       }
     }
     
     // handle top aligned and top/bottom 
     if (!SC.none(lT)) {
-      if(lT<1 && lT>0) f.y = lT*dH ;
+      if(SC.isPercentage(lT)) f.y = lT*dH ;
       else f.y = lT ;
       if (lH !== undefined) {
         if(lH === AUTO) f.height = AUTO ;
-        else if(lH<1 && lH>0) f.height = lH ;
+        else if(SC.isPercentage(lH)) f.height = lH*dH ;
         else f.height = lH ;
       } else { // better have lB!
-        if(lB && lB<1 && lB>0) f.height = dH - f.y - (lB*dH) ;
+        if(lB && SC.isPercentage(lB)) f.height = dH - f.y - (lB*dH) ;
         else f.height = dH - f.y - (lB || 0) ;
       }
       
     // handle bottom aligned
     } else if (!SC.none(lB)) {
       if (SC.none(lH)) {
-        if (lB<1 && lB>0) f.height = dH - (lB*dH) ;
+        if (SC.isPercentage(lB)) f.height = dH - (lB*dH) ;
         else f.height = dH - lB ;
         f.y = 0 ;
       } else {
         if(lH === AUTO) f.height = AUTO ;
-        if (lH && lH<1 && lH>0) f.height = lH*dH ;
+        if (lH && SC.isPercentage(lH)) f.height = lH*dH ;
         else f.height = (lH || 0) ;
-        if (lB<1 && lB>0) f.y = dH - (lB*dH) - f.height ;
+        if (SC.isPercentage(lB)) f.y = dH - (lB*dH) - f.height ;
         else f.y = dH - lB - f.height ;
       }
       
     // handle centered
     } else if (!SC.none(lcY)) {
       if(lH === AUTO) f.height = AUTO ;
-      if (lH && lH<1 && lH>0) f.height = lH*dH ;
+      if (lH && SC.isPercentage(lH)) f.height = lH*dH ;
       else f.height = (lH || 0) ;
-      if (lcY<1 && lcY>0) f.y = (dH - f.height)/2 + (lcY*dH) ;
+      if (SC.isPercentage(lcY)) f.y = (dH - f.height)/2 + (lcY*dH) ;
       else f.y = (dH - f.height)/2 + lcY ;
       
     // fallback
@@ -1946,7 +1945,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         f.height = dH ;
       } else {
         if(lH === AUTO) f.height = AUTO ;
-        if (lH<1 && lH>0) f.height = lH*dH ;
+        if (SC.isPercentage(lH)) f.height = lH*dH ;
         else f.height = lH || 0 ;
       }
     }
@@ -1988,7 +1987,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   computeParentDimensions: function(frame) {
-    // debugger;
     var ret, pv = this.get('parentView'), pf = (pv) ? pv.get('frame') : null ;
     
     if (pf) {
@@ -2047,16 +2045,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in viewDidResize
   */
   parentViewDidResize: function() {
-    var layout = this.get('layout') ;
+    var layout = this.get('layout') , isPercentage, isFixed;
     
     // only resizes if the layout does something other than left/top - fixed
     // size.
-    var isFixed = (
+    isFixed = (
       (layout.left !== undefined) && (layout.top !== undefined) &&
       (layout.width !== undefined) && (layout.height !== undefined)
     );
     
-    if (!isFixed) {
+    isPercentage = (SC.isPercentage(layout.left) || 
+                    SC.isPercentage(layout.top) ||
+                    SC.isPercentage(layout.width) || 
+                    SC.isPercentage(layout.right) ||
+                    SC.isPercentage(layout.centerX) || 
+                    SC.isPercentage(layout.centerY));
+    
+    if (!isFixed || isPercentage) {
       this.notifyPropertyChange('frame') ;
       this.viewDidResize() ;
     }
@@ -2167,19 +2172,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lH = layout.height, 
         lcX = layout.centerX, 
         lcY = layout.centerY;
-    
-    if (lW !== undefined &&
-        lW === SC.LAYOUT_AUTO &&
-        !stLayout) {
-     error= SC.Error.desc("%@.layout() you cannot use width:auto if "+
+    if (lW !== undefined && lW === SC.LAYOUT_AUTO && !stLayout) {
+      error= SC.Error.desc("%@.layout() you cannot use width:auto if "+
               "staticLayout is disabled".fmt(this),"%@".fmt(this),-1);
-     console.error(error.toString()) ;
-     throw error ;
+      console.error(error.toString()) ;
+      throw error ;
     }
     
-    if (lH !== undefined &&
-        lH === SC.LAYOUT_AUTO &&
-        !stLayout) {
+    if (lH !== undefined && lH === SC.LAYOUT_AUTO && !stLayout) {
       error = SC.Error.desc("%@.layout() you cannot use height:auto if "+
                 "staticLayout is disabled".fmt(this),"%@".fmt(this),-1);  
       console.error(error.toString()) ;
@@ -2190,7 +2190,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // handle left aligned and left/right
     if (!SC.none(lL)) {
-      if(lL > 0 && lL < 1) {
+      if(SC.isPercentage(lL)) {
         ret.left = (lL*100)+"%";  //percentage left
       }else{
         ret.left = Math.floor(lL); //px left
@@ -2199,18 +2199,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       
       if (lW !== undefined) {
         if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else if(lW > 0 && lW < 1) ret.width = (lW*100)+"%"; //percentage width
+        else if(SC.isPercentage(lW)) ret.width = (lW*100)+"%"; //percentage width
         else ret.width = Math.floor(lW) ; //px width
         ret.right = null ;
       } else {
         ret.width = null ;
-        if(lR && lR > 0 && lR < 1) ret.right = (lR*100)+"%"; //percentage right
+        if(lR && SC.isPercentage(lR)) ret.right = (lR*100)+"%"; //percentage right
         else ret.right = Math.floor(lR || 0) ; //px right
       }
       
     // handle right aligned
     } else if (!SC.none(lR)) {
-      if(lR > 0 && lR < 1) {
+      if(SC.isPercentage(lR)) {
         ret.right = Math.floor(lR*100)+"%";  //percentage left
       }else{
         ret.right = Math.floor(lR) ;
@@ -2223,16 +2223,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       } else {
         ret.left = null ;
         if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else if(lW && lW > 0 && lW < 1) ret.width = (lW*100)+"%" ; //percentage width
+        else if(lW && SC.isPercentage(lW)) ret.width = (lW*100)+"%" ; //percentage width
         else ret.width = Math.floor(lW || 0) ; //px width
       }
       
     // handle centered
     } else if (!SC.none(lcX)) {
       ret.left = "50%";
-      if(lW && lW > 0 && lW < 1) ret.width = (lW*100)+"%" ; //percentage width
+      if(lW && SC.isPercentage(lW)) ret.width = (lW*100)+"%" ; //percentage width
       else ret.width = Math.floor(lW || 0) ;
-      if(lW && lW > 0 && lW < 1 && lcX >= 0 && lcX < 1){
+      if(lW && SC.isPercentage(lW) && lcX >= 0 && lcX < 1){
         ret.marginLeft = Math.floor((lcX - lW/2)*100)+"%" ;
       }else if(lW && lW > 1 && (lcX > 1 || lcX <= 0)){
         ret.marginLeft = Math.floor(lcX - ret.width/2) ;
@@ -2247,7 +2247,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.left =  0;
       ret.right = null;
       if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-      else if(lW > 0 && lW < 1) ret.width = (lW*100)+"%";
+      else if(SC.isPercentage(lW)) ret.width = (lW*100)+"%";
       else ret.width = Math.floor(lW);
       ret.marginLeft = 0;
       
@@ -2267,17 +2267,17 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // Y DIRECTION
     
     // handle left aligned and left/right
-    if (!SC.none(layout.top)) {
-      if(layout.top > 0 && layout.top < 1) ret.top = (layout.top*100)+"%";
-      else ret.top = Math.floor(layout.top);
+    if (!SC.none(lT)) {
+      if(SC.isPercentage(lT)) ret.top = (lT*100)+"%";
+      else ret.top = Math.floor(lT);
       if (lH !== undefined) {
         if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-        else if(lH > 0 && lH < 1) ret.height = (lH*100)+"%" ;
+        else if(SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
         else ret.height = Math.floor(lH) ;
         ret.bottom = null ;
       } else {
         ret.height = null ;
-        if(lB && lB > 0 && lB < 1) ret.bottom = (lB*100)+"%" ;
+        if(lB && SC.isPercentage(lB)) ret.bottom = (lB*100)+"%" ;
         else ret.bottom = Math.floor(lB || 0) ;
       }
       ret.marginTop = 0 ;
@@ -2285,7 +2285,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // handle right aligned
     } else if (!SC.none(lB)) {
       ret.marginTop = 0 ;
-      if(lB > 0 && lB < 1) ret.bottom = (lB*100)+"%";
+      if(SC.isPercentage(lB)) ret.bottom = (lB*100)+"%";
       else ret.bottom = Math.floor(lB) ;
       if (SC.none(lH)) {
         ret.top = 0;
@@ -2293,7 +2293,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       } else {
         ret.top = null ;
         if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-        else if(lH && lH > 0 && lH < 1 ) ret.height = (lH*100)+"%" ;
+        else if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
         else ret.height = Math.floor(lH || 0) ;
       }
       
@@ -2302,10 +2302,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.top = "50%";
       ret.bottom = null ;
       
-      if(lH && lH > 0 && lH < 1) ret.height = (lH*100)+ "%" ;
+      if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+ "%" ;
       else ret.height = Math.floor(lH || 0) ;
       
-      if(lH && lH > 0 && lH < 1 && lcY >= 0 && lcY < 1){
+      if(lH && SC.isPercentage(lH) && lcY >= 0 && lcY < 1){
         ret.marginTop = Math.floor((lcY - lH/2)*100)+"%" ;
       }else if(lH && lH > 1 && (lcY > 1 || lcY <= 0)){
         ret.marginTop = Math.floor(lcY - ret.height/2) ;
@@ -2318,7 +2318,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       ret.top = 0;
       ret.bottom = null;
       if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-      else if(lH && lH > 0 && lH < 1) ret.height = (lH*100)+"%" ;
+      else if(lH && SC.isPercentage(lH)) ret.height = (lH*100)+"%" ;
       else ret.height = Math.floor(lH || 0) ;
       ret.marginTop = 0;
       
@@ -2378,7 +2378,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver
   */
   layoutDidChange: function() {
-    debugger;
     this.beginPropertyChanges() ;
     if (this.frame) this.notifyPropertyChange('frame') ;
     this.notifyPropertyChange('layoutStyle') ;
@@ -2580,47 +2579,66 @@ SC.View.mixin(/** @scope SC.View */ {
     Convert any layout to a Top, Left, Width, Height layout
   */
   convertLayoutToAnchoredLayout: function(layout, parentFrame){
-    var ret = {top: 0, left: 0, width: parentFrame.width, height: parentFrame.height};
+    var ret = {top: 0, left: 0, width: parentFrame.width, height: parentFrame.height},
+        pFW = parentFrame.width, pFH = parentFrame.height, //shortHand for parentDimensions
+        lR = layout.right, 
+        lL = layout.left, 
+        lT = layout.top, 
+        lB = layout.bottom, 
+        lW = layout.width, 
+        lH = layout.height, 
+        lcX = layout.centerX, 
+        lcY = layout.centerY;
     
     // X Conversion
     // handle left aligned and left/right
-    if (!SC.none(layout.left)) {
-      ret.left = layout.left;
-      if (layout.width !== undefined) {
-        if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
-        else ret.width = layout.width ;
+    if (!SC.none(lL)) {
+      if(SC.isPercentage(lL)) ret.left = lL*pFW;
+      else ret.left = lL;
+      if (lW !== undefined) {
+        if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+        else if(SC.isPercentage(lW)) ret.width = lW*pFW ;
+        else ret.width = lW ;
       } else {
-        ret.width = parentFrame.width - ret.left - (layout.right || 0);
+        if (lR && SC.isPercentage(lR)) ret.width = pFW - ret.left - (lR*pFW);
+        else ret.width = pFW - ret.left - (lR || 0);
       }
 
     // handle right aligned
-    } else if (!SC.none(layout.right)) {
+    } else if (!SC.none(lR)) {
       
       // if no width, calculate it from the parent frame
-      if (SC.none(layout.width)) {
+      if (SC.none(lW)) {
         ret.left = 0;
-        ret.width = parentFrame.width - (layout.right || 0);
+        if(lR && SC.isPercentage(lR)) ret.width = pFW - (lR*pFW);
+        else ret.width = pFW - (lR || 0);
       
       // If has width, calculate the left anchor from the width and right and parent frame
       } else {
-        if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+        if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
         else { 
-          ret.width = layout.width;
-          ret.left = parentFrame.width - (layout.width + layout.right); 
+          if (SC.isPercentage(lW)) ret.width = lW*pFW;
+          else ret.width = lW;
+          if (SC.isPercentage(lR)) ret.left = pFW - (ret.width + lR);
+          else ret.left = pFW - (ret.width + lR); 
         }
       }
 
     // handle centered
-    } else if (!SC.none(layout.centerX)) {
-      ret.width = (layout.width || 0) ;
-      ret.left = ((parentFrame.width - ret.width)/2) + layout.centerX;
+    } else if (!SC.none(lcX)) {
+      if(lW && SC.isPercentage(lW)) ret.width = (lW*pFW) ;
+      else ret.width = (lW || 0) ;
+      ret.left = ((pFW - ret.width)/2);
+      if (SC.isPercentage(lcX)) ret.left = ret.left + lcX*pFW;
+      else ret.left = ret.left + lcX;
     
     // if width defined, assume left of zero
-    } else if (!SC.none(layout.width)) {
+    } else if (!SC.none(lW)) {
       ret.left =  0;
-      if(layout.width === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
+      if(lW === SC.LAYOUT_AUTO) ret.width = SC.LAYOUT_AUTO ;
       else {
-        ret.width = layout.width;
+        if(SC.isPercentage(lW)) ret.width = lW*pFW;
+        else ret.width = lW;
       }
 
     // fallback, full width.
@@ -2635,42 +2653,54 @@ SC.View.mixin(/** @scope SC.View */ {
     
     // Y Conversion
     // handle left aligned and top/bottom
-    if (!SC.none(layout.top)) {
-      ret.top = layout.top;
-      if (layout.height !== undefined) {
-        if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-        else ret.height = layout.height ;
+    if (!SC.none(lT)) {
+      if(SC.isPercentage(lT)) ret.top = lT*pFH;
+      else ret.top = lT;
+      if (lH !== undefined) {
+        if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+        else if (SC.isPercentage(lH)) ret.height = lH*pFH;
+        else ret.height = lH ;
       } else {
-        ret.height = parentFrame.height - ret.top - (layout.bottom || 0);
+        ret.height = pFH - ret.top;
+        if(lB && SC.isPercentage(lB)) ret.height = ret.height - (lB*pFH);
+        else ret.height = ret.height - (lB || 0);
       }
 
     // handle bottom aligned
-    } else if (!SC.none(layout.bottom)) {
+    } else if (!SC.none(lB)) {
       
       // if no height, calculate it from the parent frame
-      if (SC.none(layout.height)) {
+      if (SC.none(lH)) {
         ret.top = 0;
-        ret.height = parentFrame.height - (layout.bottom || 0);
+        if (lB && SC.isPercentage(lB)) ret.height = pFH - (lB*pFH);
+        else ret.height = pFH - (lB || 0);
       
       // If has height, calculate the top anchor from the height and bottom and parent frame
       } else {
-        if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+        if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
         else { 
-          ret.height = layout.height;
-          ret.top = parentFrame.height - (layout.height + layout.bottom); 
+          if (SC.isPercentage(lH)) ret.height = lH*pFH;
+          else ret.height = lH;
+          ret.top = pFH - ret.height;
+          if (SC.isPercentage(lB)) ret.top = ret.top - (lB*pFH);
+          else ret.top = ret.top - lB; 
         }
       }
 
     // handle centered
-    } else if (!SC.none(layout.centerY)) {
-      ret.height = (layout.height || 0) ;
-      ret.top = ((parentFrame.height - ret.height)/2) + layout.centerY;
+    } else if (!SC.none(lcY)) {
+      if(lH && SC.isPercentage(lH)) ret.height = (lH*pFH) ;
+      else ret.height = (lH || 0) ;
+      ret.top = ((pFH - ret.height)/2);
+      if(SC.isPercentage(lcY)) ret.top = ret.top + lcY*pFH;
+      else ret.top = ret.top + lcY;
     
     // if height defined, assume top of zero
-    } else if (!SC.none(layout.height)) {
+    } else if (!SC.none(lH)) {
       ret.top =  0;
-      if(layout.height === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
-      else ret.height = layout.height;
+      if(lH === SC.LAYOUT_AUTO) ret.height = SC.LAYOUT_AUTO ;
+      else if (SC.isPercentage(lH)) ret.height = lH*pFH;
+      else ret.height = lH;
 
     // fallback, full height.
     } else {
@@ -2817,9 +2847,10 @@ SC.View.mixin(/** @scope SC.View */ {
     }
     
     // apply localization recursively to childViews
-    var childViews = this.prototype.childViews, idx = childViews.length;
+    var childViews = this.prototype.childViews, idx = childViews.length,
+      viewClass;
     while(--idx>=0) {
-      var viewClass = childViews[idx];
+      viewClass = childViews[idx];
       loc = childLocs[idx];
       if (loc && viewClass && viewClass.loc) viewClass.loc(loc) ;
     }

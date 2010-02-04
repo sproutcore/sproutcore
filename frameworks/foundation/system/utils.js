@@ -80,6 +80,12 @@ SC.mixin( /** @scope SC */ {
     return url ;
   },
   
+  /** Return true if the number is between 0 and 1 */
+  isPercentage: function(val){
+    return (val<1 && val>0);
+  },
+
+  
   
   /** Return the left edge of the frame */
   minX: function(frame) { 
