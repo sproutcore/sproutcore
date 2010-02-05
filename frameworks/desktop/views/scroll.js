@@ -691,19 +691,31 @@ SC.ScrollView = SC.View.extend(SC.Border, {
       this.contentViewFrameDidChange();
     }
   }.observes('contentView'),
-  
+
+  /** @private
+    If we redraw after the initial render, we need to make sure that we reset
+    the scrollTop/scrollLeft properties on the content view.  This ensures
+    that, for example, the scroll views displays correctly when switching
+    views out in a ContainerView.
+  */
+  render: function(context, firstTime) {
+    if (!firstTime) {
+      this.invokeLast(this.adjustElementScroll);
+    }
+    return sc_super();
+  },
+
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the 
     scroller maxmimum and optionally update the scroller visibility if the
     size of the contentView changes.  We don't care about the origin since
     that is tracked separately from the offset values.
   */
-  
+
   oldMaxHOffset: 0,
   oldMaxVOffset: 0,
-  
+
   contentViewFrameDidChange: function() {
-        
     var view   = this.get('contentView'), 
         f      = (view) ? view.get('frame') : null,
         width  = (f) ? f.width : 0,  
