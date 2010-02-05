@@ -93,6 +93,14 @@ SC.ScrollerView = SC.View.extend(
   layoutDirection: SC.LAYOUT_VERTICAL,
 
   /**
+    YES if the maximum value exceeds the frame size of the scroller.  This
+    will hide the thumb and buttons.
+
+    @property
+  */
+  controlsHidden: NO,
+
+  /**
     Returns the owner view property the scroller should modify.  If this
     property is non-null and the owner view defines this property, then the
     scroller will automatically update this property whenever its own value
@@ -178,7 +186,7 @@ SC.ScrollerView = SC.View.extend(
   // INTERNAL SUPPORT
   //
 
-  displayProperties: 'maximum isEnabled layoutDirection value frame'.w(),
+  displayProperties: 'maximum isEnabled value frame controlsHidden'.w(),
 
   /**
     Generates the HTML that gets displayed to the user.
@@ -209,6 +217,8 @@ SC.ScrollerView = SC.View.extend(
 
     // The appearance of the scroller changes if disabled
     if (!this.get('isEnabled')) classNames.push('disabled');
+    // Whether to hide the thumb and buttons
+    if (this.get('controlsHidden')) classNames.push('controls-hidden');
 
     // Change the class names of the DOM element all at once to improve
     // performance
@@ -524,24 +534,33 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   _sc_scroller_frameDidChange: function() {
-    var max = this.get('maximum'), length,
+    var max = this.get('maximum'), length = this.get('trackLength'),
+        size = this.get('pageSize'),
         thumb = this.$('.thumb'),
         thumbEndSizes = this.get('thumbEndSizes'),
         thumbCenter;
 
+    if (max <= size) {
+      this.set('isEnabled', NO);
+      this.set('controlsHidden', YES);
+      return;
+    }
+
+    this.set('controlsHidden', NO);
+    this.set('isEnabled', YES);
     if (thumb.length < 1) return;
     thumbCenter = thumb.children().first();
 
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        length = this.get('frame').height;
-        length = Math.ceil(Math.max((length/max)*length, 20));
+        length = this.get('trackLength');
+        length = Math.ceil(Math.max((size/max)*length, 20));
         thumb.css('height', length);
         thumbCenter.css('height', Math.max(length-thumbEndSizes,0));
         break;
       case SC.LAYOUT_HORIZONTAL:
-        length = this.get('frame').width;
-        length = Math.ceil(Math.max((length/max)*length, 20));
+        length = this.get('trackLength');
+        length = Math.ceil(Math.max((size/max)*length, 20));
         thumb.css('width', length);
         thumbCenter.css('width', Math.max(length-thumbEndSizes,0));
         break;
