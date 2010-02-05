@@ -60,20 +60,32 @@ test('isEnabled', function() {
   SC.RunLoop.begin().end();
   ok(view.$().hasClass('disabled'), 'scrollers should have disabled class set if isEnabled is set to NO');
 
-  var evt = SC.Object.create({
-    target: { className: 'button-top' }
-  });
-  var scrollerHeight = view.get('frame').height;
+  var layer = view.$('.button-down'),
+      evt = SC.Event.simulateEvent(layer, 'mousedown'),
+      scrollerHeight = view.get('frame').height;
+
   view.set('maximum', scrollerHeight+100);
   view.set('value', 500);
-  view.mouseDown(evt);
+  SC.Event.trigger(layer, 'mousedown', [evt]);
   equals(view.get('value'), 500, 'scrollers should not respond to mouse events if they are disabled');
   view.set('isEnabled', YES);
-  view.mouseDown(evt);
+  SC.Event.trigger(layer, 'mousedown', [evt]);
   ok(view.get('value') < (scrollerHeight+100), 'scrollers should respond to mouse events if they are not disabled');
+});
+
+test('mouseDown', function() {
+  var layer = view.get('layer');
+  var ev = SC.Event.simulateEvent(layer, 'mousedown');
 });
 
 test('maximum', function() {
   var scrollerHeight = view.get('frame').height;
   view.set('maximum', scrollerHeight + 100);
+});
+
+test('layoutDirection', function() {
+  equals(view.get('layoutDirection'), SC.LAYOUT_VERTICAL, 'scrollers should default to vertical direction');
+  ok(view.$().hasClass('sc-vertical'), 'scroller with vertical layoutDirection has sc-vertical class name');
+  equals(view1.get('layoutDirection'), SC.LAYOUT_HORIZONTAL, 'precond - view1 has horizontal direction');
+  ok(view1.$().hasClass('sc-horizontal'), 'scroller with horizontal layoutDirection has sc-horizontal class name');
 });
