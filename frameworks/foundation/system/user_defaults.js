@@ -80,10 +80,12 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     // attempt to read from localStorage
     
     if(SC.browser.msie=="7.0"){
-       localStorage=ie7userdata;
+       localStorage=document.body;
        try{
          localStorage.load("SC.UserDefaults");
-       }catch(e){}
+       }catch(e){
+         console.err("Couldn't load userDefaults in IE7: "+e.description);
+       }
     }else if(this.HTML5DB_noLocalStorage){
          storageSafari3 = this._safari3DB;
     }else{
@@ -147,7 +149,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     // save to local storage
     
     if(SC.browser.msie=="7.0"){
-      localStorage=ie7userdata;
+      localStorage=document.body;
     }else if(this.HTML5DB_noLocalStorage){
       storageSafari3 = this._safari3DB;
     }else{
@@ -210,7 +212,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     if (written) delete written[userKeyName];
     
     if(SC.browser.msie=="7.0"){
-       localStorage=ie7userdata;
+       localStorage=document.body;
     }else if(this.HTML5DB_noLocalStorage){
          storageSafari3 = this._safari3DB;
     }else{
@@ -301,15 +303,9 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
     this._scud_userDomain = this.get('userDomain');
     this._scud_appDomain  = this.get('appDomain');
     if(SC.browser.msie=="7.0"){
-      var el = document.createElement('div');
-      
-      // set element properties
-      el.id = "ie7userdata";
-      el.style.display = 'none';
-      el.addBehavior('#default#userData');
-      
-      // append element to body
-      document.body.appendChild(el);
+      //Add user behavior userData. This works in all versions of IE.
+      //Adding to the body as is the only element never removed.
+      document.body.addBehavior('#default#userData');
     }
     this.HTML5DB_noLocalStorage = ((parseInt(SC.browser.safari, 0)>523) && (parseInt(SC.browser.safari, 0)<528));
     if(this.HTML5DB_noLocalStorage){
