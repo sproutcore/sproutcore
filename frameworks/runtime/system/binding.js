@@ -508,9 +508,8 @@ SC.Binding = {
     var source = this._bindingSource,
         key    = this._bindingKey,
         v, idx;
-        
-    if (!source) return ; // nothing to do
-    this._bindingValue = v = source.getPath(key);
+    
+    this._bindingValue = v = (source ? source.getPath(key) : null);
     
     // apply any transforms to get the to property value also
     var transforms = this._transforms;

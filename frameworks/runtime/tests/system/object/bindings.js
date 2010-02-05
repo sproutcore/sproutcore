@@ -340,3 +340,21 @@ test("fooBinding: SC.Binding.not(TestNamespace.fromObject.bar should override de
   SC.Binding.flushPendingChanges();
   equals(YES, testObject.get("foo"), "testObject.foo == YES");
 });
+
+test("Chained binding should be null if intermediate object in chain is null", function() {
+  var a, z;
+  
+  a = SC.Object.create({
+    b: SC.Object.create({
+      c: 'c'
+    }),
+    zBinding: '*b.c'
+  });
+  
+  SC.Binding.flushPendingChanges();
+  equals(a.get('z'), 'c', "a.z == 'c'");
+    
+  a.set('b', null);
+  SC.Binding.flushPendingChanges();
+  equals(a.get('z'), null, "a.z == null");
+});
