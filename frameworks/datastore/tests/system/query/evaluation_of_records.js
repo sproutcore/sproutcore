@@ -74,7 +74,7 @@ test("should handle undefined record properties correctly", function() {
   equals(q.contains(rec3), true, 'record with bornIn set should match');
   equals(q.contains(rec2), false, 'record without bornIn set should not match');
   
-  q.conditions = "bornIn = null";
+  q.conditions = "bornIn = undefined";
   q.parse();
   equals(q.contains(rec3), false, 'record with bornIn set different to null should not match');
   equals(q.contains(rec2), true, 'record without bornIn set should match');

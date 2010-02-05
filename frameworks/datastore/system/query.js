@@ -625,7 +625,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) == 0;//left == right;
+                          return SC.isEqual(left, right); 
                         }
     },
 
@@ -639,7 +639,7 @@ SC.Query = SC.Object.extend(SC.Copyable, SC.Freezable,
       evaluate:         function (r,w) {
                           var left  = this.leftSide.evaluate(r,w);
                           var right = this.rightSide.evaluate(r,w);
-                          return SC.compare(left, right) != 0;//left != right;
+                          return !SC.isEqual(left, right); 
                         }
     },
 
