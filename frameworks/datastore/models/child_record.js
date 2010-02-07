@@ -87,14 +87,14 @@ SC.ChildRecord = SC.Record.extend(
    * all the children in a root parent tree  
    */
   createChildRecord: function(recordType, hash) {
-    var myParent = this._parentRecord;
+    var ret, myParent = this._parentRecord;
   
     if (myParent) {
-      return myParent.createChildRecord(recordType, hash);
+      ret = myParent.createChildRecord(recordType, hash);
     } else {
-      throw 'Error creating child record: Parent record is unknown.';
+      ret = sc_super();
     }
   
-    return null;
+    return ret;
   }  
 });
