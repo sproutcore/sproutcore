@@ -495,12 +495,17 @@ SC.ScrollerView = SC.View.extend(
     @property {Number}
     @private
   */
-  pageSize: function() {
+  scrollerLength: function() {
+    var elem = this.$()[0];
+    if (!elem) return 0;
+    console.log('clientHeight: '+elem.clientHeight);
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-        return this.get('frame').height;
+        return elem.clientHeight;
+        // return this.get('frame').height;
       case SC.LAYOUT_HORIZONTAL:
-        return this.get('frame').width;
+        return elem.clientWidth;
+        // return this.get('frame').width;
     }
 
     return 0;
