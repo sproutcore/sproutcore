@@ -98,7 +98,10 @@ SC.ScrollerView = SC.View.extend(
 
     @property
   */
-  controlsHidden: NO,
+  controlsHidden: function() {
+    if (this.get('maximum') <= this.get('scrollerLength')) return YES;
+    return NO;
+  }.property('maximum', 'scrollerLength').cacheable(),
 
   /**
     Returns the owner view property the scroller should modify.  If this
@@ -202,7 +205,7 @@ SC.ScrollerView = SC.View.extend(
     var classNames = [],
         capLength = this.get('capLength'),
         capOverlap = this.get('capOverlap'),
-        value, thumbElement, max, frame, length, pct;
+        value, thumbElement, max, scrollerLength, length, pct;
 
     // We set a class name depending on the layout direction so that we can
     // style them differently using CSS.
@@ -244,21 +247,26 @@ SC.ScrollerView = SC.View.extend(
 
       // If the value hasn't changed then don't bother moving the thumb
       if (value === this._scs_scrollValue) return;
+      // If we aren't displaying controls don't bother
+      if (this.get('controlsHidden')) return;
+      // If we haven't calculated the thumb's size yet then we don't need to
+      // reposition yet.
+      if (!this._scs_thumbSize) return;
 
       thumbElement = this.$('.thumb');
       max = this.get('maximum');
-      frame = this.get('frame');
+      scrollerLength = this.get('scrollerLength');
       length = (this.get('trackLength') - this._scs_thumbSize);
 
       switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
-          pct = (value / (max - frame.height));
+          pct = (value / (max - scrollerLength));
           if (pct > 1) pct = 1;
           this._scs_thumbPosition = Math.ceil(pct * length + (capLength - capOverlap));
           thumbElement.css('top', this._scs_thumbPosition);
           break;
       case SC.LAYOUT_HORIZONTAL:
-          pct = (value / (max - this.get('frame').width));
+          pct = (value / (max - scrollerLength));
           if (pct > 1) pct = 1;
           this._scs_thumbPosition = Math.ceil(pct * length + (capLength - capOverlap));
           thumbElement.css('left', this._scs_thumbPosition);
@@ -279,17 +287,9 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   trackLength: function() {
-    var frame = this.get('frame'), size;
+    var scrollerLength = this.get('scrollerLength');
 
-    switch (this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        size = frame.height;
-        break;
-      case SC.LAYOUT_HORIZONTAL:
-        size = frame.width;
-        break;
-    }
-    return size - this.capLength + this.capOverlap - this.buttonLength + this.buttonOverlap;
+    return scrollerLength - this.capLength + this.capOverlap - this.buttonLength + this.buttonOverlap;
   }.property(),
 
   /**
@@ -347,7 +347,7 @@ SC.ScrollerView = SC.View.extend(
     } else {
       // User clicked in the track
       var thumbPosition = this._scs_thumbPosition,
-          pageSize = this.get('pageSize'),
+          scrollerLength = this.get('scrollerLength'),
           frame = this.convertFrameFromView({ x: evt.pageX, y: evt.pageY }),
           mousePosition;
 
@@ -363,10 +363,10 @@ SC.ScrollerView = SC.View.extend(
       // Move the thumb up or down a page depending on whether the click
       // was above or below the thumb
       if (mousePosition < thumbPosition) {
-        this.decrementProperty('value',pageSize);
+        this.decrementProperty('value',scrollerLength);
         this.startMouseDownTimer('pageUp');
       } else {
-        this.incrementProperty('value', pageSize);
+        this.incrementProperty('value', scrollerLength);
         this.startMouseDownTimer('pageDown');
       }
     }
@@ -460,7 +460,7 @@ SC.ScrollerView = SC.View.extend(
     @private
   */
   mouseDownTimerDidFire: function() {
-    var pageSize = this.get('pageSize'),
+    var scrollerLength = this.get('scrollerLength'),
         mouseLocation = this._mouseDownLocation,
         thumbPosition;
 
@@ -474,12 +474,12 @@ SC.ScrollerView = SC.View.extend(
       case 'pageDown':
         thumbPosition = this._scs_thumbPosition+this._scs_thumbSize;
         if (mouseLocation < thumbPosition) return;
-        this.incrementProperty('value', pageSize);
+        this.incrementProperty('value', scrollerLength);
         break;
       case 'pageUp':
         thumbPosition = this._scs_thumbPosition;
         if (mouseLocation > thumbPosition) return;
-        this.decrementProperty('value', pageSize);
+        this.decrementProperty('value', scrollerLength);
         break;
     }
 
@@ -535,14 +535,13 @@ SC.ScrollerView = SC.View.extend(
   */
   _sc_scroller_frameDidChange: function() {
     var max = this.get('maximum'), length = this.get('trackLength'),
-        size = this.get('pageSize'),
+        size = this.get('scrollerLength'),
         thumb = this.$('.thumb'),
         thumbEndSizes = this.get('thumbEndSizes'),
         thumbCenter;
 
-    if (max <= size) {
+    if (this.get('controlsHidden')) {
       this.set('isEnabled', NO);
-      this.set('controlsHidden', YES);
       return;
     }
 
