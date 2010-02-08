@@ -45,69 +45,69 @@ SC.VideoView = SC.View.extend({
           break;
         case "quicktime":
           if(SC.browser.msie){
-            context.push('<object id="qt_event_source" ');
-            context.push('classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" ');         
-            context.push('codebase="http://www.apple.com/qtactivex/qtplugin.cab#version=7,2,1,0"> ');
-            context.push('</object> ');
+            context.push('<object id="qt_event_source" '+
+                        'classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" '+         
+                        'codebase="http://www.apple.com/qtactivex/qtplugin.cab#version=7,2,1,0"> '+
+                        '</object> ');
           }
           context.push('<object width="100%" height="100%"');
           if(SC.browser.msie){
             console.log('adding style behavior');
             context.push('style="behavior:url(#qt_event_source);"');
           }
-          context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" ');
-          context.push('id="qt_'+id+'" ');
-          context.push('codebase="http://www.apple.com/qtactivex/qtplugin.cab">');
-          context.push('<param name="src" value="'+this.get('value')+'"/>');
-          context.push('<param name="autoplay" value="false"/>');
-          context.push('<param name="loop" value="false"/>');
-          context.push('<param name="controller" value="false"/>');
-          context.push('<param name="postdomevents" value="true"/>');
-          context.push('<param name="scale" value="aspect"/>');
-          context.push('<embed width="100%" height="100%" ');
-          context.push('name="flash_'+id+'" ');
-          context.push('src="'+this.get('value')+'" ');
-          context.push('autostart="false" ');
-          context.push('EnableJavaScript="true" ');
-          context.push('postdomevents="true" ');
-          context.push('controller="false" ');
-          context.push('scale="aspect" ');
-          context.push('pluginspage="www.apple.com/quicktime/download">');
-          context.push('</embed></object>');
-          context.push('</object>');
+          context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
+                      'id="qt_'+id+'" '+
+                      'codebase="http://www.apple.com/qtactivex/qtplugin.cab">'+
+                      '<param name="src" value="'+this.get('value')+'"/>'+
+                      '<param name="autoplay" value="false"/>'+
+                      '<param name="loop" value="false"/>'+
+                      '<param name="controller" value="false"/>'+
+                      '<param name="postdomevents" value="true"/>'+
+                      '<param name="scale" value="aspect"/>'+
+                      '<embed width="100%" height="100%" '+
+                      'name="flash_'+id+'" '+
+                      'src="'+this.get('value')+'" '+
+                      'autostart="false" '+
+                      'EnableJavaScript="true" '+
+                      'postdomevents="true" '+
+                      'controller="false" '+
+                      'scale="aspect" '+
+                      'pluginspage="www.apple.com/quicktime/download">'+
+                      '</embed></object>'+
+                      '</object>');
           this.loaded='quicktime';
           console.log('loaded using quicktime');
           return;
         case "flash":
           console.log('loaded using flash');
           var flashURL= sc_static('videoCanvas.swf');
-          context.push('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" ');
-          context.push('codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" ');
-          context.push('width="100%" ');
-          context.push('height="100%" ');
-          context.push('id="flash_'+id+'" ');
-          context.push('align="middle">');
-        	context.push('<param name="allowScriptAccess" value="sameDomain" />');
-        	context.push('<param name="allowFullScreen" value="true" />');
-        	context.push('<param name="movie" value="'+flashURL+'?src='+encodeURI(this.get('value'))+'" />');
-        	context.push('<param name="quality" value="autohigh" />');
-        	context.push('<param name="scale" value="default" />');
-        	context.push('<param name="wmode" value="transparent" />');
-        	context.push('<param name="bgcolor" value="#ffffff" />	');
-        	context.push('<embed src="'+flashURL+'?src='+encodeURI(this.get('value'))+'" ');
-        	context.push('quality="autohigh" ');
-        	context.push('scale="default" ');
-        	context.push('wmode="transparent" ');
-        	context.push('bgcolor="#ffffff" ');
-        	context.push('width="100%" ');
-        	context.push('height="100%" ');
-        	context.push('name="flash_'+id+'" ');
-        	context.push('align="middle" ');
-        	context.push('allowScriptAccess="sameDomain" ');
-        	context.push('allowFullScreen="true" ');
-        	context.push('type="application/x-shockwave-flash" ');
-        	context.push('pluginspage="http://www.adobe.com/go/getflashplayer" />');
-        	context.push('</object>');
+          context.push('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" '+
+                        'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" '+
+                        'width="100%" '+
+                        'height="100%" '+
+                        'id="flash_'+id+'" '+
+                        'align="middle">'+
+        	              '<param name="allowScriptAccess" value="sameDomain" />'+
+        	              '<param name="allowFullScreen" value="true" />'+
+        	              '<param name="movie" value="'+flashURL+'?src='+encodeURI(this.get('value'))+'" />'+
+        	              '<param name="quality" value="autohigh" />'+
+        	              '<param name="scale" value="default" />'+
+        	              '<param name="wmode" value="transparent" />'+
+        	              '<param name="bgcolor" value="#ffffff" />	'+
+        	              '<embed src="'+flashURL+'?src='+encodeURI(this.get('value'))+'" '+
+        	              'quality="autohigh" '+
+        	              'scale="default" '+
+        	              'wmode="transparent" '+
+        	              'bgcolor="#ffffff" '+
+        	              'width="100%" '+
+        	              'height="100%" '+
+        	              'name="flash_'+id+'" '+
+        	              'align="middle" '+
+        	              'allowScriptAccess="sameDomain" '+
+        	              'allowFullScreen="true" '+
+        	              'type="application/x-shockwave-flash" '+
+        	              'pluginspage="http://www.adobe.com/go/getflashplayer" />'+
+        	              '</object>');
           this.loaded='flash';
           return;
         default:
