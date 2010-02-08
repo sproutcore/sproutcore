@@ -100,6 +100,15 @@ SC.MenuPane = SC.PickerPane.extend(
   itemSeparatorHeight: 9,
 
   /**
+    The height of the menu pane.  This is updated every time menuItemViews
+    is recalculated.
+
+    @type Number
+    @isReadOnly
+  */
+  menuHeight: 0,
+
+  /**
     The amount of padding to add to the height of the pane.
 
     The first menu item is offset by half this amount, and the other half is
@@ -438,7 +447,7 @@ SC.MenuPane = SC.PickerPane.extend(
         keyArray, idx,
         len;
 
-    if (!items) return null;
+    if (!items) return views; // return an empty array
 
     heightKey = this.get('itemHeightKey');
     separatorKey = this.get('itemSeparatorKey');
