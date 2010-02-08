@@ -354,15 +354,6 @@ SC.MenuPane = SC.PickerPane.extend(
   // INTERNAL PROPERTIES
   //
 
-  /**
-    The height of the menu and ultimately the menu itself.
-
-    @type Number
-    @default null
-    @private
-  */
-  _menuHeight: null,
-
   /** @private */
   preferType: SC.PICKER_MENU,
 
