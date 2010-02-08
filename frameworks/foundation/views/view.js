@@ -2234,7 +2234,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       else ret.width = Math.floor(lW || 0) ;
       if(lW && SC.isPercentage(lW) && lcX >= 0 && lcX < 1){
         ret.marginLeft = Math.floor((lcX - lW/2)*100)+"%" ;
-      }else if(lW && lW > 1 && (lcX > 1 || lcX <= 0)){
+      }else if(lW && lW > 1 && (lcX >= 1 || lcX <= 0)){
         ret.marginLeft = Math.floor(lcX - ret.width/2) ;
       }else {
         console.error("You have to set width and centerX usign both percentages or pixels");
@@ -2307,7 +2307,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       
       if(lH && SC.isPercentage(lH) && lcY >= 0 && lcY < 1){
         ret.marginTop = Math.floor((lcY - lH/2)*100)+"%" ;
-      }else if(lH && lH > 1 && (lcY > 1 || lcY <= 0)){
+      }else if(lH && lH > 1 && (lcY >= 1 || lcY <= 0)){
         ret.marginTop = Math.floor(lcY - ret.height/2) ;
       }else {
         console.error("You have to set height and centerY to use both percentages or pixels");
