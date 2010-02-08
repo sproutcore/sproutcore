@@ -29,6 +29,7 @@ SC.VideoView = SC.View.extend({
   
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen;
+    var id = SC.guidFor(this);
     if(firstTime){
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
@@ -43,7 +44,6 @@ SC.VideoView = SC.View.extend({
           }
           break;
         case "quicktime":
-          var id = SC.guidFor(this);
           if(SC.browser.msie){
             context.push('<object id="qt_event_source" ');
             context.push('classid="clsid:CB927D12-4FF7-4a9e-A169-56E4B8A75598" ');         
@@ -56,7 +56,7 @@ SC.VideoView = SC.View.extend({
             context.push('style="behavior:url(#qt_event_source);"');
           }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" ');
-          context.push('id="object_'+id+'" ');
+          context.push('id="qt_'+id+'" ');
           context.push('codebase="http://www.apple.com/qtactivex/qtplugin.cab">');
           context.push('<param name="src" value="'+this.get('value')+'"/>');
           context.push('<param name="autoplay" value="false"/>');
@@ -65,7 +65,7 @@ SC.VideoView = SC.View.extend({
           context.push('<param name="postdomevents" value="true"/>');
           context.push('<param name="scale" value="aspect"/>');
           context.push('<embed width="100%" height="100%" ');
-          context.push('name="object_'+id+'" ');
+          context.push('name="flash_'+id+'" ');
           context.push('src="'+this.get('value')+'" ');
           context.push('autostart="false" ');
           context.push('EnableJavaScript="true" ');
@@ -85,23 +85,23 @@ SC.VideoView = SC.View.extend({
           context.push('codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" ');
           context.push('width="100%" ');
           context.push('height="100%" ');
-          context.push('id="videoCanvas" ');
+          context.push('id="flash_'+id+'" ');
           context.push('align="middle">');
         	context.push('<param name="allowScriptAccess" value="sameDomain" />');
         	context.push('<param name="allowFullScreen" value="true" />');
-        	context.push('<param name="movie" value="'+flashURL+'" />');
+        	context.push('<param name="movie" value="'+flashURL+'?src='+encodeURI(this.get('value'))+'" />');
         	context.push('<param name="quality" value="autohigh" />');
         	context.push('<param name="scale" value="default" />');
         	context.push('<param name="wmode" value="transparent" />');
         	context.push('<param name="bgcolor" value="#ffffff" />	');
-        	context.push('<embed src="'+flashURL+'" ');
+        	context.push('<embed src="'+flashURL+'?src='+encodeURI(this.get('value'))+'" ');
         	context.push('quality="autohigh" ');
         	context.push('scale="default" ');
         	context.push('wmode="transparent" ');
         	context.push('bgcolor="#ffffff" ');
         	context.push('width="100%" ');
         	context.push('height="100%" ');
-        	context.push('name="videoCanvas" ');
+        	context.push('name="flash_'+id+'" ');
         	context.push('align="middle" ');
         	context.push('allowScriptAccess="sameDomain" ');
         	context.push('allowFullScreen="true" ');
@@ -393,9 +393,11 @@ SC.VideoView = SC.View.extend({
   
   
   play: function(){
+    debugger;
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.play();
     if(this.loaded==="quicktime") vid.Play();
+    if(this.loaded==="quicktime") vid.playVideo();
   },
   
   stop: function(){
@@ -405,6 +407,8 @@ SC.VideoView = SC.View.extend({
   },
   
   playPause: function(){
+    
+    debugger;
     var vid=this._getVideoObject();
     if(this.loaded==="video"){
       if(this.get('paused')){
@@ -422,6 +426,15 @@ SC.VideoView = SC.View.extend({
       }else{
         this.set('paused', YES);
         vid.Stop();
+      }
+    }
+    if(this.loaded==="flash"){
+      if(this.get('paused')){
+        this.set('paused', NO);
+        vid.playVideo();
+      }else{
+        this.set('paused', YES);
+        vid.stopVideo();
       }
     }   
   },
@@ -447,7 +460,8 @@ SC.VideoView = SC.View.extend({
   
   _getVideoObject:function(){
     if(this.loaded==="video") return this.get('videoObject');
-    if(this.loaded==="quicktime") return document['object_'+SC.guidFor(this)];
+    if(this.loaded==="quicktime") return document['qt_'+SC.guidFor(this)];
+    if(this.loaded==="flash") return window['flash_'+SC.guidFor(this)];
   },
   
   updateTime:function(){
