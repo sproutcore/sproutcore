@@ -11,11 +11,10 @@ SC.VideoView = SC.View.extend({
   displayProperties: ['value', 'shouldAutoResize'],
   videoObject:null,
   
-  currentTime : 0, //current time in secs
-  duration : 0, //video duration in secs
+  currentTime: 0, //current time in secs
+  duration: 0, //video duration in secs
   volume:0, //volume value from 0 to 1
-  size:0, //total size of file
-  loadedData:0, //loaded bits
+  loadedTimeRanges:[], //loaded bits
   paused: YES, //is the video paused
   loaded: NO, //has the video loaded
   ended: NO, //did the video finished playing
@@ -65,7 +64,7 @@ SC.VideoView = SC.View.extend({
                       '<param name="postdomevents" value="true"/>'+
                       '<param name="scale" value="aspect"/>'+
                       '<embed width="100%" height="100%" '+
-                      'name="flash_'+id+'" '+
+                      'name="qt_'+id+'" '+
                       'src="'+this.get('value')+'" '+
                       'autostart="false" '+
                       'EnableJavaScript="true" '+
@@ -89,12 +88,12 @@ SC.VideoView = SC.View.extend({
                         'align="middle">'+
         	              '<param name="allowScriptAccess" value="sameDomain" />'+
         	              '<param name="allowFullScreen" value="true" />'+
-        	              '<param name="movie" value="'+flashURL+'?src='+encodeURI(this.get('value'))+'" />'+
+        	              '<param name="movie" value="'+flashURL+'src='+encodeURI(this.get('value'))+'" />'+
         	              '<param name="quality" value="autohigh" />'+
         	              '<param name="scale" value="default" />'+
         	              '<param name="wmode" value="transparent" />'+
         	              '<param name="bgcolor" value="#ffffff" />	'+
-        	              '<embed src="'+flashURL+'?src='+encodeURI(this.get('value'))+'" '+
+        	              '<embed src="'+flashURL+'src='+encodeURI(this.get('value'))+'" '+
         	              'quality="autohigh" '+
         	              'scale="default" '+
         	              'wmode="transparent" '+
@@ -143,9 +142,14 @@ SC.VideoView = SC.View.extend({
         console.log('loadstart');
         SC.RunLoop.end();
       });     
-      SC.Event.add(videoElem, 'progress', this, function () {
+      SC.Event.add(videoElem, 'progress', this, function (e) {
         SC.RunLoop.begin();
-        if(this.lengthComputable) view.set('size', ev.total);
+        debugger;
+        this.loadedTimeRanges=[];
+        for (var j=0, jLen = videoElem.seekable.length; j<jLen; j++){
+          this.loadedTimeRanges.push(videoElem.seekable.start(j));
+          this.loadedTimeRanges.push(videoElem.seekable.end(j));
+        }
          try{
             var trackCount=view.GetTrackCount(),i;
             for(i=1; i<=trackCount;i++){
@@ -274,8 +278,8 @@ SC.VideoView = SC.View.extend({
     var vid=this._getVideoObject();
     var videoElem = this.$()[0];
     var view=this;
-    
     if(this.loaded==="quicktime"){
+    
       try{
         vid.GetDuration();
       }catch(e){
@@ -286,6 +290,10 @@ SC.VideoView = SC.View.extend({
       this.set('videoObject', vid);
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
       view.set('volume', vid.GetVolume()/256);
+      var dimensions=vid.GetRectangle().split(',');
+      view.set('videoWidth', dimensions[2]);
+      view.set('videoHeight', dimensions[3]);
+      
       this.updateTime();
       SC.Event.add(videoElem, 'qt_durationchange', this, function () {
         SC.RunLoop.begin();
@@ -309,6 +317,9 @@ SC.VideoView = SC.View.extend({
       SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
         SC.RunLoop.begin();
         view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+        var dimensions=vid.GetRectangle().split(',');
+        view.set('videoWidth', dimensions[2]);
+        view.set('videoHeight', dimensions[3]);
         console.log('qt_loadedmetadata');
         SC.RunLoop.end();
       });
@@ -328,6 +339,7 @@ SC.VideoView = SC.View.extend({
         console.log('qt_load');
       });
       SC.Event.add(videoElem, 'qt_ended', this, function () {
+        view.set('ended', YES);
         console.log('qt_ended');
       });
       SC.Event.add(videoElem, 'qt_error', this, function () {
