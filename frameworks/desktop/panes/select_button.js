@@ -78,6 +78,11 @@ SC.SelectButtonView = SC.ButtonView.extend(
   iconKey: null,
 
   /**
+    Key used to indicate if the item is to be enabled
+   */
+  isEnabledKey: "isEnabled",
+
+  /**
     If true, the empty name will be localized.
 
     @property
@@ -247,12 +252,12 @@ SC.SelectButtonView = SC.ButtonView.extend(
     customView used to draw the menu
   */
   customView: null,
-  
+
   /**
     css classes applied to customView
   */
   customViewClassName: null,
-  
+
   /**
     customView menu offset width
   */
@@ -274,10 +279,10 @@ SC.SelectButtonView = SC.ButtonView.extend(
     @property {Number} heightPadding for menu pane.
   */
   menuPaneHeightPadding: 0,
-  
+
   /**
     This is a property to enable/disable focus rings in buttons.
-    For select_button we are making it a default. 
+    For select_button we are making it a default.
 
     @default YES
   */
@@ -325,7 +330,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     sc_super();
     var layoutWidth, objects, len, nameKey, iconKey, valueKey, checkboxEnabled,
       currentSelectedVal, shouldLocalize, separatorPostion, itemList, isChecked,
-      idx, name, icon, value, item;
+      idx, name, icon, value, item, itemEnabled, isEnabledKey ;
     layoutWidth = this.layout.width ;
     if(firstTime && layoutWidth) {
       this.adjust({ width: layoutWidth - this.SELECT_BUTTON_SPRITE_WIDTH }) ;
@@ -339,6 +344,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     nameKey = this.get('nameKey') ;
     iconKey = this.get('iconKey') ;
     valueKey = this.get('valueKey') ;
+    isEnabledKey = this.get('isEnabledKey') ;
     checkboxEnabled = this.get('checkboxEnabled') ;
 
     //get the current selected value
@@ -371,7 +377,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       name = shouldLocalize? name.loc() : name ;
 
       //Get the icon value
-      icon = iconKey ? (object.get ? 
+      icon = iconKey ? (object.get ?
         object.get(iconKey) : object[iconKey]) : null ;
       if (SC.none(object[iconKey])) icon = null ;
 
@@ -397,6 +403,10 @@ SC.SelectButtonView = SC.ButtonView.extend(
         isChecked = NO ;
       }
 
+      //Check if item is enabled
+      itemEnabled = object[isEnabledKey] ;
+      if(NO !== itemEnabled) itemEnabled = YES ;
+
       //Set the first item from the list as default selected item
       if (idx === 0) {
         this._defaultVal = value ;
@@ -408,7 +418,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
         title: name,
         icon: icon,
         value: value,
-        isEnabled: YES,
+        isEnabled: itemEnabled,
         checkbox: isChecked,
         action: this.displaySelectedItem
       }) ;
@@ -460,7 +470,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
       items, elementOffsetWidth, largestMenuWidth, item, element, idx,
       value, itemList, menuControlSize, menuHeightPadding, customView,
       customMenuView, menu, itemsLength;
-      
+
     buttonLabel = this.$('.sc-button-label')[0] ;
     // Get the length of the text on the button in pixels
     menuWidth = this.get('layer').offsetWidth ;
@@ -557,14 +567,14 @@ SC.SelectButtonView = SC.ButtonView.extend(
   displaySelectedItem: function() {
     var menuView, currSel, itemViews, title, val, itemIdx = 0, button, object,
       len, found = null, objTmp;
-    
+
     //Get MenuPane, currentSelectedMenuItem & menuItemView
     // Get the main parent view to show the menus
-      
+
     menuView = this.parentMenu() ;
     currSel = menuView.get('currentSelectedMenuItem') ;
     itemViews = menuView.menuItemViews ;
-    
+
     //  Fetch the index of the current selected item
     if (currSel && itemViews) {
       itemIdx = itemViews.indexOf(currSel) ;
@@ -599,7 +609,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
      place aligned to the item on the button when menu is opened.
   */
   changeSelectButtonPreferMatrix: function() {
-    var controlSizeTuning = 
+    var controlSizeTuning =
       this.get('controlSize')===SC.SMALL_CONTROL_SIZE ? 0 : -2;
     var preferMatrixAttributeTop = controlSizeTuning ,
       itemIdx = this.get('itemIdx') ,
@@ -611,7 +621,7 @@ SC.SelectButtonView = SC.ButtonView.extend(
     }
     else {
       if(itemIdx) {
-        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT + 
+        preferMatrixAttributeTop = itemIdx * this.CUSTOM_MENU_ITEM_HEIGHT +
           controlSizeTuning ;
       }
       tempPreferMatrix = [leftAlign, -preferMatrixAttributeTop, 2] ;
