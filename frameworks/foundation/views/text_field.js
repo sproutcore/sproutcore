@@ -598,7 +598,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   /** @private */
   willBecomeKeyResponderFrom: function(keyView) {
     if(this.get('isVisibleInWindow')) {
-      this.$input()[0].focus();
+      var inp = this.$input()[0];
+      if(inp) inp.focus();
       
       if(!this._txtFieldMouseDown){
         if(SC.browser.mozilla) this.invokeOnce(this._selectRootElement) ;
