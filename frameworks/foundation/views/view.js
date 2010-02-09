@@ -2238,7 +2238,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       }else if(lW && lW > 1 && (lcX >= 1 || lcX <= 0)){
         ret.marginLeft = Math.floor(lcX - ret.width/2) ;
       }else {
-        console.error("You have to set width and centerX usign both percentages or pixels");
+        // This error message happens whenever width is not set.
+        // console.error("You have to set width and centerX usign both percentages or pixels");
         ret.marginLeft = 0;
       }
       ret.right = null ;
