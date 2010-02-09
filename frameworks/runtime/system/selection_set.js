@@ -79,7 +79,10 @@ SC.SelectionSet = SC.Object.extend(SC.Enumerable, SC.Freezable, SC.Copyable,
   indexSetForSource: function(source) {
     if (!source || !source.isSCArray) return null; // nothing to do
 
-    source = source.toArray(); //force it, in case we're dealing with a SC.RecordArray    
+    //if we're dealing with a SC.RecordArray (or a controller referencing one), force toArray
+    if(source.get('isSCRecordArray') || source.getPath('content.isSCRecordArray')){
+      source = source.toArray();
+    }
     
     var cache   = this._indexSetCache,
         objects = this._objects,
