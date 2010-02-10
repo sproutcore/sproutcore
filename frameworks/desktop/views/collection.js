@@ -579,6 +579,16 @@ SC.CollectionView = SC.View.extend(
     return this.delegateFor('isCollectionContent', del, content);
   }.property('delegate', 'content').cacheable(),
   
+  
+  /** @private
+    A cache of the contentGroupIndexes value returned by the delegate.  This
+    is frequently accessed and usually involves creating an SC.IndexSet
+    object, so it's worthwhile to cache.
+  */
+  _contentGroupIndexes: function() {
+    return this.get('contentDelegate').contentGroupIndexes(this, this.get('content'));
+  }.property('contentDelegate', 'content').cacheable(),
+  
   // ..........................................................
   // CONTENT CHANGES
   // 
@@ -712,7 +722,7 @@ SC.CollectionView = SC.View.extend(
     var content = this.get('content'),
         lfunc   = this.contentLengthDidChange ;
 
-    if (content === this._content) return this; // nothing to do
+    if (content === this._content) return; // nothing to do
 
     // cleanup old content
     this.removeContentRangeObserver();
@@ -767,7 +777,10 @@ SC.CollectionView = SC.View.extend(
       if (invalid) invalid.add(indexes);
       else invalid = this._invalidIndexes = indexes.clone();
 
-    } else this._invalidIndexes = YES ; // force a total reload
+    }
+    else {
+      this._invalidIndexes = YES ; // force a total reload
+    }
     
     if (this.get('isVisibleInWindow')) this.invokeOnce(this.reloadIfNeeded);
     
@@ -797,70 +810,119 @@ SC.CollectionView = SC.View.extend(
     this._invalidIndexes = NO ;
     
     var content = this.get('content'),
-        len     = content ? content.get('length'): 0,
+        i, len, existing,
         layout  = this.computeLayout(),
         bench   = SC.BENCHMARK_RELOAD,
         nowShowing = this.get('nowShowing'),
         itemViews  = this._sc_itemViews,
         containerView = this.get('containerView') || this,
-        views, idx, view, layer ;
+        exampleView, exampleGroupView,
+        shouldReuseViews, shouldReuseGroupViews, shouldReuse,
+        viewsToRemove, viewsToRedraw, viewsToCreate,
+        views, idx, view, layer, parentNode, viewPool,
+        del, groupIndexes, isGroupView;
 
     // if the set is defined but it contains the entire nowShowing range, just
     // replace
     if (invalid.isIndexSet && invalid.contains(nowShowing)) invalid = YES ;
     if (this.willReload) this.willReload(invalid === YES ? null : invalid);
 
+    
+    // Up-front, figure out whether the view class (and, if applicable,
+    // group view class) is re-usable.  If so, it's beneficial for us to
+    // first return all no-longer-needed views to the pool before allocating
+    // new ones, because that will maximize the potential for re-use.
+    exampleView = this.get('exampleView');
+    shouldReuseViews = exampleView ? exampleView.isReusableInCollections : NO;
+    exampleGroupView = this.get('exampleGroupView');
+    shouldReuseGroupViews = exampleGroupView ? exampleGroupView.isReusableInCollections : NO;
+
     // if an index set, just update indexes
     if (invalid.isIndexSet) {
-      
       if (bench) {
         SC.Benchmark.start(bench="%@#reloadIfNeeded (Partial)".fmt(this),YES);
       }
+            
+      // Each of these arrays holds indexes.
+      viewsToRemove = [];
+      viewsToRedraw = [];
+      viewsToCreate = [];
       
       invalid.forEach(function(idx) {
         // get the existing item view, if there is one
-        var existing = itemViews ? itemViews[idx] : null;
+        existing = itemViews ? itemViews[idx] : null;
         
         // if nowShowing, then reload the item view.
         if (nowShowing.contains(idx)) {
-          view = this.itemViewForContentIndex(idx, YES);
           if (existing && existing.parentView === containerView) {
-    
-            // if the existing view has a layer, remove it immediately from
-            // the parent.  This is necessary because the old and new views 
-            // will use the same layerId
-            layer = existing.get('layer');
-            if (layer && layer.parentNode) {
-              layer.parentNode.removeChild(layer);  
-            } 
-            layer = null ; // avoid leaks
-            
-            containerView.replaceChild(view, existing);
+            viewsToRedraw.push(idx);
+
           } else {
-            containerView.appendChild(view);
+            viewsToCreate.push(idx);
           }
           
         // if not nowShowing, then remove the item view if needed
         } else if (existing && existing.parentView === containerView) {
-          delete itemViews[idx];
-          
-          // if the existing view has a layer, remove it immediately from
-          // the parent...
-          layer = existing.get('layer');
-          if (layer && layer.parentNode) {
-            layer.parentNode.removeChild(layer);
-          }
-          layer = null ; // avoid leaks
-          
-          containerView.removeChild(existing);
+          viewsToRemove.push(idx);
         }
       },this);
+      
+      
+      // Now that we know what operations we need to perform, let's perform
+      // all the removals first…
+      for (i = 0, len = viewsToRemove.length;  i < len;  ++i) {
+        idx = viewsToRemove[i];
+        existing = itemViews ? itemViews[idx] : null;        
+        delete itemViews[idx];
+        
+        // If this view class is reusable, then add it back to the pool.
+        del = this.get('contentDelegate');
+        groupIndexes = this.get('_contentGroupIndexes');
+        isGroupView = groupIndexes && groupIndexes.contains(idx);
+        if (isGroupView) isGroupView = del.contentIndexIsGroup(this, content, idx);
+        shouldReuse = isGroupView ? shouldReuseGroupViews : shouldReuseViews;
+        if (shouldReuse) {
+          viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
+          
+          viewPool.push(existing);
+          
+          // Because it's possible that we'll return this view to the pool
+          // and then immediately re-use it, there's the potential that the
+          // layer will not be correctly destroyed, because that support
+          // (built into removeChild) is coalesced at the runloop, and we
+          // will likely change the layerId when re-using the view.  So
+          // we'll destroy the layer now.
+          existing.destroyLayer();
+        }
+        
+        containerView.removeChild(existing);
+      }
+      
+      // …then the redraws…
+      for (i = 0, len = viewsToRedraw.length;  i < len;  ++i) {
+        idx = viewsToRedraw[i];
+        existing = itemViews ? itemViews[idx] : null;
+        view = this.itemViewForContentIndex(idx, YES);
+
+        // if the existing view has a layer, remove it immediately from
+        // the parent.  This is necessary because the old and new views 
+        // will use the same layerId
+        existing.destroyLayer();            
+        containerView.replaceChild(view, existing);
+      }
+      
+      // …and finally the creations.
+      for (i = 0, len = viewsToCreate.length;  i < len;  ++i) {
+        idx = viewsToCreate[i];
+        view = this.itemViewForContentIndex(idx, YES);
+        containerView.insertBefore(view, null);   // Equivalent to 'append()', but avoids one more function call
+      }
+      
 
       if (bench) SC.Benchmark.end(bench);
       
     // if set is NOT defined, replace entire content with nowShowing
     } else {
-
       if (bench) {
         SC.Benchmark.start(bench="%@#reloadIfNeeded (Full)".fmt(this),YES);
       }
@@ -868,16 +930,48 @@ SC.CollectionView = SC.View.extend(
       // truncate cached item views since they will all be removed from the
       // container anyway.
       if (itemViews) itemViews.length = 0 ; 
+
+      views = containerView.get('childViews');
+      if (views) views = views.copy();
+
+      // below is an optimized version of:
+      //this.replaceAllChildren(views);
+      containerView.beginPropertyChanges();
+      // views = containerView.get('views');
+      containerView.destroyLayer().removeAllChildren();
       
+      // For all previous views that can be re-used, return them to the pool.
+      if (views) {
+        for (i = 0, len = views.length;  i < len;  ++i) {
+          view = views[i];
+          isGroupView = view.get('isGroupView');
+          shouldReuse = isGroupView ? shouldReuseGroupViews : shouldReuseViews;
+          if (shouldReuse) {
+            viewPool = isGroupView ? this._GROUP_VIEW_POOL : this._VIEW_POOL;
+          
+            viewPool.push(view);
+          
+            // Because it's possible that we'll return this view to the pool
+            // and then immediately re-use it, there's the potential that the
+            // layer will not be correctly destroyed, because that support
+            // (built into removeChild) is coalesced at the runloop, and we
+            // will likely change the layerId when re-using the view.  So
+            // we'll destroy the layer now.
+            view.destroyLayer();
+          }
+        }
+      }
+      
+
+      // Only after the children are removed should we create the new views.
+      // We do this in order to maximize the change of re-use should the view
+      // be marked as such.
       views = [];
       nowShowing.forEach(function(idx) {
         views.push(this.itemViewForContentIndex(idx, YES));
       }, this);
 
-      // below is an optimized version of:
-      //this.replaceAllChildren(views);
-      containerView.beginPropertyChanges();
-      containerView.destroyLayer().removeAllChildren();
+      
       containerView.set('childViews', views); // quick swap
       containerView.replaceLayer();
       containerView.endPropertyChanges();
@@ -889,7 +983,6 @@ SC.CollectionView = SC.View.extend(
     // adjust my own layout if computed
     if (layout) this.adjust(layout);
     if (this.didReload) this.didReload(invalid === YES ? null : invalid);
-    
     
     return this ;
   },
@@ -915,6 +1008,8 @@ SC.CollectionView = SC.View.extend(
   _TMP_ATTRS: {},
   _COLLECTION_CLASS_NAMES: 'sc-collection-item'.w(),
   _GROUP_COLLECTION_CLASS_NAMES: 'sc-collection-item sc-group-item'.w(),
+  _VIEW_POOL: null,
+  _GROUP_VIEW_POOL: null,
   
   /**
     Returns the item view for the content object at the specified index. Call
@@ -940,19 +1035,25 @@ SC.CollectionView = SC.View.extend(
     @returns {SC.View} instantiated view
   */
   itemViewForContentIndex: function(idx, rebuild) {
+    // Use the cached view for this index, if we have it.  We'll do this up-
+    // front to avoid 
+    var itemViews = this._sc_itemViews;
+    if (!itemViews) {
+      itemViews = this._sc_itemViews = [] ;
+    }
+    else if (!rebuild && (ret = itemViews[idx])) {
+      return ret ; 
+    }
 
     // return from cache if possible
     var content   = this.get('content'),
-        itemViews = this._sc_itemViews,
         item = content.objectAt(idx),
         del  = this.get('contentDelegate'),
-        groupIndexes = del.contentGroupIndexes(this, content),
+        groupIndexes = this.get('_contentGroupIndexes'),
         isGroupView = NO,
-        key, ret, E, layout, layerId;
-
-    // use cache if available
-    if (!itemViews) itemViews = this._sc_itemViews = [] ;
-    if (!rebuild && (ret = itemViews[idx])) return ret ; 
+        key, ret, E, layout, layerId,
+        viewPoolKey, viewPool, reuseFunc, parentView, isEnabled, isSelected,
+        outlineLevel, disclosureState, isVisibleInWindow;
 
     // otherwise generate...
     
@@ -963,38 +1064,103 @@ SC.CollectionView = SC.View.extend(
       key  = this.get('contentGroupExampleViewKey');
       if (key && item) E = item.get(key);
       if (!E) E = this.get('groupExampleView') || this.get('exampleView');
-
+      viewPoolKey = '_GROUP_VIEW_POOL';
     } else {
       key  = this.get('contentExampleViewKey');
       if (key && item) E = item.get(key);
       if (!E) E = this.get('exampleView');
+      viewPoolKey = '_VIEW_POOL';
     }
+    
+    
+    // Collect other state that we'll need whether we're re-using a previous
+    // view or creating a new view.
+    parentView        = this.get('containerView') || this;
+    layerId           = this.layerIdFor(idx);
+    isEnabled         = del.contentIndexIsEnabled(this, content, idx);
+    isSelected        = del.contentIndexIsSelected(this, content, idx);
+    outlineLevel      = del.contentIndexOutlineLevel(this, content, idx);
+    disclosureState   = del.contentIndexDisclosureState(this, content, idx);
+    isVisibleInWindow = this.isVisibleInWindow;
+    layout            = this.layoutForContentIndex(idx);    
+    
+    
+    // If the view is reusable and there is an appropriate view inside the
+    // pool, simply reuse it to avoid having to create a new view.
+    if (E  &&  E.isReusableInCollections) {
+      // Lazily create the view pool.
+      viewPool = this[viewPoolKey];
+      if (!viewPool) viewPool = this[viewPoolKey] = [];
+      
+      // Is there a view we can re-use?
+      if (viewPool.length > 0) {
+        ret = viewPool.pop();
 
-    // collect some other state
-    var attrs = this._TMP_ATTRS;
-    attrs.contentIndex = idx;
-    attrs.content      = item ;
-    attrs.owner        = attrs.displayDelegate = this;
-    attrs.parentView   = this.get('containerView') || this ;
-    attrs.page         = this.page ;
-    attrs.layerId      = this.layerIdFor(idx, item);
-    attrs.isEnabled    = del.contentIndexIsEnabled(this, content, idx);
-    attrs.isSelected   = del.contentIndexIsSelected(this, content, idx);
-    attrs.outlineLevel = del.contentIndexOutlineLevel(this, content, idx);
-    attrs.disclosureState = del.contentIndexDisclosureState(this, content, idx);
-    attrs.isGroupView  = isGroupView;
-    attrs.isVisibleInWindow = this.isVisibleInWindow;
-    if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
-    else attrs.classNames = this._COLLECTION_CLASS_NAMES;
-    
-    layout = this.layoutForContentIndex(idx);
-    if (layout) {
-      attrs.layout = layout;
-    } else {
-      delete attrs.layout ;
+        // Tell the view it's about to be re-used.
+        reuseFunc = ret.prepareForReuse;
+        if (reuseFunc) reuseFunc.call(ret);
+        
+        // Set the new state.  We'll set content last, because it's the most
+        // likely to have observers.
+        ret.beginPropertyChanges();
+        ret.set('contentIndex', idx);
+        ret.set('layerId', layerId);
+        ret.set('isEnabled', isEnabled);
+        ret.set('isSelected', isSelected);
+        ret.set('outlineLevel', outlineLevel);
+        ret.set('disclosureState', disclosureState);
+        ret.set('isVisibleInWindow', isVisibleInWindow);
+        
+        // TODO:  In theory this shouldn't be needed, but without it, we
+        //        sometimes get errors when doing a full reload, because
+        //        'childViews' contains the view but the parent is not set.
+        //        This implies a timing issue with the general flow of
+        //        collection view.
+        ret.set('parentView', parentView);
+        
+        // Since we re-use layerIds, we need to reset SproutCore's internal
+        // mapping table.
+        SC.View.views[layerId] = ret;
+        
+        if (layout) {
+          ret.set('layout', layout);
+        }
+        else {
+          ret.set('layout', E.prototype.layout);
+        }
+        ret.set('content', item);
+        ret.endPropertyChanges();
+      }
     }
     
-    ret = this.createItemView(E, idx, attrs);
+    // If we weren't able to re-use a view, then create a new one.
+    if (!ret) {
+      // collect some other state
+      var attrs = this._TMP_ATTRS;
+      attrs.contentIndex      = idx;
+      attrs.content           = item;
+      attrs.owner             = attrs.displayDelegate = this;
+      attrs.parentView        = parentView;   // Same here; shouldn't be needed
+      attrs.page              = this.page;
+      attrs.layerId           = layerId;
+      attrs.isEnabled         = isEnabled;
+      attrs.isSelected        = isSelected;
+      attrs.outlineLevel      = outlineLevel;
+      attrs.disclosureState   = disclosureState;
+      attrs.isGroupView       = isGroupView;
+      attrs.isVisibleInWindow = isVisibleInWindow;
+      if (isGroupView) attrs.classNames = this._GROUP_COLLECTION_CLASS_NAMES;
+      else attrs.classNames = this._COLLECTION_CLASS_NAMES;
+    
+      if (layout) {
+        attrs.layout = layout;
+      } else {
+        delete attrs.layout ;
+      }
+    
+      ret = this.createItemView(E, idx, attrs);
+    }
+    
     itemViews[idx] = ret ;
     return ret ;
   },
@@ -1169,7 +1335,7 @@ SC.CollectionView = SC.View.extend(
         last = this._cv_selection,
         func = this._cv_selectionContentDidChange;
         
-    if (sel === last) return this; // nothing to do
+    if (sel === last) return; // nothing to do
     if (last) last.removeObserver('[]', this, func);
     if (sel) sel.addObserver('[]', this, func);
     
@@ -1290,8 +1456,7 @@ SC.CollectionView = SC.View.extend(
 
     var content = this.get('content'),
         del     = this.get('selectionDelegate'),
-        cdel    = this.get('contentDelegate'),
-        groupIndexes = cdel.contentGroupIndexes(this, content),
+        groupIndexes = this.get('_contentGroupIndexes'),
         sel;
         
     if(!this.get('isSelectable')) return this;
@@ -1391,8 +1556,7 @@ SC.CollectionView = SC.View.extend(
         range   = SC.IndexSet.create(), 
         content = this.get('content'),
         del     = this.get('selectionDelegate'),
-        cdel    = this.get('contentDelegate'),
-        groupIndexes = cdel.contentGroupIndexes(this, content),
+        groupIndexes = this.get('_contentGroupIndexes'),
         ret, sel ;
 
     // fast path
@@ -1434,8 +1598,7 @@ SC.CollectionView = SC.View.extend(
     var range   = SC.IndexSet.create(), 
         content = this.get('content'),
         del     = this.get('selectionDelegate'),
-        cdel    = this.get('contentDelegate'),
-        groupIndexes = cdel.contentGroupIndexes(this, content),
+        groupIndexes = this.get('_contentGroupIndexes'),
         ret ;
 
     if (SC.none(proposedIndex)) proposedIndex = -1;
@@ -2189,8 +2352,7 @@ SC.CollectionView = SC.View.extend(
         content = this.get('content'),
         sel     = this.get('selection'),
         info    = this.mouseDownInfo,
-        cdel    = this.get('contentDelegate'),
-        groupIndexes = cdel.contentGroupIndexes(this, content),
+        groupIndexes = this.get('_contentGroupIndexes'),
         dragContent, dragDataTypes, dragView;
     
     // if the mouse down event was cleared, there is nothing to do; return.
