@@ -565,6 +565,7 @@ SC.MenuPane = SC.PickerPane.extend(
       } else if (itemType === SC.T_ARRAY) {
         item = this.convertArrayMenuItemToObject(item);
       }
+      item.contentIndex = idx;
 
       ret.push(item);
     }
