@@ -49,11 +49,6 @@ SC.RecordArray = SC.Object.extend(SC.Enumerable, SC.Array,
   /** @scope SC.RecordArray.prototype */ {
     
   /**
-    Walk like a duck.
-  */
-  isSCRecordArray: true,
-    
-  /**
     The store that owns this record array.  All record arrays must have a 
     store to function properly. 
     
