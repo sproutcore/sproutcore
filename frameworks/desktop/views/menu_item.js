@@ -231,19 +231,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   }.property('content').cacheable(),
   
   /**
-    Checks if a menu is a sub menu, during branching.
-    
-    @param {}
-    @returns MenuPane
-  */
-  isSubMenuAMenuPane: function() {
-    var subMenu = this.get('subMenu');
-    if(subMenu && subMenu.kindOf(SC.MenuPane)) return subMenu ;
-    return NO ;  
-  },
-  
-  
-  /**
     This method will check whether the current Menu Item is still
     selected and then create a submenu accordignly.
     
