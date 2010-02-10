@@ -313,14 +313,20 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
     this._flashCounter = 0;
     if (skipFlash) {
-      responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
+      rootMenu.set('selectedItem', this.get('content'));
 
-      if (responder) {
-        responder.sendAction(action, target, this, this.get('pane'));
+      // Legacy support for actions that are functions
+      if (SC.typeOf(action) === SC.T_FUNCTION) {
+        action.apply(target, [rootMenu]);
+      } else {
+        responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
+
+        if (responder) {
+          responder.sendAction(action, target, this, this.get('pane'));
+        }
       }
 
       rootMenu.remove();
-      rootMenu.set('selectedItem', this.get('content'));
     } else {
       this.invokeLater(this.flashHighlight, 25);
     }
