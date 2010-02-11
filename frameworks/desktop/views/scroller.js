@@ -498,7 +498,7 @@ SC.ScrollerView = SC.View.extend(
   scrollerLength: function() {
     var elem = this.$()[0];
     if (!elem) return 0;
-    console.log('clientHeight: '+elem.clientHeight);
+
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         return elem.clientHeight;
