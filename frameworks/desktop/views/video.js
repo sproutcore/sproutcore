@@ -27,8 +27,7 @@ SC.VideoView = SC.View.extend({
   degradeList: ['video','quicktime', 'flash'],
   
   render: function(context, firstTime) {
-    var i, j, listLen, pluginsLen;
-    var id = SC.guidFor(this);
+    var i, j, listLen, pluginsLen, id = SC.guidFor(this);
     if(firstTime){
       for(i=0, listLen = this.degradeList.length; i<listLen; i++){
         switch(this.degradeList[i]){
@@ -37,8 +36,9 @@ SC.VideoView = SC.View.extend({
             context.tagName('video');
             context.attr('src', this.get('value'));
             context.attr('poster', this.poster);
+            context.attr('width', '100%');
+            context.attr('height', '100%');
             this.loaded='video';
-            console.log('loaded using video tag');
             return;
           }
           break;
@@ -51,7 +51,6 @@ SC.VideoView = SC.View.extend({
           }
           context.push('<object width="100%" height="100%"');
           if(SC.browser.msie){
-            console.log('adding style behavior');
             context.push('style="behavior:url(#qt_event_source);"');
           }
           context.push('classid="clsid:02BF25D5-8C17-4B23-BC80-D3488ABDDC6B" '+
@@ -62,6 +61,8 @@ SC.VideoView = SC.View.extend({
                       '<param name="loop" value="false"/>'+
                       '<param name="controller" value="false"/>'+
                       '<param name="postdomevents" value="true"/>'+
+                      '<param name="kioskmode" value="true"/>'+
+                      '<param name="bgcolor" value="000000"/>'+
                       '<param name="scale" value="aspect"/>'+
                       '<embed width="100%" height="100%" '+
                       'name="qt_'+id+'" '+
@@ -69,17 +70,25 @@ SC.VideoView = SC.View.extend({
                       'autostart="false" '+
                       'EnableJavaScript="true" '+
                       'postdomevents="true" '+
+                      'kioskmode="true" '+
                       'controller="false" '+
+                      'bgcolor="000000"'+
                       'scale="aspect" '+
                       'pluginspage="www.apple.com/quicktime/download">'+
                       '</embed></object>'+
                       '</object>');
           this.loaded='quicktime';
-          console.log('loaded using quicktime');
           return;
         case "flash":
-          console.log('loaded using flash');
           var flashURL= sc_static('videoCanvas.swf');
+          var movieURL = this.get('value');
+          if(movieURL.indexOf('http:')==-1){
+            movieURL=location.protocol+'//'+location.host+movieURL;
+          }
+          if(movieURL.indexOf('?')!=-1){
+            movieURL=movieURL.substring(0, movieURL.indexOf('?'));
+          }
+          movieURL = encodeURI(movieURL);
           context.push('<object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" '+
                         'codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=8,0,0,0" '+
                         'width="100%" '+
@@ -88,16 +97,16 @@ SC.VideoView = SC.View.extend({
                         'align="middle">'+
         	              '<param name="allowScriptAccess" value="sameDomain" />'+
         	              '<param name="allowFullScreen" value="true" />'+
-        	              '<param name="movie" value="'+flashURL+'src='+encodeURI(this.get('value'))+'" />'+
+        	              '<param name="movie" value="'+flashURL+'&src='+movieURL+'&scid='+id+'" />'+
         	              '<param name="quality" value="autohigh" />'+
         	              '<param name="scale" value="default" />'+
         	              '<param name="wmode" value="transparent" />'+
-        	              '<param name="bgcolor" value="#ffffff" />	'+
-        	              '<embed src="'+flashURL+'src='+encodeURI(this.get('value'))+'" '+
+        	              '<param name="bgcolor" value="#000000" />	'+
+        	              '<embed src="'+flashURL+'&src='+movieURL+'&scid='+id+'" '+
         	              'quality="autohigh" '+
         	              'scale="default" '+
         	              'wmode="transparent" '+
-        	              'bgcolor="#ffffff" '+
+        	              'bgcolor="#000000" '+
         	              'width="100%" '+
         	              'height="100%" '+
         	              'name="flash_'+id+'" '+
@@ -108,6 +117,7 @@ SC.VideoView = SC.View.extend({
         	              'pluginspage="http://www.adobe.com/go/getflashplayer" />'+
         	              '</object>');
           this.loaded='flash';
+          SC.VideoView.addToVideoFlashViews(this);
           return;
         default:
           context.push('video is not supported by your browser');
@@ -120,8 +130,7 @@ SC.VideoView = SC.View.extend({
   
   
   didCreateLayer :function(){
-    var videoElem = this.$()[0];
-    var view=this;
+    var videoElem, view=this;
     if(this.loaded==="video"){
       videoElem = this.$()[0];
       this.set('videoObject', videoElem);
@@ -144,7 +153,6 @@ SC.VideoView = SC.View.extend({
       });     
       SC.Event.add(videoElem, 'progress', this, function (e) {
         SC.RunLoop.begin();
-        debugger;
         this.loadedTimeRanges=[];
         for (var j=0, jLen = videoElem.seekable.length; j<jLen; j++){
           this.loadedTimeRanges.push(videoElem.seekable.start(j));
@@ -275,11 +283,11 @@ SC.VideoView = SC.View.extend({
   },
   
   didAppendToDocument :function(){
-    var vid=this._getVideoObject();
-    var videoElem = this.$()[0];
-    var view=this;
+    var vid=this._getVideoObject(),
+        videoElem = this.$()[0],
+        view=this,
+        dimensions;
     if(this.loaded==="quicktime"){
-    
       try{
         vid.GetDuration();
       }catch(e){
@@ -290,7 +298,7 @@ SC.VideoView = SC.View.extend({
       this.set('videoObject', vid);
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
       view.set('volume', vid.GetVolume()/256);
-      var dimensions=vid.GetRectangle().split(',');
+      dimensions=vid.GetRectangle().split(',');
       view.set('videoWidth', dimensions[2]);
       view.set('videoHeight', dimensions[3]);
       
@@ -382,13 +390,15 @@ SC.VideoView = SC.View.extend({
   }.observes('paused'),
   
   seek:function(){
-    var timeInSecs, totaltimeInSecs, formattedTime;
-    var vid=this._getVideoObject();
+    var timeInSecs, totaltimeInSecs, formattedTime, vid=this._getVideoObject();
     if(this.loaded==='video'){
       if(this.get('paused')) vid.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
       vid.SetTime(this.get('currentTime')*vid.GetTimeScale());
+    }
+    if(this.loaded==='flash'){
+      vid.SetTime(this.get('currentTime'));
     }
   }.observes('currentTime'),
   
@@ -401,26 +411,25 @@ SC.VideoView = SC.View.extend({
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.volume=this.get('volume');
     if(this.loaded==="quicktime") vid.SetVolume(this.get('volume')*256);
+    if(this.loaded==="flash") vid.setVolume(this.get('volume')*100);
   }.observes('volume'),
   
   
   play: function(){
-    debugger;
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.play();
     if(this.loaded==="quicktime") vid.Play();
-    if(this.loaded==="quicktime") vid.playVideo();
+    if(this.loaded==="flash") vid.play();
   },
   
   stop: function(){
     var vid=this._getVideoObject();
     if(this.loaded==="video")  vid.pause();
     if(this.loaded==="quicktime")  vid.Stop();
+    if(this.loaded==="flash")  vid.pause();
   },
   
   playPause: function(){
-    
-    debugger;
     var vid=this._getVideoObject();
     if(this.loaded==="video"){
       if(this.get('paused')){
@@ -443,16 +452,17 @@ SC.VideoView = SC.View.extend({
     if(this.loaded==="flash"){
       if(this.get('paused')){
         this.set('paused', NO);
-        vid.playVideo();
+        vid.play();
       }else{
         this.set('paused', YES);
-        vid.stopVideo();
+        vid.pause();
       }
     }   
   },
    
   fullScreen: function(){
-    return;
+    if(this.loaded==="video") this.$()[0].webkitEnterFullScreen();
+    return; 
   },
   
   closedCaption:function(){
@@ -473,14 +483,47 @@ SC.VideoView = SC.View.extend({
   _getVideoObject:function(){
     if(this.loaded==="video") return this.get('videoObject');
     if(this.loaded==="quicktime") return document['qt_'+SC.guidFor(this)];
-    if(this.loaded==="flash") return window['flash_'+SC.guidFor(this)];
+    if(this.loaded==="flash") {
+      var movieName='flash_'+SC.guidFor(this);
+      if (window.document[movieName]) 
+      {
+          return window.document[movieName];
+      }
+      if (navigator.appName.indexOf("Microsoft Internet")==-1)
+      {
+        if (document.embeds && document.embeds[movieName]) {
+          return document.embeds[movieName]; 
+        }
+      }
+      else
+      {
+        return document.getElementById(movieName);
+      }
+    }
   },
   
   updateTime:function(){
-    var currentTime=this.get('currentTime');
-    var totaltimeInSecs = this.get('duration');
+    var currentTime=this.get('currentTime'),
+        totaltimeInSecs = this.get('duration');
     var formattedTime = this._addZeros(Math.floor(currentTime/60))+':'+this._addZeros(Math.floor(currentTime%60))+"/"+this._addZeros(Math.floor(totaltimeInSecs/60))+':'+this._addZeros(Math.floor(totaltimeInSecs%60));
     this.set('time', formattedTime);
   }.observes('currentTime')
   
 });
+
+SC.VideoView.flashViews={};
+
+SC.VideoView.addToVideoFlashViews = function(view) {
+  SC.VideoView.flashViews[SC.guidFor(view)]=view;
+} ;
+
+
+
+SC.VideoView.updateProperty = function(scid, property, value) {
+  var view = SC.VideoView.flashViews[scid];
+  if(view){
+    SC.RunLoop.begin();
+    view.set(property, value);
+    SC.RunLoop.end();
+  }
+} ;
