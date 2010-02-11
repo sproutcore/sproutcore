@@ -392,7 +392,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.commitEditing() ;
     if(this._delegate){
       var next = this._delegate.nextValidKeyView();
-      if(next) next.beginEditing();
+      if(next && next.beginEditing) next.beginEditing();
     }
     return YES ;
   },
