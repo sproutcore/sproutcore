@@ -60,10 +60,12 @@ SC.ChildRecord = SC.Record.extend(
   */
   status: function() {
     var pStatus = SC.Record.EMPTY;
-    if (this._parentRecord && this._parentRecord) {
+    if (this._parentRecord) {
       pStatus = this._parentRecord.get('status');
       this.store.writeStatus(this.storeKey, pStatus);
       this.store.dataHashDidChange(this.storeKey);
+    } else {
+      pStatus = this.store.readStatus(this.storeKey);
     }
     return pStatus;
   }.property('storeKey').cacheable(),
@@ -78,6 +80,9 @@ SC.ChildRecord = SC.Record.extend(
   recordDidChange: function() {
     if (this._parentRecord && this._parentRecord.recordDidChange) {
       this._parentRecord.recordDidChange();
+    }
+    else{
+      sc_super();
     }
   },
   

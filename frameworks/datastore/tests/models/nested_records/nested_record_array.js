@@ -196,21 +196,23 @@ test("Basic Write", function() {
   equals(testParent.get('nothing'), 'nothing', "set should change non-existent property to a new property");
   
   // Test Child Record creation
-   var oldCR = testParent.get('elements');
-   var newChildren = [
-     { type: 'ChildRecordTest1', name: 'Tom', value: 'Jones'},
-     { type: 'ChildRecordTest1', name: 'Dick', value: 'Smothers'},
-     { type: 'ChildRecordTest1', name: 'Harry', value: 'Balls'}
-   ];
-   //debugger;
-   testParent.set('elements', newChildren);
-   var newArray = testParent.get('elements');
-   ok(SC.instanceOf(newArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
-   equals(newArray.get('length'), 3, "after set() on parent, check that the length of the array of child records is 3");
-   var cr = newArray.objectAt(0);
-   
-   ok(SC.kindOf(cr, SC.ChildRecord), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.ChildRecord Object");
-   ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that first ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
+  var oldCR = testParent.get('elements');
+  var newChildren = [
+   { type: 'ChildRecordTest1', name: 'Tom', value: 'Jones'},
+   { type: 'ChildRecordTest1', name: 'Dick', value: 'Smothers'},
+   { type: 'ChildRecordTest1', name: 'Harry', value: 'Balls'}
+  ];
+  //debugger;
+  //SC.RunLoop.begin();
+  testParent.set('elements', newChildren);
+  //SC.RunLoop.end();
+  var newArray = testParent.get('elements');
+  ok(SC.instanceOf(newArray, SC.ChildArray), "check that get() creates an actual instance of a SC.ChildArray");
+  equals(newArray.get('length'), 3, "after set() on parent, check that the length of the array of child records is 3");
+  var cr = newArray.objectAt(0);
+
+  ok(SC.kindOf(cr, SC.ChildRecord), "check that first ChildRecord from the get() creates an actual instance that is a kind of a SC.ChildRecord Object");
+  ok(SC.instanceOf(cr, NestedRecord.ChildRecordTest1), "check that first ChildRecord from the get() creates an actual instance of a ChildRecordTest1 Object");
 });
 
 test("Basic Write: reference tests", function() {

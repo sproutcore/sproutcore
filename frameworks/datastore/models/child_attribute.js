@@ -61,6 +61,11 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
     }
     return ret;
   },
+  
+  // Default fromType is just returning itself
+  fromType: function(record, key, value){
+    return value;
+  },
     
   /**
     The core handler.  Called from the property.
