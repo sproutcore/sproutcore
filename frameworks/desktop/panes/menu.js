@@ -507,8 +507,8 @@ SC.MenuPane = SC.PickerPane.extend(
     @private
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    this.adjust('height', this.get('menuHeight'));
-    sc_super();
+    this.remove();
+    return sc_super();
   },
 
   /**
