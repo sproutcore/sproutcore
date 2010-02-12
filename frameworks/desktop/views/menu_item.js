@@ -205,7 +205,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   */
 
   renderBranch: function(context) {
-    context.push('<span class= "hasBranch"></span>') ;
+    context.push('<span class="has-branch"></span>') ;
   },
 
   /** 

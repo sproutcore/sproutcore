@@ -41,8 +41,9 @@
   border-bottom: 1px #cccccc solid;
 }
 
-.sc-menu-item a img {
-  left: 6px;
+.sc-menu-item img {
+  left: 24px;
+  top: 3px;
   display: block;
   position: absolute;
 }
@@ -95,20 +96,14 @@
   right: 5px;
   display: inline-block;
   text-align:left;
-  margin-left:28px;
+  margin-left:25px;
 }
 
 .sc-menu-item a.has-icon span.value {
-  margin-left: 45px;
+  margin-left: 44px;
 }
 
 .sc-menu-item a.shortcutkey span.value {
   right: 55px;
-}
-
-.sc-menu-item span.hasBranch {
-  position:absolute;
-  text-align:center;
-  right:5px;
 }
 
