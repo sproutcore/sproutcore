@@ -2714,8 +2714,8 @@ SC.View.mixin(/** @scope SC.View */ {
     if(ret.bottom) ret.bottom = Math.floor(ret.bottom);
     if(ret.left) ret.left = Math.floor(ret.left);
     if(ret.right) ret.right = Math.floor(ret.right);
-    if(ret.width === SC.LAYOUT_AUTO) ret.width = Math.floor(ret.width);
-    if(ret.height === SC.LAYOUT_AUTO) ret.height = Math.floor(ret.width);
+    if(ret.width !== SC.LAYOUT_AUTO) ret.width = Math.floor(ret.width);
+    if(ret.height !== SC.LAYOUT_AUTO) ret.height = Math.floor(ret.height);
 
     // handle min/max
     if (layout.minHeight !== undefined) ret.minHeight = layout.minHeight ;
