@@ -11,6 +11,8 @@ SC.VideoView = SC.View.extend({
   displayProperties: ['value', 'shouldAutoResize'],
   videoObject:null,
   
+  degradeList: ['video','quicktime', 'flash'],
+  
   currentTime: 0, //current time in secs
   duration: 0, //video duration in secs
   volume:0, //volume value from 0 to 1
@@ -23,8 +25,12 @@ SC.VideoView = SC.View.extend({
   videoHeight:0,
   captionsEnabled: NO,
   
-  time: '00:00/00:00',
-  degradeList: ['video','quicktime', 'flash'],
+  time: function(){
+    var currentTime=this.get('currentTime'),
+        totaltimeInSecs = this.get('duration');
+    var formattedTime = this._addZeros(Math.floor(currentTime/60))+':'+this._addZeros(Math.floor(currentTime%60))+"/"+this._addZeros(Math.floor(totaltimeInSecs/60))+':'+this._addZeros(Math.floor(totaltimeInSecs%60));
+    return formattedTime;
+  }.property('currentTime').cacheable(),
   
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen, id = SC.guidFor(this);
@@ -33,11 +39,12 @@ SC.VideoView = SC.View.extend({
         switch(this.degradeList[i]){
         case "video":
           if(SC.browser.safari){
+            var fr= this.get('frame');
             context.tagName('video');
             context.attr('src', this.get('value'));
             context.attr('poster', this.poster);
-            context.attr('width', '100%');
-            context.attr('height', '100%');
+            context.attr('width', fr.width);
+            context.attr('height', fr.height);
             this.loaded='video';
             return;
           }
@@ -101,7 +108,8 @@ SC.VideoView = SC.View.extend({
         	              '<param name="quality" value="autohigh" />'+
         	              '<param name="scale" value="default" />'+
         	              '<param name="wmode" value="transparent" />'+
-        	              '<param name="bgcolor" value="#000000" />	'+
+        	              '<param name="menu" value="false" />'+
+                        '<param name="bgcolor" value="#000000" />	'+
         	              '<embed src="'+flashURL+'&src='+movieURL+'&scid='+id+'" '+
         	              'quality="autohigh" '+
         	              'scale="default" '+
@@ -113,6 +121,7 @@ SC.VideoView = SC.View.extend({
         	              'align="middle" '+
         	              'allowScriptAccess="sameDomain" '+
         	              'allowFullScreen="true" '+
+        	              'menu="false" '+
         	              'type="application/x-shockwave-flash" '+
         	              'pluginspage="http://www.adobe.com/go/getflashplayer" />'+
         	              '</object>');
@@ -142,7 +151,6 @@ SC.VideoView = SC.View.extend({
       SC.Event.add(videoElem, 'timeupdate', this, function () {
           SC.RunLoop.begin();
           view.set('currentTime', videoElem.currentTime);
-          view.updateTime();
           SC.RunLoop.end();
       }) ;
       SC.Event.add(videoElem, 'loadstart', this, function () {
@@ -289,7 +297,7 @@ SC.VideoView = SC.View.extend({
         dimensions;
     if(this.loaded==="quicktime"){
       try{
-        vid.GetDuration();
+        vid.GetVolume();
       }catch(e){
         console.log('loaded fail trying later');
         this.invokeLater(this.didAppendToDocument, 100);
@@ -302,7 +310,6 @@ SC.VideoView = SC.View.extend({
       view.set('videoWidth', dimensions[2]);
       view.set('videoHeight', dimensions[3]);
       
-      this.updateTime();
       SC.Event.add(videoElem, 'qt_durationchange', this, function () {
         SC.RunLoop.begin();
         view.set('duration', vid.GetDuration()/vid.GetTimeScale());
@@ -356,14 +363,12 @@ SC.VideoView = SC.View.extend({
       SC.Event.add(videoElem, 'qt_pause', this, function () {
         SC.RunLoop.begin();
         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-        view.updateTime();
         view.set('paused', YES);
         console.log('qt_pause');
       });
       SC.Event.add(videoElem, 'qt_play', this, function () {
         SC.RunLoop.begin();
         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-        view.updateTime();
         view.set('paused', NO);
         console.log('qt_play');
       });
@@ -395,10 +400,10 @@ SC.VideoView = SC.View.extend({
       if(this.get('paused')) vid.currentTime=this.get('currentTime');
     }
     if(this.loaded==='quicktime'){
-      vid.SetTime(this.get('currentTime')*vid.GetTimeScale());
+      if(this.get('paused')) vid.SetTime(this.get('currentTime')*vid.GetTimeScale());
     }
     if(this.loaded==='flash'){
-      vid.SetTime(this.get('currentTime'));
+      if(this.get('paused')) vid.setTime(this.get('currentTime'));
     }
   }.observes('currentTime'),
   
@@ -411,7 +416,7 @@ SC.VideoView = SC.View.extend({
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.volume=this.get('volume');
     if(this.loaded==="quicktime") vid.SetVolume(this.get('volume')*256);
-    if(this.loaded==="flash") vid.setVolume(this.get('volume')*100);
+    if(this.loaded==="flash") vid.setVolume(this.get('volume'));
   }.observes('volume'),
   
   
@@ -419,14 +424,14 @@ SC.VideoView = SC.View.extend({
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.play();
     if(this.loaded==="quicktime") vid.Play();
-    if(this.loaded==="flash") vid.play();
+    if(this.loaded==="flash") vid.playVideo();
   },
   
   stop: function(){
     var vid=this._getVideoObject();
     if(this.loaded==="video")  vid.pause();
     if(this.loaded==="quicktime")  vid.Stop();
-    if(this.loaded==="flash")  vid.pause();
+    if(this.loaded==="flash")  vid.pauseVideo();
   },
   
   playPause: function(){
@@ -452,31 +457,35 @@ SC.VideoView = SC.View.extend({
     if(this.loaded==="flash"){
       if(this.get('paused')){
         this.set('paused', NO);
-        vid.play();
+        vid.playVideo();
       }else{
         this.set('paused', YES);
-        vid.pause();
+        vid.pauseVideo();
       }
     }   
   },
    
   fullScreen: function(){
+    var vid=this._getVideoObject();
     if(this.loaded==="video") this.$()[0].webkitEnterFullScreen();
+    if(this.loaded==="flash") vid.fullScreen();
     return; 
   },
   
   closedCaption:function(){
-    try{
-      if(this.get('captionsEnabled')){
-        if(this._closedCaptionTrackIndex){
-          this.SetTrackEnabled(this._closedCaptionTrackIndex,true);
-          this.set('captionsEnabled', YES);
-        }
-      }else{
-        this.SetTrackEnabled(this._closedCaptionTrackIndex,false);
-        this.set('captionsEnabled', NO);
-      }   
-    }catch(a){}
+    if(this.loaded==="video"){
+      try{
+        if(this.get('captionsEnabled')){
+          if(this._closedCaptionTrackIndex){
+            this.SetTrackEnabled(this._closedCaptionTrackIndex,true);
+            this.set('captionsEnabled', YES);
+          }
+        }else{
+          this.SetTrackEnabled(this._closedCaptionTrackIndex,false);
+          this.set('captionsEnabled', NO);
+        }   
+      }catch(a){}
+    }
     return;
   },
   
@@ -500,15 +509,7 @@ SC.VideoView = SC.View.extend({
         return document.getElementById(movieName);
       }
     }
-  },
-  
-  updateTime:function(){
-    var currentTime=this.get('currentTime'),
-        totaltimeInSecs = this.get('duration');
-    var formattedTime = this._addZeros(Math.floor(currentTime/60))+':'+this._addZeros(Math.floor(currentTime%60))+"/"+this._addZeros(Math.floor(totaltimeInSecs/60))+':'+this._addZeros(Math.floor(totaltimeInSecs%60));
-    this.set('time', formattedTime);
-  }.observes('currentTime')
-  
+  }
 });
 
 SC.VideoView.flashViews={};
@@ -516,8 +517,6 @@ SC.VideoView.flashViews={};
 SC.VideoView.addToVideoFlashViews = function(view) {
   SC.VideoView.flashViews[SC.guidFor(view)]=view;
 } ;
-
-
 
 SC.VideoView.updateProperty = function(scid, property, value) {
   var view = SC.VideoView.flashViews[scid];
