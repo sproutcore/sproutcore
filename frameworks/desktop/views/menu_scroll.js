@@ -210,7 +210,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   _invokeScrollOnMouseOver: function(){
     this._scrollMenu();
     if(this.get('isMouseOver')){
-      this.invokeLater(this._invokeScrollOnMouseOver, 50);
+      this.invokeLater(this._invokeScrollOnMouseOver, 100);
     }
   }
   
