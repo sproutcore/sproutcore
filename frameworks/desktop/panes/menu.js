@@ -479,7 +479,7 @@ SC.MenuPane = SC.PickerPane.extend(
   }.property('displayItems').cacheable(),
 
   /**
-    An associate array of the shortcut keys. The key is the shortcut in the
+    An associative array of the shortcut keys. The key is the shortcut in the
     form 'ctrl_z', and the value is the menu item of the action to trigger.
 
     @private
