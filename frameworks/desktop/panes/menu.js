@@ -703,8 +703,65 @@ SC.MenuPane = SC.PickerPane.extend(
     return !ret ? NO : ret ;
   },
 
+  /**
+    Selects the next enabled menu item above the currently
+    selected menu item when the up-arrow key is pressed.
+
+    @private
+  */
   moveUp: function() {
-    SC.Logger.log("moveUp");
+    var currentMenuItem = this.get('currentMenuItem'),
+        items = this.get('menuItemViews'),
+        currentIndex, parentMenu, idx;
+
+    if (!currentMenuItem) {
+      idx = items.get('length')-1;
+    } else {
+      currentIndex = currentMenuItem.getPath('content.contentIndex');
+      if (currentIndex === 0) return YES;
+      idx = currentIndex-1;
+    }
+
+    while (idx >= 0) {
+      if (items[idx].get('isEnabled')) {
+        this.set('currentMenuItem', items[idx]);
+        break;
+      }
+      idx--;
+    }
+
+    return YES;
+  },
+
+  /**
+    Selects the next enabled menu item below the currently
+    selected menu item when the down-arrow key is pressed.
+
+    @private
+  */
+  moveDown: function() {
+    var currentMenuItem = this.get('currentMenuItem'),
+        items = this.get('menuItemViews'),
+        len = items.get('length'),
+        currentIndex, parentMenu, idx;
+
+    if (!currentMenuItem) {
+      idx = 0;
+    } else {
+      currentIndex = currentMenuItem.getPath('content.contentIndex');
+      if (currentIndex === len) return YES;
+      idx = currentIndex+1;
+    }
+
+    while (idx < len) {
+      if (items[idx].get('isEnabled')) {
+        this.set('currentMenuItem', items[idx]);
+        break;
+      }
+      idx++;
+    }
+
+    return YES;
   },
 
   insertText: function(chr, evt) {

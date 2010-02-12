@@ -245,7 +245,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
   
   isEnabled: function() {
-    return this.getContentProperty('itemIsEnabledKey') !== NO;
+    return this.getContentProperty('itemIsEnabledKey') !== NO &&
+           this.getContentProperty('itemSeparatorKey') !== YES;
   }.property('content.isEnabled').cacheable(),
 
   title: function() {
@@ -428,8 +429,8 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @returns Boolean
   */
   moveRight: function(sender,evt) {
-    this.createSubMenu() ;
-    return YES ;
+    this.showSubMenu() ;
+    return YES;
   },
   
   /** @private*/
