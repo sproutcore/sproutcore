@@ -280,7 +280,7 @@ SC.MenuPane = SC.PickerPane.extend(
     @default "separator"
     @commonTask Menu Item Properties
   */
-  itemSeparatorKey: 'isSeparator',
+  itemSeparatorKey: 'separator',
 
   /**
     The name of the property that contains the target for the action that is triggered when the user clicks the menu item.
