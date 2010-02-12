@@ -348,7 +348,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     @returns Boolean
   */
   mouseEntered: function(evt) {
-    var menu = this.get('parentMenu'), content = this.get('content');
+    var menu = this.get('parentMenu');
     menu.set('mouseHasEntered', YES);
     menu.set('currentMenuItem', this);
 
