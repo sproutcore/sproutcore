@@ -240,7 +240,7 @@ SC.PickerPane = SC.PalettePane.extend({
       switch(this.preferType) {
         case SC.PICKER_MENU:
           // apply default + menu re-position rule
-          picker = this.fitPositionToScreenMenu(wret, picker) ;
+          picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu')) ;
           break;
         case SC.PICKER_POINTER:
           // apply pointer re-position rule
@@ -303,9 +303,13 @@ SC.PickerPane = SC.PalettePane.extend({
   /** @private
     re-position rule optimized for Menu to enforce min left(7px)/right(8px) padding to the window
   */
-  fitPositionToScreenMenu: function(w, f) {
+  fitPositionToScreenMenu: function(w, f, subMenu) {
     // min left/right padding to the window
-    if( (f.x + f.width) > (w.width-9) ) f.x = f.x - (f.width*2);
+    if( (f.x + f.width) > (w.width-9) ) {
+      // sub-menus should be re-anchored to the left of the parent menu
+      if (subMenu) f.x = f.x - (f.width*2);
+      else f.x = w.width - f.width - 9;
+    }
     if( f.x < 7 ) f.x = 7;
     
     // if the height of the menu is bigger than the window height resize it.
