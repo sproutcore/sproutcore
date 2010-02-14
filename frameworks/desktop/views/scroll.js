@@ -559,7 +559,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     this.contentView = this.containerView.get('contentView');
     
     // create a horizontal scroller view if needed...
-    if (view=this.horizontalScrollerView) {
+    if (view == this.horizontalScrollerView) {
       if (this.get('hasHorizontalScroller')) {
         view = this.horizontalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_HORIZONTAL,
@@ -570,7 +570,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     }
     
     // create a vertical scroller view if needed...
-    if (view=this.verticalScrollerView) {
+    if (view == this.verticalScrollerView) {
       if (this.get('hasVerticalScroller')) {
         view = this.verticalScrollerView = this.createChildView(view, {
           layoutDirection: SC.LAYOUT_VERTICAL,
@@ -736,6 +736,31 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
   }.observes('verticalScrollOffset'),
   
+  /** @private
+    Whenever the scroll frame changes check if the verticalScrollOffset and 
+    horizontalScrollOffset are still smaller then the maximum value.
+  */
+  _scroll_frameDidChange: function() {
+    SC.RunLoop.currentRunLoop.invokeLast(this, function() {
+      var verticalScrolllOffset = this.get('verticalScrollOffset');
+      var maxVerticalScrollOffset = this.get('maximumVerticalScrollOffset');
+      
+      var horizontalScrollOffset = this.get('horizontalScrollOffset');
+      var maxHorizontalScrollOffset = this.get('maximumHorizontalScrollOffset');
+      
+      var clampVertical =  verticalScrolllOffset > maxVerticalScrollOffset;
+      var clampHorizontal = horizontalScrollOffset > maxHorizontalScrollOffset;
+      
+      if (clampVertical && clampHorizontal) {
+        this.scrollTo(maxHorizontalScrollOffset, maxVerticalScrollOffset);
+      } else if (clampVertical) {
+        this.scrollTo(horizontalScrollOffset, maxVerticalScrollOffset);
+      } else if (clampHorizontal) {
+        this.scrollTo(maxHorizontalScrollOffset, verticalScrolllOffset);
+      }
+    });
+  }.observes('frame'),
+   
   forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
     var oldScrollHOffset = hOffSet;
     var oldScrollVOffset = vOffSet;
