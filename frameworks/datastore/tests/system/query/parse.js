@@ -72,6 +72,13 @@ test("should recognize all primitives", function() {
   ok(q._tokenList.length == 1, 'list should have one token');
   equals(q._tokenList[0].tokenType, 'NUMBER', 'type should be NUMBER');
   equals(q._tokenList[0].tokenValue, 12.34, 'value should be 12.34');
+
+  // NUMBER - negative
+  q.conditions = "-1";
+  q.parse();
+  ok.(q._tokenList.length == 1, 'list should have one token');
+  equals(q._tokenList[0].tokenType, 'NUMBER', 'type should be NUMBER');
+  equals(q._tokenList[0].tokenValue, -1, 'value should be -1');
   
   // STRING - single quoted
   q.conditions = "'ultravisitor'";
