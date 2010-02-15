@@ -202,7 +202,7 @@ SC.Animatable = {
   It will return null if there is no such style.
   */
   getCurrentJavaScriptStyles: function() {
-    return this._animatableCurrentStyle
+    return this._animatableCurrentStyle;
   },
 
   /**
@@ -237,7 +237,7 @@ SC.Animatable = {
     // get our frame and parent's frame
     this.notifyPropertyChange("layout");
     var f = this.get("frame");
-    var p = this.getPath("layoutView.frame");
+    var p = this.computeParentDimensions();
 
     // set back to target
     this.layout = original_layout;
@@ -807,11 +807,11 @@ SC.Animatable = {
     var widthOrHeight, style;
     if (this.property == "centerX")
     {
-      widthOrHeight = "width"; style = "margin-left";
+      widthOrHeight = "width"; style = "marginLeft";
     }
     else
     {
-      widthOrHeight = "height"; style = "margin-top";
+      widthOrHeight = "height"; style = "marginTop";
     }
 
     this.style[style] = Math.round(value - (this.holder._animatableCurrentStyle[widthOrHeight] / 2)) + "px";
