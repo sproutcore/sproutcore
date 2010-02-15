@@ -254,6 +254,7 @@ SC.PickerPane = SC.PalettePane.extend({
       // apply default re-position rule
       picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
     }
+    this.displayDidChange();
     return picker ;
   },
 
