@@ -574,7 +574,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return ret;
   }.property('items').cacheable(),
 
-  itemsDidChange: function() {
+  _sc_menu_itemsDidChange: function() {
     var views = this.get('menuItemViews');
     this._menuView.replaceAllChildren(views);
     this._menuView.adjust('height', this.get('menuHeight'));
@@ -652,8 +652,7 @@ SC.MenuPane = SC.PickerPane.extend(
     return this._currentMenuItem;
   }.property().cacheable(),
 
-  currentMenuItemDidChange: function() {
-
+  _sc_menu_currentMenuItemDidChange: function() {
     var currentMenuItem = this.get('currentMenuItem'),
         previousMenuItem = this.get('previousMenuItem');
 
