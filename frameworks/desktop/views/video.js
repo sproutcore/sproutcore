@@ -39,12 +39,9 @@ SC.VideoView = SC.View.extend({
         switch(this.degradeList[i]){
         case "video":
           if(SC.browser.safari){
-            var fr= this.get('frame');
             context.tagName('video');
             context.attr('src', this.get('value'));
             context.attr('poster', this.poster);
-            context.attr('width', fr.width);
-            context.attr('height', fr.height);
             this.loaded='video';
             return;
           }
@@ -136,6 +133,16 @@ SC.VideoView = SC.View.extend({
     }
   },
 
+
+  frameDidChange: function() { 
+    if(this.loaded==="video"){
+      var fr= this.get('frame');
+      console.log(fr.width+","+fr.height);
+      this.$().attr('width', fr.width);
+      this.$().attr('height', fr.height);
+      
+    }
+  }.observes('frame'),
   
   
   didCreateLayer :function(){
