@@ -283,11 +283,10 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     targetMenuItem = this.getPath('parentMenu.rootMenu.targetMenuItem');
 
     if (targetMenuItem) targetMenuItem.performAction();
-
     return YES ;
   },
 
-  performAction: function(skipFlash) {
+  performAction: function() {
     var action = this.getContentProperty('itemActionKey'),
         target = this.getContentProperty('itemTargetKey'),
         rootMenu = this.getPath('parentMenu.rootMenu'), responder;
@@ -300,24 +299,19 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     target = (target === undefined) ? rootMenu.get('target') : target;
 
     this._flashCounter = 0;
-    if (skipFlash) {
-      rootMenu.set('selectedItem', this.get('content'));
+    rootMenu.set('selectedItem', this.get('content'));
 
-      // Legacy support for actions that are functions
-      if (SC.typeOf(action) === SC.T_FUNCTION) {
-        action.apply(target, [rootMenu]);
-      } else {
-        responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
-
-        if (responder) {
-          responder.sendAction(action, target, this, this.get('pane'));
-        }
-      }
-
-      rootMenu.remove();
+    // Legacy support for actions that are functions
+    if (SC.typeOf(action) === SC.T_FUNCTION) {
+      action.apply(target, [rootMenu]);
     } else {
-      this.invokeLater(this.flashHighlight, 25);
+      responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
+      if (responder) {
+        responder.sendAction(action, target, this, this.get('pane'));
+      }
     }
+
+    this.invokeLater(this.flashHighlight, 25);
   },
 
   flashHighlight: function() {
@@ -329,7 +323,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     }
 
     if (flashCounter > 2) {
-      this.performAction(YES);
+      this.getPath('parentMenu.rootMenu').remove();
     } else {
       this.invokeLater(this.flashHighlight, 50);
       this._flashCounter++;
