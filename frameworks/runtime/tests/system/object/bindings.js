@@ -100,6 +100,13 @@ test("bind(*extraObject.foo) should create locally chained binding", function() 
   equals("extraObjectValue", testObject.get("foo"), "testObject.foo") ;
 });
 
+test("bind(*extraObject.foo) should be disconnectable", function() {
+  var binding = testObject.bind("foo", "*extraObject.foo");
+  SC.Binding.flushPendingChanges() ; // actually sets up up the binding
+  
+  binding.disconnect();
+  SC.Binding.flushPendingChanges() ;
+});
 
 module("fooBinding method", {
   

@@ -83,6 +83,18 @@ test("suspended observing during bindings", function() {
   equals(toObject.callCount, 2, 'should call observer twice');
 });
 
+test("binding will disconnect", function() {
+  binding.disconnect();
+  equals(binding.isConnected, NO, "binding.isConnected");
+});
+
+test("binding disconnection actually works", function() {
+  binding.disconnect();
+  fromObject.set('value', 'change');
+  SC.Binding.flushPendingChanges();
+  equals(toObject.get('value'), 'start');
+});
+
 module("one way binding", {
   
   setup: function() {
