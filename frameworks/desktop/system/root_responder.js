@@ -205,6 +205,8 @@ SC.RootResponder = SC.RootResponder.extend(
     // do some initial set
     this.set('currentWindowSize', this.computeWindowSize()) ;
     this.focus(); // assume the window is focused when you load.
+    
+    sc_super();
   },
 
   /**
