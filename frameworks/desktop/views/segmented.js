@@ -316,14 +316,11 @@ SC.SegmentedView = SC.View.extend(SC.Control,
       icon = item[3];
       toolTip = item[5];
       
-      stylesHash = {};
-      classArray = [];
-
       if (this.get('layoutDirection') == SC.LAYOUT_HORIZONTAL) {
-        stylesHash['display'] = 'inline-block' ;
+        ic.addStyle('display', 'inline-block') ;
       }
 
-      classArray.push('sc-segment');
+      ic.addClass('sc-segment');
       
       if(!item[2]){
         ic.addClass('disabled');
