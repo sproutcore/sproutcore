@@ -446,59 +446,67 @@ SC.Record = SC.Object.extend(
   */
   
   normalize: function(includeNull) {
-    
     var primaryKey = this.primaryKey, 
         recordId   = this.get('id'), 
         store      = this.get('store'), 
         storeKey   = this.get('storeKey'), 
-        recHash, attrValue, normChild,  isRecord, isChild, defaultVal;
+        key, valueForKey, typeClass, recHash, attrValue, normChild,  isRecord,
+        isChild, defaultVal;
       
     var dataHash = store.readEditableDataHash(storeKey) || {};
     dataHash[primaryKey] = recordId;
+    recHash = store.readDataHash(storeKey);
     
-    for(var key in this) {
+    for (key in this) {
       // make sure property is a record attribute.
-      if(this[key] && this[key].typeClass) {
-        
-        isRecord = SC.typeOf(this[key].typeClass())==='class';
-        isChild = this[key].isChildRecordTransform;
-        if (!isRecord && !isChild) {
-          attrValue = this.get(key);
+      valueForKey = this[key];
+      if (valueForKey) {
+        typeClass = valueForKey.typeClass;
+        if (typeClass) {
+          isRecord = SC.typeOf(typeClass.call(valueForKey))===SC.T_CLASS;
+          isChild  = valueForKey.isChildRecordTransform;
+          if (!isRecord && !isChild) {
+            attrValue = this.get(key);
 
-          if(attrValue!==undefined || (attrValue===null && includeNull)) {
-            dataHash[key] = attrValue;
+            if(attrValue!==undefined || (attrValue===null && includeNull)) {
+              dataHash[key] = attrValue;
+            }
           }
-        }
-        else if (isChild){
-          attrValue = this.get(key);
-          normChild = attrValue.normalize();
-        }
-        else if(isRecord) {
-          recHash = store.readDataHash(storeKey);
+          else if (isChild){
+            attrValue = this.get(key);
+            normChild = attrValue.normalize();
 
-          if(recHash[key]!==undefined) {
-            // write value already there
-            dataHash[key] = recHash[key];
+            if(normChild!==undefined || (normChild===null && includeNull)) {
+              dataHash[key] = normChild;
+            }
+          }
+          else if (isRecord) {
+            attrValue = recHash[key];
+            if (attrValue !== undefined) {
+              // write value already there
+              dataHash[key] = attrValue;
+            }
+            else {
+              // or write default
+              defaultVal = valueForKey.get('defaultValue');
 
-          // or write default
-          } else {
-            defaultVal = this[key].get('defaultValue');
-
-            // computed default value
-            if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
-              dataHash[key] = defaultVal(this, key, defaultVal);
-            
-            // plain value
-            } else {
-              dataHash[key] = defaultVal;
+              // computed default value
+              if (SC.typeOf(defaultVal)===SC.T_FUNCTION) {
+                dataHash[key] = defaultVal(this, key, defaultVal);
+              }
+              else {
+                // plain value                
+                dataHash[key] = defaultVal;
+              }
             }
           }
         }
       }
     }
   
-    return store.materializeRecord(storeKey);
+    return this;
   },
+
   
   
   /**
