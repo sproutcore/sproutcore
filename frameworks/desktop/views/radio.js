@@ -335,12 +335,20 @@ SC.RadioView = SC.FieldView.extend(
      for( var i=0, inputLen = inputElems.length; i<inputLen; i++){
        SC.Event.add(inputElems[i], 'click', this, this._field_fieldValueDidChange) ;
      }
+     inputElems=this.$('label');
+      for(i=0, inputLen = inputElems.length; i<inputLen; i++){
+        SC.Event.add(inputElems[i], 'click', this, this._field_fieldValueDidChange) ;
+      }
    },
 
   willDestroyLayer: function() {
     var inputElems=this.$input();
     for( var i=0, inputLen = inputElems.length; i<inputLen; i++){
       SC.Event.remove(this.$input()[i], 'click', this, this._field_fieldValueDidChange); 
+    }
+    inputElems=this.$('label');
+    for( i=0, inputLen = inputElems.length; i<inputLen; i++){
+      SC.Event.remove(inputElems[i], 'click', this, this._field_fieldValueDidChange); 
     }
   },
   

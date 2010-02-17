@@ -115,10 +115,12 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   didCreateLayer: function() {
     this.setFieldValue(this.get('fieldValue'));
     SC.Event.add(this.$input()[0], 'click', this, this._field_fieldValueDidChange) ;
+    SC.Event.add(this.$('.label')[0], 'click', this, this._field_fieldValueDidChange) ;
   },
   
   willDestroyLayer: function() {
     SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
+    SC.Event.remove(this.$('.label')[0], 'click', this, this._field_fieldValueDidChange) ;
   },
   
   mouseDown: function(evt) {
