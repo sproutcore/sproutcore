@@ -180,8 +180,11 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
         );
         this.dataHash[key] = encodedValue;
       }else{
-        
-        localStorage[key] = encodedValue;
+        try{
+          localStorage[key] = encodedValue;
+        }catch(e){
+          console.error("Failed using localStorage. "+e);
+        }
       }
     }
     
