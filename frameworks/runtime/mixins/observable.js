@@ -424,7 +424,7 @@ SC.Observable = {
         cachedep, idx, dfunc, cache, func,
         log = SC.LOG_OBSERVERS && !(this.LOG_OBSERVING===NO);
 
-    if (this._kvo_cacheable && (cache = this._kvo_cache)) {
+    if (cache = this._kvo_cache) {
 
       // clear any cached value
       if (!_keepCache) {
@@ -434,18 +434,20 @@ SC.Observable = {
         }
       }
 
-      // if there are any dependent keys and they use caching, then clear the
-      // cache.  This is the same code as is in set.  It is inlined for perf.
-      cachedep = this._kvo_cachedep;
-      if (!cachedep || (cachedep = cachedep[key])===undefined) {
-        cachedep = this._kvo_computeCachedDependentsFor(key);
-      }
+      if (this._kvo_cacheable) {
+        // if there are any dependent keys and they use caching, then clear the
+        // cache.  This is the same code as is in set.  It is inlined for perf.
+        cachedep = this._kvo_cachedep;
+        if (!cachedep || (cachedep = cachedep[key])===undefined) {
+          cachedep = this._kvo_computeCachedDependentsFor(key);
+        }
 
-      if (cachedep) {
-        idx = cachedep.length;
-        while(--idx>=0) {
-          dfunc = cachedep[idx];
-          cache[dfunc.cacheKey] = cache[dfunc.lastSetValueKey] = undefined;
+        if (cachedep) {
+          idx = cachedep.length;
+          while(--idx>=0) {
+            dfunc = cachedep[idx];
+            cache[dfunc.cacheKey] = cache[dfunc.lastSetValueKey] = undefined;
+          }
         }
       }
     }

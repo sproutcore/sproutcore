@@ -130,3 +130,26 @@ test("revision passed to observers should match .propertyRevision", function() {
   equals(revMatches, true) ;
   
 });
+
+test("should invalidate function property cache when notifyPropertyChange is called", function() {
+  
+  var a = SC.Object.create({
+    _b: null,
+    b: function(key, value) {
+      if (value !== undefined) {
+        this._b = value;
+        return this;
+      }
+      return this._b;
+    }.property()
+  });
+  
+  a.set('b', 'foo');
+  equals(a.get('b'), 'foo', 'should have set the correct value for property b');
+  
+  a._b = 'bar';
+  a.notifyPropertyChange('b');
+  a.set('b', 'foo');
+  equals(a.get('b'), 'foo', 'should have invalidated the cache so that the newly set value is actually set');
+  
+});
