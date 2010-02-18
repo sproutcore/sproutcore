@@ -1851,6 +1851,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
         stLayout = this.get('useStaticLayout'),
         dH, dW, //shortHand for parentDimensions
+        borderTop, borderLeft,
         lR = layout.right, 
         lL = layout.left, 
         lT = layout.top, 
@@ -1859,7 +1860,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
         lH = layout.height, 
         lcX = layout.centerX, 
         lcY = layout.centerY;
-    
+
     if (lW !== undefined &&
         lW === SC.LAYOUT_AUTO &&
         stLayout !== undefined && !stLayout) {
@@ -1992,6 +1993,16 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (f.width === AUTO) f.width = layer ? layer.clientWidth : 0;
     }
     
+    // views with SC.Border mixin applied applied
+    if (this.get('hasBorder')) {
+      borderTop = this.get('borderTop');
+      borderLeft = this.get('borderLeft');
+      f.height -= borderTop+this.get('borderBottom');
+      f.y += borderTop;
+      f.width -= borderLeft+this.get('borderRight');
+      f.x += borderLeft;
+    }
+
     // make sure the width/height fix min/max...
     if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight)) {
       f.height = layout.maxHeight ;
