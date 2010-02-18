@@ -756,6 +756,19 @@ SC.SplitView = SC.View.extend(
   /* Force to rendering once the pane is attached */
   _forceSplitCalculation: function(){
     this.updateLayout(); 
-  }.observes('*pane.isPaneAttached')
+  }.observes('*pane.isPaneAttached'),
+
+  /**
+    This method is invoked on the split view when the view resizes due to a layout
+    change or due to the parent view resizing. It forces an update on topLeft and
+    bottomRight thickness.
+
+    @returns {void}
+  */
+  viewDidResize: function() {
+     sc_super();
+     this.notifyPropertyChange('topLeftThickness')
+         .notifyPropertyChange('bottomRightThickness');
+   }.observes('layout')
 
 });
