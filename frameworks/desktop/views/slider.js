@@ -172,7 +172,7 @@ SC.SliderView = SC.View.extend(SC.Control,
         min = this.get('minimum'), max=this.get('maximum'),  
         step = this.get('step'), v=this.get('value'), loc;
 
-    if (evt.changedTouches.length > 0) {
+    if (evt.changedTouches && evt.changedTouches.length > 0) {
       var changed = evt.changedTouches[0];
       loc = this.convertFrameFromView({ x: changed.pageX }).x;
     }else loc = this.convertFrameFromView({ x: evt.pageX }).x,
