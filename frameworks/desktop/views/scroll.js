@@ -500,7 +500,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     
     if (hasHorizontal) {
       hscroll.set('layout', { left: 0, bottom: 0, right: vt-1, height: ht }) ;
-      clipLayout.bottom = ht-1 ;
+      clipLayout.bottom = ht ;
     } else {
       clipLayout.bottom = 0 ;
     }
@@ -509,7 +509,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (hasVertical) {
       ht = ht + this.get('verticalScrollerBottom') ;
       vscroll.set('layout', { top: 0, bottom: ht, right: 0, width: vt }) ;
-      clipLayout.right = vt-1 ;
+      clipLayout.right = vt ;
     } else {
       clipLayout.right = 0 ;
     }
