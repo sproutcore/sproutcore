@@ -287,6 +287,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   },
 
   performAction: function() {
+    if(!this.get('isEnabled')) return ;
     var action = this.getContentProperty('itemActionKey'),
         target = this.getContentProperty('itemTargetKey'),
         rootMenu = this.getPath('parentMenu.rootMenu'), responder;
