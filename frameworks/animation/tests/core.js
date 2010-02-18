@@ -3,9 +3,15 @@
 // ==========================================================================
 
 /*globals module test ok isObj equals expects */
-var view, base, inherited;
+var view, base, inherited, pane;
 module("Animatable", {
   setup: function() {
+    SC.RunLoop.begin();
+    pane = SC.Pane.create({
+      layout: { top: 0, right: 0, width: 200, height: 200 },
+    });
+    pane.append();
+    
     view = SC.View.create(SC.Animatable, { 
       layout: { left: 100, top: 100, height: 100, width: 100 },
       style: { opacity: .5 },
@@ -16,6 +22,7 @@ module("Animatable", {
         style: { opacity: 1 }
       }
     });
+    pane.appendChild(view);
     
     // identical to normal view above
     base = SC.View.extend(SC.Animatable, { 
@@ -33,7 +40,10 @@ module("Animatable", {
         left: 0.99
       }
     });
-  }
+    
+    SC.RunLoop.end();
+  },
+  
 });
 
 test("animatable should have init-ed correctly", function(){
@@ -69,15 +79,7 @@ test("animatable handler for layer update should ensure both layout and styles a
   var original_transition_enabled = SC.Animatable.enableCSSTransitions;
   SC.Animatable.enableCSSTransitions = NO;
   
-  // check current style (should be none yet)
-  var current = view.getCurrentJavaScriptStyles();
-  equals(current, null, "There should be no current style yet.");
-  
-  // create the layer
-  view.createLayer();
-  view.updateLayer();
-  
-  // check again. Now, we should have a style
+  // we should have a style (it is inside a pane)
   current = view.getCurrentJavaScriptStyles();
   ok(!SC.none(current), "There now SHOULD be a current JS style.");
   
@@ -87,4 +89,26 @@ test("animatable handler for layer update should ensure both layout and styles a
   
   // go back to the beginning
   SC.Animatable.enableCSSTransitions = original_transition_enabled;
+});
+
+test("animatable callbacks work in general", function(){
+  SC.RunLoop.begin();
+  view.transitions["left"] = {
+    duration: .25,
+    action: function() {
+      console.error("Callback");
+      ok(true, "Callback was called.");
+      start();
+    }
+  };
+  view.updateLayout();
+  view.adjust("left", 0).updateLayout();
+  SC.RunLoop.end();
+  stop();
+  
+  setTimeout(function(){
+    ok(false, "Timeout! Callback was not called.");
+    start();
+  }, 1000);
+  
 });
