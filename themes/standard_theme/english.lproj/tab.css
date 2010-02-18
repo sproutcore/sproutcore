@@ -1,7 +1,6 @@
 /* SC.TabView */
 
 .sc-theme .sc-tab-view > .sc-container-view {
-  border: 1px #333 solid;
   border-radius: 5px;
   -webkit-border-radius: 5px;
   background-color: #8991a2;

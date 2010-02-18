@@ -109,8 +109,9 @@ SC.TabView = SC.View.extend(
              { top: 12, left: 0, right: 0, bottom: 0 } :
              { top: 0, left: 0, right: 0, bottom: 12 } ;
     
-    containerView = this.containerView.extend({
-      layout: layout
+    containerView = this.containerView.extend(SC.Border, {
+      layout: layout,
+      borderStyle: SC.BORDER_BLACK
     });
 
     view = this.containerView = this.createChildView(containerView) ;
