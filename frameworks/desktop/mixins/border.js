@@ -15,32 +15,95 @@ SC.BORDER_NONE   = null ;
   @namespace
 
   The Border mixin can be applied to any view to give it a visual border.
-  In addition to specifying the mixing itself, you should specify the border
+  In addition to specifying the mixin itself, you should specify the border
   style with the borderStyle property on your view.
 
-  border style can be any predefined CSS class name or a border color.  If
-  you specify a CSS class name, it must end in -border.
+  Border style can be any predefined CSS class name or a border color.
+
+  If you specify a CSS class name, it must end in "-border". Additionally,
+  you should set the borderTop, borderRight, borderBottom, and borderLeft
+  properties so SproutCore can accurately account for the size of your view.
 
   SproutCore pre-defines several useful border styles including:
 
-  * SC.BORDER_BEZEL  - displays an inlaid bezel
-  * SC.BORDER_BLACK  - displays a black border
-  * SC.BORDER_GRAY   - displays a gray border
-  * SC.BORDER_TOP    - displays a border on the top only
-  * SC.BORDER_BOTTOM - displays a border on the bottom only
-  * SC.BORDER_NONE   - disables the border
-
-  Note that borders do not count in the dimensions of the view.  You may need
-  to adjust your layout to make room for it.
+- SC.BORDER_BEZEL  - displays an inlaid bezel
+- SC.BORDER_BLACK  - displays a black border
+- SC.BORDER_GRAY   - displays a gray border
+- SC.BORDER_TOP    - displays a border on the top only
+- SC.BORDER_BOTTOM - displays a border on the bottom only
+- SC.BORDER_NONE   - disables the border
 
   @since SproutCore 1.0
 */
 SC.Border = {
+  /**
+    The thickness of the top border.
 
+    @property {Number}
+    @commonTask Border Dimensions
+  */
+  borderTop: 0,
+
+  /**
+    The thickness of the right border.
+
+    @property {Number}
+    @commonTask Border Dimensions
+  */
+  borderRight: 0,
+
+  /**
+    The thickness of the bottom border.
+
+    @property {Number}
+    @commonTask Border Dimensions
+  */
+  borderBottom: 0,
+
+  /**
+    The thickness of the left border.
+
+    @property {Number}
+    @commonTask Border Dimensions
+  */
+  borderLeft: 0,
+
+  /**
+    The style of the border. You may specify a color string (like 'red' or
+    '#fff'), a CSS class name, or one of:
+- SC.BORDER_BEZEL
+- SC.BORDER_BLACK
+- SC.BORDER_GRAY
+- SC.BORDER_TOP
+- SC.BORDER_BOTTOM
+- SC.BORDER_NONE
+
+    If you specify a CSS class name, it must end in "-border".
+  */
   borderStyle: SC.BORDER_GRAY,
 
+  /**
+    Walk like a duck
+
+    @private
+  */
+  hasBorder: YES,
+
+  /**
+    Make sure we re-render if the borderStyle property changes.
+    @private
+  */
+  displayProperties: ['borderStyle'],
+
+  /** @private */
   _BORDER_REGEXP: (/-border$/),
 
+  /** @private */
+  initMixin: function() {
+    this._sc_border_borderStyleDidChange();
+  },
+
+  /** @private */
   renderMixin: function(context, firstTime) {
     var style = this.get('borderStyle');
     if (style) {
@@ -50,17 +113,26 @@ SC.Border = {
     }
   },
 
-  computeFrameWithParentFrame: function(pdim) {
-    var ret = sc_super(),
-        borderStyle = this.get('borderStyle');
+  /** @private */
+  _sc_border_borderStyleDidChange: function() {
+    var borderStyle = this.get('borderStyle'),
+        borderSize = SC.Border.dimensions[borderStyle];
 
-    if (borderStyle && borderStyle !== SC.BORDER_NONE) {
-      ret.height -= 2;
-      ret.width -= 2;
+    if (borderSize) {
+      this.borderTop    = borderSize;
+      this.borderRight  = borderSize;
+      this.borderBottom = borderSize;
+      this.borderLeft   = borderSize;
     }
-
-    return ret;
   }
 };
 
-// handle views with border
+SC.mixin(SC.Border, {
+  dimensions: {
+    'sc-bezel-border': 1,
+    'sc-black-border': 1,
+    'sc-gray-border': 1,
+    'sc-top-border': 1,
+    'sc-bottom-border': 1
+  }
+});
