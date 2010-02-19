@@ -57,7 +57,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
     return ret;
   },
       
-  orphan: function(){
+  orphan: function(parentRecord){
     var cArray = this._cachedRef,
         store, storeKey, attrs, key, 
         len, param, cr;
@@ -68,7 +68,7 @@ SC.ChildrenAttribute = SC.ChildAttribute.extend(
         for(key in attrs) {
           param = cr[key];
           // Orphan all the child record and child records in a tree to clean up the store
-          if(param && param.isChildRecordTransform) param.orphan();
+          if(param && param.isChildRecordTransform) param.orphan(parentRecord);
         }
         store = cr.get('store');
         if(store) storeKey = cr.storeKey;

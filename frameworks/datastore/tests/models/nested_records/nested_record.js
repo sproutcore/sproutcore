@@ -7,7 +7,7 @@
 // ..........................................................
 // Basic Set up needs to move to the setup and teardown
 // 
-var NestedRecord, store, testParent, childData1; 
+var NestedRecord, store, testParent, testParent2, childData1; 
 
 var initModels = function(){
   NestedRecord.ParentRecordTest = SC.Record.extend({
@@ -37,6 +37,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
     store = NestedRecord.store;
     initModels();
     SC.RunLoop.begin();
+    // Test Parent 1
     testParent = store.createRecord(NestedRecord.ParentRecordTest, {
       name: 'Parent Name',
       info: {
@@ -46,7 +47,19 @@ module("Basic SC.Record Functions w/ Parent > Child", {
         id: '5001'
       }
     });
+    // Test parent 2
+    testParent2 = NestedRecord.store.createRecord(NestedRecord.ParentRecordTest, {
+      name: 'Parent Name 2',
+      info: {
+        type: 'ChildRecordTest',
+        name: 'Child Name 2',
+        value: 'Purple Goo',
+        id: '5002'
+      }
+    });
     SC.RunLoop.end();
+    
+    
     // ..........................................................
     // Child Data
     // 
@@ -62,6 +75,7 @@ module("Basic SC.Record Functions w/ Parent > Child", {
     delete NestedRecord.ParentRecordTest;
     delete NestedRecord.ChildRecordTest;
     testParent = null;
+    testParent2 = null;
     store = null;
     childData1 = null;
     NestedRecord = null;
@@ -82,6 +96,29 @@ test("Function: readAttribute()", function() {
     },
     "readAttribute should be correct for info child attribute");
   
+});
+
+test("Support Multiple Parent Records With Different Child Records", function() {
+  
+  same(testParent2.readAttribute('info'),
+    {
+      type: 'ChildRecordTest',
+      name: 'Child Name 2',
+      value: 'Purple Goo',
+      id: '5002'
+    },
+    "readAttribute should be correct for info child attribute on new record");
+  equals(testParent2.get('info').get('value'), 'Purple Goo', "get should retrieve the proper value on new record");
+
+  same(testParent.readAttribute('info'),
+    {
+      type: 'ChildRecordTest',
+      name: 'Child Name',
+      value: 'Blue Goo',
+      id: '5001'
+    },
+    "readAttribute should be correct for info child attribute on first record");
+  equals(testParent.get('info').get('value'), 'Blue Goo', "get should retrieve the proper value on first record");
 });
 
 test("Function: writeAttribute()", function() {

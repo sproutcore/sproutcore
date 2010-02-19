@@ -25,12 +25,10 @@ sc_require('models/record_attribute');
   @since SproutCore 1.0
 */
 SC.ChildAttribute = SC.RecordAttribute.extend(
-  /** @scope SC.ChildrenAttribute.prototype */ {
+  /** @scope SC.ChildAttribute.prototype */ {
     
   isChildRecordTransform: YES,
-  
-  _cachedRef: null,
-    
+      
   // ..........................................................
   // LOW-LEVEL METHODS
   //
@@ -38,8 +36,10 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
   /**  @private - adapted for to many relationship */
   toType: function(parentRecord, key, hash) {
     var ret   = null,
+        cacheKey  = SC.keyFor('__kid__', SC.guidFor(this)),
         recordType  = this.get('typeClass');
-    if (this._cachedRef) return this._cachedRef;
+    
+    if (parentRecord[cacheKey]) return parentRecord[cacheKey];
     
     if (!parentRecord) {
       throw 'SC.Child: Error during transform: Unable to retrieve parent record.';
@@ -57,7 +57,7 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
         throw 'SC.Child: Error during transform: Invalid record type.';
       }
       // Create an instance of the record by registering it with the parent and return.
-      ret = this._cachedRef = parentRecord.registerChildRecord(recordType, hash);
+      ret = parentRecord[cacheKey] = parentRecord.registerChildRecord(recordType, hash);
     }
     return ret;
   },
@@ -76,14 +76,15 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
     @returns {Object} property value
   */
   call: function(record, key, value) {
-    var attrKey = this.get('key') || key, nvalue;
-
+    var attrKey = this.get('key') || key,
+        cacheKey = SC.keyFor('__kid__', SC.guidFor(this)), 
+        nvalue;
     if (value !== undefined) {
       // careful: don't overwrite value here.  we want the return value to 
       // cache.
-      this.orphan();
+      this.orphan(record);
       nvalue = this.fromType(record, key, value) ; // convert to attribute.
-      this._cachedRef = null;
+      record[cacheKey] = null;
       record.writeAttribute(attrKey, nvalue);
       value = this.toType(record, key, value); // need to convert to the child record for caching
     } else {
@@ -100,14 +101,16 @@ SC.ChildAttribute = SC.RecordAttribute.extend(
     return value ;
   },
   
-  orphan: function(){
-    var store, storeKey, attrs, key, param, cRef = this._cachedRef;
+  orphan: function(parentRecord){
+    var cacheKey = SC.keyFor('__kid__', SC.guidFor(this)),
+        store, storeKey, attrs, key, param, cRef;
+    cRef = parentRecord ? parentRecord[cacheKey] : null;
     if (cRef) {
       attrs = cRef.get('attributes');
       for(key in attrs) {
         param = cRef[key];
         // Orphan all the child record and child records in a tree to clean up the store
-        if(param && param.isChildRecordTransform) param.orphan();
+        if(param && param.isChildRecordTransform) param.orphan(parentRecord);
       }
       store = cRef.get('store');
       if(store) storeKey = cRef.storeKey;
