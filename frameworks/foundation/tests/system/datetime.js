@@ -16,11 +16,7 @@ module("SC.DateTime", {
     timezones = [480, 420, 0, -60, -120, -330]; // PST, PDT, UTC, CET, CEST, Mumbai
   },
   teardown: function() {
-    delete dt;
-    delete options;
-    delete ms;
-    delete timezone;
-    delete startTime;
+    dt = options = ms = timezone = startTime = null;
   }
 });
 
@@ -260,10 +256,11 @@ test('fancy getters', function() {
   equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('week0'), 53);
   equals(SC.DateTime.create({ year: 2006, month: 12, day: 31 }).get('week1'), 52);
 
+  debugger;
   var e = dt.get('lastMonday');
-  equals(dt.get('lastMonday'), dt.advance({ day: -5 }));
-  equals(dt.get('nextFriday'), dt.advance({ day: 6 }));
-  equals(dt.get('lastWednesday'), dt.advance({ day: -3 }));
+  equals(dt.get('lastMonday'), dt.advance({ day: -5 }), 'dt.advance(day: -5)');
+  equals(dt.get('nextFriday'), dt.advance({ day: 6 }), 'dt.advance(day: 6)');
+  equals(dt.get('lastWednesday'), dt.advance({ day: -3 }), 'dt.advance(day: -3)');
 });
  
 test('parse', function() {
