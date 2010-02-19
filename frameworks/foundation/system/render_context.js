@@ -612,6 +612,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         }
       }
     }
+    
     return this;
   },
   
