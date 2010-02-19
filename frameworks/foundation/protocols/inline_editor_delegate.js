@@ -30,6 +30,18 @@ SC.InlineEditorDelegate = {
   
   
     /**
+      Called before the inline editor is configured for display.  
+
+      You can use this method to prevent editing
+
+      @param inlineEditor {SC.InlineTextFieldView} The inline editor.
+      @returns {Boolean} YES to allow the editor to begin editing.
+    */
+    inlineEditorShouldBeginEditing: function(inlineEditor) {
+      return YES ;
+    },
+      
+    /**
       Called just before the inline edit displays itself but after it has been 
       configured for display.  
       
