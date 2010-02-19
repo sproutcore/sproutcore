@@ -785,6 +785,14 @@ SC.ListItemView = SC.View.extend(
    return SC.InlineTextFieldView.discardEditing();
   },
   
+  
+  /** @private
+    Allow editing.
+  */
+  inlineEditorShouldBeginEditing: function(inlineEditor) {
+    return YES ;
+  },
+  
   /** @private
    Set editing to true so edits will no longer be allowed.
   */

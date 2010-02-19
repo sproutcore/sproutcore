@@ -247,6 +247,13 @@ SC.LabelView = SC.View.extend(SC.Control,
   },
 
   /** @private
+    Allow editing.
+  */
+  inlineEditorShouldBeginEditing: function(inlineEditor) {
+    return YES ;
+  },
+  
+  /** @private
     Set editing to true so edits will no longer be allowed.
   */
   inlineEditorWillBeginEditing: function(inlineEditor) {
