@@ -8,63 +8,61 @@
 sc_require('validators/validator') ;
 
 /**
-  Handles parsing and validating of numbers.
+  Handles parsing and validating of positive integers.
   
   @extends SC.Validator
-  @author Charles Jolley
+  @author Nirumal Thomas
   @version 1.0
   @class
 */
-SC.Validator.Number = SC.Validator.extend(
-/** @scope SC.Validator.Number.prototype */ {
+SC.Validator.PositiveInteger = SC.Validator.extend(
+/** @scope SC.Validator.PositiveInteger.prototype */ {
 
   /**
-    Number of decimal places to show.  
-    
-    If 0, then numbers will be treated as integers.  Otherwise, numbers will
-    show with a fixed number of decimals.
+    Default Value to be displayed. If the value in the text field is null,
+    undefined or an empty string, it will be replaced by this value.
+
+    @property
+    @type Number
+    @default null
   */
-  places: 0,
-  
+  defaultValue: null,
+
   fieldValueForObject: function(object, form, field) {
     switch(SC.typeOf(object)) {
       case SC.T_NUMBER:
-        object = object.toFixed(this.get('places')) ;
+        object = object.toFixed(0) ;
         break ;
       case SC.T_NULL:
       case SC.T_UNDEFINED:
-        object = '';
+        object = this.get('defaultValue') ;
         break ;
     }
     return object ;
   },
 
   objectForFieldValue: function(value, form, field) {
-    
     // strip out commas
     value = value.replace(/,/g,'');
     switch(SC.typeOf(value)) {
       case SC.T_STRING:
         if (value.length === 0) {
-          value = null ;
-        } else if (this.get('places') > 0) {
-          value = parseFloat(value) ;
+          value = this.get('defaultValue') ;
         } else {
-          if(value.length==1 && value.match(/-/)) value = null;
-          else value = parseInt(value,0) ;
+          value = parseInt(value, 0) ;
         }
         break ;
       case SC.T_NULL:
       case SC.T_UNDEFINED:
-        value = null ;
+        value = this.get('defaultValue') ;
         break ;
     }
     return value ;
   },
-  
-  validate: function(form, field) { 
+
+  validate: function(form, field) {
     var value = field.get('fieldValue') ;
-    return (value === '') || !(isNaN(value) || isNaN(parseFloat(value))) ; 
+    return (value === '') || !isNaN(value) ;
   },
   
   validateError: function(form, field) {
@@ -73,19 +71,14 @@ SC.Validator.Number = SC.Validator.extend(
   },
   
   /** 
-    Allow only numbers, dashes, period, and commas
+    Allow only numbers
   */
   validateKeyDown: function(form, field, charStr) {
     var text = field.$input().val();
     if (!text) text='';
     text+=charStr;
-    if(this.get('places')===0){
-      if(charStr.length===0) return true;
-      else return text.match(/^[\-{0,1}]?[0-9,\0]*/)[0]===text;
-    }else {
-      if(charStr.length===0) return true;
-      else return text.match(/^[\-{0,1}]?[0-9,\0]*\.?[0-9\0]+/)===text;
-    }
+    if(charStr.length===0) return true ;
+    else return text.match(/^[0-9\0]*/)[0]===text;
   }
     
 }) ;

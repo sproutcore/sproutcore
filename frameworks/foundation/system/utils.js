@@ -80,6 +80,12 @@ SC.mixin( /** @scope SC */ {
     return url ;
   },
   
+  /** Return true if the number is between 0 and 1 */
+  isPercentage: function(val){
+    return (val<1 && val>0);
+  },
+
+  
   
   /** Return the left edge of the frame */
   minX: function(frame) { 
@@ -205,7 +211,7 @@ SC.mixin( /** @scope SC */ {
     @returns {String} A string representation of the rect.
   */
   stringFromRect: function(r) {
-    return '{%@, %@, %@, %@}'.fmt(r.x, r.y, r.width, r.height);
+    return '{'+r.x+', '+r.y+', '+r.width+', '+r.height+'}';
   },
   
   /**
@@ -273,7 +279,7 @@ SC.mixin( /** @scope SC */ {
       document.body.insertBefore(elem, null);
     }
 
-    style = '%@; width: %@px; left: %@px; position: absolute'.fmt(style, width, (-1*width));
+    style = style+'; width: '+width+'px; left: '+(-1*width)+'px; position: absolute';
     SC.$(elem).attr('style', style);
 
     if (classes !== '') {
@@ -484,7 +490,7 @@ SC.mixin( /** @scope SC */ {
         // In FireFox 3 -- the offsetTop/offsetLeft subtracts the clientTop/
         // clientLeft of the offset parent.
         var offsetParent = element.offsetParent ;
-        if ((SC.browser.mozilla >= 3) && offsetParent) {
+        if (SC.browser.mozilla.match(/1[.]9/) && offsetParent) {
           valueT -= offsetParent.clientTop ;
           valueL -= offsetParent.clientLeft;
         }

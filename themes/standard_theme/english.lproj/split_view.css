@@ -1,27 +1,11 @@
 /* @group SC.SplitView */
 
-.sc-theme .sc-split-view {
-  overflow: hidden !important;
-}
-
-.sc-theme .sc-split-view.horizontal > .sc-split-divider-view {
+.sc-theme .sc-horizontal .sc-split-divider-view {
 	background: static_url('images/sc-theme-ysprite.png') repeat-y 0px top;
-/*  border-left: 1px #888 solid;
-  border-right: 1px #888 solid;
-*/	z-index: 5;
 }
 
-.sc-theme .sc-split-view.vertical > .sc-split-divider-view {
+.sc-theme .sc-vertical .sc-split-divider-view {
 	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1397px;
-/*  border-top: 1px #888 solid;
-  border-bottom: 1px #888 solid;
-*/	z-index: 5;
 }
 
-/*.sc-theme .sc-split-view.thin > .sc-split-divider-view {
-  border: 0;
-  background: 0;
-  background-color: #888;
-}
-*/
 /* @end */

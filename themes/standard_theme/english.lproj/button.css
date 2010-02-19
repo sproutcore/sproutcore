@@ -79,11 +79,11 @@
 }
 
 .sc-theme .sc-button-view.sc-regular-size.square .sc-button-label {
-  height: 24px;
+  height: 18px;
   line-height: 24px;  
   margin-left: 11px;
   margin-right: 11px;  
-  background: static_url('images/sc-theme-repeat-x.png') repeat-x left -764px;
+  background: static_url('images/sc-theme-repeat-x.png') repeat-x -15px -764px;
 }
 
 /* @end */
@@ -317,6 +317,79 @@
 	background: static_url('images/sc-theme-repeat-x.png') repeat-x 0 -889px;
 	color: white;
 }
+
+/* @end */
+
+/* @group focus ring */
+
+.sc-theme .sc-button-view.focus {
+  overflow: visible;
+}
+
+.sc-theme .sc-button-view div.focus-ring {
+  visibility: hidden;
+}
+
+.sc-theme .sc-button-view.focus div.focus-ring {
+  visibility: visible;
+  right: 0px;
+  top: 0px;
+  left: 0px;
+  bottom:0px;
+  position: absolute;
+}
+.sc-theme .sc-button-view.focus div.focus-ring div {
+  top: -3px;
+  bottom: -3px;
+  position: absolute;
+}
+
+
+.sc-theme .sc-button-view.square.focus .focus-ring .focus-left,
+.sc-theme .sc-button-view.dropdown.focus .focus-ring .focus-left,
+.sc-theme .sc-button-view.popup.focus .focus-ring .focus-left {
+  left: -2px;
+  width: 10px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat 0px -1685px;
+}
+
+.sc-theme .sc-button-view.square.focus .focus-ring .focus-right,
+.sc-theme .sc-button-view.dropdown.focus .focus-ring .focus-right,
+.sc-theme .sc-button-view.popup.focus .focus-ring .focus-right {
+  right: -2px;
+  width: 10px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat scroll right -1717px;
+}
+
+.sc-theme .sc-button-view.square.focus .focus-ring .focus-middle,
+.sc-theme .sc-button-view.dropdown.focus .focus-ring .focus-middle,
+.sc-theme .sc-button-view.popup.focus .focus-ring .focus-middle {
+  left: 7px;
+  right: 7px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1749px;
+}
+
+
+
+
+.sc-theme .sc-button-view.capsule div.focus-ring .focus-left {
+  left: -3px;
+  width: 16px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') no-repeat 0px -1783px;
+}
+
+.sc-theme .sc-button-view.capsule div.focus-ring .focus-right {
+  right: -3px;
+  width: 16px;
+  background: transparent static_url('images/sc-theme-repeat-x.png') no-repeat -16px -1815px;
+}
+
+.sc-theme .sc-button-view.capsule div.focus-ring .focus-middle {
+  left: 13px;
+  right: 13px;
+  background: transparent  static_url('images/sc-theme-repeat-x.png') repeat-x 0px -1847px;
+}
+
 
 /* @end */
 

@@ -50,19 +50,20 @@ SC.Cursor = SC.Object.extend(
     
     // create a unique style rule and add it to the shared cursor style sheet
     var cursorStyle = this.get('cursorStyle') || SC.DEFAULT_CURSOR ,
-        ss = this.constructor.sharedStyleSheet() ;
+        ss = this.constructor.sharedStyleSheet(),
+        guid = SC.guidFor(this);
     
     if (ss.insertRule) { // WC3
       ss.insertRule(
-        '.%@ {cursor: %@;}'.fmt(SC.guidFor(this), cursorStyle),
+        '.'+guid+' {cursor: '+cursorStyle+';}',
         ss.cssRules ? ss.cssRules.length : 0
       ) ;
     } else if (ss.addRule) { // IE
-      ss.addRule('.'+SC.guidFor(this), 'cursor: '+cursorStyle) ;
+      ss.addRule('.'+guid, 'cursor: '+cursorStyle) ;
     }
     
     this.cursorStyle = cursorStyle ;
-    this.className = SC.guidFor(this) ; // used by cursor clients...
+    this.className = guid ; // used by cursor clients...
     return this ;
   },
   

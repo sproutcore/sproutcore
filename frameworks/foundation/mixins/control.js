@@ -218,7 +218,7 @@ SC.Control = {
   updatePropertyFromContent: function(prop, key, contentKey, content) {
     var all = key === '*';
     if (contentKey === undefined) {
-      contentKey = "content%@Key".fmt(prop.capitalize());
+      contentKey = "content"+prop.capitalize()+"Key";
     }
     if (content === undefined) content = this.get('content');
     
@@ -254,9 +254,8 @@ SC.Control = {
   updateContentWithValueObserver: function() {
     var key = this.contentValueKey ?
       this.get('contentValueKey') :
-      this.getDelegateProperty('contentValueKey', this.displayDelegate) ;
-    
-    var content = this.get('content') ;
+      this.getDelegateProperty('contentValueKey', this.displayDelegate),
+      content = this.get('content') ;
     if (!key || !content) return ; // do nothing if disabled
     
     // get value -- set on content if changed
@@ -313,8 +312,8 @@ SC.Control = {
     // if field label is not provided, compute something...
     fk = this.get('fieldKey') || this.constructor.toString() ;
     def = (fk || '').humanize().capitalize() ;
-    return "ErrorLabel.%@".fmt(fk)
-      .locWithDefault("FieldKey.%@".fmt(fk).locWithDefault(def)) ;
+    return "ErrorLabel."+fk
+      .locWithDefault(("FieldKey."+fk).locWithDefault(def)) ;
       
   }.property('fieldLabel','fieldKey').cacheable(),
 
@@ -337,11 +336,10 @@ SC.Control = {
     control CSS classes.
   */
   renderMixin: function(context, firstTime) {
-    var sel = this.get('isSelected'), disabled = !this.get('isEnabled');
-    
+    var sel = this.get('isSelected'), disabled = !this.get('isEnabled'),
     // update the CSS classes for the control.  note we reuse the same hash
     // to avoid consuming more memory
-    var names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
+        names = this._CONTROL_TMP_CLASSNAMES ; // temporary object
     names.mixed = sel === SC.MIXED_STATE;
     names.sel = sel && (sel !== SC.MIXED_STATE) ;
     names.active = this.get('isActive') ;
@@ -350,7 +348,10 @@ SC.Control = {
     // if the control implements the $input() helper, then fixup the input
     // tags
     if (!firstTime && this.$input) {
-      this.$input().attr('disabled', disabled);
+      var inps = this.$input();
+      if(inps.attr('type')!=="radio"){
+        this.$input().attr('disabled', disabled);
+      }
     }
   },
   
@@ -368,10 +369,9 @@ SC.Control = {
     var content = this.get('content') ;
     if (this._control_content === content) return; // nothing changed
     
-    var f = this.contentPropertyDidChange ;
-    
+    var f = this.contentPropertyDidChange,
     // remove an observer from the old content if necessary
-    var old = this._control_content ;
+        old = this._control_content ;
     if (old && old.removeObserver) old.removeObserver('*', this, f) ;
     
     // add observer to new content if necessary.

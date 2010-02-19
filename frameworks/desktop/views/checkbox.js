@@ -32,19 +32,21 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     
     // add checkbox -- set name to view guid to separate it from others
     if (firstTime) {
+      var blank = SC.BLANK_IMAGE_URL,
+          disabled = this.get('isEnabled') ? '' : 'disabled="disabled"',
+          guid = SC.guidFor(this);
+      
       dt = this._field_currentDisplayTitle = this.get('displayTitle');
 
-      var blank = SC.BLANK_IMAGE_URL;
-      var disabled = this.get('isEnabled') ? '' : 'disabled="disabled"';
-      if(SC.browser.msie) context.attr('for', SC.guidFor(this));
+      if(SC.browser.msie) context.attr('for', guid);
       context.push('<span class="button" ></span>');
-      context.push('<input type="checkbox" id="%@" name="%@" %@ />'.fmt(SC.guidFor(this),SC.guidFor(this),disabled));
+      context.push('<input type="checkbox" id="'+guid+'" name="'+guid+'" '+disabled+' />');
       if(this.get('needsEllipsis')){
         context.push('<span class="label ellipsis">', dt, '</span>');
       }else{
         context.push('<span class="label">', dt, '</span>');  
       }
-      context.attr('name', SC.guidFor(this));
+      context.attr('name', guid);
 
     // since we don't want to regenerate the contents each time 
     // actually search for and update the displayTitle.
@@ -113,10 +115,12 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
   didCreateLayer: function() {
     this.setFieldValue(this.get('fieldValue'));
     SC.Event.add(this.$input()[0], 'click', this, this._field_fieldValueDidChange) ;
+    SC.Event.add(this.$('.label')[0], 'click', this, this._field_fieldValueDidChange) ;
   },
   
   willDestroyLayer: function() {
     SC.Event.remove(this.$input()[0], 'click', this, this._field_fieldValueDidChange); 
+    SC.Event.remove(this.$('.label')[0], 'click', this, this._field_fieldValueDidChange) ;
   },
   
   mouseDown: function(evt) {

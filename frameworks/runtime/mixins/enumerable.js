@@ -729,7 +729,37 @@ SC.Enumerable = {
     var ret = [];
     this.forEach(function(o) { ret.push(o); }, this);
     return ret ;
-  }        
+  },
+  
+  /**
+    Converts an enumerable into a matrix, with inner arrays grouped based 
+    on a particular property of the elements of the enumerable.
+
+    @params key {String} the property to test
+    @returns {Array} matrix of arrays
+  */        
+  groupBy: function(key){
+    var len = this.get ? this.get('length') : this.length,
+        ret = [],
+        last = null,
+        context = SC.Enumerator._popContext(),
+        grouped = [], 
+        keyValues = [];          
+    for(var idx=0;idx<len;idx++) {
+      var next = this.nextObject(idx, last, context) ;
+      var cur = next ? (next.get ? next.get(key) : next[key]) : null;
+      if(SC.none(grouped[cur])){ grouped[cur] = []; keyValues.push(cur); }
+      grouped[cur].push(next);
+      last = next;
+    }
+    last = null;
+    context = SC.Enumerator._pushContext(context);
+    
+    for(var idx=0,len2=keyValues.length; idx < len2; idx++){
+      ret.push(grouped[keyValues[idx]]);        
+    }
+    return ret ;
+  }
   
 } ;
 
@@ -988,6 +1018,25 @@ Array.prototype.isEnumerable = YES ;
       }
       return ret ;
     },    
+
+    //returns a matrix
+    groupBy: function(key) {
+      var len = this.length,
+          ret = [],
+          grouped = [], 
+          keyValues = [];          
+      for(var idx=0;idx<len;idx++) {
+        var next = this[idx] ;
+        var cur = next ? (next.get ? next.get(key) : next[key]) : null;
+        if(SC.none(grouped[cur])){ grouped[cur] = []; keyValues.push(cur); }
+        grouped[cur].push(next);
+      }
+      for(var idx=0,len2=keyValues.length; idx < len2; idx++){
+        ret.push(grouped[keyValues[idx]]);        
+      }
+      return ret ;
+    },    
+
     
     find: function(callback, target) {
       if (typeof callback !== "function") throw new TypeError() ;

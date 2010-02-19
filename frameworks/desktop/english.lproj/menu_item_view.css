@@ -1,10 +1,6 @@
 .sc-button-view.sc-menu-item {
-  position:relative;
   background-color: #ffffff none repeat scroll 0 0;
   border: none;
-  display:block;
-  font-size: 12px;
-  cursor:default;
 }
 
 .sc-button-view.sc-menu-item.sc-small-size a span {
@@ -16,7 +12,7 @@
   line-height: 11px;
 }
 
-.sc-menu-item a{
+.sc-menu-item a {
   position: absolute;
   display: block;
   top: 0;
@@ -42,22 +38,14 @@
 .sc-menu-item span.separator{
   display: block;
   height: 1px;
-  border-bottom: 2px #cccccc solid;
+  border-bottom: 1px #cccccc solid;
 }
 
-.sc-menu-item span.branch-visible{
-  left: 25px;
-}
-
-.sc-menu-item a.has-option {
-  
-}
-
-.sc-menu-item a img {
-  left: 25px;
-  bottom: 25%;
-  vertical-align: middle;
-  
+.sc-menu-item img {
+  left: 24px;
+  top: 3px;
+  display: block;
+  position: absolute;
 }
 
 /*for the shortcut keys*/
@@ -67,13 +55,6 @@
   margin-right:15px;
   text-align:center;
   font-size: 12px;
-}
-
-/*Hovering over menu items*/
-.sc-pane.sc-panel > .sc-view.sc-menu-item.focus, 
-.sc-menu-item a:hover {
-  background-color: #5A8EC6;
-  color: #fff;
 }
 
 .sc-menu-item.disabled a:hover {
@@ -96,6 +77,10 @@
 .sc-menu-item.focus div.checkbox {
 }
 
+.sc-menu-item.disabled.focus div.checkbox {
+  background-image: sc_static('icons/mini_454545'); 
+}
+
 
 .sc-menu-item.disabled div.checkbox,
 .sc-menu-item div.checkbox.inactive {
@@ -107,24 +92,18 @@
   position: absolute;
   top: 0px;
   bottom: 0px;
-  left: 15px;
+  left: 0px;
   right: 5px;
   display: inline-block;
   text-align:left;
-  margin-left:30px;
+  margin-left:25px;
+}
+
+.sc-menu-item a.has-icon span.value {
+  margin-left: 44px;
 }
 
 .sc-menu-item a.shortcutkey span.value {
   right: 55px;
-}
-
-.sc-menu-item a.hasIcon span.value {
-  margin-left: 45px;
-}
-
-.sc-menu-item span.hasBranch {
-  position:absolute;
-  text-align:center;
-  right:5px;
 }
 

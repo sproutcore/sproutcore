@@ -440,10 +440,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
       for(key in attrs) {
         if (!attrs.hasOwnProperty(key)) continue ;
         if (attrs[key] === null) continue ; // skip empty attrs
-        tag.push(key);
-        tag.push('="');
-        tag.push(attrs[key]) ;
-        tag.push('" ') ;
+        tag.push(key, '="', attrs[key], '" ');
       }
       
       // if we are using the DEFAULT_ATTRS temporary object, make sure we 
@@ -591,15 +588,31 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
     Adds the specified className to the current tag, if it does not already
     exist.  This method has no effect if there is no open tag.
     
-    @param {String} className the class to add
+    @param {String|Array} nameOrClasses the class name or an array of classes
     @returns {SC.RenderContext} receiver
   */
-  addClass: function(className) {
-    var classNames = this.classNames() ; // handles cloning ,etc.
-    if (classNames.indexOf(className)<0) {
-      classNames.push(className);
-      this._classNamesDidChange = YES ;
+  addClass: function(nameOrClasses) {
+    if(nameOrClasses === undefined || nameOrClasses === null) {
+      console.warn('You are adding an undefined or empty class'+ this.toString());
+      return this;
     }
+    
+    var classNames = this.classNames() ; // handles cloning ,etc.
+    if(SC.typeOf(nameOrClasses) === SC.T_STRING){
+      if (classNames.indexOf(nameOrClasses)<0) {
+        classNames.push(nameOrClasses);
+        this._classNamesDidChange = YES ;
+      }
+    } else {
+      for(var i = 0, iLen= nameOrClasses.length; i<iLen; i++){
+        var cl = nameOrClasses[i];
+        if (classNames.indexOf(cl)<0) {
+          classNames.push(cl);
+          this._classNamesDidChange = YES ;
+        }
+      }
+    }
+    
     return this;
   },
   

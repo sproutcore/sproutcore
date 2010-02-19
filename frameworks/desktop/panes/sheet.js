@@ -120,20 +120,26 @@ SC.SheetPane = SC.PanelPane.extend({
     this._timer = null ; // clear out
 
     var now = Date.now();
-    var target = this;
-    var pct = (now-this._start)/(this._end-this._start);
-    var dir = this._direction, layout = this.get('layout'), newLayout, adjust;
+    var pct = (now-this._start)/(this._end-this._start),
+        target = this, dir = this._direction, layout = this.get('layout'), 
+        newLayout, adjust;
     if (pct<0) pct = 0;
-
+    
     // If we are done...
     if (pct>=1) {
+      
       if (dir === this.SLIDE_DOWN){
         target.adjust('top', 0);
+        
+        //Hack to make sure textfields are at the right place at the end of
+        // the animation.
+        if(SC.browser.mozilla) this.parentViewDidChange();
       } else {
         target.adjust('top', -1*layout.height);
       }
       this._state = SC.SheetPane.READY;
       this.updateLayout();
+      
       return this;
     }
 

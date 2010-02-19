@@ -112,6 +112,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this._optIsCollection = options.isCollection;
     this._exampleElement = options.exampleElement ;
     this._delegate = options.delegate ;
+    this.set('delegate', this._delegate);
 
     if (!this._optframe || !this._delegate) {
       throw "At least frame and delegate options are required for inline editor";
@@ -391,7 +392,7 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.commitEditing() ;
     if(this._delegate){
       var next = this._delegate.nextValidKeyView();
-      if(next) next.beginEditing();
+      if(next && next.beginEditing) next.beginEditing();
     }
     return YES ;
   },

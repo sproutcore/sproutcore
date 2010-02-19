@@ -2041,7 +2041,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Object} id the record id or null
     @param {Hash} dataHash data hash to load
     @param {Number} storeKey optional store key.  
-    @returns {Boolean} YES if push was allowed
+    @returns {Number|Boolean} storeKey if push was allowed, NO if not
   */
   pushRetrieve: function(recordType, id, dataHash, storeKey) {
     var K = SC.Record, status;
@@ -2056,7 +2056,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
 
       this.dataHashDidChange(storeKey);
       
-      return YES;
+      return storeKey;
     }
     //conflicted (ready)
     return NO;
@@ -2069,7 +2069,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Class} recordType the SC.Record subclass
     @param {Object} id the record id or null
     @param {Number} storeKey optional store key.  
-    @returns {Boolean} YES if push was allowed
+    @returns {Number|Boolean} storeKey if push was allowed, NO if not
   */
   pushDestroy: function(recordType, id, storeKey) {
     var K = SC.Record, status;
@@ -2082,7 +2082,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       status = K.DESTROYED_CLEAN;
       this.removeDataHash(storeKey, status) ;
       this.dataHashDidChange(storeKey);
-      return YES;
+      return storeKey;
     }
     //conflicted (destroy)
     return NO;
@@ -2096,7 +2096,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     @param {Object} id the record id or null
     @param {SC.Error} error [optional] an SC.Error instance to associate with id or storeKey
     @param {Number} storeKey optional store key.
-    @returns {Boolean} YES if push was allowed
+    @returns {Number|Boolean} storeKey if push was allowed, NO if not
   */
   pushError: function(recordType, id, error, storeKey) {
     var K = SC.Record, status, errors = this.recordErrors;
@@ -2115,7 +2115,7 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
       
       this.writeStatus(storeKey, status) ;
       this.dataHashDidChange(storeKey, null, YES);
-      return YES;
+      return storeKey;
     }
     //conflicted (error)
     return NO;
@@ -2164,9 +2164,9 @@ SC.Store = SC.Object.extend( /** @scope SC.Store.prototype */ {
     query.  This will put the query into a READY state if it was loading.
     
     Note that if the query is a REMOTE query, then you must separately load 
-    the results into the query using loadQuery().  If the query is LOCAL, then
-    the query will update automatically with any new records you added to the
-    store.
+    the results into the query using loadQueryResults().  If the query is 
+    LOCAL, then the query will update automatically with any new records you 
+    added to the store.
     
     @param {SC.Query} query the query you fetched
     @returns {SC.Store} receiver

@@ -26,3 +26,7 @@ test("Trim ' spaces on both sides ' on left only", function() {
 test("Trim ' spaces on both sides ' on right only", function() {
   same(' spaces on both sides '.trimRight(), ' spaces on both sides', "should be equal");
 });
+
+test("Regular expression escaping a string", function() {
+  same('\.+*?[^]$(){}=!<>|:'.escapeForRegExp(), '\\.\\+\\*\\?\\[\\^\\]\\$\\(\\)\\{\\}\\=\\!\\<\\>\\|\\:', "should be escaped");
+});

@@ -75,7 +75,7 @@ SC.ContentDisplay = {
       this.allPropertiesDidChange() ;
       this.endPropertyChanges() ;
     }
-  }.observes('content'),
+  }.observes('content', 'contentDisplayProperties'),
   
   /** @private Invoked when properties on the content object change. */
   _display_contentPropertyDidChange: function(target, key, value, propertyRevision) {

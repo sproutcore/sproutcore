@@ -82,7 +82,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
      Defaults to 20px.
   */
   verticalLineScroll: 20,
-  
+
   /**
     This function overrides the default function in SC.Scroller as 
     menus only have vertical scrolling.
@@ -110,16 +110,16 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   },
   
   didCreateLayer: function() {
-    var callback, amt, layer;
-    
-    callback = this._sc_scroller_scrollDidChange ;
-    SC.Event.add(this.$(), 'scroll', this, callback) ;
-    
-    // set scrollOffset first time
-    amt = this.get('value') ;
-    layer = this.get('layer') ;
-    
-    layer.scrollTop = amt ;
+    // var callback, amt, layer;
+    // 
+    // callback = this._sc_scroller_scrollDidChange ;
+    // SC.Event.add(this.$(), 'scroll', this, callback) ;
+    // 
+    // // set scrollOffset first time
+    // amt = this.get('value') ;
+    // layer = this.get('layer') ;
+    // 
+    // layer.scrollTop = amt ;
   },
   
   willDestroyLayer: function() {
@@ -210,7 +210,7 @@ SC.MenuScrollerView = SC.ScrollerView.extend({
   _invokeScrollOnMouseOver: function(){
     this._scrollMenu();
     if(this.get('isMouseOver')){
-      this.invokeLater(this._invokeScrollOnMouseOver, 50);
+      this.invokeLater(this._invokeScrollOnMouseOver, 100);
     }
   }
   
@@ -346,6 +346,11 @@ SC.MenuScrollView = SC.ScrollView.extend({
   // ..........................................................
   // CUSTOM VIEWS
   // 
+
+  /**
+    Control Size for Menu content: change verticalLineScroll
+  */
+  controlSize: SC.REGULAR_CONTROL_SIZE,
   
   /**
     The container view that will contain your main content view.  You can 
@@ -382,31 +387,32 @@ SC.MenuScrollView = SC.ScrollView.extend({
     
     if (hasVertical) {
       viewportHeight =0;
+      var scrollerThickness = vscroll.get('scrollerThickness') || vscroll2.get('scrollerThickness');
       var view   = this.get('contentView'), view2, 
             f      = (view) ? view.get('frame') : null, 
             height = (f) ? f.height : 0,
             elem = this.containerView.$()[0],
             verticalOffset = this.get('verticalScrollOffset'),
             topArrowInvisible = { height: 0, top: 0, right: 0, left: 0 },
-            topArrowVisible = { height: this.verticalLineScroll, top: 0, right: 0, left: 0 },
-            bottomArrowVisible = { height: this.verticalLineScroll, bottom: 0, right: 0, left: 0 },
+            topArrowVisible = { height: scrollerThickness, top: 0, right: 0, left: 0 },
+            bottomArrowVisible = { height: scrollerThickness, bottom: 0, right: 0, left: 0 },
             bottomArrowInvisible = { height: 0, bottom: 0, right: 0, left: 0 };
       
       if(elem) viewportHeight = elem.offsetHeight;
       
       if(verticalOffset===0){
         clipLayout.top = 0 ;
-        clipLayout.bottom = this.verticalLineScroll;
+        clipLayout.bottom = scrollerThickness;
         vscroll.set('layout', topArrowInvisible) ;
         vscroll2.set('layout', bottomArrowVisible) ;
-      }else if(verticalOffset>=(height-viewportHeight-this.verticalLineScroll)){
-        clipLayout.top = this.verticalLineScroll ;
+      }else if(verticalOffset>=(height-viewportHeight-scrollerThickness)){
+        clipLayout.top = scrollerThickness ;
         clipLayout.bottom = 0 ;
         vscroll.set('layout', topArrowVisible) ;
         vscroll2.set('layout', bottomArrowInvisible) ;
       }else{
-        clipLayout.top = this.verticalLineScroll ;
-        clipLayout.bottom = this.verticalLineScroll ;
+        clipLayout.top = scrollerThickness ;
+        clipLayout.bottom = scrollerThickness ;
         vscroll.set('layout', topArrowVisible) ;
         vscroll2.set('layout', bottomArrowVisible) ;
       }
@@ -451,14 +457,17 @@ SC.MenuScrollView = SC.ScrollView.extend({
     // create a vertical scroller 
     if ((view=this.verticalScrollerView) && (view2=this.verticalScrollerView2)) {
       if (this.get('hasVerticalScroller')) {
+        var scrollerThickness = (this.get('controlSize') === SC.SMALL_CONTROL_SIZE) ? 14 : 16;
         view = this.verticalScrollerView = this.createChildView(view, {
-          layout: {top: 0, left: 0, right: 0, height: this.verticalLineScroll},
+          layout: {top: 0, left: 0, right: 0, height: scrollerThickness},
+          scrollerThickness: scrollerThickness,
           valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view);
         view2 = this.verticalScrollerView2 = this.createChildView(view2, {
           scrollDown: YES,
-          layout: {bottom: 0, left: 0, right: 0, height: this.verticalLineScroll},
+          layout: {bottom: 0, left: 0, right: 0, height: scrollerThickness},
+          scrollerThickness: scrollerThickness,
           valueBinding: '*owner.verticalScrollOffset'
         }) ;
         childViews.push(view2);
@@ -496,31 +505,6 @@ SC.MenuScrollView = SC.ScrollView.extend({
     if (this.get('isVisibleInWindow')) SC.Drag.addScrollableView(this);
     else SC.Drag.removeScrollableView(this);
   }.observes('isVisibleInWindow'),
-  
-  /** @private
-    Whenever the contentView is changed, we need to observe the content view's
-    frame to be notified whenever it's size changes.
-  */
-  contentViewDidChange: function() {
-    var newView = this.get('contentView'), 
-        oldView = this._scroll_contentView,
-        f = this.contentViewFrameDidChange ;
-      
-    if (newView !== oldView) {
-      
-      // stop observing old content view
-      if (oldView) oldView.removeObserver('frame', this, f);
-      
-      // update cache
-      this._scroll_contentView = newView;
-      if (newView) newView.addObserver('frame', this, f);
-      
-      // replace container
-      this.containerView.set('content', newView);
-      
-      this.contentViewFrameDidChange();
-    }
-  }.observes('contentView'),
   
   /** @private
     Invoked whenever the contentView's frame changes.  This will update the 
@@ -569,7 +553,7 @@ SC.MenuScrollView = SC.ScrollView.extend({
     edit the location of the contentView.
   */
   _scroll_verticalScrollOffsetDidChange: function() {
-    var offset = this.get('verticalScrollOffset') ;
+    var offset = this.get('verticalScrollOffset')+1 ;
     
     // update the offset for the contentView...
     var contentView = this.get('contentView');

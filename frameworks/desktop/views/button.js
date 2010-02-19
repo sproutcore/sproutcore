@@ -10,9 +10,9 @@
 // Constants
 SC.TOGGLE_BEHAVIOR = 'toggle';
 SC.PUSH_BEHAVIOR =   'push';
-SC.TOGGLE_ON_BEHAVIOR = "on";
-SC.TOGGLE_OFF_BEHAVIOR = "off" ;
-SC.HOLD_BEHAVIOR = 'hold' ;
+SC.TOGGLE_ON_BEHAVIOR = 'on';
+SC.TOGGLE_OFF_BEHAVIOR = 'off';
+SC.HOLD_BEHAVIOR = 'hold';
 
 /** @class
 
@@ -20,6 +20,11 @@ SC.HOLD_BEHAVIOR = 'hold' ;
   both standard push buttons and tab-style controls.  See also SC.CheckboxView
   and SC.RadioView which are implemented as field views, but can also be 
   treated as buttons.
+  
+  By default, a button uses the SC.Control mixin which will apply CSS 
+  classnames when the state of the button changes:
+    - active     when button is active
+    - sel        when button is toggled to a selected state
   
   @extends SC.View
   @extends SC.Control
@@ -29,7 +34,18 @@ SC.HOLD_BEHAVIOR = 'hold' ;
 SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 /** @scope SC.ButtonView.prototype */ {
   
+  /**
+    What type of element this view is represented as
+    
+    @property {String}
+  */
   tagName: 'a',
+  
+  /**
+    Class names that will be applied to this view
+    
+    @property {Array}
+  */
   classNames: ['sc-button-view'],
   
   /**
@@ -41,6 +57,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     
     The default SproutCore theme supports "regular", "capsule", "checkbox", 
     and "radio"
+    
+    @property {String}
   */
   theme: 'square',
   
@@ -48,20 +66,25 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     Optionally set the behavioral mode of this button.  
   
     Possible values are:
-
-    - *SC.PUSH_BEHAVIOR* Pressing the button will trigger an action tied to the button. Does not change the value of the button.
-    - *SC.TOGGLE_BEHAVIOR* Pressing the button will invert the current value of the button. If the button has a mixed value, it will be set to true.
-    - *SC.TOGGLE_ON_BEHAVIOR* Pressing the button will set the current state to true no matter the previous value.
-    - *SC.TOGGLE_OFF_BEHAVIOR* Pressing the button will set the current state to false no matter the previous value.
-  
-  */  
+    - *SC.PUSH_BEHAVIOR* Pressing the button will trigger an action tied to the 
+      button. Does not change the value of the button.
+    - *SC.TOGGLE_BEHAVIOR* Pressing the button will invert the current value of 
+      the button. If the button has a mixed value, it will be set to true.
+    - *SC.TOGGLE_ON_BEHAVIOR* Pressing the button will set the current state to 
+      true no matter the previous value.
+    - *SC.TOGGLE_OFF_BEHAVIOR* Pressing the button will set the current state to 
+      false no matter the previous value.
+      
+    @property {String}
+  */
   buttonBehavior: SC.PUSH_BEHAVIOR,
 
   /*
-    If buttonBehavior is SC.HOLD_BEHAVIOR, this specifies, in miliseconds, how often to trigger the action.
-    Ignored for other behaviors.
+    If buttonBehavior is SC.HOLD_BEHAVIOR, this specifies, in miliseconds, how 
+    often to trigger the action. Ignored for other behaviors.
+    
+    @property {Number}
   */
-
   holdInterval: 100,
 
   /**
@@ -69,20 +92,26 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     
     This is the same as setting the keyEquivalent to 'return'.  This will also
     apply the "def" classname to the button.
+    
+    @property {Boolean}
   */
   isDefault: NO,
   isDefaultBindingDefault: SC.Binding.oneWay().bool(),
   
   /**
     If YES, then this button will be triggered when you hit escape.
-    
     This is the same as setting the keyEquivalent to 'escape'.
+    
+    @property {Boolean}
   */  
   isCancel: NO,
   isCancelBindingDefault: SC.Binding.oneWay().bool(),
 
   /**
-    The button href value.  This can be used to create localized button href values.  Setting an empty or null href will set it to javascript:;
+    The button href value.  This can be used to create localized button href 
+    values.  Setting an empty or null href will set it to javascript:;
+    
+    @property {String}
   */
   href: '',
 
@@ -103,7 +132,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     clicked.  It is generally better to use the target/action approach and 
     to implement your code in a controller of some type.
     
-    @type String
+    @property {String}
   */
   action: null,
   
@@ -115,9 +144,16 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     null, then the button will search the responder chain for a view that 
     implements the action when the button is pressed instead.
     
-    @type Object
+    @property {Object}
   */
   target: null,
+  
+  /** 
+    If YES, use a focus ring.
+    
+    @property {Boolean}
+  */
+  supportFocusRing: NO,
   
   /**
     fakes a click... evt is optional.  
@@ -125,7 +161,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     Temporarily highlights the button to show that it is being triggered.  
     Does nothing if the button is disabled. 
     
-    @returns {bool} success/failure of the request
+    @param {Event} evt
+    @returns {Boolean} success/failure of the request
   */  
   triggerAction: function(evt) {  
     if (!this.get('isEnabled')) return NO;
@@ -137,7 +174,11 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   },
   
   /**
-    This method is called anytime the button's action is triggered.  You can implement this method in your own subclass to perform any cleanup needed after an action is performed.
+    This method is called anytime the button's action is triggered.  You can 
+    implement this method in your own subclass to perform any cleanup needed 
+    after an action is performed.
+    
+    @property {function}
   */
   didTriggerAction: function() {},
 
@@ -150,6 +191,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     Note that the title width does not exactly match the width of the button
     itself.  Extra padding added by the theme can impact the final total
     size.
+    
+    @property {Number}
   */
   titleMinWidth: 80,
   
@@ -173,10 +216,10 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
 
   render: function(context, firstTime) {
     // add href attr if tagName is anchor...
-    var href, toolTip, classes;
+    var href, toolTip, classes, theme;
     if (this.get('tagName') === 'a') {
       href = this.get('href');
-      if (!href || (href.length === 0)) href = "javascript"+":;";
+      if (!href || (href.length === 0)) href = "javascript:;";
       context.attr('href', href);
     }
 
@@ -193,15 +236,26 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     classes.def = this.get('isDefault');
     classes.cancel = this.get('isCancel');
     classes.icon = !!this.get('icon');
-    context.attr('role', 'button')
-      .setClass(classes).addClass(this.get('theme'));
+    context.attr('role', 'button').setClass(classes);
+    theme = this.get('theme');
+    if (theme) context.addClass(theme);
     // render inner html 
-    if(firstTime){
-       context = context.push("<span class='sc-button-inner' style = 'min-width:%@px'>"
-            .fmt(this.get('titleMinWidth')));
+    if(firstTime) {
+      context = context.push("<span class='sc-button-inner' style = 'min-width:"
+        ,this.get('titleMinWidth'),
+        "px'>");
+      
       this.renderTitle(context, firstTime) ; // from button mixin
       context.push("</span>") ;
-    }else{
+      
+      if(this.get('supportFocusRing')) {
+        context.push('<div class="focus-ring">',
+                      '<div class="focus-left"></div>',
+                      '<div class="focus-middle"></div>',
+                      '<div class="focus-right"></div></div>');
+      }
+    }
+    else {
       this.renderTitle(context, firstTime) ;
     }
    },
@@ -286,7 +340,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     return YES ;
   },
   
-  
+  /** @private */
   keyDown: function(evt) {
     // handle tab key
     if (evt.which === 9) {
@@ -343,6 +397,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     }
   },
 
+  /** @private */
   _runAction: function(evt) {
     var action = this.get('action'),
         target = this.get('target') || null;
@@ -358,6 +413,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     }
   },
 
+  /** @private */
   _runHoldAction: function(evt, skipRepeat) {
     if (this.get('isActive')) {
       this._runAction();
@@ -405,7 +461,8 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        this.$()[0].focus();
+        var elem=this.$()[0];
+        if (elem) elem.focus();
       }
     }
   },

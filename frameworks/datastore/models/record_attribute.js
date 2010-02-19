@@ -393,12 +393,13 @@ SC.RecordAttribute.registerTransform(Date, {
   /** @private - convert a string to a Date */
   to: function(str, attr) {
     var ret ;
+    str = str.toString() || '';
     
     if (attr.get('useIsoDate')) {
       var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
              "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\\.([0-9]+))?)?" +
              "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?",
-          d      = str.toString().match(new RegExp(regexp)),
+          d      = str.match(new RegExp(regexp)),
           offset = 0,
           date   = new Date(d[1], 0, 1),
           time ;

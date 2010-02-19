@@ -95,14 +95,19 @@ SC.ObserverSet = {
     Note: does not support context
   */
   invokeMethods: function() {
+    var key, value, idx, target, val;
+    
     // iterate through the set, look for sets.
-    for(var key in this) {
+    for(key in this) {
       if (!this.hasOwnProperty(key)) continue ;
-      var value = this[key] ;
+      value = this[key] ;
       if (value && value.isTargetSet) {
-        var idx = value.length;
-        var target = value.target ;
-        while(--idx>=0) value[idx].call(target);
+        idx = value.length;
+        target = value.target ;
+        while(--idx>=0) {
+          val = value[idx];
+          if(val) val.call(target);
+        }
       }
     }
   },

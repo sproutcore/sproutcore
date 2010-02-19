@@ -183,10 +183,10 @@ SC.ListItemView = SC.View.extend(
         del     = this.displayDelegate,
         level   = this.get('outlineLevel'),
         indent  = this.get('outlineIndent'),
-        key, value, working ;
+        key, value, working, classArray = [];
     
     // add alternating row classes
-    context.addClass((this.get('contentIndex')%2 === 0) ? 'even' : 'odd');
+    classArray.push((this.get('contentIndex')%2 === 0) ? 'even' : 'odd');
     context.setClass('disabled', !this.get('isEnabled'));
 
     // outline level wrapper
@@ -197,7 +197,7 @@ SC.ListItemView = SC.View.extend(
     value = this.get('disclosureState');
     if (value !== SC.LEAF_NODE) {
       this.renderDisclosure(working, value);
-      context.addClass('has-disclosure');
+      classArray.push('has-disclosure');
     }
     
     
@@ -206,7 +206,7 @@ SC.ListItemView = SC.View.extend(
     if (key) {
       value = content ? (content.get ? content.get(key) : content[key]) : NO ;
       this.renderCheckbox(working, value);
-      context.addClass('has-checkbox');
+      classArray.push('has-checkbox');
     }
     
     // handle icon
@@ -215,7 +215,7 @@ SC.ListItemView = SC.View.extend(
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
       
       this.renderIcon(working, value);
-      context.addClass('has-icon');
+      classArray.push('has-icon');      
     }
     
     // handle label -- always invoke
@@ -231,7 +231,7 @@ SC.ListItemView = SC.View.extend(
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
       
       this.renderRightIcon(working, value);
-      context.addClass('has-right-icon');
+      classArray.push('has-right-icon');
     }
     
     // handle unread count
@@ -240,8 +240,10 @@ SC.ListItemView = SC.View.extend(
     if (!SC.none(value) && (value !== 0)) {
       this.renderCount(working, value) ;
       var digits = ['zero', 'one', 'two', 'three', 'four', 'five'];
-      var digit = (value.toString().length < digits.length) ? digits[value.toString().length] : digits[digits.length-1];
-      context.addClass('has-count '+digit+'-digit');
+      var valueLength = value.toString().length;
+      var digitsLength = digits.length;
+      var digit = (valueLength < digitsLength) ? digits[valueLength] : digits[digitsLength-1];
+      classArray.push('has-count '+digit+'-digit');
     }
     
     // handle action 
@@ -249,7 +251,7 @@ SC.ListItemView = SC.View.extend(
     value = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
     if (value) {
       this.renderAction(working, value);
-      context.addClass('has-action');
+      classArray.push('has-action');
     }
     
     // handle branch
@@ -257,9 +259,9 @@ SC.ListItemView = SC.View.extend(
       key = this.getDelegateProperty('contentIsBranchKey', del);
       value = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
       this.renderBranch(working, value);
-      context.addClass('has-branch');
+      classArray.push('has-branch');
     }
-    
+    context.addClass(classArray);
     context = working.end();
   },
   
@@ -301,7 +303,7 @@ SC.ListItemView = SC.View.extend(
     var key = (state === SC.MIXED_STATE) ? "mixed" : state ? "sel" : "nosel",
         cache = this._scli_checkboxHtml,
         isEnabled = this.get('contentIsEditable') && this.get('isEnabled'),
-        html, tmp;
+        html, tmp, classArray=[];
         
     if (!isEnabled) key = SC.keyFor('disabled', key);
     if (!cache) cache = this.constructor.prototype._scli_checkboxHtml = {};
@@ -312,11 +314,13 @@ SC.ListItemView = SC.View.extend(
         .classNames(SC.CheckboxView.prototype.classNames);
 
       // set state on html
-      if (state === SC.MIXED_STATE) tmp.addClass('mixed');
-      else tmp.setClass('sel', state);
+      if (state === SC.MIXED_STATE) classArray.push('mixed');
+      else if(state) classArray.push('sel');
       
       // disabled
-      tmp.setClass('disabled', !isEnabled);
+      if(!isEnabled) classArray.push('disabled');
+      
+      tmp.addClass(classArray);
 
       // now add inner content.  note we do not add a real checkbox because
       // we don't want to have to setup a change observer on it.
@@ -340,7 +344,7 @@ SC.ListItemView = SC.View.extend(
   */
   renderIcon: function(context, icon){
     // get a class name and url to include if relevant
-    var url = null, className = null ;
+    var url = null, className = null , classArray=[];
     if (icon && SC.ImageView.valueIsUrl(icon)) {
       url = icon; className = '' ;
     } else {
@@ -348,10 +352,12 @@ SC.ListItemView = SC.View.extend(
     }
     
     // generate the img element...
+    classArray.push(className);
+    classArray.push('icon');
     context.begin('img')
-      .addClass('icon').addClass(className)
-      .attr('src', url)
-    .end();
+            .addClass(classArray)
+            .attr('src', url)
+            .end();
   },
   
   /** 
@@ -389,7 +395,7 @@ SC.ListItemView = SC.View.extend(
   */
   renderRightIcon: function(context, icon){
     // get a class name and url to include if relevant
-    var url = null, className = null ;
+    var url = null, className = null, classArray=[];
     if (icon && SC.ImageView.valueIsUrl(icon)) {
       url = icon; className = '' ;
     } else {
@@ -397,8 +403,10 @@ SC.ListItemView = SC.View.extend(
     }
     
     // generate the img element...
+    classArray.push('right-icon');
+    classArray.push(className);
     context.begin('img')
-      .addClass('right-icon').addClass(className)
+      .addClass(classArray)
       .attr('src', url)
     .end();
   },
@@ -438,9 +446,13 @@ SC.ListItemView = SC.View.extend(
    @returns {void}
   */
   renderBranch: function(context, hasBranch) {
-    context.begin('span').addClass('branch')
-      .addClass(hasBranch ? 'branch-visible' : 'branch-hidden')
-      .push('&nbsp;').end();
+    var classArray=[];
+    classArray.push('branch');
+    classArray.push(hasBranch ? 'branch-visible' : 'branch-hidden');
+    context.begin('span')
+          .addClass(classArray)
+          .push('&nbsp;')
+          .end();
   },
   
   /** 
@@ -689,7 +701,7 @@ SC.ListItemView = SC.View.extend(
     // view too often.
     if (scrollIfNeeded && this.scrollToVisible()) {
       var collectionView = this.get('owner'), idx = this.get('contentIndex');
-      this.invokeLater(function() {
+      this.invokeLast(function() {
         var item = collectionView.itemViewForContentIndex(idx);
         if (item && item._beginEditing) item._beginEditing(NO);
       });

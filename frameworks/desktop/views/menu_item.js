@@ -7,25 +7,18 @@
 sc_require('views/button') ;
 sc_require('views/separator') ;
 
-// Constants
-SC.BENCHMARK_MENU_ITEM_RENDER = YES ;
-
 /**
-  @class SC.MenuItemView
+  @class
+
+  An SC.MenuItemView is created for every item in a menu.
+
   @extends SC.ButtonView
   @since SproutCore 1.0
 */
-SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
+SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 /** @scope SC.MenuItemView.prototype */{
-  
-  
-  classNames: ['sc-menu-item'],
-  tagName: 'div',
 
-  /**
-    This provides the parentPane for the current MenuItemView
-  */
-  parentPane: null,
+  classNames: ['sc-menu-item'],
   
   /** 
     @private
@@ -51,115 +44,70 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @type Boolean
   */
   isSubMenuViewVisible: null,
-  
-  /**
-    This will return true if the menu item is a separator.
 
-    @type Boolean
-  */
-  isSeparator: NO,
-
-  /**
-    (displayDelegate) The name of the property used for label itself   
-    If null, then the content object itself will be used.
-    
-    @readOnly
-    @type String
-  */
-  contentValueKey: null,
-
-  /**
-    (displayDelegate) The name of the property used to determine if the menu 
-    item is a branch or leaf (i.e. if the branch arow should be displayed to 
-    the right edge.)   
-    If this is null, then the branch arrow will be collapsed.
-
-    @readOnly
-    @type String
-  */
-  contentIsBranchKey: null,
-
-  /**
-    The name of the property which will set the image for the short cut keys
-
-    @readOnly
-    @type String
-  */
-  shortCutKey: null,
-
-  /**
-    The name of the property which will set the icon image for the menu item.
-
-    @readOnly
-    @type String
-  */
-  contentIconKey: null,
-
-  /**
-    The name of the property which will set the checkbox image for the menu 
-    item.
-
-    @readOnly
-    @type String
-  */
-  contentCheckboxKey: 'checkbox',
-
-  /**
-    The name of the property which will set the checkbox image for the menu 
-    item.
-
-    @readOnly
-    @type String
-  */
-  contentActionKey: null,
-  
-  
-  /**
-    Describes the width of the menu item    
-    Default it to 100
-
-    @type Integer
-  */
-  itemWidth: 100,
-  
-  /**
-    Describes the height of the menu item    
-    Default it to 20
-
-    @type Integer
-  */
-  itemHeight: 20,
-  
-
-  /**
-    Sub Menu Items 
-    If this is null then there is no branching
-
-    @type MenuPane
-  */
-  subMenu: null,
-  
   /**
     This property specifies whether this menu item is currently in focus
 
     @type Boolean
   */
   hasMouseExited: NO,
-  
-  /**
-    Anchor for the Parent Menu of which the Menu Item is part of
 
-    @type ButtonView/MenuItemView
+  /**
+    Because we don't know what keys to observe for display changes
+    until we're instantiated, we explicitly set contentDisplayProperties
+    on init.
+    
+    @private
   */
-  anchor: null,
+  init: function() {
+    var menu = this.getPath('parentMenu.rootMenu'),
+    keyArray = menu.menuItemKeys.map(SC._menu_fetchKeys, menu);
+
+    this.set('contentDisplayProperties', keyArray);
+    return sc_super();
+  },
+
+  /**
+    This menu item's submenu, if it exists.
+
+    @type SC.MenuView
+  */
+  subMenu: function() {
+    var content = this.get('content'), menuItems, parentMenu;
+    
+    if (!content) return null;
+    
+    parentMenu = this.get('parentMenu');
+    menuItems = content.get(parentMenu.itemSubMenuKey );
+    if (menuItems) {
+      if (SC.kindOf(menuItems, SC.MenuPane)) {
+        menuItems.set('isModal', NO);
+        menuItems.set('isSubMenu', YES);
+        menuItems.set('parentMenu', parentMenu);
+        return menuItems;
+      } else {
+        return SC.MenuPane.create({
+          layout: { width: 200 },
+          items: menuItems,
+          isModal: NO,
+          isSubMenu: YES,
+          parentMenu: parentMenu
+        });
+      }
+    }
+    
+    return null;
+  }.property('content').cacheable(),
   
   /**
-    This will hold the properties that can trigger a change in the diplay
+    Whether or not this menu item has a submenu.
+    
+    @type Boolean
   */
-  displayProperties: ['contentValueKey', 'contentIconKey', 'shortCutKey',
-                  'contentIsBranchKey', 'itemHeight',
-                   'subMenu','isEnabled','content'],
-  contentDisplayProperties: 'title value icon separator action checkbox shortcut branchItem subMenu'.w(),
+  hasSubMenu: function() {
+    return !!this.get('subMenu');
+  }.property('subMenu').cacheable(),
+  
   /**
     Fills the passed html-array with strings that can be joined to form the
     innerHTML of the receiver element.  Also populates an array of classNames
@@ -170,89 +118,52 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns {void}
   */
   render: function(context, firstTime) {
-    var bkey ;
-    if (SC.BENCHMARK_MENU_ITEM_RENDER) {
-      bkey = '%@.render'.fmt(this) ;
-      SC.Benchmark.start(bkey) ;
-    }
     var content = this.get('content') ;
-    var del = this.displayDelegate ;
     var key, val ;
-    var ic ;
-    var menu = this.parentMenu() ;
+    var menu = this.get('parentMenu');
     var itemWidth = this.get('itemWidth') || menu.layout.width ;
     var itemHeight = this.get('itemHeight') || 20 ;
-    this.set('itemWidth',itemWidth) ;
-    this.set('itemHeight',itemHeight) ;
-    
-    if(!this.get('isEnabled')) context.addClass('disabled') ;
-    //handle separator    
-    ic = context.begin('a').attr('href', 'javascript: ;') ;   
-    key = this.getDelegateProperty('isSeparatorKey', del) ;
-    val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-    if (val) {
-      ic.push("<span class='separator'></span>") ;
-      context.addClass('disabled') ;
+    this.set('itemWidth',itemWidth);
+    this.set('itemHeight',itemHeight);
+
+    context = context.begin('a');
+
+    if (content.get(menu.itemSeparatorKey)) {
+      context.push('<span class="separator"></span>');
+      context.addClass('disabled');
     } else {
-      // handle checkbox
-      key = this.getDelegateProperty('contentCheckboxKey', del) ;
-      if (key) {
-        val = content ? (content.get ? content.get(key) : content[key]) : NO ;
-        if (val) {
-          ic.begin('div').addClass('checkbox').end() ;
-        }
+      val = content.get(menu.itemIconKey);
+      if (val) {
+        this.renderImage(context, val);
+        context.addClass('has-icon');
       }
 
-      // handle image -- always invoke
-      key = this.getDelegateProperty('contentIconKey', del) ;
-      val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-      if(val && SC.typeOf(val) !== SC.T_STRING) val = val.toString() ;
-      if(val) {
-        this.renderImage(ic, val) ;
-        ic.addClass('hasIcon') ;
+      val = this.getContentProperty('itemTitleKey') || '';
+      if (SC.typeOf(val) !== SC.T_STRING) val = val.toString();
+      // TODO check localization setting
+      this.renderLabel(context, val.loc());
+
+      if (this.getContentProperty('itemCheckboxKey')) {
+        context.push('<div class="checkbox"></div>');
       }
 
-      // handle label -- always invoke
-      key = this.getDelegateProperty('contentValueKey', del) ;
-      val = (key && content) ? (content.get ? content.get(key) : content[key]) : content ;
-      if (val && SC.typeOf(val) !== SC.T_STRING) val = val.toString() ;
-      this.renderLabel(ic, val||'') ;
+      if (this.get('hasSubMenu')) {
+        this.renderBranch(context);
+      }
 
-      // handle branch
-      key = this.getDelegateProperty('contentIsBranchKey', del) ;
-      val = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
-      if (val) {       
-        this.renderBranch(ic, val) ;
-        ic.addClass('has-branch') ;
-      } else { // handle action
-        
-        key = this.getDelegateProperty('action', del) ;
-        val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-        if (val && isNaN(val)) this.set('action', val) ;
-
-        key = this.getDelegateProperty('target', del) ;
-        val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-        if (val && isNaN(val)) this.set('target', val) ;
-
-        // handle short cut keys
-        if (this.getDelegateProperty('shortCutKey', del)) {
-          key = this.getDelegateProperty('shortCutKey', del) ;
-          val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-          if (val) {
-            this.renderShortcut(ic, val) ;
-            ic.addClass('shortcutkey') ;
-          }
-        }
+      val = this.getContentProperty('itemShortCutKey');
+      if (val) {
+        this.renderShortcut(context, val);
       }
     }
-    ic.end() ;
-    if (SC.BENCHMARK_MENU_ITEM_RENDER) SC.Benchmark.end(bkey) ;
+
+    context = context.end();
   },
-      
-  /** 
-   Generates the image used to represent the image icon. override this to 
+
+  /**
+   Generates the image used to represent the image icon. override this to
    return your own custom HTML
- 
+
    @param {SC.RenderContext} context the render context
    @param {String} the source path of the image
    @returns {void}
@@ -290,15 +201,11 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
    return your own custom HTML
  
    @param {SC.RenderContext} context the render context
-   @param {Boolean} hasBranch YES if the item has a branch
    @returns {void}
   */
 
-  renderBranch: function(context, hasBranch) {
-
-    var a = '>' ;
-    var url = SC.BLANK_IMAGE_URL;
-    context.push('<span class= "hasBranch">'+a+'</span>') ; 
+  renderBranch: function(context) {
+    context.push('<span class="has-branch"></span>') ;
   },
 
   /** 
@@ -314,49 +221,14 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   },
 
   /**
-    This method is used to fetch the Menu Item View to which the
-    Parent Menu Pane is anchored 
-    to
-
-    @param {}
-    @returns MenuPane
-  */
-  getAnchor: function() {
-    var anchor = this.get('anchor') ;
-    if(anchor && anchor.kindOf && anchor.kindOf(SC.MenuItemView)) return anchor ;
-    return null ;
-  },
-  
-  isCurrent: NO,
-
-  /**
     This method checks if the menu item is a separator.
 
     @param {}
     @returns Boolean
-  */	  
-  isSeparator: function() {
-    var content = this.get('content') ;
-    var del = this.displayDelegate ;
-    var key = this.getDelegateProperty('isSeparatorKey', del) ;
-    var val = (key && content) ? (content.get ? content.get(key) : content[key]) : null ;
-    if (val) return YES ;
-    return NO ;
-  },
-  
-  /**
-    Checks if a menu is a sub menu, during branching.
-    
-    @param {}
-    @returns MenuPane
   */
-  isSubMenuAMenuPane: function() {
-    var content = this.get('content') ;
-    var subMenu = content.get('subMenu') ;
-    if(subMenu && subMenu.kindOf(SC.MenuPane)) return subMenu ;
-    return NO ;  
-  },
-  
+  isSeparator: function() {
+    return this.getContentProperty('itemSeparatorKey') === YES;
+  }.property('content').cacheable(),
   
   /**
     This method will check whether the current Menu Item is still
@@ -365,51 +237,34 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @param {}
     @returns void
   */
-  branching: function() {
-    if(this.get('hasMouseExited')) {
-      this.set('hasMouseExited',NO) ;
-      return ;
-    }
-      this.createSubMenu() ;
-  },
-  
-  /**
-    This method will remove the focus of the current selected menu item.
-
-    @param {}
-  */
-  loseFocus: function() {
-    if(!this.isSubMenuAMenuPane()) {
-      this.set('hasMouseExited',YES) ;
-      this.$().removeClass('focus') ;
-      //this.resignFirstResponder() ;
-    }
-  },
-  
-  /**
-    This method will create the sub Menu with the current Menu Item as anchor
-    
-    @param {}
-    @returns void
-  */
-  createSubMenu: function() {
-    var subMenu = this.isSubMenuAMenuPane() ;
+  showSubMenu: function() {
+    var subMenu = this.get('subMenu') ;
     if(subMenu) {
-      subMenu.set('anchor', this) ;
       subMenu.popup(this,[0,0,0]) ;
-      var context = SC.RenderContext(this) ;
-      context = context.begin(subMenu.get('tagName')) ;
-      subMenu.prepareContext(context, YES) ;
-      context = context.end() ;
-      var menuItemViews = subMenu.get('menuItemViews') ;
-      if(menuItemViews && menuItemViews.length>0) {
-        subMenu.becomeKeyPane();
-      }
     }
   },
   
-  parentMenu: function() {
-    return this.get('parentPane') ;
+  isEnabled: function() {
+    return this.getContentProperty('itemIsEnabledKey') !== NO &&
+           this.getContentProperty('itemSeparatorKey') !== YES;
+  }.property('content.isEnabled').cacheable(),
+
+  title: function() {
+    var ret = this.getContentProperty('itemTitleKey');
+
+    if (ret) {
+      ret = ret.loc();
+    }
+    return ret;
+  }.property('content.title').cacheable(),
+  
+  getContentProperty: function(property) {
+    var content = this.get('content'),
+        menu = this.get('parentMenu');
+    
+    if (content) {
+      return content.get(menu.get(property));
+    }
   },
 
   //..........................................
@@ -423,38 +278,57 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     // SproutCore's event system will deliver the mouseUp event to the view
     // that got the mouseDown event, but for menus we want to track the mouse,
     // so we'll do our own dispatching.
-    var parentMenu = this.parentMenu() ;
-    if (parentMenu) {
-      var selectedMenuItem = parentMenu.get('currentSelectedMenuItem') ;
-      if (selectedMenuItem  &&  (this !== selectedMenuItem)) {
-        return selectedMenuItem.tryToPerform('mouseUp', evt) ;
+    var targetMenuItem;
+    
+    targetMenuItem = this.getPath('parentMenu.rootMenu.targetMenuItem');
+
+    if (targetMenuItem) targetMenuItem.performAction();
+    return YES ;
+  },
+
+  performAction: function() {
+    if(!this.get('isEnabled')) return ;
+    var action = this.getContentProperty('itemActionKey'),
+        target = this.getContentProperty('itemTargetKey'),
+        rootMenu = this.getPath('parentMenu.rootMenu'), responder;
+
+    if (this.get('hasSubMenu')) {
+      return;
+    }
+
+    action = (action === undefined) ? rootMenu.get('action') : action;
+    target = (target === undefined) ? rootMenu.get('target') : target;
+
+    this._flashCounter = 0;
+    rootMenu.set('selectedItem', this.get('content'));
+
+    // Legacy support for actions that are functions
+    if (SC.typeOf(action) === SC.T_FUNCTION) {
+      action.apply(target, [rootMenu]);
+    } else {
+      responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
+      if (responder) {
+        responder.sendAction(action, target, this, this.get('pane'));
       }
     }
 
-    if (!this.get('isEnabled')) {
-      this.set('hasMouseExited',NO) ;
-      return YES ;
-    }
-    this.set('hasMouseExited',NO) ;
-    var key = this.get('contentCheckboxKey') ;
-    var content = this.get('content') ;
-    if (key) {
-      if (content && content.get(key)) {
-        content.set(key, NO) ;
-      } else if( content.get(key)!== undefined ) {
-        content.set(key, YES) ;
-      }
-      this.displayDidChange();
-    }
-    this._action(evt) ;
-    var anchor = this.getAnchor() ;
-    if(anchor) {
-      anchor.mouseUp(evt) ;
+    this.invokeLater(this.flashHighlight, 25);
+  },
+
+  flashHighlight: function() {
+    var flashCounter = this._flashCounter, layer = this.$();
+    if (flashCounter % 2 === 0) {
+      layer.addClass('focus');
     } else {
-      this.resignFirstResponder() ;
+      layer.removeClass('focus');
     }
-    this.closeParent() ;
-    return YES ;
+
+    if (flashCounter > 2) {
+      this.getPath('parentMenu.rootMenu').remove();
+    } else {
+      this.invokeLater(this.flashHighlight, 50);
+      this._flashCounter++;
+    }
   },
 
   /** @private*/
@@ -470,31 +344,13 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns Boolean
   */
   mouseEntered: function(evt) {
-    var parentMenu = this.parentMenu() ;
-    this.set('hasMouseExited', NO) ;
-    if(parentMenu) {
-      parentMenu.becomeKeyPane() ;
-      // condition check whether the anchor tag has _isMouseDown or not
-      if(parentMenu.get('anchor')._isMouseDown){
-        var isAnchorMouseDown = parentMenu.getPath('anchor._isMouseDown') ;
-        this.set('isAnchorMouseDown', isAnchorMouseDown) ;
-        if(this.get('isAnchorMouseDown')) {
-          SC.Event.trigger(this.get('layer'), 'mousedown');
-        }
-      }
-    }
-    if (!this.get('isEnabled') && !this.isSeparator()) {
-      if (parentMenu) parentMenu.set('currentSelectedMenuItem', null);
-      return YES ;
-    }
+    var menu = this.get('parentMenu');
+    menu.set('mouseHasEntered', YES);
+    menu.set('currentMenuItem', this);
 
-    var key = this.get('contentIsBranchKey') ;
-    if(key) {
-      var content = this.get('content') ;
-      var val = (key && content) ? (content.get ? content.get(key) : content[key]) : NO ;
-      if(val) this.invokeLater(this.branching(),100) ;
+    if(this.get('hasSubMenu')) {
+      this.invokeLater(this.showSubMenu(),100) ;
     }
-    this.becomeFirstResponder() ;
 	  return YES ;
   },
 
@@ -504,14 +360,37 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns Boolean
   */
   mouseExited: function(evt) {
-    this.loseFocus() ;
-    var parentMenu = this.parentMenu() ;
-    if(parentMenu) {
-      parentMenu.set('previousSelectedMenuItem', this) ;
+    var subMenu, parentMenu;
+
+    if (this.get('hasSubMenu')) {
+      subMenu = this.get('subMenu');
+      this.invokeLater(this.checkMouseLocation, 200);
+    } else {
+      parentMenu = this.get('parentMenu');
+      
+      if (parentMenu.get('currentMenuItem') === this) {
+        parentMenu.set('currentMenuItem', null);
+      }
     }
+
     return YES ;
   },
+  
+  checkMouseLocation: function() {
+    var subMenu = this.get('subMenu'), parentMenu = this.get('parentMenu'),
+        currentMenuItem, previousMenuItem;
+    if (!subMenu.get('mouseHasEntered')) {
+      currentMenuItem = parentMenu.get('currentMenuItem');
+      if (currentMenuItem === this || currentMenuItem === null) {
+        previousMenuItem = parentMenu.get('previousMenuItem');
 
+        if (previousMenuItem) {
+          previousMenuItem.resignFirstResponder();
+        }
+        subMenu.remove();
+      }
+    }
+  },
 
   /** @private
     Call the moveUp function on the parent Menu
@@ -519,20 +398,20 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns Boolean
   */
   moveUp: function(sender,evt) {
-    var menu = this.parentMenu() ;
+    var menu = this.get('parentMenu') ;
     if(menu) {
       menu.moveUp(this) ;
     }
     return YES ;
   },
-  
+
   /** @private
     Call the moveDown function on the parent Menu
     
     @returns Boolean
   */
   moveDown: function(sender,evt) {
-    var menu = this.parentMenu() ;
+    var menu = this.get('parentMenu') ;
     if(menu) {
       menu.moveDown(this) ;
     }
@@ -545,8 +424,8 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
     @returns Boolean
   */
   moveRight: function(sender,evt) {
-    this.createSubMenu() ;
-    return YES ;
+    this.showSubMenu() ;
+    return YES;
   },
   
   /** @private*/
@@ -562,7 +441,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   /** @private*/
   cancel: function(evt) {
     this.loseFocus() ;
-    var menu = this.parentMenu() ;
+    var menu = this.get('parentMenu') ;
     if (menu) menu.remove() ;
     var pane = menu.getPath('anchor.pane') ;
     if (pane) pane.becomeKeyPane() ;
@@ -572,10 +451,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   /** @private*/
   didBecomeFirstResponder: function(responder) {
     if (responder !== this) return;
-    if(!this.isSeparator()) {
-      this.$().addClass('focus') ;
-    }
-    var parentMenu = this.parentMenu() ;
+    var parentMenu = this.get('parentMenu') ;
     if(parentMenu) {
       parentMenu.set('currentSelectedMenuItem', this) ;
     }
@@ -584,8 +460,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   /** @private*/
   willLoseFirstResponder: function(responder) {
     if (responder !== this) return;
-    this.$().removeClass('focus') ;
-    var parentMenu = this.parentMenu() ;
+    var parentMenu = this.get('parentMenu') ;
     if(parentMenu) {
       parentMenu.set('currentSelectedMenuItem', null) ;
       parentMenu.set('previousSelectedMenuItem', this) ;
@@ -605,7 +480,7 @@ SC.MenuItemView = SC.ButtonView.extend( SC.ContentDisplay,
   */
   closeParent: function() {
     this.$().removeClass('focus') ;
-    var menu = this.parentMenu() ;
+    var menu = this.get('parentMenu') ;
     if(menu) {
       menu.remove() ;
     }

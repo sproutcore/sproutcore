@@ -29,6 +29,8 @@ SC.PICKER_POINTER = 'pointer';
 SC.POINTER_LAYOUT = ["perfectRight", "perfectLeft", "perfectTop", "perfectBottom"];
 
 /**
+  @class
+
   Displays a non-modal, self anchor positioned picker pane.
 
   The default way to use the picker pane is to simply add it to your page like this:
@@ -150,7 +152,6 @@ SC.PickerPane = SC.PalettePane.extend({
     if (preferType) this.set('preferType',preferType) ;
     if (preferMatrix) this.set('preferMatrix',preferMatrix) ;
     this.endPropertyChanges();
-
     this.positionPane();
     this.append();
   },
@@ -210,12 +211,16 @@ SC.PickerPane = SC.PalettePane.extend({
 
   /** @private
     This method will return ret (x, y, width, height) from a rectangular element
+    Notice: temp hack for calculating visiable anchor height by counting height 
+    up to window bottom only. We do have 'clippingFrame' supported from view.
+    But since our anchor can be element, we use this solution for now.
   */  
   computeAnchorRect: function(anchor) {
     var ret = SC.viewportOffset(anchor); // get x & y
     var cq = SC.$(anchor);
+    var wsize = SC.RootResponder.responder.computeWindowSize() ;
     ret.width = cq.outerWidth();
-    ret.height = cq.outerHeight();
+    ret.height = (wsize.height-ret.y) < cq.outerHeight() ? (wsize.height-ret.y) : cq.outerHeight();
     return ret ;
   },
 
@@ -224,7 +229,7 @@ SC.PickerPane = SC.PalettePane.extend({
   */  
   fitPositionToScreen: function(preferredPosition, picker, anchor) {
     // get window rect.
-    var wsize = this.get('currentWindowSize') || SC.RootResponder.responder.computeWindowSize() ;
+    var wsize = SC.RootResponder.responder.computeWindowSize() ;
     var wret = { x: 0, y: 0, width: wsize.width, height: wsize.height } ;
     picker.x = preferredPosition.x ; picker.y = preferredPosition.y ;
 
@@ -232,8 +237,7 @@ SC.PickerPane = SC.PalettePane.extend({
       switch(this.preferType) {
         case SC.PICKER_MENU:
           // apply default + menu re-position rule
-          picker = this.fitPositionToScreenDefault(wret, picker, anchor) ;
-          picker = this.fitPositionToScreenMenu(wret, picker) ;
+          picker = this.fitPositionToScreenMenu(wret, picker, this.get('isSubMenu')) ;
           break;
         case SC.PICKER_POINTER:
           // apply pointer re-position rule
@@ -295,20 +299,28 @@ SC.PickerPane = SC.PalettePane.extend({
   },
 
   /** @private
-    re-position rule optimized for Menu to enforce min left(7px)/right(8px) padding to the window
+    re-position rule optimized for Menu to enforce min left(7px)/right(20px) padding to the window
   */
-  fitPositionToScreenMenu: function(w, f) {
+  fitPositionToScreenMenu: function(w, f, subMenu) {
     // min left/right padding to the window
-    if( (f.x + f.width) > (w.width-9) ) f.x = w.width - f.width - 9;
+    if( (f.x + f.width) > (w.width-20) ) {
+      // sub-menus should be re-anchored to the left of the parent menu
+      if (subMenu) f.x = f.x - (f.width*2);
+      else f.x = w.width - f.width - 20;
+    }
     if( f.x < 7 ) f.x = 7;
-	
-	// if the height of the menu is bigger than the window height resize it.
-	  if( f.height > w.height){
-		  f.y = 15;
-		  f.height = w.height - 35;
-	  }
-	
-	  return f ;    
+    
+    // if the height of the menu is bigger than the window height resize it.
+    if( f.height+f.y+35 >= w.height){
+      if (f.height+50 >= w.height) {
+        f.y = 15;
+        f.height = w.height - 50;
+      } else {
+        f.y += (w.height - (f.height+f.y+35));
+      }
+    }
+
+    return f ;    
   },
 
   /** @private
@@ -399,12 +411,12 @@ SC.PickerPane = SC.PalettePane.extend({
     var ret = sc_super();
     if (context.needsContent) {
       if (this.get('preferType') == SC.PICKER_POINTER) {
-        context.push('<div class="sc-pointer %@" style="margin-top: %@px"></div>'.fmt(this.get('pointerPos'), this.get('pointerPosY')));
+        context.push('<div class="sc-pointer '+this.get('pointerPos')+'" style="margin-top: '+this.get('pointerPosY')+'px"></div>');
       }
     } else {
       var el = this.$('.sc-pointer');
-      el.attr('class', "sc-pointer %@".fmt(this.get('pointerPos')));
-      el.attr('style', "margin-top: %@px".fmt(this.get('pointerPosY')));
+      el.attr('class', "sc-pointer "+this.get('pointerPos'));
+      el.attr('style', "margin-top: "+this.get('pointerPosY')+"px");
     }
     return ret ;
   },
@@ -434,7 +446,6 @@ SC.PickerPane = SC.PalettePane.extend({
     Invoked by the root responder. Re-position picker whenever the window resizes. 
   */
   windowSizeDidChange: function(oldSize, newSize) {
-    sc_super();
     this.positionPane();
   }
 

@@ -39,7 +39,6 @@ SC.Animatable = {
   */
   isAnimatable: YES,
   
-  
   transitions: {},
   concatenatedProperties: ["transitions"],
 

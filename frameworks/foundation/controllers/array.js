@@ -376,9 +376,17 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
     if (!func) {  
       len = orderBy.get('length');
       func = function(a,b) {
-        var idx=0, status=0, key, aValue, bValue;
+        var idx=0, status=0, key, aValue, bValue, descending;
         for(idx=0;(idx<len)&&(status===0);idx++) {
           key = orderBy.objectAt(idx);
+          descending = NO;
+          
+          if (key.indexOf('ASC') > -1) {
+            key = key.split('ASC ')[1];
+          } else if (key.indexOf('DESC') > -1) {
+            key = key.split('DESC ')[1];
+            descending = YES;
+          }
         
           if (!a) aValue = a ;
           else if (a.isObservable) aValue = a.get(key);
@@ -389,8 +397,9 @@ SC.ArrayController = SC.Controller.extend(SC.Array, SC.SelectionSupport,
           else bValue = b[key];
         
           status = SC.compare(aValue, bValue);
+          if (descending) status = (-1) * status;
         }
-        return status ; 
+        return status ;
       };
     }
 

@@ -90,7 +90,7 @@ test("no order should result in comparison by guid", function() {
   equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
 });
 
-test("comparing non existant properties", function() {
+test("comparing non existent properties", function() {
   q.orderBy = "year";
   q.parse();
   equals(q.compare(rec5,rec1), -1, 'null should be before 1974');
@@ -128,4 +128,17 @@ test("comparing by equal properties should use guid for order", function() {
   q.orderBy = "lastName";
   q.parse();
   equals(q.compare(rec1,rec2), -1, 'guid 1 should be before guid 2');
+});
+
+test("specifying a custom orderBy comparison function", function() {
+  var usedCustomFunction = NO;
+  q.orderBy = function(rec1, rec2) {
+    // We'll be explicit about our use of a custom comparison function, in
+    // addition to returning later years first.
+    usedCustomFunction = YES;
+    return SC.compare(rec2.get('year'), rec1.get('year'));
+  };
+  q.parse();
+  equals(q.compare(rec1,rec2), 1, 'guid 2 should be before guid 1');
+  equals(usedCustomFunction, YES, 'we should have used our custom comparison function');
 });

@@ -45,9 +45,7 @@ SC.SplitDividerView = SC.View.extend(
     return (splitView) ? splitView.mouseDownInThumbView(evt, this) : sc_super();
   },
   
-  // FIXME: how does this work with event capture?
   doubleClick: function(evt) {
-    console.log('doubleClick in split divider');
     var splitView = this.get('splitView');
     return (splitView) ? splitView.doubleClickInThumbView(evt, this) : sc_super();
   }

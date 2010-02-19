@@ -203,12 +203,13 @@ SC.ListView = SC.CollectionView.extend(
 
     var del       = this.get('rowDelegate'),
         rowHeight = del.get('rowHeight'),
-        ret, custom, cache, delta, max, content ;
+        rowSpacing, ret, custom, cache, delta, max, content ;
         
     ret = idx * rowHeight;
 
-		if(this.get('rowSpacing')){ 
-      ret += idx * this.get('rowSpacing'); 
+    rowSpacing = this.get('rowSpacing');
+		if(rowSpacing){ 
+      ret += idx * rowSpacing; 
     } 
 
     if (del.customRowHeightIndexes && (custom=del.get('customRowHeightIndexes'))) {
@@ -603,6 +604,18 @@ SC.ListView = SC.CollectionView.extend(
     
     // return whatever we came up with
     return [index, dropOperation];
+  },
+  
+  mouseWheel: function(evt) {
+    // The following commits changes in a list item that is being edited,
+    // if the list is scrolled.
+    var inlineEditor = SC.InlineTextFieldView.editor;
+    if(inlineEditor && inlineEditor.get('isEditing')){
+      if(inlineEditor.get('delegate').get('displayDelegate')===this){
+        SC.InlineTextFieldView.commitEditing();
+      }
+    }
+    return NO ;  
   },
   
   // ..........................................................

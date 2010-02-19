@@ -30,7 +30,10 @@ SC.TabView = SC.View.extend(
   // ..........................................................
   // PROPERTIES
   // 
-  
+
+ /** 
+    Set nowShowing with the page you want to display.
+  */
   nowShowing: null,
   
   items: [],
@@ -100,19 +103,17 @@ SC.TabView = SC.View.extend(
   },
   
   createChildViews: function() {
-    var childViews = [], view, ContainerView ;
+    var childViews = [], view, containerView, layout ;
     
-    if (this.get('tabLocation') === SC.TOP_LOCATION) {
-      ContainerView = this.containerView.extend({
-        layout: { top:12, left:0, right:0, bottom: 0 }
-      });
-    } else {
-      ContainerView = this.containerView.extend({
-        layout: { top:0, left:0, right:0, bottom: 12 }
-      });
-    }
+    layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
+             { top: 12, left: 0, right: 0, bottom: 0 } :
+             { top: 0, left: 0, right: 0, bottom: 12 } ;
     
-    view = this.containerView = this.createChildView(ContainerView) ;
+    containerView = this.containerView.extend({
+      layout: layout
+    });
+
+    view = this.containerView = this.createChildView(containerView) ;
     childViews.push(view);
     
     view = this.segmentedView = this.createChildView(this.segmentedView) ;

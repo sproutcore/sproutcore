@@ -46,8 +46,8 @@ SC.Border = {
     if (style) {
       if (this._BORDER_REGEXP.exec(style)) {
         context.addClass(style);
-      } else context.addStyle('border', '1px %@ solid'.fmt(style));
+      } else context.addStyle('border', '1px '+style+' solid');
     }
   }
-  
+
 };

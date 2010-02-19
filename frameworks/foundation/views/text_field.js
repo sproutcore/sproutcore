@@ -390,7 +390,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       
       // Render the hint.
       context.push('<span class="sc-hint">', hint, '</span>') ;
-      
+      value = this.get('escapeHTML')?SC.RenderContext.escapeHTML(value):value; 
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {
         context.push('<textarea name="', name, '" ', disabled, '>', value, '</textarea></span>') ;
@@ -477,24 +477,12 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   //
 
   didCreateLayer: function() {
-    if(!this.get('isTextArea')){
-      sc_super(); 
-      this._addTextAreaEvents();
-    } 
-  },
-  
-  
-  didAppendToDocument: function() {
-    // Turns out that in safari and firefox you can attach events to a textarea
-    // only if it has been appended to the DOM or if you did did it during
-    // loading time. For input tags is the other way around. I tested in all
-    // browsers and if I add the event for input tag before being visible it works
-    // fine, and if I add the event after the textarea is visible then the 
-    // textarea works. In IE works fine both ways.
-    if(this.get('isTextArea')){
-      sc_super();
-      this._addTextAreaEvents();
-    }
+    sc_super(); 
+    // For some strange reason if we add focus/blur events to textarea
+    // inmediately they won't work. However if I add them at the end of the
+    // runLoop it works fine.
+    if(this.get('isTextArea')) this.invokeLast(this._addTextAreaEvents);
+    else this._addTextAreaEvents();
   },
   
   _addTextAreaEvents: function() {
@@ -557,10 +545,13 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     // to fix the cursor at any position. As of FF 3.5.3 mozilla hasn't fixed this 
     // bug, even though related bugs that I've found on their database appear
     // as fixed.  
+    
+    // UPDATE: Things seem to be working on FF3.6 therefore we are disabling the
+    // hack for the latest versions of FF.
     // 
     // Juan Pinzon
     
-    if (SC.browser.mozilla) {
+    if (parseFloat(SC.browser.mozilla)<1.9 && !this.get('useStaticLayout')) {
       var top, left, width, height, p, layer, element, textfield;
       
       // I'm caching in didCreateLayer this elements to improve perf
@@ -607,7 +598,8 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   /** @private */
   willBecomeKeyResponderFrom: function(keyView) {
     if(this.get('isVisibleInWindow')) {
-      this.$input()[0].focus();
+      var inp = this.$input()[0];
+      if(inp) inp.focus();
       
       if(!this._txtFieldMouseDown){
         if(SC.browser.mozilla) this.invokeOnce(this._selectRootElement) ;
@@ -647,9 +639,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
     implementation.
   */
   keyDown: function(evt) {
-    // handle return and escape.  this way they can be passed on to the
+    // Handle return and escape.  this way they can be passed on to the
     // responder chain.
-    if ((evt.which === 13) && !this.get('isTextArea')) return NO ;
+    // If the event is triggered by a return while entering IME input,
+    // don't got through this path.
+    if ((evt.which === 13 && !evt.isIMEInput) && !this.get('isTextArea')) return NO ;
     if (evt.which === 27) return NO ;
 
     // handle tab key
@@ -672,7 +666,6 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   },
 
   keyUp: function(evt) {
-    
     // The caret/selection could have moved.  In some browsers, though, the
     // element's values won't be updated until after this event is finished
     // processing.
@@ -697,7 +690,7 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
       return YES;
     } else {
       // This fixes the double click issue in firefox
-      if(SC.browser.mozilla) this.$input()[0].focus();
+      if(!SC.browser.safari) this.$input()[0].focus();
       return sc_super();
     }
   },

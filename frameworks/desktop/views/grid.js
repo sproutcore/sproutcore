@@ -43,8 +43,8 @@ SC.GridView = SC.ListView.extend(
   
   /** @private */
   itemsPerRow: function() {
-    var f = this.get('frame') ;
-    var columnWidth = this.get('columnWidth') || 0 ;
+    var f = this.get('frame'),
+        columnWidth = this.get('columnWidth') || 0 ;
 
     return (columnWidth <= 0) ? 1 : Math.floor(f.width / columnWidth) ;
   }.property('clippingFrame', 'columnWidth').cacheable(),
@@ -55,23 +55,21 @@ SC.GridView = SC.ListView.extend(
     contiguous range.
   */
   contentIndexesInRect: function(rect) {
-    var rowHeight = this.get('rowHeight') || 48 ;
-    var itemsPerRow = this.get('itemsPerRow') ;
-    
-    var min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow  ;
-    var max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow ;
+    var rowHeight = this.get('rowHeight') || 48 ,
+        itemsPerRow = this.get('itemsPerRow'),
+        min = Math.floor(SC.minY(rect) / rowHeight) * itemsPerRow,
+        max = Math.ceil(SC.maxY(rect) / rowHeight) * itemsPerRow ;
     return SC.IndexSet.create(min, max-min);
   },
   
   /** @private */
   layoutForContentIndex: function(contentIndex) {
-    var rowHeight = this.get('rowHeight') || 48 ;
-    var frameWidth = this.get('clippingFrame').width ;
-    var itemsPerRow = this.get('itemsPerRow') ;
-    var columnWidth = Math.floor(frameWidth/itemsPerRow);
-    
-    var row = Math.floor(contentIndex / itemsPerRow) ;
-    var col = contentIndex - (itemsPerRow*row) ;
+    var rowHeight = this.get('rowHeight') || 48,
+        frameWidth = this.get('clippingFrame').width,
+        itemsPerRow = this.get('itemsPerRow'),
+        columnWidth = Math.floor(frameWidth/itemsPerRow),
+        row = Math.floor(contentIndex / itemsPerRow),
+        col = contentIndex - (itemsPerRow*row) ;
     return { 
       left: col * columnWidth,
       top: row * rowHeight,
@@ -85,11 +83,11 @@ SC.GridView = SC.ListView.extend(
     of the list view.
   */
   computeLayout: function() {
-    var content = this.get('content') ;
-    var count = (content) ? content.get('length') : 0 ;
-    var rowHeight = this.get('rowHeight') || 48 ;
-    var itemsPerRow = this.get('itemsPerRow') ;
-    var rows = Math.ceil(count / itemsPerRow) ;
+    var content = this.get('content'),
+        count = (content) ? content.get('length') : 0,
+        rowHeight = this.get('rowHeight') || 48,
+        itemsPerRow = this.get('itemsPerRow'),
+        rows = Math.ceil(count / itemsPerRow) ;
   
     // use this cached layout hash to avoid allocing memory...
     var ret = this._cachedLayoutHash ;
@@ -163,18 +161,16 @@ SC.GridView = SC.ListView.extend(
   
   // // We can do this much faster programatically using the rowHeight
   insertionIndexForLocation: function(loc, dropOperation) {  
-    var f = this.get('frame') ;
-    var sf = this.get('scrollFrame') ;
-    
-    var itemsPerRow = this.get('itemsPerRow') ; 
-    var columnWidth = Math.floor(f.width / itemsPerRow) ;
-    var row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight')) ;
+    var f = this.get('frame'),
+        sf = this.get('scrollFrame'),
+        itemsPerRow = this.get('itemsPerRow'),
+        columnWidth = Math.floor(f.width / itemsPerRow),
+        row = Math.floor((loc.y - f.y - sf.y) / this.get('rowHeight')) ;
 
-    var retOp = SC.DROP_BEFORE ;
-    
-    var offset = (loc.x - f.x - sf.x) ;
-    var col = Math.floor(offset / columnWidth) ;
-    var percentage = (offset / columnWidth) - col ;
+    var retOp = SC.DROP_BEFORE,
+        offset = (loc.x - f.x - sf.x),
+        col = Math.floor(offset / columnWidth),
+        percentage = (offset / columnWidth) - col ;
     
     // if the dropOperation is SC.DROP_ON and we are in the center 60%
     // then return the current item.

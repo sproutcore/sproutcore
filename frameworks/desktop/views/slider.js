@@ -86,29 +86,30 @@ SC.SliderView = SC.View.extend(SC.Control,
   render: function(context, firstTime) {
     sc_super();
     
-    var min = this.get('minimum');
-    var max = this.get('maximum');
-    var value = this.get('value');
+    var min = this.get('minimum'),
+        max = this.get('maximum'),
+        value = this.get('value'),
+        step = this.get('step');
 
     // determine the constrained value.  Must fit within min & max
     value = Math.min(Math.max(value, min), max);
 
     // limit to step value
-    var step = this.get('step');
     if (!SC.none(step) && step !== 0) {
       value = Math.round(value / step) * step;
     }
     
     // determine the percent across
-    value = Math.floor((value - min) / (max - min) * 100);
+    if(value!==0) value = Math.floor((value - min) / (max - min) * 100);
     
     if(firstTime) {
       var blankImage = SC.BLANK_IMAGE_URL;
-      context.push('<span class="sc-inner">');
-      context.push('<span class="sc-leftcap"></span>');
-      context.push('<span class="sc-rightcap"></span>');
-      context.push('<img src="', blankImage, '" class="sc-handle" style="left: ', value, '%" />');
-      context.push('</span>');
+      context.push('<span class="sc-inner">',
+                    '<span class="sc-leftcap"></span>',
+                    '<span class="sc-rightcap"></span>',
+                    '<img src="', blankImage, 
+                    '" class="sc-handle" style="left: ', value, '%" />',
+                    '</span>');
     }
     else {
       this.$(this.get('handleSelector')).css('left', value + "%");
@@ -138,14 +139,44 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret ;
   },
   
+  /** @private 
+    On touch start, set active only if enabled.
+  */    
+  touchStart: function(evt) {
+    this.mouseDown(evt);
+  },
+
+
+  
+  /** @private 
+    On touch start, set active only if enabled.
+  */    
+  touchMoved: function(evt) {
+    this.mouseDragged(evt);
+  },
+
+
+  /** @private
+    ON mouse up, trigger the action only if we are enabled and the mouse was released inside of the view.
+  */  
+  touchEnd: function(evt) {
+    this.mouseUp(evt);
+  },
+  
   /** @private
     Updates the handle based on the mouse location of the handle in the
     event.
   */
   _triggerHandle: function(evt) {
-    var loc = this.convertFrameFromView({ x: evt.pageX }).x ;
-    var width = this.get('frame').width ;
+    var width = this.get('frame').width,
+        min = this.get('minimum'), max=this.get('maximum'),  
+        step = this.get('step'), v=this.get('value'), loc;
 
+    if (evt.changedTouches && evt.changedTouches.length > 0) {
+      var changed = evt.changedTouches[0];
+      loc = this.convertFrameFromView({ x: changed.pageX }).x;
+    }else loc = this.convertFrameFromView({ x: evt.pageX }).x,
+    
     // constrain loc to 8px on either side (left to allow knob overhang)
     loc = Math.max(Math.min(loc,width-8), 8) - 8;
     width -= 16 ; // reduce by margin
@@ -153,9 +184,6 @@ SC.SliderView = SC.View.extend(SC.Control,
     // convert to percentage
     loc = loc / width ;
     
-    var min = this.get('minimum'),max=this.get('maximum');  
-    var step = this.get('step'), v=this.get('value');
-
     // convert to value using minimum/maximum then constrain to steps
     loc = min + ((max-min)*loc);
     if (step !== 0) loc = Math.round(loc / step) * step ;
@@ -197,9 +225,9 @@ SC.SliderView = SC.View.extend(SC.Control,
      }
      
      if (evt.which === 37 || evt.which === 38 || evt.which === 39 || evt.which === 40){
-       var min = this.get('minimum'),max=this.get('maximum');  
-       var step = this.get('step');
-       var size = max-min, val=0, calculateStep;
+       var min = this.get('minimum'),max=this.get('maximum'),
+          step = this.get('step'),
+          size = max-min, val=0, calculateStep;
      
        if (evt.which === 37 || evt.which === 38 ){
          if(step === 0){
