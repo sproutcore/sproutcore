@@ -211,7 +211,7 @@ SC.mixin( /** @scope SC */ {
     @returns {String} A string representation of the rect.
   */
   stringFromRect: function(r) {
-    return '{'+r.x+', '+r.y+', '+r.width+', '+r.height+'}';
+    return '{x:'+r.x+', y:'+r.y+', width:'+r.width+', height:'+r.height+'}';
   },
   
   /**
