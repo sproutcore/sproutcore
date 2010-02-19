@@ -438,7 +438,7 @@ SC.Binding = {
       
     // connection is completed, disconnect.
     } else {
-      SC.Observers.removeObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, this._fromRoot) ;
+      SC.Observers.removeObserver(this._fromPropertyPath, this, this.fromPropertyDidChange, (this._fromRoot || this._toRoot)) ;
       if (!this._oneWay) {
         SC.Observers.removeObserver(this._toPropertyPath, this, this.toPropertyDidChange, this._toRoot) ;
       }
