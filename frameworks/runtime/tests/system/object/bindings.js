@@ -1,7 +1,7 @@
 // ========================================================================
 // SC.Object bindings Tests
 // ========================================================================
-/*globals module test ok isObj equals expects */
+/*globals module test ok isObj equals expects TestNamespace */
 
 var testObject, fromObject, extraObject, TestObject;
 
@@ -30,10 +30,7 @@ module("bind() method", {
   },
   
   teardown: function() { 
-    delete testObject ; 
-    delete fromObject ;
-    delete extraObject ;
-  //  delete TestNamespace ;
+    testObject = fromObject = extraObject = null ; 
   }
   
 });
@@ -133,9 +130,7 @@ module("fooBinding method", {
   },
   
   teardown: function() { 
-    delete TestObject ;
-    delete fromObject ;
-    delete extraObject ;
+    TestObject = fromObject = extraObject = null ;
   //  delete TestNamespace ;
   }
   
@@ -236,8 +231,7 @@ module("fooBindingDefault: SC.Binding.Bool (old style)", {
   },
   
   teardown: function() { 
-    delete TestObject ;
-    delete fromObject ;
+    TestObject = fromObject = null ;
  //   delete TestNamespace ;
   }
   
@@ -303,8 +297,7 @@ module("fooBindingDefault: SC.Binding.bool() (new style)", {
   },
   
   teardown: function() { 
-    delete TestObject ;
-    delete fromObject ;
+    TestObject = fromObject = null ;
    // delete TestNamespace ;
   }
   
