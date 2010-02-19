@@ -181,7 +181,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     if(firstTime) {
       var classString = this._createClassNameString(classNames);
       context.push('<div class="sc-inner ', classString, '" style="width: ', 
-                    value, ';left: ', offset, '">',
+                    value, ';left: ', offset, 'px;">',
                     '<div class="sc-inner-head">','</div>',
                     '<div class="sc-inner-tail"></div></div>',
                     '<div class="sc-outer-head"></div>',
@@ -191,7 +191,8 @@ SC.ProgressView = SC.View.extend(SC.Control, {
       context.setClass(classNames);
       inner = this.$('.sc-inner');
       animatedBackground = this.get('animatedBackgroundMatrix');
-      inner.css('width', value).css('left',offset);
+      cssString = "width: "+value+"; ";
+      cssString = cssString + "left: "+offset+"px; ";
       if (animatedBackground.length === 3 ) {
         inner.css('backgroundPosition', '0px -'+ 
                 (animatedBackground[0] + 
@@ -202,7 +203,11 @@ SC.ProgressView = SC.View.extend(SC.Control, {
         }
         this._currentBackground += this._nextBackground;
         
-       
+        cssString = cssString + "backgroundPosition: "+backPosition+"px; ";
+        //Instead of using css() set attr for faster perf.
+        inner.attr('style', cssString);
+      }else{
+        inner.attr('style', cssString);
       }
     }
     
