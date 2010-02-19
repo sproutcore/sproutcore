@@ -603,7 +603,7 @@ SC.RenderContext = SC.Builder.create(/** SC.RenderContext.fn */ {
         classNames.push(nameOrClasses);
         this._classNamesDidChange = YES ;
       }
-    }else{
+    } else {
       for(var i = 0, iLen= nameOrClasses.length; i<iLen; i++){
         var cl = nameOrClasses[i];
         if (classNames.indexOf(cl)<0) {
