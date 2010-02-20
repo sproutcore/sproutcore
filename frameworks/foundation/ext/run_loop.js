@@ -90,7 +90,9 @@ SC.RunLoop = SC.RunLoop.extend(
     if (!this._timerQueue || this._firing) return NO; // nothing to do
 
     // max time we are allowed to run timers
-    var now = this.get('startTime') ;
+    var now = this.get('startTime'),
+        timers = this.TIMER_ARRAY,
+        idx, len, didFire;
     
     // avoid recursive calls
     this._firing = YES;
@@ -98,15 +100,14 @@ SC.RunLoop = SC.RunLoop.extend(
     // collect timers to fire.  we do this one time up front to avoid infinite 
     // loops where firing a timer causes it to schedule itself again, causing 
     // it to fire again, etc.
-    var timers = this.TIMER_ARRAY ;
     this._timerQueue = this._timerQueue.collectExpiredTimers(timers, now);
 
     // now step through timers and fire them.
-    var idx, len = timers.length;
+    len = timers.length;
     for(idx=0;idx<len;idx++) timers[idx].fire();
     
     // cleanup
-    var didFire = timers.length > 0 ;
+    didFire = timers.length > 0 ;
     timers.length = 0 ; // reset for later use...
     this._firing = NO ;
     return didFire; 
