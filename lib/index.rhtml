@@ -112,7 +112,6 @@
 <%
   #disable main if the application is loaded in design mode
 %>
-<%= inline_designer_javascript('sproutcore/designer:disable_main') %>
-
+<%= @content_for_designer -%>
 	</body>
 </html>

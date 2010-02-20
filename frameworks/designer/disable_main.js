@@ -1,1 +1,0 @@
-SC.suppressMain = YES;
