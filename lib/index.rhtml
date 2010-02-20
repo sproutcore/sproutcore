@@ -109,5 +109,11 @@
    # tests among other things.  
 -%>
 <%= @content_for_final -%>
+<%
+  #disable main if the application is loaded in design mode
+%>
+<% if $design_mode %>
+  <script type="text/javascript">SC.suppressMain = YES;</script>
+<%end%>
 	</body>
 </html>
