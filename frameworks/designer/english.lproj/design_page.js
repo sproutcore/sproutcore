@@ -3,12 +3,11 @@
 // Copyright: ©2009 Mike Ball
 // ==========================================================================
 /*globals SC */
-//TODO: [MB] make this a mainPane
 SC.designPage = SC.Page.create({
   // ..........................................................
   // Views used inside iframe...
   // 
-  designViewer: SC.View.design({
+  designMainPane: SC.MainPane.design({
     childViews: 'container viewList'.w(),
     
     container: SC.ContainerView.design({
