@@ -112,8 +112,7 @@
 <%
   #disable main if the application is loaded in design mode
 %>
-<% if $design_mode %>
-  <script type="text/javascript">SC.suppressMain = YES;</script>
-<%end%>
+<%= inline_designer_javascript('sproutcore/designer:disable_main') %>
+
 	</body>
 </html>
