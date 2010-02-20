@@ -38,3 +38,13 @@ test("after removing all ranges", function() {
   equals(set.get('min'), -1, 'min should be back to -1 with no content');
 });
 
+
+test("newly created index, clearing and then adding", function() {
+  var set = SC.IndexSet.create().add(4,2);
+  equals(set.get('min'), 4, 'min should be lowest index');
+	set.clear()
+  equals(set.get('min'), -1, 'min should be back to -1 with no content');
+	set.add(7, 3)
+  equals(set.get('min'), 7, 'min should be lowest index');
+});
+
