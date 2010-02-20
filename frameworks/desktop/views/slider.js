@@ -139,30 +139,6 @@ SC.SliderView = SC.View.extend(SC.Control,
     return ret ;
   },
   
-  /** @private 
-    On touch start, set active only if enabled.
-  */    
-  touchStart: function(evt) {
-    this.mouseDown(evt);
-  },
-
-
-  
-  /** @private 
-    On touch start, set active only if enabled.
-  */    
-  touchMoved: function(evt) {
-    this.mouseDragged(evt);
-  },
-
-
-  /** @private
-    ON mouse up, trigger the action only if we are enabled and the mouse was released inside of the view.
-  */  
-  touchEnd: function(evt) {
-    this.mouseUp(evt);
-  },
-  
   /** @private
     Updates the handle based on the mouse location of the handle in the
     event.
@@ -171,11 +147,8 @@ SC.SliderView = SC.View.extend(SC.Control,
     var width = this.get('frame').width,
         min = this.get('minimum'), max=this.get('maximum'),  
         step = this.get('step'), v=this.get('value'), loc;
-
-    if (evt.changedTouches && evt.changedTouches.length > 0) {
-      var changed = evt.changedTouches[0];
-      loc = this.convertFrameFromView({ x: changed.pageX }).x;
-    }else loc = this.convertFrameFromView({ x: evt.pageX }).x,
+        
+    loc = this.convertFrameFromView({ x: evt.pageX }).x;
     
     // constrain loc to 8px on either side (left to allow knob overhang)
     loc = Math.max(Math.min(loc,width-8), 8) - 8;
