@@ -386,10 +386,9 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
         if (rightAdjustment) adjustmentStyle += 'right: ' + rightAdjustment + ';' ;
         adjustmentStyle += '"' ;
       }
-      context.push('<span class="padding" %@>'.fmt(adjustmentStyle));
-      
-      // Render the hint.
-      context.push('<span class="sc-hint">', hint, '</span>') ;
+      context.push('<span class="padding" '+adjustmentStyle+'>',
+                  '<span class="sc-hint">', hint, '</span>');
+                  
       value = this.get('escapeHTML')?SC.RenderContext.escapeHTML(value):value; 
       // Render the input/textarea field itself, and close off the padding.
       if (this.get('isTextArea')) {

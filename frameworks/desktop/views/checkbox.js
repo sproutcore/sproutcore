@@ -26,6 +26,13 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
 
   /* Ellipsis is disabled by default to allow multiline text */
   needsEllipsis: NO,
+  
+  /** 
+    This is temporary , while we reimplement radio buttons without input 
+    tags.
+  */
+  routeTouchEvents: NO,
+  
 
   render: function(context, firstTime) {
     var dt, elem ;
@@ -39,8 +46,8 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
       dt = this._field_currentDisplayTitle = this.get('displayTitle');
 
       if(SC.browser.msie) context.attr('for', guid);
-      context.push('<span class="button" ></span>');
-      context.push('<input type="checkbox" id="'+guid+'" name="'+guid+'" '+disabled+' />');
+      context.push('<span class="button" ></span>'+
+                  '<input type="checkbox" id="'+guid+'" name="'+guid+'" '+disabled+' />');
       if(this.get('needsEllipsis')){
         context.push('<span class="label ellipsis">', dt, '</span>');
       }else{
