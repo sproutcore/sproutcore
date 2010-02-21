@@ -175,7 +175,6 @@ version: 2.7.0
  */ 
 .sc-view select,
 .sc-view input,
-.sc-view button,
 .sc-view textarea,
 .sc-view button {
 	font:99% "Lucida Sans", "Lucida Grande", Verdana, Arial, sans-serif;
