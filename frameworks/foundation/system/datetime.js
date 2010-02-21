@@ -595,14 +595,14 @@ SC.DateTime.mixin(SC.Comparable,
     if (v === null) {
       prefix = key.slice(0, 4);
       suffix = key.slice(4);
-      if (prefix === 'last' || prefix === 'next') {
-        currentWeekday = d.getDay();
+      if (prefix === 'last' || prefix === 'next') {
+        currentWeekday = this._get('dayOfWeek');
         targetWeekday = this._englishDayNames.indexOf(suffix);    
         if (targetWeekday >= 0) {
           var delta = targetWeekday - currentWeekday;
           if (prefix === 'last' && delta >= 0) delta -= 7;
           if (prefix === 'next' && delta <  0) delta += 7;
-          this._advance({ day: delta });
+          this._advance({ day: delta }, start, timezone);
           v = this._createFromCurrentState();
         }
       }
