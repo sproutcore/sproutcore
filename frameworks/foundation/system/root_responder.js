@@ -457,65 +457,76 @@ SC.RootResponder = SC.Object.extend({
   touchmove: function(evt) {
     SC.RunLoop.begin();
     try {
-      var lh = this._lastHovered || [],
-          nh = [],
-          view = this.targetViewForEvent(evt), 
-          loc, locLen, exited;
-      
-      // work up the view chain.  Notify of touchEntered and
-      // touchMoved if implemented.
-      while(view && (view !== this)) {
-        if (lh.indexOf(view) !== -1) {
-          if(view.respondsTo('touchMoved')) {
-            view.tryToPerform('touchMoved', evt);
-          }
-          else if(view.get('routeTouchEvents')){
-            evt = this.convertTouchEvToMouseEv(evt);
-            view.tryToPerform('mouseMoved', evt);
-          }
-          nh.push(view) ;
-        } else {
-          if(view.respondsTo('touchEntered')) {
-            view.tryToPerform('touchEntered', evt);
-          }
-          else if(view.get('routeTouchEvents')){
-            evt = this.convertTouchEvToMouseEv(evt);
-            view.tryToPerform('mouseEntered', evt);
-          }
-          nh.push(view) ;
+      // make sure the view gets focus no matter what.  FF is inconsistant 
+      // about this.
+      this.focus();
+      // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
+      // drags send their own events, e.g. drag[Moved|Entered|Exited]
+      if (this._drag) {
+        if(this._drag.respondsTo('touchDragged')){
+          this._drag.tryToPerform('touchDragged', evt);
+        }else if(this._drag.get('routeTouchEvents')){
+          evt = this.convertTouchEvToMouseEv(evt);
+          this._drag.tryToPerform('mouseDragged', evt);
         }
-        
-        view = view.get('nextResponder');
-      }
-      
-      // now find those views last hovered over that were no longer found 
-      // in this chain and notify of mouseExited.
-      for(loc=0, locLen = lh.length; loc < locLen; loc++) {
-        view = lh[loc] ;
-        exited = view.respondsTo('touchExited') || view.respondsTo('mouseExited');
-        if (exited && !(nh.indexOf(view) !== -1)) {
-          if(view.touchExited) view.tryToPerform('touchExited',evt);
-          else if(view.get('routeTouchEvents')){
-            view.tryToPerform('mouseExited',evt);
-          } 
+      } else {
+        var lh = this._lastHovered || [] , nh = [] , exited, loc, len, 
+            view = this.targetViewForEvent(evt) ;
+
+        // work up the view chain.  Notify of mouse entered and
+        // mouseMoved if implemented.
+        while(view && (view !== this)) {
+          if (lh.indexOf(view) !== -1) {
+            if(view.respondsTo('touchDragged')){
+              view.tryToPerform('touchMoved', evt);
+            }else if(view.get('routeTouchEvents')){
+              evt = this.convertTouchEvToMouseEv(evt);
+              view.tryToPerform('mouseMoved', evt);
+            }
+            nh.push(view) ;
+          } else {
+            if(view.respondsTo('touchEntered')){
+              view.tryToPerform('touchEntered', evt);
+            }else if(view.get('routeTouchEvents')){
+              evt = this.convertTouchEvToMouseEv(evt);
+              view.tryToPerform('mouseEntered', evt);
+            }
+            nh.push(view) ;
+          }
+
+          view = view.get('nextResponder');
+        }
+        // now find those views last hovered over that were no longer found 
+        // in this chain and notify of mouseExited.
+        for(loc=0, len=lh.length; loc < len; loc++) {
+          view = lh[loc] ;
+          exited = view.respondsTo('touchExited') ;
+          if (exited && !(nh.indexOf(view) !== -1)) {
+            if(view.respondsTo('touchExited')){
+              view.tryToPerform('touchExited',evt);
+            }else if(view.get('routeTouchEvents')){
+              evt = this.convertTouchEvToMouseEv(evt);
+              view.tryToPerform('mouseExited', evt);
+            }
+          }
+        }
+        this._lastHovered = nh; 
+
+        // also, if a mouseDownView exists, call the mouseDragged action, if 
+        // it exists.
+        if (this._touchView) {
+          if(this._touchView.respondsTo('touchExited')){
+            this._touchView.tryToPerform('touchDragged', evt);
+          }else if(view && view.get('routeTouchEvents')){
+            evt = this.convertTouchEvToMouseEv(evt);
+            this._touchView.tryToPerform('mouseDragged', evt);
+          }
         }
       }
-      
-      this._lastHovered = nh; 
-      
-      // also, if a touchView exists, call the touchDragged action, if 
-      // it exists.
-      if (this._touchView && this._touchView.touchDragged) {
-        this._touchView.tryToPerform('touchDragged', evt);
-      }else if(view.get('routeTouchEvents') && this._touchView && this._touchView.mouseDragged){
-        this._touchView.tryToPerform('mouseDragged', evt);
-      }
-      
     } catch (e) {
-      console.log('Exception during touchMove: %@'.fmt(e)) ;
+      throw e;
     }
     SC.RunLoop.end();
-    return YES ;
   },
   
   touchend: function(evt) {
