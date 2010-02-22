@@ -58,7 +58,7 @@ SC.Animatable = {
 
   // properties that adjust should relay to style
   _styleProperties: [ "opacity", "display" ],
-  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight'.w(),
+  _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY'.w(),
 
   // we cache this dictionary so we don't generate a new one each time we make
   // a new animation. It is used so we can start the animations in order—
@@ -213,7 +213,7 @@ SC.Animatable = {
 
 
   transitionEnd: function(evt){
-    var propertyName = evt.originalEvent.propertyName;
+    var propertyName = evt.originalEvent.propertyName,
         callback = this._transitionCallbacks[propertyName];
 
     if(callback) SC.Animatable.runCallback(callback);
@@ -412,7 +412,7 @@ SC.Animatable = {
             target: (this.transitions[i].target || this),
             action: this.transitions[i].action
           };
-        };
+        }
 
         continue;
       }
@@ -468,7 +468,7 @@ SC.Animatable = {
           target: (this.transitions[i].target || this),
           action: this.transitions[i].action
         };
-      };
+      }
 
       timing = this.transitions[i].timing || SC.Animatable.defaultTimingFunction;
       if (timing && SC.typeOf(timing) != SC.T_STRING) a.timingFunction = timing;
@@ -863,7 +863,7 @@ SC.Animatable = {
     }
 
     this.style[style] = Math.round(value - (this.holder._animatableCurrentStyle[widthOrHeight] / 2)) + "px";
-
+    
     if (t < e) SC.Animatable.addTimer(this);
     else {
       this.going = false;
