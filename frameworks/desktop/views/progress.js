@@ -148,7 +148,7 @@ SC.ProgressView = SC.View.extend(SC.Control, {
     if (delay===0) delay = 1000/30;
     if (this.get('isRunning') && this.get('isVisibleInWindow')) {
       this.displayDidChange();
-      this.invokeLater(this._animateProgressBar, delay, 10);
+      this.invokeLater(this._animateProgressBar, delay, 30);
     }
   },
   
