@@ -311,7 +311,7 @@ SC.ListItemView = SC.View.extend(
     
     if (!html) {
       tmp = SC.RenderContext('a').attr('href', 'javascript:;')
-        .classNames(SC.CheckboxView.prototype.classNames);
+        .classNames(SC.clone(SC.CheckboxView.prototype.classNames));
 
       // set state on html
       if (state === SC.MIXED_STATE) classArray.push('mixed');
