@@ -86,6 +86,13 @@ SC.CONTEXT_MENU_ENABLED = YES;
 */
 SC.TABBING_ONLY_INSIDE_DOCUMENT = YES;
 
+/**
+  This will enabled touch events to be routed into mouse events. 
+  It is disabled by default you just have to change this value in your app to
+  enable routing.
+*/
+SC.ROUTE_TOUCH = NO;
+
 
 /** @private - custom array used for child views */
 SC.EMPTY_CHILD_VIEWS_ARRAY = [];
@@ -191,6 +198,8 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @property {String}
   */
   backgroundColor: null,
+  
+  routeTouch: YES,
   
   // ..........................................................
   // IS ENABLED SUPPORT
@@ -1440,6 +1449,26 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // register scroll views for autoscroll during drags
     if (this.get('isScrollable')) SC.Drag.addScrollableView(this) ;
+    
+    if(SC.ROUTE_TOUCH && this.get('routeTouch')) this.routeTouchEvents();
+  },
+  
+  routeTouchEvents: function(){
+    if(!this.respondsTo('touchStart') && this.respondsTo('mouseDown')) {
+      this.touchStart=this.mouseDown;
+    }
+    if(!this.respondsTo('touchEnd') && this.respondsTo('mouseUp')) {
+      this.touchEnd=this.mouseUp;
+    }
+    if(!this.respondsTo('touchMoved') && this.respondsTo('mouseMove')) {
+      this.touchMoved=this.mouseMove;
+    }
+    if(!this.respondsTo('touchEntered') && this.respondsTo('mouseEntered')) {
+      this.touchEntered=this.mouseEntered;
+    }
+    if(!this.respondsTo('touchExited') && this.respondsTo('mouseExited')) {
+      this.touchExited=this.mouseExited;
+    }
   },
   
   /**

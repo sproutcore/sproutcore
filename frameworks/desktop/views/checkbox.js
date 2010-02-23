@@ -31,7 +31,7 @@ SC.CheckboxView = SC.FieldView.extend(SC.StaticLayout, SC.Button,
     This is temporary , while we reimplement radio buttons without input 
     tags.
   */
-  routeTouchEvents: NO,
+  routeTouch: NO,
   
 
   render: function(context, firstTime) {

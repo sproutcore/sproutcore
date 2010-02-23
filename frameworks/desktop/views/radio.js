@@ -109,7 +109,7 @@ SC.RadioView = SC.FieldView.extend(
     This is temporary , while we reimplement radio buttons without input 
     tags.
   */
-  routeTouchEvents: NO,
+  routeTouch: NO,
   
   /** @private - 
     Will iterate the items property to return an array with items that is 

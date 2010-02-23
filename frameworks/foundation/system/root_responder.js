@@ -429,11 +429,13 @@ SC.RootResponder = SC.Object.extend({
   */
   setup: function() {
     this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
+    SC.Event.add(window, 'touchmove', this, function(e){return false;});
   },
   
   touchstart: function(evt) {
     try {
       var view = this.targetViewForEvent(evt) ;
+      evt = this.convertTouchEvToMouseEv(evt);
       view = this._touchView = this.sendEvent('touchStart', evt, view) ;
       if (view && view.respondsTo('touchDragged')) this._touchCanDrag = YES ;
     } catch (e) {
@@ -445,53 +447,59 @@ SC.RootResponder = SC.Object.extend({
     return view ? evt.hasCustomEventHandling : YES;
   },
 
+  
   touchmove: function(evt) {
     SC.RunLoop.begin();
     try {
-      var lh = this._lastHovered || [] ;
-      var nh = [] ;
-      var view = this.targetViewForEvent(evt) ;
+      evt = this.convertTouchEvToMouseEv(evt);
+      // only do mouse[Moved|Entered|Exited|Dragged] if not in a drag session
+      // drags send their own events, e.g. drag[Moved|Entered|Exited]
+      if (this._drag) {
+        this._drag.tryToPerform('touchDragged', evt);
+      } else {
+        var lh = this._lastHovered || [] , nh = [] , exited, loc, len, 
+            view = this.targetViewForEvent(evt) ;
         
-      // work up the view chain.  Notify of touchEntered and
-      // touchMoved if implemented.
-      while(view && (view !== this)) {
-        if (lh.indexOf(view) !== -1) {
-          view.tryToPerform('touchMoved', evt);
-          nh.push(view) ;
-        } else {
-          view.tryToPerform('touchEntered', evt);
-          nh.push(view) ;
+        // work up the view chain.  Notify of mouse entered and
+        // mouseMoved if implemented.
+        while(view && (view !== this)) {
+          if (lh.indexOf(view) !== -1) {
+            view.tryToPerform('touchMoved', evt);
+            nh.push(view) ;
+          } else {
+            view.tryToPerform('touchEntered', evt);
+            nh.push(view) ;
+          }
+          
+          view = view.get('nextResponder');
         }
+        // now find those views last hovered over that were no longer found 
+        // in this chain and notify of mouseExited.
+        for(loc=0, len=lh.length; loc < len; loc++) {
+          view = lh[loc] ;
+          exited = view.respondsTo('touchExited') ;
+          if (exited && !(nh.indexOf(view) !== -1)) {
+            view.tryToPerform('touchExited',evt);
+          }
+        }
+        this._lastHovered = nh; 
         
-        view = view.get('nextResponder');
+        // also, if a touchView exists, call the touchDragged action, if 
+        // it exists.
+        if (this._touchView) this._touchView.tryToPerform('touchDragged', evt);
       }
-      
-      // now find those views last hovered over that were no longer found 
-      // in this chain and notify of mouseExited.
-      for(var loc=0; loc < lh.length; loc++) {
-        view = lh[loc] ;
-        var exited = view.respondsTo('touchExited') ;
-        if (exited && !(nh.indexOf(view) !== -1)) {
-          view.tryToPerform('touchExited',evt);
-        }
-      }
-      
-      this._lastHovered = nh; 
-      
-      // also, if a touchView exists, call the touchDragged action, if 
-      // it exists.
-      if (this._touchView) this._touchView.tryToPerform('touchDragged', evt);
     } catch (e) {
-      console.log('Exception during touchMove: %@'.fmt(e)) ;
+      throw e;
     }
     SC.RunLoop.end();
-    return YES ;
+    return YES;
   },
   
   touchend: function(evt) {
     try {
       evt.cancel = NO ;
       var handler = null, view = this._touchView ;
+      evt = this.convertTouchEvToMouseEv(evt);
       
       // attempt the call only if there's a target.
       // don't want a touch end going to anyone unless they handled the 
@@ -518,8 +526,22 @@ SC.RootResponder = SC.Object.extend({
   touchcancel: function(evt) {
     evt.cancel = YES ;
     return this.touchend(evt);
+  },
+  
+  convertTouchEvToMouseEv: function(ev){
+    var touches = ev.changedTouches;
+    if (touches && touches.length > 0) {
+      var firstTouch = touches[0];
+      ev.pageX = firstTouch.pageX;
+      ev.pageY = firstTouch.pageY;
+    }
+    else{
+      ev.pageX = 0;
+      ev.pageY = 0;
+    }
+  return ev;
   }
-    
+
 });
 
 /* 

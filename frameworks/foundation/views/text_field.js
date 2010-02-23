@@ -99,6 +99,11 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
   rightAccessoryView: null,
   
   _isFocused: NO,
+  
+  /** 
+    This is temporary , until we fix touch for textfields.
+  */
+  routeTouch: NO,
 
 
   /** isEditable maps to isEnabled with a TextField. */
