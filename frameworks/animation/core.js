@@ -263,8 +263,7 @@ SC.Animatable = {
     this.layout = start;
 
     // get our frame and parent's frame
-    this.notifyPropertyChange("layout");
-    var f = this.get("frame");
+    var f = this.computeFrameWithParentFrame();
     var p = this.computeParentDimensions();
 
     // set back to target
