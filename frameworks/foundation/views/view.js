@@ -253,16 +253,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   isVisibleInWindow: NO,
   
   /**
-    YES by default. If your browser supports touchEvents and this flag is
-    set to YES in your view touch events will be rerouted to the corresponding
-    mouse event. IE: touchStart -> mouseDown, touchEnd -> mouseUp, 
-    touchMove -> mouseMove, touchDragged-> mouseDragged, etc.
-    
-    Look at foundation/root_responder for more details.
-  */
-  routeTouchEvents: YES,
-  
-  /**
    By default we don't disable the context menu. Overriding this property
    can enable/disable the context menu per view.
   */

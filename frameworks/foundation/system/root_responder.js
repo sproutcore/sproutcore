@@ -429,22 +429,13 @@ SC.RootResponder = SC.Object.extend({
   */
   setup: function() {
     this.listenFor('touchstart touchmove touchend touchcancel'.w(), document);
-    SC.Event.add(window, 'touchmove', this, function(e){return false;});
   },
   
   touchstart: function(evt) {
     try {
       var view = this.targetViewForEvent(evt) ;
-      if(view.respondsTo('touchStart')){
-        view = this._touchView = this.sendEvent('touchStart', evt, view) ;
-      }else if(view.get('routeTouchEvents')){
-        evt = this.convertTouchEvToMouseEv(evt);
-        view = this._touchView = this.sendEvent('mouseDown', evt, view) ;
-      }
-      if (view && (view.respondsTo('touchDragged') 
-          || view.respondsTo('mouseDragged'))) {
-        this._touchCanDrag = YES ;
-      }
+      view = this._touchView = this.sendEvent('touchStart', evt, view) ;
+      if (view && view.respondsTo('touchDragged')) this._touchCanDrag = YES ;
     } catch (e) {
       console.log('Exception during touchStart: %@'.fmt(e)) ;
       this._touchView = null ;
@@ -457,31 +448,18 @@ SC.RootResponder = SC.Object.extend({
   touchmove: function(evt) {
     SC.RunLoop.begin();
     try {
-      var lh = this._lastHovered || [],
-          nh = [],
-          view = this.targetViewForEvent(evt), 
-          loc, locLen, exited;
-      
+      var lh = this._lastHovered || [] ;
+      var nh = [] ;
+      var view = this.targetViewForEvent(evt) ;
+        
       // work up the view chain.  Notify of touchEntered and
       // touchMoved if implemented.
       while(view && (view !== this)) {
         if (lh.indexOf(view) !== -1) {
-          if(view.respondsTo('touchMoved')) {
-            view.tryToPerform('touchMoved', evt);
-          }
-          else if(view.get('routeTouchEvents')){
-            evt = this.convertTouchEvToMouseEv(evt);
-            view.tryToPerform('mouseMoved', evt);
-          }
+          view.tryToPerform('touchMoved', evt);
           nh.push(view) ;
         } else {
-          if(view.respondsTo('touchEntered')) {
-            view.tryToPerform('touchEntered', evt);
-          }
-          else if(view.get('routeTouchEvents')){
-            evt = this.convertTouchEvToMouseEv(evt);
-            view.tryToPerform('mouseEntered', evt);
-          }
+          view.tryToPerform('touchEntered', evt);
           nh.push(view) ;
         }
         
@@ -490,14 +468,11 @@ SC.RootResponder = SC.Object.extend({
       
       // now find those views last hovered over that were no longer found 
       // in this chain and notify of mouseExited.
-      for(loc=0, locLen = lh.length; loc < locLen; loc++) {
+      for(var loc=0; loc < lh.length; loc++) {
         view = lh[loc] ;
-        exited = view.respondsTo('touchExited') || view.respondsTo('mouseExited');
+        var exited = view.respondsTo('touchExited') ;
         if (exited && !(nh.indexOf(view) !== -1)) {
-          if(view.touchExited) view.tryToPerform('touchExited',evt);
-          else if(view.get('routeTouchEvents')){
-            view.tryToPerform('mouseExited',evt);
-          } 
+          view.tryToPerform('touchExited',evt);
         }
       }
       
@@ -505,12 +480,7 @@ SC.RootResponder = SC.Object.extend({
       
       // also, if a touchView exists, call the touchDragged action, if 
       // it exists.
-      if (this._touchView && this._touchView.touchDragged) {
-        this._touchView.tryToPerform('touchDragged', evt);
-      }else if(view.get('routeTouchEvents') && this._touchView && this._touchView.mouseDragged){
-        this._touchView.tryToPerform('mouseDragged', evt);
-      }
-      
+      if (this._touchView) this._touchView.tryToPerform('touchDragged', evt);
     } catch (e) {
       console.log('Exception during touchMove: %@'.fmt(e)) ;
     }
@@ -526,14 +496,8 @@ SC.RootResponder = SC.Object.extend({
       // attempt the call only if there's a target.
       // don't want a touch end going to anyone unless they handled the 
       // touch start...
+      if (view) handler = this.sendEvent('touchEnd', evt, view) ;
       
-      if (view) {
-        if(view.touchEnd) handler = this.sendEvent('touchEnd', evt, view) ;
-        else if(view.get('routeTouchEvents')){
-          evt = this.convertTouchEvToMouseEv(evt);
-          handler = this.sendEvent('mouseUp', evt, view) ;
-        }
-      }
       // try whoever's under the mouse if we haven't handle the mouse up yet
       if (!handler) view = this.targetViewForEvent(evt) ;
       
@@ -554,20 +518,6 @@ SC.RootResponder = SC.Object.extend({
   touchcancel: function(evt) {
     evt.cancel = YES ;
     return this.touchend(evt);
-  },
-  
-  convertTouchEvToMouseEv: function(ev){
-    var touches = ev.changedTouches;
-    if (touches && touches.length > 0) {
-      var firstTouch = touches[0];
-      ev.pageX = firstTouch.pageX;
-      ev.pageY = firstTouch.pageY;
-    }
-    else{
-      ev.pageX = 0;
-      ev.pageY = 0;
-    }
-    return ev;
   }
     
 });
