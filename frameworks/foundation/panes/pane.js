@@ -385,14 +385,15 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     well.
     
     @param {SC.View} view
+    @param {Event} evt that cause this to become first responder
     @returns {SC.Pane} receiver
   */
-  makeFirstResponder: function(view) {
+  makeFirstResponder: function(view, evt) {
     var current=this.get('firstResponder'), isKeyPane=this.get('isKeyPane');
     if (current === view) return this ; // nothing to do
     
     // notify current of firstResponder change
-    if (current) current.willLoseFirstResponder(current);
+    if (current) current.willLoseFirstResponder(current, evt);
     
     // if we are currently key pane, then notify key views of change also
     if (isKeyPane) {

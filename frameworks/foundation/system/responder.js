@@ -85,12 +85,13 @@ SC.Responder = SC.Object.extend( /** SC.Responder.prototype */ {
     status. Normally this is not necessary since you will lose first responder 
     status automatically when another view becomes first responder.
     
+    @param {Event} the original event that caused this method to be called
     @returns {SC.Responder} receiver
   */
-  resignFirstResponder: function() {
+  resignFirstResponder: function(evt) {
     var pane = this.get('pane') || this.get('responderContext');
     if (pane && (pane.get('firstResponder') === this)) {
-      pane.makeFirstResponder(null);
+      pane.makeFirstResponder(null, evt);
     }
     return YES;  
   },

@@ -118,9 +118,10 @@ SC.ResponderContext = SC.Responder.extend({
     it will stop notifying.
     
     @param {SC.Responder} responder
+    @param {Event} evt that cause this to become first responder
     @returns {SC.ResponderContext} receiver
   */
-  makeFirstResponder: function(responder) {
+  makeFirstResponder: function(responder, evt) {
     var current = this.get('firstResponder'), 
         last    = this.get('nextResponder'),
         trace   = this.get('trace'),
@@ -155,7 +156,7 @@ SC.ResponderContext = SC.Responder.extend({
     if (!common) common = last;
     
     // Cleanup old first responder
-    this._notifyWillLoseFirstResponder(current, current, common);
+    this._notifyWillLoseFirstResponder(current, current, common, evt);
     if (current) current.set('isFirstResponder', NO);
 
     // Set new first responder.  If new firstResponder does not have its 
@@ -183,10 +184,10 @@ SC.ResponderContext = SC.Responder.extend({
     return this ;
   },
 
-  _notifyWillLoseFirstResponder: function(responder, cur, root) {
+  _notifyWillLoseFirstResponder: function(responder, cur, root, evt) {
     if (cur === root) return ; // nothing to do
 
-    cur.willLoseFirstResponder(responder);  
+    cur.willLoseFirstResponder(responder, evt);  
     cur.set('hasFirstResponder', NO);
 
     var next = this.nextResponderFor(cur);

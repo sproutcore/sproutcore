@@ -523,23 +523,25 @@ SC.TextFieldView = SC.FieldView.extend(SC.StaticLayout, SC.Editable,
 
   _textField_fieldDidFocus: function(evt) {
     SC.RunLoop.begin();
-    this.fieldDidFocus();
+    this.fieldDidFocus(evt);
     SC.RunLoop.end();
   },
 
   _textField_fieldDidBlur: function(evt) {
     SC.RunLoop.begin();
-    this.fieldDidBlur();
+    // passing the original event here instead that was potentially set from
+    // loosing the responder on the inline text editor so that we can
+    // use it for the delegate to end editing
+    this.fieldDidBlur(this._origEvent);
     SC.RunLoop.end();
   },
   
   fieldDidFocus: function(evt) {
-    this.beginEditing();
+    this.beginEditing(evt);
   },
   
-  fieldDidBlur: function() {
-    
-    this.commitEditing();
+  fieldDidBlur: function(evt) {
+    this.commitEditing(evt);
   },
 
   /**

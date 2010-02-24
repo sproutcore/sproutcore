@@ -553,7 +553,7 @@ SC.RootResponder = SC.RootResponder.extend(
       if(view) fr=view.getPath('pane.firstResponder');
       
       if(fr && fr.kindOf(SC.InlineTextFieldView) && fr!==view){
-        fr.resignFirstResponder();
+        fr.resignFirstResponder(evt);
       }
       
       view = this._mouseDownView = this.sendEvent('mouseDown', evt, view) ;
