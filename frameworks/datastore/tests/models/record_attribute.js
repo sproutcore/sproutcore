@@ -59,7 +59,10 @@ module("SC.RecordAttribute core methods", {
         // not using .get() to avoid another transform which will 
         // trigger an infinite loop
         return (this.readAttribute('relatedToComputed').indexOf("foo")===0) ? MyApp.Foo : MyApp.Bar;
-      })
+      }),
+      
+      // test readONly
+      readOnly: SC.Record.attr(String, { isEditable: NO })
       
     });
     
@@ -77,7 +80,8 @@ module("SC.RecordAttribute core methods", {
         date: "2009-03-01T20:30-08:00",
         anArray: ['one', 'two', 'three'],
         anObject: { 'key1': 'value1', 'key2': 'value2' },
-        aNumber: '123'
+        aNumber: '123',
+        readOnly: 'foo1'
       },
       
       { 
@@ -181,6 +185,12 @@ test("writing pass-through should simply set value", function() {
   
 });
 
+test("writing when isEditable is NO should ignore", function() {
+  var v = rec.get('readOnly');
+  rec.set('readOnly', 'NEW VALUE');
+  equals(rec.get('readOnly'), v, 'read only value should not change');
+});
+
 test("writing a value should override default value", function() {
   equals(rec.get('defaultValue'), 'default', 'precond - returns default');
   rec.set('defaultValue', 'not-default');
@@ -190,7 +200,7 @@ test("writing a value should override default value", function() {
 test("writing a string to a number attribute should store a number" ,function() {
      equals(rec.set('aNumber', "456"), rec, 'returns reciever');
      equals(rec.get('aNumber'), 456, 'should have new value');
-     equals(typeof(rec.get('aNumber')), 'number', 'new value should be a number');
+     equals(typeof rec.get('aNumber'), 'number', 'new value should be a number');
 });
 
 test("writing a date should generate an ISO date" ,function() {
