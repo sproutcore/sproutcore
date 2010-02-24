@@ -243,7 +243,7 @@ version: 2.7.0
 .sc-view h2,
 .sc-view h3 {
 	/* Top & bottom margin based on font size. */
-	margin: 1em 0;
+	margin: 0em 0;
 }
 
 .sc-view h1,
