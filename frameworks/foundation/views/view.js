@@ -1773,7 +1773,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in converFrames
   */
   convertFrameFromView: function(frame, targetView) {
-    var myX=0, myY=0, targetX=0, targetY=0, view = this, next, f ;
+    var myX=0, myY=0, targetX=0, targetY=0, view = this, f ;
     
     if (this.get('useStaticLayout')) {
       throw "convertFrameToView is not available with static layout";
