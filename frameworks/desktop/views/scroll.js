@@ -610,7 +610,8 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     if (SC.none(view = this.containerView)) view = SC.ContainerView;
     
     childViews.push(this.containerView = this.createChildView(view, {
-      contentView: this.contentView
+      contentView: this.contentView,
+      isScrollContainer: YES
     }));
     
     // and replace our own contentView...

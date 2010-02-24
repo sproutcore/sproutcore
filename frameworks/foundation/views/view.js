@@ -1850,6 +1850,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var layout = this.get('layout'),
         f = {} , error, layer, AUTO = SC.LAYOUT_AUTO,
         stLayout = this.get('useStaticLayout'),
+        pv = this.get('parentView'),
         dH, dW, //shortHand for parentDimensions
         borderTop, borderLeft,
         lR = layout.right, 
@@ -2003,6 +2004,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       f.x += borderLeft;
     }
 
+    // Account for special cases inside ScrollView, where we adjust the
+    // element's scrollTop/scrollLeft property for performance reasons.
+    if (pv && pv.isScrollContainer) {
+      pv = pv.get('parentView');
+      f.x -= pv.get('horizontalScrollOffset');
+      f.y -= pv.get('verticalScrollOffset');
+    }
+
     // make sure the width/height fix min/max...
     if (!SC.none(layout.maxHeight) && (f.height > layout.maxHeight)) {
       f.height = layout.maxHeight ;
@@ -2057,13 +2066,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (pv) {
       cf = pv.get('clippingFrame');
       ret = SC.intersectRects(cf, f);
-
-      // Account for special cases inside ScrollView, where we adjust the
-      // element's scrollTop/scrollLeft property for performance reasons.
-      if (pv.isScrollable) {
-          ret.x += pv.get('horizontalScrollOffset');
-          ret.y += pv.get('verticalScrollOffset');
-      }
     }
 
     ret.x -= f.x ;
