@@ -988,6 +988,7 @@ SC.DateTime.mixin(SC.Comparable,
       case 'B': return this.monthNames[this._get('month')-1];
       case 'c': return this._date.toString();
       case 'd': return this._pad(this._get('day'));
+      case 'D': return this._get('day');
       case 'h': return this._get('hour');
       case 'H': return this._pad(this._get('hour'));
       case 'i':
@@ -1029,7 +1030,7 @@ SC.DateTime.mixin(SC.Comparable,
     // need to move into local time zone for these calculations
     this._setCalcState(start - (timezone * 60000), 0); // so simulate a shifted 'UTC' time
 
-    return format.replace(/\%([aAbBcdHIjmMpSUWwxXyYZ\%])/g, function() {
+    return format.replace(/\%([aAbBcdDHiIjmMpSUWwxXyYZ\%])/g, function() {
       var v = that.__toFormattedString.call(that, arguments, start, timezone);
       return v;
     });
