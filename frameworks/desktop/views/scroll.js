@@ -792,13 +792,14 @@ SC.ScrollView = SC.View.extend(SC.Border, {
   adjustElementScroll: function() {
     var container = this.get('containerView'),
         containerElement = container.$(),
+        content = this.get('contentView'),
         offset;
 
     offset = this.get('verticalScrollOffset');
     containerElement[0].scrollTop = offset;
     offset = this.get('horizontalScrollOffset');
     containerElement[0].scrollLeft = offset;
-    container.notifyPropertyChange('clippingFrame');
+    content.notifyPropertyChange('frame');
   },
 
   forceDimensionsRecalculation: function (forceWidth, forceHeight, vOffSet, hOffSet) {
