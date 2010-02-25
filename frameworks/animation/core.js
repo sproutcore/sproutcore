@@ -392,11 +392,15 @@ SC.Animatable = {
       // first, handle special cases
       var timing_function;
       
+      // this is a VERY special case. If right or bottom are supplied, can't do it. If left+top need
+      // animation at different speeds: can't do it.
       if (
         SC.Animatable.enableCSSTransforms &&
         this.transitions["left"] && this.transitions["top"] && 
         this.transitions["left"].duration == this.transitions["top"].duration &&
-        this.transitions["left"].timing == this.transitions["top"].timing
+        this.transitions["left"].timing == this.transitions["top"].timing &&
+        (!newStyle["right"] || newStyle["right"] == "") &&
+        (!newStyle["bottom"] || newStyle["bottom"] == "") 
       ) {
         specialTransform = YES;
         timing_function = this.cssTimingStringFor(this.transitions["left"]);
@@ -1101,34 +1105,38 @@ SC.mixin(SC.Animatable, {
 Test for CSS transition capability...
 */
 (function(){
-  var test = function(){ //return false;
-    // a test element
-    var el = document.createElement("div");
+  var allowsCSSTransforms = NO, allowsCSSTransitions = NO;
+  
+  // a test element
+  var el = document.createElement("div");
 
-    // the css and javascript to test
-    var css_browsers = ["-webkit"];
-    var test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
+  // the css and javascript to test
+  var css_browsers = ["-webkit-", "-moz-", "-o-", "-ms-"];
+  var test_browsers = ["moz", "Moz", "o", "ms", "webkit"];
 
-    // prepare css
-    var css = "", i = null;
-    for (i = 0; i < css_browsers.length; i++) css += css_browsers[i] + "-transition:all 1s linear;"
+  // prepare css
+  var css = "", i = null;
+  for (i = 0; i < css_browsers.length; i++) {
+    css += css_browsers[i] + "transition:all 1s linear;"
+    css += css_browsers[i] + "transform: translate3d(1px, 1px, 1px)";
+  }
 
-    // set css text
-    el.style.cssText = css;
-
-    // test
-    for (i = 0; i < test_browsers.length; i++)
-    {
-      if (el.style[test_browsers[i] + "TransitionProperty"] !== undefined) return true;	
-    }
-
-    return false;
-  };
+  // set css text
+  el.style.cssText = css;
 
   // test
-  var testResult = test();
+  for (i = 0; i < test_browsers.length; i++)
+  {
+    if (el.style[test_browsers[i] + "TransitionProperty"] !== undefined) allowsCSSTransitions = YES;
+    if (el.style[test_browsers[i] + "Transform"] !== undefined) allowsCSSTransforms = YES;
+  }
+
+
+  // test
+  
   // console.error("Supports CSS transitions: " + testResult);
 
   // and apply what we found
-  if (testResult) SC.Animatable.enableCSSTransitions = true;
+  SC.Animatable.enableCSSTransitions = allowsCSSTransitions;
+  SC.Animatable.enableCSSTransforms = allowsCSSTransforms;
 })();
