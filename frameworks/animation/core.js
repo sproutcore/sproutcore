@@ -53,11 +53,12 @@ SC.Animatable = {
     "left": "left", "top": "top", 
     "right": "right", "bottom": "bottom",
     "width": "width", "height": "height",
-    "opacity": "opacity"
+    "opacity": "opacity",
+    "-webkit-transform": "-webkit-transform"
   },
 
   // properties that adjust should relay to style
-  _styleProperties: [ "opacity", "display" ],
+  _styleProperties: [ "opacity", "display", "-webkit-transform" ],
   _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY'.w(),
 
   // we cache this dictionary so we don't generate a new one each time we make
@@ -66,9 +67,7 @@ SC.Animatable = {
   _animationsToStart: {},
 
   // and, said animation order
-  _animationOrder: ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "display"],
-
-  _transitionCallbacks: {},
+  _animationOrder: ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "display", "-webkit-transform"],
 
 
   initMixin: function()
@@ -116,6 +115,20 @@ SC.Animatable = {
     this._animatableSetCSS = "";
     this._last_transition_css = ""; // to keep from re-setting unnecessarily
     this._disableAnimation = 0; // calls to disableAnimation add one; enableAnimation remove one.
+    this._transitionCallbacks = {}; // define callback set
+    
+    // alert if layer already created
+    if (!SC.none(this.get("layer"))) {
+      var o = this._animatable_original_didCreateLayer;
+      this._animatable_original_didCreateLayer = function(){};
+      this.didCreateLayer();
+      this._animatable_original_didCreateLayer = o;
+      
+      o = this._animatable_original_didUpdateLayer;
+      this._animatable_original_didUpdateLayer = function(){};
+      this.didUpdateLayer();
+      this._animatable_original_didUpdateLayer = o;
+    }
   },
 
   _animatable_didCreateLayer: function(){
@@ -213,10 +226,12 @@ SC.Animatable = {
 
 
   transitionEnd: function(evt){
+    SC.RunLoop.begin();
     var propertyName = evt.originalEvent.propertyName,
         callback = this._transitionCallbacks[propertyName];
 
     if(callback) SC.Animatable.runCallback(callback);
+    SC.RunLoop.end();
   },
 
 
@@ -297,6 +312,23 @@ SC.Animatable = {
   _TMP_CSS_TRANSITIONS: [],
   
   /**
+  @private
+  Returns a string with CSS for the timing portion of a transition.
+  */
+  cssTimingStringFor: function(transition) {
+    var timing_function = "linear";
+    if (transition.timing || SC.Animatable.defaultTimingFunction) {
+      var timing = transition.timing || SC.Animatable.defaultTimingFunction;
+      if (SC.typeOf(timing) != SC.T_STRING) {
+        timing_function = "cubic-bezier(" + timing[0] + ", " + timing[1] + ", " + timing[2] + ", " + timing[3] + ")";
+      } else {
+        timing_function = timing;
+      }
+    }
+    return timing_function;
+  },
+  
+  /**
   Immediately applies styles to elements, and starts any needed transitions.
   
   Called automatically when style changes, but if you need styles to be adjusted
@@ -350,33 +382,69 @@ SC.Animatable = {
 
     // prepare stuff for timing function calc
     var timing;
+    
+    // prepare special cases
+    var specialTransform = NO, specialTransformValue = "";
 
     // also prepare an array of CSS transitions to set up. Do this always so we get (and keep) all transitions.
     var cssTransitions = this._TMP_CSS_TRANSITIONS;
     if (SC.Animatable.enableCSSTransitions) {
+      // first, handle special cases
+      var timing_function;
+      
+      if (
+        SC.Animatable.enableCSSTransforms &&
+        this.transitions["left"] && this.transitions["top"] && 
+        this.transitions["left"].duration == this.transitions["top"].duration &&
+        this.transitions["left"].timing == this.transitions["top"].timing
+      ) {
+        specialTransform = YES;
+        timing_function = this.cssTimingStringFor(this.transitions["left"]);
+        cssTransitions.push("-webkit-transform " + this.transitions["left"].duration + "s " + timing_function);
+      }
+      
       // loop
       for (i in this.transitions) {
         if (!this._cssTransitionFor[i]) continue;
+        if (specialTransform && (i == "left" || i == "top")) continue;
 
         // get timing function
-        var timing_function = "linear";
-        if (this.transitions[i].timing || SC.Animatable.defaultTimingFunction) {
-          timing = this.transitions[i].timing || SC.Animatable.defaultTimingFunction;
-          if (SC.typeOf(timing) != SC.T_STRING) {
-            timing_function = "cubic-bezier(" + timing[0] + ", " + timing[1] + ", " + timing[2] + ", " + timing[3] + ")";
-          } else {
-            timing_function = timing;
-          }
-        }
-
-        // add transition
-        cssTransitions.push(this._cssTransitionFor[i] + " " + this.transitions[i].duration + "s " + timing_function);
-      }				
+        timing_function = this.cssTimingStringFor(this.transitions[i]);
+        
+        // sanitize name
+        cssTransitions.push(this._cssTransitionFor[i] + " " + this.transitions[i].duration + "s " + timing_function);		
+      }
     }
 
     for (i in newStyle)
     {
       if (i[0] == "_") continue; // guid (or something else we can't deal with anyway)
+      
+      // special case: Transform
+      if (specialTransform && (i == "left" || i == "top")) {
+        specialTransformValue += (i == "left" ? "translateX(" : "translateY(") + newStyle[i] + "px)";
+        startingPoint["-webkit-transform"] = specialTransformValue;
+        startingPoint["left"] = 0;
+        startingPoint["top"] = 0;
+        
+        if (this.transitions["left"].action){
+          this._transitionCallbacks["-webkit-transform"] = {
+            source: this,
+            target: (this.transitions["left"].target || this),
+            action: this.transitions["left"].action
+          };
+        }
+        
+        if (this.transitions["top"].action){
+          this._transitionCallbacks["-webkit-transform"] = {
+            source: this,
+            target: (this.transitions["right"].target || this),
+            action: this.transitions["right"].action
+          };
+        }
+        
+        continue;
+      }
 
       // if it needs to be set right away since it is not animatable, _getStartStyleHash
       // will have done that. But if we aren't supposed to animate it, we need to know, now.
@@ -563,7 +631,8 @@ SC.Animatable = {
         updateLayout = YES;
         continue;
       }
-      if (styleHelpers[i]) styleHelpers[i](style, i, styles);
+      else if (styleHelpers[i]) styleHelpers[i](style, i, styles);
+      else style[i] = styles[i];
     }
 
     // don't want to set because we don't want updateLayout... again.
@@ -618,7 +687,7 @@ SC.Animatable = {
       var key = ls[i];
       if (style[key] !== newLayout[key])
       {
-        if (SC.none(newLayout[key])) style[key] = ""; // because IE is stupid and can't handle delete or debug.
+        if (SC.none(newLayout[key])) style[key] = undefined; // because IE is stupid and can't handle delete or debug.
         else style[key] = newLayout[key];
         didChange = YES;
       }
@@ -915,7 +984,9 @@ SC.mixin(SC.Animatable, {
   currentTime: new Date().getTime(),
 
   // global setting deciding whether CSS transitions should be enabled
-  enableCSSTransitions: false, // automatically calculated. You can override, but only from OUTSIDE.
+  enableCSSTransitions: NO, // automatically calculated. You can override, but only from OUTSIDE.
+  
+  enableCSSTransforms: NO, // automatically calculated (or, will be)
 
   // keep track of some basic statistics in an object (so they can be observable)
   stats: SC.Object.create({
@@ -998,7 +1069,7 @@ SC.mixin(SC.Animatable, {
 
     // if the action is a function, just try to call it.
     if (typeOfAction == SC.T_FUNCTION) {
-      callback.action.call(callback.target);
+      callback.action.call(callback.target, callback.source);
 
     // otherwise, action should be a string.  If it has a period, treat it
     // like a property path.
@@ -1010,7 +1081,7 @@ SC.mixin(SC.Animatable, {
         var target = SC.objectForPropertyPath(path, window) ;
         var action = target.get ? target.get(property) : target[property];
         if (action && SC.typeOf(action) == SC.T_FUNCTION) {
-          action.call(target);
+          action.call(target, callback.source);
         } else {
           throw 'SC.Animator could not find a function at %@'.fmt(callback.action) ;
         }
@@ -1018,7 +1089,7 @@ SC.mixin(SC.Animatable, {
       // otherwise, try to execute action direction on target or send down
       // responder chain.
       } else {
-        SC.RootResponder.responder.sendAction(callback.action, callback.target);
+        SC.RootResponder.responder.sendAction(callback.action, callback.target, callback.source);
       }
     }
   }
