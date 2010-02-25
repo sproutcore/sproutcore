@@ -136,262 +136,271 @@ SC.VideoView = SC.View.extend({
 
   frameDidChange: function() { 
     if(this.loaded==="video"){
-      var fr= this.get('frame');
-      console.log(fr.width+","+fr.height);
-      this.$().attr('width', fr.width);
-      this.$().attr('height', fr.height);
-      
+      var fr= this.get('frame'),
+          elem = this.$();
+      elem.attr('width', fr.width);
+      elem.attr('height', fr.height);
     }
   }.observes('frame'),
   
   
   didCreateLayer :function(){
-    var videoElem, view=this;
     if(this.loaded==="video"){
-      videoElem = this.$()[0];
-      this.set('videoObject', videoElem);
-      SC.Event.add(videoElem, 'durationchange', this, function () {
-        SC.RunLoop.begin();
-        view.set('duration', videoElem.duration);
-        SC.RunLoop.end();
-      }) ;
-      SC.Event.add(videoElem, 'timeupdate', this, function () {
-          SC.RunLoop.begin();
-          view.set('currentTime', videoElem.currentTime);
-          SC.RunLoop.end();
-      }) ;
-      SC.Event.add(videoElem, 'loadstart', this, function () {
-        SC.RunLoop.begin();
-        view.set('volume', videoElem.volume);
-        console.log('loadstart');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'progress', this, function (e) {
-        SC.RunLoop.begin();
-        this.loadedTimeRanges=[];
-        for (var j=0, jLen = videoElem.seekable.length; j<jLen; j++){
-          this.loadedTimeRanges.push(videoElem.seekable.start(j));
-          this.loadedTimeRanges.push(videoElem.seekable.end(j));
-        }
-         try{
-            var trackCount=view.GetTrackCount(),i;
-            for(i=1; i<=trackCount;i++){
-              if("Closed Caption"===this.GetTrackType(i)){
-                view._closedCaptionTrackIndex=i;
-              }
-            }
-          }catch(f){}
-        //view.set('loadedData', ev.loaded);
-        //console.log('progress '+ev.loaded+","+ev.total );
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'suspend', this, function () {
-        SC.RunLoop.begin();
-        console.log('suspend');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'load', this, function () {
-        SC.RunLoop.begin();
-        console.log('load');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'abort', this, function () {
-        SC.RunLoop.begin();
-        console.log('abort');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'error', this, function () {
-        SC.RunLoop.begin();
-        console.log('error');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'loadend', this, function () {
-        SC.RunLoop.begin();
-        console.log('loadend');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'emptied', this, function () {
-        SC.RunLoop.begin();
-        console.log('emptied');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'stalled', this, function () {
-        SC.RunLoop.begin();
-        console.log('stalled');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'play', this, function () {
-        SC.RunLoop.begin();
-        view.set('paused', NO);
-        console.log('play');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'pause', this, function () {
-        SC.RunLoop.begin();
-        view.set('paused', YES);
-        console.log('pause');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'loadedmetadata', this, function () {
-        SC.RunLoop.begin();
-        view.set('videoWidth', videoElem.videoWidth);
-        view.set('videoHeight', videoElem.videoHeight);
-        
-        console.log('loadedmetadata');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'loadeddata', this, function () {
-        SC.RunLoop.begin();
-        console.log('loadeddata');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'waiting', this, function () {
-        SC.RunLoop.begin();
-        console.log('waiting');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'playing', this, function () {
-        SC.RunLoop.begin();
-        console.log('playing');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'canplay', this, function () {
-        SC.RunLoop.begin();
-        view.set('canPlay', YES);
-        console.log('canplay');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'canplaythrough', this, function () {
-        SC.RunLoop.begin();
-        console.log('canplaythrough');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'seeking', this, function () {
-        SC.RunLoop.begin();
-        console.log('seeking');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'seeked', this, function () {
-        SC.RunLoop.begin();
-        console.log('seeked');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'ended', this, function () {
-        SC.RunLoop.begin();
-        view.set('ended', YES);
-        console.log('ended');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'ratechange', this, function () {
-        SC.RunLoop.begin();
-        console.log('ratechange');
-        SC.RunLoop.end();
-      });     
-      SC.Event.add(videoElem, 'volumechange', this, function () {
-        SC.RunLoop.begin();
-        console.log('volumechange');
-        SC.RunLoop.end();
-      });     
-      
+      this.addVideoDOMEvents();
     }
-    
+    if(this.loaded==="quicktime"){
+      this.addQTDOMEvents();
+    }
   },
   
   didAppendToDocument :function(){
+    if(this.loaded==="quicktime"){
+      this.addQTDOMEvents();
+    }
+  },
+  
+  addVideoDOMEvents: function() {
+    var videoElem, view=this;
+    videoElem = this.$()[0];
+    this.set('videoObject', videoElem);
+    SC.Event.add(videoElem, 'durationchange', this, function () {
+      SC.RunLoop.begin();
+      view.set('duration', videoElem.duration);
+      SC.RunLoop.end();
+    }) ;
+    SC.Event.add(videoElem, 'timeupdate', this, function () {
+        SC.RunLoop.begin();
+        view.set('currentTime', videoElem.currentTime);
+        SC.RunLoop.end();
+    }) ;
+    SC.Event.add(videoElem, 'loadstart', this, function () {
+      SC.RunLoop.begin();
+      view.set('volume', videoElem.volume);
+      console.log('loadstart');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'progress', this, function (e) {
+      SC.RunLoop.begin();
+      this.loadedTimeRanges=[];
+      for (var j=0, jLen = videoElem.seekable.length; j<jLen; j++){
+        this.loadedTimeRanges.push(videoElem.seekable.start(j));
+        this.loadedTimeRanges.push(videoElem.seekable.end(j));
+      }
+       try{
+          var trackCount=view.GetTrackCount(),i;
+          for(i=1; i<=trackCount;i++){
+            if("Closed Caption"===this.GetTrackType(i)){
+              view._closedCaptionTrackIndex=i;
+            }
+          }
+        }catch(f){}
+      //view.set('loadedData', ev.loaded);
+      //console.log('progress '+ev.loaded+","+ev.total );
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'suspend', this, function () {
+      SC.RunLoop.begin();
+      console.log('suspend');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'load', this, function () {
+      SC.RunLoop.begin();
+      console.log('load');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'abort', this, function () {
+      SC.RunLoop.begin();
+      console.log('abort');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'error', this, function () {
+      SC.RunLoop.begin();
+      console.log('error');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'loadend', this, function () {
+      SC.RunLoop.begin();
+      console.log('loadend');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'emptied', this, function () {
+      SC.RunLoop.begin();
+      console.log('emptied');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'stalled', this, function () {
+      SC.RunLoop.begin();
+      console.log('stalled');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'play', this, function () {
+      SC.RunLoop.begin();
+      view.set('paused', NO);
+      console.log('play');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'pause', this, function () {
+      SC.RunLoop.begin();
+      view.set('paused', YES);
+      console.log('pause');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'loadedmetadata', this, function () {
+      SC.RunLoop.begin();
+      view.set('videoWidth', videoElem.videoWidth);
+      view.set('videoHeight', videoElem.videoHeight);
+      
+      console.log('loadedmetadata');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'loadeddata', this, function () {
+      SC.RunLoop.begin();
+      console.log('loadeddata');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'waiting', this, function () {
+      SC.RunLoop.begin();
+      console.log('waiting');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'playing', this, function () {
+      SC.RunLoop.begin();
+      console.log('playing');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'canplay', this, function () {
+      SC.RunLoop.begin();
+      view.set('canPlay', YES);
+      console.log('canplay');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'canplaythrough', this, function () {
+      SC.RunLoop.begin();
+      console.log('canplaythrough');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'seeking', this, function () {
+      SC.RunLoop.begin();
+      console.log('seeking');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'seeked', this, function () {
+      SC.RunLoop.begin();
+      console.log('seeked');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'ended', this, function () {
+      SC.RunLoop.begin();
+      view.set('ended', YES);
+      console.log('ended');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'ratechange', this, function () {
+      SC.RunLoop.begin();
+      console.log('ratechange');
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'volumechange', this, function () {
+      SC.RunLoop.begin();
+      console.log('volumechange');
+      SC.RunLoop.end();
+    });
+  },
+  
+  addQTDOMEvents: function() {
     var vid=this._getVideoObject(),
         videoElem = this.$()[0],
         view=this,
         dimensions;
-    if(this.loaded==="quicktime"){
-      try{
-        vid.GetVolume();
-      }catch(e){
-        console.log('loaded fail trying later');
-        this.invokeLater(this.didAppendToDocument, 100);
-        return;
-      }
-      this.set('videoObject', vid);
+    try{
+      vid.GetVolume();
+    }catch(e){
+      console.log('loaded fail trying later');
+      this.invokeLater(this.didAppendToDocument, 100);
+      return;
+    }
+    this.set('videoObject', vid);
+    view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+    view.set('volume', vid.GetVolume()/256);
+    dimensions=vid.GetRectangle().split(',');
+    view.set('videoWidth', dimensions[2]);
+    view.set('videoHeight', dimensions[3]);
+    
+    SC.Event.add(videoElem, 'qt_durationchange', this, function () {
+      SC.RunLoop.begin();
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+      console.log('qt_durationchange');
+      SC.RunLoop.end();
+    });
+    // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
+      // SC.RunLoop.begin();
+      //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      //         console.log('qt_timechanged');
+      //         view.updateTime();
+      //         SC.RunLoop.end();
+    // });
+    SC.Event.add(videoElem, 'qt_begin', this, function () {
+      SC.RunLoop.begin();
       view.set('volume', vid.GetVolume()/256);
-      dimensions=vid.GetRectangle().split(',');
+      console.log('qt_begin');
+      SC.RunLoop.end();
+    });
+    SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
+      SC.RunLoop.begin();
+      view.set('duration', vid.GetDuration()/vid.GetTimeScale());
+      var dimensions=vid.GetRectangle().split(',');
       view.set('videoWidth', dimensions[2]);
       view.set('videoHeight', dimensions[3]);
-      
-      SC.Event.add(videoElem, 'qt_durationchange', this, function () {
-        SC.RunLoop.begin();
-        view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-        console.log('qt_durationchange');
-        SC.RunLoop.end();
-      });
-      // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
-        // SC.RunLoop.begin();
-        //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-        //         console.log('qt_timechanged');
-        //         view.updateTime();
-        //         SC.RunLoop.end();
-      // });
-      SC.Event.add(videoElem, 'qt_begin', this, function () {
-        SC.RunLoop.begin();
-        view.set('volume', vid.GetVolume()/256);
-        console.log('qt_begin');
-        SC.RunLoop.end();
-      });
-      SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
-        SC.RunLoop.begin();
-        view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-        var dimensions=vid.GetRectangle().split(',');
-        view.set('videoWidth', dimensions[2]);
-        view.set('videoHeight', dimensions[3]);
-        console.log('qt_loadedmetadata');
-        SC.RunLoop.end();
-      });
-      SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
-        console.log('qt_loadedfirstframe');
-      });
-      SC.Event.add(videoElem, 'qt_canplay', this, function () {
-        SC.RunLoop.begin();
-        view.set('canPlay', YES);
-        console.log('qt_canplay');
-        SC.RunLoop.end();
-      });
-      SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
-        console.log('qt_canplaythrough');
-      });
-      SC.Event.add(videoElem, 'qt_load', this, function () {
-        console.log('qt_load');
-      });
-      SC.Event.add(videoElem, 'qt_ended', this, function () {
-        view.set('ended', YES);
-        console.log('qt_ended');
-      });
-      SC.Event.add(videoElem, 'qt_error', this, function () {
-        console.log('qt_error');
-      });
-      SC.Event.add(videoElem, 'qt_pause', this, function () {
-        SC.RunLoop.begin();
-        view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-        view.set('paused', YES);
-        console.log('qt_pause');
-      });
-      SC.Event.add(videoElem, 'qt_play', this, function () {
-        SC.RunLoop.begin();
-        view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-        view.set('paused', NO);
-        console.log('qt_play');
-      });
-      SC.Event.add(videoElem, 'qt_progress', this, function () {
-        console.log('qt_progress');
-      });
-      SC.Event.add(videoElem, 'qt_waiting', this, function () {
-        console.log('qt_waiting');
-      });
-      SC.Event.add(videoElem, 'qt_stalled', this, function () {
-        console.log('qt_stalled');
-      });
-      SC.Event.add(videoElem, 'qt_volumechange', this, function () {
-        console.log('qt_volumechange');
-      });
-    }
+      console.log('qt_loadedmetadata');
+      SC.RunLoop.end();
+    });
+    SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
+      console.log('qt_loadedfirstframe');
+    });
+    SC.Event.add(videoElem, 'qt_canplay', this, function () {
+      SC.RunLoop.begin();
+      view.set('canPlay', YES);
+      console.log('qt_canplay');
+      SC.RunLoop.end();
+    });
+    SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
+      console.log('qt_canplaythrough');
+    });
+    SC.Event.add(videoElem, 'qt_load', this, function () {
+      console.log('qt_load');
+    });
+    SC.Event.add(videoElem, 'qt_ended', this, function () {
+      view.set('ended', YES);
+      console.log('qt_ended');
+    });
+    SC.Event.add(videoElem, 'qt_error', this, function () {
+      console.log('qt_error');
+    });
+    SC.Event.add(videoElem, 'qt_pause', this, function () {
+      SC.RunLoop.begin();
+      view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      view.set('paused', YES);
+      console.log('qt_pause');
+    });
+    SC.Event.add(videoElem, 'qt_play', this, function () {
+      SC.RunLoop.begin();
+      view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      view.set('paused', NO);
+      console.log('qt_play');
+    });
+    SC.Event.add(videoElem, 'qt_progress', this, function () {
+      console.log('qt_progress');
+    });
+    SC.Event.add(videoElem, 'qt_waiting', this, function () {
+      console.log('qt_waiting');
+    });
+    SC.Event.add(videoElem, 'qt_stalled', this, function () {
+      console.log('qt_stalled');
+    });
+    SC.Event.add(videoElem, 'qt_volumechange', this, function () {
+      console.log('qt_volumechange');
+    });
+   
   },
   
   _qtTimer:function(){
@@ -414,6 +423,20 @@ SC.VideoView = SC.View.extend({
     }
   }.observes('currentTime'),
   
+  startSeek: function(){
+    if(!this.get('paused')) {
+      this.stop();
+      this._wasPlaying = true;
+    }
+  },
+  
+  endSeek: function(){
+    if(this._wasPlaying) {
+      this.play();
+      this._wasPlaying = false;
+    }
+  },
+  
   _addZeros:function(value){
     if(value.toString().length<2) return "0"+value;
     return value;
@@ -432,6 +455,7 @@ SC.VideoView = SC.View.extend({
     if(this.loaded==="video") vid.play();
     if(this.loaded==="quicktime") vid.Play();
     if(this.loaded==="flash") vid.playVideo();
+    this.set('paused', NO);
   },
   
   stop: function(){
@@ -439,6 +463,7 @@ SC.VideoView = SC.View.extend({
     if(this.loaded==="video")  vid.pause();
     if(this.loaded==="quicktime")  vid.Stop();
     if(this.loaded==="flash")  vid.pauseVideo();
+    this.set('paused', YES);
   },
   
   playPause: function(){
@@ -529,7 +554,13 @@ SC.VideoView.updateProperty = function(scid, property, value) {
   var view = SC.VideoView.flashViews[scid];
   if(view){
     SC.RunLoop.begin();
+    console.log("setting property from flash"+property+","+value);
     view.set(property, value);
     SC.RunLoop.end();
   }
+} ;
+
+
+SC.VideoView.logFlash = function(message) {
+  console.log("FLASHLOG: "+message);
 } ;
