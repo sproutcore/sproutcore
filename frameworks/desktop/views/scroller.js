@@ -569,9 +569,6 @@ SC.ScrollerView = SC.View.extend(
     });
   },
 
-
-
-
   /**
     Given a selector, finds the corresponding DOM element and adds
     the 'active' class name.  Also stores the returned element so that
