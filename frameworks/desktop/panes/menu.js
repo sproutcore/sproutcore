@@ -342,6 +342,21 @@ SC.MenuPane = SC.PickerPane.extend(
   itemKeyEquivalentKey: 'keyEquivalent',
 
   /**
+    The name of the property that determines whether menu flash should be
+    disabled.
+
+    When you click on a menu item, it will flash several times to indicate
+    selection to the user. Some browsers block windows from opening outside of
+    a mouse event, so you may wish to disable menu flashing if the action of
+    the menu item should open a new window.
+
+    @type String
+    @default "disableMenuFlash"
+    @commonTask Menu Item Properties
+  */
+  itemDisableMenuFlashKey: 'disableMenuFlash',
+
+  /**
     The array of keys used by SC.MenuItemView when inspecting your menu items
     for display properties.
 
