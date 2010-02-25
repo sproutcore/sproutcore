@@ -46,7 +46,7 @@ SC.ScrollerView = SC.View.extend(
 
     The value represents the position of the scroller's thumb.
 
-    @property
+    @property {Number}
   */
   value: function(key, val) {
     if (val !== undefined) {
@@ -114,34 +114,6 @@ SC.ScrollerView = SC.View.extend(
   controlsHidden: function() {
     return this.get('proportion') >= 1;
   }.property('proportion').cacheable(),
-
-  /**
-    Returns the owner view property the scroller should modify.  If this
-    property is non-null and the owner view defines this property, then the
-    scroller will automatically update this property whenever its own value
-    changes.
-
-    The default value of this property is computed based on the
-    layoutDirection.  You can override this property to provide your own
-    calculation if necessary or to return null if you want to disable this
-    behavior.
-
-    @property {String}
-  */
-  ownerScrollValueKey: function() {
-    var key = null ;
-    switch(this.get('layoutDirection')) {
-      case SC.LAYOUT_VERTICAL:
-        key = 'verticalScrollOffset' ;
-        break ;
-      case SC.LAYOUT_HORIZONTAL:
-        key = 'horizontalScrollOffset' ;
-        break ;
-      default:
-        key = null ;
-    }
-    return key ;
-  }.property('layoutDirection').cacheable(),
 
   // ..........................................................
   // DISPLAY METRICS
