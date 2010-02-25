@@ -274,9 +274,6 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
   //Mouse Events Handling
   //..........................................
 
-  // to check the 'isMouseDown' property of the anchor 
-  isAnchorMouseDown: NO,
-
   mouseUp: function(evt) {
     // SproutCore's event system will deliver the mouseUp event to the view
     // that got the mouseDown event, but for menus we want to track the mouse,
