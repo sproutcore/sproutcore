@@ -12,7 +12,7 @@ sc_require('views/text_field') ;
   that are not always editable such as label views and source list views.
   
   You generally will not use the inline editor directly but instead will
-  invoke beginEditing() and endEditing() on the views yous are 
+  invoke beginEditing() and endEditing() on the views you are 
   editing. If you would like to use the inline editor for your own views, 
   you can do that also by using the editing API described here.
   
@@ -40,14 +40,14 @@ sc_require('views/text_field') ;
   You can pass a variety of options to this method to configure the inline
   editor behavior, including:
 
-  - *frame* The editors initial frame in viewport coordinates (REQ)
+  - *frame* The editors initial frame in viewport coordinates. (REQ)
+  - *delegate* Delegate to receive update notices. (REQ)
+  - *value* Initial value of the edit field.
   - *exampleElement* A DOM element to use when copying styles.
-  - *delegate* Optional delegate to receive update notices.  If not passed, the target view will be treated as the delegate. (REQ)
-  - *value* The initial value of the edit field.  If not passed, the value property of the target view will be used instead.
   - *multiline* If YES then the hitting return will add to the value instead of exiting the inline editor.
   - *selectedRange* The range of text that should be selected.  If omitted, then the insertion point will be placed at the end of the value.
-  - *commitOnBlur* If YES then bluring will commit the value, otherwise it will discard the current value.  Defaults to YES.
-  - *validator* Optional validator will be attached to the field.
+  - *commitOnBlur* If YES then blurring will commit the value, otherwise it will discard the current value.  Defaults to YES.
+  - *validator* Validator to be attached to the field.
   
   If the inline editor is currently in use elsewhere, it will automatically
   close itself over there and begin editing for your view instead.  The 
@@ -120,10 +120,10 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     
     this._originalValue = options.value || '' ;
     this._multiline = (options.multiline !== undefined) ? options.multiline : NO ;
-    if(this._multiline){
+    if (this._multiline) {
       this.set('isTextArea', YES);
-    }else{
-    this.set('isTextArea', NO);
+    } else {
+      this.set('isTextArea', NO);
     }
     this._commitOnBlur =  (options.commitOnBlur !== undefined) ? options.commitOnBlur : YES ;
 
@@ -176,18 +176,17 @@ SC.InlineTextFieldView = SC.TextFieldView.extend(SC.DelegateSupport,
     this.invokeDelegateMethod(del, 'inlineEditorWillBeginEditing', this) ;
     // this.resizeToFit(this.getFieldValue()) ;
 
-    // allow notifications to go
-    
-    
-    // and become first responder
     this._previousFirstResponder = pane ? pane.get('firstResponder') : null;
    
     this.endPropertyChanges() ;
-
-    this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this) ;
-    //if(SC.browser.mozilla)this.invokeOnce(this.becomeFirstResponder) ;
-    this.invokeLast(this.becomeFirstResponder) ;
-
+    
+    // TODO: remove? if(SC.browser.mozilla)this.invokeOnce(this.becomeFirstResponder) ;
+      
+    // Become first responder and notify the delegate after run loop completes
+    this.invokeLast(function() {
+      this.becomeFirstResponder();
+      this.invokeDelegateMethod(del, 'inlineEditorDidBeginEditing', this);
+    });
   },
   
   
