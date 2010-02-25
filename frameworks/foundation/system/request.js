@@ -268,6 +268,17 @@ SC.Request = SC.Object.extend(SC.Copyable, SC.Freezable,
 
     return this ;
   },
+
+  /**
+    Converts the current request to be asynchronous.
+
+    @property {Boolean} flag YES to make asynchronous, NO or undefined
+    @returns {SC.Request} receiver
+  */
+  async: function(flag) {
+    if (flag === undefined) flag = YES;
+    return this.set('isAsynchronous', flag);
+  },
   
   /**
     Converts the current request to use JSON.
