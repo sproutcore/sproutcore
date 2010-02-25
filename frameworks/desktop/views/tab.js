@@ -141,7 +141,7 @@ SC.TabView = SC.View.extend(
     it.
   */
   segmentedView: SC.SegmentedView.extend({
-    layout: { left: 0, right: 0, height: 24 },
+    layout: { left: 0, right: 0, height: SC.REGULAR_BUTTON_HEIGHT },
 
     /** @private
       When the value changes, update the parentView's value as well.

@@ -14,6 +14,8 @@ SC.TOGGLE_ON_BEHAVIOR = 'on';
 SC.TOGGLE_OFF_BEHAVIOR = 'off';
 SC.HOLD_BEHAVIOR = 'hold';
 
+SC.REGULAR_BUTTON_HEIGHT=24;
+
 /** @class
 
   Implements a push-button-style button.  This class is used to implement 
