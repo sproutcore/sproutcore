@@ -448,11 +448,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
 
   /** @private*/
   cancel: function(evt) {
-    this.loseFocus() ;
-    var menu = this.get('parentMenu') ;
-    if (menu) menu.remove() ;
-    var pane = menu.getPath('anchor.pane') ;
-    if (pane) pane.becomeKeyPane() ;
+    this.getPath('parentMenu.rootMenu').remove();
     return YES ;
   },
 
