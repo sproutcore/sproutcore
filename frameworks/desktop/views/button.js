@@ -215,6 +215,15 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   // isCancel and isDefault also cause a refresh but this is implemented as 
   // a separate observer (see below)
   displayProperties: ['href', 'icon', 'title', 'value', 'toolTip'],
+  
+  
+  /**
+    This property is used to call the right render style for the button.
+    * This might be a future way to start implementing the render method
+    as part of the theme
+  */ 
+  
+  renderStyle: 'renderDefault', //SUPPORTED DEFAULT, IMAGE
 
   render: function(context, firstTime) {
     // add href attr if tagName is anchor...
@@ -241,15 +250,24 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     context.attr('role', 'button').setClass(classes);
     theme = this.get('theme');
     if (theme) context.addClass(theme);
+    
     // render inner html 
+    this[this.get('renderStyle')](context, firstTime);
+  },
+   
+   
+  /**
+    Render the button with the default render style.
+  */
+  renderDefault: function(context, firstTime){
     if(firstTime) {
       context = context.push("<span class='sc-button-inner' style = 'min-width:"
         ,this.get('titleMinWidth'),
         "px'>");
-      
+    
       this.renderTitle(context, firstTime) ; // from button mixin
       context.push("</span>") ;
-      
+    
       if(this.get('supportFocusRing')) {
         context.push('<div class="focus-ring">',
                       '<div class="focus-left"></div>',
@@ -260,7 +278,17 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     else {
       this.renderTitle(context, firstTime) ;
     }
-   },
+  },
+  
+  /**
+    Render the button with the image render style. To set image 
+    set the icon property with the classname that has the style with the image
+  */
+  renderImage: function(context, firstTime){
+    var icon = this.get('icon');
+    if(icon) context.push("<div class='img "+icon+"'></div>");
+    else context.push("<div class='img'></div>");
+  },
   
   /** @private {String} used to store a previously defined key equiv */
   _defaultKeyEquivalent: null,
