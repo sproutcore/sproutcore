@@ -286,21 +286,48 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return YES ;
   },
 
+  /**
+    Called on mouse down to send the action to the target.
+
+    This method will start flashing the menu item to indicate to the user that
+    their selection has been received, unless disableMenuFlash has been set to
+    YES on the menu item.
+
+    @private
+  */
   performAction: function() {
-    if(!this.get('isEnabled')) return ;
+    // Disabled menu items and menu items with submenus should not have
+    // actions.
+    if (!this.get('isEnabled')||this.get('hasSubMenu')) return;
+
+    var disableFlash = this.getContentProperty('itemDisableMenuFlashKey');
+
+    if (disableFlash) {
+      // Menu flashing has been disabled for this menu item, so perform
+      // the action immediately.
+      this.sendAction();
+    } else {
+      // Flash the highlight of the menu item to indicate selection,
+      // then actually send the action once its done.
+      this._flashCounter = 0;
+      this.invokeLater(this.flashHighlight, 25);
+      this.invokeLater(this.sendAction, 200);
+    }
+  },
+
+  /**
+    Actually sends the action of the menu item to the target.
+    @private
+  */
+  sendAction: function() {
     var action = this.getContentProperty('itemActionKey'),
         target = this.getContentProperty('itemTargetKey'),
-        disableFlash  = this.getContentProperty('itemDisableMenuFlashKey'),
         rootMenu = this.getPath('parentMenu.rootMenu'), responder;
-
-    if (this.get('hasSubMenu')) {
-      return;
-    }
 
     action = (action === undefined) ? rootMenu.get('action') : action;
     target = (target === undefined) ? rootMenu.get('target') : target;
 
-    this._flashCounter = 0;
+    // Notify the root menu pane that the selection has changed
     rootMenu.set('selectedItem', this.get('content'));
 
     // Legacy support for actions that are functions
@@ -309,20 +336,25 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       SC.Logger.warn('Support for menu item action functions has been deprecated. Please use target and action.');
     } else {
       responder = this.getPath('pane.rootResponder') || SC.RootResponder.responder;
-      if (!responder) return;
-
-      if (!disableFlash) {
-        // Start the menu flash, then invoke the action in 200ms
-        responder.invokeLater(responder.sendAction, 200, action, target, this, this.get('pane'));
-        this.invokeLater(this.flashHighlight, 25);
-      } else {
-        // Menu flash is disabled for this menu item, so fire the action immediately
+      if (responder) {
         responder.sendAction(action, target, this, this.get('pane'));
-        this.getPath('parentMenu.rootMenu').remove();
       }
     }
+
+    // Now that the action has been dispatched, close the menu
+    this.getPath('parentMenu.rootMenu').remove();
   },
 
+  /**
+    Toggles the focus class name on the menu item layer to quickly flash the
+    highlight. This indicates to the user that a selection has been made.
+
+    This is initially called by performAction(). flashHighlight then keeps
+    track of how many flashes have occurred, and calls itself until a maximum
+    has been reached.
+
+    @private
+  */
   flashHighlight: function() {
     var flashCounter = this._flashCounter, layer = this.$();
     if (flashCounter % 2 === 0) {
@@ -331,9 +363,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
       layer.removeClass('focus');
     }
 
-    if (flashCounter > 2) {
-      this.getPath('parentMenu.rootMenu').remove();
-    } else {
+    if (flashCounter <= 2) {
       this.invokeLater(this.flashHighlight, 50);
       this._flashCounter++;
     }
@@ -344,13 +374,7 @@ SC.MenuItemView = SC.View.extend( SC.ContentDisplay,
     return YES ;
   },
 
-  /** @private
-    This has been over ridden from button view to prevent calling of render
-    method (When isActive property is changed).
-    Also based on whether the menu item has a sub Branch we create a sub Menu
-
-    @returns Boolean
-  */
+  /** @private */
   mouseEntered: function(evt) {
     var menu = this.get('parentMenu');
     menu.set('mouseHasEntered', YES);
