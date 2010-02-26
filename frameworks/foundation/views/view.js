@@ -2395,7 +2395,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (layoutView.get('childViewsNeedLayout')) {
         layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
       }
-     }
+    }
     
     return this ;
   }.observes('layout'),
@@ -2463,13 +2463,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */
   layoutChildViews: function() {
-    var set = this._needLayoutViews, len = set ? set.length : 0, idx,
-        view, context, layer;
-    for(idx=0;idx<len;idx++) {
-      view = set[idx];
-      view.updateLayout();
+    var set = this._needLayoutViews,
+        len = set ? set.length : 0,
+        i;
+    for (i = 0; i < len; ++i) {
+      set[i].updateLayout();
     }
-    view = context = layer = null ; // cleanup
     set.clear(); // reset & reuse
   },
   
