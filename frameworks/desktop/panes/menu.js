@@ -489,7 +489,6 @@ SC.MenuPane = SC.PickerPane.extend(
       }
     }
 
-
     this.set('menuHeight', menuHeight+menuHeightPadding);
     return views;
   }.property('displayItems').cacheable(),
@@ -514,7 +513,7 @@ SC.MenuPane = SC.PickerPane.extend(
   rootMenu: function() {
     if (this.get('isSubMenu')) return this.getPath('parentMenu.rootMenu');
     return this;
-  }.property().cacheable(),
+  }.property('isSubMenu').cacheable(),
 
   /**
     If the window resizes, we need to make sure that the height of the pane expands to fill the viewport as much as possible.
