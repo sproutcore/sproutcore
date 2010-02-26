@@ -146,7 +146,8 @@ SC.ResponderContext = SC.Responder.extend({
     
     // Find the nearest common responder in the responder chain for the new
     // responder.  If there are no common responders, use last responder.
-    common = responder ? this.nextResponderFor(responder) : null;
+    // Note: start at the responder itself: it could be the common responder.
+    common = responder ? responder : null;
     while (common) {
       if (common.get('hasFirstResponder')) break;
       common = (common===last) ? null : this.nextResponderFor(common);
