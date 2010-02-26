@@ -13,14 +13,18 @@ var initModels = function(){
   NestedRecord.Directory = SC.ChildRecord.extend({
     /** Child Record Namespace */
     childRecordNamespace: NestedRecord,
-    
+    primaryKey: 'id',
+    id: SC.Record.attr(Number),
     name: SC.Record.attr(String),
     contents: SC.Record.toMany('SC.Record', { nested: true })
   });
   
   NestedRecord.File = SC.ChildRecord.extend({
+    primaryKey: 'id',
+    id: SC.Record.attr(Number),
     name: SC.Record.attr(String)
   });
+  
 };
 
 // ..........................................................
@@ -39,17 +43,21 @@ module("Parentless SC.ChildRecord", {
       {
         type: 'Directory',
         name: 'Dir 1',
+        id: 1,
         contents: [
           {
             type: 'Directory',
             name: 'Dir 2',
+            id: 2,
             contents: [
               {
                 type: 'File',
+                id: 3,
                 name: 'File 1'
               },
               {
                 type: 'File',
+                id: 4,
                 name: 'File 2'
               } 
             ]
@@ -58,6 +66,7 @@ module("Parentless SC.ChildRecord", {
       },
       {
         type: 'File',
+        id: 5,
         name: 'File 3'
       }
     ]);
@@ -72,8 +81,7 @@ module("Parentless SC.ChildRecord", {
   }
 });
 
-test("Proper Initialization",
-function() {
+test("Proper Initialization",function() {
   var first, second;
   equals(storeKeys.get('length'), 2, "number of primary store keys should be 2");
   
@@ -88,8 +96,7 @@ function() {
   ok(SC.instanceOf(second, NestedRecord.File), "second record is a instance of a NestedRecord.File Object");
 });
 
-test("Proper Status",
-function() {
+test("Proper Status",function() {
   var first, second;
   
   // First
@@ -99,4 +106,29 @@ function() {
   // Second
   second = store.materializeRecord(storeKeys[1]);
   equals(second.get('status'), SC.Record.READY_CLEAN, 'second record has a READY_CLEAN State');
+});
+
+test("Can Push onto child array",function() {
+  var first, contents;
+  
+  // First
+  first = store.materializeRecord(storeKeys[0]);
+  first = first.get('contents').objectAt(0);
+  contents = first.get('contents');
+  equals(contents.get('length'), 2, "should have two items");
+  contents.forEach(function(f){
+    ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
+    ok(f.get('name'), "should have a name property");
+  });
+  
+  contents.pushObject({type: 'File', name: 'File 4', id: 12});
+  
+  equals(contents.get('length'), 3, "should have three items");
+  contents.forEach(function(f){
+    ok(SC.instanceOf(f, NestedRecord.File), "should be a NestedRecord.File");
+    ok(f.get('name'), "should have a name property");
+    equals(f.get('status'), SC.Record.READY_DIRTY, 'second record has a READY_CLEAN State');
+    
+  });
+
 });
