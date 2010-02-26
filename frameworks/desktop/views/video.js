@@ -5,26 +5,127 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+
+/** 
+  @class
+  
+  Renders a videoView using different technologies like HTML5 video tag, 
+  quicktime and flash.
+  
+  This view wraps the different technologies so you can use one standard and 
+  simple API to play videos.
+  
+  You can specify and array with the order of how the technologies will degrad
+  depending on availability. For example you can set degradeList to be 
+  ['video', 'flash'] and it will load your video in a video tag if the 
+  technology is available otherwise flash and if neither of the technologies 
+  are available it will show a message saying that your machine needs to install
+  one of this technologies.
+  
+  @extends SC.View
+  @since SproutCore 1.1
+*/
+
 SC.VideoView = SC.View.extend({
 
+  /** 
+    Video view className. 
+    @property {String}
+  */
   classNames: 'sc-video-view',
+  
+  /** 
+    Properties that trigger a re render of the view. If the value changes, it
+    means that the video url changed.
+    
+    @property {Array}
+  */
   displayProperties: ['value', 'shouldAutoResize'],
+  
+  /** 
+    Reference to the video object once is created. 
+    @property {Object}
+  */
+  
   videoObject:null,
   
+  /** 
+    Array containing the technologies and the order to load them depending
+    availability
+     
+    @property {Array}
+  */
   degradeList: ['video','quicktime', 'flash'],
   
-  currentTime: 0, //current time in secs
+  /** 
+    Current time in secs
+    @property {Number}
+  */
+  currentTime: 0, 
+  
+  /** 
+    Duration in secs
+    @property {Number}
+  */
   duration: 0, //video duration in secs
+  
+  /** 
+    Volume. The value should be between 0 and 1
+    @property {Number}
+  */
   volume:0, //volume value from 0 to 1
-  loadedTimeRanges:[], //loaded bits
+  
+  /** 
+    Tells you if the video is paused or not.
+    @property {Boolean}
+  */
   paused: YES, //is the video paused
+
+  /** 
+    Tells you if the video is loaded.
+    @property {Boolean}
+  */
+
   loaded: NO, //has the video loaded
+  
+  /** 
+    Indicates if the video has reached the end
+    @property {Boolean}
+  */
+  
   ended: NO, //did the video finished playing
+  
+  /** 
+    Indicates if the video is ready to be played.
+    @property {Boolean}
+  */
+  
   canPlay: NO, //can the video be played
+  
+  /** 
+    Width of the video in pixels.
+    @property {Number}
+  */
   videoWidth:0,
+  
+  /** 
+    Width of the video in pixels.
+    @property {Number}
+  */
   videoHeight:0,
+  
+  /** 
+    Flag to enable captions if available.
+    @property {Boolean}
+  */
   captionsEnabled: NO,
   
+  loadedTimeRanges:[], //loaded bits
+  
+  /** 
+    Formatted currentTime. (00:00)
+    @property {String}
+  */
   time: function(){
     var currentTime=this.get('currentTime'),
         totaltimeInSecs = this.get('duration');
@@ -32,6 +133,13 @@ SC.VideoView = SC.View.extend({
     return formattedTime;
   }.property('currentTime').cacheable(),
   
+  /** 
+    Renders the appropiate HTML according for the technology to use.
+    
+    @param {SC.RenderContext} context the render context
+    @param {Boolean} firstTime YES if this is creating a layer
+    @returns {void}
+  */
   render: function(context, firstTime) {
     var i, j, listLen, pluginsLen, id = SC.guidFor(this);
     if(firstTime){
@@ -134,6 +242,12 @@ SC.VideoView = SC.View.extend({
   },
 
 
+  /** 
+    This function is called everytime the frame changes. This is done to get 
+    the right video dimensions for HTML5 video tag.
+    
+    @returns {void}
+  */
   frameDidChange: function() { 
     if(this.loaded==="video"){
       var fr= this.get('frame'),
@@ -143,7 +257,11 @@ SC.VideoView = SC.View.extend({
     }
   }.observes('frame'),
   
-  
+  /** 
+    In didCreateLayer we add DOM events for video tag or quicktime.
+    
+    @returns {void}
+  */
   didCreateLayer :function(){
     if(this.loaded==="video"){
       this.addVideoDOMEvents();
@@ -159,6 +277,11 @@ SC.VideoView = SC.View.extend({
     }
   },
   
+  /** 
+    Adds all the neccesary video DOM elements.
+    
+    @returns {void}
+  */
   addVideoDOMEvents: function() {
     var videoElem, view=this;
     videoElem = this.$()[0];
@@ -169,16 +292,43 @@ SC.VideoView = SC.View.extend({
       SC.RunLoop.end();
     }) ;
     SC.Event.add(videoElem, 'timeupdate', this, function () {
-        SC.RunLoop.begin();
-        view.set('currentTime', videoElem.currentTime);
-        SC.RunLoop.end();
+      SC.RunLoop.begin();
+      view.set('currentTime', videoElem.currentTime);
+      SC.RunLoop.end();
     }) ;
     SC.Event.add(videoElem, 'loadstart', this, function () {
       SC.RunLoop.begin();
       view.set('volume', videoElem.volume);
-      console.log('loadstart');
       SC.RunLoop.end();
     });     
+    SC.Event.add(videoElem, 'play', this, function () {
+      SC.RunLoop.begin();
+      view.set('paused', NO);
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'pause', this, function () {
+      SC.RunLoop.begin();
+      view.set('paused', YES);
+      SC.RunLoop.end();
+    });     
+    SC.Event.add(videoElem, 'loadedmetadata', this, function () {
+      SC.RunLoop.begin();
+      view.set('videoWidth', videoElem.videoWidth);
+      view.set('videoHeight', videoElem.videoHeight);
+      SC.RunLoop.end();
+    });     
+       
+    SC.Event.add(videoElem, 'canplay', this, function () {
+      SC.RunLoop.begin();
+      view.set('canPlay', YES);
+      SC.RunLoop.end();
+    });     
+         
+    SC.Event.add(videoElem, 'ended', this, function () {
+      SC.RunLoop.begin();
+      view.set('ended', YES);
+      SC.RunLoop.end();
+    });
     SC.Event.add(videoElem, 'progress', this, function (e) {
       SC.RunLoop.begin();
       this.loadedTimeRanges=[];
@@ -198,115 +348,90 @@ SC.VideoView = SC.View.extend({
       //console.log('progress '+ev.loaded+","+ev.total );
       SC.RunLoop.end();
     });     
-    SC.Event.add(videoElem, 'suspend', this, function () {
-      SC.RunLoop.begin();
-      console.log('suspend');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'load', this, function () {
-      SC.RunLoop.begin();
-      console.log('load');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'abort', this, function () {
-      SC.RunLoop.begin();
-      console.log('abort');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'error', this, function () {
-      SC.RunLoop.begin();
-      console.log('error');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'loadend', this, function () {
-      SC.RunLoop.begin();
-      console.log('loadend');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'emptied', this, function () {
-      SC.RunLoop.begin();
-      console.log('emptied');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'stalled', this, function () {
-      SC.RunLoop.begin();
-      console.log('stalled');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'play', this, function () {
-      SC.RunLoop.begin();
-      view.set('paused', NO);
-      console.log('play');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'pause', this, function () {
-      SC.RunLoop.begin();
-      view.set('paused', YES);
-      console.log('pause');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'loadedmetadata', this, function () {
-      SC.RunLoop.begin();
-      view.set('videoWidth', videoElem.videoWidth);
-      view.set('videoHeight', videoElem.videoHeight);
-      
-      console.log('loadedmetadata');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'loadeddata', this, function () {
-      SC.RunLoop.begin();
-      console.log('loadeddata');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'waiting', this, function () {
-      SC.RunLoop.begin();
-      console.log('waiting');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'playing', this, function () {
-      SC.RunLoop.begin();
-      console.log('playing');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'canplay', this, function () {
-      SC.RunLoop.begin();
-      view.set('canPlay', YES);
-      console.log('canplay');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'canplaythrough', this, function () {
-      SC.RunLoop.begin();
-      console.log('canplaythrough');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'seeking', this, function () {
-      SC.RunLoop.begin();
-      console.log('seeking');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'seeked', this, function () {
-      SC.RunLoop.begin();
-      console.log('seeked');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'ended', this, function () {
-      SC.RunLoop.begin();
-      view.set('ended', YES);
-      console.log('ended');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'ratechange', this, function () {
-      SC.RunLoop.begin();
-      console.log('ratechange');
-      SC.RunLoop.end();
-    });     
-    SC.Event.add(videoElem, 'volumechange', this, function () {
-      SC.RunLoop.begin();
-      console.log('volumechange');
-      SC.RunLoop.end();
-    });
+         
+    // SC.Event.add(videoElem, 'suspend', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('suspend');
+    //       SC.RunLoop.end();
+    //     });     
+    // SC.Event.add(videoElem, 'load', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('load');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'abort', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('abort');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'error', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('error');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'loadend', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('loadend');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'emptied', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('emptied');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'stalled', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('stalled');
+    //       SC.RunLoop.end();
+    //     });     
+    // SC.Event.add(videoElem, 'loadeddata', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('loadeddata');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'waiting', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('waiting');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'playing', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('playing');
+    //       SC.RunLoop.end();
+    //     });
+    // SC.Event.add(videoElem, 'canplaythrough', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('canplaythrough');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'seeking', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('seeking');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'seeked', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('seeked');
+    //       SC.RunLoop.end();
+    //     });
+    // SC.Event.add(videoElem, 'ratechange', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('ratechange');
+    //       SC.RunLoop.end();
+    //     });     
+    //     SC.Event.add(videoElem, 'volumechange', this, function () {
+    //       SC.RunLoop.begin();
+    //       console.log('volumechange');
+    //       SC.RunLoop.end();
+    //     });
+    
   },
   
+  /** 
+     Adds all the neccesary quicktime DOM elements.
+
+     @returns {void}
+   */
   addQTDOMEvents: function() {
     var vid=this._getVideoObject(),
         videoElem = this.$()[0],
@@ -329,20 +454,11 @@ SC.VideoView = SC.View.extend({
     SC.Event.add(videoElem, 'qt_durationchange', this, function () {
       SC.RunLoop.begin();
       view.set('duration', vid.GetDuration()/vid.GetTimeScale());
-      console.log('qt_durationchange');
       SC.RunLoop.end();
     });
-    // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
-      // SC.RunLoop.begin();
-      //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
-      //         console.log('qt_timechanged');
-      //         view.updateTime();
-      //         SC.RunLoop.end();
-    // });
     SC.Event.add(videoElem, 'qt_begin', this, function () {
       SC.RunLoop.begin();
       view.set('volume', vid.GetVolume()/256);
-      console.log('qt_begin');
       SC.RunLoop.end();
     });
     SC.Event.add(videoElem, 'qt_loadedmetadata', this, function () {
@@ -351,65 +467,81 @@ SC.VideoView = SC.View.extend({
       var dimensions=vid.GetRectangle().split(',');
       view.set('videoWidth', dimensions[2]);
       view.set('videoHeight', dimensions[3]);
-      console.log('qt_loadedmetadata');
       SC.RunLoop.end();
-    });
-    SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
-      console.log('qt_loadedfirstframe');
     });
     SC.Event.add(videoElem, 'qt_canplay', this, function () {
       SC.RunLoop.begin();
       view.set('canPlay', YES);
-      console.log('qt_canplay');
       SC.RunLoop.end();
     });
-    SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
-      console.log('qt_canplaythrough');
-    });
-    SC.Event.add(videoElem, 'qt_load', this, function () {
-      console.log('qt_load');
-    });
+    
     SC.Event.add(videoElem, 'qt_ended', this, function () {
       view.set('ended', YES);
-      console.log('qt_ended');
-    });
-    SC.Event.add(videoElem, 'qt_error', this, function () {
-      console.log('qt_error');
     });
     SC.Event.add(videoElem, 'qt_pause', this, function () {
       SC.RunLoop.begin();
       view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       view.set('paused', YES);
-      console.log('qt_pause');
     });
     SC.Event.add(videoElem, 'qt_play', this, function () {
       SC.RunLoop.begin();
       view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
       view.set('paused', NO);
-      console.log('qt_play');
     });
-    SC.Event.add(videoElem, 'qt_progress', this, function () {
-      console.log('qt_progress');
-    });
-    SC.Event.add(videoElem, 'qt_waiting', this, function () {
-      console.log('qt_waiting');
-    });
-    SC.Event.add(videoElem, 'qt_stalled', this, function () {
-      console.log('qt_stalled');
-    });
-    SC.Event.add(videoElem, 'qt_volumechange', this, function () {
-      console.log('qt_volumechange');
-    });
-   
+    // SC.Event.add(videoElem, 'qt_loadedfirstframe', this, function () {
+    //       console.log('qt_loadedfirstframe');
+    //     });
+    // SC.Event.add(videoElem, 'qt_error', this, function () {
+    //       console.log('qt_error');
+    //     });
+    // SC.Event.add(videoElem, 'qt_canplaythrough', this, function () {
+    //       console.log('qt_canplaythrough');
+    //     });
+    //     SC.Event.add(videoElem, 'qt_load', this, function () {
+    //       console.log('qt_load');
+    //     });
+    // SC.Event.add(videoElem, 'qt_progress', this, function () {
+    //       console.log('qt_progress');
+    //     });
+    //     SC.Event.add(videoElem, 'qt_waiting', this, function () {
+    //       console.log('qt_waiting');
+    //     });
+    //     SC.Event.add(videoElem, 'qt_stalled', this, function () {
+    //       console.log('qt_stalled');
+    //     });
+    //     SC.Event.add(videoElem, 'qt_volumechange', this, function () {
+    //       console.log('qt_volumechange');
+    //     });
+    // SC.Event.add(videoElem, 'qt_timechanged', this, function () {
+      // SC.RunLoop.begin();
+      //         view.set('currentTime', vid.GetTime()/vid.GetTimeScale());
+      //         console.log('qt_timechanged');
+      //         view.updateTime();
+      //         SC.RunLoop.end();
+    // });
   },
   
-  _qtTimer:function(){
+  
+  /** 
+     For Quicktime we need to simulated the timer as there is no data,
+     coming back from the plugin that reports back the currentTime of the 
+     video.
+
+     @returns {void}
+   */
+  qtTimer:function(){
     if(this.loaded==='quicktime' && !this.get('paused')){
       this.incrementProperty('currentTime');
       this.invokeLater(this._qtTimer, 1000);
     }
   }.observes('paused'),
   
+  /** 
+    Called when currentTime changes. Notifies the differnt technologies 
+    then new currentTime.
+    
+    @returns {void}
+  */
   seek:function(){
     var timeInSecs, totaltimeInSecs, formattedTime, vid=this._getVideoObject();
     if(this.loaded==='video'){
@@ -423,6 +555,12 @@ SC.VideoView = SC.View.extend({
     }
   }.observes('currentTime'),
   
+  /** 
+    Should be called once the progress view is clicked to stop the event and
+    later start seeking.
+    
+    @returns {void}
+  */
   startSeek: function(){
     if(!this.get('paused')) {
       this.stop();
@@ -430,6 +568,12 @@ SC.VideoView = SC.View.extend({
     }
   },
   
+  /** 
+    Should be called once the progress view gets a mouseUp. It will get the
+    player to continue playing if it was playing before starting the seek.
+    
+    @returns {void}
+  */
   endSeek: function(){
     if(this._wasPlaying) {
       this.play();
@@ -437,11 +581,12 @@ SC.VideoView = SC.View.extend({
     }
   },
   
-  _addZeros:function(value){
-    if(value.toString().length<2) return "0"+value;
-    return value;
-  },
   
+  /** 
+    Set the volume of the video.
+    
+    @returns {void}
+  */
   setVolume:function(){
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.volume=this.get('volume');
@@ -449,7 +594,10 @@ SC.VideoView = SC.View.extend({
     if(this.loaded==="flash") vid.setVolume(this.get('volume'));
   }.observes('volume'),
   
-  
+  /** 
+    Calls the right play method depending on the technology.
+    @returns {void}
+  */
   play: function(){
     var vid=this._getVideoObject();
     if(this.loaded==="video") vid.play();
@@ -458,6 +606,10 @@ SC.VideoView = SC.View.extend({
     this.set('paused', NO);
   },
   
+  /** 
+    Calls the right stop method depending on the technology.
+    @returns {void}
+  */
   stop: function(){
     var vid=this._getVideoObject();
     if(this.loaded==="video")  vid.pause();
@@ -466,37 +618,22 @@ SC.VideoView = SC.View.extend({
     this.set('paused', YES);
   },
   
+  /** 
+    Plays or stops the video.
+    @returns {void}
+  */
   playPause: function(){
-    var vid=this._getVideoObject();
-    if(this.loaded==="video"){
-      if(this.get('paused')){
-        this.set('paused', NO);
-        vid.play();
-      }else{
-        this.set('paused', YES);
-        vid.pause();
-      }
-    }
-    if(this.loaded==="quicktime"){
-      if(this.get('paused')){
-        this.set('paused', NO);
-        vid.Play();
-      }else{
-        this.set('paused', YES);
-        vid.Stop();
-      }
-    }
-    if(this.loaded==="flash"){
-      if(this.get('paused')){
-        this.set('paused', NO);
-        vid.playVideo();
-      }else{
-        this.set('paused', YES);
-        vid.pauseVideo();
-      }
+    if(this.get('paused')){
+      this.play();
+    }else{
+      this.stop();
     }   
   },
    
+  /** 
+    Goes into fullscreen mode if available
+    @returns {void}
+  */ 
   fullScreen: function(){
     var vid=this._getVideoObject();
     if(this.loaded==="video") this.$()[0].webkitEnterFullScreen();
@@ -504,6 +641,10 @@ SC.VideoView = SC.View.extend({
     return; 
   },
   
+  /** 
+    Enables captions if available
+    @returns {void}
+  */
   closedCaption:function(){
     if(this.loaded==="video"){
       try{
@@ -521,6 +662,13 @@ SC.VideoView = SC.View.extend({
     return;
   },
   
+  /*private*/
+  
+  
+  /** 
+    Gets the right video object depending on the browser.
+    @returns {void}
+  */
   _getVideoObject:function(){
     if(this.loaded==="video") return this.get('videoObject');
     if(this.loaded==="quicktime") return document['qt_'+SC.guidFor(this)];
@@ -528,7 +676,7 @@ SC.VideoView = SC.View.extend({
       var movieName='flash_'+SC.guidFor(this);
       if (window.document[movieName]) 
       {
-          return window.document[movieName];
+        return window.document[movieName];
       }
       if (navigator.appName.indexOf("Microsoft Internet")==-1)
       {
@@ -541,26 +689,44 @@ SC.VideoView = SC.View.extend({
         return document.getElementById(movieName);
       }
     }
+  },
+  
+  _addZeros:function(value){
+    if(value.toString().length<2) return "0"+value;
+    return value;
   }
+  
 });
 
+/** 
+  Hash to store references to the different flash videos.
+*/
 SC.VideoView.flashViews={};
 
+/**
+  Adds the flash view to the flashViews hash.
+*/
 SC.VideoView.addToVideoFlashViews = function(view) {
   SC.VideoView.flashViews[SC.guidFor(view)]=view;
 } ;
 
+/**
+  This function is called from flash to update the properties of the corresponding
+  flash view.
+*/
 SC.VideoView.updateProperty = function(scid, property, value) {
   var view = SC.VideoView.flashViews[scid];
   if(view){
     SC.RunLoop.begin();
-    console.log("setting property from flash"+property+","+value);
+    //console.log("setting property from flash"+property+","+value);
     view.set(property, value);
     SC.RunLoop.end();
   }
 } ;
 
-
+/**
+  Function to log events coming from flash.
+*/
 SC.VideoView.logFlash = function(message) {
   console.log("FLASHLOG: "+message);
 } ;
