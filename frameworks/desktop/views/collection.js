@@ -430,7 +430,7 @@ SC.CollectionView = SC.View.extend(
     specified index.  This layout will be applied to the view just before it
     is rendered.
     
-    @param {Number} contentIndex the index of content beind rendered by
+    @param {Number} contentIndex the index of content being rendered by
       itemView
     @returns {Hash} a view layout
   */
