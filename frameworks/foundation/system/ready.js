@@ -138,8 +138,13 @@ SC.mixin({
     // Remove any loading div
     if (SC.removeLoading) SC.$('#loading').remove();
     
-    // Now execute main, if defined
-    if ((SC.mode === SC.APP_MODE) && (typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
+    // Now execute main, if defined and SC.UserDefaults is ready
+    if(SC.userDefaults.get('ready')){
+      if ((SC.mode === SC.APP_MODE) && (typeof main != "undefined") && (main instanceof Function) && !SC.suppressMain) main();
+    } 
+    else {
+      SC.userDefaults.readyCallback(window, main);
+    }
     
     // handle routes, if modules is installed.
     if (SC.routes && SC.routes.ping) SC.routes.ping() ; 
