@@ -877,6 +877,8 @@ SC.ViewDesigner.mixin({
   */
   didLoadDesign: function(designedView, sourceView, attrs) {
     designedView.isDesign = YES ; // indicates that we need a designer.
+    designedView.designAttrs = attrs;
+    designedView.sourceView = sourceView;
   },
 
   /**
@@ -898,7 +900,7 @@ SC.ViewDesigner.mixin({
     if (design.isDesign && page && page.get('needsDesigner')) {
       
       // find the designer class
-      var cur = design;
+      var cur = design, origDesign = design;
       while(cur && !cur.Designer) cur = cur.superclass;
       var DesignerClass = (cur) ? cur.Designer : SC.View.Designer;
       
@@ -910,7 +912,9 @@ SC.ViewDesigner.mixin({
       
       view.designer = DesignerClass.create({
         view: view,
-        viewClass: design
+        viewClass: design,
+        designAttrs: origDesign.designAttrs,
+        sourceView: origDesign.sourceView
       });
     }
   }
