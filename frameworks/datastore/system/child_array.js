@@ -177,7 +177,7 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
     var store = this.get('store'),
         parentRecord = this.get('record'), 
         recordType = this.get('defaultRecordType'),
-        key, ret, storeKey, pm;
+        id, ret, storeKey, pm;
         
     // Find the record type
     if (!parentRecord) return undefined;
@@ -191,10 +191,10 @@ SC.ChildArray = SC.Object.extend(SC.Enumerable, SC.Array,
       throw 'ChildrenArray: Error during transform: Invalid record type.';
     }
     
-    pm = recordType.primaryKey || 'childRecordKey';
-    key = hash[pm];
-    if (key){
-      storeKey = store.storeKeyFor(recordType, key);
+    pm = recordType.prototype.primaryKey || 'childRecordKey';
+    id = hash[pm];
+    storeKey = store.storeKeyExists(recordType, id);
+    if (storeKey){
       ret = store.materializeRecord(storeKey);
     } 
     else {
