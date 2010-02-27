@@ -503,18 +503,24 @@ SC.RootResponder = SC.RootResponder.extend(
       // the default action and we have something in the app like an iframe.
       window.focus();
       this.focus();
-      if(SC.browser.msie) {
-        this._lastMouseDownX = evt.clientX;
-        this._lastMouseDownY = evt.clientY;
-      }
-      // first, save the click count.  Click count resets if your down is
-      // more than 125msec after you last click up.
+
+      // First, save the click count. The click count resets if the mouse down
+      // event occurs more than 200 ms later than the mouse up event or more
+      // than 8 pixels away from the mouse down event.
       this._clickCount += 1 ;
       if (!this._lastMouseUpAt || ((Date.now()-this._lastMouseUpAt) > 200)) {
-        this._clickCount = 1 ; 
+        this._clickCount = 1 ;
+      } else {
+        var deltaX = this._lastMouseDownX - evt.clientX ;
+        var deltaY = this._lastMouseDownY - evt.clientY ;
+        var distance = Math.sqrt(deltaX*deltaX + deltaY*deltaY) ;
+        if (distance > 8.0) this._clickCount = 1 ;
       }
       evt.clickCount = this._clickCount ;
-      
+
+      this._lastMouseDownX = evt.clientX ;
+      this._lastMouseDownY = evt.clientY ;
+
       var fr, view = this.targetViewForEvent(evt) ;
       // InlineTextField needs to loose firstResponder whenever you click outside
       // the view. This is a special case as textfields are not supposed to loose 

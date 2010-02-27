@@ -5,6 +5,9 @@
 // License:   Licened under MIT license (see license.js)
 // ==========================================================================
 
+/** Vary based on current platform. */
+SC.NATURAL_SCROLLER_THICKNESS = 16;
+
 /** @class
 
   Displays a horizontal or vertical scroller.  You will not usually need to

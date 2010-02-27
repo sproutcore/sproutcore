@@ -3,18 +3,18 @@
 // ==========================================================================
 
 /*globals module test ok isObj equals expects */
-var view, base, inherited, pane;
+var view, base, inherited, pane, computed;
 module("Animatable", {
   setup: function() {
     SC.RunLoop.begin();
     pane = SC.Pane.create({
-      layout: { top: 0, right: 0, width: 200, height: 200 },
+      layout: { top: 0, right: 0, width: 200, height: 200 }
     });
     pane.append();
     
     view = SC.View.create(SC.Animatable, { 
       layout: { left: 100, top: 100, height: 100, width: 100 },
-      style: { opacity: .5 },
+      style: { opacity: 0.5 },
       transitions: {
         left: 0.25,
         top: { duration: 0.35 },
@@ -41,8 +41,16 @@ module("Animatable", {
       }
     });
     
+    // computed
+    computed = base.create({
+      _test_left: 5,
+      layout: function() {
+        return { left: this._test_left, top: 5, width: 50, height: 50 };
+      }.property("_test_left").cacheable()
+    });
+    
     SC.RunLoop.end();
-  },
+  }
   
 });
 
@@ -80,11 +88,11 @@ test("animatable handler for layer update should ensure both layout and styles a
   SC.Animatable.enableCSSTransitions = NO;
   
   // we should have a style (it is inside a pane)
-  current = view.getCurrentJavaScriptStyles();
+  var current = view.getCurrentJavaScriptStyles();
   ok(!SC.none(current), "There now SHOULD be a current JS style.");
   
   // and now, make sure we have both style AND layout set properly.
-  equals(current["opacity"], .5, "opacity should be .5");
+  equals(current["opacity"], 0.5, "opacity should be .5");
   equals(current["left"], 100, "left should be 100");
   
   // go back to the beginning
@@ -94,11 +102,10 @@ test("animatable handler for layer update should ensure both layout and styles a
 test("animatable callbacks work in general", function(){
   SC.RunLoop.begin();
   view.transitions["left"] = {
-    duration: .25,
+    duration: 0.25,
     action: function() {
-      console.error("Callback");
-      ok(true, "Callback was called.");
       start();
+      ok(true, "Callback was called.");
     }
   };
   view.updateLayout();
@@ -107,8 +114,34 @@ test("animatable callbacks work in general", function(){
   stop();
   
   setTimeout(function(){
-    ok(false, "Timeout! Callback was not called.");
     start();
+    ok(false, "Timeout! Callback was not called.");
   }, 1000);
   
+});
+
+test("animation should not interfere with layout property observers or frame", function(){
+  SC.RunLoop.begin();
+  
+  // sanity check
+  equals(view.get("layout").left, 100, "layout left before adjust");
+  equals(view.get("frame").x, 100, "frame x before adjust");
+  
+  // adjust left
+  view.adjust("left", 0).updateLayout();
+
+  // check values
+  equals(view.get("layout").left, 0, "layout left after adjust");
+  equals(view.get("frame").x, 0, "frame x after adjust");
+  SC.RunLoop.end();
+});
+
+test("animation should not interfere with computed layout properties.", function() {
+  equals(computed.get("layout").left, 5, "layout left before change and animation");
+  computed.adjust("left", 20);
+  equals(computed.get("layout").left, 5, "layout left after change (shouldn't change)");
+  computed.updateLayout();
+  equals(computed.get("layout").left, 5, "layout left after updateLayout");
+  computed.set("_test_left", 21);
+  equals(computed.get("layout").left, 21, "layout left after setting _test_left (make sure computed property is undisturbed)");
 });

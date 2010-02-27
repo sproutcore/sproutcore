@@ -936,16 +936,18 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     // do some standard setup...
-    if (this.get('isTextSelectable')) context.addClass('allow-select') ;
-    if (!this.get('isEnabled')) context.addClass('disabled') ;
-    if (!this.get('isVisible')) context.addClass('hidden') ;
-    if (this.get('isFirstResponder')) context.addClass('focus');
+    if (this.get('isTextSelectable')) classArray.push('allow-select') ;
+    if (!this.get('isEnabled')) classArray.push('disabled') ;
+    if (!this.get('isVisible')) classArray.push('hidden') ;
+    if (this.get('isFirstResponder')) classArray.push('focus');
     
     bgcolor = this.get('backgroundColor');
     if (bgcolor) context.addStyle('backgroundColor', bgcolor);
     
     cursor = this.get('cursor') ;
-    if (cursor) context.addClass(cursor.get('className')) ;
+    if (cursor) classArray.push(cursor.get('className')) ;
+    
+    context.addClass(classArray);
     
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
@@ -2444,7 +2446,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       if (layoutView.get('childViewsNeedLayout')) {
         layoutView.invokeOnce(layoutView.layoutChildViewsIfNeeded);
       }
-     }
+    }
     
     return this ;
   }.observes('layout'),
@@ -2512,13 +2514,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {void}
   */
   layoutChildViews: function() {
-    var set = this._needLayoutViews, len = set ? set.length : 0, idx,
-        view, context, layer;
-    for(idx=0;idx<len;idx++) {
-      view = set[idx];
-      view.updateLayout();
+    var set = this._needLayoutViews,
+        len = set ? set.length : 0,
+        i;
+    for (i = 0; i < len; ++i) {
+      set[i].updateLayout();
     }
-    view = context = layer = null ; // cleanup
     set.clear(); // reset & reuse
   },
   

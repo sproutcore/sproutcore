@@ -168,6 +168,11 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     this.parentViewDidResize(); // start notifications.
     return this ;
   },
+
+  /** @private */
+  paneLayoutDidChange: function() {
+    this.invokeOnce(this.updateLayout);
+  }.observes('layout'),
   
   /**
     Attempts to send the event down the responder chain for this pane.  If you 
