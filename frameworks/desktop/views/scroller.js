@@ -23,9 +23,7 @@
     capLength: 18,
     capOverlap: 14,
     buttonOverlap: 11,
-    buttonLength: 41,
-    thumbTopLength: 10,
-    thumbBottomLength: 10
+    buttonLength: 41
   });
 }}}
 
@@ -160,20 +158,6 @@ SC.ScrollerView = SC.View.extend(
   */
   buttonOverlap: 11,
 
-  /**
-    The size of the top/left end of the thumb.
-
-    @property {Number}
-  */
-  thumbTopLength: 10,
-
-  /**
-    The size of the bottom/right end of the thumb.
-
-    @property {Number}
-  */
-  thumbBottomLength: 10,
-
   // ..........................................................
   // INTERNAL SUPPORT
   //
@@ -218,7 +202,6 @@ SC.ScrollerView = SC.View.extend(
 
     // Calculate the position and size of the thumb
     thumbLength = this.get('thumbLength');
-    thumbCenterLength = thumbLength - this.get('thumbEndSizes');
     thumbPosition = this.get('thumbPosition');
 
     // If this is the first time, generate the actual HTML
@@ -232,21 +215,21 @@ SC.ScrollerView = SC.View.extend(
       switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
         context.push('<div class="track"></div>',
-                     '<div class="cap"></div>',
-                     buttons,
-                     '<div class="thumb" style="height: '+thumbLength+'px;">',
-                     '<div class="thumb-center" style="height: '+thumbCenterLength+'px;"></div>',
-                     '<div class="thumb-top"></div>',
-                     '<div class="thumb-bottom"></div></div>');
+                      '<div class="cap"></div>',
+                      buttons,
+                      '<div class="thumb" style="height: '+thumbLength+'px;">',
+                      '<div class="thumb-center"></div>',
+                      '<div class="thumb-top"></div>',
+                      '<div class="thumb-bottom"></div></div>');
         break;
         case SC.LAYOUT_HORIZONTAL:
         context.push('<div class="track"></div>',
-                     '<div class="cap"></div>',
-                     buttons,
-                     '<div class="thumb" style="width: '+thumbLength+'px;">',
-                     '<div class="thumb-center" style="width: '+thumbCenterLength+'px;"></div>',
-                     '<div class="thumb-top"></div>',
-                     '<div class="thumb-bottom"></div></div>');
+                      '<div class="cap"></div>',
+                      buttons,
+                      '<div class="thumb" style="width: '+thumbLength+'px;">',
+                      '<div class="thumb-center"></div>',
+                      '<div class="thumb-top"></div>',
+                      '<div class="thumb-bottom"></div></div>');
       }
     } else {
       // The HTML has already been generated, so all we have to do is
@@ -257,7 +240,7 @@ SC.ScrollerView = SC.View.extend(
 
       thumbElement = this.$('.thumb');
 
-      this.adjustThumbSize(thumbElement, thumbLength, thumbCenterLength);
+      this.adjustThumbSize(thumbElement, thumbLength);
       this.adjustThumbPosition(thumbElement, thumbPosition);
     }
   },
@@ -288,19 +271,16 @@ SC.ScrollerView = SC.View.extend(
     this._thumbPosition = position;
   },
 
-  adjustThumbSize: function(thumb, size, centerSize) {
+  adjustThumbSize: function(thumb, size) {
     // Don't touch the DOM if the size hasn't changed
     if (this._thumbSize === size) return;
 
-    var thumbCenter = thumb.children().first();
     switch (this.get('layoutDirection')) {
       case SC.LAYOUT_VERTICAL:
         thumb.css('height', Math.max(size, 20));
-        thumbCenter.css('height', Math.max(centerSize,0));
         break;
       case SC.LAYOUT_HORIZONTAL:
         thumb.css('width', Math.max(size,20));
-        thumbCenter.css('width', Math.max(centerSize,0));
         break;
     }
 
@@ -351,16 +331,6 @@ SC.ScrollerView = SC.View.extend(
 
     return 0;
   }.property('frame').cacheable(),
-
-  /**
-    The size of the thumb end caps.
-
-    @property
-    @private
-  */
-  thumbEndSizes: function() {
-    return this.thumbTopLength + this.thumbBottomLength;
-  }.property().cacheable(),
 
   /**
     The total length of the thumb. The size of the thumb is the
