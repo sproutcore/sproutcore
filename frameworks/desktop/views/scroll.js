@@ -499,7 +499,7 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     var vt = (hasVertical) ?   vscroll.get('scrollbarThickness') : 0 ;
     
     if (hasHorizontal) {
-      hscroll.set('layout', { left: 0, bottom: 0, right: vt-1, height: ht }) ;
+      hscroll.set('layout', { left: 0, bottom: 0, right: vt, height: ht }) ;
       clipLayout.bottom = ht ;
     } else {
       clipLayout.bottom = 0 ;
