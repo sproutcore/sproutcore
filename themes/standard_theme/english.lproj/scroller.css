@@ -109,7 +109,6 @@
 }
 
 /* Active */
-
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .button-top:active {
 	background: sc_static("images/sc-scroller-sprite") -26px 0px no-repeat;
 }
@@ -117,6 +116,7 @@
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .button-bottom:active {
 	background: sc_static("images/sc-scroller-sprite") 0px -14px no-repeat;
 }
+
 
 /* Thumb */
 .sc-theme .sc-view.sc-scroller-view.sc-horizontal .thumb {
