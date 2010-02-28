@@ -701,7 +701,9 @@ SC.ScrollView = SC.View.extend(SC.Border, {
     views out in a ContainerView.
   */
   render: function(context, firstTime) {
-    if (!firstTime) {
+    if (firstTime) {
+      context.push('<div class="corner"></div>');
+    } else {
       this.invokeLast(this.adjustElementScroll);
     }
     return sc_super();
