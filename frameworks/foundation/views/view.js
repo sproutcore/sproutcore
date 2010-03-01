@@ -851,16 +851,47 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   updateLayer: function() {
+    /* AGAIN, SHOULD PROBABLY BE IN RENDERER */
+    var classNames = this.get("classNames"), mixins, len, idx, 
+        layerId, bgcolor, cursor, classSet = {};
+    
+    var q = this.$();
+    q.attr("class", "");
+
+    // do some standard setup...
+    // add view class names
+    len = classNames.length;
+    for (idx = 0; idx < len; idx++) {
+      classSet[classNames[idx]] = YES;
+    }
+    
+    // add special class names
+    if (this.get('isTextSelectable')) classSet["allow-select"] = YES;
+    if (!this.get('isEnabled')) classSet["disabled"] = YES;
+    if (!this.get('isVisible')) classSet["hidden"] = YES;
+    if (this.get('isFirstResponder')) classSet["focus"] = YES;
+    
+    bgcolor = this.get('backgroundColor');
+    if (bgcolor) q.css('backgroundColor', bgcolor);
+
+    cursor = this.get('cursor') ;
+    if (cursor) classSet[cursor.get('className')] = YES;
+
+    q.setClass(classSet);
+    
+    // Now, update using renderer if possible; render() otherwise
     var renderer;
     if (renderer = this.renderer) {
-      this.viewRenderer.update();
       this.updateRenderer(renderer); // renderers always update.
       renderer.update();
     } else {
-      this.viewRenderer.update();
-      
       var context = this.renderContext(this.get('layer')) ;
-      this.render(context, NO); // render function may update. On other hand, may replace HTML. Hm.
+      this.render(context, NO) ;
+      if (mixins = this.renderMixin) {
+        len = mixins.length;
+        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, NO) ;
+      }
+      
       context.update() ;
       if (context._innerHTMLReplaced) {
         var pane = this.get('pane');
@@ -976,7 +1007,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       
       // tell the renderer
       if (this.renderer) this.renderer.detachLayer();
-      this.viewRenderer.detachLayer();
       
       // do final cleanup
       if (layer.parentNode) layer.parentNode.removeChild(layer) ;
@@ -1031,11 +1061,33 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   renderToContext: function(context) {
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
-    
+
+    /* MUCH OF THIS SHOULD POSSIBLY BE MOVED INTO A RENDERER FOR VIEWS */
     // first, render view stuff.
-    if (!this.viewRenderer) this.viewRenderer = this.createViewRenderer();
-    this.viewRenderer.renderToContext(context);
+    var layerId, bgcolor, cursor, classArray=[];
+
+    // do some initial setup only needed at create time.
+    layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
+    context.id(layerId).classNames(this.get('classNames'), YES) ;
     
+    // VIEW LAYOUT RENDERER, ANYONE?
+    this.renderLayout(context) ;
+
+    // do some standard setup...
+    if (this.get('isTextSelectable')) classArray.push('allow-select') ;
+    if (!this.get('isEnabled')) classArray.push('disabled') ;
+    if (!this.get('isVisible')) classArray.push('hidden') ;
+    if (this.get('isFirstResponder')) classArray.push('focus');
+
+    bgcolor = this.get('backgroundColor');
+    if (bgcolor) context.addStyle('backgroundColor', bgcolor);
+
+    cursor = this.get('cursor') ;
+    if (cursor) classArray.push(cursor.get('className')) ;
+
+    context.addClass(classArray);
+    
+    /* Now, the actual rendering, which will use a renderer if possible */
     // now, if we have a createRenderer function, use that
     if (this.createRenderer) {
       if (!this.renderer) this.renderer = this.createRenderer();
@@ -1114,7 +1166,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     if (cursor instanceof SC.Cursor) {
-      context.addClass(cursor.get('className'));
+      classArray.push(cursor.get('className'));
     }
     
     this.beginPropertyChanges() ;
@@ -1124,7 +1176,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       len = mixins.length;
       for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
     }
-    this.endPropertyChanges() ;
+    this.endPropertyChanges() ; */
   },
   
   /**
