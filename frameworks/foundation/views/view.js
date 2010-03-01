@@ -201,6 +201,58 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   useStaticLayout: NO,  
   
   // ..........................................................
+  // THEME SUPPORT
+  // 
+  
+  /**
+    @private
+    The theme to use.
+  */
+  _theme: null,
+  _last_theme: null, // used to determine if theme has changed since last time the property was evaluated.
+  
+  _themeProperty: function(key, value) {
+    var ret = null;
+    
+    if (SC.typeOf(value) === SC.T_STRING) {
+      // find
+      var theme = SC.Theme.find(value);
+      if (theme) {
+        this._theme = theme;
+      }
+    }
+    
+    if (this._theme){
+      ret = this._theme; 
+    } else {
+      var parent = this.get("parentView");
+      if (parent) {
+        ret = parent.get("theme");
+      }
+    }
+    
+    if (ret !== this._last_theme) {
+      this._last_theme = ret;
+      if (this._hasCreatedChildViews) this._notifyThemeDidChange();
+    }
+    return ret;
+  }.property("parentView").cacheable(),
+  
+  _notifyThemeDidChange: function() {
+    var len, idx, childViews = this.get("childViews");
+    len = childViews.length;
+    for (idx = 0; idx < len; idx++){
+      childViews[idx].notifyPropertyChange("theme");
+    }
+  },
+  
+  /**
+    The current theme. You may only set this to a string, and during runtime, the value
+    (from get()) will always be a theme object or null.
+  */
+  theme: null,
+  
+  // ..........................................................
   // IS ENABLED SUPPORT
   // 
   
@@ -865,6 +917,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       classSet[classNames[idx]] = YES;
     }
     
+    if (this.get("theme")) {
+      classNames = this.get("theme").classNames;
+      len = classNames.length;
+      for (idx = 0; idx < len; idx++) {
+        classSet[classNames[idx]] = YES;
+      }
+    }
+    
     // add special class names
     if (this.get('isTextSelectable')) classSet["allow-select"] = YES;
     if (!this.get('isEnabled')) classSet["disabled"] = YES;
@@ -956,7 +1016,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   _notifyDidCreateLayer: function() {
     // notify, not just the view, but also the view renderers
-    if (this.renderer) this.renderer.didCreateLayer(this);
+    if (this.renderer) this.renderer.attachLayer(this);
     if (this.didCreateLayer) this.didCreateLayer() ;
     
     // and notify others
@@ -1096,6 +1156,10 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
 
     cursor = this.get('cursor') ;
     if (cursor) classArray.push(cursor.get('className')) ;
+    
+    if (this.get("theme")) {
+      classArray.splice(0, 0, this.get("theme").classNames);
+    }
 
     context.addClass(classArray);
     
@@ -1103,7 +1167,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     // now, if we have a createRenderer function, use that
     if (this.createRenderer) {
       if (!this.renderer) this.renderer = this.createRenderer();
-      this.renderer.renderToContext(context);
+      this.renderer.render(context);
     } else {
       this.render(context, YES);
       var mixins, len, idx;
@@ -1689,15 +1753,21 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var parentView, path, root, idx, len, lp, dp ;
     
     sc_super() ;
-
-    // Register this view for event handling
+    
+    // set up theme
+    var theme = this.theme;
+    this.theme = this._themeProperty;
+    this.set("theme", theme);
+    
+    // register for event handling
     SC.View.views[this.get('layerId')] = this ;
-
+    
     var childViews = this.get('childViews');
     
     // setup child views.  be sure to clone the child views array first
     this.childViews = childViews ? childViews.slice() : [] ;
     this.createChildViews() ; // setup child Views
+    this._hasCreatedChildViews = YES;
     
     // register display property observers ..
     // TODO: Optimize into class setup 
