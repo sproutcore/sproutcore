@@ -21,15 +21,12 @@ SC.MediaControlsView = SC.View.extend({
   classNames: 'controllers',
   
   playObserver: function(){
-    console.log("playobserver");
     if(this.getPath('target.paused')){
       this.get('playButton').set('icon', 'play');
     }else{
       this.get('playButton').set('icon', 'stop');
-    
     }
-    
-  }.observes('target.paused'),
+  }.observes('*target.paused'),
   
   
   playButton: SC.ButtonView.design({
