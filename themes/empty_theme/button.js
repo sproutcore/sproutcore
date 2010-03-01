@@ -11,7 +11,21 @@
 */
 require("theme");
 SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
+  init: function(settings) {
+    this._controlRenderer = this.theme.control();
+    this._titleRenderer = this.theme.title();
+    this.attr(settings);
+  },
   render: function(context) {
+    this._controlRenderer.attr({
+      isEnabled: this.isEnabled,
+      isActive: this.isActive,
+      isSelected: this.isSelected,
+      controlSize: this.controlSize
+    });
+    this._controlRenderer.render(context);
+    
+    /* Render OUR stuff */
     // add href attr if tagName is anchor...
     var href, toolTip, classes, theme;
     if (this.isAnchor) {
@@ -40,14 +54,16 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     // render inner html 
     context = context.push("<span class='sc-button-inner test'>");
     
-    if (!this.titleRenderer) this.titleRenderer = this.theme.title();
-    this.titleRenderer.attr({
+    /* Render title */
+    this._titleRenderer.attr({
       title: this.title,
       icon: this.icon,
       needsEllipsis: this.needsEllipsis,
       escapeHTML: this.escapeHTML
     });
-    this.titleRenderer.render(context);
+    this._titleRenderer.render(context);
+    
+    
     
     context.push("</span>") ;
     
@@ -60,6 +76,14 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
   },
   
   update: function() {
+    this._controlRenderer.attr({
+      isEnabled: this.isEnabled,
+      isActive: this.isActive,
+      isSelected: this.isSelected,
+      controlSize: this.controlSize
+    });
+    this._controlRenderer.update();
+    
     var classes, theme, q = this.$();
     
     classes = this._TEMPORARY_CLASS_HASH ? this._TEMPORARY_CLASS_HASH : this._TEMPORARY_CLASS_HASH = {};
@@ -72,22 +96,29 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     if (theme) q.addClass(theme);
     
     // update title
-    this.titleRenderer.attr({
+    this._titleRenderer.attr({
       title: this.title,
       icon: this.icon,
       needsEllipsis: this.needsEllipsis,
       escapeHTML: this.escapeHTML
     });
     
-    this.titleRenderer.update();
+    this._titleRenderer.update();
+  },
+  
+  focus: function() {
+    var elem = this.$()[0];
+    elem.focus();
   },
   
   didAttachLayer: function(layer){
-    this.titleRenderer.attachLayer(layer);
+    this._titleRenderer.attachLayer(layer);
+    this._controlRenderer.attachLayer(layer);
   },
   
   didDetachLayer: function() {
-    this.titleRenderer.detachLayer();
+    this._titleRenderer.detachLayer();
+    this._controlRenderer.detachLayer();
   }
 });
 
