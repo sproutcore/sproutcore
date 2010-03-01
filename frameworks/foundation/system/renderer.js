@@ -89,7 +89,7 @@ SC.Renderer = SC.Renderer = {
     
     // and, as we said, even though we did not necessarily set the real layer, we will act as if we did.
     // we're lazy. that doesn't mean we don't do anything. we just don't do it 'til the last minute.
-    this.didAttachLayer();
+    this.didAttachLayer(layer);
   },
   
   /**

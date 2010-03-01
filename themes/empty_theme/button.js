@@ -33,13 +33,21 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     classes.cancel = this.isCancel;
     classes.icon = !!this.icon;
     context.attr('role', 'button').setClass(classes);
+
     theme = this.oldButtonTheme;
     if (theme) context.addClass(theme);
     
     // render inner html 
-    context = context.push("<span class='sc-button-inner'>");
+    context = context.push("<span class='sc-button-inner test'>");
     
-    // this.renderTitle(context, firstTime) ; // from button mixin
+    if (!this.titleRenderer) this.titleRenderer = this.theme.title();
+    this.titleRenderer.attr({
+      title: this.title,
+      icon: this.icon,
+      needsEllipsis: this.needsEllipsis,
+      escapeHTML: this.escapeHTML
+    });
+    this.titleRenderer.render(context);
     
     context.push("</span>") ;
     
@@ -52,8 +60,35 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
   },
   
   update: function() {
+    var classes, theme, q = this.$();
     
+    classes = this._TEMPORARY_CLASS_HASH ? this._TEMPORARY_CLASS_HASH : this._TEMPORARY_CLASS_HASH = {};
+    classes.def = this.isDefault;
+    classes.cancel = this.isCancel;
+    classes.icon = !!this.icon;
+    
+    q.setClass(classes);
+    theme = this.oldButtonTheme;
+    if (theme) q.addClass(theme);
+    
+    // update title
+    this.titleRenderer.attr({
+      title: this.title,
+      icon: this.icon,
+      needsEllipsis: this.needsEllipsis,
+      escapeHTML: this.escapeHTML
+    });
+    
+    this.titleRenderer.update();
+  },
+  
+  didAttachLayer: function(layer){
+    this.titleRenderer.attachLayer(layer);
+  },
+  
+  didDetachLayer: function() {
+    this.titleRenderer.detachLayer();
   }
 });
-debugger;
+
 SC.EmptyTheme.renderers.button = SC.EmptyTheme.renderers.Button.create();
