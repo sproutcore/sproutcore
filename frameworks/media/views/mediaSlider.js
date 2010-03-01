@@ -18,15 +18,14 @@ SC.mediaSlider = SC.SliderView.extend({
 
   mouseDown: function(evt) {
     var media=this.get('mediaView');
-    if(media) media.stop();
+    if(media) media.startSeek();
     return sc_super();
   },
 
   mouseUp: function(evt) {
     var media=this.get('mediaView');
-    if(media) media.play();
+    if(media) media.endSeek();
     return sc_super();
-  }
-   
+  }  
 });
 

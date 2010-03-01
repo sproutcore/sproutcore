@@ -563,6 +563,7 @@ SC.VideoView = SC.View.extend({
   */
   startSeek: function(){
     if(!this.get('paused')) {
+      console.log('startseetk');
       this.stop();
       this._wasPlaying = true;
     }
@@ -576,6 +577,7 @@ SC.VideoView = SC.View.extend({
   */
   endSeek: function(){
     if(this._wasPlaying) {
+      console.log('startseetk');
       this.play();
       this._wasPlaying = false;
     }
