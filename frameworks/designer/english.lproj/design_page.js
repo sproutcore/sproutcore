@@ -16,11 +16,14 @@ SC.designPage = SC.Page.create({
       backgroundColor: 'white'
     }),
     
-    viewList: SC.GridView.design({
+    viewList: SC.ScrollView.design({
       layout: {left:0, right: 0, bottom: 0, height: 50},
-      //contentBinding: 'SC.designsController',
-      selectionBinding: 'SC.designsController.selection',
-      contentValueKey: 'name'
+      hasVerticalScroller: NO,
+      contentView: SC.GridView.design({
+        //contentBinding: 'SC.designsController',
+        selectionBinding: 'SC.designsController.selection',
+        contentValueKey: 'name'
+      })
     })
   })
 });
