@@ -869,8 +869,6 @@ SC.DateTime.mixin(SC.Comparable,
         timezone: timezone
       });
     }
-    
-    return null;
   },
   
   /** @private

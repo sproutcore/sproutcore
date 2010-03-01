@@ -1,0 +1,67 @@
+
+.stop
+{
+  background: static_url('controls.png') no-repeat -8px 4px;  
+  height: 20px;
+  width: 22px;
+}
+
+.play
+{
+  background: static_url('controls.png') no-repeat 7px 4px;  
+  height: 20px;
+  width: 22px;
+}
+
+.theater
+{
+  background: static_url('controls.png') no-repeat -24px 4px;  
+  height: 20px;
+  width: 18px;
+}
+
+.minus
+{
+  background: static_url('controls.png') no-repeat -45px 3px;
+  height: 20px;
+  width: 20px;
+}
+
+.plus
+{
+  background: static_url('controls.png') no-repeat -60px 3px;
+  height: 20px;
+  width: 20px;
+}
+
+.time{
+  font-size: 10px !important;
+  line-height: 20px !important;
+}
+
+.controllers{
+  background: black;
+  opacity:0.8;
+}
+
+.sc-theme .sc-slider-view .sc-inner{
+  background:white;
+  height:2px;
+  top:9px;
+}
+
+.sc-theme .sc-slider-view .sc-inner .sc-leftcap{
+  background:white;
+}
+
+.sc-theme .sc-slider-view .sc-inner .sc-rightcap{
+  background:white;
+}
+
+.sc-theme .sc-slider-view .sc-handle{
+  background:white;
+  height: 10px;
+  width:10px;
+  top:-4px;
+  margin-left:-3px;
+}
