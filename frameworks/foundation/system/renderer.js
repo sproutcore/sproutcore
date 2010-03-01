@@ -118,7 +118,7 @@ SC.Renderer = SC.Renderer = {
     Extends this renderer.
   */
   extend: function(ext) {
-    return SC.beget(this, ext);
+    return SC.mixin(SC.beget(this), ext);
   },
  
   /**
@@ -126,7 +126,7 @@ SC.Renderer = SC.Renderer = {
     to a theme.
   */
   create: function(ext) {
-    ext = ext ? SC.beget(this, ext) : ext;
+    ext = ext ? SC.mixin(SC.beget(this), ext) : this;
     return function(attrs) {
       var ret = SC.beget(ext);
       ret.theme = this;

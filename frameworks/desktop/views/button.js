@@ -235,6 +235,37 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
   */ 
   
   renderStyle: 'renderDefault', //SUPPORTED DEFAULT, IMAGE
+  
+  /**
+    Creates the button view's renderer.
+  */
+  createRenderer: function() {
+    var theme = this.get("theme");
+    var ret = theme.button();
+    this.updateRenderer(ret); // updating looks _exactly_ like normal stuff for us.
+    return ret;
+  },
+  
+  updateRenderer: function(r) {
+    var toolTip = this.get("toolTip");
+    if (this.get("localize")) toolTip = toolTip.loc();
+    
+    r.attr({
+      toolTip: toolTip,
+      isAnchor: this.get("tagName") === 'a',
+      href: this.get("href"),
+      isDefault: this.get('isDefault'),
+      isCancel: this.get('isCancel'),
+      icon: this.get('icon'),
+      supportFocusRing: this.get("supportFocusRing"),
+      
+      title: this.get("displayTitle"),
+      escapeHTML: this.get("escapeHTML"),
+      needsEllipsis: this.get("needsEllipsis"),
+      
+      oldButtonTheme: this.get("oldButtonTheme")
+    });
+  },
 
   render: function(context, firstTime) {
     // add href attr if tagName is anchor...

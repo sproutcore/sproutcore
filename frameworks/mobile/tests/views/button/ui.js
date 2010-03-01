@@ -5,5 +5,12 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/*global module test htmlbody ok equals same stop start */
+/** @class
+  @extends SC.Theme
+  @since SproutCore 1.1
+*/
+SC.EmptyTheme = SC.Theme.extend({
+  classNames: ["sc-empty"]
+});
 
+SC.Theme.register("sc-empty", SC.EmptyTheme);
