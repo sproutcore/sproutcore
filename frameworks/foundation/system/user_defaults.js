@@ -388,9 +388,7 @@ SC.UserDefaults = SC.Object.extend(/** @scope SC.UserDefaults.prototype */ {
   readyChanged: function(){
     if(this.ready===YES){
       var f = this.func;
-      SC.RunLoop.begin();
       if(f) f.apply(this.ob);
-      SC.RunLoop.end();
     }
   }.observes('ready')  
 });
