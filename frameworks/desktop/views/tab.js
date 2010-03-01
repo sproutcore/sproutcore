@@ -46,6 +46,7 @@ SC.TabView = SC.View.extend(
   itemIconKey: null,
   itemWidthKey: null,
   itemToolTipKey: null,
+  tabHeight:null,
   
   tabLocation: SC.TOP_LOCATION,
   
@@ -106,7 +107,7 @@ SC.TabView = SC.View.extend(
     var childViews = [], view, containerView, layout ;
     
     layout = (this.get('tabLocation') === SC.TOP_LOCATION) ?
-             { top: 12, left: 0, right: 0, bottom: 0 } :
+             { top: (SC.REGULAR_BUTTON_HEIGHT/2)+1, left: 0, right: 0, bottom: 0 } :
              { top: 0, left: 0, right: 0, bottom: 12 } ;
     
     containerView = this.containerView.extend(SC.Border, {
@@ -116,6 +117,56 @@ SC.TabView = SC.View.extend(
 
     view = this.containerView = this.createChildView(containerView) ;
     childViews.push(view);
+    
+    
+    //  The segmentedView managed by this tab view.  Note that this TabView uses
+    //  a custom segmented view.  You can access this view but you cannot change
+    // it.
+    
+    this.segmentedView = SC.SegmentedView.extend({
+      layout: { left: 0, right: 0, height: SC.REGULAR_BUTTON_HEIGHT },
+
+      /** @private
+        When the value changes, update the parentView's value as well.
+      */
+      _sc_tab_segmented_valueDidChange: function() {
+        var pv = this.get('parentView');
+        if (pv) pv.set('nowShowing', this.get('value'));
+
+        // FIXME: why is this necessary? 'value' is a displayProperty and should
+        // automatically cause displayDidChange() to fire, which should cause 
+        // the two lines below to execute in the normal course of things...
+        this.set('layerNeedsUpdate', YES) ;
+        this.invokeOnce(this.updateLayerIfNeeded) ;
+      }.observes('value'),
+
+      /** @private
+        When we need to actually create a container, look for the tab loc from
+        the parent view and adjust the internal frame accordingly.  Also copy
+        the item key settings from the tab view.
+      */
+      render: function(context, firstTime) {
+        sc_super();
+        // copy some useful properties from the parent view first
+        var pv = this.get('parentView');
+        var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
+        if (tabLoc === SC.TOP_LOCATION) {
+          context.addStyle('top', '0px');
+        } else {
+          context.addStyle('bottom', '0px');
+        }
+      },
+
+      init: function() {
+        // before we setup the rest of the view, copy key config properties 
+        // from the owner view...
+        var pv = this.get('parentView');
+        if (pv) {
+          SC._TAB_ITEM_KEYS.forEach(function(k) { this[k] = pv.get(k); }, this);
+        }
+        return sc_super();
+      }
+    });
     
     view = this.segmentedView = this.createChildView(this.segmentedView) ;
     childViews.push(view);
@@ -133,57 +184,8 @@ SC.TabView = SC.View.extend(
     custom container view.  You can access this view but you cannot change 
     it.
   */
-  containerView: SC.ContainerView,
+  containerView: SC.ContainerView
   
-  /**
-    The segmentedView managed by this tab view.  Note that this TabView uses
-    a custom segmented view.  You can access this view but you cannot change
-    it.
-  */
-  segmentedView: SC.SegmentedView.extend({
-    layout: { left: 0, right: 0, height: SC.REGULAR_BUTTON_HEIGHT },
-
-    /** @private
-      When the value changes, update the parentView's value as well.
-    */
-    _sc_tab_segmented_valueDidChange: function() {
-      var pv = this.get('parentView');
-      if (pv) pv.set('nowShowing', this.get('value'));
-      
-      // FIXME: why is this necessary? 'value' is a displayProperty and should
-      // automatically cause displayDidChange() to fire, which should cause 
-      // the two lines below to execute in the normal course of things...
-      this.set('layerNeedsUpdate', YES) ;
-      this.invokeOnce(this.updateLayerIfNeeded) ;
-    }.observes('value'),
-    
-    /** @private
-      When we need to actually create a container, look for the tab loc from
-      the parent view and adjust the internal frame accordingly.  Also copy
-      the item key settings from the tab view.
-    */
-    render: function(context, firstTime) {
-      sc_super();
-      // copy some useful properties from the parent view first
-      var pv = this.get('parentView');
-      var tabLoc = (pv) ? pv.get('tabLocation') : SC.TOP_LOCATION ;
-      if (tabLoc === SC.TOP_LOCATION) {
-        context.addStyle('top', '0px');
-      } else {
-        context.addStyle('bottom', '0px');
-      }
-    },
-    
-    init: function() {
-      // before we setup the rest of the view, copy key config properties 
-      // from the owner view...
-      var pv = this.get('parentView');
-      if (pv) {
-        SC._TAB_ITEM_KEYS.forEach(function(k) { this[k] = pv.get(k); }, this);
-      }
-      return sc_super();
-    }
-  })
   
 }) ;
 
