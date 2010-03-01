@@ -36,7 +36,7 @@ SC.EmptyTheme.renderers.Title = SC.Renderer.extend({
     if(this.needsEllipsis){
       context.push('<label class="sc-button-label ellipsis">'+imgTitle+'</label>'); 
     } else {
-        context.push('<label class="sc-button-label">'+imgTitle+'</label>'); 
+      context.push('<label class="sc-button-label">'+imgTitle+'</label>'); 
     }
     this._ImageTitleCached = imgTitle;
   },

@@ -324,7 +324,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        this.$()[0].focus();
+        this.renderer.focus();
       }
     }
 
@@ -359,7 +359,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
     this._isMouseDown = false;
 
     if (this.get('buttonBehavior') !== SC.HOLD_BEHAVIOR) {
-      var inside = this.$().within(evt.target) ;
+      var inside = this.renderer.causedEvent(evt) ;
       if (inside && this.get('isEnabled')) this._action(evt) ;
     }
 
@@ -538,8 +538,7 @@ SC.ButtonView = SC.View.extend(SC.Control, SC.Button, SC.StaticLayout,
       this._isFocused = YES ;
       this.becomeFirstResponder();
       if (this.get('isVisibleInWindow')) {
-        var elem=this.$()[0];
-        if (elem) elem.focus();
+        if (this.renderer) this.renderer.focus();
       }
     }
   },

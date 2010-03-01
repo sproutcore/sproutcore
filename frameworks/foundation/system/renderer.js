@@ -62,7 +62,7 @@ SC.Renderer = SC.Renderer = {
   /**
     Returns YES if the event took place within this view.
   */
-  within: function(evt) {
+  causedEvent: function(evt) {
     return this.$().within(evt.target); // return YES if evt.target is or is inside the layer.
   },
   

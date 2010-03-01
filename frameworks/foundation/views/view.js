@@ -145,7 +145,7 @@ SC.EMPTY_CHILD_VIEWS_ARRAY.needsClone = YES;
 SC.View = SC.Responder.extend(SC.DelegateSupport,
 /** @scope SC.View.prototype */ {
   
-  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin'.w(),
+  concatenatedProperties: 'outlets displayProperties layoutProperties classNames renderMixin didCreateLayerMixin willDestroyLayerMixin createRendererMixin updateRendererMixin'.w(),
   
   /** 
     The current pane. 
@@ -901,47 +901,20 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @returns {SC.View} receiver 
   */
   updateLayer: function() {
-    /* AGAIN, SHOULD PROBABLY BE IN RENDERER */
-    var classNames = this.get("classNames"), mixins, len, idx, 
-        layerId, bgcolor, cursor, classSet = {};
+    var mixins, idx, len, renderer;
+    this.updateViewSettings();
     
-    var q = this.$();
-    q.attr("class", "");
-
-    // do some standard setup...
-    // add view class names
-    len = classNames.length;
-    for (idx = 0; idx < len; idx++) {
-      classSet[classNames[idx]] = YES;
-    }
-    
-    if (this.get("theme")) {
-      classNames = this.get("theme").classNames;
-      len = classNames.length;
-      for (idx = 0; idx < len; idx++) {
-        classSet[classNames[idx]] = YES;
+    if (renderer = this.renderer) {
+      this.updateRenderer(renderer); // renderers always update.
+      if (mixins = this.updateRendererMixin) {
+        len = mixins.length;
+        for (idx = 0; idx < len; idx++) mixins[idx].call(this, renderer);
       }
     }
     
-    // add special class names
-    if (this.get('isTextSelectable')) classSet["allow-select"] = YES;
-    if (!this.get('isEnabled')) classSet["disabled"] = YES;
-    if (!this.get('isVisible')) classSet["hidden"] = YES;
-    if (this.get('isFirstResponder')) classSet["focus"] = YES;
-    
-    bgcolor = this.get('backgroundColor');
-    if (bgcolor) q.css('backgroundColor', bgcolor);
-
-    cursor = this.get('cursor') ;
-    if (cursor) classSet[cursor.get('className')] = YES;
-
-    q.setClass(classSet);
-    
     // Now, update using renderer if possible; render() otherwise
-    var renderer;
-    if (renderer = this.renderer) {
-      this.updateRenderer(renderer); // renderers always update.
-      renderer.update();
+    if (!this._useRenderFirst && this.createRenderer) {
+      this.updateUsingRenderer();
     } else {
       var context = this.renderContext(this.get('layer')) ;
       this.render(context, NO) ;
@@ -1119,19 +1092,66 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     a context.
   */
   renderToContext: function(context) {
+    var mixins, idx, len;
+    
     this.beginPropertyChanges() ;
     this.set('layerNeedsUpdate', NO) ;
-
+    
+    this.renderViewSettings(context);
+    
+    /* Now, the actual rendering, which will use a renderer if possible */
+    // even if we don't use the renderer to update, we must make sure we create it if there is one
+    // because inheriting views will build on top of the renderer (even if they don't know it)
+    if (this.createRenderer) {
+      // create if needed
+      if (!this.renderer) {
+        this.renderer = this.createRenderer();
+        if (mixins = this.createRendererMixin) {
+          len = mixins.length;
+          for (idx = 0; idx < len; idx++) mixins[idx].call(this);
+        }
+      }
+      
+      // update!
+      this.updateRenderer(this.renderer);
+      if (mixins = this.updateRendererMixin) {
+        len = mixins.length;
+        for (idx = 0; idx < len; idx++) mixins[idx].call(this, this.renderer);
+      }
+    }
+    
+    if (!this._useRenderFirst && this.createRenderer) {
+      this.renderUsingRenderer(context);
+    } else {
+      this.render(context, YES);
+      if (mixins = this.renderMixin) {
+        len = mixins.length;
+        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, YES) ;
+      }
+    }
+    
+    this.endPropertyChanges() ;
+  },
+  
+  renderUsingRenderer: function(context) {
+    this.renderer.render(context);
+  },
+  
+  updateUsingRenderer: function() {
+    this.renderer.update();
+  },
+  
+  renderViewSettings: function(context) {
     /* MUCH OF THIS SHOULD POSSIBLY BE MOVED INTO A RENDERER FOR VIEWS */
     // first, render view stuff.
-    var layerId, bgcolor, cursor, classArray=[];
+    var layerId, bgcolor, cursor, classArray=[], mixins, len, idx;
 
     // do some initial setup only needed at create time.
     layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
     context.id(layerId).classNames(this.get('classNames'), YES) ;
     
     // VIEW LAYOUT RENDERER, ANYONE?
-    this.renderLayout(context) ;
+    this.renderLayout(context, YES) ;
 
     // do some standard setup...
     if (this.get('isTextSelectable')) classArray.push('allow-select') ;
@@ -1150,22 +1170,44 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
 
     context.addClass(classArray);
+  },
+  
+  updateViewSettings: function() {
+    /* AGAIN, SHOULD PROBABLY BE IN RENDERER */
+    var classNames = this.get("classNames"), mixins, len, idx, 
+        layerId, bgcolor, cursor, classSet = {};
     
-    /* Now, the actual rendering, which will use a renderer if possible */
-    // now, if we have a createRenderer function, use that
-    if (this.createRenderer) {
-      if (!this.renderer) this.renderer = this.createRenderer();
-      this.renderer.render(context);
-    } else {
-      this.render(context, YES);
-      var mixins, len, idx;
-      if (mixins = this.renderMixin) {
-        len = mixins.length;
-        for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, YES) ;
+    var q = this.$();
+    q.attr("class", "");
+
+    // do some standard setup...
+    // add view class names
+    len = classNames.length;
+    for (idx = 0; idx < len; idx++) {
+      classSet[classNames[idx]] = YES;
+    }
+    
+    if (this.get("theme")) {
+      classNames = this.get("theme").classNames;
+      len = classNames.length;
+      for (idx = 0; idx < len; idx++) {
+        classSet[classNames[idx]] = YES;
       }
     }
     
-    this.endPropertyChanges() ;
+    // add special class names
+    if (this.get('isTextSelectable')) classSet["allow-select"] = YES;
+    if (!this.get('isEnabled')) classSet["disabled"] = YES;
+    if (!this.get('isVisible')) classSet["hidden"] = YES;
+    if (this.get('isFirstResponder')) classSet["focus"] = YES;
+    
+    bgcolor = this.get('backgroundColor');
+    if (bgcolor) q.css('backgroundColor', bgcolor);
+
+    cursor = this.get('cursor') ;
+    if (cursor) classSet[cursor.get('className')] = YES;
+
+    q.setClass(classSet);
   },
   
   /**
@@ -1288,6 +1330,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   */
   render: function(context, firstTime) {
     if (firstTime) this.renderChildViews(context, firstTime) ;
+    if (this.createRenderer) {
+      if (firstTime) { 
+        this.renderUsingRenderer();
+      } else {
+        this.updateUsingRenderer();
+      }
+    }
   },
   
   
@@ -1727,6 +1776,23 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     var theme = this.theme;
     this.theme = this._themeProperty;
     this.set("theme", theme);
+    
+    // find render path (to be removed in SC 2.0?)
+    var renderAge = 0, rendererAge = 0, currentAge = 0, c = this.constructor;
+    while (c && c.prototype.render) {
+      if (renderAge === 0 && c.prototype.render !== this.render) renderAge = currentAge;
+      if (rendererAge === 0 && c.prototype.createRenderer !== this.createRenderer) rendererAge = currentAge;
+      if (rendererAge > 0 && renderAge > 0) break;
+      currentAge = currentAge + 1;
+      c = c.superclass;
+    }
+    
+    // which one?
+    if (renderAge < rendererAge) {
+      this._useRenderFirst = YES;
+    } else {
+      this._useRenderFirst = NO;
+    }
     
     // register for event handling now if we're not a materialized view
     // (materialized views register themselves as needed)
