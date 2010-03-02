@@ -1232,57 +1232,6 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     } else {
       this.updateLayer();
     }
-    
-    /*var mixins, len, idx, layerId, bgcolor, cursor, classArray=[];
-
-    // do some initial setup only needed at create time.
-    if (firstTime) {
-      // TODO: seems like things will break later if SC.guidFor(this) is used
-  
-      layerId = this.layerId ? this.get('layerId') : SC.guidFor(this) ;
-      context.id(layerId).classNames(this.get('classNames'), YES) ;
-      this.renderLayout(context, firstTime) ;
-    }else{
-      context.resetClassNames();
-      context.classNames(this.get('classNames'), YES);  
-    }
-  
-    // do some standard setup...
-    if (this.get('isTextSelectable')) context.addClass('allow-select') ;
-    if (!this.get('isEnabled')) context.addClass('disabled') ;
-    if (!this.get('isVisible')) context.addClass('hidden') ;
-    if (this.get('isFirstResponder')) context.addClass('focus');
-    if (this.get('useStaticLayout')) context.addClass('sc-static-layout');
-  
-    bgcolor = this.get('backgroundColor');
-    if (bgcolor) context.addStyle('backgroundColor', bgcolor);
-  
-    // Sets cursor class, if present.
-    cursor = this.get('cursor');
-    if (!cursor && this.get('shouldInheritCursor')) {
-      // If this view has no cursor and should inherit it from the parent, 
-      // then it sets its own cursor view.  This sets the cursor rather than 
-      // simply using the parent's cursor object so that its cursorless 
-      // childViews can also inherit it.
-      cursor = this.getPath('parentView.cursor');
-    }
-
-    if (SC.typeOf(cursor) === SC.T_STRING) {
-      cursor = SC.objectForPropertyPath(cursor);
-    }
-    
-    if (cursor instanceof SC.Cursor) {
-      classArray.push(cursor.get('className'));
-    }
-    
-    this.beginPropertyChanges() ;
-    this.set('layerNeedsUpdate', NO) ;
-    this.render(context, firstTime) ;
-    if (mixins = this.renderMixin) {
-      len = mixins.length;
-      for(idx=0; idx<len; ++idx) mixins[idx].call(this, context, firstTime) ;
-    }
-    this.endPropertyChanges() ; */
   },
   
   /**
@@ -1297,15 +1246,43 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     @test in render
   */
   renderChildViews: function(context, firstTime) {
+    if (firstTime) {
+      this.renderContent(context);
+    } else {
+      this.updateContent();
+    }
+  },
+  
+  /**
+    @private
+    Views are content suppliers for renderers. That is, views pass themselves to renderers
+    for renderers' "content" properties. Content providers have two functions: renderContent and updateContent.
+    This is the first of those.
+  */
+  renderContent: function(context) {
     var cv = this.get('childViews'), len = cv.length, idx, view ;
     for (idx=0; idx<len; ++idx) {
       view = cv[idx] ;
       if (!view) continue;
       context = context.begin(view.get('tagName')) ;
-      view.prepareContext(context, firstTime) ;
+      view.renderToContext(context);
       context = context.end() ;
     }
-    return context ;  
+  },
+  
+  /**
+    @private
+    Views are content suppliers for renderers. That is, views pass themselves to renderers
+    for renderers' "content" properties. Content providers have two functions: renderContent and updateContent.
+    This is the first of those.
+  */
+  updateContent: function() {
+    var cv = this.get('childViews'), len = cv.length, idx, view ;
+    for (idx=0; idx<len; ++idx) {
+      view = cv[idx] ;
+      if (!view) continue;
+      view.updateLayer();
+    }
   },
   
   /**
