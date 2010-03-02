@@ -2,7 +2,7 @@
 // Project:   SproutCore Unit Testing Library
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            Portions ©2008-2009 Apple Inc. All rights reserved.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 // These utility methods are included from the SproutCore's foundation to 

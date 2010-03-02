@@ -2,7 +2,7 @@
 // Project:   SproutCore - JavaScript Application Framework
 // Copyright: ©2006-2009 Sprout Systems, Inc. and contributors.
 //            portions copyright @2009 Apple Inc. and contributors.
-// License:   Licened under MIT license (see license.js)
+// License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
 /*global module test equals context ok same htmlbody */
