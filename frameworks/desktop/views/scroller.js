@@ -5,9 +5,6 @@
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
 
-/** Vary based on current platform. */
-SC.NATURAL_SCROLLER_THICKNESS = 16;
-
 /** @class
 
   Displays a horizontal or vertical scroller.  You will not usually need to
@@ -32,6 +29,9 @@ SC.NATURAL_SCROLLER_THICKNESS = 16;
   });
 }}}
 
+  You can change whether scroll buttons are displayed by setting the
+  hasButtons property.
+
   @extends SC.View
   @since SproutCore 1.0
 */
@@ -52,12 +52,13 @@ SC.ScrollerView = SC.View.extend(
     @property {Number}
   */
   value: function(key, val) {
+    var minimum = this.get('minimum');
     if (val !== undefined) {
       this._scs_value = val;
     }
 
-    val = this._scs_value || 0 ; // default value is at top/left
-    return Math.max(Math.min(val, this.get('maximum')), this.get('minimum')) ;
+    val = this._scs_value || minimum; // default value is at top/left
+    return Math.max(Math.min(val, this.get('maximum')), minimum) ;
   }.property('maximum', 'minimum').cacheable(),
 
   /**
@@ -81,7 +82,7 @@ SC.ScrollerView = SC.View.extend(
 
     @property {Number}
   */
-  maximum: 0,
+  maximum: 100,
 
   /**
     The minimum offset value for the scroller.  This will be used to calculate
@@ -109,14 +110,12 @@ SC.ScrollerView = SC.View.extend(
   layoutDirection: SC.LAYOUT_VERTICAL,
 
   /**
-    YES if the maximum value exceeds the frame size of the scroller.  This
-    will hide the thumb and buttons.
+    Whether or not the scroller should display scroll buttons
 
-    @property
+    @property {Boolean}
+    @default YES
   */
-  controlsHidden: function() {
-    return this.get('proportion') >= 1;
-  }.property('proportion').cacheable(),
+  hasButtons: YES,
 
   // ..........................................................
   // DISPLAY METRICS
@@ -137,25 +136,29 @@ SC.ScrollerView = SC.View.extend(
   capLength: 18,
 
   /**
-    The amount by which the scroller overlaps the cap.
+    The amount by which the thumb overlaps the cap.
 
     @property {Number}
   */
   capOverlap: 15,
 
   /**
-    The amount by which the scroller overlaps the arrow buttons.
-
-    @property {Number}
-  */
-  buttonOverlap: 8,
-
-  /**
-    The width or height of the up/down or left/right arrow buttons.
+    The width or height of the up/down or left/right arrow buttons. If the
+    scroller is not displaying arrows, this is the width or height of the end
+    cap.
 
     @property {Number}
   */
   buttonLength: 40,
+
+  /**
+    The amount by which the thumb overlaps the arrow buttons. If the scroller
+    is not displaying arrows, this is the amount by which the thumb overlaps
+    the end cap.
+
+    @property {Number}
+  */
+  buttonOverlap: 8,
 
   /**
     The size of the top/left end of the thumb.
@@ -163,7 +166,6 @@ SC.ScrollerView = SC.View.extend(
     @property {Number}
   */
   thumbTopLength: 10,
-
 
   /**
     The size of the bottom/right end of the thumb.
@@ -190,6 +192,7 @@ SC.ScrollerView = SC.View.extend(
   */
   render: function(context, firstTime) {
     var classNames = [],
+        buttons = '',
         thumbPosition, thumbLength, thumbCenterLength, thumbElement,
         value, max, scrollerLength, length, pct;
 
@@ -220,27 +223,30 @@ SC.ScrollerView = SC.View.extend(
 
     // If this is the first time, generate the actual HTML
     if (firstTime) {
+      if (this.get('hasButtons')) {
+        buttons = '<div class="button-bottom"></div><div class="button-top"></div>';
+      } else {
+        buttons = '<div class="endcap"></div>';
+      }
+
       switch (this.get('layoutDirection')) {
         case SC.LAYOUT_VERTICAL:
         context.push('<div class="track"></div>',
-                      '<div class="button-bottom"></div>',
-                      '<div class="button-top"></div>',
-                      '<div class="cap"></div>',
-                      '<div class="thumb" style="height: '+thumbLength+'px;">',
-                      '<div class="thumb-center" style="height: '+thumbCenterLength+'px;"></div>',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-bottom"></div></div>');
+                     '<div class="cap"></div>',
+                     buttons,
+                     '<div class="thumb" style="height: '+thumbLength+'px;">',
+                     '<div class="thumb-center" style="height: '+thumbCenterLength+'px;"></div>',
+                     '<div class="thumb-top"></div>',
+                     '<div class="thumb-bottom"></div></div>');
         break;
         case SC.LAYOUT_HORIZONTAL:
-
         context.push('<div class="track"></div>',
-                      '<div class="button-bottom"></div>',
-                      '<div class="button-top"></div>',
-                      '<div class="cap"></div>',
-                      '<div class="thumb" style="width: '+thumbLength+'px;">',
-                      '<div class="thumb-center" style="width: '+thumbCenterLength+'px;"></div>',
-                      '<div class="thumb-top"></div>',
-                      '<div class="thumb-bottom"></div></div>');
+                     '<div class="cap"></div>',
+                     buttons,
+                     '<div class="thumb" style="width: '+thumbLength+'px;">',
+                     '<div class="thumb-center" style="width: '+thumbCenterLength+'px;"></div>',
+                     '<div class="thumb-top"></div>',
+                     '<div class="thumb-bottom"></div></div>');
       }
     } else {
       // The HTML has already been generated, so all we have to do is
@@ -318,7 +324,13 @@ SC.ScrollerView = SC.View.extend(
   trackLength: function() {
     var scrollerLength = this.get('scrollerLength');
 
-    return scrollerLength - this.capLength + this.capOverlap - this.buttonLength + this.buttonOverlap;
+    // Subtract the size of the top/left cap
+    scrollerLength -= this.capLength - this.capOverlap;
+    // Subtract the size of the scroll buttons, or the end cap if they are
+    // not shown.
+    scrollerLength -= this.buttonLength - this.buttonOverlap;
+
+    return scrollerLength;
   }.property('scrollerLength').cacheable(),
 
   /**
@@ -343,6 +355,7 @@ SC.ScrollerView = SC.View.extend(
   /**
     The size of the thumb end caps.
 
+    @property
     @private
   */
   thumbEndSizes: function() {
@@ -352,6 +365,9 @@ SC.ScrollerView = SC.View.extend(
   /**
     The total length of the thumb. The size of the thumb is the
     length of the track times the content proportion.
+
+    @property
+    @private
   */
   thumbLength: function() {
     return Math.max(Math.floor(this.get('trackLength')) * this.get('proportion'),20);
@@ -376,6 +392,22 @@ SC.ScrollerView = SC.View.extend(
 
     return position;
   }.property('value', 'maximum', 'trackLength', 'thumbLength').cacheable(),
+
+  /**
+    YES if the maximum value exceeds the frame size of the scroller.  This
+    will hide the thumb and buttons.
+
+    @property {Boolean}
+    @isReadOnly
+    @private
+  */
+  controlsHidden: function() {
+    return this.get('proportion') >= 1;
+  }.property('proportion').cacheable(),
+
+  // ..........................................................
+  // MOUSE EVENTS
+  //
 
   /**
     Handles mouse down events and adjusts the value property depending where
