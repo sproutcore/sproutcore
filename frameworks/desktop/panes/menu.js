@@ -643,7 +643,6 @@ SC.MenuPane = SC.PickerPane.extend(
   },
 
   mouseEntered: function() {
-    this.becomeKeyPane();
     this.set('mouseHasEntered', YES);
   },
 
