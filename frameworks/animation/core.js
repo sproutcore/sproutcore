@@ -21,13 +21,14 @@ Animatable things:
   need to set the delay a tad longer to accomodate any delays in beginning the
   transition.
 
+@class SC.Animatable
 @example Example Usage:
 {{{
-aView: SC.LabelView.design(Animate.Animatable, {
+aView: SC.LabelView.design(SC.Animatable, {
   transitions: {
     left: {duration: .25},
     top: .25, // only possible during design; otherwise you must use long form.
-    width: {duration: , timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
+    width: {duration: .25, timing: SC.Animatable.TRANSITION_EASE_IN_OUT }
   }
 })
 }}}
@@ -54,11 +55,11 @@ SC.Animatable = {
     "right": "right", "bottom": "bottom",
     "width": "width", "height": "height",
     "opacity": "opacity",
-    "-webkit-transform": "-webkit-transform"
+    "transform": "transform"
   },
 
   // properties that adjust should relay to style
-  _styleProperties: [ "opacity", "display", "-webkit-transform" ],
+  _styleProperties: [ "opacity", "display", "transform" ],
   _layoutStyles: 'width height top bottom marginLeft marginTop left right zIndex minWidth maxWidth minHeight maxHeight centerX centerY'.w(),
 
   // we cache this dictionary so we don't generate a new one each time we make
@@ -67,7 +68,7 @@ SC.Animatable = {
   _animationsToStart: {},
 
   // and, said animation order
-  _animationOrder: ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "display", "-webkit-transform"],
+  _animationOrder: ["top", "left", "bottom", "right", "width", "height", "centerX", "centerY", "opacity", "display", "transform"],
 
   _transitionCallbacks: {},
 
@@ -134,6 +135,7 @@ SC.Animatable = {
   },
 
   _animatable_didCreateLayer: function(){
+    this.resetAnimation();
     SC.Event.add(this.get('layer'), "webkitTransitionEnd", this, this.transitionEnd);
     SC.Event.add(this.get('layer'), "transitionend", this, this.transitionEnd);
     return this._animatable_original_didCreateLayer();
@@ -259,6 +261,7 @@ SC.Animatable = {
     this.disableAnimation();
     this.updateStyle();
     this.enableAnimation();
+    this.updateStyle();
   },
   
   /**
@@ -339,12 +342,29 @@ SC.Animatable = {
   */
   updateStyle: function()
   {
-
     // get the layer. We need it for a great many things.
     var layer = this.get("layer");
 
     // cont. with other stuff
     var newStyle = this.get("style");
+
+    /* SPECIAL CASES (done now because they need to happen whether or not animation will take place) */
+    ////**SPECIAL TRANSFORM CASE**////
+    var specialTransform = NO, specialTransformValue = "";
+    if (
+      SC.Animatable.enableCSSTransforms &&
+      this.transitions["left"] && this.transitions["top"] && 
+      this.transitions["left"].duration === this.transitions["top"].duration &&
+      this.transitions["left"].timing === this.transitions["top"].timing &&
+      (SC.none(newStyle["right"]) || newStyle["right"] === "") &&
+      (SC.none(newStyle["bottom"]) || newStyle["bottom"] === "")
+    ) {
+      specialTransform = YES;
+      this._useSpecialCaseTransform = YES;
+    } else {
+      this._useSpecialCaseTransform = NO;
+    }
+    ////**/SPECIAL TRANSFORM CASE**////
 
     // make sure there _is_ a previous style to animate from. Otherwise,
     // we don't animate—and this is sometimes used to temporarily disable animation.
@@ -352,6 +372,7 @@ SC.Animatable = {
     if (!this._animatableCurrentStyle || this._disableAnimation > 0 || !layer)
     {
       // clone it to be a nice starting point next time.
+      this._animatableSetCSS = "";
       this._animatableCurrentStyle = {};
       this._animatableSetCSS = "";
       for (i in newStyle)
@@ -386,34 +407,46 @@ SC.Animatable = {
     // prepare stuff for timing function calc
     var timing;
     
-    // prepare special cases
-    var specialTransform = NO, specialTransformValue = "";
-
     // also prepare an array of CSS transitions to set up. Do this always so we get (and keep) all transitions.
     var cssTransitions = this._TMP_CSS_TRANSITIONS;
     if (SC.Animatable.enableCSSTransitions) {
       // first, handle special cases
       var timing_function;
       
+      ////**SPECIAL TRANSFORM CASE**////
       // this is a VERY special case. If right or bottom are supplied, can't do it. If left+top need
       // animation at different speeds: can't do it.
-      if (
-        SC.Animatable.enableCSSTransforms &&
-        this.transitions["left"] && this.transitions["top"] && 
-        this.transitions["left"].duration == this.transitions["top"].duration &&
-        this.transitions["left"].timing == this.transitions["top"].timing &&
-        (!newStyle["right"] || newStyle["right"] == "") &&
-        (!newStyle["bottom"] || newStyle["bottom"] == "") 
-      ) {
+      if (specialTransform) {
         specialTransform = YES;
         timing_function = this.cssTimingStringFor(this.transitions["left"]);
         cssTransitions.push("-webkit-transform " + this.transitions["left"].duration + "s " + timing_function);
       }
+      ////**END SPECIAL TRANSFORM CASE**////
       
       // loop
       for (i in this.transitions) {
         if (!this._cssTransitionFor[i]) continue;
-        if (specialTransform && (i == "left" || i == "top")) continue;
+        
+        ////**SPECIAL TRANSFORM CASE**////        
+        if (specialTransform && (i == "left" || i == "top")) {
+          if (this.transitions["left"].action){
+            this._transitionCallbacks["-webkit-transform"] = {
+              source: this,
+              target: (this.transitions["left"].target || this),
+              action: this.transitions["left"].action
+            };
+          }
+
+          if (this.transitions["top"].action){
+            this._transitionCallbacks["-webkit-transform"] = {
+              source: this,
+              target: (this.transitions["right"].target || this),
+              action: this.transitions["right"].action
+            };
+          }
+          continue;
+        }
+        ////**END SPECIAL TRANSFORM CASE**////
 
         // get timing function
         timing_function = this.cssTimingStringFor(this.transitions[i]);
@@ -427,32 +460,7 @@ SC.Animatable = {
     {
       if (i[0] == "_") continue; // guid (or something else we can't deal with anyway)
       
-      // special case: Transform
-      if (specialTransform && (i == "left" || i == "top")) {
-        specialTransformValue += (i == "left" ? "translateX(" : "translateY(") + newStyle[i] + "px)";
-        startingPoint["-webkit-transform"] = specialTransformValue;
-        startingPoint["left"] = 0;
-        startingPoint["top"] = 0;
-        
-        if (this.transitions["left"].action){
-          this._transitionCallbacks["-webkit-transform"] = {
-            source: this,
-            target: (this.transitions["left"].target || this),
-            action: this.transitions["left"].action
-          };
-        }
-        
-        if (this.transitions["top"].action){
-          this._transitionCallbacks["-webkit-transform"] = {
-            source: this,
-            target: (this.transitions["right"].target || this),
-            action: this.transitions["right"].action
-          };
-        }
-        
-        continue;
-      }
-
+      
       // if it needs to be set right away since it is not animatable, _getStartStyleHash
       // will have done that. But if we aren't supposed to animate it, we need to know, now.
       var shouldSetImmediately = !this.transitions[i] || newStyle[i] == startingPoint[i];
@@ -591,8 +599,10 @@ SC.Animatable = {
     if (!layer) return;
     
     // handle a specific style first: display. There is a special case because it disrupts transitions.
-    if (styles["display"]) {
+    var needsRender = NO;
+    if (styles["display"] && layer.style["display"] !== styles["display"]) {
       layer.style["display"] = styles["display"];
+      needsRender = YES;
     }
 
     // set CSS transitions very first thing
@@ -600,6 +610,7 @@ SC.Animatable = {
       layer.style["-webkit-transition"] = this._animatableSetCSS;
       layer.style["-moz-transition"] = this._animatableSetCSS;
       this._last_transition_css = this._animatableSetCSS;
+      needsRender = YES;
     }
 
     if (!this._animators["display-styles"]) this._animators["display-styles"] = {};
@@ -609,18 +620,30 @@ SC.Animatable = {
     
     // set settings
     timer.holder = this;
-    timer.action = this._animatableApplyNonDisplayStyles;
+    timer.action = this._animatableApplyNonDisplayStylesFromTimer;
+    timer.inLoopAction = this._animatableApplyNonDisplayStyles;
     timer.layer = layer;
     timer.styles = styles;
     this._animatableCurrentStyle = styles;
     
     // schedule.
-    SC.Animatable.addTimer(timer);
+    if (this._disableAnimation > 0) {
+      timer.inLoopAction();
+    } else {
+      // after setting transition or display, we must wait a moment;
+      // otherwise, no animation will happen.
+      SC.Animatable.addTimer(timer);
+    }
+  },
+  
+  _animatableApplyNonDisplayStylesFromTimer: function() {
+    SC.RunLoop.begin();
+    this.inLoopAction();
+    SC.RunLoop.end();
   },
 
   _animatableApplyNonDisplayStyles: function(){
-    var loop = SC.RunLoop.begin();
-    var layer = this.layer, styles = this.styles; // this == timer
+    var layer = this.layer, styles = this.holder._animatableCurrentStyle; // this == timer
     var styleHelpers = {
       opacity: this.holder._style_opacity_helper
       // more to be added here...
@@ -629,17 +652,39 @@ SC.Animatable = {
     var newLayout = {}, updateLayout = NO, style = layer.style;
 
     // we extract the layout portion so SproutCore can do its own thing...
+    var specialTransform = "";
     for (var i in styles)
     {
       if (i == "display") continue;
       if (this.holder._layoutStyles.indexOf(i) >= 0)
       {
+        ////**SPECIAL TRANSFORM CASE**////
+        // handle special case for CSS transforms
+        if (this.holder._useSpecialCaseTransform && i === "left") {
+          newLayout[i] = 0;
+          specialTransform += "translateX(" + styles[i] + "px) ";
+          updateLayout = YES;
+          continue;
+        } else if (this.holder._useSpecialCaseTransform && i === "top") {
+          newLayout[i] = 0;
+          specialTransform += "translateY(" + styles[i] + "px) ";
+          updateLayout = YES;
+          continue;
+        }
+        ////**END SPECIAL TRANSFORM CASE**////
+        
+        // otherwise, normal layout
         newLayout[i] = styles[i];
         updateLayout = YES;
         continue;
       }
       else if (styleHelpers[i]) styleHelpers[i](style, i, styles);
       else style[i] = styles[i];
+    }
+    
+    // apply special case
+    if (specialTransform) {
+      style["webkitTransform"] = specialTransform;
     }
 
     // don't want to set because we don't want updateLayout... again.
@@ -660,7 +705,6 @@ SC.Animatable = {
       // go back to previous
       this.holder.layout = prev;
     }
-    loop.end();
   },
 
   /**
@@ -669,14 +713,7 @@ SC.Animatable = {
   _animatable_did_update_layer: function()
   {
     this._animatable_original_did_update_layer();
-    var styles = this._animatableCurrentStyle, layer = this.get("layer");
-    if (!styles) {
-      styles = {};
-      var s = this.get("style");
-      var l = this.get("layout");
-      SC.mixin(styles, s, l);
-    }
-    this._animatableApplyStyles(layer, styles);
+    this.resetAnimation();
   },
 
   /**
@@ -1024,7 +1061,7 @@ SC.mixin(SC.Animatable, {
     SC.Animatable.going = true;
 
     // set a timeout so tick only runs AFTER any pending animation timers are set.
-    setTimeout(SC.Animatable.timeout, 0);
+    setTimeout(function(){ SC.Animatable.timeout(); }, SC.Animatable.interval);
   },
 
   timeout: function()
