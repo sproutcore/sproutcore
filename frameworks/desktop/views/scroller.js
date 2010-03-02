@@ -232,7 +232,7 @@ SC.ScrollerView = SC.View.extend(
                       '<div class="thumb-bottom"></div></div>');
         break;
         case SC.LAYOUT_HORIZONTAL:
-        console.log(thumbLength+ ' and '+thumbCenterLength);
+
         context.push('<div class="track"></div>',
                       '<div class="button-bottom"></div>',
                       '<div class="button-top"></div>',
