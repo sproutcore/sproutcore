@@ -6,7 +6,13 @@
 // ==========================================================================
 
 /** @class
-  Handles a rendering process.
+  Handles rendering for a view.
+  
+  Renderers have two primary functions: rendering and updating. Rendering is done
+  to a context, to produce one giant string of rendered output. Updating is done
+  to layers, usually using CoreQuery.
+  
+  
 */
 SC.Renderer = SC.Renderer = {
   //
@@ -35,14 +41,27 @@ SC.Renderer = SC.Renderer = {
   },
   
   /**
-    Attaches a layer. If event handling is necessary, this is the place to do it.
+    Called when a layer is attached. 
+    
+    The "layer" parameter is not necessarily the layer itself; it may be a layer provider.
+    To get the real layer, use the renderer's "layer" method.
+    
+    If you have sub-renderers, you may want to relay this to them by calling their attachLayer methods.
+    
+    If event handling is necessary, this is the place to do it.
+    
     Note: usually, you do not do event handling; instead, the view does, with its mouse and touch
-    event handling. Instead, to handle events, you should make sure the within function works properly.
+    event handling. Instead, to handle events, you should make sure the causedEvent function works properly.
+    
+    @param {layer} layer The layer or layer provider being attached.
   */
   didAttachLayer: function(layer) {
     
   },
   
+  /**
+    Called when a layer is being detached (a good ).
+  */
   willDetachLayer: function() {
     
   },
@@ -50,6 +69,9 @@ SC.Renderer = SC.Renderer = {
   //
   // Functions that may be called by subclasses
   //
+  /**
+    CoreQuery. Need I say more?
+  */
   $: function(sel) {
     var ret, layer = this.layer();
     // note: SC.$([]) returns an empty CoreQuery object.  SC.$() would 
@@ -140,6 +162,10 @@ SC.Renderer = SC.Renderer = {
     };
   },
  
+  /**
+    Sets one or more attributes. Also modifies a "changes" set (allowing, but not requiring you,
+    to perform some optimizations).
+  */
   attr: function(key, value) {
     var changes = this.changes, didChange, opts;
 

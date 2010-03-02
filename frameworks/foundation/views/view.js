@@ -914,7 +914,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     
     // Now, update using renderer if possible; render() otherwise
     if (!this._useRenderFirst && this.createRenderer) {
-      this.updateUsingRenderer();
+      this.renderer.update();
     } else {
       var context = this.renderContext(this.get('layer')) ;
       this.render(context, NO) ;
@@ -1072,6 +1072,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
+    @private (semi)
     Returns the layer. Meant only for use from renderers and such—this is a layer provider function.
   */
   isLayerProvider: YES,
@@ -1080,12 +1081,14 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
+    @private
+    
     Renders to a context.
-    Rendering only happens for the initial rendering. Further updates
-    happen in updateLayer, and are not done to contexts, but to layers.
+    Rendering only happens for the initial rendering. Further updates happen in updateLayer,
+    and are not done to contexts, but to layers.
     
     Both renderToContext and updateLayer will call render(context, firstTime) as needed
-    to maintain backwards compatibility.
+    to maintain backwards compatibility, but prefer calling createRenderer.
     
     Note: You should not generally override nor directly call this method. This method is only
     called by createLayer to set up the layer initially, and by renderChildViews, to write to
@@ -1122,7 +1125,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     if (!this._useRenderFirst && this.createRenderer) {
-      this.renderUsingRenderer(context);
+      this.renderer.render(context);
     } else {
       this.render(context, YES);
       if (mixins = this.renderMixin) {
@@ -1134,16 +1137,12 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.endPropertyChanges() ;
   },
   
-  renderUsingRenderer: function(context) {
-    this.renderer.render(context);
-  },
-  
-  updateUsingRenderer: function() {
-    this.renderer.update();
-  },
-  
+  /**
+    @private
+    Renders view settings (class names and id, for instance) to the context.
+  */
+  //TODO consider moving into a "view renderer"
   renderViewSettings: function(context) {
-    /* MUCH OF THIS SHOULD POSSIBLY BE MOVED INTO A RENDERER FOR VIEWS */
     // first, render view stuff.
     var layerId, bgcolor, cursor, classArray=[], mixins, len, idx;
 
@@ -1173,8 +1172,11 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     context.addClass(classArray);
   },
   
+  /**
+    @private
+    Updates view settings on the context (including class names).
+  */
   updateViewSettings: function() {
-    /* AGAIN, SHOULD PROBABLY BE IN RENDERER */
     var classNames = this.get("classNames"), mixins, len, idx, 
         layerId, bgcolor, cursor, classSet = {};
     
@@ -1212,12 +1214,13 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
   },
   
   /**
+  @private
+  
     Invoked by createLayer() and updateLayer() to actually render a context.
     This method calls the render() method on your view along with any 
     renderMixin() methods supplied by mixins you might have added.
     
-    You should not override this method directly.  However, you might call
-    this method if you choose to override updateLayer() or createLayer().
+    You should not override this method directly. Nor should you call it. It is OLD.
     
     @param {SC.RenderContext} context the render context
     @param {Boolean} firstTime YES if this is creating a layer
@@ -1310,9 +1313,9 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (firstTime) this.renderChildViews(context, firstTime) ;
     if (this.createRenderer) {
       if (firstTime) { 
-        this.renderUsingRenderer(context);
+        this.renderer.render(context);
       } else {
-        this.updateUsingRenderer();
+        this.renderer.update();
       }
     }
   },
