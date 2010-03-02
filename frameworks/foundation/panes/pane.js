@@ -493,7 +493,7 @@ SC.Pane = SC.View.extend( /** @scope SC.Pane.prototype */ {
     @returns {SC.Pane} receiver
   */
   append: function() {   
-    this.appendTo(document.body) ;
+    return this.appendTo(document.body) ;
   },
   
   /**
