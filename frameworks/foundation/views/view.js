@@ -1106,6 +1106,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
       // create if needed
       if (!this.renderer) {
         this.renderer = this.createRenderer();
+        this.renderer.contentProvider = this; // set renderer's content provider to this (it will call renderContent, etc. as needed)
         if (mixins = this.createRendererMixin) {
           len = mixins.length;
           for (idx = 0; idx < len; idx++) mixins[idx].call(this);
@@ -1755,7 +1756,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     this.set("theme", theme);
     
     // find render path (to be removed in SC 2.0?)
-    var renderAge = 0, rendererAge = 0, currentAge = 0, c = this.constructor;
+    var renderAge = -1, rendererAge = -1, currentAge = 0, c = this.constructor;
     while (c && c.prototype.render) {
       if (renderAge === 0 && c.prototype.render !== this.render) renderAge = currentAge;
       if (rendererAge === 0 && c.prototype.createRenderer !== this.createRenderer) rendererAge = currentAge;
@@ -1765,7 +1766,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     }
     
     // which one?
-    if (renderAge < rendererAge) {
+    if (renderAge < rendererAge && renderAge >= 0) {
       this._useRenderFirst = YES;
     } else {
       this._useRenderFirst = NO;
