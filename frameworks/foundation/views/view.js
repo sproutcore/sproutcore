@@ -1178,7 +1178,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (cursor) classArray.push(cursor.get('className')) ;
     
     if (this.get("theme")) {
-      classArray.splice(0, 0, this.get("theme").classNames);
+      classArray = classArray.concat(this.get("theme").classNames);
     }
 
     context.addClass(classArray);
@@ -1344,7 +1344,7 @@ SC.View = SC.Responder.extend(SC.DelegateSupport,
     if (firstTime) this.renderChildViews(context, firstTime) ;
     if (this.createRenderer) {
       if (firstTime) { 
-        this.renderUsingRenderer();
+        this.renderUsingRenderer(context);
       } else {
         this.updateUsingRenderer();
       }

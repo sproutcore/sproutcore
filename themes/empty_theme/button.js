@@ -17,12 +17,21 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     this.attr(settings);
   },
   render: function(context) {
+    // configure sub renderers
     this._controlRenderer.attr({
       isEnabled: this.isEnabled,
       isActive: this.isActive,
       isSelected: this.isSelected,
       controlSize: this.controlSize
     });
+    this._titleRenderer.attr({
+      title: this.title,
+      icon: this.icon,
+      needsEllipsis: this.needsEllipsis,
+      escapeHTML: this.escapeHTML
+    });
+    
+    // render control renderer
     this._controlRenderer.render(context);
     
     /* Render OUR stuff */
@@ -51,19 +60,16 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     theme = this.oldButtonTheme;
     if (theme) context.addClass(theme);
     
+    
+    this.renderContents(context);
+  },
+  
+  renderContents: function(context) {
     // render inner html 
-    context = context.push("<span class='sc-button-inner test'>");
+    context = context.push("<span class='sc-button-inner'>");
     
     /* Render title */
-    this._titleRenderer.attr({
-      title: this.title,
-      icon: this.icon,
-      needsEllipsis: this.needsEllipsis,
-      escapeHTML: this.escapeHTML
-    });
     this._titleRenderer.render(context);
-    
-    
     
     context.push("</span>") ;
     
@@ -82,6 +88,14 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
       isSelected: this.isSelected,
       controlSize: this.controlSize
     });
+    this._titleRenderer.attr({
+      title: this.title,
+      icon: this.icon,
+      needsEllipsis: this.needsEllipsis,
+      escapeHTML: this.escapeHTML
+    });
+    
+    // do actual updating
     this._controlRenderer.update();
     
     var classes, theme, q = this.$();
@@ -95,14 +109,12 @@ SC.EmptyTheme.renderers.Button = SC.Renderer.extend({
     theme = this.oldButtonTheme;
     if (theme) q.addClass(theme);
     
-    // update title
-    this._titleRenderer.attr({
-      title: this.title,
-      icon: this.icon,
-      needsEllipsis: this.needsEllipsis,
-      escapeHTML: this.escapeHTML
-    });
     
+    // update title
+    this.updateContents();
+  },
+  
+  updateContents: function() {
     this._titleRenderer.update();
   },
   
