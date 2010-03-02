@@ -494,6 +494,19 @@ SC.MenuPane = SC.PickerPane.extend(
   }.property('displayItems').cacheable(),
 
   /**
+    Returns the menu item view for the content object at the specified index.
+
+    @param {Number} idx the item index
+    @returns {SC.MenuItemView} instantiated view
+  */
+  menuItemViewForContentIndex: function(idx) {
+    var menuItemViews = this.get('menuItemViews');
+
+    if (!menuItemViews) return undefined;
+    return menuItemViews.objectAt(idx);
+  },
+
+  /**
     An associative array of the shortcut keys. The key is the shortcut in the
     form 'ctrl_z', and the value is the menu item of the action to trigger.
 
