@@ -77,9 +77,9 @@ SC.Event = function(originalEvent) {
   
   // normalize wheelDelta, wheelDeltaX, & wheelDeltaY for Safari
   if (SC.browser.safari && originalEvent.wheelDelta!==undefined) {
-    this.wheelDelta = this.wheelDeltaY = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDelta);
-    this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0) ;
-    
+    this.wheelDelta = 0-(originalEvent.wheelDeltaY || originalEvent.wheelDeltaX);
+    this.wheelDeltaY = 0-(originalEvent.wheelDeltaY||0);
+    this.wheelDeltaX = 0-(originalEvent.wheelDeltaX||0);
   // normalize wheelDelta for Firefox
   // note that we multiple the delta on FF to make it's acceleration more 
   // natural.
